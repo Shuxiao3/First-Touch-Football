@@ -43,6 +43,9 @@ and hold-to-CROSS buttons sit alongside it.
 - **Career mode** — create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
+- **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
+  interceptions from live play, rates each match, and pays out skill points you spend back
+  into the same creation trees. Kit trim, boots and hair carry onto the pitch.
 - **Feel dials** — live-tunable simulation parameters with arcade / balanced / sim
   presets, persisted to `localStorage`.
 - **Practice drills** — dribbling, heading, slide and standing tackles, interceptions,
@@ -55,8 +58,15 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–451 | Styles |
-| 453–654 | Markup — canvas, menus, career hub, tuning panel |
-| 655–8334 | Engine — sim, AI, rendering, career, UI |
+| 14–490 | Styles |
+| 492–693 | Markup — canvas, menus, career hub, tuning panel |
+| 694–8709 | Engine — sim, AI, rendering, career, UI |
 
-State persists to `localStorage` under the `ft7_` prefix (settings, squads, career saves).
+Career saves and squads persist to `localStorage`; the feel dials persist through
+`window.storage` when the host provides it.
+
+## Tests
+
+`tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
+creation through to the House, a played career match, and a five-match season. They need
+Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

@@ -385,6 +385,45 @@
   .bpTabs{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; justify-content:center; }
   .bpTab{ font-family:'Baskic8',sans-serif; font-size:12px; letter-spacing:.5px; color:#7f9a6f; background:rgba(157,255,60,.05); border:1px solid #243019; border-radius:7px; padding:7px 12px; cursor:pointer; }
   .bpTab.on{ color:#0c0f08; background:#9dff3c; border-color:#9dff3c; font-weight:700; }
+  .bpSect{ font-family:'Baskic8',sans-serif; color:#7f9a6f; font-size:10px; letter-spacing:2px; margin:16px 0 7px; border-bottom:1px solid #223019; padding-bottom:5px; }
+  .hsHead{ display:flex; gap:14px; align-items:center; }
+  .hsPort{ flex:none; width:80px; height:110px; background:#0c120d; border:1px solid #1c291d; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+  .hsWho{ min-width:0; }
+  .hsName{ font-family:'Baskic8',sans-serif; color:#e9f5ec; font-size:19px; letter-spacing:.5px; }
+  .hsSub{ color:#7f9a6f; font-size:11px; margin-top:3px; }
+  .hsOvrRow{ display:flex; align-items:baseline; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .hsOvr{ font-family:'Baskic8',sans-serif; color:#9dff3c; font-size:26px; line-height:1; }
+  .hsSp{ font-family:'Baskic8',sans-serif; color:#ffb43c; font-size:26px; line-height:1; margin-left:12px; }
+  .hsOvrL{ color:#5d7350; font-size:9px; letter-spacing:1.5px; }
+  .hsStrip{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:7px; }
+  .hsCell{ flex:1 1 76px; background:#0e160f; border:1px solid #243524; border-radius:7px; padding:7px 9px; }
+  .hsCell .k{ color:#5d7350; font-size:9px; letter-spacing:1px; text-transform:uppercase; }
+  .hsCell .v{ font-family:'Baskic8',sans-serif; font-size:16px; margin-top:3px; line-height:1; }
+  .hsForm{ display:flex; gap:6px; flex-wrap:wrap; }
+  .hsChip{ border:1px solid #243524; border-radius:6px; padding:4px 8px; font-size:12px; font-weight:600; }
+  .hsChip i{ font-style:normal; color:#7f9a6f; font-size:10px; }
+  .hsTbl{ width:100%; border-collapse:collapse; font-size:12px; }
+  .hsTbl th{ color:#5d7350; font-size:9px; letter-spacing:1px; text-align:right; padding:3px 6px; border-bottom:1px solid #223019; }
+  .hsTbl th:first-child,.hsTbl td:first-child{ text-align:left; }
+  .hsTbl td{ text-align:right; padding:3px 6px; color:#9bb88a; }
+  .hsAttr{ display:flex; flex-wrap:wrap; gap:5px; }
+  .hsAt{ flex:1 1 92px; display:flex; justify-content:space-between; gap:6px; background:#0e160f; border:1px solid #1c291d; border-radius:6px; padding:4px 7px; font-size:11px; }
+  .hsAt .n{ color:#7f9a6f; }
+  .hsAt .v{ color:#e9f5ec; font-weight:600; }
+  .hsAt .g{ color:#9dff3c; font-size:10px; }
+  .hsLookWrap{ display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+  .hsLookPrev{ flex:none; width:132px; height:180px; background:#0c120d; border:1px solid #1c291d; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .hsLookOpts{ flex:1; min-width:220px; }
+  .hsLookOpts .bpSect:first-child{ margin-top:0; }
+  .hsLookRow{ display:flex; gap:9px; flex-wrap:wrap; margin-bottom:20px; }
+  .hsSw{ width:38px; height:38px; border-radius:8px; border:2px solid #243524; cursor:pointer; padding:0; position:relative; font-family:inherit; }
+  .hsSw.on{ border-color:#e9f5ec; box-shadow:0 0 0 2px rgba(157,255,60,.35); }
+  .hsSw span{ position:absolute; left:-6px; right:-6px; bottom:-13px; font-size:8px; color:#7f9a6f; letter-spacing:.5px; text-align:center; }
+  .hsDev .mkLayout{ flex-wrap:wrap; }
+  .hsDev .mkLeft{ flex:1 1 300px; }
+  .hsDev .mkRight{ width:210px; flex:1 1 190px; }
+  .hsDev .mkTreeWrap{ max-height:none; overflow:visible; }
+
   .stadBtn{ font-family:'Baskic8',sans-serif; font-size:13px; color:#9dff3c; background:rgba(157,255,60,.07); border:1px solid #2a3a22; border-radius:8px; padding:11px 14px; cursor:pointer; display:block; width:100%; text-align:left; margin:5px 0; }
   .stadBtn:hover{ background:rgba(157,255,60,.16); border-color:#9dff3c; }
   .stadBtn[disabled]{ opacity:.4; cursor:default; }
@@ -663,7 +702,7 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=68;
+  const SETTINGS_V=69;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, clean-touch 400, window 0.10s; 10 = reach 45, clean-touch 700, window 0.20s. Bigger trap radius, settles faster balls, more forgiving timing. Baseline for all players.'},
@@ -1108,7 +1147,7 @@
   function noSwitch(p){}
 
   const ball={x:FW/2,y:FH/2,vx:0,vy:0,r:8,roll:0,z:0,vz:0,
-              ownedBy:null,cushBy:null,cushQ:0,cushZ:0,lastTouch:null,shotBy:null,shotT:0,curveSpin:0,curveSpinT:0,curveK:0,crossBy:null,crossT:0,lastTouchP:null,prevTouchP:null,
+              ownedBy:null,cushBy:null,cushQ:0,cushZ:0,lastTouch:null,shotBy:null,shotT:0,curveSpin:0,curveSpinT:0,curveK:0,crossBy:null,crossT:0,lastTouchP:null,prevTouchP:null,mePassBy:null,mePassT:0,
               dribbler:null,dribbleGrace:0};
   function mkKeeper(side,team){
     return {x:side<0?26:FW-26,homeX:side<0?26:FW-26,y:YC,side,team,r:12,
@@ -2116,6 +2155,7 @@
       ball.vy=ay*sol.vh;
       ball.vz=sol.vz;                               // loft slides with charge
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
+      if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
       recordPassTeam(p.team,p);
       // locked: do not switch to the receiver
     } else {
@@ -2465,6 +2505,7 @@
     return { gx, corner, kp, sp, top, bot, pick };
   }
   function shootAt(p,atkSide,aim,charge,aiCurl,accMul){
+    if(meIs(p)) meBump('shots');
     const gx=atkSide>0?FW:0;
     let ty=YC+aim*(GOAL_W/2-14);
     const manual=(p===controlled), aimed=Math.abs(aim)>0.25;   // player picked a corner -> honor it
@@ -2577,6 +2618,7 @@
   function passTo(p,mate,loft=0){
     const atk=atkOf(p.team);
     ball.passerRef=p;                                        // remembered by the receiver (anti ping-pong)
+    if(meIs(p)) meBump('passes');
     const L=passLead(p,mate); const running=L.running;
     const lead={x:L.x, y:L.y};
     // OFF IQ (passer): weight the ball into the runner's stride. Low IQ over/under-leads (ball drifts
@@ -2647,6 +2689,8 @@
     ball.lastTouch=t.team;
     offsidePass=null;
     // locked: winning the ball doesn't switch control
+    if(meIs(t)) meBump('tackles');
+    if(meIs(carrier)) meBump('lost');
     if(t===controlled){lastGrade='TACKLE!';gradeColor='#9dff3c';gradeFade=1.2;}
     else if(carrier===controlled){lastGrade='TACKLED';gradeColor='#ff5a4d';gradeFade=1.2;}
   }
@@ -5691,6 +5735,7 @@
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;
     if(!wasOwner){ p.lastPasser=(ball.passerRef&&ball.passerRef.team===p.team&&ball.passerRef!==p)?ball.passerRef:null; p.lastPasserT=p.lastPasser?1.6:0;
       if(p===controlled) p.passLockT=(P.passLock?P.passLock.val:0.25); }   // touch: a tap right after receiving means TRAP, never pass
+    if(!wasOwner) meOnReceive(p, ball.passerRef);
     ball.passerRef=null;
     if(keepPos){
       // recapturing a ball that drifted off-line: keep it where it actually is and aim the
@@ -5865,6 +5910,7 @@
           kp.mode='hold';kp.holdT=1.15+Math.random()*0.45;
           gkHold=kp;ball.cushBy=null;offsidePass=null;
           ball.lastTouch=kp.team;
+          if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
           lastGrade='CLAIMED';gradeColor='#ffb43c';gradeFade=1.2;
         }
       }
@@ -6005,6 +6051,7 @@
         ball.cushBy=null;offsidePass=null;
         ball.lastTouch=kp.team;
         endCurve();                       // parried -> curve stops
+        if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
         lastGrade = (kp.diveT>0)?'DIVING SAVE!':'SAVED!'; gradeColor='#ffb43c'; gradeFade=1.4;
         if(practice==='keeper') kdSaves++;
         if(kp.diveT>0){ kp.diveT=0; kp.groundT=0.5; }   // saved from the dive -> go to ground ~0.5s
@@ -6548,10 +6595,13 @@
     const _og=_sp&&_sp.team!==scorer;
     const _aok=!_og&&_ap&&_ap!==_sp&&_ap.team===scorer;
     goalLog.push({team:scorer,scorerName:_sp?(_sp.pname||_sp.name||'?'):'?',scorerNum:_sp?(_sp.num||''):'',assistName:_aok?(_ap.pname||_ap.name||null):null,assistNum:_aok?(_ap.num||null):null,ownGoal:!!_og,time:Math.round(matchClock)});
+    if(meIs(_sp)){ if(_og) meBump('og'); else { meBump('goals'); meBump('shotsOn'); } }
+    if(_aok && meIs(_ap)) meBump('assists');
     scoredT=1.4;
     lastGrade='GOAL!';gradeColor='#ffb43c';gradeFade=1.6;
   }
   function newMatch(){
+    meMatch=null; meLook=null;                    // career play re-arms these straight after
     goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0;
     ball.lastTouchP=null;ball.prevTouchP=null;
     ftPending=false;ftShot=false;ftLastTeam=null;
@@ -6910,6 +6960,34 @@
   SPRITE.load(SPRITE_SHEET); SPRITE.loadPose(SHOOT_SHEET, SLIDE_SHEET); SPRITE.enable();        // art is embedded -> on by default
   try{ window.SPRITE=SPRITE; }catch(e){}
   // ===== END SPRITE SYSTEM =====================================================================
+  // YOUR PRO on the pitch: the shirt keeps the team colour so sides stay readable, and the
+  // trim / boots / hair you picked in the House ride on top of it.
+  function drawLookBody(base,bodyH,w){
+    const sc=base.scale, kit=lookPick('kit',meLook.kit||0).c, boot=lookPick('boot',meLook.boot||0).c;
+    ctx.save();
+    ctx.beginPath();ctx.roundRect(base.x-w/2,base.y-bodyH,w,bodyH,w/2);ctx.clip();
+    ctx.fillStyle=kit;ctx.fillRect(base.x-w/2,base.y-bodyH*0.78,w,Math.max(1.3,3*sc));
+    ctx.restore();
+    const bw=Math.max(1.8,3.8*sc), bh=Math.max(1.2,2.4*sc);
+    ctx.fillStyle=boot;
+    ctx.fillRect(base.x-w/2-0.6*sc, base.y-bh*0.55, bw, bh);
+    ctx.fillRect(base.x+w/2-bw+0.6*sc, base.y-bh*0.55, bw, bh);
+  }
+  function drawLookHair(base,bodyH,headR){
+    const H=lookPick('hair',meLook.hair||0); if(H.s==='bald') return;
+    const cx=base.x, cy=base.y-bodyH-headR*0.4;
+    ctx.save(); ctx.fillStyle=H.c;
+    const cut=HAIR_CUT[H.s]; if(cut==null) return;
+    ctx.fillStyle=H.c;
+    ctx.beginPath();ctx.arc(cx,cy,headR,0,Math.PI*2);ctx.clip();          // hair never leaves the skull
+    ctx.fillRect(cx-headR*1.2, cy-headR*1.2, headR*2.4, headR*(1.2+cut));
+    ctx.fillStyle='#0c0f08';
+    ctx.fillRect(cx-headR*1.2, cy+headR*cut-Math.max(0.5,headR*0.10), headR*2.4, Math.max(0.8,headR*0.13));
+    ctx.restore();
+    if(H.s==='curls'){ ctx.save(); ctx.fillStyle=H.c;                     // bobbles may sit proud
+      for(let i=-1;i<=1;i++){ ctx.beginPath();ctx.arc(cx+i*headR*0.55,cy-headR*0.72,headR*0.34,0,Math.PI*2);ctx.fill(); }
+      ctx.restore(); }
+  }
   function drawOutfielder(p){
     const col=p.team==='G'?'#9dff3c':'#ff5a4d';
     const headCol=p.team==='G'?'#e7f3d4':'#ffd9d4';
@@ -6934,8 +7012,10 @@
       ctx.fillStyle=col;
       ctx.beginPath();ctx.roundRect(base.x-w/2,base.y-bodyH,w,bodyH,w/2);ctx.fill();
       ctx.lineWidth=2;ctx.strokeStyle='#0c0f08';ctx.stroke();
+      if(p.me&&meLook) drawLookBody(base,bodyH,w);
       ctx.beginPath();ctx.arc(base.x,base.y-bodyH-headR*0.4,headR,0,Math.PI*2);
       ctx.fillStyle=headCol;ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle='#0c0f08';ctx.stroke();
+      if(p.me&&meLook) drawLookHair(base,bodyH,headR);
     }
     ctx.restore();
     // --- stamina bar for ALL players, with a red MAX-CAP line ---
@@ -7578,6 +7658,7 @@
     if(d.loyalty==null) d.loyalty=LOYALTY_BASE[d.tier]||1000;
     if(d.streak==null) d.streak=0;
     if(!Array.isArray(d.results)) d.results=[];
+    ensureMe(d);
     return d; }
   let careerFix=null;   // active live career fixture {opp, home, recorded}
   let stadNote='';
@@ -7845,7 +7926,7 @@
     h+='<div style="color:#7f9a6f;font-size:10px;letter-spacing:1px;margin:12px 0 4px">SUBSTITUTES</div>';
     for(const ri of lu.bench){ const p=d.roster[ri]; if(p) h+=finRow((p.subRole||p.role)+' '+p.name+' \u00b7 OVR '+p.ovr, money(p.wage)); }
     return h; }
-  function showMatchReport(d,cf,yr,mine,logs,f,broadBump,gate,income,budBefore,loyBefore,dl){
+  function showMatchReport(d,cf,yr,mine,logs,f,broadBump,gate,income,budBefore,loyBefore,dl,meRes){
     const el=document.getElementById('matchReport'); if(!el)return;
     const result=yr.you>yr.opp?'WON':yr.you===yr.opp?'DREW':'LOST';
     const rCol=yr.you>yr.opp?'#9dff3c':yr.you===yr.opp?'#ffb43c':'#ff5a4d';
@@ -7868,6 +7949,19 @@
     h+='<div class="mrGoalList">'+(goalsG.length?goalsG.map(fmtGoal).join(''):'<span style="color:#4a5e40">— no goals scored</span>')+'</div>';
     h+='<div class="mrSect">'+cf.opp.toUpperCase()+' GOALS</div>';
     h+='<div class="mrGoalList">'+(goalsR.length?goalsR.map(fmtGoal).join(''):'<span style="color:#4a5e40">— no goals scored</span>')+'</div>';
+    if(meRes){
+      const m=meRes.m, _M=ensureMe(d), nm=(_M&&d.roster[_M.ri]&&d.roster[_M.ri].name)||'YOU';
+      const rc=meRes.rating>=7.5?'#9dff3c':meRes.rating>=6?'#ffb43c':'#ff5a4d';
+      h+='<div class="mrSect">'+mkEsc(nm.toUpperCase())+'</div>';
+      h+=mRow('Match rating',meRes.rating.toFixed(1),true,rc);
+      h+=mRow('Goals / assists',m.goals+' / '+m.assists,false,(m.goals||m.assists)?'#9dff3c':'#9bb88a');
+      h+=mRow('Shots (on target)',m.shots+' ('+m.shotsOn+')');
+      h+=mRow('Passes',m.passesOk+' / '+m.passes+(m.passes?'  ·  '+Math.round(m.passesOk/m.passes*100)+'%':''));
+      h+=mRow('Tackles / interceptions',m.tackles+' / '+m.intercepts);
+      if(m.lost) h+=mRow('Possession lost',String(m.lost),false,'#ff5a4d');
+      if(m.og) h+=mRow('Own goals',String(m.og),false,'#ff5a4d');
+      h+=mRow('Skill points earned','+'+meRes.sp,true,'#ffb43c');
+    }
     h+='<div class="mrSect">FINANCES · WEEK '+(d.week||0)+'</div>';
     h+=mRow('Sponsorship',money(f.sponsorWk));
     h+=mRow('Broadcast / central',money(f.broadcastWk));
@@ -7890,6 +7984,7 @@
   }
   function finishCareerMatch(cf){ const d=CAREER&&CAREER.data; if(!d){ careerFix=null; return; }
     const yr={you:scoreG,opp:scoreR};
+    const meRes=meCommit(d, scoreG>scoreR?'W':scoreG===scoreR?'D':'L');
     const budBefore=d.budget; const loyBefore=Math.round(d.loyalty||0);
     const f=computeFinance(d);
     const mine=simMatchday(d,yr);
@@ -7900,7 +7995,7 @@
     const dl=mine?mine.loyaltyDelta||0:0;
     const logs=goalLog.slice();
     document.getElementById('stageWrap').classList.add('menuMode'); showHubScreen();
-    showMatchReport(d,cf,yr,mine,logs,f,broadBump,gate,income,budBefore,loyBefore,dl); }
+    showMatchReport(d,cf,yr,mine,logs,f,broadBump,gate,income,budBefore,loyBefore,dl,meRes); }
   function showNote(msg,color){ const el=document.getElementById('chNote'); if(!el)return; el.textContent=msg; el.style.color=color||'#ffb43c'; el.style.display='block'; clearTimeout(showNote._t); showNote._t=setTimeout(()=>{ el.style.display='none'; },6000); }
   // ---- Stadium screen ----
   function stadPrice(d){ const ft=FIN_TIER[d.tier]||FIN_TIER[1]; return d.ticketPrice!=null?d.ticketPrice:ft.price; }
@@ -7969,6 +8064,142 @@
   // ===== END SEASON, FIXTURES & STADIUM =======================================================
 
 
+  // ---- YOUR HOUSE: the screen for your created pro --------------------------------------
+  let houseTab='pace', houseSel=null;
+
+  // a scaled-up portrait built the same way drawOutfielder builds the on-pitch body,
+  // so what you pick here is what you see on the pitch.
+  function lookSvg(look,big){
+    const kit=lookPick('kit',look.kit||0).c, boot=lookPick('boot',look.boot||0).c, H=lookPick('hair',look.hair||0);
+    const sc=big?1.55:1, W=74*sc, HT=104*sc, cx=W/2, baseY=94*sc;
+    const bodyH=52*sc, w=20*sc, headR=11*sc, hy=baseY-bodyH-headR*0.4;
+    const n=v=>(Math.round(v*10)/10);
+    const cut=HAIR_CUT[H.s], hid='hsHead'+(big?'B':'S');
+    let hair='';
+    if(cut!=null){
+      hair='<clipPath id="'+hid+'"><circle cx="'+n(cx)+'" cy="'+n(hy)+'" r="'+n(headR)+'"/></clipPath>'
+          +'<rect clip-path="url(#'+hid+')" x="'+n(cx-headR*1.2)+'" y="'+n(hy-headR*1.2)+'" '
+          +'width="'+n(headR*2.4)+'" height="'+n(headR*(1.2+cut))+'" fill="'+H.c+'"/>'
+          +'<rect clip-path="url(#'+hid+')" x="'+n(cx-headR*1.2)+'" y="'+n(hy+headR*cut-headR*0.10)+'" '
+          +'width="'+n(headR*2.4)+'" height="'+n(headR*0.13)+'" fill="#0c0f08"/>';
+      if(H.s==='curls') for(let i=-1;i<=1;i++)
+        hair+='<circle cx="'+n(cx+i*headR*0.55)+'" cy="'+n(hy-headR*0.72)+'" r="'+n(headR*0.34)+'" fill="'+H.c+'"/>';
+    }
+    const bw=8*sc, bh=5*sc, cid='hsClip'+(big?'B':'S');
+    return '<svg width="'+n(W)+'" height="'+n(HT)+'" viewBox="0 0 '+n(W)+' '+n(HT)+'">'
+      +'<ellipse cx="'+n(cx)+'" cy="'+n(baseY+3*sc)+'" rx="'+n(w*0.8)+'" ry="'+n(4*sc)+'" fill="rgba(0,0,0,.45)"/>'
+      +'<clipPath id="'+cid+'"><rect x="'+n(cx-w/2)+'" y="'+n(baseY-bodyH)+'" width="'+n(w)+'" height="'+n(bodyH)+'" rx="'+n(w/2)+'"/></clipPath>'
+      +'<rect x="'+n(cx-w/2)+'" y="'+n(baseY-bodyH)+'" width="'+n(w)+'" height="'+n(bodyH)+'" rx="'+n(w/2)+'" fill="#9dff3c" stroke="#0c0f08" stroke-width="2"/>'
+      +'<rect clip-path="url(#'+cid+')" x="'+n(cx-w/2)+'" y="'+n(baseY-bodyH*0.78)+'" width="'+n(w)+'" height="'+n(6*sc)+'" fill="'+kit+'"/>'
+      +'<rect x="'+n(cx-w/2-1*sc)+'" y="'+n(baseY-bh)+'" width="'+n(bw)+'" height="'+n(bh)+'" rx="'+n(1.5*sc)+'" fill="'+boot+'" stroke="#0c0f08" stroke-width="1"/>'
+      +'<rect x="'+n(cx+w/2-bw+1*sc)+'" y="'+n(baseY-bh)+'" width="'+n(bw)+'" height="'+n(bh)+'" rx="'+n(1.5*sc)+'" fill="'+boot+'" stroke="#0c0f08" stroke-width="1"/>'
+      +'<circle cx="'+n(cx)+'" cy="'+n(hy)+'" r="'+n(headR)+'" fill="#e7f3d4" stroke="#0c0f08" stroke-width="1.5"/>'
+      +hair+'</svg>';
+  }
+
+  function hsStrip(items){ return '<div class="hsStrip">'+items.map(it=>
+    '<div class="hsCell"><div class="k">'+it[0]+'</div><div class="v" style="color:'+(it[2]||'#9dff3c')+'">'+it[1]+'</div></div>').join('')+'</div>'; }
+  function hsRateCol(r){ return r>=7.5?'#9dff3c':r>=6?'#ffb43c':'#ff5a4d'; }
+
+  function renderHouseOverview(d,M){
+    const e=d.roster[M.ri], S=M.season, C=M.career;
+    const avgS=S.apps?S.ratingSum/S.apps:0, avgC=C.apps?C.ratingSum/C.apps:0;
+    const left=tvLeft(meCtx(M));
+    let h='<div class="hsHead"><div class="hsPort">'+lookSvg(M.look)+'</div><div class="hsWho">'
+      +'<div class="hsName">'+mkEsc(e.name)+'</div>'
+      +'<div class="hsSub">#'+(e.num||'')+' · '+(e.role||'MID')+' · age '+(e.age||21)+' · '+mkEsc(d.clubName)+'</div>'
+      +'<div class="hsOvrRow"><span class="hsOvr">'+tvOVR(e.stats)+'</span><span class="hsOvrL">OVR</span>'
+      +'<span class="hsSp">'+left+'</span><span class="hsOvrL">POINT'+(left===1?'':'S')+' TO SPEND</span></div>'
+      +'</div></div>';
+    h+='<div class="bpSect">SEASON '+S.season+'</div>';
+    h+=hsStrip([['Apps',S.apps],['Goals',S.goals,'#9dff3c'],['Assists',S.assists,'#9dff3c'],
+                ['Avg rating',S.apps?avgS.toFixed(2):'—',S.apps?hsRateCol(avgS):'#5d7350'],
+                ['W-D-L',S.w+'-'+S.d+'-'+S.l,'#e9f5ec']]);
+    h+=hsStrip([['Shots',S.shots+' ('+S.shotsOn+')'],
+                ['Pass %',S.passes?Math.round(S.passesOk/S.passes*100)+'%':'—'],
+                ['Tackles',S.tackles],['Interceptions',S.intercepts],
+                ['Lost',S.lost,S.lost?'#ffb43c':'#9dff3c']]);
+    if(M.recent.length){
+      h+='<div class="bpSect">RECENT FORM</div><div class="hsForm">';
+      for(const r of M.recent){ const c=hsRateCol(r.r);
+        h+='<span class="hsChip" style="border-color:'+c+';color:'+c+'">'+r.r.toFixed(1)
+          +'<i>'+(r.g?' '+r.g+'G':'')+(r.a?' '+r.a+'A':'')+' '+r.res+'</i></span>'; }
+      h+='</div>';
+    }
+    h+='<div class="bpSect">CAREER</div>';
+    h+=hsStrip([['Apps',C.apps],['Goals',C.goals,'#9dff3c'],['Assists',C.assists,'#9dff3c'],
+                ['Avg rating',C.apps?avgC.toFixed(2):'—',C.apps?hsRateCol(avgC):'#5d7350'],
+                ['Points earned',M.sp||0,'#ffb43c']]);
+    if(C.seasons.length){
+      h+='<div class="bpSect">PREVIOUS SEASONS</div><table class="hsTbl">'
+        +'<tr><th>SEASON</th><th>APP</th><th>G</th><th>A</th><th>AVG</th></tr>';
+      for(const x of C.seasons.slice().reverse())
+        h+='<tr><td>'+x.season+'</td><td>'+x.apps+'</td><td>'+x.goals+'</td><td>'+x.assists+'</td>'
+          +'<td>'+(x.apps?(x.ratingSum/x.apps).toFixed(2):'—')+'</td></tr>';
+      h+='</table>';
+    }
+    if(!C.apps&&!S.apps) h+='<div class="bpSect">—</div><div style="color:#7f9a6f">Nothing logged yet. Play a match and your goals, assists, passing, tackling and rating all land here — and turn into points you can spend on the DEVELOPMENT tab.</div>';
+    return h;
+  }
+
+  function renderHouseDev(d,M){
+    const ctx=meCtx(M), tree=MK_TREES.find(t=>t.id===houseTab)||MK_TREES[0];
+    if(houseSel && !mkNode(tree,houseSel)) houseSel=null;
+    const left=tvLeft(ctx), st=d.roster[M.ri].stats, g=tvGrants(ctx);
+    let tabs=''; for(const t of MK_TREES) tabs+='<button class="mkTab'+(t.id===tree.id?' on':'')+'" data-htab="'+t.id+'">'+t.name+'</button>';
+    let panel;
+    if(houseSel){
+      const n=mkNode(tree,houseSel);
+      const own=tvOwnedQ(ctx,tree.id,n.id), can=tvCanBuy(ctx,tree,n), canR=tvCanRefund(ctx,tree,n);
+      const keys=Object.keys(n.g);
+      const title=keys.length===1?STAT_LABEL[keys[0]]:(n.id==='cap'?'Capstone':'Combo node');
+      const desc=keys.length===1?(MK_DESC[keys[0]]||''):'One purchase, several gains at once.';
+      let lock='';
+      if(!own&&!can) lock=(n.par.length&&!n.par.some(pid=>tvOwnedQ(ctx,tree.id,pid)))
+        ? 'Unlock a connected node above this one first.'
+        : 'Not enough points — go and earn some on the pitch.';
+      panel='<div class="mkDetName">'+title+'</div><div class="mkDetDesc">'+desc+'</div>'
+        +'<div class="mkDetVal">'+mkGrantText(n)+'</div>'
+        +'<div class="mkDetCost">'+(own?('Owned · refund returns <b>+'+mkCost(n)+'</b>'):('Cost: <b>'+mkCost(n)+'</b> pt'+(mkCost(n)>1?'s':'')))+'</div>'
+        +(lock?'<div class="mkDetDesc" style="color:#ffb43c">'+lock+'</div>':'')
+        +(own?'<button class="pauseBtn mkDo" data-hmk="do"'+(canR?'':' disabled')+'>'+(canR?'REFUND':'LOCKED · picks below depend on it')+'</button>'
+             :'<button class="pauseBtn mkDo" data-hmk="do"'+(can?'':' disabled')+'>UNLOCK</button>');
+    } else panel='<div class="mkDetHint">Tap a node to inspect it, tap it again to unlock. Points are <b>earned by playing</b> — an appearance, a goal, an assist, a win, a big rating. Refund an owned node any time to move those points somewhere else.</div>';
+    let attrs='';
+    for(const k of OUT_KEYS){ const gv=g[k]||0;
+      attrs+='<div class="hsAt"><span class="n">'+STAT_LABEL[k]+'</span><span><span class="v">'+(st[k]||0).toFixed(1)+'</span>'
+        +(gv?'<span class="g"> +'+gv.toFixed(1)+'</span>':'')+'</span></div>'; }
+    return '<div class="hsDev"><div class="mkLayout">'
+        +'<div class="mkLeft"><div class="mkTabs">'+tabs+'</div>'+tvSvg(ctx,tree,houseSel,true)+'</div>'
+        +'<div class="mkRight">'
+          +'<div class="mkMeta"><span>PTS <b style="color:'+(left>0?'#ffb43c':'#5d7350')+'">'+left+'</b></span>'
+          +'<span>OVR <b style="color:#9dff3c">'+tvOVR(st)+'</b></span></div>'
+          +'<div class="mkDetail">'+panel+'</div>'
+        +'</div></div></div>'
+      +'<div class="bpSect">ATTRIBUTES</div><div class="hsAttr">'+attrs+'</div>';
+  }
+
+  function renderHouseLook(d,M){
+    const row=(set,label)=>{ const L=LOOK_SETS[set], cur=M.look[set]||0;
+      let h='<div class="bpSect">'+label+'</div><div class="hsLookRow">';
+      L.forEach((o,i)=>{ h+='<button class="hsSw'+(i===cur?' on':'')+'" data-look="'+set+'" data-li="'+i+'" '
+        +'style="background:'+o.c+'" title="'+o.n+'"><span>'+o.n.toUpperCase()+'</span></button>'; });
+      return h+'</div>'; };
+    return '<div class="hsLookWrap"><div class="hsLookPrev">'+lookSvg(M.look,true)+'</div>'
+      +'<div class="hsLookOpts">'+row('kit','KIT TRIM')+row('boot','BOOTS')+row('hair','HAIR')+'</div></div>'
+      +'<div style="color:#7f9a6f;margin-top:14px">Your shirt keeps the team colour — the trim, boots and hair are yours, and they follow you onto the pitch.</div>';
+  }
+
+  function renderHouse(d,tab){
+    const M=ensureMe(d);
+    if(!M) return '<div style="color:#ffb43c">This save has no created pro — it was started before create-a-pro, or from the quick-start slot. Begin a NEW GAME to create one and this screen fills in.</div>';
+    if(tab==='Development') return renderHouseDev(d,M);
+    if(tab==='Appearance')  return renderHouseLook(d,M);
+    return renderHouseOverview(d,M);
+  }
+  function rerenderHouse(){ const el=document.getElementById('bpBody');
+    if(el&&curBldg==='house') el.innerHTML=renderBuildingBody('house'); }
+
   function newCareerStub(slot){
     const seed=(Math.floor(Math.random()*1e9))>>>0;
     const world=cwBuildWorld(seed);
@@ -7979,6 +8210,159 @@
     return { v:2, slot, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-2', width:{atk:1,def:1},
              budget:5000, wageWk, sponsorWk:ft.sponsor, capacity:ft.capacity, ticketPrice:ft.price, form:0.5,
              loyalty:LOYALTY_BASE[1], streak:0, results:[], beatenClubs:[], ledger:[], roster, created:Date.now(), updated:Date.now() };
+  }
+
+  // ============ YOUR PRO: development trees, season stats, appearance ============
+  // The creation trees keep working after creation. Every attribute tops out at +3.0 of node
+  // grants, and buying all 66 nodes costs 200 against a creation budget of 90 -- so 110 points
+  // of headroom are left over, to be EARNED by playing rather than bought.
+  const STAT_MAX=10;
+  // what a single appearance is worth, before tree costs (row cost 1..5) are paid out of it
+  const ME_SP={ app:1, goal:2, assist:1, win:1, rate75:1, rate90:2 };
+
+  // ---- generic tree context: {owned, base, budget} -------------------------------------
+  // MK (creation) and d.mePro (career) are both just contexts, so one renderer serves both.
+  function tvOwnedQ(ctx,tid,nid){ return !!ctx.owned[tid+'.'+nid]; }
+  function tvSpent(ctx){ let sp=0; for(const t of MK_TREES) for(const n of t.nodes) if(tvOwnedQ(ctx,t.id,n.id)) sp+=mkCost(n); return sp; }
+  function tvLeft(ctx){ return (ctx.budget||0)-tvSpent(ctx); }
+  function tvCanBuy(ctx,tree,n){ if(tvOwnedQ(ctx,tree.id,n.id)) return false;
+    if(n.par.length && !n.par.some(pid=>tvOwnedQ(ctx,tree.id,pid))) return false;   // needs a connected node above
+    return tvLeft(ctx)>=mkCost(n); }
+  function tvCanRefund(ctx,tree,n){ if(!tvOwnedQ(ctx,tree.id,n.id)) return false;
+    for(const c of mkChildren(tree,n.id)){ if(!tvOwnedQ(ctx,tree.id,c.id)) continue;
+      if(!c.par.some(pid=>pid!==n.id && tvOwnedQ(ctx,tree.id,pid))) return false; }  // an owned pick below would be orphaned
+    return true; }
+  function tvGrants(ctx){ const g={}; for(const t of MK_TREES) for(const n of t.nodes){ if(!tvOwnedQ(ctx,t.id,n.id)) continue;
+      for(const k in n.g) g[k]=(g[k]||0)+n.g[k]*0.5; } return g; }
+  function tvStats(ctx){ const s=Object.assign({},ctx.base), g=tvGrants(ctx);
+    for(const k in g) s[k]=Math.min(STAT_MAX,(s[k]||0)+g[k]); return s; }
+  function tvOVR(stats){ let s=0; for(const k of MK_ALLOC) s+=(stats[k]||0); return Math.max(1,Math.min(99,Math.round(s/MK_ALLOC.length*10))); }
+  function tvToggle(ctx,tree,nid){ const n=mkNode(tree,nid); if(!n) return false;
+    const key=tree.id+'.'+n.id;
+    if(tvOwnedQ(ctx,tree.id,n.id)){ if(!tvCanRefund(ctx,tree,n)) return false; delete ctx.owned[key]; return true; }
+    if(!tvCanBuy(ctx,tree,n)) return false; ctx.owned[key]=true; return true; }
+
+  // the tree, as an SVG graph (shared by creation and the House)
+  function tvSvg(ctx,tree,sel,fit){
+    const R=17, DX=176, DY=82;
+    let minC=1e9,maxC=-1e9,maxR=0;
+    for(const n of tree.nodes){ minC=Math.min(minC,n.col); maxC=Math.max(maxC,n.col); maxR=Math.max(maxR,n.row); }
+    const W=520, H=maxR*DY+96, cx=W/2;
+    const xF=c=>cx+(c-(minC+maxC)/2)*DX, yF=r=>44+r*DY;
+    const hex=(x,y,r)=>{ let pts=''; for(let i=0;i<6;i++){ const a=Math.PI/180*(60*i-90); pts+=(x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1)+' '; } return pts.trim(); };
+    let edges='', nodes='';
+    for(const n of tree.nodes){ const x=xF(n.col), y=yF(n.row);
+      for(const pid of n.par){ const pn=mkNode(tree,pid); const px=xF(pn.col), py=yF(pn.row);
+        const lit=tvOwnedQ(ctx,tree.id,n.id)&&tvOwnedQ(ctx,tree.id,pid);
+        edges+='<line x1="'+px.toFixed(1)+'" y1="'+(py+R+2)+'" x2="'+x.toFixed(1)+'" y2="'+(y-R-2)+'" stroke="'+(lit?'#9dff3c':'#243524')+'" stroke-width="2"/>'; } }
+    for(const n of tree.nodes){ const x=xF(n.col), y=yF(n.row);
+      const own=tvOwnedQ(ctx,tree.id,n.id), can=tvCanBuy(ctx,tree,n), isSel=(sel===n.id);
+      const fill=own?'#2f7a22':(can?'#131d14':'#0d130e');
+      const stroke=isSel?'#e9f5ec':(own?'#b9ff6e':(can?'#7fce5f':'#22301f'));
+      const codes=Object.keys(n.g).map(k=>MK_ABBR[k]+'+'+(n.g[k]===1?'.5':(n.g[k]*0.5).toFixed(1)));
+      let sub=''; for(let i=0;i<codes.length;i+=2){ sub+='<text x="'+x+'" y="'+(y+R+11+9*(i/2))+'" text-anchor="middle" font-size="7.5" fill="'+(own?'#cfe7d2':'#7f9a6f')+'">'+codes.slice(i,i+2).join(' ')+'</text>'; }
+      nodes+='<g data-node="'+n.id+'" style="cursor:pointer">'
+        +'<polygon points="'+hex(x,y,R)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(isSel?3:2)+'"/>'
+        +(!own&&can?'<text x="'+x+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="13" fill="#7fce5f">+</text>':'')
+        +(own?'':'<text x="'+(x+R+3)+'" y="'+(y-R+3)+'" font-size="8.5" fill="#ffb43c">'+mkCost(n)+'</text>')
+        +sub+'</g>'; }
+    const size=fit ? 'width="100%" style="height:auto;display:block"'   // viewBox drives the height
+                   : 'width="'+W+'" height="'+H+'"';
+    return '<div class="mkTreeWrap"><svg '+size+' viewBox="0 0 '+W+' '+H+'">'+edges+nodes+'</svg></div>';
+  }
+
+  // ---- appearance ----------------------------------------------------------------------
+  const LOOK_KIT =[{n:'Phosphor',c:'#9dff3c'},{n:'Bone',c:'#e9f5ec'},{n:'Amber',c:'#ffb43c'},{n:'Ice',c:'#4de3ff'},{n:'Violet',c:'#c08bff'},{n:'Rust',c:'#ff7a3c'}];
+  const LOOK_BOOT=[{n:'Black',c:'#141a11'},{n:'Bone',c:'#e9f5ec'},{n:'Lime',c:'#9dff3c'},{n:'Amber',c:'#ffb43c'},{n:'Blood',c:'#ff5a4d'},{n:'Ice',c:'#4de3ff'}];
+  const LOOK_HAIR=[{n:'Crop',s:'crop',c:'#2a2118'},{n:'Buzz',s:'buzz',c:'#2a2118'},{n:'Mop',s:'mop',c:'#43301c'},{n:'Curls',s:'curls',c:'#1a1410'},{n:'Blond',s:'mop',c:'#e0c766'},{n:'Bleach',s:'crop',c:'#e9f5ec'},{n:'Shaved',s:'bald',c:'#000000'}];
+  const HAIR_CUT={buzz:-0.50, crop:-0.30, mop:-0.08, curls:-0.25};   // where the hairline sits, in head radii
+  const LOOK_SETS={kit:LOOK_KIT, boot:LOOK_BOOT, hair:LOOK_HAIR};
+  function lookPick(set,i){ const L=LOOK_SETS[set]; return L[clamp(i|0,0,L.length-1)]; }
+
+  // ---- live per-match tally for YOUR player --------------------------------------------
+  // null outside a career match, so exhibition and practice never write to a save.
+  let meMatch=null, meLook=null;
+  function meBlank(){ return {played:false,goals:0,assists:0,og:0,shots:0,shotsOn:0,passes:0,passesOk:0,tackles:0,intercepts:0,lost:0}; }
+  function meIs(p){ return !!(meMatch && p && p.me); }
+  function meBump(k,n){ if(meMatch) meMatch[k]=(meMatch[k]||0)+(n==null?1:n); }
+  function meOnReceive(p,passer){
+    if(!meMatch) return;
+    // a manual pass is only still "in flight" for a few seconds -- past that the ball went
+    // dead and came back via a restart, which is nobody's completed pass.
+    const dtp=matchClock-ball.mePassT;   // negative across the half-time reset -> not in flight
+    const mine=(ball.mePassBy && dtp>=0 && dtp<4) ? ball.mePassBy : null;
+    ball.mePassBy=null;
+    const from=passer||mine;
+    if(!from||from===p) return;
+    if(from.team===p.team){ if(from.me) meBump('passesOk'); }   // pass found its man
+    else if(p.me) meBump('intercepts');                          // you read it and cut it out
+  }
+  function meRating(m,res){
+    if(!m||!m.played) return null;
+    const pa=m.passes>0?m.passesOk/m.passes:0.78;
+    const r=6.0 + m.goals*1.0 + m.assists*0.7 - m.og*1.2
+      + m.shotsOn*0.12 + m.tackles*0.15 + m.intercepts*0.15
+      + clamp((pa-0.78)*2.2,-0.7,0.7)
+      - m.lost*0.07
+      + (res==='W'?0.3:res==='L'?-0.3:0);
+    return Math.round(clamp(r,1,10)*10)/10;
+  }
+  function meSPFor(m,rating,res){
+    if(!m||!m.played) return 0;
+    let sp=ME_SP.app + m.goals*ME_SP.goal + m.assists*ME_SP.assist + (res==='W'?ME_SP.win:0);
+    if(rating>=9.0) sp+=ME_SP.rate90; else if(rating>=7.5) sp+=ME_SP.rate75;
+    return sp;
+  }
+
+  // ---- the saved record ------------------------------------------------------------------
+  function meBlankSeason(sn){ return {season:sn,apps:0,goals:0,assists:0,og:0,shots:0,shotsOn:0,passes:0,passesOk:0,tackles:0,intercepts:0,lost:0,ratingSum:0,w:0,d:0,l:0}; }
+  function ensureMe(d){
+    if(!d||!Array.isArray(d.roster)) return null;
+    const ri=d.roster.findIndex(p=>p&&p.me);
+    if(ri<0) return null;                                  // a save with no created pro (club-only career)
+    if(!d.mePro||typeof d.mePro!=='object') d.mePro={};
+    const M=d.mePro;
+    if(!M.owned||typeof M.owned!=='object') M.owned={};
+    if(!M.base||typeof M.base!=='object'){
+      // a save from before development existed: lock today's stats in as the floor and start
+      // the tree empty, so nothing is lost and nothing is handed out twice.
+      M.base=Object.assign({},d.roster[ri].stats); M.budget0=0;
+    }
+    if(!isFinite(M.budget0)) M.budget0=0;
+    if(!isFinite(M.sp)) M.sp=0;
+    if(!M.career||typeof M.career!=='object') M.career={apps:0,goals:0,assists:0,ratingSum:0,seasons:[]};
+    if(!Array.isArray(M.career.seasons)) M.career.seasons=[];
+    if(!Array.isArray(M.recent)) M.recent=[];
+    if(!M.look||typeof M.look!=='object') M.look={kit:1,boot:0,hair:0};
+    const sn=d.season||1;
+    if(!M.season||M.season.season!==sn){                   // season rolled over -> file the old one
+      if(M.season&&M.season.apps>0) M.career.seasons.push(M.season);
+      M.season=meBlankSeason(sn);
+    }
+    M.ri=ri;
+    return M;
+  }
+  function meCtx(M){ return {owned:M.owned, base:M.base, budget:(M.budget0||0)+(M.sp||0)}; }
+  function meApply(d){                                     // push developed stats onto the roster entry
+    const M=ensureMe(d); if(!M) return null;
+    const st=tvStats(meCtx(M)), e=d.roster[M.ri];
+    e.stats=st; e.ovr=tvOVR(st);
+    return M;
+  }
+  function meCommit(d,res){                                // fold the finished match into the save
+    const M=ensureMe(d), m=meMatch;
+    if(!M||!m||!m.played) return null;
+    const rating=meRating(m,res), sp=meSPFor(m,rating,res);
+    const S=M.season;
+    S.apps++; S.goals+=m.goals; S.assists+=m.assists; S.og+=m.og;
+    S.shots+=m.shots; S.shotsOn+=m.shotsOn; S.passes+=m.passes; S.passesOk+=m.passesOk;
+    S.tackles+=m.tackles; S.intercepts+=m.intercepts; S.lost+=m.lost; S.ratingSum+=rating;
+    if(res==='W')S.w++; else if(res==='D')S.d++; else S.l++;
+    const C=M.career; C.apps++; C.goals+=m.goals; C.assists+=m.assists; C.ratingSum+=rating;
+    M.sp=(M.sp||0)+sp;
+    M.recent.unshift({r:rating,g:m.goals,a:m.assists,res});
+    if(M.recent.length>6) M.recent.length=6;
+    return {rating,sp,m};
   }
 
   // ============ CHARACTER MAKER + IN-APP CONFIRM (new-game flow) ============
@@ -8006,28 +8390,19 @@
   function mkKey(tid,nid){ return tid+'.'+nid; }
   function mkOwnedQ(tid,nid){ return !!MK.owned[mkKey(tid,nid)]; }
   function mkCost(n){ return MK_ROWCOST[n.row]; }
-  function mkSpent(){ let sp=0; for(const t of MK_TREES) for(const n of t.nodes) if(mkOwnedQ(t.id,n.id)) sp+=mkCost(n); return sp; }
+  function mkCtx(){ return {owned:MK.owned, base:mkBaseStats(), budget:MK_BUDGET}; }
+  function mkSpent(){ return tvSpent(mkCtx()); }
   function mkChildren(tree,nid){ return tree.nodes.filter(n=>n.par.indexOf(nid)>=0); }
-  function mkCanBuy(tree,n){ if(mkOwnedQ(tree.id,n.id)) return false;
-    if(n.par.length && !n.par.some(pid=>mkOwnedQ(tree.id,pid))) return false;    // needs a connected node above
-    return (MK_BUDGET-mkSpent())>=mkCost(n); }
-  function mkCanRefund(tree,n){ if(!mkOwnedQ(tree.id,n.id)) return false;
-    for(const c of mkChildren(tree,n.id)){ if(!mkOwnedQ(tree.id,c.id)) continue;
-      if(!c.par.some(pid=>pid!==n.id && mkOwnedQ(tree.id,pid))) return false; }   // an owned pick below would be orphaned
-    return true; }
-  function mkRecalc(){ MK.stats=mkBaseStats();
-    for(const t of MK_TREES) for(const n of t.nodes){ if(!mkOwnedQ(t.id,n.id)) continue;
-      for(const k in n.g) MK.stats[k]=Math.min(MK_CAP, MK.stats[k]+n.g[k]*0.5); } }
+  function mkCanBuy(tree,n){ return tvCanBuy(mkCtx(),tree,n); }
+  function mkCanRefund(tree,n){ return tvCanRefund(mkCtx(),tree,n); }
+  function mkRecalc(){ MK.stats=tvStats(mkCtx()); }
   function mkGrantText(n){ return Object.keys(n.g).map(k=>STAT_LABEL[k]+' +'+(n.g[k]*0.5).toFixed(1)).join(' \u00b7 '); }
   const MK_DESC={ speed:'Top sprint speed, with and without the ball.', acceleration:'How quickly you reach top speed.', agility:'Sharper turns at speed.', strength:'Win shoulder barges and shield the ball.', stamina:'Hold your pace deep into the match.',
     passAcc:'Cleaner, truer passes.', crossing:'Better deliveries from wide.', offIQ:'Smarter runs, timing and first touches in attack.', composure:'Stay calm on the ball under pressure.', ballControl:'Softer first touch, fewer heavy knocks.', dribbling:'Keep the ball closer through moves.',
     shotPower:'Harder strikes.', shotAcc:'More shots on target.', longShots:'A real threat from outside the box.', curve:'Bend on shots and crosses.', heading:'Aerial finishing and clearances.',
     tackle:'Win more standing tackles.', slideTackle:'Cleaner, better-timed slides.', interceptions:'Read and cut out passes.', defIQ:'Defensive positioning and closing bursts.' };
-  function mkDoNode(nid){ const tree=mkTree(); const n=mkNode(tree,nid); if(!n) return;
-    if(mkOwnedQ(tree.id,n.id)){ if(mkCanRefund(tree,n)){ delete MK.owned[mkKey(tree.id,n.id)]; mkRecalc(); } }
-    else if(mkCanBuy(tree,n)){ MK.owned[mkKey(tree.id,n.id)]=true; mkRecalc(); }
-    renderMakerStats(); }
-  function mkOVR(){ let s=0; for(const k of MK_ALLOC) s+=MK.stats[k]; return Math.max(1,Math.min(99,Math.round(s/MK_ALLOC.length*10))); }
+  function mkDoNode(nid){ const tree=mkTree(); if(tvToggle(mkCtx(),tree,nid)) mkRecalc(); renderMakerStats(); }
+  function mkOVR(){ return tvOVR(MK.stats); }
   function makerPool(){
     const rng=cwMul((Math.floor(Math.random()*1e9))>>>0), used=new Set();
     const pick=()=>{ let fn,ln,t=0; do{ fn=CW_FIRST[Math.floor(rng()*CW_FIRST.length)]; ln=CW_LAST[Math.floor(rng()*CW_LAST.length)]; t++; }while(used.has(fn+ln)&&t<80); used.add(fn+ln); return fn+' '+ln; };
@@ -8055,30 +8430,7 @@
     const tree=mkTree();
     if(MK.sel && !mkNode(tree,MK.sel)) MK.sel=null;
     let tabs=''; for(const t of MK_TREES){ tabs+='<button class="mkTab'+(t.id===MK.tab?' on':'')+'" data-tab="'+t.id+'">'+t.name+'</button>'; }
-    // ---- the tree, as an SVG graph ----
-    const R=17, DX=176, DY=82;
-    let minC=1e9,maxC=-1e9,maxR=0;
-    for(const n of tree.nodes){ minC=Math.min(minC,n.col); maxC=Math.max(maxC,n.col); maxR=Math.max(maxR,n.row); }
-    const W=520, H=maxR*DY+96, cx=W/2;
-    const xF=c=>cx+(c-(minC+maxC)/2)*DX, yF=r=>44+r*DY;
-    const hex=(x,y,r)=>{ let pts=''; for(let i=0;i<6;i++){ const a=Math.PI/180*(60*i-90); pts+=(x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1)+' '; } return pts.trim(); };
-    let edges='', nodes='';
-    for(const n of tree.nodes){ const x=xF(n.col), y=yF(n.row);
-      for(const pid of n.par){ const pn=mkNode(tree,pid); const px=xF(pn.col), py=yF(pn.row);
-        const lit=mkOwnedQ(tree.id,n.id)&&mkOwnedQ(tree.id,pid);
-        edges+='<line x1="'+px.toFixed(1)+'" y1="'+(py+R+2)+'" x2="'+x.toFixed(1)+'" y2="'+(y-R-2)+'" stroke="'+(lit?'#9dff3c':'#243524')+'" stroke-width="2"/>'; } }
-    for(const n of tree.nodes){ const x=xF(n.col), y=yF(n.row);
-      const own=mkOwnedQ(tree.id,n.id), can=mkCanBuy(tree,n), sel=(MK.sel===n.id);
-      const fill=own?'#2f7a22':(can?'#131d14':'#0d130e');
-      const stroke=sel?'#e9f5ec':(own?'#b9ff6e':(can?'#7fce5f':'#22301f'));
-      const codes=Object.keys(n.g).map(k=>MK_ABBR[k]+'+'+(n.g[k]===1?'.5':(n.g[k]*0.5).toFixed(1)));
-      let sub=''; for(let i=0;i<codes.length;i+=2){ sub+='<text x="'+x+'" y="'+(y+R+11+9*(i/2))+'" text-anchor="middle" font-size="7.5" fill="'+(own?'#cfe7d2':'#7f9a6f')+'">'+codes.slice(i,i+2).join(' ')+'</text>'; }
-      nodes+='<g data-node="'+n.id+'" style="cursor:pointer">'
-        +'<polygon points="'+hex(x,y,R)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sel?3:2)+'"/>'
-        +(!own&&can?'<text x="'+x+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="13" fill="#7fce5f">+</text>':'')
-        +(own?'':'<text x="'+(x+R+3)+'" y="'+(y-R+3)+'" font-size="8.5" fill="#ffb43c">'+mkCost(n)+'</text>')
-        +sub+'</g>'; }
-    const svg='<div class="mkTreeWrap"><svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">'+edges+nodes+'</svg></div>';
+    const svg=tvSvg(mkCtx(),tree,MK.sel);
     // ---- detail panel ----
     let panel;
     if(MK.sel){ const n=mkNode(tree,MK.sel); const own=mkOwnedQ(tree.id,n.id), can=mkCanBuy(tree,n), canR=mkCanRefund(tree,n);
@@ -8161,9 +8513,12 @@
     const lineup={ gk:0, atk:seven.slice(), def:seven.slice(), bench:[8,9,10,11,12,13,14].filter(i=>i<N) };
     const wageWk=roster.reduce((a,p)=>a+(p.wage||0),0);
     const seed=(Math.floor(Math.random()*1e9))>>>0;
+    const mePro={ owned:Object.assign({},MK.owned), base:mkBaseStats(), budget0:MK_BUDGET, sp:0,
+                  look:{kit:1,boot:0,hair:0}, season:meBlankSeason(1),
+                  career:{apps:0,goals:0,assists:0,ratingSum:0,seasons:[]}, recent:[] };
     return { v:2, slot:MK.label, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-2', width:{atk:1,def:1},
              budget:5000, wageWk, sponsorWk:ft.sponsor, capacity:ft.capacity, ticketPrice:ft.price, form:0.5,
-             loyalty:LOYALTY_BASE[1], streak:0, results:[], beatenClubs:[], ledger:[], roster, lineup, created:Date.now(), updated:Date.now() };
+             loyalty:LOYALTY_BASE[1], streak:0, results:[], beatenClubs:[], ledger:[], roster, lineup, mePro, created:Date.now(), updated:Date.now() };
   }
   function doCreateFromMaker(){ if(!mkValid())return; const data=buildCareerFromMaker(); writeSave(MK.key,data); writeSave(SAVE_KEYS.auto,data); document.getElementById('charMaker').classList.remove('on'); openHub(MK.key); }
 
@@ -8190,9 +8545,9 @@
     office:{title:'MANAGER’S OFFICE', sub:'tactics · schedule · wages', tabs:['Offensive','Defensive','Schedule','Wages'], body:'Run the club from here.<br><br><b>Roster &amp; tactics</b> — lineup, formation, the tactical tools you already have.<br><b>Scouting room</b> — browse every other club’s squad freely, and a generated pool of transfer targets.<br><b>Transfers</b> — sign generated players (one-time fee) and take on their wage.<br><b>Wages &amp; finance</b> — your weekly wage bill vs. income. <b>Making payroll is the core of the game.</b>'},
     training:{title:'TRAINING PITCH', sub:'player development', body:'Develop the squad.<br><br><b>Training</b> — assign focus; players improve through playing &amp; drilling (stat points are earned, never bought).<br><b>Facility upgrades</b> — a muddy field becomes a manicured training ground, raising development speed and stamina recovery.'},
     medical:{title:'MEDICAL CENTER', sub:'fitness &amp; recovery', body:'Keep the squad on the pitch.<br><br><b>Injuries</b> — recovery times, risk management.<br><b>Fitness</b> — restore the eroded stamina ceiling you already model over a season.<br><b>Upgrades</b> — faster recovery, lower injury risk. Push hard in Training for gains, but mind the risk.'},
-    house:{title:'YOUR HOUSE', sub:'your created pro', body:'Your player-manager identity.<br><br><b>Your stats</b> — spend the stat points you’ve <b>earned by playing</b> (never purchasable).<br><b>Appearance</b> — kit, boots, hair, look.<br>This is your created pro — the through-line of the whole career.'}
+    house:{title:'YOUR HOUSE', sub:'your created pro', tabs:['Overview','Development','Appearance'], body:''},
   };
-  function renderHub(){ const d=CAREER&&CAREER.data; if(!d)return;
+  function renderHub(){ const d=CAREER&&CAREER.data; if(!d)return; ensureMe(d);
     ensureCareerWorld(d); ensureSeason(d);
     const f=computeFinance(d); d.wageWk=f.wageWk;
     const leagueName = d.tier ? ((CW_TIERS[d.tier]||{}).name||('Tier '+d.tier)) : ('Division '+(d.division||''));
@@ -8215,7 +8570,9 @@
   function hideBldg(){ tacticSel=null; document.getElementById('bldgPanel').classList.remove('show'); }
   function hideHub(){ document.getElementById('careerHub').classList.remove('show'); hideBldg(); }
   function showHubScreen(){ SCREEN='hub'; document.getElementById('stageWrap').classList.add('menuMode'); document.getElementById('careerHub').classList.add('show'); renderHub(); }
-  function openHub(key){ const d=readSave(key); if(!d)return; migrateCareer(d); CAREER={key,data:d}; resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
+  function openHub(key){ const d=readSave(key); if(!d)return; migrateCareer(d); CAREER={key,data:d};
+    writeSave(key,d);                       // persist the migration (e.g. filing a finished season) right away
+    resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=HUB_BLDGS[id]; if(!b)return; curBldg=id; statViewRi=null;
     document.getElementById('bpTitle').innerHTML=b.title;
@@ -8226,7 +8583,8 @@
   }
   function renderBuildingBody(id){ const b=HUB_BLDGS[id], d=CAREER&&CAREER.data; let h='';
     if(b.tabs){ const cur=curTab[id]||b.tabs[0]; h+='<div class="bpTabs">'+b.tabs.map(t=>'<button class="bpTab'+(t===cur?' on':'')+'" data-tab="'+t+'">'+t+'</button>').join('')+'</div>'; }
-    if(id==='stadium' && d) h+=renderStadiumTab(d, curTab[id]||'Overview');
+    if(id==='house' && d) h+=renderHouse(d, curTab[id]||'Overview');
+    else if(id==='stadium' && d) h+=renderStadiumTab(d, curTab[id]||'Overview');
     else if(id==='office' && d){ const t=curTab[id]||'Offensive';
       if(t==='Offensive') h+=renderTactics(d,'atk')+styleRowHtml(d);
       else if(t==='Defensive') h+=renderTactics(d,'def')+postureRowHtml(d);
@@ -8236,12 +8594,20 @@
     else h+=b.body;
     return h;
   }
+  function houseBuy(nid){
+    const d=CAREER&&CAREER.data; if(!d) return;
+    const M=ensureMe(d); if(!M) return;
+    const tree=MK_TREES.find(t=>t.id===houseTab)||MK_TREES[0];
+    if(tvToggle(meCtx(M),tree,nid)){ meApply(d); if(CAREER.key)writeSave(CAREER.key,d); renderHub(); }
+    rerenderHouse();
+  }
   function hubToMenu(){ hideHub(); showStartMenu(); }
   function playFromHub(){ const d=CAREER&&CAREER.data; if(!d) return;
     const ss=ensureSeason(d);
     if(ss.md>=ss.fixtures.length){ const r=endSeason(d); maybeRename(d); if(CAREER.key)writeSave(CAREER.key,d); showNote('SEASON DONE \u2014 finished '+ordinal(r.pos)+', '+r.result,'#ffb43c'); renderHub(); return; }
     const nf=yourNextFixture(d); if(!nf){ advanceWeek(d); return; }
     const opp=cwFindClub(d,nf.opp); if(!opp){ advanceWeek(d); return; }
+    meApply(d);                                     // spent points reach the pitch
     const me=careerLineupYours(d);
     SQUAD.G=me.squad; LINEUP.G=me.lineup;
     SQUAD.R=careerSquad(opp); LINEUP.R=defaultLineup();
@@ -8251,6 +8617,9 @@
     careerFix={opp:nf.opp, home:nf.home, recorded:false};
     matchReturn='hub'; resumable=false;
     document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch();
+    { const M=ensureMe(d); meMatch=meBlank(); meLook=M?M.look:null;
+      // benched? then there is nothing of yours to rate this week
+      meMatch.played=!!(M && (d.lineup.gk===M.ri || d.lineup.atk.indexOf(M.ri)>=0)); }
   }
   function pauseFromMatch(){ if(matchReturn==='hub' && CAREER){ document.getElementById('stageWrap').classList.remove('menuMode'); showHubScreen(); } else { resumable=true; showStartMenu(); } }
   document.getElementById('careerHub').addEventListener('click',e=>{
@@ -8262,6 +8631,14 @@
     const cp=e.target.closest('[data-cposture]'); if(cp){ const d=CAREER&&CAREER.data; if(d){ d.posture=cp.dataset.cposture; TAC.G.def=d.posture; if(CAREER.key)writeSave(CAREER.key,d); document.getElementById('bpBody').innerHTML=renderBuildingBody(curBldg); } return; }
     const tc=e.target.closest('[data-tac]'); if(tc){ tacticTap(tc); return; }
     const sd=e.target.closest('[data-stad]'); if(sd){ applyStadium(sd.dataset.stad, sd.dataset); return; }
+    const ht=e.target.closest('[data-htab]'); if(ht){ houseTab=ht.dataset.htab; houseSel=null; rerenderHouse(); return; }
+    const hnd=e.target.closest('#bpBody [data-node]');
+    if(hnd && curBldg==='house'){ const nid=hnd.dataset.node;
+      if(houseSel===nid) houseBuy(nid); else { houseSel=nid; rerenderHouse(); }
+      return; }
+    const hmk=e.target.closest('[data-hmk]'); if(hmk){ if(houseSel) houseBuy(houseSel); return; }
+    const lk=e.target.closest('[data-look]'); if(lk){ const d=CAREER&&CAREER.data, M=d&&ensureMe(d);
+      if(M){ M.look[lk.dataset.look]=+lk.dataset.li; if(CAREER.key)writeSave(CAREER.key,d); rerenderHouse(); } return; }
     const h=e.target.closest('[data-hub]'); if(!h)return;
     const a=h.dataset.hub;
     if(a==='menu') hubToMenu();
