@@ -3,8 +3,10 @@
 
 Builds a 32x32, 8-direction sheet in the style of the Gen-4 (HeartGold/SoulSilver) overworld
 sprites: a big hand-pixelled head on a small body. The body is a little 3D skeleton (capsules
-and ellipsoids) posed per frame, ray-marched at exactly one ray per pixel, cel-shaded into
-three tones per material and outlined; the head is hand-drawn pixel art per view.
+and ellipsoids) posed per frame and ray-marched at exactly one ray per pixel. A cleanup pass
+then does what a pixel artist would: fills 1px bites and shaves spurs off the silhouette,
+removes lone tones, cuts clean 1px cuffs, shades the far limb down, and lines only where parts
+overlap. The head is hand-drawn pixel art per view.
 
     python3 tools/sprites/make_player_sheet.py            # writes assets/sprites/*
     python3 tools/sprites/make_player_sheet.py --embed    # ...and embeds the sheet in index.html
@@ -43,8 +45,8 @@ RAMPS = {
 }
 RAMPS['socks'] = RAMPS['shirt']   # socks match the shirt, so a kit swap recolours both
 OUTLINE = (24, 20, 28)
-LINE_COL = None          # None -> each material's own darkest tone
 LINE_GAP = 0.75          # depth gap (px) before two body groups get a separating line
+FAR_GAP = 1.5            # depth gap (px) between paired limbs before the far one is shaded down
 
 HEAD_PAL = {
     'K': OUTLINE, 'D': (56, 36, 32),
@@ -61,12 +63,12 @@ HEADS_TXT = """
 ......DDDD......
 ....DD1111DD....
 ...D11111112D...
-..D1112222111D..
-.D112222222213D.
-.D122223222233D.
-K12232232223323K
-K22322322232333K
-K2223a2232a3233K
+..D1111112222D..
+.D112222222223D.
+.D122222222233D.
+K12223222232333K
+K22223222232333K
+K2223a2222a3333K
 K23baaa33aaab33K
 K3bal3aaaa3lab3K
 .DbawpaaaapwabD.
@@ -77,12 +79,12 @@ K3bal3aaaa3lab3K
 .....DDDDD......
 ...DD11111DD....
 ..D111111112D...
-.D11122221112D..
-.D122222222113D.
-K1222232222233D.
-K12223222322233K
-K22232223222333K
-K2232223a32a333K
+.D11111112222D..
+.D112222222223D.
+K1222222222233D.
+K12222322232333K
+K22222322232333K
+K2222223a32a333K
 K23bc3aaa33aaa3K
 K3bcb3alaaaa3lK.
 .D3bb3awpaaapwK.
@@ -93,15 +95,15 @@ K3bcb3alaaaa3lK.
 .....DDDDD......
 ...DD11111DD....
 ..D111111112D...
-.D11122221112D..
-.D122222222113D.
-K1222232222233D.
-K12223222322233D
-K22232223222233K
-K2232222322aa3K.
-K32223bc3aaaaaK.
-K3223bcbaaalpaK.
-.D323bbaaaawpaaK
+.D11111112222D..
+.D112222222223D.
+K1222222222233D.
+K12222322223333D
+K22222322223333K
+K2222232222aa3K.
+K32222bc3aaaaaK.
+K3222bcbaaalpaK.
+.D322bbaaaawpaaK
 ..D33rbaaaaaabK.
 ...K3rbbaaaabrK.
 ....KKrrrrrrK...
@@ -109,32 +111,32 @@ K3223bcbaaalpaK.
 .....DDDDD......
 ..DD211111DD....
 .D2111111112D...
-.D21122221112D..
-K1122222222113D.
-K1222232222233D.
-K12223222322233K
-K22232223222333K
-K22322232222333K
-K2322232222bc33K
-K3322232223bcbaK
-.D33222322223baK
-..D332223223brK.
+.D21111112222D..
+K1122222222223D.
+K1222222222233D.
+K12222222222333K
+K22222322222333K
+K22222322223333K
+K2222322222bc33K
+K3222322222bcbaK
+.D32222222223baK
+..D332222223brK.
 ...K333333333K..
 ....KKKKKKKKK...
 # N
 ......DDDD......
 ....DD1111DD....
 ...D11111112D...
-..D1112222111D..
-.D112222222213D.
-.D122223222233D.
-K12232232223323K
-K22322322232333K
-K22322232223233K
-K23222322232233K
-Kb322232223223bK
-.Kc3223222322cK.
-..K3322222333K..
+..D1111112222D..
+.D112222222223D.
+.D122222222233D.
+K12222222222333K
+K22222222222333K
+K22232222322333K
+K22232222322333K
+Kb223222232233bK
+.Kc3322222233cK.
+..K3332222333K..
 ...KK33bbb33KK..
 .....KKrrrKK....
 """
@@ -288,6 +290,10 @@ def local_to_world_matrix(phi):
                      [0, 0, 1]])
 
 
+THIGH_BANDS = [(0.55, 'shorts'), (1.0, 'skin')]     # shorts, then a bare knee
+SHIN_BANDS = [(0.12, 'skin'), (1.0, 'socks')]
+
+
 def body_prims(J, pose, phi):
     Rw = local_to_world_matrix(phi)
     W = lambda k: Rw @ J[k]
@@ -300,12 +306,11 @@ def body_prims(J, pose, phi):
     ]
     for s in 'RL':
         g = 'leg' + s
-        prims.append(Capsule(W('hip' + s), W('knee' + s), 1.5, [(0.55, 'shorts'), (1.0, 'skin')], g))
-        prims.append(Capsule(W('knee' + s), W('ankle' + s), 1.2, [(0.12, 'skin'), (1.0, 'socks')], g))
+        prims.append(Capsule(W('hip' + s), W('knee' + s), 1.5, THIGH_BANDS, g))
+        prims.append(Capsule(W('knee' + s), W('ankle' + s), 1.2, SHIN_BANDS, g))
         prims.append(Capsule(W('heel' + s), W('toe' + s), 1.15, [(1.0, 'boots')], g))
         g = 'arm' + s
-        prims.append(Capsule(W('sho' + s), W('elb' + s), 1.25,
-                             [(0.5, 'shirt'), (0.68, 'trim'), (1.0, 'skin')], g))
+        prims.append(Capsule(W('sho' + s), W('elb' + s), 1.25, [(0.62, 'shirt'), (1.0, 'skin')], g))
         prims.append(Capsule(W('elb' + s), W('wri' + s), 1.0, [(1.0, 'skin')], g))
         prims.append(Capsule(W('hand' + s), W('hand' + s), 1.1, [(1.0, 'skin')], g))
     for i, (kind, pos, r) in enumerate(pose.get('fx', [])):
@@ -363,51 +368,129 @@ def raymarch(prims):
     return hit.reshape(sh), mat.reshape(sh), grp.reshape(sh), nrm.reshape(CAN, CAN, 3), s.reshape(sh)
 
 
-def shade(hit, nrm):
-    tone = np.zeros(hit.shape, int)
+# per-material cel thresholds on N.L: (light above, shadow below). Small parts get no light
+# tone at all -- on a 2px limb a third tone only reads as noise.
+TONES = {
+    'shirt':  (0.80, 0.25),
+    'shorts': (0.86, 0.25),
+    'skin':   (0.88, 0.22),
+    'socks':  (None, 0.30),
+    'trim':   (None, 0.25),
+    'boots':  (None, 0.55),
+    'dust':   (0.70, 0.20),
+}
+
+
+def shade(hit, mat, nrm):
     v = nrm @ LIGHT
-    tone[hit] = 2
-    tone[hit & (v > 0.78)] = 3
-    tone[hit & (v < 0.22)] = 1
+    tone = np.zeros(hit.shape, int)
+    for y, x in zip(*np.where(hit)):
+        hi, lo = TONES[mat[y, x]]
+        tone[y, x] = 3 if hi is not None and v[y, x] > hi else 1 if v[y, x] < lo else 2
     return tone
 
 
 N4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
+N8 = N4 + ((1, 1), (1, -1), (-1, 1), (-1, -1))
 
 
-def compose(hit, mat, grp, tone, depth, head_rows, head_at):
-    H = W = CAN
-    img = np.zeros((H, W, 4), np.uint8)
+def nbrs(y, x, ring=N4):
+    for dx, dy in ring:
+        if 0 <= y + dy < CAN and 0 <= x + dx < CAN:
+            yield y + dy, x + dx
+
+
+# ----------------------------------------------------------------------------- cleanup
+def clean_silhouette(L):
+    """fill 1px bites (an empty pixel walled in on 3+ sides) and shave 1px spurs (a pixel hanging
+    on by a single side), so limbs keep smooth edges instead of ray-sampling noise."""
+    hit, mat, grp, tone, depth = L['hit'], L['mat'], L['grp'], L['tone'], L['depth']
+    for _ in range(2):
+        for y in range(CAN):
+            for x in range(CAN):
+                if hit[y, x]:
+                    continue
+                nb = [q for q in nbrs(y, x) if hit[q]]
+                if len(nb) >= 3:
+                    q = max(nb, key=lambda q: depth[q])
+                    hit[y, x], mat[y, x], grp[y, x], tone[y, x], depth[y, x] = (
+                        True, mat[q], grp[q], tone[q], depth[q])
+        spurs = [(y, x) for y, x in zip(*np.where(hit))
+                 if sum(hit[q] for q in nbrs(y, x)) <= 1 and mat[y, x] != 'dust']
+        for q in spurs:
+            hit[q] = False
+
+
+def despeckle(L):
+    """a tone that appears nowhere among a pixel's same-material neighbours is noise: take theirs."""
+    hit, mat, tone = L['hit'], L['mat'], L['tone']
+    out = tone.copy()
+    for y, x in zip(*np.where(hit)):
+        same = [tone[q] for q in nbrs(y, x, N8) if hit[q] and mat[q] == mat[y, x]]
+        if len(same) >= 3 and tone[y, x] not in same:
+            out[y, x] = max(set(same), key=same.count)
+    L['tone'] = out
+
+
+def add_cuffs(L):
+    """the last row of each sleeve, where it meets the forearm, is trim -- a clean 1px cuff."""
+    hit, mat, grp, tone = L['hit'], L['mat'], L['grp'], L['tone']
+    cuff = [(y, x) for y, x in zip(*np.where(hit))
+            if mat[y, x] == 'shirt' and str(grp[y, x]).startswith('arm')
+            and any(hit[q] and grp[q] == grp[y, x] and mat[q] == 'skin' for q in nbrs(y, x))]
+    for q in cuff:
+        mat[q], tone[q] = 'trim', 2
+
+
+def shade_far_limbs(L):
+    """when a pair of limbs is clearly split front-to-back, the far one drops a tone -- the
+    standard pixel-art depth cue, and it keeps crossing legs apart without extra lines."""
+    hit, grp, tone, depth = L['hit'], L['grp'], L['tone'], L['depth']
+    for a, b in (('legR', 'legL'), ('armR', 'armL')):
+        ma, mb = hit & (grp == a), hit & (grp == b)
+        if not ma.any() or not mb.any():
+            continue
+        da, db = depth[ma].mean(), depth[mb].mean()
+        if abs(da - db) > FAR_GAP:
+            far = mb if da > db else ma
+            tone[far] = np.maximum(tone[far] - 1, 1)
+
+
+def part_lines(L):
+    """1px line on the farther of two touching body parts. Where that part is only a sliver
+    against the background, a line would double the outline, so it gets its shadow tone."""
+    hit, grp, tone, depth = L['hit'], L['grp'], L['tone'], L['depth']
     line = np.zeros_like(hit)
-    for y in range(H):
-        for x in range(W):
-            if not hit[y, x]:
-                continue
-            for dx, dy in N4:
-                qx, qy = x + dx, y + dy
-                if (0 <= qx < W and 0 <= qy < H and hit[qy, qx] and grp[qy, qx] != grp[y, x]
-                        and depth[qy, qx] > depth[y, x] + LINE_GAP):
-                    line[y, x] = True
-    for y in range(H):
-        for x in range(W):
-            if hit[y, x]:
-                ramp = RAMPS[mat[y, x]]
-                c = (LINE_COL or ramp[0]) if line[y, x] else ramp[tone[y, x]]
-                img[y, x] = (*c, 255)
+    for y, x in zip(*np.where(hit)):
+        if any(hit[q] and grp[q] != grp[y, x] and depth[q] > depth[y, x] + LINE_GAP for q in nbrs(y, x)):
+            if all(hit[q] for q in nbrs(y, x)):
+                line[y, x] = True
+            else:
+                tone[y, x] = 1
+    lone = [(y, x) for y, x in zip(*np.where(line)) if not any(line[q] for q in nbrs(y, x, N8))]
+    for q in lone:
+        line[q], tone[q] = False, 1
+    L['line'] = line
+
+
+def compose(L, head_rows, head_at):
+    hit, mat, tone, line = L['hit'], L['mat'], L['tone'], L['line']
+    img = np.zeros((CAN, CAN, 4), np.uint8)
+    for y, x in zip(*np.where(hit)):
+        ramp = RAMPS[mat[y, x]]
+        img[y, x] = (*(ramp[0] if line[y, x] else ramp[tone[y, x]]), 255)
     # external outline; dust keeps a soft outline of its own
-    for y in range(H):
-        for x in range(W):
+    for y in range(CAN):
+        for x in range(CAN):
             if hit[y, x]:
                 continue
-            nb = [mat[y + dy, x + dx] for dx, dy in N4
-                  if 0 <= x + dx < W and 0 <= y + dy < H and hit[y + dy, x + dx]]
+            nb = [mat[q] for q in nbrs(y, x) if hit[q]]
             if nb:
-                c = RAMPS['dust'][0] if all(m == 'dust' for m in nb) else OUTLINE
-                img[y, x] = (*c, 255)
+                img[y, x] = (*(RAMPS['dust'][0] if all(m == 'dust' for m in nb) else OUTLINE), 255)
     ox, oy = head_at
     for j, row in enumerate(head_rows):
         for i, ch in enumerate(row):
-            if ch != '.' and 0 <= ox + i < W and 0 <= oy + j < H:
+            if ch != '.' and 0 <= ox + i < CAN and 0 <= oy + j < CAN:
                 img[oy + j, ox + i] = (*HEAD_PAL[ch], 255)
     return img
 
@@ -469,10 +552,15 @@ def head_positions(poses, phi, head_rows, steady=False):
 def render_frame(pose, phi, head_rows, head_at=None):
     J = build_skeleton(pose)
     hit, mat, grp, nrm, depth = raymarch(body_prims(J, pose, phi))
-    tone = shade(hit, nrm)
+    L = dict(hit=hit, mat=mat, grp=grp, depth=depth, tone=shade(hit, mat, nrm))
+    clean_silhouette(L)
+    add_cuffs(L)
+    despeckle(L)
+    shade_far_limbs(L)
+    part_lines(L)
     if head_at is None:
         head_at = head_positions([pose], phi, head_rows)[0]
-    return compose(hit, mat, grp, tone, depth, head_rows, head_at)
+    return compose(L, head_rows, head_at)
 
 
 # ----------------------------------------------------------------------------- poses
