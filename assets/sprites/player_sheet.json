@@ -1,0 +1,125 @@
+{
+  "image": "player_sheet.png",
+  "frame": {
+    "w": 32,
+    "h": 32
+  },
+  "columns": 6,
+  "anchor": {
+    "x": 16,
+    "y": 29
+  },
+  "directions": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE"
+  ],
+  "direction_note": "row = anim.row + direction index; directions follow atan2(dy, dx) on screen in 45 degree steps, starting East and turning clockwise",
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 4,
+      "fps": 4,
+      "loop": true
+    },
+    "run": {
+      "row": 8,
+      "frames": 6,
+      "fps": 12,
+      "loop": true
+    },
+    "shoot": {
+      "row": 16,
+      "frames": 5,
+      "fps": 12,
+      "loop": false
+    },
+    "pass": {
+      "row": 24,
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "slide": {
+      "row": 32,
+      "frames": 5,
+      "fps": 10,
+      "loop": false
+    }
+  },
+  "palette": {
+    "shirt": [
+      "#282868",
+      "#3048a0",
+      "#4870d8",
+      "#80a8f0"
+    ],
+    "trim": [
+      "#707080",
+      "#b0b0c0",
+      "#e0e0ec",
+      "#ffffff"
+    ],
+    "shorts": [
+      "#484860",
+      "#98a0b8",
+      "#d8dce8",
+      "#f8f8f8"
+    ],
+    "boots": [
+      "#101018",
+      "#2c2c38",
+      "#48485c",
+      "#9090a8"
+    ],
+    "hair": [
+      "#382420",
+      "#462c24",
+      "#6c462e",
+      "#9c6840"
+    ]
+  },
+  "palette_note": "ramps are [line, shadow, base, light]; socks use the shirt ramp. Swap exact colours to recolour kits, boots or hair.",
+  "kits": {
+    "blue": {},
+    "green": {
+      "shirt": [
+        "#1c5424",
+        "#489c28",
+        "#84dc34",
+        "#c4ff80"
+      ],
+      "trim": [
+        "#707c70",
+        "#b8c8bc",
+        "#e9f5ec",
+        "#ffffff"
+      ],
+      "shorts": [
+        "#0a0e0a",
+        "#1e261e",
+        "#323e32",
+        "#566654"
+      ]
+    },
+    "red": {
+      "shirt": [
+        "#641828",
+        "#b03034",
+        "#f05c4c",
+        "#ffa48c"
+      ],
+      "trim": [
+        "#707c70",
+        "#b8c8bc",
+        "#e9f5ec",
+        "#ffffff"
+      ]
+    }
+  }
+}

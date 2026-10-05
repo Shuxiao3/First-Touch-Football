@@ -23,6 +23,7 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate |
 | `SPACE` | Trap (timing-graded first touch) |
+| `V` | Toggle the pixel-art players / plain vector players |
 
 **Touch**
 
@@ -46,6 +47,9 @@ and hold-to-CROSS buttons sit alongside it.
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
   into the same creation trees. Kit trim, boots and hair carry onto the pitch.
+- **Pixel-art players** — a 32×32, 8-direction sprite sheet in the Gen-4 handheld RPG style
+  (idle, run, shoot, pass, slide tackle). Team kits, and your pro's trim, boots and hair, are
+  exact palette swaps of one embedded sheet. See [Sprites](#sprites).
 - **Feel dials** — live-tunable simulation parameters with arcade / balanced / sim
   presets, persisted to `localStorage`.
 - **Practice drills** — dribbling, heading, slide and standing tackles, interceptions,
@@ -60,10 +64,38 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–490 | Styles |
 | 492–693 | Markup — canvas, menus, career hub, tuning panel |
-| 694–8709 | Engine — sim, AI, rendering, career, UI |
+| 694–8726 | Engine — sim, AI, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
+
+## Sprites
+
+`assets/sprites/player_sheet.png` is the player sheet: 32×32 cells, 6 columns (frames) by 40
+rows (5 animations × 8 directions). Rows run animation-major, and directions follow the
+engine's `snap8` order — `atan2` on screen in 45° steps from East, clockwise:
+
+| Rows | Animation | Frames | Notes |
+| --- | --- | --- | --- |
+| 0–7 | idle | 4 | breathing bob, loops |
+| 8–15 | run | 6 | two strides, loops; frame picked from stride phase |
+| 16–23 | shoot | 5 | wind-up, swing, contact, follow-through, recover |
+| 24–31 | pass | 4 | side-foot: backswing, strike, follow-through, recover |
+| 32–39 | slide | 5 | lunge, slide ×2 (with dust), brake, kneel to get up |
+
+Within each block the rows are E, SE, S, SW, W, NW, N, NE, and every cell's ground anchor
+(between the feet) is at (16, 29). `player_sheet.json` has the same layout in machine-readable form, plus
+the palette ramps to swap for recolouring. `player_sheet_green.png` / `player_sheet_red.png`
+are the in-game team kits, and `player_sheet_preview.png` / `.gif` show every frame.
+
+The sheet is generated, not hand-edited. `tools/sprites/make_player_sheet.py` poses a small 3D
+skeleton per frame, cel-shades and outlines it, and tops it with hand-drawn pixel heads. To
+change the art, edit the script and re-run it with `--embed` so `index.html` picks it up:
+
+```sh
+pip install numpy pillow                              # dev only
+python3 tools/sprites/make_player_sheet.py --embed
+```
 
 ## Tests
 
