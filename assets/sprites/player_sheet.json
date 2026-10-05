@@ -4,7 +4,7 @@
     "w": 32,
     "h": 32
   },
-  "columns": 6,
+  "columns": 4,
   "anchor": {
     "x": 16,
     "y": 29
@@ -23,33 +23,54 @@
   "animations": {
     "idle": {
       "row": 0,
-      "frames": 4,
-      "fps": 4,
-      "loop": true
+      "frames": 1,
+      "fps": 1,
+      "loop": true,
+      "frame_names": [
+        "stand"
+      ]
     },
     "run": {
       "row": 8,
-      "frames": 6,
-      "fps": 12,
-      "loop": true
+      "frames": 4,
+      "fps": 10,
+      "loop": true,
+      "frame_names": [
+        "contact R",
+        "passing",
+        "contact L",
+        "passing"
+      ]
     },
     "shoot": {
       "row": 16,
-      "frames": 5,
-      "fps": 12,
-      "loop": false
+      "frames": 2,
+      "fps": 6,
+      "loop": false,
+      "frame_names": [
+        "build-up",
+        "shot"
+      ]
     },
     "pass": {
       "row": 24,
-      "frames": 4,
-      "fps": 12,
-      "loop": false
+      "frames": 2,
+      "fps": 8,
+      "loop": false,
+      "frame_names": [
+        "backswing",
+        "strike"
+      ]
     },
     "slide": {
       "row": 32,
-      "frames": 5,
-      "fps": 10,
-      "loop": false
+      "frames": 2,
+      "fps": 3,
+      "loop": false,
+      "frame_names": [
+        "slide",
+        "get up"
+      ]
     }
   },
   "palette": {

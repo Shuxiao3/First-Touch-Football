@@ -71,22 +71,23 @@ Career saves and squads persist to `localStorage`; the feel dials persist throug
 
 ## Sprites
 
-`assets/sprites/player_sheet.png` is the player sheet: 32×32 cells, 6 columns (frames) by 40
+`assets/sprites/player_sheet.png` is the player sheet: 32×32 cells, 4 columns (frames) by 40
 rows (5 animations × 8 directions). Rows run animation-major, and directions follow the
 engine's `snap8` order — `atan2` on screen in 45° steps from East, clockwise:
 
-| Rows | Animation | Frames | Notes |
+| Rows | Animation | Frames | In game |
 | --- | --- | --- | --- |
-| 0–7 | idle | 4 | breathing bob, loops |
-| 8–15 | run | 6 | two strides, loops; frame picked from stride phase |
-| 16–23 | shoot | 5 | wind-up, swing, contact, follow-through, recover |
-| 24–31 | pass | 4 | side-foot: backswing, strike, follow-through, recover |
-| 32–39 | slide | 5 | lunge, slide ×2 (with dust), brake, kneel to get up |
+| 0–7 | idle | 1 | stand |
+| 8–15 | run | 4 | contact, passing, contact, passing — picked from stride phase; airborne players use passing |
+| 16–23 | shoot | 2 | build-up while you hold `K`, then the shot after the strike |
+| 24–31 | pass | 2 | backswing while you hold `J` / `L`, then the strike after any pass or cross |
+| 32–39 | slide | 2 | the slide, then getting up |
 
 Within each block the rows are E, SE, S, SW, W, NW, N, NE, and every cell's ground anchor
-(between the feet) is at (16, 29). `player_sheet.json` has the same layout in machine-readable form, plus
-the palette ramps to swap for recolouring. `player_sheet_green.png` / `player_sheet_red.png`
-are the in-game team kits, and `player_sheet_preview.png` / `.gif` show every frame.
+(between the feet) is at (16, 29). `player_sheet.json` has the same layout in machine-readable
+form, with each frame's name and the palette ramps to swap for recolouring.
+`player_sheet_green.png` / `player_sheet_red.png` are the in-game team kits, and
+`player_sheet_preview.png` / `.gif` show every frame.
 
 The sheet is generated, not hand-edited. `tools/sprites/make_player_sheet.py` poses a small 3D
 skeleton per frame, cel-shades and outlines it, and tops it with hand-drawn pixel heads. To

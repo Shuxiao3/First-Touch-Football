@@ -590,109 +590,73 @@ def mirror_pose(p):
 
 
 def anim_idle():
-    out = []
-    for cdz, el, ab in ((0.0, 24, 16), (0.0, 28, 17), (-1.0, 32, 18), (-1.0, 28, 17)):
-        leg = dict(flex=4, knee=9, abd=7, toe=12)
-        arm = dict(flex=6, abd=ab, elbow=el)
-        p = P(lean=4, R=dict(leg), L=dict(leg), aR=dict(arm), aL=dict(arm))
-        p['chest_dz'], p['bob'] = cdz, int(-cdz)
-        out.append(p)
-    return out
+    leg = dict(flex=4, knee=9, abd=7, toe=12)
+    arm = dict(flex=6, abd=16, elbow=24)
+    return [P(lean=4, R=dict(leg), L=dict(leg), aR=dict(arm), aL=dict(arm))]
 
 
 def anim_run():
+    """four frames: contact (legs split, body low), passing (knee up, body high), mirrored."""
     lean = 13
-    contact = P(lean=lean, twist=-7, root=(0, 0, 0.0),
-                R=dict(flex=34, knee=14, ankle=-8), L=dict(flex=-34, knee=78, ankle=18),
-                aR=dict(flex=-38, abd=14, elbow=70), aL=dict(flex=42, abd=12, elbow=78))
-    down = P(lean=lean, twist=-3, root=(0, 0, -0.6),
-             R=dict(flex=10, knee=32), L=dict(flex=8, knee=104, ankle=10),
-             aR=dict(flex=-12, abd=14, elbow=74), aL=dict(flex=14, abd=12, elbow=78))
-    up = P(lean=lean + 2, twist=4, root=(0, 0, 0.4),
-           R=dict(flex=-30, knee=22, ankle=28), L=dict(flex=46, knee=72),
-           aR=dict(flex=26, abd=12, elbow=78), aL=dict(flex=-26, abd=14, elbow=70))
-    down['bob'] = 1
-    frames = [contact, down, up]
+    contact = P(lean=lean, twist=-7, root=(0, 0, -0.2),
+                R=dict(flex=36, knee=12, ankle=-8), L=dict(flex=-36, knee=80, ankle=18),
+                aR=dict(flex=-40, abd=14, elbow=70), aL=dict(flex=44, abd=12, elbow=78))
+    passing = P(lean=lean + 2, twist=1, root=(0, 0, 0.5),
+                R=dict(flex=-14, knee=30, ankle=24), L=dict(flex=48, knee=88),
+                aR=dict(flex=10, abd=14, elbow=74), aL=dict(flex=-8, abd=14, elbow=74))
+    passing['bob'] = -1                                   # the head rides up a pixel in flight
+    frames = [contact, passing]
     return frames + [dict(mirror_pose(f), bob=f.get('bob', 0)) for f in frames]
 
 
 def anim_shoot():
     return [
-        # 0 wind-up: plant left, right heel kicked up high behind, shoulders turned away
+        # build-up: plant left, right heel drawn high behind, shoulders turned away, arms wide
         P(lean=8, twist=-20, root=(0, -0.8, -0.7),
           R=dict(flex=-64, knee=84, ankle=24, toe=0, abd=22, len=1.1), L=dict(flex=16, knee=28, abd=6),
           aR=dict(flex=-56, abd=46, elbow=30), aL=dict(flex=44, abd=76, elbow=26)),
-        # 1 swing: thigh drives through, shin still trailing
-        P(lean=6, twist=-8, root=(0, -0.3, -0.9),
-          R=dict(flex=14, knee=96, ankle=30, toe=0, abd=14, len=1.1), L=dict(flex=16, knee=32, abd=6),
-          aR=dict(flex=-30, abd=56, elbow=26), aL=dict(flex=24, abd=80, elbow=22)),
-        # 2 contact: leg snaps straight, toe pointed
-        P(lean=8, twist=8, root=(0, 0.4, -0.7),
-          R=dict(flex=62, knee=6, ankle=48, toe=0, abd=2, len=1.2), L=dict(flex=8, knee=24, abd=6),
-          aR=dict(flex=-46, abd=64, elbow=20), aL=dict(flex=0, abd=86, elbow=18)),
-        # 3 follow-through: leg high, body leans back, arms out
-        P(lean=-16, twist=16, root=(0, 1.0, 0.3),
-          R=dict(flex=108, knee=4, ankle=40, toe=0, abd=-16, len=1.2), L=dict(flex=-8, knee=10, ankle=30),
-          aR=dict(flex=44, abd=70, elbow=24), aL=dict(flex=-26, abd=92, elbow=18)),
-        # 4 recover
-        P(lean=4, twist=6, root=(0, 1.3, -0.4),
-          R=dict(flex=44, knee=56, ankle=10), L=dict(flex=0, knee=16),
-          aR=dict(flex=12, abd=34, elbow=30), aL=dict(flex=0, abd=46, elbow=30)),
+        # shot: the leg whips through high, toe pointed, body leaning back, arms flung out
+        P(lean=-10, twist=12, root=(0, 0.8, 0.0),
+          R=dict(flex=90, knee=6, ankle=44, toe=0, abd=-8, len=1.2), L=dict(flex=-4, knee=14, ankle=20),
+          aR=dict(flex=36, abd=66, elbow=22), aL=dict(flex=-24, abd=88, elbow=18)),
     ]
 
 
 def anim_pass():
     return [
-        # 0 backswing, foot opened out for the side-foot
+        # backswing, foot opened out for the side-foot
         P(lean=4, twist=-9, root=(0, -0.2, -0.3),
           R=dict(flex=-34, knee=38, toe=60, abd=10), L=dict(flex=8, knee=18),
           aR=dict(flex=-18, abd=32, elbow=24), aL=dict(flex=18, abd=44, elbow=24)),
-        # 1 strike across the ball
-        P(lean=6, twist=4, root=(0, 0.2, -0.45),
-          R=dict(flex=16, knee=12, toe=78, abd=-6), L=dict(flex=8, knee=18),
-          aR=dict(flex=-6, abd=38, elbow=22), aL=dict(flex=4, abd=50, elbow=22)),
-        # 2 follow-through
-        P(lean=2, twist=10, root=(0, 0.5, -0.2),
-          R=dict(flex=40, knee=8, toe=72, abd=-10), L=dict(flex=4, knee=14),
-          aR=dict(flex=14, abd=30, elbow=24), aL=dict(flex=-8, abd=42, elbow=24)),
-        # 3 recover
-        P(lean=3, twist=3, root=(0, 0.5, 0.0),
-          R=dict(flex=12, knee=22, toe=30), L=dict(flex=2, knee=12),
-          aR=dict(flex=4, abd=20, elbow=24), aL=dict(flex=2, abd=22, elbow=24)),
+        # strike: the inside of the foot swept through
+        P(lean=4, twist=8, root=(0, 0.4, -0.3),
+          R=dict(flex=30, knee=8, toe=74, abd=-8), L=dict(flex=6, knee=16),
+          aR=dict(flex=6, abd=34, elbow=22), aL=dict(flex=-4, abd=46, elbow=22)),
     ]
 
 
 def anim_slide():
     return [
-        # 0 lunge: dropping, lead leg reaching, trail leg folding under
-        P(lean=-24, roll=-12, root=(0, 1.0, -3.0),
-          R=dict(flex=66, knee=10, ankle=-4, toe=0, len=1.15), L=dict(flex=-22, knee=104, toe=20),
-          aR=dict(flex=20, abd=72, elbow=30), aL=dict(flex=-46, abd=36, elbow=16),
-          fx=[('dust', (-1.0, -2.6), 1.6)]),
-        # 1 slide: on the hip, lead leg flat out, trail knee up, hand down behind
+        # slide: down on the hip, lead leg flat out, trail knee up, hand down behind, dust kicked up
         P(lean=-56, roll=-26, root=(0, 1.6, -4.8), head=(-1.0, -0.6, -0.8),
           R=dict(flex=82, knee=0, ankle=-16, toe=0, len=1.3), L=dict(flex=34, knee=122, abd=14),
           aR=dict(flex=40, abd=84, elbow=50), aL=dict(flex=-62, abd=42, elbow=4),
           fx=[('dust', (-1.4, -4.4), 2.3), ('dust', (1.6, -5.0), 1.6)]),
-        # 2 slide (hold variant, the dust rolls back)
-        P(lean=-56, roll=-26, root=(0, 1.8, -4.8), head=(-1.0, -0.6, -0.8),
-          R=dict(flex=80, knee=0, ankle=-16, toe=0, len=1.3), L=dict(flex=34, knee=116, abd=14),
-          aR=dict(flex=36, abd=88, elbow=64), aL=dict(flex=-62, abd=42, elbow=4),
-          fx=[('dust', (-0.8, -5.6), 2.5), ('dust', (2.2, -6.4), 1.7), ('dust', (-3.2, -3.6), 1.2)]),
-        # 3 brake / sit up
-        P(lean=-28, roll=-14, root=(0, 1.8, -4.6), head=(-0.5, -0.3, -0.4),
-          R=dict(flex=76, knee=26, len=1.15), L=dict(flex=48, knee=124),
-          aR=dict(flex=40, abd=54, elbow=40), aL=dict(flex=-40, abd=34, elbow=20),
-          fx=[('dust', (0.0, -6.6), 1.8)]),
-        # 4 get up: kneel on the trail leg, lead foot planted
+        # get up: kneeling on the trail leg, lead foot planted
         P(lean=12, root=(0, 1.4, -2.4),
           R=dict(flex=72, knee=96), L=dict(flex=-22, knee=112),
           aR=dict(flex=30, abd=25, elbow=50), aL=dict(flex=-10, abd=30, elbow=20)),
     ]
 
 
-ANIMS = [('idle', anim_idle, 4), ('run', anim_run, 12), ('shoot', anim_shoot, 12),
-         ('pass', anim_pass, 12), ('slide', anim_slide, 10)]   # name, frames, suggested fps
+# name, poses, suggested fps, what each frame is
+ANIMS = [
+    ('idle', anim_idle, 1, ['stand']),
+    ('run', anim_run, 10, ['contact R', 'passing', 'contact L', 'passing']),
+    ('shoot', anim_shoot, 6, ['build-up', 'shot']),
+    ('pass', anim_pass, 8, ['backswing', 'strike']),
+    ('slide', anim_slide, 3, ['slide', 'get up']),
+]
 
 # sheet direction order (matches the game's snap8: atan2 on screen, 0=E clockwise)
 DIRS = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE']
@@ -717,10 +681,10 @@ def render_row(name, poses, d):
 
 
 def build_sheet(log=None):
-    cols = max(len(fn()) for _, fn, _ in ANIMS)
+    cols = max(len(fn()) for _, fn, _, _ in ANIMS)
     blank = np.zeros((CELL, CELL, 4), np.uint8)
     rows = []
-    for name, fn, _ in ANIMS:
+    for name, fn, _, _ in ANIMS:
         poses = fn()
         drawn = {}
         for d in DIR_ANGLE:
@@ -801,9 +765,10 @@ def save_indexed(arr, path):
 
 def sheet_meta(cols):
     anims, row = {}, 0
-    for name, fn, fps in ANIMS:
+    for name, fn, fps, names in ANIMS:
         n = len(fn())
-        anims[name] = {'row': row, 'frames': n, 'fps': fps, 'loop': name in ('idle', 'run')}
+        anims[name] = {'row': row, 'frames': n, 'fps': fps, 'loop': name in ('idle', 'run'),
+                       'frame_names': names}
         row += len(DIRS)
     return {
         'image': 'player_sheet.png',
@@ -823,20 +788,23 @@ def sheet_meta(cols):
 
 
 def preview(sheet, path, z=3):
-    """labelled, zoomed contact sheet: animations side by side, one row per direction"""
+    """labelled, zoomed contact sheet: animations side by side, one row per direction,
+    each frame named underneath"""
     from PIL import ImageDraw
     meta = sheet_meta(sheet.shape[1] // CELL)
-    lab, top, gap, C = 34, 22, 14, CELL * z
-    widths = [meta['animations'][n]['frames'] * C for n, _, _ in ANIMS]
-    img = Image.new('RGBA', (lab + sum(widths) + gap * (len(ANIMS) - 1) + 8, top + len(DIRS) * C + 6),
+    lab, top, foot, gap, C = 34, 22, 20, 14, CELL * z
+    widths = [meta['animations'][n]['frames'] * C for n, _, _, _ in ANIMS]
+    img = Image.new('RGBA', (lab + sum(widths) + gap * (len(ANIMS) - 1) + 8, top + len(DIRS) * C + foot),
                     (16, 28, 20, 255))
     d = ImageDraw.Draw(img)
     for di, dn in enumerate(DIRS):
         d.text((8, top + di * C + C // 2 - 5), dn, fill=(157, 255, 60, 255))
     x = lab
-    for (name, _, fps), w in zip(ANIMS, widths):
+    for (name, _, _, names), w in zip(ANIMS, widths):
         m = meta['animations'][name]
-        d.text((x + 4, 5), '%s  %d frames @ %d fps' % (name, m['frames'], fps), fill=(233, 245, 236, 255))
+        d.text((x + 4, 5), name, fill=(233, 245, 236, 255))
+        for f, label in enumerate(names):
+            d.text((x + f * C + 4, top + len(DIRS) * C + 5), label, fill=(157, 255, 60, 255))
         for di in range(len(DIRS)):
             r = m['row'] + di
             for f in range(m['frames']):
@@ -859,7 +827,7 @@ def preview_gif(sheet, path, z=3):
     d = ImageDraw.Draw(base)
     for di, dn in enumerate(DIRS):
         d.text((lab + di * C + C // 2 - 6, 3), dn, fill=(157, 255, 60, 255))
-    for ai, (name, _, _) in enumerate(ANIMS):
+    for ai, (name, _, _, _) in enumerate(ANIMS):
         d.text((6, 16 + ai * C + C // 2 - 5), name, fill=(233, 245, 236, 255))
         for di in range(len(DIRS)):
             fill = (49, 129, 77, 255) if (ai + di) % 2 else (43, 116, 69, 255)
@@ -867,7 +835,7 @@ def preview_gif(sheet, path, z=3):
     frames = []
     for t in range(0, total, tick):
         fr = base.copy()
-        for ai, (name, _, fps) in enumerate(ANIMS):
+        for ai, (name, _, fps, _) in enumerate(ANIMS):
             m = meta['animations'][name]
             f = int(t / 1000 * fps)
             f = f % m['frames'] if m['loop'] else min(f % (m['frames'] + 4), m['frames'] - 1)
