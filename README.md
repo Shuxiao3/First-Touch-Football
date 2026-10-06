@@ -49,7 +49,9 @@ and hold-to-CROSS buttons sit alongside it.
   into the same creation trees. Kit trim, boots and hair carry onto the pitch.
 - **Pixel-art players** — a 32×32, 8-direction sprite sheet in the Gen-4 handheld RPG style
   (idle, run, shoot, pass, slide tackle). Team kits, and your pro's trim, boots and hair, are
-  exact palette swaps of one embedded sheet. See [Sprites](#sprites).
+  exact palette swaps of one embedded sheet. The two kits differ in brightness as well as
+  colour, and your side carries a ring at its feet, so teams read apart at a glance (colour
+  blindness included). See [Sprites](#sprites).
 - **Feel dials** — live-tunable simulation parameters with arcade / balanced / sim
   presets, persisted to `localStorage`.
 - **Practice drills** — dribbling, heading, slide and standing tackles, interceptions,

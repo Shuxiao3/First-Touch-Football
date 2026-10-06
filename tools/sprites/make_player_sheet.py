@@ -290,6 +290,8 @@ def local_to_world_matrix(phi):
                      [0, 0, 1]])
 
 
+UPPER_ARM_BANDS = [(1.0, 'shirt')]                    # long sleeves: more kit on show, so
+FOREARM_BANDS = [(0.8, 'shirt'), (1.0, 'skin')]      # the teams read apart at a glance
 THIGH_BANDS = [(0.55, 'shorts'), (1.0, 'skin')]     # shorts, then a bare knee
 SHIN_BANDS = [(0.12, 'skin'), (1.0, 'socks')]
 
@@ -310,8 +312,8 @@ def body_prims(J, pose, phi):
         prims.append(Capsule(W('knee' + s), W('ankle' + s), 1.2, SHIN_BANDS, g))
         prims.append(Capsule(W('heel' + s), W('toe' + s), 1.15, [(1.0, 'boots')], g))
         g = 'arm' + s
-        prims.append(Capsule(W('sho' + s), W('elb' + s), 1.25, [(0.62, 'shirt'), (1.0, 'skin')], g))
-        prims.append(Capsule(W('elb' + s), W('wri' + s), 1.0, [(1.0, 'skin')], g))
+        prims.append(Capsule(W('sho' + s), W('elb' + s), 1.25, UPPER_ARM_BANDS, g))
+        prims.append(Capsule(W('elb' + s), W('wri' + s), 1.0, FOREARM_BANDS, g))
         prims.append(Capsule(W('hand' + s), W('hand' + s), 1.1, [(1.0, 'skin')], g))
     for i, (kind, pos, r) in enumerate(pose.get('fx', [])):
         if kind == 'dust':
@@ -700,13 +702,15 @@ def build_sheet(log=None):
 
 # ----------------------------------------------------------------------------- kits
 # Kits recolour the sheet by exact palette swap: socks share the shirt ramp, so a kit names
-# ramps for 'shirt', 'trim' and 'shorts' (and optionally 'boots' / 'hair').
+# ramps for 'shirt', 'trim' and 'shorts' (and optionally 'boots' / 'hair'). The two game kits
+# differ in value as well as hue -- light shirt over dark shorts against dark shirt over white
+# -- so they stay apart in grayscale and for red-green colour blindness.
 KITS = {
     'blue':  {},                                              # the base sheet as drawn
     'green': {'shirt':  [(28, 84, 36), (72, 156, 40), (132, 220, 52), (196, 255, 128)],
               'trim':   [(112, 124, 112), (184, 200, 188), (233, 245, 236), (255, 255, 255)],
               'shorts': [(10, 14, 10), (30, 38, 30), (50, 62, 50), (86, 102, 84)]},
-    'red':   {'shirt':  [(100, 24, 40), (176, 48, 52), (240, 92, 76), (255, 164, 140)],
+    'red':   {'shirt':  [(88, 16, 32), (156, 32, 44), (212, 52, 52), (248, 120, 104)],
               'trim':   [(112, 124, 112), (184, 200, 188), (233, 245, 236), (255, 255, 255)]},
 }
 HAIR_KEYS = ['D', '3', '2', '1']     # head palette letters for the hair ramp: line, dark, base, light
