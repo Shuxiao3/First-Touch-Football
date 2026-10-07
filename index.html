@@ -6951,13 +6951,7 @@
       const [name,f,dx,dy]=pick(p), A=ANIM[name];
       const sc=base.scale*cfg.scale, row=A.row+snap8(dx,dy);
       const sz=Math.round(CELL*sc), x=Math.round(base.x-AX*sc), y=Math.round(base.y-AY*sc);   // whole pixels: no shimmer
-      ctx.save();
-      if(p.team==='G'){                                    // your side: a ring at the feet, so the
-        ctx.beginPath();                                   // big shared heads can't hide whose is whose
-        ctx.ellipse(base.x, base.y, 15*base.scale, 6.3*base.scale, 0, 0, Math.PI*2);
-        ctx.strokeStyle='rgba(157,255,60,.9)'; ctx.lineWidth=Math.max(1.5,2*base.scale); ctx.stroke();
-      }
-      ctx.imageSmoothingEnabled=false;
+      ctx.save(); ctx.imageSmoothingEnabled=false;
       ctx.drawImage(sheetFor(p), clamp(f,0,A.n-1)*CELL, row*CELL, CELL, CELL, x, y, sz, sz);
       ctx.restore();
       return true;
