@@ -22,7 +22,7 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | `K` | Shoot / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate |
-| `SPACE` | Trap (timing-graded first touch) |
+| `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
 
 **Touch**
@@ -44,6 +44,11 @@ and hold-to-CROSS buttons sit alongside it.
 - **Career mode** — create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
+- **Timing-only trapping** — a trap is a bounce off a round body. Square on, the ball pops
+  slightly up and back the way it came; stand off its line and it glances away from the side
+  you're on. Timing sets how much pace the bounce keeps (never more than it arrived with), and
+  an untrapped ball runs past you. Computer players trap with a human-like spread of error, so
+  their first touch varies too (tunable with the AI first-touch error dial).
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
   into the same creation trees. Kit trim, boots and hair carry onto the pitch.

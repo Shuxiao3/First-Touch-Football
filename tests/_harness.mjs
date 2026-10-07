@@ -79,6 +79,11 @@ export async function playMatch(page){
   await page.click('#careerHub [data-hub="play"]');
   await page.waitForTimeout(400);
   let over = false;
+  // Receiving takes a timed trap now -- an untrapped pass runs past you -- so a second hand
+  // keeps pressing Space. The whiff lockout means it only catches some passes, which is plenty.
+  const trap = (async () => {
+    while(!over){ await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(60); }
+  })();
   const input = (async () => {
     let i = 0;
     while(!over){
@@ -89,7 +94,6 @@ export async function playMatch(page){
       await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(240);
       await page.keyboard.up('k').catch(() => {});
       await page.keyboard.up(fwd).catch(() => {});
-      if(i % 6 === 0) await page.keyboard.press('Space').catch(() => {});
     }
     for(const k of ['d', 'w', 's', 'a', 'k']) await page.keyboard.up(k).catch(() => {});
   })();
@@ -98,5 +102,6 @@ export async function playMatch(page){
     null, { timeout: 300000, polling: 500 });
   over = true;
   await input.catch(() => {});
+  await trap.catch(() => {});
   return page.textContent('#matchReport');
 }
