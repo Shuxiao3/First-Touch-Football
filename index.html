@@ -537,6 +537,9 @@
   .ltDial input{width:100%;accent-color:#9dff3c;}
   .ltHint{font-size:9px;line-height:1.35;color:var(--ink-dim);}
   .ltReset{margin-top:4px;}
+  @media (max-height:500px){   /* phone: while tuning, keep the pitch clear (chips + meter only) */
+    #stageWrap.labTuneOpen #labResult, #stageWrap.labTuneOpen .labTallyRow{display:none;}
+  }
 </style>
 </head>
 <body>
@@ -1982,6 +1985,15 @@
   document.getElementById('labExitBtn').addEventListener('click',e=>{ e.currentTarget.blur(); labChip('exit'); });
   document.getElementById('labTune').addEventListener('click',e=>{
     const b=e.target.closest('[data-lab]'); if(!b) return; b.blur(); labChip(b.dataset.lab); });
+  // The lab's fixed camera: the receiver a little right of centre, the machine on the left. With the
+  // TUNE drawer open, slide over so both stay clear of it.
+  function labCamX(){
+    let want=W*0.565;                                     // where the receiver sits on screen
+    if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw;
+      want=Math.min(want,W-dw-130); }
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(LAB.spot.y/FH,PERSP);
+    return clamp(LAB.spot.x-(want-W/2)/sc,camMin,camMax);
+  }
   // on the pitch: the AI receiver's reach ring, your mark, and the last touch's in/out arrows
   function labDrawPitch(){
     const rc=labRecv();
@@ -6911,9 +6923,9 @@
     }
 
     const focusX=controllingKeeper?controllingKeeper.x:controlled.x;
-    let camTarget=LAB.on?clamp(LAB.spot.x-70,camMin,camMax):clamp(focusX*0.35+ball.x*0.65,camMin,camMax);
+    let camTarget=LAB.on?labCamX():clamp(focusX*0.35+ball.x*0.65,camMin,camMax);
     if(!isFinite(camTarget)) camTarget=clamp(isFinite(ball.x)?ball.x:FW/2,camMin,camMax);
-    camX+=(camTarget-camX)*Math.min(1,dt*3.2);
+    camX+=(camTarget-camX)*Math.min(1,rdt*3.2);       // real time, so slow motion doesn't drag the camera
     if(!isFinite(camX)) camX=FW/2;        // never let a stray NaN black out the whole pitch
 
     draw();
