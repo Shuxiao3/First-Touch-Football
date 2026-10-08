@@ -1380,9 +1380,10 @@
           if(controlled.passLockT>0){ pressTrap(); trapHeld=true; if(trapTouchId===null)trapTouchId=t.identifier; }  // too soon after receiving: this tap meant TRAP
           else { kickHeld=true; kickTouchId=t.identifier; }                                                          // controlled possession: PASS (hold to charge)
         }
-        else if(firstTouchBall(controlled)) firstTouchPass();                                                        // strikeable loose ball: one-touch pass
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
         else { pressTrap(); trapHeld=true; if(trapTouchId===null)trapTouchId=t.identifier; }                         // incoming / loose / opponent: TRAP
+        // (no first-time pass off this button: an arriving ball is always "strikeable", so it would
+        //  turn a TRAP tap into a kick right as the ball reaches you)
         continue;
       }
       if(t.target===btns.shoot){

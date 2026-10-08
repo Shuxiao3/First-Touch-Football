@@ -176,6 +176,22 @@ ok(await visible('#rScore'), 'score chip back for the match');
   await ph.tap('#labBar [data-lab="slow"]'); await ph.waitForTimeout(120);
   ok((await ph.textContent('#labSlowV')) === '½×', 'phone: tapping a lab chip works');
   ok(/^Tap TRAP/.test((await ph.textContent('#labResult')).trim()), 'phone: the intro says to tap TRAP');
+  // the big button reads TRAP as the ball arrives, and a tap right then must trap it -- not kick it
+  // first-time (an arriving ball is always strikeable)
+  await ph.tap('#labBar [data-lab="slow"]'); await ph.waitForTimeout(120);          // ½× -> ¼×
+  await ph.tap('#labBar [data-lab="auto"]'); await ph.waitForTimeout(120);          // on cue
+  for(const eT of [-0.01, 0.03]){
+    const n = await ph.evaluate(() => { const m = /^(\d+) balls?/.exec(document.getElementById('labTally').textContent || ''); return m ? +m[1] : 0; });
+    await ph.tap('#labGoChip');
+    await ph.waitForFunction(eT => { const c = document.getElementById('labCursor');
+      return c.style.display === 'block' && -0.35 + parseFloat(c.style.left) / 100 * 0.55 >= eT; }, eT, { timeout: 15000, polling: 'raf' });
+    const label = (await ph.textContent('#kickBtn')).trim();
+    await ph.tap('#kickBtn');
+    await ph.waitForFunction(n => { const m = /^(\d+) balls?/.exec(document.getElementById('labTally').textContent || ''); return m && +m[1] > n; }, n, { timeout: 20000 });
+    const res = (await ph.textContent('#labResult')).trim();
+    info('phone tap as it arrives (' + label + ') → ' + res);
+    ok(label === 'TRAP' && /PERFECT|CLEAN|LOOSE|HEAVY/.test(res), 'phone: TRAP tapped as the ball arrives traps it');
+  }
   await ph.tap('#menuBtn'); await ph.waitForTimeout(300);
   ok(await ph.isVisible('#pauseMenu.on'), 'phone: tapping ☰ opens the pause menu');
   await ph.tap('#pauseMenu [data-pause="back"]'); await ph.waitForTimeout(200);
