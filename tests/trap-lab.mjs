@@ -1,6 +1,6 @@
 // Trap Lab: open it from the start menu, let a ball run past, time presses off the guide
-// cursor (perfect / late / too early), glance one off-line, take one on the chest, watch the
-// AI receiver, tune a dial, and leave cleanly for an exhibition.
+// cursor (perfect / late / too early), glance one off-line, take one on the chest, aim
+// directional first touches, watch the AI receiver, tune a dial, and leave for an exhibition.
 import { open } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
@@ -29,6 +29,28 @@ async function pressAt(eT){
     })();
   }), { eT, MIN, MAX });
 }
+// The same, holding a movement key (`code`) from just before the press until the touch is made:
+// a directional first touch.
+async function pressAimedAt(code, eT){
+  return page.evaluate(({ code, eT, MIN, MAX }) => new Promise(res => {
+    const cur = document.getElementById('labCursor'), t0 = performance.now(), holdAt = Math.min(-0.10, eT - 0.03);
+    let held = false;
+    (function tick(){
+      if(performance.now() - t0 > 15000) return res(null);
+      if(cur.style.display === 'block'){
+        const e = MIN + parseFloat(cur.style.left) / 100 * (MAX - MIN);
+        if(!held && e >= holdAt){ window.dispatchEvent(new KeyboardEvent('keydown', { code })); held = true; }
+        if(e >= eT){
+          window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', key: ' ' }));
+          setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space', key: ' ' })), 40);
+          setTimeout(() => { window.dispatchEvent(new KeyboardEvent('keyup', { code })); res(e); }, 600);
+          return;
+        }
+      }
+      requestAnimationFrame(tick);
+    })();
+  }), { code, eT, MIN, MAX });
+}
 // Real milliseconds the guide cursor takes to sweep from -300 ms to -50 ms (0.25 s of game time).
 async function sweepMs(){
   return page.evaluate(({ MIN, MAX }) => new Promise(res => {
@@ -54,10 +76,10 @@ async function nextResult(n, timeout = 20000){
   }, n, { timeout, polling: 100 });
   return text('#labResult');
 }
-async function serveAndPress(eT){
+async function serveAndPress(eT, code){
   const n = await balls();
   await page.keyboard.press('r');
-  const at = await pressAt(eT);
+  const at = code ? await pressAimedAt(code, eT) : await pressAt(eT);
   const res = await nextResult(n);
   info(`pressed at ${at == null ? '—' : Math.round(at * 1000) + ' ms'} → ${res}`);
   return res;
@@ -101,6 +123,7 @@ ok(/straight back/.test(r), 'square on, it comes straight back');
 
 r = await serveAndPress(0.045);
 ok(/LOOSE|HEAVY/.test(r) && /late/.test(r), 'a press ~45 ms late is loose/heavy and reads "late"');
+ok(/ran on past you/.test(r), 'a late touch lets the ball run on past you, not back');
 
 r = await serveAndPress(-0.30);
 ok(/RAN PAST/.test(r) && /window shut/.test(r), 'a press 300 ms early whiffs and the ball runs past');
@@ -116,8 +139,22 @@ ok((await text('#labServeV')) === 'CHEST HIGH', 'SERVE switches to chest high');
 r = await serveAndPress(-0.035);
 ok(/in the air/.test(r) && /PERFECT|CLEAN/.test(r), 'a chest-high ball is trapped in the air');
 
-// ---- AI receiver at full speed, auto serves ----
+// ---- directional first touch: hold a direction as the ball arrives ----
 await chip('serve'); await chip('serve');           // CHEST -> MIXED -> ROLLED
+await page.keyboard.press('0'); await page.waitForTimeout(150);   // back on the mark
+r = await serveAndPress(-0.035, 'KeyW');
+ok(/aimed ↑ (and went there|went [0-9]° off)/.test(r), 'holding up as it arrives takes the touch up the pitch');
+ok(/turned it \d+° \(window ×0\.[5-8]\d\)/.test(r), 'a sideways touch gets a narrower window');
+await page.keyboard.press('0'); await page.waitForTimeout(150);
+r = await serveAndPress(-0.035, 'KeyA');
+ok(/aimed ← (and went there|went [0-9]° off)/.test(r) && !/turned it/.test(r), 'taking it back the way it came: no turn penalty');
+await page.keyboard.press('0'); await page.waitForTimeout(150);
+r = await serveAndPress(0.06, 'KeyW');
+ok(/aimed ↑/.test(r) && /late: it got past your foot/.test(r), 'an aimed touch that is late gets past your foot');
+ok(/aimed/.test(await text('#labTally')), 'the tally counts aimed touches: ' + await text('#labTally'));
+await page.keyboard.press('0'); await page.waitForTimeout(150);
+
+// ---- AI receiver at full speed, auto serves ----
 await chip('slow');                                 // ¼× -> 1×
 await chip('recv'); await chip('auto');
 ok((await text('#labRecvV')) === 'AI' && (await text('#labAutoV')) === 'AUTO', 'receiver AI, serving automatically');
@@ -129,7 +166,7 @@ ok(/perfect|clean|loose|heavy/.test(aiTally), 'the AI traps balls with graded to
 // ---- tune drawer ----
 await chip('tune');
 ok(await visible('#labTune'), 'TUNE opens the drawer');
-ok((await page.locator('#labDials input[type=range]').count()) === 9, 'nine trap dials in the drawer');
+ok((await page.locator('#labDials input[type=range]').count()) === 12, 'twelve trap dials in the drawer');
 await page.evaluate(() => { const s = document.querySelector('#labDials [data-lk="trapWin"]'); s.value = 2; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(100);
 ok(/window -300 to/.test(await text('#labWinTxt')), 'doubling the window widens the meter: ' + await text('#labWinTxt'));

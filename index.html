@@ -836,6 +836,10 @@
     trapKeepBad:{val:0.70,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
+    // directional first touch: hold a direction as you trap and the touch goes that way
+    ftPush:   {val:55,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (hold a direction as you trap). Running along your aim adds your own pace on top, so the ball stays just ahead of you.'},
+    ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed.'},
+    ftTurn:   {val:1,min:0,max:1.6,step:0.05,label:'First touch: turn difficulty',hint:'How much turning the ball (aiming away from where it would bounce off you anyway) narrows the timing window. 1 = a full turn halves it on a 450 ball, and quicker balls are harder to turn. 0 = every direction is as easy as the next.'},
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
@@ -1041,7 +1045,7 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','firstTouchAcc'],
-    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','aiTouch']
+    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','ftPush','ftErr','ftTurn','aiTouch']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -1628,16 +1632,17 @@
   function labRecv(){ return LAB.recv==='ai' ? (players.find(q=>q.pRole==='labRecv')||controlled) : controlled; }
   function labServer(){ return players.find(q=>q.pRole==='labServer'); }
   function labTally(){ const k=LAB.recv==='ai'?'ai':'you';
-    return LAB.tally[k]||(LAB.tally[k]={reps:0,perfect:0,clean:0,loose:0,heavy:0,past:0,other:0,touches:0,settled:0,errSum:0,errN:0}); }
+    return LAB.tally[k]||(LAB.tally[k]={reps:0,perfect:0,clean:0,loose:0,heavy:0,past:0,other:0,touches:0,settled:0,errSum:0,errN:0,aimed:0,aimErrSum:0}); }
 
   // Fly a copy of the ball under the game's own rules (gravity, bounce, grass drag below 12)
   // until it comes into rc's reach: on the ground inside reach + ball, or -- when `air` -- at
   // thigh/chest height inside 90% of reach. Returns when and how it arrives, or null.
-  function labFly(b,rc,air,maxT){
+  function labFly(b,rc,air,maxT,mv){           // mv: the receiver keeps moving as he is (for the live guide)
     const h=LAB.h, kf=Math.pow(1-P.friction.val,h*3.2), cr=controlROf(rc), rg=cr+ball.r, ra=cr*0.9;   // steps like the game's frames
     let x=b.x,y=b.y,z=b.z,vx=b.vx,vy=b.vy,vz=b.vz;
+    const rvx=mv?rc.vx:0, rvy=mv?rc.vy:0;
     for(let t=0;t<=maxT;t+=h){
-      const g=Math.hypot(x-rc.x,y-rc.y);
+      const g=Math.hypot(x-rc.x-rvx*t,y-rc.y-rvy*t);
       if(z<12&&g<rg) return {t,spd:Math.hypot(vx,vy),z,air:false};
       if(air&&z>=12&&z<=AIR_REACH&&g<ra) return {t,spd:Math.hypot(vx,vy),z,air:true};
       if(z>0||vz!==0){ vz-=520*h; z+=vz*h; if(z<=0){ z=0; vz=vz<-40?-vz*0.45:0; } }
@@ -1725,7 +1730,8 @@
     const r=LAB.rep; if(!r||r.done) return;
     r.done=true; r.result=res; r.endT=simNow;
     const T=labTally(); T.reps++;
-    if(r.touch){ T.touches++; T[r.touch.grade.toLowerCase()]++; T.errSum+=Math.abs(r.touch.e-trapSweet()); T.errN++; if(res==='settled')T.settled++; }
+    if(r.touch){ T.touches++; T[r.touch.grade.toLowerCase()]++; T.errSum+=Math.abs(r.touch.e-trapSweet()); T.errN++; if(res==='settled')T.settled++;
+      if(r.touch.aim){ T.aimed++; T.aimErrSum+=Math.abs(r.touch.aimErr); } }
     else if(res==='past') T.past++;
     else T.other++;
     const e=r.touch?r.touch.e:(r.ai?r.aiMiss:labPressE(r,labLastPress(r)));
@@ -1761,7 +1767,7 @@
     const r=LAB.rep; if(!r||r.ai) return;
     if(r.done){ if(r.result==='past'&&r.latePress==null&&simNow-r.endT<0.6){ r.latePress=simNow-r.arrive; LAB.dirty=true; } return; }
     let est=null;
-    if(r.arrive==null){ const f=labFly(ball,r.recv,true,2.5); if(f) est=-f.t; }   // where it sits before the ball has arrived
+    if(r.arrive==null){ const f=labFly(ball,r.recv,true,2.5,true); if(f) est=-f.t; }   // where it sits before the ball has arrived
     r.presses.push({t:simNow,locked,est}); LAB.dirty=true;
   }
   function labOnArrive(p,air){
@@ -1772,9 +1778,11 @@
     const r=LAB.rep; if(!r||r.done||p!==r.recv||r.touch) return;
     const out=Math.hypot(ball.vx,ball.vy), ox=out>0.01?ball.vx/out:-o.dx, oy=out>0.01?ball.vy/out:-o.dy;
     const ang=Math.atan2(-o.dx*oy+o.dy*ox, -o.dx*ox-o.dy*oy);    // the bounce against straight back the way it came
-    r.touch={t:simNow,s,e,grade:trapGrade(s),inSpd:o.sp,outSpd:out,keep:o.keep,off:o.u*(controlROf(p)+ball.r),ang,pop:ball.vz,z:o.z,outDir:{x:ox,y:oy}};
+    const aimOff=o.aim?Math.acos(clamp(o.aim.x*ox+o.aim.y*oy,-1,1))*180/Math.PI:0;   // where it went against where you aimed
+    r.touch={t:simNow,s,e,grade:trapGrade(s),inSpd:o.sp,outSpd:out,keep:o.keep,off:o.u*(controlROf(p)+ball.r),ang,pop:ball.vz,z:o.z,outDir:{x:ox,y:oy},
+      aim:o.aim,aimErr:aimOff,phi:o.phi*180/Math.PI,wScale:o.wScale,late:o.late};
     const col=s>0.55?'157,255,60':s>0.3?'255,180,60':'255,90,77';
-    LAB.fx={x:ball.x,y:ball.y,z:Math.max(0,o.z),inDir:{x:o.dx,y:o.dy},outDir:{x:ox,y:oy},len:clamp(out*0.35,18,120),col,t:1.8};
+    LAB.fx={x:ball.x,y:ball.y,z:Math.max(0,o.z),inDir:{x:o.dx,y:o.dy},outDir:{x:ox,y:oy},aim:o.aim,len:clamp(out*0.35,18,120),col,t:1.8};
     LAB.dirty=true;
   }
   function labOnAiMiss(p,e){ const r=LAB.rep; if(r&&!r.done&&p===r.recv){ r.aiMiss=e; LAB.dirty=true; } }
@@ -1835,8 +1843,8 @@
   function labMs(e){ const v=Math.round(e*1000); return v===0?'right on time':Math.abs(v)+' ms '+(v<0?'early':'late'); }
   function labArrow(x,y){ const i=Math.round(Math.atan2(y,x)/(Math.PI/4)); return ['→','↘','↓','↙','←','↖','↑','↗'][(i+8)%8]; }
   function labLineTxt(v){ return v==='rnd'?'RANDOM':v===0?'AT YOU':(v>0?'↑':'↓')+Math.abs(v); }
-  function labZones(rc){
-    const win=trapWindowOf(rc), sw=trapSweet(), L=win*P.trapLate.val;
+  function labZones(rc,ws){
+    const win=trapWindowOf(rc)*(ws||1), sw=trapSweet(), L=win*P.trapLate.val;
     const z=[[LAB_MIN,-win,'rgba(138,149,128,.16)'],                // so early the window shuts before it arrives
       [-win,sw-0.7*win,'rgba(255,90,77,.6)'],[sw-0.7*win,sw-0.45*win,'rgba(255,180,60,.65)'],
       [sw-0.45*win,sw-0.2*win,'rgba(157,255,60,.42)'],[sw-0.2*win,sw+0.2*L,'rgba(157,255,60,.95)'],
@@ -1850,20 +1858,24 @@
   }
   function labHud(){
     if(!labEl.labCursor) labInitHud();
-    const rc=labRecv(), r=LAB.rep;
-    const win=trapWindowOf(rc), sig=win.toFixed(4)+'|'+P.trapSweet.val+'|'+P.trapLate.val;
+    const rc=labRecv(), r=LAB.rep, live=r&&!r.done&&!r.touch;
+    // the guide: where "now" sits against the ball's arrival (following you if you're on the move)
+    let cur=null, f=null;
+    if(live){ f=labFly(ball,rc,rc===controlled,-LAB_MIN+0.02,true);
+      if(LAB.guide) cur=r.arrive!=null?simNow-r.arrive:(f?-f.t:null); }
+    // holding a direction as it comes: show the narrower window a touch turned that way gets
+    LAB.aimWs=1;
+    const aim=live&&rc===controlled?touchAim(rc):null;
+    if(aim){ const g=touchGeom(rc); LAB.aimWs=turnScale(turnPhi(g,aim),f?f.spd:g.sp); }
+    else if(!live){ const T=r&&r.touch?r.touch:LAB.last&&LAB.last.touch; if(T&&T.aim) LAB.aimWs=T.wScale; }   // keep the window that touch was judged on
+    const win=trapWindowOf(rc)*LAB.aimWs, sig=win.toFixed(3)+'|'+P.trapSweet.val+'|'+P.trapLate.val;
     if(sig!==LAB.zoneSig){
       LAB.zoneSig=sig;
-      labEl.labZonesEl.innerHTML=labZones(rc).map(([a,b,c])=>`<div class="lmZone" style="left:${labPct(a)}%;width:${labPct(b)-labPct(a)}%;background:${c}"></div>`).join('')
+      labEl.labZonesEl.innerHTML=labZones(rc,LAB.aimWs).map(([a,b,c])=>`<div class="lmZone" style="left:${labPct(a)}%;width:${labPct(b)-labPct(a)}%;background:${c}"></div>`).join('')
         +`<div class="lmZero" style="left:${labPct(0)}%"></div>`;
       const sw=trapSweet(), L=win*P.trapLate.val, ms=v=>(v>0?'+':'')+Math.round(v*1000);
-      labEl.labWinTxt.textContent=`window ${ms(-win)} to ${ms(sw+L)} ms · perfect ${ms(sw-0.2*win)} to ${ms(sw+0.2*L)}`;
-    }
-    // the guide: where "now" sits against the ball's arrival
-    let cur=null;
-    if(LAB.guide&&r&&!r.done&&!r.touch){
-      if(r.arrive!=null) cur=simNow-r.arrive;
-      else { const f=labFly(ball,rc,rc===controlled,-LAB_MIN+0.02); if(f) cur=-f.t; }
+      labEl.labWinTxt.textContent=`window ${ms(-win)} to ${ms(sw+L)} ms · perfect ${ms(sw-0.2*win)} to ${ms(sw+0.2*L)}`
+        +(LAB.aimWs<0.97?` · turning ×${LAB.aimWs.toFixed(2)}`:'');
     }
     if(cur!=null&&cur<=LAB_MAX){ labEl.labCursor.style.display='block'; labEl.labCursor.style.left=labPct(cur)+'%'; }
     else labEl.labCursor.style.display='none';
@@ -1892,15 +1904,21 @@
     const shown=r&&(r.touch||r.done)?r:LAB.last;            // a touch reads out at once; the settle is added when known
     labEl.labResult.innerHTML=shown?labRepText(shown)
       :(LAB.recv==='ai'?'Watch the AI receiver. Its timing error comes from Ball control and the AI first-touch error dial.'
-        :(isTouch?'Tap <b>TRAP</b> (or the right side)':'Press <b>SPACE</b>')+' a hair before the ball reaches your ring. Leave it and it runs past.');
+        :(isTouch?'Tap <b>TRAP</b> (or the right side)':'Press <b>SPACE</b>')+' a hair before the ball reaches your ring; hold a direction to take the touch that way. Leave it and it runs past.');
     labEl.labTally.textContent=labTallyText();
   }
   function labRepText(r){
     const head=`<span class="lsv">${labServeName(r.type)} ${r.pace}${r.line?' '+(r.line>0?'↑':'↓')+Math.abs(r.line):''}</span>`;
     if(r.touch){
       const T=r.touch, deg=Math.round(Math.abs(T.ang)*180/Math.PI);
-      const defl=deg<6?'straight back':`glanced ${deg}° ${labArrow(T.outDir.x,T.outDir.y)}`;
+      const defl=deg<6?'straight back':deg>100?`ran on past you ${labArrow(T.outDir.x,T.outDir.y)}`:`glanced ${deg}° ${labArrow(T.outDir.x,T.outDir.y)}`;
       const how=!r.done?'':r.result==='settled'?` · settled in ${r.collectT.toFixed(2)} s`:r.result==='lost'?' · lost it':' · never settled';
+      if(T.aim){
+        const off=Math.round(Math.abs(T.aimErr));
+        return `${head} <b style="color:${LAB_COL[T.grade]}">${T.grade}</b> ${labMs(T.e)}${T.z>=12?' (in the air)':''}`
+          +` · aimed ${labArrow(T.aim.x,T.aim.y)} ${off<2?'and went there':`went ${off}° off ${labArrow(T.outDir.x,T.outDir.y)}`}${T.late>0.5?' (late: it got past your foot)':''} · ${Math.round(T.inSpd)} → ${Math.round(T.outSpd)}`
+          +`${T.wScale<0.97?` · turned it ${Math.round(T.phi)}° (window ×${T.wScale.toFixed(2)})`:''}${how}`;
+      }
       return `${head} <b style="color:${LAB_COL[T.grade]}">${T.grade}</b> ${labMs(T.e)}${T.z>=12?' (in the air)':''}`
         +` · kept ${Math.round(T.outSpd/Math.max(1,T.inSpd)*100)}% (${Math.round(T.inSpd)} → ${Math.round(T.outSpd)})`
         +` · ${defl}${Math.abs(T.off)>=3?` (${Math.round(Math.abs(T.off))} off its line)`:''}${how}`;
@@ -1928,12 +1946,14 @@
     if(T.past) parts.push(T.past+' ran past');
     if(T.other) parts.push(T.other+' out of reach');
     if(T.errN) parts.push('avg '+Math.round(T.errSum/T.errN*1000)+' ms off perfect');
+    if(T.aimed) parts.push(T.aimed+' aimed, avg '+Math.round(T.aimErrSum/T.aimed)+'° off');
     if(T.touches) parts.push(T.settled+'/'+T.touches+' settled');
     return parts.join(' · ');
   }
   // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
-    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',aiTouch:'AI timing error'};
+    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',
+    ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',aiTouch:'AI timing error'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
     trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
@@ -1943,6 +1963,9 @@
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
+    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top).',
+    ftErr:'How far off your aim a directional touch strays at the worst timing.',
+    ftTurn:'How much turning the ball narrows the window. 0 = every direction is as easy.',
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.'};
   function labDialTxt(k){
     const v=P[k].val;
@@ -1950,6 +1973,8 @@
     if(k==='trapKeepGood'||k==='trapKeepBad') return Math.round(v*100)+'%';
     if(k==='trapWin'||k==='trapPop') return v.toFixed(2)+'×';
     if(k==='trapLock') return v.toFixed(2)+' s';
+    if(k==='ftPush') return v+' (≈'+(v/controlROf({stats:{}})).toFixed(1)+' rings)';
+    if(k==='ftErr') return v+'°';
     if(k==='ballControl'){ const pr={stats:{}}; return v.toFixed(1)+' · ring '+Math.round(controlROf(pr))+' · '+Math.round(trapWindowOf(pr)*1000)+' ms'; }
     return v.toFixed(2);
   }
@@ -2006,12 +2031,26 @@
     { const sp=LAB.spot, a=proj(sp.x-7,sp.y), b=proj(sp.x+7,sp.y), c=proj(sp.x,sp.y-7), d=proj(sp.x,sp.y+7);
       ctx.strokeStyle='rgba(223,230,212,.28)'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke(); }
+  }
+  // over the players: where a directional touch would go (guide), and the last touch's in / aim / out
+  function labDrawOver(){
+    const rc=labRecv(), r=LAB.rep, aim=LAB.guide&&rc===controlled&&r&&!r.done&&!r.touch?touchAim(rc):null;
+    if(aim){                                               // holding a direction: the push, from the edge of your ring
+      const cr=controlROf(rc), a=proj(rc.x+aim.x*cr,rc.y+aim.y*cr), b=proj(rc.x+aim.x*(cr+P.ftPush.val),rc.y+aim.y*(cr+P.ftPush.val));
+      ctx.save(); ctx.setLineDash([3,4]); ctx.strokeStyle='rgba(223,230,212,.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.setLineDash([]);
+      const ha=Math.atan2(b.y-a.y,b.x-a.x);
+      ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(b.x-Math.cos(ha-0.5)*6,b.y-Math.sin(ha-0.5)*6);
+      ctx.moveTo(b.x,b.y); ctx.lineTo(b.x-Math.cos(ha+0.5)*6,b.y-Math.sin(ha+0.5)*6); ctx.stroke(); ctx.restore();
+    }
     const fx=LAB.fx; if(!fx) return;
     const al=clamp(fx.t/0.6,0,1), o=proj(fx.x,fx.y,fx.z);
     const i0=proj(fx.x-fx.inDir.x*70,fx.y-fx.inDir.y*70,fx.z), o1=proj(fx.x+fx.outDir.x*fx.len,fx.y+fx.outDir.y*fx.len,fx.z);
     ctx.save(); ctx.lineCap='round';
     ctx.setLineDash([4,4]); ctx.strokeStyle=`rgba(223,230,212,${0.45*al})`; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(i0.x,i0.y); ctx.lineTo(o.x,o.y); ctx.stroke(); ctx.setLineDash([]);
+    if(fx.aim){ const a1=proj(fx.x+fx.aim.x*fx.len,fx.y+fx.aim.y*fx.len,fx.z);   // what you aimed at, under what you got
+      ctx.strokeStyle=`rgba(223,230,212,${0.5*al})`; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(a1.x,a1.y); ctx.stroke(); }
     ctx.strokeStyle=`rgba(${fx.col},${0.95*al})`; ctx.lineWidth=2.5;
     ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(o1.x,o1.y); ctx.stroke();
     const ha=Math.atan2(o1.y-o.y,o1.x-o.x);
@@ -6123,8 +6162,8 @@
   // pace kept on a perfect / botched touch, bounce pop, and the lockout after a press that whiffs
   const trapSweet=()=>P.trapSweet.val/1000;  // ideal press, in seconds from the ball's arrival (negative = early)
   function trapGrade(s){ return s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY'; }
-  function trapTimingScore(p,e){             // e = press time minus arrival (negative = early)
-    const W=trapWindowOf(p), d=e-trapSweet();
+  function trapTimingScore(p,e,wScale){      // e = press time minus arrival (negative = early)
+    const W=trapWindowOf(p)*(wScale||1), d=e-trapSweet();
     return clamp(1-(d<0?-d/W:d/(W*P.trapLate.val)),0,1);   // early presses fade over the window, late ones faster
   }
   let aiLastE=0;                             // the last AI press error, kept even when it missed (for the lab)
@@ -6142,19 +6181,61 @@
   // The touch itself is a bounce off a round body. Square on, the ball pops slightly up and back
   // the way it came. Stand off its line and it glances the other way -- left of it and it goes
   // right, wider the further off you are. Timing sets how much pace survives; it never gains any.
-  function trapTouch(p,s,damp,e){
-    const sp=Math.hypot(ball.vx,ball.vy), inZ=ball.z;
+  // A LATE touch catches the ball as it's already going past you -- further round your side -- so
+  // it glances on past instead of coming back, all the way past at the end of the window.
+  function bounceDir(g,th){                  // off a round body, met at angle th from square on
+    const c2=Math.cos(2*th), s2=Math.sin(2*th);
+    return {x:-g.dx*c2-g.lx*s2, y:-g.dy*c2-g.ly*s2};
+  }
+  function touchGeom(p){                     // the ball as it meets p, and where it would bounce off him
+    const sp=Math.hypot(ball.vx,ball.vy);
     let dx,dy;
     if(sp>1){ dx=ball.vx/sp; dy=ball.vy/sp; }
     else { const g=dist(p,ball)||1; dx=(p.x-ball.x)/g; dy=(p.y-ball.y)/g; }
     const lx=dy, ly=-dx;                                         // the ball's left (screen y is down)
     const u=clamp(((p.x-ball.x)*lx+(p.y-ball.y)*ly)/(controlROf(p)+ball.r),-0.97,0.97);   // + = you're left of its line
-    const th=Math.asin(u), c2=Math.cos(2*th), s2=Math.sin(2*th);
-    const ox=-dx*c2-lx*s2, oy=-dy*c2-ly*s2;                      // reflected off the body
-    const keep=(P.trapKeepBad.val+(P.trapKeepGood.val-P.trapKeepBad.val)*s)*(1-(damp||0)*0.5);
-    ball.vx=ox*sp*keep; ball.vy=oy*sp*keep;
+    const g={sp,dx,dy,lx,ly,u}, b=bounceDir(g,Math.asin(u));
+    g.bx=b.x; g.by=b.y;                                          // (bx,by): the on-time bounce
+    return g;
+  }
+  // DIRECTIONAL FIRST TOUCH: the direction you hold as the ball arrives aims the touch (none held =
+  // a plain trap). Perfect timing pushes it right where you aimed, far enough to run onto; the worse
+  // the timing, the further it strays and the heavier it is. Turning the ball -- aiming away from
+  // where it would bounce off you anyway -- narrows the window, and more so on a quick ball.
+  function touchAim(p){
+    if(p!==controlled) return null;
+    const l=Math.hypot(curIx,curIy); return l>0.5?{x:curIx/l,y:curIy/l}:null;
+  }
+  const turnPhi=(g,aim)=>Math.acos(clamp(aim.x*g.bx+aim.y*g.by,-1,1));   // how far the aim turns it from its own bounce
+  function turnScale(phi,sp){                // the share of the timing window a touch turned this far gets
+    return 1-clamp(P.ftTurn.val*0.5*(phi/Math.PI)*clamp(sp/450,0.6,1.6),0,0.8);
+  }
+  function trapTouch(p,s,damp,e){
+    const g=touchGeom(p), sp=g.sp, inZ=ball.z, aim=touchAim(p);
+    let out, keep, aimErr=0, wScale=1, phi=0;
+    if(aim){ phi=turnPhi(g,aim); wScale=turnScale(phi,sp); if(e!=null) s=trapTimingScore(p,e,wScale); }
+    const lateBy=e!=null?e-trapSweet():0;
+    const lt=lateBy>0?clamp(lateBy/(trapWindowOf(p)*wScale*P.trapLate.val),0,1):0, late=lt*lt;   // a hair late barely shows; heavy-late goes past
+    const th0=Math.asin(g.u), side=g.u>0.02?1:g.u<-0.02?-1:(Math.random()<0.5?-1:1);
+    const nat=bounceDir(g,th0+late*(side*Math.PI/2-th0));        // late: met further round your side
+    let ox=nat.x, oy=nat.y;
+    if(aim){
+      const k=3.2*Math.log(1/(1-P.friction.val));                // grass drag: a ball at speed v rolls v/k
+      const push=P.ftPush.val*k+Math.max(0,p.vx*aim.x+p.vy*aim.y);   // + your own pace along the aim
+      aimErr=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
+      let a=Math.atan2(aim.y,aim.x)+aimErr;
+      if(late>0){ let dv=Math.atan2(nat.y,nat.x)-a; while(dv>Math.PI)dv-=2*Math.PI; while(dv<-Math.PI)dv+=2*Math.PI; a+=dv*late; }   // late: it gets past your foot
+      ox=Math.cos(a); oy=Math.sin(a);
+      out=push+(sp*P.trapKeepBad.val-push)*(1-s);               // worse timing: nearer a botched trap's pace
+      out=Math.min(out,sp+Math.max(0,push-sp)*s)*(1-(damp||0)*0.5);   // only a good touch may add pace
+      keep=out/Math.max(1,sp);
+    } else {
+      keep=(P.trapKeepBad.val+(P.trapKeepGood.val-P.trapKeepBad.val)*s)*(1-(damp||0)*0.5);
+      out=sp*keep;
+    }
+    ball.vx=ox*out; ball.vy=oy*out;
     const pop=(35+105*(1-s))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
-    ball.vz=Math.max(pop, ball.vz<0?-ball.vz*keep*0.6:0);
+    ball.vz=Math.max(pop, ball.vz<0?-ball.vz*Math.min(1,keep)*0.6:0);
     ball.z=Math.max(ball.z,1);
     endCurve();
     ball.cushBy=null; ball.lastTouch=p.team;
@@ -6165,7 +6246,7 @@
       gradeColor=s>0.55?'#9dff3c':s>0.3?'#ffb43c':'#ff5a4d'; gradeFade=1.3;
       const l=Math.hypot(ball.vx,ball.vy)||1; lastTouchDir={x:ball.vx/l,y:ball.vy/l};
     }
-    if(LAB.on) labOnTouch(p,s,e,{sp,keep,u,dx,dy,z:inZ});
+    if(LAB.on) labOnTouch(p,s,e,{sp,keep,u:g.u,dx:g.dx,dy:g.dy,z:inZ,aim,aimErr,wScale,phi,late});
   }
   function attemptCaptures(){
     if(ball.ownedBy||gkHold||ball.z>=12||scoredT>0||offsideT>0||restartT>0){
@@ -7260,6 +7341,7 @@
     for(const kp of keepers)actors.push({y:kp.y,fn:()=>drawKeeper(kp)});
     actors.sort((a,b)=>a.y-b.y);
     for(const a of actors)a.fn();
+    if(LAB.on) labDrawOver();
 
     // --- HEADER ZONE (heading drill only): the dome within which you can head the ball ---
     if(practice==='heading' && controlled){

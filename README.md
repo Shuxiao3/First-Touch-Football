@@ -23,13 +23,15 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
+| `SPACE` + direction | Directional first touch: hold a direction as the ball arrives and the touch goes that way |
 | `V` | Toggle the pixel-art players / plain vector players |
 
 **Touch**
 
 Drag on the left half to move (double-tap to sprint). The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
-and hold-to-CROSS buttons sit alongside it.
+and hold-to-CROSS buttons sit alongside it. Keep dragging while you tap TRAP and your first
+touch goes in the direction you're dragging.
 
 ## Trap Lab
 
@@ -42,7 +44,13 @@ A ball machine serves at you (or at an AI receiver) and the lab shows, for every
 - a **result line**: the grade, how many ms early or late you were, pace in and out, which way
   the ball came off you and how far you were off its line, and how long it took to settle —
   or why it ran past (no press, pressed too early, locked out, pressed after it had gone).
-- a **tally** of grades, balls that ran past, average error, and how many you settled.
+  For a directional touch it shows where you aimed, how far off it went, and how much you
+  turned it.
+- a **tally** of grades, balls that ran past, average error, aimed touches and how far off they
+  went, and how many you settled.
+
+Hold a direction as the ball comes in and GUIDE draws where the touch will go, and the meter
+narrows to the window that turn gets.
 
 The chips across the top set the serve. Each has a desktop shortcut:
 
@@ -56,7 +64,7 @@ The chips across the top set the serve. Each has a desktop shortcut:
 | RECEIVER | `C` | You, or an AI teammate (kept on its own tally) |
 | GUIDE | `G` | Show or hide the approach cursor |
 | ▶ SERVE | `R` | Serve a ball now |
-| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, AI timing error |
+| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, directional push / aim error / turn difficulty, AI timing error |
 | clear | `X` | Reset the tally |
 
 The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
@@ -77,9 +85,16 @@ goes back to the start menu.
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
 - **Timing-only trapping** — a trap is a bounce off a round body. Square on, the ball pops
   slightly up and back the way it came; stand off its line and it glances away from the side
-  you're on. Timing sets how much pace the bounce keeps (never more than it arrived with), and
-  an untrapped ball runs past you. Computer players trap with a human-like spread of error, so
-  their first touch varies too. Every number in the trap is a dial; see [Trap Lab](#trap-lab).
+  you're on. Timing sets how much pace the bounce keeps (never more than it arrived with). A
+  late touch catches the ball as it's already going by, so it glances on past you rather than
+  back, and an untrapped ball runs past you. Computer players trap with a human-like spread of
+  error, so their first touch varies too. Every number in the trap is a dial; see
+  [Trap Lab](#trap-lab).
+- **Directional first touch** — hold a direction as the ball arrives and the touch goes that
+  way: perfect timing puts it right where you aimed, far enough to run onto (your own pace is
+  added, so a touch into your stride stays just ahead of you); the worse the timing, the
+  further it strays and the heavier it is. Turning the ball — aiming away from where it would
+  bounce off you anyway — narrows the window, and quicker balls are harder to turn.
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
   into the same creation trees. Kit trim, boots and hair carry onto the pitch.
@@ -99,9 +114,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–540 | Styles |
-| 542–771 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 772–9204 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 14–543 | Styles |
+| 545–774 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
+| 775–9304 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
