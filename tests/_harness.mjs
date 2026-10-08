@@ -85,14 +85,22 @@ export async function playMatch(page){
     while(!over){ await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(60); }
   })();
   const input = (async () => {
-    let i = 0;
+    let i = 0, onBallTurns = 0;
     while(!over){
       i++;
       const fwd = (i % 7 < 5) ? 'd' : 'w';
       await page.keyboard.down(fwd).catch(() => {});   await page.waitForTimeout(240);
-      await page.keyboard.press('j').catch(() => {});  await page.waitForTimeout(130);
-      await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(240);
-      await page.keyboard.up('k').catch(() => {});
+      // On the ball (the state chip reads "dribbling"), alternate a deliberate shot with the pass,
+      // so the shot hook doesn't hang on a loose ball happening to sit in front of us.
+      const onBall = await page.textContent('#rState').then(t => t === 'dribbling').catch(() => false);
+      if(onBall && (++onBallTurns % 2)){
+        await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(300);
+        await page.keyboard.up('k').catch(() => {});
+      } else {
+        await page.keyboard.press('j').catch(() => {});  await page.waitForTimeout(130);
+        await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(240);
+        await page.keyboard.up('k').catch(() => {});
+      }
       await page.keyboard.up(fwd).catch(() => {});
     }
     for(const k of ['d', 'w', 's', 'a', 'k']) await page.keyboard.up(k).catch(() => {});
