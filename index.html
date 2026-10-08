@@ -783,7 +783,7 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=69;
+  const SETTINGS_V=70;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, trap window 0.10s; 10 = reach 45, window 0.20s. A bigger reach meets the ball sooner and a longer window forgives early presses (late ones always fall off fast). Also the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
@@ -826,7 +826,7 @@
     strengthG: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — your team (1–10)',hint:'Your team strength stat (baseline). 1 = 0.1 (weak, easily shoved); 10 = 1.0 (dominant). Compare against the opponent.'},
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
-    aiTouch:  {val:1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" a hair early with human-like error that also grows for poor ball control and under pressure: 1 = default spread (most touches clean, roughly one in five loose or heavy, the odd ball let run), 0 = perfect every time, 2+ = scrappy.'},
+    aiTouch:  {val:1.4, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.4 = default (a real mix of clean, loose and heavy touches, and the odd ball let run), 2+ = scrappy.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
     trapSweet:{val:-30,min:-120,max:40,step:5,label:'Trap: sweet spot (ms)',hint:'When the perfect press lands, measured from the moment the ball reaches your reach ring. -30 = a hair before it arrives; 0 = exactly as it arrives.'},
@@ -836,6 +836,7 @@
     trapKeepBad:{val:0.70,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
+    gatherR:  {val:28,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, and the ball (or any dead ball) is yours once it is back inside it, measured from your middle. Your trap reach (Ball control) only decides where you can first meet the ball, so a big reach never sends a touch further away.'},
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
@@ -1000,6 +1001,7 @@
         if(v<63){ if(P.shotSelection)P.shotSelection.val=0.5; if(P.decisionSpeed)P.decisionSpeed.val=0.5; if(P.offBallRuns)P.offBallRuns.val=0.5; if(P.supportAngles)P.supportAngles.val=0.5; if(P.markingTight)P.markingTight.val=0.5; if(P.pressTrigger)P.pressTrigger.val=0.5; if(P.tackleTiming)P.tackleTiming.val=0.5; if(P.laneCutting)P.laneCutting.val=0.5; }
         if(v<64){ ['shotSelection','decisionSpeed','offBallRuns','supportAngles','markingTight','pressTrigger','tackleTiming','laneCutting'].forEach(k=>{if(P[k])P[k].val=1.0;}); }
         if(v<68){ P.knockOn.val=120; }   // knock-on touch dialled right down (1500 caused far-fling dribble touches)
+        if(v<70){ P.aiTouch.val=1.4; }   // AI first touches are scrappier by default
         if(o.__fG&&FORMS[o.__fG])myForm=o.__fG;
         if(o.__fR&&FORMS[o.__fR])rForm=o.__fR;
         if(o.__rdtac)TAC.R.def=o.__rdtac;
@@ -1041,7 +1043,7 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','firstTouchAcc'],
-    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','aiTouch']
+    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','aiTouch']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -1934,7 +1936,7 @@
   }
   // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
-    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',aiTouch:'AI timing error'};
+    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'AI timing error'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
     trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
@@ -1944,6 +1946,7 @@
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
+    gatherR:'Same for everyone: a trap comes off you at this ring (the inner one), and the ball is yours once it\'s back inside it. Your reach only decides where you first meet it.',
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.'};
   function labDialTxt(k){
     const v=P[k].val;
@@ -1951,6 +1954,7 @@
     if(k==='trapKeepGood'||k==='trapKeepBad') return Math.round(v*100)+'%';
     if(k==='trapWin'||k==='trapPop') return v.toFixed(2)+'×';
     if(k==='trapLock') return v.toFixed(2)+' s';
+    if(k==='gatherR') return v+' (reach '+Math.round(controlROf({stats:{}}))+')';
     if(k==='ballControl'){ const pr={stats:{}}; return v.toFixed(1)+' · ring '+Math.round(controlROf(pr))+' · '+Math.round(trapWindowOf(pr)*1000)+' ms'; }
     return v.toFixed(2);
   }
@@ -1998,6 +2002,11 @@
   // on the pitch: the AI receiver's reach ring, your mark, and the last touch's in/out arrows
   function labDrawPitch(){
     const rc=labRecv();
+    if(ball.ownedBy!==rc){                                 // the gather radius: a trapped ball is yours once it's in here
+      ctx.beginPath();
+      for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/16){ const s=proj(rc.x+Math.cos(a)*P.gatherR.val,rc.y+Math.sin(a)*P.gatherR.val); a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y); }
+      ctx.setLineDash([2,4]); ctx.strokeStyle='rgba(223,230,212,.35)'; ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+    }
     if(rc!==controlled){
       ctx.beginPath();
       for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/20){ const s=proj(rc.x+Math.cos(a)*controlROf(rc),rc.y+Math.sin(a)*controlROf(rc)); a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y); }
@@ -6163,6 +6172,11 @@
   }
   function trapTouch(p,s,damp,e){
     const g=touchGeom(p), sp=g.sp, inZ=ball.z;
+    // Your reach (Ball control) is only where you can first meet the ball: the touch itself comes off
+    // the gather radius -- the same size for everyone -- so a bigger reach never sends it further
+    // away. (A defender stretching to cut a pass out still pokes it from where he met it.)
+    if(!damp){ const gp=dist(p,ball), cd=P.gatherR.val;
+      if(gp>cd){ ball.x=p.x+(ball.x-p.x)/gp*cd; ball.y=p.y+(ball.y-p.y)/gp*cd; } }
     const lateBy=e!=null?e-trapSweet():0;
     const lt=lateBy>0?clamp(lateBy/(trapWindowOf(p)*P.trapLate.val),0,1):0, late=lt*lt;   // a hair late barely shows; heavy-late goes past
     const th0=Math.asin(g.u), side=g.u>0.02?1:g.u<-0.02?-1:(Math.random()<0.5?-1:1);
@@ -6174,7 +6188,7 @@
     ball.z=Math.max(ball.z,1);
     endCurve();
     ball.cushBy=null; ball.lastTouch=p.team;
-    ball.dribbler=p; ball.dribbleGrace=0.85;                     // still your ball: run onto it to take it
+    ball.dribbler=p; ball.dribbleGrace=0.85; ball.fromTrap=true;   // still your ball: get to it (the gather radius) to take it
     p.noTouchT=0.12+0.2*(1-s);
     if(p===controlled){
       lastGrade=trapGrade(s);
@@ -6202,6 +6216,15 @@
         if(nearOppBox)continue;
       }
       const gap=dist(p,ball);
+      // GATHER: a ball that's yours, or a dead one, is simply collected once it's close enough. A
+      // trapped ball has to come to your feet (the gather radius) -- not just into your trap reach;
+      // a dribble knock-on re-gathers anywhere in your reach, as it always has.
+      const mine=ball.dribbler===p&&ball.dribbleGrace>0;
+      if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<(mine&&!ball.fromTrap?controlROf(p)+ball.r:P.gatherR.val)){
+        if(checkOffsideTouch(p))return;
+        endCurve(); own(p,p.r+ball.r+5);
+        return;
+      }
       const intercept=!!(passerTeam&&p.team!==passerTeam);
       let myR=intercept
         ? winReachR(p)*(0.45+0.55*interceptReachOf(p))    // defender intercept reach (Interceptions stat)
@@ -6215,14 +6238,7 @@
       }
       if(gap>=myR+ball.r){ p.reachT=-1; continue; }
       if(!(p.reachT>=0)){ p.reachT=simNow; p.trapRolled=false; if(LAB.on) labOnArrive(p,false); }   // the ball has just come into reach
-
-      // your own knock-on or trap: run onto it and it's yours. A stopped ball right at your feet is
-      // picked up too -- but only there: a slow pass you didn't trap rolls on past your reach.
-      if((ball.dribbler===p&&ball.dribbleGrace>0)||(ballSp<DEAD_BALL&&ball.z<6&&gap<p.r+ball.r+6)){
-        if(checkOffsideTouch(p))return;
-        endCurve(); own(p,p.r+ball.r+5);
-        return;
-      }
+      if(mine) continue;                                   // your own touch, not at your feet yet: go and get it
       let s,e;
       if(p===controlled){
         if(trapping<=0)continue;                           // no press, no touch: it runs past you
@@ -6244,7 +6260,7 @@
     const wasOwner=ball.ownedBy===p;
     const prevTeam=ball.lastTouch;
     ball.ownedBy=p;
-    ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;
+    ball.dribbler=null;ball.dribbleGrace=0;ball.fromTrap=false;ball.intendedRcv=null;
     if(!wasOwner){ p.lastPasser=(ball.passerRef&&ball.passerRef.team===p.team&&ball.passerRef!==p)?ball.passerRef:null; p.lastPasserT=p.lastPasser?1.6:0;
       if(p===controlled) p.passLockT=(P.passLock?P.passLock.val:0.25); }   // touch: a tap right after receiving means TRAP, never pass
     if(!wasOwner) meOnReceive(p, ball.passerRef);
@@ -6335,6 +6351,7 @@
         p.noTouchT=0.0;
         ball.dribbler=p;              // it's still "your" touch...
         ball.dribbleGrace=0.85;       // ...for a short window, to run onto
+        ball.fromTrap=false;          // (a knock-on re-gathers anywhere in your reach)
         p.stepPhase=0;
         return;
       }

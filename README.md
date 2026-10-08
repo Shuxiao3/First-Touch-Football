@@ -37,6 +37,7 @@ and hold-to-CROSS buttons sit alongside it.
 A ball machine serves at you (or at an AI receiver) and the lab shows, for every ball:
 
 - a **timing meter**: the trap window drawn around the moment the ball reaches your reach ring
+  (the dashed ring; the dotted one inside it is the gather radius)
   (perfect / clean / loose / heavy zones), where each of your presses landed, and dots for
   recent balls. With **GUIDE** on, a cursor shows the ball approaching in real time.
 - a **result line**: the grade, how many ms early or late you were, pace in and out, which way
@@ -56,7 +57,7 @@ The chips across the top set the serve. Each has a desktop shortcut:
 | RECEIVER | `C` | You, or an AI teammate (kept on its own tally) |
 | GUIDE | `G` | Show or hide the approach cursor |
 | ▶ SERVE | `R` | Serve a ball now |
-| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, AI timing error |
+| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, gather radius, AI timing error |
 | clear | `X` | Reset the tally |
 
 The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
@@ -79,8 +80,11 @@ goes back to the start menu.
   slightly up and back the way it came; stand off its line and it glances away from the side
   you're on. Timing sets how much pace the bounce keeps (never more than it arrived with). A
   late touch catches the ball as it's already going by, so it glances on past you rather than
-  back, and an untrapped ball runs past you. Computer players trap with a human-like spread of
-  error, so their first touch varies too. Every number in the trap is a dial; see
+  back, and an untrapped ball runs past you. Two radii: your **reach** (from Ball control) is
+  where you can first meet the ball and when the timing is judged; the **gather radius** is the
+  same for everyone — the touch comes off you there, and the ball is yours once it's back inside
+  it — so a big reach never sends a touch further away. Computer players trap with a human-like
+  spread of error, so their first touch varies too. Every number in the trap is a dial; see
   [Trap Lab](#trap-lab).
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back

@@ -98,6 +98,20 @@ let r = await serveAndPress(-0.035);
 ok(/PERFECT/.test(r), 'a press ~35 ms early is PERFECT');
 ok(/kept 1\d%/.test(r), 'a perfect touch keeps about 12% of the pace');
 ok(/straight back/.test(r), 'square on, it comes straight back');
+ok(/never settled/.test(r), 'stand still and it stays just outside the gather radius');
+
+{ // trap it, then step onto it: it's yours once it's back inside the gather radius
+  const n = await balls();
+  await page.keyboard.press('0'); await page.waitForTimeout(150);
+  await page.keyboard.press('r');
+  await pressAt(-0.035);
+  await page.waitForTimeout(400);
+  await page.keyboard.down('a'); await page.waitForTimeout(1500); await page.keyboard.up('a');
+  r = await nextResult(n);
+  info('stepped onto it → ' + r);
+  ok(/settled in/.test(r), 'step onto a trapped ball and you gather it');
+  await page.keyboard.press('0'); await page.waitForTimeout(150);
+}
 
 r = await serveAndPress(0.045);
 ok(/LOOSE|HEAVY/.test(r) && /late/.test(r), 'a press ~45 ms late is loose/heavy and reads "late"');
@@ -130,7 +144,7 @@ ok(/perfect|clean|loose|heavy/.test(aiTally), 'the AI traps balls with graded to
 // ---- tune drawer ----
 await chip('tune');
 ok(await visible('#labTune'), 'TUNE opens the drawer');
-ok((await page.locator('#labDials input[type=range]').count()) === 9, 'nine trap dials in the drawer');
+ok((await page.locator('#labDials input[type=range]').count()) === 10, 'ten trap dials in the drawer');
 await page.evaluate(() => { const s = document.querySelector('#labDials [data-lk="trapWin"]'); s.value = 2; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(100);
 ok(/window -300 to/.test(await text('#labWinTxt')), 'doubling the window widens the meter: ' + await text('#labWinTxt'));
