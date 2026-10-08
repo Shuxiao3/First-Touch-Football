@@ -31,6 +31,37 @@ Drag on the left half to move (double-tap to sprint). The big right-hand button 
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it.
 
+## Trap Lab
+
+**TRAP LAB** on the start menu is a practice session for testing and tuning the first touch.
+A ball machine serves at you (or at an AI receiver) and the lab shows, for every ball:
+
+- a **timing meter**: the trap window drawn around the moment the ball reaches your reach ring
+  (perfect / clean / loose / heavy zones), where each of your presses landed, and dots for
+  recent balls. With **GUIDE** on, a cursor shows the ball approaching in real time.
+- a **result line**: the grade, how many ms early or late you were, pace in and out, which way
+  the ball came off you and how far you were off its line, and how long it took to settle —
+  or why it ran past (no press, pressed too early, locked out, pressed after it had gone).
+- a **tally** of grades, balls that ran past, average error, and how many you settled.
+
+The chips across the top set the serve. Each has a desktop shortcut:
+
+| Chip | Key | What it does |
+| --- | --- | --- |
+| SERVE | `1`–`5` | Rolled, bouncing, thigh-high, chest-high, or a mix |
+| PACE | `[` `]` | The ball's speed as it reaches you (the machine works out the launch) |
+| LINE | `,` `.` | Shift the ball's line off you, to test the glancing bounce |
+| NEXT | `Q` | Serve automatically, or only on cue |
+| TIME | `Z` | 1×, ½× or ¼× speed |
+| RECEIVER | `C` | You, or an AI teammate (kept on its own tally) |
+| GUIDE | `G` | Show or hide the approach cursor |
+| ▶ SERVE | `R` | Serve a ball now |
+| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, AI timing error |
+| clear | `X` | Reset the tally |
+
+The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
+goes back to the start menu.
+
 ## What's in the engine
 
 - **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
@@ -48,7 +79,7 @@ and hold-to-CROSS buttons sit alongside it.
   slightly up and back the way it came; stand off its line and it glances away from the side
   you're on. Timing sets how much pace the bounce keeps (never more than it arrived with), and
   an untrapped ball runs past you. Computer players trap with a human-like spread of error, so
-  their first touch varies too (tunable with the AI first-touch error dial).
+  their first touch varies too. Every number in the trap is a dial; see [Trap Lab](#trap-lab).
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
   into the same creation trees. Kit trim, boots and hair carry onto the pitch.
@@ -68,9 +99,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–490 | Styles |
-| 492–693 | Markup — canvas, menus, career hub, tuning panel |
-| 694–8726 | Engine — sim, AI, rendering, career, UI |
+| 14–540 | Styles |
+| 542–771 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
+| 772–9204 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
@@ -107,5 +138,5 @@ python3 tools/sprites/make_player_sheet.py --embed
 ## Tests
 
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
-creation through to the House, a played career match, and a five-match season. They need
+creation through to the House, a played career match, a five-match season, and the Trap Lab. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

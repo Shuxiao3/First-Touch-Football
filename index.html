@@ -487,6 +487,56 @@
   #bldgPanel .bpSub{ color:#7f9a6f; font-size:10px; text-align:center; letter-spacing:2px; margin-bottom:16px; text-transform:uppercase; }
   #bldgPanel .bpBody{ color:#9bb88a; font-size:13px; line-height:1.7; background:rgba(157,255,60,.04); border:1px solid #2a3a22; border-radius:10px; padding:15px 18px; margin-bottom:16px; }
   #bldgPanel .bpBody b{ color:#9dff3c; }
+  /* ===== TRAP LAB ===== */
+  .labUI{display:none;}
+  #stageWrap.labMode #labHud{display:flex;}
+  #stageWrap.labMode.labTuneOpen #labTune{display:block;}
+  #stageWrap.menuMode .labUI{display:none !important;}
+  #stageWrap.labMode #rScore, #stageWrap.labMode #rDir{display:none;}
+  #stageWrap.labMode #labExitBtn{display:inline-block;margin-left:0;color:var(--red);}
+  #labHud{position:absolute;top:42px;left:10px;right:10px;z-index:6;flex-direction:column;align-items:center;gap:5px;pointer-events:none;}
+  #stageWrap.labTuneOpen #labHud{right:calc(min(280px, 46%) + 18px);}
+  #labBar{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;pointer-events:auto;}
+  .labChip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.4px;color:var(--ink-dim);background:rgba(8,14,9,.8);
+    border:1px solid var(--edge);border-radius:6px;padding:4px 7px;cursor:pointer;display:inline-flex;align-items:baseline;gap:5px;line-height:1.2;}
+  .labChip i{font-style:normal;font-size:8.5px;letter-spacing:.8px;}
+  .labChip b{color:var(--phosphor);font-weight:600;}
+  .labChip kbd{font-family:inherit;font-size:8px;color:#5c6b55;border:1px solid #2c3a26;border-radius:3px;padding:0 3px;}
+  body.touch .labChip kbd{display:none;}
+  .labChip:hover,.labChip.on{border-color:var(--phosphor);background:rgba(157,255,60,.12);}
+  .labGo{border-color:var(--phosphor-dim);}
+  .labGo.wait{animation:cmdPulse 1s ease-in-out infinite;border-color:var(--phosphor);}
+  #labMeter{width:min(470px,100%);pointer-events:none;margin-top:2px;}
+  .lmTrack{position:relative;height:15px;background:rgba(8,14,9,.85);border:1px solid var(--edge);border-radius:4px;overflow:hidden;}
+  .lmZone{position:absolute;top:0;bottom:0;}
+  .lmZero{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#e9f5ec;}
+  .lmCursor{position:absolute;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 6px #fff;display:none;}
+  .lmTick{position:absolute;top:1px;bottom:1px;width:2px;margin-left:-1px;background:#e9f5ec;}
+  .lmTick.wf{background:#8a9580;}
+  .lmTick.lk{background:#56634f;}
+  .lmTick.hit{top:-1px;bottom:-1px;width:4px;margin-left:-2px;box-shadow:0 0 0 1px rgba(0,0,0,.6);}
+  .lmDots{position:relative;height:6px;margin-top:2px;}
+  .lmDot{position:absolute;top:0;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;}
+  .lmScale{display:flex;justify-content:space-between;gap:8px;font-size:8.5px;color:#7f9a6f;letter-spacing:.6px;margin-top:1px;
+    text-shadow:0 1px 2px #000;}
+  #labResult{font-size:10.5px;line-height:1.45;color:var(--ink);background:rgba(8,14,9,.8);border:1px solid var(--edge);border-radius:6px;
+    padding:3px 9px;text-align:center;max-width:100%;}
+  #labResult b{font-weight:700;letter-spacing:.5px;}
+  #labResult .lsv{color:#7f9a6f;font-size:9.5px;margin-right:2px;}
+  .labTallyRow{display:flex;gap:6px;align-items:baseline;justify-content:center;font-size:9.5px;color:var(--ink-dim);
+    text-shadow:0 1px 2px #000;flex-wrap:wrap;}
+  .labClear{pointer-events:auto;font-family:inherit;font-size:9px;color:#7f9a6f;background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
+  #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow-y:auto;
+    background:rgba(8,14,9,.93);border:1px solid var(--edge);border-radius:8px;padding:9px 12px 12px;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+  .ltHead{display:flex;justify-content:space-between;align-items:center;font-family:'Baskic8','Space Grotesk',sans-serif;font-size:12px;
+    font-weight:700;letter-spacing:1.5px;color:var(--ink);}
+  .ltNote{font-size:9px;color:#7f9a6f;margin:3px 0 8px;}
+  .ltDial{margin-bottom:10px;}
+  .ltDial label{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--ink);margin-bottom:2px;}
+  .ltDial label b{color:var(--phosphor);font-weight:600;white-space:nowrap;}
+  .ltDial input{width:100%;accent-color:#9dff3c;}
+  .ltHint{font-size:9px;line-height:1.35;color:var(--ink-dim);}
+  .ltReset{margin-top:4px;}
 </style>
 </head>
 <body>
@@ -511,6 +561,7 @@
         <button class="smBtn" data-act="continue" data-needsave="1"><span class="mk">▶</span>CONTINUE</button>
         <button class="smBtn" data-act="load" data-needsave="1"><span class="mk">▶</span>LOAD GAME</button>
         <button class="smBtn" data-act="exhibition"><span class="mk">▶</span>EXHIBITION</button>
+        <button class="smBtn" data-act="traplab"><span class="mk">▶</span>TRAP LAB</button>
         <button class="smBtn" data-act="settings"><span class="mk">▶</span>SETTINGS</button>
       </div>
     </div>
@@ -578,13 +629,40 @@
     <div id="dbgText" style="white-space:pre"></div>
   </div>
   <div id="readout">
-    <span class="chip">GRN <b id="sG">0</b> : <b class="r" id="sR">0</b> RED</span>
+    <span class="chip" id="rScore">GRN <b id="sG">0</b> : <b class="r" id="sR">0</b> RED</span>
     <span class="chip" id="rDir" style="color:#9dff3c;font-weight:700">▶</span>
     <span class="chip">⏱ <b id="rClock">0:00</b></span>
     <span class="chip">ball <b id="rBallSpd">0</b></span>
     <span class="chip" id="rState">loose</span>
     <span class="chip" id="touchGrade"></span>
     <button id="menuBtn" class="chip menuChip">☰</button>
+    <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
+  </div>
+  <div id="labHud" class="labUI">
+    <div id="labBar">
+      <button class="labChip" data-lab="serve"><i>SERVE</i><b id="labServeV">ROLLED</b><kbd>1-5</kbd></button>
+      <button class="labChip" data-lab="pace"><i>PACE</i><b id="labPaceV">450</b><kbd>[ ]</kbd></button>
+      <button class="labChip" data-lab="line"><i>LINE</i><b id="labLineV">AT YOU</b><kbd>, .</kbd></button>
+      <button class="labChip" data-lab="auto"><i>NEXT</i><b id="labAutoV">AUTO</b><kbd>Q</kbd></button>
+      <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b><kbd>Z</kbd></button>
+      <button class="labChip" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b><kbd>C</kbd></button>
+      <button class="labChip" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b><kbd>G</kbd></button>
+      <button class="labChip labGo" data-lab="go" id="labGoChip"><b>▶ SERVE</b><kbd>R</kbd></button>
+      <button class="labChip" data-lab="tune" id="labTuneChip"><b>⚙ TUNE</b><kbd>T</kbd></button>
+    </div>
+    <div id="labMeter">
+      <div class="lmTrack"><div id="labZonesEl"></div><div id="labTicks"></div><div class="lmCursor" id="labCursor"></div></div>
+      <div class="lmDots" id="labDots"></div>
+      <div class="lmScale"><span>◂ EARLY</span><span id="labWinTxt"></span><span>LATE ▸</span></div>
+    </div>
+    <div id="labResult"></div>
+    <div class="labTallyRow"><span id="labTally"></span><button class="labClear" data-lab="clear" title="Clear the tally (X)">clear</button></div>
+  </div>
+  <div id="labTune" class="labUI">
+    <div class="ltHead"><span>TUNE THE TRAP</span><button class="labChip" data-lab="tune"><b>✕</b></button></div>
+    <div class="ltNote">Changes apply to the next ball, and to matches.</div>
+    <div id="labDials"></div>
+    <button class="labChip ltReset" data-lab="defaults"><b>FACTORY DEFAULTS</b></button>
   </div>
   <div id="pad"><div class="base"></div><div class="stick" id="stick"></div></div>
   <div id="tapRing"></div>
@@ -747,7 +825,16 @@
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
     aiTouch:  {val:1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" a hair early with human-like error that also grows for poor ball control and under pressure: 1 = default spread (most touches clean, roughly one in five loose or heavy, the odd ball let run), 0 = perfect every time, 2+ = scrappy.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
+    // the trap's own numbers (tune them live in the Trap Lab)
+    trapSweet:{val:-30,min:-120,max:40,step:5,label:'Trap: sweet spot (ms)',hint:'When the perfect press lands, measured from the moment the ball reaches your reach ring. -30 = a hair before it arrives; 0 = exactly as it arrives.'},
+    trapWin:  {val:1,min:0.4,max:2.5,step:0.05,label:'Trap: window ×',hint:'Scales the timing window Ball control gives you (0.10 s at 1 up to 0.20 s at 10). Bigger = more forgiving timing for everyone, AI included.'},
+    trapLate: {val:0.6,min:0.2,max:1.5,step:0.05,label:'Trap: late tolerance',hint:'How much room a LATE press gets, as a share of the early side. 0.6 = late presses fall off almost twice as fast as early ones; 1 = both sides equal.'},
+    trapKeepGood:{val:0.12,min:0,max:0.6,step:0.01,label:'Trap: pace kept, perfect',hint:'Share of the ball\'s pace a perfect touch keeps as it comes off you. Lower = it drops dead closer to your feet.'},
+    trapKeepBad:{val:0.70,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
+    trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
+    trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
   };
+  const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
     arcade:  {friction:0.78,ballControl:9,knockOn:340,knockVar:0.25,speed:10,accel:6.8,agility:7,aiThink:0.35,mateThink:0.35,pressTight:0.35,shotPower:3, passAcc:7,curve:8,shotAcc:10, longShots:9, keeperSpd:3,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.7,stamina:8,dribbling:8,composure:8,tackle:6,interceptions:6,crossing:7,heading:7,offIQ:8,defIQ:7},
     balanced:{friction:0.55,ballControl:6,knockOn:480,knockVar:0.35,speed:7,accel:3,agility:5,aiThink:0.45,mateThink:0.45,pressTight:0.45,shotPower:4, passAcc:6,curve:7,shotAcc:8, longShots:7,keeperSpd:4,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.6,stamina:5.5,dribbling:5.5,composure:5.5,tackle:5.5,interceptions:5.5,crossing:5.5,heading:5.5,offIQ:5.5,defIQ:5.5},
@@ -950,7 +1037,8 @@
     shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','keeperSpd'],
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
-    firsttouch:['ballControl','aiTouch','firstTouchAcc']
+    firsttouch:['ballControl','aiTouch','firstTouchAcc'],
+    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','aiTouch']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -1210,6 +1298,8 @@
   addEventListener('keydown',e=>{
     if(teOpen) return;
     if(SCREEN!=='match'){ startMenuKey(e); return; }
+    if(e.target&&e.target.tagName==='INPUT'&&e.target.closest('.labUI')) return;   // a focused lab slider keeps its arrow keys
+    if(LAB.on&&!e.repeat&&!pauseOpen&&!settingsOpen&&!menuOpen&&labKey(e.code)){ e.preventDefault(); return; }
     if(!e.repeat){
       if(e.code==='Space'){pressTrap();trapHeld=true;}
       if(e.code==='KeyF')feed();
@@ -1273,8 +1363,10 @@
     stick.style.transform=`translate(${pdx/l*c}px,${pdy/l*c}px)`;}
   const wrapEl=document.getElementById('stageWrap');
   const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !matchOver;
+  const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip'));   // on-screen buttons (☰, Trap Lab) take taps as clicks
   wrapEl.addEventListener('touchstart',e=>{
     if(!touchLive()) return;                 // menus/hub/full-time: DON'T preventDefault, or iOS never synthesizes their clicks
+    if([...e.changedTouches].some(onLabUI)) return;   // a button or slider: let the browser make the click / drag
     const r=rect();
     for(const t of e.changedTouches){
       if(t.target===btns.kick){
@@ -1316,6 +1408,7 @@
     e.preventDefault();},{passive:false});
   wrapEl.addEventListener('touchmove',e=>{
     if(!touchLive()) return;                 // (also lets the hub panels scroll on a phone)
+    if([...e.changedTouches].some(onLabUI)) return;   // dragging a Trap Lab slider / scrolling its drawer
     for(const t of e.changedTouches) if(t.identifier===padId){pdx=t.clientX-pox;pdy=t.clientY-poy;moveStick();}
     e.preventDefault();},{passive:false});
   function endT(e){for(const t of e.changedTouches){
@@ -1496,7 +1589,9 @@
       ball.ownedBy=null; ball.dribbler=null; ball.cushBy=null; ball.x=f.x; ball.y=f.y; ball.z=6; ball.vx=ball.vy=ball.vz=0;
       practiceT=1.2;
     }
-    lastGrade='PRACTICE: '+practice.toUpperCase(); gradeColor='#ffb43c'; gradeFade=1.4;
+    else if(practice==='traplab') labSetup();           // the Trap Lab (below) places its own people
+    if(practice==='traplab') gradeFade=0;
+    else { lastGrade='PRACTICE: '+practice.toUpperCase(); gradeColor='#ffb43c'; gradeFade=1.4; }
   }
   document.querySelectorAll('[data-prac]').forEach(b=>{
     b.onclick=()=>startPractice(b.getAttribute('data-prac'));
@@ -1505,6 +1600,413 @@
     if(practice) startPractice(practice);   // re-arm the current drill
     else applyFreePlayState();              // otherwise just reset the ball to you
   };
+
+  // ===== TRAP LAB ================================================================================
+  // A practice session for testing and tuning the first touch. A ball machine (a green teammate)
+  // serves at you -- or at an AI receiver -- and the lab shows how early or late each press was
+  // against the moment the ball reached the reach ring, what the touch did to the ball, and a
+  // running tally. The trap's own dials sit in its TUNE drawer, so they can be changed mid-session.
+  const LAB={
+    on:false,
+    serve:'roll', pace:450, line:0, auto:true, slow:1, recv:'you', guide:true, tune:false,
+    spot:{x:FW*0.55,y:YC+170}, dist:380,   // the receiver's mark; the machine stands this far to its left
+    rep:null,        // the ball in play: serve, presses, arrival, touch, outcome
+    last:null,       // the last finished rep (its result stays up until the next one finishes)
+    hist:[],         // recent results for the meter's history dots
+    tally:{you:null,ai:null},
+    nextT:0, fx:null, dirty:true, zoneSig:'', h:1/60
+  };
+  const LAB_SERVES=[['roll','ROLLED'],['bounce','BOUNCING'],['thigh','THIGH HIGH'],['chest','CHEST HIGH'],['mix','MIXED']];
+  const LAB_PACES=[250,350,450,550,700,900];   // the ball's speed as it reaches you
+  const LAB_LINES=[0,12,24,-24,-12,'rnd'];     // + = its line runs above you on screen
+  const LAB_SLOWS=[1,0.5,0.25];
+  const LAB_MIN=-0.35, LAB_MAX=0.20;           // the timing meter's span, in seconds from the ball's arrival
+  function labServeName(t){ const s=LAB_SERVES.find(x=>x[0]===t); return s?s[1]:t; }
+  function labRecv(){ return LAB.recv==='ai' ? (players.find(q=>q.pRole==='labRecv')||controlled) : controlled; }
+  function labServer(){ return players.find(q=>q.pRole==='labServer'); }
+  function labTally(){ const k=LAB.recv==='ai'?'ai':'you';
+    return LAB.tally[k]||(LAB.tally[k]={reps:0,perfect:0,clean:0,loose:0,heavy:0,past:0,other:0,touches:0,settled:0,errSum:0,errN:0}); }
+
+  // Fly a copy of the ball under the game's own rules (gravity, bounce, grass drag below 12)
+  // until it comes into rc's reach: on the ground inside reach + ball, or -- when `air` -- at
+  // thigh/chest height inside 90% of reach. Returns when and how it arrives, or null.
+  function labFly(b,rc,air,maxT){
+    const h=LAB.h, kf=Math.pow(1-P.friction.val,h*3.2), cr=controlROf(rc), rg=cr+ball.r, ra=cr*0.9;   // steps like the game's frames
+    let x=b.x,y=b.y,z=b.z,vx=b.vx,vy=b.vy,vz=b.vz;
+    for(let t=0;t<=maxT;t+=h){
+      const g=Math.hypot(x-rc.x,y-rc.y);
+      if(z<12&&g<rg) return {t,spd:Math.hypot(vx,vy),z,air:false};
+      if(air&&z>=12&&z<=AIR_REACH&&g<ra) return {t,spd:Math.hypot(vx,vy),z,air:true};
+      if(z>0||vz!==0){ vz-=520*h; z+=vz*h; if(z<=0){ z=0; vz=vz<-40?-vz*0.45:0; } }
+      x+=vx*h; y+=vy*h;
+      if(z<12){ vx*=kf; vy*=kf; }
+      if(z===0&&vz===0&&vx*vx+vy*vy<4) return null;   // stopped short
+    }
+    return null;
+  }
+  // Launch speed and lift for a serve of this type that reaches rc at about `pace`.
+  function labSolve(type,pace,st,ax,ay,rc,air){
+    const D=Math.hypot(rc.x-st.x,rc.y-st.y), cr=controlROf(rc);
+    const lift=v0=>{
+      if(type==='roll') return 0;
+      if(type==='bounce'){ const T=Math.max(0.3,(D-cr-ball.r-60)/v0); return 260*T; }   // lands ~60 short and comes up off the bounce
+      const zt=type==='thigh'?18:32, T=Math.max(0.2,(D-cr*0.9)/v0);
+      return (zt+260*T*T)/T;                                                           // still thigh/chest high as it gets to you
+    };
+    const k=3.2*Math.log(1/(1-P.friction.val));
+    let lo=pace*0.5, hi=pace+k*D+400, best=null;
+    for(let i=0;i<24;i++){
+      const v0=(lo+hi)/2, vz=lift(v0);
+      const f=labFly({x:st.x,y:st.y,z:0,vx:ax*v0,vy:ay*v0,vz},rc,air,4);
+      if(f) best={v0,vz,f};
+      if(!f||f.spd<pace) lo=v0; else hi=v0;
+    }
+    if(best) return best;
+    const v0=pace+k*Math.max(0,D-cr-ball.r);              // never reaches the ring (served wide): rolled-ball estimate
+    return {v0,vz:lift(v0),f:null};
+  }
+
+  function labSetup(){
+    LAB.on=true; LAB.rep=null; LAB.fx=null; LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig='';
+    trapping=0; trapCd=0;
+    const mates=grnList().filter(q=>q!==controlled), S=mates[0], A=mates[1];
+    // both receivers read the Ball control dial, so the lab can try any skill level
+    controlled.stats=Object.assign({},controlled.stats,{ballControl:undefined,composure:undefined});
+    if(A){ A.pRole='labRecv'; A.stats=Object.assign({},A.stats,{ballControl:undefined,composure:undefined}); }
+    if(S){ S.pRole='labServer'; S.x=LAB.spot.x-LAB.dist; S.y=LAB.spot.y; S.facing={x:1,y:0}; }
+    let n=0; for(const q of mates){ if(q!==S&&q!==A){ q.x=70; q.y=70+(n++)*36; } }   // everyone else well out of shot
+    redList().forEach((q,i)=>{ q.x=FW-70; q.y=70+i*36; });
+    labPlace();
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.x=S?S.x+14:LAB.spot.x-300; ball.y=LAB.spot.y; ball.z=0; ball.vx=ball.vy=ball.vz=0;
+    document.getElementById('stageWrap').classList.add('labMode');
+    labBuildTune();
+  }
+  function labPlace(){             // put the receiver on the mark (and the other one out of the way)
+    const sp=LAB.spot, A=players.find(q=>q.pRole==='labRecv'), you=controlled;
+    if(LAB.recv==='ai'){
+      if(A){ A.x=sp.x; A.y=sp.y; A.vx=A.vy=0; A.facing={x:-1,y:0}; }
+      you.x=sp.x+40; you.y=sp.y-200; you.vx=you.vy=0; you.facing={x:0,y:1};   // watch from up the pitch
+    } else {
+      you.x=sp.x; you.y=sp.y; you.vx=you.vy=0; you.facing={x:-1,y:0};
+      if(A){ A.x=70; A.y=70+4*36; A.vx=A.vy=0; }
+    }
+  }
+  function labServe(){
+    const rc=labRecv(), S=labServer(); if(!rc||!S) return;
+    if(Math.hypot(rc.x-LAB.spot.x,rc.y-LAB.spot.y)>140) labPlace();   // wandered off chasing a touch: back on the mark
+    S.x=LAB.spot.x-LAB.dist; S.y=LAB.spot.y; S.vx=S.vy=0;
+    gkHold=null; controllingKeeper=null; restartT=0; restartInfo=null; headerT=0;
+    keepers.forEach(k=>{ k.mode='line'; k.holdT=0; });
+    let type=LAB.serve, pace=LAB.pace, line=LAB.line;
+    if(type==='mix'){
+      const pool=rc===controlled?['roll','roll','bounce','thigh','chest']:['roll','roll','bounce'];
+      type=pool[Math.floor(Math.random()*pool.length)];
+      pace=Math.round(pace*(0.75+Math.random()*0.5)/10)*10;
+    }
+    if(line==='rnd') line=Math.round((Math.random()*2-1)*24);
+    let ux=rc.x-S.x, uy=rc.y-S.y; const d0=Math.hypot(ux,uy)||1; ux/=d0; uy/=d0;
+    const st={x:S.x+ux*14,y:S.y+uy*14};
+    const tx=rc.x+uy*line, ty=rc.y-ux*line;                 // the line is offset square to the serve
+    let ax=tx-st.x, ay=ty-st.y; const dd=Math.hypot(ax,ay)||1; ax/=dd; ay/=dd;
+    const L=labSolve(type,pace,st,ax,ay,rc,rc===controlled);
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null;
+    ball.x=st.x; ball.y=st.y; ball.z=0; ball.vx=ax*L.v0; ball.vy=ay*L.v0; ball.vz=L.vz;
+    ball.lastTouch='G'; ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; offsidePass=null; endCurve();
+    S.facing={x:ux,y:uy}; passPose(S);
+    for(const q of players){ q.reachT=-1; q.airReachT=-1; }
+    trapping=0; trapCd=0;                                   // every ball starts with a clean press
+    LAB.rep={t0:simNow,type,pace,line,pred:L.f,recv:rc,ai:rc!==controlled,presses:[],arrive:null,air:false,touch:null,done:false,result:null};
+    LAB.dirty=true;
+  }
+  function labFinish(res){
+    const r=LAB.rep; if(!r||r.done) return;
+    r.done=true; r.result=res; r.endT=simNow;
+    const T=labTally(); T.reps++;
+    if(r.touch){ T.touches++; T[r.touch.grade.toLowerCase()]++; T.errSum+=Math.abs(r.touch.e-trapSweet()); T.errN++; if(res==='settled')T.settled++; }
+    else if(res==='past') T.past++;
+    else T.other++;
+    const e=r.touch?r.touch.e:(r.ai?r.aiMiss:labPressE(r,labLastPress(r)));
+    LAB.hist.unshift({who:LAB.recv,e,grade:r.touch?r.touch.grade:'PAST'}); if(LAB.hist.length>30) LAB.hist.length=30;
+    LAB.last=r; LAB.nextT=res==='settled'?1.0:1.4; LAB.dirty=true;
+  }
+  function labLastPress(r){ for(let i=r.presses.length-1;i>=0;i--) if(!r.presses[i].locked) return r.presses[i]; return null; }
+  function labPressE(r,pr){ return !pr?undefined:(r.arrive!=null?pr.t-r.arrive:pr.est); }
+  // per-frame bookkeeping: call the outcome of the ball in play, then serve the next one
+  function labStep(dt,rdt){
+    LAB.h=LAB.h*0.9+clamp(dt,1/480,1/30)*0.1;             // the sim step, smoothed (the predictor matches it)
+    if(LAB.fx){ LAB.fx.t-=rdt; if(LAB.fx.t<=0) LAB.fx=null; }
+    const r=LAB.rep;
+    if(r&&!r.done){
+      const rc=r.recv, g=dist(rc,ball), owner=ball.ownedBy;
+      const away=(ball.x-rc.x)*ball.vx+(ball.y-rc.y)*ball.vy>0;
+      if(r.touch){
+        r.touchReal=(r.touchReal||0)+rdt;
+        if(owner===rc){ r.collectT=simNow-r.touch.t; labFinish('settled'); }
+        else if(owner) labFinish('lost');
+        else if(simNow-r.touch.t>2.5||r.touchReal>4) labFinish('loose');   // never got to it (slow motion: don't wait forever)
+      }
+      else if(owner===rc) labFinish('settled');                    // a dead-slow ball, just picked up
+      else if(owner) labFinish('lost');                            // someone else got to it first
+      else if(r.arrive!=null){ if(away&&g>controlROf(rc)+ball.r+4) labFinish('past'); }
+      else if(away&&g<220){ r.passZ=ball.z; labFinish('unreached'); }   // went by without coming into reach
+      else if(simNow-r.t0>5) labFinish('short');
+    }
+    if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) labServe(); }
+  }
+  // hooks from the trap code
+  function labOnPress(locked){
+    const r=LAB.rep; if(!r||r.ai) return;
+    if(r.done){ if(r.result==='past'&&r.latePress==null&&simNow-r.endT<0.6){ r.latePress=simNow-r.arrive; LAB.dirty=true; } return; }
+    let est=null;
+    if(r.arrive==null){ const f=labFly(ball,r.recv,true,2.5); if(f) est=-f.t; }   // where it sits before the ball has arrived
+    r.presses.push({t:simNow,locked,est}); LAB.dirty=true;
+  }
+  function labOnArrive(p,air){
+    const r=LAB.rep; if(!r||r.done||p!==r.recv||r.arrive!=null) return;
+    r.arrive=simNow; r.air=air; r.inSpd=Math.hypot(ball.vx,ball.vy); r.inZ=ball.z; LAB.dirty=true;
+  }
+  function labOnTouch(p,s,e,o){
+    const r=LAB.rep; if(!r||r.done||p!==r.recv||r.touch) return;
+    const out=Math.hypot(ball.vx,ball.vy), ox=out>0.01?ball.vx/out:-o.dx, oy=out>0.01?ball.vy/out:-o.dy;
+    const ang=Math.atan2(-o.dx*oy+o.dy*ox, -o.dx*ox-o.dy*oy);    // the bounce against straight back the way it came
+    r.touch={t:simNow,s,e,grade:trapGrade(s),inSpd:o.sp,outSpd:out,keep:o.keep,off:o.u*(controlROf(p)+ball.r),ang,pop:ball.vz,z:o.z,outDir:{x:ox,y:oy}};
+    const col=s>0.55?'157,255,60':s>0.3?'255,180,60':'255,90,77';
+    LAB.fx={x:ball.x,y:ball.y,z:Math.max(0,o.z),inDir:{x:o.dx,y:o.dy},outDir:{x:ox,y:oy},len:clamp(out*0.35,18,120),col,t:1.8};
+    LAB.dirty=true;
+  }
+  function labOnAiMiss(p,e){ const r=LAB.rep; if(r&&!r.done&&p===r.recv){ r.aiMiss=e; LAB.dirty=true; } }
+  function labOnWhiff(){ const r=LAB.rep; if(!r||r.done||r.ai) return; const pr=labLastPress(r); if(pr) pr.whiff=true; LAB.dirty=true; }
+
+  function labSetRecv(m){ if(LAB.recv===m) return; LAB.recv=m; LAB.rep=null; LAB.fx=null; labPlace(); LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig=''; }
+  function labClear(){ LAB.tally[LAB.recv==='ai'?'ai':'you']=null; LAB.hist=LAB.hist.filter(h=>h.who!==LAB.recv); LAB.last=null; LAB.dirty=true; }
+  function labTune(open){
+    LAB.tune=!!open; document.getElementById('stageWrap').classList.toggle('labTuneOpen',LAB.tune);
+    if(LAB.tune) labSyncTune(); LAB.dirty=true;
+  }
+  function labOff(){
+    LAB.on=false; LAB.rep=null; LAB.last=null; LAB.fx=null;
+    labTune(false);
+    document.getElementById('stageWrap').classList.remove('labMode');
+  }
+  // desktop shortcuts while in the lab (none of them clash with play: WASD/arrows, J K L, SPACE)
+  function labKey(code){
+    switch(code){
+      case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5':
+        LAB.serve=LAB_SERVES[+code.slice(5)-1][0]; break;
+      case 'BracketLeft':  LAB.pace=Math.max(150,LAB.pace-50); break;
+      case 'BracketRight': LAB.pace=Math.min(1200,LAB.pace+50); break;
+      case 'Comma':  LAB.line=clamp((LAB.line==='rnd'?0:LAB.line)-6,-42,42); break;   // line lower on screen
+      case 'Period': LAB.line=clamp((LAB.line==='rnd'?0:LAB.line)+6,-42,42); break;   // line higher on screen
+      case 'KeyQ': LAB.auto=!LAB.auto; LAB.nextT=0.6; break;
+      case 'KeyZ': LAB.slow=LAB_SLOWS[(LAB_SLOWS.indexOf(LAB.slow)+1)%LAB_SLOWS.length]; break;
+      case 'KeyC': labSetRecv(LAB.recv==='ai'?'you':'ai'); break;
+      case 'KeyG': LAB.guide=!LAB.guide; break;
+      case 'KeyR': labServe(); break;
+      case 'KeyT': labTune(!LAB.tune); break;
+      case 'KeyX': labClear(); break;
+      default: return false;
+    }
+    LAB.dirty=true; return true;
+  }
+  function labChip(act){
+    const nextOf=(arr,v)=>arr[(arr.indexOf(v)+1)%arr.length];
+    if(act==='serve') LAB.serve=nextOf(LAB_SERVES.map(s=>s[0]),LAB.serve);
+    else if(act==='pace'){ const i=LAB_PACES.findIndex(v=>v>LAB.pace); LAB.pace=LAB_PACES[i<0?0:i]; }
+    else if(act==='line'){ const i=LAB_LINES.indexOf(LAB.line); LAB.line=LAB_LINES[i<0?0:(i+1)%LAB_LINES.length]; }
+    else if(act==='auto'){ LAB.auto=!LAB.auto; LAB.nextT=0.6; }
+    else if(act==='slow') LAB.slow=nextOf(LAB_SLOWS,LAB.slow);
+    else if(act==='recv') labSetRecv(LAB.recv==='ai'?'you':'ai');
+    else if(act==='guide') LAB.guide=!LAB.guide;
+    else if(act==='go') labServe();
+    else if(act==='tune') labTune(!LAB.tune);
+    else if(act==='clear') labClear();
+    else if(act==='defaults'){ for(const k of PRACTICE_DIALS.traplab) labSetDial(k,DIAL_DEFAULT[k]); }
+    else if(act==='exit'){ resumable=false; newMatch(); showStartMenu(); return; }
+    LAB.dirty=true;
+  }
+
+  // ----- lab HUD (DOM, over the top of the pitch) -----
+  const labEl={};
+  const LAB_COL={PERFECT:'#9dff3c',CLEAN:'#c8f58a',LOOSE:'#ffb43c',HEAVY:'#ff5a4d',PAST:'#8a9580'};
+  const labPct=e=>clamp((e-LAB_MIN)/(LAB_MAX-LAB_MIN),0,1)*100;
+  function labMs(e){ const v=Math.round(e*1000); return v===0?'right on time':Math.abs(v)+' ms '+(v<0?'early':'late'); }
+  function labArrow(x,y){ const i=Math.round(Math.atan2(y,x)/(Math.PI/4)); return ['→','↘','↓','↙','←','↖','↑','↗'][(i+8)%8]; }
+  function labLineTxt(v){ return v==='rnd'?'RANDOM':v===0?'AT YOU':(v>0?'↑':'↓')+Math.abs(v); }
+  function labZones(rc){
+    const win=trapWindowOf(rc), sw=trapSweet(), L=win*P.trapLate.val;
+    const z=[[LAB_MIN,-win,'rgba(138,149,128,.16)'],                // so early the window shuts before it arrives
+      [-win,sw-0.7*win,'rgba(255,90,77,.6)'],[sw-0.7*win,sw-0.45*win,'rgba(255,180,60,.65)'],
+      [sw-0.45*win,sw-0.2*win,'rgba(157,255,60,.42)'],[sw-0.2*win,sw+0.2*L,'rgba(157,255,60,.95)'],
+      [sw+0.2*L,sw+0.45*L,'rgba(157,255,60,.42)'],[sw+0.45*L,sw+0.7*L,'rgba(255,180,60,.65)'],
+      [sw+0.7*L,sw+L,'rgba(255,90,77,.6)'],[sw+L,LAB_MAX,'rgba(255,90,77,.18)']];   // later still: a heavy touch while it's on you
+    return z.map(([a,b,c],i)=>[i>0&&i<5?Math.max(a,-win):a,b,c]).filter(([a,b])=>b>a);
+  }
+  function labInitHud(){
+    for(const id of ['labZonesEl','labTicks','labDots','labCursor','labResult','labTally','labWinTxt','labServeV','labPaceV','labLineV','labAutoV','labSlowV','labRecvV','labGuideV','labGoChip','labTuneChip'])
+      labEl[id]=document.getElementById(id);
+  }
+  function labHud(){
+    if(!labEl.labCursor) labInitHud();
+    const rc=labRecv(), r=LAB.rep;
+    const win=trapWindowOf(rc), sig=win.toFixed(4)+'|'+P.trapSweet.val+'|'+P.trapLate.val;
+    if(sig!==LAB.zoneSig){
+      LAB.zoneSig=sig;
+      labEl.labZonesEl.innerHTML=labZones(rc).map(([a,b,c])=>`<div class="lmZone" style="left:${labPct(a)}%;width:${labPct(b)-labPct(a)}%;background:${c}"></div>`).join('')
+        +`<div class="lmZero" style="left:${labPct(0)}%"></div>`;
+      const sw=trapSweet(), L=win*P.trapLate.val, ms=v=>(v>0?'+':'')+Math.round(v*1000);
+      labEl.labWinTxt.textContent=`window ${ms(-win)} to ${ms(sw+L)} ms · perfect ${ms(sw-0.2*win)} to ${ms(sw+0.2*L)}`;
+    }
+    // the guide: where "now" sits against the ball's arrival
+    let cur=null;
+    if(LAB.guide&&r&&!r.done&&!r.touch){
+      if(r.arrive!=null) cur=simNow-r.arrive;
+      else { const f=labFly(ball,rc,rc===controlled,-LAB_MIN+0.02); if(f) cur=-f.t; }
+    }
+    if(cur!=null&&cur<=LAB_MAX){ labEl.labCursor.style.display='block'; labEl.labCursor.style.left=labPct(cur)+'%'; }
+    else labEl.labCursor.style.display='none';
+    if(!LAB.dirty) return;
+    LAB.dirty=false;
+    labEl.labServeV.textContent=labServeName(LAB.serve);
+    labEl.labPaceV.textContent=LAB.pace;
+    labEl.labLineV.textContent=labLineTxt(LAB.line);
+    labEl.labAutoV.textContent=LAB.auto?'AUTO':'ON CUE';
+    labEl.labSlowV.textContent=LAB.slow===1?'1×':LAB.slow===0.5?'½×':'¼×';
+    labEl.labRecvV.textContent=LAB.recv==='ai'?'AI':'YOU';
+    labEl.labGuideV.textContent=LAB.guide?'ON':'OFF';
+    labEl.labTuneChip.classList.toggle('on',LAB.tune);
+    labEl.labGoChip.classList.toggle('wait',!LAB.auto&&(!r||r.done));
+    // ticks: this ball's presses (and its touch), plus dots for recent balls
+    let t='';
+    if(r&&!r.ai){
+      for(const pr of r.presses){ const e=labPressE(r,pr); if(e==null) continue;
+        t+=`<div class="lmTick${pr.locked?' lk':pr.whiff?' wf':''}" style="left:${labPct(e)}%"></div>`; }
+    }
+    const tt=r&&r.touch?r.touch:(LAB.last&&LAB.last.touch&&(!r||r.done)?LAB.last.touch:null);
+    if(tt) t+=`<div class="lmTick hit" style="left:${labPct(tt.e)}%;background:${LAB_COL[tt.grade]}"></div>`;
+    labEl.labTicks.innerHTML=t;
+    labEl.labDots.innerHTML=LAB.hist.filter(h=>h.who===LAB.recv&&h.e!=null).slice(0,14)
+      .map((h,i)=>`<div class="lmDot" style="left:${labPct(h.e)}%;background:${LAB_COL[h.grade]};opacity:${(1-i/15).toFixed(2)}"></div>`).join('');
+    const shown=r&&(r.touch||r.done)?r:LAB.last;            // a touch reads out at once; the settle is added when known
+    labEl.labResult.innerHTML=shown?labRepText(shown)
+      :(LAB.recv==='ai'?'Watch the AI receiver. Its timing error comes from Ball control and the AI first-touch error dial.'
+        :(isTouch?'Tap <b>TRAP</b> (or the right side)':'Press <b>SPACE</b>')+' a hair before the ball reaches your ring. Leave it and it runs past.');
+    labEl.labTally.textContent=labTallyText();
+  }
+  function labRepText(r){
+    const head=`<span class="lsv">${labServeName(r.type)} ${r.pace}${r.line?' '+(r.line>0?'↑':'↓')+Math.abs(r.line):''}</span>`;
+    if(r.touch){
+      const T=r.touch, deg=Math.round(Math.abs(T.ang)*180/Math.PI);
+      const defl=deg<6?'straight back':`glanced ${deg}° ${labArrow(T.outDir.x,T.outDir.y)}`;
+      const how=!r.done?'':r.result==='settled'?` · settled in ${r.collectT.toFixed(2)} s`:r.result==='lost'?' · lost it':' · never settled';
+      return `${head} <b style="color:${LAB_COL[T.grade]}">${T.grade}</b> ${labMs(T.e)}${T.z>=12?' (in the air)':''}`
+        +` · kept ${Math.round(T.outSpd/Math.max(1,T.inSpd)*100)}% (${Math.round(T.inSpd)} → ${Math.round(T.outSpd)})`
+        +` · ${defl}${Math.abs(T.off)>=3?` (${Math.round(Math.abs(T.off))} off its line)`:''}${how}`;
+    }
+    if(r.result==='past'){
+      let why;
+      if(r.ai) why=r.aiMiss!=null?`the AI mistimed it, ${labMs(r.aiMiss)}`:'the AI left it';
+      else { const pr=labLastPress(r);
+        if(r.latePress!=null) why=`you pressed ${Math.round(r.latePress*1000)} ms late, after it had gone`;
+        else if(!pr) why=r.presses.length?'locked out: that press came during the lockout':'no press';
+        else why=`you pressed ${labMs(labPressE(r,pr))}: the window shut before it arrived`; }
+      return `${head} <b style="color:${LAB_COL.PAST}">RAN PAST</b> ${why}`;
+    }
+    if(r.result==='unreached') return `${head} <b style="color:${LAB_COL.PAST}">OUT OF REACH</b> `
+      +(r.passZ>AIR_REACH?'over your head':r.ai&&r.passZ>=12?'in the air: AI players only trap a ball on the ground':'wide of the reach ring');
+    if(r.result==='lost') return `${head} <b style="color:${LAB_COL.PAST}">TAKEN</b> someone else got to it first`;
+    return `${head} <b style="color:${LAB_COL.PAST}">NEVER ARRIVED</b>`;
+  }
+  function labTallyText(){
+    const T=labTally();
+    if(!T.reps) return LAB.auto?'no balls yet · the machine serves on its own'+(isTouch?'':' (Q for on cue)')
+                               :'no balls yet · '+(isTouch?'tap':'press R or')+' ▶ SERVE for a ball';
+    const parts=[T.reps+(T.reps===1?' ball':' balls')];
+    for(const k of ['perfect','clean','loose','heavy']) if(T[k]) parts.push(T[k]+' '+k);
+    if(T.past) parts.push(T.past+' ran past');
+    if(T.other) parts.push(T.other+' out of reach');
+    if(T.errN) parts.push('avg '+Math.round(T.errSum/T.errN*1000)+' ms off perfect');
+    if(T.touches) parts.push(T.settled+'/'+T.touches+' settled');
+    return parts.join(' · ');
+  }
+  // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
+  const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
+    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',aiTouch:'AI timing error'};
+  const LAB_DIAL_HINTS={
+    ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
+    trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
+    trapWin:'Stretches or shrinks the whole timing window, for everyone.',
+    trapLate:'How much room a late press gets, as a share of the early side.',
+    trapKeepGood:'Pace a perfect touch keeps. Lower = it dies closer to you.',
+    trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
+    trapPop:'How high the ball hops off the touch.',
+    trapLock:'Dead time after a press that caught nothing, so mashing loses.',
+    aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.'};
+  function labDialTxt(k){
+    const v=P[k].val;
+    if(k==='trapSweet') return (v>0?'+':'')+v+' ms';
+    if(k==='trapKeepGood'||k==='trapKeepBad') return Math.round(v*100)+'%';
+    if(k==='trapWin'||k==='trapPop') return v.toFixed(2)+'×';
+    if(k==='trapLock') return v.toFixed(2)+' s';
+    if(k==='ballControl'){ const pr={stats:{}}; return v.toFixed(1)+' · ring '+Math.round(controlROf(pr))+' · '+Math.round(trapWindowOf(pr)*1000)+' ms'; }
+    return v.toFixed(2);
+  }
+  function labBuildTune(){
+    const box=document.getElementById('labDials'); if(!box||box.childElementCount) return;
+    for(const k of PRACTICE_DIALS.traplab){
+      const d=P[k], row=document.createElement('div'); row.className='ltDial';
+      row.innerHTML=`<label>${LAB_DIAL_NAMES[k]||d.label}<b data-lv="${k}"></b></label>
+        <input type="range" data-lk="${k}" min="${d.min}" max="${d.max}" step="${d.step}" value="${d.val}">
+        <div class="ltHint">${LAB_DIAL_HINTS[k]||d.hint}</div>`;
+      box.appendChild(row);
+    }
+    box.addEventListener('input',e=>{ const k=e.target.dataset&&e.target.dataset.lk; if(k) labSetDial(k,parseFloat(e.target.value),true); });
+    box.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lk) e.target.blur(); });   // hand the keys back to the game
+    labSyncTune();
+  }
+  function labSyncTune(){
+    document.querySelectorAll('#labDials [data-lk]').forEach(s=>{ s.value=P[s.dataset.lk].val; });
+    document.querySelectorAll('#labDials [data-lv]').forEach(b=>{ b.textContent=labDialTxt(b.dataset.lv); });
+  }
+  function labSetDial(k,v,fromLab){       // set a dial from the lab and mirror it in the settings panel
+    const d=P[k]; d.val=clamp(v,d.min,d.max);
+    const s=document.getElementById('s_'+k), vv=document.getElementById('v_'+k);
+    if(s) s.value=d.val;
+    if(vv) vv.textContent=(d.step<1?d.val.toFixed(d.step<0.01?3:2):d.val);
+    if(!fromLab) labSyncTune();
+    else document.querySelectorAll('#labDials [data-lv]').forEach(b=>{ b.textContent=labDialTxt(b.dataset.lv); });
+    saveSettings(); LAB.dirty=true;
+  }
+  dialsEl.addEventListener('input',()=>{ if(LAB.on) labSyncTune(); });   // a change made in Settings shows up here too
+  document.getElementById('labHud').addEventListener('click',e=>{
+    const b=e.target.closest('[data-lab]'); if(!b) return; b.blur(); labChip(b.dataset.lab); });
+  document.getElementById('labExitBtn').addEventListener('click',e=>{ e.currentTarget.blur(); labChip('exit'); });
+  document.getElementById('labTune').addEventListener('click',e=>{
+    const b=e.target.closest('[data-lab]'); if(!b) return; b.blur(); labChip(b.dataset.lab); });
+  // on the pitch: the AI receiver's reach ring, your mark, and the last touch's in/out arrows
+  function labDrawPitch(){
+    const rc=labRecv();
+    if(rc!==controlled){
+      ctx.beginPath();
+      for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/20){ const s=proj(rc.x+Math.cos(a)*controlROf(rc),rc.y+Math.sin(a)*controlROf(rc)); a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y); }
+      ctx.setLineDash([6,6]); ctx.strokeStyle=dist(rc,ball)<controlROf(rc)+ball.r?'rgba(157,255,60,.7)':'rgba(157,255,60,.22)';
+      ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]);
+    }
+    { const sp=LAB.spot, a=proj(sp.x-7,sp.y), b=proj(sp.x+7,sp.y), c=proj(sp.x,sp.y-7), d=proj(sp.x,sp.y+7);
+      ctx.strokeStyle='rgba(223,230,212,.28)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke(); }
+    const fx=LAB.fx; if(!fx) return;
+    const al=clamp(fx.t/0.6,0,1), o=proj(fx.x,fx.y,fx.z);
+    const i0=proj(fx.x-fx.inDir.x*70,fx.y-fx.inDir.y*70,fx.z), o1=proj(fx.x+fx.outDir.x*fx.len,fx.y+fx.outDir.y*fx.len,fx.z);
+    ctx.save(); ctx.lineCap='round';
+    ctx.setLineDash([4,4]); ctx.strokeStyle=`rgba(223,230,212,${0.45*al})`; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(i0.x,i0.y); ctx.lineTo(o.x,o.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle=`rgba(${fx.col},${0.95*al})`; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(o1.x,o1.y); ctx.stroke();
+    const ha=Math.atan2(o1.y-o.y,o1.x-o.x);
+    ctx.beginPath(); ctx.moveTo(o1.x,o1.y); ctx.lineTo(o1.x-Math.cos(ha-0.5)*7,o1.y-Math.sin(ha-0.5)*7);
+    ctx.moveTo(o1.x,o1.y); ctx.lineTo(o1.x-Math.cos(ha+0.5)*7,o1.y-Math.sin(ha+0.5)*7); ctx.stroke();
+    ctx.restore();
+  }
 
   // simple spring-carry of the GHOST ball behind a scripted dribbler (mirrors the real carry feel)
   function ghostCarry(p,dt){
@@ -1612,6 +2114,17 @@
         ball.crossBy=p.team; ball.crossT=1.6;      // mark a live cross so it can be headed / defended
         practiceT=3.4;
       }
+      return true;
+    }
+    if(p.pRole==='labServer'){ p.vx=p.vy=0; p.noTouchT=Math.max(p.noTouchT,0.2); return true; }   // the ball machine never plays it
+    if(p.pRole==='labRecv'){
+      if(LAB.recv!=='ai'){ p.vx=p.vy=0; return true; }
+      const r=LAB.rep;
+      if(ball.ownedBy===p){ p.vx=p.vy=0; return true; }
+      if(r&&r.touch&&!r.done&&!ball.ownedBy){ steerTo(p,ball.x,ball.y,dt,false); return true; }   // go and collect its own touch
+      const dx=LAB.spot.x-p.x, dy=LAB.spot.y-p.y;
+      if(Math.hypot(dx,dy)>8&&!(r&&!r.done)) steerTo(p,LAB.spot.x,LAB.spot.y,dt,false);       // walk back to the mark between balls
+      else { p.vx=p.vy=0; if(r&&!r.done){ const S=labServer(); if(S){ const l=Math.hypot(S.x-p.x,S.y-p.y)||1; p.facing={x:(S.x-p.x)/l,y:(S.y-p.y)/l}; } } }
       return true;
     }
     if(p.pRole==='server'){
@@ -1822,7 +2335,7 @@
   function interceptReachOf(p){ return statLerp(statOf(p,'interceptions',P.interceptions.val), 0.1, 1.0); }
   function interceptDampOf(p){  return statLerp(statOf(p,'interceptions',P.interceptions.val), 0.1, 0.8); }
   function cleanSpdOf(p){    return statLerp(statOf(p,'ballControl',P.ballControl.val),400,700); }
-  function trapWindowOf(p){  return statLerp(statOf(p,'ballControl',P.ballControl.val),0.10,0.20); }
+  function trapWindowOf(p){  return statLerp(statOf(p,'ballControl',P.ballControl.val),0.10,0.20)*P.trapWin.val; }
 
   // STRENGTH stat (1..10) -> physics 0.1..1.0. per-player stats.strength overrides the team dial.
   function strengthOf(p){
@@ -2020,6 +2533,7 @@
 
   // ===== actions =====
   function pressTrap(){
+    if(LAB.on) labOnPress(trapCd>0);
     if(trapCd>0)return;                     // mashing can't hold the window open
     trapping=trapWindowOf(controlled); trapPressT=simNow; trapCd=trapping+0.12;
   }
@@ -5592,14 +6106,16 @@
   // press came to the moment the ball reached you (a hair early is ideal). Don't press and the ball
   // runs past you. AI receivers "press" too, with a human-like spread of error, so their first
   // touch varies with ball control and pressure instead of being perfect every time.
-  const TRAP_SWEET=-0.03;                    // ideal press: this many seconds before the ball arrives
-  const TRAP_KEEP_GOOD=0.12, TRAP_KEEP_BAD=0.70;   // share of the ball's pace a perfect / a botched touch keeps
-  const TRAP_WHIFF_CD=0.35;                  // a press that catches nothing locks the next one out this long
   const DEAD_BALL=25;                        // a ball this slow (grounded, at your feet) is just picked up
+  // the trap's numbers are dials (Trap Lab tunes them live): sweet spot, window scale, late side,
+  // pace kept on a perfect / botched touch, bounce pop, and the lockout after a press that whiffs
+  const trapSweet=()=>P.trapSweet.val/1000;  // ideal press, in seconds from the ball's arrival (negative = early)
+  function trapGrade(s){ return s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY'; }
   function trapTimingScore(p,e){             // e = press time minus arrival (negative = early)
-    const W=trapWindowOf(p), d=e-TRAP_SWEET;
-    return clamp(1-(d<0?-d/W:d/(W*0.6)),0,1);   // early presses fade over the window, late ones faster
+    const W=trapWindowOf(p), d=e-trapSweet();
+    return clamp(1-(d<0?-d/W:d/(W*P.trapLate.val)),0,1);   // early presses fade over the window, late ones faster
   }
+  let aiLastE=0;                             // the last AI press error, kept even when it missed (for the lab)
   function aiTrapTiming(p,intercept){        // an AI press error in seconds, or null when it misses it entirely
     let oppD=1e9;
     for(const o of players)if(o.team!==p.team){const dd=dist(o,p);if(dd<oppD)oppD=dd;}
@@ -5607,14 +6123,15 @@
     let sd=statLerp(statOf(p,'ballControl',P.ballControl.val),0.065,0.028)*(1+0.7*pressure*(1-composureOf(p)))*P.aiTouch.val;
     if(intercept) sd*=1.3-0.5*interceptReachOf(p);   // cutting out someone else's pass is a stretch
     const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
-    const e=TRAP_SWEET+g*sd, W=trapWindowOf(p);
-    return (e<-W||e>TRAP_SWEET+W*0.6)?null:e;
+    const e=trapSweet()+g*sd, W=trapWindowOf(p);
+    aiLastE=e;
+    return (e<-W||e>trapSweet()+W*P.trapLate.val)?null:e;
   }
   // The touch itself is a bounce off a round body. Square on, the ball pops slightly up and back
   // the way it came. Stand off its line and it glances the other way -- left of it and it goes
   // right, wider the further off you are. Timing sets how much pace survives; it never gains any.
-  function trapTouch(p,s,damp){
-    const sp=Math.hypot(ball.vx,ball.vy);
+  function trapTouch(p,s,damp,e){
+    const sp=Math.hypot(ball.vx,ball.vy), inZ=ball.z;
     let dx,dy;
     if(sp>1){ dx=ball.vx/sp; dy=ball.vy/sp; }
     else { const g=dist(p,ball)||1; dx=(p.x-ball.x)/g; dy=(p.y-ball.y)/g; }
@@ -5622,9 +6139,9 @@
     const u=clamp(((p.x-ball.x)*lx+(p.y-ball.y)*ly)/(controlROf(p)+ball.r),-0.97,0.97);   // + = you're left of its line
     const th=Math.asin(u), c2=Math.cos(2*th), s2=Math.sin(2*th);
     const ox=-dx*c2-lx*s2, oy=-dy*c2-ly*s2;                      // reflected off the body
-    const keep=(TRAP_KEEP_BAD+(TRAP_KEEP_GOOD-TRAP_KEEP_BAD)*s)*(1-(damp||0)*0.5);
+    const keep=(P.trapKeepBad.val+(P.trapKeepGood.val-P.trapKeepBad.val)*s)*(1-(damp||0)*0.5);
     ball.vx=ox*sp*keep; ball.vy=oy*sp*keep;
-    const pop=(35+105*(1-s))*clamp(sp/400,0.4,1.2);              // a little hop, bigger off a bad touch
+    const pop=(35+105*(1-s))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
     ball.vz=Math.max(pop, ball.vz<0?-ball.vz*keep*0.6:0);
     ball.z=Math.max(ball.z,1);
     endCurve();
@@ -5632,10 +6149,11 @@
     ball.dribbler=p; ball.dribbleGrace=0.85;                     // still your ball: run onto it to take it
     p.noTouchT=0.12+0.2*(1-s);
     if(p===controlled){
-      lastGrade=s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY';
+      lastGrade=trapGrade(s);
       gradeColor=s>0.55?'#9dff3c':s>0.3?'#ffb43c':'#ff5a4d'; gradeFade=1.3;
       const l=Math.hypot(ball.vx,ball.vy)||1; lastTouchDir={x:ball.vx/l,y:ball.vy/l};
     }
+    if(LAB.on) labOnTouch(p,s,e,{sp,keep,u,dx,dy,z:inZ});
   }
   function attemptCaptures(){
     if(ball.ownedBy||gkHold||ball.z>=12||scoredT>0||offsideT>0||restartT>0){
@@ -5668,7 +6186,7 @@
         myR += winReachR(p)*exposure*1.1;                // up to ~2.1x reach on a loose touch
       }
       if(gap>=myR+ball.r){ p.reachT=-1; continue; }
-      if(!(p.reachT>=0)){ p.reachT=simNow; p.trapRolled=false; }   // the ball has just come into reach
+      if(!(p.reachT>=0)){ p.reachT=simNow; p.trapRolled=false; if(LAB.on) labOnArrive(p,false); }   // the ball has just come into reach
 
       // your own knock-on or trap: run onto it and it's yours. A stopped ball right at your feet is
       // picked up too -- but only there: a slow pass you didn't trap rolls on past your reach.
@@ -5677,20 +6195,20 @@
         endCurve(); own(p,p.r+ball.r+5);
         return;
       }
-      let s;
+      let s,e;
       if(p===controlled){
         if(trapping<=0)continue;                           // no press, no touch: it runs past you
-        s=trapTimingScore(p,trapPressT-p.reachT);
+        e=trapPressT-p.reachT; s=trapTimingScore(p,e);
         trapping=0;
       } else {
         if(p.trapRolled)continue;                          // already had (and missed) this one
         p.trapRolled=true;
-        const e=aiTrapTiming(p,intercept);
-        if(e===null)continue;                              // mistimed entirely: it runs past
+        e=aiTrapTiming(p,intercept);
+        if(e===null){ if(LAB.on) labOnAiMiss(p,aiLastE); continue; }   // mistimed entirely: it runs past
         s=trapTimingScore(p,e);
       }
       if(checkOffsideTouch(p))return;
-      trapTouch(p,s,intercept?interceptDampOf(p):0);
+      trapTouch(p,s,intercept?interceptDampOf(p):0,e);
       return;
     }
   }
@@ -6095,7 +6613,8 @@
   }
   function frame(t){
     try{
-    const dt=Math.min(0.033,(t-last)/1000||0.016);last=t;
+    const rdt=Math.min(0.033,(t-last)/1000||0.016);last=t;
+    const dt=LAB.on?rdt*LAB.slow:rdt;                  // the Trap Lab can run the game in slow motion
     if(menuOpen || pauseOpen || settingsOpen || SCREEN!=='match'){ requestAnimationFrame(frame); return; }
     if(matchOver && careerFix && !careerFix.recorded){ careerFix.recorded=true; const cf=careerFix; setTimeout(()=>finishCareerMatch(cf),1600); }
     nanChk('FRAME-START');
@@ -6163,6 +6682,7 @@
     if(shootHeld&&ball.ownedBy===controlled)shootCharge=clamp(shootCharge+dt/0.57,0,1);
     if(crossHeld&&ball.ownedBy===controlled)crossCharge=clamp(crossCharge+dt/0.7,0,1);
 
+    if(LAB.on) labStep(dt,rdt);
     const hi=humanIntent();
     const frozen = offsideT>0 || scoredT>0 || breakT>0 || matchOver;
     if(!frozen) for(const p of players){
@@ -6277,8 +6797,8 @@
                   &&dist(c,ball)<controlROf(c)*0.9;
       if(!inAir) c.airReachT=-1;
       else {
-        if(!(c.airReachT>=0)) c.airReachT=simNow;        // it has just come into reach
-        if(trapping>0){ trapping=0; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,trapPressT-c.airReachT),0); }
+        if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
+        if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,e),0,e); }
       }
     }
 
@@ -6300,7 +6820,7 @@
     nanChk('contactTackles');
     attemptCaptures();
     nanChk('attemptCaptures');
-    if(trapping>0){ trapping-=dt; if(trapping<=0) trapCd=Math.max(trapCd,TRAP_WHIFF_CD); }   // a press that caught nothing
+    if(trapping>0){ trapping-=dt; if(trapping<=0){ trapCd=Math.max(trapCd,P.trapLock.val); if(LAB.on) labOnWhiff(); } }   // a press that caught nothing
     if(trapCd>0)trapCd-=dt;
     simNow+=dt;
 
@@ -6391,7 +6911,7 @@
     }
 
     const focusX=controllingKeeper?controllingKeeper.x:controlled.x;
-    let camTarget=clamp(focusX*0.35+ball.x*0.65,camMin,camMax);
+    let camTarget=LAB.on?clamp(LAB.spot.x-70,camMin,camMax):clamp(focusX*0.35+ball.x*0.65,camMin,camMax);
     if(!isFinite(camTarget)) camTarget=clamp(isFinite(ball.x)?ball.x:FW/2,camMin,camMax);
     camX+=(camTarget-camX)*Math.min(1,dt*3.2);
     if(!isFinite(camX)) camX=FW/2;        // never let a stray NaN black out the whole pitch
@@ -6404,7 +6924,8 @@
       // football clock: the short real half is scaled to read up to 45:00; 2nd half runs 45:00 -> 90:00
       const _foot=(half===1?0:2700)+clamp(matchClock/halfLenSec(),0,1)*2700;
       const mm=Math.floor(_foot/60), ss=Math.floor(_foot%60);
-      const lbl = practice ? 'PRACTICE'
+      const lbl = practice==='traplab' ? 'TRAP LAB'
+                : practice ? 'PRACTICE'
                 : matchOver ? 'FULL TIME'
                 : ftPending ? 'FULL TIME +ADV'
                 : breakT>0&&half===2 ? 'HALF TIME'
@@ -6445,6 +6966,7 @@
     rs.style.color=label.includes('RED')||label==='goal!'?'#ff5a4d':
                    label==='offside'||restartT>0?'#ffb43c':
                    label.includes('GRN')||label==='dribbling'?'#9dff3c':'#8a9580';
+    if(LAB.on) labHud();
     const tg=document.getElementById('touchGrade');
     if(gradeFade>0){gradeFade-=dt;
       let _arrow='';
@@ -6568,6 +7090,7 @@
     lastGrade='GOAL!';gradeColor='#ffb43c';gradeFade=1.6;
   }
   function newMatch(){
+    labOff(); if(practice){ practice=null; pball.on=false; prioritizeDials(null); }   // matches never run as a drill
     meMatch=null; meLook=null;                    // career play re-arms these straight after
     goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0;
     ball.lastTouchP=null;ball.prevTouchP=null;
@@ -6697,6 +7220,7 @@
       ctx.strokeStyle=dist(controlled,ball)<controlROf(controlled)+ball.r?'rgba(157,255,60,.7)':'rgba(157,255,60,.22)';
       ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
     }
+    if(LAB.on) labDrawPitch();
     if(ball.ownedBy){
       const p=ball.ownedBy;
       ctx.beginPath();
@@ -8501,6 +9025,7 @@
     const has=anySaves();
     document.querySelectorAll('#smItems .smBtn[data-needsave]').forEach(b=>b.classList.toggle('disabled',!has));
     document.getElementById('smResume').style.display=resumable?'block':'none';
+    document.getElementById('smResume').innerHTML='<span class="mk">▶</span>'+(LAB.on?'RESUME TRAP LAB':'RESUME MATCH');
     document.getElementById('smVer').textContent='build '+SETTINGS_V;
     smSel=0; smHighlight();
   }
@@ -8510,6 +9035,7 @@
   function hideStartMenu(){ sm.classList.remove('show'); hideSubs(); }
   function startExhibition(){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); }
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }
+  function startTrapLab(){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); startPractice('traplab'); }
   // ===== CAREER HUB =====
   let matchReturn='menu';   // where Esc/finish returns after a match: 'menu' or 'hub'
   const HUB_BLDGS={
@@ -8662,6 +9188,7 @@
     const act=b.dataset.act;
     if(act==='resume') resumeMatch();
     else if(act==='exhibition'||act==='hubExhibition') startExhibition();
+    else if(act==='traplab') startTrapLab();
     else if(act==='settings'){ openSettings(); }
     else if(act==='continue'){ const k=mostRecentKey(); if(k)openHub(k); }
     else if(act==='load'){ renderSlots('slotList',false); showSub('loadPanel'); }
