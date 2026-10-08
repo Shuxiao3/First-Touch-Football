@@ -19,7 +19,7 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
 | `J` | Call for the ball / pass · head-clear an incoming cross |
-| `K` | Shoot / header / command a teammate to shoot · standing tackle |
+| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |

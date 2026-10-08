@@ -1271,6 +1271,7 @@
   let trapping=0,trapHeld=false,lastGrade='',gradeColor='#9dff3c',gradeFade=0,lastTouchDir=null;
   let trapPressT=-9,trapCd=0,simNow=0;   // when trap was last pressed; re-press lockout; sim clock (s)
   let kickHeld=false,kickCharge=0,shootHeld=false,shootCharge=0;
+  let windUp=null;                    // the shot wind-up you started: when, and which defenders were goal-side then
   let curveArmed=false,curveT=0,curveActive=0;
   let crossHeld=false,crossCharge=0;
   let scoredT=0,scoreG=0,scoreR=0,offsideT=0,offSpot=null;
@@ -2829,6 +2830,8 @@
       return;
     }
     shootHeld=true;
+    const atk=atkOf(controlled.team);
+    windUp={t:simNow, ahead:new Set(players.filter(q=>q.team!==controlled.team&&(q.x-controlled.x)*atk>0))};
   }
   function tryHeaderContact(){
     if(headerT<=0)return;
@@ -3223,6 +3226,18 @@
     const l=Math.hypot(dx,dy)||1;
     return (dx/l*f.x+dy/l*f.y)<-0.15;
   }
+  // WINDING UP A SHOT: you're planted, ball out in front toward goal. A defender who was behind you
+  // when you started the wind-up can't win it -- not even if he catches you up and gets alongside or
+  // ahead while you're slowed. One who was already goal-side can, but only from in front of you
+  // (within 60 degrees of where you're shooting). It lasts as long as a full charge, so holding the
+  // shot on isn't a shield.
+  function windingUp(carrier){ return carrier===controlled&&shootHeld&&ball.ownedBy===carrier&&!!windUp&&simNow-windUp.t<=0.65; }
+  function shotWindUpSafe(carrier,tackler){
+    if(!windingUp(carrier)) return false;
+    if(!windUp.ahead.has(tackler)) return true;
+    const f=carrier.facing, dx=tackler.x-carrier.x, dy=tackler.y-carrier.y, l=Math.hypot(dx,dy)||1;
+    return (dx*f.x+dy*f.y)/l<0.5;
+  }
 
   function winBall(t,carrier){
     ball.ownedBy=null;
@@ -3252,6 +3267,7 @@
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
+        if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
         if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
       }
@@ -3259,7 +3275,7 @@
       // TURN (the ball is swinging around his body toward me), it's a physical duel. If I'm
       // stronger I can step across and nick it; if he's stronger he holds me off and completes
       // the turn. pressTight is irrelevant here — it's body-on-body strength.
-      else if(inBody && p.tackleCd<=0){
+      else if(inBody && p.tackleCd<=0 && !windingUp(carrier)){   // (winding up a shot is planted, not turning)
         const exp=ballExposure(carrier,p);
         const turning = exp>0.30 && exp<0.62;        // mid-rotation: ball coming round the body
         const cSpeed=Math.hypot(carrier.vx,carrier.vy);
@@ -3328,6 +3344,7 @@
         else { const cf=carrier.facing||{x:0,y:0}; fx=cf.x; fy=cf.y; }   // ...or where they face if near-stationary
         const slideAlign = p.slideDx*fx + p.slideDy*fy;   // +1 = lunging the way they're going (from their back), -1 = into their front
         if(isBehind(carrier,p) || slideAlign > 0.30) return;   // behind / back-diagonal -> the slide whiffs
+        if(shotWindUpSafe(carrier,p)) return;                   // winding up a shot: only a slide from in front can win it
       }
       if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2))return;   // Def IQ: flat cut to the exposure a slide needs
       winBall(p,carrier);
