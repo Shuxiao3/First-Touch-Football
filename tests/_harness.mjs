@@ -75,41 +75,50 @@ export const readSave = page =>
 
 // Play the next fixture through to the match report, driving real input the whole way so
 // the tracking hooks actually fire. Standing still exercises none of them.
+let botTurn = 0;   // shot / pass alternation, carried across matches: each kick-off is ours, so a
+                   // season's kick-offs alone give both a shot and a pass
 export async function playMatch(page){
   await page.click('#careerHub [data-hub="play"]');
   await page.waitForTimeout(400);
   let over = false;
-  // Receiving takes a timed trap now -- an untrapped pass runs past you -- so a second hand
-  // keeps pressing Space. The whiff lockout means it only catches some passes, which is plenty.
+  const onBall = () => page.textContent('#rState').then(t => t === 'dribbling').catch(() => false);
+  // Receiving takes a timed trap now -- an untrapped pass runs past you -- so one hand keeps
+  // pressing Space. The whiff lockout means it only catches some passes, which is plenty.
   const trap = (async () => {
     while(!over){ await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(60); }
   })();
-  const input = (async () => {
-    let i = 0, onBallTurns = 0;
+  // Another keeps moving: mostly forward, now and then up the pitch.
+  const move = (async () => {
+    let i = 0;
     while(!over){
-      i++;
-      const fwd = (i % 7 < 5) ? 'd' : 'w';
-      await page.keyboard.down(fwd).catch(() => {});   await page.waitForTimeout(240);
-      // On the ball (the state chip reads "dribbling"), alternate a deliberate shot with the pass,
-      // so the shot hook doesn't hang on a loose ball happening to sit in front of us.
-      const onBall = await page.textContent('#rState').then(t => t === 'dribbling').catch(() => false);
-      if(onBall && (++onBallTurns % 2)){
-        await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(300);
-        await page.keyboard.up('k').catch(() => {});
-      } else {
-        await page.keyboard.press('j').catch(() => {});  await page.waitForTimeout(130);
-        await page.keyboard.down('k').catch(() => {});   await page.waitForTimeout(240);
-        await page.keyboard.up('k').catch(() => {});
-      }
+      const fwd = (++i % 7 < 5) ? 'd' : 'w';
+      await page.keyboard.down(fwd).catch(() => {}); await page.waitForTimeout(600);
       await page.keyboard.up(fwd).catch(() => {});
     }
-    for(const k of ['d', 'w', 's', 'a', 'k']) await page.keyboard.up(k).catch(() => {});
+    for(const k of ['d', 'w']) await page.keyboard.up(k).catch(() => {});
+  })();
+  // And the moment we have the ball (the state chip reads "dribbling") we play it: a shot and a
+  // pass in turn, so both hooks fire. Off the ball, J now and then calls for it.
+  const play = (async () => {
+    let t = 0;
+    while(!over){
+      if(await onBall()){
+        if(botTurn++ % 2 === 0){
+          await page.keyboard.down('k').catch(() => {}); await page.waitForTimeout(300);
+          await page.keyboard.up('k').catch(() => {});
+        } else await page.keyboard.press('j').catch(() => {});
+        await page.waitForTimeout(300);
+      } else {
+        if(++t % 12 === 0) await page.keyboard.press('j').catch(() => {});
+        await page.waitForTimeout(50);
+      }
+    }
+    await page.keyboard.up('k').catch(() => {});
   })();
   await page.waitForFunction(
     () => document.getElementById('matchReport').style.display === 'block',
     null, { timeout: 300000, polling: 500 });
   over = true;
-  await input.catch(() => {});
-  await trap.catch(() => {});
+  await Promise.all([trap, move, play].map(x => x.catch(() => {})));
   return page.textContent('#matchReport');
 }
