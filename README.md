@@ -1,6 +1,6 @@
 # First Touch. Football
 
-A phosphor-green 7v7 arcade football game — one self-contained HTML file, no build step,
+A phosphor-green 6v6 arcade football game (six outfielders and a keeper a side) — one self-contained HTML file, no build step,
 no dependencies. Open `index.html` in a browser and play.
 
 ## Play
@@ -65,7 +65,7 @@ goes back to the start menu.
 
 ## What's in the engine
 
-- **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
+- **6v6 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
   and possession-aware team phases.
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
@@ -107,7 +107,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–543 | Styles |
 | 545–774 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 775–9239 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 775–9316 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
