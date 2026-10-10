@@ -21,7 +21,8 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | `J` | Call for the ball / pass · head-clear an incoming cross |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
-| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate |
+| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it |
+| `L` in your own half | **Clear** it instead: with the ball it's hoofed high and long at once; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
 
@@ -29,7 +30,17 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 
 Drag on the left half to move (double-tap to sprint). The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
-and hold-to-CROSS buttons sit alongside it.
+and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
+like `L` there.
+
+**Swipe to shoot** — with the ball, swipe toward goal on the right half of the screen (off the
+buttons). The swipe's line, cast from your player, picks the spot on the goal line (point past a
+post and it goes for that corner; straight at the middle lets your player pick the better corner,
+as an unaimed `K` shot does). How fast you flick it sets the power. **Bend the swipe to curl the
+shot**: the ball bows out the same way your swipe did and bends back onto the spot, so a curled
+shot still finds its target while starting out away from the keeper. The bigger the bow, the more
+spin, and your Curve stat sets how hard it bends. A tap, or a swipe back toward your own goal,
+doesn't shoot.
 
 ## Trap Lab
 
@@ -105,9 +116,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–543 | Styles |
-| 545–774 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 775–9316 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 14–545 | Styles |
+| 547–777 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
+| 778–9523 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.

@@ -21,6 +21,7 @@ node tests/house-rollover.mjs  # ~10s  — a finished season is filed into caree
 node tests/house-match.mjs     # ~90s  — plays a career match, checks the report and payout
 node tests/house-season.mjs    # ~7min — plays five matches, checks accumulation
 node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit
+node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 ```
 
 Each exits non-zero on failure and prints a PASS/FAIL line per assertion.
