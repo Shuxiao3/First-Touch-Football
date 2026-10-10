@@ -549,8 +549,8 @@
 <header>
   <h1>FIRST TOUCH<span class="dot">.</span> FOOTBALL</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · SPACE trap · K shoot (hold K+Up/Down to curl) / header</span>
-    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · SPACE trap · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
 
@@ -771,7 +771,7 @@
     other way. <b>Tactics</b> for both teams (press / neutral / low block · neutral / wing / counter). <b>L</b> crosses
     when you have the ball, or <b>requests a cross</b> when you don\u2019t (a wide teammate whips it toward you); in
     your own half it <b>clears</b> instead (first time, no control needed) ·
-    <b>J</b> call/pass · <b>K</b> shoot/header/command/tackle · SPACE traps. <b>FREE PLAY</b> for shooting practice.
+    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · SPACE traps. <b>FREE PLAY</b> for shooting practice.
   </p>
 </div>
 
@@ -1290,6 +1290,13 @@
   let trapping=0,trapHeld=false,lastGrade='',gradeColor='#9dff3c',gradeFade=0,lastTouchDir=null;
   let trapPressT=-9,trapCd=0,simNow=0;   // when trap was last pressed; re-press lockout; sim clock (s)
   let kickHeld=false,kickCharge=0,shootHeld=false,shootCharge=0;
+  // PASS TYPES: a double-tap puts the pass in the air; on touch, dragging off the PASS button plays it through,
+  // led the way you dragged. A quick tap has to wait a moment to know it isn't the first half of a double-tap.
+  let passPend=null;        // a quick-tap pass held back for the double-tap window: {charge, at}
+  let passLoft=false;       // this press is the second tap of a double-tap
+  let passDown=null;        // the PASS press in progress: {t, x, y, lx, ly} (+ pts/w/h for a touch's trail)
+  let thruMark=null;        // where the last through ball was played to, shown briefly on the pitch
+  const DTAP_WIN=150, DTAP_PRESS=220, THRU_DRAG=28;   // ms gap that still makes a double-tap; ms a press must be under to be a tap; px a drag must cover
   let windUp=null;                    // the shot wind-up you started: when, and which defenders were goal-side then
   let curveArmed=false,curveT=0,curveActive=0;
   let crossHeld=false,crossCharge=0;
@@ -1332,7 +1339,7 @@
       if(e.code==='Backquote'){ DBG=!DBG; }
       if(e.code==='KeyV'){ try{SPRITE.enable(!SPRITE.enabled);}catch(_){} }   // toggle sprites
       if(e.code==='KeyJ'){
-        if(ball.ownedBy===controlled)kickHeld=true;   // you have it -> kick/pass
+        if(ball.ownedBy===controlled)passPress();     // you have it -> pass (double-tap: in the air)
         else if(defHeaderReady()){controlled.vz=300;defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
         else callPass();                               // on offense w/o the ball -> demand it
@@ -1365,7 +1372,7 @@
     if(SCREEN!=='match') return;
     keys[e.code]=false;
     if(e.code==='Space')trapHeld=false;
-    if(e.code==='KeyJ')releaseKick();
+    if(e.code==='KeyJ')passRelease();
     if(e.code==='KeyK'){ if(practice!=='keeper') releaseShoot(); }
     if(e.code==='KeyL'){clearHeld=false;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}
     // releasing all movement keys ends the sprint
@@ -1403,7 +1410,7 @@
       if(t.target===btns.kick){
         if(ball.ownedBy===controlled){
           if(controlled.passLockT>0){ pressTrap(); trapHeld=true; if(trapTouchId===null)trapTouchId=t.identifier; }  // too soon after receiving: this tap meant TRAP
-          else { kickHeld=true; kickTouchId=t.identifier; }                                                          // controlled possession: PASS (hold to charge)
+          else { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
         else { pressTrap(); trapHeld=true; if(trapTouchId===null)trapTouchId=t.identifier; }                         // incoming / loose / opponent: TRAP
@@ -1450,6 +1457,7 @@
     for(const t of e.changedTouches){
       if(t.identifier===padId){pdx=t.clientX-pox;pdy=t.clientY-poy;moveStick();}
       if(swipe&&t.identifier===trapTouchId) swipePoint(swipe,t,evT(e));
+      if(passDown&&passDown.pts&&t.identifier===kickTouchId){ passDown.lx=t.clientX; passDown.ly=t.clientY; swipePoint(passDown,t,evT(e)); }
     }
     e.preventDefault();},{passive:false});
   function endT(e){for(const t of e.changedTouches){
@@ -1457,7 +1465,7 @@
     if(t.identifier===trapTouchId){trapTouchId=null;trapHeld=false;
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
-    if(t.identifier===kickTouchId){kickTouchId=null;releaseKick();}
+    if(t.identifier===kickTouchId){kickTouchId=null;if(passDown&&passDown.pts){passDown.lx=t.clientX;passDown.ly=t.clientY;}passRelease();}
     if(t.identifier===shootTouchId){shootTouchId=null;releaseShoot();}
     if(t.identifier===crossTouchId){crossTouchId=null;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}}}
   wrapEl.addEventListener('touchend',endT);wrapEl.addEventListener('touchcancel',endT);
@@ -1468,7 +1476,7 @@
     const r=rect(); s.pts.push({x:t.clientX-r.left,y:t.clientY-r.top,t:ts});
     if(s.pts.length>160) s.pts.splice(1,1);                // keep the start; thin the middle of a very long drag
     const o=s.pts[0], q=s.pts[s.pts.length-1];
-    if((!swipeTrail||swipeTrail.pts!==s.pts)&&Math.hypot(q.x-o.x,q.y-o.y)>8) swipeTrail={pts:s.pts,w:s.w,h:s.h,endT:0,shot:false};
+    if((!swipeTrail||swipeTrail.pts!==s.pts)&&Math.hypot(q.x-o.x,q.y-o.y)>8) swipeTrail={pts:s.pts,w:s.w,h:s.h,endT:0,shot:false,kind:s.kind||'shot'};
   }
   // Read a finished swipe as a shot, or null if it wasn't one:
   //   the line from start to end, cast from the ball, picks the spot on their goal line it points at,
@@ -1478,11 +1486,17 @@
   // where on their goal line a screen direction points from the shooter, undoing the camera's perspective
   // at the shooter's depth (the far side of the pitch is squashed: a corner 19 deg away is ~9 deg up the screen)
   function swipeAim(dx,dy){
-    const p=controlled, atk=atkOf(p.team), t=clamp(p.y/FH,0.05,1);
+    const p=controlled, atk=atkOf(p.team), u=screenDirToPitch(dx,dy,p.y);
+    const ty=p.y+u.y/(atk*u.x)*Math.abs((atk>0?FW:0)-p.x);
+    return clamp((ty-YC)/(GOAL_W/2-14),-1,1);                       // past a post -> that corner
+  }
+  // a direction on the screen as a direction on the pitch, at depth y
+  function screenDirToPitch(dx,dy,y){
+    const t=clamp(y/FH,0.05,1);
     const kx=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(t,PERSP);    // screen px per pitch px, across
     const ky=(NEAR_Y-HORIZON)*PERSP*Math.pow(t,PERSP-1)/FH;         // screen px per pitch px, in depth
-    const ty=p.y+(dy/ky)/(atk*dx/kx)*Math.abs((atk>0?FW:0)-p.x);
-    return clamp((ty-YC)/(GOAL_W/2-14),-1,1);                       // past a post -> that corner
+    const px=dx/kx, py=dy/ky, l=Math.hypot(px,py)||1;
+    return {x:px/l, y:py/l};
   }
   function readSwipe(s){
     const a=s.pts[0], b=s.pts[s.pts.length-1];
@@ -1539,7 +1553,7 @@
     if(tr.pts.length<2) return;
     const kx=W/tr.w, ky=H/tr.h;
     ctx.save(); ctx.globalAlpha=0.85*(1-age/0.45); ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.strokeStyle=tr.endT&&!tr.shot?'rgba(233,245,236,.5)':'#ff5a4d'; ctx.lineWidth=4;
+    ctx.strokeStyle=tr.endT&&!tr.shot?'rgba(233,245,236,.5)':(tr.kind==='pass'?'#9dff3c':'#ff5a4d'); ctx.lineWidth=4;
     ctx.beginPath(); ctx.moveTo(tr.pts[0].x*kx,tr.pts[0].y*ky);
     for(let i=1;i<tr.pts.length;i++) ctx.lineTo(tr.pts[i].x*kx,tr.pts[i].y*ky);
     ctx.stroke(); ctx.restore();
@@ -2576,7 +2590,7 @@
     ball.vx=ax*sol.vh;ball.vy=ay*sol.vh;
     ball.vz=sol.vz;
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
-    ball.intendedRcv=mate; ball.rcvRunner=(mate.gapRun>0 || Math.hypot(mate.vx,mate.vy)>runSpeedOf(mate)*0.7);
+    ball.intendedRcv=mate; ball.rcvRunner=(mate.gapRun>0 || Math.hypot(mate.vx,mate.vy)>runSpeedOf(mate)*0.7); ball.thru=null; ball.lob=null;
     ball.passerRef=p;
     recordPassTeam(p.team,p); passPose(p);
   }
@@ -2841,11 +2855,40 @@
     recordPassTeam(p.team,p); passPose(p);
   }
 
-  function releaseKick(){
+  // ===== PASSING =====
+  // Press PASS with the ball (x,y: where a finger came down, r: the canvas box -- touch only).
+  function passPress(x,y,r){
+    const now=performance.now();
+    if(passPend&&now>passPend.at){ passFlush(); return; }   // the first pass's moment is up: that one goes now
+    passLoft=!!passPend;                                    // the second tap of a double-tap: this one goes in the air
+    passPend=null;                                          // (it replaces the ground pass held back from the first)
+    kickHeld=true; kickCharge=0;
+    passDown={t:now,x,y,lx:x,ly:y};
+    if(r){ passDown.pts=[{x:x-r.left,y:y-r.top,t:now}]; passDown.w=r.width; passDown.h=r.height; passDown.kind='pass'; }
+  }
+  // Let go of PASS: a drag off the button plays it through, the second tap of a double-tap lofts it, a held
+  // (charged) press goes at once -- and a quick tap waits a moment in case it's the first half of a double-tap.
+  function passRelease(){
+    const d=passDown; passDown=null;
+    if(!kickHeld) return;
     kickHeld=false;
-    if(ball.ownedBy!==controlled){kickCharge=0;return;}
+    const loft=passLoft; passLoft=false;
+    let thru=null;
+    if(d&&d.x!=null){ const dx=d.lx-d.x, dy=d.ly-d.y; if(Math.hypot(dx,dy)>=THRU_DRAG) thru={dx,dy}; }
+    if(d&&swipeTrail&&d.pts&&swipeTrail.pts===d.pts){ swipeTrail.endT=performance.now(); swipeTrail.shot=!!thru&&ball.ownedBy===controlled; }
+    if(ball.ownedBy!==controlled){ kickCharge=0; return; }
+    const charge=kickCharge; kickCharge=0;
+    if(thru||loft||!d||performance.now()-d.t>DTAP_PRESS) doPass(charge,{loft,thru});
+    else passPend={charge,at:performance.now()+DTAP_WIN};
+  }
+  function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
+  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); }   // (every frame)
+
+  // The pass itself. o.loft: in the air, over them; o.thru: {dx,dy} a screen direction to play it through.
+  function doPass(charge,o){
+    o=o||{};
+    if(ball.ownedBy!==controlled) return;
     const p=controlled;
-    const charge=kickCharge;kickCharge=0;
     const atk=atkOf(p.team);
 
     // aim direction: stick/keys if pressed, else the player's facing
@@ -2872,6 +2915,7 @@
       if(score>bs){bs=score;best=q;}
     }
 
+    if(best&&o.thru){ thruBall(p,best,o.thru,o.loft); return; }
     if(best){
       // lead the target slightly along their motion + a touch ahead
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
@@ -2881,29 +2925,62 @@
       const aerr=passSpray(d, p);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-      const idealSpeed=d*2.0+140;                              // launch speed that reaches the receiver
-      const passPow=clamp(idealSpeed,160,2200);                 // auto power to reach the receiver
-      const sol=passSolve(d);
-      ball.vx=ax*sol.vh;
-      ball.vy=ay*sol.vh;
-      ball.vz=sol.vz;                               // loft slides with charge
+      if(o.loft){
+        // LOFTED: up over everyone and down at their feet -- no drag in the air, so it lands d away after T
+        const T=clamp(0.55+d/900,0.65,1.45), vh=loftVh(d,T);
+        ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T;
+        ball.lob={x:ax,y:ay};                        // it checks up where it lands (see the bounce)
+        ball.intendedRcv=best; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // the receiver goes to where it drops
+      } else {
+        const sol=passSolve(d);
+        ball.vx=ax*sol.vh;
+        ball.vy=ay*sol.vh;
+        ball.vz=sol.vz;                               // loft slides with charge
+      }
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
       recordPassTeam(p.team,p); passPose(p);
       // locked: do not switch to the receiver
     } else {
-      // no good target: raw directional kick where aimed
+      // no good target: raw directional kick where aimed -- or into space the way you dragged
+      if(o.thru){ const u=screenDirToPitch(o.thru.dx,o.thru.dy,p.y); aimx=u.x; aimy=u.y; }
       ball.vx=aimx*power+p.vx*0.3;
       ball.vy=aimy*power+p.vy*0.3;
-      ball.vz=200;
+      ball.vz=o.loft?320:200;
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       recordPassTeam(p.team,p); passPose(p);
-      const land=landingPoint();
-      const greens=players.filter(q=>q.team==='G'&&q!==p);
-      greens.sort((a,b)=>
-        Math.hypot(a.x-land.x,a.y-land.y)-Math.hypot(b.x-land.x,b.y-land.y));
-      // locked: no auto-switch to landing zone
     }
+  }
+  // Pace along the ground that carries a lofted ball (vz = 260*T) d in T seconds: there's no drag in the air,
+  // but the grass still drags at it for the few frames it's under 12 px on the way up.
+  function loftVh(d,T){ const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); return d/T*Math.exp(k*12/(260*T)); }
+  // THROUGH BALL: played into the space ahead of `mate`, the way the drag pointed, and weighted so they
+  // run onto it -- along the grass dying on the spot as they get there, or (lofted) over the top to drop there.
+  function thruBall(p,mate,drag,loft){
+    const u=screenDirToPitch(drag.dx,drag.dy,mate.y);
+    const lead=clamp(120+dist(p,mate)*0.15,130,230);
+    const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
+    let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    const aerr=passSpray(d,p);
+    const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+    const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
+    let tA;
+    if(loft){
+      tA=clamp(tRun,0.7,1.5);
+      const vh=loftVh(d,tA);
+      ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*tA; ball.lob={x:ax,y:ay};
+    } else {
+      const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999));   // grass drag, as the physics step applies it
+      tA=Math.max(0.45,tRun);
+      const v0=clamp(d*k/(1-Math.exp(-k*tA)),380,1500);   // covers d in tA, then barely rolls on
+      ball.vx=ax*v0; ball.vy=ay*v0; ball.vz=0;
+    }
+    ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
+    ball.intendedRcv=mate; ball.rcvRunner=false; ball.passerRef=p;
+    ball.thru={x:L.x,y:L.y,until:simNow+tA+1.5};             // the receiver runs onto it (see aiBrain)
+    if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
+    recordPassTeam(p.team,p); passPose(p);
+    thruMark={x:L.x,y:L.y,t:performance.now()};
   }
 
   function headerReady(){
@@ -3421,7 +3498,7 @@
     ball.vz=sol.vz+loft;
     ball.ownedBy=null;p.noTouchT=0.3;
     ball.lastTouch=p.team;
-    ball.intendedRcv=mate; ball.rcvRunner=running;   // tell the receiver a ball is coming (and whether it's a run in behind)
+    ball.intendedRcv=mate; ball.rcvRunner=running; ball.thru=null; ball.lob=null;   // tell the receiver a ball is coming (and whether it's a run in behind)
     recordPassTeam(p.team,p); passPose(p);
     // locked: no auto-switch
   }
@@ -4865,6 +4942,14 @@
       p.dbgTag='CLOSE-GRAB';
       p.sprint=p.stamina>0.1;
       return steer(p, ball.x+ball.vx*0.10, ball.y+ball.vy*0.10, 1.0);
+    }
+    // THROUGH BALL played into space for me: run onto it -- to the spot it was played to, then after the
+    // ball once it's run beyond the spot (the pass is weighted for me to arrive with it).
+    if(p!==controlled && p===ball.intendedRcv && ball.thru && simNow<ball.thru.until && p.state==='normal' &&
+       !ball.ownedBy && !gkHold && ball.lastTouch===p.team && ball.shotT<=0){
+      const T=ball.thru, past=(T.x-ball.x)*ball.vx+(T.y-ball.y)*ball.vy<=0;
+      p.sprint=p.stamina>0.08; p.runTarget=null; p.goingForBall=true; p.dbgTag='THRU';
+      return past ? steer(p, ball.x+ball.vx*0.3, ball.y+ball.vy*0.3, 1.0) : steer(p, T.x, T.y, 1.0);
     }
     // INTENDED RECEIVER: a teammate has played it to me -> come SHORT to meet the pass instead of
     // drifting away and letting a defender step in. (Runners played in behind keep their run.)
@@ -6496,7 +6581,7 @@
     const wasOwner=ball.ownedBy===p;
     const prevTeam=ball.lastTouch;
     ball.ownedBy=p;
-    ball.dribbler=null;ball.dribbleGrace=0;ball.fromTrap=false;ball.intendedRcv=null;
+    ball.dribbler=null;ball.dribbleGrace=0;ball.fromTrap=false;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
     if(!wasOwner){ p.lastPasser=(ball.passerRef&&ball.passerRef.team===p.team&&ball.passerRef!==p)?ball.passerRef:null; p.lastPasserT=p.lastPasser?1.6:0;
       if(p===controlled) p.passLockT=(P.passLock?P.passLock.val:0.25); }   // touch: a tap right after receiving means TRAP, never pass
     if(!wasOwner) meOnReceive(p, ball.passerRef);
@@ -7074,6 +7159,7 @@
 
     tryClear(dt);          // an armed CLEAR goes first: no trap, no control -- just away
     swipeStep(dt);         // a swipe-shot waiting on the ball being back at your feet
+    passStep();            // a quick-tap pass whose double-tap window has run out
     // a ball at chest/thigh height within reach: your trap meets it in the air, judged the same way
     if(controlled){ const c=controlled;
       const inAir=!ball.ownedBy&&ball.z>=12&&ball.z<=AIR_REACH&&!gkHold&&restartT<=0&&c.noTouchT<=0
@@ -7113,7 +7199,11 @@
     if(!gkHold&&restartT<=0&&!frozen){
       if(ball.z>0||ball.vz!==0){
         ball.vz-=520*dt;ball.z+=ball.vz*dt;
-        if(ball.z<=0){ball.z=0;ball.vz=ball.vz<-40?-ball.vz*0.45:0;}
+        if(ball.z<=0){ball.z=0;ball.vz=ball.vz<-40?-ball.vz*0.45:0;
+          if(ball.lob){   // a lofted pass checks up where it lands (backspin) -- if it's still on the line it was struck on
+            const sp=Math.hypot(ball.vx,ball.vy)||1;
+            if((ball.vx*ball.lob.x+ball.vy*ball.lob.y)/sp>0.995){ ball.vx*=0.5; ball.vy*=0.5; ball.vz*=0.5; }
+            ball.lob=null; }}
       }
       ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
       // a live shot skids with much less drag so it carries to goal; normal balls use full friction
@@ -7220,7 +7310,8 @@
         const strikeable=controlled&&(headerReady()||firstTouchBall(controlled));
         if(btns.kick){
           const lockT = mine && controlled && controlled.passLockT>0;
-          btns.kick.textContent = mine ? (lockT?'TRAP':'PASS') : (oursHave?'CALL':'TRAP');
+          const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=THRU_DRAG;
+          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : (oursHave?'CALL':'TRAP');
           btns.kick.classList.toggle('mCall', !mine && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
         }
@@ -7526,6 +7617,13 @@
       ctx.beginPath();ctx.arc(s.x,s.y,2,0,Math.PI*2);ctx.fillStyle='#ff5a4d';ctx.fill();
     }
 
+    if(thruMark){                       // where the last through ball was played to
+      const age=(performance.now()-thruMark.t)/1000;
+      if(age>1.1) thruMark=null;
+      else { const s=proj(thruMark.x,thruMark.y); ctx.save(); ctx.globalAlpha=1-age/1.1; ctx.setLineDash([5,4]);
+        ctx.strokeStyle='#9dff3c'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(s.x,s.y,18*s.scale,8*s.scale,0,0,Math.PI*2);
+        ctx.stroke(); ctx.restore(); }
+    }
     const actors=[];
     for(const p of players)actors.push({y:p.y,fn:()=>drawOutfielder(p)});
     actors.push({y:ball.y,fn:drawBall});
@@ -9331,7 +9429,7 @@
   }
   function doCreateFromMaker(){ if(!mkValid())return; const data=buildCareerFromMaker(); writeSave(MK.key,data); writeSave(SAVE_KEYS.auto,data); document.getElementById('charMaker').classList.remove('on'); openHub(MK.key); }
 
-  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
+  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
   function hideSubs(){ ['loadPanel','newPanel','hubPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
   function refreshMenuButtons(){

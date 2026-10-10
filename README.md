@@ -18,7 +18,8 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | Key | Action |
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass · head-clear an incoming cross |
+| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross |
+| `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it |
@@ -32,6 +33,15 @@ Drag on the left half to move (double-tap to sprint). The big right-hand button 
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
 like `L` there.
+
+**Passes** — tap PASS for a pass along the grass to the teammate your move stick points at (or
+the way you're facing). **Double-tap** it for a **lofted pass** (the button reads LOB on the second
+tap). **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
+it, and the drag picks where in front of them it goes — the ball is played into that space,
+weighted so they run onto it as it gets there, and the receiver sprints for it. The spot it was
+played to flashes on the pitch. Drag on the second tap of a double-tap for a lofted through ball
+over the top. (A quick tap waits ~0.15 s before it goes, to see whether a second tap is coming;
+a held pass, a drag and a double-tap go at once.)
 
 **Swipe to shoot** — with the ball, swipe toward goal on the right half of the screen (off the
 buttons). The swipe's line, cast from your player, picks the spot on the goal line (point past a
@@ -118,7 +128,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–545 | Styles |
 | 547–777 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 778–9523 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 778–9617 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
