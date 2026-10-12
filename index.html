@@ -296,6 +296,9 @@
     border:1px solid #2a3a22;border-radius:8px;padding:11px 15px;cursor:pointer;text-align:left;transition:background .12s,border-color .12s,color .12s;}
   .smBtn:hover,.smBtn.sel{background:rgba(157,255,60,.17);border-color:#9dff3c;color:#e9f5ec;}
   .smBtn .mk{opacity:0;margin-right:8px;}
+  .smRow{display:flex;gap:7px;}
+  .smRow .smBtn{flex:1 1 auto;white-space:nowrap;font-size:13px;padding-left:11px;padding-right:11px;}
+  .smRow .smBtn .mk{margin-right:5px;}
   .smBtn.sel .mk,.smBtn:hover .mk{opacity:1;}
   .smBtn.disabled{opacity:.32;cursor:not-allowed;color:#5a6b4d;}
   .smBtn.disabled:hover{background:rgba(157,255,60,.06);border-color:#2a3a22;color:#5a6b4d;}
@@ -496,6 +499,18 @@
   #stageWrap.menuMode .labUI{display:none !important;}
   #stageWrap.labMode #rScore, #stageWrap.labMode #rDir{display:none;}
   #stageWrap.labMode #labExitBtn{display:inline-block;margin-left:0;color:var(--red);}
+  #stageWrap[data-labkind="trap"] #labHud [data-kinds]:not([data-kinds~="trap"]),
+  #stageWrap[data-labkind="pass"] #labHud [data-kinds]:not([data-kinds~="pass"]),
+  #stageWrap[data-labkind="shoot"] #labHud [data-kinds]:not([data-kinds~="shoot"]){display:none !important;}
+  /* the Shooting Lab's goal mouth, seen from where you shoot: dots where each shot crossed the line */
+  #stageWrap.labMode[data-labkind="shoot"] #labLow{display:block;}
+  #labLow{position:absolute;left:12px;bottom:12px;width:min(250px,40%);z-index:6;pointer-events:none;}
+  #labGoal .lmScale span{white-space:nowrap;}
+  .lgBox{position:relative;height:58px;background:rgba(8,14,9,.85);border:1px solid var(--edge);border-radius:4px;overflow:hidden;}
+  .lgFrame{position:absolute;border:2px solid #e9f5ec;border-bottom:none;border-radius:2px 2px 0 0;}
+  .lgDot{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;}
+  .lgDot.last{width:10px;height:10px;margin:-5px 0 0 -5px;box-shadow:0 0 0 1.5px rgba(0,0,0,.7);}
+  .lgAim{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:1.5px dashed #e9f5ec;opacity:.75;}
   #labHud{position:absolute;top:42px;left:10px;right:10px;z-index:6;flex-direction:column;align-items:center;gap:5px;pointer-events:none;}
   #stageWrap.labTuneOpen #labHud{right:calc(min(280px, 46%) + 18px);}
   #labBar{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;pointer-events:auto;}
@@ -541,6 +556,10 @@
   .ltReset{margin-top:4px;}
   @media (max-height:500px){   /* phone: while tuning, keep the pitch clear (chips + meter only) */
     #stageWrap.labTuneOpen #labResult, #stageWrap.labTuneOpen .labTallyRow{display:none;}
+    .lgBox{height:36px;}
+    #labLow{bottom:16px;left:8px;width:min(220px,36%);}
+    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
+    #stageWrap.labTuneOpen #labLow{display:none !important;}
   }
 </style>
 </head>
@@ -566,7 +585,11 @@
         <button class="smBtn" data-act="continue" data-needsave="1"><span class="mk">▶</span>CONTINUE</button>
         <button class="smBtn" data-act="load" data-needsave="1"><span class="mk">▶</span>LOAD GAME</button>
         <button class="smBtn" data-act="exhibition"><span class="mk">▶</span>EXHIBITION</button>
-        <button class="smBtn" data-act="traplab"><span class="mk">▶</span>TRAP LAB</button>
+        <div class="smRow">
+          <button class="smBtn" data-act="traplab"><span class="mk">▶</span>TRAP LAB</button>
+          <button class="smBtn" data-act="passlab"><span class="mk">▶</span>PASS LAB</button>
+          <button class="smBtn" data-act="shootlab"><span class="mk">▶</span>SHOOTING LAB</button>
+        </div>
         <button class="smBtn" data-act="settings"><span class="mk">▶</span>SETTINGS</button>
       </div>
     </div>
@@ -645,17 +668,24 @@
   </div>
   <div id="labHud" class="labUI">
     <div id="labBar">
-      <button class="labChip" data-lab="serve"><i>SERVE</i><b id="labServeV">ROLLED</b><kbd>1-5</kbd></button>
-      <button class="labChip" data-lab="pace"><i>PACE</i><b id="labPaceV">450</b><kbd>[ ]</kbd></button>
-      <button class="labChip" data-lab="line"><i>LINE</i><b id="labLineV">AT YOU</b><kbd>, .</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="serve"><i>SERVE</i><b id="labServeV">ROLLED</b><kbd>1-5</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="pace"><i>PACE</i><b id="labPaceV">450</b><kbd>[ ]</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="line"><i>LINE</i><b id="labLineV">AT YOU</b><kbd>, .</kbd></button>
+      <button class="labChip" data-kinds="pass" data-lab="pdist"><i>DISTANCE</i><b id="labPDistV">MEDIUM</b><kbd>1-4</kbd></button>
+      <button class="labChip" data-kinds="pass" data-lab="pang"><i>WHERE</i><b id="labPAngV">AHEAD</b><kbd>, .</kbd></button>
+      <button class="labChip" data-kinds="pass" data-lab="prun"><i>RECEIVER</i><b id="labPRunV">STANDS</b><kbd>C</kbd></button>
+      <button class="labChip" data-kinds="pass" data-lab="pdef"><i>DEFENDER</i><b id="labPDefV">NONE</b><kbd>B</kbd></button>
+      <button class="labChip" data-kinds="shoot" data-lab="sdist"><i>FROM</i><b id="labSDistV">EDGE OF BOX</b><kbd>1-4</kbd></button>
+      <button class="labChip" data-kinds="shoot" data-lab="sang"><i>ANGLE</i><b id="labSAngV">CENTRE</b><kbd>, .</kbd></button>
+      <button class="labChip" data-kinds="shoot" data-lab="skeep"><i>KEEPER</i><b id="labSKeepV">ON</b><kbd>B</kbd></button>
       <button class="labChip" data-lab="auto"><i>NEXT</i><b id="labAutoV">AUTO</b><kbd>Q</kbd></button>
       <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b><kbd>Z</kbd></button>
-      <button class="labChip" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b><kbd>C</kbd></button>
-      <button class="labChip" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b><kbd>G</kbd></button>
-      <button class="labChip labGo" data-lab="go" id="labGoChip"><b>▶ SERVE</b><kbd>R</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b><kbd>C</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b><kbd>G</kbd></button>
+      <button class="labChip labGo" data-lab="go" id="labGoChip"><b id="labGoV">▶ SERVE</b><kbd>R</kbd></button>
       <button class="labChip" data-lab="tune" id="labTuneChip"><b>⚙ TUNE</b><kbd>T</kbd></button>
     </div>
-    <div id="labMeter">
+    <div id="labMeter" data-kinds="trap">
       <div class="lmTrack"><div id="labZonesEl"></div><div id="labTicks"></div><div class="lmCursor" id="labCursor"></div></div>
       <div class="lmDots" id="labDots"></div>
       <div class="lmScale"><span>◂ EARLY</span><span id="labWinTxt"></span><span>LATE ▸</span></div>
@@ -663,8 +693,14 @@
     <div id="labResult"></div>
     <div class="labTallyRow"><span id="labTally"></span><button class="labClear" data-lab="clear" title="Clear the tally (X)">clear</button></div>
   </div>
+  <div id="labLow" class="labUI">
+    <div id="labGoal">
+      <div class="lgBox" id="labGoalBox"><div class="lgFrame"></div><div id="labGoalDots"></div></div>
+      <div class="lmScale"><span>◂ LEFT</span><span id="labGoalTxt">your last shots</span><span>RIGHT ▸</span></div>
+    </div>
+  </div>
   <div id="labTune" class="labUI">
-    <div class="ltHead"><span>TUNE THE TRAP</span><button class="labChip" data-lab="tune"><b>✕</b></button></div>
+    <div class="ltHead"><span id="labTuneTitle">TUNE THE TRAP</span><button class="labChip" data-lab="tune"><b>✕</b></button></div>
     <div class="ltNote">Changes apply to the next ball, and to matches.</div>
     <div id="labDials"></div>
     <button class="labChip ltReset" data-lab="defaults"><b>FACTORY DEFAULTS</b></button>
@@ -840,6 +876,16 @@
     trapKeepBad:{val:0.70,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
+    // pass types (tune them live in the Pass Lab)
+    passDtap: {val:150,min:60,max:350,step:10,label:'Pass: double-tap window (ms)',hint:'How soon the second tap of a double-tap (a lofted pass) has to follow the first. A quick single tap waits this long before it goes, to see whether a second tap is coming, so shorter = snappier taps but a quicker double-tap needed.'},
+    passDrag: {val:28,min:12,max:80,step:2,label:'Pass: drag for a through ball (px)',hint:'On touch, how far you have to drag off the PASS button for it to be a through ball rather than a plain pass.'},
+    thruLead: {val:1,min:0.4,max:2,step:0.05,label:'Through ball: lead ×',hint:'How far ahead of the receiver a through ball is played (130 to 230 px at 1x, longer for longer passes). Bigger = further into space, more for them to run onto.'},
+    loftHang: {val:1,min:0.6,max:1.6,step:0.05,label:'Lofted pass: hang time ×',hint:'How long a lofted pass stays up (0.65 to 1.45 s at 1x, longer for longer passes). Higher = a higher, slower ball that drops more steeply.'},
+    lobCheck: {val:0.5,min:0.1,max:1,step:0.05,label:'Lofted pass: pace kept on landing',hint:'A lofted pass checks up where it lands (backspin): this is the share of its pace it keeps through that first bounce. 1 = no check-up at all.'},
+    // swipe shots (tune them live in the Shooting Lab)
+    swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball, against holding K+Up/Down for the whole flight (1x). The Curve stat scales it again.'},
+    swipePow: {val:3.2,min:1.4,max:6,step:0.1,label:'Swipe shot: flick for full power',hint:'How fast a flick (in screen widths per second, over its quickest 70 ms) gives a full-power shot. Lower = full power comes easier.'},
+    swipeBow: {val:0.30,min:0.12,max:0.6,step:0.01,label:'Swipe shot: bend for full spin',hint:'How far a swipe has to bow off its straight line (as a share of its length) for full spin. A bow under about a quarter of this is read as straight, so a thumb\'s natural arc does not curl it.'},
     gatherR:  {val:28,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, and the ball (or any dead ball) is yours once it is back inside it, measured from your middle. Your trap reach (Ball control) only decides where you can first meet the ball, so a big reach never sends a touch further away.'},
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
@@ -1052,7 +1098,9 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
-    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','aiTouch','aiReact']
+    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','aiTouch','aiReact'],
+    passlab:  ['passAcc','passLoft','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -1297,7 +1345,7 @@
   let passLoft=false;       // this press is the second tap of a double-tap
   let passDown=null;        // the PASS press in progress: {t, x, y, lx, ly} (+ pts/w/h for a touch's trail)
   let thruMark=null;        // where the last through ball was played to, shown briefly on the pitch
-  const DTAP_WIN=150, DTAP_PRESS=220, THRU_DRAG=28;   // ms gap that still makes a double-tap; ms a press must be under to be a tap; px a drag must cover
+  const DTAP_PRESS=220;      // ms a press must be under to count as a tap (the window and the drag are dials: passDtap, passDrag)
   let windUp=null;                    // the shot wind-up you started: when, and which defenders were goal-side then
   let curveArmed=false,curveT=0,curveActive=0;
   let crossHeld=false,crossCharge=0;
@@ -1471,7 +1519,7 @@
     if(t.identifier===crossTouchId){crossTouchId=null;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}}}
   wrapEl.addEventListener('touchend',endT);wrapEl.addEventListener('touchcancel',endT);
   // the ball is yours to swipe: at your feet, or just knocked on in your own dribble (not in the Trap Lab)
-  function swipeable(){ return !LAB.on && !!controlled && (ball.ownedBy===controlled || (!ball.ownedBy&&!gkHold&&ball.dribbler===controlled&&ball.dribbleGrace>0)); }
+  function swipeable(){ return (!LAB.on||LAB.kind==='shoot') && !!controlled && (ball.ownedBy===controlled || (!ball.ownedBy&&!gkHold&&ball.dribbler===controlled&&ball.dribbleGrace>0)); }
   const evT=e=>e.timeStamp>0?e.timeStamp:performance.now();   // when the finger was there (not when we got round to it)
   function swipePoint(s,t,ts){
     const r=rect(); s.pts.push({x:t.clientX-r.left,y:t.clientY-r.top,t:ts});
@@ -1483,7 +1531,7 @@
   //   the line from start to end, cast from the ball, picks the spot on their goal line it points at,
   //   the speed of the flick sets the power, and how far the path BOWS off that line sets the spin
   //   -- the ball bows out the same way and curls back onto the spot.
-  const SWIPE_BOW0=0.08, SWIPE_BOW1=0.30;                   // bow (sagitta / length): dead zone .. full spin
+  // bow (sagitta / length): a quarter of the full-spin bow is a dead zone (a thumb's natural arc), full spin at the swipeBow dial
   // where on their goal line a screen direction points from the shooter, undoing the camera's perspective
   // at the shooter's depth (the far side of the pitch is squashed: a corner 19 deg away is ~9 deg up the screen)
   function swipeAim(dx,dy){
@@ -1512,13 +1560,13 @@
       vmax=Math.max(vmax, Math.hypot(q.x-o.x,q.y-o.y)/Math.max(30,q.t-o.t));
     }
     const v=vmax*1000/s.w;                                            // screen widths per second
-    const charge=clamp((v-0.6)/2.6,0,1);
+    const charge=clamp((v-0.6)/Math.max(0.3,P.swipePow.val-0.6),0,1);
     const aim=swipeAim(dx,dy);
     let A=0;                                                          // twice the signed area between path and line
     for(let i=1;i<s.pts.length;i++){ const p0=s.pts[i-1], p1=s.pts[i];
       A+=(p0.x-a.x)*(p1.y-a.y)-(p0.y-a.y)*(p1.x-a.x); }
     const bow=0.75*A/(L*L);                                           // ~ sagitta / length for an arc (+ = bowed to the left of travel)
-    const k=clamp((Math.abs(bow)-SWIPE_BOW0)/(SWIPE_BOW1-SWIPE_BOW0),0,1);
+    const b1=P.swipeBow.val, b0=b1*0.27, k=clamp((Math.abs(bow)-b0)/(b1-b0),0,1);
     return {aim,charge,spin:-Math.sign(bow)*k,bow,v};                 // bowed left -> it curls back right (spin -1), and vice versa
   }
   function swipeRelease(s){
@@ -1730,8 +1778,8 @@
       ball.ownedBy=null; ball.dribbler=null; ball.cushBy=null; ball.x=f.x; ball.y=f.y; ball.z=6; ball.vx=ball.vy=ball.vz=0;
       practiceT=1.2;
     }
-    else if(practice==='traplab') labSetup();           // the Trap Lab (below) places its own people
-    if(practice==='traplab') gradeFade=0;
+    else if(LAB_PRACTICE[practice]) labSetup(LAB_PRACTICE[practice]);   // the labs (below) place their own people
+    if(LAB_PRACTICE[practice]) gradeFade=0;
     else { lastGrade='PRACTICE: '+practice.toUpperCase(); gradeColor='#ffb43c'; gradeFade=1.4; }
   }
   document.querySelectorAll('[data-prac]').forEach(b=>{
@@ -1748,15 +1796,22 @@
   // against the moment the ball reached the reach ring, what the touch did to the ball, and a
   // running tally. The trap's own dials sit in its TUNE drawer, so they can be changed mid-session.
   const LAB={
-    on:false,
+    on:false, kind:'trap',                // 'trap' | 'pass' | 'shoot' -- which lab is running
     serve:'roll', pace:450, line:0, auto:true, slow:1, recv:'you', guide:true, tune:false,
     spot:{x:FW*0.55,y:YC+170}, dist:380,   // the receiver's mark; the machine stands this far to its left
     rep:null,        // the ball in play: serve, presses, arrival, touch, outcome
     last:null,       // the last finished rep (its result stays up until the next one finishes)
     hist:[],         // recent results for the meter's history dots
     tally:{you:null,ai:null},
-    nextT:0, fx:null, dirty:true, zoneSig:'', h:1/60
+    nextT:0, fx:null, dirty:true, zoneSig:'', h:1/60,
+    // PASS LAB: how far and where the receiver stands, whether he makes a run, a defender
+    pDist:380, pAng:0, pRun:false, pDef:'none', pspot:{x:FW*0.3,y:YC+160}, pt:null,
+    // SHOOTING LAB: how far out and how wide you shoot from, keeper on/off; recent shots for the goal panel
+    sDist:260, sAng:0, sKeep:true, st:null, shots:[],
+    trail:[]                              // the ball's path for the pass/shot in play (drawn on the pitch)
   };
+  const LAB_TITLE={trap:'TRAP LAB',pass:'PASS LAB',shoot:'SHOOTING LAB'};
+  const LAB_PRACTICE={traplab:'trap',passlab:'pass',shootlab:'shoot'};   // practice name -> lab
   const LAB_SERVES=[['roll','ROLLED'],['bounce','BOUNCING'],['thigh','THIGH HIGH'],['chest','CHEST HIGH'],['mix','MIXED']];
   const LAB_PACES=[250,350,450,550,700,900];   // the ball's speed as it reaches you
   const LAB_LINES=[0,12,24,-24,-12,'rnd'];     // + = its line runs above you on screen
@@ -1808,9 +1863,19 @@
     return {v0,vz:lift(v0),f:null};
   }
 
-  function labSetup(){
-    LAB.on=true; LAB.rep=null; LAB.fx=null; LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig='';
+  function labSetup(kind){
+    LAB.kind=kind||'trap';
+    LAB.on=true; LAB.rep=null; LAB.last=null; LAB.fx=null; LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig=''; LAB.trail=[];
     trapping=0; trapCd=0;
+    const wrap=document.getElementById('stageWrap'); wrap.classList.add('labMode'); wrap.dataset.labkind=LAB.kind;
+    if(labEl.labGoV) labEl.labGoV.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL';
+    else { const g=document.getElementById('labGoV'); if(g) g.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL'; }
+    if(LAB.kind==='pass') passLabSetup();
+    else if(LAB.kind==='shoot') shootLabSetup();
+    else trapLabSetup();
+    labBuildTune();
+  }
+  function trapLabSetup(){
     const mates=grnList().filter(q=>q!==controlled), S=mates[0], A=mates[1];
     // both receivers read the Ball control dial, so the lab can try any skill level
     controlled.stats=Object.assign({},controlled.stats,{ballControl:undefined,composure:undefined});
@@ -1820,8 +1885,6 @@
     redList().forEach((q,i)=>{ q.x=FW-70; q.y=70+i*36; });
     labPlace();
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.x=S?S.x+14:LAB.spot.x-300; ball.y=LAB.spot.y; ball.z=0; ball.vx=ball.vy=ball.vz=0;
-    document.getElementById('stageWrap').classList.add('labMode');
-    labBuildTune();
   }
   function labPlace(){             // put the receiver on the mark (and the other one out of the way)
     const sp=LAB.spot, A=players.find(q=>q.pRole==='labRecv'), you=controlled;
@@ -1834,6 +1897,8 @@
     }
   }
   function labServe(){
+    if(LAB.kind==='pass') return passLabServe();
+    if(LAB.kind==='shoot') return shootLabServe();
     const rc=labRecv(), S=labServer(); if(!rc||!S) return;
     if(Math.hypot(rc.x-LAB.spot.x,rc.y-LAB.spot.y)>140) labPlace();   // wandered off chasing a touch: back on the mark
     S.x=LAB.spot.x-LAB.dist; S.y=LAB.spot.y; S.vx=S.vy=0;
@@ -1877,6 +1942,8 @@
   function labStep(dt,rdt){
     LAB.h=LAB.h*0.9+clamp(dt,1/480,1/30)*0.1;             // the sim step, smoothed (the predictor matches it)
     if(LAB.fx){ LAB.fx.t-=rdt; if(LAB.fx.t<=0) LAB.fx=null; }
+    if(LAB.kind==='pass') return passLabStep(dt,rdt);
+    if(LAB.kind==='shoot') return shootLabStep(dt,rdt);
     const r=LAB.rep;
     if(r&&!r.done){
       const rc=r.recv, g=dist(rc,ball), owner=ball.ownedBy;
@@ -1897,6 +1964,7 @@
   }
   // hooks from the trap code
   function labOnPress(locked){
+    if(LAB.kind!=='trap') return;
     const r=LAB.rep; if(!r||r.ai) return;
     if(r.done){ if(r.result==='past'&&r.latePress==null&&simNow-r.endT<0.6){ r.latePress=simNow-r.arrive; LAB.dirty=true; } return; }
     let est=null;
@@ -1904,10 +1972,13 @@
     r.presses.push({t:simNow,locked,est}); LAB.dirty=true;
   }
   function labOnArrive(p,air){
+    if(LAB.kind!=='trap') return;
     const r=LAB.rep; if(!r||r.done||p!==r.recv||r.arrive!=null) return;
     r.arrive=simNow; r.air=air; r.inSpd=Math.hypot(ball.vx,ball.vy); r.inZ=ball.z; LAB.dirty=true;
   }
   function labOnTouch(p,s,e,o){
+    if(LAB.kind==='pass') return passLabTouch(p,s,e);
+    if(LAB.kind!=='trap') return;
     const r=LAB.rep; if(!r||r.done||p!==r.recv||r.touch) return;
     const out=Math.hypot(ball.vx,ball.vy), ox=out>0.01?ball.vx/out:-o.dx, oy=out>0.01?ball.vy/out:-o.dy;
     const ang=Math.atan2(-o.dx*oy+o.dy*ox, -o.dx*ox-o.dy*oy);    // the bounce against straight back the way it came
@@ -1916,22 +1987,35 @@
     LAB.fx={x:ball.x,y:ball.y,z:Math.max(0,o.z),inDir:{x:o.dx,y:o.dy},outDir:{x:ox,y:oy},len:clamp(out*0.35,18,120),col,t:1.8};
     LAB.dirty=true;
   }
-  function labOnAiMiss(p,e){ const r=LAB.rep; if(r&&!r.done&&p===r.recv){ r.aiMiss=e; LAB.dirty=true; } }
-  function labOnWhiff(){ const r=LAB.rep; if(!r||r.done||r.ai) return; const pr=labLastPress(r); if(pr) pr.whiff=true; LAB.dirty=true; }
+  function labOnAiMiss(p,e){ if(LAB.kind!=='trap') return; const r=LAB.rep; if(r&&!r.done&&p===r.recv){ r.aiMiss=e; LAB.dirty=true; } }
+  function labOnWhiff(){ if(LAB.kind!=='trap') return; const r=LAB.rep; if(!r||r.done||r.ai) return; const pr=labLastPress(r); if(pr) pr.whiff=true; LAB.dirty=true; }
 
   function labSetRecv(m){ if(LAB.recv===m) return; LAB.recv=m; LAB.rep=null; LAB.fx=null; labPlace(); LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig=''; }
-  function labClear(){ LAB.tally[LAB.recv==='ai'?'ai':'you']=null; LAB.hist=LAB.hist.filter(h=>h.who!==LAB.recv); LAB.last=null; LAB.dirty=true; }
+  function labClear(){
+    if(LAB.kind==='pass'){ LAB.pt=null; LAB.last=null; LAB.dirty=true; return; }
+    if(LAB.kind==='shoot'){ LAB.st=null; LAB.shots=[]; LAB.last=null; LAB.dirty=true; return; }
+    LAB.tally[LAB.recv==='ai'?'ai':'you']=null; LAB.hist=LAB.hist.filter(h=>h.who!==LAB.recv); LAB.last=null; LAB.dirty=true; }
   function labTune(open){
     LAB.tune=!!open; document.getElementById('stageWrap').classList.toggle('labTuneOpen',LAB.tune);
     if(LAB.tune) labSyncTune(); LAB.dirty=true;
   }
   function labOff(){
-    LAB.on=false; LAB.rep=null; LAB.last=null; LAB.fx=null;
+    LAB.on=false; LAB.rep=null; LAB.last=null; LAB.fx=null; LAB.trail=[];
     labTune(false);
-    document.getElementById('stageWrap').classList.remove('labMode');
+    keepers.forEach(k=>{ k.benched=false; });
+    const wrap=document.getElementById('stageWrap'); wrap.classList.remove('labMode'); delete wrap.dataset.labkind;
   }
   // desktop shortcuts while in the lab (none of them clash with play: WASD/arrows, J K L, SPACE)
   function labKey(code){
+    switch(code){                          // every lab
+      case 'KeyQ': LAB.auto=!LAB.auto; LAB.nextT=0.6; LAB.dirty=true; return true;
+      case 'KeyZ': LAB.slow=LAB_SLOWS[(LAB_SLOWS.indexOf(LAB.slow)+1)%LAB_SLOWS.length]; LAB.dirty=true; return true;
+      case 'KeyR': labServe(); LAB.dirty=true; return true;
+      case 'KeyT': labTune(!LAB.tune); LAB.dirty=true; return true;
+      case 'KeyX': labClear(); LAB.dirty=true; return true;
+    }
+    if(LAB.kind==='pass') return passLabKey(code);
+    if(LAB.kind==='shoot') return shootLabKey(code);
     switch(code){
       case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5':
         LAB.serve=LAB_SERVES[+code.slice(5)-1][0]; break;
@@ -1952,6 +2036,9 @@
   }
   function labChip(act){
     const nextOf=(arr,v)=>arr[(arr.indexOf(v)+1)%arr.length];
+    if(act==='defaults'){ for(const k of PRACTICE_DIALS[LAB.kind+'lab']) labSetDial(k,DIAL_DEFAULT[k]); LAB.dirty=true; return; }
+    if(LAB.kind==='pass'&&passLabChip(act)) { LAB.dirty=true; return; }
+    if(LAB.kind==='shoot'&&shootLabChip(act)) { LAB.dirty=true; return; }
     if(act==='serve') LAB.serve=nextOf(LAB_SERVES.map(s=>s[0]),LAB.serve);
     else if(act==='pace'){ const i=LAB_PACES.findIndex(v=>v>LAB.pace); LAB.pace=LAB_PACES[i<0?0:i]; }
     else if(act==='line'){ const i=LAB_LINES.indexOf(LAB.line); LAB.line=LAB_LINES[i<0?0:(i+1)%LAB_LINES.length]; }
@@ -1962,7 +2049,6 @@
     else if(act==='go') labServe();
     else if(act==='tune') labTune(!LAB.tune);
     else if(act==='clear') labClear();
-    else if(act==='defaults'){ for(const k of PRACTICE_DIALS.traplab) labSetDial(k,DIAL_DEFAULT[k]); }
     else if(act==='exit'){ resumable=false; newMatch(); showStartMenu(); return; }
     LAB.dirty=true;
   }
@@ -1984,11 +2070,23 @@
     return z.map(([a,b,c],i)=>[i>0&&i<5?Math.max(a,-win):a,b,c]).filter(([a,b])=>b>a);
   }
   function labInitHud(){
-    for(const id of ['labZonesEl','labTicks','labDots','labCursor','labResult','labTally','labWinTxt','labServeV','labPaceV','labLineV','labAutoV','labSlowV','labRecvV','labGuideV','labGoChip','labTuneChip'])
+    for(const id of ['labZonesEl','labTicks','labDots','labCursor','labResult','labTally','labWinTxt','labServeV','labPaceV','labLineV','labAutoV','labSlowV','labRecvV','labGuideV','labGoChip','labGoV','labTuneChip',
+                     'labPDistV','labPAngV','labPRunV','labPDefV','labSDistV','labSAngV','labSKeepV','labGoalBox','labGoalDots','labGoalTxt'])
       labEl[id]=document.getElementById(id);
+  }
+  // the chips every lab shares
+  function labHudCommon(){
+    const r=LAB.rep;
+    labEl.labAutoV.textContent=LAB.auto?'AUTO':'ON CUE';
+    labEl.labSlowV.textContent=LAB.slow===1?'1×':LAB.slow===0.5?'½×':'¼×';
+    labEl.labTuneChip.classList.toggle('on',LAB.tune);
+    labEl.labGoChip.classList.toggle('wait',!LAB.auto&&(!r||r.done));
+    labEl.labGoV.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL';
   }
   function labHud(){
     if(!labEl.labCursor) labInitHud();
+    if(LAB.kind==='pass') return passLabHud();
+    if(LAB.kind==='shoot') return shootLabHud();
     const rc=labRecv(), r=LAB.rep, live=r&&!r.done&&!r.touch;
     // the guide: where "now" sits against the ball's arrival (following you if you're on the move)
     let cur=null;
@@ -2011,12 +2109,9 @@
     labEl.labServeV.textContent=labServeName(LAB.serve);
     labEl.labPaceV.textContent=LAB.pace;
     labEl.labLineV.textContent=labLineTxt(LAB.line);
-    labEl.labAutoV.textContent=LAB.auto?'AUTO':'ON CUE';
-    labEl.labSlowV.textContent=LAB.slow===1?'1×':LAB.slow===0.5?'½×':'¼×';
+    labHudCommon();
     labEl.labRecvV.textContent=LAB.recv==='ai'?'AI':'YOU';
     labEl.labGuideV.textContent=LAB.guide?'ON':'OFF';
-    labEl.labTuneChip.classList.toggle('on',LAB.tune);
-    labEl.labGoChip.classList.toggle('wait',!LAB.auto&&(!r||r.done));
     // ticks: this ball's presses (and its touch), plus dots for recent balls
     let t='';
     if(r&&!r.ai){
@@ -2072,7 +2167,10 @@
   }
   // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
-    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'AI timing error',aiReact:'AI reaction'};
+    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'AI timing error',aiReact:'AI reaction',
+    passAcc:'Passing',passLoft:'Pass loft',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
+    shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
+    gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
     trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
@@ -2084,28 +2182,56 @@
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
     gatherR:'Same for everyone: a trap comes off you at this ring (the inner one), and the ball is yours once it\'s back inside it. Your reach only decides where you first meet it.',
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.',
-    aiReact:'How long the AI takes to react to where its own touch went. Until then it carries on as it was. 0 = instant.'};
+    aiReact:'How long the AI takes to react to where its own touch went. Until then it carries on as it was. 0 = instant.',
+    passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
+    passLoft:'How high every pass is struck. The default sends a medium pass over a man in the lane.',
+    passDtap:'How quickly the second tap of a double-tap has to come. A single tap waits this long.',
+    passDrag:'How far you drag off PASS (touch) before it is a through ball.',
+    thruLead:'How far ahead of the receiver a through ball goes. Bigger = more to run onto.',
+    loftHang:'How long a lofted pass stays up. Longer = higher, slower, steeper drop.',
+    lobCheck:'Pace a lofted pass keeps when it lands (it checks up). 100% = no check-up.',
+    shotPower:'Your shot power (1 to 10): pace and how far it carries.',
+    shotAcc:'Your shot accuracy (1 to 10): how close to the aim it flies. Corners are only a few px inside the posts.',
+    curve:'Your curve (1 to 10): how hard a curled shot bends, held K+Up/Down or swiped.',
+    longShots:'Your long shots (1 to 10): how well shots from distance hold their pace and line.',
+    swipeCurl:'How hard a fully bent swipe curls it, against holding K+Up/Down all the way (1×).',
+    swipePow:'How fast a flick has to be for full power, in screen widths per second. Lower = easier.',
+    swipeBow:'How far a swipe has to bow for full spin. A quarter of this reads as straight.',
+    gkReflex:'Their keeper\'s reflexes (1 to 10): how soon they react to the strike.',
+    gkReach:'Their keeper\'s reach (1 to 10): how far they get to a shot without diving.',
+    gkDiveRange:'Their keeper\'s diving (1 to 10): how far they fling themselves.'};
   function labDialTxt(k){
     const v=P[k].val;
     if(k==='trapSweet') return (v>0?'+':'')+v+' ms';
     if(k==='trapKeepGood'||k==='trapKeepBad') return Math.round(v*100)+'%';
     if(k==='trapWin'||k==='trapPop') return v.toFixed(2)+'×';
     if(k==='trapLock'||k==='aiReact') return v.toFixed(2)+' s';
+    if(k==='passDtap') return Math.round(v)+' ms';
+    if(k==='passDrag') return Math.round(v)+' px';
+    if(k==='thruLead'||k==='loftHang'||k==='swipeCurl'||k==='passLoft') return v.toFixed(2)+'×';
+    if(k==='lobCheck') return Math.round(v*100)+'%';
+    if(k==='swipePow') return v.toFixed(1)+' /s';
+    if(k==='swipeBow') return Math.round(v*100)+'% of its length';
+    if(['passAcc','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange'].includes(k)) return v.toFixed(1);
     if(k==='gatherR') return v+' (reach '+Math.round(controlROf({stats:{}}))+')';
     if(k==='ballControl'){ const pr={stats:{}}; return v.toFixed(1)+' · ring '+Math.round(controlROf(pr))+' · '+Math.round(trapWindowOf(pr)*1000)+' ms'; }
     return v.toFixed(2);
   }
   function labBuildTune(){
-    const box=document.getElementById('labDials'); if(!box||box.childElementCount) return;
-    for(const k of PRACTICE_DIALS.traplab){
+    const box=document.getElementById('labDials'); if(!box) return;
+    document.getElementById('labTuneTitle').textContent=LAB.kind==='pass'?'TUNE PASSING':LAB.kind==='shoot'?'TUNE SHOOTING':'TUNE THE TRAP';
+    if(box.dataset.kind===LAB.kind&&box.childElementCount){ labSyncTune(); return; }
+    box.dataset.kind=LAB.kind; box.innerHTML='';
+    for(const k of PRACTICE_DIALS[LAB.kind+'lab']){
       const d=P[k], row=document.createElement('div'); row.className='ltDial';
       row.innerHTML=`<label>${LAB_DIAL_NAMES[k]||d.label}<b data-lv="${k}"></b></label>
         <input type="range" data-lk="${k}" min="${d.min}" max="${d.max}" step="${d.step}" value="${d.val}">
         <div class="ltHint">${LAB_DIAL_HINTS[k]||d.hint}</div>`;
       box.appendChild(row);
     }
-    box.addEventListener('input',e=>{ const k=e.target.dataset&&e.target.dataset.lk; if(k) labSetDial(k,parseFloat(e.target.value),true); });
-    box.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lk) e.target.blur(); });   // hand the keys back to the game
+    if(!box.dataset.wired){ box.dataset.wired='1';
+      box.addEventListener('input',e=>{ const k=e.target.dataset&&e.target.dataset.lk; if(k) labSetDial(k,parseFloat(e.target.value),true); });
+      box.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lk) e.target.blur(); }); }   // hand the keys back to the game
     labSyncTune();
   }
   function labSyncTune(){
@@ -2130,6 +2256,8 @@
   // The lab's fixed camera: the receiver a little right of centre, the machine on the left. With the
   // TUNE drawer open, slide over so both stay clear of it.
   function labCamX(){
+    if(LAB.kind==='pass') return passLabCamX();
+    if(LAB.kind==='shoot') return shootLabCamX();
     let want=W*0.565;                                     // where the receiver sits on screen
     if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw;
       want=Math.min(want,W-dw-130); }
@@ -2138,6 +2266,8 @@
   }
   // on the pitch: the AI receiver's reach ring, your mark, and the last touch's in/out arrows
   function labDrawPitch(){
+    if(LAB.kind==='pass') return passLabDraw();
+    if(LAB.kind==='shoot') return shootLabDraw();
     const rc=labRecv();
     if(ball.ownedBy!==rc){                                 // the gather radius: a trapped ball is yours once it's in here
       ctx.beginPath();
@@ -2156,6 +2286,7 @@
   }
   // over the players: the last touch's way in and way out
   function labDrawOver(){
+    if(LAB.kind!=='trap') return;
     const fx=LAB.fx; if(!fx) return;
     const al=clamp(fx.t/0.6,0,1), o=proj(fx.x,fx.y,fx.z);
     const i0=proj(fx.x-fx.inDir.x*70,fx.y-fx.inDir.y*70,fx.z), o1=proj(fx.x+fx.outDir.x*fx.len,fx.y+fx.outDir.y*fx.len,fx.z);
@@ -2168,6 +2299,384 @@
     ctx.beginPath(); ctx.moveTo(o1.x,o1.y); ctx.lineTo(o1.x-Math.cos(ha-0.5)*7,o1.y-Math.sin(ha-0.5)*7);
     ctx.moveTo(o1.x,o1.y); ctx.lineTo(o1.x-Math.cos(ha+0.5)*7,o1.y-Math.sin(ha+0.5)*7); ctx.stroke();
     ctx.restore();
+  }
+
+  // ===== PASS LAB =====
+  // You on a mark with the ball, a teammate to pass to (standing, or making a run in behind), and if you
+  // like a defender in the lane or marking him. Every pass is called: what you played (along the grass,
+  // lofted, through ball), and whether it got to him -- his first touch and how soon it was his -- or
+  // where it went instead.
+  const PL_DISTS=[[220,'SHORT'],[380,'MEDIUM'],[560,'LONG'],[760,'VERY LONG']];
+  const PL_ANGS=[[0,'AHEAD'],[-35,'AHEAD ↑'],[35,'AHEAD ↓'],[-80,'SQUARE ↑'],[80,'SQUARE ↓'],['rnd','RANDOM']];
+  const PL_DEFS=[['none','NONE'],['lane','IN THE LANE'],['mark','MARKING']];
+  const PL_COL={received:'#9dff3c',intercepted:'#ff5a4d',lost:'#ff5a4d',dead:'#8a9580',back:'#ffb43c'};
+  const plName=(arr,v)=>{ const e=arr.find(x=>x[0]===v); return e?e[1]:String(v); };
+  function plRcv(){ return players.find(q=>q.pRole==='labPassRcv'); }
+  function plDef(){ return players.find(q=>q.pRole==='labPassDef'); }
+  function passLabSetup(){
+    const mates=grnList().filter(q=>q!==controlled), R=mates[0], reds=redList(), D=reds[0];
+    controlled.stats=Object.assign({},controlled.stats,{passAcc:undefined});                // you pass off the Passing dial...
+    if(R){ R.pRole='labPassRcv'; R.stats=Object.assign({},R.stats,{ballControl:undefined,composure:undefined}); }   // ...he traps off Ball control
+    if(D) D.pRole='labPassDef';
+    let n=0; for(const q of mates){ if(q!==R){ q.x=60; q.y=60+(n++)*36; } }                  // everyone else well out of it
+    reds.forEach((q,i)=>{ if(q!==D){ q.x=FW-60; q.y=FH-60-i*36; } });
+    passLabServe();
+  }
+  // a new ball: you on the mark with it, him (and the defender) placed for the chosen pass
+  function passLabServe(){
+    const you=controlled, R=plRcv(), D=plDef(); if(!R) return;
+    gkHold=null; controllingKeeper=null; restartT=0; restartInfo=null; headerT=0; scoredT=0; offsideT=0;
+    keepers.forEach(k=>{ k.mode='line'; k.holdT=0; });
+    let ang=LAB.pAng; if(ang==='rnd') ang=Math.round((Math.random()*2-1)*80);
+    const a=ang*Math.PI/180, sp=LAB.pspot;
+    for(const q of [you,R]){ q.vx=q.vy=0; q.state='normal'; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.runTarget=null; q.gapRun=0; }
+    you.x=sp.x; you.y=sp.y;
+    R.x=clamp(sp.x+Math.cos(a)*LAB.pDist,60,FW-320); R.y=clamp(sp.y+Math.sin(a)*LAB.pDist,60,FH-60);
+    const dx=R.x-you.x, dy=R.y-you.y, dl=Math.hypot(dx,dy)||1;
+    you.facing={x:dx/dl,y:dy/dl}; R.facing={x:-dx/dl,y:-dy/dl};
+    if(D){
+      D.vx=D.vy=0; D.state='normal'; D.z=0; D.vz=0; D.noTouchT=0; D.facing={x:-1,y:0};
+      if(LAB.pDef==='lane'){ D.x=you.x+dx*0.5; D.y=you.y+dy*0.5; }                         // stood on the line of the pass
+      else if(LAB.pDef==='mark'){ D.x=R.x+44; D.y=R.y+(R.y<YC?16:-16); }                   // goal-side of him
+      else { D.x=FW-60; D.y=FH-60; }
+    }
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
+    ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); offsidePass=null; ball.z=0; ball.vz=0;
+    own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;
+    passPend=null; passDown=null; passLoft=false; kickHeld=false; kickCharge=0; thruMark=null;
+    for(const q of players){ q.reachT=-1; q.airReachT=-1; q.trapRolled=false; }
+    LAB.rep={t0:simNow, d:Math.round(dl), dSet:LAB.pDist, ang, run:LAB.pRun, def:LAB.pDef, r0:{x:R.x,y:R.y}, runAt:simNow+0.7,
+             pass:null, touch:null, closest:1e9, deadT:0, done:false, result:null};
+    LAB.trail=[]; LAB.dirty=true;
+  }
+  // the receiver and the defender are scripted until the ball's on its way; then he takes it as he would
+  // in a match (reading it, meeting it, his own first touch and his reaction to it)
+  function passLabActor(p,dt){
+    const r=LAB.rep;
+    if(p.pRole==='labPassDef'){ p.vx=p.vy=0; return true; }                                // a mannequin, but he cuts out anything that comes to him
+    if(r&&r.pass&&!r.done){
+      let ai=aiBrain(p,dt);
+      if(p.touchLagT>0){ p.touchLagT-=dt; ai=p.preTouchAi||{ix:0,iy:0}; } else p.preTouchAi=ai;
+      stepOutfield(p,ai.ix,ai.iy,dt); return true;
+    }
+    if(r&&!r.done&&r.run&&simNow>=r.runAt&&simNow<r.runAt+2.6){ p.sprint=true; stepOutfield(p,1,0,dt); return true; }   // a run in behind
+    p.sprint=false; stepOutfield(p,0,0,dt); return true;
+  }
+  // from doPass / thruBall: what you played
+  function labOnPass(type,rcv,tgt){
+    if(!LAB.on||LAB.kind!=='pass') return;
+    const r=LAB.rep; if(!r||r.done||r.pass) return;
+    r.pass={type,t:simNow,rcv,tgt:tgt?{x:tgt.x,y:tgt.y}:null,v:Math.round(Math.hypot(ball.vx,ball.vy)),vz:Math.round(ball.vz),from:{x:ball.x,y:ball.y}};
+    offsidePass=null;                                   // no offside in the lab
+    LAB.trail=[{x:ball.x,y:ball.y,z:ball.z}]; LAB.dirty=true;
+  }
+  function passLabTouch(p,s,e){
+    const r=LAB.rep; if(!r||r.done||!r.pass||r.touch||p!==plRcv()) return;
+    r.touch={t:simNow,s,e,grade:trapGrade(s)}; LAB.dirty=true;
+  }
+  function passLabStep(dt,rdt){
+    const r=LAB.rep, R=plRcv(), you=controlled;
+    if(r&&!r.done&&R){
+      if(!r.pass){
+        if((ball.ownedBy&&ball.ownedBy!==you)||(!ball.ownedBy&&ball.lastTouch&&ball.lastTouch!==you.team)) passLabFinish('lost');
+      } else {
+        if(LAB.trail.length<900) LAB.trail.push({x:ball.x,y:ball.y,z:ball.z});
+        if(ball.z<40) r.closest=Math.min(r.closest,dist(ball,R));
+        const o=ball.ownedBy, sp=Math.hypot(ball.vx,ball.vy);
+        if(o===R) passLabFinish('received');
+        else if(o&&o!==you) passLabFinish('intercepted');
+        else if(o===you) passLabFinish('back');
+        else if(ball.lastTouch&&ball.lastTouch!==you.team) passLabFinish('intercepted');   // cut out (or deflected) by the defender
+        else if(sp<12&&ball.z<1){ r.deadT+=dt; if(r.deadT>1.4) passLabFinish('dead'); }      // it stopped and he didn't get to it
+        else if(simNow-r.pass.t>6) passLabFinish('dead');
+        else r.deadT=0;
+      }
+    }
+    if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) passLabServe(); }
+  }
+  function passLabTally(){ return LAB.pt||(LAB.pt={n:0,ok:0,cut:0,by:{},touch:{}}); }
+  function passLabFinish(res){
+    const r=LAB.rep; if(!r||r.done) return;
+    r.done=true; r.result=res; r.endT=simNow;
+    if(r.pass){
+      const R=plRcv(); r.rest=R?Math.round(dist(ball,R)):null;
+      const T=passLabTally(), k=r.pass.type, b=T.by[k]||(T.by[k]={n:0,ok:0});
+      T.n++; b.n++;
+      if(res==='received'){ T.ok++; b.ok++; }
+      if(res==='intercepted') T.cut++;
+      if(r.touch) T.touch[r.touch.grade]=(T.touch[r.touch.grade]||0)+1;
+    }
+    LAB.last=r; LAB.nextT=res==='received'?1.2:1.6; LAB.dirty=true;
+  }
+  function passLabKey(code){
+    switch(code){
+      case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': LAB.pDist=PL_DISTS[+code.slice(5)-1][0]; break;
+      case 'Comma':  case 'Period': { const vs=PL_ANGS.map(a=>a[0]), i=vs.indexOf(LAB.pAng); LAB.pAng=vs[(i+(code==='Period'?1:vs.length-1))%vs.length]; break; }
+      case 'KeyC': LAB.pRun=!LAB.pRun; break;
+      case 'KeyB': { const vs=PL_DEFS.map(a=>a[0]); LAB.pDef=vs[(vs.indexOf(LAB.pDef)+1)%vs.length]; break; }
+      default: return false;
+    }
+    passLabServe(); LAB.dirty=true; return true;     // a new setup takes effect at once
+  }
+  function passLabChip(act){
+    const nextOf=(arr,v)=>{ const vs=arr.map(a=>a[0]); return vs[(vs.indexOf(v)+1)%vs.length]; };
+    if(act==='pdist') LAB.pDist=nextOf(PL_DISTS,LAB.pDist);
+    else if(act==='pang') LAB.pAng=nextOf(PL_ANGS,LAB.pAng);
+    else if(act==='prun') LAB.pRun=!LAB.pRun;
+    else if(act==='pdef') LAB.pDef=nextOf(PL_DEFS,LAB.pDef);
+    else return false;
+    passLabServe(); return true;
+  }
+  function passLabHud(){
+    if(!LAB.dirty) return;
+    LAB.dirty=false;
+    labHudCommon();
+    labEl.labPDistV.textContent=plName(PL_DISTS,LAB.pDist);
+    labEl.labPAngV.textContent=plName(PL_ANGS,LAB.pAng);
+    labEl.labPRunV.textContent=LAB.pRun?'MAKES A RUN':'STANDS';
+    labEl.labPDefV.textContent=plName(PL_DEFS,LAB.pDef);
+    const r=LAB.rep, shown=r&&(r.pass||r.done)?r:LAB.last;
+    labEl.labResult.innerHTML=shown&&(shown.pass||shown.done)?passLabText(shown):passLabHint();
+    labEl.labTally.textContent=passLabTallyText();
+  }
+  function passLabHint(){
+    return isTouch
+      ? 'Tap <b>PASS</b> · <b>double-tap</b> to loft it · <b>drag off PASS</b> for a through ball'
+      : 'Pass to your teammate: <b>J</b> (hold for a longer ball) · <b>J J</b> double-tap for a lofted pass. Aim with WASD. (Through balls are the touch drag off PASS.)';
+  }
+  function passLabText(r){
+    const head=`<span class="lsv">${plName(PL_DISTS,r.dSet)} ${r.d} px · ${r.run?'running':'standing'}${r.def!=='none'?' · defender '+(r.def==='lane'?'in the lane':'marking'):''}</span>`;
+    if(!r.pass) return `${head} <b style="color:${PL_COL.lost}">LOST IT</b> before you passed`;
+    const P_=r.pass, hi=Math.round(Math.max(0,P_.vz)*Math.max(0,P_.vz)/1040);
+    const what=`<b>${P_.type}</b> ${P_.v} px/s, ${hi>=4?hi+' px high':'along the grass'}`+(P_.rcv&&P_.rcv!==plRcv()?' · to someone else':'');
+    if(!r.done) return `${head} ${what} → on its way…`;
+    const res=r.result;
+    if(res==='received'){
+      const tt=r.touch?` · touch <b style="color:${LAB_COL[r.touch.grade]}">${r.touch.grade}</b> at ${(r.touch.t-P_.t).toFixed(2)} s`:' · straight to their feet';
+      return `${head} ${what} → <b style="color:${PL_COL.received}">RECEIVED</b>${tt} · controlled at ${(r.endT-P_.t).toFixed(2)} s`;
+    }
+    if(res==='intercepted') return `${head} ${what} → <b style="color:${PL_COL.intercepted}">CUT OUT</b> by the defender`;
+    if(res==='back') return `${head} ${what} → <b style="color:${PL_COL.back}">BACK TO YOU</b>`;
+    const near=r.closest<1e8?`, ${Math.round(r.closest)} px from them at the closest`:'';
+    return `${head} ${what} → <b style="color:${PL_COL.dead}">NOT RECEIVED</b> · it stopped ${r.rest!=null?r.rest+' px from them':'out of reach'}${near}`;
+  }
+  function passLabTallyText(){
+    const T=passLabTally();
+    if(!T.n) return LAB.auto?'no passes yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
+                             :'no passes yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    const parts=[T.n+(T.n===1?' pass':' passes'), T.ok+' received ('+Math.round(T.ok/T.n*100)+'%)'];
+    if(T.cut) parts.push(T.cut+' cut out');
+    for(const k of Object.keys(T.by)) parts.push(k.toLowerCase()+' '+T.by[k].ok+'/'+T.by[k].n);
+    const tg=['PERFECT','CLEAN','LOOSE','HEAVY'].filter(g=>T.touch[g]).map(g=>T.touch[g]+' '+g.toLowerCase());
+    if(tg.length) parts.push('first touches: '+tg.join(', '));
+    return parts.join(' · ');
+  }
+  function passLabCamX(){
+    const r=LAB.rep, sp=LAB.pspot, R0=r?r.r0:{x:sp.x+LAB.pDist,y:sp.y};
+    let mid=(sp.x+Math.max(R0.x,sp.x))/2+(r&&r.run?110:0);
+    if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw; mid+=dw*0.5; }
+    return clamp(mid,camMin,camMax);
+  }
+  // on the pitch: your mark, where he started (and his run), and the ball's path -- lofted ones in the air
+  function passLabDraw(){
+    const r=LAB.rep||LAB.last;
+    const cross=(x,y,c)=>{ const a=proj(x-7,y),b=proj(x+7,y),c1=proj(x,y-7),d=proj(x,y+7); ctx.strokeStyle=c; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.moveTo(c1.x,c1.y); ctx.lineTo(d.x,d.y); ctx.stroke(); };
+    cross(LAB.pspot.x,LAB.pspot.y,'rgba(223,230,212,.28)');
+    if(r){ cross(r.r0.x,r.r0.y,'rgba(157,255,60,.35)');
+      if(r.run){ const a=proj(r.r0.x+20,r.r0.y), b=proj(r.r0.x+300,r.r0.y); ctx.save(); ctx.setLineDash([6,6]); ctx.strokeStyle='rgba(157,255,60,.35)'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore(); } }
+    const tr=LAB.trail; if(tr.length<2) return;
+    const col=r&&r.done?(PL_COL[r.result]||'#8a9580'):'#e9f5ec';
+    ctx.save(); ctx.globalAlpha=0.55; ctx.setLineDash([3,4]); ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+    tr.forEach((q,i)=>{ const s=proj(q.x,q.y,q.z); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }); ctx.stroke(); ctx.restore();
+  }
+
+  // ===== SHOOTING LAB =====
+  // You on a spot with the ball and (if you want him) their keeper in goal. Every shot is called -- goal,
+  // saved, wide, over, short -- with where it crossed the line against where you aimed, its pace and power,
+  // and how far it bent; the goal panel keeps the last shots, and the pitch shows the last one's flight.
+  const SL_DISTS=[[150,'PENALTY SPOT'],[260,'EDGE OF BOX'],[420,'25 YARDS'],[600,'LONG RANGE']];
+  const SL_ANGS=[[0,'CENTRE'],[-170,'LEFT ↑'],[170,'RIGHT ↓'],['rnd','RANDOM']];
+  const SL_COL={goal:'#9dff3c',saved:'#ffb43c',post:'#e9f5ec',wide:'#ff5a4d',over:'#ff5a4d',short:'#8a9580',keeper:'#ffb43c',lost:'#ff5a4d'};
+  const SL_M=70, SL_ZTOP=GOAL_H+45;                     // the goal panel: this much either side of the posts, this high
+  function slKeeper(){ return keepers.find(k=>k.team!==controlled.team); }
+  function shootLabSetup(){
+    // you shoot off the shot dials, their keeper saves off the keeper dials
+    controlled.stats=Object.assign({},controlled.stats,{shotPower:undefined,shotAcc:undefined,curve:undefined,longShots:undefined,composure:undefined});
+    const kp=slKeeper(); if(kp) kp.stats=Object.assign({},kp.stats,{gkReflex:undefined,gkReach:undefined,gkDiveRange:undefined});
+    let n=0; for(const q of players){ if(q===controlled) continue; q.x=q.team==='G'?60:260; q.y=60+(n++)*36; }   // everyone well out of it
+    shootLabServe();
+  }
+  function shootLabServe(){
+    const you=controlled, kp=slKeeper();
+    gkHold=null; controllingKeeper=null; restartT=0; restartInfo=null; headerT=0; scoredT=0; offsideT=0;
+    keepers.forEach(k=>{ k.mode='line'; k.holdT=0; k.diveT=0; k.groundT=0; k.reactT=0; k.threatActive=false; k.claimCd=0.4;
+      k.x=k.homeX; k.y=YC; k.benched=(k===kp&&!LAB.sKeep); });
+    let ang=LAB.sAng; if(ang==='rnd') ang=Math.round((Math.random()*2-1)*190);
+    you.x=FW-LAB.sDist; you.y=clamp(YC+ang,80,FH-80); you.vx=you.vy=0; you.state='normal'; you.z=0; you.vz=0; you.noTouchT=0; you.sprint=false;
+    const fl=Math.hypot(FW-you.x,YC-you.y)||1; you.facing={x:(FW-you.x)/fl,y:(YC-you.y)/fl};
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
+    ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); offsidePass=null; ball.z=0; ball.vz=0;
+    own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;
+    shootHeld=false; shootCharge=0; curveArmed=false; curveT=0; windUp=null; swipeShot=null; passPend=null; kickHeld=false; kickCharge=0;
+    LAB.rep={t0:simNow, dSet:LAB.sDist, ang, keeper:LAB.sKeep, spot:{x:you.x,y:you.y}, shot:null, cross:null, save:null, goal:false, done:false, result:null};
+    LAB.trail=[]; LAB.dirty=true;
+  }
+  // from shootAt: the strike
+  function labOnShot(o){
+    if(!LAB.on||LAB.kind!=='shoot') return;
+    const r=LAB.rep; if(!r||r.done||r.shot) return;
+    r.shot={t:simNow,from:{x:ball.x,y:ball.y},v:Math.round(Math.hypot(ball.vx,ball.vy)),vz:Math.round(ball.vz),charge:o.charge,ty:o.ty,aimed:o.aimed,spin:o.spin||0,swipe:!!o.swipe,first:!!o.first};
+    LAB.trail=[{x:ball.x,y:ball.y,z:ball.z}]; LAB.dirty=true;
+  }
+  // from the keeper: a save (or he came and took it)
+  function labOnSave(kind){
+    if(!LAB.on||LAB.kind!=='shoot') return;
+    const r=LAB.rep; if(r&&!r.done&&r.shot&&!r.save){ r.save={kind,t:simNow}; LAB.dirty=true; }
+  }
+  // from goal(): in the lab a goal is just called, nothing restarts
+  function labOnGoal(){
+    const r=LAB.rep; if(LAB.kind==='shoot'&&r&&!r.done&&r.shot){ r.goal=true; LAB.dirty=true; }
+    lastGrade='GOAL!'; gradeColor='#9dff3c'; gradeFade=1.2;
+  }
+  function shootLabStep(dt,rdt){
+    const r=LAB.rep;
+    if(r&&!r.done){
+      if(!r.shot){
+        if(gkHold) shootLabFinish('keeper');                                    // he came out and took it off you
+        else if(ball.ownedBy&&ball.ownedBy!==controlled) shootLabFinish('lost');
+      } else {
+        if(LAB.trail.length<900) LAB.trail.push({x:ball.x,y:ball.y,z:ball.z});
+        // where it will cross the goal line, kept up to date as it comes in; it's settled when the ball turns back
+        // (off the post or the end, or a save) or goes in
+        if(!r.cross&&ball.vx>1&&!ball.ownedBy&&!gkHold&&ball.x>FW-320){
+          const tg=(FW-ball.x)/ball.vx;
+          r.crossEst={y:ball.y+ball.vy*tg, z:Math.max(0,ball.z+ball.vz*tg-260*tg*tg), n:LAB.trail.length};
+        } else if(r.crossEst&&!r.cross&&ball.vx<=1) r.cross=r.crossEst;
+        if(gkHold&&!r.save) r.save={kind:'caught',t:simNow};
+        if(r.goal){ r.cross=r.cross||r.crossEst; shootLabFinish('goal'); }
+        else if(r.save) shootLabFinish('saved');
+        else if(r.cross){ const ay=Math.abs(r.cross.y-YC);
+          shootLabFinish(r.cross.z>=GOAL_H&&ay<GOAL_W/2?'over':ay<GOAL_W/2+ball.r?'post':'wide'); }
+        else if(!r.crossEst&&Math.hypot(ball.vx,ball.vy)<15&&ball.z<1) shootLabFinish('short');
+        else if(simNow-r.shot.t>4) shootLabFinish('short');
+      }
+    }
+    if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) shootLabServe(); }
+  }
+  function shootLabTally(){ return LAB.st||(LAB.st={n:0,goal:0,saved:0,post:0,wide:0,over:0,short:0,errSum:0,errN:0}); }
+  function shootLabFinish(res){
+    const r=LAB.rep; if(!r||r.done) return;
+    r.done=true; r.result=res; r.endT=simNow;
+    if(r.shot){
+      const T=shootLabTally(); T.n++; if(T[res]!=null) T[res]++;
+      if(r.cross&&res!=='saved'){ r.err=Math.abs(r.cross.y-r.shot.ty); T.errSum+=r.err; T.errN++; }
+      // how far it bent: the most the flight strayed off the straight line from strike to where it ended up
+      const tr=LAB.trail.slice(0,r.cross&&r.cross.n?r.cross.n:LAB.trail.length), a=tr[0], b=r.cross?{x:FW,y:r.cross.y}:tr[tr.length-1];   // (up to the line)
+      if(a&&b){ const L=Math.hypot(b.x-a.x,b.y-a.y)||1; let m=0;
+        for(const q of tr){ const c=((b.x-a.x)*(q.y-a.y)-(b.y-a.y)*(q.x-a.x))/L; if(Math.abs(c)>Math.abs(m)) m=c; }
+        r.bend=m; }
+      const at=r.cross||(res==='saved'&&tr.length?{y:tr[tr.length-1].y,z:tr[tr.length-1].z}:null);
+      if(at){ LAB.shots.unshift({y:at.y,z:at.z,res,ty:r.shot.ty}); if(LAB.shots.length>14) LAB.shots.length=14; }
+    }
+    LAB.last=r; LAB.nextT=res==='goal'?1.4:1.6; LAB.dirty=true;
+  }
+  function shootLabKey(code){
+    switch(code){
+      case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': LAB.sDist=SL_DISTS[+code.slice(5)-1][0]; break;
+      case 'Comma': case 'Period': { const vs=SL_ANGS.map(a=>a[0]), i=vs.indexOf(LAB.sAng); LAB.sAng=vs[(i+(code==='Period'?1:vs.length-1))%vs.length]; break; }
+      case 'KeyB': LAB.sKeep=!LAB.sKeep; break;
+      default: return false;
+    }
+    shootLabServe(); LAB.dirty=true; return true;
+  }
+  function shootLabChip(act){
+    const nextOf=(arr,v)=>{ const vs=arr.map(a=>a[0]); return vs[(vs.indexOf(v)+1)%vs.length]; };
+    if(act==='sdist') LAB.sDist=nextOf(SL_DISTS,LAB.sDist);
+    else if(act==='sang') LAB.sAng=nextOf(SL_ANGS,LAB.sAng);
+    else if(act==='skeep') LAB.sKeep=!LAB.sKeep;
+    else return false;
+    shootLabServe(); return true;
+  }
+  // across the goal from where you shoot: your left is the top of the screen when you're attacking right
+  const slGx=y=>clamp((y-(YC-GOAL_W/2-SL_M))/(GOAL_W+2*SL_M),0,1)*100;
+  const slGz=z=>(1-clamp(z/SL_ZTOP,0,1))*100;
+  function slWhere(y,z){
+    const u=(y-YC)/(GOAL_W/2), side=u<-0.45?'left':u>0.45?'right':'centre', h=z<GOAL_H*0.33?'low':z<GOAL_H*0.7?'mid-height':'high';
+    return side==='centre'?h+' through the middle':h+' to your '+side+((Math.abs(u)>0.72&&h!=='mid-height')?' corner':'');
+  }
+  function shootLabHud(){
+    if(!LAB.dirty) return;
+    LAB.dirty=false;
+    labHudCommon();
+    labEl.labSDistV.textContent=plName(SL_DISTS,LAB.sDist);
+    labEl.labSAngV.textContent=plName(SL_ANGS,LAB.sAng);
+    labEl.labSKeepV.textContent=LAB.sKeep?'ON':'OFF';
+    // the goal panel: posts and bar, and where the last shots went
+    const fr=labEl.labGoalBox.querySelector('.lgFrame');
+    fr.style.left=slGx(YC-GOAL_W/2)+'%'; fr.style.width=(slGx(YC+GOAL_W/2)-slGx(YC-GOAL_W/2))+'%'; fr.style.top=slGz(GOAL_H)+'%'; fr.style.bottom='0';
+    let h='';
+    const lr=LAB.last&&LAB.last.shot?LAB.last:null;
+    if(lr) h+=`<div class="lgAim" style="left:${slGx(lr.shot.ty)}%;top:${slGz(GOAL_H*0.45)}%"></div>`;
+    LAB.shots.forEach((q,i)=>{ h+=`<div class="lgDot${i===0?' last':''}" style="left:${slGx(q.y)}%;top:${slGz(q.z)}%;background:${SL_COL[q.res]};opacity:${(1-i/16).toFixed(2)}"></div>`; });
+    labEl.labGoalDots.innerHTML=h;
+    const r=LAB.rep, shown=r&&(r.shot||r.done)?r:LAB.last;
+    labEl.labResult.innerHTML=shown&&(shown.shot||shown.done)?shootLabText(shown):shootLabHint();
+    labEl.labTally.textContent=shootLabTallyText();
+  }
+  function shootLabHint(){
+    return isTouch
+      ? '<b>Swipe</b> at the goal on the right side (<b>bend it to curl</b>) or hold <b>SHOOT</b>'
+      : 'Shoot: hold <b>K</b> to wind up and let go · hold <b>W</b> / <b>S</b> as you shoot to pick the corner · hold <b>K</b> + <b>W</b>/<b>S</b> while it flies to curl it.';
+  }
+  function shootLabText(r){
+    const head=`<span class="lsv">${plName(SL_DISTS,r.dSet)} · ${r.ang===0?'centre':r.ang<0?'left':'right'}${r.keeper?'':' · no keeper'}</span>`;
+    if(!r.shot) return `${head} <b style="color:${SL_COL[r.result]||'#8a9580'}">${r.result==='keeper'?'THE KEEPER TOOK IT':'LOST IT'}</b> before you shot`;
+    const S=r.shot, how=`<b>${S.swipe?'SWIPE':S.first?'FIRST TIME':'SHOT'}</b> power ${Math.round(S.charge*100)}% · ${S.v} px/s`;
+    if(!r.done) return `${head} ${how} → …`;
+    const bend=r.bend!=null&&Math.abs(r.bend)>=6?` · bent ${Math.round(Math.abs(r.bend))} px`:'';
+    const off=r.err!=null?` · ${Math.round(r.err)} px from where you aimed`:'';
+    const res=r.result, c=SL_COL[res];
+    if(res==='goal') return `${head} ${how} → <b style="color:${c}">GOAL!</b> ${r.cross?slWhere(r.cross.y,r.cross.z):''}${off}${bend}`;
+    if(res==='saved') return `${head} ${how} → <b style="color:${c}">SAVED</b> (${r.save.kind})${bend}`;
+    if(res==='post') return `${head} ${how} → <b style="color:${c}">OFF THE POST</b>${off}${bend}`;
+    if(res==='wide') return `${head} ${how} → <b style="color:${c}">WIDE</b> by ${Math.max(1,Math.round(Math.abs(r.cross.y-YC)-GOAL_W/2))} px${off}${bend}`;
+    if(res==='over') return `${head} ${how} → <b style="color:${c}">OVER</b> the bar by ${Math.max(1,Math.round(r.cross.z-GOAL_H))} px${off}${bend}`;
+    return `${head} ${how} → <b style="color:${c}">SHORT</b> · it never got there`;
+  }
+  function shootLabTallyText(){
+    const T=shootLabTally();
+    if(!T.n) return LAB.auto?'no shots yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
+                             :'no shots yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    const on=T.goal+T.saved, parts=[T.n+(T.n===1?' shot':' shots'), T.goal+' scored', T.saved+' saved'];
+    if(T.post) parts.push(T.post+' off the post');
+    if(T.wide+T.over) parts.push((T.wide+T.over)+' off target ('+[T.wide?T.wide+' wide':'',T.over?T.over+' over':''].filter(Boolean).join(', ')+')');
+    if(T.short) parts.push(T.short+' short');
+    parts.push(Math.round(on/T.n*100)+'% on target');
+    if(T.errN) parts.push('avg '+Math.round(T.errSum/T.errN)+' px off your aim');
+    return parts.join(' · ');
+  }
+  function shootLabCamX(){
+    let want=W*0.8;                                       // the goal line, toward the right of the screen
+    if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw; want=Math.min(want,W-dw-60); }
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/FH,PERSP);
+    return clamp(FW-(want-W/2)/sc,camMin,FW);           // (may look past the goal line to keep the goal clear of the drawer)
+  }
+  // on the pitch: your spot, the spot you aimed at, and the shot's flight (bend and height)
+  function shootLabDraw(){
+    const r=LAB.rep||LAB.last;
+    if(r){ const sp=r.spot, a=proj(sp.x-7,sp.y),b=proj(sp.x+7,sp.y),c=proj(sp.x,sp.y-7),d=proj(sp.x,sp.y+7);
+      ctx.strokeStyle='rgba(223,230,212,.28)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.moveTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.stroke(); }
+    const rr=r&&r.shot?r:(LAB.last&&LAB.last.shot?LAB.last:null);
+    if(rr){ const s=proj(FW,rr.shot.ty,GOAL_H*0.45); ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(233,245,236,.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(s.x,s.y,6,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+    const tr=LAB.trail; if(tr.length<2) return;
+    const col=r&&r.done?(SL_COL[r.result]||'#8a9580'):'#e9f5ec';
+    ctx.save(); ctx.globalAlpha=0.6; ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+    tr.forEach((q,i)=>{ const s=proj(q.x,q.y,q.z); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }); ctx.stroke();
+    ctx.globalAlpha=0.25; ctx.setLineDash([2,5]); ctx.beginPath();                       // its shadow on the grass: the bend
+    tr.forEach((q,i)=>{ const s=proj(q.x,q.y,0); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }); ctx.stroke(); ctx.restore();
   }
 
   // simple spring-carry of the GHOST ball behind a scripted dribbler (mirrors the real carry feel)
@@ -2195,6 +2704,7 @@
   // per-frame scripted behavior for practice helpers + feeders. returns true if it handled p's movement.
   function practiceStep(p,dt){
     if(!practice) return false;
+    if(p.pRole==='labPassRcv'||p.pRole==='labPassDef') return passLabActor(p,dt);
     const atk = atkOf(p.team);
     if(p.pRole==='dribbler'){
       // demo run: drive forward, weave through a few turns (showing max-agility close control),
@@ -2878,12 +3388,12 @@
     kickHeld=false;
     const loft=passLoft; passLoft=false;
     let thru=null;
-    if(d&&d.x!=null){ const dx=d.lx-d.x, dy=d.ly-d.y; if(Math.hypot(dx,dy)>=THRU_DRAG) thru={dx,dy}; }
+    if(d&&d.x!=null){ const dx=d.lx-d.x, dy=d.ly-d.y; if(Math.hypot(dx,dy)>=P.passDrag.val) thru={dx,dy}; }
     if(d&&swipeTrail&&d.pts&&swipeTrail.pts===d.pts){ swipeTrail.endT=performance.now(); swipeTrail.shot=!!thru&&ball.ownedBy===controlled; }
     if(ball.ownedBy!==controlled){ kickCharge=0; return; }
     const charge=kickCharge; kickCharge=0;
     if(thru||loft||!d||performance.now()-d.t>DTAP_PRESS) doPass(charge,{loft,thru});
-    else passPend={charge,at:performance.now()+DTAP_WIN};
+    else passPend={charge,at:performance.now()+P.passDtap.val};
   }
   function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
   function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); }   // (every frame)
@@ -2919,7 +3429,7 @@
       if(score>bs){bs=score;best=q;}
     }
 
-    if(best&&o.thru){ thruBall(p,best,o.thru,o.loft); return; }
+    if(best&&o.thru){ thruBall(p,best,o.thru,o.loft); labOnPass(o.loft?'LOFTED THROUGH BALL':'THROUGH BALL',best,ball.thru); return; }
     if(best){
       // lead the target slightly along their motion + a touch ahead
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
@@ -2931,7 +3441,7 @@
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       if(o.loft){
         // LOFTED: up over everyone and down at their feet -- no drag in the air, so it lands d away after T
-        const T=clamp(0.55+d/900,0.65,1.45), vh=loftVh(d,T);
+        const T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, vh=loftVh(d,T);
         ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T;
         ball.lob={x:ax,y:ay};                        // it checks up where it lands (see the bounce)
         ball.intendedRcv=best; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // the receiver goes to where it drops
@@ -2944,6 +3454,7 @@
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
       recordPassTeam(p.team,p); passPose(p);
+      labOnPass(o.loft?'LOFTED PASS':'PASS',best,lead);
       // locked: do not switch to the receiver
     } else {
       // no good target: raw directional kick where aimed -- or into space the way you dragged
@@ -2953,6 +3464,7 @@
       ball.vz=o.loft?320:200;
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       recordPassTeam(p.team,p); passPose(p);
+      labOnPass(o.thru?'KICK INTO SPACE':o.loft?'LOFTED KICK':'KICK (nobody that way)',null,null);
     }
   }
   // Pace along the ground that carries a lofted ball (vz = 260*T) d in T seconds: there's no drag in the air,
@@ -2962,7 +3474,7 @@
   // run onto it -- along the grass dying on the spot as they get there, or (lofted) over the top to drop there.
   function thruBall(p,mate,drag,loft){
     const u=screenDirToPitch(drag.dx,drag.dy,mate.y);
-    const lead=clamp(120+dist(p,mate)*0.15,130,230);
+    const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
     let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const aerr=passSpray(d,p);
@@ -2970,7 +3482,7 @@
     const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
     let tA;
     if(loft){
-      tA=clamp(tRun,0.7,1.5);
+      tA=clamp(tRun,0.7,1.5)*P.loftHang.val;
       const vh=loftVh(d,tA);
       ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*tA; ball.lob={x:ax,y:ay};
     } else {
@@ -3376,7 +3888,7 @@
     // round onto the spot the swipe pointed at instead of curling off it.
     if(manual && spin && Math.abs(spin)>0.02){
       const side=Math.sign(spin), vz=(60+200*charge)*Math.min(1,Math.max(0.4,distG/600));   // (vz as struck below)
-      let force=SWIPE_CURL*curveOf(p)*Math.abs(spin), swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side);
+      let force=1700*P.swipeCurl.val*curveOf(p)*Math.abs(spin), swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side);
       // more bend than a 23 deg swing-out (a big curler from far) is toned down to fit, so it still finds the spot
       for(let i=0;i<2&&Math.abs(swing)>0.4;i++){ force*=0.4/Math.abs(swing); swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side); }
       const pre=clamp(-swing,-0.45,0.45);
@@ -3396,9 +3908,9 @@
     if(curlSpin!==0){ ball.curveSpin=curlSpin; ball.curveSpinT=manual?SWIPE_SPIN_T:0.9; ball.curveK=curlK; }
     else { ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; }
     recordPassTeam(p.team,p);
+    if(LAB.on&&manual) labOnShot({ty,charge,aimed,spin,swipe:spin!==undefined,first:accMul!==undefined});
   }
   const SWIPE_SPIN_T=1.1;               // how long a swiped shot keeps bending (s) -- as long as a held K+Up/Down can
-  const SWIPE_CURL=3400;                // bend per unit Curve: twice a held K+Up/Down's, so a big arc visibly bends it
   // Which way (radians, signed) a curling ball's line has swung by the time it has run `range`: fly it
   // as the physics step does (gravity and bounces, drag only near the grass -- a live shot's light drag
   // for its first 1.1 s), the curl turning its heading at force/speed rad/s exactly as applyAICurve does.
@@ -6710,6 +7222,7 @@
     kp.y = clamp(kp.y, YC-lim, YC+lim);
   }
   function keeperUpdate(kp,dt){
+    if(kp.benched){ kp.x=kp.homeX+kp.side*90; kp.y=-80; kp.diveT=0; kp.groundT=0; return; }   // Shooting Lab, keeper off: nowhere near it
     kp.claimCd-=dt;
     if(kp.diveT>0){ kp.diveT-=dt; if(kp.diveT<=0 && kp.groundT<=0) kp.groundT=0.5; }   // after the dive, lie down ~0.5s
     else if(kp.groundT>0){ kp.groundT-=dt; }
@@ -6769,6 +7282,7 @@
           ball.lastTouch=kp.team;
           if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
           lastGrade='CLAIMED';gradeColor='#ffb43c';gradeFade=1.2;
+          if(LAB.on) labOnSave('gathered');
         }
       }
       return;
@@ -6793,7 +7307,7 @@
 
     // RUSH OUT: an opponent is carrying the ball close in our box -> close him down
     const oppCarrier = ball.ownedBy && ball.ownedBy.team!==kp.team;
-    const carrierClose = oppCarrier &&
+    const carrierClose = oppCarrier && !(LAB.on&&LAB.kind==='shoot') &&   // (in the Shooting Lab he waits on his line for the shot)
       Math.abs(ball.x-kp.homeX)<BX+30 && Math.abs(ball.y-YC)<BY+10;
     if(carrierClose && scoredT<=0 && offsideT<=0){
       const c=ball.ownedBy;
@@ -6809,6 +7323,7 @@
         kp.mode='hold';kp.holdT=1.1;gkHold=kp;
         ball.cushBy=null;offsidePass=null;ball.ownedBy=null;ball.lastTouch=kp.team;
         lastGrade='KEEPER OUT!';gradeColor='#ffb43c';gradeFade=1.3;
+        if(LAB.on) labOnSave('smothered');
       }
       cageKeeper(kp);
       return;
@@ -6910,6 +7425,7 @@
         endCurve();                       // parried -> curve stops
         if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
         lastGrade = (kp.diveT>0)?'DIVING SAVE!':'SAVED!'; gradeColor='#ffb43c'; gradeFade=1.4;
+        if(LAB.on) labOnSave(kp.diveT>0?'diving save':'parried');
         if(practice==='keeper') kdSaves++;
         if(kp.diveT>0){ kp.diveT=0; kp.groundT=0.5; }   // saved from the dive -> go to ground ~0.5s
       }
@@ -7214,7 +7730,7 @@
         if(ball.z<=0){ball.z=0;ball.vz=ball.vz<-40?-ball.vz*0.45:0;
           if(ball.lob){   // a lofted pass checks up where it lands (backspin) -- if it's still on the line it was struck on
             const sp=Math.hypot(ball.vx,ball.vy)||1;
-            if((ball.vx*ball.lob.x+ball.vy*ball.lob.y)/sp>0.995){ ball.vx*=0.5; ball.vy*=0.5; ball.vz*=0.5; }
+            if((ball.vx*ball.lob.x+ball.vy*ball.lob.y)/sp>0.995){ const k=P.lobCheck.val; ball.vx*=k; ball.vy*=k; ball.vz*=Math.min(1,k); }
             ball.lob=null; }}
       }
       ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
@@ -7309,7 +7825,7 @@
       // football clock: the short real half is scaled to read up to 45:00; 2nd half runs 45:00 -> 90:00
       const _foot=(half===1?0:2700)+clamp(matchClock/halfLenSec(),0,1)*2700;
       const mm=Math.floor(_foot/60), ss=Math.floor(_foot%60);
-      const lbl = practice==='traplab' ? 'TRAP LAB'
+      const lbl = LAB_PRACTICE[practice] ? LAB_TITLE[LAB_PRACTICE[practice]]
                 : practice ? 'PRACTICE'
                 : matchOver ? 'FULL TIME'
                 : ftPending ? 'FULL TIME +ADV'
@@ -7322,7 +7838,7 @@
         const strikeable=controlled&&(headerReady()||firstTouchBall(controlled));
         if(btns.kick){
           const lockT = mine && controlled && controlled.passLockT>0;
-          const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=THRU_DRAG;
+          const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=P.passDrag.val;
           btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : (oursHave?'CALL':'TRAP');
           btns.kick.classList.toggle('mCall', !mine && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
@@ -7449,6 +7965,7 @@
   }
 
   function goal(side){
+    if(LAB.on){ labOnGoal(side); return; }           // the labs call it themselves (no score, no restart)
     if(practice){
       if(practice==='keeper'){
         // ball machine: count it ONCE (the ball sits in the net until the next shot), flash GOAL, and let
@@ -7640,7 +8157,7 @@
     for(const p of players)actors.push({y:p.y,fn:()=>drawOutfielder(p)});
     actors.push({y:ball.y,fn:drawBall});
     if(pball.on)actors.push({y:pball.y,fn:drawGhostBall});
-    for(const kp of keepers)actors.push({y:kp.y,fn:()=>drawKeeper(kp)});
+    for(const kp of keepers) if(!kp.benched) actors.push({y:kp.y,fn:()=>drawKeeper(kp)});
     actors.sort((a,b)=>a.y-b.y);
     for(const a of actors)a.fn();
     if(LAB.on) labDrawOver();
@@ -9448,7 +9965,7 @@
     const has=anySaves();
     document.querySelectorAll('#smItems .smBtn[data-needsave]').forEach(b=>b.classList.toggle('disabled',!has));
     document.getElementById('smResume').style.display=resumable?'block':'none';
-    document.getElementById('smResume').innerHTML='<span class="mk">▶</span>'+(LAB.on?'RESUME TRAP LAB':'RESUME MATCH');
+    document.getElementById('smResume').innerHTML='<span class="mk">▶</span>'+(LAB.on?'RESUME '+LAB_TITLE[LAB.kind]:'RESUME MATCH');
     document.getElementById('smVer').textContent='build '+SETTINGS_V;
     smSel=0; smHighlight();
   }
@@ -9458,7 +9975,7 @@
   function hideStartMenu(){ sm.classList.remove('show'); hideSubs(); }
   function startExhibition(){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); }
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }
-  function startTrapLab(){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); startPractice('traplab'); }
+  function startLab(kind){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); startPractice(kind+'lab'); }
   // ===== CAREER HUB =====
   let matchReturn='menu';   // where Esc/finish returns after a match: 'menu' or 'hub'
   const HUB_BLDGS={
@@ -9611,7 +10128,9 @@
     const act=b.dataset.act;
     if(act==='resume') resumeMatch();
     else if(act==='exhibition'||act==='hubExhibition') startExhibition();
-    else if(act==='traplab') startTrapLab();
+    else if(act==='traplab') startLab('trap');
+    else if(act==='passlab') startLab('pass');
+    else if(act==='shootlab') startLab('shoot');
     else if(act==='settings'){ openSettings(); }
     else if(act==='continue'){ const k=mostRecentKey(); if(k)openHub(k); }
     else if(act==='load'){ renderSlots('slotList',false); showSub('loadPanel'); }

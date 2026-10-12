@@ -84,6 +84,49 @@ The chips across the top set the serve. Each has a desktop shortcut:
 The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
 goes back to the start menu.
 
+## Pass Lab
+
+**PASS LAB** (next to the Trap Lab on the start menu) puts you on a mark with the ball and a
+teammate to pass to. Every pass is called in the result line: what you played (a pass, a lofted
+pass, a through ball, a lofted through ball), its pace and how high it went, and then whether it
+got there — the receiver's first touch and its grade, how soon it was under control — or that it
+was cut out, or where it stopped instead. The tally counts passes received, by type, and the
+receiver's touches. On the pitch you see your mark, where the receiver started (and their run),
+and the ball's path, lofted ones drawn up in the air. Once the ball is on its way the receiver
+reads and takes it exactly as in a match.
+
+| Chip | Key | What it does |
+| --- | --- | --- |
+| DISTANCE | `1`–`4` | Short, medium, long or very long |
+| WHERE | `,` `.` | Ahead, diagonally up or down, square up or down, or random |
+| RECEIVER | `C` | Stands, or makes a run in behind (for through balls) |
+| DEFENDER | `B` | None, one stood in the passing lane, or one marking the receiver |
+| NEXT · TIME | `Q` · `Z` | A new ball after each pass or only on cue · 1×, ½×, ¼× |
+| ▶ NEW BALL | `R` | Reset now |
+| ⚙ TUNE | `T` | Passing, pass loft, the double-tap window, the drag that makes a through ball, through-ball lead, lofted-pass hang time and check-up, and the receiver's ball control, AI timing error and AI reaction |
+
+## Shooting Lab
+
+**SHOOTING LAB** puts you on a spot with the ball and their keeper in goal (who stays on the
+line until you shoot). Every shot is called — goal, saved (and how), off the post, wide or over (and by
+how much), or short — with its power and pace, how far from where you aimed it crossed the
+line, and how far it bent. The goal panel in the corner keeps where your last shots crossed,
+seen from where you shoot, with the spot you aimed at; the pitch shows the last shot's flight
+and its shadow on the grass, so you can see the curl. Swipe shots on a phone are called as
+swipes.
+
+| Chip | Key | What it does |
+| --- | --- | --- |
+| FROM | `1`–`4` | Penalty spot, edge of the box, 25 yards, long range |
+| ANGLE | `,` `.` | Centre, left, right, or random |
+| KEEPER | `B` | On or off |
+| NEXT · TIME | `Q` · `Z` | A new ball after each shot or only on cue · 1×, ½×, ¼× |
+| ▶ NEW BALL | `R` | Reset now |
+| ⚙ TUNE | `T` | Shot power, accuracy, curve and long shots; the swipe's curl, the flick for full power and the bend for full spin; the keeper's reflexes, reach and diving |
+
+In both labs your player uses the dials (not their own stats), so what you tune is what you
+test, and like the Trap Lab the values are the game's settings.
+
 ## What's in the engine
 
 - **6v6 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
@@ -120,6 +163,8 @@ goes back to the start menu.
   presets, persisted to `localStorage`.
 - **Practice drills** — dribbling, heading, slide and standing tackles, interceptions,
   passing, first touch, shooting, keeper reflexes, keeper distribution.
+- **Three labs** — Trap, Pass and Shooting: every rep called and tallied, with the relevant dials
+  live in a drawer. See [Trap Lab](#trap-lab), [Pass Lab](#pass-lab), [Shooting Lab](#shooting-lab).
 
 ## Layout
 
@@ -128,9 +173,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–545 | Styles |
-| 547–777 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 778–9633 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 14–564 | Styles |
+| 566–813 | Markup — canvas, menus, the labs, career hub, tuning panel |
+| 814–10152 | Engine — sim, AI, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
