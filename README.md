@@ -78,7 +78,7 @@ The chips across the top set the serve. Each has a desktop shortcut:
 | RECEIVER | `C` | You, or an AI teammate (kept on its own tally) |
 | GUIDE | `G` | Show or hide the approach cursor |
 | ▶ SERVE | `R` | Serve a ball now |
-| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, gather radius, AI timing error |
+| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, gather radius, AI timing error, AI reaction |
 | clear | `X` | Reset the tally |
 
 The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
@@ -105,7 +105,9 @@ goes back to the start menu.
   where you can first meet the ball and when the timing is judged; the **gather radius** is the
   same for everyone — the touch comes off you there, and the ball is yours once it's back inside
   it — so a big reach never sends a touch further away. Computer players trap with a human-like
-  spread of error, so their first touch varies too. Every number in the trap is a dial; see
+  spread of error, so their first touch varies too, and like you they take a moment (0.3 s by
+  default, a little less for agile players) to react to where their touch went, so a heavy one can
+  get away from them. Every number in the trap is a dial; see
   [Trap Lab](#trap-lab).
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
@@ -128,7 +130,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–545 | Styles |
 | 547–777 | Markup — canvas, menus, Trap Lab, career hub, tuning panel |
-| 778–9617 | Engine — sim, AI, Trap Lab, rendering, career, UI |
+| 778–9633 | Engine — sim, AI, Trap Lab, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.

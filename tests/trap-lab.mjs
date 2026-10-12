@@ -144,7 +144,7 @@ ok(/perfect|clean|loose|heavy/.test(aiTally), 'the AI traps balls with graded to
 // ---- tune drawer ----
 await chip('tune');
 ok(await visible('#labTune'), 'TUNE opens the drawer');
-ok((await page.locator('#labDials input[type=range]').count()) === 10, 'ten trap dials in the drawer');
+ok((await page.locator('#labDials input[type=range]').count()) === 11, 'eleven trap dials in the drawer');
 await page.evaluate(() => { const s = document.querySelector('#labDials [data-lk="trapWin"]'); s.value = 2; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(100);
 ok(/window -300 to/.test(await text('#labWinTxt')), 'doubling the window widens the meter: ' + await text('#labWinTxt'));
