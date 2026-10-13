@@ -1,6 +1,7 @@
 // Pass types. A double-tap of PASS (J on a keyboard) lofts the pass; on a phone, pressing PASS and dragging
 // off it plays a through ball the way you dragged. A quick single tap waits a moment (it might be the first
-// half of a double-tap); a drag goes at once. Every kick-off is ours, so each check starts from one.
+// half of a double-tap); a drag goes at once. Every kick-off is ours, so each check starts from one. And
+// running with the ball, knocked a touch ahead every few strides, PASS stays PASS and a tap then passes.
 import { open } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
@@ -85,6 +86,39 @@ async function phonePage(){
   await ph.waitForTimeout(40);
   const st = await state(ph);
   ok(st !== 'dribbling', 'phone: a dragged through ball goes at once (no double-tap wait): ' + st);
+  await ph.close();
+}
+{ // running with it: every stride or two the ball is knocked a touch ahead and gathered again, and it's
+  // yours all along. The button stays PASS the whole way (TRAP is only for just after a ball reaches you),
+  // and a tap mid-run passes. In the Pass Lab, so nobody else is near: run at him, a very long pass away.
+  const ph = await ctx.newPage();
+  ph.on('pageerror', e => rep.errs.push('PAGEERROR (phone): ' + e.message));
+  await ph.goto(page.url()); await ph.waitForTimeout(700);
+  await ph.tap('#smItems [data-act="passlab"]'); await ph.waitForTimeout(400);
+  await ph.tap('#labBar [data-lab="pdist"]'); await ph.tap('#labBar [data-lab="pdist"]');
+  await kickOff(ph); await passReady(ph);
+  const cdp = await ctx.newCDPSession(ph);
+  const k = await ph.evaluate(() => { const r = document.getElementById('kickBtn').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  const touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 7 }] });
+  await ph.keyboard.down('d');
+  const seen = await ph.evaluate(ms => new Promise(res => {
+    const n = { frames: 0, pass: 0, trap: 0 }, t0 = performance.now();
+    (function tick(){
+      const b = document.getElementById('kickBtn').textContent.trim();
+      n.frames++; if(b === 'PASS') n.pass++; if(b === 'TRAP') n.trap++;
+      if(performance.now() - t0 > ms) return res(n);
+      requestAnimationFrame(tick);
+    })();
+  }), 1200);
+  info('running with it for 1.2 s -> ' + JSON.stringify(seen));
+  ok(seen.trap === 0 && seen.pass === seen.frames, 'phone: running with the ball, the button reads PASS throughout, never TRAP');
+  await touch('touchStart', k.x, k.y); await ph.waitForTimeout(50); await touch('touchEnd');
+  await ph.waitForTimeout(250);
+  await ph.keyboard.up('d');
+  const got = await ph.waitForFunction(() => /^1 pass/.test(document.getElementById('labTally').textContent || ''), null, { timeout: 8000, polling: 100 }).then(() => true, () => false);
+  const r = (await ph.textContent('#labResult')).trim();
+  info('tapped PASS mid-run -> ' + r);
+  ok(got && /\bPASS\b/.test(r) && !/KICK/.test(r), 'phone: a tap of PASS mid-run passes it to him');
   await ph.close();
 }
 await ctx.close();

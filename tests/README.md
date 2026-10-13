@@ -22,7 +22,7 @@ node tests/house-match.mjs     # ~90s  — plays a career match, checks the repo
 node tests/house-season.mjs    # ~7min — plays five matches, checks accumulation
 node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
-node tests/pass-types.mjs      # ~30s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait
+node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it
 node tests/pass-shoot-lab.mjs  # ~1min — Pass Lab and Shooting Lab: calls, tallies, tuning, phone gestures
 ```
 

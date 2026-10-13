@@ -34,6 +34,14 @@ context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT
 and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
 like `L` there.
 
+A ball you're running with is knocked a stride ahead every step or two, and a trapped ball comes
+off you before you gather it. Either way it's still yours while it's a step away, and PASS, SHOOT
+and CROSS (on any device) mean what they say: pressed with the ball in reach, it's played from
+where it is; pressed with it just out of reach, it goes once it's back at your feet (or is dropped
+if it isn't within about half a second). Just after a ball reaches you (a pass you receive, or
+your own trap) the big button reads TRAP for a quarter of a second, so a late trap tap can't turn
+into a pass. Running with the ball never sets that off.
+
 **Passes** — tap PASS for a pass along the grass to the teammate your move stick points at (or
 the way you're facing). **Double-tap** it for a **lofted pass** (the button reads LOB on the second
 tap). **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
@@ -175,7 +183,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–564 | Styles |
 | 566–813 | Markup — canvas, menus, the labs, career hub, tuning panel |
-| 814–10152 | Engine — sim, AI, the labs, rendering, career, UI |
+| 814–10181 | Engine — sim, AI, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
