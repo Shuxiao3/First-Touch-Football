@@ -145,7 +145,9 @@ test, and like the Trap Lab the values are the game's settings.
   range, shot odds) reads from a stat, not a constant.
 - **AI cascades** — separate carrier, defender, and keeper decision trees, with team
   style levers (press / neutral / low block · neutral / wing / counter) and per-player
-  defensive personalities.
+  defensive personalities. A pair of centre-backs works as a pair: one goes to the ball and the
+  other picks up a free man or covers behind him, and when your team has it in your own third they
+  split wide either side of the box to play out.
 - **Career mode** — create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
@@ -184,7 +186,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–564 | Styles |
 | 566–813 | Markup — canvas, menus, the labs, career hub, tuning panel |
-| 814–10197 | Engine — sim, AI, the labs, rendering, career, UI |
+| 814–10227 | Engine — sim, AI, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.

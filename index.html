@@ -4760,8 +4760,9 @@
     }
     // DEFENSIVE WIDTH CAP: the back line stays no wider than the widest opposing forward,
     // so they don't fan out beyond the attack they're covering. A BACK THREE stays NARROWER
-    // (an extra central body means they don't need to spread as wide).
-    if(p.role==='DEF'){
+    // (an extra central body means they don't need to spread as wide). Only out of possession:
+    // with the ball the centre-backs keep their width, spread to receive and to play out.
+    if(p.role==='DEF' && !weAttack){
       const opp=p.team==='G'?'R':'G';
       let widestFwd=FH*0.14;                          // a sensible minimum half-width
       for(const o of players){
@@ -6256,8 +6257,12 @@
       const carrierDeep = c.role==='DEF' || (gkHold&&gkHold.team===p.team);
       if(ownThird && carrierDeep && p.runTarget===null){
         if(p.role==='DEF'){
-          // the OTHER defender splits wide to offer a lateral out-ball
-          const side=p.homeY<YC?-1:1;
+          const defs=teamOf(p.team).filter(q=>q.role==='DEF');
+          if(defs.length!==2) return steer(p,anchor.x,anchor.y);   // a back three builds from its triangle (anchorOf)
+          // the OTHER centre-back splits wide to offer a lateral out-ball: to the far side from his partner on
+          // the ball (wherever the two have ended up), or to his own side of the box when the keeper has it
+          let side=p.homeY<YC?-1:1;
+          if(c.role==='DEF') side=c.y<YC?1:-1;
           tx=atk>0?FW*0.20:FW*0.80;
           ty=YC+side*(BY+90);
           return steer(p,tx,ty);
@@ -6670,10 +6675,22 @@
         // _rl/_eL are defined just above (coverMan block). Compute my level and whether
         // I'm allowed to leave shape: only same level or one level deeper than the engager.
         const _myL=_rl(p.role), _canChase=_myL>=_eL&&_myL<=_eL+1;
-        // BEATEN: if the carrier is goal-side of me and driving, abandon marking and
-        // sprint to recover onto the goal-side of the ball to win it back.
+        // CENTRE-BACK PAIR: one goes to the ball, never both. If my partner is the one engaging him (or is
+        // nearer him), I mark a free attacker, or cover: goal-side of the ball, behind my partner, tucked in.
+        // (A partner you're playing only counts once you're actually close to him.)
+        const partnerOnIt = p.role==='DEF' && teamOf(p.team).some(q=>q!==p && q.role==='DEF' &&
+          (q===engager || dist(q,c)<dist(p,c)) && (q!==controlled || dist(q,c)<220));
+        let pairSpot=null;
+        if(partnerOnIt){
+          const otherCover=teamOf(p.team).some(q=>q!==p && q!==engager && q.role==='DEF' && dist(q,c)<dist(p,c));
+          pairSpot = freeManToMark(p,c)                      // a free man to pick up first,
+                  || (otherCover ? anchor : coverSpot(c, ownGoalX));   // else cover (a back three: only the nearest spare one)
+        }
+        // BEATEN: the carrier has got past ME -- goal-side of me, close by, and driving -- so I abandon marking
+        // and sprint to recover goal-side of the ball. Not when he's merely level with me across the pitch.
         // Only players at same/adjacent role depth as the engager chase — deeper lines hold shape.
-        if(_canChase && c && atkC*(c.x-p.x) > -10 && Math.hypot(c.vx,c.vy)>runSpeedOf(c)*0.3){
+        const pastMe=atkC*(c.x-p.x);
+        if(!partnerOnIt && _canChase && c && pastMe>15 && pastMe<260 && Math.abs(c.y-p.y)<170 && Math.hypot(c.vx,c.vy)>runSpeedOf(c)*0.3){
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
           // aim for a point just goal-side of the carrier, chasing hard
@@ -6690,7 +6707,9 @@
         const mates=teamOf(p.team);
         const ranked=rankByDist(mates,c);                 // [nearest..farthest] to carrier
         const secondMan = ranked.length>1 ? ranked[1] : null;  // rank0 presses, rank1 covers
-        if(carrierInOurBox){
+        if(pairSpot){
+          tx=pairSpot.x; ty=pairSpot.y;                     // my centre-back partner has the ball covered
+        } else if(carrierInOurBox){
           const gl=Math.hypot(ourGoalX-ball.x,YC-ball.y)||1;
           tx=ball.x+(ourGoalX-ball.x)/gl*30;
           ty=ball.y+(YC-ball.y)/gl*30;
@@ -6703,32 +6722,9 @@
           tx=c.x+gx2*squeeze*0.5;
           ty=c.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
         } else {
-          // MARK an opponent, but DISTINCT ones — don't both pick the same man.
-          // claim the nearest unclaimed opponent (claimed = a closer teammate is on him).
-          let mark=null,md=1e9;
-          for(const q of players){
-            if(q.team===p.team||q===c)continue;
-            const myd=dist(p,q);
-            if(myd>=md)continue;
-            // is a different teammate clearly closer to this opponent? if so, it's theirs.
-            let taken=false;
-            for(const m of mates){
-              if(m===p)continue;
-              if(dist(m,q) < myd-6){ taken=true; break; }
-            }
-            if(!taken){ md=myd; mark=q; }
-          }
-          if(mark&&md<210){
-            const lead=statLerp(defIQof(p),0,0.30);       // Def IQ10: mark where he's GOING; Def IQ1: where he is
-            const mx=mark.x+mark.vx*lead, my=mark.y+mark.vy*lead;
-            const gl=Math.hypot(ourGoalX-mx,YC-my)||1;
-            const mc=(TAC[p.team].def==='press')?15:26;   // off-ball goal-side cushion: default; only the press tactic steps tighter
-            tx=mx+(ourGoalX-mx)/gl*mc;
-            ty=my+(YC-my)/gl*mc;
-          } else {
-            // nobody to mark -> hold our anchored shape (keeps the line spaced out)
-            tx=anchor.x; ty=anchor.y;
-          }
+          // MARK an opponent (distinct ones), or nobody to mark -> hold our anchored shape (keeps the line spaced out)
+          const m=freeManToMark(p,c);
+          if(m){ tx=m.x; ty=m.y; } else { tx=anchor.x; ty=anchor.y; }
         }
       }
     } else {
@@ -6750,14 +6746,20 @@
         }
         if(bestMate===p) iAmReceiver=true;
       }
-      const rank=rankByDist(teamOf(p.team),ball).indexOf(p);
+      const byBall=rankByDist(teamOf(p.team),ball), rank=byBall.indexOf(p);
       const dangerDeep = atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66;   // loose ball deep in OUR defensive third
+      // a second man goes for their loose ball deep in our third -- but not my centre-back partner's ball: then I
+      // cover goal-side of it (unless it's you, the human, nearest: you might not go)
+      const coverLoose = !friendlyPass && dangerDeep && rank===1 && p.role==='DEF' && byBall[0].role==='DEF' && byBall[0]!==controlled;
       if(iAmReceiver){
         // ATTACK THE PASS: sprint onto the ball's projected path / landing point
         p.dbgTag='RECEIVER';
         tx=land.x+p.iqLeadX; ty=land.y+p.iqLeadY;             // Off IQ mis-read of the pass's landing
         p.sprint = p.stamina>0.1; p.goingForBall=true;
         p.runTarget=null; p.runT=0;
+      } else if(coverLoose){
+        const cv=coverSpot(ball, ownGoalX); p.dbgTag='COVER';
+        tx=cv.x; ty=cv.y; p.sprint=p.stamina>0.1;
       } else if(rank===0 || (dangerDeep && rank===1)){
         p.dbgTag = friendlyPass ? 'COLLECT' : 'CONTEST';
         if(friendlyPass){
@@ -6815,6 +6817,34 @@
     if(l<14){ix=0;iy=0;}else{ix/=l;iy/=l;}
     if(urgency!==undefined){ix*=urgency;iy*=urgency;}
     return{ix,iy};
+  }
+  // The nearest opponent (other than the carrier c) that no teammate is clearly closer to, if he's within 210:
+  // where to stand to mark him (goal-side, reading his run by Def IQ). null if nobody needs marking.
+  function freeManToMark(p,c){
+    const ownGoalX=atkOf(p.team)>0?0:FW, mates=teamOf(p.team);
+    let mark=null,md=1e9;
+    for(const q of players){
+      if(q.team===p.team||q===c)continue;
+      const myd=dist(p,q);
+      if(myd>=md)continue;
+      let taken=false;                                // a different teammate clearly closer to him: he's theirs
+      for(const m of mates){ if(m!==p&&dist(m,q)<myd-6){ taken=true; break; } }
+      if(!taken){ md=myd; mark=q; }
+    }
+    if(!mark||md>=210) return null;
+    const lead=statLerp(defIQof(p),0,0.30);         // Def IQ10: mark where he's GOING; Def IQ1: where he is
+    const mx=mark.x+mark.vx*lead, my=mark.y+mark.vy*lead;
+    const gl=Math.hypot(ownGoalX-mx,YC-my)||1;
+    const mc=(TAC[p.team].def==='press')?15:26;     // off-ball goal-side cushion: default; only the press tactic steps tighter
+    return {x:mx+(ownGoalX-mx)/gl*mc, y:my+(YC-my)/gl*mc};
+  }
+  // COVER: where a centre-back stands while his partner goes to the ball (b: the ball or the carrier) -- between
+  // it and our goal, a stride or two goal-side of it, and tucked toward the middle (guarding the goal, not the line)
+  function coverSpot(b,ownGoalX){
+    const gx=ownGoalX-b.x, gy=YC-b.y, gl=Math.hypot(gx,gy)||1;
+    const back=clamp(gl*0.4,90,210);
+    const x=b.x+gx/gl*back, y=b.y+gy/gl*back;
+    return {x:clamp(x,40,FW-40), y:clamp(y+(YC-y)*0.35,30,FH-30)};
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
   // refreshes on a reaction interval and lags the carrier's true position/velocity.
