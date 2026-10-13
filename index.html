@@ -877,7 +877,7 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=71;
+  const SETTINGS_V=72;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, trap window 0.10s; 10 = reach 45, window 0.20s. A bigger reach meets the ball sooner and a longer window forgives early presses (late ones always fall off fast). Also the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
@@ -921,8 +921,8 @@
     strengthG: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — your team (1–10)',hint:'Your team strength stat (baseline). 1 = 0.1 (weak, easily shoved); 10 = 1.0 (dominant). Compare against the opponent.'},
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
-    aiTouch:  {val:1.4, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.4 = default (a real mix of clean, loose and heavy touches, and the odd ball let run), 2+ = scrappy.'},
-    aiReact:  {val:0.3, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it carries on doing what it was doing as the ball arrived, as you would, so a heavy or glancing touch can get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
+    aiTouch:  {val:1.1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.1 = default (mostly clean, some loose, the odd heavy one), 1.4+ = a real mix with balls let run, 2+ = scrappy.'},
+    aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
     trapSweet:{val:-30,min:-120,max:40,step:5,label:'Trap: sweet spot (ms)',hint:'When the perfect press lands, measured from the moment the ball reaches your reach ring. -30 = a hair before it arrives; 0 = exactly as it arrives.'},
@@ -1114,6 +1114,7 @@
         if(v<68){ P.knockOn.val=120; }   // knock-on touch dialled right down (1500 caused far-fling dribble touches)
         if(v<70){ P.aiTouch.val=1.4; }   // AI first touches are scrappier by default
         if(v<71){ if(P.passLoft.val>=2.5) P.passLoft.val=2.1; }   // normal passes flatter (and quicker) by default
+        if(v<72){ if(P.aiTouch.val===1.4) P.aiTouch.val=1.1; if(P.aiReact.val===0.3) P.aiReact.val=0.15; }   // AI first touches tidier, and quicker to react
         if(o.__fG)myForm=formOK(o.__fG,myForm);
         if(o.__fR)rForm=formOK(o.__fR,rForm);
         if(o.__rdtac)TAC.R.def=o.__rdtac;
@@ -2349,7 +2350,7 @@
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
     gatherR:'Same for everyone: a trap comes off you at this ring (the inner one), and the ball is yours once it\'s back inside it. Your reach only decides where you first meet it.',
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.',
-    aiReact:'How long the AI takes to react to where its own touch went. Until then it carries on as it was. 0 = instant.',
+    aiReact:'How long the AI takes to react to where its own touch went. Until then it eases off what it was doing. 0 = instant.',
     passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
     passLoft:'How high a normal pass is struck. The default stays low over short range and clears a man halfway along a medium pass; double-tap for a lofted one.',
     passPace:'How firmly a normal pass is struck. Higher = there sooner, but harder to control when it arrives.',
@@ -2524,7 +2525,7 @@
     if(p.pRole==='labPassDef'){ p.vx=p.vy=0; return true; }                                // a mannequin, but he cuts out anything that comes to him
     if(r&&r.pass&&!r.done){
       let ai=aiBrain(p,dt);
-      if(p.touchLagT>0){ p.touchLagT-=dt; ai=p.preTouchAi||{ix:0,iy:0}; } else p.preTouchAi=ai;
+      if(p.touchLagT>0){ p.touchLagT-=dt; ai=easeOff(p.preTouchAi); p.sprint=false; } else p.preTouchAi=ai;
       stepOutfield(p,ai.ix,ai.iy,dt); return true;
     }
     if(r&&!r.done&&r.run&&simNow>=r.runAt&&simNow<r.runAt+2.6){ p.sprint=true; stepOutfield(p,1,0,dt); return true; }   // a run in behind
@@ -6976,6 +6977,8 @@
     }
     return steer(p,tx+p.iqJitX,ty+p.iqJitY);                  // Off IQ movement jitter (final-third only)
   }
+  // reacting to its own touch: the input it had as the ball arrived, eased right off
+  function easeOff(a){ return a?{ix:a.ix*0.3, iy:a.iy*0.3}:{ix:0,iy:0}; }
   function steer(p,tx,ty,urgency){
     let ix=tx-p.x,iy=ty-p.y;
     const l=Math.hypot(ix,iy);
@@ -7826,10 +7829,10 @@
       }
       else{
         let ai=aiBrain(p,dt);
-        // REACTION TO ITS OWN TOUCH: for a moment after a first touch it carries on doing what it was doing
-        // as the ball arrived -- it hasn't seen where the touch sent the ball yet.
+        // REACTION TO ITS OWN TOUCH: for a moment after a first touch it hasn't seen where the touch sent the
+        // ball, so it eases off what it was doing as the ball arrived -- rather than charge on, away from it.
         const reacting=p.touchLagT>0;
-        if(reacting){ p.touchLagT-=dt; ai=p.preTouchAi||{ix:0,iy:0}; }
+        if(reacting){ p.touchLagT-=dt; ai=easeOff(p.preTouchAi); }
         // AI sprint logic (BOTH teams): CONSERVE stamina — only sprint when it matters.
         const dBall=dist(p,ball);
         const atkP=atkOf(p.team);
@@ -7882,8 +7885,8 @@
         else if(opportunistic && sta>0.55) doSprint=true;  // only with plenty in the tank
         if(!critical && sta<0.40) doSprint=false;          // conserve when not critical
 
-        p.sprint = reacting ? !!p.preTouchSprint : (doSprint && (ai.ix||ai.iy));
-        if(!reacting){ p.preTouchAi=ai; p.preTouchSprint=p.sprint; }
+        p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));
+        if(!reacting) p.preTouchAi=ai;
         stepOutfield(p,ai.ix,ai.iy,dt);
       }
     }

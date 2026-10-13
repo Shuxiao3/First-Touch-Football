@@ -176,9 +176,10 @@ test, and like the Trap Lab the values are the game's settings.
   where you can first meet the ball and when the timing is judged; the **gather radius** is the
   same for everyone — the touch comes off you there, and the ball is yours once it's back inside
   it — so a big reach never sends a touch further away. Computer players trap with a human-like
-  spread of error, so their first touch varies too, and like you they take a moment (0.3 s by
-  default, a little less for agile players) to react to where their touch went, so a heavy one can
-  get away from them. Every number in the trap is a dial; see
+  spread of error, so their first touch varies too (mostly clean, some loose, the odd heavy one),
+  and like you they take a moment (0.15 s by default, a little less for agile players) to react to
+  where their touch went, easing off what they were doing meanwhile rather than running on, so a
+  heavy one can still get away from them. Every number in the trap is a dial; see
   [Trap Lab](#trap-lab).
 - **Your pro** — the House tracks your own goals, assists, shots, passing, tackling and
   interceptions from live play, rates each match, and pays out skill points you spend back
@@ -203,7 +204,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–599 | Styles |
 | 601–868 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
-| 869–10470 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
+| 869–10473 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
