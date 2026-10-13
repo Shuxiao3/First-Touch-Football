@@ -2,7 +2,7 @@
 // keyboard, the CROSS button on a phone, which then reads CLEAR): with the ball it's hoofed high and long
 // at once. On a phone, with the ball, a swipe on the right side shoots; a tap there doesn't.
 // Every kick-off is ours and taken a step inside our own half, so each check starts from one.
-import { open } from './_harness.mjs';
+import { open, startExhibition } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
 const ok = rep.ok, info = rep.info;
@@ -14,7 +14,7 @@ const kickOff = async p => {
 };
 
 // ---- keyboard: L at our own kick-off clears it ----
-await page.click('#smItems [data-act="exhibition"]');
+await startExhibition(page);
 await kickOff(page);
 await page.keyboard.press('l');
 await page.waitForTimeout(120);
@@ -32,7 +32,7 @@ async function phonePage(){
   const ph = await ctx.newPage();
   ph.on('pageerror', e => errs.push('PAGEERROR (phone): ' + e.message));
   await ph.goto(page.url()); await ph.waitForTimeout(700);
-  await ph.tap('#smItems [data-act="exhibition"]');
+  await startExhibition(ph, { tap: true });
   await kickOff(ph);
   return ph;
 }

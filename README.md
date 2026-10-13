@@ -61,6 +61,23 @@ shot still finds its target while starting out away from the keeper. The bigger 
 spin, and your Curve stat sets how hard it bends. A tap, or a swipe back toward your own goal,
 doesn't shoot.
 
+## Exhibition
+
+**EXHIBITION** opens a match setup before kick-off. Pick **your team** and the **opponent** from the
+2026/27 Premier League (◀ ▶ step through the clubs; tap a club for the full list), then pick the
+player **you control** from your team's six outfielders (the striker by default). **KICK OFF**
+(or `Enter`) starts it; `Esc` or BACK leaves.
+
+- Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
+  Your team wears its home kit. The opponent wears theirs too, unless the shirts are too alike to
+  tell apart at a glance (brightness counts most, so colour-blind players can tell them apart);
+  then it's their change kit, or a plain white or black one if that's no better. The keepers pick a
+  top unlike either team's shirts and the grass.
+- The squads are made up: fixed names, numbers and stats for each club, with stronger squads for
+  clubs that finished higher last season. Line-up and stat changes you make in the match's TACTICS
+  menu stay with that club for next time (and never touch the custom GRN / RED squads the labs use).
+- Your last setup is remembered.
+
 ## Trap Lab
 
 **TRAP LAB** on the start menu is a practice session for testing and tuning the first touch.
@@ -184,9 +201,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–564 | Styles |
-| 566–813 | Markup — canvas, menus, the labs, career hub, tuning panel |
-| 814–10227 | Engine — sim, AI, the labs, rendering, career, UI |
+| 14–599 | Styles |
+| 601–868 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
+| 869–10470 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
@@ -223,5 +240,6 @@ python3 tools/sprites/make_player_sheet.py --embed
 ## Tests
 
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
-creation through to the House, a played career match, a five-match season, and the Trap Lab. They need
+creation through to the House, a played career match, a five-match season, the exhibition setup,
+and the labs. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

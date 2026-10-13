@@ -311,6 +311,41 @@
   .slotRow .slotBtn{flex:1;text-align:left;font-size:13px;}
   .slotDel{font-size:12px;color:#ff5a4d;background:rgba(255,90,77,.1);border:1px solid #5a2a26;border-radius:6px;padding:9px 11px;cursor:pointer;}
   .smBack{margin-top:14px;min-width:248px;}
+  /* exhibition setup: two clubs, the player you control */
+  #exhPanel{background:rgb(6,10,7);}
+  #exhPanel .exhWrap{max-width:660px;}
+  #exhPanel h3{margin-bottom:4px;}
+  .exhLeague{font-size:10px;letter-spacing:3px;color:#6f8a5f;margin-bottom:10px;}
+  .exhTeams{display:flex;align-items:stretch;justify-content:center;gap:8px;width:100%;}
+  .exhSide{flex:1 1 0;min-width:0;border:1px solid #2a3a22;border-radius:10px;padding:7px 6px 6px;background:rgba(157,255,60,.04);}
+  .exhSide.you{border-color:var(--phosphor-dim);}
+  .exhVs{align-self:center;font-family:'Baskic8','Space Grotesk',sans-serif;color:#6f8a5f;font-size:13px;letter-spacing:1px;}
+  .exhLbl{font-size:10px;letter-spacing:2px;color:#7f9a6f;margin:1px 0 5px;text-transform:uppercase;}
+  .exhPick{display:flex;align-items:center;gap:4px;}
+  .exhArr{flex:0 0 auto;width:30px;height:48px;border-radius:7px;border:1px solid #2a3a22;background:rgba(157,255,60,.06);color:#9dff3c;font-size:13px;cursor:pointer;font-family:inherit;}
+  .exhArr:hover{border-color:#9dff3c;}
+  .exhClub{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid transparent;background:none;color:#e9f5ec;cursor:pointer;padding:2px 4px 4px;border-radius:8px;font-family:inherit;}
+  .exhClub:hover,.exhClub.open{border-color:#2a3a22;background:rgba(157,255,60,.07);}
+  canvas.exhKit{width:64px;height:64px;image-rendering:pixelated;border:0;border-radius:0;box-shadow:none;background:none;}
+  .exhName{font-family:'Baskic8','Space Grotesk',sans-serif;font-size:15px;line-height:22px;height:22px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .exhMeta{font-size:10px;color:#7f9a6f;letter-spacing:1px;white-space:nowrap;}
+  .exhGrid{display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;width:100%;margin-top:8px;}
+  .exhGrid.on{display:grid;}
+  .exhChip{display:flex;align-items:center;gap:7px;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:11px;padding:6px 7px;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exhChip i{width:11px;height:13px;border-radius:2px;border:2px solid;flex:0 0 auto;}
+  .exhChip:hover,.exhChip.cur{border-color:#9dff3c;color:#e9f5ec;}
+  .exhChip:disabled{opacity:.3;cursor:not-allowed;border-color:#2a3a22;}
+  .exhCtrl{width:100%;margin-top:9px;}
+  .exhPlayers{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;}
+  .exhPl{display:flex;align-items:center;gap:6px;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:12px;padding:7px 8px;cursor:pointer;text-align:left;min-width:0;}
+  .exhPl .r{font-size:9px;letter-spacing:1px;color:#7f9a6f;width:26px;flex:0 0 auto;}
+  .exhPl .n{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exhPl .o{color:#9dff3c;font-weight:700;}
+  .exhPl:hover{border-color:#5c7a2e;}
+  .exhPl.sel{border-color:#9dff3c;background:rgba(157,255,60,.14);color:#e9f5ec;}
+  .exhGo{display:flex;gap:8px;margin-top:11px;width:100%;}
+  .exhGo .smBtn{flex:1;text-align:center;}
+  @media (max-width:520px){ .exhPlayers{grid-template-columns:repeat(2,1fr);} .exhName{font-size:13px;} }
   /* hide the in-match HUD + touch controls while a menu screen is up */
   #stageWrap.menuMode #readout,
   #stageWrap.menuMode #pad,
@@ -617,6 +652,26 @@
         <button class="smBtn smBack" data-act="menu" style="min-width:300px"><span class="mk">◀</span>MAIN MENU</button>
       </div>
     </div>
+    <div class="smPanel" id="exhPanel">
+      <div class="smCenter exhWrap">
+        <h3>EXHIBITION</h3>
+        <div class="exhLeague" id="exhLeague"></div>
+        <div class="exhTeams">
+          <div class="exhSide" id="exhSideG"></div>
+          <div class="exhVs">VS</div>
+          <div class="exhSide" id="exhSideR"></div>
+        </div>
+        <div class="exhGrid" id="exhGrid"></div>
+        <div id="exhCtrlBlock" class="exhCtrl">
+          <div class="exhLbl">YOU CONTROL</div>
+          <div class="exhPlayers" id="exhPlayers"></div>
+        </div>
+        <div class="exhGo">
+          <button class="smBtn" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
+          <button class="smBtn" data-act="back"><span class="mk">◀</span>BACK</button>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="matchReport"></div>
   <div id="careerHub">
@@ -657,7 +712,7 @@
     <div id="dbgText" style="white-space:pre"></div>
   </div>
   <div id="readout">
-    <span class="chip" id="rScore">GRN <b id="sG">0</b> : <b class="r" id="sR">0</b> RED</span>
+    <span class="chip" id="rScore"><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span></span>
     <span class="chip" id="rDir" style="color:#9dff3c;font-weight:700">▶</span>
     <span class="chip">⏱ <b id="rClock">0:00</b></span>
     <span class="chip">ball <b id="rBallSpd">0</b></span>
@@ -1247,6 +1302,115 @@
     const pick=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0]||'Player';
     return roles.map((r,i)=>{ const e={name:pick(),num:i+1,role:r,defPers:PERS3[Math.floor(Math.random()*3)],stats:genStats(r)}; e.ovr=overallOf(e); return e; });
   }
+  // ============ CLUBS (exhibition): the 2026/27 Premier League ============
+  // A kit is [shirt, trim, shorts]: the club's colours, plus a change kit worn when the shirts clash. str nudges
+  // a generated squad's stats (roughly last season's finish). The players are made up: the same seven each time.
+  const CLUB_LEAGUE='PREMIER LEAGUE · 2026/27';
+  const CLUBS=[
+    {id:'ARS',name:'Arsenal',           str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
+    {id:'AVL',name:'Aston Villa',       str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
+    {id:'BOU',name:'Bournemouth',       str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
+    {id:'BRE',name:'Brentford',         str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
+    {id:'BHA',name:'Brighton',          str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
+    {id:'CHE',name:'Chelsea',           str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
+    {id:'COV',name:'Coventry City',     str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
+    {id:'CRY',name:'Crystal Palace',    str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
+    {id:'EVE',name:'Everton',           str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
+    {id:'FUL',name:'Fulham',            str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
+    {id:'HUL',name:'Hull City',         str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
+    {id:'IPS',name:'Ipswich Town',      str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
+    {id:'LEE',name:'Leeds United',      str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
+    {id:'LIV',name:'Liverpool',         str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
+    {id:'MCI',name:'Manchester City',   str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
+    {id:'MUN',name:'Manchester United', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
+    {id:'NEW',name:'Newcastle United',  str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
+    {id:'NFO',name:'Nottingham Forest', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
+    {id:'SUN',name:'Sunderland',        str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
+    {id:'TOT',name:'Tottenham Hotspur', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
+  ];
+  const clubById=id=>CLUBS.find(c=>c.id===id)||null;
+  const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
+    'Avila','Bailey','Baird','Banda','Barros','Bastian','Beaumont','Bekele','Belov','Bergen','Bishop','Blake','Bonnet','Booth','Borg',
+    'Boyd','Brady','Brennan','Brock','Calder','Callahan','Campos','Carver','Castillo','Chao','Clay','Cobb','Colley','Conti','Cordero',
+    'Crane','Croft','Cruz','Dagher','Dale','Danso','Darcy','Dekker','Diallo','Dorsey','Drake','Duarte','Dunn','Eady','Eckert','Egan',
+    'Ellis','Esteban','Evers','Falk','Farrow','Faye','Fenn','Fischer','Flint','Forde','Foss','Frost','Gale','Garrido','Geller','Gill',
+    'Goode','Grady','Greer','Gunn','Haas','Hagen','Hardy','Harlow','Hayes','Healy','Hearn','Hollis','Horne','Hurst','Ibe','Ingram',
+    'Iqbal','Irving','Jalloh','Jansen','Jarvis','Joly','Juarez','Kamara','Kemp','Kimura','Kirby','Klein','Koenig','Kovac','Lacey',
+    'Lamb','Lange','Larkin','Lund','Lyle','Mabry','Madsen','Maher','Mallory','Marsh','Mayer','Mensah','Mercer','Moody','Morley',
+    'Nash','Neves','Nkosi','Noble','Nunes','Oakes','Obi','Odell','Okoye','Oyelaran','Pace','Paget','Park','Pearce','Penn','Pinto',
+    'Quaye','Quinn','Rahman','Rand','Reyes','Riggs','Rios','Roby','Rourke','Rudd','Ruiz','Ryder','Sadiq','Salo','Sandoval','Sarr',
+    'Sauer','Selby','Shaw','Sims','Sloane','Soria','Stark','Strand','Sutton','Swann','Tait','Tamura','Tate','Teague','Thorne','Tully',
+    'Udeh','Upton','Vance','Varga','Voss','Wade','Ward','Weller','Wilde','Winter','Wolfe','Yates','Yilmaz','Zamora','Zeller'];
+  function rng32(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+  function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  // one fixed shuffle of the surnames, dealt out seven to a club: nobody shares a name
+  const CLUB_NAME_DEAL=(()=>{ const R=rng32(hashStr('ft-club-names')), a=CLUB_SURNAMES.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; })();
+  function clubSquadGen(club){
+    const R=rng32(hashStr('ft-club-'+club.id)), ci=CLUBS.indexOf(club);
+    const roles=['GK','DEF','DEF','MID','MID','MID','ATT'];
+    const NUMS={GK:[1],DEF:[2,3,4,5,6,12,15],MID:[8,10,14,16,17,18,20,23],ATT:[7,9,11,19,21]};
+    const take=r=>{ const l=NUMS[r]; return l.splice(Math.floor(R()*l.length),1)[0]; };
+    return roles.map((r,i)=>{
+      const st={};
+      for(const k of ALL_STAT_KEYS){ const m=ARCH[r][k]+(r==='GK'||!GK_KEYS.includes(k)?club.str:0); st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*1.5)*2)/2)); }
+      const e={name:CLUB_NAME_DEAL[(ci*7+i)%CLUB_NAME_DEAL.length], num:take(r), role:r, defPers:PERS3[Math.floor(R()*3)], stats:st};
+      e.ovr=overallOf(e); return e;
+    });
+  }
+  function clubOvr(sq){ return Math.round(sq.reduce((s,e)=>s+(e.ovr||0),0)/Math.max(1,sq.length)); }
+  // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-6) ----
+  const EXH={on:false, you:'ARS', opp:'MCI', ctrl:6, play:null};   // play: the clubs actually out there (set at kick-off)
+  try{ const o=JSON.parse(localStorage.getItem('ft_exh')||'null');
+       if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; if(o.ctrl>=1&&o.ctrl<=6) EXH.ctrl=o.ctrl|0; } }catch(e){}
+  function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp,ctrl:EXH.ctrl})); }catch(e){} }
+  // a club's squad and lineup: as you last left them in the tactics menu, else as generated
+  function clubSide(id){
+    let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
+    if(o&&Array.isArray(o.squad)&&o.squad.length===7&&o.lineup) return {squad:o.squad, lineup:o.lineup};
+    return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup()};
+  }
+  function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
+    all[EXH.play.you]={squad:SQUAD.G, lineup:LINEUP.G}; all[EXH.play.opp]={squad:SQUAD.R, lineup:LINEUP.R};
+    localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
+  // ---- who's on the pitch: a code for the scoreboard, a kit [shirt,trim,shorts] (null = the drawn GRN/RED kits),
+  //      the colour a body is drawn in without sprites, and the keeper's top ----
+  const TEAM_DEF={G:{code:'GRN',name:'GREEN',col:'#9dff3c',kit:null,gk:'#5fae4b'}, R:{code:'RED',name:'RED',col:'#ff5a4d',kit:null,gk:'#c4564b'}};
+  const TEAM={G:Object.assign({},TEAM_DEF.G), R:Object.assign({},TEAM_DEF.R)};
+  function teamKit(t){ return (TEAM[t]&&TEAM[t].kit)||null; }
+  function kitLum(h){ const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4));
+    return Math.sqrt(0.2126*c[0]+0.7152*c[1]+0.0722*c[2]); }
+  // how easily two colours are told apart: ~0 the same .. 1+ at a glance. Brightness counts most (colour blindness).
+  function kitApart(a,b){ const A=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16)), B=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+    return 1.8*Math.abs(kitLum(a)-kitLum(b)) + 0.6*Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])/441; }
+  // your side wears its home kit; theirs too, unless the shirts are too alike: then their change kit, and if
+  // that's no better, a plain white or black one (whichever stands out more) trimmed in their colour
+  function matchKits(you,opp){
+    const h=you.home[0], third=[['#f4f4f4',opp.home[0],'#f4f4f4'],['#1c1c1c',opp.home[0],'#1c1c1c']];
+    const cands=[opp.home,opp.away,...third], sc=cands.map(k=>kitApart(h,k[0]));
+    let i=sc[0]>=0.5?0:sc[1]>=0.5?1:-1;
+    if(i<0){ i=0; for(let j=1;j<cands.length;j++) if(sc[j]>sc[i]) i=j; }
+    return {G:you.home, R:cands[i]};
+  }
+  function kitKind(club,kit){ return kit===club.home?'HOME KIT':kit===club.away?'CHANGE KIT':'THIRD KIT'; }
+  // the keepers: a bright top unlike either side's shirts, each other's, and the grass
+  const GK_TOPS=['#f2e14c','#ff8a1c','#b07cff','#ff6fae','#23c4c4','#e9f5ec'], GRASS='#319450';
+  function keeperTops(sG,sR){
+    const pick=avoid=>GK_TOPS.reduce((b,c)=>{ const v=Math.min(...avoid.map(x=>kitApart(c,x))); return v>b.v?{c,v}:b; },{c:GK_TOPS[0],v:-1}).c;
+    const g=pick([sG,sR,GRASS]); return {G:g, R:pick([sG,sR,GRASS,g])};
+  }
+  function setTeamsFromClubs(){
+    const you=clubById(EXH.play.you), opp=clubById(EXH.play.opp), k=matchKits(you,opp), gk=keeperTops(k.G[0],k.R[0]);
+    TEAM.G={code:you.id,name:you.name,col:k.G[0],kit:k.G,gk:gk.G};
+    TEAM.R={code:opp.id,name:opp.name,col:k.R[0],kit:k.R,gk:gk.R};
+    teamLabels();
+  }
+  function setTeamsDefault(){ TEAM.G=Object.assign({},TEAM_DEF.G); TEAM.R=Object.assign({},TEAM_DEF.R); teamLabels(); }
+  function teamLabels(){
+    const g=document.getElementById('tnG'), r=document.getElementById('tnR');
+    if(g) g.textContent=TEAM.G.code; if(r) r.textContent=TEAM.R.code;
+    document.querySelectorAll('.mteam').forEach(b=>{ b.textContent=b.dataset.mteam==='G'?'your team ('+TEAM.G.code+')':'opponent ('+TEAM.R.code+')'; });
+  }
   let SQUAD={G:null,R:null}, LINEUP={G:null,R:null};
   function defaultLineup(){ return {gk:0, atk:[1,2,3,4,5,6], def:[1,2,3,4,5,6]}; }
   // a lineup's starters, trimmed or topped up to six: the attack order picks who starts, the
@@ -1259,7 +1423,7 @@
     for(const i of atk) if(!def.includes(i)) def.push(i);
     li.atk=atk; li.def=def;
   }
-  function saveSquads(){ try{ localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP})); }catch(e){} }
+  function saveSquads(){ if(EXH.on&&EXH.play){ saveClubSides(); return; } try{ localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP})); }catch(e){} }
   function normalizeSquads(){
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
       SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
@@ -1296,7 +1460,8 @@
   }
   function buildTeams(){
     players=[...layoutTeam('G'),...layoutTeam('R')];
-    controlled=players.find(p=>p.team==='G'&&p.me) || players.filter(p=>p.team==='G').sort((a,b)=>b.homeX-a.homeX)[0];
+    const mine=players.filter(p=>p.team==='G');
+    controlled=mine.find(p=>p.me) || (EXH.on&&EXH.play&&mine.find(p=>p.squadIdx===EXH.play.ctrl)) || mine.sort((a,b)=>b.homeX-a.homeX)[0];
   }
   buildTeams();
 
@@ -7938,13 +8103,14 @@
     if(scoredT>0)label='goal!';
     else if(offsideT>0)label='offside';
     else if(restartT>0)label=restartLabel.toLowerCase();
-    else if(gkHold)label=gkHold.team==='G'?'GRN keeper':'RED keeper';
+    else if(gkHold)label=TEAM[gkHold.team].code+' keeper';
     else if(ball.ownedBy===controlled)label='dribbling';
-    else if(ball.ownedBy)label=ball.ownedBy.team==='G'?'GRN ball':'RED ball';
+    else if(ball.ownedBy)label=TEAM[ball.ownedBy.team].code+' ball';
     rs.textContent=label;
-    rs.style.color=label.includes('RED')||label==='goal!'?'#ff5a4d':
+    const lt=(scoredT>0||offsideT>0||restartT>0)?null:gkHold?gkHold.team:ball.ownedBy?ball.ownedBy.team:null;   // whose ball the label names
+    rs.style.color=lt==='R'||label==='goal!'?'#ff5a4d':
                    label==='offside'||restartT>0?'#ffb43c':
-                   label.includes('GRN')||label==='dribbling'?'#9dff3c':'#8a9580';
+                   lt==='G'?'#9dff3c':'#8a9580';
     if(LAB.on) labHud();
     const tg=document.getElementById('touchGrade');
     if(gradeFade>0){gradeFade-=dt;
@@ -8301,7 +8467,7 @@
       ctx.fillStyle='#9dff3c';ctx.shadowColor='rgba(157,255,60,.7)';ctx.shadowBlur=22;
       ctx.fillText(matchOver?'FULL TIME':'HALF TIME',W/2,H/2-18);
       ctx.shadowBlur=0;ctx.font="700 30px 'Baskic8','Space Grotesk',sans-serif";ctx.fillStyle='#e9f5ec';
-      ctx.fillText('GRN '+scoreG+' : '+scoreR+' RED',W/2,H/2+24);
+      ctx.fillText(TEAM.G.code+' '+scoreG+' : '+scoreR+' '+TEAM.R.code,W/2,H/2+24);
       if(matchOver){ctx.font="500 16px 'IBM Plex Mono',monospace";ctx.fillStyle='#8a9580';
         ctx.fillText('click the pitch to play again',W/2,H/2+56);}
       ctx.restore();
@@ -8380,9 +8546,10 @@
         return [h+1/3,h,h-1/3].map(t=>Math.round(255*(s?ch(p,q,t):L))); };
       return [at(l-0.3),at(l-0.14),at(l),at(l+0.15)];
     }
-    function bake(swaps){                                  // {material: ramp} -> recoloured sheet
-      const c=document.createElement('canvas'); c.width=cfg.img.width; c.height=cfg.img.height;
-      const x=c.getContext('2d'); x.drawImage(cfg.img,0,0);
+    function bake(swaps,sx,sy,w,h){                       // {material: ramp} -> recoloured sheet (or one cell of it)
+      w=w||cfg.img.width; h=h||cfg.img.height;
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      const x=c.getContext('2d'); x.drawImage(cfg.img,sx||0,sy||0,w,h,0,0,w,h);
       const lut=new Map();
       for(const m in swaps){
         const from=(PLAYER_SHEET_PAL.drawn||{})[m]; if(!from) continue;
@@ -8398,9 +8565,23 @@
       }catch(e){}                                          // unreadable canvas: keep the drawn kit
       return c;
     }
+    // a club kit [shirt,trim,shorts] as ramps. Dark kits keep a little light in them so they still read on the pitch.
+    const KIT_FLOOR=0.16;
+    const kitSwaps=k=>({shirt:rampOf(k[0],KIT_FLOOR), trim:rampOf(k[1],KIT_FLOOR), shorts:rampOf(k[2],KIT_FLOOR)});
+    const prevCells={};
+    function preview(cv,kit){                              // a kit on a player standing facing you (the exhibition setup)
+      const g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height);
+      if(!cfg.ready) return false;
+      const key=kit.join(''), cell=prevCells[key]||(prevCells[key]=bake(kitSwaps(kit),0,(ANIM.idle.row+2)*CELL,CELL,CELL));
+      const k=Math.max(1,Math.floor(Math.min(cv.width,cv.height)/CELL));
+      g.imageSmoothingEnabled=false; g.drawImage(cell,Math.round((cv.width-CELL*k)/2),Math.round((cv.height-CELL*k)/2),CELL*k,CELL*k);
+      return true;
+    }
     function sheetFor(p){
       const swaps=Object.assign({}, (PLAYER_SHEET_PAL.kits||{})[p.team]);
       let key=p.team;
+      const tk=teamKit(p.team);                            // a club's kit in an exhibition
+      if(tk){ Object.assign(swaps,kitSwaps(tk)); key+='|'+tk.join(''); }
       if(p.me&&meLook){                                    // your pro: the picked trim, boots and hair
         const K=lookPick('kit',meLook.kit||0).c, B=lookPick('boot',meLook.boot||0).c, Hc=lookPick('hair',meLook.hair||0).c;
         key+='|'+K+B+Hc; swaps.trim=rampOf(K); swaps.boots=rampOf(B); swaps.hair=rampOf(Hc,0.18);
@@ -8441,7 +8622,7 @@
     }
     return { get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;},
              enable(v){cfg.enabled=(v!==false);}, disable(){cfg.enabled=false;},
-             load, draw, pick, cfg };
+             load, draw, pick, preview, cfg };
   })();
   SPRITE.load(PLAYER_SHEET); SPRITE.enable();              // art is embedded -> on by default
   try{ window.SPRITE=SPRITE; }catch(e){}
@@ -8475,7 +8656,7 @@
       ctx.restore(); }
   }
   function drawOutfielder(p){
-    const col=p.team==='G'?'#9dff3c':'#ff5a4d';
+    const col=TEAM[p.team].col;
     const headCol=p.team==='G'?'#e7f3d4':'#ffd9d4';
     drawShadow(p.x,p.y,p.r+3,1);
     const base=proj(p.x,p.y,p.z);
@@ -8567,7 +8748,7 @@
       ctx.setLineDash([]);ctx.restore();
     }
     const base=proj(kp.x,kp.y);
-    const col=kp.side<0?'#5fae4b':'#c4564b';
+    const col=TEAM[kp.team].gk;
     const bodyH=26*base.scale,headR=5.5*base.scale,w=9*base.scale;
     if(kp.diveT>0||kp.groundT>0){
       // DIVE / DOWN: a COMPACT body laid flat & PARALLEL to the goal line, stretched toward the corner
@@ -8831,7 +9012,7 @@
   function renderMenu(){ if(menuState.tab==='squad')renderSquad(); else { const ph=(menuState.tab==='defense'?'def':'atk'); renderPhase(ph); menuStyleRows(ph); } }
   function menuStyleRows(phase){
     const body=document.getElementById('menuBody'); if(!body) return;
-    const t=menuState.team||'G', who=(t==='G'?'GRN':'RED');
+    const t=menuState.team||'G', who=TEAM[t].code;
     const wrap=document.createElement('div');
     if(phase==='atk'){ const cur=TAC[t].off; let h='<div class="styRow"><span class="styLbl">TEAM STYLE \u00b7 '+who+'</span>';
       for(const st of STYLE_LIST) h+='<button class="styBtn'+(st[0]===cur?' on':'')+'" data-mstyle="'+st[0]+'">'+st[1]+'</button>';
@@ -10034,7 +10215,7 @@
   function doCreateFromMaker(){ if(!mkValid())return; const data=buildCareerFromMaker(); writeSave(MK.key,data); writeSave(SAVE_KEYS.auto,data); document.getElementById('charMaker').classList.remove('on'); openHub(MK.key); }
 
   function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
-  function hideSubs(){ ['loadPanel','newPanel','hubPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
+  function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
   function refreshMenuButtons(){
     const has=anySaves();
@@ -10048,9 +10229,69 @@
   function smHighlight(){ const all=[...document.querySelectorAll('#smItems .smBtn')]; const en=smEnabledBtns(); if(en.length){ smSel=((smSel%en.length)+en.length)%en.length; } all.forEach(b=>b.classList.remove('sel')); if(en[smSel])en[smSel].classList.add('sel'); }
   function showStartMenu(){ SCREEN='menu'; clearInputs(); hideHub(); document.getElementById('stageWrap').classList.add('menuMode'); sm.classList.add('show'); hideSubs(); refreshMenuButtons(); }
   function hideStartMenu(){ sm.classList.remove('show'); hideSubs(); }
-  function startExhibition(){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); }
+  // EXHIBITION: pick the two clubs and the player you control first (the setup screen), then kick off
+  function startExhibition(){ exhGridSide=null; renderExh(); showSub('exhPanel'); }
+  function kickOffExhibition(){
+    resumable=false; matchReturn='menu'; CAREER=null; careerFix=null;
+    EXH.on=true; EXH.play={you:EXH.you, opp:EXH.opp, ctrl:EXH.ctrl}; saveExh();
+    const a=clubSide(EXH.you), b=clubSide(EXH.opp);
+    SQUAD={G:a.squad,R:b.squad}; LINEUP={G:a.lineup,R:b.lineup}; normalizeSquads();
+    setTeamsFromClubs();
+    document.getElementById('stageWrap').classList.remove('menuMode'); hideSubs(); hideHub(); hideStartMenu(); SCREEN='match'; newMatch();
+  }
+  // ----- the setup screen -----
+  let exhGridSide=null;                       // 'G' / 'R' while picking that side's club from the full list
+  function exhSideHTML(t){
+    const id=t==='G'?EXH.you:EXH.opp, club=clubById(id), kit=matchKits(clubById(EXH.you),clubById(EXH.opp))[t];
+    return '<div class="exhLbl">'+(t==='G'?'YOUR TEAM':'OPPONENT')+'</div><div class="exhPick">'
+      +'<button class="exhArr" data-exh="prev" data-side="'+t+'" aria-label="previous club">\u25c0</button>'
+      +'<button class="exhClub'+(exhGridSide===t?' open':'')+'" data-exh="grid" data-side="'+t+'" title="pick from all the clubs">'
+      +'<canvas class="exhKit" width="64" height="64" data-kit="'+kit.join(',')+'"></canvas>'
+      +'<span class="exhName">'+club.name+'</span>'
+      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvr(clubSide(id).squad)+' \u00b7 '+kitKind(club,kit)+'</span></button>'
+      +'<button class="exhArr" data-exh="next" data-side="'+t+'" aria-label="next club">\u25b6</button></div>';
+  }
+  function drawKitSwatch(cv,k){                // (no sprites yet) a plain shirt and shorts
+    const g=cv.getContext('2d'), w=cv.width, h=cv.height; g.clearRect(0,0,w,h);
+    g.fillStyle=k[1]; g.fillRect(w*0.16,h*0.16,w*0.68,h*0.2);
+    g.fillStyle=k[0]; g.fillRect(w*0.28,h*0.16,w*0.44,h*0.44);
+    g.fillStyle=k[2]; g.fillRect(w*0.3,h*0.6,w*0.4,h*0.22);
+  }
+  function renderExh(){
+    document.getElementById('exhLeague').textContent=CLUB_LEAGUE;
+    for(const t of ['G','R']){ const el=document.getElementById('exhSide'+t); el.innerHTML=exhSideHTML(t); el.classList.toggle('you',t==='G'); }
+    document.querySelectorAll('#exhPanel canvas.exhKit').forEach(cv=>{ const k=cv.dataset.kit.split(','); if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); });
+    const grid=document.getElementById('exhGrid');
+    if(exhGridSide){
+      const cur=exhGridSide==='G'?EXH.you:EXH.opp, other=exhGridSide==='G'?EXH.opp:EXH.you;
+      grid.innerHTML='<div class="exhLbl" style="grid-column:1/-1">'+(exhGridSide==='G'?'PICK YOUR TEAM':'PICK THE OPPONENT')+'</div>'
+        +CLUBS.map(c=>'<button class="exhChip'+(c.id===cur?' cur':'')+'" data-exh="pick" data-side="'+exhGridSide+'" data-id="'+c.id+'"'+(c.id===other?' disabled':'')+'>'
+          +'<i style="background:'+c.home[0]+';border-color:'+c.home[1]+'"></i>'+c.name+'</button>').join('');
+    } else grid.innerHTML='';
+    grid.classList.toggle('on',!!exhGridSide);
+    document.getElementById('exhCtrlBlock').style.display=exhGridSide?'none':'';
+    const sq=clubSide(EXH.you).squad;
+    document.getElementById('exhPlayers').innerHTML=sq.map((e,i)=>i===0?'':
+      '<button class="exhPl'+(i===EXH.ctrl?' sel':'')+'" data-exh="ctrl" data-i="'+i+'"><span class="r">'+e.role+'</span><span class="n">#'+e.num+' '+e.name+'</span><span class="o">'+e.ovr+'</span></button>').join('');
+  }
+  function exhSet(t,id){ if(t==='G') EXH.you=id; else EXH.opp=id; }
+  function exhCycle(t,dir){
+    const other=t==='G'?EXH.opp:EXH.you; let i=CLUBS.findIndex(c=>c.id===(t==='G'?EXH.you:EXH.opp));
+    do{ i=(i+dir+CLUBS.length)%CLUBS.length; } while(CLUBS[i].id===other);
+    exhSet(t,CLUBS[i].id);
+  }
+  document.getElementById('exhPanel').addEventListener('click',e=>{
+    const b=e.target.closest('[data-exh]'); if(!b||b.disabled) return;
+    const a=b.dataset.exh, t=b.dataset.side;
+    if(a==='go'){ kickOffExhibition(); return; }
+    if(a==='prev'||a==='next') exhCycle(t,a==='next'?1:-1);
+    else if(a==='grid') exhGridSide=(exhGridSide===t)?null:t;
+    else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }
+    else if(a==='ctrl') EXH.ctrl=+b.dataset.i;
+    saveExh(); renderExh();
+  });
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }
-  function startLab(kind){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); startPractice(kind+'lab'); }
+  function startLab(kind){ resumable=false; matchReturn='menu'; CAREER=null; careerFix=null; EXH.on=false; setTeamsDefault(); loadSquads(); document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); startPractice(kind+'lab'); }
   // ===== CAREER HUB =====
   let matchReturn='menu';   // where Esc/finish returns after a match: 'menu' or 'hub'
   const HUB_BLDGS={
@@ -10121,6 +10362,7 @@
     const nf=yourNextFixture(d); if(!nf){ advanceWeek(d); return; }
     const opp=cwFindClub(d,nf.opp); if(!opp){ advanceWeek(d); return; }
     meApply(d);                                     // spent points reach the pitch
+    EXH.on=false; setTeamsDefault();                 // career sides play in the GRN / RED kits
     const me=careerLineupYours(d);
     SQUAD.G=me.squad; LINEUP.G=me.lineup;
     SQUAD.R=careerSquad(opp); LINEUP.R=defaultLineup();
@@ -10191,8 +10433,9 @@
   }
   function startMenuKey(e){
     if(SCREEN==='hub'){ if(e.key==='Escape'){ if(document.getElementById('bldgPanel').classList.contains('show')) hideBldg(); else hubToMenu(); } return; }
-    const subOpen=['loadPanel','newPanel','hubPanel'].some(id=>document.getElementById(id).classList.contains('show'));
+    const subOpen=['loadPanel','newPanel','hubPanel','exhPanel'].some(id=>document.getElementById(id).classList.contains('show'));
     if(e.key==='Escape'){ if(subOpen){ hideSubs(); refreshMenuButtons(); } return; }
+    if(document.getElementById('exhPanel').classList.contains('show') && e.code==='Enter'){ kickOffExhibition(); e.preventDefault(); return; }
     if(subOpen) return;
     if(e.code==='ArrowDown'||e.code==='KeyS'){ smSel++; smHighlight(); e.preventDefault(); }
     else if(e.code==='ArrowUp'||e.code==='KeyW'){ smSel--; smHighlight(); e.preventDefault(); }

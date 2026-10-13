@@ -41,6 +41,15 @@ export async function open({ fastFrames = false } = {}){
   return { browser, page, rep };
 }
 
+// EXHIBITION opens the match setup (two clubs, the player you control); take the defaults and kick off.
+// tap: true on a touch page.
+export async function startExhibition(page, { tap = false } = {}){
+  const press = sel => tap ? page.tap(sel) : page.click(sel);
+  await press('#smItems [data-act="exhibition"]');
+  await page.waitForSelector('#exhPanel.show', { timeout: 5000 });
+  await press('#exhGo');
+}
+
 // Walk the real new-game flow: create-a-pro, pick a legal squad, land in the career hub.
 export async function createCareer(page, { name = 'Rowan Pike', buy = {} } = {}){
   await page.click('#smItems [data-act="new"]');

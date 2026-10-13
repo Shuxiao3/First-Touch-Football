@@ -24,6 +24,7 @@ node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver,
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it
 node tests/pass-shoot-lab.mjs  # ~1min — Pass Lab and Shooting Lab: calls, tallies, tuning, phone gestures
+node tests/exhibition-setup.mjs # ~20s  — exhibition setup: clubs, kits, the player you control, remembered, phone
 ```
 
 Each exits non-zero on failure and prints a PASS/FAIL line per assertion.

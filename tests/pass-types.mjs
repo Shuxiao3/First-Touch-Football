@@ -2,7 +2,7 @@
 // off it plays a through ball the way you dragged. A quick single tap waits a moment (it might be the first
 // half of a double-tap); a drag goes at once. Every kick-off is ours, so each check starts from one. And
 // running with the ball, knocked a touch ahead every few strides, PASS stays PASS and a tap then passes.
-import { open } from './_harness.mjs';
+import { open, startExhibition } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
 const ok = rep.ok, info = rep.info;
@@ -26,7 +26,7 @@ const paceHold = (p, ms) => p.evaluate(ms => new Promise(res => {
 }), ms);
 
 // ---- keyboard: double-tap J, aiming back at our own half ----
-await page.click('#smItems [data-act="exhibition"]');
+await startExhibition(page);
 await kickOff(page);
 await page.keyboard.down('a');
 await page.waitForTimeout(120);
@@ -45,7 +45,7 @@ async function phonePage(){
   const ph = await ctx.newPage();
   ph.on('pageerror', e => rep.errs.push('PAGEERROR (phone): ' + e.message));
   await ph.goto(page.url()); await ph.waitForTimeout(700);
-  await ph.tap('#smItems [data-act="exhibition"]');
+  await startExhibition(ph, { tap: true });
   await kickOff(ph); await passReady(ph);
   const cdp = await ctx.newCDPSession(ph);
   const k = await ph.evaluate(() => { const r = document.getElementById('kickBtn').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });

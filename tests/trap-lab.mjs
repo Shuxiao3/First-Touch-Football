@@ -1,7 +1,7 @@
 // Trap Lab: open it from the start menu, let a ball run past, time presses off the guide
 // cursor (perfect / late / too early), glance one off-line, take one on the chest, watch the
 // AI receiver, tune a dial, and leave cleanly for an exhibition.
-import { open } from './_harness.mjs';
+import { open, startExhibition } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
 const ok = rep.ok, info = rep.info;
@@ -160,7 +160,7 @@ await page.click('#labExitBtn');
 await page.waitForTimeout(300);
 ok(await visible('#startMenu'), 'EXIT returns to the start menu');
 ok(!(await visible('#labHud')), 'lab HUD is gone');
-await page.click('#smItems [data-act="exhibition"]');
+await startExhibition(page);
 await page.waitForTimeout(1200);
 ok(!(await visible('#labHud')), 'no lab HUD in an exhibition');
 ok(/^\d+:\d\d$/.test(await text('#rClock')), 'exhibition runs its match clock: ' + await text('#rClock'));
