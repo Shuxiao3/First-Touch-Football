@@ -822,7 +822,7 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=70;
+  const SETTINGS_V=71;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, trap window 0.10s; 10 = reach 45, window 0.20s. A bigger reach meets the ball sooner and a longer window forgives early presses (late ones always fall off fast). Also the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
@@ -855,7 +855,8 @@
     shotAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Shot accuracy (stat 1–10)',hint:'How true a shot flies, as a 1–10 stat. 1 = 0.1, 10 = 0.9. High = on target; low = sprays, especially at power.'},
     longShots: {val:5.5, min:1,   max:10,  step:0.1, label:'Long shots (stat 1–10)',hint:'How well shots hold up from distance, as a 1–10 stat. 1 = 0.1, 10 = 0.6. Low = long shots lose pace and spray; high = they hold up. Scales with true distance to the goal centre, so wide shots are penalised more. No effect inside the box.'},
     heading:{val:5.5,min:1,max:10,step:0.1,label:'Heading (stat 1–10)',hint:'Attacking headers: power (1≈200 → 10≈500 px/s), aerial-duel win rate vs the opponent (1≈0.1 → 10≈1.0), and accuracy (1≈0.2 → 10≈0.8).'},
-    passLoft:{val:2.5,min:0.3,max:2.5,step:0.05,label:'Pass loft',hint:'Universal multiplier on pass arc. 1.0 = calibrated to land at the receiver. Higher = floatier; lower = flatter and faster through the air.'},
+    passLoft:{val:2.1,min:0.3,max:2.5,step:0.05,label:'Pass loft',hint:'Universal multiplier on pass arc (a normal pass, yours and the AI\'s). 1.0 = calibrated to land at the receiver. Higher = floatier; lower = flatter and faster through the air. A double-tapped lofted pass has its own hang-time dial.'},
+    passPace:{val:1,min:0.7,max:1.4,step:0.02,label:'Pass pace ×',hint:'How firmly a normal pass is struck, yours and the AI\'s. 1 = solved to reach the receiver with some zip left. Higher = it gets there sooner but arrives harder to control; lower = softer and slower.'},
     headClear:{val:470,min:200,max:800,step:10,label:'Heading: clearance dist',hint:'How far a DEFENSIVE header is booted clear toward a teammate. Still a separate dial — give endpoints to fold it into the Heading stat.'},
     keeperSpd: {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper speed (stat 1–10)',hint:'Keeper movement as a 1–10 stat. 1 = 80, 10 = 140. How fast they shuffle on the line and come out.'},
     gkReach:   {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reach (stat 1–10)',hint:'Save radius — how far the keeper grabs or parries a shot WITHOUT diving, as a 1–10 stat. 1 = 14, 10 = 24.'},
@@ -1057,6 +1058,7 @@
         if(v<64){ ['shotSelection','decisionSpeed','offBallRuns','supportAngles','markingTight','pressTrigger','tackleTiming','laneCutting'].forEach(k=>{if(P[k])P[k].val=1.0;}); }
         if(v<68){ P.knockOn.val=120; }   // knock-on touch dialled right down (1500 caused far-fling dribble touches)
         if(v<70){ P.aiTouch.val=1.4; }   // AI first touches are scrappier by default
+        if(v<71){ if(P.passLoft.val>=2.5) P.passLoft.val=2.1; }   // normal passes flatter (and quicker) by default
         if(o.__fG)myForm=formOK(o.__fG,myForm);
         if(o.__fR)rForm=formOK(o.__fR,rForm);
         if(o.__rdtac)TAC.R.def=o.__rdtac;
@@ -1093,13 +1095,13 @@
     slide:    ['slideTackle','defIQ','defIQtime'],
     standtackle:['tackle','dribbling'],
     intercept:['interceptions','pressTight'],
-    passing:  ['passLoft','passAcc'],
+    passing:  ['passLoft','passPace','passAcc'],
     shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','keeperSpd'],
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','aiTouch','aiReact'],
-    passlab:  ['passAcc','passLoft','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    passlab:  ['passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
   };
   // pin the IQ dials to the top of the settings panel
@@ -2168,7 +2170,7 @@
   // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
     trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'AI timing error',aiReact:'AI reaction',
-    passAcc:'Passing',passLoft:'Pass loft',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
+    passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving'};
   const LAB_DIAL_HINTS={
@@ -2184,7 +2186,8 @@
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.',
     aiReact:'How long the AI takes to react to where its own touch went. Until then it carries on as it was. 0 = instant.',
     passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
-    passLoft:'How high every pass is struck. The default sends a medium pass over a man in the lane.',
+    passLoft:'How high a normal pass is struck. The default stays low over short range and clears a man halfway along a medium pass; double-tap for a lofted one.',
+    passPace:'How firmly a normal pass is struck. Higher = there sooner, but harder to control when it arrives.',
     passDtap:'How quickly the second tap of a double-tap has to come. A single tap waits this long.',
     passDrag:'How far you drag off PASS (touch) before it is a through ball.',
     thruLead:'How far ahead of the receiver a through ball goes. Bigger = more to run onto.',
@@ -2208,7 +2211,7 @@
     if(k==='trapLock'||k==='aiReact') return v.toFixed(2)+' s';
     if(k==='passDtap') return Math.round(v)+' ms';
     if(k==='passDrag') return Math.round(v)+' px';
-    if(k==='thruLead'||k==='loftHang'||k==='swipeCurl'||k==='passLoft') return v.toFixed(2)+'×';
+    if(k==='thruLead'||k==='loftHang'||k==='swipeCurl'||k==='passLoft'||k==='passPace') return v.toFixed(2)+'×';
     if(k==='lobCheck') return Math.round(v*100)+'%';
     if(k==='swipePow') return v.toFixed(1)+' /s';
     if(k==='swipeBow') return Math.round(v*100)+'% of its length';
@@ -2953,11 +2956,24 @@
   // Pass loft: a simple arc set by DISTANCE × the charge-scaled loft. If no charge is given (AI passes),
   // a charge is inferred from distance so longer balls arc more, matching a player's charged pass.
   function passLoftD(d){ return clamp(40 + d*0.14, 90, 430); }   // auto loft by distance only: short = driven, long = lofted (extra args ignored)
+  const PASS_ARRIVE=420;    // the most pace a pass keeps when it gets to the receiver (px/s, at Pass pace 1x)
   function passSolve(d, arcMul){ arcMul=arcMul||1;
     const vz = clamp(d*0.22*arcMul, 0, 520)*P.passLoft.val;  // loft grows with distance, scaled by the universal loft dial (arcMul lifts a chip)
-    const shortBoost = clamp((260-d)/260,0,1)*340;    // very short passes need extra zip: friction kills a low-lofted ball fast
-    const vh = clamp(gkSolvePower(d, vz)*1.55 + shortBoost, 440, 1800); // arrive with pace; short balls no longer die at the foot
+    const shortBoost = clamp((260-d)/260,0,1)*360;    // very short passes need extra zip: friction kills a low-lofted ball fast
+    // arrive with pace (short balls no longer die at the foot) -- but a flat ball spends longer on the grass, so the
+    // solve strikes it harder, and a long one would get there hotter than a first touch can take: cap the arrival
+    const vh = clamp(Math.min(gkSolvePower(d, vz)*1.64 + shortBoost, passArriveAt(d, vz, PASS_ARRIVE))*P.passPace.val, 440, 1800);
     return {vz:vz, vh:vh};
+  }
+  // The pace to strike a ball (lifted with vz) so it's going at A when it has gone d: drag-free above 12 px,
+  // the grass dragging at it below (as the physics step does).
+  function passArriveAt(d, vz, A){
+    const st=1/60, frF=Math.pow(1-P.friction.val, st*3.2);
+    const at=vx=>{ let x=0,z=0,v=vx,w=vz,t=0;
+      while(t<5){ if(z>0||w!==0){ w-=520*st; z+=w*st; if(z<=0){z=0; w=w<-40?-w*0.45:0;} }
+        x+=v*st; if(z<12)v*=frF; t+=st; if(x>=d) return v; if(v<5&&z<1) return 0; }
+      return 0; };
+    let lo=60,hi=2400; for(let i=0;i<24;i++){ const m=(lo+hi)/2; (at(m)<A)?lo=m:hi=m; } return (lo+hi)/2;
   }
   // Kick power + aerial loft now read straight from their dials (team-wide).
   function kickPowerOf(p){ return 800; }   // (legacy stub; pass power is auto-solved to reach the target)
@@ -4035,7 +4051,7 @@
     const T=clamp(d/420,0.30,1.25);                           // desired travel time
     const avgKeep=Math.max(0.4,(1+frPerSec*T)/(1+T));         // avg pace retained over flight
     const chipTgt=chipOverWindow(p, lead.x, lead.y);          // is there a defender to loft over?
-    const sol=passSolve(d, chipTgt?1.7:1);                    // chip arcs higher; otherwise normal flight to the foot
+    const sol=passSolve(d, chipTgt?2.0:1);                    // chip arcs higher (well over a man); otherwise normal flight to the foot
     ball.vx=ax*sol.vh;ball.vy=ay*sol.vh;
     ball.vz=sol.vz+loft;
     ball.ownedBy=null;p.noTouchT=0.3;

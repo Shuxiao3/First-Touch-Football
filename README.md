@@ -42,8 +42,9 @@ if it isn't within about half a second). Just after a ball reaches you (a pass y
 your own trap) the big button reads TRAP for a quarter of a second, so a late trap tap can't turn
 into a pass. Running with the ball never sets that off.
 
-**Passes** — tap PASS for a pass along the grass to the teammate your move stick points at (or
-the way you're facing). **Double-tap** it for a **lofted pass** (the button reads LOB on the second
+**Passes** — tap PASS for a low, firm pass to the teammate your move stick points at (or the
+way you're facing): the longer it is, the more it's lifted, but never so hard it arrives too hot to
+control. **Double-tap** it for a **lofted pass** (the button reads LOB on the second
 tap). **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
 it, and the drag picks where in front of them it goes — the ball is played into that space,
 weighted so they run onto it as it gets there, and the receiver sprints for it. The spot it was
@@ -111,7 +112,7 @@ reads and takes it exactly as in a match.
 | DEFENDER | `B` | None, one stood in the passing lane, or one marking the receiver |
 | NEXT · TIME | `Q` · `Z` | A new ball after each pass or only on cue · 1×, ½×, ¼× |
 | ▶ NEW BALL | `R` | Reset now |
-| ⚙ TUNE | `T` | Passing, pass loft, the double-tap window, the drag that makes a through ball, through-ball lead, lofted-pass hang time and check-up, and the receiver's ball control, AI timing error and AI reaction |
+| ⚙ TUNE | `T` | Passing, pass loft and pace, the double-tap window, the drag that makes a through ball, through-ball lead, lofted-pass hang time and check-up, and the receiver's ball control, AI timing error and AI reaction |
 
 ## Shooting Lab
 
@@ -183,7 +184,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–564 | Styles |
 | 566–813 | Markup — canvas, menus, the labs, career hub, tuning panel |
-| 814–10181 | Engine — sim, AI, the labs, rendering, career, UI |
+| 814–10197 | Engine — sim, AI, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.

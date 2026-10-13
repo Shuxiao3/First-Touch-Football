@@ -49,7 +49,7 @@ ok(/^3 passes · \d received/.test(passTally) && /lofted pass \d\/1/.test(passTa
 
 await page.click('#labBar [data-lab="tune"]'); await page.waitForTimeout(150);
 ok(await page.isVisible('#labTune') && (await text(page, '#labTuneTitle')) === 'TUNE PASSING', 'TUNE opens the passing dials');
-ok((await page.locator('#labDials input[type=range]').count()) === 10, 'ten passing dials');
+ok((await page.locator('#labDials input[type=range]').count()) === 11, 'eleven passing dials');
 await page.evaluate(() => { const s = document.querySelector('#labDials [data-lk="passDtap"]'); s.value = 250; s.dispatchEvent(new Event('input', { bubbles: true })); });
 ok((await page.inputValue('#s_passDtap')) === '250', 'a lab dial moves the Settings slider too');
 await page.click('#labTune [data-lab="defaults"]'); await page.waitForTimeout(100);
