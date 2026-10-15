@@ -82,6 +82,8 @@
   #pad{position:absolute;display:none;border-radius:50%;pointer-events:none;z-index:5;}
   #pad .base{position:absolute;inset:0;border:2px solid rgba(157,255,60,.3);border-radius:50%;background:rgba(157,255,60,.05);}
   #pad .stick{position:absolute;width:44%;height:44%;left:28%;top:28%;border-radius:50%;background:rgba(157,255,60,.5);}
+  #pad.sprint .base{border-color:#ffb43c;background:rgba(255,180,60,.09);box-shadow:0 0 14px rgba(255,180,60,.45);}
+  #pad.sprint .stick{background:rgba(255,180,60,.75);}
   .actBtn{position:absolute;width:64px;height:64px;border-radius:50%;display:none;
     align-items:center;justify-content:center;text-align:center;z-index:6;
     font-size:11px;font-weight:700;letter-spacing:.4px;line-height:1.15;}
@@ -922,6 +924,8 @@
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
     aiTouch:  {val:1.1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.1 = default (mostly clean, some loose, the odd heavy one), 1.4+ = a real mix with balls let run, 2+ = scrappy.'},
+    foulRisk: {val:1, min:0, max:3, step:0.05,label:'Fouls: risk \u00d7',hint:'How likely a reckless challenge is to be called a foul: charging in hard, from the side or (much more) from behind, muscling a man off it, or a slide that takes the man and not the ball. A foul is a free kick where it happened, or a penalty in the box. A firm, controlled tackle is rarely a foul. Good tacklers (and readers of the game) foul less, aggressive ones more. 0 = no fouls.'},
+    wrongFoot:{val:0.45, min:0, max:1, step:0.05,label:'Beat a tight press (s)',hint:'A defender right up against the man on the ball, or diving in at him, is wrong-footed by a sharp cut (55\u00b0 or more): he stumbles for this long and cannot tackle. A good dribbler makes it longer, an agile defender shorter. You, defending, only get caught diving in. 0 = off.'},
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
@@ -1146,10 +1150,10 @@
   }
   // When a practice drill is active, float the dials relevant to that stat to the top and highlight them.
   const PRACTICE_DIALS = {
-    dribble:  ['dribbling','knockOn','knockVar'],
+    dribble:  ['dribbling','knockOn','knockVar','wrongFoot'],
     heading:  ['heading','crossing','headClear'],
     slide:    ['slideTackle','defIQ','defIQtime'],
-    standtackle:['tackle','dribbling'],
+    standtackle:['tackle','dribbling','wrongFoot'],
     intercept:['interceptions','pressTight'],
     passing:  ['passLoft','passPace','passAcc'],
     shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','keeperSpd'],
@@ -1615,8 +1619,22 @@
   function rect(){return cv.getBoundingClientRect();}
   function placePad(lx,ly){const s=112;pad.style.width=pad.style.height=s+'px';
     pad.style.left=(lx-s/2)+'px';pad.style.top=(ly-s/2)+'px';pad.style.display='block';}
-  function moveStick(){const max=40,l=Math.hypot(pdx,pdy)||1,c=Math.min(l,max);
+  function moveStick(){const max=padSprint?52:40,l=Math.hypot(pdx,pdy)||1,c=Math.min(l,max);
     stick.style.transform=`translate(${pdx/l*c}px,${pdy/l*c}px)`;}
+  // SPRINT ON THE STICK: push it out past its ring and you sprint, ease back in to stop -- no lifting the thumb.
+  // (A double-tap of the stick still works.) A thumb that wanders far out drags the stick base along behind
+  // it, so the sprint zone stays under the thumb.
+  const PAD_SPRINT_IN=58, PAD_SPRINT_OUT=46, PAD_FOLLOW=78;
+  let padSprint=false, padSprintOn=false;
+  function padDrag(t){
+    pdx=t.clientX-pox; pdy=t.clientY-poy;
+    let l=Math.hypot(pdx,pdy);
+    if(l>PAD_FOLLOW){ const k=(l-PAD_FOLLOW)/l; pox+=pdx*k; poy+=pdy*k; pdx=t.clientX-pox; pdy=t.clientY-poy; l=PAD_FOLLOW;
+      const r=rect(); placePad(pox-r.left,poy-r.top); }
+    padSprint = padSprint ? l>PAD_SPRINT_OUT : l>PAD_SPRINT_IN;
+    pad.classList.toggle('sprint',padSprint);
+    moveStick();
+  }
   const wrapEl=document.getElementById('stageWrap');
   const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !matchOver;
   const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip'));   // on-screen buttons (☰, Trap Lab) take taps as clicks
@@ -1673,13 +1691,13 @@
     if(!touchLive()) return;                 // (also lets the hub panels scroll on a phone)
     if([...e.changedTouches].some(onLabUI)) return;   // dragging a Trap Lab slider / scrolling its drawer
     for(const t of e.changedTouches){
-      if(t.identifier===padId){pdx=t.clientX-pox;pdy=t.clientY-poy;moveStick();}
+      if(t.identifier===padId) padDrag(t);
       if(swipe&&t.identifier===trapTouchId) swipePoint(swipe,t,evT(e));
       if(passDown&&passDown.pts&&t.identifier===kickTouchId){ passDown.lx=t.clientX; passDown.ly=t.clientY; swipePoint(passDown,t,evT(e)); }
     }
     e.preventDefault();},{passive:false});
   function endT(e){for(const t of e.changedTouches){
-    if(t.identifier===padId){padId=null;pdx=pdy=0;pad.style.display='none';if(controlled)controlled.sprint=false;}
+    if(t.identifier===padId){padId=null;pdx=pdy=0;pad.style.display='none';padSprint=padSprintOn=false;pad.classList.remove('sprint');if(controlled)controlled.sprint=false;}
     if(t.identifier===trapTouchId){trapTouchId=null;trapHeld=false;
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
@@ -3097,6 +3115,12 @@
 
   function humanIntent(){
     let ix=0,iy=0;
+    // the stick's sprint zone (see padDrag): on while it's pushed out, off when it eases back -- and a
+    // sharp turn still costs the sprint for a moment, then it comes back by itself if you're still pushing
+    if(controlled&&padId!==null){
+      if(padSprint){ if(!(controlled.sprintDropT>0)){ controlled.sprint=true; padSprintOn=true; } }
+      else if(padSprintOn){ controlled.sprint=false; padSprintOn=false; }
+    }
     if(keys['KeyW']||keys['ArrowUp'])iy-=1;
     if(keys['KeyS']||keys['ArrowDown'])iy+=1;
     if(keys['KeyA']||keys['ArrowLeft'])ix-=1;
@@ -4284,12 +4308,19 @@
       if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0)continue;
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
+      // running into his back: no way to the ball from there, but a shove can be a foul -- judged once
+      // as the bump happens, not again every moment he stays on him
+      const backBump=inBody&&isBehind(carrier,p), newBump=backBump&&!p.backBump;
+      p.backBump=backBump;
+      if(newBump&&Math.random()<foulChance(p,carrier,'back')){ callFoul(p,carrier,'back'); return; }
       if(dist(p,ball)<p.r+ball.r+tackleReachOf(p)){
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
-        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
+        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){
+          if(Math.random()<foulChance(p,carrier,'tackle')){ callFoul(p,carrier,'tackle'); return; }   // went through the man
+          winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
       }
       // SHIELD / TURN BATTLE (strength): if I'm tight to a shielding carrier and he's trying to
@@ -4304,6 +4335,7 @@
           // strength-weighted contest, sampled at a modest rate so it plays out over a moment
           const odds=duelOdds(strengthOf(p),strengthOf(carrier));   // P(defender wins)
           if(Math.random() < odds*0.06){
+            if(Math.random()<foulChance(p,carrier,'duel')){ callFoul(p,carrier,'duel'); return; }   // a shove too far
             // defender muscles across and steals it as the carrier exposes it
             p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
             winBall(p,carrier);
@@ -4314,6 +4346,62 @@
     }
   }
 
+  // ===== FOULS: going through the man rather than the ball =====
+  // The chance grows with how hard HE comes in (his own speed into the man -- a firm, controlled challenge
+  // is fine, charging in isn't; the carrier running into him doesn't count), from the side and much more
+  // from behind. Good tacklers and readers of the game
+  // foul less, aggressive temperaments more. kind: 'tackle' (took it by contact), 'back' (ran into his
+  // back), 'duel' (muscled him off it), 'slide' (slid in, took the man), 'slideBack' (slid in from behind).
+  function foulChance(t,c,kind){
+    if(LAB.on||practice) return 0;                                      // (no whistle in the labs and drills)
+    const dx=c.x-t.x, dy=c.y-t.y, d=Math.hypot(dx,dy)||1;
+    const into=Math.max(0,(t.vx*dx+t.vy*dy)/d);                      // how hard he's coming in
+    const f=c.facing||{x:1,y:0}, front=-(dx*f.x+dy*f.y)/d;          // +1 he's in front of the carrier .. -1 behind
+    const hard=clamp((into-90)/150,0,1), angle=front>0.5?0:front>-0.15?0.35:1;   // (jogging in is fine)
+    const base = kind==='tackle' ? 0.04+0.45*hard+0.10*angle
+               : kind==='back'   ? 0.03+0.55*hard
+               : kind==='duel'   ? 0.08+0.25*hard
+               : kind==='slide'  ? 0.45 : 0.75;
+    const skill=statLerp((statOf(t,'tackle',P.tackle.val)+defIQof(t))/2,1.35,0.65);
+    const temper=1+(persOf(t)-1)*0.6;                                  // passive 0.7 .. aggressive 1.3
+    return clamp(base*skill*temper*P.foulRisk.val,0,0.95);
+  }
+  // the whistle: no turnover -- a free kick where it happened, or a penalty if it was in the fouler's box
+  function callFoul(t,c,kind){
+    const team=c.team, atk=atkOf(team), goalX=atk>0?FW:0;
+    const inBox=Math.abs(c.x-goalX)<BX && Math.abs(c.y-YC)<BY;
+    t.tackleCd=Math.max(t.tackleCd,1.0); t.state='stumble'; t.stateT=0.35;
+    if(inBox) doRestart('penalty',team,atk>0?FW-BX*0.66:BX*0.66,YC);
+    else doRestart('freekick',team,clamp(c.x,30,FW-30),clamp(c.y,20,FH-20));
+    lastGrade=inBox?'FOUL \u00b7 PENALTY!':'FOUL \u00b7 FREE KICK'; gradeColor=team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.6;
+  }
+  // ===== BEATING A TIGHT PRESS =====
+  // A sharp cut by the man on the ball (55 degrees or more, at pace) wrong-foots a defender who's right up
+  // against him or diving in at him: he stumbles (can't tackle) for a moment. You, defending, only get caught
+  // diving in; the computer's markers also when they sit too tight.
+  let cutWho=null;
+  function beatTheChallenge(dt){
+    const c=ball.ownedBy;
+    if(!c||gkHold||restartT>0||P.wrongFoot.val<=0){ cutWho=null; return; }
+    if(cutWho!==c){ cutWho=c; c.svx=c.vx; c.svy=c.vy; c.cutCd=0; }   // a new man on the ball: start his heading afresh
+    const px=c.svx, py=c.svy, k=Math.min(1,dt/0.22);
+    c.svx+=(c.vx-c.svx)*k; c.svy+=(c.vy-c.svy)*k;                      // where he's been heading lately
+    if(c.cutCd>0){ c.cutCd-=dt; return; }
+    const sp=Math.hypot(c.vx,c.vy), ps=Math.hypot(px,py);
+    if(sp<70||ps<50||(c.vx*px+c.vy*py)/(sp*ps)>0.57) return;         // not a sharp cut
+    c.cutCd=0.35;
+    for(const p of players){
+      if(p.team===c.team||p.state!=='normal'||p.beatenCd>0) continue;
+      const dx=c.x-p.x, dy=c.y-p.y, d=Math.hypot(dx,dy)||1;
+      if(d>85) continue;
+      const diving=(p.vx*dx+p.vy*dy)/d, tight=d<38&&p!==controlled;
+      if(!(tight||diving>100)) continue;
+      const T=P.wrongFoot.val*statLerp(statOf(c,'dribbling',P.dribbling.val),0.7,1.3)*statLerp(statOf(p,'agility',P.agility.val),1.2,0.8);
+      p.state='stumble'; p.stateT=T; p.tackleCd=Math.max(p.tackleCd,T); p.beatenCd=1.2;
+      if(c===controlled){ lastGrade='SKINNED HIM!'; gradeColor='#9dff3c'; gradeFade=1.0; }
+      else if(p===controlled){ lastGrade='WRONG-FOOTED'; gradeColor='#ff5a4d'; gradeFade=1.0; }
+    }
+  }
   // SLIDE TACKLE stat -> lunge length/speed & contact reach (endpoints: 1 => 0.5/0.7, 10 => 1.1/1.3)
   function slideLenOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.5, 1.1); }
   function slideHitOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.7, 1.3); }
@@ -4364,10 +4452,14 @@
         if(sp>30){ fx/=sp; fy/=sp; }                      // use where the carrier is actually going
         else { const cf=carrier.facing||{x:0,y:0}; fx=cf.x; fy=cf.y; }   // ...or where they face if near-stationary
         const slideAlign = p.slideDx*fx + p.slideDy*fy;   // +1 = lunging the way they're going (from their back), -1 = into their front
-        if(isBehind(carrier,p) || slideAlign > 0.30) return;   // behind / back-diagonal -> the slide whiffs
+        if(isBehind(carrier,p) || slideAlign > 0.30){               // behind / back-diagonal: through the man to get it
+          if(Math.random()<foulChance(p,carrier,'slideBack')) callFoul(p,carrier,'slideBack');
+          return; }
         if(shotWindUpSafe(carrier,p)) return;                   // winding up a shot: only a slide from in front can win it
       }
-      if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2))return;   // Def IQ: flat cut to the exposure a slide needs
+      if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2)){   // Def IQ: flat cut to the exposure a slide needs
+        if(Math.random()<foulChance(p,carrier,'slide')) callFoul(p,carrier,'slide');   // took the man, not the ball
+        return; }
       winBall(p,carrier);
       ball.vx=p.slideDx*340;ball.vy=p.slideDy*340;ball.vz=35;
     } else if(!carrier&&!p.slideTried){
@@ -4395,7 +4487,7 @@
   function doRestart(type,team,x,y){
     restartT=1.0;
     restartInfo={type,team,x,y};
-    restartLabel=type==='kickin'?'KICK-IN':type==='corner'?'CORNER':'GOAL KICK';
+    restartLabel={kickin:'KICK-IN',corner:'CORNER',goalkick:'GOAL KICK',freekick:'FREE KICK',penalty:'PENALTY'}[type]||'RESTART';
     ball.x=x;ball.y=y;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;
     ball.ownedBy=null;ball.cushBy=null;offsidePass=null;headerT=0;
     lastGrade=restartLabel;gradeColor='#ffb43c';gradeFade=1.4;
@@ -4415,6 +4507,22 @@
     taker.y=clamp(y,16,FH-16);
     taker.state='normal';taker.stateT=0;taker.noTouchT=0;
     own(taker,taker.r+ball.r+5);
+    if(type==='freekick'||type==='penalty') clearRestartArea(type,team,x,y,taker);
+  }
+  // a free kick: they back off 110 px. A penalty: everyone but the taker (and the keeper, on his line) out of the box.
+  function clearRestartArea(type,team,x,y,taker){
+    const goalX=x<FW/2?0:FW;
+    for(const p of players){
+      if(p===taker) continue;
+      if(type==='penalty'){
+        if(Math.abs(p.x-goalX)<BX+14 && Math.abs(p.y-YC)<BY+14) p.x=goalX===0?BX+26:FW-BX-26;
+      } else if(p.team!==team){
+        const dx=p.x-x, dy=p.y-y, d=Math.hypot(dx,dy);
+        if(d<110){ const ux=d>1?dx/d:-atkOf(team), uy=d>1?dy/d:0;
+          p.x=clamp(x+ux*110,p.r,FW-p.r); p.y=clamp(y+uy*110,p.r,FH-p.r); }
+      }
+    }
+    if(type==='penalty'){ const kp=keepers.find(k=>k.team!==team); if(kp){ kp.x=kp.homeX; kp.y=YC; kp.mode='line'; } }
   }
   function checkOutOfPlay(){
     if(restartT>0||scoredT>0||offsideT>0||gkHold)return;
@@ -5643,7 +5751,7 @@
   function aiBrain(p,dt){
     p.aiActT-=dt*statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,2.0);p.runT-=dt;   // Off IQ: 1 = slow re-reads .. 10 = fast
     p.intercepting=false;
-    p.dbgTag=''; p.goingForBall=false;
+    p.dbgTag=''; p.goingForBall=false; p.engageCap=1;
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -6807,6 +6915,10 @@
           mode='block';
         }
 
+        // CLOSED DOWN: the last stretch in, goal-side of him, comes under control rather than at full tilt --
+        // a defender charging in gets skinned, or gives away a foul. (A ball showing right in front of him
+        // he can still go and win.)
+        if(d<80 && atkC*(c.x-p.x)<0 && !(mode==='commit'&&showing)) p.engageCap=0.7;
         if(mode==='block'){
           // get tight to his body, on the ball side, to block the turn — no standoff cushion.
           const bx=(ball.x-c.x), by=(ball.y-c.y); const bl=Math.hypot(bx,by)||1;
@@ -6860,8 +6972,10 @@
         if(!partnerOnIt && _canChase && c && pastMe>15 && pastMe<260 && Math.abs(c.y-p.y)<170 && Math.hypot(c.vx,c.vy)>runSpeedOf(c)*0.3){
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
-          // aim for a point just goal-side of the carrier, chasing hard
-          const rtx=c.x+gx2*30, rty=c.y+gy2*30;
+          // aim for a point just goal-side of the carrier and beside him (the side I'm on), chasing hard --
+          // alongside him, not through his back
+          const side=Math.sign((p.x-c.x)*(-gy2)+(p.y-c.y)*gx2)||1;
+          const rtx=c.x+gx2*30-gy2*side*26, rty=c.y+gy2*30+gx2*side*26;
           p.sprint = p.stamina>0.05;
           return steer(p,clamp(rtx,40,FW-40),clamp(rty,30,FH-30),1.0);
         }
@@ -7040,6 +7154,8 @@
   function stepOutfield(p,ix,iy,dt){
     if(p.lastPasserT>0)p.lastPasserT-=dt;
     if(p.passLockT>0)p.passLockT-=dt;
+    if(p.sprintDropT>0)p.sprintDropT-=dt;
+    if(p.beatenCd>0)p.beatenCd-=dt;
     if(p.state==='slide'){
       p.stateT-=dt;
       p.vx*=Math.pow(0.03,dt);p.vy*=Math.pow(0.03,dt);
@@ -7073,6 +7189,7 @@
     // both scale with current stamina AND the eroded ceiling.
     const sprintingNow = wantSprint && !empty;
     let MAX = (sprintingNow ? sprintSpeedOf(p) : runSpeedOf(p)) * fatigue;
+    if(p.engageCap<1){ MAX *= p.engageCap; p.engageCap=1; }    // an AI defender coming in under control (aiBrain sets it each frame)
     if(p.intercepting) MAX *= statLerp(defIQof(p),1.0,1.15);   // Def IQ interception burst (+15% at Def IQ 10)
     else if(p.goingForBall) MAX *= statLerp(statOf(p,'offIQ',P.offIQ.val),1.0,1.10);  // Off IQ receiving burst: arrive on a ball meant for you a beat sooner (+10% at Off IQ 10)
     let accelMul=1;
@@ -7119,7 +7236,7 @@
       // re-accelerate. Turn SHARPER than ~45° (align below 0.70) and the sprint drops; you then
       // get the heavy momentum decel and must double-tap to sprint anew.
       if(p===controlled && p.sprint && sp>60 && align<0.70){
-        p.sprint=false;
+        p.sprint=false; p.sprintDropT=0.4;            // (the stick's sprint zone waits this long to put it back)
       }
       // agility -> how well you keep speed through a turn; acceleration -> how fast you build speed.
       // both worn down a touch by cumulative fatigue (eroded cap).
@@ -7817,7 +7934,7 @@
 
     if(LAB.on) labStep(dt,rdt);
     const hi=humanIntent();
-    const frozen = offsideT>0 || scoredT>0 || breakT>0 || matchOver;
+    const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || matchOver;
     if(!frozen) for(const p of players){
       if(p===controlled){stepOutfield(p,hi.ix,hi.iy,dt);}
       else if(practice && practiceStep(p,dt)){ /* scripted helper handled */ }
@@ -7875,7 +7992,7 @@
         const critical = beaten || gapBurst || openBehind || closeChase;
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
-        const pressClose = oppHasBallTeam(p.team) && dBall<170 && nearestMine!==false &&
+        const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
                            (()=>{ for(const q of players){ if(q.team===p.team&&q!==p&&dist(q,carrier||ball)<dBall-10) return false; } return true; })();
         const driving    = carrying && Math.hypot(p.vx,p.vy)>runSpeedOf(p)*0.6;
         const longRun    = p.runTarget && Math.hypot(p.runTarget.x-p.x,p.runTarget.y-p.y)>220;
@@ -7957,6 +8074,7 @@
       else carry(p,dt,p===controlled?(hi.ix||hi.iy):true);
     }
     nanChk('carry');
+    beatTheChallenge(dt);
     contactTackles();
     nanChk('contactTackles');
     attemptCaptures();
@@ -8024,6 +8142,8 @@
       else if(freePlay){ resetKickoff(); const p=controlled;p.x=FW*0.5;p.y=YC;own(p,p.r+ball.r+5);p.facing={x:atkOf('G'),y:0}; }
       else resetKickoff(lastConceder||'G');     // the team that conceded restarts
     }}
+    // a foul's free kick / penalty: the whistle holds play a moment, then it's taken (see doRestart)
+    if(restartT>0){ restartT-=dt; if(restartT<=0){ restartT=0; if(restartInfo) executeRestart(); } }
     if(offsideT>0){offsideT-=dt;
       if(offsideT<=0&&offSpot){
         // indirect free kick to the DEFENDING team at the offence spot

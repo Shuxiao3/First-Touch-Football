@@ -29,7 +29,10 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 
 **Touch**
 
-Drag on the left half to move (double-tap to sprint). The big right-hand button is
+Drag on the left half to move. **Push the stick out past its ring to sprint** (the ring lights up
+orange) and ease back inside it to stop, without ever lifting your thumb; push on out and the
+stick follows your thumb, so you can't run off its edge. A double-tap on the left half still
+sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
 like `L` there.
@@ -165,7 +168,21 @@ test, and like the Trap Lab the values are the game's settings.
   style levers (press / neutral / low block · neutral / wing / counter) and per-player
   defensive personalities. A pair of centre-backs works as a pair: one goes to the ball and the
   other picks up a free man or covers behind him, and when your team has it in your own third they
-  split wide either side of the box to play out.
+  split wide either side of the box to play out. Defenders close down quickly, then come in under
+  control for the last few strides, and a beaten one chases back up alongside rather than through
+  the man.
+- **Fouls** — a challenge that goes through the man rather than the ball can be called: charging
+  in hard (his own speed into the man counts, so a firm, controlled challenge is fine), from the
+  side and much more from behind, bundling a man off it, or a slide that takes the man and not the
+  ball. Good tacklers and readers of the game foul less, aggressive ones more. A foul is a
+  **free kick** where it happened (the ball at the fouled team's feet, the other side 110 px back
+  and unable to tackle for a moment), or a **penalty** if it was in the box (everyone else out of
+  it, the keeper on his line). The *Fouls: risk ×* dial scales it, and 0 turns fouls off. There's no
+  whistle in the labs or the drills.
+- **Beating a tight press** — a sharp cut on the ball (55° or more, at pace) wrong-foots a defender
+  who's right up against the man on it, or diving in at him: he stumbles and can't tackle for a
+  moment (0.45 s on the *Beat a tight press* dial, longer against a good dribbler, shorter for an
+  agile defender). When you're defending, only diving in gets you caught; standing close is fine.
 - **Career mode** — create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
@@ -203,9 +220,9 @@ Everything lives in `index.html`:
 | Lines | Contents |
 | --- | --- |
 | 13 | Embedded `Baskic8` pixel font (base64) |
-| 14–599 | Styles |
-| 601–868 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
-| 869–10474 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
+| 14–601 | Styles |
+| 603–870 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
+| 871–10594 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
