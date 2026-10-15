@@ -1209,8 +1209,9 @@
     TAC[tacTeam].off=b.dataset.otac;markTac();saveSettings();
   });
 
-  // ===== pitch (slightly bigger) =====
-  const FW=2420, FH=1285;
+  // ===== pitch: 25% longer and wider than the old 2420 x 1285, for more room 6-a-side (the boxes, goals and
+  //       centre circle keep their size, as on a real bigger pitch; the whole width stays in view) =====
+  const FW=3025, FH=1606;
   const GOAL_W=227, GOAL_H=69, NET_D=28, YC=FH/2;
   let gDir=1, lastConceder=null;          // gDir = +1 when Green attacks the RIGHT goal; flips each half
   function atkOf(team){ return team==='G' ? gDir : -gDir; }   // a team's attacking x-direction

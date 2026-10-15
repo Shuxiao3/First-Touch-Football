@@ -156,7 +156,8 @@ test, and like the Trap Lab the values are the game's settings.
 ## What's in the engine
 
 - **6v6 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
-  and possession-aware team phases.
+  and possession-aware team phases, on a roomy 3025 × 1606 pitch (the boxes, goals and centre circle
+  are regular size; the camera always shows the full width and follows play along the length).
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant.
@@ -204,7 +205,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–599 | Styles |
 | 601–868 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
-| 869–10473 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
+| 869–10474 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
