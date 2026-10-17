@@ -338,7 +338,7 @@
   .exhChip:hover,.exhChip.cur{border-color:#9dff3c;color:#e9f5ec;}
   .exhChip:disabled{opacity:.3;cursor:not-allowed;border-color:#2a3a22;}
   .exhCtrl{width:100%;margin-top:9px;}
-  .exhPlayers{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;}
+  .exhPlayers{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%;}
   .exhPl{display:flex;align-items:center;gap:6px;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:12px;padding:7px 8px;cursor:pointer;text-align:left;min-width:0;}
   .exhPl .r{font-size:9px;letter-spacing:1px;color:#7f9a6f;width:26px;flex:0 0 auto;}
   .exhPl .n{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -615,7 +615,7 @@
   <div id="startMenu">
     <div class="smCenter">
       <div class="smTitle">FIRST TOUCH<span class="dot">.</span> FOOTBALL</div>
-      <div class="smSub">phosphor 6v6</div>
+      <div class="smSub">phosphor 7v7</div>
       <div class="smItems" id="smItems">
         <button class="smBtn" data-act="resume" id="smResume" style="display:none"><span class="mk">▶</span>RESUME MATCH</button>
         <button class="smBtn" data-act="new"><span class="mk">▶</span>NEW GAME</button>
@@ -822,14 +822,14 @@
   </div>
   <div class="row" style="margin-top:8px">
     <span class="lbl"></span>
-    <button class="btn form" data-form="2-3-1">2-3-1</button>
-    <button class="btn form" data-form="3-2-1">3-2-1</button>
-    <button class="btn form" data-form="2-2-2">2-2-2</button>
-    <button class="btn form" data-form="3-1-2">3-1-2</button>
-    <button class="btn form" data-form="1-3-2">1-3-2</button>
-    <button class="btn form" data-form="2-1-3">2-1-3</button>
-    <button class="btn form" data-form="1-4-1">1-4-1</button>
-    <button class="btn form" data-form="1-2-3">1-2-3</button>
+    <button class="btn form" data-form="3-2-2">3-2-2</button>
+    <button class="btn form" data-form="2-3-2">2-3-2</button>
+    <button class="btn form" data-form="2-2-3">2-2-3</button>
+    <button class="btn form" data-form="2-4-1">2-4-1</button>
+    <button class="btn form" data-form="3-3-1">3-3-1</button>
+    <button class="btn form" data-form="1-4-2">1-4-2</button>
+    <button class="btn form" data-form="3-1-3">3-1-3</button>
+    <button class="btn form" data-form="1-3-3">1-3-3</button>
   </div>
   <div class="row" style="margin-top:14px">
     <span class="lbl">FORMATION FOR</span>
@@ -879,7 +879,7 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=72;
+  const SETTINGS_V=73;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, trap window 0.10s; 10 = reach 45, window 0.20s. A bigger reach meets the ball sooner and a longer window forgives early presses (late ones always fall off fast). Also the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
@@ -924,7 +924,6 @@
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
     aiTouch:  {val:1.1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.1 = default (mostly clean, some loose, the odd heavy one), 1.4+ = a real mix with balls let run, 2+ = scrappy.'},
-    foulRisk: {val:1, min:0, max:3, step:0.05,label:'Fouls: risk \u00d7',hint:'How likely a reckless challenge is to be called a foul: charging in hard, from the side or (much more) from behind, muscling a man off it, or a slide that takes the man and not the ball. A foul is a free kick where it happened, or a penalty in the box. A firm, controlled tackle is rarely a foul. Good tacklers (and readers of the game) foul less, aggressive ones more. 0 = no fouls.'},
     wrongFoot:{val:0.45, min:0, max:1, step:0.05,label:'Beat a tight press (s)',hint:'A defender right up against the man on the ball, or diving in at him, is wrong-footed by a sharp cut (55\u00b0 or more): he stumbles for this long and cannot tackle. A good dribbler makes it longer, an agile defender shorter. You, defending, only get caught diving in. 0 = off.'},
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
@@ -933,7 +932,7 @@
     trapWin:  {val:1,min:0.4,max:2.5,step:0.05,label:'Trap: window ×',hint:'Scales the timing window Ball control gives you (0.10 s at 1 up to 0.20 s at 10). Bigger = more forgiving timing for everyone, AI included.'},
     trapLate: {val:0.6,min:0.2,max:1.5,step:0.05,label:'Trap: late tolerance',hint:'How much room a LATE press gets, as a share of the early side. 0.6 = late presses fall off almost twice as fast as early ones; 1 = both sides equal.'},
     trapKeepGood:{val:0.12,min:0,max:0.6,step:0.01,label:'Trap: pace kept, perfect',hint:'Share of the ball\'s pace a perfect touch keeps as it comes off you. Lower = it drops dead closer to your feet.'},
-    trapKeepBad:{val:0.70,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
+    trapKeepBad:{val:0.63,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
     // pass types (tune them live in the Pass Lab)
@@ -954,15 +953,15 @@
     balanced:{friction:0.55,ballControl:6,knockOn:480,knockVar:0.35,speed:7,accel:3,agility:5,aiThink:0.45,mateThink:0.45,pressTight:0.45,shotPower:4, passAcc:6,curve:7,shotAcc:8, longShots:7,keeperSpd:4,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.6,stamina:5.5,dribbling:5.5,composure:5.5,tackle:5.5,interceptions:5.5,crossing:5.5,heading:5.5,offIQ:5.5,defIQ:5.5},
     sim:     {friction:0.32,ballControl:4,knockOn:600,knockVar:0.5, speed:5.5,accel:2,agility:2,aiThink:0.8, mateThink:0.8, pressTight:0.6, shotPower:6,passAcc:5,curve:7,shotAcc:5.5, longShots:5,keeperSpd:8,strengthG:6,strengthR:6,firstTouchAcc:0.5,stamina:4,dribbling:4,composure:6,tackle:6,interceptions:6,crossing:6,heading:6,offIQ:5,defIQ:6},
   };
-  // six outfielders a side: every formation's lines add up to 6
-  const FORMS={'2-3-1':[2,3,1],'3-2-1':[3,2,1],'2-2-2':[2,2,2],'3-1-2':[3,1,2],'1-3-2':[1,3,2],'2-1-3':[2,1,3],'1-4-1':[1,4,1],'1-2-3':[1,2,3]};
-  const OUTFIELD=6;
-  // saved settings / careers from the seven-outfielder days: map each old formation to its closest
-  const FORM_FROM_7={'2-3-2':'2-3-1','3-2-2':'3-2-1','3-3-1':'3-2-1','2-2-3':'2-1-3','2-4-1':'1-4-1','1-4-2':'1-3-2','3-1-3':'3-1-2','1-3-3':'1-2-3'};
-  function formOK(f,dflt){ f=FORM_FROM_7[f]||f; return FORMS[f]?f:dflt; }
+  // seven outfielders a side: every formation's lines add up to 7
+  const FORMS={'3-2-2':[3,2,2],'2-3-2':[2,3,2],'2-2-3':[2,2,3],'2-4-1':[2,4,1],'3-3-1':[3,3,1],'1-4-2':[1,4,2],'3-1-3':[3,1,3],'1-3-3':[1,3,3]};
+  const OUTFIELD=7;
+  // saved settings / careers from the six-outfielder days: each six-a-side formation grows into its closest
+  const FORM_FROM_6={'2-3-1':'2-3-2','3-2-1':'3-2-2','2-2-2':'2-3-2','3-1-2':'3-1-3','1-3-2':'1-4-2','2-1-3':'2-2-3','1-4-1':'2-4-1','1-2-3':'1-3-3'};
+  function formOK(f,dflt){ f=FORM_FROM_6[f]||f; return FORMS[f]?f:dflt; }
   // each team has an ATTACK shape and a DEFENSE shape; players adopt the right one by phase
-  let myForm='2-3-1';
-  let rForm='2-3-1';
+  let myForm='2-3-2';
+  let rForm='2-3-2';
   function formFor(team,phase){ return team==='G'?myForm:rForm; }  // single formation; phase ignored
   // tactics: G is player-controlled via UI; R uses a fixed default
   function widthObj(v){ const d={atk:1,def:1};
@@ -1119,6 +1118,7 @@
         if(v<70){ P.aiTouch.val=1.4; }   // AI first touches are scrappier by default
         if(v<71){ if(P.passLoft.val>=2.5) P.passLoft.val=2.1; }   // normal passes flatter (and quicker) by default
         if(v<72){ if(P.aiTouch.val===1.4) P.aiTouch.val=1.1; if(P.aiReact.val===0.3) P.aiReact.val=0.15; }   // AI first touches tidier, and quicker to react
+        if(v<73){ if(P.trapKeepBad.val===0.7) P.trapKeepBad.val=0.63; }   // a botched touch runs a little less far
         if(o.__fG)myForm=formOK(o.__fG,myForm);
         if(o.__fR)rForm=formOK(o.__fR,rForm);
         if(o.__rdtac)TAC.R.def=o.__rdtac;
@@ -1213,9 +1213,9 @@
     TAC[tacTeam].off=b.dataset.otac;markTac();saveSettings();
   });
 
-  // ===== pitch: 25% longer and wider than the old 2420 x 1285, for more room 6-a-side (the boxes, goals and
-  //       centre circle keep their size, as on a real bigger pitch; the whole width stays in view) =====
-  const FW=3025, FH=1606;
+  // ===== pitch: room for seven-a-side -- 10% longer and wider than 3025 x 1606 (itself 25% up on 2420 x 1285).
+  //       The boxes, goals and centre circle keep their size, as on a real bigger pitch; the whole width stays in view =====
+  const FW=3328, FH=1766;
   const GOAL_W=227, GOAL_H=69, NET_D=28, YC=FH/2;
   let gDir=1, lastConceder=null;          // gDir = +1 when Green attacks the RIGHT goal; flips each half
   function atkOf(team){ return team==='G' ? gDir : -gDir; }   // a team's attacking x-direction
@@ -1302,15 +1302,18 @@
   function jitter(mean){ const x=Math.round((mean+(Math.random()*2-1)*1.5)*2)/2; return Math.max(1,Math.min(10,x)); }
   function genStats(role){ const o={}; for(const k of ALL_STAT_KEYS) o[k]=jitter(ARCH[role][k]); return o; }
   function overallOf(entry){ const w=OVR_W[entry.role]||OVR_W.MID; let sum=0,wt=0; for(const k in w){ sum+=(entry.stats[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(sum/wt*10))); }
-  function genSquad(){
-    const roles=['GK','DEF','DEF','MID','MID','MID','ATT'];
-    const pool=NAMES.slice();
+  const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
+  function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
+  // new squads, and those saved in the six-a-side days (a keeper and six): fill up to a keeper and seven
+  function topUpSquad(sq){
+    const used=new Set(sq.map(e=>e.name)), pool=NAMES.filter(n=>!used.has(n));
     const pick=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0]||'Player';
-    return roles.map((r,i)=>{ const e={name:pick(),num:i+1,role:r,defPers:PERS3[Math.floor(Math.random()*3)],stats:genStats(r)}; e.ovr=overallOf(e); return e; });
+    while(sq.length<SQUAD_ROLES.length){ const r=SQUAD_ROLES[sq.length];
+      const e={name:pick(),num:sq.length+1,role:r,defPers:PERS3[Math.floor(Math.random()*3)],stats:genStats(r)}; e.ovr=overallOf(e); sq.push(e); }
   }
   // ============ CLUBS (exhibition): the 2026/27 Premier League ============
   // A kit is [shirt, trim, shorts]: the club's colours, plus a change kit worn when the shirts clash. str nudges
-  // a generated squad's stats (roughly last season's finish). The players are made up: the same seven each time.
+  // a generated squad's stats (roughly last season's finish). The players are made up: the same eight each time.
   const CLUB_LEAGUE='PREMIER LEAGUE · 2026/27';
   const CLUBS=[
     {id:'ARS',name:'Arsenal',           str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
@@ -1349,31 +1352,34 @@
     'Udeh','Upton','Vance','Varga','Voss','Wade','Ward','Weller','Wilde','Winter','Wolfe','Yates','Yilmaz','Zamora','Zeller'];
   function rng32(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
   function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
-  // one fixed shuffle of the surnames, dealt out seven to a club: nobody shares a name
+  // one fixed shuffle of the surnames, dealt out seven to a club and then one more each: nobody shares a name
   const CLUB_NAME_DEAL=(()=>{ const R=rng32(hashStr('ft-club-names')), a=CLUB_SURNAMES.slice();
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; })();
   function clubSquadGen(club){
     const R=rng32(hashStr('ft-club-'+club.id)), ci=CLUBS.indexOf(club);
-    const roles=['GK','DEF','DEF','MID','MID','MID','ATT'];
+    const roles=SQUAD_ROLES;
     const NUMS={GK:[1],DEF:[2,3,4,5,6,12,15],MID:[8,10,14,16,17,18,20,23],ATT:[7,9,11,19,21]};
     const take=r=>{ const l=NUMS[r]; return l.splice(Math.floor(R()*l.length),1)[0]; };
     return roles.map((r,i)=>{
       const st={};
       for(const k of ALL_STAT_KEYS){ const m=ARCH[r][k]+(r==='GK'||!GK_KEYS.includes(k)?club.str:0); st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*1.5)*2)/2)); }
-      const e={name:CLUB_NAME_DEAL[(ci*7+i)%CLUB_NAME_DEAL.length], num:take(r), role:r, defPers:PERS3[Math.floor(R()*3)], stats:st};
+      const e={name:CLUB_NAME_DEAL[(i<7?ci*7+i:CLUBS.length*7+ci)%CLUB_NAME_DEAL.length], num:take(r), role:r, defPers:PERS3[Math.floor(R()*3)], stats:st};
       e.ovr=overallOf(e); return e;
     });
   }
   function clubOvr(sq){ return Math.round(sq.reduce((s,e)=>s+(e.ovr||0),0)/Math.max(1,sq.length)); }
-  // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-6) ----
+  // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-7) ----
   const EXH={on:false, you:'ARS', opp:'MCI', ctrl:6, play:null};   // play: the clubs actually out there (set at kick-off)
   try{ const o=JSON.parse(localStorage.getItem('ft_exh')||'null');
-       if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; if(o.ctrl>=1&&o.ctrl<=6) EXH.ctrl=o.ctrl|0; } }catch(e){}
+       if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; if(o.ctrl>=1&&o.ctrl<=OUTFIELD) EXH.ctrl=o.ctrl|0; } }catch(e){}
   function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp,ctrl:EXH.ctrl})); }catch(e){} }
   // a club's squad and lineup: as you last left them in the tactics menu, else as generated
   function clubSide(id){
     let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
-    if(o&&Array.isArray(o.squad)&&o.squad.length===7&&o.lineup) return {squad:o.squad, lineup:o.lineup};
+    if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
+      if(o.squad.length<1+OUTFIELD){ o.squad.push(...clubSquadGen(clubById(id)).slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from six-a-side: their eighth man back
+      return {squad:o.squad, lineup:o.lineup};
+    }
     return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup()};
   }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
@@ -1418,8 +1424,8 @@
     document.querySelectorAll('.mteam').forEach(b=>{ b.textContent=b.dataset.mteam==='G'?'your team ('+TEAM.G.code+')':'opponent ('+TEAM.R.code+')'; });
   }
   let SQUAD={G:null,R:null}, LINEUP={G:null,R:null};
-  function defaultLineup(){ return {gk:0, atk:[1,2,3,4,5,6], def:[1,2,3,4,5,6]}; }
-  // a lineup's starters, trimmed or topped up to six: the attack order picks who starts, the
+  function defaultLineup(){ return {gk:0, atk:[1,2,3,4,5,6,7], def:[1,2,3,4,5,6,7]}; }
+  // a lineup's starters, trimmed or topped up to seven: the attack order picks who starts, the
   // defence order keeps its own arrangement of those same players
   function fitLineup(li,n){
     const pool=[...Array(n).keys()].filter(i=>i!==li.gk);
@@ -1432,15 +1438,19 @@
   function saveSquads(){ if(EXH.on&&EXH.play){ saveClubSides(); return; } try{ localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP})); }catch(e){} }
   function normalizeSquads(){
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
+      topUpSquad(SQUAD[t]);
       SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
       const li=LINEUP[t];
       if(li){ if(li.out&&!li.atk){ li.atk=li.out.slice(); li.def=li.out.slice(); delete li.out; }
-              if(!li.atk)li.atk=[1,2,3,4,5,6]; if(!li.def)li.def=li.atk.slice(); if(li.gk==null)li.gk=0;
+              if(!li.atk)li.atk=defaultLineup().atk; if(!li.def)li.def=li.atk.slice(); if(li.gk==null)li.gk=0;
               fitLineup(li,SQUAD[t].length); }
     }
   }
   function loadSquads(){
-    try{ const raw=localStorage.getItem('ft7_squads'); if(raw){ const o=JSON.parse(raw); if(o.__v===SQUAD_V&&o.SQUAD&&o.LINEUP){ SQUAD=o.SQUAD; LINEUP=o.LINEUP; normalizeSquads(); return; } } }catch(e){}
+    try{ const raw=localStorage.getItem('ft7_squads'); if(raw){ const o=JSON.parse(raw); if(o.__v===SQUAD_V&&o.SQUAD&&o.LINEUP){ SQUAD=o.SQUAD; LINEUP=o.LINEUP;
+      const grew=['G','R'].some(t=>SQUAD[t]&&SQUAD[t].length<SQUAD_ROLES.length); normalizeSquads();
+      if(grew) localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP}));   // keep the man who came back
+      return; } } }catch(e){}
     SQUAD={G:genSquad(),R:genSquad()}; LINEUP={G:defaultLineup(),R:defaultLineup()}; saveSquads();
   }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
@@ -4308,19 +4318,12 @@
       if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0)continue;
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
-      // running into his back: no way to the ball from there, but a shove can be a foul -- judged once
-      // as the bump happens, not again every moment he stays on him
-      const backBump=inBody&&isBehind(carrier,p), newBump=backBump&&!p.backBump;
-      p.backBump=backBump;
-      if(newBump&&Math.random()<foulChance(p,carrier,'back')){ callFoul(p,carrier,'back'); return; }
       if(dist(p,ball)<p.r+ball.r+tackleReachOf(p)){
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
-        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){
-          if(Math.random()<foulChance(p,carrier,'tackle')){ callFoul(p,carrier,'tackle'); return; }   // went through the man
-          winBall(p,carrier); return; }
+        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
       }
       // SHIELD / TURN BATTLE (strength): if I'm tight to a shielding carrier and he's trying to
@@ -4335,7 +4338,6 @@
           // strength-weighted contest, sampled at a modest rate so it plays out over a moment
           const odds=duelOdds(strengthOf(p),strengthOf(carrier));   // P(defender wins)
           if(Math.random() < odds*0.06){
-            if(Math.random()<foulChance(p,carrier,'duel')){ callFoul(p,carrier,'duel'); return; }   // a shove too far
             // defender muscles across and steals it as the carrier exposes it
             p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
             winBall(p,carrier);
@@ -4346,35 +4348,6 @@
     }
   }
 
-  // ===== FOULS: going through the man rather than the ball =====
-  // The chance grows with how hard HE comes in (his own speed into the man -- a firm, controlled challenge
-  // is fine, charging in isn't; the carrier running into him doesn't count), from the side and much more
-  // from behind. Good tacklers and readers of the game
-  // foul less, aggressive temperaments more. kind: 'tackle' (took it by contact), 'back' (ran into his
-  // back), 'duel' (muscled him off it), 'slide' (slid in, took the man), 'slideBack' (slid in from behind).
-  function foulChance(t,c,kind){
-    if(LAB.on||practice) return 0;                                      // (no whistle in the labs and drills)
-    const dx=c.x-t.x, dy=c.y-t.y, d=Math.hypot(dx,dy)||1;
-    const into=Math.max(0,(t.vx*dx+t.vy*dy)/d);                      // how hard he's coming in
-    const f=c.facing||{x:1,y:0}, front=-(dx*f.x+dy*f.y)/d;          // +1 he's in front of the carrier .. -1 behind
-    const hard=clamp((into-90)/150,0,1), angle=front>0.5?0:front>-0.15?0.35:1;   // (jogging in is fine)
-    const base = kind==='tackle' ? 0.04+0.45*hard+0.10*angle
-               : kind==='back'   ? 0.03+0.55*hard
-               : kind==='duel'   ? 0.08+0.25*hard
-               : kind==='slide'  ? 0.45 : 0.75;
-    const skill=statLerp((statOf(t,'tackle',P.tackle.val)+defIQof(t))/2,1.35,0.65);
-    const temper=1+(persOf(t)-1)*0.6;                                  // passive 0.7 .. aggressive 1.3
-    return clamp(base*skill*temper*P.foulRisk.val,0,0.95);
-  }
-  // the whistle: no turnover -- a free kick where it happened, or a penalty if it was in the fouler's box
-  function callFoul(t,c,kind){
-    const team=c.team, atk=atkOf(team), goalX=atk>0?FW:0;
-    const inBox=Math.abs(c.x-goalX)<BX && Math.abs(c.y-YC)<BY;
-    t.tackleCd=Math.max(t.tackleCd,1.0); t.state='stumble'; t.stateT=0.35;
-    if(inBox) doRestart('penalty',team,atk>0?FW-BX*0.66:BX*0.66,YC);
-    else doRestart('freekick',team,clamp(c.x,30,FW-30),clamp(c.y,20,FH-20));
-    lastGrade=inBox?'FOUL \u00b7 PENALTY!':'FOUL \u00b7 FREE KICK'; gradeColor=team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.6;
-  }
   // ===== BEATING A TIGHT PRESS =====
   // A sharp cut by the man on the ball (55 degrees or more, at pace) wrong-foots a defender who's right up
   // against him or diving in at him: he stumbles (can't tackle) for a moment. You, defending, only get caught
@@ -4452,14 +4425,10 @@
         if(sp>30){ fx/=sp; fy/=sp; }                      // use where the carrier is actually going
         else { const cf=carrier.facing||{x:0,y:0}; fx=cf.x; fy=cf.y; }   // ...or where they face if near-stationary
         const slideAlign = p.slideDx*fx + p.slideDy*fy;   // +1 = lunging the way they're going (from their back), -1 = into their front
-        if(isBehind(carrier,p) || slideAlign > 0.30){               // behind / back-diagonal: through the man to get it
-          if(Math.random()<foulChance(p,carrier,'slideBack')) callFoul(p,carrier,'slideBack');
-          return; }
+        if(isBehind(carrier,p) || slideAlign > 0.30) return;   // behind / back-diagonal -> the slide whiffs
         if(shotWindUpSafe(carrier,p)) return;                   // winding up a shot: only a slide from in front can win it
       }
-      if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2)){   // Def IQ: flat cut to the exposure a slide needs
-        if(Math.random()<foulChance(p,carrier,'slide')) callFoul(p,carrier,'slide');   // took the man, not the ball
-        return; }
+      if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2))return;   // Def IQ: flat cut to the exposure a slide needs
       winBall(p,carrier);
       ball.vx=p.slideDx*340;ball.vy=p.slideDy*340;ball.vz=35;
     } else if(!carrier&&!p.slideTried){
@@ -4487,7 +4456,7 @@
   function doRestart(type,team,x,y){
     restartT=1.0;
     restartInfo={type,team,x,y};
-    restartLabel={kickin:'KICK-IN',corner:'CORNER',goalkick:'GOAL KICK',freekick:'FREE KICK',penalty:'PENALTY'}[type]||'RESTART';
+    restartLabel=type==='kickin'?'KICK-IN':type==='corner'?'CORNER':'GOAL KICK';
     ball.x=x;ball.y=y;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;
     ball.ownedBy=null;ball.cushBy=null;offsidePass=null;headerT=0;
     lastGrade=restartLabel;gradeColor='#ffb43c';gradeFade=1.4;
@@ -4507,22 +4476,6 @@
     taker.y=clamp(y,16,FH-16);
     taker.state='normal';taker.stateT=0;taker.noTouchT=0;
     own(taker,taker.r+ball.r+5);
-    if(type==='freekick'||type==='penalty') clearRestartArea(type,team,x,y,taker);
-  }
-  // a free kick: they back off 110 px. A penalty: everyone but the taker (and the keeper, on his line) out of the box.
-  function clearRestartArea(type,team,x,y,taker){
-    const goalX=x<FW/2?0:FW;
-    for(const p of players){
-      if(p===taker) continue;
-      if(type==='penalty'){
-        if(Math.abs(p.x-goalX)<BX+14 && Math.abs(p.y-YC)<BY+14) p.x=goalX===0?BX+26:FW-BX-26;
-      } else if(p.team!==team){
-        const dx=p.x-x, dy=p.y-y, d=Math.hypot(dx,dy);
-        if(d<110){ const ux=d>1?dx/d:-atkOf(team), uy=d>1?dy/d:0;
-          p.x=clamp(x+ux*110,p.r,FW-p.r); p.y=clamp(y+uy*110,p.r,FH-p.r); }
-      }
-    }
-    if(type==='penalty'){ const kp=keepers.find(k=>k.team!==team); if(kp){ kp.x=kp.homeX; kp.y=YC; kp.mode='line'; } }
   }
   function checkOutOfPlay(){
     if(restartT>0||scoredT>0||offsideT>0||gkHold)return;
@@ -6916,7 +6869,7 @@
         }
 
         // CLOSED DOWN: the last stretch in, goal-side of him, comes under control rather than at full tilt --
-        // a defender charging in gets skinned, or gives away a foul. (A ball showing right in front of him
+        // a defender charging in gets skinned. (A ball showing right in front of him
         // he can still go and win.)
         if(d<80 && atkC*(c.x-p.x)<0 && !(mode==='commit'&&showing)) p.engageCap=0.7;
         if(mode==='block'){
@@ -8142,7 +8095,7 @@
       else if(freePlay){ resetKickoff(); const p=controlled;p.x=FW*0.5;p.y=YC;own(p,p.r+ball.r+5);p.facing={x:atkOf('G'),y:0}; }
       else resetKickoff(lastConceder||'G');     // the team that conceded restarts
     }}
-    // a foul's free kick / penalty: the whistle holds play a moment, then it's taken (see doRestart)
+    // a restart (see doRestart): play holds a moment, then it's taken
     if(restartT>0){ restartT-=dt; if(restartT<=0){ restartT=0; if(restartInfo) executeRestart(); } }
     if(offsideT>0){offsideT-=dt;
       if(offsideT<=0&&offSpot){
@@ -9431,7 +9384,7 @@
     if(!Array.isArray(d.roster) || d.roster.length!==15){
       const your=(W.leagues[d.tier]||[]).find(c=>c.name===(d.clubName||'Athletic Mudchester'))||(W.leagues[d.tier]||[]).find(c=>c.name==='Athletic Mudchester')||(W.leagues[1]||[])[0];
       d.roster=your?your.players.map(p=>Object.assign({},p,{stats:Object.assign({},p.stats)})):[];
-      d.lineup=null;   // force a fresh 6-starter / 8-bench lineup for the rebuilt roster
+      d.lineup=null;   // force a fresh 7-starter / 7-bench lineup for the rebuilt roster
     }
     ensureForms(d);
     const ft=FIN_TIER[d.tier]||FIN_TIER[1];
@@ -9533,19 +9486,19 @@
   // ===== PER-PLAYER INSTRUCTIONS (career) =====================================
   // Each sub-role exposes option groups; each group has a default (def) choice.
   // Stored on d.instructions[rosterIdx] = {groupIdx: choiceId}. Resolved with defaults.
-  function controlledRi(d){ ensureLineup(d); ensureForms(d); const mi=d.roster?d.roster.findIndex(p=>p&&p.me):-1; if(mi>=0 && (d.lineup.gk===mi || d.lineup.atk.indexOf(mi)>=0)) return mi; const ln=FORMS[d.formation]||FORMS['2-3-1']; return d.lineup.atk[ln[0]+ln[1]]; }
+  function controlledRi(d){ ensureLineup(d); ensureForms(d); const mi=d.roster?d.roster.findIndex(p=>p&&p.me):-1; if(mi>=0 && (d.lineup.gk===mi || d.lineup.atk.indexOf(mi)>=0)) return mi; const ln=FORMS[d.formation]||FORMS['2-3-2']; return d.lineup.atk[ln[0]+ln[1]]; }
   function careerSquad(club){ return (club.players||[]).slice(0,1+OUTFIELD).map((p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, defPers:p.defPers||'default', stats:p.stats, ovr:p.ovr })); }
   // ---- career lineup / tactics ----
   let tacticSel=null, tacNote='', statViewRi=null, tacPhase='atk';
   const TAC_GK=[50,92];
   const CAREER_STEP={1:0,2:52,3:23,4:17};
-  function ensureForms(d){ careerTo6(d); if(!d.formation||!FORMS[d.formation])d.formation=formOK(d.formation,formOK(d.formAtk,'2-3-1'));
+  function ensureForms(d){ careerTo7(d); if(!d.formation||!FORMS[d.formation])d.formation=formOK(d.formation,formOK(d.formAtk,'2-3-2'));
     if(!d.width||typeof d.width!=='object')d.width={atk:1,def:1};
     if(!isFinite(d.width.atk))d.width.atk=1; if(!isFinite(d.width.def))d.width.def=1; return d; }
   function formForCareer(d,phase){ ensureForms(d); return d.formation; }
-  // formation -> 6 slot positions on the portrait tactics pitch, with role/line metadata
+  // formation -> 7 slot positions on the portrait tactics pitch, with role/line metadata
   function careerSlots(form, phase, wMul){ wMul=clamp(wMul||1,0.8,1.2);
-    const lines=FORMS[form]||FORMS['2-3-1']; const roles=['DEF','MID','ATT'];
+    const lines=FORMS[form]||FORMS['2-3-2']; const roles=['DEF','MID','ATT'];
     const Y = {DEF:70,MID:45,ATT:18};   // one shape -> players sit in the same spot in offense & defense
     const out=[];
     const maxCnt=Math.max(...lines);
@@ -9582,36 +9535,30 @@
     }
   }
   function ensureLineup(d){ const R=d.roster||[];
-    careerTo6(d);
+    careerTo7(d);
     let lu=d.lineup;
     if(!(lu && Array.isArray(lu.atk) && Array.isArray(lu.bench) && lu.atk.length===OUTFIELD)){
       const starters=[...Array(OUTFIELD).keys()].map(i=>i+1).filter(i=>i<R.length), bench=[];
-      for(let i=OUTFIELD+1;i<R.length&&bench.length<8;i++) bench.push(i);
+      for(let i=OUTFIELD+1;i<R.length;i++) bench.push(i);
       lu={ gk:0, atk:starters.slice(), def:starters.slice(), bench }; d.lineup=lu;
     }
     lu.def = lu.atk.slice();   // positions are shared between offense & defense
     return lu; }
-  // A career saved with seven outfielders: its formation becomes the nearest six-a-side one, and the
-  // one starter that no longer fits drops to the front of the bench -- taken from the line that
-  // shrinks, so everyone else keeps the position they had.
-  function careerTo6(d){
-    if(d.six) return; d.six=true;
+  // A career saved with six outfielders: its formation grows into the nearest seven-a-side one, and the line
+  // that grows takes a man off the bench (the first one there who plays in that line, else the front of the
+  // bench), so everyone else keeps the position they had.
+  function careerTo7(d){
+    if(d.seven) return; d.seven=true;
     const lu=d.lineup, oldF=d.formation||d.formAtk;
-    if(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD+1){
-      const oldL=String(oldF||'').split('-').map(Number), newL=FORMS[formOK(oldF,'2-3-1')];
-      let keep=null;
-      const isMe=ri=>!!(d.roster&&d.roster[ri]&&d.roster[ri].me);
-      const cut=(seg,n)=>{ seg=seg.slice(); while(seg.length>n){ let j=seg.length-1; if(isMe(seg[j])&&j>0) j--; seg.splice(j,1); } return seg; };   // never your pro
-      if(oldL.length===3&&oldL.every(n=>n>=0)&&oldL.reduce((a,b)=>a+b,0)===lu.atk.length){
-        keep=[]; let at=0;
-        oldL.forEach((n,li)=>{ keep.push(...cut(lu.atk.slice(at,at+n),Math.min(n,newL[li]))); at+=n; });
-        if(keep.length!==OUTFIELD) keep=null;
-      }
-      if(!keep) keep=cut(lu.atk,OUTFIELD);
-      const out=lu.atk.filter(ri=>!keep.includes(ri));
-      lu.atk=keep; lu.def=keep.slice(); lu.bench=[...out,...(lu.bench||[])];
-    }
-    if(oldF&&!FORMS[oldF]) d.formation=formOK(oldF,'2-3-1');
+    if(oldF&&!FORMS[oldF]) d.formation=formOK(oldF,'2-3-2');
+    if(!(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD-1&&Array.isArray(lu.bench)&&lu.bench.length)) return;
+    const oldL=String(oldF||'').split('-').map(Number), newL=FORMS[d.formation]||FORMS['2-3-2'];
+    let li=oldL.length===3 ? newL.findIndex((n,k)=>n>oldL[k]) : -1;
+    if(li<0) li=2;
+    const R=d.roster||[], role=['DEF','MID','ATT'][li];
+    let bi=lu.bench.findIndex(ri=>R[ri]&&R[ri].role===role); if(bi<0) bi=0;
+    const ri=lu.bench.splice(bi,1)[0], at=newL.slice(0,li+1).reduce((a,b)=>a+b,0)-1;   // the end of that line
+    lu.atk.splice(Math.min(at,lu.atk.length),0,ri); lu.def=lu.atk.slice();
   }
   function subIn(d, inRi, outRi){ const lu=d.lineup;
     for(const ph of ['atk','def']){ const k=lu[ph].indexOf(outRi); if(k>=0) lu[ph][k]=inRi; }
@@ -9675,7 +9622,7 @@
   function renderTactics(d, phase){ ensureLineup(d); ensureForms(d); const lu=d.lineup;
     if(statViewRi==null||!d.roster[statViewRi]) statViewRi=controlledRi(d);
     tacPhase=phase;
-    const form=d.formation||'2-3-1'; const wMul=clamp((d.width&&d.width[phase])||1,0.8,1.2); const slots=careerSlots(form,phase,wMul), forms=Object.keys(FORMS);
+    const form=d.formation||'2-3-2'; const wMul=clamp((d.width&&d.width[phase])||1,0.8,1.2); const slots=careerSlots(form,phase,wMul), forms=Object.keys(FORMS);
     let h='<div style="color:#6f8a5f;font-size:10px;text-align:center;margin-bottom:8px">Tap a player for instructions or to move them. Tap a sub to bring them on. Positions are shared between offense &amp; defense \u2014 '+(phase==='atk'?'offensive':'defensive')+' instructions shown.</div>';
     h+='<div class="formRow">'+forms.map(fm=>'<button class="formBtn'+(fm===form?' on':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'">'+fm+'</button>').join('')+'</div>';
     h+='<div class="cwWrap"><span class="cwLbl">WIDTH</span><input type="range" class="cwSlider" data-cwphase="'+phase+'" min="0.8" max="1.2" step="0.02" value="'+wMul+'"><span class="cwVal">'+wMul.toFixed(2)+'\u00d7</span></div>';
@@ -10022,7 +9969,7 @@
     const roster=your.players.map(p=>Object.assign({},p,{stats:Object.assign({},p.stats)}));   // mutable copy
     const wageWk=roster.reduce((a,p)=>a+(p.wage||0),0);
     const ft=FIN_TIER[1];
-    return { v:2, slot, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-1', width:{atk:1,def:1}, six:true,
+    return { v:2, slot, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-2', width:{atk:1,def:1}, seven:true,
              budget:5000, wageWk, sponsorWk:ft.sponsor, capacity:ft.capacity, ticketPrice:ft.price, form:0.5,
              loyalty:LOYALTY_BASE[1], streak:0, results:[], beatenClubs:[], ledger:[], roster, created:Date.now(), updated:Date.now() };
   }
@@ -10324,15 +10271,15 @@
     if(roster.length>15) roster.length=15;
     roster.forEach((p,i)=>{ p.num=i+1; });        // dedupe jersey numbers 1..15
     const N=roster.length;
-    const six=[...Array(OUTFIELD).keys()].map(i=>i+1).filter(i=>i<N), bench=[];
+    const xi=[...Array(OUTFIELD).keys()].map(i=>i+1).filter(i=>i<N), bench=[];
     for(let i=OUTFIELD+1;i<N;i++) bench.push(i);
-    const lineup={ gk:0, atk:six.slice(), def:six.slice(), bench };
+    const lineup={ gk:0, atk:xi.slice(), def:xi.slice(), bench };
     const wageWk=roster.reduce((a,p)=>a+(p.wage||0),0);
     const seed=(Math.floor(Math.random()*1e9))>>>0;
     const mePro={ owned:Object.assign({},MK.owned), base:mkBaseStats(), budget0:MK_BUDGET, sp:0,
                   look:{kit:1,boot:0,hair:0}, season:meBlankSeason(1),
                   career:{apps:0,goals:0,assists:0,ratingSum:0,seasons:[]}, recent:[] };
-    return { v:2, slot:MK.label, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-1', width:{atk:1,def:1}, six:true,
+    return { v:2, slot:MK.label, seed, clubName:'Athletic Mudchester', clubNameUnlocked:false, tier:1, season:1, week:0, formation:'2-3-2', width:{atk:1,def:1}, seven:true,
              budget:5000, wageWk, sponsorWk:ft.sponsor, capacity:ft.capacity, ticketPrice:ft.price, form:0.5,
              loyalty:LOYALTY_BASE[1], streak:0, results:[], beatenClubs:[], ledger:[], roster, lineup, mePro, created:Date.now(), updated:Date.now() };
   }
@@ -10490,7 +10437,7 @@
     const me=careerLineupYours(d);
     SQUAD.G=me.squad; LINEUP.G=me.lineup;
     SQUAD.R=careerSquad(opp); LINEUP.R=defaultLineup();
-    ensureForms(d); myForm=d.formation; rForm='2-3-1'; TAC.G.width=widthObj(d.width); TAC.R.width=widthObj();
+    ensureForms(d); myForm=d.formation; rForm='2-3-2'; TAC.G.width=widthObj(d.width); TAC.R.width=widthObj();
     TAC.G.off=d.style||'neutral'; TAC.G.def=d.posture||'neutral';
     TAC.R.off=opp.style||'neutral'; TAC.R.def=opp.posture||'neutral';
     careerFix={opp:nf.opp, home:nf.home, recorded:false};
@@ -10530,7 +10477,7 @@
     const ph=ws.dataset.cwphase||'atk', v=Math.round(+ws.value*100)/100;
     d.width[ph]=v; if(CAREER&&CAREER.key)writeSave(CAREER.key,d);
     const val=ws.parentNode.querySelector('.cwVal'); if(val)val.textContent=v.toFixed(2)+'\u00d7';
-    const sN=careerSlots(d.formation||'2-3-1', ph, v); const pit=document.querySelector('#bpBody .pitch');
+    const sN=careerSlots(d.formation||'2-3-2', ph, v); const pit=document.querySelector('#bpBody .pitch');
     if(pit){ let si=0; pit.querySelectorAll('.ptk').forEach(tk=>{ if(tk.dataset.tac==='field'){ const sx=sN[si++]; if(sx){ tk.style.left=sx.x+'%'; tk.style.top=sx.y+'%'; } } }); }
   });
   function renderSlots(containerId,isNew){

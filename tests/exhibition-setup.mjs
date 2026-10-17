@@ -22,7 +22,7 @@ let G = await side(page, 'G'), R = await side(page, 'R');
 info(`defaults: ${G.name} (${G.meta}) v ${R.name} (${R.meta})`);
 ok(G.name && R.name && G.name !== R.name, 'two different clubs to start with');
 let pl = await players(page);
-ok(pl.length === 6 && pl.filter(x => x.sel).length === 1, 'six outfield players to pick from, one picked');
+ok(pl.length === 7 && pl.filter(x => x.sel).length === 1, 'seven outfield players to pick from, one picked');
 ok(pl.find(x => x.sel).role === 'ATT', 'by default you are the striker');
 
 await page.click('#exhSideG [data-exh="next"]'); await page.waitForTimeout(100);

@@ -1,6 +1,6 @@
 # First Touch. Football
 
-A phosphor-green 6v6 arcade football game (six outfielders and a keeper a side) — one self-contained HTML file, no build step,
+A phosphor-green 7v7 arcade football game (seven outfielders and a keeper a side) — one self-contained HTML file, no build step,
 no dependencies. Open `index.html` in a browser and play.
 
 ## Play
@@ -68,7 +68,7 @@ doesn't shoot.
 
 **EXHIBITION** opens a match setup before kick-off. Pick **your team** and the **opponent** from the
 2026/27 Premier League (◀ ▶ step through the clubs; tap a club for the full list), then pick the
-player **you control** from your team's six outfielders (the striker by default). **KICK OFF**
+player **you control** from your team's seven outfielders (a striker by default). **KICK OFF**
 (or `Enter`) starts it; `Esc` or BACK leaves.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
@@ -158,8 +158,8 @@ test, and like the Trap Lab the values are the game's settings.
 
 ## What's in the engine
 
-- **6v6 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
-  and possession-aware team phases, on a roomy 3025 × 1606 pitch (the boxes, goals and centre circle
+- **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
+  and possession-aware team phases, on a roomy 3328 × 1766 pitch (the boxes, goals and centre circle
   are regular size; the camera always shows the full width and follows play along the length).
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
@@ -171,14 +171,6 @@ test, and like the Trap Lab the values are the game's settings.
   split wide either side of the box to play out. Defenders close down quickly, then come in under
   control for the last few strides, and a beaten one chases back up alongside rather than through
   the man.
-- **Fouls** — a challenge that goes through the man rather than the ball can be called: charging
-  in hard (his own speed into the man counts, so a firm, controlled challenge is fine), from the
-  side and much more from behind, bundling a man off it, or a slide that takes the man and not the
-  ball. Good tacklers and readers of the game foul less, aggressive ones more. A foul is a
-  **free kick** where it happened (the ball at the fouled team's feet, the other side 110 px back
-  and unable to tackle for a moment), or a **penalty** if it was in the box (everyone else out of
-  it, the keeper on his line). The *Fouls: risk ×* dial scales it, and 0 turns fouls off. There's no
-  whistle in the labs or the drills.
 - **Beating a tight press** — a sharp cut on the ball (55° or more, at pace) wrong-foots a defender
   who's right up against the man on it, or diving in at him: he stumbles and can't tackle for a
   moment (0.45 s on the *Beat a tight press* dial, longer against a good dribbler, shorter for an
@@ -222,7 +214,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–601 | Styles |
 | 603–870 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
-| 871–10594 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
+| 871–10541 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.
