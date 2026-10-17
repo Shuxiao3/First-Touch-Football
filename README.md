@@ -38,7 +38,9 @@ and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR
 like `L` there.
 
 A ball you're running with is knocked a stride ahead every step or two, and a trapped ball comes
-off you before you gather it. Either way it's still yours while it's a step away, and PASS, SHOOT
+off you before you gather it. Either way it's still yours while it's a step away: it's back at your
+feet as soon as it's in your reach again, and if you let go of the stick your player steps onto it
+and collects it himself. PASS, SHOOT
 and CROSS (on any device) mean what they say: pressed with the ball in reach, it's played from
 where it is; pressed with it just out of reach, it goes once it's back at your feet (or is dropped
 if it isn't within about half a second). Just after a ball reaches you (a pass you receive, or
@@ -182,10 +184,13 @@ test, and like the Trap Lab the values are the game's settings.
   slightly up and back the way it came; stand off its line and it glances away from the side
   you're on. Timing sets how much pace the bounce keeps (never more than it arrived with). A
   late touch catches the ball as it's already going by, so it glances on past you rather than
-  back, and an untrapped ball runs past you. Two radii: your **reach** (from Ball control) is
-  where you can first meet the ball and when the timing is judged; the **gather radius** is the
-  same for everyone — the touch comes off you there, and the ball is yours once it's back inside
-  it — so a big reach never sends a touch further away. Computer players trap with a human-like
+  back, and an untrapped ball runs past you. A ball you take running its way (it's catching you
+  up, or you're catching it) is judged against your run, so it stays with you rather than being
+  knocked back behind you. Two radii: your **reach** (from Ball control) is where you can first meet
+  the ball, when the timing is judged, and where you take it back afterwards (a dead ball too); the
+  **gather radius** is the same for everyone — the touch comes off you there — so a big reach never
+  sends a touch further away. You can't take it back for a moment after the touch (longer after a
+  worse one): a good touch is at your feet at once, a heavy one has got away. Computer players trap with a human-like
   spread of error, so their first touch varies too (mostly clean, some loose, the odd heavy one),
   and like you they take a moment (0.15 s by default, a little less for agile players) to react to
   where their touch went, easing off what they were doing meanwhile rather than running on, so a
@@ -214,7 +219,7 @@ Everything lives in `index.html`:
 | 13 | Embedded `Baskic8` pixel font (base64) |
 | 14–601 | Styles |
 | 603–870 | Markup — canvas, menus, exhibition setup, the labs, career hub, tuning panel |
-| 871–10541 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
+| 871–10549 | Engine — sim, AI, clubs, the labs, rendering, career, UI |
 
 Career saves and squads persist to `localStorage`; the feel dials persist through
 `window.storage` when the host provides it.

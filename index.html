@@ -945,7 +945,7 @@
     swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball, against holding K+Up/Down for the whole flight (1x). The Curve stat scales it again.'},
     swipePow: {val:3.2,min:1.4,max:6,step:0.1,label:'Swipe shot: flick for full power',hint:'How fast a flick (in screen widths per second, over its quickest 70 ms) gives a full-power shot. Lower = full power comes easier.'},
     swipeBow: {val:0.30,min:0.12,max:0.6,step:0.01,label:'Swipe shot: bend for full spin',hint:'How far a swipe has to bow off its straight line (as a share of its length) for full spin. A bow under about a quarter of this is read as straight, so a thumb\'s natural arc does not curl it.'},
-    gatherR:  {val:28,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, and the ball (or any dead ball) is yours once it is back inside it, measured from your middle. Your trap reach (Ball control) only decides where you can first meet the ball, so a big reach never sends a touch further away.'},
+    gatherR:  {val:28,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, measured from your middle. Your trap reach (Ball control) is where you can first meet the ball and where you take it back afterwards, but a big reach never sends a touch further away.'},
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
@@ -1789,7 +1789,7 @@
     const p=controlled, atk=atkOf(p.team);
     if(ball.ownedBy===p){ ball.x=p.x+atk*(p.r+ball.r+4); ball.y=p.y; }   // strike it from in front, as a held K shot does
     shootAt(p,atk,sw.aim,sw.charge,0,undefined,sw.spin);
-    ball.dribbler=null; ball.dribbleGrace=0; ball.fromTrap=false;
+    ball.dribbler=null; ball.dribbleGrace=0;
     curveArmed=!!sw.kb; curveT=sw.kb?1.1:0; trapping=0; shootHeld=false; shootCharge=0; windUp=null;   // (a K shot can still be bent)
   }
   function drawSwipeTrail(){
@@ -2377,7 +2377,7 @@
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
-    gatherR:'Same for everyone: a trap comes off you at this ring (the inner one), and the ball is yours once it\'s back inside it. Your reach only decides where you first meet it.',
+    gatherR:'Same for everyone: a trap comes off you at this ring (the inner one). Your reach (the outer one) is where you first meet the ball, and where you take it back.',
     aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.',
     aiReact:'How long the AI takes to react to where its own touch went. Until then it eases off what it was doing. 0 = instant.',
     passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
@@ -3138,6 +3138,9 @@
     if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}
     const l=Math.hypot(ix,iy);if(l>1){ix/=l;iy/=l;}
     curIx=ix;curIy=iy;
+    // not steering, with your own touch a step away (a trap, a knock-on): your player goes and collects it.
+    // (Movement only: an aim taken from the stick still reads it as centred.)
+    if(!ix&&!iy&&controlled&&myLooseBall()&&ball.z<12){ const dx=ball.x-controlled.x, dy=ball.y-controlled.y, d=Math.hypot(dx,dy)||1; return {ix:dx/d, iy:dy/d}; }
     return{ix,iy};
   }
 
@@ -3546,7 +3549,7 @@
     const D=statLerp(statOf(p,'shotPower',P.shotPower.val),470,610)*(1-0.25*awk*Math.random());   // where it first comes down
     const T=1.3;                                                         // high and long: over everyone's head
     ball.vx=cx*D/T; ball.vy=cy*D/T; ball.vz=520*T/2; ball.z=Math.max(ball.z,1);
-    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.fromTrap=false; ball.cushBy=null; ball.intendedRcv=null;
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null;
     ball.crossBy=null; ball.crossT=0; ball.shotBy=null; ball.shotT=0;
     p.noTouchT=0.35; ball.lastTouch=p.team;
     endCurve(); recordPassTeam(p.team,p); passPose(p);
@@ -7309,19 +7312,25 @@
     const c2=Math.cos(2*th), s2=Math.sin(2*th);
     return {x:-g.dx*c2-g.lx*s2, y:-g.dy*c2-g.ly*s2};
   }
-  function touchGeom(p){                     // the ball as it meets p: speed, direction, its left, where p is off its line
-    const sp=Math.hypot(ball.vx,ball.vy);
+  function touchGeom(p,vx,vy){               // the ball as it meets p (vx,vy: its velocity against p): speed, direction, its left, where p is off its line
+    const sp=Math.hypot(vx,vy);
     let dx,dy;
-    if(sp>1){ dx=ball.vx/sp; dy=ball.vy/sp; }
+    if(sp>1){ dx=vx/sp; dy=vy/sp; }
     else { const g=dist(p,ball)||1; dx=(p.x-ball.x)/g; dy=(p.y-ball.y)/g; }
     const lx=dy, ly=-dx;                                         // the ball's left (screen y is down)
     const u=clamp(((p.x-ball.x)*lx+(p.y-ball.y)*ly)/(controlROf(p)+ball.r),-0.97,0.97);   // + = you're left of its line
     return {sp,dx,dy,lx,ly,u};
   }
   function trapTouch(p,s,damp,e){
-    const g=touchGeom(p), sp=g.sp, inZ=ball.z;
-    // Your reach (Ball control) is only where you can first meet the ball: the touch itself comes off
-    // the gather radius -- the same size for everyone -- so a bigger reach never sends it further
+    // Running the ball's way (it's catching you up, or you're catching it), the touch is against your run:
+    // the pace that comes off you is the ball's pace relative to you, and it keeps your run on top -- so a
+    // ball you take in your stride stays with you rather than being knocked back behind you. Standing, or
+    // coming to meet it, it's the ball's own pace, as before.
+    const bs=Math.hypot(ball.vx,ball.vy), bdx=bs>1?ball.vx/bs:0, bdy=bs>1?ball.vy/bs:0;
+    const run=Math.max(0,p.vx*bdx+p.vy*bdy);
+    const g=touchGeom(p,ball.vx-bdx*run,ball.vy-bdy*run), sp=g.sp, inZ=ball.z;
+    // Your reach (Ball control) is where you first meet the ball (and take it back after): the touch itself
+    // comes off the gather radius -- the same size for everyone -- so a bigger reach never sends it further
     // away. (A defender stretching to cut a pass out still pokes it from where he met it.)
     if(!damp){ const gp=dist(p,ball), cd=P.gatherR.val;
       if(gp>cd){ ball.x=p.x+(ball.x-p.x)/gp*cd; ball.y=p.y+(ball.y-p.y)/gp*cd; } }
@@ -7330,13 +7339,13 @@
     const th0=Math.asin(g.u), side=g.u>0.02?1:g.u<-0.02?-1:(Math.random()<0.5?-1:1);
     const dir=bounceDir(g,th0+late*(side*Math.PI/2-th0));        // late: met further round your side
     const keep=(P.trapKeepBad.val+(P.trapKeepGood.val-P.trapKeepBad.val)*s)*(1-(damp||0)*0.5);
-    ball.vx=dir.x*sp*keep; ball.vy=dir.y*sp*keep;
+    ball.vx=dir.x*sp*keep+bdx*run; ball.vy=dir.y*sp*keep+bdy*run;
     const pop=(35+105*(1-s))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
     ball.vz=Math.max(pop, ball.vz<0?-ball.vz*keep*0.6:0);
     ball.z=Math.max(ball.z,1);
     endCurve();
     ball.cushBy=null; ball.lastTouch=p.team;
-    ball.dribbler=p; ball.dribbleGrace=0.85; ball.fromTrap=true;   // still your ball: get to it (the gather radius) to take it
+    ball.dribbler=p; ball.dribbleGrace=0.85;   // still your ball: it's yours again once it's in your reach (see attemptCaptures)
     p.noTouchT=0.12+0.2*(1-s);
     // a computer player doesn't know where its touch went any sooner than you would (see the AI step)
     if(p!==controlled) p.touchLagT=P.aiReact.val*statLerp(statOf(p,'agility',P.agility.val),1.25,0.75);
@@ -7367,11 +7376,11 @@
         if(nearOppBox)continue;
       }
       const gap=dist(p,ball);
-      // GATHER: a ball that's yours, or a dead one, is simply collected once it's close enough. A
-      // trapped ball has to come to your feet (the gather radius) -- not just into your trap reach;
-      // a dribble knock-on re-gathers anywhere in your reach, as it always has.
+      // GATHER: a ball that's yours (your own touch or knock-on), or a dead one, is collected once it's in your
+      // reach. A trap comes off you at the gather radius and you can't take it back for a moment (noTouchT,
+      // longer after a worse touch): a good touch is at your feet straight away, a heavy one has got away.
       const mine=ball.dribbler===p&&ball.dribbleGrace>0;
-      if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<(mine&&!ball.fromTrap?controlROf(p)+ball.r:P.gatherR.val)){
+      if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<controlROf(p)+ball.r){
         if(checkOffsideTouch(p))return;
         endCurve(); own(p,p.r+ball.r+5);
         return;
@@ -7412,7 +7421,7 @@
     const prevTeam=ball.lastTouch;
     const reGather=ball.dribbler===p&&ball.dribbleGrace>0;     // catching up with your own knock-on / trapped ball
     ball.ownedBy=p;
-    ball.dribbler=null;ball.dribbleGrace=0;ball.fromTrap=false;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
+    ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
     p.touchLagT=0;
     if(!wasOwner){ p.lastPasser=(ball.passerRef&&ball.passerRef.team===p.team&&ball.passerRef!==p)?ball.passerRef:null; p.lastPasserT=p.lastPasser?1.6:0;
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
@@ -7504,8 +7513,7 @@
         ball.ownedBy=null;            // momentary loss of control
         p.noTouchT=0.0;
         ball.dribbler=p;              // it's still "your" touch...
-        ball.dribbleGrace=0.85;       // ...for a short window, to run onto
-        ball.fromTrap=false;          // (a knock-on re-gathers anywhere in your reach)
+        ball.dribbleGrace=0.85;       // ...for a short window, to run onto (it's yours again anywhere in your reach)
         p.stepPhase=0;
         return;
       }

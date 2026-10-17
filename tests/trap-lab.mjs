@@ -1,6 +1,6 @@
 // Trap Lab: open it from the start menu, let a ball run past, time presses off the guide
-// cursor (perfect / late / too early), glance one off-line, take one on the chest, watch the
-// AI receiver, tune a dial, and leave cleanly for an exhibition.
+// cursor (perfect / late / too early), collect your own touch, glance one off-line, take one on
+// the chest, watch the AI receiver, tune a dial, and leave cleanly for an exhibition.
 import { open, startExhibition } from './_harness.mjs';
 
 const { browser, page, rep } = await open();
@@ -98,20 +98,12 @@ let r = await serveAndPress(-0.035);
 ok(/PERFECT/.test(r), 'a press ~35 ms early is PERFECT');
 ok(/kept 1\d%/.test(r), 'a perfect touch keeps about 12% of the pace');
 ok(/straight back/.test(r), 'square on, it comes straight back');
-ok(/never settled/.test(r), 'stand still and it stays just outside the gather radius');
+ok(/settled in 0\.1\d s/.test(r), 'standing still, a perfect touch comes off you inside your reach and is yours again at once');
 
-{ // trap it, then step onto it: it's yours once it's back inside the gather radius
-  const n = await balls();
-  await page.keyboard.press('0'); await page.waitForTimeout(150);
-  await page.keyboard.press('r');
-  await pressAt(-0.035);
-  await page.waitForTimeout(400);
-  await page.keyboard.down('a'); await page.waitForTimeout(1500); await page.keyboard.up('a');
-  r = await nextResult(n);
-  info('stepped onto it → ' + r);
-  ok(/settled in/.test(r), 'step onto a trapped ball and you gather it');
-  await page.keyboard.press('0'); await page.waitForTimeout(150);
-}
+// a looser touch rolls out of your reach: leave the stick alone and your player steps onto it and takes it
+r = await serveAndPress(-0.10);
+const st = /settled in (\d+\.\d+) s/.exec(r);
+ok(/CLEAN|LOOSE/.test(r) && st && +st[1] > 0.2 && +st[1] < 0.85, 'a looser touch gets out of reach, and left alone you step onto it and collect it: ' + (st ? st[1] + ' s' : r));
 
 r = await serveAndPress(0.045);
 ok(/LOOSE|HEAVY/.test(r) && /late/.test(r), 'a press ~45 ms late is loose/heavy and reads "late"');
