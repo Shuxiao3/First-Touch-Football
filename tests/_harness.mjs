@@ -86,6 +86,7 @@ export const readSave = page =>
 // the tracking hooks actually fire. Standing still exercises none of them.
 let botTurn = 0;   // shot / pass alternation, carried across matches: each kick-off is ours, so a
                    // season's kick-offs alone give both a shot and a pass
+let passTurn = 0;  // which way along the pitch the next pass is aimed
 export async function playMatch(page){
   await page.click('#careerHub [data-hub="play"]');
   await page.waitForTimeout(400);
@@ -96,10 +97,12 @@ export async function playMatch(page){
   const trap = (async () => {
     while(!over){ await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(60); }
   })();
-  // Another keeps moving: mostly forward, now and then up the pitch.
+  // Another keeps moving: mostly forward, now and then up the pitch (and lets go while a pass is aimed).
+  let aiming = false;
   const move = (async () => {
     let i = 0;
     while(!over){
+      if(aiming){ await page.waitForTimeout(40); continue; }
       const fwd = (++i % 7 < 5) ? 'd' : 'w';
       await page.keyboard.down(fwd).catch(() => {}); await page.waitForTimeout(600);
       await page.keyboard.up(fwd).catch(() => {});
@@ -107,7 +110,9 @@ export async function playMatch(page){
     for(const k of ['d', 'w']) await page.keyboard.up(k).catch(() => {});
   })();
   // And the moment we have the ball (the state chip reads "dribbling") we play it: a shot and a
-  // pass in turn, so both hooks fire. Off the ball, J now and then calls for it.
+  // pass in turn, so both hooks fire. The pass is aimed along the pitch, one way and then the other
+  // (so back toward our own half in either half): up front a forward ball often has nobody to find,
+  // and a kick into space isn't a pass. Off the ball, J now and then calls for it.
   const play = (async () => {
     let t = 0;
     while(!over){
@@ -115,7 +120,16 @@ export async function playMatch(page){
         if(botTurn++ % 2 === 0){
           await page.keyboard.down('k').catch(() => {}); await page.waitForTimeout(300);
           await page.keyboard.up('k').catch(() => {});
-        } else await page.keyboard.press('j').catch(() => {});
+        } else {
+          const aim = (passTurn++ % 2) ? 'a' : 'd';
+          aiming = true;
+          for(const k of ['d', 'w']) await page.keyboard.up(k).catch(() => {});
+          await page.keyboard.down(aim).catch(() => {});
+          await page.keyboard.press('j').catch(() => {});
+          await page.waitForTimeout(250);                  // (a quick tap waits a moment for a double-tap)
+          await page.keyboard.up(aim).catch(() => {});
+          aiming = false;
+        }
         await page.waitForTimeout(300);
       } else {
         if(++t % 12 === 0) await page.keyboard.press('j').catch(() => {});
