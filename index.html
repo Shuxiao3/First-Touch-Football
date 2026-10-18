@@ -1213,13 +1213,15 @@
     TAC[tacTeam].off=b.dataset.otac;markTac();saveSettings();
   });
 
-  // ===== pitch: room for seven-a-side -- 10% longer and wider than 3025 x 1606 (itself 25% up on 2420 x 1285).
-  //       The boxes, goals and centre circle keep their size, as on a real bigger pitch; the whole width stays in view =====
-  const FW=3328, FH=1766;
+  // ===== pitch: a real pitch's shape (105 x 68 m) at 25 px to the metre; the whole width stays in view =====
+  const FW=2625, FH=1700;
   const GOAL_W=227, GOAL_H=69, NET_D=28, YC=FH/2;
+  // the markings, real size at that scale: penalty area 16.5 x 40.32 m, goal area 5.5 x 18.32 m, the penalty
+  // spot 11 m out, the arc and the centre circle 9.15 m. (The goal itself is a little wider than a real one.)
+  const PX_M=25, PA_D=16.5*PX_M, PA_HW=20.16*PX_M, GA_D=5.5*PX_M, GA_HW=9.16*PX_M, PEN_SPOT=11*PX_M, CIRCLE_R=9.15*PX_M;
   let gDir=1, lastConceder=null;          // gDir = +1 when Green attacks the RIGHT goal; flips each half
   function atkOf(team){ return team==='G' ? gDir : -gDir; }   // a team's attacking x-direction
-  const BX=227, BY=232;
+  const BX=227, BY=232;   // the area the computer works to at each goal (the keeper's patch, where crosses and cutbacks go)
   const PLAYER_H=34, AIR_REACH=PLAYER_H*1.5;
 
   const ROLE_FRAC={DEF:0.16,MID:0.36,ATT:0.56};
@@ -1545,7 +1547,9 @@
   let curIx=0,curIy=0;
 
   // ===== camera + projection =====
-  const HORIZON=64, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.18;
+  // PERSP 1: depth is spread evenly down the screen, so the middle of the pitch (and the goals on it) sits in the
+  // middle between the touchlines; things further off are still drawn smaller
+  const HORIZON=64, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;
   const camHalf=(W/2)/NEAR_SCALE+14;
   const camMin=camHalf, camMax=FW-camHalf;
   let camX=FW/2;
@@ -8401,6 +8405,16 @@
     const a=proj(x1,y1),b=proj(x2,y2);
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
   }
+  // a circle (or part of one) on the grass, centred x,y, from angle a0 to a1
+  function markArc(x,y,r,a0,a1){
+    const n=Math.max(6,Math.ceil((a1-a0)/(Math.PI/24)));
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*i/n, s=proj(x+Math.cos(a)*r,y+Math.sin(a)*r); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }
+    ctx.stroke();
+  }
+  // a box on the goal line gx, out to x2, hw either side of the middle
+  function markBox(gx,x2,hw){ line(gx,YC-hw,x2,YC-hw); line(x2,YC-hw,x2,YC+hw); line(x2,YC+hw,gx,YC+hw); }
+  function markSpot(x,y){ const s=proj(x,y); ctx.save(); ctx.fillStyle=ctx.strokeStyle; ctx.beginPath(); ctx.ellipse(s.x,s.y,2.6*s.scale+0.6,1.4*s.scale+0.4,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
 
   function draw(){
     ctx.fillStyle='#0c1410';ctx.fillRect(0,0,W,H);
@@ -8430,14 +8444,15 @@
     ctx.strokeStyle='rgba(233,245,236,.85)';ctx.lineWidth=2;
     line(0,0,FW,0);line(0,FH,FW,FH);line(0,0,0,FH);line(FW,0,FW,FH);
     line(FW/2,0,FW/2,FH);
-    ctx.beginPath();
-    for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/24){
-      const s=proj(FW/2+Math.cos(a)*95,FH/2+Math.sin(a)*95);
-      a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y);
+    markArc(FW/2,YC,CIRCLE_R,0,Math.PI*2); markSpot(FW/2,YC);
+    for(const side of [-1,1]){
+      const gx=side>0?FW:0, dx=-side;                                   // dx: from that goal line into the pitch
+      markBox(gx,gx+dx*PA_D,PA_HW); markBox(gx,gx+dx*GA_D,GA_HW);
+      markSpot(gx+dx*PEN_SPOT,YC);
+      const a0=Math.acos((PA_D-PEN_SPOT)/CIRCLE_R), dir=side>0?Math.PI:0;   // the arc: the part of the circle round the spot outside the box
+      markArc(gx+dx*PEN_SPOT,YC,CIRCLE_R,dir-a0,dir+a0);
+      markArc(gx,0,PX_M,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); markArc(gx,FH,PX_M,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);   // corners
     }
-    ctx.stroke();
-    line(BX,YC-BY,BX,YC+BY);line(0,YC-BY,BX,YC-BY);line(0,YC+BY,BX,YC+BY);
-    line(FW-BX,YC-BY,FW-BX,YC+BY);line(FW,YC-BY,FW-BX,YC-BY);line(FW,YC+BY,FW-BX,YC+BY);
 
     drawGoal(-1);drawGoal(1);
 
