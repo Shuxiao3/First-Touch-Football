@@ -79,8 +79,11 @@ player **you control** from your team's seven outfielders (a striker by default)
   then it's their change kit, or a plain white or black one if that's no better. The keepers pick a
   top unlike either team's shirts and the grass.
 - The squads are made up: fixed names, numbers and stats for each club, with stronger squads for
-  clubs that finished higher last season. Line-up and stat changes you make in the match's TACTICS
-  menu stay with that club for next time (and never touch the custom GRN / RED squads the labs use).
+  clubs that finished higher last season. Every outfielder has a **playing style** (shown under his
+  name, with a line about it in the TACTICS menu), and his stats are built around it (see
+  [Playing styles](#playing-styles)). Line-up and stat changes you make in the match's TACTICS menu
+  stay with that club for next time (and never touch the custom GRN / RED squads the labs use). A
+  club kept from before styles gets its generated players back once, styled; its line-up stays.
 - Your last setup is remembered.
 
 ## Trap Lab
@@ -168,14 +171,37 @@ test, and like the Trap Lab the values are the game's settings.
   touchlines, and follows play along the length.
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
-  range, shot odds) reads from a stat, not a constant.
+  range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
+  playing style; see [Playing styles](#playing-styles).
 - **AI cascades** — separate carrier, defender, and keeper decision trees, with team
   style levers (press / neutral / low block · neutral / wing / counter) and per-player
-  defensive personalities. A pair of centre-backs works as a pair: one goes to the ball and the
-  other picks up a free man or covers behind him, and when your team has it in your own third they
-  split wide either side of the box to play out. Defenders close down quickly, then come in under
-  control for the last few strides, and a beaten one chases back up alongside rather than through
-  the man.
+  defensive personalities. Defenders close down quickly, then come in under control for the last
+  few strides, and a beaten one chases back up alongside rather than through the man.
+- **Defending as a block** — out of possession a team defends in lines, not man for man. The back
+  line holds one height, goal-side of the ball by a gap that shrinks as the ball comes closer and
+  never higher than the tactic allows; it doesn't drop for a forward standing on it (he'd be
+  offside), only the defender with a runner in his zone drops with him. The midfield sits a gap in
+  front and the forwards in front of that, every line sliding across toward the ball. When the ball's
+  lost, a man caught a long way upfield sprints back goal-side of it; the rest jog back into shape
+  (the forwards always do). One man presses the ball; of a pair of
+  centre-backs one goes and the other covers. The block reads the ball a beat late (about a third of
+  a second), and a run a beat late too, so quick passing and well-timed runs can still open it up.
+- **Attacking movement** — in possession the wide men hold the touchlines and one central
+  midfielder stays behind the ball as a screen against the counter. Everyone else looks for space
+  around his place in the shape: a pocket away from their men, with a clear lane from the ball,
+  ahead of it where it can be, not on top of a teammate. Forwards work their own channel. Runs are
+  triggered, not random: when the man on the ball can play it forward, a forward or a wide man near
+  their line goes beyond it (a speedster or winger from further out, a target man only off the
+  line), and the ball is slipped in behind as he arrives at it. In the final third the man on the
+  ball shoots when he has a sight of goal (the Long Shots stat sets from how far), sets up a teammate
+  with a better one, or crosses into the space between their line and the keeper when one of ours
+  can get there first. A good dribbler facing a lone defender with nobody covering takes him on: he
+  runs at him to make him commit, then cuts sharply past him (see *Beating a tight press*).
+- **The keeper's ball out** — on a goal kick the back line splits to the corners of the box and the
+  holding midfielder drops in front of them. The keeper plays it short only to a man who'll reach
+  it before any of theirs can close him down, struck to arrive at him, and tells him it's his; he
+  waits a moment for his team to set if he has to. Nothing safe short, he goes long to a man who'll
+  win or contest it, or into the open side of the pitch.
 - **Beating a tight press** — a sharp cut on the ball (55° or more, at pace) wrong-foots a defender
   who's right up against the man on it, or diving in at him: he stumbles and can't tackle for a
   moment (0.45 s on the *Beat a tight press* dial, longer against a good dribbler, shorter for an
@@ -212,6 +238,38 @@ test, and like the Trap Lab the values are the game's settings.
   passing, first touch, shooting, keeper reflexes, keeper distribution.
 - **Three labs** — Trap, Pass and Shooting: every rep called and tallied, with the relevant dials
   live in a drawer. See [Trap Lab](#trap-lab), [Pass Lab](#pass-lab), [Shooting Lab](#shooting-lab).
+
+## Playing styles
+
+Every outfield player has a style within his position, and his stats are built around it: the
+position's averages shifted by the style. Pace most of all — centre-backs and holding midfielders
+are the slowest men on the pitch, wingers and speedsters the quickest, and a forward's pace goes
+with his build. Ratings come out about the same across styles; what changes is the kind of player.
+
+| Position | Style | Pace (typical speed stat, 1–10) | Strengths |
+|---|---|---|---|
+| Centre-back | Stopper | 4 | strength, heading, tackling |
+| | Ball-playing CB | 4.5 | passing, composure, control |
+| | Cover CB | 5.5 | reading the game, interceptions |
+| Full-back | Full-back | 6.5 | stamina, crossing |
+| | Wing-back | 7.5 | crossing, dribbling, engine (defends less) |
+| Midfield | Anchor (DM) | 4.5 | tackling, interceptions, strength |
+| | Playmaker (CM) | 4.5 | passing, vision, bend |
+| | Box-to-box (CM) | 5.5 | stamina, tackling, shooting |
+| | Creator (AM) | 5.5 | dribbling, the killer ball, shooting |
+| | Wide midfielder | 6.5 | stamina, crossing |
+| | Winger (wide midfield) | 8 | dribbling, crossing |
+| Forward | Target man | 5.5 | strength, heading, holding it up |
+| | Poacher | 6.5 | finishing, composure, movement |
+| | Complete forward | 6.5 | link play, passing, shooting |
+| | Inside forward | 8 | cutting in, bend, shooting |
+| | Winger | 8 | dribbling, crossing |
+| | Speedster | 8.5 | pace, runs in behind |
+
+The style also shapes how a player is used: an Anchor is the one who holds in midfield, speedsters
+and wingers make runs in behind sooner and from further out, and a target man stays on the line.
+In a career, each sub-role (CB, FB, DM, CM, AM, STK, WNG) has its styles; players signed before
+styles existed are labelled with the style their stats already fit, and keep their stats.
 
 ## Layout
 

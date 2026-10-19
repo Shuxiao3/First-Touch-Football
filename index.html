@@ -249,6 +249,7 @@
   .sqRole{font-size:10px;color:var(--ink-dim);letter-spacing:.6px;margin-left:6px;}
   .sqOvr{font-family:'Baskic8','Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--phosphor);line-height:1;}
   .sqPers{font-size:9px;letter-spacing:.5px;color:var(--amber);text-transform:uppercase;}
+  .sqStyle{font-size:10px;color:var(--ink-dim);margin:2px 0 1px;}
   .statRow{display:flex;align-items:center;gap:7px;margin:2px 0;font-size:10.5px;}
   .statRow .sl{width:96px;color:var(--ink-dim);flex:none;}
   .statBar{flex:1;height:7px;background:#0a120c;border-radius:4px;overflow:hidden;}
@@ -339,10 +340,11 @@
   .exhChip:disabled{opacity:.3;cursor:not-allowed;border-color:#2a3a22;}
   .exhCtrl{width:100%;margin-top:9px;}
   .exhPlayers{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%;}
-  .exhPl{display:flex;align-items:center;gap:6px;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:12px;padding:7px 8px;cursor:pointer;text-align:left;min-width:0;}
-  .exhPl .r{font-size:9px;letter-spacing:1px;color:#7f9a6f;width:26px;flex:0 0 auto;}
-  .exhPl .n{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .exhPl .o{color:#9dff3c;font-weight:700;}
+  .exhPl{display:grid;grid-template-columns:26px minmax(0,1fr) auto;column-gap:6px;align-items:center;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:12px;padding:5px 8px;cursor:pointer;text-align:left;min-width:0;}
+  .exhPl .r{grid-row:1/3;font-size:9px;letter-spacing:1px;color:#7f9a6f;}
+  .exhPl .n{grid-column:2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exhPl .st{grid-column:2;min-width:0;font-size:9px;letter-spacing:.5px;color:#8fae7d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .exhPl .o{grid-column:3;grid-row:1/3;color:#9dff3c;font-weight:700;}
   .exhPl:hover{border-color:#5c7a2e;}
   .exhPl.sel{border-color:#9dff3c;background:rgba(157,255,60,.14);color:#e9f5ec;}
   .exhGo{display:flex;gap:8px;margin-top:11px;width:100%;}
@@ -991,7 +993,7 @@
   // (used by low-block teams: if lost high, hold a neutral shape until the ball crosses
   // into our half, then drop into the low block; if lost in our half, low-block at once.)
   const lostInOppHalf={G:false,R:false};
-  let possConfTeam='G', possFlipT=0; const POSS_FLIP_TIME=1.2;  // a team keeps its attack shape until the OTHER team has held the ball this long
+  let possConfTeam='G', possFlipT=0; const POSS_FLIP_TIME=0.4;  // a team keeps its attack shape until the OTHER team has held the ball this long
 
   // ===== persistence =====
   const hasStorage=typeof window!=='undefined'&&window.storage;
@@ -1299,10 +1301,80 @@
     MID:{passAcc:3,offIQ:3,stamina:2,ballControl:2,dribbling:2,agility:2,composure:2,defIQ:1,interceptions:1,shotAcc:1,speed:1,longShots:1},
     ATT:{shotAcc:3,dribbling:3,shotPower:2,speed:2,acceleration:2,agility:2,composure:2,offIQ:2,ballControl:2,longShots:1,heading:1}
   };
+  // ============ PLAYING STYLES ============
+  // Every outfield player has a style within his position, and his stats are built around it: the role's
+  // averages (ARCH) shifted by the style's offsets. Pace above all -- centre-backs and holding midfielders are
+  // the slowest men on the pitch, wingers and speedsters the quickest, and a forward's pace goes with his build
+  // (a target man is big and slow, a speedster small and quick). sub: the career sub-role the style belongs to.
+  const STYLES={
+    stopper:   {role:'DEF',sub:'CB', name:'Stopper',        blurb:'Big, slow centre-back: wins headers and tackles.',
+                d:{speed:-2,acceleration:-1.5,agility:-1,strength:1.5,heading:1.5,tackle:0.5,slideTackle:0.5,passAcc:-0.5,dribbling:-0.5}},
+    ballplayer:{role:'DEF',sub:'CB', name:'Ball-playing CB', blurb:'Centre-back who brings it out and passes well; not quick.',
+                d:{speed:-1.5,acceleration:-1,strength:0.5,passAcc:1.5,composure:1,ballControl:1,heading:0.5,interceptions:0.5,defIQ:0.5}},
+    cover:     {role:'DEF',sub:'CB', name:'Cover CB',        blurb:'Reads the game and sweeps up behind; the quicker centre-back.',
+                d:{speed:-0.5,defIQ:1,interceptions:1,strength:-0.5,heading:-0.5}},
+    fullback:  {role:'DEF',sub:'FB', name:'Full-back',       blurb:'Quick, tireless defender for the flank.',
+                d:{speed:0.5,acceleration:1,agility:1,stamina:1.5,crossing:1.5,strength:-1,heading:-1,tackle:-0.5}},
+    wingback:  {role:'DEF',sub:'FB', name:'Wing-back',       blurb:'Lives on the touchline: pace, crossing, engine; defends less.',
+                d:{speed:1.5,acceleration:1.5,agility:1,stamina:2,crossing:2.5,dribbling:1.5,offIQ:1,strength:-1.5,heading:-1.5,tackle:-1,slideTackle:-1,defIQ:-0.5}},
+    anchor:    {role:'MID',sub:'DM', name:'Anchor',          blurb:'Holding midfielder: screens the back line, tackles, slow.',
+                d:{speed:-1.5,acceleration:-1,strength:2,tackle:2,interceptions:2,defIQ:1.5,slideTackle:1.5,heading:1,dribbling:-1,shotAcc:-1,offIQ:-0.5}},
+    boxtobox:  {role:'MID',sub:'CM', name:'Box-to-box',      blurb:'Covers every blade of grass, both boxes.',
+                d:{speed:-0.5,stamina:1.5,strength:1,tackle:1,shotPower:0.5,longShots:0.5,defIQ:0.5}},
+    playmaker: {role:'MID',sub:'CM', name:'Playmaker',       blurb:'Dictates from deep: passing and vision, not pace.',
+                d:{speed:-1,acceleration:-0.5,passAcc:1.5,offIQ:1.5,composure:1,ballControl:1,curve:1,longShots:0.5,strength:-1,tackle:-1,stamina:-0.5}},
+    creator:   {role:'MID',sub:'AM', name:'Creator',         blurb:'Between the lines: dribbles, plays the killer ball, shoots.',
+                d:{acceleration:0.5,agility:1,dribbling:1.5,ballControl:1,passAcc:0.5,offIQ:1,shotAcc:1,longShots:1,curve:0.5,strength:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
+    widemid:   {role:'MID',sub:'CM', name:'Wide midfielder', blurb:'Up and down the flank all game; crosses, tracks back.',
+                d:{speed:0.5,acceleration:0.5,stamina:1.5,crossing:1.5,tackle:0.5,defIQ:0.5}},
+    mwinger:   {role:'MID',sub:'WNG',name:'Winger',          blurb:'Flies down the touchline: pace, tricks and crosses.',
+                d:{speed:2,acceleration:2,agility:1.5,dribbling:1.5,crossing:2,stamina:0.5,strength:-2,heading:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1,passAcc:-0.5}},
+    speedster: {role:'ATT',sub:'STK',name:'Speedster',       blurb:'Small and rapid: runs in behind all day.',
+                d:{speed:1.5,acceleration:1.5,agility:0.5,strength:-1.5,heading:-1.5,composure:-0.5,ballControl:-0.5,shotAcc:-0.5,offIQ:0.5}},
+    poacher:   {role:'ATT',sub:'STK',name:'Poacher',         blurb:'Lives in the box: movement and finishing.',
+                d:{speed:-0.5,shotAcc:1.5,composure:1.5,offIQ:1.5,heading:0.5,passAcc:-1,dribbling:-1,stamina:-0.5,longShots:-1}},
+    target:    {role:'ATT',sub:'STK',name:'Target man',      blurb:'Big centre-forward: holds it up, wins headers, slow.',
+                d:{speed:-2.5,acceleration:-2,agility:-2,strength:3,heading:2.5,ballControl:0.5,shotPower:1,composure:0.5,dribbling:-1.5}},
+    complete:  {role:'ATT',sub:'STK',name:'Complete forward',blurb:'Does a bit of everything: links play and scores.',
+                d:{speed:-0.5,passAcc:1.5,offIQ:1,ballControl:1,dribbling:0.5,longShots:1,shotPower:0.5,strength:0.5}},
+    winger:    {role:'ATT',sub:'WNG',name:'Winger',          blurb:'Pace and trickery wide; beats his man and crosses.',
+                d:{speed:1,acceleration:1,agility:1,dribbling:1,crossing:2,curve:0.5,strength:-2,heading:-2,shotAcc:-0.5}},
+    insidefwd: {role:'ATT',sub:'WNG',name:'Inside forward',  blurb:'Starts wide, cuts in to shoot.',
+                d:{speed:1,acceleration:1,dribbling:1,shotAcc:0.5,curve:1,longShots:1,strength:-1.5,crossing:-0.5}}
+  };
+  const STYLE_PACE_KEYS=['speed','acceleration'];   // a style's pace is its identity: these get less random spread
+  function styleOf(e){ return (e&&STYLES[e.style])||null; }
+  // a fresh stat block for a role and style: the role's averages plus the style, with a random spread (half
+  // as much on pace). R: a 0..1 random source; shift: added to everything (a club's strength).
+  function genStyledStats(role,style,R,shift){
+    const st={}, d=(STYLES[style]&&STYLES[style].d)||{};
+    for(const k of ALL_STAT_KEYS){ const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
+      const m=ARCH[role][k]+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);
+      st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*sp)*2)/2)); }
+    return st;
+  }
+  // the styles a lineup slot calls for (index into SQUAD_ROLES; the default 2-3-2 puts squad men 3 and 5 out
+  // wide in midfield, 4 in the middle), and a pick from them -- a second centre-back or forward unlike the first
+  const SQUAD_STYLES=[null,['stopper','ballplayer','cover'],['stopper','ballplayer','cover'],['mwinger','mwinger','widemid'],
+    ['anchor','anchor','boxtobox','playmaker','creator'],['mwinger','mwinger','widemid'],['speedster','poacher','target','complete'],['speedster','poacher','target','complete','insidefwd']];
+  function pickSquadStyle(i,R,taken){
+    const opts=SQUAD_STYLES[i]; if(!opts) return undefined;
+    const fresh=opts.filter(s=>!(taken||[]).includes(s)), pool=(i===2||i===7)&&fresh.length?fresh:opts;
+    return pool[Math.floor(R()*pool.length)];
+  }
+  // a style for a career sub-role (r: a 0..1 draw)
+  const SUB_STYLES={CB:['stopper','ballplayer','cover'],FB:['fullback','fullback','wingback'],DM:['anchor'],CM:['boxtobox','playmaker','widemid'],AM:['creator'],STK:['speedster','poacher','target','complete'],WNG:['winger','winger','insidefwd']};
+  function styleForSub(sub,r){ const l=SUB_STYLES[sub]; return l?l[Math.min(l.length-1,Math.floor(r*l.length))]:undefined; }
+  // an older player (saved before styles) gets the style his stats already fit best -- labelled, not changed
+  function inferStyle(role,sub,stats){
+    let best, bs=1e9;
+    for(const id in STYLES){ const S=STYLES[id]; if(S.role!==role || (sub && S.sub!==sub)) continue;
+      let e=0; for(const k of OUT_KEYS){ const want=ARCH[role][k]+(S.d[k]||0), got=stats[k]!=null?stats[k]:want; e+=(got-want)*(got-want)*(STYLE_PACE_KEYS.includes(k)?2:1); }
+      if(e<bs){ bs=e; best=id; } }
+    return best;
+  }
   const NAMES=['Vega','Brandt','Okafor','Sato','Lindqvist','Moreau','Adeyemi','Ferraro','Novak','Costa','Haines','Reuben','Mbeki','Ericsson','Volkov','Ishida','Caro','Pulis','Soto','Friel','Tanaka','Olsen','Bauer','Naranjo','Esposito','Hale','Drummond','Cisse','Holt','Marek','Dietz','Quill'];
   const PERS3=['passive','default','aggressive'];
-  function jitter(mean){ const x=Math.round((mean+(Math.random()*2-1)*1.5)*2)/2; return Math.max(1,Math.min(10,x)); }
-  function genStats(role){ const o={}; for(const k of ALL_STAT_KEYS) o[k]=jitter(ARCH[role][k]); return o; }
   function overallOf(entry){ const w=OVR_W[entry.role]||OVR_W.MID; let sum=0,wt=0; for(const k in w){ sum+=(entry.stats[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(sum/wt*10))); }
   const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
   function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
@@ -1310,8 +1382,8 @@
   function topUpSquad(sq){
     const used=new Set(sq.map(e=>e.name)), pool=NAMES.filter(n=>!used.has(n));
     const pick=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0]||'Player';
-    while(sq.length<SQUAD_ROLES.length){ const r=SQUAD_ROLES[sq.length];
-      const e={name:pick(),num:sq.length+1,role:r,defPers:PERS3[Math.floor(Math.random()*3)],stats:genStats(r)}; e.ovr=overallOf(e); sq.push(e); }
+    while(sq.length<SQUAD_ROLES.length){ const r=SQUAD_ROLES[sq.length], style=pickSquadStyle(sq.length,Math.random,sq.map(e=>e.style));
+      const e={name:pick(),num:sq.length+1,role:r,style,defPers:PERS3[Math.floor(Math.random()*3)],stats:genStyledStats(r,style,Math.random,0)}; e.ovr=overallOf(e); sq.push(e); }
   }
   // ============ CLUBS (exhibition): the 2026/27 Premier League ============
   // A kit is [shirt, trim, shorts]: the club's colours, plus a change kit worn when the shirts clash. str nudges
@@ -1358,14 +1430,14 @@
   const CLUB_NAME_DEAL=(()=>{ const R=rng32(hashStr('ft-club-names')), a=CLUB_SURNAMES.slice();
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; })();
   function clubSquadGen(club){
-    const R=rng32(hashStr('ft-club-'+club.id)), ci=CLUBS.indexOf(club);
-    const roles=SQUAD_ROLES;
+    const R=rng32(hashStr('ft-club-'+club.id)), RS=rng32(hashStr('ft-style-'+club.id)), ci=CLUBS.indexOf(club);
+    const roles=SQUAD_ROLES, styles=[];
     const NUMS={GK:[1],DEF:[2,3,4,5,6,12,15],MID:[8,10,14,16,17,18,20,23],ATT:[7,9,11,19,21]};
     const take=r=>{ const l=NUMS[r]; return l.splice(Math.floor(R()*l.length),1)[0]; };
     return roles.map((r,i)=>{
-      const st={};
-      for(const k of ALL_STAT_KEYS){ const m=ARCH[r][k]+(r==='GK'||!GK_KEYS.includes(k)?club.str:0); st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*1.5)*2)/2)); }
-      const e={name:CLUB_NAME_DEAL[(i<7?ci*7+i:CLUBS.length*7+ci)%CLUB_NAME_DEAL.length], num:take(r), role:r, defPers:PERS3[Math.floor(R()*3)], stats:st};
+      const style=pickSquadStyle(i,RS,styles); styles.push(style);
+      const st=genStyledStats(r,style,R,club.str);
+      const e={name:CLUB_NAME_DEAL[(i<7?ci*7+i:CLUBS.length*7+ci)%CLUB_NAME_DEAL.length], num:take(r), role:r, style, defPers:PERS3[Math.floor(R()*3)], stats:st};
       e.ovr=overallOf(e); return e;
     });
   }
@@ -1379,7 +1451,9 @@
   function clubSide(id){
     let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
     if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
-      if(o.squad.length<1+OUTFIELD){ o.squad.push(...clubSquadGen(clubById(id)).slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from six-a-side: their eighth man back
+      const gen=clubSquadGen(clubById(id));
+      if(o.squad.length<1+OUTFIELD){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from six-a-side: their eighth man back
+      o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
       return {squad:o.squad, lineup:o.lineup};
     }
     return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup()};
@@ -1441,7 +1515,8 @@
   function normalizeSquads(){
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
       topUpSquad(SQUAD[t]);
-      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
+      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ;
+        if(!e.style && !e.me && e.role!=='GK' && ARCH[e.role]) e.style=inferStyle(e.role,e.subRole,e.stats); for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
       const li=LINEUP[t];
       if(li){ if(li.out&&!li.atk){ li.atk=li.out.slice(); li.def=li.out.slice(); delete li.out; }
               if(!li.atk)li.atk=defaultLineup().atk; if(!li.def)li.def=li.atk.slice(); if(li.gk==null)li.gk=0;
@@ -1457,7 +1532,7 @@
   }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=entry.style; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   function layoutTeam(team){
@@ -3385,18 +3460,18 @@
     if(atk>0)return q.x>ol&&q.x>ball.x&&q.x>FW/2;
     return q.x<ol&&q.x<ball.x&&q.x<FW/2;
   }
-  // find a GAP in the opposing back line near attacker q: a vertical channel between
-  // defenders that q could time a run into. returns {y, size} or null.
-  function backlineGap(team, fromY){
-    const def=team==='G'?'R':'G';
-    const dys=players.filter(p=>p.team===def).map(p=>p.y);
-    const k=keeperOf(def); if(k)dys.push(k.y);
+  // find a GAP in the opposing back line near attacker q: a vertical channel between the defenders on (or near)
+  // their line that q could time a run into -- the touchlines count as edges, so the wide channels do too, unless
+  // maxOff keeps it to gaps within that far of the middle. returns {y, size} or null.
+  function backlineGap(team, fromY, maxOff){
+    const def=team==='G'?'R':'G', ol=offsideLineX(team), atk=atkOf(team);
+    const dys=players.filter(p=>p.team===def && atk*(p.x-ol)>-160).map(p=>p.y);   // the line, and anyone just in front of it
     dys.sort((a,b)=>a-b);
-    // include the touchlines as edges so wide channels count
     const edges=[40,...dys,FH-40];
     let best=null,bs=120;     // need a gap of at least ~120 to be runnable
     for(let i=0;i<edges.length-1;i++){
       const lo=edges[i],hi=edges[i+1],mid=(lo+hi)/2,size=hi-lo;
+      if(maxOff!==undefined && Math.abs(mid-YC)>maxOff) continue;
       if(size>bs){ // prefer the gap nearest the attacker's current lane
         const near=1-clamp(Math.abs(mid-fromY)/(FH*0.5),0,1);
         const score=size+near*120;
@@ -3561,21 +3636,32 @@
     lastGrade='CLEARED!'; gradeColor='#9dff3c'; gradeFade=1.0;
   }
   // AI cross: a wide/advanced AI carrier whips it into the box toward a teammate
-  function aiCross(p){
+  // WHERE A CROSS GOES: into the space between their back line and the keeper -- the near post, the penalty spot
+  // or the far post -- whichever one of ours can get to soonest against their nearest man (or the keeper) as it
+  // drops. It hangs the best part of a second, so the runners arrive with it rather than waiting under it.
+  // margin: their time there less ours (>0: ours to win; around 0: a contest). Null with nobody to aim at.
+  function crossSpot(p){
+    const atk=atkOf(p.team), goalX=atk>0?FW:0, side=p.y<YC?-1:1, kp=keeperOf(atk>0?'R':'G');
+    const spots=[{x:goalX-atk*150,y:YC+side*80},{x:goalX-atk*260,y:YC},{x:goalX-atk*170,y:YC-side*110}];
+    let best=null;
+    for(const sp of spots){
+      const T=clamp(0.7+0.0008*Math.hypot(sp.x-ball.x,sp.y-ball.y),0.6,1.2);
+      let ours=1e9, who=null;
+      for(const q of teamOf(p.team)){ if(q===p||(q.role!=='ATT'&&q.role!=='MID')||inOffsidePos(q)) continue;
+        const t=Math.hypot(q.x-sp.x,q.y-sp.y)/sprintSpeedOf(q); if(t<ours){ ours=t; who=q; } }
+      let theirs=1e9;
+      for(const o of players) if(o.team!==p.team) theirs=Math.min(theirs, 0.2+Math.hypot(o.x-sp.x,o.y-sp.y)/sprintSpeedOf(o));
+      if(kp) theirs=Math.min(theirs, 0.15+Math.max(0,Math.hypot(kp.x-sp.x,kp.y-sp.y)-reachOf(kp)*3)/keeperSpdOf(kp));
+      const margin=Math.min(theirs,T+0.6)-Math.max(ours,T);
+      if(who && (!best || margin>best.margin)) best={x:sp.x,y:sp.y,who,margin};
+    }
+    return best;
+  }
+  function aiCross(p,spot){
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0;
-    const penX = atk>0 ? FW-BX*0.66 : BX*0.66;
-    const penSpot = {x:penX, y:YC};
-    let best=null,bs=1e9;
-    for(const q of players){
-      if(q.team!==p.team||q===p)continue;
-      if(q.role!=='ATT'&&q.role!=='MID')continue;
-      const dPen=dist(q,penSpot);
-      if(dPen<bs){bs=dPen;best=q;}
-    }
-    const target = best
-      ? {x:best.x+best.vx*0.45, y:best.y+best.vy*0.45}
-      : penSpot;
+    const cs=spot||crossSpot(p);
+    const target = cs ? {x:cs.x, y:cs.y} : {x:atk>0?FW-BX*0.66:BX*0.66, y:YC};
     let dx=target.x-ball.x, dy=target.y-ball.y;
     const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
     const aerr=crossSpray(p);
@@ -4032,7 +4118,7 @@
     // RANGE: a steeper, higher-capped distance penalty so nobody lets fly from absurd range. LONG SHOTS eases it
     // (a specialist will try from a bit further) but only partially -- it extends how far out THEY specifically
     // shoot rather than making them shoot more from everywhere.
-    const L = statLerp(longShotsOf(p),0,1);
+    const L = statLerp(statOf(p,'longShots',P.longShots.val),0,1);
     need += clamp((dGme-150)/400, 0, 0.72) * (1 - 0.58*L);
     if(dGme<120) need-=0.14;                      // point-blank: just hit it
     if(presserD<70) need-=0.10;                   // tight marker: have a go before losing it
@@ -4619,6 +4705,17 @@
     return {x,y};
   }
   function anchorOf(p){ return applyInstrAnchor(p, _anchorBase(p)); }
+  // the HOLDING MIDFIELDER: in possession one midfielder stays behind the ball as the screen against a counter --
+  // the most central of the midfield (the deeper of two central ones; an Anchor if he's anywhere near the middle).
+  // Null without a midfield.
+  const holderCache={G:null,R:null};
+  function holderOf(team){
+    const hc=holderCache[team]; if(hc&&hc.t===simNow) return hc.p;
+    let best=null, bs=1e9;
+    for(const q of teamOf(team)){ const s=q.slotAtk; if(!s||s.role!=='MID') continue;
+      const sc=Math.abs(s.homeY-YC)+(s.lineIdx%2)*0.5-(q.style==='anchor'?150:0); if(sc<bs){ bs=sc; best=q; } }
+    holderCache[team]={t:simNow,p:best}; return best;
+  }
   function _anchorBase(p){
     const atk=atkOf(p.team);
 
@@ -4692,7 +4789,7 @@
     if(weAttack && p.isWidthLine && p.lineSize>=2){
       const side=p.wide;                              // -1 / 0 / +1
       const wingTac = TAC[p.team].off==='wing';
-      const wideY = YC + side*(FH*(wingTac?0.40:0.33));  // hug the touchline harder on wing play
+      const wideY = YC + side*(FH*(wingTac?0.43:0.40));  // wide players hug the touchline (harder still on wing play)
       if(p.role==='DEF'){
         // LCB/RCB push up to overlap / offer a lane; MCB stays to guard the counter.
         if(side===0){
@@ -4721,6 +4818,11 @@
           let wx=atk>0?f*FW:FW-f*FW;
           if(atk>0)wx=Math.min(wx,ol-12);else wx=Math.max(wx,ol+12);
           return {x:clamp(wx,40,FW-40), y:clamp(wideY,40,FH-40)};
+        } else if(p===holderOf(p.team)){
+          // the HOLDER: behind the ball, central, the safe recycle and the first man against a counter
+          let hx=ball.x-atk*240;
+          hx = atk>0 ? clamp(hx, FW*0.24, FW*0.60) : clamp(hx, FW*0.40, FW*0.76);
+          return {x:clamp(hx,40,FW-40), y:clamp(YC+(ball.y-YC)*0.35,40,FH-40)};
         } else {
           // CENTRAL mids in a big midfield: STAGGER (alternate slightly fwd/back) to
           // offer layered passing lanes rather than sitting flat.
@@ -4850,6 +4952,11 @@
         const cap=dtac==='press'?0.50:0.44;
         if(atk>0)ax=clamp(ax,40,FW*cap);else ax=clamp(ax,FW*(1-cap),FW-40);
       }
+    } else if(p.role==='MID' && weAttack && p===holderOf(p.team)){
+      // the HOLDER (see holderOf): behind the ball, central
+      ax=ball.x-atk*240;
+      ax = atk>0 ? clamp(ax, FW*0.24, FW*0.60) : clamp(ax, FW*0.40, FW*0.76);
+      return {x:clamp(ax,40,FW-40), y:clamp(YC+(ball.y-YC)*0.35,40,FH-40)};
     } else if(p.role==='MID'){
       let lineFrac=0.40+0.22*commit;
       // push up higher when the ball is deep in the attacking third (support the attack)
@@ -4954,21 +5061,21 @@
       }
     }
 
-    // ATT lateral: when attacking, drift into the GAP between the nearest defenders,
-    // so the forward waits in space between markers for a through ball.
+    // ATT lateral: when attacking, each forward works HIS CHANNEL (the half-space on his side), drifting into the
+    // gap between defenders there -- a forward pair splits, rather than both coming into the middle.
     let gapY=null;
     let stretchY=null;
     if(p.role==='ATT' && weAttack){
       const def=p.team==='G'?'R':'G';
       const dys=players.filter(q=>q.team===def).map(q=>q.y).sort((a,b)=>a-b);
       const dk2=keeperOf(def); if(dk2)dys.push(dk2.y); dys.sort((a,b)=>a-b);
-      // find the largest vertical gap straddling the forward's current y, target its middle
+      const chan = p.lineSize>=2 ? YC+Math.sign(p.homeY-YC||1)*FH*0.17 : YC;   // my channel
       let bestMid=null,bestSize=-1;
       for(let i=0;i<dys.length-1;i++){
-        const lo=dys[i],hi=dys[i+1],size=hi-lo;
-        if(size>40&&size>bestSize){bestSize=size;bestMid=(lo+hi)/2;}
+        const lo=dys[i],hi=dys[i+1],size=hi-lo,mid=(lo+hi)/2;
+        if(size>40 && Math.abs(mid-chan)<FH*0.12 && size>bestSize){bestSize=size;bestMid=mid;}
       }
-      if(bestMid!==null)gapY=bestMid;
+      gapY = bestMid!==null ? bestMid : chan;
       // partnership width: if a partner has dropped in centrally, the other pulls WIDE
       const atts=teamOf(p.team).filter(q=>q.role==='ATT');
       if(atts.length>=2){
@@ -5223,7 +5330,7 @@
       const inAttThird = atk*(p.x-FW*0.5) > FW*0.16;
       const tightAngle = Math.abs(p.y-YCc) > GOAL_W*0.5;     // beyond the posts -> bad shooting angle
       const marked     = presserD < 100;                     // someone on me, including from behind
-      const inShotRange= dGme < statLerp(longShotsOf(p),178,245);  // only where they'd normally shoot
+      const inShotRange= dGme < statLerp(statOf(p,'longShots',P.longShots.val),178,245);  // only where they'd normally shoot
       if(inAttThird && tightAngle && marked && inShotRange){
         let best=null,bd=1e9;
         for(const q of teamOf(p.team)){
@@ -5231,7 +5338,7 @@
           if(inOffsidePos(q))continue;
           if(atk*(q.x-FW*0.5)<=0)continue;                   // in the attacking half
           if(goalLaneOf(q)<300)continue;                     // genuinely through on goal (clean route)
-          if(Math.abs(goalX-q.x)>statLerp(longShotsOf(q),178,245))continue;   // and within their OWN shooting range
+          if(Math.abs(goalX-q.x)>statLerp(statOf(q,'longShots',P.longShots.val),178,245))continue;   // and within their OWN shooting range
           if(Math.abs(q.y-YCc)>GOAL_W*0.5)continue;          // within the goalpost lines (a central chance, not wide)
           if(atk*(q.x-p.x) < -20)continue;                   // no more than 20px behind the ball line (don't drop it back)
           if(dist(p,q)<100)continue;                         // a square to a man beside me achieves nothing
@@ -5303,9 +5410,92 @@
         const sc=atk*(q.x-FW/2) + (q.gapRun>0?160:0) + goalLaneOf(q)*0.25;
         if(sc>bsc){bsc=sc;fwdBest=q;}
       } }
-    const inShotRangeNow = dGme < statLerp(longShotsOf(p),178,245)+40;
+    const inShotRangeNow = dGme < statLerp(statOf(p,'longShots',P.longShots.val),178,245)+40;
     let lastDefX=goalX; { let bd2=1e9; for(const o of players){ if(o.team===p.team||o.role==='G')continue; const dgo=atk*(goalX-o.x); if(dgo<bd2){bd2=dgo;lastDefX=o.x;} } }
     const farFromLine = atk*(lastDefX-p.x) > SL.fwdBackline;      // the opponent backline is still a long way off
+    // A RUNNER IN BEHIND (making his run past their line, onside): slip him in now, before he's offside or the gap
+    // shuts -- unless I'm through on goal myself. The ball goes in behind them, into the space in his path, as he
+    // arrives at their line: forward of me, a lane to it, and nobody (keeper included) there before him. He can be
+    // level with me -- a diagonal run off my shoulder is the classic one.
+    if(goalFullCd<0){
+      let runner=null, rsc=-1e9; const ol=offsideLineX(p.team);
+      for(const q of teamOf(p.team)){
+        if(q===p || !(q.gapRun>0) || inOffsidePos(q) || atk*(q.x-ol) < -70) continue;
+        const L=passLead(p,q);
+        if(atk*(L.x-ol) < 20 || atk*(L.x-p.x) < 30 || laneClearance(p,L) < 0.45 || laneClearance(p,q) < 0.35) continue;
+        if(!inRange(p,q,1.2*SL.rangeMul)) continue;
+        const qT=Math.hypot(q.x-L.x,q.y-L.y); let oD=1e9;
+        for(const o of players) if(o.team!==p.team) oD=Math.min(oD,Math.hypot(o.x-L.x,o.y-L.y));
+        for(const k of keepers) if(k.team!==p.team) oD=Math.min(oD,Math.hypot(k.x-L.x,k.y-L.y)-30);   // a keeper comes off his line for it
+        if(oD < qT+15) continue;
+        const sc=atk*(L.x-FW/2) - Math.abs(L.y-YCc)*0.3 + Math.min(oD-qT,200)*0.5;
+        if(sc>rsc){ rsc=sc; runner=q; }
+      }
+      if(runner){ passTo(p,runner); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc); }
+    }
+    // A SIGHT OF GOAL (not through on goal -- then I drive in closer, below): within my range (Long Shots stretches
+    // it to the edge of the box and beyond), a corner the keeper can't cover with nobody on the line to it, and
+    // nobody right on me -- have a go. Weighed every 0.4 s rather than every frame.
+    if(goalFullCd<0 && (p.lookShotT=(p.lookShotT||0)-dt)<=0){
+      p.lookShotT=0.4;
+      const LSn=statLerp(statOf(p,'longShots',P.longShots.val),0,1), dTrue=Math.hypot(goalX-p.x,YCc-p.y);
+      if(dTrue < 300+260*LSn && atk*(goalX-p.x)>80 && presserD>45 && shotAngleOf(p,goalX)>0.30){
+        const cq=(ev=>ev[ev.pick])(evalShotCorners(p,atk,0.9,p.x,p.y));
+        if(cq.qLane>0.7 && Math.random() < clamp((cq.q-0.15)*1.6,0,0.9)*(0.6+0.4*LSn)){
+          shootAt(p,atk,0,0.9,aiCurlFor(p,atk)); p.aiActT=0.8; return steer(p,goalX,YCc);
+        }
+      }
+    }
+
+    // SET UP A SHOT: in the final third (and not through myself), a teammate with a clearly better sight of goal
+    // than mine -- a wider angle on it, inside his range, nobody on him -- and a lane to him: give it to him
+    if(goalFullCd<0 && atk*(p.x-FW/2) > FW/6){
+      const myAng=shotAngleOf(p,goalX); let best=null, bsc=0;
+      for(const q of teamOf(p.team)){
+        if(q===p || q.role==='G' || inOffsidePos(q)) continue;
+        const dq=Math.hypot(goalX-q.x,YCc-q.y), angQ=shotAngleOf(q,goalX);
+        if(dq > 330+200*statLerp(statOf(q,'longShots',P.longShots.val),0,1) || angQ < Math.max(0.42, myAng+0.12)) continue;
+        if(dist(p,q)<100 || (p.lastPasserT>0 && q===p.lastPasser && !hardP)) continue;
+        const mk=nearestOppTo(q,q); if(mk && dist(mk,q)<85) continue;   // free to strike it
+        if(laneClearance(p,q)<0.5 || !inRange(p,q,SL.rangeMul)) continue;
+        const sc=angQ*300 - dq*0.25 + (mk?Math.min(dist(mk,q),220):220)*0.4;
+        if(sc>bsc){ bsc=sc; best=q; }
+      }
+      if(best){ passTo(p,best); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc); }
+    }
+
+    // TAKE HIM ON: one man in front of me, goal-side, nobody covering behind him, and I'm a dribbler (the better
+    // the dribbler, the more often) with a head of steam, in their half: I run at him to make him commit, then cut
+    // sharply past him on the side with more room (a sharp cut at pace wrong-foots a man diving in -- see
+    // beatTheChallenge) and go.
+    if(p.takeOn && simNow-p.takeOn.at>0.1) p.takeOn=null;              // (I lost it since)
+    if(p.takeOn){
+      const T=p.takeOn, d=T.who; T.at=simNow; T.t-=dt;
+      if(T.t<=0 || !d) p.takeOn=null;
+      else if(T.phase==='approach'){
+        if(atk*(d.x-p.x)<0 || dist(p,d)>190 || d.state!=='normal') p.takeOn=null;
+        else if(dist(p,d)<60){ T.phase='cut'; T.t=0.32; T.hx=atk*0.34; T.hy=T.side*0.94; }
+        else { p.sprint=p.stamina>0.15; return steer(p, d.x, d.y-T.side*18, 1.0); }   // straight at him, leaning the other way
+      }
+      if(p.takeOn && T.phase==='cut'){
+        p.sprint=p.stamina>0.1; p.facing={x:T.hx,y:T.hy}; p.carryAngle=Math.atan2(T.hy,T.hx);
+        if(T.t<=dt){ T.phase='go'; T.t=0.6; }
+        return steer(p, p.x+T.hx*140, p.y+T.hy*140, 1.0);
+      }
+      if(p.takeOn && T.phase==='go'){ p.sprint=p.stamina>0.1; return steer(p, goalX, clamp(p.y+(YCc-p.y)*0.3,60,FH-60), 1.0); }
+    }
+    if(!p.takeOn && (p.takeOnCd=(p.takeOnCd||0)-dt)<=0 && goalFullCd<0 && presser && atk*(p.x-FW/2)>-FW*0.05 &&
+       presserD>65 && presserD<150 && atk*(presser.x-p.x)>30 && Math.hypot(p.vx,p.vy)>runSpeedOf(p)*0.45){
+      p.takeOnCd=0.5;
+      let covered=false;
+      for(const o of players){ if(o.team===p.team||o===presser) continue; if(atk*(o.x-p.x)>0 && Math.hypot(o.x-presser.x,o.y-presser.y)<170){ covered=true; break; } }
+      if(!covered && Math.random()<clamp((statOf(p,'dribbling',P.dribbling.val)-5)/5,0,0.7)){
+        const up=spaceAlong(0,-1,240), dn=spaceAlong(0,1,240);
+        const side = p.y<160 ? 1 : p.y>FH-160 ? -1 : (dn>up ? 1 : -1);
+        p.takeOn={who:presser, side, phase:'approach', t:1.3, at:simNow}; p.takeOnCd=3.5;
+        p.sprint=p.stamina>0.15; return steer(p, presser.x, presser.y-side*18, 1.0);
+      }
+    }
     if(fwdBest && goalFullCd<0 && !inShotRangeNow && farFromLine && atk*(fwdBest.x-p.x) > SL.fwdGain){
       passTo(p,fwdBest); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc);
     }
@@ -5356,20 +5546,15 @@
       }
     }
 
-    // (2.5) CROSS: if I'm WIDE & ADVANCED with an OPEN cross and a teammate in the box, whip
-    // it in (preferred over running the byline when the cross is on).
+    // (2.5) CROSS: if I'm WIDE & well ADVANCED with an OPEN cross and one of ours can attack the ball in the box
+    // (see crossSpot -- he needn't be standing in it), whip it in (preferred over running the byline when it's on).
     {
       const wideNow=Math.abs(p.y-YCc)>FH*0.22;
-      const advNow =atk*(p.x-FW/2)>FW*0.10;
+      const advNow =atk*(p.x-FW/2)>FW*0.22;
       const frontClear=spaceAlong(atk,0,200)>(SL.crossEase?110:140);     // nobody right in front blocking the cross
-      let boxTarget=false;
-      for(const q of teamOf(p.team)){
-        if(q===p||q.role==='DEF')continue;
-        const inBox = atk>0 ? q.x>FW-BX-40 : q.x<BX+40;
-        if(inBox && Math.abs(q.y-YCc)<BY+30){boxTarget=true;break;}
-      }
-      if(wideNow && advNow && frontClear && boxTarget && presserD>(SL.crossEase?55:70)){
-        aiCross(p); p.aiActT=1.1*SL.tempo;
+      const cs=(wideNow && advNow && frontClear && presserD>(SL.crossEase?55:70)) ? crossSpot(p) : null;
+      if(cs && cs.margin>(SL.crossEase?-0.1:0.05)){
+        aiCross(p,cs); p.aiActT=1.1*SL.tempo;
         lastGrade='CROSS';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
         return steer(p,p.x,p.y,0.2);
       }
@@ -5379,7 +5564,8 @@
     const mySideSign = p.y<=YCc ? -1 : 1;
     const bylineSpace=spaceAlong(atk,0,340);
     const atByline = atk>0 ? p.x>FW-BX-120 : p.x<BX+120;
-    if(bylineSpace>150 && !atByline && Math.abs(p.y-YCc)>FH*0.16){
+    const pinned = hardP && atk*(presser.x-p.x) > -20;   // closed down by a man level with me or goal-side: no run
+    if(bylineSpace>150 && !atByline && Math.abs(p.y-YCc)>FH*0.16 && !pinned){
       const ty2=YCc+mySideSign*(FH*0.34);
       p.aiActT=0.22; p.sprint=p.stamina>0.12;
       return steer(p, clamp(p.x+atk*280,40,FW-40), clamp(ty2,60,FH-60), 1.0);
@@ -5710,8 +5896,9 @@
 
   function aiBrain(p,dt){
     p.aiActT-=dt*statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,2.0);p.runT-=dt;   // Off IQ: 1 = slow re-reads .. 10 = fast
+    if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
-    p.dbgTag=''; p.goingForBall=false; p.engageCap=1;
+    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false;
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -6491,6 +6678,18 @@
       const ownThird = atk>0 ? c.x<FW*0.34 : c.x>FW*0.66;
       const carrierDeep = c.role==='DEF' || (gkHold&&gkHold.team===p.team);
       if(ownThird && carrierDeep && p.runTarget===null){
+        if(gkHold && gkHold.team===p.team && (p.role==='DEF' || p===holderOf(p.team))){
+          // THE KEEPER'S BALL (a goal kick, say): the back line splits to the corners of the box -- the middle one of
+          // a three just in front of the keeper -- and the holding midfielder drops in ahead of them, so he has
+          // short balls on (see distribute)
+          const U=u=>atk>0?u:FW-u;
+          if(p.role==='DEF'){
+            const defs=teamOf(p.team).filter(q=>q.role==='DEF').sort((a,b)=>a.homeY-b.homeY), i=defs.indexOf(p), n=defs.length;
+            const mid = n%2===1 && i===(n-1)/2, f = n===1 ? (p.homeY<YC?-0.8:0.8) : (i/(n-1))*2-1;
+            return steer(p, U(mid?470:340), clamp(YC+(mid?0:f*310),60,FH-60));
+          }
+          return steer(p, U(620), YC+(p.homeY-YC)*0.3);
+        }
         if(p.role==='DEF'){
           const defs=teamOf(p.team).filter(q=>q.role==='DEF');
           if(defs.length!==2) return steer(p,anchor.x,anchor.y);   // a back three builds from its triangle (anchorOf)
@@ -6515,10 +6714,18 @@
           return steer(p,tx,ty);
         }
       }
+      // THE HOLDER stays behind the ball (his anchor), the screen against a counter -- he doesn't join the runs
+      if(p===holderOf(p.team) && p!==c){ p.runTarget=null; return steer(p,anchor.x,anchor.y); }
       // SUPPORT RUNS: carrier attacking the opponent's box -> get into it
       const oppGoalX=goalX;
       const otac=TAC[p.team].off;
       const carrierNearBox=Math.abs(c.x-oppGoalX)<BX+260&&atk*(c.x-FW/2)>0;
+      // THE CUE FOR A RUN: the man on the ball can play it (nobody right on him -- a man jockeying him from a couple
+      // of yards doesn't stop a pass) and is facing up the pitch, from the top end of our half onward. That's when
+      // forwards and wide men go -- not on a whim.
+      const cueFeed = c!==gkHold && !players.some(o=>o.team!==p.team&&dist(o,c)<50) &&
+                      ((c.facing&&atk*c.facing.x>0.2) || atk*c.vx>40) && atk*(c.x-FW/2) > -FW*0.22;
+      const wideMan = p.slotAtk && Math.abs(p.slotAtk.wide)===1 && p.slotAtk.lineSize>=3 && (p.role==='MID'||p.role==='ATT');
 
       // ===== WING PLAY OVERLAP =====
       // Under the 'wing' tactic, when a WIDE width-line player has the ball, trigger an
@@ -6620,11 +6827,11 @@
       const supChance = otacS==='tiki' ? 0.18 : 0.12;
       if(fwdHasBall && p.role==='MID' && p!==c && p.runTarget===null){
         const behindFwd = atk*(c.x-p.x) > -40;            // I'm level/behind the forward
-        if(behindFwd && Math.random()<supChance){
-          const mids=teamOf(p.team).filter(q=>q.role==='MID');
-          // order this player among the mids by proximity to the carrier
-          const ordered=mids.slice().sort((a,b)=>dist(a,c)-dist(b,c));
-          const myRank=ordered.indexOf(p);                // 0 = nearest mid to the carrier
+        // order the (non-holding) mids by proximity to the carrier: the nearest ALWAYS offers himself, others sometimes
+        const mids=teamOf(p.team).filter(q=>q.role==='MID'&&q!==holderOf(p.team));
+        const ordered=mids.slice().sort((a,b)=>dist(a,c)-dist(b,c));
+        const myRank=ordered.indexOf(p);                  // 0 = nearest mid to the carrier
+        if(behindFwd && (myRank===0 || Math.random()<supChance)){
           const ballSide = c.y<YC ? -1 : 1;               // flank the ball is on
           const ol=offsideLineX(p.team);
           // distance/width multipliers per tactic
@@ -6699,20 +6906,29 @@
         }
       }
 
-      // GAP RUN IN BEHIND: an off-ball attacker (or advanced/overlapping mid) spots a gap
-      // in the back line and times a burst into the space behind it.
-      const advancedMid = p.role==='MID' && atk*(p.x-FW/2) > -40;
-      const eligibleRunner = (p.role==='ATT'||advancedMid) && p!==c && p.runTarget===null;
-      const carrierCanFeed = atk*(c.x-FW/2) > -120;     // carrier is upfield enough to slide it
-      if(eligibleRunner && carrierCanFeed && p.runT<=0 && Math.random()<0.04){
-        const ol=offsideLineX(p.team);
-        const onsideX = atk>0 ? p.x<ol+20 : p.x>ol-20;  // not already way past the line
-        const gap=backlineGap(p.team, p.y);
-        if(gap && onsideX){
-          // run into the channel, a good chunk beyond the line, anticipating a through ball
-          p.runTarget={x:clamp((atk>0?ol+220:ol-220),70,FW-70), y:clamp(gap.y,60,FH-60)};
-          p.runT=1.8; p.gapRun=1.6;                      // mark it as an in-behind run
+      // RUN IN BEHIND, on the cue: a forward or wide man onside and within reach of their line (a forward from up to
+      // 420 px short of it, a wide man 320), with room behind it and a gap in his lane, goes beyond it -- two
+      // runners at most at a time. A man whose support run ends on their line (or past it: into the box, say) is
+      // only waiting there, held onside, so he can make the run too.
+      const waitingOnLine = p.runTarget && !(p.gapRun>0) && atk*(p.runTarget.x-offsideLineX(p.team)) > -40;
+      // (by style: a speedster or a winger goes from further out and sooner again; a target man only off the line)
+      const runMul = p.style==='speedster'?1.35 : (p.style==='winger'||p.style==='mwinger'||p.style==='insidefwd'||p.style==='wingback')?1.2 : p.style==='target'?0.35 : 1;
+      if(cueFeed && p!==c && (p.runTarget===null||waitingOnLine) && !(p.runCd>0) && (p.role==='ATT'||wideMan) && teamOf(p.team).filter(q=>q.gapRun>0).length<2){
+        const ol=offsideLineX(p.team), toLine=atk*(ol-p.x), room=atk>0?FW-ol:ol;
+        // a forward attacks the goal: a gap no wider than the box, and his run bends in toward the posts; a wide man
+        // may take the channel outside the full-back
+        const gap=(toLine>-15 && toLine<(p.role==='ATT'?420:320)*runMul && room>240) ? backlineGap(p.team, p.y, p.role==='ATT'?PA_HW-60:undefined) : null;
+        if(gap && Math.abs(gap.y-p.y)<FH*0.25){
+          const gy = p.role==='ATT' ? gap.y+(YC-gap.y)*0.30 : gap.y;
+          p.runTarget={x:clamp(ol+atk*(170+Math.random()*90),70,FW-70), y:clamp(gy,60,FH-60)};
+          p.runT=1.8; p.gapRun=1.6; p.runCd=3.0/runMul;  // an in-behind run (the carrier looks for it; see the AI step)
         }
+      }
+      // DOWN THE LINE, on the same cue: a wide man on the ball's side with open grass ahead of him goes for the byline
+      if(cueFeed && wideMan && p!==c && p.runTarget===null && !(p.runCd>0) && !carrierNearBox && countRunners(p.team)<2 &&
+         (p.y<YC)===(ball.y<YC) && Math.abs(p.y-YC)>FH*0.28){
+        let room=420; for(const o of players){ if(o.team===p.team) continue; const ah=atk*(o.x-p.x); if(ah>0&&ah<room&&Math.abs(o.y-p.y)<110) room=ah; }
+        if(room>240){ p.runTarget={x:clamp(p.x+atk*Math.min(room-60,380),70,FW-70), y:clamp(YC+(p.y<YC?-1:1)*FH*0.41,55,FH-55)}; p.runT=1.6; p.runCd=2.5; }
       }
 
       // COUNTER: just won the ball -> forwards burst in behind
@@ -6722,16 +6938,6 @@
         const lane=clamp(p.homeY+(Math.random()*2-1)*120,60,FH-60);
         p.runTarget={x:clamp((atk>0?ol+260:ol-260),80,FW-80),y:lane};
         p.runT=2.2;
-      }
-      // WING PLAY: forwards/mids look to get wide and to the byline.
-      // Happens under any tactic (more eagerly with the 'wing' tactic) so teams use the flanks.
-      const wingRunChance = otac==='wing' ? 0.06 : 0.03;
-      if((p.role==='ATT'||p.role==='MID')&&p!==c&&p.runTarget===null&&
-         carrierNearBox===false&&atk*(c.x-FW/2)>-120&&Math.random()<wingRunChance){
-        const side=p.homeY<=YC?-1:1;
-        p.runTarget={x:clamp(oppGoalX-atk*40,80,FW-80),       // toward the byline
-                     y:clamp(YC+side*(BY+150),40,FH-40)};
-        p.runT=2.0;
       }
       if(carrierNearBox&&p!==c&&p.role!=='DEF'&&p.runTarget===null){
         // pick a near-post / far-post / pull-back slot by who's where
@@ -6755,10 +6961,10 @@
         // defenders never run past halfway
         if(p.role==='DEF'){ if(atk>0)tx=Math.min(tx,FW/2-12);else tx=Math.max(tx,FW/2+12); }
         if(Math.abs(p.x-tx)<46||Math.random()<0.004){p.runTarget=null;p.runT=2.0;}
-      } else if(p.role!=='DEF'&&p.runT<=0&&dist(p,c)<420&&atk*(c.x-p.x)>=-40&&
-                countRunners(p.team)<2&&Math.random()<0.06){
-        const wide=p.y>=c.y?clamp(c.y+230,60,FH-60):clamp(c.y-230,60,FH-60);
-        p.runTarget={x:clamp(c.x+atk*400,60,FW-60),y:wide};
+      } else if(p.role!=='DEF' && c===ball.ownedBy){
+        // FIND SPACE around my place in the shape (see spaceNear)
+        const sp=spaceNear(p,c,tx,ty,atk,dt); tx=sp.x; ty=sp.y;
+        if(p.role==='ATT'){ if(atk>0)tx=Math.max(tx,FW*0.58);else tx=Math.min(tx,FW*0.42); }
       } else {
         const opp=nearestOppTo(p,p);
         if(opp&&dist(opp,p)<100){
@@ -6919,11 +7125,12 @@
         // (A partner you're playing only counts once you're actually close to him.)
         const partnerOnIt = p.role==='DEF' && teamOf(p.team).some(q=>q!==p && q.role==='DEF' &&
           (q===engager || dist(q,c)<dist(p,c)) && (q!==controlled || dist(q,c)<220));
+        const spot=blockSpot(p);                             // my place in the block (with a runner in my zone, if any)
         let pairSpot=null;
         if(partnerOnIt){
           const otherCover=teamOf(p.team).some(q=>q!==p && q!==engager && q.role==='DEF' && dist(q,c)<dist(p,c));
-          pairSpot = freeManToMark(p,c)                      // a free man to pick up first,
-                  || (otherCover ? anchor : coverSpot(c, ownGoalX));   // else cover (a back three: only the nearest spare one)
+          pairSpot = spot.track ? spot                        // a runner in my zone to pick up first,
+                  : (otherCover ? spot : coverSpot(c, ownGoalX));   // else cover (a back three: only the nearest spare one)
         }
         // BEATEN: the carrier has got past ME -- goal-side of me, close by, and driving -- so I abandon marking
         // and sprint to recover goal-side of the ball. Not when he's merely level with me across the pitch.
@@ -6950,23 +7157,21 @@
         const secondMan = ranked.length>1 ? ranked[1] : null;  // rank0 presses, rank1 covers
         if(pairSpot){
           tx=pairSpot.x; ty=pairSpot.y;                     // my centre-back partner has the ball covered
-        } else if(carrierInOurBox){
-          const gl=Math.hypot(ourGoalX-ball.x,YC-ball.y)||1;
-          tx=ball.x+(ourGoalX-ball.x)/gl*30;
-          ty=ball.y+(YC-ball.y)/gl*30;
-        } else if(carrierAdvancingMiddle && p===secondMan && (p.role==='DEF'||p.role==='MID') && _canChase){
-          // ONE covering player steps to the central runner, goal-side — role-gated so only
-          // same/adjacent depth to the engager responds; deeper lines stay in shape.
+        } else if(carrierAdvancingMiddle && !carrierInOurBox && p===secondMan && p.role==='MID' && _canChase){
+          // ONE midfielder steps to the central runner, goal-side, covering the man engaging him -- the back line
+          // holds its height behind them.
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
           const squeeze=clamp(200-dist(p,c)*0.4,50,170);
           tx=c.x+gx2*squeeze*0.5;
           ty=c.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
         } else {
-          // MARK an opponent (distinct ones), or nobody to mark -> hold our anchored shape (keeps the line spaced out)
-          const m=freeManToMark(p,c);
-          if(m){ tx=m.x; ty=m.y; } else { tx=anchor.x; ty=anchor.y; }
+          tx=spot.x; ty=spot.y;                            // hold my place in the block
         }
+        // caught a long way upfield of my place in the block: get back at a sprint (see the AI step). Otherwise I jog
+        // back into it -- and so do the forwards, always: the man who lost it and those near the ball press it.
+        p.recover = atk*(p.x-ball.x) > -40 &&                // (once goal-side of the ball, jog the rest)
+                    p.role!=='ATT' && atk*(p.x-tx) > 260;
       }
     } else {
       p.runTarget=null;
@@ -7052,6 +7257,37 @@
     }
     return steer(p,tx+p.iqJitX,ty+p.iqJitY);                  // Off IQ movement jitter (final-third only)
   }
+  // FINDING SPACE (in possession, off the ball): around my place in the shape (ax,ay), the pocket the man on the
+  // ball can find me in -- away from their men, a clear lane from him, ahead of the ball where it can be, onside,
+  // not on top of a teammate, not out of his range, and not far off my post. A wide man looks up and down his
+  // touchline rather than coming inside. Re-read about twice a second; a new pocket has to be clearly better.
+  function spaceNear(p,c,ax,ay,atk,dt){
+    const ol=offsideLineX(p.team), onside=x=>atk>0?Math.min(x,ol-14):Math.max(x,ol+14);
+    const wide = (p.isWidthLine && Math.abs(p.wide)===1) || (p.slotAtk && Math.abs(p.slotAtk.wide)===1 && p.slotAtk.lineSize>=3);
+    const score=(x,y)=>{
+      let dO=1e9; for(const o of players) if(o.team!==p.team) dO=Math.min(dO,Math.hypot(o.x-x,o.y-y));
+      const dc=Math.hypot(x-c.x,y-c.y);
+      let s = clamp(dO/170,0,1) + laneClearance(c,{x,y})*0.9 + clamp(atk*(x-c.x)/450,-0.4,0.6)*0.6;
+      if(dc<130) s-=(130-dc)/130*0.8;                                    // not on his shoulder
+      if(dc>passRangeOf(c)*1.1) s-=0.6;                                  // nor out of his range
+      for(const q of teamOf(p.team)){ if(q===p||q===c) continue; const dq=Math.hypot(q.x-x,q.y-y); if(dq<140) s-=(140-dq)/140*0.6; }
+      return s - Math.hypot(x-ax,y-ay)/200*0.35;                         // stay near my post
+    };
+    p.spaceT=(p.spaceT||0)-dt;
+    if(p.spaceT<=0 || !p.spaceAt){
+      p.spaceT=0.45+Math.random()*0.2;
+      let best={x:clamp(onside(ax),50,FW-50), y:clamp(ay,50,FH-50)}, bs=score(best.x,best.y);
+      const cur=p.spaceAt;
+      if(cur && Math.hypot(cur.x-ax,cur.y-ay)<240){ const k={x:clamp(onside(cur.x),50,FW-50), y:cur.y}, cs=score(k.x,k.y)+0.12; if(cs>bs){ bs=cs; best=k; } }
+      for(const r of [80,160]) for(let k=0;k<8;k++){
+        const a=k*Math.PI/4+(r===160?Math.PI/8:0);
+        const x=clamp(onside(ax+Math.cos(a)*r),50,FW-50), y=clamp(ay+Math.sin(a)*r*(wide?0.35:1),50,FH-50);
+        const sc=score(x,y); if(sc>bs){ bs=sc; best={x,y}; }
+      }
+      p.spaceAt=best;
+    }
+    return p.spaceAt;
+  }
   // reacting to its own touch: the input it had as the ball arrived, eased right off
   function easeOff(a){ return a?{ix:a.ix*0.3, iy:a.iy*0.3}:{ix:0,iy:0}; }
   function steer(p,tx,ty,urgency){
@@ -7061,25 +7297,68 @@
     if(urgency!==undefined){ix*=urgency;iy*=urgency;}
     return{ix,iy};
   }
-  // The nearest opponent (other than the carrier c) that no teammate is clearly closer to, if he's within 210:
-  // where to stand to mark him (goal-side, reading his run by Def IQ). null if nobody needs marking.
-  function freeManToMark(p,c){
-    const ownGoalX=atkOf(p.team)>0?0:FW, mates=teamOf(p.team);
-    let mark=null,md=1e9;
-    for(const q of players){
-      if(q.team===p.team||q===c)continue;
-      const myd=dist(p,q);
-      if(myd>=md)continue;
-      let taken=false;                                // a different teammate clearly closer to him: he's theirs
-      for(const m of mates){ if(m!==p&&dist(m,q)<myd-6){ taken=true; break; } }
-      if(!taken){ md=myd; mark=q; }
+  // ===== THE DEFENSIVE BLOCK =====
+  // Out of possession the team defends in lines rather than chasing men. The back line holds one height:
+  // goal-side of the ball by a gap that shrinks as the ball comes closer, never higher than the tactic allows.
+  // It doesn't give ground to a forward standing on it (he'd be offside the moment he stepped past) -- only a
+  // defender with a runner in his zone drops, with the runner (see blockSpot). The midfield sits a gap in
+  // front of it and the forwards a gap in front of that, neither ahead of the ball -- except one forward, left
+  // up as an outlet while the ball is deep in our third. Every line slides across toward the ball. A player's
+  // place in his line comes from his defensive slot.
+  // The block shifts off where it SEES the ball: a beat behind it (~0.35 s), so moving the ball quickly -- a switch,
+  // a ball through the lines -- catches it still sliding across. (Snaps to the ball after a restart.)
+  const blockCache={G:null,R:null}, blockEye={G:{x:FW/2,y:FH/2,t:0},R:{x:FW/2,y:FH/2,t:0}};
+  function defBlock(team){
+    const bc=blockCache[team]; if(bc&&bc.t===simNow) return bc;
+    const e=blockEye[team], de=simNow-e.t; e.t=simNow;
+    if(de<0 || de>0.2 || Math.hypot(ball.x-e.x,ball.y-e.y)>1100){ e.x=ball.x; e.y=ball.y; }
+    else { const k=1-Math.exp(-de/0.35); e.x+=(ball.x-e.x)*k; e.y+=(ball.y-e.y)*k; }
+    const atk=atkOf(team), U=x=>atk>0?x:FW-x;                        // depth: distance from our own goal line
+    const uB=U(e.x), dtac=TAC[team].def;
+    const tacMax = dtac==='press'?0.40*FW : dtac==='lowblock'?0.20*FW : 0.32*FW;
+    let uD=Math.min(tacMax, uB-clamp((uB-150)*0.30,60,330));
+    // nobody on the man with the ball: he has time to pick a pass, so the line drops off to cover the space behind it
+    const c=ball.ownedBy;
+    if(c && c.team!==team && !players.some(q=>q.team===team && dist(q,c)<100)) uD-=60;
+    uD=Math.max(uD, GA_D+15);
+    const uM=clamp(uD+0.115*FW, uD+90, Math.max(uD+90, uB-90));
+    const uF=clamp(uM+0.105*FW, uM+60, Math.max(uM+60, uB-20));
+    return (blockCache[team]={t:simNow, atk, U, uB, uD, uM, uF, by:e.y});
+  }
+  const BLOCK_SHIFT={DEF:0.40,MID:0.55,ATT:0.60};                       // how far each line slides toward the ball's side
+  const BLOCK_W={DEF:[0,0,0.25,0.40,0.52],MID:[0,0,0.34,0.52,0.66],ATT:[0,0,0.30,0.50,0.60]};   // a line's width (x FH) by its size
+  // my spot in the block; .track: the runner I've picked up in my zone, if any
+  function blockSpot(p){
+    const B=defBlock(p.team), s=p.slotDef||p, role=s.role, n=Math.max(1,s.lineSize||1), mates=teamOf(p.team);
+    let u = role==='DEF'?B.uD : role==='MID'?B.uM : B.uF;
+    if(role==='ATT' && B.uB<FW*0.34){                                  // ball deep in our third: our highest forward stays up, the outlet
+      let top=null; for(const q of mates) if(q.slotDef&&q.slotDef.role==='ATT'&&(!top||B.U(q.x)>B.U(top.x))) top=q;
+      if(p===top) u=Math.max(u, FW*0.45);
     }
-    if(!mark||md>=210) return null;
-    const lead=statLerp(defIQof(p),0,0.30);         // Def IQ10: mark where he's GOING; Def IQ1: where he is
-    const mx=mark.x+mark.vx*lead, my=mark.y+mark.vy*lead;
-    const gl=Math.hypot(ownGoalX-mx,YC-my)||1;
-    const mc=(TAC[p.team].def==='press')?15:26;     // off-ball goal-side cushion: default; only the press tactic steps tighter
-    return {x:mx+(ownGoalX-mx)/gl*mc, y:my+(YC-my)/gl*mc};
+    let f=0;
+    if(n>1){ let mo=1; for(const q of mates){ const t=q.slotDef; if(t&&t.role===role) mo=Math.max(mo,Math.abs(t.homeY-YC)); } f=clamp((s.homeY-YC)/mo,-1,1); }
+    const w=(BLOCK_W[role]||BLOCK_W.MID)[Math.min(n,4)]*FH, cy=YC+(B.by-YC)*(BLOCK_SHIFT[role]||0.5);
+    let y=clamp(cy+f*w/2,60,FH-60), track=null;
+    // ZONAL MARKING: a defender picks up a RUNNER in his zone -- a man going for the space behind, from up to 220
+    // px out -- and drops with him before he's past (only if no line-mate is nearer him); a man standing on the
+    // line he leaves to the offside flag. A midfielder screens a man sitting between the lines in front of him.
+    // Nobody follows a man who drops short of the line -- the next line has him.
+    if(role==='DEF'||role==='MID'){
+      const zone=Math.max(110, n>1 ? w/(n-1)*0.6 : 140), c=ball.ownedBy;
+      let best=null, bu=1e9;
+      for(const o of players){
+        if(o.team===p.team||o===c) continue;
+        const uo=B.U(o.x), vu=B.atk>0?o.seenVx||0:-(o.seenVx||0);      // vu < 0: he's running at our goal (as read, a beat late)
+        if(Math.abs(o.y-y)>zone) continue;
+        if(role==='DEF' ? !(uo<u+220 && vu<-60) : (uo<=B.uD+30 || uo>u+60)) continue;
+        if(mates.some(q=>q!==p&&q.slotDef&&q.slotDef.role===role&&dist(q,o)<dist(p,o)-10)) continue;
+        if(uo<bu){ bu=uo; best=o; }
+      }
+      if(best){ const vu=B.atk>0?best.seenVx||0:-(best.seenVx||0);
+        track=best; u=Math.min(u, bu-(role==='DEF'?25+clamp(-vu*0.3,0,60):20)); y=y+(best.y-y)*(role==='DEF'?0.75:0.6); }
+    }
+    u=Math.max(u,30);
+    return {x:B.atk>0?u:FW-u, y:clamp(y,40,FH-40), track};
   }
   // COVER: where a centre-back stands while his partner goes to the ball (b: the ball or the carrier) -- between
   // it and our goal, a stride or two goal-side of it, and tucked toward the middle (guarding the goal, not the line)
@@ -7561,9 +7840,9 @@
       kp.y+=clamp(YC-kp.y,-spd*0.4*dt,spd*0.4*dt);
       ball.x=kp.x-kp.side*18;ball.y=kp.y;
       ball.vx=ball.vy=0;ball.z=6;ball.vz=0;
-      if(kp.holdT<=0){
-        distribute(kp);
-        kp.mode='return';kp.claimCd=1.6;gkHold=null;
+      kp.heldT=(kp.heldT||0)+dt;
+      if(kp.holdT<=0 && distribute(kp, kp.heldT>3.2)){         // (he waits, up to a few seconds, for a safe short ball)
+        kp.mode='return';kp.claimCd=1.6;gkHold=null;kp.heldT=0;
       }
       return;
     }
@@ -7770,31 +8049,71 @@
     // locked: no auto-switch
   }
 
-  function distribute(kp){
+  // THE KEEPER'S BALL OUT (a goal kick, or after a save or a claim). He plays it short only to a man who'll get
+  // there first: the ball's flight time to him against how fast each of their men could close the spot (flat out,
+  // after a beat to react), with time left over to take it. Short, it's struck to arrive -- not to run on past him
+  // -- and the man it's for is told so he comes to meet it. Nothing safe short -> long, to whichever of our men
+  // further up will win it, or else into the open side of the pitch, away from their men. Unless forced (he's
+  // held it long enough), he'd rather wait for his team to give him a short ball: returns false if he's waiting.
+  function gkBallT(d, vh, vz){                                       // seconds for a launched ball to cover d (or 9: never)
+    const st=1/60, frF=Math.pow(1-P.friction.val, st*3.2); let x=0,z=6,v=vh,w=vz,t=0;
+    while(t<4){ if(z>0||w!==0){ w-=520*st; z+=w*st; if(z<=0){z=0; w=w<-40?-w*0.45:0;} } x+=v*st; if(z<12)v*=frF; t+=st;
+      if(x>=d) return t; if(Math.abs(v)<10&&z<1) break; }
+    return 9;
+  }
+  function oppTimeTo(team, x, y){                                    // how soon their quickest man could be at (x,y)
+    let t=1e9; for(const o of players){ if(o.team===team) continue;
+      t=Math.min(t, 0.25 + Math.max(0, Math.hypot(o.x-x,o.y-y)-28)/sprintSpeedOf(o)); }
+    return t;
+  }
+  function distribute(kp,force){
     const atk=atkOf(kp.team);
-    let best=null,bs=-1e9;
+    let best=null,bs=-1e9,bt=null;
     for(const q of teamOf(kp.team)){
       if(inOffsidePos(q))continue;
       const d=dist(kp,q);
-      if(d<70)continue;
-      const opp=nearestOppTo({team:kp.team},q);
-      const open=opp?dist(opp,q):260;
-      if(open<60)continue;                 // receiver marked tight -> unsafe
-      if(laneBlocked(kp,q))continue;        // opponent in the passing lane
-      let roleBonus=q.role==='DEF'?260:q.role==='MID'?200:0;
-      const distPenalty=Math.abs(d-360)*0.4;
-      const score=open*1.4 + roleBonus - distPenalty;
-      if(score>bs){bs=score;best=q;}
+      if(d<70 || d>760)continue;
+      if(laneBlocked(kp,q))continue;                 // an opponent in the passing lane
+      const tx=q.x+q.vx*0.25, ty=q.y+q.vy*0.25, dd=Math.hypot(tx-ball.x,ty-ball.y);
+      const vz=clamp(40+dd*0.18,55,240)*gkLoftOf(kp,dd)*0.75, vh=gkSolvePower(dd*1.12,vz);   // arrives with a little pace on it
+      const T=gkBallT(dd,vh,vz), spare=oppTimeTo(kp.team,tx,ty)-T;
+      if(spare<0.45)continue;                        // they'd be on him as it arrives (or before): not safe
+      const roleBonus=q.role==='DEF'?160:q.role==='MID'?120:0;
+      const score=Math.min(spare,2.5)*180 + roleBonus - Math.abs(d-380)*0.25;
+      if(score>bs){bs=score;best=q;bt={x:tx,y:ty,vh,vz};}
     }
     if(best){
-      gkLaunch(kp, best.x+best.vx*0.4, best.y+best.vy*0.4);
+      let dx=bt.x-ball.x, dy=bt.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+      const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
+      ball.vx=(dx*cs-dy*sn)*bt.vh; ball.vy=(dx*sn+dy*cs)*bt.vh; ball.vz=bt.vz;
+      ball.z=Math.max(ball.z,6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;
+      recordPassTeam(kp.team, null);
+      ball.intendedRcv=best; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null;
+    } else if(!force){
+      return false;
     } else {
-      // no safe option -> clear it long downfield
-      const atk=atkOf(kp.team);
-      gkLaunch(kp, clamp(kp.x+atk*720, 80, FW-80), YC + (Math.random()<0.5?-1:1)*190);
+      // LONG: to a man further up who'll win it where it lands, or at least contest it (by the same race), else
+      // into the open side of the pitch near halfway
+      let tgt=null, ts=-1e9;
+      for(const q of teamOf(kp.team)){
+        if(q.role==='DEF' || inOffsidePos(q)) continue;
+        const d=dist(kp,q); if(d<600) continue;
+        const lx=clamp(q.x+atk*40,80,FW-80), ly=q.y, dl=Math.hypot(lx-ball.x,ly-ball.y);
+        const vz=clamp(40+dl*0.18,55,240)*gkLoftOf(kp,dl), T=gkBallT(dl, gkSolvePower(dl,vz)*gkPowerOf(kp), vz);   // as gkLaunch strikes it
+        const mine=0.2+Math.hypot(q.x-lx,q.y-ly)/sprintSpeedOf(q), spare=oppTimeTo(kp.team,lx,ly)-Math.max(T,mine);
+        const sc=spare*200 - Math.abs(d-1000)*0.15;
+        if(spare>-0.25 && sc>ts){ ts=sc; tgt={q,x:lx,y:ly}; }
+      }
+      if(tgt){ gkLaunch(kp, tgt.x, tgt.y); ball.intendedRcv=tgt.q; ball.rcvRunner=false; }
+      else {
+        const lx=clamp(kp.x+atk*1050,80,FW-80);
+        const side=oppTimeTo(kp.team,lx,YC-330) > oppTimeTo(kp.team,lx,YC+330) ? -1 : 1;
+        gkLaunch(kp, lx, YC+side*330);
+      }
     }
     ball.lastTouch=kp.team;
     recordPassTeam(kp.team,null);
+    return true;
   }
 
   // ===== sim =====
@@ -7875,6 +8194,8 @@
       }
     }
 
+    const seeK=1-Math.exp(-dt/0.35);
+    for(const p of players){ p.seenVx=(p.seenVx||0)+(p.vx-(p.seenVx||0))*seeK; p.seenVy=(p.seenVy||0)+(p.vy-(p.seenVy||0))*seeK; }   // how others read a man's running: a beat late (see blockSpot)
     for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
       if(!p.facing||!isFinite(p.facing.x)||!isFinite(p.facing.y)) p.facing={x:atkOf(p.team),y:0};}
     for(const kp of keepers){ if(!kp.facing||!isFinite(kp.facing.x)||!isFinite(kp.facing.y)) kp.facing={x:atkOf(kp.team),y:0}; }
@@ -7932,7 +8253,7 @@
         // OPEN LANE IN BEHIND: I'm an off-ball attacker with clear grass AND the ball can
         // actually find me soon (carrier is on my team and roughly behind me).
         let openBehind=false;
-        if(teamHasBall(p.team) && !carrying && p.role!=='DEF' && carrier && carrier.team===p.team){
+        if(teamHasBall(p.team) && !carrying && p.role!=='DEF' && carrier && carrier.team===p.team && p.runTarget){   // (only on a run)
           const aheadX = atkP>0 ? FW : 0;
           const behindMe = atkP*(p.x-carrier.x) > -40;     // I'm ahead of the carrier (a run)
           if(behindMe && atkP*(aheadX-p.x) > 200){
@@ -7953,15 +8274,20 @@
         // a genuine counter where I'm one of the closest going forward
         const onCounter  = transitionT[p.team]>0 && dBall<420;
 
+        // RECOVERING: lost it with me upfield of the ball -- sprint back goal-side of it (aiBrain sets the flag)
+        const recovering = p.recover && oppHasBallTeam(p.team);
         // --- CRITICAL: always worth a sprint (down to a low stamina floor) ---
-        const critical = beaten || gapBurst || openBehind || closeChase;
+        const critical = beaten || gapBurst || openBehind || closeChase || recovering;
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
         const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
                            (()=>{ for(const q of players){ if(q.team===p.team&&q!==p&&dist(q,carrier||ball)<dBall-10) return false; } return true; })();
         const driving    = carrying && Math.hypot(p.vx,p.vy)>runSpeedOf(p)*0.6;
         const longRun    = p.runTarget && Math.hypot(p.runTarget.x-p.x,p.runTarget.y-p.y)>220;
-        const opportunistic = onCounter || pressClose || driving || longRun;
+        // GETTING UP IN SUPPORT: our man on the ball is well upfield of me in their half and I'm on my way up to join him
+        const supporting = carrier && carrier.team===p.team && !carrying && p.role!=='DEF' && p!==holderOf(p.team) &&
+                           atkP*(carrier.x-p.x)>260 && atkP*(carrier.x-FW/2)>0 && atkP*ai.ix>0.5;
+        const opportunistic = onCounter || pressClose || driving || longRun || supporting;
 
         let doSprint=false;
         if(critical && sta>0.06) doSprint=true;            // push hard for the important stuff
@@ -8999,7 +9325,8 @@
     let h='<div class="sqTabs">'+SQUAD[t].map((e,i)=>'<button class="btn sqTab" data-i="'+i+'" style="'+(i===sel?hi:'')+'">#'+e.num+' '+e.name+(i===youIdx?' \u25b6':'')+'</button>').join('')+'</div>';
     h+='<div class="menuHint">'+(ed?'Drag a slider to change a stat \u2014 saved instantly and applied to the live match.':'Turn on EDIT STATS to change any value.')+'</div>';
     const e=SQUAD[t][sel], keys=(e.role==='GK')?GK_KEYS:OUT_KEYS;
-    h+='<div class="sqCard'+(sel===youIdx?' you':'')+'" style="max-width:560px"><div class="sqHead"><div><span class="sqName">#'+e.num+' '+e.name+'</span><span class="sqRole">'+e.role+'</span>'+(sel===youIdx?'<span class="youBadge">\u25b6 YOU</span>':'')+'<div class="sqPers">'+e.defPers+' temperament</div></div><div class="sqOvr" id="ovr_'+t+'_'+sel+'">'+e.ovr+'</div></div>';
+    const sty=styleOf(e);
+    h+='<div class="sqCard'+(sel===youIdx?' you':'')+'" style="max-width:560px"><div class="sqHead"><div><span class="sqName">#'+e.num+' '+e.name+'</span><span class="sqRole">'+e.role+(sty?' \u00b7 '+sty.name.toUpperCase():'')+'</span>'+(sel===youIdx?'<span class="youBadge">\u25b6 YOU</span>':'')+(sty?'<div class="sqStyle">'+sty.blurb+'</div>':'')+'<div class="sqPers">'+e.defPers+' temperament</div></div><div class="sqOvr" id="ovr_'+t+'_'+sel+'">'+e.ovr+'</div></div>';
     for(const k of keys) h+=statRowHTML(t,sel,k,ed);
     h+='</div>';
     menuBodyEl.innerHTML=h;
@@ -9193,13 +9520,12 @@
   const CW_AUTHORED={};   // hand-authored clubs slot in here later (name -> [13 players])
   function cwSubRole(role,rng){ if(role==='GK')return 'GK'; if(role==='DEF')return rng()<0.4?'FB':'CB'; if(role==='MID'){ const r=rng(); return r<0.3?'DM':(r<0.75?'CM':'AM'); } return rng()<0.45?'WNG':'STK'; }
   function cwDefaultSub(role){ return role==='GK'?'GK':role==='DEF'?'CB':role==='MID'?'CM':'STK'; }
-  function cwSubTilt(sub,s){ const add=(k,d)=>{ s[k]=clamp(Math.round((s[k]+d)*2)/2,1,10); };
-    if(sub==='FB'){ add('speed',1.5);add('acceleration',1.0);add('crossing',1.0);add('stamina',0.5);add('strength',-0.5);add('heading',-0.5); }
-    else if(sub==='CB'){ add('heading',0.5);add('strength',0.5);add('tackle',0.5); }
-    else if(sub==='DM'){ add('tackle',0.7);add('interceptions',0.7);add('defIQ',0.7);add('shotAcc',-0.5); }
-    else if(sub==='AM'){ add('passAcc',0.7);add('offIQ',0.7);add('dribbling',0.7);add('shotAcc',0.5); }
-    else if(sub==='STK'){ add('shotAcc',0.7);add('shotPower',0.7);add('heading',0.5);add('composure',0.5); }
-    else if(sub==='WNG'){ add('speed',1.0);add('acceleration',0.8);add('dribbling',0.8);add('crossing',0.8);add('strength',-0.7); }
+  // a generated player's style: its offsets on top of his stats, then the whole block nudged back to the rating he
+  // was made for (so a stopper's lost pace comes back as strength and heading, not as a lower rating)
+  function cwStyleStats(role,s,style,T){
+    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role];
+    for(const k in d) s[k]=clamp(Math.round((s[k]+d[k])*2)/2,1,10);
+    if(w) for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k in w){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwMul(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
@@ -9208,7 +9534,6 @@
   function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=cwWmean(base,w),delta=T/10-B,s={};
     for(const k of ALL_STAT_KEYS){ const onW=(k in w); let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
     for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k in w){ s[k]=clamp(s[k]+step,1,10); } }
-    if(role==='DEF'){ s.speed=clamp(Math.round((s.speed-1.6)*2)/2,1,10); s.acceleration=clamp(Math.round((s.acceleration-1.1)*2)/2,1,10); }  // generated defenders run slower for their rating
     return s; }
   function cwWage(tier,ovr){ const T=CW_TIERS[tier],f=clamp((ovr-T.ovr[0])/(T.ovr[1]-T.ovr[0]),0,1); return Math.round((T.wage[0]+(T.wage[1]-T.wage[0])*Math.pow(f,1.6))/10)*10; }
   function cwFee(tier,ovr,age){ const aF=age<=24?1.15:age<=28?1:age<=31?0.55:0.28; let fee=Math.pow(ovr,3)*CW_TIER_FEE[tier]*aF; const r=fee>5e6?1e6:fee>5e5?1e5:fee>5e4?1e4:fee>5e3?1e3:100; return Math.round(fee/r)*r; }
@@ -9223,10 +9548,10 @@
   function cwPostureFor(style,rng){ return style==='tiki'?'press' : style==='counter'?'lowblock' : (style==='direct'&&rng()<0.35?'lowblock':'neutral'); }
   function cwGenClub(name,tier,seed,bias){
     if(CW_AUTHORED[name]){ return cwAuthoredClub(name,tier); }
-    const rng=cwMul(seed),used=new Set(),uL=new Set();
+    const rng=cwMul(seed),rs=cwMul(cwHash(seed,'styles')),used=new Set(),uL=new Set();   // (styles from their own draw: the names stay put)
     const pick=()=>{ let fn,ln,t=0; do{ fn=CW_FIRST[Math.floor(rng()*CW_FIRST.length)]; ln=CW_LAST[Math.floor(rng()*CW_LAST.length)]; t++; }while((used.has(fn+ln)||uL.has(ln))&&t<40); used.add(fn+ln); uL.add(ln); return fn+' '+ln; };
     const T=CW_TIERS[tier],lo=T.ovr[0],hi=T.ovr[1];
-    const players=CW_ROLES.map((role,i)=>{ const st=i<1+OUTFIELD; const f=st?(0.45+rng()*0.55):(rng()*0.55); const ovrT=Math.round(clamp(lo+(hi-lo)*f+(bias||0),1,99)); const age=17+Math.round((rng()+rng())/2*17); const stats=cwStatsForOVR(role,ovrT,rng); const subRole=CW_FORCE_SUB[i]||cwSubRole(role,rng); cwSubTilt(subRole,stats); const ovr=cwOverall(role,stats); return { num:i+1, name:pick(), role, subRole, age, ovr, wage:cwWage(tier,ovr), fee:cwFee(tier,ovr,age), stats }; });
+    const players=CW_ROLES.map((role,i)=>{ const st=i<1+OUTFIELD; const f=st?(0.45+rng()*0.55):(rng()*0.55); const ovrT=Math.round(clamp(lo+(hi-lo)*f+(bias||0),1,99)); const age=17+Math.round((rng()+rng())/2*17); const stats=cwStatsForOVR(role,ovrT,rng); const subRole=CW_FORCE_SUB[i]||cwSubRole(role,rng); const style=styleForSub(subRole,rs()); cwStyleStats(role,stats,style,ovrT); const ovr=cwOverall(role,stats); return { num:i+1, name:pick(), role, subRole, style, age, ovr, wage:cwWage(tier,ovr), fee:cwFee(tier,ovr,age), stats }; });
     const _sty=cwStyleFor(tier,rng);
     return { name, tier, style:_sty, posture:cwPostureFor(_sty,rng), ovr:Math.round(players.slice(0,1+OUTFIELD).reduce((a,p)=>a+p.ovr,0)/(1+OUTFIELD)), wageBill:players.reduce((a,p)=>a+p.wage,0), players };
   }
@@ -9510,7 +9835,9 @@
   // Each sub-role exposes option groups; each group has a default (def) choice.
   // Stored on d.instructions[rosterIdx] = {groupIdx: choiceId}. Resolved with defaults.
   function controlledRi(d){ ensureLineup(d); ensureForms(d); const mi=d.roster?d.roster.findIndex(p=>p&&p.me):-1; if(mi>=0 && (d.lineup.gk===mi || d.lineup.atk.indexOf(mi)>=0)) return mi; const ln=FORMS[d.formation]||FORMS['2-3-2']; return d.lineup.atk[ln[0]+ln[1]]; }
-  function careerSquad(club){ return (club.players||[]).slice(0,1+OUTFIELD).map((p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, defPers:p.defPers||'default', stats:p.stats, ovr:p.ovr })); }
+  function careerSquad(club){ return (club.players||[]).slice(0,1+OUTFIELD).map((p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:p.stats, ovr:p.ovr })); }
+  // a career player's style: as made, or for one signed before styles, the one his stats fit (your own pro has none)
+  function careerStyle(p){ if(!p||p.me||p.role==='GK'||!ARCH[p.role]) return p&&p.style; if(!p.style) p.style=inferStyle(p.role,p.subRole,p.stats||{}); return p.style; }
   // ---- career lineup / tactics ----
   let tacticSel=null, tacNote='', statViewRi=null, tacPhase='atk';
   const TAC_GK=[50,92];
@@ -9589,7 +9916,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters], sIdx={};
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,defPers:p.defPers||'default',stats:p.stats,ovr:p.ovr}; });
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:p.stats,ovr:p.ovr}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   function tacTok(d, ri, x, y, isBench, phase, bad, ctrl){ const p=d.roster[ri]; if(!p) return '';
@@ -9601,11 +9928,12 @@
     return '<button class="ptk'+(sel?' sel':'')+(bad?' bad':'')+(ctrl?' youtok':'')+(ri===statViewRi?' statview':'')+swp+'" style="'+pos+'" data-tac="'+tac+'" data-ri="'+ri+'"'+ph+'>'+ctrlBadge+'<span class="ptkOvr">'+p.ovr+'</span><span class="ptkNum">'+(p.subRole||p.role)+'</span><span class="ptkName">'+(p.name.split(' ').slice(-1)[0])+'</span></button>'; }
   function tacStatCard(e, isYou){
     if(!e||!e.stats) return '<div class="tacStat tacStatEmpty">Tap a player to see their stats</div>';
-    const keys=(e.role==='GK')?GK_KEYS:OUT_KEYS;
+    const keys=(e.role==='GK')?GK_KEYS:OUT_KEYS; careerStyle(e); const sty=styleOf(e);
     let h='<div class="tacStat'+(isYou?' you':'')+'">';
     h+='<div class="tacStatHead"><div><span class="tacStatName">#'+(e.num!=null?e.num:'')+' '+(e.name||'')+'</span>'
-      +'<span class="tacStatRole">'+(e.subRole||e.role||'')+'</span>'
+      +'<span class="tacStatRole">'+(e.subRole||e.role||'')+(sty?' \u00b7 '+sty.name:'')+'</span>'
       +(isYou?'<span class="youBadge">\u25b6 YOU</span>':'')
+      +(sty?('<div class="tacStatPers">'+sty.blurb+'</div>'):'')
       +(e.defPers?('<div class="tacStatPers">'+e.defPers+' temperament</div>'):'')
       +'</div><div class="tacStatOvr">'+(e.ovr!=null?e.ovr:'')+'</div></div>';
     for(const k of keys){ const v=e.stats[k]; if(!isFinite(v))continue; const pct=((clamp(v,1,10)-1)/9*100).toFixed(0);
@@ -10193,8 +10521,8 @@
     const pick=()=>{ let fn,ln,t=0; do{ fn=CW_FIRST[Math.floor(rng()*CW_FIRST.length)]; ln=CW_LAST[Math.floor(rng()*CW_LAST.length)]; t++; }while(used.has(fn+ln)&&t<80); used.add(fn+ln); return fn+' '+ln; };
     const tier=1, T=CW_TIERS[1], lo=T.ovr[0], hi=T.ovr[1];
     const mk=(role)=>{ const f=rng()*0.92; const ovrT=Math.round(clamp(lo+(hi-lo)*f,1,99)); const age=17+Math.round((rng()+rng())/2*17);
-      const stats=cwStatsForOVR(role,ovrT,rng); const subRole=cwSubRole(role,rng); cwSubTilt(subRole,stats); const ovr=cwOverall(role,stats);
-      return { name:pick(), role, subRole, age, ovr, wage:cwWage(tier,ovr), fee:cwFee(tier,ovr,age), stats }; };
+      const stats=cwStatsForOVR(role,ovrT,rng); const subRole=cwSubRole(role,rng); const style=styleForSub(subRole,Math.random()); cwStyleStats(role,stats,style,ovrT); const ovr=cwOverall(role,stats);
+      return { name:pick(), role, subRole, style, age, ovr, wage:cwWage(tier,ovr), fee:cwFee(tier,ovr,age), stats }; };
     const pool=[], counts={GK:4,DEF:9,MID:9,ATT:8};
     for(const r of ['GK','DEF','MID','ATT']) for(let i=0;i<counts[r];i++) pool.push(mk(r));
     return pool;
@@ -10366,7 +10694,7 @@
     document.getElementById('exhCtrlBlock').style.display=exhGridSide?'none':'';
     const sq=clubSide(EXH.you).squad;
     document.getElementById('exhPlayers').innerHTML=sq.map((e,i)=>i===0?'':
-      '<button class="exhPl'+(i===EXH.ctrl?' sel':'')+'" data-exh="ctrl" data-i="'+i+'"><span class="r">'+e.role+'</span><span class="n">#'+e.num+' '+e.name+'</span><span class="o">'+e.ovr+'</span></button>').join('');
+      '<button class="exhPl'+(i===EXH.ctrl?' sel':'')+'" data-exh="ctrl" data-i="'+i+'"'+(styleOf(e)?' title="'+styleOf(e).blurb+'"':'')+'><span class="r">'+e.role+'</span><span class="n">#'+e.num+' '+e.name+'</span><span class="st">'+(styleOf(e)?styleOf(e).name:'')+'</span><span class="o">'+e.ovr+'</span></button>').join('');
   }
   function exhSet(t,id){ if(t==='G') EXH.you=id; else EXH.opp=id; }
   function exhCycle(t,dir){
