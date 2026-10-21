@@ -177,17 +177,29 @@ test, and like the Trap Lab the values are the game's settings.
   style levers (press / neutral / low block · neutral / wing / counter) and per-player
   defensive personalities. Defenders close down quickly, then come in under control for the last
   few strides, and a beaten one chases back up alongside rather than through the man.
+- **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
+  knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
+  his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a
+  block. Only the man it's for goes after it. It's nobody's ball only after a tackle or a deflection, a
+  clearance, or a pass that's gone astray. Each side's shape shifts off where it sees the ball, a beat
+  behind it, so a quick one-two doesn't drag everyone back and forth.
 - **Defending as a block** — out of possession a team defends in lines, not man for man. The back
   line holds one height, goal-side of the ball by a gap that shrinks as the ball comes closer and
   never higher than the tactic allows; it doesn't drop for a forward standing on it (he'd be
   offside), only the defender with a runner in his zone drops with him. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. When the ball's
-  lost, a man caught a long way upfield sprints back goal-side of it; the rest jog back into shape
-  (the forwards always do). One man presses the ball; of a pair of
-  centre-backs one goes and the other covers. The block reads the ball a beat late (about a third of
-  a second), and a run a beat late too, so quick passing and well-timed runs can still open it up.
-- **Attacking movement** — in possession the wide men hold the touchlines and one central
-  midfielder stays behind the ball as a screen against the counter. Everyone else looks for space
+  lost, a man caught a long way upfield sprints back goal-side of it (a forward only from a very long
+  way up); the rest jog back into shape. One man presses the ball, and keeps him until a teammate is
+  clearly better placed; of a pair of centre-backs one goes and the other covers. When they pass, a man
+  who can get onto the ball's path before their receiver goes to cut it out; otherwise the nearest
+  closes the receiver down as the ball travels, to be on him for his first touch. The block reads the
+  ball a beat late (about a third of a second), and a run a beat late too, so quick passing and
+  well-timed runs can still open it up.
+- **Attacking movement** — in possession the wide men hold the touchlines (on a break they go up their
+  own touchline; coming short to support is the central men's job) and one central
+  midfielder stays behind the ball as a screen against the counter. Past halfway the full-back on the
+  ball's side goes up his own flank while the other holds; the ball has to get clearly across the
+  middle before they swap. Everyone else looks for space
   around his place in the shape: a pocket away from their men, with a clear lane from the ball,
   ahead of it where it can be, not on top of a teammate. Forwards work their own channel. Runs are
   triggered, not random: when the man on the ball can play it forward, a forward or a wide man near

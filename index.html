@@ -3842,8 +3842,7 @@
     return (ball.ownedBy&&ball.ownedBy.team==='R')||(gkHold&&gkHold.team==='R');
   }
   function oppHasBallTeam(team){
-    const o=team==='G'?'R':'G';
-    return (ball.ownedBy&&ball.ownedBy.team===o)||(gkHold&&gkHold.team===o);
+    return teamHasBall(team==='G'?'R':'G');
   }
   function teammateOnBall(){
     if(ball.ownedBy&&ball.ownedBy.team==='G'&&ball.ownedBy!==controlled)return ball.ownedBy;
@@ -4631,9 +4630,71 @@
   function composureOf(p){ return statLerp(statOf(p,'composure',P.composure.val), 0.0, 0.9); }
   // poiseLoss: net wobble under pressure, 0 (unaffected / in space / ice-cold) .. 1 (max). drives touch/pass/shot.
   function poiseLoss(p){ return pressFactor(p)*(1-composureOf(p)); }
+  // WHOSE BALL IT IS, for everyone off it: the man on it; else a dribbler whose touch is running on ahead of him (his
+  // again in a stride or two); else a pass on its way to a team-mate -- the man it's for, while it's still coming to
+  // him (a ball into space for him to run onto, until it should have reached the spot). Null when it's nobody's: a
+  // tackle or a deflection running loose, a clearance, a pass gone astray or past its man, a shot. (The keeper's
+  // ball is gkHold.) A team keeps playing as the side with the ball through all of that -- it doesn't drop its shape
+  // and runs every time the man on the ball knocks it on or plays a pass.
+  function heldBy(){
+    if(ball.ownedBy) return ball.ownedBy;
+    if(gkHold || ball.shotT>0) return null;
+    const d=ball.dribbler; if(d && ball.dribbleGrace>0 && ball.lastTouch===d.team) return d;
+    const r=ball.intendedRcv;
+    if(r && ball.lastTouch===r.team){
+      if(ball.thru && simNow<ball.thru.until) return r;
+      const sp=Math.hypot(ball.vx,ball.vy), dx=r.x-ball.x, dy=r.y-ball.y, dl=Math.hypot(dx,dy)||1;
+      if(dl<110 || (sp>90 && (ball.vx*dx+ball.vy*dy)/(sp*dl)>0.25)) return r;
+    }
+    return null;
+  }
   function teamHasBall(team){
-    return (ball.ownedBy&&ball.ownedBy.team===team)||(gkHold&&gkHold.team===team)||
-           (ball.dribbler&&ball.dribbler.team===team);
+    const h=heldBy(); return (h&&h.team===team)||(gkHold&&gkHold.team===team);
+  }
+  // WHERE A SIDE SEES THE BALL, for its shape: a beat behind it (~0.35 s). The shape shifts off this -- in and out of
+  // possession -- so moving the ball quickly (a switch, a ball through the lines, a one-two) catches it still sliding
+  // across, and a ball knocked back and forth doesn't drag everyone back and forth with it. (Snaps to the ball after a
+  // restart.)
+  const ballEye={G:{x:FW/2,y:FH/2,t:0},R:{x:FW/2,y:FH/2,t:0}};
+  function seenBall(team){
+    const e=ballEye[team], de=simNow-e.t; if(de===0) return e;
+    e.t=simNow;
+    if(de<0 || de>0.2 || Math.hypot(ball.x-e.x,ball.y-e.y)>1100){ e.x=ball.x; e.y=ball.y; }
+    else { const k=1-Math.exp(-de/0.35); e.x+=(ball.x-e.x)*k; e.y+=(ball.y-e.y)*k; }
+    return e;
+  }
+  // WHICH SIDE THE BALL IS ON, for a team's shape: it has to get clearly across the middle to change (the far-side men
+  // don't swap jobs every time it's knocked about in the centre)
+  const sideMem={G:1,R:1};
+  function ballSideFor(team){ if(ball.y<YC-110) sideMem[team]=-1; else if(ball.y>YC+110) sideMem[team]=1; return sideMem[team]; }
+  // THE BALL'S PATH: where it will be t s on -- at its own pace through the air until it comes down, then slowing on the grass
+  function ballAt(t){
+    const G=520, lam=Math.max(1e-3,-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)));
+    const tAir=(ball.z>12||ball.vz>0) ? (ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G : 0;
+    if(t<=tAir) return {x:ball.x+ball.vx*t, y:ball.y+ball.vy*t, z:Math.max(0,ball.z+ball.vz*t-G*t*t/2)};
+    const k=tAir+(1-Math.exp(-lam*(t-tAir)))/lam;
+    return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z:0};
+  }
+  // CUTTING OUT A PASS: of the side without the ball, the computer player who can get onto the pass's path soonest -- low
+  // enough to reach, and a beat before the man it's meant for gets there -- and where; null if nobody can. A man who
+  // reads the game well (Def IQ) is off a touch sooner. (Worked out once a frame per side.)
+  const cutCache={G:null,R:null}, engMem={G:null,R:null};   // (engMem: who's been engaging their man on the ball, see aiBrain)
+  function cutOut(team){
+    const cc=cutCache[team]; if(cc&&cc.t===simNow) return cc.v;
+    let v=null; const r=ball.intendedRcv;
+    if(r && r.team!==team && !ball.ownedBy && !gkHold && ball.lastTouch===r.team && ball.shotT<=0){
+      const path=[]; for(let t=0.05;t<=2.0;t+=0.05) path.push([t,ballAt(t)]);
+      let tR=2.0;                                                   // when the man it's for meets it, coming to it
+      for(const [t,b] of path) if(b.z<40 && Math.hypot(b.x-r.x,b.y-r.y) <= controlROf(r)+ball.r+sprintSpeedOf(r)*t){ tR=t; break; }
+      let best=tR-0.1;
+      for(const q of players){
+        if(q.team!==team || q===controlled || q.state!=='normal') continue;
+        const reach=winReachR(q)*(0.45+0.55*interceptReachOf(q))+ball.r, react=statLerp(defIQof(q),0.4,0.12), spd=sprintSpeedOf(q);
+        for(const [t,b] of path){ if(t>=best) break;
+          if(b.z<12 && Math.hypot(b.x-q.x,b.y-q.y) <= reach+spd*Math.max(0,t-react)){ best=t; v={q,x:b.x,y:b.y,t}; break; } }
+      }
+    }
+    cutCache[team]={t:simNow,v}; return v;
   }
   // attacking PHASE for shape, driven by confident possession (with hysteresis). A momentary
   // opponent touch in a tackle/contest does NOT flip us to defending — only sustained control does.
@@ -4642,7 +4703,7 @@
   // before we accept possession has changed. A loose ball gives that progress back (must be sustained).
   function updatePossConf(dt){
     transitionT.G=Math.max(0,transitionT.G-dt); transitionT.R=Math.max(0,transitionT.R-dt);   // the counter window DECAYS (it never did before)
-    const ownT = ball.ownedBy ? ball.ownedBy.team : (gkHold ? gkHold.team : null);
+    const hb=heldBy(), ownT = hb ? hb.team : (gkHold ? gkHold.team : null);   // (a knock-on or a pass to a team-mate is still his side's ball)
     if(restartT>0 || scoredT>0 || offsideT>0){ if(ownT) possConfTeam=ownT; possFlipT=0; return; }  // dead ball: unambiguous, snap
     if(ownT){
       if(ownT===possConfTeam){ possFlipT=0; }
@@ -4666,13 +4727,14 @@
   // Role-shape anchor adjustments: WING PLAY fullbacks overlap, and the back line holds behind halfway.
   function applyInstrAnchor(p, a){
     if(!p.subRole) return a;
+    const B=seenBall(p.team);                                     // (where we see the ball: a beat behind it)
     const atk=atkOf(p.team), weAttack=teamInAttackPhase(p.team), ol=offsideLineX(p.team);
-    const ballFrac = atk>0 ? ball.x/FW : 1-ball.x/FW;            // 0 our goal .. 1 their goal
-    const ballSide = ball.y<YC ? -1 : 1;
+    const ballFrac = atk>0 ? B.x/FW : 1-B.x/FW;            // 0 our goal .. 1 their goal
+    const ballSide = ballSideFor(p.team);
     let x=a.x, y=a.y; const sideSign = p.wide || (y<YC?-1:1);
     p._fbOverlap=false;
     if(p.subRole==='FB' && weAttack && TAC[p.team].off==='wing'){   // WING PLAY: fullbacks bomb on
-      const c=ball.ownedBy||ball.dribbler;
+      const c=heldBy();
       const advanced = c && c.team===p.team && (c.role==='MID'||c.role==='ATT') && ballFrac>=0.34;
       if(advanced){
         if(ballSide===sideSign){
@@ -4691,7 +4753,7 @@
     }
     // OFF-BALL SPACING: give the man on the ball room to work -- if my anchor sits inside the
     // spacing bubble around MY OWN carrier, slide it radially out to the bubble's edge.
-    { const spc=(P.mateSpace?P.mateSpace.val:170), c=ball.ownedBy;
+    { const spc=(P.mateSpace?P.mateSpace.val:170), c=heldBy();
       if(spc>0 && weAttack && c && c.team===p.team && c!==p && ball.intendedRcv!==p && !(p.gapRun>0) && !p.goingForBall){
         const dx2=x-c.x, dy2=y-c.y, dd=Math.hypot(dx2,dy2);
         if(dd<spc){ if(dd>1){ x=c.x+dx2*(spc/dd); y=c.y+dy2*(spc/dd); } else { y=c.y+((p.y>=c.y)?spc:-spc); } } } }
@@ -4700,13 +4762,19 @@
       // The back line holds behind halfway EARLY -- but once possession is sustained and the ball
       // is well into the opponent's half, the line steps up with it (capped ~0.59 FW) so the team
       // doesn't stretch and the forwards aren't stranded.
-      const ballAdv2=((atk>0?ball.x:FW-ball.x)-FW/2)/(FW/2);
+      const ballAdv2=((atk>0?B.x:FW-B.x)-FW/2)/(FW/2);
       const push=(weAttack && ballAdv2>0.15)? Math.min(ballAdv2-0.15,0.55)*FW*0.16 : 0;
       if(atk>0)x=Math.min(x,FW/2-12+push); else x=Math.max(x,FW/2+12-push);
     }
     return {x,y};
   }
   function anchorOf(p){ return applyInstrAnchor(p, _anchorBase(p)); }
+  // a WIDE MAN: a winger or wide midfielder -- the flank man of a midfield or front line of three or more (or of the
+  // line that gives the team its width). In possession he holds the touchline: the central support jobs aren't his.
+  function isWideMan(q){
+    return (q.role==='MID'||q.role==='ATT') &&
+           ((q.isWidthLine && Math.abs(q.wide)===1) || (q.slotAtk && Math.abs(q.slotAtk.wide)===1 && q.slotAtk.lineSize>=3));
+  }
   // the HOLDING MIDFIELDER: in possession one midfielder stays behind the ball as the screen against a counter --
   // the most central of the midfield (the deeper of two central ones; an Anchor if he's anywhere near the middle).
   // Null without a midfield.
@@ -4719,7 +4787,7 @@
     holderCache[team]={t:simNow,p:best}; return best;
   }
   function _anchorBase(p){
-    const atk=atkOf(p.team);
+    const atk=atkOf(p.team), B=seenBall(p.team);                  // (where we see the ball: a beat behind it)
 
     // possession sense for SHAPE positioning only (local to anchorOf). A LOOSE ball we last
     // touched still counts as ours — a missed pass or uncontrolled ball does NOT flip us to
@@ -4728,7 +4796,7 @@
     // DANGER OVERRIDE: an UNOWNED ball deep in a team's DEFENSIVE third is nobody's possession,
     // whatever the hysteresis says (a loose ball freezes possConf progress, so the stale phase can
     // hold forever) -- that team drops into its defensive shape and the opponent pushes up.
-    { const c0=ball.ownedBy||ball.dribbler;
+    { const c0=heldBy();
       if(!c0){ if(atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66) weAttack=false;
                else if(atk>0 ? ball.x>FW*0.66 : ball.x<FW*0.34) weAttack=true; } }
     // ADOPT THE RIGHT FORMATION SHAPE for the phase (attack vs defense).
@@ -4737,20 +4805,20 @@
     let baseFrac=p.lineFrac;
     let ax=atk>0?baseFrac*FW:FW-baseFrac*FW;
 
-    const ballAdv=(ball.x-FW/2)/(FW/2);
+    const ballAdv=(B.x-FW/2)/(FW/2);
     const adv=atk>0?ballAdv:-ballAdv;            // +1 = ball in opp half (good for us)
     const commit=clamp((weAttack?0.55:0.18)+adv*0.45,0,1);
     let dtac=TAC[p.team].def;
     // LOW BLOCK delay: if we lost the ball in the opponent's half, hold a NEUTRAL shape
     // (don't retreat deep yet) until the ball crosses into our half — then drop into the block.
     if(!weAttack && dtac==='lowblock' && lostInOppHalf[p.team]){
-      const ballInOurHalf = atk>0 ? ball.x<FW*0.5 : ball.x>FW*0.5;
+      const ballInOurHalf = atk>0 ? B.x<FW*0.5 : B.x>FW*0.5;
       if(!ballInOurHalf) dtac='neutral';
     }
     // oppAdv: how far the OPPONENT has advanced into our half when defending (0..1)
     const oppAdv=clamp(-adv,0,1);               // ball deep in our half -> ~1
     const ol=offsideLineX(p.team);
-    const carrier=ball.ownedBy||ball.dribbler;
+    const carrier=heldBy();
     const carrierIsMine = carrier && carrier.team===p.team;
 
     // ===== SPECIAL: 1-4-1 defensive drop -> wide midfielders form a back three (3-2-1) =====
@@ -4758,7 +4826,7 @@
       const defLine=ROLE_FRAC.DEF+0.04;
       const dax=atk>0?defLine*FW:FW-defLine*FW;
       const side=p.wide;                              // -1 top, +1 bottom
-      const day=clamp(YC+side*(FH*0.30)+(ball.y-YC)*0.15,40,FH-40);
+      const day=clamp(YC+side*(FH*0.30)+(B.y-YC)*0.15,40,FH-40);
       return {x:clamp(dax,40,FW-40), y:day};
     }
 
@@ -4768,7 +4836,7 @@
     //       toward whichever side has the ball. Kept deep enough that all three are in keeper range.
     if(p.role==='DEF' && p.lineSize===3 && weAttack){
       const keeperHasIt = gkHold && gkHold.team===p.team;
-      const ballDeep = atk>0 ? ball.x < FW*0.34 : ball.x > FW*0.66;
+      const ballDeep = atk>0 ? B.x < FW*0.34 : B.x > FW*0.66;
       if(keeperHasIt || ballDeep){
         const side=p.wide;                                   // -1 top wide CB, 0 middle, +1 bottom wide CB
         if(side===0){
@@ -4776,7 +4844,7 @@
           const cx=atk>0?0.155*FW:FW-0.155*FW;
           const carrierMine = carrier && carrier.team===p.team;
           const lean = carrierMine ? 0.24 : 0.15;            // only a slight ball-side shift
-          const ty = YC + clamp((ball.y-YC)*lean, -90, 90);
+          const ty = YC + clamp((B.y-YC)*lean, -90, 90);
           return clampReturn(p, cx, clamp(ty,40,FH-40), atk);
         } else {
           // wide CB: split wide and sit a touch higher to stretch the first line of the press
@@ -4797,7 +4865,7 @@
         if(side===0){
           // middle CB: hold, central, as cover + a recycle option
           const f=0.42+0.09*commit;
-          return clampReturn(p, atk>0?f*FW:FW-f*FW, YC+(ball.y-YC)*0.15, atk);
+          return clampReturn(p, atk>0?f*FW:FW-f*FW, YC+(B.y-YC)*0.15, atk);
         } else {
           // wide CB: push up the flank to give width/overlap, but stay in our own half
           let f=0.46+0.12*commit;                       // the (progress-aware) halfway clamp does the guarding
@@ -4808,7 +4876,7 @@
         if(side!==0){
           // WIDE MID: stay wide for passing options. If a forward has the ball, push up
           // and overlap on the flank; if the ball is on the OPPOSITE side, come into the box.
-          const ballSide = ball.y<YC ? -1 : 1;
+          const ballSide = ballSideFor(p.team);
           const fwdHasBall = carrierIsMine && carrier.role==='ATT';
           if(fwdHasBall && ballSide!==side){
             // far-side wide mid attacks the box at the back post
@@ -4822,9 +4890,9 @@
           return {x:clamp(wx,40,FW-40), y:clamp(wideY,40,FH-40)};
         } else if(p===holderOf(p.team)){
           // the HOLDER: behind the ball, central, the safe recycle and the first man against a counter
-          let hx=ball.x-atk*240;
+          let hx=B.x-atk*240;
           hx = atk>0 ? clamp(hx, FW*0.24, FW*0.60) : clamp(hx, FW*0.40, FW*0.76);
-          return {x:clamp(hx,40,FW-40), y:clamp(YC+(ball.y-YC)*0.35,40,FH-40)};
+          return {x:clamp(hx,40,FW-40), y:clamp(YC+(B.y-YC)*0.35,40,FH-40)};
         } else {
           // CENTRAL mids in a big midfield: STAGGER (alternate slightly fwd/back) to
           // offer layered passing lanes rather than sitting flat.
@@ -4832,20 +4900,21 @@
           let f=0.42+0.34*commit;                          // PUSH WITH THE BALL: support arrives at the ball line
           let cx=(atk>0?f*FW:FW-f*FW) + atk*stagger;
           if(atk>0)cx=Math.min(cx,ol-12);else cx=Math.max(cx,ol+12);
-          return {x:clamp(cx,40,FW-40), y:clamp(p.homeY+(ball.y-YC)*0.25,40,FH-40)};
+          return {x:clamp(cx,40,FW-40), y:clamp(p.homeY+(B.y-YC)*0.25,40,FH-40)};
         }
       } else { // ATT width line
         const isWinger = side!==0 && p.lineSize>=3;       // wide forward in a 3/4-front
         if(isWinger){
-          const ballSide = ball.y<YC ? -1 : 1;
-          const fwdAreaClear=(()=>{                        // is the channel ahead of me open to run?
+          const ballSide = ballSideFor(p.team);
+          if(!(p.laneT>simNow)){ p.laneT=simNow+0.5;      // is the channel ahead of me open to run? (a read every half second)
             let clear=true;
             for(const o of players)if(o.team!==p.team){
               const ahead=atk*(o.x-p.x);
               if(ahead>0&&ahead<300&&Math.abs(o.y-wideY)<90){clear=false;break;}
             }
-            return clear;
-          })();
+            p.laneClear=clear;
+          }
+          const fwdAreaClear=p.laneClear;
           // OPPOSITE SIDE from the ball -> get into the box / edge of box for a header.
           if(ballSide!==side){
             const bx = atk>0 ? FW-BX*0.7 : BX*0.7;         // edge-of-box depth
@@ -4883,27 +4952,28 @@
       // FULL JOIN-THE-ATTACK once the ball is past halfway (adv>0): overlap + support.
       const joinAttack = weAttack && adv>0 && dtac!=='lowblock';
       if(joinAttack && defs.length>=2){
-        // who STAYS to hold? the defender furthest from the ball (safety).
-        let holder=defs[0],hd=-1;
-        for(const q of defs){const dd=dist(q,ball);if(dd>hd){hd=dd;holder=q;}}
-        // who OVERLAPS? the ball-side defender (closest to the ball laterally).
-        let over=defs[0],od=1e9;
-        for(const q of defs){if(q===holder)continue;const dd=Math.abs(q.y-ball.y);if(dd<od){od=dd;over=q;}}
+        // who OVERLAPS? the defender on the ball's side, up his own flank. Who STAYS to hold? the one in the middle of
+        // a back three, else the one on the far side. (By side, not by who's nearest the ball this instant -- so they
+        // don't swap jobs, or flanks, every time it's played across.)
+        const bs=ballSideFor(p.team), sideOf=q=>q.wide||(q.homeY<YC?-1:1);
+        const over=defs.reduce((m,q)=>sideOf(q)*bs>sideOf(m)*bs?q:m, defs[0]);
+        const mid=defs.find(q=>q!==over&&!q.wide);
+        const holder=mid||defs.reduce((m,q)=>q!==over&&(m===over||sideOf(q)*bs<sideOf(m)*bs)?q:m, defs[0]);
         if(p===holder){
           const lineFrac=0.35+0.08*commit;               // the safety still sits deepest, but steps with play
           ax=atk>0?lineFrac*FW:FW-lineFrac*FW;
-          return clampReturn(p,ax, YC+(ball.y-YC)*0.15, atk);
+          return clampReturn(p,ax, YC+(B.y-YC)*0.15, atk);
         } else if(p===over){
           // only the ball-side defender overlaps, and only modestly (clamped at halfway anyway)
           const lineFrac=0.47+0.13*commit;
           ax=atk>0?lineFrac*FW:FW-lineFrac*FW;
           if(atk>0)ax=Math.min(ax,ol-14);else ax=Math.max(ax,ol+14);
-          const wingY = ball.y<YC ? FH*0.22 : FH*0.78;
+          const wingY = YC+sideOf(p)*FH*0.28;
           return clampReturn(p,ax,wingY,atk);
         } else {
           const lineFrac=0.41+0.11*commit;               // support, a line behind the mids
           ax=atk>0?lineFrac*FW:FW-lineFrac*FW;
-          return clampReturn(p,ax, p.homeY+(ball.y-YC)*0.3, atk);
+          return clampReturn(p,ax, p.homeY+(B.y-YC)*0.3, atk);
         }
       }
       // EARLY PUSH-UP: as our attack approaches halfway, the line steps up only gently.
@@ -4911,7 +4981,7 @@
         const ramp=clamp((adv+0.35)/0.35,0,1);          // 0 (deep) .. 1 (at halfway)
         const lineFrac=0.26 + 0.12*ramp;                // ~0.26 -> ~0.38 as we near halfway
         ax=atk>0?lineFrac*FW:FW-lineFrac*FW;
-        return clampReturn(p, ax, p.homeY+(ball.y-YC)*0.25, atk);
+        return clampReturn(p, ax, p.homeY+(B.y-YC)*0.25, atk);
       }
       const deepInOppHalf = weAttack && adv>0.4;
       const stepper = defs.length? defs.reduce((m,q)=> (atk>0? q.homeX>m.homeX : q.homeX<m.homeX)?q:m, defs[0]) : null;
@@ -4956,14 +5026,14 @@
       }
     } else if(p.role==='MID' && weAttack && p===holderOf(p.team)){
       // the HOLDER (see holderOf): behind the ball, central
-      ax=ball.x-atk*240;
+      ax=B.x-atk*240;
       ax = atk>0 ? clamp(ax, FW*0.24, FW*0.60) : clamp(ax, FW*0.40, FW*0.76);
-      return {x:clamp(ax,40,FW-40), y:clamp(YC+(ball.y-YC)*0.35,40,FH-40)};
+      return {x:clamp(ax,40,FW-40), y:clamp(YC+(B.y-YC)*0.35,40,FH-40)};
     } else if(p.role==='MID'){
       let lineFrac=0.40+0.22*commit;
       // push up higher when the ball is deep in the attacking third (support the attack)
       if(weAttack){
-        const ballAttThird = atk>0 ? ball.x>FW*0.66 : ball.x<FW*0.34;
+        const ballAttThird = atk>0 ? B.x>FW*0.66 : B.x<FW*0.34;
         if(ballAttThird) lineFrac=Math.max(lineFrac, 0.56);
       }
       if(!weAttack){
@@ -4972,7 +5042,7 @@
           // DROP BACK with the block and sit in the BAND BETWEEN our defenders and our
           // forwards — a cushion ahead of the back line, but also clearly behind the front
           // line (never level with or ahead of the forwards). Hold shape while they build.
-          const ballFrac = atk>0 ? ball.x/FW : 1-ball.x/FW;   // 0=our goal .. 1=their goal
+          const ballFrac = atk>0 ? B.x/FW : 1-B.x/FW;   // 0=our goal .. 1=their goal
           const defFrac  = 0.16 - 0.08*oppAdv;                // where our back line sits
           const cushion  = 0.12;                              // gap to keep ahead of the DEF line
           // where is OUR forward line right now? (deepest/most-goal-side of our forwards)
@@ -5002,7 +5072,7 @@
       // cap in the final third — the compact-shape logic above already keeps them deep.
       if(!weAttack && dtac==='lowblock'){
         const finalThird = oppAdv>0.5;                 // ball deep in our half
-        if(!finalThird){ if(atk>0)ax=Math.min(ax,ball.x-12); else ax=Math.max(ax,ball.x+12); }
+        if(!finalThird){ if(atk>0)ax=Math.min(ax,B.x-12); else ax=Math.max(ax,B.x+12); }
       }
     } else { // ATT
       let lineFrac=0.55+0.22*commit;
@@ -5014,8 +5084,8 @@
           // FORWARDS in a low block stay COMPACT — generally behind the ball-line, dropping
           // with the ball as it comes into our half. The nearest forward may step to press the
           // carrier (and may cross halfway to do so, but only when close enough to engage).
-          const ballFrac = atk>0 ? ball.x/FW : 1-ball.x/FW;   // 0=our goal .. 1=their goal
-          const c2=ball.ownedBy||ball.dribbler;
+          const ballFrac = atk>0 ? B.x/FW : 1-B.x/FW;   // 0=our goal .. 1=their goal
+          const c2=heldBy();
           const oppHasIt = oppHasBallTeam(p.team) || (c2&&c2.team!==p.team);
           const fwds=teamOf(p.team).filter(q=>q.role==='ATT');
           const nearest=fwds.slice().sort((a,b)=>dist(a,ball)-dist(b,ball))[0];
@@ -5041,11 +5111,11 @@
         // low block: stay BEHIND the ball-line (goal-side of the ball) — the only line that
         // matters. A forward close to the carrier may step ahead to press. In the final third
         // the compact-shape logic already keeps them deep, so no extra cap there.
-        const c2=ball.ownedBy||ball.dribbler;
+        const c2=heldBy();
         const closeToCarrier = c2 && c2.team!==p.team && dist(p,c2)<300;
         const finalThird = oppAdv>0.5;
         if(!closeToCarrier && !finalThird){
-          if(atk>0)ax=Math.min(ax,ball.x-12); else ax=Math.max(ax,ball.x+12);
+          if(atk>0)ax=Math.min(ax,B.x-12); else ax=Math.max(ax,B.x+12);
         }
       }
       // TWO-STRIKER PARTNERSHIP: if there are 2+ forwards, one DROPS to link play and
@@ -5095,12 +5165,12 @@
     let ay;
     if(stretchY!==null){
       // the stretching striker prioritizes pulling wide to give width / a run channel
-      ay=stretchY*0.6 + (p.homeY+(ball.y-YC)*0.20)*0.4;
+      ay=stretchY*0.6 + (p.homeY+(B.y-YC)*0.20)*0.4;
     } else if(gapY!==null){
       // blend toward the gap between defenders, biased to the forward's side
-      ay=gapY*0.7 + (p.homeY+(ball.y-YC)*0.30)*0.3;
+      ay=gapY*0.7 + (p.homeY+(B.y-YC)*0.30)*0.3;
     } else {
-      ay=p.homeY+(ball.y-YC)*0.30;
+      ay=p.homeY+(B.y-YC)*0.30;
     }
     // DEFENSIVE WIDTH CAP: the back line stays no wider than the widest opposing forward,
     // so they don't fan out beyond the attack they're covering. A BACK THREE stays NARROWER
@@ -5919,10 +5989,12 @@
       p.iqLeadX=Math.cos(a2)*lmag; p.iqLeadY=Math.sin(a2)*lmag;
       p.iqJitT=0.4+Math.random()*0.4;
     }
-    // CLOSE LOOSE BALL: if a loose ball is right next to me, go take it regardless of shape/role.
+    const hb=heldBy();                                       // whose ball it is (a knock-on or a pass on its way still counts)
+    // CLOSE LOOSE BALL: if a loose ball is right next to me, go take it regardless of shape/role -- unless it's a team-mate's
+    // touch or a pass to a team-mate (I don't take it off him).
     if(p!==controlled && p.state==='normal' && p.noTouchT<=0 && !ball.ownedBy && !gkHold &&
-       ball.shotT<=0 && ball.z<40 && dist(p,ball)<66){
-      p.dbgTag='CLOSE-GRAB';
+       ball.shotT<=0 && ball.z<40 && dist(p,ball)<66 && !(hb && hb.team===p.team && hb!==p)){
+      p.dbgTag='CLOSE-GRAB'; p.goingForBall=true;
       p.sprint=p.stamina>0.1;
       return steer(p, ball.x+ball.vx*0.10, ball.y+ball.vy*0.10, 1.0);
     }
@@ -6674,12 +6746,13 @@
           }
         }
       }
-    } else if((ball.ownedBy&&ball.ownedBy.team===p.team)||(gkHold&&gkHold.team===p.team)){
-      const c=ball.ownedBy||gkHold;
+    } else if((hb&&hb.team===p.team&&hb!==p)||(gkHold&&gkHold.team===p.team)){
+      const c=hb||gkHold;                       // our man on it -- or knocking it on, or the man our pass is going to
       // BUILD-UP: ball with keeper or a defender deep in our own third
       const ownThird = atk>0 ? c.x<FW*0.34 : c.x>FW*0.66;
       const carrierDeep = c.role==='DEF' || (gkHold&&gkHold.team===p.team);
       if(ownThird && carrierDeep && p.runTarget===null){
+        p.dbgTag='BUILD';
         if(gkHold && gkHold.team===p.team && (p.role==='DEF' || p===holderOf(p.team))){
           // THE KEEPER'S BALL (a goal kick, say): the back line splits to the corners of the box -- the middle one of
           // a three just in front of the keeper -- and the holding midfielder drops in ahead of them, so he has
@@ -6717,7 +6790,7 @@
         }
       }
       // THE HOLDER stays behind the ball (his anchor), the screen against a counter -- he doesn't join the runs
-      if(p===holderOf(p.team) && p!==c){ p.runTarget=null; return steer(p,anchor.x,anchor.y); }
+      if(p===holderOf(p.team) && p!==c){ p.runTarget=null; p.dbgTag='HOLD'; return steer(p,anchor.x,anchor.y); }
       // SUPPORT RUNS: carrier attacking the opponent's box -> get into it
       const oppGoalX=goalX;
       const otac=TAC[p.team].off;
@@ -6727,7 +6800,7 @@
       // forwards and wide men go -- not on a whim.
       const cueFeed = c!==gkHold && !players.some(o=>o.team!==p.team&&dist(o,c)<50) &&
                       ((c.facing&&atk*c.facing.x>0.2) || atk*c.vx>40) && atk*(c.x-FW/2) > -FW*0.22;
-      const wideMan = p.slotAtk && Math.abs(p.slotAtk.wide)===1 && p.slotAtk.lineSize>=3 && (p.role==='MID'||p.role==='ATT');
+      const wideMan = isWideMan(p);
 
       // ===== WING PLAY OVERLAP =====
       // Under the 'wing' tactic, when a WIDE width-line player has the ball, trigger an
@@ -6827,10 +6900,11 @@
       const otacS=TAC[p.team].off;
       // tiki-taka supports MORE often and SHORTER; central pulls support narrow.
       const supChance = otacS==='tiki' ? 0.18 : 0.12;
-      if(fwdHasBall && p.role==='MID' && p!==c && p.runTarget===null){
+      if(fwdHasBall && p.role==='MID' && !wideMan && p!==c && p.runTarget===null){
         const behindFwd = atk*(c.x-p.x) > -40;            // I'm level/behind the forward
-        // order the (non-holding) mids by proximity to the carrier: the nearest ALWAYS offers himself, others sometimes
-        const mids=teamOf(p.team).filter(q=>q.role==='MID'&&q!==holderOf(p.team));
+        // order the (non-holding, central) mids by proximity to the carrier: the nearest ALWAYS offers himself, others
+        // sometimes. (The wide men hold their touchlines -- see isWideMan.)
+        const mids=teamOf(p.team).filter(q=>q.role==='MID'&&q!==holderOf(p.team)&&!isWideMan(q));
         const ordered=mids.slice().sort((a,b)=>dist(a,c)-dist(b,c));
         const myRank=ordered.indexOf(p);                  // 0 = nearest mid to the carrier
         if(behindFwd && (myRank===0 || Math.random()<supChance)){
@@ -6868,13 +6942,14 @@
       if(carrierDriving && p!==c && p.runTarget===null && p.role!=='DEF'){
         const iAmBehind = atk*(c.x-p.x) > -120;
         if(iAmBehind && Math.random()<0.10){
-          // rank among non-DEF teammates behind the carrier -> assign distinct lanes
-          const supporters=teamOf(p.team).filter(q=>q.role!=='DEF'&&q!==c&&atk*(c.x-q.x)>-120);
+          // a wide man goes up his own touchline; the central men behind the carrier fan into distinct lanes, ranked
+          const supporters=teamOf(p.team).filter(q=>q.role!=='DEF'&&q!==c&&!isWideMan(q)&&atk*(c.x-q.x)>-120);
           const ordered=supporters.slice().sort((a,b)=>dist(a,c)-dist(b,c));
-          const myRank=ordered.indexOf(p);
+          const myRank=wideMan ? 1 : ordered.indexOf(p);
           const ballSide = c.y<YC ? -1 : 1;
           // lane offsets: near support central, then opposite flank, then ball-side wide
-          const laneY = myRank===0 ? c.y
+          const laneY = wideMan ? YC + (p.wide||(p.homeY<YC?-1:1))*FH*0.40
+                      : myRank===0 ? c.y
                       : myRank===1 ? YC - ballSide*(FH*0.28)
                       :              YC + ballSide*(FH*0.28);
           const aheadX = c.x + atk*(150+myRank*70+Math.random()*80);
@@ -6950,7 +7025,7 @@
         p.runT=1.6;
       }
       if(p.runTarget){
-        tx=p.runTarget.x;ty=p.runTarget.y;
+        tx=p.runTarget.x;ty=p.runTarget.y; p.dbgTag=p.gapRun>0?'GAPRUN':'RUN';
         const ol=offsideLineX(p.team);
         if(p.gapRun>0){
           // in-behind run: allow going past the line (timing risk), but if there's no ball
@@ -6963,25 +7038,30 @@
         // defenders never run past halfway
         if(p.role==='DEF'){ if(atk>0)tx=Math.min(tx,FW/2-12);else tx=Math.max(tx,FW/2+12); }
         if(Math.abs(p.x-tx)<46||Math.random()<0.004){p.runTarget=null;p.runT=2.0;}
-      } else if(p.role!=='DEF' && c===ball.ownedBy){
+      } else if(p.role!=='DEF' && c!==gkHold){
         // FIND SPACE around my place in the shape (see spaceNear)
-        const sp=spaceNear(p,c,tx,ty,atk,dt); tx=sp.x; ty=sp.y;
+        const sp=spaceNear(p,c,tx,ty,atk,dt); tx=sp.x; ty=sp.y; p.dbgTag='SPACE';
         if(p.role==='ATT'){ if(atk>0)tx=Math.max(tx,FW*0.58);else tx=Math.min(tx,FW*0.42); }
       } else {
+        p.dbgTag='SHAPE';
+        // step off a man close to me -- easing in as he comes, and to whichever side of him I'm already on (no lurch
+        // from one side to the other as he crosses my line)
         const opp=nearestOppTo(p,p);
-        if(opp&&dist(opp,p)<100){
-          ty+=(p.y>=opp.y?80:-80);
-          tx+=atk*40;
-        }
+        if(opp){ const k=clamp((140-dist(opp,p))/60,0,1), dy=p.y-opp.y;
+          ty+=80*k*dy/(Math.abs(dy)+30); tx+=atk*40*k; }
         if(p.role==='ATT'){
           if(atk>0)tx=Math.max(tx,FW*0.58);else tx=Math.min(tx,FW*0.42);
           const ol=offsideLineX(p.team);
           if(atk>0)tx=Math.min(tx,ol-12);else tx=Math.max(tx,ol+12);
         }
       }
-    } else if(ball.ownedBy){
+    } else if(hb && hb.team!==p.team){
       p.runTarget=null;
-      const c=ball.ownedBy;
+      const c=hb;                               // their man on it -- or knocking it on, or the man their pass is going to
+      // A PASS ON ITS WAY to him: whoever can cut it out goes for it (see cutOut); the rest defend as if he had it already
+      const passOn = !ball.ownedBy && c===ball.intendedRcv;
+      if(passOn){ const cut=cutOut(p.team);
+        if(cut && cut.q===p){ p.dbgTag='CUT-OUT'; p.intercepting=true; p.goingForBall=true; return steer(p,cut.x,cut.y,1.0); } }
       // PRIMARY MARKER selection: we always want someone engaging the ball, ideally a
       // player who is goal-side or level with the carrier (able to block the route to goal),
       // not someone trailing behind. Fall back to plain nearest if nobody is goal-side.
@@ -6989,11 +7069,14 @@
       const atkC=atkOf(c.team);                       // carrier's attacking direction
       function goalSideScore(q){
         // how well-placed is q to engage: distance to ball, with a big bonus for being
-        // goal-side of the carrier (between carrier and our goal).
+        // goal-side of the carrier (between carrier and our goal). The man already on him keeps him unless another
+        // is clearly better placed (no handing him back and forth).
         const behindCarrier = atkC*(q.x - c.x) > 0;       // q is goal-side (toward our goal)
-        return dist(q,c) + (behindCarrier?0:240);         // trailing players penalised
+        const em=engMem[p.team];
+        return dist(q,c) + (behindCarrier?0:240) - (em&&em.q===q&&em.c===c?70:0);   // trailing players penalised
       }
       const engager = mates.slice().sort((a,b)=>goalSideScore(a)-goalSideScore(b))[0];
+      engMem[p.team]={q:engager,c};
       // rank 0 = the engager (always marks the ball); others ranked by distance after.
       const others = rankByDist(mates.filter(q=>q!==engager),c);
       const rank = (p===engager) ? 0 : (others.indexOf(p)+1);
@@ -7031,6 +7114,7 @@
         }
       }
       if(coverMan===p){
+        p.dbgTag='COVERBREAK';
         // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.
         const gl=Math.hypot(ownGoalX-c.x,YC-c.y)||1;
         const gx2=(ownGoalX-c.x)/gl, gy2=(YC-c.y)/gl;     // toward our goal from the carrier
@@ -7082,12 +7166,18 @@
         if(shieldingMe && mode!=='commit'){
           mode='block';
         }
+        // the pass is still on its way to him: close him down as it travels, to be on him -- goal-side -- for his first touch
+        if(passOn) mode='meet';
+        p.dbgTag='PRESS-'+mode;
 
         // CLOSED DOWN: the last stretch in, goal-side of him, comes under control rather than at full tilt --
         // a defender charging in gets skinned. (A ball showing right in front of him
         // he can still go and win.)
         if(d<80 && atkC*(c.x-p.x)<0 && !(mode==='commit'&&showing)) p.engageCap=0.7;
-        if(mode==='block'){
+        if(mode==='meet'){
+          const STANDOFF=40+30*(1-effTight);
+          tx=c.x+gx2*STANDOFF; ty=c.y+gy2*STANDOFF;
+        } else if(mode==='block'){
           // get tight to his body, on the ball side, to block the turn — no standoff cushion.
           const bx=(ball.x-c.x), by=(ball.y-c.y); const bl=Math.hypot(bx,by)||1;
           tx=c.x+bx/bl*(c.r+p.r-2); ty=c.y+by/bl*(c.r+p.r-2);   // press onto the ball side of him
@@ -7126,7 +7216,7 @@
         // nearer him), I mark a free attacker, or cover: goal-side of the ball, behind my partner, tucked in.
         // (A partner you're playing only counts once you're actually close to him.)
         const partnerOnIt = p.role==='DEF' && teamOf(p.team).some(q=>q!==p && q.role==='DEF' &&
-          (q===engager || dist(q,c)<dist(p,c)) && (q!==controlled || dist(q,c)<220));
+          (q===engager || dist(q,c)<dist(p,c)-25) && (q!==controlled || dist(q,c)<220));
         const spot=blockSpot(p);                             // my place in the block (with a runner in my zone, if any)
         let pairSpot=null;
         if(partnerOnIt){
@@ -7145,7 +7235,7 @@
           // alongside him, not through his back
           const side=Math.sign((p.x-c.x)*(-gy2)+(p.y-c.y)*gx2)||1;
           const rtx=c.x+gx2*30-gy2*side*26, rty=c.y+gy2*30+gx2*side*26;
-          p.sprint = p.stamina>0.05;
+          p.sprint = p.stamina>0.05; p.dbgTag='BEATEN';
           return steer(p,clamp(rtx,40,FW-40),clamp(rty,30,FH-30),1.0);
         }
         const carrierInOurBox = Math.abs(c.x-ourGoalX)<BX+40 && Math.abs(c.y-YC)<BY+50;
@@ -7158,26 +7248,27 @@
         const ranked=rankByDist(mates,c);                 // [nearest..farthest] to carrier
         const secondMan = ranked.length>1 ? ranked[1] : null;  // rank0 presses, rank1 covers
         if(pairSpot){
-          tx=pairSpot.x; ty=pairSpot.y;                     // my centre-back partner has the ball covered
+          tx=pairSpot.x; ty=pairSpot.y; p.dbgTag='PAIR';    // my centre-back partner has the ball covered
         } else if(carrierAdvancingMiddle && !carrierInOurBox && p===secondMan && p.role==='MID' && _canChase){
           // ONE midfielder steps to the central runner, goal-side, covering the man engaging him -- the back line
           // holds its height behind them.
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
-          const squeeze=clamp(200-dist(p,c)*0.4,50,170);
+          const squeeze=clamp(200-dist(p,c)*0.4,50,170); p.dbgTag='SCREEN';
           tx=c.x+gx2*squeeze*0.5;
           ty=c.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
         } else {
-          tx=spot.x; ty=spot.y;                            // hold my place in the block
+          tx=spot.x; ty=spot.y; p.dbgTag=spot.track?'TRACK':'BLOCK';   // hold my place in the block
         }
-        // caught a long way upfield of my place in the block: get back at a sprint (see the AI step). Otherwise I jog
-        // back into it -- and so do the forwards, always: the man who lost it and those near the ball press it.
+        // caught a long way upfield of my place in the block: get back at a sprint (see the AI step) -- a forward only
+        // from a very long way up. Otherwise I jog back into it: the man who lost it and those near the ball press it.
         p.recover = atk*(p.x-ball.x) > -40 &&                // (once goal-side of the ball, jog the rest)
-                    p.role!=='ATT' && atk*(p.x-tx) > 260;
+                    atk*(p.x-tx) > (p.role==='ATT' ? 380 : 260);    // (a forward only from a long way up)
       }
     } else {
-      p.runTarget=null;
+      // NOBODY'S BALL -- or mine to go and get: my own touch running on, or a pass to me I'm not meeting above.
       // project where the (loose / in-flight) ball is heading and who should attack it.
+      const mine = hb===p;
       const friendlyPass = ball.lastTouch===p.team && ball.shotT<=0;
       const ballSpd=Math.hypot(ball.vx,ball.vy);
       // landing estimate: lead the ball along its velocity (more lead the faster it moves)
@@ -7194,7 +7285,8 @@
         }
         if(bestMate===p) iAmReceiver=true;
       }
-      const byBall=rankByDist(teamOf(p.team),ball), rank=byBall.indexOf(p);
+      if(mine && p===ball.intendedRcv) iAmReceiver=true;             // it's played to me: it's mine to go and meet
+      const byBall=rankByDist(teamOf(p.team),ball), rank=mine ? 0 : byBall.indexOf(p);
       const dangerDeep = atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66;   // loose ball deep in OUR defensive third
       // a second man goes for their loose ball deep in our third -- but not my centre-back partner's ball: then I
       // cover goal-side of it (unless it's you, the human, nearest: you might not go)
@@ -7207,9 +7299,9 @@
         p.runTarget=null; p.runT=0;
       } else if(coverLoose){
         const cv=coverSpot(ball, ownGoalX); p.dbgTag='COVER';
-        tx=cv.x; ty=cv.y; p.sprint=p.stamina>0.1;
+        tx=cv.x; ty=cv.y; p.sprint=p.stamina>0.1; p.runTarget=null;
       } else if(rank===0 || (dangerDeep && rank===1)){
-        p.dbgTag = friendlyPass ? 'COLLECT' : 'CONTEST';
+        p.dbgTag = friendlyPass ? 'COLLECT' : 'CONTEST'; p.runTarget=null;
         if(friendlyPass){
           // COLLECT OUR OWN PASS: go straight ONTO the ball and gather it. Do NOT sit goal-side of it
           // (that leaves a backpass into our own third sitting untouched between us and our goal).
@@ -7233,6 +7325,19 @@
             p.intercepting=true; p.sprint=p.stamina>0.1; p.goingForBall=true;
           }
         }
+      } else {
+        // EVERYONE ELSE takes up the shape the ball calls for -- not his old spot in the formation. Ours to win back
+        // (or loose deep in our third): back into the block. Ours to keep (or loose deep in theirs): a run keeps going
+        // (onside, unless it's one in behind) and a man who'd found a pocket keeps it.
+        const uB = atk>0 ? ball.x/FW : 1-ball.x/FW;
+        const attackShape = uB<0.34 ? false : uB>0.66 ? true : teamInAttackPhase(p.team);
+        p.dbgTag='LOOSE-SHAPE';
+        if(!attackShape){ const s=blockSpot(p); tx=s.x; ty=s.y; p.runTarget=null; p.dbgTag='LOOSE-BLOCK'; }
+        else if(p.runTarget){
+          tx=p.runTarget.x; ty=p.runTarget.y; p.dbgTag='LOOSE-RUN';
+          if(!(p.gapRun>0)){ const ol=offsideLineX(p.team); if(atk>0)tx=Math.min(tx,ol-12); else tx=Math.max(tx,ol+12); }
+          if(p.role==='DEF'){ if(atk>0)tx=Math.min(tx,FW/2-12); else tx=Math.max(tx,FW/2+12); }
+        } else if(p.role!=='DEF' && p.spaceAt && Math.hypot(p.spaceAt.x-tx,p.spaceAt.y-ty)<240){ tx=p.spaceAt.x; ty=p.spaceAt.y; p.dbgTag='LOOSE-SPACE'; }
       }
     }
     // LOW BLOCK: the only line that matters is the BALL-LINE — a defending player shouldn't
@@ -7240,7 +7345,7 @@
     // to the carrier may step ahead to press. In the final third they're already deep, so no
     // cap there (the compact block shape handles it).
     if(!teamHasBall(p.team) && TAC[p.team].def==='lowblock' && !p.goingForBall){
-      const c2=ball.ownedBy||ball.dribbler;
+      const c2=hb;
       const closeToCarrier = c2 && c2.team!==p.team && dist(p,c2)<300;
       const oppAdv2 = atk>0 ? (FW/2-ball.x)/(FW/2) : (ball.x-FW/2)/(FW/2);  // 0 halfway .. 1 deep
       const finalThird = oppAdv2>0.5;
@@ -7307,21 +7412,20 @@
   // front of it and the forwards a gap in front of that, neither ahead of the ball -- except one forward, left
   // up as an outlet while the ball is deep in our third. Every line slides across toward the ball. A player's
   // place in his line comes from his defensive slot.
-  // The block shifts off where it SEES the ball: a beat behind it (~0.35 s), so moving the ball quickly -- a switch,
-  // a ball through the lines -- catches it still sliding across. (Snaps to the ball after a restart.)
-  const blockCache={G:null,R:null}, blockEye={G:{x:FW/2,y:FH/2,t:0},R:{x:FW/2,y:FH/2,t:0}};
+  // The block shifts off where it SEES the ball (see seenBall): a beat behind it, so moving the ball quickly -- a switch,
+  // a ball through the lines -- catches it still sliding across.
+  const blockCache={G:null,R:null};
   function defBlock(team){
     const bc=blockCache[team]; if(bc&&bc.t===simNow) return bc;
-    const e=blockEye[team], de=simNow-e.t; e.t=simNow;
-    if(de<0 || de>0.2 || Math.hypot(ball.x-e.x,ball.y-e.y)>1100){ e.x=ball.x; e.y=ball.y; }
-    else { const k=1-Math.exp(-de/0.35); e.x+=(ball.x-e.x)*k; e.y+=(ball.y-e.y)*k; }
+    const e=seenBall(team);
     const atk=atkOf(team), U=x=>atk>0?x:FW-x;                        // depth: distance from our own goal line
     const uB=U(e.x), dtac=TAC[team].def;
     const tacMax = dtac==='press'?0.40*FW : dtac==='lowblock'?0.20*FW : 0.32*FW;
     let uD=Math.min(tacMax, uB-clamp((uB-150)*0.30,60,330));
     // nobody on the man with the ball: he has time to pick a pass, so the line drops off to cover the space behind it
-    const c=ball.ownedBy;
-    if(c && c.team!==team && !players.some(q=>q.team===team && dist(q,c)<100)) uD-=60;
+    // (eased in with how far off him our nearest man is, so the line doesn't lurch as the press comes and goes)
+    const c=heldBy();
+    if(c && c.team!==team){ let dn=1e9; for(const q of players) if(q.team===team) dn=Math.min(dn,dist(q,c)); uD-=60*clamp((dn-90)/80,0,1); }
     uD=Math.max(uD, GA_D+15);
     const uM=clamp(uD+0.115*FW, uD+90, Math.max(uD+90, uB-90));
     const uF=clamp(uM+0.105*FW, uM+60, Math.max(uM+60, uB-20));
@@ -7346,7 +7450,7 @@
     // line he leaves to the offside flag. A midfielder screens a man sitting between the lines in front of him.
     // Nobody follows a man who drops short of the line -- the next line has him.
     if(role==='DEF'||role==='MID'){
-      const zone=Math.max(110, n>1 ? w/(n-1)*0.6 : 140), c=ball.ownedBy;
+      const zone=Math.max(110, n>1 ? w/(n-1)*0.6 : 140), c=heldBy();   // (the man on the ball -- or the pass -- is the press's)
       let best=null, bu=1e9;
       for(const o of players){
         if(o.team===p.team||o===c) continue;
@@ -8244,7 +8348,7 @@
         const dBall=dist(p,ball);
         const atkP=atkOf(p.team);
         const carrying = ball.ownedBy===p;
-        const carrier = ball.ownedBy || ball.dribbler;
+        const carrier = heldBy();                          // (his touch running on, or a pass on its way to him, counts)
         const sta=p.stamina;
 
         // RECOVERY: I have been BEATEN — the carrier is just past me, I'm close, and I'm
@@ -8273,7 +8377,7 @@
         // a REAL chance to win a loose ball: close AND I'm the nearest on my team to it.
         let nearestMine=true;
         if(ballLoose){ for(const q of players){ if(q.team===p.team&&q!==p&&dist(q,ball)<dBall){nearestMine=false;break;} } }
-        const closeChase = ballLoose && dBall<240 && nearestMine;
+        const closeChase = ballLoose && dBall<240 && (p.goingForBall || (nearestMine && !carrier));   // (not a team-mate's knock-on or pass)
         // a genuine counter where I'm one of the closest going forward
         const onCounter  = transitionT[p.team]>0 && dBall<420;
 

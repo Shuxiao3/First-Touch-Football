@@ -26,7 +26,11 @@ node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through bal
 node tests/pass-shoot-lab.mjs  # ~1min — Pass Lab and Shooting Lab: calls, tallies, tuning, phone gestures
 node tests/exhibition-setup.mjs # ~20s  — exhibition setup: clubs, kits, the player you control, remembered, phone
 node tests/touch-sprint.mjs    # ~15s  — phone: push the stick past its ring to sprint, ease back in to stop
+node tests/ai-shape.mjs        # ~50s  — computer players keep their side's logic while the ball is knocked on or passed
 ```
+
+`ai-shape.mjs` runs on an instrumented copy of the game (written to a temp folder) that exposes who has the ball and
+each computer player's decision tag; the game itself is unchanged.
 
 Each exits non-zero on failure and prints a PASS/FAIL line per assertion.
 

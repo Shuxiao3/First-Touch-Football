@@ -23,7 +23,7 @@ export function reporter(){
   };
 }
 
-export async function open({ fastFrames = false } = {}){
+export async function open({ fastFrames = false, url = GAME } = {}){
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
   const rep = reporter();
@@ -36,7 +36,7 @@ export async function open({ fastFrames = false } = {}){
     await page.addInitScript(() => { let vt = 0;
       window.requestAnimationFrame = cb => { setTimeout(() => { vt += 33; cb(vt); }, 0); return 0; }; });
   }
-  await page.goto(GAME);
+  await page.goto(url);
   await page.waitForTimeout(700);
   return { browser, page, rep };
 }
