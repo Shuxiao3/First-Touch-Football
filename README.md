@@ -197,7 +197,9 @@ test, and like the Trap Lab the values are the game's settings.
   well-timed runs can still open it up.
 - **Attacking movement** — in possession the wide men hold the touchlines (on a break they go up their
   own touchline; coming short to support is the central men's job) and one central
-  midfielder stays behind the ball as a screen against the counter. Past halfway the full-back on the
+  midfielder holds: a gap in front of the back line, the pass out from the back (he doesn't drop in
+  between the centre-backs), and once the ball's further up, behind it as a screen against the
+  counter. Past halfway the full-back on the
   ball's side goes up his own flank while the other holds; the ball has to get clearly across the
   middle before they swap. Everyone else looks for space
   around his place in the shape: a pocket away from their men, with a clear lane from the ball,

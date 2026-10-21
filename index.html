@@ -4786,6 +4786,15 @@
       const sc=Math.abs(s.homeY-YC)+(s.lineIdx%2)*0.5-(q.style==='anchor'?150:0); if(sc<bs){ bs=sc; best=q; } }
     holderCache[team]={t:simNow,p:best}; return best;
   }
+  // where THE HOLDER stands in possession: central, and a gap in front of our deepest defender -- the pass out from the
+  // back, and the screen in front of him against a counter -- not dropped in level with the centre-backs. Once the ball
+  // is further up than that, a little way behind it. (B: where we see the ball.)
+  function holderSpot(p,B,atk){
+    const U=x=>atk>0?x:FW-x;                                          // depth from our own goal line (and back)
+    let deep=null; for(const q of teamOf(p.team)) if(q.role==='DEF'&&q!==p){ const u=U(q.x); if(deep===null||u<deep) deep=u; }
+    const u=clamp(Math.max(U(B.x)-240, deep===null?0:deep+0.10*FW), FW*0.24, FW*0.60);
+    return {x:clamp(U(u),40,FW-40), y:clamp(YC+(B.y-YC)*0.35,40,FH-40)};
+  }
   function _anchorBase(p){
     const atk=atkOf(p.team), B=seenBall(p.team);                  // (where we see the ball: a beat behind it)
 
@@ -4889,10 +4898,7 @@
           if(atk>0)wx=Math.min(wx,ol-12);else wx=Math.max(wx,ol+12);
           return {x:clamp(wx,40,FW-40), y:clamp(wideY,40,FH-40)};
         } else if(p===holderOf(p.team)){
-          // the HOLDER: behind the ball, central, the safe recycle and the first man against a counter
-          let hx=B.x-atk*240;
-          hx = atk>0 ? clamp(hx, FW*0.24, FW*0.60) : clamp(hx, FW*0.40, FW*0.76);
-          return {x:clamp(hx,40,FW-40), y:clamp(YC+(B.y-YC)*0.35,40,FH-40)};
+          return holderSpot(p,B,atk);                     // the HOLDER: the safe recycle and the first man against a counter
         } else {
           // CENTRAL mids in a big midfield: STAGGER (alternate slightly fwd/back) to
           // offer layered passing lanes rather than sitting flat.
@@ -5025,10 +5031,7 @@
         if(atk>0)ax=clamp(ax,40,FW*cap);else ax=clamp(ax,FW*(1-cap),FW-40);
       }
     } else if(p.role==='MID' && weAttack && p===holderOf(p.team)){
-      // the HOLDER (see holderOf): behind the ball, central
-      ax=B.x-atk*240;
-      ax = atk>0 ? clamp(ax, FW*0.24, FW*0.60) : clamp(ax, FW*0.40, FW*0.76);
-      return {x:clamp(ax,40,FW-40), y:clamp(YC+(B.y-YC)*0.35,40,FH-40)};
+      return holderSpot(p,B,atk);                         // the HOLDER (see holderOf)
     } else if(p.role==='MID'){
       let lineFrac=0.40+0.22*commit;
       // push up higher when the ball is deep in the attacking third (support the attack)
