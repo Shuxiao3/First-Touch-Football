@@ -7260,10 +7260,11 @@
         } else {
           tx=spot.x; ty=spot.y; p.dbgTag=spot.track?'TRACK':'BLOCK';   // hold my place in the block
         }
-        // caught a long way upfield of my place in the block: get back at a sprint (see the AI step) -- a forward only
-        // from a very long way up. Otherwise I jog back into it: the man who lost it and those near the ball press it.
+        // caught a long way upfield of my place in the block: get back at a sprint (see the AI step). Otherwise I jog
+        // back into it -- and so do the forwards, always (a sprint all the way back would leave them nothing for the
+        // next attack): the man who lost it and those near the ball press it.
         p.recover = atk*(p.x-ball.x) > -40 &&                // (once goal-side of the ball, jog the rest)
-                    atk*(p.x-tx) > (p.role==='ATT' ? 380 : 260);    // (a forward only from a long way up)
+                    p.role!=='ATT' && atk*(p.x-tx) > 260;
       }
     } else {
       // NOBODY'S BALL -- or mine to go and get: my own touch running on, or a pass to me I'm not meeting above.

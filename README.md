@@ -188,8 +188,8 @@ test, and like the Trap Lab the values are the game's settings.
   never higher than the tactic allows; it doesn't drop for a forward standing on it (he'd be
   offside), only the defender with a runner in his zone drops with him. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. When the ball's
-  lost, a man caught a long way upfield sprints back goal-side of it (a forward only from a very long
-  way up); the rest jog back into shape. One man presses the ball, and keeps him until a teammate is
+  lost, a defender or midfielder caught a long way upfield sprints back goal-side of it; the rest jog
+  back into shape, the forwards always (they save their legs for the next attack). One man presses the ball, and keeps him until a teammate is
   clearly better placed; of a pair of centre-backs one goes and the other covers. When they pass, a man
   who can get onto the ball's path before their receiver goes to cut it out; otherwise the nearest
   closes the receiver down as the ball travels, to be on him for his first touch. The block reads the
