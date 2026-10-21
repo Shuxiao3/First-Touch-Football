@@ -1,0 +1,117 @@
+{
+  "image": "keeper_sheet.png",
+  "frame": {
+    "w": 32,
+    "h": 32
+  },
+  "columns": 4,
+  "anchor": {
+    "x": 16,
+    "y": 29
+  },
+  "directions": [
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE"
+  ],
+  "direction_note": "row = anim.row + direction index (snap8 order) for every animation but dive, whose four rows are listed under it",
+  "animations": {
+    "ready": {
+      "row": 0,
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "frame_names": [
+        "set"
+      ]
+    },
+    "shuffle": {
+      "row": 8,
+      "frames": 2,
+      "fps": 8,
+      "loop": true,
+      "frame_names": [
+        "wide",
+        "together"
+      ]
+    },
+    "run": {
+      "row": 16,
+      "frames": 4,
+      "fps": 10,
+      "loop": true,
+      "frame_names": [
+        "contact R",
+        "passing",
+        "contact L",
+        "passing"
+      ]
+    },
+    "hold": {
+      "row": 24,
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "frame_names": [
+        "ball held"
+      ]
+    },
+    "kick": {
+      "row": 32,
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "frame_names": [
+        "kick out"
+      ]
+    },
+    "dive": {
+      "row": 40,
+      "frames": 2,
+      "fps": 2,
+      "loop": false,
+      "frame_names": [
+        "in the air",
+        "down"
+      ],
+      "rows": [
+        "up the screen, facing E",
+        "down the screen, facing E",
+        "up the screen, facing W",
+        "down the screen, facing W"
+      ]
+    }
+  },
+  "palette": {
+    "shirt": [
+      "#282868",
+      "#3048a0",
+      "#4870d8",
+      "#80a8f0"
+    ],
+    "trim": [
+      "#707080",
+      "#b0b0c0",
+      "#e0e0ec",
+      "#ffffff"
+    ],
+    "shorts": [
+      "#484860",
+      "#98a0b8",
+      "#d8dce8",
+      "#f8f8f8"
+    ],
+    "boots": [
+      "#101018",
+      "#2c2c38",
+      "#48485c",
+      "#9090a8"
+    ]
+  },
+  "palette_note": "ramps are [line, shadow, base, light]; socks use the shirt ramp. The game swaps shirt (and socks) to the keeper top, and trim and shorts to a dark kit."
+}

@@ -197,6 +197,9 @@ test, and like the Trap Lab the values are the game's settings.
   with a better one, or crosses into the space between their line and the keeper when one of ours
   can get there first. A good dribbler facing a lone defender with nobody covering takes him on: he
   runs at him to make him commit, then cuts sharply past him (see *Beating a tight press*).
+- **The keeper's area** — he works his whole penalty area: he comes for a loose ball or a cross anywhere
+  in it, uses his hands anywhere in it, closes down a man on the ball in it, and sweeps outside it for a
+  free ball he'll win. Guarding his goal, he stays between the posts.
 - **The keeper's ball out** — on a goal kick the back line splits to the corners of the box and the
   holding midfielder drops in front of them. The keeper plays it short only to a man who'll reach
   it before any of theirs can close him down, struck to arrive at him, and tells him it's his; he
@@ -312,7 +315,27 @@ change the art, edit the script and re-run it with `--embed` so `index.html` pic
 ```sh
 pip install numpy pillow                              # dev only
 python3 tools/sprites/make_player_sheet.py --embed
+python3 tools/sprites/make_keeper_sheet.py --embed    # the keepers' sheet (below)
 ```
+
+`assets/sprites/keeper_sheet.png` is the keepers' sheet, made the same way by
+`tools/sprites/make_keeper_sheet.py` (which reuses the player renderer): long sleeves and gloves,
+and his top, socks, shorts and trim recoloured in the game — the top to the team's keeper colour
+(one unlike either side's shirts), the shorts and trim dark. Same 32×32 cells and ground anchor:
+
+| Rows | Animation | Frames | In game |
+| --- | --- | --- | --- |
+| 0–7 | ready | 1 | set, watching the ball |
+| 8–15 | shuffle | 2 | side-stepping along his line, still facing the ball |
+| 16–23 | run | 4 | going for a ball or a man |
+| 24–31 | hold | 1 | the ball gathered into his chest (the ball itself isn't drawn meanwhile) |
+| 32–39 | kick | 1 | just after he's sent it out, toward where it went |
+| 40–43 | dive | 2 | the stretch, then down on the turf: up the screen and down it, facing E, then facing W |
+
+A dive along the goal line runs toward or away from this camera, so the stretch goes forward as
+well, climbing toward the top corner or dropping toward the bottom one, and reads at full length.
+The head is bigger than the arms can reach past, so the gloves are painted in front of the face, as
+a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
 
 ## Tests
 
