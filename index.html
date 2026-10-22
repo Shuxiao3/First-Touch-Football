@@ -4678,7 +4678,7 @@
   // CUTTING OUT A PASS: of the side without the ball, the computer player who can get onto the pass's path soonest -- low
   // enough to reach, and a beat before the man it's meant for gets there -- and where; null if nobody can. A man who
   // reads the game well (Def IQ) is off a touch sooner. (Worked out once a frame per side.)
-  const cutCache={G:null,R:null}, engMem={G:null,R:null};   // (engMem: who's been engaging their man on the ball, see aiBrain)
+  const cutCache={G:null,R:null}, engMem={G:null,R:null}, coverMem={G:null,R:null};   // (who's been engaging their man on the ball, and covering him: see aiBrain)
   function cutOut(team){
     const cc=cutCache[team]; if(cc&&cc.t===simNow) return cc.v;
     let v=null; const r=ball.intendedRcv;
@@ -5969,11 +5969,257 @@
     return steer(p,p.x+atk*20,p.y,0.4);
   }
 
+  // ===== POSITIONAL PLAY: the plan with the ball (the neutral style) =====
+  // With the ball a neutral side plays to one plan, not seven separate rule-books. Every frame it lays out the shape
+  // around the ball and gives each man a job in it:
+  //  - REST: the back line stays behind the ball by a gap that grows as we get up the pitch -- the team stays ~35 m
+  //    long rather than stretched to 40-plus -- goal-side of any man of theirs left up, and never past ~63 m.
+  //  - PIVOT: the holding midfielder, a gap in front of them and ~11 m behind the ball (the edge of their box once
+  //    we're camped in their third): the way back, and the first man against a counter.
+  //  - WIDTH: the wide men on the touchlines, about level with the ball. Once we're in their third with the ball on
+  //    the other flank, the far one comes in to the back post (BACKPOST).
+  //  - PIN and POCKET: a front two stay in their own channels -- the one on the ball's side on their last line, the
+  //    other dropped between their lines; near and far post (NEARPOST, FARPOST) once the ball's out wide in their
+  //    third. INSIDE: any other central midfielder, in his channel between their lines.
+  //  - SUPPORT: two or three leave their spot to give the man on the ball options (see planSupport).
+  //  - RUN: one man at a time goes in behind, when the man on the ball can find him (see planRun).
+  // The keeper's ball has its own shape (BUILD): the back line at the corners of the box, the pivot in front of them.
+  // Nobody's spot is on top of another's: the lesser job gives way.
+  function planOn(team){ return !!TAC[team] && TAC[team].off==='neutral'; }
+  // WHERE PLAY IS, for the shape: the ball read slower still than seenBall (~1 s) -- the lines move with the play, not
+  // with every pass knocked back and forth across them. (Snaps after a restart or a long ball.)
+  const playEye={G:{x:FW/2,y:FH/2,t:-9},R:{x:FW/2,y:FH/2,t:-9}};
+  function playAt(team){
+    const e=playEye[team], de=simNow-e.t; if(de===0) return e;
+    e.t=simNow;
+    if(de<0 || de>0.25 || Math.hypot(ball.x-e.x,ball.y-e.y)>1300){ e.x=ball.x; e.y=ball.y; }
+    else { const k=1-Math.exp(-de/0.9); e.x+=(ball.x-e.x)*k; e.y+=(ball.y-e.y)*k; }
+    return e;
+  }
+  function mkPlanState(){ return {t:-1, jobs:new Map(), last:null, lastT:-9, sup:[], supT:-9, supC:null, runs:[], runGapT:-9}; }
+  const PLAN={G:mkPlanState(), R:mkPlanState()};
+  const JOB_PRI={RUN:6, SUPPORT:5, REST:4, PIVOT:4, BUILD:4, NEARPOST:3, FARPOST:3, BACKPOST:3, CUTBACK:3, PIN:3, WIDTH:2, INSIDE:2, POCKET:1};
+  const wideSide=q=>Math.sign((q.slotAtk?q.slotAtk.wide:q.wide)||0)||(q.homeY<YC?-1:1);
+  function teamPlan(team,dt){
+    const S=PLAN[team]; if(S.t===simNow) return S;
+    S.t=simNow; S.jobs=new Map();
+    const c=heldBy()||gkHold;
+    if(!c || c.team!==team || !planOn(team)) return S;
+    const atk=atkOf(team), U=x=>atk>0?x:FW-x, B=playAt(team), uB=U(B.x);     // U: depth from our goal line (and back)
+    const mates=teamOf(team), opps=players.filter(o=>o.team!==team);
+    const kpPhase=c===gkHold;
+    const uol=U(offsideLineX(team)), uOn=Math.max(uol, U(ball.x), FW/2)-25;    // as far up as a man can stand onside
+    let uTop=1e9, upK=0; for(const o of opps){ uTop=Math.min(uTop,U(o.x)); if(U(o.x)<uB-200) upK++; }   // their man nearest our goal; how many they've left up
+    const bs=ballSideFor(team);
+    const set=(q,u,y,job)=>{ if(q!==c && q!==controlled) S.jobs.set(q,{x:clamp(U(u),40,FW-40), y:clamp(y,45,FH-45), job, sprint:false}); };
+    const defs=mates.filter(q=>q.role==='DEF').sort((a,b)=>a.homeY-b.homeY);
+    const h=holderOf(team), pivot=(h&&h.role==='MID')?h:null;
+    const wides=mates.filter(q=>q!==pivot&&isWideMan(q));
+    const sts=mates.filter(q=>q.role==='ATT'&&!isWideMan(q));
+    const inside=mates.filter(q=>q.role==='MID'&&q!==pivot&&!isWideMan(q));
+    // REST DEFENCE (or, on the keeper's ball, the back line at the corners of the box -- see distribute)
+    let uCB;
+    if(kpPhase){
+      const n=defs.length;
+      defs.forEach((q,i)=>{ const mid=n%2===1&&i===(n-1)/2, f=n===1?(q.homeY<YC?-0.8:0.8):(i/(n-1))*2-1;
+        set(q, mid?470:340, YC+(mid?0:f*310), 'BUILD'); });
+      uCB=340;
+      if(pivot) set(pivot, 620, YC+(pivot.homeY-YC)*0.3, 'BUILD');
+    } else {
+      { const de=Math.min(0.1,simNow-(S.upT||simNow)); S.upT=simNow; S.upKs=(S.upKs===undefined||de<=0)?upK:S.upKs+(upK-S.upKs)*(1-Math.exp(-de/0.8)); }
+      const tt=clamp((uB-600)/1500,0,1), gFar=420+140*clamp(S.upKs,0,2);
+      uCB=uB-(60+(gFar-60)*tt);                             // ~level with the ball in our third .. 17-28 m behind it in theirs (as many as they've left up)
+      if(uB>FW/3) uCB=Math.min(uCB,uTop-70);                // goal-side of any man they leave up
+      uCB=clamp(uCB,200,FW*0.60);
+      const n=defs.length, hs=uB<FW/3?300:230, cy=YC+(B.y-YC)*0.25;
+      defs.forEach((q,i)=>{ const f=n===1?0:(i/(n-1))*2-1, mid=n%2===1&&i===(n-1)/2;
+        set(q, uCB-(mid&&n>=3?40:0), cy+f*(n>=3?hs+40:hs), 'REST'); });
+    }
+    // THE PIVOT
+    let uP=uCB+240;
+    const sc=Math.sign(c.y-YC)||1, boxPhase=!kpPhase && U(c.x)>FW*0.70 && Math.abs(c.y-YC)>FH*0.22;
+    if(pivot && !kpPhase){
+      if(boxPhase && (S.upKs===undefined?upK:S.upKs)<=1.3) set(pivot, Math.min(FW-340,uOn), YC+sc*FH*0.05, 'CUTBACK');     // arriving late, for the pull-back
+      else { uP=clamp(Math.max(uCB+240, uB-((S.upKs===undefined?upK:S.upKs)<=1.3?200:280)), 380, FW-470); set(pivot, Math.min(uP,uOn), YC+(B.y-YC)*0.35, 'PIVOT'); } }
+    // WIDTH (a winger and a wide midfielder on one flank: the winger outside and higher, the midfielder inside him)
+    for(const side of [-1,1]){
+      wides.filter(q=>wideSide(q)===side).sort((a,b)=>(a.role==='ATT'?0:1)-(b.role==='ATT'?0:1)).forEach((q,k)=>{
+        if(k===0 && !kpPhase && uB>FW*0.68 && Math.abs(B.y-YC)>FH*0.16 && Math.sign(B.y-YC)!==side){
+          set(q, Math.min(FW-230,uOn), YC+side*FH*0.15, 'BACKPOST'); return; }
+        set(q, clamp(uB+60-k*170, uCB+380, uOn), YC+side*FH*(k===0?0.41:0.22), k===0?'WIDTH':'INSIDE');
+      });
+    }
+    // DEPTH: the forwards keep to their own channels; the one on the ball's side pins their last line, the other drops
+    // between their lines. Out wide in their third: near post and far post.
+    const fw=sts.slice().sort((a,b)=>(b.homeY-a.homeY)*bs);
+    fw.forEach((q,i)=>{
+      const lane=fw.length===1 ? YC+bs*FH*0.10 : YC+(Math.sign(q.homeY-YC)||(i===0?bs:-bs))*FH*0.13;
+      if(boxPhase){ if(i===0) set(q, Math.min(FW-170,uOn), YC+sc*FH*0.08, 'NEARPOST'); else set(q, Math.min(FW-200,uOn), YC-sc*FH*0.10, 'FARPOST'); return; }
+      if(i===0){ const g=backlineGap(team, lane, PA_HW-60); set(q, uol-35, g&&Math.abs(g.y-lane)<FH*0.15?g.y:lane, 'PIN'); }
+      else set(q, clamp(uol-clamp(0.11*FW,220,330), uB-150, uOn), lane, 'POCKET');
+    });
+    for(const q of inside) set(q, clamp(uB+120, uP+200, uOn-120), YC+(Math.sign(q.homeY-YC)||1)*FH*0.17, 'INSIDE');
+    // RUNS and SUPPORT
+    planRun(S,team,c,atk,U,uol);
+    if(!kpPhase){
+      planSupport(S,team,c,atk,U,uOn,uol,opps);
+      // the men near the ball who aren't supporting him step into the space where he can find them: out of a marker's
+      // shadow, a clear lane from him (see spaceNear)
+      for(const [q,a] of S.jobs) if((a.job==='PIVOT'||a.job==='WIDTH'||a.job==='POCKET'||a.job==='INSIDE') && Math.hypot(a.x-c.x,a.y-c.y)<passRangeOf(c)*1.3){
+        const sp=spaceNear(q,c,a.x,a.y,atk,dt||1/60); a.x=sp.x; a.y=sp.y; }
+    }
+    // on winning it back, the men going up the pitch get up there at a sprint
+    if(transitionT[team]>0) for(const [q,a] of S.jobs) if(a.job!=='REST' && a.job!=='PIVOT' && atk*(a.x-q.x)>350) a.sprint=true;
+    // SPACING: nobody's spot within ~7 m of another's (the lesser job gives way), nor on top of the man on the ball (or you)
+    const arr=[...S.jobs.entries()].map(([q,a])=>({a,pri:JOB_PRI[a.job]||1}));
+    arr.push({a:{x:c.x,y:c.y},pri:9}); if(controlled && controlled.team===team && controlled!==c) arr.push({a:{x:controlled.x,y:controlled.y},pri:9});
+    for(let it=0;it<2;it++) for(let i=0;i<arr.length;i++) for(let k=i+1;k<arr.length;k++){
+      const A=arr[i], Bj=arr[k], dx=Bj.a.x-A.a.x, dy=Bj.a.y-A.a.y, d=Math.hypot(dx,dy), need=(A.pri===9||Bj.pri===9)?150:170;
+      if(d>=need || (A.pri===9&&Bj.pri===9)) continue;
+      const mv=A.pri>=Bj.pri?Bj:A, sg=mv===Bj?1:-1, ux=d>1?dx/d*sg:0, uy=d>1?dy/d*sg:sg;
+      mv.a.x=clamp(mv.a.x+ux*(need-d),40,FW-40); mv.a.y=clamp(mv.a.y+uy*(need-d),45,FH-45);
+    }
+    S.last=S.jobs; S.lastT=simNow;
+    return S;
+  }
+  // SUPPORT: the spots around the man on the ball where a pass reaches a team-mate before any of theirs can get there --
+  // a clear lane, ideally further forward, best of all between their lines, ~12 m away -- two of them at clearly
+  // different angles (a triangle), and a way back as well when he's pressed or we're deep. They're handed to whoever
+  // can get there soonest without leaving a more important job (the back line never goes ahead of the ball, the wide
+  // men stay out wide, the men in the box stay there). Read about three times a second; the spots are held relative to
+  // him, so they move with him, and a new set has to be clearly better than the one in place.
+  function planSupport(S,team,c,atk,U,uOn,uol,opps){
+    // the spots hang off where he is, read a touch behind (~0.4 s): a supporter doesn't mirror every touch he takes
+    { const de=simNow-(S.fT||-9); S.fT=simNow;
+      if(!(S.fx>=0) || de>0.25 || Math.hypot(c.x-S.fx,c.y-S.fy)>900){ S.fx=c.x; S.fy=c.y; }
+      else { const k=1-Math.exp(-de/0.4); S.fx+=(c.x-S.fx)*k; S.fy+=(c.y-S.fy)*k; } }
+    const F={x:S.fx,y:S.fy}, uF=U(F.x);
+    const presser=nearestOppTo(c,c), pressed=presser&&dist(presser,c)<140;
+    let uMid=0,nm=0; for(const o of opps) if(((o.slotDef&&o.slotDef.role)||o.role)==='MID'){ uMid+=U(o.x); nm++; }
+    uMid=nm?uMid/nm:uol-300;                                                  // their midfield line
+    const spotScore=(x,y)=>{
+      if(x<50||x>FW-50||y<50||y>FH-50) return -9;
+      const u=U(x); if(u>uOn||u<200) return -9;
+      const r=Math.hypot(x-F.x,y-F.y); if(r<150) return -9;
+      const lane=laneClearance(c,{x,y}); if(lane<0.45) return -9;
+      let tO=9; for(const o of opps) tO=Math.min(tO, 0.2+Math.max(0,Math.hypot(o.x-x,o.y-y)-28)/sprintSpeedOf(o));
+      const safe=tO-(0.12+r/600); if(safe<(uF>FW*0.66?-0.15:0.05)) return -9;   // a pass gets there before any of theirs can (in their third, a contested one will do)
+      const du=u-uF;
+      let s=lane*1.2 + Math.min(safe,1.2)*1.4 + clamp(du/500,-0.5,1)*(du>0?1:0.6) - Math.abs(r-300)/700;
+      if(u>uMid+60 && u<uol-60) s+=0.35;                                       // between their lines
+      return s;
+    };
+    const elig=teamOf(team).filter(q=>q!==c && q!==controlled && q.state==='normal' && !S.runs.some(R=>R.p===q));
+    const hold=holderOf(team), prevQ=new Set(S.sup.map(sp=>sp.q));
+    const cost=(q,x,y)=>{
+      // (from where he'll be in a moment, the way he's going: a man already heading there gets there sooner than one who has to turn round)
+      const t=Math.hypot(q.x+q.vx*0.3-x,q.y+q.vy*0.3-y)/Math.max(60,runSpeedOf(q)); if(t>1.6) return 99;   // a support he can't get to in time is no support
+      const j=S.jobs.get(q), u=U(x); let pen=0;
+      if(q.role==='DEF'){ if(u>uF-40) return 99; pen+=uF<FW/3?0:0.45; }       // the back line only ever offers a way back
+      if(isWideMan(q)){ if(Math.abs(y-YC)<FH*0.20) pen+=0.9; if(Math.sign(y-YC)!==wideSide(q)) pen+=2; }   // wide men stay wide
+      if(q.role==='ATT' && !isWideMan(q) && u<uF-60) pen+=0.8;                 // forwards don't come back behind the ball
+      if(j && (j.job==='NEARPOST'||j.job==='FARPOST'||j.job==='BACKPOST'||j.job==='CUTBACK')) pen+=1.2;
+      if(j && j.job==='PIN') pen+=1.5;                                          // the man pinning their line stays on it
+      if(q===hold && Math.abs(y-YC)>FH*0.30) pen+=0.6;
+      if(prevQ.has(q)) pen-=0.6;                                                 // already supporting: he carries on (no handing over)
+      return t+pen;
+    };
+    const apply=()=>{ for(const s of S.sup) S.jobs.set(s.q,{x:clamp(F.x+s.ox,40,FW-40), y:clamp(F.y+s.oy,45,FH-45), job:'SUPPORT', sprint:false}); };
+    const angGap=(a,b)=>{ const d=Math.abs(a-b)%(2*Math.PI); return d>Math.PI?2*Math.PI-d:d; };
+    const here=sp=>{ const x=F.x+sp.ox, y=F.y+sp.oy; return {x, y, a:Math.atan2(sp.oy,sp.ox), s:spotScore(x,y), q:sp.q}; };
+    // a set of spots: the ones kept, then the best of the rest at clearly different angles (and a way back when he's
+    // pressed or we're deep), each new one manned the cheapest way (every arrangement: there are only a handful)
+    const buildSet=kept=>{
+      const keptQ=new Set(kept.map(k=>k.q)), free=elig.filter(q=>!keptQ.has(q)), cand=[];
+      for(const r of [220,300,380,470]) for(let k=0;k<18;k++){                 // rings ~9-19 m out
+        const a=k*Math.PI/9+(r===300||r===470?Math.PI/18:0), x=F.x+Math.cos(a)*r, y=F.y+Math.sin(a)*r, s=spotScore(x,y);
+        if(s<=-5) continue;
+        let tq=99; for(const q of free) tq=Math.min(tq,cost(q,x,y)); if(tq>=99) continue;
+        cand.push({x,y,a,s,k:s-0.4*tq});                                       // (one somebody can get to soon is worth more)
+      }
+      cand.sort((p1,p2)=>p2.k-p1.k);
+      const spots=kept.slice(), fits=(sp,ga,gd)=>spots.every(o=>angGap(sp.a,o.a)>=ga && Math.hypot(sp.x-o.x,sp.y-o.y)>=gd);
+      for(const sp of cand){ if(spots.length>=2) break; if(fits(sp,Math.PI*0.30,200)) spots.push(sp); }
+      if((pressed||uF<FW/3) && !spots.some(sp=>U(sp.x)<uF-40)){ const back=cand.find(sp=>U(sp.x)<uF-40 && fits(sp,Math.PI*0.22,180)); if(back) spots.push(back); }
+      const open=spots.filter(sp=>!sp.q);
+      let best=null, bc=1e9;
+      const rec=(i,used,acc,picks)=>{ if(acc>=bc) return; if(i===open.length){ bc=acc; best=picks.slice(); return; }
+        for(const q of free){ if(used.has(q)) continue; const cq=cost(q,open[i].x,open[i].y); if(cq>=99) continue;
+          used.add(q); picks.push(q); rec(i+1,used,acc+cq,picks); picks.pop(); used.delete(q); } };
+      while(open.length){ bc=1e9; best=null; rec(0,new Set(),0,[]); if(best) break; spots.splice(spots.indexOf(open.pop()),1); }
+      if(best) open.forEach((sp,i)=>sp.q=best[i]);
+      return spots.filter(sp=>sp.q);
+    };
+    const value=set=>set.reduce((a,sp)=>a+sp.s-0.5*cost(sp.q,sp.x,sp.y),0);
+    // KEEP WHAT WORKS: with the same man on the ball a spot only counts as gone once it's been no good for a moment (one
+    // of theirs crossing the lane doesn't send everybody somewhere else), and only that one is replaced. A new man on the
+    // ball gets a new set (the men already supporting carry on if they're as well placed for it: see cost); and every
+    // second or so a whole new set is weighed, taken only if it's clearly better.
+    const dtS=Math.min(0.1,simNow-(S.supLT||simNow)); S.supLT=simNow;
+    const fresh=S.supC!==c;
+    let gone=false;
+    if(!fresh) for(const sp of S.sup){ const ok=elig.includes(sp.q) && spotScore(F.x+sp.ox,F.y+sp.oy)>-5;
+      sp.bad=ok?0:(sp.bad||0)+dtS; if(!elig.includes(sp.q) || sp.bad>0.35) gone=true; }
+    if(!fresh && !gone && S.sup.length && simNow-S.supT<1.0){ apply(); return; }
+    let set;
+    if(fresh || !S.sup.length) set=buildSet([]);
+    else if(gone) set=buildSet(S.sup.filter(sp=>elig.includes(sp.q) && sp.bad<=0.35).map(here));
+    else { const cur=S.sup.map(here), nw=buildSet([]); set=value(nw)>value(cur)+0.4 ? nw : cur; }
+    S.sup=set.map(sp=>({q:sp.q, ox:sp.x-F.x, oy:sp.y-F.y, bad:0}));
+    S.supT=simNow; S.supC=c;
+    apply();
+  }
+  // RUNS: a man goes in behind only when the man on the ball can find him: the ball at his feet (or running with it),
+  // nobody right on him, facing up the pitch, beyond our own third, with room behind their line. It's the man best
+  // placed for it -- the forward pinning their line first, then the wide man on the ball's side -- with a gap in their
+  // line near him (a forward on the line may just go up his own channel) and a landing spot the passer can reach. Two
+  // at most, in different lanes, a moment apart. He arcs along their line until he's on it, then goes; if the ball goes
+  // elsewhere, or doesn't come and he's left offside, he's back in the shape. A breather for him after.
+  function planRun(S,team,c,atk,U,uol){
+    S.runs=S.runs.filter(R=>{ const q=R.p;
+      return players.includes(q) && simNow<=R.until && Math.hypot(q.x-R.x,q.y-R.y)>=50 &&
+             !(ball.intendedRcv && ball.intendedRcv!==q && !ball.ownedBy && ball.lastTouch===team) &&   // the pass went elsewhere
+             !(!(q.gapRun>0) && inOffsidePos(q)); });                                                     // left offside, nothing coming
+    if(S.runs.length<2 && simNow>S.runGapT && (ball.ownedBy===c || ball.dribbler===c) && c!==gkHold){
+      const pr=nearestOppTo(c,c);
+      if((!pr||dist(pr,c)>55) && c.facing && atk*c.facing.x>0 && U(c.x)>FW*0.22 && FW-uol>320){
+        let best=null, bsc=-1e9;
+        for(const q of teamOf(team)){
+          if(q===c||q===controlled||q.state!=='normal'||q.runCd>0||inOffsidePos(q)||S.runs.some(R=>R.p===q)) continue;
+          const j=S.jobs.get(q); if(!j) continue;
+          const kind=j.job==='PIN'?2 : j.job==='WIDTH'?(wideSide(q)===Math.sign(c.y-YC)?1.5:0.6) : j.job==='POCKET'?1 : j.job==='INSIDE'?0.8 : 0;
+          if(!kind) continue;
+          const toLine=uol-U(q.x); if(toLine<-15 || toLine>(j.job==='PIN'?330:j.job==='WIDTH'?600:j.job==='POCKET'?400:300)) continue;
+          const st=q.role==='ATT'&&!isWideMan(q); let g=backlineGap(team,q.y,st?PA_HW-60:undefined);
+          if(!g || Math.abs(g.y-q.y)>FH*0.25){ if(j.job!=='PIN') continue; g={y:q.y}; }
+          const L={x:U(Math.min(uol+230,FW-140)), y:clamp(st?g.y+(YC-g.y)*0.3:g.y,60,FH-60)};
+          if(S.runs.some(R=>Math.abs(R.y-L.y)<FH*0.25)) continue;                // a second run goes down another lane
+          if(dist(c,q)>passRangeOf(c)*1.3 || dist(c,L)>passRangeOf(c)*1.7 || laneClearance(c,L)<0.35) continue;   // (a ball over the top can go further than one to feet)
+          const sc=kind-toLine/400; if(sc>bsc){ bsc=sc; best={q,L}; }
+        }
+        if(best){ S.runs.push({p:best.q, x:best.L.x, y:best.L.y, t0:simNow, until:simNow+2.2}); best.q.gapRun=1.6; best.q.runCd=3.0; S.runGapT=simNow+0.8; }
+      }
+    }
+    for(const R of S.runs){ const q=R.p, onLine=U(q.x)>=uol-60 || simNow-R.t0>0.7;    // arc onto their line first, then go
+      S.jobs.set(q,{x:onLine?R.x:U(uol-30), y:R.y, job:'RUN', sprint:true}); }
+  }
+  // a man following the plan: his job, his spot -- eased toward it (~0.25 s), so a spot that flickers for a moment doesn't
+  // turn him round -- or, on a run, straight there (see carrierCascade, which looks for the runner)
+  function followPlan(p,a,dt){
+    p.dbgTag=a.job; p.planned=true; p.planSprint=!!a.sprint;
+    p.runTarget = a.job==='RUN' ? {x:a.x,y:a.y} : null;
+    if(a.job==='RUN' || !(p.ptT>simNow-0.25)){ p.ptx=a.x; p.pty=a.y; }
+    else { const k=1-Math.exp(-(dt||1/60)/0.25); p.ptx+=(a.x-p.ptx)*k; p.pty+=(a.y-p.pty)*k; }
+    p.ptT=simNow;
+    return a.job==='RUN' ? steer(p,a.x,a.y,1.0) : arrive(p,p.ptx+p.iqJitX,p.pty+p.iqJitY);
+  }
+
   function aiBrain(p,dt){
+    p.planned=false; p.planSprint=false;
     p.aiActT-=dt*statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,2.0);p.runT-=dt;   // Off IQ: 1 = slow re-reads .. 10 = fast
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
-    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false;
+    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false;
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -6751,6 +6997,7 @@
       }
     } else if((hb&&hb.team===p.team&&hb!==p)||(gkHold&&gkHold.team===p.team)){
       const c=hb||gkHold;                       // our man on it -- or knocking it on, or the man our pass is going to
+      if(planOn(p.team)){ const a=teamPlan(p.team,dt).jobs.get(p); if(a) return followPlan(p,a,dt); }   // a neutral side: its plan (see teamPlan)
       // BUILD-UP: ball with keeper or a defender deep in our own third
       const ownThird = atk>0 ? c.x<FW*0.34 : c.x>FW*0.66;
       const carrierDeep = c.role==='DEF' || (gkHold&&gkHold.team===p.team);
@@ -7116,6 +7363,38 @@
           }
         }
       }
+      // COVER: with the man on the ball engaged, the next man sits ~5 m behind the presser at an angle, on the inside -- if
+      // he's beaten, the cover's there. From the same line as the presser or the one behind (a centre-back only once he's
+      // in our half; a centre-back pair has its own cover: PAIR). The man covering keeps the job unless another's clearly
+      // better placed.
+      let cover2=null, cpt=null;
+      const oursHalf=atkC*(c.x-FW/2)>0;                                       // (the man on the ball is in our half)
+      const cm0=coverMem[p.team], covering=cm0&&cm0.q&&cm0.c===c;            // (once covering, until the presser's clearly off him)
+      if(engager && engager.role!=='DEF' && dist(engager,c)<(covering?220:160) && !engagerBeaten){
+        const gl0=Math.hypot(ownGoalX-c.x,YC-c.y)||1, gx0=(ownGoalX-c.x)/gl0, gy0=(YC-c.y)/gl0;
+        const inside=Math.abs(c.y-YC)<FH*0.10 ? (engager.y>c.y?-1:1) : Math.sign(YC-c.y);
+        cpt={x:clamp(c.x+gx0*165,40,FW-40), y:clamp(c.y+gy0*165+inside*70,40,FH-40)};
+        let bd=1e9;
+        for(const q of mates){ if(q===engager||q===controlled||q.state!=='normal') continue;
+          const qL=_rl(q.role); if(qL<_eL||qL>_eL+1) continue;
+          if(q.role==='DEF' && !oursHalf) continue;
+          const dd=Math.hypot(q.x-cpt.x,q.y-cpt.y)-(covering&&cm0.q===q?60:0);
+          if(dd<bd){ bd=dd; cover2=q; } }
+        if(bd>420) cover2=null;                                               // nobody near enough to cover in time
+      }
+      coverMem[p.team]={q:cover2,c};
+      // PRESSING TOGETHER (see pressing): the man nearest it cuts out his easiest pass -- onto the lane to it, nearer the man it's for
+      let cutter=null, lpt=null;
+      if(pressing(p.team) && engager){
+        let opt=null, od=1e9;
+        for(const q of players){ if(q.team!==c.team||q===c) continue; const dq=dist(q,c); if(dq<450 && dq<od && laneClearance(c,q)>=0.5){ od=dq; opt=q; } }
+        if(opt){ lpt={x:c.x+(opt.x-c.x)*0.62, y:c.y+(opt.y-c.y)*0.62}; let bd=1e9;
+          for(const q of mates){ if(q===engager||q===cover2||q===controlled||q.state!=='normal') continue;
+            const dd=Math.hypot(q.x-lpt.x,q.y-lpt.y); if(dd<bd){ bd=dd; cutter=q; } }
+          if(bd>380) cutter=null; }
+      }
+      if(cutter===p){ p.dbgTag='PRESS-LANE'; p.pressRun=true; return steer(p,lpt.x,lpt.y,1.0); }
+      if(cover2===p){ p.dbgTag='COVER2'; return steer(p,cpt.x,cpt.y); }
       if(coverMan===p){
         p.dbgTag='COVERBREAK';
         // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.
@@ -7169,6 +7448,8 @@
         if(shieldingMe && mode!=='commit'){
           mode='block';
         }
+        // pressing together (see pressing): get in on him
+        if(pressing(p.team) && !passOn && mode!=='block' && d<170){ mode='commit'; effTight=1; }
         // the pass is still on its way to him: close him down as it travels, to be on him -- goal-side -- for his first touch
         if(passOn) mode='meet';
         p.dbgTag='PRESS-'+mode;
@@ -7336,7 +7617,9 @@
         const uB = atk>0 ? ball.x/FW : 1-ball.x/FW;
         const attackShape = uB<0.34 ? false : uB>0.66 ? true : teamInAttackPhase(p.team);
         p.dbgTag='LOOSE-SHAPE';
-        if(!attackShape){ const s=blockSpot(p); tx=s.x; ty=s.y; p.runTarget=null; p.dbgTag='LOOSE-BLOCK'; }
+        const PL=PLAN[p.team], pa=attackShape && planOn(p.team) && PL.last && simNow-PL.lastT<1.0 ? PL.last.get(p) : null;
+        if(pa && pa.job!=='RUN'){ tx=pa.x; ty=pa.y; p.runTarget=null; p.dbgTag='LOOSE-'+pa.job; }
+        else if(!attackShape){ const s=blockSpot(p); tx=s.x; ty=s.y; p.runTarget=null; p.dbgTag='LOOSE-BLOCK'; }
         else if(p.runTarget){
           tx=p.runTarget.x; ty=p.runTarget.y; p.dbgTag='LOOSE-RUN';
           if(!(p.gapRun>0)){ const ol=offsideLineX(p.team); if(atk>0)tx=Math.min(tx,ol-12); else tx=Math.max(tx,ol+12); }
@@ -7366,7 +7649,7 @@
         if(side<0) ty=Math.min(ty, YC+margin);
         else       ty=Math.max(ty, YC-margin); }
     }
-    return steer(p,tx+p.iqJitX,ty+p.iqJitY);                  // Off IQ movement jitter (final-third only)
+    return arrive(p,tx+p.iqJitX,ty+p.iqJitY);                 // Off IQ movement jitter (final-third only)
   }
   // FINDING SPACE (in possession, off the ball): around my place in the shape (ax,ay), the pocket the man on the
   // ball can find me in -- away from their men, a clear lane from him, ahead of the ball where it can be, onside,
@@ -7401,6 +7684,16 @@
   }
   // reacting to its own touch: the input it had as the ball arrived, eased right off
   function easeOff(a){ return a?{ix:a.ix*0.3, iy:a.iy*0.3}:{ix:0,iy:0}; }
+  // TAKING UP A POSITION: run to it, easing off over the last couple of metres rather than charging past and coming
+  // back. (A position on the move -- a man tracked, the ball followed -- is run at flat out: see steer.)
+  function arrive(p,tx,ty){
+    const pv=p.arPrev, de=pv?simNow-pv.t:0, mv=pv&&de>0&&de<0.1?Math.hypot(tx-pv.x,ty-pv.y)/de:0;
+    p.arPrev={x:tx,y:ty,t:simNow};
+    const dx=tx-p.x, dy=ty-p.y, l=Math.hypot(dx,dy);
+    if(l<14) return {ix:0,iy:0};
+    if(mv<60 && l<110 && Math.hypot(p.vx,p.vy)>40+l*2.2) return {ix:0,iy:0};   // too quick for what's left: let it run off
+    return {ix:dx/l, iy:dy/l};
+  }
   function steer(p,tx,ty,urgency){
     let ix=tx-p.x,iy=ty-p.y;
     const l=Math.hypot(ix,iy);
@@ -7418,6 +7711,28 @@
   // place in his line comes from his defensive slot.
   // The block shifts off where it SEES the ball (see seenBall): a beat behind it, so moving the ball quickly -- a switch,
   // a ball through the lines -- catches it still sliding across.
+  // PRESSING TOGETHER: a side without the ball goes after it as a unit, for a moment, when the man on it is in trouble -- a
+  // pass played back to him, a first touch that's got away from him, his back to our goal with one of ours close, the
+  // touchline at his shoulder -- and not otherwise. (Not up in their third unless we're a pressing side; a low block only
+  // in our half.) It lasts a second and a half, then a breather: the man on him goes in, the next man cuts out his
+  // easiest pass (see aiBrain), and the lines step up (see defBlock).
+  const pressSt={G:{until:-9,cd:-9,t:-1,on:false},R:{until:-9,cd:-9,t:-1,on:false}};
+  function pressing(team){
+    const S2=pressSt[team]; if(S2.t===simNow) return S2.on; S2.t=simNow; S2.on=false;
+    const c=heldBy(); if(!c || c.team===team || gkHold) return false;
+    if(simNow<S2.until) return S2.on=true;
+    if(simNow<S2.cd) return false;
+    const atk=atkOf(team), U=x=>atk>0?x:FW-x, dtac=TAC[team].def, uBall=U(ball.x);
+    if((dtac!=='press' && uBall>FW*0.70) || (dtac==='lowblock' && uBall>FW*0.5)) return false;
+    let near=1e9; for(const q of teamOf(team)) near=Math.min(near,dist(q,c));
+    const cAtk=atkOf(c.team), lp=ball.lastTouchP;
+    const backPass   = !ball.ownedBy && c===ball.intendedRcv && lp && lp!==c && lp.team===c.team && cAtk*(lp.x-c.x)>150;
+    const heavy      = !ball.ownedBy && c===ball.dribbler && ball.dribbleGrace>0 && dist(c,ball)>75 && near<220;
+    const facingBack = ball.ownedBy===c && c.facing && cAtk*c.facing.x<-0.5 && near<200;
+    const touchline  = Math.abs(c.y-YC)>FH*0.40 && near<180;
+    if(backPass||heavy||facingBack||touchline){ S2.until=simNow+1.6; S2.cd=simNow+3.2; return S2.on=true; }
+    return false;
+  }
   const blockCache={G:null,R:null};
   function defBlock(team){
     const bc=blockCache[team]; if(bc&&bc.t===simNow) return bc;
@@ -7430,6 +7745,7 @@
     // (eased in with how far off him our nearest man is, so the line doesn't lurch as the press comes and goes)
     const c=heldBy();
     if(c && c.team!==team){ let dn=1e9; for(const q of players) if(q.team===team) dn=Math.min(dn,dist(q,c)); uD-=60*clamp((dn-90)/80,0,1); }
+    if(pressing(team)) uD+=70;                                         // pressing together: the line steps up behind it
     uD=Math.max(uD, GA_D+15);
     const uM=clamp(uD+0.115*FW, uD+90, Math.max(uD+90, uB-90));
     const uF=clamp(uM+0.105*FW, uM+60, Math.max(uM+60, uB-20));
@@ -8388,7 +8704,7 @@
         // RECOVERING: lost it with me upfield of the ball -- sprint back goal-side of it (aiBrain sets the flag)
         const recovering = p.recover && oppHasBallTeam(p.team);
         // --- CRITICAL: always worth a sprint (down to a low stamina floor) ---
-        const critical = beaten || gapBurst || openBehind || closeChase || recovering;
+        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press: see aiBrain)
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
         const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
@@ -8405,6 +8721,7 @@
         else if(opportunistic && sta>0.55) doSprint=true;  // only with plenty in the tank
         if(!critical && sta<0.40) doSprint=false;          // conserve when not critical
 
+        if(p.planned) doSprint = (critical && sta>0.06) || (p.planSprint && sta>0.25);   // on the plan: only its runs (see teamPlan)
         p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));
         if(!reacting) p.preTouchAi=ai;
         stepOutfield(p,ai.ix,ai.iy,dt);
