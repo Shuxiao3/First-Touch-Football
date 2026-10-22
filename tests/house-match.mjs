@@ -7,6 +7,12 @@ const { ok, info } = rep;
 
 await createCareer(page);
 ok((await readSave(page)).mePro.sp === 0, 'no points before kick-off');
+// the office's schedule shows the next opponent's shape
+await page.click('#careerHub .bldg[data-bldg="office"]'); await page.waitForTimeout(200);
+await page.click('#bldgPanel .bpTab[data-tab="Schedule"]'); await page.waitForTimeout(150);
+const nextRow = await page.evaluate(() => { const el = [...document.querySelectorAll('#bpBody span')].find(e => /NEXT/.test(e.textContent)); return el ? el.textContent : ''; });
+ok(/NEXT · OVR \d+ · \d-\d-\d/.test(nextRow), 'the schedule shows the next opponent and their shape: ' + nextRow);
+await page.click('#bldgPanel [data-hub="bldgback"]').catch(() => {}); await page.waitForTimeout(150);
 
 const t0 = Date.now();
 const report = await playMatch(page);

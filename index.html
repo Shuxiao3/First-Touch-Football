@@ -6076,7 +6076,7 @@
       wides.filter(q=>wideSide(q)===side).sort((a,b)=>(a.role==='ATT'?0:1)-(b.role==='ATT'?0:1)).forEach((q,k)=>{
         if(k===0 && !kpPhase && uB>FW*0.68 && Math.abs(B.y-YC)>FH*0.16 && Math.sign(B.y-YC)!==side){
           set(q, Math.min(FW-230,uOn), YC+side*FH*0.15, 'BACKPOST'); return; }
-        if(wbs.includes(q)){ set(q, clamp(uB-20, uCB+300, uOn), YC+side*FH*0.41, 'WIDTH'); return; }   // (a wing-back: up with the play, a touch behind the ball)
+        if(wbs.includes(q)){ set(q, clamp(uB+(uB>FW*0.66?40:-20), uCB+300, uOn), YC+side*FH*0.41, 'WIDTH'); return; }   // (a wing-back: up with the play, a touch behind the ball -- level with it in their third)
         set(q, clamp(uB+60-k*170, uCB+380, uOn), YC+side*FH*(k===0?0.41:0.22), k===0?'WIDTH':'INSIDE');
       });
     }
@@ -10606,7 +10606,7 @@
       for(const fx of ss.fixtures[md]){ if(fx[0]===d.clubName){opp=fx[1];home=true;break;} if(fx[1]===d.clubName){opp=fx[0];home=false;break;} }
       if(!opp)continue; const res=R.find(r=>r.md===md); const left=(md+1)+'. '+(home?'vs ':'@ ')+opp; let right;
       if(res){ const w=res.you>res.og, dr=res.you===res.og; right='<span style="color:'+(w?'#9dff3c':dr?'#ffb43c':'#ff5a4d')+'">'+(w?'W':dr?'D':'L')+' '+res.you+'-'+res.og+'</span>'; }
-      else if(md===ss.md){ right='<span style="color:#ffb43c">NEXT \u00b7 OVR '+cwClubOvr(d,opp)+'</span>'; }
+      else if(md===ss.md){ right='<span style="color:#ffb43c">NEXT \u00b7 OVR '+cwClubOvr(d,opp)+' \u00b7 '+cwFormFor(cwFindClub(d,opp))+'</span>'; }
       else { right='<span style="color:#6f8a5f">OVR '+cwClubOvr(d,opp)+'</span>'; }
       h+='<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #18220f"><span style="color:#9bb88a">'+left+'</span>'+right+'</div>'; }
     return h; }

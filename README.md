@@ -70,14 +70,32 @@ doesn't shoot.
 
 **EXHIBITION** opens a match setup before kick-off. Pick **your team** and the **opponent** from the
 2026/27 Premier League (◀ ▶ step through the clubs; tap a club for the full list), then pick the
-player **you control** from your team's seven outfielders (a striker by default). **KICK OFF**
-(or `Enter`) starts it; `Esc` or BACK leaves.
+player **you control** from your team's seven outfielders (a striker by default; switching clubs keeps you
+in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
   Your team wears its home kit. The opponent wears theirs too, unless the shirts are too alike to
   tell apart at a glance (brightness counts most, so colour-blind players can tell them apart);
   then it's their change kit, or a plain white or black one if that's no better. The keepers pick a
   top unlike either team's shirts and the grass.
+- **Every club has its own shape**, loosely after how it lines up (a back four is two here, a front
+  three three), and the setup shows it under the club's name:
+
+  | Shape | Clubs |
+  |---|---|
+  | 2-2-3 | Arsenal, Leeds United, Liverpool |
+  | 2-3-2 | Bournemouth, Coventry City, Everton, Newcastle United |
+  | 2-4-1 | Aston Villa, Brighton, Chelsea, Fulham |
+  | 3-3-1 | Crystal Palace, Ipswich Town, Manchester United, Sunderland |
+  | 3-2-2 | Brentford, Nottingham Forest |
+  | 3-1-3 | Manchester City |
+  | 1-4-2 | Hull City |
+  | 1-3-3 | Tottenham Hotspur |
+
+  Both sides kick off in their club's shape, and a club's squad is made for it: wingers on the flanks
+  of a front three, wide midfielders in a midfield of three or four, wing-backs in a back three with
+  nobody wide ahead of it (who go up the flanks with the ball). Change a shape in the match and the
+  club keeps it. A club whose line-up you'd saved before clubs had shapes stays in its 2-3-2.
 - The squads are made up: fixed names, numbers and stats for each club, with stronger squads for
   clubs that finished higher last season. Every outfielder has a **playing style** (shown under his
   name, with a line about it in the TACTICS menu), and his stats are built around it (see
@@ -205,7 +223,10 @@ test, and like the Trap Lab the values are the game's settings.
   the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and
   always goal-side of their highest man. The holding midfielder is the pivot in front of them (with the
   ball out wide in their third, he arrives late for the pull-back). The wide men hold the touchlines; the
-  far one comes in to the back post once the ball's out wide near their box. One forward pins their last
+  far one comes in to the back post once the ball's out wide near their box. A back three with nobody
+  wide ahead of it (3-2-2) sends its outside men up the flanks as wing-backs once the ball's out of its
+  third, the middle one and the holder staying back (the far wing-back too while they've two or more
+  men left up). One forward pins their last
   line, in a gap in it, and the other drops between their lines (whoever is pinning stays on it unless the
   other gets clearly higher: one comes short, the other goes); out wide in their third they go to the
   near and far posts. Around the man on the ball, two team-mates take up spots at clearly different
@@ -248,7 +269,10 @@ test, and like the Trap Lab the values are the game's settings.
   who's right up against the man on it, or diving in at him: he stumbles and can't tackle for a
   moment (0.45 s on the *Beat a tight press* dial, longer against a good dribbler, shorter for an
   agile defender). When you're defending, only diving in gets you caught; standing close is fine.
-- **Career mode** — create-a-pro with stat trees, a 4-tier league world with simulated
+- **Career mode** — every club in the league world has a shape that goes with how it plays (a passing
+  side keeps men in midfield, a wing side has wingers, a direct side two up front, a counter-attacking
+  side a back three); an opponent picks its starters to fit it, and the office shows your next
+  opponent's shape. Create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
   concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
 - **Timing-only trapping** — a trap is a bounce off a round body. Square on, the ball pops
