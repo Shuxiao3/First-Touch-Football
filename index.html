@@ -7398,7 +7398,7 @@
           const qL=_rl(q.role); if(qL<_eL||qL>_eL+1) continue;
           if(q.role==='DEF' && !oursHalf) continue;
           const dd=Math.hypot(q.x-cpt.x,q.y-cpt.y)-(covering&&cm0.q===q?60:0)
-                   + (atkC*(q.x-c.x)>-20?0:250);                                // (a man still behind the play has to get back first: one goal-side of him covers)
+                   + (Math.hypot(ownGoalX-q.x,YC-q.y)<gl0+20?0:250);            // (a man still behind the play has to get back first: one goal-side of him covers)
           if(dd<bd){ bd=dd; cover2=q; } }
         if(bd>420) cover2=null;                                               // nobody near enough to cover in time
       }

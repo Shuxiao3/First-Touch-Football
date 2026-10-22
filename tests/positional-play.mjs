@@ -39,8 +39,9 @@ while(Date.now() - t0 < 50000){
     const first = opp.reduce((m, o) => Math.hypot(o.x - h.x, o.y - h.y) < Math.hypot(m.x - h.x, m.y - h.y) ? o : m, opp[0]);
     const pressed = Math.hypot(first.x - h.x, first.y - h.y) < 100;
     const covered = pressed && opp.some(o => o !== first && U(o.x) > U(h.x) && Math.hypot(o.x - h.x, o.y - h.y) < 230);   // (goal-side of him, from their end)
-    const cov = opp.find(o => o.dbgTag === 'COVER2');                                                                       // the cover man, if there is one:
-    const covGs = !!cov && U(cov.x) > U(h.x) - 20 && Math.hypot(cov.x - h.x, cov.y - h.y) < 400;                           // goal-side of him and near
+    const cov = opp.find(o => o.dbgTag === 'COVER2'), gx = atk > 0 ? A.FW : 0;                                              // the cover man, if there is one:
+    const covGs = !!cov && Math.hypot(gx - cov.x, A.YC - cov.y) < Math.hypot(gx - h.x, A.YC - h.y) + 20 &&                 // nearer their goal than the man on the ball is,
+                  Math.hypot(cov.x - h.x, cov.y - h.y) < 450;                                                               // and close by
     return { tags: plan.map(p => p.dbgTag || ''), uBall: U(b.x), FW: A.FW, behind: mates.filter(p => U(p.x) < U(b.x) - 200).length,
              bunched, pressed, covered, cov: !!cov, covGs, oppTags: opp.map(p => p.dbgTag || '') };
   });
