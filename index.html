@@ -7414,7 +7414,7 @@
           if(bd>380) cutter=null; }
       }
       if(cutter===p){ p.dbgTag='PRESS-LANE'; p.pressRun=true; return steer(p,lpt.x,lpt.y,1.0); }
-      if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>220) p.coverRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: at a sprint, with legs to spare)
+      if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>220) p.coverRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: a short sprint, with legs to spare)
       if(coverMan===p){
         p.dbgTag='COVERBREAK';
         // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.

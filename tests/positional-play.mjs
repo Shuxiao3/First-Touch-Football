@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../index.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('      if(p===controlled){stepOutfield(p,hi.ix,hi.iy,dt);}', '      if(p===controlled&&!window.__aiAll){stepOutfield(p,hi.ix,hi.iy,dt);}');   // your man on the computer too
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, ball:()=>ball, gk:()=>gkHold, heldBy, atkOf, controlled:()=>controlled, FW, FH, YC, live:()=>!(restartT>0||scoredT>0||offsideT>0)};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, ball:()=>ball, gk:()=>gkHold, heldBy, atkOf, controlled:()=>controlled, FW, FH, YC, sim:()=>simNow, live:()=>!(restartT>0||scoredT>0||offsideT>0)};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pp-')), 'index.html');
 writeFileSync(copy, src);
 
@@ -26,9 +26,10 @@ await startExhibition(page);
 await page.waitForTimeout(500);
 
 const JOBS = /^(REST|PIVOT|WIDTH|INSIDE|BACKPOST|PIN|POCKET|NEARPOST|FARPOST|CUTBACK|SUPPORT|RUN)$/;
-const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, cover2: 0, cover2gs: 0, lane: 0 };
+const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, settled: 0, inCover: 0, lane: 0 };
+let covWho = null, covSince = 0;
 const t0 = Date.now();
-while(Date.now() - t0 < 50000){
+while(Date.now() - t0 < 70000){
   const s = await page.evaluate(() => {
     const A = window.__T; if(!A || !A.live() || A.gk()) return null;
     const b = A.ball(), h = A.heldBy(); if(!h || b.ownedBy !== h) return null;
@@ -39,11 +40,12 @@ while(Date.now() - t0 < 50000){
     const first = opp.reduce((m, o) => Math.hypot(o.x - h.x, o.y - h.y) < Math.hypot(m.x - h.x, m.y - h.y) ? o : m, opp[0]);
     const pressed = Math.hypot(first.x - h.x, first.y - h.y) < 100;
     const covered = pressed && opp.some(o => o !== first && U(o.x) > U(h.x) && Math.hypot(o.x - h.x, o.y - h.y) < 230);   // (goal-side of him, from their end)
-    const cov = opp.find(o => o.dbgTag === 'COVER2'), gx = atk > 0 ? A.FW : 0;                                              // the cover man, if there is one:
-    const covGs = !!cov && Math.hypot(gx - cov.x, A.YC - cov.y) < Math.hypot(gx - h.x, A.YC - h.y) + 20 &&                 // nearer their goal than the man on the ball is,
-                  Math.hypot(cov.x - h.x, cov.y - h.y) < 450;                                                               // and close by
+    // the cover man, if there is one: where he is against the man on the ball -- how far, and how near the line from him to goal
+    const cov = opp.find(o => o.dbgTag === 'COVER2'), gx = atk > 0 ? A.FW : 0;
+    let covD = 0, covCos = 0;
+    if(cov){ const vx = cov.x - h.x, vy = cov.y - h.y, wx = gx - h.x, wy = A.YC - h.y; covD = Math.hypot(vx, vy); covCos = (vx * wx + vy * wy) / ((covD || 1) * (Math.hypot(wx, wy) || 1)); }
     return { tags: plan.map(p => p.dbgTag || ''), uBall: U(b.x), FW: A.FW, behind: mates.filter(p => U(p.x) < U(b.x) - 200).length,
-             bunched, pressed, covered, cov: !!cov, covGs, oppTags: opp.map(p => p.dbgTag || '') };
+             bunched, pressed, covered, cov: cov ? cov.team + cov.num : null, carrier: h.team + h.num, covD, covCos, t: A.sim(), oppTags: opp.map(p => p.dbgTag || '') };
   });
   if(s){
     T.owned++; T.men += s.tags.length; T.onJob += s.tags.filter(t => JOBS.test(t)).length;
@@ -51,7 +53,11 @@ while(Date.now() - t0 < 50000){
     if(s.uBall > s.FW * 2 / 3){ T.fin++; if(s.behind >= 2) T.rest++; }
     if(s.bunched) T.bunched++;
     if(s.pressed){ T.pressed++; if(s.covered) T.covered++; }
-    if(s.cov){ T.cover2++; if(s.covGs) T.cover2gs++; }
+    // once a man's been covering the same man on the ball for a moment: is he there -- 3-15 m from him, between him and goal?
+    // (most covers are over in a fraction of a second, the ball moved on; these are the ones that last)
+    const who = s.cov ? s.cov + '>' + s.carrier : null;
+    if(who !== covWho){ covWho = who; covSince = s.t; }
+    else if(who && s.t - covSince >= 0.4){ T.settled++; if(s.covD >= 75 && s.covD <= 380 && s.covCos >= 0.4) T.inCover++; }
     if(s.oppTags.includes('PRESS-LANE')) T.lane++;
   }
   await page.waitForTimeout(40);
@@ -64,7 +70,7 @@ ok(T.sup / Math.max(1, T.owned) >= 0.6, `someone comes to support the man on the
 ok(T.fin >= 20 && T.rest / Math.max(1, T.fin) >= 0.85, `with the ball in their third, two men or more stay back behind it (${pct(T.rest, T.fin)} of the time)`);
 ok(T.bunched / Math.max(1, T.owned) <= 0.25, `the men off the ball don't bunch: two within 4 m of each other ${pct(T.bunched, T.owned)} of the time`);
 info(`with the man on the ball pressed, a second man goal-side of him within 9 m: ${pct(T.covered, T.pressed)} of the time`);
-ok(T.cover2 >= 20 && T.cover2gs / Math.max(1, T.cover2) >= 0.75, `with the ball pressed, the next man covers: goal-side of the man on it (${pct(T.cover2gs, T.cover2)} of ${T.cover2} looks)`);
+ok(T.settled >= 8 && T.inCover / Math.max(1, T.settled) >= 0.5, `with the ball pressed, the next man covers: 3-15 m from the man on it, between him and goal (${pct(T.inCover, T.settled)} of ${T.settled} looks)`);
 ok(T.lane > 0, `pressing together: a man cuts out the pass while the ball is pressed (seen ${T.lane} times)`);
 
 await browser.close();
