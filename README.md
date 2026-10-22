@@ -190,12 +190,37 @@ test, and like the Trap Lab the values are the game's settings.
   front and the forwards in front of that, every line sliding across toward the ball. When the ball's
   lost, a defender or midfielder caught a long way upfield sprints back goal-side of it; the rest jog
   back into shape, the forwards always (they save their legs for the next attack). One man presses the ball, and keeps him until a teammate is
-  clearly better placed; of a pair of centre-backs one goes and the other covers. When they pass, a man
+  clearly better placed; the next man sits about 5 m behind him at an angle, on the inside, to cover if
+  he's beaten (of a pair of centre-backs one goes and the other covers). When the man on the ball is in
+  trouble — a pass played back to him, a heavy touch, his back to our goal with one of ours close, the
+  touchline at his shoulder — the side presses together for a second and a half: the man on him goes in,
+  the nearest other man cuts out his easiest pass, and the lines step up behind them (not in their third
+  unless it's a pressing side; a low block only in its own half). When they pass, a man
   who can get onto the ball's path before their receiver goes to cut it out; otherwise the nearest
   closes the receiver down as the ball travels, to be on him for his first touch. The block reads the
   ball a beat late (about a third of a second), and a run a beat late too, so quick passing and
   well-timed runs can still open it up.
-- **Attacking movement** — in possession the wide men hold the touchlines (on a break they go up their
+- **Positional play (the neutral style)** — with the ball, a side on the neutral style plays off one plan
+  for the whole team, and every man has a job in it. The centre-backs are the rest defence: level with
+  the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and
+  always goal-side of their highest man. The holding midfielder is the pivot in front of them (with the
+  ball out wide in their third, he arrives late for the pull-back). The wide men hold the touchlines; the
+  far one comes in to the back post once the ball's out wide near their box. One forward pins their last
+  line, in a gap in it, and the other drops between their lines (whoever is pinning stays on it unless the
+  other gets clearly higher: one comes short, the other goes); out wide in their third they go to the
+  near and far posts. Around the man on the ball, two team-mates take up spots at clearly different
+  angles (a triangle) where a pass reaches them before any opponent can get there: further forward
+  where it can be, best of all between their lines, about 12 m away, plus a way back when he's pressed.
+  The men who can get there soonest go, without leaving a more important job. A spot that stops working
+  is first put right with a step or two, and a set only changes when the ball goes to another man or
+  a clearly better one turns up. Runs in behind are triggered: when the man on the ball is facing up,
+  unpressed, with room behind their line, the man best placed (the forward on their line first) arcs
+  along it and goes; two at most, down different lanes. Nobody stands within about 7 m of a team-mate,
+  and only runs, and getting up the pitch after winning it back, are at a sprint.
+- **Taking up a position** — a computer player heading for a position eases off over the last few metres
+  instead of charging past it, and moves with a position that's on the move (following the ball,
+  tracking a runner) at its pace. Only the man going for the ball, the presser and a runner go flat out.
+- **Attacking movement (the wing and counter styles)** — in possession the wide men hold the touchlines (on a break they go up their
   own touchline; coming short to support is the central men's job) and one central
   midfielder holds: a gap in front of the back line, the pass out from the back (he doesn't drop in
   between the centre-backs), and once the ball's further up, behind it as a screen against the
@@ -206,7 +231,7 @@ test, and like the Trap Lab the values are the game's settings.
   ahead of it where it can be, not on top of a teammate. Forwards work their own channel. Runs are
   triggered, not random: when the man on the ball can play it forward, a forward or a wide man near
   their line goes beyond it (a speedster or winger from further out, a target man only off the
-  line), and the ball is slipped in behind as he arrives at it. In the final third the man on the
+  line), and the ball is slipped in behind as he arrives at it. On any style, in the final third the man on the
   ball shoots when he has a sight of goal (the Long Shots stat sets from how far), sets up a teammate
   with a better one, or crosses into the space between their line and the keeper when one of ours
   can get there first. A good dribbler facing a lone defender with nobody covering takes him on: he

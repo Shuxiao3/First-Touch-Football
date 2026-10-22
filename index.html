@@ -6051,8 +6051,14 @@
     }
     // DEPTH: the forwards keep to their own channels; the one on the ball's side pins their last line, the other drops
     // between their lines. Out wide in their third: near post and far post.
+    // (who pins: the one already on their line, unless the other's clearly the higher -- when one comes short, the other
+    // goes -- so a switch of play doesn't swap them over)
     const fw=sts.slice().sort((a,b)=>(b.homeY-a.homeY)*bs);
-    fw.forEach((q,i)=>{
+    let pinQ=fw.includes(S.pinQ)?S.pinQ:fw[0];
+    for(const q of fw) if(q!==pinQ && pinQ && U(q.x)>U(pinQ.x)+150) pinQ=q;
+    S.pinQ=pinQ;
+    const ord=boxPhase||!pinQ ? fw : [pinQ, ...fw.filter(q=>q!==pinQ)];
+    ord.forEach((q,i)=>{
       const lane=fw.length===1 ? YC+bs*FH*0.10 : YC+(Math.sign(q.homeY-YC)||(i===0?bs:-bs))*FH*0.13;
       if(boxPhase){ if(i===0) set(q, Math.min(FW-170,uOn), YC+sc*FH*0.08, 'NEARPOST'); else set(q, Math.min(FW-200,uOn), YC-sc*FH*0.10, 'FARPOST'); return; }
       if(i===0){ const g=backlineGap(team, lane, PA_HW-60); set(q, uol-35, g&&Math.abs(g.y-lane)<FH*0.15?g.y:lane, 'PIN'); }
@@ -6157,9 +6163,22 @@
     // second or so a whole new set is weighed, taken only if it's clearly better.
     const dtS=Math.min(0.1,simNow-(S.supLT||simNow)); S.supLT=simNow;
     const fresh=S.supC!==c;
+    // a spot that's gone bad (a lane cut, one of theirs closing on it) is first put right where it is: the man shifts a
+    // step or two to open the pass up again rather than going off somewhere else
+    const nudge=sp=>{ const x0=F.x+sp.ox, y0=F.y+sp.oy; let best=null, bv=-1e9;
+      for(const r of [50,100,150]) for(let k=0;k<8;k++){
+        const a=k*Math.PI/4+(r===100?Math.PI/8:0), x=x0+Math.cos(a)*r, y=y0+Math.sin(a)*r, sc2=spotScore(x,y);
+        if(sc2<=-5) continue;
+        const an=Math.atan2(y-F.y,x-F.x);
+        if(!S.sup.every(o=>o===sp || (angGap(an,Math.atan2(o.oy,o.ox))>=Math.PI*0.25 && Math.hypot(F.x+o.ox-x,F.y+o.oy-y)>=180))) continue;
+        const v=sc2-r/300; if(v>bv){ bv=v; best={x,y}; } }
+      return best; };
     let gone=false;
-    if(!fresh) for(const sp of S.sup){ const ok=elig.includes(sp.q) && spotScore(F.x+sp.ox,F.y+sp.oy)>-5;
-      sp.bad=ok?0:(sp.bad||0)+dtS; if(!elig.includes(sp.q) || sp.bad>0.35) gone=true; }
+    if(!fresh) for(const sp of S.sup){
+      if(!elig.includes(sp.q)){ gone=true; continue; }
+      if(spotScore(F.x+sp.ox,F.y+sp.oy)>-5){ sp.bad=0; continue; }
+      const fix=nudge(sp); if(fix){ sp.ox=fix.x-F.x; sp.oy=fix.y-F.y; sp.bad=0; continue; }
+      sp.bad=(sp.bad||0)+dtS; if(sp.bad>0.35) gone=true; }
     if(!fresh && !gone && S.sup.length && simNow-S.supT<1.0){ apply(); return; }
     let set;
     if(fresh || !S.sup.length) set=buildSet([]);
@@ -7649,7 +7668,9 @@
         if(side<0) ty=Math.min(ty, YC+margin);
         else       ty=Math.max(ty, YC-margin); }
     }
-    return arrive(p,tx+p.iqJitX,ty+p.iqJitY);                 // Off IQ movement jitter (final-third only)
+    // the man going for the ball, the man on it and a man on a run go flat out; everyone else takes up his position (see arrive)
+    const chase = p.goingForBall || p.intercepting || p.runTarget || (p.dbgTag||'').startsWith('PRESS-');
+    return chase ? steer(p,tx+p.iqJitX,ty+p.iqJitY) : arrive(p,tx+p.iqJitX,ty+p.iqJitY);   // (Off IQ movement jitter: final third only)
   }
   // FINDING SPACE (in possession, off the ball): around my place in the shape (ax,ay), the pocket the man on the
   // ball can find me in -- away from their men, a clear lane from him, ahead of the ball where it can be, onside,
@@ -7684,15 +7705,23 @@
   }
   // reacting to its own touch: the input it had as the ball arrived, eased right off
   function easeOff(a){ return a?{ix:a.ix*0.3, iy:a.iy*0.3}:{ix:0,iy:0}; }
-  // TAKING UP A POSITION: run to it, easing off over the last couple of metres rather than charging past and coming
-  // back. (A position on the move -- a man tracked, the ball followed -- is run at flat out: see steer.)
+  // TAKING UP A POSITION: at the pace that gets him there without overshooting -- easing off over the last few metres --
+  // and, when the position's itself on the move (following the ball, tracking a man), moving with it at its pace rather
+  // than running at it and stopping, over and over. (Read as a pace to be at: he pushes on toward it, harder the further
+  // off it he is. A position that jumps -- a new job -- isn't a pace.)
   function arrive(p,tx,ty){
-    const pv=p.arPrev, de=pv?simNow-pv.t:0, mv=pv&&de>0&&de<0.1?Math.hypot(tx-pv.x,ty-pv.y)/de:0;
-    p.arPrev={x:tx,y:ty,t:simNow};
+    const pv=p.arPrev, de=pv?simNow-pv.t:0;
+    let tvx=0, tvy=0;
+    if(pv && de>0 && de<0.1){ const jx=(tx-pv.x)/de, jy=(ty-pv.y)/de;
+      if(Math.hypot(jx,jy)<400){ const k=1-Math.exp(-de/0.2); tvx=pv.vx+(jx-pv.vx)*k; tvy=pv.vy+(jy-pv.vy)*k; } }
+    p.arPrev={x:tx,y:ty,t:simNow,vx:tvx,vy:tvy};
     const dx=tx-p.x, dy=ty-p.y, l=Math.hypot(dx,dy);
-    if(l<14) return {ix:0,iy:0};
-    if(mv<60 && l<110 && Math.hypot(p.vx,p.vy)>40+l*2.2) return {ix:0,iy:0};   // too quick for what's left: let it run off
-    return {ix:dx/l, iy:dy/l};
+    if(l<14 && Math.hypot(tvx,tvy)<12) return {ix:0,iy:0};
+    const top=sprintSpeedOf(p), w=l>0.5?Math.min(top,l*2.5)/l:0;
+    let vx=tvx+dx*w, vy=tvy+dy*w; const vl=Math.hypot(vx,vy); if(vl>top){ vx*=top/vl; vy*=top/vl; }
+    let ix=(vx-p.vx)/150, iy=(vy-p.vy)/150; const il=Math.hypot(ix,iy); if(il>1){ ix/=il; iy/=il; }
+    p.arSoft=true;
+    return {ix,iy};
   }
   function steer(p,tx,ty,urgency){
     let ix=tx-p.x,iy=ty-p.y;
@@ -7840,6 +7869,7 @@
     }
     // --- STAMINA & SPRINT ---
     const moving = !!(ix||iy);
+    const softIn = p.arSoft; p.arSoft=false;        // (this frame's input is a computer player easing into position: see arrive)
     const hasBall = (ball.ownedBy===p);
     const wantSprint = p.sprint && moving && p.stamina>0.02;
     const empty = p.stamina<=0.02;                  // gassed
@@ -7964,9 +7994,12 @@
           p.vx=Math.cos(a2)*newSp; p.vy=Math.sin(a2)*newSp;
         }
       }
-      const l=Math.hypot(ix,iy)||1;
-      const fxx=ix/l, fyy=iy/l;
-      if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
+      // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging)
+      const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
+      if(!softIn || nsp>30 || il2>=0.35){
+        const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
+        if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
+      }
     } else {
       p.vx*=Math.pow(0.86,dt*60);p.vy*=Math.pow(0.86,dt*60);  // coast to a stop
     }
