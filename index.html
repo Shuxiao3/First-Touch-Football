@@ -1195,6 +1195,7 @@
     const f=b.dataset.form;
     if(tacTeam==='G')myForm=f; else rForm=f;
     markForm();buildTeams();resetKickoff();saveSettings();
+    if(EXH.on&&EXH.play) saveClubSides();            // (an exhibition club keeps the shape you give it)
   });
   let tacTeam='G';   // which team the tactic buttons currently edit
   function markTac(){
@@ -1357,9 +1358,10 @@
   // wide in midfield, 4 in the middle), and a pick from them -- a second centre-back or forward unlike the first
   const SQUAD_STYLES=[null,['stopper','ballplayer','cover'],['stopper','ballplayer','cover'],['mwinger','mwinger','widemid'],
     ['anchor','anchor','boxtobox','playmaker','creator'],['mwinger','mwinger','widemid'],['speedster','poacher','target','complete'],['speedster','poacher','target','complete','insidefwd']];
-  function pickSquadStyle(i,R,taken){
-    const opts=SQUAD_STYLES[i]; if(!opts) return undefined;
-    const fresh=opts.filter(s=>!(taken||[]).includes(s)), pool=(i===2||i===7)&&fresh.length?fresh:opts;
+  function pickSquadStyle(i,R,taken,list){
+    const L=list||SQUAD_STYLES, opts=L[i]; if(!opts) return undefined;
+    const prev=L[i-1], again=!!prev&&prev[0]===opts[0]&&opts[0]!=='mwinger';   // a second centre-back or striker unlike the first
+    const fresh=opts.filter(s=>!(taken||[]).includes(s)), pool=again&&fresh.length?fresh:opts;
     return pool[Math.floor(R()*pool.length)];
   }
   // a style for a career sub-role (r: a 0..1 draw)
@@ -1377,6 +1379,22 @@
   const PERS3=['passive','default','aggressive'];
   function overallOf(entry){ const w=OVR_W[entry.role]||OVR_W.MID; let sum=0,wt=0; for(const k in w){ sum+=(entry.stats[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(sum/wt*10))); }
   const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
+  // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in
+  function rolesFor(form){ const L=FORMS[form]||FORMS['2-3-2'], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=['GK'];
+    L.forEach((n,i)=>{ for(let k=0;k<n;k++) out.push(R[i]); }); return out; }
+  // the styles each place in a shape calls for (as SQUAD_STYLES does for 2-3-2): out wide in a line of three or more, a
+  // winger's (a back three with nobody wide ahead of it: wing-backs); the middle of midfield, the holder's first; the
+  // middle up front, a striker's
+  function slotStylesFor(form){
+    const L=FORMS[form]||FORMS['2-3-2'], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=[null];
+    const wideAhead=L.some((n,i)=>R[i]!=='DEF'&&n>=3);
+    const CB=['stopper','ballplayer','cover'], WB=['wingback','wingback','fullback'], ST=['speedster','poacher','target','complete'];
+    L.forEach((n,li)=>{ const role=R[li]; let cen=0;
+      for(let k=0;k<n;k++){ const wide=n>=3&&(k===0||k===n-1);
+        if(role==='DEF') out.push(wide&&!wideAhead?WB:CB);
+        else if(role==='MID') out.push(wide?['mwinger','mwinger','widemid']:(cen++===0?['anchor','anchor','boxtobox','playmaker','creator']:['boxtobox','playmaker','creator']));
+        else out.push(wide?['winger','winger','insidefwd']:(cen++===0?ST:[...ST,'insidefwd'])); } });
+    return out; }
   function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
   // new squads, and those saved in the six-a-side days (a keeper and six): fill up to a keeper and seven
   function topUpSquad(sq){
@@ -1387,29 +1405,31 @@
   }
   // ============ CLUBS (exhibition): the 2026/27 Premier League ============
   // A kit is [shirt, trim, shorts]: the club's colours, plus a change kit worn when the shirts clash. str nudges
-  // a generated squad's stats (roughly last season's finish). The players are made up: the same eight each time.
+  // a generated squad's stats (roughly last season's finish). form: the club's shape, loosely after how it lines up
+  // (a back four is two here, a front three three) -- its squad is made for it. The players are made up: the same
+  // eight each time.
   const CLUB_LEAGUE='PREMIER LEAGUE · 2026/27';
   const CLUBS=[
-    {id:'ARS',name:'Arsenal',           str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
-    {id:'AVL',name:'Aston Villa',       str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
-    {id:'BOU',name:'Bournemouth',       str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
-    {id:'BRE',name:'Brentford',         str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
-    {id:'BHA',name:'Brighton',          str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
-    {id:'CHE',name:'Chelsea',           str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
-    {id:'COV',name:'Coventry City',     str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
-    {id:'CRY',name:'Crystal Palace',    str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
-    {id:'EVE',name:'Everton',           str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
-    {id:'FUL',name:'Fulham',            str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
-    {id:'HUL',name:'Hull City',         str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
-    {id:'IPS',name:'Ipswich Town',      str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
-    {id:'LEE',name:'Leeds United',      str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
-    {id:'LIV',name:'Liverpool',         str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
-    {id:'MCI',name:'Manchester City',   str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
-    {id:'MUN',name:'Manchester United', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
-    {id:'NEW',name:'Newcastle United',  str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
-    {id:'NFO',name:'Nottingham Forest', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
-    {id:'SUN',name:'Sunderland',        str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
-    {id:'TOT',name:'Tottenham Hotspur', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
+    {id:'ARS',name:'Arsenal',           form:'2-2-3', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
+    {id:'AVL',name:'Aston Villa',       form:'2-4-1', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
+    {id:'BOU',name:'Bournemouth',       form:'2-3-2', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
+    {id:'BRE',name:'Brentford',         form:'3-2-2', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
+    {id:'BHA',name:'Brighton',          form:'2-4-1', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
+    {id:'CHE',name:'Chelsea',           form:'2-4-1', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
+    {id:'COV',name:'Coventry City',     form:'2-3-2', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
+    {id:'CRY',name:'Crystal Palace',    form:'3-3-1', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
+    {id:'EVE',name:'Everton',           form:'2-3-2', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
+    {id:'FUL',name:'Fulham',            form:'2-4-1', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
+    {id:'HUL',name:'Hull City',         form:'1-4-2', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
+    {id:'IPS',name:'Ipswich Town',      form:'3-3-1', str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
+    {id:'LEE',name:'Leeds United',      form:'2-2-3', str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
+    {id:'LIV',name:'Liverpool',         form:'2-2-3', str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
+    {id:'MCI',name:'Manchester City',   form:'3-1-3', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
+    {id:'MUN',name:'Manchester United', form:'3-3-1', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
+    {id:'NEW',name:'Newcastle United',  form:'2-3-2', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
+    {id:'NFO',name:'Nottingham Forest', form:'3-2-2', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
+    {id:'SUN',name:'Sunderland',        form:'3-3-1', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
+    {id:'TOT',name:'Tottenham Hotspur', form:'1-3-3', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
   ];
   const clubById=id=>CLUBS.find(c=>c.id===id)||null;
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
@@ -1431,11 +1451,11 @@
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; })();
   function clubSquadGen(club){
     const R=rng32(hashStr('ft-club-'+club.id)), RS=rng32(hashStr('ft-style-'+club.id)), ci=CLUBS.indexOf(club);
-    const roles=SQUAD_ROLES, styles=[];
+    const roles=rolesFor(club.form), slotSt=slotStylesFor(club.form), styles=[];
     const NUMS={GK:[1],DEF:[2,3,4,5,6,12,15],MID:[8,10,14,16,17,18,20,23],ATT:[7,9,11,19,21]};
     const take=r=>{ const l=NUMS[r]; return l.splice(Math.floor(R()*l.length),1)[0]; };
     return roles.map((r,i)=>{
-      const style=pickSquadStyle(i,RS,styles); styles.push(style);
+      const style=pickSquadStyle(i,RS,styles,slotSt); styles.push(style);
       const st=genStyledStats(r,style,R,club.str);
       const e={name:CLUB_NAME_DEAL[(i<7?ci*7+i:CLUBS.length*7+ci)%CLUB_NAME_DEAL.length], num:take(r), role:r, style, defPers:PERS3[Math.floor(R()*3)], stats:st};
       e.ovr=overallOf(e); return e;
@@ -1447,19 +1467,20 @@
   try{ const o=JSON.parse(localStorage.getItem('ft_exh')||'null');
        if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; if(o.ctrl>=1&&o.ctrl<=OUTFIELD) EXH.ctrl=o.ctrl|0; } }catch(e){}
   function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp,ctrl:EXH.ctrl})); }catch(e){} }
-  // a club's squad and lineup: as you last left them in the tactics menu, else as generated
+  // a club's squad, lineup and shape: as you last left them (a side kept from before clubs had shapes stays in the
+  // 2-3-2 it was made for), else as generated, in the club's own shape
   function clubSide(id){
     let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
     if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
       const gen=clubSquadGen(clubById(id));
       if(o.squad.length<1+OUTFIELD){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from six-a-side: their eighth man back
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
-      return {squad:o.squad, lineup:o.lineup};
+      return {squad:o.squad, lineup:o.lineup, form:formOK(o.form,'2-3-2')};
     }
-    return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup()};
+    return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form};
   }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
-    all[EXH.play.you]={squad:SQUAD.G, lineup:LINEUP.G}; all[EXH.play.opp]={squad:SQUAD.R, lineup:LINEUP.R};
+    all[EXH.play.you]={squad:SQUAD.G, lineup:LINEUP.G, form:myForm}; all[EXH.play.opp]={squad:SQUAD.R, lineup:LINEUP.R, form:rForm};
     localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
   // ---- who's on the pitch: a code for the scoreboard, a kit [shirt,trim,shorts] (null = the drawn GRN/RED kits),
   //      the colour a body is drawn in without sprites, and the keeper's top ----
@@ -6012,9 +6033,18 @@
     let uTop=1e9, upK=0; for(const o of opps){ uTop=Math.min(uTop,U(o.x)); if(U(o.x)<uB-200) upK++; }   // their man nearest our goal; how many they've left up
     const bs=ballSideFor(team);
     const set=(q,u,y,job)=>{ if(q!==c && q!==controlled) S.jobs.set(q,{x:clamp(U(u),40,FW-40), y:clamp(y,45,FH-45), job, sprint:false}); };
-    const defs=mates.filter(q=>q.role==='DEF').sort((a,b)=>a.homeY-b.homeY);
+    let defs=mates.filter(q=>q.role==='DEF').sort((a,b)=>a.homeY-b.homeY);
     const h=holderOf(team), pivot=(h&&h.role==='MID')?h:null;
     const wides=mates.filter(q=>q!==pivot&&isWideMan(q));
+    // WING-BACKS: a back three with nobody wide ahead of it gets its width from its outside men -- up the flanks once the
+    // ball's out of our third, the middle one (and the holder) behind as the rest defence. The far one stays back too
+    // while they've two or more men left up.
+    const wbs=[];
+    if(!wides.length && defs.length>=3 && !kpPhase && uB>FW*0.36){
+      const up=S.upKs===undefined?upK:S.upKs;
+      for(const q of [defs[0],defs[defs.length-1]]) if(up<1.5 || wideSide(q)===bs) wbs.push(q);
+      defs=defs.filter(q=>!wbs.includes(q)); wides.push(...wbs);
+    }
     const sts=mates.filter(q=>q.role==='ATT'&&!isWideMan(q));
     const inside=mates.filter(q=>q.role==='MID'&&q!==pivot&&!isWideMan(q));
     // REST DEFENCE (or, on the keeper's ball, the back line at the corners of the box -- see distribute)
@@ -6046,6 +6076,7 @@
       wides.filter(q=>wideSide(q)===side).sort((a,b)=>(a.role==='ATT'?0:1)-(b.role==='ATT'?0:1)).forEach((q,k)=>{
         if(k===0 && !kpPhase && uB>FW*0.68 && Math.abs(B.y-YC)>FH*0.16 && Math.sign(B.y-YC)!==side){
           set(q, Math.min(FW-230,uOn), YC+side*FH*0.15, 'BACKPOST'); return; }
+        if(wbs.includes(q)){ set(q, clamp(uB-20, uCB+300, uOn), YC+side*FH*0.41, 'WIDTH'); return; }   // (a wing-back: up with the play, a touch behind the ball)
         set(q, clamp(uB+60-k*170, uCB+380, uOn), YC+side*FH*(k===0?0.41:0.22), k===0?'WIDTH':'INSIDE');
       });
     }
@@ -6205,6 +6236,7 @@
         let best=null, bsc=-1e9;
         for(const q of teamOf(team)){
           if(q===c||q===controlled||q.state!=='normal'||q.runCd>0||inOffsidePos(q)||S.runs.some(R=>R.p===q)) continue;
+          if(q.role==='DEF') continue;                                           // (a wing-back gives the width, not the run)
           const j=S.jobs.get(q); if(!j) continue;
           const kind=j.job==='PIN'?2 : j.job==='WIDTH'?(wideSide(q)===Math.sign(c.y-YC)?1.5:0.6) : j.job==='POCKET'?1 : j.job==='INSIDE'?0.8 : 0;
           if(!kind) continue;
@@ -9870,6 +9902,7 @@
   function setMenuForm(team,phase,fm){
     if(team==='G')myForm=fm; else rForm=fm;
     buildTeams(); applyKeeperStats(); resetKickoff(); saveSettings();
+    if(EXH.on&&EXH.play) saveClubSides();
     if(typeof markForm==='function')markForm();
   }
   function renderPhase(phase){
@@ -10356,7 +10389,33 @@
   // Each sub-role exposes option groups; each group has a default (def) choice.
   // Stored on d.instructions[rosterIdx] = {groupIdx: choiceId}. Resolved with defaults.
   function controlledRi(d){ ensureLineup(d); ensureForms(d); const mi=d.roster?d.roster.findIndex(p=>p&&p.me):-1; if(mi>=0 && (d.lineup.gk===mi || d.lineup.atk.indexOf(mi)>=0)) return mi; const ln=FORMS[d.formation]||FORMS['2-3-2']; return d.lineup.atk[ln[0]+ln[1]]; }
-  function careerSquad(club){ return (club.players||[]).slice(0,1+OUTFIELD).map((p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:p.stats, ovr:p.ovr })); }
+  // a club's eight for a match: in a shape, its keeper, then each line's best men of that position -- out wide the men
+  // who play wide (full-backs, wingers), in the middle the rest, the holding midfielder in the holder's place; short of
+  // a position, the best man left. (No shape: the first eight.)
+  function careerSquad(club,form){
+    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:p.stats, ovr:p.ovr });
+    if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
+    const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||p.ovr>b.ovr)) b=p; if(b) used.add(b); return b; };
+    const gk=best(p=>p.role==='GK')||best(()=>true), out=[gk];
+    const L=FORMS[form], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'];
+    const wideness=p=>(p.subRole==='FB'||p.subRole==='WNG')?2:p.subRole==='AM'?1:p.subRole==='DM'?-1:0;
+    L.forEach((n,li)=>{
+      const men=[]; for(let k=0;k<n;k++) men.push(best(p=>p.role===R[li])||best(p=>p.role!=='GK')||best(()=>true));
+      men.sort((a,b)=>wideness(b)-wideness(a));                                  // the widest first...
+      const line=new Array(n), wideIdx=n>=3?[0,n-1]:[], mid=[...Array(n).keys()].filter(k=>!wideIdx.includes(k));
+      wideIdx.forEach((k,j)=>line[k]=men[j]);                                    // ...to the flanks
+      const rest=men.slice(wideIdx.length).sort((a,b)=>wideness(a)-wideness(b)); // the holder (most central) first
+      const order=mid.slice().sort((a,b)=>Math.abs(a-(n-1)/2)-Math.abs(b-(n-1)/2)||(a%2)-(b%2));   // (of two as central, the holder's is the even one: see holderOf)
+      order.forEach((k,j)=>line[k]=rest[j]);
+      out.push(...line);
+    });
+    if(out.some(p=>!p)) return ps.slice(0,1+OUTFIELD).map(ent);                 // (a squad too small to fill it)
+    return out.map(ent);
+  }
+  // A CLUB'S SHAPE: from how it plays -- a passing side keeps men in midfield, a wing side has wingers, a direct one two
+  // up front, a counter-attacking one a back three -- and which of those its name draws (the same every season)
+  const CW_STYLE_FORMS={tiki:['2-4-1','2-3-2','1-4-2'], wing:['2-2-3','3-1-3','1-3-3'], direct:['3-2-2','2-3-2','1-4-2'], counter:['3-3-1','3-2-2','2-4-1'], neutral:['2-3-2','2-2-3','2-4-1','3-3-1']};
+  function cwFormFor(club){ if(!club) return '2-3-2'; const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
   // a career player's style: as made, or for one signed before styles, the one his stats fit (your own pro has none)
   function careerStyle(p){ if(!p||p.me||p.role==='GK'||!ARCH[p.role]) return p&&p.style; if(!p.style) p.style=inferStyle(p.role,p.subRole,p.stats||{}); return p.style; }
   // ---- career lineup / tactics ----
@@ -10687,7 +10746,7 @@
   function renderOfficeTable(d){ const ss=ensureSeason(d), T=cwTable(d), pos=T.findIndex(r=>r.name===d.clubName)+1, nf=yourNextFixture(d); let h='';
     h+='<div style="border-top:1px solid #2a3a22;margin:14px 0"></div>';
     h+='<div style="color:#7f9a6f;font-size:10px;letter-spacing:1px;margin-bottom:6px">'+((CW_TIERS[d.tier]||{}).name||'')+' · matchday '+Math.min(ss.md+1,ss.fixtures.length)+'/'+ss.fixtures.length+'</div>';
-    if(nf) h+=finRow('Next · '+(nf.home?'vs ':'@ ')+nf.opp, 'OVR '+cwClubOvr(d,nf.opp)); else h+=finRow('Season complete','');
+    if(nf) h+=finRow('Next · '+(nf.home?'vs ':'@ ')+nf.opp, 'OVR '+cwClubOvr(d,nf.opp)+' · '+cwFormFor(cwFindClub(d,nf.opp))); else h+=finRow('Season complete','');
     const lo=Math.max(0,Math.min(T.length-7,pos-4));
     h+='<div style="margin-top:8px">';
     for(let i=lo;i<Math.min(T.length,lo+7);i++){ const r=T[i], you=r.name===d.clubName;
@@ -11179,19 +11238,20 @@
     EXH.on=true; EXH.play={you:EXH.you, opp:EXH.opp, ctrl:EXH.ctrl}; saveExh();
     const a=clubSide(EXH.you), b=clubSide(EXH.opp);
     SQUAD={G:a.squad,R:b.squad}; LINEUP={G:a.lineup,R:b.lineup}; normalizeSquads();
+    myForm=a.form; rForm=b.form;                     // each club in its own shape
     setTeamsFromClubs();
     document.getElementById('stageWrap').classList.remove('menuMode'); hideSubs(); hideHub(); hideStartMenu(); SCREEN='match'; newMatch();
   }
   // ----- the setup screen -----
   let exhGridSide=null;                       // 'G' / 'R' while picking that side's club from the full list
   function exhSideHTML(t){
-    const id=t==='G'?EXH.you:EXH.opp, club=clubById(id), kit=matchKits(clubById(EXH.you),clubById(EXH.opp))[t];
+    const id=t==='G'?EXH.you:EXH.opp, club=clubById(id), kit=matchKits(clubById(EXH.you),clubById(EXH.opp))[t], side=clubSide(id);
     return '<div class="exhLbl">'+(t==='G'?'YOUR TEAM':'OPPONENT')+'</div><div class="exhPick">'
       +'<button class="exhArr" data-exh="prev" data-side="'+t+'" aria-label="previous club">\u25c0</button>'
       +'<button class="exhClub'+(exhGridSide===t?' open':'')+'" data-exh="grid" data-side="'+t+'" title="pick from all the clubs">'
       +'<canvas class="exhKit" width="64" height="64" data-kit="'+kit.join(',')+'"></canvas>'
       +'<span class="exhName">'+club.name+'</span>'
-      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvr(clubSide(id).squad)+' \u00b7 '+kitKind(club,kit)+'</span></button>'
+      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvr(side.squad)+' \u00b7 '+side.form+' \u00b7 '+kitKind(club,kit)+'</span></button>'
       +'<button class="exhArr" data-exh="next" data-side="'+t+'" aria-label="next club">\u25b6</button></div>';
   }
   function drawKitSwatch(cv,k){                // (no sprites yet) a plain shirt and shorts
@@ -11217,7 +11277,11 @@
     document.getElementById('exhPlayers').innerHTML=sq.map((e,i)=>i===0?'':
       '<button class="exhPl'+(i===EXH.ctrl?' sel':'')+'" data-exh="ctrl" data-i="'+i+'"'+(styleOf(e)?' title="'+styleOf(e).blurb+'"':'')+'><span class="r">'+e.role+'</span><span class="n">#'+e.num+' '+e.name+'</span><span class="st">'+(styleOf(e)?styleOf(e).name:'')+'</span><span class="o">'+e.ovr+'</span></button>').join('');
   }
-  function exhSet(t,id){ if(t==='G') EXH.you=id; else EXH.opp=id; }
+  // (a new club of your own keeps you in the same position: the most central of its men there)
+  function exhSet(t,id){ if(t!=='G'){ EXH.opp=id; return; }
+    const was=(clubSide(EXH.you).squad[EXH.ctrl]||{}).role; EXH.you=id;
+    const sq=clubSide(id).squad; if(!was||(sq[EXH.ctrl]&&sq[EXH.ctrl].role===was)) return;
+    const same=sq.map((e,i)=>i).filter(i=>i>0&&sq[i].role===was); if(same.length) EXH.ctrl=same[Math.floor((same.length-1)/2)]; }
   function exhCycle(t,dir){
     const other=t==='G'?EXH.opp:EXH.you; let i=CLUBS.findIndex(c=>c.id===(t==='G'?EXH.you:EXH.opp));
     do{ i=(i+dir+CLUBS.length)%CLUBS.length; } while(CLUBS[i].id===other);
@@ -11308,8 +11372,8 @@
     EXH.on=false; setTeamsDefault();                 // career sides play in the GRN / RED kits
     const me=careerLineupYours(d);
     SQUAD.G=me.squad; LINEUP.G=me.lineup;
-    SQUAD.R=careerSquad(opp); LINEUP.R=defaultLineup();
-    ensureForms(d); myForm=d.formation; rForm='2-3-2'; TAC.G.width=widthObj(d.width); TAC.R.width=widthObj();
+    rForm=cwFormFor(opp); SQUAD.R=careerSquad(opp,rForm); LINEUP.R=defaultLineup();   // they line up in their own shape
+    ensureForms(d); myForm=d.formation; TAC.G.width=widthObj(d.width); TAC.R.width=widthObj();
     TAC.G.off=d.style||'neutral'; TAC.G.def=d.posture||'neutral';
     TAC.R.off=opp.style||'neutral'; TAC.R.def=opp.posture||'neutral';
     careerFix={opp:nf.opp, home:nf.home, recorded:false};

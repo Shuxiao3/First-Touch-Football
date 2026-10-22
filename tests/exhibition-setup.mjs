@@ -21,6 +21,7 @@ ok(/PREMIER LEAGUE/.test(await text(page, '#exhLeague')), 'the clubs are the Pre
 let G = await side(page, 'G'), R = await side(page, 'R');
 info(`defaults: ${G.name} (${G.meta}) v ${R.name} (${R.meta})`);
 ok(G.name && R.name && G.name !== R.name, 'two different clubs to start with');
+ok(/· 2-2-3 ·/.test(G.meta) && /· 3-1-3 ·/.test(R.meta), 'each club shows its own shape: ' + G.meta + ' / ' + R.meta);
 let pl = await players(page);
 ok(pl.length === 7 && pl.filter(x => x.sel).length === 1, 'seven outfield players to pick from, one picked');
 ok(pl.find(x => x.sel).role === 'ATT', 'by default you are the striker');
@@ -28,6 +29,7 @@ ok(pl.find(x => x.sel).role === 'ATT', 'by default you are the striker');
 await page.click('#exhSideG [data-exh="next"]'); await page.waitForTimeout(100);
 const G2 = await side(page, 'G');
 ok(G2.name !== G.name, 'the arrows change your club: ' + G.name + ' -> ' + G2.name);
+ok(/· 2-4-1 ·/.test(G2.meta) && (await players(page)).find(x => x.sel).role === 'ATT', 'Aston Villa play 2-4-1, and you are still their striker: ' + G2.meta);
 await page.click('#exhSideG [data-exh="prev"]'); await page.waitForTimeout(100);
 ok((await side(page, 'G')).name === G.name, '...and back');
 
@@ -53,6 +55,11 @@ await page.click('#menuBtn'); await page.click('#pauseMenu [data-pause="tactics"
 const youTab = await page.$$eval('#menuBody .sqTab', bs => (bs.find(b => /▶/.test(b.textContent)) || {}).textContent || '');
 ok(youTab.includes(mine.name.replace(/^#\d+ /, '')), 'you control the player you picked: ' + youTab);
 ok(/ARS/.test(await text(page, '.mteam[data-mteam="G"]')) && /LIV/.test(await text(page, '.mteam[data-mteam="R"]')), 'the tactics menu names both clubs');
+const formOf = t => page.evaluate(t => { document.querySelector('.tteam[data-tteam="' + t + '"]').click(); const a = document.querySelector('.form.active'); return a ? a.dataset.form : ''; }, t);
+ok(await formOf('G') === '2-2-3' && await formOf('R') === '2-2-3', 'both line up in their own shapes (Arsenal and Liverpool: 2-2-3)');
+await page.evaluate(() => document.querySelector('.form[data-form="3-3-1"]').click()); await page.waitForTimeout(100);   // (the opponent's, still picked)
+ok(await formOf('R') === '3-3-1' && (JSON.parse(await page.evaluate(() => localStorage.getItem('ft_clubsq')) || '{}').LIV || {}).form === '3-3-1', 'a shape changed in the match is kept with the club');
+await page.evaluate(() => document.querySelector('.tteam[data-tteam="G"]').click());
 // a stat edit is kept with the club, not over the saved custom squads
 await page.click('#editToggle'); await page.waitForTimeout(100);
 await page.evaluate(() => { const s = document.querySelector('#menuBody input[type=range]'); s.value = 9.5; s.dispatchEvent(new Event('input', { bubbles: true })); });
@@ -67,6 +74,7 @@ await page.reload(); await page.waitForTimeout(800);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForTimeout(200);
 G = await side(page, 'G'); R = await side(page, 'R'); pl = await players(page);
 ok(G.name === 'Arsenal' && R.name === 'Liverpool' && pl.find(x => x.sel).i === 1, 'the setup is remembered: ' + G.name + ' v ' + R.name);
+ok(/· 3-3-1 ·/.test(R.meta), '...and Liverpool in the shape you gave them: ' + R.meta);
 await page.keyboard.press('Escape'); await page.waitForTimeout(150);
 ok(!(await page.isVisible('#exhPanel')) && await page.isVisible('#smItems'), 'Escape goes back to the start menu');
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForTimeout(150);
