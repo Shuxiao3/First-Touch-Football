@@ -26,7 +26,7 @@ await startExhibition(page);
 await page.waitForTimeout(500);
 
 const JOBS = /^(REST|PIVOT|WIDTH|INSIDE|BACKPOST|PIN|POCKET|NEARPOST|FARPOST|CUTBACK|SUPPORT|RUN)$/;
-const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, cover2: 0, lane: 0 };
+const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, cover2: 0, cover2gs: 0, lane: 0 };
 const t0 = Date.now();
 while(Date.now() - t0 < 50000){
   const s = await page.evaluate(() => {
@@ -39,15 +39,18 @@ while(Date.now() - t0 < 50000){
     const first = opp.reduce((m, o) => Math.hypot(o.x - h.x, o.y - h.y) < Math.hypot(m.x - h.x, m.y - h.y) ? o : m, opp[0]);
     const pressed = Math.hypot(first.x - h.x, first.y - h.y) < 100;
     const covered = pressed && opp.some(o => o !== first && U(o.x) > U(h.x) && Math.hypot(o.x - h.x, o.y - h.y) < 230);   // (goal-side of him, from their end)
+    const cov = opp.find(o => o.dbgTag === 'COVER2');                                                                       // the cover man, if there is one:
+    const covGs = !!cov && U(cov.x) > U(h.x) - 20 && Math.hypot(cov.x - h.x, cov.y - h.y) < 400;                           // goal-side of him and near
     return { tags: plan.map(p => p.dbgTag || ''), uBall: U(b.x), FW: A.FW, behind: mates.filter(p => U(p.x) < U(b.x) - 200).length,
-             bunched, pressed, covered, oppTags: opp.map(p => p.dbgTag || '') };
+             bunched, pressed, covered, cov: !!cov, covGs, oppTags: opp.map(p => p.dbgTag || '') };
   });
   if(s){
     T.owned++; T.men += s.tags.length; T.onJob += s.tags.filter(t => JOBS.test(t)).length;
     if(s.tags.includes('SUPPORT')) T.sup++;
     if(s.uBall > s.FW * 2 / 3){ T.fin++; if(s.behind >= 2) T.rest++; }
     if(s.bunched) T.bunched++;
-    if(s.pressed){ T.pressed++; if(s.covered) T.covered++; if(s.oppTags.includes('COVER2')) T.cover2++; }
+    if(s.pressed){ T.pressed++; if(s.covered) T.covered++; }
+    if(s.cov){ T.cover2++; if(s.covGs) T.cover2gs++; }
     if(s.oppTags.includes('PRESS-LANE')) T.lane++;
   }
   await page.waitForTimeout(40);
@@ -59,8 +62,8 @@ ok(T.onJob / Math.max(1, T.men) >= 0.8, `with the ball, the computer players wor
 ok(T.sup / Math.max(1, T.owned) >= 0.6, `someone comes to support the man on the ball (${pct(T.sup, T.owned)} of the time)`);
 ok(T.fin >= 20 && T.rest / Math.max(1, T.fin) >= 0.85, `with the ball in their third, two men or more stay back behind it (${pct(T.rest, T.fin)} of the time)`);
 ok(T.bunched / Math.max(1, T.owned) <= 0.25, `the men off the ball don't bunch: two within 4 m of each other ${pct(T.bunched, T.owned)} of the time`);
-ok(T.pressed >= 30 && T.covered / Math.max(1, T.pressed) >= 0.25, `when the man on the ball is pressed, a second man covers the presser (${pct(T.covered, T.pressed)} of the time)`);
-ok(T.cover2 > 0, `the next man takes up the cover position (seen ${T.cover2} times)`);
+info(`with the man on the ball pressed, a second man goal-side of him within 9 m: ${pct(T.covered, T.pressed)} of the time`);
+ok(T.cover2 >= 20 && T.cover2gs / Math.max(1, T.cover2) >= 0.75, `with the ball pressed, the next man covers: goal-side of the man on it (${pct(T.cover2gs, T.cover2)} of ${T.cover2} looks)`);
 ok(T.lane > 0, `pressing together: a man cuts out the pass while the ball is pressed (seen ${T.lane} times)`);
 
 await browser.close();

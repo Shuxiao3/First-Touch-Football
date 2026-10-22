@@ -7384,8 +7384,8 @@
       }
       // COVER: with the man on the ball engaged, the next man sits ~5 m behind the presser at an angle, on the inside -- if
       // he's beaten, the cover's there. From the same line as the presser or the one behind (a centre-back only once he's
-      // in our half; a centre-back pair has its own cover: PAIR). The man covering keeps the job unless another's clearly
-      // better placed.
+      // in our half; a centre-back pair has its own cover: PAIR), a man already goal-side of the ball before one who'd have
+      // to get back past it. The man covering keeps the job unless another's clearly better placed.
       let cover2=null, cpt=null;
       const oursHalf=atkC*(c.x-FW/2)>0;                                       // (the man on the ball is in our half)
       const cm0=coverMem[p.team], covering=cm0&&cm0.q&&cm0.c===c;            // (once covering, until the presser's clearly off him)
@@ -7397,7 +7397,8 @@
         for(const q of mates){ if(q===engager||q===controlled||q.state!=='normal') continue;
           const qL=_rl(q.role); if(qL<_eL||qL>_eL+1) continue;
           if(q.role==='DEF' && !oursHalf) continue;
-          const dd=Math.hypot(q.x-cpt.x,q.y-cpt.y)-(covering&&cm0.q===q?60:0);
+          const dd=Math.hypot(q.x-cpt.x,q.y-cpt.y)-(covering&&cm0.q===q?60:0)
+                   + (atkC*(q.x-c.x)>-20?0:250);                                // (a man still behind the play has to get back first: one goal-side of him covers)
           if(dd<bd){ bd=dd; cover2=q; } }
         if(bd>420) cover2=null;                                               // nobody near enough to cover in time
       }
@@ -7413,7 +7414,7 @@
           if(bd>380) cutter=null; }
       }
       if(cutter===p){ p.dbgTag='PRESS-LANE'; p.pressRun=true; return steer(p,lpt.x,lpt.y,1.0); }
-      if(cover2===p){ p.dbgTag='COVER2'; return steer(p,cpt.x,cpt.y); }
+      if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>150) p.pressRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: get there at a sprint)
       if(coverMan===p){
         p.dbgTag='COVERBREAK';
         // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.
@@ -8737,7 +8738,7 @@
         // RECOVERING: lost it with me upfield of the ball -- sprint back goal-side of it (aiBrain sets the flag)
         const recovering = p.recover && oppHasBallTeam(p.team);
         // --- CRITICAL: always worth a sprint (down to a low stamina floor) ---
-        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press: see aiBrain)
+        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press, or getting into cover: see aiBrain)
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
         const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
