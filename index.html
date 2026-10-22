@@ -6238,7 +6238,7 @@
     p.aiActT-=dt*statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,2.0);p.runT-=dt;   // Off IQ: 1 = slow re-reads .. 10 = fast
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
-    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false;
+    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false; p.coverRun=false;
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -7414,7 +7414,7 @@
           if(bd>380) cutter=null; }
       }
       if(cutter===p){ p.dbgTag='PRESS-LANE'; p.pressRun=true; return steer(p,lpt.x,lpt.y,1.0); }
-      if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>150) p.pressRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: get there at a sprint)
+      if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>220) p.coverRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: at a sprint, with legs to spare)
       if(coverMan===p){
         p.dbgTag='COVERBREAK';
         // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.
@@ -8738,7 +8738,7 @@
         // RECOVERING: lost it with me upfield of the ball -- sprint back goal-side of it (aiBrain sets the flag)
         const recovering = p.recover && oppHasBallTeam(p.team);
         // --- CRITICAL: always worth a sprint (down to a low stamina floor) ---
-        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press, or getting into cover: see aiBrain)
+        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press: see aiBrain)
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
         const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
@@ -8748,7 +8748,7 @@
         // GETTING UP IN SUPPORT: our man on the ball is well upfield of me in their half and I'm on my way up to join him
         const supporting = carrier && carrier.team===p.team && !carrying && p.role!=='DEF' && p!==holderOf(p.team) &&
                            atkP*(carrier.x-p.x)>260 && atkP*(carrier.x-FW/2)>0 && atkP*ai.ix>0.5;
-        const opportunistic = onCounter || pressClose || driving || longRun || supporting;
+        const opportunistic = onCounter || pressClose || driving || longRun || supporting || !!p.coverRun;   // (a long way off the cover spot: see aiBrain)
 
         let doSprint=false;
         if(critical && sta>0.06) doSprint=true;            // push hard for the important stuff
