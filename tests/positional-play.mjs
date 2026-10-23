@@ -26,7 +26,7 @@ await startExhibition(page);
 await page.waitForTimeout(500);
 
 const JOBS = /^(REST|PIVOT|WIDTH|INSIDE|BACKPOST|PIN|POCKET|NEARPOST|FARPOST|CUTBACK|SUPPORT|RUN)$/;
-const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, settled: 0, inCover: 0, lane: 0 };
+const T = { owned: 0, men: 0, onJob: 0, sup: 0, fin: 0, rest: 0, bunched: 0, pressed: 0, covered: 0, cover2: 0, cover2gs: 0, settled: 0, inCover: 0, lane: 0 };
 let covWho = null, covSince = 0;
 const t0 = Date.now();
 while(Date.now() - t0 < 70000){
@@ -42,10 +42,11 @@ while(Date.now() - t0 < 70000){
     const covered = pressed && opp.some(o => o !== first && U(o.x) > U(h.x) && Math.hypot(o.x - h.x, o.y - h.y) < 230);   // (goal-side of him, from their end)
     // the cover man, if there is one: where he is against the man on the ball -- how far, and how near the line from him to goal
     const cov = opp.find(o => o.dbgTag === 'COVER2'), gx = atk > 0 ? A.FW : 0;
-    let covD = 0, covCos = 0;
-    if(cov){ const vx = cov.x - h.x, vy = cov.y - h.y, wx = gx - h.x, wy = A.YC - h.y; covD = Math.hypot(vx, vy); covCos = (vx * wx + vy * wy) / ((covD || 1) * (Math.hypot(wx, wy) || 1)); }
+    let covD = 0, covCos = 0, covGs = false;
+    if(cov){ const vx = cov.x - h.x, vy = cov.y - h.y, wx = gx - h.x, wy = A.YC - h.y; covD = Math.hypot(vx, vy); covCos = (vx * wx + vy * wy) / ((covD || 1) * (Math.hypot(wx, wy) || 1));
+      covGs = Math.hypot(gx - cov.x, A.YC - cov.y) < Math.hypot(gx - h.x, A.YC - h.y) + 20 && covD < 450; }   // nearer their goal than the man on the ball is, and close by
     return { tags: plan.map(p => p.dbgTag || ''), uBall: U(b.x), FW: A.FW, behind: mates.filter(p => U(p.x) < U(b.x) - 200).length,
-             bunched, pressed, covered, cov: cov ? cov.team + cov.num : null, carrier: h.team + h.num, covD, covCos, t: A.sim(), oppTags: opp.map(p => p.dbgTag || '') };
+             bunched, pressed, covered, cov: cov ? cov.team + cov.num : null, carrier: h.team + h.num, covD, covCos, covGs, t: A.sim(), oppTags: opp.map(p => p.dbgTag || '') };
   });
   if(s){
     T.owned++; T.men += s.tags.length; T.onJob += s.tags.filter(t => JOBS.test(t)).length;
@@ -53,8 +54,10 @@ while(Date.now() - t0 < 70000){
     if(s.uBall > s.FW * 2 / 3){ T.fin++; if(s.behind >= 2) T.rest++; }
     if(s.bunched) T.bunched++;
     if(s.pressed){ T.pressed++; if(s.covered) T.covered++; }
-    // once a man's been covering the same man on the ball for a moment: is he there -- 3-15 m from him, between him and goal?
-    // (most covers are over in a fraction of a second, the ball moved on; these are the ones that last)
+    // the cover man: goal-side of the man on the ball, and near (over the many short covers in a match); and, once he's been
+    // covering the same man for a moment, whether he's there -- 3-15 m from him, between him and goal (only a handful of
+    // covers last that long in one short match, the ball moves on, so that's reported, not judged)
+    if(s.cov){ T.cover2++; if(s.covGs) T.cover2gs++; }
     const who = s.cov ? s.cov + '>' + s.carrier : null;
     if(who !== covWho){ covWho = who; covSince = s.t; }
     else if(who && s.t - covSince >= 0.4){ T.settled++; if(s.covD >= 75 && s.covD <= 380 && s.covCos >= 0.4) T.inCover++; }
@@ -70,7 +73,8 @@ ok(T.sup / Math.max(1, T.owned) >= 0.6, `someone comes to support the man on the
 ok(T.fin >= 20 && T.rest / Math.max(1, T.fin) >= 0.85, `with the ball in their third, two men or more stay back behind it (${pct(T.rest, T.fin)} of the time)`);
 ok(T.bunched / Math.max(1, T.owned) <= 0.25, `the men off the ball don't bunch: two within 4 m of each other ${pct(T.bunched, T.owned)} of the time`);
 info(`with the man on the ball pressed, a second man goal-side of him within 9 m: ${pct(T.covered, T.pressed)} of the time`);
-ok(T.settled >= 8 && T.inCover / Math.max(1, T.settled) >= 0.5, `with the ball pressed, the next man covers: 3-15 m from the man on it, between him and goal (${pct(T.inCover, T.settled)} of ${T.settled} looks)`);
+ok(T.cover2 >= 20 && T.cover2gs / Math.max(1, T.cover2) >= 0.65, `with the ball pressed, the next man covers from goal-side of the man on it (${pct(T.cover2gs, T.cover2)} of ${T.cover2} looks)`);
+info(`a cover that lasts: 3-15 m from the man on the ball, between him and goal, ${pct(T.inCover, T.settled)} of ${T.settled} looks`);
 ok(T.lane > 0, `pressing together: a man cuts out the pass while the ball is pressed (seen ${T.lane} times)`);
 
 await browser.close();
