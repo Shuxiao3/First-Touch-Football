@@ -20,12 +20,13 @@ node tests/house-ui.mjs        # ~15s  — creation, the three House tabs, save 
 node tests/house-rollover.mjs  # ~10s  — a finished season is filed into career history
 node tests/house-match.mjs     # ~90s  — plays a career match, checks the report and payout
 node tests/house-season.mjs    # ~7min — plays five matches, checks accumulation
-node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit
+node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit, phone: press TRAP and drag to aim the touch
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it
 node tests/pass-shoot-lab.mjs  # ~1min — Pass Lab and Shooting Lab: calls, tallies, tuning, phone gestures
 node tests/exhibition-setup.mjs # ~20s  — exhibition setup: clubs, kits, the player you control, remembered, phone
 node tests/touch-sprint.mjs    # ~15s  — phone: push the stick past its ring to sprint, ease back in to stop
+node tests/touch-layout.mjs    # ~20s  — phone: SETTINGS > BUTTON LAYOUT, drag and size the buttons, kept in matches, RESET
 node tests/ai-shape.mjs        # ~50s  — computer players keep their side's logic while the ball is knocked on or passed
 node tests/positional-play.mjs # ~80s  — the neutral style: a job for every man with the ball, support, rest defence, spacing; cover and pressing together without it
 ```

@@ -136,7 +136,7 @@ ok(/perfect|clean|loose|heavy/.test(aiTally), 'the AI traps balls with graded to
 // ---- tune drawer ----
 await chip('tune');
 ok(await visible('#labTune'), 'TUNE opens the drawer');
-ok((await page.locator('#labDials input[type=range]').count()) === 11, 'eleven trap dials in the drawer');
+ok((await page.locator('#labDials input[type=range]').count()) === 16, 'sixteen trap dials in the drawer (five for the directional touch)');
 await page.evaluate(() => { const s = document.querySelector('#labDials [data-lk="trapWin"]'); s.value = 2; s.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(100);
 ok(/window -300 to/.test(await text('#labWinTxt')), 'doubling the window widens the meter: ' + await text('#labWinTxt'));
@@ -183,6 +183,27 @@ ok(await visible('#rScore'), 'score chip back for the match');
     const res = (await ph.textContent('#labResult')).trim();
     info('phone tap as it arrives (' + label + ') → ' + res);
     ok(label === 'TRAP' && /PERFECT|CLEAN|LOOSE|HEAVY/.test(res), 'phone: TRAP tapped as the ball arrives traps it');
+  }
+  // DIRECTIONAL FIRST TOUCH: press TRAP as it arrives and drag a way -- the touch goes that way. The press is timed from
+  // the finger landing; the drag can come just after the touch
+  { const cdp = await ctx.newCDPSession(ph);
+    for(const [dx, dy, arrow, wait] of [[0, -50, '↑', 0], [-50, 0, '←', 40]]){
+      const n = await ph.evaluate(() => { const m = /^(\d+) balls?/.exec(document.getElementById('labTally').textContent || ''); return m ? +m[1] : 0; });
+      await ph.tap('#labGoChip');
+      await ph.waitForFunction(() => { const c = document.getElementById('labCursor');
+        return c.style.display === 'block' && -0.35 + parseFloat(c.style.left) / 100 * 0.55 >= -0.03; }, null, { timeout: 15000, polling: 'raf' });
+      const b = await ph.$eval('#kickBtn', el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: b.x, y: b.y, id: 3 }] });
+      if(wait) await ph.waitForTimeout(wait);
+      for(let i = 1; i <= 5; i++){ await ph.waitForTimeout(12); await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: b.x + dx * i / 5, y: b.y + dy * i / 5, id: 3 }] }); }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await ph.waitForFunction(n => { const m = /^(\d+) balls?/.exec(document.getElementById('labTally').textContent || ''); return m && +m[1] > n; }, n, { timeout: 20000 });
+      const res = (await ph.textContent('#labResult')).trim();
+      info('phone: press TRAP and drag ' + arrow + ' → ' + res);
+      const off = /went (\d+)° off/.exec(res);
+      ok(new RegExp('aimed ' + arrow).test(res) && (/and went there/.test(res) || (off && +off[1] <= 45)), 'phone: press TRAP and drag ' + arrow + ': the touch goes that way');
+    }
+    ok(/\b2 aimed\b/.test(await ph.textContent('#labTally')), 'phone: the tally counts the aimed touches: ' + (await ph.textContent('#labTally')).trim());
   }
   await ph.tap('#menuBtn'); await ph.waitForTimeout(300);
   ok(await ph.isVisible('#pauseMenu.on'), 'phone: tapping ☰ opens the pause menu');

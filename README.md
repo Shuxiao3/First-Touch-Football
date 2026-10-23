@@ -35,7 +35,23 @@ stick follows your thumb, so you can't run off its edge. A double-tap on the lef
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
-like `L` there.
+like `L` there. Anywhere else on the right half, off the buttons, is TRAP too.
+
+**Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
+and **drag** the way you want the ball to go. The trap is timed from the moment your finger lands,
+exactly as a tap is; the drag only aims it. It can come before the ball gets to you or in the
+moment just after (up to 0.2 s after your finger lands: the touch is still on your foot), so a
+press-and-flick in one movement works. An arrow under your player shows the way it'll go. Perfect
+timing puts the ball where you aimed, a couple of metres ahead to run onto (your own pace along the
+aim is added); worse timing strays further off and is heavier, and turning the ball away from where
+it would come off you anyway narrows the timing window, more so on a quick ball. No drag is the plain
+trap. The push, aim error, turn difficulty, drag window and how far a drag has to go are dials (in
+the Trap Lab's TUNE drawer and Settings).
+
+**Button layout** — **SETTINGS → BUTTON LAYOUT** shows the game screen with PASS, SHOOT and CROSS on
+it: drag them wherever suits your thumbs, tap one and set its size (70 to 180%), RESET for the
+standard cluster in the corner, DONE to keep it. It's kept on the device and used in every match and
+lab; the left half is still the stick and the rest of the right half still TRAP.
 
 A ball you're running with is knocked a stride ahead every step or two, and a trapped ball comes
 off you before you gather it. Either way it's still yours while it's a step away: it's back at your
@@ -115,7 +131,10 @@ A ball machine serves at you (or at an AI receiver) and the lab shows, for every
   recent balls. With **GUIDE** on, a cursor shows the ball approaching in real time.
 - a **result line**: the grade, how many ms early or late you were, pace in and out, which way
   the ball came off you and how far you were off its line, and how long it took to settle —
-  or why it ran past (no press, pressed too early, locked out, pressed after it had gone).
+  or why it ran past (no press, pressed too early, locked out, pressed after it had gone). A
+  directional touch (on a phone: press TRAP and drag) reads where you aimed and how far off it
+  went, whether you dragged just after the touch, and how much turning it narrowed the window; an
+  amber line on the pitch shows the aim under the white one for where it went.
 - a **tally** of grades, balls that ran past, average error, and how many you settled.
 
 The chips across the top set the serve. Each has a desktop shortcut:
@@ -130,7 +149,7 @@ The chips across the top set the serve. Each has a desktop shortcut:
 | RECEIVER | `C` | You, or an AI teammate (kept on its own tally) |
 | GUIDE | `G` | Show or hide the approach cursor |
 | ▶ SERVE | `R` | Serve a ball now |
-| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, gather radius, AI timing error, AI reaction |
+| ⚙ TUNE | `T` | The trap's dials, live: ball control, sweet spot, window, late tolerance, pace kept on a perfect / botched touch, bounce pop, re-press lockout, gather radius, the directional touch's push, aim error, turn difficulty, drag window and drag distance, AI timing error, AI reaction |
 | clear | `X` | Reset the tally |
 
 The tuned values are the game's settings, so they carry into matches. **EXIT LAB** (next to ☰)
