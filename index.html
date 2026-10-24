@@ -3338,13 +3338,21 @@
   // a charge is inferred from distance so longer balls arc more, matching a player's charged pass.
   function passLoftD(d){ return clamp(40 + d*0.14, 90, 430); }   // auto loft by distance only: short = driven, long = lofted (extra args ignored)
   const PASS_ARRIVE=420;    // the most pace a pass keeps when it gets to the receiver (px/s, at Pass pace 1x)
-  function passSolve(d, arcMul){ arcMul=arcMul||1;
-    const vz = clamp(d*0.22*arcMul, 0, 520)*P.passLoft.val;  // loft grows with distance, scaled by the universal loft dial (arcMul lifts a chip)
+  function passSolve(d){
+    const vz = clamp(d*0.22, 0, 520)*P.passLoft.val;          // loft grows with distance, scaled by the universal loft dial (a chip: chipSolve)
     const shortBoost = clamp((260-d)/260,0,1)*360;    // very short passes need extra zip: friction kills a low-lofted ball fast
     // arrive with pace (short balls no longer die at the foot) -- but a flat ball spends longer on the grass, so the
     // solve strikes it harder, and a long one would get there hotter than a first touch can take: cap the arrival
     const vh = clamp(Math.min(gkSolvePower(d, vz)*1.64 + shortBoost, passArriveAt(d, vz, PASS_ARRIVE))*P.passPace.val, 440, 1800);
     return {vz:vz, vh:vh};
+  }
+  // A CHIP over a man in the way, dd along a pass of length d: just high enough to be over his head where he is (about
+  // 2.5 m, out of reach even of a man who jumps or chests it), coming down a little short of the receiver so it skips on
+  // to him. Solved for that flight -- a normal pass's arc doubled skied it 15 m up and on 15 m past the man it was for.
+  function chipSolve(d,dd){
+    const L=d*0.88, f=clamp(dd/L,0.2,0.8), apex=clamp(62/(4*f*(1-f)),70,170);   // a parabola through 62 px at the man
+    const vz=Math.sqrt(2*520*apex);
+    return {vz, vh:clamp(L*520/(2*vz),300,1800)};
   }
   // The pace to strike a ball (lifted with vz) so it's going at A when it has gone d: drag-free above 12 px,
   // the grass dragging at it below (as the physics step does).
@@ -4396,12 +4404,9 @@
     if(p.role==='DEF' && mate.role==='DEF') aerr*=0.45;      // defenders keep it tidy between themselves
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    // POWER from a target flight time, friction-aware, so it ARRIVES at the receiver
-    const frPerSec=Math.pow(1-P.friction.val,3.2);            // per-sec velocity retention
-    const T=clamp(d/420,0.30,1.25);                           // desired travel time
-    const avgKeep=Math.max(0.4,(1+frPerSec*T)/(1+T));         // avg pace retained over flight
-    const chipTgt=chipOverWindow(p, lead.x, lead.y);          // is there a defender to loft over?
-    const sol=passSolve(d, chipTgt?2.0:1);                    // chip arcs higher (well over a man); otherwise normal flight to the foot
+    // POWER solved so it ARRIVES at the receiver: chipped over a man in the way, otherwise the normal flight to his feet
+    const chipTgt=chipOverWindow(p, lead.x, lead.y);
+    const sol=chipTgt ? chipSolve(d,(chipTgt.x-ball.x)*dx+(chipTgt.y-ball.y)*dy) : passSolve(d);
     ball.vx=ax*sol.vh;ball.vy=ay*sol.vh;
     ball.vz=sol.vz+loft;
     ball.ownedBy=null;p.noTouchT=0.3;
@@ -5360,8 +5365,9 @@
     const atk=atkOf(team), u=clamp((atk>0?x:FW-x)/FW,0,1), base=0.008+0.04*Math.pow(u,2.5), sh=0.6*obXg0(x,y,atk>0?FW:0);
     return Math.max(base,sh)+0.25*Math.min(base,sh);
   }
-  // ...and how much of that the man with it keeps, with the nearest opponent nd px from him: hemmed in, not much
-  function obRoom(nd){ return 0.55+0.5*clamp((nd-35)/200,0,1); }
+  // ...and how much of that the man with it keeps, with the nearest opponent nd px from him: hemmed in, not much; all
+  // of it with nobody within 9 m
+  function obRoom(nd){ return 0.55+0.45*clamp((nd-35)/200,0,1); }
   // how soon opponent o can be within r of (x,y): a beat to react (still going the way he was), then flat out
   function obOppT(o,x,y,r){
     const k=o.team&&keepers.includes(o), rt=k?0.2:0.16, ox=o.x+(o.vx||0)*rt, oy=o.y+(o.vy||0)*rt;
@@ -5374,13 +5380,13 @@
     let n=1e9; for(const o of opps){ let d=Math.hypot(o.x-x,o.y-y)-sprintSpeedOf(o)*0.65*Math.max(0,tt); if(atk&&atk*(o.x-x)<-20) d*=1.5; if(d<n) n=d; }
     return Math.max(0,n);
   }
-  // A pass of length d, struck as passTo strikes it (arc 2: chipped over a man): when the ball is an eighth of the way
-  // along, a quarter, ... and how high it is then. Worked out once for each distance.
+  // A pass of length d, struck as passTo strikes it (chipped over a man dd along it, if dd): when the ball is an eighth
+  // of the way along, a quarter, ... and how high it is then. Worked out once for each distance.
   const obFlights=new Map();
-  function obFlight(d,arc){
-    const D=Math.max(48,Math.round(d/16)*16), key=D+'|'+arc+'|'+P.friction.val+'|'+P.passLoft.val+'|'+P.passPace.val;
+  function obFlight(d,dd){
+    const D=Math.max(48,Math.round(d/16)*16), DD=dd?Math.round(dd/16)*16:0, key=D+'|'+DD+'|'+P.friction.val+'|'+P.passLoft.val+'|'+P.passPace.val;
     let F=obFlights.get(key); if(F) return F;
-    const sol=passSolve(D,arc), st=1/60, frF=Math.pow(1-P.friction.val,st*3.2);
+    const sol=DD?chipSolve(D,DD):passSolve(D), st=1/60, frF=Math.pow(1-P.friction.val,st*3.2);
     F=[]; let x=0,z=0,v=sol.vh,w=sol.vz,t=0,k=1;
     while(k<=8&&t<5){
       if(z>0||w!==0){ w-=520*st; z+=w*st; if(z<=0){ z=0; w=w<-40?-w*0.45:0; } }
@@ -5464,7 +5470,7 @@
     // to his feet as passTo strikes it (chipped over a man in the way on a long one), or into his path weighted to
     // get there with him
     const tQ=L.running?Math.max(0,Math.hypot(q.x-tx,q.y-ty)-20)/sprintSpeedOf(q):0, tA=Math.max(0.45,tQ);
-    const chip=!L.running&&!!chipOverWindow(p,tx,ty), F=L.running?obThruFlight(d,tA):obFlight(d,chip?2:1), tEnd=F[7].t;
+    const chip=L.running?null:chipOverWindow(p,tx,ty), F=L.running?obThruFlight(d,tA):obFlight(d,chip?((chip.x-ball.x)*dx+(chip.y-ball.y)*dy)/d:0), tEnd=F[7].t;
     if(tEnd>4) return null;
     // the race for it along the way: each opponent's best chance, where he'd cut it out
     let safe=1, worst=0, cx=tx, cy=ty;
@@ -5512,6 +5518,12 @@
   function obCarryOpts(p,C,out){
     const vC=Math.max(80,(runSpeedOf(p)+sprintSpeedOf(p))*0.5*(1-dribSpeedPenOf(p))), H=230, a0=C.atk>0?0:Math.PI;
     const drib=statLerp(statOf(p,'dribbling',P.dribbling.val),-0.06,0.06), kpIn=(x)=>Math.abs(x-C.gx)<BX*1.6;
+    // ATTACKING THE SPACE: with room in front of him (nobody within ~6 m in the 120 degrees ahead, all of it at 14 m), a
+    // run at them is worth more than the ground it gains -- it draws a man out to meet him and opens a ball for someone
+    // else, which nothing here models -- so a run forward is credited for the room there is. Any run costs a little
+    // time, so running about with nothing in it doesn't beat keeping it.
+    let ahead=1e9; for(const o of C.opps){ const rx=C.atk*(o.x-p.x), ry=o.y-p.y; if(rx>0&&Math.abs(ry)<rx*1.73) ahead=Math.min(ahead,Math.hypot(rx,ry)); }
+    const space=clamp((ahead-150)/200,0,1);
     for(let i=0;i<OB_HEAD.length;i++){
       const a=a0+OB_HEAD[i], ux=Math.cos(a), uy=Math.sin(a);
       let s=0;
@@ -5526,9 +5538,12 @@
       }
       if(s<25) continue;
       const ex=p.x+ux*s, ey=p.y+uy*s, tE=0.1+s/vC, nd=obNearAt(C.opps,ex,ey,tE,C.atk), free=s>=H;
-      const pk=clamp((free?0.97:0.78+0.19*s/H)+drib,0.5,0.99);
+      // he keeps it, mostly: running on until a man could get to him doesn't lose it, it means deciding again with him
+      // closing (what that costs is in the room he'll have there); only a poor dribbler risks much
+      const pk=clamp((free?0.98:0.93+0.05*s/H)+drib,0.8,0.995);
       let v=obVal(p.team,ex,ey)*obRoom(nd);
       v=C.vHere+(v-C.vHere)*C.M.carry;                                   // (his taste for running with it)
+      const fw=clamp(C.atk*ux,0,1); v+=C.vHere*(0.35*fw*fw*space*C.M.carry-0.03*tE);
       if(ey<110||ey>FH-110) v*=0.92;                                     // toward the touchline: toward trouble
       if(p.role==='DEF'&&C.atk*(ex-FW/2)>FW*0.05&&!(TAC[p.team].off==='counter'&&transitionT[p.team]>0)) v*=0.85;   // a centre-back's job is behind it
       v+=obGain(C,ex);
@@ -5590,15 +5605,16 @@
   }
   function obGauss(){ return (Math.random()+Math.random()+Math.random()-1.5)*2; }
   // the pick: the best score, as he judges it (a lower Off IQ misjudges more), with a little loyalty to what he was
-  // already doing; while he's still getting it under control, only a ball that's clearly on goes first time
-  function obChoose(p,ob,opts,looking){
+  // already doing (less with a man closing in); while he's still getting it under control, only a ball that's clearly
+  // on goes first time
+  function obChoose(p,ob,opts,looking,C){
     const iq=statOf(p,'offIQ',P.offIQ.val), sdA=statLerp(iq,0.0015,0.0002), sdR=statLerp(iq,0.12,0.02);
     let keep=-1e9; for(const o of opts) if(!o.rel&&o.ev>keep) keep=o.ev;
     const firstTime=ob.pressed?0:0.006+0.8*Math.max(0,keep);
     let best=null, bs=-1e9;
     for(const o of opts){
       let s=o.ev+obGauss()*(sdA+sdR*Math.abs(o.ev));
-      if(ob.plan&&o.key===ob.plan.key) s+=0.0015+0.1*Math.abs(o.ev);
+      if(ob.plan&&o.key===ob.plan.key) s+=(C.prD<150?0.5:1)*(0.0015+0.1*Math.abs(o.ev));   // (less so with a man coming)
       if(looking&&o.rel) s-=firstTime;
       o.score=s;
       if(s>bs){ bs=s; best=o; }
@@ -5684,12 +5700,14 @@
     ob.seen=simNow;
     if(p.takeOn&&simNow-p.takeOn.at>0.1) p.takeOn=null;                  // (he lost it since)
     if(p.takeOn&&p.takeOn.phase!=='go'){ const r=obTakeOnStep(p,dt,C); if(r) return r; }   // committed: past him first
-    const looking=simNow<ob.look;
     if(C.prD<70) ob.pressed=true;
-    const closing=C.presser&&C.prD<75&&simNow-ob.scanT>0.08;             // a man arriving: decide now
+    const looking=simNow<ob.look||(ball.z>10&&!ob.pressed);             // (still up off his touch: he lets it drop first)
+    // a man arriving: decide now -- once he's on his way in, not once he's on him, so the ball goes before he gets there
+    const pr=C.presser, inbound=pr&&C.prD<130&&((pr.vx||0)*(p.x-pr.x)+(pr.vy||0)*(p.y-pr.y))/Math.max(1,C.prD)>40;
+    const closing=pr&&(C.prD<75||inbound)&&simNow-ob.scanT>0.08;
     if(simNow>=ob.next||closing){
       ob.scanT=simNow; ob.next=simNow+statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.14)*C.M.tempo;
-      const opts=obOptions(p,C,ob), pick=obChoose(p,ob,opts,looking);
+      const opts=obOptions(p,C,ob), pick=obChoose(p,ob,opts,looking,C);
       p.obLast={t:simNow, opts, pick, looking};
       if(pick&&pick.rel){ p.takeOn=null; return obExec(p,pick,C); }
       if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, phase:'approach', t:1.3, at:simNow}; }

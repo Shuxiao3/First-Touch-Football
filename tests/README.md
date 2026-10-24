@@ -29,7 +29,7 @@ node tests/touch-sprint.mjs    # ~15s  — phone: push the stick past its ring t
 node tests/touch-layout.mjs    # ~20s  — phone: SETTINGS > BUTTON LAYOUT, drag and size the buttons, kept in matches, RESET
 node tests/ai-shape.mjs        # ~50s  — computer players keep their side's logic while the ball is knocked on or passed
 node tests/positional-play.mjs # ~80s  — the neutral style: a job for every man with the ball, support, rest defence, spacing; cover and pressing together without it
-node tests/on-ball.mjs         # ~40s  — the computer's man on the ball: picks his best-scored option, looks up first, runs with it, few tackles; the decision-time dials
+node tests/on-ball.mjs         # ~50s  — the computer's man on the ball: picks his best-scored option, looks up first, runs with it, few tackles; the decision-time dials; passes land where aimed (no skied chips); with room ahead he runs into it
 ```
 
 `ai-shape.mjs`, `positional-play.mjs` and `on-ball.mjs` run on an instrumented copy of the game (written to a temp

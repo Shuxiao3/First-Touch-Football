@@ -220,7 +220,13 @@ test, and like the Trap Lab the values are the game's settings.
     (a ball in the air can't be cut out until it comes down), the passer's accuracy over that distance,
     and how tight they'll be on the receiver when it arrives. Its worth is where the receiver has it
     and how much room he has there; a runner through on goal is worth most of a shot.
-  - A carry is worth where he gets to before anyone can reach him.
+  - Over a man in the way, a long ball is chipped just high enough to be over his head where he is
+    (about 2.5 m) and comes down a little short of the receiver, skipping on to him. A ball still
+    bouncing up off his first touch, he lets drop before he plays it unless there's a man on him.
+  - A carry is worth where he gets to before anyone can reach him. With room in front of him (nobody
+    within about 6 m in the 120° ahead), a run forward is worth more than the ground it gains: it draws a
+    man out to meet him and opens a ball for someone else. So he attacks the space rather than turning
+    back with it, and he lets the ball go as a man comes in to meet him, not once he's on him.
   - A shot's chance comes from a table measured in this game: shots struck the way the computer
     strikes them, run onto from all over their half. About half go in from 8–16 m out and fairly
     central, few from 20 m, and almost none from right in front, where the keeper's out at your feet.
