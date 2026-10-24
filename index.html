@@ -1018,23 +1018,7 @@
     return d; }
   const TAC={G:{def:'neutral',off:'neutral',width:widthObj()}, R:{def:'neutral',off:'neutral',width:widthObj()}};
   const transitionT={G:0,R:0};   // counts down after a team wins the ball
-  // ---- TEAM STYLE LEVERS: every attacking-style delta reads from this one table ----
-  function styleLevers(team){
-    const off=TAC[team].off, tr=(off==='counter' && transitionT[team]>0);   // counter's transition window
-    return {
-      swCap:      off==='tiki'?0.40 : off==='wing'?0.60 : 0.52,   // side-switch width cap (x FH)
-      swCapFinal: off==='tiki'?0.26 : 0.34,                        // ...tighter in the final third
-      slope:      off==='tiki'?0.0022 : 0.0015,                    // near-option preference in side passes
-      tempo:      tr?0.55 : off==='tiki'?0.70 : 1,                 // post-pass think-time multiplier
-      driveGate:  off==='tiki'?210 : 150,                          // clear run needed before driving
-      fwdBackline:tr?0 : off==='direct'?300 : 380,                 // backline distance for the early forward ball
-      fwdGain:    tr?80 : off==='direct'?100 : off==='tiki'?190 : 140,
-      minSide:    off==='direct'?150 : 110,                        // shortest useful side pass
-      bylineNeed: off==='wing'?110 : 150,                          // byline room to feed the flank runner
-      rangeMul:   off==='direct'?1.15 : 1,                         // passing-range stretch
-      crossEase:  off==='wing'                                     // looser cross gates
-    };
-  }
+
   // when a team loses the ball, remember whether it was lost in the OPPONENT's half.
   // (used by low-block teams: if lost high, hold a neutral shape until the ball crosses
   // into our half, then drop into the low block; if lost in our half, low-block at once.)
@@ -1281,7 +1265,7 @@
     return {x:0,y:0,vx:0,vy:0,r:12,team,
       facing:{x:atkOf(team),y:0},carryAngle:0,stepPhase:0,sprintMoT:0,
       z:0,vz:0,state:'normal',stateT:0,tackleCd:0,noTouchT:0,
-      slideDx:1,slideDy:0,slideTried:false,aiActT:0,shotPoseT:0,shotPoseDir:null,passPoseT:0,passPoseDir:null,
+      slideDx:1,slideDy:0,slideTried:false,shotPoseT:0,shotPoseDir:null,passPoseT:0,passPoseDir:null,
       role:'MID',lineFrac:0.36,homeX:0,homeY:0,
       runT:0,runTarget:null,cmdShoot:0,gapRun:0,
       perc:null,reactT:0,jitterX:0,jitterY:0,         // delayed/noisy read of the carrier
@@ -1684,7 +1668,7 @@
   let kdShots=0,kdSaves=0,kdGoals=0,kdGoalLock=false;        // keeper-drill running tally (+ re-trigger lock)
   const halfLenSec=()=>Math.max(60,(P.halfMin?P.halfMin.val:3)*60);   // real seconds per half, from the Half length setting
   let matchClock=0, half=1, matchOver=false, breakT=0;  // breakT freezes play at half/full time
-  let ftPending=false, ftShot=false, ftLastTeam=null;   // 2nd-half "play the advantage" past full time
+  let ftPending=false, ftShot=false, ftLastTeam=null, ftT0=0;   // 2nd-half "play the advantage" past full time (since ftT0)
   let offsidePass=null;
   let restartT=0,restartInfo=null,restartLabel='';
   let headerT=0, defHeaderT=0;
@@ -3347,8 +3331,6 @@
   // reliably. Weak passers (low stat) keep it short; only elite passers ping it long. The AI uses
   // this to STOP attempting balls beyond its range (which passSpray would just spray anyway).
   function passRangeOf(p){ return statLerp(statOf(p,'passAcc',P.passAcc.val), 281, 713); }
-  // Is teammate q inside p's reliable passing range? mul lets a high-value ball stretch a touch.
-  function inRange(p,q,mul){ const open=opennessOf(p.team,q); return dist(p,q) <= passRangeOf(p)*(mul||1)*(1+0.20*open); }   // open target -> a bit farther
   // Aerial loft vs charge (0..1). Both endpoints come from the PASS POWER stat: the low-charge end
   // flattens as power rises (1.6 at 1 -> 1.2 at 10), the high-charge end stays at 2.5 either way.
   function aerialAt(charge){ return 1.0; }   // (legacy; loft is now distance-based in passLoftD)
@@ -4212,47 +4194,6 @@
     const a1=Math.atan2((YC-GOAL_W/2)-p.y, goalX-p.x);
     const a2=Math.atan2((YC+GOAL_W/2)-p.y, goalX-p.x);
     let d=Math.abs(a1-a2); if(d>Math.PI)d=2*Math.PI-d; return d;
-  }
-  // Should an AI carrier shoot from here? Angle-driven, modulated by finishing quality,
-  // how far the keeper is off his line, range and pressure. Ends in a probability ramp so a
-  // great look fires ~always, a half-chance is a coin-flip, and a poor angle ~never -- which
-  // stops every attacker letting fly from the same fixed distance.
-  // shot-decision math, factored out so the diagnostic overlay can read the exact same numbers
-  function shotOdds(p, atk, goalX, clearRun){
-    const dGme=Math.hypot(goalX-p.x, YC-p.y);   // TRUE distance to goal centre -- x-only distance made
-                                                // byline-wide spots read as point-blank with no range penalty
-    const ang=shotAngleOf(p, goalX);
-    // close-range finishing quality. Long shots are NO LONGER baked in here (that made high-long-shots players
-    // generally trigger-happy); they are handled by the distance term below instead.
-    const fin = statLerp(statOf(p,'shotAcc',P.shotAcc.val),0,1)*0.64
-              + statLerp(statOf(p,'composure',P.composure.val),0,1)*0.36;   // 0..1 finishing
-    const gk=keeperOf(atk>0?'R':'G');
-    const gkOff = gk ? clamp((dGme-Math.abs(goalX-gk.x))/Math.max(dGme,1),0,1) : 0;  // space between shooter and keeper
-    const pr=nearestOppTo(p,p); const presserD=pr?dist(pr,p):1e9;
-    let need = 0.90 - 0.42*fin - 0.24*gkOff;     // angle required to take it on (smaller = more willing)
-    // RANGE: a steeper, higher-capped distance penalty so nobody lets fly from absurd range. LONG SHOTS eases it
-    // (a specialist will try from a bit further) but only partially -- it extends how far out THEY specifically
-    // shoot rather than making them shoot more from everywhere.
-    const L = statLerp(statOf(p,'longShots',P.longShots.val),0,1);
-    need += clamp((dGme-150)/400, 0, 0.72) * (1 - 0.58*L);
-    if(dGme<120) need-=0.14;                      // point-blank: just hit it
-    if(presserD<70) need-=0.10;                   // tight marker: have a go before losing it
-    if(clearRun) need-=0.06;                      // genuinely through on goal
-    need=clamp(need, 0.30, 1.20);
-    let pShoot=clamp(0.32 + (ang-need)*2.4, 0, 1);   // lower base -> more selective overall (higher effective threshold)
-    pShoot*=clamp((ang-0.11)/0.06, 0, 1);            // HARD ANGLE FLOOR: below ~6° of goal mouth never shoot;
-                                                     // fade in by ~10° (re-rolled every tick, so any leak fires eventually)
-    return {ang, need, pShoot, dGme, presserD};
-  }
-  function aiTakesShot(p, atk, goalX, clearRun){ return Math.random() < shotOdds(p, atk, goalX, clearRun).pShoot; }
-  // clear space along the carrier->goal channel (diagnostic-only; mirrors the cascades' inline check)
-  function dbgGoalLane(p, goalX){
-    const gdx=goalX-p.x, gdy=YC-p.y, gl=Math.hypot(gdx,gdy)||1, ux=gdx/gl, uy=gdy/gl; let sLane=460;
-    for(const o of players)if(o.team!==p.team){
-      const rx=o.x-p.x, ry=o.y-p.y, along=rx*ux+ry*uy;
-      if(along>0&&along<460){ const perp=Math.abs(rx*(-uy)+ry*ux); if(perp<64)sLane=Math.min(sLane,along); }
-    }
-    return sLane;
   }
   function shotAccOf(p){ return statLerp(statOf(p,'shotAcc',P.shotAcc.val), 0.1, 0.9); }         // shot-accuracy stat -> how true it flies
   // Per-corner shot-quality model, shared by the AI aim (shootAt) and the DBG overlay so the two can never
@@ -5355,12 +5296,7 @@
     return worst;
   }
   function laneBlocked(p,q){ return laneClearance(p,q)<0.25; }
-  // how open is q in space? graded by distance to the nearest opponent.
-  function opennessOf(team,q){
-    let nd=1e9;
-    for(const o of players)if(o.team!==team){const d=dist(o,q);if(d<nd)nd=d;}
-    return clamp(nd/170,0,1);   // ~170+ away from any opponent = fully open
-  }
+
   // is q marked in front? an opponent goal-side of q and close = can't receive & turn
   function markedInFront(team,q){
     const atk=atkOf(team);
@@ -5375,713 +5311,394 @@
     }
     return worst;                                 // 0 = free in front, 1 = tightly marked
   }
-  // returns {target, score, quality} — quality 0..1 how good the best option is
-  function bestPass(p){
-    const atk=atkOf(p.team);
-    const otac=TAC[p.team].off;
-    // SPACING & ANTI-PING-PONG at the source: no passes to a teammate on my shoulder, and no
-    // returning it straight to the man who just gave it -- unless I'm being pressed hard
-    // (a squeezed carrier keeps his short emergency outlets and the wall-pass).
-    const _po=nearestOppTo(p,p), _hardBP=_po && dist(_po,p)<58;
-    let best=null,bs=-1e9,bq=0;
-    for(const q of teamOf(p.team)){
-      if(q===p)continue;
-      const d=dist(p,q);
-      if(d<70)continue;
-      if(!_hardBP && d<120)continue;
-      if(!_hardBP && p.lastPasserT>0 && q===p.lastPasser)continue;
-      if(inOffsidePos(q))continue;
-      let lane=laneClearance(p,q);
-      if(lane<=0)continue;                          // fully blocked, skip
-      const open=opennessOf(p.team,q);
-      // HARD RANGE GATE: no Hollywood balls. Beyond this passer's reliable range, only allow a
-      // genuinely open, clear THROUGH-BALL to a runner (a real over-the-top pass); skip everything else.
-      const maxMul=(p.role==='DEF'||p.role==='G')?2.0:1.5;
-      if(d > passRangeOf(p)*maxMul && !(open>0.55 && lane>0.6 && q.gapRun>0)) continue;
-      // judge by where the ball will ACTUALLY ARRIVE, not the receiver's current spot: the lane to
-      // the (lead) arrival must be clear too, and a defender mustn't beat the receiver to it.
-      const lp=passLead(p,q);
-      lane=Math.min(lane, laneClearance(p,lp));
-      { let oD=1e9; for(const o of players){ if(o.team===p.team)continue; const dd=Math.hypot(o.x-lp.x,o.y-lp.y); if(dd<oD)oD=dd; }
-        if(oD < Math.hypot(q.x-lp.x,q.y-lp.y)-4 && oD < 60) continue; }   // defender gets there first -> giveaway
-      const progress = Math.max(0, atk*(q.x-p.x)/600);   // 0 backward/square .. ~1 forward
-      // a forward ball only counts if the lane is clear (don't reward threading)
-      const safeForward = progress * lane;
-      // length penalty: relative to THIS passer's range. No penalty inside their comfortable
-      // range; ramps up (and past 1, for way-out-of-range balls) once it exceeds what they can hit.
-      const cmf = passRangeOf(p)*(1+0.20*open);          // an open target can be hit from a bit farther
-      let lenPen = clamp((d-cmf)/260,0,2.2);           // 0 inside range, ramps hard (and high) beyond it
-
-      // role-based desirability
-      const markFront = markedInFront(p.team,q);         // 0 free in front .. 1 tightly marked
-      let roleBonus=0;
-      if(q.role==='MID')      roleBonus = 1.3;            // building through midfield is preferred
-      else if(q.role==='ATT') roleBonus = 0.6;
-      else                    roleBonus = 0.2;           // DEF: safe recycle option, low priority
-
-      // WIDE SWITCH: a deep defender (or keeper) shouldn't always force it central —
-      // reward spreading the ball to an open wide teammate.
-      const passerDeep = (p.role==='DEF'||p.role==='G') && atk*(p.x-FW/2) < -0.15*(FW/2);
-      const qWide = Math.abs(q.y-YC)/(FH/2);             // 0 central .. 1 touchline
-      let wideSwitch = passerDeep ? qWide*open*0.9 : 0;  // open & wide = good out-ball
-
-      // --- TACTIC BIASES ---
-      let tacBonus=0;
-      if(otac==='tiki'){
-        // TIKI-TAKA: favour short, safe, retain possession. Reward short open passes,
-        // punish long balls harder, lean toward keeping it (even square/back is fine).
-        const shortOpen = clamp(1-(d/360),0,1)*open;      // short AND open
-        tacBonus += shortOpen*1.4 + lane*0.5;
-        lenPen *= 1.6;                                     // really discourage long balls
-        wideSwitch *= 0.6;                                 // less interested in big switches
-      } else if(otac==='central'){
-        // CENTRAL: funnel through the middle. Reward central targets & forward central
-        // threads; penalise wide targets and discourage switching it to the flanks.
-        const central = 1-qWide;                          // 1 central .. 0 wide
-        tacBonus += central*1.3 + (q.gapRun>0?central*0.8:0) + safeForward*central*0.6;
-        tacBonus -= qWide*1.1;                            // wide options less desirable
-        wideSwitch *= 0.3;
-      }
-
-      // discourage non-progressive cross-field SWITCHES (overused from midfield): a big sideways
-      // ball that isn't really advancing is penalised; a forward diagonal is exempt. Lightest for
-      // defenders, who are *meant* to spread play (they also get the wideSwitch bonus below).
-      const lateral = Math.abs(q.y-p.y)/FH;                     // 0 .. ~0.8 of the pitch travelled sideways
-      const switchy = lateral * clamp(1 - progress*1.5, 0, 1);  // sideways AND not going forward
-      const switchPen = switchy * (p.role==='MID' ? 2.6 : (p.role==='ATT' ? 1.6 : 0.8));
-      const score = open*1.4
-                  + lane*1.2
-                  + safeForward*1.3
-                  + roleBonus*1.6
-                  - lenPen*2.0                            // punish long balls hard
-                  - markFront*1.3               // don't pass into a man marked in front (near-giveaway)
-                  + (q.runTarget?0.4:0)
-                  + (q.gapRun>0?1.1:0)          // reward sliding it to a runner in behind
-                  + wideSwitch                  // deep defenders can spread it wide
-                  - switchPen                   // ...but don't spray needless cross-field switches (esp. midfield)
-                  + tacBonus;                   // attacking-style bias
-      // confidence to actually play it
-      const quality = clamp(open*0.45 + lane*0.4 + (1-markFront)*0.15, 0, 1);
-      if(score>bs){bs=score;best=q;bq=quality;}
-    }
-    return {target:best,score:bs,quality:bq};
-  }
   function countRunners(team){
     return players.filter(p=>p.team===team&&p.runTarget).length;
   }
 
-  // ===== UNIFIED CARRIER CASCADE for MIDFIELDERS & FORWARDS =====
-  // Strict priority when carrying the ball:
-  //  1) run toward GOAL if open  2) pass to a teammate with an opening ahead
-  //  3) run the BYLINE if open    4) pass to a teammate with an opening toward the byline
-  //  5) open SIDE pass            6) hold up & pivot for a short side pass
-  //  7) closed down, no side -> short BACK pass
-  //  8) no openings -> longer SIDE pass   9) longer BACK pass
-  // Returns a steer result; performs passes/shots as side-effects. Returns null if N/A.
-  function carrierCascade(p,dt,atk,goalX){
-    const YCc=YC;
-    const presser=nearestOppTo(p,p);
-    const presserD=presser?dist(presser,p):1e9;
-    const hardP=presserD<70;
-    // clear space along a unit direction (how far until an opponent blocks the channel)
-    const spaceAlong=(ux,uy,maxR)=>{
-      let s=maxR;
-      for(const o of players)if(o.team!==p.team){
-        const rx=o.x-p.x,ry=o.y-p.y, along=rx*ux+ry*uy;
-        if(along>0&&along<maxR){const perp=Math.abs(rx*(-uy)+ry*ux);if(perp<64)s=Math.min(s,along);}
-      }
-      return s;
-    };
-    const goalLaneOf=(q)=>{
-      const qgl=Math.hypot(goalX-q.x,YCc-q.y)||1; let s=460;
-      for(const o of players)if(o.team!==p.team){
-        const rx=o.x-q.x,ry=o.y-q.y,al=rx*(goalX-q.x)/qgl+ry*(YCc-q.y)/qgl;
-        if(al>0&&al<460){const pp=Math.abs(rx*(-(YCc-q.y)/qgl)+ry*(goalX-q.x)/qgl);if(pp<70)s=Math.min(s,al);}
-      }
-      return s;
-    };
-    // byline opening for a teammate: clear run toward the byline on their flank
-    const bylineRoomOf=(q)=>{
-      const dir=atk; let s=360;
-      for(const o of players)if(o.team!==p.team){
-        const rx=o.x-q.x,ry=o.y-q.y, along=rx*dir;
-        if(along>0&&along<360){const perp=Math.abs(ry);if(perp<70)s=Math.min(s,along);}
-      }
-      return s;
-    };
-    const dGme=Math.abs(goalX-p.x);
-    const SL=styleLevers(p.team);
-
-    // (0) TIGHT ANGLE & MARKED, with a free forward THROUGH ON GOAL -> square it to them.
-    // In the attacking third, outside the goalposts (poor angle), with a man on me (even behind):
-    // if a forward has broken clear with a clean route to goal and no marker, prioritise the pass.
-    {
-      const inAttThird = atk*(p.x-FW*0.5) > FW*0.16;
-      const tightAngle = Math.abs(p.y-YCc) > GOAL_W*0.5;     // beyond the posts -> bad shooting angle
-      const marked     = presserD < 100;                     // someone on me, including from behind
-      const inShotRange= dGme < statLerp(statOf(p,'longShots',P.longShots.val),178,245);  // only where they'd normally shoot
-      if(inAttThird && tightAngle && marked && inShotRange){
-        let best=null,bd=1e9;
-        for(const q of teamOf(p.team)){
-          if(q===p||q.role==='DEF')continue;
-          if(inOffsidePos(q))continue;
-          if(atk*(q.x-FW*0.5)<=0)continue;                   // in the attacking half
-          if(goalLaneOf(q)<300)continue;                     // genuinely through on goal (clean route)
-          if(Math.abs(goalX-q.x)>statLerp(statOf(q,'longShots',P.longShots.val),178,245))continue;   // and within their OWN shooting range
-          if(Math.abs(q.y-YCc)>GOAL_W*0.5)continue;          // within the goalpost lines (a central chance, not wide)
-          if(atk*(q.x-p.x) < -20)continue;                   // no more than 20px behind the ball line (don't drop it back)
-          if(dist(p,q)<100)continue;                         // a square to a man beside me achieves nothing
-          if(p.lastPasserT>0 && q===p.lastPasser)continue;   // no final-third ping-pong
-          const mk=nearestOppTo(q,q);
-          if(mk && dist(mk,q)<120)continue;                  // and unmarked
-          if(laneClearance(p,q)<0.40)continue;               // I can actually find them
-          if(!inRange(p,q,1.2))continue;                     // and inside my range (small stretch for a clear chance)
-          const gd=Math.abs(goalX-q.x);
-          if(gd<bd){bd=gd;best=q;}                            // prefer the one nearest goal
-        }
-        if(best){ passTo(p,best); p.aiActT=0.7*SL.tempo; return steer(p,goalX,YCc); }  // lead the ball into space in front of the runner
-      }
-    }
-
-    // (1) RUN TOWARD GOAL if the lane is open
-    const gdx=(goalX-p.x), gdy=(YCc-p.y), gl=Math.hypot(gdx,gdy)||1;
-    const goalLane=spaceAlong(gdx/gl,gdy/gl,460);          // straight-at-goal channel (kept for the SHOOT read below)
-    const canAdvance=atk*(goalX-p.x)>100;
-    // RUN-LANE SEARCH: of several forward headings (straight at goal / vertical to the byline /
-    // angled out toward the touchline), pick the one we can carry FARTHEST before a defender's
-    // meeting-point cuts us off -- so we don't blindly run into goal-center traffic.
-    const rSide=(p.y>=YCc?1:-1);
-    const runCands=[
-      {x:goalX, y:YCc},                                    // at goal
-      {x:goalX, y:p.y},                                    // vertical to the byline (hold current width)
-      {x:goalX, y:clamp(p.y+rSide*FH*0.12,70,FH-70)},      // angled out a little
-      {x:goalX, y:clamp(p.y+rSide*FH*0.26,70,FH-70)},      // angled out toward the corner
-      {x:clamp(p.x+atk*320,40,FW-40), y:YCc},              // CUT INSIDE: short diagonal into the central corridor
-      {x:goalX, y:clamp(YCc+(p.y-YCc)*0.35,70,FH-70)}      // angled IN a little (between my width and centre)
-    ];
-    const cSpd=Math.max(120,sprintSpeedOf(p));
-    const rOpps=[]; for(const ro of players) if(ro.team!==p.team && ro.role!=='G') rOpps.push(ro);
-    // farthest we can travel toward (tx,ty) before any defender (flat-out, short reaction lag) reaches our path
-    const clearRunTo=(tx,ty)=>{ let ux=tx-p.x,uy=ty-p.y; const RL=Math.hypot(ux,uy)||1; ux/=RL;uy/=RL;
-      const cap=Math.min(480,RL); let s=28;
-      for(; s<=cap; s+=28){ const px=p.x+ux*s, py=p.y+uy*s;
-        if(px<30||px>FW-30||py<40||py>FH-40) break;
-        const t=s/cSpd; let hit=false;
-        for(const ro of rOpps){ const dd=Math.hypot(ro.x-px,ro.y-py);
-          if(dd <= sprintSpeedOf(ro)*Math.max(0,t-0.12)+26){ hit=true; break; } }
-        if(hit) break; }
-      return s-28; };
-    let bestT=runCands[0], bestScore=-1, bestClear=0, goalFullCd=-1;
-    for(const rc of runCands){ const cd=clearRunTo(rc.x,rc.y);
-      const cln=Math.hypot(rc.x-p.x,rc.y-p.y)||1, gw=((rc.x-p.x)*gdx+(rc.y-p.y)*gdy)/(cln*gl);  // goal-wardness cosine
-      if(rc===runCands[0] && cd>=Math.min(480,cln)-28) goalFullCd=cd;   // the straight-at-goal run is clear the WHOLE way
-      const ex=p.x+((rc.x-p.x)/cln)*cd, ey=p.y+((rc.y-p.y)/cln)*cd;   // where this clear run ENDS
-      const angE=shotAngleOf({x:ex,y:ey},goalX);                       // how wide the goal is FROM THERE
-      const wideE=Math.max(0,Math.abs(ey-YCc)-GOAL_W*0.55);            // ...and how far OUTSIDE the posts it strands us
-      const sc=cd*0.30 + angE*300 - wideE*0.45 + Math.max(0,gw)*10;    // end the run where the goal is widest; distance is secondary
-      if(sc>bestScore){ bestScore=sc; bestT=rc; bestClear=cd; } }
-    // THROUGH ON GOAL: if the at-goal route is fully clear, take it outright -- never turn away
-    // from goal just because a LONGER sideways lane exists (route scores are length-capped by
-    // target distance, and near goal the direct target is always the closest one).
-    if(goalFullCd>=0){ bestT=runCands[0]; bestClear=goalFullCd; }
-    // FORWARD PASS THAT OUT-GAINS THE CARRY: deep in buildup (not through, out of shot range),
-    // an open teammate ahead who gains meaningfully MORE ground than our best clear carry beats
-    // driving -- otherwise open grass ahead makes the carrier blind to forward passes.
-    let fwdBest=null; { let bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p||q.role==='DEF')continue;
-        if(inOffsidePos(q))continue;
-        if(atk*(q.x-p.x)<40)continue;                 // must be ahead of me
-        if(dist(p,q)<120)continue;                    // not to someone on my shoulder
-        if(laneClearance(p,q)<0.45)continue;          // I can reach them
-        if(goalLaneOf(q)<160)continue;                // their route forward/goal is open
-        if(!inRange(p,q,SL.rangeMul))continue;        // only forward balls inside my passing range
-        const sc=atk*(q.x-FW/2) + (q.gapRun>0?160:0) + goalLaneOf(q)*0.25;
-        if(sc>bsc){bsc=sc;fwdBest=q;}
-      } }
-    const inShotRangeNow = dGme < statLerp(statOf(p,'longShots',P.longShots.val),178,245)+40;
-    let lastDefX=goalX; { let bd2=1e9; for(const o of players){ if(o.team===p.team||o.role==='G')continue; const dgo=atk*(goalX-o.x); if(dgo<bd2){bd2=dgo;lastDefX=o.x;} } }
-    const farFromLine = atk*(lastDefX-p.x) > SL.fwdBackline;      // the opponent backline is still a long way off
-    // A RUNNER IN BEHIND (making his run past their line, onside): slip him in now, before he's offside or the gap
-    // shuts -- unless I'm through on goal myself. The ball goes in behind them, into the space in his path, as he
-    // arrives at their line: forward of me, a lane to it, and nobody (keeper included) there before him. He can be
-    // level with me -- a diagonal run off my shoulder is the classic one.
-    if(goalFullCd<0){
-      let runner=null, rsc=-1e9; const ol=offsideLineX(p.team);
-      for(const q of teamOf(p.team)){
-        if(q===p || !(q.gapRun>0) || inOffsidePos(q) || atk*(q.x-ol) < -70) continue;
-        const L=passLead(p,q);
-        if(atk*(L.x-ol) < 20 || atk*(L.x-p.x) < 30 || laneClearance(p,L) < 0.45 || laneClearance(p,q) < 0.35) continue;
-        if(!inRange(p,q,1.2*SL.rangeMul)) continue;
-        const qT=Math.hypot(q.x-L.x,q.y-L.y); let oD=1e9;
-        for(const o of players) if(o.team!==p.team) oD=Math.min(oD,Math.hypot(o.x-L.x,o.y-L.y));
-        for(const k of keepers) if(k.team!==p.team) oD=Math.min(oD,Math.hypot(k.x-L.x,k.y-L.y)-30);   // a keeper comes off his line for it
-        if(oD < qT+15) continue;
-        const sc=atk*(L.x-FW/2) - Math.abs(L.y-YCc)*0.3 + Math.min(oD-qT,200)*0.5;
-        if(sc>rsc){ rsc=sc; runner=q; }
-      }
-      if(runner){ passTo(p,runner); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc); }
-    }
-    // A SIGHT OF GOAL (not through on goal -- then I drive in closer, below): within my range (Long Shots stretches
-    // it to the edge of the box and beyond), a corner the keeper can't cover with nobody on the line to it, and
-    // nobody right on me -- have a go. Weighed every 0.4 s rather than every frame.
-    if(goalFullCd<0 && (p.lookShotT=(p.lookShotT||0)-dt)<=0){
-      p.lookShotT=0.4;
-      const LSn=statLerp(statOf(p,'longShots',P.longShots.val),0,1), dTrue=Math.hypot(goalX-p.x,YCc-p.y);
-      if(dTrue < 300+260*LSn && atk*(goalX-p.x)>80 && presserD>45 && shotAngleOf(p,goalX)>0.30){
-        const cq=(ev=>ev[ev.pick])(evalShotCorners(p,atk,0.9,p.x,p.y));
-        if(cq.qLane>0.7 && Math.random() < clamp((cq.q-0.15)*1.6,0,0.9)*(0.6+0.4*LSn)){
-          shootAt(p,atk,0,0.9,aiCurlFor(p,atk)); p.aiActT=0.8; return steer(p,goalX,YCc);
-        }
-      }
-    }
-
-    // SET UP A SHOT: in the final third (and not through myself), a teammate with a clearly better sight of goal
-    // than mine -- a wider angle on it, inside his range, nobody on him -- and a lane to him: give it to him
-    if(goalFullCd<0 && atk*(p.x-FW/2) > FW/6){
-      const myAng=shotAngleOf(p,goalX); let best=null, bsc=0;
-      for(const q of teamOf(p.team)){
-        if(q===p || q.role==='G' || inOffsidePos(q)) continue;
-        const dq=Math.hypot(goalX-q.x,YCc-q.y), angQ=shotAngleOf(q,goalX);
-        if(dq > 330+200*statLerp(statOf(q,'longShots',P.longShots.val),0,1) || angQ < Math.max(0.42, myAng+0.12)) continue;
-        if(dist(p,q)<100 || (p.lastPasserT>0 && q===p.lastPasser && !hardP)) continue;
-        const mk=nearestOppTo(q,q); if(mk && dist(mk,q)<85) continue;   // free to strike it
-        if(laneClearance(p,q)<0.5 || !inRange(p,q,SL.rangeMul)) continue;
-        const sc=angQ*300 - dq*0.25 + (mk?Math.min(dist(mk,q),220):220)*0.4;
-        if(sc>bsc){ bsc=sc; best=q; }
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc); }
-    }
-
-    // TAKE HIM ON: one man in front of me, goal-side, nobody covering behind him, and I'm a dribbler (the better
-    // the dribbler, the more often) with a head of steam, in their half: I run at him to make him commit, then cut
-    // sharply past him on the side with more room (a sharp cut at pace wrong-foots a man diving in -- see
-    // beatTheChallenge) and go.
-    if(p.takeOn && simNow-p.takeOn.at>0.1) p.takeOn=null;              // (I lost it since)
-    if(p.takeOn){
-      const T=p.takeOn, d=T.who; T.at=simNow; T.t-=dt;
-      if(T.t<=0 || !d) p.takeOn=null;
-      else if(T.phase==='approach'){
-        if(atk*(d.x-p.x)<0 || dist(p,d)>190 || d.state!=='normal') p.takeOn=null;
-        else if(dist(p,d)<60){ T.phase='cut'; T.t=0.32; T.hx=atk*0.34; T.hy=T.side*0.94; }
-        else { p.sprint=p.stamina>0.15; return steer(p, d.x, d.y-T.side*18, 1.0); }   // straight at him, leaning the other way
-      }
-      if(p.takeOn && T.phase==='cut'){
-        p.sprint=p.stamina>0.1; p.facing={x:T.hx,y:T.hy}; p.carryAngle=Math.atan2(T.hy,T.hx);
-        if(T.t<=dt){ T.phase='go'; T.t=0.6; }
-        return steer(p, p.x+T.hx*140, p.y+T.hy*140, 1.0);
-      }
-      if(p.takeOn && T.phase==='go'){ p.sprint=p.stamina>0.1; return steer(p, goalX, clamp(p.y+(YCc-p.y)*0.3,60,FH-60), 1.0); }
-    }
-    if(!p.takeOn && (p.takeOnCd=(p.takeOnCd||0)-dt)<=0 && goalFullCd<0 && presser && atk*(p.x-FW/2)>-FW*0.05 &&
-       presserD>65 && presserD<150 && atk*(presser.x-p.x)>30 && Math.hypot(p.vx,p.vy)>runSpeedOf(p)*0.45){
-      p.takeOnCd=0.5;
-      let covered=false;
-      for(const o of players){ if(o.team===p.team||o===presser) continue; if(atk*(o.x-p.x)>0 && Math.hypot(o.x-presser.x,o.y-presser.y)<170){ covered=true; break; } }
-      if(!covered && Math.random()<clamp((statOf(p,'dribbling',P.dribbling.val)-5)/5,0,0.7)){
-        const up=spaceAlong(0,-1,240), dn=spaceAlong(0,1,240);
-        const side = p.y<160 ? 1 : p.y>FH-160 ? -1 : (dn>up ? 1 : -1);
-        p.takeOn={who:presser, side, phase:'approach', t:1.3, at:simNow}; p.takeOnCd=3.5;
-        p.sprint=p.stamina>0.15; return steer(p, presser.x, presser.y-side*18, 1.0);
-      }
-    }
-    if(fwdBest && goalFullCd<0 && !inShotRangeNow && farFromLine && atk*(fwdBest.x-p.x) > SL.fwdGain){
-      passTo(p,fwdBest); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc);
-    }
-    if((bestClear>SL.driveGate || goalFullCd>=0) && canAdvance){
-      // THROUGH ON GOAL? lane very open AND no defender goal-side between me and the net.
-      // If so, DON'T shoot from distance — drive at the keeper and shoot once close (or once
-      // the keeper rushes out and commits, so we can slot/dink past him).
-      const gk=keeperOf(atk>0?'R':'G');
-      const gkD = gk ? Math.abs(goalX-gk.x) : 0;          // how far the keeper is off his line
-      const keeperRushing = gk && Math.abs(gk.y-p.y)<70 && (dGme - gkD) < 150; // closing me down
-      const clearRun = goalLane>300;                       // genuinely through, not just a gap
-      if(aiTakesShot(p,atk,goalX,clearRun) || keeperRushing){
-        const aimC=clamp((YCc-p.y)/(GOAL_W*0.9),-1,1);
-        shootAt(p,atk,aimC,clamp(0.62+dGme/1100,0.62,1),aiCurlFor(p,atk));
-        p.aiActT=0.8; return steer(p,goalX,YCc);
-      }
-      // DRIVE the most open forward heading (toward goal, the byline, or angled out)
-      p.aiActT=0.2; p.sprint=p.stamina>0.12;
-      return steer(p, clamp(bestT.x,40,FW-40), clamp(bestT.y,60,FH-60), 1.0);
-    }
-
-    // (2) PASS to a teammate with an OPENING AHEAD (picked above, before the drive gate)
-    if(fwdBest){ passTo(p,fwdBest); p.aiActT=0.6*SL.tempo; return steer(p,goalX,YCc); }
-
-    // (2.4) CUTBACK: deep and wide with an OPEN teammate attacking the box -> the pull-back
-    // beats a hopeful cross. The cross (2.5) below only remains for when NO open box pass exists.
-    {
-      const deepWide = (atk>0 ? p.x>FW-BX-110 : p.x<BX+110) && Math.abs(p.y-YCc)>GOAL_W*0.5+20;
-      if(deepWide){
-        let best=null,bsc=-1;
-        for(const q of teamOf(p.team)){
-          if(q===p||q.role==='DEF')continue;
-          if(inOffsidePos(q))continue;
-          const inBoxish=(atk>0 ? q.x>FW-BX-80 : q.x<BX+80) && Math.abs(q.y-YCc)<BY+10;
-          if(!inBoxish)continue;                          // must be attacking the box
-          if(atk*(q.x-p.x)>40)continue;                   // cutback target sits LEVEL or BEHIND the byline carrier
-          if(dist(p,q)<110)continue;                      // the pull-back must actually travel
-          const mk=nearestOppTo(q,q);
-          if(mk && dist(mk,q)<110)continue;               // genuinely open to take the shot
-          if(laneClearance(p,q)<0.45)continue;            // I can actually find them
-          if(!inRange(p,q,1.1*SL.rangeMul))continue;
-          const sc=shotAngleOf(q,goalX)*300 + (mk?Math.min(dist(mk,q),220):220)*0.3;   // best strike position wins
-          if(sc>bsc){bsc=sc;best=q;}
-        }
-        if(best){ passTo(p,best); p.aiActT=0.7*SL.tempo;
-          lastGrade='CUTBACK';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-          return steer(p,goalX,YCc); }
-      }
-    }
-
-    // (2.5) CROSS: if I'm WIDE & well ADVANCED with an OPEN cross and one of ours can attack the ball in the box
-    // (see crossSpot -- he needn't be standing in it), whip it in (preferred over running the byline when it's on).
-    {
-      const wideNow=Math.abs(p.y-YCc)>FH*0.22;
-      const advNow =atk*(p.x-FW/2)>FW*0.22;
-      const frontClear=spaceAlong(atk,0,200)>(SL.crossEase?110:140);     // nobody right in front blocking the cross
-      const cs=(wideNow && advNow && frontClear && presserD>(SL.crossEase?55:70)) ? crossSpot(p) : null;
-      if(cs && cs.margin>(SL.crossEase?-0.1:0.05)){
-        aiCross(p,cs); p.aiActT=1.1*SL.tempo;
-        lastGrade='CROSS';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-        return steer(p,p.x,p.y,0.2);
-      }
-    }
-
-    // (3) RUN THE BYLINE if it's open (drive the flank channel toward the byline)
-    const mySideSign = p.y<=YCc ? -1 : 1;
-    const bylineSpace=spaceAlong(atk,0,340);
-    const atByline = atk>0 ? p.x>FW-BX-120 : p.x<BX+120;
-    const pinned = hardP && atk*(presser.x-p.x) > -20;   // closed down by a man level with me or goal-side: no run
-    if(bylineSpace>150 && !atByline && Math.abs(p.y-YCc)>FH*0.16 && !pinned){
-      const ty2=YCc+mySideSign*(FH*0.34);
-      p.aiActT=0.22; p.sprint=p.stamina>0.12;
-      return steer(p, clamp(p.x+atk*280,40,FW-40), clamp(ty2,60,FH-60), 1.0);
-    }
-
-    // (4) PASS to a teammate with an OPENING TOWARD THE BYLINE
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p||q.role==='DEF')continue;
-        if(inOffsidePos(q))continue;
-        if(laneClearance(p,q)<0.45)continue;
-        const wideEnough=Math.abs(q.y-YCc)>FH*0.18;     // out near a flank
-        if(!wideEnough)continue;
-        if(bylineRoomOf(q)<SL.bylineNeed)continue;      // they have room to attack the byline
-        if(dist(p,q)<130)continue;                      // not to someone on my shoulder
-        if(p.lastPasserT>0 && q===p.lastPasser)continue;
-        if(!inRange(p,q,SL.rangeMul))continue;          // inside my passing range
-        const sc=bylineRoomOf(q)+atk*(q.x-FW/2)*0.4;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.55*SL.tempo; return steer(p,goalX,YCc); }
-    }
-
-    // (5) open SIDE pass (a roughly-level teammate with a clear, open lane)
-    {
-      let best=null,bsc=-1;
-      const inFinal5 = atk*(p.x-FW/2) > FW/6;           // carrier in the FINAL third
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        if(inOffsidePos(q))continue;
-        if(Math.abs(atk*(q.x-p.x))>200)continue;        // roughly level
-        if(p.lastPasserT>0 && q===p.lastPasser && !hardP)continue;   // don't ping the ball straight back (a pressured wall-pass is fine)
-        if(dist(p,q)<SL.minSide)continue;                // a side pass that travels nowhere achieves nothing
-        const dy=Math.abs(q.y-p.y);
-        if(dy>FH*SL.swCap)continue;                      // never the full-width spray
-        if(inFinal5 && dy>FH*SL.swCapFinal)continue;     // deep in the final third, only TIGHT switches
-        if(!inRange(p,q,SL.rangeMul))continue;           // a switch must be inside MY passing range like any other ball
-        const lane=laneClearance(p,q), open=opennessOf(p.team,q);
-        if(lane<0.5||open<0.5)continue;                 // must be genuinely OPEN
-        const sc=lane+open - dist(p,q)*SL.slope;        // the NEAREST open option wins; switch only when nothing closer is on
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.5*SL.tempo; return steer(p,goalX,YCc); }
-    }
-
-    // (6) HOLD UP & PIVOT to find an open short side pass (not under hard pressure)
-    if(!hardP){
-      // pivot: shield, face play, drift slightly to open a short angle, keep looking
-      let hx=p.x,hy=p.y;
-      if(presser){
-        const ax2=p.x-presser.x, ay2=p.y-presser.y, al=Math.hypot(ax2,ay2)||1;
-        p.facing={x:ax2/al,y:ay2/al}; p.carryAngle=Math.atan2(ay2,ax2);
-        // pivot toward the more open side to create a short passing angle
-        const openUp=spaceAlong(0,-1,160), openDn=spaceAlong(0,1,160);
-        const pv=openUp>openDn?-1:1;
-        hx=p.x+(ax2/al)*22; hy=clamp(p.y+pv*26,60,FH-60);
-      }
-      p.aiActT=0.16;
-      // short, open side pass if one is there
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        if(inOffsidePos(q))continue;
-        const d=dist(p,q); if(d>300)continue;           // SHORT
-        if(d<SL.minSide)continue;                        // ...but not a zero-value tap to someone on my shoulder
-        if(p.lastPasserT>0 && q===p.lastPasser)continue; // and not straight back to the man who just gave it to me
-        if(Math.abs(atk*(q.x-p.x))>200)continue;        // side-ish
-        const lane=laneClearance(p,q), open=opennessOf(p.team,q);
-        if(lane<0.5)continue;
-        const sc=lane+open;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.5; return steer(p,goalX,YCc); }
-      return steer(p,hx,hy,0.35);                        // hold up & keep pivoting
-    }
-
-    // ---- closed down (hardP) ----
-    // (7) short SIDE pass if open; else a HIGH-QUALITY short BACK pass. A poor backward ball is NOT
-    // forced here -- we'd rather shield & dribble out (7.5) than concede possession going backward.
-    {
-      let sideShort=null,ssc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        const d=dist(p,q); if(d>320)continue;
-        if(Math.abs(atk*(q.x-p.x))>180)continue;         // roughly level
-        const lane=laneClearance(p,q);
-        if(lane<0.45)continue;
-        const sc=lane - d/600;
-        if(sc>ssc){ssc=sc;sideShort=q;}
-      }
-      if(sideShort){ passTo(p,sideShort); p.aiActT=0.55; return steer(p,goalX,YCc); }
-      let backShort=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        const d=dist(p,q); if(d>320)continue;            // short
-        if(atk*(q.x-p.x)>-20)continue;                   // behind me (a back option)
-        const lane=laneClearance(p,q), open=opennessOf(p.team,q);
-        if(lane<0.6 || open<0.5)continue;                // HIGH quality only (clear lane + open man)
-        const sc=lane+open - d/600;
-        if(sc>bsc){bsc=sc;backShort=q;}
-      }
-      if(backShort){ passTo(p,backShort); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-
-    // (7.5) SHIELD & WRIGGLE INTO SPACE: closed down with only a poor backward ball available -> turn,
-    // shield the ball, and dribble BACK or SIDEWAYS into open space to escape the defender instead of
-    // conceding it. Pick the direction (not forward into the block, not into the defender) with the most
-    // clear room; only commit if there's space to wriggle into, else fall through to the last-resort ball.
-    if(presser){
-      const awayX=p.x-presser.x, awayY=p.y-presser.y, al=Math.hypot(awayX,awayY)||1;
-      const ux0=awayX/al, uy0=awayY/al;
-      let bestDir=null, bestScore=-1;
-      for(let a=0;a<16;a++){
-        const ang=a/16*Math.PI*2, dx=Math.cos(ang), dy=Math.sin(ang);
-        if(atk*dx>0.35)continue;                          // not a forward escape (forward is blocked)
-        const awayDot=dx*ux0+dy*uy0;
-        if(awayDot<-0.2)continue;                         // don't dribble into the defender
-        const room=spaceAlong(dx,dy,260);
-        if(room<70)continue;                              // need real space to wriggle into
-        let score=room + awayDot*40 + Math.abs(dy)*15;    // prefer space, away-from-presser, lateral
-        if((dy<0&&p.y<200)||(dy>0&&p.y>FH-200))score-=120;  // avoid dribbling into a near touchline
-        if(score>bestScore){bestScore=score;bestDir={dx,dy,room};}
-      }
-      if(bestDir){
-        const reach=Math.min(150, bestDir.room*0.7);
-        const tx=clamp(p.x+bestDir.dx*reach,40,FW-40), ty=clamp(p.y+bestDir.dy*reach,60,FH-60);
-        p.facing={x:bestDir.dx,y:bestDir.dy};            // turn to the escape; ball is carried that way (far side from the defender)
-        p.carryAngle=Math.atan2(bestDir.dy,bestDir.dx);
-        p.sprint = bestDir.room>150 && p.stamina>0.15;   // burst clear if there's room
-        p.aiActT=0.18;
-        return steer(p, tx, ty, p.sprint?1.0:0.7);
-      }
-    }
-
-    // (8) no openings -> longer SIDE pass
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        if(inOffsidePos(q))continue;
-        if(Math.abs(atk*(q.x-p.x))>240)continue;         // side-ish (allow longer)
-        if(dist(p,q) > passRangeOf(p)*1.5)continue;       // ...but still within a believable range
-        const lane=laneClearance(p,q);
-        if(lane<0.35)continue;
-        const sc=lane - dist(p,q)/900;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-
-    // (9) longer BACK pass (last resort)
-    {
-      const bp=bestPass(p);
-      if(bp.target){ passTo(p,bp.target); p.aiActT=0.7; return steer(p,goalX,YCc); }
-    }
-    // nothing at all: shield and ride it
-    if(presser){
-      const ax2=p.x-presser.x, ay2=p.y-presser.y, al=Math.hypot(ax2,ay2)||1;
-      p.facing={x:ax2/al,y:ay2/al}; p.carryAngle=Math.atan2(ay2,ax2);
-      return steer(p,p.x+(ax2/al)*24,clamp(p.y+(ay2/al)*24,60,FH-60),0.4);
-    }
-    return steer(p,goalX,YCc,0.3);
+  // ===== ON THE BALL =====
+  // The computer's man on the ball makes one decision, re-made a few times a second, instead of going down a list of
+  // rules where the first one that fires wins. Everything he could do is scored in one currency -- roughly, how likely
+  // it is to lead to a goal for us, less how likely it is to give one to them (see obVal):
+  //  - a PASS to each team-mate, to his feet or into his path if he's making a run (weighted to get there with him). Its
+  //    odds come from a race between the ball and every opponent who could get to it on the way (a ball in the air
+  //    can't be cut out until it comes down), the passer's accuracy over that distance, and how tight they'll be on the
+  //    receiver when it gets there. Its worth is where the receiver has it then, and the room he has; a runner through
+  //    on goal is worth most of a shot. If it's cut out, it costs what the ball is worth to them where they win it.
+  //  - a CARRY in a dozen directions: how far he gets before anyone can get to him, and what it's worth there.
+  //  - TAKING HIS MAN ON, a few strides in front of him: a dribbler's odds against a tackler's, worse with a man covering.
+  //  - a SHOT: its chance from where he is, as measured in this game (see OB_XG), less for anyone in the way; his
+  //    finishing, and from range his long shots.
+  //  - a CROSS from out wide near their box, when one of ours will get to it first.
+  //  - SHIELDING it when nothing's better; with a man on him in our third and nothing on, a CLEARANCE.
+  // He gets it under control and looks up before he decides -- a beat (the decision-time dials), less with a man on
+  // him -- unless a ball's on that's clearly worth playing first time. Then he sticks with a choice for a moment
+  // rather than changing his mind every frame. A lower Off IQ misjudges the options more. Player styles and the
+  // side's way of playing tilt it: a winger fancies a run at his man, a playmaker the ball through, a stopper keeps it
+  // simple; tiki-taka keeps the ball, direct looks forward first, a counter goes quickly.
+  const OBM=25;                                                        // pixels to the metre
+  // The chance an unhurried shot from (x,y) goes in -- measured in this game, not borrowed from real football: shots
+  // struck as the computer strikes them, run onto from 6 m further out, by an average side's players against an
+  // average keeper with nobody else about, eight from each spot, smoothed. Rows: metres from their goal line (4, 6, 8,
+  // 10, 12, 14, 16, 18, 20, 23, 26, 30, 34); columns: metres off the middle (0, 4, 8, 12, 16, 22). Close in and in
+  // front, the keeper's out at your feet; from 20 m he gets across to most; the best of it is 8-16 m out, fairly
+  // central. (Nothing from a tighter angle than about 6 degrees.)
+  const OB_XG_DX=[4,6,8,10,12,14,16,18,20,23,26,30,34], OB_XG_DY=[0,4,8,12,16,22];
+  const OB_XG=[[0.1,0.09,0.2,0.26,0.36,0.03],[0.21,0.15,0.17,0.17,0.24,0.02],[0.35,0.23,0.2,0.11,0.11,0.01],[0.44,0.31,0.25,0.09,0.04,0],
+               [0.48,0.38,0.3,0.12,0.03,0],[0.48,0.42,0.31,0.15,0.05,0],[0.4,0.4,0.29,0.17,0.07,0],[0.27,0.3,0.23,0.17,0.09,0],
+               [0.14,0.17,0.16,0.14,0.09,0.01],[0.03,0.04,0.07,0.07,0.06,0],[0,0.01,0.02,0.02,0.02,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
+  function obXg0(x,y,gx){
+    const dx=Math.max(4,Math.abs(gx-x)/OBM), dy=Math.abs(y-YC)/OBM;
+    if(dx>34||dy>22) return 0;
+    const at=(L,v)=>{ let i=0; while(i<L.length-2&&v>L[i+1]) i++; return [i,clamp((v-L[i])/(L[i+1]-L[i]),0,1)]; };
+    const [i,a]=at(OB_XG_DX,dx), [j,b]=at(OB_XG_DY,dy), T=OB_XG;
+    const v=(1-a)*((1-b)*T[i][j]+b*T[i][j+1])+a*((1-b)*T[i+1][j]+b*T[i+1][j+1]);
+    return v*clamp((shotAngleOf({x,y},gx)-0.06)/0.1,0,1);
   }
-
-  // ===== DEFENDER CARRIER CASCADE =====
-  // Priority when a defender has the ball:
-  //  1) a FORWARD with an opening ahead (toward goal or byline)
-  //  2) short forward pass to an open midfielder
-  //  3) long open forward pass to an open midfielder
-  //  4) short side pass to a midfielder
-  //  5) short side pass to an open defender
-  //  6) long side pass to an open midfielder with space around him
-  //  7) long side pass to an open defender with space around him
-  //  8) open back pass to anyone (not the keeper)
-  //  9) open back pass to the keeper
-  function defenderCascade(p,dt,atk,goalX){
-    const YCc=YC;
-    const presser=nearestOppTo(p,p);
-    const presserD=presser?dist(presser,p):1e9;
-    const fwd=(q)=>atk*(q.x-p.x);                       // >0 = ahead of me
-    const side=(q)=>Math.abs(atk*(q.x-p.x));            // ~0 = level
-    const openClear=(q)=>laneClearance(p,q);
-    const openSpace=(q)=>opennessOf(p.team,q);
-    // openings ahead for a teammate (room toward goal OR the byline on their flank)
-    const openingAhead=(q)=>{
-      // toward goal
-      const qgl=Math.hypot(goalX-q.x,YCc-q.y)||1; let g=460;
-      for(const o of players)if(o.team!==p.team){const rx=o.x-q.x,ry=o.y-q.y,al=rx*(goalX-q.x)/qgl+ry*(YCc-q.y)/qgl;if(al>0&&al<460){const pp=Math.abs(rx*(-(YCc-q.y)/qgl)+ry*(goalX-q.x)/qgl);if(pp<70)g=Math.min(g,al);}}
-      // toward byline (straight up the pitch on their flank)
-      let b=360; for(const o of players)if(o.team!==p.team){const rx=o.x-q.x,ry=o.y-q.y,al=rx*atk;if(al>0&&al<360){if(Math.abs(ry)<70)b=Math.min(b,al);}}
-      return Math.max(g,b);
-    };
-    const peopleAround=(q,rad)=>{let n=0;for(const o of players){if(o===q)continue;if(dist(o,q)<rad)n++;}return n;};
-    const kp=keeperOf(p.team);
-
-    // (1) a FORWARD with an opening ahead
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='ATT')continue;
-        if(inOffsidePos(q))continue;
-        if(fwd(q)<60)continue;                          // ahead of me
-        const dQ=dist(p,q);
-        if(!inRange(p,q))continue;                      // inside MY range (no skying to a far forward; an open man reaches a bit farther)
-        if(openClear(q)<0.45)continue;                  // I can reach them
-        if(openingAhead(q)<160)continue;                // they have room to attack
-        const nearDef=nearestOppTo(p,q); if(nearDef&&dist(nearDef,q)<120)continue;  // skip if a defender is close to them
-        const sc=openingAhead(q)+(q.gapRun>0?160:0) - dQ*0.25;   // and prefer the nearer of two open forwards
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-    // (2) SHORT forward pass to an open midfielder
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='MID')continue; if(inOffsidePos(q))continue;
-        if(fwd(q)<30)continue; if(dist(p,q)>340)continue;        // short & forward
-        if(openClear(q)<0.5||openSpace(q)<0.45)continue;
-        const sc=openClear(q)+openSpace(q)+fwd(q)/600;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.55; return steer(p,goalX,YCc); }
-    }
-    // (3) LONG open forward pass to an open midfielder
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='MID')continue; if(inOffsidePos(q))continue;
-        if(fwd(q)<30)continue;                                   // forward (any distance)
-        if(!inRange(p,q,1.15))continue;                          // cap to MY range (open men reachable a bit farther)
-        if(openClear(q)<0.45||openSpace(q)<0.5)continue;         // must be clearly open for a long ball
-        const sc=openSpace(q)+openClear(q) - dist(p,q)/1200;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-    // (4) SHORT side pass to a midfielder
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='MID')continue;
-        if(side(q)>180)continue; if(dist(p,q)>320)continue;      // level & short
-        if(openClear(q)<0.5)continue;
-        const sc=openClear(q)+openSpace(q);
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.55; return steer(p,goalX,YCc); }
-    }
-    // (5) SHORT side pass to an open defender
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='DEF'||q===p)continue;
-        if(side(q)>200)continue; if(dist(p,q)>320)continue;
-        if(openClear(q)<0.5||openSpace(q)<0.45)continue;
-        const sc=openClear(q)+openSpace(q);
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.55; return steer(p,goalX,YCc); }
-    }
-    // (6) LONG side pass to an open midfielder with space around him
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='MID')continue;
-        if(side(q)>280)continue;                                 // side-ish, allow longer
-        if(openClear(q)<0.4)continue;
-        if(peopleAround(q,170)>1)continue;                       // not many people around him
-        if(!inRange(p,q))continue;                               // don't switch beyond my range (open men a bit farther)
-        const sc=openSpace(q) - dist(p,q)/1400;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-    // (7) LONG side pass to an open defender with nobody around
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q.role!=='DEF'||q===p)continue;
-        if(side(q)>320)continue;
-        if(openClear(q)<0.4)continue;
-        if(peopleAround(q,150)>0)continue;                       // nobody around him
-        const sc=openSpace(q) - dist(p,q)/1400;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-    // (7.5) NO pass on, but OPEN SPACE AHEAD and nobody pressing -> CARRY it forward into the
-    //       space rather than passing back. Lets a defender step out and build instead of recycling.
-    if(presserD>120){
-      let room=460;                                              // clear room straight up the pitch in my lane
-      for(const o of players){ if(o.team===p.team)continue; const ahead=atk*(o.x-p.x); if(ahead>0&&ahead<room&&Math.abs(o.y-p.y)<80) room=ahead; }
-      if(room>190){
-        let cx=p.x+atk*Math.min(room-50,220);                    // drive into the space
-        cx = atk>0 ? Math.min(cx, FW/2-20) : Math.max(cx, FW/2+20);   // a DEF still doesn't cross halfway
-        p.sprint=false; p.aiActT=0.28;                           // composed carry, then re-read (look up for a pass)
-        return steer(p, cx, p.y, 0.8);
-      }
-    }
-
-    // (8) open BACK pass to anyone (not the keeper)
-    {
-      let best=null,bsc=-1;
-      for(const q of teamOf(p.team)){
-        if(q===p)continue;
-        if(fwd(q)>-20)continue;                                  // behind me
-        if(openClear(q)<0.45)continue;
-        const sc=openClear(q)+openSpace(q) - dist(p,q)/1600;
-        if(sc>bsc){bsc=sc;best=q;}
-      }
-      if(best){ passTo(p,best); p.aiActT=0.6; return steer(p,goalX,YCc); }
-    }
-    // (9) open BACK pass to the keeper
-    if(kp && laneClearance(p,kp)>0.45){
-      passTo(p,kp); p.aiActT=0.7; return steer(p,goalX,YCc);
-    }
-    // nothing on -> hold position / clear under pressure
-    if(presserD<90){
-      // clear it long up the line rather than lose it cheaply
-      const ty2=YCc + (p.y<=YCc?-1:1)*(FH*0.30);
-      passToTarget(p,{x:clamp(p.x+atk*600,40,FW-40), y:clamp(ty2,40,FH-40)});
-      p.aiActT=0.6; return steer(p,goalX,YCc);
-    }
-    return steer(p,p.x+atk*20,p.y,0.4);
+  // What having the ball at (x,y) is worth to a side: about 1% in our own third, climbing through midfield, then
+  // steeply up near their goal, where it's a good share of a shot from there.
+  function obVal(team,x,y){
+    const atk=atkOf(team), u=clamp((atk>0?x:FW-x)/FW,0,1), base=0.008+0.04*Math.pow(u,2.5), sh=0.6*obXg0(x,y,atk>0?FW:0);
+    return Math.max(base,sh)+0.25*Math.min(base,sh);
   }
+  // ...and how much of that the man with it keeps, with the nearest opponent nd px from him: hemmed in, not much
+  function obRoom(nd){ return 0.55+0.5*clamp((nd-35)/200,0,1); }
+  // how soon opponent o can be within r of (x,y): a beat to react (still going the way he was), then flat out
+  function obOppT(o,x,y,r){
+    const k=o.team&&keepers.includes(o), rt=k?0.2:0.16, ox=o.x+(o.vx||0)*rt, oy=o.y+(o.vy||0)*rt;
+    return rt+Math.max(0,Math.hypot(x-ox,y-oy)-r)/(k?keeperSpdOf(o)*1.6:sprintSpeedOf(o)*0.95);
+  }
+  // the nearest of `opps` to (x,y) once t seconds have gone (each closing on it after a beat; a second at most). Given
+  // the way we're going (atk), one who'll be behind the man there is chasing him, and counts for less.
+  function obNearAt(opps,x,y,t,atk){
+    const tt=Math.min(t,1)-0.25;
+    let n=1e9; for(const o of opps){ let d=Math.hypot(o.x-x,o.y-y)-sprintSpeedOf(o)*0.65*Math.max(0,tt); if(atk&&atk*(o.x-x)<-20) d*=1.5; if(d<n) n=d; }
+    return Math.max(0,n);
+  }
+  // A pass of length d, struck as passTo strikes it (arc 2: chipped over a man): when the ball is an eighth of the way
+  // along, a quarter, ... and how high it is then. Worked out once for each distance.
+  const obFlights=new Map();
+  function obFlight(d,arc){
+    const D=Math.max(48,Math.round(d/16)*16), key=D+'|'+arc+'|'+P.friction.val+'|'+P.passLoft.val+'|'+P.passPace.val;
+    let F=obFlights.get(key); if(F) return F;
+    const sol=passSolve(D,arc), st=1/60, frF=Math.pow(1-P.friction.val,st*3.2);
+    F=[]; let x=0,z=0,v=sol.vh,w=sol.vz,t=0,k=1;
+    while(k<=8&&t<5){
+      if(z>0||w!==0){ w-=520*st; z+=w*st; if(z<=0){ z=0; w=w<-40?-w*0.45:0; } }
+      x+=v*st; if(z<12) v*=frF; t+=st;
+      while(k<=8&&x>=D*k/8){ F.push({f:k/8,t,z}); k++; }
+      if(v<5&&z<1) break;
+    }
+    while(k<=8){ F.push({f:k/8,t:9,z:0}); k++; }                      // (one that dies short never gets there)
+    if(obFlights.size>400) obFlights.clear();
+    obFlights.set(key,F); return F;
+  }
+  // A ball into a runner's path, weighted to get there as he does and die there (as a through ball off the PASS button
+  // is) rather than run on to the keeper: struck against the grass drag to cover d in tA seconds. When it's an eighth of
+  // the way, a quarter, ... (along the ground).
+  function obThruV0(d,tA){ const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); return {k, v0:clamp(d*k/(1-Math.exp(-k*tA)),380,1500)}; }
+  function obThruFlight(d,tA){
+    const {k,v0}=obThruV0(d,tA), F=[];
+    for(let i=1;i<=8;i++){ const u=1-d*i/8*k/v0; F.push({f:i/8, t:u>0?-Math.log(u)/k:9, z:0}); }
+    return F;
+  }
+  function obThruBall(p,q,tx,ty,tA){
+    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    const aerr=passSpray(d,p), ca=Math.cos(aerr), sa=Math.sin(aerr), {v0}=obThruV0(d,tA);
+    ball.vx=(dx*ca-dy*sa)*v0; ball.vy=(dx*sa+dy*ca)*v0; ball.vz=0;
+    ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
+    ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
+    ball.thru={x:tx,y:ty,until:simNow+tA+1.5};                         // he runs onto it (see aiBrain)
+    if(meIs(p)) meBump('passes');
+    recordPassTeam(p.team,p); passPose(p);
+  }
+  // How the side's way of playing, and the man's own style, tilt his choices (1 = no tilt): risk -- what a ball given
+  // away weighs; fwd -- a ball forward; carry -- running with it; takeOn -- his odds taking a man on, as he sees them;
+  // shoot, cross; range -- how far he'll pass; tempo -- how long he looks up for; hold -- keeping it under pressure;
+  // patience -- how many seconds the side will keep it without getting forward before it starts forcing it.
+  function obMods(p){
+    const off=TAC[p.team]?TAC[p.team].off:'neutral', tr=off==='counter'&&transitionT[p.team]>0, st=p.style||'';
+    const M={risk:1,fwd:1,carry:1,takeOn:1,shoot:1,cross:1,range:1,tempo:1,hold:1,patience:8};
+    if(off==='tiki'){ M.risk=1.35; M.carry=0.85; M.tempo=0.75; M.range=0.9; M.patience=13; }
+    else if(off==='direct'){ M.risk=0.85; M.fwd=1.15; M.range=1.15; M.tempo=0.85; M.patience=4; }
+    else if(off==='wing'){ M.cross=1.25; M.carry=1.05; }
+    if(tr){ M.fwd*=1.2; M.tempo*=0.55; M.carry*=1.15; M.risk*=0.85; M.patience=2; }
+    if(st==='winger'||st==='mwinger'){ M.takeOn*=1.35; M.carry*=1.15; M.cross*=1.2; }
+    else if(st==='insidefwd'){ M.takeOn*=1.3; M.carry*=1.15; M.shoot*=1.12; }
+    else if(st==='speedster'){ M.carry*=1.2; M.takeOn*=1.1; }
+    else if(st==='playmaker'||st==='creator'){ M.risk*=0.85; M.range*=1.1; M.fwd*=1.08; }
+    else if(st==='target'){ M.carry*=0.75; M.takeOn*=0.6; M.hold*=1.25; }
+    else if(st==='poacher'){ M.shoot*=1.15; M.carry*=0.85; }
+    else if(st==='anchor'){ M.risk*=1.15; M.carry*=0.85; M.takeOn*=0.6; }
+    else if(st==='stopper'){ M.risk*=1.25; M.carry*=0.8; M.takeOn*=0.4; }
+    else if(st==='ballplayer'){ M.carry*=1.15; M.range*=1.1; M.fwd*=1.05; }
+    else if(st==='boxtobox'){ M.carry*=1.1; }
+    else if(st==='wingback'||st==='fullback'){ M.cross*=1.1; M.carry*=1.05; }
+    return M;
+  }
+  // what the man on the ball can see: who's on him, what the ball's worth where he is
+  function obCtx(p,atk,goalX){
+    const opp=p.team==='G'?'R':'G', opps=players.filter(o=>o.team!==p.team), kp=keeperOf(opp), M=obMods(p);
+    let presser=null, prD=1e9; for(const o of opps){ const d=dist(o,p); if(d<prD){ prD=d; presser=o; } }
+    const C={atk, gx:goalX, opp, opps, kp, M, presser, prD, vHere:obVal(p.team,p.x,p.y)*obRoom(obNearAt(opps,p.x,p.y,0.5,atk)), lossHere:obVal(opp,p.x,p.y)*M.risk,
+             range:passRangeOf(p)*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
+    C.urge=obUrge(p,C);
+    return C;
+  }
+  // THE URGE TO GET FORWARD: a side that's had it a while without getting anywhere starts to force it. Each side's
+  // clock starts when it wins the ball and again whenever it gets it 8 m further up than it's been; a quarter of the
+  // urge is always there, the rest builds over its patience. Every option is credited with the ground it gains (and
+  // charged for ground it gives up) at that rate.
+  const obPoss={G:{t:-9,u:0,last:-9},R:{t:-9,u:0,last:-9}};
+  function obUrge(p,C){
+    const S=obPoss[p.team], O=obPoss[C.opp];
+    if(O.last>S.last||simNow-S.last>3){ S.t=simNow; S.u=C.u; }
+    S.last=simNow;
+    if(C.u>S.u+8*OBM){ S.t=simNow; S.u=C.u; }
+    return clamp(0.25+(simNow-S.t-C.M.patience*0.4)/C.M.patience,0.25,1);
+  }
+  function obGain(C,x){ return 0.025*C.urge*((C.atk>0?x:FW-x)-C.u)/FW; }
+  // a pass to q (a team-mate, or our keeper)
+  function obPassOpt(p,q,C){
+    const L=passLead(p,q), tx=L.x, ty=L.y, dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
+    if(d<90||d>C.range*1.3) return null;                                 // a tap to a man beside him, or out of his range
+    // to his feet as passTo strikes it (chipped over a man in the way on a long one), or into his path weighted to
+    // get there with him
+    const tQ=L.running?Math.max(0,Math.hypot(q.x-tx,q.y-ty)-20)/sprintSpeedOf(q):0, tA=Math.max(0.45,tQ);
+    const chip=!L.running&&!!chipOverWindow(p,tx,ty), F=L.running?obThruFlight(d,tA):obFlight(d,chip?2:1), tEnd=F[7].t;
+    if(tEnd>4) return null;
+    // the race for it along the way: each opponent's best chance, where he'd cut it out
+    let safe=1, worst=0, cx=tx, cy=ty;
+    const race=(o,r,inArea)=>{
+      let m=9, mx=tx, my=ty;
+      for(const s of F){
+        if(s.z>34) continue;                                             // over his head
+        const px=ball.x+dx*s.f, py=ball.y+dy*s.f;
+        if(inArea&&!inArea(px,py)) continue;
+        const tb=s.f===1?Math.max(s.t,tQ):s.t, mm=obOppT(o,px,py,r)-tb;
+        if(mm<m){ m=mm; mx=px; my=py; }
+      }
+      const pi=1/(1+Math.exp(m/0.09));                                   // gets there with a tenth of a second to spare: ~75%
+      safe*=1-pi; if(pi>worst){ worst=pi; cx=mx; cy=my; }
+    };
+    for(const o of C.opps) race(o, winReachR(o)*(0.45+0.55*interceptReachOf(o))+ball.r);
+    if(C.kp) race(C.kp, reachOf(C.kp)+divingOf(C.kp)*0.5, (x,y)=>Math.abs(x-C.gx)<BX*2.2&&Math.abs(y-YC)<BY*1.6);   // the keeper, in his area
+    // struck as passTo will strike it: how far off line it may go, against how far the receiver can reach for it
+    const lane=laneClearance(p,q), fwd=clamp(C.atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
+    let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
+    let amp=((1-acc)*0.06+(1-longAccOf(p))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
+    if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
+    const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30);
+    const pAcc=lat<=reachL?1:clamp(reachL/lat,0.2,1);
+    // how close they'll be on him when it gets there
+    const nd=obNearAt(C.opps,tx,ty,Math.max(tEnd,tQ),C.atk), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
+    const P_=safe*pAcc*pCtl;
+    let v=obVal(p.team,tx,ty)*obRoom(nd);
+    if(L.running||C.atk*(q.vx||0)>80) v*=1.08;                         // on the move: he can go at them straight away
+    else if(markedInFront(p.team,q)>0.6) v*=0.85;                      // back to goal with a man tight behind him
+    // THROUGH ON GOAL: running onto it with none of theirs goal-side of him near his line -- he'll be in on the keeper,
+    // and it's worth most of a shot from 12 m out, a little in from his line
+    if(L.running&&Math.abs(C.gx-tx)>12*OBM){
+      let thru=true; for(const o of C.opps) if(C.atk*(o.x-tx)>-20&&Math.abs(o.y-ty)<240){ thru=false; break; }
+      if(thru) v=Math.max(v,0.85*obVal(p.team,C.gx-C.atk*12*OBM,ty+(YC-ty)*0.4));
+    }
+    if(C.atk*(tx-p.x)>3*OBM) v*=C.M.fwd;
+    if(q.num==null) v*=0.6;                                             // our keeper: he'll often have to kick it long
+    v+=obGain(C,tx);
+    const loss=obVal(C.opp,cx,cy)*C.M.risk;
+    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0};
+  }
+  // carrying it: a dozen headings round the way we're going (behind him only matters with a man on him)
+  const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI];
+  function obCarryOpts(p,C,out){
+    const vC=Math.max(80,(runSpeedOf(p)+sprintSpeedOf(p))*0.5*(1-dribSpeedPenOf(p))), H=230, a0=C.atk>0?0:Math.PI;
+    const drib=statLerp(statOf(p,'dribbling',P.dribbling.val),-0.06,0.06), kpIn=(x)=>Math.abs(x-C.gx)<BX*1.6;
+    for(let i=0;i<OB_HEAD.length;i++){
+      const a=a0+OB_HEAD[i], ux=Math.cos(a), uy=Math.sin(a);
+      let s=0;
+      for(let t=25;t<=H;t+=25){
+        const px=p.x+ux*t, py=p.y+uy*t;
+        if((px<40&&ux<0)||(px>FW-40&&ux>0)||(py<45&&uy<0)||(py>FH-45&&uy>0)) break;   // the lines (pinned on one, he can still come off it)
+        const tc=0.1+t/vC; let hit=false;
+        for(const o of C.opps) if(obOppT(o,px,py,30)<tc){ hit=true; break; }
+        if(!hit&&C.kp&&kpIn(px)&&obOppT(C.kp,px,py,reachOf(C.kp)+20)<tc) hit=true;
+        if(hit) break;
+        s=t;
+      }
+      if(s<25) continue;
+      const ex=p.x+ux*s, ey=p.y+uy*s, tE=0.1+s/vC, nd=obNearAt(C.opps,ex,ey,tE,C.atk), free=s>=H;
+      const pk=clamp((free?0.97:0.78+0.19*s/H)+drib,0.5,0.99);
+      let v=obVal(p.team,ex,ey)*obRoom(nd);
+      v=C.vHere+(v-C.vHere)*C.M.carry;                                   // (his taste for running with it)
+      if(ey<110||ey>FH-110) v*=0.92;                                     // toward the touchline: toward trouble
+      if(p.role==='DEF'&&C.atk*(ex-FW/2)>FW*0.05&&!(TAC[p.team].off==='counter'&&transitionT[p.team]>0)) v*=0.85;   // a centre-back's job is behind it
+      v+=obGain(C,ex);
+      const loss=obVal(C.opp,ex,ey)*C.M.risk;
+      out.push({kind:'carry', key:'c'+i, ux, uy, s, ex, ey, P:pk, v, loss, ev:pk*v-(1-pk)*loss, free});
+    }
+  }
+  // taking on the man in front of him, a few strides off: harder with another of theirs close behind him to cover
+  function obTakeOnOpt(p,C){
+    const d=C.presser; if(!d||C.prD<55||C.prD>200||C.atk*(d.x-p.x)<10) return null;
+    let cover=1; for(const o of C.opps) if(o!==d&&C.atk*(o.x-p.x)>0){ const dd=Math.hypot(o.x-d.x,o.y-d.y); if(dd<110) return null; if(dd<200) cover=Math.min(cover,0.55+0.45*(dd-110)/90); }
+    const room=(sy)=>{ let s=240; for(const o of C.opps){ const ry=(o.y-p.y)*sy, rx=Math.abs(o.x-p.x); if(ry>0&&ry<s&&rx<64) s=ry; } return s; };
+    const side=p.y<160?1:p.y>FH-160?-1:(room(1)>room(-1)?1:-1);
+    const bx=clamp(d.x+C.atk*200,40,FW-40), by=clamp(d.y+side*60,60,FH-60);
+    const pb=clamp((0.3+0.045*(statOf(p,'dribbling',P.dribbling.val)-5.5)-0.03*(statOf(d,'tackle',P.tackle.val)-5.5)
+                       -0.015*(statOf(d,'agility',P.agility.val)-5.5))*C.M.takeOn*cover,0.08,0.7);
+    const v=obVal(p.team,bx,by)*obRoom(obNearAt(C.opps.filter(o=>o!==d),bx,by,1.0))+obGain(C,bx);
+    return {kind:'takeon', key:'t', who:d, side, P:pb, v, loss:C.lossHere, ev:pb*v-(1-pb)*C.lossHere};
+  }
+  function obShotOpt(p,C){
+    const d=Math.hypot(C.gx-p.x,YC-p.y); if(d>34*OBM||C.atk*(C.gx-p.x)<40) return null;
+    if(shotAngleOf(p,C.gx)<0.1) return null;
+    const E=evalShotCorners(p,C.atk,clamp(0.62+d/1100,0.62,1),p.x,p.y), c=E[E.pick];
+    let xg=obXg0(p.x,p.y,C.gx)*(0.3+0.7*c.qLane);                      // anyone in the way of the corner he'd go for
+    xg*=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'composure',P.composure.val),0.94,1.06);   // (an average man: 1)
+    if(d>18*OBM) xg*=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4);
+    if(C.prD<45) xg*=0.8;                                               // rushed
+    xg=clamp(xg*C.M.shoot,0,0.95);
+    return {kind:'shot', key:'s', P:xg, v:1, loss:0.003, ev:xg-(1-xg)*0.003, rel:true};
+  }
+  function obCrossOpt(p,C){
+    if(Math.abs(p.y-YC)<FH*0.2||C.atk*(p.x-FW/2)<FW*0.22||C.atk*(C.gx-p.x)<5) return null;
+    const cs=crossSpot(p); if(!cs||cs.margin<-0.1) return null;
+    let pc=clamp(0.5+cs.margin*1.2,0.1,0.85)*statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1);
+    for(const o of C.opps) if(C.atk*(o.x-p.x)>0&&C.atk*(o.x-p.x)<110&&Math.abs(o.y-p.y)<70){ pc*=0.6; break; }   // a man right in front to block it
+    if(C.prD<50) pc*=0.85;
+    const v=0.09*C.M.cross;                                             // a header or a volley from the middle of their box
+    return {kind:'cross', key:'x', cs, P:pc, v, loss:0.003, ev:pc*v-(1-pc)*0.003, rel:true};
+  }
+  function obHoldOpt(p,C,ob){
+    const d=C.presser, pk=(!d||C.prD>110)?0.99:clamp(0.62+0.3*(duelOdds(strengthOf(p),strengthOf(d))-0.5)+statLerp(statOf(p,'dribbling',P.dribbling.val),-0.05,0.08),0.35,0.95);
+    const held=simNow-ob.since, cost=0.0005+C.vHere*(0.05+0.2*clamp(held/2.5,0,1))+0.004*Math.max(0,held-3);   // the longer he holds it, the more of the chance goes -- and in the end he has to do something
+    const v=C.vHere*C.M.hold;
+    return {kind:'hold', key:'h', P:pk, v, loss:C.lossHere, ev:pk*v-(1-pk)*C.lossHere-cost};
+  }
+  function obClearOpt(p,C){
+    if(!C.own3||C.prD>100) return null;
+    const side=Math.abs(p.y-YC)>30?Math.sign(p.y-YC):(Math.random()<0.5?-1:1);
+    return {kind:'clear', key:'k', tx:clamp(p.x+C.atk*620,40,FW-40), ty:clamp(YC+side*FH*0.32,60,FH-60), P:1, v:0, loss:0, ev:-0.003, rel:true};
+  }
+  function obOptions(p,C,ob){
+    const out=[];
+    for(const q of players) if(q.team===p.team&&q!==p&&q.state==='normal'&&!inOffsidePos(q)){ const o=obPassOpt(p,q,C); if(o) out.push(o); }
+    const k=keeperOf(p.team);
+    if(k&&!gkHold&&C.atk*(p.x-(C.atk>0?0:FW))<FW*0.5){ const o=obPassOpt(p,k,C); if(o) out.push(o); }   // back to the keeper, from our half
+    obCarryOpts(p,C,out);
+    for(const o of [obTakeOnOpt(p,C),obShotOpt(p,C),obCrossOpt(p,C),obHoldOpt(p,C,ob),obClearOpt(p,C)]) if(o) out.push(o);
+    return out;
+  }
+  function obGauss(){ return (Math.random()+Math.random()+Math.random()-1.5)*2; }
+  // the pick: the best score, as he judges it (a lower Off IQ misjudges more), with a little loyalty to what he was
+  // already doing; while he's still getting it under control, only a ball that's clearly on goes first time
+  function obChoose(p,ob,opts,looking){
+    const iq=statOf(p,'offIQ',P.offIQ.val), sdA=statLerp(iq,0.0015,0.0002), sdR=statLerp(iq,0.12,0.02);
+    let keep=-1e9; for(const o of opts) if(!o.rel&&o.ev>keep) keep=o.ev;
+    const firstTime=ob.pressed?0:0.006+0.8*Math.max(0,keep);
+    let best=null, bs=-1e9;
+    for(const o of opts){
+      let s=o.ev+obGauss()*(sdA+sdR*Math.abs(o.ev));
+      if(ob.plan&&o.key===ob.plan.key) s+=0.0015+0.1*Math.abs(o.ev);
+      if(looking&&o.rel) s-=firstTime;
+      o.score=s;
+      if(s>bs){ bs=s; best=o; }
+    }
+    return best;
+  }
+  function obStart(p,C){
+    const base=p.team==='G'?P.mateThink.val:P.aiThink.val, pr=C.prD<80?0.3:C.prD<150?0.6:1;
+    return {since:simNow, seen:simNow, look:simNow+base*statLerp(statOf(p,'offIQ',P.offIQ.val),1.25,0.75)*pr*C.M.tempo,
+            next:simNow, scanT:-9, plan:null, pressed:C.prD<70, done:false};
+  }
+  // the AI's own clearance: high and long, up toward the touchline
+  function obClearBall(p,tx,ty){
+    let dx=tx-p.x, dy=ty-p.y; const l=Math.hypot(dx,dy)||1; dx/=l; dy/=l;
+    const err=0.06*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err), cx=dx*ca-dy*sa, cy=dx*sa+dy*ca;
+    const D=statLerp(statOf(p,'shotPower',P.shotPower.val),470,610), T=1.3;
+    ball.vx=cx*D/T; ball.vy=cy*D/T; ball.vz=520*T/2; ball.z=Math.max(ball.z,1);
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null;
+    ball.crossBy=null; ball.crossT=0; ball.shotBy=null; ball.shotT=0;
+    p.noTouchT=0.35; ball.lastTouch=p.team;
+    endCurve(); recordPassTeam(p.team,p); passPose(p);
+  }
+  // running at the man (approach), the sharp cut past him (cut), and away (go)
+  function obTakeOnStep(p,dt,C){
+    const T=p.takeOn, d=T.who; T.at=simNow; T.t-=dt;
+    if(T.t<=0||!d){ p.takeOn=null; return null; }
+    if(T.phase==='approach'){
+      if(C.atk*(d.x-p.x)<0||dist(p,d)>190||d.state!=='normal'){ p.takeOn=null; return null; }
+      if(dist(p,d)<60){ T.phase='cut'; T.t=0.32; T.hx=C.atk*0.34; T.hy=T.side*0.94; }
+      else { p.sprint=p.stamina>0.15; p.dbgTag='OB-TAKEON'; return steer(p,d.x,d.y-T.side*18,1.0); }   // straight at him, leaning the other way
+    }
+    if(T.phase==='cut'){
+      p.sprint=p.stamina>0.1; p.facing={x:T.hx,y:T.hy}; p.carryAngle=Math.atan2(T.hy,T.hx); p.dbgTag='OB-TAKEON';
+      if(T.t<=dt){ T.phase='go'; T.t=0.6; }
+      return steer(p,p.x+T.hx*140,p.y+T.hy*140,1.0);
+    }
+    p.sprint=p.stamina>0.1; p.dbgTag='OB-TAKEON';
+    return steer(p,C.gx,clamp(p.y+(YC-p.y)*0.3,60,FH-60),1.0);
+  }
+  function obExec(p,o,C){
+    const ob=p.ob; p.dbgTag='OB-'+o.kind.toUpperCase();
+    if(o.kind==='pass'){
+      const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
+      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru); else passTo(p,o.q);
+      ob.done=true;
+      if(deepWide&&Math.abs(C.gx-o.tx)<BX+80&&Math.abs(o.ty-YC)<BY+10&&C.atk*(o.tx-p.x)<=40){ lastGrade='CUTBACK'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0; }
+      return steer(p,C.gx,YC);
+    }
+    if(o.kind==='shot'){
+      const dG=Math.abs(C.gx-p.x);
+      shootAt(p,C.atk,clamp((YC-p.y)/(GOAL_W*0.9),-1,1),clamp(0.62+dG/1100,0.62,1),aiCurlFor(p,C.atk)); ob.done=true;
+      return steer(p,C.gx,YC);
+    }
+    if(o.kind==='cross'){
+      aiCross(p,o.cs); ob.done=true;
+      lastGrade='CROSS'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0;
+      return steer(p,p.x,p.y,0.2);
+    }
+    obClearBall(p,o.tx,o.ty); ob.done=true;                           // (clear)
+    return steer(p,C.gx,YC);
+  }
+  // with it at his feet: run with it the way he chose, or shield it from the man on him
+  function obMove(p,o,C,looking){
+    if(o&&o.kind==='carry'){
+      const reach=Math.max(o.s,90), tx=clamp(p.x+o.ux*reach,40,FW-40), ty=clamp(p.y+o.uy*reach,50,FH-50);
+      const go=!looking&&o.free&&p.stamina>0.3&&(p.role!=='DEF'||(TAC[p.team].off==='counter'&&transitionT[p.team]>0))&&C.atk*o.ux>0.3;
+      p.sprint=go; p.dbgTag='OB-CARRY';
+      return steer(p,tx,ty,go?1:looking?0.6:o.s>=120?1:0.75);
+    }
+    p.sprint=false; p.dbgTag='OB-SHIELD';
+    const d=C.presser;
+    if(d&&C.prD<160){
+      const ax=p.x-d.x, ay=p.y-d.y, al=Math.hypot(ax,ay)||1;
+      p.facing={x:ax/al,y:ay/al}; p.carryAngle=Math.atan2(ay,ax);
+      return steer(p,clamp(p.x+ax/al*24,60,FW-60),clamp(p.y+ay/al*24,60,FH-60),0.35);   // (not into a line)
+    }
+    return steer(p,p.x+C.atk*20,p.y,0.3);
+  }
+  function onBall(p,dt,atk,goalX){
+    const C=obCtx(p,atk,goalX);
+    let ob=p.ob;
+    if(!ob||ob.done||simNow-ob.seen>0.7) ob=p.ob=obStart(p,C);         // a new spell on the ball
+    ob.seen=simNow;
+    if(p.takeOn&&simNow-p.takeOn.at>0.1) p.takeOn=null;                  // (he lost it since)
+    if(p.takeOn&&p.takeOn.phase!=='go'){ const r=obTakeOnStep(p,dt,C); if(r) return r; }   // committed: past him first
+    const looking=simNow<ob.look;
+    if(C.prD<70) ob.pressed=true;
+    const closing=C.presser&&C.prD<75&&simNow-ob.scanT>0.08;             // a man arriving: decide now
+    if(simNow>=ob.next||closing){
+      ob.scanT=simNow; ob.next=simNow+statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.14)*C.M.tempo;
+      const opts=obOptions(p,C,ob), pick=obChoose(p,ob,opts,looking);
+      p.obLast={t:simNow, opts, pick, looking};
+      if(pick&&pick.rel){ p.takeOn=null; return obExec(p,pick,C); }
+      if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, phase:'approach', t:1.3, at:simNow}; }
+      else if(pick){ p.takeOn=null; ob.plan=pick; }
+    }
+    if(p.takeOn){ const r=obTakeOnStep(p,dt,C); if(r) return r; }
+    return obMove(p,ob.plan,C,looking);
+  }
+  // ===== END ON THE BALL =====
 
   // ===== POSITIONAL PLAY: the plan with the ball (the neutral style) =====
   // With the ball a neutral side plays to one plan, not seven separate rule-books. Every frame it lays out the shape
@@ -6348,7 +5965,7 @@
       S.jobs.set(q,{x:onLine?R.x:U(uol-30), y:R.y, job:'RUN', sprint:true}); }
   }
   // a man following the plan: his job, his spot -- eased toward it (~0.25 s), so a spot that flickers for a moment doesn't
-  // turn him round -- or, on a run, straight there (see carrierCascade, which looks for the runner)
+  // turn him round -- or, on a run, straight there (the man on the ball looks for the runner: see ON THE BALL)
   function followPlan(p,a,dt){
     p.dbgTag=a.job; p.planned=true; p.planSprint=!!a.sprint;
     p.runTarget = a.job==='RUN' ? {x:a.x,y:a.y} : null;
@@ -6360,7 +5977,7 @@
 
   function aiBrain(p,dt){
     p.planned=false; p.planSprint=false;
-    p.aiActT-=dt*statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,2.0);p.runT-=dt;   // Off IQ: 1 = slow re-reads .. 10 = fast
+    p.runT-=dt;
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
     p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false; p.coverRun=false;
@@ -6509,636 +6126,15 @@
 
     if(ball.ownedBy===p){
       p.runTarget=null;
-      const presser=nearestOppTo(p,p);
-      const pressuredNow=presser&&dist(presser,p)<70;
       // COMMANDED to shoot by the player: do it now (header if it's up in the air near box)
       if(p.cmdShoot>0){
         p.cmdShoot=0;
         const dG=Math.abs(goalX-p.x);
         const aimC=clamp((YC-p.y)/(GOAL_W),-1,1);
         shootAt(p,atk,aimC,clamp(0.7+dG/900,0.7,1),aiCurlFor(p,atk));
-        p.aiActT=0.7;
         return steer(p,goalX,YC);
       }
-      // SETTLING: just received it — take a touch, shield, look up (don't charge yet).
-      // Forwards skip this (their cascade below decides immediately); others settle unless
-      // the lane to goal is open.
-      const onCounterNow = TAC[p.team].off==='counter' && transitionT[p.team]>0;
-      if(p.aiActT>0&&!pressuredNow&&p.role==='DEF'&&!onCounterNow){
-        let gLane=420;
-        const gdx=(goalX-p.x), gdy=(YC-p.y), gl=Math.hypot(gdx,gdy)||1;
-        const ux=gdx/gl, uy=gdy/gl;
-        for(const o of players)if(o.team!==p.team){
-          const rx=o.x-p.x,ry=o.y-p.y, along=rx*ux+ry*uy;
-          if(along>0&&along<420){const perp=Math.abs(rx*(-uy)+ry*ux);if(perp<64)gLane=Math.min(gLane,along);}
-        }
-        const laneOpen = gLane>150 && atk*(goalX-p.x)>120;
-        if(!laneOpen){
-          // no clear lane -> take the settling touch as before
-          tx=p.x+atk*30;ty=p.y+(YC-p.y)*0.1;
-          return steer(p,tx,ty,0.45);
-        }
-        // lane is open -> fall through and drive (handled below)
-      }
-
-      // ===================================================================
-      // COUNTER-ATTACK carrier cascade (active during the transition window on the
-      // 'counter' tactic): prioritise the FAST forward ball.
-      //   1) a forward/mid AHEAD with an open lane -> play them in immediately
-      //   2) else the safest FORWARD pass
-      //   3) else a side pass
-      //   4) else shield & back-pass
-      // (A clear shot on goal still takes precedence over passing.)
-      // ===================================================================
-      if(TAC[p.team].off==='counter' && transitionT[p.team]>0){
-        const presserD0 = presser?dist(presser,p):1e9;
-        const hardP0 = presserD0<58;
-        const dGme=Math.abs(goalX-p.x);
-        // 0) clear shot? (close, lane to goal open) -> shoot rather than pass
-        const sgl=Math.hypot(goalX-p.x,YC-p.y)||1;
-        let goalLane0=460;
-        for(const o of players)if(o.team!==p.team){
-          const rx=o.x-p.x,ry=o.y-p.y,al=rx*(goalX-p.x)/sgl+ry*(YC-p.y)/sgl;
-          if(al>0&&al<460){const pp=Math.abs(rx*(-(YC-p.y)/sgl)+ry*(goalX-p.x)/sgl);if(pp<64)goalLane0=Math.min(goalLane0,al);}
-        }
-        if(p.role!=='DEF' && goalLane0>150){
-          // through on goal -> close down the keeper before shooting (or shoot if he rushes out)
-          const gk=keeperOf(atk>0?'R':'G');
-          const gkD = gk ? Math.abs(goalX-gk.x) : 0;
-          const keeperRushing = gk && Math.abs(gk.y-p.y)<70 && (dGme - gkD) < 150;
-          const shootDist = (goalLane0>300 ? 300 : 470);   // (legacy)
-          if(aiTakesShot(p,atk,goalX,goalLane0>300) || keeperRushing){
-            const aimC=clamp((YC-p.y)/(GOAL_W*0.9),-1,1);
-            shootAt(p,atk,aimC,clamp(0.62+dGme/1100,0.62,1),aiCurlFor(p,atk));
-            p.aiActT=0.8; return steer(p,goalX,YC);
-          }
-          // not yet close enough -> keep driving at goal
-          p.aiActT=0.2; p.sprint=p.stamina>0.12;
-          return steer(p,goalX,YC+(p.y-YC)*0.18,1.0);
-        }
-        // helper: a teammate's lane to goal is open?
-        const goalLaneOf=(q)=>{
-          const qgl=Math.hypot(goalX-q.x,YC-q.y)||1; let s=460;
-          for(const o of players)if(o.team!==p.team){
-            const rx=o.x-q.x,ry=o.y-q.y,al=rx*(goalX-q.x)/qgl+ry*(YC-q.y)/qgl;
-            if(al>0&&al<460){const pp=Math.abs(rx*(-(YC-q.y)/qgl)+ry*(goalX-q.x)/qgl);if(pp<70)s=Math.min(s,al);}
-          }
-          return s;
-        };
-        // 1) a forward/mid AHEAD of me with an OPEN lane to goal -> play them in (led ahead)
-        let breakTarget=null,bestB=-1;
-        for(const q of teamOf(p.team)){
-          if(q===p||q.role==='DEF')continue;
-          if(inOffsidePos(q))continue;
-          if(atk*(q.x-p.x)<60)continue;                 // must be ahead of me
-          if(dist(p,q)<130)continue;                    // not to someone on my shoulder
-          if(laneClearance(p,q)<0.45)continue;          // I can actually reach them
-          if(goalLaneOf(q)<170)continue;                // their route to goal is open
-          const adv=atk*(q.x-FW/2);
-          const sc=adv + (q.gapRun>0?200:0) + goalLaneOf(q)*0.3;
-          if(sc>bestB){bestB=sc;breakTarget=q;}
-        }
-        if(breakTarget){ passTo(p,breakTarget); p.aiActT=0.6; return steer(p,goalX,YC); }
-
-        // 2) safest FORWARD pass: among teammates ahead of me, best clear lane / openness
-        let fwdPass=null,bestF=-1;
-        for(const q of teamOf(p.team)){
-          if(q===p)continue;
-          if(inOffsidePos(q))continue;
-          if(atk*(q.x-p.x)<40)continue;                 // forward of me
-          if(dist(p,q)<120)continue;                    // not to someone on my shoulder
-          const lane=laneClearance(p,q), open=opennessOf(p.team,q);
-          if(lane<0.4)continue;
-          const sc=lane*1.2+open*1.0 - clamp((dist(p,q)-420)/400,0,1)*1.2;
-          if(sc>bestF){bestF=sc;fwdPass=q;}
-        }
-        if(fwdPass){ passTo(p,fwdPass); p.aiActT=0.5; return steer(p,goalX,YC); }
-
-        // 3) a SIDE pass: a roughly-level teammate with a clear lane
-        let sidePass=null,bestS=-1;
-        for(const q of teamOf(p.team)){
-          if(q===p)continue;
-          if(inOffsidePos(q))continue;
-          if(Math.abs(atk*(q.x-p.x))>200)continue;      // roughly level (not clearly forward/back)
-          if(dist(p,q)<120)continue;                    // not to someone on my shoulder
-          if(p.lastPasserT>0 && q===p.lastPasser)continue;   // and not straight back to the passer
-          const lane=laneClearance(p,q), open=opennessOf(p.team,q);
-          if(lane<0.45)continue;
-          const sc=lane+open;
-          if(sc>bestS){bestS=sc;sidePass=q;}
-        }
-        if(sidePass){ passTo(p,sidePass); p.aiActT=0.5; return steer(p,goalX,YC); }
-
-        // 4) no safe forward/side ball -> shield & look for a back pass
-        const back=bestPass(p);                         // bestPass will surface a safe recycle
-        if(!hardP0){
-          // shield briefly, then recycle if a back option is on
-          let hx=p.x,hy=p.y;
-          if(presser){const ax2=p.x-presser.x,ay2=p.y-presser.y,al=Math.hypot(ax2,ay2)||1;
-            p.facing={x:ax2/al,y:ay2/al};p.carryAngle=Math.atan2(ay2,ax2);
-            hx=p.x+(ax2/al)*26;hy=clamp(p.y+(ay2/al)*26,60,FH-60);}
-          if(back.target && back.quality>0.45){ passTo(p,back.target); p.aiActT=0.55; return steer(p,goalX,YC); }
-          p.aiActT=0.18; return steer(p,hx,hy,0.4);
-        }
-        if(back.target){ passTo(p,back.target); p.aiActT=0.6; return steer(p,goalX,YC); }
-        // truly nothing -> just keep it under control
-        return steer(p,p.x+atk*20,p.y,0.4);
-      }
-
-      // ===================================================================
-      // MIDFIELDER / FORWARD ON-BALL: unified strict priority cascade
-      // (run at goal > pass to an opening ahead > run byline > pass to a byline opening >
-      //  open side pass > hold-up & pivot > short backpass > longer side > longer back).
-      // ===================================================================
-      if((p.role==='ATT'||p.role==='MID') && !(TAC[p.team].off==='counter'&&transitionT[p.team]>0)){
-        const r=carrierCascade(p,dt,atk,goalX);
-        if(r) return r;
-      }
-      if(p.role==='DEF' && !(TAC[p.team].off==='counter'&&transitionT[p.team]>0)){
-        const r=defenderCascade(p,dt,atk,goalX);
-        if(r) return r;
-      }
-
-      // (legacy forward cascade kept as a fallback; normally unreachable now)
-      if(p.role==='ATT'){
-        const presserD0 = presser?dist(presser,p):1e9;
-        const hardP = presserD0<58;
-        const dG=Math.abs(goalX-p.x);
-        // measure clear space along an arbitrary unit direction
-        const spaceAlong=(ux,uy,maxR)=>{
-          let s=maxR;
-          for(const o of players)if(o.team!==p.team){
-            const rx=o.x-p.x,ry=o.y-p.y, along=rx*ux+uy*ry;
-            if(along>0&&along<maxR){const perp=Math.abs(rx*(-uy)+ry*ux);if(perp<64)s=Math.min(s,along);}
-          }
-          return s;
-        };
-        const gdx=(goalX-p.x), gdy=(YC-p.y), gl=Math.hypot(gdx,gdy)||1;
-        const goalLane = spaceAlong(gdx/gl, gdy/gl, 460);
-
-        // (1) OPEN LANE TO GOAL -> drive at goal; shoot once in range. Never backpass out of this.
-        if(goalLane>150 && atk*(goalX-p.x)>120){
-          if(aiTakesShot(p,atk,goalX,goalLane>300)){
-            const aimC=clamp((YC-p.y)/(GOAL_W*0.9),-1,1);
-            shootAt(p,atk,aimC,clamp(0.62+dG/1100,0.62,1),aiCurlFor(p,atk));
-            p.aiActT=0.8; return steer(p,goalX,YC);
-          }
-          p.aiActT=0.2; p.sprint=p.stamina>0.12;
-          return steer(p,goalX,YC+(p.y-YC)*0.18,1.0);
-        }
-
-        // (2) A TEAMMATE HAS AN OPEN LANE TO GOAL -> play them in (led ahead by passTo).
-        {
-          let bestThru=null,bestThruScore=-1;
-          for(const q of teamOf(p.team)){
-            if(q===p)continue;
-            if(inOffsidePos(q))continue;
-            const qgl=Math.hypot(goalX-q.x,YC-q.y)||1;
-            // q's lane to goal
-            let s=460;
-            for(const o of players)if(o.team!==p.team){
-              const rx=o.x-q.x,ry=o.y-q.y, along=rx*(goalX-q.x)/qgl+ry*(YC-q.y)/qgl;
-              if(along>0&&along<460){const perp=Math.abs(rx*(-(YC-q.y)/qgl)+ry*(goalX-q.x)/qgl);if(perp<70)s=Math.min(s,along);}
-            }
-            const lane=laneClearance(p,q);                 // can I even get it to them?
-            const adv=atk*(q.x-FW/2);
-            if(s>170 && lane>0.45 && adv>-40){
-              const score=s+adv*0.5+lane*100;
-              if(score>bestThruScore){bestThruScore=score;bestThru=q;}
-            }
-          }
-          if(bestThru){ passTo(p,bestThru); p.aiActT=0.6; return steer(p,goalX,YC); }
-        }
-
-        // (2.6) TOUCHLINE OUTLET: a teammate hugging the flank with no defender near them
-        //       and a fairly open pass lane -> switch or clip out to them for width.
-        {
-          let touchBest=null, touchBsc=-1;
-          for(const q of teamOf(p.team)){
-            if(q===p||q.role==='DEF')continue;
-            const touchline = Math.abs(q.y-YC) > FH*0.32;    // genuinely wide, near the touchline
-            if(!touchline)continue;
-            const nearD=nearestOppTo(p,q); if(nearD&&dist(nearD,q)<110)continue;  // defender on them -> skip
-            const lane=laneClearance(p,q); if(lane<0.45)continue;
-            const sc=lane+opennessOf(p.team,q);
-            if(sc>touchBsc){touchBsc=sc;touchBest=q;}
-          }
-          if(touchBest){ passTo(p,touchBest); p.aiActT=0.55; return steer(p,goalX,YC); }
-        }
-
-        // (2.5) WINGER ON-BALL: wide forward in a 3/4-front has a specific decision tree.
-        if(Math.abs(p.wide)===1 && p.lineSize>=3){
-          const mySide = p.wide;                          // -1 top flank, +1 bottom flank
-          const advW = atk*(p.x-FW/2) > -40;              // advanced enough to be dangerous
-          // is the MIDDLE open to cut inside? (channel from me toward the central goal area)
-          const inx=(goalX-p.x), iny=(YC-p.y), il=Math.hypot(inx,iny)||1;
-          const midSpace = spaceAlong(inx/il, iny/il, 360);
-          // is the BYLINE channel ahead open? (straight down the flank toward the byline)
-          const bylineSpace = spaceAlong(atk, 0, 320);
-          const atByline = atk>0 ? p.x>FW-BX-130 : p.x<BX+130;
-          // header target(s) in the box: a supporting forward or the opposite winger
-          let headerTarget=false;
-          for(const q of teamOf(p.team)){
-            if(q===p||q.role==='DEF')continue;
-            const inBox = atk>0 ? q.x>FW-BX-30 : q.x<BX+30;
-            if(inBox && Math.abs(q.y-YC)<BY+30){headerTarget=true;break;}
-          }
-          if(advW && !hardP){
-            // 1) cut inside if the middle is open
-            if(midSpace>170 && Math.abs(p.y-YC)>GOAL_W*0.5){
-              const ang=Math.atan2(iny,inx);
-              const dx=Math.cos(ang),dy=Math.sin(ang);
-              p.aiActT=0.22; p.sprint=p.stamina>0.12;
-              return steer(p, clamp(p.x+dx*280,40,FW-40), clamp(p.y+dy*260,60,FH-60), 1.0);
-            }
-            // 2) run the open byline for a cutback
-            if(bylineSpace>150 && !atByline){
-              const ty2 = YC + mySide*(FH*0.34);          // hug the touchline lane
-              p.aiActT=0.22; p.sprint=p.stamina>0.12;
-              return steer(p, clamp(p.x+atk*280,40,FW-40), clamp(ty2,60,FH-60), 1.0);
-            }
-            // 3) cross if there's a header target in the box
-            if(headerTarget && (atByline || bylineSpace<140)){
-              aiCross(p); p.aiActT=1.1;
-              lastGrade='CROSS';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-              return steer(p,p.x,p.y,0.2);
-            }
-            // 4) no opening -> hold up & look for a side/back pass (fall through to step 4)
-          }
-        }
-
-        // (3) DRIVE FORWARD (not necessarily at goal) / CROSS. If in a crossing zone with
-        //     nobody in front and a forward in the box -> cross. Else carry into open space.
-        const wideNow = Math.abs(p.y-YC) > FH*0.22;
-        const advNow  = atk*(p.x-FW/2) > FW*0.10;
-        const nearByline = atk>0 ? p.x>FW-BX-200 : p.x<BX+200;
-        let boxTarget=false;
-        for(const q of teamOf(p.team)){
-          if(q===p||q.role==='DEF')continue;
-          const inBox = atk>0 ? q.x>FW-BX-40 : q.x<BX+40;
-          if(inBox && Math.abs(q.y-YC)<BY+30){boxTarget=true;break;}
-        }
-        const frontClear = spaceAlong(atk,0,200) > 150;    // nobody right in front
-        const otacC=TAC[p.team].off;
-        // CENTRAL tactic: don't cross — funnel through the middle instead (skip the cross).
-        const allowCross = otacC!=='central';
-        if(allowCross && wideNow && advNow && nearByline && frontClear && boxTarget && !hardP){
-          aiCross(p); p.aiActT=1.1;
-          lastGrade='CROSS';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-          return steer(p,p.x,p.y,0.2);
-        }
-        // probe a forward fan for the most open lane and drive it; CENTRAL biases the probe
-        // toward infield angles, so the carrier looks to come inside rather than stay wide.
-        if(!hardP){
-          let bestAng=null,bestSpace=-1;
-          const baseAng=atk>0?0:Math.PI;
-          for(let a=-1.35;a<=1.35;a+=0.18){
-            const ang=baseAng+a, dx=Math.cos(ang), dy=Math.sin(ang);
-            if(atk*dx<=0.05)continue;
-            const s=spaceAlong(dx,dy,420);
-            let hs=s-Math.abs(a)*22;
-            if(otacC==='central'){
-              // reward angles that bring the ball toward the central band
-              const towardCentre = (p.y>YC && dy<0) || (p.y<YC && dy>0) || Math.abs(p.y-YC)<FH*0.12;
-              hs += towardCentre ? 60 : -40;
-            }
-            if(hs>bestSpace){bestSpace=hs;bestAng=ang;}
-          }
-          if(bestAng!==null && bestSpace>110){
-            const dx=Math.cos(bestAng),dy=Math.sin(bestAng);
-            p.aiActT=0.25; p.sprint=p.stamina>0.12;
-            return steer(p, clamp(p.x+dx*300,40,FW-40), clamp(p.y+dy*300,60,FH-60), 1.0);
-          }
-        }
-
-        // (4) HOLD-UP or a safe SIDE pass. Prefer holding it up (wait for support) unless
-        //     a clean square/forward option is on; only forced if truly swarmed.
-        {
-          const pass=bestPass(p);
-          // TIKI-TAKA: take the safe pass more readily (patience), lower the quality bar.
-          const passBar = otacC==='tiki' ? 0.4 : 0.5;
-          if(pass.target && pass.quality>passBar){
-            passTo(p,pass.target); p.aiActT=0.55; return steer(p,goalX,YC);
-          }
-          // In the FINAL THIRD, be patient: shield and HOLD UP play, waiting for midfielders to
-          // overlap, instead of panicking into a backpass. Only bail if genuinely swarmed.
-          const inFinalThird = atk>0 ? p.x>FW*0.66 : p.x<FW*0.34;
-          // is support on the way? a teammate (esp. a mid) advancing toward us from behind
-          let supportComing=false;
-          for(const q of teamOf(p.team)){
-            if(q===p)continue;
-            const behindMe = atk*(p.x-q.x) > 0;                 // q is behind me (can overlap)
-            const advancing = atk*q.vx > 30;                    // moving forward
-            if(behindMe && advancing && dist(p,q)<420){ supportComing=true; break; }
-          }
-          // swarmed = two+ opponents right on top of us (genuine pressure, can't hold)
-          let swarm=0; for(const o of players){ if(o.team!==p.team && dist(o,p)<70) swarm++; }
-          const reallyStuck = swarm>=2 && !supportComing;
-          if(inFinalThird && !reallyStuck){
-            // hold it up: shield with body between defender and ball, wait for the overlap
-            let hx=p.x,hy=p.y;
-            if(presser){
-              const ax2=p.x-presser.x, ay2=p.y-presser.y, al=Math.hypot(ax2,ay2)||1;
-              p.facing={x:ax2/al,y:ay2/al}; p.carryAngle=Math.atan2(ay2,ax2);
-              hx=p.x+(ax2/al)*26; hy=clamp(p.y+(ay2/al)*26,60,FH-60);
-            }
-            // WIDE in the final third -> attack the byline rather than holding static
-            const isWide = Math.abs(p.y-YC) > FH*0.26;
-            const bylineOpen = spaceAlong(atk, 0, 240) > 120;
-            if(isWide && bylineOpen && !presser){
-              return steer(p, atk>0?FW-30:30, p.y, 0.9);   // drive the byline channel
-            }
-            p.aiActT=0.16;
-            // avoid long passes in the attacking third — only take a SHORT or MEDIUM option
-            const sp2=bestPass(p);
-            const isFwdPass = sp2.target && atk*(sp2.target.x-p.x)>40;  // forward passes are always fine in the final third
-            const shortEnough = sp2.target && (isFwdPass || dist(p,sp2.target)<340);  // sideways/back capped at 340px
-            if(sp2.target && sp2.quality>0.5 && shortEnough){ passTo(p,sp2.target); p.aiActT=0.55; return steer(p,goalX,YC); }
-            return steer(p,hx,hy,0.35);                          // patient hold-up
-          }
-          if(!hardP){
-            // outside the final third: shield, but recycle if a decent ball is on
-            let hx=p.x,hy=p.y;
-            if(presser){
-              const ax2=p.x-presser.x, ay2=p.y-presser.y, al=Math.hypot(ax2,ay2)||1;
-              p.facing={x:ax2/al,y:ay2/al}; p.carryAngle=Math.atan2(ay2,ax2);
-              hx=p.x+(ax2/al)*28; hy=clamp(p.y+(ay2/al)*28,60,FH-60);
-            }
-            p.aiActT=0.18;
-            const sp2=bestPass(p);
-            if(sp2.target && sp2.quality>0.46){ passTo(p,sp2.target); p.aiActT=0.55; return steer(p,goalX,YC); }
-            // ONE DEFENDER: if there's only one opponent close and no forward pass is on,
-            // drift to find a passing angle — move away from the helping defender's approach vector.
-            {
-              let closeOpp=0; let helper=null;
-              for(const o of players){
-                if(o.team===p.team)continue;
-                const od=dist(o,p);
-                if(od<130)closeOpp++;
-                if(od>130&&od<280&&atk*(p.x-o.x)>0&&(helper===null||od<dist(helper,p)))helper=o;
-              }
-              if(closeOpp<=1){
-                // drift perpendicular to the presser, away from the nearest helping defender
-                let driftY=0;
-                if(presser){ driftY=(p.y>YC)?30:-30; }
-                if(helper){ driftY=(p.y<helper.y)?-24:24; }  // step away from the helper's side
-                const tx=p.x+atk*14, ty=clamp(p.y+driftY,80,FH-80);
-                p.aiActT=0.14;
-                const sp3=bestPass(p);
-                if(sp3.target&&sp3.quality>0.42){ passTo(p,sp3.target); p.aiActT=0.55; return steer(p,goalX,YC); }
-                return steer(p,tx,ty,0.5);
-              }
-            }
-            return steer(p,hx,hy,0.4);
-          }
-          // (5) BACKPASS / last resort: swarmed (or pressed hard outside the final third) with
-          // nothing better -> play the safest ball.
-          if(pass.target){ passTo(p,pass.target); p.aiActT=0.7; return steer(p,goalX,YC); }
-          // truly nothing: shield and ride it
-          if(presser){
-            const ax2=p.x-presser.x, ay2=p.y-presser.y, al=Math.hypot(ax2,ay2)||1;
-            p.facing={x:ax2/al,y:ay2/al}; p.carryAngle=Math.atan2(ay2,ax2);
-            return steer(p,p.x+(ax2/al)*26,clamp(p.y+(ay2/al)*26,60,FH-60),0.4);
-          }
-          return steer(p,goalX,YC,0.3);
-        }
-      }
-
-      // --- CARRY vs SHIELD: read the space and the nearest defender ---
-      const presserD = presser?dist(presser,p):1e9;
-      const closedDown = presser && presserD<95;
-      if(closedDown){
-        // CLOSED DOWN -> shield: body between defender and ball, ball on the far side,
-        // don't run into the presser.
-        const awayX=p.x-presser.x, awayY=p.y-presser.y;
-        const al=Math.hypot(awayX,awayY)||1;
-        p.facing={x:awayX/al,y:awayY/al};
-        p.carryAngle=Math.atan2(awayY,awayX);
-        tx=p.x+(awayX/al)*40; ty=clamp(p.y+(awayY/al)*40,60,FH-60);
-        p.aiActT=0.12;
-        const sp=bestPass(p);
-        if(sp.target && sp.quality>0.4){ passTo(p,sp.target); p.aiActT=0.6; }
-        else {
-          // RELEASE VALVE: closed down with no good FORWARD ball -> square/back it to the most
-          // open supporting teammate with a clear lane, instead of holding it under pressure.
-          let outlet=null, ob=-1;
-          for(const q of teamOf(p.team)){
-            if(q===p)continue;
-            const d=dist(p,q);
-            if(d<55||d>520)continue;                   // not on top of me, not a hopeful long ball
-            if(inOffsidePos(q))continue;
-            const lane=laneClearance(p,q);
-            if(lane<0.4)continue;                      // need a genuinely clear lane
-            const open=opennessOf(p.team,q);
-            if(open<0.45)continue;                     // and a genuinely open man
-            const fwd=clamp(atk*(q.x-p.x)/400,0,1);    // square/back fine; tiny nudge for level/ahead
-            const sc=open*1.0+lane*0.7+fwd*0.25;
-            if(sc>ob){ob=sc;outlet=q;}
-          }
-          if(outlet){ passTo(p,outlet); p.aiActT=0.6; }
-          else return steer(p,tx,ty,0.5);
-        }
-      } else {
-        // not closed down: look for the most OPEN FORWARD direction and drive into it.
-        // probe headings across a wide fan; pick the one with the most clear space,
-        // with only a slight nudge toward straight-ahead (wing lanes are fine).
-        let bestAng=null,bestSpace=-1;
-        const baseAng = atk>0?0:Math.PI;                 // straight upfield
-        for(let a=-1.35;a<=1.35;a+=0.18){
-          const ang=baseAng+a;
-          const dirx=Math.cos(ang),diry=Math.sin(ang);
-          if(atk*dirx<=0.05)continue;                    // must make forward progress
-          let space=420;
-          for(const o of players)if(o.team!==p.team){
-            const rx=o.x-p.x,ry=o.y-p.y;
-            const along=rx*dirx+ry*diry;
-            if(along>0&&along<420){
-              const perp=Math.abs(rx*(-diry)+ry*dirx);
-              if(perp<70) space=Math.min(space,along);
-            }
-          }
-          // only a gentle straight-ahead preference; don't punish wing runs hard
-          const headingScore=space - Math.abs(a)*22;
-          if(headingScore>bestSpace){bestSpace=headingScore;bestAng=ang;}
-        }
-        const canAdvance = atk*(goalX-p.x)>120;
-        // is the straight-to-goal lane itself clear? (measure space directly toward goal)
-        let goalLaneSpace=420;
-        {
-          const gdx=(goalX-p.x), gdy=(YC-p.y);
-          const gl=Math.hypot(gdx,gdy)||1; const ux=gdx/gl, uy=gdy/gl;
-          for(const o of players)if(o.team!==p.team){
-            const rx=o.x-p.x,ry=o.y-p.y;
-            const along=rx*ux+ry*uy;
-            if(along>0&&along<420){
-              const perp=Math.abs(rx*(-uy)+ry*ux);
-              if(perp<64) goalLaneSpace=Math.min(goalLaneSpace,along);
-            }
-          }
-        }
-        const openToGoal = goalLaneSpace>150 && canAdvance;
-        // SQUARE FOR THE TAP-IN (weighed ABOVE taking the keeper on myself): if I'm bearing down
-        // on goal with the keeper committed to ME, and a teammate is level/near-level, unmarked,
-        // with a clean lane and NO keeper covering their angle -> give them the open goal.
-        {
-          const gk=keeperOf(atk>0?'R':'G');
-          const advanced = atk*(p.x-FW/2) > FW*0.12;             // into the attacking half-ish
-          const dGp=Math.abs(goalX-p.x);
-          const keeperOnMe = gk && advanced && dGp<700 &&
-                             atk*(goalX-gk.x) <= atk*(goalX-p.x)+10 &&   // keeper goal-side of me (in front)
-                             Math.abs(gk.y-p.y) < 150;                   // and engaging my line
-          if(keeperOnMe){
-            let tgt=null,tb=-1;
-            for(const q of teamOf(p.team)){
-              if(q===p)continue;
-              if(inOffsidePos(q))continue;
-              const fore=atk*(q.x-p.x);
-              if(fore < -150 || fore > 220) continue;            // level or near-level with the ball only
-              let dm=1e9;                                        // nearest OUTFIELD opponent to them
-              for(const o of players){ if(o.team===p.team||o.role==='G')continue; dm=Math.min(dm,dist(o,q)); }
-              if(dm<120) continue;                               // someone's on them -> not a free shot
-              if(Math.abs(gk.y-q.y) < 80) continue;              // keeper still level with them -> covered
-              if(Math.abs(gk.y-p.y) > Math.abs(gk.y-q.y)-40) continue; // keeper not actually committed to me
-              if(laneClearance(p,q) < 0.5) continue;             // need a clean square ball
-              const dGq=Math.abs(goalX-q.x);
-              const goalPos=BX*1.5;                              // within 1.5x the penalty-box length of goal
-              if(dGq>goalPos) continue;                          // they must have a real goal chance
-              const sc = dm*0.01 + (goalPos-dGq)*0.002;
-              if(sc>tb){tb=sc;tgt=q;}
-            }
-            if(tgt){ passTo(p,tgt); p.aiActT=0.7; return steer(p,goalX,YC,0.3); }
-          }
-        }
-        // FORWARDS are the most eager to run into space; open midfielders next.
-        const openMid = p.role==='MID' && (!presser || presserD>150);
-        let driveBar, driveProb;
-        if(p.role==='ATT'){
-          driveBar  = (!presser || presserD>120) ? 100 : 150;
-          driveProb = 0.95;
-        } else if(openMid){
-          driveBar=130; driveProb=0.92;
-        } else {
-          driveBar=160; driveProb=0.8;
-        }
-        // If the lane to GOAL is open: shoot when in range, otherwise drive AT goal.
-        if(openToGoal){
-          const dG=Math.abs(goalX-p.x);
-          // THROUGH ON GOAL (lane very clear) -> get closer to the keeper before shooting;
-          // a keeper rushing out lets us shoot earlier to beat him.
-          const gk=keeperOf(atk>0?'R':'G');
-          const gkD = gk ? Math.abs(goalX-gk.x) : 0;
-          const keeperRushing = gk && Math.abs(gk.y-p.y)<70 && (dG - gkD) < 150;
-          const shootDist = (goalLaneSpace>300 ? 300 : 470);   // (legacy)
-          // a good enough angle on goal -> have a go (don't backpass)
-          if((aiTakesShot(p,atk,goalX,goalLaneSpace>300) || keeperRushing) && p.role!=='DEF'){
-            const aimC=clamp((YC-p.y)/(GOAL_W*0.9),-1,1);
-            shootAt(p,atk,aimC,clamp(0.62+dG/1100,0.62,1),aiCurlFor(p,atk));
-            p.aiActT=0.8;
-            return steer(p,goalX,YC);
-          }
-          // otherwise keep driving straight at goal
-          tx=goalX; ty=YC+(p.y-YC)*0.18;
-          if(p.role==='DEF'){ if(atk>0)tx=Math.min(tx,FW/2-12);else tx=Math.max(tx,FW/2+12); }
-          p.aiActT=0.2;
-          p.sprint = p.stamina>0.12;
-          return steer(p,tx,ty,1.0);
-        }
-        // otherwise, drive into the most open forward lane (wing or central) if there is one
-        if(bestAng!==null && bestSpace>driveBar && canAdvance && Math.random()<driveProb){
-          const dirx=Math.cos(bestAng),diry=Math.sin(bestAng);
-          tx=clamp(p.x+dirx*300,40,FW-40);
-          ty=clamp(p.y+diry*300,60,FH-60);
-          // a defender carrying the ball still must not cross halfway
-          if(p.role==='DEF'){ if(atk>0)tx=Math.min(tx,FW/2-12);else tx=Math.max(tx,FW/2+12); }
-          p.aiActT=0.25;
-          p.sprint = p.stamina>0.12;                             // burst into the opening
-          return steer(p,tx,ty,1.0);                             // drive into the open lane
-        }
-      }
-
-      tx=goalX;ty=YC+(p.y-YC)*0.25;
-      const dGoal=Math.abs(goalX-p.x);
-      const atCorner=Math.abs(p.x-goalX)<80&&(p.y<90||p.y>FH-90);
-      if(p.aiActT<=0||pressuredNow){
-        // WIDE & ADVANCED near the byline -> whip a cross into the box if a teammate is there
-        const wideNow = Math.abs(p.y-YC) > FH*0.24;
-        const advNow  = atk*(p.x-FW/2) > FW*0.16;                 // into the attacking third-ish
-        const nearByline = atk>0 ? p.x>FW-BX-140 : p.x<BX+140;
-        let boxTarget=false;
-        for(const q of teamOf(p.team)){
-          if(q===p)continue;
-          const inBox = atk>0 ? q.x>FW-BX-60 : q.x<BX+60;
-          if(inBox && Math.abs(q.y-YC)<BY+40){boxTarget=true;break;}
-        }
-        if(atCorner){
-          let tgt=null,bd=1e9;
-          for(const q of teamOf(p.team))if(q!==p){
-            const d=Math.hypot(q.x-(goalX-atk*120),q.y-YC);
-            if(d<bd){bd=d;tgt=q;}
-          }
-          if(tgt){passTo(p,tgt,170);p.aiActT=1.0;}
-        } else if(wideNow && advNow && (nearByline||boxTarget) && boxTarget && Math.random()<0.7){
-          aiCross(p);
-          p.aiActT=1.1;
-          lastGrade='CROSS';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-        } else if(aiTakesShot(p,atk,goalX,false)){
-          shootAt(p,atk,(Math.random()<0.5?-1:1)*(0.5+Math.random()*0.5),0.75+Math.random()*0.25,aiCurlFor(p,atk));
-          p.aiActT=0.9;
-        } else if(p.team==='R' && dGoal<720 && Math.abs(p.y-YC)<330 &&
-                  presser && dist(presser,p)<70 &&
-                  (function(){const sp=bestPass(p);return !sp.target||sp.quality<0.3;})()){
-          // OPPONENT: closed down with no support -> let fly from distance rather than lose it
-          shootAt(p,atk,(Math.random()<0.5?-1:1)*(0.4+Math.random()*0.6),0.8+Math.random()*0.2,aiCurlFor(p,atk));
-          p.aiActT=1.0;
-        } else {
-          const pass=bestPass(p);
-          const pressured=presser&&dist(presser,p)<95;
-          const hardPress=presser&&dist(presser,p)<60;
-          if(pass.target && pass.quality>0.45){
-            // a genuinely open, safe option — play it
-            passTo(p,pass.target);p.aiActT=0.55;
-          } else if(pass.target && pass.quality>0.28 && (pressured||Math.random()<0.3)){
-            // a half-open option — take it if pressured or occasionally
-            passTo(p,pass.target);p.aiActT=0.6;
-          } else if(hardPress && pass.target){
-            // no clean option but being closed down hard -> risk the best ball we have
-            passTo(p,pass.target);p.aiActT=0.7;
-          } else if(p.role==='ATT' && !hardPress){
-            // HOLD-UP PLAY: a forward with no good option doesn't force it — shields the
-            // ball, protects it with body between defender and ball, and waits for support
-            // to arrive. (Midfielders are pushing up to support, see support-runs below.)
-            if(presser){
-              const awayX=p.x-presser.x, awayY=p.y-presser.y;
-              const al=Math.hypot(awayX,awayY)||1;
-              p.facing={x:awayX/al,y:awayY/al};
-              p.carryAngle=Math.atan2(awayY,awayX);       // ball on the far side from defender
-              tx=p.x+(awayX/al)*30; ty=clamp(p.y+(awayY/al)*30,60,FH-60);
-            } else {
-              // no immediate pressure: hold position, shield, face play, wait a beat
-              tx=p.x; ty=p.y;
-            }
-            p.aiActT=0.2;                                  // keep re-checking for support
-            // if a good option appears, take it immediately
-            const sp2=bestPass(p);
-            if(sp2.target && sp2.quality>0.42){ passTo(p,sp2.target); p.aiActT=0.55; }
-            else return steer(p,tx,ty,0.4);                // hold up, minimal movement
-          } else {
-            // lanes cut off and not in immediate danger: WRIGGLE to open an angle.
-            // drift laterally toward the more open flank / away from the nearest marker,
-            // carrying the ball a bit to change the passing geometry.
-            let openY=ty;
-            if(presser){
-              openY = presser.y>p.y ? p.y-160 : p.y+160;   // step away from the marker
-            } else {
-              openY = p.y<YC ? p.y+120 : p.y-120;          // drift toward center
-            }
-            tx=p.x+atk*70;                                  // probe forward a touch
-            ty=clamp(openY,60,FH-60);
-            p.aiActT=0.18;                                  // re-evaluate soon (look for the lane)
-            return steer(p,tx,ty,0.7);
-          }
-        }
-      }
+      return onBall(p,dt,atk,goalX);                    // see ON THE BALL
     } else if((hb&&hb.team===p.team&&hb!==p)||(gkHold&&gkHold.team===p.team)){
       const c=hb||gkHold;                       // our man on it -- or knocking it on, or the man our pass is going to
       if(planOn(p.team)){ const a=teamPlan(p.team,dt).jobs.get(p); if(a) return followPlan(p,a,dt); }   // a neutral side: its plan (see teamPlan)
@@ -7972,7 +6968,6 @@
 
   // ===== movement =====
   function stepOutfield(p,ix,iy,dt){
-    if(p.lastPasserT>0)p.lastPasserT-=dt;
     if(p.passLockT>0)p.passLockT-=dt;
     if(p.sprintDropT>0)p.sprintDropT-=dt;
     if(p.beatenCd>0)p.beatenCd-=dt;
@@ -8350,7 +7345,7 @@
     ball.ownedBy=p;
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
     p.touchLagT=0;
-    if(!wasOwner){ p.lastPasser=(ball.passerRef&&ball.passerRef.team===p.team&&ball.passerRef!==p)?ball.passerRef:null; p.lastPasserT=p.lastPasser?1.6:0;
+    if(!wasOwner){
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
         actQ=null; swipeShot=null; } }                       // a fresh ball (a pass, a restart, a lab serve): a press waiting on the last one doesn't carry over
     if(!wasOwner) meOnReceive(p, ball.passerRef);
@@ -8374,7 +7369,6 @@
     ball.lastTouch=p.team;
     if(!wasOwner){ if(ball.lastTouchP!==p){ ball.prevTouchP=ball.lastTouchP; } ball.lastTouchP=p; }
     // locked: gaining the ball does not switch control
-    if(!wasOwner&&p!==controlled) p.aiActT=Math.max(p.aiActT, p.team==='G'?P.mateThink.val:P.aiThink.val); // settle before deciding
   }
 
   function carry(p,dt,moving){
@@ -8828,7 +7822,7 @@
           resetKickoff('R');            // the team that didn't start (Red) kicks off the second half
         } else if(!matchOver && !ftPending){
           // SECOND-HALF full time: don't blow the whistle yet — play the advantage out
-          ftPending=true; ftShot=false; ftLastTeam = ball.ownedBy ? ball.ownedBy.team : null;
+          ftPending=true; ftShot=false; ftLastTeam = ball.ownedBy ? ball.ownedBy.team : null; ftT0=simNow;
           lastGrade='FULL TIME — ADVANTAGE'; gradeColor='#ffb43c'; gradeFade=2.4;
         }
       }
@@ -9208,13 +8202,13 @@
         const car=ball.ownedBy;
         if(car && car.role!=='G'){
           const atkc=atkOf(car.team), goalXc=atkc>0?FW:0;
-          const lanec=dbgGoalLane(car, goalXc);
-          const od=shotOdds(car, atkc, goalXc, lanec>300);
-          const sp=bestPass(car);
           const prc=nearestOppTo(car,car); const prd=prc?dist(prc,car):1e9;
-          L.push('\u2014 carrier '+car.team+'#'+car.num+' '+(car.subRole||car.role)+'  ['+(car===controlled?'YOU':'AI')+']');
-          L.push('  SHOT ang='+(od.ang*180/Math.PI).toFixed(0)+'\u00b0 need='+(od.need*180/Math.PI).toFixed(0)+'\u00b0 P='+Math.round(od.pShoot*100)+'%  dGoal='+od.dGme.toFixed(0)+' lane='+lanec.toFixed(0));
-          L.push('  PASS '+(sp.target?('#'+sp.target.num+' '+sp.target.role+' q='+sp.quality.toFixed(2)):'(none)')+'   PRESS '+(prc?('#'+prc.num+' d='+prd.toFixed(0)):'-'));
+          // the computer's last look at its options (see ON THE BALL): the best five, as it scored them (x100)
+          const ob=car.obLast&&simNow-car.obLast.t<1.5?car.obLast:null, tops=ob?ob.opts.slice().sort((a,b)=>b.ev-a.ev).slice(0,5):[];
+          const oName=o=>o.kind+(o.q?' #'+(o.q.num!=null?o.q.num:'GK'):'');
+          L.push('\u2014 carrier '+car.team+'#'+car.num+' '+(car.subRole||car.role)+'  ['+(car===controlled?'YOU':'AI')+']   PRESS '+(prc?('#'+prc.num+' d='+prd.toFixed(0)):'-'));
+          if(ob) L.push('  picked '+(ob.pick?oName(ob.pick):'-')+(ob.looking?'  (still looking up)':''));
+          for(const o of tops) L.push('    '+oName(o).padEnd(10)+' odds '+String(Math.round(o.P*100)).padStart(3)+'%  worth '+(o.v*100).toFixed(1).padStart(5)+'  if lost '+(o.loss*100).toFixed(1).padStart(4)+'  score '+(o.ev*100).toFixed(2));
           // shot-quality (corner aim) preview: only meaningful within a believable shooting range
           const dGoalc=Math.hypot(goalXc-ball.x, YC-ball.y);
           let shotEv=null, shotChg=0;
@@ -9226,10 +8220,17 @@
           try{
             const cc=proj(car.x,car.y,car.z||0);
             ctx.save(); ctx.font="bold 12px 'IBM Plex Mono',monospace"; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-            if(sp.target){ const tt=proj(sp.target.x,sp.target.y,0); ctx.strokeStyle='rgba(90,175,255,.85)'; ctx.lineWidth=2; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(cc.x,cc.y); ctx.lineTo(tt.x,tt.y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='rgba(140,200,255,.95)'; ctx.fillText('q'+sp.quality.toFixed(2),(cc.x+tt.x)/2,(cc.y+tt.y)/2-4); }
+            for(const o of tops){                                     // passes dashed, carries solid; the pick in green
+              if(o.kind!=='pass'&&o.kind!=='carry') continue;
+              const pk=ob.pick&&o.key===ob.pick.key, col=pk?'rgba(157,255,60,.95)':'rgba(140,200,255,.75)', tt=o.kind==='pass'?proj(o.tx,o.ty,0):proj(o.ex,o.ey,0);
+              ctx.strokeStyle=col; ctx.lineWidth=pk?2.5:1.5; ctx.setLineDash(o.kind==='pass'?[6,4]:[]);
+              ctx.beginPath(); ctx.moveTo(cc.x,cc.y); ctx.lineTo(tt.x,tt.y); ctx.stroke(); ctx.setLineDash([]);
+              ctx.fillStyle=col; ctx.fillText((o.ev*100).toFixed(1),(cc.x+tt.x)/2,(cc.y+tt.y)/2-4);
+            }
             if(prc){ const qq=proj(prc.x,prc.y,0); ctx.strokeStyle='rgba(255,90,77,.8)'; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(cc.x,cc.y); ctx.lineTo(qq.x,qq.y); ctx.stroke(); ctx.setLineDash([]); }
-            ctx.fillStyle = od.pShoot>0.6?'#9dff3c':(od.pShoot>0.3?'#ffb43c':'#ff5a4d');
-            ctx.fillText('SHOOT '+Math.round(od.pShoot*100)+'%', cc.x, cc.y-34);
+            const so=ob&&ob.opts.find(o=>o.kind==='shot');            // its chance of a shot going in from here
+            ctx.fillStyle = !so?'#8a9580':so.P>0.25?'#9dff3c':(so.P>0.1?'#ffb43c':'#ff5a4d');
+            ctx.fillText('SHOT '+(so?Math.round(so.P*100)+'%':'-'), cc.x, cc.y-34);
             // ---- SHOT-QUALITY: each corner colored by quality, the keeper's reach toward it, and the AI's pick ----
             if(shotEv){
               const bp=proj(ball.x,ball.y,ball.z||0);
@@ -9336,6 +8337,7 @@
       if(ball.shotT>0) return false;       // shot still live
       return true;
     }
+    if(simNow-ftT0>12) return true;        // 4) and the referee won't wait for ever: a side keeping it up there gets 12 s
     const owner=ball.ownedBy;
     if(owner){
       const t=owner.team, dir=atkOf(t), third=ftThird(ball.x,dir);

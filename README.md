@@ -210,8 +210,31 @@ test, and like the Trap Lab the values are the game's settings.
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
   playing style; see [Playing styles](#playing-styles).
-- **AI cascades** — separate carrier, defender, and keeper decision trees, with team
-  style levers (press / neutral / low block · neutral / wing / counter) and per-player
+- **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
+  best, rather than going down a list of rules where the first that fits wins: a pass to each
+  team-mate (to his feet, or into the path of a man making a run, weighted to arrive with him), a carry
+  in a dozen directions, taking his man on, a shot, a cross, shielding it, and, with a man on him in his
+  own third and nothing on, a clearance. Everything is scored in one currency: roughly, how likely it
+  is to lead to a goal for his side, less how likely it is to give one away.
+  - A pass's odds come from a race between the ball and every opponent who could get to it on the way
+    (a ball in the air can't be cut out until it comes down), the passer's accuracy over that distance,
+    and how tight they'll be on the receiver when it arrives. Its worth is where the receiver has it
+    and how much room he has there; a runner through on goal is worth most of a shot.
+  - A carry is worth where he gets to before anyone can reach him.
+  - A shot's chance comes from a table measured in this game: shots struck the way the computer
+    strikes them, run onto from all over their half. About half go in from 8–16 m out and fairly
+    central, few from 20 m, and almost none from right in front, where the keeper's out at your feet.
+    Anyone in the way of the corner he'd aim for cuts it down.
+  - He gets the ball under control and looks up first (the decision-time dials say for how long, less
+    with a man on him), and plays it first time only when he's pressed or a ball's clearly on. Then he
+    sticks with a choice for a moment rather than changing his mind every frame.
+  - A side that's had the ball a while without getting forward starts to force it (sooner for a direct
+    side, later for tiki-taka).
+  - A lower Off IQ misjudges the options more, and the side's way of playing and the man's own style
+    tilt them (see [Playing styles](#playing-styles)).
+  - Press ` (backquote) for the debug overlay: it shows the man on the ball's five best options, as he
+    scored them, and the one he picked.
+- **Team style levers** (press / neutral / low block · neutral / wing / counter) and per-player
   defensive personalities. Defenders close down quickly, then come in under control for the last
   few strides, and a beaten one chases back up alongside rather than through the man.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
@@ -353,6 +376,11 @@ with his build. Ratings come out about the same across styles; what changes is t
 
 The style also shapes how a player is used: an Anchor is the one who holds in midfield, speedsters
 and wingers make runs in behind sooner and from further out, and a target man stays on the line.
+On the ball it tilts his choices: wingers and inside forwards fancy taking their man on (an inside
+forward a shot too), a speedster running with it, a playmaker or creator the ball through, a poacher a
+shot; a target man holds it up, and a stopper or an anchor keeps it simple. The side's way of playing
+tilts them too: tiki-taka keeps the ball and passes quickly, direct looks forward first and further, a
+wing side crosses more, and a counter goes quickly while the break is on.
 In a career, each sub-role (CB, FB, DM, CM, AM, STK, WNG) has its styles; players signed before
 styles existed are labelled with the style their stats already fit, and keep their stats.
 
