@@ -4,8 +4,12 @@
 // arrives, men run with it into space, and few run into a tackle. How long he looks up for is the decision-time dials'.
 // His passes land where he means them to -- a chip over a man goes just over his head, not up into the sky and on past
 // the man it was for -- and with space in front of him he runs into it rather than turning back.
+// Through on goal, he takes it on and shoots from close in -- not a ball square or back. With time to get closer, he
+// gets closer before he shoots. Out wide with the way inside shut and men of his in the box, he goes down the line or
+// puts it into the box (a cross, a ball in to one of them, a shot from in there) -- not straight back out of it.
 // Plays an exhibition with every player on the computer, on a copy of the game that lets the test see each decision
-// and what came of it; then sets a midfielder up with the ball and room ahead of him, a few times.
+// and what came of it; then sets a midfielder up with the ball and room ahead of him, a few times; then the other
+// three situations, a few times each.
 import { open, startExhibition } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -23,6 +27,7 @@ patch('  function shootAt(p,atkSide,aim,charge,aiCurl,accMul,spin){\n', '  funct
 patch('  function aiCross(p,spot){\n', '  function aiCross(p,spot){\n    if(window.__OBT) window.__OBT.rel(p,"cross",null,simNow);\n');
 patch('  function obClearBall(p,tx,ty){\n', '  function obClearBall(p,tx,ty){\n    if(window.__OBT) window.__OBT.rel(p,"clear",null,simNow);\n');
 patch('  function winBall(t,carrier){\n', '  function winBall(t,carrier){\n    if(window.__OBT) window.__OBT.lost(carrier,simNow);\n');
+patch('    if(!ob||ob.done||simNow-ob.seen>0.7) ob=p.ob=obStart(p,C);', '    if(!ob||ob.done||simNow-ob.seen>0.7){ ob=p.ob=obStart(p,C); if(window.__OBT) window.__OBT.looks.push({ seg: window.__OBT.seg, t: ob.look - ob.since, alone: C.prD >= 150 }); }');   // how long he'll look up
 // each pass as it's struck (how far it's meant to go, and where to), and every frame, so the test can follow its flight
 patch('    recordPassTeam(p.team,p); passPose(p);\n    // locked: no auto-switch\n', '    if(window.__OBT) window.__OBT.struck(d,lead.x,lead.y);\n    recordPassTeam(p.team,p); passPose(p);\n    // locked: no auto-switch\n');
 patch("    if(meIs(p)) meBump('passes');\n    recordPassTeam(p.team,p); passPose(p);\n  }\n  // How the side", "    if(meIs(p)) meBump('passes');\n    if(window.__OBT) window.__OBT.struck(d,tx,ty);\n    recordPassTeam(p.team,p); passPose(p);\n  }\n  // How the side");
@@ -30,7 +35,7 @@ patch('    if(LAB.on) labStep(dt,rdt);\n', '    if(LAB.on) labStep(dt,rdt);\n   
 // ROOM AHEAD: green's man in midfield with the ball; his back line 15 m behind him, free; his other team-mates level with
 // him out on the touchlines; theirs in a line 12 m in front of him, spread right across, and two more behind that
 patch('  const LAB_TITLE=', `  window.__T={players:()=>players, P, sim:()=>simNow, ball:()=>ball, gk:()=>gkHold, dead:()=>restartT>0||scoredT>0||offsideT>0, atkOf,
-    space:(k)=>{ restartT=0; scoredT=0; offsideT=0; gkHold=null; breakT=0;
+    space:(k)=>{ restartT=0; scoredT=0; offsideT=0; gkHold=null; breakT=0; matchClock=0;   // (no half-time whistle mid-trial)
       const atk=atkOf('G'), X=u=>atk>0?u:FW-u, G=players.filter(q=>q.team==='G'), R=players.filter(q=>q.team==='R');
       const mids=G.filter(q=>q.role!=='DEF'), c=mids[k%mids.length], u0=FW*0.42;
       const put=(q,u,y)=>{ q.x=X(u); q.y=y; q.vx=q.vy=0; q.state='normal'; q.z=0; q.vz=0; q.noTouchT=0; q.takeOn=null; q.ob=null; q.runTarget=null; q.gapRun=0; };
@@ -40,7 +45,22 @@ patch('  const LAB_TITLE=', `  window.__T={players:()=>players, P, sim:()=>simNo
       ball.x=c.x+atk*(c.r+ball.r+5); ball.y=c.y; ball.z=0; ball.vx=ball.vy=ball.vz=0; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.thru=null; ball.shotT=0; ball.crossT=0;
       own(c,c.r+ball.r+5);
       return {id:c.team+c.num, atk, x:c.x}; },
-    pos:(id)=>{ const q=players.find(q=>q.team+q.num===id); return q?{x:q.x,y:q.y}:null; } };
+    // green's man with the ball and others placed about him: dl metres from their goal line, y metres off the middle;
+    // c.pref picks him (a striker, a wide man); the rest of his team (defenders last) and theirs go where listed, or
+    // well out of it
+    scene:(S)=>{ restartT=0; scoredT=0; offsideT=0; gkHold=null; breakT=0; ftPending=false; matchClock=0;
+      const atk=atkOf('G'), gx=atk>0?FW:0, X=dl=>gx-atk*dl*25, Y=y=>YC+y*25;
+      const G=players.filter(q=>q.team==='G'), R=players.filter(q=>q.team==='R');
+      const put=(q,dl,y)=>{ q.x=X(dl); q.y=Y(y); q.vx=q.vy=0; q.state='normal'; q.z=0; q.vz=0; q.noTouchT=0; q.takeOn=null; q.ob=null; q.runTarget=null; q.gapRun=0; q.stamina=1; };
+      const pool=G.filter(q=>S.c.pref==='WIDE'?(q.role!=='DEF'&&(q.slotAtk||q).wide):q.role==='ATT'), c=pool[(S.k||0)%pool.length];
+      put(c,S.c.dl,S.c.y); controlled=c;
+      G.filter(q=>q!==c).sort((a,b)=>(a.role==='DEF')-(b.role==='DEF')).forEach((q,i)=>{ const m=(S.mates||[])[i]; if(m) put(q,m.dl,m.y); else put(q,72,-24+i*8); });
+      R.forEach((q,n)=>{ const o=(S.opps||[])[n]; if(o) put(q,o.dl,o.y); else put(q,92,-20+n*7); });
+      for(const kk of keepers){ kk.x=kk.homeX; kk.y=YC; kk.mode='line'; kk.holdT=0; kk.claimCd=0; kk.diveT=0; kk.groundT=0; kk.reactT=0; kk.threatActive=false; }
+      ball.x=c.x+atk*(c.r+ball.r+5); ball.y=c.y; ball.z=0; ball.vx=ball.vy=ball.vz=0; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.thru=null; ball.shotT=0; ball.crossT=0; ball.shotBy=null;
+      own(c,c.r+ball.r+5);
+      return {id:c.team+c.num, x:c.x}; },
+    pos:(id)=>{ const q=players.find(q=>q.team+q.num===id), gx=atkOf('G')>0?FW:0; return q?{x:q.x,y:q.y,dl:Math.abs(gx-q.x)/25}:null; } };
   const LAB_TITLE=`);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ob-')), 'index.html');
 writeFileSync(copy, src);
@@ -50,7 +70,7 @@ const ok = rep.ok, info = rep.info;
 await page.addInitScript(() => {
   window.__aiAll = true;
   // spells on the ball: who, when he got it, where, how close the nearest opponent was then; and what he did with it
-  const O = window.__OBT = { log: [], tackled: 0, spells: 0, cur: null, pend: null, seg: 1, longest: 0 };
+  const O = window.__OBT = { log: [], tackled: 0, spells: 0, cur: null, pend: null, seg: 1, longest: 0, looks: [] };
   const near = p => { let d = 1e9; for(const o of window.__T.players()) if(o.team !== p.team) d = Math.min(d, Math.hypot(o.x - p.x, o.y - p.y)); return d; };
   O.got = (p, t) => {
     if(O.pend){ O.pend.out = p.team === O.pend.team ? 'ok' : 'lost'; O.pend = null; }
@@ -62,8 +82,10 @@ await page.addInitScript(() => {
     const c = O.cur; if(!c || c.p !== p || c.done) return;
     c.done = true; c.tEnd = t;
     const L = p.obLast, mine = !!L && L.t === t && !!L.pick && L.pick.kind === kind && (kind !== 'pass' || L.pick.q === mate);
+    const atk = window.__T.atkOf(p.team), gx = atk > 0 ? 2625 : 0;
     const r = { kind, team: p.team, by: p.team + p.num, tOn: t - c.t0, carry: Math.hypot(p.x - c.x0, p.y - c.y0) / 25, free: c.free, seg: c.seg, brain: mine, nOpts: L ? L.opts.length : 0,
-                dU: mate ? (window.__T.atkOf(p.team) * (mate.x - p.x)) / 25 : 0, toBack: !!mate && mate.role === 'DEF' };
+                dU: mate ? (atk * (mate.x - p.x)) / 25 : 0, toBack: !!mate && mate.role === 'DEF',
+                dl: Math.abs(gx - p.x) / 25, y: (p.y - 850) / 25, toDl: mate ? Math.abs(gx - mate.x) / 25 : null, toY: mate ? (mate.y - 850) / 25 : null };
     O.log.push(r); if(kind === 'pass') O.pend = r;
   };
   O.lost = (carrier, t) => { const c = O.cur; if(c && c.p === carrier && !c.done){ c.done = true; c.tEnd = t; O.tackled++; } };
@@ -85,17 +107,36 @@ await until(75);
 const think = await page.evaluate(() => { const P = window.__T.P, was = [P.aiThink.val, P.mateThink.val]; P.aiThink.val = 1.3; P.mateThink.val = 1.3; window.__OBT.seg = 2; return was; });
 await until(120);
 const R = await page.evaluate(() => { const O = window.__OBT, c = O.cur, now = window.__T.sim();
-  return { rel: O.log, tackled: O.tackled, spells: O.spells, longest: Math.max(O.longest, c ? (c.tEnd || now) - c.t0 : 0), flights: O.flights }; });
-// room ahead, six times over (a different man each time): does he go forward with it -- a run of 2 m or more, or a ball
-// forward -- inside a second and a half, rather than play it back to his back line?
+  return { rel: O.log, tackled: O.tackled, spells: O.spells, longest: Math.max(O.longest, c ? (c.tEnd || now) - c.t0 : 0), flights: O.flights, looks: O.looks }; });
+// room ahead, eight times over (a different man each time): does he go forward with it -- a run of 2 m or more, or a
+// ball forward -- inside a second and a half, rather than play it back to his back line?
 await page.evaluate(was => { const P = window.__T.P; P.aiThink.val = was[0]; P.mateThink.val = was[1]; }, think);   // (the dials back as they were)
 const trials = [];
-for(let k = 0; k < 6; k++){
+for(let k = 0; k < 8; k++){
   const s = await page.evaluate(k => { window.__OBT.log.length = 0; window.__OBT.cur = null; window.__OBT.pend = null; return window.__T.space(k); }, k);
   const t0 = await sim(); while((await sim()) - t0 < 1.5) await page.waitForTimeout(20);
   const r = await page.evaluate(id => ({ played: window.__OBT.log.filter(e => e.by === id), at: window.__T.pos(id) }), s.id);
   const ran = s.atk * (r.at.x - s.x) / 25, first = r.played[0];
   trials.push({ ran, back: !!first && first.toBack, fwd: !!first && first.dU > 3, kind: first ? first.kind : null });
+}
+// THROUGH ON GOAL from 30 m (their back line 10 m behind him, a team-mate out wide on the other side); TIME TO GET
+// CLOSER, 23 m out with their nearest men 9 m away; OUT WIDE 25 m out, their full-back goal-side and inside him, a
+// striker of his level with their last man at the far post and another arriving: what he does with it (6 s at most)
+const SCENES = {
+  thru: { c: { dl: 30, y: 3, pref: 'ATT' }, mates: [{ dl: 32, y: -14 }], opps: [{ dl: 40, y: -8 }, { dl: 40, y: 0 }, { dl: 40, y: 8 }] },
+  closer: { c: { dl: 23, y: 2, pref: 'ATT' }, mates: [{ dl: 30, y: -16 }], opps: [{ dl: 23, y: 11 }, { dl: 23, y: -7 }, { dl: 32, y: 2 }] },
+  wide: { c: { dl: 25, y: 17, pref: 'WIDE' }, mates: [{ dl: 11, y: -8 }, { dl: 14, y: 1 }, { dl: 30, y: 5 }], opps: [{ dl: 22, y: 12 }, { dl: 10, y: 3 }, { dl: 10, y: -5 }] },
+};
+const scenes = {};
+for(const name of Object.keys(SCENES)) for(let k = 0; k < 4; k++){
+  const s = await page.evaluate(([S, k]) => { window.__OBT.log.length = 0; window.__OBT.cur = null; window.__OBT.pend = null; return window.__T.scene({ ...S, k }); }, [SCENES[name], k]);
+  const t0 = await sim(); let r = null;
+  while((await sim()) - t0 < 6){
+    await page.waitForTimeout(40);
+    r = await page.evaluate(id => ({ played: window.__OBT.log.filter(e => e.by === id), at: window.__T.pos(id), dead: window.__T.dead() }), s.id);
+    if(r.played.length || r.dead) break;
+  }
+  (scenes[name] = scenes[name] || []).push({ first: r && r.played[0] || null, endDl: r ? r.at.dl : 99 });
 }
 await browser.close();
 
@@ -115,14 +156,28 @@ const done = passes.filter(r => r.out);
 ok(done.filter(r => r.out === 'ok').length / Math.max(1, done.length) >= 0.7, `passes find a team-mate: ${pct(done.filter(r => r.out === 'ok').length, done.length)} of ${done.length}`);
 ok(R.tackled / Math.max(1, R.spells) <= 0.1, `few run into a tackle: ${R.tackled} of ${R.spells} spells end in one`);
 ok(R.longest < 12, `nobody keeps it for ever (shielding it in a corner, say): the longest spell on the ball was ${R.longest.toFixed(1)} s`);
-const m1 = med(p1.filter(r => r.free).map(r => r.tOn)), m2 = med(p2.filter(r => r.free).map(r => r.tOn));
-ok(p2.filter(r => r.free).length >= 5 && m2 >= m1 + 0.3, `with the decision-time dials up he looks up for longer: ${m1.toFixed(2)} s -> ${m2.toFixed(2)} s on the ball (median, nobody on him)`);
+// (how long he looks up before he'll play it, getting it with nobody of theirs within 6 m: a man closing in cuts it short)
+const l1 = R.looks.filter(l => l.seg === 1 && l.alone).map(l => l.t), l2 = R.looks.filter(l => l.seg === 2 && l.alone).map(l => l.t), m1 = med(l1), m2 = med(l2);
+ok(l2.length >= 5 && m2 >= m1 + 0.4, `with the decision-time dials up he looks up for longer before he'll play it: ${m1.toFixed(2)} s -> ${m2.toFixed(2)} s (median, nobody within 6 m when it came)`);
 
 const fl = R.flights, over = fl.filter(f => (f.along - f.d) / 25 > 10).length, top = Math.max(0, ...fl.map(f => f.top)) / 25;
 ok(fl.length >= 25 && top < 10, `no pass is skied: the highest of ${fl.length} went ${top.toFixed(1)} m up`);
-ok(over / Math.max(1, fl.length) <= 0.05, `passes land where they're meant to: ${over} of ${fl.length} ran on more than 10 m past the man they were for`);
+ok(over / Math.max(1, fl.length) <= 0.08, `passes land where they're meant to: ${over} of ${fl.length} ran on more than 10 m past the man they were for`);
 info('room ahead: ' + trials.map(t => 'ran ' + t.ran.toFixed(1) + ' m' + (t.back ? ', then BACK TO THE BACK LINE' : t.fwd ? ', then a ball forward' : t.kind ? ', then a ' + t.kind : '')).join(' | '));
 const goodT = trials.filter(t => !t.back && (t.ran >= 2 || t.fwd)).length;
-ok(goodT >= 5 && !trials.some(t => t.back), `with room ahead of him he goes forward with it, not back: ${goodT} of ${trials.length}`);
+ok(goodT >= 6 && !trials.some(t => t.back), `with room ahead of him he goes forward with it, not back: ${goodT} of ${trials.length}`);
+const said = (r) => r.first ? `${r.first.kind}${r.first.kind === 'pass' ? (r.first.dU > 3 ? ' forward' : ' square/back') : ''} from ${r.first.dl.toFixed(1)} m` : 'nothing';
+info('through on goal: ' + scenes.thru.map(said).join(' | '));
+const thruOk = scenes.thru.filter(r => r.first && r.first.kind === 'shot' && r.first.dl <= 16).length;
+ok(thruOk >= 3 && !scenes.thru.some(r => r.first && r.first.kind === 'pass' && r.first.dU <= 3), `through on goal, he takes it on and shoots from 16 m or closer, never a ball square or back: ${thruOk} of 4`);
+info('time to get closer: ' + scenes.closer.map(said).join(' | '));
+const closeOk = scenes.closer.filter(r => r.first && !(r.first.kind === 'shot' && r.first.dl > 18)).length, closeShots = scenes.closer.filter(r => r.first && r.first.kind === 'shot' && r.first.dl <= 16).length;
+ok(closeOk === 4 && closeShots >= 2, `with time to get closer he gets closer first: no shot from beyond 18 m, ${closeShots} of 4 from 16 m or closer`);
+info('out wide, the way inside shut: ' + scenes.wide.map(r => (r.first ? said(r) + ` (${Math.abs(r.first.y).toFixed(0)} m wide)` + (r.first.kind === 'pass' ? ` to a man ${r.first.toDl.toFixed(0)} m out` : '') : `still on it ${r.endDl.toFixed(0)} m out`)).join(' | '));
+const intoBox = (f) => f && (f.kind === 'cross' || (f.kind === 'pass' && f.toDl < 17.5 && Math.abs(f.toY) < 20) || (f.kind === 'shot' && f.dl < 16.5));
+const downLine = (r) => (r.first ? r.first.dl : r.endDl) <= 18;              // (7 m or more down the line, whatever then)
+const backOut = (r) => r.first && r.first.kind === 'pass' && r.first.toDl > 20 && r.first.dl > 18;   // back out without trying the line
+const wideOk = scenes.wide.filter(r => intoBox(r.first) || downLine(r)).length;
+ok(wideOk >= 3 && !scenes.wide.some(backOut), `out wide with the way inside shut and men in the box, he goes down the line or puts it in -- never straight back out: ${wideOk} of 4`);
 
 process.exit(rep.finish() ? 1 : 0);

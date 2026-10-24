@@ -3759,7 +3759,7 @@
       for(const o of players) if(o.team!==p.team) theirs=Math.min(theirs, 0.2+Math.hypot(o.x-sp.x,o.y-sp.y)/sprintSpeedOf(o));
       if(kp) theirs=Math.min(theirs, 0.15+Math.max(0,Math.hypot(kp.x-sp.x,kp.y-sp.y)-reachOf(kp)*3)/keeperSpdOf(kp));
       const margin=Math.min(theirs,T+0.6)-Math.max(ours,T);
-      if(who && (!best || margin>best.margin)) best={x:sp.x,y:sp.y,who,margin};
+      if(who && (!best || margin>best.margin)) best={x:sp.x,y:sp.y,who,margin,ours,theirs};
     }
     return best;
   }
@@ -3773,13 +3773,12 @@
     const aerr=crossSpray(p);
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const G=520;
-    const T=clamp(0.7+0.0008*d, 0.6, 1.2);
-    const frPerSec=Math.pow(1-P.friction.val,3.2);
-    const avgKeep=Math.max(0.35,(1+frPerSec*T)/(1+T));
-    const gndSpeed=clamp((d/T)/avgKeep,120,520);
-    ball.vx=ax*gndSpeed; ball.vy=ay*gndSpeed;
-    ball.vz=clamp(G*T*0.5*crossLoftOf(p), 140, 540);
+    // It gets to the spot in T, coming down through head height there -- where the man attacking it meets it (see
+    // aiBrain) -- having been in the air (no drag) all the way: a 25 m cross peaks 4-5 m up. (The cross loft that
+    // floats yours to a man who jumps for it would still be 5 m up over the spot, and come down well beyond it.)
+    const G=520, T=clamp(0.7+0.0008*d, 0.6, 1.2), zH=PLAYER_H*1.15;
+    ball.vx=ax*d/T; ball.vy=ay*d/T;
+    ball.vz=(zH+G*0.5*T*T)/T;
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.crossBy=p.team;ball.crossT=1.6;
     recordPassTeam(p.team,p); passPose(p);
@@ -4053,6 +4052,44 @@
     const atk=atkOf(controlled.team);
     windUp={t:simNow, ahead:new Set(players.filter(q=>q.team!==controlled.team&&(q.x-controlled.x)*atk>0))};
   }
+  // A HEADER ON GOAL, yours (K) or the computer's: at the corner farther from the keeper, as true as his heading, as
+  // hard as his heading plus some of the cross's pace
+  function headOnGoal(p){
+    const gx=atkOf(p.team)>0?FW:0, kp=keepers.find(k=>k.team!==p.team), ky=kp?kp.y:YC;
+    const ty=YC+(ky>YC?-1:1)*(GOAL_W/2-12);
+    let dx=gx-ball.x, dy=ty-ball.y, dG=Math.hypot(dx,dy);
+    if(!isFinite(dG)||dG<0.001){ dx=atkOf(p.team); dy=0; dG=1; }
+    dx/=dG; dy/=dG;
+    const dev=(1-clamp(headAccOf(p),0,1))*0.12*(Math.random()*2-1);   // header accuracy (Heading stat)
+    const ca=Math.cos(dev), sa=Math.sin(dev), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+    const speed=headPowerOf(p)+Math.hypot(ball.vx,ball.vy)*0.3;          // header power (Heading stat) + redirected pace
+    ball.vx=ax*speed; ball.vy=ay*speed; ball.vz=30;                     // (headers go down)
+    ball.cushBy=null; ball.ownedBy=null; ball.lastTouch=p.team; ball.crossT=0;
+    ball.shotBy=p.team; ball.shotT=1.0; ball.curveSpin=0; ball.curveSpinT=0;
+    recordPassTeam(p.team,p);
+    lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;
+  }
+  // A HEADER CLEAR: up and away from his own goal, out to the side it came from
+  function headClear(p){
+    let dx=atkOf(p.team), dy=(ball.y>=YC?1:-1)*0.6; const l=Math.hypot(dx,dy); dx/=l; dy/=l;
+    const sp=headPowerOf(p)*0.8+120;
+    ball.vx=dx*sp; ball.vy=dy*sp; ball.vz=200;
+    ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=p.team; ball.crossT=0; ball.crossBy=null; ball.shotBy=null; ball.shotT=0;
+    endCurve(); recordPassTeam(p.team,p);
+    lastGrade='HEADED CLEAR'; gradeColor='#ffb43c'; gradeFade=1.0;
+  }
+  // Who of theirs goes up for this ball with him: anyone off the ground at it, or one of the computer's men going for
+  // the cross (see aiBrain)
+  function aerialRival(p){
+    let c=null, cd=1e9;
+    for(const o of players){
+      if(o.team===p.team) continue;
+      const up=o.z>6&&Math.abs((o.z+PLAYER_H*0.95)-ball.z)<52, going=o.aerialT!=null&&simNow-o.aerialT<0.1;
+      if(!up&&!going) continue;
+      const dd=dist(o,ball); if(dd<58&&dd<cd){ cd=dd; c=o; }
+    }
+    return c;
+  }
   function tryHeaderContact(){
     if(headerT<=0)return;
     if(ball.ownedBy||gkHold){headerT=0;return;}
@@ -4068,37 +4105,12 @@
       if(checkOffsideTouch(p))return;
       // AERIAL DUEL (winning-rate = STRENGTH): if an opponent is challenging for the same ball,
       // strength tilts who wins it — but never a guaranteed win for the stronger man.
-      let contester=null,cd=1e9;
-      for(const o of players){ if(o.team===p.team||o.z<=6)continue; const dd=dist(o,ball); if(dd<58&&Math.abs((o.z+PLAYER_H*0.95)-ball.z)<52&&dd<cd){cd=dd;contester=o;} } // only an airborne (jumping) opponent contests
+      const contester=aerialRival(p);
       if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))){
-        // lost the header: opponent gets the flick, ball glances away from our man
-        let ax=contester.facing.x, ay=contester.facing.y;
-        let al=Math.hypot(ax,ay);
-        if(!isFinite(al)||al<0.001){ ax=(atkOf(contester.team)); ay=0; al=1; }  // fallback dir
-        ball.vx=ax/al*260; ball.vy=ay/al*260; ball.vz=120;
-        ball.ownedBy=null; ball.lastTouch=contester.team; ball.cushBy=null;
-        endCurve(); recordPassTeam(contester.team,contester);
+        headClear(contester);                            // lost the header: he heads it away
         lastGrade='OUTJUMPED';gradeColor='#ff5a4d';gradeFade=1.0; return;
       }
-      // ALWAYS aim the corner farthest from the keeper (Heading stat sets the accuracy below)
-      const kp=keepers.find(k=>k.team!==p.team); const ky=kp?kp.y:YC;
-      let ty=YC+(ky>YC?-1:1)*(GOAL_W/2-12);
-      let dx=FW-ball.x,dy=ty-ball.y;
-      let dG=Math.hypot(dx,dy);
-      if(!isFinite(dG)||dG<0.001){ dx=(atkOf(p.team)); dy=0; dG=1; }
-      dx/=dG;dy/=dG;
-      const dev=(1-clamp(headAccOf(p),0,1))*0.12*(Math.random()*2-1);   // header accuracy (Heading stat)
-      const ca=Math.cos(dev),sa=Math.sin(dev);
-      const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-      const incoming=Math.hypot(ball.vx,ball.vy);
-      const speed=headPowerOf(p)+incoming*0.3;          // header power dial (offensive heading) + redirected pace
-      ball.vx=ax*speed;ball.vy=ay*speed;
-      ball.vz=30;                         // headers go down
-      ball.cushBy=null;ball.lastTouch=p.team;
-      ball.shotBy=p.team;ball.shotT=1.0;
-      ball.curveSpin=0;ball.curveSpinT=0;curveArmed=false;curveT=0;
-      recordPassTeam(p.team,p);
-      lastGrade='HEADER!';gradeColor='#9dff3c';gradeFade=1.4;
+      headOnGoal(p); curveArmed=false; curveT=0;
     }
   }
   // DEFENSIVE header (J): in your own box, head an opponent's cross clear (away from goal)
@@ -4665,12 +4677,12 @@
   }
   // How clear the lane is from the ball to a goal target (gx,ty) of OUTFIELD bodies (keepers excluded —
   // the keeper is handled by its own reach/dive). 1 = wide open, 0 = a defender's body on the line.
-  function shotLaneClear(gx,ty,team){
-    let dx=gx-ball.x, dy=ty-ball.y; const L=Math.hypot(dx,dy)||1; const ux=dx/L, uy=dy/L;
+  function shotLaneClear(gx,ty,team,sx=ball.x,sy=ball.y){             // (from the ball, or from (sx,sy))
+    let dx=gx-sx, dy=ty-sy; const L=Math.hypot(dx,dy)||1; const ux=dx/L, uy=dy/L;
     let clear=1;
     for(const o of players){
       if(o.team===team) continue;                  // only opponents block the shot
-      const rx=o.x-ball.x, ry=o.y-ball.y;
+      const rx=o.x-sx, ry=o.y-sy;
       const along=rx*ux+ry*uy;
       if(along<=10 || along>=L) continue;          // must be BETWEEN the ball and the goal
       const perp=Math.abs(rx*(-uy)+ry*ux);
@@ -5343,14 +5355,15 @@
   const OBM=25;                                                        // pixels to the metre
   // The chance an unhurried shot from (x,y) goes in -- measured in this game, not borrowed from real football: shots
   // struck as the computer strikes them, run onto from 6 m further out, by an average side's players against an
-  // average keeper with nobody else about, eight from each spot, smoothed. Rows: metres from their goal line (4, 6, 8,
-  // 10, 12, 14, 16, 18, 20, 23, 26, 30, 34); columns: metres off the middle (0, 4, 8, 12, 16, 22). Close in and in
-  // front, the keeper's out at your feet; from 20 m he gets across to most; the best of it is 8-16 m out, fairly
-  // central. (Nothing from a tighter angle than about 6 degrees.)
+  // average keeper with nobody else about, 32 from each spot, smoothed. Rows: metres from their goal line (4, 6, 8,
+  // 10, 12, 14, 16, 18, 20, 23, 26, 30, 34); columns: metres off the middle (0, 4, 8, 12, 16, 22). Run in closer
+  // than 8 m and the keeper's out at your feet; by the byline he's on his near post; from outside the box he gets
+  // across to nearly everything; the best of it is 10-16 m out, fairly central. (Nothing from a tighter angle than
+  // about 6 degrees.)
   const OB_XG_DX=[4,6,8,10,12,14,16,18,20,23,26,30,34], OB_XG_DY=[0,4,8,12,16,22];
-  const OB_XG=[[0.1,0.09,0.2,0.26,0.36,0.03],[0.21,0.15,0.17,0.17,0.24,0.02],[0.35,0.23,0.2,0.11,0.11,0.01],[0.44,0.31,0.25,0.09,0.04,0],
-               [0.48,0.38,0.3,0.12,0.03,0],[0.48,0.42,0.31,0.15,0.05,0],[0.4,0.4,0.29,0.17,0.07,0],[0.27,0.3,0.23,0.17,0.09,0],
-               [0.14,0.17,0.16,0.14,0.09,0.01],[0.03,0.04,0.07,0.07,0.06,0],[0,0.01,0.02,0.02,0.02,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
+  const OB_XG=[[0,0,0,0,0,0],[0.06,0,0,0,0,0],[0.24,0.14,0.07,0,0,0],[0.54,0.43,0.32,0.07,0,0],
+               [0.61,0.54,0.41,0.08,0,0],[0.56,0.52,0.4,0.09,0,0],[0.31,0.3,0.23,0.05,0.01,0],[0.07,0.08,0.08,0.06,0.04,0.01],
+               [0.01,0.01,0.02,0.06,0.05,0.02],[0.01,0.01,0.01,0.03,0.03,0],[0.01,0.01,0.01,0.01,0,0],[0,0.01,0,0,0,0],[0,0,0,0,0,0]];
   function obXg0(x,y,gx){
     const dx=Math.max(4,Math.abs(gx-x)/OBM), dy=Math.abs(y-YC)/OBM;
     if(dx>34||dy>22) return 0;
@@ -5448,7 +5461,29 @@
     const C={atk, gx:goalX, opp, opps, kp, M, presser, prD, vHere:obVal(p.team,p.x,p.y)*obRoom(obNearAt(opps,p.x,p.y,0.5,atk)), lossHere:obVal(opp,p.x,p.y)*M.risk,
              range:passRangeOf(p)*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
     C.urge=obUrge(p,C);
+    // his finishing against the table's average man (and from range, his long shots); his crossing, and who of ours
+    // would be first to a cross
+    C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'composure',P.composure.val),0.94,1.06)*M.shoot;
+    C.finLong=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4);
+    C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1);
+    C.cs=C.u>FW*0.45?crossSpot(p):null;
     return C;
+  }
+  function obFinish(C,x,y){ return Math.hypot(C.gx-x,YC-y)>18*OBM?C.fin*C.finLong:C.fin; }
+  // how clear his way to goal would be from (x,y), as things stand: the better of the two corners
+  function obLaneAt(C,team,x,y){ const c=GOAL_W/2-10; return Math.max(shotLaneClear(C.gx,YC-c,team,x,y),shotLaneClear(C.gx,YC+c,team,x,y)); }
+  // A CROSS FROM (x,y), out wide near their box, to wherever crossSpot sends it (the near post, the spot or the far
+  // post): is one of ours there as it drops, and one of theirs? Ours alone: his header, most of the time; theirs
+  // there too: he mostly heads it away first (see aiBrain); nobody of ours: theirs. And how well he crosses. A header
+  // that's ours is worth a good share of a goal -- more from by the byline, with their defenders turning to face
+  // their own goal, than from 25 m.
+  function obCrossAt(C,x,y){
+    const dl=C.atk*(C.gx-x), cs=C.cs;
+    if(!cs||Math.abs(y-YC)<FH*0.2||dl>FW*0.28||dl<5) return null;
+    const T=clamp(0.7+0.0008*Math.hypot(cs.x-x,cs.y-y),0.6,1.2);
+    const ours=clamp(1-(cs.ours-T-0.1)/0.4,0,1), theirs=clamp(1-(cs.theirs-T-0.1)/0.4,0,1);
+    if(ours<0.25) return null;                                           // nobody of ours to get on the end of it
+    return {P:(0.05+0.85*ours*(1-0.75*theirs))*C.crs, v:0.25*C.M.cross*(1.3-0.5*clamp(dl/(FW*0.28),0,1))};
   }
   // THE URGE TO GET FORWARD: a side that's had it a while without getting anywhere starts to force it. Each side's
   // clock starts when it wins the ball and again whenever it gets it 8 m further up than it's been; a quarter of the
@@ -5514,10 +5549,15 @@
     return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0};
   }
   // carrying it: a dozen headings round the way we're going (behind him only matters with a man on him)
-  const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI];
+  const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI], OB_RUN=600;
+  // at goal with nobody able to get to him, he goes flat out (a centre-back only on the break)
+  function obSprints(p){ return p.stamina>0.3&&(p.role!=='DEF'||(TAC[p.team].off==='counter'&&transitionT[p.team]>0)); }
   function obCarryOpts(p,C,out){
-    const vC=Math.max(80,(runSpeedOf(p)+sprintSpeedOf(p))*0.5*(1-dribSpeedPenOf(p))), H=230, a0=C.atk>0?0:Math.PI;
-    const drib=statLerp(statOf(p,'dribbling',P.dribbling.val),-0.06,0.06), kpIn=(x)=>Math.abs(x-C.gx)<BX*1.6;
+    const pen=1-dribSpeedPenOf(p), vC=Math.max(80,(runSpeedOf(p)+sprintSpeedOf(p))*0.5*pen), vR=obSprints(p)?Math.max(vC,sprintSpeedOf(p)*pen):vC;
+    const H=230, a0=C.atk>0?0:Math.PI, drib=statLerp(statOf(p,'dribbling',P.dribbling.val),-0.06,0.06);
+    // their keeper doesn't come out to a man on the ball beyond a few yards off his line (see keeperUpdate): only a
+    // run right in on him meets him
+    const kR=C.kp?reachOf(C.kp)+20:0, kpIn=(x,y)=>C.kp&&Math.abs(x-C.gx)<140+kR&&Math.abs(y-YC)<GOAL_W/2+kR;
     // ATTACKING THE SPACE: with room in front of him (nobody within ~6 m in the 120 degrees ahead, all of it at 14 m), a
     // run at them is worth more than the ground it gains -- it draws a man out to meet him and opens a ball for someone
     // else, which nothing here models -- so a run forward is credited for the room there is. Any run costs a little
@@ -5525,30 +5565,38 @@
     let ahead=1e9; for(const o of C.opps){ const rx=C.atk*(o.x-p.x), ry=o.y-p.y; if(rx>0&&Math.abs(ry)<rx*1.73) ahead=Math.min(ahead,Math.hypot(rx,ry)); }
     const space=clamp((ahead-150)/200,0,1);
     for(let i=0;i<OB_HEAD.length;i++){
-      const a=a0+OB_HEAD[i], ux=Math.cos(a), uy=Math.sin(a);
-      let s=0;
-      for(let t=25;t<=H;t+=25){
+      const a=a0+OB_HEAD[i], ux=Math.cos(a), uy=Math.sin(a), far=C.atk*ux>0.3, vF=far?vR:vC;
+      // how far he gets before anyone could be on him. THE RUN IN: toward goal, on past that to the best he could
+      // do before anyone could get to him -- the shot (his own finishing, anyone in the way, rushed if a man's about
+      // to arrive) or the cross -- a little less the longer it takes to get there
+      let s=0, run=0, runS=0;
+      for(let t=25;t<=(far?OB_RUN:H);t+=25){
         const px=p.x+ux*t, py=p.y+uy*t;
         if((px<40&&ux<0)||(px>FW-40&&ux>0)||(py<45&&uy<0)||(py>FH-45&&uy>0)) break;   // the lines (pinned on one, he can still come off it)
-        const tc=0.1+t/vC; let hit=false;
-        for(const o of C.opps) if(obOppT(o,px,py,30)<tc){ hit=true; break; }
-        if(!hit&&C.kp&&kpIn(px)&&obOppT(C.kp,px,py,reachOf(C.kp)+20)<tc) hit=true;
-        if(hit) break;
-        s=t;
+        const tc=0.1+t/vF; let oT=9;
+        for(const o of C.opps){ const q=obOppT(o,px,py,30); if(q<oT) oT=q; }
+        if(kpIn(px,py)) oT=Math.min(oT,obOppT(C.kp,px,py,kR));
+        const m=oT-tc; if(m<0) break;
+        if(t<=H) s=t;
+        if(!far) continue;
+        const k=1-0.04*tc, x0=obXg0(px,py,C.gx);
+        if(x0>0.01){ const sv=x0*(0.3+0.7*obLaneAt(C,p.team,px,py))*obFinish(C,px,py)*(m<0.3?0.8+0.2*m/0.3:1)*k; if(sv>run){ run=sv; runS=t; } }
+        const X=obCrossAt(C,px,py); if(X){ const cv=X.P*X.v*(m<0.3?0.85:1)*k; if(cv>run){ run=cv; runS=t; } }
       }
       if(s<25) continue;
-      const ex=p.x+ux*s, ey=p.y+uy*s, tE=0.1+s/vC, nd=obNearAt(C.opps,ex,ey,tE,C.atk), free=s>=H;
+      const ex=p.x+ux*s, ey=p.y+uy*s, tE=0.1+s/vF, nd=obNearAt(C.opps,ex,ey,tE,C.atk), free=s>=H;
       // he keeps it, mostly: running on until a man could get to him doesn't lose it, it means deciding again with him
       // closing (what that costs is in the room he'll have there); only a poor dribbler risks much
       const pk=clamp((free?0.98:0.93+0.05*s/H)+drib,0.8,0.995);
       let v=obVal(p.team,ex,ey)*obRoom(nd);
       v=C.vHere+(v-C.vHere)*C.M.carry;                                   // (his taste for running with it)
       const fw=clamp(C.atk*ux,0,1); v+=C.vHere*(0.35*fw*fw*space*C.M.carry-0.03*tE);
-      if(ey<110||ey>FH-110) v*=0.92;                                     // toward the touchline: toward trouble
+      if((ey<110&&uy<-0.3)||(ey>FH-110&&uy>0.3)) v*=0.92;                // toward the touchline: toward trouble
       if(p.role==='DEF'&&C.atk*(ex-FW/2)>FW*0.05&&!(TAC[p.team].off==='counter'&&transitionT[p.team]>0)) v*=0.85;   // a centre-back's job is behind it
+      const isRun=run>v; if(isRun) v=run;
       v+=obGain(C,ex);
       const loss=obVal(C.opp,ex,ey)*C.M.risk;
-      out.push({kind:'carry', key:'c'+i, ux, uy, s, ex, ey, P:pk, v, loss, ev:pk*v-(1-pk)*loss, free});
+      out.push({kind:'carry', key:'c'+i, ux, uy, s, ex, ey, P:pk, v, loss, ev:pk*v-(1-pk)*loss, free, run:isRun?runS:0});
     }
   }
   // taking on the man in front of him, a few strides off: harder with another of theirs close behind him to cover
@@ -5560,28 +5608,26 @@
     const bx=clamp(d.x+C.atk*200,40,FW-40), by=clamp(d.y+side*60,60,FH-60);
     const pb=clamp((0.3+0.045*(statOf(p,'dribbling',P.dribbling.val)-5.5)-0.03*(statOf(d,'tackle',P.tackle.val)-5.5)
                        -0.015*(statOf(d,'agility',P.agility.val)-5.5))*C.M.takeOn*cover,0.08,0.7);
-    const v=obVal(p.team,bx,by)*obRoom(obNearAt(C.opps.filter(o=>o!==d),bx,by,1.0))+obGain(C,bx);
+    let v=obVal(p.team,bx,by)*obRoom(obNearAt(C.opps.filter(o=>o!==d),bx,by,1.0));
+    const X=obCrossAt(C,bx,by), sv=obXg0(bx,by,C.gx)*(0.3+0.7*obLaneAt(C,p.team,bx,by))*obFinish(C,bx,by)*0.8;   // (once past him: the shot, a stride off balance, or the cross)
+    v=Math.max(v,sv,X?X.P*X.v:0)+obGain(C,bx);
     return {kind:'takeon', key:'t', who:d, side, P:pb, v, loss:C.lossHere, ev:pb*v-(1-pb)*C.lossHere};
   }
   function obShotOpt(p,C){
     const d=Math.hypot(C.gx-p.x,YC-p.y); if(d>34*OBM||C.atk*(C.gx-p.x)<40) return null;
     if(shotAngleOf(p,C.gx)<0.1) return null;
     const E=evalShotCorners(p,C.atk,clamp(0.62+d/1100,0.62,1),p.x,p.y), c=E[E.pick];
-    let xg=obXg0(p.x,p.y,C.gx)*(0.3+0.7*c.qLane);                      // anyone in the way of the corner he'd go for
-    xg*=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'composure',P.composure.val),0.94,1.06);   // (an average man: 1)
-    if(d>18*OBM) xg*=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4);
+    let xg=obXg0(p.x,p.y,C.gx)*(0.3+0.7*c.qLane)*obFinish(C,p.x,p.y);   // anyone in the way of the corner he'd go for; his finishing
     if(C.prD<45) xg*=0.8;                                               // rushed
-    xg=clamp(xg*C.M.shoot,0,0.95);
+    xg=clamp(xg,0,0.95);
     return {kind:'shot', key:'s', P:xg, v:1, loss:0.003, ev:xg-(1-xg)*0.003, rel:true};
   }
   function obCrossOpt(p,C){
-    if(Math.abs(p.y-YC)<FH*0.2||C.atk*(p.x-FW/2)<FW*0.22||C.atk*(C.gx-p.x)<5) return null;
-    const cs=crossSpot(p); if(!cs||cs.margin<-0.1) return null;
-    let pc=clamp(0.5+cs.margin*1.2,0.1,0.85)*statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1);
+    const X=obCrossAt(C,p.x,p.y); if(!X) return null;
+    let pc=X.P;
     for(const o of C.opps) if(C.atk*(o.x-p.x)>0&&C.atk*(o.x-p.x)<110&&Math.abs(o.y-p.y)<70){ pc*=0.6; break; }   // a man right in front to block it
     if(C.prD<50) pc*=0.85;
-    const v=0.09*C.M.cross;                                             // a header or a volley from the middle of their box
-    return {kind:'cross', key:'x', cs, P:pc, v, loss:0.003, ev:pc*v-(1-pc)*0.003, rel:true};
+    return {kind:'cross', key:'x', cs:C.cs, P:pc, v:X.v, loss:0.003, ev:pc*X.v-(1-pc)*0.003, rel:true};
   }
   function obHoldOpt(p,C,ob){
     const d=C.presser, pk=(!d||C.prD>110)?0.99:clamp(0.62+0.3*(duelOdds(strengthOf(p),strengthOf(d))-0.5)+statLerp(statOf(p,'dribbling',P.dribbling.val),-0.05,0.08),0.35,0.95);
@@ -5680,7 +5726,7 @@
   function obMove(p,o,C,looking){
     if(o&&o.kind==='carry'){
       const reach=Math.max(o.s,90), tx=clamp(p.x+o.ux*reach,40,FW-40), ty=clamp(p.y+o.uy*reach,50,FH-50);
-      const go=!looking&&o.free&&p.stamina>0.3&&(p.role!=='DEF'||(TAC[p.team].off==='counter'&&transitionT[p.team]>0))&&C.atk*o.ux>0.3;
+      const go=!looking&&(o.free||o.run)&&obSprints(p)&&C.atk*o.ux>0.3;
       p.sprint=go; p.dbgTag='OB-CARRY';
       return steer(p,tx,ty,go?1:looking?0.6:o.s>=120?1:0.75);
     }
@@ -6018,6 +6064,27 @@
       p.iqJitT=0.4+Math.random()*0.4;
     }
     const hb=heldBy();                                       // whose ball it is (a knock-on or a pass on its way still counts)
+    // DEFEND A LIVE CROSS: one of theirs has whipped one into our box -> the man of ours nearest where it'll come down
+    // goes to meet it, goal-side of it, and heads it away (a duel, Heading against Heading, if one of theirs goes up
+    // with him; lose it and it's his header)
+    if(p!==controlled && ball.crossT>0 && ball.crossBy && ball.crossBy!==p.team && !ball.ownedBy && !gkHold && p.state==='normal'){
+      const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L={x:ball.x+ball.vx*tLand, y:ball.y+ball.vy*tLand};
+      if(Math.abs(L.x-ownGoalX)<BX+80&&Math.abs(L.y-YC)<BY+60){
+        const dL=dist(p,L); let first=dL<360;
+        for(const q of players) if(first&&q.team===p.team&&q!==p&&q!==controlled&&q.state==='normal'&&dist(q,L)<dL) first=false;
+        if(first){
+          p.aerialT=simNow;
+          if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH){
+            if(ball.z>30){ p.vz=240; p.z=0.1; }
+            const r=aerialRival(p);
+            if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it)
+            else headClear(p);
+          }
+          p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1;
+          return steer(p,L.x-atk*24,L.y,1.0);
+        }
+      }
+    }
     // CLOSE LOOSE BALL: if a loose ball is right next to me, go take it regardless of shape/role -- unless it's a team-mate's
     // touch or a pass to a team-mate (I don't take it off him).
     if(p!==controlled && p.state==='normal' && p.noTouchT<=0 && !ball.ownedBy && !gkHold &&
@@ -6094,37 +6161,14 @@
         // Only head it ON GOAL when actually in/around the box. Without this, a player standing under
         // a high ball's flight path heads it goalward from midfield before it ever reaches the box.
         const pNearBox = Math.abs(p.x-goalX) < BX+90 && Math.abs(p.y-YC) < BY+100;
+        p.aerialT=simNow;                          // (going up for it: a man of theirs at it has a duel on his hands)
         if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH){
           if(ball.z>30) { p.vz=240; p.z=0.1; }     // modest leap for the higher ones
-          // AERIAL DUEL: a defender contesting the same ball can win it (strength-weighted)
-          let contester=null,cd=1e9;
-          for(const o of players){ if(o.team===p.team||o.z<=6)continue; const dd=dist(o,ball); if(dd<58&&dd<cd){cd=dd;contester=o;} } // only an airborne opponent contests
-          if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))){
-            let ax=contester.facing.x, ay=contester.facing.y;
-            let al=Math.hypot(ax,ay);
-            if(!isFinite(al)||al<0.001){ ax=(atkOf(contester.team)); ay=0; al=1; }
-            ball.vx=ax/al*240; ball.vy=ay/al*240; ball.vz=120;
-            ball.ownedBy=null; ball.lastTouch=contester.team; ball.cushBy=null; ball.crossT=0;
-            endCurve(); recordPassTeam(contester.team,contester);
-          } else {
-            // WON the header -> POWER it toward a goal CORNER away from the keeper.
-            const gx=goalX;
-            const kp=keepers.find(k=>k.team!==p.team);
-            const ky=kp?kp.y:YC;
-            // aim to whichever post is farther from the keeper; accuracy from shot accuracy
-            let far = ky>YC ? -1 : 1;
-            const miss=(1-clamp(headAccOf(p),0,1))*0.5;               // header accuracy (Heading stat)
-            let aimFrac = (1-miss);                                   // 1 = tight to the post
-            let ty2 = YC + far*aimFrac*(GOAL_W/2-12);
-            let dxh=gx-ball.x, dyh=ty2-ball.y; const dh=Math.hypot(dxh,dyh)||1; dxh/=dh; dyh/=dh;
-            const power=560;                                          // a proper header on goal
-            ball.vx=dxh*power; ball.vy=dyh*power; ball.vz=-30;        // downward header
-            ball.cushBy=null;ball.ownedBy=null;ball.lastTouch=p.team;ball.crossT=0;
-            ball.shotBy=p.team;ball.shotT=1.0;
-            ball.curveSpin=0;ball.curveSpinT=0;
-            lastGrade='HEADER!';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.2;
-            recordPassTeam(p.team,p);
-          }
+          // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
+          // header on goal, the same as yours
+          const contester=aerialRival(p);
+          if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))) headClear(contester);
+          else headOnGoal(p);
         }
         p.sprint = p.stamina>0.1;
         return steer(p,tx,ty,1.0);
@@ -7475,6 +7519,16 @@
   function reachOf(p){   return statLerp(statOf(p,'gkReach',P.gkReach.val),    14, 24); }      // keeper reach stat  -> save radius (u)
   function reflexOf(p){  return statLerp(statOf(p,'gkReflex',P.gkReflex.val), 0.00, 0.6); }     // keeper reflex stat -> reaction quality (0..0.6)
   function divingOf(p){  return statLerp(statOf(p,'gkDiveRange',P.gkDiveRange.val), 30, 100); }    // keeper diving stat -> dive explosiveness
+  // The line that splits the angle between his posts as the man on the ball sees them: which way it runs (from the ball
+  // toward goal), how far it is along it from the ball to his line, and where it crosses his line. Facing a man on the
+  // ball, the keeper stands KP_LEAN of the way from that line to where he used to stand, toward his near post.
+  const KP_LEAN=0.5;
+  function kpBisector(kp){
+    const glX=kp.side<0?0:FW, ex=glX-ball.x, e1=(YC-GOAL_W/2)-ball.y, e2=(YC+GOAL_W/2)-ball.y, l1=Math.hypot(ex,e1)||1, l2=Math.hypot(ex,e2)||1;
+    let bx=ex/l1+ex/l2, by=e1/l1+e2/l2; const bl=Math.hypot(bx,by)||1; bx/=bl; by/=bl;
+    const t0=Math.abs(bx)>1e-3?(kp.homeX-ball.x)/bx:0;
+    return {bx, by, t0, y0:ball.y+by*t0};
+  }
   function cageKeeper(kp){
     if(kp.diveT>0||kp.groundT>0) return;                 // mid-dive: let the lunge extend past the post
     const gl=kp.side<0?0:FW, maxOut=120;                 // never stray more than ~120px off the goal line
@@ -7562,6 +7616,7 @@
       ty=(tA>0&&tA<2.2)?ball.y+ball.vy*tA*0.8:ball.y; // a real shot incoming -> track it to save
     } else if(ball.ownedBy&&Math.abs(ball.x-kp.x)<560){
       ty=YC+(ball.y-YC)*0.32;
+      if(ball.ownedBy.team!==kp.team){ const B=kpBisector(kp); ty=B.y0+KP_LEAN*(ty-B.y0); }   // (one of theirs: see kpBisector)
     }
     const lim=GOAL_W/2-kp.r;                     // never let the body sit outside the post (max = half a body length to the post)
     ty=clamp(ty,YC-lim,YC+lim);
@@ -7572,13 +7627,25 @@
     const carrierClose = oppCarrier && !(LAB.on&&LAB.kind==='shoot') &&   // (in the Shooting Lab he waits on his line for the shot)
       Math.abs(ball.x-glX)<PA_D && Math.abs(ball.y-YC)<PA_HW;
     if(carrierClose && scoredT<=0 && offsideT<=0){
-      const c=ball.ownedBy;
-      const dC=Math.abs(c.x-glX);
-      // advance off the line proportionally, narrowing the angle: more the closer he is
-      const advance=clamp((PA_D-dC)*0.45,0,110);
-      const tx=kp.homeX-kp.side*advance*0.7;
+      // advance off the line proportionally, narrowing the angle: more the closer he is; leaning to the near post, part
+      // way from the line that splits the angle between his posts (see kpBisector)
+      const c=ball.ownedBy, lim=GOAL_W/2-kp.r;
+      const advance=clamp((PA_D-Math.abs(c.x-glX))*0.45,0,110);
+      let tx=kp.homeX-kp.side*advance*0.7, shadeY=YC+clamp((ball.y-YC)*0.5,-GOAL_W*0.35,GOAL_W*0.35);
+      { const B=kpBisector(kp), yMid=Math.abs(B.bx)>1e-3?ball.y+B.by*(tx-ball.x)/B.bx:YC; shadeY=yMid+KP_LEAN*(shadeY-yMid); }
+      // ...but from a tight angle that would take him out level with the man, beside the way to goal, and leave him
+      // the far post. Out of the angle the ball has on goal, he takes the line that splits it instead, near his line by
+      // the near post.
+      const dep=(x)=>Math.abs(x-glX), dB=dep(ball.x), dK=dep(tx), f=clamp(dK/Math.max(1,dB),0,1);
+      const yA=(YC-GOAL_W/2)+(ball.y-(YC-GOAL_W/2))*f, yB=(YC+GOAL_W/2)+(ball.y-(YC+GOAL_W/2))*f;   // the lines to his posts, at his depth
+      if(dB<dK+20||shadeY<Math.min(yA,yB)-reachOf(kp)||shadeY>Math.max(yA,yB)+reachOf(kp)){
+        const {bx,by,t0,y0}=kpBisector(kp);
+        let adv=clamp((PA_D-Math.hypot(glX-ball.x,YC-ball.y))*0.45,0,110)*0.7;
+        if(Math.abs(by)>1e-3) adv=Math.min(adv,Math.max(0,(lim-Math.abs(y0-YC))/Math.abs(by)));   // (inside his posts)
+        adv=Math.min(adv,Math.max(0,t0-40));                             // (not on top of him)
+        tx=kp.homeX-bx*adv; shadeY=clamp(y0-by*adv,YC-lim,YC+lim);
+      }
       kp.x+=clamp(tx-kp.x,-spd*1.15*dt,spd*1.15*dt);
-      const shadeY=YC+clamp((ball.y-YC)*0.5,-GOAL_W*0.35,GOAL_W*0.35);  // cover the near post but stay central enough for mid/far
       kp.y+=clamp(shadeY-kp.y,-spd*1.15*dt,spd*1.15*dt);
       // very close -> smother / take the ball off him
       if(dist(kp,ball)<reachOf(kp)+ball.r+6&&ball.z<34){
@@ -8223,7 +8290,7 @@
           const prc=nearestOppTo(car,car); const prd=prc?dist(prc,car):1e9;
           // the computer's last look at its options (see ON THE BALL): the best five, as it scored them (x100)
           const ob=car.obLast&&simNow-car.obLast.t<1.5?car.obLast:null, tops=ob?ob.opts.slice().sort((a,b)=>b.ev-a.ev).slice(0,5):[];
-          const oName=o=>o.kind+(o.q?' #'+(o.q.num!=null?o.q.num:'GK'):'');
+          const oName=o=>o.kind+(o.q?' #'+(o.q.num!=null?o.q.num:'GK'):'')+(o.run?' in '+Math.round(o.run/25)+'m':'');   // (a carry worth the run in: how far)
           L.push('\u2014 carrier '+car.team+'#'+car.num+' '+(car.subRole||car.role)+'  ['+(car===controlled?'YOU':'AI')+']   PRESS '+(prc?('#'+prc.num+' d='+prd.toFixed(0)):'-'));
           if(ob) L.push('  picked '+(ob.pick?oName(ob.pick):'-')+(ob.looking?'  (still looking up)':''));
           for(const o of tops) L.push('    '+oName(o).padEnd(10)+' odds '+String(Math.round(o.P*100)).padStart(3)+'%  worth '+(o.v*100).toFixed(1).padStart(5)+'  if lost '+(o.loss*100).toFixed(1).padStart(4)+'  score '+(o.ev*100).toFixed(2));

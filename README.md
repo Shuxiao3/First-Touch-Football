@@ -219,7 +219,7 @@ test, and like the Trap Lab the values are the game's settings.
   - A pass's odds come from a race between the ball and every opponent who could get to it on the way
     (a ball in the air can't be cut out until it comes down), the passer's accuracy over that distance,
     and how tight they'll be on the receiver when it arrives. Its worth is where the receiver has it
-    and how much room he has there; a runner through on goal is worth most of a shot.
+    and how much room he has there; a runner through on goal is worth a good part of a shot.
   - Over a man in the way, a long ball is chipped just high enough to be over his head where he is
     (about 2.5 m) and comes down a little short of the receiver, skipping on to him. A ball still
     bouncing up off his first touch, he lets drop before he plays it unless there's a man on him.
@@ -227,10 +227,22 @@ test, and like the Trap Lab the values are the game's settings.
     within about 6 m in the 120° ahead), a run forward is worth more than the ground it gains: it draws a
     man out to meet him and opens a ball for someone else. So he attacks the space rather than turning
     back with it, and he lets the ball go as a man comes in to meet him, not once he's on him.
+  - Toward goal a carry is also worth the best he could do further on, flat out, before anyone could
+    get to him: the shot from closer in (his own finishing, anyone in the way, hurried if a man's about
+    to arrive) or the cross from nearer the byline, a little less the longer it takes to get there. So
+    through on goal he takes it on and shoots from 10–14 m rather than squaring it; with time to get
+    closer he gets closer rather than shooting from 20 m; and only once a man can get to him does he
+    settle for what's on where he is.
   - A shot's chance comes from a table measured in this game: shots struck the way the computer
-    strikes them, run onto from all over their half. About half go in from 8–16 m out and fairly
-    central, few from 20 m, and almost none from right in front, where the keeper's out at your feet.
-    Anyone in the way of the corner he'd aim for cuts it down.
+    strikes them, run onto from all over their half. About half go in from 10–14 m out and fairly
+    central, a third from 16 m, one in twelve from 18 m and next to none from further out, from a tight
+    angle, or from right in front, where the keeper's out at your feet. Anyone in the way of the corner
+    he'd aim for cuts it down.
+  - A cross is worth what's at the end of it: whether one of his will be at the near post, the
+    penalty spot or the far post as it comes down, and whether one of theirs will be there first to
+    head it away; and how well he crosses. It's worth more from by the byline than from 25 m. So out
+    wide, with the way inside shut and men of his in the box, he takes it down the line and puts it in
+    rather than playing it back.
   - He gets the ball under control and looks up first (the decision-time dials say for how long, less
     with a man on him), and plays it first time only when he's pressed or a ball's clearly on. Then he
     sticks with a choice for a moment rather than changing his mind every frame.
@@ -308,6 +320,18 @@ test, and like the Trap Lab the values are the game's settings.
 - **The keeper's area** — he works his whole penalty area: he comes for a loose ball or a cross anywhere
   in it, uses his hands anywhere in it, closes down a man on the ball in it, and sweeps outside it for a
   free ball he'll win. Guarding his goal, he stays between the posts.
+- **The keeper's angles** — facing a man on the ball he stands about halfway between the line that
+  splits the angle between his posts and his near post: not hugging the post (that leaves the far
+  corner to anyone wide of him), and closer in, he comes off his line toward the man. From a tight
+  angle by the byline he doesn't step out level with him: he stays near his line on his near post, where
+  stepping out would leave the far post. Shots from by the byline, or from the corner of the box, now
+  rarely go in.
+- **Crosses and headers** — the computer's cross comes down through head height where it's aimed, so
+  the man attacking it can meet it (it used to sail on over everyone). Its defenders go up for a cross
+  into their box: the man nearest where it'll drop gets goal-side of it and heads it away, and if one
+  of the other side goes up with him it's a heading duel (Heading against Heading). A header on goal
+  follows the same rules for the computer's men as for yours: aimed away from the keeper, as true and
+  as hard as the Heading stat makes it.
 - **The keeper's ball out** — on a goal kick the back line splits to the corners of the box and the
   holding midfielder drops in front of them. The keeper plays it short only to a man who'll reach
   it before any of theirs can close him down, struck to arrive at him, and tells him it's his; he
