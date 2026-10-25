@@ -11,6 +11,21 @@ Open `index.html` directly, or serve it:
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
+## Football Classic (`classic.html`)
+
+The same game played like any other football game. It's a copy of `index.html` with two changes:
+
+- **No first touch to time.** A ground ball that reaches your man is under control at once, and a ball at chest or
+  thigh height is cushioned down for you, unless you've gone up for a header. The only exception is a rocket you get
+  in the way of, such as their shot or a hard-hit pass over 700 px/s, which is a block that runs loose.
+- **No player lock.** You control whichever of your players has the ball, so a completed pass hands you the receiver.
+  Without the ball, `SPACE` (or the SWITCH button, or a tap on the right side of the screen) switches you to the team-mate
+  nearest where the ball will be a moment from now. When they win it, you're moved to a closer team-mate if one is
+  more than 6 m nearer than your man.
+
+Drills and the labs still lock you to one player and keep the timed trap. Everything else is unchanged, including the
+AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
+
 ## Controls
 
 **Desktop**
