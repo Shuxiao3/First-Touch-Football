@@ -28,25 +28,36 @@ The same game played like any other football game. It's a copy of `index.html` w
 
 - **Skill moves instead of a trap.** With the ball, draw a pattern. On a touch screen, start on the SKILL button and
   draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go:
-  - **Spin** (a circle or swirl): a roulette. You turn 360° and come out about 2.3 m to the side the circle went
-    (clockwise goes to your right), with the ball shielded.
+  - **Spin** (a circle or swirl): you turn as far round as you drew, from 180° to 450°, and come out facing wherever
+    that leaves you. You roll up to about 2.3 m to the side the circle went (clockwise goes to your right). The ball
+    goes round with your body, so halfway through it's showing on the far side.
   - **Croqueta** (an L): the ball is shifted foot to foot, and you shift about 1.8 m the way the L's second stroke goes,
     still running the same way.
-  - **Cut** (a straight flick): the ball is chopped the way you flicked, and you burst after it.
+  - **Cut** (a straight flick): the ball is chopped the way you flicked and popped a step ahead. It's loose until
+    you get back on it.
 
-  While a move is on, a standing tackle can't take the ball (a slide still can). Defenders close in may be
-  wrong-footed and stumble, and that's more likely the better your Dribbling is and the worse their Agility.
-  Each move costs a little stamina.
+  A move gives you nothing for free. The ball is wherever the move puts it, and a defender who can reach it while it's
+  showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
+  commits. Nobody is wrong-footed automatically: the old stumble on a sharp cut is gone from this version. Each move
+  costs a little stamina.
+
+  **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
+  arrives, by the First touch push dial (your own pace along it is added).
 
 - **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
   past him. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
-  after 10 s. Each skill move you made is listed, with whether he bought it. The tally counts runs, beats, tackles,
-  and how often each move fooled him.
+  after 10 s.
+  - The defender sees the ball 0.2 s late and lunges at it when he's close (about 2.3 m, 2.8 m when pressing). The
+    lunge is a 0.22 s burst at where he saw it, and it wins the ball if it's showing when he gets there. He then
+    needs 0.45 s to recover.
+  - Each move you made is listed with its timing against his lunge, e.g. "he lunged 83 ms later" or "17 ms after he
+    lunged". The tally counts runs, beats, tackles, and for each move how often it was the one that got you past.
+  - Measured against a closing defender from 10 m: a croqueta started 4.4 m from him beat him 6 times in 8, at 3.6 m
+    8 in 8, at 2.8 m 3 in 8, and from 5.2 m or further, or once he'd lunged, never.
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
-  - TUNE has the skill-move dials, which also apply in matches: how often each move fools a defender, how much of a
-    move is safe from standing tackles, each move's distance and time, the cut's burst, the stumble time, and the
-    Dribbling, Agility and Tackling baselines.
+  - TUNE has the skill-move dials, which also apply in matches: each move's distance and time, the cut's burst and
+    pop, the first-touch push, and the Dribbling, Agility and Tackling baselines.
   - Keys: `1`-`3` distance, `B` defender, `C` slides.
 
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the

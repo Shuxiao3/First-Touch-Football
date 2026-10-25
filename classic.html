@@ -973,17 +973,13 @@
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
     aiTouch:  {val:1.1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.1 = default (mostly clean, some loose, the odd heavy one), 1.4+ = a real mix with balls let run, 2+ = scrappy.'},
-    skFoolSpin:{val:0.65,min:0,max:1,step:0.05,label:'Skill: spin fools',hint:'Base chance a defender close in (within 2.8 m) buys a SPIN and stumbles. Scaled up by your Dribbling and down by his Agility.'},
-    skFoolCroq:{val:0.6,min:0,max:1,step:0.05,label:'Skill: croqueta fools',hint:'Base chance a defender close in (within 3.2 m) buys a CROQUETA and stumbles. Scaled up by your Dribbling and down by his Agility.'},
-    skFoolCut:{val:0.45,min:0,max:1,step:0.05,label:'Skill: cut fools',hint:'Base chance a defender close in (within 3.2 m) buys a CUT and stumbles. Scaled up by your Dribbling and down by his Agility.'},
-    skShield:{val:1,min:0,max:1,step:0.05,label:'Skill: protected share',hint:'How much of a skill move a standing tackle cannot win the ball in, from its start. 1 = the whole move, 0 = none of it. A slide can always win it.'},
-    skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: spin distance (px)',hint:'How far to the side a spin carries you (25 px = 1 m).'},
+    skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
+    skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: spin distance (px)',hint:'How far to the side a full spin carries you (25 px = 1 m). A shorter spin goes less far.'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
     skCutBurst:{val:0.9,min:0.5,max:1.3,step:0.05,label:'Skill: cut burst',hint:'Your pace out of a cut, as a share of your running speed (or your pace going in, if faster).'},
-    skSpinT:{val:0.6,min:0.3,max:1,step:0.05,label:'Skill: spin time (s)',hint:'How long a spin takes. Quicker is harder to read, but it\'s over sooner.'},
+    skSpinT:{val:0.6,min:0.3,max:1,step:0.05,label:'Skill: spin time (s)',hint:'How long a full 360 spin takes. A spin is as far round as you draw it (180 to 450 degrees), and takes that share of this.'},
     skCroqT:{val:0.3,min:0.15,max:0.6,step:0.05,label:'Skill: croqueta time (s)',hint:'How long a croqueta takes.'},
     skCutT:{val:0.2,min:0.1,max:0.4,step:0.02,label:'Skill: cut time (s)',hint:'How long a cut takes.'},
-    wrongFoot:{val:0.45, min:0, max:1, step:0.05,label:'Beat a tight press (s)',hint:'A defender right up against the man on the ball, or diving in at him, is wrong-footed by a sharp cut (55\u00b0 or more): he stumbles for this long and cannot tackle. A good dribbler makes it longer, an agile defender shorter. You, defending, only get caught diving in. 0 = off.'},
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
@@ -1199,10 +1195,10 @@
   }
   // When a practice drill is active, float the dials relevant to that stat to the top and highlight them.
   const PRACTICE_DIALS = {
-    dribble:  ['dribbling','knockOn','knockVar','wrongFoot'],
+    dribble:  ['dribbling','knockOn','knockVar'],
     heading:  ['heading','crossing','headClear'],
     slide:    ['slideTackle','defIQ','defIQtime'],
-    standtackle:['tackle','dribbling','wrongFoot'],
+    standtackle:['tackle','dribbling'],
     intercept:['interceptions','pressTight'],
     passing:  ['passLoft','passPace','passAcc'],
     shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','keeperSpd'],
@@ -1211,7 +1207,7 @@
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
-    dribblelab:['skFoolSpin','skFoolCroq','skFoolCut','skShield','skSpinDist','skCroqDist','skCutBurst','skSpinT','skCroqT','skCutT','wrongFoot','dribbling','agility','tackle'],
+    dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skSpinT','skCroqT','skCutT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
   };
   // pin the IQ dials to the top of the settings panel
@@ -1634,7 +1630,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p; skill=null; recvAuto=null;
+      controlled=p; skill=null; recvAuto=null; ftAim=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -2043,16 +2039,18 @@
   }
   // ===== SKILL MOVES =====
   // Start on SKILL (on a computer: hold the mouse button down anywhere on the pitch) and draw:
-  //   a circle or swirl -> SPIN (a roulette: you turn 360 and come out to the side the circle went, ball shielded)
+  //   a circle or swirl -> SPIN (you turn as far round as you drew -- 180 to 450 degrees -- and roll out to the side
+  //                        the circle went, the ball going round with your body)
   //   an L              -> CROQUETA (the ball shifted foot to foot, the way the L's second stroke goes)
-  //   a straight flick  -> CUT (the ball chopped the way you flicked, and you go with it)
-  // The pattern is read when you let go. While a move is on, nobody can take the ball off you with a standing
-  // tackle (a slide still can), and a defender close in may be wrong-footed by it. Better dribblers fool more.
-  let skill=null, skillCd=0, skillG=null, skillTrail=null;
+  //   a straight flick  -> CUT (the ball chopped the way you flicked and popped a step ahead; you go after it)
+  // The pattern is read when you let go. A move gives you nothing for free: the ball is wherever the move puts it,
+  // and a defender who can reach it while it's showing takes it, just as he would off your stick. Beating him is
+  // timing -- move it as he commits, out of his reach.
+  // A flick on SKILL while a ball is on its way to you is a DIRECTIONAL FIRST TOUCH: it's pushed that way as it arrives.
+  let skill=null, skillCd=0, skillG=null, skillTrail=null, ftAim=null;
   const SKILL_NAME={spin:'SPIN',croq:'CROQUETA',cut:'CUT'};
-  const skillSafe=c=>c===controlled&&!!skill&&skill.t<=skill.T*P.skShield.val;   // a standing tackle can't win it yet
   function skillTurn(a,b){ let d=b-a; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; return d; }
-  // the drawn pattern (canvas px) -> {kind, dx, dy (screen direction), sense}, or null
+  // the drawn pattern (canvas px) -> {kind, dx, dy (screen direction), sense, turn}, or null
   function readSkill(raw){
     const pts=[raw[0]];
     for(const q of raw){ const l=pts[pts.length-1]; if(Math.hypot(q.x-l.x,q.y-l.y)>=5) pts.push(q); }
@@ -2061,7 +2059,7 @@
     if(L<22) return null;
     let turn=0, h0=null;
     for(let i=1;i<n;i++){ const h=Math.atan2(pts[i].y-pts[i-1].y,pts[i].x-pts[i-1].x); if(h0!=null) turn+=skillTurn(h0,h); h0=h; }
-    if(Math.abs(turn)>4.4) return {kind:'spin',sense:Math.sign(turn)};
+    if(Math.abs(turn)>4.4) return {kind:'spin',sense:Math.sign(turn),turn:Math.abs(turn)};
     // an L: one corner, two fairly straight strokes meeting at 50-135 degrees
     const a=pts[0], z=pts[n-1]; let best=null;
     for(let k=1;k<n-1;k++){
@@ -2075,7 +2073,7 @@
     if(best&&best.ang>0.87&&best.ang<2.36) return {kind:'croq',dx:best.dx,dy:best.dy};
     const D=Math.hypot(z.x-a.x,z.y-a.y);
     if(D/L>=0.75) return {kind:'cut',dx:(z.x-a.x)/D,dy:(z.y-a.y)/D};
-    if(Math.abs(turn)>2.5) return {kind:'spin',sense:Math.sign(turn)};
+    if(Math.abs(turn)>2.5) return {kind:'spin',sense:Math.sign(turn),turn:Math.abs(turn)};
     return null;
   }
   function skillReady(){
@@ -2088,8 +2086,9 @@
   function startSkill(g){
     const p=controlled; if(!g||!skillReady()) return false;
     const sp=Math.hypot(p.vx,p.vy), f=sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:p.facing.x,y:p.facing.y};
-    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)),fooled:false};
-    if(g.kind==='spin'){ sk.T=P.skSpinT.val; sk.sense=g.sense; sk.side={x:-f.y*g.sense,y:f.x*g.sense}; }
+    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p))};
+    if(g.kind==='spin'){ sk.sense=g.sense; sk.turn=clamp(g.turn||2*Math.PI,Math.PI,2.5*Math.PI);
+      sk.T=P.skSpinT.val*sk.turn/(2*Math.PI); sk.side={x:-f.y*g.sense,y:f.x*g.sense}; }
     else { const d=screenDirToPitch(g.dx,g.dy,p.y); sk.d=d; sk.T=g.kind==='cut'?P.skCutT.val:P.skCroqT.val;
       if(g.kind==='croq'){ const along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
         if(sl<0.2){ sx=-f.y; sy=f.x; sl=1; } sk.side={x:sx/sl,y:sy/sl}; } }
@@ -2099,20 +2098,6 @@
     if(LAB.on&&LAB.kind==='dribble') dribLabOnMove(g.kind);
     return true;
   }
-  // close defenders may buy it: they stumble for a moment
-  function skillFool(p,R,base){
-    let n=0;
-    for(const q of players){
-      if(q.team===p.team||q.state!=='normal'||q.beatenCd>0) continue;
-      if(dist(q,p)>R) continue;
-      const ch=clamp(base*statLerp(statOf(p,'dribbling',P.dribbling.val),0.7,1.25)*statLerp(statOf(q,'agility',P.agility.val),1.15,0.85),0,0.95);
-      if(Math.random()>ch) continue;
-      const T=Math.max(0.35,P.wrongFoot.val)*statLerp(statOf(p,'dribbling',P.dribbling.val),0.8,1.3);
-      q.state='stumble'; q.stateT=T; q.tackleCd=Math.max(q.tackleCd||0,T); q.beatenCd=1.2; n++;
-    }
-    if(LAB.on&&LAB.kind==='dribble') dribLabOnFool(n);
-    if(n){ lastGrade=SKILL_NAME[skill.kind]+' · BEATEN!'; gradeColor='#9dff3c'; gradeFade=1.1; }
-  }
   const skillSmooth=u=>u*u*(3-2*u);
   // a move in progress moves you and the ball itself (instead of stepOutfield and carry). false = it's over.
   function skillStep(p,dt){
@@ -2121,38 +2106,62 @@
     if(ball.ownedBy!==p||p.state!=='normal'){ skill=null; return false; }
     sk.t+=dt; const u=clamp(sk.t/sk.T,0,1), e=skillSmooth(u), f=sk.f;
     const cd=p.r+ball.r+5;
-    let x=p.x, y=p.y, bx, by;
+    let x=p.x, y=p.y, bx, by, out=null;
     if(sk.kind==='cut'){
-      const out=Math.max(sk.sp0,runSpeedOf(p)*P.skCutBurst.val)*(1-dribSpeedPenOf(p));   // a burst off the chop
-      p.vx=sk.d.x*out*e+f.x*sk.sp0*0.35*(1-e); p.vy=sk.d.y*out*e+f.y*sk.sp0*0.35*(1-e);
+      // the chop: you check and turn the ball, then pop it a step ahead the way you flicked and go after it
+      const go=Math.max(sk.sp0,runSpeedOf(p)*P.skCutBurst.val)*(1-dribSpeedPenOf(p));
+      p.vx=sk.d.x*go*e+f.x*sk.sp0*0.35*(1-e); p.vy=sk.d.y*go*e+f.y*sk.sp0*0.35*(1-e);
       x+=p.vx*dt; y+=p.vy*dt; p.facing={x:sk.d.x,y:sk.d.y};
       bx=x+sk.d.x*cd; by=y+sk.d.y*cd;
-      if(u>=0.5&&!sk.fooled){ sk.fooled=true; skillFool(p,80,P.skFoolCut.val); }
+      if(u>=1) out={g:sk.d,keep:go,pop:true};
     } else if(sk.kind==='croq'){
       const D=P.skCroqDist.val;
       x=sk.x0+sk.side.x*D*e+f.x*sk.sp0*0.5*sk.t; y=sk.y0+sk.side.y*D*e+f.y*sk.sp0*0.5*sk.t;
       p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:f.x,y:f.y};
       const shift=-12+26*e;                                       // the ball rolled from one foot across to the other
       bx=x+f.x*(cd-4)+sk.side.x*shift; by=y+f.y*(cd-4)+sk.side.y*shift;
-      if(u>=0.5&&!sk.fooled){ sk.fooled=true; skillFool(p,80,P.skFoolCroq.val); }
+      if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.5)};
     } else {
-      const a=Math.atan2(f.y,f.x)+sk.sense*2*Math.PI*e;
-      const D=P.skSpinDist.val;
+      // the body turns as far as you drew; the ball's on the sole, going round with it (so it shows, half way round)
+      const a=Math.atan2(f.y,f.x)+sk.sense*sk.turn*e;
+      const D=P.skSpinDist.val*Math.min(1,sk.turn/(2*Math.PI));
       x=sk.x0+sk.side.x*D*e+f.x*14*e; y=sk.y0+sk.side.y*D*e+f.y*14*e;
       p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:Math.cos(a),y:Math.sin(a)};
       bx=x+Math.cos(a)*(cd-3); by=y+Math.sin(a)*(cd-3);
-      if(u>=0.7&&!sk.fooled){ sk.fooled=true; skillFool(p,70,P.skFoolSpin.val); }
+      if(u>=1) out={g:{x:Math.cos(a),y:Math.sin(a)},keep:Math.max(sk.sp0*0.5,runSpeedOf(p)*0.35)};   // you come out facing where the turn left you
     }
     p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r);
     ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
-    if(u>=1){
-      const g=sk.kind==='cut'?sk.d:f;                              // you come out going that way, ball in front
-      const keep=sk.kind==='cut'?Math.hypot(p.vx,p.vy):Math.max(sk.sp0,runSpeedOf(p)*0.5);
-      p.facing={x:g.x,y:g.y}; p.vx=g.x*keep; p.vy=g.y*keep; p.carryAngle=Math.atan2(g.y,g.x);
+    if(out){
+      const g=out.g;
+      p.facing={x:g.x,y:g.y}; p.vx=g.x*out.keep; p.vy=g.y*out.keep; p.carryAngle=Math.atan2(g.y,g.x);
       ball.vx=p.vx; ball.vy=p.vy; p.stepPhase=0;
+      if(out.pop){                                                 // a little pop ahead: it's loose until you get back on it
+        ball.vx=g.x*(out.keep+P.skCutPop.val); ball.vy=g.y*(out.keep+P.skCutPop.val); ball.vz=55; ball.z=1;
+        ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.1;
+      }
       skill=null; skillCd=0.25;
     }
     return true;
+  }
+  // DIRECTIONAL FIRST TOUCH: a flick on SKILL with a ball coming to you
+  function ftAimOK(){ return !!ftAim&&ftAim.p===controlled&&simNow<ftAim.until; }
+  function incomingToMe(){
+    const p=controlled; if(!p||ball.ownedBy||gkHold) return false;
+    if(recvAuto&&recvAuto.q===p) return true;
+    const dx=p.x-ball.x, dy=p.y-ball.y, d=Math.hypot(dx,dy), sp=Math.hypot(ball.vx,ball.vy);
+    return d<380&&sp>60&&(ball.vx*dx+ball.vy*dy)/(d*sp||1)>0.7;
+  }
+  // the touch itself, as the ball reaches you: pushed the way you flicked, your own pace along it on top
+  function directionalTouch(p){
+    const a=ftAim.d; ftAim=null;
+    own(p,p.r+ball.r+5);
+    const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999)));
+    const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
+    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.12;
+    ball.vx=a.x*push; ball.vy=a.y*push; ball.z=1; ball.vz=30;
+    p.facing={x:a.x,y:a.y};
+    lastGrade='TOUCH '+labArrow(a.x,a.y); gradeColor='#78c8ff'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
   function skillGStart(cx,cy){ const r=rect(); skillG={pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
@@ -2160,7 +2169,10 @@
   function skillGEnd(cancel){
     const g=skillG; skillG=null; if(!g) return;
     const read=cancel?null:readSkill(g.pts);
-    const ok=!!read&&startSkill(read);
+    let ok=!!read&&startSkill(read);
+    if(!ok&&read&&read.kind==='cut'&&incomingToMe()){            // a flick with it on its way: the first touch goes that way
+      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+2}; ok=true;
+      lastGrade='TOUCH '+labArrow(ftAim.d.x,ftAim.d.y)+' …'; gradeColor='#78c8ff'; gradeFade=0.9; }
     if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
     if(!cancel&&!read&&g.pts.length>2){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
   }
@@ -2777,9 +2789,9 @@
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
-    skFoolSpin:'Spin · fools',skFoolCroq:'Croqueta · fools',skFoolCut:'Cut · fools',skShield:'Protected share of a move',
+    skCutPop:'Cut · pop',
     skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skCutBurst:'Cut · burst',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Cut · time',
-    wrongFoot:'Stumble time',dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
+    dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
     trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
@@ -2817,10 +2829,10 @@
     gkDiveRange:'Their keeper\'s diving (1 to 10): how far they fling themselves.'};
   function labDialTxt(k){
     const v=P[k].val;
-    if(k==='skFoolSpin'||k==='skFoolCroq'||k==='skFoolCut'||k==='skShield') return Math.round(v*100)+'%';
+    if(k==='skCutPop') return '+'+v+' px/s';
     if(k==='skSpinDist'||k==='skCroqDist') return v+' px ('+(v/25).toFixed(1)+' m)';
     if(k==='skCutBurst') return v.toFixed(2)+'×';
-    if(k==='skSpinT'||k==='skCroqT'||k==='skCutT'||k==='wrongFoot') return v.toFixed(2)+' s';
+    if(k==='skSpinT'||k==='skCroqT'||k==='skCutT') return v.toFixed(2)+' s';
     if(k==='dribbling'||k==='agility'||k==='tackle') return v.toFixed(1);
     if(k==='trapSweet') return (v>0?'+':'')+v+' ms';
     if(k==='trapKeepGood'||k==='trapKeepBad') return Math.round(v*100)+'%';
@@ -3310,7 +3322,8 @@
   // ===== DRIBBLE LAB =====
   // You on a mark with the ball, one defender in front. Take him on: draw a skill move from SKILL (or with the mouse)
   // and get past him. Each ball is called: BEAT HIM (you're 1.8 m past him with it), TACKLED, or it ran out / took too
-  // long. Each move you made is listed, with whether he bought it, and the tally keeps count per move.
+  // long. He sees the ball a beat late and lunges in when he's close, then needs a moment to recover -- so a move
+  // made as he commits takes the ball out of his reach. Each move you made is listed with its timing against his lunge.
   const DL_DEFS=[['stand','STANDS'],['close','CLOSES'],['press','PRESSES']];
   const DL_DISTS=[[125,'5 M'],[250,'10 M'],[400,'16 M']];
   const DL_COL={beat:'#9dff3c',tackled:'#ff5a4d',out:'#8a9580',time:'#ffb43c'};
@@ -3329,40 +3342,57 @@
     gkHold=null; controllingKeeper=null; restartT=0; restartInfo=null; headerT=0; scoredT=0; offsideT=0;
     skill=null; skillCd=0; skillG=null;
     for(const q of [you,D]){ q.vx=q.vy=0; q.state='normal'; q.stateT=0; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.tackleCd=0; q.beatenCd=0; q.runTarget=null; q.stamina=q.staminaCap=1; }
+    D.lungeT=0; D.recoverT=0; ftAim=null;
     you.x=FW/2-atk*260; you.y=YC; you.facing={x:atk,y:0};
     D.x=you.x+atk*LAB.dDist; D.y=YC; D.facing={x:-atk,y:0};
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
     ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); offsidePass=null; ball.z=0; ball.vz=0;
     own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;
     kickHeld=shootHeld=crossHeld=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
-    LAB.rep={t0:simNow, def:LAB.dDef, d:LAB.dDist, slide:LAB.dSlide, start:{x:you.x,y:you.y}, moves:[], stick:0, dState:'normal', looseT:0, done:false, result:null};
+    LAB.rep={t0:simNow, def:LAB.dDef, d:LAB.dDist, slide:LAB.dSlide, start:{x:you.x,y:you.y}, moves:[], lunges:[], seen:[], looseT:0, done:false, result:null};
     LAB.dirty=true;
   }
-  // the defender: comes to meet you (or waits for you), goal-side of the ball, and tries to win it the way anyone does
-  // in a match -- a standing tackle when it shows, a slide if they're on
+  // the defender: comes to meet you (or waits for you), goal-side of the ball as he sees it -- a fifth of a second
+  // late. Close in, he lunges at it: a standing tackle that wins it if it's showing when he gets there. Then he has
+  // to recover before he can go again. (And slides, if they're on.)
+  const DL_REACT=0.2, DL_LUNGE_V=310, DL_LUNGE_T=0.22, DL_RECOVER=0.45;
   function dribLabActor(p,dt){
     const r=LAB.rep, you=controlled, atk=atkOf(you.team);
-    if(!r||r.done||p.state!=='normal'){ stepOutfield(p,0,0,dt); return true; }
-    const gx=ball.x+atk*14, gy=ball.y;                        // just goal-side of the ball
+    if(!r||r.done||p.state!=='normal'){ p.lungeT=0; stepOutfield(p,0,0,dt); return true; }
+    r.seen.push({t:simNow,x:ball.x,y:ball.y}); while(r.seen.length>2&&r.seen[1].t<=simNow-DL_REACT) r.seen.shift();
+    const seen=r.seen[0];                                       // where he thinks the ball is
+    if(p.lungeT>0){                                             // committed: straight in at where he saw it
+      p.lungeT-=dt; p.x=clamp(p.x+p.vx*dt,p.r,FW-p.r); p.y=clamp(p.y+p.vy*dt,p.r,FH-p.r);
+      if(p.lungeT<=0){ p.tackleCd=Math.max(p.tackleCd,0.8); p.recoverT=DL_RECOVER; p.vx*=0.3; p.vy*=0.3; }
+      return true;
+    }
+    if(p.recoverT>0){ p.recoverT-=dt; p.engageCap=0.25; }      // getting his feet back under him
+    const sd=Math.hypot(seen.x-p.x,seen.y-p.y);
+    if(p.recoverT<=0&&p.tackleCd<=0&&sd<(r.def==='press'?70:58)){
+      const l=sd||1; p.vx=(seen.x-p.x)/l*DL_LUNGE_V; p.vy=(seen.y-p.y)/l*DL_LUNGE_V; p.facing={x:(seen.x-p.x)/l,y:(seen.y-p.y)/l};
+      p.lungeT=DL_LUNGE_T; r.lunges.push(simNow-r.t0); LAB.dirty=true;
+      return true;
+    }
+    const gx=seen.x+atk*14, gy=seen.y;                          // just goal-side of the ball
     const d=dist(p,ball), dx=gx-p.x, dy=gy-p.y, l=Math.hypot(dx,dy)||1;
     if(r.def==='stand'&&d>90){ p.sprint=false; stepOutfield(p,0,0,dt); const fl=dist(p,you)||1; p.facing={x:(you.x-p.x)/fl,y:(you.y-p.y)/fl}; return true; }
     p.sprint=r.def==='press'&&d>70;
-    if(d<90) p.engageCap=r.def==='press'?0.8:0.6;             // the last few strides come in under control
+    if(d<90&&!(p.recoverT>0)) p.engageCap=r.def==='press'?0.8:0.6;   // the last few strides come in under control
     if(r.slide&&d<80&&p.tackleCd<=0&&Math.random()<dt*1.2) slideAt(p,you);
     if(p.state==='normal') stepOutfield(p,dx/l,dy/l,dt);
     return true;
   }
-  function dribLabOnMove(kind){ const r=LAB.rep; if(!r||r.done) return; r.moves.push({kind,t:simNow-r.t0,fooled:false}); LAB.dirty=true; }
-  function dribLabOnFool(n){ const r=LAB.rep; if(!r||r.done||!r.moves.length||!n) return; r.moves[r.moves.length-1].fooled=true; LAB.dirty=true; }
+  function dribLabOnMove(kind){ const r=LAB.rep; if(!r||r.done) return; r.moves.push({kind,t:simNow-r.t0}); LAB.dirty=true; }
+  // a move against his lunges: how long after the last one it came (null: he hadn't gone), or how soon he went after it
+  function dlTiming(r,m){
+    let after=null, before=null;
+    for(const t of r.lunges){ const d=m.t-t; if(d>=0&&d<0.8&&(after==null||d<after)) after=d; if(d<0&&d>-0.6&&(before==null||-d<before)) before=-d; }
+    return {after,before};
+  }
   function dribLabStep(dt,rdt){
     const r=LAB.rep, you=controlled, D=dlDef();
     if(r&&!r.done&&D){
       const atk=atkOf(you.team), mine=ball.ownedBy===you||myLooseBall();
-      if(D.state==='stumble'&&r.dState!=='stumble'){             // he went down: to a skill move, or to a cut on the stick
-        const m=r.moves[r.moves.length-1];
-        if(!(m&&m.fooled&&simNow-r.t0-m.t<1.2)) r.stick++;
-      }
-      r.dState=D.state;
       if(ball.ownedBy&&ball.ownedBy!==you) dribLabFinish('tackled');
       else if(!ball.ownedBy&&ball.lastTouch&&ball.lastTouch!==you.team) dribLabFinish('tackled');
       else if(mine&&(you.x-D.x)*atk>45) dribLabFinish('beat');
@@ -3373,12 +3403,12 @@
     }
     if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) dribLabServe(); }
   }
-  function dribLabTally(){ return LAB.dt||(LAB.dt={n:0,beat:0,tackled:0,out:0,time:0,mv:{spin:{n:0,f:0},croq:{n:0,f:0},cut:{n:0,f:0}},stick:0,beatT:0}); }
+  function dribLabTally(){ return LAB.dt||(LAB.dt={n:0,beat:0,tackled:0,out:0,time:0,mv:{spin:{n:0,b:0},croq:{n:0,b:0},cut:{n:0,b:0}},beatT:0}); }
   function dribLabFinish(res){
     const r=LAB.rep; if(!r||r.done) return;
     r.done=true; r.result=res; r.endT=simNow;
-    const T=dribLabTally(); T.n++; T[res]++; T.stick+=r.stick;
-    for(const m of r.moves){ const k=T.mv[m.kind]; k.n++; if(m.fooled) k.f++; }
+    const T=dribLabTally(); T.n++; T[res]++;
+    for(const m of r.moves){ const k=T.mv[m.kind]; k.n++; if(res==='beat'&&m===r.moves[r.moves.length-1]) k.b++; }   // the last move before you got past
     if(res==='beat') T.beatT+=simNow-r.t0;
     LAB.last=r; LAB.nextT=res==='beat'?1.2:1.6; LAB.dirty=true;
     if(res==='beat'){ lastGrade='BEAT HIM!'; gradeColor='#9dff3c'; gradeFade=1.1; }
@@ -3417,9 +3447,11 @@
   }
   function dribLabText(r){
     const head=`<span class="lsv">${plName(DL_DEFS,r.def)} · ${plName(DL_DISTS,r.d).toLowerCase()} off${r.slide?' · slides':''}</span>`;
-    const mv=r.moves.map(m=>`<b style="color:${m.fooled?'#9dff3c':'#78c8ff'}">${SKILL_NAME[m.kind]}</b> ${m.t.toFixed(1)}s${m.fooled?' (he bought it)':''}`).join(' → ');
-    const stick=r.stick?` · <b style="color:#9dff3c">SKINNED HIM</b> on the stick`:'';
-    const how=(mv||'no skill moves')+stick;
+    const mv=r.moves.map(m=>{ const T=dlTiming(r,m);
+      const when=T.after!=null?`${Math.round(T.after*1000)} ms after he lunged`:T.before!=null?`he lunged ${Math.round(T.before*1000)} ms later`:'he hadn\'t gone';
+      return `<b style="color:#78c8ff">${SKILL_NAME[m.kind]}</b> ${m.t.toFixed(1)}s (${when})`; }).join(' → ');
+    const lg=r.lunges.length?` · he lunged ${r.lunges.length}×`:'';
+    const how=(mv||'no skill moves')+lg;
     if(!r.done) return `${head} ${how} → …`;
     const c=DL_COL[r.result];
     const res=r.result==='beat'?`BEAT HIM in ${(r.endT-r.t0).toFixed(1)} s`:r.result==='tackled'?'TACKLED':r.result==='time'?'TOO SLOW (10 s)':'LOST IT';
@@ -3431,8 +3463,7 @@
                              :'no runs yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
     const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
     if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
-    for(const k of ['spin','croq','cut']){ const m=T.mv[k]; if(m.n) parts.push(SKILL_NAME[k].toLowerCase()+' '+m.f+'/'+m.n+' fooled him'); }
-    if(T.stick) parts.push(T.stick+' skinned on the stick');
+    for(const k of ['spin','croq','cut']){ const m=T.mv[k]; if(m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
     if(T.beat) parts.push('avg '+(T.beatT/T.beat).toFixed(1)+' s to beat him');
     return parts.join(' · ');
   }
@@ -4890,7 +4921,6 @@
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
-        if(skillSafe(carrier))continue;                          // mid skill move: the ball's out of reach of a standing tackle
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
         if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
@@ -4899,7 +4929,7 @@
       // TURN (the ball is swinging around his body toward me), it's a physical duel. If I'm
       // stronger I can step across and nick it; if he's stronger he holds me off and completes
       // the turn. pressTight is irrelevant here — it's body-on-body strength.
-      else if(inBody && p.tackleCd<=0 && !windingUp(carrier) && !skillSafe(carrier)){   // (winding up a shot is planted, not turning)
+      else if(inBody && p.tackleCd<=0 && !windingUp(carrier)){   // (winding up a shot is planted, not turning)
         const exp=ballExposure(carrier,p);
         const turning = exp>0.30 && exp<0.62;        // mid-rotation: ball coming round the body
         const cSpeed=Math.hypot(carrier.vx,carrier.vy);
@@ -4917,33 +4947,6 @@
     }
   }
 
-  // ===== BEATING A TIGHT PRESS =====
-  // A sharp cut by the man on the ball (55 degrees or more, at pace) wrong-foots a defender who's right up
-  // against him or diving in at him: he stumbles (can't tackle) for a moment. You, defending, only get caught
-  // diving in; the computer's markers also when they sit too tight.
-  let cutWho=null;
-  function beatTheChallenge(dt){
-    const c=ball.ownedBy;
-    if(!c||gkHold||restartT>0||P.wrongFoot.val<=0){ cutWho=null; return; }
-    if(cutWho!==c){ cutWho=c; c.svx=c.vx; c.svy=c.vy; c.cutCd=0; }   // a new man on the ball: start his heading afresh
-    const px=c.svx, py=c.svy, k=Math.min(1,dt/0.22);
-    c.svx+=(c.vx-c.svx)*k; c.svy+=(c.vy-c.svy)*k;                      // where he's been heading lately
-    if(c.cutCd>0){ c.cutCd-=dt; return; }
-    const sp=Math.hypot(c.vx,c.vy), ps=Math.hypot(px,py);
-    if(sp<70||ps<50||(c.vx*px+c.vy*py)/(sp*ps)>0.57) return;         // not a sharp cut
-    c.cutCd=0.35;
-    for(const p of players){
-      if(p.team===c.team||p.state!=='normal'||p.beatenCd>0) continue;
-      const dx=c.x-p.x, dy=c.y-p.y, d=Math.hypot(dx,dy)||1;
-      if(d>85) continue;
-      const diving=(p.vx*dx+p.vy*dy)/d, tight=d<38&&p!==controlled;
-      if(!(tight||diving>100)) continue;
-      const T=P.wrongFoot.val*statLerp(statOf(c,'dribbling',P.dribbling.val),0.7,1.3)*statLerp(statOf(p,'agility',P.agility.val),1.2,0.8);
-      p.state='stumble'; p.stateT=T; p.tackleCd=Math.max(p.tackleCd,T); p.beatenCd=1.2;
-      if(c===controlled){ lastGrade='SKINNED HIM!'; gradeColor='#9dff3c'; gradeFade=1.0; }
-      else if(p===controlled){ lastGrade='WRONG-FOOTED'; gradeColor='#ff5a4d'; gradeFade=1.0; }
-    }
-  }
   // SLIDE TACKLE stat -> lunge length/speed & contact reach (endpoints: 1 => 0.5/0.7, 10 => 1.1/1.3)
   function slideLenOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.5, 1.1); }
   function slideHitOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.7, 1.3); }
@@ -7826,7 +7829,9 @@
         // (their shot, a hard-hit pass) is a block that runs loose.
         if(checkOffsideTouch(p))return;
         if(intercept&&ballSp>700){ trapTouch(p,0.45,interceptDampOf(p),null); return; }
-        endCurve(); own(p,p.r+ball.r+5); ball.z=0; ball.vz=0;
+        endCurve();
+        if(ftAimOK()) directionalTouch(p);
+        else { own(p,p.r+ball.r+5); ball.z=0; ball.vz=0; }
         return;
       } else if(p===controlled){
         if(trapping<=0)continue;                           // no press, no touch: it runs past you
@@ -8528,7 +8533,7 @@
       if(!inAir) c.airReachT=-1;
       else {
         if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
-        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)) trapTouch(c,1,0,trapSweet()); }   // CLASSIC: chested down for you
+        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(ftAimOK()){ endCurve(); directionalTouch(c); } else trapTouch(c,1,0,trapSweet()); } }   // CLASSIC: chested down for you
         else if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,e),0,e); }
       }
     }
@@ -8547,8 +8552,7 @@
       else if(!(p===controlled&&skill)) carry(p,dt,p===controlled?(hi.ix||hi.iy):true);   // (a skill move places the ball itself)
     }
     nanChk('carry');
-    beatTheChallenge(dt);
-    contactTackles();
+      contactTackles();
     nanChk('contactTackles');
     attemptCaptures();
     nanChk('attemptCaptures');
@@ -9226,7 +9230,9 @@
       const f=p.facing||{x:1,y:0};
       if(p.shotPoseT>0){ const d=p.shotPoseDir||f; return ['shoot',1,d.x,d.y]; }   // the shot, held after the strike
       if(p.passPoseT>0){ const d=p.passPoseDir||f; return ['pass',1,d.x,d.y]; }
-      const sp=Math.hypot(p.vx,p.vy), dx=sp>12?p.vx:f.x||0, dy=sp>12?p.vy:f.y||0;
+      const inMove=p===controlled&&!!skill;
+      const sp=Math.hypot(p.vx,p.vy), dx=(sp>12&&!inMove)?p.vx:f.x||0, dy=(sp>12&&!inMove)?p.vy:f.y||0;
+      if(inMove) return ['run', Math.floor(skill.t/0.07)%4, dx, dy];   // feet going, body turned the move's way
       if(p===controlled&&ball.ownedBy===p){                // your build-up while the button is held
         if(shootCharge>0.02) return ['shoot',0,(atkOf(p.team)>0?FW:0)-p.x,YC-p.y];
         if(kickCharge>0.02||crossCharge>0.02) return ['pass',0,dx,dy];
