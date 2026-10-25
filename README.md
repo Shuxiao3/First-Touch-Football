@@ -22,7 +22,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far).
   Without the ball, PASS (`J`, or the PASS button, which reads SWITCH) switches player. Push the stick as you press it
   and you get the nearest team-mate within 60° of that direction. With the stick centred, or nobody that way, you get
-  the one nearest where the ball will be a moment from now. `SPACE` does the same. You can also tap or click a team-mate
+  the one nearest where the ball will be a moment from now. `SPACE` does the same. On a phone you can also swipe off the
+  SWITCH button: the swipe's direction picks the man and overrides the stick. After any switch, the man you get
+  keeps running the way he was going for 0.25 s (the Switch: keep his run dial) before the stick takes him over, so
+  the direction you held for the last man doesn't snap him round. You can also tap or click a team-mate
   to switch to him. On the left side of a phone screen the stick still starts too.
 - **One-touch passing.** With a ball on its way to you, press PASS (`J`, or the PASS button, which reads 1-TOUCH),
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that

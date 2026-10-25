@@ -947,6 +947,7 @@
     offIQ:{val:5.5,min:1,max:10,step:0.1,label:'Off IQ (stat 1–10)',hint:'Attacking decision speed. 1 = slow to re-read play and commit; 10 = decisive, near one-touch. (decision clock x0.5 at 1 to x2.0 at 10.)'},
     halfMin:{val:3,min:3,max:5,step:1,label:'Half length (min)',hint:'Real minutes per half (3, 4, or 5). The on-screen clock is scaled to read 1–45 in the first half and 45–90 in the second, whatever you pick here.'},
     mateSpace:{val:170,min:0,max:260,step:10,label:'Off-ball spacing from carrier',hint:'Teammates positioning off the ball keep at least this distance from their own carrier (anchor-based positioning only; committed runs, the intended receiver, and ball contests are exempt). 0 disables.'},
+    switchLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Switch: keep his run (s)',hint:'For this long after you switch, the man you switch to carries on the way he was running, before the stick takes him over, so the direction you were holding for the last man doesn\'t snap him round. 0 = off.'},
     passLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Touch: pass lockout after receiving',hint:'TOUCH ONLY — for this many seconds after a ball reaches you (a pass you receive, or your own trap), the big button still reads as TRAP and cannot fire a pass, so a trap-intent tap landing just after it arrives never becomes an accidental pass. Running with the ball never sets it off. 0 disables. Keyboard passing (J) is never locked.'},
     oppShift:{val:0,min:-3,max:3,step:0.5,label:'Exhibition: opponent stat shift',hint:'EXHIBITION ONLY — shifts every stat of every opponent (red) player by this amount, clamped 1–10. -3 = pub team, 0 = as generated, +3 = world beaters. Career matches ignore this; league opponents come from the career world.'},
     defIQ:{val:5.5,min:1,max:10,step:0.1,label:'Def IQ (stat 1–10)',hint:'Defensive read on three traits: slide-tackle TIMING (1 = mistimed/short, 10 = perfect lead), an INTERCEPTION speed burst, and TACKLING (lower ball-exposure needed to nick it).'},
@@ -1634,7 +1635,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p; skill=null; recvAuto=null; ftAim=null; oneTouch=null;
+      controlled=p; skill=null; recvAuto=null; ftAim=null; oneTouch=null; switchLock=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -1660,10 +1661,20 @@
       const sc=d*(1+(1-dot)*1.5); if(sc<bs){ bs=sc; best=q; } }
     return best;
   }
-  function switchPlayer(){
+  // SWITCH LOCK: the man you switch to carries on the way he was running for a moment (the Switch lock dial), so the
+  // stick you were holding for the last man doesn't snap him round
+  let switchLock=null;
+  function switchTo(q){
+    const sp=Math.hypot(q.vx,q.vy), spr=!!q.sprint;
+    setControlled(q);
+    q.sprint=spr&&sp>40;                                       // (sprinting into it, he still is)
+    switchLock=P.switchLock.val>0?{p:q,until:simNow+P.switchLock.val,ix:sp>25?q.vx/sp:0,iy:sp>25?q.vy/sp:0}:null;
+  }
+  // ix,iy: a direction to switch towards (a swipe off SWITCH), else the stick's
+  function switchPlayer(ix,iy){
     if(!canSwitch()||!controlled) return;
     if(ball.ownedBy===controlled||myLooseBall()) return;   // it's yours: nothing to switch to
-    const q=switchToward(curIx,curIy)||switchTarget(); if(q) setControlled(q);
+    const q=(ix!=null?switchToward(ix,iy):switchToward(curIx,curIy))||switchTarget(); if(q) switchTo(q);
   }
   // a tap (or click) on one of your players: him. (canvas px)
   function teammateAt(cx,cy){
@@ -1686,7 +1697,7 @@
     if(!canSwitch()||!controlled||ball.ownedBy===controlled||myLooseBall()||incomingAny()) return false;
     const r=rect(), q=teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height);
     if(!q) return false;
-    setControlled(q); return true;
+    switchTo(q); return true;
   }
   // YOUR PASS: you're on the man it's going to as soon as it's played, and until you steer him he goes to meet it
   let recvAuto=null;
@@ -1708,7 +1719,7 @@
   function autoDefSwitch(){
     if(!canSwitch()||!controlled) return;
     const q=switchTarget(); if(!q) return;
-    if(dist(controlled,ball)-dist(q,ball)>150) setControlled(q);
+    if(dist(controlled,ball)-dist(q,ball)>150) switchTo(q);
   }
   // possession-driven switches call this instead — now a no-op (you stay locked)
   function noSwitch(p){}
@@ -1875,6 +1886,7 @@
   const wrapEl=document.getElementById('stageWrap');
   const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !matchOver;
   const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip'));   // on-screen buttons (☰, Trap Lab) take taps as clicks
+  let swTouch=null;          // a finger on SWITCH: where it landed
   const tapStart={};        // finger id -> where and when it landed, and the team-mate under it (for a touch pass)
   wrapEl.addEventListener('touchstart',e=>{
     if(!touchLive()) return;                 // menus/hub/full-time: DON'T preventDefault, or iOS never synthesizes their clicks
@@ -1889,7 +1901,8 @@
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
         else if(incomingAny()) queueOneTouch();                                                                       // on its way to you: ONE-TOUCH pass
-        else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // incoming / loose / opponent: TRAP (drag it to aim the touch)
+        else if(canSwitch()){ swTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }   // SWITCH: on release -- a tap goes the stick's way, a swipe off it that way
+        else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // (a lab) TRAP
         // (no first-time pass off this button: an arriving ball is always "strikeable", so it would
         //  turn a TRAP tap into a kick right as the ball reaches you)
         continue;
@@ -1953,6 +1966,10 @@
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
     if(t.identifier===skillTouchId){skillTouchId=null; if(e.type!=='touchcancel'&&touchLive()) skillGMove(t.clientX,t.clientY); skillGEnd(e.type==='touchcancel'||!touchLive());}
+    if(swTouch&&t.identifier===swTouch.id){ const w=swTouch; swTouch=null;
+      if(e.type!=='touchcancel'&&touchLive()){ const dx=t.clientX-w.x, dy=t.clientY-w.y;
+        if(Math.hypot(dx,dy)>=18){ const r=rect(), u=screenDirToPitch(dx*W/r.width,dy*H/r.height,controlled.y); switchPlayer(u.x,u.y); }
+        else switchPlayer(); } }
     if(t.identifier===kickTouchId){kickTouchId=null;if(passDown&&passDown.pts){passDown.lx=t.clientX;passDown.ly=t.clientY;}passRelease();}
     if(t.identifier===shootTouchId){shootTouchId=null;releaseShoot();}
     if(t.identifier===crossTouchId){crossTouchId=null;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}}}
@@ -3801,6 +3818,7 @@
     curIx=ix;curIy=iy;
     // not steering, with your own touch a step away (a trap, a knock-on): your player goes and collects it.
     // (Movement only: an aim taken from the stick still reads it as centred.)
+    if(switchLock){ if(switchLock.p!==controlled||simNow>switchLock.until) switchLock=null; else return {ix:switchLock.ix, iy:switchLock.iy}; }
     if(recvAuto&&(recvAuto.q!==controlled||ball.ownedBy||gkHold||simNow>recvAuto.until)) recvAuto=null;
     if(recvAuto&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
