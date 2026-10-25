@@ -1809,7 +1809,7 @@
       if(e.code==='KeyV'){ try{SPRITE.enable(!SPRITE.enabled);}catch(_){} }   // toggle sprites
       if(e.code==='KeyJ'){
         if(myBall())passPress();                      // you have it (or it's a touch away) -> pass (double-tap: in the air)
-        else if(defHeaderReady()){controlled.vz=300;defHeaderT=0.85;}  // head a cross clear
+        else if(defHeaderReady()){controlled.vz=headJumpVz(controlled);defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
         else if(incomingAny())queueOneTouch();         // it's on its way to you -> pass it first time when it gets there
         else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> demand it
@@ -4211,7 +4211,7 @@
       const tA=d<40?0:(closing>1?(d-40)/closing:9);                      // until it's over your head
       const zA=ball.z+ball.vz*tA-260*tA*tA;                              // its height then
       const headA=PLAYER_H*0.95+300*tA-260*tA*tA;                        // your head then, if you jump now
-      if(p.z<=1&&headerT<=0&&defHeaderT<=0&&tA<=0.5&&Math.abs(zA-headA)<=40){ p.vz=300; defHeaderT=0.85; clearArm=0; clearHeld=false; }
+      if(p.z<=1&&headerT<=0&&defHeaderT<=0&&tA<=0.5&&Math.abs(zA-headA)<=40){ p.vz=headJumpVz(p); defHeaderT=0.85; clearArm=0; clearHeld=false; }
       return;
     }
     // in reach = inside the ring round your feet (your trap reach), whoever played it -- you can stretch to
@@ -4440,10 +4440,14 @@
   }
 
   function headerReady(){
+    const gx=atkOf(controlled.team)>0?FW:0;               // their goal (the ends swap at half time)
     return ball.z>=16&&!ball.ownedBy&&!gkHold&&
-      controlled.x>FW-BX-90&&Math.abs(controlled.y-YC)<BY+70&&
+      Math.abs(controlled.x-gx)<BX+90&&Math.abs(controlled.y-YC)<BY+70&&
       dist(controlled,ball)<200;
   }
+  // GOING UP FOR A HEADER: the take-off speed (players fall at 700 px/s^2) that lifts his feet 8 px (Heading 1)
+  // to 14 px (Heading 10) -- a quarter to two-fifths of his height. The header's reach above his head does the rest.
+  function headJumpVz(p){ return Math.sqrt(2*700*statLerp(statOf(p,'heading',P.heading.val),8,14)); }
   function oppHasBall(){
     return (ball.ownedBy&&ball.ownedBy.team==='R')||(gkHold&&gkHold.team==='R');
   }
@@ -4570,8 +4574,8 @@
     if(curveArmed){return;}                 // re-holding K bends the live shot
     if(headerT>0 || controlled.z>1){ return; }   // already leaping / mid-header -> ignore repeats (no double jump)
     if(headerReady()){
-      controlled.vz=340;          // jump higher so you can reach a ball above your head
-      headerT=1.0;                // window matches the longer hang time (rise + fall)
+      controlled.vz=headJumpVz(controlled);   // up for it (a real leap: the header's reach does the rest)
+      headerT=1.0;                // the window to meet it: rising, falling, or just landed
       return;
     }
     if(myLooseBall()) gatherForAction();     // your own ball a touch away: still yours to wind up and shoot
@@ -6621,7 +6625,7 @@
         if(first){
           p.aerialT=simNow;
           if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH){
-            if(ball.z>30){ p.vz=240; p.z=0.1; }
+            if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
             const r=aerialRival(p);
             if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it)
             else headClear(p);
@@ -6709,7 +6713,7 @@
         const pNearBox = Math.abs(p.x-goalX) < BX+90 && Math.abs(p.y-YC) < BY+100;
         p.aerialT=simNow;                          // (going up for it: a man of theirs at it has a duel on his hands)
         if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH){
-          if(ball.z>30) { p.vz=240; p.z=0.1; }     // modest leap for the higher ones
+          if(ball.z>30) { p.vz=headJumpVz(p); p.z=0.1; }     // a leap for the higher ones
           // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
           // header on goal, the same as yours
           const contester=aerialRival(p);

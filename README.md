@@ -92,6 +92,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
   `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. Your career
   pro keeps the look you picked.
+- **Headers are a real leap.** Going up for a header lifts a player's feet 8 px (Heading 1) to 14 px (Heading 10),
+  a quarter to two-fifths of his height. It used to be up to 83 px, over two and a half times his height. That
+  covers your attacking header (K), your defensive one (J) and the computer's. Your header arms in their box
+  whichever end you're attacking: it used to work only at the right-hand end, so after half-time it never did.
 - **Stamina bars in the team's colour**, with no shirt number beside them. The bar is the colour of the shirt the
   team is wearing, on a dark track under a light colour and a light track under a dark one. Shirts follow the
   usual rule: your side wears its home kit, and the other side wears its home kit unless the shirts are too alike,
