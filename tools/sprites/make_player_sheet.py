@@ -8,8 +8,15 @@ then does what a pixel artist would: fills 1px bites and shaves spurs off the si
 removes lone tones, cuts clean 1px cuffs, shades the far limb down, and lines only where parts
 overlap. The head is hand-drawn pixel art per view.
 
-    python3 tools/sprites/make_player_sheet.py            # writes assets/sprites/*
-    python3 tools/sprites/make_player_sheet.py --embed    # ...and embeds the sheet in index.html
+    python3 tools/sprites/make_player_sheet.py                  # writes assets/sprites/*
+    python3 tools/sprites/make_player_sheet.py --embed          # ...and embeds the sheet in index.html
+    python3 tools/sprites/make_player_sheet.py --parts          # ...plus the swappable parts (below)
+    python3 tools/sprites/make_player_sheet.py --embed-classic  # ...and embeds the parts in classic.html
+
+The parts (Football Classic): player_body.png is the sheet with no heads, player_heads.png every hairstyle and
+overlay from head_variants.py in the five drawn views, player_parts.json where the head sits in each cell and
+the palette (skin and eyelids included). The game builds each player from those; player_looks_preview.png
+shows a few. Body + the mop head is checked to give back player_sheet.png exactly.
 
 Needs numpy and Pillow (dev only -- the game itself stays dependency-free).
 
@@ -551,7 +558,8 @@ def head_positions(poses, phi, head_rows, steady=False):
     return [(x0 + snap(mx), y0 + snap(my) + p.get('bob', 0)) for p in poses]
 
 
-def render_frame(pose, phi, head_rows, head_at=None):
+def body_layers(pose, phi):
+    """the posed body, ray-marched and cleaned up, ready to compose (with or without a head)"""
     J = build_skeleton(pose)
     hit, mat, grp, nrm, depth = raymarch(body_prims(J, pose, phi))
     L = dict(hit=hit, mat=mat, grp=grp, depth=depth, tone=shade(hit, mat, nrm))
@@ -560,6 +568,11 @@ def render_frame(pose, phi, head_rows, head_at=None):
     despeckle(L)
     shade_far_limbs(L)
     part_lines(L)
+    return L
+
+
+def render_frame(pose, phi, head_rows, head_at=None):
+    L = body_layers(pose, phi)
     if head_at is None:
         head_at = head_positions([pose], phi, head_rows)[0]
     return compose(L, head_rows, head_at)
@@ -877,6 +890,214 @@ def embed(index_path, sheet_path):
     print('embedded', os.path.basename(sheet_path), '->', index_path, '(%d base64 chars)' % len(b64))
 
 
+# ----------------------------------------------------------------------------- parts (Football Classic)
+# The same sheet split into swappable parts: the body with no head, an atlas of heads (every hairstyle and
+# overlay in head_variants.py, in the five drawn views), and where the base head sits in every cell. The game
+# puts each player together from those and recolours skin, hair, boots and kit, so no two look alike.
+# Composited with the mop, the parts give back player_sheet.png exactly (checked on every build).
+import head_variants as hv                                # noqa: E402
+
+HEAD_VIEWS = hv.VIEWS                                     # the atlas's columns
+DIR_VIEW = {'E': 'E', 'SE': 'SE', 'S': 'S', 'SW': 'SE', 'W': 'E', 'NW': 'NE', 'N': 'N', 'NE': 'NE'}
+HEAD_PAL_X = dict(HEAD_PAL)
+HEAD_PAL_X.update(dict(zip('vutT', RAMPS['trim'])))      # a headband: the kit's trim ramp
+BASE_HEAD_W = len(HEADS['S'][0])
+
+
+def build_parts():
+    """(body sheet, head table): the sheet's cells with no head, and for each row of cells the base head's
+    top-left in the cell, its view (atlas column) and whether the row is mirrored -- the same fit as
+    build_sheet, so the feet sit where they always did."""
+    assert all(len(HEADS[v][0]) == BASE_HEAD_W for v in HEAD_VIEWS)
+    cols = max(len(fn()) for _, fn, _, _ in ANIMS)
+    blank = np.zeros((CELL, CELL, 4), np.uint8)
+    rows, table = [], []
+    for name, fn, _, _ in ANIMS:
+        poses = fn()
+        drawn = {}
+        for d in DIR_ANGLE:
+            phi = math.radians(DIR_ANGLE[d])
+            heads = head_positions(poses, phi, HEADS[d], steady=name in STEADY_HEAD)
+            full, body = [], []
+            for p, h in zip(poses, heads):
+                L = body_layers(p, phi)
+                full.append(compose(L, HEADS[d], h))
+                body.append(compose(L, [], h))
+            shifts = [fit_shift([im]) for im in full] if name in PER_FRAME_FIT else [fit_shift(full)] * len(full)
+            cells = [crop(im, sh) for im, sh in zip(body, shifts)]
+            at = [(int(h[0] - PAD + sh[0]), int(h[1] - PAD + sh[1])) for h, sh in zip(heads, shifts)]
+            drawn[d] = (cells, at)
+        for d in DIRS:
+            cells, at = drawn[MIRROR.get(d, d)]
+            if d in MIRROR:
+                cells = [c[:, ::-1].copy() for c in cells]
+                at = [(CELL - (x + BASE_HEAD_W), y) for x, y in at]
+            view, mir = HEAD_VIEWS.index(DIR_VIEW[d]), int(d in MIRROR)
+            table.append([[x, y, view, mir] for x, y in at] + [None] * (cols - len(cells)))
+            rows.append(np.concatenate(cells + [blank] * (cols - len(cells)), axis=1))
+    return np.concatenate(rows, axis=0), table
+
+
+def head_atlas():
+    """every style and overlay in every view, one atlas cell each (drawn from its top-left), and for each
+    its offset from the base head's top-left and its size"""
+    V = hv.build(HEADS)
+    names = list(hv.STYLES) + list(hv.OVERLAYS)
+    aw = max(len(r[0]) for r, _, _ in V.values() if r)
+    ah = max(len(r) for r, _, _ in V.values() if r)
+    atlas = np.zeros((ah * len(names), aw * len(HEAD_VIEWS), 4), np.uint8)
+    meta = {}
+    for j, n in enumerate(names):
+        for i, v in enumerate(HEAD_VIEWS):
+            rows, ox, oy = V[(n, v)]
+            for r, row in enumerate(rows):
+                for c, ch in enumerate(row):
+                    if ch != '.':
+                        atlas[j * ah + r, i * aw + c] = (*HEAD_PAL_X[ch], 255)
+            meta[n + '/' + v] = [int(ox), int(oy), len(rows[0]) if rows else 0, len(rows)]
+    return atlas, names, (aw, ah), meta
+
+
+def parts_palette():
+    """everything the game may recolour on a player: the kit and boot and hair ramps, and skin and eyelids.
+    Skin is shared by the body and the head's face letters (a/b/c/r) on purpose; nothing else uses it."""
+    keys = palette_keys()
+    keys['skin'] = list(RAMPS['skin'])
+    keys['lid'] = [HEAD_PAL['l']]
+    assert [HEAD_PAL[k] for k in 'rcba'] == list(RAMPS['skin']), 'the face letters must be the skin ramp'
+    owners = {}
+    for m, ramp in RAMPS.items():
+        if m != 'socks':
+            for c in ramp:
+                owners.setdefault(tuple(c), set()).add(m)
+    for k, c in HEAD_PAL.items():
+        owners.setdefault(tuple(c), set()).add('skin' if k in 'abcr' else 'lid' if k == 'l' else
+                                               'hair' if k in HAIR_KEYS else 'head')
+    for m in ('skin', 'lid'):
+        for c in keys[m]:
+            assert owners[tuple(c)] == {m}, 'palette clash: %s shares %r with %r' % (m, c, owners[tuple(c)])
+    return keys
+
+
+def composite(body, table, atlas, names, asz, meta, style='mop', overlays=()):
+    """a whole sheet: the body with a style's head (and overlays) in every cell -- what the game does"""
+    out = body.copy()
+    aw, ah = asz
+    for r, row in enumerate(table):
+        for f, cell in enumerate(row):
+            if cell is None:
+                continue
+            x, y, vi, mir = cell
+            for n in (style,) + tuple(overlays):
+                ox, oy, w, h = meta[n + '/' + HEAD_VIEWS[vi]]
+                if not w:
+                    continue
+                src = atlas[names.index(n) * ah:names.index(n) * ah + h, vi * aw:vi * aw + w]
+                if mir:
+                    src = src[:, ::-1]
+                    px = x + (BASE_HEAD_W - ox - w)
+                else:
+                    px = x + ox
+                py = y + oy
+                for j in range(h):
+                    for i in range(w):
+                        cx, cy = px + i, py + j
+                        if src[j, i, 3] and 0 <= cx < CELL and 0 <= cy < CELL:
+                            out[r * CELL + cy, f * CELL + cx] = src[j, i]
+    return out
+
+
+# looks for the preview (the game has its own, seeded per player)
+PREVIEW_LOOKS = [
+    ('mop', (), (224, 160, 120), (108, 70, 46)),
+    ('crop', (), (198, 134, 90), (30, 26, 28)),
+    ('bald', ('beard',), (122, 74, 44), (30, 26, 28)),
+    ('afro', (), (94, 54, 32), (24, 20, 22)),
+    ('long', (), (240, 196, 160), (214, 176, 96)),
+    ('mohawk', (), (160, 104, 66), (200, 64, 40)),
+    ('bun', ('band',), (232, 178, 140), (60, 40, 30)),
+    ('crop', ('beard', 'band'), (176, 112, 72), (90, 58, 40)),
+]
+
+
+def _ramp_from(base, hair=False):
+    """[line, shadow, base, light] around a base colour (good enough for a preview)"""
+    b = np.array(base, float)
+    return [tuple(int(v) for v in np.clip(b * k, 0, 255)) for k in ((0.42, 0.68, 1.0, 1.22) if hair else (0.55, 0.8, 1.0, 1.12))]
+
+
+def looks_preview(body, table, atlas, names, asz, meta, path, z=4):
+    from PIL import ImageDraw
+    pk = parts_palette()
+    show = [('idle', 'S', 0), ('idle', 'SE', 0), ('idle', 'E', 0), ('idle', 'N', 0), ('run', 'SW', 0), ('run', 'W', 1)]
+    C = CELL * z
+    img = Image.new('RGBA', (70 + len(show) * C, 16 + len(PREVIEW_LOOKS) * C), (16, 28, 20, 255))
+    d = ImageDraw.Draw(img)
+    anim_row = {n: i * len(DIRS) for i, (n, _, _, _) in enumerate(ANIMS)}
+    for li, (style, ovs, skin, hair) in enumerate(PREVIEW_LOOKS):
+        sheet = composite(body, table, atlas, names, asz, meta, style, ovs)
+        kit = {'skin': _ramp_from(skin), 'hair': _ramp_from(hair, True)}
+        out = sheet.copy()
+        rgb = sheet[:, :, :3]
+        for m, ramp in kit.items():
+            for a, b in zip(pk[m], ramp):
+                sel = np.all(rgb == np.array(a, np.uint8), axis=2) & (sheet[:, :, 3] > 0)
+                out[sel, :3] = b
+        d.text((6, 16 + li * C + C // 2 - 5), style + ('+' + '+'.join(ovs) if ovs else ''), fill=(233, 245, 236, 255))
+        for si, (an, dn, fr) in enumerate(show):
+            r = anim_row[an] + DIRS.index(dn)
+            x0, y0 = 70 + si * C, 16 + li * C
+            d.rectangle([x0, y0, x0 + C - 1, y0 + C - 1], fill=(49, 129, 77, 255) if (li + si) % 2 else (43, 116, 69, 255))
+            cell = Image.fromarray(out[r * CELL:(r + 1) * CELL, fr * CELL:(fr + 1) * CELL], 'RGBA')
+            img.alpha_composite(cell.resize((C, C), Image.NEAREST), (x0, y0))
+    img.save(path)
+
+
+def main_parts(outdir):
+    check_palette()
+    pal = parts_palette()
+    body, table = build_parts()
+    atlas, names, asz, meta = head_atlas()
+    # the parts must give back the drawn sheet exactly
+    whole = composite(body, table, atlas, names, asz, meta, 'mop')
+    ref = build_sheet()
+    assert np.array_equal(whole, ref), 'body + mop head != player sheet (%d px differ)' % int((whole != ref).any(axis=2).sum())
+    save_indexed(body, os.path.join(outdir, 'player_body.png'))
+    save_indexed(atlas, os.path.join(outdir, 'player_heads.png'))
+    hexr = lambda ramp: ['#%02x%02x%02x' % tuple(c) for c in ramp]
+    parts = {'cell': CELL, 'views': HEAD_VIEWS, 'styles': list(hv.STYLES), 'overlays': list(hv.OVERLAYS),
+             'atlas': {'w': asz[0], 'h': asz[1]}, 'baseW': BASE_HEAD_W, 'heads': meta, 'at': table,
+             'drawn': {m: hexr(r) for m, r in pal.items()}}
+    with open(os.path.join(outdir, 'player_parts.json'), 'w') as f:
+        json.dump(parts, f, separators=(',', ':'))
+        f.write('\n')
+    looks_preview(body, table, atlas, names, asz, meta, os.path.join(outdir, 'player_looks_preview.png'))
+    print('wrote parts', outdir, 'body', body.shape[1], 'x', body.shape[0], '| heads', atlas.shape[1], 'x', atlas.shape[0],
+          '| styles', ', '.join(hv.STYLES), '| overlays', ', '.join(hv.OVERLAYS))
+    return parts
+
+
+def embed_parts(html_path, outdir, parts):
+    """write the parts into a page (classic.html): the PLAYER_BODY / PLAYER_HEADS / PLAYER_PARTS lines"""
+    import base64
+    src = open(html_path, encoding='utf-8').read()
+    b64 = lambda f: base64.b64encode(open(os.path.join(outdir, f), 'rb').read()).decode()
+    want = {'const PLAYER_BODY = ': 'const PLAYER_BODY = "data:image/png;base64,' + b64('player_body.png') + '";',
+            'const PLAYER_HEADS = ': 'const PLAYER_HEADS = "data:image/png;base64,' + b64('player_heads.png') + '";',
+            'const PLAYER_PARTS = ': 'const PLAYER_PARTS = ' + json.dumps(parts, separators=(',', ':')) + ';'}
+    lines, hits = src.split('\n'), set()
+    for i, line in enumerate(lines):
+        lead = line[:len(line) - len(line.lstrip())]
+        for k, v in want.items():
+            if line.lstrip().startswith(k):
+                lines[i] = lead + v
+                hits.add(k)
+    assert len(hits) == len(want), 'PLAYER_BODY / PLAYER_HEADS / PLAYER_PARTS lines not found in ' + html_path
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines))
+    print('embedded parts ->', html_path)
+
+
 def main(outdir):
     check_palette()
     os.makedirs(outdir, exist_ok=True)
@@ -905,3 +1126,7 @@ if __name__ == '__main__':
     main(outdir)
     if '--embed' in sys.argv:
         embed(os.path.join(root, 'index.html'), os.path.join(outdir, 'player_sheet.png'))
+    if '--parts' in sys.argv or '--embed-classic' in sys.argv:
+        parts = main_parts(outdir)
+        if '--embed-classic' in sys.argv:
+            embed_parts(os.path.join(root, 'classic.html'), outdir, parts)

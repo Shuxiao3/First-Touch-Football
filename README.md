@@ -84,6 +84,19 @@ The same game played like any other football game. It's a copy of `index.html` w
     pop, the rainbow's lead and height, the first-touch push, and the Dribbling, Agility and Tackling baselines.
   - Keys: `1`-`3` distance, `B` defender, `C` slides.
 
+- **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
+  in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
+  style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
+  a hair colour (natural shades, plus the odd dyed one), a boot colour and a slightly different height. A player's
+  look is seeded from his name, so he looks the same every match. Keepers get their own skin and hair colour.
+  The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
+  `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. Your career
+  pro keeps the look you picked.
+- **Stamina bars in the team's colour**, with no shirt number beside them. The bar is the colour of the shirt the
+  team is wearing, on a dark track under a light colour and a light track under a dark one. Shirts follow the
+  usual rule: your side wears its home kit, and the other side wears its home kit unless the shirts are too alike,
+  then its change kit, then plain white or black. So the bars never clash either.
+
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
 AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
 
