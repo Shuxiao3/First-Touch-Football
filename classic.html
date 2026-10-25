@@ -636,7 +636,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · SPACE switch player · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut) · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut) · K shoot (hold K+Up/Down to curl) / header</span>
     <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
@@ -824,7 +824,7 @@
 <div id="layoutEd">
   <div class="leStage" id="leStage">
     <div class="leZone leL"><b>MOVE</b><span>drag anywhere on this side</span></div>
-    <div class="leZone leR"><b>SWITCH</b><span>tap anywhere off the buttons to switch player</span></div>
+    <div class="leZone leR"><b>SWITCH</b><span>tap a team-mate to switch to him · tap anywhere else to switch</span></div>
     <div class="leB" data-k="kick">PASS</div><div class="leB" data-k="shoot">SHOOT</div><div class="leB" data-k="cross">CROSS</div><div class="leB" data-k="skill">SKILL</div>
   </div>
   <div class="leBar">
@@ -913,7 +913,7 @@
     other way. <b>Tactics</b> for both teams (press / neutral / low block · neutral / wing / counter). <b>L</b> crosses
     when you have the ball, or <b>requests a cross</b> when you don\u2019t (a wide teammate whips it toward you); in
     your own half it <b>clears</b> instead (first time, no control needed) ·
-    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · SPACE switches player. <b>FREE PLAY</b> for shooting practice.
+    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · J or SPACE switches player (towards the way you're pushing), or click one. <b>FREE PLAY</b> for shooting practice.
   </p>
 </div>
 
@@ -1634,7 +1634,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p; skill=null;
+      controlled=p; skill=null; recvAuto=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -1649,10 +1649,50 @@
       const d=Math.hypot(q.x-bx,q.y-by); if(d<bd){ bd=d; best=q; } }
     return best;
   }
+  // pushing the stick picks the team-mate that way from your man (the nearest of those within 60 degrees of it);
+  // with the stick centred, or nobody that way, the one best placed for the ball
+  function switchToward(ix,iy){
+    const l=Math.hypot(ix,iy); if(l<0.3) return null;
+    const ux=ix/l, uy=iy/l, c=controlled; let best=null, bs=1e9;
+    for(const q of players){ if(q.team!=='G'||q===c||q.state==='slide'||q.state==='getup') continue;
+      const dx=q.x-c.x, dy=q.y-c.y, d=Math.hypot(dx,dy)||1, dot=(dx*ux+dy*uy)/d;
+      if(dot<0.5) continue;
+      const sc=d*(1+(1-dot)*1.5); if(sc<bs){ bs=sc; best=q; } }
+    return best;
+  }
   function switchPlayer(){
     if(!canSwitch()||!controlled) return;
     if(ball.ownedBy===controlled||myLooseBall()) return;   // it's yours: nothing to switch to
-    const q=switchTarget(); if(q) setControlled(q);
+    const q=switchToward(curIx,curIy)||switchTarget(); if(q) setControlled(q);
+  }
+  // a tap (or click) on one of your players: him. (canvas px)
+  function teammateAt(cx,cy){
+    let best=null, bd=26;
+    for(const q of players){ if(q.team!=='G'||q===controlled) continue;
+      const s=proj(q.x,q.y,PLAYER_H*0.45), d=Math.hypot(s.x-cx,s.y-cy); if(d<bd){ bd=d; best=q; } }
+    return best;
+  }
+  function tapSwitch(clientX,clientY){
+    if(!canSwitch()||!controlled||ball.ownedBy===controlled||myLooseBall()) return false;
+    const r=rect(), q=teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height);
+    if(!q) return false;
+    setControlled(q); return true;
+  }
+  // YOUR PASS: you're on the man it's going to as soon as it's played, and until you steer him he goes to meet it
+  let recvAuto=null;
+  function passSwitch(q){
+    if(!canSwitch()||!q||q.team!=='G') return;
+    setControlled(q); recvAuto={q,until:simNow+3};
+  }
+  // where to meet the ball in flight: where it comes down, then the nearest point on its roll (not past where it stops)
+  function meetPoint(p){
+    let gx=ball.x, gy=ball.y;
+    if(ball.z>12){ const tl=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520; gx+=ball.vx*tl; gy+=ball.vy*tl; }
+    const sp=Math.hypot(ball.vx,ball.vy);
+    if(sp<40) return {x:gx,y:gy};
+    const dx=ball.vx/sp, dy=ball.vy/sp, lp=landingPoint(), stop=Math.max(0,(lp.x-gx)*dx+(lp.y-gy)*dy);
+    const s0=clamp((p.x-gx)*dx+(p.y-gy)*dy,0,stop);
+    return {x:gx+dx*s0, y:gy+dy*s0};
   }
   // they've just won it: if a team-mate is clearly closer than your man, you get him
   function autoDefSwitch(){
@@ -1748,7 +1788,8 @@
         if(myBall())passPress();                      // you have it (or it's a touch away) -> pass (double-tap: in the air)
         else if(defHeaderReady()){controlled.vz=300;defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
-        else callPass();                               // on offense w/o the ball -> demand it
+        else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> demand it
+        else switchPlayer();                           // defending -> SWITCH (to the man the way you're pushing)
       }
       if(e.code==='Digit0'||e.code==='Numpad0'){
         if(practice) startPractice(practice);   // re-arm the current drill
@@ -1857,6 +1898,7 @@
         continue;
       }
       const lx=t.clientX-r.left, ly=t.clientY-r.top;
+      if(tapSwitch(t.clientX,t.clientY)&&lx>r.width*0.5) continue;   // a tap on one of your men: him (on the left the stick still starts)
       if(lx > r.width*0.5){
         // RIGHT HALF (off-button) = TRAP: the biggest target on the screen for the most
         // timing-critical action. Hold to keep the trap window armed, exactly like SPACE.
@@ -2136,6 +2178,7 @@
   // a computer: hold the left mouse button anywhere on the pitch and draw
   wrapEl.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||e.button!==0||!touchLive()||onLabUI(e)) return;
     if(e.target.closest&&e.target.closest('.actBtn,#menuBtn')) return;
+    if(tapSwitch(e.clientX,e.clientY)) return;               // a click on one of your men: him
     skillGStart(e.clientX,e.clientY); });
   addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'&&skillG&&skillG.mouse!==false) skillGMove(e.clientX,e.clientY); });
   addEventListener('pointerup',e=>{ if(e.pointerType==='mouse'&&skillG) skillGEnd(!touchLive()); });
@@ -3678,6 +3721,10 @@
     curIx=ix;curIy=iy;
     // not steering, with your own touch a step away (a trap, a knock-on): your player goes and collects it.
     // (Movement only: an aim taken from the stick still reads it as centred.)
+    if(recvAuto&&(recvAuto.q!==controlled||ball.ownedBy||gkHold||simNow>recvAuto.until)) recvAuto=null;
+    if(recvAuto&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
+      if(d>8){ if(d>140&&!c.sprint) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
+    if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
     if(!ix&&!iy&&controlled&&myLooseBall()&&ball.z<12){ const dx=ball.x-controlled.x, dy=ball.y-controlled.y, d=Math.hypot(dx,dy)||1; return {ix:dx/d, iy:dy/d}; }
     return{ix,iy};
   }
@@ -4245,7 +4292,7 @@
       if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
       recordPassTeam(p.team,p); passPose(p);
       labOnPass(o.loft?'LOFTED PASS':'PASS',best,lead);
-      // locked: do not switch to the receiver
+      passSwitch(best);
     } else {
       // no good target: raw directional kick where aimed -- or into space the way you dragged
       if(o.thru){ const u=screenDirToPitch(o.thru.dx,o.thru.dy,p.y); aimx=u.x; aimy=u.y; }
@@ -4287,6 +4334,7 @@
     if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
     recordPassTeam(p.team,p); passPose(p);
     thruMark={x:L.x,y:L.y,t:performance.now()};
+    if(p===controlled) passSwitch(mate);
   }
 
   function headerReady(){
