@@ -636,7 +636,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball, click a team-mate to pass to him · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut, down-up = rainbow flick) · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut, down-up = rainbow flick) · K shoot (hold K+Up/Down to curl) / header</span>
     <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
@@ -976,6 +976,7 @@
     skRainbowDist:{val:40,min:40,max:250,step:5,label:'Skill: rainbow lead (px)',hint:'How far ahead of where your run takes you the rainbow flick comes down (25 px = 1 m).'},
     skRainbowH:{val:300,min:180,max:420,step:10,label:'Skill: rainbow height',hint:'How hard it goes up (px/s). 300 peaks at about 3.5 m and is in the air about 1.15 s.'},
     skRainbowT:{val:0.35,min:0.15,max:0.7,step:0.05,label:'Skill: rainbow wind-up (s)',hint:'How long it takes to roll the ball up the back of your leg before the flick.'},
+    oneTouchErr:{val:16,min:0,max:40,step:1,label:'One-touch pass: worst spray (°)',hint:'How far off line a first-time pass can go at worst: a ball at chest height, coming in at 1200 px/s or more, played by a man with Passing 1 and Ball control 1. A good passer takes much of it off; a slow ball along the grass takes it all off.'},
     skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
     skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: spin distance (px)',hint:'How far to the side a full spin carries you (25 px = 1 m). A shorter spin goes less far.'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
@@ -1209,7 +1210,7 @@
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
-    passlab:  ['passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    passlab:  ['oneTouchErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
   };
@@ -1633,7 +1634,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p; skill=null; recvAuto=null; ftAim=null;
+      controlled=p; skill=null; recvAuto=null; ftAim=null; oneTouch=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -1673,6 +1674,7 @@
   }
   // TOUCH PASSING: with the ball, a quick tap (or click) on a team-mate passes to him, weighted for how far he is
   function touchPass(q){
+    if(q&&controlled&&!ball.ownedBy&&!myLooseBall()&&incomingAny()){ queueOneTouch(q); return true; }   // still coming: first time, to him
     if(!q||!controlled||!(ball.ownedBy===controlled||myLooseBall())) return false;
     const d=dist(controlled,q), dx=q.x-controlled.x, dy=q.y-controlled.y;
     curIx=dx/(d||1); curIy=dy/(d||1);                          // (the aim, for the no-target case)
@@ -1681,7 +1683,7 @@
   }
   function mateAtClient(clientX,clientY){ const r=rect(); return teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height); }
   function tapSwitch(clientX,clientY){
-    if(!canSwitch()||!controlled||ball.ownedBy===controlled||myLooseBall()) return false;
+    if(!canSwitch()||!controlled||ball.ownedBy===controlled||myLooseBall()||incomingAny()) return false;
     const r=rect(), q=teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height);
     if(!q) return false;
     setControlled(q); return true;
@@ -1796,6 +1798,7 @@
         if(myBall())passPress();                      // you have it (or it's a touch away) -> pass (double-tap: in the air)
         else if(defHeaderReady()){controlled.vz=300;defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
+        else if(incomingAny())queueOneTouch();         // it's on its way to you -> pass it first time when it gets there
         else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> demand it
         else switchPlayer();                           // defending -> SWITCH (to the man the way you're pushing)
       }
@@ -1879,12 +1882,13 @@
     const r=rect();
     for(const t of e.changedTouches){
       const onBtn=Object.values(btns).includes(t.target);
-      tapStart[t.identifier]=onBtn?null:{x:t.clientX,y:t.clientY,t:performance.now(),q:myBall()?mateAtClient(t.clientX,t.clientY):null};
+      tapStart[t.identifier]=onBtn?null:{x:t.clientX,y:t.clientY,t:performance.now(),q:(myBall()||incomingAny())?mateAtClient(t.clientX,t.clientY):null};
       if(t.target===btns.kick){
         if(myBall()){
           { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
+        else if(incomingAny()) queueOneTouch();                                                                       // on its way to you: ONE-TOUCH pass
         else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // incoming / loose / opponent: TRAP (drag it to aim the touch)
         // (no first-time pass off this button: an arriving ball is always "strikeable", so it would
         //  turn a TRAP tap into a kick right as the ball reaches you)
@@ -2203,7 +2207,7 @@
     lastGrade='TOUCH '+labArrow(a.x,a.y); gradeColor='#78c8ff'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
-  function skillGStart(cx,cy){ const r=rect(); skillG={mate:myBall()?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
+  function skillGStart(cx,cy){ const r=rect(); skillG={mate:(myBall()||incomingAny())?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
   function skillGMove(cx,cy){ if(!skillG) return; const r=rect(); skillG.pts.push({x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}); if(skillG.pts.length>240) skillG.pts.splice(1,1); }
   function skillGEnd(cancel){
     const g=skillG; skillG=null; if(!g) return;
@@ -2212,7 +2216,7 @@
     const read=cancel?null:readSkill(g.pts);
     let ok=!!read&&startSkill(read);
     if(!ok&&read&&read.kind==='cut'&&incomingToMe()){            // a flick with it on its way: the first touch goes that way
-      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+2}; ok=true;
+      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+2}; ok=true; oneTouch=null;
       lastGrade='TOUCH '+labArrow(ftAim.d.x,ftAim.d.y)+' …'; gradeColor='#78c8ff'; gradeFade=0.9; }
     if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
     if(!cancel&&!read&&g.pts.length>2){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
@@ -2830,7 +2834,7 @@
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
-    skCutPop:'Cut · pop',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
+    skCutPop:'Cut · pop',oneTouchErr:'One-touch · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
     skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skCutBurst:'Cut · burst',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Cut · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
@@ -2871,6 +2875,7 @@
   function labDialTxt(k){
     const v=P[k].val;
     if(k==='skCutPop') return '+'+v+' px/s';
+    if(k==='oneTouchErr') return v+'°';
     if(k==='skRainbowDist') return v+' px ('+(v/25).toFixed(1)+' m)';
     if(k==='skRainbowH'){ const pk=v*v/1040; return v+' px/s · peak '+(pk/25).toFixed(1)+' m'; }
     if(k==='skRainbowT') return v.toFixed(2)+' s';
@@ -4450,51 +4455,75 @@
     mate.cmdShoot=1.4;                       // honored for a short window
     lastGrade='SHOOT!';gradeColor='#ffb43c';gradeFade=0.8;
   }
-  function firstTouchPass(){
+  // ONE-TOUCH PASS: played first time off a ball arriving at you. How true it goes depends on the ball -- quicker and
+  // higher is harder (a ball at chest height is the hardest; along the grass at walking pace the easiest) -- and on
+  // the man: mostly his Passing, some his Ball control. o.target: the man you picked (a tap), else whoever's that way.
+  function oneTouchSkill(p){ return 0.7*(statOf(p,'passAcc',P.passAcc.val)-1)/9 + 0.3*(statOf(p,'ballControl',P.ballControl.val)-1)/9; }
+  function oneTouchDifficulty(p){
+    const rel=Math.hypot(ball.vx-p.vx,ball.vy-p.vy);
+    const sp=clamp((rel-300)/900,0,1), ht=clamp(ball.z/AIR_REACH,0,1);
+    return {sp,ht,rel,z:ball.z,d:clamp(0.55*sp+0.8*ht,0,1)};
+  }
+  function firstTouchPass(o){
+    o=o||{};
     const p=controlled;
     const atk=atkOf(p.team);
     let aimx=curIx,aimy=curIy;
     if(!aimx&&!aimy){aimx=p.facing.x;aimy=p.facing.y;}
     const al=Math.hypot(aimx,aimy)||1;aimx/=al;aimy/=al;
-    const charge=0.5;                                   // snap strike, medium pace
-    const intendedDist=clamp(180+charge*720,180,950);
-    const ftMul=P.firstTouchAcc.val;                    // first-time = less accurate
-    // pick a teammate roughly in the aimed direction
+    const D=oneTouchDifficulty(p), sk=oneTouchSkill(p);
+    const worst=P.oneTouchErr.val*Math.PI/180*D.d*(1-0.75*sk);   // the extra spray this ball, for this man
+    // pick a teammate roughly in the aimed direction (or the one you tapped)
     let best=null,bs=-1e9;
     for(const q of players){
       if(q.team!==p.team||q===p)continue;
       let dx=q.x-p.x,dy=q.y-p.y; const d=Math.hypot(dx,dy)||1;
       const dirDot=(dx/d)*aimx+(dy/d)*aimy;
       if(dirDot<0.30)continue;
-      const distErr=Math.abs(d-intendedDist)/300;
       const opp=nearestOppTo(p,q);
       const open=opp?clamp(dist(opp,q)/120,0,1):1;
       const score=dirDot*2.4 + open*0.7 - clamp(d/1400,0,1)*0.4;
       if(score>bs){bs=score;best=q;}
     }
+    if(o.target&&o.target.team===p.team&&o.target!==p) best=o.target;
+    const err=worst*(Math.random()+Math.random()+Math.random()-1.5)*1.15;   // a bell curve, mostly well inside the worst
     if(best){
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
       let dx=lead.x-ball.x,dy=lead.y-ball.y; const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-      const aerr=passSpray(d, p, kickAccOf(p)*ftMul);
+      const aerr=passSpray(d,p)+err;
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-      const idealSpeed=d*2.0+140;
-      const passPow=clamp(idealSpeed,160,2200);
       const sol=passSolve(d);
-      ball.vx=ax*sol.vh; ball.vy=ay*sol.vh;
-      ball.vz=sol.vz;
+      const pace=1+(Math.random()*2-1)*0.25*D.ht*(1-0.6*sk);    // off a high ball the weight's harder to judge, too
+      ball.vx=ax*sol.vh*pace; ball.vy=ay*sol.vh*pace;
+      ball.vz=sol.vz+D.z*1.5;                                   // met in the air, it goes up more
     } else {
-      // no target: raw directional first-time kick where aimed, with extra spray
-      const aerr=(1-clamp(kickAccOf(p)*ftMul,0,1))*0.18*(Math.random()*2-1);
+      // no target: raw directional first-time kick where aimed
+      const aerr=(1-clamp(kickAccOf(p),0,1))*0.18*(Math.random()*2-1)+err;
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const dxk=aimx*ca-aimy*sa, dyk=aimx*sa+aimy*ca;
       const power=620;
-      ball.vx=dxk*power+p.vx*0.3; ball.vy=dyk*power+p.vy*0.3; ball.vz=160;
+      ball.vx=dxk*power+p.vx*0.3; ball.vy=dyk*power+p.vy*0.3; ball.vz=160+D.z*1.5;
     }
-    ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
+    ball.ownedBy=null;ball.dribbler=null;ball.dribbleGrace=0;p.noTouchT=0.3;ball.lastTouch=p.team;ball.z=Math.max(ball.z,1);
     endCurve(); recordPassTeam(p.team,p); passPose(p);
-    lastGrade='FIRST-TIME!';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=0.9;
+    if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
+    labOnPass('ONE-TOUCH PASS',best,null);
+    lastGrade='ONE-TOUCH';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=0.9;
+    if(best) passSwitch(best);
   }
+  // a pass asked for while the ball is still on its way to you: played first time the moment it gets there
+  let oneTouch=null;
+  function oneTouchOK(){ return !!oneTouch&&oneTouch.p===controlled&&simNow<oneTouch.until; }
+  function incomingAny(){                                       // on its way to you, along the grass or in the air
+    const p=controlled; if(!p||ball.ownedBy||gkHold||ball.z>AIR_REACH+30) return false;
+    return incomingToMe();
+  }
+  function queueOneTouch(target){
+    oneTouch={p:controlled,target:target||null,until:simNow+2}; ftAim=null;
+    lastGrade='ONE-TOUCH …'; gradeColor='#9dff3c'; gradeFade=0.9;
+  }
+  function playOneTouch(p){ const o=oneTouch; oneTouch=null; firstTouchPass({target:o.target}); }
   // a loose ball near you that you could strike FIRST-TIME (before controlling it):
   // grounded, within your trap reach, and slow enough to be a clean-ish contact.
   function firstTouchBall(p){
@@ -7876,7 +7905,8 @@
         if(checkOffsideTouch(p))return;
         if(intercept&&ballSp>700){ trapTouch(p,0.45,interceptDampOf(p),null); return; }
         endCurve();
-        if(ftAimOK()) directionalTouch(p);
+        if(oneTouchOK()) playOneTouch(p);
+        else if(ftAimOK()) directionalTouch(p);
         else { own(p,p.r+ball.r+5); ball.z=0; ball.vz=0; }
         return;
       } else if(p===controlled){
@@ -8579,7 +8609,7 @@
       if(!inAir) c.airReachT=-1;
       else {
         if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
-        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(ftAimOK()){ endCurve(); directionalTouch(c); } else trapTouch(c,1,0,trapSweet()); } }   // CLASSIC: chested down for you
+        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(oneTouchOK()){ endCurve(); playOneTouch(c); } else if(ftAimOK()){ endCurve(); directionalTouch(c); } else trapTouch(c,1,0,trapSweet()); } }   // CLASSIC: chested down for you
         else if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,e),0,e); }
       }
     }
@@ -8733,7 +8763,7 @@
         if(btns.kick){
           const lockT = false;
           const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=P.passDrag.val;
-          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : (oursHave?'CALL':'SWITCH');
+          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : (oursHave?'CALL':incomingAny()?'1-TOUCH':'SWITCH');
           btns.kick.classList.toggle('mCall', !mine && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
         }
