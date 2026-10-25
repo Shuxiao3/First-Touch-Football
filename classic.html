@@ -90,6 +90,7 @@
   /* thumb-arc cluster around the bottom-right corner: KICK biggest & nearest, SHOOT above, CROSS beside, CALL on the diagonal */
   #kickBtn{width:76px;height:76px;font-size:13px;right:max(12px, env(safe-area-inset-right));bottom:12px;background:rgba(157,255,60,.18);border:2.5px solid var(--phosphor);color:var(--phosphor);}
   #shootBtn{right:max(18px, env(safe-area-inset-right));bottom:102px;background:rgba(255,90,77,.16);border:2px solid var(--red);color:var(--red);}
+  #skillBtn{right:102px;bottom:100px;width:58px;height:58px;background:rgba(120,200,255,.14);border:2px solid #78c8ff;color:#78c8ff;}
   #crossBtn{right:100px;bottom:16px;background:rgba(255,180,60,.14);border:2px solid var(--amber);color:var(--amber);}
   .actBtn.dimBtn{opacity:.32;}
   #crossBtn.mClear{background:rgba(223,230,212,.12);border-color:var(--ink);color:var(--ink);}
@@ -129,6 +130,7 @@
   .leB[data-k="kick"]{ background:rgba(157,255,60,.18); border:2.5px solid var(--phosphor); color:var(--phosphor); font-size:13px; }
   .leB[data-k="shoot"]{ background:rgba(255,90,77,.16); border:2px solid var(--red); color:var(--red); }
   .leB[data-k="cross"]{ background:rgba(255,180,60,.14); border:2px solid var(--amber); color:var(--amber); }
+  .leB[data-k="skill"]{ background:rgba(120,200,255,.14); border:2px solid #78c8ff; color:#78c8ff; }
   .leB.sel{ box-shadow:0 0 0 3px rgba(233,245,236,.75); }
   .leBar{ position:absolute; top:max(6px, env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-wrap:wrap; align-items:center;
     justify-content:center; gap:6px 10px; max-width:96vw; padding:6px 10px; border-radius:10px; background:rgba(5,8,6,.86); border:1px solid #2a3a22;
@@ -633,7 +635,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · SPACE switch player · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · SPACE switch player · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut) · K shoot (hold K+Up/Down to curl) / header</span>
     <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
@@ -795,6 +797,7 @@
   <div id="kickBtn" class="actBtn">PASS</div>
   <div id="shootBtn" class="actBtn">SHOOT</div>
   <div id="crossBtn" class="actBtn">CROSS</div>
+  <div id="skillBtn" class="actBtn">SKILL</div>
 </div>
 
 <div id="pauseMenu" class="pauseOv">
@@ -818,7 +821,7 @@
   <div class="leStage" id="leStage">
     <div class="leZone leL"><b>MOVE</b><span>drag anywhere on this side</span></div>
     <div class="leZone leR"><b>SWITCH</b><span>tap anywhere off the buttons to switch player</span></div>
-    <div class="leB" data-k="kick">PASS</div><div class="leB" data-k="shoot">SHOOT</div><div class="leB" data-k="cross">CROSS</div>
+    <div class="leB" data-k="kick">PASS</div><div class="leB" data-k="shoot">SHOOT</div><div class="leB" data-k="cross">CROSS</div><div class="leB" data-k="skill">SKILL</div>
   </div>
   <div class="leBar">
     <span class="leTitle">BUTTON LAYOUT</span>
@@ -1616,7 +1619,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p;
+      controlled=p; skill=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -1773,10 +1776,11 @@
 
   const pad=document.getElementById('pad'),stick=document.getElementById('stick');
   const el=id=>document.getElementById(id);
-  const btns={kick:el('kickBtn'),shoot:el('shootBtn'),cross:el('crossBtn')};
+  const btns={kick:el('kickBtn'),shoot:el('shootBtn'),cross:el('crossBtn'),skill:el('skillBtn')};
   const tapRing=el('tapRing');
   function ringAt(lx,ly){ if(!tapRing)return; tapRing.style.left=(lx-32)+'px'; tapRing.style.top=(ly-32)+'px';
     tapRing.classList.remove('go'); void tapRing.offsetWidth; tapRing.classList.add('go'); }
+  let skillTouchId=null;
   let padId=null,pox=0,poy=0,pdx=0,pdy=0,kickTouchId=null,shootTouchId=null,trapTouchId=null,crossTouchId=null,clearTouchId=null;
   // SWIPE TO SHOOT: with the ball at your feet, a right-side touch is followed as a swipe and read on release
   let swipe=null;          // the swipe in progress: {pts:[{x,y,t}] (px in the canvas box), w, h}
@@ -1826,6 +1830,10 @@
         else startSlide(controlled);                                       // defending or dead loose ball -> SLIDE
         continue;
       }
+      if(t.target===btns.skill){
+        if(skillTouchId===null){ skillTouchId=t.identifier; skillGStart(t.clientX,t.clientY); skillG.mouse=false; }
+        continue;
+      }
       if(t.target===btns.cross){
         if(clearMode()){ if(pressClear()) clearTouchId=t.identifier; }           // own half: CLEAR (nothing to clear -> inert)
         else if(myBall()){crossHeld=true;crossTouchId=t.identifier;}
@@ -1857,6 +1865,7 @@
     if([...e.changedTouches].some(onLabUI)) return;   // dragging a Trap Lab slider / scrolling its drawer
     for(const t of e.changedTouches){
       if(t.identifier===padId) padDrag(t);
+      if(t.identifier===skillTouchId) skillGMove(t.clientX,t.clientY);
       if(swipe&&t.identifier===trapTouchId) swipePoint(swipe,t,evT(e));
       else if(t.identifier===trapTouchId) trapDragMove(t);
       if(passDown&&passDown.pts&&t.identifier===kickTouchId){ passDown.lx=t.clientX; passDown.ly=t.clientY; swipePoint(passDown,t,evT(e)); }
@@ -1867,6 +1876,7 @@
     if(t.identifier===trapTouchId){trapTouchId=null;trapHeld=false;
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
+    if(t.identifier===skillTouchId){skillTouchId=null; if(e.type!=='touchcancel'&&touchLive()) skillGMove(t.clientX,t.clientY); skillGEnd(e.type==='touchcancel'||!touchLive());}
     if(t.identifier===kickTouchId){kickTouchId=null;if(passDown&&passDown.pts){passDown.lx=t.clientX;passDown.ly=t.clientY;}passRelease();}
     if(t.identifier===shootTouchId){shootTouchId=null;releaseShoot();}
     if(t.identifier===crossTouchId){crossTouchId=null;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}}}
@@ -1974,6 +1984,142 @@
     for(let i=1;i<tr.pts.length;i++) ctx.lineTo(tr.pts[i].x*kx,tr.pts[i].y*ky);
     ctx.stroke(); ctx.restore();
   }
+  // ===== SKILL MOVES =====
+  // Start on SKILL (on a computer: hold the mouse button down anywhere on the pitch) and draw:
+  //   a circle or swirl -> SPIN (a roulette: you turn 360 and come out to the side the circle went, ball shielded)
+  //   an L              -> CROQUETA (the ball shifted foot to foot, the way the L's second stroke goes)
+  //   a straight flick  -> CUT (the ball chopped the way you flicked, and you go with it)
+  // The pattern is read when you let go. While a move is on, nobody can take the ball off you with a standing
+  // tackle (a slide still can), and a defender close in may be wrong-footed by it. Better dribblers fool more.
+  let skill=null, skillCd=0, skillG=null, skillTrail=null;
+  const SKILL_NAME={spin:'SPIN',croq:'CROQUETA',cut:'CUT'};
+  function skillTurn(a,b){ let d=b-a; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; return d; }
+  // the drawn pattern (canvas px) -> {kind, dx, dy (screen direction), sense}, or null
+  function readSkill(raw){
+    const pts=[raw[0]];
+    for(const q of raw){ const l=pts[pts.length-1]; if(Math.hypot(q.x-l.x,q.y-l.y)>=5) pts.push(q); }
+    const n=pts.length; if(n<3) return null;
+    let L=0; const cum=[0]; for(let i=1;i<n;i++){ L+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y); cum.push(L); }
+    if(L<22) return null;
+    let turn=0, h0=null;
+    for(let i=1;i<n;i++){ const h=Math.atan2(pts[i].y-pts[i-1].y,pts[i].x-pts[i-1].x); if(h0!=null) turn+=skillTurn(h0,h); h0=h; }
+    if(Math.abs(turn)>4.4) return {kind:'spin',sense:Math.sign(turn)};
+    // an L: one corner, two fairly straight strokes meeting at 50-135 degrees
+    const a=pts[0], z=pts[n-1]; let best=null;
+    for(let k=1;k<n-1;k++){
+      const v1x=pts[k].x-a.x, v1y=pts[k].y-a.y, v2x=z.x-pts[k].x, v2y=z.y-pts[k].y;
+      const l1=Math.hypot(v1x,v1y), l2=Math.hypot(v2x,v2y);
+      if(l1<15||l2<18||l2<0.3*l1) continue;
+      if(cum[k]>1.3*l1||(L-cum[k])>1.3*l2) continue;
+      const ang=Math.acos(clamp((v1x*v2x+v1y*v2y)/(l1*l2),-1,1));
+      if(!best||ang>best.ang) best={ang,dx:v2x/l2,dy:v2y/l2};
+    }
+    if(best&&best.ang>0.87&&best.ang<2.36) return {kind:'croq',dx:best.dx,dy:best.dy};
+    const D=Math.hypot(z.x-a.x,z.y-a.y);
+    if(D/L>=0.75) return {kind:'cut',dx:(z.x-a.x)/D,dy:(z.y-a.y)/D};
+    if(Math.abs(turn)>2.5) return {kind:'spin',sense:Math.sign(turn)};
+    return null;
+  }
+  function skillReady(){
+    const p=controlled;
+    if(!p||p.state!=='normal'||skill||skillCd>0||restartT>0||scoredT>0||offsideT>0||gkHold||matchOver) return false;
+    if(ball.ownedBy===p) return true;
+    if(myLooseBall()&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10){ own(p,p.r+ball.r+5); return true; }   // your own touch, a step away: take it
+    return false;
+  }
+  function startSkill(g){
+    const p=controlled; if(!g||!skillReady()) return false;
+    const sp=Math.hypot(p.vx,p.vy), f=sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:p.facing.x,y:p.facing.y};
+    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)),fooled:false};
+    if(g.kind==='spin'){ sk.T=0.6; sk.sense=g.sense; sk.side={x:-f.y*g.sense,y:f.x*g.sense}; }
+    else { const d=screenDirToPitch(g.dx,g.dy,p.y); sk.d=d; sk.T=g.kind==='cut'?0.2:0.3;
+      if(g.kind==='croq'){ const along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
+        if(sl<0.2){ sx=-f.y; sy=f.x; sl=1; } sk.side={x:sx/sl,y:sy/sl}; } }
+    skill=sk; ball.ownedBy=p;
+    p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false;
+    lastGrade=SKILL_NAME[g.kind]; gradeColor='#78c8ff'; gradeFade=0.8;
+    return true;
+  }
+  // close defenders may buy it: they stumble for a moment
+  function skillFool(p,R,base){
+    let n=0;
+    for(const q of players){
+      if(q.team===p.team||q.state!=='normal'||q.beatenCd>0) continue;
+      if(dist(q,p)>R) continue;
+      const ch=clamp(base*statLerp(statOf(p,'dribbling',P.dribbling.val),0.7,1.25)*statLerp(statOf(q,'agility',P.agility.val),1.15,0.85),0,0.95);
+      if(Math.random()>ch) continue;
+      const T=Math.max(0.35,P.wrongFoot.val)*statLerp(statOf(p,'dribbling',P.dribbling.val),0.8,1.3);
+      q.state='stumble'; q.stateT=T; q.tackleCd=Math.max(q.tackleCd||0,T); q.beatenCd=1.2; n++;
+    }
+    if(n){ lastGrade=SKILL_NAME[skill.kind]+' · BEATEN!'; gradeColor='#9dff3c'; gradeFade=1.1; }
+  }
+  const skillSmooth=u=>u*u*(3-2*u);
+  // a move in progress moves you and the ball itself (instead of stepOutfield and carry). false = it's over.
+  function skillStep(p,dt){
+    const sk=skill;
+    if(!sk) return false;
+    if(ball.ownedBy!==p||p.state!=='normal'){ skill=null; return false; }
+    sk.t+=dt; const u=clamp(sk.t/sk.T,0,1), e=skillSmooth(u), f=sk.f;
+    const cd=p.r+ball.r+5;
+    let x=p.x, y=p.y, bx, by;
+    if(sk.kind==='cut'){
+      const out=Math.max(sk.sp0,runSpeedOf(p)*0.9)*(1-dribSpeedPenOf(p));   // a burst off the chop
+      p.vx=sk.d.x*out*e+f.x*sk.sp0*0.35*(1-e); p.vy=sk.d.y*out*e+f.y*sk.sp0*0.35*(1-e);
+      x+=p.vx*dt; y+=p.vy*dt; p.facing={x:sk.d.x,y:sk.d.y};
+      bx=x+sk.d.x*cd; by=y+sk.d.y*cd;
+      if(u>=0.5&&!sk.fooled){ sk.fooled=true; skillFool(p,80,0.45); }
+    } else if(sk.kind==='croq'){
+      x=sk.x0+sk.side.x*46*e+f.x*sk.sp0*0.5*sk.t; y=sk.y0+sk.side.y*46*e+f.y*sk.sp0*0.5*sk.t;
+      p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:f.x,y:f.y};
+      const shift=-12+26*e;                                       // the ball rolled from one foot across to the other
+      bx=x+f.x*(cd-4)+sk.side.x*shift; by=y+f.y*(cd-4)+sk.side.y*shift;
+      if(u>=0.5&&!sk.fooled){ sk.fooled=true; skillFool(p,80,0.6); }
+    } else {
+      const a=Math.atan2(f.y,f.x)+sk.sense*2*Math.PI*e;
+      x=sk.x0+sk.side.x*58*e+f.x*14*e; y=sk.y0+sk.side.y*58*e+f.y*14*e;
+      p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:Math.cos(a),y:Math.sin(a)};
+      bx=x+Math.cos(a)*(cd-3); by=y+Math.sin(a)*(cd-3);
+      if(u>=0.7&&!sk.fooled){ sk.fooled=true; skillFool(p,70,0.65); }
+    }
+    p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r);
+    ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
+    if(u>=1){
+      const g=sk.kind==='cut'?sk.d:f;                              // you come out going that way, ball in front
+      const keep=sk.kind==='cut'?Math.hypot(p.vx,p.vy):Math.max(sk.sp0,runSpeedOf(p)*0.5);
+      p.facing={x:g.x,y:g.y}; p.vx=g.x*keep; p.vy=g.y*keep; p.carryAngle=Math.atan2(g.y,g.x);
+      ball.vx=p.vx; ball.vy=p.vy; p.stepPhase=0;
+      skill=null; skillCd=0.25;
+    }
+    return true;
+  }
+  // the drawing: on SKILL (touch) or with the mouse held down (a computer)
+  function skillGStart(cx,cy){ const r=rect(); skillG={pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
+  function skillGMove(cx,cy){ if(!skillG) return; const r=rect(); skillG.pts.push({x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}); if(skillG.pts.length>240) skillG.pts.splice(1,1); }
+  function skillGEnd(cancel){
+    const g=skillG; skillG=null; if(!g) return;
+    const read=cancel?null:readSkill(g.pts);
+    const ok=!!read&&startSkill(read);
+    if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
+    if(!cancel&&!read&&g.pts.length>2){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
+  }
+  function drawSkillTrail(){
+    const tr=skillTrail; if(!tr) return;
+    const age=tr.endT?(performance.now()-tr.endT)/1000:0;
+    if(age>0.5){ skillTrail=null; return; }
+    if(tr.pts.length<2) return;
+    ctx.save(); ctx.globalAlpha=0.9*(1-age/0.5); ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle=tr.endT&&!tr.ok?'rgba(233,245,236,.45)':'#78c8ff'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(tr.pts[0].x,tr.pts[0].y);
+    for(let i=1;i<tr.pts.length;i++) ctx.lineTo(tr.pts[i].x,tr.pts[i].y);
+    ctx.stroke(); ctx.restore();
+  }
+  // a computer: hold the left mouse button anywhere on the pitch and draw
+  wrapEl.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||e.button!==0||!touchLive()||onLabUI(e)) return;
+    if(e.target.closest&&e.target.closest('.actBtn,#menuBtn')) return;
+    skillGStart(e.clientX,e.clientY); });
+  addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'&&skillG&&skillG.mouse!==false) skillGMove(e.clientX,e.clientY); });
+  addEventListener('pointerup',e=>{ if(e.pointerType==='mouse'&&skillG) skillGEnd(!touchLive()); });
+
   if(isTouch)for(const k in btns)btns[k].style.display='flex';
   document.getElementById('feedBtn').onclick=feed;
   document.getElementById('c').addEventListener('click',()=>{ if(matchOver && !careerFix)newMatch(); });
@@ -4506,6 +4652,7 @@
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
+        if(carrier===controlled&&skill)continue;                 // mid skill move: the ball's out of reach of a standing tackle
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
         if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
@@ -4514,7 +4661,7 @@
       // TURN (the ball is swinging around his body toward me), it's a physical duel. If I'm
       // stronger I can step across and nick it; if he's stronger he holds me off and completes
       // the turn. pressTight is irrelevant here — it's body-on-body strength.
-      else if(inBody && p.tackleCd<=0 && !windingUp(carrier)){   // (winding up a shot is planted, not turning)
+      else if(inBody && p.tackleCd<=0 && !windingUp(carrier) && !(carrier===controlled&&skill)){   // (winding up a shot is planted, not turning)
         const exp=ballExposure(carrier,p);
         const turning = exp>0.30 && exp<0.62;        // mid-rotation: ball coming round the body
         const cSpeed=Math.hypot(carrier.vx,carrier.vy);
@@ -8008,7 +8155,7 @@
     const hi=humanIntent();
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || matchOver;
     if(!frozen) for(const p of players){
-      if(p===controlled){stepOutfield(p,hi.ix,hi.iy,dt);}
+      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
       else if(practice && practiceStep(p,dt)){ /* scripted helper handled */ }
       else if(practice){ p.vx=p.vy=0; p.z=0; p.vz=0; }   // everyone else parked during practice
       else if(freePlay&&p.team==='R'){
@@ -8159,7 +8306,7 @@
     if(ball.ownedBy){
       const p=ball.ownedBy;
       if(p.state!=='normal')ball.ownedBy=null;
-      else carry(p,dt,p===controlled?(hi.ix||hi.iy):true);
+      else if(!(p===controlled&&skill)) carry(p,dt,p===controlled?(hi.ix||hi.iy):true);   // (a skill move places the ball itself)
     }
     nanChk('carry');
     beatTheChallenge(dt);
@@ -8169,6 +8316,7 @@
     nanChk('attemptCaptures');
     if(trapping>0){ trapping-=dt; if(trapping<=0){ trapCd=Math.max(trapCd,P.trapLock.val); if(LAB.on) labOnWhiff(); } }   // a press that caught nothing
     if(trapCd>0)trapCd-=dt;
+    if(skillCd>0)skillCd-=dt;
     if(aimShow&&aimShow.t>0) aimShow.t-=dt;
     if(aimLate&&(!trapDrag||simNow-trapDrag.t0>P.ftWin.val)) aimLate=null;   // the drag never came in time: a plain trap it stays
     simNow+=dt;
@@ -8639,7 +8787,7 @@
     actors.sort((a,b)=>a.y-b.y);
     for(const a of actors)a.fn();
     if(LAB.on) labDrawOver();
-    drawSwipeTrail();
+    drawSwipeTrail(); drawSkillTrail();
     drawTrapAim();
 
     // --- HEADER ZONE (heading drill only): the dome within which you can head the ball ---
@@ -9335,8 +9483,8 @@
   // ===== BUTTON LAYOUT (touch screens): where PASS, SHOOT and CROSS sit, and how big -- yours to arrange =====
   // Each is kept as its centre, a share of the way across and down the game screen (so it lands in the same place on
   // any phone), and a size against the standard one. Nothing kept = the standard cluster in the bottom right.
-  const BTN_BASE={kick:{size:76,r:12,b:12,font:13},shoot:{size:64,r:18,b:102,font:11},cross:{size:64,r:100,b:16,font:11}};
-  const BTN_NAME={kick:'PASS',shoot:'SHOOT',cross:'CROSS'};
+  const BTN_BASE={kick:{size:76,r:12,b:12,font:13},shoot:{size:64,r:18,b:102,font:11},cross:{size:64,r:100,b:16,font:11},skill:{size:58,r:102,b:100,font:11}};
+  const BTN_NAME={kick:'PASS',shoot:'SHOOT',cross:'CROSS',skill:'SKILL'};
   let btnLayout={}, layoutOpen=false, leSel='kick', leDraft=null;
   try{ const o=JSON.parse(localStorage.getItem('ft_btnlayout')||'null'); if(o&&typeof o==='object') btnLayout=o; }catch(e){}
   function saveBtnLayout(){ try{ localStorage.setItem('ft_btnlayout',JSON.stringify(btnLayout)); }catch(e){} }

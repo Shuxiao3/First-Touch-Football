@@ -23,6 +23,18 @@ The same game played like any other football game. It's a copy of `index.html` w
   nearest where the ball will be a moment from now. When they win it, you're moved to a closer team-mate if one is
   more than 6 m nearer than your man.
 
+- **Skill moves instead of a trap.** With the ball, draw a pattern. On a touch screen, start on the SKILL button and
+  draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go:
+  - **Spin** (a circle or swirl): a roulette. You turn 360° and come out about 2.3 m to the side the circle went
+    (clockwise goes to your right), with the ball shielded.
+  - **Croqueta** (an L): the ball is shifted foot to foot, and you shift about 1.8 m the way the L's second stroke goes,
+    still running the same way.
+  - **Cut** (a straight flick): the ball is chopped the way you flicked, and you burst after it.
+
+  While a move is on, a standing tackle can't take the ball (a slide still can). Defenders close in may be
+  wrong-footed and stumble, and that's more likely the better your Dribbling is and the worse their Agility.
+  Each move costs a little stamina.
+
 Drills and the labs still lock you to one player and keep the timed trap. Everything else is unchanged, including the
 AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
 
