@@ -7,8 +7,9 @@
 // Through on goal, he takes it on and shoots from close in -- not a ball square or back. With time to get closer, he
 // gets closer before he shoots. Out wide with the way inside shut and men of his in the box, he goes down the line or
 // puts it into the box (a cross, a ball in to one of them, a shot from in there) -- not straight back out of it.
-// Through on goal with a defender of the same pace 4 m behind him, an ordinary man still gets his shot off from in
-// the box. And with his side of the pitch crowded and one of his free out on the far side, he switches it.
+// Through on goal with a defender of the same pace 4 m behind him, the defender sprints after him -- and an ordinary
+// man still gets his shot off, from the edge of the box or closer. And with his side of the pitch crowded and one of
+// his free out on the far side, he switches it.
 // Plays an exhibition with every player on the computer, on a copy of the game that lets the test see each decision
 // and what came of it; then sets a midfielder up with the ball and room ahead of him, a few times; then the other
 // five situations, a few times each.
@@ -64,7 +65,9 @@ patch('  const LAB_TITLE=', `  window.__T={players:()=>players, P, sim:()=>simNo
       ball.x=c.x+atk*(c.r+ball.r+5); ball.y=c.y; ball.z=0; ball.vx=ball.vy=ball.vz=0; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.thru=null; ball.shotT=0; ball.crossT=0; ball.shotBy=null;
       own(c,c.r+ball.r+5);
       return {id:c.team+c.num, x:c.x}; },
-    pos:(id)=>{ const q=players.find(q=>q.team+q.num===id), gx=atkOf('G')>0?FW:0; return q?{x:q.x,y:q.y,dl:Math.abs(gx-q.x)/25}:null; } };
+    pos:(id)=>{ const q=players.find(q=>q.team+q.num===id), gx=atkOf('G')>0?FW:0; return q?{x:q.x,y:q.y,dl:Math.abs(gx-q.x)/25}:null; },
+    // the first of theirs (placed first in a scene): sprinting?
+    chaser:()=>{ const q=players.find(q=>q.team==='R'); return !!q.sprint&&Math.hypot(q.vx,q.vy)>60; } };
   const LAB_TITLE=`);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ob-')), 'index.html');
 writeFileSync(copy, src);
@@ -137,15 +140,17 @@ const SCENES = {
   switch: { c: { dl: 38, y: 22, pref: 'MID' }, mates: [{ dl: 35, y: -18 }, { dl: 34, y: 16 }, { dl: 52, y: 8 }], opps: [{ dl: 33, y: 23 }, { dl: 36, y: 17 }, { dl: 41, y: 17 }, { dl: 42, y: 26 }, { dl: 33, y: 15 }, { dl: 25, y: 4 }, { dl: 22, y: -6 }] },
 };
 const scenes = {}, TRIALS = { wide: 6 };   // (four of each, six out wide: it's right nine times in ten, so three of four would fail one run in twenty)
-for(const name of Object.keys(SCENES)) for(let k = 0; k < (TRIALS[name] || 4); k++){
+for(const name of Object.keys(SCENES)) for(let k = 0, redo = 0; k < (TRIALS[name] || 4); k++){
   const s = await page.evaluate(([S, k]) => { window.__OBT.log.length = 0; window.__OBT.cur = null; window.__OBT.pend = null; return window.__T.scene({ ...S, k }); }, [SCENES[name], k]);
-  const t0 = await sim(); let r = null;
+  const t0 = await sim(); let r = null, polls = 0, spr = 0;
   while((await sim()) - t0 < 6){
     await page.waitForTimeout(40);
-    r = await page.evaluate(id => ({ played: window.__OBT.log.filter(e => e.by === id), at: window.__T.pos(id), dead: window.__T.dead() }), s.id);
+    r = await page.evaluate(id => ({ played: window.__OBT.log.filter(e => e.by === id), at: window.__T.pos(id), dead: window.__T.dead(), chaser: window.__T.chaser(), t: window.__T.sim() }), s.id);
     if(r.played.length || r.dead) break;
+    if(r.t - t0 > 0.5){ polls++; if(r.chaser) spr++; }        // (once he's off the mark)
   }
-  (scenes[name] = scenes[name] || []).push({ first: r && r.played[0] || null, endDl: r ? r.at.dl : 99 });
+  if(r && r.dead && !r.played.length && redo < 2){ redo++; k--; continue; }   // (the ball went dead before he'd played it -- out of play, say: no decision to judge, so again)
+  (scenes[name] = scenes[name] || []).push({ first: r && r.played[0] || null, endDl: r ? r.at.dl : 99, chaserSprint: polls ? spr / polls : 0 });
 }
 await browser.close();
 
@@ -189,8 +194,10 @@ const backOut = (r) => r.first && r.first.kind === 'pass' && r.first.toDl > 20 &
 const wideOk = scenes.wide.filter(r => intoBox(r.first) || downLine(r)).length;
 ok(wideOk >= 4 && !scenes.wide.some(backOut), `out wide with the way inside shut and men in the box, he goes down the line or puts it in -- never straight back out: ${wideOk} of ${scenes.wide.length}`);
 info('the chase: ' + scenes.chase.map(said).join(' | '));
-const chaseOk = scenes.chase.filter(r => r.first && r.first.kind === 'shot' && r.first.dl <= 15.5).length;
-ok(chaseOk >= 3, `through on goal with a defender as quick as him 4 m behind, an ordinary man still gets his shot off from in the box (15.5 m or closer): ${chaseOk} of 4`);
+const chaseSpr = scenes.chase.reduce((a, r) => a + r.chaserSprint, 0) / scenes.chase.length;
+ok(chaseSpr >= 0.9, `through on goal, the defender behind him sprints after him: ${(100 * chaseSpr).toFixed(0)}% of the time`);
+const chaseOk = scenes.chase.filter(r => r.first && r.first.kind === 'shot' && r.first.dl <= 17.5).length;
+ok(chaseOk >= 3, `through on goal with a defender as quick as him 4 m behind and sprinting after him, an ordinary man still gets his shot off, from the edge of the box or closer (17.5 m): ${chaseOk} of 4`);
 info('switch: ' + scenes.switch.map(r => r.first ? `${r.first.kind} to a man ${Math.abs(r.first.toY - r.first.y).toFixed(0)} m across` : 'nothing').join(' | '));
 const swOk = scenes.switch.filter(r => r.first && r.first.kind === 'pass' && r.first.toY * r.first.y < 0 && Math.abs(r.first.toY - r.first.y) >= 25).length;
 ok(swOk >= 3, `with his side crowded and a man free out on the far side, he switches it to him: ${swOk} of 4`);

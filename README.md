@@ -213,9 +213,9 @@ test, and like the Trap Lab the values are the game's settings.
 - **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.4 m/s
   flat out at 1, up to 6.6 and 9.1 m/s at 10. With the ball at his feet he's slower, by a fifth at
   Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
-  it; running with it at a jog doesn't tire him, but he doesn't get his breath back either (without the
-  ball he would). So a man through on goal isn't caught by a defender of his own pace who starts 4 m
-  behind him: he gets into the box and gets his shot off.
+  it, and running with it at a jog tires him a little (well under half what it once did); without the
+  ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
+  him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
 - **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
   best, rather than going down a list of rules where the first that fits wins: a pass to each
   team-mate (to his feet, or into the path of a man making a run, weighted to arrive with him), a carry
@@ -268,6 +268,13 @@ test, and like the Trap Lab the values are the game's settings.
 - **Team style levers** (press / neutral / low block · neutral / wing / counter) and per-player
   defensive personalities. Defenders close down quickly, then come in under control for the last
   few strides, and a beaten one chases back up alongside rather than through the man.
+- **When the computer sprints** — most of the time it saves its legs, but it goes flat out when it
+  matters: a defender or midfielder who's been beaten; every defender and midfielder within 30 m when
+  one of yours is through on goal; closing down the man on the ball; covering a break; staying with a
+  runner who's sprinting in behind; going for a cross or a through ball; a run in behind; getting back
+  when caught upfield. Forwards jog back: a sprint all the way back would leave them nothing for the
+  next attack. By full time a side has used a good part of its legs (the ceiling on its stamina is
+  around 0.6–0.75), not all of them.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
   knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
   his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a

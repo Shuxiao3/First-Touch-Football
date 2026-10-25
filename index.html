@@ -931,7 +931,7 @@
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
     accel:     {val:5.5, min:1,   max:10,  step:0.1, label:'Acceleration (stat 1–10)',hint:'Outfielder acceleration as a 1–10 stat. 1 = 0.05 (sluggish off the mark); 10 = 0.50 (explosive). Baseline for all players.'},
     agility:   {val:5.5, min:1,   max:10,  step:0.1, label:'Agility (stat 1–10)',hint:'How fast players turn / change direction. 1 = 0.20 (wide, sluggish turns); 10 = 0.50 (sharp, snappy). Baseline for all players.'},
-    stamina:   {val:5.5, min:1,   max:10,  step:0.1, label:'Stamina (stat 1–10)',hint:'Endurance as a 1–10 stat. Higher = drains slower (sprint, sprint with the ball), recovers faster, and the max-stamina ceiling erodes less. 1 = drains fast & low recovery; 10 = barely tires. Baseline for all players.'},
+    stamina:   {val:5.5, min:1,   max:10,  step:0.1, label:'Stamina (stat 1–10)',hint:'Endurance as a 1–10 stat. Higher = drains slower (sprinting, running with the ball), recovers faster, and the max-stamina ceiling erodes less. 1 = drains fast & low recovery; 10 = barely tires. Baseline for all players.'},
     slideTackle:{val:5.5,min:1,max:10,step:0.1,label:'Slide tackle (stat 1–10)',hint:'Sliding tackle as a 1–10 stat, driving both the lunge and the reach. 1 = length 0.5 / hitbox 0.7 (short, easy to mistime and miss); 10 = length 1.1 / hitbox 1.3 (long, fast lunge that connects from further out).'},
     tackle:{val:5.5,min:1,max:10,step:0.1,label:'Tackle (stat 1–10)',hint:'STANDING tackle as a 1–10 stat, driving reach and how shielded a ball you can still nick. 1 = reach 0 / needs the ball 0.75 exposed (served out front); 10 = reach 14 / nicks it at 0.25 exposure (off the toe of a shielding carrier). A good DRIBBLER raises the exposure you must beat.'},
     aiThink:   {val:0.45,min:0,   max:1.4, step:0.02,label:'Opponent decision time',hint:'Seconds the opponent settles on the ball before acting. Higher = they take a touch and look up first.'},
@@ -3399,7 +3399,8 @@
   function accelStatOf(p){   return statLerp(statOf(p,'acceleration', P.accel.val),0.05,0.5); }
   // AGILITY stat -> the agility coefficient (endpoints: 1 => 0.2, 10 => 0.5)
   function agilityStatOf(p){ return statLerp(statOf(p,'agility',       P.agility.val),0.2, 0.5); }
-  // STAMINA stat -> the four stamina rates. Higher stat = less drain, faster recovery.
+  // STAMINA stat -> the five stamina rates. Higher stat = less drain, faster recovery.
+  function drainCarryOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.04,0.025); }  // jogging with the ball (a little)
   function drainSprintOf(p){    return statLerp(statOf(p,'stamina',P.stamina.val),0.18,0.08); }   // sprint, no ball
   function drainSprintBallOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),0.19,0.09); }   // sprint + ball (a touch more)
   function staminaRecOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.30,0.60); }   // recovery
@@ -6069,7 +6070,7 @@
     p.runT-=dt;
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
-    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false; p.coverRun=false;
+    p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false; p.coverRun=false; p.dash=false;
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -6105,7 +6106,7 @@
             if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it)
             else headClear(p);
           }
-          p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1;
+          p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1; p.dash=true;
           return steer(p,L.x-atk*24,L.y,1.0);
         }
       }
@@ -6123,7 +6124,7 @@
     if(p!==controlled && p===ball.intendedRcv && ball.thru && simNow<ball.thru.until && p.state==='normal' &&
        !ball.ownedBy && !gkHold && ball.lastTouch===p.team && ball.shotT<=0){
       const T=ball.thru, past=(T.x-ball.x)*ball.vx+(T.y-ball.y)*ball.vy<=0;
-      p.sprint=p.stamina>0.08; p.runTarget=null; p.goingForBall=true; p.dbgTag='THRU';
+      p.sprint=p.stamina>0.08; p.runTarget=null; p.goingForBall=true; p.dbgTag='THRU'; p.dash=true;
       return past ? steer(p, ball.x+ball.vx*0.3, ball.y+ball.vy*0.3, 1.0) : steer(p, T.x, T.y, 1.0);
     }
     // INTENDED RECEIVER: a teammate has played it to me -> come SHORT to meet the pass instead of
@@ -6195,7 +6196,7 @@
           if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))) headClear(contester);
           else headOnGoal(p);
         }
-        p.sprint = p.stamina>0.1;
+        p.sprint = p.stamina>0.1; p.dash=true;
         return steer(p,tx,ty,1.0);
       }
     }
@@ -6634,7 +6635,7 @@
         if(p.tackleCd<=0&&p.state==='normal'&&ballExposure(c,p)>0.55&&dist(p,ball)<44&&Math.random()<0.05*iqDef(p,'tackleTiming')){
           slideAt(p,c);
         }
-        p.sprint = p.stamina>0.12;
+        p.sprint = p.stamina>0.12; p.dash=true;
         return steer(p,clamp(tx,40,FW-40),clamp(ty,30,FH-30),1.0);
       }
 
@@ -6747,7 +6748,7 @@
           // alongside him, not through his back
           const side=Math.sign((p.x-c.x)*(-gy2)+(p.y-c.y)*gx2)||1;
           const rtx=c.x+gx2*30-gy2*side*26, rty=c.y+gy2*30+gx2*side*26;
-          p.sprint = p.stamina>0.05; p.dbgTag='BEATEN';
+          p.sprint = p.stamina>0.05; p.dbgTag='BEATEN'; p.dash=p.role!=='ATT';
           return steer(p,clamp(rtx,40,FW-40),clamp(rty,30,FH-30),1.0);
         }
         const carrierInOurBox = Math.abs(c.x-ourGoalX)<BX+40 && Math.abs(c.y-YC)<BY+50;
@@ -6761,6 +6762,7 @@
         const secondMan = ranked.length>1 ? ranked[1] : null;  // rank0 presses, rank1 covers
         if(pairSpot){
           tx=pairSpot.x; ty=pairSpot.y; p.dbgTag='PAIR';    // my centre-back partner has the ball covered
+          if(pairSpot===spot&&spot.track&&Math.hypot(spot.track.vx,spot.track.vy)>runSpeedOf(p)) p.dash=true;   // (his runner's off: with him)
         } else if(carrierAdvancingMiddle && !carrierInOurBox && p===secondMan && p.role==='MID' && _canChase){
           // ONE midfielder steps to the central runner, goal-side, covering the man engaging him -- the back line
           // holds its height behind them.
@@ -6771,6 +6773,7 @@
           ty=c.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
         } else {
           tx=spot.x; ty=spot.y; p.dbgTag=spot.track?'TRACK':'BLOCK';   // hold my place in the block
+          if(spot.track&&Math.hypot(spot.track.vx,spot.track.vy)>runSpeedOf(p)) p.dash=true;   // a runner in my zone going faster than I jog: stay with him
         }
         // caught a long way upfield of my place in the block: get back at a sprint (see the AI step). Otherwise I jog
         // back into it -- and so do the forwards, always (a sprint all the way back would leave them nothing for the
@@ -7107,8 +7110,9 @@
       p.staminaCap=clamp(p.staminaCap - dt*0.035*staminaCapDrainOf(p), 0.30, 1);
       p.stamina=0;
     } else if(hasBall && moving){
-      // running WITH the ball (not sprinting): it doesn't tire him, but he doesn't get his breath back either -- or a
-      // quick man could sprint, ease off, and sprint again the length of the pitch with it
+      // running WITH the ball (not sprinting) tires him a little -- or a quick man could sprint, ease off, and sprint
+      // again the length of the pitch with it
+      p.stamina=clamp(p.stamina - dt*drainCarryOf(p), 0, p.staminaCap);
     } else if(moving){
       // jogging without the ball recovers (a bit slower than standing still)
       p.stamina=clamp(p.stamina + dt*staminaRecOf(p)*0.55, 0, p.staminaCap);
@@ -7992,12 +7996,21 @@
         const carrier = heldBy();                          // (his touch running on, or a pass on its way to him, counts)
         const sta=p.stamina;
 
-        // RECOVERY: I have been BEATEN — the carrier is just past me, I'm close, and I'm
-        // genuinely chasing (not just anyone vaguely goal-side). Tight so the whole team
-        // doesn't sprint whenever the opponent has it.
-        const beaten = carrier && carrier.team!==p.team &&
-                       atkP*(carrier.x - p.x) > 0 && atkP*(carrier.x - p.x) < 220 &&
-                       Math.abs(carrier.y-p.y)<150 && dBall<240;
+        // CLOSING HIM DOWN: their man on the ball just in front of me, me goal-side of him and close (the last few strides
+        // in come under control: see engageCap). Tight so the whole team doesn't sprint whenever the opponent has it.
+        const closing = carrier && carrier.team!==p.team &&
+                        atkP*(carrier.x - p.x) > 0 && atkP*(carrier.x - p.x) < 220 &&
+                        Math.abs(carrier.y-p.y)<150 && dBall<240;
+        // BEATEN: he's got past me -- nearer our goal than I am, close by. A defender or a midfielder goes after him at a
+        // sprint (a forward jogs back: a sprint back would leave him nothing for the next attack).
+        const pastMe = carrier && carrier.team!==p.team ? atkP*(p.x-carrier.x) : 0;
+        const beaten = p.role!=='ATT' && pastMe>15 && pastMe<300 && Math.abs(carrier.y-p.y)<220;
+        // THROUGH ON GOAL: their man on the ball in our half with none of ours but the keeper goal-side of him -- every
+        // defender and midfielder within 30 m of him gets back at a sprint
+        const through = p.role!=='ATT' && !!carrier && carrier.team!==p.team && atkP*(carrier.x-FW/2)<0 && dist(p,carrier)<750 &&
+                        !players.some(q=>q.team===p.team && atkP*(q.x-carrier.x)<0);
+        // and through on goal with it himself, asking to go flat out (see obMove): he does
+        const breakaway = carrying && p.sprint && !players.some(q=>q.team!==p.team && atkP*(q.x-p.x)>0);
         // OPEN LANE IN BEHIND: I'm an off-ball attacker with clear grass AND the ball can
         // actually find me soon (carrier is on my team and roughly behind me).
         let openBehind=false;
@@ -8025,7 +8038,7 @@
         // RECOVERING: lost it with me upfield of the ball -- sprint back goal-side of it (aiBrain sets the flag)
         const recovering = p.recover && oppHasBallTeam(p.team);
         // --- CRITICAL: always worth a sprint (down to a low stamina floor) ---
-        const critical = beaten || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (cutting out a pass while we press: see aiBrain)
+        const critical = closing || beaten || through || breakaway || !!p.dash || gapBurst || openBehind || closeChase || recovering || !!p.pressRun;   // (p.dash: a moment aiBrain says is worth it)
         // --- OPPORTUNISTIC: only sprint if I have stamina to spare ---
         // the single designated presser (nearest, very close) may sprint to close down
         const pressClose = oppHasBallTeam(p.team) && dBall<170 && dBall>80 && nearestMine!==false &&   // (not the last 80 px: see engageCap)
