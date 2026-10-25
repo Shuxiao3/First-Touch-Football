@@ -23,7 +23,13 @@ The same game played like any other football game. It's a copy of `index.html` w
   Without the ball, PASS (`J`, or the PASS button, which reads SWITCH) switches player. Push the stick as you press it
   and you get the nearest team-mate within 60° of that direction. With the stick centred, or nobody that way, you get
   the one nearest where the ball will be a moment from now. `SPACE` does the same. You can also tap or click a team-mate
-  to switch to him. On the left side of a phone screen the stick still starts too. When they win it, you're moved to a closer team-mate if one is
+  to switch to him. On the left side of a phone screen the stick still starts too.
+- **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
+  A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
+- **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
+  the space ahead of the man. The lofted through ball is unchanged.
+- **Losing the ball to a slide** puts you down longer than a standing tackle (0.5 s): 0.65 s against Slide tackle 1,
+  up to 1.05 s against 10, and you can't touch the ball for 0.2 s after that. When they win it, you're moved to a closer team-mate if one is
   more than 6 m nearer than your man.
 
 - **Skill moves instead of a trap.** With the ball, draw a pattern. On a touch screen, start on the SKILL button and

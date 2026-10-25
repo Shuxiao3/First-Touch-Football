@@ -636,7 +636,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut, down-up = rainbow flick) · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball, click a team-mate to pass to him · hold the mouse and draw for a skill move (circle = spin, L = croqueta, flick = cut, down-up = rainbow flick) · K shoot (hold K+Up/Down to curl) / header</span>
     <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
@@ -824,7 +824,7 @@
 <div id="layoutEd">
   <div class="leStage" id="leStage">
     <div class="leZone leL"><b>MOVE</b><span>drag anywhere on this side</span></div>
-    <div class="leZone leR"><b>SWITCH</b><span>tap a team-mate to switch to him · tap anywhere else to switch</span></div>
+    <div class="leZone leR"><b>SWITCH</b><span>tap a team-mate: switch to him (or pass to him, with the ball) · tap anywhere else to switch</span></div>
     <div class="leB" data-k="kick">PASS</div><div class="leB" data-k="shoot">SHOOT</div><div class="leB" data-k="cross">CROSS</div><div class="leB" data-k="skill">SKILL</div>
   </div>
   <div class="leBar">
@@ -1671,6 +1671,15 @@
       const s=proj(q.x,q.y,PLAYER_H*0.45), d=Math.hypot(s.x-cx,s.y-cy); if(d<bd){ bd=d; best=q; } }
     return best;
   }
+  // TOUCH PASSING: with the ball, a quick tap (or click) on a team-mate passes to him, weighted for how far he is
+  function touchPass(q){
+    if(!q||!controlled||!(ball.ownedBy===controlled||myLooseBall())) return false;
+    const d=dist(controlled,q), dx=q.x-controlled.x, dy=q.y-controlled.y;
+    curIx=dx/(d||1); curIy=dy/(d||1);                          // (the aim, for the no-target case)
+    doPass(clamp((d-180)/720,0,1),{target:q});
+    return true;
+  }
+  function mateAtClient(clientX,clientY){ const r=rect(); return teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height); }
   function tapSwitch(clientX,clientY){
     if(!canSwitch()||!controlled||ball.ownedBy===controlled||myLooseBall()) return false;
     const r=rect(), q=teammateAt((clientX-r.left)*W/r.width,(clientY-r.top)*H/r.height);
@@ -1863,11 +1872,14 @@
   const wrapEl=document.getElementById('stageWrap');
   const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !matchOver;
   const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip'));   // on-screen buttons (☰, Trap Lab) take taps as clicks
+  const tapStart={};        // finger id -> where and when it landed, and the team-mate under it (for a touch pass)
   wrapEl.addEventListener('touchstart',e=>{
     if(!touchLive()) return;                 // menus/hub/full-time: DON'T preventDefault, or iOS never synthesizes their clicks
     if([...e.changedTouches].some(onLabUI)) return;   // a button or slider: let the browser make the click / drag
     const r=rect();
     for(const t of e.changedTouches){
+      const onBtn=Object.values(btns).includes(t.target);
+      tapStart[t.identifier]=onBtn?null:{x:t.clientX,y:t.clientY,t:performance.now(),q:myBall()?mateAtClient(t.clientX,t.clientY):null};
       if(t.target===btns.kick){
         if(myBall()){
           { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
@@ -1928,6 +1940,10 @@
     }
     e.preventDefault();},{passive:false});
   function endT(e){for(const t of e.changedTouches){
+    { const ts=tapStart[t.identifier]; delete tapStart[t.identifier];
+      if(ts&&ts.q&&e.type!=='touchcancel'&&touchLive()&&performance.now()-ts.t<280&&Math.hypot(t.clientX-ts.x,t.clientY-ts.y)<14&&touchPass(ts.q)){
+        if(t.identifier===trapTouchId){ trapTouchId=null; trapHeld=false; swipe=null; }   // it was a pass, not a swipe
+      } }
     if(t.identifier===padId){padId=null;pdx=pdy=0;pad.style.display='none';padSprint=padSprintOn=false;pad.classList.remove('sprint');if(controlled)controlled.sprint=false;}
     if(t.identifier===trapTouchId){trapTouchId=null;trapHeld=false;
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
@@ -2187,10 +2203,12 @@
     lastGrade='TOUCH '+labArrow(a.x,a.y); gradeColor='#78c8ff'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
-  function skillGStart(cx,cy){ const r=rect(); skillG={pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
+  function skillGStart(cx,cy){ const r=rect(); skillG={mate:myBall()?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
   function skillGMove(cx,cy){ if(!skillG) return; const r=rect(); skillG.pts.push({x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}); if(skillG.pts.length>240) skillG.pts.splice(1,1); }
   function skillGEnd(cancel){
     const g=skillG; skillG=null; if(!g) return;
+    if(!cancel&&g.mate&&g.mouse!==false){ let L=0; for(let i=1;i<g.pts.length;i++) L+=Math.hypot(g.pts[i].x-g.pts[i-1].x,g.pts[i].y-g.pts[i-1].y);
+      if(L<10&&touchPass(g.mate)){ skillTrail=null; return; } }   // a click on a team-mate: pass to him
     const read=cancel?null:readSkill(g.pts);
     let ok=!!read&&startSkill(read);
     if(!ok&&read&&read.kind==='cut'&&incomingToMe()){            // a flick with it on its way: the first touch goes that way
@@ -4323,6 +4341,7 @@
       if(score>bs){bs=score;best=q;}
     }
 
+    if(o.target&&o.target.team===p.team&&o.target!==p) best=o.target;   // a touch pass: him, whoever the stick would pick
     if(best&&o.thru){ thruBall(p,best,o.thru,o.loft); labOnPass(o.loft?'LOFTED THROUGH BALL':'THROUGH BALL',best,ball.thru); return; }
     if(best){
       // lead the target slightly along their motion + a touch ahead
@@ -4380,10 +4399,9 @@
       const vh=loftVh(d,tA);
       ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*tA; ball.lob={x:ax,y:ay};
     } else {
-      const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999));   // grass drag, as the physics step applies it
-      tA=Math.max(0.45,tRun);
-      const v0=clamp(d*k/(1-Math.exp(-k*tA)),380,1500);   // covers d in tA, then barely rolls on
-      ball.vx=ax*v0; ball.vy=ay*v0; ball.vz=0;
+      const sol=passSolve(d);                                  // CLASSIC: hit like any pass, just into the space ahead of him
+      ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; ball.vz=sol.vz;
+      tA=d/sol.vh;
     }
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=mate; ball.rcvRunner=false; ball.passerRef=p;
@@ -5028,6 +5046,8 @@
       }
       if(ballExposure(carrier,p) < 0.4 - statLerp(defIQof(p),0,0.2))return;   // Def IQ: flat cut to the exposure a slide needs
       winBall(p,carrier);
+      { const st=statLerp(statOf(p,'slideTackle',P.slideTackle.val),0.65,1.05);   // taken out by a slide: 0.65 s at stat 1, 1.05 s at 10
+        carrier.stateT=st; carrier.noTouchT=st+0.2; }
       ball.vx=p.slideDx*340;ball.vy=p.slideDy*340;ball.vz=35;
     } else if(!carrier&&!p.slideTried){
       p.slideTried=true;
