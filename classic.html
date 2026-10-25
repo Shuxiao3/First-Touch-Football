@@ -1900,7 +1900,7 @@
           { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
-        else if(incomingAny()) queueOneTouch();                                                                       // on its way to you: ONE-TOUCH pass
+        else if(incomingAny()){ queueOneTouch(); otTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }               // on its way to you: ONE-TOUCH pass (swipe off it to aim it)
         else if(canSwitch()){ swTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }   // SWITCH: on release -- a tap goes the stick's way, a swipe off it that way
         else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // (a lab) TRAP
         // (no first-time pass off this button: an arriving ball is always "strikeable", so it would
@@ -1951,6 +1951,7 @@
     for(const t of e.changedTouches){
       if(t.identifier===padId) padDrag(t);
       if(t.identifier===skillTouchId) skillGMove(t.clientX,t.clientY);
+      if(otTouch&&t.identifier===otTouch.id) otSwipe(t);
       if(swipe&&t.identifier===trapTouchId) swipePoint(swipe,t,evT(e));
       else if(t.identifier===trapTouchId) trapDragMove(t);
       if(passDown&&passDown.pts&&t.identifier===kickTouchId){ passDown.lx=t.clientX; passDown.ly=t.clientY; swipePoint(passDown,t,evT(e)); }
@@ -1966,6 +1967,7 @@
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
     if(t.identifier===skillTouchId){skillTouchId=null; if(e.type!=='touchcancel'&&touchLive()) skillGMove(t.clientX,t.clientY); skillGEnd(e.type==='touchcancel'||!touchLive());}
+    if(otTouch&&t.identifier===otTouch.id){ if(e.type!=='touchcancel'&&touchLive()) otSwipe(t); otTouch=null; }
     if(swTouch&&t.identifier===swTouch.id){ const w=swTouch; swTouch=null;
       if(e.type!=='touchcancel'&&touchLive()){ const dx=t.clientX-w.x, dy=t.clientY-w.y;
         if(Math.hypot(dx,dy)>=18){ const r=rect(), u=screenDirToPitch(dx*W/r.width,dy*H/r.height,controlled.y); switchPlayer(u.x,u.y); }
@@ -4487,6 +4489,7 @@
     const p=controlled;
     const atk=atkOf(p.team);
     let aimx=curIx,aimy=curIy;
+    if(o.dir){aimx=o.dir.x;aimy=o.dir.y;}                   // swiped off 1-TOUCH: that way, whatever the stick says
     if(!aimx&&!aimy){aimx=p.facing.x;aimy=p.facing.y;}
     const al=Math.hypot(aimx,aimy)||1;aimx/=al;aimy/=al;
     const D=oneTouchDifficulty(p), sk=oneTouchSkill(p);
@@ -4541,7 +4544,17 @@
     oneTouch={p:controlled,target:target||null,until:simNow+2}; ftAim=null;
     lastGrade='ONE-TOUCH …'; gradeColor='#9dff3c'; gradeFade=0.9;
   }
-  function playOneTouch(p){ const o=oneTouch; oneTouch=null; firstTouchPass({target:o.target}); }
+  function playOneTouch(p){ const o=oneTouch; oneTouch=null; firstTouchPass({target:o.target,dir:o.dir}); }
+  // a finger on 1-TOUCH: the pass goes the stick's way when the ball gets to you -- unless the finger has been swiped
+  // off the button, which sets the way itself (taken as soon as it's a swipe, since the ball may arrive before you let go)
+  let otTouch=null;
+  function otSwipe(t){
+    const w=otTouch; if(!w||!oneTouchOK()||!controlled) return;
+    const dx=t.clientX-w.x, dy=t.clientY-w.y; if(Math.hypot(dx,dy)<18) return;
+    const r=rect(), u=screenDirToPitch(dx*W/r.width,dy*H/r.height,controlled.y);
+    oneTouch.dir=u; oneTouch.target=null;
+    lastGrade='ONE-TOUCH '+labArrow(u.x,u.y); gradeColor='#9dff3c'; gradeFade=0.9;
+  }
   // a loose ball near you that you could strike FIRST-TIME (before controlling it):
   // grounded, within your trap reach, and slow enough to be a clean-ish contact.
   function firstTouchBall(p){

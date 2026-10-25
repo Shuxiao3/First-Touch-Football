@@ -29,7 +29,9 @@ The same game played like any other football game. It's a copy of `index.html` w
   to switch to him. On the left side of a phone screen the stick still starts too.
 - **One-touch passing.** With a ball on its way to you, press PASS (`J`, or the PASS button, which reads 1-TOUCH),
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that
-  way, and you're on the receiver. How true it goes depends on the ball and the man. Quicker and higher is harder:
+  way, and you're on the receiver. "That way" is the stick's direction as the ball reaches you. On a phone, swiping
+  off the 1-TOUCH button sets the direction instead and overrides the stick. The swipe counts as soon as it's 18 px
+  long, so the ball can arrive while your finger is still down. How true it goes depends on the ball and the man. Quicker and higher is harder:
   chest height is the hardest, slow along the grass the easiest. Passing counts for most of it (70%), Ball control
   for the rest. The worst case is a dial (One-touch pass: worst spray, default 16°, also in the Pass Lab's TUNE).
   Measured mean error off line, Passing/Ball control 2/2 against 9/9: slow along the grass 3.0° v 0.8°, hard along
