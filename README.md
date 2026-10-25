@@ -35,7 +35,18 @@ The same game played like any other football game. It's a copy of `index.html` w
   wrong-footed and stumble, and that's more likely the better your Dribbling is and the worse their Agility.
   Each move costs a little stamina.
 
-Drills and the labs still lock you to one player and keep the timed trap. Everything else is unchanged, including the
+- **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
+  past him. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
+  after 10 s. Each skill move you made is listed, with whether he bought it. The tally counts runs, beats, tackles,
+  and how often each move fooled him.
+  - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
+    (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
+  - TUNE has the skill-move dials, which also apply in matches: how often each move fools a defender, how much of a
+    move is safe from standing tackles, each move's distance and time, the cut's burst, the stumble time, and the
+    Dribbling, Agility and Tackling baselines.
+  - Keys: `1`-`3` distance, `B` defender, `C` slides.
+
+Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
 AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
 
 ## Controls
