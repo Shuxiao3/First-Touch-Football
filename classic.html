@@ -359,25 +359,16 @@
   .exhClub:hover,.exhClub.open{border-color:#2a3a22;background:rgba(157,255,60,.07);}
   canvas.exhKit{width:64px;height:64px;image-rendering:pixelated;border:0;border-radius:0;box-shadow:none;background:none;}
   .exhName{font-family:'Baskic8','Space Grotesk',sans-serif;font-size:15px;line-height:22px;height:22px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-  .exhMeta{font-size:10px;color:#7f9a6f;letter-spacing:1px;white-space:nowrap;}
+  .exhMeta{font-size:10px;color:#7f9a6f;letter-spacing:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
   .exhGrid{display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;width:100%;margin-top:8px;}
   .exhGrid.on{display:grid;}
   .exhChip{display:flex;align-items:center;gap:7px;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:11px;padding:6px 7px;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .exhChip i{width:11px;height:13px;border-radius:2px;border:2px solid;flex:0 0 auto;}
   .exhChip:hover,.exhChip.cur{border-color:#9dff3c;color:#e9f5ec;}
   .exhChip:disabled{opacity:.3;cursor:not-allowed;border-color:#2a3a22;}
-  .exhCtrl{width:100%;margin-top:9px;}
-  .exhPlayers{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%;}
-  .exhPl{display:grid;grid-template-columns:26px minmax(0,1fr) auto;column-gap:6px;align-items:center;border:1px solid #2a3a22;border-radius:7px;background:rgba(157,255,60,.04);color:#cfe7d2;font-family:inherit;font-size:12px;padding:5px 8px;cursor:pointer;text-align:left;min-width:0;}
-  .exhPl .r{grid-row:1/3;font-size:9px;letter-spacing:1px;color:#7f9a6f;}
-  .exhPl .n{grid-column:2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .exhPl .st{grid-column:2;min-width:0;font-size:9px;letter-spacing:.5px;color:#8fae7d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .exhPl .o{grid-column:3;grid-row:1/3;color:#9dff3c;font-weight:700;}
-  .exhPl:hover{border-color:#5c7a2e;}
-  .exhPl.sel{border-color:#9dff3c;background:rgba(157,255,60,.14);color:#e9f5ec;}
   .exhGo{display:flex;gap:8px;margin-top:11px;width:100%;}
   .exhGo .smBtn{flex:1;text-align:center;}
-  @media (max-width:520px){ .exhPlayers{grid-template-columns:repeat(2,1fr);} .exhName{font-size:13px;} }
+  @media (max-width:520px){ .exhName{font-size:13px;} .exhMeta{white-space:normal;text-align:center;line-height:1.35;} }   /* (a phone: the club's line wraps inside its card) */
   /* hide the in-match HUD + touch controls while a menu screen is up */
   #stageWrap.menuMode #readout,
   #stageWrap.menuMode #pad,
@@ -695,10 +686,6 @@
           <div class="exhSide" id="exhSideR"></div>
         </div>
         <div class="exhGrid" id="exhGrid"></div>
-        <div id="exhCtrlBlock" class="exhCtrl">
-          <div class="exhLbl">YOU CONTROL</div>
-          <div class="exhPlayers" id="exhPlayers"></div>
-        </div>
         <div class="exhGo">
           <button class="smBtn" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
           <button class="smBtn" data-act="back"><span class="mk">◀</span>BACK</button>
@@ -1512,10 +1499,10 @@
   }
   function clubOvr(sq){ return Math.round(sq.reduce((s,e)=>s+(e.ovr||0),0)/Math.max(1,sq.length)); }
   // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-7) ----
-  const EXH={on:false, you:'ARS', opp:'MCI', ctrl:6, play:null};   // play: the clubs actually out there (set at kick-off)
+  const EXH={on:false, you:'ARS', opp:'MCI', play:null};   // play: the clubs actually out there (set at kick-off)
   try{ const o=JSON.parse(localStorage.getItem('ft_exh')||'null');
-       if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; if(o.ctrl>=1&&o.ctrl<=OUTFIELD) EXH.ctrl=o.ctrl|0; } }catch(e){}
-  function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp,ctrl:EXH.ctrl})); }catch(e){} }
+       if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; } }catch(e){}
+  function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp})); }catch(e){} }
   // a club's squad, lineup and shape: as you last left them (a side kept from before clubs had shapes stays in the
   // 2-3-2 it was made for), else as generated, in the club's own shape
   function clubSide(id){
@@ -1628,7 +1615,7 @@
   function buildTeams(){
     players=[...layoutTeam('G'),...layoutTeam('R')];
     const mine=players.filter(p=>p.team==='G');
-    controlled=mine.find(p=>p.me) || (EXH.on&&EXH.play&&mine.find(p=>p.squadIdx===EXH.play.ctrl)) || mine.sort((a,b)=>b.homeX-a.homeX)[0];
+    controlled=mine.find(p=>p.me) || mine.sort((a,b)=>b.homeX-a.homeX)[0];   // (who kicks off, or has the ball, is yours from there)
   }
   buildTeams();
 
@@ -11185,11 +11172,11 @@
   function smHighlight(){ const all=[...document.querySelectorAll('#smItems .smBtn')]; const en=smEnabledBtns(); if(en.length){ smSel=((smSel%en.length)+en.length)%en.length; } all.forEach(b=>b.classList.remove('sel')); if(en[smSel])en[smSel].classList.add('sel'); }
   function showStartMenu(){ SCREEN='menu'; clearInputs(); hideHub(); document.getElementById('stageWrap').classList.add('menuMode'); sm.classList.add('show'); hideSubs(); refreshMenuButtons(); }
   function hideStartMenu(){ sm.classList.remove('show'); hideSubs(); }
-  // EXHIBITION: pick the two clubs and the player you control first (the setup screen), then kick off
+  // EXHIBITION: pick the two clubs (the setup screen), then kick off -- you're on whoever has the ball, and switch from there
   function startExhibition(){ exhGridSide=null; renderExh(); showSub('exhPanel'); }
   function kickOffExhibition(){
     resumable=false; matchReturn='menu'; CAREER=null; careerFix=null;
-    EXH.on=true; EXH.play={you:EXH.you, opp:EXH.opp, ctrl:EXH.ctrl}; saveExh();
+    EXH.on=true; EXH.play={you:EXH.you, opp:EXH.opp}; saveExh();
     const a=clubSide(EXH.you), b=clubSide(EXH.opp);
     SQUAD={G:a.squad,R:b.squad}; LINEUP={G:a.lineup,R:b.lineup}; normalizeSquads();
     myForm=a.form; rForm=b.form;                     // each club in its own shape
@@ -11226,16 +11213,8 @@
           +'<i style="background:'+c.home[0]+';border-color:'+c.home[1]+'"></i>'+c.name+'</button>').join('');
     } else grid.innerHTML='';
     grid.classList.toggle('on',!!exhGridSide);
-    document.getElementById('exhCtrlBlock').style.display=exhGridSide?'none':'';
-    const sq=clubSide(EXH.you).squad;
-    document.getElementById('exhPlayers').innerHTML=sq.map((e,i)=>i===0?'':
-      '<button class="exhPl'+(i===EXH.ctrl?' sel':'')+'" data-exh="ctrl" data-i="'+i+'"'+(styleOf(e)?' title="'+styleOf(e).blurb+'"':'')+'><span class="r">'+e.role+'</span><span class="n">#'+e.num+' '+e.name+'</span><span class="st">'+(styleOf(e)?styleOf(e).name:'')+'</span><span class="o">'+e.ovr+'</span></button>').join('');
   }
-  // (a new club of your own keeps you in the same position: the most central of its men there)
-  function exhSet(t,id){ if(t!=='G'){ EXH.opp=id; return; }
-    const was=(clubSide(EXH.you).squad[EXH.ctrl]||{}).role; EXH.you=id;
-    const sq=clubSide(id).squad; if(!was||(sq[EXH.ctrl]&&sq[EXH.ctrl].role===was)) return;
-    const same=sq.map((e,i)=>i).filter(i=>i>0&&sq[i].role===was); if(same.length) EXH.ctrl=same[Math.floor((same.length-1)/2)]; }
+  function exhSet(t,id){ if(t==='G') EXH.you=id; else EXH.opp=id; }
   function exhCycle(t,dir){
     const other=t==='G'?EXH.opp:EXH.you; let i=CLUBS.findIndex(c=>c.id===(t==='G'?EXH.you:EXH.opp));
     do{ i=(i+dir+CLUBS.length)%CLUBS.length; } while(CLUBS[i].id===other);
@@ -11248,7 +11227,6 @@
     if(a==='prev'||a==='next') exhCycle(t,a==='next'?1:-1);
     else if(a==='grid') exhGridSide=(exhGridSide===t)?null:t;
     else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }
-    else if(a==='ctrl') EXH.ctrl=+b.dataset.i;
     saveExh(); renderExh();
   });
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }

@@ -36,6 +36,8 @@ The same game played like any other football game. It's a copy of `index.html` w
   for the rest. The worst case is a dial (One-touch pass: worst spray, default 16°, also in the Pass Lab's TUNE).
   Measured mean error off line, Passing/Ball control 2/2 against 9/9: slow along the grass 3.0° v 0.8°, hard along
   the grass (1200 px/s) 4.3° v 1.7°, chest high 7.0° v 2.4°.
+- **Exhibition setup is just the two clubs.** There's no "you control" picker: you start on whoever kicks off, and
+  switch from there.
 - **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
 - **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
