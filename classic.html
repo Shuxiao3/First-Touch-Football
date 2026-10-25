@@ -1667,7 +1667,7 @@
   }
   // a tap (or click) on one of your players: him. (canvas px)
   function teammateAt(cx,cy){
-    let best=null, bd=26;
+    let best=null, bd=32;
     for(const q of players){ if(q.team!=='G'||q===controlled) continue;
       const s=proj(q.x,q.y,PLAYER_H*0.45), d=Math.hypot(s.x-cx,s.y-cy); if(d<bd){ bd=d; best=q; } }
     return best;
