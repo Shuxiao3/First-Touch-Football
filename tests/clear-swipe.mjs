@@ -58,16 +58,23 @@ const line = (x0, y0, x1, y1, n = 10) => Array.from({ length: n + 1 }, (_, i) =>
   ok(st !== 'dribbling' && sp > 300, 'phone: tapping CLEAR with the ball clears it');
   await ph.close();
 }
-{ // a tap on the right with the ball does nothing; a swipe toward goal shoots; a swipe back doesn't
+const swipeAt = async ph => { const r = await ph.evaluate(() => { const r = document.getElementById('c').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+  return { X0: r.x + r.w * 0.6, Y0: r.y + r.h * 0.55 }; };
+{ // a tap on the right with the ball does nothing; a swipe back doesn't shoot either
   const ph = await phonePage();
-  const box = await ph.evaluate(() => { const r = document.getElementById('c').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
-  const X0 = box.x + box.w * 0.6, Y0 = box.y + box.h * 0.55;
+  const { X0, Y0 } = await swipeAt(ph);
   await swipe(ph, [[X0, Y0], [X0 + 2, Y0 + 1]], 60);
   await ph.waitForTimeout(150);
   ok((await state(ph)) === 'dribbling', 'phone: a tap on the right with the ball is not a shot');
   await swipe(ph, line(X0 + 160, Y0, X0 - 40, Y0), 140);
   await ph.waitForTimeout(150);
   ok((await state(ph)) === 'dribbling', 'phone: a swipe away from goal is not a shot');
+  await ph.close();
+}
+{ // a swipe toward goal shoots -- from a fresh kick-off, before one of theirs can get to you (after the two
+  // gestures above, he sometimes had)
+  const ph = await phonePage();
+  const { X0, Y0 } = await swipeAt(ph);
   // the strike happens on release: watch the next 400 ms for the ball running loose. From halfway it's a
   // long shot, so even the softest from the weakest long-shooter leaves at ~190 px/s; a red can step in after.
   await swipe(ph, line(X0, Y0, X0 + 200, Y0 - 25), 80);

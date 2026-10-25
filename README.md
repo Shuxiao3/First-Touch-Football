@@ -210,6 +210,12 @@ test, and like the Trap Lab the values are the game's settings.
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
   playing style; see [Playing styles](#playing-styles).
+- **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.4 m/s
+  flat out at 1, up to 6.6 and 9.1 m/s at 10. With the ball at his feet he's slower, by a fifth at
+  Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
+  it; running with it at a jog doesn't tire him, but he doesn't get his breath back either (without the
+  ball he would). So a man through on goal isn't caught by a defender of his own pace who starts 4 m
+  behind him: he gets into the box and gets his shot off.
 - **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
   best, rather than going down a list of rules where the first that fits wins: a pass to each
   team-mate (to his feet, or into the path of a man making a run, weighted to arrive with him), a carry
@@ -232,7 +238,8 @@ test, and like the Trap Lab the values are the game's settings.
     to arrive) or the cross from nearer the byline, a little less the longer it takes to get there. So
     through on goal he takes it on and shoots from 10–14 m rather than squaring it; with time to get
     closer he gets closer rather than shooting from 20 m; and only once a man can get to him does he
-    settle for what's on where he is.
+    settle for what's on where he is. Through on goal with a man after him from behind, he stays flat
+    out: easing off would only let him catch up.
   - A shot's chance comes from a table measured in this game: shots struck the way the computer
     strikes them, run onto from all over their half. About half go in from 10–14 m out and fairly
     central, a third from 16 m, one in twelve from 18 m and next to none from further out, from a tight
@@ -243,6 +250,12 @@ test, and like the Trap Lab the values are the game's settings.
     head it away; and how well he crosses. It's worth more from by the byline than from 25 m. So out
     wide, with the way inside shut and men of his in the box, he takes it down the line and puts it in
     rather than playing it back.
+  - With his side of the pitch crowded (three or more of theirs more than of his own within 18 m of
+    the ball) and one of his free out on the far side, he can switch it: a ball lofted up over
+    everyone, not much over 7 m high, and down at the man's feet, as your double-tapped lofted pass is.
+    An average passer can hit one 45 m, a good one 55. He rates it a little below the same ball to a
+    man with others round him, so he switches it when his side is shut, not every time he could: about
+    one time in six his side's crowded like that, three or so times a side a match.
   - He gets the ball under control and looks up first (the decision-time dials say for how long, less
     with a man on him), and plays it first time only when he's pressed or a ball's clearly on. Then he
     sticks with a choice for a moment rather than changing his mind every frame.
@@ -329,9 +342,12 @@ test, and like the Trap Lab the values are the game's settings.
 - **Crosses and headers** — the computer's cross comes down through head height where it's aimed, so
   the man attacking it can meet it (it used to sail on over everyone). Its defenders go up for a cross
   into their box: the man nearest where it'll drop gets goal-side of it and heads it away, and if one
-  of the other side goes up with him it's a heading duel (Heading against Heading). A header on goal
-  follows the same rules for the computer's men as for yours: aimed away from the keeper, as true and
-  as hard as the Heading stat makes it.
+  of the other side goes up with him it's a heading duel (Heading against Heading). Your cross comes
+  down through head height too, where the man it's for is going: tap it and it's driven in low and
+  quick (no quicker than 26 m/s), hold it and it's floated. It used to go up like a lofted pass, for
+  a man to jump for, and come down beyond him. A header on goal follows the same rules for the
+  computer's men as for yours: toward the side away from the keeper, but not right into the corner
+  (you can't place a header like a shot), as true and as hard as the Heading stat makes it.
 - **The keeper's ball out** — on a goal kick the back line splits to the corners of the box and the
   holding midfielder drops in front of them. The keeper plays it short only to a man who'll reach
   it before any of theirs can close him down, struck to arrive at him, and tells him it's his; he

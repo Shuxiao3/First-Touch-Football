@@ -931,7 +931,7 @@
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
     accel:     {val:5.5, min:1,   max:10,  step:0.1, label:'Acceleration (stat 1–10)',hint:'Outfielder acceleration as a 1–10 stat. 1 = 0.05 (sluggish off the mark); 10 = 0.50 (explosive). Baseline for all players.'},
     agility:   {val:5.5, min:1,   max:10,  step:0.1, label:'Agility (stat 1–10)',hint:'How fast players turn / change direction. 1 = 0.20 (wide, sluggish turns); 10 = 0.50 (sharp, snappy). Baseline for all players.'},
-    stamina:   {val:5.5, min:1,   max:10,  step:0.1, label:'Stamina (stat 1–10)',hint:'Endurance as a 1–10 stat. Higher = drains slower (carry/sprint/sprint-on-ball), recovers faster, and the max-stamina ceiling erodes less. 1 = drains fast & low recovery; 10 = barely tires. Baseline for all players.'},
+    stamina:   {val:5.5, min:1,   max:10,  step:0.1, label:'Stamina (stat 1–10)',hint:'Endurance as a 1–10 stat. Higher = drains slower (sprint, sprint with the ball), recovers faster, and the max-stamina ceiling erodes less. 1 = drains fast & low recovery; 10 = barely tires. Baseline for all players.'},
     slideTackle:{val:5.5,min:1,max:10,step:0.1,label:'Slide tackle (stat 1–10)',hint:'Sliding tackle as a 1–10 stat, driving both the lunge and the reach. 1 = length 0.5 / hitbox 0.7 (short, easy to mistime and miss); 10 = length 1.1 / hitbox 1.3 (long, fast lunge that connects from further out).'},
     tackle:{val:5.5,min:1,max:10,step:0.1,label:'Tackle (stat 1–10)',hint:'STANDING tackle as a 1–10 stat, driving reach and how shielded a ball you can still nick. 1 = reach 0 / needs the ball 0.75 exposed (served out front); 10 = reach 14 / nicks it at 0.25 exposure (off the toe of a shielding carrier). A good DRIBBLER raises the exposure you must beat.'},
     aiThink:   {val:0.45,min:0,   max:1.4, step:0.02,label:'Opponent decision time',hint:'Seconds the opponent settles on the ball before acting. Higher = they take a touch and look up first.'},
@@ -3392,17 +3392,16 @@
   function statLerp(s,lo,hi){ s=clamp(isFinite(s)?s:5.5,1,10); return lo+(s-1)/9*(hi-lo); }
   // read a player's stat; undefined per-player => use the global stat dial as the baseline.
   function statOf(p,key,dialVal){ const s=p&&p.stats&&p.stats[key]; return isFinite(s)?s:dialVal; }
-  // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 100/140, 10 => 160/220)
-  function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val),100, 160); }
-  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),140, 220); }
+  // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/134, 10 => 166/228)
+  function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
+  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),134, 228); }
   // ACCELERATION stat -> the accel coefficient (endpoints: 1 => 0.05, 10 => 0.5)
   function accelStatOf(p){   return statLerp(statOf(p,'acceleration', P.accel.val),0.05,0.5); }
   // AGILITY stat -> the agility coefficient (endpoints: 1 => 0.2, 10 => 0.5)
   function agilityStatOf(p){ return statLerp(statOf(p,'agility',       P.agility.val),0.2, 0.5); }
-  // STAMINA stat -> the five stamina rates. Higher stat = less drain, faster recovery.
-  function drainCarryOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.10,0.06); }   // carry ball
+  // STAMINA stat -> the four stamina rates. Higher stat = less drain, faster recovery.
   function drainSprintOf(p){    return statLerp(statOf(p,'stamina',P.stamina.val),0.18,0.08); }   // sprint, no ball
-  function drainSprintBallOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),0.22,0.12); }   // sprint + ball
+  function drainSprintBallOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),0.19,0.09); }   // sprint + ball (a touch more)
   function staminaRecOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.30,0.60); }   // recovery
   function staminaCapDrainOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),1.50,1.00); }   // ceiling erosion
   // BALL CONTROL stat -> trap reach, clean-touch speed, trap timing window.
@@ -3425,9 +3424,9 @@
     return statLerp(stat,0.1,1.0);
   }
   // DRIBBLING stat (1..10) -> ball-carry penalties (fraction of speed/accel/agility lost while
-  // carrying). Endpoints: speed 1=>0.4 / 10=>0.1; accel 1=>0.4 / 10=>0.1; agility 1=>0.6 / 10=>0.2.
+  // carrying). Endpoints: speed 1=>0.2 / 10=>0.05; accel 1=>0.4 / 10=>0.1; agility 1=>0.6 / 10=>0.2.
   // Even a 10 keeps a small penalty. per-player stats.dribbling overrides the global baseline dial.
-  function dribSpeedPenOf(p){ return statLerp(statOf(p,'dribbling',P.dribbling.val),0.4,0.1); }
+  function dribSpeedPenOf(p){ return statLerp(statOf(p,'dribbling',P.dribbling.val),0.2,0.05); }
   function dribAccelPenOf(p){ return statLerp(statOf(p,'dribbling',P.dribbling.val),0.4,0.1); }
   function dribAgilPenOf(p){  return statLerp(statOf(p,'dribbling',P.dribbling.val),0.6,0.2); }
   // TACKLE stat -> standing-tackle reach & the ball-exposure needed to nick it (endpoints: 1 => 0/0.75, 10 => 14/0.25)
@@ -3653,19 +3652,12 @@
     const aerr=crossSpray(p);
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    // --- physically derived: choose a flight time, then set arc + ground speed ---
-    // longer charge = a bit longer hang; keep the arc LOW (modest vz).
-    const G=520;                                   // gravity used in the sim
-    const T=clamp(0.55+0.55*c, 0.55, 1.15);        // seconds of flight
-    // ground speed accounts for friction drag over the flight so it actually carries
-    const frPerSec=Math.pow(1-P.friction.val,3.2); // per-second velocity retention
-    // average retention over the flight (rough): halfway decay
-    const avgKeep=Math.max(0.35,(1+frPerSec*T)/(1+T));
-    let gndSpeed=(d/T)/avgKeep;
-    gndSpeed=clamp(gndSpeed,120,520);
-    ball.vx=ax*gndSpeed; ball.vy=ay*gndSpeed;
-    // arc height scaled by the CROSSING stat (floatier than a normal pass)
-    ball.vz=clamp(G*T*0.5*crossLoftOf(p), 140, 540);
+    // the charge picks the flight: driven in (0.55 s, but no quicker than 26 m/s, the computer's fastest) to floated
+    // (1.1 s). Either way it comes down through head height where the man is going, as the computer's cross does (see
+    // aiCross) -- so he can meet it
+    const G=520, T=clamp(Math.max(0.55+0.55*c, d/650), 0.55, 1.3), zH=PLAYER_H*1.15;
+    ball.vx=ax*d/T; ball.vy=ay*d/T;
+    ball.vz=(zH+G*0.5*T*T)/T;
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.crossBy=p.team;ball.crossT=1.6;           // live cross -> forwards attack it
     recordPassTeam(p.team,p); passPose(p);
@@ -4052,17 +4044,18 @@
     const atk=atkOf(controlled.team);
     windUp={t:simNow, ahead:new Set(players.filter(q=>q.team!==controlled.team&&(q.x-controlled.x)*atk>0))};
   }
-  // A HEADER ON GOAL, yours (K) or the computer's: at the corner farther from the keeper, as true as his heading, as
-  // hard as his heading plus some of the cross's pace
+  // A HEADER ON GOAL, yours (K) or the computer's: toward the side farther from the keeper -- not right into the corner,
+  // you can't place a header like a shot -- as true as his heading, as hard as his heading plus a little of the cross's
+  // pace
   function headOnGoal(p){
     const gx=atkOf(p.team)>0?FW:0, kp=keepers.find(k=>k.team!==p.team), ky=kp?kp.y:YC;
-    const ty=YC+(ky>YC?-1:1)*(GOAL_W/2-12);
+    const ty=YC+(ky>YC?-1:1)*(GOAL_W/2-12)*0.75;
     let dx=gx-ball.x, dy=ty-ball.y, dG=Math.hypot(dx,dy);
     if(!isFinite(dG)||dG<0.001){ dx=atkOf(p.team); dy=0; dG=1; }
     dx/=dG; dy/=dG;
-    const dev=(1-clamp(headAccOf(p),0,1))*0.12*(Math.random()*2-1);   // header accuracy (Heading stat)
+    const dev=((1-clamp(headAccOf(p),0,1))*0.25+0.03)*(Math.random()*2-1);   // header accuracy (Heading stat)
     const ca=Math.cos(dev), sa=Math.sin(dev), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const speed=headPowerOf(p)+Math.hypot(ball.vx,ball.vy)*0.3;          // header power (Heading stat) + redirected pace
+    const speed=headPowerOf(p)+Math.hypot(ball.vx,ball.vy)*0.15;         // header power (Heading stat) + redirected pace
     ball.vx=ax*speed; ball.vy=ay*speed; ball.vz=30;                     // (headers go down)
     ball.cushBy=null; ball.ownedBy=null; ball.lastTouch=p.team; ball.crossT=0;
     ball.shotBy=p.team; ball.shotT=1.0; ball.curveSpin=0; ball.curveSpinT=0;
@@ -5386,10 +5379,11 @@
     const k=o.team&&keepers.includes(o), rt=k?0.2:0.16, ox=o.x+(o.vx||0)*rt, oy=o.y+(o.vy||0)*rt;
     return rt+Math.max(0,Math.hypot(x-ox,y-oy)-r)/(k?keeperSpdOf(o)*1.6:sprintSpeedOf(o)*0.95);
   }
-  // the nearest of `opps` to (x,y) once t seconds have gone (each closing on it after a beat; a second at most). Given
-  // the way we're going (atk), one who'll be behind the man there is chasing him, and counts for less.
-  function obNearAt(opps,x,y,t,atk){
-    const tt=Math.min(t,1)-0.25;
+  // the nearest of `opps` to (x,y) once t seconds have gone (each closing on it after a beat; a second at most, or
+  // `upTo` for a long ball in the air, the whole of which they have to get across). Given the way we're going (atk),
+  // one who'll be behind the man there is chasing him, and counts for less.
+  function obNearAt(opps,x,y,t,atk,upTo=1){
+    const tt=Math.min(t,upTo)-0.25;
     let n=1e9; for(const o of opps){ let d=Math.hypot(o.x-x,o.y-y)-sprintSpeedOf(o)*0.65*Math.max(0,tt); if(atk&&atk*(o.x-x)<-20) d*=1.5; if(d<n) n=d; }
     return Math.max(0,n);
   }
@@ -5419,6 +5413,25 @@
     const {k,v0}=obThruV0(d,tA), F=[];
     for(let i=1;i<=8;i++){ const u=1-d*i/8*k/v0; F.push({f:i/8, t:u>0?-Math.log(u)/k:9, z:0}); }
     return F;
+  }
+  // SWITCHING PLAY: with his side of the pitch crowded (three or more of theirs more than ours within 18 m of the ball), a
+  // ball out to a man in space on the far side, further than he'd pass it along the ground -- lofted up over everyone
+  // and down at the man's feet, as your double-tapped lofted pass is, checking up where it lands. An average passer can
+  // hit one 45 m, a good one 55. Up for longer the further it goes, but not much over 7 m high.
+  function obLobT(d){ return clamp(0.55+d/900,0.65,1.65)*P.loftHang.val; }
+  function obLobFlight(d){
+    const T=obLobT(d), vz=260*T, F=[];                                  // (no drag in the air: it covers d evenly)
+    for(let i=1;i<=8;i++){ const t=T*i/8; F.push({f:i/8, t, z:Math.max(0,vz*t-260*t*t)}); }
+    return F;
+  }
+  function obLobBall(p,q,tx,ty){
+    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    const aerr=passSpray(d,p), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, T=obLobT(d), vh=loftVh(d,T);
+    ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T; ball.lob={x:ax,y:ay};
+    ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
+    ball.intendedRcv=q; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // he goes to where it drops
+    if(meIs(p)) meBump('passes');
+    recordPassTeam(p.team,p); passPose(p);
   }
   function obThruBall(p,q,tx,ty,tA){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
@@ -5459,7 +5472,7 @@
     const opp=p.team==='G'?'R':'G', opps=players.filter(o=>o.team!==p.team), kp=keeperOf(opp), M=obMods(p);
     let presser=null, prD=1e9; for(const o of opps){ const d=dist(o,p); if(d<prD){ prD=d; presser=o; } }
     const C={atk, gx:goalX, opp, opps, kp, M, presser, prD, vHere:obVal(p.team,p.x,p.y)*obRoom(obNearAt(opps,p.x,p.y,0.5,atk)), lossHere:obVal(opp,p.x,p.y)*M.risk,
-             range:passRangeOf(p)*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
+             range:passRangeOf(p)*M.range, lobD:statLerp(statOf(p,'passAcc',P.passAcc.val),35,55)*OBM*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
     C.urge=obUrge(p,C);
     // his finishing against the table's average man (and from range, his long shots); his crossing, and who of ours
     // would be first to a cross
@@ -5467,6 +5480,8 @@
     C.finLong=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4);
     C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1);
     C.cs=C.u>FW*0.45?crossSpot(p):null;
+    // how crowded his side is: theirs less ours (him aside) within 18 m of the ball
+    C.crowd=0; for(const q of players) if(q!==p&&Math.hypot(q.x-ball.x,q.y-ball.y)<18*OBM) C.crowd+=q.team===p.team?-1:1;
     return C;
   }
   function obFinish(C,x,y){ return Math.hypot(C.gx-x,YC-y)>18*OBM?C.fin*C.finLong:C.fin; }
@@ -5483,7 +5498,7 @@
     const T=clamp(0.7+0.0008*Math.hypot(cs.x-x,cs.y-y),0.6,1.2);
     const ours=clamp(1-(cs.ours-T-0.1)/0.4,0,1), theirs=clamp(1-(cs.theirs-T-0.1)/0.4,0,1);
     if(ours<0.25) return null;                                           // nobody of ours to get on the end of it
-    return {P:(0.05+0.85*ours*(1-0.75*theirs))*C.crs, v:0.25*C.M.cross*(1.3-0.5*clamp(dl/(FW*0.28),0,1))};
+    return {P:(0.05+0.85*ours*(1-0.75*theirs))*C.crs, v:0.2*C.M.cross*(1.2-0.4*clamp(dl/(FW*0.28),0,1))};
   }
   // THE URGE TO GET FORWARD: a side that's had it a while without getting anywhere starts to force it. Each side's
   // clock starts when it wins the ball and again whenever it gets it 8 m further up than it's been; a quarter of the
@@ -5501,11 +5516,17 @@
   // a pass to q (a team-mate, or our keeper)
   function obPassOpt(p,q,C){
     const L=passLead(p,q), tx=L.x, ty=L.y, dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
-    if(d<90||d>C.range*1.3) return null;                                 // a tap to a man beside him, or out of his range
+    if(d<90) return null;                                                // (a tap to a man beside him)
+    let lob=false;
+    if(d>C.range*1.3){                                                   // out of his range along the ground: only the
+      if(C.crowd<3||L.running||d>C.lobD||Math.abs(ty-p.y)<20*OBM||obNearAt(C.opps,q.x,q.y,0)<250) return null;   // switch, with his side
+      lob=true;                                                          // crowded, to a man in space out on the far side
+    }
     // to his feet as passTo strikes it (chipped over a man in the way on a long one), or into his path weighted to
-    // get there with him
+    // get there with him, or the switch
     const tQ=L.running?Math.max(0,Math.hypot(q.x-tx,q.y-ty)-20)/sprintSpeedOf(q):0, tA=Math.max(0.45,tQ);
-    const chip=L.running?null:chipOverWindow(p,tx,ty), F=L.running?obThruFlight(d,tA):obFlight(d,chip?((chip.x-ball.x)*dx+(chip.y-ball.y)*dy)/d:0), tEnd=F[7].t;
+    const chip=(L.running||lob)?null:chipOverWindow(p,tx,ty);
+    const F=lob?obLobFlight(d):L.running?obThruFlight(d,tA):obFlight(d,chip?((chip.x-ball.x)*dx+(chip.y-ball.y)*dy)/d:0), tEnd=F[7].t;
     if(tEnd>4) return null;
     // the race for it along the way: each opponent's best chance, where he'd cut it out
     let safe=1, worst=0, cx=tx, cy=ty;
@@ -5528,10 +5549,10 @@
     let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     let amp=((1-acc)*0.06+(1-longAccOf(p))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
     if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
-    const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30);
+    const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30)+(lob?runSpeedOf(q)*Math.max(0,tEnd-0.4)*0.8:0);   // (a long ball up: he has time to get under it)
     const pAcc=lat<=reachL?1:clamp(reachL/lat,0.2,1);
     // how close they'll be on him when it gets there
-    const nd=obNearAt(C.opps,tx,ty,Math.max(tEnd,tQ),C.atk), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
+    const nd=obNearAt(C.opps,tx,ty,Math.max(tEnd,tQ),C.atk,lob?2:1), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
     const P_=safe*pAcc*pCtl;
     let v=obVal(p.team,tx,ty)*obRoom(nd);
     if(L.running||C.atk*(q.vx||0)>80) v*=1.08;                         // on the move: he can go at them straight away
@@ -5543,10 +5564,11 @@
       if(thru) v=Math.max(v,0.85*obVal(p.team,C.gx-C.atk*12*OBM,ty+(YC-ty)*0.4));
     }
     if(C.atk*(tx-p.x)>3*OBM) v*=C.M.fwd;
+    if(lob) v*=0.85;                                                    // switched out wide he's on his own: nobody close to play with
     if(q.num==null) v*=0.6;                                             // our keeper: he'll often have to kick it long
     v+=obGain(C,tx);
     const loss=obVal(C.opp,cx,cy)*C.M.risk;
-    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0};
+    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob};
   }
   // carrying it: a dozen headings round the way we're going (behind him only matters with a man on him)
   const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI], OB_RUN=600;
@@ -5704,7 +5726,7 @@
     const ob=p.ob; p.dbgTag='OB-'+o.kind.toUpperCase();
     if(o.kind==='pass'){
       const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
-      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru); else passTo(p,o.q);
+      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru); else if(o.lob) obLobBall(p,o.q,o.tx,o.ty); else passTo(p,o.q);
       ob.done=true;
       if(deepWide&&Math.abs(C.gx-o.tx)<BX+80&&Math.abs(o.ty-YC)<BY+10&&C.atk*(o.tx-p.x)<=40){ lastGrade='CUTBACK'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0; }
       return steer(p,C.gx,YC);
@@ -5726,7 +5748,10 @@
   function obMove(p,o,C,looking){
     if(o&&o.kind==='carry'){
       const reach=Math.max(o.s,90), tx=clamp(p.x+o.ux*reach,40,FW-40), ty=clamp(p.y+o.uy*reach,50,FH-50);
-      const go=!looking&&(o.free||o.run)&&obSprints(p)&&C.atk*o.ux>0.3;
+      // through on goal (none of theirs but the keeper goal-side of him) with a man after him from behind: easing off
+      // would only let him catch up
+      const chased=!!C.presser&&C.prD<260&&C.atk*(C.presser.x-p.x)<0&&C.opps.every(q=>C.atk*(q.x-p.x)<=0);
+      const go=!looking&&(o.free||o.run||chased)&&obSprints(p)&&C.atk*o.ux>0.3;
       p.sprint=go; p.dbgTag='OB-CARRY';
       return steer(p,tx,ty,go?1:looking?0.6:o.s>=120?1:0.75);
     }
@@ -7082,8 +7107,8 @@
       p.staminaCap=clamp(p.staminaCap - dt*0.035*staminaCapDrainOf(p), 0.30, 1);
       p.stamina=0;
     } else if(hasBall && moving){
-      // running WITH the ball (not sprinting) eats stamina
-      p.stamina=clamp(p.stamina - dt*drainCarryOf(p), 0, p.staminaCap);
+      // running WITH the ball (not sprinting): it doesn't tire him, but he doesn't get his breath back either -- or a
+      // quick man could sprint, ease off, and sprint again the length of the pitch with it
     } else if(moving){
       // jogging without the ball recovers (a bit slower than standing still)
       p.stamina=clamp(p.stamina + dt*staminaRecOf(p)*0.55, 0, p.staminaCap);
@@ -7091,7 +7116,6 @@
       // standing still: full recovery rate. The CAP does NOT recover in play — only half-time.
       p.stamina=clamp(p.stamina + dt*staminaRecOf(p), 0, p.staminaCap);
     }
-    // CARRYING THE BALL costs top speed — the dribble speed-penalty dial (Dribbling stat reduces it)
     // CARRYING THE BALL costs top speed — set by the Dribbling stat (endpoint penalties)
     if(hasBall) MAX *= (1 - dribSpeedPenOf(p));
     if(p.stamina>p.staminaCap)p.stamina=p.staminaCap;
