@@ -35,6 +35,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     still running the same way.
   - **Cut** (a straight flick): the ball is chopped the way you flicked and popped a step ahead. It's loose until
     you get back on it.
+  - **Rainbow flick** (down, then up): over 0.35 s you ease off and roll the ball back up the back of your leg, then
+    flick it over your head. It peaks about 3.5 m up, is in the air about 1.15 s, and drops 1.6 m ahead of where your
+    run would take you. It checks up where it lands, like a lofted pass. Leave the stick alone and you burst on to it.
+    It beats a man who has committed to you. A defender who can simply turn round gets there first, and one already
+    in tackling range takes it during the wind-up.
 
   A move gives you nothing for free. The ball is wherever the move puts it, and a defender who can reach it while it's
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
@@ -53,11 +58,12 @@ The same game played like any other football game. It's a copy of `index.html` w
   - Each move you made is listed with its timing against his lunge, e.g. "he lunged 83 ms later" or "17 ms after he
     lunged". The tally counts runs, beats, tackles, and for each move how often it was the one that got you past.
   - Measured against a closing defender from 10 m: a croqueta started 4.4 m from him beat him 6 times in 8, at 3.6 m
-    8 in 8, at 2.8 m 3 in 8, and from 5.2 m or further, or once he'd lunged, never.
+    8 in 8, at 2.8 m 3 in 8, and from 5.2 m or further, or once he'd lunged, never. A rainbow started 5.6 to 6.8 m
+    from him beat him 7 times in 12, and from 8 m or further, or at 4.4 m, never.
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: each move's distance and time, the cut's burst and
-    pop, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+    pop, the rainbow's lead and height, the first-touch push, and the Dribbling, Agility and Tackling baselines.
   - Keys: `1`-`3` distance, `B` defender, `C` slides.
 
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
