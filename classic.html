@@ -751,7 +751,8 @@
     --bench:var(--bg); --panel:var(--win); --edge:var(--well); --phosphor:var(--acc); --phosphor-dim:var(--accB); --amber:var(--warn); --red:var(--bad);
     --ink-dim:var(--dim); --btn:var(--btnM); --btnHov:var(--btnT); --btnHi:var(--rim); --btnLo:var(--well); --frame:var(--rim); --frameSh:var(--rimLo);
     --accHi:var(--accSh); --accLo:var(--accB);
-    --pxOut:0 -2px 0 0 var(--ol), 0 2px 0 0 var(--ol), -2px 0 0 0 var(--ol), 2px 0 0 0 var(--ol);
+    --r:6px; --rWin:10px; --rS:3px;   /* the corners: a button, chip or man; a window or card; a tag */
+    --pxOut:0 0 0 2px var(--ol);
     --pxWin:var(--pxOut), inset 0 0 0 2px var(--rim), inset 0 0 0 4px var(--rimLo);
     --pxRim:inset 0 0 0 1px var(--rim), inset 0 2px 0 0 var(--rim), inset 0 -2px 0 0 var(--rimLo);
     --pxBtn:var(--pxOut), var(--pxRim);
@@ -764,7 +765,7 @@
   .pauseOv, .menuOverlay{ background:color-mix(in srgb, var(--bg) 94%, transparent); }
   /* windows */
   .pauseCard, .menuCard, #bldgPanel .bpBody, .chTop, .mgCard, .tacStat, .sqCard, .exhSide, .mgOffer, #labTune, .mkDetail, .hsCell, .instrLocked{
-    background:var(--win); border:0; border-radius:0; box-shadow:var(--pxWin); }
+    background:var(--win); border:0; border-radius:var(--rWin); box-shadow:var(--pxWin); }
   .pauseCard{ padding:14px 16px 14px; }
   .pauseCard.mkCard, .settingsCard{ padding:14px 18px; }
   .mgCard, .tacStat, .sqCard, .exhSide, .mgOffer, .hsCell{ padding:12px 14px; }
@@ -773,7 +774,7 @@
   /* buttons: a light top over a darker band, a rim, the outline; the text has a one-pixel shadow */
   .pauseBtn, .smBtn, .bpTab, .bpTopBack, .chPlay, .chBtn2, .chMenuBtn, .mgBtn, .mgAdj, .mgChip, .setOpt, .iOpt, .formBtn, .phTab,
   .mrContinue, .stadBtn, .btn, .mtab, .exhArr, .exhChip, .slotDel, .leBtn, .labChip, .iDone, .styBtn, .mkTab, .mkAdj, .menuChip, .cwSlider{
-    border:0; border-radius:0; background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'FTC Dot',monospace; font-weight:400;
+    border:0; border-radius:var(--r); background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'FTC Dot',monospace; font-weight:400;
     text-shadow:1px 1px 0 var(--btnSh); min-height:36px; }
   .labChip{ min-height:30px; }
   .pauseBtn, .smBtn, .mgBtn, .chPlay, .chBtn2, .mrContinue, .stadBtn, .iDone{ letter-spacing:1px; }
@@ -804,12 +805,12 @@
   .pauseBack{ color:var(--btnInk); }
   .mgBtn.go, .chPlay{ color:var(--accInk); }
   /* lists: flat rows on the window, a lit one for the man you've picked */
-  .mgRow{ border:0; border-radius:0; background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well); color:var(--ink); min-height:36px; }
+  .mgRow{ border:0; border-radius:var(--r); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well); color:var(--ink); min-height:36px; }
   .mgRow:hover{ background:var(--rowOn); border:0; }
   .mgRow.on{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc), inset 0 -2px 0 0 var(--well); }
-  .slotRow, .benchRow{ border-radius:0; }
+  .slotRow, .benchRow{ border-radius:var(--r); }
   .mgFx{ border-bottom:2px solid var(--well); color:var(--ink2); }
-  .mgFx.next{ background:rgb(var(--accRGB) / .12); border-radius:0; }
+  .mgFx.next{ background:rgb(var(--accRGB) / .12); border-radius:var(--rS); }
   .mgTbl th, .hsTbl th{ color:var(--dim2); border-bottom:2px solid var(--well); }
   .mgTbl td, .hsTbl td{ color:var(--ink2); border-bottom:1px solid var(--well); }
   .mgNews{ color:var(--ink2); border-bottom:2px solid var(--well); }
@@ -825,21 +826,21 @@
   .cwLbl, .styLbl, .mkColName, .mkpSub, .mkGroupHead, .tacInstrHdr, #startMenu .smVer{ color:var(--dim); }
   .mgRow .ovr .pot, .mgRow .ovr i, .mgRow .sub{ color:var(--dim2); }
   .bpSect, .mrSect, .instrHead, .tacInstr, .tacStatHead{ border-color:var(--btnLo); }
-  .statBar, .mkBarWrap{ background:var(--well); border-radius:0; }
+  .statBar, .mkBarWrap{ background:var(--well); border-radius:var(--rS); overflow:hidden; }
   .statBar i{ background:linear-gradient(90deg,var(--accLo),var(--acc)); }
-  .mgTag{ border-radius:0; }
+  .mgTag{ border-radius:var(--rS); }
   /* fields */
-  .mkInput{ background:var(--well); border:0; border-radius:0; color:var(--ink); box-shadow:var(--pxOut), inset 2px 2px 0 0 var(--btnLo); }
+  .mkInput{ background:var(--well); border:0; border-radius:var(--r); color:var(--ink); box-shadow:var(--pxOut), inset 2px 2px 0 0 var(--btnLo); }
   .mkInput:focus{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
-  .hsSw{ border-radius:0; box-shadow:var(--pxOut); border:0; }
+  .hsSw{ border-radius:var(--r); box-shadow:var(--pxOut); border:0; }
   .hsSw.on{ box-shadow:var(--pxOut), inset 0 0 0 3px var(--frame); }
-  .mgMakerKit canvas, .hsPort, .hsLookPrev{ background:var(--well); border:0; border-radius:0; box-shadow:var(--pxOut); }
+  .mgMakerKit canvas, .hsPort, .hsLookPrev{ background:var(--well); border:0; border-radius:var(--r); box-shadow:var(--pxOut); }
   /* the hub */
   /* the hub: each building a card -- its sign in a window, its name on a button along the bottom */
-  .chCampus .bldg{ justify-content:flex-end; gap:0; padding:0 2px 2px; border:0; border-radius:0; background:var(--row); box-shadow:var(--pxWin); transition:none; }
+  .chCampus .bldg{ justify-content:flex-end; gap:0; padding:0 2px 2px; border:0; border-radius:var(--rWin); background:var(--row); box-shadow:var(--pxWin); transition:none; }
   .chCampus .bldg svg{ margin:auto; flex:none; stroke:var(--btnT); filter:drop-shadow(2px 2px 0 var(--ol)); }
   .chCampus .bldg .bn, .chCampus .bldg .bs{ align-self:stretch; flex:none; margin:0 2px; background:var(--btnM); color:var(--btnInk); text-shadow:1px 1px 0 var(--btnSh); }
-  .chCampus .bldg .bn{ min-height:46px; display:flex; align-items:center; justify-content:center; padding:5px 4px; background:var(--fillBtn); box-shadow:inset 0 0 0 1px var(--rim), inset 0 2px 0 0 var(--rim); font-weight:400; font-size:13px; line-height:1.2; margin-bottom:2px; }
+  .chCampus .bldg .bn{ border-radius:var(--r) var(--r) calc(var(--rWin) - 4px) calc(var(--rWin) - 4px); min-height:46px; display:flex; align-items:center; justify-content:center; padding:5px 4px; background:var(--fillBtn); box-shadow:inset 0 0 0 1px var(--rim), inset 0 2px 0 0 var(--rim); font-weight:400; font-size:13px; line-height:1.2; margin-bottom:2px; }
   .chCampus .bldg .bs{ order:-1; background:none; color:var(--dim); text-shadow:none; padding:0 6px 8px; opacity:1; }
   @media (hover:hover){ .chCampus .bldg:hover{ filter:brightness(1.12); background:var(--row); } }
   .chCampus .bldg:active{ transform:translateY(1px); }
@@ -848,16 +849,16 @@
   .chCampus .bldg.sel .bn{ background:var(--fillAcc); color:var(--accInk); text-shadow:1px 1px 0 var(--accSh); }
   .chStat .k{ color:var(--dim); }
   .chStat .v{ color:var(--ink); }
-  .bBadge{ border-radius:0; box-shadow:var(--pxOut); }
+  .bBadge{ border-radius:var(--rS); box-shadow:var(--pxOut); }
   .chStat .v{ text-shadow:1px 1px 0 var(--ol); }
   /* the match: its chips, framed like everything else */
-  #readout .chip, .menuChip{ background:rgba(20,26,44,.88); border:0; border-radius:0; box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); color:var(--ink2); }
-  #labResult, .labTallyRow{ background:rgba(20,26,44,.9); border:0; border-radius:0; box-shadow:var(--pxOut); }
+  #readout .chip, .menuChip{ background:rgba(20,26,44,.88); border:0; border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); color:var(--ink2); }
+  #labResult, .labTallyRow{ background:rgba(20,26,44,.9); border:0; border-radius:var(--r); box-shadow:var(--pxOut); }
   .bldg.sel, .exhClub.open, .labChip.on, .mkPick.on, .slotRow.sel, .pphase.active{ background:var(--rowOn); border-color:var(--acc); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
-  .exhClub{ border:0; border-radius:0; }
+  .exhClub{ border:0; border-radius:var(--r); }
   @media (hover:hover){ .exhClub:hover{ background:var(--btnHov); } }
   .exhSide.you{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), inset 0 0 0 4px var(--accLo); }
-  .mkPick, .slotRow, .benchRow{ background:var(--row); border:0; border-radius:0; box-shadow:inset 0 -2px 0 0 var(--btnLo); }
+  .mkPick, .slotRow, .benchRow{ background:var(--row); border:0; border-radius:var(--r); box-shadow:inset 0 -2px 0 0 var(--btnLo); }
   /* a list and its man, side by side */
   .mgPanes{ display:flex; height:100%; }
   .mgPane{ min-width:0; display:flex; flex-direction:column; min-height:0; }
@@ -879,7 +880,7 @@
   #bpBody.panes .mgSum{ text-align:left; }
   .six{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:7px; margin:10px 2px 8px; }
   .sixC{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:46px; padding:4px 0; cursor:pointer;
-    border:0; border-radius:0; background:var(--row); color:var(--ink); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo), inset 0 -3px 0 0 var(--well); font-family:'FTC Dot',monospace; }
+    border:0; border-radius:var(--r); background:var(--row); color:var(--ink); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo), inset 0 -3px 0 0 var(--well); font-family:'FTC Dot',monospace; }
   .sixC b{ font-size:16px; font-weight:400; line-height:1; text-shadow:1px 1px 0 var(--ol); }
   .sixC i{ font-style:normal; font-size:10px; color:var(--dim); letter-spacing:1px; }
   .sixC.on{ background:var(--rowOn); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), inset 0 -3px 0 0 var(--well); }
@@ -892,17 +893,17 @@
   .tbSeg .phTab{ flex:none; padding:0 9px; font-size:11px; }
   .tbDropW{ position:relative; flex:none; }
   .tbDrop{ display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; min-height:36px; padding:2px 10px; white-space:nowrap; cursor:pointer;
-    font:12px 'FTC Dot',monospace; border:0; border-radius:0; background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
+    font:12px 'FTC Dot',monospace; border:0; border-radius:var(--r); background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
   .tbDrop i{ font:9px 'FTC Dot',monospace; font-style:normal; color:inherit; opacity:.8; letter-spacing:1px; }
   .tbDrop.on{ background:var(--fillAcc); color:var(--accInk); text-shadow:1px 1px 0 var(--accSh); }
   .tbBest{ margin-left:auto; flex:none !important; padding:0 12px !important; font-size:12px; }
-  .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin);
+  .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin);
     padding:10px; display:flex; flex-direction:column; gap:6px; }
   .tbMenuGrid{ display:grid; grid-template-columns:repeat(5,auto); gap:6px; }
   .tbMenuNote{ font-size:10px; color:var(--dim); }
   .tbMenu.r{ left:auto; right:0; }
   .tbOpt{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:6px 10px; text-align:left; white-space:normal; cursor:pointer; min-height:36px;
-    border:0; border-radius:0; background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'FTC Dot',monospace; text-shadow:1px 1px 0 var(--btnSh); }
+    border:0; border-radius:var(--r); background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'FTC Dot',monospace; text-shadow:1px 1px 0 var(--btnSh); }
   .tbOpt.on{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); text-shadow:1px 1px 0 var(--accSh); }
   .tbOpt b{ font-size:13px; font-weight:400; } .tbOpt i{ font-style:normal; font-family:'FTC Dot',monospace; font-size:10px; line-height:1.35; color:var(--dim); text-shadow:none; }
   .tbOpt.on i{ color:var(--accInk); }
@@ -910,7 +911,7 @@
   .tbLeft{ flex:1.5 1 0; min-width:0; display:flex; flex-direction:column; padding:4px 12px 8px; }
   .tbRight{ flex:1 1 0; min-width:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 12px 10px; box-shadow:inset 2px 0 0 0 var(--btnLo); }
   .tpitch{ position:relative; flex:1 1 auto; min-height:110px; background:repeating-linear-gradient(90deg,#6ec88b 0 8.333%,#5cbc7c 8.333% 16.667%);
-    box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; }
+    box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; border-radius:var(--r); }
   .tpitch i{ position:absolute; pointer-events:none; }
   .tpHalf{ left:50%; top:0; bottom:0; width:2px; margin-left:-1px; background:#f4fbf2; }
   .tpCirc{ left:50%; top:50%; width:15%; aspect-ratio:1; transform:translate(-50%,-50%); box-shadow:0 0 0 2px #f4fbf2; border-radius:50%; }
@@ -926,15 +927,16 @@
   .sqPitch .ptk.dropOver{ background:var(--acc); }
   .sqList .mgRow{ -webkit-touch-callout:none; }
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
-  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:38px; border:0; border-radius:0; padding:0 3px 0 5px; cursor:grab;
+  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:38px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
     background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:3px;
     touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; font-family:'FTC Dot',monospace; }
   /* his face beside his number, as an item sits beside its name in a bag */
   .ptkFace{ width:24px; height:24px; flex:none; image-rendering:pixelated; pointer-events:none; -webkit-user-drag:none; }
   .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
-  .cardFace{ width:48px; height:48px; flex:none; image-rendering:pixelated; background:var(--well); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
-  .mgCardHead > .cardFace + div{ margin-right:auto; min-width:0; }
-  .tpitch .tpGhost{ transform:translate(calc(-50% + 8px), calc(-50% + 8px)); width:72px; height:38px; display:flex; align-items:center; gap:3px; padding:0 3px 0 5px;
+  .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
+    background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
+  .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
+  .tpitch .tpGhost{ transform:translate(calc(-50% + 8px), calc(-50% + 8px)); width:72px; height:38px; display:flex; align-items:center; gap:3px; padding:0 3px 0 5px; border-radius:var(--r);
     background:rgb(var(--accRGB) / .2); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9), 0 0 0 4px rgb(var(--accRGB) / .25); opacity:.8;
     font:9px 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tpitch .tpGhost .ptkFace{ opacity:.7; }
@@ -948,11 +950,11 @@
   .tacB1 .ptk.dropOver{ background:var(--acc); } .tacB1 .ptk.dropOver .ptkOvr, .tacB1 .ptk.dropOver .ptkName{ color:var(--accInk); text-shadow:none; }
   .tacB1 .ptk.lifted{ opacity:.3; }
   .tacB1 .ptk[data-fit]::after{ content:attr(data-fit); position:absolute; top:-10px; right:-11px; min-width:20px; padding:1px 3px; font:11px 'FTC Dot',monospace;
-    text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); }
+    text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); border-radius:var(--rS); }
   .tacB1 .ptk.fitOop::after{ background:var(--warn); }
   .pxGhost{ position:fixed !important; transform:none !important; margin:0 !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 3px 3px 0 0 rgba(0,0,0,.35) !important; }
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:7px 7px; align-items:center; padding:8px 12px 9px; box-shadow:inset 0 2px 0 0 var(--btnLo); }
-  .tbBench .ptk{ position:relative; transform:none; width:70px; height:36px; }
+  .tbBench .ptk{ position:relative; transform:none; width:54px; height:36px; padding:0 3px; justify-content:center; }
   .tbBenchLbl{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; margin-right:2px; }
   .tbRight .mgCardHead{ margin-top:6px; }
   .tbRight .tacInstr{ margin-top:4px; }
@@ -963,7 +965,7 @@
   #mtacOv{ align-items:stretch; }
   .mtacCard{ width:100%; max-width:1100px; height:100%; margin:0 auto; display:flex; flex-direction:column; gap:7px; position:relative; }
   .mtacCard h3{ font-family:'FTC Dot',monospace; color:var(--ink); font-size:17px; letter-spacing:1px; text-shadow:2px 2px 0 var(--ol); }
-  .mtacBody{ flex:1 1 auto; min-height:0; background:var(--win); box-shadow:var(--pxWin); }
+  .mtacBody{ flex:1 1 auto; min-height:0; background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin); }
   .mtSubs{ font:11px 'FTC Dot',monospace; color:var(--acc); letter-spacing:1px; }
   .mtacBody .ptk{ position:absolute; }
   .mtacBody .tbBench .ptk{ position:relative; }
@@ -10460,21 +10462,22 @@
       ctx.restore();
       return true;
     }
-    // his face for the menus: head and shoulders, facing you, in his kit (a data URL; '' until the art is in)
-    const faces={};
-    function face(who,kit){
+    // him for the menus, standing facing you in his kit: his face (head and shoulders) or all of him, head to toe
+    // (a data URL; '' until the art is in)
+    const cuts={}, FACE={x:8,y:6,w:16,h:16}, BODY={x:7,y:3,w:18,h:28};   // in the 32 px cell: the head is rows 7-20, his feet row 29
+    function cut(who,kit,R){
       if(!cfg.ready||!cfg.body) return '';
-      const L=lookOf(who), key=L.key+'|'+(kit?kit.join(''):'');
-      if(faces[key]) return faces[key];
+      const L=lookOf(who), key=L.key+'|'+(kit?kit.join(''):'')+'|'+R.y+R.h;
+      if(cuts[key]) return cuts[key];
       const cell=bake(Object.assign({}, kit?kitSwaps(kit):{}, lookSwaps(L)),0,(ANIM.idle.row+2)*CELL,CELL,CELL,composeLook(L.style,L.ovs),PARTS.drawn);
-      const c=document.createElement('canvas'); c.width=FACE.w; c.height=FACE.h;
-      const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(cell,FACE.x,FACE.y,FACE.w,FACE.h,0,0,FACE.w,FACE.h);
-      try{ return faces[key]=c.toDataURL(); }catch(e){ return ''; }
+      const c=document.createElement('canvas'); c.width=R.w; c.height=R.h;
+      const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(cell,R.x,R.y,R.w,R.h,0,0,R.w,R.h);
+      try{ return cuts[key]=c.toDataURL(); }catch(e){ return ''; }
     }
-    const FACE={x:8,y:6,w:16,h:16};   // the head (rows 7-20 of the cell) and the top of the shirt
+    const face=(who,kit)=>cut(who,kit,FACE), body=(who,kit)=>cut(who,kit,BODY);
     return { get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, get keeperReady(){return cfg.gk.ready;},
              enable(v){cfg.enabled=(v!==false);}, disable(){cfg.enabled=false;},
-             load, loadParts, draw, pick, preview, face, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
+             load, loadParts, draw, pick, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
              flush(){ cfg.looks={}; cfg.gk.looks={}; } };
   })();
   SPRITE.loadParts(PLAYER_BODY,PLAYER_HEADS); SPRITE.loadKeeper(KEEPER_SHEET); SPRITE.enable();   // art is embedded -> on by default
@@ -10936,16 +10939,17 @@
   const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
   function mtRating(e,role){ return !e?0:(!role||role===e.role)?e.ovr:cwOverall(role,e.stats); }
   function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW; return {L:30+(u-0.16)/0.40*52, T:9+(g?s.homeY/FH:1-s.homeY/FH)*82}; }   // their own goal on the left, the lines spread as the Office draws them
+  const mtKeeperKit=t=>keeperKit(teamKit(t),TEAM[t]&&TEAM[t].gk);   // his keeper's top in this match
   // the man as the match has him (his look), or as his squad entry has him if he isn't on
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,L,T,kind,role){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
     return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')
-      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+faceImg(mtWho(t,si),teamKit(t))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(e.name)+'</span></span></button>'; }
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(e.name)+'</span></span></button>'; }
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
-    let h='<div class="tbCard"><div class="mgCardHead">'+faceImg(mtWho(t,si),teamKit(t),'cardFace')+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
+    let h='<div class="tbCard"><div class="mgCardHead">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
       +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">'+(SUBS[t].off.includes(si)?'subbed off':'on the bench')+'</div>')+'</div>'
       +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div></div></div>';
     if(p&&role&&role!=='GK'){ const st=clamp(p.stamina,0,1); h+='<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(st*100)+'%;background:'+(st>0.6?'':st>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(st*100)+'%</b></div>'; }
@@ -11886,7 +11890,7 @@
   function tbCard(d, ri, phase){ const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
-    return '<div class="tbCard"><div class="mgCardHead">'+faceImg({lookKey:p.id},careerKit(d),'cardFace')+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+    return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
       +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">on the bench</div>')+'</div>'
       +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' as a '+p.role+'</div>':'')+'</div></div>'
@@ -11912,13 +11916,16 @@
   function tbPos(x,y){ return {L:100-y, T:9+(clamp(x,6,94)-6)/88*82}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
   // a man's face for the menus, in his club's kit (SPRITE.face): an <img>, or nothing while the art loads
   function faceImg(who,kit,cls){ const u=SPRITE.face(who,kit); return u?'<img class="'+(cls||'ptkFace')+'" src="'+u+'" alt="" draggable="false">':''; }
+  function bodyImg(who,kit){ const u=SPRITE.body(who,kit); return u?'<img class="cardBody" src="'+u+'" alt="" draggable="false">':''; }   // all of him, for his card
   const careerKit=d=>{ const c=d&&d.world&&d.world.clubs&&d.world.clubs[d.clubId]; return c&&c.home||null; };
+  const GK_SHORTS='#2c2e34';
+  const keeperKit=(kit,top)=>[top||keeperTops(kit?kit[0]:'#2f6bd6',kit?kit[0]:'#2f6bd6').G, GK_SHORTS, GK_SHORTS];   // a keeper's top that stands out from the shirts
   const surname=n=>mgEsc(String(n||'').split(' ').slice(-1)[0]);
   function tbTok(d, ri, L, T, kind, phase, slotRole){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
     return '<button class="ptk'+(oop?' oop':'')+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
-      +faceImg({lookKey:p.id},careerKit(d))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
+      +(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
   // the other phase's shape, lit and set a little right and down, under the men: where each of them goes when the ball changes hands
   function ghostTok(L,T,face,name){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+face+'<b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
@@ -12243,7 +12250,7 @@
   function mgCard(d,pid){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p);
     const where=f.mine?d.clubName:f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier];
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
-    let h='<div class="mgCard"><div class="mgCardHead">'+faceImg({lookKey:p.id},kit,'cardFace')+'<div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
+    let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)+'<div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+(f.mine?'#'+p.num+' · ':'')+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div><div class="mgCardSub">'+mgEsc(where)+'</div></div>'
       +'<div><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div></div></div>';
     h+=known?sixHtml(mgStats(p),p.role):'<div class="mgHint">Not scouted: his rating is somewhere in that range, and his potential is a mystery.</div>';

@@ -47,7 +47,7 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box, and no word
   or number runs out of its box (checked at 640×360 up to 932×430).
-  - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline with its corners nicked, a thin
+  - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
   - **Four colour schemes**, in Settings → COLOURS: BLUE (blue buttons, orange for what's picked; the default),
@@ -69,8 +69,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     for what it's made of.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under it, the bench. On the right, the man you tapped and his spot's instructions. Every man shows his
-    face (his own look, in the club's kit) beside his rating, and his card has a bigger one. Under the men, lit and
+    BEST 8. Under it, the bench. On the right, the man you tapped and his spot's instructions. Every man on the
+    pitch shows his face (his own look, in the club's kit) beside his rating; the bench is just numbers and names.
+    The man's card shows all of him, head to toe (a keeper in a keeper's top). Under the men, lit and
     set a little right and down, is the other phase's shape: on WITH BALL you see where each of them goes without
     it, and the other way round.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same

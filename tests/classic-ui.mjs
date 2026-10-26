@@ -3,9 +3,10 @@
 // the start menu, Settings (a player's settings only: the feel dials are the game's own, a developer's with ?dev),
 // the exhibition setup, a new career (Start on screen), the hub, every building's tabs, the market's pages, the
 // tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels (a dark outline,
-// a light rim), in four colour schemes. A finger holds a man to drag him (a quick tap just shows his card) and he
-// stays where he was picked up; the tactics show the men's faces and the other phase's shape. The game is as wide
-// as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock and the menu.
+// a light rim, rounded corners), in four colour schemes. A finger holds a man to drag him (a quick tap just shows his
+// card) and he stays where he was picked up; the men on the tactics pitch show their faces (the bench doesn't), his
+// card shows all of him, and the other phase's shape is lit under them. The game is as wide as the phone: no bands,
+// the buttons over the pitch's corner, the HUD just the score, the clock and the menu.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -48,7 +49,9 @@ for(const [w, h] of SIZES){
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
     ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,COLOURS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
-    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame), 'the menus are framed in pixels: a dark outline and a light rim');
+    const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
+    const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
+    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && radius >= 8 && btnR >= 5, 'the menus are framed in pixels: a dark outline, a light rim, rounded corners (' + radius + ' / ' + btnR + ' px)');
     const look = async () => page.evaluate(() => ({ theme: document.documentElement.dataset.theme || 'blue', btn: getComputedStyle(document.querySelector('#setRows .setOpt:not(.on)')).backgroundImage.slice(0, 40),
       font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }));
     const l0 = await look(); await page.tap('#setRows [data-pref="theme"][data-val="ruby"]'); await page.waitForTimeout(100); const l1 = await look();
@@ -129,11 +132,14 @@ for(const [w, h] of SIZES){
   await touch('touchEnd', c.x + 25, c.y + 13); await page.waitForTimeout(150);
   ok(Math.abs(g0.l - tok.l) < 1.5 && Math.abs(g0.t - tok.t) < 1.5 && Math.abs(g1.l - g0.l - 20) < 1.5 && Math.abs(g1.t - g0.t - 10) < 1.5,
     'held, he stays where he was (' + [g0.l - tok.l, g0.t - tok.t].map(Math.round) + ') and moves with the finger (' + [g1.l - g0.l, g1.t - g0.t].map(Math.round) + ')');
-  // the tactics: every man with his face, the other phase's shape lit under them, no MOVE/SWAP, no essays in the menus
-  const tv = await page.evaluate(() => ({ faces: document.querySelectorAll('#bpBody .tpitch .ptk img.ptkFace').length, men: document.querySelectorAll('#bpBody .tpitch .ptk').length,
-    bench: document.querySelectorAll('#bpBody .tbBench .ptk img.ptkFace').length, ghosts: document.querySelectorAll('#bpBody .tpitch .tpGhost').length,
-    card: !!document.querySelector('#cTacRight .cardFace'), move: !!document.querySelector('[data-imove]') }));
-  ok(tv.faces === tv.men && tv.men === 8 && tv.bench > 0 && tv.card, 'every man on the tactics pitch and the bench shows his face, and so does his card (' + tv.faces + '/' + tv.men + ')');
+  // the tactics: every man on the pitch with his face (not the bench), his card all of him, the other phase's shape lit
+  // under them, no MOVE/SWAP, no essays in the menus
+  const tv = await page.evaluate(() => { const c = document.querySelector('#cTacRight img.cardBody');
+    return { faces: document.querySelectorAll('#bpBody .tpitch .ptk img.ptkFace').length, men: document.querySelectorAll('#bpBody .tpitch .ptk').length,
+      benchMen: document.querySelectorAll('#bpBody .tbBench .ptk').length, benchFaces: document.querySelectorAll('#bpBody .tbBench .ptk img').length,
+      ghosts: document.querySelectorAll('#bpBody .tpitch .tpGhost').length, card: c ? [c.naturalWidth, c.naturalHeight] : null, move: !!document.querySelector('[data-imove]') }; });
+  ok(tv.faces === tv.men && tv.men === 8 && tv.benchMen > 0 && !tv.benchFaces, 'every man on the tactics pitch shows his face (' + tv.faces + '/' + tv.men + '); the bench doesn\'t');
+  ok(!!tv.card && tv.card[1] > tv.card[0], 'his card shows all of him, head to toe (' + (tv.card || []).join('x') + ')');
   ok(tv.ghosts === 7, 'the other phase\'s shape is drawn under the men, lit (' + tv.ghosts + ' ghosts)');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);

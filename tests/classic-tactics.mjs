@@ -179,9 +179,10 @@ await page.evaluate(() => document.getElementById('menuBtn').click()); await pag
 const pm = await page.$$eval('#pauseGrid [data-pause]', ns => ns.filter(n => getComputedStyle(n).display !== 'none').map(n => n.dataset.pause));
 ok(String(pm) === 'tactics,settings,exit,back' && !(await page.$('#pauseQuick')), 'the pause menu: TACTICS, SETTINGS, EXIT, BACK (no quick row)');
 await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(150);
-const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .ptk img.ptkFace').length,
-  men: document.querySelectorAll('#mtacBody .ptk').length, you: document.querySelectorAll('#mtacBody .ptkYou').length }));
-ok(mt.ghosts === 7 && mt.faces === mt.men && !mt.you, 'the match\'s tactics: faces on every man (' + mt.faces + '/' + mt.men + '), the other phase lit under them (' + mt.ghosts + '), no YOU badge');
+const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .tpitch .ptk img.ptkFace').length,
+  men: document.querySelectorAll('#mtacBody .tpitch .ptk').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk img').length,
+  card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
+ok(mt.ghosts === 7 && mt.faces === mt.men && mt.men === 8 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
 const offSi = await page.$eval('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[2].dataset.si));
 await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${offSi}"]`);
