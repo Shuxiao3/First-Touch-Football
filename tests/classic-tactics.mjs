@@ -72,12 +72,17 @@ await pick('style', '[data-cstyle="counter"]');
 d = await save();
 ok(d.style === 'counter' && d.posture === 'press', 'picking a style leaves the posture alone: ' + d.style + ' / ' + d.posture);
 
-// anyone anywhere: the keeper out, a defender in goal (MOVE / SWAP)
+// DRAGGING: pick a man up and put him on another (a mouse drags at once; a finger holds him first: see classic-ui)
+const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+async function drag(a, b, peek){ const p = await centre(a), q = await centre(b); await page.mouse.move(p.x, p.y); await page.mouse.down();
+  for(let i = 1; i <= 8; i++){ await page.mouse.move(p.x + (q.x - p.x) * i / 8, p.y + (q.y - p.y) * i / 8); await page.waitForTimeout(15); }
+  const seen = peek ? await page.evaluate(peek) : null; await page.mouse.up(); await page.waitForTimeout(100); return seen; }
+
+// anyone anywhere: the keeper out, a defender in goal (dragged onto him)
 const gkBefore = d.lineup.gk, field = d.lineup.atk[0];
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
-await page.click(`#bpBody .tpitch .ptk[data-ri="${field}"]`); await page.waitForTimeout(60);
-await page.click('#cTacRight [data-imove]'); await page.waitForTimeout(60);
-await page.click(`#bpBody .tpitch .ptk[data-ri="${gkBefore}"]`); await page.waitForTimeout(80);
+ok(!(await page.$('[data-imove]')), 'no MOVE / SWAP button: a man is moved by dragging him');
+await drag(`#bpBody .tpitch .ptk[data-ri="${field}"]`, `#bpBody .tpitch .ptk[data-ri="${gkBefore}"]`);
 d = await save();
 ok(d.lineup.gk === field && d.lineup.atk.includes(gkBefore) && d.lineup.def.includes(gkBefore), 'an outfielder in goal, the keeper outfield (both phases)');
 const tok = await page.$eval(`#bpBody .tpitch .ptk[data-ri="${field}"]`, e => ({ oop: e.classList.contains('oop'), ovr: +e.querySelector('.ptkOvr').textContent }));
@@ -118,17 +123,13 @@ ok(!d.pinstr.def['3-3-1'][6], 'back to BALANCED: nothing kept');
 // they go with the position: the striker and the left winger swap places, and the false nine is still a false nine
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 const st0 = lu.atk[5], w0 = lu.atk[4];
-await tap(st0); await page.click('#cTacRight [data-imove]'); await page.waitForTimeout(60); await tap(w0);
+await drag(`#bpBody .tpitch .ptk[data-ri="${st0}"]`, `#bpBody .tpitch .ptk[data-ri="${w0}"]`);
 d = await save(); lu = d.lineup;
 await tap(lu.atk[5]); pn = await panel();
 ok(lu.atk[5] === w0 && lu.atk[4] === st0 && pn.on.includes('stRuns=false9') && d.pinstr.atk['2-2-3'][5].stRuns === 'false9', 'after a swap the spot keeps its instructions: the new man there is the false nine');
 const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
 
-// DRAGGING: pick a man up and put him on another (a mouse drags at once; a finger holds him first: see classic-ui)
-const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
-async function drag(a, b, peek){ const p = await centre(a), q = await centre(b); await page.mouse.move(p.x, p.y); await page.mouse.down();
-  for(let i = 1; i <= 8; i++){ await page.mouse.move(p.x + (q.x - p.x) * i / 8, p.y + (q.y - p.y) * i / 8); await page.waitForTimeout(15); }
-  const seen = peek ? await page.evaluate(peek) : null; await page.mouse.up(); await page.waitForTimeout(100); return seen; }
+// a drag's fits and swaps
 const a0 = lu.atk[1], b0 = lu.atk[2], def0 = d.lineup.def.slice();
 const fits = await drag(`#bpBody .tpitch .ptk[data-ri="${a0}"]`, `#bpBody .tpitch .ptk[data-ri="${b0}"]`,
   () => [...document.querySelectorAll('#bpBody .tpitch .ptk[data-fit]')].length);
@@ -173,11 +174,14 @@ ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int
 ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');
 ok(m.stars.every(s => s >= 1 && s <= 3), 'every man has 1-3 stars: ' + m.stars.join(''));
 
-// SUBS: the pause menu's quick row, then a man off the bench dragged onto one of yours -- he comes on, on fresh legs
+// SUBS: the pause menu's TACTICS, then a man off the bench dragged onto one of yours -- he comes on, on fresh legs
 await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
-const quick = await page.$$eval('#pauseQuick [data-pq]', ns => ns.map(n => n.dataset.pq));
-ok(String(quick) === 'form,style,posture,subs', 'the pause menu\'s quick row: shape, style, posture, subs');
-await page.click('#pauseQuick [data-pq="subs"]'); await page.waitForTimeout(150);
+const pm = await page.$$eval('#pauseGrid [data-pause]', ns => ns.filter(n => getComputedStyle(n).display !== 'none').map(n => n.dataset.pause));
+ok(String(pm) === 'tactics,settings,exit,back' && !(await page.$('#pauseQuick')), 'the pause menu: TACTICS, SETTINGS, EXIT, BACK (no quick row)');
+await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(150);
+const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .ptk img.ptkFace').length,
+  men: document.querySelectorAll('#mtacBody .ptk').length, you: document.querySelectorAll('#mtacBody .ptkYou').length }));
+ok(mt.ghosts === 7 && mt.faces === mt.men && !mt.you, 'the match\'s tactics: faces on every man (' + mt.faces + '/' + mt.men + '), the other phase lit under them (' + mt.ghosts + '), no YOU badge');
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
 const offSi = await page.$eval('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[2].dataset.si));
 await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${offSi}"]`);

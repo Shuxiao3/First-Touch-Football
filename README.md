@@ -28,7 +28,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   | 5.5 / 5.5 | 100% (97% perfect) | 85% | 89% |
   | 8 / 8 | 100% (100% perfect) | 100% | 100% |
 
-  The grades are PERFECT, CLEAN, LOOSE and HEAVY.
+  The grades are PERFECT, CLEAN, LOOSE and HEAVY (the game no longer shows them; you see the touch itself).
   - A PERFECT touch along the grass is dead at his feet.
   - Anything less comes off him like a bounce off a round body: back the way it came if he's square on, glancing off
     if he's off its line. Half the time a poor one squirms on past him instead.
@@ -45,11 +45,21 @@ The same game played like any other football game. It's a copy of `index.html` w
   dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
   marks where it will land while it's in the air.
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
-  iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box.
-  - **The menus are pixel windows**, in the colours of the stand: navy, with a cream frame and a black outline,
-    bevelled buttons, lime for what's picked with a ▶ cursor beside it. Nothing you tap is under 36 px.
-  - **Settings** are a player's: match length, how good exhibition opponents are, and pixel or simple graphics,
-    kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 80 feel dials are the game's
+  iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box, and no word
+  or number runs out of its box (checked at 640×360 up to 932×430).
+  - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline with its corners nicked, a thin
+    light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
+    What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
+  - **Four colour schemes**, in Settings → COLOURS: BLUE (blue buttons, orange for what's picked; the default),
+    RUBY (red and gold), SILVER (grey and blue) and MINT (teal and pink). A money figure, a result or a rating is
+    green, yellow or red by how good it is, in any scheme; in a match PASS is green, SHOOT red, CROSS amber and
+    SKILL blue.
+  - **One font** for everything, menus and match alike: DotGothic16 (Fontworks, SIL Open Font License), cut to the
+    characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
+    and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
+    `assets/fonts/OFL-DotGothic16.txt`.
+  - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
+    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 80 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
@@ -58,18 +68,22 @@ The same game played like any other football game. It's a copy of `index.html` w
     numbers (pace, physical, technique, passing, shooting, defending, each the average of its attributes); tap one
     for what it's made of.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
-    without the ball, then menus for the shape, the width and the style (or the posture), and BEST 8. Under it, the
-    bench. On the right, the man you tapped and his spot's instructions.
-  - **In a match**, the pause menu has a quick row: the shape, the style, the posture and SUBS. TACTICS opens the
-    same pitch-first screen on the match itself, with each man's legs on his card. In a career match the rest of
-    your squad is on the bench: drag one onto a man to bring him on, on fresh legs. That's three subs a match, and a
-    man taken off can't come back. (An exhibition club has no bench.) Swapping men's spots is free, and the other
-    side is there to look at.
+    without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
+    BEST 8. Under it, the bench. On the right, the man you tapped and his spot's instructions. Every man shows his
+    face (his own look, in the club's kit) beside his rating, and his card has a bigger one. Under the men, lit and
+    set a little right and down, is the other phase's shape: on WITH BALL you see where each of them goes without
+    it, and the other way round.
+  - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
+    pitch-first screen on the match itself, with each man's legs on his card. The rest of your squad is on the
+    bench: drag one onto a man to bring him on, on fresh legs. That's three subs a match, and a man taken off can't
+    come back. Every exhibition club has a bench of six too (a keeper and five), a little short of its starters.
+    Swapping men's spots is free, and the other side is there to look at.
+  - **The match** has the score, the way you're kicking, the clock and the menu along the top, nothing else.
   - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
-  - **The bands.** On a phone wider than the game screen (844×390 leaves 107 px either side), the stick starts
-    anywhere in the left band and the buttons stand in a column in the right one, so neither covers the pitch.
-    Buttons you've placed yourself in BUTTON LAYOUT stay where you put them. Too narrow a band, after the notch
-    (an iPhone SE's is 31 px), and they're on the screen as before.
+  - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
+    phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
+    The buttons stand over the pitch's bottom-right corner, the stick starts anywhere on the left, and buttons
+    you've placed yourself in BUTTON LAYOUT stay where you put them.
   - **Fixed along the way.** A new career can be started by touch (Start was cut off below a card that didn't
     scroll). In a match the tactics card is no longer left blank after a visit to the Office's tactics. The pause
     menu, Settings and the new-career card keep clear of the notch.
@@ -292,12 +306,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a forward
     at the back or a defender in goal plays below his usual rating; in the Office that rating shows in amber. BEST 8
     puts a keeper in goal and the best seven by their ratings in the spots they're in.
-  - **Moving men is a drag.** On a touch screen, hold a man a moment and he lifts (a quick tap only shows his
-    card, and a finger that moves off at once is a swipe); with a mouse, just drag. While he's up, every spot on
-    the pitch shows what he'd be rated there, lime in his own position and amber out of it. Drop him on another
-    man and they swap spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). MOVE
-    / SWAP on his card does the same in two taps. In the Office's Squad tab you can drop a man from the list onto a
-    small pitch above his card.
+  - **Moving men is a drag.** On a touch screen, hold a man a moment and he's picked up (a quick tap only shows
+    his card, and a finger that moves off at once is a swipe); with a mouse, just drag. He stays where you picked
+    him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
+    there, in the scheme's colour in his own position and amber out of it. Drop him on another man and they swap
+    spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the Office's
+    Squad tab you can drop a man from the list onto a small pitch above his card.
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
   pitch. That covers your CLEAR, the computer's clearances and headed clearances.
   - **How far.** A kicked clearance can carry ×0.85 of what Shot power gives it at Def IQ 1, and ×1.3 at 10: for a

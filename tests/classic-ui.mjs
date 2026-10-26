@@ -2,9 +2,10 @@
 // 844x390, 844x340 (Safari's bar showing) and 667x375 (an iPhone SE), and only lists scroll, inside their own boxes:
 // the start menu, Settings (a player's settings only: the feel dials are the game's own, a developer's with ?dev),
 // the exhibition setup, a new career (Start on screen), the hub, every building's tabs, the market's pages, the
-// tactics, the pause menu (its quick row) and the match's tactics, the match report. The menus are framed in pixels.
-// A finger holds a man to drag him (a quick tap just shows his card), and on a phone wider than the game screen the
-// stick and the buttons stand in the empty bands beside it.
+// tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels (a dark outline,
+// a light rim), in four colour schemes. A finger holds a man to drag him (a quick tap just shows his card) and he
+// stays where he was picked up; the tactics show the men's faces and the other phase's shape. The game is as wide
+// as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock and the menu.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -45,9 +46,15 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,COLOURS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
-    ok(/232, 224, 200/.test(frame), 'the menus are framed in pixels: a cream frame on a navy window');
+    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame), 'the menus are framed in pixels: a dark outline and a light rim');
+    const look = async () => page.evaluate(() => ({ theme: document.documentElement.dataset.theme || 'blue', btn: getComputedStyle(document.querySelector('#setRows .setOpt:not(.on)')).backgroundImage.slice(0, 40),
+      font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }));
+    const l0 = await look(); await page.tap('#setRows [data-pref="theme"][data-val="ruby"]'); await page.waitForTimeout(100); const l1 = await look();
+    await page.tap('#setRows [data-pref="theme"][data-val="blue"]'); await page.waitForTimeout(100); const l2 = await look();
+    ok(l0.theme === 'blue' && l1.theme === 'ruby' && l1.btn !== l0.btn && l2.btn === l0.btn, 'COLOURS swaps the scheme (blue -> ruby -> blue): ' + l0.btn + ' / ' + l1.btn);
+    ok(/FTC Dot/.test(l0.font), 'one font throughout (' + l0.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(200);
@@ -66,15 +73,13 @@ for(const [w, h] of SIZES){
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
   ok(!fails.length, w + 'x' + h + ': every menu screen fits' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
-  // a match: the pause menu, its quick row, the match's tactics, the report
+  // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
-  await mcheck('pause', ['#pauseQuick .tbDrop', '#pauseGrid .pauseBtn']);
-  await page.tap('#pauseQuick [data-pq="style"]'); await page.waitForTimeout(100);
-  await mcheck('pause / style', ['#pqMenu .tbOpt']);
-  await page.tap('#pauseQuick [data-pq="style"]'); await page.waitForTimeout(100);
+  await mcheck('pause', ['#pauseGrid .pauseBtn']);
+  if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: four buttons, no quick-tactics row');
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtacBody .tbDrop', '#mtacBody .tbBench']);
   await page.tap('#mtacOv [data-mt="back"]'); await page.waitForTimeout(100); await page.tap('#pauseGrid [data-pause="back"]');
@@ -115,21 +120,45 @@ for(const [w, h] of SIZES){
   await touch('touchEnd', b.x, b.y); await page.waitForTimeout(200);
   const o1 = (await order()).split(','), w0 = o0.split(',');
   ok(lifted && o1[1] === w0[3] && o1[3] === w0[1], 'held a moment, he lifts; dropped on another, they swap');
+  // ...and while he's held he stays where he was: the stand-in sits on him, then follows the finger by as much as it moved
+  const c = await at('#bpBody .tpitch .ptk[data-tac="field"] >> nth=2'), tok = await page.$eval('#bpBody .tpitch .ptk[data-tac="field"] >> nth=2', e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top }; });
+  await touch('touchStart', c.x + 5, c.y + 3); await page.waitForTimeout(450);
+  const g0 = await page.$eval('.pxGhost', e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top }; });
+  await touch('touchMove', c.x + 25, c.y + 13); await page.waitForTimeout(40);
+  const g1 = await page.$eval('.pxGhost', e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top }; });
+  await touch('touchEnd', c.x + 25, c.y + 13); await page.waitForTimeout(150);
+  ok(Math.abs(g0.l - tok.l) < 1.5 && Math.abs(g0.t - tok.t) < 1.5 && Math.abs(g1.l - g0.l - 20) < 1.5 && Math.abs(g1.t - g0.t - 10) < 1.5,
+    'held, he stays where he was (' + [g0.l - tok.l, g0.t - tok.t].map(Math.round) + ') and moves with the finger (' + [g1.l - g0.l, g1.t - g0.t].map(Math.round) + ')');
+  // the tactics: every man with his face, the other phase's shape lit under them, no MOVE/SWAP, no essays in the menus
+  const tv = await page.evaluate(() => ({ faces: document.querySelectorAll('#bpBody .tpitch .ptk img.ptkFace').length, men: document.querySelectorAll('#bpBody .tpitch .ptk').length,
+    bench: document.querySelectorAll('#bpBody .tbBench .ptk img.ptkFace').length, ghosts: document.querySelectorAll('#bpBody .tpitch .tpGhost').length,
+    card: !!document.querySelector('#cTacRight .cardFace'), move: !!document.querySelector('[data-imove]') }));
+  ok(tv.faces === tv.men && tv.men === 8 && tv.bench > 0 && tv.card, 'every man on the tactics pitch and the bench shows his face, and so does his card (' + tv.faces + '/' + tv.men + ')');
+  ok(tv.ghosts === 7, 'the other phase\'s shape is drawn under the men, lit (' + tv.ghosts + ' ghosts)');
+  ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
+  await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
+  const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length })));
+  ok(opts.length === 5 && opts.every(o => !o.i), 'the style menu: five names, no descriptions (' + opts.map(o => o.t).join(', ') + ')');
   await ctx.close(); }
 
-// THE BANDS: 844x390 has 107 px either side of the game screen -- the buttons stand there, the stick starts there
+// AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons
+// stand over its bottom-right corner where they always did, the stick starts anywhere on the left, and the HUD is
+// the score, the way you're kicking, the clock and the menu
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700);
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(250); await page.tap('#exhGo'); await page.waitForTimeout(1200);
-  const g = await page.evaluate(() => { const s = document.getElementById('stageWrap').getBoundingClientRect(), b = ['kickBtn','shootBtn','crossBtn','skillBtn'].map(id => document.getElementById(id).getBoundingClientRect());
-    return { right: s.right, left: s.left, out: b.every(r => r.left >= s.right - 1 && r.right <= innerWidth + 1) }; });
-  ok(g.out, 'the buttons stand in the band right of the game screen, off the pitch');
+  const g = await page.evaluate(() => { const s = document.getElementById('stageWrap').getBoundingClientRect(), c = document.getElementById('c'), b = ['kickBtn','shootBtn','crossBtn','skillBtn'].map(id => document.getElementById(id).getBoundingClientRect());
+    return { left: s.left, width: s.width, height: s.height, W: c.width, inside: b.every(r => r.left >= s.left && r.right <= s.right + 1 && r.bottom <= s.bottom + 1 && r.left > s.left + s.width * 0.6 && r.top > s.top + s.height * 0.35),
+      chips: [...document.querySelectorAll('#readout .chip')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.id || e.textContent.trim().slice(0, 6)) }; });
+  ok(g.left === 0 && Math.abs(g.width - 844) < 1 && Math.abs(g.height - 390) < 2 && g.W > 1100, 'the game fills the phone: ' + Math.round(g.width) + 'x' + Math.round(g.height) + ', ' + g.W + ' wide inside (no bands)');
+  ok(g.inside, 'the buttons stand over the bottom-right corner of the pitch, as they did before the bands');
+  ok(String(g.chips) === 'rScore,rDir,⏱ 0:0,menuBtn' || (g.chips.length === 4 && g.chips[0] === 'rScore' && g.chips[3] === 'menuBtn'), 'the HUD: score, direction, clock, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
   const cdp = await ctx.newCDPSession(page), touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 3 }] });
-  const x0 = Math.round(g.left / 2), c0 = await page.evaluate(() => window.__T.controlled().x);
+  const x0 = 70, c0 = await page.evaluate(() => window.__T.controlled().x);
   await touch('touchStart', x0, 230); for(let i = 1; i <= 6; i++){ await touch('touchMove', x0 + i * 8, 230); await page.waitForTimeout(40); }
   await page.waitForTimeout(500); const c1 = await page.evaluate(() => window.__T.controlled().x); await touch('touchEnd', x0, 230);
-  ok(Math.abs(c1 - c0) > 30, 'a thumb in the left band drives your man (' + Math.round(c1 - c0) + ' px)');
+  ok(Math.abs(c1 - c0) > 30, 'a thumb on the left of the screen drives your man (' + Math.round(c1 - c0) + ' px)');
   await ctx.close(); }
 
 process.exitCode = rep.finish();
