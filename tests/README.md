@@ -20,6 +20,8 @@ node tests/house-ui.mjs        # ~15s  — creation, the three House tabs, save 
 node tests/house-rollover.mjs  # ~10s  — a finished season is filed into career history
 node tests/house-match.mjs     # ~90s  — plays a career match, checks the report and payout
 node tests/house-season.mjs    # ~7min — plays five matches, checks accumulation
+node tests/manager-career.mjs  # ~40s  — Football Classic's manager career: creation, every building, a signing, the windows, a season to the review, promotion, the playoffs, goals credited
+node tests/manager-match.mjs   # ~70s  — Football Classic's manager career: a live match through to the report
 node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit, phone: press TRAP and drag to aim the touch
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it

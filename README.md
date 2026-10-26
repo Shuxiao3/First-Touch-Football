@@ -92,8 +92,8 @@ The same game played like any other football game. It's a copy of `index.html` w
   a hair colour (natural shades, plus the odd dyed one), a boot colour and a slightly different height. A player's
   look is seeded from his name, so he looks the same every match. Keepers get their own skin and hair colour.
   The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
-  `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. Your career
-  pro keeps the look you picked.
+  `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. A career
+  player's look is seeded from the player himself, so he looks the same at every club.
 - **Headers are a real leap.** Going up for a header lifts a player's feet 8 px (Heading 1) to 14 px (Heading 10),
   a quarter to two-fifths of his height. It used to be up to 83 px, over two and a half times his height. That
   covers your attacking header (K), your defensive one (J) and the computer's. Your header arms in their box
@@ -102,6 +102,41 @@ The same game played like any other football game. It's a copy of `index.html` w
   team is wearing, on a dark track under a light colour and a light track under a dark one. Shirts follow the
   usual rule: your side wears its home kit, and the other side wears its home kit unless the shirts are too alike,
   then its change kit, then plain white or black. So the bars never clash either.
+- **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
+  and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
+  Premium League), with a weak squad of 16 and $20,000. The game is buying and selling players: nobody's stats are
+  built up by hand.
+  - **The season.** 26 matchdays, home and away. You PLAY each one (the live match, in your colours, with the home
+    side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
+    at the higher seed's ground, then a final, with a shoot-out if it's level. The bottom three go down. There's no
+    sack: however badly it goes, you carry on.
+  - **Transfer windows.** Five days in the summer before the season, and three at the winter break after matchday
+    13. NEXT DAY moves a window on. In a window you can bid for anyone at another club. His club takes the asking
+    price, may take 85% or more (once), and turns down less. Then you agree his contract: 1 to 4 seasons at the
+    wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price and
+    clubs bid for him every window day (now and then they bid for your best men anyway); accept or reject. Free
+    agents sign any time, for wages only. In the red you can't buy or sign anyone until you're back in the black,
+    but selling still works.
+  - **Contracts.** Every deal runs to the end of a season. Renew it in the Office before it ends, or the player
+    leaves as a free agent. Releasing a player pays off half of what's left on his deal.
+  - **Scouting.** A player at another club shows a rating range until you scout him: 8 points wide, 6 and then 2
+    as you grow your scouting network. One player costs $200 in League 2, up to $6,000 in the Premium League. Or
+    send your scouts round a league's goalkeepers, defenders, midfielders or forwards. A scouted player shows his
+    exact rating, potential and attributes. Reports last until the end of the season.
+  - **Ageing.** At the end of a season everyone is a year older. Players up to 25 grow towards their potential:
+    faster with 12 or more games that season, slower with fewer than 4. The late twenties hold, the thirties
+    decline, and players retire from 34. The youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer
+    (more and better as you build it up). Promote them, or they leave at 19.
+  - **The computer clubs** buy from each other and from the free agents every window day, bid for your players,
+    and fill their squads up every summer.
+  - **Money.** The stadium works as before: ticket price, seats, concessions, sponsor. Prize money comes at the
+    end of the season: $12,000 for winning League 2, up to $1.5m for the Premium League, less the lower you
+    finish. The broadcast share follows your league position, and the ground and the sponsor grow when you go up.
+  - **The town.** For now its buildings sit in a row. Manager's Office (squad and contracts, tactics, fixtures,
+    finances), Transfer Market, Scouting, Youth Academy, Stadium, Newsstand (news, all four tables, results, top
+    scorers) and Your House (your record). The walkable town on the tileset comes next.
+  - Careers save to three slots (`ft_mgr_slot1` to `3` in `localStorage`). Careers from the old player-manager
+    mode (`ft_save_*`) aren't carried over.
 
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
 AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
@@ -599,5 +634,6 @@ a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_previ
 
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
-and the labs. They need
+the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
+a played match). They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
