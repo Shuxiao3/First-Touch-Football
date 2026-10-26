@@ -44,6 +44,35 @@ The same game played like any other football game. It's a copy of `index.html` w
   and the ring under whoever had the ball, are gone. The ball is drawn in whole pixels like the players: white with
   dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
   marks where it will land while it's in the air.
+- **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
+  iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box.
+  - **The menus are pixel windows**, in the colours of the stand: navy, with a cream frame and a black outline,
+    bevelled buttons, lime for what's picked with a ▶ cursor beside it. Nothing you tap is under 36 px.
+  - **Settings** are a player's: match length, how good exhibition opponents are, and pixel or simple graphics,
+    kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 80 feel dials are the game's
+    own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
+    labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
+  - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
+    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left and the man
+    you tap on the right, each side scrolling by itself, and a long list goes ten to a page. His card leads with six
+    numbers (pace, physical, technique, passing, shooting, defending, each the average of its attributes); tap one
+    for what it's made of.
+  - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
+    without the ball, then menus for the shape, the width and the style (or the posture), and BEST 8. Under it, the
+    bench. On the right, the man you tapped and his spot's instructions.
+  - **In a match**, the pause menu has a quick row: the shape, the style, the posture and SUBS. TACTICS opens the
+    same pitch-first screen on the match itself, with each man's legs on his card. In a career match the rest of
+    your squad is on the bench: drag one onto a man to bring him on, on fresh legs. That's three subs a match, and a
+    man taken off can't come back. (An exhibition club has no bench.) Swapping men's spots is free, and the other
+    side is there to look at.
+  - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
+  - **The bands.** On a phone wider than the game screen (844×390 leaves 107 px either side), the stick starts
+    anywhere in the left band and the buttons stand in a column in the right one, so neither covers the pitch.
+    Buttons you've placed yourself in BUTTON LAYOUT stay where you put them. Too narrow a band, after the notch
+    (an iPhone SE's is 31 px), and they're on the screen as before.
+  - **Fixed along the way.** A new career can be started by touch (Start was cut off below a card that didn't
+    scroll). In a match the tactics card is no longer left blank after a visit to the Office's tactics. The pause
+    menu, Settings and the new-career card keep clear of the notch.
 - **No player lock.** You control whichever of your players has the ball. When you pass, you're on the receiver as
   soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far).
   Without the ball, PASS (`J`, or the PASS button, which reads SWITCH) switches player. Push the stick as you press it
@@ -259,11 +288,16 @@ The same game played like any other football game. It's a copy of `index.html` w
       - A striker told to STAY FORWARD waits 7.5 m higher, and one told to COME BACK 5.4 m deeper.
       - A central midfielder told to INTERCEPT is in a passing lane 10% of the time. One told to COVER WING is
         2.7 m nearer a ball that's been out wide for 1.5 s.
-  - **Anyone can play anywhere**, the keeper included. MOVE or SWAP any two men, or put an outfielder in goal (the
-    keeper then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a
-    forward at the back or a defender in goal plays below his usual rating. In the Office his rating there shows in
-    amber over the move (ATT→DEF, say). PICK MY BEST EIGHT puts a keeper in goal and the best seven by their
-    ratings in the spots they're in.
+  - **Anyone can play anywhere**, the keeper included. Swap any two men, or put an outfielder in goal (the keeper
+    then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a forward
+    at the back or a defender in goal plays below his usual rating; in the Office that rating shows in amber. BEST 8
+    puts a keeper in goal and the best seven by their ratings in the spots they're in.
+  - **Moving men is a drag.** On a touch screen, hold a man a moment and he lifts (a quick tap only shows his
+    card, and a finger that moves off at once is a swipe); with a mouse, just drag. While he's up, every spot on
+    the pitch shows what he'd be rated there, lime in his own position and amber out of it. Drop him on another
+    man and they swap spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). MOVE
+    / SWAP on his card does the same in two taps. In the Office's Squad tab you can drop a man from the list onto a
+    small pitch above his card.
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
   pitch. That covers your CLEAR, the computer's clearances and headed clearances.
   - **How far.** A kicked clearance can carry ×0.85 of what Shot power gives it at Def IQ 1, and ×1.3 at 10: for a
@@ -312,7 +346,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     mode (`ft_save_*`) aren't carried over.
 
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
-AI, stats and settings. Changes to `index.html` aren't carried over to `classic.html` automatically.
+AI and the stats. Changes to `index.html` aren't carried over to `classic.html` automatically.
 
 ## Controls
 

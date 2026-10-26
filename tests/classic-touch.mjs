@@ -99,7 +99,9 @@ const look = await page.evaluate(() => {
   const hex = (x, y) => { const d = g.getImageData(x, y, 1, 1).data; return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join(''); };
   T.draw();
   const R = T.controlROf(c), ring = [];
-  for(const a of [0, 0.5, 1.2, 1.9, 2.6, Math.PI]){ const s = T.proj(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R); ring.push(hex(Math.floor(s.x / 2) * 2 + 1, Math.floor(s.y / 2) * 2)); }
+  // (the ring is snapped to the pitch's 2 px pixels: look within a pixel or two of where each point of it falls)
+  const near = (x, y) => { const d = g.getImageData(Math.round(x) - 3, Math.round(y) - 3, 7, 7).data; for(let i = 0; i < d.length; i += 4) if(d[i] === 0x9d && d[i + 1] === 0xff && d[i + 2] === 0x3c) return '#9dff3c'; return hex(Math.round(x), Math.round(y)); };
+  for(const a of [0, 0.5, 1.2, 1.9, 2.6, Math.PI]){ const s = T.proj(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R); ring.push(near(s.x, s.y)); }
   const s = T.proj(b.x, b.y, 0), box = g.getImageData(Math.round(s.x) - 12, Math.round(s.y) - 22, 24, 26).data, cols = new Set();
   for(let i = 0; i < box.length; i += 4) cols.add('#' + [box[i], box[i + 1], box[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''));
   SPRITE.disable(); T.draw();

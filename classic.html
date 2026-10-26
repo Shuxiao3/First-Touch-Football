@@ -96,6 +96,10 @@
   #skillBtn{right:102px;bottom:100px;width:58px;height:58px;background:rgba(120,200,255,.14);border:2px solid #78c8ff;color:#78c8ff;}
   #crossBtn{right:100px;bottom:16px;background:rgba(255,180,60,.14);border:2px solid var(--amber);color:var(--amber);}
   .actBtn.dimBtn{opacity:.32;}
+  #padBand{position:absolute;top:0;bottom:0;left:calc(-1 * var(--bandL,0px));width:var(--bandL,0px);display:none;z-index:4;}
+  body.touch #stageWrap.bands:not(.menuMode) #padBand{display:block;}
+  #safeProbe{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;
+    padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);}
   #crossBtn.mClear{background:rgba(223,230,212,.12);border-color:var(--ink);color:var(--ink);}
   #crossBtn.armed{box-shadow:0 0 14px 3px rgba(223,230,212,.5);filter:brightness(1.3);}
   #shootBtn.mSlide{background:rgba(255,180,60,.16);border-color:var(--amber);color:var(--amber);}
@@ -114,10 +118,14 @@
   .menuChip{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--phosphor);pointer-events:auto;margin-left:auto;
     border-color:var(--phosphor-dim);letter-spacing:.5px;}
   .menuChip:hover{background:rgba(157,255,60,.12);}
-  .pauseOv{ display:none; position:fixed; inset:0; z-index:150; background:rgba(4,8,5,.92); align-items:center; justify-content:center; padding:18px; }
+  .pauseOv{ display:none; position:fixed; inset:0; z-index:150; background:rgba(4,8,5,.92); align-items:center; justify-content:center;
+    padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); }
   .pauseOv.on{ display:flex; }
-  .pauseCard{ width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; }
-  .settingsCard{ max-width:540px; max-height:90vh; }
+  /* FIXED FRAME: a card always fits the screen -- its title and buttons stay put, and only a long middle (.pScroll) scrolls */
+  .pauseCard{ width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; max-height:100%; min-height:0; overflow:hidden; padding-top:4px; }
+  .pauseCard .pauseTitle{ line-height:1.3; flex:none; }
+  .pScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .settingsCard{ max-width:600px; }
   body:not(.touch) .layoutEntry{ display:none; }   /* (the buttons are only on touch screens) */
   #layoutEd{ display:none; position:fixed; inset:0; z-index:170; background:#050806; align-items:center; justify-content:center; touch-action:none; }
   #layoutEd.on{ display:flex; }
@@ -150,7 +158,10 @@
   .cfBtns,.mkBtns{ display:flex; gap:8px; margin-top:14px; }
   .cfBtns .pauseBtn,.mkBtns .pauseBtn{ flex:1; }
   .cfDanger{ background:linear-gradient(90deg,#5a1a14,#3a100c)!important; border-color:#ff5a4d!important; color:#ffd7d2!important; }
-  .mkCard{ max-width:560px; width:min(560px,94vw); max-height:90vh; display:flex; flex-direction:column; overflow:hidden; }
+  .mkCard{ max-width:720px; width:min(720px,94vw); display:flex; flex-direction:column; overflow:hidden; }
+  .mkGrid{ display:grid; grid-template-columns:1fr 1.25fr; gap:4px 18px; align-items:start; }
+  @media (max-width:560px){ .mkGrid{ grid-template-columns:1fr; } }
+  .mkCard .mkBtns{ margin-top:4px; flex:none; }
   .mkStep{ color:#7f9a6f; font-size:11px; letter-spacing:.4px; margin:2px 0 12px; line-height:1.5; }
   .mkInput{ width:100%; box-sizing:border-box; background:#0c140d; border:1px solid #2a3a2c; color:#e9f5ec; border-radius:8px; padding:10px 12px; font-size:14px; font-family:inherit; margin-bottom:10px; }
   .mkMeta{ display:flex; justify-content:space-between; color:#9fb89f; font-size:12px; margin-bottom:8px; }
@@ -213,7 +224,19 @@
   .mkpSub{ font-size:9px; color:#7f9a6f; }
   .mkpOvr{ font-size:12px; color:#9dff3c; font-weight:700; }
   .mkpWage{ font-size:9px; color:#6f8a5f; }
-  #settingsDials{ overflow-y:auto; max-height:76vh; margin-bottom:4px; }
+  #settingsDials{ display:none; margin-top:6px; }
+  .setMid{ display:flex; flex-direction:column; gap:10px; }
+  .setMid > *{ flex:none; }
+  #settingsDials.on{ display:block; }
+  .devOnly{ display:none; } body.dev .devOnly{ display:block; }
+  body:not(.dev) #labTuneChip, body:not(.dev) #editToggle{ display:none !important; }
+  .setRows{ display:flex; flex-direction:column; gap:8px; }
+  .setRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .setLbl{ font-family:'Baskic8',sans-serif; font-size:13px; letter-spacing:1px; color:#cfe8c4; min-width:0; }
+  .setLbl i{ display:block; font:10px 'IBM Plex Mono',monospace; font-style:normal; letter-spacing:0; color:#7f9a6f; margin-top:2px; }
+  .setOpts{ display:flex; gap:4px; flex:none; }
+  .setOpt{ font-family:'Baskic8',sans-serif; font-size:12px; letter-spacing:.5px; color:#9bb88a; background:rgba(157,255,60,.05); border:1px solid #243019; border-radius:7px; min-height:36px; padding:0 10px; cursor:pointer; }
+  .setOpt.on{ color:#0c0f08; background:#9dff3c; border-color:#9dff3c; }
   .pauseTitle{ font-family:'Baskic8',sans-serif; font-size:26px; font-weight:700; color:#9dff3c; letter-spacing:3px; text-align:center; margin-bottom:12px; }
   .pauseBtn{ font-family:'Baskic8',sans-serif; font-size:18px; font-weight:700; letter-spacing:1px; color:#cfe8c4; background:rgba(157,255,60,.06); border:1px solid #2a3a22; border-radius:10px; padding:15px 0; cursor:pointer; }
   .pauseBtn:hover{ background:rgba(157,255,60,.14); border-color:#9dff3c; }
@@ -221,9 +244,12 @@
   .pauseExit:hover{ background:rgba(255,90,77,.12); border-color:#ff5a4d; }
   .pauseBack{ color:#7f9a6f; }
   .menuOverlay{position:fixed;inset:0;z-index:50;background:rgba(4,8,5,.86);
-    display:flex;align-items:flex-start;justify-content:center;padding:18px;overflow:auto;backdrop-filter:blur(2px);}
+    display:flex;align-items:flex-start;justify-content:center;overflow:hidden;backdrop-filter:blur(2px);
+    padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));}
   .menuCard{width:min(96vw,1000px);background:var(--panel);border:1px solid var(--edge);border-radius:12px;
-    padding:16px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+    padding:12px 16px 12px;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:100%;display:flex;flex-direction:column;min-height:0;}
+  .menuCard > .menuTop, .menuCard > .menuTeamRow{flex:none;}
+  #menuBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .menuTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
   .menuTabs{display:flex;gap:6px;}
   .sqTabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
@@ -310,8 +336,10 @@
   .slotDel{font-size:12px;color:#ff5a4d;background:rgba(255,90,77,.1);border:1px solid #5a2a26;border-radius:6px;padding:9px 11px;cursor:pointer;}
   .smBack{margin-top:14px;min-width:248px;}
   /* exhibition setup: two clubs, the player you control */
-  #exhPanel{background:rgb(6,10,7);}
-  #exhPanel .exhWrap{max-width:660px;}
+  #exhPanel{background:rgb(6,10,7);overflow:hidden;}
+  #exhPanel .exhWrap{max-width:660px;max-height:100%;min-height:0;}
+  #exhPanel .exhGrid.on{flex:0 1 auto;min-height:0;overflow-y:auto;}
+  #exhPanel .exhGo{flex:none;}
   #exhPanel h3{margin-bottom:4px;}
   .exhLeague{font-size:10px;letter-spacing:3px;color:#6f8a5f;margin-bottom:10px;}
   .exhTeams{display:flex;align-items:stretch;justify-content:center;gap:8px;width:100%;}
@@ -354,6 +382,13 @@
   .smBtn{ padding:9px 15px; }
   .smCenter{ margin:auto 0; display:flex; flex-direction:column; align-items:center; width:100%; max-width:520px; }
   #startMenu .smVer{ position:fixed; bottom:max(8px, env(safe-area-inset-bottom)); right:max(10px, env(safe-area-inset-right)); }
+  @media (max-height:400px){
+    #startMenu .smTitle{ font-size:22px; } #startMenu .smSub{ margin-bottom:8px; }
+    #startMenu .smItems{ display:grid; grid-template-columns:1fr 1fr; gap:6px; min-width:min(520px,90vw); }
+    #startMenu .smItems > .smRow, #startMenu .smItems > [data-act="resume"], #startMenu .smItems > [data-act="settings"]{ grid-column:1 / -1; }
+    .smPanel h3{ margin-bottom:8px; } .smBack{ margin-top:8px; }
+    .smBtn{ min-height:36px; padding-top:6px; padding-bottom:6px; }
+  }
 
   /* ===== CAREER HUB / CAMPUS ===== */
   #careerHub{ position:fixed; inset:0; z-index:62; display:none; flex-direction:column;
@@ -385,8 +420,18 @@
   .chBtn2{ font-family:'Baskic8','Space Grotesk',sans-serif; font-weight:700; font-size:14px; letter-spacing:1px; color:#9dff3c; background:rgba(157,255,60,.08); border:1px solid #2a3a22; border-radius:9px; padding:12px 22px; cursor:pointer; margin-right:10px; }
   .chBtn2:hover{ background:rgba(157,255,60,.18); border-color:#9dff3c; }
   .chBtn2:disabled,.chBtn2[disabled]{ opacity:.32; pointer-events:none; cursor:default; }
-  #matchReport{ display:none;position:fixed;inset:0;background:#080e07;z-index:200;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) calc(env(safe-area-inset-right,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 20px) calc(env(safe-area-inset-left,0px) + 18px); }
+  #matchReport{ display:none;position:fixed;inset:0;background:#080e07;z-index:200;overflow:hidden;padding:calc(env(safe-area-inset-top,0px) + 16px) calc(env(safe-area-inset-right,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 20px) calc(env(safe-area-inset-left,0px) + 18px); }
   .mrHead{ text-align:center;padding:14px 0 18px; }
+  /* FIXED FRAME: the score along the top, two columns under it (each scrolls by itself), CONTINUE pinned bottom right */
+  #matchReport .mrWrap{ height:100%; max-width:1000px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+  #matchReport .mrHead{ flex:none; padding:4px 0 2px; }
+  #matchReport .mrScore{ font-size:34px; line-height:1.2; margin-top:6px; }
+  .mrCols{ flex:1 1 auto; min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .mrCol{ min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--win); box-shadow:var(--pxWin); padding:6px 14px 10px; }
+  .mrCol .mrSect:first-child{ border-top:0; margin-top:4px; padding-top:2px; }
+  .mrFoot{ flex:none; display:flex; justify-content:flex-end; }
+  .mrFoot .mrContinue{ width:min(320px,100%); margin-top:0; padding:11px 0; }
+  @media (max-width:560px){ .mrCols{ grid-template-columns:1fr; } }
   .mrScore{ font-family:'Baskic8',sans-serif;font-size:44px;font-weight:700;letter-spacing:2px;line-height:1; }
   .mrLabel{ font-size:10px;color:#7f9a6f;letter-spacing:2px;text-transform:uppercase;margin-top:4px; }
   .mrSect{ color:#7f9a6f;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:14px 0 5px;border-top:1px solid #1a2a14;padding-top:10px; }
@@ -408,12 +453,18 @@
   .chPlay{ font-family:'Baskic8','Space Grotesk',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; color:#0c0f08; background:#9dff3c; border:none; border-radius:9px; padding:12px 30px; cursor:pointer; }
   .chPlay:hover{ background:#b6ff6a; }
   #bldgPanel{ position:fixed; inset:0; z-index:63; display:none; flex-direction:column; align-items:center; justify-content:flex-start;
-    overflow-y:auto; -webkit-overflow-scrolling:touch; background:rgba(5,8,6,.985); color:#9dff3c; font-family:'IBM Plex Mono',monospace;
-    padding: max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left)); }
+    overflow:hidden; background:rgba(5,8,6,.985); color:#9dff3c; font-family:'IBM Plex Mono',monospace;
+    padding: max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
   #bldgPanel.show{ display:flex; }
-  #bldgPanel .bpInner{ margin:auto 0; max-width:700px; width:100%; }
-  .bpTabs{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; justify-content:center; }
-  .bpTab{ font-family:'Baskic8',sans-serif; font-size:12px; letter-spacing:.5px; color:#7f9a6f; background:rgba(157,255,60,.05); border:1px solid #243019; border-radius:7px; padding:7px 12px; cursor:pointer; }
+  /* FIXED FRAME: ◀ TOWN · the title · its tabs, all on one line; the body fills the rest and scrolls inside */
+  #bldgPanel .bpInner{ max-width:1100px; width:100%; height:100%; display:flex; flex-direction:column; gap:7px; }
+  .bpHead{ flex:none; display:flex; align-items:center; gap:10px; min-height:36px; }
+  .bpTabs{ display:flex; gap:5px; flex-wrap:nowrap; overflow-x:auto; margin-left:auto; scrollbar-width:none; }
+  .bpTabs::-webkit-scrollbar{ display:none; }
+  .bpMsg{ position:absolute; left:50%; bottom:6px; transform:translate(-50%,8px); max-width:min(560px,92%); opacity:0; pointer-events:none; z-index:5;
+    background:rgba(8,14,9,.96); border:1px solid #3a5a2c; border-radius:8px; padding:8px 14px; font-size:12px; line-height:1.4; text-align:center; transition:opacity .2s,transform .2s; }
+  .bpMsg.on{ opacity:1; transform:translate(-50%,0); pointer-events:auto; cursor:pointer; }
+  .bpTab{ flex:none; font-family:'Baskic8',sans-serif; font-size:12px; letter-spacing:.5px; color:#7f9a6f; background:rgba(157,255,60,.05); border:1px solid #243019; border-radius:7px; padding:0 12px; min-height:36px; cursor:pointer; white-space:nowrap; }
   .bpTab.on{ color:#0c0f08; background:#9dff3c; border-color:#9dff3c; font-weight:700; }
   .bpSect{ font-family:'Baskic8',sans-serif; color:#7f9a6f; font-size:10px; letter-spacing:2px; margin:16px 0 7px; border-bottom:1px solid #223019; padding-bottom:5px; }
   .hsHead{ display:flex; gap:14px; align-items:center; }
@@ -455,20 +506,23 @@
   .hsDev .mkTreeWrap{ max-height:none; overflow:visible; }
 
   /* ===== MANAGER CAREER: building screens ===== */
-  #careerHub{ overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .chCampus{ display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); grid-auto-rows:minmax(96px,1fr); flex:1 0 auto; }
-  .chCampus .bldg{ position:relative; min-height:96px; }
+  #careerHub{ overflow:hidden; }   /* FIXED FRAME: the hub is one screen -- the top bar, the buildings (they shrink), the next match */
+  .chCampus{ display:grid; grid-template-columns:repeat(auto-fit,minmax(84px,1fr)); grid-auto-rows:minmax(0,1fr); flex:1 1 auto; min-height:0; }
+  .chCampus .bldg{ position:relative; min-height:0; overflow:hidden; }
+  @media (max-height:430px){ .bldg .bs{ display:none; } .bldg svg{ width:34px; height:34px; } .bldg{ gap:6px; padding:8px 4px; } }
+  .chWarn{ flex:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chBottom{ flex:none; }
   #bldgPanel{ background:#050806; }
   #bldgPanel .bpInner{ position:relative; }
-  .bpTopBack{ position:absolute; left:0; top:0; font:11px 'IBM Plex Mono',monospace; color:#9dff3c; background:rgba(157,255,60,.08); border:1px solid #2a3a22; border-radius:7px; padding:7px 10px; cursor:pointer; }
+  .bpTopBack{ flex:none; font:11px 'IBM Plex Mono',monospace; color:#9dff3c; background:rgba(157,255,60,.08); border:1px solid #2a3a22; border-radius:7px; padding:0 10px; min-height:36px; cursor:pointer; }
   @media (max-width:640px){
     .chTop{ flex-wrap:wrap; }
     .chTop > div:first-child{ flex:1 1 100%; }
     .chStats{ flex:1 1 100%; flex-wrap:wrap; justify-content:space-between; gap:6px 10px; }
     .chStat{ text-align:left; }
     .chStat .v{ font-size:13px; }
-    #bldgPanel h3{ margin-top:34px; }
   }
+  @media (max-height:430px){ .pauseTitle{ font-size:20px; margin-bottom:4px; } .pauseBtn{ padding:11px 0; font-size:16px; } .pauseCard{ gap:8px; } }
   .bBadge{ display:none; position:absolute; top:8px; right:9px; min-width:18px; padding:1px 5px; border-radius:9px; background:#ffb43c; color:#0c1a08; font-size:10px; font-weight:700; text-align:center; }
   .chBottom{ flex-wrap:wrap; gap:8px 0; }
   .chNext{ width:100%; text-align:center; color:#7f9a6f; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
@@ -604,9 +658,13 @@
   .formBtn{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7f9a6f; background:rgba(157,255,60,.05); border:1px solid #243019; border-radius:6px; padding:5px 8px; cursor:pointer; letter-spacing:.5px; }
   .formBtn.on{ color:#0c1a08; background:#9dff3c; border-color:#9dff3c; font-weight:700; }
   .tacWarn{ color:#ff8a7d; background:rgba(255,90,77,.08); border:1px solid rgba(255,90,77,.3); border-radius:7px; font-size:10px; text-align:center; padding:6px 8px; margin:0 auto 8px; max-width:340px; }
-  #bldgPanel h3{ font-family:'Baskic8','Space Grotesk',sans-serif; color:#e9f5ec; font-size:20px; letter-spacing:1px; margin-bottom:4px; text-align:center; }
-  #bldgPanel .bpSub{ color:#7f9a6f; font-size:10px; text-align:center; letter-spacing:2px; margin-bottom:16px; text-transform:uppercase; }
-  #bldgPanel .bpBody{ color:#9bb88a; font-size:13px; line-height:1.7; background:rgba(157,255,60,.04); border:1px solid #2a3a22; border-radius:10px; padding:15px 18px; margin-bottom:16px; }
+  #bldgPanel h3{ font-family:'Baskic8','Space Grotesk',sans-serif; color:#e9f5ec; font-size:17px; letter-spacing:1px; white-space:nowrap; }
+  #bldgPanel .bpBody{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#9bb88a; font-size:13px; line-height:1.6;
+    background:rgba(157,255,60,.04); border:1px solid #2a3a22; border-radius:10px; padding:10px 14px; }
+  #bldgPanel .bpBody.panes{ overflow:hidden; padding:0; }
+  .bpFoot{ display:none; flex:none; gap:8px; justify-content:center; }
+  .bpFoot.on{ display:flex; }
+  .bpFoot .mrContinue{ margin-top:0; padding:11px 0; max-width:520px; }
   #bldgPanel .bpBody b{ color:#9dff3c; }
   /* ===== TRAP LAB ===== */
   .labUI{display:none;}
@@ -678,6 +736,223 @@
     #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="dribble"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
     #stageWrap.labTuneOpen #labLow{display:none !important;}
   }
+  /* ===== PIXEL THEME ===================================================================================================
+     Every menu in framed pixel windows, as the town's tiles and the players are drawn: navy windows with a cream frame
+     and a black outline (whole pixels, the corners notched -- offset shadows, so any size), bevelled buttons, lime for
+     what's picked with a ▶ cursor beside it, and nothing smaller than 36 px to tap. The palette is the stand's. ===== */
+  :root{ --bg:#141a2c; --win:#232a44; --well:#151a2e; --ol:#070912; --frame:#e8e0c8; --frameSh:#7d7a68;
+    --btn:#2e3860; --btnHov:#38447a; --btnHi:#4b578a; --btnLo:#171c33; --ink:#f2ecd8; --ink2:#cdd1e2; --dim:#a7aecb; --dim2:#828bad;
+    --acc:#9dff3c; --accInk:#0c1a08; --accHi:#d2ffa0; --accLo:#5aa61e; --row:#262e4b; --rowOn:#34416c;
+    --pxOut:0 -2px 0 0 var(--ol), 0 2px 0 0 var(--ol), -2px 0 0 0 var(--ol), 2px 0 0 0 var(--ol);
+    --pxWin:var(--pxOut), inset 0 0 0 2px var(--frame), inset 0 0 0 4px var(--frameSh);
+    --pxBtn:var(--pxOut), inset 2px 2px 0 0 var(--btnHi), inset -2px -2px 0 0 var(--btnLo);
+    --pxBtnOn:var(--pxOut), inset 2px 2px 0 0 var(--accHi), inset -2px -2px 0 0 var(--accLo);
+    --pxBtnDown:var(--pxOut), inset 2px 2px 0 0 var(--btnLo), inset -2px -2px 0 0 var(--btnHi);
+    --pxCur:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='10' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h1v2h-1v1h-1v1h-1v1h-1v1h-1z'/%3E%3C/svg%3E"); }
+  body{ background:var(--bg); }
+  #startMenu, .smPanel, #exhPanel, #careerHub, #bldgPanel, .pauseOv, .menuOverlay, #matchReport, #layoutEd{ background:var(--bg); }
+  .pauseOv, .menuOverlay{ background:rgba(14,18,32,.94); }
+  /* windows */
+  .pauseCard, .menuCard, #bldgPanel .bpBody, .chTop, .mgCard, .tacStat, .sqCard, .exhSide, .mgOffer, #labTune, .mkDetail, .hsCell, .instrLocked{
+    background:var(--win); border:0; border-radius:0; box-shadow:var(--pxWin); }
+  .pauseCard{ padding:14px 16px 14px; }
+  .pauseCard.mkCard, .settingsCard{ padding:14px 18px; }
+  .mgCard, .tacStat, .sqCard, .exhSide, .mgOffer, .hsCell{ padding:12px 14px; }
+  #bldgPanel .bpBody{ padding:12px 16px; }
+  .chTop{ padding:8px 14px; }
+  /* buttons: bevelled, the pixel font */
+  .pauseBtn, .smBtn, .bpTab, .bpTopBack, .chPlay, .chBtn2, .chMenuBtn, .mgBtn, .mgAdj, .mgChip, .setOpt, .iOpt, .formBtn, .phTab,
+  .mrContinue, .stadBtn, .btn, .mtab, .exhArr, .exhChip, .slotDel, .leBtn, .labChip, .iMove, .iDone, .styBtn, .mkTab, .mkAdj, .bldg, .menuChip, .cwSlider{
+    border:0; border-radius:0; background:var(--btn); color:var(--ink); box-shadow:var(--pxBtn); font-family:'Baskic8','IBM Plex Mono',monospace;
+    text-shadow:1px 1px 0 var(--ol); min-height:36px; }
+  .bldg{ min-height:0; }
+  .labChip{ min-height:30px; }
+  .pauseBtn, .smBtn, .mgBtn, .chPlay, .chBtn2, .mrContinue, .stadBtn, .iMove, .iDone{ letter-spacing:1px; }
+  .smBtn{ color:var(--acc); }
+  .mgAdj, .exhArr{ color:var(--acc); }
+  @media (hover:hover){
+    .pauseBtn:hover, .smBtn:hover, .bpTab:hover, .bpTopBack:hover, .chBtn2:hover, .chMenuBtn:hover, .mgBtn:hover, .mgAdj:hover, .mgChip:hover, .setOpt:hover,
+    .iOpt:hover, .formBtn:hover, .phTab:hover, .stadBtn:hover, .btn:hover, .mtab:hover, .exhArr:hover, .exhChip:hover, .leBtn:hover, .labChip:hover,
+    .iMove:hover, .styBtn:hover, .mkTab:hover, .bldg:hover, .menuChip:hover{ background:var(--btnHov); border:0; }
+    .smBtn:hover{ color:var(--ink); }
+  }
+  .pauseBtn:active, .smBtn:active, .bpTab:active, .bpTopBack:active, .chBtn2:active, .chMenuBtn:active, .mgBtn:active, .mgAdj:active, .mgChip:active,
+  .setOpt:active, .iOpt:active, .formBtn:active, .phTab:active, .stadBtn:active, .btn:active, .mtab:active, .exhArr:active, .exhChip:active, .leBtn:active,
+  .iMove:active, .styBtn:active, .mkTab:active, .bldg:active, .chPlay:active, .mrContinue:active{ box-shadow:var(--pxBtnDown); transform:translateY(1px); }
+  /* what's picked: lime, and the ▶ cursor on tabs, options and the man in a list */
+  .pauseBtn.on, .bpTab.on, .setOpt.on, .mgChip.on, .iOpt.on, .formBtn.on, .phTab.on, .mtab.active, .btn.active, .btn.solid, .styBtn.on, .mkTab.on,
+  .exhChip.cur, .chPlay, .mgBtn.go, .mrContinue, .iDone, .leDone, .labGo, .form.active, .dform.active, .mform.active, .mwidth.active, .tteam.active,
+  .iMove.moveActive, .smBtn.sel{
+    background:var(--acc); color:var(--accInk); box-shadow:var(--pxBtnOn); text-shadow:none; }
+  .smBtn.sel{ color:var(--accInk); }
+  .bpTab.on::before, .setOpt.on::before, .phTab.on::before, .mtab.active::before, .mkTab.on::before, .mgRow.on::before{
+    content:''; display:inline-block; flex:none; width:6px; height:10px; margin-right:6px; vertical-align:0; background:currentColor;
+    -webkit-mask:var(--pxCur) no-repeat; mask:var(--pxCur) no-repeat; }
+  .mgRow.on::before{ background:var(--acc); margin-right:2px; }
+  .smBtn .mk{ display:none; }
+  .smBtn.sel::before, .smBtn:hover::before{ content:''; display:inline-block; width:6px; height:10px; margin-right:9px; background:currentColor;
+    -webkit-mask:var(--pxCur) no-repeat; mask:var(--pxCur) no-repeat; }
+  .pauseBtn[disabled], .mgBtn[disabled], .btn[disabled], .formBtn[disabled], .chBtn2[disabled], .smBtn.disabled, .exhChip:disabled{ opacity:.38; }
+  .pauseExit, .mgBtn.warn, .slotDel{ color:#ff8a7d; }
+  .pauseBack{ color:var(--dim); }
+  .mgBtn.go, .chPlay{ color:var(--accInk); }
+  /* lists: flat rows on the window, a lit one for the man you've picked */
+  .mgRow{ border:0; border-radius:0; background:var(--row); box-shadow:inset 0 -2px 0 0 var(--btnLo); color:var(--ink); min-height:36px; }
+  .mgRow:hover{ background:var(--rowOn); border:0; }
+  .mgRow.on{ background:var(--rowOn); box-shadow:inset 3px 0 0 0 var(--acc), inset 0 -2px 0 0 var(--btnLo); }
+  .slotRow, .benchRow{ border-radius:0; }
+  .mgFx{ border-bottom:2px solid var(--well); color:var(--ink2); }
+  .mgFx.next{ background:rgba(255,180,60,.12); border-radius:0; }
+  .mgTbl th, .hsTbl th{ color:var(--dim2); border-bottom:2px solid var(--btnLo); }
+  .mgTbl td, .hsTbl td{ color:var(--ink2); border-bottom:1px solid var(--well); }
+  .mgNews{ color:var(--ink2); border-bottom:2px solid var(--well); }
+  .mgNews i{ color:var(--dim2); }
+  /* type */
+  .pauseTitle, #bldgPanel h3, .chTop .chClub, .smPanel h3, #startMenu .smTitle, .mgCardName, .tacStatName, .hsName, .sqName, .exhName, .mrScore{
+    color:var(--ink); text-shadow:2px 2px 0 var(--ol); }
+  .pauseTitle{ color:var(--acc); }
+  #bldgPanel .bpBody, .mgRow .nm, .cfMsg, .mgOffer, .mrRow, .mrGoalList, .setLbl, .bldg .bn, .instrDesc, .mkDetDesc{ color:var(--ink2); }
+  .mgSum, .mgHint, .bpSect, .mgLbl, .mgRow .pos, .mgRow .sub, .mgFx .md, .mgFxBreak, .chStat .k, .chMeta, .chNext, .mgCardSub, .statRow .sl, .tacStatRole,
+  .tacStatPers, .instrGrpLbl, .instrNote, .instrHead, .tacHint, .benchHdr, .hsSub, .hsOvrL, .hsCell .k, .hsAt .n, .mkStep, .mrLabel, .mrSect, .exhLeague,
+  .exhLbl, .exhMeta, .setLbl i, .bldg .bs, #startMenu .smSub, .ltNote, .ltHint, .lmScale, .labChip i, .menuHint, .lbl, .legend, .wlab, .sqRole, .sqStyle,
+  .cwLbl, .styLbl, .mkColName, .mkpSub, .mkGroupHead, .tacInstrHdr, #startMenu .smVer{ color:var(--dim); }
+  .mgRow .ovr .pot, .mgRow .ovr i, .mgRow .sub{ color:var(--dim2); }
+  .bpSect, .mrSect, .instrHead, .tacInstr, .tacStatHead{ border-color:var(--btnLo); }
+  .statBar, .mkBarWrap{ background:var(--well); border-radius:0; }
+  .statBar i{ background:linear-gradient(90deg,var(--accLo),var(--acc)); }
+  .mgTag{ border-radius:0; }
+  /* fields */
+  .mkInput{ background:var(--well); border:0; border-radius:0; color:var(--ink); box-shadow:var(--pxOut), inset 2px 2px 0 0 var(--btnLo); }
+  .mkInput:focus{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
+  .hsSw{ border-radius:0; box-shadow:var(--pxOut); border:0; }
+  .hsSw.on{ box-shadow:var(--pxOut), inset 0 0 0 3px var(--frame); }
+  .mgMakerKit canvas, .hsPort, .hsLookPrev{ background:var(--well); border:0; border-radius:0; box-shadow:var(--pxOut); }
+  /* the hub */
+  .bldg{ background:var(--btn); }
+  .bldg svg{ stroke:var(--acc); }
+  .bldg .bn{ color:var(--ink); }
+  .bBadge{ border-radius:0; box-shadow:var(--pxOut); }
+  .chStat .v{ text-shadow:1px 1px 0 var(--ol); }
+  /* the match: its chips, framed like everything else */
+  #readout .chip, .menuChip{ background:rgba(20,26,44,.88); border:0; border-radius:0; box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); color:var(--ink2); }
+  #labResult, .labTallyRow{ background:rgba(20,26,44,.9); border:0; border-radius:0; box-shadow:var(--pxOut); }
+  .bldg.sel, .exhClub.open, .labChip.on, .mkPick.on, .slotRow.sel, .pphase.active{ background:var(--rowOn); border-color:var(--acc); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
+  .exhClub{ border:0; border-radius:0; }
+  @media (hover:hover){ .exhClub:hover{ background:var(--btnHov); } }
+  .exhSide.you{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), inset 0 0 0 4px var(--accLo); }
+  .mkPick, .slotRow, .benchRow{ background:var(--row); border:0; border-radius:0; box-shadow:inset 0 -2px 0 0 var(--btnLo); }
+  /* a list and its man, side by side */
+  .mgPanes{ display:flex; height:100%; }
+  .mgPane{ min-width:0; display:flex; flex-direction:column; min-height:0; }
+  .mgPaneL{ flex:1.15 1 0; box-shadow:inset -2px 0 0 0 var(--btnLo); }
+  .mgPaneR{ flex:1 1 0; }
+  .mgPaneScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 12px; }
+  .mgPaneL .mgPaneScroll{ padding-left:10px; }
+  .mgPager{ flex:none; display:flex; align-items:center; justify-content:center; gap:12px; padding:6px 8px 8px; box-shadow:inset 0 2px 0 0 var(--btnLo), inset -2px 0 0 0 var(--btnLo); }
+  .mgPager b{ font-family:'Baskic8',sans-serif; color:var(--ink); min-width:54px; text-align:center; font-size:14px; }
+  .mgPager span{ color:var(--dim2); font-size:10px; }
+  .mgPager .mgAdj{ width:44px; height:36px; }
+  .mgPick0{ color:var(--dim); text-align:center; padding:36px 10px; font-size:12px; line-height:1.6; }
+  .mgPaneR .mgCard{ margin:0; padding:0; background:transparent; box-shadow:none; }
+  .mgPaneR .mgBars{ grid-template-columns:1fr; }
+  .mgFilters{ justify-content:flex-start; }
+  .mgPaneL .mgFilters{ flex-wrap:nowrap; overflow-x:auto; padding:2px 2px 4px; scrollbar-width:none; }
+  .mgPaneL .mgFilters::-webkit-scrollbar{ display:none; }
+  .mgPaneL .mgChip{ flex:none; white-space:nowrap; }
+  #bpBody.panes .mgSum{ text-align:left; }
+  .six{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:7px; margin:10px 2px 8px; }
+  .sixC{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:46px; padding:4px 0; cursor:pointer;
+    border:0; border-radius:0; background:var(--btn); color:var(--ink); box-shadow:var(--pxBtn); font-family:'Baskic8',sans-serif; }
+  .sixC b{ font-size:16px; line-height:1; text-shadow:1px 1px 0 var(--ol); }
+  .sixC i{ font-style:normal; font-size:10px; color:var(--dim); letter-spacing:1px; }
+  .sixC.on{ background:var(--rowOn); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
+  .sixOpen{ background:var(--well); padding:8px 10px 6px; margin:0 2px 10px; box-shadow:inset 0 0 0 2px var(--btnLo); }
+  .sixHd{ font-family:'Baskic8',sans-serif; font-size:11px; color:var(--dim); letter-spacing:1px; margin-bottom:4px; }
+  /* TACTICS: the pitch first */
+  .tacB1{ display:flex; flex-direction:column; height:100%; min-height:0; }
+  .tbTop{ flex:none; display:flex; align-items:center; gap:8px; padding:8px 10px 8px; }
+  .tbSeg{ display:flex; gap:4px; flex:none; }
+  .tbSeg .phTab{ flex:none; padding:0 9px; font-size:11px; }
+  .tbDropW{ position:relative; flex:none; }
+  .tbDrop{ display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; min-height:36px; padding:2px 10px; white-space:nowrap; cursor:pointer;
+    font:12px 'Baskic8',sans-serif; border:0; border-radius:0; background:var(--btn); color:var(--ink); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--ol); }
+  .tbDrop i{ font:8.5px 'IBM Plex Mono',monospace; font-style:normal; color:var(--dim); letter-spacing:1px; text-shadow:none; }
+  .tbDrop.on{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
+  .tbBest{ margin-left:auto; flex:none !important; padding:0 12px !important; font-size:12px; }
+  .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin);
+    padding:10px; display:flex; flex-direction:column; gap:6px; }
+  .tbMenuGrid{ display:grid; grid-template-columns:repeat(5,auto); gap:6px; }
+  .tbMenuNote{ font-size:10px; color:var(--dim); }
+  .tbMenu.r{ left:auto; right:0; }
+  .tbOpt{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:6px 10px; text-align:left; white-space:normal; cursor:pointer; min-height:36px;
+    border:0; border-radius:0; background:var(--btn); color:var(--ink); box-shadow:var(--pxBtn); font-family:'Baskic8',sans-serif; text-shadow:1px 1px 0 var(--ol); }
+  .tbOpt.on{ background:var(--acc); color:var(--accInk); box-shadow:var(--pxBtnOn); text-shadow:none; }
+  .tbOpt b{ font-size:13px; font-weight:400; } .tbOpt i{ font-style:normal; font-family:'IBM Plex Mono',monospace; font-size:10px; line-height:1.35; color:var(--dim); text-shadow:none; }
+  .tbOpt.on i{ color:#2a4a10; }
+  .tbMain{ flex:1 1 auto; min-height:0; display:flex; }
+  .tbLeft{ flex:1.5 1 0; min-width:0; display:flex; flex-direction:column; padding:4px 12px 8px; }
+  .tbRight{ flex:1 1 0; min-width:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 12px 10px; box-shadow:inset 2px 0 0 0 var(--btnLo); }
+  .tpitch{ position:relative; flex:1 1 auto; min-height:110px; background:repeating-linear-gradient(90deg,#6ec88b 0 8.333%,#5cbc7c 8.333% 16.667%);
+    box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; }
+  .tpitch i{ position:absolute; pointer-events:none; }
+  .tpHalf{ left:50%; top:0; bottom:0; width:2px; margin-left:-1px; background:#f4fbf2; }
+  .tpCirc{ left:50%; top:50%; width:15%; aspect-ratio:1; transform:translate(-50%,-50%); box-shadow:0 0 0 2px #f4fbf2; border-radius:50%; }
+  .tpBox{ top:26%; bottom:26%; width:13%; box-shadow:inset 0 0 0 2px #f4fbf2; }
+  .tpBox.l{ left:0; } .tpBox.r{ right:0; }
+  .sqPitchW{ flex:none; padding:10px 12px 4px; }
+  .sqPitch{ height:124px; flex:none; }
+  .sqPitchHint{ font-size:9.5px; color:var(--dim2); margin-top:6px; }
+  .sqPitch .ptk{ width:40px !important; height:30px !important; }
+  .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
+  .sqPitch .ptk .ptkName{ font-size:7.5px !important; max-width:38px !important; }
+  .sqPitch .ptk.dropOver{ background:var(--acc); }
+  .sqList .mgRow{ -webkit-touch-callout:none; }
+  .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
+  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:50px; height:38px; border:0; border-radius:0; padding:0; cursor:grab;
+    background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; font-family:'Baskic8',sans-serif; }
+  .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
+  .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:8.5px 'IBM Plex Mono',monospace; color:var(--ink2); max-width:48px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px #ffb43c; } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:#ffb43c; }
+  .tacB1 .ptk.statview{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgba(157,255,60,.4); }
+  .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px #ffb43c, 0 0 0 4px rgba(255,180,60,.5); }
+  .tacB1 .ptk.canswap{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
+  .tacB1 .ptk.dropOver{ background:var(--acc); } .tacB1 .ptk.dropOver .ptkOvr, .tacB1 .ptk.dropOver .ptkName{ color:var(--accInk); text-shadow:none; }
+  .tacB1 .ptk.lifted{ opacity:.3; }
+  .tacB1 .ptk[data-fit]::after{ content:attr(data-fit); position:absolute; top:-10px; right:-11px; min-width:20px; padding:1px 3px; font:11px 'Baskic8',sans-serif;
+    text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); }
+  .tacB1 .ptk.fitOop::after{ background:#ffb43c; }
+  .pxGhost{ position:fixed !important; transform:scale(1.12) !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 4px 6px 0 0 rgba(0,0,0,.35) !important; }
+  .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:7px 7px; align-items:center; padding:8px 12px 9px; box-shadow:inset 0 2px 0 0 var(--btnLo); }
+  .tbBench .ptk{ position:relative; transform:none; width:46px; height:36px; }
+  .tbBenchLbl{ font:10px 'Baskic8',sans-serif; color:var(--dim); letter-spacing:1px; margin-right:2px; }
+  .tbRight .mgCardHead{ margin-top:6px; }
+  .tbRight .tacInstr{ margin-top:4px; }
+  /* the pause menu: a quick row, then four buttons two by two */
+  .pauseMain{ max-width:560px; }
+  .pauseQuick{ display:flex; gap:7px; flex-wrap:wrap; justify-content:center; flex:none; }
+  .pauseQuick .tbDrop{ flex:1 1 0; min-width:0; }
+  .pqMenu{ display:none; flex-direction:column; gap:6px; } .pqMenu.on{ display:flex; }
+  .pqMenu .tbMenuGrid{ grid-template-columns:repeat(5,1fr); }
+  .pauseGrid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  /* the match's tactics */
+  #mtacOv{ align-items:stretch; }
+  .mtacCard{ width:100%; max-width:1100px; height:100%; margin:0 auto; display:flex; flex-direction:column; gap:7px; position:relative; }
+  .mtacCard h3{ font-family:'Baskic8',sans-serif; color:var(--ink); font-size:17px; letter-spacing:1px; text-shadow:2px 2px 0 var(--ol); }
+  .mtacBody{ flex:1 1 auto; min-height:0; background:var(--win); box-shadow:var(--pxWin); }
+  .mtSubs{ font:11px 'Baskic8',sans-serif; color:var(--acc); letter-spacing:1px; }
+  .mtacBody .ptk{ position:absolute; }
+  .mtacBody .tbBench .ptk{ position:relative; }
+  .tacB1 .ptk.dim{ opacity:.45; }
+  .tacB1.ro .ptk{ cursor:pointer; }
+  .tbBenchNone{ font-size:10px; color:var(--dim2); }
+  .ptkYou{ position:absolute; top:-8px; left:-8px; font:8px 'Baskic8',sans-serif; font-style:normal; background:#ffb43c; color:#0c1a08; padding:1px 3px; box-shadow:var(--pxOut); }
+  .mtLegs{ display:flex; align-items:center; gap:8px; font:10px 'Baskic8',sans-serif; color:var(--dim); margin:6px 2px 0; }
+  .mtLegs .statBar{ flex:1; height:7px; } .mtLegs b{ color:var(--ink); font-weight:400; min-width:34px; text-align:right; }
+  .tbDrop[disabled]{ opacity:1; cursor:default; }
+  /* scrollbars */
+  *{ scrollbar-color:var(--btnHi) var(--well); scrollbar-width:thin; }
+  ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-track{ background:var(--well); } ::-webkit-scrollbar-thumb{ background:var(--btnHi); }
 </style>
 </head>
 <body>
@@ -780,9 +1055,10 @@
     <div class="chWarn" id="chWarn" style="display:none"></div>
     <div class="chBottom" id="chBottom"></div>
     <div id="bldgPanel"><div class="bpInner">
-      <button class="bpTopBack" data-hub="bldgback" aria-label="back to town">◀ TOWN</button>
-      <h3 id="bpTitle"></h3><div class="bpSub" id="bpSub"></div><div class="bpBody" id="bpBody"></div>
-      <button class="smBtn smBack" data-hub="bldgback" style="min-width:240px;margin:0 auto;display:block"><span class="mk">◀</span>BACK TO TOWN</button>
+      <div class="bpHead"><button class="bpTopBack" data-hub="bldgback" aria-label="back to town">◀ TOWN</button><h3 id="bpTitle"></h3><div class="bpTabs" id="bpTabs"></div></div>
+      <div class="bpBody" id="bpBody"></div>
+      <div class="bpFoot" id="bpFoot"></div>
+      <div class="bpMsg" id="bpMsg"></div>
     </div></div>
   </div>
   <div id="dbg" style="display:none;position:absolute;left:8px;bottom:8px;z-index:50;font:11px/1.35 'IBM Plex Mono',monospace;color:#9dff3c;background:rgba(0,0,0,.72);border:1px solid #2a3a22;border-radius:6px;padding:7px 9px;pointer-events:auto;-webkit-user-select:text;user-select:text;max-width:92vw;letter-spacing:.2px">
@@ -842,6 +1118,7 @@
     <button class="labChip ltReset" data-lab="defaults"><b>FACTORY DEFAULTS</b></button>
   </div>
   <div id="pad"><div class="base"></div><div class="stick" id="stick"></div></div>
+  <div id="padBand"></div>
   <div id="tapRing"></div>
   <div id="kickBtn" class="actBtn">PASS</div>
   <div id="shootBtn" class="actBtn">SHOOT</div>
@@ -849,20 +1126,36 @@
   <div id="skillBtn" class="actBtn">SKILL</div>
 </div>
 
+<div id="safeProbe"></div>
 <div id="pauseMenu" class="pauseOv">
-  <div class="pauseCard">
+  <div class="pauseCard pauseMain">
     <div class="pauseTitle">MENU</div>
-    <button class="pauseBtn" data-pause="tactics">TACTICS</button>
-    <button class="pauseBtn" data-pause="settings">SETTINGS</button>
-    <button class="pauseBtn pauseExit" data-pause="exit">EXIT GAME</button>
-    <button class="pauseBtn pauseBack" data-pause="back">◀ BACK TO GAME</button>
+    <div class="pauseQuick" id="pauseQuick"></div>
+    <div class="pqMenu" id="pqMenu"></div>
+    <div class="pauseGrid" id="pauseGrid">
+      <button class="pauseBtn" data-pause="tactics">TACTICS</button>
+      <button class="pauseBtn" data-pause="settings">SETTINGS</button>
+      <button class="pauseBtn pauseExit" data-pause="exit">EXIT GAME</button>
+      <button class="pauseBtn pauseBack" data-pause="back">◀ BACK TO GAME</button>
+      <button class="pauseBtn devOnly" data-pause="oldtac" style="grid-column:1/-1">DEV · OLD TACTICS MENU</button>
+    </div>
   </div>
 </div>
+<div id="mtacOv" class="pauseOv"><div class="mtacCard">
+  <div class="bpHead"><button class="bpTopBack" data-mt="back">◀ BACK</button><h3>TACTICS</h3><span class="mtSubs" id="mtSubs"></span>
+    <div class="bpTabs" id="mtTeams"></div></div>
+  <div class="mtacBody" id="mtacBody"></div>
+  <div class="bpMsg" id="mtMsg"></div>
+</div></div>
 <div id="settingsOverlay" class="pauseOv">
   <div class="pauseCard settingsCard">
     <div class="pauseTitle">SETTINGS</div>
-    <button class="pauseBtn layoutEntry" data-setlayout="1">BUTTON LAYOUT ▶</button>
-    <div id="settingsDials"></div>
+    <div class="pScroll setMid">
+      <div class="setRows" id="setRows"></div>
+      <button class="pauseBtn layoutEntry" data-setlayout="1">BUTTON LAYOUT ▶</button>
+      <button class="pauseBtn devOnly" data-setdev="1">ADVANCED · DEV ▶</button>
+      <div id="settingsDials"></div>
+    </div>
     <button class="pauseBtn pauseBack" data-setclose="1">◀ BACK</button>
   </div>
 </div>
@@ -1143,6 +1436,18 @@
   const lostInOppHalf={G:false,R:false};
   let possConfTeam='G', possFlipT=0; const POSS_FLIP_TIME=0.4;  // a team keeps its attack shape until the OTHER team has held the ball this long
 
+  // ===== WHO MAY TUNE: the feel dials are the game's own tuning (backend only): players never see them, and their saved
+  // values aren't loaded. A developer turns them back on (with the labs' TUNE and EDIT STATS) with ?dev in the address,
+  // or five taps on the build number on the start menu.
+  let DEV=false; try{ DEV=/[?&#]dev\b/.test(location.search+location.hash)||localStorage.getItem('ftc_dev')==='1'; }catch(e){}
+  function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
+  document.body.classList.toggle('dev',DEV);
+  // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
+  const PREFS={halfMin:3, oppShift:0, art:true};
+  try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
+  function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
+  function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||3),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
+    try{ SPRITE.enable(PREFS.art!==false); PITCH.enable(PREFS.art!==false); }catch(e){} }
   // ===== persistence =====
   const hasStorage=typeof window!=='undefined'&&window.storage;
   let saveT=null;
@@ -1163,6 +1468,7 @@
       if(r&&r.value){
         const o=JSON.parse(r.value);
         const v=o.__v||1;
+        if(DEV){                         // (a player plays on the game's own tuning: see DEV)
         for(const k in o){
           if(k.startsWith('__')||P[k]===undefined)continue;
           P[k].val=Math.max(P[k].min,Math.min(P[k].max,o[k]));
@@ -1271,6 +1577,8 @@
         if(v<73){ if(P.trapKeepBad.val===0.7) P.trapKeepBad.val=0.63; }   // a botched touch runs a little less far
         if(v<74){ if(P.aiTouch.val===1.1) P.aiTouch.val=1; if(P.trapKeepGood.val===0.12) P.trapKeepGood.val=0.06;   // the first touch is the player's own now (no timing):
                   if(P.trapKeepBad.val===0.63) P.trapKeepBad.val=0.45; if(P.gatherR.val===28) P.gatherR.val=20; }    // a kinder bounce, and a smaller reach to gather it in
+        }
+        applyPrefs();                    // the player's own settings win over anything saved with the dials
         if(o.__fG)myForm=formOKAtk(o.__fG,myForm);
         if(o.__fR)rForm=formOKAtk(o.__fR,rForm);
         myFormDef=o.__fGd?formOKDef(o.__fGd,defFormFor(myForm)):defFormFor(myForm);
@@ -2884,7 +3192,7 @@
       case 'KeyQ': LAB.auto=!LAB.auto; LAB.nextT=0.6; LAB.dirty=true; return true;
       case 'KeyZ': LAB.slow=LAB_SLOWS[(LAB_SLOWS.indexOf(LAB.slow)+1)%LAB_SLOWS.length]; LAB.dirty=true; return true;
       case 'KeyR': labServe(); LAB.dirty=true; return true;
-      case 'KeyT': labTune(!LAB.tune); LAB.dirty=true; return true;
+      case 'KeyT': if(!DEV) return false; labTune(!LAB.tune); LAB.dirty=true; return true;
       case 'KeyX': labClear(); LAB.dirty=true; return true;
     }
     if(LAB.kind==='pass') return passLabKey(code);
@@ -2902,7 +3210,7 @@
       case 'KeyC': labSetRecv(LAB.recv==='ai'?'you':'ai'); break;
       case 'KeyG': LAB.guide=!LAB.guide; break;
       case 'KeyR': labServe(); break;
-      case 'KeyT': labTune(!LAB.tune); break;
+      case 'KeyT': if(DEV) labTune(!LAB.tune); break;
       case 'KeyX': labClear(); break;
       default: return false;
     }
@@ -2922,7 +3230,7 @@
     else if(act==='recv') labSetRecv(LAB.recv==='ai'?'you':'ai');
     else if(act==='guide') LAB.guide=!LAB.guide;
     else if(act==='go') labServe();
-    else if(act==='tune') labTune(!LAB.tune);
+    else if(act==='tune'){ if(DEV) labTune(!LAB.tune); }
     else if(act==='clear') labClear();
     else if(act==='exit'){ resumable=false; newMatch(); showStartMenu(); return; }
     LAB.dirty=true;
@@ -9454,7 +9762,7 @@
   }
   function newMatch(){
     labOff(); if(practice){ practice=null; pball.on=false; prioritizeDials(null); }   // matches never run as a drill
-    meMatch=null;
+    meMatch=null; SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
     goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0;
     ball.lastTouchP=null;ball.prevTouchP=null;
     ftPending=false;ftShot=false;ftLastTeam=null;
@@ -10584,18 +10892,139 @@
   }
   function openMenu(){ menuOpen=true; menuState.selPos=null; menuState.statPos=null; document.getElementById('menu').style.display='flex'; renderMenu(); }
   function closeMenu(){ menuOpen=false; document.getElementById('menu').style.display='none'; if(SCREEN==='match') openPause(); }   // back out to the in-game menu list
+  // ===== THE MATCH'S TACTICS (the pause menu): the pitch-first screen on the match itself -- your side's shapes, width, style
+  // and posture, every man's card (with his legs) and his spot's instructions. Drag a man onto another to swap their spots;
+  // in a career match, drag one off the bench onto a man to bring him on (SUB_MAX a match; the man off can't come back).
+  // The other side: look, don't touch. =====
+  const SUB_MAX=3;
+  let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
+  const MT={team:'G', phase:'atk', drop:null, sel:null};
+  function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
+  const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
+  function mtRating(e,role){ return !e?0:(!role||role===e.role)?e.ovr:cwOverall(role,e.stats); }
+  function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW; return {L:30+(u-0.16)/0.40*52, T:9+(g?s.homeY/FH:1-s.homeY/FH)*82}; }   // their own goal on the left, the lines spread as the Office draws them
+  function mtTok(t,si,L,T,kind,role){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
+    const you=controlled&&controlled.team===t&&controlled.squadIdx===si&&kind!=='bench';
+    return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'><span class="ptkOvr">'+r+'</span><span class="ptkName">'+mgEsc(String(e.name||'').split(' ').slice(-1)[0])+'</span>'+(you?'<i class="ptkYou">YOU</i>':'')+'</button>'; }
+  function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
+    const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
+    const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
+    let h='<div class="tbCard"><div class="mgCardHead"><div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
+      +(oop?'<div class="mgCardSub" style="color:#ffb43c">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">'+(SUBS[t].off.includes(si)?'subbed off':'on the bench')+'</div>')+'</div>'
+      +'<div><div class="mgCardOvr"'+(oop?' style="color:#ffb43c"':'')+'>'+at+'</div></div></div>';
+    if(p&&role&&role!=='GK'){ const st=clamp(p.stamina,0,1); h+='<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(st*100)+'%;background:'+(st>0.6?'':st>0.3?'#ffb43c':'#ff5a4d')+'"></i></span><b>'+Math.round(st*100)+'%</b></div>'; }
+    h+=sixHtml(e.stats,e.role)+'</div>';
+    if(sl&&t==='G') h+='<div class="tacInstr">'+instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC)+'</div>';
+    return h; }
+  function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'||MT.drop==='posture'?' r':'')+'">';
+    if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
+        return '<button class="formBtn'+(fm===form?' on':'')+'" data-mtform="'+fm+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
+    else if(MT.drop==='width'){ const w=widthSnap(widthOf(t,phase)); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-mtwidth="'+x[2]+'"><b>'+x[1]+'</b></button>').join(''); }
+    else if(MT.drop==='style'){ h+=STYLE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC[t].off?' on':'')+'" data-mtstyle="'+s[0]+'"><b>'+s[1]+'</b><i>'+STYLE_BLURB[s[0]]+'</i></button>').join(''); }
+    else if(MT.drop==='posture'){ h+=POSTURE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC[t].def?' on':'')+'" data-mtposture="'+s[0]+'"><b>'+s[1]+'</b><i>'+POSTURE_BLURB[s[0]]+'</i></button>').join(''); }
+    return h+'</div>'; }
+  function renderMatchTac(){ const t=MT.team, phase=MT.phase, li=LINEUP[t]; if(!li||!SQUAD[t]) return;
+    const mine=t==='G', form=formFor(t,phase), slots=slotsFor(t,form,phase), order=li[phase]||li.atk, bench=mtBench(t);
+    if(MT.sel==null||!SQUAD[t][MT.sel]) MT.sel=(controlled&&controlled.team===t)?controlled.squadIdx:order[0];
+    const lbl=x=>(x||'').toUpperCase(), w=widthSnap(widthOf(t,phase)), wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
+    const sl=phase==='atk'?(STYLE_LIST.find(s=>s[0]===TAC[t].off)||STYLE_LIST[0])[1]:(POSTURE_LIST.find(s=>s[0]===TAC[t].def)||POSTURE_LIST[1])[1];
+    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(MT.drop===k?' on':'')+'" data-mtdrop="'+k+'"'+(mine?'':' disabled')+'><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE',posture:'POSTURE'}[k]+'</i>'+label+(mine?' ▾':'')+'</button>'+(MT.drop===k?mtMenuHtml(t,phase):'')+'</span>';
+    let h='<div class="tacB1'+(mine?'':' ro')+'"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-mtph="atk">WITH BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-mtph="def">WITHOUT</button></div>'
+      +drop('form',form)+drop('width',wl)+drop(phase==='atk'?'style':'posture',sl)+'</div>';
+    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>'+mtTok(t,li.gk,5.5,50,'gk','GK');
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role); }
+    h+='</div></div><div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';
+    h+='<div class="tbBench"><span class="tbBenchLbl">BENCH</span>'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one on the bench in an exhibition':'—')+'</span>')+'</div>';
+    document.getElementById('mtacBody').innerHTML=h+'</div>';
+    document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
+    document.getElementById('mtSubs').textContent=mtBench('G').length||SUBS.G.used?'SUBS LEFT '+(SUB_MAX-SUBS.G.used):''; }
+  function openMatchTac(){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; menuOpen=true; document.getElementById('mtacOv').classList.add('on'); renderMatchTac(); }
+  function closeMatchTac(){ menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on'); if(SCREEN==='match') openPause(); }
+  let _mtMsgT=null;
+  function mtMsg(m,col){ const el=document.getElementById('mtMsg'); el.textContent=m; el.style.color=col||'#ffb43c'; el.classList.add('on'); clearTimeout(_mtMsgT); _mtMsgT=setTimeout(()=>el.classList.remove('on'),3500); }
+  // two of your men swap spots in one shape, live (and a career or a club keeps it)
+  function mtSwapPos(t,phase,i,j){ const arr=LINEUP[t][phase]; if(!arr) return; const a=arr[i], b=arr[j]; arr[i]=b; arr[j]=a;
+    const slots=slotsFor(t,formFor(t,phase),phase), pa=players.find(q=>q.team===t&&q.squadIdx===a), pb=players.find(q=>q.team===t&&q.squadIdx===b);
+    if(phase==='atk'){ if(pa)pa.slotAtk=slots[j]; if(pb)pb.slotAtk=slots[i]; } else { if(pa)pa.slotDef=slots[j]; if(pb)pb.slotDef=slots[i]; }
+    saveTeamSide(t); }
+  // A SUB: the man off the bench takes the other's place (his spots in both shapes, his instructions), on fresh legs
+  function matchSub(t,out,inn){ const li=LINEUP[t], e=SQUAD[t][inn]; if(!e) return false;
+    if(li.gk===out){ li.gk=inn; const kp=keepers.find(k=>k.team===t); if(kp) applyEntry(kp,e,inn); }
+    else { let hit=false; for(const ph of ['atk','def']){ const k=li[ph].indexOf(out); if(k>=0){ li[ph][k]=inn; hit=true; } } if(!hit) return false;
+      const p=players.find(q=>q.team===t&&q.squadIdx===out); if(p){ applyEntry(p,e,inn); p.stamina=1; p.staminaCap=1; } }
+    SUBS[t].used++; SUBS[t].off.push(out); SUBS[t].on.push(inn); return true; }
+  function mtSwap(a,b){ const t=MT.team, li=LINEUP[t]; if(t!=='G'||a.si===b.si) return; const kinds=[a.kind,b.kind].sort().join('+');
+    if(kinds==='field+field'){ const ph=MT.phase, i=li[ph].indexOf(a.si), j=li[ph].indexOf(b.si); if(i>=0&&j>=0) mtSwapPos(t,ph,i,j); }
+    else if(kinds==='bench+field'||kinds==='bench+gk'){ if(!mtCanSub(t)){ mtMsg('No subs left this match.'); return; }
+      const inn=a.kind==='bench'?a.si:b.si, out=a.kind==='bench'?b.si:a.si, eo=SQUAD[t][out], ei=SQUAD[t][inn];
+      if(matchSub(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' · '+(SUB_MAX-SUBS[t].used)+' sub'+(SUB_MAX-SUBS[t].used===1?'':'s')+' left','#9dff3c'); } }
+    else if(kinds==='field+gk') mtMsg('Change your keeper with a sub off the bench.'); }
+  document.getElementById('mtacOv').addEventListener('click',e=>{ const t=MT.team;
+    const b=e.target.closest('[data-mt]'); if(b){ if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; renderMatchTac(); return; } }
+    const dd=e.target.closest('[data-mtdrop]'); if(dd){ if(!dd.disabled) MT.drop=MT.drop===dd.dataset.mtdrop?null:dd.dataset.mtdrop; renderMatchTac(); return; }
+    if(MT.drop&&!e.target.closest('.tbMenu')){ MT.drop=null; renderMatchTac(); return; }
+    const f=e.target.closest('[data-mtform]'); if(f){ MT.drop=null; if(!f.disabled){ setTeamForm(t,MT.phase,f.dataset.mtform); } renderMatchTac(); return; }
+    const w=e.target.closest('[data-mtwidth]'); if(w){ MT.drop=null; setMenuWidth(t,MT.phase,+w.dataset.mtwidth); renderMatchTac(); return; }
+    const s=e.target.closest('[data-mtstyle],[data-mtposture]'); if(s){ MT.drop=null; if(s.dataset.mtstyle) TAC[t].off=s.dataset.mtstyle; else TAC[t].def=s.dataset.mtposture;
+      if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
+    const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
+    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; renderMatchTac(); return; }
+    const mi=e.target.closest('[data-mi]'); if(mi){ const li=LINEUP[t], k=li[MT.phase].indexOf(MT.sel); if(k>=0) setPosInstr(t,MT.phase,k,mi.dataset.mi,mi.dataset.v); renderMatchTac(); return; }
+    const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; renderMatchTac(); return; } });
+  pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
+    can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtCanSub(MT.team)); },
+    lift(el){ const e=SQUAD[MT.team][+el.dataset.si]; if(!e) return;
+      for(const t of document.querySelectorAll('#mtacBody .ptk[data-si]')){ if(t===el) continue; t.classList.add('canswap'); const role=t.dataset.role;
+        if(role){ t.dataset.fit=mtRating(e,role); t.classList.toggle('fitOop',role!==e.role); } } },
+    drop(a,b){ mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si:+b.dataset.si,kind:b.dataset.mtk}); renderMatchTac(); },
+    cancel(){ renderMatchTac(); } });
+  // THE PAUSE MENU'S QUICK ROW: your shape, style and posture a tap away, and SUBS (straight into the tactics, with a bench)
+  let pqDrop=null;
+  function renderPauseQuick(){ const q=document.getElementById('pauseQuick'), m=document.getElementById('pqMenu'), g=document.getElementById('pauseGrid'); if(!q) return;
+    const sty=(STYLE_LIST.find(s=>s[0]===TAC.G.off)||STYLE_LIST[0])[1], pos=(POSTURE_LIST.find(s=>s[0]===TAC.G.def)||POSTURE_LIST[1])[1], bench=mtBench('G').length;
+    const b=(k,lbl,val)=>'<button class="tbDrop'+(pqDrop===k?' on':'')+'" data-pq="'+k+'"><i>'+lbl+'</i>'+val+' ▾</button>';
+    q.innerHTML=b('form','SHAPE',myForm)+b('style','STYLE',sty)+b('posture','POSTURE',pos)+(bench?'<button class="tbDrop" data-pq="subs"><i>SUBS</i>'+(SUB_MAX-SUBS.G.used)+' LEFT ▸</button>':'');
+    let h=''; if(pqDrop==='form') h='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>'<button class="formBtn'+(fm===myForm?' on':'')+'" data-pqv="'+fm+'"'+(DEF_ONLY.includes(fm)?' disabled':'')+'>'+fm+'</button>').join('')+'</div>';
+    else if(pqDrop==='style') h=STYLE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC.G.off?' on':'')+'" data-pqv="'+s[0]+'"><b>'+s[1]+'</b></button>').join('');
+    else if(pqDrop==='posture') h=POSTURE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC.G.def?' on':'')+'" data-pqv="'+s[0]+'"><b>'+s[1]+'</b></button>').join('');
+    m.innerHTML=h; m.classList.toggle('on',!!h); g.style.display=h?'none':''; }
+  function pauseQuickClick(e){ const b=e.target.closest('[data-pq]');
+    if(b){ if(b.dataset.pq==='subs'){ closePause(); openMatchTac(); return true; } pqDrop=pqDrop===b.dataset.pq?null:b.dataset.pq; renderPauseQuick(); return true; }
+    const v=e.target.closest('[data-pqv]'); if(v){ if(v.disabled) return true; const x=v.dataset.pqv;
+      if(pqDrop==='form') setTeamForm('G','atk',x); else { if(pqDrop==='style') TAC.G.off=x; else TAC.G.def=x;
+        if(CAREER&&CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); }
+      pqDrop=null; renderPauseQuick(); return true; }
+    if(pqDrop){ pqDrop=null; renderPauseQuick(); return true; }
+    return false; }
   // ===== IN-GAME PAUSE MENU (Tactics / Settings / Exit / Back) =====
-  function openPause(){ if(SCREEN!=='match') return; pauseOpen=true; document.getElementById('pauseMenu').classList.add('on'); }
+  function openPause(){ if(SCREEN!=='match') return; pauseOpen=true; pqDrop=null; renderPauseQuick(); document.getElementById('pauseMenu').classList.add('on'); }
   function closePause(){ pauseOpen=false; document.getElementById('pauseMenu').classList.remove('on'); }
   let _dialsHome=null, _dialsAnchor=null;
-  function openSettings(){ const dials=document.getElementById('dials'); if(dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } document.getElementById('settingsDials').appendChild(dials); } settingsOpen=true; document.getElementById('settingsOverlay').classList.add('on'); }
-  function closeSettings(){ const dials=document.getElementById('dials'); if(dials&&_dialsHome){ _dialsHome.insertBefore(dials, _dialsAnchor); } settingsOpen=false; document.getElementById('settingsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
-  document.getElementById('pauseMenu').onclick=(e)=>{ const b=e.target.closest('[data-pause]'); if(!b)return; const a=b.dataset.pause;
-    if(a==='tactics'){ closePause(); openMenu(); }
+  // SETTINGS: what a player sets, one row each (see PREFS); a developer can open the feel dials under it (see DEV)
+  const SET_ROWS=[
+    ['halfMin','MATCH LENGTH',[[3,'3 MIN'],[4,'4 MIN'],[5,'5 MIN']],'a half; the clock still reads 1–90'],
+    ['oppShift','EXHIBITION OPPONENTS',[[-3,'PUB'],[-1.5,'EASY'],[0,'NORMAL'],[1.5,'HARD'],[3,'ELITE']],'their stats, against the clubs as they are (career matches are as they are)'],
+    ['art','GRAPHICS',[[true,'PIXEL ART'],[false,'SIMPLE']],'pixel players, pitch and ball, or plain shapes']];
+  function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
+    el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
+      +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
+  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':+raw; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
+  function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
+    if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
+    else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
+  function openSettings(){ renderSetRows(); showDevDials(false); settingsOpen=true; document.getElementById('settingsOverlay').classList.add('on'); }
+  function closeSettings(){ showDevDials(false); settingsOpen=false; document.getElementById('settingsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
+  document.getElementById('pauseMenu').onclick=(e)=>{ if(pauseQuickClick(e)) return; const b=e.target.closest('[data-pause]'); if(!b)return; const a=b.dataset.pause;
+    if(a==='tactics'){ closePause(); openMatchTac(); }
+    else if(a==='oldtac'){ closePause(); openMenu(); }
     else if(a==='settings'){ closePause(); openSettings(); }
     else if(a==='exit'){ closePause(); pauseFromMatch(); }
     else { closePause(); } };
-  document.getElementById('settingsOverlay').onclick=(e)=>{ if(e.target.closest('[data-setclose]')) closeSettings();
+  document.getElementById('settingsOverlay').onclick=(e)=>{ const pf=e.target.closest('[data-pref]');
+    if(pf) setPref(pf.dataset.pref,pf.dataset.val);
+    else if(e.target.closest('[data-setdev]')) showDevDials(!document.getElementById('settingsDials').classList.contains('on'));
+    else if(e.target.closest('[data-setclose]')) closeSettings();
     else if(e.target.closest('[data-setlayout]')){ document.getElementById('settingsOverlay').classList.remove('on'); openLayout(); } };   // (still in Settings: the match stays paused)
   // ===== BUTTON LAYOUT (touch screens): where PASS, SHOOT and CROSS sit, and how big -- yours to arrange =====
   // Each is kept as its centre, a share of the way across and down the game screen (so it lands in the same place on
@@ -10614,11 +11043,24 @@
     el.style.left=Math.round(cx-size/2)+'px'; el.style.top=Math.round(cy-size/2)+'px'; el.style.right='auto'; el.style.bottom='auto';
     el.style.width=el.style.height=size+'px'; el.style.fontSize=Math.round(d.font*Math.sqrt(sc))+'px';
   }
+  // THE BANDS: on a phone wider than the game screen, the empty strips either side of it take the controls -- the stick
+  // starts anywhere in the left one, and the buttons you haven't placed yourself stand in a column in the right one,
+  // so neither covers the pitch. (Too narrow a band, after the notch: they stay on the screen as before.)
+  function bandInfo(){ const wrap=document.getElementById('stageWrap'), r=stageBox(); if(!(r.width>0)||!document.body.classList.contains('touch')) return null;
+    const probe=document.getElementById('safeProbe'), cs=probe?getComputedStyle(probe):null, sL=cs?parseFloat(cs.paddingLeft)||0:0, sR=cs?parseFloat(cs.paddingRight)||0:0;
+    const left=r.left-sL, right=innerWidth-r.right-sR; if(Math.min(left,right)<64) return null;
+    return {left, right, sL, sR, h:r.height}; }
   function applyBtnLayout(){
     const r=stageBox(); if(!(r.width>0)) return;
-    for(const k in btns){ const el=btns[k], L=btnLayout[k];
-      if(L) btnPlace(el,k,r.width,r.height,L);
-      else for(const q of ['left','top','right','bottom','width','height','fontSize']) el.style[q]=''; }
+    const B=bandInfo(), wrap=document.getElementById('stageWrap'); wrap.classList.toggle('bands',!!B);
+    if(B){ wrap.style.setProperty('--bandL',B.left+'px'); }
+    const order=['kick','shoot','cross','skill']; let y=r.height-6;   // the column in the right band, from the bottom up
+    for(const k of order){ const el=btns[k], L=btnLayout[k];
+      if(L){ btnPlace(el,k,r.width,r.height,L); continue; }
+      if(B){ const d=BTN_BASE[k], sz=Math.round(Math.min(d.size,B.right-8)*(k==='kick'?1:0.94)); y-=sz;
+        el.style.left=Math.round(r.width+(B.right-sz)/2)+'px'; el.style.top=Math.round(y)+'px'; el.style.right='auto'; el.style.bottom='auto';
+        el.style.width=el.style.height=sz+'px'; el.style.fontSize=Math.round(d.font*Math.min(1,sz/d.size+0.08))+'px'; y-=10; continue; }
+      for(const q of ['left','top','right','bottom','width','height','fontSize']) el.style[q]=''; }
   }
   addEventListener('resize',applyBtnLayout); addEventListener('orientationchange',()=>setTimeout(applyBtnLayout,250));
   applyBtnLayout();
@@ -10684,7 +11126,7 @@
   document.getElementById('editToggle').onclick=function(){ menuState.edit=!menuState.edit; this.textContent='EDIT STATS: '+(menuState.edit?'ON':'OFF'); if(menuState.tab==='squad')renderSquad(); };
   window.addEventListener('keydown',e=>{ if(teOpen) return; if(e.key==='Escape'){
     if(layoutOpen){ layoutDone(); }           // button layout -> back to settings (what you've moved is kept)
-    else if(menuOpen){ closeMenu(); }         // tactics -> back to menu list
+    else if(menuOpen){ if(document.getElementById('mtacOv').classList.contains('on')) closeMatchTac(); else closeMenu(); }   // tactics -> back to menu list
     else if(settingsOpen){ closeSettings(); } // settings -> back to menu list
     else if(pauseOpen){ closePause(); }       // menu list -> resume
     else if(SCREEN==='match'){ openPause(); }  // match -> open menu list
@@ -10907,6 +11349,7 @@
   function mgCreditYours(d,mine,logs){ const st=mgStarters(d);
     if(!logs){ mine.scorers=mgCredit(st,mine.you).map(p=>p.name); return; }
     for(const p of st) p.apps=(p.apps||0)+1;
+    for(const si of SUBS.G.on){ const e=SQUAD.G&&SQUAD.G[si], p=e&&e.ri!=null?d.roster[e.ri]:null; if(p&&!st.includes(p)) p.apps=(p.apps||0)+1; }   // and the subs who came on
     mine.scorers=[];
     for(const g of logs){ if(g.team!=='G'||g.ownGoal) continue; const p=g.scorerRi!=null?d.roster[g.scorerRi]:null; if(p){ p.goals=(p.goals||0)+1; mine.scorers.push(p.name); } } }
   // one round of league games everywhere: yours from `yours` ({score:[you,them], logs}) when you played it, the rest simulated
@@ -11382,7 +11825,7 @@
     for(const ph of ['atk','def']){ const k=lu[ph].indexOf(outRi); if(k>=0) lu[ph][k]=inRi; }
     const bk=lu.bench.indexOf(inRi); if(bk>=0) lu.bench[bk]=outRi; }
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
-    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters], sIdx={};
+    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench], sIdx={};   // (the bench comes too: subs)
     order.forEach((ri,i)=>sIdx[ri]=i);
     const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
@@ -11424,8 +11867,16 @@
     if(onPitch&&ri!==lu.gk){ const f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=careerSlots(f,phase)[si];   // the instructions of the spot he's in
       if(sl) h+=instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50); }
     return h+'</div>'; }
-  function paintCareerRight(d){ const rp=document.getElementById('tacStatRight'); if(!rp)return; const ri=statViewRi;
-    rp.innerHTML=tacStatCard(d.roster[ri], false)+careerInstrBlock(d, ri, tacPhase); }
+  function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
+  // THE MAN YOU TAPPED: his rating where he's playing, his six, then MOVE / SWAP and his spot's instructions
+  function tbCard(d, ri, phase){ const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
+    const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
+    const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
+    return '<div class="tbCard"><div class="mgCardHead"><div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+      +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
+      +(oop?'<div class="mgCardSub" style="color:#ffb43c">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">on the bench</div>')+'</div>'
+      +'<div><div class="mgCardOvr"'+(oop?' style="color:#ffb43c"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' as a '+p.role+'</div>':'')+'</div></div>'
+      +sixHtml(st,p.role)+'</div>'+careerInstrBlock(d, ri, phase); }
   function toggleMove(){ const d=CAREER&&CAREER.data; if(!d||statViewRi==null)return; const lu=ensureLineup(d);
     if(tacticSel && tacticSel.ri===statViewRi){ tacticSel=null; }
     else tacticSel={ri:statViewRi, kind:statViewRi===lu.gk?'gk':lu.bench.includes(statViewRi)?'bench':'field', phase:tacPhase};
@@ -11443,23 +11894,43 @@
     let h='<div class="styRow"><span class="styLbl">DEF POSTURE</span>';
     for(const t of POSTURE_LIST) h+='<button class="styBtn'+(t[0]===cur?' on':'')+'" data-cposture="'+t[0]+'">'+t[1]+'</button>';
     return h+'</div><div class="tacHint">'+(POSTURE_BLURB[cur]||'')+'</div>'; }
+  // TACTICS: the pitch first, on its side as in a match (your goal on the left) -- the shape, width and style in one row of
+  // menus above it, the bench under it, the man you tapped on the right. Hold a man and drag him onto another to swap them
+  // (or onto a sub to bring the sub on): while he's up, every spot shows what he'd be worth there. MOVE / SWAP on his card
+  // does the same with two taps.
+  let tacDrop=null;   // the menu open on the top row: 'form' | 'width' | 'style' | 'posture'
+  function tbPos(x,y){ return {L:100-y, T:9+(clamp(x,6,94)-6)/88*82}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
+  function tbTok(d, ri, L, T, kind, phase, slotRole){ const p=d.roster[ri]; if(!p) return '';
+    const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
+    return '<button class="ptk'+(oop?' oop':'')+(ri===statViewRi?' statview':'')+(tacticSel&&tacticSel.ri===ri?' sel':'')+(tacticSel&&tacticSel.ri!==ri?' canswap':'')+'"'
+      +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
+      +'<span class="ptkOvr">'+r+'</span><span class="ptkName">'+mgEsc(p.name.split(' ').slice(-1)[0])+'</span></button>'; }
+  function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
+    if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
+      h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
+        return '<button class="formBtn'+(fm===form?' on':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'
+        +'<div class="tbMenuNote">'+(phase==='def'?'1-3-3 and 1-4-2 are attacking shapes only.':'4-2-1 and 4-1-2 are defending shapes only.')+'</div>'; }
+    else if(tacDrop==='width'){ const w=widthSnap(d.width[phase]); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-cwidth="'+x[2]+'" data-cphase="'+phase+'"><b>'+x[1]+'</b></button>').join(''); }
+    else if(tacDrop==='style'){ const cur=d.style||'neutral'; h+=STYLE_LIST.map(t=>'<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cstyle="'+t[0]+'"><b>'+t[1]+'</b><i>'+STYLE_BLURB[t[0]]+'</i></button>').join(''); }
+    else if(tacDrop==='posture'){ const cur=d.posture||'neutral'; h+=POSTURE_LIST.map(t=>'<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cposture="'+t[0]+'"><b>'+t[1]+'</b><i>'+POSTURE_BLURB[t[0]]+'</i></button>').join(''); }
+    return h+'</div>'; }
   function renderTactics(d, phase){ ensureForms(d); const lu=ensureLineup(d);
     if(statViewRi==null||!d.roster[statViewRi]) statViewRi=lu.atk[0];
     tacPhase=phase;
-    const form=phase==='def'?d.formDef:d.formation, w=d.width[phase], slots=careerSlots(form,phase,w), order=lu[phase], forms=Object.keys(FORMS);
-    let h='<div class="phTabs"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH THE BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT THE BALL</button></div>';
-    h+='<div class="formRow">'+forms.map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm); return '<button class="formBtn'+(fm===form?' on':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'"'+(off?' disabled title="'+(phase==='def'?'attacking':'defending')+' only"':'')+'>'+fm+'</button>'; }).join('')+'</div>';
-    h+='<div class="tacHint">'+(phase==='def'?'1-3-3 and 1-4-2 are attacking shapes only.':'4-2-1 and 4-1-2 are defending shapes only.')+'</div>';
-    h+='<div class="formRow">'+WIDTHS.map(x=>'<button class="formBtn wBtn'+(widthSnap(w)===x[2]?' on':'')+'" data-cwidth="'+x[2]+'" data-cphase="'+phase+'">'+x[1]+'</button>').join('')+'</div>';
-    h+=phase==='atk'?styleRowHtml(d):postureRowHtml(d);
-    if(tacNote) h+='<div class="tacWarn">'+tacNote+'</div>';
-    h+='<div class="pitch" data-phase="'+phase+'">'+tacTok(d, lu.gk, TAC_GK[0], TAC_GK[1], false, phase, 'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++) h+=tacTok(d, order[i], slots[i].x, slots[i].y, false, phase, slots[i].role);
-    h+='</div>';
-    h+='<div class="tacHint">Tap a player for his card and the instructions of the position he’s in: they go with the position, whoever plays there. MOVE / SWAP changes who plays where '+(phase==='atk'?'with the ball':'without it')+' (a sub comes on for both). Anyone can play anywhere: the number is how good he is in that spot.</div>';
-    h+='<div class="benchHdr">THE REST OF THE SQUAD ('+lu.bench.length+')</div>';
-    h+='<div class="benchRow">'+lu.bench.map(ri=>tacTok(d, ri, 0,0, true, phase, null)).join('')+'</div>';
-    return '<div class="tacSplit"><div class="tacLeft">'+h+'</div><div class="tacRight" id="tacStatRight">'+tacStatCard(d.roster[statViewRi], false)+careerInstrBlock(d, statViewRi, phase)+'</div></div>'; }
+    const form=phase==='def'?d.formDef:d.formation, w=widthSnap(d.width[phase]), slots=careerSlots(form,phase,w), order=lu[phase];
+    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(tacDrop===k?' on':'')+'" data-tdrop="'+k+'"><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE',posture:'POSTURE'}[k]+'</i>'+label+' ▾</button>'+(tacDrop===k?tbMenuHtml(d,phase):'')+'</span>';
+    const wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
+    const sl=phase==='atk'?(STYLE_LIST.find(t=>t[0]===(d.style||'neutral'))||STYLE_LIST[0])[1]:(POSTURE_LIST.find(t=>t[0]===(d.posture||'neutral'))||POSTURE_LIST[1])[1];
+    let h='<div class="tacB1"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
+      +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
+      +drop('form',form)+drop('width',wl)+drop(phase==='atk'?'style':'posture',sl)+'<button class="mgBtn tbBest" data-mg="best8">BEST 8</button></div>';
+    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
+    h+='</div></div>';
+    h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';
+    h+='<div class="tbBench"><span class="tbBenchLbl">BENCH</span>'+lu.bench.map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div>';
+    return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
     if(phase==='def'){ if(ATK_ONLY.includes(form)||!FORMS[form]) return; d.formDef=form; } else { if(DEF_ONLY.includes(form)||!FORMS[form]) return; d.formation=form; }
     const lu=ensureLineup(d); lu.def=careerMapDef(d);
@@ -11474,9 +11945,12 @@
       return;
     }
     // ---- MOVE / SWAP MODE (entered via the MOVE button under the card) ----
-    tacNote='';
     if(tacticSel.ri===ri){ tacticSel=null; rerenderOffice(); return; }   // tap himself -> cancel
-    const a=tacticSel, b={ri,kind}, ph=tacPhase, kinds=[a.kind,b.kind].sort().join('+');
+    careerSwap(d, tacticSel, {ri,kind}, tacPhase);
+    tacticSel=null; statViewRi=ri; mgSave(d); rerenderOffice(); }
+  // two men change places (a: the one picked up, b: the one he's put on), as the career's lineup has them
+  function careerSwap(d,a,b,ph){ const lu=ensureLineup(d); tacNote=''; if(a.ri===b.ri) return;
+    const kinds=[a.kind,b.kind].sort().join('+');
     if(kinds==='field+field'){                                            // swap spots, this phase only
       const ia=lu[ph].indexOf(a.ri), ib=lu[ph].indexOf(b.ri);
       if(ia>=0&&ib>=0){ lu[ph][ia]=b.ri; lu[ph][ib]=a.ri; }
@@ -11489,9 +11963,8 @@
       if(k>=0) lu.bench[k]=lu.gk; lu.gk=s;
     } else if(kinds==='bench+field'){                                     // a sub on, for both phases
       subIn(d, a.kind==='bench'?a.ri:b.ri, a.kind==='field'?a.ri:b.ri);
-    } else { const ia=lu.bench.indexOf(a.ri), ib=lu.bench.indexOf(b.ri); if(ia>=0&&ib>=0){ lu.bench[ia]=b.ri; lu.bench[ib]=a.ri; } }
-    tacticSel=null; statViewRi=ri; mgSave(d); rerenderOffice(); }
-  function rerenderOffice(){ const el=document.getElementById('bpBody'); if(el) el.innerHTML=renderBuildingBody('office'); }
+    } else { const ia=lu.bench.indexOf(a.ri), ib=lu.bench.indexOf(b.ri); if(ia>=0&&ib>=0){ lu.bench[ia]=b.ri; lu.bench[ib]=a.ri; } } }
+  function rerenderOffice(){ if(curBldg==='office') paintBuilding(); }
   function showNote(msg,color){ const el=document.getElementById('chNote'); if(!el)return; el.textContent=msg; el.style.color=color||'#ffb43c'; el.style.display='block'; clearTimeout(showNote._t); showNote._t=setTimeout(()=>{ el.style.display='none'; },6000); }
   // ---- Stadium screen ----
   function stadPrice(d){ const ft=FIN_TIER[d.tier]||FIN_TIER[1]; return d.ticketPrice!=null?d.ticketPrice:ft.price; }
@@ -11583,9 +12056,10 @@
     const goal=x=>'<div><span style="color:#e9f5ec">'+(x.scorerNum?'#'+x.scorerNum+' ':'')+mgEsc(x.scorerName)+'</span>'+(x.ownGoal?' <span style="color:#ff5a4d">(OG)</span>':'')
       +(x.assistName?' <span style="color:#7f9a6f">← '+mgEsc(x.assistName)+'</span>':'')+'</div>';
     const gG=logs.filter(x=>x.team==='G'), gR=logs.filter(x=>x.team==='R');
-    let h='<div class="mrHead"><div class="mrLabel">'+mgEsc(g.label)+' · '+(m.home?'HOME':'AWAY')+'</div>';
+    let h='<div class="mrWrap"><div class="mrHead"><div class="mrLabel">'+mgEsc(g.label)+' · '+(m.home?'HOME':'AWAY')+'</div>';
     h+='<div class="mrScore" style="color:'+col+'">'+m.you+' – '+m.them+'</div>';
     h+='<div class="mrLabel" style="font-size:13px;margin-top:6px;color:#e9f5ec">'+mgEsc(d.clubName)+' <span style="color:'+col+'">'+mgResultWord(m)+'</span> vs '+mgEsc(opp)+'</div></div>';
+    h+='<div class="mrCols"><div class="mrCol">';
     h+='<div class="mrSect">'+mgEsc(d.clubName.toUpperCase())+' GOALS</div><div class="mrGoalList">'+(gG.length?gG.map(goal).join(''):'<span style="color:#4a5e40">— none</span>')+'</div>';
     h+='<div class="mrSect">'+mgEsc(opp.toUpperCase())+' GOALS</div><div class="mrGoalList">'+(gR.length?gR.map(goal).join(''):'<span style="color:#4a5e40">— none</span>')+'</div>';
     if(g.kind==='league'){
@@ -11599,7 +12073,7 @@
       const msg=m.through?(P&&P.winner===d.clubId?'PROMOTED through the playoffs!':'Through to the playoff final.'):'Out of the playoffs.';
       h+='<div class="mrSect">PLAYOFFS</div>'+row(msg,'',true,m.through?'#9dff3c':'#ff5a4d');
     }
-    h+='<div class="mrSect">FINANCES</div>';
+    h+='</div><div class="mrCol"><div class="mrSect">FINANCES</div>';
     h+=row('Sponsorship',money(f.sponsorWk))+row('Broadcast / central',money(f.broadcastWk));
     if(wk.tv>0) h+=row('Broadcast match bump','+'+money(wk.tv),false,'#ffb43c');
     h+=row(m.home?'Gate ('+f.attendance.toLocaleString()+' × $'+f.price+(f.cph>0?' + concessions':'')+')':'Away gate share',money(wk.gate));
@@ -11607,7 +12081,7 @@
     const net=wk.income-wk.wages;
     h+='<div style="border-top:1px solid #2a3a22;margin:6px 0"></div>'+row('Net this week',(net>=0?'+':'')+money(net),true,net>=0?'#9dff3c':'#ff5a4d')+row('Budget',money(d.budget),true,d.budget>=0?'#9dff3c':'#ff5a4d');
     h+='<div class="mrSect">FANS</div>'+row('This result',(rep.loyDelta>=0?'+':'')+rep.loyDelta.toLocaleString(),false,rep.loyDelta>=0?'#9dff3c':'#ff5a4d')+row('Fans',Math.round(d.loyalty||0).toLocaleString(),true,'#ffb43c');
-    h+='<button class="mrContinue" id="mrContinueBtn">CONTINUE ▶</button>';
+    h+='</div></div><div class="mrFoot"><button class="mrContinue" id="mrContinueBtn">CONTINUE ▶</button></div></div>';
     el.innerHTML=h; el.style.display='block'; el.scrollTop=0;
     document.getElementById('mrContinueBtn').onclick=()=>{ el.style.display='none'; renderHub(); }; }
 
@@ -11630,7 +12104,7 @@
     document.querySelectorAll('#smItems .smBtn[data-needsave]').forEach(b=>b.classList.toggle('disabled',!has));
     document.getElementById('smResume').style.display=resumable?'block':'none';
     document.getElementById('smResume').innerHTML='<span class="mk">▶</span>'+(LAB.on?'RESUME '+LAB_TITLE[LAB.kind]:'RESUME MATCH');
-    document.getElementById('smVer').textContent='build '+SETTINGS_V;
+    document.getElementById('smVer').textContent='build '+SETTINGS_V+(DEV?' · dev':'');
     smSel=0; smHighlight();
   }
   function smEnabledBtns(){ return [...document.querySelectorAll('#smItems .smBtn')].filter(b=>b.style.display!=='none'&&!b.classList.contains('disabled')); }
@@ -11703,10 +12177,10 @@
   let matchReturn='menu';   // where Esc/finish returns after a match: 'menu' or 'hub'
   // ---- the buildings: each door opens one of these screens ----
   const MG_BLDGS={
-    office:  {title:'MANAGER’S OFFICE', sub:'your squad, tactics, fixtures and money', tabs:['Squad','Tactics','Fixtures','Finances']},
-    market:  {title:'TRANSFER MARKET', sub:'buy, sell and sign free agents', tabs:['Search','Free agents','Offers','Selling']},
+    office:  {title:'OFFICE', sub:'your squad, tactics, fixtures and money', tabs:['Squad','Tactics','Fixtures','Finances']},
+    market:  {title:'MARKET', sub:'buy, sell and sign free agents', tabs:['Search','Free agents','Offers','Selling']},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
-    academy: {title:'YOUTH ACADEMY', sub:'your own youngsters', tabs:['Prospects','Facilities']},
+    academy: {title:'ACADEMY', sub:'your own youngsters', tabs:['Prospects','Facilities']},
     stadium: {title:'STADIUM', sub:'tickets, seats and sponsors', tabs:['Overview','Upgrades','Concessions','Broadcast']},
     news:    {title:'NEWSSTAND', sub:'headlines, tables and results', tabs:['Headlines','Tables','Results','Scorers']},
     home:    {title:'YOUR HOUSE', sub:'your career so far', tabs:['Profile','History']},
@@ -11732,6 +12206,27 @@
   function mgBars(p){ const st=mgStats(p); let h='<div class="mgBars">';
     for(const k of Object.keys(OVR_W[p.role]||OVR_W.MID)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
+  // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
+  const SIX=[['PAC','Pace',['speed','acceleration']],['PHY','Physical',['strength','stamina','agility']],['TEC','Technique',['ballControl','dribbling','composure']],
+    ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','curve']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ','heading']]];
+  const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution']],['CMP','Composure',['composure','ballControl']]];
+  let sixOpen=null;   // the group opened -- it stays open as you look at the next man
+  function sixCol(v){ return v>=7.5?'#9dff3c':v>=6?'#d8f088':v>=4.5?'#ffd27a':'#ff8a7d'; }
+  function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
+    for(const [k,,ks] of G){ const v=ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length;
+      h+='<button class="sixC'+(sixOpen===k?' on':'')+'" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
+    h+='</div>'; const g=G.find(x=>x[0]===sixOpen);
+    if(g) h+='<div class="sixOpen"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
+      return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
+    return h; }
+  // A LIST AND ITS MAN: the list on the left, the man picked on the right, each side scrolling by itself; a long list goes
+  // ten to a page, with the pager under it
+  const MG_PAGE=10;
+  function mgPanes(left,right,foot,top){ return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll">'+left+'</div>'+(foot||'')+'</div>'
+    +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||'<div class="mgPick0">Tap a player to see him here.</div>')+'</div></div></div>'; }
+  function mgPaged(L){ const pages=Math.max(1,Math.ceil(L.length/MG_PAGE)); MGUI.page=clamp(MGUI.page||1,1,pages); return {rows:L.slice((MGUI.page-1)*MG_PAGE,MGUI.page*MG_PAGE),pages,n:L.length}; }
+  function mgPager(pg){ return pg.pages>1?'<div class="mgPager"><button class="mgAdj" data-mg="page" data-dir="-1"'+(MGUI.page<=1?' disabled':'')+'>◀</button><b>'+MGUI.page+' / '+pg.pages+'</b>'
+    +'<span>'+pg.n+' players</span><button class="mgAdj" data-mg="page" data-dir="1"'+(MGUI.page>=pg.pages?' disabled':'')+'>▶</button></div>':''; }
   function mgWindowLine(d){ return mgWindowOpen(d)?'<div class="mgSum" style="color:#9dff3c">'+(d.phase==='summer'?'SUMMER':'WINTER')+' WINDOW OPEN · DAY '+d.day+' OF '+MG_WINDOW[d.phase]+'</div>'
     :'<div class="mgSum">The transfer window is shut'+(d.phase==='league'&&d.md<MG_HALF?' until the winter break (after matchday '+MG_HALF+')':' until the summer')+'. Free agents can sign any time.</div>'; }
   // one man, close up, with what you can do about him
@@ -11740,7 +12235,7 @@
     let h='<div class="mgCard"><div class="mgCardHead"><div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+(f.mine?'#'+p.num+' · ':'')+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div><div class="mgCardSub">'+mgEsc(where)+'</div></div>'
       +'<div><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div></div></div>';
-    h+=known?mgBars(p):'<div class="mgHint">Not scouted: his rating is somewhere in that range, and his potential is a mystery.</div>';
+    h+=known?sixHtml(mgStats(p),p.role):'<div class="mgHint">Not scouted: his rating is somewhere in that range, and his potential is a mystery.</div>';
     if(!f.mine&&!f.youth&&mgWontCome(d,p)) h+='<div class="mgHint" style="color:#ff8a7d">'+mgEsc(mgWontCome(d,p))+'</div>';
     if(f.mine) h+=mgMineActions(d,p);
     else if(f.youth) h+=finRow('He’d earn',money(Math.max(30,mgRound(mgWage(p.ovr)*0.8)))+'/wk')
@@ -11775,9 +12270,15 @@
     return h+'<div class="bpSect">YOUR OFFER</div>'+mgStep('bidstep',money(fee))+'<div class="mgBtns"><button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">MAKE THE OFFER</button></div>'; }
 
   // ---- the office ----
+  // THE LINEUP ON A SMALL PITCH, over the squad's card: hold a man in the list and drop him on a spot to put him there (his
+  // place goes to the man he replaces); tap a spot for that man's card
+  function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
+    let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK');
+    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role); }
+    return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:#ffb43c">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
-    if(MGUI.sel&&R.some(p=>p.id===MGUI.sel)) h+=mgCard(d,MGUI.sel);
     const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean));
     for(const role of ['GK','DEF','MID','ATT']){ const L=R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr); if(!L.length) continue;
       h+='<div class="bpSect">'+{GK:'GOALKEEPERS',DEF:'DEFENDERS',MID:'MIDFIELDERS',ATT:'FORWARDS'}[role]+'</div><div class="mgList">';
@@ -11785,7 +12286,7 @@
           +((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'');
         h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
       h+='</div>'; }
-    return h; }
+    return mgPanes('<div class="sqList">'+h+'</div>', MGUI.sel&&R.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):'', '', mgSquadPitch(d)); }
   function mgFixturesTab(d){ const L=d.lg[d.tier]; let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'—')+'</div><div class="mgList">';
     L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId); if(!m) return; const home=m[0]===d.clubId, opp=home?m[1]:m[0]; let right;
       if(m[2]!=null){ const you=home?m[2]:m[3], them=home?m[3]:m[2], r=you>them?'W':you<them?'L':'D'; right='<span style="color:'+(r==='W'?'#9dff3c':r==='D'?'#ffb43c':'#ff5a4d')+'">'+r+' '+you+'–'+them+'</span>'; }
@@ -11806,19 +12307,17 @@
 
   // ---- the market ----
   function mgSearchTab(d){ const t=MGUI.tier||d.tier; let h=mgWindowLine(d)+mgChips('tier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x]]),t)+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
-    if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.club&&!f.mine) h+=mgCard(d,MGUI.sel); }
+    let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.club&&!f.mine) card=mgCard(d,MGUI.sel); }
     const L=[]; for(const id of d.div[t]){ if(id===d.clubId) continue; const c=d.world.clubs[id]; for(const p of c.players) if(MGUI.role==='ALL'||p.role===MGUI.role) L.push([p,c]); }
     L.sort((a,b)=>mgSortOvr(d,b[0])-mgSortOvr(d,a[0]));
-    const n=MGUI.page*25; h+='<div class="mgList">';
-    for(const [p,c] of L.slice(0,n)) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
-    h+='</div>'; if(L.length>n) h+='<button class="mgBtn" data-mg="more" style="width:100%;margin-top:8px">SHOW MORE ('+(L.length-n)+')</button>';
-    return h; }
+    const pg=mgPaged(L); h+='<div class="mgList">';
+    for(const [p,c] of pg.rows) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
+    return mgPanes(h+'</div>', card, mgPager(pg)); }
   function mgFreeTab(d){ let h='<div class="mgSum">Players without a club: no fee, just wages. They can sign any time.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
-    if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) h+=mgCard(d,MGUI.sel); }
-    const L=d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a)), n=MGUI.page*25;
-    h+='<div class="mgList">'+L.slice(0,n).map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgDemandSeen(d,p,false))+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
-    if(L.length>n) h+='<button class="mgBtn" data-mg="more" style="width:100%;margin-top:8px">SHOW MORE ('+(L.length-n)+')</button>';
-    return h; }
+    let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
+    const pg=mgPaged(d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a)));
+    h+='<div class="mgList">'+pg.rows.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgDemandSeen(d,p,false))+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
+    return mgPanes(h, card, mgPager(pg)); }
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
     for(const o of O){ const p=d.roster.find(x=>x.id===o.pid), c=d.world.clubs[o.club];
@@ -11827,19 +12326,18 @@
         +'<div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
     return h; }
   function mgSellingTab(d){ let h=mgWindowLine(d)+'<div class="mgHint">Pick a man to put him on the transfer list at your price. Clubs bid for listed men every day a window is open, and now and then for your best men anyway.</div>';
-    if(MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)) h+=mgCard(d,MGUI.sel);
     const L=d.roster.slice().sort((a,b)=>(d.listed[b.id]?1:0)-(d.listed[a.id]?1:0)||mgValue(d,b)-mgValue(d,a));
-    return h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
-      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>'; }
+    return mgPanes(h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
+      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
 
   // ---- scouting ----
   function mgReportsTab(d){ const L=Object.keys(d.scouted||{}).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
     let h='<div class="mgSum">'+L.length+' scouted this season. Reports go out of date when the season ends.</div>';
-    if(MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)) h+=mgCard(d,MGUI.sel);
     if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
-    return h+'<div class="mgList">'+L.slice(0,MGUI.page*25).map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
-      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgDemand(d,f.p,false))+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>'
-      +(L.length>MGUI.page*25?'<button class="mgBtn" data-mg="more" style="width:100%;margin-top:8px">SHOW MORE</button>':''); }
+    const pg=mgPaged(L);
+    return mgPanes(h+'<div class="mgList">'+pg.rows.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
+      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgDemand(d,f.p,false))+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
+      MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):'', mgPager(pg)); }
   function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: they report on every player in one position, and the reports last until the end of the season.</div>';
     for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · '+money(c)+' EACH</div><div class="mgBtns">';
       for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>';
@@ -11851,9 +12349,9 @@
 
   // ---- the academy ----
   function mgProspectsTab(d){ const Y=d.youth||[]; let h='<div class="mgHint">Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.</div>';
-    if(MGUI.sel&&Y.some(p=>p.id===MGUI.sel)) h+=mgCard(d,MGUI.sel);
     if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
-    return h+'<div class="mgList">'+Y.slice().sort((a,b)=>b.pot-a.pot).map(p=>mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>'; }
+    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>b.pot-a.pot).map(p=>mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
+      MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgFacilitiesTab(d){ const L=d.academy||1; let h=finRow('Academy','level '+L+' of 3',true)+finRow('Intake every summer',(2+L)+' youngsters');
     if(L<3){ const c=MG_ACAD_COST[L+1]; h+='<button class="stadBtn" data-mg="upacad"'+(c>d.budget?' disabled':'')+'>Build up to level '+(L+1)+' (a bigger, better intake)  —  '+money(c)+'</button>'; }
     return h; }
@@ -11900,7 +12398,7 @@
     for(const t of [4,3,2,1]){ const mv=R.moves[t]; h+=finRow(MG_LEAGUE[t]+' champions',mgEsc(mgNameOf(d,mv.table[0])),false,'#e9f5ec');
       if(mv.up.length) h+=finRow(' up',mv.up.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'#9dff3c');
       if(mv.down.length) h+=finRow(' down',mv.down.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'#ff5a4d'); }
-    return h+'<button class="mrContinue" data-mg="newseason">START SEASON '+(R.season+1)+' ▶</button>'; }
+    return h+'<button class="mrContinue bpPin" data-mg="newseason">START SEASON '+(R.season+1)+' ▶</button>'; }
 
   // ---- the town (until it can be walked round: its buildings in a row) ----
   function renderHub(){ const d=CAREER&&CAREER.data; if(!d) return; const f=computeFinance(d);
@@ -11924,7 +12422,7 @@
     else if(g){ const opp=mgClub(d,g.opp); b='<button class="chBtn2" data-mg="sim">SIMULATE ⏭</button><button class="chPlay" data-mg="play">PLAY ▶ '+(g.home?'vs ':'@ ')+mgEsc(opp?opp.name:'')+'</button>'; }
     else b='<button class="chPlay" data-mg="continue">CONTINUE ▶</button>';
     document.getElementById('chBottom').innerHTML=(g?'<div class="chNext">'+mgEsc(g.label)+' · '+(g.home?'home':'away')+'</div>':'')+b; }
-  function hideBldg(){ tacticSel=null; curBldg=null; document.getElementById('bldgPanel').classList.remove('show'); }
+  function hideBldg(){ tacticSel=null; tacDrop=null; curBldg=null; document.getElementById('bldgPanel').classList.remove('show'); document.getElementById('bpBody').innerHTML=''; }   // (none of it left behind in the page)
   function hideHub(){ document.getElementById('careerHub').classList.remove('show'); hideBldg(); }
   function showHubScreen(){ SCREEN='hub'; document.getElementById('stageWrap').classList.add('menuMode'); document.getElementById('careerHub').classList.add('show'); renderHub(); }
   function openHub(key){ const d=readSave(key); if(!d||d.kind!=='manager') return; mgMigrate(d); CAREER={key,data:d};
@@ -11934,15 +12432,29 @@
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null; tacticSel=null;
     Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',page:1,tier:null,ntier:null,role:'ALL'});
-    document.getElementById('bpTitle').innerHTML=b.title; document.getElementById('bpSub').innerHTML=b.sub;
+    document.getElementById('bpTitle').innerHTML=b.title;
     if(b.tabs&&!curTab[id]) curTab[id]=b.tabs[0];
-    document.getElementById('bpBody').innerHTML=renderBuildingBody(id);
-    const panel=document.getElementById('bldgPanel'); panel.classList.add('show'); panel.scrollTop=0; }
+    document.getElementById('bldgPanel').classList.add('show'); paintBuilding(true); }
+  // THE BUILDING SCREEN: its tabs up in the header line, its body below (which scrolls by itself, or holds panes that
+  // do), and a message, if there is one, as a toast along the bottom
+  function paintBuilding(top){ const id=curBldg, b=MG_BLDGS[id]; if(!b) return; const t=b.tabs?(curTab[id]||b.tabs[0]):null;
+    document.getElementById('bpTabs').innerHTML=b.tabs?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
+    const body=document.getElementById('bpBody'), keep=top?0:body.scrollTop, oL=body.querySelector('.mgPaneL .mgPaneScroll'), oR=body.querySelector('.mgPaneR .mgPaneScroll');
+    const keepL=top||MGUI.pageTop||!oL?0:oL.scrollTop, keepR=top||!oR||MGUI.sel!==_bpSel?0:oR.scrollTop; MGUI.pageTop=false; _bpSel=MGUI.sel;
+    body.innerHTML=renderBuildingBody(id); body.scrollTop=keep; body.classList.toggle('panes',!!body.querySelector('.mgPanes,.tacB1'));
+    const nL=body.querySelector('.mgPaneL .mgPaneScroll'), nR=body.querySelector('.mgPaneR .mgPaneScroll'); if(nL) nL.scrollTop=keepL; if(nR) nR.scrollTop=keepR;
+    const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
+    foot.classList.toggle('on',foot.children.length>0);
+    paintBpMsg(); }
+  let _bpMsgShown='', _bpMsgT=null, _bpSel=null;
+  function paintBpMsg(){ const el=document.getElementById('bpMsg'); if(!el) return; const m=MGUI.msg||'';
+    if(!m){ el.classList.remove('on'); _bpMsgShown=''; return; }
+    if(m===_bpMsgShown&&el.classList.contains('on')) return;
+    _bpMsgShown=m; el.textContent=m; el.style.color=MGUI.msgCol||'#ffb43c'; el.classList.add('on');
+    clearTimeout(_bpMsgT); _bpMsgT=setTimeout(()=>el.classList.remove('on'),4500); }
   function renderBuildingBody(id){ const b=MG_BLDGS[id], d=CAREER&&CAREER.data; if(!b||!d) return ''; let h='';
     const t=b.tabs?(curTab[id]||b.tabs[0]):null;
-    if(b.tabs) h+='<div class="bpTabs">'+b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join('')+'</div>';
-    if(MGUI.msg) h+='<div class="mgMsg" style="color:'+(MGUI.msgCol||'#ffb43c')+'">'+mgEsc(MGUI.msg)+'</div>';
-    if(id==='office') h+=t==='Tactics'?renderTactics(d,tacPhase)+'<button class="mgBtn" data-mg="best8" style="display:block;margin:14px auto 0;width:100%;max-width:340px">PICK MY BEST EIGHT</button>'
+    if(id==='office') h+=t==='Tactics'?renderTactics(d,tacPhase)
       :t==='Fixtures'?mgFixturesTab(d):t==='Finances'?mgFinanceTab(d):mgSquadTab(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
@@ -11953,7 +12465,7 @@
     else if(id==='review') h+=mgReviewBody(d);
     return h; }
   function mgRerender(){ const d=CAREER&&CAREER.data; if(!d) return; mgSave(d);
-    if(curBldg&&document.getElementById('bldgPanel').classList.contains('show')) document.getElementById('bpBody').innerHTML=renderBuildingBody(curBldg);
+    if(curBldg&&document.getElementById('bldgPanel').classList.contains('show')) paintBuilding();
     renderHub(); }
   function mgAct(a,ds){ const d=CAREER&&CAREER.data; if(!d) return; const pid=ds.pid!=null?+ds.pid:MGUI.sel;
     const say=(msg,col)=>{ MGUI.msg=msg||''; MGUI.msgCol=col||'#ffb43c'; };
@@ -11989,31 +12501,78 @@
       case 'ryouth': mgReleaseYouth(d,pid); MGUI.sel=null; break;
       case 'filt': MGUI[ds.k]=ds.k==='role'?ds.v:+ds.v; MGUI.page=1; MGUI.sel=null; break;
       case 'more': MGUI.page++; break;
+      case 'page': MGUI.page=Math.max(1,(MGUI.page||1)+(+ds.dir)); MGUI.pageTop=true; break;
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'#ff5a4d':'#9dff3c'); break; }
       case 'upnet': { const L=d.scoutLvl||1, c=MG_NET_COST[L+1]; if(L<3&&d.budget>=c){ d.budget-=c; d.scoutLvl=L+1; say('The scouting network has grown.','#9dff3c'); } break; }
       case 'upacad': { const L=d.academy||1, c=MG_ACAD_COST[L+1]; if(L<3&&d.budget>=c){ d.budget-=c; d.academy=L+1; say('The academy has been built up.','#9dff3c'); } break; }
       case 'best8': mgAutoLineup(d); statViewRi=null; tacticSel=null; say('Your best eight are picked.','#9dff3c'); break;
     }
     mgRerender();
-    if(a==='sel'&&MGUI.sel){ const c=document.querySelector('#bpBody .mgCard'); if(c&&c.scrollIntoView) c.scrollIntoView({block:'nearest'}); } }
+    if(a==='sel'&&MGUI.sel){ const c=document.querySelector('#bpBody .mgCard'); if(c&&c.scrollIntoView&&!c.closest('.mgPane')) c.scrollIntoView({block:'nearest'}); } }
   function hubToMenu(){ hideHub(); showStartMenu(); }
   function pauseFromMatch(){ if(matchReturn==='hub' && CAREER){ document.getElementById('stageWrap').classList.remove('menuMode'); showHubScreen(); } else { resumable=true; showStartMenu(); } }
   document.getElementById('careerHub').addEventListener('click',e=>{
     const bl=e.target.closest('[data-bldg]'); if(bl){ openBuilding(bl.dataset.bldg); return; }
-    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; tacticSel=null; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',page:1}); document.getElementById('bpBody').innerHTML=renderBuildingBody(curBldg); } return; }
-    const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
-    const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
-    const cph=e.target.closest('[data-ctphase]'); if(cph){ tacPhase=cph.dataset.ctphase; tacticSel=null; rerenderOffice(); return; }
+    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; tacticSel=null; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',page:1}); paintBuilding(true); } return; }
+    if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
+    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; paintBuilding(); return; }
+    const td=e.target.closest('[data-tdrop]'); if(td){ tacDrop=tacDrop===td.dataset.tdrop?null:td.dataset.tdrop; rerenderOffice(); return; }
+    if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
+    const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
+    const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; tacDrop=null; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
+    const cph=e.target.closest('[data-ctphase]'); if(cph){ tacPhase=cph.dataset.ctphase; tacticSel=null; tacDrop=null; rerenderOffice(); return; }
     const ci=e.target.closest('[data-ci]'); if(ci){ const d=CAREER&&CAREER.data; if(d){ const si=ensureLineup(d)[tacPhase].indexOf(statViewRi); if(si>=0) careerSetInstr(d, tacPhase, si, ci.dataset.ci, ci.dataset.v); } return; }
-    const mv=e.target.closest('#tacStatRight [data-imove]'); if(mv){ toggleMove(); return; }
-    const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; if(d){ d.style=cs.dataset.cstyle; TAC.G.off=d.style; mgSave(d); mgRerender(); } return; }
-    const cp=e.target.closest('[data-cposture]'); if(cp){ const d=CAREER&&CAREER.data; if(d){ d.posture=cp.dataset.cposture; TAC.G.def=d.posture; mgSave(d); mgRerender(); } return; }
-    const tc=e.target.closest('[data-tac]'); if(tc){ tacticTap(tc); return; }
+    const mv=e.target.closest('#cTacRight [data-imove]'); if(mv){ toggleMove(); return; }
+    const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.style=cs.dataset.cstyle; TAC.G.off=d.style; mgSave(d); mgRerender(); } return; }
+    const cp=e.target.closest('[data-cposture]'); if(cp){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.posture=cp.dataset.cposture; TAC.G.def=d.posture; mgSave(d); mgRerender(); } return; }
+    const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; } tacticTap(tc); return; }
     const sd=e.target.closest('[data-stad]'); if(sd){ applyStadium(sd.dataset.stad, sd.dataset); return; }
     const mg=e.target.closest('[data-mg]'); if(mg){ if(!mg.disabled) mgAct(mg.dataset.mg, mg.dataset); return; }
     const h=e.target.closest('[data-hub]'); if(!h) return;
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg();
   });
+
+  // PICK HIM UP AND PUT HIM DOWN: on a touch screen, hold a man a moment and he lifts (moving first is a scroll or a tap); a
+  // mouse just drags him. A copy follows the finger; drop it on another man (o.target, or the same kind) and o.drop decides.
+  // o.lift(el) as he's picked up, o.over(el|null) as he's carried over others, o.cancel() if he's put down anywhere else.
+  function pxDrag(root, sel, o){ let st=null;
+    const quiet=()=>{ const f=e=>{ e.stopPropagation(); e.preventDefault(); }; addEventListener('click',f,{capture:true}); setTimeout(()=>removeEventListener('click',f,{capture:true}),60); };
+    function start(x,y){ const r0=st.el.getBoundingClientRect(), g=o.ghost?o.ghost(st.el):st.el.cloneNode(true);
+      if(o.ghost) document.body.appendChild(g); const r=o.ghost?Object.assign({},{left:r0.left,top:r0.top,width:g.offsetWidth,height:g.offsetHeight}):r0, w=r.width;
+      g.classList.add('pxGhost'); g.removeAttribute('id'); g.style.cssText='left:'+(x-w/2)+'px;top:'+r.top+'px;width:'+w+'px;height:'+r.height+'px';
+      document.body.appendChild(g); st.ghost=g; st.dx=w/2; st.dy=st.mouse?y-r.top:r.height+18; st.live=true; st.el.classList.add('lifted'); if(o.lift) o.lift(st.el); }
+    root.addEventListener('pointerdown',e=>{ const el=e.target.closest(sel); if(!el||!root.contains(el)||e.button>0||(o.can&&!o.can(el))) return;
+      st={el, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', over:null};
+      if(!st.mouse){ const s=st; st.t=setTimeout(()=>{ if(st===s&&!s.live) start(s.x0,s.y0); },320); } });
+    root.addEventListener('contextmenu',e=>{ if(e.target.closest(sel)) e.preventDefault(); });
+    root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // no scrolling under a man you're carrying
+    addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return; const dx=e.clientX-st.x0, dy=e.clientY-st.y0;
+      if(!st.live){ if(Math.hypot(dx,dy)<(st.mouse?6:10)) return; if(st.mouse) start(e.clientX,e.clientY); else { clearTimeout(st.t); st=null; return; } }
+      e.preventDefault(); st.ghost.style.left=(e.clientX-st.dx)+'px'; st.ghost.style.top=(e.clientY-st.dy)+'px';
+      const u=document.elementFromPoint(e.clientX,e.clientY), t=u&&u.closest(o.target||sel), over=(t&&t!==st.el&&root.contains(t))?t:null;
+      if(over!==st.over){ if(st.over) st.over.classList.remove('dropOver'); st.over=over; if(over) over.classList.add('dropOver'); if(o.over) o.over(over); } },{passive:false});
+    const end=e=>{ if(!st||e.pointerId!==st.id) return; clearTimeout(st.t); const s=st; st=null; if(!s.live) return;
+      s.ghost.remove(); s.el.classList.remove('lifted'); if(s.over) s.over.classList.remove('dropOver'); quiet();
+      if(s.over&&e.type==='pointerup') o.drop(s.el,s.over); else if(o.cancel) o.cancel(s.el); };
+    addEventListener('pointerup',end); addEventListener('pointercancel',end); }
+  // the career's tactics: while a man is up, every spot on the pitch shows what he'd be worth there
+  pxDrag(document.getElementById('bldgPanel'), '.tacB1 .ptk[data-ri]', {
+    can(){ return !tacDrop; },
+    lift(el){ const d=CAREER&&CAREER.data, p=d&&d.roster[+el.dataset.ri]; if(!p) return;
+      for(const t of document.querySelectorAll('#bpBody .tacB1 .ptk[data-ri]')){ if(t===el) continue; t.classList.add('canswap');
+        const role=t.dataset.role; if(role){ t.dataset.fit=ovrAt(p,role); t.classList.toggle('fitOop',role!==p.role); } } },
+    drop(a,b){ const d=CAREER&&CAREER.data; if(!d) return; tacticSel=null;
+      careerSwap(d,{ri:+a.dataset.ri,kind:a.dataset.tac},{ri:+b.dataset.ri,kind:b.dataset.tac},tacPhase); statViewRi=+a.dataset.ri; mgSave(d); rerenderOffice(); },
+    cancel(){ rerenderOffice(); } });
+
+  // the squad list: drop a man on the mini-pitch
+  pxDrag(document.getElementById('bldgPanel'), '.sqList .mgRow[data-pid]', { target:'.sqPitch .ptk[data-ri]',
+    ghost(row){ const d=CAREER&&CAREER.data, p=d&&d.roster.find(x=>x.id===+row.dataset.pid), g=document.createElement('div'); g.className='ptk pxGhost';
+      g.innerHTML='<span class="ptkOvr">'+(p?p.ovr:'')+'</span><span class="ptkName">'+(p?mgEsc(p.name.split(' ').slice(-1)[0]):'')+'</span>'; return g; },
+    drop(row,tok){ const d=CAREER&&CAREER.data; if(!d) return; const lu=ensureLineup(d), ri=d.roster.findIndex(p=>p.id===+row.dataset.pid); if(ri<0) return;
+      const kind=ri===lu.gk?'gk':lu.atk.includes(ri)?'field':'bench';
+      careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=d.roster[ri].id; mgSave(d); mgRerender(); },
+    cancel(){ mgRerender(); } });
 
   // ---- a new career: you, your club, its colours ----
   function mgNewCareer(o){ const ft=FIN_TIER[1];
@@ -12039,10 +12598,10 @@
   function renderMgrMaker(){ const card=document.querySelector('#mgrMaker .mkCard');
     const sw=(which,cur)=>'<div class="mgSw">'+MG_PALETTE.map(p=>'<button class="hsSw'+(p.c===cur?' on':'')+'" style="background:'+p.c+'" data-mm="'+which+'" data-c="'+p.c+'" title="'+p.n+'" aria-label="'+p.n+'"></button>').join('')+'</div>';
     card.innerHTML='<div class="pauseTitle">NEW CAREER</div>'
-      +'<div class="mkStep">You are the manager. Name yourself and your club: you start in League 2, the bottom of four leagues, with a weak squad and '+money(20000)+'. Buy well, sell well, and climb.</div>'
-      +'<label class="mgLbl" for="mgName">YOUR NAME</label><input class="mkInput" id="mgName" maxlength="22" autocomplete="off" placeholder="Manager name" value="'+mgEsc(MM.name)+'">'
-      +'<label class="mgLbl" for="mgClubIn">YOUR CLUB</label><input class="mkInput" id="mgClubIn" maxlength="24" autocomplete="off" placeholder="Club name" value="'+mgEsc(MM.club)+'">'
-      +'<div class="mgMakerKit"><canvas id="mgKitCv" width="72" height="72"></canvas><div class="mgMakerCols"><div class="mgLbl">SHIRT</div>'+sw('pri',MM.pri)+'<div class="mgLbl">TRIM &amp; SHORTS</div>'+sw('sec',MM.sec)+'</div></div>'
+      +'<div class="pScroll"><div class="mkStep">You are the manager. Name yourself and your club: you start in League 2, the bottom of four leagues, with a weak squad and '+money(20000)+'. Buy well, sell well, and climb.</div>'
+      +'<div class="mkGrid"><div><label class="mgLbl" for="mgName">YOUR NAME</label><input class="mkInput" id="mgName" maxlength="22" autocomplete="off" placeholder="Manager name" value="'+mgEsc(MM.name)+'">'
+      +'<label class="mgLbl" for="mgClubIn">YOUR CLUB</label><input class="mkInput" id="mgClubIn" maxlength="24" autocomplete="off" placeholder="Club name" value="'+mgEsc(MM.club)+'"></div>'
+      +'<div class="mgMakerKit"><canvas id="mgKitCv" width="72" height="72"></canvas><div class="mgMakerCols"><div class="mgLbl">SHIRT</div>'+sw('pri',MM.pri)+'<div class="mgLbl">TRIM &amp; SHORTS</div>'+sw('sec',MM.sec)+'</div></div></div></div>'
       +'<div class="mkBtns"><button class="pauseBtn pauseBack" data-mm="cancel">Cancel</button><button class="pauseBtn" data-mm="go" id="mgGo"'+(MM.name.trim()&&MM.club.trim()?'':' disabled')+'>Start career</button></div>';
     const cv=document.getElementById('mgKitCv'), k=[MM.pri,MM.sec,MM.sec]; if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); }
   function mgCreate(){ if(!MM.name.trim()||!MM.club.trim()) return;
@@ -12101,6 +12660,9 @@
   markForm();
   markTac();
   resetKickoff();
+  applyPrefs();
+  { let n=0, t0=0; document.getElementById('smVer').addEventListener('click',()=>{ const t=performance.now(); n=t-t0<1500?n+1:1; t0=t;
+      if(n>=5){ n=0; setDev(!DEV); refreshMenuButtons(); } }); }   // five taps on the build number: developer mode on / off
   Promise.resolve(loadSettings()).then(()=>{
     newMatch();                    // build a match (ready for Exhibition / frozen backdrop)
     showStartMenu();               // ...but open the start menu first

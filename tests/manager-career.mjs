@@ -27,7 +27,7 @@ async function create(club){
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', club);
   await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 }
-const msg = () => page.$eval('#bpBody .mgMsg', e => e.textContent).catch(() => '');
+const msg = () => page.$eval('#bpMsg', e => e.classList.contains('on') ? e.textContent : '').catch(() => '');   // (a toast along the bottom)
 const bottom = () => page.textContent('#chBottom');
 
 // --- creation ------------------------------------------------------------------------
@@ -58,7 +58,7 @@ for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'h
 // --- the market: scout, bid the asking price, sign him -----------------------------------------
 await page.click('#chCampus [data-bldg="market"]'); await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 let signed = false;
-for(let i = 0; i < 12 && !signed; i++){                          // the first man who'd come and whom we can afford
+for(let i = 0; i < 10 && !signed; i++){                          // the first man who'd come and whom we can afford (page 1: ten men)
   await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); await page.waitForTimeout(60);
   const card = await page.innerText('#bpBody .mgCard');
   const ask = +(card.match(/Asking price\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
@@ -96,8 +96,8 @@ for(let i = 0; i < 3 && !/REVIEW/.test(await bottom()); i++){ await page.click('
 d = await save();
 ok(d.phase === 'review' && d.review && d.review.pos >= 1, 'the season ends in the review: ' + (d.review && d.review.pos + ', ' + d.review.result));
 await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(80);
-ok((await page.innerText('#bpBody')).includes('START SEASON 2'), 'the review offers season 2');
-await page.click('#bpBody [data-mg="newseason"]'); await page.waitForTimeout(120);
+ok((await page.innerText('#bldgPanel')).includes('START SEASON 2'), 'the review offers season 2');
+await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
 ok(d.season === 2 && d.phase === 'summer' && [1, 2, 3, 4].every(t => d.div[t].length === 14), 'season 2: the summer window, four leagues of 14');
 ok(d.manager.history.length === 1 && d.roster.every(p => p.apps === 0), 'season 1 is in your history, the season numbers start again');
@@ -109,7 +109,7 @@ let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.ro
   let n = 0; while(d.phase !== 'review' && n++ < 300){ if(M.mgWindowOpen(d)) M.mgNextDay(d); else M.mgPlayGame(d, null, null); }
   M.mgSave(d); M.renderHub(); return { pos: d.review.pos, result: d.review.result, up: d.review.up }; });
 ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins League 2: ' + r.result);
-await page.click('#chBottom [data-mg="review"]'); await page.click('#bpBody [data-mg="newseason"]'); await page.waitForTimeout(120);
+await page.click('#chBottom [data-mg="review"]'); await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
 ok(d.tier === 2 && d.lg[2].ids.includes(d.clubId) && d.lg[2].fx.filter(day => day.some(m => m[0] === d.clubId || m[1] === d.clubId)).length === 26,
    'promoted: League 1, 26 games');
