@@ -658,7 +658,7 @@
   #labResult b{font-weight:700;letter-spacing:.5px;}
   #labResult .lsv{color:#7f9a6f;font-size:9.5px;margin-right:2px;}
   .labTallyRow{display:flex;gap:6px;align-items:baseline;justify-content:center;font-size:9.5px;color:var(--ink-dim);
-    text-shadow:0 1px 2px #000;flex-wrap:wrap;}
+    text-shadow:0 1px 2px #000;flex-wrap:wrap;background:rgba(8,14,9,.72);border-radius:6px;padding:1px 8px;}   /* a pill: it sits on the turf now */
   .labClear{pointer-events:auto;font-family:inherit;font-size:9px;color:#7f9a6f;background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
   #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow-y:auto;
     background:rgba(8,14,9,.93);border:1px solid var(--edge);border-radius:8px;padding:9px 12px 12px;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
@@ -1975,7 +1975,7 @@
   // ===== camera + projection =====
   // PERSP 1: depth is spread evenly down the screen, so the middle of the pitch (and the goals on it) sits in the
   // middle between the touchlines; things further off are still drawn smaller
-  const HORIZON=64, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;
+  const HORIZON=100, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;   // far touchline at 100: room for the stand
   const camHalf=(W/2)/NEAR_SCALE+14;
   const camMin=camHalf, camMax=FW-camHalf;
   let camX=FW/2;
@@ -9489,7 +9489,162 @@
   function markBox(gx,x2,hw){ line(gx,YC-hw,x2,YC-hw); line(x2,YC-hw,x2,YC+hw); line(x2,YC+hw,gx,YC+hw); }
   function markSpot(x,y){ const s=proj(x,y); ctx.save(); ctx.fillStyle=ctx.strokeStyle; ctx.beginPath(); ctx.ellipse(s.x,s.y,2.6*s.scale+0.6,1.4*s.scale+0.4,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
 
+  // ===== PITCH ART (optional / EASILY DELETABLE) ==============================================
+  // The pitch in the style of the town's tiles (Ekat's GBA-era look). The ground -- mint turf mown in the 14 bands
+  // and specked, the run-off, a lawn past it -- the lines, the goals and the corner flags are rendered at half size,
+  // a pixel at a time, into an image that's doubled onto the screen, so the ground is as chunky as the players. The
+  // specks are fixed to the pitch, not the screen, so they travel with it as the camera pans. The far side -- sky,
+  // trees past the ends of the stand, floodlights, the timber stand under its tiled roof and the boards -- is one
+  // strip from `python3 tools/sprites/make_pitch_art.py --embed-classic`, panned with the camera at the stand's own
+  // depth (a touch slower than the far touchline). Remove this block and the "if(!PITCH.draw()){" wrapped round the
+  // old pitch in draw() (keep what's inside it) to go back to the vector pitch. Console: PITCH.enable(false).
+  // ============================================================================================
+  const PITCH_ART = "data:image/png;base64,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";
+  const PITCH_ART_META = {"x0":-700,"k":0.262,"w":1055,"h":43,"opaque":42};
+  const PITCH = (function(){
+    const HW=W>>1, HH=H>>1, RUN=3*PX_M;                    // half size; the run-off past the lines
+    const cfg={enabled:true, ready:false, strip:null};
+    const off=document.createElement('canvas'); off.width=HW; off.height=HH;
+    const octx=off.getContext('2d'), img=octx.createImageData(HW,HH), buf=new Uint32Array(img.data.buffer);
+    const LE=new Uint8Array(new Uint32Array([0x01020304]).buffer)[0]===4;
+    const pk=(h,a)=>{ const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+      a=a==null?255:a; return (LE?((a<<24)|(b<<16)|(g<<8)|r):((r<<24)|(g<<16)|(b<<8)|a))>>>0; };
+    const mixTo=(c,r,g,b,a)=>{                             // a pixel part of the way to (r,g,b)
+      let cr,cg,cb; if(LE){ cr=c&255; cg=(c>>>8)&255; cb=(c>>>16)&255; } else { cr=c>>>24; cg=(c>>>16)&255; cb=(c>>>8)&255; }
+      cr=Math.round(cr+(r-cr)*a); cg=Math.round(cg+(g-cg)*a); cb=Math.round(cb+(b-cb)*a);
+      return (LE?((255<<24)|(cb<<16)|(cg<<8)|cr):((cr<<24)|(cg<<16)|(cb<<8)|255))>>>0; };
+    const T={ A:pk('#70c88b'), B:pk('#5cbc7c'), AL:pk('#8cd6a2'), BD:pk('#48b070'),
+      lawn:pk('#70c8a0'), lawnL:pk('#88d8b8'), lawnD:pk('#40b088'), rimA:pk('#18a068'), rimB:pk('#40b088'),
+      line:pk('#f4fbf2'), navy:pk('#313852'), white:pk('#f8f8f8'), grey:pk('#a8b8c8') };
+    const BAND=FW/14, ROWW=(NEAR_Y-HORIZON)/FH;            // screen px per pitch px down the screen
+    // the markings, as points along them: x, y, and which way a near line thickens (0 down, 1 across, 2 a spot)
+    const pts=[];
+    const way=(tx,ty)=>Math.abs(tx)*0.8>=Math.abs(ty)*ROWW?0:1;
+    function seg(x0,y0,x1,y1){ const n=Math.max(1,Math.ceil(Math.max(Math.abs(x1-x0)/1.5,Math.abs(y1-y0)/6))), d=way(x1-x0,y1-y0);
+      for(let i=0;i<=n;i++) pts.push(x0+(x1-x0)*i/n, y0+(y1-y0)*i/n, d); }
+    function arc(cx,cy,r,a0,a1){ const n=Math.max(8,Math.ceil(Math.abs(a1-a0)*r/1.5));
+      for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*i/n; pts.push(cx+r*Math.cos(a), cy+r*Math.sin(a), way(-Math.sin(a),Math.cos(a))); } }
+    seg(0,0,FW,0); seg(0,FH,FW,FH); seg(0,0,0,FH); seg(FW,0,FW,FH); seg(FW/2,0,FW/2,FH);
+    arc(FW/2,YC,CIRCLE_R,0,Math.PI*2); pts.push(FW/2,YC,2);
+    for(const side of [-1,1]){
+      const gx=side>0?FW:0, dx=-side;
+      for(const [d,hw] of [[PA_D,PA_HW],[GA_D,GA_HW]]){
+        seg(gx,YC-hw,gx+dx*d,YC-hw); seg(gx,YC+hw,gx+dx*d,YC+hw); seg(gx+dx*d,YC-hw,gx+dx*d,YC+hw); }
+      pts.push(gx+dx*PEN_SPOT,YC,2);
+      const a0=Math.acos((PA_D-PEN_SPOT)/CIRCLE_R), dir=side>0?Math.PI:0;
+      arc(gx+dx*PEN_SPOT,YC,CIRCLE_R,dir-a0,dir+a0);
+      arc(gx,0,PX_M,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); arc(gx,FH,PX_M,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);
+    }
+    const LP=Float32Array.from(pts);
+    const half=(x,y)=>({ x:(W/2+(x-camX)*(FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/FH))/2, y:(HORIZON+(NEAR_Y-HORIZON)*y/FH)/2,
+                       s:FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/FH });   // a pitch point, in half-size pixels
+    // Each half-size row of the screen always shows the same line across the pitch (only the camera's x moves),
+    // so every row's ground is worked out once, in 4 px steps along the pitch, and a frame just samples it.
+    const XA=-700, XB=FW+700, NT=Math.ceil((XB-XA)/4), ROWS=new Uint32Array(HH*NT);   // XA a multiple of 4: specks fixed to the pitch
+    for(let j=0;j<HH;j++){
+      const t=(2*j+1-HORIZON)/(NEAR_Y-HORIZON), s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t, y=t*FH, dx=2/s;
+      const inY=y>=-RUN&&y<=FH+RUN, rimY=!inY&&y>-RUN-17&&y<FH+RUN+17;
+      const rk=Math.imul(j+1,0x9E3779B1), thr=(0.05+0.07*Math.max(0,Math.min(1,t)))*256;
+      for(let k=0;k<NT;k++){
+        const x=XA+4*k+2;
+        let h=Math.imul((XA>>2)+k^rk,0x27d4eb2d); h=(h^(h>>>15))&255;
+        let c;
+        if(inY&&x>=-RUN&&x<=FW+RUN){                       // turf: the band, and a speck now and then
+          const a=(Math.floor(x/BAND)&1)===0;
+          c=h<thr*0.5?(a?T.AL:T.A):h<thr?(a?T.B:T.BD):(a?T.A:T.B);
+        } else if(rimY||(inY&&x>-RUN-2*dx&&x<FW+RUN+2*dx)){
+          c=((k+j)&1)?T.rimA:T.rimB;                       // the turf's edge, dithered
+        } else {
+          c=h<thr*0.4?T.lawnL:h<thr*0.8?T.lawnD:T.lawn;     // the lawn past it
+        }
+        ROWS[j*NT+k]=c;
+      }
+    }
+    function ground(j0){
+      for(let j=j0;j<HH;j++){
+        const t=(2*j+1-HORIZON)/(NEAR_Y-HORIZON), s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t, du=0.5/s, r=j*NT;
+        let u=Math.max(0,(camX+(1-W/2)/s-XA)/4), o=j*HW;
+        for(let i=0;i<HW;i++,u+=du) buf[o++]=ROWS[r+Math.min(NT-1,u|0)];
+      }
+    }
+    function lines(){
+      const LN=T.line;
+      for(let k=0;k<LP.length;k+=3){
+        const x=LP[k], y=LP[k+1], t=y/FH, s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t;
+        const i=Math.floor((W/2+(x-camX)*s)/2), j=Math.floor((HORIZON+(NEAR_Y-HORIZON)*t)/2);
+        if(i<0||i>=HW-1||j<0||j>=HH-1) continue;
+        const o=j*HW+i, d=LP[k+2];
+        buf[o]=LN;
+        if(d===2){ buf[o+1]=LN; buf[o+HW]=LN; buf[o+HW+1]=LN; }
+        else if(t>0.55) buf[d===0?o+HW:o+1]=LN;
+      }
+    }
+    const put=(i,j,c)=>{ i=Math.round(i); j=Math.round(j); if(i>=0&&i<HW&&j>=0&&j<HH) buf[j*HW+i]=c; };
+    function bres(x0,y0,x1,y1,c){
+      x0=Math.round(x0); y0=Math.round(y0); x1=Math.round(x1); y1=Math.round(y1);
+      const dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let e=dx+dy;
+      for(let n=0;n<400;n++){ put(x0,y0,c); if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } }
+    }
+    function inside(px,py,q){ let c=false;
+      for(let i=0,k=q.length-1;i<q.length;k=i++){ const [x1,y1]=q[i], [x2,y2]=q[k];
+        if((y1>py)!==(y2>py) && px<(x2-x1)*(py-y1)/(y2-y1+1e-9)+x1) c=!c; }
+      return c; }
+    function fill(q,fn){
+      const xs=q.map(p=>p[0]), ys=q.map(p=>p[1]);
+      for(let j=Math.max(0,Math.floor(Math.min(...ys)));j<=Math.min(HH-1,Math.ceil(Math.max(...ys)));j++)
+        for(let i=Math.max(0,Math.floor(Math.min(...xs)));i<=Math.min(HW-1,Math.ceil(Math.max(...xs)));i++)
+          if(inside(i+0.5,j+0.5,q)) fn(j*HW+i,i,j);
+    }
+    function goal(side){                                  // white posts edged in navy, a mesh net, its shadow
+      const gx=side>0?FW:0, bxw=gx+side*NET_D;
+      const pF=half(gx,YC-GOAL_W/2), pN=half(gx,YC+GOAL_W/2), bF=half(bxw,YC-GOAL_W/2), bN=half(bxw,YC+GOAL_W/2);
+      if(Math.max(pF.x,pN.x,bF.x,bN.x)<-4||Math.min(pF.x,pN.x,bF.x,bN.x)>HW+4) return;
+      const tF=pF.y-GOAL_H*pF.s/2, tN=pN.y-GOAL_H*pN.s/2, btF=bF.y-GOAL_H*bF.s/2*0.85, btN=bN.y-GOAL_H*bN.s/2*0.85;
+      fill([[pF.x,pF.y],[pN.x,pN.y],[bN.x+2*side,bN.y+1],[bF.x+2*side,bF.y]], o=>{ buf[o]=mixTo(buf[o],0,0,0,0.14); });
+      const mesh=(o,i,j)=>{ if(((i+j)&1)===0) buf[o]=mixTo(buf[o],240,248,255,0.745); };
+      fill([[bF.x,bF.y],[bN.x,bN.y],[bN.x,btN],[bF.x,btF]],mesh);
+      fill([[pF.x,tF],[pN.x,tN],[bN.x,btN],[bF.x,btF]],mesh);
+      fill([[pF.x,pF.y],[bF.x,bF.y],[bF.x,btF],[pF.x,tF]],mesh);
+      fill([[pN.x,pN.y],[bN.x,bN.y],[bN.x,btN],[pN.x,tN]],mesh);
+      bres(bF.x,bF.y,bN.x,bN.y,T.grey); bres(bF.x,btF,bN.x,btN,T.grey); bres(bF.x,bF.y,bF.x,btF,T.grey); bres(bN.x,bN.y,bN.x,btN,T.grey);
+      for(const [x,y0,y1] of [[pF.x,pF.y,tF],[pN.x,pN.y,tN]]){
+        const X=Math.round(x-0.5);
+        for(let j=Math.round(y1);j<=Math.round(y0);j++){ put(X-1,j,T.navy); put(X,j,T.white); put(X+1,j,T.white); put(X+2,j,T.navy); }
+      }
+      bres(pF.x-0.5,tF-1,pN.x-0.5,tN-1,T.navy); bres(pF.x-0.5,tF,pN.x-0.5,tN,T.white); bres(pF.x-0.5,tF+1,pN.x-0.5,tN+1,T.white);
+    }
+    function flags(){                                      // the salmon pennant on a navy pole, at each corner
+      for(const [x,y] of [[0,0],[FW,0],[0,FH],[FW,FH]]){
+        const p=proj(x,y), X=Math.round(p.x/2)*2, Y=Math.round(p.y/2)*2, h=Math.round(1.5*PX_M*p.scale/2)*2, w=p.scale<0.7?3:5;
+        if(X<-12||X>W+12) continue;
+        ctx.fillStyle='#313852'; ctx.fillRect(X,Y-h,2,h+2);
+        ctx.fillStyle='#e88068';
+        for(let k=0;k<w-1;k++) ctx.fillRect(X+2,Y-h+k*2,2*(w-1-k),2);
+      }
+    }
+    function draw(){
+      if(!(cfg.enabled&&cfg.ready)) return false;
+      const M=PITCH_ART_META, top=HORIZON-2*M.h-14;
+      ground(Math.max(0,Math.floor((top+2*M.opaque)/2)-1));
+      lines(); goal(-1); goal(1);
+      octx.putImageData(img,0,0);
+      ctx.save(); ctx.imageSmoothingEnabled=false;
+      ctx.drawImage(off,0,0,W,H);
+      if(top>0){ ctx.fillStyle='#a8d8f0'; ctx.fillRect(0,0,W,top); }
+      ctx.drawImage(cfg.strip, Math.round((W/2+(M.x0-camX)*M.k*2)/2)*2, top, M.w*2, M.h*2);
+      flags();
+      ctx.restore();
+      return true;
+    }
+    if(PITCH_ART.length>40 && PITCH_ART_META.w){
+      const im=new Image(); im.onload=()=>{ cfg.strip=im; cfg.ready=true; }; im.onerror=()=>{ cfg.ready=false; }; im.src=PITCH_ART;
+    }
+    return { draw, cfg, get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, enable(v){ cfg.enabled=(v!==false); } };
+  })();
+  try{ window.PITCH=PITCH; }catch(e){}
+  // ===== END PITCH ART =========================================================================
   function draw(){
+    if(!PITCH.draw()){                                     // PITCH HOOK: the vector pitch, while the art is off
     ctx.fillStyle='#0c1410';ctx.fillRect(0,0,W,H);
     const sky=ctx.createLinearGradient(0,0,0,HORIZON+30);
     sky.addColorStop(0,'#0e1626');sky.addColorStop(1,'#1a2740');
@@ -9528,6 +9683,7 @@
     }
 
     drawGoal(-1);drawGoal(1);
+    }
 
     if(ball.ownedBy!==controlled){
       ctx.beginPath();

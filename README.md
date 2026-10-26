@@ -122,6 +122,20 @@ The same game played like any other football game. It's a copy of `index.html` w
     the other; turned away, the cheek and ear show at the edge.
   - Every sprite stands on a flat oval shadow of whole sprite pixels instead of the soft one, which comes back if
     the sprites are switched off (`V`).
+- **The pitch is in the town's style.** It's drawn the way Ekat's tiles are: mint turf mown in the 14 bands and specked,
+  a dithered edge to the run-off and a lawn past it, the lines, goals (mesh nets, white posts edged in navy) and
+  corner flags (a salmon pennant on a navy pole) all in whole pixels.
+  - The ground is rendered at half size and doubled, so it's as chunky as the players. Each screen row always shows
+    the same line across the pitch, so every row's ground is worked out once and a frame only samples it; drawing a
+    frame takes about a millisecond longer than the old vector pitch did. The specks are fixed to the pitch, so they
+    travel with it as the camera pans.
+  - The far side is one strip: sky, trees past the ends of the stand, a floodlight at each corner, a timber stand
+    under a grey tiled roof with four terraces of fans and a picket fence, a paved track and the advertising boards.
+    It pans with the camera at the stand's own depth, a touch slower than the far touchline.
+  - The camera's far touchline is now 100 px down the screen instead of 64, so the stand shows over it.
+  - The strip comes from `python3 tools/sprites/make_pitch_art.py --embed-classic`. `PITCH.enable(false)` in the
+    console puts the old vector pitch back.
+  - The labs' tally line sits on a dark pill now that it's over the turf rather than a night sky.
   The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
   `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. A career
   player's look is seeded from the player himself, so he looks the same at every club.
@@ -769,6 +783,7 @@ where the head sits in each cell) so each player can be put together and recolou
 ```sh
 python3 tools/sprites/make_player_sheet.py --embed-classic
 python3 tools/sprites/make_keeper_sheet.py --embed-classic
+python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch (assets/sprites/pitch_far.png)
 ```
 
 `index.html` keeps the sheets it was last embedded with until it is re-embedded with `--embed`.
