@@ -1033,6 +1033,8 @@
     skRainbowH:{val:300,min:180,max:420,step:10,label:'Skill: rainbow height',hint:'How hard it goes up (px/s). 300 peaks at about 3.5 m and is in the air about 1.15 s.'},
     skRainbowT:{val:0.35,min:0.15,max:0.7,step:0.05,label:'Skill: rainbow wind-up (s)',hint:'How long it takes to roll the ball up the back of your leg before the flick.'},
     oneTouchErr:{val:16,min:0,max:40,step:1,label:'One-touch pass: worst spray (°)',hint:'How far off line a first-time pass can go at worst: a ball at chest height, coming in at 1200 px/s or more, played by a man with Passing 1 and Ball control 1. A good passer takes much of it off; a slow ball along the grass takes it all off.'},
+    oneTouchMax:{val:18,min:8,max:30,step:1,label:'One-touch pass: longest (m)',hint:'A first-time pass only goes to a team-mate this close, along the grass. Further than that, take a touch first.'},
+    turnPassErr:{val:14,min:0,max:30,step:1,label:'Turn-and-pass: worst spray (°)',hint:'How far off line a pass can go when it is played the moment the passer has turned right round to face it, at Off IQ 1. The longer he has been facing that way the less; a slight angle costs nothing; Off IQ 10 takes four-fifths of it off.'},
     skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
     skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far to the side a full roulette carries you (25 px = 1 m). A shorter one goes less far.'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
@@ -1311,7 +1313,7 @@
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
-    passlab:  ['oneTouchErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
   };
@@ -1876,7 +1878,9 @@
   }
   // TOUCH PASSING: with the ball, a quick tap (or click) on a team-mate passes to him, weighted for how far he is
   function touchPass(q){
-    if(q&&controlled&&!ball.ownedBy&&!myLooseBall()&&incomingAny()){ queueOneTouch(q); return true; }   // still coming: first time, to him
+    if(q&&controlled&&!ball.ownedBy&&!myLooseBall()&&incomingAny()){                       // still coming: first time, to him --
+      if(dist(controlled,q)>oneTouchMax()){ lastGrade='TOO FAR TO PLAY FIRST TIME'; gradeColor='#ffb43c'; gradeFade=1.0; return true; }   // if he's near enough
+      queueOneTouch(q); return true; }
     if(!q||!controlled||!(ball.ownedBy===controlled||myLooseBall())) return false;
     const d=dist(controlled,q), dx=q.x-controlled.x, dy=q.y-controlled.y;
     curIx=dx/(d||1); curIy=dy/(d||1);                          // (the aim, for the no-target case)
@@ -3047,7 +3051,7 @@
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
-    skCutPop:'Cut · pop',oneTouchErr:'One-touch · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
+    skCutPop:'Cut · pop',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
     skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skCutBurst:'Cut · burst',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Cut · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
@@ -3088,7 +3092,8 @@
   function labDialTxt(k){
     const v=P[k].val;
     if(k==='skCutPop') return '+'+v+' px/s';
-    if(k==='oneTouchErr') return v+'°';
+    if(k==='oneTouchErr'||k==='turnPassErr') return v+'°';
+    if(k==='oneTouchMax') return v+' m';
     if(k==='skRainbowDist') return v+' px ('+(v/25).toFixed(1)+' m)';
     if(k==='skRainbowH'){ const pk=v*v/1040; return v+' px/s · peak '+(pk/25).toFixed(1)+' m'; }
     if(k==='skRainbowT') return v.toFixed(2)+' s';
@@ -4087,6 +4092,19 @@
     const longErr= (1-la)*clamp((d-250)/650,0,1)*0.45;   // big spread: up to ~25° at the worst
     return (base+longErr)*(1+poiseLoss(p)*0.9)*(Math.random()*2-1);   // composure: pressure widens the spray
   }
+  // TURNING AND PASSING: a pass played the moment he's turned to face it goes less true than one he's been lined up for.
+  // His facing, read over the last ~0.3 s (faceAvg: midway through a turn it's short, about square), against the way the
+  // ball goes: a slight angle costs nothing, right round costs the most (the Turn-and-pass dial), and Off IQ -- knowing
+  // where it's going before it gets to him -- takes it down to a fifth. turnWorst: the worst of it, this pass (radians);
+  // turnSpray: a draw from it, mostly well inside.
+  function turnWorst(p,dx,dy){
+    const f=p&&(p.faceAvg||p.facing); if(!f) return 0;
+    const k=clamp((Math.acos(clamp(f.x*dx+f.y*dy,-1,1))-0.35)/(Math.PI-0.35),0,1);
+    return P.turnPassErr.val*Math.PI/180*k*statLerp(statOf(p,'offIQ',P.offIQ.val),1,0.2);
+  }
+  function turnSpray(p,dx,dy){ return turnWorst(p,dx,dy)*(Math.random()+Math.random()+Math.random()-1.5)*1.15; }
+  // (the way he's been facing, kept up each frame)
+  function trackFacing(p,dt){ const f=p.facing; if(!f) return; const a=p.faceAvg||(p.faceAvg={x:f.x,y:f.y}), k=1-Math.exp(-dt/0.3); a.x+=(f.x-a.x)*k; a.y+=(f.y-a.y)*k; }
   // a player's strength (0..1). per-player stat if set, else the global dial.
   // ===== PER-PLAYER STAT MAPPING =====
   // A stat is 1..10. statLerp maps it linearly onto a [lo(=stat 1) .. hi(=stat 10)] value range.
@@ -4200,7 +4218,7 @@
     const lead={x:mate.x+mate.vx*0.5+(curIx*60),y:mate.y+mate.vy*0.5+(curIy*60)};
     let dx=lead.x-ball.x,dy=lead.y-ball.y;
     const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-    const aerr=passSpray(d, p);
+    const aerr=passSpray(d, p)+turnSpray(p,dx,dy);
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const frPerSec=Math.pow(1-P.friction.val,3.2);
@@ -4590,8 +4608,8 @@
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
       let dx=lead.x-ball.x,dy=lead.y-ball.y;
       const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-      // pass accuracy: angular drift that grows with distance and missing accuracy
-      const aerr=passSpray(d, p);
+      // pass accuracy: angular drift that grows with distance and missing accuracy, and with a quick turn to play it
+      const aerr=passSpray(d, p)+turnSpray(p,dx,dy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       if(o.loft){
@@ -4614,6 +4632,7 @@
     } else {
       // no good target: raw directional kick where aimed -- or into space the way you dragged
       if(o.thru){ const u=screenDirToPitch(o.thru.dx,o.thru.dy,p.y); aimx=u.x; aimy=u.y; }
+      { const te=turnSpray(p,aimx,aimy), c=Math.cos(te), sn=Math.sin(te); const ax=aimx*c-aimy*sn; aimy=aimx*sn+aimy*c; aimx=ax; }
       ball.vx=aimx*power+p.vx*0.3;
       ball.vy=aimy*power+p.vy*0.3;
       ball.vz=o.loft?320:200;
@@ -4632,7 +4651,7 @@
     const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
     let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p);
+    const aerr=passSpray(d,p)+turnSpray(p,dx,dy);
     const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
     let tA;
@@ -4705,12 +4724,17 @@
     const sp=clamp((rel-300)/900,0,1), ht=clamp(ball.z/AIR_REACH,0,1);
     return {sp,ht,rel,z:ball.z,d:clamp(0.55*sp+0.8*ht,0,1)};
   }
+  // ONE-TOUCH PASSES ARE SHORT: only to a team-mate within the One-touch dial (18 m), along the grass
+  function oneTouchMax(){ return P.oneTouchMax.val*25; }
   function firstTouchPass(o){
     o=o||{};
     const p=controlled;
     const atk=atkOf(p.team);
     let aimx=curIx,aimy=curIy;
     if(o.dir){aimx=o.dir.x;aimy=o.dir.y;}                   // swiped off 1-TOUCH: that way, whatever the stick says
+    const otMax=oneTouchMax();
+    if(o.target&&o.target.team===p.team&&o.target!==p&&dist(p,o.target)>otMax){   // the man you tapped has got too far away: his way, short
+      aimx=o.target.x-p.x; aimy=o.target.y-p.y; o={dir:o.dir}; }
     if(!aimx&&!aimy){aimx=p.facing.x;aimy=p.facing.y;}
     const al=Math.hypot(aimx,aimy)||1;aimx/=al;aimy/=al;
     const D=oneTouchDifficulty(p), sk=oneTouchSkill(p);
@@ -4720,6 +4744,7 @@
     for(const q of players){
       if(q.team!==p.team||q===p)continue;
       let dx=q.x-p.x,dy=q.y-p.y; const d=Math.hypot(dx,dy)||1;
+      if(d>otMax) continue;                                     // (first time, it's a short ball)
       const dirDot=(dx/d)*aimx+(dy/d)*aimy;
       if(dirDot<0.30)continue;
       const opp=nearestOppTo(p,q);
@@ -4732,7 +4757,7 @@
     if(best){
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
       let dx=lead.x-ball.x,dy=lead.y-ball.y; const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-      const aerr=passSpray(d,p)+err;
+      const aerr=passSpray(d,p)+err+turnSpray(p,dx,dy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       const sol=passSolve(d);
@@ -4740,12 +4765,12 @@
       ball.vx=ax*sol.vh*pace; ball.vy=ay*sol.vh*pace;
       ball.vz=sol.vz+D.z*1.5;                                   // met in the air, it goes up more
     } else {
-      // no target: raw directional first-time kick where aimed
-      const aerr=(1-clamp(kickAccOf(p),0,1))*0.18*(Math.random()*2-1)+err;
+      // no team-mate near enough that way: a short ball into the space where aimed
+      const aerr=(1-clamp(kickAccOf(p),0,1))*0.18*(Math.random()*2-1)+err+turnSpray(p,aimx,aimy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const dxk=aimx*ca-aimy*sa, dyk=aimx*sa+aimy*ca;
-      const power=620;
-      ball.vx=dxk*power+p.vx*0.3; ball.vy=dyk*power+p.vy*0.3; ball.vz=160+D.z*1.5;
+      const sol=passSolve(Math.min(otMax,340));
+      ball.vx=dxk*sol.vh; ball.vy=dyk*sol.vh; ball.vz=sol.vz+D.z*1.5;
     }
     ball.ownedBy=null;ball.dribbler=null;ball.dribbleGrace=0;p.noTouchT=0.3;ball.lastTouch=p.team;ball.z=Math.max(ball.z,1);
     endCurve(); recordPassTeam(p.team,p); passPose(p);
@@ -5178,6 +5203,7 @@
     // gentle angular error, scaled down so even risky passes mostly find a teammate
     let aerr=passSpray(d, p, acc);
     if(p.role==='DEF' && mate.role==='DEF') aerr*=0.45;      // defenders keep it tidy between themselves
+    aerr+=turnSpray(p,dx,dy);                                 // (turned and played it at once: less true)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     // POWER solved so it ARRIVES at the receiver: chipped over a man in the way, otherwise the normal flight to his feet
@@ -6178,7 +6204,7 @@
   }
   function obLobBall(p,q,tx,ty){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, T=obLobT(d), vh=loftVh(d,T);
+    const aerr=passSpray(d,p)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, T=obLobT(d), vh=loftVh(d,T);
     ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T; ball.lob={x:ax,y:ay};
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // he goes to where it drops
@@ -6187,7 +6213,7 @@
   }
   function obThruBall(p,q,tx,ty,tA){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p), ca=Math.cos(aerr), sa=Math.sin(aerr), {v0}=obThruV0(d,tA);
+    const aerr=passSpray(d,p)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr), {v0}=obThruV0(d,tA);
     ball.vx=(dx*ca-dy*sa)*v0; ball.vy=(dx*sa+dy*ca)*v0; ball.vz=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
@@ -6308,6 +6334,7 @@
     let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     let amp=((1-acc)*0.06+(1-longAccOf(p))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
     if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
+    amp+=0.5*turnWorst(p,dx/(d||1),dy/(d||1));                         // (a ball he'd have to turn and play at once)
     const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30)+(lob?runSpeedOf(q)*Math.max(0,tEnd-0.4)*0.8:0);   // (a long ball up: he has time to get under it)
     const pAcc=lat<=reachL?1:clamp(reachL/lat,0.2,1);
     // how close they'll be on him when it gets there
@@ -6452,7 +6479,9 @@
     let keep=-1e9; for(const o of opts) if(!o.rel&&o.ev>keep) keep=o.ev;
     const firstTime=ob.pressed?0:0.006+0.8*Math.max(0,keep);
     let best=null, bs=-1e9;
+    const otMax=oneTouchMax();
     for(const o of opts){
+      if(looking && o.kind==='pass' && o.d>otMax) continue;               // first time, only a short ball (see firstTouchPass)
       let s=o.ev+obGauss()*(sdA+sdR*Math.abs(o.ev));
       if(ob.plan&&o.key===ob.plan.key) s+=(C.prD<150?0.5:1)*(0.0015+0.1*Math.abs(o.ev));   // (less so with a man coming)
       if(looking&&o.rel) s-=firstTime;
@@ -6545,6 +6574,11 @@
     if(p.takeOn&&simNow-p.takeOn.at>0.1) p.takeOn=null;                  // (he lost it since)
     if(p.takeOn&&p.takeOn.phase!=='go'){ const r=obTakeOnStep(p,dt,C); if(r) return r; }   // committed: past him first
     if(C.prD<70) ob.pressed=true;
+    // SETTING HIMSELF for a pass he'd otherwise play across his body (see turnWorst): he turns to face it, and plays it
+    // once he's lined up -- or at once if a man closes in
+    if(ob.set){ const S=ob.set;
+      if(C.prD<110 || simNow>=S.until || !players.includes(S.q)){ ob.set=null; const o2=obPassOpt(p,S.q,C); if(o2) return obExec(p,o2,C); }
+      else { const dx=S.tx-p.x, dy=S.ty-p.y, l=Math.hypot(dx,dy)||1; p.sprint=false; p.dbgTag='OB-SET'; return steer(p,p.x+dx/l*30,p.y+dy/l*30,0.25); } }
     const looking=simNow<ob.look||(ball.z>10&&!ob.pressed);             // (still up off his touch: he lets it drop first)
     // a man arriving: decide now -- once he's on his way in, not once he's on him, so the ball goes before he gets there
     const pr=C.presser, inbound=pr&&C.prD<130&&((pr.vx||0)*(p.x-pr.x)+(pr.vy||0)*(p.y-pr.y))/Math.max(1,C.prD)>40;
@@ -6553,7 +6587,11 @@
       ob.scanT=simNow; ob.next=simNow+statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.14)*C.M.tempo;
       const opts=obOptions(p,C,ob), pick=obChoose(p,ob,opts,looking,C);
       p.obLast={t:simNow, opts, pick, looking};
-      if(pick&&pick.rel){ p.takeOn=null; return obExec(p,pick,C); }
+      if(pick&&pick.rel){ p.takeOn=null;
+        if(pick.kind==='pass' && C.prD>140 && turnWorst(p,(pick.tx-ball.x)/(pick.d||1),(pick.ty-ball.y)/(pick.d||1))>0.026){   // (over ~1.5 deg at worst, and time to do it)
+          ob.set={q:pick.q, tx:pick.tx, ty:pick.ty, until:simNow+0.3}; const l=pick.d||1;
+          p.dbgTag='OB-SET'; return steer(p,p.x+(pick.tx-ball.x)/l*30,p.y+(pick.ty-ball.y)/l*30,0.25); }
+        return obExec(p,pick,C); }
       if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, phase:'approach', t:1.3, at:simNow}; }
       else if(pick){ p.takeOn=null; ob.plan=pick; }
     }
@@ -8881,6 +8919,7 @@
 
     const seeK=1-Math.exp(-dt/0.35);
     for(const p of players){ p.seenVx=(p.seenVx||0)+(p.vx-(p.seenVx||0))*seeK; p.seenVy=(p.seenVy||0)+(p.vy-(p.seenVy||0))*seeK; }   // how others read a man's running: a beat late (see blockSpot)
+    for(const p of players) trackFacing(p,dt);
     for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
       if(!p.facing||!isFinite(p.facing.x)||!isFinite(p.facing.y)) p.facing={x:atkOf(p.team),y:0};}
     for(const kp of keepers){ if(!kp.facing||!isFinite(kp.facing.x)||!isFinite(kp.facing.y)) kp.facing={x:atkOf(kp.team),y:0}; }

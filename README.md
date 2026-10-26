@@ -36,6 +36,22 @@ The same game played like any other football game. It's a copy of `index.html` w
   for the rest. The worst case is a dial (One-touch pass: worst spray, default 16°, also in the Pass Lab's TUNE).
   Measured mean error off line, Passing/Ball control 2/2 against 9/9: slow along the grass 3.0° v 0.8°, hard along
   the grass (1200 px/s) 4.3° v 1.7°, chest high 7.0° v 2.4°.
+  - **One-touch passes are short passes.** A first-time pass only goes to a team-mate within 18 m (the One-touch
+    pass: longest dial, in the Pass Lab's TUNE), along the grass. Tap a man further away as the ball comes in and
+    it isn't played first time: the screen says TOO FAR TO PLAY FIRST TIME, and you take it as normal. With nobody
+    near enough the way you've aimed, it's a short ball (14 m) into the space there. The computer's first-time
+    passes, played while it's still looking up, are short too: a longer ball waits for a touch.
+- **Turning and passing costs accuracy.** A pass played the moment you've turned to face it goes less true than one
+  you've been lined up for. The game reads your facing over the last ~0.3 s against the way the ball goes.
+  - **The angle.** Up to 20° costs nothing. At Off IQ 1 the worst spray is 6.1° turned square and 14° right round
+    (the Turn-and-pass: worst spray dial, in the Pass Lab's TUNE). Most passes land well inside the worst.
+  - **Off IQ** is the only stat that matters here: at 10 the penalty is a fifth of what it is at 1.
+  - **Facing it for a moment takes it away.** Turned square and held there, the penalty is 76% after 0.1 s, 44% after
+    0.3 s, 14% after 0.6 s and gone by 1 s.
+  - **Every pass gets it**, yours and the computer's, one-touch passes and through balls included. The computer
+    knows it. With time on the ball (nobody within 5.6 m), a man about to play it across his body turns to face it
+    for 0.3 s first. With a man close, he plays it as he is. Measured over 15-minute computer-against-computer
+    games, a side now loses the ball 33.5 times against 30.7.
 - **Exhibition setup is just the two clubs.** There's no "you control" picker: you start on whoever kicks off, and
   switch from there.
 - **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
@@ -742,5 +758,5 @@ a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_previ
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match) and tactics. They need
+a played match), tactics and passing. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
