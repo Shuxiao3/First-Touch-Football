@@ -26,6 +26,7 @@ node tests/classic-tactics.mjs # ~30s  — Football Classic's tactics: a shape w
 node tests/classic-sprites.mjs # ~10s  — Football Classic's players: every man has an eye colour of his own, swapped into his sheet (the keepers' too), and the pixel shadow under the sprites (the plain one with them off)
 node tests/classic-pitch.mjs   # ~10s  — Football Classic's pitch: the art on by default, the far touchline at 100 px under the stand, a white pixel line, the specked turf, the ground moving with the camera speck for speck, and the vector pitch back when it's switched off
 node tests/classic-passing.mjs # ~15s  — Football Classic's passing: one-touch passes only short (the near man, not the far one; a far man tapped isn't played first time; nobody near: a short ball), the turn-and-pass penalty (none lined up, more the further round, a fifth at Off IQ 10, easing off as you keep facing it)
+node tests/classic-touch.mjs   # ~15s  — Football Classic's first touch: the smaller reach (18 to 32); no timing, the touch is the player's own -- near-perfect at the back with nobody near whatever his stats, down to Ball control and Composure under pressure and in the final third; taken as it arrives, for you and the computer alike (a perfect one dead at the feet, a poor one off him); one solid green ring under the man you control, the ball in whole pixels (the plain one with the sprites off)
 node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit, phone: press TRAP and drag to aim the touch
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it
@@ -42,7 +43,8 @@ node tests/on-ball.mjs         # ~90s  — the computer's man on the ball: picks
 folder) that exposes who has the ball, each computer player's decision tag, and each ball he plays; the game itself
 is unchanged. `classic-tactics.mjs` does the same to reach the match's shapes, the positions' instructions and the stars, and
 `classic-passing.mjs` to set up the one-touch scenes and read the turn penalty, `classic-sprites.mjs` to reach the
-players and their baked sheets, and `classic-pitch.mjs` to move the camera and redraw.
+players and their baked sheets, `classic-pitch.mjs` to move the camera and redraw, and `classic-touch.mjs` to set
+the first-touch scenes, judge touches and read the drawn ring and ball.
 
 Each exits non-zero on failure and prints a PASS/FAIL line per assertion.
 

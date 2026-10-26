@@ -15,9 +15,35 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 
 The same game played like any other football game. It's a copy of `index.html` with two changes:
 
-- **No first touch to time.** A ground ball that reaches your man is under control at once, and a ball at chest or
-  thigh height is cushioned down for you, unless you've gone up for a header. The only exception is a rocket you get
-  in the way of, such as their shot or a hard-hit pass over 700 px/s, which is a block that runs loose.
+- **The first touch is the player's own.** There's nothing to time, for you or the computer. As the ball reaches a
+  man, his touch is judged from his Ball control and Composure, and how much they matter depends on the moment.
+  Knocking it about at the back with nobody near, nearly anyone takes it cleanly: a defender rated 3 for both is clean
+  or better every time, and perfect most of it. Pressure counts the nearest opponent, closer still if he's closing in:
+  full inside 1.6 m, none beyond 5.6 m. Under pressure or in the final third, the touch is only as good as the player.
+  Measured over exhibition matches, with everyone given the same stats:
+
+  | Ball control / Composure | At the back, nobody near | Under pressure | Final third |
+  | --- | --- | --- | --- |
+  | 3 / 3 | 100% clean or better (85% perfect) | 33% | 46% |
+  | 5.5 / 5.5 | 100% (97% perfect) | 85% | 89% |
+  | 8 / 8 | 100% (100% perfect) | 100% | 100% |
+
+  The grades are PERFECT, CLEAN, LOOSE and HEAVY.
+  - A PERFECT touch along the grass is dead at his feet.
+  - Anything less comes off him like a bounce off a round body: back the way it came if he's square on, glancing off
+    if he's off its line. Half the time a poor one squirms on past him instead.
+  - It keeps less pace than the old timed trap did: from 6% for the best touch to 45% for the worst, falling away
+    steeply. A clean touch ends a step away, a loose one a couple of metres, a heavy one a few.
+  - A ball in the air is met the same way, and it has to drop to his feet.
+  - A flicked first touch (a flick on SKILL as the ball comes) strays and runs on as the touch does.
+  - A rocket you get in the way of (their shot, or a pass over 700 px/s) is still a block that runs loose.
+
+  The reach, where you first meet the ball, is smaller: 18 at Ball control 1 up to 32 at 10 (it was 25 to 45). How
+  far a touch can fall from the likely one is a dial: First-touch spread ×, default 1.
+- **On the pitch.** The man you control has one solid green ring on the grass at his reach. The dotted reach ring,
+  and the ring under whoever had the ball, are gone. The ball is drawn in whole pixels like the players: white with
+  dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
+  marks where it will land while it's in the air.
 - **No player lock.** You control whichever of your players has the ball. When you pass, you're on the receiver as
   soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far).
   Without the ball, PASS (`J`, or the PASS button, which reads SWITCH) switches player. Push the stick as you press it
@@ -784,6 +810,7 @@ where the head sits in each cell) so each player can be put together and recolou
 python3 tools/sprites/make_player_sheet.py --embed-classic
 python3 tools/sprites/make_keeper_sheet.py --embed-classic
 python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch (assets/sprites/pitch_far.png)
+python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9 frames (assets/sprites/ball_preview.png)
 ```
 
 `index.html` keeps the sheets it was last embedded with until it is re-embedded with `--embed`.
@@ -793,5 +820,5 @@ python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of th
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match), tactics and passing. They need
+a played match), tactics, passing, the first touch, the players' sprites and the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

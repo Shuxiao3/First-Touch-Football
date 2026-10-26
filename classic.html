@@ -983,11 +983,11 @@
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=73;
+  const SETTINGS_V=74;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
-    ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'First touch / trapping as a 1–10 stat. 1 = trap reach 25, trap window 0.10s; 10 = reach 45, window 0.20s. A bigger reach meets the ball sooner and a longer window forgives early presses (late ones always fall off fast). Also the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
-    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects first touch, passing and shooting UNDER PRESSURE only — in space it changes nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
+    ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
+    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
     knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'Forward nudge per dribble stride. Bigger = the ball rolls much further out ahead.'},
     knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'Random spread on each touch. Higher = looser, less predictable dribbling.'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
@@ -1028,7 +1028,7 @@
     strengthG: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — your team (1–10)',hint:'Your team strength stat (baseline). 1 = 0.1 (weak, easily shoved); 10 = 1.0 (dominant). Compare against the opponent.'},
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
-    aiTouch:  {val:1.1, min:0, max:2.5, step:0.05,label:'AI first-touch error',hint:'How sloppily computer players time their traps. They "press" around the sweet spot with a human-like spread of error that also grows for poor ball control and under pressure. 0 = perfect every time, 1 = tidy (most touches clean, the odd one loose), 1.1 = default (mostly clean, some loose, the odd heavy one), 1.4+ = a real mix with balls let run, 2+ = scrappy.'},
+    aiTouch:  {val:1, min:0, max:2.5, step:0.05,label:'First-touch spread ×',hint:'Everyone\'s first touch, yours and the computer\'s: how far a touch can fall from the one Ball control, Composure and the moment make likely. 0 = always the likely touch, 1 = default, 2+ = scrappy. (In the Trap Lab: the computer receiver\'s timing error.)'},
     skRainbowDist:{val:40,min:40,max:250,step:5,label:'Skill: rainbow lead (px)',hint:'How far ahead of where your run takes you the rainbow flick comes down (25 px = 1 m).'},
     skRainbowH:{val:300,min:180,max:420,step:10,label:'Skill: rainbow height',hint:'How hard it goes up (px/s). 300 peaks at about 3.5 m and is in the air about 1.15 s.'},
     skRainbowT:{val:0.35,min:0.15,max:0.7,step:0.05,label:'Skill: rainbow wind-up (s)',hint:'How long it takes to roll the ball up the back of your leg before the flick.'},
@@ -1045,13 +1045,13 @@
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
-    trapSweet:{val:-30,min:-120,max:40,step:5,label:'Trap: sweet spot (ms)',hint:'When the perfect press lands, measured from the moment the ball reaches your reach ring. -30 = a hair before it arrives; 0 = exactly as it arrives.'},
-    trapWin:  {val:1,min:0.4,max:2.5,step:0.05,label:'Trap: window ×',hint:'Scales the timing window Ball control gives you (0.10 s at 1 up to 0.20 s at 10). Bigger = more forgiving timing for everyone, AI included.'},
-    trapLate: {val:0.6,min:0.2,max:1.5,step:0.05,label:'Trap: late tolerance',hint:'How much room a LATE press gets, as a share of the early side. 0.6 = late presses fall off almost twice as fast as early ones; 1 = both sides equal.'},
-    trapKeepGood:{val:0.12,min:0,max:0.6,step:0.01,label:'Trap: pace kept, perfect',hint:'Share of the ball\'s pace a perfect touch keeps as it comes off you. Lower = it drops dead closer to your feet.'},
-    trapKeepBad:{val:0.63,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by a touch at the very edge of the window. Capped at 1, so a bad touch never adds pace.'},
+    trapSweet:{val:-30,min:-120,max:40,step:5,label:'Trap Lab: sweet spot (ms)',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. When the perfect press lands, measured from the moment the ball reaches your reach ring. -30 = a hair before it arrives; 0 = exactly as it arrives.'},
+    trapWin:  {val:1,min:0.4,max:2.5,step:0.05,label:'Trap Lab: window ×',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. Scales the timing window Ball control gives you (0.10 s at 1 up to 0.20 s at 10). Bigger = more forgiving timing for everyone, AI included.'},
+    trapLate: {val:0.6,min:0.2,max:1.5,step:0.05,label:'Trap Lab: late tolerance',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. How much room a LATE press gets, as a share of the early side. 0.6 = late presses fall off almost twice as fast as early ones; 1 = both sides equal.'},
+    trapKeepGood:{val:0.06,min:0,max:0.6,step:0.01,label:'Trap: pace kept, best',hint:'Share of the ball\'s pace the best touch keeps as it comes off you (a PERFECT one along the grass is simply dead at your feet). Lower = it drops dead closer to you.'},
+    trapKeepBad:{val:0.45,min:0.2,max:1,step:0.01,label:'Trap: pace kept, botched',hint:'Share of the pace kept by the worst touch there is. In between it eases off steeply, so a touch that is merely loose stays near you. Capped at 1, so a bad touch never adds pace.'},
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
-    trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap: re-press lockout (s)',hint:'A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
+    trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap Lab: re-press lockout (s)',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
     // directional first touch (touch screens): press TRAP and drag the way you want the ball to go
     ftPush:   {val:55,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (press TRAP and drag the way you want it). Running along your aim adds your own pace on top, so the ball stays just ahead of you.'},
     ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed.'},
@@ -1068,7 +1068,7 @@
     swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball, against holding K+Up/Down for the whole flight (1x). The Curve stat scales it again.'},
     swipePow: {val:3.2,min:1.4,max:6,step:0.1,label:'Swipe shot: flick for full power',hint:'How fast a flick (in screen widths per second, over its quickest 70 ms) gives a full-power shot. Lower = full power comes easier.'},
     swipeBow: {val:0.30,min:0.12,max:0.6,step:0.01,label:'Swipe shot: bend for full spin',hint:'How far a swipe has to bow off its straight line (as a share of its length) for full spin. A bow under about a quarter of this is read as straight, so a thumb\'s natural arc does not curl it.'},
-    gatherR:  {val:28,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, measured from your middle. Your trap reach (Ball control) is where you can first meet the ball and where you take it back afterwards, but a big reach never sends a touch further away.'},
+    gatherR:  {val:20,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, measured from your middle. Your trap reach (Ball control) is where you can first meet the ball and where you take it back afterwards, but a big reach never sends a touch further away.'},
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
@@ -1269,6 +1269,8 @@
         if(v<71){ if(P.passLoft.val>=2.5) P.passLoft.val=2.1; }   // normal passes flatter (and quicker) by default
         if(v<72){ if(P.aiTouch.val===1.4) P.aiTouch.val=1.1; if(P.aiReact.val===0.3) P.aiReact.val=0.15; }   // AI first touches tidier, and quicker to react
         if(v<73){ if(P.trapKeepBad.val===0.7) P.trapKeepBad.val=0.63; }   // a botched touch runs a little less far
+        if(v<74){ if(P.aiTouch.val===1.1) P.aiTouch.val=1; if(P.trapKeepGood.val===0.12) P.trapKeepGood.val=0.06;   // the first touch is the player's own now (no timing):
+                  if(P.trapKeepBad.val===0.63) P.trapKeepBad.val=0.45; if(P.gatherR.val===28) P.gatherR.val=20; }    // a kinder bounce, and a smaller reach to gather it in
         if(o.__fG)myForm=formOKAtk(o.__fG,myForm);
         if(o.__fR)rForm=formOKAtk(o.__fR,rForm);
         myFormDef=o.__fGd?formOKDef(o.__fGd,defFormFor(myForm)):defFormFor(myForm);
@@ -2412,16 +2414,19 @@
     const dx=p.x-ball.x, dy=p.y-ball.y, d=Math.hypot(dx,dy), sp=Math.hypot(ball.vx,ball.vy);
     return d<380&&sp>60&&(ball.vx*dx+ball.vy*dy)/(d*sp||1)>0.7;
   }
-  // the touch itself, as the ball reaches you: pushed the way you flicked, your own pace along it on top
-  function directionalTouch(p){
-    const a=ftAim.d; ftAim=null;
+  // the touch itself, as the ball reaches you: pushed the way you flicked, your own pace along it on top. It's as good
+  // as his first touch (s, see touchQuality): a poor one strays off the line you asked for and runs on further.
+  function directionalTouch(p,s){
+    const a=ftAim.d; ftAim=null; if(!(s>=0)) s=1;
     own(p,p.r+ball.r+5);
     const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999)));
     const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
-    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.12;
-    ball.vx=a.x*push; ball.vy=a.y*push; ball.z=1; ball.vz=30;
+    const err=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
+    const ang=Math.atan2(a.y,a.x)+err, out=push*(1+0.8*(1-s)*(1-s));
+    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.12+0.15*(1-s);
+    ball.vx=Math.cos(ang)*out; ball.vy=Math.sin(ang)*out; ball.z=1; ball.vz=30+60*(1-s);
     p.facing={x:a.x,y:a.y};
-    lastGrade='TOUCH '+labArrow(a.x,a.y); gradeColor='#78c8ff'; gradeFade=0.8;
+    lastGrade='TOUCH '+labArrow(a.x,a.y)+(s>0.55?'':' · '+trapGrade(s)); gradeColor=s>0.55?'#78c8ff':s>0.3?'#ffb43c':'#ff5a4d'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
   function skillGStart(cx,cy){ const r=rect(); skillG={mate:(myBall()||incomingAny())?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
@@ -3046,7 +3051,7 @@
   }
   // ----- tune drawer: the trap dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
-    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'AI timing error',aiReact:'AI reaction',
+    trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'First-touch spread',aiReact:'AI reaction',
     ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
@@ -3055,7 +3060,7 @@
     skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skCutBurst:'Cut · burst',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Cut · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
-    ballControl:'The receiver\'s skill. Sets the reach ring (25 to 45) and the window (0.10 to 0.20 s).',
+    ballControl:'The receiver\'s skill. Sets the reach ring (18 to 32) and the window (0.10 to 0.20 s).',
     trapSweet:'When a perfect press lands, from the moment the ball reaches your ring. Negative = before it.',
     trapWin:'Stretches or shrinks the whole timing window, for everyone.',
     trapLate:'How much room a late press gets, as a share of the early side.',
@@ -3069,7 +3074,7 @@
     ftWin:'How long after your finger lands a drag still aims the touch (before the ball gets to you, or just after).',
     ftDrag:'How far your finger moves before it counts as a direction.',
     gatherR:'Same for everyone: a trap comes off you at this ring (the inner one). Your reach (the outer one) is where you first meet the ball, and where you take it back.',
-    aiTouch:'Spread of the AI\'s timing. 0 = perfect every time, 2+ = scrappy.',
+    aiTouch:'How far a first touch can fall from the likely one, for everyone. 0 = always the likely touch, 2+ = scrappy.',
     aiReact:'How long the AI takes to react to where its own touch went. Until then it eases off what it was doing. 0 = instant.',
     passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
     passLoft:'How high a normal pass is struck. The default stays low over short range and clears a man halfway along a medium pass; double-tap for a lofted one.',
@@ -4124,8 +4129,9 @@
   function drainSprintBallOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),0.19,0.09); }   // sprint + ball (a touch more)
   function staminaRecOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.30,0.60); }   // recovery
   function staminaCapDrainOf(p){return statLerp(statOf(p,'stamina',P.stamina.val),1.50,1.00); }   // ceiling erosion
-  // BALL CONTROL stat -> trap reach, clean-touch speed, trap timing window.
-  function controlROf(p){    return statLerp(statOf(p,'ballControl',P.ballControl.val),25, 45); }
+  // BALL CONTROL stat -> reach (where you first meet the ball, and take it back after a touch), clean-touch speed, and
+  // the Trap Lab's timing window. (The first touch itself: touchQuality, with Composure.)
+  function controlROf(p){    return statLerp(statOf(p,'ballControl',P.ballControl.val),18, 32); }
   // Ball-WINNING reach (intercepting an opponent's pass / nicking a loose dribble touch). Independent
   // of Ball control: base reach from Tackle (1->15 .. 10->30) plus a Def IQ bonus (1->0 .. 10->+10).
   function winReachR(p){     return statLerp(statOf(p,'tackle',P.tackle.val),15,30) + statLerp(defIQof(p),0,10); }
@@ -8179,15 +8185,58 @@
   }
 
   // ===== capture =====
-  // TRAPPING is timing only. A press opens a short window; the touch is judged by how close the
-  // press came to the moment the ball reached you (a hair early is ideal). Don't press and the ball
-  // runs past you. AI receivers "press" too, with a human-like spread of error, so their first
-  // touch varies with ball control and pressure instead of being perfect every time.
+  // THE FIRST TOUCH has no timing to it: it's the player's own, yours and the computer's alike. As the ball reaches
+  // him it's judged off his Ball control and Composure (touchQuality), and how much they matter depends on the
+  // moment: knocking it about at the back with nobody near, nearly anyone takes it cleanly; with a man on him, or in
+  // the final third, the good ones still do and the poor ones don't. A PERFECT touch along the grass is dead at his
+  // feet; anything less comes off him (trapTouch) -- a step away when it's clean, further the worse it is.
+  // (The Trap Lab still practises the old timed press: trapping, trapTimingScore and aiTrapTiming are only its.)
   const DEAD_BALL=25;                        // a ball this slow (grounded, at your feet) is just picked up
-  // the trap's numbers are dials (Trap Lab tunes them live): sweet spot, window scale, late side,
-  // pace kept on a perfect / botched touch, bounce pop, and the lockout after a press that whiffs
+  // the trap's numbers are dials: pace kept by the best / worst touch, bounce pop, gather radius; and the Trap Lab's
+  // timing ones (sweet spot, window scale, late side, the lockout after a press that whiffs)
   const trapSweet=()=>P.trapSweet.val/1000;  // ideal press, in seconds from the ball's arrival (negative = early)
   function trapGrade(s){ return s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY'; }
+  // PRESSURE on a touch: the nearest opponent -- where he'll be a moment from now, at the rate he's closing.
+  // 0 = nobody within 5.6 m, 1 = a man right on him (inside 1.6 m)
+  function touchPressure(p){
+    let d=1e9;
+    for(const o of players.concat(keepers)){
+      if(o.team===p.team||o.benched||o.state==='getup') continue;
+      const dx=p.x-o.x, dy=p.y-o.y, g=Math.hypot(dx,dy)||1;
+      d=Math.min(d, g-Math.max(0,((o.vx||0)*dx+(o.vy||0)*dy)/g)*0.2);
+    }
+    return clamp(1-(d-40)/100,0,1);
+  }
+  // how far into the final third he is, going his own side's way: 0 short of it, 1 well into it
+  function finalThirdOf(p){ const u=atkOf(p.team)>0?p.x:FW-p.x; return clamp((u/FW-0.62)/0.12,0,1); }
+  // how hard this touch is: 0 = nobody near and it's at the back .. 1 = as hard as a first touch gets
+  function touchDifficulty(p,intercept){
+    let D=1-(1-touchPressure(p))*(1-0.6*finalThirdOf(p));
+    D+=clamp((Math.hypot(ball.vx,ball.vy)-650)/1500,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
+    if(intercept) D=Math.max(D,0.45)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch
+    return clamp(D,0,1);
+  }
+  // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
+  // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
+  function touchQuality(p,intercept){
+    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(statOf(p,'composure',P.composure.val)-1)/9;
+    const D=touchDifficulty(p,intercept), k=0.45*bc+0.55*cp;
+    const m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
+    const sd=((0.085-0.035*bc)*(1-D)+(0.16-0.07*k)*D)*P.aiTouch.val;
+    const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
+    return clamp(m+g*sd,0,1);
+  }
+  // the touch as it's made, along the grass: PERFECT is dead at his feet; anything less comes off him (as does any
+  // touch on their pass: see trapTouch)
+  function receiveTouch(p,s,intercept){
+    if(s>0.8&&!intercept){
+      endCurve(); own(p,p.r+ball.r+5); ball.z=0; ball.vz=0;
+      if(p===controlled){ touchGraded(s); lastTouchDir=null; }
+      if(LAB.on) labOnTouch(p,s,null,{sp:0,keep:0,u:0,dx:0,dy:0,z:0});
+      return;
+    }
+    trapTouch(p,s,intercept?interceptDampOf(p):0,null);
+  }
   function trapTimingScore(p,e,wScale){      // e = press time minus arrival (negative = early); wScale: a turned touch's narrower window
     const W=trapWindowOf(p)*(wScale||1), d=e-trapSweet();
     return clamp(1-(d<0?-d/W:d/(W*P.trapLate.val)),0,1);   // early presses fade over the window, late ones faster
@@ -8206,9 +8255,10 @@
   }
   // The touch itself is a bounce off a round body. Square on, the ball pops slightly up and back
   // the way it came. Stand off its line and it glances the other way -- left of it and it goes
-  // right, wider the further off you are. Timing sets how much pace survives; it never gains any.
-  // A LATE touch catches the ball as it's already going past you -- further round your side -- so
-  // it glances on past instead of coming back, all the way past at the end of the window.
+  // right, wider the further off you are. The touch's quality sets how much pace survives; it never
+  // gains any. A poor touch is as likely to be LATE -- caught as it's already going past you, further
+  // round your side -- so it glances on past instead of coming back. (In the Trap Lab it's the press
+  // that's late: all the way past at the end of the window.)
   function bounceDir(g,th){                  // off a round body, met at angle th from square on
     const c2=Math.cos(2*th), s2=Math.sin(2*th);
     return {x:-g.dx*c2-g.lx*s2, y:-g.dy*c2-g.ly*s2};
@@ -8241,13 +8291,14 @@
     let keep;
     if(aim){ const r=aimTouch(p,T,aim); s=r.s; keep=r.keep; }
     else {
-      const lateBy=e!=null?e-trapSweet():0;
-      const lt=lateBy>0?clamp(lateBy/(trapWindowOf(p)*P.trapLate.val),0,1):0, late=lt*lt;   // a hair late barely shows; heavy-late goes past
+      let late;
+      if(e!=null){ const lateBy=e-trapSweet(), lt=lateBy>0?clamp(lateBy/(trapWindowOf(p)*P.trapLate.val),0,1):0; late=lt*lt; }   // a hair late barely shows; heavy-late goes past
+      else late=Math.random()<0.5?0:(1-s)*(1-s)*0.8;              // his own touch: a poor one squirms past as often as it comes back
       const dir=bounceDir(g,th0+late*(side*Math.PI/2-th0));        // late: met further round your side
-      keep=(P.trapKeepBad.val+(P.trapKeepGood.val-P.trapKeepBad.val)*s)*(1-(damp||0)*0.5);
+      keep=(P.trapKeepGood.val+(P.trapKeepBad.val-P.trapKeepGood.val)*Math.pow(1-s,1.5))*(1-(damp||0)*0.5);   // eases off steeply from the worst
       ball.vx=dir.x*sp*keep+bdx*run; ball.vy=dir.y*sp*keep+bdy*run;
     }
-    const pop=(35+105*(1-s))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
+    const pop=(20+75*Math.pow(1-s,1.5))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
     ball.vz=Math.max(pop, ball.vz<0?-ball.vz*Math.min(1,keep)*0.6:0);
     ball.z=Math.max(ball.z,1);
     endCurve();
@@ -8361,24 +8412,28 @@
       if(mine) continue;                                   // your own touch, not at your feet yet: go and get it
       let s,e;
       if(p===controlled&&!(LAB.on&&LAB.kind==='trap')){
-        // CLASSIC: no trap to time -- it's controlled as it reaches you. Only a rocket you get in the way of
-        // (their shot, a hard-hit pass) is a block that runs loose.
+        // CLASSIC: no trap to time -- the touch is his own (touchQuality). A first-time pass or a flicked first touch
+        // you asked for still go where you asked; a rocket you get in the way of (their shot, a hard-hit pass) is a block.
         if(checkOffsideTouch(p))return;
         if(intercept&&ballSp>700){ trapTouch(p,0.45,interceptDampOf(p),null); return; }
         endCurve();
         if(oneTouchOK()) playOneTouch(p);
-        else if(ftAimOK()) directionalTouch(p);
-        else { own(p,p.r+ball.r+5); ball.z=0; ball.vz=0; }
+        else if(ftAimOK()) directionalTouch(p,touchQuality(p,intercept));
+        else receiveTouch(p,touchQuality(p,intercept),intercept);
         return;
       } else if(p===controlled){
         if(trapping<=0)continue;                           // no press, no touch: it runs past you
         e=trapPressT-p.reachT; s=trapTimingScore(p,e);
         trapping=0;
-      } else {
+      } else if(!(LAB.on&&LAB.kind==='trap')){
+        if(checkOffsideTouch(p))return;
+        receiveTouch(p,touchQuality(p,intercept),intercept);   // his own touch, as anyone's
+        return;
+      } else {                                             // the Trap Lab's computer receiver times a press
         if(p.trapRolled)continue;                          // already had (and missed) this one
         p.trapRolled=true;
         e=aiTrapTiming(p,intercept);
-        if(e===null){ if(LAB.on) labOnAiMiss(p,aiLastE); continue; }   // mistimed entirely: it runs past
+        if(e===null){ labOnAiMiss(p,aiLastE); continue; }  // mistimed entirely: it runs past
         s=trapTimingScore(p,e);
       }
       if(checkOffsideTouch(p))return;
@@ -9072,14 +9127,15 @@
     tryClear(dt);          // an armed CLEAR goes first: no trap, no control -- just away
     swipeStep(dt);         // a swipe-shot waiting on the ball being back at your feet
     passStep();            // a quick-tap pass whose double-tap window has run out
-    // a ball at chest/thigh height within reach: your trap meets it in the air, judged the same way
+    // a ball at chest/thigh height within reach: you meet it in the air, the touch judged the same way (and in the air
+    // even a perfect one has to drop to your feet)
     if(controlled){ const c=controlled;
       const inAir=!ball.ownedBy&&ball.z>=12&&ball.z<=AIR_REACH&&!gkHold&&restartT<=0&&c.noTouchT<=0
                   &&dist(c,ball)<controlROf(c)*0.9;
       if(!inAir) c.airReachT=-1;
       else {
         if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
-        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(oneTouchOK()){ endCurve(); playOneTouch(c); } else if(ftAimOK()){ endCurve(); directionalTouch(c); } else trapTouch(c,1,0,trapSweet()); } }   // CLASSIC: chested down for you
+        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(oneTouchOK()){ endCurve(); playOneTouch(c); } else { const icp=!!(ball.lastTouch&&ball.lastTouch!==c.team); if(ftAimOK()){ endCurve(); directionalTouch(c,touchQuality(c,icp)); } else trapTouch(c,touchQuality(c,icp),icp?interceptDampOf(c):0,null); } } }   // CLASSIC: chested down for you
         else if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,e),0,e); }
       }
     }
@@ -9685,27 +9741,9 @@
     drawGoal(-1);drawGoal(1);
     }
 
-    if(ball.ownedBy!==controlled){
-      ctx.beginPath();
-      for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/20){
-        const s=proj(controlled.x+Math.cos(a)*controlROf(controlled),controlled.y+Math.sin(a)*controlROf(controlled));
-        a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y);
-      }
-      ctx.setLineDash([6,6]);
-      ctx.strokeStyle=dist(controlled,ball)<controlROf(controlled)+ball.r?'rgba(157,255,60,.7)':'rgba(157,255,60,.22)';
-      ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
-    }
+    // the man you control: a solid green ring on the grass at his reach (Ball control), the only ring there is
+    if(controlled) pixelRing(controlled.x,controlled.y,controlROf(controlled),'#9dff3c','rgba(14,58,30,.6)');
     if(LAB.on) labDrawPitch();
-    if(ball.ownedBy){
-      const p=ball.ownedBy;
-      ctx.beginPath();
-      for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/20){
-        const s=proj(p.x+Math.cos(a)*(controlROf(p)*0.55),p.y+Math.sin(a)*(controlROf(p)*0.55));
-        a===0?ctx.moveTo(s.x,s.y):ctx.lineTo(s.x,s.y);
-      }
-      ctx.strokeStyle=p.team==='G'?'rgba(157,255,60,.8)':'rgba(255,90,77,.8)';
-      ctx.lineWidth=2;ctx.stroke();
-    }
 
     if(shootCharge>0.02&&ball.ownedBy===controlled){
       const aim=Math.max(-1,Math.min(1,curIy));
@@ -10220,11 +10258,66 @@
     }
   }
 
+  // A RING ON THE GRASS in the pitch's whole pixels (2 px, as the pitch art is drawn), round (cx,cy) at R on the pitch,
+  // with a dark edge under it if asked (it reads on the light turf)
+  function pixelRing(cx,cy,R,col,edge){
+    const n=Math.max(32,Math.ceil(R*3.6)), seen=new Set(), pts=[];
+    for(let i=0;i<n;i++){
+      const a=i/n*Math.PI*2, s=proj(cx+Math.cos(a)*R,cy+Math.sin(a)*R), x=Math.floor(s.x/2), y=Math.floor(s.y/2), k=x*8192+y;
+      if(!seen.has(k)){ seen.add(k); pts.push(x*2,y*2); }
+    }
+    if(edge){ ctx.fillStyle=edge; for(let i=0;i<pts.length;i+=2) ctx.fillRect(pts[i],pts[i+1]+2,2,2); }
+    ctx.fillStyle=col; for(let i=0;i<pts.length;i+=2) ctx.fillRect(pts[i],pts[i+1],2,2);
+  }
+  // THE BALL in whole pixels, as the players are: a 9x9 sprite at their scale, sitting on a pixel shadow. Six frames of
+  // it turning as it rolls -- about one of its own five-fold axes, so the sixth comes round to the first -- and its
+  // patches go amber while it's bending. (Designed in tools/sprites/make_ball.py.) The plain round ball while the
+  // sprites are off.
+  const BALL_ART=(function(){
+    const F=[
+      "..KKKKK.. .KWWWQPK. KWQQWWWLK KQQQWWWLK KWQWWWPSK KWWWWPPPK KLLLLPPSK .KPPSSSK. ..KKKKK..",
+      "..KKKKK.. .KWWWQPK. KWWWWWPPK KWQQWWWLK KQQPWWLSK KWWWWLPSK KLLLLPPPK .KPSSSPK. ..KKKKK..",
+      "..KKKKK.. .KQWWWPK. KWWWWPPPK KWWWWWPLK KQQPWWLSK KWPPWLLSK KLLLLSPPK .KSSSPPK. ..KKKKK..",
+      "..KKKKK.. .KQQWWWK. KWWWWPPLK KWWWWPPPK KWQWWWPSK KPPPWLLSK KLPPLSSSK .KSSSPPK. ..KKKKK..",
+      "..KKKKK.. .KQQWWWK. KQQWWWWLK KWWWWPPLK KWWWWPPPK KWPWWLLSK KPPPLSSSK .KPSSSPK. ..KKKKK..",
+      "..KKKKK.. .KQWWWPK. KQQQWWWLK KWQWWWWLK KWWWWPPPK KWWWWPPSK KPPLLSSSK .KPPSSSK. ..KKKKK.."];
+    const PAL={K:'#1c1c28',W:'#f8f8f4',L:'#d0d4e0',S:'#a8b0c4',P:'#2c2c3c',Q:'#545468'};
+    const bake=pal=>F.map(f=>{ const rows=f.split(' '), c=document.createElement('canvas'); c.width=c.height=9;
+      const x=c.getContext('2d'); rows.forEach((r,j)=>{ for(let i=0;i<9;i++){ const ch=r[i]; if(ch==='.') continue; x.fillStyle=pal[ch]; x.fillRect(i,j,1,1); } });
+      return c; });
+    const plain=bake(PAL), spin=bake(Object.assign({},PAL,{P:'#c8701c',Q:'#ffb43c'}));
+    const SH=(()=>{ const w=8, h=3, c=document.createElement('canvas'); c.width=w; c.height=h;
+      const x=c.getContext('2d'), d=x.createImageData(w,h);
+      for(let j=0;j<h;j++) for(let i=0;i<w;i++){ const u=(i+0.5-w/2)/(w/2), v=(j+0.5-h/2)/(h/2); if(u*u+v*v<=1.15) d.data[(j*w+i)*4+3]=82; }
+      x.putImageData(d,0,0); return c; })();
+    const on=()=>typeof SPRITE!=='undefined'&&SPRITE.enabled;
+    const k=s=>s.scale*((typeof SPRITE!=='undefined'&&SPRITE.cfg&&SPRITE.cfg.scale)||1.7);
+    function shadow(xF,yF,sq){
+      const s=proj(xF,yF), K=k(s)*sq, w=Math.max(3,Math.round(SH.width*K)), h=Math.max(2,Math.round(SH.height*K));
+      ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(SH,Math.round(s.x-w/2),Math.round(s.y-h/2),w,h); ctx.restore();
+    }
+    // the ball at s (its projected point on the grass, or in the air): its bottom sits there. -> its middle and radius
+    function draw(s,spinning,phase){
+      const K=k(s), sz=Math.max(5,Math.round(9*K)), x=Math.round(s.x-sz/2), y=Math.round(s.y-sz+K);
+      const f=((Math.floor(phase*1.33)%6)+6)%6;
+      ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage((spinning?spin:plain)[f],x,y,sz,sz); ctx.restore();
+      return {x:x+sz/2, y:y+sz/2, r:sz/2};
+    }
+    return {on, shadow, draw, frames:F};
+  })();
   function drawBall(){
     if(gkHold && SPRITE.keeperShowsBall(gkHold)) return;      // held: it's in his gloves on his sprite
-    drawShadow(ball.x,ball.y,ball.r,ball.z>4?clamp(1-ball.z/300,0.45,1):1);
+    const px=BALL_ART.on(), sq=ball.z>4?clamp(1-ball.z/300,0.45,1):1;
+    if(px) BALL_ART.shadow(ball.x,ball.y,sq); else drawShadow(ball.x,ball.y,ball.r,sq);
     // ground target ring while airborne — easier to track where it'll land
-    if(ball.z>14){
+    if(ball.z>14&&px){
+      const pulse=0.6+0.4*Math.sin(performance.now()/180);
+      pixelRing(ball.x,ball.y,ball.r*1.7,'rgba(255,255,255,'+(0.3+0.4*pulse).toFixed(2)+')');
+      const a=proj(ball.x,ball.y,0), b=proj(ball.x,ball.y,ball.z);
+      ctx.fillStyle='rgba(255,255,255,.6)'; ctx.fillRect(Math.floor(a.x/2)*2,Math.floor(a.y/2)*2,2,2);
+      ctx.fillStyle='rgba(255,255,255,.14)'; for(let y=Math.round(b.y)+4;y<a.y-3;y+=4) ctx.fillRect(Math.round(a.x),y,1,2);   // a faint dotted tether
+    }
+    else if(ball.z>14){
       const g=proj(ball.x,ball.y,0);
       const rr0=ball.r*g.scale;
       const pulse=0.6+0.4*Math.sin(performance.now()/180);
@@ -10241,14 +10334,9 @@
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
       ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.stroke();
     }
-    const s=proj(ball.x,ball.y,ball.z);
-    const rr=ball.r*s.scale;
-    ctx.beginPath();ctx.arc(s.x,s.y,rr,0,Math.PI*2);
-    ctx.fillStyle='#f4f7ee';ctx.fill();
-    ctx.lineWidth=1.5;ctx.strokeStyle='#10130f';ctx.stroke();
-    // SPIN DOT: a marker on the ball that conveys its spin. It orbits with the ball's roll,
-    // and when the ball is curving/swerving it whirls faster and brightens so you can read
-    // the spin that's bending the flight.
+    const s0=proj(ball.x,ball.y,ball.z);
+    // SPIN: the ball turns with its roll, and when it's curving/swerving it whirls faster and goes amber (the pixel
+    // ball's patches, the plain ball's dot) so you can read the spin that's bending the flight.
     const spinning = (ball.curveSpinT>0) || (curveActive!==0);
     let spinPhase = isFinite(ball.roll) ? ball.roll : 0;
     if(spinning){
@@ -10256,11 +10344,18 @@
       const dir = (ball.curveSpin||curveActive||1) >= 0 ? 1 : -1;
       spinPhase += dir*performance.now()/70;
     }
-    const dotOff = spinning ? rr*0.42 : rr*0.35;
-    ctx.beginPath();
-    ctx.arc(s.x+Math.cos(spinPhase)*dotOff, s.y+Math.sin(spinPhase)*dotOff, rr*0.28, 0, Math.PI*2);
-    ctx.fillStyle = spinning ? '#ffb43c' : '#10130f';   // amber when spinning, dark otherwise
-    ctx.fill();
+    let s=s0, rr=ball.r*s0.scale;
+    if(px){ const b=BALL_ART.draw(s0,spinning,spinPhase); s={x:b.x,y:b.y,scale:s0.scale}; rr=b.r; }
+    else {
+      ctx.beginPath();ctx.arc(s.x,s.y,rr,0,Math.PI*2);
+      ctx.fillStyle='#f4f7ee';ctx.fill();
+      ctx.lineWidth=1.5;ctx.strokeStyle='#10130f';ctx.stroke();
+      const dotOff = spinning ? rr*0.42 : rr*0.35;
+      ctx.beginPath();
+      ctx.arc(s.x+Math.cos(spinPhase)*dotOff, s.y+Math.sin(spinPhase)*dotOff, rr*0.28, 0, Math.PI*2);
+      ctx.fillStyle = spinning ? '#ffb43c' : '#10130f';   // amber when spinning, dark otherwise
+      ctx.fill();
+    }
     const ch=Math.max(kickCharge,shootCharge,crossCharge);
     if(ball.ownedBy===controlled&&ch>0.02){
       ctx.beginPath();ctx.arc(s.x,s.y,rr+5,-Math.PI/2,-Math.PI/2+Math.PI*2*ch);
