@@ -22,6 +22,7 @@ node tests/house-match.mjs     # ~90s  — plays a career match, checks the repo
 node tests/house-season.mjs    # ~7min — plays five matches, checks accumulation
 node tests/manager-career.mjs  # ~40s  — Football Classic's manager career: creation, every building, a signing, the windows, a season to the review, promotion, the playoffs, goals credited
 node tests/manager-match.mjs   # ~70s  — Football Classic's manager career: a live match through to the report
+node tests/classic-tactics.mjs # ~30s  — Football Classic's tactics: a shape with the ball and one without (the computer never defends in 1-3-3 or 1-4-2), width, the style and the posture set apart, anyone anywhere (the keeper too), instructions saved and on the pitch, skill stars
 node tests/trap-lab.mjs        # ~2min — Trap Lab: timed presses, AI receiver, tuning, exit, phone: press TRAP and drag to aim the touch
 node tests/clear-swipe.mjs     # ~30s  — own-half CLEAR (keyboard + phone), swipe to shoot
 node tests/pass-types.mjs      # ~40s  — lofted pass (double-tap), through ball (drag off PASS), the tap wait, PASS while running with it
@@ -36,7 +37,7 @@ node tests/on-ball.mjs         # ~90s  — the computer's man on the ball: picks
 
 `ai-shape.mjs`, `positional-play.mjs` and `on-ball.mjs` run on an instrumented copy of the game (written to a temp
 folder) that exposes who has the ball, each computer player's decision tag, and each ball he plays; the game itself
-is unchanged.
+is unchanged. `classic-tactics.mjs` does the same to reach the match's shapes, the players' instructions and stars.
 
 Each exits non-zero on failure and prints a PASS/FAIL line per assertion.
 

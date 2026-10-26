@@ -47,15 +47,20 @@ The same game played like any other football game. It's a copy of `index.html` w
   more than 6 m nearer than your man.
 
 - **Skill moves instead of a trap.** With the ball, draw a pattern. On a touch screen, start on the SKILL button and
-  draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go:
-  - **Spin** (a circle or swirl): you turn as far round as you drew, from 180° to 450°, and come out facing wherever
-    that leaves you. You roll up to about 2.3 m to the side the circle went (clockwise goes to your right). The ball
-    goes round with your body, so halfway through it's showing on the far side.
-  - **Croqueta** (an L): the ball is shifted foot to foot, and you shift about 1.8 m the way the L's second stroke goes,
+  draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go.
+  Every player has one to three **skill stars**, from his Dribbling (counted twice), Agility and Ball control: one star
+  for the cut, two for the croqueta as well, three for the roulette and the rainbow flick too. A move above his stars
+  doesn't happen, and the screen says how many it needs. Two stars from an average of 5.4, three from 7: most
+  League 2 forwards have two, about half of the Championship's forwards have three, and nearly all the Premium
+  League's. Defenders mostly have one. The stars show on every player card.
+  - **Roulette** (a circle or swirl, 3 stars): you turn as far round as you drew, from 180° to 450°, and come out facing
+    wherever that leaves you. You roll up to about 2.3 m to the side the circle went (clockwise goes to your right). The
+    ball goes round with your body, so halfway through it's showing on the far side.
+  - **Croqueta** (an L, 2 stars): the ball is shifted foot to foot, and you shift about 1.8 m the way the L's second stroke goes,
     still running the same way.
-  - **Cut** (a straight flick): the ball is chopped the way you flicked and popped a step ahead. It's loose until
+  - **Cut** (a straight flick, 1 star): the ball is chopped the way you flicked and popped a step ahead. It's loose until
     you get back on it.
-  - **Rainbow flick** (down, then up): over 0.35 s you ease off and roll the ball back up the back of your leg, then
+  - **Rainbow flick** (down, then up, 3 stars): over 0.35 s you ease off and roll the ball back up the back of your leg, then
     flick it over your head. It peaks about 3.5 m up, is in the air about 1.15 s, and drops 1.6 m ahead of where your
     run would take you. It checks up where it lands, like a lofted pass. Leave the stick alone and you burst on to it.
     It beats a man who has committed to you. A defender who can simply turn round gets there first, and one already
@@ -70,7 +75,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   arrives, by the First touch push dial (your own pace along it is added).
 
 - **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
-  past him. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
+  past him. You have all three stars there, to practise every move. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
   after 10 s.
   - The defender sees the ball 0.2 s late and lunges at it when he's close (about 2.3 m, 2.8 m when pressing). The
     lunge is a 0.22 s burst at where he saw it, and it wins the ball if it's showing when he gets there. He then
@@ -102,6 +107,60 @@ The same game played like any other football game. It's a copy of `index.html` w
   team is wearing, on a dark track under a light colour and a light track under a dark one. Shirts follow the
   usual rule: your side wears its home kit, and the other side wears its home kit unless the shirts are too alike,
   then its change kit, then plain white or black. So the bars never clash either.
+- **Tactics: one shape with the ball, another without it.** In a match, PAUSE > TACTICS has an OFFENSE and a
+  DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
+  again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the Office's
+  Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
+  - **Formations.** There are eight seven-a-side shapes: 3-2-2, 2-3-2, 2-2-3, 2-4-1, 3-3-1, 3-1-3, 1-3-3 and 1-4-2.
+    1-3-3 and 1-4-2 are attacking shapes only. Nobody defends in them, the computer included, and they're greyed out
+    without the ball. The same seven men play in both shapes. Each man's defending spot starts as the one nearest his
+    attacking spot, and you can rearrange either shape. A computer side defends in the shape it attacks in, with
+    two exceptions. A front three drops a man into midfield unless the side presses, so 2-2-3 defends as 2-4-1 and
+    3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2 and 1-4-2 as 2-4-1, or both as 3-3-1 when the side sits deep.
+  - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
+    out the wide men go, by ×0.84, ×1 or ×1.18.
+  - **Styles and postures** are set apart: picking a style no longer changes your posture. A note under the buttons
+    says what each one does. Each was measured with the computer playing both sides, for an hour against a BALANCED
+    side in a MID BLOCK: two 30-minute games, one from each end. The figures are per 15 minutes.
+    - **BALANCED**: positional play. Wide men on the touchlines, a forward pinning their back line, two men always
+      open for a pass, and runs in behind when the man on the ball can find them. 54% of the ball, passes averaging
+      21.6 m (35% of them long, 43% forward), 9 shots.
+    - **TIKI-TAKA**: short passing. Three men always close for a pass, the team squeezed up behind the ball, few long
+      balls and few runs in behind. Passes average 15.9 m: 40% are under 13 m and 15% long. 8.4 shots.
+    - **WING PLAY**: wingers high on the touchlines, the full-back on the ball's side overlapping, early crosses and
+      the forwards attacking the near and far posts. It's the widest shape (its players spread 16.0 m across the
+      pitch, against 15.4) and crosses most: 6.1 against 3.4. Few crosses become headers at goal, though, so it takes
+      fewer shots (5.8 against 8.8).
+    - **DIRECT**: forward quickly. Long balls up to the forwards, the midfielders up behind them for the second ball,
+      and the keeper kicking long. 42% of the ball and 52% of passes forward (43% for BALANCED). It gains the most
+      after winning the ball back: 17 m in 6 s, against 14.
+    - **COUNTER**: without the ball one forward stays up on halfway. When the ball's won, the wide men and a
+      midfielder sprint up past it, the forwards run in behind, and it goes forward at once, for as long as the break
+      keeps going (up to 10 s). In settled play an extra man stays back. 7% of the balls it wins back end in a shot
+      within 12 s, against 5% for BALANCED.
+    - **PRESS HIGH, MID BLOCK and SIT DEEP**: the back line holds 40, 33 and 24 m from goal, the ball is won back 45,
+      37 and 30 m out, and the side spends 123, 108 and 82 s pressing. PRESS HIGH marks their men when they play out
+      from the back, and chases the ball for three seconds after losing it. MID BLOCK goes at the ball together as it
+      comes into the middle third, with the forwards screening the pass into midfield. SIT DEEP is narrower and
+      compact, and nobody steps out until the ball is in its half.
+  - **Player instructions.** Pick a player in the pause menu or the Office to give him instructions for each phase.
+    Each has three settings, with BALANCED in the middle. With the ball: a defender's GOING FORWARD (STAY BACK /
+    OVERLAP), a midfielder's GOING FORWARD (STAY BACK / INTO THE BOX), a forward's MOVEMENT (COME SHORT / IN BEHIND),
+    a wide man's POSITION (HUG THE LINE / CUT INSIDE), and everyone's ON THE BALL (KEEP IT SIMPLE / TAKE MEN ON) and
+    SHOOTING (WORK IT IN / SHOOT ON SIGHT). Without it: everyone's PRESSING (HOLD POSITION / CLOSE DOWN) and a
+    forward's DEFENDING (STAY UP / TRACK BACK). Each setting has a line under it saying what it does. A career keeps
+    a player's instructions wherever he plays. An exhibition club keeps them with its squad.
+    Measured over 10 minutes: a forward told IN BEHIND spends 74% of his side's possession on their last line (38%
+    left BALANCED), and one told COME SHORT spends 51% dropped between their lines (25%). A full-back told to OVERLAP
+    is up the flank 21% of the time, against never. A forward told to STAY UP waits 63 m from his own goal while
+    they have it, against 53 m. A midfielder told INTO THE BOX is never the holder: in a 3-2-2 the pair of them,
+    both told, never hold (a quarter of the time otherwise) and arrive in the box late. A wide midfielder has
+    POSITION in place of GOING FORWARD.
+  - **Anyone can play anywhere**, the keeper included. MOVE or SWAP any two men, or put an outfielder in goal (the
+    keeper then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a
+    forward at the back or a defender in goal plays below his usual rating. In the Office his rating there shows in
+    amber over the move (ATT→DEF, say). PICK MY BEST EIGHT puts a keeper in goal and the best seven by their
+    ratings in the spots they're in.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 16 and $20,000. The game is buying and selling players: nobody's stats are
@@ -128,7 +187,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     decline, and players retire from 34. The youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer
     (more and better as you build it up). Promote them, or they leave at 19.
   - **The computer clubs** buy from each other and from the free agents every window day, bid for your players,
-    and fill their squads up every summer.
+    and fill their squads up every summer. Each has its own style and posture, with shapes and widths to suit
+    them: a wing side plays wide with three up, a counter-attacking side compact.
   - **Money.** The stadium works as before: ticket price, seats, concessions, sponsor. Prize money comes at the
     end of the season: $12,000 for winning League 2, up to $1.5m for the Premium League, less the lower you
     finish. The broadcast share follows your league position, and the ground and the sponsor grow when you go up.
@@ -635,5 +695,5 @@ a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_previ
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match). They need
+a played match) and tactics. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
