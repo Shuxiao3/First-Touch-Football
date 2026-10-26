@@ -9,6 +9,7 @@ dives to either side (stretched in the air, then down on the turf).
 
     python3 tools/sprites/make_keeper_sheet.py            # writes assets/sprites/keeper_sheet*
     python3 tools/sprites/make_keeper_sheet.py --embed    # ...and embeds it in index.html
+    python3 tools/sprites/make_keeper_sheet.py --embed-classic   # ...or in classic.html
 
 Sheet layout, 32x32 cells, rows animation-major like the player sheet:
     ready, shuffle, run, hold, kick -- 8 rows each, directions in snap8 order (E, SE, S, SW, W, NW, N, NE)
@@ -41,11 +42,9 @@ def keeper_prims(J, pose, phi):
     Rw = pl.local_to_world_matrix(phi)
     W = lambda k: Rw @ J[k]
     prims = [
-        pl.Ellipsoid(W('chest'), (4.1, 3.0, 2.7), Rw @ J['Rt'], 'shirt', 'torso'),
-        pl.Ellipsoid(Rw @ (J['chest'] + J['Rt'] @ np.array([0, 0.75, 1.55])), (2.1, 2.4, 0.62),
-                     Rw @ J['Rt'], 'trim', 'torso'),
-        pl.Ellipsoid(W('pelvis') + Rw @ J['Rp'] @ np.array([0, 0, 0.1]), (3.4, 2.4, 1.7),
-                     Rw @ J['Rp'], 'shorts', 'torso'),
+        pl.Ellipsoid(W('chest'), pl.TORSO_R, Rw @ J['Rt'], 'shirt', 'torso'),
+        pl.Ellipsoid(Rw @ (J['chest'] + J['Rt'] @ np.array(pl.COLLAR_AT)), pl.COLLAR_R, Rw @ J['Rt'], 'trim', 'torso'),
+        pl.Ellipsoid(W('pelvis') + Rw @ J['Rp'] @ np.array([0, 0, 0.1]), pl.PELVIS_R, Rw @ J['Rp'], 'shorts', 'torso'),
     ]
     for s in 'RL':
         g = 'leg' + s
@@ -361,3 +360,5 @@ if __name__ == '__main__':
     main(outdir)
     if '--embed' in sys.argv:
         embed(os.path.join(root, 'index.html'), os.path.join(outdir, 'keeper_sheet.png'))
+    if '--embed-classic' in sys.argv:
+        embed(os.path.join(root, 'classic.html'), os.path.join(outdir, 'keeper_sheet.png'))

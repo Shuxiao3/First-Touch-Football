@@ -51,7 +51,7 @@ RAMPS = {
     'dust':   [(150, 132, 104), (200, 186, 150), (226, 216, 186), (246, 242, 226)],
 }
 RAMPS['socks'] = RAMPS['shirt']   # socks match the shirt, so a kit swap recolours both
-OUTLINE = (24, 20, 28)
+OUTLINE = (0, 0, 0)       # pure black, as the reference overworld sprites
 LINE_GAP = 0.75          # depth gap (px) before two body groups get a separating line
 FAR_GAP = 1.5            # depth gap (px) between paired limbs before the far one is shaded down
 
@@ -59,93 +59,96 @@ HEAD_PAL = {
     'K': OUTLINE, 'D': (56, 36, 32),
     '1': (156, 104, 64), '2': (108, 70, 46), '3': (70, 44, 36),
     'a': (248, 208, 184), 'b': (224, 160, 120), 'c': (184, 112, 80), 'r': (120, 64, 64),
-    'l': (168, 160, 200), 'w': (240, 240, 248), 'p': OUTLINE,
+    'l': (168, 160, 200), 'i': (88, 136, 112), 'w': (240, 240, 248), 'p': OUTLINE,
 }
 
-# Hand-drawn heads, 16x15. Views facing right; SW/W/NW are mirrors of SE/E/NE.
+# Hand-drawn heads, 16x15, in the style of the reference overworld sprites (Gen 5): hair in clumps under a
+# band of sheen, the fringe hanging to the eyes, a small face framed by the hair, 2x2 eyes -- lid and iris over
+# white and pupil, the pupils turned in -- a one-pixel mouth, and the far side seen per the 8-direction angles
+# (the face slides toward the turned side, the ear to the near one). Views facing right; SW/W/NW are mirrors.
 # K outline  D hair outline  1/2/3 hair light/base/dark  a/b/c skin  r skin line
-# l lid  w eye white  p pupil
+# l lid  i iris  w eye white  p pupil
 HEADS_TXT = """
 # S
-......DDDD......
-....DD1111DD....
-...D11111112D...
-..D1111112222D..
-.D112222222223D.
-.D122222222233D.
-K12223222232333K
-K22223222232333K
-K2223a2222a3333K
-K23baaa33aaab33K
-K3bal3aaaa3lab3K
-.DbawpaaaapwabD.
-..rbaaaaaaaabr..
-...rbbaaaabbr...
-....KrrrrrrK....
+.....DDDDDD.....
+...DD111122DD...
+..D1111111222D..
+.D111111122223D.
+.D111122322323K.
+K11122223223233K
+K11222232223333K
+K12322232232333K
+K23223b23b23333K
+K23b3ba3ab3b333K
+K23aliaaailb333K
+.K3awpaaapwb33K.
+.K3baaaaaaab3DK.
+..KrbaabaabrK...
+...KrrrrrrrK....
 # SE
-.....DDDDD......
-...DD11111DD....
-..D111111112D...
-.D11111112222D..
-.D112222222223D.
-K1222222222233D.
-K12222322232333K
-K22222322232333K
-K2222223a32a333K
-K23bc3aaa33aaa3K
-K3bcb3alaaaa3lK.
-.D3bb3awpaaapwK.
-..rbbbaaaaaaabK.
-...rbbaaaaaabr..
-....KKrrrrrrK...
+.....DDDDDD.....
+...DD111122DD...
+..D1111111222D..
+.D111111122223D.
+.D111112232233K.
+K11112222322333K
+K11222223222333K
+K12232223223233K
+K223323b23b2333K
+K233cb3ab3ab3bK.
+K3rbcaliaaailar.
+.Krcbawpaaapwar.
+.KDKrbaaaaaabr..
+...Krbaaabaabr..
+....KKrrrrrrrK..
 # E
 .....DDDDD......
-...DD11111DD....
-..D111111112D...
-.D11111112222D..
-.D112222222223D.
-K1222222222233D.
-K12222322223333D
-K22222322223333K
-K2222232222aa3K.
-K32222bc3aaaaaK.
-K3222bcbaaalpaK.
-.D322bbaaaawpaaK
-..D33rbaaaaaabK.
-...K3rbbaaaabrK.
+...DD111112DD...
+..D11111111222D.
+.D111111122222D.
+.D1111222232223K
+K11122223222323K
+K11222232223223K
+K12232232232233K
+K2232232232b2bK.
+K32223333baaaar.
+K32233rbcbaliar.
+K33233rcbbawpar.
+.K333Krbbaaaabr.
+..KKKrbbaaabrK..
 ....KKrrrrrrK...
 # NE
-.....DDDDD......
-..DD211111DD....
-.D2111111112D...
-.D21111112222D..
-K1122222222223D.
-K1222222222233D.
-K12222222222333K
-K22222322222333K
-K22222322223333K
-K2222322222bc33K
-K3222322222bcbaK
-.D32222222223baK
-..D332222223brK.
-...K333333333K..
-....KKKKKKKKK...
+.....DDDDDD.....
+...DD111112DD...
+..D1111111222D..
+.D111111122223D.
+.D111112232223K.
+K11112222322233K
+K11222232223233K
+K12232223222333K
+K22232223223333K
+K3223222323bc33K
+K3223322323bcbaK
+.K322332323rbaaK
+.K333232233brrK.
+..KK33333333KK..
+....KKKKKKKK....
 # N
-......DDDD......
-....DD1111DD....
-...D11111112D...
-..D1111112222D..
-.D112222222223D.
-.D122222222233D.
-K12222222222333K
-K22222222222333K
-K22232222322333K
-K22232222322333K
-Kb223222232233bK
-.Kc3322222233cK.
-..K3332222333K..
-...KK33bbb33KK..
-.....KKrrrKK....
+.....DDDDDD.....
+...DD111112DD...
+..D1111111222D..
+.D111111122223D.
+.D111132223223D.
+K11123222232233K
+K11232222232233K
+K12322232223233K
+K22322232223333K
+K32233223223333K
+Kbc2332322333cbK
+.Kc3332323333cK.
+..K3333333333K..
+...KK3bbbbb3KK..
+.....KKrrrrKK...
 """
 
 
@@ -190,14 +193,21 @@ def ang_dir(flex, abd=0.0, side=1):
 
 
 # ----------------------------------------------------------------------------- skeleton
-PELVIS_Z = 6.3
-HIP_W = 1.75
-THIGH, SHIN = 2.4, 2.25
-FOOT = 1.8
-CHEST_UP = 2.6     # pelvis centre -> chest centre
-SH_W, SH_Z = 3.9, 0.9
-UPPER, FORE = 2.1, 1.8
-NECK_UP = 2.4      # chest centre -> head anchor
+# The reference sprites' proportions: the head about two-thirds of the figure, on a short, stocky body. Every
+# length is the old, taller body's times SHRINK (the poses' root offsets too, in P); widths stay, so the body
+# gets stockier rather than thinner.
+SHRINK = 0.76
+PELVIS_Z = 6.3 * SHRINK
+HIP_W = 1.7
+THIGH, SHIN = 2.4 * SHRINK, 2.25 * SHRINK
+FOOT = 1.6
+CHEST_UP = 2.6 * SHRINK     # pelvis centre -> chest centre
+SH_W, SH_Z = 3.8, 0.9 * SHRINK
+UPPER, FORE = 2.1 * SHRINK, 1.8 * SHRINK
+NECK_UP = 2.4 * SHRINK      # chest centre -> head anchor
+TORSO_R = (4.1, 3.0, 2.7 * SHRINK)          # chest, collar and pelvis ellipsoids (the keeper uses them too)
+COLLAR_AT, COLLAR_R = (0, 0.75, 1.55 * SHRINK), (2.1, 2.4, 0.62)
+PELVIS_R = (3.4, 2.4, 1.7 * SHRINK)
 
 
 def pose_default():
@@ -307,11 +317,9 @@ def body_prims(J, pose, phi):
     Rw = local_to_world_matrix(phi)
     W = lambda k: Rw @ J[k]
     prims = [
-        Ellipsoid(W('chest'), (4.1, 3.0, 2.7), Rw @ J['Rt'], 'shirt', 'torso'),
-        Ellipsoid(Rw @ (J['chest'] + J['Rt'] @ np.array([0, 0.75, 1.55])), (2.1, 2.4, 0.62),
-                  Rw @ J['Rt'], 'trim', 'torso'),
-        Ellipsoid(W('pelvis') + Rw @ J['Rp'] @ np.array([0, 0, 0.1]), (3.4, 2.4, 1.7),
-                  Rw @ J['Rp'], 'shorts', 'torso'),
+        Ellipsoid(W('chest'), TORSO_R, Rw @ J['Rt'], 'shirt', 'torso'),
+        Ellipsoid(Rw @ (J['chest'] + J['Rt'] @ np.array(COLLAR_AT)), COLLAR_R, Rw @ J['Rt'], 'trim', 'torso'),
+        Ellipsoid(W('pelvis') + Rw @ J['Rp'] @ np.array([0, 0, 0.1]), PELVIS_R, Rw @ J['Rp'], 'shorts', 'torso'),
     ]
     for s in 'RL':
         g = 'leg' + s
@@ -582,8 +590,8 @@ def render_frame(pose, phi, head_rows, head_at=None):
 def P(lean=0.0, twist=0.0, roll=0.0, yaw=0.0, root=(0, 0, 0), head=(0, 0, 0),
       R=None, L=None, aR=None, aL=None, fx=()):
     p = pose_default()
-    p.update(lean=lean, twist=twist, roll=roll, yaw=yaw, root=tuple(root), head=tuple(head),
-             fx=list(fx))
+    p.update(lean=lean, twist=twist, roll=roll, yaw=yaw, root=tuple(v * SHRINK for v in root),
+             head=tuple(v * SHRINK for v in head), fx=[(k, tuple(v * SHRINK for v in pos), r) for k, pos, r in fx])
     for side, d in (('R', R), ('L', L)):
         if d:
             p['leg'][side].update(d)
@@ -606,7 +614,7 @@ def mirror_pose(p):
 
 def anim_idle():
     leg = dict(flex=4, knee=9, abd=7, toe=12)
-    arm = dict(flex=6, abd=16, elbow=24)
+    arm = dict(flex=6, abd=34, elbow=20)          # arms held out from the sides, hands showing, as the references stand
     return [P(lean=4, R=dict(leg), L=dict(leg), aR=dict(arm), aL=dict(arm))]
 
 
@@ -959,11 +967,12 @@ def head_atlas():
 
 
 def parts_palette():
-    """everything the game may recolour on a player: the kit and boot and hair ramps, and skin and eyelids.
+    """everything the game may recolour on a player: the kit and boot and hair ramps, skin, eyelids and irises.
     Skin is shared by the body and the head's face letters (a/b/c/r) on purpose; nothing else uses it."""
     keys = palette_keys()
     keys['skin'] = list(RAMPS['skin'])
     keys['lid'] = [HEAD_PAL['l']]
+    keys['iris'] = [HEAD_PAL['i']]
     assert [HEAD_PAL[k] for k in 'rcba'] == list(RAMPS['skin']), 'the face letters must be the skin ramp'
     owners = {}
     for m, ramp in RAMPS.items():
@@ -971,9 +980,9 @@ def parts_palette():
             for c in ramp:
                 owners.setdefault(tuple(c), set()).add(m)
     for k, c in HEAD_PAL.items():
-        owners.setdefault(tuple(c), set()).add('skin' if k in 'abcr' else 'lid' if k == 'l' else
+        owners.setdefault(tuple(c), set()).add('skin' if k in 'abcr' else 'lid' if k == 'l' else 'iris' if k == 'i' else
                                                'hair' if k in HAIR_KEYS else 'head')
-    for m in ('skin', 'lid'):
+    for m in ('skin', 'lid', 'iris'):
         for c in keys[m]:
             assert owners[tuple(c)] == {m}, 'palette clash: %s shares %r with %r' % (m, c, owners[tuple(c)])
     return keys

@@ -26,7 +26,7 @@ head's own pixels, so whatever of the body the base head hid stays hidden.
 PADX, PADT, PADB = 3, 4, 4          # room around the base grid for hair to grow into
 HAIR = set('D123')
 SKIN = set('abcr')
-FACE = SKIN | set('lwp')
+FACE = SKIN | set('lwpi')
 VIEWS = ['S', 'SE', 'E', 'NE', 'N']
 FRONT = {'S', 'SE', 'E'}            # views that show the face
 
@@ -100,11 +100,11 @@ def mop(G, view):
 
 def bald(G, view):
     """hair -> skin, shaded the way the hair was (light top-left, shadow right); the outline goes to the
-    head outline; eyebrows (hair-dark beside an eyelid) stay."""
+    head outline; eyebrows -- the hair-dark pixels right over each eye -- stay, so the face still reads."""
     B = G.copy()
     brow = set()
     for r, c in G.cells():
-        if G.get(r, c) == '3' and ('l' in (G.get(r, c - 1), G.get(r, c + 1))):
+        if G.get(r + 1, c) in ('l', 'i') and G.get(r, c) not in ('.', 'K', 'D'):
             brow.add((r, c))
     dome = set()
     for r, c in G.cells():
@@ -114,6 +114,8 @@ def bald(G, view):
         B.set(r, c, 'K' if ch == 'D' else 'a')
         if ch != 'D':
             dome.add((r, c))
+    for r, c in brow:
+        B.set(r, c, '3')
     # shade the dome's far side (a ring in from the outline on the right), so it reads round, and light none
     mid = head_mid(G)
     for r, c in dome:

@@ -110,8 +110,18 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
   in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
   style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
-  a hair colour (natural shades, plus the odd dyed one), a boot colour and a slightly different height. A player's
-  look is seeded from his name, so he looks the same every match. Keepers get their own skin and hair colour.
+  a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a slightly different
+  height. A player's look is seeded from his name, so he looks the same every match (the eye colour is drawn last,
+  so nobody's other picks changed when it came in). Keepers get their own skin, hair and eye colour.
+  - The art follows the reference overworld sprites (the handheld Gen-5 style). The head is about two-thirds of the
+    figure, on a short, stocky body with the hands held out from the sides. The hair falls in clumps under a band of
+    sheen, with the fringe hanging to the eyes and the outline in black. The face is small and framed by the hair,
+    with 2×2 eyes (lid and iris over white and pupil, the pupils turned in) and a one-pixel mouth. Bald heads keep
+    their brows.
+  - The diagonals follow an 8-direction reference: turned toward you the face slides to that side and the ear to
+    the other; turned away, the cheek and ear show at the edge.
+  - Every sprite stands on a flat oval shadow of whole sprite pixels instead of the soft one, which comes back if
+    the sprites are switched off (`V`).
   The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
   `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. A career
   player's look is seeded from the player himself, so he looks the same at every club.
@@ -752,6 +762,16 @@ A dive along the goal line runs toward or away from this camera, so the stretch 
 well, climbing toward the top corner or dropping toward the bottom one, and reads at full length.
 The head is bigger than the arms can reach past, so the gloves are painted in front of the face, as
 a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
+
+Football Classic (`classic.html`) takes the same art split into parts (a body sheet, every hairstyle's head, and
+where the head sits in each cell) so each player can be put together and recoloured. Write them in with:
+
+```sh
+python3 tools/sprites/make_player_sheet.py --embed-classic
+python3 tools/sprites/make_keeper_sheet.py --embed-classic
+```
+
+`index.html` keeps the sheets it was last embedded with until it is re-embedded with `--embed`.
 
 ## Tests
 
