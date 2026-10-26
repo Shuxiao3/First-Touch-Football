@@ -1,8 +1,8 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
-// never defends in them), width as COMPACT / BALANCED / WIDE, the style and the posture set apart, anyone in any
-// position (the keeper too), player instructions (a midfielder told into the box gives up holding), and skill stars
-// (1: the cut; 2: + the croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test
-// reach the match.
+// never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, the style and the
+// posture set apart, anyone in any position (the keeper too), instructions by position (each spot's own, kept when
+// the men in it change; a midfielder told to run in behind gives up holding), and skill stars (1: the cut; 2: + the
+// croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test reach the match.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, ATK_ONLY, ins, instrKeys, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }, '
   + 'trySkill:(st,g)=>{ const c=controlled; restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; skillCd=0; c.state="normal"; c.stars=st; own(c,c.r+ball.r+5); const r=startSkill(g); skill=null; skillCd=0; return r; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
@@ -27,6 +27,11 @@ const bad = await page.evaluate(() => { const T = window.__T, out = [];
     for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(T.cwFormFor(club), po); if(T.ATK_ONLY.includes(f)) out.push(st + ' ' + po + ' ' + f); } }
   return out; });
 ok(bad.length === 0, 'no computer side defends in 1-3-3 or 1-4-2' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
+const badA = await page.evaluate(() => { const T = window.__T, out = [];
+  for(const c of T.CLUBS) if(T.DEF_ONLY.includes(c.form)) out.push(c.id);
+  for(const st of ['neutral','tiki','wing','direct','counter']) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
+  return out; });
+ok(badA.length === 0, 'no computer side attacks in 4-2-1 or 4-1-2');
 
 // --- a career: the tactics screen ------------------------------------------------------------------
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
@@ -37,10 +42,13 @@ await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeo
 await page.click('#chCampus [data-bldg="office"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(100);
 ok(await page.isVisible('#bpBody [data-ctphase="atk"]') && await page.isVisible('#bpBody [data-ctphase="def"]'), 'WITH THE BALL / WITHOUT THE BALL');
 ok(!(await page.isDisabled('#bpBody [data-cform="1-3-3"]')), 'with the ball, 1-3-3 can be picked');
+ok(await page.isDisabled('#bpBody [data-cform="4-2-1"]') && await page.isDisabled('#bpBody [data-cform="4-1-2"]'), 'with the ball, 4-2-1 and 4-1-2 are off');
 await page.click('#bpBody [data-cform="2-2-3"]'); await page.waitForTimeout(80);
 await page.click('#bpBody [data-cwidth="1.18"]'); await page.waitForTimeout(80);
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(80);
 ok(await page.isDisabled('#bpBody [data-cform="1-3-3"]') && await page.isDisabled('#bpBody [data-cform="1-4-2"]'), 'without it, 1-3-3 and 1-4-2 are off');
+await page.click('#bpBody [data-cform="4-2-1"]'); await page.waitForTimeout(80);
+ok((await save()).formDef === '4-2-1', 'without it, a back four: 4-2-1');
 await page.click('#bpBody [data-cform="3-3-1"]'); await page.waitForTimeout(80);
 await page.click('#bpBody [data-cwidth="0.84"]'); await page.waitForTimeout(80);
 let d = await save();
@@ -70,45 +78,75 @@ await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
 ok(d.roster[d.lineup.gk].role === 'GK', 'PICK MY BEST EIGHT puts a keeper back in goal');
 
-// instructions: a forward told to go in behind, a midfielder into the box, a man told to close down
-const att = d.lineup.atk.find(ri => d.roster[ri].role === 'ATT');
-await page.click(`#bpBody .pitch .ptk[data-ri="${att}"]`); await page.waitForTimeout(60);
-const keys = await page.$$eval('#tacStatRight .instrGrpLbl', ns => ns.map(n => n.textContent));
-ok(keys.includes('MOVEMENT') && keys.includes('ON THE BALL') && keys.includes('SHOOTING'), 'a forward\'s instructions with the ball: ' + keys.join(', '));
-await page.click('#tacStatRight [data-ci="move"][data-v="behind"]'); await page.waitForTimeout(60);
-await page.click('#tacStatRight [data-ci="shoot"][data-v="sight"]'); await page.waitForTimeout(60);
+// instructions by position (2-2-3 with the ball: CB CB CM CM W ST W; 3-3-1 without it: CB CB CB WM CM WM ST)
+const tap = async ri => { await page.click(`#bpBody .pitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(60); };
+const panel = () => page.evaluate(() => ({ head: (document.querySelector('#tacStatRight .instrHead') || {}).textContent || '',
+  groups: [...document.querySelectorAll('#tacStatRight .instrGrpLbl')].map(n => n.textContent),
+  on: [...document.querySelectorAll('#tacStatRight .iOpt.on')].map(n => n.dataset.ci + '=' + n.dataset.v) }));
+const ci = async (k, v) => { await page.click(`#tacStatRight [data-ci="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
+await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
+let lu = d.lineup;
+await tap(lu.atk[5]); let pn = await panel();
+ok(/STRIKER · WITH THE BALL/.test(pn.head) && String(pn.groups) === 'WIDTH,RUNS', 'the striker\'s instructions with the ball: ' + pn.groups.join(', '));
+await ci('stRuns', 'false9'); await ci('stWidth', 'wide');
+await tap(lu.atk[4]); pn = await panel();
+ok(/LEFT WING/.test(pn.head) && String(pn.groups) === 'SUPPORT,WIDTH', 'the left winger\'s: ' + pn.groups.join(', '));
+await ci('wWidth', 'inside');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);
-await page.click(`#bpBody .pitch .ptk[data-ri="${att}"]`); await page.waitForTimeout(60);
-await page.click('#tacStatRight [data-ci="press"][data-v="close"]'); await page.waitForTimeout(60);
+await tap(lu.def[0]); pn = await panel();
+ok(/CENTRE-BACK · WITHOUT THE BALL/.test(pn.head) && String(pn.groups) === 'AGGRESSION', 'a centre-back\'s without it: ' + pn.groups.join(', '));
+await ci('cbAggr', 'step');
+await tap(lu.def[4]); pn = await panel();
+ok(String(pn.groups) === 'COVER,DEFENDING', 'the central midfielder\'s: ' + pn.groups.join(', '));
+await ci('cmCover', 'wing'); await ci('cmDef', 'int');
+await tap(lu.def[6]); await ci('stDef', 'up');
 d = await save();
-const pid = d.roster[att].id;
-ok(d.instr[pid] && d.instr[pid].move === 'behind' && d.instr[pid].shoot === 'sight' && d.instr[pid].press === 'close', 'saved: ' + JSON.stringify(d.instr[pid]));
-await page.click('#tacStatRight [data-ci="press"][data-v="bal"]'); await page.waitForTimeout(60);
+const PIc = d.pinstr;
+ok(JSON.stringify(PIc.atk['2-2-3'][5]) === '{"stRuns":"false9","stWidth":"wide"}' && JSON.stringify(PIc.atk['2-2-3'][4]) === '{"wWidth":"inside"}', 'saved with the ball: ' + JSON.stringify(PIc.atk));
+ok(PIc.def['3-3-1'][0].cbAggr === 'step' && PIc.def['3-3-1'][4].cmCover === 'wing' && PIc.def['3-3-1'][4].cmDef === 'int' && PIc.def['3-3-1'][6].stDef === 'up', 'saved without it: ' + JSON.stringify(PIc.def));
+await ci('stDef', 'bal');
 d = await save();
-ok(!('press' in d.instr[pid]), 'back to BALANCED: nothing kept');
+ok(!d.pinstr.def['3-3-1'][6], 'back to BALANCED: nothing kept');
+// they go with the position: the striker and the left winger swap places, and the false nine is still a false nine
+await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
+const st0 = lu.atk[5], w0 = lu.atk[4];
+await tap(st0); await page.click('#tacStatRight [data-imove]'); await page.waitForTimeout(60); await tap(w0);
+d = await save(); lu = d.lineup;
+await tap(lu.atk[5]); pn = await panel();
+ok(lu.atk[5] === w0 && lu.atk[4] === st0 && pn.on.includes('stRuns=false9') && d.pinstr.atk['2-2-3'][5].stRuns === 'false9', 'after a swap the spot keeps its instructions: the new man there is the false nine');
+const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
 
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------
 await page.click('#bldgPanel .bpTopBack');
 for(let i = 0; i < 6 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(40); }
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(600);
-const m = await page.evaluate(pid => { const T = window.__T, f = T.forms(), G = T.players().filter(p => p.team === 'G'), R = T.players().filter(p => p.team === 'R');
+const ids = { st: d.roster[posRi.st].id, cb: d.roster[posRi.cb].id, cm: d.roster[posRi.cm].id };
+const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = T.players().filter(p => p.team === 'G'), R = T.players().filter(p => p.team === 'R');
   const count = (ps, k) => { const o = {}; for(const p of ps){ const r = p[k].role; o[r] = (o[r] || 0) + 1; } return o; };
-  const me = G.find(p => p.lookKey === pid);
-  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), instr: me && me.instr, stars: G.map(p => p.stars) }; }, pid);
+  const by = id => G.find(p => p.lookKey === id);
+  const posOK = G.every(p => p.slotAtk.pos === T.POS_OF[f[0]][p.slotAtk.si] && p.slotDef.pos === T.POS_OF[f[1]][p.slotDef.si]);
+  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK,
+    st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
+    other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
-ok(m.instr && m.instr.move === 'behind' && m.instr.shoot === 'sight', 'his instructions are on him in the match');
+ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
+ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int', 'in the match the men in those spots follow them: ' + JSON.stringify([m.st, m.cb, m.cm]));
+ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');
 ok(m.stars.every(s => s >= 1 && s <= 3), 'every man has 1-3 stars: ' + m.stars.join(''));
 
-// a wide midfielder is told where to stand (POSITION), not when to go forward; a midfielder told INTO THE BOX is never
-// the one holding
-const hk = await page.evaluate(() => { const T = window.__T, wide = T.instrKeys('MID', 'MID', true, 'atk'), mid = T.instrKeys('MID', 'MID', false, 'atk');
-  const h0 = T.holderOf('G'); if(!h0) return { wide, mid };
-  const was = h0.instr; h0.instr = Object.assign({}, was, { fwdMID: 'box' }); const h1 = T.holderOf('G'); h0.instr = was; T.holderOf('G');
-  return { wide, mid, h0: h0.lookKey, h1: h1 && h1.lookKey }; });
-ok(!hk.wide.includes('fwdMID') && hk.wide.includes('pos') && hk.mid.includes('fwdMID'), 'a wide midfielder: ' + hk.wide.join(', ') + '; a central one: ' + hk.mid.join(', '));
-ok(hk.h0 && hk.h1 !== hk.h0, 'told INTO THE BOX, the holder hands it on (' + (hk.h1 ? 'to his partner' : 'to nobody') + ')');
+// what each position can be told, with the ball and without it
+const keys = await page.evaluate(() => { const T = window.__T, o = {}; for(const pos of ['CB','FB','CM','WM','W','ST']) for(const ph of ['atk','def']) o[pos + ph] = T.instrKeysFor(pos, ph).join(','); return o; });
+ok(keys.CBatk === 'cbWidth,cbSupport' && keys.CBdef === 'cbAggr' && keys.FBatk === 'fbRuns' && keys.FBdef === 'fbAggr', 'defenders: ' + [keys.CBatk, keys.CBdef, keys.FBatk, keys.FBdef].join(' | '));
+ok(keys.CMatk === 'cmSupport,cmCross' && keys.CMdef === 'cmCover,cmDef' && keys.WMatk === 'wmSupport,wmWidth' && keys.WMdef === 'wmDef', 'midfielders: ' + [keys.CMatk, keys.CMdef, keys.WMatk, keys.WMdef].join(' | '));
+ok(keys.Watk === 'wSupport,wWidth' && keys.Wdef === 'wDef' && keys.STatk === 'stWidth,stRuns' && keys.STdef === 'stDef', 'forwards: ' + [keys.Watk, keys.Wdef, keys.STatk, keys.STdef].join(' | '));
+// a midfielder told to RUN IN BEHIND is never the one holding
+const hk = await page.evaluate(() => { const T = window.__T, f = T.forms()[0], h0 = T.holderOf('G'); if(!h0) return {};
+  T.piSet(T.PI().G, 'atk', f, h0.slotAtk.si, 'cmSupport', 'run'); const h1 = T.holderOf('G');
+  T.piSet(T.PI().G, 'atk', f, h0.slotAtk.si, 'cmSupport', 'bal'); T.holderOf('G');
+  return { h0: h0.lookKey, h1: h1 && h1.lookKey }; });
+ok(hk.h0 && hk.h1 !== hk.h0, 'told to RUN IN BEHIND, the holder hands it on (' + (hk.h1 ? 'to his partner' : 'to nobody') + ')');
 
 // skill stars: a one-star man can cut but not croqueta; a two-star man can croqueta but not roulette or rainbow
 const sk = await page.evaluate(() => { const T = window.__T, out = {};

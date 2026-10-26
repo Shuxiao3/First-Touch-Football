@@ -111,12 +111,14 @@ The same game played like any other football game. It's a copy of `index.html` w
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
   again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the Office's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
-  - **Formations.** There are eight seven-a-side shapes: 3-2-2, 2-3-2, 2-2-3, 2-4-1, 3-3-1, 3-1-3, 1-3-3 and 1-4-2.
-    1-3-3 and 1-4-2 are attacking shapes only. Nobody defends in them, the computer included, and they're greyed out
-    without the ball. The same seven men play in both shapes. Each man's defending spot starts as the one nearest his
-    attacking spot, and you can rearrange either shape. A computer side defends in the shape it attacks in, with
-    two exceptions. A front three drops a man into midfield unless the side presses, so 2-2-3 defends as 2-4-1 and
-    3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2 and 1-4-2 as 2-4-1, or both as 3-3-1 when the side sits deep.
+  - **Formations.** There are ten seven-a-side shapes: 3-2-2, 2-3-2, 2-2-3, 2-4-1, 3-3-1, 3-1-3, 1-3-3, 1-4-2, 4-2-1
+    and 4-1-2. 1-3-3 and 1-4-2 are attacking shapes only, and 4-2-1 and 4-1-2 (four at the back) are defending shapes
+    only. Each pair is greyed out in the other phase, and the computer keeps to the same rule. The same seven men play
+    in both shapes. Each man's defending spot starts as the one nearest his attacking spot, and you can rearrange
+    either shape. A computer side defends in the shape it attacks in, with some exceptions. A front three drops a man
+    into midfield unless the side presses, so 2-2-3 defends as 2-4-1 and 3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2 and
+    1-4-2 as 2-4-1. A side that sits deep makes a back four of some: 2-2-3 and 3-2-2 defend as 4-2-1 and 1-4-2 as
+    4-1-2 (1-3-3 as 3-3-1).
   - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
     out the wide men go, by ×0.84, ×1 or ×1.18.
   - **Styles and postures** are set apart: picking a style no longer changes your posture. A note under the buttons
@@ -127,7 +129,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       21.6 m (35% of them long, 43% forward), 9 shots.
     - **TIKI-TAKA**: short passing. Three men always close for a pass, the team squeezed up behind the ball, few long
       balls and few runs in behind. Passes average 15.9 m: 40% are under 13 m and 15% long. 8.4 shots.
-    - **WING PLAY**: wingers high on the touchlines, the full-back on the ball's side overlapping, early crosses and
+    - **WING PLAY**: wingers high on the touchlines, the full-back on the ball's side overlapping (in a shape with
+      full-backs: see below), early crosses and
       the forwards attacking the near and far posts. It's the widest shape (its players spread 16.0 m across the
       pitch, against 15.4) and crosses most: 6.1 against 3.4. Few crosses become headers at goal, though, so it takes
       fewer shots (5.8 against 8.8).
@@ -143,24 +146,68 @@ The same game played like any other football game. It's a copy of `index.html` w
       from the back, and chases the ball for three seconds after losing it. MID BLOCK goes at the ball together as it
       comes into the middle third, with the forwards screening the pass into midfield. SIT DEEP is narrower and
       compact, and nobody steps out until the ball is in its half.
-  - **Player instructions.** Pick a player in the pause menu or the Office to give him instructions for each phase.
-    Each has three settings, with BALANCED in the middle. With the ball: a defender's GOING FORWARD (STAY BACK /
-    OVERLAP), a midfielder's GOING FORWARD (STAY BACK / INTO THE BOX), a forward's MOVEMENT (COME SHORT / IN BEHIND),
-    a wide man's POSITION (HUG THE LINE / CUT INSIDE), and everyone's ON THE BALL (KEEP IT SIMPLE / TAKE MEN ON) and
-    SHOOTING (WORK IT IN / SHOOT ON SIGHT). Without it: everyone's PRESSING (HOLD POSITION / CLOSE DOWN) and a
-    forward's DEFENDING (STAY UP / TRACK BACK). Each setting has a line under it saying what it does. A career keeps
-    a player's instructions wherever he plays. An exhibition club keeps them with its squad.
-    Measured over 10 minutes: a forward told IN BEHIND spends 74% of his side's possession on their last line (38%
-    left BALANCED), and one told COME SHORT spends 51% dropped between their lines (25%). A full-back told to OVERLAP
-    is up the flank 21% of the time, against never. A forward told to STAY UP waits 63 m from his own goal while
-    they have it, against 53 m. A midfielder told INTO THE BOX is never the holder: in a 3-2-2 the pair of them,
-    both told, never hold (a quarter of the time otherwise) and arrive in the box late. A wide midfielder has
-    POSITION in place of GOING FORWARD.
+  - **Instructions go with the position, not the player.** Pick a player in the pause menu or the Office and you
+    get the instructions of the spot he's in. Whoever plays there follows them, swaps and subs included, and each shape
+    keeps its own. What a spot can be told depends on what it is: with the ball in the attacking shape, without it in
+    the defending one.
+    - **Centre-back**: both of a back two, all three of a back three (except in 3-2-2, where it's the middle one), the
+      middle two of a back four, and a lone defender. With the ball, WIDTH (NORMAL / WIDE: the one away from the ball
+      splits wider from his partner) and SUPPORT (NORMAL / PUSH UP: closer to the play in the middle and final thirds,
+      past halfway once the ball's deep in their third / STAY BACK, against the counter). Without it, AGGRESSION (STEP
+      UP: out to the ball, and to a man dropping in front of him, when they're near him / HOLD THE LINE).
+    - **Full-back**: the outside men of a back four, and of 3-2-2's three. With the ball, RUNS (STAY BACK / SUPPORT: up
+      into midfield once we're in their third / ATTACKING: in midfield from the build-up, overlapping nearer their
+      goal). Without it, AGGRESSION (STEP UP / HOLD THE LINE).
+    - **Central midfielder**: both of a midfield two, the middle two of a four, the middle one of a three, or a lone
+      one. With the ball, SUPPORT (STAY BACK / BALANCED / RUN IN BEHIND) and CROSSES (EDGE OF THE BOX / BALANCED /
+      INTO THE BOX, with the ball out wide in their third). Without it, COVER (COVER CENTRE / COVER WING: across to
+      the ball's flank once it's out wide) and DEFENDING (BALANCED / INTERCEPT: in the passing lanes near the ball,
+      reading passes sooner).
+    - **Left or right midfielder**: the outside men of a midfield three or four. With the ball, SUPPORT (COME SHORT /
+      BALANCED / FORWARD: a midfielder in the build-up and a winger nearer their goal, running in behind, cutting in if
+      he's narrow and overlapping if he's wide) and WIDTH (NARROW / BALANCED / WIDE). Without it, DEFENDING (STEP UP /
+      HOLD THE LINE).
+    - **Winger**: the outside men of a front three. With the ball, SUPPORT (RUN IN BEHIND / BALANCED / COME SHORT) and
+      WIDTH (CUT INSIDE / BALANCED / STAY WIDE). Without it, DEFENDING (COME BACK / BALANCED / STAY UP).
+    - **Striker**: both of a front two, the middle one of a three, or a lone one. With the ball, WIDTH (CENTRAL /
+      BALANCED / WIDE) and RUNS (RUN IN BEHIND / BALANCED / TARGET MAN: up and central, holding it up / FALSE NINE:
+      dropping into midfield). Without it, DEFENDING (COME BACK / BALANCED / STAY FORWARD).
+
+    The defaults (BALANCED, NORMAL, SUPPORT for a full-back's runs, HOLD THE LINE and COVER CENTRE) play as before,
+    with two exceptions. A 3-2-2's full-backs used to go up their flanks from the middle third and now, on SUPPORT,
+    wait until we're in their third. And WING PLAY's overlap is a full-back's only, so a centre-back of a back two no
+    longer goes. A central midfielder told to RUN IN BEHIND never holds; if he's the only central one, the side plays
+    without a holder. Each setting has a line under it saying what it does. A career keeps your positions'
+    instructions, and an exhibition club keeps them with its squad. The per-player instructions of the last version
+    are gone. Measured in 10-minute computer-against-computer games, against the same side left on the defaults:
+    - **Strikers.** One told to RUN IN BEHIND is on their last line for 66% of his side's possession (38% otherwise),
+      and a TARGET MAN 62%. A FALSE NINE plays 6.6 m deeper.
+    - **Central midfielders.** One told to STAY BACK holds 73% of the time (40%), and one told to RUN IN BEHIND
+      (and INTO THE BOX for crosses) plays 13 m further up.
+    - **Wide men and full-backs.** A full-back told ATTACKING is up his flank 41% of the time (9%) and 7 m wider. A
+      wide midfielder told NARROW plays 6 m narrower; a winger told to CUT INSIDE plays 9 m narrower and one told to
+      STAY WIDE 3 m wider.
+    - **Centre-backs.** One told to STAY BACK sits 2.4 m further behind the ball once it's past our third.
+    - **Without the ball.**
+      - A centre-back told to STEP UP picks up a man 16% of the time (4%); a wide midfielder told to, 33% (14%).
+      - A striker told to STAY FORWARD waits 7.5 m higher, and one told to COME BACK 5.4 m deeper.
+      - A central midfielder told to INTERCEPT is in a passing lane 10% of the time. One told to COVER WING is
+        2.7 m nearer a ball that's been out wide for 1.5 s.
   - **Anyone can play anywhere**, the keeper included. MOVE or SWAP any two men, or put an outfielder in goal (the
     keeper then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a
     forward at the back or a defender in goal plays below his usual rating. In the Office his rating there shows in
     amber over the move (ATT→DEF, say). PICK MY BEST EIGHT puts a keeper in goal and the best seven by their
     ratings in the spots they're in.
+- **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
+  pitch. That covers your CLEAR, the computer's clearances and headed clearances.
+  - **How far.** A kicked clearance can carry ×0.85 of what Shot power gives it at Def IQ 1, and ×1.3 at 10: for a
+    man with Shot power 4.5, about 18 m against 27 m.
+  - **Where to.** It looks for a free team-mate upfield within reach 25% of the time at Def IQ 1, and every time at
+    10. If you're pushing the stick, it looks the way the stick points; if not, anywhere upfield. Its spread narrows
+    from up to 4.6° to 1.1°.
+  - **Measured in open play**, a clearance finds a team-mate 8% of the time at Def IQ 1, 31% at 5.5 and 65% at 10.
+  - **Headers.** A headed clearance goes ×0.9 to ×1.15 as far, from Def IQ 1 to 10, and is aimed more surely and
+    truly at a team-mate. So is your own defensive header.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 16 and $20,000. The game is buying and selling players: nobody's stats are
