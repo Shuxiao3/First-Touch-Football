@@ -12989,8 +12989,10 @@
     for(const k of Object.keys(OVR_W[p.role]||OVR_W.MID)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
   // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
-  const SIX=[['PAC','Pace',['speed','acceleration']],['PHY','Physical',['strength','stamina','agility']],['TEC','Technique',['ballControl','dribbling','composure']],
-    ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','curve']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ','heading']]];
+  // (how he moves; his body and the air -- Heading's a duel at both ends; on the ball -- Curve bends his shots, crosses and
+  // passes alike; delivery and vision; finishing; winning it back)
+  const SIX=[['PAC','Pace',['speed','acceleration','agility']],['PHY','Physical',['strength','stamina','heading']],['TEC','Technique',['ballControl','dribbling','composure','curve']],
+    ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ']]];
   const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution']],['CMP','Composure',['composure','ballControl']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
   function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }

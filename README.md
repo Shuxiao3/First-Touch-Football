@@ -133,8 +133,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     pages and has no long text on it: his figure, name, own position, style, age, stars, rating and potential on
     top, and one small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as
     you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending,
-    each the average of its attributes; tap one and what it's made of opens under them, a coloured bar for each
-    rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
+    each the average of its attributes, as in **The six** below; tap one and what it's made of opens under them, a
+    coloured bar for each rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
     for each, with SCOUT HIM. The other side, his deal, has what he earns or costs in a small grid, then what you
     can do about him, a line each: in the Squad tab his contract (a new deal, releasing him); in the market's
     Selling tab selling him (the two best bids, the transfer list); for another club's man the asking price,
@@ -157,7 +157,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     his name, his own position, style, age, skill stars and rating (amber out of position: no line of text says so,
     nor that he's on the bench), and in a match his legs. Under it, the ratings side has the six (tap one and what
     it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall
-    or less a category of four or five ratings puts them two to a line); the other has his spot's instructions for
+    or less a category of four ratings puts them two to a line); the other has his spot's instructions for
     the phase you're looking at, just each one's name and its options, no descriptions, and no ratings. The side
     you're on stays as you tap from man to man. His card never goes over pages: it has the whole right-hand side,
     and everything on it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
@@ -510,6 +510,20 @@ The same game played like any other football game. It's a copy of `index.html` w
     from him, but along the grass over a short ball that isn't far: 0.4 m round a man 0.6 m off its line at Curve
     10. That beats a man at the edge of his reach, not one stood on the line. To a man running along its line it
     goes straight. Yours bend the same way as the computer's.
+- **The six** on a player's card are each the average of the attributes under them. They're only what the card
+  shows: a man's rating comes from weights for each position, as before.
+
+  | | Attributes |
+  | --- | --- |
+  | PAC Pace | Speed, Accel, Agility |
+  | PHY Physical | Strength, Stamina, Heading |
+  | TEC Technique | Ball ctrl, Dribbling, Composure, Curve |
+  | PAS Passing | Passing, Crossing, Off IQ |
+  | SHO Shooting | Shot acc, Shot power, Long shots |
+  | DEF Defending | Tackle, Slide tackle, Interceptions, Def IQ |
+
+  Agility went from Physical to Pace (it's how he turns on the run), Heading from Defending to Physical (it's a duel
+  at both ends) and Curve from Shooting to Technique (it bends his crosses and passes as well as his shots).
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
