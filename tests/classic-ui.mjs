@@ -162,11 +162,13 @@ for(const [w, h] of SIZES){
   const gh = await page.evaluate(() => { const toks = [...document.querySelectorAll('#bpBody .tpitch .ptk')].map(e => e.getBoundingClientRect()), out = [];
     for(const g of document.querySelectorAll('#bpBody .tpitch .tpGhost')){ const r = g.getBoundingClientRect(); let worst = 0;
       for(const t of toks){ const w = Math.max(0, Math.min(r.right, t.right) - Math.max(r.left, t.left)), h = Math.max(0, Math.min(r.bottom, t.bottom) - Math.max(r.top, t.top)); worst = Math.max(worst, w * h / (r.width * r.height)); }
-      out.push({ face: !!g.querySelector('img'), w: Math.round(r.width), h: Math.round(r.height), over: +worst.toFixed(2) }); }
+      const P = g.parentElement.getBoundingClientRect(), dx = r.left - (P.left + parseFloat(g.style.left) / 100 * P.width);
+      out.push({ face: !!g.querySelector('img'), w: Math.round(r.width), h: Math.round(r.height), over: +worst.toFixed(2), dx: Math.round(dx), inside: r.right <= P.right + 1 }); }
     const t0 = toks[0]; return { out, tok: [Math.round(t0.width), Math.round(t0.height)] }; });
   info('the ghosts: ' + JSON.stringify(gh));
   ok(gh.out.every(g => !g.face && g.w * g.h < 0.4 * gh.tok[0] * gh.tok[1]), 'a ghost has no face, and is a small box (' + gh.out[0].w + 'x' + gh.out[0].h + ', a man ' + gh.tok.join('x') + ')');
   ok(gh.out.filter(g => g.over > 0.35).length <= 1, 'it sits off the corner of its spot, a man there covering little of it (' + gh.out.map(g => g.over).join(' ') + ')');
+  ok(gh.out.every(g => g.dx > 10 && g.inside), 'every box is off the right of its spot, the forwards\' too, and on the pitch (' + gh.out.map(g => g.dx).join(' ') + ' px right)');
   // ...and each carries his shirt number, as his token does (under his face; in the corner on the bench)
   const nums = await page.evaluate(() => { const no = el => ((el && el.querySelector('.ptkNo, em')) || {}).textContent || '';
     return { men: [...document.querySelectorAll('#bpBody .tpitch .ptk[data-tac="field"]')].map(no), keeper: no(document.querySelector('#bpBody .tpitch .ptk[data-tac="gk"]')),
@@ -174,19 +176,25 @@ for(const [w, h] of SIZES){
   const allNo = [nums.keeper, ...nums.men, ...nums.bench], sorted = a => a.slice().sort().join(' ');
   ok(allNo.every(n => /^#\d+$/.test(n)) && new Set(allNo).size === allNo.length && sorted(nums.ghosts) === sorted(nums.men),
     'every man shows his shirt number, on the pitch and the bench, and the other phase\'s boxes carry the same ones (' + nums.men.join(' ') + ' | ' + nums.ghosts.join(' ') + ')');
-  // THE CARD HAS TWO SIDES: his ratings (a category opens in their place) and his spot's instructions (no ratings), his
-  // name, rating and stars on top of both
-  const side = () => page.evaluate(() => ({ six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixDet .statRow').length,
-    instr: document.querySelectorAll('#cTacRight .instrGrp:not(.fitHide)').length + document.querySelectorAll('#cTacRight .instrGrp.fitHide').length, ovr: !!document.querySelector('#cTacRight .mgCardOvr'),
-    stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '', on: (document.querySelector('#cTacRight .cardSide.on') || {}).textContent }));
+  // THE CARD HAS TWO SIDES: his ratings (a category opens under the six) and his spot's instructions (no ratings), turned
+  // over with one small button under his rating; his figure, name, rating and stars on top of both
+  const side = () => page.evaluate(() => { const flips = [...document.querySelectorAll('#cTacRight button[data-cside]')], f = flips[0], fr = f && f.getBoundingClientRect(), o = document.querySelector('#cTacRight .mgCardOvr');
+    return { six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixOpen .statRow').length,
+      instr: document.querySelectorAll('#cTacRight .instrGrp').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
+      stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
+      flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
+      seen: [...document.querySelectorAll('#cTacRight .sixHd')].some(e => !e.closest('.fitHide')) }; });
   await page.tap('#bpBody .tpitch .ptk[data-tac="field"] >> nth=6'); await page.waitForTimeout(150);
   const s1 = await side(); await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(150); const s2 = await side();
+  for(let i = 0; i < 5; i++){ const pv = await page.$('#cTacRight .fitPager [data-fitgo="-1"]:not([disabled])'); if(!pv) break; await pv.tap(); await page.waitForTimeout(60); }   // (back to the six)
   await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(100); await page.tap('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(150); const s3 = await side();
   await page.tap('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(100);
   info('the card: ' + JSON.stringify({ s1, s2, s3 }));
-  ok(s1.on === 'RATINGS' && s1.six === 6 && !s1.instr && s1.ovr && s1.stars, 'his card, RATINGS: the six, his rating and stars on top, no instructions');
-  ok(s2.six === 0 && s2.det === 5, '...tap one and what it\'s made of takes their place (DEF: ' + s2.det + ' ratings)');
-  ok(s3.on === 'INSTRUCTIONS' && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.ovr && s3.stars && s3.name === s1.name, 'turned over, INSTRUCTIONS: his spot\'s (' + s3.instr + '), no ratings, his name, rating and stars still on top');
+  ok(s1.flips === 1 && s1.small && s1.under && /INSTRUCTIONS/.test(s1.flip) && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
+    'his card: his figure, rating and stars, the six, and one small button under his rating (' + s1.flip + ')');
+  ok(s2.six === 6 && s2.det === 5 && s2.seen, '...tap one and what it\'s made of opens under the six, its page brought up (DEF: ' + s2.det + ' ratings)');
+  ok(s3.flips === 1 && /RATINGS/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.body && s3.ovr && s3.stars && s3.name === s1.name,
+    'turned over: his spot\'s instructions (' + s3.instr + '), no ratings, his figure, name, rating and stars still on top, the button back to RATINGS');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
   // the font, against the token's 2 px rim -- on the tactics pitch, the bench and the squad's little pitch

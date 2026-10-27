@@ -131,24 +131,27 @@ The same game played like any other football game. It's a copy of `index.html` w
     bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left and the man
     you tap on the right, each side over pages of its own. His card leads with six numbers (pace, physical,
     technique, passing, shooting, defending, each the average of its attributes); tap one and what it's made of
-    takes their place (◀ on it, or a tap on it again, for the six). In the Squad tab his card has the right side to
-    itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little pitch comes back as you
-    pick a man up to drop on it.
+    opens under them (tap it again to shut it), its page brought up if it's gone over one. In the Squad tab his card
+    has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little
+    pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
     BEST 8. Under it, the bench. On the right, the card of the man you tapped. Every man on the pitch shows his
     face (his own look, in the club's kit) with his shirt number under it, beside his rating and name; the bench
     is ratings and names, each man's shirt number in his token's corner. The rating and the name sit inside each
     token with room round them, clear of its edges.
-  - **His card has two sides**, turned over with RATINGS and INSTRUCTIONS under his name. RATINGS: all of him,
-    head to toe (a keeper in a keeper's top), and the six (tap one for what it's made of). INSTRUCTIONS: his spot's
-    instructions for the phase you're looking at, each with its options on one line and what it means under them,
-    and no ratings. On both, his name, position, age, skill stars and rating stay on top, and the side you're on
-    stays as you tap from man to man. More instructions than fit go over pages.
+  - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then
+    RATINGS ▶). Both are drawn as the card always was: all of him, head to toe (a keeper in a keeper's top), his
+    name, position, age, skill stars and rating, and, out of position, the amber line saying where he's playing.
+    Under that, the ratings side has the six (tap one for what it's made of); the other has his spot's instructions
+    for the phase you're looking at, each with its options on one line and what it means under them, and no
+    ratings. The side you're on stays as you tap from man to man, and what doesn't fit goes over pages under his
+    name and rating, an instruction kept whole on a page. On a short phone his figure and name are drawn a little
+    smaller, so the six fit under them.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
-    shows, so you can tell whose box is whose), off the bottom-right corner of his spot
-    (bottom-left for a man up by their goal, at the right-hand end): on WITH BALL you see where each of them goes
-    without it, and the other way round. It's no longer a full token tucked under the man, with his face, that you couldn't see.
+    shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
+    BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
+    under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's legs on his card (and the two sides: the other team's
     men show their ratings only). The rest of your squad is on the

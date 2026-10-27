@@ -893,15 +893,8 @@
   .sixC b{ font-size:16px; font-weight:400; line-height:1; text-shadow:1px 1px 0 var(--ol); }
   .sixC i{ font-style:normal; font-size:10px; color:var(--dim); letter-spacing:1px; }
   .sixC.on{ background:var(--rowOn); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), inset 0 -3px 0 0 var(--well); }
-  .sixDet{ background:var(--well); padding:5px 8px 6px; margin:8px 2px 8px; box-shadow:inset 0 0 0 2px var(--btnLo); border-radius:var(--rS); }
-  .sixBack{ display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:0 10px; margin:0 0 4px; border:0; border-radius:var(--r); cursor:pointer;
-    font:11px 'FTC Dot',monospace; letter-spacing:1px; background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
-  .sixBack b{ font-weight:400; font-size:13px; text-shadow:1px 1px 0 var(--ol); }
-  .sixRows{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
-  .sixRows .statRow{ margin:1px 0; font-size:10px; } .sixRows .statRow .sl{ width:auto; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .sixRows .statBar{ flex:0 0 34px; }
-  @media (max-height:400px){ .sixDet{ margin:4px 2px; padding:4px 8px 5px; } .sixBack{ min-height:26px; margin-bottom:2px; }
-    .sixRows{ grid-template-columns:1fr 1fr 1fr; gap:0 10px; } .sixRows .statBar{ display:none; } .sixRows .statRow{ margin:0; } }   /* (a short phone: three to a row, the number alone) */
+  .sixOpen{ background:var(--well); padding:8px 10px 6px; margin:0 2px 10px; box-shadow:inset 0 0 0 2px var(--btnLo); }
+  .sixHd{ font-family:'FTC Dot',monospace; font-size:11px; color:var(--dim); letter-spacing:1px; margin-bottom:4px; }
   /* TACTICS: the pitch first */
   .tacB1{ display:flex; flex-direction:column; height:100%; min-height:0; }
   .tbTop{ flex:none; display:flex; align-items:center; gap:8px; padding:8px 10px 8px; }
@@ -959,11 +952,10 @@
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
   /* the other phase's man: a small box with just his number and name, off the corner of his slot -- right and down, so it only
-     clips the corner of a man standing there (left, up by their goal at the right-hand end) */
+     clips the corner of a man standing there */
   .tpitch .tpGhost{ transform:translate(26px,14px); max-width:56px; height:18px; display:flex; align-items:center; padding:0 4px; border-radius:var(--rS);
     background:rgb(var(--accRGB) / .28); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9); opacity:.9;
     font:9px/1 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
-  .tpitch .tpGhost.flip{ transform:translate(calc(-100% - 26px),14px); }
   .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tpitch .tpGhost em{ flex:none; font-style:normal; margin-right:3px; }
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
@@ -981,24 +973,17 @@
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:7px 7px; align-items:center; padding:8px 12px 9px; box-shadow:inset 0 2px 0 0 var(--btnLo); }
   .tbBench .ptk{ position:relative; transform:none; width:54px; height:42px; padding:0 3px; justify-content:center; }
   .tbBenchLbl{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; margin-right:2px; }
-  .tbRight .mgCardHead{ margin-top:6px; margin-bottom:6px; }
-  .cardSides{ display:flex; gap:6px; margin:0 0 8px; }
-  .cardSide{ flex:1 1 0; min-height:30px; padding:0 6px; border:0; border-radius:var(--r); cursor:pointer; font:11px 'FTC Dot',monospace; letter-spacing:1px;
-    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
-  .cardSide.on{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); text-shadow:1px 1px 0 var(--accSh); }
-  .tbRight .instrHead{ margin:0 0 6px; padding-top:0; border-top:0; }
-  .tbRight .instrGrp{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin:0 0 8px; }
-  .tbRight .instrGrpLbl{ margin:0; min-width:64px; }
-  .tbRight .instrOpts{ flex:1 1 0; min-width:0; }
-  .tbRight .iOpt{ min-height:30px; }
+  .tbRight .mgCardHead{ margin-top:6px; }
+  .tbRight .tacInstr{ padding-top:6px; } .tbRight .tacInstr .instrHead{ margin:0 0 6px; padding-top:0; border-top:0; }   /* (one line under his name) */
+  .tbRight .instrGrp{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin:0 0 8px; }   /* an instruction's name on its options' line */
+  .tbRight .instrGrpLbl{ margin:0; min-width:64px; } .tbRight .instrOpts{ flex:1 1 0; min-width:0; } .tbRight .iOpt{ min-height:30px; }
   .tbRight .instrDesc{ flex:1 0 100%; margin-top:0; }
-  @media (max-height:360px){ .tbRight{ padding-bottom:4px; } .tbRight .iOpt{ min-height:26px; padding:3px 8px; } .tbRight .instrDesc{ font-size:10px; line-height:1.3; }
-    .tbRight .instrGrp{ margin-bottom:5px; } .tbRight .cardBody{ width:26px; height:40px; } .tbRight .mgCardName{ font-size:15px; } .mtLegs{ margin:0 2px; } }
-  @media (max-height:400px){   /* a short phone: his card's front on one page */
-    .tbRight .mgCardHead{ margin-top:2px; margin-bottom:4px; } .tbRight .cardBody{ width:30px; height:46px; }
-    .cardSides{ margin-bottom:5px; } .cardSide{ min-height:26px; }
-    .tbRight .six{ margin:4px 2px 4px; } .tbRight .sixC{ min-height:40px; }
-    .tbRight .mtLegs{ margin:2px 0 0; } }
+  @media (max-height:360px), (max-width:700px){   /* a small phone: his figure and name a little smaller, so the six fit under them on a page */
+    .tbRight .cardBody{ width:26px; height:40px; } .tbRight .mgCardName{ font-size:15px; } .tbRight .mgCardHead{ gap:8px; } }
+  @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; the amber says he's out of position) */
+  .cardEnd{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .cardFlip{ min-height:20px; padding:0 6px; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'FTC Dot',monospace; white-space:nowrap;
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }   /* (turns his card over: small, out of the way) */
   .tbRight .tacInstr{ margin-top:4px; }
   /* the pause menu: four buttons two by two */
   .pauseMain{ max-width:560px; }
@@ -1334,22 +1319,28 @@
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   // NO SCROLLING: a box marked data-pages="key" that would overflow shows a page of what fits in it, with ◀ 2 / 3 ▶ along
   // its foot. It breaks between rows: a list in a wrapper (or a table) is opened up into its rows, but never a button, a
-  // table row or anything .fitWhole (an instruction with its options, an offer with its buttons). Items side by side (a
-  // grid's lines) stay together, and anything .fitKeep (a table's head, a list's filters, a card's name and rating)
-  // shows on every page. It runs whenever one of the menus repaints (fitWatch); a box keeps its page by its key.
+  // table row or anything .fitWhole (an offer with its buttons), nor anything .fitTogether a page can take whole (an
+  // instruction with its options). Items side by side (a grid's lines) stay together, a
+  // heading goes over with at least two of its lines, and anything .fitKeep (a table's head, a list's filters, a card's
+  // name and rating) shows on every page. It runs whenever one of the menus repaints (fitWatch); a box keeps its page
+  // by its key.
   const FITPG={};                                      // the page each box is on
+  let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
-  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); }
+  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); fitGoTo=null; }
   function fitForget(part){ for(const k in FITPG) if(k.includes(part)) delete FITPG[k]; }   // (back to page 1)
   function fitBox(box){
     for(const x of box.querySelectorAll(':scope > .fitPager')) x.remove();
     for(const x of box.querySelectorAll('.fitHide')) x.classList.remove('fitHide');
     box.classList.remove('fitPaged'); box.style.height=''; box.scrollTop=0;
+    const goto=fitGoTo&&box.querySelector(fitGoTo); if(goto) fitGoTo=null;
     if(!box.getClientRects().length||box.scrollHeight<=box.clientHeight+1) return;   // (not showing, or it fits)
     const padT=parseFloat(getComputedStyle(box).paddingTop)||0, R0=box.getBoundingClientRect();
     const room=box.clientHeight-padT-fitPH()-4, keep=el=>el.matches('thead,.fitKeep');   // (the pager sits over the box's foot, padding and all)
+    const keepEst=[...box.querySelectorAll('thead,.fitKeep')].filter(k=>!k.parentElement.closest('.fitKeep')).reduce((a,k)=>a+k.getBoundingClientRect().height,0);
     const open=el=>{ if(keep(el)||!el.children.length||el.matches('button,a,input,select,textarea,label,img,canvas,svg,tr,.fitWhole')) return false;
-      const h=el.getBoundingClientRect().height; return el.children.length>1?h>Math.min(60,room/3):h>room-4; };
+      const h=el.getBoundingClientRect().height; if(el.matches('.fitTogether')&&h<=room-keepEst-20) return false;   // (whole, if a page can take it)
+      return el.children.length>1?h>Math.min(60,room/3):h>room-4; };
     let items=[...box.children];
     const opened=[];
     for(let n=0;n<6;n++){ let deeper=false; const next=[];
@@ -1365,12 +1356,23 @@
       if(L){ L.b=Math.max(L.b,b); L.els.push(it); } else lines.push({t,b,els:[it]}); }
     for(const k of keeps) k.classList.remove('fitHide');
     lines.sort((a,b)=>a.t-b.t);
-    const cap=room-keepH, pages=[]; let s0=0;
-    while(s0<lines.length){ let e=s0; while(e+1<lines.length&&lines[e+1].b-lines[s0].t<=cap) e++;
-      if(e>s0&&e+1<lines.length&&lines[e].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr')) e--;   // (a heading goes over with what it heads)
+    // ...and what else a page draws past page 1: under what's kept, its bottom margin (on page 1 the first line's own may
+    // have swallowed it); over the first line, the top (margin, frame, padding) of an opened box it starts inside; under
+    // the last, that box's frame and padding (and the line's own margin inside them)
+    const px=(el,k)=>parseFloat(getComputedStyle(el)[k])||0, keepMB=keeps.reduce((m,k)=>Math.max(m,px(k,'marginBottom')),0);
+    for(const l of lines){ const ws=opened.filter(w=>w.contains(l.els[0]));
+      l.pt=px(l.els[0],'marginTop')+ws.reduce((a,w)=>a+px(w,'marginTop')+px(w,'borderTopWidth')+px(w,'paddingTop'),0);
+      l.pb=ws.reduce((a,w)=>a+px(w,'borderBottomWidth')+px(w,'paddingBottom'),0); if(l.pb) l.pb+=px(l.els[0],'marginBottom'); }
+    const span=(a,z)=>(a===0?lines[z].b:keepMB+lines[a].pt+lines[z].b-lines[a].t)+lines[z].pb;   // (a page from line a to line z, as tall as it draws)
+    const cap=room-keepH, pages=[], head=i=>lines[i].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr,.instrGrpLbl'); let s0=0;
+    while(s0<lines.length){ let e=s0; while(e+1<lines.length&&span(s0,e+1)<=cap) e++;
+      if(e+1<lines.length){ if(e>s0&&head(e)) e--;                          // (a heading goes over with what it heads,
+        else if(e-1>s0&&head(e-1)&&!head(e+1)) e-=2; }                      //  and takes at least two of its lines with it)
       pages.push([s0,e]); s0=e+1; }
     if(pages.length<2) return;
-    const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0}); st.p=clamp(st.p,0,pages.length-1);
+    const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0});
+    if(goto){ const li=lines.findIndex(l=>l.els.some(x=>x===goto||x.contains(goto)||goto.contains(x))), pi=pages.findIndex(([a,z])=>li>=a&&li<=z); if(pi>=0) st.p=pi; }
+    st.p=clamp(st.p,0,pages.length-1);
     const [a,z]=pages[st.p];
     lines.forEach((l,i)=>{ if(i<a||i>z) for(const el of l.els) el.classList.add('fitHide'); });
     for(let i=opened.length-1;i>=0;i--){ const w=opened[i]; if([...w.children].every(c=>c.classList.contains('fitHide'))) w.classList.add('fitHide'); }
@@ -2037,9 +2039,9 @@
   function instrPanelHtml(cur,pos,phase,attr,left,card){
     const ks=instrKeysFor(pos,phase); if(!ks.length) return '';
     let h='<div class="instrHead">'+posName(pos,left)+' · '+(phase==='atk'?'WITH THE BALL':'WITHOUT THE BALL')+'</div>'
-      +(card?'':'<div class="instrNote">These go with the position: whoever plays there follows them.</div>');
+      +(card?'':'<div class="instrNote">These go with the position: whoever plays there follows them.</div>');   // (on a man's card it goes: his card is short)
     for(const k of ks){ const I=INSTR[k], v=(cur&&cur[k])||I.dflt;
-      h+='<div class="instrGrp fitWhole"><div class="instrGrpLbl">'+I.lbl+'</div><div class="instrOpts">'
+      h+='<div class="instrGrp fitTogether"><div class="instrGrpLbl">'+I.lbl+'</div><div class="instrOpts">'
         +I.opts.map(o=>'<button class="iOpt'+(o[0]===v?' on':'')+'" data-'+attr+'="'+k+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('')
         +'</div><div class="instrDesc">'+I.tip[v]+'</div></div>'; }
     return h; }
@@ -11476,16 +11478,16 @@
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
-    let h='<div class="tbCard fitKeep"><div class="mgCardHead">'+(t==='G'&&cardSide==='instr'?'':bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t)))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')
-      +(oop?' · <span style="color:var(--warn)">playing '+role+'</span>':role?'':' · '+(SUBS[t].off.includes(si)?'subbed off':'on the bench'))+'</div></div>'
-      +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div></div></div>';
-    if(p&&role&&role!=='GK'){ const st=clamp(p.stamina,0,1); h+='<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(st*100)+'%;background:'+(st>0.6?'':st>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(st*100)+'%</b></div>'; }
-    const side=t==='G'?cardSide:'rate';                                  // (their instructions are theirs)
-    h+=(t==='G'?cardSides():'')+'</div>';
-    if(side==='rate') return h+sixHtml(e.stats,e.role);
-    if(si===li.gk) return h+'<div class="mgHint">The keeper has no instructions.</div>';
-    if(!sl) return h+'<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div>';
-    return h+(instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC,true)||'<div class="mgHint">No instructions for this spot.</div>'); }
+    const instr=t==='G'&&cardSide==='instr';                          // (their instructions are theirs: their men show their ratings)
+    let h='<div class="tbCard'+(instr?' fitKeep':'')+'"><div class="mgCardHead fitKeep">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
+      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">'+(SUBS[t].off.includes(si)?'subbed off':'on the bench')+'</div>')+'</div>'
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
+    if(p&&role&&role!=='GK'){ const st=clamp(p.stamina,0,1); h+='<div class="mtLegs fitKeep"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(st*100)+'%;background:'+(st>0.6?'':st>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(st*100)+'%</b></div>'; }
+    if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
+    h+='</div><div class="tacInstr">';
+    if(si===li.gk) return h+'<div class="mgHint">The keeper has no instructions.</div></div>';
+    if(!sl) return h+'<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div></div>';
+    return h+(instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC,true)||'<div class="mgHint">No instructions for this spot.</div>')+'</div>'; }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'||MT.drop==='posture'?' r':'')+'">';
     if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
         return '<button class="formBtn'+(fm===form?' on':'')+'" data-mtform="'+fm+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
@@ -11542,7 +11544,7 @@
     const s=e.target.closest('[data-mtstyle],[data-mtposture]'); if(s){ MT.drop=null; if(s.dataset.mtstyle) TAC[t].off=s.dataset.mtstyle; else TAC[t].def=s.dataset.mtposture;
       if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
     const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
-    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; renderMatchTac(); return; }
+    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; renderMatchTac(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
     const mi=e.target.closest('[data-mi]'); if(mi){ const li=LINEUP[t], k=li[MT.phase].indexOf(MT.sel); if(k>=0) setPosInstr(t,MT.phase,k,mi.dataset.mi,mi.dataset.v); renderMatchTac(); return; }
     const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; renderMatchTac(); return; } });
@@ -12412,26 +12414,26 @@
   // the card's other side: his spot's instructions for this phase (he's moved by dragging him)
   function careerInstrBlock(d, ri, phase){ const p=d.roster[ri]; if(!p) return '';
     const lu=d.lineup;
-    if(ri===lu.gk) return '<div class="mgHint">The keeper has no instructions.</div>';
+    if(ri===lu.gk) return '<div class="tacInstr"><div class="mgHint">The keeper has no instructions.</div></div>';
     const f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;   // the instructions of the spot he's in
-    if(!sl) return '<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div>';
-    return instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50,true)||'<div class="mgHint">No instructions for this spot.</div>'; }
-  // THE CARD HAS TWO SIDES: his ratings (the six, each opening on what it's made of), and the instructions of the spot he's
-  // in -- turned over with the two buttons under his name. Whichever side, his name, rating and stars stay on top.
+    if(!sl) return '<div class="tacInstr"><div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div></div>';
+    return '<div class="tacInstr">'+(instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50,true)||'<div class="mgHint">No instructions for this spot.</div>')+'</div>'; }
+  // THE CARD HAS TWO SIDES: his ratings (the six, each opening on what it's made of) and the instructions of the spot he's
+  // in, turned over with the one small button under his rating. Whichever side, his name, rating and stars stay on top.
   let cardSide='rate';
-  function cardSides(){ return '<div class="cardSides"><button class="cardSide'+(cardSide==='rate'?' on':'')+'" data-cside="rate">RATINGS</button>'
-    +'<button class="cardSide'+(cardSide==='instr'?' on':'')+'" data-cside="instr">INSTRUCTIONS</button></div>'; }
+  const cardFlip=()=>cardSide==='rate'?'<button class="cardFlip" data-cside="instr">INSTRUCTIONS ▶</button>':'<button class="cardFlip" data-cside="rate">RATINGS ▶</button>';
   const tacPagesKey=phase=>'tac:'+statViewRi+':'+cardSide+':'+phase;   // (each man's card, each side and phase, starts on its page 1)
   function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.dataset.pages=tacPagesKey(tacPhase); rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
   // THE MAN YOU TAPPED: his rating where he's playing, his six, then his spot's instructions
   function tbCard(d, ri, phase){ const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
-    return '<div class="tbCard fitKeep"><div class="mgCardHead">'+(cardSide==='instr'?'':bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d)))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
-      +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')
-      +(oop?' · <span style="color:var(--warn)">playing '+role+'</span>':role?'':' · on the bench')+'</div></div>'
-      +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' as a '+p.role+'</div>':'')+'</div></div>'
-      +cardSides()+'</div>'+(cardSide==='instr'?careerInstrBlock(d, ri, phase):sixHtml(st,p.role)); }
+    const instr=cardSide==='instr';
+    return '<div class="tbCard'+(instr?' fitKeep':'')+'"><div class="mgCardHead fitKeep">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+      +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
+      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">on the bench</div>')+'</div>'
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' as a '+p.role+'</div>':'')+cardFlip()+'</div></div>'
+      +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
   const STYLE_LIST=[['neutral','BALANCED'],['tiki','TIKI-TAKA'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER']];
   const POSTURE_LIST=[['press','PRESS HIGH'],['neutral','MID BLOCK'],['lowblock','SIT DEEP']];
   // an instruction for one of your spots (si: its index in that phase's shape)
@@ -12468,8 +12470,8 @@
       +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
       +(kind==='bench'?shirtNo(p.num):ptkSide(faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),p.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
-  // a small lit box off the bottom-right corner of the spot (bottom-left up by their goal, at the right-hand end)
-  function ghostTok(L,T,num,name){ return '<i class="tpGhost'+(L>80?' flip':'')+'" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
+  // a small lit box off the bottom-right corner of the spot
+  function ghostTok(L,T,num,name){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -12769,20 +12771,19 @@
   function mgBars(p){ const st=mgStats(p); let h='<div class="mgBars">';
     for(const k of Object.keys(OVR_W[p.role]||OVR_W.MID)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
-  // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one and what it's made of takes their place
-  // (◀ on it, or a tap on it again, for the six), so a card's front never grows past a page
+  // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
   const SIX=[['PAC','Pace',['speed','acceleration']],['PHY','Physical',['strength','stamina','agility']],['TEC','Technique',['ballControl','dribbling','composure']],
     ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','curve']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ','heading']]];
   const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution']],['CMP','Composure',['composure','ballControl']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
   function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }
-  function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX, avg=ks=>ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length, g=G.find(x=>x[0]===sixOpen);
-    if(g){ const v=avg(g[2]);
-      return '<div class="sixDet fitWhole"><button class="sixBack" data-six="'+g[0]+'">◀ <b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b> '+g[1].toUpperCase()+'</button><div class="sixRows">'+g[2].map(x=>{ const w=+st[x]||0;
-        return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(w,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv" style="color:'+sixCol(w)+'">'+w.toFixed(1)+'</span></div>'; }).join('')+'</div></div>'; }
-    let h='<div class="six">';
-    for(const [k,,ks] of G){ const v=avg(ks); h+='<button class="sixC" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
-    return h+'</div>'; }
+  function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
+    for(const [k,,ks] of G){ const v=ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length;
+      h+='<button class="sixC'+(sixOpen===k?' on':'')+'" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
+    h+='</div>'; const g=G.find(x=>x[0]===sixOpen);
+    if(g) h+='<div class="sixOpen"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
+      return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
+    return h; }
   // A LIST AND ITS MAN: the list on the left, the man picked on the right; a side with more than fits goes over pages
   // (fitBox), the list's filters on every page and the man's name and rating on every page of his card
   function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
@@ -13075,7 +13076,7 @@
     const bl=e.target.closest('[data-bldg]'); if(bl){ openBuilding(bl.dataset.bldg); return; }
     const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:''}); paintBuilding(true); } return; }
     if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
-    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; paintBuilding(); return; }
+    const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; paintBuilding(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; paintBuilding(); return; }
     const td=e.target.closest('[data-tdrop]'); if(td){ tacDrop=tacDrop===td.dataset.tdrop?null:td.dataset.tdrop; rerenderOffice(); return; }
     if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
