@@ -234,7 +234,7 @@ for(const [w, h] of SIZES){
 
 // A NARROW PHONE (640x360): the bench on one line, each name inside its token and the number clear of the rating; and
 // his card fits its box, every man's (his ratings with DEF open, his instructions), with the longest name put out of
-// position: his name on one line, the amber line under his rating rather than wrapped beside it -- Office and match
+// position: his name on one line, his rating amber, and no line of text saying so (nor "on the bench") -- Office and match
 { const ctx = await browser.newContext({ viewport: { width: 640, height: 360 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
@@ -251,9 +251,11 @@ for(const [w, h] of SIZES){
       clear: T.every(t => !hit(t.querySelector('.ptkNo').getBoundingClientRect(), t.querySelector('.ptkOvr').getBoundingClientRect())) }; });
   ok(bench.n >= 6 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (' + bench.n + ' men), every name inside its token, the number clear of the rating');
   await page.tap(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(100);
-  const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), am = [...h.querySelectorAll('.mgCardSub')].find(e => /out of position/.test(e.textContent)), fs = e => parseFloat(getComputedStyle(e).fontSize);
-    return { name: nm.textContent, oneLine: nm.getBoundingClientRect().height < fs(nm) * 2, whole: nm.scrollWidth <= nm.clientWidth + 1, amber: am ? am.textContent : '', amberLines: am ? am.getBoundingClientRect().height / (fs(am) * 1.45) : 0 }; });
-  ok(head.oneLine && head.whole && head.amber && head.amberLines < 1.5, '...the longest name out of position: "' + head.name + '" whole on one line, "' + head.amber + '" on one line');
+  const said = () => page.evaluate(() => /out of position|on the bench|in reserve|subbed off/.test(document.querySelector('#cTacRight .tbCard').textContent));
+  const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), fs = e => parseFloat(getComputedStyle(e).fontSize), o = h.querySelector('.mgCardOvr');
+    return { name: nm.textContent, oneLine: nm.getBoundingClientRect().height < fs(nm) * 2, whole: nm.scrollWidth <= nm.clientWidth + 1, amber: /var\(--warn\)/.test(o.getAttribute('style') || '') }; });
+  const oopSaid = await said(); await page.tap('#bpBody .tbBench .ptk >> nth=0'); await page.waitForTimeout(100); const benchSaid = await said();
+  ok(head.oneLine && head.whole && head.amber && !oopSaid && !benchSaid, '...the longest name out of position: "' + head.name + '" whole on one line, his rating amber, and no line saying he\'s out of position (nor, for a man on the bench, that he\'s on it)');
   const fits = sel => page.evaluate(sel => { const b = document.querySelector(sel); return b.scrollHeight <= b.clientHeight + 1 && !b.querySelector('.fitPager'); }, sel);
   const walk = async (sel, toks) => { const n = await page.$$eval(toks, ns => ns.length), bad = []; let views = 0;
     for(let i = 0; i < n; i++){ await page.tap(`${toks} >> nth=${i}`); await page.waitForTimeout(60);

@@ -154,15 +154,15 @@ The same game played like any other football game. It's a copy of `index.html` w
     name at the foot. The rating and the name sit inside each token with room round them, clear of its edges.
   - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
     ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
-    his name, his own position, style, age, skill stars and rating, out of position the amber line saying where
-    he's playing, and in a match his legs. Under it, the ratings side has the six (tap one and what it's made of
-    opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall or less a
-    category of four or five ratings puts them two to a line); the other has his spot's instructions for the phase you're looking at, just
-    each one's name and its options, no descriptions, and no ratings. The side you're on stays as you tap from man
-    to man. His card never goes over pages: it has the whole right-hand side, and everything on it fits, down to
-    640×360. On a short phone his figure and name are drawn a little smaller; on a narrow one (700 px wide or
-    less) his name stays on one line, and the lines under his style (the amber one, his legs) run on under his
-    rating and button rather than wrap beside them.
+    his name, his own position, style, age, skill stars and rating (amber out of position: no line of text says so,
+    nor that he's on the bench), and in a match his legs. Under it, the ratings side has the six (tap one and what
+    it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall
+    or less a category of four or five ratings puts them two to a line); the other has his spot's instructions for
+    the phase you're looking at, just each one's name and its options, no descriptions, and no ratings. The side
+    you're on stays as you tap from man to man. His card never goes over pages: it has the whole right-hand side,
+    and everything on it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
+    a narrow one (700 px wide or less) his name stays on one line, and his legs run on under his rating and button
+    rather than beside them.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
@@ -462,8 +462,8 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
-  least; eight start, four are on the bench, and the rest wait in reserve. The game is buying and selling players: nobody's stats are
-  built up by hand.
+  least; eight start, four are on the bench, and the rest wait in reserve. The game is buying and selling players:
+  nobody's stats are built up by hand.
   - **The season.** 26 matchdays, home and away. You PLAY each one (the live match, in your colours, with the home
     side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
     at the higher seed's ground, then a final, with a shoot-out if it's level. The bottom three go down. There's no

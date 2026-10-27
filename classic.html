@@ -1004,7 +1004,7 @@
     .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName{ grid-column:2; grid-row:1; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName + .mgCardSub{ grid-column:2; grid-row:2; }
     .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; } }
-  @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; the amber says he's out of position) */
+  @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; it's amber out of position) */
   /* A BUILDING'S CARD (the squad, the market, scouting, the academy) is drawn as the tactics card: his figure, name and
      rating on top, then his six -- a category opened in a small grid under them -- or, turned over, his deal: a small
      grid of what he earns or costs, then what you can do about him, one line each. It never goes over pages. */
@@ -2016,7 +2016,6 @@
   // HIS OWN POSITION: a career man's, else what his style makes him (an exhibition squad's men have none of their own),
   // else his line. A winger (WNG) is an attacker; a wide midfielder (WM) a midfielder.
   const natPos=e=>!e?'':e.role==='GK'?'GK':(e.subRole||(STYLES[e.style]&&STYLES[e.style].sub)||e.role||'');
-  const spotPos=pos=>({W:'WNG',ST:'STK'})[pos]||pos;   // a spot in the shape, named as a man's own position is
   // ============ SKILL MOVES: ONE TO THREE STARS ============
   // How many skill moves a man has, from his feet (Dribbling twice over, Agility and Ball control). One star: the cut
   // (a flick). Two: the croqueta as well. Three: the roulette and the rainbow flick too.
@@ -11549,7 +11548,7 @@
     const instr=t==='G'&&cardSide==='instr';                          // (their instructions are theirs: their men show their ratings)
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(lg*100)+'%</b></div>';
     let h='<div class="tbCard"><div class="mgCardHead">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
-      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+(sl?spotPos(sl.pos):role)+', out of position</div>':role?'':'<div class="mgCardSub">'+(SUBS[t].off.includes(si)?'subbed off':'on the bench')+'</div>')+legs+'</div>'
+      +legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
     if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
     h+='</div><div class="tacInstr">';
@@ -12501,7 +12500,7 @@
     const instr=cardSide==='instr';
     return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
-      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+(sl?spotPos(sl.pos):role)+', out of position</div>':role?'':'<div class="mgCardSub">'+(lu.bench.indexOf(ri)>=BENCH_N?'in reserve':'on the bench')+'</div>')+'</div>'
+      +'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+(p.role==='ATT'?' as an ':' as a ')+p.role+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
   const STYLE_LIST=[['neutral','BALANCED'],['tiki','TIKI-TAKA'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER']];
