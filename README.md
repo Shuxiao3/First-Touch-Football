@@ -185,7 +185,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     scroll). In a match the tactics card is no longer left blank after a visit to the Office's tactics. The pause
     menu, Settings and the new-career card keep clear of the notch.
 - **No player lock.** You control whichever of your players has the ball. When you pass, you're on the receiver as
-  soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far).
+  soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far), once
+  he's read it (his Off IQ: see **Off IQ meets the ball**).
   Without the ball, PASS (`J`, or the PASS button, which reads SWITCH) switches player. Push the stick as you press it
   and you get the nearest team-mate within 60° of that direction. With the stick centred, or nobody that way, you get
   the one nearest where the ball will be a moment from now. `SPACE` does the same. On a phone you can also swipe off the
@@ -524,6 +525,37 @@ The same game played like any other football game. It's a copy of `index.html` w
 
   Agility went from Physical to Pace (it's how he turns on the run), Heading from Defending to Physical (it's a duel
   at both ends) and Curve from Shooting to Technique (it bends his crosses and passes as well as his shots).
+- **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
+  yours when you've passed to him and left the stick alone.
+  - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
+    carries on as he was.
+  - **He reads where it's going** out by up to 2.5 m at Off IQ 1 (none at 10), less the nearer it is to getting to
+    him, so he corrects as it comes.
+  - **A good one goes to meet it, a poor one lets it come.** At Off IQ 10 he goes for the first point on its path he
+    can get to as it does, low enough to take; at 1 he waits on its line where he is (or where it stops, if it won't
+    get to him); in between, he goes part of the way. Going for it, he runs a little quicker than he would anywhere
+    else, the more so the higher his Off IQ (up to 10% at 10). Measured, a 15 m pass in midfield with a marker 2 m
+    off him, 10 each: at Off IQ 10 he goes for a spot 1.6 m nearer the ball than he is, at 5.5 0.6 m, at 1 0.3 m
+    (medians). Before, everyone went at once for where it would first come down, whatever his Off IQ: on that
+    pass, 1.4 m behind him.
+  - **Crosses.** Only the two of ours best placed to get to it go for it (forwards and midfielders); the rest keep
+    their places. A good one goes for the first point of its flight he can get to at head height and times his
+    run: he holds, then attacks it at pace. A poor one goes at once to where it comes down, a step goal-side of it,
+    and waits there. In the air he hardly corrects his read: 80% of it is still there as the ball gets to him.
+    Measured, a cross from the byline to the penalty spot, our man 13 m out with a marker goal-side of him, 16
+    each, headed (before → now): 5 → 10 at Off IQ 1, 8 → 12 at 5.5, 12 → 16 at 10. A poor one gains too: his old
+    misread jumped about as the ball came, and was up to 4 m.
+  - **First-time finishes.** A chance of xG 0.3 or better (inside about 16 m and within 8 m of the middle, with a
+    clear sight of goal) a high Off IQ hits first time, rather than taking a touch and giving it away: not at all at
+    5.5 or under, all the way from 9. Measured, a ball pulled back from the byline to a man 13 m out with nobody
+    near him, 10 each, hit first time (before → now): 0 → 9 at Off IQ 10, 0 → 0 at 5.5 and 1. Squared to him 22 m
+    out, nothing like a chance from there, Off IQ 10 takes a touch first.
+  - **The computer's passer** picks his pass a moment before he strikes it, so the game could tell the man it's for
+    where it's going early. It doesn't: that would be reading the passer's mind. He reads it from the strike.
+  - **Over whole matches** (16 six-minute computer-against-computer games on each, per 6 minutes, before → now):
+    crosses 6.9 → 8.6, headers on goal 1.6 → 1.7, shots 5.0 → 4.2, goals 1.8 → 2.2, and 87-88% of passes reach a
+    team-mate either way. The shots and goals are inside how much one batch of games differs from the next; a
+    first-time finish comes up about once a game.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
@@ -816,7 +848,8 @@ test, and like the Trap Lab the values are the game's settings.
     man with others round him, so he switches it when his side is shut, not every time he could: about
     one time in six his side's crowded like that, three or so times a side a match.
   - He gets the ball under control and looks up first (the decision-time dials say for how long, less
-    with a man on him), and plays it first time only when he's pressed or a ball's clearly on. Then he
+    with a man on him), and plays it first time only when he's pressed or a ball's clearly on (a good chance, to a
+    high Off IQ: see **Off IQ meets the ball**). Then he
     sticks with a choice for a moment rather than changing his mind every frame.
   - A side that's had the ball a while without getting forward starts to force it (sooner for a direct
     side, later for tiki-taka).

@@ -148,15 +148,16 @@ ok(watch.runner.share > 1.25 && watch.runner.face > 0.95, 'a runner played in be
 ok(watch.behind.watching && watch.behind.share < 1 && watch.behind.face < 0.2, 'one that comes to him from behind, he checks and turns to it (' + pc(watch.behind.share) + ' of his run, facing ' + watch.behind.face + ' his way)');
 ok(watch.cut.share > 1.25 && !watch.cut.watching, 'darting across to cut out their pass, he goes flat out for the spot (' + watch.cut.share + 'x his run)');
 ok(watch.expects && watch.expectsFace > 0.95 && !watch.theirs, 'you on the ball, a team-mate 8 m away looking to get it turns to face it before it\'s played (facing ' + watch.expectsFace + ' its way); one of theirs on it, he doesn\'t');
-// ...and in the match: a pass rolled to a computer team-mate with his back to it. Quick to read it (Off IQ 9), he's round
-// to it by the time it gets to him and takes it; slow (Off IQ 1), he isn't round yet (side-on, a harder touch)
+// ...and in the match: a firm pass to a computer team-mate with his back to it, at him in 0.4 s whether he goes to meet it
+// or lets it come. Quick to read it (Off IQ 9), he's round to it by the time it gets to him and takes it; slow (Off IQ
+// 1), he isn't round yet (side-on, a harder touch)
 const squareUp = iq => page.evaluate(iq => new Promise(res => {
   const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team); T.freeze();
   const p = T.players().find(q => q !== c && q.team === c.team), keep = p.stats;
   for(const q of T.players()) if(q !== p){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = q.team === c.team ? 90 : T.FH - 90; q.vx = q.vy = 0; q.state = 'normal'; }
   p.stats = Object.assign({}, keep, { offIQ: iq }); p.x = T.FW / 2; p.y = T.YC - 150; p.vx = p.vy = 0; p.noTouchT = 0; p.state = 'normal'; p.facing = { x: atk, y: 0 };
   const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.lastTouch = c.team; b.intendedRcv = p; b.rcvRunner = false; b.thru = null;
-  b.x = p.x - atk * 240; b.y = p.y; b.z = 0; b.vz = 0; b.vx = atk * 430; b.vy = 0;
+  b.passT = T.simNow(); b.x = p.x - atk * 220; b.y = p.y; b.z = 0; b.vz = 0; b.vx = atk * 600; b.vy = 0;   // (struck now)
   let cos = -1, near = false; const t0 = performance.now();
   (function tick(){
     const got = b.ownedBy === p || b.dribbler === p, lost = b.intendedRcv !== p && !got;

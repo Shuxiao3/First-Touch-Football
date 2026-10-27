@@ -2447,7 +2447,7 @@
   function passSwitch(q,first){
     if(!canSwitch()||!q||q.team!=='G') return;
     const hold=first&&(curIx||curIy)?{x:curIx,y:curIy}:null;
-    setControlled(q); recvAuto={q,until:simNow+3,wait:first?q.reactUntil:0,hold};
+    setControlled(q); recvAuto={q,until:simNow+3,wait:first?q.reactUntil:simNow+offReact(q),hold};   // (a beat to read it: Off IQ)
   }
   // where to meet the ball in flight: where it comes down, then the nearest point on its roll (not past where it stops)
   function meetPoint(p){
@@ -4609,7 +4609,8 @@
     if(recvAuto&&recvAuto.hold){ const h=recvAuto.hold;              // the stick still held the way a first-time pass went
       if((ix||iy)&&ix*h.x+iy*h.y>0.9){ ix=0; iy=0; } else recvAuto.hold=null; }
     if(recvAuto&&!ix&&!iy&&recvAuto.wait>simNow) return {ix:0,iy:0};   // (a beat to see it's his)
-    if(recvAuto&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
+    if(recvAuto&&!ix&&!iy){ const c=controlled, m0=meetPoint(c), mr=offMisread(c,Math.hypot(ball.x-c.x,ball.y-c.y)/Math.max(150,Math.hypot(ball.vx,ball.vy))),
+        m={x:m0.x+mr.x, y:m0.y+mr.y}, dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // (where he reads it going: Off IQ)
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
@@ -4951,6 +4952,7 @@
     return best;
   }
   function recordPassTeam(team,exclude){
+    ball.passT=simNow;                     // (when it was struck: a man it's for reads it from then -- offReading)
     // snapshot teammates who are in an offside position at the moment of the pass
     offsidePass={team, passer:exclude,
       flagged:players.filter(q=>q.team===team&&q!==exclude&&inOffsidePos(q))};
@@ -5431,6 +5433,50 @@
       rcv.reactUntil=simNow+oneTouchReactOf(rcv); passSwitch(rcv,true); }
   }
   // how long a man takes to see a first-time ball is his: 0.35 s at Off IQ 1 .. 0.15 s at 10
+  // OFF IQ, MEETING THE BALL: how a man a ball's played to reads it. He moves for it OFF_REACT after it's struck (0.4 s
+  // at Off IQ 1, 0.05 s at 10), and sees where it's going as well as his Off IQ lets him -- out by up to OFF_READ px at 1
+  // (none at 10), less the nearer it is to getting to him, so he corrects as it comes. A good one goes to meet it at the
+  // first point he can get to; a poor one waits for it to come to him (see aiBrain, crossMeet, and your man's run with
+  // the stick left alone).
+  const OFF_REACT=[0.4,0.05], OFF_READ=[62,0], RECV_Z=12;   // (RECV_Z: low enough to take -- see attemptCaptures)
+  function offIQf(p){ return clamp((statOf(p,'offIQ',P.offIQ.val)-1)/9,0,1); }
+  function offReact(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),OFF_REACT[0],OFF_REACT[1]); }
+  function offReading(p){ return simNow-(ball.passT==null?-9:ball.passT)>=offReact(p); }   // has he read it yet?
+  function offMisread(p,tArr,floor){                             // his read of where it'll be is out by this much
+    if(p.readK!==ball.passT){ p.readK=ball.passT; p.readA=Math.random()*6.2832; }
+    const f=floor||0, e=statLerp(statOf(p,'offIQ',P.offIQ.val),OFF_READ[0],OFF_READ[1])*(f+(1-f)*clamp(tArr,0,1));   // (floor: a high ball he never quite reads right)
+    return {x:Math.cos(p.readA)*e, y:Math.sin(p.readA)*e};
+  }
+  // A CROSS OF OURS: where a man of ours meets it, if he's one of the two of ours best placed to (by when each could get
+  // to it). Its flight is read at head height (18 px up to AIR_REACH, in or by their box). A good one (Off IQ 10) goes
+  // for the first point of it he can get to, and holds his run until it's time to go, to get there as it does, at pace;
+  // a poor one (1) goes where it'll come down, a step goal-side of it, at once -- and waits there; between, between.
+  // Misread by his Off IQ, and in the air he hardly corrects it: still 80% of it as it gets to him.
+  const crossCache={t:-1,team:null,F:null,top:null};
+  function crossMeetT(q,F){
+    const v=runSpeedOf(q)*0.72, wait=Math.max(0,offReact(q)-(simNow-(ball.passT==null?-9:ball.passT)));   // (side-on to it, watching it: see stepOutfield)
+    for(const f of F) if(Math.max(0,Math.hypot(f.x-q.x,f.y-q.y)-40)<=v*Math.max(0,f.t-wait-0.15)) return f.t;
+    return null;
+  }
+  function crossMeet(p){
+    if(crossCache.t!==simNow||crossCache.team!==p.team){
+      const atk=atkOf(p.team), gx=atk>0?FW:0, F=[];
+      for(let t=0.05;t<=2.0;t+=0.05){ const B=ballAt(t); if(B.z<=0) break;
+        if(B.z>18&&B.z<AIR_REACH&&Math.abs(B.x-gx)<BX+90&&Math.abs(B.y-YC)<BY+100) F.push({t,x:B.x,y:B.y}); }
+      const C=[]; if(F.length) for(const q of players){ if(q.team!==p.team||q===controlled||q.state!=='normal'||(q.role!=='ATT'&&q.role!=='MID')) continue;
+        const t=crossMeetT(q,F); if(t!==null) C.push({q,t}); }
+      C.sort((a,b)=>a.t-b.t);
+      crossCache.t=simNow; crossCache.team=p.team; crossCache.F=F; crossCache.top=C.slice(0,2).map(c=>c.q);
+    }
+    const F=crossCache.F; if(!F.length||!crossCache.top.includes(p)||!offReading(p)) return null;
+    const tE=crossMeetT(p,F); if(tE===null) return null;
+    let f=F[0]; for(const g of F) if(g.t===tE) f=g;                     // (the first point of it he can get to)
+    const tL=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L=ballAt(tL), atk=atkOf(p.team);   // (where it'll come down)
+    const iq=offIQf(p), tC=tL+(f.t-tL)*iq, mr=offMisread(p,tC,0.8);
+    const x=L.x+atk*36+(f.x-L.x-atk*36)*iq+mr.x, y=L.y+(f.y-L.y)*iq+mr.y;
+    const need=Math.max(0,Math.hypot(x-p.x,y-p.y)-30)/(runSpeedOf(p)*0.72)+0.15;
+    return {x,y,hold:need<tC-(0.12+(1-iq)*0.8)};
+  }
   function oneTouchReactOf(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),0.35,0.15); }
   // a pass asked for while the ball is still on its way to you: played first time the moment it gets there
   let oneTouch=null;
@@ -7322,6 +7368,11 @@
   // the pick: the best score, as he judges it (a lower Off IQ misjudges more), with a little loyalty to what he was
   // already doing (less with a man closing in); while he's still getting it under control, only a ball that's clearly
   // on goes first time
+  // A FIRST-TIME FINISH: a chance of FT_XG or better (a third), and a high Off IQ takes it first time rather than a touch
+  // first -- he knows the touch gives it away (a man gets back, the keeper sets) -- not at all below 5.5, all the way
+  // from 9
+  const FT_XG=0.3;
+  function ftFinishOf(p){ return clamp((statOf(p,'offIQ',P.offIQ.val)-5.5)/3.5,0,1); }
   function obChoose(p,ob,opts,looking,C){
     const iq=statOf(p,'offIQ',P.offIQ.val), sdA=statLerp(iq,0.0015,0.0002), sdR=statLerp(iq,0.12,0.02);
     let keep=-1e9; for(const o of opts) if(!o.rel&&o.ev>keep) keep=o.ev;
@@ -7332,7 +7383,8 @@
       if(looking && o.kind==='pass' && o.d>otMax) continue;               // first time, only a short ball (see firstTouchPass)
       let s=o.ev+obGauss()*(sdA+sdR*Math.abs(o.ev));
       if(ob.plan&&o.key===ob.plan.key) s+=(C.prD<150?0.5:1)*(0.0015+0.1*Math.abs(o.ev));   // (less so with a man coming)
-      if(looking&&o.rel) s-=firstTime;
+      if(looking&&o.rel){ const ft=o.kind==='shot'&&o.P>=FT_XG?ftFinishOf(p):0;
+        s-=firstTime*(1-ft); if(ft>0) s+=ft*Math.max(0,keep+0.02-s); }   // (a good chance: a high Off IQ hits it first time, over a touch)
       o.score=s;
       if(s>bs){ bs=s; best=o; }
     }
@@ -7871,35 +7923,31 @@
     if(p!==controlled && p===ball.intendedRcv && p.state==='normal' && p.noTouchT<=0 &&
        !ball.ownedBy && !gkHold && ball.shotT<=0 && ball.lastTouch===p.team && !ball.rcvRunner){
       const dB=dist(p,ball);
-      if(dB>56){
+      if(dB>56 && offReading(p)){                            // (till he's read it -- Off IQ -- he carries on as he was)
         const toMx=p.x-ball.x, toMy=p.y-ball.y, tl=Math.hypot(toMx,toMy)||1;
         const bspd=Math.hypot(ball.vx,ball.vy)||1;
         const vdot=(ball.vx*toMx+ball.vy*toMy)/(tl*bspd);     // >0 = ball is travelling toward me
         if(vdot>0.2){
-          // PREDICT where to go. An aerial ball -> the spot where it will LAND (constant horizontal
-          // pace in flight, gravity 520). A ground ball -> the earliest point along its decelerating
-          // path I can actually reach, solving my run speed against the ball's slowing pace.
-          const G=520;
-          const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G;
-          let tgx,tgy;
-          if(tLand>0.3){
-            tgx=ball.x+ball.vx*tLand; tgy=ball.y+ball.vy*tLand;          // go to the landing spot
-          } else {
-            const f=clamp(P.friction.val,0.001,0.999);
-            const lam=Math.max(1e-3,-3.2*Math.log(1-f));                 // ground velocity-decay rate, matches the sim
-            const sx=ball.vx/lam, sy=ball.vy/lam;                        // remaining travel until it stops
-            const rs=Math.max(40,runSpeedOf(p));
-            tgx=ball.x+sx; tgy=ball.y+sy;                                // default: where the ball comes to rest
-            for(let t=0.05;t<=1.6;t+=0.05){                              // earliest t I can be there as the ball arrives
-              const k=1-Math.exp(-lam*t);
-              const bx=ball.x+sx*k, by=ball.y+sy*k;
-              if(rs*t+12 >= Math.hypot(bx-p.x,by-p.y)){ tgx=bx; tgy=by; break; }
-            }
+          // PREDICT where to go, along the ball's path (ballAt: its flight, then slowing on the grass, its curl too), low
+          // enough to take (RECV_Z): the earliest point he can get to as it does, solving his run
+          // against its pace -- and the nearest it comes to where he is. A good one (Off IQ) goes to meet it at the
+          // first; a poor one lets it come to him, onto its line where he is (or, if it won't get to him, where it stops)
+          const rs=Math.max(40,runSpeedOf(p));
+          let ex=0, ey=0, et=0, nx=0, ny=0, nt=0, nd=1e9, found=false;
+          for(let i=1;i<=32;i++){
+            const t=i*0.05, b=ballAt(t), dd=Math.hypot(b.x-p.x,b.y-p.y);
+            if(b.z>=RECV_Z) continue;
+            if(!found && rs*t+12 >= dd){ ex=b.x; ey=b.y; et=t; found=true; }   // the earliest he can be there as the ball is
+            if(dd<nd){ nd=dd; nx=b.x; ny=b.y; nt=t; }                    // ...and the nearest it passes to where he is
           }
+          if(nd===1e9){ const b=ballAt(1.6); nx=b.x; ny=b.y; nt=1.6; }     // (up the whole way: where it is by then)
+          if(!found){ ex=nx; ey=ny; et=nt; }
+          const iq=offIQf(p); let tgx=nx+(ex-nx)*iq, tgy=ny+(ey-ny)*iq; const tArr=nt+(et-nt)*iq;
+          { const mr=offMisread(p,tArr); tgx+=mr.x; tgy+=mr.y; }           // (as well as he reads it)
           tgx=clamp(tgx,20,FW-20); tgy=clamp(tgy,20,FH-20);
           let oppD=1e9; for(const o of players)if(o.team!==p.team){const dd=Math.hypot(tgx-o.x,tgy-o.y);if(dd<oppD)oppD=dd;}
           p.sprint=(oppD < Math.hypot(tgx-p.x,tgy-p.y)+40) && p.stamina>0.1;  // a defender could get there first -> sprint
-          p.runTarget=null;
+          p.runTarget=null; p.goingForBall=true;                     // (and he gets there a beat sooner: the Off IQ burst)
           p.dbgTag='RECEIVE';
           return steer(p, tgx, tgy, 1.0);
         }
@@ -7908,36 +7956,28 @@
     const anchor=anchorOf(p);
     let tx=anchor.x,ty=anchor.y;
 
-    // --- ATTACK A LIVE CROSS: a teammate has whipped one in -> go meet it in the box ---
+    // --- ATTACK A LIVE CROSS: a teammate has whipped one in -> the two of us best placed go and meet it (crossMeet:
+    // where, as each reads it with his Off IQ, and when to go), and whoever's at it at head height heads it ---
     if(ball.crossT>0 && ball.crossBy===p.team && !ball.ownedBy && p!==controlled &&
        (p.role==='ATT'||p.role==='MID')){
-      // where will the cross come down? project its flight under gravity.
-      const G=520;
-      const tLand = (ball.vz + Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G;
-      const LA = ballAt(tLand);                             // (its curl too)
-      const lx = LA.x + p.iqLeadX;                          // Off IQ mis-read of where the cross lands
-      const ly = LA.y + p.iqLeadY;
-      const inBoxLand = (atk>0 ? lx>FW-BX-80 : lx<BX+80) && Math.abs(ly-YC)<BY+60;
-      // only the closest attacker(s) to the landing spot commit, so they don't all stack
-      if(inBoxLand && dist(p,{x:lx,y:ly})<360){
-        // wait/attack from a touch CLOSER to goal than the raw landing spot (poacher's position)
-        tx=lx+atk*36+p.iqJitX; ty=ly+p.iqJitY;
-        // head it when the BALL is on us at a natural heading height (not at full stretch up high).
-        // a small jump only if it's a bit higher; never head a ball that's still way up.
-        // Only head it ON GOAL when actually in/around the box. Without this, a player standing under
-        // a high ball's flight path heads it goalward from midfield before it ever reaches the box.
-        const pNearBox = Math.abs(p.x-goalX) < BX+90 && Math.abs(p.y-YC) < BY+100;
+      // head it when the BALL is on us at a natural heading height (not at full stretch up high): a small jump only if
+      // it's a bit higher; only ON GOAL when actually in/around the box (not from midfield, under a high ball's flight)
+      const pNearBox = Math.abs(p.x-goalX) < BX+90 && Math.abs(p.y-YC) < BY+100;
+      if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH && !keeperOnIt()){
         p.aerialT=simNow;                          // (going up for it: a man of theirs at it has a duel on his hands)
-        if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH && !keeperOnIt()){
-          if(ball.z>30) { p.vz=headJumpVz(p); p.z=0.1; }     // a leap for the higher ones
-          // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
-          // header on goal, the same as yours
-          const contester=aerialRival(p);
-          if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()) headClear(contester);   // (a curling one's harder to clear)
-          else headOnGoal(p);
-        }
+        if(ball.z>30) { p.vz=headJumpVz(p); p.z=0.1; }     // a leap for the higher ones
+        // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
+        // header on goal, the same as yours
+        const contester=aerialRival(p);
+        if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()) headClear(contester);   // (a curling one's harder to clear)
+        else headOnGoal(p);
+      }
+      const H=crossMeet(p);
+      if(H){
+        p.aerialT=simNow; p.goingForBall=true; p.dbgTag=H.hold?'CROSS-HOLD':'CROSS-GO';
+        if(H.hold){ p.sprint=false; return steer(p,p.x,p.y,0.2); }   // (timing his run: not yet)
         p.sprint = p.stamina>0.1; p.dash=true;
-        return steer(p,tx,ty,1.0);
+        return steer(p,H.x,H.y,1.0);
       }
     }
 
@@ -8553,7 +8593,9 @@
         if(bestMate===p) iAmReceiver=true;
       }
       if(mine && p===ball.intendedRcv) iAmReceiver=true;             // it's played to me: it's mine to go and meet
-      const byBall=rankByDist(teamOf(p.team),ball), rank=mine ? 0 : byBall.indexOf(p);
+      const unread = p===ball.intendedRcv && !offReading(p);         // ...once I've read it (Off IQ): till then I carry on as I was
+      if(unread) iAmReceiver=false;
+      const byBall=rankByDist(teamOf(p.team),ball), rank=unread ? 99 : mine ? 0 : byBall.indexOf(p);
       const dangerDeep = atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66;   // loose ball deep in OUR defensive third
       // a second man goes for their loose ball deep in our third -- but not my centre-back partner's ball: then I
       // cover goal-side of it (unless it's you, the human, nearest: you might not go)

@@ -134,9 +134,11 @@ ok(tk.length >= 4 && tk.every(a => a <= 62), 'a strong man standing with it is o
 // HOLD-UP PLAY: the computer's centre-forward is keener to hold it up the stronger he is (1.6 times at 9, as keen as
 // ever at 5.5), and with his back to goal and one of ours on his back he keeps it -- laid off, played or still his
 // after 5 s -- at 9 against 4; at 4 against 9 he loses it more
-const keen = await page.evaluate(() => { const T = window.__T, st = T.players().find(q => q.team === 'R' && q.role === 'ATT'), keep = st.stats, out = {};
+const keen = await page.evaluate(() => { const T = window.__T, R = T.players().filter(q => q.team === 'R'), out = {};
+  const st = R.find(q => q.slotAtk && q.slotAtk.pos === 'ST') || R.find(q => q.role === 'ATT'), keep = st.stats, slot = st.slotAtk;
+  st.slotAtk = Object.assign({}, slot, { pos: 'ST' });   // (the centre-forward, whatever the shape)
   for(const s of [5.5, 9]){ st.stats = Object.assign({}, keep, { strength: s }); out[s] = T.obMods(st).hold; }
-  st.stats = keep; return out; });
+  st.stats = keep; st.slotAtk = slot; return out; });
 info('keenness to hold it up (his position and style aside): ' + JSON.stringify(keen));
 ok(Math.abs(keen[9] / keen[5.5] - 1.6) < 0.01, 'a centre-forward of Strength 9 is 1.6 times as keen to hold it up as one of 5.5');
 
