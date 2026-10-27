@@ -492,6 +492,24 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Holding it up.** The computer's centre-forward is keener to hold it up the stronger he is: no keener at
     Strength 5.5, up to 1.6 times at 9 and over. How sure he is of keeping it under pressure leans on Strength more
     too.
+- **Curve is one stat.** It was Shot curve. Now it's Curve, and it bends crosses, through balls and long passes as
+  well as shots (a shot's curl is as it was).
+  - **Crosses swing.** Facing the byline it's an outswinger, bending away from goal; facing back toward his own
+    goal, an inswinger, bending in toward it; side-on, whichever brings it onto the run of the man it's for (him
+    standing, away from the nearest of theirs to where it's going). It's aimed with the swing in, so it still comes
+    down on the spot: a 25 m cross at Curve 10 bows about 1.9 m off the straight line and comes down within 0.5 m of
+    the spot (Crossing 10); at Curve 1 it hardly bends. Crosses no longer lose pace skimming the grass as they're
+    struck, so they get there on time and at head height (they used to arrive a tenth of a second late, nearly on
+    the grass).
+  - **Everyone reads the swing:** the keeper coming for it, and the men attacking it and defending it. It's still
+    harder to deal with. A defender's chance in a heading duel drops by up to 10 points at Curve 10, his headed
+    clearance goes a fifth less far and twice as wild, and the keeper's reach for it is 15% shorter.
+  - **Passes bend only when it helps.** A through ball, or a long pass (along the grass over 24 m, your lofted ball
+    over 20 m), to a man running across its line bends into his path, so it comes to him going his way. At Curve 10
+    a through ball gets to him turned 17° his way; at Curve 1, 1°. One with a man of theirs on its line bends away
+    from him, but along the grass over a short ball that isn't far: 0.4 m round a man 0.6 m off its line at Curve
+    10. That beats a man at the edge of his reach, not one stood on the line. To a man running along its line it
+    goes straight. Yours bend the same way as the computer's.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at

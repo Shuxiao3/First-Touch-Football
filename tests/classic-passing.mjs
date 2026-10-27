@@ -73,7 +73,8 @@ ok(ease[0] > 0 && ease[1] < ease[0] && ease[2] < ease[1] && ease[3] < ease[0] * 
 // struck a hundred times each, a Passing 1 man's pace spreads two or three times as wide as a 10's.
 const tb = await page.evaluate(() => { const T = window.__T, c = T.controlled(), mates = T.players().filter(q => q.team === c.team && q !== c), q = mates[0], b = T.ball(), keep = c.stats.passAcc, out = {};
   T.freeze(); const ox = c.x, oy = c.y;
-  const hit = (d, tA, acc) => { c.stats.passAcc = acc; c.x = ox; c.y = oy; q.x = ox + 300; q.y = oy; b.ownedBy = c; b.x = c.x + 20; b.y = c.y; b.z = 0;
+  const hit = (d, tA, acc) => { c.stats.passAcc = acc; c.x = ox; c.y = oy; q.x = ox + 300; q.y = oy; q.vx = q.vy = 0; b.ownedBy = c;   // (him standing: nothing to bend it into)
+    b.x = c.x + 20; b.y = c.y; b.z = 0;
     T.obThruBall(c, q, b.x + d, b.y, tA); const sp = Math.hypot(b.vx, b.vy); b.vx = b.vy = 0; return { sp, vz: b.vz }; };
   out.cap = T.P.thruPace.val; out.need = Math.round(T.obThruV0(600, 0.45).v0);
   const R = Math.random; Math.random = () => 0.5; try { out.long = hit(600, 0.45, 9); out.short = hit(220, 0.8, 9); } finally { Math.random = R; }

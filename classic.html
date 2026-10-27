@@ -1490,7 +1490,7 @@
     interceptions:{val:5.5,min:1,max:10,step:0.1,label:'Interceptions (stat 1–10)',hint:'Reading & cutting out passes as a 1–10 stat, driving both reach and how dead the ball is cushioned. 1 = reach 0.1 / damping 0.1 (short reach, the ball ricochets off); 10 = reach 1.0 / damping 0.8 (long reach, cushions the cut-out pass nearly dead at the feet). Only affects cutting out the OPPONENT\'s passes.'},
     passAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Passing (stat 1–10)',hint:'Passing precision as a 1–10 stat. 1 = short accuracy 0.92 + long accuracy 0.20 (long balls spray badly); 10 = short 0.97 + long 0.90 (pinpoint at any range). Baseline for all players.'},
     crossing:{val:5.5,min:1,max:10,step:0.1,label:'Crossing (stat 1–10)',hint:'Accuracy of balls whipped into the box (pace auto-set to reach the target; loft is fixed at 1.6). 1 = sprays wide (~0.2 accuracy); 10 = tight and true (~0.9).'},
-    curve:     {val:5.5, min:1,   max:10,  step:0.1, label:'Shot curve (stat 1–10)',hint:'How hard a shot bends, as a 1–10 stat. 1 = 0.05, 10 = 0.3. Hold K + Up (left) or K + Down (right) after striking.'},
+    curve:     {val:5.5, min:1,   max:10,  step:0.1, label:'Curve (stat 1–10)',hint:'How much a ball bends, as a 1–10 stat: a shot (1 = 0.05, 10 = 0.3; hold K + Up (left) or K + Down (right) after striking), a cross, a through ball or a long pass.'},
     shotPower: {val:5.5, min:1,   max:10,  step:0.1, label:'Shot power (stat 1–10)',hint:'Shot pace as a 1–10 stat. 1 = 600, 10 = 900, on a full-charge strike at goal.'},
     shotAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Shot accuracy (stat 1–10)',hint:'How true a shot flies, as a 1–10 stat. 1 = 0.1, 10 = 0.9. High = on target; low = sprays, especially at power.'},
     longShots: {val:5.5, min:1,   max:10,  step:0.1, label:'Long shots (stat 1–10)',hint:'How well shots hold up from distance, as a 1–10 stat. 1 = 0.1, 10 = 0.6. Low = long shots lose pace and spray; high = they hold up. Scales with true distance to the goal centre, so wide shots are penalised more. No effect inside the box.'},
@@ -1957,7 +1957,7 @@
   const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
   const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution'];
   const ALL_STAT_KEYS=[...OUT_KEYS,...GK_KEYS];
-  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Passing',composure:'Composure',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Shot curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution'};
+  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Passing',composure:'Composure',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution'};
   const ARCH={
     GK:{keeperSpd:6.5,gkReflex:7,gkReach:7,gkDiveRange:7,gkDistribution:6.5,speed:5,acceleration:5,agility:5.5,stamina:6,strength:6,ballControl:5,dribbling:3.5,passAcc:5.5,composure:6.5,crossing:3,heading:5,slideTackle:3,tackle:4,interceptions:5,offIQ:5,defIQ:5.5,shotPower:4,curve:3,longShots:3,shotAcc:3},
     DEF:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,speed:6,acceleration:6,agility:5.5,stamina:6.5,strength:7,ballControl:5.5,dribbling:4.5,passAcc:6,composure:6,crossing:4.5,heading:7,slideTackle:7,tackle:7.5,interceptions:7.5,offIQ:5,defIQ:7.5,shotPower:4.5,curve:4,longShots:4,shotAcc:4.5},
@@ -4835,8 +4835,8 @@
     const frPerSec=Math.pow(1-P.friction.val,3.2);
     const avgKeep=Math.max(0.35,(1+frPerSec*T)/(1+T));
     let gndSpeed=clamp((d/T)/avgKeep,120,520);
-    ball.vx=ax*gndSpeed; ball.vy=ay*gndSpeed;
     ball.vz=clamp(G*T*0.5*crossLoftOf(p),120,460);
+    { const Ta=2*ball.vz/G, bend=crossBendOf(p); curlFlight(ax,ay,gndSpeed*takeoffKeep(ball.vz),Ta,bend,crossSwing(p,ax,ay,target.x,target.y,mate),ball.vz); ball.crossCurl=bend; }   // (swinging, while it's up)
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     recordPassTeam(p.team,p); passPose(p);
   }
@@ -5022,8 +5022,7 @@
     // (1.1 s). Either way it comes down through head height where the man is going, as the computer's cross does (see
     // aiCross) -- so he can meet it
     const G=520, T=clamp(Math.max(0.55+0.55*c, d/650), 0.55, 1.3), zH=PLAYER_H*1.15;
-    ball.vx=ax*d/T; ball.vy=ay*d/T;
-    ball.vz=(zH+G*0.5*T*T)/T;
+    curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,target.x,target.y,best);   // (swinging: crossSwing)
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.crossBy=p.team;ball.crossT=1.6;           // live cross -> forwards attack it
     recordPassTeam(p.team,p); passPose(p);
@@ -5157,8 +5156,7 @@
     // aiBrain) -- having been in the air (no drag) all the way: a 25 m cross peaks 4-5 m up. (The cross loft that
     // floats yours to a man who jumps for it would still be 5 m up over the spot, and come down well beyond it.)
     const G=520, T=clamp(0.7+0.0008*d, 0.6, 1.2), zH=PLAYER_H*1.15;
-    ball.vx=ax*d/T; ball.vy=ay*d/T;
-    ball.vz=(zH+G*0.5*T*T)/T;
+    curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,target.x,target.y,cs&&cs.who);   // (swinging: crossSwing)
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.crossBy=p.team;ball.crossT=1.6;
     recordPassTeam(p.team,p); passPose(p);
@@ -5259,9 +5257,9 @@
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       if(o.loft){
         // LOFTED: up over everyone and down at their feet -- no drag in the air, so it lands d away after T
-        const T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, vh=loftVh(d,T);
-        ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T;
-        ball.lob={x:ax,y:ay};                        // it checks up where it lands (see the bounce)
+        const T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, vh=loftVh(d,T), cu=d>=500?passCurl(p,best,lead.x,lead.y,true):null;   // (a long one bent into his path, if it helps)
+        ball.vz=260*T;
+        if(cu) ball.lob=curlFlight(ax,ay,d/T,T,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }   // it checks up where it lands (see the bounce)
         ball.intendedRcv=best; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // the receiver goes to where it drops
       } else {
         const sol=passSolve(d);
@@ -5300,13 +5298,15 @@
     const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
     let tA;
+    const cu=passCurl(p,mate,L.x,L.y,!!loft);                  // (bent, if it helps)
     if(loft){
       tA=clamp(tRun,0.7,1.5)*P.loftHang.val;
       const vh=loftVh(d,tA);
-      ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*tA; ball.lob={x:ax,y:ay};
+      ball.vz=260*tA; if(cu) ball.lob=curlFlight(ax,ay,d/tA,tA,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }
     } else {
       const sol=passSolve(d);                                  // CLASSIC: hit like any pass, just into the space ahead of him
-      ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; ball.vz=sol.vz;
+      if(cu) curlGround(ax,ay,d,sol.vh,sol.vz,cu.bend,cu.side,1800); else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; }
+      ball.vz=sol.vz;
       tA=d/sol.vh;
     }
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
@@ -5508,12 +5508,12 @@
   // A HEADER CLEAR: up and away from his own goal, out to the side it came from -- or, the better he reads the game (Def
   // IQ), further and more surely to a team-mate up the pitch
   function headClear(p){
-    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1);
+    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), cq=crossCurlQ();   // (a curling cross: up to a fifth less far, twice as wild)
     let dx=atkOf(p.team), dy=(ball.y>=YC?1:-1)*0.6; const l=Math.hypot(dx,dy); dx/=l; dy/=l;
-    const sp=(headPowerOf(p)*0.8+120)*(0.9+0.25*iq);
-    const tg=Math.random()<0.15+0.6*iq ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77) : null;   // (in the air ~0.77 s)
+    const sp=(headPowerOf(p)*0.8+120)*(0.9+0.25*iq)*(1-0.2*cq);
+    const tg=Math.random()<(0.15+0.6*iq)*(1-0.5*cq) ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77) : null;   // (in the air ~0.77 s)
     if(tg){ dx=(tg.x-p.x)/tg.d; dy=(tg.y-p.y)/tg.d; }
-    const err=(0.04+0.12*(1-iq))*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
+    const err=(0.04+0.12*(1-iq))*(1+cq)*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
     ball.vx=(dx*ca-dy*sa)*sp; ball.vy=(dx*sa+dy*ca)*sp; ball.vz=200;
     ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=p.team; ball.crossT=0; ball.crossBy=null; ball.shotBy=null; ball.shotT=0;
     endCurve(); recordPassTeam(p.team,p);
@@ -5547,7 +5547,7 @@
       // AERIAL DUEL (winning-rate = STRENGTH): if an opponent is challenging for the same ball,
       // strength tilts who wins it — but never a guaranteed win for the stronger man.
       const contester=aerialRival(p);
-      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))){
+      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()){   // (a curling cross is harder for him to clear)
         headClear(contester);                            // lost the header: he heads it away
         lastGrade='OUTJUMPED';gradeColor='#ff5a4d';gradeFade=1.0; return;
       }
@@ -5575,7 +5575,7 @@
       // for the same ball, our defensive heading prowess decides if we get the clearance.
       let contester=null,cd=1e9;
       for(const o of players){ if(o.team===p.team||o.z<=6)continue; const dd=dist(o,ball); if(dd<58&&dd<cd){cd=dd;contester=o;} } // only an airborne opponent contests
-      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))){
+      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))-CURL_HEAD*crossCurlQ()){   // (a curling cross is harder to clear)
         // beaten in the air: attacker gets the flick on, ball drops dangerously
         let ax=contester.facing.x, ay=contester.facing.y;
         let al=Math.hypot(ax,ay);
@@ -5647,7 +5647,7 @@
     return statOf(p,'curve',P.curve.val) >= 3.5 ? 1 : 0;
   }
   function shotPowerOf(p){ return statLerp(statOf(p,'shotPower',P.shotPower.val), 600, 900); }   // shot power stat -> px/s
-  function curveOf(p){ return statLerp(statOf(p,'curve',P.curve.val), 0.05, 0.3); }           // shot curve stat -> bend strength
+  function curveOf(p){ return statLerp(statOf(p,'curve',P.curve.val), 0.05, 0.3); }           // Curve stat -> a shot's bend strength (crosses, passes: CROSS_BEND, PASS_BEND)
   function longShotsOf(p){ return statLerp(statOf(p,'longShots',P.longShots.val), 0.1, 0.6); }     // long-shots stat -> distance hold-up
   // Angle (radians) the goal mouth subtends at p's position. Bigger = more open net.
   // Naturally folds in BOTH distance (farther = smaller) and lateral position (wider = smaller),
@@ -5769,17 +5769,20 @@
   // Which way (radians, signed) a curling ball's line has swung by the time it has run `range`: fly it
   // as the physics step does (gravity and bounces, drag only near the grass -- a live shot's light drag
   // for its first 1.1 s), the curl turning its heading at force/speed rad/s exactly as applyAICurve does.
-  function curlSwing(sp,vz,range,force,spinT,side){
-    let x=0,y=0,z=0,h=0,t=0; const dt=1/120;
+  function curlSwing(sp,vz,range,force,spinT,side){ return curlPath(sp,vz,range,force,spinT,side,1.1).swing; }
+  // ...and the rest of it: which way it's going by then (h, the same way), when (t), how far it went to get there
+  // (len), and whether it got there at all. light: how long it has a live shot's lighter drag (a pass: none)
+  function curlPath(sp,vz,range,force,spinT,side,light){
+    let x=0,y=0,z=0,h=0,t=0,len=0; const dt=1/120;
     const frShot=Math.pow(1-P.friction.val*0.3,dt*3.2), fr=Math.pow(1-P.friction.val,dt*3.2);
     while(t<3 && x*x+y*y<range*range && sp>40){
       if(t<spinT) h-=side*force*dt/sp;
       if(z>0||vz!==0){ vz-=520*dt; z+=vz*dt; if(z<=0){ z=0; vz=vz<-40?-vz*0.45:0; } }
-      x+=Math.cos(h)*sp*dt; y+=Math.sin(h)*sp*dt;
-      if(z<12) sp*=(t<1.1?frShot:fr);
+      x+=Math.cos(h)*sp*dt; y+=Math.sin(h)*sp*dt; len+=sp*dt;
+      if(z<12) sp*=(t<light?frShot:fr);
       t+=dt;
     }
-    return Math.atan2(y,x);
+    return {swing:Math.atan2(y,x), h, t, len, reached:x*x+y*y>=range*range};
   }
   // autonomous in-flight curve for AI shots and swiped shots (mirrors applyCurve's force model)
   function applyAICurve(dt){
@@ -5793,6 +5796,79 @@
     ball.vx+=nx*force*dt;ball.vy+=ny*force*dt;
     const ns=Math.hypot(ball.vx,ball.vy)||1;
     ball.vx=ball.vx/ns*sp;ball.vy=ball.vy/ns*sp;
+  }
+  // ===== CURVE ON CROSSES AND PASSES (the Curve stat, as on a shot) =====
+  // A ball struck with curl turns at a steady rate across its line (applyAICurve: CURL_F*curveK px/s^2). In the air
+  // nothing slows it, so it flies a circular arc: set off half its turn the other way, a touch quicker (the arc is
+  // longer than the line), it still comes down where it was meant to (curlFlight). Along the grass it slows and turns
+  // the harder, so it's aimed by flying it first, as a swiped shot's curl is (curlGround). How much: a cross turns by
+  // CROSS_BEND over its flight (Curve 1 .. 10); a pass by what it needs, up to PASS_BEND.
+  const CURL_F=1700*0.85, CROSS_BEND=[0.08,0.6], PASS_BEND=[0.06,0.7];
+  function crossBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),CROSS_BEND[0],CROSS_BEND[1]); }
+  function passBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),PASS_BEND[0],PASS_BEND[1]); }
+  // a ball to fly at v (on a straight line) in the air for T along (cx,cy), bent by `bend` swinging `side` (+1/-1, as
+  // applyAICurve takes it); struck from the grass lifted at vz, it's struck harder by what the grass takes off it on the
+  // way up (takeoffKeep). Returns the way it comes down.
+  function takeoffKeep(vz){ return vz>0 ? Math.exp(3.2*Math.log(1-clamp(P.friction.val,0.001,0.999))*12/vz) : 1; }   // (the grass drags at it until it's 12 px up)
+  function curlFlight(cx,cy,v,T,bend,side,vz){
+    const h=bend/2, a=side*h, ca=Math.cos(a), sa=Math.sin(a), vc=v*(h>1e-4?h/Math.sin(h):1), vl=vc/takeoffKeep(vz);
+    ball.vx=(cx*ca-cy*sa)*vl; ball.vy=(cx*sa+cy*ca)*vl;
+    ball.curveSpin=side; ball.curveSpinT=T; ball.curveK=bend*vc/T/CURL_F;
+    return {x:cx*ca+cy*sa, y:cy*ca-cx*sa};
+  }
+  // a ball along the grass (or not much off it: vz) struck at sp along (dx,dy) to go d, bent by `bend` swinging
+  // `side`: spun just hard enough that it comes in turned half the bend off its line, as an arc would, set off as far
+  // the other way as the curl will swing it back, and struck that much harder for the longer way round (so it gets
+  // there when it would have, no harder than max)
+  function curlGround(dx,dy,d,sp,vz,bend,side,max){
+    const solve=v=>{ let lo=0, hi=3000;
+      for(let i=0;i<14;i++){ const F=(lo+hi)/2, r=curlPath(v,vz,d,F,9,side,0); if(!r.reached||side*(r.swing-r.h)>bend/2) hi=F; else lo=F; }
+      return {F:lo, r:curlPath(v,vz,d,lo,9,side,0)}; };
+    let S=solve(sp);
+    if(S.r.reached){ const v2=Math.min(max||9e9, sp*S.r.len/d); if(v2>sp*1.005){ sp=v2; S=solve(sp); } }
+    if(!S.r.reached||S.F<1){ ball.vx=dx*sp; ball.vy=dy*sp; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; return; }   // (it won't get there anyway, or won't bend: straight)
+    const pre=-S.r.swing, c=Math.cos(pre), sn=Math.sin(pre);
+    ball.vx=(dx*c-dy*sn)*sp; ball.vy=(dx*sn+dy*c)*sp;
+    ball.curveSpin=side; ball.curveSpinT=S.r.t+0.05; ball.curveK=S.F/CURL_F;
+  }
+  // WHICH WAY A CROSS SWINGS: facing the byline, an outswinger (bending away from goal); facing back toward his own
+  // goal, an inswinger (bending in toward it); side-on, whichever brings it onto the run of the man it's for (him
+  // standing, or nobody: away from the nearest of theirs to where it's going)
+  function crossSwing(p,cx,cy,tx,ty,man){
+    const atk=atkOf(p.team), f=p.facing||{x:atk,y:0}, fa=f.x*atk, inSw=Math.sign(cy*atk)||1;
+    if(fa>0.5) return -inSw;
+    if(fa<-0.5) return inSw;
+    let rx=0, ry=0;
+    if(man&&Math.hypot(man.vx,man.vy)>60){ rx=man.vx; ry=man.vy; }
+    else { let o=null, od=1e9; for(const q of players) if(q.team!==p.team){ const dd=Math.hypot(q.x-tx,q.y-ty); if(dd<od){ od=dd; o=q; } }
+      if(o){ rx=tx-o.x; ry=ty-o.y; } }
+    return Math.sign(cy*rx-cx*ry)||inSw;
+  }
+  // a cross, swinging: off along (ax,ay), d to its spot in the air in T (lifted at vz), for `man`
+  function curlCross(p,ax,ay,d,T,vz,tx,ty,man){
+    const bend=crossBendOf(p); curlFlight(ax,ay,d/T,T,bend,crossSwing(p,ax,ay,tx,ty,man),vz); ball.vz=vz; ball.crossCurl=bend;
+  }
+  // how much a live cross is curling, 0 (none) .. 1 (Curve 10): it's that much harder to head clear (CURL_HEAD off the
+  // defender's chance in a duel; a weaker, wilder clearance) and to claim (CURL_CLAIM off the keeper's reach)
+  const CURL_HEAD=0.10, CURL_CLAIM=0.15;
+  function crossCurlQ(){ return ball.crossT>0 ? clamp((ball.crossCurl||0)/CROSS_BEND[1],0,1) : 0; }
+  // A PASS THAT BENDS (a through ball, a long pass): only when it helps. One of theirs in its way along the grass, it
+  // bends round him (bulging away from him, as far as takes it 2 m wide of him); the man it's for running across its
+  // line, it bends into his path, so it comes to him going his way. As much as that takes, up to PASS_BEND at the
+  // passer's Curve. In the air (air), nobody's in its way.
+  function passCurl(p,q,tx,ty,air){
+    const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy); if(d<200) return null;
+    const cx=dx/d, cy=dy/d, max=passBendOf(p);
+    if(!air){ let lane=null, s0=0, off0=0;
+      for(const o of players){ if(o.team===p.team) continue;
+        const ox=o.x-ball.x, oy=o.y-ball.y, s=ox*cx+oy*cy, off=oy*cx-ox*cy;           // along its line; across it (+: to its left)
+        if(s<70||s>d-50||Math.abs(off)>40) continue;
+        if(!lane||s<s0){ lane=o; s0=s; off0=off; } }
+      if(lane) return {bend:Math.min(max,Math.max(0.1,2*d*(50-Math.abs(off0))/(s0*(d-s0)))), side:off0>0?-1:1, why:'round'}; }
+    const mv=Math.hypot(q.vx,q.vy); if(mv<90) return null;
+    const ang=Math.atan2(cx*q.vy-cy*q.vx, cx*q.vx+cy*q.vy);                              // his run, against its line
+    if(Math.abs(ang)<0.12||Math.abs(ang)>2.0) return null;                              // (along it already, or coming back to it)
+    return {bend:Math.min(max,2*Math.abs(ang)), side:ang>0?-1:1, why:'path'};
   }
   // Cosmetic: a short timer the sprites read to play the side-foot strike in the pass's direction.
   const PASS_POSE_T=0.36;
@@ -5863,7 +5939,8 @@
     // POWER solved so it ARRIVES at the receiver: chipped over a man in the way, otherwise the normal flight to his feet
     const chipTgt=chipOverWindow(p, lead.x, lead.y);
     const sol=chipTgt ? chipSolve(d,(chipTgt.x-ball.x)*dx+(chipTgt.y-ball.y)*dy) : passSolve(d);
-    ball.vx=ax*sol.vh;ball.vy=ay*sol.vh;
+    const cu=(!chipTgt&&!loft&&(running||d>=600)) ? passCurl(p,mate,lead.x,lead.y,false) : null;   // (a ball in behind or a long one: bent, if it helps)
+    if(cu) curlGround(ax,ay,d,sol.vh,sol.vz,cu.bend,cu.side,1800); else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; }
     ball.vz=sol.vz+loft;
     ball.ownedBy=null;p.noTouchT=0.3;
     ball.lastTouch=p.team;
@@ -6247,11 +6324,21 @@
   // don't swap jobs every time it's knocked about in the centre)
   const sideMem={G:1,R:1};
   function ballSideFor(team){ if(ball.y<YC-110) sideMem[team]=-1; else if(ball.y>YC+110) sideMem[team]=1; return sideMem[team]; }
-  // THE BALL'S PATH: where it will be t s on -- at its own pace through the air until it comes down, then slowing on the grass
+  // THE BALL'S PATH: where it will be t s on -- at its own pace through the air until it comes down, then slowing on the grass;
+  // with curl on it (a shot, a cross, a bent pass: applyAICurve), turning as it goes, stepped as the physics steps it
+  // (so the keeper coming for a cross, and the men attacking and defending it, read its swing)
   function ballAt(t){
     const G=520, lam=Math.max(1e-3,-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)));
     const tAir=(ball.z>12||ball.vz>0) ? (ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G : 0;
-    if(t<=tAir) return {x:ball.x+ball.vx*t, y:ball.y+ball.vy*t, z:Math.max(0,ball.z+ball.vz*t-G*t*t/2)};
+    const z=t<=tAir ? Math.max(0,ball.z+ball.vz*t-G*t*t/2) : 0;
+    if(ball.curveSpinT>0 && ball.curveSpin && !ball.ownedBy){
+      const F=CURL_F*(ball.curveK||curveOf()), st=1/60; let x=ball.x, y=ball.y, vx=ball.vx, vy=ball.vy, u=0;
+      while(u<t-1e-9){ const h=Math.min(st,t-u);
+        if(u<ball.curveSpinT){ const sp=Math.hypot(vx,vy)||1, a=-ball.curveSpin*F/sp*h, c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; }
+        x+=vx*h; y+=vy*h; if(u>=tAir){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
+      return {x, y, z};
+    }
+    if(t<=tAir) return {x:ball.x+ball.vx*t, y:ball.y+ball.vy*t, z};
     const k=tAir+(1-Math.exp(-lam*(t-tAir)))/lam;
     return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z:0};
   }
@@ -6949,7 +7036,8 @@
   function obLobBall(p,q,tx,ty){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const aerr=passSpray(d,p)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, T=obLobT(d), vh=loftVh(d,T);
-    ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=260*T; ball.lob={x:ax,y:ay};
+    const cu=passCurl(p,q,tx,ty,true);                                   // (bent into his path, if that helps)
+    ball.vz=260*T; if(cu) ball.lob=curlFlight(ax,ay,d/T,T,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // he goes to where it drops
     if(meIs(p)) meBump('passes');
@@ -6967,7 +7055,9 @@
     let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
     const v0=obThruV0(d,tA).v0*(1+obGauss()*statLerp(statOf(p,'passAcc',P.passAcc.val),0.14,0.05));   // (over- or under-hit: 14% at Passing 1, 5% at 10)
-    ball.vx=(dx*ca-dy*sa)*v0; ball.vy=(dx*sa+dy*ca)*v0; ball.vz=0;
+    const cu=passCurl(p,q,tx,ty,false), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;   // (bent, if it helps)
+    if(cu) curlGround(ax,ay,d,v0,0,cu.bend,cu.side,Math.max(v0,P.thruPace.val)); else { ball.vx=ax*v0; ball.vy=ay*v0; }
+    ball.vz=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
     ball.thru={x:tx,y:ty,until:simNow+Math.max(tA,obThruFlight(d,tA)[7].t)+1.5};   // he runs onto it (see aiBrain)
@@ -7743,7 +7833,7 @@
     // goes to meet it, goal-side of it, and heads it away (a duel, Heading against Heading, if one of theirs goes up
     // with him; lose it and it's his header)
     if(p!==controlled && ball.crossT>0 && ball.crossBy && ball.crossBy!==p.team && !ball.ownedBy && !gkHold && p.state==='normal'){
-      const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L={x:ball.x+ball.vx*tLand, y:ball.y+ball.vy*tLand};
+      const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L=ballAt(tLand);   // (its curl too)
       if(Math.abs(L.x-ownGoalX)<BX+80&&Math.abs(L.y-YC)<BY+60){
         const dL=dist(p,L); let first=dL<360;
         for(const q of players) if(first&&q.team===p.team&&q!==p&&q!==controlled&&q.state==='normal'&&dist(q,L)<dL) first=false;
@@ -7752,7 +7842,7 @@
           if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt()){
             if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
             const r=aerialRival(p);
-            if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it)
+            if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))-CURL_HEAD*crossCurlQ()){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it; a curling one's harder)
             else headClear(p);
           }
           p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1; p.dash=true;
@@ -7824,8 +7914,9 @@
       // where will the cross come down? project its flight under gravity.
       const G=520;
       const tLand = (ball.vz + Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G;
-      const lx = ball.x + ball.vx*tLand + p.iqLeadX;        // Off IQ mis-read of where the cross lands
-      const ly = ball.y + ball.vy*tLand + p.iqLeadY;
+      const LA = ballAt(tLand);                             // (its curl too)
+      const lx = LA.x + p.iqLeadX;                          // Off IQ mis-read of where the cross lands
+      const ly = LA.y + p.iqLeadY;
       const inBoxLand = (atk>0 ? lx>FW-BX-80 : lx<BX+80) && Math.abs(ly-YC)<BY+60;
       // only the closest attacker(s) to the landing spot commit, so they don't all stack
       if(inBoxLand && dist(p,{x:lx,y:ly})<360){
@@ -7842,7 +7933,7 @@
           // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
           // header on goal, the same as yours
           const contester=aerialRival(p);
-          if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))) headClear(contester);
+          if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()) headClear(contester);   // (a curling one's harder to clear)
           else headOnGoal(p);
         }
         p.sprint = p.stamina>0.1; p.dash=true;
@@ -9428,11 +9519,11 @@
   // flies (see the physics step).
   const GK_CLAIM_H=PLAYER_H*2.4;
   function crossClaim(kp){
-    const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=reachOf(kp)+ball.r;
+    const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
     for(let t=0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach
-      const x=ball.x+ball.vx*t, y=ball.y+ball.vy*t;
+      const B=ballAt(t), x=B.x, y=B.y;                                 // (its curl too)
       if(Math.abs(x-glX)>GA_D+80||Math.abs(y-YC)>GA_HW+60) continue;   // outside his patch
       if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+0.12<=t) return {x,y,t};   // (a moment to read it)
     }
@@ -9522,7 +9613,7 @@
       const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
       kp.x+=dx/l*mv; kp.y+=dy/l*mv;
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
-      if(Math.hypot(ball.x-kp.x,ball.y-kp.y)<reachOf(kp)+ball.r+10&&ball.z<=GK_CLAIM_H+8){
+      if(Math.hypot(ball.x-kp.x,ball.y-kp.y)<(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())&&ball.z<=GK_CLAIM_H+8){
         kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; gkHold=kp;
         ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
         lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
