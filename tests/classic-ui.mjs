@@ -167,6 +167,13 @@ for(const [w, h] of SIZES){
   info('the ghosts: ' + JSON.stringify(gh));
   ok(gh.out.every(g => !g.face && g.w * g.h < 0.4 * gh.tok[0] * gh.tok[1]), 'a ghost has no face, and is a small box (' + gh.out[0].w + 'x' + gh.out[0].h + ', a man ' + gh.tok.join('x') + ')');
   ok(gh.out.filter(g => g.over > 0.35).length <= 1, 'it sits off the corner of its spot, a man there covering little of it (' + gh.out.map(g => g.over).join(' ') + ')');
+  // ...and each carries his shirt number, as his token does (under his face; in the corner on the bench)
+  const nums = await page.evaluate(() => { const no = el => ((el && el.querySelector('.ptkNo, em')) || {}).textContent || '';
+    return { men: [...document.querySelectorAll('#bpBody .tpitch .ptk[data-tac="field"]')].map(no), keeper: no(document.querySelector('#bpBody .tpitch .ptk[data-tac="gk"]')),
+      bench: [...document.querySelectorAll('#bpBody .tbBench .ptk')].map(no), ghosts: [...document.querySelectorAll('#bpBody .tpitch .tpGhost')].map(no) }; });
+  const allNo = [nums.keeper, ...nums.men, ...nums.bench], sorted = a => a.slice().sort().join(' ');
+  ok(allNo.every(n => /^#\d+$/.test(n)) && new Set(allNo).size === allNo.length && sorted(nums.ghosts) === sorted(nums.men),
+    'every man shows his shirt number, on the pitch and the bench, and the other phase\'s boxes carry the same ones (' + nums.men.join(' ') + ' | ' + nums.ghosts.join(' ') + ')');
   // THE CARD HAS TWO SIDES: his ratings (a category opens in their place) and his spot's instructions (no ratings), his
   // name, rating and stars on top of both
   const side = () => page.evaluate(() => ({ six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixDet .statRow').length,

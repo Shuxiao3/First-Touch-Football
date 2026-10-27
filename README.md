@@ -137,14 +137,16 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
     BEST 8. Under it, the bench. On the right, the card of the man you tapped. Every man on the pitch shows his
-    face (his own look, in the club's kit) beside his rating; the bench is just numbers and names. The number and
-    the name sit inside each token with room round them, clear of its edges.
+    face (his own look, in the club's kit) with his shirt number under it, beside his rating and name; the bench
+    is ratings and names, each man's shirt number in his token's corner. The rating and the name sit inside each
+    token with room round them, clear of its edges.
   - **His card has two sides**, turned over with RATINGS and INSTRUCTIONS under his name. RATINGS: all of him,
     head to toe (a keeper in a keeper's top), and the six (tap one for what it's made of). INSTRUCTIONS: his spot's
     instructions for the phase you're looking at, each with its options on one line and what it means under them,
     and no ratings. On both, his name, position, age, skill stars and rating stay on top, and the side you're on
     stays as you tap from man to man. More instructions than fit go over pages.
-  - **The other phase's shape** is a small lit box with each man's name, off the bottom-right corner of his spot
+  - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
+    shows, so you can tell whose box is whose), off the bottom-right corner of his spot
     (bottom-left for a man up by their goal, at the right-hand end): on WITH BALL you see where each of them goes
     without it, and the other way round. It's no longer a full token tucked under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same

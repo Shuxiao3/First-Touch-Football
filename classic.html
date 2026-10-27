@@ -940,6 +940,7 @@
   .sqPitch .ptk{ width:60px !important; height:36px !important; padding:0 2px 0 4px; }
   .sqPitch .ptk .ptkTxt{ gap:3px; padding:2px 0 0; }
   .sqPitch .ptk .ptkFace{ width:16px; height:16px; }
+  .sqPitch .ptk .ptkSide{ gap:1px; } .sqPitch .ptk .ptkNo{ font-size:8px; }
   .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
   .sqPitch .ptk .ptkName{ font-size:8px !important; max-width:36px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
@@ -948,26 +949,30 @@
   .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:44px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
     background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:3px;
     touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; font-family:'FTC Dot',monospace; }
-  /* his face beside his number, as an item sits beside its name in a bag */
+  /* his face beside his rating, as an item sits beside its name in a bag; his shirt number under his face */
   .ptkFace{ width:24px; height:24px; flex:none; image-rendering:pixelated; pointer-events:none; -webkit-user-drag:none; }
+  .ptkSide{ flex:none; display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
+  .ptkNo{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); text-shadow:1px 1px 0 var(--ol); white-space:nowrap; pointer-events:none; }
+  .tbBench .ptk .ptkNo{ position:absolute; top:4px; left:4px; } .tbBench .ptk .ptkNo + .ptkTxt{ padding-left:8px; }   /* (clear of the number) */
   .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:3px 0 1px; pointer-events:none; }   /* (room over the number and under the name) */
   .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
-  /* the other phase's man: a small box with just his name, off the corner of his slot -- right and down, so it only
+  /* the other phase's man: a small box with just his number and name, off the corner of his slot -- right and down, so it only
      clips the corner of a man standing there (left, up by their goal at the right-hand end) */
   .tpitch .tpGhost{ transform:translate(26px,14px); max-width:56px; height:18px; display:flex; align-items:center; padding:0 4px; border-radius:var(--rS);
     background:rgb(var(--accRGB) / .28); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9); opacity:.9;
     font:9px/1 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tpitch .tpGhost.flip{ transform:translate(calc(-100% - 26px),14px); }
   .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tpitch .tpGhost em{ flex:none; font-style:normal; margin-right:3px; }
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:var(--warn); }
   .tacB1 .ptk.statview{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .4); }
   .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5); }
   .tacB1 .ptk.canswap{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
-  .tacB1 .ptk.dropOver{ background:var(--acc); } .tacB1 .ptk.dropOver .ptkOvr, .tacB1 .ptk.dropOver .ptkName{ color:var(--accInk); text-shadow:none; }
+  .tacB1 .ptk.dropOver{ background:var(--acc); } .tacB1 .ptk.dropOver .ptkOvr, .tacB1 .ptk.dropOver .ptkName, .tacB1 .ptk.dropOver .ptkNo{ color:var(--accInk); text-shadow:none; }
   .tacB1 .ptk.lifted{ opacity:.3; }
   .tacB1 .ptk[data-fit]::after{ content:attr(data-fit); position:absolute; top:-10px; right:-11px; min-width:20px; padding:1px 3px; font:11px 'FTC Dot',monospace;
     text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); border-radius:var(--rS); }
@@ -11467,7 +11472,7 @@
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,L,T,kind,role){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
     return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')
-      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(e.name)+'</span></span></button>'; }
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+(kind==='bench'?shirtNo(e.num):ptkSide(faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),e.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(e.name)+'</span></span></button>'; }
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
@@ -11499,7 +11504,7 @@
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
-      h+=ghostTok(q.L,q.T,surname(e.name)); }
+      h+=ghostTok(q.L,q.T,e.num,surname(e.name)); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role); }
     h+='</div></div><div class="tbRight" data-pages="mtac:'+t+':'+MT.sel+':'+cardSide+':'+phase+'">'+mtCard(t,MT.sel,phase)+'</div></div>';
@@ -12453,14 +12458,18 @@
   const GK_SHORTS='#2c2e34';
   const keeperKit=(kit,top)=>[top||keeperTops(kit?kit[0]:'#2f6bd6',kit?kit[0]:'#2f6bd6').G, GK_SHORTS, GK_SHORTS];   // a keeper's top that stands out from the shirts
   const surname=n=>mgEsc(String(n||'').split(' ').slice(-1)[0]);
+  // HIS SHIRT NUMBER on his token: under his face on the pitch, in the corner on the bench -- and on the other phase's
+  // box, so you can tell which box is whose
+  const shirtNo=n=>n?'<span class="ptkNo">#'+n+'</span>':'';
+  const ptkSide=(face,n)=>'<span class="ptkSide">'+face+shirtNo(n)+'</span>';
   function tbTok(d, ri, L, T, kind, phase, slotRole){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
     return '<button class="ptk'+(oop?' oop':'')+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
-      +(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
-  // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his name in a small
-  // lit box off the bottom-right corner of the spot (bottom-left up by their goal, at the right-hand end)
-  function ghostTok(L,T,name){ return '<i class="tpGhost'+(L>80?' flip':'')+'" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"><b>'+name+'</b></i>'; }
+      +(kind==='bench'?shirtNo(p.num):ptkSide(faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),p.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
+  // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
+  // a small lit box off the bottom-right corner of the spot (bottom-left up by their goal, at the right-hand end)
+  function ghostTok(L,T,num,name){ return '<i class="tpGhost'+(L>80?' flip':'')+'" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -12482,7 +12491,7 @@
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y);
-      h+=ghostTok(q.L,q.T,surname(p.name)); }
+      h+=ghostTok(q.L,q.T,p.num,surname(p.name)); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
     h+='</div></div>';
@@ -13123,7 +13132,7 @@
     lift(){ const d=CAREER&&CAREER.data, R=document.querySelector('#bpBody .mgPaneR'); if(!d||!R||R.querySelector('.sqPitch')) return;   // (his card was up: the team, to drop him on)
       MGUI.sel=null; R.innerHTML=mgSquadPitch(d)+'<div class="mgPaneScroll"></div>'; },
     ghost(row){ const d=CAREER&&CAREER.data, p=d&&d.roster.find(x=>x.id===+row.dataset.pid), g=document.createElement('div'); g.className='ptk pxGhost';
-      g.innerHTML=(p?faceImg({lookKey:p.id},careerKit(d)):'')+'<span class="ptkTxt"><span class="ptkOvr">'+(p?p.ovr:'')+'</span><span class="ptkName">'+(p?surname(p.name):'')+'</span></span>'; return g; },
+      g.innerHTML=(p?ptkSide(faceImg({lookKey:p.id},careerKit(d)),p.num):'')+'<span class="ptkTxt"><span class="ptkOvr">'+(p?p.ovr:'')+'</span><span class="ptkName">'+(p?surname(p.name):'')+'</span></span>'; return g; },
     drop(row,tok){ const d=CAREER&&CAREER.data; if(!d) return; const lu=ensureLineup(d), ri=d.roster.findIndex(p=>p.id===+row.dataset.pid); if(ri<0) return;
       const kind=ri===lu.gk?'gk':lu.atk.includes(ri)?'field':'bench';
       careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=null; mgSave(d); mgRerender(); },   // (the team stays up: you see him in his spot)
