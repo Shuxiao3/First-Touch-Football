@@ -17,7 +17,10 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, atkOf, controlROf, '
   + 'touchQuality, touchPressure, finalThirdOf, lastGrade:()=>lastGrade, proj, draw:()=>draw(), stepOutfield, runSpeedOf, simNow:()=>simNow, cam:v=>{ camX=v; }, '
+  + 'watchBall, setControlled, queueOneTouch, recvAuto:()=>recvAuto, stick:(x,y)=>{ window.__stick={x,y}; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
+patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
+  '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-touch-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -97,57 +100,114 @@ ok(aiEasy.owned, 'a computer team-mate the same, no press to time: taken at his 
 const aiHard = await receive('mate', 0.8, 30, 1, 1);
 ok(aiHard.off && aiHard.sp > 20, '...and pressed in the final third with poor stats, off him at ' + aiHard.sp + ' px/s');
 
-// WATCHING THE BALL: a man the ball's coming to turns his body to it as it comes -- as quick as his Agility lets him --
-// and gets to it however he must: off his front he's slower, side-on slower still backing off, and he can't sprint. A
-// runner played in behind takes it on the run. One man, stepped by hand, the ball his.
+// WATCHING THE BALL: a man the ball's coming to turns his body to it as it comes -- as quick as he reads it, his Off IQ
+// -- and gets to it however he must: off his front he's slower, side-on slower still backing off, and he can't sprint. A
+// runner played in behind runs onto a ball out in front of him flat out; one that comes to him from behind, he has to
+// check and turn to. One man, stepped by hand, the ball his.
 const watch = await page.evaluate(() => {
   const T = window.__T, c = T.controlled(), p = T.players().find(q => q !== c && q.team === c.team), atk = T.atkOf(p.team), dt = 1 / 60, keep = p.stats;
   T.freeze(); for(const q of T.players()) if(q !== p){ q.x = 60; q.y = 60; q.vx = q.vy = 0; }
-  const scene = (ag, bx, bv) => { p.stats = Object.assign({}, keep, { agility: ag, speed: 5.5 }); p.state = 'normal'; p.stamina = 1; p.staminaCap = 1; p.sprint = false; p.sprintMoT = 0;
+  const scene = (iq, bx, bv) => { p.stats = Object.assign({}, keep, { offIQ: iq, speed: 5.5 }); p.state = 'normal'; p.stamina = 1; p.staminaCap = 1; p.sprint = false; p.sprintMoT = 0;
     p.x = T.FW / 2; p.y = T.YC; p.vx = p.vy = 0; p.goingForBall = p.intercepting = false;
     const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.x = p.x + bx; b.y = p.y; b.z = b.vz = 0; b.vx = bv; b.vy = 0;
     b.lastTouch = p.team; b.intendedRcv = p; b.rcvRunner = false; b.thru = null; return b; };
   const out = { turn: {} };
-  for(const ag of [1, 10]){ const b = scene(ag, -atk * 200, 0); p.facing = { x: atk, y: 0 }; let t = 0;   // his back to it
+  for(const iq of [1, 10]){ const b = scene(iq, -atk * 200, 0); p.facing = { x: atk, y: 0 }; let t = 0;   // his back to it
     for(; t < 3; t += dt){ T.stepOutfield(p, 0, 0, dt); b.x = p.x - atk * 200; b.y = p.y; if(-p.facing.x * atk > 0.95) break; }
-    out.turn[ag] = +t.toFixed(2); }
+    out.turn[iq] = +t.toFixed(2); }
   const run = T.runSpeedOf(p);   // the ball 70 px in front of him; pushed each way, asking to sprint: his top speed, as a share of his run
   for(const [k, ix, iy] of [['fwd', 1, 0], ['side', 0, 1], ['back', -1, 0]]){ const b = scene(5.5, atk * 70, 0); p.facing = { x: atk, y: 0 }; let v = 0, face = 1;
     for(let t = 0; t < 2; t += dt){ p.sprint = true; T.stepOutfield(p, ix * atk, iy, dt); b.x = p.x + atk * 70; b.y = p.y;
       if(t > 1.2){ v = Math.max(v, Math.hypot(p.vx, p.vy)); face = Math.min(face, p.facing.x * atk); } }
     out[k] = { share: +(v / run).toFixed(2), face: +face.toFixed(2) }; }
-  { const b = scene(5.5, -atk * 150, atk * 300); b.thru = { until: T.simNow() + 5 }; p.facing = { x: atk, y: 0 }; let v = 0, w = 0;   // a through ball
-    for(let t = 0; t < 1.5; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); v = Math.max(v, Math.hypot(p.vx, p.vy)); w += p.watching ? 1 : 0; }
-    out.runner = { share: +(v / run).toFixed(2), watching: w, face: +(p.facing.x * atk).toFixed(2) }; }
+  { const b = scene(5.5, atk * 120, atk * 140); b.thru = { until: T.simNow() + 5 }; p.facing = { x: atk, y: 0 }; let v = 0;   // a through ball out in front of him
+    for(let t = 0; t < 0.8; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); b.x += b.vx * dt; v = Math.max(v, Math.hypot(p.vx, p.vy)); }
+    out.runner = { share: +(v / run).toFixed(2), face: +(p.facing.x * atk).toFixed(2) }; }
+  { const b = scene(5.5, -atk * 260, atk * 380); b.thru = { until: T.simNow() + 5 }; p.facing = { x: atk, y: 0 }; let v = 0, face = 1;   // ...and one that comes to him from behind
+    for(let t = 0; t < 0.9; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); b.x += b.vx * dt; if(t > 0.6){ v = Math.max(v, Math.hypot(p.vx, p.vy)); face = Math.min(face, p.facing.x * atk); } }
+    out.behind = { share: +(v / run).toFixed(2), face: +face.toFixed(2), watching: !!p.watching }; }
   { const b = scene(5.5, atk * 250, -atk * 400), o = T.players().find(q => q.team !== p.team); b.lastTouch = o.team; b.intendedRcv = o;   // their pass, across him
     p.facing = { x: 0, y: 1 }; let v = 0, w = 0;
     for(let t = 0; t < 0.5; t += dt){ p.sprint = true; p.intercepting = true; T.stepOutfield(p, 0, 1, dt); b.x -= atk * 400 * dt; v = Math.max(v, Math.hypot(p.vx, p.vy)); w += p.watching ? 1 : 0; }
     p.intercepting = false; out.cut = { share: +(v / run).toFixed(2), watching: w }; }
+  { const b = scene(5.5, -atk * 200, 0); b.intendedRcv = null; b.ownedBy = c; c.x = b.x - atk * 20; c.y = b.y;   // you on it, him 8 m off with his back to you
+    p.facing = { x: atk, y: 0 }; out.expects = T.watchBall(p, 0, 0);
+    for(let t = 0; t < 1; t += dt) T.stepOutfield(p, 0, 0, dt);
+    out.expectsFace = +(-p.facing.x * atk).toFixed(2);
+    const o = T.players().find(q => q.team !== p.team); b.ownedBy = o; out.theirs = T.watchBall(p, 0, 0);   // (one of theirs on it: no)
+    b.ownedBy = null; }
   p.stats = keep; return out; });
 info('watching the ball: ' + JSON.stringify(watch));
-ok(watch.turn[1] > 0.6 && watch.turn[1] < 1.1 && watch.turn[10] < 0.4 && watch.turn[1] > 2.4 * watch.turn[10], 'his back to a ball that\'s his, he turns to it: in ' + watch.turn[1] + ' s at Agility 1, ' + watch.turn[10] + ' s at 10');
+ok(watch.turn[1] > 0.6 && watch.turn[1] < 1.1 && watch.turn[10] < 0.4 && watch.turn[1] > 2.4 * watch.turn[10], 'his back to a ball that\'s his, he turns to it as quick as he reads it: in ' + watch.turn[1] + ' s at Off IQ 1, ' + watch.turn[10] + ' s at 10');
 ok(watch.fwd.share > 1.25 && watch.fwd.face > 0.95, 'facing it, he can go at it flat out (' + watch.fwd.share + 'x his run)');
 ok(watch.side.share > 0.6 && watch.side.share < 0.85 && watch.side.face > 0.95, 'side-on to it he shuffles across, still facing it, at ' + pc(watch.side.share) + ' of his run (no sprint)');
 ok(watch.back.share > 0.4 && watch.back.share < watch.side.share - 0.08 && watch.back.face > 0.95, 'backing off, facing it, slower still: ' + pc(watch.back.share));
-ok(watch.runner.share > 1.25 && !watch.runner.watching && watch.runner.face > 0.95, 'a runner played in behind takes it on the run: flat out his way (' + watch.runner.share + 'x), not turned to it');
+ok(watch.runner.share > 1.25 && watch.runner.face > 0.95, 'a runner played in behind runs onto a ball out in front of him flat out (' + watch.runner.share + 'x his run)');
+ok(watch.behind.watching && watch.behind.share < 1 && watch.behind.face < 0.2, 'one that comes to him from behind, he checks and turns to it (' + pc(watch.behind.share) + ' of his run, facing ' + watch.behind.face + ' his way)');
 ok(watch.cut.share > 1.25 && !watch.cut.watching, 'darting across to cut out their pass, he goes flat out for the spot (' + watch.cut.share + 'x his run)');
-// ...and in the match: a pass rolled to a computer team-mate with his back to it. Quick on his feet, he's round to it
-// by the time it gets to him; slow (Agility 1), he isn't
-const squareUp = ag => page.evaluate(ag => new Promise(res => {
+ok(watch.expects && watch.expectsFace > 0.95 && !watch.theirs, 'you on the ball, a team-mate 8 m away looking to get it turns to face it before it\'s played (facing ' + watch.expectsFace + ' its way); one of theirs on it, he doesn\'t');
+// ...and in the match: a pass rolled to a computer team-mate with his back to it. Quick to read it (Off IQ 9), he's round
+// to it by the time it gets to him and takes it; slow (Off IQ 1), he isn't round yet (side-on, a harder touch)
+const squareUp = iq => page.evaluate(iq => new Promise(res => {
   const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team); T.freeze();
   const p = T.players().find(q => q !== c && q.team === c.team), keep = p.stats;
   for(const q of T.players()) if(q !== p){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = q.team === c.team ? 90 : T.FH - 90; q.vx = q.vy = 0; q.state = 'normal'; }
-  p.stats = Object.assign({}, keep, { agility: ag }); p.x = T.FW / 2; p.y = T.YC - 150; p.vx = p.vy = 0; p.noTouchT = 0; p.state = 'normal'; p.facing = { x: atk, y: 0 };
+  p.stats = Object.assign({}, keep, { offIQ: iq }); p.x = T.FW / 2; p.y = T.YC - 150; p.vx = p.vy = 0; p.noTouchT = 0; p.state = 'normal'; p.facing = { x: atk, y: 0 };
   const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.lastTouch = c.team; b.intendedRcv = p; b.rcvRunner = false; b.thru = null;
   b.x = p.x - atk * 240; b.y = p.y; b.z = 0; b.vz = 0; b.vx = atk * 430; b.vy = 0;
-  let cos = -1; const t0 = performance.now();
+  let cos = -1, near = false; const t0 = performance.now();
   (function tick(){
-    if(b.ownedBy === p || b.dribbler === p || performance.now() - t0 > 2500){ p.stats = keep; return res(+cos.toFixed(2)); }
-    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy); if(d > 1) cos = (p.facing.x * dx + p.facing.y * dy) / d;
+    const got = b.ownedBy === p || b.dribbler === p, lost = b.intendedRcv !== p && !got;
+    if(got || lost || performance.now() - t0 > 2500){ p.stats = keep; return res({ cos: +cos.toFixed(2), got }); }
+    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy); if(d > 1 && !near) cos = (p.facing.x * dx + p.facing.y * dy) / d;
+    near = near || d < 34;
     requestAnimationFrame(tick);
-  })(); }), ag);
+  })(); }), iq);
 const quick = await squareUp(9), slow = await squareUp(1);
-ok(quick > 0.9 && slow < quick - 0.3, 'a pass to a team-mate with his back to it: he\'s square to it when it gets to him at Agility 9 (' + quick + '), not yet round at 1 (' + slow + ')');
+ok(quick.cos > 0.9 && quick.got && slow.cos < quick.cos - 0.3, 'a pass to a team-mate with his back to it: at Off IQ 9 he\'s square to it as it gets to him (' + quick.cos + ') and takes it; at 1 he isn\'t round yet (' + slow.cos + ')');
+
+// HIS BACK TO IT: you running away from a ball rolled after you, too quick on you to turn to it -- it hits you and comes
+// off you, or (22 px wide of you) it goes past you; with time to turn (Off IQ 10, the ball further off) you get round
+// and take it
+const backTo = (off, turnIn) => page.evaluate(({ off, turnIn }) => new Promise(res => {
+  const T = window.__T, atk = T.atkOf('G'), m = T.players().find(q => q.team === 'G'); T.setControlled(m); T.freeze();
+  for(const q of T.players()) if(q !== m){ q.x = T.FW / 2 + 600; q.y = 40; q.vx = q.vy = 0; }
+  const keep = m.stats; m.stats = Object.assign({}, keep, { offIQ: turnIn ? 10 : 5.5 });
+  m.x = T.FW / 2; m.y = T.YC; m.vx = atk * 60; m.vy = 0; m.state = 'normal'; m.noTouchT = 0; m.facing = { x: atk, y: 0 }; m.reactUntil = turnIn ? 0 : T.simNow() + 5;
+  const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.x = m.x - atk * (turnIn ? 380 : 90); b.y = m.y + off; b.z = 0; b.vz = 0; b.vx = atk * 800; b.vy = 0; b.lastTouch = 'G'; b.intendedRcv = m; b.shotT = 0;
+  T.stick(turnIn ? 0 : atk * 0.4, 0); const t0 = performance.now();
+  (function tick(){
+    const got = b.ownedBy === m || b.dribbler === m, off_ = b.intendedRcv !== m, past = (b.x - m.x) * atk > 30;
+    if(got || off_ || past || performance.now() - t0 > 2500){ T.stick(0, 0); m.reactUntil = 0; m.stats = keep;
+      return res({ got, cameOff: off_ && !got && !past && b.lastTouch === 'G', past, behind: Math.round((b.x - m.x) * atk) }); }
+    requestAnimationFrame(tick);
+  })(); }), { off, turnIn });
+const hit = await backTo(0, false), wide = await backTo(22, false), turned = await backTo(0, true);
+info('his back to it: ' + JSON.stringify({ hit, wide, turned }));
+ok(!hit.got && hit.cameOff, 'his back to it, it hits him and comes off him (not his)');
+ok(!wide.got && wide.past, '...22 px wide of him, it goes past him');
+ok(turned.got, 'with time to turn (Off IQ 10), he gets round to it and takes it');
+// A FIRST-TIME PASS INTO SPACE: nobody near enough the way it's aimed, so it's a short ball into space -- and you're put
+// on whoever's best placed for it, who takes a beat (Off IQ) to see it's his, then goes to meet it; the stick you aimed
+// it with, still held that way, isn't his
+const ot = await page.evaluate(() => new Promise(res => {
+  const T = window.__T, atk = T.atkOf('G'), mates = T.players().filter(q => q.team === 'G'), c = mates[0], m = mates[1]; T.setControlled(c); T.freeze();
+  for(const q of T.players()) if(q !== c && q !== m){ q.x = T.FW / 2 - atk * 700; q.y = 40; q.vx = q.vy = 0; }
+  c.x = T.FW / 2; c.y = T.YC; c.vx = c.vy = 0; c.facing = { x: -atk, y: 0 }; c.noTouchT = 0; c.state = 'normal';
+  m.x = c.x + atk * 600; m.y = T.YC + 150; m.vx = m.vy = 0; m.state = 'normal';   // (24 m off: too far to play first time to him)
+  const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.x = c.x + atk * 160; b.y = c.y; b.z = 0; b.vz = 0; b.vx = -atk * 350; b.vy = 0; b.lastTouch = 'G'; b.intendedRcv = c; b.shotT = 0;
+  T.stick(atk, 0.25); T.queueOneTouch();
+  const t0 = performance.now(); let at = null, p0 = null, r = null;
+  (function tick(){
+    if(!at && T.controlled() !== c){ at = T.simNow(); p0 = { x: m.x, y: m.y }; r = { switched: T.controlled() === m, wait: +((T.recvAuto() && T.recvAuto().wait || 0) - at).toFixed(2), held: !!(T.recvAuto() && T.recvAuto().hold) }; }
+    if(at && r.inWait === undefined && T.simNow() > at + 0.08) r.inWait = Math.round(Math.hypot(m.x - p0.x, m.y - p0.y));
+    if(at && T.simNow() > at + 0.9){ r.after = Math.round(Math.hypot(m.x - p0.x, m.y - p0.y)); T.stick(0, 0); return res(r); }
+    if(performance.now() - t0 > 4000){ T.stick(0, 0); return res(r || { switched: false }); }
+    requestAnimationFrame(tick);
+  })(); }));
+info('a first-time ball into space: ' + JSON.stringify(ot));
+ok(ot.switched && ot.wait >= 0.14 && ot.wait <= 0.36 && ot.held, 'a first-time pass into space puts you on the man best placed for it (he takes ' + ot.wait + ' s to see it\'s his)');
+ok(ot.inWait <= 8 && ot.after >= 60, '...he waits that beat, then goes to meet it (' + ot.inWait + ' px, then ' + ot.after + ' px), the stick you aimed it with left out of it');
 
 // ON THE PITCH: the man you control has one solid green ring at his reach; the ball is drawn in whole pixels
 const look = await page.evaluate(() => {

@@ -1347,10 +1347,15 @@
     oneTouchErr:{val:16,min:0,max:40,step:1,label:'One-touch pass: worst spray (°)',hint:'How far off line a first-time pass can go at worst: a ball at chest height, coming in at 1200 px/s or more, played by a man with Passing 1 and Ball control 1. A good passer takes much of it off; a slow ball along the grass takes it all off.'},
     oneTouchMax:{val:18,min:8,max:30,step:1,label:'One-touch pass: longest (m)',hint:'A first-time pass only goes to a team-mate this close, along the grass. Further than that, take a touch first.'},
     turnPassErr:{val:14,min:0,max:30,step:1,label:'Turn-and-pass: worst spray (°)',hint:'How far off line a pass can go when it is played the moment the passer has turned right round to face it, at Off IQ 1. The longer he has been facing that way the less; a slight angle costs nothing; Off IQ 10 takes four-fifths of it off.'},
-    bodyTurn:{val:1,min:0.4,max:2,step:0.05,label:'Body turn ×',hint:'How fast a man turns his body to face a ball coming to him: about 3.4 rad/s at Agility 1, 9.5 at 10 (a half turn in 0.9 s / 0.33 s). Scales both.'},
+    bodyTurn:{val:1,min:0.4,max:2,step:0.05,label:'Body turn ×',hint:'How fast a man turns his body to face a ball coming to him -- reading it is his Off IQ: about 3.4 rad/s at Off IQ 1, 9.5 at 10 (a half turn in 0.9 s / 0.33 s). Scales both.'},
     pedalSide:{val:0.72,min:0.4,max:1,step:0.01,label:'Side-step speed',hint:'Top speed moving side-on to the way he faces while he watches the ball, as a share of his running pace (Agility nudges it ±8%). He cannot sprint off his front.'},
     pedalBack:{val:0.55,min:0.3,max:1,step:0.01,label:'Back-pedal speed',hint:'Top speed moving backwards while he watches the ball (Agility nudges it ±10%).'},
-    turnTouch:{val:0.25,min:0,max:0.6,step:0.01,label:'Touch off-square',hint:'How much harder the first touch is with his back to the ball (side-on about half that): a man who could not turn to it in time.'},
+    turnTouch:{val:0.25,min:0,max:0.6,step:0.01,label:'Touch off-square',hint:'How much harder the first touch is the further he is turned from the ball (side-on about half the most): a man who could not turn to it in time.'},
+    awayAngle:{val:110,min:90,max:160,step:5,label:'Back to it from (°)',hint:'Turned further than this from the ball as it reaches him, he can\'t take it at all: it hits him and comes off, or it goes past him.'},
+    blockReach:{val:25,min:14,max:40,step:1,label:'Shot block: reach (px)',hint:'How close to a defender a shot has to pass, below his shoulders, for him to get his body or a leg in the way (25 px = 1 m). His Def IQ takes it a little either way: Block: Def IQ spread.'},
+    swipeFree:{val:25,min:0,max:60,step:5,label:'Swipe shot: off his line, free (°)',hint:'A swipe shot this far off the way he is facing costs nothing. Further round it is struck across his body: weaker and wilder, the more so the further, worst turned right round (Swipe shot: off his line, cost).'},
+    swipeCross:{val:1,min:0,max:1.5,step:0.05,label:'Swipe shot: off his line, cost',hint:'How much a swipe shot struck across his body costs at worst (1: 45% of its pace and 80% of his accuracy, at 150 degrees or more off the way he faces).'},
+    blockIQ:{val:0.12,min:0,max:0.4,step:0.01,label:'Block: Def IQ spread',hint:'How much Def IQ moves the block reach: a share either way, from Def IQ 1 (less) to 10 (more). Kept small on purpose.'},
     skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
     skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far to the side a full roulette carries you (25 px = 1 m). A shorter one goes less far.'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
@@ -1653,10 +1658,10 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
-    traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
+    traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
-    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
+    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -2256,9 +2261,12 @@
   }
   // YOUR PASS: you're on the man it's going to as soon as it's played, and until you steer him he goes to meet it
   let recvAuto=null;
-  function passSwitch(q){
+  // first: a first-time pass -- he waits his reaction (q.reactUntil) before he moves, and the stick you aimed it with,
+  // held that way, isn't his until you let it go or push it somewhere else
+  function passSwitch(q,first){
     if(!canSwitch()||!q||q.team!=='G') return;
-    setControlled(q); recvAuto={q,until:simNow+3};
+    const hold=first&&(curIx||curIy)?{x:curIx,y:curIy}:null;
+    setControlled(q); recvAuto={q,until:simNow+3,wait:first?q.reactUntil:0,hold};
   }
   // where to meet the ball in flight: where it comes down, then the nearest point on its roll (not past where it stops)
   function meetPoint(p){
@@ -2580,7 +2588,7 @@
       A+=(p0.x-a.x)*(p1.y-a.y)-(p0.y-a.y)*(p1.x-a.x); }
     const bow=0.75*A/(L*L);                                           // ~ sagitta / length for an arc (+ = bowed to the left of travel)
     const b1=P.swipeBow.val, b0=b1*0.27, k=clamp((Math.abs(bow)-b0)/(b1-b0),0,1);
-    return {aim,charge,spin:-Math.sign(bow)*k,bow,v};                 // bowed left -> it curls back right (spin -1), and vice versa
+    return {aim,charge,spin:-Math.sign(bow)*k,bow,v,dir:screenDirToPitch(dx,dy,controlled.y)};   // bowed left -> it curls back right (spin -1), and vice versa
   }
   function swipeRelease(s){
     const tr=(swipeTrail&&swipeTrail.pts===s.pts)?swipeTrail:null;
@@ -2604,9 +2612,15 @@
   function swipeShoot(sw){
     const p=controlled, atk=atkOf(p.team);
     if(ball.ownedBy===p){ ball.x=p.x+atk*(p.r+ball.r+4); ball.y=p.y; }   // strike it from in front, as a held K shot does
-    shootAt(p,atk,sw.aim,sw.charge,0,undefined,sw.spin);
+    shootAt(p,atk,sw.aim,sw.charge,0,undefined,sw.spin,sw.dir?swipeAcross(p,sw.dir):0);
     ball.dribbler=null; ball.dribbleGrace=0;
     curveArmed=!!sw.kb; curveT=sw.kb?1.1:0; trapping=0; shootHeld=false; shootCharge=0; windUp=null;   // (a K shot can still be bent)
+  }
+  // ACROSS HIS BODY: a swipe that way, off the way he's facing -- 0 within the free angle, up to 1 turned right round (150
+  // degrees). It costs the shot pace and accuracy (shootAt).
+  function swipeAcross(p,u){
+    const f=p.facing||{x:atkOf(p.team),y:0}, th=Math.acos(clamp(f.x*u.x+f.y*u.y,-1,1))*180/Math.PI, fr=P.swipeFree.val;
+    return clamp((th-fr)/Math.max(1,150-fr),0,1)*P.swipeCross.val;
   }
   // DIRECTIONAL FIRST TOUCH: while your finger drags TRAP, an arrow under you shows the way the touch will go; once
   // it's gone that way, it fades
@@ -4385,6 +4399,9 @@
     // (Movement only: an aim taken from the stick still reads it as centred.)
     if(switchLock){ if(switchLock.p!==controlled||simNow>switchLock.until) switchLock=null; else return {ix:switchLock.ix, iy:switchLock.iy}; }
     if(recvAuto&&(recvAuto.q!==controlled||ball.ownedBy||gkHold||simNow>recvAuto.until)) recvAuto=null;
+    if(recvAuto&&recvAuto.hold){ const h=recvAuto.hold;              // the stick still held the way a first-time pass went
+      if((ix||iy)&&ix*h.x+iy*h.y>0.9){ ix=0; iy=0; } else recvAuto.hold=null; }
+    if(recvAuto&&!ix&&!iy&&recvAuto.wait>simNow) return {ix:0,iy:0};   // (a beat to see it's his)
     if(recvAuto&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
@@ -4468,26 +4485,43 @@
   function turnSpray(p,dx,dy){ return turnWorst(p,dx,dy)*(Math.random()+Math.random()+Math.random()-1.5)*1.15; }
   // WATCHING THE BALL: a man the ball is coming to -- played to him, loose and his to go and get, a pass of theirs he's
   // cutting out, or just rolling right at him -- turns his body to it as it comes, and gets to it however he must: off
-  // his front he's slower, side-on slower still, backwards slowest, and he can't sprint but forwards (stepOutfield). A
-  // runner played in behind takes it on the run instead, and a man with a long way to go across or away from it turns
-  // and runs, and turns back in time to face it (how long that turn takes is his Agility). A man darting across to cut
-  // out their pass goes flat out for the spot and stretches for it as he gets there.
+  // his front he's slower, side-on slower still, backwards slowest, and he can't sprint but forwards (stepOutfield). So
+  // does a team-mate of the man on the ball who's looking to get it: near it, or free with the way to him clear. A man
+  // with a long way to go across or away from it turns and runs, and turns back in time to face it (how quickly he
+  // turns to it is his Off IQ) -- a runner played in behind meets it where it's played, and if it comes to his side he
+  // has to check and turn to it. A man darting across to cut out their pass goes flat out for the spot and stretches
+  // for it as he gets there.
   function watchBall(p,ix,iy){
-    if(p.state!=='normal'||ball.ownedBy||gkHold||restartT>0||scoredT>0||offsideT>0||(p===controlled&&skill)) return false;
-    const mine=p===ball.intendedRcv&&ball.lastTouch===p.team;
-    if(mine&&(ball.rcvRunner||(ball.thru&&simNow<ball.thru.until))) return false;   // on the run onto it
-    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy)||1, bs=Math.hypot(ball.vx,ball.vy);
-    const closing=bs>1?-(ball.vx*dx+ball.vy*dy)/d:0;                                // how fast it's coming at him
-    const miss=bs>1?Math.abs(ball.vx*dy-ball.vy*dx)/bs:d;                           // how wide of him its line runs
-    const atMe=closing>0.5*bs&&miss<controlROf(p)+24&&d<320&&ball.z<30;           // (not one going over his head)
-    if(!(mine||p.goingForBall||p.intercepting||atMe||(p===controlled&&incomingToMe()))||d>900) return false;
-    if(bs>150&&closing<0.2*bs) return false;                                       // going away from him: he runs after it
-    const il=Math.hypot(ix,iy), tArr=d/Math.max(closing,120), ci=il>0.2?(ix*dx+iy*dy)/(il*d):1;
-    const cutting=p.intercepting&&!!ball.intendedRcv&&ball.intendedRcv.team!==p.team;   // their pass, and he's going to cut it out
+    if(p.state!=='normal'||gkHold||restartT>0||scoredT>0||offsideT>0||(p===controlled&&skill)) return false;
+    if(p.reactUntil>simNow) return false;                                          // (still taking in a first-time ball: see firstTouchPass)
+    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy)||1;
+    let tArr;
+    if(ball.ownedBy){                                                              // a team-mate on it, and he wants it
+      if(ball.ownedBy===p||ball.ownedBy.team!==p.team||!expectsPass(p,d)) return false;
+      tArr=d/120;
+    } else {
+      const mine=p===ball.intendedRcv&&ball.lastTouch===p.team, bs=Math.hypot(ball.vx,ball.vy);
+      const closing=bs>1?-(ball.vx*dx+ball.vy*dy)/d:0;                              // how fast it's coming at him
+      const miss=bs>1?Math.abs(ball.vx*dy-ball.vy*dx)/bs:d;                         // how wide of him its line runs
+      const atMe=closing>0.5*bs&&miss<controlROf(p)+24&&d<320&&ball.z<30;         // (not one going over his head)
+      if(!(mine||p.goingForBall||p.intercepting||atMe||(p===controlled&&incomingToMe()))||d>900) return false;
+      if(bs>150&&closing<0.2*bs) return false;                                     // going away from him: he runs after it
+      tArr=d/Math.max(closing,120);
+    }
+    const il=Math.hypot(ix,iy), ci=il>0.2?(ix*dx+iy*dy)/(il*d):1;
+    const cutting=p.intercepting&&!ball.ownedBy&&!!ball.intendedRcv&&ball.intendedRcv.team!==p.team;   // their pass, and he's going to cut it out
     if(ci<0.5&&(cutting||tArr>Math.acos(Math.max(ci,-1))/bodyTurnOf(p)+(p.watching?0.75:0.45))) return false;   // a long way off his front
     return true;
   }
-  function bodyTurnOf(p){ return statLerp(statOf(p,'agility',P.agility.val),3.4,9.5)*P.bodyTurn.val; }   // rad/s
+  // a team-mate has the ball: is this man looking to get it? Near it (14 m), or free (nobody within 4 m) with the way to
+  // him clear, within 32 m
+  function expectsPass(p,d){
+    if(d<350) return true;
+    if(d>800) return false;
+    for(const o of players) if(o.team!==p.team&&Math.hypot(o.x-p.x,o.y-p.y)<100) return false;
+    return !laneBlocked(ball.ownedBy,p);
+  }
+  function bodyTurnOf(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),3.4,9.5)*P.bodyTurn.val; }   // rad/s: reading the ball is his Off IQ
   // his top speed off his front, as a share: c the cosine between the way he faces and the way he's going
   function pedalOf(p,c){ const ag=statLerp(statOf(p,'agility',P.agility.val),-1,1);
     const S=clamp(P.pedalSide.val*(1+0.08*ag),0.3,1), B=clamp(P.pedalBack.val*(1+0.1*ag),0.2,S);
@@ -5167,8 +5201,16 @@
     if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
     labOnPass('ONE-TOUCH PASS',best,null);
     lastGrade='ONE-TOUCH';gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=0.9;
-    if(best) passSwitch(best);
+    // you're on the man it's going to -- played into space, whoever's best placed to get to it -- and, it being played
+    // first time, he takes a beat to see it's his before he goes to meet it
+    let rcv=best;
+    if(!rcv){ const lp=landingPoint(); let bd=1e9; for(const q of players){ if(q.team!==p.team||q===p||q.state!=='normal') continue;
+      const dq=Math.hypot(q.x-lp.x,q.y-lp.y); if(dq<bd){ bd=dq; rcv=q; } } }
+    if(rcv){ ball.intendedRcv=rcv; ball.rcvRunner=false; ball.thru=null; ball.passerRef=p;
+      rcv.reactUntil=simNow+oneTouchReactOf(rcv); passSwitch(rcv,true); }
   }
+  // how long a man takes to see a first-time ball is his: 0.35 s at Off IQ 1 .. 0.15 s at 10
+  function oneTouchReactOf(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),0.35,0.15); }
   // a pass asked for while the ball is still on its way to you: played first time the moment it gets there
   let oneTouch=null;
   function oneTouchOK(){ return !!oneTouch&&oneTouch.p===controlled&&simNow<oneTouch.until; }
@@ -5278,7 +5320,7 @@
     const hvr=hdz>=0?HVU:HVD;
     let Rh=HHR;                                          // for a live cross: full toward the incoming ball, halved on the far side (behind)
     if(ball.crossT>0 && ball.crossDir && hdh>0.001){ const al=((ball.x-p.x)/hdh)*ball.crossDir.x+((ball.y-p.y)/hdh)*ball.crossDir.y; Rh=HHR*(0.75-0.25*al); }
-    if((hdh*hdh)/(Rh*Rh)+(hdz*hdz)/(hvr*hvr)<=1){
+    if((hdh*hdh)/(Rh*Rh)+(hdz*hdz)/(hvr*hvr)<=1&&!keeperOnIt()){
       headerT=0;
       if(checkOffsideTouch(p))return;
       // AERIAL DUEL (winning-rate = STRENGTH): if an opponent is challenging for the same ball,
@@ -5423,7 +5465,7 @@
     const pick = (!kp) ? 'top' : (top.q>=bot.q ? 'top' : 'bot');
     return { gx, corner, kp, sp, top, bot, pick };
   }
-  function shootAt(p,atkSide,aim,charge,aiCurl,accMul,spin){
+  function shootAt(p,atkSide,aim,charge,aiCurl,accMul,spin,across){
     if(meIs(p)) meBump('shots');
     const gx=atkSide>0?FW:0;
     let ty=YC+aim*(GOAL_W/2-14);
@@ -5464,7 +5506,8 @@
     const distG=Math.hypot(dx,dy)||1;
     dx/=distG;dy/=distG;
     const ftMul = (accMul!==undefined)?accMul:1;             // first-touch strikes are less accurate
-    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p)*0.25),0,1);   // composure: pressure saps shot accuracy
+    const xb=clamp(across||0,0,1.5);                          // struck across his body (a swipe off his line: swipeAcross)
+    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p)*0.25)*(1-0.8*Math.min(1,xb)),0,1);   // composure: pressure saps shot accuracy
     // LONG SHOTS: shots from beyond the box edge lose pace and accuracy unless the dial is high.
     const dGoalAbs2 = Math.hypot(gx-ball.x, YC-ball.y);      // true distance to goal centre (wide shots travel further)
     const longRange = clamp((dGoalAbs2-330)/370, 0, 1);      // 0 at the box edge, full penalty by 700 out
@@ -5473,7 +5516,7 @@
     const dev=((1-effAcc)*(0.05+0.13*charge)*(1+longPen*1.5) + longPen*0.14)*(Math.random()*2-1);
     const ca=Math.cos(dev),sa=Math.sin(dev);
     let ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const speed=shotPowerOf(p)*(0.68+0.32*charge)*(1-longPen*0.60);
+    const speed=shotPowerOf(p)*(0.68+0.32*charge)*(1-longPen*0.60)*(1-0.45*Math.min(1,xb));
     // SWIPE CURL (touch): the swipe's bow sets the spin (-1..1, sign = which way it bends; Curve stat sets how
     // hard). Struck out to the side the swipe bowed by exactly what the curl will swing back, so it bends
     // round onto the spot the swipe pointed at instead of curling off it.
@@ -7381,7 +7424,7 @@
         for(const q of players) if(first&&q.team===p.team&&q!==p&&q!==controlled&&q.state==='normal'&&dist(q,L)<dL) first=false;
         if(first){
           p.aerialT=simNow;
-          if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH){
+          if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt()){
             if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
             const r=aerialRival(p);
             if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it)
@@ -7469,7 +7512,7 @@
         // a high ball's flight path heads it goalward from midfield before it ever reaches the box.
         const pNearBox = Math.abs(p.x-goalX) < BX+90 && Math.abs(p.y-YC) < BY+100;
         p.aerialT=simNow;                          // (going up for it: a man of theirs at it has a duel on his hands)
-        if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH){
+        if(pNearBox && dist(p,ball)<48 && p.state==='normal' && p.z<=0 && ball.z>18 && ball.z<AIR_REACH && !keeperOnIt()){
           if(ball.z>30) { p.vz=headJumpVz(p); p.z=0.1; }     // a leap for the higher ones
           // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
           // header on goal, the same as yours
@@ -8556,7 +8599,7 @@
     } else {
       p.vx*=Math.pow(0.86,dt*60);p.vy*=Math.pow(0.86,dt*60);  // coast to a stop
     }
-    if(watch){                                      // his body comes round to the ball no faster than his Agility lets it
+    if(watch){                                      // his body comes round to the ball as quickly as he reads it (Off IQ)
       const tx=ball.x-p.x, ty=ball.y-p.y, f=p.facing||{x:atkOf(p.team),y:0};
       if(Math.hypot(tx,ty)>1){ const a0=Math.atan2(f.y,f.x); let dd=Math.atan2(ty,tx)-a0; while(dd>Math.PI)dd-=Math.PI*2; while(dd<-Math.PI)dd+=Math.PI*2;
         const mx=bodyTurnOf(p)*capFatigue*dt, a=a0+clamp(dd,-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
@@ -8612,12 +8655,57 @@
     else D+=offSquare(p)*P.turnTouch.val;                                      // he didn't get his body round to it in time
     return clamp(D,0,1);
   }
-  // how far he's turned from the ball as it reaches him: 0 square to it, about half side-on, 1 his back to it (a runner
-  // taking a pass played in behind on the run doesn't count: it comes with him)
+  // how far he's turned from the ball as it reaches him: 0 square to it, about half side-on, 1 his back to it
   function offSquare(p){
-    if(!p||!p.facing||(p===ball.intendedRcv&&(ball.rcvRunner||(ball.thru&&simNow<ball.thru.until)))) return 0;
+    if(!p||!p.facing) return 0;
     const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy); if(d<1) return 0;
     return clamp(((1-(p.facing.x*dx+p.facing.y*dy)/d)/2-0.1)/0.9,0,1);
+  }
+  // turned away from the ball -- it's further round than the Back-to-it dial (110 deg) from the way he faces, or it's
+  // coming at him from there (he never saw it coming): he can't take it (see attemptCaptures)
+  function facingAway(p){
+    if(!p||!p.facing) return false;
+    const c=Math.cos(P.awayAngle.val*Math.PI/180), dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
+    if(d>=1&&(p.facing.x*dx+p.facing.y*dy)/d<c) return true;
+    const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy, rs=Math.hypot(rvx,rvy);
+    return rs>60&&-(p.facing.x*rvx+p.facing.y*rvy)/rs<c;
+  }
+  // OFF HIM: a ball that runs into a man who isn't facing it comes off him like off a post -- glancing off a round body,
+  // a little bounce in it and losing pace -- and it's nobody's
+  function deflectOff(p,keepLo=0.55,keepHi=0.75){
+    const nx0=ball.x-p.x, ny0=ball.y-p.y, nl=Math.hypot(nx0,ny0)||1, nx=nx0/nl, ny=ny0/nl, inSp=Math.hypot(ball.vx,ball.vy), z0=ball.z;
+    const idx=inSp>1?ball.vx/inSp:-nx, idy=inSp>1?ball.vy/inSp:-ny;
+    let rvx=ball.vx-p.vx, rvy=ball.vy-p.vy; const vn=rvx*nx+rvy*ny;   // (< 0: into him)
+    if(vn<0){ rvx-=1.35*vn*nx; rvy-=1.35*vn*ny; }
+    const k=keepLo+(keepHi-keepLo)*Math.random();
+    ball.vx=p.vx+rvx*k; ball.vy=p.vy+rvy*k;
+    ball.x=p.x+nx*(p.r+ball.r+1); ball.y=p.y+ny*(p.r+ball.r+1);
+    ball.z=Math.max(ball.z,1); ball.vz=Math.max(ball.vz,20+40*Math.random());
+    endCurve(); ball.cushBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.intendedRcv=null; ball.thru=null; ball.rcvRunner=false;
+    ball.lastTouch=p.team; if(ball.lastTouchP!==p) ball.prevTouchP=ball.lastTouchP; ball.lastTouchP=p; p.noTouchT=0.35;
+    if(LAB.on) labOnTouch(p,0,null,{sp:inSp,keep:k,u:0,dx:idx,dy:idy,z:z0});
+  }
+  // SHOT BLOCKS: a shot that passes close enough to one of theirs, below his shoulders, is blocked -- it comes off his body
+  // or a leg, losing most of its pace, and it's a loose ball. How close is his block reach: the Shot block dial, a little
+  // more or less for his Def IQ. Swept along the ball's path this frame (x0,y0 to where it is now), so a hard shot can't
+  // skip through a man between two frames. A slow one (a scuff, a roller) is just a ball he can take (attemptCaptures).
+  function blockReachOf(p){ return P.blockReach.val*statLerp(defIQof(p),1-P.blockIQ.val,1+P.blockIQ.val); }
+  function blockShots(x0,y0){
+    if(!(ball.shotT>0)||!ball.shotBy||ball.ownedBy||gkHold||scoredT>0||ball.z>=PLAYER_H*1.3) return;
+    const sx=ball.x-x0, sy=ball.y-y0, L2=sx*sx+sy*sy, sp=Math.hypot(ball.vx,ball.vy);
+    if(sp<450) return;
+    let hit=null, ht=2;
+    for(const q of players){
+      if(q.team===ball.shotBy||q.noTouchT>0||q.benched||(q.state!=='normal'&&q.state!=='slide')) continue;
+      const t=L2>0?clamp(((q.x-x0)*sx+(q.y-y0)*sy)/L2,0,1):1, cx=x0+sx*t, cy=y0+sy*t;
+      if(Math.hypot(q.x-cx,q.y-cy)<blockReachOf(q)&&t<ht){ ht=t; hit=q; }   // (the first man in its way)
+    }
+    if(!hit) return;
+    ball.x=x0+sx*ht; ball.y=y0+sy*ht;
+    deflectOff(hit,0.3,0.6);
+    ball.shotT=0; ball.shotBy=null; hit.noTouchT=0.3;
+    lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
+    if(LAB.on&&LAB.kind==='shoot') labOnSave('blocked');
   }
   // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
@@ -8800,6 +8888,7 @@
         return;
       }
       const intercept=!!(passerTeam&&p.team!==passerTeam);
+      if(intercept&&ball.shotT>0&&ball.shotBy&&ball.shotBy!==p.team&&ballSp>=450) continue;   // (a live shot: blockShots)
       let myR=intercept
         ? winReachR(p)*(0.45+0.55*interceptReachOf(p))    // defender intercept reach (Interceptions stat)
         : controlROf(p);
@@ -8813,6 +8902,14 @@
       if(gap>=myR+ball.r){ p.reachT=-1; continue; }
       if(!(p.reachT>=0)){ p.reachT=simNow; p.trapRolled=false; if(LAB.on) labOnArrive(p,false); }   // the ball has just come into reach
       if(mine) continue;                                   // your own touch, not at your feet yet: go and get it
+      // HIS BACK TO IT: turned away from the ball as it gets to him, he can't take it. If it's coming into him it hits
+      // him and comes off; otherwise it goes on past him (he may yet get round to it while it's in his reach).
+      if(facingAway(p)){
+        const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy, rs=Math.hypot(rvx,rvy), into=rvx*(p.x-ball.x)+rvy*(p.y-ball.y)>0;
+        const miss=rs>1?Math.abs(rvx*(p.y-ball.y)-rvy*(p.x-ball.x))/rs:gap;
+        if(gap<p.r+ball.r||(into&&miss<p.r+ball.r)){ if(checkOffsideTouch(p))return; deflectOff(p); return; }
+        continue;
+      }
       let s,e;
       if(p===controlled&&!(LAB.on&&LAB.kind==='trap')){
         // CLASSIC: no trap to time -- the touch is his own (touchQuality). A first-time pass or a flicked first touch
@@ -8979,13 +9076,30 @@
     const t0=Math.abs(bx)>1e-3?(kp.homeX-ball.x)/bx:0;
     return {bx, by, t0, y0:ball.y+by*t0};
   }
-  function cageKeeper(kp){
+  function cageKeeper(kp,out){
     if(kp.diveT>0||kp.groundT>0) return;                 // mid-dive: let the lunge extend past the post
-    const gl=kp.side<0?0:FW, maxOut=120;                 // never stray more than ~120px off the goal line
+    const gl=kp.side<0?0:FW, maxOut=out?PA_D:120;        // never stray more than ~120px off the goal line (out closing a man down: his box)
     kp.x = kp.side<0 ? clamp(kp.x,gl,gl+maxOut) : clamp(kp.x,gl-maxOut,gl);
-    const lim=GOAL_W/2-kp.r;                             // and never sit outside the posts laterally
+    const lim=out?PA_HW-kp.r:GOAL_W/2-kp.r;              // and never sit outside the posts laterally (or his box)
     kp.y = clamp(kp.y, YC-lim, YC+lim);
   }
+  // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
+  // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
+  // flies (see the physics step).
+  const GK_CLAIM_H=PLAYER_H*2.4;
+  function crossClaim(kp){
+    const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=reachOf(kp)+ball.r;
+    for(let t=0.04;t<=1.6;t+=0.04){
+      const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
+      if(z>GK_CLAIM_H) continue;                                       // still over his reach
+      const x=ball.x+ball.vx*t, y=ball.y+ball.vy*t;
+      if(Math.abs(x-glX)>GA_D+80||Math.abs(y-YC)>GA_HW+60) continue;   // outside his patch
+      if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+0.12<=t) return {x,y,t};   // (a moment to read it)
+    }
+    return null;
+  }
+  // a keeper coming for a cross is at it: the men going up for it leave it to him
+  function keeperOnIt(){ for(const k of keepers) if(k.mode==='claimX'&&Math.hypot(ball.x-k.x,ball.y-k.y)<reachOf(k)+ball.r+14) return true; return false; }
   function keeperUpdate(kp,dt){
     if(kp.benched){ kp.x=kp.homeX+kp.side*90; kp.y=-80; kp.diveT=0; kp.groundT=0; return; }   // Shooting Lab, keeper off: nowhere near it
     kp.claimCd-=dt;
@@ -9052,10 +9166,27 @@
       }
       return;
     }
+    // CLAIMING A CROSS: one of theirs whipped into his patch that he can get to while it's still at his hands (crossClaim)
+    // -- he comes for it (from his line, or on his way back to it) and catches it, over their heads
+    if((kp.mode==='line'||kp.mode==='return')&&kp.claimCd<=0&&ball.crossT>0&&ball.crossBy&&ball.crossBy!==kp.team&&!ball.ownedBy&&!gkHold&&ball.z>0
+       &&kp.diveT<=0&&kp.groundT<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&!(LAB.on&&LAB.kind==='shoot')&&crossClaim(kp)) kp.mode='claimX';
     if(kp.mode==='return'){
       kp.x+=clamp(kp.homeX-kp.x,-spd*dt,spd*dt);
       kp.y+=clamp(YC-kp.y,-spd*dt,spd*dt);
       if(Math.abs(kp.x-kp.homeX)<6)kp.mode='line';
+      return;
+    }
+    if(kp.mode==='claimX'){
+      const cs=(!ball.ownedBy&&!gkHold&&scoredT<=0&&offsideT<=0&&restartT<=0)?crossClaim(kp):null;
+      if(!cs){ kp.mode='return'; return; }                // (headed on, cleared, or he can't get there now)
+      const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
+      kp.x+=dx/l*mv; kp.y+=dy/l*mv;
+      kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
+      if(Math.hypot(ball.x-kp.x,ball.y-kp.y)<reachOf(kp)+ball.r+10&&ball.z<=GK_CLAIM_H+8){
+        kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; gkHold=kp;
+        ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
+        lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
+      }
       return;
     }
 
@@ -9071,42 +9202,52 @@
     const lim=GOAL_W/2-kp.r;                     // never let the body sit outside the post (max = half a body length to the post)
     ty=clamp(ty,YC-lim,YC+lim);
 
-    // RUSH OUT: an opponent is carrying the ball close in our box -> close him down
+    // CLOSING HIM DOWN: one of theirs on the ball coming in on our goal -> the keeper comes off his line to narrow the
+    // angle, further the nearer the man gets (2.5 m off it with him at the edge of the box, 6 m or so with him 8 m out):
+    // leaning to the near post, part way from the line that splits the angle between his posts (see kpBisector). Once
+    // the man's close (7 m) with none of ours between them, he goes straight at the ball -- and at the man's feet he
+    // takes it off him (his reach, and a dive at the feet: Diving).
     const oppCarrier = ball.ownedBy && ball.ownedBy.team!==kp.team;
     const glX=kp.side<0?0:FW;                    // his goal line
     const carrierClose = oppCarrier && !(LAB.on&&LAB.kind==='shoot') &&   // (in the Shooting Lab he waits on his line for the shot)
-      Math.abs(ball.x-glX)<PA_D && Math.abs(ball.y-YC)<PA_HW;
+      Math.abs(ball.x-glX)<PA_D+140 && Math.abs(ball.y-YC)<PA_HW+20;
     if(carrierClose && scoredT<=0 && offsideT<=0){
-      // advance off the line proportionally, narrowing the angle: more the closer he is; leaning to the near post, part
-      // way from the line that splits the angle between his posts (see kpBisector)
       const c=ball.ownedBy, lim=GOAL_W/2-kp.r;
-      const advance=clamp((PA_D-Math.abs(c.x-glX))*0.45,0,110);
+      const advance=clamp((PA_D+140-Math.hypot(glX-ball.x,YC-ball.y))*0.45,0,200);   // how far off his line
       let tx=kp.homeX-kp.side*advance*0.7, shadeY=YC+clamp((ball.y-YC)*0.5,-GOAL_W*0.35,GOAL_W*0.35);
       { const B=kpBisector(kp), yMid=Math.abs(B.bx)>1e-3?ball.y+B.by*(tx-ball.x)/B.bx:YC; shadeY=yMid+KP_LEAN*(shadeY-yMid); }
       // ...but from a tight angle that would take him out level with the man, beside the way to goal, and leave him
-      // the far post. Out of the angle the ball has on goal, he takes the line that splits it instead, near his line by
-      // the near post.
+      // the far post. Out of the angle the ball has on goal, he takes the line that splits it instead.
       const dep=(x)=>Math.abs(x-glX), dB=dep(ball.x), dK=dep(tx), f=clamp(dK/Math.max(1,dB),0,1);
       const yA=(YC-GOAL_W/2)+(ball.y-(YC-GOAL_W/2))*f, yB=(YC+GOAL_W/2)+(ball.y-(YC+GOAL_W/2))*f;   // the lines to his posts, at his depth
       if(dB<dK+20||shadeY<Math.min(yA,yB)-reachOf(kp)||shadeY>Math.max(yA,yB)+reachOf(kp)){
         const {bx,by,t0,y0}=kpBisector(kp);
-        let adv=clamp((PA_D-Math.hypot(glX-ball.x,YC-ball.y))*0.45,0,110)*0.7;
+        let adv=advance*0.7;
         if(Math.abs(by)>1e-3) adv=Math.min(adv,Math.max(0,(lim-Math.abs(y0-YC))/Math.abs(by)));   // (inside his posts)
         adv=Math.min(adv,Math.max(0,t0-40));                             // (not on top of him)
         tx=kp.homeX-bx*adv; shadeY=clamp(y0-by*adv,YC-lim,YC+lim);
       }
-      kp.x+=clamp(tx-kp.x,-spd*1.15*dt,spd*1.15*dt);
-      kp.y+=clamp(shadeY-kp.y,-spd*1.15*dt,spd*1.15*dt);
-      // very close -> smother / take the ball off him
-      if(dist(kp,ball)<reachOf(kp)+ball.r+6&&ball.z<34){
+      // close, and nothing of ours between them: straight at the ball
+      const dKB=dist(kp,ball)||1;
+      let charge=dKB<175&&dep(ball.x)<PA_D+20;
+      if(charge) for(const q of players){ if(q.team!==kp.team||q.state!=='normal') continue;
+        const t=((q.x-kp.x)*(ball.x-kp.x)+(q.y-kp.y)*(ball.y-kp.y))/(dKB*dKB);
+        if(t>0.1&&t<0.9&&Math.hypot(q.x-(kp.x+(ball.x-kp.x)*t),q.y-(kp.y+(ball.y-kp.y)*t))<26){ charge=false; break; } }
+      if(charge){ tx=ball.x+c.vx*0.12; shadeY=ball.y+c.vy*0.12; }
+      { const v=spd*(charge?1.35:1.15), mx=tx-kp.x, my=shadeY-kp.y, ml=Math.hypot(mx,my)||1, st=Math.min(ml,v*dt);
+        kp.x+=mx/ml*st; kp.y+=my/ml*st; }
+      kp.charging=charge;
+      // at his feet -> the keeper takes it off him
+      if(dist(kp,ball)<reachOf(kp)+ball.r+6+divingOf(kp)*0.1&&ball.z<34){
         kp.mode='hold';kp.holdT=1.1;gkHold=kp;
         ball.cushBy=null;offsidePass=null;ball.ownedBy=null;ball.lastTouch=kp.team;
         lastGrade='KEEPER OUT!';gradeColor='#ffb43c';gradeFade=1.3;
         if(LAB.on) labOnSave('smothered');
       }
-      cageKeeper(kp);
+      cageKeeper(kp,true);
       return;
     }
+    kp.charging=false;
 
     // REACTION: when a shot is struck the keeper can't adjust until its reaction delay passes.
     // High reflexes = a near-instant reaction; low = a slow start (beaten to the corners).
@@ -9586,6 +9727,7 @@
             ball.lob=null; }}
       }
       ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
+      blockShots(ball.x-ball.vx*dt,ball.y-ball.vy*dt);
       // a live shot skids with much less drag so it carries to goal; normal balls use full friction
       const fcoef = ball.shotT>0 ? P.friction.val*0.3 : P.friction.val;
       const fr=Math.pow(1-fcoef,dt*3.2);
@@ -9869,6 +10011,14 @@
       if(face==='back') x+=side*g; else if(face==='roof') z+=g; else y+=(face==='far'?-1:1)*g; }
     return {x,y,z};
   }
+  // DEPTH IN THE GOAL: the parts of a goal nearer the camera (further down the pitch, a bigger y) than this go in front of
+  // what's behind them -- the near post and side netting always, and with the ball in or at the goal everything nearer
+  // than the ball -- so the ball's behind the near post and inside the netting, not drawn over them
+  function goalSplit(side){
+    const gx=side>0?FW:0;
+    if((ball.inNet===side||Math.abs(ball.x-gx)<ball.r+30)&&Math.abs(ball.y-YC)<GOAL_W/2+20) return clamp(ball.y,YC-GOAL_W/2,YC+GOAL_W/2);
+    return YC+GOAL_W/2;
+  }
   function goal(side){
     if(LAB.on){ labOnGoal(side); return; }           // the labs call it themselves (no score, no restart)
     if(practice){
@@ -10009,7 +10159,12 @@
     const cfg={enabled:true, ready:false, strip:null};
     const off=document.createElement('canvas'); off.width=HW; off.height=HH;
     const octx=off.getContext('2d'); let img=octx.createImageData(HW,HH), buf=new Uint32Array(img.data.buffer);
-    function resize(){ if((W>>1)===HW) return; HW=W>>1; off.width=HW; img=octx.createImageData(HW,HH); buf=new Uint32Array(img.data.buffer); }   // the screen changed width
+    // the goals' fronts (see goalSplit) go on an overlay of their own, drawn with the men and the ball (front)
+    const foff=document.createElement('canvas'); foff.width=HW; foff.height=HH;
+    const foctx=foff.getContext('2d'); let fimg=foctx.createImageData(HW,HH), fbuf=new Uint32Array(fimg.data.buffer);
+    const FR={'-1':null,'1':null};                         // each goal's front this frame: the box its pixels are in
+    function resize(){ if((W>>1)===HW) return; HW=W>>1; off.width=HW; img=octx.createImageData(HW,HH); buf=new Uint32Array(img.data.buffer);
+      foff.width=HW; fimg=foctx.createImageData(HW,HH); fbuf=new Uint32Array(fimg.data.buffer); FR[-1]=FR[1]=null; }   // the screen changed width
     const LE=new Uint8Array(new Uint32Array([0x01020304]).buffer)[0]===4;
     const pk=(h,a)=>{ const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
       a=a==null?255:a; return (LE?((a<<24)|(b<<16)|(g<<8)|r):((r<<24)|(g<<16)|(b<<8)|a))>>>0; };
@@ -10106,35 +10261,81 @@
       for(let n=0;n<400;n++){ if(x0>=0&&x0<HW&&y0>=0&&y0<HH){ const o=y0*HW+x0; buf[o]=mixTo(buf[o],248,252,255,a); }
         if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } }
     }
-    let NM=null;                                           // which pixels the net covers this frame (each stippled once)
+    let NM=null, FM=null;                                  // which pixels the net covers this frame, behind / in front (each stippled once)
+    let FS=1;                                              // (the goal being drawn: its front's box is FR[FS])
+    const fgrow=(i,j)=>{ const r=FR[FS]||(FR[FS]={x0:i,y0:j,x1:i,y1:j}); if(i<r.x0)r.x0=i; if(i>r.x1)r.x1=i; if(j<r.y0)r.y0=j; if(j>r.y1)r.y1=j; };
+    const fput=(i,j,c)=>{ i=Math.round(i); j=Math.round(j); if(i>=0&&i<HW&&j>=0&&j<HH){ fbuf[j*HW+i]=c; fgrow(i,j); } };
+    const fmix=(i,j,r,g,b,a)=>{                            // a see-through colour laid on the overlay (over what's there)
+      if(i<0||i>=HW||j<0||j>=HH) return; const o=j*HW+i, c=fbuf[o];
+      let ca,cr,cg,cb; if(LE){ cr=c&255; cg=(c>>>8)&255; cb=(c>>>16)&255; ca=(c>>>24)/255; } else { cr=c>>>24; cg=(c>>>16)&255; cb=(c>>>8)&255; ca=(c&255)/255; }
+      const na=a+ca*(1-a), k=ca*(1-a);
+      const nr=Math.round((r*a+cr*k)/na), ng=Math.round((g*a+cg*k)/na), nb=Math.round((b*a+cb*k)/na), A=Math.round(na*255);
+      fbuf[o]=(LE?((A<<24)|(nb<<16)|(ng<<8)|nr):((nr<<24)|(ng<<16)|(nb<<8)|A))>>>0; fgrow(i,j); };
+    function fbres(x0,y0,x1,y1,c){
+      x0=Math.round(x0); y0=Math.round(y0); x1=Math.round(x1); y1=Math.round(y1);
+      const dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let e=dx+dy;
+      for(let n=0;n<400;n++){ fput(x0,y0,c); if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } }
+    }
+    function fmixLine(x0,y0,x1,y1,a){
+      x0=Math.round(x0); y0=Math.round(y0); x1=Math.round(x1); y1=Math.round(y1);
+      const dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let e=dx+dy;
+      for(let n=0;n<400;n++){ fmix(x0,y0,248,252,255,a); if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } }
+    }
+    function fclear(side){ const r=FR[side]; if(!r) return; for(let j=r.y0;j<=r.y1;j++) fbuf.fill(0,j*HW+r.x0,j*HW+r.x1+1); FR[side]=null; }
+    // a goal's front, drawn in its place among the men (see draw's actors); false while the art is off
+    function front(side){
+      if(!(cfg.enabled&&cfg.ready)) return false;
+      const r=FR[side]; if(!r) return true;
+      const w=r.x1-r.x0+1, h=r.y1-r.y0+1;
+      ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(foff,r.x0,r.y0,w,h,r.x0*2,r.y0*2,w*2,h*2); ctx.restore();
+      return true;
+    }
     const NET_GRID=[['back',12,4],['roof',12,2],['far',3,4],['near',3,4]];   // face, squares across, squares up
     function goal(side){                                  // white posts edged in navy, a mesh net (pushed in where it's hit), its shadow
-      const gx=side>0?FW:0, bxw=gx+side*NET_D;
+      fclear(side); FS=side;
+      const gx=side>0?FW:0, bxw=gx+side*NET_D, sy=goalSplit(side);   // (sy: nearer than this is the goal's front, on the overlay)
       const pF=half(gx,YC-GOAL_W/2), pN=half(gx,YC+GOAL_W/2), bF=half(bxw,YC-GOAL_W/2), bN=half(bxw,YC+GOAL_W/2);
       if(Math.max(pF.x,pN.x,bF.x,bN.x)<-12||Math.min(pF.x,pN.x,bF.x,bN.x)>HW+12) return;
-      const tF=pF.y-GOAL_H*pF.s/2, tN=pN.y-GOAL_H*pN.s/2, btF=bF.y-GOAL_H*bF.s/2*0.85, btN=bN.y-GOAL_H*bN.s/2*0.85;
+      const tF=pF.y-GOAL_H*pF.s/2, tN=pN.y-GOAL_H*pN.s/2;
       fill([[pF.x,pF.y],[pN.x,pN.y],[bN.x+2*side,bN.y+1],[bF.x+2*side,bF.y]], o=>{ buf[o]=mixTo(buf[o],0,0,0,0.14); });
       // the netting: each face a grid, pushed in where the ball hit it (netPoint); its squares marked, then stippled once
-      if(!NM||NM.length!==HW*HH) NM=new Uint8Array(HW*HH);
-      const sc=q=>{ const h=half(q.x,q.y); return [h.x, h.y-q.z*h.s/2]; };
-      let X0=1e9, Y0=1e9, X1=-1e9, Y1=-1e9; const grids=[];
+      if(!NM||NM.length!==HW*HH){ NM=new Uint8Array(HW*HH); FM=new Uint8Array(HW*HH); }
+      const sc=q=>{ const h=half(q.x,q.y); return [h.x, h.y-q.z*h.s/2, q.y]; };   // (and where it is down the pitch)
+      const at=(x,y,z)=>{ const h=half(x,y); return [h.x, h.y-z*h.s/2]; };
+      let X0=1e9, Y0=1e9, X1=-1e9, Y1=-1e9, U0=1e9, V0=1e9, U1=-1e9, V1=-1e9; const grids=[];
       for(const [f,nu,nv] of NET_GRID){
         const G=[]; for(let j=0;j<=nv;j++){ const row=[]; for(let i=0;i<=nu;i++) row.push(sc(netPoint(side,f,i/nu,j/nv))); G.push(row); }
         grids.push(G);
-        for(let j=0;j<nv;j++) for(let i=0;i<nu;i++) fill([G[j][i],G[j][i+1],G[j+1][i+1],G[j+1][i]], (o,x,y)=>{ NM[o]=1;
-          if(x<X0)X0=x; if(x>X1)X1=x; if(y<Y0)Y0=y; if(y>Y1)Y1=y; });
+        for(let j=0;j<nv;j++) for(let i=0;i<nu;i++){ const q=[G[j][i],G[j][i+1],G[j+1][i+1],G[j+1][i]];
+          if((q[0][2]+q[1][2]+q[2][2]+q[3][2])/4>=sy) fill(q,(o,x,y)=>{ FM[o]=1; if(x<U0)U0=x; if(x>U1)U1=x; if(y<V0)V0=y; if(y>V1)V1=y; });
+          else fill(q,(o,x,y)=>{ NM[o]=1; if(x<X0)X0=x; if(x>X1)X1=x; if(y<Y0)Y0=y; if(y>Y1)Y1=y; }); }
       }
       for(let y=Y0;y<=Y1;y++) for(let x=X0;x<=X1;x++){ const o=y*HW+x; if(NM[o]){ NM[o]=0; if(((x+y)&1)===0) buf[o]=mixTo(buf[o],240,248,255,0.62); } }
+      for(let y=V0;y<=V1;y++) for(let x=U0;x<=U1;x++){ const o=y*HW+x; if(FM[o]){ FM[o]=0; if(((x+y)&1)===0) fmix(x,y,240,248,255,0.62); } }
       for(const G of grids){                               // the strings, every other square: they bend where it's pushed in
-        for(let j=0;j<G.length;j+=1) for(let i=0;i+1<G[j].length;i++) mixLine(G[j][i][0],G[j][i][1],G[j][i+1][0],G[j][i+1][1],0.5);
-        for(let i=0;i<G[0].length;i+=2) for(let j=0;j+1<G.length;j++) mixLine(G[j][i][0],G[j][i][1],G[j+1][i][0],G[j+1][i][1],0.5);
+        const str=(a,b)=>((a[2]+b[2])/2>=sy?fmixLine:mixLine)(a[0],a[1],b[0],b[1],0.5);
+        for(let j=0;j<G.length;j+=1) for(let i=0;i+1<G[j].length;i++) str(G[j][i],G[j][i+1]);
+        for(let i=0;i<G[0].length;i+=2) for(let j=0;j+1<G.length;j++) str(G[j][i],G[j+1][i]);
       }
-      bres(bF.x,bF.y,bN.x,bN.y,T.grey); bres(bF.x,btF,bN.x,btN,T.grey); bres(bF.x,bF.y,bF.x,btF,T.grey); bres(bN.x,bN.y,bN.x,btN,T.grey);
-      for(const [x,y0,y1] of [[pF.x,pF.y,tF],[pN.x,pN.y,tN]]){
-        const X=Math.round(x-0.5);
-        for(let j=Math.round(y1);j<=Math.round(y0);j++){ put(X-1,j,T.navy); put(X,j,T.white); put(X+1,j,T.white); put(X+2,j,T.navy); }
+      // a line on the goal from a to b (pitch points [x,y,z]), behind the split on the ground, in front of it on the overlay
+      const line3=(a,b,c,dy=0)=>{
+        const draw=(u,v,fr)=>(fr?fbres:bres)(u[0],u[1]+dy,v[0],v[1]+dy,c);
+        if((a[1]>=sy)===(b[1]>=sy)){ draw(at(...a),at(...b),a[1]>=sy); return; }
+        const t=(sy-a[1])/(b[1]-a[1]), m=at(a[0]+(b[0]-a[0])*t,sy,a[2]+(b[2]-a[2])*t);
+        draw(at(...a),m,a[1]>=sy); draw(m,at(...b),b[1]>=sy);
+      };
+      const yF=YC-GOAL_W/2, yN=YC+GOAL_W/2, hb=GOAL_H*0.85;
+      line3([bxw,yF,0],[bxw,yN,0],T.grey); line3([bxw,yF,hb],[bxw,yN,hb],T.grey); line3([bxw,yF,0],[bxw,yF,hb],T.grey); line3([bxw,yN,0],[bxw,yN,hb],T.grey);
+      for(const [x,y0,y1,fr] of [[pF.x,pF.y,tF,false],[pN.x,pN.y,tN,true]]){   // the posts: the near one is in front
+        const X=Math.round(x-0.5), pt=fr?fput:put;
+        for(let j=Math.round(y1);j<=Math.round(y0);j++){ pt(X-1,j,T.navy); pt(X,j,T.white); pt(X+1,j,T.white); pt(X+2,j,T.navy); }
       }
-      bres(pF.x-0.5,tF-1,pN.x-0.5,tN-1,T.navy); bres(pF.x-0.5,tF,pN.x-0.5,tN,T.white); bres(pF.x-0.5,tF+1,pN.x-0.5,tN+1,T.white);
+      { const A=[gx,yF,GOAL_H], B=[gx,yN,GOAL_H];         // the bar (half a pixel in, as the posts are)
+        const bar=(c,dy)=>{ const a=at(...A), b=at(...B);
+          if(sy<=yF){ fbres(a[0]-0.5,a[1]+dy,b[0]-0.5,b[1]+dy,c); return; }
+          const m=at(gx,sy,GOAL_H); bres(a[0]-0.5,a[1]+dy,m[0]-0.5,m[1]+dy,c); fbres(m[0]-0.5,m[1]+dy,b[0]-0.5,b[1]+dy,c); };
+        bar(T.navy,-1); bar(T.white,0); bar(T.white,1); }
+      const r=FR[side]; if(r) foctx.putImageData(fimg,0,0,r.x0,r.y0,r.x1-r.x0+1,r.y1-r.y0+1);
     }
     function flags(){                                      // the salmon pennant on a navy pole, at each corner
       for(const [x,y] of [[0,0],[FW,0],[0,FH],[FW,FH]]){
@@ -10162,7 +10363,7 @@
     if(PITCH_ART.length>40 && PITCH_ART_META.w){
       const im=new Image(); im.onload=()=>{ cfg.strip=im; cfg.ready=true; }; im.onerror=()=>{ cfg.ready=false; }; im.src=PITCH_ART;
     }
-    return { draw, resize, cfg, get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, enable(v){ cfg.enabled=(v!==false); } };
+    return { draw, front, resize, cfg, get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, enable(v){ cfg.enabled=(v!==false); } };
   })();
   try{ window.PITCH=PITCH; }catch(e){}
   // ===== END PITCH ART =========================================================================
@@ -10205,7 +10406,7 @@
       markArc(gx,0,PX_M,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); markArc(gx,FH,PX_M,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);   // corners
     }
 
-    drawGoal(-1);drawGoal(1);
+    drawGoal(-1,false);drawGoal(1,false);
     }
 
     // the man you control: a solid green ring on the grass at his reach (Ball control), the only ring there is
@@ -10231,6 +10432,7 @@
     const actors=[];
     for(const p of players)actors.push({y:p.y,fn:()=>drawOutfielder(p)});
     actors.push({y:ball.y,fn:drawBall});
+    for(const sd of [-1,1]) actors.push({y:goalSplit(sd)+0.01,fn:()=>{ if(!PITCH.front(sd)) drawGoal(sd,true); }});   // the goals' fronts
     if(pball.on)actors.push({y:pball.y,fn:drawGhostBall});
     for(const kp of keepers) if(!kp.benched) actors.push({y:kp.y,fn:()=>drawKeeper(kp)});
     actors.sort((a,b)=>a.y-b.y);
@@ -10321,21 +10523,27 @@
     }
   }
 
-  function drawGoal(side){
-    const gx=side>0?FW:0;
-    const pF=proj(gx,YC-GOAL_W/2), pN=proj(gx,YC+GOAL_W/2);
-    const topF=pF.y-GOAL_H*pF.scale, topN=pN.y-GOAL_H*pN.scale;
+  // the plain goal: front false, the parts behind goalSplit (drawn with the pitch); true, the ones in front of it (drawn
+  // among the men, in their place)
+  function drawGoal(side,front){
+    const gx=side>0?FW:0, sy=goalSplit(side), yF=YC-GOAL_W/2, yN=YC+GOAL_W/2;
+    const pp=(x,y,z)=>{ const r=proj(x,y,z); return [r.x,r.y]; };
+    const seg=(a,b)=>{ const [ax,ay]=pp(a.x,a.y,a.z), [bx,by]=pp(b.x,b.y,b.z); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); };
+    const mine=(a,b)=>((a.y+b.y)/2>=sy)===!!front;      // this bit is on this side of the split
     // the net's strings, bent where the ball's pushed them (netPoint)
-    ctx.strokeStyle='rgba(244,248,244,.30)';ctx.lineWidth=1;
-    const sp=q=>{ const r=proj(q.x,q.y,q.z); return [r.x,r.y]; };
+    ctx.strokeStyle='rgba(244,248,244,.30)';ctx.lineWidth=1;ctx.beginPath();
     for(const [f,nu,nv] of [['back',8,3],['roof',8,2],['far',2,3],['near',2,3]]){
-      for(let j=0;j<=nv;j++){ ctx.beginPath(); for(let i=0;i<=nu;i++){ const [x,y]=sp(netPoint(side,f,i/nu,j/nv)); if(i) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.stroke(); }
-      for(let i=0;i<=nu;i++){ ctx.beginPath(); for(let j=0;j<=nv;j++){ const [x,y]=sp(netPoint(side,f,i/nu,j/nv)); if(j) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.stroke(); }
+      const G=[]; for(let j=0;j<=nv;j++){ const row=[]; for(let i=0;i<=nu;i++) row.push(netPoint(side,f,i/nu,j/nv)); G.push(row); }
+      for(let j=0;j<=nv;j++) for(let i=0;i<nu;i++) if(mine(G[j][i],G[j][i+1])) seg(G[j][i],G[j][i+1]);
+      for(let i=0;i<=nu;i++) for(let j=0;j<nv;j++) if(mine(G[j][i],G[j+1][i])) seg(G[j][i],G[j+1][i]);
     }
-    ctx.strokeStyle='#f4f8f4';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(pF.x,pF.y);ctx.lineTo(pF.x,topF);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(pN.x,pN.y);ctx.lineTo(pN.x,topN);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(pF.x,topF);ctx.lineTo(pN.x,topN);ctx.stroke();
+    ctx.stroke();
+    ctx.strokeStyle='#f4f8f4';ctx.lineWidth=3;ctx.beginPath();
+    const P0={x:gx,y:yF,z:0}, P1={x:gx,y:yF,z:GOAL_H}, Q0={x:gx,y:yN,z:0}, Q1={x:gx,y:yN,z:GOAL_H};
+    if(!front) seg(P0,P1); else seg(Q0,Q1);                // the far post behind, the near one in front
+    if(sy<=yF){ if(front) seg(P1,Q1); }                    // the bar, split where the split crosses it
+    else { const M={x:gx,y:sy,z:GOAL_H}; if(front) seg(M,Q1); else seg(P1,M); }
+    ctx.stroke();
   }
 
   function drawShadow(xF,yF,rF,squash){

@@ -41,25 +41,33 @@ The same game played like any other football game. It's a copy of `index.html` w
   The reach, where you first meet the ball, is smaller: 18 at Ball control 1 up to 32 at 10 (it was 25 to 45). How
   far a touch can fall from the likely one is a dial: First-touch spread ×, default 1.
 - **A man the ball is coming to faces it.** Played to him, loose and his to go and get, or just rolling at him: he
-  turns his body to it as it comes, as fast as his Agility lets him, and gets to it however he must. Yours too, while
-  a pass is on its way to you.
-  - **Turning is Agility.** A half turn takes 0.82 s at Agility 1, 0.43 s at 5.5 and 0.28 s at 10.
+  turns his body to it as it comes, as quickly as he reads it (his Off IQ), and gets to it however he must. Yours too,
+  while a pass is on its way to you.
+  - **Turning is Off IQ.** A half turn takes 0.82 s at Off IQ 1, 0.43 s at 5.5 and 0.28 s at 10.
   - **Off his front he's slower, and he can't sprint.** Side-on he shuffles across at 72% of his running pace, and
     backs off at 55%. Agility moves both: 66% and 50% at 1, 78% and 61% at 10. Facing the ball, he goes at it flat out.
   - **A long way across or away from it**, he turns and runs, and turns back to face it in time. The slower he
     turns, the sooner he has to start.
-  - **A runner played in behind** takes it on the run, as before, and so does a man going after a ball that's
-    running away from him. A man darting across to cut out their pass goes flat out for the spot and stretches for
-    it as he gets there.
-  - **His back to it, the touch is harder.** If he couldn't get round to it in time, the touch is a quarter of the
-    way harder, from the easiest to the hardest there is; side-on it's about half that. A man with Ball control and
-    Composure 3, at the back with nobody near, takes it perfectly 85% of the time square to it and 43% with his back
-    to it. (Cutting out their pass is a stretch whichever way he faces, as it always was.)
+  - **Team-mates looking for it face it too, before it's played.** With one of yours on the ball, a man within 14 m
+    of it, or one up to 32 m off who's free (nobody within 4 m) with the way to him clear, turns to face the ball,
+    so he's ready for the pass. A man making a run keeps facing his run.
+  - **A through ball** the runner meets where it's played: out in front of him, he runs onto it flat out. If it
+    comes to his side or from behind, he has to check, turn and face it.
+  - **A man going after a ball that's running away from him** chases it. A man darting across to cut out their
+    pass goes flat out for the spot and stretches for it as he gets there.
+  - **Turned away from it, he can't take it.** If the ball is behind him as it reaches him (more than 110° from the
+    way he faces), or it's coming at him from behind where he can't see it, he gets nothing on it. If it runs into
+    him it comes off him, a little bounce and most of its pace gone, and it's nobody's. If not, it goes past him.
+    (Dead or crawling balls he just turns and picks up.)
+  - **Side-on, the touch is harder**, up to a quarter of the way from the easiest touch to the hardest. Cutting out
+    their pass is a stretch whichever way he faces, as it always was.
   - The sprite faces the ball while he does all this, so you see him side-step and back-pedal.
   - Measured over eight three-minute computer-against-computer matches, men took 54 to 77% of their passes with
-    their backs to the ball before, and 0 to 2% now. Goals and shots are much as they were: 15 and 41 over the eight
-    matches, against 13 and 40.
-  - The dials, in the Trap Lab's TUNE: Body turn ×, Side-step speed, Back-pedal speed and Touch off-square.
+    their backs to the ball before any of this, and 0 to 2% now. Goals, shots and interceptions are as they were: 18
+    goals, 45 shots and 14.5 interceptions a match, against 18, 42 and 14.0. A ball comes off someone's back about
+    eight times a match.
+  - The dials, in the Trap Lab's TUNE: Body turn ×, Side-step speed, Back-pedal speed, Touch off-square and Back to
+    it from (°).
 - **On the pitch.** The man you control has one solid green ring on the grass at his reach. The dotted reach ring,
   and the ring under whoever had the ball, are gone. The ball is drawn in whole pixels like the players: white with
   dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
@@ -72,6 +80,24 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Nothing goes through it** or out of the back.
   - The netting is drawn pushed in where it was hit, and it wobbles back after.
   - Wide of a post or over the bar, the ball still comes back off the line.
+  - **The near post and side netting are in front.** A ball in the goal, or a keeper on his line, is drawn behind
+    the near post and seen through the near side netting. Before, they were drawn over them. Once the ball is in,
+    every part of the goal nearer the camera than the ball is in front of it.
+- **Defenders block shots.** A shot that passes close enough to a defender, below his shoulders, is blocked: it
+  comes off his body or a leg, losing most of its pace, and it's a loose ball. How close is his block reach: 1 m
+  (the Shot block: reach dial), a little more or less for his Def IQ, 22 px at Def IQ 1 up to 28 px at 10. The
+  difference is kept small on purpose (Block: Def IQ spread, 12% either way). Hard shots are checked along their
+  whole path, so one can't skip through a man between two frames. A scuffed or rolling shot is just a ball he can
+  take.
+- **The keeper closes a man down.** With one of theirs on the ball coming in on goal (from 5 m outside the box), the
+  keeper comes off his line to narrow the angle. He's about 2.5 m out with the man at the edge of the box and 6 m or
+  so with him 8 m out, leaning to his near post as before. Once the man is close (7 m), with none of his own
+  between them, he goes straight at the ball, and at the man's feet he takes it off him. His reach and a dive at the
+  feet (Diving) decide how close that is. Out closing a man down he can leave his posts, anywhere in his box.
+- **The keeper claims crosses.** A cross into his six-yard box, or just past it, that he can get to while it's
+  within his reach (hands up, a little higher than the bar), he comes for and catches, over everyone's heads: the
+  men going up for it leave it to him. One that comes down further out he leaves to his defenders.
+
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box, and no word
   or number runs out of its box (checked at 640×360 up to 932×430).
@@ -87,7 +113,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
-    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 84 feel dials are the game's
+    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 89 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
@@ -130,7 +156,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that
   way, and you're on the receiver. "That way" is the stick's direction as the ball reaches you. On a phone, swiping
   off the 1-TOUCH button sets the direction instead and overrides the stick. The swipe counts as soon as it's 18 px
-  long, so the ball can arrive while your finger is still down. How true it goes depends on the ball and the man. Quicker and higher is harder:
+  long, so the ball can arrive while your finger is still down. You're put on the man it's going to (played into
+  space, whoever's best placed to get to it). He takes a beat to see it's his (0.35 s at Off IQ 1, 0.15 s at 10)
+  before he turns to it and goes to meet it, and the stick you aimed it with, still held that way, doesn't steer him
+  until you let it go or push it somewhere new. How true it goes depends on the ball and the man. Quicker and higher is harder:
   chest height is the hardest, slow along the grass the easiest. Passing counts for most of it (70%), Ball control
   for the rest. The worst case is a dial (One-touch pass: worst spray, default 16°, also in the Pass Lab's TUNE).
   Measured mean error off line, Passing/Ball control 2/2 against 9/9: slow along the grass 3.0° v 0.8°, hard along
@@ -454,7 +483,10 @@ played to flashes on the pitch. Drag on the second tap of a double-tap for a lof
 over the top. (A quick tap waits ~0.15 s before it goes, to see whether a second tap is coming;
 a held pass, a drag and a double-tap go at once.)
 
-**Swipe to shoot** — with the ball, swipe toward goal on the right half of the screen (off the
+**Swipe to shoot** — (Football Classic: swipe the way your man is facing. Up to 25° off it costs nothing; further
+round, the shot is struck across his body, slower and wilder. At 150° or more it loses 45% of its pace and most of
+his accuracy, and it grows evenly in between: the Swipe shot: off his line dials, in the Shooting Lab's TUNE.)
+With the ball, swipe toward goal on the right half of the screen (off the
 buttons). The swipe's line, cast from your player, picks the spot on the goal line (point past a
 post and it goes for that corner; straight at the middle lets your player pick the better corner,
 as an unaimed `K` shot does). How fast you flick it sets the power. **Bend the swipe to curl the

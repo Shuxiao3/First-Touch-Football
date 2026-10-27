@@ -1,5 +1,6 @@
 // FOOTBALL CLASSIC, PASSING: one-touch passes are short (only to a team-mate within the One-touch dial, 18 m; a man
-// tapped further away isn't played first time; with nobody near that way it's a short ball into space), and a pass
+// tapped further away isn't played first time; with nobody near that way it's a short ball into space, and you're put
+// on whoever's best placed for it), and a pass
 // played the moment you've turned to face it goes less true -- by how far you've turned over the last ~0.3 s, less the
 // higher your Off IQ. On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
@@ -35,10 +36,10 @@ const strike = (dir) => page.evaluate(dir => { const T = window.__T, c = T.contr
 let s = await scene([[330, 120], [900, 0]]);
 let r = await strike({ x: s.atk, y: 0 });
 ok(r.switched && Math.abs(r.toX) < 400 && Math.abs(r.toY - 120) < 5, 'one-touch: to the man 14 m away, not the one 36 m on (' + (r.toX / 25).toFixed(0) + ' m)');
-// only the far one that way: a short ball into space, nobody picked
+// only the far one that way: a short ball into space -- and you're put on whoever's best placed for it, him
 s = await scene([[900, 0]]);
 r = await strike({ x: s.atk, y: 0 });
-ok(!r.switched && r.sp <= r.short * 1.05, 'one-touch with only a man 36 m away: a short ball, struck at ' + Math.round(r.sp) + ' px/s (a ' + Math.round(Math.min(r.max, 340) / 25) + ' m pass is ' + Math.round(r.short) + ')');
+ok(r.sp <= r.short * 1.05 && r.switched && Math.abs(r.toX - s.atk * 900) < 5, 'one-touch with only a man 36 m away: a short ball, struck at ' + Math.round(r.sp) + ' px/s (a ' + Math.round(Math.min(r.max, 340) / 25) + ' m pass is ' + Math.round(r.short) + '), and you\'re put on him, the man best placed for it');
 // a tap on a man 36 m away with the ball coming in: not played first time
 s = await scene([[900, 0], [330, 120]]);
 const tap = await page.evaluate(() => { const T = window.__T, c = T.controlled(); const far = T.players().filter(q => q.team === c.team && q !== c).sort((a, b) => Math.hypot(b.x - c.x, b.y - c.y) - Math.hypot(a.x - c.x, a.y - c.y))[0];
