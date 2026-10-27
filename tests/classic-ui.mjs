@@ -269,6 +269,42 @@ for(const [w, h] of SIZES){
   ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 
+// A MAN'S CARD IN A BUILDING (the squad, the market, the academy) never goes over pages, either side -- his ratings (a
+// category open) or his deal -- and has no long text on it; and a big squad's bench stays on one line, a page at a time,
+// the pitch keeping its height -- on the shortest phone (844x340) and the narrowest (640x360)
+for(const [w, h] of [[844, 340], [640, 360]]){
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
+  const R = await page.evaluate(() => { const d = window.__MG.d, R = d.roster, other = Object.values(d.world.clubs).filter(c => c.id !== d.clubId);
+    d.listed[R[3].id] = 900; d.offers = d.offers || []; d.offerSeq = d.offerSeq || 0;   // a man listed, a man with three bids, the longest name
+    for(const [k, fee] of [[0, 12500], [1, 9800], [2, 9000]]) d.offers.push({ id: ++d.offerSeq, pid: R[5].id, club: other[k].id, fee });
+    R[0].name = 'Samuel Lindqvist'; window.__MG.mgSave(d); return R.map(p => String(p.id)); });
+  const card = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P && P.querySelector('.mgCard');
+    return { fits: !!P && P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, paged: !!(P && P.querySelector('.fitPager')), flips: c ? c.querySelectorAll('.cardFlip').length : 0,
+      long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'] }; });
+  const views = [], bad = [];
+  const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
+    const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
+    for(const id of ids){ await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(80);
+      for(const side of ['rate', 'deal']){ const fl = await page.$(`.mgPaneR [data-mside="${side}"]`); if(fl){ await fl.tap(); await page.waitForTimeout(60); }
+        const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.flips !== 1) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
+        if(side === 'rate' && await page.$('.mgPaneR [data-six="DEF"]')){ await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(60);
+          const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
+    await page.tap('.bpTopBack'); await page.waitForTimeout(100); };
+  await walk('office', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
+  ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
+  await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
+  const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
+  await page.evaluate(() => { const d = window.__MG.d; let id = 990000; while(d.roster.length < 22){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 16])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); });
+  await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250);
+  const bs = () => page.evaluate(() => { const B = document.querySelector('#bpBody .tbBench'), vis = [...B.querySelectorAll('.ptk')].filter(t => t.getClientRects().length), pg = B.querySelector('.benchPg');
+    return { men: B.querySelectorAll('.ptk').length, ids: vis.map(t => t.dataset.ri).join(), rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '', pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
+  const b1 = await bs(); await page.tap('#bpBody .tbBench .benchPg'); await page.waitForTimeout(150); const b2 = await bs();
+  ok(b1.men === 14 && b1.rows === 1 && /^1\/\d/.test(b1.pager) && b2.rows === 1 && /^2\//.test(b2.pager) && b1.ids !== b2.ids && b1.pitch === pitch0 && b2.pitch === pitch0,
+    w + 'x' + h + ': a bench of ' + b1.men + ' stays on one line, a page at a time (' + b1.pager + ', then ' + b2.pager + '), the pitch keeping its height (' + b1.pitch + ' px)');
+  await ctx.close(); }
+
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons
 // stand over its bottom-right corner where they always did, the stick starts anywhere on the left, and the HUD is
 // the score, the way you're kicking, the clock and the menu

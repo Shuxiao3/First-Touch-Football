@@ -783,7 +783,7 @@
   #bldgPanel .bpBody{ padding:12px 16px; }
   .chTop{ padding:8px 14px; }
   /* buttons: a light top over a darker band, a rim, the outline; the text has a one-pixel shadow */
-  .pauseBtn, .smBtn, .bpTab, .bpTopBack, .chPlay, .chBtn2, .chMenuBtn, .mgBtn, .mgAdj, .mgChip, .setOpt, .iOpt, .formBtn, .phTab,
+  .pauseBtn, .smBtn, .bpTab, .bpTopBack, .chPlay, .chBtn2, .chMenuBtn, .mgBtn, .mgAdj, .benchPg, .mgChip, .setOpt, .iOpt, .formBtn, .phTab,
   .mrContinue, .stadBtn, .btn, .mtab, .exhArr, .exhChip, .slotDel, .leBtn, .labChip, .iDone, .styBtn, .mkTab, .mkAdj, .menuChip, .cwSlider{
     border:0; border-radius:var(--r); background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'FTC Dot',monospace; font-weight:400;
     text-shadow:1px 1px 0 var(--btnSh); min-height:36px; }
@@ -927,7 +927,7 @@
   .tpBox{ top:26%; bottom:26%; width:13%; box-shadow:inset 0 0 0 2px #f4fbf2; }
   .tpBox.l{ left:0; } .tpBox.r{ right:0; }
   .sqPitchW{ flex:none; padding:10px 12px 4px; }
-  .sqBack{ width:100%; margin:0 0 8px; min-height:30px; }
+  .sqBack{ width:100%; margin:0 0 6px; min-height:24px; padding:2px 8px; font-size:10px; }
   .sqPitch{ height:156px; flex:none; }
   .sqPitchHint{ font-size:9.5px; color:var(--dim2); margin-top:6px; }
   .sqPitch .ptk{ width:60px !important; height:36px !important; padding:0 2px 0 4px; }
@@ -973,6 +973,8 @@
   .tacB1 .ptk.fitOop::after{ background:var(--warn); }
   .pxGhost{ position:fixed !important; transform:none !important; margin:0 !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 3px 3px 0 0 rgba(0,0,0,.35) !important; }
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:7px 0 0; }   /* (under the pitch: his card has the right side) */
+  .benchPg{ flex:none; width:36px; height:44px; min-height:44px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:13px; line-height:1; cursor:pointer; }
+  .benchPg i{ font-style:normal; font-size:9px; letter-spacing:0; }   /* (a bench with more men than its line: 1/2 ▶) */
   .tbBench .ptk{ position:relative; transform:none; flex:1 1 39px; min-width:39px; max-width:54px; height:44px; padding:0 2px; justify-content:center; }   /* (narrow enough for 8 on a line on a small phone) */
   .tbRight .mgCardHead{ margin-top:2px; margin-bottom:6px; } .tbRight .mgCardHead > .cardBody + div{ flex:1 1 auto; }
   .mgCardHead .mtLegs{ margin:3px 0 0; gap:6px; font-size:9px; } .mgCardHead .mtLegs .statBar{ height:6px; } .mgCardHead .mtLegs b{ min-width:28px; }
@@ -997,6 +999,25 @@
     .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName + .mgCardSub{ grid-column:2; grid-row:2; }
     .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; } }
   @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; the amber says he's out of position) */
+  /* A BUILDING'S CARD (the squad, the market, scouting, the academy) is drawn as the tactics card: his figure, name and
+     rating on top, then his six -- a category opened in a small grid under them -- or, turned over, his deal: a small
+     grid of what he earns or costs, then what you can do about him, one line each. It never goes over pages. */
+  .mgPaneR .mgCardHead{ margin-top:0; margin-bottom:6px; } .mgPaneR .mgCardHead > .cardBody + div{ flex:1 1 auto; }
+  .mgPaneR .six{ margin:4px 2px 6px; } .mgPaneR .sixC.unk{ cursor:default; } .mgPaneR .sixC.unk b{ color:var(--dim); }
+  .mgPaneR .sixOpen{ display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:0 10px; padding:4px 8px; margin:0 2px 4px; }
+  .mgPaneR .sixOpen .sixHd, .mgPaneR .sixOpen .statBar{ display:none; }
+  .mgPaneR .sixOpen .statRow{ margin:1px 0; gap:4px; font-size:10px; } .mgPaneR .sixOpen .statRow .sl{ width:auto; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mgFacts{ display:grid; grid-template-columns:1fr 1fr; gap:1px 14px; margin:2px 2px 2px; } .mgFact.wide{ grid-column:1 / -1; }
+  .mgFact{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; min-width:0; font-size:12px; line-height:1.55; }
+  .mgFact span{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; }
+  .mgFact b{ font-weight:400; color:var(--good); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mgAct{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; margin:6px 2px 0; }
+  .mgActL{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; margin-right:auto; }
+  .mgActL b{ font-size:12px; color:var(--ink); letter-spacing:0; }
+  .mgActC{ display:flex; align-items:center; gap:4px 6px; margin-left:auto; }
+  .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
+  .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
+  @media (max-height:360px), (max-width:700px){ .mgPaneR .cardBody{ width:26px; height:40px; } .mgPaneR .mgCardName{ font-size:15px; } .mgPaneR .mgCardHead{ gap:8px; } }
   .cardEnd{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
   .cardFlip{ width:62px; min-height:20px; padding:0; text-align:center; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'FTC Dot',monospace; white-space:nowrap;
     background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }   /* (turns his card over: small, out of the way,
@@ -1343,7 +1364,23 @@
   const FITPG={};                                      // the page each box is on
   let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
-  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); fitGoTo=null; }
+  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; }
+  // THE BENCH ON ONE LINE, under the pitch: if its men don't all fit, a page of them and a small button that turns to the next
+  // (1/2 ▶, round to the first again) -- rather than a second line that would take the pitch's height
+  const BENCHPG={};   // the page each bench is on: the Office's, each team's in a match
+  function fitBench(b){ if(!b.getClientRects().length) return;   // (not on the screen: laid out when it is)
+    const T=[...b.children].filter(e=>e.classList.contains('ptk')); let pg=[...b.children].find(e=>e.classList.contains('benchPg'));
+    for(const t of T) t.classList.remove('fitHide'); if(pg) pg.classList.add('fitHide'); b.dataset.bpages=1;
+    if(!T.length) return; const cs=getComputedStyle(b), W=b.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0), gap=parseFloat(cs.columnGap)||4, min=parseFloat(getComputedStyle(T[0]).minWidth)||39;
+    if(T.length*min+(T.length-1)*gap<=W+0.5) return;
+    if(!pg){ pg=document.createElement('button'); pg.className='benchPg'; pg.dataset.benchgo='1'; b.appendChild(pg); }
+    const k=Math.max(1,Math.floor((W-BENCH_PG_W)/(min+gap))), pages=Math.ceil(T.length/k), key=b.dataset.bench||'bench', p=BENCHPG[key]=clamp(BENCHPG[key]||0,0,pages-1);
+    T.forEach((t,i)=>{ if(i<p*k||i>=p*k+k) t.classList.add('fitHide'); });
+    pg.classList.remove('fitHide'); pg.innerHTML='<i>'+(p+1)+'/'+pages+'</i>▶'; b.dataset.bpages=pages; }
+  const BENCH_PG_W=36;   // (the button's width, as the CSS has it)
+  document.addEventListener('click',e=>{ const g=e.target.closest('[data-benchgo]'); if(!g) return; e.stopPropagation(); e.preventDefault();
+    const b=g.closest('.tbBench'); if(!b) return; const key=b.dataset.bench||'bench'; BENCHPG[key]=((BENCHPG[key]||0)+1)%Math.max(1,+b.dataset.bpages||1);
+    fitObs.disconnect(); try{ fitBench(b); } finally { fitWatch(); } },true);
   function fitForget(part){ for(const k in FITPG) if(k.includes(part)) delete FITPG[k]; }   // (back to page 1)
   function fitBox(box){
     for(const x of box.querySelectorAll(':scope > .fitPager')) x.remove();
@@ -11527,7 +11564,7 @@
       h+=ghostTok(q.L,q.T,e.num,surname(e.name)); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role); }
-    h+='</div><div class="tbBench">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
+    h+='</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
     document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
@@ -12513,7 +12550,7 @@
       h+=ghostTok(q.L,q.T,p.num,surname(p.name)); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
-    h+='</div><div class="tbBench">'+lu.bench.map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch)
+    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
@@ -12800,53 +12837,68 @@
     if(g) h+='<div class="sixOpen"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
       return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv" style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
     return h; }
-  // A LIST AND ITS MAN: the list on the left, the man picked on the right; a side with more than fits goes over pages
-  // (fitBox), the list's filters on every page and the man's name and rating on every page of his card
+  // A LIST AND ITS MAN: the list on the left, going over pages (fitBox) with its filters on every page if it's long;
+  // the man picked on the right, his card, which never goes over pages: it fits
   function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
     return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll" data-pages="L:'+k+'">'+left+'</div>'+(foot||'')+'</div>'
-    +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll" data-pages="R:'+k+':'+(MGUI.sel||'')+'">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
+    +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
   function mgWindowLine(d){ return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">'+(d.phase==='summer'?'SUMMER':'WINTER')+' WINDOW OPEN · DAY '+d.day+' OF '+MG_WINDOW[d.phase]+'</div>'
     :'<div class="mgSum">The transfer window is shut'+(d.phase==='league'&&d.md<MG_HALF?' until the winter break (after matchday '+MG_HALF+')':' until the summer')+'. Free agents can sign any time.</div>'; }
-  // one man, close up, with what you can do about him
-  function mgCard(d,pid){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p);
-    const where=f.mine?d.clubName:f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier];
+  // ONE MAN, CLOSE UP, as his tactics card is: his figure, name, own position, style, age, stars, rating and potential on
+  // top; one small button under his rating turns it over, his ratings (the six) or his deal (what he earns or costs, and
+  // what you can do about him, each on a line). It never goes over pages, and there's no long text on it.
+  let mgSide='rate';   // the side it shows -- it stays as you go from man to man
+  const mgFlip=()=>mgSide==='rate'?'<button class="cardFlip" data-mside="deal">DEAL ▶</button>':'<button class="cardFlip" data-mside="rate">RATINGS ▶</button>';
+  const mgSixUnknown=p=>'<div class="six">'+(p.role==='GK'?SIX_GK:SIX).map(([k])=>'<span class="sixC unk"><b>?</b><i>'+k+'</i></span>').join('')+'</div>';
+  const mgFact=(k,v,c,wide)=>'<div class="mgFact'+(wide?' wide':'')+'"><span>'+k+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+v+'</b></div>';
+  const mgActRow=(label,ctl)=>'<div class="mgAct">'+(label?'<span class="mgActL">'+label+'</span>':'')+'<span class="mgActC">'+ctl+'</span></div>';   // (its controls wrap together)
+  const mgScoutBtn=(d,p,c)=>'<div class="mgAct"><button class="mgBtn" data-mg="scout" data-pid="'+p.id+'">SCOUT HIM ('+money(mgScoutCost(d,p,c))+')</button></div>';
+  // ctx: 'sale' on the market's Selling list (his deal side is selling him), else his contract
+  function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p);
+    const where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier], wont=!f.mine&&!f.youth&&!!mgWontCome(d,p);
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
-    let h='<div class="mgCard"><div class="mgCardHead fitKeep">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)+'<div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
-      +'<div class="mgCardSub">'+(f.mine?'#'+p.num+' · ':'')+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div><div class="mgCardSub">'+mgEsc(where)+'</div></div>'
-      +'<div><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div></div></div>';
-    h+=known?sixHtml(mgStats(p),p.role):'<div class="mgHint">Not scouted: his rating is somewhere in that range, and his potential is a mystery.</div>';
-    if(!f.mine&&!f.youth&&mgWontCome(d,p)) h+='<div class="mgHint" style="color:var(--bad)">'+mgEsc(mgWontCome(d,p))+'</div>';
-    if(f.mine) h+=mgMineActions(d,p);
-    else if(f.youth) h+=finRow('He’d earn',money(Math.max(30,mgRound(mgWage(p.ovr)*0.8)))+'/wk')
-      +'<div class="mgBtns"><button class="mgBtn go" data-mg="promote" data-pid="'+p.id+'">PROMOTE TO THE FIRST TEAM</button><button class="mgBtn warn" data-mg="ryouth" data-pid="'+p.id+'">RELEASE</button></div>';
+    let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+      +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div>'
+      +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
+      +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div>'+mgFlip()+'</div></div>';
+    if(mgSide==='rate') h+=known?sixHtml(mgStats(p),p.role)+(f.mine?'<div class="mgFacts">'+mgFact('THIS SEASON',(p.apps||0)+' games · '+(p.goals||0)+' goals','',true)+'</div>':'')
+      :mgSixUnknown(p)+mgScoutBtn(d,p,f.club||null);
+    else if(f.mine) h+=ctx==='sale'?mgSaleActions(d,p):mgContractActions(d,p);
+    else if(f.youth) h+='<div class="mgFacts">'+mgFact('HE’D EARN',money(Math.max(30,mgRound(mgWage(p.ovr)*0.8)))+'/wk','',true)+'</div>'
+      +'<div class="mgAct"><button class="mgBtn go" data-mg="promote" data-pid="'+p.id+'">PROMOTE</button><button class="mgBtn warn" data-mg="ryouth" data-pid="'+p.id+'">RELEASE</button></div>';
     else if(f.free) h+=mgFreeActions(d,p,known);
     else h+=mgBuyActions(d,p,f.club,known);
     return h+'</div>'; }
-  function mgMineActions(d,p){ const left=mgLeft(d,p), S=d.season; let h='';
-    h+=finRow('Wage',money(p.wage)+'/wk')+finRow('Contract',(p.until<=S?'ends this season':'until season '+p.until+' ('+left+' seasons)'),false,p.until<=S?'var(--warn)':'var(--good)')
-      +finRow('Value',money(mgValue(d,p)))+finRow('This season',(p.apps||0)+' games · '+(p.goals||0)+' goals');
-    for(const o of (d.offers||[]).filter(o=>o.pid===p.id)){ const c=d.world.clubs[o.club]; if(!c) continue;
-      h+='<div class="mgOffer fitWhole"><b>'+mgEsc(c.name)+'</b> bid <b style="color:var(--warn)">'+money(o.fee)+'</b><div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
-    h+='<div class="bpSect">NEW CONTRACT</div><div class="mgCardSub">He asks '+money(mgDemand(d,p,false))+'/wk, from next season.</div>'+mgYears()
-      +'<div class="mgBtns"><button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE A NEW DEAL</button></div>';
-    h+='<div class="bpSect">SELL</div>';
-    if(d.listed[p.id]) h+='<div class="mgCardSub">On the transfer list at '+money(d.listed[p.id])+'. Clubs bid on listed men every day a window is open.</div><div class="mgBtns"><button class="mgBtn" data-mg="unlist" data-pid="'+p.id+'">TAKE HIM OFF THE LIST</button></div>';
-    else { const pr=MGUI.list&&MGUI.list.pid===p.id?MGUI.list.price:mgValue(d,p);
-      h+=mgStep('liststep',money(pr))+'<div class="mgBtns"><button class="mgBtn" data-mg="list" data-pid="'+p.id+'">PUT HIM ON THE TRANSFER LIST</button></div>'; }
-    h+='<div class="mgBtns"><button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>';
-    return h; }
-  function mgFreeActions(d,p,known){ let h=finRow('He asks',(known?'':'about ')+money(mgDemandSeen(d,p,false))+'/wk');
-    if(!known) h+='<div class="mgBtns"><button class="mgBtn" data-mg="scout" data-pid="'+p.id+'">SCOUT HIM ('+money(mgScoutCost(d,p,null))+')</button></div>';
-    return h+'<div class="bpSect">SIGN HIM</div>'+mgYears()+'<div class="mgBtns"><button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN ON A FREE</button></div>'; }
-  function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c); let h='';
-    h+=finRow('Asking price',money(ask),true,'var(--warn)')+finRow('He’d want',(known?'':'about ')+money(mgDemandSeen(d,p,true))+'/wk')
-      +finRow('Contract','until season '+(p.until||d.season));
-    if(!known) h+='<div class="mgBtns"><button class="mgBtn" data-mg="scout" data-pid="'+p.id+'">SCOUT HIM ('+money(mgScoutCost(d,p,c))+')</button></div>';
-    if(!mgWindowOpen(d)) return h+'<div class="mgHint">The transfer window is shut: you can bid when it opens.</div>';
-    if(MGUI.deal&&MGUI.deal.pid===p.id) return h+'<div class="bpSect">FEE AGREED: '+money(MGUI.deal.fee)+'</div><div class="mgCardSub">His contract: '+money(mgDemand(d,p,true))+'/wk</div>'+mgYears()
-      +'<div class="mgBtns"><button class="mgBtn go" data-mg="sign" data-pid="'+p.id+'">SIGN HIM</button></div>';
+  // HIS CONTRACT (the squad): what he earns and is worth, how long he's signed for; a new deal; letting him go
+  function mgContractActions(d,p){ const left=mgLeft(d,p), ends=p.until<=d.season;
+    let h='<div class="mgFacts">'+mgFact('WAGE',money(p.wage)+'/wk')+mgFact('VALUE',money(mgValue(d,p)))
+      +mgFact('CONTRACT',ends?'ends this season':left+' more season'+(left>1?'s':''),ends?'var(--warn)':'',true)
+      +(d.listed[p.id]?mgFact('ON THE LIST',money(d.listed[p.id]),'var(--warn)',true):'')+'</div>';
+    h+=mgActRow('NEW DEAL <b>'+money(mgDemand(d,p,false))+'/wk</b>',mgYears()+'<button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE</button>');
+    return h+'<div class="mgAct"><button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
+  // SELLING HIM (the market): what he's worth, the best two bids for him, the transfer list
+  function mgSaleActions(d,p){ let h='<div class="mgFacts">'+mgFact('VALUE',money(mgValue(d,p)))+mgFact('WAGE',money(p.wage)+'/wk')+'</div>';
+    const O=(d.offers||[]).filter(o=>o.pid===p.id&&d.world.clubs[o.club]).sort((a,b)=>b.fee-a.fee);
+    for(const o of O.slice(0,2)){ const c=d.world.clubs[o.club];
+      h+=mgActRow('BID <b style="color:var(--warn)">'+money(o.fee)+'</b> '+mgEsc(c.code||c.name),
+        '<button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button>'); }
+    if(O.length>2) h+='<div class="mgAct"><span class="mgActL">'+(O.length-2)+' MORE BID'+(O.length>3?'S':'')+'</span></div>';
+    if(d.listed[p.id]) return h+mgActRow('LISTED <b>'+money(d.listed[p.id])+'</b>','<button class="mgBtn" data-mg="unlist" data-pid="'+p.id+'">TAKE HIM OFF</button>');
+    const pr=MGUI.list&&MGUI.list.pid===p.id?MGUI.list.price:mgValue(d,p);
+    return h+mgActRow('PRICE',mgStep('liststep',money(pr))+'<button class="mgBtn" data-mg="list" data-pid="'+p.id+'">LIST HIM</button>'); }
+  function mgFreeActions(d,p,known){ let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,false))+'/wk')+mgFact('FEE','none')+'</div>';
+    if(!known) h+=mgScoutBtn(d,p,null);
+    return h+mgActRow('SIGN',mgYears()+'<button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN HIM</button>'); }
+  function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
+    let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
+      +mgFact('CONTRACT','until season '+(p.until||d.season),'',true)+'</div>';
+    if(!known) h+=mgScoutBtn(d,p,c);
+    if(!mgWindowOpen(d)) return h+'<div class="mgAct"><span class="mgActL" style="color:var(--warn)">WINDOW SHUT</span></div>';
+    if(MGUI.deal&&MGUI.deal.pid===p.id) return h+mgActRow('AGREED <b>'+money(MGUI.deal.fee)+'</b> · <b>'+money(mgDemand(d,p,true))+'/wk</b>',
+      mgYears()+'<button class="mgBtn go" data-mg="sign" data-pid="'+p.id+'">SIGN HIM</button>');
     const fee=MGUI.bid&&MGUI.bid.pid===p.id?MGUI.bid.fee:ask;
-    return h+'<div class="bpSect">YOUR OFFER</div>'+mgStep('bidstep',money(fee))+'<div class="mgBtns"><button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">MAKE THE OFFER</button></div>'; }
+    return h+mgActRow('OFFER',mgStep('bidstep',money(fee))+'<button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">BID</button>'); }
 
   // ---- the office ----
   // THE LINEUP ON A SMALL PITCH, over the squad's card: hold a man in the list and drop him on a spot to put him there (his
@@ -12908,7 +12960,7 @@
   function mgSellingTab(d){ let h=mgWindowLine(d)+'<div class="mgHint">Pick a man to put him on the transfer list at your price. Clubs bid for listed men every day a window is open, and now and then for your best men anyway.</div>';
     const L=d.roster.slice().sort((a,b)=>(d.listed[b.id]?1:0)-(d.listed[a.id]?1:0)||mgValue(d,b)-mgValue(d,a));
     return mgPanes(h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
-      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
+      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
 
   // ---- scouting ----
   function mgReportsTab(d){ const L=Object.keys(d.scouted||{}).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
@@ -13097,6 +13149,7 @@
     if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; paintBuilding(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; paintBuilding(); return; }
+    const ms=e.target.closest('[data-mside]'); if(ms){ mgSide=ms.dataset.mside; paintBuilding(); return; }
     const td=e.target.closest('[data-tdrop]'); if(td){ tacDrop=tacDrop===td.dataset.tdrop?null:td.dataset.tdrop; rerenderOffice(); return; }
     if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
     const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }

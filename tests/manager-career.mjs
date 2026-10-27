@@ -60,8 +60,9 @@ await page.click('#chCampus [data-bldg="market"]'); await page.click('#bldgPanel
 let signed = false;
 for(let i = 0; i < 10 && !signed; i++){                          // the first man who'd come and whom we can afford (page 1: ten men)
   await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); await page.waitForTimeout(60);
+  if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }   // (his card turned over: his deal)
   const card = await page.innerText('#bpBody .mgCard');
-  const ask = +(card.match(/Asking price\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
+  const ask = +(card.match(/ASKING\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
   if(/won’t drop/.test(card) || ask > 15000){ await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); continue; }
   if(await page.$('#bpBody [data-mg="scout"]')){ await page.click('#bpBody [data-mg="scout"]'); await page.waitForTimeout(60); ok(/Scouted/.test(await msg()), 'scouted: ' + await msg()); }
   await page.click('#bpBody [data-mg="bid"]'); await page.waitForTimeout(60);
@@ -76,6 +77,7 @@ ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.includes(16), '
 // --- selling: put the worst man on the list ------------------------------------------------
 await page.click('#bldgPanel .bpTab:text-is("Selling")'); await page.waitForTimeout(60);
 await page.click('#bpBody .mgList .mgRow >> nth=-1'); await page.waitForTimeout(60);
+if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }
 await page.click('#bpBody [data-mg="list"]'); await page.waitForTimeout(60);
 d = await save();
 ok(Object.keys(d.listed).length === 1, 'one man on the transfer list: ' + await msg());

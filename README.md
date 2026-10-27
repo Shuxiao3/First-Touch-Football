@@ -107,10 +107,10 @@ The same game played like any other football game. It's a copy of `index.html` w
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
-  - **Nothing scrolls.** A box with more in it than fits shows a page of it, with ◀ 2 / 3 ▶ along its foot; hold
-    an arrow to flip through the pages. Pages break between rows, never through one: a list keeps its filters on
-    every page, a card keeps the man's name and rating, a table keeps its head row, and a heading moves over with
-    the rows it heads. Measured on a new career at 844×390: the squad over 4 pages, the market's list of League 2
+  - **Nothing scrolls.** A list or a table with more in it than fits shows a page of it, with ◀ 2 / 3 ▶ along its
+    foot; hold an arrow to flip through the pages. Pages break between rows, never through one: a list keeps its
+    filters on every page, a table keeps its head row, and a heading moves over with the rows it heads. A player's
+    card never goes over pages, anywhere: it's made to fit. Measured on a new career at 844×390: the squad over 4 pages, the market's list of League 2
     over 42 (5 to a page, the league and the positions on one line above them), the league table over 3.
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
@@ -128,16 +128,24 @@ The same game played like any other football game. It's a copy of `index.html` w
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
-    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left and the man
-    you tap on the right, each side over pages of its own. His card leads with six numbers (pace, physical,
-    technique, passing, shooting, defending, each the average of its attributes); tap one and what it's made of
-    opens under them (tap it again to shut it), its page brought up if it's gone over one. In the Squad tab his card
-    has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little
-    pitch comes back as you pick a man up to drop on it.
+    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages
+    if it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over
+    pages and has no long text on it: his figure, name, own position, style, age, stars, rating and potential on
+    top, and one small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as
+    you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending,
+    each the average of its attributes; tap one and what it's made of shows in a small grid under them, tap it
+    again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
+    for each, with SCOUT HIM. The other side, his deal, has what he earns or costs in a small grid, then what you
+    can do about him, a line each: in the Squad tab his contract (a new deal, releasing him); in the market's
+    Selling tab selling him (the two best bids, the transfer list); for another club's man the asking price,
+    scouting him and your offer; for a free agent signing him; for a youngster promoting him. In the Squad tab his
+    card has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the
+    little pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under the pitch, the bench, on one line (its men narrow to fit, eight of them even on a 640-wide
-    phone; a bigger bench takes a second line). On the right, from under that row to the foot of the screen, the
+    BEST 8. Under the pitch, the bench, on one line: its men narrow to fit (eight of them even on a 640-wide
+    phone), and a bigger bench shows a page of them at a time, with a small 1/2 ▶ button at its end to turn to the
+    next, so the pitch never loses height to it. On the right, from under that row to the foot of the screen, the
     card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) with his
     shirt number under it, beside his rating, his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) and his
     name; on the bench the shirt number is in the token's corner, with the rating and position under it and the
@@ -459,10 +467,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Transfer windows.** Five days in the summer before the season, and three at the winter break after matchday
     13. NEXT DAY moves a window on. In a window you can bid for anyone at another club. His club takes the asking
     price, may take 85% or more (once), and turns down less. Then you agree his contract: 1 to 4 seasons at the
-    wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price and
-    clubs bid for him every window day (now and then they bid for your best men anyway); accept or reject. Free
-    agents sign any time, for wages only. In the red you can't buy or sign anyone until you're back in the black,
-    but selling still works.
+    wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price
+    (the market's Selling tab) and clubs bid for him every window day (now and then they bid for your best men
+    anyway); accept or reject. Free agents sign any time, for wages only. In the red you can't buy or sign anyone
+    until you're back in the black, but selling still works.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the Office before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
   - **Scouting.** A player at another club shows a rating range until you scout him: 8 points wide, 6 and then 2
