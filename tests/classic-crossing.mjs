@@ -5,7 +5,10 @@
 // gets to: from 8 m out with nobody on them, most are headed, a good crosser's coming closer to his man than a poor
 // one's; an early ball from 24 m finds the runs in behind. Two of theirs meet it in the air and clear a good share. The
 // CROSSING LAB: who crosses, from how far, how many of ours and of theirs, the keeper -- each ball called and tallied.
-// On a copy of the game that lets the test reach the lab and the side's plan, the frames pumped (no vsync).
+// YOUR CROSS: how long you hold it picks the man it's for, nearest first -- a tap the near post, a long hold the far
+// post -- and a double-tap is a low driven cross: flat and quick, to his feet.
+// On a copy of the game that lets the test reach the lab and the side's plan, the frames pumped (no vsync) -- and for
+// your own presses, which go by the clock, a second copy in real time.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -15,7 +18,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={LAB, P, players:()=>players, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, PLAN:()=>PLAN, FW, FH, YC, MK, GOAL_W, atkOf, '
-  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe()};\n  const LAB_TITLE=');
+  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe(), crossMen:()=>crossMen(controlled,false)};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-cross-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -65,7 +68,7 @@ const poor = await crosses({ crossing: 1, lab: { cFrom: 180, cAtk: 2, cDef: 0 } 
 const early = await crosses({ crossing: 8, lab: { cFrom: 540, cAtk: 2, cDef: 0 } }, N);
 const marked = await crosses({ crossing: 8, lab: { cFrom: 180, cAtk: 2, cDef: 2 } }, N);
 await page.evaluate(v => { window.__T.P.crossing.val = v; }, dial);
-const hd = R => R.T.goal + R.T.saved + R.T.headed, avg = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length), within = (a, m) => a.filter(v => v < m).length;
+const hd = R => R.T.head, avg = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length), within = (a, m) => a.filter(v => v < m).length;
 const line = (k, R) => `${k}: ${hd(R)} of ${R.T.n} headed by ours (${R.T.goal} in), ${R.T.cleared} cleared, ${R.T.keeper} the keeper's, ${R.T.nobody} to nobody; ${within(R.miss, 2.2)} within heading reach of the man it was for (2.2 m), ${avg(R.miss).toFixed(1)} m from him on average (of the ${R.miss.length} that came near him at a heading height); ${avg(R.aim).toFixed(2)} m off where it was aimed`;
 for(const [k, R] of [['Crossing 8, 8 m out, 2 of ours, none of theirs', good], ['Crossing 1, the same', poor], ['Crossing 8, 24 m out (early)', early], ['Crossing 8, 8 m out, 2 v 2', marked]]) info(line(k, R));
 ok(hd(good) >= 0.7 * N && within(good.miss, 2.2) >= 0.7 * N, 'the computer crosses to a man: with nobody on them, 70% or more headed, and 70% or more come within heading reach of the man it was for');
@@ -93,5 +96,32 @@ const yours2 = await page.evaluate(() => new Promise(res => { const T = window._
 info('yours: ' + JSON.stringify(yours) + ' then ' + JSON.stringify(yours2));
 ok(!yours.crossed && yours.has && yours2.crossed && !!yours2.result && /CROSS/.test(yours2.text) && /1 cross/.test(yours2.tally), 'CROSSER: YOU -- he waits for you; your cross (L) is called and tallied');
 
-process.exitCode = rep.finish();
+// YOUR CROSS, pressed for real (the clock: a tap, a hold, a double-tap), three of ours in the box: who it's for, and the
+// ball's flight -- how high it gets and how fast it goes
 await browser.close();
+const R2 = await open({ url: 'file://' + copy }), page2 = R2.page;
+R2.rep.errs = rep.errs;   // (one tally of page errors, and of checks: rep's)
+await page2.click('#smItems [data-act="crosslab"]'); await page2.waitForTimeout(500);
+const press = async seq => {
+  await page2.evaluate(() => { const T = window.__T, L = T.LAB; Object.assign(L, { auto: false, cWho: 'you', cFrom: 180, cAtk: 3, cDef: 0, cKeep: true }); L.ct = null; T.cast(); T.serve(); });
+  await page2.waitForTimeout(1500);
+  const men = await page2.evaluate(() => window.__T.crossMen().map(m => m.q.num));
+  for(let i = 0; i < seq.length; i++){ await page2.keyboard.down('KeyL'); await page2.waitForTimeout(seq[i]); await page2.keyboard.up('KeyL'); if(i < seq.length - 1) await page2.waitForTimeout(40); }
+  return page2.evaluate(men => new Promise(res => { const T = window.__T, L = T.LAB, t0 = T.simNow(); let zMax = 0, vMax = 0, low = 99;
+    (function tick(){ const r = L.rep, b = T.ball();
+      if(r && r.cross && !r.done){ zMax = Math.max(zMax, b.z); if(!b.ownedBy) vMax = Math.max(vMax, Math.hypot(b.vx, b.vy)); if(r.man && b.z < 12 && !b.ownedBy) low = Math.min(low, Math.hypot(b.x - r.man.x, b.y - r.man.y)); }
+      if(!(r && r.done) && T.simNow() - t0 < 5) return requestAnimationFrame(tick);
+      res({ men, man: r && r.man ? r.man.num : null, low: !!(r && r.low), result: r && r.result, peak: +(zMax / 25).toFixed(2), top: +(vMax / T.MK).toFixed(1),
+            near: low < 99 ? +(low / T.MK).toFixed(2) : null, text: document.getElementById('labResult').textContent }); })(); }), men);
+};
+const Y = { tap: await press([60]), hold: await press([800]), dbl: await press([60, 60]), dblHold: await press([60, 800]) };
+for(const [k, y] of Object.entries(Y)) info(`${k}: our men nearest first #${y.men.join(', #')} -- for #${y.man}, ${y.low ? 'low' : 'lofted'}, up to ${y.peak} m, ${y.top} m/s at most${y.near != null ? ', ' + y.near + ' m from him at his feet' : ''}: ${y.result} (${y.text.replace(/^.*→ /, '')})`);
+ok(Y.tap.men.length === 3 && Y.tap.man === Y.tap.men[0] && Y.hold.man === Y.hold.men[2] && !Y.tap.low && !Y.hold.low && Y.hold.peak > 3,
+  'your cross: a tap goes to the nearest of ours (#' + Y.tap.man + '), a long hold to the furthest (#' + Y.hold.man + '), both lofted');
+ok(Y.dbl.low && Y.dbl.man === Y.dbl.men[0] && Y.dblHold.low && Y.dblHold.man === Y.dblHold.men[2] && /LOW CROSS/.test(Y.dbl.text),
+  'a double-tap is a low cross, to the man the second press picks (#' + Y.dbl.man + ' quick, #' + Y.dblHold.man + ' held)');
+ok(Y.dbl.peak < 1.8 && Y.dbl.peak < Y.tap.peak / 2 && Y.dbl.top > 25 && Y.dbl.near != null && Y.dbl.near < 1.5 && /^(goal|saved|shot|ours)$/.test(Y.dbl.result),
+  'the low cross is flat and quick (up to ' + Y.dbl.peak + ' m high, ' + Y.dbl.top + ' m/s, against ' + Y.tap.peak + ' m lofted), and gets to his feet: ' + Y.dbl.result);
+
+process.exitCode = rep.finish();
+await R2.browser.close();

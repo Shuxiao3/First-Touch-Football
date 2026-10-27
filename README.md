@@ -322,12 +322,13 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Crossing Lab.** A cross from out on the right, over and over: the computer's, to watch who he picks and how true it
   goes, or yours. Everyone in the box is the computer, exactly as in a match; the lab only clears everyone else off
   the pitch.
-  - Each ball is called: headed in, headed and saved, headed but not in, cleared, the keeper's, or nobody's, with who it was
-    for and how close it came to him at a height he could head it. The tally counts each, the share headed by ours,
-    how close they came on average and, for the computer's, how far from where they were aimed. On the pitch: the
-    spots our men are waiting on, where it was aimed, and its flight with its shadow.
+  - Each ball is called: headed in, headed and saved, headed but not in; scored, saved or missed off his feet; his to
+    keep; cleared; the keeper's; or nobody's. With it, who it was for and how close it came to him at a height he
+    could head it (a low cross: take it). The tally counts each, how many got to one of ours (headed, or to his
+    feet), how close they came on average and how far from where they were aimed. On the pitch: the spots our men are
+    waiting on, where it was aimed, and its flight with its shadow.
   - The computer crosses 1.4 s after the ball's put down, once his men have taken their spots. With CROSSER: YOU it
-    waits for you.
+    waits for you: hold CROSS for the man you want (the amber ring), or double-tap it for a low cross.
   - Chips: CROSSER (COMPUTER or YOU), FROM (the byline, or 8, 16 or 24 m out for an early ball), OURS (1-3 in the
     box), THEIRS (0-3), KEEPER (on or off), plus the usual NEXT, TIME, NEW BALL and TUNE. TUNE has Crossing, Curve,
     Heading, Off IQ, Def IQ and the keeper's reach and speed.
@@ -627,6 +628,21 @@ The same game played like any other football game. It's a copy of `index.html` w
 
     The contested ones move by three or four from one run of 16 to the next. With one of theirs against one of
     ours, he goes out to the crosser. How many headers go in swings a lot from run to run, so it isn't shown here.
+  - **Your cross picks its man.** Hold CROSS (`L`) and let go: how long you hold it picks which of ours it's for, of
+    the men in their box or on their way into it (and onside), nearest the ball first. A tap is for the nearest (the
+    near post), the whole bar for the furthest (the far post), and the bar is shared out between them; with three in
+    the box, under a quarter of a second for the near post, half a second or more for the far post. While you hold
+    it, the man it's for has an amber ring under him. It goes where the computer's would for him (his spot, where he
+    is, or his run), timed as the computer's is, and your Crossing aims it. It used to go to whichever man was
+    nearest the penalty spot every time, and the hold only made it float or drive.
+    - **Double-tap it for a low driven cross** to the man the second press picks (a quick second tap: the nearest;
+      hold it: further across). It's flat and quick, up to 30 m/s, and comes in at his knees, low enough to take or
+      hit first time. He reads it as he would a pass (his Off IQ), and their men can cut it out as they would one.
+      The grass in this game drags a ball along it to a stop too soon for a cross to skim all the way, so it's in the
+      air until its last stride: it gets about 1 m up over 13 m, 1.5 m over 22 m and 2.5 m to a man 29 m away,
+      against 4-5 m for a lofted cross.
+    - A single tap waits the double-tap window (the pass's, 150 ms) in case a second tap is coming; a held press goes
+      as you let go. A second press just after your cross has gone doesn't turn into a slide.
   - **The predicted flight** of a ball that's just been lofted now allows for the grass dragging at it till it's off
     the ground. It used to run every cross on 8% too far in its first moments.
   - **Over whole matches** (computer against computer, 12 six-minute games each, per 6 minutes, before → now):
@@ -711,7 +727,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
-| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it |
+| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**.) |
 | `L` in your own half | **Clear** it instead: with the ball it's hoofed high and long at once; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
@@ -723,8 +739,8 @@ orange) and ease back inside it to stop, without ever lifting your thumb; push o
 stick follows your thumb, so you can't run off its edge. A double-tap on the left half still
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
-and hold-to-CROSS buttons sit alongside it; in your own half CROSS reads **CLEAR** and works
-like `L` there. Anywhere else on the right half, off the buttons, is TRAP too.
+and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
+for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there. Anywhere else on the right half, off the buttons, is TRAP too.
 
 **Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
 and **drag** the way you want the ball to go. The trap is timed from the moment your finger lands,

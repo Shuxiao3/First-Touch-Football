@@ -1054,8 +1054,8 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L hold to cross, CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move (flick = cut, L = croqueta, circle = roulette, down-up = rainbow flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
-    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · hold CROSS / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L cross (hold it longer for a man further across; double-tap: a low driven cross), CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move (flick = cut, L = croqueta, circle = roulette, down-up = rainbow flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
 
@@ -2383,7 +2383,7 @@
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
       controlled=p; skill=null; p.skill=null; recvAuto=null; ftAim=null; oneTouch=null; switchLock=null;
-      kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
+      kickHeld=shootHeld=crossHeld=false;crossPend=null;crossLow=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
     }
@@ -2516,7 +2516,7 @@
   const DTAP_PRESS=220;      // ms a press must be under to count as a tap (the window and the drag are dials: passDtap, passDrag)
   let windUp=null;                    // the shot wind-up you started: when, and which defenders were goal-side then
   let curveArmed=false,curveT=0,curveActive=0;
-  let crossHeld=false,crossCharge=0;
+  let crossHeld=false,crossCharge=0,crossPend=null,crossLow=false,crossDown=0,crossGoneAt=-1e9;   // (crossPend/crossLow: a tap waiting for a second, the second of a double-tap -- see crossPressBall)
   let clearArm=0,clearHeld=false,clearT0=0;   // CLEAR (own half): while armed, the next ball to reach you is hoofed away first time
   let scoredT=0,scoreG=0,scoreR=0,offsideT=0,offSpot=null;
   let goalLog=[];
@@ -2575,7 +2575,8 @@
       if(e.code==='KeyK'){ if(practice==='keeper'){ practiceT=0; } else pressK(); }
       if(e.code==='KeyL'){
         if(clearMode()&&pressClear()){/* own half: CLEAR it (now if it's yours, first time if it's loose) */}
-        else if(myBall())crossHeld=true;                                  // you have it -> charge your own cross
+        else if(myBall())crossPressBall();                                // you have it -> charge your own cross (double-tap: low)
+        else if(performance.now()-crossGoneAt<450){/* a double-tap's second press just after your cross went: nothing (not a slide) */}
         else if(ball.ownedBy&&ball.ownedBy.team==='G')requestCross();     // a teammate has it -> ask for a cross (can't slide your own team)
         else if(gkHold&&gkHold.team==='G'){/* your keeper has it -> no slide */}
         else startSlide(controlled);                                      // opponent has it / loose -> SLIDE TACKLE
@@ -2598,7 +2599,7 @@
     if(e.code==='Space')trapHeld=false;
     if(e.code==='KeyJ')passRelease();
     if(e.code==='KeyK'){ if(practice!=='keeper') releaseShoot(); }
-    if(e.code==='KeyL'){clearHeld=false;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}
+    if(e.code==='KeyL'){clearHeld=false;crossRelease();}
     // releasing all movement keys ends the sprint
     if(MOVE_OK(e.code)){
       const anyMove=keys['KeyW']||keys['KeyS']||keys['KeyA']||keys['KeyD']||
@@ -2675,7 +2676,7 @@
       }
       if(t.target===btns.cross){
         if(clearMode()){ if(pressClear()) clearTouchId=t.identifier; }           // own half: CLEAR (nothing to clear -> inert)
-        else if(myBall()){crossHeld=true;crossTouchId=t.identifier;}
+        else if(myBall()){crossPressBall();crossTouchId=t.identifier;}
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G'))requestCross();   // teammate has it -> DEMAND the cross
         /* defending: inert -- the slide lives on SHOOT now */
         continue;
@@ -2729,7 +2730,7 @@
         else switchPlayer(); } }
     if(t.identifier===kickTouchId){kickTouchId=null;if(passDown&&passDown.pts){passDown.lx=t.clientX;passDown.ly=t.clientY;}passRelease();}
     if(t.identifier===shootTouchId){shootTouchId=null;releaseShoot();}
-    if(t.identifier===crossTouchId){crossTouchId=null;if(crossHeld)cross(crossCharge);crossHeld=false;crossCharge=0;}}}
+    if(t.identifier===crossTouchId){crossTouchId=null;crossRelease();}}}
   wrapEl.addEventListener('touchend',endT);wrapEl.addEventListener('touchcancel',endT);
   // the ball is yours to swipe: at your feet, or just knocked on in your own dribble (not in the Trap Lab)
   function swipeable(){ return (!LAB.on||LAB.kind==='shoot') && !!controlled && (ball.ownedBy===controlled || (!ball.ownedBy&&!gkHold&&ball.dribbler===controlled&&ball.dribbleGrace>0)); }
@@ -4065,14 +4066,14 @@
   }
   // from the keeper: a save (or he came and took it)
   function labOnSave(kind){
-    if(LAB.on&&LAB.kind==='cross'){ const r=LAB.rep; if(r&&!r.done&&r.headBy&&!r.save){ r.save=kind; LAB.dirty=true; } return; }
+    if(LAB.on&&LAB.kind==='cross'){ const r=LAB.rep; if(r&&!r.done&&(r.headBy||r.shotBy)&&!r.save){ r.save=kind; LAB.dirty=true; } return; }
     if(!LAB.on||LAB.kind!=='shoot') return;
     const r=LAB.rep; if(r&&!r.done&&r.shot&&!r.save){ r.save={kind,t:simNow}; LAB.dirty=true; }
   }
   // from goal(): in the lab a goal is just called, nothing restarts
   function labOnGoal(){
     const r=LAB.rep; if(LAB.kind==='shoot'&&r&&!r.done&&r.shot){ r.goal=true; LAB.dirty=true; }
-    if(LAB.kind==='cross'&&r&&!r.done&&r.headBy){ r.goal=true; LAB.dirty=true; }
+    if(LAB.kind==='cross'&&r&&!r.done&&(r.headBy||r.shotBy)){ r.goal=true; LAB.dirty=true; }
     lastGrade='GOAL!'; gradeColor='#9dff3c'; gradeFade=1.2;
   }
   function shootLabStep(dt,rdt){
@@ -4244,7 +4245,7 @@
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
     ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); offsidePass=null; ball.z=0; ball.vz=0;
     own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;
-    kickHeld=shootHeld=crossHeld=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
+    kickHeld=shootHeld=crossHeld=false;crossPend=null;crossLow=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
     LAB.rep={t0:simNow, def:LAB.dDef, d:LAB.dDist, slide:LAB.dSlide, start:{x:you.x,y:you.y}, moves:[], lunges:[], seen:[], looseT:0, done:false, result:null};
     LAB.dirty=true;
   }
@@ -4393,7 +4394,7 @@
   // keeper's, or nobody's; and how close it came to the man it was for, at a height he could head it.
   const CL_WHO=[['ai','COMPUTER'],['you','YOU']];
   const CL_FROMS=[[25,'BYLINE'],[180,'8 M OUT'],[360,'16 M OUT'],[540,'24 M OUT']];
-  const CL_COL={goal:'#9dff3c',saved:'#c8f58a',headed:'#ffb43c',cleared:'#ff5a4d',keeper:'#ff5a4d',nobody:'#8a9580',nocross:'#8a9580',lost:'#ff5a4d'};
+  const CL_COL={goal:'#9dff3c',saved:'#c8f58a',headed:'#ffb43c',shot:'#ffb43c',ours:'#c8f58a',cleared:'#ff5a4d',keeper:'#ff5a4d',nobody:'#8a9580',nocross:'#8a9580',lost:'#ff5a4d'};
   const CL_SETTLE=1.4;                                   // (his men take their spots before the computer crosses)
   const clRole=r=>players.filter(q=>q.pRole===r);
   // the cast: you (the crosser), so many of ours as forwards and so many of theirs as centre-backs -- nobody else on the
@@ -4432,17 +4433,23 @@
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
     ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); ball.z=0; ball.vz=0;
     own(cr,cr.r+ball.r+5); cr.passLockT=0; ball.lastTouch=cr.team;
-    kickHeld=shootHeld=crossHeld=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
+    kickHeld=shootHeld=crossHeld=false;crossPend=null;crossLow=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
     LAB.rep={t0:simNow, who:LAB.cWho, from:LAB.cFrom, nA:A.length, nD:D.length, keeper:LAB.cKeep, cross:null, aim:null, man:null, miss:null, aimMiss:null, headBy:null, goal:false, save:null, done:false, result:null};
     LAB.trail=[]; LAB.dirty=true;
   }
   // the cross is in: the man it's for (the computer's pick; yours, the one of ours it comes nearest at a height he
   // could head it) -- see crossLabStep
-  function crossLabStruck(cs){
+  const clBand=(r,z)=>r.low ? z<18 : z>18&&z<AIR_REACH;           // (a height to head it -- or, a low one, to take it)
+  function crossLabStruck(cs,low){
     const r=LAB.rep; if(!r||r.cross) return;
-    r.cross={t:simNow, x:ball.x, y:ball.y}; r.aim=cs?{x:cs.x,y:cs.y}:null; r.man=cs&&cs.who?cs.who:null;
-    if(r.aim) for(let t=0.02;t<=2;t+=0.02){ const B=ballAt(t); if(B.z>18&&B.z<AIR_REACH){ const d=Math.hypot(B.x-r.aim.x,B.y-r.aim.y); if(r.aimMiss==null||d<r.aimMiss) r.aimMiss=d; } }   // (how near its flight passes where it was aimed, at a height to head: the crosser's own accuracy)
+    r.cross={t:simNow, x:ball.x, y:ball.y}; r.low=!!low; r.aim=cs?{x:cs.x,y:cs.y}:null; r.man=cs&&cs.who?cs.who:null;
+    if(r.aim) for(let t=0.02;t<=2;t+=0.02){ const B=ballAt(t); if(clBand(r,B.z)){ const d=Math.hypot(B.x-r.aim.x,B.y-r.aim.y); if(r.aimMiss==null||d<r.aimMiss) r.aimMiss=d; } }   // (how near its flight passes where it was aimed, at a height to head or take it: the crosser's own accuracy)
     LAB.trail=[{x:ball.x,y:ball.y,z:ball.z}]; LAB.dirty=true;
+  }
+  // from shootAt: one of ours (not the crosser) has a shot off it
+  function crossLabOnShot(p){
+    const r=LAB.rep; if(!r||r.done||!r.cross||r.headBy||r.shotBy||p.team!==controlled.team||p===controlled) return;
+    r.shotBy={p,t:simNow}; LAB.dirty=true;
   }
   // from headOnGoal / headClear
   function crossLabOnHead(p,kind){
@@ -4463,27 +4470,34 @@
       if(r.cross&&!r.done){
         if(LAB.trail.length<900) LAB.trail.push({x:ball.x,y:ball.y,z:ball.z});
         const gx=atkOf(cr.team)>0?FW:0, inBox=Math.abs(ball.x-gx)<BX+90&&Math.abs(ball.y-YC)<BY+100;
-        if(!r.headBy&&inBox&&ball.z>18&&ball.z<AIR_REACH&&!ball.ownedBy){                    // how close it came to its man, at a height he could head it
+        const hit=r.headBy||r.shotBy;
+        if(!hit&&!r.got&&inBox&&clBand(r,ball.z)&&!ball.ownedBy){                           // how close it came to its man, at a height he could head it (a low one: take it)
           if(r.man){ const d=Math.hypot(r.man.x-ball.x,r.man.y-ball.y); if(r.miss==null||d<r.miss) r.miss=d; }
           else for(const q of A){ const d=Math.hypot(q.x-ball.x,q.y-ball.y); if(r.miss==null||d<r.miss){ r.miss=d; r.near=q; } } }
+        const tp=ball.ownedBy||(ball.dribbler&&ball.dribbleGrace>0?ball.dribbler:null)||ball.lastTouchP;
+        if(!r.got&&tp&&tp.team===cr.team&&tp!==cr){ r.got={p:tp,t:simNow}; LAB.dirty=true; }   // one of ours has had it at his feet (or a touch on it)
         const ct=simNow-r.cross.t;
-        if(r.headBy){
+        if(hit){
           if(r.goal) crossLabFinish('goal');
           else if(r.save||(gkHold&&gkHold.team!==cr.team)) crossLabFinish('saved');
-          else if(simNow-r.headBy.t>2.2) crossLabFinish('headed');
+          else if(simNow-hit.t>2.2) crossLabFinish(r.headBy?'headed':'shot');
         }
         else if(gkHold&&gkHold.team!==cr.team) crossLabFinish('keeper');
         else if((ball.ownedBy&&ball.ownedBy.team!==cr.team)||(ball.lastTouch&&ball.lastTouch!==cr.team)) crossLabFinish('cleared');
-        else if(ct>3.2||(ct>0.6&&ball.z<1&&Math.hypot(ball.vx,ball.vy)<40)||ball.x<0||ball.x>FW||ball.y<0||ball.y>FH) crossLabFinish('nobody');
+        else if(ball.x<0||ball.x>FW||ball.y<0||ball.y>FH) crossLabFinish('nobody');            // (out of play)
+        else if(r.got){ if(simNow-r.got.t>1.8) crossLabFinish('ours'); }                    // (he's had it a moment and not shot: he has it)
+        else if(ct>3.2||(ct>0.6&&ball.z<1&&Math.hypot(ball.vx,ball.vy)<40)) crossLabFinish('nobody');
       }
     }
     if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) crossLabServe(); }
   }
-  function crossLabTally(){ return LAB.ct||(LAB.ct={n:0,goal:0,saved:0,headed:0,cleared:0,keeper:0,nobody:0,missSum:0,missN:0,aimSum:0,aimN:0}); }
+  // the tally: each result; head -- headed by ours; found -- got to one of ours (headed, shot, or at his feet)
+  function crossLabTally(){ return LAB.ct||(LAB.ct={n:0,goal:0,saved:0,headed:0,shot:0,ours:0,cleared:0,keeper:0,nobody:0,head:0,found:0,missSum:0,missN:0,aimSum:0,aimN:0}); }
   function crossLabFinish(res){
     const r=LAB.rep; if(!r||r.done) return;
     r.done=true; r.result=res; r.endT=simNow;
-    if(r.cross){ const T=crossLabTally(); T.n++; if(T[res]!=null) T[res]++; if(r.miss!=null){ T.missSum+=r.miss; T.missN++; } if(r.aimMiss!=null){ T.aimSum+=r.aimMiss; T.aimN++; } }
+    if(r.cross){ const T=crossLabTally(); T.n++; if(T[res]!=null) T[res]++; if(r.headBy) T.head++; if(/^(goal|saved|headed|shot|ours)$/.test(res)) T.found++;
+      if(r.miss!=null){ T.missSum+=r.miss; T.missN++; } if(r.aimMiss!=null){ T.aimSum+=r.aimMiss; T.aimN++; } }
     LAB.last=r; LAB.nextT=res==='goal'?1.4:1.6; LAB.dirty=true;
     if(res==='goal'){ lastGrade='GOAL!'; gradeColor='#9dff3c'; gradeFade=1.2; }
   }
@@ -4524,24 +4538,29 @@
   }
   function crossLabHint(){
     if(LAB.cWho==='ai') return 'The computer crosses once his men are in their spots. Watch who he picks, how true it goes, and who gets on the end of it.';
-    return isTouch ? 'Hold <b>CROSS</b> and let go to whip it in (tap for low and quick); your men in the box are the computer.'
-                   : 'Hold <b>L</b> and let go to cross it (tap for low and quick); your men in the box are the computer.';
+    return isTouch ? 'Hold <b>CROSS</b> and let go: the longer, the further the man it\'s for (his amber ring). Double-tap it for a low driven cross.'
+                   : 'Hold <b>L</b> and let go: the longer, the further the man it\'s for (his amber ring). Double-tap L for a low driven cross.';
   }
   function crossLabText(r){
     const head=`<span class="lsv">${plName(CL_FROMS,r.from).toLowerCase()} · ${r.nA} of ours, ${r.nD} of theirs${r.keeper?'':' · no keeper'}</span>`;
     if(!r.cross) return `${head} <b style="color:${CL_COL[r.result]||'#8a9580'}">${r.result==='lost'?'LOST IT':'NO CROSS'}</b>`;
-    const m=r.man||r.near, who=m?`#${m.num}`:'nobody', near=r.miss!=null?` · ${(r.miss/MK).toFixed(1)} m from him at a heading height`:` · never near him at a heading height`;
-    const how=`<b>CROSS</b> for ${who}${near}`;
+    const m=r.man||r.near, who=m?`#${m.num}`:'nobody', ht=r.low?'low enough to take':'at a heading height';
+    const near=r.miss!=null?` · ${(r.miss/MK).toFixed(1)} m from him ${ht}`:` · never near him ${ht}`;
+    const how=`<b>${r.low?'LOW CROSS':'CROSS'}</b> for ${who}${near}`;
     if(!r.done) return `${head} ${how} → …`;
-    const c=CL_COL[r.result]||'#8a9580', hb=r.headBy?`#${r.headBy.p.num} `:'';
-    const res={goal:hb+'HEADED IN!',saved:hb+'HEADED, SAVED',headed:hb+'HEADED, NOT IN',cleared:'CLEARED',keeper:'THE KEEPER\'S',nobody:'NOBODY GOT IT'}[r.result]||r.result.toUpperCase();
+    const c=CL_COL[r.result]||'#8a9580', by=r.headBy||r.shotBy||r.got, hb=by?`#${by.p.num} `:'', hd=!!r.headBy;
+    const res={goal:hb+(hd?'HEADED IN!':'SCORED!'),saved:hb+(hd?'HEADED, SAVED':'SHOT, SAVED'),headed:hb+'HEADED, NOT IN',shot:hb+'SHOT, NOT IN',ours:hb+'HAS IT',
+               cleared:'CLEARED',keeper:'THE KEEPER\'S',nobody:'NOBODY GOT IT'}[r.result]||r.result.toUpperCase();
     return `${head} ${how} → <b style="color:${c}">${res}</b>`;
   }
   function crossLabTallyText(){
     const T=crossLabTally();
     if(!T.n) return LAB.auto?'no crosses yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
                              :'no crosses yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
-    const hd=T.goal+T.saved+T.headed, parts=[T.n+(T.n===1?' cross':' crosses'), hd+' headed by ours ('+Math.round(hd/T.n*100)+'%)', T.goal+' in'];
+    const parts=[T.n+(T.n===1?' cross':' crosses'), T.found+' to ours ('+Math.round(T.found/T.n*100)+'%)'];
+    if(T.head) parts.push(T.head+' headed');
+    if(T.found>T.head) parts.push((T.found-T.head)+' to his feet');
+    parts.push(T.goal+' in');
     if(T.cleared) parts.push(T.cleared+' cleared');
     if(T.keeper) parts.push(T.keeper+' the keeper\'s');
     if(T.nobody) parts.push(T.nobody+' to nobody');
@@ -5234,41 +5253,94 @@
            y:clamp(ball.y+ball.vy/sp*d,20,FH-20)};
   }
 
-  function cross(charge){
-    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>cross(charge)); return; }
-    const c=clamp(charge||0,0,1);
-    const p=controlled;
-    const atk=atkOf(p.team);
-    const goalX=atk>0?FW:0;
-    // PENALTY SPOT (the danger zone we whip crosses onto)
-    const penX = atk>0 ? FW-BX*0.66 : BX*0.66;
-    const penSpot = {x:penX, y:YC};
-    // target the FORWARD/MIDFIELDER closest to the penalty spot (attacking the cross)
-    let best=null,bs=1e9;
-    for(const q of players){
-      if(q.team!==p.team||q===p)continue;
-      if(q.role!=='ATT'&&q.role!=='MID')continue;        // only attackers/midfielders attack a cross
-      const dPen=dist(q,penSpot);
-      if(dPen<bs){bs=dPen;best=q;}
+  // YOUR CROSS: hold CROSS (L) and let go. How long you hold it picks the man it's for: of ours in their box or on our
+  // way into it (and onside), nearest the ball first -- a tap for the nearest (the near post), the whole bar for the
+  // furthest (the far post), the bar shared out between them. While you hold it the man it's for has an amber ring.
+  // It's struck as the computer's is (see aiCross): to where he'll meet it, coming down through head height, swinging
+  // (crossSwing). DOUBLE-TAP it for a low driven cross to him instead (lowCross): the second press's hold picks the man
+  // the same way. A quick single tap waits the double-tap window (the pass's: passDtap) in case a second is coming.
+  // where a cross to q goes, struck now: his spot in the box if he'll be there as it is (as far toward it as he'll have
+  // got, if not); where he is if he's in the box; where his run takes him if he's on one; null if none of those
+  function crossAimFor(p,q,J,low){
+    const atk=atkOf(p.team), gx=atk>0?FW:0;
+    const inBox=sp=>atk*(gx-sp.x)>=40 && atk*(gx-sp.x)<=BX+110 && Math.abs(sp.y-YC)<=BY+40;
+    const T0=sp=>{ const d=Math.hypot(sp.x-ball.x,sp.y-ball.y); return low ? clamp(d/650,0.25,1.2) : clamp(0.7+0.0008*d,0.6,1.2); };
+    const j=J&&J.get(q), mv=Math.hypot(q.vx,q.vy);
+    if(j&&BOX_SPOT.has(j.job)){
+      const B={x:j.bx!=null?j.bx:j.x, y:j.by!=null?j.by:j.y}, dB=Math.hypot(B.x-q.x,B.y-q.y);
+      const reach=40+crossRunV(q,dB)*Math.max(0,T0(B)-offReact(q)-0.15);
+      if(dB<=reach) return B;
+      const k=reach/dB; return {x:q.x+(B.x-q.x)*k, y:q.y+(B.y-q.y)*k};
     }
-    const target = best
-      ? {x:best.x+best.vx*0.4, y:best.y+best.vy*0.4}
-      : penSpot;
-    let dx=target.x-ball.x, dy=target.y-ball.y;
-    const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-    const aerr=crossSpray(p);
-    const ca=Math.cos(aerr),sa=Math.sin(aerr);
-    const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    // the charge picks the flight: driven in (0.55 s, but no quicker than 26 m/s, the computer's fastest) to floated
-    // (1.1 s). Either way it comes down through head height where the man is going, as the computer's cross does (see
-    // aiCross) -- so he can meet it
-    const G=520, T=clamp(Math.max(0.55+0.55*c, d/650), 0.55, 1.3), zH=PLAYER_H*1.15;
-    curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,target.x,target.y,best);   // (swinging: crossSwing)
-    ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
-    ball.crossBy=p.team;ball.crossT=1.6;           // live cross -> forwards attack it
+    const T=T0(q), L={x:q.x+q.vx*T, y:q.y+q.vy*T};
+    if(inBox(q)) return mv>80&&inBox(L) ? L : {x:q.x, y:q.y};
+    return mv>80&&inBox(L) ? L : null;
+  }
+  // the men a cross of yours could be for, nearest the ball first: {q, x, y (where it goes), d}
+  function crossMen(p,low){
+    const J=PLAN[p.team]&&PLAN[p.team].last, out=[];
+    for(const q of players){ if(q.team!==p.team||q===p||q.state!=='normal'||inOffsidePos(q)) continue;
+      const a=crossAimFor(p,q,J,low); if(a) out.push({q, x:a.x, y:a.y, d:Math.hypot(a.x-ball.x,a.y-ball.y)}); }
+    return out.sort((a,b)=>a.d-b.d);
+  }
+  // the man a charge c (0..1) picks: the bar shared out between them, nearest first
+  function crossPick(p,c,low){ const M=crossMen(p,low); return M.length ? M[Math.min(M.length-1,Math.floor(clamp(c,0,1)*M.length))] : null; }
+  // the cross button with the ball (L, or CROSS on a phone): pressed, and let go
+  function crossPressBall(){
+    const now=performance.now();
+    if(crossPend&&now>crossPend.at){ crossFlush(); return; }   // the first one's moment is up: that one goes now
+    crossLow=!!crossPend; crossPend=null;                      // the second tap of a double-tap: a low driven cross
+    crossHeld=true; crossCharge=0; crossDown=now;
+  }
+  function crossRelease(){
+    if(!crossHeld) return;
+    crossHeld=false; const c=crossCharge, low=crossLow; crossCharge=0; crossLow=false;
+    if(!myBall()) return;
+    if(low||performance.now()-crossDown>DTAP_PRESS) cross(c,low);   // held, or the second tap: it goes now
+    else crossPend={charge:c, at:performance.now()+P.passDtap.val};  // a quick tap: is a second coming?
+  }
+  function crossFlush(){ const cp=crossPend; crossPend=null; if(cp&&myBall()) cross(cp.charge,false); }
+  function cross(charge,low){
+    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>cross(charge,low)); return; }
+    const c=clamp(charge||0,0,1), p=controlled, atk=atkOf(p.team), pick=crossPick(p,c,low);
+    let tq=null, tx, ty;
+    if(pick){ tq=pick.q; tx=pick.x; ty=pick.y; }
+    else {                                   // nobody in their box or on his way in: the forward or midfielder nearest the penalty spot
+      const pen={x:atk>0?FW-BX*0.66:BX*0.66, y:YC}; let bs=1e9;
+      for(const q of players){ if(q.team!==p.team||q===p||(q.role!=='ATT'&&q.role!=='MID')) continue; const d=dist(q,pen); if(d<bs){ bs=d; tq=q; } }
+      if(tq){ tx=tq.x+tq.vx*0.4; ty=tq.y+tq.vy*0.4; } else { tx=pen.x; ty=pen.y; }
+    }
+    crossGoneAt=performance.now();
+    if(low) lowCross(p,tq,tx,ty);
+    else {
+      let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+      const aerr=crossSpray(p), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+      const G=520, T=clamp(0.7+0.0008*d,0.6,1.2), zH=PLAYER_H*1.15;
+      curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,tx,ty,tq);   // (swinging: crossSwing)
+      ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
+      ball.crossBy=p.team; ball.crossT=1.6;            // live cross -> forwards attack it
+      recordPassTeam(p.team,p); passPose(p);
+      // locked: stay on your player after crossing (use K to command the target to head it)
+      lastGrade='CROSS'; gradeColor='#9dff3c'; gradeFade=1.0;
+    }
+    if(LAB.on&&LAB.kind==='cross') crossLabStruck({x:tx,y:ty,who:tq},low);
+  }
+  // A LOW DRIVEN CROSS: flat and hard -- up to LOWX_V (30 m/s), getting to the man as quick as that allows -- and
+  // coming in at his knees where he'll be when it gets there, low enough to take or hit first time. (The grass drags a
+  // ball along it to a stop too soon for a cross to skim all the way, so it's in the air all but its last stride: about
+  // 1 m up at the top over 13 m, 1.5 m over 22 m, against the 4-5 m of a lofted one.) It's a ball played to him: he
+  // reads it as he would a pass (his Off IQ), and takes it, or hits it first time if it's on; their men can cut it out as
+  // they would a pass. Your Crossing aims it, a little more surely than a lofted one.
+  const LOWX_V=680, LOWX_Z=9;
+  function lowCross(p,q,tx,ty){
+    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    const aerr=crossSpray(p)*0.8, ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+    const T=Math.max(0.38+0.0006*d, d/LOWX_V), vz=(LOWX_Z+260*T*T)/T, vh=d/T/takeoffKeep(vz);   // (struck that bit harder for the grass at its take-off: takeoffKeep)
+    ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=vz; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; ball.crossCurl=0;
+    ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team; ball.crossBy=null; ball.crossT=0;
+    ball.intendedRcv=q; ball.rcvRunner=!!q&&Math.hypot(q.vx,q.vy)>runSpeedOf(q)*0.7; ball.thru=null; ball.lob=null; ball.passerRef=p;
     recordPassTeam(p.team,p); passPose(p);
-    // locked: stay on your player after crossing (use K to command the target to head it)
-    lastGrade='CROSS';gradeColor='#9dff3c';gradeFade=1.0;
+    lastGrade='LOW CROSS'; gradeColor='#9dff3c'; gradeFade=1.0;
   }
   // ===== CLEARANCE: in your own half the cross button clears the ball instead =====
   // With it at your feet it's hoofed away at once; if it's loose (rolling or dropping toward you) the press
@@ -5338,7 +5410,7 @@
     ball.crossBy=null; ball.crossT=0; ball.shotBy=null; ball.shotT=0;
     p.noTouchT=0.35; ball.lastTouch=p.team;
     endCurve(); recordPassTeam(p.team,p); passPose(p);
-    clearArm=0; clearHeld=false; trapping=0; crossHeld=false; crossCharge=0;
+    clearArm=0; clearHeld=false; trapping=0; crossHeld=false; crossCharge=0; crossPend=null; crossLow=false;
     lastGrade='CLEARED!'; gradeColor='#9dff3c'; gradeFade=1.0;
   }
   // A CLEARANCE AND DEF IQ: the better a man reads the game, the further his clearance can go (x0.85 at Def IQ 1, x1.3 at
@@ -5468,7 +5540,7 @@
     else passPend={charge,at:performance.now()+P.passDtap.val};
   }
   function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
-  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); actStep(); }   // (every frame)
+  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); }   // (every frame)
 
   // The pass itself. o.loft: in the air, over them; o.thru: {dx,dy} a screen direction to play it through.
   function doPass(charge,o){
@@ -6021,6 +6093,7 @@
     return { gx, corner, kp, sp, top, bot, pick };
   }
   function shootAt(p,atkSide,aim,charge,aiCurl,accMul,spin,across){
+    if(LAB.on&&LAB.kind==='cross') crossLabOnShot(p);
     if(meIs(p)) meBump('shots');
     const gx=atkSide>0?FW:0;
     let ty=YC+aim*(GOAL_W/2-14);
@@ -11204,6 +11277,8 @@
 
     // the man you control: a solid green ring on the grass at his reach (Ball control), the only ring there is
     if(controlled) pixelRing(controlled.x,controlled.y,controlROf(controlled),'#9dff3c','rgba(14,58,30,.6)');
+    // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
+    if(controlled&&(crossHeld||crossPend)&&myBall()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     if(LAB.on) labDrawPitch();
 
     if(shootCharge>0.02&&ball.ownedBy===controlled){
@@ -13268,7 +13343,7 @@
     if(b.dataset.cf==='yes'){ const f=_cfYes; hideConfirm(); if(f)f(); } else hideConfirm(); });
   // ===== END MANAGER CAREER ===================================================================
 
-  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
+  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
   function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
   function refreshMenuButtons(){
