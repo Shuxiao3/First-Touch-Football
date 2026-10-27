@@ -34,8 +34,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     if he's off its line. Half the time a poor one squirms on past him instead.
   - It keeps less pace than the old timed trap did: from 6% for the best touch to 45% for the worst, falling away
     steeply. A clean touch ends a step away, a loose one a couple of metres, a heavy one a few.
-  - A ball in the air is met the same way, and it has to drop to his feet.
-  - A flicked first touch (a flick on SKILL as the ball comes) strays and runs on as the touch does.
+  - **Above the waist it's never PERFECT.** A ball you meet at chest or high-thigh height (over 55% of a man's height)
+    is never dead at your feet. It comes off your body, CLEAN at best, keeping at least 16% of its pace at Ball
+    control 10 (a little way off you) and 45% at 1 (a long way), up to 8% more the higher it is. Below the waist, at
+    shin or knee height, it's met as on the grass. Measured: a 450 px/s ball at chest height came off a man at 18%
+    of its pace at Ball control 10 and 47% at 1; at knee height, Ball control 10 still killed it (6-8%). The old game
+    chested nearly everything down dead (6-11% of its pace at either rating, mostly PERFECT). New dials: Above the waist: pace kept, best and worst.
+  - A flicked first touch (a flick on SKILL as the ball comes) strays and runs on as the touch does. Above the waist
+    it goes from where you met it, off your chest or thigh, not from your feet.
   - A rocket you get in the way of (their shot, or a pass over 700 px/s) is still a block that runs loose.
 
   The reach, where you first meet the ball, is smaller: 18 at Ball control 1 up to 32 at 10 (it was 25 to 45). How
@@ -58,6 +64,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Turned away from it, he can't take it.** If the ball is behind him as it reaches him (more than 110° from the
     way he faces), or it's coming at him from behind where he can't see it, he gets nothing on it. If it runs into
     him it comes off him, a little bounce and most of its pace gone, and it's nobody's. If not, it goes past him.
+    A ball in the air is the same: one dropping onto his back comes off him, one over his head goes on.
     (Dead or crawling balls he just turns and picks up.)
   - **Side-on, the touch is harder**, up to a quarter of the way from the easiest touch to the hardest. Cutting out
     their pass is a stretch whichever way he faces, as it always was.
@@ -113,7 +120,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
-    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 89 feel dials are the game's
+    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 91 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
@@ -217,6 +224,16 @@ The same game played like any other football game. It's a copy of `index.html` w
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
   arrives, by the First touch push dial (your own pace along it is added).
+  - **Any ball on its way to you arms it:** one played to you, one led into space ahead of you, or one whose path runs
+    within 6 m of you, from as far as 40 m off. It stays armed until the ball gets to you, or someone else touches it.
+    (It used to need the ball heading straight at you from within 15 m, unless you'd left the stick alone since the
+    pass.)
+  - **A flick begun as the ball gets to you, or up to 0.2 s after,** is still your first touch, as long as it ends
+    within 0.6 s. The ball is still on your foot, so it goes the way you flicked rather than turning into a cut. On a
+    short pass the ball is often there before the flick is done.
+  - **While it comes, you open your body to it:** halfway round from the ball toward the way you flicked, but never
+    more than 60° off the ball or off the way it's coming, so you're never turned away from it.
+  - **Leave the stick alone and you go to meet it.**
 
 - **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
   past him. You have all three stars there, to practise every move. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW

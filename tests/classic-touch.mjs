@@ -5,7 +5,9 @@
 // PERFECT touch dead at your feet, a worse one off you. The reach is smaller (18 to 32, was 25 to 45). A man the ball
 // is coming to turns his body to it, as quick as his Agility lets him, and moves however he must to get to it (slower
 // side-on, slower still backing off); one who hasn't got round to it takes it worse. On the pitch: one solid green
-// ring under the man you control (no dotted one), and the ball in whole pixels, as the players are.
+// ring under the man you control (no dotted one), and the ball in whole pixels, as the players are. Above the waist the
+// touch is never PERFECT: chest high, it comes off him by his Ball control. And the directional first touch as it's
+// played on a phone, with real flicks on SKILL.
 // On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -17,7 +19,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, atkOf, controlROf, '
   + 'touchQuality, touchPressure, finalThirdOf, lastGrade:()=>lastGrade, proj, draw:()=>draw(), stepOutfield, runSpeedOf, simNow:()=>simNow, cam:v=>{ camX=v; }, '
-  + 'watchBall, setControlled, queueOneTouch, recvAuto:()=>recvAuto, stick:(x,y)=>{ window.__stick={x,y}; }, '
+  + 'watchBall, setControlled, queueOneTouch, recvAuto:()=>recvAuto, stick:(x,y)=>{ window.__stick={x,y}; }, doPass, ftAim:()=>ftAim, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
@@ -233,6 +235,71 @@ info(JSON.stringify(look));
 ok(look.ring.every(h => h === '#9dff3c'), 'one solid green ring at his reach, all the way round its near side (' + look.ring.join(' ') + ')');
 ok(look.pixel.length === 3, 'the ball in whole pixels: its outline, white and patches (' + look.pixel.join(' ') + ')');
 ok(look.plain, 'with the sprites off, the plain round ball is back');
+
+// ABOVE THE WAIST: a ball you meet at chest height is never a PERFECT touch, dead at your feet -- it comes off you, a
+// little way at Ball control 10 and a long way at 1. At knee height (below the waist) a good touch still kills it.
+const airTouch = (bc, z, n) => page.evaluate(({ bc, z, n }) => new Promise(res => {
+  const T = window.__T, atk = T.atkOf('G'), m = T.players().find(q => q.team === 'G'), keep = m.stats, out = [];
+  T.setControlled(m); m.stats = Object.assign({}, keep, { ballControl: bc, composure: bc });
+  for(const q of T.players()) if(q !== m){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = 90; q.vx = q.vy = 0; }
+  const serve = () => { T.freeze();
+    m.x = atk > 0 ? T.FW * 0.3 : T.FW * 0.7; m.y = T.YC; m.vx = m.vy = 0; m.state = 'normal'; m.noTouchT = 0; m.reactUntil = 0; m.facing = { x: -atk, y: 0 };
+    const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.lastTouch = 'G'; b.intendedRcv = m; b.thru = null; b.shotT = 0;
+    b.x = m.x - atk * 60; b.y = m.y; b.z = z; b.vz = 35; b.vx = atk * 450; b.vy = 0; return b; };   // (vz: it comes in level)
+  let b = serve(), t0 = performance.now();
+  (function tick(){
+    m.vx = m.vy = 0;
+    if(b.dribbler === m || b.ownedBy === m){ out.push({ grade: T.lastGrade(), keep: +(Math.hypot(b.vx, b.vy) / 450).toFixed(2), z: Math.round(b.z) }); b = serve(); t0 = performance.now(); }
+    else if(performance.now() - t0 > 2000){ out.push({ grade: 'none' }); b = serve(); t0 = performance.now(); }
+    if(out.length >= n){ m.stats = keep; return res(out); }
+    requestAnimationFrame(tick);
+  })(); }), { bc, z, n });
+const chest10 = await airTouch(10, 27, 6), chest1 = await airTouch(1, 27, 6), knee10 = await airTouch(10, 15, 3);
+const mean = a => +(a.reduce((s, t) => s + (t.keep || 0), 0) / a.length).toFixed(2);
+info('above the waist: ' + JSON.stringify({ chest10, chest1, knee10 }));
+ok(chest10.every(t => t.grade !== 'none' && t.grade !== 'PERFECT' && t.keep >= 0.15 && t.z > 12), 'chest high at Ball control 10: never PERFECT, it comes off him a little (' + chest10.map(t => t.grade + ' ' + t.keep).join(', ') + ' of its pace), from his chest');
+ok(chest1.every(t => t.grade !== 'none' && t.grade !== 'PERFECT' && t.keep >= 0.4) && mean(chest1) >= 2 * mean(chest10), '...at Ball control 1, a long way (' + mean(chest1) + ' of its pace on average, ' + mean(chest10) + ' at 10)');
+ok(knee10.every(t => t.grade === 'PERFECT' && t.keep < 0.1), 'knee high, below the waist, Ball control 10 still kills it (' + knee10.map(t => t.grade + ' ' + t.keep).join(', ') + ')');
+
+// DIRECTIONAL FIRST TOUCH, as played on a phone: you pass, you're put on the man it's going to, and a flick on SKILL
+// sends his first touch that way. (A pass hit without its spray, so it goes where it's aimed.)
+const mob = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+const mp = await mob.newPage(); mp.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+await mp.goto('file://' + copy); await mp.waitForTimeout(700);
+await mp.tap('#smItems [data-act="exhibition"]'); await mp.waitForSelector('#exhPanel.show'); await mp.tap('#exhGo'); await mp.waitForTimeout(1500);
+const cdp = await mob.newCDPSession(mp), finger = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 5 }] });
+const skillAt = await mp.$eval('#skillBtn', e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+const flick = async (dx, dy) => { await finger('touchStart', skillAt.x, skillAt.y);
+  for(let i = 1; i <= 4; i++){ await finger('touchMove', skillAt.x + dx * i / 4, skillAt.y + dy * i / 4); await mp.waitForTimeout(16); }
+  await finger('touchEnd', skillAt.x + dx, skillAt.y + dy); };
+const passTo = (gap, charge, sx) => mp.evaluate(({ gap, charge, sx }) => { const T = window.__T, atk = T.atkOf('G'), mates = T.players().filter(q => q.team === 'G'), a = mates[0], r = mates[1];
+  T.setControlled(a); T.freeze();
+  for(const q of T.players()) if(q !== a && q !== r){ q.x = T.FW / 2 - atk * 900; q.y = 40; q.vx = q.vy = 0; }
+  a.x = T.FW / 2 - atk * gap; a.y = T.YC; a.vx = a.vy = 0; a.noTouchT = 0; r.x = T.FW / 2; r.y = T.YC + 100; r.vx = r.vy = 0; r.facing = { x: -atk, y: 0 }; r.noTouchT = 0; r.reactUntil = 0; r.state = 'normal';
+  const b = T.ball(); b.ownedBy = a; b.dribbler = null; b.x = a.x + atk * 20; b.y = a.y; b.z = 0; b.vx = b.vy = b.vz = 0;
+  const R = Math.random; Math.random = () => 0.5; try { T.doPass(charge, { target: r }); } finally { Math.random = R; }
+  T.stick(sx * atk, 0); return { on: T.controlled() === r, d: Math.round(Math.hypot(b.x - r.x, b.y - r.y)) }; }, { gap, charge, sx });
+const firstTouch = () => mp.evaluate(() => new Promise(res => { const T = window.__T, r = T.controlled(), b = T.ball(), t0 = performance.now();
+  (function tick(){ if(b.dribbler === r || b.ownedBy === r){ const sp = Math.hypot(b.vx, b.vy) || 1; T.stick(0, 0); return res({ grade: T.lastGrade(), x: +(b.vx / sp).toFixed(2), y: +(b.vy / sp).toFixed(2), sp: Math.round(sp) }); }
+    if(performance.now() - t0 > 4000){ T.stick(0, 0); return res({ grade: 'none' }); } requestAnimationFrame(tick); })(); }));
+const atkM = await mp.evaluate(() => window.__T.atkOf('G'));
+// (1) a 24 m pass, your stick held on up the pitch (away from it), a flick that way as it comes
+const p1 = await passTo(600, 0.6, 1); await mp.waitForTimeout(150); await flick(atkM * 60, 0);
+const a1 = await mp.evaluate(() => !!window.__T.ftAim()), t1 = await firstTouch();
+// (2) a 10 m pass, the flick landing just after it got to him (the ball's still on his foot): his first touch, not a CUT
+const p2 = await passTo(250, 0.1, 0);
+await mp.evaluate(() => new Promise(res => { const T = window.__T, r = T.controlled(), b = T.ball(), t0 = performance.now(); (function tick(){ if(b.ownedBy === r || performance.now() - t0 > 3000) return res(); requestAnimationFrame(tick); })(); }));
+await flick(0, -60); const t2 = await mp.evaluate(() => { const T = window.__T, b = T.ball(), sp = Math.hypot(b.vx, b.vy) || 1; return { grade: T.lastGrade(), x: +(b.vx / sp).toFixed(2), y: +(b.vy / sp).toFixed(2), sp: Math.round(sp), loose: !b.ownedBy }; });
+// (3) a 30 m pass, the stick nudged and let go (so it's yours to steer), flicked while it's still 25 m off: it's armed at
+// once, and he meets it and takes it that way
+const p3 = await passTo(760, 0.8, 1); await mp.waitForTimeout(100); await mp.evaluate(() => window.__T.stick(0, 0));
+p3.steer = await mp.evaluate(() => !window.__T.recvAuto()); await flick(0, 60);
+const a3 = await mp.evaluate(() => { const T = window.__T, f = T.ftAim(), b = T.ball(), r = T.controlled(); return f ? { x: +f.d.x.toFixed(2), y: +f.d.y.toFixed(2), d: Math.round(Math.hypot(b.x - r.x, b.y - r.y)) } : null; }), t3 = await firstTouch();
+info('directional first touch: ' + JSON.stringify({ p1, a1, t1, p2, t2, p3, a3, t3 }));
+ok(p1.on && a1 && /^TOUCH/.test(t1.grade) && t1.x * atkM > 0.9 && t1.sp > 100, 'a 24 m pass, the stick held on up the pitch: a flick that way on SKILL sends his first touch that way (' + t1.grade + ', ' + t1.sp + ' px/s)');
+ok(p2.on && /^TOUCH/.test(t2.grade) && t2.y < -0.9 && t2.loose && t2.sp > 80, 'a 10 m pass, the flick ending just after it got to him: still his first touch, pushed the way you flicked (' + t2.grade + '), not a skill move');
+ok(p3.on && p3.steer && a3 && a3.d > 450 && a3.y > 0.9 && /^TOUCH/.test(t3.grade) && t3.y > 0.9, 'a 30 m pass, yours to steer, flicked with it ' + (a3 && a3.d) + ' px off: armed at once, and he meets it and takes it that way (' + t3.grade + ')');
+await mob.close();
 
 process.exitCode = rep.finish();
 await browser.close();

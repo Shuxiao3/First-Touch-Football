@@ -1351,6 +1351,8 @@
     pedalSide:{val:0.72,min:0.4,max:1,step:0.01,label:'Side-step speed',hint:'Top speed moving side-on to the way he faces while he watches the ball, as a share of his running pace (Agility nudges it ±8%). He cannot sprint off his front.'},
     pedalBack:{val:0.55,min:0.3,max:1,step:0.01,label:'Back-pedal speed',hint:'Top speed moving backwards while he watches the ball (Agility nudges it ±10%).'},
     turnTouch:{val:0.25,min:0,max:0.6,step:0.01,label:'Touch off-square',hint:'How much harder the first touch is the further he is turned from the ball (side-on about half the most): a man who could not turn to it in time.'},
+    airKeepGood:{val:0.16,min:0,max:0.6,step:0.01,label:'Above the waist: pace kept, best',hint:'A ball met above the waist (chest, high thigh) is never dead at his feet: it comes off him with at least this share of its pace at Ball control 10 (a little way off him) ...'},
+    airKeepBad:{val:0.45,min:0.1,max:0.9,step:0.01,label:'Above the waist: pace kept, worst',hint:'... and this share at Ball control 1 (a long way off him). Higher up it keeps a little more.'},
     awayAngle:{val:110,min:90,max:160,step:5,label:'Back to it from (°)',hint:'Turned further than this from the ball as it reaches him, he can\'t take it at all: it hits him and comes off, or it goes past him.'},
     blockReach:{val:25,min:14,max:40,step:1,label:'Shot block: reach (px)',hint:'How close to a defender a shot has to pass, below his shoulders, for him to get his body or a leg in the way (25 px = 1 m). His Def IQ takes it a little either way: Block: Def IQ spread.'},
     swipeFree:{val:25,min:0,max:60,step:5,label:'Swipe shot: off his line, free (°)',hint:'A swipe shot this far off the way he is facing costs nothing. Further round it is struck across his body: weaker and wilder, the more so the further, worst turned right round (Swipe shot: off his line, cost).'},
@@ -1374,7 +1376,7 @@
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap Lab: re-press lockout (s)',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.'},
     // directional first touch (touch screens): press TRAP and drag the way you want the ball to go
-    ftPush:   {val:55,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (press TRAP and drag the way you want it). Running along your aim adds your own pace on top, so the ball stays just ahead of you.'},
+    ftPush:   {val:55,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (a flick on SKILL as the ball comes; in the Trap Lab, press TRAP and drag the way you want it). Running along your aim adds your own pace on top, so the ball stays just ahead of you.'},
     ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed.'},
     ftTurn:   {val:1,min:0,max:1.6,step:0.05,label:'First touch: turn difficulty',hint:'How much turning the ball (aiming away from where it would bounce off you anyway) narrows the timing window. 1 = a full turn halves it on a 450 ball, and quicker balls are harder to turn. 0 = every direction is as easy as the next.'},
     ftWin:    {val:0.2,min:0.05,max:0.5,step:0.01,label:'First touch: drag window (s)',hint:'How long after your finger lands on TRAP a drag still aims the touch. The press itself is timed from the moment your finger lands; drag before the ball gets to you, or just after, and the touch goes that way.'},
@@ -1658,7 +1660,7 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
-    traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
+    traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange']
@@ -2778,7 +2780,10 @@
     }
     return true;
   }
-  // DIRECTIONAL FIRST TOUCH: a flick on SKILL with a ball coming to you
+  // DIRECTIONAL FIRST TOUCH: a flick on SKILL with a ball coming to you -- or one begun as it got to you, or just after
+  // (FT_LATE), and ended within FT_END of it: the ball's still on your foot, so it's the first touch that goes that way,
+  // not a skill move
+  const FT_LATE=0.2, FT_END=0.6;
   function ftAimOK(){ return !!ftAim&&ftAim.p===controlled&&simNow<ftAim.until; }
   function incomingToMe(){
     const p=controlled; if(!p||ball.ownedBy||gkHold) return false;
@@ -2786,31 +2791,50 @@
     const dx=p.x-ball.x, dy=p.y-ball.y, d=Math.hypot(dx,dy), sp=Math.hypot(ball.vx,ball.vy);
     return d<380&&sp>60&&(ball.vx*dx+ball.vy*dy)/(d*sp||1)>0.7;
   }
+  // ...or played for him, or led into space ahead of him (a flick on SKILL arms a directional touch on any of these): his
+  // team's ball, loose, its path running within 6 m of him, not yet past him
+  function comingMyWay(){
+    const p=controlled; if(!p||ball.ownedBy||gkHold) return false;
+    if(incomingToMe()) return true;
+    if(ball.lastTouch!==p.team) return false;
+    if(ball.intendedRcv===p) return true;
+    const dx=p.x-ball.x, dy=p.y-ball.y, d=Math.hypot(dx,dy), sp=Math.hypot(ball.vx,ball.vy);
+    if(!(d<1000&&sp>60)) return false;
+    return (ball.vx*dx+ball.vy*dy)/sp>-40&&Math.abs(ball.vx*dy-ball.vy*dx)/sp<150;
+  }
   // the touch itself, as the ball reaches you: pushed the way you flicked, your own pace along it on top. It's as good
   // as his first touch (s, see touchQuality): a poor one strays off the line you asked for and runs on further.
   function directionalTouch(p,s){
     const a=ftAim.d; ftAim=null; if(!(s>=0)) s=1;
+    const up=ball.z>WAIST, z0=ball.z, bx=ball.x, by=ball.y, inSp=Math.hypot(ball.vx,ball.vy), floor=up?airKeepOf(p)*inSp:0;
+    if(up) s=Math.min(s,AIR_CAP);                         // (above the waist: never perfect, see airKeepOf)
     own(p,p.r+ball.r+5);
     const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999)));
     const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
     const err=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
-    const ang=Math.atan2(a.y,a.x)+err, out=push*(1+0.8*(1-s)*(1-s));
+    const ang=Math.atan2(a.y,a.x)+err, out=Math.max(push*(1+0.8*(1-s)*(1-s)),floor);
     ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.12+0.15*(1-s);
     ball.vx=Math.cos(ang)*out; ball.vy=Math.sin(ang)*out; ball.z=1; ball.vz=30+60*(1-s);
+    if(up){ ball.x=bx; ball.y=by; ball.z=z0; ball.vz=20+40*(1-s); }   // off his chest or thigh, from where he met it
     p.facing={x:a.x,y:a.y};
     lastGrade='TOUCH '+labArrow(a.x,a.y)+(s>0.55?'':' · '+trapGrade(s)); gradeColor=s>0.55?'#78c8ff':s>0.3?'#ffb43c':'#ff5a4d'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
-  function skillGStart(cx,cy){ const r=rect(); skillG={mate:(myBall()||incomingAny())?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
+  function skillGStart(cx,cy){ const r=rect(); skillG={t0:simNow,mate:(myBall()||incomingAny())?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
   function skillGMove(cx,cy){ if(!skillG) return; const r=rect(); skillG.pts.push({x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}); if(skillG.pts.length>240) skillG.pts.splice(1,1); }
   function skillGEnd(cancel){
     const g=skillG; skillG=null; if(!g) return;
     if(!cancel&&g.mate&&g.mouse!==false){ let L=0; for(let i=1;i<g.pts.length;i++) L+=Math.hypot(g.pts[i].x-g.pts[i-1].x,g.pts[i].y-g.pts[i-1].y);
       if(L<10&&touchPass(g.mate)){ skillTrail=null; return; } }   // a click on a team-mate: pass to him
     const read=cancel?null:readSkill(g.pts);
+    if(read&&read.kind==='cut'&&controlled&&ball.ownedBy===controlled&&g.t0<ball.gotT+FT_LATE&&simNow-ball.gotT<FT_END){   // (begun as it got to him)
+      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+1}; oneTouch=null;
+      directionalTouch(controlled,touchQuality(controlled,false));
+      if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=true; }
+      return; }
     let ok=!!read&&startSkill(read);
-    if(!ok&&read&&read.kind==='cut'&&incomingToMe()){            // a flick with it on its way: the first touch goes that way
-      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+2}; ok=true; oneTouch=null;
+    if(!ok&&read&&read.kind==='cut'&&comingMyWay()){             // a flick with it on its way: the first touch goes that way
+      ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+3.5,lt:ball.lastTouch}; ok=true; oneTouch=null;
       lastGrade='TOUCH '+labArrow(ftAim.d.x,ftAim.d.y)+' …'; gradeColor='#78c8ff'; gradeFade=0.9; }
     if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
     if(!cancel&&!read&&g.pts.length>2){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
@@ -3440,7 +3464,7 @@
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
-    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). Phone: press TRAP and drag.',
+    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). A flick on SKILL as the ball comes (Trap Lab: press TRAP and drag).',
     ftErr:'How far off your aim a directional touch strays at the worst timing.',
     ftTurn:'How much turning the ball narrows the window. 0 = every direction is as easy.',
     ftWin:'How long after your finger lands a drag still aims the touch (before the ball gets to you, or just after).',
@@ -4399,12 +4423,15 @@
     // (Movement only: an aim taken from the stick still reads it as centred.)
     if(switchLock){ if(switchLock.p!==controlled||simNow>switchLock.until) switchLock=null; else return {ix:switchLock.ix, iy:switchLock.iy}; }
     if(recvAuto&&(recvAuto.q!==controlled||ball.ownedBy||gkHold||simNow>recvAuto.until)) recvAuto=null;
+    if(ftAim&&(ftAim.p!==controlled||ball.ownedBy||gkHold||ball.lastTouch!==ftAim.lt||simNow>ftAim.until)) ftAim=null;   // someone's got it, or touched it
     if(recvAuto&&recvAuto.hold){ const h=recvAuto.hold;              // the stick still held the way a first-time pass went
       if((ix||iy)&&ix*h.x+iy*h.y>0.9){ ix=0; iy=0; } else recvAuto.hold=null; }
     if(recvAuto&&!ix&&!iy&&recvAuto.wait>simNow) return {ix:0,iy:0};   // (a beat to see it's his)
     if(recvAuto&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
+    if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
+      return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
     if(!ix&&!iy&&controlled&&myLooseBall()&&ball.z<12){ const dx=ball.x-controlled.x, dy=ball.y-controlled.y, d=Math.hypot(dx,dy)||1; return {ix:dx/d, iy:dy/d}; }
     return{ix,iy};
   }
@@ -4504,7 +4531,7 @@
       const closing=bs>1?-(ball.vx*dx+ball.vy*dy)/d:0;                              // how fast it's coming at him
       const miss=bs>1?Math.abs(ball.vx*dy-ball.vy*dx)/bs:d;                         // how wide of him its line runs
       const atMe=closing>0.5*bs&&miss<controlROf(p)+24&&d<320&&ball.z<30;         // (not one going over his head)
-      if(!(mine||p.goingForBall||p.intercepting||atMe||(p===controlled&&incomingToMe()))||d>900) return false;
+      if(!(mine||p.goingForBall||p.intercepting||atMe||(p===controlled&&(incomingToMe()||ftAimOK())))||d>900) return false;
       if(bs>150&&closing<0.2*bs) return false;                                     // going away from him: he runs after it
       tArr=d/Math.max(closing,120);
     }
@@ -4522,6 +4549,18 @@
     return !laneBlocked(ball.ownedBy,p);
   }
   function bodyTurnOf(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),3.4,9.5)*P.bodyTurn.val; }   // rad/s: reading the ball is his Off IQ
+  // which way a man watching the ball turns his body: square to it -- or, with a directional first touch asked for (you, a
+  // flick on SKILL), open to it: halfway round toward where he'll push it, but no more than 60 deg off the ball or off
+  // the way it's coming at him, so he can still take it (see facingAway)
+  function watchAngle(p,tx,ty){
+    const ab=Math.atan2(ty,tx);
+    if(p!==controlled||!ftAimOK()) return ab;
+    const wrap=a=>{ while(a>Math.PI)a-=2*Math.PI; while(a<-Math.PI)a+=2*Math.PI; return a; };
+    let t=ab+clamp(wrap(Math.atan2(ftAim.d.y,ftAim.d.x)-ab)/2,-Math.PI/3,Math.PI/3);
+    const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy;
+    if(Math.hypot(rvx,rvy)>60){ const ai=Math.atan2(-rvy,-rvx); t=ai+clamp(wrap(t-ai),-Math.PI/3,Math.PI/3); }
+    return t;
+  }
   // his top speed off his front, as a share: c the cosine between the way he faces and the way he's going
   function pedalOf(p,c){ const ag=statLerp(statOf(p,'agility',P.agility.val),-1,1);
     const S=clamp(P.pedalSide.val*(1+0.08*ag),0.3,1), B=clamp(P.pedalBack.val*(1+0.1*ag),0.2,S);
@@ -8601,7 +8640,7 @@
     }
     if(watch){                                      // his body comes round to the ball as quickly as he reads it (Off IQ)
       const tx=ball.x-p.x, ty=ball.y-p.y, f=p.facing||{x:atkOf(p.team),y:0};
-      if(Math.hypot(tx,ty)>1){ const a0=Math.atan2(f.y,f.x); let dd=Math.atan2(ty,tx)-a0; while(dd>Math.PI)dd-=Math.PI*2; while(dd<-Math.PI)dd+=Math.PI*2;
+      if(Math.hypot(tx,ty)>1){ const a0=Math.atan2(f.y,f.x); let dd=watchAngle(p,tx,ty)-a0; while(dd>Math.PI)dd-=Math.PI*2; while(dd<-Math.PI)dd+=Math.PI*2;
         const mx=bodyTurnOf(p)*capFatigue*dt, a=a0+clamp(dd,-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
       const vs=Math.hypot(p.vx,p.vy);               // ...and off his front he's slower
       if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; if(c<0.5) MAX=Math.min(MAX,runSpeedOf(p)*fatigue); MAX*=pedalOf(p,c); }
@@ -8655,6 +8694,14 @@
     else D+=offSquare(p)*P.turnTouch.val;                                      // he didn't get his body round to it in time
     return clamp(D,0,1);
   }
+  // ABOVE THE WAIST: a ball met at chest or high-thigh height is never a PERFECT touch, dead at his feet -- it comes off
+  // his body, a little way with good Ball control and a long way with poor, a little further the higher it is (the
+  // Above the waist dials). Below the waist (a ball at his shins or knees) it's the touch as on the grass.
+  const WAIST=PLAYER_H*0.55, AIR_CAP=0.78;               // (AIR_CAP: CLEAN at best)
+  function airKeepOf(p){
+    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, hw=clamp((ball.z-WAIST)/(AIR_REACH-WAIST),0,1);
+    return P.airKeepBad.val+(P.airKeepGood.val-P.airKeepBad.val)*bc+0.08*hw;
+  }
   // how far he's turned from the ball as it reaches him: 0 square to it, about half side-on, 1 his back to it
   function offSquare(p){
     if(!p||!p.facing) return 0;
@@ -8669,6 +8716,12 @@
     if(d>=1&&(p.facing.x*dx+p.facing.y*dy)/d<c) return true;
     const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy, rs=Math.hypot(rvx,rvy);
     return rs>60&&-(p.facing.x*rvx+p.facing.y*rvy)/rs<c;
+  }
+  // the ball is running into him, not on past him
+  function runsInto(p){
+    const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy, rs=Math.hypot(rvx,rvy), gap=dist(p,ball), into=rvx*(p.x-ball.x)+rvy*(p.y-ball.y)>0;
+    const miss=rs>1?Math.abs(rvx*(p.y-ball.y)-rvy*(p.x-ball.x))/rs:gap;
+    return gap<p.r+ball.r||(into&&miss<p.r+ball.r);
   }
   // OFF HIM: a ball that runs into a man who isn't facing it comes off him like off a post -- glancing off a round body,
   // a little bounce in it and losing pace -- and it's nobody's
@@ -8763,7 +8816,7 @@
     const u=clamp(((p.x-ball.x)*lx+(p.y-ball.y)*ly)/(controlROf(p)+ball.r),-0.97,0.97);   // + = you're left of its line
     return {sp,dx,dy,lx,ly,u};
   }
-  function trapTouch(p,s,damp,e){
+  function trapTouch(p,s,damp,e,minKeep){
     // Running the ball's way (it's catching you up, or you're catching it), the touch is against your run:
     // the pace that comes off you is the ball's pace relative to you, and it keeps your run on top -- so a
     // ball you take in your stride stays with you rather than being knocked back behind you. Standing, or
@@ -8780,13 +8833,15 @@
     const T={sp,e,s,damp:damp||0,g,th0,side,inZ};                  // the touch as it was made (a drag may still aim it: see aimLate)
     const aim=p===controlled?trapAim():null;
     let keep;
-    if(aim){ const r=aimTouch(p,T,aim); s=r.s; keep=r.keep; }
+    if(aim){ const r=aimTouch(p,T,aim); s=r.s; keep=r.keep;
+      const l=Math.hypot(ball.vx,ball.vy); if(minKeep&&l>1&&l<minKeep*sp){ ball.vx*=minKeep*sp/l; ball.vy*=minKeep*sp/l; keep=minKeep; } }
     else {
       let late;
       if(e!=null){ const lateBy=e-trapSweet(), lt=lateBy>0?clamp(lateBy/(trapWindowOf(p)*P.trapLate.val),0,1):0; late=lt*lt; }   // a hair late barely shows; heavy-late goes past
       else late=Math.random()<0.5?0:(1-s)*(1-s)*0.8;              // his own touch: a poor one squirms past as often as it comes back
       const dir=bounceDir(g,th0+late*(side*Math.PI/2-th0));        // late: met further round your side
       keep=(P.trapKeepGood.val+(P.trapKeepBad.val-P.trapKeepGood.val)*Math.pow(1-s,1.5))*(1-(damp||0)*0.5);   // eases off steeply from the worst
+      keep=Math.max(keep,minKeep||0);                              // (met above the waist it can't be killed dead: airKeepOf)
       ball.vx=dir.x*sp*keep+bdx*run; ball.vy=dir.y*sp*keep+bdy*run;
     }
     const pop=(20+75*Math.pow(1-s,1.5))*clamp(sp/400,0.4,1.2)*P.trapPop.val;   // a little hop, bigger off a bad touch
@@ -8905,9 +8960,7 @@
       // HIS BACK TO IT: turned away from the ball as it gets to him, he can't take it. If it's coming into him it hits
       // him and comes off; otherwise it goes on past him (he may yet get round to it while it's in his reach).
       if(facingAway(p)){
-        const rvx=ball.vx-p.vx, rvy=ball.vy-p.vy, rs=Math.hypot(rvx,rvy), into=rvx*(p.x-ball.x)+rvy*(p.y-ball.y)>0;
-        const miss=rs>1?Math.abs(rvx*(p.y-ball.y)-rvy*(p.x-ball.x))/rs:gap;
-        if(gap<p.r+ball.r||(into&&miss<p.r+ball.r)){ if(checkOffsideTouch(p))return; deflectOff(p); return; }
+        if(runsInto(p)){ if(checkOffsideTouch(p))return; deflectOff(p); return; }
         continue;
       }
       let s,e;
@@ -8952,6 +9005,7 @@
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
         actQ=null; swipeShot=null; } }                       // a fresh ball (a pass, a restart, a lab serve): a press waiting on the last one doesn't carry over
     if(!wasOwner) meOnReceive(p, ball.passerRef);
+    if(!wasOwner&&!reGather) ball.gotT=simNow;                // (a fresh ball: see FT_LATE)
     ball.passerRef=null;
     if(keepPos){
       // recapturing a ball that drifted off-line: keep it where it actually is and aim the
@@ -9679,8 +9733,10 @@
       if(!inAir) c.airReachT=-1;
       else {
         if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
-        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(!checkOffsideTouch(c)){ if(oneTouchOK()){ endCurve(); playOneTouch(c); } else { const icp=!!(ball.lastTouch&&ball.lastTouch!==c.team); if(ftAimOK()){ endCurve(); directionalTouch(c,touchQuality(c,icp)); } else trapTouch(c,touchQuality(c,icp),icp?interceptDampOf(c):0,null); } } }   // CLASSIC: chested down for you
-        else if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT; if(!checkOffsideTouch(c)) trapTouch(c,trapTimingScore(c,e),0,e); }
+        if(!(LAB.on&&LAB.kind==='trap')&&headerT<=0&&defHeaderT<=0){ if(facingAway(c)){ if(ball.z<PLAYER_H&&runsInto(c)&&!checkOffsideTouch(c)) deflectOff(c); }   // his back to it: off him, or over or past him
+          else if(!checkOffsideTouch(c)){ if(oneTouchOK()){ endCurve(); playOneTouch(c); } else { const icp=!!(ball.lastTouch&&ball.lastTouch!==c.team); if(ftAimOK()){ endCurve(); directionalTouch(c,touchQuality(c,icp)); }
+            else { const up=ball.z>WAIST, sq=touchQuality(c,icp); trapTouch(c,up?Math.min(sq,AIR_CAP):sq,icp?interceptDampOf(c):0,null,up?airKeepOf(c):0); } } } }   // CLASSIC: chested down for you (above the waist, off you: airKeepOf)
+        else if(trapping>0){ trapping=0; const e=trapPressT-c.airReachT, up=ball.z>WAIST, sc=trapTimingScore(c,e); if(!checkOffsideTouch(c)) trapTouch(c,up?Math.min(sc,AIR_CAP):sc,0,e,up?airKeepOf(c):0); }
       }
     }
 
