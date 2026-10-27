@@ -133,8 +133,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     pages and has no long text on it: his figure, name, own position, style, age, stars, rating and potential on
     top, and one small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as
     you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending,
-    each the average of its attributes; tap one and what it's made of shows in a small grid under them, tap it
-    again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
+    each the average of its attributes; tap one and what it's made of opens under them, a coloured bar for each
+    rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
     for each, with SCOUT HIM. The other side, his deal, has what he earns or costs in a small grid, then what you
     can do about him, a line each: in the Squad tab his contract (a new deal, releasing him); in the market's
     Selling tab selling him (the two best bids, the transfer list); for another club's man the asking price,
@@ -143,9 +143,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     little pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under the pitch, the bench, on one line: its men narrow to fit (eight of them even on a 640-wide
-    phone), and a bigger bench shows a page of them at a time, with a small 1/2 ▶ button at its end to turn to the
-    next, so the pitch never loses height to it. On the right, from under that row to the foot of the screen, the
+    BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a match. After a thin line
+    come the rest of the squad, in reserve, dimmed: drag one onto a man on the bench or the pitch to swap them (BEST
+    8 puts the best four of the rest on the bench). The tokens narrow to fit; if they still don't (a squad from
+    before squads were capped), the reserves show a page at a time, with a small 1/2 ▶ button to turn to the next,
+    the bench's four always there, so the pitch never loses height. On the right, from under that row to the foot of the screen, the
     card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) with his
     shirt number under it, beside his rating, his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) and his
     name; on the bench the shirt number is in the token's corner, with the rating and position under it and the
@@ -154,7 +156,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
     his name, his own position, style, age, skill stars and rating, out of position the amber line saying where
     he's playing, and in a match his legs. Under it, the ratings side has the six (tap one and what it's made of
-    shows in a small grid under them); the other has his spot's instructions for the phase you're looking at, just
+    opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall or less a
+    category of four or five ratings puts them two to a line); the other has his spot's instructions for the phase you're looking at, just
     each one's name and its options, no descriptions, and no ratings. The side you're on stays as you tap from man
     to man. His card never goes over pages: it has the whole right-hand side, and everything on it fits, down to
     640×360. On a short phone his figure and name are drawn a little smaller; on a narrow one (700 px wide or
@@ -166,9 +169,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's legs on his card (and the two sides: the other team's
-    men show their ratings only). The rest of your squad is on the
-    bench: drag one onto a man to bring him on, on fresh legs. That's three subs a match, and a man taken off can't
-    come back. Every exhibition club has a bench of six too (a keeper and five), a little short of its starters.
+    men show their ratings only). Your four subs are on the bench: drag one onto a man to bring him on, on fresh
+    legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of four
+    too (a keeper and a man for each line), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
   - **The match** has the score, the way you're kicking, the clock and the menu along the top, nothing else. The
     man on the ball, either side's, has his skill stars over his stamina bar (three little stars, lit gold up to
@@ -458,7 +461,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     truly at a team-mate. So is your own defensive header.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
-  Premium League), with a weak squad of 16 and $20,000. The game is buying and selling players: nobody's stats are
+  Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
+  least; eight start, four are on the bench, and the rest wait in reserve. The game is buying and selling players: nobody's stats are
   built up by hand.
   - **The season.** 26 matchdays, home and away. You PLAY each one (the live match, in your colours, with the home
     side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis

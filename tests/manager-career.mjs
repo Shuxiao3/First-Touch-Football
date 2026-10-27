@@ -42,7 +42,7 @@ let d = await save();
 ok(d.kind === 'manager' && d.manager.name === 'Sam Okafor' && d.clubName === 'Fenmoor Athletic', 'saved: the manager and the club');
 ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
-ok(d.roster.length === 16 && d.budget === 20000 && d.phase === 'summer', 'a 16-man squad, $20,000, the summer window open');
+ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the summer window open');
 ok(!d.roster.some(p => p.stats), 'no stats in the save (they are rebuilt from the rating)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
@@ -70,9 +70,9 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   if(await page.$('#bpBody [data-mg="sign"]')){ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(60); signed = /Signed/.test(await msg()); }
 }
 d = await save();
-ok(signed && d.roster.length === 17 && d.budget < 20000, 'signed a man for the asking price: squad 17, budget ' + d.budget);
-const newMan = d.roster[16];
-ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.includes(16), 'he has a contract and a place on the bench');
+ok(signed && d.roster.length === 15 && d.budget < 20000, 'signed a man for the asking price: squad 15 (the most), budget ' + d.budget);
+const newMan = d.roster[14];
+ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(14) >= 4, 'he has a contract, and waits in reserve (the bench is four)');
 
 // --- selling: put the worst man on the list ------------------------------------------------
 await page.click('#bldgPanel .bpTab:text-is("Selling")'); await page.waitForTimeout(60);

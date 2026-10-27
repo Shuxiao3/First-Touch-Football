@@ -975,13 +975,19 @@
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:7px 0 0; }   /* (under the pitch: his card has the right side) */
   .benchPg{ flex:none; width:36px; height:44px; min-height:44px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:13px; line-height:1; cursor:pointer; }
   .benchPg i{ font-style:normal; font-size:9px; letter-spacing:0; }   /* (a bench with more men than its line: 1/2 ▶) */
+  .benchSep{ flex:none; width:2px; align-self:stretch; margin:3px 3px; background:var(--btnLo); }   /* (the bench's four | the men in reserve) */
+  .tbBench .ptk.res{ opacity:.62; }
   .tbBench .ptk{ position:relative; transform:none; flex:1 1 39px; min-width:39px; max-width:54px; height:44px; padding:0 2px; justify-content:center; }   /* (narrow enough for 8 on a line on a small phone) */
   .tbRight .mgCardHead{ margin-top:2px; margin-bottom:6px; } .tbRight .mgCardHead > .cardBody + div{ flex:1 1 auto; }
   .mgCardHead .mtLegs{ margin:3px 0 0; gap:6px; font-size:9px; } .mgCardHead .mtLegs .statBar{ height:6px; } .mgCardHead .mtLegs b{ min-width:28px; }
   .tbRight .six{ margin:4px 2px 6px; }
-  .tbRight .sixOpen{ display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:0 10px; padding:4px 8px; margin:0 2px 4px; }   /* (a small grid: no heading, no bars) */
-  .tbRight .sixOpen .sixHd, .tbRight .sixOpen .statBar{ display:none; }
-  .tbRight .sixOpen .statRow{ margin:1px 0; gap:4px; font-size:10px; } .tbRight .sixOpen .statRow .sl{ width:auto; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tbRight .sixOpen, .mgPaneR .sixOpen{ padding:4px 10px 3px; margin:0 2px 4px; }   /* (a category opened: its heading, then a row and a coloured bar for each rating) */
+  .tbRight .sixOpen .sixHd, .mgPaneR .sixOpen .sixHd{ font-size:10px; line-height:12px; margin-bottom:2px; }
+  .tbRight .sixOpen .statRow, .mgPaneR .sixOpen .statRow{ margin:0; line-height:13px; } .tbRight .sixOpen .statRow .sl, .mgPaneR .sixOpen .statRow .sl{ width:88px; }
+  @media (max-height:360px){   /* a short phone: a long category's rows two to a line, bars and all */
+    .tbRight .sixOpen.long, .mgPaneR .sixOpen.long{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+    .tbRight .sixOpen.long .sixHd, .mgPaneR .sixOpen.long .sixHd{ grid-column:1 / -1; }
+    .tbRight .sixOpen.long .statRow .sl, .mgPaneR .sixOpen.long .statRow .sl{ width:auto; flex:0 1 66px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }
   .tbRight .tacInstr{ padding-top:6px; } .tbRight .tacInstr .instrHead{ margin:0 0 6px; padding-top:0; border-top:0; }   /* (one line under his name) */
   .tbRight .instrGrp{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin:0 0 6px; }   /* an instruction's name on its options' line */
   .tbRight .instrGrp:last-child{ margin-bottom:0; }
@@ -1004,9 +1010,6 @@
      grid of what he earns or costs, then what you can do about him, one line each. It never goes over pages. */
   .mgPaneR .mgCardHead{ margin-top:0; margin-bottom:6px; } .mgPaneR .mgCardHead > .cardBody + div{ flex:1 1 auto; }
   .mgPaneR .six{ margin:4px 2px 6px; } .mgPaneR .sixC.unk{ cursor:default; } .mgPaneR .sixC.unk b{ color:var(--dim); }
-  .mgPaneR .sixOpen{ display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:0 10px; padding:4px 8px; margin:0 2px 4px; }
-  .mgPaneR .sixOpen .sixHd, .mgPaneR .sixOpen .statBar{ display:none; }
-  .mgPaneR .sixOpen .statRow{ margin:1px 0; gap:4px; font-size:10px; } .mgPaneR .sixOpen .statRow .sl{ width:auto; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mgFacts{ display:grid; grid-template-columns:1fr 1fr; gap:1px 14px; margin:2px 2px 2px; } .mgFact.wide{ grid-column:1 / -1; }
   .mgFact{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; min-width:0; font-size:12px; line-height:1.55; }
   .mgFact span{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; }
@@ -1365,17 +1368,21 @@
   let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
   function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; }
-  // THE BENCH ON ONE LINE, under the pitch: if its men don't all fit, a page of them and a small button that turns to the next
-  // (1/2 ▶, round to the first again) -- rather than a second line that would take the pitch's height
+  // THE BENCH ON ONE LINE, under the pitch: its four, then (in the Office) the men in reserve. If they don't all fit, the
+  // reserves go a page at a time with a small button that turns to the next (1/2 ▶, round to the first again) -- the
+  // four on the bench always there -- rather than a second line that would take the pitch's height
   const BENCHPG={};   // the page each bench is on: the Office's, each team's in a match
   function fitBench(b){ if(!b.getClientRects().length) return;   // (not on the screen: laid out when it is)
-    const T=[...b.children].filter(e=>e.classList.contains('ptk')); let pg=[...b.children].find(e=>e.classList.contains('benchPg'));
+    const kids=[...b.children], T=kids.filter(e=>e.classList.contains('ptk')), Rv=T.filter(e=>e.classList.contains('res'));
+    let pg=kids.find(e=>e.classList.contains('benchPg'));
     for(const t of T) t.classList.remove('fitHide'); if(pg) pg.classList.add('fitHide'); b.dataset.bpages=1;
     if(!T.length) return; const cs=getComputedStyle(b), W=b.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0), gap=parseFloat(cs.columnGap)||4, min=parseFloat(getComputedStyle(T[0]).minWidth)||39;
-    if(T.length*min+(T.length-1)*gap<=W+0.5) return;
+    const sepW=kids.filter(e=>e.classList.contains('benchSep')).reduce((a,e)=>a+e.getBoundingClientRect().width+gap,0);
+    if(T.length*min+(T.length-1)*gap+sepW<=W+0.5) return;
     if(!pg){ pg=document.createElement('button'); pg.className='benchPg'; pg.dataset.benchgo='1'; b.appendChild(pg); }
-    const k=Math.max(1,Math.floor((W-BENCH_PG_W)/(min+gap))), pages=Math.ceil(T.length/k), key=b.dataset.bench||'bench', p=BENCHPG[key]=clamp(BENCHPG[key]||0,0,pages-1);
-    T.forEach((t,i)=>{ if(i<p*k||i>=p*k+k) t.classList.add('fitHide'); });
+    const turn=Rv.length?Rv:T, keepW=Rv.length?(T.length-Rv.length)*(min+gap)+sepW:0;   // (the reserves turn; a bench of old, all of it)
+    const k=Math.max(1,Math.floor((W-keepW-BENCH_PG_W)/(min+gap))), pages=Math.ceil(turn.length/k), key=b.dataset.bench||'bench', p=BENCHPG[key]=clamp(BENCHPG[key]||0,0,pages-1);
+    turn.forEach((t,i)=>{ if(i<p*k||i>=p*k+k) t.classList.add('fitHide'); });
     pg.classList.remove('fitHide'); pg.innerHTML='<i>'+(p+1)+'/'+pages+'</i>▶'; b.dataset.bpages=pages; }
   const BENCH_PG_W=36;   // (the button's width, as the CSS has it)
   document.addEventListener('click',e=>{ const g=e.target.closest('[data-benchgo]'); if(!g) return; e.stopPropagation(); e.preventDefault();
@@ -2217,9 +2224,10 @@
     });
     return xi.concat(clubBenchGen(club,xi));
   }
-  // THE BENCH: six more for every club -- a keeper, then a man for each line in turn -- a little short of the starters,
-  // named from a pool of their own (dealt like the starters' names, so no two benches share one)
-  const BENCH_N=6;
+  // THE BENCH: four more for every club -- a keeper, then a man for each line -- a little short of the starters, named
+  // from a pool of their own (dealt like the starters' names, so no two benches share one). A career club's bench is
+  // four too: four of the men not starting, the rest in reserve.
+  const BENCH_N=4;
   const BENCH_SURNAMES=['Abara','Adebayo','Aguilar','Ahlberg','Almeida','Amrani','Andersen','Arslan','Asante','Bakker','Barros','Bellamy','Benali','Bergman','Bianchi','Bjork','Boateng','Bondarenko','Brennan','Calloway','Carvalho','Castro','Celik','Chandler','Cisse','Coleman','Conti','Cruz','Dahl','Delgado','Demir','Diallo','Dorsey','Doyle','Dubois','Duarte','Eklund','Esposito','Falk','Ferreira','Fischer','Fofana','Gallo','Garrido','Giraud','Guerra','Halloran','Hansen','Haddad','Ibarra','Ivanov','Jensen','Jovic','Kaya','Keller','Kimura','Koroma','Kowalski','Kruger','Laine','Larsen','Lopes','Maddox','Marin','Medina','Moreno','Murray','Nakamura','Navarro','Nielsen','Nwosu','Okoro','Ortega','Osei','Pajic','Pereira','Petrov','Pires','Quinn','Rahimi','Ramos','Reyes','Rocha','Romero','Sadiq','Salazar','Santos','Schmidt','Serra','Sorensen','Sousa','Stone','Suzuki','Teixeira','Toure','Tran','Ulloa','Valdez','Vargas','Vidal','Vogel','Walsh','Weber','Yamada','Yusuf','Zielinski','Acheampong','Barrow','Cardoso','Danso','Ekberg','Farrell','Gomes','Holm','Ilic','Juarez','Kagawa','Lacroix','Mahrez','Nunes','Obi','Pacheco','Quaresma','Rask','Sala','Tiago','Ueda','Valente','Wiggins','Xavier','Yeboah','Zubiri',
     'Ashby','Brook','Carver','Dunne','Ellery','Foley','Grady','Hollis','Irwin','Jarvis','Kerr','Lowe','Mercer','Nash','Oakes','Price','Reid','Sutton','Tate','Vaughan','Whitby','Yardley','Bramble','Colby','Penrose'];
   const BENCH_NAME_DEAL=(()=>{ const taken=new Set(CLUB_SURNAMES), R=rng32(hashStr('ft-bench-names')), a=BENCH_SURNAMES.filter(n=>!taken.has(n));
@@ -2248,11 +2256,16 @@
     if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
       const gen=clubSquadGen(clubById(id));
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
+      else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
       const f=formOKAtk(o.form,'2-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, pi:piClean(o.pi)};
     }
     return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form, dform:null, pi:piClean(null)};
   }
+  // a side cut to n men: its starters, and the first of the rest (the bench), the lineup renumbered to match
+  function trimSide(o,n){ const li=o.lineup, xi=new Set([li.gk,...(li.atk||[])]), keep=[...xi].concat(o.squad.map((e,i)=>i).filter(i=>!xi.has(i))).slice(0,n).sort((a,b)=>a-b);
+    const to={}; keep.forEach((i,k)=>to[i]=k); o.squad=keep.map(i=>o.squad[i]);
+    li.gk=to[li.gk]; li.atk=(li.atk||[]).map(i=>to[i]); li.def=(li.def||li.atk).map(i=>to[i]); }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
     all[EXH.play.you]={squad:SQUAD.G, lineup:LINEUP.G, form:myForm, dform:myFormDef, pi:piClean(PI.G)}; all[EXH.play.opp]={squad:SQUAD.R, lineup:LINEUP.R, form:rForm, dform:rFormDef, pi:piClean(PI.R)};
     localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
@@ -11516,7 +11529,7 @@
   // and posture, every man's card (with his legs) and his spot's instructions. Drag a man onto another to swap their spots;
   // in a career match, drag one off the bench onto a man to bring him on (SUB_MAX a match; the man off can't come back).
   // The other side: look, don't touch. =====
-  const SUB_MAX=3;
+  const SUB_MAX=2;
   let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
   const MT={team:'G', phase:'atk', drop:null, sel:null};
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
@@ -11804,7 +11817,7 @@
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
   function cwPostureFor(style,rng){ return style==='tiki'?'press' : style==='counter'?'lowblock' : (style==='direct'&&rng()<0.35?'lowblock':'neutral'); }
-  const MG_CLUBS=14, MG_SQUAD=16, MG_MAX=22, MG_MIN=12, MG_MD=26, MG_HALF=13;
+  const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=15, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, fifteen at most
   const MG_WINDOW={summer:5, winter:3};                  // days each transfer window stays open
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
@@ -11813,7 +11826,7 @@
   const MG_SCOUT_COST={1:200,2:600,3:1800,4:6000};       // to scout one man, by the league he plays in
   const MG_SCOUT_W={1:4,2:3,3:1};                        // how far an unscouted rating can be off, by your scouting network
   const MG_NET_COST={2:15000,3:60000}, MG_ACAD_COST={2:25000,3:120000};
-  const MG_ROLES=['GK','GK','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','MID','ATT','ATT','ATT','ATT'];
+  const MG_ROLES=['GK','GK','DEF','DEF','DEF','DEF','MID','MID','MID','MID','ATT','ATT','ATT','ATT'];   // (MG_SQUAD of them)
   const MG_FIRST=['Leo','Marco','Tariq','Samuel','Dani','Iker','Bruno','Kemar','Yuki','Lars','Pavel','Andre','Felix','Oskar','Diego','Sven',
     'Reece','Hugo','Noah','Eli','Theo','Kai','Ivan','Omar','Luka','Cole','Jude','Phil','Rio','Aron','Beni','Drew','Emre','Finn','Gio','Hadi',
     'Joao','Mason','Tom','Jack','Liam','Kofi','Sami','Mateo','Nico','Alfie','Jonah','Rafa','Ade','Tobi','Callum','Ryan','Ben','Kieran','Ollie',
@@ -12070,12 +12083,12 @@
       else { c.players.splice(c.players.indexOf(p),1); p.until=0; d.world.free.push(p); } }
     d.youth=(d.youth||[]).filter(p=>{ if(p.age>=19){ R.youthOut.push(p.name); return false; } return true; });   // 19: promoted by now, or gone
     for(const L of [d.roster,d.world.free,...mgAiClubs(d).map(c=>c.players)]) for(const p of L){ p.apps=0; p.goals=0; } }
-  // the role a squad is shortest of, against two keepers, five defenders, five midfielders and four forwards
-  function mgNeedRole(L){ const want={GK:2,DEF:5,MID:5,ATT:4}, n={GK:0,DEF:0,MID:0,ATT:0}; for(const p of L) n[p.role]++;
+  // the role a squad is shortest of, against two keepers and four each of defenders, midfielders and forwards
+  function mgNeedRole(L){ const want={GK:2,DEF:4,MID:4,ATT:4}, n={GK:0,DEF:0,MID:0,ATT:0}; for(const p of L) n[p.role]++;
     return Object.keys(want).sort((a,b)=>(want[b]-n[b])-(want[a]-n[a]))[0]; }
-  // a computer club made up to fifteen men (two of them keepers): free agents at its level, else a youngster of its own
+  // a computer club made up to fourteen men (two of them keepers): free agents at its level, else a youngster of its own
   function mgRefill(d,c){ const lvl=MG_LEVEL[c.tier];
-    while(c.players.length<15||c.players.filter(p=>p.role==='GK').length<2){
+    while(c.players.length<MG_SQUAD||c.players.filter(p=>p.role==='GK').length<2){
       const role=c.players.filter(p=>p.role==='GK').length<2?'GK':mgNeedRole(c.players);
       const fa=d.world.free.filter(p=>p.role===role&&Math.abs(mgLevelTier(p.ovr)-c.tier)<=1&&p.ovr>=lvl-10).sort((a,b)=>b.ovr-a.ovr)[0];
       let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else p=mgNewPlayer(d,role,lvl-5+mgGauss()*3,17+Math.floor(Math.random()*5));
@@ -12184,6 +12197,7 @@
     const idx=d.roster.findIndex(p=>p.id===o.pid), c=d.world.clubs[o.club]; if(idx<0||!c) return 'That offer has gone.';
     const why=mgCanLose(d,idx); if(why) return why;
     if(c.budget<o.fee){ d.offers=d.offers.filter(x=>x!==o); return c.name+' can’t find the money any more.'; }
+    if(c.players.length>=MG_MAX){ d.offers=d.offers.filter(x=>x!==o); return c.name+'’s squad is full now.'; }
     const p=mgRosterRemove(d,idx); c.budget-=o.fee; d.budget+=o.fee;
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p);
     mgTx(d,'out',p,c.name,o.fee); mgNews(d,p.name+' joins '+c.name+' from '+d.clubName+' for '+money(o.fee)+'.');
@@ -12226,7 +12240,7 @@
     for(const p of d.roster){ const ask=d.listed&&d.listed[p.id], lt=mgLevelTier(p.ovr);
       if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))) continue;
       const fee=ask?mgRound(ask*(0.82+Math.random()*0.26)):mgRound(mgValue(d,p)*(1+Math.random()*0.35));
-      const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<20&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
+      const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<MG_MAX&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
       if(!fits.length) continue;
       const c=mgPick(fits); d.offers.push({id:++d.offerSeq,pid:p.id,club:c.id,fee});
       mgNews(d,c.name+' bid '+money(fee)+' for '+p.name+'.'); } }
@@ -12244,13 +12258,15 @@
         if(p.role!==weak.role||p.ovr<weak.ovr+2) continue;
         if(src&&(src.tier>b.tier+1||(src.tier>b.tier&&mgEight(src.players).includes(p)))) continue;   // a bigger club's regulars stay
         if(!src&&mgLevelTier(p.ovr)>b.tier+1) continue;
-        if(src&&(src.players.length<=14||(p.role==='GK'&&src.players.filter(x=>x.role==='GK').length<=2))) continue;
+        if(src&&(src.players.length<=MG_MIN||(p.role==='GK'&&src.players.filter(x=>x.role==='GK').length<=2))) continue;
         const fee=src?mgAsk(d,p,src):0; if(fee>b.budget*0.6) continue;
         if(!best||p.ovr>best.ovr){ best=p; bestClub=src; bestFee=fee; } }
       if(best) mgMoveAi(d,best,bestClub,b,bestFee); }
-    for(const c of clubs){ mgRefill(d,c);
-      while(c.players.length>19){ const w=c.players.filter(p=>p.role!=='GK'||c.players.filter(x=>x.role==='GK').length>2).sort((a,b)=>(a.ovr-a.age*0.3)-(b.ovr-b.age*0.3))[0];
-        c.players.splice(c.players.indexOf(w),1); w.until=0; F.push(w); } } }
+    for(const c of clubs){ mgRefill(d,c); mgTrimAi(d,c); } }
+  // a computer club over fifteen lets its weakest go (counting age), never its second keeper
+  function mgTrimAi(d,c){ const F=d.world.free;
+      while(c.players.length>MG_MAX){ const w=c.players.filter(p=>p.role!=='GK'||c.players.filter(x=>x.role==='GK').length>2).sort((a,b)=>(a.ovr-a.age*0.3)-(b.ovr-b.age*0.3))[0];
+        c.players.splice(c.players.indexOf(w),1); w.until=0; F.push(w); } }
   // the window moves on a day; after its last day it shuts
   function mgNextDay(d){ if(!mgWindowOpen(d)) return;
     mgAiTrades(d);
@@ -12441,7 +12457,7 @@
     for(const ph of ['atk','def']){ const k=lu[ph].indexOf(outRi); if(k>=0) lu[ph][k]=inRi; }
     const bk=lu.bench.indexOf(inRi); if(bk>=0) lu.bench[bk]=outRi; }
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
-    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench], sIdx={};   // (the bench comes too: subs)
+    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, four)
     order.forEach((ri,i)=>sIdx[ri]=i);
     const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
@@ -12485,7 +12501,7 @@
     const instr=cardSide==='instr';
     return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
-      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+(sl?spotPos(sl.pos):role)+', out of position</div>':role?'':'<div class="mgCardSub">on the bench</div>')+'</div>'
+      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+(sl?spotPos(sl.pos):role)+', out of position</div>':role?'':'<div class="mgCardSub">'+(lu.bench.indexOf(ri)>=BENCH_N?'in reserve':'on the bench')+'</div>')+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+(p.role==='ATT'?' as an ':' as a ')+p.role+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
   const STYLE_LIST=[['neutral','BALANCED'],['tiki','TIKI-TAKA'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER']];
@@ -12518,9 +12534,9 @@
   // box, so you can tell which box is whose
   const shirtNo=n=>n?'<span class="ptkNo">#'+n+'</span>':'';
   const ptkSide=(face,n)=>'<span class="ptkSide">'+face+shirtNo(n)+'</span>';
-  function tbTok(d, ri, L, T, kind, phase, slotRole){ const p=d.roster[ri]; if(!p) return '';
+  function tbTok(d, ri, L, T, kind, phase, slotRole, res){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
-    return '<button class="ptk'+(oop?' oop':'')+(ri===statViewRi?' statview':'')+'"'
+    return '<button class="ptk'+(oop?' oop':'')+(res?' res':'')+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
       +(kind==='bench'?shirtNo(p.num):ptkSide(faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),p.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'<i class="ptkPos">'+natPos(p)+'</i></span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
@@ -12550,7 +12566,7 @@
       h+=ghostTok(q.L,q.T,p.num,surname(p.name)); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
-    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch)
+    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map((ri,k)=>(k===BENCH_N?'<i class="benchSep"></i>':'')+tbTok(d, ri, 0,0, 'bench', phase, null, k>=BENCH_N)).join('')+'</div></div>';   // (the bench under the pitch, four; then the men in reserve)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
@@ -12834,7 +12850,7 @@
     for(const [k,,ks] of G){ const v=ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length;
       h+='<button class="sixC'+(sixOpen===k?' on':'')+'" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
     h+='</div>'; const g=G.find(x=>x[0]===sixOpen);
-    if(g) h+='<div class="sixOpen"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
+    if(g) h+='<div class="sixOpen'+(g[2].length>3?' long':'')+'"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
       return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv" style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
     return h; }
   // A LIST AND ITS MAN: the list on the left, going over pages (fitBox) with its filters on every page if it's long;
@@ -12910,10 +12926,10 @@
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
-    const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean));
+    const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean)), subs=new Set(lu.bench.slice(0,BENCH_N).map(i=>R[i]).filter(Boolean));
     for(const role of ['GK','DEF','MID','ATT']){ const L=R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr); if(!L.length) continue;
       h+='<div class="bpSect">'+{GK:'GOALKEEPERS',DEF:'DEFENDERS',MID:'MIDFIELDERS',ATT:'FORWARDS'}[role]+'</div><div class="mgList">';
-      for(const p of L){ const tags=(xi.has(p)?'<span class="mgTag on">XI</span>':'')+(d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':'')
+      for(const p of L){ const tags=(xi.has(p)?'<span class="mgTag on">XI</span>':subs.has(p)?'<span class="mgTag on">SUB</span>':'')+(d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':'')
           +((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'');
         h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
       h+='</div>'; }
@@ -13062,6 +13078,7 @@
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
+    if(W.clubs&&W.free) for(const c of Object.values(W.clubs)) if(c.id!==d.clubId&&(c.players||[]).length>MG_MAX) mgTrimAi(d,c);   // (squads were up to 22; your own men stay)
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;

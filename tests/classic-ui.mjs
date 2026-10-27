@@ -183,7 +183,7 @@ for(const [w, h] of SIZES){
         return [(t.querySelector('.ptkPos') || {}).textContent || '', p.role === 'GK' ? 'GK' : p.subRole]; }),
       midStyles: Object.values(window.__MG.STYLES).filter(S => S.role === 'MID').map(S => S.sub + ' ' + S.name), wngNotAtt: all.filter(p => p.subRole === 'WNG' && p.role !== 'ATT').length,
       wm: all.filter(p => p.subRole === 'WM' && p.role === 'MID').length }; });
-  ok(own.toks.length >= 15 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating (' + own.toks.map(x => x[0]).join(' ') + ')');
+  ok(own.toks.length >= 14 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating (' + own.toks.map(x => x[0]).join(' ') + ')');
   ok(!own.midStyles.some(x => /WNG|Winger/.test(x)) && !own.wngNotAtt && own.wm > 0, 'a winger is an attacker: no midfielder is a winger; wide midfielders are WM (' + own.wm + ' in the world; midfield styles ' + own.midStyles.join(', ') + ')');
   // THE CARD HAS TWO SIDES: his ratings (a category opens under the six) and his spot's instructions (no ratings), turned
   // over with one small button under his rating; his figure, name, rating and stars on top of both
@@ -193,6 +193,7 @@ for(const [w, h] of SIZES){
       stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
       flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
       seen: [...document.querySelectorAll('#cTacRight .sixOpen .statRow')].every(e => e.getClientRects().length),
+      bars: [...document.querySelectorAll('#cTacRight .sixOpen .statBar')].filter(e => e.getClientRects().length && e.getBoundingClientRect().width > 10).length, hd: (document.querySelector('#cTacRight .sixOpen .sixHd') || {}).textContent || '',
       desc: document.querySelectorAll('#cTacRight .instrDesc, #cTacRight .instrNote, #cTacRight .instrHead').length,
       paged: !!document.querySelector('#cTacRight .fitPager'), fits: (b => b.scrollHeight <= b.clientHeight + 1)(document.getElementById('cTacRight')),
       top: [...document.querySelectorAll('#cTacRight .mgCardHead, #cTacRight .mgCardHead > *')].map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join(' ') }; });
@@ -204,7 +205,7 @@ for(const [w, h] of SIZES){
   info('the card: ' + JSON.stringify({ s1, s2, s3 }));
   ok(s1.flips === 1 && s1.small && s1.under && /INSTRUCTIONS/.test(s1.flip) && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
     'his card: his figure, rating and stars, the six, and one small button under his rating (' + s1.flip + ')');
-  ok(s2.six === 6 && s2.det === 5 && s2.seen && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, all of it on the card, no pages (DEF: ' + s2.det + ' ratings)');
+  ok(s2.six === 6 && s2.det === 5 && s2.seen && s2.bars === 5 && /DEFENDING/.test(s2.hd) && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, its name and a coloured bar for each rating, all of it on the card, no pages (DEF: ' + s2.det + ' ratings, ' + s2.bars + ' bars)');
   ok(s3.flips === 1 && /RATINGS/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.body && s3.ovr && s3.stars && s3.name === s1.name,
     'turned over: his spot\'s instructions (' + s3.instr + '), no ratings, his figure, name, rating and stars still on top, the button back to RATINGS');
   ok(s3.top === s1.top, 'the top of his card is the same on both sides, figure and all (' + s1.top + ')');
@@ -225,7 +226,7 @@ for(const [w, h] of SIZES){
   await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150); room.squad = await pads('#bpBody .sqPitch .ptk');
   await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
   const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
-  ok(Object.values(room).every(v => v.n >= 7 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
+  ok(Object.values(room).every(v => v.n >= 6 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length })));
   ok(opts.length === 5 && opts.every(o => !o.i), 'the style menu: five names, no descriptions (' + opts.map(o => o.t).join(', ') + ')');
@@ -248,7 +249,7 @@ for(const [w, h] of SIZES){
     return { n: T.length, rows: new Set(T.map(t => Math.round(t.getBoundingClientRect().top))).size,
       inside: T.every(t => { const r = t.getBoundingClientRect(), n = t.querySelector('.ptkName').getBoundingClientRect(); return n.left >= r.left - 0.5 && n.right <= r.right + 0.5; }),
       clear: T.every(t => !hit(t.querySelector('.ptkNo').getBoundingClientRect(), t.querySelector('.ptkOvr').getBoundingClientRect())) }; });
-  ok(bench.n >= 8 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (' + bench.n + ' men), every name inside its token, the number clear of the rating');
+  ok(bench.n >= 6 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (' + bench.n + ' men), every name inside its token, the number clear of the rating');
   await page.tap(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(100);
   const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), am = [...h.querySelectorAll('.mgCardSub')].find(e => /out of position/.test(e.textContent)), fs = e => parseFloat(getComputedStyle(e).fontSize);
     return { name: nm.textContent, oneLine: nm.getBoundingClientRect().height < fs(nm) * 2, whole: nm.scrollWidth <= nm.clientWidth + 1, amber: am ? am.textContent : '', amberLines: am ? am.getBoundingClientRect().height / (fs(am) * 1.45) : 0 }; });
@@ -296,13 +297,17 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
   await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
   const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
-  await page.evaluate(() => { const d = window.__MG.d; let id = 990000; while(d.roster.length < 22){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 16])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); });
-  await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250);
+  const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);
+  const redraw = async () => { await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250); };
   const bs = () => page.evaluate(() => { const B = document.querySelector('#bpBody .tbBench'), vis = [...B.querySelectorAll('.ptk')].filter(t => t.getClientRects().length), pg = B.querySelector('.benchPg');
-    return { men: B.querySelectorAll('.ptk').length, ids: vis.map(t => t.dataset.ri).join(), rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '', pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
-  const b1 = await bs(); await page.tap('#bpBody .tbBench .benchPg'); await page.waitForTimeout(150); const b2 = await bs();
-  ok(b1.men === 14 && b1.rows === 1 && /^1\/\d/.test(b1.pager) && b2.rows === 1 && /^2\//.test(b2.pager) && b1.ids !== b2.ids && b1.pitch === pitch0 && b2.pitch === pitch0,
-    w + 'x' + h + ': a bench of ' + b1.men + ' stays on one line, a page at a time (' + b1.pager + ', then ' + b2.pager + '), the pitch keeping its height (' + b1.pitch + ' px)');
+    return { men: B.querySelectorAll('.ptk').length, subs: vis.filter(t => !t.classList.contains('res')).length, res: vis.filter(t => t.classList.contains('res')).map(t => t.dataset.ri).join(), sep: !!B.querySelector('.benchSep'),
+      rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '', pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
+  await grow(15); await redraw(); const f = await bs();   // a full squad: eight on the pitch, the bench's four, three in reserve
+  ok(f.men === 7 && f.subs === 4 && f.res.split(',').length === 3 && f.sep && f.rows === 1 && !f.pager && f.pitch === pitch0,
+    w + 'x' + h + ': a full squad of 15: the bench\'s four, then the three in reserve after a line, all on one line with no pager, the pitch keeping its height (' + f.pitch + ' px)');
+  await grow(22); await redraw(); const b1 = await bs(); await page.tap('#bpBody .tbBench .benchPg'); await page.waitForTimeout(150); const b2 = await bs();   // (a squad from before the limit)
+  ok(b1.men === 14 && b1.rows === 1 && b1.subs === 4 && b2.subs === 4 && /^1\/\d/.test(b1.pager) && /^2\//.test(b2.pager) && b1.res !== b2.res && b1.pitch === pitch0 && b2.pitch === pitch0,
+    w + 'x' + h + ': a squad of 22 from before: the bench\'s four always there, the ten in reserve a page at a time (' + b1.pager + ', then ' + b2.pager + '), one line, the pitch keeping its height');
   await ctx.close(); }
 
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons
