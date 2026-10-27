@@ -140,14 +140,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     face (his own look, in the club's kit) with his shirt number under it, beside his rating and name; the bench
     is ratings and names, each man's shirt number in his token's corner. The rating and the name sit inside each
     token with room round them, clear of its edges.
-  - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then
-    RATINGS ▶). Both are drawn as the card always was: all of him, head to toe (a keeper in a keeper's top), his
-    name, position, age, skill stars and rating, and, out of position, the amber line saying where he's playing.
-    Under that, the ratings side has the six (tap one for what it's made of); the other has his spot's instructions
-    for the phase you're looking at, each with its options on one line and what it means under them, and no
-    ratings. The side you're on stays as you tap from man to man, and what doesn't fit goes over pages under his
-    name and rating, an instruction kept whole on a page. On a short phone his figure and name are drawn a little
-    smaller, so the six fit under them.
+  - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
+    ▶, one size either way). Both are drawn as the card always was, the top exactly the same on both: all of him,
+    head to toe (a keeper in a keeper's top), his name, position, age, skill stars and rating, and, out of
+    position, the amber line saying where he's playing. Under that, the ratings side has the six (tap one for what
+    it's made of); the other has his spot's instructions for the phase you're looking at, each with its options on
+    one line and what it means under them, and no ratings. The side you're on stays as you tap from man to man,
+    and what doesn't fit goes over pages under his name and rating, an instruction kept whole on a page. On a
+    short phone his figure and name are drawn a little smaller, so the six fit under them.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked

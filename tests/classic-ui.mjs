@@ -183,7 +183,8 @@ for(const [w, h] of SIZES){
       instr: document.querySelectorAll('#cTacRight .instrGrp').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
       stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
       flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
-      seen: [...document.querySelectorAll('#cTacRight .sixHd')].some(e => !e.closest('.fitHide')) }; });
+      seen: [...document.querySelectorAll('#cTacRight .sixHd')].some(e => !e.closest('.fitHide')),
+      top: [...document.querySelectorAll('#cTacRight .mgCardHead, #cTacRight .mgCardHead > *')].map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join(' ') }; });
   await page.tap('#bpBody .tpitch .ptk[data-tac="field"] >> nth=6'); await page.waitForTimeout(150);
   const s1 = await side(); await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(150); const s2 = await side();
   for(let i = 0; i < 5; i++){ const pv = await page.$('#cTacRight .fitPager [data-fitgo="-1"]:not([disabled])'); if(!pv) break; await pv.tap(); await page.waitForTimeout(60); }   // (back to the six)
@@ -195,6 +196,7 @@ for(const [w, h] of SIZES){
   ok(s2.six === 6 && s2.det === 5 && s2.seen, '...tap one and what it\'s made of opens under the six, its page brought up (DEF: ' + s2.det + ' ratings)');
   ok(s3.flips === 1 && /RATINGS/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.body && s3.ovr && s3.stars && s3.name === s1.name,
     'turned over: his spot\'s instructions (' + s3.instr + '), no ratings, his figure, name, rating and stars still on top, the button back to RATINGS');
+  ok(s3.top === s1.top, 'the top of his card is the same on both sides, figure and all (' + s1.top + ')');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
   // the font, against the token's 2 px rim -- on the tactics pitch, the bench and the squad's little pitch

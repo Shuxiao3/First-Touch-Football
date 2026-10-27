@@ -982,8 +982,9 @@
     .tbRight .cardBody{ width:26px; height:40px; } .tbRight .mgCardName{ font-size:15px; } .tbRight .mgCardHead{ gap:8px; } }
   @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; the amber says he's out of position) */
   .cardEnd{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
-  .cardFlip{ min-height:20px; padding:0 6px; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'FTC Dot',monospace; white-space:nowrap;
-    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }   /* (turns his card over: small, out of the way) */
+  .cardFlip{ width:62px; min-height:20px; padding:0; text-align:center; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'FTC Dot',monospace; white-space:nowrap;
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }   /* (turns his card over: small, out of the way,
+     one width whichever it says, so the top of his card is the same on both sides) */
   .tbRight .tacInstr{ margin-top:4px; }
   /* the pause menu: four buttons two by two */
   .pauseMain{ max-width:560px; }
