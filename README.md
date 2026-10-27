@@ -40,10 +40,38 @@ The same game played like any other football game. It's a copy of `index.html` w
 
   The reach, where you first meet the ball, is smaller: 18 at Ball control 1 up to 32 at 10 (it was 25 to 45). How
   far a touch can fall from the likely one is a dial: First-touch spread ×, default 1.
+- **A man the ball is coming to faces it.** Played to him, loose and his to go and get, or just rolling at him: he
+  turns his body to it as it comes, as fast as his Agility lets him, and gets to it however he must. Yours too, while
+  a pass is on its way to you.
+  - **Turning is Agility.** A half turn takes 0.82 s at Agility 1, 0.43 s at 5.5 and 0.28 s at 10.
+  - **Off his front he's slower, and he can't sprint.** Side-on he shuffles across at 72% of his running pace, and
+    backs off at 55%. Agility moves both: 66% and 50% at 1, 78% and 61% at 10. Facing the ball, he goes at it flat out.
+  - **A long way across or away from it**, he turns and runs, and turns back to face it in time. The slower he
+    turns, the sooner he has to start.
+  - **A runner played in behind** takes it on the run, as before, and so does a man going after a ball that's
+    running away from him. A man darting across to cut out their pass goes flat out for the spot and stretches for
+    it as he gets there.
+  - **His back to it, the touch is harder.** If he couldn't get round to it in time, the touch is a quarter of the
+    way harder, from the easiest to the hardest there is; side-on it's about half that. A man with Ball control and
+    Composure 3, at the back with nobody near, takes it perfectly 85% of the time square to it and 43% with his back
+    to it. (Cutting out their pass is a stretch whichever way he faces, as it always was.)
+  - The sprite faces the ball while he does all this, so you see him side-step and back-pedal.
+  - Measured over eight three-minute computer-against-computer matches, men took 54 to 77% of their passes with
+    their backs to the ball before, and 0 to 2% now. Goals and shots are much as they were: 15 and 41 over the eight
+    matches, against 13 and 40.
+  - The dials, in the Trap Lab's TUNE: Body turn ×, Side-step speed, Back-pedal speed and Touch off-square.
 - **On the pitch.** The man you control has one solid green ring on the grass at his reach. The dotted reach ring,
   and the ring under whoever had the ball, are gone. The ball is drawn in whole pixels like the players: white with
   dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
   marks where it will land while it's in the air.
+- **A goal goes in the net.** A ball that crosses the line between the posts and under the bar carries on into the
+  goal, and it's a goal once all of it is over the line. Play stops, but the ball doesn't: it runs on into the net.
+  - **The net is 1.6 m deep**, with a back, two sides and a roof that falls from the bar to the back bar.
+  - **Each part gives where it's hit**, the harder the shot the further: up to 0.8 m (20 px). It takes all the
+    ball's pace on the way, eases it back off and lets it drop to the floor of the goal.
+  - **Nothing goes through it** or out of the back.
+  - The netting is drawn pushed in where it was hit, and it wobbles back after.
+  - Wide of a post or over the bar, the ball still comes back off the line.
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box, and no word
   or number runs out of its box (checked at 640×360 up to 932×430).
@@ -59,7 +87,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
-    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 80 feel dials are the game's
+    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 84 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
@@ -71,6 +99,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
     BEST 8. Under it, the bench. On the right, the man you tapped and his spot's instructions. Every man on the
     pitch shows his face (his own look, in the club's kit) beside his rating; the bench is just numbers and names.
+    The number and the name sit inside each token with room round them, clear of its edges.
     The man's card shows all of him, head to toe (a keeper in a keeper's top). Under the men, lit and
     set a little right and down, is the other phase's shape: on WITH BALL you see where each of them goes without
     it, and the other way round.

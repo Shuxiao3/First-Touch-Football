@@ -5,7 +5,8 @@
 // tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels (a dark outline,
 // a light rim, rounded corners), in four colour schemes. A finger holds a man to drag him (a quick tap just shows his
 // card) and he stays where he was picked up; the men on the tactics pitch show their faces (the bench doesn't), his
-// card shows all of him, and the other phase's shape is lit under them. The game is as wide as the phone: no bands,
+// card shows all of him, and the other phase's shape is lit under them; each man's number and name sit in his token with
+// room round them, clear of its edges. The game is as wide as the phone: no bands,
 // the buttons over the pitch's corner, the HUD just the score, the clock and the menu.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
@@ -142,6 +143,22 @@ for(const [w, h] of SIZES){
   ok(!!tv.card && tv.card[1] > tv.card[0], 'his card shows all of him, head to toe (' + (tv.card || []).join('x') + ')');
   ok(tv.ghosts === 7, 'the other phase\'s shape is drawn under the men, lit (' + tv.ghosts + ' ghosts)');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
+  // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
+  // the font, against the token's 2 px rim -- on the tactics pitch, the bench and the squad's little pitch
+  const pads = sel => page.evaluate(sel => {
+    const g = document.createElement('canvas').getContext('2d'), out = [];
+    const ink = e => { const cs = getComputedStyle(e), r = e.getBoundingClientRect(); g.font = cs.fontSize + ' ' + cs.fontFamily;
+      const m = g.measureText(e.textContent), lh = parseFloat(cs.lineHeight), fa = m.fontBoundingBoxAscent, fd = m.fontBoundingBoxDescent;
+      const base = r.top + ((isFinite(lh) ? lh : r.height) - (fa + fd)) / 2 + fa;
+      return { top: base - m.actualBoundingBoxAscent, bottom: base + m.actualBoundingBoxDescent }; };
+    for(const t of document.querySelectorAll(sel)){ const o = t.querySelector('.ptkOvr'), n = t.querySelector('.ptkName'); if(!o || !o.textContent.trim()) continue;
+      const T = t.getBoundingClientRect(); out.push({ top: ink(o).top - T.top - 2, bottom: n && n.textContent.trim() ? T.bottom - 2 - ink(n).bottom : 99 }); }
+    return { n: out.length, top: Math.min(...out.map(o => o.top)), bottom: Math.min(...out.map(o => o.bottom)) }; }, sel);
+  const room = { pitch: await pads('#bpBody .tpitch .ptk'), bench: await pads('#bpBody .tbBench .ptk') };
+  await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150); room.squad = await pads('#bpBody .sqPitch .ptk');
+  await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
+  const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
+  ok(Object.values(room).every(v => v.n >= 7 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length })));
   ok(opts.length === 5 && opts.every(o => !o.i), 'the style menu: five names, no descriptions (' + opts.map(o => o.t).join(', ') + ')');

@@ -918,31 +918,32 @@
   .tpBox{ top:26%; bottom:26%; width:13%; box-shadow:inset 0 0 0 2px #f4fbf2; }
   .tpBox.l{ left:0; } .tpBox.r{ right:0; }
   .sqPitchW{ flex:none; padding:10px 12px 4px; }
-  .sqPitch{ height:124px; flex:none; }
+  .sqPitch{ height:156px; flex:none; }
   .sqPitchHint{ font-size:9.5px; color:var(--dim2); margin-top:6px; }
-  .sqPitch .ptk{ width:60px !important; height:30px !important; padding:0 2px 0 4px; }
+  .sqPitch .ptk{ width:60px !important; height:36px !important; padding:0 2px 0 4px; }
+  .sqPitch .ptk .ptkTxt{ gap:3px; padding:2px 0 0; }
   .sqPitch .ptk .ptkFace{ width:16px; height:16px; }
   .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
   .sqPitch .ptk .ptkName{ font-size:8px !important; max-width:36px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
   .sqList .mgRow{ -webkit-touch-callout:none; }
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
-  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:38px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
+  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:44px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
     background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:3px;
     touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; font-family:'FTC Dot',monospace; }
   /* his face beside his number, as an item sits beside its name in a bag */
   .ptkFace{ width:24px; height:24px; flex:none; image-rendering:pixelated; pointer-events:none; -webkit-user-drag:none; }
-  .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
+  .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:3px 0 1px; pointer-events:none; }   /* (room over the number and under the name) */
   .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
-  .tpitch .tpGhost{ transform:translate(calc(-50% + 8px), calc(-50% + 8px)); width:72px; height:38px; display:flex; align-items:center; gap:3px; padding:0 3px 0 5px; border-radius:var(--r);
+  .tpitch .tpGhost{ transform:translate(calc(-50% + 8px), calc(-50% + 8px)); width:72px; height:44px; display:flex; align-items:center; gap:3px; padding:0 3px 0 5px; border-radius:var(--r);
     background:rgb(var(--accRGB) / .2); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9), 0 0 0 4px rgb(var(--accRGB) / .25); opacity:.8;
     font:9px 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tpitch .tpGhost .ptkFace{ opacity:.7; }
   .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
-  .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:9px 'FTC Dot',monospace; color:var(--ink2); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:var(--warn); }
   .tacB1 .ptk.statview{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .4); }
   .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5); }
@@ -954,7 +955,7 @@
   .tacB1 .ptk.fitOop::after{ background:var(--warn); }
   .pxGhost{ position:fixed !important; transform:none !important; margin:0 !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 3px 3px 0 0 rgba(0,0,0,.35) !important; }
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:7px 7px; align-items:center; padding:8px 12px 9px; box-shadow:inset 0 2px 0 0 var(--btnLo); }
-  .tbBench .ptk{ position:relative; transform:none; width:54px; height:36px; padding:0 3px; justify-content:center; }
+  .tbBench .ptk{ position:relative; transform:none; width:54px; height:42px; padding:0 3px; justify-content:center; }
   .tbBenchLbl{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; margin-right:2px; }
   .tbRight .mgCardHead{ margin-top:6px; }
   .tbRight .tacInstr{ margin-top:4px; }
@@ -1346,6 +1347,10 @@
     oneTouchErr:{val:16,min:0,max:40,step:1,label:'One-touch pass: worst spray (°)',hint:'How far off line a first-time pass can go at worst: a ball at chest height, coming in at 1200 px/s or more, played by a man with Passing 1 and Ball control 1. A good passer takes much of it off; a slow ball along the grass takes it all off.'},
     oneTouchMax:{val:18,min:8,max:30,step:1,label:'One-touch pass: longest (m)',hint:'A first-time pass only goes to a team-mate this close, along the grass. Further than that, take a touch first.'},
     turnPassErr:{val:14,min:0,max:30,step:1,label:'Turn-and-pass: worst spray (°)',hint:'How far off line a pass can go when it is played the moment the passer has turned right round to face it, at Off IQ 1. The longer he has been facing that way the less; a slight angle costs nothing; Off IQ 10 takes four-fifths of it off.'},
+    bodyTurn:{val:1,min:0.4,max:2,step:0.05,label:'Body turn ×',hint:'How fast a man turns his body to face a ball coming to him: about 3.4 rad/s at Agility 1, 9.5 at 10 (a half turn in 0.9 s / 0.33 s). Scales both.'},
+    pedalSide:{val:0.72,min:0.4,max:1,step:0.01,label:'Side-step speed',hint:'Top speed moving side-on to the way he faces while he watches the ball, as a share of his running pace (Agility nudges it ±8%). He cannot sprint off his front.'},
+    pedalBack:{val:0.55,min:0.3,max:1,step:0.01,label:'Back-pedal speed',hint:'Top speed moving backwards while he watches the ball (Agility nudges it ±10%).'},
+    turnTouch:{val:0.25,min:0,max:0.6,step:0.01,label:'Touch off-square',hint:'How much harder the first touch is with his back to the ball (side-on about half that): a man who could not turn to it in time.'},
     skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
     skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far to the side a full roulette carries you (25 px = 1 m). A shorter one goes less far.'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
@@ -1648,7 +1653,7 @@
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
-    traplab:  ['ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
+    traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','gkReflex','gkReach','gkDiveRange']
@@ -1704,7 +1709,7 @@
 
   // ===== pitch: a real pitch's shape (105 x 68 m) at 25 px to the metre; the whole width stays in view =====
   const FW=2625, FH=1700;
-  const GOAL_W=227, GOAL_H=69, NET_D=28, YC=FH/2;
+  const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
   // the markings, real size at that scale: penalty area 16.5 x 40.32 m, goal area 5.5 x 18.32 m, the penalty
   // spot 11 m out, the arc and the centre circle 9.15 m. (The goal itself is a little wider than a real one.)
   const PX_M=25, PA_D=16.5*PX_M, PA_HW=20.16*PX_M, GA_D=5.5*PX_M, GA_HW=9.16*PX_M, PEN_SPOT=11*PX_M, CIRCLE_R=9.15*PX_M;
@@ -4461,6 +4466,32 @@
     return P.turnPassErr.val*Math.PI/180*k*statLerp(statOf(p,'offIQ',P.offIQ.val),1,0.2);
   }
   function turnSpray(p,dx,dy){ return turnWorst(p,dx,dy)*(Math.random()+Math.random()+Math.random()-1.5)*1.15; }
+  // WATCHING THE BALL: a man the ball is coming to -- played to him, loose and his to go and get, a pass of theirs he's
+  // cutting out, or just rolling right at him -- turns his body to it as it comes, and gets to it however he must: off
+  // his front he's slower, side-on slower still, backwards slowest, and he can't sprint but forwards (stepOutfield). A
+  // runner played in behind takes it on the run instead, and a man with a long way to go across or away from it turns
+  // and runs, and turns back in time to face it (how long that turn takes is his Agility). A man darting across to cut
+  // out their pass goes flat out for the spot and stretches for it as he gets there.
+  function watchBall(p,ix,iy){
+    if(p.state!=='normal'||ball.ownedBy||gkHold||restartT>0||scoredT>0||offsideT>0||(p===controlled&&skill)) return false;
+    const mine=p===ball.intendedRcv&&ball.lastTouch===p.team;
+    if(mine&&(ball.rcvRunner||(ball.thru&&simNow<ball.thru.until))) return false;   // on the run onto it
+    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy)||1, bs=Math.hypot(ball.vx,ball.vy);
+    const closing=bs>1?-(ball.vx*dx+ball.vy*dy)/d:0;                                // how fast it's coming at him
+    const miss=bs>1?Math.abs(ball.vx*dy-ball.vy*dx)/bs:d;                           // how wide of him its line runs
+    const atMe=closing>0.5*bs&&miss<controlROf(p)+24&&d<320&&ball.z<30;           // (not one going over his head)
+    if(!(mine||p.goingForBall||p.intercepting||atMe||(p===controlled&&incomingToMe()))||d>900) return false;
+    if(bs>150&&closing<0.2*bs) return false;                                       // going away from him: he runs after it
+    const il=Math.hypot(ix,iy), tArr=d/Math.max(closing,120), ci=il>0.2?(ix*dx+iy*dy)/(il*d):1;
+    const cutting=p.intercepting&&!!ball.intendedRcv&&ball.intendedRcv.team!==p.team;   // their pass, and he's going to cut it out
+    if(ci<0.5&&(cutting||tArr>Math.acos(Math.max(ci,-1))/bodyTurnOf(p)+(p.watching?0.75:0.45))) return false;   // a long way off his front
+    return true;
+  }
+  function bodyTurnOf(p){ return statLerp(statOf(p,'agility',P.agility.val),3.4,9.5)*P.bodyTurn.val; }   // rad/s
+  // his top speed off his front, as a share: c the cosine between the way he faces and the way he's going
+  function pedalOf(p,c){ const ag=statLerp(statOf(p,'agility',P.agility.val),-1,1);
+    const S=clamp(P.pedalSide.val*(1+0.08*ag),0.3,1), B=clamp(P.pedalBack.val*(1+0.1*ag),0.2,S);
+    return c>=0 ? 1-(1-c)*(1-S) : S+c*(S-B); }
   // (the way he's been facing, kept up each frame)
   function trackFacing(p,dt){ const f=p.facing; if(!f) return; const a=p.faceAvg||(p.faceAvg={x:f.x,y:f.y}), k=1-Math.exp(-dt/0.3); a.x+=(f.x-a.x)*k; a.y+=(f.y-a.y)*k; }
   // a player's strength (0..1). per-player stat if set, else the global dial.
@@ -8385,11 +8416,14 @@
       if(p.stateT<=0)p.state='normal';
       return;
     }
+    // --- WATCHING THE BALL (watchBall): his body turns to it, and off his front he can't sprint ---
+    const watch=watchBall(p,ix,iy); p.watching=watch;
+    const sp0=Math.hypot(p.vx,p.vy), offFront=watch&&!!p.facing&&sp0>8&&(p.vx*p.facing.x+p.vy*p.facing.y)/sp0<0.5;
     // --- STAMINA & SPRINT ---
     const moving = !!(ix||iy);
     const softIn = p.arSoft; p.arSoft=false;        // (this frame's input is a computer player easing into position: see arrive)
     const hasBall = (ball.ownedBy===p);
-    const wantSprint = p.sprint && moving && p.stamina>0.02;
+    const wantSprint = p.sprint && moving && p.stamina>0.02 && !offFront;
     const empty = p.stamina<=0.02;                  // gassed
     if(p.staminaCap===undefined)p.staminaCap=1;
     // CUMULATIVE FATIGUE: a lower recoverable CEILING (staminaCap) means the player has been
@@ -8512,14 +8546,22 @@
           p.vx=Math.cos(a2)*newSp; p.vy=Math.sin(a2)*newSp;
         }
       }
-      // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging)
+      // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging; one watching
+      // the ball faces it: below)
       const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
-      if(!softIn || nsp>30 || il2>=0.35){
+      if(!watch && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
       }
     } else {
       p.vx*=Math.pow(0.86,dt*60);p.vy*=Math.pow(0.86,dt*60);  // coast to a stop
+    }
+    if(watch){                                      // his body comes round to the ball no faster than his Agility lets it
+      const tx=ball.x-p.x, ty=ball.y-p.y, f=p.facing||{x:atkOf(p.team),y:0};
+      if(Math.hypot(tx,ty)>1){ const a0=Math.atan2(f.y,f.x); let dd=Math.atan2(ty,tx)-a0; while(dd>Math.PI)dd-=Math.PI*2; while(dd<-Math.PI)dd+=Math.PI*2;
+        const mx=bodyTurnOf(p)*capFatigue*dt, a=a0+clamp(dd,-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
+      const vs=Math.hypot(p.vx,p.vy);               // ...and off his front he's slower
+      if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; if(c<0.5) MAX=Math.min(MAX,runSpeedOf(p)*fatigue); MAX*=pedalOf(p,c); }
     }
     const sp2=Math.hypot(p.vx,p.vy);
     if(sp2>MAX){p.vx=p.vx/sp2*MAX;p.vy=p.vy/sp2*MAX;}
@@ -8567,7 +8609,15 @@
     let D=1-(1-touchPressure(p))*(1-0.6*finalThirdOf(p));
     D+=clamp((Math.hypot(ball.vx,ball.vy)-650)/1500,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
     if(intercept) D=Math.max(D,0.45)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch
+    else D+=offSquare(p)*P.turnTouch.val;                                      // he didn't get his body round to it in time
     return clamp(D,0,1);
+  }
+  // how far he's turned from the ball as it reaches him: 0 square to it, about half side-on, 1 his back to it (a runner
+  // taking a pass played in behind on the run doesn't count: it comes with him)
+  function offSquare(p){
+    if(!p||!p.facing||(p===ball.intendedRcv&&(ball.rcvRunner||(ball.thru&&simNow<ball.thru.until)))) return 0;
+    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy); if(d<1) return 0;
+    return clamp(((1-(p.facing.x*dx+p.facing.y*dy)/d)/2-0.1)/0.9,0,1);
   }
   // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
@@ -9525,7 +9575,8 @@
     }
     nanChk('keeper');
 
-    if(!gkHold&&restartT<=0&&!frozen){
+    const intoNet=scoredT>0&&offsideT<=0&&breakT<=0;   // (a goal: everyone stops, the ball carries on into the net)
+    if(!gkHold&&restartT<=0&&(!frozen||intoNet)){
       if(ball.z>0||ball.vz!==0){
         ball.vz-=520*dt;ball.z+=ball.vz*dt;
         if(ball.z<=0){ball.z=0;ball.vz=ball.vz<-40?-ball.vz*0.45:0;
@@ -9559,22 +9610,23 @@
     }
     __nanStage=null;
 
-    // goal mouths score; everywhere else the ball bounces off the walls (losing pace)
-    const inMouth=Math.abs(ball.y-YC)<GOAL_W/2-ball.r;
+    // THE GOALS: a ball that crosses the line between the posts and under the bar is in the goal, and the net keeps it
+    // (netStep); it's a goal once it's all the way over. Everywhere else the ball bounces off the walls (losing pace).
     if(ball.y<ball.r){ball.y=ball.r;ball.vy=Math.abs(ball.vy)*0.55;ball.vx*=0.8;endCurve();}
     if(ball.y>FH-ball.r){ball.y=FH-ball.r;ball.vy=-Math.abs(ball.vy)*0.55;ball.vx*=0.8;endCurve();}
-    if(ball.x<ball.r){
-      if(inMouth&&ball.z<GOAL_H){
-        if(scoredT<=0&&!gkHold&&!ballFixed&&ball.x<-2)goal(-1);
-        if(ball.x<-(NET_D-ball.r)){ball.x=-(NET_D-ball.r);ball.vx=Math.abs(ball.vx)*0.12;ball.vy*=0.3;endCurve();}
-      } else {ball.x=ball.r;ball.vx=Math.abs(ball.vx)*0.55;ball.vy*=0.8;endCurve();}
+    if(ball.inNet&&!netHolds(ball.inNet)) ball.inNet=0;          // (put back in play somewhere else)
+    for(const side of [-1,1]){ const gx=side>0?FW:0, over=side*(ball.x-gx);   // how far past this line (its centre)
+      const mouth=Math.abs(ball.y-YC)<GOAL_W/2-ball.r&&ball.z<GOAL_H;
+      if(ball.inNet===side&&over<=0&&!mouth) ball.inNet=0;          // back out in front, past a post: it's left the goal
+      if(ball.inNet!==side){
+        if(over<=-ball.r) continue;
+        if(mouth){ ball.inNet=side; endCurve(); }                    // in through the mouth
+        else { ball.x=gx-side*ball.r; ball.vx=-side*Math.abs(ball.vx)*0.55; ball.vy*=0.8; endCurve(); continue; }   // the wall
+      }
+      netStep(side,dt);
+      if(scoredT<=0&&!gkHold&&!ballFixed&&side*(ball.x-gx)>ball.r) goal(side);   // all of it over the line
     }
-    if(ball.x>FW-ball.r){
-      if(inMouth&&ball.z<GOAL_H){
-        if(scoredT<=0&&!gkHold&&!ballFixed&&ball.x>FW+2)goal(1);
-        if(ball.x>FW+NET_D-ball.r){ball.x=FW+NET_D-ball.r;ball.vx=-Math.abs(ball.vx)*0.12;ball.vy*=0.3;endCurve();}
-      } else {ball.x=FW-ball.r;ball.vx=-Math.abs(ball.vx)*0.55;ball.vy*=0.8;endCurve();}
-    }
+    netRelax(dt);
 
     if(scoredT>0){scoredT-=dt;if(scoredT<=0){
       if(ftPending){ matchOver=true; breakT=1e9; lastGrade='FULL TIME'; gradeColor='#9dff3c'; gradeFade=3.0; }
@@ -9752,6 +9804,71 @@
     requestAnimationFrame(frame);
   }
 
+  // ===== THE NET =====
+  // In the goal the ball meets the netting: the back, the two sides and the roof (it falls from the bar to the back
+  // bar, as drawn). Each gives where the ball presses it -- the faster it comes, the further, up to NET_GIVE, taking all
+  // its pace on the way -- then eases it back off with next to none, and grips it so it drops. Nothing goes through:
+  // past NET_GIVE it stops dead. Each face keeps how far in it's been pushed and where (NET), and wobbles back after,
+  // as the pitch art draws it (netPoint).
+  const NET_GIVE=20, NET_GRIP=6;
+  const NET={}; for(const sd of [-1,1]) NET[sd]={back:{d:0,v:0,a:YC,b:20}, roof:{d:0,v:0,a:YC,b:20}, far:{d:0,v:0,a:20,b:20}, near:{d:0,v:0,a:20,b:20}};
+  const roofZ=dd=>GOAL_H*(1-0.15*clamp(dd,0,NET_D)/NET_D);
+  // still in this goal? (anywhere near its box: a ball put back in play elsewhere has left it)
+  function netHolds(side){ const gx=side>0?FW:0, d=side*(ball.x-gx);
+    return d>-3*ball.r && d<NET_D+NET_GIVE+ball.r && Math.abs(ball.y-YC)<GOAL_W/2+NET_GIVE+ball.r && ball.z<GOAL_H+NET_GIVE; }
+  // one face against the ball: pen how far the ball is past it (this frame's move made), vn its speed outward, (a,b)
+  // where on the face. Returns the change to that speed and to where the ball is along it.
+  function netPress(F,pen,vn,a,b,dt){
+    if(pen<=0){ F.imp=0; return null; }
+    let nv;
+    if(!F.imp&&vn>0){ F.imp=vn; F.stop=clamp(vn*0.021,3,NET_GIVE); }
+    const rem=(F.stop||0)-(pen-vn*dt);                       // how much give it had left at the start of this step
+    if(vn>25&&rem>0.5) nv=Math.max(0,vn-vn*vn/(2*rem)*dt);   // still going: it stops within a span that grows with its pace
+    else nv=Math.min(Math.min(vn,0),-Math.min(30,0.04*(F.imp||0)));   // stopped: the net eases it back out
+    let np=pen+(((vn+nv)/2)-vn)*dt, corr=(((vn+nv)/2)-vn)*dt;
+    if(np>NET_GIVE){ corr+=NET_GIVE-np; np=NET_GIVE; nv=Math.min(nv,0); }   // never further than it gives
+    F.d=Math.max(0,np); F.v=nv; F.a=a; F.b=b; F.on=true;
+    return {dv:nv-vn, corr};
+  }
+  function netStep(side,dt){
+    const N=NET[side], gx=side>0?FW:0, r=ball.r, d=side*(ball.x-gx);
+    const grip=Math.exp(-NET_GRIP*dt);
+    // the back
+    let q=netPress(N.back, d-(NET_D-r), side*ball.vx, ball.y, ball.z, dt);
+    if(q){ ball.vx+=side*q.dv; ball.x+=side*q.corr; ball.vy*=grip; ball.vz*=Math.sqrt(grip); }
+    if(d>0){
+      // the sides (far: the top of the screen, near: the bottom)
+      const sy=ball.y<YC?-1:1, F=sy<0?N.far:N.near;
+      q=netPress(F, Math.abs(ball.y-YC)-(GOAL_W/2-r), sy*ball.vy, d, ball.z, dt);
+      if(q){ ball.vy+=sy*q.dv; ball.y+=sy*q.corr; ball.vx*=grip; ball.vz*=Math.sqrt(grip); }
+      // the roof
+      q=netPress(N.roof, ball.z-(roofZ(d)-r), ball.vz, ball.y, d, dt);
+      if(q){ ball.vz+=q.dv; ball.z+=q.corr; ball.vx*=grip; ball.vy*=grip; }
+    }
+    if(ball.z<0) ball.z=0;
+    if(ball.z<2&&d>0){ const k=Math.exp(-2.2*dt); ball.vx*=k; ball.vy*=k; }   // on the floor of the goal it soon stops
+  }
+  // the faces the ball isn't pressing spring back, wobbling a little
+  function netRelax(dt){
+    for(const sd of [-1,1]) for(const k in NET[sd]){ const F=NET[sd][k];
+      if(F.on){ F.on=false; continue; }
+      if(!F.d&&!F.v) continue;
+      F.v+=(-900*F.d-11*F.v)*dt; F.d=clamp(F.d+F.v*dt,-5,NET_GIVE);
+      if(Math.abs(F.d)<0.05&&Math.abs(F.v)<1){ F.d=0; F.v=0; } }
+  }
+  // a point on a face of the net, pushed in where it's been hit: u across it, v up it (or back, for the roof), each 0..1;
+  // the netting is tied to the frame, so the give dies away to its edges
+  function netPoint(side,face,u,v){
+    const F=NET[side][face], gx=side>0?FW:0, hb=GOAL_H*0.85, tp=t=>Math.min(1,t*3.2,(1-t)*3.2);
+    let x,y,z,a,b,R=44;
+    if(face==='back'){ y=YC-GOAL_W/2+u*GOAL_W; z=v*hb; x=gx+side*NET_D; a=y; b=z; }
+    else if(face==='roof'){ y=YC-GOAL_W/2+u*GOAL_W; const dd=v*NET_D; z=roofZ(dd); x=gx+side*dd; a=y; b=dd; }
+    else { const dd=u*NET_D; z=v*roofZ(dd); x=gx+side*dd; y=YC+(face==='far'?-1:1)*GOAL_W/2; a=dd; b=z; R=26; }
+    if(F.d){ const q=Math.hypot(a-F.a,b-F.b)/R, w=q<1?(1-q*q)*(1-q*q):0;
+      const g=F.d*tp(u)*(face==='back'?tp(v):Math.min(1,v*3.2))*(0.4+0.6*w);   // (the roof and sides: tied along the bar and the posts)
+      if(face==='back') x+=side*g; else if(face==='roof') z+=g; else y+=(face==='far'?-1:1)*g; }
+    return {x,y,z};
+  }
   function goal(side){
     if(LAB.on){ labOnGoal(side); return; }           // the labs call it themselves (no score, no restart)
     if(practice){
@@ -9982,17 +10099,36 @@
         for(let i=Math.max(0,Math.floor(Math.min(...xs)));i<=Math.min(HW-1,Math.ceil(Math.max(...xs)));i++)
           if(inside(i+0.5,j+0.5,q)) fn(j*HW+i,i,j);
     }
-    function goal(side){                                  // white posts edged in navy, a mesh net, its shadow
+    // a line mixed into the turf (the net's strings), not painted over it
+    function mixLine(x0,y0,x1,y1,a){
+      x0=Math.round(x0); y0=Math.round(y0); x1=Math.round(x1); y1=Math.round(y1);
+      const dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let e=dx+dy;
+      for(let n=0;n<400;n++){ if(x0>=0&&x0<HW&&y0>=0&&y0<HH){ const o=y0*HW+x0; buf[o]=mixTo(buf[o],248,252,255,a); }
+        if(x0===x1&&y0===y1) break; const e2=2*e; if(e2>=dy){ e+=dy; x0+=sx; } if(e2<=dx){ e+=dx; y0+=sy; } }
+    }
+    let NM=null;                                           // which pixels the net covers this frame (each stippled once)
+    const NET_GRID=[['back',12,4],['roof',12,2],['far',3,4],['near',3,4]];   // face, squares across, squares up
+    function goal(side){                                  // white posts edged in navy, a mesh net (pushed in where it's hit), its shadow
       const gx=side>0?FW:0, bxw=gx+side*NET_D;
       const pF=half(gx,YC-GOAL_W/2), pN=half(gx,YC+GOAL_W/2), bF=half(bxw,YC-GOAL_W/2), bN=half(bxw,YC+GOAL_W/2);
-      if(Math.max(pF.x,pN.x,bF.x,bN.x)<-4||Math.min(pF.x,pN.x,bF.x,bN.x)>HW+4) return;
+      if(Math.max(pF.x,pN.x,bF.x,bN.x)<-12||Math.min(pF.x,pN.x,bF.x,bN.x)>HW+12) return;
       const tF=pF.y-GOAL_H*pF.s/2, tN=pN.y-GOAL_H*pN.s/2, btF=bF.y-GOAL_H*bF.s/2*0.85, btN=bN.y-GOAL_H*bN.s/2*0.85;
       fill([[pF.x,pF.y],[pN.x,pN.y],[bN.x+2*side,bN.y+1],[bF.x+2*side,bF.y]], o=>{ buf[o]=mixTo(buf[o],0,0,0,0.14); });
-      const mesh=(o,i,j)=>{ if(((i+j)&1)===0) buf[o]=mixTo(buf[o],240,248,255,0.745); };
-      fill([[bF.x,bF.y],[bN.x,bN.y],[bN.x,btN],[bF.x,btF]],mesh);
-      fill([[pF.x,tF],[pN.x,tN],[bN.x,btN],[bF.x,btF]],mesh);
-      fill([[pF.x,pF.y],[bF.x,bF.y],[bF.x,btF],[pF.x,tF]],mesh);
-      fill([[pN.x,pN.y],[bN.x,bN.y],[bN.x,btN],[pN.x,tN]],mesh);
+      // the netting: each face a grid, pushed in where the ball hit it (netPoint); its squares marked, then stippled once
+      if(!NM||NM.length!==HW*HH) NM=new Uint8Array(HW*HH);
+      const sc=q=>{ const h=half(q.x,q.y); return [h.x, h.y-q.z*h.s/2]; };
+      let X0=1e9, Y0=1e9, X1=-1e9, Y1=-1e9; const grids=[];
+      for(const [f,nu,nv] of NET_GRID){
+        const G=[]; for(let j=0;j<=nv;j++){ const row=[]; for(let i=0;i<=nu;i++) row.push(sc(netPoint(side,f,i/nu,j/nv))); G.push(row); }
+        grids.push(G);
+        for(let j=0;j<nv;j++) for(let i=0;i<nu;i++) fill([G[j][i],G[j][i+1],G[j+1][i+1],G[j+1][i]], (o,x,y)=>{ NM[o]=1;
+          if(x<X0)X0=x; if(x>X1)X1=x; if(y<Y0)Y0=y; if(y>Y1)Y1=y; });
+      }
+      for(let y=Y0;y<=Y1;y++) for(let x=X0;x<=X1;x++){ const o=y*HW+x; if(NM[o]){ NM[o]=0; if(((x+y)&1)===0) buf[o]=mixTo(buf[o],240,248,255,0.62); } }
+      for(const G of grids){                               // the strings, every other square: they bend where it's pushed in
+        for(let j=0;j<G.length;j+=1) for(let i=0;i+1<G[j].length;i++) mixLine(G[j][i][0],G[j][i][1],G[j][i+1][0],G[j][i+1][1],0.5);
+        for(let i=0;i<G[0].length;i+=2) for(let j=0;j+1<G.length;j++) mixLine(G[j][i][0],G[j][i][1],G[j+1][i][0],G[j+1][i][1],0.5);
+      }
       bres(bF.x,bF.y,bN.x,bN.y,T.grey); bres(bF.x,btF,bN.x,btN,T.grey); bres(bF.x,bF.y,bF.x,btF,T.grey); bres(bN.x,bN.y,bN.x,btN,T.grey);
       for(const [x,y0,y1] of [[pF.x,pF.y,tF],[pN.x,pN.y,tN]]){
         const X=Math.round(x-0.5);
@@ -10187,22 +10323,14 @@
 
   function drawGoal(side){
     const gx=side>0?FW:0;
-    const backX=side>0?FW+NET_D:-NET_D;
     const pF=proj(gx,YC-GOAL_W/2), pN=proj(gx,YC+GOAL_W/2);
-    const bF=proj(backX,YC-GOAL_W/2), bN=proj(backX,YC+GOAL_W/2);
     const topF=pF.y-GOAL_H*pF.scale, topN=pN.y-GOAL_H*pN.scale;
-    const btF=bF.y-GOAL_H*bF.scale*0.85, btN=bN.y-GOAL_H*bN.scale*0.85;
+    // the net's strings, bent where the ball's pushed them (netPoint)
     ctx.strokeStyle='rgba(244,248,244,.30)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(bF.x,bF.y);ctx.lineTo(bN.x,bN.y);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(bF.x,btF);ctx.lineTo(bN.x,btN);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(bF.x,bF.y);ctx.lineTo(bF.x,btF);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(bN.x,bN.y);ctx.lineTo(bN.x,btN);ctx.stroke();
-    for(let i=1;i<5;i++){
-      const t=i/5;
-      const x1=pF.x+(pN.x-pF.x)*t, y1=topF+(topN-topF)*t;
-      const x2=bF.x+(bN.x-bF.x)*t, y2=btF+(btN-btF)*t;
-      const yb=bF.y+(bN.y-bF.y)*t;
-      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x2,yb);ctx.stroke();
+    const sp=q=>{ const r=proj(q.x,q.y,q.z); return [r.x,r.y]; };
+    for(const [f,nu,nv] of [['back',8,3],['roof',8,2],['far',2,3],['near',2,3]]){
+      for(let j=0;j<=nv;j++){ ctx.beginPath(); for(let i=0;i<=nu;i++){ const [x,y]=sp(netPoint(side,f,i/nu,j/nv)); if(i) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.stroke(); }
+      for(let i=0;i<=nu;i++){ ctx.beginPath(); for(let j=0;j<=nv;j++){ const [x,y]=sp(netPoint(side,f,i/nu,j/nv)); if(j) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.stroke(); }
     }
     ctx.strokeStyle='#f4f8f4';ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(pF.x,pF.y);ctx.lineTo(pF.x,topF);ctx.stroke();
@@ -10363,7 +10491,8 @@
       if(p.shotPoseT>0){ const d=p.shotPoseDir||f; return ['shoot',1,d.x,d.y]; }   // the shot, held after the strike
       if(p.passPoseT>0){ const d=p.passPoseDir||f; return ['pass',1,d.x,d.y]; }
       const inMove=p===controlled&&!!skill;
-      const sp=Math.hypot(p.vx,p.vy), dx=(sp>12&&!inMove)?p.vx:f.x||0, dy=(sp>12&&!inMove)?p.vy:f.y||0;
+      const byV=sp=>sp>12&&!inMove&&!p.watching;           // (one watching the ball faces it, side-stepping or backing off)
+      const sp=Math.hypot(p.vx,p.vy), dx=byV(sp)?p.vx:f.x||0, dy=byV(sp)?p.vy:f.y||0;
       if(inMove) return ['run', Math.floor(skill.t/0.07)%4, dx, dy];   // feet going, body turned the move's way
       if(p===controlled&&ball.ownedBy===p){                // your build-up while the button is held
         if(shootCharge>0.02) return ['shoot',0,(atkOf(p.team)>0?FW:0)-p.x,YC-p.y];
