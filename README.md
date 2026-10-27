@@ -279,10 +279,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     It beats a man who has committed to you. A defender who can simply turn round gets there first, and one already
     in tackling range takes it during the wind-up.
 
-  A move gives you nothing for free. The ball is wherever the move puts it, and a defender who can reach it while it's
+  A move gives you little for free. The ball is wherever the move puts it, and a defender who can reach it while it's
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
-  commits. Nobody is wrong-footed automatically: the old stumble on a sharp cut is gone from this version. Each move
-  costs a little stamina.
+  commits. The old stumble on a sharp cut is gone from this version; instead a move sells the man in front of you for
+  a moment, the longer the better you are than him (see **The computer does skill moves**). Each move costs a little
+  stamina. How quick a move is and how far it carries you is your Dribbling: the times and distances here are at
+  Dribbling 10.
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
   arrives, by the First touch push dial (your own pace along it is added).
@@ -312,8 +314,24 @@ The same game played like any other football game. It's a copy of `index.html` w
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: each move's distance and time, the cut's burst and
     pop, the rainbow's lead and height, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+    A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
+    as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
+    measured).
   - Keys: `1`-`3` distance, `B` defender, `C` slides.
 
+- **Crossing Lab.** A cross from out on the right, over and over: the computer's, to watch who he picks and how true it
+  goes, or yours. Everyone in the box is the computer, exactly as in a match; the lab only clears everyone else off
+  the pitch.
+  - Each ball is called: headed in, headed and saved, headed but not in, cleared, the keeper's, or nobody's, with who it was
+    for and how close it came to him at a height he could head it. The tally counts each, the share headed by ours,
+    how close they came on average and, for the computer's, how far from where they were aimed. On the pitch: the
+    spots our men are waiting on, where it was aimed, and its flight with its shadow.
+  - The computer crosses 1.4 s after the ball's put down, once his men have taken their spots. With CROSSER: YOU it
+    waits for you.
+  - Chips: CROSSER (COMPUTER or YOU), FROM (the byline, or 8, 16 or 24 m out for an early ball), OURS (1-3 in the
+    box), THEIRS (0-3), KEEPER (on or off), plus the usual NEXT, TIME, NEW BALL and TUNE. TUNE has Crossing, Curve,
+    Heading, Off IQ, Def IQ and the keeper's reach and speed.
+  - Keys: `1`-`4` from, `C` crosser, `,` `.` ours, `[` `]` theirs, `B` keeper.
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
   in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
   style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
@@ -540,11 +558,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     pass, 1.4 m behind him.
   - **Crosses.** Only the two of ours best placed to get to it go for it (forwards and midfielders); the rest keep
     their places. A good one goes for the first point of its flight he can get to at head height and times his
-    run: he holds, then attacks it at pace. A poor one goes at once to where it comes down, a step goal-side of it,
-    and waits there. In the air he hardly corrects his read: 80% of it is still there as the ball gets to him.
-    Measured, a cross from the byline to the penalty spot, our man 13 m out with a marker goal-side of him, 16
-    each, headed (before → now): 5 → 10 at Off IQ 1, 8 → 12 at 5.5, 12 → 16 at 10. A poor one gains too: his old
-    misread jumped about as the ball came, and was up to 4 m.
+    run: he holds, then attacks it at pace. A poor one goes at once to where it will have come down to his head
+    (the last of its flight he could head) and waits there for it, so a man attacking it gets there first. In the
+    air he hardly corrects his read: 80% of it is still there as the ball gets to him. (He used to wait where it
+    would come down on the grass, a step goal-side of it: about 3 m past where it was aimed, so he stepped off its
+    line and let it drop behind him. See **Crosses find a man**.) Measured, a cross from the byline to the penalty
+    spot, our man 13 m out with a marker goal-side of him who now goes to meet it too, 48 each, headed: 4 at Off IQ
+    1, 22 at 5.5 and 36 at 10 (Off IQ is in the duel in the air now: see **Crosses find a man**). When the marker
+    went to where it would land, 16 each: 10 at Off IQ 1, 12 at 5.5, 16 at 10.
   - **First-time finishes.** A chance of xG 0.3 or better (inside about 16 m and within 8 m of the middle, with a
     clear sight of goal) a high Off IQ hits first time, rather than taking a touch and giving it away: not at all at
     5.5 or under, all the way from 9. Measured, a ball pulled back from the byline to a man 13 m out with nobody
@@ -556,6 +577,88 @@ The same game played like any other football game. It's a copy of `index.html` w
     crosses 6.9 → 8.6, headers on goal 1.6 → 1.7, shots 5.0 → 4.2, goals 1.8 → 2.2, and 87-88% of passes reach a
     team-mate either way. The shots and goals are inside how much one batch of games differs from the next; a
     first-time finish comes up about once a game.
+- **Crosses find a man.** The computer's crosses went where nobody was. Measured over whole matches, the man a cross
+  was for was within 1.5 m of it at head height a quarter of the time, and a fifth of them were headed by one of ours.
+  - **Waiting in the box.** With the ball out wide in their third, the men going into the box take spots a cross can
+    find, all inside the posts (5 m either side of the middle). Before, a forward would come toward the man on the
+    ball, out past the near post.
+
+    | In the box | Where they wait |
+    | --- | --- |
+    | One | The middle of the box, 9 m out |
+    | Two | One favouring each post: 3.6 m toward the ball's side and 7 m out, and 4.2 m to the far side and 8 m out |
+    | Three | The two posts, and one in the middle 12 m out, far enough back that a cross to him clears the keeper |
+    | Four | And one on the edge of the box, 16 m out, toward the ball's side |
+
+    Who takes which spot keeps everyone's run shortest, and they don't swap about unless it saves 4 m. Until it's
+    crossed they wait onside, level with their last man, and none of them comes out to help the man on the ball.
+  - **Aimed at a man.** The computer crosses to one of ours: to his spot if he'll be there as it is, to him if he's in
+    the box already, or to where his run is taking him. It goes to whichever of them it's likeliest to find first,
+    against how soon one of theirs, or the keeper off his line, could be there; a header from in front of goal
+    beats one from wide of a post or further out. With nobody in the box yet, it goes to the near post, the penalty
+    spot or the far post for whoever can run onto it. It used to go to one of those three every time, for whoever
+    was nearest as the crow flies. How soon a man gets there is worked out the way he'd run it: a beat to read it,
+    then side-on watching it over a step or two, or turned and sprinting on a longer way.
+  - **How true it goes is his Crossing.** Most crosses go close to where they're aimed, and the worst still go as
+    wide as ever (up to 9° off at Crossing 1, 1° at 10). Measured in the Crossing Lab, 16 from 8 m out at each, they
+    came through head height about 0.55 m from where they were aimed at Crossing 8, and 1.6 m at Crossing 1.
+  - **Our man heads it.** A man under a cross of ours no longer tries to bring it down at his feet instead of heading
+    it. A man going for it who reads it poorly now waits where it comes down to his head, not where it lands (see
+    **Off IQ meets the ball**).
+  - **Their men meet it in the air.** The two of theirs best placed to get to it go to meet it at head height, a step
+    goal-side of it, once they've read it: 0.4 s after it's struck at Def IQ 1, 0.05 s at 10. If neither can get
+    there, the man nearest where it comes down goes there. Before, only the man nearest where it would land went, and
+    to where it would land, so our men met it in the air before he could.
+  - **The duel in the air.** When one of ours and one of theirs go up for it together, it's Heading against Heading
+    as before, and now the timing of it too: the attacker's Off IQ (his run, his jump) against the defender's Def IQ
+    (his read of it), worth up to a quarter of the duel either way, and nothing between two men level on them. That
+    goes for your headers too.
+  - **Measured in the Crossing Lab,** 16 crosses each from the computer at Crossing 8, the men in the box on the dials.
+    On average they came through head height 0.4 to 0.8 m from where they were aimed:
+
+    | From | Ours v theirs | Headed by ours | Cleared |
+    | --- | --- | --- | --- |
+    | 8 m out | 2 v 0 | 16 | 0 |
+    | 8 m out | 2 v 2 | 8 | 8 |
+    | 8 m out | 3 v 3 | 13 | 3 |
+    | The byline | 1 v 1 | 15 | 1 |
+    | 16 m out | 3 v 2 | 11 | 5 |
+    | 24 m out (early) | 2 v 0 | 16 | 0 |
+
+    The contested ones move by three or four from one run of 16 to the next. With one of theirs against one of
+    ours, he goes out to the crosser. How many headers go in swings a lot from run to run, so it isn't shown here.
+  - **The predicted flight** of a ball that's just been lofted now allows for the grass dragging at it till it's off
+    the ground. It used to run every cross on 8% too far in its first moments.
+  - **Over whole matches** (computer against computer, 12 six-minute games each, per 6 minutes, before → now):
+    crosses 7.9 → 4.3, headers on goal 1.9 → 2.3, shots 4.6 → 5.6, goals 1.9 → 2.4; 86-88% of passes reach a
+    team-mate either way. There are fewer crosses because the computer now only crosses when a man of ours can be
+    there to meet it, and more than half of them end in a header on goal, where it was one in four. Goals are up by
+    about as much as one batch of games differs from the next.
+- **The computer does skill moves.** Taking his man on, one of the computer's men with the moves (his skill stars)
+  does one to get past him: a cut, a croqueta, a roulette or a rainbow flick, as many kinds as his stars allow.
+  - **Who.** Wingers and wide midfielders most. Central midfielders and strikers now and then. A full-back only when
+    he's pushed on (told to attack, or already in their third) and is clearly the better man (by 1.5 or more). A
+    centre-back never.
+  - **How keen** is how much better he is on the ball than the man in front of him is at stopping him, not how good
+    either of them is: his Dribbling (counted twice), Ball control and Agility against that man's Tackling (twice),
+    Def IQ and Agility. Level, he's a third as keen as at 2 better; at 1 worse, not at all. A 5 against a 2 is as
+    keen as an 8 against a 5. Keener out on the touchline (×1.3) and in their third (×1.15); never in his own half.
+    The keener he is, the more often he takes his man on at all (about twice as often at the keenest).
+  - **Which move.** He goes into it about 3 m from his man, toward the side away from him: a croqueta or a cut most
+    often (a cut chopped square, away from him), a rainbow flick with nobody behind his man to pick it up, and a
+    roulette only with the man right on him and when he's a good deal the better (by 2.5 or more).
+  - **A move sells the man in front of him,** yours as well as the computer's. Anyone of theirs within 5.5 m and not
+    behind him is wrong-footed for a moment: he goes at where the ball was and can't win it. 0.1 s against a level
+    man, up to 0.35 s at 4 better, and not at all from 1.6 worse. (Not in the Dribble Lab, where it's your timing
+    against his lunge.)
+  - **A move's pace and reach are the man's Dribbling,** yours too. At Dribbling 10 it's as the dials have it (as
+    quick as before); at 1 it takes 1.6 times as long and carries him and the ball 30% less far; at 5.5, 1.23 times
+    as long and 85% as far. A poor dribbler shows the man the ball for longer and gets less far from him.
+  - **Measured** over six 6-minute computer-against-computer games: 35 moves, about 6 a game. 30 were by wingers, 3
+    by central midfielders and 2 by strikers; 15 croquetas, 14 cuts and 6 rainbow flicks; 22 out on the touchline.
+    He still had the ball after 26 of them. A winger against a defender closing him down, 8 runs each: at 9 against
+    4 he did a move 8 times, got past 5 times and never lost it; at 7 against 6, 5 moves, 1 past, lost it 3 times;
+    at 5 against 8 he never tried one.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at

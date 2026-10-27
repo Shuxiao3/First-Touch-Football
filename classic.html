@@ -321,8 +321,8 @@
     border:1px solid var(--well);border-radius:8px;padding:11px 15px;cursor:pointer;text-align:left;transition:background .12s,border-color .12s,color .12s;}
   .smBtn:hover,.smBtn.sel{background:rgb(var(--accRGB) / .17);border-color:var(--acc);color:var(--ink);}
   .smBtn .mk{opacity:0;margin-right:8px;}
-  .smRow{display:flex;gap:7px;}
-  .smRow .smBtn{flex:1 1 auto;white-space:nowrap;font-size:13px;padding-left:11px;padding-right:11px;}
+  .smRow{display:grid;grid-template-columns:1fr 1fr;gap:7px;}   /* (the four labs, two by two) */
+  .smRow .smBtn{white-space:nowrap;font-size:13px;padding-left:11px;padding-right:11px;}
   .smRow .smBtn .mk{margin-right:5px;}
   .smBtn.sel .mk,.smBtn:hover .mk{opacity:1;}
   .smBtn.disabled{opacity:.32;cursor:not-allowed;color:var(--dim2);}
@@ -674,7 +674,8 @@
   #stageWrap[data-labkind="trap"] #labHud [data-kinds]:not([data-kinds~="trap"]),
   #stageWrap[data-labkind="pass"] #labHud [data-kinds]:not([data-kinds~="pass"]),
   #stageWrap[data-labkind="shoot"] #labHud [data-kinds]:not([data-kinds~="shoot"]),
-  #stageWrap[data-labkind="dribble"] #labHud [data-kinds]:not([data-kinds~="dribble"]){display:none !important;}
+  #stageWrap[data-labkind="dribble"] #labHud [data-kinds]:not([data-kinds~="dribble"]),
+  #stageWrap[data-labkind="cross"] #labHud [data-kinds]:not([data-kinds~="cross"]){display:none !important;}
   /* the Shooting Lab's goal mouth, seen from where you shoot: dots where each shot crossed the line */
   #stageWrap.labMode[data-labkind="shoot"] #labLow{display:block;}
   #labLow{position:absolute;left:12px;bottom:12px;width:min(250px,40%);z-index:6;pointer-events:none;}
@@ -731,7 +732,7 @@
     #stageWrap.labTuneOpen #labResult, #stageWrap.labTuneOpen .labTallyRow{display:none;}
     .lgBox{height:36px;}
     #labLow{bottom:16px;left:8px;width:min(220px,36%);}
-    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="dribble"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
+    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="dribble"] #labResult, #stageWrap[data-labkind="cross"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
     #stageWrap.labTuneOpen #labLow{display:none !important;}
   }
   /* ===== PIXEL THEME ===================================================================================================
@@ -1074,6 +1075,7 @@
           <button class="smBtn" data-act="dribblelab"><span class="mk">▶</span>DRIBBLE LAB</button>
           <button class="smBtn" data-act="passlab"><span class="mk">▶</span>PASS LAB</button>
           <button class="smBtn" data-act="shootlab"><span class="mk">▶</span>SHOOTING LAB</button>
+          <button class="smBtn" data-act="crosslab"><span class="mk">▶</span>CROSSING LAB</button>
         </div>
         <button class="smBtn" data-act="settings"><span class="mk">▶</span>SETTINGS</button>
       </div>
@@ -1180,6 +1182,11 @@
       <button class="labChip" data-kinds="dribble" data-lab="ddef"><i>DEFENDER</i><b id="labDDefV">CLOSES</b><kbd>B</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="ddist"><i>FROM</i><b id="labDDistV">10 M</b><kbd>1-3</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="dslide"><i>SLIDES</i><b id="labDSlideV">OFF</b><kbd>C</kbd></button>
+      <button class="labChip" data-kinds="cross" data-lab="cwho"><i>CROSSER</i><b id="labCWhoV">COMPUTER</b><kbd>C</kbd></button>
+      <button class="labChip" data-kinds="cross" data-lab="cfrom"><i>FROM</i><b id="labCFromV">8 M OUT</b><kbd>1-4</kbd></button>
+      <button class="labChip" data-kinds="cross" data-lab="catk"><i>OURS</i><b id="labCAtkV">2</b><kbd>, .</kbd></button>
+      <button class="labChip" data-kinds="cross" data-lab="cdef"><i>THEIRS</i><b id="labCDefV">2</b><kbd>[ ]</kbd></button>
+      <button class="labChip" data-kinds="cross" data-lab="ckeep"><i>KEEPER</i><b id="labCKeepV">ON</b><kbd>B</kbd></button>
       <button class="labChip" data-lab="auto"><i>NEXT</i><b id="labAutoV">AUTO</b><kbd>Q</kbd></button>
       <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b><kbd>Z</kbd></button>
       <button class="labChip" data-kinds="trap" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b><kbd>C</kbd></button>
@@ -1830,7 +1837,8 @@
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
-    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange']
+    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange'],
+    crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
   };
   // pin the IQ dials to the top of the settings panel
   ['halfMin','oppShift','offIQ','pressTrigger','tackleTiming'].slice().reverse().forEach(k=>{
@@ -2374,7 +2382,7 @@
   function setControlled(p){
     if(controlled!==p){
       if(controlled) controlled.sprint=false;
-      controlled=p; skill=null; recvAuto=null; ftAim=null; oneTouch=null; switchLock=null;
+      controlled=p; skill=null; p.skill=null; recvAuto=null; ftAim=null; oneTouch=null; switchLock=null;
       kickHeld=shootHeld=crossHeld=false;kickCharge=shootCharge=crossCharge=0;
       trapping=0; actQ=null; swipe=null; swipeShot=null; passPend=null; passDown=null; passLoft=false; windUp=null;
       p.sprint=false; padSprintOn=false; p.runTarget=null; p.touchLagT=0;
@@ -2889,26 +2897,50 @@
     const p=controlled; if(!g||!skillReady()) return false;
     const need=SKILL_STARS[g.kind]||1;
     if((p.stars||1)<need){ lastGrade=SKILL_NAME[g.kind]+' '+'\u2605'.repeat(need)+' ONLY'; gradeColor='#8a9580'; gradeFade=1.0; return false; }   // above his stars
-    const sp=Math.hypot(p.vx,p.vy), f=sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:p.facing.x,y:p.facing.y};
-    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p))};
-    if(g.kind==='rainbow'){ sk.T=P.skRainbowT.val; }
-    else if(g.kind==='spin'){ sk.sense=g.sense; sk.turn=clamp(g.turn||2*Math.PI,Math.PI,2.5*Math.PI);
-      sk.T=P.skSpinT.val*sk.turn/(2*Math.PI); sk.side={x:-f.y*g.sense,y:f.x*g.sense}; }
-    else { const d=screenDirToPitch(g.dx,g.dy,p.y); sk.d=d; sk.T=g.kind==='cut'?P.skCutT.val:P.skCroqT.val;
-      if(g.kind==='croq'){ const along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
-        if(sl<0.2){ sx=-f.y; sy=f.x; sl=1; } sk.side={x:sx/sl,y:sy/sl}; } }
-    skill=sk; ball.ownedBy=p;
+    skill=mkSkill(p,g,(g.kind==='cut'||g.kind==='croq')?screenDirToPitch(g.dx,g.dy,p.y):null); ball.ownedBy=p; skillSells(p);
     p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false;
     lastGrade=SKILL_NAME[g.kind]; gradeColor='#78c8ff'; gradeFade=0.8;
     if(LAB.on&&LAB.kind==='dribble') dribLabOnMove(g.kind);
     return true;
   }
+  // A MOVE'S PACE AND REACH ARE HIS DRIBBLING -- yours and the computer's alike: at 10 as the dials have it, at 1 it takes
+  // 1.6 times as long (0.62 of the pace) and carries him and the ball 30% less far, so a poor dribbler shows the ball to
+  // the man in front of him for longer, and gets less far from him
+  function skillPaceOf(p){ return statLerp(statOf(p,'dribbling',P.dribbling.val),0.62,1); }
+  function skillReachOf(p){ return statLerp(statOf(p,'dribbling',P.dribbling.val),0.7,1); }
+  function skillOf(p){ return p===controlled?skill:p.skill; }                // (the move he's in, if any: yours, or one of the computer's men)
+  // A MOVE SELLS THE MAN IN FRONT OF HIM: one of theirs within 5 m and not behind him is wrong-footed by it for a moment --
+  // he goes at where the ball was and can't win it -- for longer the better the man on the ball is than him (Dribbling
+  // twice, Ball control, Agility against Tackle twice, Def IQ, Agility): 0.1 s level, 0.35 s at 4 better, not at all at 2
+  // worse. (Not the Dribble Lab's man: there it's your timing against his lunges.)
+  function skillEdge(p,d){ return (2*statOf(p,'dribbling',P.dribbling.val)+statOf(p,'ballControl',P.ballControl.val)+statOf(p,'agility',P.agility.val))/4
+                                -(2*statOf(d,'tackle',P.tackle.val)+statOf(d,'defIQ',P.defIQ.val)+statOf(d,'agility',P.agility.val))/4; }
+  function skillSells(p){
+    const f=p.facing||{x:atkOf(p.team),y:0};
+    for(const q of players){ if(q.team===p.team||q.state!=='normal'||q.pRole==='labDribDef') continue;
+      const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy); if(d>125||(dx*f.x+dy*f.y)<-0.3*d) continue;
+      const sell=clamp(0.1+0.0625*skillEdge(p,q),0,0.35); if(sell<=0) continue;
+      q.soldT=simNow+sell; q.soldAt={x:ball.x,y:ball.y}; }
+  }
+  // the move g (kind; a roulette's sense and turn) from where he is and the way he's going -- a cut or a croqueta the way
+  // d points on the pitch -- at his Dribbling's pace and reach
+  function mkSkill(p,g,d){
+    const sp=Math.hypot(p.vx,p.vy), f=sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:p.facing.x,y:p.facing.y}, k=skillPaceOf(p), r=skillReachOf(p);
+    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)), burst:P.skCutBurst.val*(0.85+0.15*r), pop:P.skCutPop.val*r, rbDist:P.skRainbowDist.val*r};
+    if(g.kind==='rainbow'){ sk.T=P.skRainbowT.val/k; }
+    else if(g.kind==='spin'){ sk.sense=g.sense; sk.turn=clamp(g.turn||2*Math.PI,Math.PI,2.5*Math.PI);
+      sk.T=P.skSpinT.val*sk.turn/(2*Math.PI)/k; sk.side={x:-f.y*g.sense,y:f.x*g.sense}; sk.D=P.skSpinDist.val*r*Math.min(1,sk.turn/(2*Math.PI)); }
+    else { sk.d=d; sk.T=(g.kind==='cut'?P.skCutT.val:P.skCroqT.val)/k;
+      if(g.kind==='croq'){ const along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
+        if(sl<0.2){ sx=-f.y; sy=f.x; sl=1; } sk.side={x:sx/sl,y:sy/sl}; sk.D=P.skCroqDist.val*r; } }
+    return sk;
+  }
   const skillSmooth=u=>u*u*(3-2*u);
   // a move in progress moves you and the ball itself (instead of stepOutfield and carry). false = it's over.
   function skillStep(p,dt){
-    const sk=skill;
+    const sk=skillOf(p), end=()=>{ if(p===controlled){ skill=null; skillCd=0.25; } else { p.skill=null; p.skillCd=0.6; } };
     if(!sk) return false;
-    if(ball.ownedBy!==p||p.state!=='normal'){ skill=null; return false; }
+    if(ball.ownedBy!==p||p.state!=='normal'||(sk.px!=null&&Math.hypot(p.x-sk.px,p.y-sk.py)>30)){ if(p===controlled) skill=null; else p.skill=null; return false; }   // (lost it -- or put somewhere else since the last step, as at a restart: it's off)
     sk.t+=dt; const u=clamp(sk.t/sk.T,0,1), e=skillSmooth(u), f=sk.f;
     const cd=p.r+ball.r+5;
     let x=p.x, y=p.y, bx, by, bz=0, out=null;
@@ -2921,13 +2953,13 @@
       if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.6),rainbow:true};
     } else if(sk.kind==='cut'){
       // the chop: you check and turn the ball, then pop it a step ahead the way you flicked and go after it
-      const go=Math.max(sk.sp0,runSpeedOf(p)*P.skCutBurst.val)*(1-dribSpeedPenOf(p));
+      const go=Math.max(sk.sp0,runSpeedOf(p)*sk.burst)*(1-dribSpeedPenOf(p));
       p.vx=sk.d.x*go*e+f.x*sk.sp0*0.35*(1-e); p.vy=sk.d.y*go*e+f.y*sk.sp0*0.35*(1-e);
       x+=p.vx*dt; y+=p.vy*dt; p.facing={x:sk.d.x,y:sk.d.y};
       bx=x+sk.d.x*cd; by=y+sk.d.y*cd;
       if(u>=1) out={g:sk.d,keep:go,pop:true};
     } else if(sk.kind==='croq'){
-      const D=P.skCroqDist.val;
+      const D=sk.D;
       x=sk.x0+sk.side.x*D*e+f.x*sk.sp0*0.5*sk.t; y=sk.y0+sk.side.y*D*e+f.y*sk.sp0*0.5*sk.t;
       p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:f.x,y:f.y};
       const shift=-12+26*e;                                       // the ball rolled from one foot across to the other
@@ -2936,29 +2968,29 @@
     } else {
       // the body turns as far as you drew; the ball's on the sole, going round with it (so it shows, half way round)
       const a=Math.atan2(f.y,f.x)+sk.sense*sk.turn*e;
-      const D=P.skSpinDist.val*Math.min(1,sk.turn/(2*Math.PI));
+      const D=sk.D;
       x=sk.x0+sk.side.x*D*e+f.x*14*e; y=sk.y0+sk.side.y*D*e+f.y*14*e;
       p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:Math.cos(a),y:Math.sin(a)};
       bx=x+Math.cos(a)*(cd-3); by=y+Math.sin(a)*(cd-3);
       if(u>=1) out={g:{x:Math.cos(a),y:Math.sin(a)},keep:Math.max(sk.sp0*0.5,runSpeedOf(p)*0.35)};   // you come out facing where the turn left you
     }
-    p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r);
+    p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r); sk.px=p.x; sk.py=p.y;
     ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=p.vx; ball.vy=p.vy; ball.z=bz; ball.vz=0;
     if(out){
       const g=out.g;
       p.facing={x:g.x,y:g.y}; p.vx=g.x*out.keep; p.vy=g.y*out.keep; p.carryAngle=Math.atan2(g.y,g.x);
       ball.vx=p.vx; ball.vy=p.vy; p.stepPhase=0;
       if(out.rainbow){                                             // up and over: it drops this far ahead of where your run takes you
-        const vz=P.skRainbowH.val, tf=(vz+Math.sqrt(vz*vz+2*520*ball.z))/520, hv=out.keep+P.skRainbowDist.val/tf;
+        const vz=P.skRainbowH.val, tf=(vz+Math.sqrt(vz*vz+2*520*ball.z))/520, hv=out.keep+sk.rbDist/tf;
         ball.vx=g.x*hv; ball.vy=g.y*hv; ball.vz=vz; ball.lob={x:g.x,y:g.y};   // it checks up where it drops, like a lofted pass
         ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=tf+0.6; p.noTouchT=0.3;
-        recvAuto={q:p,until:simNow+tf+1.2};                        // (stick left alone: you burst on to where it drops)
+        if(p===controlled) recvAuto={q:p,until:simNow+tf+1.2};     // (stick left alone: you burst on to where it drops)
       }
       else if(out.pop){                                                 // a little pop ahead: it's loose until you get back on it
-        ball.vx=g.x*(out.keep+P.skCutPop.val); ball.vy=g.y*(out.keep+P.skCutPop.val); ball.vz=55; ball.z=1;
+        ball.vx=g.x*(out.keep+sk.pop); ball.vy=g.y*(out.keep+sk.pop); ball.vz=55; ball.z=1;
         ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.1;
       }
-      skill=null; skillCd=0.25;
+      end();
     }
     return true;
   }
@@ -3243,10 +3275,12 @@
     sDist:260, sAng:0, sKeep:true, st:null, shots:[],
     // DRIBBLE LAB: how the defender plays you, how far off he starts, whether he slides; the tally
     dDef:'close', dDist:250, dSlide:false, dt:null,
+    // CROSSING LAB: who crosses, from how far out, how many of ours and of theirs in the box, the keeper; the tally
+    cWho:'ai', cFrom:180, cAtk:2, cDef:2, cKeep:true, ct:null, cAll:null,
     trail:[]                              // the ball's path for the pass/shot in play (drawn on the pitch)
   };
-  const LAB_TITLE={trap:'TRAP LAB',pass:'PASS LAB',shoot:'SHOOTING LAB',dribble:'DRIBBLE LAB'};
-  const LAB_PRACTICE={traplab:'trap',passlab:'pass',shootlab:'shoot',dribblelab:'dribble'};   // practice name -> lab
+  const LAB_TITLE={trap:'TRAP LAB',pass:'PASS LAB',shoot:'SHOOTING LAB',dribble:'DRIBBLE LAB',cross:'CROSSING LAB'};
+  const LAB_PRACTICE={traplab:'trap',passlab:'pass',shootlab:'shoot',dribblelab:'dribble',crosslab:'cross'};   // practice name -> lab
   const LAB_SERVES=[['roll','ROLLED'],['bounce','BOUNCING'],['thigh','THIGH HIGH'],['chest','CHEST HIGH'],['mix','MIXED']];
   const LAB_PACES=[250,350,450,550,700,900];   // the ball's speed as it reaches you
   const LAB_LINES=[0,12,24,-24,-12,'rnd'];     // + = its line runs above you on screen
@@ -3308,6 +3342,7 @@
     if(LAB.kind==='pass') passLabSetup();
     else if(LAB.kind==='shoot') shootLabSetup();
     else if(LAB.kind==='dribble') dribLabSetup();
+    else if(LAB.kind==='cross') crossLabSetup();
     else trapLabSetup();
     labBuildTune();
   }
@@ -3336,6 +3371,7 @@
     if(LAB.kind==='pass') return passLabServe();
     if(LAB.kind==='shoot') return shootLabServe();
     if(LAB.kind==='dribble') return dribLabServe();
+    if(LAB.kind==='cross') return crossLabServe();
     const rc=labRecv(), S=labServer(); if(!rc||!S) return;
     if(Math.hypot(rc.x-LAB.spot.x,rc.y-LAB.spot.y)>140) labPlace();   // wandered off chasing a touch: back on the mark
     S.x=LAB.spot.x-LAB.dist; S.y=LAB.spot.y; S.vx=S.vy=0;
@@ -3383,6 +3419,7 @@
     if(LAB.kind==='pass') return passLabStep(dt,rdt);
     if(LAB.kind==='shoot') return shootLabStep(dt,rdt);
     if(LAB.kind==='dribble') return dribLabStep(dt,rdt);
+    if(LAB.kind==='cross') return crossLabStep(dt,rdt);
     const r=LAB.rep;
     if(r&&!r.done){
       const rc=r.recv, g=dist(rc,ball), owner=ball.ownedBy;
@@ -3445,13 +3482,14 @@
     if(LAB.kind==='pass'){ LAB.pt=null; LAB.last=null; LAB.dirty=true; return; }
     if(LAB.kind==='shoot'){ LAB.st=null; LAB.shots=[]; LAB.last=null; LAB.dirty=true; return; }
     if(LAB.kind==='dribble'){ LAB.dt=null; LAB.last=null; LAB.dirty=true; return; }
+    if(LAB.kind==='cross'){ LAB.ct=null; LAB.last=null; LAB.dirty=true; return; }
     LAB.tally[LAB.recv==='ai'?'ai':'you']=null; LAB.hist=LAB.hist.filter(h=>h.who!==LAB.recv); LAB.last=null; LAB.dirty=true; }
   function labTune(open){
     LAB.tune=!!open; document.getElementById('stageWrap').classList.toggle('labTuneOpen',LAB.tune);
     if(LAB.tune) labSyncTune(); LAB.dirty=true;
   }
   function labOff(){
-    LAB.on=false; LAB.rep=null; LAB.last=null; LAB.fx=null; LAB.trail=[];
+    LAB.on=false; LAB.rep=null; LAB.last=null; LAB.fx=null; LAB.trail=[]; LAB.cAll=null;
     labTune(false);
     keepers.forEach(k=>{ k.benched=false; });
     const wrap=document.getElementById('stageWrap'); wrap.classList.remove('labMode'); delete wrap.dataset.labkind;
@@ -3468,6 +3506,7 @@
     if(LAB.kind==='pass') return passLabKey(code);
     if(LAB.kind==='shoot') return shootLabKey(code);
     if(LAB.kind==='dribble') return dribLabKey(code);
+    if(LAB.kind==='cross') return crossLabKey(code);
     switch(code){
       case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5':
         LAB.serve=LAB_SERVES[+code.slice(5)-1][0]; break;
@@ -3492,6 +3531,7 @@
     if(LAB.kind==='pass'&&passLabChip(act)) { LAB.dirty=true; return; }
     if(LAB.kind==='shoot'&&shootLabChip(act)) { LAB.dirty=true; return; }
     if(LAB.kind==='dribble'&&dribLabChip(act)) { LAB.dirty=true; return; }
+    if(LAB.kind==='cross'&&crossLabChip(act)) { LAB.dirty=true; return; }
     if(act==='serve') LAB.serve=nextOf(LAB_SERVES.map(s=>s[0]),LAB.serve);
     else if(act==='pace'){ const i=LAB_PACES.findIndex(v=>v>LAB.pace); LAB.pace=LAB_PACES[i<0?0:i]; }
     else if(act==='line'){ const i=LAB_LINES.indexOf(LAB.line); LAB.line=LAB_LINES[i<0?0:(i+1)%LAB_LINES.length]; }
@@ -3541,6 +3581,7 @@
     if(LAB.kind==='pass') return passLabHud();
     if(LAB.kind==='shoot') return shootLabHud();
     if(LAB.kind==='dribble') return dribLabHud();
+    if(LAB.kind==='cross') return crossLabHud();
     const rc=labRecv(), r=LAB.rep, live=r&&!r.done&&!r.touch;
     // the guide: where "now" sits against the ball's arrival (following you if you're on the move)
     let cur=null;
@@ -3705,7 +3746,7 @@
   }
   function labBuildTune(){
     const box=document.getElementById('labDials'); if(!box) return;
-    document.getElementById('labTuneTitle').textContent=LAB.kind==='pass'?'TUNE PASSING':LAB.kind==='shoot'?'TUNE SHOOTING':LAB.kind==='dribble'?'TUNE SKILL MOVES':'TUNE THE TRAP';
+    document.getElementById('labTuneTitle').textContent=LAB.kind==='pass'?'TUNE PASSING':LAB.kind==='shoot'?'TUNE SHOOTING':LAB.kind==='dribble'?'TUNE SKILL MOVES':LAB.kind==='cross'?'TUNE CROSSING':'TUNE THE TRAP';
     if(box.dataset.kind===LAB.kind&&box.childElementCount){ labSyncTune(); return; }
     box.dataset.kind=LAB.kind; box.innerHTML='';
     for(const k of PRACTICE_DIALS[LAB.kind+'lab']){
@@ -3745,6 +3786,7 @@
     if(LAB.kind==='pass') return passLabCamX();
     if(LAB.kind==='shoot') return shootLabCamX();
     if(LAB.kind==='dribble') return dribLabCamX();
+    if(LAB.kind==='cross') return crossLabCamX();
     let want=W*0.565;                                     // where the receiver sits on screen
     if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw;
       want=Math.min(want,W-dw-130); }
@@ -3756,6 +3798,7 @@
     if(LAB.kind==='pass') return passLabDraw();
     if(LAB.kind==='shoot') return shootLabDraw();
     if(LAB.kind==='dribble') return dribLabDraw();
+    if(LAB.kind==='cross') return crossLabDraw();
     const rc=labRecv();
     if(ball.ownedBy!==rc){                                 // the gather radius: a trapped ball is yours once it's in here
       ctx.beginPath();
@@ -4022,12 +4065,14 @@
   }
   // from the keeper: a save (or he came and took it)
   function labOnSave(kind){
+    if(LAB.on&&LAB.kind==='cross'){ const r=LAB.rep; if(r&&!r.done&&r.headBy&&!r.save){ r.save=kind; LAB.dirty=true; } return; }
     if(!LAB.on||LAB.kind!=='shoot') return;
     const r=LAB.rep; if(r&&!r.done&&r.shot&&!r.save){ r.save={kind,t:simNow}; LAB.dirty=true; }
   }
   // from goal(): in the lab a goal is just called, nothing restarts
   function labOnGoal(){
     const r=LAB.rep; if(LAB.kind==='shoot'&&r&&!r.done&&r.shot){ r.goal=true; LAB.dirty=true; }
+    if(LAB.kind==='cross'&&r&&!r.done&&r.headBy){ r.goal=true; LAB.dirty=true; }
     lastGrade='GOAL!'; gradeColor='#9dff3c'; gradeFade=1.2;
   }
   function shootLabStep(dt,rdt){
@@ -4337,6 +4382,195 @@
     ctx.setLineDash([4,5]); ctx.strokeStyle=D.state==='stumble'?'rgba(138,149,128,.4)':'rgba(255,90,77,.5)'; ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
     const bx=D.x+atk*45, t=proj(bx,D.y-70), b=proj(bx,D.y+70);
     ctx.save(); ctx.setLineDash([2,6]); ctx.strokeStyle='rgba(157,255,60,.35)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(t.x,t.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.restore();
+  }
+
+  // ===== CROSSING LAB =====
+  // A cross from out on the right, over and over: the computer's (CROSSER: COMPUTER -- to watch who he picks and how true
+  // it goes) or yours (YOU: cross it yourself). Choose how far from the byline it's crossed from (the byline itself, out
+  // to an early ball from 24 m), how many of ours are in the box for it (1-3, taking their spots: see boxSlots) and how
+  // many of theirs (0-3), and the keeper on or off. Everyone in the box is the computer, exactly as in a match -- the lab
+  // only clears the rest off the pitch. Each ball is called: a header on goal (in, saved, or wide), cleared, the
+  // keeper's, or nobody's; and how close it came to the man it was for, at a height he could head it.
+  const CL_WHO=[['ai','COMPUTER'],['you','YOU']];
+  const CL_FROMS=[[25,'BYLINE'],[180,'8 M OUT'],[360,'16 M OUT'],[540,'24 M OUT']];
+  const CL_COL={goal:'#9dff3c',saved:'#c8f58a',headed:'#ffb43c',cleared:'#ff5a4d',keeper:'#ff5a4d',nobody:'#8a9580',nocross:'#8a9580',lost:'#ff5a4d'};
+  const CL_SETTLE=1.4;                                   // (his men take their spots before the computer crosses)
+  const clRole=r=>players.filter(q=>q.pRole===r);
+  // the cast: you (the crosser), so many of ours as forwards and so many of theirs as centre-backs -- nobody else on the
+  // pitch (so they're nobody's to plan for); the crosser, the forwards and the defenders play off the dials
+  function crossLabCast(){
+    const all=LAB.cAll, atk=atkOf(controlled.team);
+    for(const q of all){ q.pRole=null; q.labAI=false; if(q.labSlot0){ q.slotAtk=q.labSlot0.a; q.slotDef=q.labSlot0.d; q.stats=q.labSlot0.st; delete q.labSlot0; } }
+    const G=all.filter(q=>q.team===controlled.team&&q!==controlled), R=all.filter(q=>q.team!==controlled.team);
+    const slot=(q,o)=>{ q.labSlot0={a:q.slotAtk, d:q.slotDef, st:q.stats}; const s=Object.assign({},q.slotAtk,{si:-1,isWidthLine:false,lineFrac:ROLE_FRAC[o.role]},o); q.slotAtk=s; q.slotDef=s; applySlot(q,s); };
+    slot(controlled,{role:'ATT', pos:'W', wide:1, lineSize:1, lineIdx:0, homeX:FW/2+atk*FW*0.3, homeY:YC+FH*0.38});
+    controlled.pRole='labCrosser'; controlled.stats=Object.assign({},controlled.stats,{crossing:undefined,curve:undefined});
+    const A=G.slice(0,LAB.cAtk), D=R.slice(0,LAB.cDef);
+    A.forEach((q,i)=>{ slot(q,{role:'ATT', pos:'ST', wide:0, lineSize:A.length, lineIdx:i, homeX:FW/2+atk*FW*0.32, homeY:YC+(i-(A.length-1)/2)*160});
+      q.pRole='labAtk'; q.labAI=true; q.stats=Object.assign({},q.stats,{heading:undefined,offIQ:undefined}); });
+    D.forEach((q,i)=>{ slot(q,{role:'DEF', pos:'CB', wide:0, lineSize:D.length, lineIdx:i, homeX:FW/2+atk*FW*0.38, homeY:YC+(i-(D.length-1)/2)*150});
+      q.pRole='labDef'; q.labAI=true; q.stats=Object.assign({},q.stats,{heading:undefined,defIQ:undefined}); });
+    players=[controlled,...A,...D];
+  }
+  function crossLabSetup(){
+    if(!LAB.cAll) LAB.cAll=players.slice();
+    crossLabCast();
+    crossLabServe();
+  }
+  function crossLabServe(){
+    const cr=controlled, atk=atkOf(cr.team), gx=atk>0?FW:0, U=u=>gx-atk*u;
+    gkHold=null; controllingKeeper=null; restartT=0; restartInfo=null; headerT=0; defHeaderT=0; scoredT=0; offsideT=0; offsidePass=null;
+    skill=null; skillCd=0; recvAuto=null; ftAim=null; oneTouch=null;
+    keepers.forEach(k=>{ k.mode='line'; k.holdT=0; k.diveT=0; k.groundT=0; k.reactT=0; k.threatActive=false; k.claimCd=0; k.vx=k.vy=0;
+      k.x=k.homeX; k.y=YC; k.benched=(k.team!==cr.team&&!LAB.cKeep); });
+    const A=clRole('labAtk'), D=clRole('labDef');
+    for(const q of players){ q.vx=q.vy=0; q.state='normal'; q.stateT=0; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.tackleCd=0;
+      q.ob=null; q.takeOn=null; q.stamina=q.staminaCap=1; q.reactUntil=0; q.runTarget=null; q.gapRun=0; q.runCd=0; q.goingForBall=false; q.intercepting=false; }
+    cr.x=U(LAB.cFrom); cr.y=YC+FH*0.37; cr.facing={x:atk,y:0};
+    A.forEach((q,i)=>{ q.x=U(PA_D-50); q.y=YC+(i-(A.length-1)/2)*170; q.facing={x:atk,y:0}; });            // (just inside the box: they take their spots from there)
+    D.forEach((q,i)=>{ const m=A[i%A.length]; q.x=U(PA_D-150); q.y=m?m.y+(i>=A.length?90:15):YC; q.facing={x:-atk,y:0}; });   // goal-side of them
+    ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
+    ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); ball.z=0; ball.vz=0;
+    own(cr,cr.r+ball.r+5); cr.passLockT=0; ball.lastTouch=cr.team;
+    kickHeld=shootHeld=crossHeld=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
+    LAB.rep={t0:simNow, who:LAB.cWho, from:LAB.cFrom, nA:A.length, nD:D.length, keeper:LAB.cKeep, cross:null, aim:null, man:null, miss:null, aimMiss:null, headBy:null, goal:false, save:null, done:false, result:null};
+    LAB.trail=[]; LAB.dirty=true;
+  }
+  // the cross is in: the man it's for (the computer's pick; yours, the one of ours it comes nearest at a height he
+  // could head it) -- see crossLabStep
+  function crossLabStruck(cs){
+    const r=LAB.rep; if(!r||r.cross) return;
+    r.cross={t:simNow, x:ball.x, y:ball.y}; r.aim=cs?{x:cs.x,y:cs.y}:null; r.man=cs&&cs.who?cs.who:null;
+    if(r.aim) for(let t=0.02;t<=2;t+=0.02){ const B=ballAt(t); if(B.z>18&&B.z<AIR_REACH){ const d=Math.hypot(B.x-r.aim.x,B.y-r.aim.y); if(r.aimMiss==null||d<r.aimMiss) r.aimMiss=d; } }   // (how near its flight passes where it was aimed, at a height to head: the crosser's own accuracy)
+    LAB.trail=[{x:ball.x,y:ball.y,z:ball.z}]; LAB.dirty=true;
+  }
+  // from headOnGoal / headClear
+  function crossLabOnHead(p,kind){
+    const r=LAB.rep; if(!r||r.done||!r.cross) return;
+    if(kind==='goal'&&p.team===controlled.team&&!r.headBy){ r.headBy={p,t:simNow}; LAB.dirty=true; }
+    else if(kind==='clear'&&p.team!==controlled.team&&!r.headBy) crossLabFinish('cleared');
+  }
+  function crossLabStep(dt,rdt){
+    const r=LAB.rep, cr=controlled;
+    if(r&&!r.done){
+      const t=simNow-r.t0, A=clRole('labAtk');
+      if(!r.cross){
+        if(r.who==='ai'&&t>=CL_SETTLE&&ball.ownedBy===cr){ const cs=crossSpot(cr); aiCross(cr,cs); crossLabStruck(cs); }
+        else if(ball.crossT>0&&ball.crossBy===cr.team&&ball.lastTouch===cr.team) crossLabStruck(null);   // (yours)
+        else if((ball.ownedBy&&ball.ownedBy.team!==cr.team)||gkHold) crossLabFinish('lost');
+        else if(t>(r.who==='ai'?CL_SETTLE+3:10)) crossLabFinish('nocross');
+      }
+      if(r.cross&&!r.done){
+        if(LAB.trail.length<900) LAB.trail.push({x:ball.x,y:ball.y,z:ball.z});
+        const gx=atkOf(cr.team)>0?FW:0, inBox=Math.abs(ball.x-gx)<BX+90&&Math.abs(ball.y-YC)<BY+100;
+        if(!r.headBy&&inBox&&ball.z>18&&ball.z<AIR_REACH&&!ball.ownedBy){                    // how close it came to its man, at a height he could head it
+          if(r.man){ const d=Math.hypot(r.man.x-ball.x,r.man.y-ball.y); if(r.miss==null||d<r.miss) r.miss=d; }
+          else for(const q of A){ const d=Math.hypot(q.x-ball.x,q.y-ball.y); if(r.miss==null||d<r.miss){ r.miss=d; r.near=q; } } }
+        const ct=simNow-r.cross.t;
+        if(r.headBy){
+          if(r.goal) crossLabFinish('goal');
+          else if(r.save||(gkHold&&gkHold.team!==cr.team)) crossLabFinish('saved');
+          else if(simNow-r.headBy.t>2.2) crossLabFinish('headed');
+        }
+        else if(gkHold&&gkHold.team!==cr.team) crossLabFinish('keeper');
+        else if((ball.ownedBy&&ball.ownedBy.team!==cr.team)||(ball.lastTouch&&ball.lastTouch!==cr.team)) crossLabFinish('cleared');
+        else if(ct>3.2||(ct>0.6&&ball.z<1&&Math.hypot(ball.vx,ball.vy)<40)||ball.x<0||ball.x>FW||ball.y<0||ball.y>FH) crossLabFinish('nobody');
+      }
+    }
+    if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) crossLabServe(); }
+  }
+  function crossLabTally(){ return LAB.ct||(LAB.ct={n:0,goal:0,saved:0,headed:0,cleared:0,keeper:0,nobody:0,missSum:0,missN:0,aimSum:0,aimN:0}); }
+  function crossLabFinish(res){
+    const r=LAB.rep; if(!r||r.done) return;
+    r.done=true; r.result=res; r.endT=simNow;
+    if(r.cross){ const T=crossLabTally(); T.n++; if(T[res]!=null) T[res]++; if(r.miss!=null){ T.missSum+=r.miss; T.missN++; } if(r.aimMiss!=null){ T.aimSum+=r.aimMiss; T.aimN++; } }
+    LAB.last=r; LAB.nextT=res==='goal'?1.4:1.6; LAB.dirty=true;
+    if(res==='goal'){ lastGrade='GOAL!'; gradeColor='#9dff3c'; gradeFade=1.2; }
+  }
+  function crossLabKey(code){
+    const nx=(arr,v,k)=>{ const vs=arr.map(a=>Array.isArray(a)?a[0]:a), i=vs.indexOf(v); return vs[(i+k+vs.length)%vs.length]; };
+    switch(code){
+      case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': LAB.cFrom=CL_FROMS[+code.slice(5)-1][0]; break;
+      case 'KeyC': LAB.cWho=nx(CL_WHO,LAB.cWho,1); break;
+      case 'Comma': case 'Period': LAB.cAtk=clamp(LAB.cAtk+(code==='Period'?1:-1),1,3); break;
+      case 'BracketLeft': case 'BracketRight': LAB.cDef=clamp(LAB.cDef+(code==='BracketRight'?1:-1),0,3); break;
+      case 'KeyB': LAB.cKeep=!LAB.cKeep; break;
+      default: return false;
+    }
+    crossLabCast(); crossLabServe(); LAB.dirty=true; return true;
+  }
+  function crossLabChip(act){
+    const nextOf=(arr,v)=>{ const vs=arr.map(a=>a[0]); return vs[(vs.indexOf(v)+1)%vs.length]; };
+    if(act==='cwho') LAB.cWho=nextOf(CL_WHO,LAB.cWho);
+    else if(act==='cfrom') LAB.cFrom=nextOf(CL_FROMS,LAB.cFrom);
+    else if(act==='catk') LAB.cAtk=LAB.cAtk%3+1;
+    else if(act==='cdef') LAB.cDef=(LAB.cDef+1)%4;
+    else if(act==='ckeep') LAB.cKeep=!LAB.cKeep;
+    else return false;
+    crossLabCast(); crossLabServe(); return true;
+  }
+  function crossLabHud(){
+    if(!LAB.dirty) return;
+    LAB.dirty=false;
+    labHudCommon();
+    document.getElementById('labCWhoV').textContent=plName(CL_WHO,LAB.cWho);
+    document.getElementById('labCFromV').textContent=plName(CL_FROMS,LAB.cFrom);
+    document.getElementById('labCAtkV').textContent=LAB.cAtk;
+    document.getElementById('labCDefV').textContent=LAB.cDef;
+    document.getElementById('labCKeepV').textContent=LAB.cKeep?'ON':'OFF';
+    const r=LAB.rep, shown=r&&(r.cross||r.done)?r:LAB.last;
+    labEl.labResult.innerHTML=shown&&(shown.cross||shown.done)?crossLabText(shown):crossLabHint();
+    labEl.labTally.textContent=crossLabTallyText();
+  }
+  function crossLabHint(){
+    if(LAB.cWho==='ai') return 'The computer crosses once his men are in their spots. Watch who he picks, how true it goes, and who gets on the end of it.';
+    return isTouch ? 'Hold <b>CROSS</b> and let go to whip it in (tap for low and quick); your men in the box are the computer.'
+                   : 'Hold <b>L</b> and let go to cross it (tap for low and quick); your men in the box are the computer.';
+  }
+  function crossLabText(r){
+    const head=`<span class="lsv">${plName(CL_FROMS,r.from).toLowerCase()} · ${r.nA} of ours, ${r.nD} of theirs${r.keeper?'':' · no keeper'}</span>`;
+    if(!r.cross) return `${head} <b style="color:${CL_COL[r.result]||'#8a9580'}">${r.result==='lost'?'LOST IT':'NO CROSS'}</b>`;
+    const m=r.man||r.near, who=m?`#${m.num}`:'nobody', near=r.miss!=null?` · ${(r.miss/MK).toFixed(1)} m from him at a heading height`:` · never near him at a heading height`;
+    const how=`<b>CROSS</b> for ${who}${near}`;
+    if(!r.done) return `${head} ${how} → …`;
+    const c=CL_COL[r.result]||'#8a9580', hb=r.headBy?`#${r.headBy.p.num} `:'';
+    const res={goal:hb+'HEADED IN!',saved:hb+'HEADED, SAVED',headed:hb+'HEADED, NOT IN',cleared:'CLEARED',keeper:'THE KEEPER\'S',nobody:'NOBODY GOT IT'}[r.result]||r.result.toUpperCase();
+    return `${head} ${how} → <b style="color:${c}">${res}</b>`;
+  }
+  function crossLabTallyText(){
+    const T=crossLabTally();
+    if(!T.n) return LAB.auto?'no crosses yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
+                             :'no crosses yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    const hd=T.goal+T.saved+T.headed, parts=[T.n+(T.n===1?' cross':' crosses'), hd+' headed by ours ('+Math.round(hd/T.n*100)+'%)', T.goal+' in'];
+    if(T.cleared) parts.push(T.cleared+' cleared');
+    if(T.keeper) parts.push(T.keeper+' the keeper\'s');
+    if(T.nobody) parts.push(T.nobody+' to nobody');
+    if(T.missN) parts.push('avg '+(T.missSum/T.missN/MK).toFixed(1)+' m from its man');
+    if(T.aimN) parts.push((T.aimSum/T.aimN/MK).toFixed(1)+' m off the aim');
+    return parts.join(' · ');
+  }
+  function crossLabCamX(){
+    let want=W*0.78;                                      // the goal line toward the right of the screen, the crosser in view
+    if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw; want=Math.min(want,W-dw-60); }
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/VIEW_D,PERSP);
+    return clamp(FW-(want-W/2)/sc,camMin,FW);
+  }
+  // on the pitch: where each of ours in the box is waiting for it (his spot), the spot the cross was aimed at, and its
+  // flight (and its shadow on the grass)
+  function crossLabDraw(){
+    const J=PLAN[controlled.team]&&PLAN[controlled.team].last;
+    if(J) for(const [q,a] of J){ if(!BOX_SPOT.has(a.job)) continue; const x=a.bx!=null?a.bx:a.x, y=a.by!=null?a.by:a.y;
+      const s1=proj(x-8,y-8), s2=proj(x+8,y+8), s3=proj(x-8,y+8), s4=proj(x+8,y-8);
+      ctx.strokeStyle='rgba(157,255,60,.45)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(s1.x,s1.y); ctx.lineTo(s2.x,s2.y); ctx.moveTo(s3.x,s3.y); ctx.lineTo(s4.x,s4.y); ctx.stroke(); }
+    const r=LAB.rep&&LAB.rep.cross?LAB.rep:(LAB.last&&LAB.last.cross?LAB.last:null);
+    if(r&&r.aim){ const s=proj(r.aim.x,r.aim.y,PLAYER_H*1.15); ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(233,245,236,.7)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(s.x,s.y,7,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+    const tr=LAB.trail; if(tr.length<2) return;
+    const col=r&&r.done?(CL_COL[r.result]||'#8a9580'):'#e9f5ec';
+    ctx.save(); ctx.globalAlpha=0.6; ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+    tr.forEach((q,i)=>{ const s=proj(q.x,q.y,q.z); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }); ctx.stroke();
+    ctx.globalAlpha=0.25; ctx.setLineDash([2,5]); ctx.beginPath();
+    tr.forEach((q,i)=>{ const s=proj(q.x,q.y,0); i?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y); }); ctx.stroke(); ctx.restore();
   }
 
   // simple spring-carry of the GHOST ball behind a scripted dribbler (mirrors the real carry feel)
@@ -4666,7 +4900,7 @@
   // CROSSING stat -> accuracy of balls whipped into the box (pace auto-set to reach the target; loft fixed at 1.6).
   function crossAccOf(p){  return statLerp(statOf(p,'crossing',P.crossing.val), 0.2, 0.9); }   // Crossing stat -> accuracy
   function crossLoftOf(p){ return 1.6; }                 // loft fixed at 1.6 (not stat-driven)
-  function crossSpray(p){  return (1-crossAccOf(p))*0.20*(Math.random()*2-1); }                  // signed angular error
+  function crossSpray(p){  return (1-crossAccOf(p))*0.20*(Math.random()-Math.random()); }       // signed angular error (most near the line, the worst as wide as ever)
   // HEADING stat -> header power, aerial-duel win rate (vs the opponent), and header accuracy.
   function headingOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.1, 1.0); }     // aerial-duel win value
   function headAccOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.2, 0.8); }     // header accuracy
@@ -4702,7 +4936,7 @@
   // has to check and turn to it. A man darting across to cut out their pass goes flat out for the spot and stretches
   // for it as he gets there.
   function watchBall(p,ix,iy){
-    if(p.state!=='normal'||gkHold||restartT>0||scoredT>0||offsideT>0||(p===controlled&&skill)) return false;
+    if(p.state!=='normal'||gkHold||restartT>0||scoredT>0||offsideT>0||skillOf(p)) return false;
     if(p.reactUntil>simNow) return false;                                          // (still taking in a first-time ball: see firstTouchPass)
     const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy)||1;
     let tArr;
@@ -4805,6 +5039,11 @@
   function tackleOf(p){ return (p&&isFinite(p.tackle))?p.tackle : 0.5; }
   // resolve a physical duel between two players: returns the probability that A wins.
   // never a guaranteed win for the stronger player — strength tilts the odds, not a hard gate.
+  // AN AERIAL DUEL AT A CROSS: Heading against Heading (duelOdds), and the timing of it -- the attacker's Off IQ (his
+  // run, his jump) against the defender's Def IQ (his read of it): up to AIR_IQ either way, nothing between level men.
+  // The attacker's chance of winning it.
+  const AIR_IQ=0.25;
+  function aerialOdds(att,def){ return clamp(duelOdds(headingOf(att),headingOf(def))+AIR_IQ*(offIQf(att)-clamp((defIQof(def)-1)/9,0,1)),0.08,0.92); }
   function duelOdds(aStr,bStr){
     const diff=aStr-bStr;                  // -1..+1
     return clamp(0.5 + diff*0.40, 0.12, 0.88);   // even at max gap, the weaker still wins ~12%
@@ -5123,24 +5362,40 @@
     return {dx, dy, D:Dmax, err:0.02+0.06*(1-iq), q:null};
   }
   // AI cross: a wide/advanced AI carrier whips it into the box toward a teammate
-  // WHERE A CROSS GOES: into the space between their back line and the keeper -- the near post, the penalty spot
-  // or the far post -- whichever one of ours can get to soonest against their nearest man (or the keeper) as it
-  // drops. It hangs the best part of a second, so the runners arrive with it rather than waiting under it.
-  // margin: their time there less ours (>0: ours to win; around 0: a contest). Null with nobody to aim at.
+  // WHERE A CROSS GOES: to a man. Each of ours in the box (or on his way into it, onside) is a target where he is, and
+  // where he's going to wait for it (his spot in the box: see boxSlots) if he'll be there in time; it's aimed to be at
+  // head height there as he is. Before anyone's in, the near post, the penalty spot or the far post for whoever can run
+  // on to it. How soon one of ours can be there is worked out as the men attacking it work it out (see crossMeet): a
+  // beat to read it, then a run watching it, side-on. Against that, how soon their nearest man -- or the keeper, coming
+  // off his line -- can be. The best of those (a man in the middle of the goal a touch over one wide of a post), or
+  // null with nobody to aim at. margin: their time there less ours, or the flight's if he's waiting there (>0: ours to
+  // win; around 0: a contest).
   function crossSpot(p){
-    const atk=atkOf(p.team), goalX=atk>0?FW:0, side=p.y<YC?-1:1, kp=keeperOf(atk>0?'R':'G');
-    const spots=[{x:goalX-atk*150,y:YC+side*80},{x:goalX-atk*260,y:YC},{x:goalX-atk*170,y:YC-side*110}];
+    const atk=atkOf(p.team), goalX=atk>0?FW:0, side=p.y<YC?-1:1, kp=keeperOf(atk>0?'R':'G'), J=PLAN[p.team]&&PLAN[p.team].last;
+    const tOf=sp=>clamp(0.7+0.0008*Math.hypot(sp.x-ball.x,sp.y-ball.y),0.6,1.2);
+    const oursAt=(q,sp)=>{ const d=Math.hypot(q.x-sp.x,q.y-sp.y); return d<=40 ? 0 : offReact(q)+0.15+(d-40)/crossRunV(q,d-40); };
+    const theirsAt=sp=>{ let t=1e9;
+      for(const o of players) if(o.team!==p.team&&o.state==='normal') t=Math.min(t, 0.2+Math.hypot(o.x-sp.x,o.y-sp.y)/sprintSpeedOf(o));
+      if(kp&&!kp.benched) t=Math.min(t, 0.15+Math.max(0,Math.hypot(kp.x-sp.x,kp.y-sp.y)-reachOf(kp)*3)/keeperSpdOf(kp));
+      return t; };
+    const inBox=sp=>atk*(goalX-sp.x)>=60 && atk*(goalX-sp.x)<=BX+90 && Math.abs(sp.y-YC)<=BY;   // (where a header is on goal: see aiBrain)
     let best=null;
-    for(const sp of spots){
-      const T=clamp(0.7+0.0008*Math.hypot(sp.x-ball.x,sp.y-ball.y),0.6,1.2);
+    const consider=(sp,who,ours)=>{
+      const T=tOf(sp), theirs=theirsAt(sp), margin=Math.min(theirs,T+0.6)-Math.max(ours,T);
+      const sc=margin-0.2*Math.max(0,Math.abs(sp.y-YC)-GOAL_W/2)/100-0.12*Math.max(0,atk*(goalX-sp.x)-200)/100;   // (a header from wide of the post, or from further out, is worth less)
+      if(ours<=T+0.05 && (!best||sc>best.sc)) best={x:sp.x,y:sp.y,who,margin,ours,theirs,sc}; };
+    const mates=teamOf(p.team).filter(q=>q!==p&&q.state==='normal'&&!inOffsidePos(q));
+    for(const q of mates){
+      const j=J&&J.get(q);
+      if(j&&BOX_SPOT.has(j.job)){ const B={x:j.bx!=null?j.bx:j.x, y:j.by!=null?j.by:j.y}; if(inBox(B)) consider(B,q,oursAt(q,B)); continue; }   // his spot in the box (held at their line: on his run in behind it)
+      if(inBox(q)) consider({x:q.x,y:q.y},q,0);                                     // to him, where he is
+      const T=tOf(q), L={x:q.x+q.vx*T,y:q.y+q.vy*T};
+      if(Math.hypot(q.vx,q.vy)>80 && inBox(L)) consider(L,q,0);                     // ...or where his run takes him
+    }
+    if(!best) for(const sp of [{x:goalX-atk*150,y:YC+side*80},{x:goalX-atk*260,y:YC},{x:goalX-atk*170,y:YC-side*110}]){
       let ours=1e9, who=null;
-      for(const q of teamOf(p.team)){ if(q===p||(q.role!=='ATT'&&q.role!=='MID')||inOffsidePos(q)) continue;
-        const t=Math.hypot(q.x-sp.x,q.y-sp.y)/sprintSpeedOf(q); if(t<ours){ ours=t; who=q; } }
-      let theirs=1e9;
-      for(const o of players) if(o.team!==p.team) theirs=Math.min(theirs, 0.2+Math.hypot(o.x-sp.x,o.y-sp.y)/sprintSpeedOf(o));
-      if(kp) theirs=Math.min(theirs, 0.15+Math.max(0,Math.hypot(kp.x-sp.x,kp.y-sp.y)-reachOf(kp)*3)/keeperSpdOf(kp));
-      const margin=Math.min(theirs,T+0.6)-Math.max(ours,T);
-      if(who && (!best || margin>best.margin)) best={x:sp.x,y:sp.y,who,margin,ours,theirs};
+      for(const q of mates){ if(q.role!=='ATT'&&q.role!=='MID') continue; const t=oursAt(q,sp); if(t<ours){ ours=t; who=q; } }
+      if(who) consider(sp,who,ours);
     }
     return best;
   }
@@ -5450,14 +5705,19 @@
   // A CROSS OF OURS: where a man of ours meets it, if he's one of the two of ours best placed to (by when each could get
   // to it). Its flight is read at head height (18 px up to AIR_REACH, in or by their box). A good one (Off IQ 10) goes
   // for the first point of it he can get to, and holds his run until it's time to go, to get there as it does, at pace;
-  // a poor one (1) goes where it'll come down, a step goal-side of it, at once -- and waits there; between, between.
+  // a poor one (1) goes at once to where it'll have come down to his head -- the last of it he could head -- and waits
+  // there for it (a man attacking it gets there first); between, between.
   // Misread by his Off IQ, and in the air he hardly corrects it: still 80% of it as it gets to him.
   const crossCache={t:-1,team:null,F:null,top:null};
   function crossMeetT(q,F){
-    const v=runSpeedOf(q)*0.72, wait=Math.max(0,offReact(q)-(simNow-(ball.passT==null?-9:ball.passT)));   // (side-on to it, watching it: see stepOutfield)
-    for(const f of F) if(Math.max(0,Math.hypot(f.x-q.x,f.y-q.y)-40)<=v*Math.max(0,f.t-wait-0.15)) return f.t;
+    const wait=Math.max(0,offReact(q)-(simNow-(ball.passT==null?-9:ball.passT)));
+    for(const f of F){ const d=Math.max(0,Math.hypot(f.x-q.x,f.y-q.y)-40); if(d<=crossRunV(q,d)*Math.max(0,f.t-wait-0.15)) return f.t; }
     return null;
   }
+  // how fast he gets across to a cross, on average over d px: a step or two side-on to it, watching it (72% of his run:
+  // see stepOutfield), and on a longer way -- in behind their line on to an early cross -- turned and sprinting, looking
+  // back for it as it comes (85% of his sprint)
+  function crossRunV(q,d){ const k=clamp((d-60)/200,0,1); return runSpeedOf(q)*0.72*(1-k)+sprintSpeedOf(q)*0.85*k; }
   function crossMeet(p){
     if(crossCache.t!==simNow||crossCache.team!==p.team){
       const atk=atkOf(p.team), gx=atk>0?FW:0, F=[];
@@ -5471,11 +5731,37 @@
     const F=crossCache.F; if(!F.length||!crossCache.top.includes(p)||!offReading(p)) return null;
     const tE=crossMeetT(p,F); if(tE===null) return null;
     let f=F[0]; for(const g of F) if(g.t===tE) f=g;                     // (the first point of it he can get to)
-    const tL=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L=ballAt(tL), atk=atkOf(p.team);   // (where it'll come down)
-    const iq=offIQf(p), tC=tL+(f.t-tL)*iq, mr=offMisread(p,tC,0.8);
-    const x=L.x+atk*36+(f.x-L.x-atk*36)*iq+mr.x, y=L.y+(f.y-L.y)*iq+mr.y;
-    const need=Math.max(0,Math.hypot(x-p.x,y-p.y)-30)/(runSpeedOf(p)*0.72)+0.15;
+    const L=F[F.length-1];                                              // (and the last: where it's come down to his head)
+    const iq=offIQf(p), tC=L.t+(f.t-L.t)*iq, mr=offMisread(p,tC,0.8);
+    const x=L.x+(f.x-L.x)*iq+mr.x, y=L.y+(f.y-L.y)*iq+mr.y;
+    const dn=Math.max(0,Math.hypot(x-p.x,y-p.y)-30), need=dn/crossRunV(p,dn)+0.15;
     return {x,y,hold:need<tC-(0.12+(1-iq)*0.8)};
+  }
+  // DEFENDING A CROSS: where one of ours goes to meet one of theirs coming into our box -- if he's one of the two of us
+  // best placed to: the first point of its flight at head height in or by our box that he can get to (worked out as the
+  // men attacking it work it out -- see crossMeetT -- his read of it his Def IQ), a step goal-side of it. If none of us
+  // can get to it in the air, the man nearest where it comes down goes there. Null: not his to go for.
+  const dCrossCache={t:-1,team:null,F:null,top:null,L:null,nearL:null};
+  function crossDefend(p,ownGoalX,atk){
+    const C=dCrossCache;
+    if(C.t!==simNow||C.team!==p.team){
+      const F=[]; for(let t=0.05;t<=2.0;t+=0.05){ const B=ballAt(t); if(B.z<=0) break;
+        if(B.z>18&&B.z<AIR_REACH&&Math.abs(B.x-ownGoalX)<BX+90&&Math.abs(B.y-YC)<BY+100) F.push({t,x:B.x,y:B.y}); }
+      const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L=ballAt(tLand), D=[];
+      if(F.length) for(const q of players){ if(q.team!==p.team||q===controlled||q.state!=='normal') continue; const t=crossDefT(q,F); if(t!==null) D.push({q,t}); }
+      D.sort((a,b)=>a.t-b.t);
+      let nearL=null, nd=360; if(Math.abs(L.x-ownGoalX)<BX+80&&Math.abs(L.y-YC)<BY+60)
+        for(const q of players) if(q.team===p.team&&q!==controlled&&q.state==='normal'){ const d=dist(q,L); if(d<nd){ nd=d; nearL=q; } }
+      Object.assign(C,{t:simNow, team:p.team, F, top:D.slice(0,2).map(d=>d.q), L, nearL});
+    }
+    if(C.top.includes(p)){ const tE=crossDefT(p,C.F); let f=C.F[0]; for(const g of C.F) if(g.t===tE) f=g; return {x:f.x-atk*12, y:f.y}; }
+    if(!C.top.length&&C.nearL===p) return {x:C.L.x-atk*24, y:C.L.y};
+    return null;
+  }
+  function crossDefT(q,F){
+    const wait=Math.max(0,statLerp(defIQof(q),0.4,0.05)-(simNow-(ball.passT==null?-9:ball.passT)));
+    for(const f of F){ const d=Math.max(0,Math.hypot(f.x-q.x,f.y-q.y)-40); if(d<=crossRunV(q,d)*Math.max(0,f.t-wait-0.15)) return f.t; }
+    return null;
   }
   function oneTouchReactOf(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),0.35,0.15); }
   // a pass asked for while the ball is still on its way to you: played first time the moment it gets there
@@ -5537,6 +5823,7 @@
   // you can't place a header like a shot -- as true as his heading, as hard as his heading plus a little of the cross's
   // pace
   function headOnGoal(p){
+    if(LAB.on&&LAB.kind==='cross') crossLabOnHead(p,'goal');
     const gx=atkOf(p.team)>0?FW:0, kp=keepers.find(k=>k.team!==p.team), ky=kp?kp.y:YC;
     const ty=YC+(ky>YC?-1:1)*(GOAL_W/2-12)*0.75;
     let dx=gx-ball.x, dy=ty-ball.y, dG=Math.hypot(dx,dy);
@@ -5554,6 +5841,7 @@
   // A HEADER CLEAR: up and away from his own goal, out to the side it came from -- or, the better he reads the game (Def
   // IQ), further and more surely to a team-mate up the pitch
   function headClear(p){
+    if(LAB.on&&LAB.kind==='cross') crossLabOnHead(p,'clear');
     const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), cq=crossCurlQ();   // (a curling cross: up to a fifth less far, twice as wild)
     let dx=atkOf(p.team), dy=(ball.y>=YC?1:-1)*0.6; const l=Math.hypot(dx,dy); dx/=l; dy/=l;
     const sp=(headPowerOf(p)*0.8+120)*(0.9+0.25*iq)*(1-0.2*cq);
@@ -5593,7 +5881,7 @@
       // AERIAL DUEL (winning-rate = STRENGTH): if an opponent is challenging for the same ball,
       // strength tilts who wins it — but never a guaranteed win for the stronger man.
       const contester=aerialRival(p);
-      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()){   // (a curling cross is harder for him to clear)
+      if(contester && Math.random()>aerialOdds(p,contester)+CURL_HEAD*crossCurlQ()){   // (a curling cross is harder for him to clear)
         headClear(contester);                            // lost the header: he heads it away
         lastGrade='OUTJUMPED';gradeColor='#ff5a4d';gradeFade=1.0; return;
       }
@@ -5621,7 +5909,7 @@
       // for the same ball, our defensive heading prowess decides if we get the clearance.
       let contester=null,cd=1e9;
       for(const o of players){ if(o.team===p.team||o.z<=6)continue; const dd=dist(o,ball); if(dd<58&&dd<cd){cd=dd;contester=o;} } // only an airborne opponent contests
-      if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))-CURL_HEAD*crossCurlQ()){   // (a curling cross is harder to clear)
+      if(contester && Math.random()>1-aerialOdds(contester,p)-CURL_HEAD*crossCurlQ()){   // (a curling cross is harder to clear)
         // beaten in the air: attacker gets the flick on, ball drops dangerously
         let ax=contester.facing.x, ay=contester.facing.y;
         let al=Math.hypot(ax,ay);
@@ -6048,7 +6336,7 @@
     if(!ball.ownedBy||gkHold||scoredT>0||offsideT>0||restartT>0||ball.z>=20)return;
     const carrier=ball.ownedBy;
     for(const p of players){
-      if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0)continue;
+      if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0||p.soldT>simNow)continue;   // (sold by a skill move: skillSells)
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
       if(dist(p,ball)<p.r+ball.r+Math.max(0,tackleReachOf(p)-shieldCushion(carrier,p))){   // (his reach doesn't count through the cushion)
@@ -6377,15 +6665,17 @@
     const G=520, lam=Math.max(1e-3,-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)));
     const tAir=(ball.z>12||ball.vz>0) ? (ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G : 0;
     const z=t<=tAir ? Math.max(0,ball.z+ball.vz*t-G*t*t/2) : 0;
+    const tUp=(ball.vz>0&&ball.z<12) ? Math.min(tAir,(12-ball.z)/ball.vz) : 0;   // (just struck, rising: the grass drags at it till it's 12 px up -- see takeoffKeep)
     if(ball.curveSpinT>0 && ball.curveSpin && !ball.ownedBy){
       const F=CURL_F*(ball.curveK||curveOf()), st=1/60; let x=ball.x, y=ball.y, vx=ball.vx, vy=ball.vy, u=0;
       while(u<t-1e-9){ const h=Math.min(st,t-u);
         if(u<ball.curveSpinT){ const sp=Math.hypot(vx,vy)||1, a=-ball.curveSpin*F/sp*h, c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; }
-        x+=vx*h; y+=vy*h; if(u>=tAir){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
+        x+=vx*h; y+=vy*h; if(u<tUp||u>=tAir){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
       return {x, y, z};
     }
-    if(t<=tAir) return {x:ball.x+ball.vx*t, y:ball.y+ball.vy*t, z};
-    const k=tAir+(1-Math.exp(-lam*(t-tAir)))/lam;
+    const kU=Math.exp(-lam*tUp), up=tUp>0?(1-kU)/lam:0;                // (how far it goes while it's dragged up off the grass, and what's left of its pace)
+    if(t<=tAir){ const k=t<=tUp ? (1-Math.exp(-lam*t))/lam : up+kU*(t-tUp); return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z}; }
+    const k=up+kU*(tAir-tUp)+kU*(1-Math.exp(-lam*(t-tAir)))/lam;
     return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z:0};
   }
   // CUTTING OUT A PASS: of the side without the ball, the computer player who can get onto the pass's path soonest -- low
@@ -7313,6 +7603,43 @@
       out.push({kind:'carry', key:'c'+i, ux, uy, s, ex, ey, P:pk, v, loss, ev:pk*v-(1-pk)*loss, free, run:isRun?runS:0});
     }
   }
+  // THE COMPUTER'S SKILL MOVES: taking a man on, one who has the moves (his stars) does one to get past him -- a cut, a
+  // croqueta, a roulette or a rainbow flick, as many as his stars allow -- rather than just swerving by. Who: a winger or
+  // a wide midfielder most of all; a central midfielder or a striker now and then; a full-back only on the attack and
+  // only when he's clearly the better of the man in front of him; a centre-back never. How keen he is (0..1.3) is how
+  // much better he is on the ball (Dribbling twice, Ball control, Agility) than that man is at stopping him (Tackle
+  // twice, Def IQ, Agility) -- not how good either is overall -- and where: out on the touchline keenest, in their
+  // third keener, never in his own half.
+  function aiSkillKeen(p,d,C){
+    if(!d) return 0;
+    const pa=posOf(p,'atk'), u=C.atk>0?p.x:FW-p.x;
+    if(pa==='CB'||(p.role==='DEF'&&pa!=='FB')||u<FW*0.5) return 0;
+    const me=(2*statOf(p,'dribbling',P.dribbling.val)+statOf(p,'ballControl',P.ballControl.val)+statOf(p,'agility',P.agility.val))/4;
+    const him=(2*statOf(d,'tackle',P.tackle.val)+statOf(d,'defIQ',P.defIQ.val)+statOf(d,'agility',P.agility.val))/4, edge=me-him;
+    let k=pa==='FB' ? ((ins(p,'fbRuns')==='attack'||u>FW*0.66)&&edge>=1.5 ? 0.6 : 0) : isWideMan(p) ? 1 : 0.45;
+    k*=clamp((edge+1)/3,0,1);
+    if(Math.abs(p.y-YC)>FH*0.28) k*=1.3;                                  // out on the touchline
+    if(u>FW*0.66) k*=1.15;                                                // in their third
+    return clamp(k,0,1.3);
+  }
+  // which move, and which way: the side he's going past him on (side, across the pitch); a croqueta or a cut most, a
+  // roulette with the man right on him (and only well the better of him), a rainbow flick with nobody behind him to pick it up
+  function aiSkillMove(p,d,side,C,clear){
+    if(ball.ownedBy!==p){ if(ball.dribbler===p&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10) own(p,p.r+ball.r+5); else return null; }   // (his own touch a step away: on it)
+    if(Math.abs(p.y-d.y)>12) side=Math.sign(p.y-d.y);                 // away from the side he's on now -- unless that's off the pitch
+    if(p.y+side*90<45||p.y+side*90>FH-45) side=-side;
+    const st=p.stars||1, opts=[['cut',1]];
+    if(st>=2) opts.push(['croq',1.3]);
+    if(st>=3){ if(dist(p,d)<55&&skillEdge(p,d)>=2.5) opts.push(['spin',0.6]); opts.push(['rainbow',clear?0.6:0.1]); }   // (the roulette only with him right on him, and a good deal the better of him: it takes long enough for him to get back to it)
+    let r=Math.random()*opts.reduce((a,o)=>a+o[1],0), kind=opts[0][0];
+    for(const o of opts){ r-=o[1]; if(r<=0){ kind=o[0]; break; } }
+    const dl=Math.hypot(0.3,0.95), d0=kind==='cut'?{x:C.atk*0.3/dl,y:side*0.95/dl}:kind==='croq'?{x:0,y:side}:null;   // (a cut chopped square, away from him, not on past him)
+    const sk=mkSkill(p,{kind,sense:side*C.atk,turn:2*Math.PI},d0);
+    if(p===controlled) skill=sk; else p.skill=sk;
+    ball.ownedBy=p; p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false; skillSells(p);
+    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;
+    return kind;
+  }
   // taking on the man in front of him, a few strides off: harder with another of theirs close behind him to cover
   function obTakeOnOpt(p,C){
     const d=C.presser; if(!d||C.prD<55||C.prD>200||C.atk*(d.x-p.x)<10) return null;
@@ -7320,12 +7647,13 @@
     const room=(sy)=>{ let s=240; for(const o of C.opps){ const ry=(o.y-p.y)*sy, rx=Math.abs(o.x-p.x); if(ry>0&&ry<s&&rx<64) s=ry; } return s; };
     const side=p.y<160?1:p.y>FH-160?-1:(room(1)>room(-1)?1:-1);
     const bx=clamp(d.x+C.atk*200,40,FW-40), by=clamp(d.y+side*60,60,FH-60);
+    const keen=aiSkillKeen(p,d,C);                                     // (a man with the moves, and the better of him, fancies it more)
     const pb=clamp((0.3+0.045*(statOf(p,'dribbling',P.dribbling.val)-5.5)-0.03*(statOf(d,'tackle',P.tackle.val)-5.5)
-                       -0.015*(statOf(d,'agility',P.agility.val)-5.5))*C.M.takeOn*cover,0.08,0.7);
+                       -0.015*(statOf(d,'agility',P.agility.val)-5.5))*C.M.takeOn*cover*(1+0.8*keen),0.08,0.8);
     let v=obVal(p.team,bx,by)*obRoom(obNearAt(C.opps.filter(o=>o!==d),bx,by,1.0));
     const X=obCrossAt(C,bx,by), sv=obXg0(bx,by,C.gx)*(0.3+0.7*obLaneAt(C,p.team,bx,by))*obFinish(C,bx,by)*0.8;   // (once past him: the shot, a stride off balance, or the cross)
     v=Math.max(v,sv,X?X.P*X.v:0)+obGain(C,bx);
-    return {kind:'takeon', key:'t', who:d, side, P:pb, v, loss:C.lossHere, ev:pb*v-(1-pb)*C.lossHere};
+    return {kind:'takeon', key:'t', who:d, side, keen, clear:cover>=1, P:pb, v, loss:C.lossHere, ev:pb*v-(1-pb)*C.lossHere};
   }
   function obShotOpt(p,C){
     const d=Math.hypot(C.gx-p.x,YC-p.y); if(d>34*OBM||C.atk*(C.gx-p.x)<40) return null;
@@ -7413,6 +7741,7 @@
     if(T.t<=0||!d){ p.takeOn=null; return null; }
     if(T.phase==='approach'){
       if(C.atk*(d.x-p.x)<0||dist(p,d)>190||d.state!=='normal'){ p.takeOn=null; return null; }
+      if(T.keen>0.15&&!(p.skillCd>0)&&dist(p,d)<68&&aiSkillMove(p,d,T.side,C,T.clear)){ p.takeOn=null; p.dbgTag='OB-SKILL'; return {ix:0,iy:0}; }   // (the move takes it from here: skillStep)
       if(dist(p,d)<60){ T.phase='cut'; T.t=0.32; T.hx=C.atk*0.34; T.hy=T.side*0.94; }
       else { p.sprint=p.stamina>0.15; p.dbgTag='OB-TAKEON'; return steer(p,d.x,d.y-T.side*18,1.0); }   // straight at him, leaning the other way
     }
@@ -7492,7 +7821,7 @@
           ob.set={q:pick.q, tx:pick.tx, ty:pick.ty, until:simNow+0.3}; const l=pick.d||1;
           p.dbgTag='OB-SET'; return steer(p,p.x+(pick.tx-ball.x)/l*30,p.y+(pick.ty-ball.y)/l*30,0.25); }
         return obExec(p,pick,C); }
-      if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, phase:'approach', t:1.3, at:simNow}; }
+      if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, keen:pick.keen, clear:pick.clear, phase:'approach', t:1.3, at:simNow}; }
       else if(pick){ p.takeOn=null; ob.plan=pick; }
     }
     if(p.takeOn){ const r=obTakeOnStep(p,dt,C); if(r) return r; }
@@ -7529,7 +7858,28 @@
   }
   function mkPlanState(){ return {t:-1, jobs:new Map(), last:null, lastT:-9, sup:[], supT:-9, supC:null, runs:[], runGapT:-9}; }
   const PLAN={G:mkPlanState(), R:mkPlanState()};
-  const JOB_PRI={RUN:6, SUPPORT:5, REST:4, PIVOT:4, BUILD:4, NEARPOST:3, FARPOST:3, BACKPOST:3, CUTBACK:3, LATE:3, PIN:3, TARGET:3, OVERLAP:3, WIDTH:2, INSIDE:2, SECOND:2, FALSE9:2, POCKET:1};
+  const JOB_PRI={RUN:6, SUPPORT:5, REST:4, PIVOT:4, BUILD:4, NEARPOST:3, FARPOST:3, BOXMID:3, BOXBACK:3, BOXEDGE:3, BOX:3, BACKPOST:3, CUTBACK:3, LATE:3, PIN:3, TARGET:3, OVERLAP:3, WIDTH:2, INSIDE:2, SECOND:2, FALSE9:2, POCKET:1};
+  // WAITING FOR A CROSS: with the ball out wide in their third, the men going in the box -- the forwards, a midfielder
+  // told to get in it, the far winger come in to the back post -- wait where a cross can find them: one man on his own in
+  // the middle of the box; two, one favouring each post; three, the posts and one in the middle a little further out,
+  // beyond where the keeper comes for it; a fourth at the edge of the box. (Spots: how far out, and how far across toward
+  // the ball's side, in px.) Whoever's nearest each spot takes it, and keeps it unless a swap saves a good few strides.
+  // None of them leaves the box to come and help the man on the ball (see planSupport) or goes on a run (planRun).
+  const BOX_SLOTS=[[['BOXMID',200,0]], [['NEARPOST',160,80],['FARPOST',185,-95]], [['NEARPOST',160,80],['FARPOST',185,-95],['BOXBACK',265,-10]],
+                   [['NEARPOST',160,80],['FARPOST',185,-95],['BOXBACK',265,-10],['BOXEDGE',370,70]]];
+  const BOX_SPOT=new Set(['NEARPOST','FARPOST','BOXMID','BOXBACK','BOXEDGE']);
+  function boxSlots(S,U,uOn,sc){
+    const men=[]; for(const [q,a] of S.jobs) if(a.job==='BOX'||a.job==='BACKPOST'||a.job==='LATE') men.push(q);
+    if(!men.length) return;
+    const m=men.slice(0,4), slots=BOX_SLOTS[m.length-1].map(([job,out,ac])=>({job, x:U(Math.min(FW-out,uOn)), y:YC+sc*ac}));
+    const cost=perm=>perm.reduce((a,k,i)=>a+Math.hypot(m[i].x-slots[k].x,m[i].y-slots[k].y),0);
+    const perms=a=>a.length<=1?[a]:a.flatMap((v,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(r=>[v,...r]));
+    let best=null, bc=1e9; for(const pm of perms(slots.map((_,i)=>i))){ const c0=cost(pm); if(c0<bc){ bc=c0; best=pm; } }
+    const prev=S.boxQ; if(prev&&prev.n===m.length&&m.every(q=>prev.at.has(q))){ const pm=m.map(q=>prev.at.get(q)); if(cost(pm)<bc+90) best=pm; }   // (keep his spot)
+    S.boxQ={n:m.length, at:new Map(m.map((q,i)=>[q,best[i]]))};
+    m.forEach((q,i)=>{ const sl=slots[best[i]], bx=U(FW-BOX_SLOTS[m.length-1][best[i]][1]);   // (bx: the spot itself, where a cross goes for his run)
+      S.jobs.set(q,{x:clamp(sl.x,40,FW-40), y:clamp(sl.y,45,FH-45), bx, by:sl.y, job:sl.job, sprint:Math.hypot(q.x-sl.x,q.y-sl.y)>300}); });
+  }
   const wideSide=q=>Math.sign((q.slotAtk?q.slotAtk.wide:q.wide)||0)||(q.homeY<YC?-1:1);
   // THE STYLES IN THE PLAN: every style plays to it, each with its own settings --
   //  sup: how many men are always on for a pass from the man on the ball, and ring: how far off him (px)
@@ -7642,7 +7992,7 @@
     // DEPTH: the strikers keep to their own channels -- CENTRAL ones the middle, WIDE ones out in the wide channels -- the
     // one on the ball's side pins their last line, the other drops between their lines. One told to RUN IN BEHIND always
     // pins; a TARGET MAN stays up and central, to hold it up; a FALSE NINE drops into midfield. Out wide in their third:
-    // near post and far post (the target man in the middle).
+    // in the box for the cross (boxSlots).
     // (who pins: the one already on their line, unless the other's clearly the higher -- when one comes short, the other
     // goes -- so a switch of play doesn't swap them over)
     const runsOf=q=>ins(q,'stRuns'), deep=q=>runsOf(q)==='false9';
@@ -7655,7 +8005,7 @@
       const R=runsOf(q), sw=ins(q,'stWidth'), sg=fw.length===1?bs:(Math.sign(q.homeY-YC)||(i===0?bs:-bs));
       const lane=R==='target'?YC+sg*FH*0.03 : sw==='central'?YC+sg*FH*(fw.length===1?0.02:0.05) : sw==='wide'?YC+sg*FH*0.25 : fw.length===1?YC+bs*FH*0.10 : YC+sg*FH*0.13*wf;
       if(R==='false9'){ set(q, clamp(uol-clamp(0.2*FW,420,560), uB-260, uOn), lane, 'FALSE9'); return; }
-      if(boxPhase){ if(R==='target') set(q, Math.min(FW-230,uOn), YC+sc*FH*0.02, 'NEARPOST'); else if(i===0) set(q, Math.min(FW-170,uOn), YC+sc*FH*0.08, 'NEARPOST'); else set(q, Math.min(FW-200,uOn), YC-sc*FH*0.10, 'FARPOST'); return; }
+      if(boxPhase){ set(q, Math.min(FW-200,uOn), YC, 'BOX'); return; }   // (his spot in it: boxSlots)
       if(R==='target'||R==='run'||q===pinQ){ const g=R==='target'?null:backlineGap(team, lane, PA_HW-60); set(q, uol-35, g&&Math.abs(g.y-lane)<FH*0.15?g.y:lane, R==='target'?'TARGET':'PIN'); }
       else set(q, clamp(uol-clamp(0.11*FW,220,330)*SP.pocket, uB-150, uOn), lane, 'POCKET');
     });
@@ -7668,6 +8018,8 @@
       else if(ins(q,'cmSupport')==='run' && !kpPhase && uB>FW*0.55) set(q, Math.min(FW-290,uOn), YC+side*FH*0.07, 'LATE');
       else if(SP.second && !kpPhase) set(q, clamp(uol-280, uP+160, uOn-60), YC+side*FH*0.14*wf, 'SECOND');
       else set(q, clamp(uBk+(SP.brk?320:120), uP+200, uOn-120), YC+side*FH*0.17*wf, 'INSIDE'); }   // (on the break: up past the ball, in support)
+    // THE BOX, FOR A CROSS: everyone going in waits where a cross can find him (boxSlots)
+    S.box=boxPhase; if(boxPhase) boxSlots(S,U,uOn,sc);
     // RUNS and SUPPORT
     planRun(S,team,c,atk,U,uol,SP);
     if(!kpPhase){
@@ -7680,11 +8032,11 @@
     // on winning it back, the men going up the pitch get up there at a sprint
     if(transitionT[team]>0) for(const [q,a] of S.jobs) if(a.job!=='REST' && a.job!=='PIVOT' && atk*(a.x-q.x)>(SP.brk?150:350)) a.sprint=true;
     // SPACING: nobody's spot within ~7 m of another's (the lesser job gives way), nor on top of the man on the ball (or you)
-    const arr=[...S.jobs.entries()].map(([q,a])=>({a,pri:JOB_PRI[a.job]||1}));
+    const arr=[...S.jobs.entries()].map(([q,a])=>({a,pri:JOB_PRI[a.job]||1,box:BOX_SPOT.has(a.job)}));
     arr.push({a:{x:c.x,y:c.y},pri:9}); if(controlled && controlled.team===team && controlled!==c) arr.push({a:{x:controlled.x,y:controlled.y},pri:9});
     for(let it=0;it<2;it++) for(let i=0;i<arr.length;i++) for(let k=i+1;k<arr.length;k++){
       const A=arr[i], Bj=arr[k], dx=Bj.a.x-A.a.x, dy=Bj.a.y-A.a.y, d=Math.hypot(dx,dy), need=(A.pri===9||Bj.pri===9)?150:170;
-      if(d>=need || (A.pri===9&&Bj.pri===9)) continue;
+      if(d>=need || (A.pri===9&&Bj.pri===9) || (A.box&&Bj.box)) continue;   // (the box spots are set for each other: boxSlots)
       const mv=A.pri>=Bj.pri?Bj:A, sg=mv===Bj?1:-1, ux=d>1?dx/d*sg:0, uy=d>1?dy/d*sg:sg;
       mv.a.x=clamp(mv.a.x+ux*(need-d),40,FW-40); mv.a.y=clamp(mv.a.y+uy*(need-d),45,FH-45);
     }
@@ -7731,7 +8083,8 @@
       if(upCB) pen+=u>uF+100?0.5:0.15;                                          // (one told to push up offers himself, level with it or a touch ahead)
       if(isWideMan(q)){ if(Math.abs(y-YC)<FH*0.20) pen+=0.9; if(Math.sign(y-YC)!==wideSide(q)) pen+=2; }   // wide men stay wide
       if(q.role==='ATT' && !isWideMan(q) && u<uF-60) pen+=0.8;                 // forwards don't come back behind the ball
-      if(j && (j.job==='NEARPOST'||j.job==='FARPOST'||j.job==='BACKPOST'||j.job==='CUTBACK')) pen+=1.2;
+      if(j && S.box && BOX_SPOT.has(j.job)) return 99;                         // waiting in the box for the cross: he stays there
+      if(j && (j.job==='BACKPOST'||j.job==='CUTBACK')) pen+=1.2;
       if(j && (j.job==='PIN'||j.job==='TARGET')) pen+=1.5;                      // the man pinning their line stays on it
       if(q===hold && Math.abs(y-YC)>FH*0.30) pen+=0.6;
       if(prevQ.has(q)) pen-=0.6;                                                 // already supporting: he carries on (no handing over)
@@ -7862,6 +8215,7 @@
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
     p.dbgTag=''; p.goingForBall=false; p.engageCap=1; p.recover=false; p.pressRun=false; p.coverRun=false; p.dash=false;
+    if(p.soldT>simNow&&p.soldAt){ p.engageCap=0.45; p.dbgTag='SOLD'; return steer(p,p.soldAt.x,p.soldAt.y,1.0); }   // (wrong-footed by a skill move: skillSells)
     const atk=atkOf(p.team);
     const goalX=atk>0?FW:0, ownGoalX=atk>0?0:FW;
     // OFF IQ EXECUTION NOISE (attacking half): low Off IQ -> sloppy movement target (iqJit)
@@ -7881,31 +8235,28 @@
       p.iqJitT=0.4+Math.random()*0.4;
     }
     const hb=heldBy();                                       // whose ball it is (a knock-on or a pass on its way still counts)
-    // DEFEND A LIVE CROSS: one of theirs has whipped one into our box -> the man of ours nearest where it'll come down
-    // goes to meet it, goal-side of it, and heads it away (a duel, Heading against Heading, if one of theirs goes up
-    // with him; lose it and it's his header)
+    // DEFEND A LIVE CROSS: one of theirs has whipped one into our box -> the two of ours best placed go and meet it where it
+    // comes through head height, a step goal-side of it (crossDefend), and whoever's at it heads it away -- a duel, Heading
+    // against Heading, if one of theirs goes up with him; lose it and it's his header
     if(p!==controlled && ball.crossT>0 && ball.crossBy && ball.crossBy!==p.team && !ball.ownedBy && !gkHold && p.state==='normal'){
-      const tLand=(ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*520*ball.z)))/520, L=ballAt(tLand);   // (its curl too)
-      if(Math.abs(L.x-ownGoalX)<BX+80&&Math.abs(L.y-YC)<BY+60){
-        const dL=dist(p,L); let first=dL<360;
-        for(const q of players) if(first&&q.team===p.team&&q!==p&&q!==controlled&&q.state==='normal'&&dist(q,L)<dL) first=false;
-        if(first){
-          p.aerialT=simNow;
-          if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt()){
-            if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
-            const r=aerialRival(p);
-            if(r&&Math.random()>duelOdds(headingOf(p),headingOf(r))-CURL_HEAD*crossCurlQ()){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it; a curling one's harder)
-            else headClear(p);
-          }
-          p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1; p.dash=true;
-          return steer(p,L.x-atk*24,L.y,1.0);
+      const H=crossDefend(p,ownGoalX,atk);
+      if(H){
+        p.aerialT=simNow;
+        if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt()){
+          if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
+          const r=aerialRival(p);
+          if(r&&Math.random()>1-aerialOdds(r,p)-CURL_HEAD*crossCurlQ()){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it; a curling one's harder)
+          else headClear(p);
         }
+        p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1; p.dash=true;
+        return steer(p,H.x,H.y,1.0);
       }
     }
     // CLOSE LOOSE BALL: if a loose ball is right next to me, go take it regardless of shape/role -- unless it's a team-mate's
-    // touch or a pass to a team-mate (I don't take it off him).
+    // touch or a pass to a team-mate (I don't take it off him), or our cross coming in at a height to head (see ATTACK A
+    // LIVE CROSS: he heads it, not waits for it to drop to his feet).
     if(p!==controlled && p.state==='normal' && p.noTouchT<=0 && !ball.ownedBy && !gkHold &&
-       ball.shotT<=0 && ball.z<40 && dist(p,ball)<66 && !(hb && hb.team===p.team && hb!==p)){
+       ball.shotT<=0 && ball.z<40 && dist(p,ball)<66 && !(hb && hb.team===p.team && hb!==p) && !(ball.crossT>0 && ball.crossBy===p.team && ball.z>18)){
       p.dbgTag='CLOSE-GRAB'; p.goingForBall=true;
       p.sprint=p.stamina>0.1;
       return steer(p, ball.x+ball.vx*0.10, ball.y+ball.vy*0.10, 1.0);
@@ -7969,7 +8320,7 @@
         // AERIAL DUEL: one of theirs going up for it too can win it (Heading against Heading); win it and it's a
         // header on goal, the same as yours
         const contester=aerialRival(p);
-        if(contester && Math.random()>duelOdds(headingOf(p),headingOf(contester))+CURL_HEAD*crossCurlQ()) headClear(contester);   // (a curling one's harder to clear)
+        if(contester && Math.random()>aerialOdds(p,contester)+CURL_HEAD*crossCurlQ()) headClear(contester);   // (a curling one's harder to clear)
         else headOnGoal(p);
       }
       const H=crossMeet(p);
@@ -9992,7 +10343,7 @@
     const seeK=1-Math.exp(-dt/0.35);
     for(const p of players){ p.seenVx=(p.seenVx||0)+(p.vx-(p.seenVx||0))*seeK; p.seenVy=(p.seenVy||0)+(p.vy-(p.seenVy||0))*seeK; }   // how others read a man's running: a beat late (see blockSpot)
     for(const p of players) trackFacing(p,dt);
-    for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
+    for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.skillCd>0)p.skillCd-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
       if(!p.facing||!isFinite(p.facing.x)||!isFinite(p.facing.y)) p.facing={x:atkOf(p.team),y:0};}
     for(const kp of keepers){ if(!kp.facing||!isFinite(kp.facing.x)||!isFinite(kp.facing.y)) kp.facing={x:atkOf(kp.team),y:0}; }
     updatePossConf(dt);
@@ -10017,8 +10368,9 @@
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || matchOver;
     if(!frozen) for(const p of players){
       if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
-      else if(practice && practiceStep(p,dt)){ /* scripted helper handled */ }
-      else if(practice){ p.vx=p.vy=0; p.z=0; p.vz=0; }   // everyone else parked during practice
+      else if(practice && !p.labAI && practiceStep(p,dt)){ /* scripted helper handled */ }
+      else if(practice && !p.labAI){ p.vx=p.vy=0; p.z=0; p.vz=0; }   // everyone else parked during practice (the Crossing Lab's men play on)
+      else if(skillOf(p) && skillStep(p,dt)){ /* one of the computer's men in a skill move: it moves him and the ball */ }
       else if(freePlay&&p.team==='R'){
         const reds=players.filter(q=>q.team==='R');
         const idx=reds.indexOf(p);
@@ -10136,7 +10488,7 @@
     if(ball.ownedBy){
       const p=ball.ownedBy;
       if(p.state!=='normal')ball.ownedBy=null;
-      else if(!(p===controlled&&skill)) carry(p,dt,p===controlled?(hi.ix||hi.iy):true);   // (a skill move places the ball itself)
+      else if(!skillOf(p)) carry(p,dt,p===controlled?(hi.ix||hi.iy):true);   // (a skill move places the ball itself)
     }
     nanChk('carry');
       contactTackles();
@@ -11139,10 +11491,10 @@
       const f=p.facing||{x:1,y:0};
       if(p.shotPoseT>0){ const d=p.shotPoseDir||f; return ['shoot',1,d.x,d.y]; }   // the shot, held after the strike
       if(p.passPoseT>0){ const d=p.passPoseDir||f; return ['pass',1,d.x,d.y]; }
-      const inMove=p===controlled&&!!skill;
+      const mv=skillOf(p), inMove=!!mv;
       const byV=sp=>sp>12&&!inMove&&!p.watching;           // (one watching the ball faces it, side-stepping or backing off)
       const sp=Math.hypot(p.vx,p.vy), dx=byV(sp)?p.vx:f.x||0, dy=byV(sp)?p.vy:f.y||0;
-      if(inMove) return ['run', Math.floor(skill.t/0.07)%4, dx, dy];   // feet going, body turned the move's way
+      if(inMove) return ['run', Math.floor(mv.t/0.07)%4, dx, dy];   // feet going, body turned the move's way
       if(p===controlled&&ball.ownedBy===p){                // your build-up while the button is held
         if(shootCharge>0.02) return ['shoot',0,(atkOf(p.team)>0?FW:0)-p.x,YC-p.y];
         if(kickCharge>0.02||crossCharge>0.02) return ['pass',0,dx,dy];
@@ -13494,6 +13846,7 @@
     else if(act==='dribblelab') startLab('dribble');
     else if(act==='passlab') startLab('pass');
     else if(act==='shootlab') startLab('shoot');
+    else if(act==='crosslab') startLab('cross');
     else if(act==='settings'){ openSettings(); }
     else if(act==='continue'){ const k=mostRecentKey(); if(k)openHub(k); }
     else if(act==='load'){ renderSlots('slotList',false); showSub('loadPanel'); }

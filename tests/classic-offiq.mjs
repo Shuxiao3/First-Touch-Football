@@ -57,7 +57,7 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
   opp.stats = Object.assign({}, opp.stats, { heading: 6.5, speed: 6.5, acceleration: 6.5, defIQ: 6.5, interceptions: 6.5, tackle: 6.5 });
   const cast = /cutback|square/.test(scene) ? [pas, rcv] : [pas, rcv, opp], jy = (i % 3 - 1) * 30, jx = (i % 2) * 20, out = {};
   const park = () => { for(const q of T.players()) if(!cast.includes(q)){ q.x = T.FW / 2 - atk * 700 + (q.team === 'R' ? 0 : 60); q.y = q.team === 'R' ? 50 : T.FH - 50; q.vx = q.vy = 0; } };
-  for(const q of cast){ q.state = 'normal'; q.noTouchT = 0; q.stamina = 1; q.staminaCap = 1; q.vx = q.vy = 0; q.ob = null; q.z = 0; q.vz = 0; q.reactUntil = 0; }
+  for(const q of cast){ q.state = 'normal'; q.noTouchT = 0; q.stamina = 1; q.staminaCap = 1; q.vx = q.vy = 0; q.ob = null; q.z = 0; q.vz = 0; q.reactUntil = 0; q.dbgTag = ''; }   // (no tag left over from the last scene)
   for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; k.vx = k.vy = 0; Object.assign(k, { mode: 'line', holdT: 0, claimCd: 0, diveT: 0, groundT: 0, reactT: 0 }); }
   park(); const b = T.ball(); b.dribbler = null; b.z = 0; b.vz = 0; b.vx = b.vy = 0; b.crossT = 0; b.crossBy = null; b.shotT = 0;
   if(scene === 'cross'){ pas.x = U(100); pas.y = T.YC + 480; pas.facing = { x: atk, y: 0 };
@@ -86,7 +86,7 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
       b.ownedBy = null; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0; b.crossT = 0; b.crossBy = null; return res(out); }
     requestAnimationFrame(tick); })(); }), { scene, iq, i });
 const S = {};
-for(const scene of ['midfield', 'cutback', 'square', 'cross']) for(const iq of [1, 10]){ const R = [], n = scene === 'cross' ? 16 : 10;
+for(const scene of ['midfield', 'cutback', 'square', 'cross']) for(const iq of [1, 10]){ const R = [], n = scene === 'cross' ? 32 : 10;   // (32 crosses: the marker goes to meet it too, so each one's a contest)
   for(let i = 0; i < n; i++) R.push(await run(scene, iq, i)); S[scene + iq] = R; }
 const avg = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length), cnt = (R, k) => R.filter(r => r.k === k).length;
 const mv = iq => S['midfield' + iq].filter(r => r.moved !== undefined).map(r => r.moved), tw = iq => S['midfield' + iq].filter(r => r.toward !== undefined).map(r => r.toward);
@@ -98,8 +98,8 @@ const ft = (sc, iq) => S[sc + iq].filter(r => r.k === 'shot' && r.after <= 0.06)
 for(const sc of ['cutback', 'square']) info((sc === 'cutback' ? 'a ball pulled back to him 13 m out: ' : 'a ball squared to him 22 m out: ') + [1, 10].map(iq => `Off IQ ${iq}: ${cnt(S[sc + iq], 'shot')} shots, ${ft(sc, iq).length} first time (${shots(sc, iq)})`).join(' -- '));
 ok(ft('cutback', 10).length >= 8 && ft('cutback', 1).length <= 1, 'a good chance pulled back to him, nobody on him: Off IQ 10 hits it first time (' + ft('cutback', 10).length + ' of 10), Off IQ 1 takes a touch (' + ft('cutback', 1).length + ' first time)');
 ok(ft('square', 10).length <= 1 && [...ft('cutback', 10), ...ft('square', 10)].every(r => r.xg >= 0.3), '...not a chance under xG 0.3: squared to him 22 m out, Off IQ 10 takes a touch too (' + ft('square', 10).length + ' first time)');
-info('a cross: ' + [1, 10].map(iq => `Off IQ ${iq}: headed ${cnt(S['cross' + iq], 'headed')}, cleared ${cnt(S['cross' + iq], 'cleared')} of 16`).join('; '));
-ok(cnt(S.cross10, 'headed') >= 9 && cnt(S.cross10, 'headed') - cnt(S.cross1, 'headed') >= 2, 'a cross to him with a marker on him: he heads it more at Off IQ 10 (' + cnt(S.cross10, 'headed') + ' of 16) than at 1 (' + cnt(S.cross1, 'headed') + ')');
+info('a cross: ' + [1, 10].map(iq => `Off IQ ${iq}: headed ${cnt(S['cross' + iq], 'headed')}, cleared ${cnt(S['cross' + iq], 'cleared')} of 32`).join('; '));
+ok(cnt(S.cross10, 'headed') >= 10 && cnt(S.cross10, 'headed') - cnt(S.cross1, 'headed') >= 5, 'a cross to him with a marker on him: he heads it far more at Off IQ 10 (' + cnt(S.cross10, 'headed') + ' of 32) than at 1 (' + cnt(S.cross1, 'headed') + ')');
 
 // ONLY TWO GO FOR A CROSS: three of ours in the box, the cross in -- at most two of them going for it at once
 const two = await page.evaluate(() => new Promise(res => {
