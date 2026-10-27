@@ -459,6 +459,39 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Measured in open play**, a clearance finds a team-mate 8% of the time at Def IQ 1, 31% at 5.5 and 65% at 10.
   - **Headers.** A headed clearance goes ×0.9 to ×1.15 as far, from Def IQ 1 to 10, and is aimed more surely and
     truly at a team-mate. So is your own defensive header.
+- **Strength is body on body.**
+  - **Running into each other.** Two men who run into each other are pushed apart, and the stronger holds his
+    ground: 7 against 5 splits it 27/73 and 9 against 3 4/96 (it was 42/58 and 25/75). A stronger man running into
+    a weaker one also knocks him off his line, by the square of the gap: near-equals hardly notice, a big gap sends
+    him clearly aside, and a huge one (4 points or more, run into hard) puts him down for a moment, and off the
+    ball if he had it. The strong man barely checks.
+  - **The cushion.** The man on the ball holds one of theirs off his back and sides, as if he had an arm out. It
+    grows with his Strength (0.4 m at 10) and more with how much stronger he is than the man trying to get through
+    (another metre for the whole scale between them): 9 against 3 keeps him about 1 m off, level men 0.2 m, and a
+    weak man on the ball against a strong one has next to none. It covers his back and sides and fades out 45°
+    either side of the way he's facing, so in front of him nothing has changed. Flat out it's a third smaller.
+    - A man leaning on it can only edge round it, the slower the bigger the gap between them.
+    - Leaning on it wears it down: a stronger man is through it in under a second, a level one in about 1.7 s, and
+      a much weaker one hardly dents it (a 3 on a 9: an eighth of it in 2 s). Off it, it comes back. A stronger man
+      who's through it, up against his back, muscles him off the ball: 9 against 4, about two times in three inside
+      a second.
+    - His tackle reach doesn't count through it.
+  - **Measured**, with you running upfield with it (not sprinting) and one of theirs pressing from 2 m behind you,
+    straight behind or off your shoulder, 12 goes each over 4 s:
+
+    | You against him | Robbed, straight behind (before → now) | Robbed, off your shoulder (before → now) |
+    | --- | --- | --- |
+    | 8 against 4 | 3 → 0 | 4 → 1 |
+    | 7 against 5.5 | 2 → 1 | 11 → 0 |
+    | 5.5 against 5.5 | 7 → 4 | 11 → 12 |
+    | 4 against 8 | 12 → 12 | 12 → 12 |
+
+    Standing still with it, you're robbed every time, before and now: he comes round you and takes it from in
+    front (22° to 55° round from the way you're facing). At 8 against 4 that takes him 1.1 s from straight behind
+    (it took 0.8 s).
+  - **Holding it up.** The computer's centre-forward is keener to hold it up the stronger he is: no keener at
+    Strength 5.5, up to 1.6 times at 9 and over. How sure he is of keeping it under pressure leans on Strength more
+    too.
 - **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
   and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at

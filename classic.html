@@ -5928,7 +5928,7 @@
       if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0)continue;
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
-      if(dist(p,ball)<p.r+ball.r+tackleReachOf(p)){
+      if(dist(p,ball)<p.r+ball.r+Math.max(0,tackleReachOf(p)-shieldCushion(carrier,p))){   // (his reach doesn't count through the cushion)
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
@@ -5954,8 +5954,97 @@
             return;
           }
         }
+        // THROUGH THE CUSHION: a stronger man who's leaned his way right through it and is up against his back
+        // muscles him off it -- the bigger the gap, the sooner (9 against 4: about two times in three inside a second)
+        else if(p.leanOn===carrier && p.lean>=0.95){
+          const odds=duelOdds(strengthOf(p),strengthOf(carrier));
+          if(odds>0.5 && Math.random()<(odds-0.5)*0.08){
+            p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
+            winBall(p,carrier);
+            return;
+          }
+        }
       }
     }
+  }
+
+  // STRENGTH, BODY ON BODY. Two men who run into each other are pushed apart, and the stronger holds his ground: each is
+  // moved by the other's Strength cubed over both of theirs cubed (7 against 5 splits it 27/73, 9 against 3 4/96). A
+  // stronger man driving into a weaker one knocks him off his line as well, by the square of the gap: near-equals hardly
+  // notice, a big gap knocks him clearly aside, and a huge one (4 points or more, run into hard) puts him down for a
+  // moment, and off the ball if he had it. The strong man barely checks. (Keepers only get pushed apart.)
+  // THE CUSHION: the man on the ball holds a man of theirs off his back and sides, as if he had an arm out. It's
+  // SHIELD_BASE px at his Strength 10 (in proportion below that), SHIELD_EDGE px more for the whole scale he's stronger
+  // than the man trying to get through: all of it behind him and square on, fading to none 45° either side of the way
+  // he's facing, and up to a third less flat out. Inside it, a man is moved out (alone, at up to SHIELD_PUSH px/s);
+  // leaning on it he can only edge round it, the slower the bigger the gap between them: at SHIELD_SLIDE[0] px/s
+  // (round the carrier, as he moves) when they're level, down to SHIELD_SLIDE[1] at a gap of SHIELD_GRIP (5 points)
+  // or more, so a weaker man can't just slide round it. Leaning on it (inside it as it would be unworn) wears it
+  // down, by SHIELD_WEAR a second times the square of his Strength over the carrier's -- through it in under a second
+  // if he's the stronger, about 1.7 s if they're level, hardly at all if he's much the weaker -- and off it, it comes
+  // back. His tackle reach doesn't count through it either (contactTackles).
+  const SHIELD_BASE=10, SHIELD_EDGE=26, SHIELD_WEAR=0.6, SHIELD_HEAL=0.8, SHIELD_PUSH=300, SHIELD_GRIP=0.5, SHIELD_SLIDE=[200,20];
+  function shieldCarrier(){
+    if(gkHold||restartT>0||scoredT>0||offsideT>0||ball.z>=20) return null;
+    const c=ball.ownedBy||(ball.dribbler&&ball.dribbleGrace>0&&dist(ball.dribbler,ball)<60?ball.dribbler:null);   // (his knock-on too)
+    return c&&c.role!=='G'&&c.state==='normal'?c:null;
+  }
+  function shieldW(c,o){ const f=c.facing||{x:atkOf(c.team),y:0}, dx=o.x-c.x, dy=o.y-c.y, l=Math.hypot(dx,dy)||1; return clamp((0.707-(dx*f.x+dy*f.y)/l)/0.707,0,1); }
+  function shieldCushion(c,o,raw){
+    if(!c||c.role==='G'||o.team===c.team||o.role==='G'||o.state!=='normal') return 0;
+    const w=shieldW(c,o); if(w<=0) return 0;
+    const sc=strengthOf(c), so=strengthOf(o);
+    let r=SHIELD_BASE*sc+SHIELD_EDGE*Math.max(0,sc-so);
+    if(c.sprint) r*=1-0.35*clamp(Math.hypot(c.vx,c.vy)/sprintSpeedOf(c),0,1);
+    if(!raw&&o.leanOn===c) r*=1-(o.lean||0);
+    return w*r;
+  }
+  function separateBodies(dt){
+    const solids=[...players,...keepers], c=shieldCarrier();
+    for(const q of players){ if(q.leanOn!==c){ q.leanOn=c; q.lean=0; } q.leaning=false; }
+    for(let i=0;i<solids.length;i++)for(let j=i+1;j<solids.length;j++){
+      const a=solids[i],b=solids[j];
+      let d=dist(a,b); const min=a.r+b.r+2;
+      if(d<min&&d>0.001){
+        const nx=(b.x-a.x)/d,ny=(b.y-a.y)/d,overlap=(min-d);
+        const sa=strengthOf(a), sb=strengthOf(b), sa3=sa*sa*sa, sb3=sb*sb*sb;
+        const aShare=clamp(sb3/(sa3+sb3),0.04,0.96), bShare=1-aShare;     // (the stronger holds his ground)
+        a.x-=nx*overlap*aShare; a.y-=ny*overlap*aShare;
+        b.x+=nx*overlap*bShare; b.y+=ny*overlap*bShare;
+        // THE BARGE: the stronger man's speed into the contact knocks the weaker one off his line (outfield only)
+        if(a.role!=='G'&&b.role!=='G'){
+          const edge=clamp(Math.abs(sa-sb),0,1);                 // 0 even .. 0.9 at the biggest gap
+          if(edge>0.06){
+            const sgn = sa>sb ? 1 : -1;                          // push the weaker along +n (a stronger) / -n (b stronger)
+            const strong = sa>sb ? a : b, weak = sa>sb ? b : a;
+            const closing = strong.vx*nx*sgn + strong.vy*ny*sgn; // strong's speed INTO the contact
+            if(closing>20 && weak.state==='normal'){
+              const imp=Math.min(closing*(1.2*edge+3*edge*edge), 260);
+              weak.vx+=nx*sgn*imp;   weak.vy+=ny*sgn*imp;
+              const rc=imp*0.15*(1-edge); strong.vx-=nx*sgn*rc; strong.vy-=ny*sgn*rc;   // (he barely checks)
+              if(edge>=0.4&&imp>=150&&restartT<=0){ weak.state='stumble'; weak.stateT=0.15+0.4*(edge-0.4); }   // flattened (off the ball: see frame)
+            }
+          }
+        }
+        d=dist(a,b);
+      }
+      // THE CUSHION round the man on the ball: one of theirs inside it is moved out, alone, a little at a time
+      if(c&&(a===c||b===c)&&d>0.001){
+        const o=a===c?b:a, raw=shieldCushion(c,o,true);
+        if(raw>0){
+          if(d<min+raw+2) o.leaning=true;
+          const push=Math.min(min+raw*(1-o.lean)-d, SHIELD_PUSH*dt);
+          if(push>0){ o.x+=(o.x-c.x)/d*push; o.y+=(o.y-c.y)/d*push; }
+          if(d<min+raw+2){                                       // leaning on it, he only edges round it (SHIELD_SLIDE)
+            const grip=clamp(Math.max(0,strengthOf(c)-strengthOf(o))*shieldW(c,o)*(1-o.lean)/SHIELD_GRIP,0,1);
+            const nx=(o.x-c.x)/d, ny=(o.y-c.y)/d, rx=o.vx-c.vx, ry=o.vy-c.vy, vn=rx*nx+ry*ny, tx=rx-vn*nx, ty=ry-vn*ny, vt=Math.hypot(tx,ty);
+            const cap=SHIELD_SLIDE[0]+(SHIELD_SLIDE[1]-SHIELD_SLIDE[0])*grip;
+            if(vt>cap){ const k=cap/vt; o.vx=c.vx+vn*nx+tx*k; o.vy=c.vy+vn*ny+ty*k; }   // (going round him, relative to him)
+          }
+        }
+      }
+    }
+    if(c) for(const q of players) if(q.leanOn===c) q.lean=clamp(q.lean+(q.leaning?SHIELD_WEAR*(strengthOf(q)/strengthOf(c))**2:-SHIELD_HEAL)*dt,0,1);
   }
 
   // SLIDE TACKLE stat -> lunge length/speed & contact reach (endpoints: 1 => 0.5/0.7, 10 => 1.1/1.3)
@@ -6903,6 +6992,9 @@
     if(pw==='W'){ const w=ins(p,'wWidth'); if(w==='inside'){ M.shoot*=1.12; M.cross*=0.8; M.takeOn*=1.1; } else if(w==='wide'){ M.cross*=1.2; } }
     else if(pw==='WM'){ const w=ins(p,'wmWidth'); if(w==='narrow'){ M.shoot*=1.05; M.cross*=0.85; } else if(w==='wide'){ M.cross*=1.15; } }
     else if(pw==='ST'){ const r=ins(p,'stRuns'); if(r==='target'){ M.hold*=1.3; M.takeOn*=0.6; M.carry*=0.75; } else if(r==='false9'){ M.risk*=0.9; M.range*=1.1; M.carry*=1.1; } }
+    // a strong man up front holds it up, keeping the man on his back off it (see shieldCushion) while his side comes up:
+    // keener on it from Strength 5.5, up to 1.6 times at 9 and over
+    if(pw==='ST') M.hold*=1+0.6*clamp((strengthOf(p)-0.55)/0.35,0,1);
     if(st==='winger'||st==='mwinger'){ M.takeOn*=1.35; M.carry*=1.15; M.cross*=1.2; }
     else if(st==='insidefwd'){ M.takeOn*=1.3; M.carry*=1.15; M.shoot*=1.12; }
     else if(st==='speedster'){ M.carry*=1.2; M.takeOn*=1.1; }
@@ -7116,7 +7208,7 @@
     return {kind:'cross', key:'x', cs:C.cs, P:pc, v:X.v, loss:0.003, ev:pc*X.v-(1-pc)*0.003, rel:true};
   }
   function obHoldOpt(p,C,ob){
-    const d=C.presser, pk=(!d||C.prD>110)?0.99:clamp(0.62+0.3*(duelOdds(strengthOf(p),strengthOf(d))-0.5)+statLerp(statOf(p,'dribbling',P.dribbling.val),-0.05,0.08),0.35,0.95);
+    const d=C.presser, pk=(!d||C.prD>110)?0.99:clamp(0.62+0.5*(duelOdds(strengthOf(p),strengthOf(d))-0.5)+statLerp(statOf(p,'dribbling',P.dribbling.val),-0.05,0.08),0.35,0.95);   // (Strength: the cushion)
     const held=simNow-ob.since, cost=0.0005+C.vHere*(0.05+0.2*clamp(held/2.5,0,1))+0.004*Math.max(0,held-3);   // the longer he holds it, the more of the chance goes -- and in the end he has to do something
     const v=C.vHere*C.M.hold;
     return {kind:'hold', key:'h', P:pk, v, loss:C.lossHere, ev:pk*v-(1-pk)*C.lossHere-cost};
@@ -9880,41 +9972,7 @@
     }
 
     nanChk('ai-strike');   // attribute any velocity set during the AI/input step (shots, passes, first-touch)
-    const solids=[...players,...keepers];
-    for(let i=0;i<solids.length;i++)for(let j=i+1;j<solids.length;j++){
-      const a=solids[i],b=solids[j];
-      const d=dist(a,b),min=a.r+b.r+2;
-      if(d<min&&d>0.001){
-        const nx=(b.x-a.x)/d,ny=(b.y-a.y)/d,overlap=(min-d);
-        // STRENGTH decides who holds their ground: the stronger player moves LESS.
-        // share is each player's portion of the total displacement (sums to 1).
-        const sa=strengthOf(a), sb=strengthOf(b);
-        const total=sa+sb;
-        // a's share of being pushed is proportional to the OTHER's strength
-        let aShare = total>0 ? sb/total : 0.5;
-        let bShare = 1-aShare;
-        // soften so a small strength edge doesn't pin someone completely, but a CLEAR edge
-        // shoves the weaker player well off the ball (0.12..0.88).
-        aShare=clamp(aShare,0.12,0.88); bShare=1-aShare;
-        a.x-=nx*overlap*aShare; a.y-=ny*overlap*aShare;
-        b.x+=nx*overlap*bShare; b.y+=ny*overlap*bShare;
-        // STRENGTH BARGE: beyond un-overlapping, a much stronger player DRIVING into a weaker one
-        // knocks him off his line (the strong man barely checks). Outfield-vs-outfield only; bounded.
-        if(a.role!=='G'&&b.role!=='G'){
-          const edge=clamp(Math.abs(sa-sb),0,1);                 // 0 even .. ~0.9 at the biggest gap
-          if(edge>0.06){
-            const sgn = sa>sb ? 1 : -1;                          // push the weaker along +n (a stronger) / -n (b stronger)
-            const strong = sa>sb ? a : b, weak = sa>sb ? b : a;
-            const closing = strong.vx*nx*sgn + strong.vy*ny*sgn; // strong's speed INTO the contact
-            if(closing>20 && weak.state==='normal'){
-              const imp=Math.min(closing*edge*0.7, 130);         // bounded shove
-              weak.vx+=nx*sgn*imp;   weak.vy+=ny*sgn*imp;        // knock the weaker off his line
-              strong.vx-=nx*sgn*imp*0.2; strong.vy-=ny*sgn*imp*0.2; // slight recoil on the barger
-            }
-          }
-        }
-      }
-    }
+    separateBodies(dt);    // men who run into each other, and the cushion round the man on the ball
 
     tryClear(dt);          // an armed CLEAR goes first: no trap, no control -- just away
     swipeStep(dt);         // a swipe-shot waiting on the ball being back at your feet
