@@ -85,7 +85,7 @@ ok(!(await page.$('[data-imove]')), 'no MOVE / SWAP button: a man is moved by dr
 await drag(`#bpBody .tpitch .ptk[data-ri="${field}"]`, `#bpBody .tpitch .ptk[data-ri="${gkBefore}"]`);
 d = await save();
 ok(d.lineup.gk === field && d.lineup.atk.includes(gkBefore) && d.lineup.def.includes(gkBefore), 'an outfielder in goal, the keeper outfield (both phases)');
-const tok = await page.$eval(`#bpBody .tpitch .ptk[data-ri="${field}"]`, e => ({ oop: e.classList.contains('oop'), ovr: +e.querySelector('.ptkOvr').textContent }));
+const tok = await page.$eval(`#bpBody .tpitch .ptk[data-ri="${field}"]`, e => ({ oop: e.classList.contains('oop'), ovr: parseInt(e.querySelector('.ptkOvr').textContent, 10) }));   // (his rating, then his own position)
 ok(tok.oop && tok.ovr < d.roster[field].ovr, 'out of position he plays below his rating: ' + tok.ovr + ' in goal, ' + d.roster[field].ovr + ' as a ' + d.roster[field].role);
 await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
@@ -101,14 +101,14 @@ await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
 await tap(lu.atk[5]); await page.click('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(60);   // (his card turned over: the INSTRUCTIONS side, kept from man to man)
 let pn = await panel();
-ok(/STRIKER · WITH THE BALL/.test(pn.head) && String(pn.groups) === 'WIDTH,RUNS', 'the striker\'s instructions with the ball: ' + pn.groups.join(', '));
+ok(String(pn.groups) === 'WIDTH,RUNS' && !pn.head, 'the striker\'s instructions with the ball, on his card without a heading: ' + pn.groups.join(', '));
 await ci('stRuns', 'false9'); await ci('stWidth', 'wide');
 await tap(lu.atk[4]); pn = await panel();
-ok(/LEFT WING/.test(pn.head) && String(pn.groups) === 'SUPPORT,WIDTH', 'the left winger\'s: ' + pn.groups.join(', '));
+ok(String(pn.groups) === 'SUPPORT,WIDTH', 'the left winger\'s: ' + pn.groups.join(', '));
 await ci('wWidth', 'inside');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);
 await tap(lu.def[0]); pn = await panel();
-ok(/CENTRE-BACK · WITHOUT THE BALL/.test(pn.head) && String(pn.groups) === 'AGGRESSION', 'a centre-back\'s without it: ' + pn.groups.join(', '));
+ok(String(pn.groups) === 'AGGRESSION', 'a centre-back\'s without it: ' + pn.groups.join(', '));
 await ci('cbAggr', 'step');
 await tap(lu.def[4]); pn = await panel();
 ok(String(pn.groups) === 'COVER,DEFENDING', 'the central midfielder\'s: ' + pn.groups.join(', '));

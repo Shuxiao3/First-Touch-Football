@@ -136,18 +136,22 @@ The same game played like any other football game. It's a copy of `index.html` w
     pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under it, the bench. On the right, the card of the man you tapped. Every man on the pitch shows his
-    face (his own look, in the club's kit) with his shirt number under it, beside his rating and name; the bench
-    is ratings and names, each man's shirt number in his token's corner. The rating and the name sit inside each
-    token with room round them, clear of its edges.
+    BEST 8. Under the pitch, the bench, on one line (its men narrow to fit, eight of them even on a 640-wide
+    phone; a bigger bench takes a second line). On the right, from under that row to the foot of the screen, the
+    card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) with his
+    shirt number under it, beside his rating, his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) and his
+    name; on the bench the shirt number is in the token's corner, with the rating and position under it and the
+    name at the foot. The rating and the name sit inside each token with room round them, clear of its edges.
   - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
-    ▶, one size either way). Both are drawn as the card always was, the top exactly the same on both: all of him,
-    head to toe (a keeper in a keeper's top), his name, position, age, skill stars and rating, and, out of
-    position, the amber line saying where he's playing. Under that, the ratings side has the six (tap one for what
-    it's made of); the other has his spot's instructions for the phase you're looking at, each with its options on
-    one line and what it means under them, and no ratings. The side you're on stays as you tap from man to man,
-    and what doesn't fit goes over pages under his name and rating, an instruction kept whole on a page. On a
-    short phone his figure and name are drawn a little smaller, so the six fit under them.
+    ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
+    his name, his own position, style, age, skill stars and rating, out of position the amber line saying where
+    he's playing, and in a match his legs. Under it, the ratings side has the six (tap one and what it's made of
+    shows in a small grid under them); the other has his spot's instructions for the phase you're looking at, just
+    each one's name and its options, no descriptions, and no ratings. The side you're on stays as you tap from man
+    to man. His card never goes over pages: it has the whole right-hand side, and everything on it fits, down to
+    640×360. On a short phone his figure and name are drawn a little smaller; on a narrow one (700 px wide or
+    less) his name stays on one line, and the lines under his style (the amber one, his legs) run on under his
+    rating and button rather than wrap beside them.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
@@ -896,8 +900,8 @@ with his build. Ratings come out about the same across styles; what changes is t
 | | Playmaker (CM) | 4.5 | passing, vision, bend |
 | | Box-to-box (CM) | 5.5 | stamina, tackling, shooting |
 | | Creator (AM) | 5.5 | dribbling, the killer ball, shooting |
-| | Wide midfielder | 6.5 | stamina, crossing |
-| | Winger (wide midfield) | 8 | dribbling, crossing |
+| | Wide midfielder (WM) | 6.5 | stamina, crossing |
+| | Wide runner (WM) | 8 | pace, dribbling, crossing |
 | Forward | Target man | 5.5 | strength, heading, holding it up |
 | | Poacher | 6.5 | finishing, composure, movement |
 | | Complete forward | 6.5 | link play, passing, shooting |
@@ -905,15 +909,17 @@ with his build. Ratings come out about the same across styles; what changes is t
 | | Winger | 8 | dribbling, crossing |
 | | Speedster | 8.5 | pace, runs in behind |
 
-The style also shapes how a player is used: an Anchor is the one who holds in midfield, speedsters
-and wingers make runs in behind sooner and from further out, and a target man stays on the line.
-On the ball it tilts his choices: wingers and inside forwards fancy taking their man on (an inside
+The style also shapes how a player is used: an Anchor is the one who holds in midfield, speedsters,
+wingers and wide runners make runs in behind sooner and from further out, and a target man stays on the line.
+On the ball it tilts his choices: wingers, wide runners and inside forwards fancy taking their man on (an inside
 forward a shot too), a speedster running with it, a playmaker or creator the ball through, a poacher a
 shot; a target man holds it up, and a stopper or an anchor keeps it simple. The side's way of playing
 tilts them too: tiki-taka keeps the ball and passes quickly, direct looks forward first and further, a
 wing side crosses more, and a counter goes quickly while the break is on.
-In a career, each sub-role (CB, FB, DM, CM, AM, STK, WNG) has its styles; players signed before
-styles existed are labelled with the style their stats already fit, and keep their stats.
+In a career, each sub-role (CB, FB, DM, CM, WM, AM, STK, WNG) has its styles; players signed before
+styles existed are labelled with the style their stats already fit, and keep their stats. A winger (WNG)
+is a forward and a wide midfielder (WM) a midfielder: no midfielder is a winger. A wide midfielder an older
+save filed as a CM is moved to WM when it loads.
 
 ## Layout
 

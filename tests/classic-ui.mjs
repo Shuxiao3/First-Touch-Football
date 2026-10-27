@@ -7,8 +7,9 @@
 // (a tap just shows his card) and the stand-in follows it from where he was picked up; the men on the tactics pitch show
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
 // other phase's shape is a small name box off each spot's corner; each man's number and name sit in his token with room
-// round them, clear of its edges. The game is as wide as the phone: no bands, the buttons over the pitch's corner, the
-// HUD just the score, the clock and the menu.
+// round them, clear of its edges. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
+// game is as wide as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock and the
+// menu.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -19,7 +20,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -176,6 +177,14 @@ for(const [w, h] of SIZES){
   const allNo = [nums.keeper, ...nums.men, ...nums.bench], sorted = a => a.slice().sort().join(' ');
   ok(allNo.every(n => /^#\d+$/.test(n)) && new Set(allNo).size === allNo.length && sorted(nums.ghosts) === sorted(nums.men),
     'every man shows his shirt number, on the pitch and the bench, and the other phase\'s boxes carry the same ones (' + nums.men.join(' ') + ' | ' + nums.ghosts.join(' ') + ')');
+  // ...and his own position beside his rating; a winger is an attacker, a wide midfielder a midfielder (WM)
+  const own = await page.evaluate(() => { const d = window.__MG.d, all = [...d.roster, ...Object.values(d.world.clubs).flatMap(c => c.players || [])];
+    return { toks: [...document.querySelectorAll('#bpBody .tpitch .ptk[data-ri], #bpBody .tbBench .ptk[data-ri]')].map(t => { const p = d.roster[+t.dataset.ri];
+        return [(t.querySelector('.ptkPos') || {}).textContent || '', p.role === 'GK' ? 'GK' : p.subRole]; }),
+      midStyles: Object.values(window.__MG.STYLES).filter(S => S.role === 'MID').map(S => S.sub + ' ' + S.name), wngNotAtt: all.filter(p => p.subRole === 'WNG' && p.role !== 'ATT').length,
+      wm: all.filter(p => p.subRole === 'WM' && p.role === 'MID').length }; });
+  ok(own.toks.length >= 15 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating (' + own.toks.map(x => x[0]).join(' ') + ')');
+  ok(!own.midStyles.some(x => /WNG|Winger/.test(x)) && !own.wngNotAtt && own.wm > 0, 'a winger is an attacker: no midfielder is a winger; wide midfielders are WM (' + own.wm + ' in the world; midfield styles ' + own.midStyles.join(', ') + ')');
   // THE CARD HAS TWO SIDES: his ratings (a category opens under the six) and his spot's instructions (no ratings), turned
   // over with one small button under his rating; his figure, name, rating and stars on top of both
   const side = () => page.evaluate(() => { const flips = [...document.querySelectorAll('#cTacRight button[data-cside]')], f = flips[0], fr = f && f.getBoundingClientRect(), o = document.querySelector('#cTacRight .mgCardOvr');
@@ -183,7 +192,9 @@ for(const [w, h] of SIZES){
       instr: document.querySelectorAll('#cTacRight .instrGrp').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
       stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
       flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
-      seen: [...document.querySelectorAll('#cTacRight .sixHd')].some(e => !e.closest('.fitHide')),
+      seen: [...document.querySelectorAll('#cTacRight .sixOpen .statRow')].every(e => e.getClientRects().length),
+      desc: document.querySelectorAll('#cTacRight .instrDesc, #cTacRight .instrNote, #cTacRight .instrHead').length,
+      paged: !!document.querySelector('#cTacRight .fitPager'), fits: (b => b.scrollHeight <= b.clientHeight + 1)(document.getElementById('cTacRight')),
       top: [...document.querySelectorAll('#cTacRight .mgCardHead, #cTacRight .mgCardHead > *')].map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join(' ') }; });
   await page.tap('#bpBody .tpitch .ptk[data-tac="field"] >> nth=6'); await page.waitForTimeout(150);
   const s1 = await side(); await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(150); const s2 = await side();
@@ -193,10 +204,11 @@ for(const [w, h] of SIZES){
   info('the card: ' + JSON.stringify({ s1, s2, s3 }));
   ok(s1.flips === 1 && s1.small && s1.under && /INSTRUCTIONS/.test(s1.flip) && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
     'his card: his figure, rating and stars, the six, and one small button under his rating (' + s1.flip + ')');
-  ok(s2.six === 6 && s2.det === 5 && s2.seen, '...tap one and what it\'s made of opens under the six, its page brought up (DEF: ' + s2.det + ' ratings)');
+  ok(s2.six === 6 && s2.det === 5 && s2.seen && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, all of it on the card, no pages (DEF: ' + s2.det + ' ratings)');
   ok(s3.flips === 1 && /RATINGS/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.body && s3.ovr && s3.stars && s3.name === s1.name,
     'turned over: his spot\'s instructions (' + s3.instr + '), no ratings, his figure, name, rating and stars still on top, the button back to RATINGS');
   ok(s3.top === s1.top, 'the top of his card is the same on both sides, figure and all (' + s1.top + ')');
+  ok(!s1.paged && !s3.paged && s1.fits && s3.fits && !s3.desc, 'his card never goes over pages, and its instructions are just the buttons: no heading, note or descriptions');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
   // the font, against the token's 2 px rim -- on the tactics pitch, the bench and the squad's little pitch
@@ -217,6 +229,44 @@ for(const [w, h] of SIZES){
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length })));
   ok(opts.length === 5 && opts.every(o => !o.i), 'the style menu: five names, no descriptions (' + opts.map(o => o.t).join(', ') + ')');
+  await ctx.close(); }
+
+// A NARROW PHONE (640x360): the bench on one line, each name inside its token and the number clear of the rating; and
+// his card fits its box, every man's (his ratings with DEF open, his instructions), with the longest name put out of
+// position: his name on one line, the amber line under his rating rather than wrapped beside it -- Office and match
+{ const ctx = await browser.newContext({ viewport: { width: 640, height: 360 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
+  const ri = await page.evaluate(() => { const d = window.__MG.d, lu = d.lineup, on = new Set(lu.atk.concat([lu.gk]));
+    const L = ['Kieran Whitlock', 'Tyrese Beaumont', 'Callum Oyelaran', 'Marco Devreese', 'Leo Ahlberg', 'Iker Castillo', 'Yuki Sandoval', 'Dani Bondarenko'];
+    let k = 0; d.roster.forEach((p, i) => { if(!on.has(i) && k < L.length) p.name = L[k++]; });
+    const f = lu.atk.find(i => d.roster[i].role === 'ATT') ?? lu.atk.find(i => d.roster[i].role !== 'DEF') ?? lu.atk[1], j = lu.atk.indexOf(f);   // a forward
+    [lu.atk[0], lu.atk[j]] = [lu.atk[j], lu.atk[0]];                                                                                            // in the first spot: a defender's
+    d.roster[f].name = 'Samuel Lindqvist'; d.roster[f].num = 23; window.__MG.mgSave(d); return f; });
+  await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
+  const bench = await page.evaluate(() => { const T = [...document.querySelectorAll('#bpBody .tbBench .ptk')], hit = (a, b) => a.right > b.left + 0.5 && a.left < b.right - 0.5 && a.bottom > b.top + 0.5 && a.top < b.bottom - 0.5;
+    return { n: T.length, rows: new Set(T.map(t => Math.round(t.getBoundingClientRect().top))).size,
+      inside: T.every(t => { const r = t.getBoundingClientRect(), n = t.querySelector('.ptkName').getBoundingClientRect(); return n.left >= r.left - 0.5 && n.right <= r.right + 0.5; }),
+      clear: T.every(t => !hit(t.querySelector('.ptkNo').getBoundingClientRect(), t.querySelector('.ptkOvr').getBoundingClientRect())) }; });
+  ok(bench.n >= 8 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (' + bench.n + ' men), every name inside its token, the number clear of the rating');
+  await page.tap(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(100);
+  const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), am = [...h.querySelectorAll('.mgCardSub')].find(e => /out of position/.test(e.textContent)), fs = e => parseFloat(getComputedStyle(e).fontSize);
+    return { name: nm.textContent, oneLine: nm.getBoundingClientRect().height < fs(nm) * 2, whole: nm.scrollWidth <= nm.clientWidth + 1, amber: am ? am.textContent : '', amberLines: am ? am.getBoundingClientRect().height / (fs(am) * 1.45) : 0 }; });
+  ok(head.oneLine && head.whole && head.amber && head.amberLines < 1.5, '...the longest name out of position: "' + head.name + '" whole on one line, "' + head.amber + '" on one line');
+  const fits = sel => page.evaluate(sel => { const b = document.querySelector(sel); return b.scrollHeight <= b.clientHeight + 1 && !b.querySelector('.fitPager'); }, sel);
+  const walk = async (sel, toks) => { const n = await page.$$eval(toks, ns => ns.length), bad = []; let views = 0;
+    for(let i = 0; i < n; i++){ await page.tap(`${toks} >> nth=${i}`); await page.waitForTimeout(60);
+      if(await page.$(sel + ' [data-six="DEF"]')){ await page.tap(sel + ' [data-six="DEF"]'); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' DEF'); await page.tap(sel + ' [data-six="DEF"]'); await page.waitForTimeout(40); }
+      const fl = await page.$(sel + ' button[data-cside="instr"]'); if(fl){ await fl.tap(); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' instr'); await page.tap(sel + ' button[data-cside="rate"]'); await page.waitForTimeout(40); } }
+    return { n, views, bad }; };
+  const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]');
+  await page.tap('.bpTopBack'); await page.waitForTimeout(100);
+  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
+  await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
+  await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
+  await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
+  const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk');
+  ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons
