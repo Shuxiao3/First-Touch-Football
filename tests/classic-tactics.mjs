@@ -99,7 +99,8 @@ const panel = () => page.evaluate(() => ({ head: (document.querySelector('#cTacR
 const ci = async (k, v) => { await page.click(`#cTacRight [data-ci="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
-await tap(lu.atk[5]); let pn = await panel();
+await tap(lu.atk[5]); await page.click('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(60);   // (his card turned over: the INSTRUCTIONS side, kept from man to man)
+let pn = await panel();
 ok(/STRIKER · WITH THE BALL/.test(pn.head) && String(pn.groups) === 'WIDTH,RUNS', 'the striker\'s instructions with the ball: ' + pn.groups.join(', '));
 await ci('stRuns', 'false9'); await ci('stWidth', 'wide');
 await tap(lu.atk[4]); pn = await panel();
@@ -128,6 +129,7 @@ d = await save(); lu = d.lineup;
 await tap(lu.atk[5]); pn = await panel();
 ok(lu.atk[5] === w0 && lu.atk[4] === st0 && pn.on.includes('stRuns=false9') && d.pinstr.atk['2-2-3'][5].stRuns === 'false9', 'after a swap the spot keeps its instructions: the new man there is the false nine');
 const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
+await page.click('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(60);
 
 // a drag's fits and swaps
 const a0 = lu.atk[1], b0 = lu.atk[2], def0 = d.lineup.def.slice();

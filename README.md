@@ -106,8 +106,12 @@ The same game played like any other football game. It's a copy of `index.html` w
   men going up for it leave it to him. One that comes down further out he leaves to his defenders.
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
-  iPhone SE). Titles, tabs and the main buttons never scroll; only lists do, each inside its own box, and no word
-  or number runs out of its box (checked at 640×360 up to 932×430).
+  iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
+  - **Nothing scrolls.** A box with more in it than fits shows a page of it, with ◀ 2 / 3 ▶ along its foot; hold
+    an arrow to flip through the pages. Pages break between rows, never through one: a list keeps its filters on
+    every page, a card keeps the man's name and rating, a table keeps its head row, and a heading moves over with
+    the rows it heads. Measured on a new career at 844×390: the squad over 4 pages, the market's list of League 2
+    over 42 (5 to a page, the league and the positions on one line above them), the league table over 3.
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
@@ -120,28 +124,38 @@ The same game played like any other football game. It's a copy of `index.html` w
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
-    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 91 feel dials are the game's
+    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
     bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left and the man
-    you tap on the right, each side scrolling by itself, and a long list goes ten to a page. His card leads with six
-    numbers (pace, physical, technique, passing, shooting, defending, each the average of its attributes); tap one
-    for what it's made of.
+    you tap on the right, each side over pages of its own. His card leads with six numbers (pace, physical,
+    technique, passing, shooting, defending, each the average of its attributes); tap one and what it's made of
+    takes their place (◀ on it, or a tap on it again, for the six). In the Squad tab his card has the right side to
+    itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little pitch comes back as you
+    pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under it, the bench. On the right, the man you tapped and his spot's instructions. Every man on the
-    pitch shows his face (his own look, in the club's kit) beside his rating; the bench is just numbers and names.
-    The number and the name sit inside each token with room round them, clear of its edges.
-    The man's card shows all of him, head to toe (a keeper in a keeper's top). Under the men, lit and
-    set a little right and down, is the other phase's shape: on WITH BALL you see where each of them goes without
-    it, and the other way round.
+    BEST 8. Under it, the bench. On the right, the card of the man you tapped. Every man on the pitch shows his
+    face (his own look, in the club's kit) beside his rating; the bench is just numbers and names. The number and
+    the name sit inside each token with room round them, clear of its edges.
+  - **His card has two sides**, turned over with RATINGS and INSTRUCTIONS under his name. RATINGS: all of him,
+    head to toe (a keeper in a keeper's top), and the six (tap one for what it's made of). INSTRUCTIONS: his spot's
+    instructions for the phase you're looking at, each with its options on one line and what it means under them,
+    and no ratings. On both, his name, position, age, skill stars and rating stay on top, and the side you're on
+    stays as you tap from man to man. More instructions than fit go over pages.
+  - **The other phase's shape** is a small lit box with each man's name, off the bottom-right corner of his spot
+    (bottom-left for a man up by their goal, at the right-hand end): on WITH BALL you see where each of them goes
+    without it, and the other way round. It's no longer a full token tucked under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
-    pitch-first screen on the match itself, with each man's legs on his card. The rest of your squad is on the
+    pitch-first screen on the match itself, with each man's legs on his card (and the two sides: the other team's
+    men show their ratings only). The rest of your squad is on the
     bench: drag one onto a man to bring him on, on fresh legs. That's three subs a match, and a man taken off can't
     come back. Every exhibition club has a bench of six too (a keeper and five), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
-  - **The match** has the score, the way you're kicking, the clock and the menu along the top, nothing else.
+  - **The match** has the score, the way you're kicking, the clock and the menu along the top, nothing else. The
+    man on the ball, either side's, has his skill stars over his stamina bar (three little stars, lit gold up to
+    his number), so you know what he can do with it.
   - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
   - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
     phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
@@ -193,6 +207,33 @@ The same game played like any other football game. It's a copy of `index.html` w
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
 - **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
   the space ahead of the man. The lofted through ball is unchanged.
+- **The computer's through ball** along the grass is struck to die where the runner will be, but never harder than
+  900 px/s (the Computer through ball dial; it was 1500, quicker than anyone could get across to). A long one would
+  need more, so it gets there after him or not at all, and he doesn't play it. It's harder to judge than a pass
+  to feet, too:
+  - the passer misreads how soon each of your men can get across, by 0.3 s at Off IQ 1 and 0.1 s at 10;
+  - its weight errs, 14% at Passing 1 and 5% at 10, and how far ahead of the runner it goes errs with his Off IQ;
+  - its line errs as any forward ball's through traffic does.
+
+  Measured in three-minute computer-against-computer matches: the last commit (on the old pitch), the old through
+  ball on the smaller pitch (to tell the two changes apart), and this one:
+
+  | | Last commit | Smaller pitch, old through ball | Now |
+  | --- | --- | --- | --- |
+  | Matches | 12 | 12 | 24 |
+  | Computer through balls a match | 6.9 | 8.8 | 2.6 |
+  | Struck at (median) | 1479 px/s | 1367 px/s | 891 px/s |
+  | How far (median, the pitch's metres) | 20 m | 21 m | 14 m |
+  | Got to the runner | 60% | 49% | 63% |
+  | Cut out | 39% | 43% | 29% |
+  | To the keeper | 1% | 1% | 5% |
+  | Got through, a match | 4.2 | 4.2 | 1.7 |
+  | Shots a match | 4.3 | 6.3 | 4.2 |
+  | Goals a match | 1.8 | 2.1 | 1.1 |
+
+  So it's played under a third as often as the old one would be on this pitch, and gets through 1.7 times a match
+  where it got through 4.2. The computer only plays it when it's on, so more of the ones it does play get to the
+  runner. Fewer goals go in, too: 1.1 a match between two computer sides, against 1.8 at the last commit.
 - **Losing the ball to a slide** puts you down longer than a standing tackle (0.5 s): 0.65 s against Slide tackle 1,
   up to 1.05 s against 10, and you can't touch the ball for 0.2 s after that. When they win it, you're moved to a closer team-mate if one is
   more than 6 m nearer than your man.
@@ -382,9 +423,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a forward
     at the back or a defender in goal plays below his usual rating; in the Office that rating shows in amber. BEST 8
     puts a keeper in goal and the best seven by their ratings in the spots they're in.
-  - **Moving men is a drag.** On a touch screen, hold a man a moment and he's picked up (a quick tap only shows
-    his card, and a finger that moves off at once is a swipe); with a mouse, just drag. He stays where you picked
-    him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
+  - **Moving men is a drag.** Touch a man and move your finger, and he's up at once: there's no hold to wait for
+    (nothing scrolls, so a moving finger can only mean him). A tap, however long, only shows his card. With a
+    mouse, just drag. He stays where you picked him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
     there, in the scheme's colour in his own position and amber out of it. Drop him on another man and they swap
     spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the Office's
     Squad tab you can drop a man from the list onto a small pitch above his card.
@@ -631,11 +672,13 @@ test, and like the Trap Lab the values are the game's settings.
 ## What's in the engine
 
 - **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
-  and possession-aware team phases, on a pitch shaped like a real one (105 × 68 m, at 25 px to the
-  metre: 2625 × 1700) and marked at real size: penalty areas, six-yard boxes, penalty spots and arcs,
-  the centre circle and the corners (the goals are a little wider than real ones). The camera always
-  shows the full width, spreads the depth evenly so the middle of the pitch sits midway between the
-  touchlines, and follows play along the length.
+  and possession-aware team phases, on a pitch shaped like a real one (105 × 68) and marked like one --
+  penalty areas, six-yard boxes, penalty spots and arcs, the centre circle and the corners -- at nine-tenths
+  of the men's size: they're 25 px to the metre, the pitch 22.5 (2362.5 × 1530; it was 2625 × 1700 at 25).
+  The goals are the men's size, so a little wider than real ones. The camera is as it was: it always shows
+  the full width, the far touchline under the stand and the near one nine-tenths of the way down the
+  screen (the lawn past it below), the men, the ball and the goals as big as ever, and it follows play along
+  the length.
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a

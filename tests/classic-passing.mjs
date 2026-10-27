@@ -2,7 +2,8 @@
 // tapped further away isn't played first time; with nobody near that way it's a short ball into space, and you're put
 // on whoever's best placed for it), and a pass
 // played the moment you've turned to face it goes less true -- by how far you've turned over the last ~0.3 s, less the
-// higher your Off IQ. On a copy of the game that lets the test set the scene.
+// higher your Off IQ. The computer's through ball along the grass is never struck harder than its dial (900 px/s), and
+// its weight errs with the passer's Passing. On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, turnWorst, trackFacing, oneTouchMax, passSolve, firstTouchPass, touchPass, oneTouch:()=>oneTouch, lastGrade:()=>lastGrade, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, turnWorst, trackFacing, oneTouchMax, passSolve, firstTouchPass, touchPass, oneTouch:()=>oneTouch, lastGrade:()=>lastGrade, obThruBall, obThruV0, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; recvAuto=null; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pass-')), 'classic.html');
 writeFileSync(copy, src);
@@ -66,6 +67,24 @@ const ease = await page.evaluate(() => { const T = window.__T, c = T.controlled(
   for(const t of [0.1, 0.2, 0.3, 0.4]){ for(let i = 0; i < Math.round(t * 60); i++) T.trackFacing(c, 1 / 60); out.push(deg(T.turnWorst(c, 0, 1))); }
   return out; });
 ok(ease[0] > 0 && ease[1] < ease[0] && ease[2] < ease[1] && ease[3] < ease[0] * 0.2 && ease[4] === 0, 'turned square and held: ' + ease.join(' -> ') + ' deg after 0, 0.1, 0.3, 0.6 and 1 s');
+
+// THE COMPUTER'S THROUGH BALL: along the grass, struck to die where the runner will be -- but never harder than the
+// Computer through ball dial (900 px/s; it was 1500, and nobody could get across to it). Its weight errs with Passing:
+// struck a hundred times each, a Passing 1 man's pace spreads two or three times as wide as a 10's.
+const tb = await page.evaluate(() => { const T = window.__T, c = T.controlled(), mates = T.players().filter(q => q.team === c.team && q !== c), q = mates[0], b = T.ball(), keep = c.stats.passAcc, out = {};
+  T.freeze(); const ox = c.x, oy = c.y;
+  const hit = (d, tA, acc) => { c.stats.passAcc = acc; c.x = ox; c.y = oy; q.x = ox + 300; q.y = oy; b.ownedBy = c; b.x = c.x + 20; b.y = c.y; b.z = 0;
+    T.obThruBall(c, q, b.x + d, b.y, tA); const sp = Math.hypot(b.vx, b.vy); b.vx = b.vy = 0; return { sp, vz: b.vz }; };
+  out.cap = T.P.thruPace.val; out.need = Math.round(T.obThruV0(600, 0.45).v0);
+  const R = Math.random; Math.random = () => 0.5; try { out.long = hit(600, 0.45, 9); out.short = hit(220, 0.8, 9); } finally { Math.random = R; }
+  out.shortNeed = Math.round(T.obThruV0(220, 0.8).v0);
+  const sd = acc => { const v = []; for(let i = 0; i < 100; i++) v.push(hit(400, 0.6, acc).sp); const m = v.reduce((a, x) => a + x, 0) / v.length; return Math.sqrt(v.reduce((a, x) => a + (x - m) * (x - m), 0) / v.length) / m; };
+  out.sd1 = +sd(1).toFixed(3); out.sd10 = +sd(10).toFixed(3);
+  c.stats.passAcc = keep; c.x = ox; c.y = oy; return out; });
+info('the computer\'s through ball: ' + JSON.stringify(tb));
+ok(tb.cap === 900 && Math.abs(tb.long.sp - 900) < 1 && tb.long.vz === 0, 'a long through ball that would need ' + tb.need + ' px/s to get there in time is struck at ' + Math.round(tb.long.sp) + ', along the grass');
+ok(Math.abs(tb.short.sp - tb.shortNeed) < 1, '...a short one at what it needs (' + Math.round(tb.short.sp) + ' px/s)');
+ok(tb.sd1 > 2 * tb.sd10 && tb.sd10 > 0.02, 'its weight errs with Passing: ' + Math.round(tb.sd1 * 100) + '% at 1, ' + Math.round(tb.sd10 * 100) + '% at 10');
 
 process.exitCode = rep.finish();
 await browser.close();

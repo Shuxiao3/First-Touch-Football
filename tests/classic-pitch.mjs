@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={cam:v=>{ if(v!=null) camX=v; return camX; }, draw:()=>draw(), HORIZON, FAR_SCALE, NEAR_SCALE, NEAR_Y, FH, '
+patch('  const LAB_TITLE=', '  window.__T={cam:v=>{ if(v!=null) camX=v; return camX; }, draw:()=>draw(), HORIZON, FAR_SCALE, NEAR_SCALE, NEAR_Y, FH, proj, PA_D, PA_HW, GA_D, GA_HW, PEN_SPOT, CIRCLE_R, '
   + 'ball:()=>ball, net:()=>NET, scored:()=>scoredT, score:()=>scoreG+scoreR, simNow:()=>simNow, players:()=>players, keepers:()=>keepers, '
   + 'FW, YC, GOAL_W, GOAL_H, NET_D, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pitch-')), 'classic.html');
@@ -50,6 +50,18 @@ ok(r.turf >= 3 && r.turf <= 12, 'the turf is a few mint shades, specked (' + r.t
 ok(r.panSame > 0.97, 'pan the camera and the ground moves with it, speck for speck (' + (r.panSame * 100).toFixed(1) + '% of a row matches)');
 ok([1, 3, 5].every(k => parseInt(r.offTop.slice(k, k + 2), 16) < 60), 'switched off, the old pitch is back: its night sky (' + r.offTop + ')');
 ok(['#2b7445', '#31814d', '#235c38'].includes(r.offTurf), '...and its dark green bands (' + r.offTurf + ')');
+// A TENTH SMALLER: a real pitch's shape (105 x 68) and markings at 22.5 px to its metre (it was 25, the men's) -- and the
+// camera as it was: the far touchline under the stand, the near one nine-tenths of the way down, the men as big as ever
+const sz = await page.evaluate(() => { const T = window.__T, cv = document.querySelector('canvas'), g = cv.getContext('2d'); PITCH.enable(true); T.cam(T.FW / 2); T.draw();
+  const near = T.proj(T.FW / 2, T.FH).y, x = Math.round(T.proj(T.FW / 2 + 300, T.FH).x);
+  let line = -1; for(let y = Math.round(near) - 3; y <= Math.round(near) + 3; y++){ const d = g.getImageData(x, y, 1, 1).data; if(d[0] === 0xf4 && d[1] === 0xfb && d[2] === 0xf2) line = y; }
+  return { FW: T.FW, FH: T.FH, mk: [[T.PA_D, 16.5], [T.PA_HW, 20.16], [T.GA_D, 5.5], [T.GA_HW, 9.16], [T.PEN_SPOT, 11], [T.CIRCLE_R, 9.15]].map(([v, m]) => +(v / T.FW * 105 / m).toFixed(6)),
+    far: T.proj(T.FW / 2, 0).y, near: +near.toFixed(1), line, sMid: +T.proj(T.FW / 2, 765).scale.toFixed(4), goal: T.GOAL_W }; });
+info('the pitch: ' + JSON.stringify(sz));
+ok(sz.FW === 2362.5 && sz.FH === 1530 && Math.abs(sz.FW / sz.FH - 105 / 68) < 1e-9, 'the pitch is a tenth smaller, a real one\'s shape: ' + sz.FW + ' x ' + sz.FH + ' (105:68; it was 2625 x 1700)');
+ok(sz.mk.every(k => Math.abs(k - 1) < 1e-6), 'its markings in proportion to it, as a real pitch\'s: the box, the six-yard box, the spot, the circle');
+ok(sz.far === 100 && Math.abs(sz.near - (100 + 412 * 0.9)) < 0.5 && sz.line >= 0 && sz.sMid === +(0.55 + 0.5 * 765 / 1700).toFixed(4) && sz.goal === 227,
+  'the camera as it was: the far touchline at 100, the near one drawn at ' + sz.line + ' (was 512), the men and the goal as big as ever');
 
 // THE NET, in real frames: everyone out of the way, the ball struck at the goal on the right from x0 px out. Followed
 // for `secs` of game time: how far past the line it got, how far the net gave, and where it lay while the goal was on.

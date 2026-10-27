@@ -112,10 +112,17 @@
   .pauseOv{ display:none; position:fixed; inset:0; z-index:150; background:rgba(4,8,5,.92); align-items:center; justify-content:center;
     padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); }
   .pauseOv.on{ display:flex; }
-  /* FIXED FRAME: a card always fits the screen -- its title and buttons stay put, and only a long middle (.pScroll) scrolls */
+  /* FIXED FRAME: a card always fits the screen -- its title and buttons stay put, and only a long middle (.pScroll) goes over pages */
   .pauseCard{ width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; max-height:100%; min-height:0; overflow:hidden; padding-top:4px; }
   .pauseCard .pauseTitle{ line-height:1.3; flex:none; }
-  .pScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .pScroll{ flex:1 1 auto; min-height:0; overflow:hidden; }
+  /* NO SCROLLING (fitBox): what doesn't fit goes over pages, with the pager along the box's foot */
+  .fitHide{ display:none !important; }
+  .fitPaged{ position:relative; overflow:hidden !important; box-sizing:border-box; flex-shrink:0 !important; }
+  .fitPager{ position:absolute; left:0; right:0; bottom:0; height:40px; display:flex; align-items:center; justify-content:center; gap:12px; z-index:5; }
+  .fitPager b{ font-family:'FTC Dot',monospace; font-weight:400; color:var(--ink); min-width:48px; text-align:center; font-size:13px; }
+  .fitPager .mgAdj{ width:44px; height:34px; }
+  @media (max-height:360px){ .fitPager{ height:32px; } .fitPager .mgAdj{ height:28px; } }
   .settingsCard{ max-width:600px; }
   body:not(.touch) .layoutEntry{ display:none; }   /* (the buttons are only on touch screens) */
   #layoutEd{ display:none; position:fixed; inset:0; z-index:170; background:var(--well); align-items:center; justify-content:center; touch-action:none; }
@@ -155,6 +162,9 @@
   .mkCard .mkBtns{ margin-top:4px; flex:none; }
   .mkStep{ color:var(--dim); font-size:11px; letter-spacing:.4px; margin:2px 0 12px; line-height:1.5; }
   .mkInput{ width:100%; box-sizing:border-box; background:var(--well); border:1px solid var(--well); color:var(--ink); border-radius:8px; padding:10px 12px; font-size:14px; font-family:inherit; margin-bottom:10px; }
+  @media (max-height:400px){ #mgrMaker .mkStep{ margin-bottom:6px; } #mgrMaker .mkInput{ padding:6px 10px; margin-bottom:6px; } #mgrMaker .mgSw{ margin-bottom:4px; }
+    #mgrMaker .pauseCard.mkCard{ padding:8px 16px; gap:6px; } }   /* (a short phone: the form still on one page) */
+  @media (max-height:400px) and (max-width:760px){ #mgrMaker .mgSw .hsSw{ width:22px; height:22px; } #mgrMaker .mkStep{ font-size:10px; } }
   .mkMeta{ display:flex; justify-content:space-between; color:var(--dim); font-size:12px; margin-bottom:8px; }
   .mkCard.mkWide{ width:min(840px,96vw); max-width:840px; }
   .mkLayout{ display:flex; gap:14px; min-height:0; }
@@ -240,7 +250,7 @@
   .menuCard{width:min(96vw,1000px);background:var(--panel);border:1px solid var(--edge);border-radius:12px;
     padding:12px 16px 12px;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:100%;display:flex;flex-direction:column;min-height:0;}
   .menuCard > .menuTop, .menuCard > .menuTeamRow{flex:none;}
-  #menuBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #menuBody{flex:1 1 auto;min-height:0;overflow:hidden;}
   .menuTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
   .menuTabs{display:flex;gap:6px;}
   .sqTabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
@@ -329,7 +339,7 @@
   /* exhibition setup: two clubs, the player you control */
   #exhPanel{background:rgb(6,10,7);overflow:hidden;}
   #exhPanel .exhWrap{max-width:660px;max-height:100%;min-height:0;}
-  #exhPanel .exhGrid.on{flex:0 1 auto;min-height:0;overflow-y:auto;}
+  #exhPanel .exhGrid.on{flex:0 1 auto;min-height:0;overflow:hidden;}
   #exhPanel .exhGo{flex:none;}
   #exhPanel h3{margin-bottom:4px;}
   .exhLeague{font-size:10px;letter-spacing:3px;color:var(--dim2);margin-bottom:10px;}
@@ -360,9 +370,9 @@
   #stageWrap.menuMode #pad,
   #stageWrap.menuMode .actBtn,
   #stageWrap.menuMode #dbg { display:none !important; }
-  /* iOS-safe menu: full-viewport, scrollable, never clips its content */
+  /* iOS-safe menu: full-viewport, never clips its content (a long panel goes over pages) */
   #startMenu, .smPanel{ position:fixed; inset:0; justify-content:flex-start;
-    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    overflow:hidden;
     /* iPhone LANDSCAPE: notch/Dynamic Island is on a side -> respect left/right insets too */
     padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
              max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
@@ -413,12 +423,13 @@
   .chBtn2:disabled,.chBtn2[disabled]{ opacity:.32; pointer-events:none; cursor:default; }
   #matchReport{ display:none;position:fixed;inset:0;background:var(--well);z-index:200;overflow:hidden;padding:calc(env(safe-area-inset-top,0px) + 16px) calc(env(safe-area-inset-right,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 20px) calc(env(safe-area-inset-left,0px) + 18px); }
   .mrHead{ text-align:center;padding:14px 0 18px; }
-  /* FIXED FRAME: the score along the top, two columns under it (each scrolls by itself), CONTINUE pinned bottom right */
+  /* FIXED FRAME: the score along the top, two columns under it (each over pages of its own), CONTINUE pinned bottom right */
   #matchReport .mrWrap{ height:100%; max-width:1000px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
   #matchReport .mrHead{ flex:none; padding:4px 0 2px; }
   #matchReport .mrScore{ font-size:34px; line-height:1.2; margin-top:6px; }
+  @media (max-height:400px){ #matchReport .mrScore{ font-size:26px; margin-top:2px; } #matchReport .mrHead{ padding:0; } #matchReport .mrWrap{ gap:6px; } }
   .mrCols{ flex:1 1 auto; min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .mrCol{ min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--win); box-shadow:var(--pxWin); padding:6px 14px 10px; }
+  .mrCol{ min-height:0; overflow:hidden; background:var(--win); box-shadow:var(--pxWin); padding:6px 14px 10px; }
   .mrCol .mrSect:first-child{ border-top:0; margin-top:4px; padding-top:2px; }
   .mrFoot{ flex:none; display:flex; justify-content:flex-end; }
   .mrFoot .mrContinue{ width:min(320px,100%); margin-top:0; padding:11px 0; }
@@ -446,10 +457,10 @@
     overflow:hidden; background:rgba(5,8,6,.985); color:var(--acc); font-family:'FTC Dot',monospace;
     padding: max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
   #bldgPanel.show{ display:flex; }
-  /* FIXED FRAME: ◀ TOWN · the title · its tabs, all on one line; the body fills the rest and scrolls inside */
+  /* FIXED FRAME: ◀ TOWN · the title · its tabs, all on one line; the body fills the rest, over pages when it's long */
   #bldgPanel .bpInner{ max-width:1100px; width:100%; height:100%; display:flex; flex-direction:column; gap:7px; }
   .bpHead{ flex:none; display:flex; align-items:center; gap:10px; min-height:36px; }
-  .bpTabs{ display:flex; gap:5px; flex-wrap:nowrap; overflow-x:auto; margin-left:auto; scrollbar-width:none; }
+  .bpTabs{ display:flex; gap:5px; flex-wrap:nowrap; overflow:hidden; margin-left:auto; }
   .bpTabs::-webkit-scrollbar{ display:none; }
   .bpMsg{ position:absolute; left:50%; bottom:6px; transform:translate(-50%,8px); max-width:min(560px,92%); opacity:0; pointer-events:none; z-index:5;
     background:rgba(8,14,9,.96); border:1px solid var(--well); border-radius:8px; padding:8px 14px; font-size:12px; line-height:1.4; text-align:center; transition:opacity .2s,transform .2s; }
@@ -646,7 +657,7 @@
   .formBtn.on{ color:var(--accInk); background:var(--acc); border-color:var(--acc); font-weight:700; }
   .tacWarn{ color:#ff8a7d; background:rgb(var(--badRGB) / .08); border:1px solid rgb(var(--badRGB) / .3); border-radius:7px; font-size:10px; text-align:center; padding:6px 8px; margin:0 auto 8px; max-width:340px; }
   #bldgPanel h3{ font-family:'FTC Dot',monospace; color:var(--ink); font-size:17px; letter-spacing:1px; white-space:nowrap; }
-  #bldgPanel .bpBody{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; color:var(--dim); font-size:13px; line-height:1.6;
+  #bldgPanel .bpBody{ flex:1 1 auto; min-height:0; overflow:hidden; color:var(--dim); font-size:13px; line-height:1.6;
     background:rgb(var(--accRGB) / .04); border:1px solid var(--well); border-radius:10px; padding:10px 14px; }
   #bldgPanel .bpBody.panes{ overflow:hidden; padding:0; }
   .bpFoot{ display:none; flex:none; gap:8px; justify-content:center; }
@@ -705,7 +716,7 @@
   .labTallyRow{display:flex;gap:6px;align-items:baseline;justify-content:center;font-size:9.5px;color:var(--ink-dim);
     text-shadow:0 1px 2px #000;flex-wrap:wrap;background:rgba(8,14,9,.72);border-radius:6px;padding:1px 8px;}   /* a pill: it sits on the turf now */
   .labClear{pointer-events:auto;font-family:inherit;font-size:9px;color:var(--dim);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
-  #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow-y:auto;
+  #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow:hidden;
     background:rgba(8,14,9,.93);border:1px solid var(--edge);border-radius:8px;padding:9px 12px 12px;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .ltHead{display:flex;justify-content:space-between;align-items:center;font-family:'FTC Dot',monospace;font-size:12px;
     font-weight:700;letter-spacing:1.5px;color:var(--ink);}
@@ -864,19 +875,17 @@
   .mgPane{ min-width:0; display:flex; flex-direction:column; min-height:0; }
   .mgPaneL{ flex:1.15 1 0; box-shadow:inset -2px 0 0 0 var(--btnLo); }
   .mgPaneR{ flex:1 1 0; }
-  .mgPaneScroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 12px; }
+  .mgPaneScroll{ flex:1 1 auto; min-height:0; overflow:hidden; padding:10px 12px; }
   .mgPaneL .mgPaneScroll{ padding-left:10px; }
-  .mgPager{ flex:none; display:flex; align-items:center; justify-content:center; gap:12px; padding:6px 8px 8px; box-shadow:inset 0 2px 0 0 var(--btnLo), inset -2px 0 0 0 var(--btnLo); }
-  .mgPager b{ font-family:'FTC Dot',monospace; color:var(--ink); min-width:54px; text-align:center; font-size:14px; }
-  .mgPager span{ color:var(--dim2); font-size:10px; }
-  .mgPager .mgAdj{ width:44px; height:36px; }
   .mgPick0{ color:var(--dim); text-align:center; padding:36px 10px; font-size:12px; line-height:1.6; }
   .mgPaneR .mgCard{ margin:0; padding:0; background:transparent; box-shadow:none; }
   .mgPaneR .mgBars{ grid-template-columns:1fr; }
   .mgFilters{ justify-content:flex-start; }
-  .mgPaneL .mgFilters{ flex-wrap:nowrap; overflow-x:auto; padding:2px 2px 4px; scrollbar-width:none; }
-  .mgPaneL .mgFilters::-webkit-scrollbar{ display:none; }
+  .mgPaneL .mgFilters{ flex-wrap:wrap; padding:2px 2px 4px; }
   .mgPaneL .mgChip{ flex:none; white-space:nowrap; }
+  .mgTierStep{ display:flex; align-items:center; gap:4px; margin-right:6px; }
+  .mgTierStep .mgAdj{ width:32px; height:32px; font-size:13px; }
+  .mgTierStep b{ font:11px 'FTC Dot',monospace; font-weight:400; color:var(--ink); min-width:96px; text-align:center; white-space:nowrap; }
   #bpBody.panes .mgSum{ text-align:left; }
   .six{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:7px; margin:10px 2px 8px; }
   .sixC{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:46px; padding:4px 0; cursor:pointer;
@@ -884,8 +893,15 @@
   .sixC b{ font-size:16px; font-weight:400; line-height:1; text-shadow:1px 1px 0 var(--ol); }
   .sixC i{ font-style:normal; font-size:10px; color:var(--dim); letter-spacing:1px; }
   .sixC.on{ background:var(--rowOn); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), inset 0 -3px 0 0 var(--well); }
-  .sixOpen{ background:var(--well); padding:8px 10px 6px; margin:0 2px 10px; box-shadow:inset 0 0 0 2px var(--btnLo); }
-  .sixHd{ font-family:'FTC Dot',monospace; font-size:11px; color:var(--dim); letter-spacing:1px; margin-bottom:4px; }
+  .sixDet{ background:var(--well); padding:5px 8px 6px; margin:8px 2px 8px; box-shadow:inset 0 0 0 2px var(--btnLo); border-radius:var(--rS); }
+  .sixBack{ display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:0 10px; margin:0 0 4px; border:0; border-radius:var(--r); cursor:pointer;
+    font:11px 'FTC Dot',monospace; letter-spacing:1px; background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
+  .sixBack b{ font-weight:400; font-size:13px; text-shadow:1px 1px 0 var(--ol); }
+  .sixRows{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+  .sixRows .statRow{ margin:1px 0; font-size:10px; } .sixRows .statRow .sl{ width:auto; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sixRows .statBar{ flex:0 0 34px; }
+  @media (max-height:400px){ .sixDet{ margin:4px 2px; padding:4px 8px 5px; } .sixBack{ min-height:26px; margin-bottom:2px; }
+    .sixRows{ grid-template-columns:1fr 1fr 1fr; gap:0 10px; } .sixRows .statBar{ display:none; } .sixRows .statRow{ margin:0; } }   /* (a short phone: three to a row, the number alone) */
   /* TACTICS: the pitch first */
   .tacB1{ display:flex; flex-direction:column; height:100%; min-height:0; }
   .tbTop{ flex:none; display:flex; align-items:center; gap:8px; padding:8px 10px 8px; }
@@ -909,7 +925,7 @@
   .tbOpt.on i{ color:var(--accInk); }
   .tbMain{ flex:1 1 auto; min-height:0; display:flex; }
   .tbLeft{ flex:1.5 1 0; min-width:0; display:flex; flex-direction:column; padding:4px 12px 8px; }
-  .tbRight{ flex:1 1 0; min-width:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 12px 10px; box-shadow:inset 2px 0 0 0 var(--btnLo); }
+  .tbRight{ flex:1 1 0; min-width:0; overflow:hidden; padding:2px 12px 10px; box-shadow:inset 2px 0 0 0 var(--btnLo); }
   .tpitch{ position:relative; flex:1 1 auto; min-height:110px; background:repeating-linear-gradient(90deg,#6ec88b 0 8.333%,#5cbc7c 8.333% 16.667%);
     box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; border-radius:var(--r); }
   .tpitch i{ position:absolute; pointer-events:none; }
@@ -918,6 +934,7 @@
   .tpBox{ top:26%; bottom:26%; width:13%; box-shadow:inset 0 0 0 2px #f4fbf2; }
   .tpBox.l{ left:0; } .tpBox.r{ right:0; }
   .sqPitchW{ flex:none; padding:10px 12px 4px; }
+  .sqBack{ width:100%; margin:0 0 8px; min-height:30px; }
   .sqPitch{ height:156px; flex:none; }
   .sqPitchHint{ font-size:9.5px; color:var(--dim2); margin-top:6px; }
   .sqPitch .ptk{ width:60px !important; height:36px !important; padding:0 2px 0 4px; }
@@ -926,7 +943,7 @@
   .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
   .sqPitch .ptk .ptkName{ font-size:8px !important; max-width:36px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
-  .sqList .mgRow{ -webkit-touch-callout:none; }
+  .sqList .mgRow{ -webkit-touch-callout:none; touch-action:none; }   /* (a finger that moves on him carries him: see pxDrag) */
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
   .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:44px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
     background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:3px;
@@ -937,10 +954,12 @@
   .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
-  .tpitch .tpGhost{ transform:translate(calc(-50% + 8px), calc(-50% + 8px)); width:72px; height:44px; display:flex; align-items:center; gap:3px; padding:0 3px 0 5px; border-radius:var(--r);
-    background:rgb(var(--accRGB) / .2); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9), 0 0 0 4px rgb(var(--accRGB) / .25); opacity:.8;
-    font:9px 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
-  .tpitch .tpGhost .ptkFace{ opacity:.7; }
+  /* the other phase's man: a small box with just his name, off the corner of his slot -- right and down, so it only
+     clips the corner of a man standing there (left, up by their goal at the right-hand end) */
+  .tpitch .tpGhost{ transform:translate(26px,14px); max-width:56px; height:18px; display:flex; align-items:center; padding:0 4px; border-radius:var(--rS);
+    background:rgb(var(--accRGB) / .28); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9); opacity:.9;
+    font:9px/1 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
+  .tpitch .tpGhost.flip{ transform:translate(calc(-100% - 26px),14px); }
   .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -957,7 +976,24 @@
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:7px 7px; align-items:center; padding:8px 12px 9px; box-shadow:inset 0 2px 0 0 var(--btnLo); }
   .tbBench .ptk{ position:relative; transform:none; width:54px; height:42px; padding:0 3px; justify-content:center; }
   .tbBenchLbl{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; margin-right:2px; }
-  .tbRight .mgCardHead{ margin-top:6px; }
+  .tbRight .mgCardHead{ margin-top:6px; margin-bottom:6px; }
+  .cardSides{ display:flex; gap:6px; margin:0 0 8px; }
+  .cardSide{ flex:1 1 0; min-height:30px; padding:0 6px; border:0; border-radius:var(--r); cursor:pointer; font:11px 'FTC Dot',monospace; letter-spacing:1px;
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); text-shadow:1px 1px 0 var(--btnSh); }
+  .cardSide.on{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); text-shadow:1px 1px 0 var(--accSh); }
+  .tbRight .instrHead{ margin:0 0 6px; padding-top:0; border-top:0; }
+  .tbRight .instrGrp{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin:0 0 8px; }
+  .tbRight .instrGrpLbl{ margin:0; min-width:64px; }
+  .tbRight .instrOpts{ flex:1 1 0; min-width:0; }
+  .tbRight .iOpt{ min-height:30px; }
+  .tbRight .instrDesc{ flex:1 0 100%; margin-top:0; }
+  @media (max-height:360px){ .tbRight{ padding-bottom:4px; } .tbRight .iOpt{ min-height:26px; padding:3px 8px; } .tbRight .instrDesc{ font-size:10px; line-height:1.3; }
+    .tbRight .instrGrp{ margin-bottom:5px; } .tbRight .cardBody{ width:26px; height:40px; } .tbRight .mgCardName{ font-size:15px; } .mtLegs{ margin:0 2px; } }
+  @media (max-height:400px){   /* a short phone: his card's front on one page */
+    .tbRight .mgCardHead{ margin-top:2px; margin-bottom:4px; } .tbRight .cardBody{ width:30px; height:46px; }
+    .cardSides{ margin-bottom:5px; } .cardSide{ min-height:26px; }
+    .tbRight .six{ margin:4px 2px 4px; } .tbRight .sixC{ min-height:40px; }
+    .tbRight .mtLegs{ margin:2px 0 0; } }
   .tbRight .tacInstr{ margin-top:4px; }
   /* the pause menu: four buttons two by two */
   .pauseMain{ max-width:560px; }
@@ -1012,14 +1048,14 @@
       </div>
     </div>
     <div class="smVer" id="smVer">build —</div>
-    <div class="smPanel" id="loadPanel">
+    <div class="smPanel" id="loadPanel" data-pages="loadPanel">
       <div class="smCenter">
         <h3>LOAD GAME</h3>
         <div id="slotList"></div>
         <button class="smBtn smBack" data-act="back"><span class="mk">◀</span>BACK</button>
       </div>
     </div>
-    <div class="smPanel" id="newPanel">
+    <div class="smPanel" id="newPanel" data-pages="newPanel">
       <div class="smCenter">
         <h3>NEW CAREER</h3>
         <div style="color:#9bb88a;font-size:12px;max-width:380px;line-height:1.6;margin-bottom:16px">You are the manager: pick a slot for your new career.</div>
@@ -1027,7 +1063,7 @@
         <button class="smBtn smBack" data-act="back"><span class="mk">◀</span>BACK</button>
       </div>
     </div>
-    <div class="smPanel" id="hubPanel">
+    <div class="smPanel" id="hubPanel" data-pages="hubPanel">
       <div class="smCenter">
         <h3 id="hubTitle">CAREER</h3>
         <div id="hubBody" style="color:#9bb88a;font-size:13px;line-height:1.7;margin-bottom:18px;text-align:center"></div>
@@ -1044,7 +1080,7 @@
           <div class="exhVs">VS</div>
           <div class="exhSide" id="exhSideR"></div>
         </div>
-        <div class="exhGrid" id="exhGrid"></div>
+        <div class="exhGrid" id="exhGrid" data-pages="exhGrid"></div>
         <div class="exhGo">
           <button class="smBtn" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
           <button class="smBtn" data-act="back"><span class="mk">◀</span>BACK</button>
@@ -1134,7 +1170,7 @@
       <div class="lmScale"><span>◂ LEFT</span><span id="labGoalTxt">your last shots</span><span>RIGHT ▸</span></div>
     </div>
   </div>
-  <div id="labTune" class="labUI">
+  <div id="labTune" class="labUI" data-pages="tune">
     <div class="ltHead"><span id="labTuneTitle">TUNE THE TRAP</span><button class="labChip" data-lab="tune"><b>✕</b></button></div>
     <div class="ltNote">Changes apply to the next ball, and to matches.</div>
     <div id="labDials"></div>
@@ -1169,7 +1205,7 @@
 <div id="settingsOverlay" class="pauseOv">
   <div class="pauseCard settingsCard">
     <div class="pauseTitle">SETTINGS</div>
-    <div class="pScroll setMid">
+    <div class="pScroll setMid" data-pages="settings">
       <div class="setRows" id="setRows"></div>
       <button class="pauseBtn layoutEntry" data-setlayout="1">BUTTON LAYOUT ▶</button>
       <button class="pauseBtn devOnly" data-setdev="1">ADVANCED · DEV ▶</button>
@@ -1291,6 +1327,71 @@
   const ctx=cv.getContext('2d');
   const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);   // pure Math helpers, defined first so load-time setup can use them
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  // NO SCROLLING: a box marked data-pages="key" that would overflow shows a page of what fits in it, with ◀ 2 / 3 ▶ along
+  // its foot. It breaks between rows: a list in a wrapper (or a table) is opened up into its rows, but never a button, a
+  // table row or anything .fitWhole (an instruction with its options, an offer with its buttons). Items side by side (a
+  // grid's lines) stay together, and anything .fitKeep (a table's head, a list's filters, a card's name and rating)
+  // shows on every page. It runs whenever one of the menus repaints (fitWatch); a box keeps its page by its key.
+  const FITPG={};                                      // the page each box is on
+  const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
+  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); }
+  function fitForget(part){ for(const k in FITPG) if(k.includes(part)) delete FITPG[k]; }   // (back to page 1)
+  function fitBox(box){
+    for(const x of box.querySelectorAll(':scope > .fitPager')) x.remove();
+    for(const x of box.querySelectorAll('.fitHide')) x.classList.remove('fitHide');
+    box.classList.remove('fitPaged'); box.style.height=''; box.scrollTop=0;
+    if(!box.getClientRects().length||box.scrollHeight<=box.clientHeight+1) return;   // (not showing, or it fits)
+    const padT=parseFloat(getComputedStyle(box).paddingTop)||0, R0=box.getBoundingClientRect();
+    const room=box.clientHeight-padT-fitPH()-4, keep=el=>el.matches('thead,.fitKeep');   // (the pager sits over the box's foot, padding and all)
+    const open=el=>{ if(keep(el)||!el.children.length||el.matches('button,a,input,select,textarea,label,img,canvas,svg,tr,.fitWhole')) return false;
+      const h=el.getBoundingClientRect().height; return el.children.length>1?h>Math.min(60,room/3):h>room-4; };
+    let items=[...box.children];
+    const opened=[];
+    for(let n=0;n<6;n++){ let deeper=false; const next=[];
+      for(const it of items){ if(open(it)){ opened.push(it); next.push(...it.children); deeper=true; } else next.push(it); }
+      items=next; if(!deeper) break; }
+    const keeps=items.filter(keep), flow=items.filter(it=>!keep(it)), last=flow[flow.length-1], lines=[];
+    const b1=last?last.getBoundingClientRect().bottom:0;
+    for(const k of keeps) k.classList.add('fitHide');
+    const keepH=Math.max(0,b1-(last?last.getBoundingClientRect().bottom:0))+2;   // (what they take, margins and all, as the rest moves up without them)
+    const top0=box.getBoundingClientRect().top+padT;             // (the rest measured without them: they're on every page anyway)
+    for(const it of items){ if(keep(it)) continue; const r=it.getBoundingClientRect(); if(!r.height&&!r.width) continue;
+      const t=r.top-top0, b=r.bottom-top0, L=lines.find(l=>Math.abs(l.t-t)<3);
+      if(L){ L.b=Math.max(L.b,b); L.els.push(it); } else lines.push({t,b,els:[it]}); }
+    for(const k of keeps) k.classList.remove('fitHide');
+    lines.sort((a,b)=>a.t-b.t);
+    const cap=room-keepH, pages=[]; let s0=0;
+    while(s0<lines.length){ let e=s0; while(e+1<lines.length&&lines[e+1].b-lines[s0].t<=cap) e++;
+      if(e>s0&&e+1<lines.length&&lines[e].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr')) e--;   // (a heading goes over with what it heads)
+      pages.push([s0,e]); s0=e+1; }
+    if(pages.length<2) return;
+    const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0}); st.p=clamp(st.p,0,pages.length-1);
+    const [a,z]=pages[st.p];
+    lines.forEach((l,i)=>{ if(i<a||i>z) for(const el of l.els) el.classList.add('fitHide'); });
+    for(let i=opened.length-1;i>=0;i--){ const w=opened[i]; if([...w.children].every(c=>c.classList.contains('fitHide'))) w.classList.add('fitHide'); }
+    const pg=document.createElement('div'); pg.className='fitPager';
+    pg.innerHTML='<button class="mgAdj" data-fitgo="-1"'+(st.p<=0?' disabled':'')+'>◀</button><b>'+(st.p+1)+' / '+pages.length+'</b><button class="mgAdj" data-fitgo="1"'+(st.p>=pages.length-1?' disabled':'')+'>▶</button>';
+    box.style.height=R0.height+'px';                     // (held at its size: a box as tall as what's in it would shrink round a short page)
+    box.classList.add('fitPaged'); box.appendChild(pg);
+  }
+  document.addEventListener('click',e=>{ const b=e.target.closest('[data-fitgo]'); if(!b) return; e.stopPropagation(); e.preventDefault();
+    const box=b.closest('[data-pages]'); if(!box||b.disabled) return; const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0});
+    st.p+= +b.dataset.fitgo; fitObs.disconnect(); try{ fitBox(box); } finally { fitWatch(); } },true);
+  // ...held, the arrow keeps turning pages (a long list)
+  let fitHold=null;
+  document.addEventListener('pointerdown',e=>{ const b=e.target.closest('[data-fitgo]'); if(!b||b.disabled) return; const box=b.closest('[data-pages]'); if(!box) return;
+    const dir=+b.dataset.fitgo, key=box.dataset.pages, step=()=>{ const st=FITPG[key]||(FITPG[key]={p:0}), was=st.p; st.p+=dir; fitObs.disconnect(); try{ fitBox(box); } finally { fitWatch(); } if(st.p===was) fitStop(); };
+    fitStop(); fitHold={t:setTimeout(()=>{ fitHold.i=setInterval(step,110); step(); },450)}; },true);
+  function fitStop(){ if(fitHold){ clearTimeout(fitHold.t); clearInterval(fitHold.i); fitHold=null; } }
+  for(const ev of ['pointerup','pointercancel']) document.addEventListener(ev,fitStop,true);
+  // ...repainting a menu, opening one, or turning the phone fits them again (on the next frame, all at once)
+  let fitRaf=0;
+  const fitObs=new MutationObserver(()=>{ if(!fitRaf) fitRaf=requestAnimationFrame(()=>{ fitRaf=0; fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } }); });
+  function fitWatch(){ for(const id of ['startMenu','careerHub','bldgPanel','settingsOverlay','mgrMaker','matchReport','mtacOv','labTune']){ const el=document.getElementById(id);
+    if(el) fitObs.observe(el,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']}); } }
+  const fitNow=()=>{ fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } };
+  addEventListener('resize',fitNow);
+  fitWatch(); if(document.fonts) document.fonts.ready.then(fitNow);   // (from the start, and again once the font is in: it sets how tall a line is)
   const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
   if(isTouch) document.body.classList.add('touch');
 
@@ -1353,6 +1454,7 @@
     turnTouch:{val:0.25,min:0,max:0.6,step:0.01,label:'Touch off-square',hint:'How much harder the first touch is the further he is turned from the ball (side-on about half the most): a man who could not turn to it in time.'},
     airKeepGood:{val:0.16,min:0,max:0.6,step:0.01,label:'Above the waist: pace kept, best',hint:'A ball met above the waist (chest, high thigh) is never dead at his feet: it comes off him with at least this share of its pace at Ball control 10 (a little way off him) ...'},
     airKeepBad:{val:0.45,min:0.1,max:0.9,step:0.01,label:'Above the waist: pace kept, worst',hint:'... and this share at Ball control 1 (a long way off him). Higher up it keeps a little more.'},
+    thruPace:{val:900,min:500,max:1500,step:25,label:'Computer through ball: top pace (px/s)',hint:'How hard the computer may drive a through ball along the grass into a runner\'s path. It is struck to die where the runner will be, so a long one needs more; past this it gets there after him, or not at all, and he doesn\'t play it. (It used to be 1500: too quick for anyone to get across to.)'},
     awayAngle:{val:110,min:90,max:160,step:5,label:'Back to it from (°)',hint:'Turned further than this from the ball as it reaches him, he can\'t take it at all: it hits him and comes off, or it goes past him.'},
     blockReach:{val:25,min:14,max:40,step:1,label:'Shot block: reach (px)',hint:'How close to a defender a shot has to pass, below his shoulders, for him to get his body or a leg in the way (25 px = 1 m). His Def IQ takes it a little either way: Block: Def IQ spread.'},
     swipeFree:{val:25,min:0,max:60,step:5,label:'Swipe shot: off his line, free (°)',hint:'A swipe shot this far off the way he is facing costs nothing. Further round it is struck across his body: weaker and wilder, the more so the further, worst turned right round (Swipe shot: off his line, cost).'},
@@ -1661,7 +1763,7 @@
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
-    passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange']
   };
@@ -1714,12 +1816,14 @@
     TAC[tacTeam].off=b.dataset.otac;markTac();saveSettings();
   });
 
-  // ===== pitch: a real pitch's shape (105 x 68 m) at 25 px to the metre; the whole width stays in view =====
-  const FW=2625, FH=1700;
+  // ===== pitch: a real pitch's shape (105 x 68) and markings, at nine-tenths of the men's size -- the men are 25 px to
+  // the metre, the pitch 22.5 (it was 25: a tenth smaller every way, for the same men); the whole width stays in view =====
+  const PX_M=25, PITCH_K=0.9, MK=PX_M*PITCH_K;          // the men's metre, and the pitch's
+  const FW=105*MK, FH=68*MK;                             // (2362.5 x 1530; it was 2625 x 1700)
   const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
-  // the markings, real size at that scale: penalty area 16.5 x 40.32 m, goal area 5.5 x 18.32 m, the penalty
-  // spot 11 m out, the arc and the centre circle 9.15 m. (The goal itself is a little wider than a real one.)
-  const PX_M=25, PA_D=16.5*PX_M, PA_HW=20.16*PX_M, GA_D=5.5*PX_M, GA_HW=9.16*PX_M, PEN_SPOT=11*PX_M, CIRCLE_R=9.15*PX_M;
+  // the markings, a real pitch's at the pitch's metre: penalty area 16.5 x 40.32, goal area 5.5 x 18.32, the penalty
+  // spot 11 out, the arc and the centre circle 9.15. (The goal is the men's size, so a little wider than a real one.)
+  const PA_D=16.5*MK, PA_HW=20.16*MK, GA_D=5.5*MK, GA_HW=9.16*MK, PEN_SPOT=11*MK, CIRCLE_R=9.15*MK;
   let gDir=1, lastConceder=null;          // gDir = +1 when Green attacks the RIGHT goal; flips each half
   function atkOf(team){ return team==='G' ? gDir : -gDir; }   // a team's attacking x-direction
   const BX=227, BY=232;   // the area the computer works to at each goal (the keeper's patch, where crosses and cutbacks go)
@@ -1925,11 +2029,12 @@
   function trackOf(p){ const d=posOf(p,'def'); return d==='W'?ins(p,'wDef') : d==='ST'?ins(p,'stDef') : 'bal'; }
   // the instructions panel for a spot: a row of settings each, with its note underneath. cur: what it's been told; attr:
   // the data- attribute its buttons carry (data-<attr>="key" data-v="setting")
-  function instrPanelHtml(cur,pos,phase,attr,left){
+  function instrPanelHtml(cur,pos,phase,attr,left,card){
     const ks=instrKeysFor(pos,phase); if(!ks.length) return '';
-    let h='<div class="instrHead">'+posName(pos,left)+' · '+(phase==='atk'?'WITH THE BALL':'WITHOUT THE BALL')+'</div><div class="instrNote">These go with the position: whoever plays there follows them.</div>';
+    let h='<div class="instrHead">'+posName(pos,left)+' · '+(phase==='atk'?'WITH THE BALL':'WITHOUT THE BALL')+'</div>'
+      +(card?'':'<div class="instrNote">These go with the position: whoever plays there follows them.</div>');
     for(const k of ks){ const I=INSTR[k], v=(cur&&cur[k])||I.dflt;
-      h+='<div class="instrGrp"><div class="instrGrpLbl">'+I.lbl+'</div><div class="instrOpts">'
+      h+='<div class="instrGrp fitWhole"><div class="instrGrpLbl">'+I.lbl+'</div><div class="instrOpts">'
         +I.opts.map(o=>'<button class="iOpt'+(o[0]===v?' on':'')+'" data-'+attr+'="'+k+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('')
         +'</div><div class="instrDesc">'+I.tip[v]+'</div></div>'; }
     return h; }
@@ -2346,11 +2451,14 @@
   // PERSP 1: depth is spread evenly down the screen, so the middle of the pitch (and the goals on it) sits in the
   // middle between the touchlines; things further off are still drawn smaller
   const HORIZON=100, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;   // far touchline at 100: room for the stand
+  // VIEW_D: how deep the camera sees, the far touchline at HORIZON to NEAR_Y -- the old pitch's width, so the men, the
+  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes nine-tenths of the way down
+  const VIEW_D=1700;
   let camHalf=(W/2)/NEAR_SCALE+14;
   let camMin=camHalf, camMax=FW-camHalf;
   let camX=FW/2;
   function proj(x,y,z=0){
-    const t=Math.pow(clamp(y,0,FH)/FH,PERSP);
+    const t=Math.pow(clamp(y,0,VIEW_D)/VIEW_D,PERSP);
     const sy=HORIZON+(NEAR_Y-HORIZON)*t;
     const scale=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t;
     const sx=W/2+(x-camX)*scale;
@@ -2511,7 +2619,7 @@
         placePad(lx,ly);moveStick();}}
     e.preventDefault();},{passive:false});
   wrapEl.addEventListener('touchmove',e=>{
-    if(!touchLive()) return;                 // (also lets the hub panels scroll on a phone)
+    if(!touchLive()) return;                 // (also leaves the menus' own touches alone on a phone)
     if([...e.changedTouches].some(onLabUI)) return;   // dragging a Trap Lab slider / scrolling its drawer
     for(const t of e.changedTouches){
       if(t.identifier===padId) padDrag(t);
@@ -2564,9 +2672,9 @@
   }
   // a direction on the screen as a direction on the pitch, at depth y
   function screenDirToPitch(dx,dy,y){
-    const t=clamp(y/FH,0.05,1);
+    const t=clamp(y/VIEW_D,0.05,1);
     const kx=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(t,PERSP);    // screen px per pitch px, across
-    const ky=(NEAR_Y-HORIZON)*PERSP*Math.pow(t,PERSP-1)/FH;         // screen px per pitch px, in depth
+    const ky=(NEAR_Y-HORIZON)*PERSP*Math.pow(t,PERSP-1)/VIEW_D;     // screen px per pitch px, in depth
     const px=dx/kx, py=dy/ky, l=Math.hypot(px,py)||1;
     return {x:px/l, y:py/l};
   }
@@ -3566,7 +3674,7 @@
     let want=W*0.565;                                     // where the receiver sits on screen
     if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw;
       want=Math.min(want,W-dw-130); }
-    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(LAB.spot.y/FH,PERSP);
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(LAB.spot.y/VIEW_D,PERSP);
     return clamp(LAB.spot.x-(want-W/2)/sc,camMin,camMax);
   }
   // on the pitch: the AI receiver's reach ring, your mark, and the last touch's in/out arrows
@@ -3968,7 +4076,7 @@
   function shootLabCamX(){
     let want=W*0.8;                                       // the goal line, toward the right of the screen
     if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw; want=Math.min(want,W-dw-60); }
-    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/FH,PERSP);
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/VIEW_D,PERSP);
     return clamp(FW-(want-W/2)/sc,camMin,FW);           // (may look past the goal line to keep the goal clear of the drawer)
   }
   // on the pitch: your spot, the spot you aimed at, and the shot's flight (bend and height)
@@ -4140,7 +4248,7 @@
     const D=dlDef(), you=controlled, mid=D?(you.x+D.x)/2:you.x;
     let want=W*0.5;
     if(LAB.tune){ const cw=cv.getBoundingClientRect().width||W, dw=(document.getElementById('labTune').offsetWidth+20)*W/cw; want=Math.min(want,(W-dw)/2+40); }
-    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/FH,PERSP);
+    const sc=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(YC/VIEW_D,PERSP);
     return clamp(mid-(want-W/2)/sc,camMin,camMax);
   }
   // on the pitch: your start mark, his tackling reach, and the line you have to get past
@@ -6655,10 +6763,11 @@
     if(obFlights.size>400) obFlights.clear();
     obFlights.set(key,F); return F;
   }
-  // A ball into a runner's path, weighted to get there as he does and die there (as a through ball off the PASS button
-  // is) rather than run on to the keeper: struck against the grass drag to cover d in tA seconds. When it's an eighth of
-  // the way, a quarter, ... (along the ground).
-  function obThruV0(d,tA){ const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); return {k, v0:clamp(d*k/(1-Math.exp(-k*tA)),380,1500)}; }
+  // A ball into a runner's path along the grass, weighted to get there as he does and die there rather than run on to
+  // the keeper: struck against the grass drag to cover d in tA seconds -- but never harder than the Computer through
+  // ball dial (900 px/s: it used to be 1500), so a long one gets there after him, or never does (and isn't played).
+  // When it's an eighth of the way, a quarter, ...
+  function obThruV0(d,tA){ const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); return {k, v0:clamp(d*k/(1-Math.exp(-k*tA)),380,P.thruPace.val)}; }
   function obThruFlight(d,tA){
     const {k,v0}=obThruV0(d,tA), F=[];
     for(let i=1;i<=8;i++){ const u=1-d*i/8*k/v0; F.push({f:i/8, t:u>0?-Math.log(u)/k:9, z:0}); }
@@ -6683,13 +6792,22 @@
     if(meIs(p)) meBump('passes');
     recordPassTeam(p.team,p); passPose(p);
   }
+  // A BALL INTO A RUNNER'S PATH, along the grass, weighted to die where he'll be but never harder than the dial
+  // (obThruV0). It's a forward ball through traffic, as hard to get right as any (passTo), with the weight to judge on
+  // top: how far ahead of him it goes errs with the passer's Off IQ (by up to 60% at 1, 10% at 10), and how hard it's
+  // hit with his Passing. (It used to go at up to 1500 px/s, dead on target, and nobody could get to it.)
   function obThruBall(p,q,tx,ty,tA){
+    const atk=atkOf(p.team), le=(Math.random()*2-1)*statLerp(statOf(p,'offIQ',P.offIQ.val),0.6,0.1);
+    tx=q.x+(tx-q.x)*(1+le); ty=q.y+(ty-q.y)*(1+le);
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr), {v0}=obThruV0(d,tA);
+    const lane=laneClearance(p,q), fwd=clamp(atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
+    let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
+    const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
+    const v0=obThruV0(d,tA).v0*(1+obGauss()*statLerp(statOf(p,'passAcc',P.passAcc.val),0.14,0.05));   // (over- or under-hit: 14% at Passing 1, 5% at 10)
     ball.vx=(dx*ca-dy*sa)*v0; ball.vy=(dx*sa+dy*ca)*v0; ball.vz=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
-    ball.thru={x:tx,y:ty,until:simNow+tA+1.5};                         // he runs onto it (see aiBrain)
+    ball.thru={x:tx,y:ty,until:simNow+Math.max(tA,obThruFlight(d,tA)[7].t)+1.5};   // he runs onto it (see aiBrain)
     if(meIs(p)) meBump('passes');
     recordPassTeam(p.team,p); passPose(p);
   }
@@ -6787,13 +6905,15 @@
     if(tEnd>4) return null;
     // the race for it along the way: each opponent's best chance, where he'd cut it out
     let safe=1, worst=0, cx=tx, cy=ty;
+    const vis=L.running?statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.1):0;   // (a ball into space: he misreads how soon they get across, by 0.3 s at Off IQ 1, 0.1 at 10)
     const race=(o,r,inArea)=>{
+      const err=vis?obGauss()*vis:0;
       let m=9, mx=tx, my=ty;
       for(const s of F){
         if(s.z>34) continue;                                             // over his head
         const px=ball.x+dx*s.f, py=ball.y+dy*s.f;
         if(inArea&&!inArea(px,py)) continue;
-        const tb=s.f===1?Math.max(s.t,tQ):s.t, mm=obOppT(o,px,py,r)-tb;
+        const tb=s.f===1?Math.max(s.t,tQ):s.t, mm=obOppT(o,px,py,r)+err-tb;
         if(mm<m){ m=mm; mx=px; my=py; }
       }
       const pi=1/(1+Math.exp(m/0.09));                                   // gets there with a tenth of a second to spare: ~75%
@@ -10211,7 +10331,7 @@
   const PITCH_ART = "data:image/png;base64,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";
   const PITCH_ART_META = {"x0":-700,"k":0.262,"w":1055,"h":43,"opaque":42};
   const PITCH = (function(){
-    let HW=W>>1; const HH=H>>1, RUN=3*PX_M;                // half size; the run-off past the lines
+    let HW=W>>1; const HH=H>>1, RUN=3*MK;                  // half size; the run-off past the lines
     const cfg={enabled:true, ready:false, strip:null};
     const off=document.createElement('canvas'); off.width=HW; off.height=HH;
     const octx=off.getContext('2d'); let img=octx.createImageData(HW,HH), buf=new Uint32Array(img.data.buffer);
@@ -10231,7 +10351,7 @@
     const T={ A:pk('#70c88b'), B:pk('#5cbc7c'), AL:pk('#8cd6a2'), BD:pk('#48b070'),
       lawn:pk('#70c8a0'), lawnL:pk('#88d8b8'), lawnD:pk('#40b088'), rimA:pk('#18a068'), rimB:pk('#40b088'),
       line:pk('#f4fbf2'), navy:pk('#313852'), white:pk('#f8f8f8'), grey:pk('#a8b8c8') };
-    const BAND=FW/14, ROWW=(NEAR_Y-HORIZON)/FH;            // screen px per pitch px down the screen
+    const BAND=FW/14, ROWW=(NEAR_Y-HORIZON)/VIEW_D;        // screen px per pitch px down the screen
     // the markings, as points along them: x, y, and which way a near line thickens (0 down, 1 across, 2 a spot)
     const pts=[];
     const way=(tx,ty)=>Math.abs(tx)*0.8>=Math.abs(ty)*ROWW?0:1;
@@ -10248,16 +10368,16 @@
       pts.push(gx+dx*PEN_SPOT,YC,2);
       const a0=Math.acos((PA_D-PEN_SPOT)/CIRCLE_R), dir=side>0?Math.PI:0;
       arc(gx+dx*PEN_SPOT,YC,CIRCLE_R,dir-a0,dir+a0);
-      arc(gx,0,PX_M,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); arc(gx,FH,PX_M,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);
+      arc(gx,0,MK,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); arc(gx,FH,MK,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);
     }
     const LP=Float32Array.from(pts);
-    const half=(x,y)=>({ x:(W/2+(x-camX)*(FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/FH))/2, y:(HORIZON+(NEAR_Y-HORIZON)*y/FH)/2,
-                       s:FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/FH });   // a pitch point, in half-size pixels
+    const half=(x,y)=>({ x:(W/2+(x-camX)*(FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/VIEW_D))/2, y:(HORIZON+(NEAR_Y-HORIZON)*y/VIEW_D)/2,
+                       s:FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*y/VIEW_D });   // a pitch point, in half-size pixels
     // Each half-size row of the screen always shows the same line across the pitch (only the camera's x moves),
     // so every row's ground is worked out once, in 4 px steps along the pitch, and a frame just samples it.
     const XA=-700, XB=FW+700, NT=Math.ceil((XB-XA)/4), ROWS=new Uint32Array(HH*NT);   // XA a multiple of 4: specks fixed to the pitch
     for(let j=0;j<HH;j++){
-      const t=(2*j+1-HORIZON)/(NEAR_Y-HORIZON), s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t, y=t*FH, dx=2/s;
+      const t=(2*j+1-HORIZON)/(NEAR_Y-HORIZON), s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t, y=t*VIEW_D, dx=2/s;
       const inY=y>=-RUN&&y<=FH+RUN, rimY=!inY&&y>-RUN-17&&y<FH+RUN+17;
       const rk=Math.imul(j+1,0x9E3779B1), thr=(0.05+0.07*Math.max(0,Math.min(1,t)))*256;
       for(let k=0;k<NT;k++){
@@ -10285,7 +10405,7 @@
     function lines(){
       const LN=T.line;
       for(let k=0;k<LP.length;k+=3){
-        const x=LP[k], y=LP[k+1], t=y/FH, s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t;
+        const x=LP[k], y=LP[k+1], t=y/VIEW_D, s=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*t;
         const i=Math.floor((W/2+(x-camX)*s)/2), j=Math.floor((HORIZON+(NEAR_Y-HORIZON)*t)/2);
         if(i<0||i>=HW-1||j<0||j>=HH-1) continue;
         const o=j*HW+i, d=LP[k+2];
@@ -10439,7 +10559,7 @@
 
     ctx.fillStyle='#235c38';
     {
-      const a=proj(-140,0),b=proj(FW+140,0),c=proj(FW+140,FH),d=proj(-140,FH);
+      const a=proj(-140,0),b=proj(FW+140,0),c=proj(FW+140,VIEW_D),d=proj(-140,VIEW_D);   // (the run-off down to the foot of the camera's view)
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.lineTo(d.x,d.y);ctx.closePath();ctx.fill();
     }
     const bands=14;
@@ -10459,7 +10579,7 @@
       markSpot(gx+dx*PEN_SPOT,YC);
       const a0=Math.acos((PA_D-PEN_SPOT)/CIRCLE_R), dir=side>0?Math.PI:0;   // the arc: the part of the circle round the spot outside the box
       markArc(gx+dx*PEN_SPOT,YC,CIRCLE_R,dir-a0,dir+a0);
-      markArc(gx,0,PX_M,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); markArc(gx,FH,PX_M,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);   // corners
+      markArc(gx,0,MK,side>0?Math.PI/2:0,side>0?Math.PI:Math.PI/2); markArc(gx,FH,MK,side>0?Math.PI:-Math.PI/2,side>0?Math.PI*1.5:0);   // corners
     }
 
     drawGoal(-1,false);drawGoal(1,false);
@@ -10924,6 +11044,8 @@
         ctx.fillStyle='rgba(255,90,77,'+(isYou?0.95:0.85)+')';
         ctx.fillRect(cx-0.5,by-1,1.6,bh+2);
       }
+      // HIS SKILL STARS over it while he has the ball (either side's man): the moves he can do (see startSkill)
+      if(ball.ownedBy===p&&p.stars){ ctx.globalAlpha=1; drawSkillStars(sb.x,by-7,p.stars); }
       // SPRINT cue: a green phosphor outline glows around YOUR stamina bar while sprinting.
       if(isYou && p.sprint && st>0.02){
         ctx.save();
@@ -10942,6 +11064,13 @@
     }
   }
 
+  // three little stars side by side, centred on (x,y): the first n lit gold, the rest dark
+  function drawSkillStars(x,y,n){
+    for(let i=0;i<3;i++){ const cx=Math.round(x+(i-1)*9), cy=Math.round(y);
+      ctx.beginPath();
+      for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5, r=k%2?1.9:4.3; k?ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r); }
+      ctx.closePath(); ctx.fillStyle=i<n?'#ffd54a':'rgba(40,44,60,.85)'; ctx.fill(); ctx.lineWidth=1.2; ctx.strokeStyle='rgba(10,12,20,.9)'; ctx.stroke(); }
+  }
   function drawKeeper(kp){
     if(!SPRITE.shadow(kp.x,kp.y)) drawShadow(kp.x,kp.y,kp.r+3,1);
     // REACH ZONE (practice aid): the radius within which the keeper saves automatically. Flattened to
@@ -11342,13 +11471,16 @@
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
-    let h='<div class="tbCard"><div class="mgCardHead">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
-      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">'+(SUBS[t].off.includes(si)?'subbed off':'on the bench')+'</div>')+'</div>'
+    let h='<div class="tbCard fitKeep"><div class="mgCardHead">'+(t==='G'&&cardSide==='instr'?'':bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t)))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+(e.subRole||e.role)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')
+      +(oop?' · <span style="color:var(--warn)">playing '+role+'</span>':role?'':' · '+(SUBS[t].off.includes(si)?'subbed off':'on the bench'))+'</div></div>'
       +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div></div></div>';
     if(p&&role&&role!=='GK'){ const st=clamp(p.stamina,0,1); h+='<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(st*100)+'%;background:'+(st>0.6?'':st>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(st*100)+'%</b></div>'; }
-    h+=sixHtml(e.stats,e.role)+'</div>';
-    if(sl&&t==='G') h+='<div class="tacInstr">'+instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC)+'</div>';
-    return h; }
+    const side=t==='G'?cardSide:'rate';                                  // (their instructions are theirs)
+    h+=(t==='G'?cardSides():'')+'</div>';
+    if(side==='rate') return h+sixHtml(e.stats,e.role);
+    if(si===li.gk) return h+'<div class="mgHint">The keeper has no instructions.</div>';
+    if(!sl) return h+'<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div>';
+    return h+(instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC,true)||'<div class="mgHint">No instructions for this spot.</div>'); }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'||MT.drop==='posture'?' r':'')+'">';
     if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
         return '<button class="formBtn'+(fm===form?' on':'')+'" data-mtform="'+fm+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
@@ -11367,10 +11499,10 @@
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
-      h+=ghostTok(q.L,q.T,faceImg(mtWho(t,oorder[i]),teamKit(t)),surname(e.name)); }
+      h+=ghostTok(q.L,q.T,surname(e.name)); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role); }
-    h+='</div></div><div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';
+    h+='</div></div><div class="tbRight" data-pages="mtac:'+t+':'+MT.sel+':'+cardSide+':'+phase+'">'+mtCard(t,MT.sel,phase)+'</div></div>';
     h+='<div class="tbBench"><span class="tbBenchLbl">BENCH</span>'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div>';
     document.getElementById('mtacBody').innerHTML=h+'</div>';
     document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
@@ -11406,6 +11538,7 @@
       if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
     const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; renderMatchTac(); return; }
+    const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
     const mi=e.target.closest('[data-mi]'); if(mi){ const li=LINEUP[t], k=li[MT.phase].indexOf(MT.sel); if(k>=0) setPosInstr(t,MT.phase,k,mi.dataset.mi,mi.dataset.v); renderMatchTac(); return; }
     const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; renderMatchTac(); return; } });
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
@@ -12271,23 +12404,29 @@
       h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+pct+'%"></i></span><span class="sv">'+(Math.round(v*2)/2).toFixed(1)+'</span></div>'; }
     return h+'</div>';
   }
-  // under the card: his instructions for this phase (he's moved by dragging him)
+  // the card's other side: his spot's instructions for this phase (he's moved by dragging him)
   function careerInstrBlock(d, ri, phase){ const p=d.roster[ri]; if(!p) return '';
-    const lu=d.lineup, onPitch=ri===lu.gk||lu.atk.includes(ri);
-    let h='<div class="tacInstr">';
-    if(onPitch&&ri!==lu.gk){ const f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=careerSlots(f,phase)[si];   // the instructions of the spot he's in
-      if(sl) h+=instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50); }
-    return h+'</div>'; }
-  function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
+    const lu=d.lineup;
+    if(ri===lu.gk) return '<div class="mgHint">The keeper has no instructions.</div>';
+    const f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;   // the instructions of the spot he's in
+    if(!sl) return '<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div>';
+    return instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50,true)||'<div class="mgHint">No instructions for this spot.</div>'; }
+  // THE CARD HAS TWO SIDES: his ratings (the six, each opening on what it's made of), and the instructions of the spot he's
+  // in -- turned over with the two buttons under his name. Whichever side, his name, rating and stars stay on top.
+  let cardSide='rate';
+  function cardSides(){ return '<div class="cardSides"><button class="cardSide'+(cardSide==='rate'?' on':'')+'" data-cside="rate">RATINGS</button>'
+    +'<button class="cardSide'+(cardSide==='instr'?' on':'')+'" data-cside="instr">INSTRUCTIONS</button></div>'; }
+  const tacPagesKey=phase=>'tac:'+statViewRi+':'+cardSide+':'+phase;   // (each man's card, each side and phase, starts on its page 1)
+  function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.dataset.pages=tacPagesKey(tacPhase); rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
   // THE MAN YOU TAPPED: his rating where he's playing, his six, then his spot's instructions
   function tbCard(d, ri, phase){ const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
-    return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
-      +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
-      +(oop?'<div class="mgCardSub" style="color:var(--warn)">playing '+role+', out of position</div>':role?'':'<div class="mgCardSub">on the bench</div>')+'</div>'
+    return '<div class="tbCard fitKeep"><div class="mgCardHead">'+(cardSide==='instr'?'':bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d)))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+      +'<div class="mgCardSub">'+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')
+      +(oop?' · <span style="color:var(--warn)">playing '+role+'</span>':role?'':' · on the bench')+'</div></div>'
       +'<div><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' as a '+p.role+'</div>':'')+'</div></div>'
-      +sixHtml(st,p.role)+'</div>'+careerInstrBlock(d, ri, phase); }
+      +cardSides()+'</div>'+(cardSide==='instr'?careerInstrBlock(d, ri, phase):sixHtml(st,p.role)); }
   const STYLE_LIST=[['neutral','BALANCED'],['tiki','TIKI-TAKA'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER']];
   const POSTURE_LIST=[['press','PRESS HIGH'],['neutral','MID BLOCK'],['lowblock','SIT DEEP']];
   // an instruction for one of your spots (si: its index in that phase's shape)
@@ -12319,8 +12458,9 @@
     return '<button class="ptk'+(oop?' oop':'')+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
       +(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'</span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
-  // the other phase's shape, lit and set a little right and down, under the men: where each of them goes when the ball changes hands
-  function ghostTok(L,T,face,name){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+face+'<b>'+name+'</b></i>'; }
+  // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his name in a small
+  // lit box off the bottom-right corner of the spot (bottom-left up by their goal, at the right-hand end)
+  function ghostTok(L,T,name){ return '<i class="tpGhost'+(L>80?' flip':'')+'" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"><b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -12342,11 +12482,11 @@
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y);
-      h+=ghostTok(q.L,q.T,faceImg({lookKey:p.id},careerKit(d)),surname(p.name)); }
+      h+=ghostTok(q.L,q.T,surname(p.name)); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
     h+='</div></div>';
-    h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';
+    h+='<div class="tbRight" id="cTacRight" data-pages="'+tacPagesKey(phase)+'">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';
     h+='<div class="tbBench"><span class="tbBenchLbl">BENCH</span>'+lu.bench.map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div>';
     return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
@@ -12469,7 +12609,7 @@
     let h='<div class="mrWrap"><div class="mrHead"><div class="mrLabel">'+mgEsc(g.label)+' · '+(m.home?'HOME':'AWAY')+'</div>';
     h+='<div class="mrScore" style="color:'+col+'">'+m.you+' – '+m.them+'</div>';
     h+='<div class="mrLabel" style="font-size:13px;margin-top:6px;color:var(--ink)">'+mgEsc(d.clubName)+' <span style="color:'+col+'">'+mgResultWord(m)+'</span> vs '+mgEsc(opp)+'</div></div>';
-    h+='<div class="mrCols"><div class="mrCol">';
+    h+='<div class="mrCols"><div class="mrCol" data-pages="mr0">';
     h+='<div class="mrSect">'+mgEsc(d.clubName.toUpperCase())+' GOALS</div><div class="mrGoalList">'+(gG.length?gG.map(goal).join(''):'<span style="color:#4a5e40">— none</span>')+'</div>';
     h+='<div class="mrSect">'+mgEsc(opp.toUpperCase())+' GOALS</div><div class="mrGoalList">'+(gR.length?gR.map(goal).join(''):'<span style="color:#4a5e40">— none</span>')+'</div>';
     if(g.kind==='league'){
@@ -12483,7 +12623,7 @@
       const msg=m.through?(P&&P.winner===d.clubId?'PROMOTED through the playoffs!':'Through to the playoff final.'):'Out of the playoffs.';
       h+='<div class="mrSect">PLAYOFFS</div>'+row(msg,'',true,m.through?'var(--good)':'var(--bad)');
     }
-    h+='</div><div class="mrCol"><div class="mrSect">FINANCES</div>';
+    h+='</div><div class="mrCol" data-pages="mr1"><div class="mrSect">FINANCES</div>';
     h+=row('Sponsorship',money(f.sponsorWk))+row('Broadcast / central',money(f.broadcastWk));
     if(wk.tv>0) h+=row('Broadcast match bump','+'+money(wk.tv),false,'var(--warn)');
     h+=row(m.home?'Gate ('+f.attendance.toLocaleString()+' × $'+f.price+(f.cph>0?' + concessions':'')+')':'Away gate share',money(wk.gate));
@@ -12597,7 +12737,7 @@
     review:  {title:'SEASON REVIEW', sub:'how the season went', tabs:null},
   };
   // what's on screen (never saved): the man picked, a bid or deal in progress, list filters
-  const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, page:1};
+  const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null};
   const MG_ROLE_CHIPS=[['ALL','ALL'],['GK','GK'],['DEF','DEF'],['MID','MID'],['ATT','ATT']];
   function mgPhaseLabel(d){ return d.phase==='summer'?'Summer window · day '+d.day+'/'+MG_WINDOW.summer : d.phase==='winter'?'Winter window · day '+d.day+'/'+MG_WINDOW.winter
     : d.phase==='league'?'Matchday '+Math.min(d.md+1,MG_MD)+'/'+MG_MD : d.phase==='playoffs'?'Playoffs':'Season over'; }
@@ -12610,40 +12750,42 @@
     return '<button class="mgRow'+(o.sel?' on':'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos">'+(p.subRole||p.role)+'</span>'
       +'<span class="nm">'+mgEsc(p.name)+' <span class="sub">'+p.age+(o.club?' · '+mgEsc(o.club):'')+'</span>'+(o.tags||'')+'</span>'
       +'<span class="ovr">'+o.ovr+'</span><span class="amt">'+(o.right||'')+'</span></button>'; }
-  function mgChips(key,opts,cur){ return '<div class="mgFilters">'+opts.map(o=>'<button class="mgChip'+(String(o[0])===String(cur)?' on':'')+'" data-mg="filt" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>'; }
+  function mgChipBtns(key,opts,cur){ return opts.map(o=>'<button class="mgChip'+(String(o[0])===String(cur)?' on':'')+'" data-mg="filt" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>').join(''); }
+  function mgChips(key,opts,cur){ return '<div class="mgFilters fitKeep">'+mgChipBtns(key,opts,cur)+'</div>'; }
+  // ...the league to look in, a step at a time (one line with the positions: more of the list on each page)
+  function mgTierStep(t){ return '<span class="mgTierStep"><button class="mgAdj" data-mg="filt" data-k="tier" data-v="'+Math.max(1,t-1)+'"'+(t<=1?' disabled':'')+'>◀</button>'
+    +'<b>'+MG_LEAGUE[t]+'</b><button class="mgAdj" data-mg="filt" data-k="tier" data-v="'+Math.min(4,t+1)+'"'+(t>=4?' disabled':'')+'>▶</button></span>'; }
   function mgStep(act,label){ return '<div class="mgStep"><button class="mgAdj" data-mg="'+act+'" data-dir="-1">−</button><b>'+label+'</b><button class="mgAdj" data-mg="'+act+'" data-dir="1">+</button></div>'; }
   function mgYears(){ const y=MGUI.years||2; return mgStep('yrs',y+' season'+(y>1?'s':'')); }
   function mgBars(p){ const st=mgStats(p); let h='<div class="mgBars">';
     for(const k of Object.keys(OVR_W[p.role]||OVR_W.MID)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
-  // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
+  // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one and what it's made of takes their place
+  // (◀ on it, or a tap on it again, for the six), so a card's front never grows past a page
   const SIX=[['PAC','Pace',['speed','acceleration']],['PHY','Physical',['strength','stamina','agility']],['TEC','Technique',['ballControl','dribbling','composure']],
     ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','curve']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ','heading']]];
   const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution']],['CMP','Composure',['composure','ballControl']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
   function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }
-  function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
-    for(const [k,,ks] of G){ const v=ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length;
-      h+='<button class="sixC'+(sixOpen===k?' on':'')+'" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
-    h+='</div>'; const g=G.find(x=>x[0]===sixOpen);
-    if(g) h+='<div class="sixOpen"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
-      return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
-    return h; }
-  // A LIST AND ITS MAN: the list on the left, the man picked on the right, each side scrolling by itself; a long list goes
-  // ten to a page, with the pager under it
-  const MG_PAGE=10;
-  function mgPanes(left,right,foot,top){ return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll">'+left+'</div>'+(foot||'')+'</div>'
-    +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||'<div class="mgPick0">Tap a player to see him here.</div>')+'</div></div></div>'; }
-  function mgPaged(L){ const pages=Math.max(1,Math.ceil(L.length/MG_PAGE)); MGUI.page=clamp(MGUI.page||1,1,pages); return {rows:L.slice((MGUI.page-1)*MG_PAGE,MGUI.page*MG_PAGE),pages,n:L.length}; }
-  function mgPager(pg){ return pg.pages>1?'<div class="mgPager"><button class="mgAdj" data-mg="page" data-dir="-1"'+(MGUI.page<=1?' disabled':'')+'>◀</button><b>'+MGUI.page+' / '+pg.pages+'</b>'
-    +'<span>'+pg.n+' players</span><button class="mgAdj" data-mg="page" data-dir="1"'+(MGUI.page>=pg.pages?' disabled':'')+'>▶</button></div>':''; }
+  function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX, avg=ks=>ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length, g=G.find(x=>x[0]===sixOpen);
+    if(g){ const v=avg(g[2]);
+      return '<div class="sixDet fitWhole"><button class="sixBack" data-six="'+g[0]+'">◀ <b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b> '+g[1].toUpperCase()+'</button><div class="sixRows">'+g[2].map(x=>{ const w=+st[x]||0;
+        return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(w,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv" style="color:'+sixCol(w)+'">'+w.toFixed(1)+'</span></div>'; }).join('')+'</div></div>'; }
+    let h='<div class="six">';
+    for(const [k,,ks] of G){ const v=avg(ks); h+='<button class="sixC" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }
+    return h+'</div>'; }
+  // A LIST AND ITS MAN: the list on the left, the man picked on the right; a side with more than fits goes over pages
+  // (fitBox), the list's filters on every page and the man's name and rating on every page of his card
+  function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
+    return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll" data-pages="L:'+k+'">'+left+'</div>'+(foot||'')+'</div>'
+    +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll" data-pages="R:'+k+':'+(MGUI.sel||'')+'">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
   function mgWindowLine(d){ return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">'+(d.phase==='summer'?'SUMMER':'WINTER')+' WINDOW OPEN · DAY '+d.day+' OF '+MG_WINDOW[d.phase]+'</div>'
     :'<div class="mgSum">The transfer window is shut'+(d.phase==='league'&&d.md<MG_HALF?' until the winter break (after matchday '+MG_HALF+')':' until the summer')+'. Free agents can sign any time.</div>'; }
   // one man, close up, with what you can do about him
   function mgCard(d,pid){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p);
     const where=f.mine?d.clubName:f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier];
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
-    let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)+'<div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
+    let h='<div class="mgCard"><div class="mgCardHead fitKeep">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)+'<div><div class="mgCardName">'+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+(f.mine?'#'+p.num+' · ':'')+(p.subRole||p.role)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div><div class="mgCardSub">'+mgEsc(where)+'</div></div>'
       +'<div><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div></div></div>';
     h+=known?sixHtml(mgStats(p),p.role):'<div class="mgHint">Not scouted: his rating is somewhere in that range, and his potential is a mystery.</div>';
@@ -12658,7 +12800,7 @@
     h+=finRow('Wage',money(p.wage)+'/wk')+finRow('Contract',(p.until<=S?'ends this season':'until season '+p.until+' ('+left+' seasons)'),false,p.until<=S?'var(--warn)':'var(--good)')
       +finRow('Value',money(mgValue(d,p)))+finRow('This season',(p.apps||0)+' games · '+(p.goals||0)+' goals');
     for(const o of (d.offers||[]).filter(o=>o.pid===p.id)){ const c=d.world.clubs[o.club]; if(!c) continue;
-      h+='<div class="mgOffer"><b>'+mgEsc(c.name)+'</b> bid <b style="color:var(--warn)">'+money(o.fee)+'</b><div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
+      h+='<div class="mgOffer fitWhole"><b>'+mgEsc(c.name)+'</b> bid <b style="color:var(--warn)">'+money(o.fee)+'</b><div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
     h+='<div class="bpSect">NEW CONTRACT</div><div class="mgCardSub">He asks '+money(mgDemand(d,p,false))+'/wk, from next season.</div>'+mgYears()
       +'<div class="mgBtns"><button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE A NEW DEAL</button></div>';
     h+='<div class="bpSect">SELL</div>';
@@ -12697,7 +12839,8 @@
           +((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'');
         h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
       h+='</div>'; }
-    return mgPanes('<div class="sqList">'+h+'</div>', MGUI.sel&&R.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):'', '', mgSquadPitch(d)); }
+    const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
+    return mgPanes('<div class="sqList">'+h+'</div>', sel?'<button class="mgBtn sqBack" data-mg="sel" data-pid="'+MGUI.sel+'">◀ THE TEAM</button>'+mgCard(d,MGUI.sel):'', '', sel?'':mgSquadPitch(d)); }
   function mgFixturesTab(d){ const L=d.lg[d.tier]; let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'—')+'</div><div class="mgList">';
     L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId); if(!m) return; const home=m[0]===d.clubId, opp=home?m[1]:m[0]; let right;
       if(m[2]!=null){ const you=home?m[2]:m[3], them=home?m[3]:m[2], r=you>them?'W':you<them?'L':'D'; right='<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+'</span>'; }
@@ -12717,22 +12860,22 @@
     return h; }
 
   // ---- the market ----
-  function mgSearchTab(d){ const t=MGUI.tier||d.tier; let h=mgWindowLine(d)+mgChips('tier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x]]),t)+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
+  function mgSearchTab(d){ const t=MGUI.tier||d.tier; let h=mgWindowLine(d)+'<div class="mgFilters fitKeep">'+mgTierStep(t)+mgChipBtns('role',MG_ROLE_CHIPS,MGUI.role)+'</div>';
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.club&&!f.mine) card=mgCard(d,MGUI.sel); }
     const L=[]; for(const id of d.div[t]){ if(id===d.clubId) continue; const c=d.world.clubs[id]; for(const p of c.players) if(MGUI.role==='ALL'||p.role===MGUI.role) L.push([p,c]); }
     L.sort((a,b)=>mgSortOvr(d,b[0])-mgSortOvr(d,a[0]));
-    const pg=mgPaged(L); h+='<div class="mgList">';
-    for(const [p,c] of pg.rows) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
-    return mgPanes(h+'</div>', card, mgPager(pg)); }
+    h+='<div class="mgList">';
+    for(const [p,c] of L) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
+    return mgPanes(h+'</div>', card); }
   function mgFreeTab(d){ let h='<div class="mgSum">Players without a club: no fee, just wages. They can sign any time.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
-    const pg=mgPaged(d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a)));
-    h+='<div class="mgList">'+pg.rows.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgDemandSeen(d,p,false))+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
-    return mgPanes(h, card, mgPager(pg)); }
+    const L=d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a));
+    h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgDemandSeen(d,p,false))+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
+    return mgPanes(h, card); }
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
     for(const o of O){ const p=d.roster.find(x=>x.id===o.pid), c=d.world.clubs[o.club];
-      h+='<div class="mgOffer"><div><b>'+mgEsc(c.name)+'</b> <span class="mgCardSub">('+MG_LEAGUE[c.tier]+')</span> bid <b style="color:var(--warn)">'+money(o.fee)+'</b> for <b>'+mgEsc(p.name)+'</b></div>'
+      h+='<div class="mgOffer fitWhole"><div><b>'+mgEsc(c.name)+'</b> <span class="mgCardSub">('+MG_LEAGUE[c.tier]+')</span> bid <b style="color:var(--warn)">'+money(o.fee)+'</b> for <b>'+mgEsc(p.name)+'</b></div>'
         +'<div class="mgCardSub">'+(p.subRole||p.role)+' · '+p.ovr+' · age '+p.age+' · value '+money(mgValue(d,p))+(d.listed[p.id]?' · you asked '+money(d.listed[p.id]):'')+'</div>'
         +'<div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
     return h; }
@@ -12745,10 +12888,9 @@
   function mgReportsTab(d){ const L=Object.keys(d.scouted||{}).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
     let h='<div class="mgSum">'+L.length+' scouted this season. Reports go out of date when the season ends.</div>';
     if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
-    const pg=mgPaged(L);
-    return mgPanes(h+'<div class="mgList">'+pg.rows.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
+    return mgPanes(h+'<div class="mgList">'+L.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
       right:f.club?money(mgAsk(d,f.p,f.club)):money(mgDemand(d,f.p,false))+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
-      MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):'', mgPager(pg)); }
+      MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: they report on every player in one position, and the reports last until the end of the season.</div>';
     for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · '+money(c)+' EACH</div><div class="mgBtns">';
       for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>';
@@ -12770,7 +12912,7 @@
   // ---- the newsstand ----
   function mgHeadlinesTab(d){ return (d.news||[]).slice(0,45).map(n=>'<div class="mgNews"><i>S'+n.s+' · '+mgEsc(n.w)+'</i>'+mgEsc(n.t)+'</div>').join('')||'<div class="mgHint">No news yet.</div>'; }
   function mgTableHtml(d,t){ const T=mgTable(d,t);
-    let h='<table class="mgTbl"><tr><th>#</th><th>CLUB</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>PTS</th></tr>';
+    let h='<table class="mgTbl"><thead><tr><th>#</th><th>CLUB</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>PTS</th></tr></thead>';
     T.forEach((r,i)=>{ const z=(t<4&&i<2)?'up':(t<4&&i<6)?'po':(t>1&&i>=MG_CLUBS-3)?'dn':'';
       h+='<tr class="'+z+(r.id===d.clubId?' you':'')+'"><td>'+(i+1)+'</td><td>'+mgEsc(mgNameOf(d,r.id))+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.gd>0?'+':'')+r.gd+'</td><td>'+r.pts+'</td></tr>'; });
     return h+'</table><div class="mgHint">'+(t<4?'Top 2 go up · 3rd–6th play off for one more place':'The top league: no promotion')+(t>1?' · bottom 3 go down':'')+'</div>'; }
@@ -12792,7 +12934,7 @@
     h+=finRow('Seasons in charge',String(M.history.length+(d.phase==='review'?0:1)))+finRow('Promotions',String(M.promotions))+finRow('League titles',String(M.titles));
     return h+finRow('This season',MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d))+' · form '+(mgForm(d).join(' ')||'—')); }
   function mgHistoryTab(d){ const H=d.manager.history; if(!H.length) return '<div class="mgHint">Your first season is still going.</div>';
-    return '<table class="mgTbl"><tr><th>S</th><th>LEAGUE</th><th>POS</th><th>RESULT</th></tr>'+H.slice().reverse().map(x=>'<tr class="'+(/PROMOTED|CHAMPIONS/.test(x.result)?'up':x.result==='RELEGATED'?'dn':'')+'"><td>'+x.season+'</td><td>'+MG_LEAGUE[x.tier]+'</td><td>'+ordinal(x.pos)+'</td><td>'+x.result+'</td></tr>').join('')+'</table>'; }
+    return '<table class="mgTbl"><thead><tr><th>S</th><th>LEAGUE</th><th>POS</th><th>RESULT</th></tr></thead>'+H.slice().reverse().map(x=>'<tr class="'+(/PROMOTED|CHAMPIONS/.test(x.result)?'up':x.result==='RELEGATED'?'dn':'')+'"><td>'+x.season+'</td><td>'+MG_LEAGUE[x.tier]+'</td><td>'+ordinal(x.pos)+'</td><td>'+x.result+'</td></tr>').join('')+'</table>'; }
 
   // ---- the end of the season ----
   function mgReviewBody(d){ const R=d.review; if(!R) return '<div class="mgHint">The season is still going.</div>';
@@ -12842,22 +12984,22 @@
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true; return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
-    Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',page:1,tier:null,ntier:null,role:'ALL'});
+    Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',tier:null,ntier:null,role:'ALL'});
     document.getElementById('bpTitle').innerHTML=b.title;
     if(b.tabs&&!curTab[id]) curTab[id]=b.tabs[0];
     document.getElementById('bldgPanel').classList.add('show'); paintBuilding(true); }
-  // THE BUILDING SCREEN: its tabs up in the header line, its body below (which scrolls by itself, or holds panes that
-  // do), and a message, if there is one, as a toast along the bottom
+  // THE BUILDING SCREEN: its tabs up in the header line, its body below (over pages if it's long, or holding panes that
+  // are), and a message, if there is one, as a toast along the bottom. A fresh building or tab starts on page 1.
   function paintBuilding(top){ const id=curBldg, b=MG_BLDGS[id]; if(!b) return; const t=b.tabs?(curTab[id]||b.tabs[0]):null;
     document.getElementById('bpTabs').innerHTML=b.tabs?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
-    const body=document.getElementById('bpBody'), keep=top?0:body.scrollTop, oL=body.querySelector('.mgPaneL .mgPaneScroll'), oR=body.querySelector('.mgPaneR .mgPaneScroll');
-    const keepL=top||MGUI.pageTop||!oL?0:oL.scrollTop, keepR=top||!oR||MGUI.sel!==_bpSel?0:oR.scrollTop; MGUI.pageTop=false; _bpSel=MGUI.sel;
-    body.innerHTML=renderBuildingBody(id); body.scrollTop=keep; body.classList.toggle('panes',!!body.querySelector('.mgPanes,.tacB1'));
-    const nL=body.querySelector('.mgPaneL .mgPaneScroll'), nR=body.querySelector('.mgPaneR .mgPaneScroll'); if(nL) nL.scrollTop=keepL; if(nR) nR.scrollTop=keepR;
+    const body=document.getElementById('bpBody');
+    if(top) fitForget(':'+id+'/');
+    body.innerHTML=renderBuildingBody(id); const panes=!!body.querySelector('.mgPanes,.tacB1'); body.classList.toggle('panes',panes);
+    if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
     foot.classList.toggle('on',foot.children.length>0);
     paintBpMsg(); }
-  let _bpMsgShown='', _bpMsgT=null, _bpSel=null;
+  let _bpMsgShown='', _bpMsgT=null;
   function paintBpMsg(){ const el=document.getElementById('bpMsg'); if(!el) return; const m=MGUI.msg||'';
     if(!m){ el.classList.remove('on'); _bpMsgShown=''; return; }
     if(m===_bpMsgShown&&el.classList.contains('on')) return;
@@ -12910,9 +13052,7 @@
       case 'reject': mgRejectOffer(d,+ds.oid); break;
       case 'promote': { const err=mgPromoteYouth(d,pid); say(err||'Promoted to the first team.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'ryouth': mgReleaseYouth(d,pid); MGUI.sel=null; break;
-      case 'filt': MGUI[ds.k]=ds.k==='role'?ds.v:+ds.v; MGUI.page=1; MGUI.sel=null; break;
-      case 'more': MGUI.page++; break;
-      case 'page': MGUI.page=Math.max(1,(MGUI.page||1)+(+ds.dir)); MGUI.pageTop=true; break;
+      case 'filt': MGUI[ds.k]=ds.k==='role'?ds.v:+ds.v; MGUI.sel=null; fitForget('L:'+curBldg+'/'); break;
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'var(--bad)':'var(--good)'); break; }
       case 'upnet': { const L=d.scoutLvl||1, c=MG_NET_COST[L+1]; if(L<3&&d.budget>=c){ d.budget-=c; d.scoutLvl=L+1; say('The scouting network has grown.','var(--good)'); } break; }
       case 'upacad': { const L=d.academy||1, c=MG_ACAD_COST[L+1]; if(L<3&&d.budget>=c){ d.budget-=c; d.academy=L+1; say('The academy has been built up.','var(--good)'); } break; }
@@ -12924,9 +13064,10 @@
   function pauseFromMatch(){ if(matchReturn==='hub' && CAREER){ document.getElementById('stageWrap').classList.remove('menuMode'); showHubScreen(); } else { resumable=true; showStartMenu(); } }
   document.getElementById('careerHub').addEventListener('click',e=>{
     const bl=e.target.closest('[data-bldg]'); if(bl){ openBuilding(bl.dataset.bldg); return; }
-    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',page:1}); paintBuilding(true); } return; }
+    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:''}); paintBuilding(true); } return; }
     if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; paintBuilding(); return; }
+    const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; paintBuilding(); return; }
     const td=e.target.closest('[data-tdrop]'); if(td){ tacDrop=tacDrop===td.dataset.tdrop?null:td.dataset.tdrop; rerenderOffice(); return; }
     if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
     const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
@@ -12942,9 +13083,10 @@
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg();
   });
 
-  // PICK HIM UP AND PUT HIM DOWN: on a touch screen, hold a man a moment and he lifts (moving first is a scroll or a tap); a
-  // mouse just drags him. A copy follows the finger; drop it on another man (o.target, or the same kind) and o.drop decides.
-  // o.lift(el) as he's picked up, o.over(el|null) as he's carried over others, o.cancel() if he's put down anywhere else.
+  // PICK HIM UP AND PUT HIM DOWN: touch a man (or press the mouse on him) and move, and he lifts straight away -- there's
+  // nothing to scroll, so there's no hold to wait for; a tap just shows his card. A copy follows the finger; drop it on
+  // another man (o.target, or the same kind) and o.drop decides. o.lift(el) as he's picked up, o.over(el|null) as he's
+  // carried over others, o.cancel() if he's put down anywhere else.
   function pxDrag(root, sel, o){ let st=null;
     const quiet=()=>{ const f=e=>{ e.stopPropagation(); e.preventDefault(); }; addEventListener('click',f,{capture:true}); setTimeout(()=>removeEventListener('click',f,{capture:true}),60); };
     // the man stays where he was picked up and moves with the finger from there (a stand-in, o.ghost, sits centred on it)
@@ -12954,16 +13096,15 @@
       g.classList.add('pxGhost'); g.removeAttribute('id'); g.style.cssText='left:'+(x-st.dx)+'px;top:'+(y-st.dy)+'px;width:'+w+'px;height:'+h+'px';
       document.body.appendChild(g); st.ghost=g; st.live=true; st.el.classList.add('lifted'); if(o.lift) o.lift(st.el); }
     root.addEventListener('pointerdown',e=>{ const el=e.target.closest(sel); if(!el||!root.contains(el)||e.button>0||(o.can&&!o.can(el))) return;
-      st={el, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', over:null};
-      if(!st.mouse){ const s=st; st.t=setTimeout(()=>{ if(st===s&&!s.live) start(s.x0,s.y0); },320); } });
+      st={el, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', over:null}; });
     root.addEventListener('contextmenu',e=>{ if(e.target.closest(sel)) e.preventDefault(); });
     root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // no scrolling under a man you're carrying
     addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return; const dx=e.clientX-st.x0, dy=e.clientY-st.y0;
-      if(!st.live){ if(Math.hypot(dx,dy)<(st.mouse?6:10)) return; if(st.mouse) start(e.clientX,e.clientY); else { clearTimeout(st.t); st=null; return; } }
+      if(!st.live){ if(Math.hypot(dx,dy)<(st.mouse?6:8)) return; start(st.x0,st.y0); }   // (from where he was picked up: the copy then moves as far as the finger has)
       e.preventDefault(); st.ghost.style.left=(e.clientX-st.dx)+'px'; st.ghost.style.top=(e.clientY-st.dy)+'px';
       const u=document.elementFromPoint(e.clientX,e.clientY), t=u&&u.closest(o.target||sel), over=(t&&t!==st.el&&root.contains(t))?t:null;
       if(over!==st.over){ if(st.over) st.over.classList.remove('dropOver'); st.over=over; if(over) over.classList.add('dropOver'); if(o.over) o.over(over); } },{passive:false});
-    const end=e=>{ if(!st||e.pointerId!==st.id) return; clearTimeout(st.t); const s=st; st=null; if(!s.live) return;
+    const end=e=>{ if(!st||e.pointerId!==st.id) return; const s=st; st=null; if(!s.live) return;
       s.ghost.remove(); s.el.classList.remove('lifted'); if(s.over) s.over.classList.remove('dropOver'); quiet();
       if(s.over&&e.type==='pointerup') o.drop(s.el,s.over); else if(o.cancel) o.cancel(s.el); };
     addEventListener('pointerup',end); addEventListener('pointercancel',end); }
@@ -12979,11 +13120,13 @@
 
   // the squad list: drop a man on the mini-pitch
   pxDrag(document.getElementById('bldgPanel'), '.sqList .mgRow[data-pid]', { target:'.sqPitch .ptk[data-ri]',
+    lift(){ const d=CAREER&&CAREER.data, R=document.querySelector('#bpBody .mgPaneR'); if(!d||!R||R.querySelector('.sqPitch')) return;   // (his card was up: the team, to drop him on)
+      MGUI.sel=null; R.innerHTML=mgSquadPitch(d)+'<div class="mgPaneScroll"></div>'; },
     ghost(row){ const d=CAREER&&CAREER.data, p=d&&d.roster.find(x=>x.id===+row.dataset.pid), g=document.createElement('div'); g.className='ptk pxGhost';
       g.innerHTML=(p?faceImg({lookKey:p.id},careerKit(d)):'')+'<span class="ptkTxt"><span class="ptkOvr">'+(p?p.ovr:'')+'</span><span class="ptkName">'+(p?surname(p.name):'')+'</span></span>'; return g; },
     drop(row,tok){ const d=CAREER&&CAREER.data; if(!d) return; const lu=ensureLineup(d), ri=d.roster.findIndex(p=>p.id===+row.dataset.pid); if(ri<0) return;
       const kind=ri===lu.gk?'gk':lu.atk.includes(ri)?'field':'bench';
-      careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=d.roster[ri].id; mgSave(d); mgRerender(); },
+      careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=null; mgSave(d); mgRerender(); },   // (the team stays up: you see him in his spot)
     cancel(){ mgRerender(); } });
 
   // ---- a new career: you, your club, its colours ----
@@ -13010,7 +13153,7 @@
   function renderMgrMaker(){ const card=document.querySelector('#mgrMaker .mkCard');
     const sw=(which,cur)=>'<div class="mgSw">'+MG_PALETTE.map(p=>'<button class="hsSw'+(p.c===cur?' on':'')+'" style="background:'+p.c+'" data-mm="'+which+'" data-c="'+p.c+'" title="'+p.n+'" aria-label="'+p.n+'"></button>').join('')+'</div>';
     card.innerHTML='<div class="pauseTitle">NEW CAREER</div>'
-      +'<div class="pScroll"><div class="mkStep">You are the manager. Name yourself and your club: you start in League 2, the bottom of four leagues, with a weak squad and '+money(20000)+'. Buy well, sell well, and climb.</div>'
+      +'<div class="pScroll" data-pages="maker"><div class="mkStep">You are the manager. Name yourself and your club: you start in League 2, the bottom of four leagues, with a weak squad and '+money(20000)+'. Buy well, sell well, and climb.</div>'
       +'<div class="mkGrid"><div><label class="mgLbl" for="mgName">YOUR NAME</label><input class="mkInput" id="mgName" maxlength="22" autocomplete="off" placeholder="Manager name" value="'+mgEsc(MM.name)+'">'
       +'<label class="mgLbl" for="mgClubIn">YOUR CLUB</label><input class="mkInput" id="mgClubIn" maxlength="24" autocomplete="off" placeholder="Club name" value="'+mgEsc(MM.club)+'"></div>'
       +'<div class="mgMakerKit"><canvas id="mgKitCv" width="72" height="72"></canvas><div class="mgMakerCols"><div class="mgLbl">SHIRT</div>'+sw('pri',MM.pri)+'<div class="mgLbl">TRIM &amp; SHORTS</div>'+sw('sec',MM.sec)+'</div></div></div></div>'
