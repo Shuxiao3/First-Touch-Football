@@ -26,6 +26,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
+  + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgToFree, mgRerender, get MGUI(){ return MGUI; }, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
@@ -41,6 +42,7 @@ async function create(club){
   await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', club);
   await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+  if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); });   // (its two arrivals: only Story Town's)
 }
 const msg = () => page.$eval('#bpMsg', e => e.classList.contains('on') ? e.textContent : '').catch(() => '');   // (a toast along the bottom)
 const bottom = () => page.textContent('#chBottom');
@@ -65,6 +67,8 @@ const crestTo = async (k, want) => { for(let i = 0; i < 12; i++){ const v = awai
 ok(await crestTo('s', 'ROUND') && await crestTo('p', 'HOOPS') && await crestTo('e', 'STAR'), 'the crest: round, hooped, a star');
 await page.click('#mgrMaker [data-mm="part"][data-i="2"]'); await page.click('#mgrMaker [data-mm="crc"][data-c="#ffb43c"]');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0}', 'a new career has its first season\'s two arrivals to come');
+await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); });   // (they're Story Town's, below)
 let d = await save();
 ok(d.kind === 'manager' && d.manager.name === 'Sam Okafor' && d.clubName === 'Fenmoor Athletic', 'saved: the manager and the club');
 ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
@@ -403,6 +407,63 @@ ok(scene.on && scene.cols > 20 && scene.waits && scene.day === 2 && !after.on &&
   'NEXT DAY: the day turns (day ' + scene.day + '), the sun goes down behind your stadium and comes up again (' + scene.cols + ' colours in it), the menu waiting; then ' + after.label + ', and it\'s gone');
 ok(!tapped.on && tapped.day === 3 && twice === 4 && !escd.on && escd.day === 4 && escd.hub && !still.on && still.day === 5,
   'a tap ends it at once; NEXT DAY again while it plays does nothing, Escape ends it (still on the campus); with less motion asked for, it doesn\'t play (the day still turns)');
+
+// --- FREE AGENTS: mostly old hands gone past their best, asking their wage; a younger man asks over the odds -- two and
+// a half times his wage at 21, sliding to his wage at 29 -- and up to twelve weeks of that to sign; none young with a
+// future (a club has him the day he's free); a season without a club nobody grows, and the old lose a point more ------
+await create('Free Town');
+const money = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
+r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out = { n: F.length, old: F.filter(p => p.age >= 29).length };
+  out.room = Math.max(0, ...F.filter(p => p.age <= 24).map(p => p.pot - p.ovr));
+  const man = age => ({ ovr: 60, age, role: 'MID' }), ask = age => Object.assign(M.mgFreeAsk(d, man(age)), { fair: M.mgDemand(d, man(age), false) });
+  Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33) });
+  const young = Object.assign(M.mgNewFreeAgent(d), { age: 22, ovr: 55, pot: 57 }), vet = Object.assign(M.mgNewFreeAgent(d), { age: 31, ovr: 60, pot: 60 });
+  M.mgIdleYear(young); M.mgIdleYear(vet); out.young = [young.age, young.ovr, young.pot, young.idle]; out.vet = [vet.age, vet.ovr, vet.pot, vet.idle];
+  const c = Object.values(d.world.clubs).find(k => k.id !== d.clubId && k.tier === 2), star = c.players[0];   // (a 21-year-old with a future, let go)
+  Object.assign(star, { age: 21, ovr: 58, pot: 72 }); c.players.splice(0, 1); M.mgToFree(d, star, c);
+  out.star = { free: d.world.free.includes(star), club: (Object.values(d.world.clubs).find(k => k.players.includes(star)) || {}).name || null };
+  return out; });
+info('free agents: ' + JSON.stringify(r));
+ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n + ' are 29 or over, and none at 24 or under has more than 4 to grow into');
+ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.3 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.3
+   && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
+  'what they ask (a 60 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
+ok(String(r.young) === '23,55,55,1' && r.vet[0] === 32 && r.vet[1] <= 59 && r.vet[1] >= 57 && r.vet[2] === r.vet[1] && r.vet[3] === 1,
+  'a season without a club: the young man doesn\'t grow (55, his ceiling 57 down to 55), the old one loses a point more than age alone (60 to ' + r.vet[1] + ')');
+ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
+// signing a young one: his card says what he wants a week and to sign; SIGN HIM pays the fee
+await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 20000; M.bldUp(d, 'market'); M.mgSave(d); });
+await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Free agents")'); await page.waitForTimeout(80);
+const fa = await page.evaluate(() => { const M = __MG, d = M.d;
+  const p = d.world.free.find(q => q.age >= 21 && q.age <= 26) || Object.assign(d.world.free[0], { age: 23 });
+  Object.assign(p, { ovr: 56, pot: 57 }); M.MGUI.sel = p.id; M.mgRerender(); const a = M.mgFreeAsk(d, p); return { id: p.id, age: p.age, wage: a.wage, fee: a.fee, budget: d.budget }; });
+await page.waitForTimeout(80);
+if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }   // (his card turned over: his deal)
+const faCard = await page.innerText('#bpBody .mgCard');
+await page.click('#bpBody [data-mg="signfree"]'); await page.waitForTimeout(80);
+d = await save(); const him = d.roster.find(p => p.id === fa.id);
+ok(/TO SIGN/.test(faCard) && fa.fee > 0 && him && him.wage === fa.wage && d.budget === fa.budget - fa.fee,
+  'a ' + fa.age + '-year-old signed: ' + money(fa.fee) + ' to sign him (the budget ' + money(fa.budget) + ' to ' + money(d.budget) + '), ' + money(fa.wage) + '/wk');
+await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
+
+// --- THE FIRST SEASON'S TWO ARRIVALS: after the 2nd game a hometown veteran of the top flight (rated in the 70s, 33 to 35)
+// joins on under a third of his wage; after the 5th a 16-year-old wonderkid (in the 60s, a ceiling of 85 to 90) asks to
+// join, and you pick where he plays and how ---------------------------------------------------------------------------
+await create('Story Town');
+const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); M.mgSave(d); M.renderHub(); return d.md; }, n);
+const story = () => page.evaluate(() => ({ on: document.getElementById('storyModal').classList.contains('on'), text: document.querySelector('#storyModal .stCard').innerText.replace(/\s+/g, ' ') }));
+await games(1); const s1 = await story(); await games(1); const s2 = await story();
+const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
+await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); const s3 = await story();
+ok(!s1.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
+  'after the 2nd game, a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
+await games(2); const s4 = await story(); await games(1); const s5 = await story();
+await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);
+const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();
+const kid = await page.evaluate(() => { const d = __MG.d, p = d.roster.find(x => x.id === d.story.kidId); return p && { age: p.age, ovr: p.ovr, pot: p.pot, role: p.role, sub: p.subRole, style: p.style, story: d.story.kid }; });
+ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Starts wide, cuts in/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
+   && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'insidefwd' && kid.story === 2,
+  'after the 5th, a wonderkid asks to join; WNG and INSIDE FORWARD picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
 
 process.exitCode = rep.finish();
 await browser.close();

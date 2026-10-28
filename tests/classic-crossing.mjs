@@ -77,7 +77,7 @@ for(const [k, R] of [['Crossing 8, from the byline, 2 of ours, none of theirs', 
 ok(hd(good) >= 0.7 * N && within(good.miss, 2.2) >= 0.7 * N, 'the computer crosses to a man: with nobody on them, 70% or more headed, and 70% or more come within heading reach of the man it was for');
 ok(avg(poor.aim) > avg(good.aim) * 1.8 && avg(good.aim) < 1, 'a good crosser puts it where he aims (' + avg(good.aim).toFixed(2) + ' m off at Crossing 8, from the byline), a poor one well off it (' + avg(poor.aim).toFixed(2) + ' m at 1)');
 ok(hd(early) >= 0.55 * N && avg(early.aim) > avg(good.aim) * 1.5, 'an early ball from 24 m out still finds the runs in behind with nobody on them (' + hd(early) + ' of ' + N + ' headed), but goes less true: ' + avg(early.aim).toFixed(2) + ' m off where it was aimed, against ' + avg(good.aim).toFixed(2) + ' m from the byline');
-ok(marked.T.cleared + marked.T.keeper >= 3 && hd(marked) < hd(good), 'two of theirs meet it in the air and clear a good share (' + marked.T.cleared + ' of ' + N + ')');
+ok(marked.T.cleared + marked.T.keeper + (marked.T.punched || 0) >= 3 && hd(marked) < hd(good), 'two of theirs meet it in the air and clear a good share (' + marked.T.cleared + ' of ' + N + (marked.T.punched ? ', and ' + marked.T.punched + ' punched' : '') + ')');
 // how wide it goes, drawn 20,000 times: its line (the mean, and the worst, in degrees) and its weight (the mean share
 // it's over or short), from the byline (f 0) and from 24 m out (f 1), at Crossing 1, 8 and 10
 const spread = await page.evaluate(() => { const T = window.__T, p = T.controlled(), keep = T.P.crossing.val, out = {};

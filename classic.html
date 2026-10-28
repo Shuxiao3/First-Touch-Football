@@ -166,6 +166,14 @@
   .cfCard{ max-width:430px; }
   .cfMsg{ color:var(--ink2); font-size:13px; line-height:1.55; margin-bottom:6px; }
   .cfBtns,.mkBtns{ display:flex; gap:8px; margin-top:14px; }
+  .stCard{ max-width:560px; gap:7px; }
+  .stTitle{ font:15px 'FTC Dot',monospace; letter-spacing:1px; color:var(--acc); }
+  .stMsg{ font-size:12px; line-height:1.4; color:var(--ink); }
+  .stMsg b{ color:var(--acc); }
+  .stLbl{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); }
+  .stRow{ display:flex; flex-wrap:wrap; gap:5px; }
+  .stRow .mgChip{ padding:7px 9px; }
+  .stBlurb{ font-size:11px; color:var(--dim); min-height:15px; }
   .cfBtns .pauseBtn,.mkBtns .pauseBtn{ flex:1; }
   .cfDanger{ background:linear-gradient(90deg,#5a1a14,#3a100c)!important; border-color:var(--bad)!important; color:#ffd7d2!important; }
   .mkCard{ max-width:720px; width:min(720px,94vw); display:flex; flex-direction:column; overflow:hidden; }
@@ -1408,6 +1416,7 @@
   </div>
 </div>
 <div id="mgrMaker" class="pauseOv"><div class="pauseCard mkCard"></div></div>
+<div id="storyModal" class="pauseOv"><div class="pauseCard stCard"></div></div>
 <div id="menu" class="menuOverlay" style="display:none">
   <div class="menuCard">
     <div class="menuTop">
@@ -3038,6 +3047,7 @@
         if(trapTouchId===null){
           trapTouchId=t.identifier;
           if(swipeable()) swipe={pts:[{x:lx,y:ly,t:evT(e)}],w:r.width,h:r.height};
+          else if(canSwitch()) trapTouchId=null;                                  // a match: off your men a tap does nothing (on one it's him: tapSwitch, above)
           else { pressTrap(); trapHeld=true; ringAt(lx,ly); trapDragStart(t); }   // (drag it to aim the touch)
         }
         continue;
@@ -4898,7 +4908,7 @@
   // keeper's, or nobody's; and how close it came to the man it was for, at a height he could head it.
   const CL_WHO=[['ai','COMPUTER'],['you','YOU']];
   const CL_FROMS=[[25,'BYLINE'],[180,'8 M OUT'],[360,'16 M OUT'],[540,'24 M OUT']];
-  const CL_COL={goal:'#9dff3c',saved:'#c8f58a',headed:'#ffb43c',shot:'#ffb43c',ours:'#c8f58a',cleared:'#ff5a4d',keeper:'#ff5a4d',nobody:'#8a9580',nocross:'#8a9580',lost:'#ff5a4d'};
+  const CL_COL={goal:'#9dff3c',saved:'#c8f58a',headed:'#ffb43c',shot:'#ffb43c',ours:'#c8f58a',cleared:'#ff5a4d',keeper:'#ff5a4d',punched:'#ff5a4d',nobody:'#8a9580',nocross:'#8a9580',lost:'#ff5a4d'};
   const CL_SETTLE=1.4;                                   // (his men take their spots before the computer crosses)
   const clRole=r=>players.filter(q=>q.pRole===r);
   // the cast: you (the crosser), so many of ours as forwards and so many of theirs as centre-backs -- nobody else on the
@@ -4996,7 +5006,7 @@
     if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) crossLabServe(); }
   }
   // the tally: each result; head -- headed by ours; found -- got to one of ours (headed, shot, or at his feet)
-  function crossLabTally(){ return LAB.ct||(LAB.ct={n:0,goal:0,saved:0,headed:0,shot:0,ours:0,cleared:0,keeper:0,nobody:0,head:0,found:0,missSum:0,missN:0,aimSum:0,aimN:0}); }
+  function crossLabTally(){ return LAB.ct||(LAB.ct={n:0,goal:0,saved:0,headed:0,shot:0,ours:0,cleared:0,keeper:0,punched:0,nobody:0,head:0,found:0,missSum:0,missN:0,aimSum:0,aimN:0}); }
   function crossLabFinish(res){
     const r=LAB.rep; if(!r||r.done) return;
     r.done=true; r.result=res; r.endT=simNow;
@@ -5054,7 +5064,7 @@
     if(!r.done) return `${head} ${how} → …`;
     const c=CL_COL[r.result]||'#8a9580', by=r.headBy||r.shotBy||r.got, hb=by?`#${by.p.num} `:'', hd=!!r.headBy;
     const res={goal:hb+(hd?'HEADED IN!':'SCORED!'),saved:hb+(hd?'HEADED, SAVED':'SHOT, SAVED'),headed:hb+'HEADED, NOT IN',shot:hb+'SHOT, NOT IN',ours:hb+'HAS IT',
-               cleared:'CLEARED',keeper:'THE KEEPER\'S',nobody:'NOBODY GOT IT'}[r.result]||r.result.toUpperCase();
+               cleared:'CLEARED',keeper:'THE KEEPER\'S',punched:'PUNCHED CLEAR',nobody:'NOBODY GOT IT'}[r.result]||r.result.toUpperCase();
     return `${head} ${how} → <b style="color:${c}">${res}</b>`;
   }
   function crossLabTallyText(){
@@ -5067,6 +5077,7 @@
     parts.push(T.goal+' in');
     if(T.cleared) parts.push(T.cleared+' cleared');
     if(T.keeper) parts.push(T.keeper+' the keeper\'s');
+    if(T.punched) parts.push(T.punched+' punched');
     if(T.nobody) parts.push(T.nobody+' to nobody');
     if(T.missN) parts.push('avg '+(T.missSum/T.missN/MK).toFixed(1)+' m from its man');
     if(T.aimN) parts.push((T.aimSum/T.aimN/MK).toFixed(1)+' m off the aim');
@@ -6213,6 +6224,11 @@
   // GOING UP FOR A HEADER: the take-off speed (players fall at 700 px/s^2) that lifts his feet 8 px (Heading 1)
   // to 14 px (Heading 10) -- a quarter to two-fifths of his height. The header's reach above his head does the rest.
   function headJumpVz(p){ return Math.sqrt(2*700*statLerp(statOf(p,'heading',P.heading.val),8,14)); }
+  // HOW HIGH A MAN CAN HEAD IT: the top of his head where he is (on the ground or up in his leap) and HEAD_UP over it at a
+  // stretch -- 61 px at the very most (Heading 10, at the top of his leap), well under a keeper's hands (GK_CLAIM_H, 82 px):
+  // no man but a keeper ever gets to a ball higher than a keeper could. (It was 51 px over his head: up to 97.)
+  const HEAD_UP=15;
+  function headTop(p){ return (p.z||0)+PLAYER_H*0.95; }
   function oppHasBall(){
     return (ball.ownedBy&&ball.ownedBy.team==='R')||(gkHold&&gkHold.team==='R');
   }
@@ -6499,7 +6515,7 @@
     if(ball.ownedBy||gkHold){headerT=0;return;}
     const p=controlled;
     const headZ=p.z+PLAYER_H*0.95;
-    const HHR=PLAYER_H, HVU=PLAYER_H*1.5, HVD=PLAYER_H;  // header reach: 1 body-length wide, 1.5 above the head, 1 below (to meet a descending cross)
+    const HHR=PLAYER_H, HVU=HEAD_UP, HVD=PLAYER_H;       // header reach: 1 body-length wide, HEAD_UP over his head (a stretch), 1 below (to meet a descending cross)
     const hdh=dist(p,ball), hdz=ball.z-headZ;            // horizontal distance + signed height vs the head
     const hvr=hdz>=0?HVU:HVD;
     let Rh=HHR;                                          // for a live cross: full toward the incoming ball, halved on the far side (behind)
@@ -6531,7 +6547,7 @@
     if(ball.ownedBy||gkHold){defHeaderT=0;return;}
     const p=controlled;
     const headZ=p.z+PLAYER_H*0.95;
-    if(dist(p,ball)<44&&Math.abs(ball.z-headZ)<46&&ball.z<=AIR_REACH+p.z+22){
+    if(dist(p,ball)<44&&Math.abs(ball.z-headZ)<46&&ball.z<=headTop(p)+HEAD_UP){
       defHeaderT=0;
       const atk=atkOf(p.team);
       // DEFENSIVE AERIAL DUEL (winning-rate = STRENGTH + TACKLE): if an attacker is challenging
@@ -10633,11 +10649,22 @@
     }
     return null;
   }
+  // A PUNCH: off his fists, up and away to the side the ball's on, 12 to 18 m out of the danger, nobody's ball. The cross is
+  // dead; he heads back to his line.
+  function keeperPunch(kp){
+    const sy=Math.sign(ball.y-YC)||(Math.random()<0.5?-1:1), a=0.35+Math.random()*0.55, sp=330+Math.random()*130;
+    endCurve(); ball.vx=-kp.side*Math.cos(a)*sp; ball.vy=sy*Math.sin(a)*sp; ball.vz=190+Math.random()*70;
+    ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=kp.team; ball.lastTouchP=kp; ball.crossT=0; ball.crossBy=null; ball.shotT=0;
+    ball.intendedRcv=null; ball.thru=null; ball.lob=null; offsidePass=null;
+    kp.mode='return'; kp.claimCd=1.2; kp.punchT=0.3; kp.punchDir=sy;
+    lastGrade='PUNCHED'; gradeColor='#ffb43c'; gradeFade=1.2;
+    if(LAB.on&&LAB.kind==='cross'&&LAB.rep&&LAB.rep.cross) crossLabFinish('punched');
+  }
   // a keeper coming for a cross is at it: the men going up for it leave it to him
   function keeperOnIt(){ for(const k of keepers) if(k.mode==='claimX'&&Math.hypot(ball.x-k.x,ball.y-k.y)<reachOf(k)+ball.r+14) return true; return false; }
   function keeperUpdate(kp,dt){
     if(kp.benched){ kp.x=kp.homeX+kp.side*90; kp.y=-80; kp.diveT=0; kp.groundT=0; return; }   // Shooting Lab, keeper off: nowhere near it
-    kp.claimCd-=dt;
+    kp.claimCd-=dt; if(kp.punchT>0) kp.punchT-=dt;
     if(kp.diveT>0){ kp.diveT-=dt; if(kp.diveT<=0 && kp.groundT<=0) kp.groundT=0.5; }   // after the dive, lie down ~0.5s
     else if(kp.groundT>0){ kp.groundT-=dt; }
     const spd=keeperSpdOf(kp);
@@ -10718,7 +10745,14 @@
       const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
       kp.x+=dx/l*mv; kp.y+=dy/l*mv;
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
-      if(Math.hypot(ball.x-kp.x,ball.y-kp.y)<(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())&&ball.z<=GK_CLAIM_H+8){
+      const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ()), dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
+      if(dd<R&&ball.z<=GK_CLAIM_H+8){
+        // CATCH IT OR PUNCH IT: by the nearest he can get it to his body in the next moment (it coming on, him going to it,
+        // while it's still up), he's comfortable and catches it -- or only gets there at the end of his reach, and punches
+        // it clear; and with one of theirs up with him, he punches anything that isn't already in his midriff
+        let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*1.25*t)); }
+        const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50);
+        if(far>0.8||(rival&&dd/R>0.3)){ keeperPunch(kp); return; }
         kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
         ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
         lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
@@ -12449,6 +12483,7 @@
       const facingE=kp.side<0;                             // he faces up the pitch, away from his goal
       if(kp.diveT>0||kp.groundT>0)                         // the stretch, then down on the turf
         return [GKR.dive+((kp.diveDir||1)<0?0:1)+(facingE?0:2), kp.diveT>0?0:1];
+      if(kp.punchT>0) return [GKR.dive+((kp.punchDir||1)<0?0:1)+(facingE?0:2), 0];   // a punch: up at it, at a stretch
       const now=performance.now();
       if(kp._held && !holding(kp) && gkHold!==kp){         // he's just let it go: the kick out, toward where it went
         kp._kickUntil=now+380; const sp=Math.hypot(ball.vx,ball.vy);
@@ -13471,8 +13506,27 @@
     d.clubId=you.id; d.div[1].push(you.id);
     d.roster=you.players; you.players=[];                // your men live in d.roster; the club entry keeps no copy
     for(const p of d.roster) p.until=d.season+Math.floor(Math.random()*3);
-    for(let i=0;i<40;i++){ const lv=mgPick([1,1,1,2,2,3]); d.world.free.push(mgNewPlayer(d,mgPick(MG_ROLES),MG_LEVEL[lv]-5+mgGauss()*4,Math.min(35,mgAge()+2),{until:0})); }
+    for(let i=0;i<40;i++) d.world.free.push(mgNewFreeAgent(d));
   }
+  // A MAN WITHOUT A CLUB, as a summer finds him: most are old hands of 29 to 35 gone past their best, a point and a half
+  // under the level they played at for every year past 29; the rest younger men nobody kept, a little under it, with
+  // little left to grow into (and asking over the odds all the same: see mgFreeAsk)
+  function mgNewFreeAgent(d){ const old=Math.random()<0.75, lv=mgPick([1,1,1,2,2,3]), peak=MG_LEVEL[lv]-4+mgGauss()*4;
+    const age=old?29+Math.floor(Math.random()*7):19+Math.floor(Math.random()*10), v=old?peak-(age-29)*1.5-Math.random()*2:peak-3-Math.random()*4;
+    const p=mgNewPlayer(d,mgPick(MG_ROLES),v,age,{until:0,pot:old?null:v+Math.random()*3}); p.idle=0; return p; }
+  // out of contract, released or let go: a season's clock starts on him -- unless he's young with a future, and a club
+  // has him the same day (mgSnapUp; `from`: not the club that let him go)
+  function mgToFree(d,p,from){ p.until=0; p.idle=0; d.world.free.push(p); mgSnapUp(d,p,from); }
+  // NO YOUNG MAN WITH A FUTURE IS LEFT WITHOUT A CLUB: one of 24 or under whose ceiling is 5 or more above him is signed
+  // by a club at his ceiling's level (or one either side) with room for him. -> true if one did
+  function mgSnapUp(d,p,from){ if(p.age>24||(p.pot||p.ovr)-p.ovr<5) return false;
+    const t=mgLevelTier(p.pot||p.ovr), C=mgAiClubs(d).filter(c=>c!==from&&c.players.length<MG_MAX&&Math.abs(c.tier-t)<=1);
+    if(!C.length) return false; mgMoveAi(d,p,null,mgPick(C),0); return true; }
+  function mgSweepFree(d){ for(const p of d.world.free.slice()) mgSnapUp(d,p,null); }
+  // a season without a club: he doesn't grow (no football), and from 29 he loses a point more than age alone takes
+  // (rust), his ceiling slipping two with it
+  function mgIdleYear(p){ const was=p.ovr; mgGrow(p); p.ovr=clamp(Math.min(p.ovr,was)-(p.age>=29?1:0),30,95);
+    p.pot=Math.max(p.ovr,(p.pot||p.ovr)-2); p.age++; p.idle=(p.idle||0)+1; }
   function mgClub(d,id){ return (d.world.clubs[id])||null; }
   function mgPlayersOf(d,id){ return id===d.clubId?d.roster:((d.world.clubs[id]||{}).players||[]); }
   function mgAiClubs(d){ return Object.values(d.world.clubs).filter(c=>c.id!==d.clubId); }
@@ -13566,8 +13620,57 @@
     if(g.kind==='league') mgAfterRound(d); else mgAfterPlayoffRound(d);
     return rep; }
   function mgAfterRound(d){
+    mgStory(d);
     if(d.md===MG_HALF){ d.phase='winter'; d.day=1; mgNews(d,'The mid-season transfer window is open for '+MG_WINDOW.winter+' days.'); mgAiBids(d); }
     else if(d.md>=MG_MD) mgStartPlayoffs(d); }
+
+  // THE FIRST SEASON'S TWO ARRIVALS. After the 2nd game, a veteran of the top flight comes home to finish his career --
+  // rated in the 70s, 33 to 35, his position and style anyone's guess -- on under a third of his wage, to the end of
+  // next season. After the 5th, a 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
+  // choose where he plays and how (mgSignKid). story.vet / .kid: 0 to come, 1 to see (on the hub), 2 done.
+  const KID_POS=['GK','CB','FB','DM','CM','WM','AM','WNG','STK'], SUB_ROLE={GK:'GK',CB:'DEF',FB:'DEF',DM:'MID',CM:'MID',WM:'MID',AM:'MID',WNG:'ATT',STK:'ATT'};
+  function mgStory(d){ const S=d.story; if(!S) return;
+    if(!S.vet&&d.md>=2){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
+      const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
+      p.wage=mgRound(mgWage(p.ovr)*0.3); mgRosterAdd(d,p); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';
+      mgNews(d,p.name+' ('+p.age+'), once of '+(S.vetFrom||'the top flight')+', comes home to '+d.clubName+' on a fraction of his wage.'); }
+    if(!S.kid&&d.md>=5){ S.kid=1; S.kidAsk={name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), ovr:60+Math.floor(Math.random()*10), pot:85+Math.floor(Math.random()*6)};
+      mgNews(d,'A 16-year-old, '+S.kidAsk.name+', has asked to join '+d.clubName+'.'); } }
+  // the wonderkid signs, where (sub) and how (style) you chose: a three-season youth deal, half his wage
+  function mgSignKid(d,sub,style){ const S=d.story, A=S&&S.kidAsk; if(!A||S.kid!==1) return 'He has gone.';
+    const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
+    p.name=A.name; if(role!=='GK'&&STYLES[style]&&STYLES[style].sub===sub) p.style=style;
+    p.wage=mgRound(mgWage(p.ovr)*0.5); mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;
+    mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+p.pot+'.');
+    return null; }
+  // the hub shows whichever of them is waiting to be seen
+  function mgStoryShow(d){ const S=d.story, m=document.getElementById('storyModal'); if(!m) return;
+    const want=S&&S.vet===1?'vet':S&&S.kid===1?'kid':'';
+    if(!want){ m.classList.remove('on'); return; }
+    if(m.classList.contains('on')&&m.dataset.k===want) return;
+    m.dataset.k=want; mgStoryPaint(d); m.classList.add('on'); }
+  function mgStoryPaint(d){ const S=d.story, card=document.querySelector('#storyModal .stCard'); let h='';
+    if(S.vet===1){ const p=d.roster.find(x=>x.id===S.vetId);
+      const nm=p&&p.role!=='GK'?((STYLES[p.style]||{}).name||p.subRole||''):'', what=p?(p.role==='GK'?'a goalkeeper':(/^[aeiou]/i.test(nm)?'an ':'a ')+nm.charAt(0).toLowerCase()+nm.slice(1)):'';
+      h='<div class="stTitle">A HOMETOWN HERO COMES HOME</div><div class="stMsg">'+(p?'<b>'+mgEsc(p.name)+'</b>, '+p.age+(S.vetFrom?', once of '+mgEsc(S.vetFrom)+',':'')+' has come home to finish his career, and he'
+        +'’ll take a pay cut to play for the club he grew up with: '+what+' rated <b>'+p.ovr+'</b>, on <b>'+money(p.wage)+'</b> a week to the end of next season.':'')+'</div>'
+        +'<div class="cfBtns"><button class="pauseBtn" data-st="ok">WELCOME HIM</button></div>'; }
+    else if(S.kid===1){ const A=S.kidAsk, pos=MGUI.kidPos&&KID_POS.includes(MGUI.kidPos)?MGUI.kidPos:'STK', L=SUB_STYLES[pos]?[...new Set(SUB_STYLES[pos])]:[], sty=L.includes(MGUI.kidSty)?MGUI.kidSty:L[0];
+      MGUI.kidPos=pos; MGUI.kidSty=sty;
+      h='<div class="stTitle">A WONDERKID ASKS TO JOIN</div><div class="stMsg"><b>'+mgEsc(A.name)+'</b>, 16, has turned the big clubs down to play for '+mgEsc(d.clubName)
+        +'. He’s rated <b>'+A.ovr+'</b> now, with a ceiling of <b>'+A.pot+'</b>. Where does he play, and how?</div>'
+        +'<div class="stLbl">POSITION</div><div class="stRow">'+KID_POS.map(k=>'<button class="mgChip'+(k===pos?' on':'')+'" data-st="pos" data-v="'+k+'">'+k+'</button>').join('')+'</div>'
+        +'<div class="stLbl">STYLE</div><div class="stRow">'+(L.length?L.map(k=>'<button class="mgChip'+(k===sty?' on':'')+'" data-st="sty" data-v="'+k+'">'+STYLES[k].name.toUpperCase()+'</button>').join(''):'<span class="stBlurb">A keeper has no style to pick.</span>')+'</div>'
+        +'<div class="stBlurb">'+(sty&&STYLES[sty]?mgEsc(STYLES[sty].blurb):'')+'</div>'
+        +'<div class="cfBtns"><button class="pauseBtn" data-st="sign">SIGN HIM</button></div>'; }
+    card.innerHTML=h; }
+  document.getElementById('storyModal').addEventListener('click',e=>{ const b=e.target.closest('[data-st]'), d=CAREER&&CAREER.data; if(!b||!d||!d.story) return;
+    const a=b.dataset.st;
+    if(a==='ok'){ d.story.vet=2; mgSave(d); document.getElementById('storyModal').classList.remove('on'); mgStoryShow(d); renderHub(); }
+    else if(a==='pos'){ MGUI.kidPos=b.dataset.v; MGUI.kidSty=null; mgStoryPaint(d); }
+    else if(a==='sty'){ MGUI.kidSty=b.dataset.v; mgStoryPaint(d); }
+    else if(a==='sign'){ const err=mgSignKid(d,MGUI.kidPos||'STK',MGUI.kidSty); if(err){ showNote(err,'var(--bad)'); return; }
+      mgSave(d); document.getElementById('storyModal').classList.remove('on'); renderHub(); showNote(d.story.kidAsk.name+' has signed.','var(--good)'); } });
 
   // ---- playoffs: 3rd v 6th and 4th v 5th, one game each at the higher seed's ground, then a final (not in the top league)
   function mgStartPlayoffs(d){
@@ -13628,15 +13731,15 @@
       const ns=careerStars(p); if(ns!==ws) mgNews(d,p.name+(ns>ws?' has grown into another skill star (':' has lost a skill star (')+'\u2605'.repeat(ns)+').'); }   // (his stars come with age: see starsAt)
     for(const p of (d.youth||[])){ mgGrow(p,1); p.age++; }
     for(const c of mgAiClubs(d)) for(const p of c.players){ mgGrow(p); p.age++; }
-    for(const p of d.world.free){ mgGrow(p); p.age++; }
+    for(const p of d.world.free) mgIdleYear(p);
     for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if(retires(p)){ R.retired.push(p.name); mgRosterRemove(d,i); } }
     for(const c of mgAiClubs(d)) c.players=c.players.filter(p=>!retires(p));
     d.world.free=d.world.free.filter(p=>!retires(p));
     // deals that run out with this season: yours leave unless you renewed them; the computer keeps the men it still wants
-    for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if((p.until||0)<=S){ R.expired.push(p.name); mgRosterRemove(d,i); p.until=0; d.world.free.push(p); } }
+    for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if((p.until||0)<=S){ R.expired.push(p.name); mgRosterRemove(d,i); mgToFree(d,p); } }
     for(const c of mgAiClubs(d)) for(const p of c.players.slice()){ if((p.until||0)>S) continue;
       if(p.age<33&&p.ovr>=MG_LEVEL[c.tier]-9){ p.until=S+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); }
-      else { c.players.splice(c.players.indexOf(p),1); p.until=0; d.world.free.push(p); } }
+      else { c.players.splice(c.players.indexOf(p),1); mgToFree(d,p,c); } }
     d.youth=(d.youth||[]).filter(p=>{ if(p.age>=19){ R.youthOut.push(p.name); return false; } return true; });   // 19: promoted by now, or gone
     for(const L of [d.roster,d.world.free,...mgAiClubs(d).map(c=>c.players)]) for(const p of L){ p.apps=0; p.goals=0; } }
   // the role a squad is shortest of, against two keepers and four each of defenders, midfielders and forwards
@@ -13671,8 +13774,9 @@
     const ft=FIN_TIER[d.tier]; d.sponsorWk=ft.sponsor; dealsExpire(d);   // (the partners' money is the league's; the ground stays as you built it)
     { const nb=LOYALTY_BASE[d.tier]||1000, cur=d.loyalty!=null?d.loyalty:nb; d.loyalty=Math.round(cur+(nb-cur)*0.3); }
     for(const c of mgAiClubs(d)){ c.budget=mgRound(Math.min(c.budget,MG_AI_BUDGET[c.tier]*1.5)+MG_AI_BUDGET[c.tier]*(0.4+Math.random()*0.4)); mgRefill(d,c); }   // (they pay no wages: what they hoard is capped)
-    d.world.free=d.world.free.filter(p=>p.age<34).sort((a,b)=>b.ovr-a.ovr).slice(0,70);
-    for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++){ const lv=mgPick([1,1,2,2,3,4]); d.world.free.push(mgNewPlayer(d,mgPick(MG_ROLES),MG_LEVEL[lv]-6+mgGauss()*4,mgAge(),{until:0})); }   // (the pool kept near sixty)
+    d.world.free=mgShuffle(d.world.free.filter(p=>(p.idle||0)<2)).slice(0,70);   // (two seasons without a club, and he's out of the game)
+    mgSweepFree(d);
+    for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++) d.world.free.push(mgNewFreeAgent(d));   // (the pool kept near sixty)
     if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); d.top=Math.max(d.top||1,d.tier);
     mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. The summer window is open for '+MG_WINDOW.summer+' days.');
     mgAiBids(d); }
@@ -13714,6 +13818,11 @@
   function mgAsk(d,p,club){ return club?mgRound(mgValue(d,p)*(mgEight(club.players).includes(p)?1.35:1.05)):0; }
   // his wage to sign (moving clubs is worth a rise to him; a man a league or more above you wants more again)
   function mgDemand(d,p,moving){ return mgRound(mgWage(p.ovr)*(moving?1.1:1)*(p.age>=31?0.85:1)*(1+0.15*Math.max(0,mgLevelTier(p.ovr)-d.tier))); }
+  // A FREE AGENT'S PRICE: from 29 he asks his wage, as from anyone; younger, he reckons he's worth more than the club
+  // that let him go did, and asks it -- up to two and a half times his wage at 21 and under, sliding to his wage at 29
+  // -- and a fee to sign of up to twelve weeks of that, the younger he is the more. -> {wage, fee}
+  function mgFreeAsk(d,p){ const young=clamp((29-(p.age||25))/8,0,1), wage=mgRound(mgDemand(d,p,false)*(1+1.5*young));
+    return {wage, fee:young>0?mgRound(wage*12*young):0}; }
   function mgWontCome(d,p){ const lt=mgLevelTier(p.ovr); return lt-d.tier>=2?p.name+' won’t drop down to '+MG_LEAGUE[d.tier]+' — he’s a '+MG_LEAGUE[lt]+' player.':null; }
   // you buying: -> {ok} when they take it, else {msg}
   function mgBid(d,pid,fee){ const f=mgFind(d,pid);
@@ -13745,8 +13854,9 @@
     const p=f.p, no=mgWontCome(d,p); if(no) return no;
     if(d.roster.length>=MG_MAX) return 'Your squad is full ('+MG_MAX+' players).';
     if(d.budget<0&&d.roster.length>=MG_MIN) return 'You’re in the red: sell before you sign anyone.';
-    d.world.free.splice(d.world.free.indexOf(p),1); p.wage=mgDemand(d,p,false); p.until=d.season+years-1; mgRosterAdd(d,p);
-    mgTx(d,'in',p,'free agent',0); mgNews(d,d.clubName+' sign free agent '+p.name+'.');
+    const ask=mgFreeAsk(d,p); if(ask.fee>d.budget) return 'He wants '+money(ask.fee)+' to sign: you have '+money(d.budget)+'.';
+    d.world.free.splice(d.world.free.indexOf(p),1); d.budget-=ask.fee; p.wage=ask.wage; p.until=d.season+years-1; p.idle=0; mgRosterAdd(d,p);
+    mgTx(d,'in',p,'free agent',ask.fee); mgNews(d,d.clubName+' sign free agent '+p.name+(ask.fee?' ('+money(ask.fee)+' to sign him)':'')+'.');
     return null; }
   function mgTx(d,dir,p,club,fee){ d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }
   // you selling: take a club's offer
@@ -13764,7 +13874,7 @@
   function mgReleaseCost(d,p){ return mgRound(p.wage*((MG_MD-Math.min(d.md,MG_MD))+MG_MD*Math.max(0,(p.until||0)-d.season))*0.5); }
   function mgRelease(d,idx){ const p=d.roster[idx], why=mgCanLose(d,idx); if(why) return why;
     const cost=mgReleaseCost(d,p); if(cost>d.budget) return 'Paying off his contract costs '+money(cost)+'.';
-    d.budget-=cost; mgRosterRemove(d,idx); p.until=0; d.world.free.push(p); mgNews(d,d.clubName+' release '+p.name+'.');
+    d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.');
     return null; }
   // a new deal: `years` seasons from next season, at what he asks now
   function mgRenew(d,idx,years){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
@@ -13821,9 +13931,9 @@
       if(best) mgMoveAi(d,best,bestClub,b,bestFee); }
     for(const c of clubs){ mgRefill(d,c); mgTrimAi(d,c); } }
   // a computer club over fifteen lets its weakest go (counting age), never its second keeper
-  function mgTrimAi(d,c){ const F=d.world.free;
+  function mgTrimAi(d,c){
       while(c.players.length>MG_MAX){ const w=c.players.filter(p=>p.role!=='GK'||c.players.filter(x=>x.role==='GK').length>2).sort((a,b)=>(a.ovr-a.age*0.3)-(b.ovr-b.age*0.3))[0];
-        c.players.splice(c.players.indexOf(w),1); w.until=0; F.push(w); } }
+        c.players.splice(c.players.indexOf(w),1); mgToFree(d,w,c); } }
   // the window moves on a day; after its last day it shuts
   function mgNextDay(d){ if(!mgWindowOpen(d)) return;
     mgAiTrades(d);
@@ -14620,6 +14730,7 @@
   function mgSortOvr(d,p){ if(mgKnown(d,p)) return p.ovr; const r=mgRange(d,p); return (r[0]+r[1])/2; }
   // what he'd ask: from his true rating once scouted, else from the middle of his range
   function mgDemandSeen(d,p,moving){ return mgKnown(d,p)?mgDemand(d,p,moving):mgDemand(d,{ovr:Math.round(mgSortOvr(d,p)),age:p.age},moving); }
+  function mgFreeAskSeen(d,p){ return mgKnown(d,p)?mgFreeAsk(d,p):mgFreeAsk(d,{ovr:Math.round(mgSortOvr(d,p)),age:p.age}); }
   function mgTooBig(d,p){ return mgLevelTier(p.ovr)-d.tier>=2?'<span class="mgTag bad">WON’T COME</span>':''; }
   function mgRow(d,p,o){
     return '<button class="mgRow'+(o.sel?' on':'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos">'+(p.subRole||p.role)+'</span>'
@@ -14701,7 +14812,8 @@
     if(d.listed[p.id]) return h+mgActRow('LISTED <b>'+money(d.listed[p.id])+'</b>','<button class="mgBtn" data-mg="unlist" data-pid="'+p.id+'">TAKE HIM OFF</button>');
     const pr=MGUI.list&&MGUI.list.pid===p.id?MGUI.list.price:mgValue(d,p);
     return h+mgActRow('PRICE',mgStep('liststep',money(pr))+'<button class="mgBtn" data-mg="list" data-pid="'+p.id+'">LIST HIM</button>'); }
-  function mgFreeActions(d,p,known){ let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,false))+'/wk')+mgFact('FEE','none')+'</div>';
+  function mgFreeActions(d,p,known){ const a=mgFreeAskSeen(d,p);
+    let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+'</div>';
     if(!known) h+=mgScoutBtn(d,p,null);
     return h+mgActRow('SIGN',mgYears()+'<button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN HIM</button>'); }
   function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
@@ -14760,10 +14872,10 @@
     h+='<div class="mgList">';
     for(const [p,c] of L) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
     return mgPanes(h+'</div>', card); }
-  function mgFreeTab(d){ let h='<div class="mgSum">Players without a club: no fee, just wages. They can sign any time.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
+  function mgFreeTab(d){ let h='<div class="mgSum">Without a club: mostly old hands. The young ask more, and a fee to sign.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
     const L=d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a));
-    h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgDemandSeen(d,p,false))+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
+    h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgFreeAskSeen(d,p).wage)+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
     return mgPanes(h, card); }
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
@@ -14782,7 +14894,7 @@
     let h='<div class="mgSum">'+L.length+' scouted this season. Reports go out of date when the season ends.</div>';
     if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
     return mgPanes(h+'<div class="mgList">'+L.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
-      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgDemand(d,f.p,false))+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
+      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
       MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: they report on every player in one position, and the reports last until the end of the season.</div>';
     for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · '+money(c)+' EACH</div><div class="mgBtns">';
@@ -14882,7 +14994,7 @@
     const ph=document.getElementById('chPhase'), what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'';
     ph.dataset.long='Season '+d.season+' · '+what+who; ph.dataset.mid=what+who;
     ph.dataset.short=(g&&g.kind==='league'?'MD '+(d.md+1):what)+(g&&opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):'');
-    cpPaint(d); cpHotspots(d); cpFitStats(); }
+    cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); }
   // ---- THE CAMPUS VIEW: the picture fitted to the space beside the menu -- at 1x (or more, to fill a big screen), the
   // middle of it in the middle -- and its buildings to tap; a building opens with the camera going in on it, and coming
   // back out to the campus closes it the same way
@@ -14983,13 +15095,14 @@
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
     for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)
     if(W.clubs&&W.free) for(const c of Object.values(W.clubs)) if(c.id!==d.clubId&&(c.players||[]).length>MG_MAX) mgTrimAi(d,c);   // (squads were up to 22; your own men stay)
+    if(W.clubs&&W.free) mgSweepFree(d);                                                           // (a young man with a future left without a club, from before: signed)
     stadOf(d);                                                                                                   // (a ground: its level from the seats it had)
     if(!d.lv){ const B=d.built, all=!B||['scouting','academy','news','home'].every(k=>B[k]);   // (a career from before the clubhouse: as built up as it was;
       d.lv=all?{club:4,train:4,physio:0,market:1,scouting:d.scoutLvl||1,academy:d.academy||1}     //  one that had only begun building, from the shed --
         :{club:1,train:1,physio:0,market:1,scouting:B.scouting?(d.scoutLvl||1):0,academy:B.academy?(d.academy||1):0};   //  and the money back for its plants)
       if(B&&!all) for(const k in d.decor||{}) d.budget+=({potplants:600,trees_club:1600,trees_ground:1200,trees_walk:1600,trees_east:1800,westlawn:1400,lamps:2000,benches:900,beds:900,maple:3500,garden:1000,bikes:400})[k]||0;
       delete d.built; delete d.decor; }
-    d.deco=d.deco||[]; d.store=d.store||{};
+    d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     return d; }
   let curBldg=null; const curTab={};
@@ -15191,7 +15304,7 @@
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,boards:0,ads:[],deals:{},bids:{}}, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, scouted:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{} };
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d);

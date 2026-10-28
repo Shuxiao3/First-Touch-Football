@@ -102,8 +102,15 @@ The same game played like any other football game. It's a copy of `index.html` w
   between them, he goes straight at the ball, and at the man's feet he takes it off him. His reach and a dive at the
   feet (Diving) decide how close that is. Out closing a man down he can leave his posts, anywhere in his box.
 - **The keeper claims crosses.** A cross into his six-yard box, or just past it, that he can get to while it's
-  within his reach (hands up, a little higher than the bar), he comes for and catches, over everyone's heads: the
-  men going up for it leave it to him. One that comes down further out he leaves to his defenders.
+  within his reach (hands up, a little higher than the bar), he comes for, over everyone's heads: the men going up
+  for it leave it to him. One that comes down further out he leaves to his defenders.
+  - **Nobody reaches higher than a keeper.** A header tops out at the top of a man's head and a little over it at
+    a stretch: 61 px at the very most (Heading 10, at the top of his leap; 47 standing), against the keeper's 82.
+    Yours used to reach 51 px over your head, up to 97 px, and your clearing header 87 px, over the keeper's hands.
+  - **Catch it or punch it.** Comfortably under it (it'll come to his body, him going to it), he catches it. If he
+    only just gets there, at the end of his reach, or one of theirs is up with him and it isn't dropping into his
+    midriff, he punches it clear: up and away to the side it's on, 12 to 18 m, nobody's ball. The Crossing Lab calls
+    it PUNCHED CLEAR.
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
@@ -202,7 +209,8 @@ The same game played like any other football game. It's a copy of `index.html` w
   SWITCH button: the swipe's direction picks the man and overrides the stick. After any switch, the man you get
   keeps running the way he was going for 0.25 s (the Switch: keep his run dial) before the stick takes him over, so
   the direction you held for the last man doesn't snap him round. You can also tap or click a team-mate
-  to switch to him. On the left side of a phone screen the stick still starts too.
+  to switch to him. On the left side of a phone screen the stick still starts too. A tap that isn't on one of your
+  men, a button or the stick does nothing: it used to switch player wherever you tapped on the right.
 - **One-touch passing.** With a ball on its way to you, press PASS (`J`, or the PASS button, which reads 1-TOUCH),
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that
   way, and you're on the receiver. "That way" is the stick's direction as the ball reaches you. On a phone, swiping
@@ -879,16 +887,37 @@ The same game played like any other football game. It's a copy of `index.html` w
     side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
     at the higher seed's ground, then a final, with a shoot-out if it's level. The bottom three go down. There's no
     sack: however badly it goes, you carry on.
+  - **Two men come to you in your first season.** After matchday 2 a veteran comes home: a man of 33 to 35, rated
+    70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
+    to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
+    join: 16, rated 60 to 69, with a ceiling of 85 to 90. You pick where he plays and his style (the card says what
+    each style does), and he signs for half his wage, to the end of the season after next. Both go straight into
+    your squad, even a full one; a card on the hub tells you, and so does the news.
   - **Transfer windows.** Five days in the summer before the season, and three at the winter break after matchday
     13. NEXT DAY moves a window on. In a window you can bid for anyone at another club. His club takes the asking
     price, may take 85% or more (once), and turns down less. Then you agree his contract: 1 to 4 seasons at the
     wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price
     (the market's Selling tab) and clubs bid for him every window day (now and then they bid for your best men
-    anyway); accept or reject. Free agents sign any time, for wages only. In the red you can't buy or sign anyone
-    until you're back in the black, but selling still works. All of it needs you on the transfer market first: your
-    phone, $1,500 (see **The campus**); till then nobody's bought, sold or signed, and nobody bids for your men.
+    anyway); accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
+    can't buy or sign anyone until you're back in the black, but selling still works. All of it needs you on the
+    transfer market first: your phone, $1,500 (see **The campus**); till then nobody's bought, sold or signed, and
+    nobody bids for your men.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
+  - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
+    standard, the best of them kept in the pool from one summer to the next and the young ones growing while they
+    waited, all for an ordinary wage.
+    - **Who's out there.** Three in four of the men a summer brings are 29 to 35, a point and a half under the
+      level they played at for every year past 29; the rest are younger men nobody kept, a little under it and with
+      next to nothing left to grow into. Players out of contract, released or let go join them.
+    - **No young man with a future is left without a club.** One of 24 or under whose ceiling is 5 or more above him
+      is signed by a club at his ceiling's level the day he's free (yours included, if you let his deal run out).
+    - **A season without a club** he doesn't grow, and from 29 he loses a point more than age alone takes (rust);
+      after two seasons without one he's out of the game.
+    - **What they ask.** From 29, his wage, as from anyone. Younger, he reckons he's worth more than the club that
+      let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
+      sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. A 60 in League 2 asks $550 a
+      week and $6,600 to sign at 21, $390 and $2,300 at 25, and $220 at 29.
   - **Scouting** needs the scouts' house built (see **The campus**). A player at another club shows a rating range
     until you scout him: 8 points wide, 6 and then 2 as you grow your scouting network. One player costs $200 in
     League 2, up to $6,000 in the Premium League. Or send your scouts round a league's goalkeepers, defenders,
@@ -1046,7 +1075,7 @@ stick follows your thumb, so you can't run off its edge. A double-tap on the lef
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
-for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too.
+for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too (Football Classic, in a match: nothing, unless it's a tap on one of your men, which switches to him).
 
 **Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
 and **drag** the way you want the ball to go. The trap is timed from the moment your finger lands,

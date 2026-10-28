@@ -23,7 +23,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, lvOf, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
@@ -80,7 +80,8 @@ async function skillsPage(page){
   return { all, seen, cut, pages, drawn: a.length > 0 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
-  await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); }
+  await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+  await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); }); }   // (the first season's two arrivals: manager-career's)
 
 for(const [w, h] of SIZES){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
@@ -447,6 +448,18 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   for(let i = 0; i < 100 && await page.evaluate(t => window.__T.sim() - t < 0.75, t0); i++) await page.waitForTimeout(50);   // (held for 0.75 s of play, however busy the machine)
   const c1 = await page.evaluate(() => window.__T.controlled().x); await touch('touchEnd', x0, 230);
   ok(Math.abs(c1 - c0) > 30, 'a thumb on the left of the screen drives your man (' + Math.round(c1 - c0) + ' px)');
+  // a tap on the grass on the right (off the buttons) doesn't switch you; a tap on one of your men does. (The game runs
+  // on between finding the spot and the tap landing: on a busy machine a man can run off his spot, or onto the grass,
+  // in between -- so each is tried afresh up to three times. Every tap on the grass switching, or none on a man, fails.)
+  const who = () => page.evaluate(() => window.__T.controlled().num);
+  let grass = null, n0 = null, n1 = null, mate = null, n2 = null;
+  for(let k = 0; k < 3 && !(grass && n1 === n0); k++){
+    grass = await page.evaluate(() => { const T = window.__T; T.theirBall(); for(let y = 70; y <= 200; y += 10) for(let x = 470; x <= 760; x += 10) if(!T.mateAt(x, y) && !document.elementFromPoint(x, y).closest('.actBtn,#menuBtn,.chip')) return { x, y }; return null; });
+    if(!grass) break; n0 = await who(); await touch('touchStart', grass.x, grass.y); n1 = await who(); await touch('touchEnd', grass.x, grass.y); }
+  for(let k = 0; k < 3 && !(mate && n2 === mate.num); k++){
+    mate = await page.evaluate(() => { const T = window.__T; T.theirBall(); const c = T.controlled(); for(const q of T.players()){ if(q.team !== c.team || q === c || q.role === 'G') continue; const s = T.scr(q); if(s.x > 20 && s.x < 440 && s.y > 60 && s.y < 330 && T.mateAt(s.x, s.y) === q) return { num: q.num, x: s.x, y: s.y }; } return null; });
+    if(!mate) break; await touch('touchStart', mate.x, mate.y); n2 = await who(); await touch('touchEnd', mate.x, mate.y); }
+  ok(grass && n1 === n0 && mate && n2 === mate.num, 'a tap on the grass doesn\'t switch you (#' + n0 + ' still); a tap on one of your men does (#' + n2 + ')');
   await ctx.close(); }
 
 process.exitCode = rep.finish();
