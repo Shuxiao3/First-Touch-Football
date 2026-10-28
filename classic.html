@@ -685,7 +685,7 @@
   .lgDot{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;}
   .lgDot.last{width:10px;height:10px;margin:-5px 0 0 -5px;box-shadow:0 0 0 1.5px rgba(0,0,0,.7);}
   .lgAim{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:1.5px dashed var(--ink);opacity:.75;}
-  #labHud{position:absolute;top:42px;left:10px;right:10px;z-index:6;flex-direction:column;align-items:center;gap:5px;pointer-events:none;}
+  #labHud{position:absolute;top:50px;left:10px;right:10px;z-index:6;flex-direction:column;align-items:center;gap:5px;pointer-events:none;}
   #stageWrap.labTuneOpen #labHud{right:calc(min(280px, 46%) + 18px);}
   #labBar{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;pointer-events:auto;}
   .labChip{font-family:'FTC Dot',monospace;font-size:10px;letter-spacing:.4px;color:var(--ink-dim);background:rgba(8,14,9,.8);
@@ -865,6 +865,17 @@
   .chStat .v{ text-shadow:1px 1px 0 var(--ol); }
   /* the match: its chips, framed like everything else */
   #readout .chip, .menuChip{ background:rgba(20,26,44,.88); border:0; border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); color:var(--ink2); }
+  /* your man, top right (see playerHud): number, full name and position over his stamina and his skill stars */
+  #rPlayer{ margin-left:auto; width:210px; display:flex; flex-direction:column; justify-content:center; gap:4px; padding:3px 9px; }
+  #rPlayer ~ .menuChip{ margin-left:0; }
+  .rpTop{ display:flex; align-items:baseline; gap:6px; white-space:nowrap; line-height:13px; }
+  .rpTop b{ color:var(--acc); font-weight:400; }
+  #rpName{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
+  #rpPos{ color:var(--dim); }
+  .rpBot{ display:flex; align-items:center; gap:6px; font-size:9px; line-height:10px; color:var(--dim); }
+  .rpBot .statBar{ position:relative; flex:1; height:6px; }
+  .rpBot .statBar s{ position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--bad); }
+  .rpBot .stars{ font-size:10px; letter-spacing:0; }
   #labResult, .labTallyRow{ background:rgba(20,26,44,.9); border:0; border-radius:var(--r); box-shadow:var(--pxOut); }
   .bldg.sel, .exhClub.open, .labChip.on, .mkPick.on, .slotRow.sel, .pphase.active{ background:var(--rowOn); border-color:var(--acc); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
   .exhClub{ border:0; border-radius:var(--r); }
@@ -1174,6 +1185,7 @@
     <span class="chip" id="rScore"><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span></span>
     <span class="chip" id="rDir" style="color:var(--acc)">▶</span>
     <span class="chip">⏱ <b id="rClock">0:00</b></span>
+    <div class="chip" id="rPlayer"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
     <button id="menuBtn" class="chip menuChip">☰</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
   </div>
@@ -10445,6 +10457,25 @@
     return true;
   }
 
+  // YOUR MAN, top right of the match (#rPlayer): his number, full name and position over his stamina (the red tick: how
+  // far it can come back, as over his head) and his skill stars. Written only when something in it changes.
+  let rpKey='', rpSt=-1, rpCap=-1;
+  // a man's full name: a career man has one; a club's man in an exhibition has only his surname, so he's given the
+  // first name that goes with it (always the same one)
+  function fullName(n){ n=String(n||''); return !n||n.includes(' ')?n:MG_FIRST[hashStr('first|'+n)%MG_FIRST.length]+' '+n; }
+  function playerHud(){
+    const p=controlled; if(!p) return;
+    const pos=natPos({role:p.natRole||p.role, subRole:p.subRole, style:p.style}), key=p.team+'|'+p.pname+'|'+p.num+'|'+pos+'|'+p.stars;
+    if(key!==rpKey){ rpKey=key;
+      document.getElementById('rpNum').textContent=p.num!=null?'#'+p.num:'';
+      document.getElementById('rpName').textContent=fullName(p.pname);
+      document.getElementById('rpPos').textContent=pos;
+      document.getElementById('rpStars').innerHTML=starsHtml(p.stars); }
+    const st=Math.round(clamp(p.stamina,0,1)*100), cap=Math.round(clamp(p.staminaCap===undefined?1:p.staminaCap,0,1)*100);
+    if(st!==rpSt){ rpSt=st; const i=document.getElementById('rpSt'); i.style.width=st+'%'; i.style.background=st>60?'':st>30?'var(--warn)':'var(--bad)'; }
+    if(cap!==rpCap){ rpCap=cap; const s=document.getElementById('rpCap'); s.style.left=cap+'%'; s.style.display=cap<100?'':'none'; }
+  }
+
   // ===== sim =====
   let last=0;
   // (diagnostic removed) — the root-cause guards below (top-of-frame entity sanitize + the
@@ -10831,6 +10862,7 @@
     }
     { const d=document.getElementById('rDir');
       if(d) d.textContent = atkOf('G')>0 ? '▶' : '◀'; }
+    playerHud();
     if(LAB.on) labHud();
     if(gradeFade>0) gradeFade-=dt;   // a touch's grade is kept (lastGrade) but no longer shown
     if(DBG){
@@ -11849,8 +11881,6 @@
         ctx.fillStyle='rgba(255,90,77,'+(isYou?0.95:0.85)+')';
         ctx.fillRect(cx-0.5,by-1,1.6,bh+2);
       }
-      // HIS SKILL STARS over it while he has the ball (either side's man): the moves he can do (see startSkill)
-      if(ball.ownedBy===p&&p.stars){ ctx.globalAlpha=1; drawSkillStars(sb.x,by-7,p.stars); }
       // SPRINT cue: a green phosphor outline glows around YOUR stamina bar while sprinting.
       if(isYou && p.sprint && st>0.02){
         ctx.save();
@@ -11877,13 +11907,6 @@
     ctx.beginPath(); ctx.arc(x,y,9.2,0,Math.PI*2); ctx.fillStyle='#ff4a3d'; ctx.fill();
     ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fillStyle='#fff4ef'; ctx.fill();
     ctx.strokeStyle='#2a0d10'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+3.4,y-3.4); ctx.stroke(); }
-  // three little stars side by side, centred on (x,y): the first n lit gold, the rest dark
-  function drawSkillStars(x,y,n){
-    for(let i=0;i<3;i++){ const cx=Math.round(x+(i-1)*9), cy=Math.round(y);
-      ctx.beginPath();
-      for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5, r=k%2?1.9:4.3; k?ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r); }
-      ctx.closePath(); ctx.fillStyle=i<n?'#ffd54a':'rgba(40,44,60,.85)'; ctx.fill(); ctx.lineWidth=1.2; ctx.strokeStyle='rgba(10,12,20,.9)'; ctx.stroke(); }
-  }
   function drawKeeper(kp){
     if(!SPRITE.shadow(kp.x,kp.y)) drawShadow(kp.x,kp.y,kp.r+3,1);
     // REACH ZONE (practice aid): the radius within which the keeper saves automatically. Flattened to

@@ -10,8 +10,9 @@
 // round them, clear of its edges. The width shows on the pitch (a four across the middle spreads from COMPACT to WIDE)
 // and no man covers another or hangs off it, at every size; in a match his card shows his STAMINA as a bar, no figure,
 // the button that turns it over level with the bar's foot. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
-// game is as wide as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock and the
-// menu.
+// game is as wide as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock, your
+// man's window (his number, full name and position, his stamina and skill stars: top right beside the menu, at every
+// size) and the menu.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -21,7 +22,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
@@ -50,6 +51,16 @@ const apart = (page, sel) => page.evaluate(sel => { const P = document.querySele
   const M = [...P.querySelectorAll('.ptk[data-role="MID"]')].map(e => e.getBoundingClientRect());
   return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
 // HIS STAMINA on his card in a match: the word, a bar and no figure -- the button that turns the card over level with the bar's foot
+// YOUR MAN'S WINDOW in a match, top right beside the menu: what it says (his number, name, position, how many of its
+// stars are lit, how far its stamina bar is filled) against the man you control, and where it sits among the HUD's chips
+const hudWin = page => page.evaluate(() => { const c = window.__T.controlled(), R = e => e.getBoundingClientRect(), W = R(document.getElementById('rPlayer')), M = R(document.getElementById('menuBtn')), S = R(document.getElementById('stageWrap'));
+  const nm = document.getElementById('rpName'), st = document.querySelector('#rpStars .stars'), fill = document.getElementById('rpSt'), chips = [...document.querySelectorAll('#readout .chip')].filter(e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden').map(R);
+  const over = chips.some((a, i) => chips.some((b, j) => j > i && a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5));
+  return { num: document.getElementById('rpNum').textContent, name: nm.textContent, pos: document.getElementById('rpPos').textContent, lit: st ? st.textContent.length - (st.querySelector('i') ? st.querySelector('i').textContent.length : 0) : -1,
+    fill: +(R(fill).width / R(fill.parentElement).width).toFixed(3), col: fill.style.background, cNum: c.num, cName: c.pname, cStars: c.stars, cSt: +c.stamina.toFixed(3),
+    cut: nm.scrollWidth > nm.clientWidth, top: Math.round(W.top - S.top), gap: Math.round(M.left - W.right), level: Math.abs(W.top - M.top) < 1 && Math.abs(W.bottom - M.bottom) < 1, inside: W.left >= S.left && M.right <= S.right, over }; });
+const winOk = (v, full) => v.num === '#' + v.cNum && (full ? v.name === v.cName : v.name.split(' ').length === 2 && v.name.endsWith(' ' + v.cName)) && v.pos.length >= 2 && v.lit === Math.max(1, Math.min(3, v.cStars || 1))
+  && Math.abs(v.fill - v.cSt) <= 0.02 && !v.cut && v.top <= 12 && v.gap >= 0 && v.gap <= 10 && v.level && v.inside && !v.over;
 const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
   return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);
 async function newCareer(page){
@@ -123,6 +134,8 @@ for(const [w, h] of SIZES){
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
+  const hw = await hudWin(page);
+  ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await mcheck('pause', ['#pauseGrid .pauseBtn']);
   if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: four buttons, no quick-tactics row');
@@ -292,6 +305,8 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(100);
   for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
+  const hw = await hudWin(page);
+  ok(winOk(hw, true), '...in a match, your man\'s window at the top right beside the menu, his name whole (' + hw.num + ' ' + hw.name + ' ' + hw.pos + ')' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk');
@@ -343,7 +358,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
 
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons
 // stand over its bottom-right corner where they always did, the stick starts anywhere on the left, and the HUD is
-// the score, the way you're kicking, the clock and the menu
+// the score, the way you're kicking, the clock, your man's window and the menu
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700);
@@ -353,7 +368,14 @@ for(const [w, h] of [[844, 340], [640, 360]]){
       chips: [...document.querySelectorAll('#readout .chip')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.id || e.textContent.trim().slice(0, 6)) }; });
   ok(g.left === 0 && Math.abs(g.width - 844) < 1 && Math.abs(g.height - 390) < 2 && g.W > 1100, 'the game fills the phone: ' + Math.round(g.width) + 'x' + Math.round(g.height) + ', ' + g.W + ' wide inside (no bands)');
   ok(g.inside, 'the buttons stand over the bottom-right corner of the pitch, as they did before the bands');
-  ok(String(g.chips) === 'rScore,rDir,⏱ 0:0,menuBtn' || (g.chips.length === 4 && g.chips[0] === 'rScore' && g.chips[3] === 'menuBtn'), 'the HUD: score, direction, clock, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
+  ok(String(g.chips) === 'rScore,rDir,⏱ 0:0,rPlayer,menuBtn' || (g.chips.length === 5 && g.chips[0] === 'rScore' && g.chips[3] === 'rPlayer' && g.chips[4] === 'menuBtn'), 'the HUD: score, direction, clock, your man\'s window, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
+  const e1 = await hudWin(page);
+  ok(winOk(e1, false), 'an exhibition: his window says who he is -- a club\'s man has only his surname, so he\'s given a first name (' + e1.num + ' ' + e1.name + ' ' + e1.pos + ')' + (winOk(e1, false) ? '' : ' ' + JSON.stringify(e1)));
+  // (looked at two frames on: a tired man standing gets it back quickly, and the game soon switches you to whoever's best placed)
+  await page.evaluate(() => new Promise(res => { const T = window.__T, c = T.controlled(), q = T.players().find(p => p.team === c.team && p !== c && p.pname !== c.pname);
+    T.setControlled(q); q.stamina = 0.2; q.stars = 1; requestAnimationFrame(() => requestAnimationFrame(res)); }));
+  const e2 = await hudWin(page);
+  ok(winOk(e2, false) && e2.name !== e1.name && e2.cSt < 0.3 && /--bad/.test(e2.col), 'switch to another man and the window\'s his: ' + e2.num + ' ' + e2.name + ', one star lit, his stamina a fifth full and red (' + Math.round(e2.fill * 100) + '%)' + (winOk(e2, false) ? '' : ' ' + JSON.stringify(e2)));
   const cdp = await ctx.newCDPSession(page), touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 3 }] });
   await page.evaluate(() => window.__T.clear());   // (their men sent off up the pitch: it's the stick on trial, not whether he's tackled)
   const x0 = 70, c0 = await page.evaluate(() => window.__T.controlled().x), t0 = await page.evaluate(() => window.__T.sim());

@@ -236,8 +236,8 @@ info(JSON.stringify(look));
 ok(look.ring.every(h => h === '#9dff3c'), 'one solid green ring at his reach, all the way round its near side (' + look.ring.join(' ') + ')');
 ok(look.pixel.length === 3, 'the ball in whole pixels: its outline, white and patches (' + look.pixel.join(' ') + ')');
 ok(look.plain, 'with the sprites off, the plain round ball is back');
-// HIS SKILL STARS: over the stamina bar of the man on the ball (either side's), lit gold up to his stars -- and nobody
-// else's
+// NO SKILL STARS OVER HIS HEAD: they're in your man's window at the top right now (see classic-ui) -- nothing gold over
+// the man on the ball, any more than over one without it
 const starPx = await page.evaluate(() => { const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team), cv = document.querySelector('canvas'), g = cv.getContext('2d'); T.freeze();
   for(const q of T.players()) if(q !== c){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = 90; }
   c.x = T.FW / 2; c.y = T.YC; c.vx = c.vy = 0; T.cam(c.x);
@@ -245,10 +245,9 @@ const starPx = await page.evaluate(() => { const T = window.__T, c = T.controlle
     for(let i = 0; i < d.length; i += 4) if(d[i] > 200 && d[i + 1] > 150 && d[i + 1] < 235 && d[i + 2] < 140) n++; return n; };   // (gold, give or take the stars' soft edges)
   const keep = c.stars, out = {};
   b.ownedBy = null; b.x = c.x + 200; b.y = c.y; c.stars = 3; T.draw(); out.none = gold();
-  b.ownedBy = c; for(const n of [1, 2, 3]){ c.stars = n; T.draw(); out[n] = gold(); }
+  b.ownedBy = c; T.draw(); out.on = gold();
   c.stars = keep; b.ownedBy = null; return out; });
-info('gold star pixels over him: ' + JSON.stringify(starPx));
-ok(!starPx.none && starPx[1] > 0 && Math.abs(starPx[2] - 2 * starPx[1]) <= 6 && Math.abs(starPx[3] - 3 * starPx[1]) <= 9, 'the man on the ball has his skill stars over his stamina bar, lit to his number (1, 2, 3: ' + [starPx[1], starPx[2], starPx[3]].join(', ') + ' px of gold), and nobody without it does');
+ok(starPx.none === 0 && starPx.on === 0, 'no skill stars over the man on the ball (' + starPx.on + ' px of gold over him with it, ' + starPx.none + ' without)');
 
 // ABOVE THE WAIST: a ball you meet at chest height is never a PERFECT touch, dead at your feet -- it comes off you, a
 // little way at Ball control 10 and a long way at 1. At knee height (below the waist) a good touch still kills it.

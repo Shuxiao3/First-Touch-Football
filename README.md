@@ -178,9 +178,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of four
     too (a keeper and a man for each line), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
-  - **The match** has the score, the way you're kicking, the clock and the menu along the top, nothing else. The
-    man on the ball, either side's, has his skill stars over his stamina bar (three little stars, lit gold up to
-    his number), so you know what he can do with it.
+  - **The match** has the score, the way you're kicking and the clock along the top, then, top right beside the
+    menu, **your man's window**: his number, full name and position over his stamina bar (the red tick on it is
+    how far it can come back, as over his head) and his skill stars, lit gold up to his number, so you know what
+    he can do with the ball. Switch and it's the new man's. A club's man in an exhibition has only his surname
+    on his card, so the window gives him a first name, always the same one. No stars over anyone's head now.
   - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
   - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
     phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
@@ -270,7 +272,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   for the cut, two for the croqueta as well, three for the roulette and the rainbow flick too. A move above his stars
   doesn't happen, and the screen says how many it needs. Two stars from an average of 5.4, three from 7: most
   League 2 forwards have two, about half of the Championship's forwards have three, and nearly all the Premium
-  League's. Defenders mostly have one. The stars show on every player card.
+  League's. Defenders mostly have one. The stars show on every player card, and in a match in your man's window.
   - **Roulette** (a circle or swirl, 3 stars): you turn as far round as you drew, from 180° to 450°, and come out facing
     wherever that leaves you. You roll up to about 2.3 m to the side the circle went (clockwise goes to your right). The
     ball goes round with your body, so halfway through it's showing on the far side.
