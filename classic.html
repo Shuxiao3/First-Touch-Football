@@ -1075,7 +1075,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L cross (hold it longer for a man further across; double-tap: a low driven cross), CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move (flick = cut, L = croqueta, circle = roulette, down-up = rainbow flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
+    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L cross (hold it longer for a man further across; double-tap: a low driven cross), CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move, read against the way he's going (a flick ahead = flick, back = drag-back, L = croqueta, circle = roulette, hook = Cruyff turn, back then ahead = rainbow, ahead then back = sombrero, out and back = elastico, loop then a line = heel flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
     <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
@@ -1554,13 +1554,12 @@
     swipeFree:{val:25,min:0,max:60,step:5,label:'Swipe shot: off his line, free (°)',hint:'A swipe shot this far off the way he is facing costs nothing. Further round it is struck across his body: weaker and wilder, the more so the further, worst turned right round (Swipe shot: off his line, cost).'},
     swipeCross:{val:1,min:0,max:1.5,step:0.05,label:'Swipe shot: off his line, cost',hint:'How much a swipe shot struck across his body costs at worst (1: 45% of its pace and 80% of his accuracy, at 150 degrees or more off the way he faces).'},
     blockIQ:{val:0.12,min:0,max:0.4,step:0.01,label:'Block: Def IQ spread',hint:'How much Def IQ moves the block reach: a share either way, from Def IQ 1 (less) to 10 (more). Kept small on purpose.'},
-    skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: cut pop (px/s)',hint:'How much faster than you the ball is popped ahead at the end of a cut. It\'s loose until you get back on it, so more is quicker away but easier to nick.'},
-    skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far to the side a full roulette carries you (25 px = 1 m). A shorter one goes less far.'},
+    skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: flick pop (px/s)',hint:'How hard a flick pops the ball up off his foot the way you flicked it (on top of his own pace that way). It\'s loose until he gets back on it, so more is quicker away but easier to nick.'},
+    skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far off to the side a roulette carries you, past the man in front (25 px = 1 m).'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
-    skCutBurst:{val:0.9,min:0.5,max:1.3,step:0.05,label:'Skill: cut burst',hint:'Your pace out of a cut, as a share of your running speed (or your pace going in, if faster).'},
-    skSpinT:{val:0.6,min:0.3,max:1,step:0.05,label:'Skill: roulette time (s)',hint:'How long a full 360 roulette takes. A roulette is as far round as you draw it (180 to 450 degrees), and takes that share of this.'},
+    skSpinT:{val:0.6,min:0.3,max:1,step:0.05,label:'Skill: roulette time (s)',hint:'How long a full 360 would take. A roulette comes out of it seven-eighths of the way round (315 degrees), so it takes that share of this.'},
     skCroqT:{val:0.3,min:0.15,max:0.6,step:0.05,label:'Skill: croqueta time (s)',hint:'How long a croqueta takes.'},
-    skCutT:{val:0.2,min:0.1,max:0.4,step:0.02,label:'Skill: cut time (s)',hint:'How long a cut takes.'},
+    skCutT:{val:0.1,min:0.05,max:0.4,step:0.01,label:'Skill: flick time (s)',hint:'How long a flick takes, from the moment it\'s drawn to the ball leaving his foot.'},
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
@@ -1879,7 +1878,7 @@
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
-    dribblelab:['skSpinDist','skCroqDist','skCutBurst','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
+    dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange'],
     crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
   };
@@ -2062,12 +2061,50 @@
   // HIS OWN POSITION: a career man's, else what his style makes him (an exhibition squad's men have none of their own),
   // else his line. A winger (WNG) is an attacker; a wide midfielder (WM) a midfielder.
   const natPos=e=>!e?'':e.role==='GK'?'GK':(e.subRole||(STYLES[e.style]&&STYLES[e.style].sub)||e.role||'');
-  // ============ SKILL MOVES: ONE TO THREE STARS ============
-  // How many skill moves a man has, from his feet (Dribbling twice over, Agility and Ball control). One star: the cut
-  // (a flick). Two: the croqueta as well. Three: the roulette and the rainbow flick too.
-  const SKILL_STARS={cut:1, croq:2, spin:3, rainbow:3};
-  function skillStarsOf(st){ if(!st) return 1; const v=(2*(st.dribbling||5)+(st.agility||5)+(st.ballControl||5))/4; return v>=7?3:v>=5.4?2:1; }
-  function starsHtml(n){ n=Math.max(1,Math.min(3,n||1)); return '<span class="stars">'+'★'.repeat(n)+'<i>'+'★'.repeat(3-n)+'</i></span>'; }
+  // ============ SKILL MOVES: ONE TO FIVE STARS ============
+  // A man's skill stars aren't his stats. Each has a ceiling of his own (his star potential), drawn once by his position
+  // and the league his potential belongs in, and he grows into it: a star or two short as a youngster, there by 19 to 23,
+  // and a little over half lose one from 32 to 35 on, before they retire. Five stars are rare: a few wingers at the top, a
+  // striker now and then, hardly ever a midfielder, perhaps one full-back in the world; a centre-back has three at most.
+  // One star: the flick. Two: the drag-back too. Three: the croqueta, the roulette and the Cruyff turn. Four: the rainbow
+  // flick. Five: the sombrero flick, the elastico and the heel flick round him.
+  const SKILL_STARS={flick:1, dragback:2, croq:3, spin:3, cruyff:3, rainbow:4, sombrero:5, elastico:5, heel:5};
+  // the odds (%) of a ceiling of 1..5 stars, by position (natPos) and league (League 2, League 1, Championship, Premium League):
+  // about three or four five-star men in a career's world, most of them Premium League wingers
+  const STAR_ODDS={
+    CB: [[94,6,0,0,0],   [86,14,0,0,0],    [72,27,1,0,0],      [52,42,6,0,0]],
+    FB: [[76,23,1,0,0],  [64,32,4,0,0],    [55,38.5,6,0.5,0],  [30,41,22,6,1]],
+    DM: [[62,34,4,0,0],  [45,45,9,1,0],    [30,50,17,3,0],     [15,48,30.5,6.2,0.3]],
+    AM: [[42,43,14,1,0], [28,46,23,3,0],   [15,42,36,7,0],     [5,30,47,17.4,0.6]],
+    WM: [[45,41,13,1,0], [32,45,20,3,0],   [18,43,32,6.5,0.5], [8,34,40,17,1]],
+    STK:[[40,46,13,1,0], [25,49,23,3,0],   [12,42,38,7.7,0.3], [5,22,51.5,19.5,2]],
+    WNG:[[25,46,25,4,0], [12,42,38,8,0],   [5,27,46,21.5,0.5], [0,11,42,40,7]]
+  };
+  STAR_ODDS.CM=STAR_ODDS.DM; STAR_ODDS.DEF=STAR_ODDS.CB; STAR_ODDS.MID=STAR_ODDS.DM; STAR_ODDS.ATT=STAR_ODDS.STK;   // (a man with only his line)
+  // the league a rating belongs in (as mgLevelTier has it: this runs before the career's levels exist)
+  function starLeague(r){ return r>=75?4:r>=67?3:r>=59?2:1; }
+  // his ceiling: u (0..1, drawn for him) against his position's odds in the league his potential rating belongs in
+  function starPot(pos,rating,u){ const o=(STAR_ODDS[pos]||STAR_ODDS.DM)[starLeague(rating||60)-1]; let s=0;
+    for(let i=0;i<5;i++){ s+=o[i]/100; if(u<s) return i+1; } return 5; }
+  // his stars at this age: a star or two short till he's grown into them (at 19 to 23), and perhaps one gone at 32 to 35
+  function starsAt(sp,age,seed){
+    if(sp<=1||age==null) return sp;
+    const R=rng32((seed>>>0)^0x2545F491), peak=19+Math.floor(R()*5), fade=R()<0.55?32+Math.floor(R()*4):99;
+    let s=sp; if(age<peak) s-=Math.min(2,Math.ceil((peak-age)/2)); if(age>=fade) s--;
+    return Math.max(1,s);
+  }
+  // a squad entry's stars: given (a career man's), else his ceiling, the same every time -- an exhibition club's men have
+  // no age (drawn from his name)
+  function entryStars(e){ if(!e) return 1; if(e.stars) return e.stars; if(e.role==='GK') return 1;
+    return starPot(natPos(e), e.ovr||overallOf(e), rng32(hashStr('stars|'+e.name+'|'+e.role))()); }
+  // a career man's: his ceiling, drawn the first time he's seen and kept (p.sp) -- for the league between where his rating
+  // is and where his potential would take him -- and his age
+  function careerStarPot(p){ if(p.role==='GK') return 1;
+    if(p.sp==null) p.sp=starPot(natPos(p),((p.ovr||60)+(p.pot||p.ovr||60))/2,rng32(((p.seed>>>0)||p.id||1)^0x9E3779B9)()); return p.sp; }
+  function careerStars(p){ return p.role==='GK'?1:starsAt(careerStarPot(p),p.age,(p.seed>>>0)||p.id||1); }
+  // anyone's: a career man's, else a squad entry's
+  function starsOf(x){ return x&&!x.stats&&x.pot!=null?careerStars(x):entryStars(x); }
+  function starsHtml(n){ n=Math.max(1,Math.min(5,n||1)); return '<span class="stars">'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'; }
   // ============ INSTRUCTIONS, BY POSITION ============
   // Instructions go with the spot in the shape, not the man: whoever plays there follows them. What a spot can be told
   // comes from what it is (see POS_OF) -- with the ball in the attacking shape, without it in the defending one -- and each
@@ -2399,7 +2436,7 @@
   }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=entry.style; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entry.stars||skillStarsOf(entry.stats); if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=entry.style; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   function layoutTeam(team){
@@ -2802,11 +2839,14 @@
     return clamp((ty-YC)/(GOAL_W/2-14),-1,1);                       // past a post -> that corner
   }
   // a direction on the screen as a direction on the pitch, at depth y
-  function screenDirToPitch(dx,dy,y){
+  // (given x too, it allows for the lines into the distance closing in: away from the middle of the screen, a way up the
+  // pitch is tilted there)
+  function screenDirToPitch(dx,dy,y,x){
     const t=clamp(y/VIEW_D,0.05,1);
     const kx=FAR_SCALE+(NEAR_SCALE-FAR_SCALE)*Math.pow(t,PERSP);    // screen px per pitch px, across
     const ky=(NEAR_Y-HORIZON)*PERSP*Math.pow(t,PERSP-1)/VIEW_D;     // screen px per pitch px, in depth
-    const px=dx/kx, py=dy/ky, l=Math.hypot(px,py)||1;
+    const kxy=x==null?0:(x-camX)*(NEAR_SCALE-FAR_SCALE)*PERSP*Math.pow(t,PERSP-1)/VIEW_D;   // screen px across, per pitch px in depth
+    const py=dy/ky, px=(dx-kxy*py)/kx, l=Math.hypot(px,py)||1;
     return {x:px/l, y:py/l};
   }
   function readSwipe(s){
@@ -2890,49 +2930,100 @@
     ctx.stroke(); ctx.restore();
   }
   // ===== SKILL MOVES =====
-  // Start on SKILL (on a computer: hold the mouse button down anywhere on the pitch) and draw:
-  //   a circle or swirl -> ROULETTE (you turn as far round as you drew -- 180 to 450 degrees -- and roll out to the side
-  //                        the circle went, the ball going round with your body)
-  //   an L              -> CROQUETA (the ball shifted foot to foot, the way the L's second stroke goes)
-  //   a straight flick  -> CUT (the ball chopped the way you flicked and popped a step ahead; you go after it)
-  //   down, then up     -> RAINBOW FLICK (rolled up the back of your leg and flicked over your head -- and his --
-  //                        to drop a few metres ahead of you; you run on to it)
+  // Start on SKILL (on a computer: hold the mouse button down anywhere on the pitch) and draw. What you draw is read
+  // against the way your man is going -- the way he's running, else the way he's facing -- as a stick is in other
+  // football games:
+  //   a straight flick ahead     -> FLICK (1 star): anywhere in the half in front of him -- the ball popped up a little
+  //                                 off his foot that way; he goes on facing the way he was and runs on to it
+  //   a straight flick back      -> DRAG-BACK (2): he stops, rolls it back under his sole the way you flicked and turns
+  //                                 to go with it
+  //   an L                       -> CROQUETA (3): the ball shifted foot to foot, the way the L's second stroke goes
+  //   a circle                   -> ROULETTE (3): he spins round with the ball on his sole, drifting off to the side --
+  //                                 clockwise to his left, anticlockwise to his right -- and comes out of it seven-eighths
+  //                                 of the way round, going diagonally away past the man in front of him, not back into him
+  //   a hook (a U)               -> CRUYFF TURN (3): he shapes to shoot or cross, drags it behind his standing leg and
+  //                                 goes the way the hook ends, back and away
+  //   back, then ahead           -> RAINBOW FLICK (4): rolled up the back of his leg and flicked over his head -- and the
+  //                                 man in front's -- to drop a few metres ahead; he runs on to it
+  //   ahead, then back           -> SOMBRERO FLICK (5): flicked up off the front of his foot over the man in front of
+  //                                 him, to drop just behind him; he goes round him to meet it
+  //   one side, then the other   -> ELASTICO (5): pushed out with the outside of his foot one way and snapped back the
+  //                                 other, popped up a little to get over a foot stuck out, past the man on that side
+  //   a loop, then a line out    -> HEEL FLICK (5): backheeled past the man in front on one side (the side the line goes)
+  //                                 while he goes round him on the other
   // The pattern is read when you let go. A move gives you nothing for free: the ball is wherever the move puts it,
   // and a defender who can reach it while it's showing takes it, just as he would off your stick. Beating him is
   // timing -- move it as he commits, out of his reach.
   // Not everyone has every move: a man's skill stars (see SKILL_STARS) say which. A move above his stars doesn't happen.
   // A flick on SKILL while a ball is on its way to you is a DIRECTIONAL FIRST TOUCH: it's pushed that way as it arrives.
   let skill=null, skillCd=0, skillG=null, skillTrail=null, ftAim=null;
-  const SKILL_NAME={spin:'ROULETTE',croq:'CROQUETA',cut:'CUT',rainbow:'RAINBOW'};
+  const SKILL_NAME={flick:'FLICK',dragback:'DRAG-BACK',croq:'CROQUETA',spin:'ROULETTE',cruyff:'CRUYFF TURN',rainbow:'RAINBOW',sombrero:'SOMBRERO',elastico:'ELASTICO',heel:'HEEL FLICK'};
+  const SKILL_KINDS=Object.keys(SKILL_NAME);
+  const ROULETTE_TURN=Math.PI*1.75;                              // (how far round he goes before he comes out of it: 315 degrees)
   function skillTurn(a,b){ let d=b-a; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; return d; }
-  // the drawn pattern (canvas px) -> {kind, dx, dy (screen direction), sense, turn}, or null
+  // the drawn pattern (canvas px) -> its shape, its ways on the screen; or null:
+  //   line {dx,dy}         a straight flick
+  //   vee {ax,ay,bx,by}    out and straight back: two straight strokes, the second turned more than 135 degrees off
+  //   el {dx,dy}           an L: two straight strokes at a corner of 50 to 135 degrees (the second stroke's way)
+  //   hook {dx,dy,sense}   curling round 125 to 250 degrees, open (the way it ends up going)
+  //   circle {sense}       round further than that, or round and nearly closed (sense +1: clockwise)
+  //   loop {dx,dy,sense}   a circle with a straight line out of it (the line's way)
+  // A corner is a corner when most of the turning is at it; drawn round (a U) it's a hook, however straight its sides look.
   function readSkill(raw){
     const pts=[raw[0]];
     for(const q of raw){ const l=pts[pts.length-1]; if(Math.hypot(q.x-l.x,q.y-l.y)>=5) pts.push(q); }
     const n=pts.length; if(n<3) return null;
     let L=0; const cum=[0]; for(let i=1;i<n;i++){ L+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y); cum.push(L); }
     if(L<22) return null;
-    let turn=0, h0=null;
-    for(let i=1;i<n;i++){ const h=Math.atan2(pts[i].y-pts[i-1].y,pts[i].x-pts[i-1].x); if(h0!=null) turn+=skillTurn(h0,h); h0=h; }
-    if(Math.abs(turn)>4.4) return {kind:'spin',sense:Math.sign(turn),turn:Math.abs(turn)};
-    // down then up (on the screen): the lowest point splits a mostly-down stroke from a mostly-up one
-    { let k=0; for(let i=1;i<n;i++) if(pts[i].y>pts[k].y) k=i;
-      const a=pts[0], z=pts[n-1], v1x=pts[k].x-a.x, v1y=pts[k].y-a.y, v2x=z.x-pts[k].x, v2y=z.y-pts[k].y;
-      if(v1y>=20&&v1y>1.5*Math.abs(v1x)&&-v2y>=20&&-v2y>1.5*Math.abs(v2x)&&-v2y>=0.4*v1y) return {kind:'rainbow'}; }
-    // an L: one corner, two fairly straight strokes meeting at 50-135 degrees
-    const a=pts[0], z=pts[n-1]; let best=null;
+    let turn=0, absT=0, h0=null; const cumT=[0], dT=[0];             // (the turning at each point, and up to it)
+    for(let i=1;i<n;i++){ const h=Math.atan2(pts[i].y-pts[i-1].y,pts[i].x-pts[i-1].x); const dt=h0!=null?skillTurn(h0,h):0;
+      turn+=dt; absT+=Math.abs(dt); h0=h; cumT.push(turn); dT.push(Math.abs(dt)); }
+    const a=pts[0], z=pts[n-1], D=Math.hypot(z.x-a.x,z.y-a.y);
+    if(Math.abs(turn)>4.4){
+      for(let k=1;k<n-2;k++){ const tl=L-cum[k]; if(tl<0.3*L) break;      // a straight line out of it, 30% of the way or more
+        const cx=z.x-pts[k].x, cy=z.y-pts[k].y, cl=Math.hypot(cx,cy);
+        if(cl>=0.92*tl&&Math.abs(cumT[k])>4.0) return {kind:'loop',dx:cx/cl,dy:cy/cl,sense:Math.sign(turn)}; }
+      return {kind:'circle',sense:Math.sign(turn)}; }
+    let best=null;
     for(let k=1;k<n-1;k++){
       const v1x=pts[k].x-a.x, v1y=pts[k].y-a.y, v2x=z.x-pts[k].x, v2y=z.y-pts[k].y;
       const l1=Math.hypot(v1x,v1y), l2=Math.hypot(v2x,v2y);
-      if(l1<15||l2<18||l2<0.3*l1) continue;
+      if(l1<15||l2<15||l2<0.3*l1) continue;
       if(cum[k]>1.3*l1||(L-cum[k])>1.3*l2) continue;
       const ang=Math.acos(clamp((v1x*v2x+v1y*v2y)/(l1*l2),-1,1));
-      if(!best||ang>best.ang) best={ang,dx:v2x/l2,dy:v2y/l2};
+      if(!best||ang>best.ang) best={k,ang,ax:v1x/l1,ay:v1y/l1,dx:v2x/l2,dy:v2y/l2};
     }
-    if(best&&best.ang>0.87&&best.ang<2.36) return {kind:'croq',dx:best.dx,dy:best.dy};
-    const D=Math.hypot(z.x-a.x,z.y-a.y);
-    if(D/L>=0.75) return {kind:'cut',dx:(z.x-a.x)/D,dy:(z.y-a.y)/D};
-    if(Math.abs(turn)>2.5) return {kind:'spin',sense:Math.sign(turn),turn:Math.abs(turn)};
+    if(best&&best.ang>0.87){ let at=0;                               // (how much of the turning is at the corner)
+      for(let i=1;i<n;i++) if(Math.abs(cum[i]-cum[best.k])<=0.15*L) at+=dT[i];
+      if(at>=0.55*absT) return best.ang>=2.36?{kind:'vee',ax:best.ax,ay:best.ay,bx:best.dx,by:best.dy}:{kind:'el',dx:best.dx,dy:best.dy}; }
+    if(D/L>=0.75) return {kind:'line',dx:(z.x-a.x)/D,dy:(z.y-a.y)/D};
+    if(Math.abs(turn)>2.2){
+      let w=0; for(const q of pts) w=Math.max(w,Math.hypot(q.x-a.x,q.y-a.y));
+      if(Math.abs(turn)>3.6&&D<0.35*w) return {kind:'circle',sense:Math.sign(turn)};
+      const k=Math.max(0,n-1-Math.max(2,Math.round(n*0.25))), ex=z.x-pts[k].x, ey=z.y-pts[k].y, el=Math.hypot(ex,ey)||1;
+      return {kind:'hook',dx:ex/el,dy:ey/el,sense:Math.sign(turn)}; }
+    return null;
+  }
+  // the way he's going: running, the way he runs; else the way he faces
+  function skillHeading(p){ const sp=Math.hypot(p.vx,p.vy); return sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:(p.facing||{x:1}).x,y:(p.facing||{y:0}).y}; }
+  // a way u kept in the half in front of f (at least `m` of it ahead), or behind it
+  function aheadOf(u,f,m){ const d=u.x*f.x+u.y*f.y; if(d>=m) return u; const x=u.x+f.x*(m-d), y=u.y+f.y*(m-d), l=Math.hypot(x,y)||1; return {x:x/l,y:y/l}; }
+  function behindOf(u,f,m){ const d=u.x*f.x+u.y*f.y; if(d<=-m) return u; const x=u.x-f.x*(d+m), y=u.y-f.y*(d+m), l=Math.hypot(x,y)||1; return {x:x/l,y:y/l}; }
+  // what a drawn shape is for p, read against the way he's going as it looks on the screen (the pitch's depth is squashed
+  // there: read on the pitch, a stroke across a man running up or down it would wobble ahead or back): the move, and
+  // its way on the pitch
+  function skillFor(p,g){
+    const f=skillHeading(p), a=proj(p.x,p.y), b=proj(p.x+f.x*20,p.y+f.y*20), l=Math.hypot(b.x-a.x,b.y-a.y)||1, F={x:(b.x-a.x)/l,y:(b.y-a.y)/l};
+    const dir=(x,y)=>screenDirToPitch(x,y,p.y,p.x), ahead=(x,y)=>(x*F.x+y*F.y)/(Math.hypot(x,y)||1);
+    if(g.kind==='line'){ const u=dir(g.dx,g.dy); return ahead(g.dx,g.dy)>=0?{kind:'flick',d:u}:{kind:'dragback',d:u}; }
+    if(g.kind==='el') return {kind:'croq',d:dir(g.dx,g.dy)};
+    if(g.kind==='circle') return {kind:'spin',sense:g.sense};
+    if(g.kind==='hook') return {kind:'cruyff',d:dir(g.dx,g.dy)};
+    if(g.kind==='loop') return {kind:'heel',d:dir(g.dx,g.dy)};
+    if(g.kind==='vee'){ const fa=ahead(g.ax,g.ay);
+      if(fa<-0.5) return {kind:'rainbow'};                            // back, then ahead
+      if(fa>0.5) return {kind:'sombrero'};                            // ahead, then back
+      return {kind:'elastico',side:Math.sign(F.x*g.by-F.y*g.bx)||1}; }  // across and back: to the side it came back to (+1 his right)
     return null;
   }
   function skillReady(){
@@ -2944,12 +3035,13 @@
   }
   function startSkill(g){
     const p=controlled; if(!g||!skillReady()) return false;
-    const need=SKILL_STARS[g.kind]||1;
-    if((p.stars||1)<need){ lastGrade=SKILL_NAME[g.kind]+' '+'\u2605'.repeat(need)+' ONLY'; gradeColor='#8a9580'; gradeFade=1.0; return false; }   // above his stars
-    skill=mkSkill(p,g,(g.kind==='cut'||g.kind==='croq')?screenDirToPitch(g.dx,g.dy,p.y):null); ball.ownedBy=p; skillSells(p);
+    const m=skillFor(p,g); if(!m) return false;
+    const need=SKILL_STARS[m.kind]||1;
+    if((p.stars||1)<need){ lastGrade=SKILL_NAME[m.kind]+' '+'★'.repeat(need)+' ONLY'; gradeColor='#8a9580'; gradeFade=1.0; return false; }   // above his stars
+    skill=mkSkill(p,m); ball.ownedBy=p; skillSells(p);
     p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false;
-    lastGrade=SKILL_NAME[g.kind]; gradeColor='#78c8ff'; gradeFade=0.8;
-    if(LAB.on&&LAB.kind==='dribble') dribLabOnMove(g.kind);
+    lastGrade=SKILL_NAME[m.kind]; gradeColor='#78c8ff'; gradeFade=0.8;
+    if(LAB.on&&LAB.kind==='dribble') dribLabOnMove(m.kind);
     return true;
   }
   // A MOVE'S PACE AND REACH ARE HIS DRIBBLING -- yours and the computer's alike: at 10 as the dials have it, at 1 it takes
@@ -2971,26 +3063,41 @@
       const sell=clamp(0.1+0.0625*skillEdge(p,q),0,0.35); if(sell<=0) continue;
       q.soldT=simNow+sell; q.soldAt={x:ball.x,y:ball.y}; }
   }
-  // the move g (kind; a roulette's sense and turn) from where he is and the way he's going -- a cut or a croqueta the way
-  // d points on the pitch -- at his Dribbling's pace and reach
-  function mkSkill(p,g,d){
-    const sp=Math.hypot(p.vx,p.vy), f=sp>30?{x:p.vx/sp,y:p.vy/sp}:{x:p.facing.x,y:p.facing.y}, k=skillPaceOf(p), r=skillReachOf(p);
-    const sk={kind:g.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)), burst:P.skCutBurst.val*(0.85+0.15*r), pop:P.skCutPop.val*r, rbDist:P.skRainbowDist.val*r};
-    if(g.kind==='rainbow'){ sk.T=P.skRainbowT.val/k; }
-    else if(g.kind==='spin'){ sk.sense=g.sense; sk.turn=clamp(g.turn||2*Math.PI,Math.PI,2.5*Math.PI);
-      sk.T=P.skSpinT.val*sk.turn/(2*Math.PI)/k; sk.side={x:-f.y*g.sense,y:f.x*g.sense}; sk.D=P.skSpinDist.val*r*Math.min(1,sk.turn/(2*Math.PI)); }
-    else { sk.d=d; sk.T=(g.kind==='cut'?P.skCutT.val:P.skCroqT.val)/k;
-      if(g.kind==='croq'){ const along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
-        if(sl<0.2){ sx=-f.y; sy=f.x; sl=1; } sk.side={x:sx/sl,y:sy/sl}; sk.D=P.skCroqDist.val*r; } }
+  // the move m ({kind}; its way d, a roulette's sense, a sombrero's or an elastico's side) from where he is and the way
+  // he's going, at his Dribbling's pace and reach. Sides: +1 his right, -1 his left.
+  function mkSkill(p,m){
+    const f=skillHeading(p), sp=Math.hypot(p.vx,p.vy), k=skillPaceOf(p), r=skillReachOf(p), right={x:-f.y,y:f.x};
+    const sk={kind:m.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)), pop:P.skCutPop.val*r, rbDist:P.skRainbowDist.val*r, r};
+    if(m.kind==='flick'){ sk.d=aheadOf(m.d||f,f,0); sk.T=P.skCutT.val/k; }
+    else if(m.kind==='dragback'){ sk.d=behindOf(m.d||{x:-f.x,y:-f.y},f,0.3); sk.T=0.32/k; }
+    else if(m.kind==='croq'){ const d=m.d||right, along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
+      if(sl<0.2){ sx=right.x; sy=right.y; sl=1; } sk.side={x:sx/sl,y:sy/sl}; sk.D=P.skCroqDist.val*r; sk.T=P.skCroqT.val/k; }
+    else if(m.kind==='spin'){ sk.sense=m.sense>0?1:-1; sk.side={x:-right.x*sk.sense,y:-right.y*sk.sense};   // (clockwise: off to his left)
+      sk.D=P.skSpinDist.val*r; sk.T=P.skSpinT.val*ROULETTE_TURN/(2*Math.PI)/k; }
+    else if(m.kind==='cruyff'){ sk.d=behindOf(m.d||{x:-f.x,y:-f.y},f,0.2); sk.T=0.36/k; }
+    else if(m.kind==='rainbow'){ sk.T=P.skRainbowT.val/k; }
+    else if(m.kind==='sombrero'){ sk.s=m.side||skillRoundSide(p,f); sk.T=0.16/k; }
+    else if(m.kind==='elastico'){ sk.s=m.side||1; sk.T=0.2/k; }
+    else if(m.kind==='heel'){ const d=aheadOf(m.d||f,f,0.2); sk.s=Math.sign(f.x*d.y-f.y*d.x)||1; sk.T=0.24/k; }   // (the ball's side: he goes round the other)
     return sk;
   }
+  // the side to go round the man in front of p: away from the side he's standing off to (his right, with nobody there)
+  function skillRoundSide(p,f){ let best=null, bd=160;
+    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy);
+      if(d<bd&&dx*f.x+dy*f.y>0.3*d){ bd=d; best=q; } }
+    return !best?1:(f.x*(best.y-p.y)-f.y*(best.x-p.x))>0?-1:1; }
+  // how far a ball over the man in front of p goes, to drop just behind him (a few strides on, with nobody there)
+  function skillOverHim(p,f){ let near=null;
+    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const dx=q.x-p.x, dy=q.y-p.y, s=dx*f.x+dy*f.y, o=Math.abs(dx*f.y-dy*f.x);
+      if(s>10&&s<130&&o<45&&(near==null||s<near)) near=s; }
+    return near==null?90:near+45; }
   const skillSmooth=u=>u*u*(3-2*u);
   // a move in progress moves you and the ball itself (instead of stepOutfield and carry). false = it's over.
   function skillStep(p,dt){
     const sk=skillOf(p), end=()=>{ if(p===controlled){ skill=null; skillCd=0.25; } else { p.skill=null; p.skillCd=0.6; } };
     if(!sk) return false;
     if(ball.ownedBy!==p||p.state!=='normal'||(sk.px!=null&&Math.hypot(p.x-sk.px,p.y-sk.py)>30)){ if(p===controlled) skill=null; else p.skill=null; return false; }   // (lost it -- or put somewhere else since the last step, as at a restart: it's off)
-    sk.t+=dt; const u=clamp(sk.t/sk.T,0,1), e=skillSmooth(u), f=sk.f;
+    sk.t+=dt; const u=clamp(sk.t/sk.T,0,1), e=skillSmooth(u), f=sk.f, right={x:-f.y,y:f.x}, a0=Math.atan2(f.y,f.x);
     const cd=p.r+ball.r+5;
     let x=p.x, y=p.y, bx, by, bz=0, out=null;
     if(sk.kind==='rainbow'){
@@ -3000,13 +3107,17 @@
       const off=cd-(cd+8)*e;                                       // from in front of you to just behind your heel
       bx=x+f.x*off; by=y+f.y*off; bz=18*e*e;
       if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.6),rainbow:true};
-    } else if(sk.kind==='cut'){
-      // the chop: you check and turn the ball, then pop it a step ahead the way you flicked and go after it
-      const go=Math.max(sk.sp0,runSpeedOf(p)*sk.burst)*(1-dribSpeedPenOf(p));
-      p.vx=sk.d.x*go*e+f.x*sk.sp0*0.35*(1-e); p.vy=sk.d.y*go*e+f.y*sk.sp0*0.35*(1-e);
-      x+=p.vx*dt; y+=p.vy*dt; p.facing={x:sk.d.x,y:sk.d.y};
-      bx=x+sk.d.x*cd; by=y+sk.d.y*cd;
-      if(u>=1) out={g:sk.d,keep:go,pop:true};
+    } else if(sk.kind==='flick'){
+      // he goes on as he was, the ball on his foot -- then it's popped up off it the way you flicked, and he goes on facing his way
+      p.vx=f.x*sk.sp0; p.vy=f.y*sk.sp0; x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
+      bx=x+f.x*cd; by=y+f.y*cd;
+      if(u>=1){ const d=sk.d, run=Math.max(0,sk.sp0*(d.x*f.x+d.y*f.y)); out={g:f,keep:sk.sp0,loose:{d,v:run+sk.pop,vz:75,grace:0.85}}; }
+    } else if(sk.kind==='dragback'){
+      // he stops dead, rolls it back under his sole the way you flicked and turns to go with it
+      p.vx=f.x*sk.sp0*(1-e); p.vy=f.y*sk.sp0*(1-e); x+=p.vx*dt; y+=p.vy*dt;
+      const h=a0+skillTurn(a0,Math.atan2(sk.d.y,sk.d.x))*skillSmooth(clamp((u-0.3)/0.7,0,1)); p.facing={x:Math.cos(h),y:Math.sin(h)};
+      bx=x+(f.x*(1-e)+sk.d.x*e)*cd; by=y+(f.y*(1-e)+sk.d.y*e)*cd;
+      if(u>=1) out={g:sk.d,keep:runSpeedOf(p)*0.45};
     } else if(sk.kind==='croq'){
       const D=sk.D;
       x=sk.x0+sk.side.x*D*e+f.x*sk.sp0*0.5*sk.t; y=sk.y0+sk.side.y*D*e+f.y*sk.sp0*0.5*sk.t;
@@ -3014,14 +3125,41 @@
       const shift=-12+26*e;                                       // the ball rolled from one foot across to the other
       bx=x+f.x*(cd-4)+sk.side.x*shift; by=y+f.y*(cd-4)+sk.side.y*shift;
       if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.5)};
-    } else {
-      // the body turns as far as you drew; the ball's on the sole, going round with it (so it shows, half way round)
-      const a=Math.atan2(f.y,f.x)+sk.sense*sk.turn*e;
-      const D=sk.D;
-      x=sk.x0+sk.side.x*D*e+f.x*14*e; y=sk.y0+sk.side.y*D*e+f.y*14*e;
+    } else if(sk.kind==='spin'){
+      // round he goes with it on his sole, drifting off to the side, and out of it seven-eighths of the way round: going
+      // diagonally away past the man in front of him, the ball on his far side from him the way round
+      const a=a0+sk.sense*ROULETTE_TURN*e;
+      x=sk.x0+sk.side.x*sk.D*e+f.x*18*e; y=sk.y0+sk.side.y*sk.D*e+f.y*18*e;
       p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:Math.cos(a),y:Math.sin(a)};
       bx=x+Math.cos(a)*(cd-3); by=y+Math.sin(a)*(cd-3);
-      if(u>=1) out={g:{x:Math.cos(a),y:Math.sin(a)},keep:Math.max(sk.sp0*0.5,runSpeedOf(p)*0.35)};   // you come out facing where the turn left you
+      if(u>=1) out={g:{x:Math.cos(a),y:Math.sin(a)},keep:Math.max(sk.sp0*0.6,runSpeedOf(p)*0.6)};
+    } else if(sk.kind==='cruyff'){
+      // he plants as if to shoot or cross, drags it behind his standing leg and turns the way the hook ended
+      p.vx=f.x*sk.sp0*(1-e); p.vy=f.y*sk.sp0*(1-e); x+=p.vx*dt; y+=p.vy*dt;
+      const h=a0+skillTurn(a0,Math.atan2(sk.d.y,sk.d.x))*skillSmooth(clamp((u-0.45)/0.55,0,1)); p.facing={x:Math.cos(h),y:Math.sin(h)};
+      const s=Math.sign(f.x*sk.d.y-f.y*sk.d.x)||1, w=10*Math.sin(Math.PI*e);   // (round the side it goes behind him on)
+      bx=x+(f.x*(1-e)+sk.d.x*e)*cd+right.x*s*w; by=y+(f.y*(1-e)+sk.d.y*e)*cd+right.y*s*w;
+      if(u>=1) out={g:sk.d,keep:runSpeedOf(p)*0.7};
+    } else if(sk.kind==='sombrero'){
+      // a quick lift off the front of his foot -- then up over the man in front, to drop just behind him, and round him he goes
+      p.vx=f.x*sk.sp0*(1-0.8*e); p.vy=f.y*sk.sp0*(1-0.8*e); x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
+      bx=x+f.x*cd; by=y+f.y*cd; bz=16*e;               // (over a foot stuck in before it's gone)
+      if(u>=1){ const vz=270, tf=(vz+Math.sqrt(vz*vz+2*520*bz))/520, g={x:f.x*0.8+right.x*sk.s*0.6,y:f.y*0.8+right.y*sk.s*0.6};
+        out={g,keep:Math.max(sk.sp0,runSpeedOf(p)*0.85),loose:{d:f,v:skillOverHim(p,f)/tf,vz,lob:true,grace:tf+0.6,nt:0.3,auto:true,go:0.35}}; }
+    } else if(sk.kind==='elastico'){
+      // out with the outside of his foot -- the ball and his weight go one way -- then snapped back the other, popped up a
+      // little past the man in front on that side; he goes after it
+      const o=-sk.s; p.vx=f.x*sk.sp0*0.6+right.x*o*45*(1-u); p.vy=f.y*sk.sp0*0.6+right.y*o*45*(1-u); x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
+      bx=x+f.x*(cd-4)+right.x*o*14*e; by=y+f.y*(cd-4)+right.y*o*14*e;
+      if(u>=1){ const g={x:f.x*0.75+right.x*sk.s*0.66,y:f.y*0.75+right.y*sk.s*0.66}, run=Math.max(0,sk.sp0*(g.x*f.x+g.y*f.y));
+        out={g,keep:runSpeedOf(p)*0.95,loose:{d:g,v:run+170*sk.r,vz:120,grace:0.9,auto:true,go:0.12}}; }
+    } else {
+      // the heel flick: he checks with it and rolls it to his heel -- then backheels it past the man in front on one side
+      // while he goes round him on the other
+      p.vx=f.x*sk.sp0*(1-0.6*e); p.vy=f.y*sk.sp0*(1-0.6*e); x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
+      bx=x+f.x*cd*(1-1.2*e)+right.x*sk.s*cd*0.8*e; by=y+f.y*cd*(1-1.2*e)+right.y*sk.s*cd*0.8*e;
+      if(u>=1){ const db={x:f.x*0.85+right.x*sk.s*0.53,y:f.y*0.85+right.y*sk.s*0.53}, g={x:f.x*0.85-right.x*sk.s*0.53,y:f.y*0.85-right.y*sk.s*0.53};
+        out={g,keep:Math.max(sk.sp0,runSpeedOf(p)*0.95),loose:{d:db,v:200*sk.r,vz:50,grace:1.1,nt:0.25,auto:true,go:0.4}}; }
     }
     p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r); sk.px=p.x; sk.py=p.y;
     ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=p.vx; ball.vy=p.vy; ball.z=bz; ball.vz=0;
@@ -3033,11 +3171,12 @@
         const vz=P.skRainbowH.val, tf=(vz+Math.sqrt(vz*vz+2*520*ball.z))/520, hv=out.keep+sk.rbDist/tf;
         ball.vx=g.x*hv; ball.vy=g.y*hv; ball.vz=vz; ball.lob={x:g.x,y:g.y};   // it checks up where it drops, like a lofted pass
         ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=tf+0.6; p.noTouchT=0.3;
-        if(p===controlled) recvAuto={q:p,until:simNow+tf+1.2};     // (stick left alone: you burst on to where it drops)
+        if(p===controlled) recvAuto={q:p,until:simNow+tf+1.2,own:true};   // (stick left alone: you burst on to where it drops)
       }
-      else if(out.pop){                                                 // a little pop ahead: it's loose until you get back on it
-        ball.vx=g.x*(out.keep+sk.pop); ball.vy=g.y*(out.keep+sk.pop); ball.vz=55; ball.z=1;
-        ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.1;
+      else if(out.loose){ const L=out.loose;                       // off his foot (its way d, pace v, lift vz): loose until he's back on it
+        ball.vx=L.d.x*L.v; ball.vy=L.d.y*L.v; ball.vz=L.vz; ball.z=Math.max(ball.z,1); if(L.lob) ball.lob={x:L.d.x,y:L.d.y};
+        ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=L.grace; p.noTouchT=L.nt||0.1;
+        if(L.auto&&p===controlled) recvAuto={q:p,until:simNow+L.grace+0.6,own:true,go:{x:g.x,y:g.y,until:simNow+(L.go||0)}};   // (stick left alone: his own way first, then on to it)
       }
       end();
     }
@@ -3090,13 +3229,13 @@
     if(!cancel&&g.mate&&g.mouse!==false){ let L=0; for(let i=1;i<g.pts.length;i++) L+=Math.hypot(g.pts[i].x-g.pts[i-1].x,g.pts[i].y-g.pts[i-1].y);
       if(L<10&&touchPass(g.mate)){ skillTrail=null; return; } }   // a click on a team-mate: pass to him
     const read=cancel?null:readSkill(g.pts);
-    if(read&&read.kind==='cut'&&controlled&&ball.ownedBy===controlled&&g.t0<ball.gotT+FT_LATE&&simNow-ball.gotT<FT_END){   // (begun as it got to him)
+    if(read&&read.kind==='line'&&controlled&&ball.ownedBy===controlled&&g.t0<ball.gotT+FT_LATE&&simNow-ball.gotT<FT_END){   // (begun as it got to him)
       ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+1}; oneTouch=null;
       directionalTouch(controlled,touchQuality(controlled,false));
       if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=true; }
       return; }
     let ok=!!read&&startSkill(read);
-    if(!ok&&read&&read.kind==='cut'&&comingMyWay()){             // a flick with it on its way: the first touch goes that way
+    if(!ok&&read&&read.kind==='line'&&comingMyWay()){             // a flick with it on its way: the first touch goes that way
       ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+3.5,lt:ball.lastTouch}; ok=true; oneTouch=null;
       lastGrade='TOUCH '+labArrow(ftAim.d.x,ftAim.d.y)+' …'; gradeColor='#78c8ff'; gradeFade=0.9; }
     if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
@@ -3724,8 +3863,8 @@
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
-    skCutPop:'Cut · pop',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
-    skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skCutBurst:'Cut · burst',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Cut · time',
+    skCutPop:'Flick · pop',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
+    skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Flick · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (18 to 32) and the window (0.10 to 0.20 s).',
@@ -3771,7 +3910,6 @@
     if(k==='skRainbowH'){ const pk=v*v/1040; return v+' px/s · peak '+(pk/25).toFixed(1)+' m'; }
     if(k==='skRainbowT') return v.toFixed(2)+' s';
     if(k==='skSpinDist'||k==='skCroqDist') return v+' px ('+(v/25).toFixed(1)+' m)';
-    if(k==='skCutBurst') return v.toFixed(2)+'×';
     if(k==='skSpinT'||k==='skCroqT'||k==='skCutT') return v.toFixed(2)+' s';
     if(k==='dribbling'||k==='agility'||k==='tackle') return v.toFixed(1);
     if(k==='trapSweet') return (v>0?'+':'')+v+' ms';
@@ -4287,7 +4425,7 @@
     skill=null; skillCd=0; skillG=null;
     for(const q of [you,D]){ q.vx=q.vy=0; q.state='normal'; q.stateT=0; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.tackleCd=0; q.beatenCd=0; q.runTarget=null; q.stamina=q.staminaCap=1; }
     D.lungeT=0; D.recoverT=0; ftAim=null;
-    you.stars=3;                                                       // (every move, to practise them all)
+    you.stars=5;                                                       // (every move, to practise them all)
     you.x=FW/2-atk*260; you.y=YC; you.facing={x:atk,y:0};
     D.x=you.x+atk*LAB.dDist; D.y=YC; D.facing={x:-atk,y:0};
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
@@ -4348,7 +4486,7 @@
     }
     if(LAB.auto&&(!r||r.done)){ LAB.nextT-=rdt; if(LAB.nextT<=0) dribLabServe(); }
   }
-  function dribLabTally(){ return LAB.dt||(LAB.dt={n:0,beat:0,tackled:0,out:0,time:0,mv:{spin:{n:0,b:0},croq:{n:0,b:0},cut:{n:0,b:0},rainbow:{n:0,b:0}},beatT:0}); }
+  function dribLabTally(){ return LAB.dt||(LAB.dt={n:0,beat:0,tackled:0,out:0,time:0,mv:Object.fromEntries(SKILL_KINDS.map(k=>[k,{n:0,b:0}])),beatT:0}); }
   function dribLabFinish(res){
     const r=LAB.rep; if(!r||r.done) return;
     r.done=true; r.result=res; r.endT=simNow;
@@ -4388,7 +4526,7 @@
   }
   function dribLabHint(){
     return (isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')
-      +': <b>―</b> flick = cut · <b>L</b> = croqueta · <b>○</b> circle = roulette · <b>↓↑</b> = rainbow. Get past him with the ball.';
+      +' a move, ahead being the way he\'s going. Get past him with the ball.';
   }
   function dribLabText(r){
     const head=`<span class="lsv">${plName(DL_DEFS,r.def)} · ${plName(DL_DISTS,r.d).toLowerCase()} off${r.slide?' · slides':''}</span>`;
@@ -4408,7 +4546,7 @@
                              :'no runs yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
     const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
     if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
-    for(const k of ['spin','croq','cut','rainbow']){ const m=T.mv[k]; if(m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
+    for(const k of SKILL_KINDS){ const m=T.mv[k]; if(m&&m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
     if(T.beat) parts.push('avg '+(T.beatT/T.beat).toFixed(1)+' s to beat him');
     return parts.join(' · ');
   }
@@ -4909,8 +5047,9 @@
     if(ftAim&&(ftAim.p!==controlled||ball.ownedBy||gkHold||ball.lastTouch!==ftAim.lt||simNow>ftAim.until)) ftAim=null;   // someone's got it, or touched it
     if(recvAuto&&recvAuto.hold){ const h=recvAuto.hold;              // the stick still held the way a first-time pass went
       if((ix||iy)&&ix*h.x+iy*h.y>0.9){ ix=0; iy=0; } else recvAuto.hold=null; }
+    if(recvAuto&&!ix&&!iy&&recvAuto.go&&simNow<recvAuto.go.until) return {ix:recvAuto.go.x, iy:recvAuto.go.y};   // (his own line first: round the man)
     if(recvAuto&&!ix&&!iy&&recvAuto.wait>simNow) return {ix:0,iy:0};   // (a beat to see it's his)
-    if(recvAuto&&!ix&&!iy){ const c=controlled, m0=meetPoint(c), mr=offMisread(c,Math.hypot(ball.x-c.x,ball.y-c.y)/Math.max(150,Math.hypot(ball.vx,ball.vy))),
+    if(recvAuto&&!ix&&!iy){ const c=controlled, m0=meetPoint(c), mr=recvAuto.own?{x:0,y:0}:offMisread(c,Math.hypot(ball.x-c.x,ball.y-c.y)/Math.max(150,Math.hypot(ball.vx,ball.vy))),   // (his own touch he knows)
         m={x:m0.x+mr.x, y:m0.y+mr.y}, dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // (where he reads it going: Off IQ)
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
@@ -5851,7 +5990,7 @@
   function offReact(p){ return statLerp(statOf(p,'offIQ',P.offIQ.val),OFF_REACT[0],OFF_REACT[1]); }
   function offReading(p){ return simNow-(ball.passT==null?-9:ball.passT)>=offReact(p); }   // has he read it yet?
   function offMisread(p,tArr,floor){                             // his read of where it'll be is out by this much
-    if(p.readK!==ball.passT){ p.readK=ball.passT; p.readA=Math.random()*6.2832; }
+    if(p.readK!==ball.passT||p.readA==null){ p.readK=ball.passT; p.readA=Math.random()*6.2832; }   // (a read of its own for each pass)
     const f=floor||0, e=statLerp(statOf(p,'offIQ',P.offIQ.val),OFF_READ[0],OFF_READ[1])*(f+(1-f)*clamp(tArr,0,1));   // (floor: a high ball he never quite reads right)
     return {x:Math.cos(p.readA)*e, y:Math.sin(p.readA)*e};
   }
@@ -7763,8 +7902,8 @@
       out.push({kind:'carry', key:'c'+i, ux, uy, s, ex, ey, P:pk, v, loss, ev:pk*v-(1-pk)*loss, free, run:isRun?runS:0});
     }
   }
-  // THE COMPUTER'S SKILL MOVES: taking a man on, one who has the moves (his stars) does one to get past him -- a cut, a
-  // croqueta, a roulette or a rainbow flick, as many as his stars allow -- rather than just swerving by. Who: a winger or
+  // THE COMPUTER'S SKILL MOVES: taking a man on, one who has the moves (his stars) does one to get past him -- whichever
+  // of them his stars allow (see aiSkillMove) -- rather than just swerving by. Who: a winger or
   // a wide midfielder most of all; a central midfielder or a striker now and then; a full-back only on the attack and
   // only when he's clearly the better of the man in front of him; a centre-back never. How keen he is (0..1.3) is how
   // much better he is on the ball (Dribbling twice, Ball control, Agility) than that man is at stopping him (Tackle
@@ -7782,19 +7921,32 @@
     if(u>FW*0.66) k*=1.15;                                                // in their third
     return clamp(k,0,1.3);
   }
-  // which move, and which way: the side he's going past him on (side, across the pitch); a croqueta or a cut most, a
-  // roulette with the man right on him (and only well the better of him), a rainbow flick with nobody behind him to pick it up
+  // which move, and which way: the side he's going past him on (side, across the pitch). As many as his stars allow: a flick
+  // past him or a croqueta most; a drag-back with the man right on him, or a roulette (only well the better of him: it
+  // takes long enough for him to get back to it); a Cruyff turn out wide or near the byline; a rainbow flick, or a sombrero
+  // over him when he's close, with nobody behind him to pick it up; an elastico, or a heel flick round him close up
   function aiSkillMove(p,d,side,C,clear){
     if(ball.ownedBy!==p){ if(ball.dribbler===p&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10) own(p,p.r+ball.r+5); else return null; }   // (his own touch a step away: on it)
     if(Math.abs(p.y-d.y)>12) side=Math.sign(p.y-d.y);                 // away from the side he's on now -- unless that's off the pitch
     if(p.y+side*90<45||p.y+side*90>FH-45) side=-side;
-    const st=p.stars||1, opts=[['cut',1]];
-    if(st>=2) opts.push(['croq',1.3]);
-    if(st>=3){ if(dist(p,d)<55&&skillEdge(p,d)>=2.5) opts.push(['spin',0.6]); opts.push(['rainbow',clear?0.6:0.1]); }   // (the roulette only with him right on him, and a good deal the better of him: it takes long enough for him to get back to it)
+    const st=p.stars||1, near=dist(p,d), opts=[['flick',1]];
+    if(st>=2&&near<55) opts.push(['dragback',0.4]);
+    if(st>=3){ opts.push(['croq',1.3]); if(near<55&&skillEdge(p,d)>=2.5) opts.push(['spin',0.6]);
+      if(Math.abs(p.y-YC)>FH*0.3||Math.abs(C.gx-p.x)<BX+120) opts.push(['cruyff',0.4]); }
+    if(st>=4) opts.push(['rainbow',clear?0.6:0.1]);
+    if(st>=5){ opts.push(['elastico',0.8]); if(clear&&near<90) opts.push(['sombrero',0.4]); if(near<80) opts.push(['heel',0.3]); }
     let r=Math.random()*opts.reduce((a,o)=>a+o[1],0), kind=opts[0][0];
     for(const o of opts){ r-=o[1]; if(r<=0){ kind=o[0]; break; } }
-    const dl=Math.hypot(0.3,0.95), d0=kind==='cut'?{x:C.atk*0.3/dl,y:side*0.95/dl}:kind==='croq'?{x:0,y:side}:null;   // (a cut chopped square, away from him, not on past him)
-    const sk=mkSkill(p,{kind,sense:side*C.atk,turn:2*Math.PI},d0);
+    // its way: on past him to `side`, which is his right (+1) or his left (-1) going the way he's going
+    const f=skillHeading(p), right={x:-f.y,y:f.x}, s=Math.sign(right.y*side)||1, n=(x,y)=>{ const l=Math.hypot(x,y)||1; return {x:x/l,y:y/l}; }, m={kind};
+    if(kind==='flick') m.d=n(C.atk*0.6,side*0.8);                    // (popped on past him, away from him)
+    else if(kind==='dragback') m.d=n(-C.atk*0.6,side*0.8);           // (back and away)
+    else if(kind==='croq') m.d={x:0,y:side};
+    else if(kind==='spin') m.sense=-s;                                // (round and out to that side: clockwise comes out to his left)
+    else if(kind==='cruyff') m.d=n(-C.atk*0.7,side*0.7);
+    else if(kind==='sombrero'||kind==='elastico') m.side=s;
+    else if(kind==='heel') m.d=n(f.x*0.85-right.x*s*0.53,f.y*0.85-right.y*s*0.53);   // (the ball round his other side; he goes round on this one)
+    const sk=mkSkill(p,m);
     if(p===controlled) skill=sk; else p.skill=sk;
     ball.ownedBy=p; p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false; skillSells(p);
     lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;
@@ -12135,7 +12287,7 @@
     h+='<div class="menuHint">'+(ed?'Drag a slider to change a stat \u2014 saved instantly and applied to the live match.':'Turn on EDIT STATS to change any value.')+'</div>';
     const e=SQUAD[t][sel], keys=(e.role==='GK')?GK_KEYS:OUT_KEYS;
     const sty=styleOf(e);
-    h+='<div class="sqCard'+(sel===youIdx?' you':'')+'" style="max-width:560px"><div class="sqHead"><div><span class="sqName">#'+e.num+' '+e.name+'</span><span class="sqRole">'+natPos(e)+(sty?' \u00b7 '+sty.name.toUpperCase():'')+'</span>'+(e.role!=='GK'?' '+starsHtml(skillStarsOf(e.stats)):'')+(sel===youIdx?'<span class="youBadge">\u25b6 YOU</span>':'')+(sty?'<div class="sqStyle">'+sty.blurb+'</div>':'')+'<div class="sqPers">'+e.defPers+' temperament</div></div><div class="sqOvr" id="ovr_'+t+'_'+sel+'">'+e.ovr+'</div></div>';
+    h+='<div class="sqCard'+(sel===youIdx?' you':'')+'" style="max-width:560px"><div class="sqHead"><div><span class="sqName">#'+e.num+' '+e.name+'</span><span class="sqRole">'+natPos(e)+(sty?' \u00b7 '+sty.name.toUpperCase():'')+'</span>'+(e.role!=='GK'?' '+starsHtml(entryStars(e)):'')+(sel===youIdx?'<span class="youBadge">\u25b6 YOU</span>':'')+(sty?'<div class="sqStyle">'+sty.blurb+'</div>':'')+'<div class="sqPers">'+e.defPers+' temperament</div></div><div class="sqOvr" id="ovr_'+t+'_'+sel+'">'+e.ovr+'</div></div>';
     for(const k of keys) h+=statRowHTML(t,sel,k,ed);
     h+='</div>';
     menuBodyEl.innerHTML=h;
@@ -12313,7 +12465,7 @@
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
     const instr=t==='G'&&cardSide==='instr';                          // (their instructions are theirs: their men show their ratings)
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
-    let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
+    let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
       +legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
     if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
@@ -12636,7 +12788,11 @@
     if(role!=='GK') p.style=styleForSub(sub,Math.random());
     p.pot=o.pot!=null?Math.min(94,Math.max(p.ovr,Math.round(o.pot))):mgPotFor(age,p.ovr);
     p.wage=mgRound(mgWage(p.ovr)*(0.85+Math.random()*0.3));
+    careerStarPot(p);                                              // (his skill-star ceiling, by his position and potential)
+    if(p.sp===5&&natPos(p)==='FB'&&mgFiveStarFB(d,p)) p.sp=4;      // (one five-star full-back in the world at most)
     return p; }
+  function mgFiveStarFB(d,p){ const lists=[d.roster||[],d.world.free||[],d.youth||[],...Object.values(d.world.clubs).map(c=>c.players)];
+    return lists.some(L=>L.some(q=>q!==p&&q.sp===5&&q.role!=='GK'&&natPos(q)==='FB')); }
   // a free shirt number for p (his position's first), or for every man in the list without one
   function mgNumber(list,p){
     const todo=p?[p]:list.filter(x=>!x.num), used=new Set(list.filter(x=>x.num&&!todo.includes(x)).map(x=>x.num));
@@ -12832,7 +12988,8 @@
     p.ovr=clamp(p.ovr+dl,30,95); if(a>=29||p.pot<p.ovr) p.pot=p.ovr;
     return dl; }
   function mgAgeWorld(d,R){ const S=d.season, retires=p=>p.age>=37||(p.age>=35&&Math.random()<0.5)||(p.age>=34&&Math.random()<0.2);
-    for(const p of d.roster){ const was=p.ovr; mgGrow(p); p.age++; if(p.ovr!==was) R.grew.push({name:p.name,from:was,to:p.ovr}); }
+    for(const p of d.roster){ const was=p.ovr, ws=careerStars(p); mgGrow(p); p.age++; if(p.ovr!==was) R.grew.push({name:p.name,from:was,to:p.ovr});
+      const ns=careerStars(p); if(ns!==ws) mgNews(d,p.name+(ns>ws?' has grown into another skill star (':' has lost a skill star (')+'\u2605'.repeat(ns)+').'); }   // (his stars come with age: see starsAt)
     for(const p of (d.youth||[])){ mgGrow(p,1); p.age++; }
     for(const c of mgAiClubs(d)) for(const p of c.players){ mgGrow(p); p.age++; }
     for(const p of d.world.free){ mgGrow(p); p.age++; }
@@ -13126,7 +13283,7 @@
   // who play wide (full-backs, wingers), in the middle the rest, the holding midfielder in the holder's place; short of
   // a position, the best man left. (No shape: the first eight.)
   function careerSquad(club,form){
-    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id });
+    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p) });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
     const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||p.ovr>b.ovr)) b=p; if(b) used.add(b); return b; };
     const gk=best(p=>p.role==='GK')||best(()=>true), out=[gk];
@@ -13223,7 +13380,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, four)
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id}; });
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p)}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   // your side's shapes and spots changed in a match (the pause menu): the career keeps them
@@ -13238,7 +13395,7 @@
     let h='<div class="tacStat'+(isYou?' you':'')+'">';
     h+='<div class="tacStatHead"><div><span class="tacStatName">#'+(e.num!=null?e.num:'')+' '+mgEsc(e.name||'')+'</span>'
       +'<span class="tacStatRole">'+natPos(e)+(sty?' · '+sty.name:'')+'</span>'
-      +(e.role!=='GK'?'<span class="tacStars" title="skill moves">'+starsHtml(skillStarsOf(st))+'</span>':'')
+      +(e.role!=='GK'?'<span class="tacStars" title="skill moves">'+starsHtml(starsOf(e))+'</span>':'')
       +(isYou?'<span class="youBadge">▶ YOU</span>':'')
       +(sty?('<div class="tacStatPers">'+sty.blurb+'</div>'):'')
       +'</div><div class="tacStatOvr">'+(e.ovr!=null?e.ovr:'')+'</div></div>';
@@ -13264,7 +13421,7 @@
     const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
     const instr=cardSide==='instr';
     return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
-      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(skillStarsOf(st)):'')+'</div>'
+      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+(p.role==='ATT'?' as an ':' as a ')+p.role+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
@@ -13638,7 +13795,7 @@
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
     let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
       +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
-      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(skillStarsOf(mgStats(p))):'')+'</div>'
+      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div>'+mgFlip()+'</div></div>';
     if(mgSide==='rate') h+=known?sixHtml(mgStats(p),p.role)+(f.mine?'<div class="mgFacts">'+mgFact('THIS SEASON',(p.apps||0)+' games · '+(p.goals||0)+' goals','',true)+'</div>':'')

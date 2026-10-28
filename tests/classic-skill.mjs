@@ -1,5 +1,6 @@
 // FOOTBALL CLASSIC, THE COMPUTER'S SKILL MOVES: taking a man on, one of the computer's men who has the moves (his stars)
-// does one -- a cut, a croqueta, a roulette, a rainbow flick -- rather than just swerving by. Who: wingers and wide
+// does one -- only those his stars allow: a one-star man the flick, a three-star man up to the croqueta, roulette and
+// Cruyff turn, a five-star man the rainbow, sombrero, elastico and heel flick too -- rather than just swerving by. Who: wingers and wide
 // midfielders most, central midfielders and strikers less, a full-back only on the attack and only when he's clearly the
 // better man, a centre-back never; how keen: how much better he is on the ball than the man in front of him is at
 // stopping him (not how good he is overall); where: on the touchline keenest, never in his own half. And every move's pace
@@ -14,7 +15,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={P, players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, FW, FH, YC, MK, atkOf, applySlot, own, '
-  + 'aiSkillKeen, mkSkill, skillPaceOf, skillReachOf, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
+  + 'aiSkillKeen, aiSkillMove, mkSkill, skillPaceOf, skillReachOf, ROULETTE_TURN, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // (your man on the computer too)
 patch("    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    return kind;",
   "    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    if(window.__SK) window.__SK.push({team:p.team, num:p.num, kind});\n    return kind;");   // (every move the computer makes)
@@ -55,13 +56,29 @@ ok(keen.fbHolding === 0 && keen.fbOn > 0 && keen.fbOnSmallEdge === 0, 'a full-ba
 // A MOVE'S PACE AND REACH ARE HIS DRIBBLING
 const pace = await page.evaluate(() => { const T = window.__T, p = T.players()[1], keep = p.stats, out = {};
   for(const v of [10, 5.5, 1]){ p.stats = Object.assign({}, keep, { dribbling: v }); p.vx = p.vy = 0; p.facing = { x: 1, y: 0 };
-    const c = T.mkSkill(p, { kind: 'croq' }, { x: 0, y: 1 }), s = T.mkSkill(p, { kind: 'spin', sense: 1, turn: 2 * Math.PI }), r = T.mkSkill(p, { kind: 'rainbow' });
+    const c = T.mkSkill(p, { kind: 'croq', d: { x: 0, y: 1 } }), s = T.mkSkill(p, { kind: 'spin', sense: 1 }), r = T.mkSkill(p, { kind: 'rainbow' });
     out[v] = { croqT: +c.T.toFixed(3), croqD: +c.D.toFixed(1), spinT: +s.T.toFixed(3), spinD: +s.D.toFixed(1), rainbowT: +r.T.toFixed(3), rbDist: +r.rbDist.toFixed(1) }; }
-  p.stats = keep; out.dial = { croqT: T.P.skCroqT.val, croqD: T.P.skCroqDist.val, spinT: T.P.skSpinT.val, spinD: T.P.skSpinDist.val }; return out; });
+  p.stats = keep; out.dial = { croqT: T.P.skCroqT.val, croqD: T.P.skCroqDist.val, spinT: T.P.skSpinT.val * T.ROULETTE_TURN / (2 * Math.PI), spinD: T.P.skSpinDist.val }; return out; });   // (the roulette: seven-eighths of the way round)
 info('by Dribbling: ' + JSON.stringify(pace));
 ok(Math.abs(pace[10].croqT - pace.dial.croqT) < 0.001 && Math.abs(pace[10].croqD - pace.dial.croqD) < 0.1 && Math.abs(pace[10].spinT - pace.dial.spinT) < 0.001, 'at Dribbling 10 a move is as the dials have it');
 ok(Math.abs(pace[1].croqT / pace[10].croqT - 1 / 0.62) < 0.01 && Math.abs(pace[1].spinT / pace[10].spinT - 1 / 0.62) < 0.01 && Math.abs(pace[1].croqD / pace[10].croqD - 0.7) < 0.01 && Math.abs(pace[1].rbDist / pace[10].rbDist - 0.7) < 0.01,
   'at 1 it takes 1.6 times as long and carries 30% less far (croqueta ' + pace[10].croqT + ' s / ' + pace[10].croqD + ' px -> ' + pace[1].croqT + ' s / ' + pace[1].croqD + ' px)');
+
+// WHICH MOVES, BY HIS STARS: a winger 2 m from his man out on the touchline, nobody behind him, 300 picks at each
+const picks = await page.evaluate(() => { const T = window.__T, R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
+  const p = R[2], d = G[2], atk = T.atkOf('R'), C = { atk, gx: atk > 0 ? T.FW : 0 }, b = T.ball(), out = {}, keep = { s: p.stats, st: p.stars };
+  T.freeze(); p.stats = Object.assign({}, keep.s, { dribbling: 9, ballControl: 9, agility: 9 });
+  for(const st of [1, 3, 5]){ const n = {};
+    for(let i = 0; i < 300; i++){ p.x = atk > 0 ? T.FW * 0.72 : T.FW * 0.28; p.y = T.YC + T.FH * 0.38; p.vx = atk * 150; p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal';
+      d.x = p.x + atk * 50; d.y = p.y; d.state = 'normal'; p.stars = st; p.skill = null; p.skillCd = 0; b.z = 0; b.vz = 0; T.own(p, p.r + b.r + 5);
+      const k = T.aiSkillMove(p, d, 1, C, true); n[k] = (n[k] || 0) + 1; p.skill = null; }
+    out[st] = n; }
+  p.stats = keep.s; p.stars = keep.st; T.freeze(); return out; });
+info('the moves picked, by stars: ' + JSON.stringify(picks));
+const kinds = st => Object.keys(picks[st]);
+ok(kinds(1).join() === 'flick', 'a one-star man only flicks it on');
+ok(kinds(3).every(k => ['flick', 'dragback', 'croq', 'spin', 'cruyff'].includes(k)) && kinds(3).includes('croq') && kinds(3).includes('cruyff'), 'a three-star man up to the croqueta, roulette and Cruyff turn (' + kinds(3).join(', ') + ')');
+ok(['rainbow', 'sombrero', 'elastico', 'heel'].every(k => picks[5][k] > 0), 'a five-star man has them all, the rainbow, sombrero, elastico and heel flick too (' + kinds(5).join(', ') + ')');
 
 // IN THE MATCH: a winger with the moves (3 stars, Dribbling 9) and the ball out on the touchline in their third, one of
 // ours 4 m in front of him (Tackle 4), nobody else near -- he takes him on with a move; a centre-back there never does

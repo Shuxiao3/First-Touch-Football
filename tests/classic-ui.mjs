@@ -59,7 +59,7 @@ const hudWin = page => page.evaluate(() => { const c = window.__T.controlled(), 
   return { num: document.getElementById('rpNum').textContent, name: nm.textContent, pos: document.getElementById('rpPos').textContent, lit: st ? st.textContent.length - (st.querySelector('i') ? st.querySelector('i').textContent.length : 0) : -1,
     fill: +(R(fill).width / R(fill.parentElement).width).toFixed(3), col: fill.style.background, cNum: c.num, cName: c.pname, cStars: c.stars, cSt: +c.stamina.toFixed(3),
     cut: nm.scrollWidth > nm.clientWidth, top: Math.round(W.top - S.top), gap: Math.round(M.left - W.right), level: Math.abs(W.top - M.top) < 1 && Math.abs(W.bottom - M.bottom) < 1, inside: W.left >= S.left && M.right <= S.right, over }; });
-const winOk = (v, full) => v.num === '#' + v.cNum && (full ? v.name === v.cName : v.name.split(' ').length === 2 && v.name.endsWith(' ' + v.cName)) && v.pos.length >= 2 && v.lit === Math.max(1, Math.min(3, v.cStars || 1))
+const winOk = (v, full) => v.num === '#' + v.cNum && (full ? v.name === v.cName : v.name.split(' ').length === 2 && v.name.endsWith(' ' + v.cName)) && v.pos.length >= 2 && v.lit === Math.max(1, Math.min(5, v.cStars || 1))
   && Math.abs(v.fill - v.cSt) <= 0.02 && !v.cut && v.top <= 12 && v.gap >= 0 && v.gap <= 10 && v.level && v.inside && !v.over;
 const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
   return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);

@@ -267,31 +267,59 @@ The same game played like any other football game. It's a copy of `index.html` w
   more than 6 m nearer than your man.
 
 - **Skill moves instead of a trap.** With the ball, draw a pattern. On a touch screen, start on the SKILL button and
-  draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go.
-  Every player has one to three **skill stars**, from his Dribbling (counted twice), Agility and Ball control: one star
-  for the cut, two for the croqueta as well, three for the roulette and the rainbow flick too. A move above his stars
-  doesn't happen, and the screen says how many it needs. Two stars from an average of 5.4, three from 7: most
-  League 2 forwards have two, about half of the Championship's forwards have three, and nearly all the Premium
-  League's. Defenders mostly have one. The stars show on every player card, and in a match in your man's window.
-  - **Roulette** (a circle or swirl, 3 stars): you turn as far round as you drew, from 180° to 450°, and come out facing
-    wherever that leaves you. You roll up to about 2.3 m to the side the circle went (clockwise goes to your right). The
-    ball goes round with your body, so halfway through it's showing on the far side.
-  - **Croqueta** (an L, 2 stars): the ball is shifted foot to foot, and you shift about 1.8 m the way the L's second stroke goes,
-    still running the same way.
-  - **Cut** (a straight flick, 1 star): the ball is chopped the way you flicked and popped a step ahead. It's loose until
-    you get back on it.
-  - **Rainbow flick** (down, then up, 3 stars): over 0.35 s you ease off and roll the ball back up the back of your leg, then
-    flick it over your head. It peaks about 3.5 m up, is in the air about 1.15 s, and drops 1.6 m ahead of where your
-    run would take you. It checks up where it lands, like a lofted pass. Leave the stick alone and you burst on to it.
-    It beats a man who has committed to you. A defender who can simply turn round gets there first, and one already
-    in tackling range takes it during the wind-up.
+  draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go,
+  against the way your man is going (the way he's running, or else the way he's facing) as it looks on the screen, as
+  a stick is in other football games. The same shape is the same move whichever way he's going on the pitch, so the
+  same stroke on the screen can be two moves: rightwards, it's a flick for a man running right and a drag-back for one
+  running left. (It's read on the screen because the pitch's depth is squashed there: read on the pitch, a stroke drawn
+  across a man running up or down it wobbled ahead or back, and an elastico could come out as a sombrero.)
+  - **Flick** (a straight flick anywhere in the half in front of him, 1 star): he goes on as he was, still facing his
+    way, and pops the ball up a little off his foot the way you flicked, over in 0.1 s. It's loose until he's back on it.
+  - **Drag-back** (a straight flick anywhere in the half behind him, 2 stars): he stops, rolls it back under his sole
+    the way you flicked and turns to go with it.
+  - **Croqueta** (an L, 3 stars): the ball is shifted foot to foot, and he shifts about 1.8 m the way the L's second
+    stroke goes, still running the same way.
+  - **Roulette** (a circle, 3 stars): he spins round with the ball on his sole, drifting off to the side as he goes,
+    clockwise to his left and anticlockwise to his right, and comes out of it seven-eighths of the way round (315°),
+    going diagonally away past the man in front of him on that side instead of back into him. He ends about 2.5 m
+    across. The ball goes round with his body, so halfway through it's showing on the far side.
+  - **Cruyff turn** (a hook, 3 stars): he shapes to shoot or cross, drags the ball behind his standing leg and goes
+    back the way the hook ends.
+  - **Rainbow flick** (back, then ahead, 4 stars): over 0.35 s he eases off and rolls the ball back up the back of his
+    leg, then flicks it over his head. It peaks about 3.5 m up, is in the air about 1.15 s, and drops 1.6 m ahead of
+    where his run would take him. It checks up where it lands, like a lofted pass. Leave the stick alone and he bursts
+    on to it. It beats a man who has committed to you. A defender who can simply turn round gets there first, and
+    one already in tackling range takes it during the wind-up.
+  - **Sombrero** (ahead, then back, 5 stars): a quick lift off the front of his foot (0.16 s, already above a foot
+    stuck in), then flicked up over the man in front of him to drop about 1.8 m behind him, and he goes round him to
+    meet it. With nobody in front, it drops about 3.6 m on.
+  - **Elastico** (out to one side and back, 5 stars): out with the outside of his foot, the ball and his weight going
+    that way, then snapped back the other and popped up about half a metre, so it gets over a foot stuck out, past the
+    man in front on the side it came back to. He goes after it.
+  - **Heel flick** (a loop with a straight line out of it, 5 stars): he checks and rolls it to his heel, then backheels
+    it past the man in front on the side the line goes while he goes round him on the other, and picks it up beyond.
+
+  There's no step-over, body feint or nutmeg.
+
+  **Skill stars** say which moves a man has, one to five, and they're nothing to do with his ratings. Each man has a
+  ceiling, drawn once for him from the odds for his position in the league his rating belongs in (halfway between his
+  rating and his potential, for a career's men); a keeper always has one star. In the Premium League most wingers have
+  three or four and one in fourteen has five; most strikers three, some four, and one in fifty five; midfielders mostly
+  one to three, with five very rare (one in 330 in the middle, one in 170 attacking, one in a hundred out wide);
+  centre-backs one or two, three at most; full-backs one to three, and never more than one five-star full-back in the
+  world. The leagues below have fewer: nobody in the bottom two has five, and their defenders nearly all one or two. A
+  new career's world has about three or four five-star men, most of them Premium League wingers.
+  - **His stars grow with him.** A young man is a star or two short of his ceiling and grows into it between 19 and 23;
+    about half lose one between 32 and 35. When one of yours gains or loses a star, the news says so. An exhibition
+    club's men have no age, so they play at their ceiling.
+  - **A move above his stars doesn't happen**, and the screen says how many it needs ("SOMBRERO ★★★★★ ONLY"). The stars
+    show on every player card, and in a match in your man's window.
 
   A move gives you little for free. The ball is wherever the move puts it, and a defender who can reach it while it's
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
-  commits. The old stumble on a sharp cut is gone from this version; instead a move sells the man in front of you for
-  a moment, the longer the better you are than him (see **The computer does skill moves**). Each move costs a little
-  stamina. How quick a move is and how far it carries you is your Dribbling: the times and distances here are at
-  Dribbling 10.
+  commits. A move sells the man in front of you for a moment, the longer the better you are than him (see **The
+  computer does skill moves**). Each move costs a little stamina. How quick a move is and how far it carries you is
+  your Dribbling: the times and distances here are at Dribbling 10.
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
   arrives, by the First touch push dial (your own pace along it is added).
@@ -307,7 +335,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Leave the stick alone and you go to meet it.**
 
 - **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
-  past him. You have all three stars there, to practise every move. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
+  past him. You have all five stars there, to practise every move. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
   after 10 s.
   - The defender sees the ball 0.2 s late and lunges at it when he's close (about 2.3 m, 2.8 m when pressing). The
     lunge is a 0.22 s burst at where he saw it, and it wins the ball if it's showing when he gets there. He then
@@ -319,8 +347,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     from him beat him 7 times in 12, and from 8 m or further, or at 4.4 m, never.
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
-  - TUNE has the skill-move dials, which also apply in matches: each move's distance and time, the cut's burst and
-    pop, the rainbow's lead and height, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+  - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
+    the flick's pop and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
     A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
     as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
     measured).
@@ -701,7 +729,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     there to meet it, and more than half of them end in a header on goal, where it was one in four. Goals are up by
     about as much as one batch of games differs from the next.
 - **The computer does skill moves.** Taking his man on, one of the computer's men with the moves (his skill stars)
-  does one to get past him: a cut, a croqueta, a roulette or a rainbow flick, as many kinds as his stars allow.
+  does one to get past him, only those his stars allow: a one-star man flicks it on past him; with more, a flick or a
+  croqueta most, a drag-back with the man right on him, a roulette only when he's well the better of him, a Cruyff
+  turn out wide or near the byline, a rainbow flick (or, at five stars, a sombrero over him when he's close) with
+  nobody behind him to pick it up, and at five stars an elastico, or a heel flick round him close up.
   - **Who.** Wingers and wide midfielders most. Central midfielders and strikers now and then. A full-back only when
     he's pushed on (told to attack, or already in their third) and is clearly the better man (by 1.5 or more). A
     centre-back never.

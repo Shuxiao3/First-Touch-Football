@@ -1,8 +1,9 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
 // never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, seven styles each
 // with its own block without the ball (no posture to set), anyone in any position (the keeper too), instructions by position (each spot's own, kept when
-// the men in it change; a midfielder told to run in behind gives up holding), the keeper's own (PASS), and skill stars
-// (1: the cut; 2: + the croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test reach the match.
+// the men in it change; a midfielder told to run in behind gives up holding), the keeper's own (PASS), and skill stars in
+// the match (each man's own, one to five: which moves each allows is classic-moves.mjs). On a copy of the game that lets
+// the test reach the match.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -11,8 +12,8 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }, '
-  + 'trySkill:(st,g)=>{ const c=controlled; restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; skillCd=0; c.state="normal"; c.stars=st; own(c,c.r+ball.r+5); const r=startSkill(g); skill=null; skillCd=0; return r; }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }};\n  const LAB_TITLE=');
+patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, careerStars};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -191,7 +192,8 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
   const posOK = G.every(p => p.slotAtk.pos === T.POS_OF[f[0]][p.slotAtk.si] && p.slotDef.pos === T.POS_OF[f[1]][p.slotDef.si]);
   return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, gk: (T.PI().G.gk || {}).gkPass, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
     st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
-    other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars) }; }, ids);
+    other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars),
+    want: G.map(p => { const S = window.__S, r = S.d.roster.find(q => q.id === p.lookKey); return r ? S.careerStars(r) : null; }) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
@@ -200,7 +202,7 @@ ok(m.gk === 'farthest', 'the keeper\'s PASS in the match: ' + m.gk);
 ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match; they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
 ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int', 'in the match the men in those spots follow them: ' + JSON.stringify([m.st, m.cb, m.cm]));
 ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');
-ok(m.stars.every(s => s >= 1 && s <= 3), 'every man has 1-3 stars: ' + m.stars.join(''));
+ok(m.stars.every(s => s >= 1 && s <= 5) && m.stars.join() === m.want.join(), 'every man in the match has his own skill stars (one to five, for his age): ' + m.stars.join(''));
 
 // SUBS: the pause menu's TACTICS, then a man off the bench dragged onto one of yours -- he comes on, on fresh legs
 await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
@@ -237,17 +239,6 @@ const hk = await page.evaluate(() => { const T = window.__T, f = T.forms()[0], h
   T.piSet(T.PI().G, 'atk', f, h0.slotAtk.si, 'cmSupport', 'bal'); T.holderOf('G');
   return { h0: h0.lookKey, h1: h1 && h1.lookKey }; });
 ok(hk.h0 && hk.h1 !== hk.h0, 'told to RUN IN BEHIND, the holder hands it on (' + (hk.h1 ? 'to his partner' : 'to nobody') + ')');
-
-// skill stars: a one-star man can cut but not croqueta; a two-star man can croqueta but not roulette or rainbow
-const sk = await page.evaluate(() => { const T = window.__T, out = {};
-  for(const [stars, kind] of [[1,'cut'],[1,'croq'],[2,'croq'],[2,'spin'],[2,'rainbow'],[3,'spin'],[3,'rainbow']]){
-    const g = kind === 'spin' ? { kind, sense: 1, turn: 6.3 } : kind === 'rainbow' ? { kind } : { kind, dx: 1, dy: 0 };
-    out[stars + kind] = T.trySkill(stars, g); }
-  return out; });
-info(JSON.stringify(sk));
-ok(sk['1cut'] === true, '1 star: the cut');
-ok(sk['1croq'] === false && sk['2croq'] === true, 'the croqueta needs 2 stars');
-ok(sk['2spin'] === false && sk['2rainbow'] === false && sk['3spin'] === true && sk['3rainbow'] === true, 'the roulette and the rainbow need 3 stars');
 
 process.exitCode = rep.finish();
 await browser.close();
