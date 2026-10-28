@@ -129,30 +129,31 @@ The same game played like any other football game. It's a copy of `index.html` w
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ CAMPUS, the building, its tabs. A message shows as a toast along the
-    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages
-    if it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over
-    pages and has no long text on it: his figure, name, own position, style, age, stars, rating and potential on
-    top, and one small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as
-    you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending,
-    each the average of its attributes, as in **The six** below; tap one and what it's made of opens under them, a
-    coloured bar for each rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
-    for each, with SCOUT HIM (once the scouts' house is built). The other side, his deal, has what he earns or costs
-    in a small grid, then what you can do about him, a line each: in the Squad tab his contract (a new deal, releasing
-    him); in the market's Selling tab selling him (the two best bids, the transfer list); for another club's man the
-    asking price, scouting him and your offer; for a free agent signing him; for a youngster promoting him. In the
-    Squad tab his card has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch),
-    and the little pitch comes back as you pick a man up to drop on it.
-  - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
-    without the ball, then menus for the shape, the width and the style -- just the names, the style's seven two to
-    a line -- and BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a match. After a thin line
-    come the rest of the squad, in reserve, dimmed: drag one onto a man on the bench or the pitch to swap them (BEST
-    8 puts the best four of the rest on the bench). The tokens narrow to fit; if they still don't (a squad from
-    before squads were capped), the reserves show a page at a time, with a small 1/2 ▶ button to turn to the next,
-    the bench's four always there, so the pitch never loses height. On the right, from under that row to the foot of the screen, the
-    card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) beside two
-    lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) on top, his name and shirt number
-    under them. The bench has the same two lines without the face, in a shorter box, so the pitch gets the height.
-    The lines sit inside each token with room round them, clear of its edges.
+    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages if
+    it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
+    has no long text on it: his figure, name, own position, style, age, stars, rating and potential on top, and one
+    small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as you go from man
+    to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending, each the average of
+    its attributes, as in **The six** below; tap one and what it's made of opens under them, a coloured bar for each
+    rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted
+    shows ? for each, with SCOUT HIM (once the scouts' house is built). The other side, his deal, has what he earns or
+    costs in a small grid, then what you can do about him, a line each: in the clubhouse's Squad tab his contract (a
+    new deal, releasing him); in the market's Selling tab selling him (the two best bids, the transfer list); for
+    another club's man the asking price, scouting him and your offer; for a free agent signing him; for a youngster
+    promoting him. In the Squad tab his card has the right side to itself (◀ THE TEAM, or a tap on him in the list,
+    for the little pitch), and the little pitch comes back as you pick a man up to drop on it.
+  - **Tactics** (in a career, on the training pitch: its level decides which shapes, styles and instructions your side
+    can have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
+    row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
+    seven two to a line -- and BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a
+    match. After a thin line come the rest of the squad, in reserve, dimmed: drag one onto a man on the bench or the
+    pitch to swap them (BEST 8 puts the best four of the rest on the bench). The tokens narrow to fit; if they still
+    don't (a squad from before squads were capped), the reserves show a page at a time, with a small 1/2 ▶ button to
+    turn to the next, the bench's four always there, so the pitch never loses height. On the right, from under that
+    row to the foot of the screen, the card of the man you tapped. Every man on the pitch shows his face (his own
+    look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK)
+    on top, his name and shirt number under them. The bench has the same two lines without the face, in a shorter box,
+    so the pitch gets the height. The lines sit inside each token with room round them, clear of its edges.
   - **The width shows on the pitch.** COMPACT draws each line's men closer together and WIDE spreads them, the lines
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
@@ -190,7 +191,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     The buttons stand over the pitch's bottom-right corner, the stick starts anywhere on the left, and buttons
     you've placed yourself in BUTTON LAYOUT stay where you put them.
   - **Fixed along the way.** A new career can be started by touch (Start was cut off below a card that didn't
-    scroll). In a match the tactics card is no longer left blank after a visit to the Office's tactics. The pause
+    scroll). In a match the tactics card is no longer left blank after a visit to the career's tactics. The pause
     menu, Settings and the new-career card keep clear of the notch.
 - **No player lock.** You control whichever of your players has the ball. When you pass, you're on the receiver as
   soon as the ball is played, and while you leave the stick alone he runs to meet it (sprinting if it's far), once
@@ -449,7 +450,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   then its change kit, then plain white or black. So the bars never clash either.
 - **Tactics: one shape with the ball, another without it.** In a match, PAUSE > TACTICS has an OFFENSE and a
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
-  again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the Office's
+  again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the training pitch's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
   - **Formations.** There are ten seven-a-side shapes: 3-2-2, 2-3-2, 2-2-3, 2-4-1, 3-3-1, 3-1-3, 1-3-3, 1-4-2, 4-2-1
     and 4-1-2. 1-3-3 and 1-4-2 are attacking shapes only, and 4-2-1 and 4-1-2 (four at the back) are defending shapes
@@ -526,7 +527,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     winners' before one of them has it at his feet, so it hardly ever started: over 12 minutes a GEGENPRESS side's
     counter-press was on for 151 frames, about one loss's worth, against 4313 now. Now it's the side that last had
     it at a man's feet that lost it; restarts and kick-offs are as they were.
-  - **Instructions go with the position, not the player.** Pick a player in the pause menu or the Office and you
+  - **Instructions go with the position, not the player.** Pick a player in the pause menu or in Training and you
     get the instructions of the spot he's in. Whoever plays there follows them, swaps and subs included, and each shape
     keeps its own. What a spot can be told depends on what it is: with the ball in the attacking shape, without it in
     the defending one.
@@ -600,7 +601,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     were. His rating in a spot is his own in his own position; in a second one, his own less a point for each point of
     IQ he loses there (2); out of position, his rating for that line less 6 (what his attributes make him there, if
     it's not his own line). On the tactics pitch a man's rating is lime in a second position of his and amber out of
-    position, and in the Office his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
+    position, and in Training his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
     spot's man by position: in a new career about 72% of them play in their own, 27% in a second one and under 1% out
     of position. Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
     change one), is still each man to the spot nearest his, but now in a position of his own before another: a second
@@ -614,7 +615,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     (nothing scrolls, so a moving finger can only mean him). A tap, however long, only shows his card. With a
     mouse, just drag. He stays where you picked him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
     there, in the scheme's colour in his own position, lime in a second one and amber out of position. Drop him on another man and they swap
-    spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the Office's
+    spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the clubhouse's
     Squad tab you can drop a man from the list onto a small pitch above his card.
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
   pitch. That covers your CLEAR, the computer's clearances and headed clearances.
@@ -850,8 +851,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price
     (the market's Selling tab) and clubs bid for him every window day (now and then they bid for your best men
     anyway); accept or reject. Free agents sign any time, for wages only. In the red you can't buy or sign anyone
-    until you're back in the black, but selling still works.
-  - **Contracts.** Every deal runs to the end of a season. Renew it in the Office before it ends, or the player
+    until you're back in the black, but selling still works. All of it needs you on the transfer market first: your
+    phone, $1,500 (see **The campus**); till then nobody's bought, sold or signed, and nobody bids for your men.
+  - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
   - **Scouting** needs the scouts' house built (see **The campus**). A player at another club shows a rating range
     until you scout him: 8 points wide, 6 and then 2 as you grow your scouting network. One player costs $200 in
@@ -876,17 +878,20 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Money.** Tickets, concessions, the club's partners (local firms: $300 a week in League 2, more in each league
     up), TV, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
     winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
-    your league position, and the partners' money grows when you go up. The ground doesn't.
+    your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
+    has it all: the gate and the ticket price, then the books (the budget, every week of the season, matchdays, the
+    season's transfers, the last few weeks).
   - **The ground.** A new career's is a field with two metal bleachers, one down each side, and no boards: 1,800
-    seats. It's built up a level at a time in the Stadium building (its Stands tab), and only when you pay:
+    seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
+    far as your clubhouse lets you (see **The campus**):
 
-    | Level | Seats | Boards | Costs |
-    | --- | --- | --- | --- |
-    | 1 Field & bleachers | 1,800 | 6 | (where you start) |
-    | 2 Big bleachers, a press box | 4,200 | 10 | $45,000 |
-    | 3 Covered stands, terraces behind the goals | 8,500 | 14 | $140,000 |
-    | 4 Four stands, floodlights | 16,000 | 18 | $380,000 |
-    | 5 Grand stadium, two tiers | 36,000 | 24 | $1,200,000 |
+    | Level | Seats | Boards | Costs | Needs |
+    | --- | --- | --- | --- | --- |
+    | 1 Field & bleachers | 1,800 | 6 | (where you start) | |
+    | 2 Big bleachers, a press box | 4,200 | 10 | $45,000 | the shed |
+    | 3 Covered stands, terraces behind the goals | 8,500 | 14 | $140,000 | the cabin |
+    | 4 Four stands, floodlights | 16,000 | 18 | $380,000 | the clubhouse |
+    | 5 Grand stadium, two tiers | 36,000 | 24 | $1,200,000 | the hall |
 
     Promotion builds nothing: a bigger league brings more fans (and a sold-out ground lets you put the price up),
     not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
@@ -906,34 +911,77 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
       sponsor's name on it; its shirt may carry a sponsor too.
     - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
-  - **The campus** is the hub: the club from above, in the town's tiles (see **The campus** under Sprites). A new
-    career's is the ground in the middle and the clubhouse (the Office) by it, with the woods and the road round them
-    and the team bus by the clubhouse, and four roped-off plots: the academy's along the top, and down by the road the
-    scouts' house's, the newsstand's on the plaza, and your house's. The transfer market isn't on it: it's your phone.
-    - The buildings are listed down the left (the right, if Settings says so), with a badge where something's
-      waiting and its price on a plot: Office (squad and contracts, tactics, fixtures, finances), Transfers (a phone:
-      in a window its badge counts the bids for your men), Scouting, Academy, Stadium, Newsstand (news, all four
-      tables, results, top scorers) and Your House (your record). NEXT DAY, or SIMULATE and PLAY, is at the foot.
-      The season, the next match, the budget, the fans and the week's net run along the campus's own foot, put
-      shorter where there's less room.
+  - **The campus** is the hub: the club from above, in the tilesets' tiles (see **The campus** under Sprites), all
+    lawn. The stadium runs along the top and off it: drawn as big as a stadium is beside a clubhouse, so what shows is
+    its outside -- the fence and the back of a bleacher at level 1, up to the bowl's two tiers at 5 -- with the pitch
+    over it while it's low enough to see over. The clubhouse is in the middle, the training pitch to its left, the
+    physio's clinic to its right, the scouts' house and the academy under them, each on a roped-off plot till it's
+    up. No paths, and no trees but the ones you buy.
+    - **The clubhouse** is the club's keep, as a town hall is in a building game: a new career has the shed, the
+      stadium and a rough training pitch, and each clubhouse after it -- the next league up first (reached once is
+      enough), then the money -- lets you put up more and build up what you have:
+
+      | Clubhouse | Needs | Costs | Brings |
+      | --- | --- | --- | --- |
+      | 1 The shed | | (where you start) | the transfer market and the physio; the stadium to level 2 |
+      | 2 The cabin | League 1 | $30,000 | the scouts' house; the training pitch and the physio to 2; the stadium to 3 |
+      | 3 The clubhouse | the Championship | $120,000 | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
+      | 4 The hall | the Premium League | $450,000 | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
+
+      Its screen: the next clubhouse and what it brings, then your career (your record, season by season); the
+      squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
+      scorers); the fixtures (yours, then every result). Your crest is on each clubhouse, your three letters on the
+      cabin's board and the hall's sign.
+    - **The buildings**, a level at a time (level 1 is putting it up), each level waiting for its clubhouse:
+
+      | Building | 1 | 2 | 3 | 4 |
+      | --- | --- | --- | --- | --- |
+      | Training pitch | (where you start) | $10,000 | $40,000 | $120,000 |
+      | Transfer market | $1,500 | | | |
+      | Physio | $5,000 | $15,000 | $45,000 | $130,000 |
+      | Scouts' house | $12,000 | $15,000 | $60,000 | |
+      | Youth academy | $25,000 | $25,000 | $120,000 | |
+
+      - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays), and its
+        level is what your side can be told: at 1 the 2-3-2, 3-2-2 and 2-2-3, the balanced and direct styles, and the
+        keeper's pass; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter, and the support and runs
+        instructions; 3 the 3-1-3, 1-4-2 and 4-1-2, control possession and direct counter, and the width and crosses
+        instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
+        the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
+      - **The transfer market** is your phone, not a building on the campus: TRANSFERS in the menu, straight in.
+      - **The physio**: without one your men get back a quarter of the legs they've lost at half-time; with one, 35%
+        at level 1 up to 65% at 4, and through a game their legs go 8% slower a level (32% at 4). In a simulated
+        game it's worth a little: 0.4 a level on your side's rating.
+      - **The scouts' house** is scouting (see **Scouting**): its level is the network's.
+      - **The youth academy**: its first intake the day it opens, then one every summer; its level is its facilities'.
+    - **Decorations** come with the clubhouse (level 3): DECORATE, at the campus's top, sells thirty -- thirteen
+      trees; flowers, a flower bed, pots, pumpkins, a scarecrow, a haystack and a beehive for a garden; a lamp post,
+      benches, a bin, a bike rack, the copper maple leaf and the team bus for a plaza -- from $150 to $12,000, one at
+      a time. A bought one goes over the campus to put down: drag it where you want it (green where it can go; red
+      on a building, a plot, the stadium or another decoration) and ✓ PUT IT HERE pays for it (✕ or `Esc` leaves
+      it). MOVE picks one up again (tap it, drag it, ✓), or PUT AWAY puts it in store, to put out again (PUT ONE OUT,
+      in the shop) for nothing. One in the way of a building as it goes up or grows goes into store by itself.
+      They're for looks only.
+    - The buildings are listed down the left (the right, if Settings says so): Clubhouse, Training, Stadium,
+      Transfers, Physio, Scouting, Academy -- one to buy with its price, one not open yet with a lock and the
+      clubhouse it needs, a badge where something's waiting (bids for your men in a window, the academy's
+      youngsters). NEXT DAY, or SIMULATE and PLAY, is at the foot. The season, the next match, the budget, the fans
+      and the week's net run along the campus's own foot, put shorter where there's less room.
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
-      it, and you're in. ◀ CAMPUS takes the camera back out. TRANSFERS opens at once, the camera staying put.
-    - **Building.** Tap a plot and it says what the building's for, what it costs and what you've got; BUILD IT puts
-      it up there and then. The newsstand costs $2,500, your house $6,000, the scouts' house $12,000 and the youth
-      academy (its barn and training pitch with it) $25,000. Till one's built there's nothing in it: no scouting
-      without the scouts' house, no youngsters without the academy, and the papers and your record wait for theirs.
-    - **Decorating.** No plants or things come with the campus. DECORATE, at its top, sells them, each with a
-      picture of what it puts where. Plants: the clubhouse's pots and flowers ($600), trees by the clubhouse
-      ($1,600), by the ground ($1,200), along the road ($1,600) and in the east ($1,800), and the west lawn ($1,400).
-      Plaza: lamps ($2,000), benches ($900), flower beds ($900) and a copper maple leaf ($3,500). Garden: the garden
-      round your house ($1,000) and bike racks ($400). They're for looks only; a tree in the way of a bigger ground
-      goes when it's built.
-    - It's drawn as the club is: what it's built and bought, the ground at the level it's built to, its name on a
-      sign (on the press box at level 2, on the south stand's roof from 3), the North Stand's name on its roof from
-      level 3, your boards along the touchline, and your crest on the clubhouse and the academy.
-    - On a phone it's at 1x, cut to its middle where there's less room (a smaller phone moves the club's name onto
-      it); a bigger screen shows the lawn, trees and road round it.
-    - A career saved before there was building to do has everything built and planted, as its campus was.
+      it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
+      you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
+    - **The day's end.** NEXT DAY turns the day, and over the campus the sun goes down behind your stadium as it
+      stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new day written
+      over it: three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
+      doesn't see it.
+    - It's drawn as the club is: the stadium at its level with its name on it (on the gate at levels 1 and 2, a board
+      on the stand's roof at 3 and 4, big letters on the bowl at 5), the clubhouse at its level, each building or its
+      plot, the decorations where you put them.
+    - On a phone it's at 1x, cut to its middle where there's less room (the clubhouse in the middle, the stadium along
+      the top quarter); a bigger screen shows more lawn round it.
+    - A career saved before the clubhouse came in is as built up as it was: the hall, the training pitch at 4, on the
+      transfer market, its scouting and academy as they were (no physio yet). One from the last version that had only
+      begun building starts in the shed, keeping what it built, with its plants' money back.
   - Careers save to three slots (`ft_mgr_slot1` to `3` in `localStorage`). Careers from the old player-manager
     mode (`ft_save_*`) aren't carried over.
 
@@ -1452,21 +1500,30 @@ python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9
 ### The campus
 
 The career's campus (`assets/campus/`) is composed from tilesets the player supplied: the houses, offices, garden,
-harbour, station, industrial and tree sets by **TerribleJared**, with **VeonTrainer** and **Ekat99**, and the shop set
-with **HimuraKenshin2010**'s items. Thanks to them; they're credited in the game's Settings too. Nothing
-Pokémon-branded from the sets is used: the clubhouse's "PC" sign is painted over with its own clapboard, the stone
-house's shop board reads SCOUTS, and no Poké Balls, Ball-Mart signs, creatures or creature planters appear. The ground
-isn't in the sets; it's drawn in their palette, its roofs cut from the wide glass office's.
+harbour, station and tree sets by **TerribleJared**, with **VeonTrainer** and **Ekat99**, and the shop set with
+**HimuraKenshin2010**'s items. Thanks to them; they're credited in the game's Settings too. Nothing Pokémon-branded
+from the sets is used: the hall's sign and ball and the clinic's balls are painted over (the hall's sign carries your
+three letters and its ball becomes a plaque for your crest; the clinic's cross is red), the clubhouse's "PC" sign is
+painted over with its own clapboard, the stone house's shop board reads SCOUTS and the log cabin's "Witch Hut" board is
+cleared for your crest; no Poké Balls, Ball-Mart signs, creatures or creature planters appear. The stadium isn't in the
+sets: it's drawn in their palette.
 
-The campus comes in pieces, so the game can draw the one a club has. `campus_1.png` is what it all stands on (768 by
-448: the 640 by 368 middle with a border of lawn and road): the lawn, the walks, the plaza, the road and the ground at
-level 1. `campus_2.png` to `campus_5.png` are each other level of the ground as a patch over it. Everything standing on
-it is in `campus_sprites.png`: the clubhouse, the bus and the woods round the edge; each building with its own things,
-and the plot roped off for it; and each set of plants and things DECORATE sells. `CAMPUS_META` says where each piece
-goes, what it belongs to, and at which levels the ground clears a tree away. The game draws the club's pieces down the
-screen, then writes the ground's and the North Stand's names, the boards and your crest on it. `campus_start.png` is a
-new career's campus, `campus_full.png` one with everything built and bought, and `campus_levels.png` shows the five
-grounds side by side. The tilesets aren't in the repo, so rebuilding needs them:
+The campus comes in pieces, so the game can draw the one a club has:
+
+- `campus_lawn.png`, a 64 by 64 tile of lawn, all over the 768 by 448 campus.
+- `campus_inside.png`, the stadium's inside as far as it shows over its walls: the apron and the near half of the
+  pitch.
+- `campus_stadium_1.png` to `_5.png`, the stadium at each level from outside, the whole of it (768 by 232, its foot 222
+  rows down): the campus shows the bottom of it along its top, the day's end all of it against the sky.
+  `campus_lights_1.png` to `_5.png` are what's lit on each at night (floodlights, windows, the doors' lamps).
+- `campus_sprites.png`, everything else: the four clubhouses (the garden set's shed, let go; the log cabin; the
+  clapboard clubhouse; the hall), the four training pitches, the physio's clinic, the scouts' house, the academy, the
+  plots, and the thirty decorations.
+
+`CAMPUS_META` says where each goes, what a decoration mustn't be put down on (each piece's footprint), and where the
+game writes on them: the ground's name, the club's crest and its three letters. `campus_start.png` is a new career's
+campus, `campus_full.png` one with everything built and a few decorations out, and `campus_levels.png` the five
+stadiums and the four clubhouses. The tilesets aren't in the repo, so rebuilding needs them:
 
 ```sh
 python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS_ART and CAMPUS_META in classic.html

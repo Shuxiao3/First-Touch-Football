@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, mgBuild, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, lvOf, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -134,34 +134,42 @@ for(const [w, h] of SIZES){
       await page.evaluate(() => window.__MG.setPref('side', 'left'));
       ok(r.right && r.s === 1 && Math.abs(r.mid[0]) <= 2, 'CAMPUS MENU: RIGHT puts the buildings down the right, the campus as it was'); }
   }
-  for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'home']){
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once; NEXT DAY's sunset is manager-career.mjs's)
+  for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'academy']){
     await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
     let tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
-    if(!tabs.length && await page.$('#bpFoot [data-mg="build"]')){   // (a plot: what it'd cost, BUILD IT -- then the building's own tabs)
-      await check(b + ' / plot', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="build"]']);
-      await page.evaluate(() => { window.__MG.d.budget = 1e6; }); await page.tap('#bpFoot [data-mg="build"]'); await page.waitForTimeout(150);
+    if(!tabs.length && await page.$('#bpFoot [data-mg="goclub"]')){   // (not yet: what it is, the clubhouse it needs -- then the clubhouse built up to it)
+      await check(b + ' / waits for its clubhouse', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="goclub"]']);
+      await page.evaluate(() => { const M = window.__MG, d = M.d; d.budget = 1e7; d.top = 4; while(M.lvOf(d, 'club') < 4) M.bldUp(d, 'club'); M.mgSave(d); M.renderHub(); });
+      await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80); }
+    if(!tabs.length && await page.$('#bpFoot [data-mg="up"]') && !(await page.$('#bpBody .bpLvl'))){   // (one to buy: what it'd cost, BUILD IT -- then its own screen)
+      await check(b + ' / to buy', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="up"]']);
+      await page.evaluate(() => { window.__MG.d.budget = 1e7; }); await page.tap('#bpFoot [data-mg="up"]'); await page.waitForTimeout(150);
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
+    if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn']);
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
       await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench']); }
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
   await page.tap('#careerHub [data-hub="decor"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
-  for(const t of ['Plants', 'Plaza', 'Garden']){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(100);
+  for(const t of ['Trees', 'Garden', 'Plaza']){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(100);
     await check('decorate / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.decoCard']); }
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
-  ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (a plot\'s BUILD IT, every building built, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
-  { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (2-4-1), COMPACT and WIDE, on the Office's pitch and the Squad's
-    await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
+  ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
+  { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (2-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
+    await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
+    await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
     const d0 = await page.evaluate(() => [window.__MG.d.formation, window.__MG.d.width.atk]);
     const set = async (form, wd) => { await page.tap('#bpBody [data-tdrop="form"]'); await page.waitForTimeout(60); await page.tap(`#bpBody [data-cform="${form}"]`); await page.waitForTimeout(80);
       await page.tap('#bpBody [data-tdrop="width"]'); await page.waitForTimeout(60); await page.tap(`#bpBody [data-cwidth="${wd}"]`); await page.waitForTimeout(80); };
     await set('2-4-1', '0.84'); const cpt = await apart(page, '#bpBody .tpitch');
+    await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(120);
     await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); const sq = await apart(page, '#bpBody .sqPitch');
-    await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
+    await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
     await set('2-4-1', '1.18'); const wde = await apart(page, '#bpBody .tpitch');
     await set(d0[0], String(d0[1])); await page.tap('.bpTopBack'); await page.waitForTimeout(80);
     ok(cpt.n === 8 && sq.n === 8 && !cpt.over && !cpt.out && !sq.over && !sq.out && !wde.over && !wde.out && wde.span > cpt.span + 20,
-      w + 'x' + h + ': a four across the middle -- COMPACT, nobody overlaps or hangs off the pitch (the Office\'s and the Squad\'s); WIDE, the four spread ' + cpt.span + ' -> ' + wde.span + ' px'
+      w + 'x' + h + ': a four across the middle -- COMPACT, nobody overlaps or hangs off the pitch (the training pitch\'s and the Squad\'s); WIDE, the four spread ' + cpt.span + ' -> ' + wde.span + ' px'
       + (cpt.over + sq.over + wde.over ? ' -- overlaps: ' + [cpt.over, sq.over, wde.over].join('/') : '') + (cpt.out + sq.out + wde.out ? ' -- off the pitch by ' + Math.max(cpt.out, sq.out, wde.out) + ' px' : '')); }
   if(w === 844 && h === 390){   // A LONG LIST GOES OVER PAGES: the market's, with ◀ 1 / n ▶ under it -- ▶ turns the page, the filters stay
     await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
@@ -212,8 +220,9 @@ for(const [w, h] of SIZES){
 // A FINGER: touch a man and move, and he's up at once -- no hold (a tap only shows his card) -- the tactics, on a real touch
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
-  await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
-  await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
+  await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page); await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });
+  await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
   const cdp = await ctx.newCDPSession(page), touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });
   const at = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, ri: e.dataset.ri }; });
   const order = () => page.$$eval('#bpBody .tpitch .ptk[data-tac="field"]', ns => ns.map(n => n.dataset.ri).join());
@@ -311,8 +320,9 @@ for(const [w, h] of SIZES){
       const T = t.getBoundingClientRect(); out.push({ top: ink(o).top - T.top - 2, bottom: n && n.textContent.trim() ? T.bottom - 2 - ink(n).bottom : 99 }); }
     return { n: out.length, top: Math.min(...out.map(o => o.top)), bottom: Math.min(...out.map(o => o.bottom)) }; }, sel);
   const room = { pitch: await pads('#bpBody .tpitch .ptk'), bench: await pads('#bpBody .tbBench .ptk') };
+  await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(120);
   await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150); room.squad = await pads('#bpBody .sqPitch .ptk');
-  await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
+  await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
   const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
   ok(Object.values(room).every(v => v.n >= 6 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
@@ -331,8 +341,9 @@ for(const [w, h] of SIZES){
     let k = 0; d.roster.forEach((p, i) => { if(!on.has(i) && k < L.length) p.name = L[k++]; });
     const f = lu.atk.find(i => d.roster[i].role === 'ATT') ?? lu.atk.find(i => d.roster[i].role !== 'DEF') ?? lu.atk[1], j = lu.atk.indexOf(f);   // a forward
     [lu.atk[0], lu.atk[j]] = [lu.atk[j], lu.atk[0]];                                                                                            // in the first spot: a defender's
-    d.roster[f].name = 'Samuel Lindqvist'; d.roster[f].num = 23; window.__MG.mgSave(d); return f; });
-  await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
+    d.roster[f].name = 'Samuel Lindqvist'; d.roster[f].num = 23; d.lv.train = 4; window.__MG.mgSave(d); return f; });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
   const bench = await page.evaluate(() => { const T = [...document.querySelectorAll('#bpBody .tbBench .ptk')], hit = (a, b) => a.right > b.left + 0.5 && a.left < b.right - 0.5 && a.bottom > b.top + 0.5 && a.top < b.bottom - 0.5;
     return { n: T.length, rows: new Set(T.map(t => Math.round(t.getBoundingClientRect().top))).size,
       inside: T.every(t => { const r = t.getBoundingClientRect(), n = t.querySelector('.ptkName').getBoundingClientRect(); return n.left >= r.left - 0.5 && n.right <= r.right + 0.5; }),
@@ -389,13 +400,15 @@ for(const [w, h] of [[844, 340], [640, 360]]){
         if(side === 'rate' && await page.$('.mgPaneR [data-six="DEF"]')){ await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(60);
           const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
     await page.tap('.bpTopBack'); await page.waitForTimeout(100); };
-  await page.evaluate(() => { const M = window.__MG; M.d.budget = 1e6; M.mgBuild(M.d, 'academy'); M.renderHub(); });   // (the academy, to look at its prospects)
-  await walk('office', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
+  await page.evaluate(() => { const M = window.__MG, d = M.d; d.budget = 1e7; d.top = 4; while(M.lvOf(d, 'club') < 3) M.bldUp(d, 'club');   // (on the market, and the academy, to look at its prospects)
+    M.bldUp(d, 'market'); M.bldUp(d, 'academy'); d.lv.train = 4; d.budget = 1e6; M.mgSave(d); M.renderHub(); });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await walk('club', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
   ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
-  await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
+  await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
   const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
   const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);
-  const redraw = async () => { await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250); };
+  const redraw = async () => { await page.tap('#bpTabs .bpTab:text-is("Pitch")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250); };
   const bs = () => page.evaluate(() => { const B = document.querySelector('#bpBody .tbBench'), vis = [...B.querySelectorAll('.ptk')].filter(t => t.getClientRects().length), pg = B.querySelector('.benchPg');
     return { men: B.querySelectorAll('.ptk').length, subs: vis.filter(t => !t.classList.contains('res')).length, res: vis.filter(t => t.classList.contains('res')).map(t => t.dataset.ri).join(), sep: !!B.querySelector('.benchSep'),
       rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '', pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });

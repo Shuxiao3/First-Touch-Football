@@ -16,7 +16,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={statOf, posPenOf, natPos, posFit, FIT_PEN, rateAt, players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, careerStars, natPos, posFit, ovrAt, careerSquad, careerSlots, cwFormFor, mgAiClubs, careerMapDef, defFormFor, postureOf};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, mgSave, careerStars, natPos, posFit, ovrAt, careerSquad, careerSlots, cwFormFor, mgAiClubs, careerMapDef, defFormFor, postureOf};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -44,7 +44,9 @@ await page.click('#newSlotList .slotBtn >> nth=0');
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await page.click('#chCampus [data-bldg="office"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(100);
+await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once, the days just turn)
+await page.evaluate(() => { const d = window.__S.d; d.lv.train = 4; window.__S.mgSave(d); });   // (every shape, style and instruction: the training pitch's locks are manager-career.mjs's)
+await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(100);
 // the shape, the width and the style are menus on the top row: open one, pick from it (it closes)
 const menu = async k => { if(!(await page.$(`#bpBody [data-tdrop="${k}"].on`))){ await page.click(`#bpBody [data-tdrop="${k}"]`); await page.waitForTimeout(60); } };
 const shut = async () => { if(await page.$('#bpBody .tbDrop.on')){ await page.click('#bpBody .tbDrop.on'); await page.waitForTimeout(60); } };
@@ -173,8 +175,8 @@ ok(d.lineup.atk[3] === benchMan && d.lineup.def.includes(benchMan) && d.lineup.b
 await drag(`#bpBody .tpitch .ptk[data-ri="${benchMan}"]`, `#bpBody .tbBench .ptk[data-ri="${offMan}"]`);
 d = await save(); lu = d.lineup;
 ok(lu.atk[3] === offMan && lu.bench.includes(benchMan), 'and back again');
-// the squad list: drop a man from it on the little pitch
-await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(100);
+// the squad list (the clubhouse's): drop a man from it on the little pitch
+await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60); await page.click('#chCampus [data-bldg="club"]'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(100);
 const out1 = lu.atk[0], in1 = lu.bench.find(ri => d.roster[ri].role !== 'GK');
 await page.$eval(`#bpBody .sqList .mgRow[data-pid="${d.roster[in1].id}"]`, e => e.scrollIntoView({ block: 'center' }));
 await drag(`#bpBody .sqList .mgRow[data-pid="${d.roster[in1].id}"]`, `#bpBody .sqPitch .ptk[data-ri="${out1}"]`);
@@ -182,7 +184,7 @@ d = await save();
 ok(d.lineup.atk[0] === in1 && d.lineup.bench.includes(out1), 'Squad: a man in the list dropped on a spot on the little pitch takes it');
 await drag(`#bpBody .sqList .mgRow[data-pid="${d.roster[out1].id}"]`, `#bpBody .sqPitch .ptk[data-ri="${in1}"]`);
 d = await save(); lu = d.lineup;
-await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
+await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60); await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 
 // --- POSITIONS: his own, his second ones, the rest ------------------------------------------------------------------
 const fit = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','CM','WM','W','ST'], o = {};
