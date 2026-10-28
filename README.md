@@ -418,6 +418,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     - A save from before keeps its way of playing, yours and every club's: TIKI-TAKA is CONTROL POSSESSION; a
       COUNTER is a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise; BALANCED with PRESS HIGH is
       GEGENPRESS; any other style keeps its name and now defends in its own block.
+  - **Your keeper waits for you.** In a match, with the ball in his hands your keeper plays it out when you press PASS
+    (on a touch screen the button reads PASS), or by himself once he's had it 5 s; for the last 2 s of that a red
+    stopwatch flashes over his head. Either way it goes where his PASS instruction says: PLAYER, to the man you're
+    playing as (what calling for it always did); CLOSEST OPEN or FARTHEST OPEN, to the nearest or the furthest of ours,
+    up to 55 m away, that the ball gets to with time to spare before any of theirs, the man it's for with an amber ring
+    while the keeper holds it; HOOF IT, as far up as it goes, to the one of ours furthest up the pitch, marked or not.
+    With nobody open he kicks it long. He used to play it out on his own after about a second. The computer's keeper
+    still does.
   - **Winning the ball back counts.** All a side does on winning it -- a counter's break, the men going up the pitch
     at a sprint, the counter-press, a deep block noting that it lost the ball high -- starts when the ball changes
     hands. That was read from the last touch alone, and a tackle, a block or a first touch makes the ball the
@@ -450,6 +458,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Striker**: both of a front two, the middle one of a three, or a lone one. With the ball, WIDTH (CENTRAL /
       BALANCED / WIDE) and RUNS (RUN IN BEHIND / BALANCED / TARGET MAN: up and central, holding it up / FALSE NINE:
       dropping into midfield). Without it, DEFENDING (COME BACK / BALANCED / STAY FORWARD).
+    - **Keeper**: his own, whatever the shape, on either tab: PASS (PLAYER / CLOSEST OPEN / FARTHEST OPEN / HOOF IT),
+      who he plays it to. See **Your keeper waits for you**.
 
     The defaults (BALANCED, NORMAL, SUPPORT for a full-back's runs, HOLD THE LINE and COVER CENTRE) play as before,
     with two exceptions. A 3-2-2's full-backs used to go up their flanks from the middle third and now, on SUPPORT,
@@ -536,12 +546,15 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Everyone reads the swing:** the keeper coming for it, and the men attacking it and defending it. It's still
     harder to deal with. A defender's chance in a heading duel drops by up to 10 points at Curve 10, his headed
     clearance goes a fifth less far and twice as wild, and the keeper's reach for it is 15% shorter.
-  - **Passes bend only when it helps.** A through ball, or a long pass (along the grass over 24 m, your lofted ball
-    over 20 m), to a man running across its line bends into his path, so it comes to him going his way. At Curve 10
-    a through ball gets to him turned 17° his way; at Curve 1, 1°. One with a man of theirs on its line bends away
-    from him, but along the grass over a short ball that isn't far: 0.4 m round a man 0.6 m off its line at Curve
-    10. That beats a man at the edge of his reach, not one stood on the line. To a man running along its line it
-    goes straight. Yours bend the same way as the computer's.
+  - **Passes bend only when it helps, and not much.** A through ball, or a long pass (along the grass over 24 m, your
+    lofted ball over 20 m), to a man running across its line bends a little into his path. At Curve 10 a pass turns
+    16° at most over its flight, and a through ball gets to him turned 7° his way; at Curve 1, 1°. It used to turn up
+    to 40°, a banana that took a long ball round almost anyone in its way. One with a man of theirs on its line bends
+    a little away from him, not round him: at Curve 10 it passes a man 0.6 m off its line 0.1 m further off than at
+    Curve 1. To a man running along its line it goes straight. Yours bend the same way as the computer's. In the
+    computer's games a curled long ball at Curve 10 now bends 15° on average, where it bent 36°. Whether a long ball
+    gets there doesn't hang on Curve, though: with every man at Curve 10 or every man at 1, about nine in ten passes
+    of 20 m or more reach one of ours.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for each position, as before.
 
@@ -736,7 +749,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | Key | Action |
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross |
+| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross · your keeper holding it: he plays it out (Football Classic: see **Your keeper waits for you**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |

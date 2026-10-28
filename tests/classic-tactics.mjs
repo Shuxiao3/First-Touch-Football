@@ -1,8 +1,8 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
 // never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, seven styles each
 // with its own block without the ball (no posture to set), anyone in any position (the keeper too), instructions by position (each spot's own, kept when
-// the men in it change; a midfielder told to run in behind gives up holding), and skill stars (1: the cut; 2: + the
-// croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test reach the match.
+// the men in it change; a midfielder told to run in behind gives up holding), the keeper's own (PASS), and skill stars
+// (1: the cut; 2: + the croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test reach the match.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -137,6 +137,14 @@ ok(PIc.def['3-3-1'][0].cbAggr === 'step' && PIc.def['3-3-1'][4].cmCover === 'win
 await ci('stDef', 'bal');
 d = await save();
 ok(!d.pinstr.def['3-3-1'][6], 'back to BALANCED: nothing kept');
+// THE KEEPER'S OWN: PASS (who he plays it to when you press PASS, or when his time's up), on either tab
+await tap(lu.gk); pn = await panel();
+const gkOpts = await page.$$eval('#cTacRight [data-cgi="gkPass"]', ns => ns.map(n => n.textContent));
+const gkOn = await page.$eval('#cTacRight [data-cgi="gkPass"].on', n => n.textContent);
+ok(String(pn.groups) === 'PASS' && String(gkOpts) === 'PLAYER,CLOSEST OPEN,FARTHEST OPEN,HOOF IT' && gkOn === 'PLAYER', 'the keeper\'s instructions: PASS -- ' + gkOpts.join(' / ') + ' (' + gkOn + ' to start with)');
+await page.click('#cTacRight [data-cgi="gkPass"][data-v="farthest"]'); await page.waitForTimeout(60);
+d = await save();
+ok(d.pinstr.gk && d.pinstr.gk.gkPass === 'farthest' && (await page.$eval('#cTacRight [data-cgi="gkPass"].on', n => n.textContent)) === 'FARTHEST OPEN', 'FARTHEST OPEN picked, and saved: ' + JSON.stringify(d.pinstr.gk));
 // they go with the position: the striker and the left winger swap places, and the false nine is still a false nine
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 const st0 = lu.atk[5], w0 = lu.atk[4];
@@ -181,13 +189,14 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
   const count = (ps, k) => { const o = {}; for(const p of ps){ const r = p[k].role; o[r] = (o[r] || 0) + 1; } return o; };
   const by = id => G.find(p => p.lookKey === id);
   const posOK = G.every(p => p.slotAtk.pos === T.POS_OF[f[0]][p.slotAtk.si] && p.slotDef.pos === T.POS_OF[f[1]][p.slotDef.si]);
-  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
+  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, gk: (T.PI().G.gk || {}).gkPass, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
     st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
     other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
 ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
+ok(m.gk === 'farthest', 'the keeper\'s PASS in the match: ' + m.gk);
 ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match; they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
 ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int', 'in the match the men in those spots follow them: ' + JSON.stringify([m.st, m.cb, m.cm]));
 ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');

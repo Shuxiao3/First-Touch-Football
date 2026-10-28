@@ -2097,8 +2097,11 @@
                tip:{run:'Stays on their last man and runs in behind.', bal:'Pins their line or comes short, as the play needs.', target:'Stays up and central to hold the ball up for the others, and makes no runs in behind.', false9:'Drops into midfield to link the play, and makes no runs in behind.'}},
     stDef:    {pos:'ST', ph:'def', lbl:'DEFENDING', dflt:'bal', opts:[['back','COME BACK'],['bal','BALANCED'],['up','STAY FORWARD']],
                tip:{back:'Drops into midfield and chases runners back.', bal:'Drops in with the block.', up:'Stays up the pitch for the ball out.'}},
+    // the keeper's (not a spot's: see gkGet): who your keeper plays it to, when you press PASS or his time's up (keeperPlay)
+    gkPass:   {pos:'GK', ph:'atk', lbl:'PASS', dflt:'player', opts:[['player','PLAYER'],['closest','CLOSEST OPEN'],['farthest','FARTHEST OPEN'],['hoof','HOOF IT']],
+               tip:{player:'To the man you’re playing as.', closest:'To the nearest of ours with nobody near him.', farthest:'To the furthest of ours with nobody near him.', hoof:'Long, up towards the forwards.'}},
   };
-  const POS_NAME={CB:'CENTRE-BACK', FB:'FULL-BACK', CM:'CENTRAL MIDFIELD', WM:'WIDE MIDFIELD', W:'WINGER', ST:'STRIKER'};
+  const POS_NAME={GK:'GOALKEEPER', CB:'CENTRE-BACK', FB:'FULL-BACK', CM:'CENTRAL MIDFIELD', WM:'WIDE MIDFIELD', W:'WINGER', ST:'STRIKER'};
   // a spot's name, on its side of the pitch (left: on the side's left)
   function posName(pos,left){ return pos==='FB'?(left?'LEFT-BACK':'RIGHT-BACK') : pos==='WM'?(left?'LEFT MIDFIELD':'RIGHT MIDFIELD') : pos==='W'?(left?'LEFT WING':'RIGHT WING') : (POS_NAME[pos]||pos||''); }
   // the instructions a spot has in one phase
@@ -2113,7 +2116,14 @@
           for(const k in x){ const I=INSTR[k]; if(I&&I.ph===ph&&POS_OF[f][i]===I.pos&&x[k]!==I.dflt&&I.opts.some(op=>op[0]===x[k])) c[k]=x[k]; }
           if(Object.keys(c).length) arr[i]=c; });
         if(arr.length) r[ph][f]=Array.from(arr,x=>x||null); } }
+    if(o.gk&&typeof o.gk==='object'){ const c={}; for(const k in o.gk){ const I=INSTR[k]; if(I&&I.pos==='GK'&&o.gk[k]!==I.dflt&&I.opts.some(op=>op[0]===o.gk[k])) c[k]=o.gk[k]; }
+      if(Object.keys(c).length) r.gk=c; }
     return r; }
+  // THE KEEPER'S INSTRUCTIONS are his own, not a spot's (he's in no shape): PI[team].gk = {key: setting}, as kept
+  function gkGet(T){ return (T&&T.gk)||{}; }
+  function gkSet(T,k,v){ const I=INSTR[k]; if(!T||!I||I.pos!=='GK'||!I.opts.some(op=>op[0]===v)) return false;
+    const o=T.gk=T.gk||{}; if(v===I.dflt) delete o[k]; else o[k]=v; if(!Object.keys(o).length) delete T.gk; return true; }
+  function gkIns(team,k){ const o=PI[team]&&PI[team].gk; return (o&&o[k])||(INSTR[k]?INSTR[k].dflt:null); }
   function piGet(T,ph,f,si){ return (T&&T[ph]&&T[ph][f]&&T[ph][f][si])||{}; }
   function piSet(T,ph,f,si,k,v){ const I=INSTR[k]; if(!T||!I||I.ph!==ph||!POS_OF[f]||POS_OF[f][si]!==I.pos||!I.opts.some(op=>op[0]===v)) return false;
     const P=T[ph]=T[ph]||{}, A=P[f]=P[f]||[], o=A[si]=A[si]||{};
@@ -2591,7 +2601,7 @@
         else if(defHeaderReady()){controlled.vz=headJumpVz(controlled);defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
         else if(incomingAny())queueOneTouch();         // it's on its way to you -> pass it first time when it gets there
-        else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> demand it
+        else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> he plays it out (his PASS instruction: keeperPlay)
         else switchPlayer();                           // defending -> SWITCH (to the man the way you're pushing)
       }
       if(e.code==='Digit0'||e.code==='Numpad0'){
@@ -2681,7 +2691,7 @@
         if(myBall()){
           { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
         }
-        else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it
+        else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it (your keeper: PASS, he plays it out)
         else if(incomingAny()){ queueOneTouch(); otTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }               // on its way to you: ONE-TOUCH pass (swipe off it to aim it)
         else if(canSwitch()){ swTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }   // SWITCH: on release -- a tap goes the stick's way, a swipe off it that way
         else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // (a lab) TRAP
@@ -5130,15 +5140,7 @@
                    ? ball.ownedBy
                    : (gkHold&&gkHold.team==='G'&&gkHold!==controlled ? gkHold : null);
     if(!holder)return;
-    // a keeper holding releases via its throw toward you
-    if(holder===gkHold){
-      // face the keeper toward you and kick it out to your run
-      const f={x:controlled.x-holder.x,y:controlled.y-holder.y};
-      const fl=Math.hypot(f.x,f.y)||1;holder.facing={x:f.x/fl,y:f.y/fl};
-      keeperThrowTo(holder,controlled);
-      holder.mode='return';holder.claimCd=1.4;gkHold=null;controllingKeeper=null;
-      return;
-    }
+    if(holder===gkHold){ keeperPlay(holder); return; }   // your keeper plays it out (his PASS instruction)
     // outfield teammate passes to you, leading your current run
     passToTarget(holder,controlled);
   }
@@ -5197,6 +5199,47 @@
   function keeperThrowTo(kp,mate){
     gkLaunch(kp, mate.x+mate.vx*0.3, mate.y+mate.vy*0.3);          // lead the run a touch
   }
+  // YOUR KEEPER WAITS FOR YOU: in a match, with the ball in his hands he plays it out when you press PASS (callPass), or by
+  // himself once he's had it GK_WAIT -- the last GK_WARN of that with a red stopwatch flashing over his head -- and either
+  // way to whoever his PASS instruction says (keeperPlay). The computer's keeper plays it out when he sees fit (distribute).
+  const GK_WAIT=5, GK_WARN=2;
+  function keeperWaits(kp){ return kp.team==='G' && !LAB.on && !practice; }
+  // who his PASS instruction plays it to now: PLAYER the man you're playing as; CLOSEST / FARTHEST OPEN the nearest /
+  // furthest of ours, onside and with a clear lane, that a ball from him gets to with time to spare before any of theirs
+  // (as distribute judges it); null for HOOF IT, or with nobody open: it goes long (gkLong)
+  function gkTarget(kp,how){
+    if(how==='player') return controlled&&controlled.team===kp.team ? controlled : null;
+    if(how!=='closest'&&how!=='farthest') return null;
+    let best=null, bd=how==='closest'?1e9:-1;
+    for(const q of teamOf(kp.team)){ if(inOffsidePos(q)) continue;
+      const d=dist(kp,q); if(d<70||d>1250||laneBlocked(kp,q)) continue;
+      if(gkSpare(kp,q.x+q.vx*0.25,q.y+q.vy*0.25)<0.45) continue;
+      if(how==='closest'?d<bd:d>bd){ bd=d; best=q; } }
+    return best; }
+  // how long the ball from him to (tx,ty) has before their quickest man could be there (a throw or a short kick under
+  // GK_SHORT; beyond it his kick, as gkLaunch strikes it)
+  const GK_SHORT=760;
+  function gkSpare(kp,tx,ty){ const dd=Math.hypot(tx-ball.x,ty-ball.y);
+    const vz=dd>GK_SHORT ? clamp(40+dd*0.18,55,240)*gkLoftOf(kp,dd) : clamp(40+dd*0.18,55,240)*gkLoftOf(kp,dd)*0.75,
+      vh=dd>GK_SHORT ? gkSolvePower(dd,vz)*gkPowerOf(kp) : gkSolvePower(dd*1.12,vz);
+    return oppTimeTo(kp.team,tx,ty)-gkBallT(dd,vh,vz); }
+  function keeperPlay(kp){
+    const how=gkIns(kp.team,'gkPass'), q=gkTarget(kp,how);
+    if(q){ const tx=q.x+q.vx*(q===controlled?0.3:0.25), ty=q.y+q.vy*(q===controlled?0.3:0.25), f={x:tx-kp.x,y:ty-kp.y}, fl=Math.hypot(f.x,f.y)||1;
+      kp.facing={x:f.x/fl,y:f.y/fl};
+      if(q===controlled||Math.hypot(tx-ball.x,ty-ball.y)>GK_SHORT) gkLaunch(kp,tx,ty);   // (to your run, or a long one: his kick)
+      else gkShort(kp,tx,ty);                                                           // (to a man near: thrown or rolled out)
+      ball.intendedRcv=q; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null; }
+    else if(how==='hoof') gkHoof(kp);                                                     // HOOF IT
+    else gkLong(kp,true);                                                                 // (nobody open: long, to whoever it can find)
+    kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0; controllingKeeper=null; }
+  // HOOF IT: kicked as far up as it'll go -- to the one of ours furthest up the pitch, beyond the back line and in his range,
+  // marked or not (it's his to win) -- or, with nobody up there, long up the emptier side (gkLong)
+  function gkHoof(kp){ const atk=atkOf(kp.team); let tgt=null, best=-1e9;
+    for(const q of teamOf(kp.team)){ if(q.role==='DEF'||inOffsidePos(q)) continue;
+      const d=dist(kp,q), up=atk*(q.x-kp.x); if(d<600||d>1250) continue; if(up>best){ best=up; tgt=q; } }
+    if(!tgt){ gkLong(kp,true); return; }
+    gkLaunch(kp, clamp(tgt.x+atk*40,80,FW-80), tgt.y); ball.intendedRcv=tgt; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null; }
 
   // ===== offside =====
   function keeperOf(team){return keepers.find(k=>k.team===team);}
@@ -6235,8 +6278,9 @@
   // nothing slows it, so it flies a circular arc: set off half its turn the other way, a touch quicker (the arc is
   // longer than the line), it still comes down where it was meant to (curlFlight). Along the grass it slows and turns
   // the harder, so it's aimed by flying it first, as a swiped shot's curl is (curlGround). How much: a cross turns by
-  // CROSS_BEND over its flight (Curve 1 .. 10); a pass by what it needs, up to PASS_BEND.
-  const CURL_F=1700*0.85, CROSS_BEND=[0.08,0.6], PASS_BEND=[0.06,0.7];
+  // CROSS_BEND over its flight (Curve 1 .. 10); a pass by what it needs, up to PASS_BEND (2 to 16 degrees: it was up to 40,
+  // a banana that took a long ball round anyone in its way).
+  const CURL_F=1700*0.85, CROSS_BEND=[0.08,0.6], PASS_BEND=[0.04,0.28];
   function crossBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),CROSS_BEND[0],CROSS_BEND[1]); }
   function passBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),PASS_BEND[0],PASS_BEND[1]); }
   // a ball to fly at v (on a straight line) in the air for T along (cx,cy), bent by `bend` swinging `side` (+1/-1, as
@@ -6651,7 +6695,7 @@
     for(const p of players)if(p.team!==team)p.noTouchT=0.9;
     if(type==='goalkick'){
       const kp=keeperOf(team);
-      kp.x=kp.homeX;kp.y=YC;kp.mode='hold';kp.holdT=1.0;
+      kp.x=kp.homeX;kp.y=YC;kp.mode='hold';kp.holdT=1.0;kp.heldT=0;
       gkHold=kp;
       return;
     }
@@ -10072,6 +10116,7 @@
       ball.x=kp.x-kp.side*18;ball.y=kp.y;
       ball.vx=ball.vy=0;ball.z=6;ball.vz=0;
       kp.heldT=(kp.heldT||0)+dt;
+      if(keeperWaits(kp)){ if(kp.heldT>=GK_WAIT) keeperPlay(kp); return; }   // yours: until you press PASS, or his time's up
       if(kp.holdT<=0 && distribute(kp, kp.heldT>3.2)){         // (he waits, up to a few seconds, for a safe short ball)
         kp.mode='return';kp.claimCd=1.6;gkHold=null;kp.heldT=0;
       }
@@ -10113,7 +10158,7 @@
           lastGrade='KEEPER CLEAR!';gradeColor='#ffb43c';gradeFade=1.5;
         } else {
           kp.gkRoaming=false;
-          kp.mode='hold';kp.holdT=1.15+Math.random()*0.45;
+          kp.mode='hold';kp.holdT=1.15+Math.random()*0.45;kp.heldT=0;
           gkHold=kp;ball.cushBy=null;offsidePass=null;
           ball.lastTouch=kp.team;
           if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
@@ -10140,7 +10185,7 @@
       kp.x+=dx/l*mv; kp.y+=dy/l*mv;
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
       if(Math.hypot(ball.x-kp.x,ball.y-kp.y)<(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())&&ball.z<=GK_CLAIM_H+8){
-        kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; gkHold=kp;
+        kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
         ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
         lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
       }
@@ -10196,7 +10241,7 @@
       kp.charging=charge;
       // at his feet -> the keeper takes it off him
       if(dist(kp,ball)<reachOf(kp)+ball.r+6+divingOf(kp)*0.1&&ball.z<34){
-        kp.mode='hold';kp.holdT=1.1;gkHold=kp;
+        kp.mode='hold';kp.holdT=1.1;kp.heldT=0;gkHold=kp;
         ball.cushBy=null;offsidePass=null;ball.ownedBy=null;ball.lastTouch=kp.team;
         lastGrade='KEEPER OUT!';gradeColor='#ffb43c';gradeFade=1.3;
         if(LAB.on) labOnSave('smothered');
@@ -10361,6 +10406,15 @@
     ball.lastTouch=kp.team; recordPassTeam(kp.team,null);
     return true;
   }
+  // a keeper's ball out to a man near him, thrown or rolled: arriving with a little pace on it (vh, vz: as worked out for
+  // it, or here)
+  function gkShort(kp,tx,ty,vh,vz){
+    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+    if(vz==null){ vz=clamp(40+d*0.18,55,240)*gkLoftOf(kp,d)*0.75; vh=gkSolvePower(d*1.12,vz); }
+    const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
+    ball.vx=(dx*cs-dy*sn)*vh; ball.vy=(dx*sn+dy*cs)*vh; ball.vz=vz;
+    ball.z=Math.max(ball.z,6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;
+    recordPassTeam(kp.team, null); }
   function distribute(kp,force){
     const atk=atkOf(kp.team), sty=TAC[kp.team]&&TAC[kp.team].off;
     if((sty==='direct'||(sty==='counter'&&TAC[kp.team].brk==='direct')) && gkLong(kp,false)) return true;   // a direct side, or a direct counter, goes long when it can
@@ -10379,11 +10433,7 @@
       if(score>bs){bs=score;best=q;bt={x:tx,y:ty,vh,vz};}
     }
     if(best){
-      let dx=bt.x-ball.x, dy=bt.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-      const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
-      ball.vx=(dx*cs-dy*sn)*bt.vh; ball.vy=(dx*sn+dy*cs)*bt.vh; ball.vz=bt.vz;
-      ball.z=Math.max(ball.z,6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;
-      recordPassTeam(kp.team, null);
+      gkShort(kp,bt.x,bt.y,bt.vh,bt.vz);
       ball.intendedRcv=best; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null;
     } else if(!force){
       return false;
@@ -10762,8 +10812,9 @@
         if(btns.kick){
           const lockT = false;
           const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=P.passDrag.val;
-          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : (oursHave?'CALL':incomingAny()?'1-TOUCH':'SWITCH');
-          btns.kick.classList.toggle('mCall', !mine && oursHave);
+          const gkYours=!!gkHold&&gkHold.team==='G'&&keeperWaits(gkHold);   // (your keeper's ball: PASS plays it out -- see keeperPlay)
+          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : gkYours ? 'PASS' : (oursHave?'CALL':incomingAny()?'1-TOUCH':'SWITCH');
+          btns.kick.classList.toggle('mCall', !mine && !gkYours && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
         }
         if(btns.shoot){ const slide=!mine&&!oursHave&&!strikeable;
@@ -11339,6 +11390,8 @@
     if(controlled) pixelRing(controlled.x,controlled.y,controlROf(controlled),'#9dff3c','rgba(14,58,30,.6)');
     // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
     if(controlled&&(crossHeld||crossPend)&&myBall()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
+    // your keeper with it: the same ring on the man he'll play it to (see keeperPlay) -- not you (PLAYER), nor a hoof
+    if(gkHold&&keeperWaits(gkHold)){ const t=gkTarget(gkHold,gkIns(gkHold.team,'gkPass')); if(t&&t!==controlled) pixelRing(t.x,t.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     if(LAB.on) labDrawPitch();
 
     if(shootCharge>0.02&&ball.ownedBy===controlled){
@@ -11816,6 +11869,14 @@
     }
   }
 
+  // a red stopwatch centred on (x,y): its button on top, a white face and one hand
+  function drawStopwatch(x,y){ x=Math.round(x); y=Math.round(y);
+    ctx.fillStyle='#2a0d10'; ctx.fillRect(x-4,y-17,8,6);
+    ctx.fillStyle='#ff4a3d'; ctx.fillRect(x-3,y-16,6,4);
+    ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.fillStyle='#2a0d10'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,9.2,0,Math.PI*2); ctx.fillStyle='#ff4a3d'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fillStyle='#fff4ef'; ctx.fill();
+    ctx.strokeStyle='#2a0d10'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+3.4,y-3.4); ctx.stroke(); }
   // three little stars side by side, centred on (x,y): the first n lit gold, the rest dark
   function drawSkillStars(x,y,n){
     for(let i=0;i<3;i++){ const cx=Math.round(x+(i-1)*9), cy=Math.round(y);
@@ -11868,6 +11929,9 @@
       ctx.strokeStyle='rgba(255,180,60,.7)';ctx.lineWidth=2;ctx.stroke();
       ctx.setLineDash([]);
     }
+    // YOUR KEEPER'S TIME (see GK_WAIT): the last GK_WARN of it, a red stopwatch flashing over his head
+    if(gkHold===kp&&keeperWaits(kp)&&GK_WAIT-(kp.heldT||0)<=GK_WARN&&Math.floor((GK_WAIT-(kp.heldT||0))*5)%2===0){
+      const m=proj(kp.x,kp.y,PLAYER_H+14); drawStopwatch(m.x,m.y-16); }
     if(controllingKeeper===kp){
       const m=proj(kp.x,kp.y,PLAYER_H+14);
       ctx.beginPath();
@@ -12063,8 +12127,9 @@
   }
   // an instruction given in the pause menu to one of a side's spots (si: its index in this phase's shape): it holds at
   // once, and it's kept with the career or the club
-  function setPosInstr(t,ph,si,k,v){ if(!piSet(PI[t],ph,formFor(t,ph),si,k,v)) return;
-    if(t==='G'&&CAREER&&CAREER.data&&matchReturn==='hub'){ CAREER.data.pinstr=piClean(PI.G); mgSave(CAREER.data); }
+  function setPosInstr(t,ph,si,k,v){ if(!piSet(PI[t],ph,formFor(t,ph),si,k,v)) return; keepInstr(t); }
+  function setGkInstr(t,k,v){ if(gkSet(PI[t],k,v)) keepInstr(t); }   // (the keeper's: see gkGet)
+  function keepInstr(t){ if(t==='G'&&CAREER&&CAREER.data&&matchReturn==='hub'){ CAREER.data.pinstr=piClean(PI.G); mgSave(CAREER.data); }
     else if(EXH.on&&EXH.play) saveClubSides(); }
   // the players' spots, from the shapes and the lineup, without stopping play (a change of shape or width mid-match)
   function applyWidthLive(team){
@@ -12230,7 +12295,7 @@
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
     if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
     h+='</div><div class="tacInstr">';
-    if(si===li.gk) return h+'<div class="mgHint">The keeper has no instructions.</div></div>';
+    if(si===li.gk) return h+instrPanelHtml(gkGet(PI[t]),'GK','atk','mgi',false,true)+'</div>';   // (his own, on both tabs)
     if(!sl) return h+'<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div></div>';
     return h+(instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC,true)||'<div class="mgHint">No instructions for this spot.</div>')+'</div>'; }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'?' r':'')+'">';
@@ -12290,6 +12355,7 @@
     const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; renderMatchTac(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
+    const mgi=e.target.closest('[data-mgi]'); if(mgi){ setGkInstr(t,mgi.dataset.mgi,mgi.dataset.v); renderMatchTac(); return; }
     const mi=e.target.closest('[data-mi]'); if(mi){ const li=LINEUP[t], k=li[MT.phase].indexOf(MT.sel); if(k>=0) setPosInstr(t,MT.phase,k,mi.dataset.mi,mi.dataset.v); renderMatchTac(); return; }
     const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; renderMatchTac(); return; } });
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
@@ -13160,7 +13226,7 @@
   // the card's other side: his spot's instructions for this phase (he's moved by dragging him)
   function careerInstrBlock(d, ri, phase){ const p=d.roster[ri]; if(!p) return '';
     const lu=d.lineup;
-    if(ri===lu.gk) return '<div class="tacInstr"><div class="mgHint">The keeper has no instructions.</div></div>';
+    if(ri===lu.gk) return '<div class="tacInstr">'+instrPanelHtml(gkGet(d.pinstr),'GK','atk','cgi',false,true)+'</div>';   // (his own, on both tabs)
     const f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;   // the instructions of the spot he's in
     if(!sl) return '<div class="tacInstr"><div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div></div>';
     return '<div class="tacInstr">'+(instrPanelHtml(piGet(d.pinstr,phase,f,si),sl.pos,phase,'ci',sl.x<50,true)||'<div class="mgHint">No instructions for this spot.</div>')+'</div>'; }
@@ -13847,6 +13913,7 @@
     const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
     const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; tacDrop=null; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
     const cph=e.target.closest('[data-ctphase]'); if(cph){ tacPhase=cph.dataset.ctphase; tacDrop=null; rerenderOffice(); return; }
+    const cg=e.target.closest('[data-cgi]'); if(cg){ const d=CAREER&&CAREER.data; if(d&&gkSet(d.pinstr,cg.dataset.cgi,cg.dataset.v)){ mgSave(d); paintCareerRight(d); } return; }
     const ci=e.target.closest('[data-ci]'); if(ci){ const d=CAREER&&CAREER.data; if(d){ const si=ensureLineup(d)[tacPhase].indexOf(statViewRi); if(si>=0) careerSetInstr(d, tacPhase, si, ci.dataset.ci, ci.dataset.v); } return; }
     const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.style=setStyle('G',cs.dataset.cstyle); mgSave(d); mgRerender(); } return; }
     const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; } tacticTap(tc); return; }
