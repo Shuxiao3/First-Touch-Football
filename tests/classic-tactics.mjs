@@ -1,6 +1,6 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
-// never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, the style and the
-// posture set apart, anyone in any position (the keeper too), instructions by position (each spot's own, kept when
+// never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, seven styles each
+// with its own block without the ball (no posture to set), anyone in any position (the keeper too), instructions by position (each spot's own, kept when
 // the men in it change; a midfielder told to run in behind gives up holding), and skill stars (1: the cut; 2: + the
 // croqueta; 3: + the roulette and the rainbow flick). On a copy of the game that lets the test reach the match.
 import { open } from './_harness.mjs';
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }, '
   + 'trySkill:(st,g)=>{ const c=controlled; restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; skillCd=0; c.state="normal"; c.stars=st; own(c,c.r+ball.r+5); const r=startSkill(g); skill=null; skillCd=0; return r; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
@@ -21,16 +21,17 @@ const { ok, info } = rep;
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 
 // --- the computer never defends in an attack-only shape ------------------------------------------------
-const bad = await page.evaluate(() => { const T = window.__T, out = [];
+const STYLES = ['neutral','gegen','control','wing','direct','fluid','dcounter'];
+const bad = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(c.form, po); if(T.ATK_ONLY.includes(f)) out.push(c.id + ' ' + po + ' ' + f); }
-  for(const st of ['neutral','tiki','wing','direct','counter']) for(let i = 0; i < 40; i++){ const club = { name: 'Club ' + i, style: st };
-    for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(T.cwFormFor(club), po); if(T.ATK_ONLY.includes(f)) out.push(st + ' ' + po + ' ' + f); } }
-  return out; });
+  for(const st of STYLES) for(let i = 0; i < 40; i++){ const club = { name: 'Club ' + i, style: st };   // (each style without the ball in its own block)
+    const f = T.defFormFor(T.cwFormFor(club), T.postureOf(st)); if(T.ATK_ONLY.includes(f)) out.push(st + ' ' + f); }
+  return out; }, STYLES);
 ok(bad.length === 0, 'no computer side defends in 1-3-3 or 1-4-2' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
-const badA = await page.evaluate(() => { const T = window.__T, out = [];
+const badA = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) if(T.DEF_ONLY.includes(c.form)) out.push(c.id);
-  for(const st of ['neutral','tiki','wing','direct','counter']) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
-  return out; });
+  for(const st of STYLES) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
+  return out; }, STYLES);
 ok(badA.length === 0, 'no computer side attacks in 4-2-1 or 4-1-2');
 
 // --- a career: the tactics screen ------------------------------------------------------------------
@@ -65,12 +66,27 @@ await menu('width');
 const widths = await page.$$eval('#bpBody [data-cwidth]', ns => ns.map(n => n.textContent));
 ok(String(widths) === 'COMPACT,BALANCED,WIDE', 'width: ' + widths.join(' / '));
 await shut();
-// the style and the posture are set apart: picking a style leaves the posture alone
-await pick('posture', '[data-cposture="press"]');
-await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
-await pick('style', '[data-cstyle="counter"]');
+// seven styles, each with its own block without the ball: no posture to set (a gegenpress presses high, a direct counter sits deep)
+ok(!(await page.$('#bpBody [data-tdrop="posture"]')) && !(await page.$('#bpBody [data-cposture]')), 'without the ball: no posture menu');
+await menu('style');
+const styles = await page.$$eval('#bpBody [data-cstyle]', ns => ns.map(n => n.textContent));
+ok(String(styles) === 'BALANCED,GEGENPRESS,CONTROL POSSESSION,WING PLAY,DIRECT,FLUID COUNTER,DIRECT COUNTER', 'the styles: ' + styles.join(' / '));
+await page.click('#bpBody [data-cstyle="dcounter"]'); await page.waitForTimeout(80);
 d = await save();
-ok(d.style === 'counter' && d.posture === 'press', 'picking a style leaves the posture alone: ' + d.style + ' / ' + d.posture);
+ok(d.style === 'dcounter' && !('posture' in d), 'picked without the ball, it is the style (nothing else saved): ' + d.style);
+await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
+ok(!(await page.$('#bpBody [data-tdrop="posture"]')) && /DIRECT COUNTER/.test(await page.textContent('#bpBody [data-tdrop="style"]')), 'with the ball: the same style, and no posture menu');
+await pick('style', '[data-cstyle="gegen"]');
+d = await save();
+ok(d.style === 'gegen', 'GEGENPRESS picked: ' + d.style);
+const blocks = await page.evaluate(STYLES => { const T = window.__T, o = {};
+  for(const s of STYLES){ T.setStyle('R', s); o[s] = [T.TAC.R.off, T.TAC.R.def, T.TAC.R.brk].filter(Boolean).join('/'); }
+  T.setStyle('R', 'neutral');
+  o.old = [['tiki','neutral'], ['counter','lowblock'], ['counter','neutral'], ['counter','press'], ['neutral','press'], ['neutral','lowblock'], ['wing','press']].map(a => T.styleKey(a[0], a[1])).join();
+  return o; }, STYLES);
+ok(blocks.gegen === 'gegen/press' && blocks.dcounter === 'counter/lowblock/direct' && blocks.fluid === 'counter/neutral/fluid' && blocks.control === 'control/neutral'
+   && ['neutral','wing','direct'].every(s => blocks[s] === s + '/neutral'), 'each style its own block: ' + JSON.stringify(blocks));
+ok(blocks.old === 'control,dcounter,fluid,fluid,gegen,neutral,wing', 'an old save\'s style and posture read as one of the new styles (tiki-taka, counter low / mid / high, balanced pressing, balanced low, wing pressing): ' + blocks.old);
 
 // DRAGGING: pick a man up and put him on another (a mouse drags at once; a finger holds him first: see classic-ui)
 const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
@@ -165,13 +181,14 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
   const count = (ps, k) => { const o = {}; for(const p of ps){ const r = p[k].role; o[r] = (o[r] || 0) + 1; } return o; };
   const by = id => G.find(p => p.lookKey === id);
   const posOK = G.every(p => p.slotAtk.pos === T.POS_OF[f[0]][p.slotAtk.si] && p.slotDef.pos === T.POS_OF[f[1]][p.slotDef.si]);
-  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK,
+  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
     st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
     other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
 ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
+ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match; they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
 ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int', 'in the match the men in those spots follow them: ' + JSON.stringify([m.st, m.cb, m.cm]));
 ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');
 ok(m.stars.every(s => s >= 1 && s <= 3), 'every man has 1-3 stars: ' + m.stars.join(''));

@@ -7,7 +7,9 @@
 // (a tap just shows his card) and the stand-in follows it from where he was picked up; the men on the tactics pitch show
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
 // other phase's shape is a small name box off each spot's corner; each man's number and name sit in his token with room
-// round them, clear of its edges. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
+// round them, clear of its edges. The width shows on the pitch (a four across the middle spreads from COMPACT to WIDE)
+// and no man covers another or hangs off it, at every size; in a match his card shows his STAMINA as a bar, no figure,
+// the button that turns it over level with the bar's foot. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
 // game is as wide as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock and the
 // menu.
 import { chromium } from 'playwright';
@@ -41,6 +43,15 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
       out.push('a box scrolls: ' + (el.id || el.className)); }
   for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
   return out; }, sels); }
+// NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads, top to bottom
+const apart = (page, sel) => page.evaluate(sel => { const P = document.querySelector(sel), pr = P.getBoundingClientRect(), T = [...P.querySelectorAll('.ptk')].map(e => e.getBoundingClientRect());
+  let over = 0, out = 0; for(let i = 0; i < T.length; i++){ const a = T[i]; out = Math.max(out, pr.left - a.left, a.right - pr.right, pr.top - a.top, a.bottom - pr.bottom);
+    for(let j = i + 1; j < T.length; j++){ const b = T[j]; if(Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) over++; } }
+  const M = [...P.querySelectorAll('.ptk[data-role="MID"]')].map(e => e.getBoundingClientRect());
+  return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
+// HIS STAMINA on his card in a match: the word, a bar and no figure -- the button that turns the card over level with the bar's foot
+const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
+  return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); }
@@ -85,6 +96,19 @@ for(const [w, h] of SIZES){
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
+  { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (2-4-1), COMPACT and WIDE, on the Office's pitch and the Squad's
+    await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
+    const d0 = await page.evaluate(() => [window.__MG.d.formation, window.__MG.d.width.atk]);
+    const set = async (form, wd) => { await page.tap('#bpBody [data-tdrop="form"]'); await page.waitForTimeout(60); await page.tap(`#bpBody [data-cform="${form}"]`); await page.waitForTimeout(80);
+      await page.tap('#bpBody [data-tdrop="width"]'); await page.waitForTimeout(60); await page.tap(`#bpBody [data-cwidth="${wd}"]`); await page.waitForTimeout(80); };
+    await set('2-4-1', '0.84'); const cpt = await apart(page, '#bpBody .tpitch');
+    await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); const sq = await apart(page, '#bpBody .sqPitch');
+    await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
+    await set('2-4-1', '1.18'); const wde = await apart(page, '#bpBody .tpitch');
+    await set(d0[0], String(d0[1])); await page.tap('.bpTopBack'); await page.waitForTimeout(80);
+    ok(cpt.n === 8 && sq.n === 8 && !cpt.over && !cpt.out && !sq.over && !sq.out && !wde.over && !wde.out && wde.span > cpt.span + 20,
+      w + 'x' + h + ': a four across the middle -- COMPACT, nobody overlaps or hangs off the pitch (the Office\'s and the Squad\'s); WIDE, the four spread ' + cpt.span + ' -> ' + wde.span + ' px'
+      + (cpt.over + sq.over + wde.over ? ' -- overlaps: ' + [cpt.over, sq.over, wde.over].join('/') : '') + (cpt.out + sq.out + wde.out ? ' -- off the pitch by ' + Math.max(cpt.out, sq.out, wde.out) + ' px' : '')); }
   if(w === 844 && h === 390){   // A LONG LIST GOES OVER PAGES: the market's, with ◀ 1 / n ▶ under it -- ▶ turns the page, the filters stay
     await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
     const pg = () => page.evaluate(() => { const b = document.querySelector('#bpBody .mgPaneL [data-pages]'), rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length);
@@ -104,6 +128,8 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: four buttons, no quick-tactics row');
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtacBody .tbDrop', '#mtacBody .tbBench']);
+  const lg = await legsRow(page, '#mtacBody');
+  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip != null && Math.abs(lg.bar - lg.flip) <= 1, w + 'x' + h + ': his card in a match: STAMINA and a bar, no figure, the button level with the bar\'s foot (' + lg.bar + ' / ' + lg.flip + ')');
   await page.tap('#mtacOv [data-mt="back"]'); await page.waitForTimeout(100); await page.tap('#pauseGrid [data-pause="back"]');
   await page.evaluate(() => window.__T.end()); await page.waitForTimeout(400);
   await mcheck('match report', ['#mrContinueBtn', '#matchReport .mrScore']);
@@ -228,8 +254,8 @@ for(const [w, h] of SIZES){
   const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
   ok(Object.values(room).every(v => v.n >= 6 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
-  const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length })));
-  ok(opts.length === 5 && opts.every(o => !o.i), 'the style menu: five names, no descriptions (' + opts.map(o => o.t).join(', ') + ')');
+  const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length }))), offMenu = await onScreen(page, ['.tbMenu .tbOpt']);
+  ok(opts.length === 7 && opts.every(o => !o.i) && !offMenu.length, 'the style menu: seven names, no descriptions, all of it on the screen (' + opts.map(o => o.t).join(', ') + ')' + (offMenu.length ? ' -- ' + offMenu[0] : ''));
   await ctx.close(); }
 
 // A NARROW PHONE (640x360): the bench on one line, each name inside its token and the number clear of the rating; and
@@ -269,6 +295,9 @@ for(const [w, h] of SIZES){
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk');
+  const lg = await legsRow(page, '#mtacOv .tbRight'), mp = await apart(page, '#mtacOv .tpitch');
+  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && Math.abs(lg.bar - lg.flip) <= 1 && mp.n === 8 && !mp.over && !mp.out,
+    '...in a match his card: STAMINA and a bar, no figure, the button level with its foot (' + lg.bar + ' / ' + lg.flip + '); the match\'s pitch: nobody overlaps or hangs off it');
   ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 

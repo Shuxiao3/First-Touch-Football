@@ -142,33 +142,38 @@ The same game played like any other football game. It's a copy of `index.html` w
     card has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the
     little pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
-    without the ball, then menus for the shape, the width and the style (or the posture) -- just the names -- and
-    BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a match. After a thin line
+    without the ball, then menus for the shape, the width and the style -- just the names, the style's seven two to
+    a line -- and BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a match. After a thin line
     come the rest of the squad, in reserve, dimmed: drag one onto a man on the bench or the pitch to swap them (BEST
     8 puts the best four of the rest on the bench). The tokens narrow to fit; if they still don't (a squad from
     before squads were capped), the reserves show a page at a time, with a small 1/2 ▶ button to turn to the next,
     the bench's four always there, so the pitch never loses height. On the right, from under that row to the foot of the screen, the
-    card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) with his
-    shirt number under it, beside his rating, his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) and his
-    name; on the bench the shirt number is in the token's corner, with the rating and position under it and the
-    name at the foot. The rating and the name sit inside each token with room round them, clear of its edges.
+    card of the man you tapped. Every man on the pitch shows his face (his own look, in the club's kit) beside two
+    lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK) on top, his name and shirt number
+    under them. The bench has the same two lines without the face, in a shorter box, so the pitch gets the height.
+    The lines sit inside each token with room round them, clear of its edges.
+  - **The width shows on the pitch.** COMPACT draws each line's men closer together and WIDE spreads them, the lines
+    running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
+    pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
+    the keeper and the three lines close up, a man's width each, rather than overlap -- in a match's tactics and the
+    Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
   - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
     ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
     his name, his own position, style, age, skill stars and rating (amber out of position: no line of text says so,
-    nor that he's on the bench), and in a match his legs. Under it, the ratings side has the six (tap one and what
+    nor that he's on the bench), and in a match his stamina: the word and a bar, no figure. Under it, the ratings side has the six (tap one and what
     it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall
     or less a category of four ratings puts them two to a line); the other has his spot's instructions for
     the phase you're looking at, just each one's name and its options, no descriptions, and no ratings. The side
     you're on stays as you tap from man to man. His card never goes over pages: it has the whole right-hand side,
     and everything on it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
-    a narrow one (700 px wide or less) his name stays on one line, and his legs run on under his rating and button
-    rather than beside them.
+    a narrow one (700 px wide or less) his name stays on one line. The button that turns it over sits under his
+    rating, its foot level with the foot of his stamina bar.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
     under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
-    pitch-first screen on the match itself, with each man's legs on his card (and the two sides: the other team's
+    pitch-first screen on the match itself, with each man's stamina on his card (and the two sides: the other team's
     men show their ratings only). Your four subs are on the bench: drag one onto a man to bring him on, on fresh
     legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of four
     too (a keeper and a man for each line), a little short of its starters.
@@ -382,36 +387,37 @@ The same game played like any other football game. It's a copy of `index.html` w
     only. Each pair is greyed out in the other phase, and the computer keeps to the same rule. The same seven men play
     in both shapes. Each man's defending spot starts as the one nearest his attacking spot, and you can rearrange
     either shape. A computer side defends in the shape it attacks in, with some exceptions. A front three drops a man
-    into midfield unless the side presses, so 2-2-3 defends as 2-4-1 and 3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2 and
-    1-4-2 as 2-4-1. A side that sits deep makes a back four of some: 2-2-3 and 3-2-2 defend as 4-2-1 and 1-4-2 as
+    into midfield unless the side gegenpresses, so 2-2-3 defends as 2-4-1 and 3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2
+    and 1-4-2 as 2-4-1. A direct counter sits deep and makes a back four of some: 2-2-3 and 3-2-2 defend as 4-2-1 and 1-4-2 as
     4-1-2 (1-3-3 as 3-3-1).
   - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
     out the wide men go, by ×0.84, ×1 or ×1.18.
-  - **Styles and postures** are set apart: picking a style no longer changes your posture. A note under the buttons
-    says what each one does. Each was measured with the computer playing both sides, for an hour against a BALANCED
-    side in a MID BLOCK: two 30-minute games, one from each end. The figures are per 15 minutes.
+  - **Seven styles, and the style is the whole game.** Each says how a side plays with the ball and how it defends
+    without it, so there's no posture to set any more (PRESS HIGH, MID BLOCK and SIT DEEP are gone, and so is
+    TIKI-TAKA). The STYLE menu, on both tabs, has the seven two to a line; a match's tactics have the same.
     - **BALANCED**: positional play. Wide men on the touchlines, a forward pinning their back line, two men always
-      open for a pass, and runs in behind when the man on the ball can find them. 54% of the ball, passes averaging
-      21.6 m (35% of them long, 43% forward), 9 shots.
-    - **TIKI-TAKA**: short passing. Three men always close for a pass, the team squeezed up behind the ball, few long
-      balls and few runs in behind. Passes average 15.9 m: 40% are under 13 m and 15% long. 8.4 shots.
+      open for a pass, and runs in behind when the man on the ball can find them. Without it, a compact block around
+      halfway that goes at the ball together as it comes into the middle third, the forwards screening the pass into
+      midfield.
+    - **GEGENPRESS**: win it high and go. A high line; when they play out from the back the forwards and midfielders
+      mark their men; and when it loses the ball the whole side goes straight back at it, together, for five seconds.
+      With the ball it's quick and forward, men running in behind, and straight at them when it's won high.
+    - **CONTROL POSSESSION**: keep the ball. Three men always close for a pass, short passes and patience (it gives a
+      move 10 s before it starts forcing it, against 8), few long balls and few runs in behind until the chance is
+      clear. Without it, a mid block, and two seconds straight back at the ball when it's lost.
     - **WING PLAY**: wingers high on the touchlines, the full-back on the ball's side overlapping (in a shape with
-      full-backs: see below), early crosses and
-      the forwards attacking the near and far posts. It's the widest shape (its players spread 16.0 m across the
-      pitch, against 15.4) and crosses most: 6.1 against 3.4. Few crosses become headers at goal, though, so it takes
-      fewer shots (5.8 against 8.8).
+      full-backs: see below), early crosses and the forwards attacking the near and far posts. A mid block without it.
     - **DIRECT**: forward quickly. Long balls up to the forwards, the midfielders up behind them for the second ball,
-      and the keeper kicking long. 42% of the ball and 52% of passes forward (43% for BALANCED). It gains the most
-      after winning the ball back: 17 m in 6 s, against 14.
-    - **COUNTER**: without the ball one forward stays up on halfway. When the ball's won, the wide men and a
-      midfielder sprint up past it, the forwards run in behind, and it goes forward at once, for as long as the break
-      keeps going (up to 10 s). In settled play an extra man stays back. 7% of the balls it wins back end in a shot
-      within 12 s, against 5% for BALANCED.
-    - **PRESS HIGH, MID BLOCK and SIT DEEP**: the back line holds 40, 33 and 24 m from goal, the ball is won back 45,
-      37 and 30 m out, and the side spends 123, 108 and 82 s pressing. PRESS HIGH marks their men when they play out
-      from the back, and chases the ball for three seconds after losing it. MID BLOCK goes at the ball together as it
-      comes into the middle third, with the forwards screening the pass into midfield. SIT DEEP is narrower and
-      compact, and nobody steps out until the ball is in its half.
+      and the keeper kicking long. A mid block without it.
+    - **FLUID COUNTER**: a mid block with one forward up on halfway. When the ball's won, the wide men and a
+      midfielder sprint up past it and it goes forward on the carry and in short, quick passes, a man staying near
+      the ball for the next one, for as long as the break keeps going (up to 10 s).
+    - **DIRECT COUNTER**: two tight banks at the edge of the box, narrow and compact, nobody stepping out until the
+      ball is in its half, and one forward up on halfway. When it's won it goes long, in behind, at once, for the
+      forwards and the wide men racing up, and the keeper kicks long.
+    - A save from before keeps its way of playing, yours and every club's: TIKI-TAKA is CONTROL POSSESSION; a
+      COUNTER is a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise; BALANCED with PRESS HIGH is
+      GEGENPRESS; any other style keeps its name and now defends in its own block.
   - **Instructions go with the position, not the player.** Pick a player in the pause menu or the Office and you
     get the instructions of the spot he's in. Whoever plays there follows them, swaps and subs included, and each shape
     keeps its own. What a spot can be told depends on what it is: with the ball in the attacking shape, without it in
@@ -702,8 +708,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     decline, and players retire from 34. The youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer
     (more and better as you build it up). Promote them, or they leave at 19.
   - **The computer clubs** buy from each other and from the free agents every window day, bid for your players,
-    and fill their squads up every summer. Each has its own style and posture, with shapes and widths to suit
-    them: a wing side plays wide with three up, a counter-attacking side compact.
+    and fill their squads up every summer. Each has its own style, with shapes and widths to suit it: a wing side
+    plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
+    The better leagues have more control and gegenpressing sides, the lower ones more direct play and deep counters.
   - **Money.** The stadium works as before: ticket price, seats, concessions, sponsor. Prize money comes at the
     end of the season: $12,000 for winning League 2, up to $1.5m for the Premium League, less the lower you
     finish. The broadcast share follows your league position, and the ground and the sponsor grow when you go up.

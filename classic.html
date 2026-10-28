@@ -910,6 +910,7 @@
   .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin);
     padding:10px; display:flex; flex-direction:column; gap:6px; }
   .tbMenuGrid{ display:grid; grid-template-columns:repeat(5,auto); gap:6px; }
+  .tbMenuGrid2{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }   /* (the seven styles, two by two: all on the screen) */
   .tbMenuNote{ font-size:10px; color:var(--dim); }
   .tbMenu.r{ left:auto; right:0; }
   .tbOpt{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:6px 10px; text-align:left; white-space:normal; cursor:pointer; min-height:36px;
@@ -918,10 +919,10 @@
   .tbOpt b{ font-size:13px; font-weight:400; } .tbOpt i{ font-style:normal; font-family:'FTC Dot',monospace; font-size:10px; line-height:1.35; color:var(--dim); text-shadow:none; }
   .tbOpt.on i{ color:var(--accInk); }
   .tbMain{ flex:1 1 auto; min-height:0; display:flex; }
-  .tbLeft{ flex:1.5 1 0; min-width:0; display:flex; flex-direction:column; padding:4px 12px 8px; }
+  .tbLeft{ flex:1.5 1 0; min-width:0; display:flex; flex-direction:column; padding:4px 12px 6px; }
   .tbRight{ flex:1 1 0; min-width:0; overflow:hidden; padding:2px 12px 10px; box-shadow:inset 2px 0 0 0 var(--btnLo); }
   .tpitch{ position:relative; flex:1 1 auto; min-height:110px; background:repeating-linear-gradient(90deg,#6ec88b 0 8.333%,#5cbc7c 8.333% 16.667%);
-    box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; border-radius:var(--r); }
+    box-shadow:var(--pxOut), inset 0 0 0 2px #f4fbf2; border-radius:var(--r); --rowH:38px; }   /* (--rowH: the least step between two men in a line, a man's height and a little -- see ptkTop) */
   .tpitch i{ position:absolute; pointer-events:none; }
   .tpHalf{ left:50%; top:0; bottom:0; width:2px; margin-left:-1px; background:#f4fbf2; }
   .tpCirc{ left:50%; top:50%; width:15%; aspect-ratio:1; transform:translate(-50%,-50%); box-shadow:0 0 0 2px #f4fbf2; border-radius:50%; }
@@ -929,28 +930,30 @@
   .tpBox.l{ left:0; } .tpBox.r{ right:0; }
   .sqPitchW{ flex:none; padding:10px 12px 4px; }
   .sqBack{ width:100%; margin:0 0 6px; min-height:24px; padding:2px 8px; font-size:10px; }
-  .sqPitch{ height:156px; flex:none; }
+  .sqPitch{ height:176px; flex:none; --rowH:34px; }
   .sqPitchHint{ font-size:9.5px; color:var(--dim2); margin-top:6px; }
-  .sqPitch .ptk{ width:60px !important; height:36px !important; padding:0 2px 0 4px; }
-  .sqPitch .ptk .ptkTxt{ gap:3px; padding:2px 0 0; }
+  .tpitch.sqPitch .ptk{ width:64px; height:32px; padding:0 2px 0 4px; gap:2px; --hw:34px; --hh:18px; }
+  @media (max-width:700px){ .tpitch.sqPitch .ptk{ width:60px; --hw:32px; } }   /* (a small phone: the keeper and three lines still fit across) */
+  .sqPitch .ptk .ptkTxt{ gap:2px; padding:2px 0 1px; }
   .sqPitch .ptk .ptkFace{ width:16px; height:16px; }
-  .sqPitch .ptk .ptkSide{ gap:1px; } .sqPitch .ptk .ptkNo{ font-size:8px; }
+  .sqPitch .ptk .ptkNo{ font-size:7px; }
   .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
-  .sqPitch .ptk .ptkName{ font-size:8px !important; max-width:36px !important; }
+  .sqPitch .ptk .ptkName{ font-size:8px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
   .sqList .mgRow{ -webkit-touch-callout:none; touch-action:none; }   /* (a finger that moves on him carries him: see pxDrag) */
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
-  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:72px; height:44px; border:0; border-radius:var(--r); padding:0 3px 0 5px; cursor:grab;
+  .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:clamp(66px,21%,84px); height:36px; border:0; border-radius:var(--r); padding:0 4px 0 5px; cursor:grab;
+    --hw:calc(clamp(33px,10.5%,42px) + 2px); --hh:20px;   /* (half of him and his rim: his spot is kept this far inside the pitch -- see ptkAt) */
     background:var(--win); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame); display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:3px;
     touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; font-family:'FTC Dot',monospace; }
-  /* his face beside his rating, as an item sits beside its name in a bag; his shirt number under his face */
+  /* his face beside his rating, as an item sits beside its name in a bag; his name and shirt number under his rating */
   .ptkFace{ width:24px; height:24px; flex:none; image-rendering:pixelated; pointer-events:none; -webkit-user-drag:none; }
-  .ptkSide{ flex:none; display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
-  .ptkNo{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); text-shadow:1px 1px 0 var(--ol); white-space:nowrap; pointer-events:none; }
+  @media (max-width:700px){ .tacB1 .tpitch .ptk .ptkFace{ width:20px; height:20px; } .tacB1 .tpitch .ptk{ gap:2px; padding:0 3px 0 4px; } .tacB1 .tpitch .ptk .ptkName{ font-size:8px; } }   /* (a small phone: narrower men) */
+  .ptkNm{ display:flex; align-items:baseline; justify-content:center; gap:3px; max-width:100%; min-width:0; pointer-events:none; }
+  .ptkNo{ flex:none; font:8px/1 'FTC Dot',monospace; color:var(--dim); text-shadow:1px 1px 0 var(--ol); white-space:nowrap; pointer-events:none; }
   .ptkPos{ font:8px/1 'FTC Dot',monospace; font-style:normal; color:var(--ink2); margin-left:2px; letter-spacing:0; vertical-align:baseline; }   /* his own position */
-  .tbBench .ptk .ptkNo{ position:absolute; top:4px; left:4px; } .tbBench .ptk .ptkNo + .ptkTxt{ padding:13px 0 4px; gap:3px; }   /* (the number in the corner, his rating and name under it: clear of it however narrow the man) */
-  .tbBench .ptk .ptkName{ max-width:100%; }
-  .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:3px 0 1px; pointer-events:none; }   /* (room over the number and under the name) */
+  .tbBench .ptk .ptkOvr{ font-size:14px; } .tbBench .ptk .ptkTxt{ gap:1px; }   /* (a short box: its two lines closer, the room over and under them as the pitch's men have) */
+  .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:2px 0 1px; pointer-events:none; }   /* (room over the rating and under the name) */
   .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
@@ -962,7 +965,7 @@
   .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tpitch .tpGhost em{ flex:none; font-style:normal; margin-right:3px; }
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
-  .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ font:9px/1 'FTC Dot',monospace; color:var(--ink2); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ flex:0 1 auto; min-width:0; font:9px/1 'FTC Dot',monospace; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }   /* (a long name gives way; his number stays) */
   .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:var(--warn); }
   .tacB1 .ptk.statview{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .4); }
   .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5); }
@@ -973,14 +976,19 @@
     text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); border-radius:var(--rS); }
   .tacB1 .ptk.fitOop::after{ background:var(--warn); }
   .pxGhost{ position:fixed !important; transform:none !important; margin:0 !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 3px 3px 0 0 rgba(0,0,0,.35) !important; }
-  .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:7px 0 0; }   /* (under the pitch: his card has the right side) */
-  .benchPg{ flex:none; width:36px; height:44px; min-height:44px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:13px; line-height:1; cursor:pointer; }
+  .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:6px 0 0; }   /* (under the pitch: his card has the right side) */
+  .benchPg{ flex:none; width:36px; height:34px; min-height:34px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:13px; line-height:1; cursor:pointer; }
   .benchPg i{ font-style:normal; font-size:9px; letter-spacing:0; }   /* (a bench with more men than its line: 1/2 ▶) */
   .benchSep{ flex:none; width:2px; align-self:stretch; margin:3px 3px; background:var(--btnLo); }   /* (the bench's four | the men in reserve) */
   .tbBench .ptk.res{ opacity:.62; }
-  .tbBench .ptk{ position:relative; transform:none; flex:1 1 39px; min-width:39px; max-width:54px; height:44px; padding:0 2px; justify-content:center; }   /* (narrow enough for 8 on a line on a small phone) */
+  .tbBench .ptk{ position:relative; transform:none; flex:1 1 39px; min-width:39px; max-width:58px; height:34px; padding:0 3px; justify-content:center; }   /* (narrow enough for 8 on a line on a small phone; two lines tall, leaving the pitch the height) */
   .tbRight .mgCardHead{ margin-top:2px; margin-bottom:6px; } .tbRight .mgCardHead > .cardBody + div{ flex:1 1 auto; }
-  .mgCardHead .mtLegs{ margin:3px 0 0; gap:6px; font-size:9px; } .mgCardHead .mtLegs .statBar{ height:6px; } .mgCardHead .mtLegs b{ min-width:28px; }
+  .mgCardHead .mtLegs{ margin:3px 0 0; gap:6px; font-size:9px; } .mgCardHead .mtLegs .statBar{ height:6px; }
+  /* with his stamina under his name (a match's card): the stamina bar and the button that turns his card over sit level,
+     their feet together at the foot of the head */
+  .mgCardHead.hasLegs .mtLegs{ align-items:flex-end; }   /* (the bar on the foot of its line) */
+  @media (min-width:701px){ .mgCardHead.hasLegs{ align-items:stretch; } .mgCardHead.hasLegs > .cardBody + div{ display:flex; flex-direction:column; }
+    .mgCardHead.hasLegs > .cardBody + div > .mtLegs{ margin-top:auto; } .mgCardHead.hasLegs > .cardEnd{ justify-content:space-between; } }
   .tbRight .six{ margin:4px 2px 6px; }
   .tbRight .sixOpen, .mgPaneR .sixOpen{ padding:4px 10px 3px; margin:0 2px 4px; }   /* (a category opened: its heading, then a row and a coloured bar for each rating) */
   .tbRight .sixOpen .sixHd, .mgPaneR .sixOpen .sixHd{ font-size:10px; line-height:12px; margin-bottom:2px; }
@@ -1004,7 +1012,9 @@
     .tbRight .mgCardHead > div:not(.cardEnd) > *{ grid-column:2 / -1; }
     .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName{ grid-column:2; grid-row:1; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName + .mgCardSub{ grid-column:2; grid-row:2; }
-    .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; } }
+    .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; }
+    .tbRight .mgCardHead.hasLegs > div:not(.cardEnd) > .mtLegs{ grid-column:2; grid-row:3; align-self:end; }   /* (his stamina beside the button, level with it) */
+    .tbRight .mgCardHead.hasLegs > .cardEnd{ grid-row:1 / span 3; justify-content:space-between; align-self:stretch; } }
   @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; it's amber out of position) */
   /* A BUILDING'S CARD (the squad, the market, scouting, the academy) is drawn as the tactics card: his figure, name and
      rating on top, then his six -- a category opened in a small grid under them -- or, turned over, his deal: a small
@@ -1619,20 +1629,41 @@
     d.atk=widthSnap(d.atk); d.def=widthSnap(d.def);
     return d; }
   function widthOf(team,phase){ const w=TAC[team]&&TAC[team].width; return w&&isFinite(w[phase])?w[phase]:1; }
-  const TAC={G:{def:'neutral',off:'neutral',width:widthObj()}, R:{def:'neutral',off:'neutral',width:widthObj()}};
+  const TAC={G:{style:'neutral',def:'neutral',off:'neutral',brk:null,width:widthObj()}, R:{style:'neutral',def:'neutral',off:'neutral',brk:null,width:widthObj()}};
+  // THE TEAM STYLES: one choice for a side's whole game -- how it plays with the ball (off: the engine's attacking style)
+  // and how it defends without it (def: its block -- 'press' high, a 'neutral' mid block, a 'lowblock' sitting deep);
+  // brk: how a counter-attacking side breaks (fluid: on the carry and short, quick passes; direct: long, in behind)
+  const STYLE_TAC={
+    neutral: {off:'neutral', def:'neutral'},
+    gegen:   {off:'gegen',   def:'press'},
+    control: {off:'control', def:'neutral'},
+    wing:    {off:'wing',    def:'neutral'},
+    direct:  {off:'direct',  def:'neutral'},
+    fluid:   {off:'counter', def:'neutral',  brk:'fluid'},
+    dcounter:{off:'counter', def:'lowblock', brk:'direct'}};
+  const STYLE_LIST=[['neutral','BALANCED'],['gegen','GEGENPRESS'],['control','CONTROL POSSESSION'],['wing','WING PLAY'],['direct','DIRECT'],['fluid','FLUID COUNTER'],['dcounter','DIRECT COUNTER']];
+  // a style as saved before the posture went into it (a style, and a posture beside it): tiki-taka keeps the ball now as
+  // CONTROL POSSESSION, a counter that sat deep is a DIRECT COUNTER and one that didn't FLUID, and a balanced side that
+  // pressed high GEGENPRESS; anything else, BALANCED
+  function styleKey(s,posture){
+    if(STYLE_TAC[s]&&(s!=='neutral'||posture!=='press')) return s;
+    if(s==='tiki') return 'control';
+    if(s==='counter') return posture==='lowblock'?'dcounter':'fluid';
+    return posture==='press'?'gegen':'neutral'; }
+  function setStyle(t,s,posture){ const k=styleKey(s,posture), S=STYLE_TAC[k]; Object.assign(TAC[t],{style:k, off:S.off, def:S.def, brk:S.brk||null}); return k; }
+  const postureOf=s=>STYLE_TAC[styleKey(s)].def;                  // (the block a style defends in)
+  const counterPressOf=t=>{ const k=TAC[t]&&TAC[t].style; return k==='gegen'?5.0 : k==='control'?2.0 : 0; };   // (s: how long it goes straight back at the ball once it's lost it)
   const transitionT={G:0,R:0};   // counts down after a team wins the ball
   const breakSt={G:{t0:-9,u:0},R:{t0:-9,u:0}};   // a counter-attacking side's break: when it won it, and how far up it's got the ball since
-  // what each style and posture does (shown under its buttons)
+  // what each style does, with the ball and without it (shown under its buttons)
   const STYLE_BLURB={
-    neutral:'Positional play: wide men on the touchlines, a forward pinning their back line, two men always open for a pass, and runs in behind when the man on the ball can find them.',
-    tiki:'Short passing and patience: three men always close for a pass, the team squeezed up behind the ball, few long balls and few runs in behind until the chance is clear.',
-    wing:'Get it wide and get it in: wingers high on the touchlines, full-backs (where the shape has them) overlapping on the ball\u2019s side, early crosses, the forwards attacking the near and far posts.',
-    direct:'Get it forward quickly: long balls up to the forwards on their last line, the midfielders up behind them for the second ball, the keeper kicking long.',
-    counter:'Quick when it\u2019s won: without the ball one forward stays up on halfway. The moment it\u2019s won the wide men and a midfielder sprint up past the ball, the forwards run in behind, and it goes forward at once, for as long as the break keeps going. In settled play an extra man stays back.'};
-  const POSTURE_BLURB={
-    press:'A high line and a high press: when they play out from the back the forwards and midfielders mark their men, the side presses together whenever the ball is in trouble, and it chases the ball for three seconds after losing it.',
-    neutral:'A compact block around halfway: the forwards screen the passes into midfield, and the side presses when the ball comes into the middle third or a pass goes astray.',
-    lowblock:'Two tight banks at the edge of the box: narrow and compact, nobody stepping out until the ball is in our half. With the counter style, one forward stays up for the ball out.'};
+    neutral:'Positional play: wide men on the touchlines, a forward pinning their back line, two men always open for a pass, and runs in behind when the man on the ball can find them. Without it, a compact block around halfway that springs when the ball comes into the middle third.',
+    gegen:'Win it high and go: a high line, the forwards and midfielders marking their men when they play out from the back, and the whole side going straight back at the ball for five seconds after losing it. With it, quick and forward, men running in behind.',
+    control:'Keep the ball: three men always close for a pass, short passes and patience, few long balls and few runs in behind until the chance is clear. Without it, a mid block, and straight back at the ball for two seconds when it\u2019s lost.',
+    wing:'Get it wide and get it in: wingers high on the touchlines, full-backs (where the shape has them) overlapping on the ball\u2019s side, early crosses, the forwards attacking the near and far posts. Without it, a mid block.',
+    direct:'Get it forward quickly: long balls up to the forwards on their last line, the midfielders up behind them for the second ball, the keeper kicking long. Without it, a mid block.',
+    fluid:'A mid block with one forward up on halfway. The moment it\u2019s won the wide men and a midfielder sprint up past the ball and it goes forward on the carry and in short, quick passes, for as long as the break keeps going.',
+    dcounter:'Two tight banks at the edge of the box with one forward up on halfway. The moment it\u2019s won it goes long, in behind, for the forwards and the wide men racing up; the keeper kicks long.'};
 
   // when a team loses the ball, remember whether it was lost in the OPPONENT's half.
   // (used by low-block teams: if lost high, hold a neutral shape until the ball crosses
@@ -1668,7 +1699,7 @@
     clearTimeout(saveT);
     saveT=setTimeout(async()=>{
       try{
-        const o={__v:SETTINGS_V,__fG:myForm,__fR:rForm,__fGd:myFormDef,__fRd:rFormDef,__dtac:TAC.G.def,__otac:TAC.G.off,__rdtac:TAC.R.def,__rotac:TAC.R.off,__wG:TAC.G.width,__wR:TAC.R.width};for(const k in P)o[k]=P[k].val;
+        const o={__v:SETTINGS_V,__fG:myForm,__fR:rForm,__fGd:myFormDef,__fRd:rFormDef,__style:TAC.G.style,__rstyle:TAC.R.style,__wG:TAC.G.width,__wR:TAC.R.width};for(const k in P)o[k]=P[k].val;
         await window.storage.set('firsttouch-dials',JSON.stringify(o));
       }catch(e){}
     },400);
@@ -1795,8 +1826,7 @@
         if(o.__fR)rForm=formOKAtk(o.__fR,rForm);
         myFormDef=o.__fGd?formOKDef(o.__fGd,defFormFor(myForm)):defFormFor(myForm);
         rFormDef=o.__fRd?formOKDef(o.__fRd,defFormFor(rForm)):defFormFor(rForm);
-        if(o.__rdtac)TAC.R.def=o.__rdtac;
-        if(o.__rotac)TAC.R.off=o.__rotac;
+        if(o.__rstyle||o.__rotac) setStyle('R',o.__rstyle||o.__rotac,o.__rstyle?null:o.__rdtac);   // (saved before the posture went into the style: both)
         if(o.__wG!=null)TAC.G.width=widthObj(o.__wG);
         if(o.__wR!=null)TAC.R.width=widthObj(o.__wR);
         for(const k in P){
@@ -1874,19 +1904,14 @@
   function markTac(){
     document.querySelectorAll('.tteam').forEach(b=>
       b.classList.toggle('active',b.dataset.tteam===tacTeam));
-    document.querySelectorAll('.dtac').forEach(b=>
-      b.classList.toggle('active',b.dataset.dtac===TAC[tacTeam].def));
     document.querySelectorAll('.otac').forEach(b=>
-      b.classList.toggle('active',b.dataset.otac===TAC[tacTeam].off));
+      b.classList.toggle('active',b.dataset.otac===TAC[tacTeam].style));
   }
   document.querySelectorAll('.tteam').forEach(b=>b.onclick=()=>{
     tacTeam=b.dataset.tteam;markTac();markForm();
   });
-  document.querySelectorAll('.dtac').forEach(b=>b.onclick=()=>{
-    TAC[tacTeam].def=b.dataset.dtac;markTac();saveSettings();
-  });
   document.querySelectorAll('.otac').forEach(b=>b.onclick=()=>{
-    TAC[tacTeam].off=b.dataset.otac;markTac();saveSettings();
+    setStyle(tacTeam,b.dataset.otac);markTac();saveSettings();
   });
 
   // ===== pitch: a real pitch's shape (105 x 68) and markings, at nine-tenths of the men's size -- the men are 25 px to
@@ -7361,7 +7386,7 @@
   // him -- unless a ball's on that's clearly worth playing first time. Then he sticks with a choice for a moment
   // rather than changing his mind every frame. A lower Off IQ misjudges the options more. Player styles and the
   // side's way of playing tilt it: a winger fancies a run at his man, a playmaker the ball through, a stopper keeps it
-  // simple; tiki-taka keeps the ball, direct looks forward first, a counter goes quickly.
+  // simple; control possession keeps the ball, gegenpress and direct look forward first, a counter goes quickly.
   const OBM=25;                                                        // pixels to the metre
   // The chance an unhurried shot from (x,y) goes in -- measured in this game, not borrowed from real football: shots
   // struck as the computer strikes them, run onto from 6 m further out, by an average side's players against an
@@ -7478,13 +7503,16 @@
   // shoot, cross; range -- how far he'll pass; tempo -- how long he looks up for; hold -- keeping it under pressure;
   // patience -- how many seconds the side will keep it without getting forward before it starts forcing it.
   function obMods(p){
-    const off=TAC[p.team]?TAC[p.team].off:'neutral', tr=off==='counter'&&transitionT[p.team]>0, st=p.style||'';
+    const off=TAC[p.team]?TAC[p.team].off:'neutral', brk=TAC[p.team]&&TAC[p.team].brk, tr=off==='counter'&&transitionT[p.team]>0, st=p.style||'';
     const M={risk:1,fwd:1,carry:1,takeOn:1,shoot:1,cross:1,range:1,tempo:1,hold:1,patience:8,longShot:1,gain:1,crossLead:0};
-    if(off==='tiki'){ M.risk=1.3; M.carry=0.8; M.takeOn=0.75; M.tempo=0.7; M.range=0.85; M.patience=11; }
+    if(off==='control'){ M.risk=1.25; M.carry=0.85; M.takeOn=0.8; M.tempo=0.75; M.range=0.88; M.patience=10; }
+    else if(off==='gegen'){ M.risk=0.9; M.fwd=1.25; M.tempo=0.8; M.range=1.1; M.patience=4; M.carry=1.05;
+      if(transitionT[p.team]>0){ M.fwd*=1.3; M.tempo*=0.7; M.gain=2; } }   // (won it back high: straight at them)
     else if(off==='direct'){ M.risk=0.75; M.fwd=1.45; M.range=1.45; M.tempo=0.7; M.patience=2; M.shoot=1.15; }
     else if(off==='wing'){ M.cross=1.35; M.carry=1.1; M.crossLead=0.2; }    // (the forwards attack the box as he shapes to cross)
     else if(off==='counter'&&!tr){ M.risk=1.1; M.patience=6; M.fwd=1.1; }        // (settled: no frills -- forward when it's on, no long spells on it)
-    if(tr){ M.fwd*=1.6; M.tempo*=0.45; M.carry*=1.3; M.risk*=0.7; M.range*=1.25; M.patience=2; M.gain=3; }   // (on the break, every yard counts)
+    if(tr){ M.fwd*=1.6; M.tempo*=0.45; M.carry*=1.3; M.risk*=0.7; M.range*=1.25; M.patience=2; M.gain=3;   // (on the break, every yard counts)
+      if(brk==='fluid'){ M.carry*=1.15; M.range*=0.85; } else if(brk==='direct'){ M.range*=1.2; M.fwd*=1.15; M.risk*=0.85; } }   // (FLUID runs it and plays it short; DIRECT goes long)
     // his position's instructions: a winger cutting inside goes for goal, one staying wide (or a wide midfielder playing
     // wide) looks to cross; a target man holds it up, a false nine plays like a midfielder
     const pw=posOf(p,'atk');
@@ -7610,7 +7638,9 @@
     // the side's way of playing: short balls for a passing side, the ball out to the wide men for a wing side, up to the
     // forwards for a direct one
     const sty=TAC[p.team]?TAC[p.team].off:'neutral', fwdD=C.atk*(tx-p.x);
-    if(sty==='tiki') v*= d<320?1.18 : d>520?0.72 : 1;
+    if(sty==='control') v*= d<320?1.15 : d>520?0.76 : 1;
+    else if(sty==='counter'&&transitionT[p.team]>0){ const bk=TAC[p.team].brk;                       // on the break: a DIRECT one in behind, a FLUID one short and on
+      if(bk==='direct'&&fwdD>350&&(q.role==='ATT'||L.running)) v*=1.35; else if(bk==='fluid'&&fwdD>0&&d<360) v*=1.15; }
     else if(sty==='wing'){ const wideQ=Math.abs(ty-YC)>FH*0.28, wideP=Math.abs(p.y-YC)>FH*0.28;
       if(wideQ&&!wideP) v*=1.15;                                                        // out to the flanks
       if(lob&&wideQ) v*=1.25; }                                                            // (and the switch to the far flank)
@@ -7963,14 +7993,15 @@
   //  overlaps; second: the midfielders push up behind the forwards for the knock-down; restMid: a midfielder holds too
   const STYLE_PLAN={
     neutral:{sup:2, ring:[220,300,380,470], wideY:0.41, wideAdv:60,  restK:1,    pivotK:1,    runK:1,    box:0.70, pocket:1},
-    tiki:   {sup:3, ring:[170,230,300,380], wideY:0.40, wideAdv:0,   restK:0.8,  pivotK:0.75, runK:0.75, box:0.74, pocket:0.85},
+    control:{sup:3, ring:[180,245,315,395], wideY:0.41, wideAdv:10,  restK:0.85, pivotK:0.8,  runK:0.8,  box:0.73, pocket:0.88},
+    gegen:  {sup:2, ring:[200,280,360,450], wideY:0.41, wideAdv:90,  restK:0.9,  pivotK:0.95, runK:1.3,  box:0.70, pocket:0.9},
     wing:   {sup:2, ring:[220,300,380,470], wideY:0.44, wideAdv:140, restK:1,    pivotK:1,    runK:1.15, box:0.64, pocket:1, fbOver:true},
     direct: {sup:1, ring:[260,380,470],     wideY:0.41, wideAdv:140, restK:1.15, pivotK:1.1,  runK:1.6,  box:0.66, pocket:0.55, second:true},
     counter:{sup:1, ring:[220,300,380],     wideY:0.38, wideAdv:20,  restK:1.3,  pivotK:1.1,  runK:0.9,  box:0.70, pocket:1, restMid:true},
   };
   // a side's settings now: a counter-attacking side that's just won it goes for it
   function stylePlan(team){ const off=TAC[team]?TAC[team].off:'neutral', S=STYLE_PLAN[off]||STYLE_PLAN.neutral;
-    return (off==='counter'&&transitionT[team]>0) ? Object.assign({},S,{runK:2.6, restMid:false, wideAdv:440, sup:1, brk:true}) : S; }
+    return (off==='counter'&&transitionT[team]>0) ? Object.assign({},S,{runK:TAC[team].brk==='fluid'?2.2:2.6, restMid:false, wideAdv:440, sup:TAC[team].brk==='fluid'?2:1, brk:true}) : S; }   // (FLUID keeps a man near him for the short one)
   function teamPlan(team,dt){
     const S=PLAN[team]; if(S.t===simNow) return S;
     S.t=simNow; S.jobs=new Map();
@@ -8582,8 +8613,8 @@
       // out (short outlet / wide overlap / advanced run) instead of all stacking.
       const fwdHasBall = c.role==='ATT';
       const otacS=TAC[p.team].off;
-      // tiki-taka supports MORE often and SHORTER; central pulls support narrow.
-      const supChance = otacS==='tiki' ? 0.18 : 0.12;
+      // control possession supports MORE often and SHORTER; central pulls support narrow.
+      const supChance = otacS==='control' ? 0.18 : 0.12;
       if(fwdHasBall && p.role==='MID' && !wideMan && p!==c && p.runTarget===null){
         const behindFwd = atk*(c.x-p.x) > -40;            // I'm level/behind the forward
         // order the (non-holding, central) mids by proximity to the carrier: the nearest ALWAYS offers himself, others
@@ -8595,15 +8626,15 @@
           const ballSide = c.y<YC ? -1 : 1;               // flank the ball is on
           const ol=offsideLineX(p.team);
           // distance/width multipliers per tactic
-          const shortMul = otacS==='tiki' ? 0.6 : 1;       // come closer for tiki-taka
-          const widthMul = otacS==='central' ? 0.45 : (otacS==='tiki'?0.7:1);  // narrower
+          const shortMul = otacS==='control' ? 0.65 : 1;   // come closer to keep it
+          const widthMul = otacS==='central' ? 0.45 : (otacS==='control'?0.75:1);  // narrower
           let rx,supY;
           if(myRank===0){
             // nearest mid: come SHORT and central, behind the ball, as a safe outlet
             rx=c.x - atk*130*shortMul;
             supY=YC + ballSide*(FH*0.10)*widthMul;
           } else if(myRank===1){
-            // second mid: provide an angle on the opposite side (narrowed for central/tiki)
+            // second mid: provide an angle on the opposite side (narrowed for central/control)
             rx=c.x + atk*60*shortMul;
             supY=YC - ballSide*(FH*0.30)*widthMul;
           } else {
@@ -8614,8 +8645,8 @@
           rx=clamp(rx,70,FW-70);
           if(atk>0)rx=Math.min(rx,ol-12);else rx=Math.max(rx,ol+12);
           p.runTarget={x:rx, y:clamp(supY,60,FH-60)};
-          p.runT= otacS==='tiki' ? 1.0 : 1.5;             // tiki re-offers angles quicker
-          p.sprint = p.stamina>0.15 && myRank>=1 && otacS!=='tiki'; // tiki keeps it calm, no sprinting
+          p.runT= otacS==='control' ? 1.0 : 1.5;          // a possession side re-offers angles quicker
+          p.sprint = p.stamina>0.15 && myRank>=1 && otacS!=='control'; // ...and keeps it calm, no sprinting
         }
       }
 
@@ -9867,7 +9898,7 @@
       const lostAdv = prevTeam==='G' ? (ball.x-FW/2) : (FW/2-ball.x);  // >0 = in opp half
       lostInOppHalf[prevTeam] = lostAdv>0;
       // THE COUNTER-PRESS: a pressing side that's just lost it goes straight back at it, together, for three seconds
-      if(TAC[prevTeam]&&TAC[prevTeam].def==='press'){ pressSt[prevTeam].until=simNow+3.0; pressSt[prevTeam].cd=simNow+4.5; pressSt[prevTeam].t=-1; }
+      const cp=counterPressOf(prevTeam); if(cp>0){ pressSt[prevTeam].until=simNow+cp; pressSt[prevTeam].cd=simNow+cp+1.5; pressSt[prevTeam].t=-1; }   // (GEGENPRESS: five seconds; CONTROL POSSESSION: two)
     }
     ball.lastTouch=p.team;
     if(!wasOwner){ if(ball.lastTouchP!==p){ ball.prevTouchP=ball.lastTouchP; } ball.lastTouchP=p; }
@@ -10303,7 +10334,7 @@
   }
   function distribute(kp,force){
     const atk=atkOf(kp.team), sty=TAC[kp.team]&&TAC[kp.team].off;
-    if((sty==='direct'||sty==='counter') && gkLong(kp,false)) return true;   // a direct or counter-attacking side goes long when it can
+    if((sty==='direct'||(sty==='counter'&&TAC[kp.team].brk==='direct')) && gkLong(kp,false)) return true;   // a direct side, or a direct counter, goes long when it can
     let best=null,bs=-1e9,bt=null;
     for(const q of teamOf(kp.team)){
       if(inOffsidePos(q))continue;
@@ -12132,18 +12163,15 @@
     const body=document.getElementById('menuBody'); if(!body) return;
     const t=menuState.team||'G', who=TEAM[t].code;
     const wrap=document.createElement('div');
-    if(phase==='atk'){ const cur=TAC[t].off; let h='<div class="styRow"><span class="styLbl">TEAM STYLE \u00b7 '+who+'</span>';
-      for(const st of STYLE_LIST) h+='<button class="styBtn'+(st[0]===cur?' on':'')+'" data-mstyle="'+st[0]+'">'+st[1]+'</button>';
-      wrap.innerHTML=h+'</div><div class="tacHint" style="max-width:640px">'+(STYLE_BLURB[cur]||'')+'</div>';
-    } else { const cur=TAC[t].def; let h='<div class="styRow"><span class="styLbl">DEF POSTURE \u00b7 '+who+'</span>';
-      for(const st of POSTURE_LIST) h+='<button class="styBtn'+(st[0]===cur?' on':'')+'" data-mposture="'+st[0]+'">'+st[1]+'</button>';
-      wrap.innerHTML=h+'</div><div class="tacHint" style="max-width:640px">'+(POSTURE_BLURB[cur]||'')+'</div>'; }
+    const cur=TAC[t].style; let h='<div class="styRow"><span class="styLbl">TEAM STYLE \u00b7 '+who+'</span>';   // (with the ball and without it alike)
+    for(const st of STYLE_LIST) h+='<button class="styBtn'+(st[0]===cur?' on':'')+'" data-mstyle="'+st[0]+'">'+st[1]+'</button>';
+    wrap.innerHTML=h+'</div><div class="tacHint" style="max-width:640px">'+(STYLE_BLURB[cur]||'')+'</div>';
     body.appendChild(wrap);
   }
   function openMenu(){ menuOpen=true; menuState.selPos=null; menuState.statPos=null; document.getElementById('menu').style.display='flex'; renderMenu(); }
   function closeMenu(){ menuOpen=false; document.getElementById('menu').style.display='none'; if(SCREEN==='match') openPause(); }   // back out to the in-game menu list
   // ===== THE MATCH'S TACTICS (the pause menu): the pitch-first screen on the match itself -- your side's shapes, width, style
-  // and posture, every man's card (with his legs) and his spot's instructions. Drag a man onto another to swap their spots;
+  // (one style, with the ball and without it), every man's card (with his stamina) and his spot's instructions. Drag a man onto another to swap their spots;
   // in a career match, drag one off the bench onto a man to bring him on (SUB_MAX a match; the man off can't come back).
   // The other side: look, don't touch. =====
   const SUB_MAX=2;
@@ -12152,20 +12180,23 @@
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
   const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
   function mtRating(e,role){ return !e?0:(!role||role===e.role)?e.ovr:cwOverall(role,e.stats); }
-  function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW; return {L:30+(u-0.16)/0.40*52, T:9+(g?s.homeY/FH:1-s.homeY/FH)*82}; }   // their own goal on the left, the lines spread as the Office draws them
+  // how far a line's men spread down the tactics pitch: a WIDE line's end men reach its edges, so a COMPACT four still has room between its men
+  const TOK_SPREAD=1.13;
+  function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW;   // their own goal on the left, the lines spread as the Office draws them
+    return {L:30+(u-0.16)/0.40*52, T:50+(g?s.homeY/FH-0.5:0.5-s.homeY/FH)*100*TOK_SPREAD, k:(g?1:-1)*(s.lineIdx-(s.lineSize-1)/2)}; }
   const mtKeeperKit=t=>keeperKit(teamKit(t),TEAM[t]&&TEAM[t].gk);   // his keeper's top in this match
   // the man as the match has him (his look), or as his squad entry has him if he isn't on
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
-  function mtTok(t,si,L,T,kind,role){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
-    return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')
-      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+(kind==='bench'?shirtNo(e.num):ptkSide(faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),e.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'<i class="ptkPos">'+natPos(e)+'</i></span><span class="ptkName">'+surname(e.name)+'</span></span></button>'; }
+  function mtTok(t,si,L,T,kind,role,k){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
+    return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
     const instr=t==='G'&&cardSide==='instr';                          // (their instructions are theirs: their men show their ratings)
-    const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>LEGS</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span><b>'+Math.round(lg*100)+'%</b></div>';
-    let h='<div class="tbCard"><div class="mgCardHead">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
+    const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
+    let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(skillStarsOf(e.stats)):'')+'</div>'
       +legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
     if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
@@ -12173,27 +12204,26 @@
     if(si===li.gk) return h+'<div class="mgHint">The keeper has no instructions.</div></div>';
     if(!sl) return h+'<div class="mgHint">On the bench: his instructions are the spot\'s he goes into.</div></div>';
     return h+(instrPanelHtml(piGet(PI[t],phase,form,k),sl.pos,phase,'mi',sl.homeY<YC,true)||'<div class="mgHint">No instructions for this spot.</div>')+'</div>'; }
-  function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'||MT.drop==='posture'?' r':'')+'">';
+  function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'?' r':'')+'">';
     if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
         return '<button class="formBtn'+(fm===form?' on':'')+'" data-mtform="'+fm+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
     else if(MT.drop==='width'){ const w=widthSnap(widthOf(t,phase)); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-mtwidth="'+x[2]+'"><b>'+x[1]+'</b></button>').join(''); }
-    else if(MT.drop==='style'){ h+=STYLE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC[t].off?' on':'')+'" data-mtstyle="'+s[0]+'"><b>'+s[1]+'</b></button>').join(''); }
-    else if(MT.drop==='posture'){ h+=POSTURE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC[t].def?' on':'')+'" data-mtposture="'+s[0]+'"><b>'+s[1]+'</b></button>').join(''); }
+    else if(MT.drop==='style'){ h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(s=>'<button class="tbOpt'+(s[0]===TAC[t].style?' on':'')+'" data-mtstyle="'+s[0]+'"><b>'+s[1]+'</b></button>').join('')+'</div>'; }
     return h+'</div>'; }
   function renderMatchTac(){ const t=MT.team, phase=MT.phase, li=LINEUP[t]; if(!li||!SQUAD[t]) return;
     const mine=t==='G', form=formFor(t,phase), slots=slotsFor(t,form,phase), order=li[phase]||li.atk, bench=mtBench(t);
     if(MT.sel==null||!SQUAD[t][MT.sel]) MT.sel=(controlled&&controlled.team===t)?controlled.squadIdx:order[0];
     const lbl=x=>(x||'').toUpperCase(), w=widthSnap(widthOf(t,phase)), wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
-    const sl=phase==='atk'?(STYLE_LIST.find(s=>s[0]===TAC[t].off)||STYLE_LIST[0])[1]:(POSTURE_LIST.find(s=>s[0]===TAC[t].def)||POSTURE_LIST[1])[1];
-    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(MT.drop===k?' on':'')+'" data-mtdrop="'+k+'"'+(mine?'':' disabled')+'><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE',posture:'POSTURE'}[k]+'</i>'+label+(mine?' ▾':'')+'</button>'+(MT.drop===k?mtMenuHtml(t,phase):'')+'</span>';
+    const sl=(STYLE_LIST.find(s=>s[0]===TAC[t].style)||STYLE_LIST[0])[1];
+    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(MT.drop===k?' on':'')+'" data-mtdrop="'+k+'"'+(mine?'':' disabled')+'><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+(mine?' ▾':'')+'</button>'+(MT.drop===k?mtMenuHtml(t,phase):'')+'</span>';
     let h='<div class="tacB1'+(mine?'':' ro')+'"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-mtph="atk">WITH BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-mtph="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop(phase==='atk'?'style':'posture',sl)+'</div>';
+      +drop('form',form)+drop('width',wl)+drop('style',sl)+'</div>';
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
-      h+=ghostTok(q.L,q.T,e.num,surname(e.name)); }
+      h+=ghostTok(q.L,q.T,e.num,surname(e.name),q.k); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role); }
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k); }
     h+='</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
@@ -12226,8 +12256,8 @@
     if(MT.drop&&!e.target.closest('.tbMenu')){ MT.drop=null; renderMatchTac(); return; }
     const f=e.target.closest('[data-mtform]'); if(f){ MT.drop=null; if(!f.disabled){ setTeamForm(t,MT.phase,f.dataset.mtform); } renderMatchTac(); return; }
     const w=e.target.closest('[data-mtwidth]'); if(w){ MT.drop=null; setMenuWidth(t,MT.phase,+w.dataset.mtwidth); renderMatchTac(); return; }
-    const s=e.target.closest('[data-mtstyle],[data-mtposture]'); if(s){ MT.drop=null; if(s.dataset.mtstyle) TAC[t].off=s.dataset.mtstyle; else TAC[t].def=s.dataset.mtposture;
-      if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
+    const s=e.target.closest('[data-mtstyle]'); if(s){ MT.drop=null; setStyle(t,s.dataset.mtstyle);
+      if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.style; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
     const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; renderMatchTac(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
@@ -12359,12 +12389,11 @@
   document.getElementById('menuBtn').onclick=openPause;
   document.getElementById('menuClose').onclick=closeMenu;
   document.getElementById('menu').addEventListener('click',e=>{
-    const ms=e.target.closest('[data-mstyle]'), mp=e.target.closest('[data-mposture]');
-    if(!ms && !mp) return;
+    const ms=e.target.closest('[data-mstyle]');
+    if(!ms) return;
     const t=menuState.team||'G';
-    if(ms){ TAC[t].off=ms.dataset.mstyle; }                     // (the style and the posture are set apart)
-    else  { TAC[t].def=mp.dataset.mposture; }
-    if(t==='G' && CAREER && CAREER.data){ CAREER.data.style=TAC.G.off; CAREER.data.posture=TAC.G.def; if(CAREER.key)writeSave(CAREER.key,CAREER.data); }   // halftime override sticks to the save
+    setStyle(t,ms.dataset.mstyle);
+    if(t==='G' && CAREER && CAREER.data){ CAREER.data.style=TAC.G.style; if(CAREER.key)writeSave(CAREER.key,CAREER.data); }   // halftime override sticks to the save
     saveSettings(); renderMenu();
   });
   document.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>{ menuState.tab=b.dataset.mtab; document.querySelectorAll('.mtab').forEach(x=>x.classList.toggle('active',x===b)); menuState.selPos=null; menuState.statPos=null; renderMenu(); });
@@ -12427,13 +12456,12 @@
     return s; }
   function cwStyleFor(tier,rng){
     const r=rng();
-    const T = tier>=4 ? [['tiki',.35],['neutral',.25],['wing',.2],['counter',.15],['direct',.05]]
-          : tier===3 ? [['neutral',.3],['tiki',.25],['wing',.2],['counter',.15],['direct',.1]]
-          : tier===2 ? [['neutral',.3],['direct',.25],['counter',.2],['wing',.15],['tiki',.1]]
-          :            [['direct',.38],['neutral',.25],['counter',.22],['wing',.15]];
+    const T = tier>=4 ? [['control',.25],['gegen',.2],['neutral',.2],['wing',.15],['fluid',.12],['direct',.04],['dcounter',.04]]
+          : tier===3 ? [['neutral',.25],['wing',.2],['control',.15],['gegen',.15],['fluid',.1],['direct',.08],['dcounter',.07]]
+          : tier===2 ? [['neutral',.25],['direct',.2],['wing',.15],['dcounter',.12],['fluid',.1],['gegen',.1],['control',.08]]
+          :            [['direct',.3],['neutral',.22],['dcounter',.18],['wing',.14],['fluid',.08],['gegen',.08]];
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
-  function cwPostureFor(style,rng){ return style==='tiki'?'press' : style==='counter'?'lowblock' : (style==='direct'&&rng()<0.35?'lowblock':'neutral'); }
   const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=15, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, fifteen at most
   const MG_WINDOW={summer:5, winter:3};                  // days each transfer window stays open
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
@@ -12512,7 +12540,7 @@
     let pri=o.colors&&o.colors[0], sec=o.colors&&o.colors[1];
     if(!pri){ for(let t=0;t<40;t++){ pri=mgPick(MG_PALETTE).c; sec=mgPick(MG_PALETTE).c; if(pri!==sec&&kitApart(pri,sec)>=0.55) break; } }
     const k=mgKits(pri,sec,Math.random()<0.4), style=cwStyleFor(tier,Math.random);
-    const c={ id:'c'+(d.world.nextClub++), name, code:'', tier, colors:[pri,sec], home:k.home, away:k.away, style, posture:cwPostureFor(style,Math.random),
+    const c={ id:'c'+(d.world.nextClub++), name, code:'', tier, colors:[pri,sec], home:k.home, away:k.away, style,
               budget:o.budget!=null?o.budget:mgRound(MG_AI_BUDGET[tier]*(0.6+Math.random()*0.8)), players:[] };
     c.code=mgCodeFor(d,name); d.world.clubs[c.id]=c;
     const lvl=MG_LEVEL[tier]+(bias||0);
@@ -13001,11 +13029,12 @@
   }
   // A CLUB'S SHAPE: from how it plays -- a passing side keeps men in midfield, a wing side has wingers, a direct one two
   // up front, a counter-attacking one a back three -- and which of those its name draws (the same every season)
-  const CW_STYLE_FORMS={tiki:['2-4-1','2-3-2','1-4-2'], wing:['2-2-3','3-1-3','1-3-3'], direct:['3-2-2','2-3-2','1-4-2'], counter:['3-3-1','3-2-2','2-4-1'], neutral:['2-3-2','2-2-3','2-4-1','3-3-1']};
+  const CW_STYLE_FORMS={control:['2-4-1','2-3-2','1-4-2'], gegen:['2-3-2','2-2-3','3-1-3'], wing:['2-2-3','3-1-3','1-3-3'], direct:['3-2-2','2-3-2','1-4-2'],
+    fluid:['3-2-2','2-3-2','3-3-1'], dcounter:['3-3-1','3-2-2','2-4-1'], neutral:['2-3-2','2-2-3','2-4-1','3-3-1']};
   function cwFormFor(club){ if(!club) return '2-3-2'; const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
   // ...and its width: a wing side wide with the ball, a counter-attacking side compact; a deep block compact without it
-  function cwWidthFor(club){ const st=club&&club.style, po=club&&club.posture;
-    return {atk:st==='wing'?1.18:st==='counter'?0.84:1, def:po==='lowblock'?0.84:1}; }
+  function cwWidthFor(club){ const st=styleKey(club&&club.style);
+    return {atk:st==='wing'?1.18:(st==='fluid'||st==='dcounter')?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
   // a career player's style: as made, or for one signed before styles, the one his stats fit (your own pro has none)
   function careerStyle(p){ if(!p||p.me||p.role==='GK'||!ARCH[p.role]) return p&&p.style; if(!p.style) p.style=inferStyle(p.role,p.subRole,p.stats||{}); return p.style; }
   // ---- career lineup / tactics ----
@@ -13017,7 +13046,7 @@
   const CAREER_STEP={1:0,2:52,3:23,4:17};
   function ensureForms(d){ careerTo7(d);
     if(!d.formation||!FORMS[d.formation]||DEF_ONLY.includes(d.formation)) d.formation=formOKAtk(d.formation,formOKAtk(d.formAtk,'2-3-2'));
-    if(!d.formDef||!FORMS[d.formDef]||ATK_ONLY.includes(d.formDef)) d.formDef=defFormFor(d.formation,d.posture);
+    if(!d.formDef||!FORMS[d.formDef]||ATK_ONLY.includes(d.formDef)) d.formDef=defFormFor(d.formation,postureOf(d.style));
     d.width=widthObj(d.width); d.pinstr=piClean(d.pinstr); delete d.instr; return d; }
   function formForCareer(d,phase){ ensureForms(d); return phase==='def'?d.formDef:d.formation; }
   // a man's rating in a position: his own, or what his stats make him there
@@ -13121,25 +13150,15 @@
       +'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+(p.role==='ATT'?' as an ':' as a ')+p.role+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
-  const STYLE_LIST=[['neutral','BALANCED'],['tiki','TIKI-TAKA'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER']];
-  const POSTURE_LIST=[['press','PRESS HIGH'],['neutral','MID BLOCK'],['lowblock','SIT DEEP']];
   // an instruction for one of your spots (si: its index in that phase's shape)
   function careerSetInstr(d,ph,si,k,v){ ensureForms(d);
     if(piSet(d.pinstr,ph,ph==='def'?d.formDef:d.formation,si,k,v)){ mgSave(d); paintCareerRight(d); } }
-  function styleRowHtml(d){ const cur=d.style||'neutral';
-    let h='<div class="styRow"><span class="styLbl">TEAM STYLE</span>';
-    for(const t of STYLE_LIST) h+='<button class="styBtn'+(t[0]===cur?' on':'')+'" data-cstyle="'+t[0]+'">'+t[1]+'</button>';
-    return h+'</div><div class="tacHint">'+(STYLE_BLURB[cur]||'')+'</div>'; }
-  function postureRowHtml(d){ const cur=d.posture||'neutral';
-    let h='<div class="styRow"><span class="styLbl">DEF POSTURE</span>';
-    for(const t of POSTURE_LIST) h+='<button class="styBtn'+(t[0]===cur?' on':'')+'" data-cposture="'+t[0]+'">'+t[1]+'</button>';
-    return h+'</div><div class="tacHint">'+(POSTURE_BLURB[cur]||'')+'</div>'; }
   // TACTICS: the pitch first, on its side as in a match (your goal on the left) -- the shape, width and style in one row of
   // menus above it, the bench under it, the man you tapped on the right. Hold a man and drag him onto another to swap them
   // (or onto a sub to bring the sub on): while he's up, every spot shows what he'd be worth there. MOVE / SWAP on his card
   // does the same with two taps.
-  let tacDrop=null;   // the menu open on the top row: 'form' | 'width' | 'style' | 'posture'
-  function tbPos(x,y){ return {L:100-y, T:9+(clamp(x,6,94)-6)/88*82}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
+  let tacDrop=null;   // the menu open on the top row: 'form' | 'width' | 'style'
+  function tbPos(x,y,s){ return {L:100-y, T:50+(clamp(x,6,94)-50)*TOK_SPREAD, k:s?s.idx-(s.count-1)/2:0}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
   // a man's face for the menus, in his club's kit (SPRITE.face): an <img>, or nothing while the art loads
   function faceImg(who,kit,cls){ const u=SPRITE.face(who,kit); return u?'<img class="'+(cls||'ptkFace')+'" src="'+u+'" alt="" draggable="false">':''; }
   function bodyImg(who,kit){ const u=SPRITE.body(who,kit); return u?'<img class="cardBody" src="'+u+'" alt="" draggable="false">':''; }   // all of him, for his card
@@ -13147,42 +13166,49 @@
   const GK_SHORTS='#2c2e34';
   const keeperKit=(kit,top)=>[top||keeperTops(kit?kit[0]:'#2f6bd6',kit?kit[0]:'#2f6bd6').G, GK_SHORTS, GK_SHORTS];   // a keeper's top that stands out from the shirts
   const surname=n=>mgEsc(String(n||'').split(' ').slice(-1)[0]);
-  // HIS SHIRT NUMBER on his token: under his face on the pitch, in the corner on the bench -- and on the other phase's
-  // box, so you can tell which box is whose
+  // HIS SHIRT NUMBER on his token -- after his name -- and on the other phase's box, so you can tell which box is whose
   const shirtNo=n=>n?'<span class="ptkNo">#'+n+'</span>':'';
-  const ptkSide=(face,n)=>'<span class="ptkSide">'+face+shirtNo(n)+'</span>';
-  function tbTok(d, ri, L, T, kind, phase, slotRole, res){ const p=d.roster[ri]; if(!p) return '';
+  // A MAN'S TOKEN, on the pitch and the bench alike: his rating and position on top, his name and number under them --
+  // and on the pitch his face beside them (the bench has none)
+  // (his spot, never so near an edge that he hangs off it -- and the keeper and each line a man's width from the next, so on a narrow pitch they close up rather than overlap)
+  const PTK_COL={DEF:1,MID:2,ATT:3};
+  const ptkAt=(L,T,role,k)=>{ const c=PTK_COL[role]||0;
+    return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(7-2*c)+'));top:clamp(var(--hh),'+ptkTop(T,k)+',calc(100% - var(--hh)))"'; };
+  // how far down: his line's middle, then k men along it (T is where its step puts him) -- the step never less than a man's height, so on a short
+  // pitch a line spreads rather than its men overlap
+  const ptkTop=(T,k)=>k?'calc(50% + '+k+' * max('+((T-50)/k).toFixed(2)+'%, var(--rowH)))':T.toFixed(1)+'%';
+  const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
+  function tbTok(d, ri, L, T, kind, phase, slotRole, res, k){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
     return '<button class="ptk'+(oop?' oop':'')+(res?' res':'')+(ri===statViewRi?' statview':'')+'"'
-      +(kind==='bench'?'':' style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%"')+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
-      +(kind==='bench'?shirtNo(p.num):ptkSide(faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),p.num))+'<span class="ptkTxt"><span class="ptkOvr">'+r+'<i class="ptkPos">'+natPos(p)+'</i></span><span class="ptkName">'+surname(p.name)+'</span></span></button>'; }
+      +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
+      +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
   // a small lit box off the bottom-right corner of the spot
-  function ghostTok(L,T,num,name){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+T.toFixed(1)+'%">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
-  function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'||tacDrop==='posture'?' r':'')+'">';
+  function ghostTok(L,T,num,name,k){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
+  function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
         return '<button class="formBtn'+(fm===form?' on':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
     else if(tacDrop==='width'){ const w=widthSnap(d.width[phase]); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-cwidth="'+x[2]+'" data-cphase="'+phase+'"><b>'+x[1]+'</b></button>').join(''); }
-    else if(tacDrop==='style'){ const cur=d.style||'neutral'; h+=STYLE_LIST.map(t=>'<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cstyle="'+t[0]+'"><b>'+t[1]+'</b></button>').join(''); }
-    else if(tacDrop==='posture'){ const cur=d.posture||'neutral'; h+=POSTURE_LIST.map(t=>'<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cposture="'+t[0]+'"><b>'+t[1]+'</b></button>').join(''); }
+    else if(tacDrop==='style'){ const cur=styleKey(d.style); h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(t=>'<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cstyle="'+t[0]+'"><b>'+t[1]+'</b></button>').join('')+'</div>'; }
     return h+'</div>'; }
   function renderTactics(d, phase){ ensureForms(d); const lu=ensureLineup(d);
     if(statViewRi==null||!d.roster[statViewRi]) statViewRi=lu.atk[0];
     tacPhase=phase;
     const form=phase==='def'?d.formDef:d.formation, w=widthSnap(d.width[phase]), slots=careerSlots(form,phase,w), order=lu[phase];
-    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(tacDrop===k?' on':'')+'" data-tdrop="'+k+'"><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE',posture:'POSTURE'}[k]+'</i>'+label+' ▾</button>'+(tacDrop===k?tbMenuHtml(d,phase):'')+'</span>';
+    const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(tacDrop===k?' on':'')+'" data-tdrop="'+k+'"><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+' ▾</button>'+(tacDrop===k?tbMenuHtml(d,phase):'')+'</span>';
     const wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
-    const sl=phase==='atk'?(STYLE_LIST.find(t=>t[0]===(d.style||'neutral'))||STYLE_LIST[0])[1]:(POSTURE_LIST.find(t=>t[0]===(d.posture||'neutral'))||POSTURE_LIST[1])[1];
+    const sl=(STYLE_LIST.find(t=>t[0]===styleKey(d.style))||STYLE_LIST[0])[1];   // (one style, with the ball and without it)
     let h='<div class="tacB1"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
       +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop(phase==='atk'?'style':'posture',sl)+'<button class="mgBtn tbBest" data-mg="best8">BEST 8</button></div>';
+      +drop('form',form)+drop('width',wl)+drop('style',sl)+'<button class="mgBtn tbBest" data-mg="best8">BEST 8</button></div>';
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
-    for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y);
-      h+=ghostTok(q.L,q.T,p.num,surname(p.name)); }
+    for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y,oslots[i]);
+      h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role); }
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, false, q.k); }
     h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map((ri,k)=>(k===BENCH_N?'<i class="benchSep"></i>':'')+tbTok(d, ri, 0,0, 'bench', phase, null, k>=BENCH_N)).join('')+'</div></div>';   // (the bench under the pitch, four; then the men in reserve)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
@@ -13277,9 +13303,9 @@
     const opp=d.world.clubs[g.opp];
     EXH.on=false; mgSetTeams(d,g);
     ensureForms(d); TAC.G.width=widthObj(d.width); TAC.R.width=widthObj(cwWidthFor(opp));
-    TAC.G.off=d.style||'neutral'; TAC.G.def=d.posture||'neutral'; TAC.R.off=opp.style||'neutral'; TAC.R.def=opp.posture||'neutral';
+    setStyle('G',d.style); setStyle('R',opp.style);
     const me=careerLineupYours(d); SQUAD.G=me.squad; LINEUP.G=me.lineup; myForm=d.formation; myFormDef=d.formDef; PI.G=piClean(d.pinstr); PI.R=piClean(null);
-    rForm=cwFormFor(opp); rFormDef=defFormFor(rForm,opp.posture);                      // they line up in their own shapes
+    rForm=cwFormFor(opp); rFormDef=defFormFor(rForm,postureOf(opp.style));             // they line up in their own shapes
     SQUAD.R=careerSquad(opp,rForm); LINEUP.R=defaultLineup(); LINEUP.R.def=mapDefOrder('R',LINEUP.R.atk);
     careerFix={opp:g.opp, home:g.home, kind:g.kind, recorded:false};
     matchReturn='hub'; resumable=false;
@@ -13541,7 +13567,7 @@
   function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
     let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK');
-    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role); }
+    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, false, q.k); }
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
@@ -13697,6 +13723,7 @@
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
+    for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)
     if(W.clubs&&W.free) for(const c of Object.values(W.clubs)) if(c.id!==d.clubId&&(c.players||[]).length>MG_MAX) mgTrimAi(d,c);   // (squads were up to 22; your own men stay)
     return d; }
   let curBldg=null; const curTab={};
@@ -13792,8 +13819,7 @@
     const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; tacDrop=null; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
     const cph=e.target.closest('[data-ctphase]'); if(cph){ tacPhase=cph.dataset.ctphase; tacDrop=null; rerenderOffice(); return; }
     const ci=e.target.closest('[data-ci]'); if(ci){ const d=CAREER&&CAREER.data; if(d){ const si=ensureLineup(d)[tacPhase].indexOf(statViewRi); if(si>=0) careerSetInstr(d, tacPhase, si, ci.dataset.ci, ci.dataset.v); } return; }
-    const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.style=cs.dataset.cstyle; TAC.G.off=d.style; mgSave(d); mgRerender(); } return; }
-    const cp=e.target.closest('[data-cposture]'); if(cp){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.posture=cp.dataset.cposture; TAC.G.def=d.posture; mgSave(d); mgRerender(); } return; }
+    const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d){ d.style=setStyle('G',cs.dataset.cstyle); mgSave(d); mgRerender(); } return; }
     const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; } tacticTap(tc); return; }
     const sd=e.target.closest('[data-stad]'); if(sd){ applyStadium(sd.dataset.stad, sd.dataset); return; }
     const mg=e.target.closest('[data-mg]'); if(mg){ if(!mg.disabled) mgAct(mg.dataset.mg, mg.dataset); return; }
@@ -13841,7 +13867,7 @@
     lift(){ const d=CAREER&&CAREER.data, R=document.querySelector('#bpBody .mgPaneR'); if(!d||!R||R.querySelector('.sqPitch')) return;   // (his card was up: the team, to drop him on)
       MGUI.sel=null; R.innerHTML=mgSquadPitch(d)+'<div class="mgPaneScroll"></div>'; },
     ghost(row){ const d=CAREER&&CAREER.data, p=d&&d.roster.find(x=>x.id===+row.dataset.pid), g=document.createElement('div'); g.className='ptk pxGhost';
-      g.innerHTML=(p?ptkSide(faceImg({lookKey:p.id},careerKit(d)),p.num):'')+'<span class="ptkTxt"><span class="ptkOvr">'+(p?p.ovr+'<i class="ptkPos">'+natPos(p)+'</i>':'')+'</span><span class="ptkName">'+(p?surname(p.name):'')+'</span></span>'; return g; },
+      g.innerHTML=p?ptkBody(faceImg({lookKey:p.id},careerKit(d)),p.ovr,natPos(p),surname(p.name),p.num):''; return g; },
     drop(row,tok){ const d=CAREER&&CAREER.data; if(!d) return; const lu=ensureLineup(d), ri=d.roster.findIndex(p=>p.id===+row.dataset.pid); if(ri<0) return;
       const kind=ri===lu.gk?'gk':lu.atk.includes(ri)?'field':'bench';
       careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=null; mgSave(d); mgRerender(); },   // (the team stays up: you see him in his spot)
@@ -13853,7 +13879,7 @@
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0,
       budget:20000, sponsorWk:ft.sponsor, capacity:ft.capacity, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
-      formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', posture:'neutral', seven:true,
+      formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, scouted:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[] };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors});
     d.clubCode=d.world.clubs[d.clubId].code;
