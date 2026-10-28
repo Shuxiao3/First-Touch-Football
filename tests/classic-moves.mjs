@@ -11,6 +11,8 @@
 // SKILL STARS: a ceiling drawn by position and the league his rating belongs in (five-stars rare and most of them the
 // top league's wingers; a centre-back three at most; the lower leagues' defenders one or two), grown into by 19 to 23 and
 // perhaps one of them lost in his thirties; in a new career's world, and its news when your man gains or loses one.
+// THE SKILL MOVES PAGE: each move's drawing, drawn as a finger would, is read as that move; its clip (recorded from the
+// game by tools/clips/record_skill_clips.cjs) is as old as the moves' code, ends with him on the ball, and shows the move.
 // On a copy of the game that lets the test reach the moves and the stars, its frames stepped at a steady 60 a second.
 import { chromium } from 'playwright';
 import { reporter } from './_harness.mjs';
@@ -22,7 +24,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={readSkill, skillFor, startSkill, mkSkill, setSkill:s=>{ skill=s; }, skill:()=>skill, grade:()=>lastGrade, controlled:()=>controlled, players:()=>players, keepers:()=>keepers, ball:()=>ball, simNow:()=>simNow, atkOf, FW, YC, proj, screenDirToPitch, SKILL_STARS, SKILL_NAME, '
-  + 'STAR_ODDS, starPot, starsAt, starLeague, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
+  + 'STAR_ODDS, starPot, starsAt, starLeague, get SKILL_CLIPS(){ return SKILL_CLIPS; }, get SKILL_DRAWS(){ return SKILL_DRAWS; }, SKILL_KINDS, clipSig:()=>hashStr(String(mkSkill)+String(skillStep)), freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
 patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, careerStars, careerStarPot, starLeague, starsAt, natPos, mgAgeWorld, mgYouthIntake};\n  // ===== END MANAGER CAREER');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-moves-')), 'classic.html');
@@ -156,6 +158,31 @@ ok(mv.elastico.end.ball[1] > 5 && mv.elastico.top >= 8 && mv.elastico.top <= 30 
   'ELASTICO: out to his right (' + mv.elastico.end.ball[1] + ' px), snapped back and popped up (' + mv.elastico.top + ' px) on past the man on his left (' + mv.elastico.ball[1] + ' px across), and he has it');
 ok(mv.heel.ballBy && mv.heel.ballBy.across >= 15 && mv.heel.passed != null && mv.heel.passed <= -5 && got(mv.heel),
   'HEEL FLICK: the ball past the man on his right (' + (mv.heel.ballBy && mv.heel.ballBy.across) + ' px), him round the other side (' + mv.heel.passed + ' px), and on it again');
+// --- THE SKILL MOVES PAGE: its drawings are the moves, its clips are this game's -----------------------------------
+const pg = await page.evaluate(() => { const T = window.__T, p = T.controlled(), out = { read: {}, clips: {} };
+  out.sig = [T.SKILL_CLIPS.sig, T.clipSig()];
+  p.x = T.FW / 2; p.y = T.YC; p.vx = 150; p.vy = 0; p.facing = { x: 1, y: 0 };
+  for(const k of T.SKILL_KINDS){
+    const P = T.SKILL_DRAWS[k], pts = [];                                 // (a point every 2 px along it, as a finger gives)
+    for(let i = 0; i < P.length; i++){ if(!i){ pts.push({ x: 500 + P[0][0] * 1.3, y: 400 + P[0][1] * 1.3 }); continue; }
+      const [a, b] = [P[i - 1], P[i]], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 1.3 / 2));
+      for(let j = 1; j <= n; j++) pts.push({ x: 500 + (a[0] + (b[0] - a[0]) * j / n) * 1.3, y: 400 + (a[1] + (b[1] - a[1]) * j / n) * 1.3 }); }
+    const g = T.readSkill(pts), m = g && T.skillFor(p, g);
+    out.read[k] = m ? { kind: m.kind, side: m.side, sense: m.sense, d: m.d && [+m.d.x.toFixed(2), +m.d.y.toFixed(2)] } : null;
+    const c = T.SKILL_CLIPS[k]; if(!c) continue; const f = c.f, n = f.length / 13, o = (n - 1) * 13, col = j => Array.from({ length: n }, (_, i) => f[i * 13 + j]);
+    out.clips[k] = { n, end: Math.round(Math.hypot(f[o + 10] - f[o], f[o + 11] - f[o + 1])), endZ: f[o + 12], top: Math.max(...col(12)), minY: Math.min(...col(1)), maxY: Math.max(...col(1)), runs: col(2).some(a => a === 1) }; }
+  p.vx = p.vy = 0; return out; });
+info('the drawings read as: ' + Object.entries(pg.read).map(([k, m]) => k + '->' + (m ? m.kind + (m.side ? ' side ' + m.side : '') + (m.sense ? ' sense ' + m.sense : '') + (m.d ? ' (' + m.d + ')' : '') : '-')).join(' | '));
+info('the clips: ' + JSON.stringify(pg.clips));
+const R = pg.read;
+ok(Object.entries(R).every(([k, m]) => m && m.kind === k) && R.croq.d[1] > 0.8 && R.spin.sense === 1 && R.cruyff.d[0] < 0 && R.cruyff.d[1] > 0 && R.elastico.side === -1 && R.heel.d[1] > 0
+   && R.flick.d[0] > 0 && R.flick.d[1] < 0 && R.dragback.d[0] < 0,
+  'every drawing on the page, drawn as a finger would, is read as its own move -- the way its clip does it (the croqueta to his right, the roulette clockwise, the elastico back to his left, the heel flick\'s ball to his right)');
+ok(pg.sig[0] === pg.sig[1], 'the clips were recorded from these moves (' + pg.sig[0] + ' / ' + pg.sig[1] + ')' + (pg.sig[0] === pg.sig[1] ? '' : ' -- a move has changed: node tools/clips/record_skill_clips.cjs'));
+const C = pg.clips;
+ok(Object.keys(C).length === 9 && Object.values(C).every(c => c.n >= 20 && c.runs && c.end <= 32 && c.endZ <= 14), 'a clip of every move, each with him running at the man first and ending with him on the ball');
+ok(C.rainbow.top >= 60 && C.sombrero.top >= 50 && C.elastico.top >= 8 && C.elastico.top <= 30 && C.flick.top >= 3 && C.spin.minY <= -30 && C.croq.maxY >= 30,
+  'the clips show the moves: the rainbow and the sombrero high over the man (' + C.rainbow.top + ', ' + C.sombrero.top + ' px), the elastico popped up a little (' + C.elastico.top + '), the flick off the grass, the roulette out to his left, the croqueta to his right');
 await page.close();
 
 // --- SKILL STARS: the odds of each ceiling ------------------------------------------------------------------------

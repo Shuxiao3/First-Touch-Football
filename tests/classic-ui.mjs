@@ -1,8 +1,9 @@
 // FOOTBALL CLASSIC ON A PHONE, LANDSCAPE: every screen fits -- its title, tabs and main buttons on the screen at
 // 844x390, 844x340 (Safari's bar showing) and 667x375 (an iPhone SE) -- and nothing scrolls: what doesn't fit goes over
 // pages (◀ 1 / 3 ▶): the start menu, Settings (a player's settings only: the feel dials are the game's own, a
-// developer's with ?dev), the exhibition setup, a new career (Start on screen), the hub, every building's tabs, the
-// market's pages, the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
+// developer's with ?dev), SKILL MOVES (every move over pages, its name whole, its drawing drawn and its clip playing; from
+// the pause menu too, the match waiting while it's open), the exhibition setup, a new career (Start on screen), the hub,
+// every building's tabs, the market's pages, the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
 // (a dark outline, a light rim, rounded corners), in four colour schemes. A finger that moves on a man lifts him at once
 // (a tap just shows his card) and the stand-in follows it from where he was picked up; the men on the tactics pitch show
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
@@ -63,6 +64,20 @@ const winOk = (v, full) => v.num === '#' + v.cNum && (full ? v.name === v.cName 
   && Math.abs(v.fill - v.cSt) <= 0.02 && !v.cut && v.top <= 12 && v.gap >= 0 && v.gap <= 10 && v.level && v.inside && !v.over;
 const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
   return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);
+// THE SKILL MOVES PAGE as it is on the screen: each page's moves (▶ to the next), any whose name or card is cut off, and
+// whether each move showing has its drawing drawn and its clip moving
+async function skillsPage(page){
+  const all = await page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].map(c => c.dataset.sk)), seen = [], cut = []; let pages = 1;
+  for(let i = 0; i < 6; i++){
+    const v = await page.evaluate(() => { const vis = [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length);
+      return { kinds: vis.map(c => c.dataset.sk), cut: vis.filter(c => { const n = c.querySelector('.skName'); return n.scrollWidth > n.clientWidth + 1 || c.scrollWidth > c.clientWidth + 1; }).map(c => c.dataset.sk),
+        next: !!document.querySelector('#skGrid .fitPager [data-fitgo="1"]:not([disabled])') }; });
+    seen.push(...v.kinds); cut.push(...v.cut); if(!v.next) break; await page.tap('#skGrid .fitPager [data-fitgo="1"]'); await page.waitForTimeout(150); pages++; }
+  const px = () => page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).map(c => {
+    const sum = cv => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let h = 0, n = 0; for(let i = 0; i < d.length; i += 4){ h = (h * 31 + d[i] + d[i + 1] * 3 + d[i + 2] * 7) >>> 0; if(d[i + 3]) n++; } return [h, n]; };
+    return { drawn: sum(c.querySelector('.skDraw'))[1], clip: sum(c.querySelector('.skClip'))[0] }; }));
+  const a = await px(); await page.waitForTimeout(450); const b = await px();
+  return { all, seen, cut, pages, drawn: a.length > 0 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); }
@@ -91,6 +106,12 @@ for(const [w, h] of SIZES){
     ok(/FTC Dot/.test(l0.font), 'one font throughout (' + l0.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);
+  await page.tap('#smItems [data-act="skills"]'); await page.waitForTimeout(300);
+  await check('skill moves', ['#skillsOverlay .pauseTitle', '#skillsOverlay .skHint', '#skGrid .skCard', '[data-skclose]']);
+  { const sk = await skillsPage(page);
+    ok(sk.all.length === 9 && sk.seen.join() === sk.all.join() && !sk.cut.length && sk.drawn && sk.moving,
+      w + 'x' + h + ': SKILL MOVES: all nine moves over ' + sk.pages + ' page' + (sk.pages > 1 ? 's' : '') + ', each name whole, what to draw drawn and its clip playing' + (sk.cut.length ? ' -- cut: ' + sk.cut.join(', ') : '')); }
+  await page.tap('[data-skclose]'); await page.waitForTimeout(100);
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(200);
   await check('exhibition', ['#exhGo', '#exhPanel [data-act="back"]']);
   await page.tap('#exhPanel [data-act="back"]'); await page.waitForTimeout(100);
@@ -138,7 +159,13 @@ for(const [w, h] of SIZES){
   ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await mcheck('pause', ['#pauseGrid .pauseBtn']);
-  if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: four buttons, no quick-tactics row');
+  if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: five buttons, no quick-tactics row');
+  await page.tap('#pauseGrid [data-pause="skills"]'); await page.waitForTimeout(300);
+  await mcheck('skill moves, in a match', ['#skillsOverlay .pauseTitle', '#skGrid .skCard', '[data-skclose]']);
+  { const t0 = await page.evaluate(() => window.__T.sim()); await page.waitForTimeout(400); const t1 = await page.evaluate(() => window.__T.sim());
+    await page.tap('[data-skclose]'); await page.waitForTimeout(150);
+    const menu = await page.evaluate(() => document.getElementById('pauseMenu').classList.contains('on') && !document.getElementById('skillsOverlay').classList.contains('on'));
+    ok(t0 === t1 && menu, w + 'x' + h + ': SKILL MOVES from the pause menu: the match waits while it\'s open, and BACK goes back to the menu'); }
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtacBody .tbDrop', '#mtacBody .tbBench']);
   const lg = await legsRow(page, '#mtacBody');

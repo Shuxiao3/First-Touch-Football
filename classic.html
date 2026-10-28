@@ -124,6 +124,16 @@
   .fitPager .mgAdj{ width:44px; height:34px; }
   @media (max-height:360px){ .fitPager{ height:32px; } .fitPager .mgAdj{ height:28px; } }
   .settingsCard{ max-width:600px; }
+  /* THE SKILL MOVES PAGE: a card a move -- what to draw, a clip of it, its name and stars -- three across on a phone held sideways */
+  .skillsCard{ max-width:860px; }
+  .skHint{ flex:none; margin-top:-6px; text-align:center; font:13px 'FTC Dot',monospace; color:var(--dim); }
+  .skHint b{ color:var(--ink); font-weight:400; }
+  .skGrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(236px,1fr)); gap:6px 8px; align-content:start; }
+  .skCard{ display:flex; align-items:center; gap:7px; padding:5px; background:var(--well); border-radius:var(--r); }
+  .skDraw{ flex:none; width:50px; height:50px; background:var(--win); border-radius:var(--rS); }
+  .skClip{ flex:none; width:108px; height:50px; border-radius:var(--rS); image-rendering:pixelated; }
+  .skTxt{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .skName{ font:13px 'FTC Dot',monospace; letter-spacing:1px; color:var(--ink); line-height:1.15; }
   body:not(.touch) .layoutEntry{ display:none; }   /* (the buttons are only on touch screens) */
   #layoutEd{ display:none; position:fixed; inset:0; z-index:170; background:var(--well); align-items:center; justify-content:center; touch-action:none; }
   #layoutEd.on{ display:flex; }
@@ -594,6 +604,7 @@
   .tacHint{ color:var(--dim2); font-size:10.5px; line-height:1.5; text-align:center; max-width:360px; margin:6px auto 10px; }
   .ptk.oop{ border-color:#7a5a1a; }
   .ptk.oop .ptkOvr{ color:var(--warn); }
+  .ptk.sec .ptkOvr{ color:var(--good2); }   /* (in a second position of his: a little off his rating) */
   .ptk.oop .ptkNum{ color:#c99a4a; }
   .stars{ color:#ffd27a; letter-spacing:1px; font-size:11px; }
   .stars i{ font-style:normal; color:var(--well); }
@@ -978,6 +989,7 @@
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ flex:0 1 auto; min-width:0; font:9px/1 'FTC Dot',monospace; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }   /* (a long name gives way; his number stays) */
   .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:var(--warn); }
+  .tacB1 .ptk.sec .ptkOvr, .sqPitch .ptk.sec .ptkOvr{ color:var(--good2); }   /* (a second position of his: no ring, just the rating) */
   .tacB1 .ptk.statview{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .4); }
   .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5); }
   .tacB1 .ptk.canswap{ outline:none; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
@@ -986,6 +998,7 @@
   .tacB1 .ptk[data-fit]::after{ content:attr(data-fit); position:absolute; top:-10px; right:-11px; min-width:20px; padding:1px 3px; font:11px 'FTC Dot',monospace;
     text-align:center; background:var(--acc); color:var(--accInk); box-shadow:var(--pxOut); border-radius:var(--rS); }
   .tacB1 .ptk.fitOop::after{ background:var(--warn); }
+  .tacB1 .ptk.fitSec::after{ background:var(--good2); }
   .pxGhost{ position:fixed !important; transform:none !important; margin:0 !important; z-index:400; pointer-events:none; opacity:.95; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 3px 3px 0 0 rgba(0,0,0,.35) !important; }
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:6px 0 0; }   /* (under the pitch: his card has the right side) */
   .benchPg{ flex:none; width:36px; height:34px; min-height:34px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:13px; line-height:1; cursor:pointer; }
@@ -1098,7 +1111,10 @@
           <button class="smBtn" data-act="shootlab"><span class="mk">▶</span>SHOOTING LAB</button>
           <button class="smBtn" data-act="crosslab"><span class="mk">▶</span>CROSSING LAB</button>
         </div>
-        <button class="smBtn" data-act="settings"><span class="mk">▶</span>SETTINGS</button>
+        <div class="smRow">
+          <button class="smBtn" data-act="skills"><span class="mk">▶</span>SKILL MOVES</button>
+          <button class="smBtn" data-act="settings"><span class="mk">▶</span>SETTINGS</button>
+        </div>
       </div>
     </div>
     <div class="smVer" id="smVer">build —</div>
@@ -1249,9 +1265,10 @@
     <div class="pauseTitle">MENU</div>
     <div class="pauseGrid" id="pauseGrid">
       <button class="pauseBtn" data-pause="tactics">TACTICS</button>
+      <button class="pauseBtn" data-pause="skills">SKILL MOVES</button>
       <button class="pauseBtn" data-pause="settings">SETTINGS</button>
       <button class="pauseBtn pauseExit" data-pause="exit">EXIT GAME</button>
-      <button class="pauseBtn pauseBack" data-pause="back">◀ BACK TO GAME</button>
+      <button class="pauseBtn pauseBack" data-pause="back" style="grid-column:1/-1">◀ BACK TO GAME</button>
       <button class="pauseBtn devOnly" data-pause="oldtac" style="grid-column:1/-1">DEV · OLD TACTICS MENU</button>
     </div>
   </div>
@@ -1272,6 +1289,14 @@
       <div id="settingsDials"></div>
     </div>
     <button class="pauseBtn pauseBack" data-setclose="1">◀ BACK</button>
+  </div>
+</div>
+<div id="skillsOverlay" class="pauseOv">
+  <div class="pauseCard skillsCard">
+    <div class="pauseTitle">SKILL MOVES</div>
+    <div class="skHint" id="skHint"></div>
+    <div class="pScroll skGrid" id="skGrid" data-pages="skills"></div>
+    <button class="pauseBtn pauseBack" data-skclose="1">◀ BACK</button>
   </div>
 </div>
 <div id="layoutEd">
@@ -1481,7 +1506,7 @@
   // ...repainting a menu, opening one, or turning the phone fits them again (on the next frame, all at once)
   let fitRaf=0;
   const fitObs=new MutationObserver(()=>{ if(!fitRaf) fitRaf=requestAnimationFrame(()=>{ fitRaf=0; fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } }); });
-  function fitWatch(){ for(const id of ['startMenu','careerHub','bldgPanel','settingsOverlay','mgrMaker','matchReport','mtacOv','labTune']){ const el=document.getElementById(id);
+  function fitWatch(){ for(const id of ['startMenu','careerHub','bldgPanel','settingsOverlay','skillsOverlay','mgrMaker','matchReport','mtacOv','labTune']){ const el=document.getElementById(id);
     if(el) fitObs.observe(el,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']}); } }
   const fitNow=()=>{ fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } };
   addEventListener('resize',fitNow);
@@ -1998,7 +2023,7 @@
   }
   // ============ SQUADS: unique per-player stat blocks ============
   const SQUAD_V=1;
-  let menuOpen=false, pauseOpen=false, settingsOpen=false;
+  let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false;
   const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
   const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution'];
   const ALL_STAT_KEYS=[...OUT_KEYS,...GK_KEYS];
@@ -2061,6 +2086,29 @@
   // HIS OWN POSITION: a career man's, else what his style makes him (an exhibition squad's men have none of their own),
   // else his line. A winger (WNG) is an attacker; a wide midfielder (WM) a midfielder.
   const natPos=e=>!e?'':e.role==='GK'?'GK':(e.subRole||(STYLES[e.style]&&STYLES[e.style].sub)||e.role||'');
+  // ============ POSITIONS: WHERE A MAN CAN PLAY ============
+  // A spot in a shape is a CB, FB, CM, WM, W (a winger's) or ST (see POS_OF). A man's own position is his main one -- a
+  // holding or an attacking midfielder's is CM's too -- and most have second positions they can play well enough. Anywhere
+  // else he's out of position. What it costs him is mostly his reading of the game: in a second position a little of his
+  // Def IQ out of possession and a little more of his Off IQ on the ball; out of position, a good deal of both. In a match
+  // it's the spot he takes with the ball that costs him Off IQ, and the one he takes without it Def IQ (see posPenOf).
+  const POS_MAIN={CB:['CB'],FB:['FB'],DM:['CM'],CM:['CM'],AM:['CM'],WM:['WM'],WNG:['W'],STK:['ST'],GK:['GK'],DEF:['CB','FB'],MID:['CM','WM'],ATT:['W','ST']};
+  const POS_SECOND={CB:['FB'],FB:['WM','CB'],CM:['WM'],DM:['CB'],AM:['WM','W','ST'],WM:['FB','W'],WNG:['WM','ST'],STK:['W']};
+  const FIT_PEN={main:{offIQ:0,defIQ:0}, second:{offIQ:1.2,defIQ:0.6}, out:{offIQ:3,defIQ:3}};   // (points off his Off IQ and Def IQ)
+  // who defends where (see mapDefOrder): a spot in a second position of his counts as a little further off than it is,
+  // and one he'd be out of position in as about a spot further on
+  const FIT_FAR={main:0, second:0.03, out:0.12};
+  function posFit(nat,spot){ if(!nat||!spot||(POS_MAIN[nat]||[nat]).includes(spot)) return 'main'; return (POS_SECOND[nat]||[]).includes(spot)?'second':'out'; }
+  // his rating in a spot (its line's role, its position), as if he played it with the ball and without: his own in his
+  // own position; in a second one his own, less the IQ he's docked there (a point of rating for each point of IQ: 2);
+  // out of position what his stats make him there, less the same (6)
+  function rateAt(own,ovr,st,nat,role,pos){ if(!role) return ovr;
+    if(role==='GK') return own==='GK'?ovr:cwOverall('GK',st);
+    const fit=posFit(nat,pos); if(fit==='main') return ovr;
+    return Math.max(1,(fit==='second'||role===own?ovr:cwOverall(role,st))-Math.round(FIT_PEN[fit].offIQ+FIT_PEN[fit].defIQ)); }
+  // a token's or card's mark for how he fits a spot: nothing in his own position, ' sec' in a second, ' oop' out of it
+  const fitCls=(nat,role,pos)=>!role||role==='GK'?(role==='GK'&&nat!=='GK'?' oop':''):{main:'',second:' sec',out:' oop'}[posFit(nat,pos)];
+  const FIT_COL={' sec':'var(--good2)',' oop':'var(--warn)'};
   // ============ SKILL MOVES: ONE TO FIVE STARS ============
   // A man's skill stars aren't his stats. Each has a ceiling of his own (his star potential), drawn once by his position
   // and the league his potential belongs in, and he grows into it: a star or two short as a youngster, there by 19 to 23,
@@ -2639,7 +2687,7 @@
     if(teOpen) return;
     if(SCREEN!=='match'){ startMenuKey(e); return; }
     if(e.target&&e.target.tagName==='INPUT'&&e.target.closest('.labUI')) return;   // a focused lab slider keeps its arrow keys
-    if(LAB.on&&!e.repeat&&!pauseOpen&&!settingsOpen&&!menuOpen&&labKey(e.code)){ e.preventDefault(); return; }
+    if(LAB.on&&!e.repeat&&!pauseOpen&&!settingsOpen&&!skillsOpen&&!menuOpen&&labKey(e.code)){ e.preventDefault(); return; }
     if(!e.repeat){
       if(e.code==='Space'){pressTrap();trapHeld=true;}
       if(e.code==='KeyF')feed();
@@ -2725,7 +2773,7 @@
     moveStick();
   }
   const wrapEl=document.getElementById('stageWrap');
-  const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !matchOver;
+  const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !skillsOpen && !matchOver;
   const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip'));   // on-screen buttons (☰, Trap Lab) take taps as clicks
   let swTouch=null;          // a finger on SWITCH: where it landed
   const tapStart={};        // finger id -> where and when it landed, and the team-mate under it (for a touch pass)
@@ -3169,12 +3217,12 @@
       ball.vx=p.vx; ball.vy=p.vy; p.stepPhase=0;
       if(out.rainbow){                                             // up and over: it drops this far ahead of where your run takes you
         const vz=P.skRainbowH.val, tf=(vz+Math.sqrt(vz*vz+2*520*ball.z))/520, hv=out.keep+sk.rbDist/tf;
-        ball.vx=g.x*hv; ball.vy=g.y*hv; ball.vz=vz; ball.lob={x:g.x,y:g.y};   // it checks up where it drops, like a lofted pass
+        ball.vx=g.x*hv; ball.vy=g.y*hv; ball.vz=vz; ball.lob={x:g.x,y:g.y}; ball.selfLob=p;   // it checks up where it drops, like a lofted pass
         ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=tf+0.6; p.noTouchT=0.3;
         if(p===controlled) recvAuto={q:p,until:simNow+tf+1.2,own:true};   // (stick left alone: you burst on to where it drops)
       }
       else if(out.loose){ const L=out.loose;                       // off his foot (its way d, pace v, lift vz): loose until he's back on it
-        ball.vx=L.d.x*L.v; ball.vy=L.d.y*L.v; ball.vz=L.vz; ball.z=Math.max(ball.z,1); if(L.lob) ball.lob={x:L.d.x,y:L.d.y};
+        ball.vx=L.d.x*L.v; ball.vy=L.d.y*L.v; ball.vz=L.vz; ball.z=Math.max(ball.z,1); if(L.lob){ ball.lob={x:L.d.x,y:L.d.y}; ball.selfLob=p; }
         ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=L.grace; p.noTouchT=L.nt||0.1;
         if(L.auto&&p===controlled) recvAuto={q:p,until:simNow+L.grace+0.6,own:true,go:{x:g.x,y:g.y,until:simNow+(L.go||0)}};   // (stick left alone: his own way first, then on to it)
       }
@@ -5195,7 +5243,12 @@
   // A stat is 1..10. statLerp maps it linearly onto a [lo(=stat 1) .. hi(=stat 10)] value range.
   function statLerp(s,lo,hi){ s=clamp(isFinite(s)?s:5.5,1,10); return lo+(s-1)/9*(hi-lo); }
   // read a player's stat; undefined per-player => use the global stat dial as the baseline.
-  function statOf(p,key,dialVal){ const s=p&&p.stats&&p.stats[key]; return isFinite(s)?s:dialVal; }
+  function statOf(p,key,dialVal){ const s=p&&p.stats&&p.stats[key]; if(!isFinite(s)) return dialVal;
+    return (key==='offIQ'||key==='defIQ')&&p.slotAtk?Math.max(1,s-posPenOf(p)[key]):s; }   // (his IQ, less what his spots cost him)
+  // what his spots cost him in the match: his Off IQ for the one he takes with the ball, his Def IQ for the one without it
+  function posPenOf(p){ const c=p.posPen; if(c&&c.a===p.slotAtk&&c.d===p.slotDef&&c.e===p.squadIdx&&c.s===p.style) return c;
+    const nat=natPos({role:p.natRole||p.role, subRole:p.subRole, style:p.style});
+    return p.posPen={a:p.slotAtk, d:p.slotDef, e:p.squadIdx, s:p.style, offIQ:FIT_PEN[posFit(nat,p.slotAtk&&p.slotAtk.pos)].offIQ, defIQ:FIT_PEN[posFit(nat,p.slotDef&&p.slotDef.pos)].defIQ}; }
   // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/134, 10 => 166/228)
   function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
   function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),134, 228); }
@@ -10107,8 +10160,9 @@
     const lostBy=(prevTeam&&prevTeam!==p.team)?prevTeam:(possTeam&&possTeam!==p.team)?possTeam:null;
     possTeam=p.team;
     const reGather=ball.dribbler===p&&ball.dribbleGrace>0;     // catching up with your own knock-on / trapped ball
+    const ownLob=ball.selfLob===p, psp=Math.hypot(p.vx,p.vy);   // (one he's flicked up over a man and run on to: dropping at his feet as he goes)
     ball.ownedBy=p;
-    ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
+    ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;ball.selfLob=null;
     p.touchLagT=0;
     if(!wasOwner){
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
@@ -10121,7 +10175,8 @@
       // carry angle at it, so a loose touch isn't magically re-centered to the feet.
       p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x);
     } else {
-      p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x);
+      p.carryAngle=ownLob&&psp>30?Math.atan2(p.vy,p.vx):Math.atan2(ball.y-p.y,ball.x-p.x);   // (his own lob: taken in his stride, the way he's going)
+      if(ownLob&&psp>30) p.facing={x:p.vx/psp,y:p.vy/psp};
       ball.x=p.x+Math.cos(p.carryAngle)*carryDist;
       ball.y=p.y+Math.sin(p.carryAngle)*carryDist;
       ball.vx=p.vx;ball.vy=p.vy;
@@ -10661,7 +10716,7 @@
     try{
     const rdt=Math.min(0.033,(t-last)/1000||0.016);last=t;
     const dt=LAB.on?rdt*LAB.slow:rdt;                  // the Trap Lab can run the game in slow motion
-    if(menuOpen || pauseOpen || settingsOpen || SCREEN!=='match'){ requestAnimationFrame(frame); return; }
+    if(menuOpen || pauseOpen || settingsOpen || skillsOpen || SCREEN!=='match'){ requestAnimationFrame(frame); return; }
     if(matchOver && careerFix && !careerFix.recorded){ careerFix.recorded=true; const cf=careerFix; setTimeout(()=>finishCareerMatch(cf),1600); }
     nanChk('FRAME-START');
     // GLOBAL ENTITY SANITIZE: scrub any non-finite position/velocity/facing on every player &
@@ -10832,7 +10887,7 @@
     // even a perfect one has to drop to your feet)
     if(controlled){ const c=controlled;
       const inAir=!ball.ownedBy&&ball.z>=12&&ball.z<=AIR_REACH&&!gkHold&&restartT<=0&&c.noTouchT<=0
-                  &&dist(c,ball)<controlROf(c)*0.9;
+                  &&dist(c,ball)<controlROf(c)*0.9&&ball.selfLob!==c;   // (a ball he's flicked up over a man himself he lets drop, and takes in his stride)
       if(!inAir) c.airReachT=-1;
       else {
         if(!(c.airReachT>=0)){ c.airReachT=simNow; if(LAB.on) labOnArrive(c,true); }   // it has just come into reach
@@ -11885,6 +11940,15 @@
       ctx.restore();
       return true;
     }
+    // one frame of a man's sheet on another canvas (the skill moves page's clips): the animation's name and frame, his way
+    // (0..7 from E, clockwise), his feet at x,y, k canvas px to a pitch px. False while the sprites are off.
+    function drawTo(c2,p,name,f,dir,x,y,k){
+      if(!(cfg.enabled&&cfg.ready)) return false;
+      const A=ANIM[name]||ANIM.idle, sc=k*cfg.scale*lookOf(p).size, sz=Math.round(CELL*sc);
+      c2.save(); c2.imageSmoothingEnabled=false;
+      c2.drawImage(sheetFor(p), clamp(f,0,A.n-1)*CELL, (A.row+(dir&7))*CELL, CELL, CELL, Math.round(x-AX*sc), Math.round(y-AY*sc), sz, sz);
+      c2.restore(); return true;
+    }
     // the parts: once the body and the heads are in, the plain drawn player (the mop, as drawn) is the default
     // sheet -- the exhibition's kit previews use it
     function loadParts(bodyUrl,headsUrl){
@@ -11956,6 +12020,8 @@
       }
       x.putImageData(d,0,0); return c;
     })();
+    function shadowTo(c2,x,y,k){ const w=Math.round(SHADOW.width*k*cfg.scale), h=Math.max(2,Math.round(SHADOW.height*k*cfg.scale));
+      c2.save(); c2.imageSmoothingEnabled=false; c2.drawImage(SHADOW, Math.round(x-w/2), Math.round(y-h/2), w, h); c2.restore(); }
     function shadow(xF,yF){                                // false while the sprites are off: draw the plain one
       if(!(cfg.enabled&&cfg.ready)) return false;
       const s=proj(xF,yF), k=s.scale*cfg.scale, w=Math.round(SHADOW.width*k), h=Math.max(2,Math.round(SHADOW.height*k));
@@ -11979,7 +12045,7 @@
     const face=(who,kit)=>cut(who,kit,FACE), body=(who,kit)=>cut(who,kit,BODY);
     return { get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, get keeperReady(){return cfg.gk.ready;},
              enable(v){cfg.enabled=(v!==false);}, disable(){cfg.enabled=false;},
-             load, loadParts, draw, pick, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
+             load, loadParts, draw, drawTo, shadowTo, pick, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
              flush(){ cfg.looks={}; cfg.gk.looks={}; } };
   })();
   SPRITE.loadParts(PLAYER_BODY,PLAYER_HEADS); SPRITE.loadKeeper(KEEPER_SHEET); SPRITE.enable();   // art is embedded -> on by default
@@ -12160,7 +12226,12 @@
       ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage((spinning?spin:plain)[f],x,y,sz,sz); ctx.restore();
       return {x:x+sz/2, y:y+sz/2, r:sz/2};
     }
-    return {on, shadow, draw, frames:F};
+    // ...and on another canvas (the skill moves page's clips): its bottom at x,y, K canvas px to one of its pixels
+    function drawTo(c2,x,y,K,phase){ const sz=Math.max(5,Math.round(9*K)), f=((Math.floor(phase*1.33)%6)+6)%6;
+      c2.save(); c2.imageSmoothingEnabled=false; c2.drawImage(plain[f],Math.round(x-sz/2),Math.round(y-sz+K),sz,sz); c2.restore(); }
+    function shadowTo(c2,x,y,K,sq){ const w=Math.max(3,Math.round(SH.width*K*sq)), h=Math.max(2,Math.round(SH.height*K*sq));
+      c2.save(); c2.imageSmoothingEnabled=false; c2.drawImage(SH,Math.round(x-w/2),Math.round(y-h/2),w,h); c2.restore(); }
+    return {on, shadow, draw, drawTo, shadowTo, frames:F};
   })();
   function drawBall(){
     if(gkHold && SPRITE.keeperShowsBall(gkHold)) return;      // held: it's in his gloves on his sprite
@@ -12321,10 +12392,12 @@
     rec(0,0); return best||[...Array(n).keys()];
   }
   // WHO DEFENDS WHERE when the shapes change: each man takes the defending spot nearest his attacking one (the best fit
-  // of the seven, depth counting for more than width -- a defender stays a defender)
+  // of the seven, depth counting for more than width -- a defender stays a defender), in a position of his own before
+  // another (FIT_FAR): a holding midfielder drops into a back three before a central one
   function mapDefOrder(team,atkOrder){
     const A=slotsFor(team,formFor(team,'atk'),'atk'), D=slotsFor(team,formFor(team,'def'),'def'), n=Math.min(atkOrder.length,A.length,D.length);
-    const pick=bestAssign(n,(i,j)=>{ const dx=(A[i].homeX-D[j].homeX)/FW, dy=(A[i].homeY-D[j].homeY)/FH; return 1.6*dx*dx+dy*dy; });
+    const nat=atkOrder.map(si=>natPos(SQUAD[team]&&SQUAD[team][si]));
+    const pick=bestAssign(n,(i,j)=>{ const dx=(A[i].homeX-D[j].homeX)/FW, dy=(A[i].homeY-D[j].homeY)/FH; return 1.6*dx*dx+dy*dy+FIT_FAR[posFit(nat[i],D[j].pos)]; });
     const def=atkOrder.slice(0,n); for(let i=0;i<n;i++) def[pick[i]]=atkOrder[i];
     return def;
   }
@@ -12448,7 +12521,7 @@
   const MT={team:'G', phase:'atk', drop:null, sel:null};
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
   const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
-  function mtRating(e,role){ return !e?0:(!role||role===e.role)?e.ovr:cwOverall(role,e.stats); }
+  function mtRating(e,role,pos){ return !e?0:rateAt(e.role,e.ovr,e.stats,natPos(e),role,pos); }
   // how far a line's men spread down the tactics pitch: a WIDE line's end men reach its edges, so a COMPACT four still has room between its men
   const TOK_SPREAD=1.13;
   function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW;   // their own goal on the left, the lines spread as the Office draws them
@@ -12457,17 +12530,17 @@
   // the man as the match has him (his look), or as his squad entry has him if he isn't on
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
-  function mtTok(t,si,L,T,kind,role,k){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role), oop=!!role&&role!==e.role;
-    return '<button class="ptk'+(oop?' oop':'')+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
-      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
+  function mtTok(t,si,L,T,kind,role,k,pos){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);
+    return '<button class="ptk'+fitCls(natPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
-    const at=mtRating(e,role), oop=!!role&&role!==e.role, sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
+    const pos=si===li.gk?'GK':sl?sl.pos:null, at=mtRating(e,role,pos), fc=fitCls(natPos(e),role,pos), sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
     const instr=t==='G'&&cardSide==='instr';                          // (their instructions are theirs: their men show their ratings)
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
       +legs+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+(t==='G'?cardFlip():'')+'</div></div>';
     if(!instr) return h+sixHtml(e.stats,e.role)+'</div>';
     h+='</div><div class="tacInstr">';
     if(si===li.gk) return h+instrPanelHtml(gkGet(PI[t]),'GK','atk','mgi',false,true)+'</div>';   // (his own, on both tabs)
@@ -12491,8 +12564,8 @@
     const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
       h+=ghostTok(q.L,q.T,e.num,surname(e.name),q.k); }
-    h+=mtTok(t,li.gk,5.5,50,'gk','GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k); }
+    h+=mtTok(t,li.gk,5.5,50,'gk','GK',0,'GK');
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k,slots[i].pos); }
     h+='</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
@@ -12536,8 +12609,8 @@
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
     can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtCanSub(MT.team)); },
     lift(el){ const e=SQUAD[MT.team][+el.dataset.si]; if(!e) return;
-      for(const t of document.querySelectorAll('#mtacBody .ptk[data-si]')){ if(t===el) continue; t.classList.add('canswap'); const role=t.dataset.role;
-        if(role){ t.dataset.fit=mtRating(e,role); t.classList.toggle('fitOop',role!==e.role); } } },
+      for(const t of document.querySelectorAll('#mtacBody .ptk[data-si]')){ if(t===el) continue; t.classList.add('canswap'); const role=t.dataset.role, pos=t.dataset.pos;
+        if(role){ const fc=fitCls(natPos(e),role,pos); t.dataset.fit=mtRating(e,role,pos); t.classList.toggle('fitOop',fc===' oop'); t.classList.toggle('fitSec',fc===' sec'); } } },
     drop(a,b){ mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si:+b.dataset.si,kind:b.dataset.mtk}); renderMatchTac(); },
     cancel(){ renderMatchTac(); } });
   // ===== IN-GAME PAUSE MENU (Tactics / Settings / Exit / Back) =====
@@ -12557,12 +12630,92 @@
   function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
     if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
     else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
+  // ===== THE SKILL MOVES PAGE (SKILL MOVES on the start menu and the pause menu): every move -- its name and stars, what
+  // to draw for it and a clip of a man doing it. The clips are the game's own: tools/clips/record_skill_clips.cjs records
+  // each move as a match plays it (a man running at one of theirs 3 m ahead, the move, and on), every 1/30 s -- where he
+  // and that man are, their sprites' frames, and the ball -- and they're played back here with the game's sprites. =====
+  const SKILL_CLIPS = {"sig":3418065725,"flick":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,1,0,70,6,0,0,4,-5,0,0,-14,0,1,1,0,70,6,0,0,4,13,0,0,-9,0,1,2,0,70,6,0,0,4,16,0,0,-4,0,1,2,0,70,6,0,0,4,19,0,0,1,0,1,0,0,70,6,0,0,4,22,0,0,6,0,1,0,0,70,6,0,0,4,34,0,0,11,0,1,0,0,70,6,0,0,4,39,0,0,16,0,1,2,0,70,6,0,0,4,45,-2,2,22,-1,1,3,0,70,6,0,0,5,53,-7,4,27,-2,1,3,0,70,6,0,0,5,60,-11,5,32,-3,1,0,0,70,6,0,0,5,59,-11,6,37,-5,1,0,0,70,6,0,0,5,61,-13,6,42,-7,1,0,7,70,6,0,0,6,63,-16,5,46,-9,1,1,7,70,6,0,0,6,65,-18,4,51,-12,1,1,7,70,6,0,0,6,68,-20,2,54,-16,1,1,7,70,6,0,0,6,71,-23,0,58,-19,1,2,7,70,6,0,0,6,74,-26,0,62,-23,1,2,7,70,6,0,0,6,78,-29,1,66,-26,1,3,7,70,6,0,0,6,81,-32,1,70,-29,1,3,7,70,6,0,0,6,85,-35,0,74,-32,1,3,7,70,6,0,0,7,89,-38,0,78,-35,1,0,7,70,6,0,0,7,104,-45,0,83,-37,1,0,7,70,6,0,0,7,106,-47,0,87,-40,1,0,7,70,6,0,0,7,108,-49,0,91,-43,1,1,7,70,6,0,0,7,110,-51,0,96,-45,1,1,7,70,6,0,0,7,113,-54,0,100,-48,1,1,7,70,6,0,0,7,116,-56,0]},"dragback":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-21,-2,0,-30,0,1,3,0,70,6,0,0,4,-16,-2,0,-25,0,1,3,0,70,6,0,0,4,-10,-2,0,-19,0,1,3,0,70,6,0,0,4,-5,-1,0,-14,0,1,0,0,70,6,0,0,4,0,-1,0,-9,0,1,0,0,70,6,0,0,4,17,-2,0,-4,0,1,0,0,70,6,0,0,4,20,-1,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,32,0,0,11,0,1,0,0,70,6,0,0,4,33,1,0,15,0,1,1,0,70,6,0,0,4,31,2,0,18,0,1,1,0,70,6,0,0,4,27,3,0,21,0,1,2,1,70,6,0,0,4,21,4,0,23,0,1,2,2,70,6,0,0,4,15,6,0,24,0,1,3,2,70,6,0,0,4,9,7,0,24,0,1,3,3,70,6,0,0,4,5,8,0,24,0,1,0,3,70,6,0,0,4,1,8,0,24,0,1,1,4,70,6,0,0,4,0,9,0,21,1,1,1,4,70,6,0,0,4,-1,9,0,16,3,1,1,4,70,6,0,0,4,-4,10,0,11,5,1,2,4,70,6,0,0,4,-7,11,0,6,6,1,2,4,70,6,0,0,4,-11,12,0,1,8,1,2,4,70,6,0,0,4,-15,14,0,-3,10,1,3,4,70,6,0,0,4,-19,15,0,-8,11,1,3,4,70,6,0,0,4,-24,17,0,-13,13,1,0,4,70,6,0,0,4,-28,18,0,-18,15,1,0,4,70,6,0,0,4,-33,20,0,-23,17,1,0,4,70,6,0,0,4,-37,22,0,-28,18,1,1,4,70,6,0,0,4,-54,27,0,-32,20,1,1,4,70,6,0,0,4,-56,28,0,-37,22,1,1,4,70,6,0,0,4,-59,29,0,-42,23,1,2,4,70,6,0,0,4,-61,30,0,-47,25,1,2,4,70,6,0,0,4,-65,31,0,-52,27,1,2,4,70,6,0,0,4,-69,33,0,-56,28,1,3,4,70,6,0,0,4,-73,34,0]},"croq":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-30,3,0,-30,0,1,0,0,70,6,0,0,4,-35,7,0,-25,0,1,0,0,70,6,0,0,4,-36,11,0,-19,0,1,0,0,70,6,0,0,4,-34,15,0,-14,0,1,1,0,70,6,0,0,4,-30,17,0,-9,0,1,1,0,70,6,0,0,4,-28,19,0,-4,0,1,2,0,70,6,0,0,4,-26,21,0,1,0,1,0,0,70,6,0,0,4,-21,23,0,4,2,1,0,0,70,6,0,0,4,26,-8,0,6,6,1,0,0,70,6,0,0,4,28,-1,0,9,12,1,1,0,70,6,0,0,4,31,10,0,11,19,1,1,0,70,6,0,0,3,34,22,0,14,27,1,2,0,70,6,0,0,3,36,34,0,16,34,1,2,0,70,6,0,0,3,39,45,0,19,40,1,3,0,70,6,0,0,3,41,54,0,22,44,1,3,0,70,6,0,0,3,44,59,0,24,46,1,0,0,70,6,0,0,3,46,60,0,28,46,1,2,0,70,6,0,0,2,50,57,0,33,46,1,2,0,70,6,0,0,2,53,54,0,38,46,1,3,0,70,6,0,0,2,57,52,0,43,46,1,3,0,70,6,0,0,2,61,50,0,48,46,1,0,0,70,6,0,0,2,65,49,0,54,46,1,0,0,70,6,0,0,2,70,48,0,59,46,1,0,0,70,6,0,0,2,75,47,0,64,46,1,1,0,70,6,0,0,2,80,47,0,69,46,1,1,0,70,6,0,0,2,85,47,0,74,46,1,1,0,70,6,0,0,1,90,46,0,79,46,1,2,0,70,6,0,0,1,107,47,0,84,46,1,2,0,70,6,0,0,1,110,47,0,89,46,1,2,0,70,6,0,0,1,112,46,0,94,46,1,3,0,70,6,0,0,1,115,46,0,100,46,1,3,0,70,6,0,0,1,119,46,0,105,46,1,0,0,70,6,0,0,1,123,46,0,110,46,1,0,0,70,6,0,0,1,127,46,0]},"spin":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,1,0,70,6,0,0,4,-21,0,0,-30,0,1,1,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,2,0,70,6,0,0,4,-5,0,0,-14,0,1,2,0,70,6,0,0,4,12,0,0,-9,0,1,2,0,70,6,0,0,4,15,0,0,-4,0,1,3,0,70,6,0,0,4,17,0,0,1,0,1,0,0,70,6,0,0,4,21,0,0,1,-1,1,0,0,70,6,0,0,4,23,0,0,2,-3,1,0,0,70,6,0,0,4,24,2,0,3,-6,1,1,1,70,6,0,0,4,22,4,0,4,-9,1,1,1,70,6,0,0,4,19,6,0,5,-14,1,2,2,70,6,0,0,4,12,5,0,7,-19,1,2,2,70,6,0,0,4,3,0,0,9,-24,1,3,3,70,6,0,0,4,-5,-10,0,10,-30,1,3,4,70,6,0,0,4,-10,-25,0,12,-35,1,0,4,70,6,0,0,5,-9,-42,0,14,-40,1,0,5,70,6,0,0,5,-3,-57,0,15,-45,1,1,5,70,6,0,0,5,7,-68,0,16,-50,1,1,6,70,6,0,0,5,17,-74,0,18,-53,1,2,6,70,6,0,0,5,25,-76,0,18,-56,1,2,7,70,6,0,0,5,31,-75,0,19,-58,1,3,7,70,6,0,0,5,34,-74,0,19,-58,1,3,7,70,6,0,0,5,35,-74,0,22,-61,1,0,7,70,6,0,0,6,37,-76,0,26,-65,1,0,7,70,6,0,0,6,40,-79,0,30,-69,1,0,7,70,6,0,0,6,42,-81,0,33,-72,1,1,7,70,6,0,0,6,45,-84,0,37,-76,1,1,7,70,6,0,0,6,49,-88,0,40,-79,1,1,7,70,6,0,0,6,52,-91,0,44,-83,1,2,7,70,6,0,0,6,55,-94,0,48,-87,1,2,7,70,6,0,0,6,59,-98,0,51,-90,1,2,7,70,6,0,0,6,62,-101,0,55,-94,1,3,7,70,6,0,0,6,66,-105,0,58,-97,1,3,7,70,6,0,0,6,78,-117,0,62,-101,1,0,7,70,6,0,0,6,80,-119,0,66,-105,1,0,7,70,6,0,0,6,82,-121,0,69,-108,1,0,7,70,6,0,0,6,84,-123,0,73,-112,1,1,7,70,6,0,0,6,86,-125,0,77,-116,1,1,7,70,6,0,0,6,89,-128,0,80,-119,1,1,7,70,6,0,0,6,92,-131,0]},"cruyff":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-22,-3,0,-30,0,1,2,0,70,6,0,0,4,-17,-4,0,-25,0,1,3,0,70,6,0,0,4,-12,-4,0,-19,0,1,3,0,70,6,0,0,4,-6,-3,0,-14,0,1,3,0,70,6,0,0,4,13,-5,0,-9,0,1,0,0,70,6,0,0,4,16,-5,0,-4,0,1,0,0,70,6,0,0,4,18,-3,0,1,0,1,0,0,70,6,0,0,4,21,-2,0,6,0,1,0,0,70,6,0,0,4,33,1,0,11,0,1,0,0,70,6,0,0,4,35,5,0,15,0,1,1,0,70,6,0,0,4,35,9,0,19,0,1,1,0,70,6,0,0,4,33,14,0,22,0,1,2,0,70,6,0,0,4,30,19,0,24,0,1,2,0,70,6,0,0,4,27,21,0,26,0,1,3,1,70,6,0,0,4,23,22,0,27,0,1,3,2,70,6,0,0,4,19,22,0,27,0,1,0,2,70,6,0,0,4,15,21,0,27,0,1,0,3,70,6,0,0,4,13,20,0,27,0,1,0,3,70,6,0,0,4,12,21,0,24,4,1,1,3,70,6,0,0,4,10,23,0,21,8,1,1,3,70,6,0,0,4,9,25,0,18,12,1,2,3,70,6,0,0,4,7,28,0,15,16,1,2,3,70,6,0,0,4,4,31,0,12,20,1,2,3,70,6,0,0,4,2,34,0,9,24,1,3,3,70,6,0,0,3,-1,38,0,6,29,1,3,3,70,6,0,0,3,-4,42,0,3,33,1,3,3,70,6,0,0,3,-7,45,0,0,37,1,0,3,70,6,0,0,3,-10,49,0,-3,41,1,0,3,70,6,0,0,3,-13,53,0,-6,45,1,0,3,70,6,0,0,3,-23,67,0,-9,49,1,1,3,70,6,0,0,3,-24,69,0,-12,53,1,1,3,70,6,0,0,3,-26,71,0,-15,57,1,2,3,70,6,0,0,3,-28,74,0,-18,61,1,2,3,70,6,0,0,3,-30,76,0,-22,65,1,2,3,70,6,0,0,3,-32,80,0,-25,69,1,3,3,70,6,0,0,3,-35,83,0]},"rainbow":{"fps":30,"f":[-40,0,1,3,0,70,14,0,0,4,-26,0,0,-35,0,1,3,0,70,14,0,0,4,-28,4,0,-30,0,1,0,0,70,14,0,0,4,-30,10,0,-25,0,1,0,0,70,14,0,0,4,-29,14,0,-19,0,1,0,0,70,14,0,0,4,-24,17,0,-14,0,1,1,0,70,14,0,0,4,-21,23,0,-9,0,1,1,0,70,14,0,0,4,-19,24,0,-4,0,1,1,0,70,14,0,0,4,-15,26,0,1,0,1,0,0,70,14,0,0,4,-10,26,0,6,0,1,0,0,70,14,0,0,4,33,0,0,11,0,1,0,0,70,14,0,0,4,35,0,0,16,0,1,1,0,70,14,0,0,5,36,0,1,20,0,1,1,0,70,14,0,0,4,36,0,2,24,0,1,2,0,70,14,0,0,4,35,0,4,27,0,1,2,0,70,14,0,0,4,34,0,6,30,0,1,3,0,70,14,0,0,4,32,0,10,33,0,1,3,0,70,14,0,0,4,30,0,13,35,0,1,0,0,70,14,0,0,4,30,0,16,37,0,1,0,0,70,14,0,0,4,30,0,18,39,0,1,2,0,70,14,0,0,4,34,0,23,46,0,1,2,0,70,14,0,0,5,40,0,32,50,-3,1,3,1,70,14,0,0,5,47,0,41,53,-7,1,3,1,70,14,0,0,5,53,0,49,58,-10,1,0,7,70,14,0,0,5,59,0,56,64,-12,1,0,0,70,14,0,0,6,65,0,63,71,-15,1,1,0,70,14,0,0,6,71,0,70,79,-16,1,1,0,70,14,0,0,7,78,0,76,86,-17,1,2,0,70,14,0,0,7,84,0,81,93,-18,1,2,0,70,14,0,0,7,90,0,86,101,-18,1,3,0,70,14,0,0,7,96,0,90,108,-18,1,3,1,70,14,0,0,7,103,0,93,115,-17,1,0,1,70,14,0,0,0,109,0,96,120,-17,1,0,1,70,14,0,0,0,115,0,98,125,-17,1,0,2,70,14,0,0,0,121,0,100,129,-16,1,1,0,70,14,0,0,0,127,0,101,136,-15,1,1,0,70,14,0,0,0,134,0,102,144,-15,1,2,0,70,14,0,0,0,140,0,102,151,-14,1,2,1,70,14,0,0,0,146,0,101,158,-13,1,3,1,70,14,0,0,0,152,0,100,163,-12,1,3,2,70,14,0,0,0,159,0,99,168,-12,1,0,2,70,14,0,0,0,165,0,96,172,-11,1,0,0,70,14,0,0,0,171,0,94,179,-10,1,0,0,70,14,0,0,0,177,0,90,187,-9,1,1,1,70,14,0,0,0,183,0,86,194,-8,1,1,1,70,14,0,0,0,190,0,81,200,-7,1,2,1,70,14,0,0,0,196,0,76,205,-7,1,2,2,70,14,0,0,0,202,0,71,209,-6,1,2,2,70,14,0,0,0,208,0,64,215,-5,1,3,0,70,14,0,0,0,215,0,57,222,-4,1,3,0,70,14,0,0,0,221,0,50,230,-3,1,0,1,70,14,0,0,0,227,0,42,237,-2,1,0,1,70,14,0,0,0,233,0,33,243,-2,1,1,1,70,14,0,0,0,240,0,24,248,-1,1,1,2,70,14,0,0,0,246,0,14,251,0,1,2,0,70,14,0,0,0,278,3,4,255,0,1,2,0,70,14,0,0,0,280,3,2,260,0,1,2,0,70,14,0,0,0,282,2,6,267,1,1,3,0,70,14,0,0,0,286,2,10,274,1,1,3,0,70,14,0,0,0,291,2,13,281,1,1,0,0,70,14,0,0,0,296,1,15,288,1,1,0,0,70,14,0,0,0,302,1,17,295,1,1,1,0,70,14,0,0,0,309,1,18,302,1,1,1,0,70,14,0,0,0,315,1,19,309,1,1,2,0,70,14,0,0,0,324,1,19,316,2,1,2,0,70,14,0,0,0,343,-1,20,323,2,1,3,0,70,14,0,0,0,353,-2,20,331,2,1,3,0,70,14,0,0,0,363,-3,20,338,2,1,0,0,70,14,0,0,0,373,-4,19,345,2,1,0,0,70,14,0,0,0,383,-5,17,352,2,1,1,0,70,14,0,0,0,393,-6,15,359,2,1,1,0,70,14,0,0,0,404,-7,12,367,2,1,2,0,70,14,0,0,0,413,-8,9,374,2,1,2,0,70,14,0,0,0,422,-8,5,381,2,1,3,0,70,14,0,0,0,431,-9,1,388,2,1,3,0,70,14,0,0,0,439,-10,1,395,2,1,0,0,70,14,0,0,0,446,-11,2,403,2,1,0,0,70,14,0,0,0,453,-11,3,410,2,1,1,0,70,14,0,0,0,459,-12,4,417,2,1,1,0,70,14,0,0,0,465,-13,3,424,2,1,2,0,70,14,0,0,0,470,-13,3,431,2,1,2,0,70,14,0,0,0,476,-14,1,438,2,1,3,0,70,14,0,0,0,480,-14,0,445,2,1,3,0,70,14,0,0,0,485,-14,1,453,2,1,0,0,70,14,0,0,0,489,-15,0,459,2,1,0,0,70,14,0,0,0,484,-10,0,466,2,1,1,0,70,14,0,0,0,488,-8,0,473,2,1,1,0,70,14,0,0,0,492,-6,0,480,2,1,2,0,70,14,0,0,0,497,-4,0,486,2,1,2,0,70,14,0,0,0,502,-2,0,493,2,1,3,0,70,14,0,0,0,508,-1,0,500,2,1,3,0,70,14,0,0,0,514,0,0,506,2,1,0,0,70,14,0,0,0,520,0,0,513,2,1,0,0,70,14,0,0,0,541,-1,0,520,2,1,1,0,70,14,0,0,0,545,0,0,527,2,1,1,0,70,14,0,0,0,548,0,0,533,2,1,2,0,70,14,0,0,0,552,1,0,540,2,1,2,0,70,14,0,0,0,557,1,0,546,2,1,3,0,70,14,0,0,0,562,1,0,553,2,1,3,0,70,14,0,0,0,568,1,0,560,2,1,0,0,70,14,0,0,0,574,1,0,566,2,1,0,0,70,14,0,0,0,580,1,0]},"sombrero":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,1,0,70,6,0,0,4,-21,0,0,-30,0,1,1,0,70,6,0,0,4,-15,0,0,-25,0,1,2,0,70,6,0,0,4,-10,0,0,-20,0,1,2,0,70,6,0,0,4,-5,0,0,-15,0,1,2,0,70,6,0,0,4,1,0,0,-10,0,1,3,0,70,6,0,0,4,6,0,0,-4,0,1,3,0,70,6,0,0,4,11,0,0,1,0,1,0,0,70,6,0,0,4,16,0,0,5,0,1,0,0,70,6,0,0,4,33,0,2,9,0,1,0,0,70,6,0,0,4,36,0,6,12,0,1,1,0,70,6,0,0,4,38,0,11,13,0,1,1,0,70,6,0,0,4,39,0,15,14,0,1,3,1,70,6,0,0,4,41,0,20,19,3,1,0,0,70,6,0,0,4,44,0,29,23,6,1,0,0,70,6,0,0,4,47,0,36,27,9,1,1,0,70,6,0,0,4,50,0,43,31,12,1,1,7,70,6,0,0,4,53,0,50,34,15,1,1,7,70,6,0,0,5,56,0,56,38,18,1,2,7,70,6,0,0,5,59,0,61,41,20,1,2,7,70,6,0,0,5,63,0,66,45,23,1,2,7,70,6,0,0,5,66,0,70,48,25,1,3,7,70,6,0,0,6,69,0,74,52,28,1,3,7,70,6,0,0,6,72,0,77,55,30,1,3,7,70,6,0,0,7,75,0,80,59,32,1,3,7,70,6,0,0,7,78,0,82,64,32,1,0,7,70,6,0,0,7,81,0,83,69,32,1,0,7,70,6,0,0,7,84,0,84,73,32,1,0,7,70,6,0,0,0,87,0,84,78,31,1,1,6,70,6,0,0,0,90,0,83,83,29,1,1,6,70,6,0,0,0,93,0,82,87,27,1,1,6,70,6,0,0,0,96,0,81,92,26,1,2,6,70,6,0,0,0,99,0,79,97,24,1,2,6,70,6,0,0,0,103,0,76,101,21,1,3,6,70,6,0,0,0,106,0,73,105,19,1,3,6,70,6,0,0,0,109,0,69,110,17,1,3,6,70,6,0,0,0,112,0,65,114,15,1,0,6,70,6,0,0,0,115,0,60,118,12,1,0,6,70,6,0,0,0,118,0,54,122,10,1,0,6,70,6,0,0,0,121,0,48,126,8,1,1,6,70,6,0,0,0,124,0,41,130,6,1,1,6,70,6,0,0,0,127,0,34,134,4,1,1,5,70,6,0,0,0,130,0,26,136,2,1,1,5,70,6,0,0,0,133,0,17,138,1,1,2,5,70,6,0,0,0,136,0,8,140,0,1,2,7,70,6,0,0,0,162,-13,0,143,-1,1,2,0,70,6,0,0,0,164,-13,4,147,-2,1,2,0,70,6,0,0,0,166,-11,7,152,-3,1,3,0,70,6,0,0,0,170,-9,10,157,-4,1,3,0,70,6,0,0,0,174,-7,12,162,-4,1,3,0,70,6,0,0,0,179,-6,14,167,-4,1,0,0,70,6,0,0,0,184,-5,15,172,-5,1,0,0,70,6,0,0,0,188,-5,16,178,-5,1,0,0,70,6,0,0,0,193,-5,16,183,-5,1,1,0,70,6,0,0,0,198,-5,15,188,-5,1,1,0,70,6,0,0,0,203,-5,14,193,-5,1,2,0,70,6,0,0,0,208,-5,12,198,-5,1,2,0,70,6,0,0,0,224,-5,9,203,-5,1,2,0,70,6,0,0,0,227,-5,7,208,-5,1,3,0,70,6,0,0,0,230,-5,3,213,-5,1,3,0,70,6,0,0,0,233,-5,0,218,-5,1,3,0,70,6,0,0,0,237,-5,1]},"elastico":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-20,0,1,1,0,70,6,0,0,4,-5,0,0,-15,0,1,1,0,70,6,0,0,4,1,0,0,-10,0,1,2,0,70,6,0,0,4,6,0,0,-4,0,1,2,0,70,6,0,0,4,22,0,0,1,0,1,0,0,70,6,0,0,4,25,0,0,4,1,1,0,0,70,6,0,0,4,26,3,0,7,2,1,0,0,70,6,0,0,4,29,7,0,10,3,1,1,0,70,6,0,0,4,32,11,0,13,4,1,1,0,70,6,0,0,4,35,14,0,16,4,1,2,0,70,6,0,0,4,38,17,0,19,4,1,2,7,70,6,0,0,4,43,15,3,23,1,1,3,7,70,6,0,0,4,50,9,6,27,-3,1,3,7,70,6,0,0,4,56,4,9,31,-6,1,0,7,70,6,0,0,5,57,-2,11,35,-10,1,0,7,70,6,0,0,5,59,-4,13,38,-13,1,0,7,70,6,0,0,5,61,-7,13,42,-16,1,1,7,70,6,0,0,6,63,-13,14,46,-19,1,1,7,70,6,0,0,6,65,-19,14,50,-22,1,1,7,70,6,0,0,6,67,-25,13,54,-25,1,2,7,70,6,0,0,6,70,-30,12,58,-29,1,2,7,70,6,0,0,6,73,-34,10,63,-32,1,2,7,70,6,0,0,6,76,-39,7,67,-35,1,3,7,70,6,0,0,6,80,-42,4,71,-38,1,3,7,70,6,0,0,6,84,-46,0,75,-41,1,0,7,70,6,0,0,6,88,-49,1,79,-44,1,0,7,70,6,0,0,7,101,-58,2,83,-47,1,0,7,70,6,0,0,7,103,-60,2,87,-50,1,1,7,70,6,0,0,7,105,-62,2,91,-53,1,1,7,70,6,0,0,7,107,-64,2,95,-56,1,1,7,70,6,0,0,7,110,-67,1]},"heel":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-22,-2,0,-30,0,1,2,0,70,6,0,0,4,-16,-3,0,-25,0,1,3,0,70,6,0,0,4,-11,-2,0,-20,0,1,3,0,70,6,0,0,4,-5,-2,0,-15,0,1,3,0,70,6,0,0,4,0,-1,0,-10,0,1,0,0,70,6,0,0,4,18,-2,0,-4,0,1,0,0,70,6,0,0,4,21,-2,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,31,1,0,10,0,1,0,0,70,6,0,0,4,32,4,0,14,0,1,1,0,70,6,0,0,4,30,8,0,18,0,1,1,0,70,6,0,0,4,27,12,0,21,0,1,2,0,70,6,0,0,4,24,16,0,23,0,1,2,0,70,6,0,0,4,21,19,0,25,0,1,3,0,70,6,0,0,4,21,20,0,28,-1,1,1,7,70,6,0,0,4,27,23,2,33,-4,1,1,7,70,6,0,0,3,32,27,3,37,-7,1,2,7,70,6,0,0,3,37,30,3,42,-10,1,2,7,70,6,0,0,3,41,32,2,46,-13,1,2,0,70,6,0,0,3,45,35,1,51,-15,1,3,0,70,6,0,0,3,49,37,0,55,-18,1,3,0,70,6,0,0,3,53,40,0,59,-21,1,3,1,70,6,0,0,2,56,42,0,63,-23,1,0,1,70,6,0,0,2,59,44,0,66,-25,1,0,2,70,6,0,0,2,62,45,0,69,-27,1,0,2,70,6,0,0,2,65,47,0,72,-29,1,0,2,70,6,0,0,2,67,49,0,75,-30,1,1,2,70,6,0,0,2,69,50,0,78,-30,1,1,2,70,6,0,0,2,71,51,0,80,-30,1,1,2,70,6,0,0,2,73,53,0,82,-29,1,1,2,70,6,0,0,2,75,54,0,85,-27,1,1,2,70,6,0,0,2,77,55,0,87,-23,1,2,2,70,6,0,0,2,78,56,0,89,-18,1,2,2,70,6,0,0,2,80,57,0,91,-13,1,3,2,70,6,0,0,2,81,58,0,92,-8,1,3,2,70,6,0,0,2,83,58,0,94,-3,1,3,2,70,6,0,0,2,84,59,0,96,1,1,0,2,70,6,0,0,2,85,60,0,96,7,1,0,2,70,6,0,0,2,86,60,0,96,12,1,0,2,70,6,0,0,2,87,61,0,95,17,1,1,2,70,6,0,0,2,88,62,0,94,23,1,1,2,70,6,0,0,2,89,62,0,94,28,1,2,2,70,6,0,0,2,90,54,0,94,32,1,2,2,70,6,0,0,2,91,56,0,95,36,1,2,2,70,6,0,0,1,93,58,0,98,41,1,3,1,70,6,0,0,1,98,59,0,101,45,1,3,1,70,6,0,0,1,104,59,0,105,48,1,3,1,70,6,0,0,1,111,58,0,110,50,1,0,1,70,6,0,0,1,118,56,0,114,52,1,0,0,70,6,0,0,1,125,55,0,119,53,1,0,0,70,6,0,0,1,132,54,0,124,54,1,1,0,70,6,0,0,1,138,54,0,129,54,1,1,0,70,6,0,0,1,143,54,0,134,55,1,1,0,70,6,0,0,1,162,53,0,139,55,1,2,0,70,6,0,0,1,165,53,0,144,55,1,2,0,70,6,0,0,1,167,54,0,149,56,1,3,0,70,6,0,0,1,170,54,0,155,56,1,3,0,70,6,0,0,1,174,55,0,160,56,1,3,0,70,6,0,0,1,178,55,0]}};
+  // what to draw, as for a man running to the right: u ahead, v across (+ his right, down the screen) -- the moves the clips
+  // show: the croqueta to his right, the roulette clockwise, the elastico back to his left, the heel flick's ball to his right
+  const SKILL_DRAWS=(()=>{ const arc=(r,turn,n,sg)=>{ const a=[]; for(let i=0;i<=n;i++){ const t=i/n*turn; a.push([r*Math.sin(t),sg*(r-r*Math.cos(t))]); } return a; };
+    return { flick:[[0,0],[40,-23]], dragback:[[0,0],[-40,14]], croq:[[0,0],[34,0],[34,30]], spin:arc(22,Math.PI*1.9,30,1), cruyff:arc(26,Math.PI,20,1),
+      rainbow:[[0,0],[-34,-5],[6,9]], sombrero:[[0,0],[34,-5],[-6,9]], elastico:[[0,0],[5,30],[9,-8]], heel:arc(16,Math.PI*2,26,-1).concat([[40,24]]) }; })();
+  const SK_SPEED=0.8, SK_DEPTH=0.55, SK_MAN={team:'G',lookKey:'skill-clip-man'}, SK_DEF={team:'R',lookKey:'skill-clip-def'}, SK_ANIMS=['idle','run','shoot','pass','slide'];
+  let skRaf=0;
+  function openSkills(){ skillsOpen=true; renderSkills(); document.getElementById('skillsOverlay').classList.add('on'); skAnimate(); }
+  function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
+  document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')) closeSkills(); };
+  function renderSkills(){
+    document.getElementById('skHint').innerHTML=(isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')+'; ahead is the way he\'s going, <b>→</b> here';
+    document.getElementById('skGrid').innerHTML=SKILL_KINDS.map(k=>'<div class="skCard fitWhole" data-sk="'+k+'"><canvas class="skDraw"></canvas><canvas class="skClip"></canvas>'
+      +'<div class="skTxt"><span class="skName">'+SKILL_NAME[k]+'</span>'+starsHtml(SKILL_STARS[k])+'</div></div>').join(''); }
+  // a canvas at its size on the screen, in device pixels: true when it's (re)sized, and so wants drawing afresh
+  function skSize(cv){ const r=window.devicePixelRatio||1, w=Math.round(cv.clientWidth*r), h=Math.round(cv.clientHeight*r);
+    if(cv.width===w&&cv.height===h) return false; cv.width=w; cv.height=h; return true; }
+  function skAnimate(){ cancelAnimationFrame(skRaf); const t0=performance.now();
+    const step=now=>{ if(!skillsOpen) return;
+      for(const card of document.querySelectorAll('#skGrid .skCard')){ if(!card.getClientRects().length) continue;   // (on another page)
+        const k=card.dataset.sk, g=card.querySelector('.skDraw'), c=card.querySelector('.skClip');
+        if(skSize(g)||!g.dataset.drawn){ skDrawGesture(g,k); g.dataset.drawn=1; }
+        skSize(c); skDrawClip(c,k,(now-t0)/1000); }
+      skRaf=requestAnimationFrame(step); };
+    skRaf=requestAnimationFrame(step); }
+  // what to draw: a faint arrow along the foot for the way he's going, and the stroke, from a dot to an arrowhead
+  function skDrawGesture(cv,kind){ const pts=SKILL_DRAWS[kind], x=cv.getContext('2d'), W=cv.width, H=cv.height; if(!pts||!W||!H) return;
+    const cs=getComputedStyle(document.documentElement), acc=cs.getPropertyValue('--acc').trim()||'#ff9c40', dim=cs.getPropertyValue('--dim2').trim()||'#8091bf', r=W/50;
+    x.clearRect(0,0,W,H);
+    x.strokeStyle=dim; x.fillStyle=dim; x.lineWidth=Math.max(1,r); x.beginPath(); x.moveTo(W*0.18,H-5*r); x.lineTo(W*0.74,H-5*r); x.stroke();
+    x.beginPath(); x.moveTo(W*0.82,H-5*r); x.lineTo(W*0.72,H-8*r); x.lineTo(W*0.72,H-2*r); x.closePath(); x.fill();
+    let u0=1e9,u1=-1e9,v0=1e9,v1=-1e9; for(const [u,v] of pts){ u0=Math.min(u0,u); u1=Math.max(u1,u); v0=Math.min(v0,v); v1=Math.max(v1,v); }
+    const top=6*r, bot=H-13*r, s=Math.min((W-14*r)/Math.max(24,u1-u0),(bot-top)/Math.max(24,v1-v0)), ox=W/2-(u0+u1)/2*s, oy=(top+bot)/2-(v0+v1)/2*s, P=pts.map(([u,v])=>[ox+u*s,oy+v*s]);
+    x.strokeStyle=acc; x.fillStyle=acc; x.lineWidth=2.6*r; x.lineJoin='round'; x.lineCap='round';
+    x.beginPath(); P.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b)); x.stroke();
+    x.beginPath(); x.arc(P[0][0],P[0][1],3*r,0,Math.PI*2); x.fill();
+    const [ax,ay]=P[P.length-1], [bx,by]=P[P.length-2], an=Math.atan2(ay-by,ax-bx), h=6.5*r;
+    x.beginPath(); x.moveTo(ax+Math.cos(an)*h*0.7,ay+Math.sin(an)*h*0.7); x.lineTo(ax+Math.cos(an+2.4)*h,ay+Math.sin(an+2.4)*h); x.lineTo(ax+Math.cos(an-2.4)*h,ay+Math.sin(an-2.4)*h); x.closePath(); x.fill(); }
+  // a clip's camera, frame by frame, for a W x H canvas: on the man doing it and the ball (the other man too, near them), as
+  // close as they let it -- out as the ball goes up, in again as it comes down -- smoothed both ways, so it never lags
+  function skClipCam(c,W,H){ const key=W+'x'+H; if(c.cam&&c.cam.key===key) return c.cam;
+    const f=c.f, n=f.length/13, kMax=(window.devicePixelRatio||1)*0.95, cx=[], cy=[], ks=[];
+    for(let i=0;i<n;i++){ const o=i*13; let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+      const box=(a,b,top,bot)=>{ x0=Math.min(x0,a); x1=Math.max(x1,b); y0=Math.min(y0,top); y1=Math.max(y1,bot); };
+      box(f[o]-14,f[o]+14,f[o+1]*SK_DEPTH-50,f[o+1]*SK_DEPTH+6);                                   // him, head to toe
+      box(f[o+10]-6,f[o+10]+6,f[o+11]*SK_DEPTH-f[o+12]-18,f[o+11]*SK_DEPTH+4);                     // the ball, in the air or not
+      if(Math.abs(f[o+5]-f[o])<120) box(f[o+5]-14,f[o+5]+14,f[o+6]*SK_DEPTH-50,f[o+6]*SK_DEPTH+6);  // the other man, near him
+      const w=Math.max(x1-x0+16,90), h=Math.max(y1-y0+10,64); ks.push(Math.min(W/w,H/h,kMax)); cx.push((x0+x1)/2); cy.push((y0+y1)/2); }
+    const smooth=a=>{ const A=0.22; for(let i=1;i<n;i++) a[i]=a[i-1]+(a[i]-a[i-1])*A; for(let i=n-2;i>=0;i--) a[i]=a[i+1]+(a[i]-a[i+1])*A; return a; };
+    smooth(cx); smooth(cy); smooth(ks);
+    for(let i=0;i<n;i++){ const o=i*13, hw=Math.max(cx[i]-Math.min(f[o],f[o+10])+16, Math.max(f[o],f[o+10])-cx[i]+16),   // (never so close, round where it's looking, that he or the ball is out of it)
+      top=Math.min(f[o+1]*SK_DEPTH-50, f[o+11]*SK_DEPTH-f[o+12]-18), bot=Math.max(f[o+1]*SK_DEPTH+6, f[o+11]*SK_DEPTH+4), hh=Math.max(cy[i]-top, bot-cy[i])+4;
+      ks[i]=Math.min(ks[i], W/2/hw, H/2/hh); }
+    return c.cam={key, x:cx, y:cy, k:ks}; }
+  // the clip at t s: the grass, the shadows, the ring under the man doing it, then him, the other man and the ball, back to front
+  function skDrawClip(cv,kind,t){ const c=SKILL_CLIPS[kind], x=cv.getContext('2d'), W=cv.width, H=cv.height; if(!W||!H) return;
+    x.imageSmoothingEnabled=false;
+    if(!c||!c.f||!c.f.length){ x.fillStyle='#6ec88b'; x.fillRect(0,0,W,H); return; }
+    const n=c.f.length/13, loop=n/c.fps+0.7, fi=Math.min(n-1,((t*SK_SPEED)%loop)*c.fps), i0=Math.floor(fi), i1=Math.min(n-1,i0+1), a=fi-i0;
+    const cam=skClipCam(c,W,H), Lc=arr=>arr[i0]+(arr[i1]-arr[i0])*a, k=Lc(cam.k), ox=W/2-Lc(cam.x)*k, oy=H/2-Lc(cam.y)*k;
+    const sw=24*k; for(let gx=Math.floor(-ox/sw)*sw;gx<W-ox;gx+=sw){ x.fillStyle=Math.round(gx/sw)%2?'#5cbc7c':'#6ec88b'; x.fillRect(Math.floor(ox+gx),0,Math.ceil(sw)+1,H); }   // (mown as the tactics pitch is, going by)
+    const F=(i,j)=>c.f[i*13+j], L=j=>F(i0,j)+(F(i1,j)-F(i0,j))*a;
+    const S=(px,py,pz)=>[ox+px*k, oy+(py*SK_DEPTH-(pz||0))*k], K=k*((SPRITE.cfg&&SPRITE.cfg.scale)||1.7);
+    const man={p:SK_MAN,x:L(0),y:L(1),an:F(i0,2),fr:F(i0,3),dir:F(i0,4)}, def={p:SK_DEF,x:L(5),y:L(6),an:F(i0,7),fr:F(i0,8),dir:F(i0,9)}, ball={x:L(10),y:L(11),z:Math.max(0,L(12))};
+    for(const q of [def,man]){ const [sx,sy]=S(q.x,q.y); SPRITE.shadowTo(x,sx,sy,k); }
+    { const [sx,sy]=S(ball.x,ball.y); BALL_ART.shadowTo(x,sx,sy,K,ball.z>4?clamp(1-ball.z/300,0.45,1):1); }
+    { const [sx,sy]=S(man.x,man.y); x.strokeStyle='#9dff3c'; x.lineWidth=Math.max(1,k*1.1); x.beginPath(); x.ellipse(sx,sy,9*k,3.6*k,0,0,Math.PI*2); x.stroke(); }
+    const draw=[{y:def.y,d:()=>skMan(x,def,S,k)},{y:man.y,d:()=>skMan(x,man,S,k)},
+      {y:ball.y+0.5,d:()=>{ const [sx,sy]=S(ball.x,ball.y,ball.z); BALL_ART.drawTo(x,sx,sy,K,(ball.x+ball.y)/9); }}].sort((p,q)=>p.y-q.y);
+    for(const o of draw) o.d(); }
+  function skMan(x,q,S,k){ const [sx,sy]=S(q.x,q.y);
+    if(SPRITE.drawTo(x,q.p,SK_ANIMS[q.an]||'idle',q.fr,q.dir,sx,sy,k)) return;
+    const h=26*k, w=9*k; x.fillStyle=q.p.team==='G'?'#84dc34':'#d43434'; x.fillRect(sx-w/2,sy-h,w,h);   // (the plain man, with the sprites off)
+    x.fillStyle='#f2d0b0'; x.beginPath(); x.arc(sx,sy-h-4*k,5*k,0,Math.PI*2); x.fill(); }
   function openSettings(){ renderSetRows(); showDevDials(false); settingsOpen=true; document.getElementById('settingsOverlay').classList.add('on'); }
   function closeSettings(){ showDevDials(false); settingsOpen=false; document.getElementById('settingsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
   document.getElementById('pauseMenu').onclick=(e)=>{ const b=e.target.closest('[data-pause]'); if(!b)return; const a=b.dataset.pause;
     if(a==='tactics'){ closePause(); openMatchTac(); }
     else if(a==='oldtac'){ closePause(); openMenu(); }
     else if(a==='settings'){ closePause(); openSettings(); }
+    else if(a==='skills'){ closePause(); openSkills(); }
     else if(a==='exit'){ closePause(); pauseFromMatch(); }
     else { closePause(); } };
   document.getElementById('settingsOverlay').onclick=(e)=>{ const pf=e.target.closest('[data-pref]');
@@ -12672,6 +12825,7 @@
   window.addEventListener('keydown',e=>{ if(teOpen) return; if(e.key==='Escape'){
     if(layoutOpen){ layoutDone(); }           // button layout -> back to settings (what you've moved is kept)
     else if(menuOpen){ if(document.getElementById('mtacOv').classList.contains('on')) closeMatchTac(); else closeMenu(); }   // tactics -> back to menu list
+    else if(skillsOpen){ closeSkills(); }     // skill moves -> back to menu list
     else if(settingsOpen){ closeSettings(); } // settings -> back to menu list
     else if(pauseOpen){ closePause(); }       // menu list -> resume
     else if(SCREEN==='match'){ openPause(); }  // match -> open menu list
@@ -12883,7 +13037,7 @@
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
       let s=R[lu.gk]?ovrAt(R[lu.gk],'GK'):30;
-      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?0.5*(ovrAt(p,A[i]&&A[i].role)+ovrAt(p,D[j]&&D[j].role)):30; });
+      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?0.5*(ovrAt(p,A[i]&&A[i].role,A[i]&&A[i].pos)+ovrAt(p,D[j]&&D[j].role,D[j]&&D[j].pos)):30; });
       return s/(1+OUTFIELD); }
     const xi=mgEight(mgPlayersOf(d,id)); return xi.length?xi.reduce((a,p)=>a+p.ovr,0)/xi.length:40; }
   function mgPois(l){ let L=Math.exp(-l),k=0,p=1; do{ k++; p*=Math.random(); }while(p>L); return Math.min(8,k-1); }
@@ -13056,11 +13210,11 @@
     if(statViewRi!=null) statViewRi=null;
     return gone; }
   // the best eight for your shapes: the best keeper, then the spots with the ball filled best first -- whoever's best in a
-  // spot (his rating there, a little extra for a man who plays wide on a wide spot) -- then who defends where
+  // spot (his rating there, a little extra in his own position) -- then who defends where
   function mgAutoLineup(d){ ensureForms(d); const R=d.roster, used=new Set();
     let gk=-1; R.forEach((p,i)=>{ if(gk<0||ovrAt(p,'GK')>ovrAt(R[gk],'GK')) gk=i; }); used.add(gk);
     const slots=careerSlots(d.formation,'atk'), atk=new Array(slots.length).fill(-1), V=[];
-    R.forEach((p,i)=>{ if(i===gk||p.role==='GK') return; slots.forEach((sl,si)=>V.push({i,si,v:ovrAt(p,sl.role)+(sl.wide&&sl.count>=2&&(p.subRole==='FB'||p.subRole==='WNG'||p.subRole==='WM')?2:0)+(p.role===sl.role?0.5:0)})); });
+    R.forEach((p,i)=>{ if(i===gk||p.role==='GK') return; slots.forEach((sl,si)=>V.push({i,si,v:ovrAt(p,sl.role,sl.pos)+(posFit(natPos(p),sl.pos)==='main'?1:0)})); });
     V.sort((a,b)=>b.v-a.v);
     for(const c of V){ if(atk[c.si]>=0||used.has(c.i)) continue; atk[c.si]=c.i; used.add(c.i); }
     for(let si=0;si<atk.length;si++) if(atk[si]<0){ const i=R.findIndex((p,k)=>!used.has(k)); if(i>=0){ atk[si]=i; used.add(i); } }   // (keepers, if that's all there is)
@@ -13279,28 +13433,22 @@
     return Math.round(base*(oppFac*compFac-1)); }
   function ordinal(n){ const s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
   // ===== YOUR LINEUP & TACTICS (career) ======================================================
-  // a club's eight for a match: in a shape, its keeper, then each line's best men of that position -- out wide the men
-  // who play wide (full-backs, wingers), in the middle the rest, the holding midfielder in the holder's place; short of
-  // a position, the best man left. (No shape: the first eight.)
+  // a club's eight for a match: in a shape, its keeper, then in each spot the man who's best there -- in his own position
+  // if it has one of its men for it, else in one of his second ones (see POSITIONS); short of a position, the best man
+  // left. (No shape: the first eight.)
   function careerSquad(club,form){
     const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p) });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
     const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||p.ovr>b.ovr)) b=p; if(b) used.add(b); return b; };
-    const gk=best(p=>p.role==='GK')||best(()=>true), out=[gk];
-    const L=FORMS[form], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'];
-    const wideness=p=>(p.subRole==='FB'||p.subRole==='WNG'||p.subRole==='WM')?2:p.subRole==='AM'?1:p.subRole==='DM'?-1:0;
-    L.forEach((n,li)=>{
-      const men=[]; for(let k=0;k<n;k++) men.push(best(p=>p.role===R[li])||best(p=>p.role!=='GK')||best(()=>true));
-      men.sort((a,b)=>wideness(b)-wideness(a));                                  // the widest first...
-      const line=new Array(n), wideIdx=n>=3?[0,n-1]:[], mid=[...Array(n).keys()].filter(k=>!wideIdx.includes(k));
-      wideIdx.forEach((k,j)=>line[k]=men[j]);                                    // ...to the flanks
-      const rest=men.slice(wideIdx.length).sort((a,b)=>wideness(a)-wideness(b)); // the holder (most central) first
-      const order=mid.slice().sort((a,b)=>Math.abs(a-(n-1)/2)-Math.abs(b-(n-1)/2)||(a%2)-(b%2));   // (of two as central, the holder's is the even one: see holderOf)
-      order.forEach((k,j)=>line[k]=rest[j]);
-      out.push(...line);
-    });
-    if(out.some(p=>!p)) return ps.slice(0,1+OUTFIELD).map(ent);                 // (a squad too small to fill it)
-    return out.map(ent);
+    const gk=best(p=>p.role==='GK')||best(()=>true);
+    // each spot to whoever's best in it (his rating there, a little extra in his own position): the best pairings first
+    const spots=careerSlots(form,'atk'), line=new Array(spots.length).fill(null), V=[];
+    for(const p of ps) if(!used.has(p)&&p.role!=='GK') spots.forEach((sl,si)=>V.push({p,si,v:ovrAt(p,sl.role,sl.pos)+(posFit(natPos(p),sl.pos)==='main'?1:0)}));
+    V.sort((a,b)=>b.v-a.v);
+    for(const c of V){ if(line[c.si]||used.has(c.p)) continue; line[c.si]=c.p; used.add(c.p); }
+    for(let si=0;si<line.length;si++) if(!line[si]) line[si]=best(()=>true);  // (short of outfielders: anyone)
+    if(!gk||line.some(p=>!p)) return ps.slice(0,1+OUTFIELD).map(ent);           // (a squad too small to fill it)
+    return [gk,...line].map(ent);
   }
   // A CLUB'S SHAPE: from how it plays -- a passing side keeps men in midfield, a wing side has wingers, a direct one two
   // up front, a counter-attacking one a back three -- and which of those its name draws (the same every season)
@@ -13325,7 +13473,7 @@
     d.width=widthObj(d.width); d.pinstr=piClean(d.pinstr); delete d.instr; return d; }
   function formForCareer(d,phase){ ensureForms(d); return phase==='def'?d.formDef:d.formation; }
   // a man's rating in a position: his own, or what his stats make him there
-  function ovrAt(p,role){ return !p?0 : (!role||role===p.role)?p.ovr : cwOverall(role,mgStats(p)); }
+  function ovrAt(p,role,pos){ return !p?0:rateAt(p.role,p.ovr,mgStats(p),natPos(p),role,pos); }
   // formation -> 7 slot positions on the portrait tactics pitch (x across, y down from their goal), with role/line metadata
   function careerSlots(form, phase, wMul){ wMul=clamp(wMul||1,0.8,1.2);
     const lines=FORMS[form]||FORMS['2-3-2']; const roles=lines.length===2?['DEF','ATT']:['DEF','MID','ATT'];
@@ -13343,7 +13491,8 @@
     return out; }
   // who defends where: each man the defending spot nearest his attacking one (as mapDefOrder does in a match)
   function careerMapDef(d){ const lu=d.lineup, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def'), n=Math.min(lu.atk.length,A.length,D.length);
-    const pick=bestAssign(n,(i,j)=>{ const dx=(A[i].x-D[j].x)/100, dy=(A[i].y-D[j].y)/100; return dx*dx+1.6*dy*dy; });
+    const nat=lu.atk.map(i=>natPos(d.roster[i]));   // (as mapDefOrder: the nearest spot, his own position before another)
+    const pick=bestAssign(n,(i,j)=>{ const dx=(A[i].x-D[j].x)/100, dy=(A[i].y-D[j].y)/100; return dx*dx+1.6*dy*dy+FIT_FAR[posFit(nat[i],D[j].pos)]; });
     const def=lu.atk.slice(0,n); for(let i=0;i<n;i++) def[pick[i]]=lu.atk[i]; return def; }
   function ensureLineup(d){ const R=d.roster||[];
     ensureForms(d);
@@ -13418,12 +13567,12 @@
   // THE MAN YOU TAPPED: his rating where he's playing, his six, then his spot's instructions
   function tbCard(d, ri, phase){ const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
-    const role=ri===lu.gk?'GK':sl?sl.role:null, at=role?ovrAt(p,role):p.ovr, oop=!!role&&role!==p.role, sty=styleOf(p), st=mgStats(p);
+    const role=ri===lu.gk?'GK':sl?sl.role:null, pos=ri===lu.gk?'GK':sl?sl.pos:null, at=role?ovrAt(p,role,pos):p.ovr, fc=fitCls(natPos(p),role,pos), sty=styleOf(p), st=mgStats(p);
     const instr=cardSide==='instr';
     return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(oop?' style="color:var(--warn)"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+(p.role==='ATT'?' as an ':' as a ')+p.role+'</div>':'')+cardFlip()+'</div></div>'
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' at '+natPos(p)+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
   // an instruction for one of your spots (si: its index in that phase's shape)
   function careerSetInstr(d,ph,si,k,v){ ensureForms(d);
@@ -13453,10 +13602,10 @@
   // pitch a line spreads rather than its men overlap
   const ptkTop=(T,k)=>k?'calc(50% + '+k+' * max('+((T-50)/k).toFixed(2)+'%, var(--rowH)))':T.toFixed(1)+'%';
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
-  function tbTok(d, ri, L, T, kind, phase, slotRole, res, k){ const p=d.roster[ri]; if(!p) return '';
-    const r=slotRole?ovrAt(p,slotRole):p.ovr, oop=!!slotRole&&slotRole!==p.role;
-    return '<button class="ptk'+(oop?' oop':'')+(res?' res':'')+(ri===statViewRi?' statview':'')+'"'
-      +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+'>'
+  function tbTok(d, ri, L, T, kind, phase, slotRole, res, k, pos){ const p=d.roster[ri]; if(!p) return '';
+    const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
+    return '<button class="ptk'+fitCls(natPos(p),slotRole,pos)+(res?' res':'')+(ri===statViewRi?' statview':'')+'"'
+      +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
       +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
   // a small lit box off the bottom-right corner of the spot
@@ -13482,8 +13631,8 @@
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y,oslots[i]);
       h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k); }
-    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, false, q.k); }
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', false, 0, 'GK');
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, false, q.k, slots[i].pos); }
     h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map((ri,k)=>(k===BENCH_N?'<i class="benchSep"></i>':'')+tbTok(d, ri, 0,0, 'bench', phase, null, k>=BENCH_N)).join('')+'</div></div>';   // (the bench under the pitch, four; then the men in reserve)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
@@ -13841,8 +13990,8 @@
   // place goes to the man he replaces); tap a spot for that man's card
   function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
     let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
-    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK');
-    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, false, q.k); }
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', false, 0, 'GK');
+    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, false, q.k, slots[i].pos); }
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
@@ -14133,7 +14282,7 @@
     can(){ return !tacDrop; },
     lift(el){ const d=CAREER&&CAREER.data, p=d&&d.roster[+el.dataset.ri]; if(!p) return;
       for(const t of document.querySelectorAll('#bpBody .tacB1 .ptk[data-ri]')){ if(t===el) continue; t.classList.add('canswap');
-        const role=t.dataset.role; if(role){ t.dataset.fit=ovrAt(p,role); t.classList.toggle('fitOop',role!==p.role); } } },
+        const role=t.dataset.role, pos=t.dataset.pos; if(role){ const fc=fitCls(natPos(p),role,pos); t.dataset.fit=ovrAt(p,role,pos); t.classList.toggle('fitOop',fc===' oop'); t.classList.toggle('fitSec',fc===' sec'); } } },
     drop(a,b){ const d=CAREER&&CAREER.data; if(!d) return;
       careerSwap(d,{ri:+a.dataset.ri,kind:a.dataset.tac},{ri:+b.dataset.ri,kind:b.dataset.tac},tacPhase); statViewRi=+a.dataset.ri; mgSave(d); rerenderOffice(); },
     cancel(){ rerenderOffice(); } });
@@ -14225,6 +14374,7 @@
     else if(act==='shootlab') startLab('shoot');
     else if(act==='crosslab') startLab('cross');
     else if(act==='settings'){ openSettings(); }
+    else if(act==='skills'){ openSkills(); }
     else if(act==='continue'){ const k=mostRecentKey(); if(k)openHub(k); }
     else if(act==='load'){ renderSlots('slotList',false); showSub('loadPanel'); }
     else if(act==='new'){ renderSlots('newSlotList',true); showSub('newPanel'); }

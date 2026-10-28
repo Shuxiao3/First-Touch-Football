@@ -159,7 +159,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
   - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
     ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
-    his name, his own position, style, age, skill stars and rating (amber out of position: no line of text says so,
+    his name, his own position, style, age, skill stars and rating (lime in a second position of his, amber out of position: no line of text says so,
     nor that he's on the bench), and in a match his stamina: the word and a bar, no figure. Under it, the ratings side has the six (tap one and what
     it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall
     or less a category of four ratings puts them two to a line); the other has his spot's instructions for
@@ -172,7 +172,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
     under the man, with his face, that you couldn't see.
-  - **In a match**, the pause menu is four buttons: TACTICS, SETTINGS, EXIT and BACK. TACTICS opens the same
+  - **In a match**, the pause menu is five buttons: TACTICS, SKILL MOVES, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's stamina on his card (and the two sides: the other team's
     men show their ratings only). Your four subs are on the bench: drag one onto a man to bring him on, on fresh
     legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of four
@@ -289,10 +289,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     leg, then flicks it over his head. It peaks about 3.5 m up, is in the air about 1.15 s, and drops 1.6 m ahead of
     where his run would take him. It checks up where it lands, like a lofted pass. Leave the stick alone and he bursts
     on to it. It beats a man who has committed to you. A defender who can simply turn round gets there first, and
-    one already in tackling range takes it during the wind-up.
+    one already in tackling range takes it during the wind-up. He lets it drop and takes it in his stride, the way
+    he's going; he used to chest it down again and again as it came down beside him, and turn round to a ball that
+    had dropped a stride behind him.
   - **Sombrero** (ahead, then back, 5 stars): a quick lift off the front of his foot (0.16 s, already above a foot
     stuck in), then flicked up over the man in front of him to drop about 1.8 m behind him, and he goes round him to
-    meet it. With nobody in front, it drops about 3.6 m on.
+    meet it, taking it in his stride as he does the rainbow. With nobody in front, it drops about 3.6 m on.
   - **Elastico** (out to one side and back, 5 stars): out with the outside of his foot, the ball and his weight going
     that way, then snapped back the other and popped up about half a metre, so it gets over a foot stuck out, past the
     man in front on the side it came back to. He goes after it.
@@ -314,6 +316,16 @@ The same game played like any other football game. It's a copy of `index.html` w
     club's men have no age, so they play at their ceiling.
   - **A move above his stars doesn't happen**, and the screen says how many it needs ("SOMBRERO ★★★★★ ONLY"). The stars
     show on every player card, and in a match in your man's window.
+
+  **SKILL MOVES**, on the start menu and the pause menu, shows every move: its name and stars, what to draw (the way
+  he's going is the arrow along the foot of the drawing) and a clip of a man doing it, on a loop, at 0.8 speed. The
+  clips are this game's own: `tools/clips/record_skill_clips.cjs` plays each move in the game, a man running at one of
+  theirs 3 m ahead who stands his ground and watches the ball, and records where the two men are, their sprites'
+  frames and the ball, every 1/30 s. The page plays them back with the game's sprites and ball, the camera following
+  the action (out as the ball goes up). Change a move and run it again (`node tools/clips/record_skill_clips.cjs`):
+  the clips carry a signature of the moves' code, and `tests/classic-moves.mjs` fails until they're re-recorded. On a
+  big phone held sideways they're three a row, all nine on one page at 844×390 (two pages at 844×340); on a smaller
+  one, two a row and four to a page.
 
   A move gives you little for free. The ball is wherever the move puts it, and a defender who can reach it while it's
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
@@ -535,13 +547,44 @@ The same game played like any other football game. It's a copy of `index.html` w
       - A central midfielder told to INTERCEPT is in a passing lane 10% of the time. One told to COVER WING is
         2.7 m nearer a ball that's been out wide for 1.5 s.
   - **Anyone can play anywhere**, the keeper included. Swap any two men, or put an outfielder in goal (the keeper
-    then takes his spots in both shapes). A man is rated for the spot he's in, from his own attributes, so a forward
-    at the back or a defender in goal plays below his usual rating; in the Office that rating shows in amber. BEST 8
-    puts a keeper in goal and the best seven by their ratings in the spots they're in.
+    then takes his spots in both shapes). BEST 8 puts a keeper in goal and the best seven by their ratings in the
+    spots they're in, a man in his own position ahead of an equal one out of it.
+  - **Positions: his own, his second ones, and the rest.** A spot in a shape is a CB, FB, CM, WM, W (a winger's) or
+    ST. A man's own position is his main one, and a holding or attacking midfielder's is CM's too. Most have second
+    positions they can play well enough:
+
+    | His position | Also plays |
+    | --- | --- |
+    | CB | FB |
+    | FB | WM, CB |
+    | CM | WM |
+    | DM | CB |
+    | AM | WM, W, ST |
+    | WM | FB, W |
+    | WNG | WM, ST |
+    | STK | W |
+
+    Anywhere else he's out of position. What it costs him is his reading of the game. In a second position he loses
+    0.6 of his Def IQ out of possession and 1.2 of his Off IQ on the ball; out of position, 3 of each. In a match it's
+    the spot he takes with the ball that costs him Off IQ and the one he takes without it Def IQ, so a winger who
+    drops to wide midfield without the ball loses a little Def IQ and nothing else. His other ratings are as they
+    were. His rating in a spot is his own in his own position; in a second one, his own less a point for each point of
+    IQ he loses there (2); out of position, his rating for that line less 6 (what his attributes make him there, if
+    it's not his own line). On the tactics pitch a man's rating is lime in a second position of his and amber out of
+    position, and in the Office his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
+    spot's man by position: in a new career about 72% of them play in their own, 27% in a second one and under 1% out
+    of position. Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
+    change one), is still each man to the spot nearest his, but now in a position of his own before another: a second
+    position counts as a little further off, one he'd be out of position in as about a spot further on. So a 2-3-2
+    that defends in a 3-3-1 drops its holding midfielder into the back three rather than the central midfielder next
+    to him. The computer's clubs had about 7% of their men out of position without the ball, and now about 4%, none of
+    them further from their spots; what's left is the shape's doing (a back three from a side with two defenders in
+    it). Before, nothing was lost in a match, and a man was only rated afresh for a spot in another line (a winger at
+    wide midfield was rated as a midfielder: 90 down to 78; now 88).
   - **Moving men is a drag.** Touch a man and move your finger, and he's up at once: there's no hold to wait for
     (nothing scrolls, so a moving finger can only mean him). A tap, however long, only shows his card. With a
     mouse, just drag. He stays where you picked him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
-    there, in the scheme's colour in his own position and amber out of it. Drop him on another man and they swap
+    there, in the scheme's colour in his own position, lime in a second one and amber out of position. Drop him on another man and they swap
     spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the Office's
     Squad tab you can drop a man from the list onto a small pitch above his card.
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
