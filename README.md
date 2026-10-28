@@ -469,20 +469,22 @@ The same game played like any other football game. It's a copy of `index.html` w
 
       | | Ball | Passes | Average pass | Under 13 m | 25 m or more | Shots | Shots against | Crosses | Spread | Back line | Pressing | Won back in 5 s |
       |---|---|---|---|---|---|---|---|---|---|---|---|---|
-      | BALANCED | 48% | 164 | 20.1 m | 32% | 22% | 5.2 | 5.7 | 1.7 | 48.9 m | 33 m | 135 s | 22% |
-      | GEGENPRESS | 47% | 166 | 19.4 m | 39% | 20% | 8.5 | 8.2 | 5.0 | 47.3 m | 42 m | 194 s | 29% |
-      | CONTROL POSSESSION | 49% | 196 | 15.5 m | 49% | 13% | 7.2 | 6.2 | 1.0 | 47.5 m | 33 m | 149 s | 23% |
-      | WING PLAY | 51% | 166 | 21.1 m | 32% | 27% | 3.5 | 5.7 | 6.2 | 50.0 m | 33 m | 127 s | 27% |
-      | DIRECT | 34% | 117 | 21.0 m | 34% | 26% | 7.2 | 5.7 | 3.5 | 47.7 m | 33 m | 133 s | 20% |
-      | FLUID COUNTER | 51% | 172 | 20.3 m | 37% | 25% | 6.7 | 7.0 | 3.2 | 46.3 m | 32 m | 126 s | 35% |
-      | DIRECT COUNTER | 48% | 164 | 20.7 m | 29% | 23% | 4.5 | 6.2 | 1.7 | 45.8 m | 24 m | 91 s | 19% |
+      | BALANCED | 49% | 177 | 19.4 m | 34% | 21% | 6.0 | 6.0 | 2.5 | 48.8 m | 33 m | 128 s | 25% |
+      | GEGENPRESS | 52% | 189 | 19.7 m | 35% | 21% | 8.2 | 8.2 | 5.0 | 48.1 m | 42 m | 178 s | 31% |
+      | CONTROL POSSESSION | 44% | 187 | 15.0 m | 54% | 13% | 5.0 | 5.5 | 1.5 | 46.7 m | 33 m | 177 s | 19% |
+      | WING PLAY | 52% | 172 | 22.0 m | 27% | 29% | 5.5 | 6.2 | 4.2 | 51.8 m | 33 m | 121 s | 25% |
+      | DIRECT | 41% | 139 | 21.3 m | 30% | 25% | 8.7 | 5.2 | 2.0 | 48.0 m | 32 m | 152 s | 22% |
+      | FLUID COUNTER | 49% | 164 | 20.2 m | 34% | 23% | 8.0 | 6.5 | 2.2 | 45.9 m | 32 m | 133 s | 26% |
+      | DIRECT COUNTER | 51% | 172 | 20.6 m | 33% | 25% | 5.7 | 4.2 | 2.2 | 46.4 m | 24 m | 86 s | 30% |
 
-      GEGENPRESS defends 9 m higher than anyone (42 m to BALANCED's 33), presses half as long again and wins more of
-      the ball back within 5 s of losing it (29% to 22%); its games are the most open, 8.5 shots a side. CONTROL
-      POSSESSION plays the most passes (196) and the shortest (15.5 m, half of them under 13 m, few long). WING PLAY
-      spreads widest and crosses most (6.2). DIRECT has the ball least (34%) and plays the fewest passes. DIRECT COUNTER
-      sits deepest (24 m) and narrowest and presses least. FLUID COUNTER wins the most back within 5 s (35%). Two games
-      a style, so a shot or two either way is noise.
+      GEGENPRESS defends 9 m higher than anyone (42 m to BALANCED's 33), presses longest (178 s to 128) and wins the
+      most back within 5 s of losing it (31% to 25%); its games are the most open, 8.2 shots a side, and it plays the
+      most passes (189). CONTROL POSSESSION plays the shortest (15.0 m, over half of them under 13 m, few long), though
+      in these two games it had less of the ball than BALANCED (44%). WING PLAY spreads widest (51.8 m) and goes long
+      most (29% of its passes 25 m or more); GEGENPRESS crossed more here (5.0 to 4.2). DIRECT has the ball least (41%)
+      and plays the fewest passes (139), and shot the most (8.7). DIRECT COUNTER sits deepest (24 m), presses least
+      (86 s) and lets the fewest shots in (4.2). Measured on the code with positions (v45). Two games a style, so a shot
+      or two either way is noise.
   - **Your keeper waits for you.** In a match, with the ball in his hands your keeper plays it out when you press PASS
     (on a touch screen the button reads PASS), or by himself once he's had it 5 s; for the last 2 s of that a red
     stopwatch flashes over his head. Either way it goes where his PASS instruction says: PLAYER, to the man you're
