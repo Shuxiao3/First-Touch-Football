@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, mgBuild, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -136,12 +136,20 @@ for(const [w, h] of SIZES){
   }
   for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'home']){
     await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
-    const tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
+    let tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
+    if(!tabs.length && await page.$('#bpFoot [data-mg="build"]')){   // (a plot: what it'd cost, BUILD IT -- then the building's own tabs)
+      await check(b + ' / plot', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="build"]']);
+      await page.evaluate(() => { window.__MG.d.budget = 1e6; }); await page.tap('#bpFoot [data-mg="build"]'); await page.waitForTimeout(150);
+      tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
       await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench']); }
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
-  ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
+  await page.tap('#careerHub [data-hub="decor"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
+  for(const t of ['Plants', 'Plaza', 'Garden']){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(100);
+    await check('decorate / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.decoCard']); }
+  await page.tap('.bpTopBack'); await page.waitForTimeout(80);
+  ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (a plot\'s BUILD IT, every building built, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (2-4-1), COMPACT and WIDE, on the Office's pitch and the Squad's
     await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
     const d0 = await page.evaluate(() => [window.__MG.d.formation, window.__MG.d.width.atk]);
@@ -370,18 +378,20 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     R[0].name = 'Samuel Lindqvist'; window.__MG.mgSave(d); return R.map(p => String(p.id)); });
   const card = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P && P.querySelector('.mgCard');
     return { fits: !!P && P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, paged: !!(P && P.querySelector('.fitPager')), flips: c ? c.querySelectorAll('.cardFlip').length : 0,
-      long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'] }; });
+      long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'],
+      cut: c ? [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [] }; });
   const views = [], bad = [];
   const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
     const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
     for(const id of ids){ await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(80);
       for(const side of ['rate', 'deal']){ const fl = await page.$(`.mgPaneR [data-mside="${side}"]`); if(fl){ await fl.tap(); await page.waitForTimeout(60); }
-        const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.flips !== 1) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
+        const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.cut.length || r.flips !== 1) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
         if(side === 'rate' && await page.$('.mgPaneR [data-six="DEF"]')){ await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(60);
           const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
     await page.tap('.bpTopBack'); await page.waitForTimeout(100); };
+  await page.evaluate(() => { const M = window.__MG; M.d.budget = 1e6; M.mgBuild(M.d, 'academy'); M.renderHub(); });   // (the academy, to look at its prospects)
   await walk('office', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
-  ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
+  ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
   await page.tap('#chCampus [data-bldg="office"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
   const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
   const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);

@@ -110,7 +110,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Nothing scrolls.** A list or a table with more in it than fits shows a page of it, with ◀ 2 / 3 ▶ along its
     foot; hold an arrow to flip through the pages. Pages break between rows, never through one: a list keeps its
     filters on every page, a table keeps its head row, and a heading moves over with the rows it heads. A player's
-    card never goes over pages, anywhere: it's made to fit. Measured on a new career at 844×390: the squad over 4 pages, the market's list of League 2
+    card never goes over pages, anywhere: it's made to fit. Measured on a new career at 844×390: the squad over 4 pages, the transfer market's list of League 2
     over 42 (5 to a page, the league and the positions on one line above them), the league table over 3.
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
@@ -136,12 +136,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending,
     each the average of its attributes, as in **The six** below; tap one and what it's made of opens under them, a
     coloured bar for each rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted shows ?
-    for each, with SCOUT HIM. The other side, his deal, has what he earns or costs in a small grid, then what you
-    can do about him, a line each: in the Squad tab his contract (a new deal, releasing him); in the market's
-    Selling tab selling him (the two best bids, the transfer list); for another club's man the asking price,
-    scouting him and your offer; for a free agent signing him; for a youngster promoting him. In the Squad tab his
-    card has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the
-    little pitch comes back as you pick a man up to drop on it.
+    for each, with SCOUT HIM (once the scouts' house is built). The other side, his deal, has what he earns or costs
+    in a small grid, then what you can do about him, a line each: in the Squad tab his contract (a new deal, releasing
+    him); in the market's Selling tab selling him (the two best bids, the transfer list); for another club's man the
+    asking price, scouting him and your offer; for a free agent signing him; for a youngster promoting him. In the
+    Squad tab his card has the right side to itself (◀ THE TEAM, or a tap on him in the list, for the little pitch),
+    and the little pitch comes back as you pick a man up to drop on it.
   - **Tactics.** The pitch first, on its side as in a match, your goal on the left. Above it, one row: with or
     without the ball, then menus for the shape, the width and the style -- just the names, the style's seven two to
     a line -- and BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a match. After a thin line
@@ -853,14 +853,16 @@ The same game played like any other football game. It's a copy of `index.html` w
     until you're back in the black, but selling still works.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the Office before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
-  - **Scouting.** A player at another club shows a rating range until you scout him: 8 points wide, 6 and then 2
-    as you grow your scouting network. One player costs $200 in League 2, up to $6,000 in the Premium League. Or
-    send your scouts round a league's goalkeepers, defenders, midfielders or forwards. A scouted player shows his
-    exact rating, potential and attributes. Reports last until the end of the season.
+  - **Scouting** needs the scouts' house built (see **The campus**). A player at another club shows a rating range
+    until you scout him: 8 points wide, 6 and then 2 as you grow your scouting network. One player costs $200 in
+    League 2, up to $6,000 in the Premium League. Or send your scouts round a league's goalkeepers, defenders,
+    midfielders or forwards. A scouted player shows his exact rating, potential and attributes. Reports last until the
+    end of the season.
   - **Ageing.** At the end of a season everyone is a year older. Players up to 25 grow towards their potential:
     faster with 12 or more games that season, slower with fewer than 4. The late twenties hold, the thirties
-    decline, and players retire from 34. The youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer
-    (more and better as you build it up). Promote them, or they leave at 19.
+    decline, and players retire from 34. Once it's built, the youth academy takes in 3 to 5 youngsters aged 16 or 17
+    every summer, the first of them the day it opens (more and better as you build up its facilities). Promote them,
+    or they leave at 19.
   - **The computer clubs** buy from each other and from the free agents every window day, bid for your players,
     and fill their squads up every summer. Each has its own style, with shapes and widths to suit it: a wing side
     plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
@@ -904,21 +906,34 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
       sponsor's name on it; its shirt may carry a sponsor too.
     - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
-  - **The campus** is the hub: the club from above, in the town's tiles (see **The campus** under Sprites). The ground
-    is in the middle, the clubhouse (the Office) and the academy with its training pitch along the top, and down by the
-    road the market hall, the scouts' house, the plaza with the newsstand, and your house.
+  - **The campus** is the hub: the club from above, in the town's tiles (see **The campus** under Sprites). A new
+    career's is the ground in the middle and the clubhouse (the Office) by it, with the woods and the road round them
+    and the team bus by the clubhouse, and four roped-off plots: the academy's along the top, and down by the road the
+    scouts' house's, the newsstand's on the plaza, and your house's. The transfer market isn't on it: it's your phone.
     - The buildings are listed down the left (the right, if Settings says so), with a badge where something's
-      waiting: Office (squad and contracts, tactics, fixtures, finances), Market, Scouting, Academy, Stadium,
-      Newsstand (news, all four tables, results, top scorers) and Your House (your record). NEXT DAY, or SIMULATE
-      and PLAY, is at the foot. The season, the next match, the budget, the fans and the week's net run along the
-      campus's own foot, put shorter where there's less room.
+      waiting and its price on a plot: Office (squad and contracts, tactics, fixtures, finances), Transfers (a phone:
+      in a window its badge counts the bids for your men), Scouting, Academy, Stadium, Newsstand (news, all four
+      tables, results, top scorers) and Your House (your record). NEXT DAY, or SIMULATE and PLAY, is at the foot.
+      The season, the next match, the budget, the fans and the week's net run along the campus's own foot, put
+      shorter where there's less room.
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
-      it, and you're in. ◀ CAMPUS takes the camera back out.
-    - It's drawn as the club is: the ground at the level it's built to, its name on a sign (on the press box at
-      level 2, on the south stand's roof from 3), the North Stand's name on its roof from level 3, your boards along
-      the touchline, and your crest on the clubhouse and the academy.
+      it, and you're in. ◀ CAMPUS takes the camera back out. TRANSFERS opens at once, the camera staying put.
+    - **Building.** Tap a plot and it says what the building's for, what it costs and what you've got; BUILD IT puts
+      it up there and then. The newsstand costs $2,500, your house $6,000, the scouts' house $12,000 and the youth
+      academy (its barn and training pitch with it) $25,000. Till one's built there's nothing in it: no scouting
+      without the scouts' house, no youngsters without the academy, and the papers and your record wait for theirs.
+    - **Decorating.** No plants or things come with the campus. DECORATE, at its top, sells them, each with a
+      picture of what it puts where. Plants: the clubhouse's pots and flowers ($600), trees by the clubhouse
+      ($1,600), by the ground ($1,200), along the road ($1,600) and in the east ($1,800), and the west lawn ($1,400).
+      Plaza: lamps ($2,000), benches ($900), flower beds ($900) and a copper maple leaf ($3,500). Garden: the garden
+      round your house ($1,000) and bike racks ($400). They're for looks only; a tree in the way of a bigger ground
+      goes when it's built.
+    - It's drawn as the club is: what it's built and bought, the ground at the level it's built to, its name on a
+      sign (on the press box at level 2, on the south stand's roof from 3), the North Stand's name on its roof from
+      level 3, your boards along the touchline, and your crest on the clubhouse and the academy.
     - On a phone it's at 1x, cut to its middle where there's less room (a smaller phone moves the club's name onto
       it); a bigger screen shows the lawn, trees and road round it.
+    - A career saved before there was building to do has everything built and planted, as its campus was.
   - Careers save to three slots (`ft_mgr_slot1` to `3` in `localStorage`). Careers from the old player-manager
     mode (`ft_save_*`) aren't carried over.
 
@@ -1443,10 +1458,15 @@ Pokémon-branded from the sets is used: the clubhouse's "PC" sign is painted ove
 house's shop board reads SCOUTS, and no Poké Balls, Ball-Mart signs, creatures or creature planters appear. The ground
 isn't in the sets; it's drawn in their palette, its roofs cut from the wide glass office's.
 
-`campus_1.png` is the whole campus (768 by 448: the 640 by 368 middle with a border of lawn, trees and road), its
-ground at level 1. `campus_2.png` to `campus_5.png` are each other level as a patch over it, the trees in its way gone
-with it, and `campus_levels.png` shows the five side by side. The game writes the ground's and the North Stand's names,
-the boards and your crest on it as it goes. The tilesets aren't in the repo, so rebuilding needs them:
+The campus comes in pieces, so the game can draw the one a club has. `campus_1.png` is what it all stands on (768 by
+448: the 640 by 368 middle with a border of lawn and road): the lawn, the walks, the plaza, the road and the ground at
+level 1. `campus_2.png` to `campus_5.png` are each other level of the ground as a patch over it. Everything standing on
+it is in `campus_sprites.png`: the clubhouse, the bus and the woods round the edge; each building with its own things,
+and the plot roped off for it; and each set of plants and things DECORATE sells. `CAMPUS_META` says where each piece
+goes, what it belongs to, and at which levels the ground clears a tree away. The game draws the club's pieces down the
+screen, then writes the ground's and the North Stand's names, the boards and your crest on it. `campus_start.png` is a
+new career's campus, `campus_full.png` one with everything built and bought, and `campus_levels.png` shows the five
+grounds side by side. The tilesets aren't in the repo, so rebuilding needs them:
 
 ```sh
 python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS_ART and CAMPUS_META in classic.html

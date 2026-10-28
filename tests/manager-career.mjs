@@ -5,8 +5,10 @@
 // fixture list, its ground as it was), a top-six side plays the playoffs, the goals in a played match go to the men
 // who scored them, and THE GROUND: a field with two bleachers to start, built up a level at a time, boards let by the
 // week, sponsors' bids for the shirt, the ground's name and the stands', their deals paid weekly and run out. Last, THE
-// CAMPUS (the hub): drawn as the club has it -- the ground as built, its name, the boards, your crest -- and a building
-// tapped on it opens with the camera going in on it, and comes back out the same way.
+// CAMPUS (the hub): a new career's has the ground and the clubhouse, plots for the rest (built when they're paid for) and
+// no plants or things (bought); it's drawn as the club has it -- the ground as built, its name, the boards, your crest,
+// what's built and bought -- and a building tapped on it opens with the camera going in on it, and comes back out the
+// same way; TRANSFERS is on your phone (straight in).
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -18,7 +20,7 @@ const anchor = '  // ===== END MANAGER CAREER';
 if(src.split(anchor).length !== 2) throw new Error('instrumenting: anchor not found once: ' + anchor);
 src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
   + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
-  + 'CAMPUS, CAMPUS_META, crestFor, get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
+  + 'CAMPUS, CAMPUS_META, crestFor, cpHas, mgBuild, mgBuilt, decorBuy, mgScout, mgMigrate, get DECOR_SHOP(){ return DECOR_SHOP; }, get MG_BUILD(){ return MG_BUILD; }, get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -69,12 +71,17 @@ ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && Objec
 ok(!d.roster.some(p => p.stats), 'no stats in the save (they are rebuilt from the rating)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
-// --- every building, every tab -----------------------------------------------------------
+// --- every building, every tab: a new career has the ground and the clubhouse (and TRANSFERS on your phone); the
+// scouts' house, the academy, the newsstand and your house are plots, each with its price -----------------------------
+ok(JSON.stringify(d.built) === '{}' && JSON.stringify(d.decor) === '{}' && d.youth.length === 0, 'a new career: nothing built, nothing bought, no academy, so no youngsters');
 for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'home']){
   await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
   const tabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent));
-  for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
-  ok(tabs.length >= 2, b + ': ' + tabs.join(', '));
+  if(['scouting', 'academy', 'news', 'home'].includes(b)){
+    const chip = await page.textContent(`#chCampus [data-bldg="${b}"] .bPrice`), btn = await page.textContent('#bpFoot [data-mg="build"]');
+    ok(!tabs.length && /BUILD IT/.test(btn) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('unbuilt')), b + ': a plot -- ' + btn + ' (' + chip + ' in the menu)'); }
+  else { for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
+    ok(tabs.length >= 2, b + ': ' + (await page.textContent('#bpTitle')) + ' -- ' + tabs.join(', ')); }
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(50);
 }
 
@@ -86,6 +93,7 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }   // (his card turned over: his deal)
   const card = await page.innerText('#bpBody .mgCard');
   const ask = +(card.match(/ASKING\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
+  if(i === 0) ok(!(await page.$('#bpBody [data-mg="scout"]')) && /scouts’ house/.test(await page.textContent('#bpBody')), 'no scouts\' house: his rating a range, and no SCOUT HIM');
   if(/won’t drop/.test(card) || ask > 15000){ await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); continue; }
   if(await page.$('#bpBody [data-mg="scout"]')){ await page.click('#bpBody [data-mg="scout"]'); await page.waitForTimeout(60); ok(/Scouted/.test(await msg()), 'scouted: ' + await msg()); }
   await page.click('#bpBody [data-mg="bid"]'); await page.waitForTimeout(60);
@@ -207,6 +215,26 @@ ok(r.away.lvl === r.away.want && r.away.boards === r.away.wantB && r.away.venue 
 ok(r.left.length === 0 && r.mid === (r.ends[0] === r.ends[1] ? '' : r.ends[0] < r.ends[1] ? 'ground' : 'kit'), 'each deal runs out when its seasons are up (the shirt\'s after season ' + r.ends[0] + ', the name\'s after ' + r.ends[1] + ')');
 ok(r.old.lvl === 3 && r.old.cap === 8500 && r.fresh === 1, 'a save from before: the level that seats as many (6,000 -> covered stands, 8,500)');
 
+// --- BUILDING AND DECORATING: a plot built on when it's paid for (the academy brings its first youngsters), the
+// scouts' house before any scouting, the campus's plants and things bought one set at a time --------------------------
+r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.div[1].find(id => id !== d.clubId)].players[0].id, out = {};
+  out.start = [JSON.stringify(d.built), JSON.stringify(d.decor)]; out.noScout = M.mgScout(d, him);
+  d.budget = 1000; out.poor = M.mgBuild(d, 'academy');
+  d.budget = 100000; out.acad = M.mgBuild(d, 'academy'); out.acadCost = 100000 - d.budget; out.youth = d.youth.length; out.again = M.mgBuild(d, 'academy');
+  for(const b of ['scouting', 'news', 'home']) M.mgBuild(d, b);
+  out.built = Object.keys(d.built).sort().join(); out.scout = M.mgScout(d, him);
+  const b1 = d.budget; out.lamps = M.decorBuy(d, 'lamps'); out.lampCost = b1 - d.budget; out.twice = M.decorBuy(d, 'lamps');
+  d.budget = 10; out.poorDecor = M.decorBuy(d, 'maple'); d.budget = 100000;
+  const old = JSON.parse(JSON.stringify(d)); delete old.built; delete old.decor; M.mgMigrate(old);
+  out.old = [Object.keys(old.built).length, Object.keys(old.decor).length, M.DECOR_SHOP.length];
+  M.renderHub(); return out; });
+info('building and decorating: ' + JSON.stringify(r));
+ok(r.start[0] === '{}' && /scouts’ house/.test(r.noScout) && r.poor && r.acad === null && r.acadCost === 25000 && r.youth > 0 && r.again,
+  'the academy built for $25,000 (and not before you have it), its first ' + r.youth + ' youngsters in at once; no scouting till the scouts\' house is up');
+ok(r.built === 'academy,home,news,scouting' && r.scout === null, 'the scouts\' house, the newsstand and your house built too: now you can scout');
+ok(r.lamps === null && r.lampCost === 2000 && r.twice && r.poorDecor, 'the plaza\'s lamps bought for $2,000, once; the maple leaf waits till you can pay');
+ok(r.old[0] === 4 && r.old[1] === r.old[2], 'a career from before: everything built and planted, as its campus was');
+
 // --- THE CAMPUS: the hub draws the club as it is -- its ground at its level, the name, the boards, its crest -- and draws
 // it again when the ground's built up; a building tapped on the campus lights its button, the camera goes in on it with
 // its name over it, it opens, and back out the camera comes back out ---------------------------------------------------
@@ -214,12 +242,14 @@ await page.evaluate(() => __MG.renderHub()); await page.waitForTimeout(100);
 r = await page.evaluate(() => { const M = __MG, d = M.d, CM = M.CAMPUS_META, cv = document.getElementById('cpCanvas');
   const hash = (c, b) => { const p = c.getContext('2d').getImageData(b[0], b[1], b[2], b[3]).data; let s = 0; for(let i = 0; i < p.length; i++) s = (s * 31 + p[i]) >>> 0; return s; };
   const full = [0, 0, CM.w, CM.h], draw = o => { const c = document.createElement('canvas'); c.width = CM.w; c.height = CM.h; M.CAMPUS.draw(c, o); return c; };
-  const g = M.groundOfYours(d), mine = { lvl: g.lvl, name: g.name, stand: g.stand, boards: g.boards, crest: M.crestFor(d.world.clubs[d.clubId]) }, but = o => Object.assign({}, mine, o);
-  const L = CM.lv[g.lvl], nameAt = L.sign ? [L.sign[0], L.sign[1], L.sign[2], 9] : L.press ? [L.press[0], L.press[1], L.press[2], 5] : [L.south[0] - L.south[2] / 2, L.south[1], L.south[2], 9];
-  const boardsAt = [L.boards[0], L.boards[2], L.boards[1] - L.boards[0], 8], crestAt = [CM.crests[0][0], CM.crests[0][1], 9, 9], big = CM.lv[5].box;
+  const g = M.groundOfYours(d), mine = { lvl: g.lvl, name: g.name, stand: g.stand, boards: g.boards, crest: M.crestFor(d.world.clubs[d.clubId]), has: M.cpHas(d) }, but = o => Object.assign({}, mine, o);
+  const L = CM.lv[g.lvl], crestAt0 = CM.items.find(it => it.n === 'office'), nameAt = L.sign ? [L.sign[0], L.sign[1], L.sign[2], 9] : L.press ? [L.press[0], L.press[1], L.press[2], 5] : [L.south[0] - L.south[2] / 2, L.south[1], L.south[2], 9];
+  const boardsAt = [L.boards[0], L.boards[2], L.boards[1] - L.boards[0], 8], crestAt = [crestAt0.x + crestAt0.c[0], crestAt0.y + crestAt0.c[1], 8, 9], big = CM.lv[5].box;
   const out = { lvl: g.lvl, boards: g.boards.length, name: g.name, asClub: hash(cv, full) === hash(draw(mine), full),
     named: hash(draw(mine), nameAt) !== hash(draw(but({ name: 'Kestrel Arena' })), nameAt), boarded: hash(draw(mine), boardsAt) !== hash(draw(but({ boards: [] })), boardsAt),
-    crested: hash(draw(mine), crestAt) !== hash(draw(but({ crest: null })), crestAt), levels: new Set([1, 2, 3, 4, 5].map(l => hash(draw(but({ lvl: l })), big))).size };
+    crested: hash(draw(mine), crestAt) !== hash(draw(but({ crest: null })), crestAt), levels: new Set([1, 2, 3, 4, 5].map(l => hash(draw(but({ lvl: l })), big))).size,
+    bare: hash(draw(but({ has: gr => gr === 'core' || gr[0] === 'p' })), full) !== hash(draw(mine), full),
+    plots: Object.keys(CM.plots).length === 4 && CM.items.filter(it => it.g[0] === 'd').length > 30 && !CM.items.some(it => it.n === 'market') };
   const before = hash(cv, big), w0 = parseFloat(document.querySelector('#cpHots [data-bldg="stadium"]').style.width);
   d.budget = 1e6; out.up = M.stadUpgrade(d); M.renderHub();
   out.rebuilt = hash(cv, big) !== before && hash(cv, full) === hash(draw(but({ lvl: M.stadOf(d).lvl })), full);
@@ -227,6 +257,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, CM = M.CAMPUS_META, cv 
   return out; });
 info('the campus: ' + JSON.stringify(r));
 ok(r.asClub && r.named && r.boarded && r.crested && r.levels === 5, 'the campus is the club\'s: its ground at level ' + r.lvl + ', ' + r.name + ' on it, its ' + r.boards + ' boards, its crest on the clubhouse; each level\'s ground its own');
+ok(r.bare && r.plots, 'built up and planted, it isn\'t a new career\'s (the clubhouse and four plots, no plants); no market hall: the market\'s on your phone');
 ok(r.up === null && r.rebuilt && r.wider, 'built up a level, the campus is drawn again with the bigger ground (and more of it to tap)');
 { const tf = () => page.evaluate(() => { const m = new DOMMatrix(getComputedStyle(document.getElementById('cpWorld')).transform); return [m.a, m.e, m.f]; });
   const at = await page.evaluate(() => { const b = document.querySelector('#cpHots [data-bldg="stadium"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
@@ -236,7 +267,11 @@ ok(r.up === null && r.rebuilt && r.wider, 'built up a level, the campus is drawn
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(450); const m2 = await tf(), lit = await page.$$eval('#chCampus .bldg.sel', ns => ns.length);
   ok(m1[0] > m0[0] && mid.sel === 'stadium' && /STADIUM/.test(mid.tag) && title === r.name.toUpperCase() && /CAMPUS/.test(back),
     'the ground tapped on the campus: STADIUM lit, the camera in on it (x' + m1[0].toFixed(2) + ' from x' + m0[0].toFixed(2) + '), then ' + title + ', back to the ' + back.replace(/[^A-Z ]/g, '').trim());
-  ok(m2.join() === m0.join() && !lit, 'back out: the camera where it was, nothing lit'); }
+  ok(m2.join() === m0.join() && !lit, 'back out: the camera where it was, nothing lit');
+  const t0 = await tf(); await page.click('#chCampus [data-bldg="market"]'); await page.waitForTimeout(40);
+  const phone = { open: await page.isVisible('#bldgPanel.show'), title: await page.textContent('#bpTitle'), still: (await tf()).join() === t0.join() };
+  await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(100);
+  ok(phone.open && phone.title === 'TRANSFERS' && phone.still, 'TRANSFERS: on your phone, open at once, the camera not moving'); }
 
 process.exitCode = rep.finish();
 await browser.close();

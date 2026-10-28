@@ -8,12 +8,15 @@ Nothing Pokemon-branded is used: the clubhouse's "PC" sign is painted over with 
 "Fly Angler" board repainted to read SCOUTS; no Poke Balls, Ball-Mart signs, creatures or creature planters appear.
 The ground isn't in the sets: it's drawn here in their palette, its roofs cut from the wide glass office's.
 
-The campus is 768 x 448: the mockup's 640 x 368 (CORE) with a border of lawn, trees and road all round it, so a bigger
-phone still shows it at 1x. The ground is drawn at each level a club can build it to: level 1 in the picture itself
-(campus_1.png), each other level as a patch over it (campus_2..5.png: only what changes, the trees in its way gone with
-it). The game writes on it as it goes: the ground's name (on a sign at level 1, the press box at 2, the south stand's
-roof from 3), the north stand's name (its roof, from 3), your boards along the north touchline, and your crest on the
-clubhouse and the academy. Where each of those goes is in CAMPUS_META, with the buildings' boxes (for tapping).
+The campus is 768 x 448: the mockup's 640 x 368 (CORE) with a border of lawn, woods and road all round it, so a bigger
+phone still shows it at 1x. It comes in pieces, so the game can put together the campus a club has: the ground (the lawn,
+walks, plaza and road, and the club's ground at level 1: campus_1.png), each other level of the ground as a patch over it
+(campus_2..5.png), and every piece standing on it in one sheet (campus_sprites.png): the clubhouse, the buildings the
+club can put up and the plots roped off for them till it does, the decorations it can buy, the woods round the edge.
+CAMPUS_META says where each piece goes, which group it's in, the order they're drawn in, and which levels of the ground
+clear a tree away; and where the game writes on the ground: its name (on a sign at level 1, the press box at 2, the
+south stand's roof from 3), the north stand's name (its roof, from 3), your boards along the north touchline -- and
+your crest on the clubhouse and the academy. campus_start.png is a new career's campus, campus_full.png everything.
 
     python3 -I tools/campus/make_campus.py <tiles dir> [out dir] [--embed-classic]
       out dir: assets/campus; --embed-classic writes CAMPUS_ART and CAMPUS_META into classic.html
@@ -180,14 +183,6 @@ def scouting():
             px[x, y] = inner or (110, 150, 110, 255)
     text(im, (x0 + x1 + 1 - text_w('SCOUTS')) // 2, (y0 + y1 - 4) // 2, 'SCOUTS', (238, 232, 206, 255))
     return im.crop(im.getbbox())
-
-
-def market():
-    """the modern hall (offices set), with our own board over the doors"""
-    im = cut('02', 13, 16, 146, 124)
-    b = board(40, 9, 'MARKET')
-    im.alpha_composite(b, ((im.width - b.width) // 2 + 6, 66))
-    return im
 
 
 def kiosk():
@@ -643,13 +638,30 @@ def mini_pitch(img, x0, y0, w, h):
         img.putpixel((bx + 1, byy + 1), OUT2)
 
 
-# ---- compose -------------------------------------------------------------------------------------------------------
-# the mockup's trees, in its own coordinates (the CORE's), and the border's, in the campus's: (name, x, y of its foot)
-CORE_TREES = (('gconeM', 118, 30), ('gconeS', 120, 112), ('spruce', 398, 46), ('round_br', 398, 128),
-              ('yconeM', 98, 128), ('round_dg', 6, 128), ('oak_big', 606, -24), ('round_or', 620, 52),
-              ('maple_or', 434, 140), ('gconeM', 136, 262), ('round_lg', 252, 290),
-              ('oak_twin', 418, 226), ('round_dg', 466, 276), ('willow2', 606, 240), ('spiky', 614, 300))
-EDGE_TREES = (  # along the top, down each side (clear of the walk across the middle), and past the road at the foot
+# ---- the pieces ------------------------------------------------------------------------------------------------------
+# Everything standing on the campus is a piece the game draws, the furthest back first, if the club has it: 'core' always
+# (the clubhouse, the woods round the edge, a bus on the road), 'b:X' once building X is built and 'p:X' (its roped-off
+# plot) till then, 'd:Y' once decoration Y is bought. A new career has the ground, the clubhouse and four plots.
+BUILDS = ('scouting', 'academy', 'news', 'home')
+PLOTS = {   # where each building goes, in the CORE's coordinates: x, y, w, h, what its sign says, on paving
+    'scouting': (162, 279, 91, 50, 'SCOUTS', False), 'academy': (426, 48, 96, 56, 'ACADEMY', False),
+    'news': (272, 270, 37, 33, 'NEWS', True), 'home': (524, 275, 89, 58, 'HOME', False)}
+DECOR = {   # what each decoration puts where (the CORE's coordinates, top left)
+    'potplants': (('pot_b', 32, 92), ('pot_a', 76, 94), ('pl_topi', 10, 166), ('blueflw', 70, 168)),
+    'trees_club': (('gconeM', 118, 30), ('gconeS', 120, 112), ('yconeM', 98, 128), ('round_dg', 6, 128)),
+    'trees_ground': (('spruce', 398, 46), ('round_br', 398, 128), ('maple_or', 434, 140)),
+    'trees_walk': (('gconeM', 136, 262), ('round_lg', 252, 290), ('oak_twin', 418, 226), ('round_dg', 466, 276)),
+    'trees_east': (('oak_big', 606, -24), ('round_or', 620, 52), ('willow2', 606, 240), ('spiky', 614, 300)),
+    'westlawn': (('oak_gr', 8, 236), ('round_lg', 96, 252), ('bench_st', 52, 300), ('purflw', 24, 304), ('yelflw', 100, 306)),
+    'lamps': (('lamp', 266, 214), ('lamp', 396, 214), ('lamp', 266, 290), ('lamp', 396, 290)),
+    'benches': (('bench_g', 352, 258), ('bench_gl', 342, 298), ('bin', 384, 262)),
+    'beds': (('pl_red', 300, 314), ('pl_blue', 334, 314), ('pl_leaf', 368, 314)),
+    'maple': (('maple', 314, 232),),
+    'garden': (('sunflowers', 492, 244), ('pumpkins', 584, 318), ('pumpkin_v', 500, 288), ('daisy', 600, 332),
+               ('yelflw', 580, 214), ('pl_mix', 488, 312)),
+    'bikes': (('bikes', 434, 290),),
+}
+EDGE_TREES = (  # the woods round the club's land: along the top, down each side (clear of the walk), past the road
     ('pine', -12, 38), ('round_lg', 28, 41), ('gconeM', 60, 36), ('oak_gr', 80, 42), ('spruce', 136, 41),
     ('round_dg', 168, 36), ('pine_d', 196, 42), ('round_or', 240, 38), ('gconeS', 270, 42), ('maple_gr', 290, 40),
     ('round_dg', 338, 37), ('pine', 366, 42), ('round_lg', 410, 38), ('spruce_b', 440, 42), ('oak_ol', 468, 40),
@@ -661,35 +673,75 @@ EDGE_TREES = (  # along the top, down each side (clear of the walk across the mi
     ('round_dg', 730, 300), ('pine_d', 730, 372),
     ('sapling', 8, 452), ('fir', 112, 454), ('sapling', 196, 452), ('fir', 350, 454), ('sapling', 424, 452),
     ('fir', 488, 454), ('sapling', 602, 452), ('fir', 662, 454), ('sapling', 724, 452))
-EDGE_PROPS = (('yelflw', 60, 446), ('pl_mix', 238, 446), ('daisy', 302, 444), ('yelflw', 542, 446), ('daisy', 752, 444))
+EARTH, EARTH_D, EARTH_L, EARTH_E = (146, 116, 84, 255), (126, 98, 70, 255), (168, 138, 102, 255), (104, 80, 58, 255)
+ROPE = (226, 206, 158, 255)
 
 
-def compose(lvl):
-    """the campus with its ground at a level: (the picture, where the game writes on the ground, the ground's box, the
-    buildings' boxes, where the crests go)"""
+def sprite(name):
+    return tree(name) if name in TREES else prop(name)
+
+
+def plot_pad(w, h, label, paved):
+    """a plot roped off for a building the club hasn't put up yet: cleared earth (or the plaza's paving), a stake at each
+    corner (and halfway along a long side), a rope round them, and a sign saying what's coming"""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    r = random.Random(w * 31 + h)
+    if not paved:
+        rect(im, 0, 0, w, h, EARTH_E)
+        rect(im, 1, 1, w - 1, h - 1, EARTH)
+        px = im.load()
+        for y in range(1, h - 1):
+            for x in range(1, w - 1):
+                v = r.random()
+                if v < 0.08:
+                    px[x, y] = EARTH_D
+                elif v < 0.13:
+                    px[x, y] = EARTH_L
+    x0, y0, x1, y1 = 2, 2, w - 3, h - 6                 # the rope, round the stakes' tops
+    rect(im, x0, y0, x1 + 1, y0 + 1, ROPE)
+    rect(im, x0, y1, x1 + 1, y1 + 1, ROPE)
+    rect(im, x0, y0, x0 + 1, y1 + 1, ROPE)
+    rect(im, x1, y0, x1 + 1, y1 + 1, ROPE)
+    xs = [x0, x1] + ([(x0 + x1) // 2] if w > 60 else [])
+    for x in xs:
+        for y in (y0, y1):
+            rect(im, x - 1, y, x + 1, y + 5, WOOD_D)
+            rect(im, x - 1, y, x, y + 4, WOOD_L)
+    b = board(text_w(label) + 8, 9, label, fill=WOOD, ink=(244, 236, 214, 255))
+    bx, by = 6, h - 15
+    rect(im, bx + 3, by + 9, bx + 4, by + 14, WOOD_D)
+    rect(im, bx + b.width - 4, by + 9, bx + b.width - 3, by + 14, WOOD_D)
+    im.alpha_composite(b, (bx, by))
+    return im
+
+
+def training_pitch():
+    """the academy's training pitch and its fence, flat on the grass: (the sprite, where it goes)"""
+    lay = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    mini_pitch(lay, 500 + OX, 122 + OY, 116, 62)
+    fence_ring(lay, 494 + OX, 116 + OY, 622 + OX, 190 + OY)
+    bb = lay.getbbox()
+    return lay.crop(bb), (bb[0], bb[1])
+
+
+def ground_img(lvl):
+    """the campus's ground: lawn, the walks, the plaza, the road, and the club's ground at a level. Returns it, where the
+    game writes on the ground, and the ground's box (what the trees in its way are cleared for)"""
     global rnd
     rnd = random.Random(7)                       # (the same grass every time, so a level's patch is only its ground)
     img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     lawn(img)
-    objs = []                                    # (sprite, x, y) drawn by where they stand (their foot)
-
-    def put(sp, x, y):
-        objs.append((sp, x, y))
-        return [x, y, sp.width, sp.height]
 
     def C(x, y):
         return x + OX, y + OY
 
-    boxes = {}
     road(img, 340 + OY, 368 + OY)                # the road along the foot and the walk across the middle
     path(img, 0, 198 + OY, W, 214 + OY)
     plaza(img, *C(262, 212), *C(414, 342))       # the plaza in front of the stadium, down to the road
-    path(img, *C(52, 106), *C(68, 200))          # walks from the doors: the top row's to the walk, the bottom row's to the road
-    path(img, *C(466, 104), *C(482, 200))
-    path(img, *C(60, 334), *C(78, 342))
+    path(img, *C(52, 106), *C(68, 200))          # walks from the doors (or the plots): the clubhouse's and the
+    path(img, *C(466, 104), *C(482, 200))        # academy's to the walk, the scouts' and your house's to the road
     path(img, *C(222, 328), *C(238, 342))
     path(img, *C(543, 332), *C(559, 342))
-    # the ground, on its own so its footprint is known: the trees in its way don't grow
     X, Y = C(140, 14)
     layer = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     anchors = ground(layer, X, Y, lvl)
@@ -698,74 +750,122 @@ def compose(lvl):
     if lvl == 1:                                 # (the sign the game puts up is part of it)
         sx, sy, sw = anchors['sign']
         fp = [min(fp[0], sx), min(fp[1], sy), max(fp[2], sx + sw), max(fp[3], sy + 17)]
-    mini_pitch(img, *C(500, 122), 116, 62)       # the training pitch, fenced, beside the academy
-    fence_ring(img, *C(494, 116), *C(622, 190))
-    boxes['training'] = [*C(494, 116), 128, 74]
+    return img, anchors, fp
+
+
+def pieces():
+    """every piece: (group, its name, sprite, x, y, flat, where a crest goes on it)"""
+    P = []
+
+    def C(x, y):
+        return x + OX, y + OY
+
     ofc, oc = office()
-    boxes['office'] = put(ofc, *C(2, 4))
-    acd, ac = academy()
-    boxes['academy'] = put(acd, *C(422, 6))
-    crests = [[boxes['office'][0] + oc[0], boxes['office'][1] + oc[1]], [boxes['academy'][0] + ac[0], boxes['academy'][1] + ac[1]]]
-    put(barn(), *C(550, 4))
-    boxes['market'] = put(market(), *C(2, 228))
-    boxes['scouting'] = put(scouting(), *C(158, 242))
-    boxes['home'] = put(house(), *C(520, 236))
-    boxes['news'] = put(kiosk(), *C(274, 258))
-    put(prop('maple'), *C(314, 232))
-
-    def grow(name, x, foot):                     # a tree, unless the ground is where it would stand
-        t = tree(name)
-        y = foot - t.height
-        if x < fp[2] + 1 and x + t.width > fp[0] - 1 and y < fp[3] + 1 and foot > fp[1] - 1:
-            return
-        put(t, x, y)
-
-    for name, x, y in CORE_TREES:
-        t = tree(name)
-        grow(name, x + OX, y + OY + t.height)
+    P.append(('core', 'office', ofc, *C(2, 4), False, oc))
+    P.append(('core', 'bus_g', prop('bus_g'), *C(420, 326), False, None))
     for name, x, foot in EDGE_TREES:
-        grow(name, x, foot)
-    for name, x, foot in EDGE_PROPS:
-        p = prop(name)
-        put(p, x, foot - p.height)
-    # the plaza's furniture
-    for name, x, y in (('lamp', 266, 214), ('lamp', 396, 214), ('lamp', 266, 290), ('lamp', 396, 290),
-                       ('bench_g', 352, 258), ('bench_gl', 342, 298), ('bin', 384, 262), ('pl_red', 300, 314),
-                       ('pl_blue', 334, 314), ('pl_leaf', 368, 314), ('ticket', 306, 270)):
-        put(prop(name), *C(x, y))
-    # the academy's yard: hay, a scarecrow by the barn
-    for name, x, y in (('haystack', 520, 88), ('bale', 612, 94), ('scarecrow', 596, 190 - 32)):
-        put(prop(name), *C(x, y))
-    # the market's deliveries and bikes, the clubhouse's pots, the house's garden
-    for name, x, y in (('crates', 108, 312), ('binm', 136, 318), ('bikes', 434, 290),
-                       ('pot_b', 32, 92), ('pot_a', 76, 94), ('pl_topi', 10, 166), ('blueflw', 70, 168),
-                       ('pl_mix', 488, 312), ('sunflowers', 492, 244), ('pumpkins', 584, 318), ('pumpkin_v', 500, 288),
-                       ('daisy', 600, 332), ('yelflw', 580, 214)):
-        put(prop(name), *C(x, y))
-    put(prop('bus_g'), *C(420, 326))             # a bus on the road
-    for sp, x, y in sorted(objs, key=lambda o: o[2] + o[0].height):
-        paste(img, sp, x, y)
-    return img, anchors, [fp[0], fp[1], fp[2] - fp[0], fp[3] - fp[1]], boxes, crests
+        t = tree(name)
+        P.append(('core', name, t, x, foot - t.height, False, None))
+    for b, (x, y, w, h, label, paved) in PLOTS.items():
+        P.append(('p:' + b, 'plot_' + b, plot_pad(w, h, label, paved), *C(x, y), True, None))
+    P.append(('b:scouting', 'scouting', scouting(), *C(158, 242), False, None))
+    acd, ac = academy()
+    P.append(('b:academy', 'academy', acd, *C(422, 6), False, ac))
+    P.append(('b:academy', 'barn', barn(), *C(550, 4), False, None))
+    for name, x, y in (('haystack', 520, 88), ('bale', 612, 94), ('scarecrow', 596, 158)):
+        P.append(('b:academy', name, prop(name), *C(x, y), False, None))
+    tp, (tx, ty) = training_pitch()
+    P.append(('b:academy', 'training', tp, tx, ty, True, None))
+    P.append(('b:news', 'kiosk', kiosk(), *C(274, 258), False, None))
+    P.append(('b:news', 'ticket', prop('ticket'), *C(306, 270), False, None))
+    P.append(('b:home', 'house', house(), *C(520, 236), False, None))
+    for gid, items in DECOR.items():
+        for name, x, y in items:
+            P.append(('d:' + gid, name, sprite(name), *C(x, y), False, None))
+    # drawn in order: the flat ones first, then by where each stands (its foot), as they're listed for a tie
+    order = sorted(range(len(P)), key=lambda i: (0 if P[i][5] else 1, 0 if P[i][5] else P[i][4] + P[i][2].height, i))
+    return [P[i] for i in order]
 
 
-def meta_and_shots():
-    shots, meta = {}, {'w': W, 'h': H, 'core': list(CORE), 'lv': {}}
+def pack(sprites):
+    """the sprites, packed in rows into one sheet: (the sheet, {name: [x, y, w, h]})"""
+    names = sorted(sprites, key=lambda n: (-sprites[n].height, n))
+    SW_, x, y, row, at = 512, 0, 0, 0, {}
+    for n in names:
+        im = sprites[n]
+        if x + im.width > SW_:
+            x, y, row = 0, y + row + 1, 0
+        at[n] = [x, y, im.width, im.height]
+        x, row = x + im.width + 1, max(row, im.height)
+    sheet = Image.new('RGBA', (SW_, y + row), (0, 0, 0, 0))
+    for n, (x, y, w, h) in at.items():
+        sheet.alpha_composite(sprites[n], (x, y))
+    return sheet, at
+
+
+def build_all():
+    grounds, anchors, fps = {}, {}, {}
     for lv in range(1, 6):
-        img, anchors, box, boxes, crests = compose(lv)
-        assert img.getextrema()[3][0] == 255, 'the campus has see-through pixels'
-        shots[lv] = img.convert('RGB')
-        meta['lv'][str(lv)] = dict(anchors, box=box)
-        if lv == 1:
-            meta['boxes'], meta['crests'] = boxes, crests
-    for lv in range(2, 6):                       # each other level: what changes from level 1
-        bb = ImageChops.difference(shots[lv], shots[1]).getbbox()
-        meta['lv'][str(lv)]['patch'] = [bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1]]
-    return shots, meta
+        grounds[lv], anchors[lv], fps[lv] = ground_img(lv)
+        assert grounds[lv].getextrema()[3][0] == 255, 'the ground has see-through pixels'
+    P = pieces()
+    sprites = {}
+    for g, name, sp, x, y, flat, cr in P:
+        if name in sprites:
+            assert sprites[name].tobytes() == sp.tobytes(), 'two different sprites called ' + name
+        sprites[name] = sp
+    sheet, at = pack(sprites)
+    meta = {'w': W, 'h': H, 'core': list(CORE), 'lv': {}, 'items': [], 'boxes': {}, 'plots': {}}
+    for lv in range(1, 6):
+        fp = fps[lv]
+        meta['lv'][str(lv)] = dict(anchors[lv], box=[fp[0], fp[1], fp[2] - fp[0], fp[3] - fp[1]])
+        if lv > 1:                               # each other level: what changes from level 1
+            bb = ImageChops.difference(grounds[lv].convert('RGB'), grounds[1].convert('RGB')).getbbox()
+            meta['lv'][str(lv)]['patch'] = [bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1]]
+    for g, name, sp, x, y, flat, cr in P:
+        it = {'g': g, 'n': name, 's': at[name], 'x': x, 'y': y}
+        if flat:
+            it['f'] = 1
+        if cr:
+            it['c'] = list(cr)
+        if name in TREES:                        # a tree where the ground's built over it is cleared at that level
+            hl = [lv for lv in range(1, 6) if x < fps[lv][2] + 1 and x + sp.width > fps[lv][0] - 1 and y < fps[lv][3] + 1 and y + sp.height > fps[lv][1] - 1]
+            if hl:
+                it['hl'] = hl
+        meta['items'].append(it)
+        box = [x, y, sp.width, sp.height]
+        if g.startswith('b:') and name in ('scouting', 'academy', 'kiosk', 'house', 'training'):
+            meta['boxes'][{'kiosk': 'news', 'house': 'home'}.get(name, name)] = box
+        elif g.startswith('p:'):
+            meta['plots'][g[2:]] = box
+        elif name == 'office':
+            meta['boxes']['office'] = box
+    return grounds, sheet, meta, P
+
+
+def compose(grounds, P, lvl, has):
+    """the campus as the game draws it: the ground at a level, then the pieces the club has, the furthest back first"""
+    img = grounds[lvl].copy()
+    for g, name, sp, x, y, flat, cr in P:
+        if not has(g):
+            continue
+        if name in TREES and meta_hidden(name, x, y, sp, lvl):
+            continue
+        paste(img, sp, x, y)
+    return img
+
+
+_FPS = {}
+
+
+def meta_hidden(name, x, y, sp, lvl):
+    fp = _FPS[lvl]
+    return x < fp[2] + 1 and x + sp.width > fp[0] - 1 and y < fp[3] + 1 and y + sp.height > fp[1] - 1
 
 
 def embed(html_path, pngs, meta):
-    """write the pictures into classic.html: the CAMPUS_ART (level 1's picture, the others' patches, as data URLs) and
-    CAMPUS_META lines"""
+    """write the pictures into classic.html: the CAMPUS_ART (the ground at level 1, the other levels' patches, the pieces'
+    sheet, as data URLs) and CAMPUS_META lines"""
     src = open(html_path, encoding='utf-8').read()
     art = {str(k): 'data:image/png;base64,' + base64.b64encode(open(v, 'rb').read()).decode() for k, v in pngs.items()}
     want = {'const CAMPUS_ART = ': 'const CAMPUS_ART = ' + json.dumps(art, separators=(',', ':')) + ';',
@@ -792,23 +892,40 @@ if __name__ == '__main__':
     TILES = args[0]
     out = args[1] if len(args) > 1 else os.path.join(root, 'assets', 'campus')
     os.makedirs(out, exist_ok=True)
-    shots, meta = meta_and_shots()
+    grounds, sheet, meta, P = build_all()
+    for lv in range(1, 6):
+        _FPS[lv] = [meta['lv'][str(lv)]['box'][0], meta['lv'][str(lv)]['box'][1],
+                    meta['lv'][str(lv)]['box'][0] + meta['lv'][str(lv)]['box'][2], meta['lv'][str(lv)]['box'][1] + meta['lv'][str(lv)]['box'][3]]
     pngs = {1: os.path.join(out, 'campus_1.png')}
-    shots[1].save(pngs[1], optimize=True)
+    grounds[1].convert('RGB').save(pngs[1], optimize=True)
     for lv in range(2, 6):
         x, y, w, h = meta['lv'][str(lv)]['patch']
         pngs[lv] = os.path.join(out, 'campus_%d.png' % lv)
-        shots[lv].crop((x, y, x + w, y + h)).save(pngs[lv], optimize=True)
-    # the preview: the ground at each level, side by side (the widest one's box, a little round it)
+        grounds[lv].convert('RGB').crop((x, y, x + w, y + h)).save(pngs[lv], optimize=True)
+    pngs['sprites'] = os.path.join(out, 'campus_sprites.png')
+    sheet.save(pngs['sprites'], optimize=True)
+    # the way the game puts it together (the ground at level 1, a level's patch, the pieces) is the way it's made here
+    for lv in range(1, 6):
+        g = grounds[1].copy()
+        if lv > 1:
+            x, y, w, h = meta['lv'][str(lv)]['patch']
+            g.paste(grounds[lv].crop((x, y, x + w, y + h)), (x, y))
+        assert g.tobytes() == grounds[lv].tobytes(), 'level %d: the patch is not the ground' % lv
+    start = compose(grounds, P, 1, lambda g: g == 'core' or g.startswith('p:'))
+    full = compose(grounds, P, 1, lambda g: not g.startswith('p:'))
+    start.convert('RGB').save(os.path.join(out, 'campus_start.png'), optimize=True)
+    full.convert('RGB').save(os.path.join(out, 'campus_full.png'), optimize=True)
+    # the ground at each level, side by side (the widest one's box, a little round it), everything built and planted
     bx = [min(meta['lv'][str(l)]['box'][0] for l in range(1, 6)) - 8, min(meta['lv'][str(l)]['box'][1] for l in range(1, 6)) - 8]
     bx += [max(meta['lv'][str(l)]['box'][0] + meta['lv'][str(l)]['box'][2] for l in range(1, 6)) + 8,
            max(meta['lv'][str(l)]['box'][1] + meta['lv'][str(l)]['box'][3] for l in range(1, 6)) + 8]
-    tiles = [shots[l].crop(tuple(bx)) for l in range(1, 6)]
+    tiles = [compose(grounds, P, l, lambda g: not g.startswith('p:')).convert('RGB').crop(tuple(bx)) for l in range(1, 6)]
     prev = Image.new('RGB', (sum(t.width for t in tiles) + 8 * 4, tiles[0].height), (18, 26, 51))
     for i, t in enumerate(tiles):
         prev.paste(t, (i * (t.width + 8), 0))
     prev.save(os.path.join(out, 'campus_levels.png'), optimize=True)
-    for lv in range(1, 6):
-        print('level', lv, os.path.getsize(pngs[lv]), 'bytes', meta['lv'][str(lv)])
+    for k, v in pngs.items():
+        print(k, os.path.getsize(v), 'bytes')
+    print(len(meta['items']), 'pieces;', 'boxes', meta['boxes'], 'plots', meta['plots'])
     if '--embed-classic' in sys.argv:
         embed(os.path.join(root, 'classic.html'), pngs, meta)
