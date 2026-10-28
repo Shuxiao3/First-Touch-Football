@@ -270,19 +270,22 @@ The same game played like any other football game. It's a copy of `index.html` w
   draw from there. On a computer, hold the left mouse button anywhere on the pitch. The pattern is read when you let go,
   against the way your man is going (the way he's running, or else the way he's facing) as it looks on the screen, as
   a stick is in other football games. The same shape is the same move whichever way he's going on the pitch, so the
-  same stroke on the screen can be two moves: rightwards, it's a flick for a man running right and a drag-back for one
+  same stroke on the screen can be two moves: rightwards, it's a knock-on for a man running right and a drag-back for one
   running left. (It's read on the screen because the pitch's depth is squashed there: read on the pitch, a stroke drawn
   across a man running up or down it wobbled ahead or back, and an elastico could come out as a sombrero.)
-  - **Flick** (a straight flick anywhere in the half in front of him, 1 star): he goes on as he was, still facing his
-    way, and pops the ball up a little off his foot the way you flicked, over in 0.1 s. It's loose until he's back on it.
-  - **Drag-back** (a straight flick anywhere in the half behind him, 2 stars): he stops, rolls it back under his sole
-    the way you flicked and turns to go with it.
-  - **Croqueta** (an L, 3 stars): the ball is shifted foot to foot, and he shifts about 1.8 m the way the L's second
-    stroke goes, still running the same way.
-  - **Roulette** (a circle, 3 stars): he spins round with the ball on his sole, drifting off to the side as he goes,
-    clockwise to his left and anticlockwise to his right, and comes out of it seven-eighths of the way round (315°),
-    going diagonally away past the man in front of him on that side instead of back into him. He ends about 2.5 m
-    across. The ball goes round with his body, so halfway through it's showing on the far side.
+  - **Knock-on** (a straight stroke anywhere in the half in front of him, 1 star): he knocks it on along the grass the
+    way you drew, over in 0.1 s, and runs on to it. It gets about 2 m clear of him, out of reach of a foot stuck out,
+    and it's loose until he's back on it. It replaces the flick, which popped it up a little off his foot.
+  - **Drag-back** (a straight stroke anywhere in the half behind him, 2 stars): he stops, rolls it back under his sole
+    the way you drew and turns to go with it.
+  - **Croqueta** (an L, to the side first and then on, 3 stars): the ball is shifted foot to foot, and he shifts about
+    1.8 m the way the L's first stroke went, still running the same way. Drawn the other way round (on, then to the
+    side) it's nothing.
+  - **Roulette** (a circle, 3 stars): clockwise he goes out to his left, anticlockwise to his right. The ball goes a
+    little that way first and then diagonally on; it never swings out on the other side, toward the man. He goes round
+    it on his sole: a quarter of the way round he's beside it, facing it, and halfway he's in front of it with his back
+    to the man, shielding it. He comes out of it seven-eighths of the way round (315°), face on, going diagonally away
+    past the man on that side, about 1.9 m across. (It used to swing the ball out the other way first, toward the man.)
   - **Cruyff turn** (a hook, 3 stars): he shapes to shoot or cross, drags the ball behind his standing leg and goes
     back the way the hook ends.
   - **Rainbow flick** (back, then ahead, 4 stars): over 0.35 s he eases off and rolls the ball back up the back of his
@@ -292,9 +295,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     one already in tackling range takes it during the wind-up. He lets it drop and takes it in his stride, the way
     he's going; he used to chest it down again and again as it came down beside him, and turn round to a ball that
     had dropped a stride behind him.
-  - **Sombrero** (ahead, then back, 5 stars): a quick lift off the front of his foot (0.16 s, already above a foot
-    stuck in), then flicked up over the man in front of him to drop about 1.8 m behind him, and he goes round him to
-    meet it, taking it in his stride as he does the rainbow. With nobody in front, it drops about 3.6 m on.
+  - **Sombrero** (ahead, then back, 5 stars): for when his back is to one of theirs. He eases off and pops it up a
+    little off his foot (0.18 s), then flicks it back over his own head and the man's to drop about 2.3 m past the
+    man, and turns and goes round him to it, taking it in his stride as he does the rainbow. With nobody behind him it
+    drops about 3.3 m behind him. (It used to go over a man in front of him.)
   - **Elastico** (out to one side and back, 5 stars): out with the outside of his foot, the ball and his weight going
     that way, then snapped back the other and popped up about half a metre, so it gets over a foot stuck out, past the
     man in front on the side it came back to. He goes after it.
@@ -302,6 +306,22 @@ The same game played like any other football game. It's a copy of `index.html` w
     it past the man in front on the side the line goes while he goes round him on the other, and picks it up beyond.
 
   There's no step-over, body feint or nutmeg.
+
+  **Holding SKILL** without drawing, the ball at his feet (on a computer, the left mouse button held down and kept
+  still). After 0.12 s it's a hold; a finger that moves more than 12 px first draws a move instead.
+  - **With the stick, he strafes:** he goes the way it points but keeps facing the way he was, the ball tight at his
+    feet. It's slower than running with it: just under two-thirds of his pace straight on, about half going across
+    (measured: 75 px/s, against 152 turning to run across with it), and a third backing up.
+  - **Without it, he shields it:** he turns his back to the nearest of theirs within 5.6 m, the ball on his far side
+    (the screen says SHIELD), and keeps his back to him as he comes round. Then who gets it off him is:
+    - **Strength,** how well he stays put. He's planted, and counts as 1.5 points stronger: pushed in the back for a
+      second by a level man he gives up two-thirds of the ground he would off the stick, at 9 against 3 next to none
+      and at 3 against 9 nearly twice as much. It counts for his cushion, and against barging and being muscled off it.
+    - **Dribbling and Ball control,** from where it can be nicked: only by a man within 80° of the way the ball lies
+      from him at 1, 30° at 10 (both counted, averaged). Round his back or his side, nobody can get a foot to it.
+    - **Off IQ,** how well he moves to keep it away: how soon he reads where the man's gone (0.4 s at 1, 0.06 s at 10)
+      and how quickly he turns his back to him (2.5 to 8 radians a second). With a man walking round him at 1.6 m, his
+      back is 6° off square to the man on average at Off IQ 10 and 32° at 1.
 
   **Skill stars** say which moves a man has, one to five, and they're nothing to do with his ratings. Each man has a
   ceiling, drawn once for him from the odds for his position in the league his rating belongs in (halfway between his
@@ -360,7 +380,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
-    the flick's pop and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
     A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
     as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
     measured).
@@ -628,7 +648,7 @@ The same game played like any other football game. It's a copy of `index.html` w
 
     Standing still with it, you're robbed every time, before and now: he comes round you and takes it from in
     front (22° to 55° round from the way you're facing). At 8 against 4 that takes him 1.1 s from straight behind
-    (it took 0.8 s).
+    (it took 0.8 s). Hold SKILL to shield it instead (see **Holding SKILL**).
   - **Holding it up.** The computer's centre-forward is keener to hold it up the stronger he is: no keener at
     Strength 5.5, up to 1.6 times at 9 and over. How sure he is of keeping it under pressure leans on Strength more
     too.
@@ -774,10 +794,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     there to meet it, and more than half of them end in a header on goal, where it was one in four. Goals are up by
     about as much as one batch of games differs from the next.
 - **The computer does skill moves.** Taking his man on, one of the computer's men with the moves (his skill stars)
-  does one to get past him, only those his stars allow: a one-star man flicks it on past him; with more, a flick or a
-  croqueta most, a drag-back with the man right on him, a roulette only when he's well the better of him, a Cruyff
-  turn out wide or near the byline, a rainbow flick (or, at five stars, a sombrero over him when he's close) with
-  nobody behind him to pick it up, and at five stars an elastico, or a heel flick round him close up.
+  does one to get past him, only those his stars allow: a one-star man knocks it on past him; with more, a knock-on or
+  a croqueta most, a drag-back with the man right on him, a roulette only when he's well the better of him, a Cruyff
+  turn out wide or near the byline, a rainbow flick with nobody behind him to pick it up, and at five stars an
+  elastico, or a heel flick round him close up.
   - **Who.** Wingers and wide midfielders most. Central midfielders and strikers now and then. A full-back only when
     he's pushed on (told to attack, or already in their third) and is clearly the better man (by 1.5 or more). A
     centre-back never.
@@ -786,9 +806,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     Def IQ and Agility. Level, he's a third as keen as at 2 better; at 1 worse, not at all. A 5 against a 2 is as
     keen as an 8 against a 5. Keener out on the touchline (×1.3) and in their third (×1.15); never in his own half.
     The keener he is, the more often he takes his man on at all (about twice as often at the keenest).
-  - **Which move.** He goes into it about 3 m from his man, toward the side away from him: a croqueta or a cut most
-    often (a cut chopped square, away from him), a rainbow flick with nobody behind his man to pick it up, and a
-    roulette only with the man right on him and when he's a good deal the better (by 2.5 or more).
+  - **Which move.** He goes into it about 3 m from his man, toward the side away from him: a croqueta or a knock-on
+    most often (knocked on diagonally, away from him), a rainbow flick with nobody behind his man to pick it up, and
+    a roulette only with the man right on him and when he's a good deal the better (by 2.5 or more).
+  - **The sombrero is for a man behind him.** A five-star man on the ball in their half, his back to one of ours 1 to
+    3 m behind him and nobody else of ours within about 6 m of that man, now and then flicks it over them both: he
+    looks four times a second, and takes it up to one look in six, the keener he is (see **How keen**). With four
+    stars, or with the man in front of him, never.
   - **A move sells the man in front of him,** yours as well as the computer's. Anyone of theirs within 5.5 m and not
     behind him is wrong-footed for a moment: he goes at where the ball was and can't win it. 0.1 s against a level
     man, up to 0.35 s at 4 better, and not at all from 1.6 worse. (Not in the Dribble Lab, where it's your timing
@@ -797,7 +821,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     quick as before); at 1 it takes 1.6 times as long and carries him and the ball 30% less far; at 5.5, 1.23 times
     as long and 85% as far. A poor dribbler shows the man the ball for longer and gets less far from him.
   - **Measured** over six 6-minute computer-against-computer games: 35 moves, about 6 a game. 30 were by wingers, 3
-    by central midfielders and 2 by strikers; 15 croquetas, 14 cuts and 6 rainbow flicks; 22 out on the touchline.
+    by central midfielders and 2 by strikers; 15 croquetas, 14 cuts (flicks chopped square, before the knock-on) and
+    6 rainbow flicks; 22 out on the touchline.
     He still had the ball after 26 of them. A winger against a defender closing him down, 8 runs each: at 9 against
     4 he did a move 8 times, got past 5 times and never lost it; at 7 against 6, 5 moves, 1 past, lost it 3 times;
     at 5 against 8 he never tried one.

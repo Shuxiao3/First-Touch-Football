@@ -1579,12 +1579,12 @@
     swipeFree:{val:25,min:0,max:60,step:5,label:'Swipe shot: off his line, free (°)',hint:'A swipe shot this far off the way he is facing costs nothing. Further round it is struck across his body: weaker and wilder, the more so the further, worst turned right round (Swipe shot: off his line, cost).'},
     swipeCross:{val:1,min:0,max:1.5,step:0.05,label:'Swipe shot: off his line, cost',hint:'How much a swipe shot struck across his body costs at worst (1: 45% of its pace and 80% of his accuracy, at 150 degrees or more off the way he faces).'},
     blockIQ:{val:0.12,min:0,max:0.4,step:0.01,label:'Block: Def IQ spread',hint:'How much Def IQ moves the block reach: a share either way, from Def IQ 1 (less) to 10 (more). Kept small on purpose.'},
-    skCutPop:{val:140,min:0,max:400,step:10,label:'Skill: flick pop (px/s)',hint:'How hard a flick pops the ball up off his foot the way you flicked it (on top of his own pace that way). It\'s loose until he gets back on it, so more is quicker away but easier to nick.'},
+    skCutPop:{val:260,min:0,max:400,step:10,label:'Skill: knock-on push (px/s)',hint:'How hard a knock-on sends the ball on along the grass the way you drew it (on top of his own pace that way). It\'s loose until he gets back on it, so more is quicker away but easier to nick.'},
     skSpinDist:{val:58,min:20,max:100,step:2,label:'Skill: roulette distance (px)',hint:'How far off to the side a roulette carries you, past the man in front (25 px = 1 m).'},
     skCroqDist:{val:46,min:16,max:90,step:2,label:'Skill: croqueta distance (px)',hint:'How far sideways a croqueta shifts you and the ball (25 px = 1 m).'},
     skSpinT:{val:0.6,min:0.3,max:1,step:0.05,label:'Skill: roulette time (s)',hint:'How long a full 360 would take. A roulette comes out of it seven-eighths of the way round (315 degrees), so it takes that share of this.'},
     skCroqT:{val:0.3,min:0.15,max:0.6,step:0.05,label:'Skill: croqueta time (s)',hint:'How long a croqueta takes.'},
-    skCutT:{val:0.1,min:0.05,max:0.4,step:0.01,label:'Skill: flick time (s)',hint:'How long a flick takes, from the moment it\'s drawn to the ball leaving his foot.'},
+    skCutT:{val:0.1,min:0.05,max:0.4,step:0.01,label:'Skill: knock-on time (s)',hint:'How long a knock-on takes, from the moment it\'s drawn to the ball leaving his foot.'},
     aiReact:  {val:0.15, min:0, max:0.8, step:0.05,label:'AI reaction to its own touch (s)',hint:'How long a computer player takes to react to where its own first touch sent the ball. Until then it eases off what it was doing as the ball arrived (no sprinting on), so a heavy or glancing touch can still get away from it. Agility shortens it a little (x1.25 at 1, x0.75 at 10). 0 = instant.'},
     firstTouchAcc:{val:0.6,min:0.2,max:1,  step:0.02,label:'First-touch accuracy',hint:'Accuracy kept when you shoot/pass a ball FIRST-TIME (before controlling it). 1 = no penalty; lower = first-time strikes spray more. A ball within clean-touch speed can be struck on the volley by pressing kick/shoot before you trap it.'},
     // the trap's own numbers (tune them live in the Trap Lab)
@@ -2116,7 +2116,7 @@
   // striker now and then, hardly ever a midfielder, perhaps one full-back in the world; a centre-back has three at most.
   // One star: the flick. Two: the drag-back too. Three: the croqueta, the roulette and the Cruyff turn. Four: the rainbow
   // flick. Five: the sombrero flick, the elastico and the heel flick round him.
-  const SKILL_STARS={flick:1, dragback:2, croq:3, spin:3, cruyff:3, rainbow:4, sombrero:5, elastico:5, heel:5};
+  const SKILL_STARS={knock:1, dragback:2, croq:3, spin:3, cruyff:3, rainbow:4, sombrero:5, elastico:5, heel:5};
   // the odds (%) of a ceiling of 1..5 stars, by position (natPos) and league (League 2, League 1, Championship, Premium League):
   // about three or four five-star men in a career's world, most of them Premium League wingers
   const STAR_ODDS={
@@ -2981,20 +2981,21 @@
   // Start on SKILL (on a computer: hold the mouse button down anywhere on the pitch) and draw. What you draw is read
   // against the way your man is going -- the way he's running, else the way he's facing -- as a stick is in other
   // football games:
-  //   a straight flick ahead     -> FLICK (1 star): anywhere in the half in front of him -- the ball popped up a little
-  //                                 off his foot that way; he goes on facing the way he was and runs on to it
-  //   a straight flick back      -> DRAG-BACK (2): he stops, rolls it back under his sole the way you flicked and turns
-  //                                 to go with it
-  //   an L                       -> CROQUETA (3): the ball shifted foot to foot, the way the L's second stroke goes
-  //   a circle                   -> ROULETTE (3): he spins round with the ball on his sole, drifting off to the side --
-  //                                 clockwise to his left, anticlockwise to his right -- and comes out of it seven-eighths
-  //                                 of the way round, going diagonally away past the man in front of him, not back into him
+  //   a straight stroke ahead    -> KNOCK-ON (1 star): anywhere in the half in front of him -- the ball knocked on along
+  //                                 the grass that way, and he goes after it
+  //   a straight stroke back     -> DRAG-BACK (2): he stops, rolls it back under his sole the way you drew and turns to
+  //                                 go with it
+  //   an L, to the side then on  -> CROQUETA (3): the ball shifted foot to foot to the side the L starts
+  //   a circle                   -> ROULETTE (3): his sole on it, the ball dragged a little to the side he's going --
+  //                                 clockwise to his left, anticlockwise to his right -- he goes round it facing it, turns
+  //                                 his back to the man in front with it shielded, and comes out of it seven-eighths of
+  //                                 the way round with it, going diagonally away past him
   //   a hook (a U)               -> CRUYFF TURN (3): he shapes to shoot or cross, drags it behind his standing leg and
   //                                 goes the way the hook ends, back and away
   //   back, then ahead           -> RAINBOW FLICK (4): rolled up the back of his leg and flicked over his head -- and the
   //                                 man in front's -- to drop a few metres ahead; he runs on to it
-  //   ahead, then back           -> SOMBRERO FLICK (5): flicked up off the front of his foot over the man in front of
-  //                                 him, to drop just behind him; he goes round him to meet it
+  //   ahead, then back           -> SOMBRERO FLICK (5): his back to the man behind him -- a little pop up, then flicked
+  //                                 over his own head and the man's, to drop past him; he turns and goes round him to it
   //   one side, then the other   -> ELASTICO (5): pushed out with the outside of his foot one way and snapped back the
   //                                 other, popped up a little to get over a foot stuck out, past the man on that side
   //   a loop, then a line out    -> HEEL FLICK (5): backheeled past the man in front on one side (the side the line goes)
@@ -3004,15 +3005,55 @@
   // timing -- move it as he commits, out of his reach.
   // Not everyone has every move: a man's skill stars (see SKILL_STARS) say which. A move above his stars doesn't happen.
   // A flick on SKILL while a ball is on its way to you is a DIRECTIONAL FIRST TOUCH: it's pushed that way as it arrives.
+  // SKILL held and not drawn on, with the ball at his feet, he strafes (with the stick) or shields it (without): HOLDING.
   let skill=null, skillCd=0, skillG=null, skillTrail=null, ftAim=null;
-  const SKILL_NAME={flick:'FLICK',dragback:'DRAG-BACK',croq:'CROQUETA',spin:'ROULETTE',cruyff:'CRUYFF TURN',rainbow:'RAINBOW',sombrero:'SOMBRERO',elastico:'ELASTICO',heel:'HEEL FLICK'};
+  // HOLDING SKILL, the ball at his feet (on a computer: the mouse button held down, still): pressed and held without
+  // drawing for HOLD_T, it's a hold -- a finger that moves more than HOLD_SLOP px draws a move instead. With the stick he
+  // STRAFES: moves the way it points keeping the way he faced, the ball tight at his feet, slower than running with it
+  // (STRAFE_K of his running pace ahead, less across, less again backing up). With the stick left alone he SHIELDS: his
+  // back to the nearest of theirs (within SHIELD_SEE), the ball on his far side. Who gets it off him then:
+  //   Strength: he's planted (SHIELD_PLANT on his Strength), so the man is moved off him the more, and needs more to
+  //     barge or muscle through him;
+  //   Dribbling and Ball control: from where it can be nicked -- only within NICK_W of the way the ball is from him
+  //     (80 degrees either side at 1, 30 at 10), never from round his back;
+  //   Off IQ: how well he keeps it away -- how soon he reads where the man's gone (0.4 s at 1, 0.06 s at 10) and how
+  //     quickly he turns his back to him (2.5 to 8 radians a second).
+  let holdMode=null;                                             // {p, kind:'strafe'|'shield', face, aim, since}
+  const HOLD_T=0.12, HOLD_SLOP=12, STRAFE_K=0.62, SHIELD_SEE=140, SHIELD_PLANT=0.15, NICK_W=[80,30];
+  function holdPending(){ const p=controlled, g=skillG; return !!(p&&g&&!g.drawn&&ball.ownedBy===p&&!skill); }   // (pressed, not drawn on: he keeps his facing)
+  function holdNow(){ const p=controlled, g=skillG;
+    return !!(holdPending()&&simNow-g.t0>=HOLD_T&&p.state==='normal'&&!gkHold&&restartT<=0&&scoredT<=0&&offsideT<=0); }
+  function updateHold(moving){
+    const p=controlled; if(!holdNow()){ holdMode=null; return; }
+    const kind=moving?'strafe':'shield';
+    if(!holdMode||holdMode.p!==p||holdMode.kind!==kind){
+      holdMode={p, kind, face:{x:p.facing.x,y:p.facing.y}, aim:null, since:simNow};
+      if(kind==='shield'&&shieldFrom(p)){ lastGrade='SHIELD'; gradeColor='#78c8ff'; gradeFade=0.6; } } }
+  const shieldingNow=c=>!!holdMode&&holdMode.p===c&&holdMode.kind==='shield'&&ball.ownedBy===c;
+  const holdStrength=c=>strengthOf(c)+(shieldingNow(c)?SHIELD_PLANT:0);
+  function shieldFrom(p){ let o=null, od=SHIELD_SEE;
+    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const d=dist(p,q); if(d<od){ od=d; o=q; } }
+    return o; }
+  // shielding: his back to that man, as soon and as quickly as his Off IQ has it
+  function shieldTurn(p,dt){
+    const o=shieldFrom(p), H=holdMode; if(!o) return;
+    const iq=statOf(p,'offIQ',P.offIQ.val), want=Math.atan2(p.y-o.y,p.x-o.x), a0=Math.atan2(p.facing.y,p.facing.x);
+    if(H.aim==null) H.aim=a0;
+    H.aim+=skillTurn(H.aim,want)*clamp(dt/statLerp(iq,0.4,0.06),0,1);
+    const mx=statLerp(iq,2.5,8)*dt, a=a0+clamp(skillTurn(a0,H.aim),-mx,mx);
+    p.facing={x:Math.cos(a),y:Math.sin(a)}; }
+  // how far round from the ball a man can nick it off a man shielding it (radians): his Dribbling and Ball control
+  function nickWindowOf(c){ return statLerp((statOf(c,'dribbling',P.dribbling.val)+statOf(c,'ballControl',P.ballControl.val))/2,NICK_W[0],NICK_W[1])*Math.PI/180; }
+  function nickAngle(c,o){ const ax=o.x-c.x, ay=o.y-c.y, bx=ball.x-c.x, by=ball.y-c.y, l=(Math.hypot(ax,ay)*Math.hypot(bx,by))||1;
+    return Math.acos(clamp((ax*bx+ay*by)/l,-1,1)); }
+  const SKILL_NAME={knock:'KNOCK-ON',dragback:'DRAG-BACK',croq:'CROQUETA',spin:'ROULETTE',cruyff:'CRUYFF TURN',rainbow:'RAINBOW',sombrero:'SOMBRERO',elastico:'ELASTICO',heel:'HEEL FLICK'};
   const SKILL_KINDS=Object.keys(SKILL_NAME);
-  const ROULETTE_TURN=Math.PI*1.75;                              // (how far round he goes before he comes out of it: 315 degrees)
+  const ROULETTE_TURN=Math.PI*1.75, ROULETTE_Q=Math.PI/2;      // (how far round he goes before he comes out of it: 315 degrees)
   function skillTurn(a,b){ let d=b-a; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; return d; }
   // the drawn pattern (canvas px) -> its shape, its ways on the screen; or null:
   //   line {dx,dy}         a straight flick
   //   vee {ax,ay,bx,by}    out and straight back: two straight strokes, the second turned more than 135 degrees off
-  //   el {dx,dy}           an L: two straight strokes at a corner of 50 to 135 degrees (the second stroke's way)
+  //   el {ax,ay,dx,dy}     an L: two straight strokes at a corner of 50 to 135 degrees (the first stroke's way, the second's)
   //   hook {dx,dy,sense}   curling round 125 to 250 degrees, open (the way it ends up going)
   //   circle {sense}       round further than that, or round and nearly closed (sense +1: clockwise)
   //   loop {dx,dy,sense}   a circle with a straight line out of it (the line's way)
@@ -3043,7 +3084,7 @@
     }
     if(best&&best.ang>0.87){ let at=0;                               // (how much of the turning is at the corner)
       for(let i=1;i<n;i++) if(Math.abs(cum[i]-cum[best.k])<=0.15*L) at+=dT[i];
-      if(at>=0.55*absT) return best.ang>=2.36?{kind:'vee',ax:best.ax,ay:best.ay,bx:best.dx,by:best.dy}:{kind:'el',dx:best.dx,dy:best.dy}; }
+      if(at>=0.55*absT) return best.ang>=2.36?{kind:'vee',ax:best.ax,ay:best.ay,bx:best.dx,by:best.dy}:{kind:'el',ax:best.ax,ay:best.ay,dx:best.dx,dy:best.dy}; }
     if(D/L>=0.75) return {kind:'line',dx:(z.x-a.x)/D,dy:(z.y-a.y)/D};
     if(Math.abs(turn)>2.2){
       let w=0; for(const q of pts) w=Math.max(w,Math.hypot(q.x-a.x,q.y-a.y));
@@ -3063,8 +3104,8 @@
   function skillFor(p,g){
     const f=skillHeading(p), a=proj(p.x,p.y), b=proj(p.x+f.x*20,p.y+f.y*20), l=Math.hypot(b.x-a.x,b.y-a.y)||1, F={x:(b.x-a.x)/l,y:(b.y-a.y)/l};
     const dir=(x,y)=>screenDirToPitch(x,y,p.y,p.x), ahead=(x,y)=>(x*F.x+y*F.y)/(Math.hypot(x,y)||1);
-    if(g.kind==='line'){ const u=dir(g.dx,g.dy); return ahead(g.dx,g.dy)>=0?{kind:'flick',d:u}:{kind:'dragback',d:u}; }
-    if(g.kind==='el') return {kind:'croq',d:dir(g.dx,g.dy)};
+    if(g.kind==='line'){ const u=dir(g.dx,g.dy); return ahead(g.dx,g.dy)>=0?{kind:'knock',d:u}:{kind:'dragback',d:u}; }
+    if(g.kind==='el') return Math.abs(ahead(g.ax,g.ay))<0.6&&ahead(g.dx,g.dy)>0.45?{kind:'croq',d:dir(g.ax,g.ay)}:null;   // (to the side, then on: the side it goes)
     if(g.kind==='circle') return {kind:'spin',sense:g.sense};
     if(g.kind==='hook') return {kind:'cruyff',d:dir(g.dx,g.dy)};
     if(g.kind==='loop') return {kind:'heel',d:dir(g.dx,g.dy)};
@@ -3116,29 +3157,29 @@
   function mkSkill(p,m){
     const f=skillHeading(p), sp=Math.hypot(p.vx,p.vy), k=skillPaceOf(p), r=skillReachOf(p), right={x:-f.y,y:f.x};
     const sk={kind:m.kind,t:0,x0:p.x,y0:p.y,f,sp0:Math.min(sp,runSpeedOf(p)), pop:P.skCutPop.val*r, rbDist:P.skRainbowDist.val*r, r};
-    if(m.kind==='flick'){ sk.d=aheadOf(m.d||f,f,0); sk.T=P.skCutT.val/k; }
+    if(m.kind==='knock'){ sk.d=aheadOf(m.d||f,f,0); sk.T=P.skCutT.val/k; }
     else if(m.kind==='dragback'){ sk.d=behindOf(m.d||{x:-f.x,y:-f.y},f,0.3); sk.T=0.32/k; }
     else if(m.kind==='croq'){ const d=m.d||right, along=d.x*f.x+d.y*f.y; let sx=d.x-f.x*along, sy=d.y-f.y*along, sl=Math.hypot(sx,sy);   // the sideways part of the L
       if(sl<0.2){ sx=right.x; sy=right.y; sl=1; } sk.side={x:sx/sl,y:sy/sl}; sk.D=P.skCroqDist.val*r; sk.T=P.skCroqT.val/k; }
     else if(m.kind==='spin'){ sk.sense=m.sense>0?1:-1; sk.side={x:-right.x*sk.sense,y:-right.y*sk.sense};   // (clockwise: off to his left)
-      sk.D=P.skSpinDist.val*r; sk.T=P.skSpinT.val*ROULETTE_TURN/(2*Math.PI)/k; }
+      sk.D=P.skSpinDist.val*r; sk.T=P.skSpinT.val*ROULETTE_TURN/(2*Math.PI)/k;
+      const cb=p.r+ball.r+2; sk.eb={x:ball.x-(p.x+f.x*cb),y:ball.y-(p.y+f.y*cb)}; }   // (where the ball is, off where the move has it: gone by the time he's round it)
     else if(m.kind==='cruyff'){ sk.d=behindOf(m.d||{x:-f.x,y:-f.y},f,0.2); sk.T=0.36/k; }
     else if(m.kind==='rainbow'){ sk.T=P.skRainbowT.val/k; }
-    else if(m.kind==='sombrero'){ sk.s=m.side||skillRoundSide(p,f); sk.T=0.16/k; }
+    else if(m.kind==='sombrero'){ sk.s=m.side||skillRoundSideBack(p,f); sk.T=0.18/k; }
     else if(m.kind==='elastico'){ sk.s=m.side||1; sk.T=0.2/k; }
     else if(m.kind==='heel'){ const d=aheadOf(m.d||f,f,0.2); sk.s=Math.sign(f.x*d.y-f.y*d.x)||1; sk.T=0.24/k; }   // (the ball's side: he goes round the other)
     return sk;
   }
-  // the side to go round the man in front of p: away from the side he's standing off to (his right, with nobody there)
-  function skillRoundSide(p,f){ let best=null, bd=160;
-    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy);
-      if(d<bd&&dx*f.x+dy*f.y>0.3*d){ bd=d; best=q; } }
-    return !best?1:(f.x*(best.y-p.y)-f.y*(best.x-p.x))>0?-1:1; }
-  // how far a ball over the man in front of p goes, to drop just behind him (a few strides on, with nobody there)
-  function skillOverHim(p,f){ let near=null;
-    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const dx=q.x-p.x, dy=q.y-p.y, s=dx*f.x+dy*f.y, o=Math.abs(dx*f.y-dy*f.x);
-      if(s>10&&s<130&&o<45&&(near==null||s<near)) near=s; }
-    return near==null?90:near+45; }
+  // the man of theirs right behind p (his back to him), if any
+  function skillManBehind(p,f){ let near=null, nd=1e9;
+    for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const dx=q.x-p.x, dy=q.y-p.y, s=-(dx*f.x+dy*f.y), o=Math.abs(dx*f.y-dy*f.x);
+      if(s>5&&s<130&&o<45&&s<nd){ nd=s; near=q; } }
+    return near; }
+  // the side to go round the man behind him: away from the side he's standing off to (his right, with nobody there)
+  function skillRoundSideBack(p,f){ const q=skillManBehind(p,f); return !q?1:(f.x*(q.y-p.y)-f.y*(q.x-p.x))>0?-1:1; }
+  // how far behind him a sombrero drops: a couple of metres past the man there (about 3 m back, with nobody there)
+  function skillOverHimBack(p,f){ const q=skillManBehind(p,f); return q?-((q.x-p.x)*f.x+(q.y-p.y)*f.y)+45:70; }
   const skillSmooth=u=>u*u*(3-2*u);
   // a move in progress moves you and the ball itself (instead of stepOutfield and carry). false = it's over.
   function skillStep(p,dt){
@@ -3155,11 +3196,12 @@
       const off=cd-(cd+8)*e;                                       // from in front of you to just behind your heel
       bx=x+f.x*off; by=y+f.y*off; bz=18*e*e;
       if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.6),rainbow:true};
-    } else if(sk.kind==='flick'){
-      // he goes on as he was, the ball on his foot -- then it's popped up off it the way you flicked, and he goes on facing his way
+    } else if(sk.kind==='knock'){
+      // he goes on as he was, the ball on his foot -- then knocks it on along the grass the way you drew, and goes after it
       p.vx=f.x*sk.sp0; p.vy=f.y*sk.sp0; x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
       bx=x+f.x*cd; by=y+f.y*cd;
-      if(u>=1){ const d=sk.d, run=Math.max(0,sk.sp0*(d.x*f.x+d.y*f.y)); out={g:f,keep:sk.sp0,loose:{d,v:run+sk.pop,vz:75,grace:0.85}}; }
+      if(u>=1){ const d=sk.d, run=Math.max(0,sk.sp0*(d.x*f.x+d.y*f.y));
+        out={g:d,keep:Math.max(sk.sp0,runSpeedOf(p)*0.9),loose:{d,v:run+sk.pop,vz:0,grace:1.3,nt:0.4,auto:true,go:0.35}}; }   // (out of his reach a moment: a knock, not a touch)
     } else if(sk.kind==='dragback'){
       // he stops dead, rolls it back under his sole the way you flicked and turns to go with it
       p.vx=f.x*sk.sp0*(1-e); p.vy=f.y*sk.sp0*(1-e); x+=p.vx*dt; y+=p.vy*dt;
@@ -3174,13 +3216,21 @@
       bx=x+f.x*(cd-4)+sk.side.x*shift; by=y+f.y*(cd-4)+sk.side.y*shift;
       if(u>=1) out={g:f,keep:Math.max(sk.sp0,runSpeedOf(p)*0.5)};
     } else if(sk.kind==='spin'){
-      // round he goes with it on his sole, drifting off to the side, and out of it seven-eighths of the way round: going
-      // diagonally away past the man in front of him, the ball on his far side from him the way round
-      const a=a0+sk.sense*ROULETTE_TURN*e;
-      x=sk.x0+sk.side.x*sk.D*e+f.x*18*e; y=sk.y0+sk.side.y*sk.D*e+f.y*18*e;
-      p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:Math.cos(a),y:Math.sin(a)};
-      bx=x+Math.cos(a)*(cd-3); by=y+Math.sin(a)*(cd-3);
-      if(u>=1) out={g:{x:Math.cos(a),y:Math.sin(a)},keep:Math.max(sk.sp0*0.6,runSpeedOf(p)*0.6)};
+      // his sole on it, the ball dragged a little to the side he's going -- and round it he goes, facing it, to that side
+      // of it; then round in front of it, his back to the man, the ball shielded; then with his other sole it comes round
+      // on that side of him to his front as he comes out of it seven-eighths of the way round, going diagonally away past
+      // the man with it. The ball never swings out on the man's side of him. (A quarter turn, a quarter, the rest.)
+      const S=sk.side, cb=cd-3, D=sk.D, L=(a,s)=>({x:sk.x0+f.x*a+S.x*s,y:sk.y0+f.y*a+S.y*s});
+      const ph=(lo,hi)=>skillSmooth(clamp((u-lo)/(hi-lo),0,1)), U1=0.33, U2=0.62;
+      const phi=u<U1?ROULETTE_Q*ph(0,U1):u<U2?ROULETTE_Q*(1+ph(U1,U2)):2*ROULETTE_Q+(ROULETTE_TURN-2*ROULETTE_Q)*ph(U2,1);
+      const a=a0+sk.sense*phi, hx=Math.cos(a), hy=Math.sin(a);
+      const P0=L(cb,0), P1=L(0.55*cb,0.5*cb), P2=L(0.6*cb,0.65*cb), B2={x:P2.x+f.x*cb,y:P2.y+f.y*cb}, BE=L(1.6*cb+0.25*D,0.65*cb+0.45*D);
+      if(u<U2){ const k1=u<U1?ph(0,U1):ph(U1,U2), A=u<U1?P0:P1, Z=u<U1?P1:P2;
+        bx=A.x+(Z.x-A.x)*k1; by=A.y+(Z.y-A.y)*k1; x=bx-hx*cb; y=by-hy*cb;            // (round the ball, facing it)
+        if(u<U1&&sk.eb){ bx+=sk.eb.x*(1-k1); by+=sk.eb.y*(1-k1); } }
+      else { const k3=ph(U2,1); x=B2.x+(BE.x-B2.x)*k3; y=B2.y+(BE.y-B2.y)*k3; bx=x+hx*cb; by=y+hy*cb; }   // (and it comes round him)
+      p.vx=(x-p.x)/Math.max(dt,1e-3); p.vy=(y-p.y)/Math.max(dt,1e-3); p.facing={x:hx,y:hy};
+      if(u>=1) out={g:{x:hx,y:hy},keep:Math.max(sk.sp0*0.6,runSpeedOf(p)*0.6)};
     } else if(sk.kind==='cruyff'){
       // he plants as if to shoot or cross, drags it behind his standing leg and turns the way the hook ended
       p.vx=f.x*sk.sp0*(1-e); p.vy=f.y*sk.sp0*(1-e); x+=p.vx*dt; y+=p.vy*dt;
@@ -3189,11 +3239,12 @@
       bx=x+(f.x*(1-e)+sk.d.x*e)*cd+right.x*s*w; by=y+(f.y*(1-e)+sk.d.y*e)*cd+right.y*s*w;
       if(u>=1) out={g:sk.d,keep:runSpeedOf(p)*0.7};
     } else if(sk.kind==='sombrero'){
-      // a quick lift off the front of his foot -- then up over the man in front, to drop just behind him, and round him he goes
-      p.vx=f.x*sk.sp0*(1-0.8*e); p.vy=f.y*sk.sp0*(1-0.8*e); x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
-      bx=x+f.x*cd; by=y+f.y*cd; bz=16*e;               // (over a foot stuck in before it's gone)
-      if(u>=1){ const vz=270, tf=(vz+Math.sqrt(vz*vz+2*520*bz))/520, g={x:f.x*0.8+right.x*sk.s*0.6,y:f.y*0.8+right.y*sk.s*0.6};
-        out={g,keep:Math.max(sk.sp0,runSpeedOf(p)*0.85),loose:{d:f,v:skillOverHim(p,f)/tf,vz,lob:true,grace:tf+0.6,nt:0.3,auto:true,go:0.35}}; }
+      // his back to the man: a little pop up off the front of his foot -- then flicked up over his own head and the man's
+      // behind him, to drop a couple of metres past him; he turns and goes round him to meet it
+      p.vx=f.x*sk.sp0*(1-e); p.vy=f.y*sk.sp0*(1-e); x+=p.vx*dt; y+=p.vy*dt; p.facing={x:f.x,y:f.y};
+      bx=x+f.x*cd*(1-0.5*e); by=y+f.y*cd*(1-0.5*e); bz=20*e;
+      if(u>=1){ const vz=250, tf=(vz+Math.sqrt(vz*vz+2*520*bz))/520, far=skillOverHimBack(p,f)+cd*0.5, gx=-f.x*0.6+right.x*sk.s*0.8, gy=-f.y*0.6+right.y*sk.s*0.8, gl=Math.hypot(gx,gy);
+        out={g:{x:gx/gl,y:gy/gl},keep:runSpeedOf(p)*0.8,loose:{d:{x:-f.x,y:-f.y},v:far/tf,vz,lob:true,grace:tf+0.7,nt:0.3,auto:true,go:0.3}}; }
     } else if(sk.kind==='elastico'){
       // out with the outside of his foot -- the ball and his weight go one way -- then snapped back the other, popped up a
       // little past the man in front on that side; he goes after it
@@ -3210,7 +3261,8 @@
         out={g,keep:Math.max(sk.sp0,runSpeedOf(p)*0.95),loose:{d:db,v:200*sk.r,vz:50,grace:1.1,nt:0.25,auto:true,go:0.4}}; }
     }
     p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r); sk.px=p.x; sk.py=p.y;
-    ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=p.vx; ball.vy=p.vy; ball.z=bz; ball.vz=0;
+    const bvx=sk.pbx!=null?(bx-sk.pbx)/Math.max(dt,1e-3):p.vx, bvy=sk.pbx!=null?(by-sk.pby)/Math.max(dt,1e-3):p.vy; sk.pbx=bx; sk.pby=by;   // (the ball's own way: it isn't always his)
+    ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=bvx; ball.vy=bvy; ball.z=bz; ball.vz=0;
     if(out){
       const g=out.g;
       p.facing={x:g.x,y:g.y}; p.vx=g.x*out.keep; p.vy=g.y*out.keep; p.carryAngle=Math.atan2(g.y,g.x);
@@ -3271,9 +3323,12 @@
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
   function skillGStart(cx,cy){ const r=rect(); skillG={t0:simNow,mate:(myBall()||incomingAny())?mateAtClient(cx,cy):null,pts:[{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}]}; skillTrail={pts:skillG.pts,endT:0,ok:null}; }
-  function skillGMove(cx,cy){ if(!skillG) return; const r=rect(); skillG.pts.push({x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}); if(skillG.pts.length>240) skillG.pts.splice(1,1); }
+  function skillGMove(cx,cy){ if(!skillG) return; const r=rect(), q={x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height}, a=skillG.pts[0];
+    skillG.pts.push(q); if(skillG.pts.length>240) skillG.pts.splice(1,1);
+    if(!skillG.drawn&&Math.hypot(q.x-a.x,q.y-a.y)>HOLD_SLOP){ skillG.drawn=true; holdMode=null; } }   // (it's a drawing: not a hold)
   function skillGEnd(cancel){
-    const g=skillG; skillG=null; if(!g) return;
+    const g=skillG; skillG=null; holdMode=null; if(!g) return;
+    if(!g.drawn&&simNow-g.t0>=0.3){ skillTrail=null; return; }      // (a hold, let go: nothing more)
     if(!cancel&&g.mate&&g.mouse!==false){ let L=0; for(let i=1;i<g.pts.length;i++) L+=Math.hypot(g.pts[i].x-g.pts[i-1].x,g.pts[i].y-g.pts[i-1].y);
       if(L<10&&touchPass(g.mate)){ skillTrail=null; return; } }   // a click on a team-mate: pass to him
     const read=cancel?null:readSkill(g.pts);
@@ -3287,7 +3342,7 @@
       ftAim={p:controlled,d:screenDirToPitch(read.dx,read.dy,controlled.y),until:simNow+3.5,lt:ball.lastTouch}; ok=true; oneTouch=null;
       lastGrade='TOUCH '+labArrow(ftAim.d.x,ftAim.d.y)+' …'; gradeColor='#78c8ff'; gradeFade=0.9; }
     if(skillTrail){ skillTrail.endT=performance.now(); skillTrail.ok=ok; }
-    if(!cancel&&!read&&g.pts.length>2){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
+    if(!cancel&&!read&&g.drawn){ lastGrade='?'; gradeColor='#8a9580'; gradeFade=0.6; }
   }
   function drawSkillTrail(){
     const tr=skillTrail; if(!tr) return;
@@ -3911,8 +3966,8 @@
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
-    skCutPop:'Flick · pop',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
-    skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Flick · time',
+    skCutPop:'Knock-on · push',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
+    skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Knock-on · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
   const LAB_DIAL_HINTS={
     ballControl:'The receiver\'s skill. Sets the reach ring (18 to 32) and the window (0.10 to 0.20 s).',
@@ -6690,6 +6745,7 @@
         // can only take it cleanly if the ball is showing (not shielded by the body)
         const exp=ballExposure(carrier,p);
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
+        if(shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier))continue;   // shielding: only from where the ball shows
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
         if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
         // shielded: bodies just bump, no turnover (collision handles spacing)
@@ -6700,11 +6756,11 @@
       // the turn. pressTight is irrelevant here — it's body-on-body strength.
       else if(inBody && p.tackleCd<=0 && !windingUp(carrier)){   // (winding up a shot is planted, not turning)
         const exp=ballExposure(carrier,p);
-        const turning = exp>0.30 && exp<0.62;        // mid-rotation: ball coming round the body
+        const turning = exp>0.30 && exp<0.62 && !(shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier));   // mid-rotation: ball coming round the body
         const cSpeed=Math.hypot(carrier.vx,carrier.vy);
         if(turning && cSpeed<140){
           // strength-weighted contest, sampled at a modest rate so it plays out over a moment
-          const odds=duelOdds(strengthOf(p),strengthOf(carrier));   // P(defender wins)
+          const odds=duelOdds(strengthOf(p),holdStrength(carrier));   // P(defender wins)
           if(Math.random() < odds*0.06){
             // defender muscles across and steals it as the carrier exposes it
             p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
@@ -6715,7 +6771,7 @@
         // THROUGH THE CUSHION: a stronger man who's leaned his way right through it and is up against his back
         // muscles him off it -- the bigger the gap, the sooner (9 against 4: about two times in three inside a second)
         else if(p.leanOn===carrier && p.lean>=0.95){
-          const odds=duelOdds(strengthOf(p),strengthOf(carrier));
+          const odds=duelOdds(strengthOf(p),holdStrength(carrier));
           if(odds>0.5 && Math.random()<(odds-0.5)*0.08){
             p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
             winBall(p,carrier);
@@ -6751,7 +6807,7 @@
   function shieldCushion(c,o,raw){
     if(!c||c.role==='G'||o.team===c.team||o.role==='G'||o.state!=='normal') return 0;
     const w=shieldW(c,o); if(w<=0) return 0;
-    const sc=strengthOf(c), so=strengthOf(o);
+    const sc=holdStrength(c), so=strengthOf(o);
     let r=SHIELD_BASE*sc+SHIELD_EDGE*Math.max(0,sc-so);
     if(c.sprint) r*=1-0.35*clamp(Math.hypot(c.vx,c.vy)/sprintSpeedOf(c),0,1);
     if(!raw&&o.leanOn===c) r*=1-(o.lean||0);
@@ -6765,7 +6821,7 @@
       let d=dist(a,b); const min=a.r+b.r+2;
       if(d<min&&d>0.001){
         const nx=(b.x-a.x)/d,ny=(b.y-a.y)/d,overlap=(min-d);
-        const sa=strengthOf(a), sb=strengthOf(b), sa3=sa*sa*sa, sb3=sb*sb*sb;
+        const sa=holdStrength(a), sb=holdStrength(b), sa3=sa*sa*sa, sb3=sb*sb*sb;   // (a man shielding it is planted)
         const aShare=clamp(sb3/(sa3+sb3),0.04,0.96), bShare=1-aShare;     // (the stronger holds his ground)
         a.x-=nx*overlap*aShare; a.y-=ny*overlap*aShare;
         b.x+=nx*overlap*bShare; b.y+=ny*overlap*bShare;
@@ -6794,7 +6850,7 @@
           const push=Math.min(min+raw*(1-o.lean)-d, SHIELD_PUSH*dt);
           if(push>0){ o.x+=(o.x-c.x)/d*push; o.y+=(o.y-c.y)/d*push; }
           if(d<min+raw+2){                                       // leaning on it, he only edges round it (SHIELD_SLIDE)
-            const grip=clamp(Math.max(0,strengthOf(c)-strengthOf(o))*shieldW(c,o)*(1-o.lean)/SHIELD_GRIP,0,1);
+            const grip=clamp(Math.max(0,holdStrength(c)-strengthOf(o))*shieldW(c,o)*(1-o.lean)/SHIELD_GRIP,0,1);
             const nx=(o.x-c.x)/d, ny=(o.y-c.y)/d, rx=o.vx-c.vx, ry=o.vy-c.vy, vn=rx*nx+ry*ny, tx=rx-vn*nx, ty=ry-vn*ny, vt=Math.hypot(tx,ty);
             const cap=SHIELD_SLIDE[0]+(SHIELD_SLIDE[1]-SHIELD_SLIDE[0])*grip;
             if(vt>cap){ const k=cap/vt; o.vx=c.vx+vn*nx+tx*k; o.vy=c.vy+vn*ny+ty*k; }   // (going round him, relative to him)
@@ -6802,7 +6858,7 @@
         }
       }
     }
-    if(c) for(const q of players) if(q.leanOn===c) q.lean=clamp(q.lean+(q.leaning?SHIELD_WEAR*(strengthOf(q)/strengthOf(c))**2:-SHIELD_HEAL)*dt,0,1);
+    if(c) for(const q of players) if(q.leanOn===c) q.lean=clamp(q.lean+(q.leaning?SHIELD_WEAR*(strengthOf(q)/holdStrength(c))**2:-SHIELD_HEAL)*dt,0,1);
   }
 
   // SLIDE TACKLE stat -> lunge length/speed & contact reach (endpoints: 1 => 0.5/0.7, 10 => 1.1/1.3)
@@ -7974,36 +8030,52 @@
     if(u>FW*0.66) k*=1.15;                                                // in their third
     return clamp(k,0,1.3);
   }
-  // which move, and which way: the side he's going past him on (side, across the pitch). As many as his stars allow: a flick
-  // past him or a croqueta most; a drag-back with the man right on him, or a roulette (only well the better of him: it
-  // takes long enough for him to get back to it); a Cruyff turn out wide or near the byline; a rainbow flick, or a sombrero
-  // over him when he's close, with nobody behind him to pick it up; an elastico, or a heel flick round him close up
-  function aiSkillMove(p,d,side,C,clear){
+  // which move, and which way: the side he's going past him on (side, across the pitch). As many as his stars allow: a
+  // knock-on past him or a croqueta most; a drag-back with the man right on him, or a roulette (only well the better of
+  // him: it takes long enough for him to get back to it); a Cruyff turn out wide or near the byline; a rainbow flick, with
+  // nobody behind him to pick it up; an elastico, or a heel flick round him close up. (The sombrero isn't for a man in
+  // front of him: see aiSombrero.) `only`: that move and no other.
+  function aiSkillMove(p,d,side,C,clear,only){
     if(ball.ownedBy!==p){ if(ball.dribbler===p&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10) own(p,p.r+ball.r+5); else return null; }   // (his own touch a step away: on it)
     if(Math.abs(p.y-d.y)>12) side=Math.sign(p.y-d.y);                 // away from the side he's on now -- unless that's off the pitch
     if(p.y+side*90<45||p.y+side*90>FH-45) side=-side;
-    const st=p.stars||1, near=dist(p,d), opts=[['flick',1]];
+    const st=p.stars||1, near=dist(p,d), opts=[['knock',1]];
     if(st>=2&&near<55) opts.push(['dragback',0.4]);
     if(st>=3){ opts.push(['croq',1.3]); if(near<55&&skillEdge(p,d)>=2.5) opts.push(['spin',0.6]);
       if(Math.abs(p.y-YC)>FH*0.3||Math.abs(C.gx-p.x)<BX+120) opts.push(['cruyff',0.4]); }
     if(st>=4) opts.push(['rainbow',clear?0.6:0.1]);
-    if(st>=5){ opts.push(['elastico',0.8]); if(clear&&near<90) opts.push(['sombrero',0.4]); if(near<80) opts.push(['heel',0.3]); }
+    if(st>=5){ opts.push(['elastico',0.8]); if(near<80) opts.push(['heel',0.3]); }
     let r=Math.random()*opts.reduce((a,o)=>a+o[1],0), kind=opts[0][0];
     for(const o of opts){ r-=o[1]; if(r<=0){ kind=o[0]; break; } }
+    if(only) kind=only;
     // its way: on past him to `side`, which is his right (+1) or his left (-1) going the way he's going
     const f=skillHeading(p), right={x:-f.y,y:f.x}, s=Math.sign(right.y*side)||1, n=(x,y)=>{ const l=Math.hypot(x,y)||1; return {x:x/l,y:y/l}; }, m={kind};
-    if(kind==='flick') m.d=n(C.atk*0.6,side*0.8);                    // (popped on past him, away from him)
+    if(kind==='knock') m.d=n(C.atk*0.6,side*0.8);                    // (knocked on past him, away from him)
     else if(kind==='dragback') m.d=n(-C.atk*0.6,side*0.8);           // (back and away)
     else if(kind==='croq') m.d={x:0,y:side};
     else if(kind==='spin') m.sense=-s;                                // (round and out to that side: clockwise comes out to his left)
     else if(kind==='cruyff') m.d=n(-C.atk*0.7,side*0.7);
-    else if(kind==='sombrero'||kind==='elastico') m.side=s;
+    else if(kind==='elastico') m.side=s;
+    else if(kind==='sombrero') m.side=skillRoundSideBack(p,f);         // (round the man behind him, on the side he isn't)
     else if(kind==='heel') m.d=n(f.x*0.85-right.x*s*0.53,f.y*0.85-right.y*s*0.53);   // (the ball round his other side; he goes round on this one)
     const sk=mkSkill(p,m);
     if(p===controlled) skill=sk; else p.skill=sk;
     ball.ownedBy=p; p.stamina=clamp(p.stamina-0.03,0,p.staminaCap); p.sprint=false; skillSells(p);
     lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;
     return kind;
+  }
+  // THE COMPUTER'S SOMBRERO: with his back to a man close behind him (shielding it, see obMove), a five-star man now and
+  // then flicks it over his own head and the man's and goes round him to it -- in their half, the better of him (as
+  // aiSkillKeen has it, against that man), and with nobody else of theirs back there to pick it up. Looked at four times a
+  // second while it's on: about once a second and a half at his keenest.
+  function aiSombrero(p,d,C){
+    if((p.stars||1)<5||p.skillCd>0||!d||C.prD<22||C.prD>75||simNow<(p.sombNext||0)) return false;
+    p.sombNext=simNow+0.25;
+    const f=p.facing||{x:C.atk,y:0}, u=C.atk>0?p.x:FW-p.x;
+    if(u<FW*0.5||-((d.x-p.x)*f.x+(d.y-p.y)*f.y)<0.7*C.prD) return false;   // (their half; the man behind him)
+    for(const o of C.opps) if(o!==d&&dist(o,d)<160) return false;
+    const keen=clamp((skillEdge(p,d)+1)/3,0,1);
+    return Math.random()<0.17*keen&&!!aiSkillMove(p,d,1,C,true,'sombrero');
   }
   // taking on the man in front of him, a few strides off: harder with another of theirs close behind him to cover
   function obTakeOnOpt(p,C){
@@ -8153,6 +8225,7 @@
     }
     p.sprint=false; p.dbgTag='OB-SHIELD';
     const d=C.presser;
+    if(aiSombrero(p,d,C)){ p.dbgTag='OB-SKILL'; return {ix:0,iy:0}; }     // (the move takes it from here: skillStep)
     if(d&&C.prD<160){
       const ax=p.x-d.x, ay=p.y-d.y, al=Math.hypot(ax,ay)||1;
       p.facing={x:ax/al,y:ay/al}; p.carryAngle=Math.atan2(ay,ax);
@@ -9663,7 +9736,8 @@
     const moving = !!(ix||iy);
     const softIn = p.arSoft; p.arSoft=false;        // (this frame's input is a computer player easing into position: see arrive)
     const hasBall = (ball.ownedBy===p);
-    const wantSprint = p.sprint && moving && p.stamina>0.02 && !offFront;
+    const held = holdMode&&holdMode.p===p ? holdMode.kind : p===controlled&&holdPending() ? 'pending' : null;   // (SKILL held: see HOLD_T)
+    const wantSprint = p.sprint && moving && p.stamina>0.02 && !offFront && !held;
     const empty = p.stamina<=0.02;                  // gassed
     if(p.staminaCap===undefined)p.staminaCap=1;
     // CUMULATIVE FATIGUE: a lower recoverable CEILING (staminaCap) means the player has been
@@ -9789,7 +9863,7 @@
       // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging; one watching
       // the ball faces it: below)
       const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
-      if(!watch && (!softIn || nsp>30 || il2>=0.35)){
+      if(!watch && !held && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
       }
@@ -9803,6 +9877,10 @@
       const vs=Math.hypot(p.vx,p.vy);               // ...and off his front he's slower
       if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; if(c<0.5) MAX=Math.min(MAX,runSpeedOf(p)*fatigue); MAX*=pedalOf(p,c); }
     }
+    if(held==='strafe'){                            // strafing: the way he faced kept, slower ahead, less across, less again backing up
+      const F=holdMode.face, vs=Math.hypot(p.vx,p.vy); p.facing={x:F.x,y:F.y};
+      if(vs>1) MAX=Math.min(MAX,runSpeedOf(p)*fatigue*STRAFE_K*(0.75+0.25*(p.vx*F.x+p.vy*F.y)/vs)); }
+    else if(held==='shield') shieldTurn(p,dt);
     const sp2=Math.hypot(p.vx,p.vy);
     if(sp2>MAX){p.vx=p.vx/sp2*MAX;p.vy=p.vy/sp2*MAX;}
     if(!isFinite(p.vx))p.vx=0; if(!isFinite(p.vy))p.vy=0;
@@ -10209,6 +10287,12 @@
       p.facing={x:atk,y:0};
       const cd=p.r+ball.r+4;
       ball.x=p.x+atk*cd; ball.y=p.y; ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
+      return;
+    }
+    if(holdMode&&holdMode.p===p){                  // SKILL held (strafing or shielding): tight at his feet, the way he faces
+      const f=p.facing, cd=p.r+ball.r+3, k=320, c=2*Math.sqrt(k), cx=p.x+f.x*cd, cy=p.y+f.y*cd;
+      p.carryAngle=Math.atan2(f.y,f.x); p.stepPhase=0;
+      ball.vx+=((cx-ball.x)*k-ball.vx*c)*dt; ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
       return;
     }
     const faceAng=Math.atan2(p.facing.y,p.facing.x);
@@ -10786,6 +10870,7 @@
 
     if(LAB.on) labStep(dt,rdt);
     const hi=humanIntent();
+    updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || matchOver;
     if(!frozen) for(const p of players){
       if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
@@ -12634,11 +12719,12 @@
   // to draw for it and a clip of a man doing it. The clips are the game's own: tools/clips/record_skill_clips.cjs records
   // each move as a match plays it (a man running at one of theirs 3 m ahead, the move, and on), every 1/30 s -- where he
   // and that man are, their sprites' frames, and the ball -- and they're played back here with the game's sprites. =====
-  const SKILL_CLIPS = {"sig":3418065725,"flick":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,1,0,70,6,0,0,4,-5,0,0,-14,0,1,1,0,70,6,0,0,4,13,0,0,-9,0,1,2,0,70,6,0,0,4,16,0,0,-4,0,1,2,0,70,6,0,0,4,19,0,0,1,0,1,0,0,70,6,0,0,4,22,0,0,6,0,1,0,0,70,6,0,0,4,34,0,0,11,0,1,0,0,70,6,0,0,4,39,0,0,16,0,1,2,0,70,6,0,0,4,45,-2,2,22,-1,1,3,0,70,6,0,0,5,53,-7,4,27,-2,1,3,0,70,6,0,0,5,60,-11,5,32,-3,1,0,0,70,6,0,0,5,59,-11,6,37,-5,1,0,0,70,6,0,0,5,61,-13,6,42,-7,1,0,7,70,6,0,0,6,63,-16,5,46,-9,1,1,7,70,6,0,0,6,65,-18,4,51,-12,1,1,7,70,6,0,0,6,68,-20,2,54,-16,1,1,7,70,6,0,0,6,71,-23,0,58,-19,1,2,7,70,6,0,0,6,74,-26,0,62,-23,1,2,7,70,6,0,0,6,78,-29,1,66,-26,1,3,7,70,6,0,0,6,81,-32,1,70,-29,1,3,7,70,6,0,0,6,85,-35,0,74,-32,1,3,7,70,6,0,0,7,89,-38,0,78,-35,1,0,7,70,6,0,0,7,104,-45,0,83,-37,1,0,7,70,6,0,0,7,106,-47,0,87,-40,1,0,7,70,6,0,0,7,108,-49,0,91,-43,1,1,7,70,6,0,0,7,110,-51,0,96,-45,1,1,7,70,6,0,0,7,113,-54,0,100,-48,1,1,7,70,6,0,0,7,116,-56,0]},"dragback":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-21,-2,0,-30,0,1,3,0,70,6,0,0,4,-16,-2,0,-25,0,1,3,0,70,6,0,0,4,-10,-2,0,-19,0,1,3,0,70,6,0,0,4,-5,-1,0,-14,0,1,0,0,70,6,0,0,4,0,-1,0,-9,0,1,0,0,70,6,0,0,4,17,-2,0,-4,0,1,0,0,70,6,0,0,4,20,-1,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,32,0,0,11,0,1,0,0,70,6,0,0,4,33,1,0,15,0,1,1,0,70,6,0,0,4,31,2,0,18,0,1,1,0,70,6,0,0,4,27,3,0,21,0,1,2,1,70,6,0,0,4,21,4,0,23,0,1,2,2,70,6,0,0,4,15,6,0,24,0,1,3,2,70,6,0,0,4,9,7,0,24,0,1,3,3,70,6,0,0,4,5,8,0,24,0,1,0,3,70,6,0,0,4,1,8,0,24,0,1,1,4,70,6,0,0,4,0,9,0,21,1,1,1,4,70,6,0,0,4,-1,9,0,16,3,1,1,4,70,6,0,0,4,-4,10,0,11,5,1,2,4,70,6,0,0,4,-7,11,0,6,6,1,2,4,70,6,0,0,4,-11,12,0,1,8,1,2,4,70,6,0,0,4,-15,14,0,-3,10,1,3,4,70,6,0,0,4,-19,15,0,-8,11,1,3,4,70,6,0,0,4,-24,17,0,-13,13,1,0,4,70,6,0,0,4,-28,18,0,-18,15,1,0,4,70,6,0,0,4,-33,20,0,-23,17,1,0,4,70,6,0,0,4,-37,22,0,-28,18,1,1,4,70,6,0,0,4,-54,27,0,-32,20,1,1,4,70,6,0,0,4,-56,28,0,-37,22,1,1,4,70,6,0,0,4,-59,29,0,-42,23,1,2,4,70,6,0,0,4,-61,30,0,-47,25,1,2,4,70,6,0,0,4,-65,31,0,-52,27,1,2,4,70,6,0,0,4,-69,33,0,-56,28,1,3,4,70,6,0,0,4,-73,34,0]},"croq":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-30,3,0,-30,0,1,0,0,70,6,0,0,4,-35,7,0,-25,0,1,0,0,70,6,0,0,4,-36,11,0,-19,0,1,0,0,70,6,0,0,4,-34,15,0,-14,0,1,1,0,70,6,0,0,4,-30,17,0,-9,0,1,1,0,70,6,0,0,4,-28,19,0,-4,0,1,2,0,70,6,0,0,4,-26,21,0,1,0,1,0,0,70,6,0,0,4,-21,23,0,4,2,1,0,0,70,6,0,0,4,26,-8,0,6,6,1,0,0,70,6,0,0,4,28,-1,0,9,12,1,1,0,70,6,0,0,4,31,10,0,11,19,1,1,0,70,6,0,0,3,34,22,0,14,27,1,2,0,70,6,0,0,3,36,34,0,16,34,1,2,0,70,6,0,0,3,39,45,0,19,40,1,3,0,70,6,0,0,3,41,54,0,22,44,1,3,0,70,6,0,0,3,44,59,0,24,46,1,0,0,70,6,0,0,3,46,60,0,28,46,1,2,0,70,6,0,0,2,50,57,0,33,46,1,2,0,70,6,0,0,2,53,54,0,38,46,1,3,0,70,6,0,0,2,57,52,0,43,46,1,3,0,70,6,0,0,2,61,50,0,48,46,1,0,0,70,6,0,0,2,65,49,0,54,46,1,0,0,70,6,0,0,2,70,48,0,59,46,1,0,0,70,6,0,0,2,75,47,0,64,46,1,1,0,70,6,0,0,2,80,47,0,69,46,1,1,0,70,6,0,0,2,85,47,0,74,46,1,1,0,70,6,0,0,1,90,46,0,79,46,1,2,0,70,6,0,0,1,107,47,0,84,46,1,2,0,70,6,0,0,1,110,47,0,89,46,1,2,0,70,6,0,0,1,112,46,0,94,46,1,3,0,70,6,0,0,1,115,46,0,100,46,1,3,0,70,6,0,0,1,119,46,0,105,46,1,0,0,70,6,0,0,1,123,46,0,110,46,1,0,0,70,6,0,0,1,127,46,0]},"spin":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,1,0,70,6,0,0,4,-21,0,0,-30,0,1,1,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,2,0,70,6,0,0,4,-5,0,0,-14,0,1,2,0,70,6,0,0,4,12,0,0,-9,0,1,2,0,70,6,0,0,4,15,0,0,-4,0,1,3,0,70,6,0,0,4,17,0,0,1,0,1,0,0,70,6,0,0,4,21,0,0,1,-1,1,0,0,70,6,0,0,4,23,0,0,2,-3,1,0,0,70,6,0,0,4,24,2,0,3,-6,1,1,1,70,6,0,0,4,22,4,0,4,-9,1,1,1,70,6,0,0,4,19,6,0,5,-14,1,2,2,70,6,0,0,4,12,5,0,7,-19,1,2,2,70,6,0,0,4,3,0,0,9,-24,1,3,3,70,6,0,0,4,-5,-10,0,10,-30,1,3,4,70,6,0,0,4,-10,-25,0,12,-35,1,0,4,70,6,0,0,5,-9,-42,0,14,-40,1,0,5,70,6,0,0,5,-3,-57,0,15,-45,1,1,5,70,6,0,0,5,7,-68,0,16,-50,1,1,6,70,6,0,0,5,17,-74,0,18,-53,1,2,6,70,6,0,0,5,25,-76,0,18,-56,1,2,7,70,6,0,0,5,31,-75,0,19,-58,1,3,7,70,6,0,0,5,34,-74,0,19,-58,1,3,7,70,6,0,0,5,35,-74,0,22,-61,1,0,7,70,6,0,0,6,37,-76,0,26,-65,1,0,7,70,6,0,0,6,40,-79,0,30,-69,1,0,7,70,6,0,0,6,42,-81,0,33,-72,1,1,7,70,6,0,0,6,45,-84,0,37,-76,1,1,7,70,6,0,0,6,49,-88,0,40,-79,1,1,7,70,6,0,0,6,52,-91,0,44,-83,1,2,7,70,6,0,0,6,55,-94,0,48,-87,1,2,7,70,6,0,0,6,59,-98,0,51,-90,1,2,7,70,6,0,0,6,62,-101,0,55,-94,1,3,7,70,6,0,0,6,66,-105,0,58,-97,1,3,7,70,6,0,0,6,78,-117,0,62,-101,1,0,7,70,6,0,0,6,80,-119,0,66,-105,1,0,7,70,6,0,0,6,82,-121,0,69,-108,1,0,7,70,6,0,0,6,84,-123,0,73,-112,1,1,7,70,6,0,0,6,86,-125,0,77,-116,1,1,7,70,6,0,0,6,89,-128,0,80,-119,1,1,7,70,6,0,0,6,92,-131,0]},"cruyff":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-22,-3,0,-30,0,1,2,0,70,6,0,0,4,-17,-4,0,-25,0,1,3,0,70,6,0,0,4,-12,-4,0,-19,0,1,3,0,70,6,0,0,4,-6,-3,0,-14,0,1,3,0,70,6,0,0,4,13,-5,0,-9,0,1,0,0,70,6,0,0,4,16,-5,0,-4,0,1,0,0,70,6,0,0,4,18,-3,0,1,0,1,0,0,70,6,0,0,4,21,-2,0,6,0,1,0,0,70,6,0,0,4,33,1,0,11,0,1,0,0,70,6,0,0,4,35,5,0,15,0,1,1,0,70,6,0,0,4,35,9,0,19,0,1,1,0,70,6,0,0,4,33,14,0,22,0,1,2,0,70,6,0,0,4,30,19,0,24,0,1,2,0,70,6,0,0,4,27,21,0,26,0,1,3,1,70,6,0,0,4,23,22,0,27,0,1,3,2,70,6,0,0,4,19,22,0,27,0,1,0,2,70,6,0,0,4,15,21,0,27,0,1,0,3,70,6,0,0,4,13,20,0,27,0,1,0,3,70,6,0,0,4,12,21,0,24,4,1,1,3,70,6,0,0,4,10,23,0,21,8,1,1,3,70,6,0,0,4,9,25,0,18,12,1,2,3,70,6,0,0,4,7,28,0,15,16,1,2,3,70,6,0,0,4,4,31,0,12,20,1,2,3,70,6,0,0,4,2,34,0,9,24,1,3,3,70,6,0,0,3,-1,38,0,6,29,1,3,3,70,6,0,0,3,-4,42,0,3,33,1,3,3,70,6,0,0,3,-7,45,0,0,37,1,0,3,70,6,0,0,3,-10,49,0,-3,41,1,0,3,70,6,0,0,3,-13,53,0,-6,45,1,0,3,70,6,0,0,3,-23,67,0,-9,49,1,1,3,70,6,0,0,3,-24,69,0,-12,53,1,1,3,70,6,0,0,3,-26,71,0,-15,57,1,2,3,70,6,0,0,3,-28,74,0,-18,61,1,2,3,70,6,0,0,3,-30,76,0,-22,65,1,2,3,70,6,0,0,3,-32,80,0,-25,69,1,3,3,70,6,0,0,3,-35,83,0]},"rainbow":{"fps":30,"f":[-40,0,1,3,0,70,14,0,0,4,-26,0,0,-35,0,1,3,0,70,14,0,0,4,-28,4,0,-30,0,1,0,0,70,14,0,0,4,-30,10,0,-25,0,1,0,0,70,14,0,0,4,-29,14,0,-19,0,1,0,0,70,14,0,0,4,-24,17,0,-14,0,1,1,0,70,14,0,0,4,-21,23,0,-9,0,1,1,0,70,14,0,0,4,-19,24,0,-4,0,1,1,0,70,14,0,0,4,-15,26,0,1,0,1,0,0,70,14,0,0,4,-10,26,0,6,0,1,0,0,70,14,0,0,4,33,0,0,11,0,1,0,0,70,14,0,0,4,35,0,0,16,0,1,1,0,70,14,0,0,5,36,0,1,20,0,1,1,0,70,14,0,0,4,36,0,2,24,0,1,2,0,70,14,0,0,4,35,0,4,27,0,1,2,0,70,14,0,0,4,34,0,6,30,0,1,3,0,70,14,0,0,4,32,0,10,33,0,1,3,0,70,14,0,0,4,30,0,13,35,0,1,0,0,70,14,0,0,4,30,0,16,37,0,1,0,0,70,14,0,0,4,30,0,18,39,0,1,2,0,70,14,0,0,4,34,0,23,46,0,1,2,0,70,14,0,0,5,40,0,32,50,-3,1,3,1,70,14,0,0,5,47,0,41,53,-7,1,3,1,70,14,0,0,5,53,0,49,58,-10,1,0,7,70,14,0,0,5,59,0,56,64,-12,1,0,0,70,14,0,0,6,65,0,63,71,-15,1,1,0,70,14,0,0,6,71,0,70,79,-16,1,1,0,70,14,0,0,7,78,0,76,86,-17,1,2,0,70,14,0,0,7,84,0,81,93,-18,1,2,0,70,14,0,0,7,90,0,86,101,-18,1,3,0,70,14,0,0,7,96,0,90,108,-18,1,3,1,70,14,0,0,7,103,0,93,115,-17,1,0,1,70,14,0,0,0,109,0,96,120,-17,1,0,1,70,14,0,0,0,115,0,98,125,-17,1,0,2,70,14,0,0,0,121,0,100,129,-16,1,1,0,70,14,0,0,0,127,0,101,136,-15,1,1,0,70,14,0,0,0,134,0,102,144,-15,1,2,0,70,14,0,0,0,140,0,102,151,-14,1,2,1,70,14,0,0,0,146,0,101,158,-13,1,3,1,70,14,0,0,0,152,0,100,163,-12,1,3,2,70,14,0,0,0,159,0,99,168,-12,1,0,2,70,14,0,0,0,165,0,96,172,-11,1,0,0,70,14,0,0,0,171,0,94,179,-10,1,0,0,70,14,0,0,0,177,0,90,187,-9,1,1,1,70,14,0,0,0,183,0,86,194,-8,1,1,1,70,14,0,0,0,190,0,81,200,-7,1,2,1,70,14,0,0,0,196,0,76,205,-7,1,2,2,70,14,0,0,0,202,0,71,209,-6,1,2,2,70,14,0,0,0,208,0,64,215,-5,1,3,0,70,14,0,0,0,215,0,57,222,-4,1,3,0,70,14,0,0,0,221,0,50,230,-3,1,0,1,70,14,0,0,0,227,0,42,237,-2,1,0,1,70,14,0,0,0,233,0,33,243,-2,1,1,1,70,14,0,0,0,240,0,24,248,-1,1,1,2,70,14,0,0,0,246,0,14,251,0,1,2,0,70,14,0,0,0,278,3,4,255,0,1,2,0,70,14,0,0,0,280,3,2,260,0,1,2,0,70,14,0,0,0,282,2,6,267,1,1,3,0,70,14,0,0,0,286,2,10,274,1,1,3,0,70,14,0,0,0,291,2,13,281,1,1,0,0,70,14,0,0,0,296,1,15,288,1,1,0,0,70,14,0,0,0,302,1,17,295,1,1,1,0,70,14,0,0,0,309,1,18,302,1,1,1,0,70,14,0,0,0,315,1,19,309,1,1,2,0,70,14,0,0,0,324,1,19,316,2,1,2,0,70,14,0,0,0,343,-1,20,323,2,1,3,0,70,14,0,0,0,353,-2,20,331,2,1,3,0,70,14,0,0,0,363,-3,20,338,2,1,0,0,70,14,0,0,0,373,-4,19,345,2,1,0,0,70,14,0,0,0,383,-5,17,352,2,1,1,0,70,14,0,0,0,393,-6,15,359,2,1,1,0,70,14,0,0,0,404,-7,12,367,2,1,2,0,70,14,0,0,0,413,-8,9,374,2,1,2,0,70,14,0,0,0,422,-8,5,381,2,1,3,0,70,14,0,0,0,431,-9,1,388,2,1,3,0,70,14,0,0,0,439,-10,1,395,2,1,0,0,70,14,0,0,0,446,-11,2,403,2,1,0,0,70,14,0,0,0,453,-11,3,410,2,1,1,0,70,14,0,0,0,459,-12,4,417,2,1,1,0,70,14,0,0,0,465,-13,3,424,2,1,2,0,70,14,0,0,0,470,-13,3,431,2,1,2,0,70,14,0,0,0,476,-14,1,438,2,1,3,0,70,14,0,0,0,480,-14,0,445,2,1,3,0,70,14,0,0,0,485,-14,1,453,2,1,0,0,70,14,0,0,0,489,-15,0,459,2,1,0,0,70,14,0,0,0,484,-10,0,466,2,1,1,0,70,14,0,0,0,488,-8,0,473,2,1,1,0,70,14,0,0,0,492,-6,0,480,2,1,2,0,70,14,0,0,0,497,-4,0,486,2,1,2,0,70,14,0,0,0,502,-2,0,493,2,1,3,0,70,14,0,0,0,508,-1,0,500,2,1,3,0,70,14,0,0,0,514,0,0,506,2,1,0,0,70,14,0,0,0,520,0,0,513,2,1,0,0,70,14,0,0,0,541,-1,0,520,2,1,1,0,70,14,0,0,0,545,0,0,527,2,1,1,0,70,14,0,0,0,548,0,0,533,2,1,2,0,70,14,0,0,0,552,1,0,540,2,1,2,0,70,14,0,0,0,557,1,0,546,2,1,3,0,70,14,0,0,0,562,1,0,553,2,1,3,0,70,14,0,0,0,568,1,0,560,2,1,0,0,70,14,0,0,0,574,1,0,566,2,1,0,0,70,14,0,0,0,580,1,0]},"sombrero":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,1,0,70,6,0,0,4,-21,0,0,-30,0,1,1,0,70,6,0,0,4,-15,0,0,-25,0,1,2,0,70,6,0,0,4,-10,0,0,-20,0,1,2,0,70,6,0,0,4,-5,0,0,-15,0,1,2,0,70,6,0,0,4,1,0,0,-10,0,1,3,0,70,6,0,0,4,6,0,0,-4,0,1,3,0,70,6,0,0,4,11,0,0,1,0,1,0,0,70,6,0,0,4,16,0,0,5,0,1,0,0,70,6,0,0,4,33,0,2,9,0,1,0,0,70,6,0,0,4,36,0,6,12,0,1,1,0,70,6,0,0,4,38,0,11,13,0,1,1,0,70,6,0,0,4,39,0,15,14,0,1,3,1,70,6,0,0,4,41,0,20,19,3,1,0,0,70,6,0,0,4,44,0,29,23,6,1,0,0,70,6,0,0,4,47,0,36,27,9,1,1,0,70,6,0,0,4,50,0,43,31,12,1,1,7,70,6,0,0,4,53,0,50,34,15,1,1,7,70,6,0,0,5,56,0,56,38,18,1,2,7,70,6,0,0,5,59,0,61,41,20,1,2,7,70,6,0,0,5,63,0,66,45,23,1,2,7,70,6,0,0,5,66,0,70,48,25,1,3,7,70,6,0,0,6,69,0,74,52,28,1,3,7,70,6,0,0,6,72,0,77,55,30,1,3,7,70,6,0,0,7,75,0,80,59,32,1,3,7,70,6,0,0,7,78,0,82,64,32,1,0,7,70,6,0,0,7,81,0,83,69,32,1,0,7,70,6,0,0,7,84,0,84,73,32,1,0,7,70,6,0,0,0,87,0,84,78,31,1,1,6,70,6,0,0,0,90,0,83,83,29,1,1,6,70,6,0,0,0,93,0,82,87,27,1,1,6,70,6,0,0,0,96,0,81,92,26,1,2,6,70,6,0,0,0,99,0,79,97,24,1,2,6,70,6,0,0,0,103,0,76,101,21,1,3,6,70,6,0,0,0,106,0,73,105,19,1,3,6,70,6,0,0,0,109,0,69,110,17,1,3,6,70,6,0,0,0,112,0,65,114,15,1,0,6,70,6,0,0,0,115,0,60,118,12,1,0,6,70,6,0,0,0,118,0,54,122,10,1,0,6,70,6,0,0,0,121,0,48,126,8,1,1,6,70,6,0,0,0,124,0,41,130,6,1,1,6,70,6,0,0,0,127,0,34,134,4,1,1,5,70,6,0,0,0,130,0,26,136,2,1,1,5,70,6,0,0,0,133,0,17,138,1,1,2,5,70,6,0,0,0,136,0,8,140,0,1,2,7,70,6,0,0,0,162,-13,0,143,-1,1,2,0,70,6,0,0,0,164,-13,4,147,-2,1,2,0,70,6,0,0,0,166,-11,7,152,-3,1,3,0,70,6,0,0,0,170,-9,10,157,-4,1,3,0,70,6,0,0,0,174,-7,12,162,-4,1,3,0,70,6,0,0,0,179,-6,14,167,-4,1,0,0,70,6,0,0,0,184,-5,15,172,-5,1,0,0,70,6,0,0,0,188,-5,16,178,-5,1,0,0,70,6,0,0,0,193,-5,16,183,-5,1,1,0,70,6,0,0,0,198,-5,15,188,-5,1,1,0,70,6,0,0,0,203,-5,14,193,-5,1,2,0,70,6,0,0,0,208,-5,12,198,-5,1,2,0,70,6,0,0,0,224,-5,9,203,-5,1,2,0,70,6,0,0,0,227,-5,7,208,-5,1,3,0,70,6,0,0,0,230,-5,3,213,-5,1,3,0,70,6,0,0,0,233,-5,0,218,-5,1,3,0,70,6,0,0,0,237,-5,1]},"elastico":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-20,0,1,1,0,70,6,0,0,4,-5,0,0,-15,0,1,1,0,70,6,0,0,4,1,0,0,-10,0,1,2,0,70,6,0,0,4,6,0,0,-4,0,1,2,0,70,6,0,0,4,22,0,0,1,0,1,0,0,70,6,0,0,4,25,0,0,4,1,1,0,0,70,6,0,0,4,26,3,0,7,2,1,0,0,70,6,0,0,4,29,7,0,10,3,1,1,0,70,6,0,0,4,32,11,0,13,4,1,1,0,70,6,0,0,4,35,14,0,16,4,1,2,0,70,6,0,0,4,38,17,0,19,4,1,2,7,70,6,0,0,4,43,15,3,23,1,1,3,7,70,6,0,0,4,50,9,6,27,-3,1,3,7,70,6,0,0,4,56,4,9,31,-6,1,0,7,70,6,0,0,5,57,-2,11,35,-10,1,0,7,70,6,0,0,5,59,-4,13,38,-13,1,0,7,70,6,0,0,5,61,-7,13,42,-16,1,1,7,70,6,0,0,6,63,-13,14,46,-19,1,1,7,70,6,0,0,6,65,-19,14,50,-22,1,1,7,70,6,0,0,6,67,-25,13,54,-25,1,2,7,70,6,0,0,6,70,-30,12,58,-29,1,2,7,70,6,0,0,6,73,-34,10,63,-32,1,2,7,70,6,0,0,6,76,-39,7,67,-35,1,3,7,70,6,0,0,6,80,-42,4,71,-38,1,3,7,70,6,0,0,6,84,-46,0,75,-41,1,0,7,70,6,0,0,6,88,-49,1,79,-44,1,0,7,70,6,0,0,7,101,-58,2,83,-47,1,0,7,70,6,0,0,7,103,-60,2,87,-50,1,1,7,70,6,0,0,7,105,-62,2,91,-53,1,1,7,70,6,0,0,7,107,-64,2,95,-56,1,1,7,70,6,0,0,7,110,-67,1]},"heel":{"fps":30,"f":[-40,0,1,2,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-22,-2,0,-30,0,1,2,0,70,6,0,0,4,-16,-3,0,-25,0,1,3,0,70,6,0,0,4,-11,-2,0,-20,0,1,3,0,70,6,0,0,4,-5,-2,0,-15,0,1,3,0,70,6,0,0,4,0,-1,0,-10,0,1,0,0,70,6,0,0,4,18,-2,0,-4,0,1,0,0,70,6,0,0,4,21,-2,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,31,1,0,10,0,1,0,0,70,6,0,0,4,32,4,0,14,0,1,1,0,70,6,0,0,4,30,8,0,18,0,1,1,0,70,6,0,0,4,27,12,0,21,0,1,2,0,70,6,0,0,4,24,16,0,23,0,1,2,0,70,6,0,0,4,21,19,0,25,0,1,3,0,70,6,0,0,4,21,20,0,28,-1,1,1,7,70,6,0,0,4,27,23,2,33,-4,1,1,7,70,6,0,0,3,32,27,3,37,-7,1,2,7,70,6,0,0,3,37,30,3,42,-10,1,2,7,70,6,0,0,3,41,32,2,46,-13,1,2,0,70,6,0,0,3,45,35,1,51,-15,1,3,0,70,6,0,0,3,49,37,0,55,-18,1,3,0,70,6,0,0,3,53,40,0,59,-21,1,3,1,70,6,0,0,2,56,42,0,63,-23,1,0,1,70,6,0,0,2,59,44,0,66,-25,1,0,2,70,6,0,0,2,62,45,0,69,-27,1,0,2,70,6,0,0,2,65,47,0,72,-29,1,0,2,70,6,0,0,2,67,49,0,75,-30,1,1,2,70,6,0,0,2,69,50,0,78,-30,1,1,2,70,6,0,0,2,71,51,0,80,-30,1,1,2,70,6,0,0,2,73,53,0,82,-29,1,1,2,70,6,0,0,2,75,54,0,85,-27,1,1,2,70,6,0,0,2,77,55,0,87,-23,1,2,2,70,6,0,0,2,78,56,0,89,-18,1,2,2,70,6,0,0,2,80,57,0,91,-13,1,3,2,70,6,0,0,2,81,58,0,92,-8,1,3,2,70,6,0,0,2,83,58,0,94,-3,1,3,2,70,6,0,0,2,84,59,0,96,1,1,0,2,70,6,0,0,2,85,60,0,96,7,1,0,2,70,6,0,0,2,86,60,0,96,12,1,0,2,70,6,0,0,2,87,61,0,95,17,1,1,2,70,6,0,0,2,88,62,0,94,23,1,1,2,70,6,0,0,2,89,62,0,94,28,1,2,2,70,6,0,0,2,90,54,0,94,32,1,2,2,70,6,0,0,2,91,56,0,95,36,1,2,2,70,6,0,0,1,93,58,0,98,41,1,3,1,70,6,0,0,1,98,59,0,101,45,1,3,1,70,6,0,0,1,104,59,0,105,48,1,3,1,70,6,0,0,1,111,58,0,110,50,1,0,1,70,6,0,0,1,118,56,0,114,52,1,0,0,70,6,0,0,1,125,55,0,119,53,1,0,0,70,6,0,0,1,132,54,0,124,54,1,1,0,70,6,0,0,1,138,54,0,129,54,1,1,0,70,6,0,0,1,143,54,0,134,55,1,1,0,70,6,0,0,1,162,53,0,139,55,1,2,0,70,6,0,0,1,165,53,0,144,55,1,2,0,70,6,0,0,1,167,54,0,149,56,1,3,0,70,6,0,0,1,170,54,0,155,56,1,3,0,70,6,0,0,1,174,55,0,160,56,1,3,0,70,6,0,0,1,178,55,0]}};
+  const SKILL_CLIPS = {"sig":3816971814,"knock":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,1,0,70,6,0,0,4,-5,0,0,-14,0,1,1,0,70,6,0,0,4,13,0,0,-9,0,1,2,0,70,6,0,0,4,16,0,0,-4,0,1,2,0,70,6,0,0,4,19,0,0,1,0,1,0,0,70,6,0,0,4,22,0,0,6,0,1,0,0,70,6,0,0,4,34,0,0,11,0,1,0,0,70,6,0,0,4,39,0,0,16,0,1,2,7,70,6,0,0,4,47,-3,1,21,-3,1,3,7,70,6,0,0,5,58,-9,0,26,-5,1,3,7,70,6,0,0,6,68,-15,0,30,-8,1,0,7,70,6,0,0,6,77,-21,0,35,-11,1,0,7,70,6,0,0,7,86,-26,0,40,-13,1,0,7,70,6,0,0,7,94,-30,0,45,-16,1,1,7,70,6,0,0,7,101,-34,0,49,-19,1,1,7,70,6,0,0,7,108,-38,0,54,-22,1,2,7,70,6,0,0,7,115,-42,0,59,-24,1,2,7,70,6,0,0,7,121,-46,0,63,-27,1,2,7,70,6,0,0,7,126,-49,0,68,-29,1,3,7,70,6,0,0,7,131,-52,0,73,-32,1,3,7,70,6,0,0,7,136,-55,0,78,-34,1,3,7,70,6,0,0,7,141,-57,0,83,-36,1,0,0,70,6,0,0,7,145,-59,0,88,-38,1,0,0,70,6,0,0,7,149,-62,0,93,-40,1,1,0,70,6,0,0,7,152,-64,0,98,-42,1,1,0,70,6,0,0,7,156,-66,0,103,-44,1,1,0,70,6,0,0,7,159,-67,0,108,-46,1,2,7,70,6,0,0,7,162,-69,0,113,-48,1,2,7,70,6,0,0,7,164,-71,0,118,-50,1,3,7,70,6,0,0,7,167,-72,0,123,-52,1,3,7,70,6,0,0,7,169,-73,0,128,-55,1,3,7,70,6,0,0,7,171,-75,0,133,-57,1,0,7,70,6,0,0,7,173,-76,0,138,-59,1,0,7,70,6,0,0,7,175,-77,0,143,-61,1,0,7,70,6,0,0,7,168,-73,0,147,-63,1,1,7,70,6,0,0,7,170,-75,0,152,-66,1,1,7,70,6,0,0,7,172,-76,0,156,-68,1,2,7,70,6,0,0,7,174,-78,0,161,-70,1,2,7,70,6,0,0,7,177,-80,0,165,-73,1,2,7,70,6,0,0,7,181,-82,0,170,-75,1,3,7,70,6,0,0,7,185,-84,0,174,-78,1,3,7,70,6,0,0,7,189,-86,0,179,-80,1,3,7,70,6,0,0,7,193,-88,0,183,-83,1,0,7,70,6,0,0,7,197,-91,0,188,-85,1,0,7,70,6,0,0,7,201,-93,0,192,-88,1,0,7,70,6,0,0,7,216,-102,0,196,-90,1,1,7,70,6,0,0,7,218,-103,0,201,-93,1,1,7,70,6,0,0,7,220,-104,0,205,-96,1,2,7,70,6,0,0,7,223,-106,0,210,-98,1,2,7,70,6,0,0,7,226,-108,0,214,-101,1,2,7,70,6,0,0,7,230,-110,0,219,-103,1,3,7,70,6,0,0,7,233,-112,0]},"dragback":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-21,-2,0,-30,0,1,0,0,70,6,0,0,4,-16,-2,0,-25,0,1,0,0,70,6,0,0,4,-10,-2,0,-19,0,1,0,0,70,6,0,0,4,-5,-1,0,-14,0,1,1,0,70,6,0,0,4,13,-2,0,-9,0,1,1,0,70,6,0,0,4,16,-2,0,-4,0,1,1,0,70,6,0,0,4,19,-1,0,1,0,1,0,0,70,6,0,0,4,22,-1,0,6,0,1,0,0,70,6,0,0,4,31,0,0,11,0,1,0,0,70,6,0,0,4,30,1,0,15,0,1,1,0,70,6,0,0,4,27,2,0,18,0,1,1,0,70,6,0,0,4,23,4,0,21,0,1,2,1,70,6,0,0,4,17,5,0,23,0,1,2,2,70,6,0,0,4,12,6,0,24,0,1,3,2,70,6,0,0,4,6,7,0,24,0,1,3,3,70,6,0,0,4,2,8,0,24,0,1,0,3,70,6,0,0,4,0,8,0,24,0,1,2,4,70,6,0,0,4,0,9,0,21,1,1,2,4,70,6,0,0,4,-1,9,0,16,3,1,2,4,70,6,0,0,4,-4,10,0,11,5,1,3,4,70,6,0,0,4,-7,11,0,6,6,1,3,4,70,6,0,0,4,-11,12,0,1,8,1,3,4,70,6,0,0,4,-15,14,0,-3,10,1,0,4,70,6,0,0,4,-19,15,0,-8,11,1,0,4,70,6,0,0,4,-24,17,0,-13,13,1,1,4,70,6,0,0,4,-28,18,0,-18,15,1,1,4,70,6,0,0,4,-33,20,0,-23,17,1,1,4,70,6,0,0,4,-37,22,0,-28,18,1,2,4,70,6,0,0,4,-54,27,0,-32,20,1,2,4,70,6,0,0,4,-56,28,0,-37,22,1,2,4,70,6,0,0,4,-59,29,0,-42,23,1,3,4,70,6,0,0,4,-61,30,0,-47,25,1,3,4,70,6,0,0,4,-65,31,0,-52,27,1,0,4,70,6,0,0,4,-69,33,0,-56,28,1,0,4,70,6,0,0,4,-73,34,0]},"croq":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-30,3,0,-30,0,1,1,0,70,6,0,0,4,-35,7,0,-25,0,1,1,0,70,6,0,0,4,-36,11,0,-19,0,1,1,0,70,6,0,0,4,-34,15,0,-14,0,1,2,0,70,6,0,0,4,-30,17,0,-9,0,1,2,0,70,6,0,0,4,-28,19,0,-4,0,1,3,0,70,6,0,0,4,-26,21,0,1,0,1,0,0,70,6,0,0,4,-21,23,0,4,2,1,0,0,70,6,0,0,4,26,-8,0,6,6,1,0,0,70,6,0,0,4,28,1,0,9,12,1,1,0,70,6,0,0,4,31,12,0,11,19,1,1,0,70,6,0,0,3,34,24,0,14,27,1,2,0,70,6,0,0,3,36,36,0,16,34,1,2,0,70,6,0,0,3,39,47,0,19,40,1,3,0,70,6,0,0,3,41,55,0,22,44,1,3,0,70,6,0,0,3,44,60,0,24,46,1,0,0,70,6,0,0,3,46,61,0,28,46,1,3,0,70,6,0,0,2,50,57,0,33,46,1,0,0,70,6,0,0,2,53,54,0,38,46,1,0,0,70,6,0,0,2,57,52,0,43,46,1,0,0,70,6,0,0,2,61,50,0,48,46,1,1,0,70,6,0,0,2,65,49,0,54,46,1,1,0,70,6,0,0,2,70,48,0,59,46,1,1,0,70,6,0,0,2,75,47,0,64,46,1,2,0,70,6,0,0,2,80,47,0,69,46,1,2,0,70,6,0,0,2,85,47,0,74,46,1,2,0,70,6,0,0,1,90,46,0,79,46,1,3,0,70,6,0,0,1,107,47,0,84,46,1,3,0,70,6,0,0,1,110,47,0,89,46,1,0,0,70,6,0,0,1,112,46,0,94,46,1,0,0,70,6,0,0,1,115,46,0,100,46,1,0,0,70,6,0,0,1,119,46,0,105,46,1,1,0,70,6,0,0,1,123,46,0,110,46,1,1,0,70,6,0,0,1,127,46,0]},"spin":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-21,0,0,-30,0,1,2,0,70,6,0,0,4,-15,0,0,-25,0,1,2,0,70,6,0,0,4,-10,0,0,-19,0,1,3,0,70,6,0,0,4,-5,0,0,-14,0,1,3,0,70,6,0,0,4,12,0,0,-9,0,1,0,0,70,6,0,0,4,15,0,0,-4,0,1,0,0,70,6,0,0,4,17,0,0,1,0,1,0,0,70,6,0,0,4,21,0,0,0,-4,1,0,0,70,6,0,0,4,19,-2,0,1,-15,1,0,1,70,6,0,0,4,17,-5,0,4,-25,1,1,1,70,6,0,0,4,15,-8,0,10,-31,1,1,2,70,6,0,0,4,13,-11,0,13,-33,1,2,2,70,6,0,0,4,13,-11,0,16,-33,1,2,2,70,6,0,0,4,13,-11,0,25,-31,1,3,3,70,6,0,0,4,14,-13,0,33,-24,1,3,3,70,6,0,0,4,14,-14,0,36,-17,1,0,4,70,6,0,0,4,14,-14,0,36,-14,1,0,4,70,6,0,0,4,14,-15,0,38,-17,1,1,4,70,6,0,0,5,18,-28,0,41,-23,1,1,5,70,6,0,0,5,29,-45,0,44,-29,1,2,6,70,6,0,0,6,47,-56,0,48,-35,1,2,6,70,6,0,0,6,61,-58,0,50,-39,1,3,7,70,6,0,0,6,68,-56,0,51,-40,1,0,7,70,6,0,0,6,67,-57,0,54,-44,1,1,7,70,6,0,0,6,69,-59,0,58,-47,1,1,7,70,6,0,0,6,71,-61,0,61,-51,1,1,7,70,6,0,0,6,74,-64,0,65,-55,1,2,7,70,6,0,0,6,77,-67,0,68,-58,1,2,7,70,6,0,0,6,80,-70,0,72,-62,1,2,7,70,6,0,0,6,84,-73,0,76,-65,1,3,7,70,6,0,0,6,87,-77,0,79,-69,1,3,7,70,6,0,0,6,91,-80,0,83,-73,1,0,7,70,6,0,0,6,94,-84,0,87,-76,1,0,7,70,6,0,0,6,98,-87,0,90,-80,1,0,7,70,6,0,0,6,110,-99,0,94,-83,1,1,7,70,6,0,0,6,112,-101,0,97,-87,1,1,7,70,6,0,0,6,113,-103,0,101,-91,1,1,7,70,6,0,0,6,116,-105,0,105,-94,1,2,7,70,6,0,0,7,118,-108,0,108,-98,1,2,7,70,6,0,0,7,121,-111,0,112,-102,1,2,7,70,6,0,0,7,124,-114,0]},"cruyff":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-22,-3,0,-30,0,1,3,0,70,6,0,0,4,-17,-4,0,-25,0,1,0,0,70,6,0,0,4,-12,-4,0,-19,0,1,0,0,70,6,0,0,4,-6,-3,0,-14,0,1,0,0,70,6,0,0,4,13,-5,0,-9,0,1,1,0,70,6,0,0,4,16,-5,0,-4,0,1,1,0,70,6,0,0,4,18,-3,0,1,0,1,0,0,70,6,0,0,4,21,-2,0,6,0,1,0,0,70,6,0,0,4,32,2,0,11,0,1,0,0,70,6,0,0,4,33,7,0,15,0,1,1,0,70,6,0,0,4,33,12,0,19,0,1,1,0,70,6,0,0,4,31,17,0,22,0,1,2,0,70,6,0,0,4,28,21,0,24,0,1,2,0,70,6,0,0,4,24,22,0,26,0,1,3,1,70,6,0,0,4,20,22,0,27,0,1,3,2,70,6,0,0,4,17,21,0,27,0,1,0,2,70,6,0,0,4,14,20,0,27,0,1,0,3,70,6,0,0,4,12,20,0,27,0,1,2,3,70,6,0,0,4,12,21,0,24,4,1,2,3,70,6,0,0,4,10,23,0,21,8,1,2,3,70,6,0,0,4,9,25,0,18,12,1,3,3,70,6,0,0,4,7,28,0,15,16,1,3,3,70,6,0,0,4,4,31,0,12,20,1,3,3,70,6,0,0,4,2,34,0,9,24,1,0,3,70,6,0,0,3,-1,38,0,6,29,1,0,3,70,6,0,0,3,-4,42,0,3,33,1,0,3,70,6,0,0,3,-7,45,0,0,37,1,1,3,70,6,0,0,3,-10,49,0,-3,41,1,1,3,70,6,0,0,3,-13,53,0,-6,45,1,2,3,70,6,0,0,3,-23,67,0,-9,49,1,2,3,70,6,0,0,3,-24,69,0,-12,53,1,2,3,70,6,0,0,3,-26,71,0,-15,57,1,3,3,70,6,0,0,3,-28,74,0,-18,61,1,3,3,70,6,0,0,3,-30,76,0,-22,65,1,3,3,70,6,0,0,3,-32,80,0,-25,69,1,0,3,70,6,0,0,3,-35,83,0]},"rainbow":{"fps":30,"f":[-40,0,1,0,0,70,14,0,0,4,-26,0,0,-35,0,1,0,0,70,14,0,0,4,-28,4,0,-30,0,1,1,0,70,14,0,0,4,-30,10,0,-25,0,1,1,0,70,14,0,0,4,-29,14,0,-19,0,1,1,0,70,14,0,0,4,-24,17,0,-14,0,1,2,0,70,14,0,0,4,-21,23,0,-9,0,1,2,0,70,14,0,0,4,-19,24,0,-4,0,1,2,0,70,14,0,0,4,-15,26,0,1,0,1,0,0,70,14,0,0,4,-10,26,0,6,0,1,0,0,70,14,0,0,4,32,0,0,11,0,1,0,0,70,14,0,0,4,34,0,0,16,0,1,1,0,70,14,0,0,4,34,0,1,20,0,1,1,0,70,14,0,0,4,34,0,2,24,0,1,2,0,70,14,0,0,4,33,0,4,27,0,1,2,0,70,14,0,0,4,31,0,6,30,0,1,3,0,70,14,0,0,4,30,0,10,33,0,1,3,0,70,14,0,0,4,29,0,13,35,0,1,0,0,70,14,0,0,4,28,0,16,37,0,1,0,0,70,14,0,0,4,30,0,18,39,0,1,3,0,70,14,0,0,4,34,0,23,46,0,1,3,0,70,14,0,0,5,40,0,32,50,-3,1,0,1,70,14,0,0,5,47,0,41,53,-7,1,0,1,70,14,0,0,5,53,0,49,58,-10,1,1,7,70,14,0,0,5,59,0,56,64,-12,1,1,0,70,14,0,0,6,65,0,63,71,-15,1,2,0,70,14,0,0,6,71,0,70,79,-16,1,2,0,70,14,0,0,7,78,0,76,86,-17,1,3,0,70,14,0,0,7,84,0,81,93,-18,1,3,0,70,14,0,0,7,90,0,86,101,-18,1,0,0,70,14,0,0,7,96,0,90,108,-18,1,0,1,70,14,0,0,7,103,0,93,115,-17,1,1,1,70,14,0,0,0,109,0,96,120,-17,1,1,1,70,14,0,0,0,115,0,98,125,-17,1,1,2,70,14,0,0,0,121,0,100,129,-16,1,2,0,70,14,0,0,0,127,0,101,136,-15,1,2,0,70,14,0,0,0,134,0,102,144,-15,1,3,0,70,14,0,0,0,140,0,102,151,-14,1,3,1,70,14,0,0,0,146,0,101,158,-13,1,0,1,70,14,0,0,0,152,0,100,163,-12,1,0,2,70,14,0,0,0,159,0,99,168,-12,1,1,2,70,14,0,0,0,165,0,96,173,-11,1,1,0,70,14,0,0,0,171,0,94,179,-10,1,1,0,70,14,0,0,0,177,0,90,187,-9,1,2,1,70,14,0,0,0,183,0,86,194,-8,1,2,1,70,14,0,0,0,190,0,81,200,-7,1,3,1,70,14,0,0,0,196,0,76,205,-7,1,3,2,70,14,0,0,0,202,0,71,209,-6,1,0,2,70,14,0,0,0,208,0,64,215,-5,1,0,0,70,14,0,0,0,215,0,57,222,-4,1,0,0,70,14,0,0,0,221,0,50,229,-3,1,1,1,70,14,0,0,0,227,0,42,236,-3,1,1,1,70,14,0,0,0,233,0,33,242,-2,1,2,2,70,14,0,0,0,240,0,24,246,-1,1,2,2,70,14,0,0,0,246,0,14,250,-1,1,2,0,70,14,0,0,0,277,3,4,254,0,1,3,0,70,14,0,0,0,279,3,2,260,0,1,3,0,70,14,0,0,0,281,2,6,267,1,1,0,0,70,14,0,0,0,285,2,10,274,1,1,0,0,70,14,0,0,0,290,1,13,281,1,1,1,0,70,14,0,0,0,296,1,15,287,1,1,1,0,70,14,0,0,0,302,1,17,294,1,1,2,0,70,14,0,0,0,308,1,18,301,1,1,2,0,70,14,0,0,0,314,1,19,308,1,1,3,0,70,14,0,0,0,322,1,19,315,1,1,3,0,70,14,0,0,0,329,1,19,323,2,1,0,0,70,14,0,0,0,336,0,19,330,2,1,0,0,70,14,0,0,0,343,0,17,337,2,1,1,0,70,14,0,0,0,350,0,15,344,2,1,1,0,70,14,0,0,0,357,-1,13,352,2,1,2,0,70,14,0,0,0,364,-1,13,359,2,1,2,0,70,14,0,0,0,371,-1,12,366,2,1,3,0,70,14,0,0,0,378,-2,11,373,2,1,3,0,70,14,0,0,0,385,-2,9,380,2,1,0,0,70,14,0,0,0,405,-9,7,387,2,1,0,0,70,14,0,0,0,409,-7,3,394,2,1,1,0,70,14,0,0,0,413,-5,0,401,2,1,1,0,70,14,0,0,0,418,-3,1,407,2,1,2,0,70,14,0,0,0,423,-2,2,414,2,1,2,0,70,14,0,0,0,429,-1,2,421,2,1,3,0,70,14,0,0,0,435,0,2,428,2,1,3,0,70,14,0,0,0,441,0,1,435,2,1,0,0,70,14,0,0,0,463,-1,0,441,2,1,0,0,70,14,0,0,0,467,0,0,448,2,1,1,0,70,14,0,0,0,470,0,0,455,2,1,1,0,70,14,0,0,0,474,1,0,462,2,1,2,0,70,14,0,0,0,479,1,0,468,2,1,2,0,70,14,0,0,0,484,1,0,475,2,1,3,0,70,14,0,0,0,490,1,0,482,2,1,3,0,70,14,0,0,0,496,1,0,489,2,1,0,0,70,14,0,0,0,502,1,0]},"sombrero":{"fps":30,"f":[0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,0,0,0,-34,6,0,0,0,16,0,0,0,0,0,0,0,-34,6,0,0,0,17,0,0,0,0,0,0,0,-34,6,0,0,0,18,0,0,0,0,0,0,0,-34,6,0,0,0,19,0,0,0,0,0,0,0,-34,6,0,0,0,19,0,0,0,0,0,0,0,-34,6,0,0,0,20,0,0,0,0,0,0,0,-34,6,0,0,0,21,0,0,0,0,0,0,0,-34,6,0,0,0,21,0,0,0,0,0,0,0,-34,6,0,0,0,22,0,0,0,0,1,0,0,-34,6,0,0,0,22,0,0,0,0,1,0,0,-34,6,0,0,0,23,0,2,0,0,1,0,0,-34,6,0,0,0,20,0,6,0,0,1,1,0,-34,6,0,0,0,16,0,12,0,0,1,1,0,-34,6,0,0,0,13,0,17,0,0,1,2,0,-34,6,0,0,0,12,0,20,-2,2,1,0,3,-34,6,0,0,0,10,0,28,-5,6,1,0,2,-34,6,0,0,0,7,0,35,-8,10,1,0,2,-34,6,0,0,0,4,0,42,-9,15,1,1,1,-34,6,0,0,0,1,0,48,-10,20,1,1,1,-34,6,0,0,0,-2,0,54,-11,24,1,1,1,-34,6,0,0,0,-5,0,59,-13,28,1,2,0,-34,6,0,0,0,-8,0,63,-15,31,1,2,0,-34,6,0,0,0,-11,0,67,-17,34,1,2,0,-34,6,0,0,0,-14,0,70,-19,36,1,2,7,-34,6,0,0,0,-17,0,73,-22,38,1,3,7,-34,6,0,0,7,-20,0,75,-25,39,1,3,6,-34,6,0,0,7,-23,0,77,-30,39,1,3,6,-34,6,0,0,7,-26,0,78,-34,38,1,0,6,-34,6,0,0,7,-29,0,78,-38,36,1,0,6,-34,6,0,0,6,-32,0,78,-42,34,1,0,6,-34,6,0,0,6,-35,0,77,-46,31,1,1,6,-34,6,0,0,5,-38,0,76,-49,29,1,1,6,-34,6,0,0,5,-41,0,74,-53,26,1,1,6,-34,6,0,0,5,-43,0,71,-56,23,1,2,6,-34,6,0,0,5,-46,0,68,-60,20,1,2,7,-34,6,0,0,4,-49,0,65,-63,16,1,2,7,-34,6,0,0,4,-52,0,60,-66,13,1,3,7,-34,6,0,0,4,-55,0,56,-69,10,1,3,7,-34,6,0,0,4,-58,0,50,-72,7,1,3,7,-34,6,0,0,4,-61,0,44,-74,4,1,3,7,-34,6,0,0,4,-64,0,38,-76,2,1,0,0,-34,6,0,0,4,-67,0,30,-78,1,1,0,0,-34,6,0,0,4,-70,0,23,-79,0,1,0,0,-34,6,0,0,4,-73,0,15,-79,-1,1,0,5,-34,6,0,0,5,-96,-20,6,-80,-2,1,0,5,-34,6,0,0,5,-97,-21,0,-82,-4,1,0,5,-34,6,0,0,5,-98,-22,4,-86,-8,1,0,5,-34,6,0,0,5,-99,-23,7,-89,-12,1,1,5,-34,6,0,0,5,-102,-26,10,-92,-16,1,1,5,-34,6,0,0,5,-104,-29,12,-96,-19,1,1,5,-34,6,0,0,5,-107,-32,14,-99,-23,1,2,5,-34,6,0,0,5,-110,-35,15,-103,-27,1,2,5,-34,6,0,0,5,-114,-39,15,-106,-31,1,2,5,-34,6,0,0,5,-117,-43,15,-109,-34,1,3,5,-34,6,0,0,5,-120,-46,14,-113,-38,1,3,5,-34,6,0,0,5,-123,-50,13,-116,-42,1,3,5,-34,6,0,0,5,-127,-54,11,-120,-46,1,0,5,-34,6,0,0,5,-138,-65,8,-123,-50,1,0,5,-34,6,0,0,5,-139,-67,5,-127,-53,1,0,5,-34,6,0,0,5,-141,-69,2,-130,-57,1,1,5,-34,6,0,0,5,-143,-72,1]},"elastico":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-29,-4,0,-30,0,1,2,0,70,6,0,0,4,-31,-9,0,-25,0,1,2,0,70,6,0,0,4,-30,-14,0,-20,0,1,3,0,70,6,0,0,4,-26,-17,0,-15,0,1,3,0,70,6,0,0,4,-20,-19,0,-9,0,1,3,0,70,6,0,0,4,-12,-18,0,-4,0,1,0,0,70,6,0,0,4,-6,-25,0,1,0,1,0,0,70,6,0,0,5,-4,-26,0,4,1,1,0,0,70,6,0,0,4,26,4,0,7,2,1,0,0,70,6,0,0,4,29,8,0,10,3,1,1,0,70,6,0,0,4,32,12,0,13,4,1,1,0,70,6,0,0,4,35,16,0,16,4,1,2,0,70,6,0,0,4,38,18,0,19,4,1,0,7,70,6,0,0,4,44,15,3,23,1,1,0,7,70,6,0,0,4,50,9,6,27,-3,1,1,7,70,6,0,0,4,57,4,9,31,-6,1,1,7,70,6,0,0,5,57,-2,11,35,-10,1,2,7,70,6,0,0,5,59,-4,13,39,-13,1,2,7,70,6,0,0,5,61,-7,13,43,-16,1,2,7,70,6,0,0,6,63,-13,14,47,-19,1,3,7,70,6,0,0,6,65,-19,14,51,-22,1,3,7,70,6,0,0,6,67,-25,13,55,-26,1,3,7,70,6,0,0,6,70,-30,12,59,-29,1,0,7,70,6,0,0,6,73,-34,10,63,-32,1,0,7,70,6,0,0,6,77,-39,7,67,-35,1,0,7,70,6,0,0,6,80,-42,4,71,-38,1,1,7,70,6,0,0,6,84,-46,0,75,-41,1,1,7,70,6,0,0,6,88,-49,1,79,-44,1,2,7,70,6,0,0,7,101,-58,2,83,-47,1,2,7,70,6,0,0,7,103,-60,2,87,-50,1,2,7,70,6,0,0,7,105,-62,2,91,-53,1,3,7,70,6,0,0,7,107,-64,2,95,-56,1,3,7,70,6,0,0,7,110,-67,1]},"heel":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-22,-2,0,-30,0,1,0,0,70,6,0,0,4,-16,-3,0,-25,0,1,0,0,70,6,0,0,4,-11,-2,0,-20,0,1,1,0,70,6,0,0,4,-5,-2,0,-15,0,1,1,0,70,6,0,0,4,0,-1,0,-9,0,1,2,0,70,6,0,0,4,18,-2,0,-4,0,1,2,0,70,6,0,0,4,21,-2,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,30,2,0,10,0,1,0,0,70,6,0,0,4,30,5,0,14,0,1,1,0,70,6,0,0,4,27,9,0,18,0,1,1,0,70,6,0,0,4,24,14,0,21,0,1,2,0,70,6,0,0,4,21,17,0,23,0,1,2,0,70,6,0,0,4,19,20,0,25,0,1,3,0,70,6,0,0,4,20,20,0,28,-1,1,2,7,70,6,0,0,4,27,23,2,33,-4,1,3,7,70,6,0,0,3,32,27,3,38,-7,1,3,7,70,6,0,0,3,37,30,3,42,-10,1,0,7,70,6,0,0,3,41,32,2,47,-13,1,0,0,70,6,0,0,3,45,35,1,51,-15,1,0,0,70,6,0,0,3,49,37,0,55,-18,1,1,0,70,6,0,0,3,53,40,0,59,-21,1,1,1,70,6,0,0,2,56,42,0,63,-23,1,1,1,70,6,0,0,2,59,44,0,66,-25,1,2,2,70,6,0,0,2,62,45,0,69,-27,1,2,2,70,6,0,0,2,65,47,0,72,-29,1,2,2,70,6,0,0,2,67,49,0,75,-30,1,2,2,70,6,0,0,2,69,50,0,78,-30,1,3,2,70,6,0,0,2,71,51,0,80,-30,1,3,2,70,6,0,0,2,73,53,0,82,-29,1,3,2,70,6,0,0,2,75,54,0,85,-27,1,3,2,70,6,0,0,2,77,55,0,87,-23,1,0,2,70,6,0,0,2,79,56,0,89,-18,1,0,2,70,6,0,0,2,80,57,0,91,-13,1,0,2,70,6,0,0,2,81,58,0,92,-8,1,1,2,70,6,0,0,2,83,58,0,94,-3,1,1,2,70,6,0,0,2,84,59,0,96,2,1,1,2,70,6,0,0,2,85,60,0,96,7,1,2,2,70,6,0,0,2,86,60,0,96,12,1,2,2,70,6,0,0,2,87,61,0,96,18,1,3,2,70,6,0,0,2,88,62,0,96,23,1,3,2,70,6,0,0,2,89,62,0,96,28,1,3,2,70,6,0,0,1,91,54,0,97,32,1,0,2,70,6,0,0,1,92,56,0,99,37,1,0,1,70,6,0,0,1,95,58,0,102,41,1,0,1,70,6,0,0,1,100,59,0,106,44,1,1,1,70,6,0,0,1,106,60,0,110,47,1,1,1,70,6,0,0,1,114,59,0,115,49,1,1,0,70,6,0,0,1,122,57,0,119,51,1,2,0,70,6,0,0,1,129,55,0,124,52,1,2,0,70,6,0,0,1,136,54,0,129,52,1,2,0,70,6,0,0,1,142,53,0,134,53,1,3,0,70,6,0,0,1,148,53,0,139,53,1,3,0,70,6,0,0,1,167,53,0,145,54,1,0,0,70,6,0,0,1,170,53,0,150,54,1,0,0,70,6,0,0,1,172,53,0,155,54,1,0,0,70,6,0,0,1,175,53,0,160,54,1,1,0,70,6,0,0,1,179,54,0,165,54,1,1,0,70,6,0,0,1,183,54,0]}};
   // what to draw, as for a man running to the right: u ahead, v across (+ his right, down the screen) -- the moves the clips
   // show: the croqueta to his right, the roulette clockwise, the elastico back to his left, the heel flick's ball to his right
+  // (the sombrero as he does it with his back to the man: popped on a little, then back over his head)
   const SKILL_DRAWS=(()=>{ const arc=(r,turn,n,sg)=>{ const a=[]; for(let i=0;i<=n;i++){ const t=i/n*turn; a.push([r*Math.sin(t),sg*(r-r*Math.cos(t))]); } return a; };
-    return { flick:[[0,0],[40,-23]], dragback:[[0,0],[-40,14]], croq:[[0,0],[34,0],[34,30]], spin:arc(22,Math.PI*1.9,30,1), cruyff:arc(26,Math.PI,20,1),
+    return { knock:[[0,0],[40,-23]], dragback:[[0,0],[-40,14]], croq:[[0,0],[0,30],[34,30]], spin:arc(22,Math.PI*1.9,30,1), cruyff:arc(26,Math.PI,20,1),
       rainbow:[[0,0],[-34,-5],[6,9]], sombrero:[[0,0],[34,-5],[-6,9]], elastico:[[0,0],[5,30],[9,-8]], heel:arc(16,Math.PI*2,26,-1).concat([[40,24]]) }; })();
   const SK_SPEED=0.8, SK_DEPTH=0.55, SK_MAN={team:'G',lookKey:'skill-clip-man'}, SK_DEF={team:'R',lookKey:'skill-clip-def'}, SK_ANIMS=['idle','run','shoot','pass','slide'];
   let skRaf=0;
@@ -12646,7 +12732,8 @@
   function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
   document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')) closeSkills(); };
   function renderSkills(){
-    document.getElementById('skHint').innerHTML=(isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')+'; ahead is the way he\'s going, <b>→</b> here';
+    document.getElementById('skHint').innerHTML=(isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')+'; ahead is the way he\'s going, <b>→</b> here.<br>'
+      +(isTouch?'Hold <b>SKILL</b>':'Hold it')+' without drawing to shield the ball, or with the '+(isTouch?'stick':'keys')+' to strafe';
     document.getElementById('skGrid').innerHTML=SKILL_KINDS.map(k=>'<div class="skCard fitWhole" data-sk="'+k+'"><canvas class="skDraw"></canvas><canvas class="skClip"></canvas>'
       +'<div class="skTxt"><span class="skName">'+SKILL_NAME[k]+'</span>'+starsHtml(SKILL_STARS[k])+'</div></div>').join(''); }
   // a canvas at its size on the screen, in device pixels: true when it's (re)sized, and so wants drawing afresh

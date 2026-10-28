@@ -1,13 +1,20 @@
 // FOOTBALL CLASSIC, SKILL MOVES AND SKILL STARS. What you draw on SKILL is read against the way your man is going -- the
 // way he's running, else the way he's facing -- as a stick is in other football games, so a shape is the same move
-// whichever way he's going on the pitch: a flick anywhere in the half in front of him a FLICK (1 star), in the half
-// behind him a DRAG-BACK (2), an L a CROQUETA, a circle a ROULETTE, a hook a CRUYFF TURN (3), back then ahead a RAINBOW
-// (4), ahead then back a SOMBRERO, across and back an ELASTICO, a loop with a line out of it a HEEL FLICK (5). A move
-// above his stars doesn't happen. Each move from a run at a man 3 m in front of him (who leaves the ball alone): the flick
-// popped up off his foot with him still facing his way, the drag-back and the Cruyff turn turned back, the croqueta
-// across, the roulette out of the spin seven-eighths of the way round going diagonally away past the man, the rainbow
-// over both their heads, the sombrero over the man to drop behind him, the elastico popped up past him on the side it
-// snapped back to, the heel flick past him on one side while he goes round the other -- and he has it again after.
+// whichever way he's going on the pitch: a straight stroke anywhere in the half in front of him a KNOCK-ON (1 star), in
+// the half behind him a DRAG-BACK (2), an L to the side then on a CROQUETA (the other way round: nothing), a circle a
+// ROULETTE, a hook a CRUYFF TURN (3), back then ahead a RAINBOW (4), ahead then back a SOMBRERO, across and back an
+// ELASTICO, a loop with a line out of it a HEEL FLICK (5). A move above his stars doesn't happen. Each move from a run at a
+// man 3 m in front of him (who leaves the ball alone): the knock-on along the grass the way drawn, out of his reach and
+// run on to; the drag-back and the Cruyff turn turned back; the croqueta across; the roulette -- the ball a little to the
+// side he's going and then diagonally on, never out on the other side; him round it facing it, then in front of it with
+// his back to the man, then out seven-eighths of the way round going diagonally away past him; the rainbow over both their
+// heads; the elastico popped up past him on the side it snapped back to; the heel flick past him on one side while he goes
+// round the other -- and he has it again after. The sombrero with his back to a man 1.5 m behind him: over his own head
+// and the man's, to drop past him, and he goes round him to it.
+// HOLDING SKILL (not drawing): with the stick he strafes -- the way he faced kept, slower than running with it, slower again
+// backing up; without it he shields -- his back to the man, quicker round at Off IQ 10 than at 1; a man at the ball's side
+// can't nick it off a good dribbler shielding it (Dribbling and Ball control 10) and can off a poor one; and he's planted:
+// a man leaning on him moves him less than he would off the stick, a strong shielder hardly at all.
 // SKILL STARS: a ceiling drawn by position and the league his rating belongs in (five-stars rare and most of them the
 // top league's wingers; a centre-back three at most; the lower leagues' defenders one or two), grown into by 19 to 23 and
 // perhaps one of them lost in his thirties; in a new career's world, and its news when your man gains or loses one.
@@ -24,9 +31,10 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={readSkill, skillFor, startSkill, mkSkill, setSkill:s=>{ skill=s; }, skill:()=>skill, grade:()=>lastGrade, controlled:()=>controlled, players:()=>players, keepers:()=>keepers, ball:()=>ball, simNow:()=>simNow, atkOf, FW, YC, proj, screenDirToPitch, SKILL_STARS, SKILL_NAME, '
-  + 'STAR_ODDS, starPot, starsAt, starLeague, get SKILL_CLIPS(){ return SKILL_CLIPS; }, get SKILL_DRAWS(){ return SKILL_DRAWS; }, SKILL_KINDS, clipSig:()=>hashStr(String(mkSkill)+String(skillStep)), freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
+  + 'STAR_ODDS, starPot, starsAt, starLeague, get SKILL_CLIPS(){ return SKILL_CLIPS; }, get SKILL_DRAWS(){ return SKILL_DRAWS; }, SKILL_KINDS, clipSig:()=>hashStr(String(mkSkill)+String(skillStep)), hold:()=>holdMode, press:()=>{ skillG={t0:simNow, pts:[{x:500,y:300}], mouse:false}; }, release:()=>{ skillG=null; holdMode=null; }, nickWindowOf, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
 patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, careerStars, careerStarPot, starLeague, starsAt, natPos, mgAgeWorld, mgYouthIntake};\n  // ===== END MANAGER CAREER');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');
+patch('  function humanIntent(){\n', '  function humanIntent(){\n    if(window.__stick) return {ix:window.__stick.x, iy:window.__stick.y};\n');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-moves-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -53,7 +61,8 @@ const SHAPES = `(() => {
   S.lineAheadSide = seg([[0, 0]], 0, 0, 10, 40, 8);                 // (80 degrees off: still in the half in front of him)
   S.lineBackSide = seg([[0, 0]], 0, 0, -12, 40, 8);                 // (100 degrees off: in the half behind him)
   S.lineBack = seg([[0, 0]], 0, 0, -40, 5, 8);
-  S.L = seg(seg([[0, 0]], 0, 0, 35, 0, 7), 35, 0, 35, 35, 7);
+  S.L = seg(seg([[0, 0]], 0, 0, 0, 35, 7), 0, 35, 35, 35, 7);           // (to his right, then on)
+  S.Lback = seg(seg([[0, 0]], 0, 0, 35, 0, 7), 35, 0, 35, 35, 7);       // (on, then to his right: the croqueta's old L)
   S.circleCW = []; for(let i = 0; i <= 40; i++){ const t = i / 40 * Math.PI * 2.1; S.circleCW.push([25 * Math.sin(t), 25 - 25 * Math.cos(t)]); }
   S.circleACW = []; for(let i = 0; i <= 40; i++){ const t = i / 40 * Math.PI * 2.1; S.circleACW.push([25 * Math.sin(t), -25 + 25 * Math.cos(t)]); }
   S.hook = []; for(let i = 0; i <= 30; i++){ const t = i / 30 * Math.PI; S.hook.push([30 * Math.sin(t), 30 - 30 * Math.cos(t)]); }   // (ahead, round to his right and back)
@@ -91,73 +100,132 @@ const gest = await page.evaluate(() => { const T = window.__T, p = T.controlled(
 const W = ['E', 'W', 'S', 'N'], all = (name, test) => W.every(w => gest[w + ' ' + name] && test(gest[w + ' ' + name]));
 const show = name => W.map(w => { const m = gest[w + ' ' + name]; return w + ':' + (m ? m.kind + (m.ahead != null ? '(' + m.ahead + ',' + m.across + ')' : '') + (m.side ? ' side ' + m.side : '') + (m.sense ? ' sense ' + m.sense : '') : '-'); }).join(' ');
 info('running east, west, south and north: ' + Object.keys(gest).filter(k => k.startsWith('E ')).map(k => k.slice(2) + ' ' + show(k.slice(2))).join(' | '));
-ok(all('lineAhead', m => m.kind === 'flick' && m.ahead > 0.85) && all('lineAheadSide', m => m.kind === 'flick' && m.ahead >= 0 && m.across > 0.6),
-  'a flick in the half in front of him is a FLICK, that way (straight on, or 80 degrees off to his right), whichever way he\'s going: ' + show('lineAheadSide'));
+ok(all('lineAhead', m => m.kind === 'knock' && m.ahead > 0.85) && all('lineAheadSide', m => m.kind === 'knock' && m.ahead >= 0 && m.across > 0.6),
+  'a stroke in the half in front of him is a KNOCK-ON, that way (straight on, or 80 degrees off to his right), whichever way he\'s going: ' + show('lineAheadSide'));
 ok(all('lineBack', m => m.kind === 'dragback' && m.ahead < -0.9) && all('lineBackSide', m => m.kind === 'dragback' && m.ahead < 0 && m.across > 0.5),
-  'a flick in the half behind him is a DRAG-BACK, that way: ' + show('lineBackSide'));
-ok(all('L', m => m.kind === 'croq' && m.across > 0.8), 'an L is a CROQUETA, the way its second stroke goes: ' + show('L'));
+  'a stroke in the half behind him is a DRAG-BACK, that way: ' + show('lineBackSide'));
+ok(all('L', m => m.kind === 'croq' && m.across > 0.8) && W.every(w => !gest[w + ' Lback']), 'an L to the side then on is a CROQUETA, to the side it starts: ' + show('L') + '; on then to the side, nothing: ' + show('Lback'));
 ok(all('circleCW', m => m.kind === 'spin' && m.sense === 1) && all('circleACW', m => m.kind === 'spin' && m.sense === -1), 'a circle is a ROULETTE, round the way it was drawn: ' + show('circleCW'));
 ok(all('hook', m => m.kind === 'cruyff' && m.ahead < -0.3 && m.across > 0), 'a hook is a CRUYFF TURN, back the way it ends: ' + show('hook'));
 ok(all('backAhead', m => m.kind === 'rainbow') && all('aheadBack', m => m.kind === 'sombrero'), 'back then ahead is a RAINBOW, ahead then back a SOMBRERO: ' + show('aheadBack'));
 ok(all('rightLeft', m => m.kind === 'elastico' && m.side === -1) && all('leftRight', m => m.kind === 'elastico' && m.side === 1), 'out to one side and back is an ELASTICO, to the side it came back to: ' + show('rightLeft'));
 ok(all('loopLine', m => m.kind === 'heel' && m.ahead > 0 && m.across < -0.1), 'a loop with a line out of it is a HEEL FLICK, the way the line goes: ' + show('loopLine'));
 ok(gest.worst < 1, 'a way on the screen is read back as the way on the pitch it shows, the camera off to one side of him or not (out by ' + gest.worst + ' degrees at worst)');
-ok(gest.standing === 'dragback' && gest.strokeGoingThatWay === 'flick' && gest.strokeGoingTheOther === 'dragback',
-  'standing, it\'s the way he faces; the same stroke on the screen is a flick going that way and a drag-back going the other (' + gest.strokeGoingThatWay + ', ' + gest.strokeGoingTheOther + ')');
+ok(gest.standing === 'dragback' && gest.strokeGoingThatWay === 'knock' && gest.strokeGoingTheOther === 'dragback',
+  'standing, it\'s the way he faces; the same stroke on the screen is a knock-on going that way and a drag-back going the other (' + gest.strokeGoingThatWay + ', ' + gest.strokeGoingTheOther + ')');
 
 // --- HIS STARS: a move above them doesn't happen -------------------------------------------------------------------
 const gate = await page.evaluate(() => { const T = window.__T, p = T.controlled(), b = T.ball(), out = {};
-  const shape = { flick: 'lineAhead', dragback: 'lineBack', croq: 'L', spin: 'circleCW', cruyff: 'hook', rainbow: 'backAhead', sombrero: 'aheadBack', elastico: 'rightLeft', heel: 'loopLine' };
+  const shape = { knock: 'lineAhead', dragback: 'lineBack', croq: 'L', spin: 'circleCW', cruyff: 'hook', rainbow: 'backAhead', sombrero: 'aheadBack', elastico: 'rightLeft', heel: 'loopLine' };
   for(const [kind, need] of Object.entries(T.SKILL_STARS)) for(const st of [need - 1, need]){ if(st < 1) continue;
     T.freeze(); p.state = 'normal'; p.stars = st; p.x = T.FW / 2; p.y = T.YC; p.vx = 150; p.vy = 0; p.facing = { x: 1, y: 0 };
     b.ownedBy = p; b.x = p.x + 14; b.y = p.y; b.z = 0; b.vz = 0;
     const did = T.startSkill(T.readSkill(window.__DRAW(T, p, { x: 1, y: 0 }, shape[kind]))), sk = T.skill();
     out[kind + st] = { did, kind: sk && sk.kind, grade: T.grade() }; T.freeze(); }
   p.stars = 5; return out; });
-const needs = { flick: 1, dragback: 2, croq: 3, spin: 3, cruyff: 3, rainbow: 4, sombrero: 5, elastico: 5, heel: 5 };
+const needs = { knock: 1, dragback: 2, croq: 3, spin: 3, cruyff: 3, rainbow: 4, sombrero: 5, elastico: 5, heel: 5 };
 const gateOK = Object.entries(needs).every(([k, n]) => gate[k + n].did && gate[k + n].kind === k && (n === 1 || (!gate[k + (n - 1)].did && /★ ONLY$/.test(gate[k + (n - 1)].grade))));
 info(Object.entries(gate).map(([k, v]) => k + ':' + (v.did ? 'yes' : 'no (' + v.grade + ')')).join(' '));
-ok(gateOK, 'every move needs its stars: the flick 1, the drag-back 2, the croqueta, roulette and Cruyff turn 3, the rainbow 4, the sombrero, elastico and heel flick 5 (one short: "' + gate.rainbow3.grade + '")');
+ok(gateOK, 'every move needs its stars: the knock-on 1, the drag-back 2, the croqueta, roulette and Cruyff turn 3, the rainbow 4, the sombrero, elastico and heel flick 5 (one short: "' + gate.rainbow3.grade + '")');
 
 // --- EACH MOVE, from a run at a man 3 m in front of him who leaves the ball alone ----------------------------------
-// where he and the ball are after it (along his run, across it: + his right), which way he faces, how high it went
+// where he and the ball are after it (along his run, across it: + his right), which way he faces, how high it went; the
+// move's own frames (sk). back: standing still with his back to the man, 1.5 m behind him
 const scene = (kind, o) => page.evaluate(({ kind, o }) => new Promise(res => { const T = window.__T, p = T.controlled(), b = T.ball(), atk = T.atkOf(p.team), d = T.players().filter(q => q.team !== p.team)[0];
-  T.freeze();
+  T.freeze(); window.__stick = null;
   for(const q of T.players()) if(q !== p){ q.x = T.FW / 2 - atk * 400; q.y = 60; q.vx = q.vy = 0; }
   for(const k of T.keepers()) k.y = 30;
-  p.x = T.FW / 2; p.y = T.YC; p.vx = atk * 150; p.vy = 0; p.facing = { x: atk, y: 0 }; p.stars = 5; p.state = 'normal'; p.noTouchT = 0; p.skill = null; p.stamina = 1;
-  d.x = p.x + atk * 70; d.y = p.y + 6; d.vx = d.vy = 0; d.state = 'normal'; d.noTouchT = 99; d.tackleCd = 99;   // (nor slides in)
+  const DX = o.back ? -34 : 70;
+  p.x = T.FW / 2; p.y = T.YC; p.vx = o.back ? 0 : atk * 150; p.vy = 0; p.facing = { x: atk, y: 0 }; p.stars = 5; p.state = 'normal'; p.noTouchT = 0; p.skill = null; p.stamina = 1;
+  d.x = p.x + atk * DX; d.y = p.y + 6; d.vx = d.vy = 0; d.state = 'normal'; d.noTouchT = 99; d.tackleCd = 99;   // (nor slides in)
   b.ownedBy = p; b.x = p.x + atk * 14; b.y = p.y; b.z = 0; b.vx = p.vx; b.vy = 0; b.vz = 0; b.lob = null; b.thru = null; b.dribbler = null; b.dribbleGrace = 0; b.intendedRcv = null; b.curveSpinT = 0;
   const m = { kind }; if(o.d) m.d = { x: o.d[0] * atk, y: o.d[1] * atk }; if(o.sense) m.sense = o.sense; if(o.side) m.side = o.side;
   T.setSkill(T.mkSkill(p, m));
   const x0 = p.x, y0 = p.y, t0 = T.simNow(), rel = (x, y) => [Math.round((x - x0) * atk), Math.round((y - y0) * atk)];
-  let top = 0, end = null, passed = null; const path = [];
-  (function tick(){ const t = T.simNow() - t0; top = Math.max(top, b.z); d.x = x0 + atk * 70; d.y = y0 + 6; d.vx = d.vy = 0; d.noTouchT = 99; d.tackleCd = 99;
-    if(!end && !T.skill()) end = { t: +t.toFixed(2), face: Math.round(Math.atan2(p.facing.y * atk, p.facing.x * atk) * 57.3), loose: !b.ownedBy, ball: rel(b.x, b.y) };
+  let top = 0, end = null, passed = null, sep = 0, land = null; const path = [], sk = [];
+  (function tick(){ const t = T.simNow() - t0; top = Math.max(top, b.z); d.x = x0 + atk * DX; d.y = y0 + 6; d.vx = d.vy = 0; d.noTouchT = 99; d.tackleCd = 99;
+    const face = Math.round(Math.atan2(p.facing.y * atk, p.facing.x * atk) * 57.3);
+    if(!end && !T.skill()) end = { t: +t.toFixed(2), face, loose: !b.ownedBy, ball: rel(b.x, b.y) };
     const pm = rel(p.x, p.y), bm = rel(b.x, b.y); path.push({ man: pm, ball: bm, z: Math.round(b.z) });
+    if(T.skill()) sk.push({ man: pm, ball: bm, face }); else sep = Math.max(sep, Math.round(Math.hypot(b.x - p.x, b.y - p.y)));
+    if(land == null && end && top > 20 && b.z <= 0) land = bm;                            // (where a ball in the air first comes down)
     if(passed == null && pm[0] >= 70) passed = pm[1];                                     // (his side as he goes by the man)
-    if(t < 1.4) return requestAnimationFrame(tick);
-    const ballBy = path.find(s => s.ball[0] >= 70);
-    res({ end, man: rel(p.x, p.y), ball: rel(b.x, b.y), top: Math.round(top), has: b.ownedBy === p, near: Math.round(Math.hypot(b.x - p.x, b.y - p.y)), passed, ballBy: ballBy && { across: ballBy.ball[1], z: ballBy.z } }); })(); }), { kind, o });
+    if(t < (o.T || 1.4)) return requestAnimationFrame(tick);
+    const ballBy = path.find(s => s.ball[0] >= 70), over = x => { const q = path.find(s => s.ball[0] <= x); return q ? q.z : null; };
+    res({ end, man: rel(p.x, p.y), ball: rel(b.x, b.y), top: Math.round(top), has: b.ownedBy === p, near: Math.round(Math.hypot(b.x - p.x, b.y - p.y)), passed, sep, land, sk,
+      overHim: o.back ? over(0) : null, overMan: o.back ? over(DX) : null, ballBy: ballBy && { across: ballBy.ball[1], z: ballBy.z } }); })(); }), { kind, o });
 const mv = {};
-for(const [key, kind, o] of [['flick', 'flick', { d: [0.6, -0.8] }], ['dragback', 'dragback', { d: [-0.9, 0.4] }], ['croq', 'croq', { d: [0, 1] }], ['spinCW', 'spin', { sense: 1 }], ['spinACW', 'spin', { sense: -1 }],
-  ['cruyff', 'cruyff', { d: [-0.6, 0.8] }], ['rainbow', 'rainbow', {}], ['sombrero', 'sombrero', { side: 1 }], ['elastico', 'elastico', { side: -1 }], ['heel', 'heel', { d: [0.85, 0.53] }]]) mv[key] = await scene(kind, o);
-for(const [k, r] of Object.entries(mv)) info(k + ': ' + JSON.stringify(r));
+for(const [key, kind, o] of [['knock', 'knock', { d: [0.6, -0.8] }], ['dragback', 'dragback', { d: [-0.9, 0.4] }], ['croq', 'croq', { d: [0, 1] }], ['spinCW', 'spin', { sense: 1 }], ['spinACW', 'spin', { sense: -1 }],
+  ['cruyff', 'cruyff', { d: [-0.6, 0.8] }], ['rainbow', 'rainbow', {}], ['sombrero', 'sombrero', { side: 1, back: true, T: 2 }], ['elastico', 'elastico', { side: -1 }], ['heel', 'heel', { d: [0.85, 0.53] }]]) mv[key] = await scene(kind, o);
+for(const [k, r] of Object.entries(mv)) info(k + ': ' + JSON.stringify({ ...r, sk: undefined }));
 const got = r => r.has || r.near < 30;
-ok(mv.flick.end.t <= 0.15 && Math.abs(mv.flick.end.face) <= 5 && mv.flick.top >= 3 && mv.flick.top <= 15 && mv.flick.end.loose && got(mv.flick),
-  'FLICK: over in ' + mv.flick.end.t + ' s, the ball popped up ' + mv.flick.top + ' px off his foot, him still facing his way (' + mv.flick.end.face + ' degrees), and on it again');
+ok(mv.knock.end.t <= 0.15 && mv.knock.top <= 3 && mv.knock.end.loose && mv.knock.sep >= 50 && mv.knock.ball[1] <= -20 && mv.knock.ball[0] >= 20 && got(mv.knock),
+  'KNOCK-ON: over in ' + mv.knock.end.t + ' s, the ball along the grass (' + mv.knock.top + ' px up at most) the way drawn, ' + mv.knock.sep + ' px off him at most, and he runs on to it');
 ok(Math.abs(mv.dragback.end.face) >= 120 && mv.dragback.ball[0] < mv.dragback.man[0] && mv.dragback.has, 'DRAG-BACK: he turns back with it (facing ' + mv.dragback.end.face + ' degrees), the ball behind where he was going');
 ok(mv.croq.man[1] >= 30 && Math.abs(mv.croq.end.face) <= 5 && mv.croq.has, 'CROQUETA: across the way the L went (' + mv.croq.man[1] + ' px), still facing on');
 ok(mv.spinCW.end.face <= -20 && mv.spinCW.end.face >= -70 && mv.spinCW.man[1] <= -30 && mv.spinACW.end.face >= 20 && mv.spinACW.end.face <= 70 && mv.spinACW.man[1] >= 30 && mv.spinCW.has && mv.spinACW.has,
   'ROULETTE: out of the spin seven-eighths of the way round, going diagonally away past the man -- clockwise to his left (facing ' + mv.spinCW.end.face + ', ' + mv.spinCW.man[1] + ' px across), anticlockwise to his right (' + mv.spinACW.end.face + ', ' + mv.spinACW.man[1] + ' px)');
+// the roulette's own frames: the ball and him, the clockwise one to his left (s -1) and the other to his right (+1)
+const rlt = (r, s) => { const q = r.sk, at = deg => q.reduce((b, x) => Math.abs(Math.abs(x.face) - deg) < Math.abs(Math.abs(b.face) - deg) ? x : b, q[0]);
+  const wrong = Math.max(...q.map(x => -s * x.ball[1])), qu = at(90), ha = at(180), first = q.find(x => s * x.ball[1] >= 6);
+  return { wrong, quarter: { face: qu.face, manOff: s * (qu.man[1] - qu.ball[1]) }, half: { face: ha.face, ahead: ha.man[0] - ha.ball[0] }, firstWay: first ? first.ball[0] : null }; };
+const rCW = rlt(mv.spinCW, -1), rACW = rlt(mv.spinACW, 1);
+info('the roulette, clockwise: ' + JSON.stringify(rCW) + ' | anticlockwise: ' + JSON.stringify(rACW));
+ok([rCW, rACW].every(r => r.wrong <= 3 && r.firstWay != null && r.firstWay <= 25),
+  'ROULETTE: the ball goes a little to the side he\'s going first, then diagonally on -- never out on the other side, where the man is (' + rCW.wrong + ' / ' + rACW.wrong + ' px at most that way)');
+ok([rCW, rACW].every(r => r.quarter.manOff >= 12 && Math.abs(r.quarter.face) >= 70 && Math.abs(r.quarter.face) <= 110 && r.half.ahead >= 12 && Math.abs(r.half.face) >= 160),
+  'ROULETTE: he goes round it facing it -- a quarter of the way round he\'s to that side of the ball (' + rCW.quarter.manOff + ' px), facing it -- then in front of it with his back to the man (' + rCW.half.ahead + ' px ahead of it, facing ' + rCW.half.face + ')');
 ok(Math.abs(mv.cruyff.end.face) >= 100 && mv.cruyff.end.face > 0 && mv.cruyff.has, 'CRUYFF TURN: back the way the hook ended (facing ' + mv.cruyff.end.face + ' degrees, to his right)');
 ok(mv.rainbow.top >= 60 && mv.rainbow.ball[0] >= 150 && got(mv.rainbow), 'RAINBOW: over both their heads (' + mv.rainbow.top + ' px up) to drop well past the man (' + mv.rainbow.ball[0] + ' px on), and he\'s on to it');
-ok(mv.sombrero.top >= 40 && mv.sombrero.ballBy && mv.sombrero.ballBy.z >= 30 && mv.sombrero.ball[0] >= 90 && got(mv.sombrero),
-  'SOMBRERO: flicked over the man (' + (mv.sombrero.ballBy && mv.sombrero.ballBy.z) + ' px up as it goes over him) to drop behind him (' + mv.sombrero.ball[0] + ' px on), and he goes round to it');
+ok(mv.sombrero.overHim >= 40 && mv.sombrero.overMan >= 50 && mv.sombrero.land && mv.sombrero.land[0] <= -50 && got(mv.sombrero),
+  'SOMBRERO, his back to the man: over his own head (' + mv.sombrero.overHim + ' px up) and the man\'s (' + mv.sombrero.overMan + ' px), to come down past him (' + (mv.sombrero.land && mv.sombrero.land[0]) + ' px back), and he goes round him to it');
 ok(mv.elastico.end.ball[1] > 5 && mv.elastico.top >= 8 && mv.elastico.top <= 30 && mv.elastico.ball[1] <= -20 && mv.elastico.ball[0] >= 45 && got(mv.elastico),
   'ELASTICO: out to his right (' + mv.elastico.end.ball[1] + ' px), snapped back and popped up (' + mv.elastico.top + ' px) on past the man on his left (' + mv.elastico.ball[1] + ' px across), and he has it');
 ok(mv.heel.ballBy && mv.heel.ballBy.across >= 15 && mv.heel.passed != null && mv.heel.passed <= -5 && got(mv.heel),
   'HEEL FLICK: the ball past the man on his right (' + (mv.heel.ballBy && mv.heel.ballBy.across) + ' px), him round the other side (' + mv.heel.passed + ' px), and on it again');
+// --- HOLDING SKILL: strafing with the stick, shielding without it --------------------------------------------------
+const hold = await page.evaluate(() => new Promise(res => { const T = window.__T, p = T.controlled(), b = T.ball(), atk = T.atkOf(p.team), d = T.players().filter(q => q.team !== p.team)[0], out = {};
+  const st0 = Object.assign({}, p.stats), dst0 = Object.assign({}, d.stats);
+  const reset = (st, dst) => { T.freeze(); T.release(); window.__stick = null;
+    for(const q of T.players()) if(q !== p){ q.x = T.FW / 2 - atk * 400; q.y = 60; q.vx = q.vy = 0; q.noTouchT = 99; q.tackleCd = 99; }
+    for(const k of T.keepers()) k.y = 30;
+    p.x = T.FW / 2; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal'; p.skill = null; p.stamina = 1; p.sprint = false; p.noTouchT = 0;
+    p.stats = Object.assign({}, st0, st || {}); d.stats = Object.assign({}, dst0, dst || {}); d.state = 'normal';
+    b.ownedBy = p; b.x = p.x + atk * 20; b.y = p.y; b.z = 0; b.vx = b.vy = 0; b.vz = 0; b.dribbler = null; b.dribbleGrace = 0; };
+  const run = (secs, each) => new Promise(r => { const t0 = T.simNow(); (function tick(){ const t = T.simNow() - t0; if(each) each(t); if(t < secs) return requestAnimationFrame(tick); r(); })(); });
+  const faceOff = () => Math.round(Math.atan2(p.facing.y * atk, p.facing.x * atk) * 57.3), sp = () => Math.round(Math.hypot(p.vx, p.vy));
+  (async () => {
+    // (1) the stick across him: off it, he turns and runs that way with it; SKILL held, he strafes it, still facing on
+    reset(); window.__stick = { x: 0, y: 1 }; await run(0.8); out.free = { sp: sp(), face: faceOff() };
+    reset(); T.press(); window.__stick = { x: 0, y: 1 }; await run(0.8); out.strafe = { kind: T.hold() && T.hold().kind, sp: sp(), face: faceOff(), ball: Math.round(Math.hypot(b.x - p.x, b.y - p.y)) };
+    reset(); T.press(); window.__stick = { x: -atk, y: 0 }; await run(0.8); out.backUp = { sp: sp(), face: faceOff() };
+    // (2) shielding: a man walks round behind him -- how far off his back the man is, at Off IQ 10 and 1
+    for(const iq of [10, 1]){ reset({ offIQ: iq }); T.press(); await run(0.2); let err = 0, n = 0;
+      await run(1.4, t => { const a = Math.atan2(0, -atk) + 1.6 * t; d.x = p.x + 40 * Math.cos(a); d.y = p.y + 40 * Math.sin(a); d.vx = d.vy = 0; d.noTouchT = 99;
+        if(t > 0.4){ let e = Math.atan2(p.facing.y, p.facing.x) - (a + Math.PI); while(e > Math.PI) e -= 2 * Math.PI; while(e < -Math.PI) e += 2 * Math.PI; err += Math.abs(e); n++; } });
+      out['err' + iq] = Math.round(err / Math.max(1, n) * 57.3); out['kind' + iq] = T.hold() && T.hold().kind; }
+    // (3) a man at the ball's side (45 degrees off it, in reach), a good tackler: can he nick it?
+    const nick = async (st, held) => { reset(st, { tackle: 10, defIQ: 10 }); if(held) T.press(); await run(0.2);
+      const put = () => { d.x = p.x + atk * 25.5; d.y = p.y + 25.5; d.vx = d.vy = 0; d.noTouchT = 0; d.tackleCd = 99; d.state = 'normal'; };
+      put(); await run(0.25, put); return b.ownedBy === p; };
+    out.keptGood = await nick({ dribbling: 10, ballControl: 10 }, true); out.keptPoor = await nick({ dribbling: 1, ballControl: 1 }, true); out.keptGoodOff = await nick({ dribbling: 10, ballControl: 10 }, false);
+    out.win = [Math.round(T.nickWindowOf({ stats: { dribbling: 10, ballControl: 10 } }) * 57.3), Math.round(T.nickWindowOf({ stats: { dribbling: 1, ballControl: 1 } }) * 57.3)];
+    // (4) a man leaning on his back for a second: how far he's moved -- level men held and not, 9 against 3 and 3 against 9 held
+    const lean = async (s1, s2, held) => { reset({ strength: s1 }, { strength: s2 }); if(held) T.press(); await run(0.2); const x0 = p.x, y0 = p.y;
+      await run(1, () => { const gap = p.r + d.r + 2 - 3; d.x = p.x - atk * gap; d.y = p.y; d.vx = d.vy = 0; d.noTouchT = 99; });
+      return Math.round(Math.hypot(p.x - x0, p.y - y0)); };
+    out.lean = { levelHeld: await lean(5.5, 5.5, true), levelFree: await lean(5.5, 5.5, false), strongHeld: await lean(9, 3, true), weakHeld: await lean(3, 9, true) };
+    reset(); p.stats = st0; d.stats = dst0; T.release(); res(out); })(); }));
+info('holding SKILL: ' + JSON.stringify(hold));
+ok(hold.strafe.kind === 'strafe' && Math.abs(hold.strafe.face) <= 5 && Math.abs(hold.free.face) >= 80 && hold.strafe.sp < 0.8 * hold.free.sp && hold.strafe.sp >= 0.3 * hold.free.sp && hold.strafe.ball <= 30 && hold.backUp.sp < hold.strafe.sp && Math.abs(hold.backUp.face) <= 5,
+  'SKILL held and the stick across him, he strafes: still facing on (' + hold.strafe.face + ' degrees; off it he turns that way, ' + hold.free.face + '), ' + hold.strafe.sp + ' px/s against ' + hold.free.sp + ' running across with it, the ball at his feet (' + hold.strafe.ball + ' px), slower again backing up (' + hold.backUp.sp + ')');
+ok(hold.kind10 === 'shield' && hold.kind1 === 'shield' && hold.err10 <= 25 && hold.err10 < hold.err1,
+  'SKILL held and the stick left alone, he shields it: his back to a man walking round him, ' + hold.err10 + ' degrees off it on average at Off IQ 10 and ' + hold.err1 + ' at 1');
+ok(hold.keptGood && !hold.keptPoor && !hold.keptGoodOff && hold.win[0] === 30 && hold.win[1] === 80,
+  'shielding, a man 45 degrees off the ball\'s side can\'t nick it off a good dribbler (Dribbling and Ball control 10: only within ' + hold.win[0] + ' degrees of it) -- he can off a poor one (' + hold.win[1] + ' degrees), and off the good one not shielding');
+ok(hold.lean.levelHeld < 0.8 * hold.lean.levelFree && hold.lean.strongHeld <= 12 && hold.lean.weakHeld >= 4 * hold.lean.strongHeld,
+  'shielding he\'s planted: a level man leaning on his back for a second moves him ' + hold.lean.levelHeld + ' px (' + hold.lean.levelFree + ' off the stick); Strength 9 against 3 hardly at all (' + hold.lean.strongHeld + '), 3 against 9 a long way (' + hold.lean.weakHeld + ')');
+
 // --- THE SKILL MOVES PAGE: its drawings are the moves, its clips are this game's -----------------------------------
 const pg = await page.evaluate(() => { const T = window.__T, p = T.controlled(), out = { read: {}, clips: {} };
   out.sig = [T.SKILL_CLIPS.sig, T.clipSig()];
@@ -170,19 +238,19 @@ const pg = await page.evaluate(() => { const T = window.__T, p = T.controlled(),
     const g = T.readSkill(pts), m = g && T.skillFor(p, g);
     out.read[k] = m ? { kind: m.kind, side: m.side, sense: m.sense, d: m.d && [+m.d.x.toFixed(2), +m.d.y.toFixed(2)] } : null;
     const c = T.SKILL_CLIPS[k]; if(!c) continue; const f = c.f, n = f.length / 13, o = (n - 1) * 13, col = j => Array.from({ length: n }, (_, i) => f[i * 13 + j]);
-    out.clips[k] = { n, end: Math.round(Math.hypot(f[o + 10] - f[o], f[o + 11] - f[o + 1])), endZ: f[o + 12], top: Math.max(...col(12)), minY: Math.min(...col(1)), maxY: Math.max(...col(1)), runs: col(2).some(a => a === 1) }; }
+    out.clips[k] = { n, end: Math.round(Math.hypot(f[o + 10] - f[o], f[o + 11] - f[o + 1])), endZ: f[o + 12], top: Math.max(...col(12)), minY: Math.min(...col(1)), maxY: Math.max(...col(1)), minBallX: Math.min(...col(10)), runs: col(2).some(a => a === 1) }; }
   p.vx = p.vy = 0; return out; });
 info('the drawings read as: ' + Object.entries(pg.read).map(([k, m]) => k + '->' + (m ? m.kind + (m.side ? ' side ' + m.side : '') + (m.sense ? ' sense ' + m.sense : '') + (m.d ? ' (' + m.d + ')' : '') : '-')).join(' | '));
 info('the clips: ' + JSON.stringify(pg.clips));
 const R = pg.read;
 ok(Object.entries(R).every(([k, m]) => m && m.kind === k) && R.croq.d[1] > 0.8 && R.spin.sense === 1 && R.cruyff.d[0] < 0 && R.cruyff.d[1] > 0 && R.elastico.side === -1 && R.heel.d[1] > 0
-   && R.flick.d[0] > 0 && R.flick.d[1] < 0 && R.dragback.d[0] < 0,
+   && R.knock.d[0] > 0 && R.knock.d[1] < 0 && R.dragback.d[0] < 0,
   'every drawing on the page, drawn as a finger would, is read as its own move -- the way its clip does it (the croqueta to his right, the roulette clockwise, the elastico back to his left, the heel flick\'s ball to his right)');
 ok(pg.sig[0] === pg.sig[1], 'the clips were recorded from these moves (' + pg.sig[0] + ' / ' + pg.sig[1] + ')' + (pg.sig[0] === pg.sig[1] ? '' : ' -- a move has changed: node tools/clips/record_skill_clips.cjs'));
 const C = pg.clips;
 ok(Object.keys(C).length === 9 && Object.values(C).every(c => c.n >= 20 && c.runs && c.end <= 32 && c.endZ <= 14), 'a clip of every move, each with him running at the man first and ending with him on the ball');
-ok(C.rainbow.top >= 60 && C.sombrero.top >= 50 && C.elastico.top >= 8 && C.elastico.top <= 30 && C.flick.top >= 3 && C.spin.minY <= -30 && C.croq.maxY >= 30,
-  'the clips show the moves: the rainbow and the sombrero high over the man (' + C.rainbow.top + ', ' + C.sombrero.top + ' px), the elastico popped up a little (' + C.elastico.top + '), the flick off the grass, the roulette out to his left, the croqueta to his right');
+ok(C.rainbow.top >= 60 && C.sombrero.top >= 50 && C.sombrero.minBallX <= -50 && C.elastico.top >= 8 && C.elastico.top <= 30 && C.knock.top <= 3 && C.spin.minY <= -30 && C.croq.maxY >= 30,
+  'the clips show the moves: the rainbow high over the man and the sombrero back over his own head (' + C.rainbow.top + ', ' + C.sombrero.top + ' px), the elastico popped up a little (' + C.elastico.top + '), the knock-on along the grass, the roulette out to his left, the croqueta to his right');
 await page.close();
 
 // --- SKILL STARS: the odds of each ceiling ------------------------------------------------------------------------

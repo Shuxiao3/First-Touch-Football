@@ -1,6 +1,8 @@
 // FOOTBALL CLASSIC, THE COMPUTER'S SKILL MOVES: taking a man on, one of the computer's men who has the moves (his stars)
-// does one -- only those his stars allow: a one-star man the flick, a three-star man up to the croqueta, roulette and
-// Cruyff turn, a five-star man the rainbow, sombrero, elastico and heel flick too -- rather than just swerving by. Who: wingers and wide
+// does one -- only those his stars allow: a one-star man the knock-on, a three-star man up to the croqueta, roulette and
+// Cruyff turn, a five-star man the rainbow, elastico and heel flick too -- rather than just swerving by. (The sombrero isn't
+// for a man in front of him: a five-star man shielding it in their half, his back to a man close behind him and nobody
+// else back there, now and then flicks it over them both; a four-star man never, nor with the man in front.) Who: wingers and wide
 // midfielders most, central midfielders and strikers less, a full-back only on the attack and only when he's clearly the
 // better man, a centre-back never; how keen: how much better he is on the ball than the man in front of him is at
 // stopping him (not how good he is overall); where: on the touchline keenest, never in his own half. And every move's pace
@@ -15,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={P, players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, FW, FH, YC, MK, atkOf, applySlot, own, '
-  + 'aiSkillKeen, aiSkillMove, mkSkill, skillPaceOf, skillReachOf, ROULETTE_TURN, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
+  + 'aiSkillKeen, aiSkillMove, aiSombrero, mkSkill, skillPaceOf, skillReachOf, ROULETTE_TURN, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // (your man on the computer too)
 patch("    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    return kind;",
   "    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    if(window.__SK) window.__SK.push({team:p.team, num:p.num, kind});\n    return kind;");   // (every move the computer makes)
@@ -76,9 +78,30 @@ const picks = await page.evaluate(() => { const T = window.__T, R = T.players().
   p.stats = keep.s; p.stars = keep.st; T.freeze(); return out; });
 info('the moves picked, by stars: ' + JSON.stringify(picks));
 const kinds = st => Object.keys(picks[st]);
-ok(kinds(1).join() === 'flick', 'a one-star man only flicks it on');
-ok(kinds(3).every(k => ['flick', 'dragback', 'croq', 'spin', 'cruyff'].includes(k)) && kinds(3).includes('croq') && kinds(3).includes('cruyff'), 'a three-star man up to the croqueta, roulette and Cruyff turn (' + kinds(3).join(', ') + ')');
-ok(['rainbow', 'sombrero', 'elastico', 'heel'].every(k => picks[5][k] > 0), 'a five-star man has them all, the rainbow, sombrero, elastico and heel flick too (' + kinds(5).join(', ') + ')');
+ok(kinds(1).join() === 'knock', 'a one-star man only knocks it on');
+ok(kinds(3).every(k => ['knock', 'dragback', 'croq', 'spin', 'cruyff'].includes(k)) && kinds(3).includes('croq') && kinds(3).includes('cruyff'), 'a three-star man up to the croqueta, roulette and Cruyff turn (' + kinds(3).join(', ') + ')');
+ok(['rainbow', 'elastico', 'heel'].every(k => picks[5][k] > 0) && !picks[5].sombrero, 'a five-star man has them all, the rainbow, elastico and heel flick too -- and no sombrero at a man in front of him (' + kinds(5).join(', ') + ')');
+
+// THE SOMBRERO, his back to a man: a winger with the ball in their half, facing away from one of ours 1.5 m behind him
+// (shielding it), looked at 400 times: five stars, four; the man in front of him instead; in his own half; another of
+// ours back there
+const somb = await page.evaluate(() => { const T = window.__T, R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
+  const p = R[2], d = G[2], e = G[3], atk = T.atkOf('R'), b = T.ball(), keep = { s: p.stats, st: p.stars }, out = {};
+  T.freeze(); p.stats = Object.assign({}, keep.s, { dribbling: 9, ballControl: 9, agility: 9 });
+  const go = (st, o) => { let n = 0, kinds = new Set();
+    for(let i = 0; i < 400; i++){ const u = o.own ? T.FW * 0.3 : T.FW * 0.7; p.x = atk > 0 ? u : T.FW - u; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal';
+      p.stars = st; p.skill = null; p.skillCd = 0; p.sombNext = 0; b.z = 0; b.vz = 0; T.own(p, p.r + b.r + 5);
+      d.x = p.x + atk * (o.front ? 34 : -34); d.y = p.y; d.state = 'normal';
+      e.x = o.cover ? d.x - atk * 60 : p.x - atk * 900; e.y = p.y + 20; e.state = 'normal';
+      const C = { atk, prD: Math.hypot(d.x - p.x, d.y - p.y), opps: [d, e] };
+      if(T.aiSombrero(p, d, C)){ n++; kinds.add(p.skill && p.skill.kind); }
+      p.skill = null; }
+    return { n, kinds: [...kinds] }; };
+  out.five = go(5, {}); out.four = go(4, {}); out.front = go(5, { front: true }); out.own = go(5, { own: true }); out.cover = go(5, { cover: true });
+  p.stats = keep.s; p.stars = keep.st; T.freeze(); return out; });
+info('the computer\'s sombrero, his back to a man: ' + JSON.stringify(somb));
+ok(somb.five.n >= 20 && somb.five.kinds.join() === 'sombrero' && !somb.four.n && !somb.front.n && !somb.own.n && !somb.cover.n,
+  'a five-star man shielding it in their half, his back to a man 1.5 m behind him, flicks it over them both now and then (' + somb.five.n + ' times in 400 looks) -- with four stars never, nor with the man in front of him, in his own half, or another of ours back there');
 
 // IN THE MATCH: a winger with the moves (3 stars, Dribbling 9) and the ball out on the touchline in their third, one of
 // ours 4 m in front of him (Tackle 4), nobody else near -- he takes him on with a move; a centre-back there never does
