@@ -5703,21 +5703,23 @@
     const u=screenDirToPitch(drag.dx,drag.dy,mate.y);
     const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
+    // along the grass: into the gap, and the way through them, that gives them least chance -- to get there when he does
+    const sp=sprintSpeedOf(mate), A=loft?null:thruAim(p.team,mate,L.x,L.y,thruBendOf(p),(x,y)=>{ const tR=Math.hypot(mate.x-x,mate.y-y)/sp, dd=Math.hypot(x-ball.x,y-ball.y), v0=thruV0(dd,tR); return {v0, tR:Math.max(tR,thruT(dd,v0))}; });
+    if(A){ L.x=A.x; L.y=A.y; }
     let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const aerr=passSpray(d,p)+turnSpray(p,dx,dy);
     const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
+    const tRun=dist(mate,L)/sp;                            // when they can be there
     let tA;
-    const cu=passCurl(p,mate,L.x,L.y,!!loft);                  // (bent, if it helps)
     if(loft){
       tA=clamp(tRun,0.7,1.5)*P.loftHang.val;
-      const vh=loftVh(d,tA);
+      const vh=loftVh(d,tA), cu=passCurl(p,mate,L.x,L.y,true);   // (bent into his path, if it helps)
       ball.vz=260*tA; if(cu) ball.lob=curlFlight(ax,ay,d/tA,tA,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }
     } else {
-      const sol=passSolve(d);                                  // CLASSIC: hit like any pass, just into the space ahead of him
-      if(cu) curlGround(ax,ay,d,sol.vh,sol.vz,cu.bend,cu.side,1800); else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; }
-      ball.vz=sol.vz;
-      tA=d/sol.vh;
+      const v0=A.v0, vz=thruVz(d), R=A.route;                  // (knee high at most)
+      if(R.bend>0) curlGround(ax,ay,d,v0,vz,R.bend,R.side,1800); else { ball.vx=ax*v0; ball.vy=ay*v0; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; }
+      ball.vz=vz;
+      tA=Math.min(3,thruT(d,v0));
     }
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=mate; ball.rcvRunner=false; ball.passerRef=p;
@@ -6341,10 +6343,10 @@
   // defender's chance in a duel; a weaker, wilder clearance) and to claim (CURL_CLAIM off the keeper's reach)
   const CURL_HEAD=0.10, CURL_CLAIM=0.15;
   function crossCurlQ(){ return ball.crossT>0 ? clamp((ball.crossCurl||0)/CROSS_BEND[1],0,1) : 0; }
-  // A PASS THAT BENDS (a through ball, a long pass): only when it helps. One of theirs in its way along the grass, it
-  // bends round him (bulging away from him, as far as takes it 2 m wide of him); the man it's for running across its
-  // line, it bends into his path, so it comes to him going his way. As much as that takes, up to PASS_BEND at the
-  // passer's Curve. In the air (air), nobody's in its way.
+  // A PASS THAT BENDS (a long pass, a lofted through ball; one along the grass goes by thruRoute): only when it helps.
+  // One of theirs in its way along the grass, it bends round him (bulging away from him, as far as takes it 2 m wide of
+  // him); the man it's for running across its line, it bends into his path, so it comes to him going his way. As much
+  // as that takes, up to PASS_BEND at the passer's Curve. In the air (air), nobody's in its way.
   function passCurl(p,q,tx,ty,air){
     const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy); if(d<200) return null;
     const cx=dx/d, cy=dy/d, max=passBendOf(p);
@@ -6354,10 +6356,73 @@
         if(s<70||s>d-50||Math.abs(off)>40) continue;
         if(!lane||s<s0){ lane=o; s0=s; off0=off; } }
       if(lane) return {bend:Math.min(max,Math.max(0.1,2*d*(50-Math.abs(off0))/(s0*(d-s0)))), side:off0>0?-1:1, why:'round'}; }
+    return pathCurl(q,cx,cy,max);
+  }
+  // bent into the path of the man it's for, running across its line (cx,cy), so it comes to him going his way
+  function pathCurl(q,cx,cy,max){
     const mv=Math.hypot(q.vx,q.vy); if(mv<90) return null;
     const ang=Math.atan2(cx*q.vy-cy*q.vx, cx*q.vx+cy*q.vy);                              // his run, against its line
     if(Math.abs(ang)<0.12||Math.abs(ang)>2.0) return null;                              // (along it already, or coming back to it)
     return {bend:Math.min(max,2*Math.abs(ang)), side:ang>0?-1:1, why:'path'};
+  }
+  // ===== THROUGH BALLS: LOW, AND THREADED =====
+  // A through ball along the grass (yours and the computer's) skips no higher than a man's knee -- yours used to be
+  // struck like a pass, up to 2.5 m high and over everyone's heads -- so their men can get a foot to it all the way,
+  // and it goes the way through them that gives them least chance (thruRoute): straight through a gap, or bent round a
+  // man and curling back in to the runner, by as much as the passer's Curve gives him (THRU_BEND: 2 degrees at Curve 1,
+  // 23 at 10, the whole of its turn over the way). With nobody near enough to matter it's bent into the runner's path,
+  // as a pass is. Yours is struck to get there when he does, arriving at 150 to 480 px/s (THRU_ARRIVE): still rolling
+  // when he gets to it, never too hot to take; the computer's is weighted as before (obThruV0).
+  const THRU_BEND=[0.04,0.4], THRU_ARRIVE=[150,480];
+  function thruBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),THRU_BEND[0],THRU_BEND[1]); }
+  function thruK(){ return -3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); }       // (how fast the grass takes its pace: v'=-k*v)
+  function thruVz(d){ return clamp(d*0.16,40,105); }                                   // (a skip off the grass: knee high at most)
+  function thruV0(d,tA){ const k=thruK(), kd=k*d;
+    return Math.min(1800, clamp(kd/(1-Math.exp(-k*Math.max(0.2,tA))), kd+THRU_ARRIVE[0], kd+THRU_ARRIVE[1])); }
+  function thruT(d,v0){ const k=thruK(), u=1-k*d/v0; return u>0.01?-Math.log(u)/k:9; }  // when it gets there (9: it never does)
+  // its way along the grass off a straight line, per unit of bend (+: to its left), s along the line of length d: it
+  // turns the harder the slower it goes (the curl's push is steady), set off so it comes in turned half its bend (as
+  // curlGround strikes it). (Going at one pace it'd be a plain arc: d*f*(1-f)/2.)
+  function thruShape(d,v0){
+    const k=thruK(), U=s=>(1/(v0-k*s)-1/v0)/k, W=s=>(Math.log(v0/(v0-k*s))/k-s/v0)/k, Wd=W(d), den=U(d)-Wd/d;
+    return s=>den>1e-9?(s/d*Wd-W(s))/den/2:0;
+  }
+  // THE WAY THROUGH for a ball along the grass from where it is to (tx,ty) for q, struck at v0: of straight, and bent
+  // by a third, two thirds or all of `max` either way, the one that keeps it furthest, in time, from every one of theirs
+  // until q has it (at tR) -- as cutOut judges a man's chance: his reach, how soon he reads it (Def IQ), his pace; in
+  // his reach, the nearer him the surer -- the straightest of those near enough as good (a full bend has to buy 0.02 s),
+  // none of it mattering once it's a third of a second clear of them all; bent into q's path costs nothing.
+  // Returns {bend, side, sb (bend, signed), slack, sc (how good), shape}.
+  function thruRoute(team,q,tx,ty,v0,max,tR){
+    const sx=ball.x, sy=ball.y, dx=tx-sx, dy=ty-sy, d=Math.hypot(dx,dy)||1, cx=dx/d, cy=dy/d, tB=thruT(d,v0);
+    const straight={bend:0, side:0, sb:0, slack:9, sc:0, shape:()=>0};
+    if(tB>=9||d<120) return straight;                                                    // (it won't get there, or it's a tap)
+    const k=thruK(), sh=thruShape(d,v0), S=[];
+    for(let i=1;i<=12;i++){ const s=d*i/12; S.push({s, t:-Math.log(1-k*s/v0)/k, o:sh(s)}); }
+    if(tR>tB) S.push({s:d, t:tR, o:0});                                                  // (waiting on him there)
+    const opp=[]; for(const o of players) if(o.team!==team&&o.state==='normal')
+      opp.push({o, reach:winReachR(o)*(0.45+0.55*interceptReachOf(o))+ball.r, react:statLerp(defIQof(o),0.4,0.12), spd:sprintSpeedOf(o)});
+    const pc=pathCurl(q,cx,cy,max), cand=[0,1/3,-1/3,2/3,-2/3,1,-1].map(f=>f*max);
+    if(pc) cand.push(pc.side*pc.bend);                                                   // (side +1: it bulges to the left)
+    let best=null;
+    for(const b of cand){ let slack=9;
+      for(const m of opp) for(const w of S){ const px=sx+cx*w.s-cy*w.o*b, py=sy+cy*w.s+cx*w.o*b, dd=Math.hypot(px-m.o.x,py-m.o.y);
+        const tq=(dd<=m.reach?0:m.react)+(dd-m.reach)/m.spd; if(tq-w.t<slack) slack=tq-w.t; }   // (in his reach: the nearer him, the surer)
+      const sc=Math.min(slack,0.33)-(pc&&b===cand[cand.length-1]?-0.01:0.05*Math.abs(b));
+      if(!best||sc>best.sc+1e-9) best={sc, bend:Math.abs(b), side:b>0?1:b<0?-1:0, sb:b, slack, shape:sh}; }
+    return best;
+  }
+  // WHERE THROUGH: the spot it's played to may move up to THRU_SHIFT either side of the one meant (across its line), into
+  // the gap that gives them least chance -- the man it's for runs onto it there -- and goes the way through to it that
+  // gives them least (thruRoute); a full shift has to buy a tenth of a second. weigh(x,y) -> {v0, tR}: how hard it's
+  // struck to there and when he has it. Returns {x, y, v0, route}.
+  const THRU_SHIFT=34;
+  function thruAim(team,q,tx,ty,max,weigh){
+    const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy)||1, nx=-dy/d, ny=dx/d; let best=null;
+    for(const f of [0,0.5,-0.5,1,-1]){ const x=clamp(tx+nx*f*THRU_SHIFT,30,FW-30), y=clamp(ty+ny*f*THRU_SHIFT,30,FH-30), w=weigh(x,y), R=thruRoute(team,q,x,y,w.v0,max,w.tR);
+      const sc=R.sc-0.1*Math.abs(f);
+      if(!best||sc>best.sc+1e-9) best={sc, x, y, v0:w.v0, route:R}; }
+    return best;
   }
   // Cosmetic: a short timer the sprites read to play the side-foot strike in the pass's direction.
   const PASS_POSE_T=0.36;
@@ -6820,18 +6885,21 @@
     const G=520, lam=Math.max(1e-3,-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)));
     const tAir=(ball.z>12||ball.vz>0) ? (ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G : 0;
     const z=t<=tAir ? Math.max(0,ball.z+ball.vz*t-G*t*t/2) : 0;
-    const tUp=(ball.vz>0&&ball.z<12) ? Math.min(tAir,(12-ball.z)/ball.vz) : 0;   // (just struck, rising: the grass drags at it till it's 12 px up -- see takeoffKeep)
+    // the grass drags at it while it's under 12 px (as the physics step does): till it rises past that (tUp), and again
+    // from when it drops back under (tDn) -- all the way, for one that skips along never getting that high
+    const h12=ball.vz*ball.vz+2*G*(ball.z-12), r12=h12>0?Math.sqrt(h12):-1;
+    const tUp=ball.z>=12?0:(r12>=0&&ball.vz>0?(ball.vz-r12)/G:0), tDn=r12>=0&&(ball.z>=12||ball.vz>0)?(ball.vz+r12)/G:0;
     if(ball.curveSpinT>0 && ball.curveSpin && !ball.ownedBy){
       const F=CURL_F*(ball.curveK||curveOf()), st=1/60; let x=ball.x, y=ball.y, vx=ball.vx, vy=ball.vy, u=0;
       while(u<t-1e-9){ const h=Math.min(st,t-u);
         if(u<ball.curveSpinT){ const sp=Math.hypot(vx,vy)||1, a=-ball.curveSpin*F/sp*h, c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; }
-        x+=vx*h; y+=vy*h; if(u<tUp||u>=tAir){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
+        x+=vx*h; y+=vy*h; if(u<tUp||u>=tDn){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
       return {x, y, z};
     }
     const kU=Math.exp(-lam*tUp), up=tUp>0?(1-kU)/lam:0;                // (how far it goes while it's dragged up off the grass, and what's left of its pace)
-    if(t<=tAir){ const k=t<=tUp ? (1-Math.exp(-lam*t))/lam : up+kU*(t-tUp); return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z}; }
-    const k=up+kU*(tAir-tUp)+kU*(1-Math.exp(-lam*(t-tAir)))/lam;
-    return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z:0};
+    if(t<=tDn){ const k=t<=tUp ? (1-Math.exp(-lam*t))/lam : up+kU*(t-tUp); return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z}; }
+    const k=up+kU*(tDn-tUp)+kU*(1-Math.exp(-lam*(t-tDn)))/lam;
+    return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z};
   }
   // CUTTING OUT A PASS: of the side without the ball, the computer player who can get onto the pass's path soonest -- low
   // enough to reach, and a beat before the man it's meant for gets there -- and where; null if nobody can. A man who
@@ -7538,7 +7606,7 @@
   // (obThruV0). It's a forward ball through traffic, as hard to get right as any (passTo), with the weight to judge on
   // top: how far ahead of him it goes errs with the passer's Off IQ (by up to 60% at 1, 10% at 10), and how hard it's
   // hit with his Passing. (It used to go at up to 1500 px/s, dead on target, and nobody could get to it.)
-  function obThruBall(p,q,tx,ty,tA){
+  function obThruBall(p,q,tx,ty,tA,route){
     const atk=atkOf(p.team), le=(Math.random()*2-1)*statLerp(statOf(p,'offIQ',P.offIQ.val),0.6,0.1);
     tx=q.x+(tx-q.x)*(1+le); ty=q.y+(ty-q.y)*(1+le);
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
@@ -7546,8 +7614,8 @@
     let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
     const v0=obThruV0(d,tA).v0*(1+obGauss()*statLerp(statOf(p,'passAcc',P.passAcc.val),0.14,0.05));   // (over- or under-hit: 14% at Passing 1, 5% at 10)
-    const cu=passCurl(p,q,tx,ty,false), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;   // (bent, if it helps)
-    if(cu) curlGround(ax,ay,d,v0,0,cu.bend,cu.side,Math.max(v0,P.thruPace.val)); else { ball.vx=ax*v0; ball.vy=ay*v0; }
+    const R=route||thruRoute(p.team,q,tx,ty,v0,thruBendOf(p),tA), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;   // (the way through them, as he saw it)
+    if(R.bend>0) curlGround(ax,ay,d,v0,0,R.bend,R.side,Math.max(v0,P.thruPace.val)); else { ball.vx=ax*v0; ball.vy=ay*v0; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; }
     ball.vz=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
@@ -7640,7 +7708,10 @@
   function obGain(C,x){ return 0.025*C.urge*C.M.gain*((C.atk>0?x:FW-x)-C.u)/FW; }
   // a pass to q (a team-mate, or our keeper)
   function obPassOpt(p,q,C){
-    const L=passLead(p,q), tx=L.x, ty=L.y, dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
+    const L=passLead(p,q); let tx=L.x, ty=L.y, aim=null;
+    // a ball in behind: into the gap, and the way through them, that gives them least chance (thruAim) -- judged along that way
+    if(L.running){ const sp=sprintSpeedOf(q); aim=thruAim(p.team,q,tx,ty,thruBendOf(p),(x,y)=>{ const tA=Math.max(0.45,Math.max(0,Math.hypot(q.x-x,q.y-y)-20)/sp), dd=Math.hypot(x-ball.x,y-ball.y), v0=obThruV0(dd,tA).v0; return {v0, tR:Math.max(tA,thruT(dd,v0))}; }); tx=aim.x; ty=aim.y; }
+    const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
     if(d<90) return null;                                                // (a tap to a man beside him)
     let lob=false;
     if(d>C.range*1.3){                                                   // out of his range along the ground: only the
@@ -7653,6 +7724,7 @@
     const chip=(L.running||lob)?null:chipOverWindow(p,tx,ty);
     const F=lob?obLobFlight(d):L.running?obThruFlight(d,tA):obFlight(d,chip?((chip.x-ball.x)*dx+(chip.y-ball.y)*dy)/d:0), tEnd=F[7].t;
     if(tEnd>4) return null;
+    const route=aim?aim.route:null, nx=-dy/(d||1), ny=dx/(d||1);
     // the race for it along the way: each opponent's best chance, where he'd cut it out
     let safe=1, worst=0, cx=tx, cy=ty;
     const vis=L.running?statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.1):0;   // (a ball into space: he misreads how soon they get across, by 0.3 s at Off IQ 1, 0.1 at 10)
@@ -7661,7 +7733,7 @@
       let m=9, mx=tx, my=ty;
       for(const s of F){
         if(s.z>34) continue;                                             // over his head
-        const px=ball.x+dx*s.f, py=ball.y+dy*s.f;
+        const off=route&&route.sb?route.sb*route.shape(s.f*d):0, px=ball.x+dx*s.f+nx*off, py=ball.y+dy*s.f+ny*off;
         if(inArea&&!inArea(px,py)) continue;
         const tb=s.f===1?Math.max(s.t,tQ):s.t, mm=obOppT(o,px,py,r)+err-tb;
         if(mm<m){ m=mm; mx=px; my=py; }
@@ -7709,7 +7781,7 @@
     if(q.num==null) v*=0.6;                                             // our keeper: he'll often have to kick it long
     v+=obGain(C,tx);
     const loss=obVal(C.opp,cx,cy)*C.M.risk;
-    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob};
+    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob, route};
   }
   // carrying it: a dozen headings round the way we're going (behind him only matters with a man on him)
   const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI], OB_RUN=600;
@@ -7917,7 +7989,7 @@
     const ob=p.ob; p.dbgTag='OB-'+o.kind.toUpperCase();
     if(o.kind==='pass'){
       const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
-      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru); else if(o.lob) obLobBall(p,o.q,o.tx,o.ty); else passTo(p,o.q);
+      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru,o.route); else if(o.lob) obLobBall(p,o.q,o.tx,o.ty); else passTo(p,o.q);
       ob.done=true;
       if(deepWide&&Math.abs(C.gx-o.tx)<BX+80&&Math.abs(o.ty-YC)<BY+10&&C.atk*(o.tx-p.x)<=40){ lastGrade='CUTBACK'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0; }
       return steer(p,C.gx,YC);

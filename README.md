@@ -233,8 +233,28 @@ The same game played like any other football game. It's a copy of `index.html` w
   switch from there.
 - **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
-- **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
-  the space ahead of the man. The lofted through ball is unchanged.
+- **Through balls go along the grass, through the gaps.** Your through ball (PASS and drag) skips along no higher
+  than a man's knee: 3 px off the grass at 17 m, 10 px at 33 m. It used to be struck like an ordinary pass, up 2.5 m
+  at 25 m and 5 m at 35 m, over everyone's heads. Now their men can get a foot to it the whole way, so it's threaded:
+  - **Into the gap.** The spot it's played to can move up to 1.5 m either side of where you aimed, into the gap that
+    gives their men least chance (how soon each could get to it: his reach, how quickly he reads it, his pace). The
+    runner runs onto it there.
+  - **Round a man and back in.** It can bend out round one of theirs and curl back in to the runner, by as much as the
+    passer's Curve gives him: 23° over its way at Curve 10, 2° at 1. With nobody near enough to matter, it bends into
+    the runner's path, as a pass does: to a man running across its line it gets there turned 10° his way at Curve 10.
+  - **Weighted for him.** It's struck to get to the spot when he does, arriving at 150 to 480 px/s: still rolling when
+    he gets there, not too hot to take.
+  - **The computer's through ball** goes through the gaps the same way, and weighs one up along the way it would go.
+  - **Not a sure thing.** A man standing in its way still cuts it out. Scripted, with a back line of three 7 to 11 m
+    apart, our runner level with it, the passer 13 to 25 m back and, half the time, a holding man in between (400
+    balls each): the runner got the old one 47% of the time at Curve 1 and 50% at Curve 10, with a quarter of them
+    running on out of play or dying; this one 53% and 58%, almost none going dead. In the computer's games it still
+    plays one now and then (12 to 16 in 20 minutes, about 13 m long).
+  - **Reading a ball along the grass.** A ball that skips but never gets 12 px up slows on the grass all the way; the
+    game's reading of where the ball will be (the men cutting it out and going to meet it) had it flying free over the
+    middle of its way. It reads it right now.
+
+  The lofted through ball is unchanged.
 - **The computer's through ball** along the grass is struck to die where the runner will be, but never harder than
   900 px/s (the Computer through ball dial; it was 1500, quicker than anyone could get across to). A long one would
   need more, so it gets there after him or not at all, and he doesn't play it. It's harder to judge than a pass
@@ -548,10 +568,11 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Everyone reads the swing:** the keeper coming for it, and the men attacking it and defending it. It's still
     harder to deal with. A defender's chance in a heading duel drops by up to 10 points at Curve 10, his headed
     clearance goes a fifth less far and twice as wild, and the keeper's reach for it is 15% shorter.
-  - **Passes bend only when it helps, and not much.** A through ball, or a long pass (along the grass over 24 m, your
-    lofted ball over 20 m), to a man running across its line bends a little into his path. At Curve 10 a pass turns
-    16° at most over its flight, and a through ball gets to him turned 7° his way; at Curve 1, 1°. It used to turn up
-    to 40°, a banana that took a long ball round almost anyone in its way. One with a man of theirs on its line bends
+  - **Passes bend only when it helps, and not much.** A long pass (along the grass over 24 m, your lofted ball over
+    20 m) or a lofted through ball, to a man running across its line, bends a little into his path. At Curve 10 a pass
+    turns 16° at most over its flight; at Curve 1, 1°. It used to turn up to 40°, a banana that took a long ball round
+    almost anyone in its way. (A through ball along the grass bends round men, by up to 23°: see **Through balls go
+    along the grass, through the gaps**.) One with a man of theirs on its line bends
     a little away from him, not round him: at Curve 10 it passes a man 0.6 m off its line 0.1 m further off than at
     Curve 1. To a man running along its line it goes straight. Yours bend the same way as the computer's. In the
     computer's games a curled long ball at Curve 10 now bends 15° on average, where it bent 36°. Whether a long ball
