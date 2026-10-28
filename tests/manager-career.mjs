@@ -4,7 +4,9 @@
 // the game that lets the test reach the season code: a strong side is promoted (and lands in League 1 with a full
 // fixture list, its ground as it was), a top-six side plays the playoffs, the goals in a played match go to the men
 // who scored them, and THE GROUND: a field with two bleachers to start, built up a level at a time, boards let by the
-// week, sponsors' bids for the shirt, the ground's name and the stands', their deals paid weekly and run out.
+// week, sponsors' bids for the shirt, the ground's name and the stands', their deals paid weekly and run out. Last, THE
+// CAMPUS (the hub): drawn as the club has it -- the ground as built, its name, the boards, your crest -- and a building
+// tapped on it opens with the camera going in on it, and comes back out the same way.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -16,7 +18,7 @@ const anchor = '  // ===== END MANAGER CAREER';
 if(src.split(anchor).length !== 2) throw new Error('instrumenting: anchor not found once: ' + anchor);
 src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
   + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
-  + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
+  + 'CAMPUS, CAMPUS_META, crestFor, get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -69,7 +71,7 @@ ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await
 
 // --- every building, every tab -----------------------------------------------------------
 for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'home']){
-  await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForTimeout(100);
+  await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
   const tabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent));
   for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
   ok(tabs.length >= 2, b + ': ' + tabs.join(', '));
@@ -204,6 +206,37 @@ ok(r.home.lvl === 2 && r.home.boards === 10 && r.home.venue === r.gname && r.hom
 ok(r.away.lvl === r.away.want && r.away.boards === r.away.wantB && r.away.venue === r.away.name, 'away: their ground (' + r.away.name + ', level ' + r.away.lvl + ')');
 ok(r.left.length === 0 && r.mid === (r.ends[0] === r.ends[1] ? '' : r.ends[0] < r.ends[1] ? 'ground' : 'kit'), 'each deal runs out when its seasons are up (the shirt\'s after season ' + r.ends[0] + ', the name\'s after ' + r.ends[1] + ')');
 ok(r.old.lvl === 3 && r.old.cap === 8500 && r.fresh === 1, 'a save from before: the level that seats as many (6,000 -> covered stands, 8,500)');
+
+// --- THE CAMPUS: the hub draws the club as it is -- its ground at its level, the name, the boards, its crest -- and draws
+// it again when the ground's built up; a building tapped on the campus lights its button, the camera goes in on it with
+// its name over it, it opens, and back out the camera comes back out ---------------------------------------------------
+await page.evaluate(() => __MG.renderHub()); await page.waitForTimeout(100);
+r = await page.evaluate(() => { const M = __MG, d = M.d, CM = M.CAMPUS_META, cv = document.getElementById('cpCanvas');
+  const hash = (c, b) => { const p = c.getContext('2d').getImageData(b[0], b[1], b[2], b[3]).data; let s = 0; for(let i = 0; i < p.length; i++) s = (s * 31 + p[i]) >>> 0; return s; };
+  const full = [0, 0, CM.w, CM.h], draw = o => { const c = document.createElement('canvas'); c.width = CM.w; c.height = CM.h; M.CAMPUS.draw(c, o); return c; };
+  const g = M.groundOfYours(d), mine = { lvl: g.lvl, name: g.name, stand: g.stand, boards: g.boards, crest: M.crestFor(d.world.clubs[d.clubId]) }, but = o => Object.assign({}, mine, o);
+  const L = CM.lv[g.lvl], nameAt = L.sign ? [L.sign[0], L.sign[1], L.sign[2], 9] : L.press ? [L.press[0], L.press[1], L.press[2], 5] : [L.south[0] - L.south[2] / 2, L.south[1], L.south[2], 9];
+  const boardsAt = [L.boards[0], L.boards[2], L.boards[1] - L.boards[0], 8], crestAt = [CM.crests[0][0], CM.crests[0][1], 9, 9], big = CM.lv[5].box;
+  const out = { lvl: g.lvl, boards: g.boards.length, name: g.name, asClub: hash(cv, full) === hash(draw(mine), full),
+    named: hash(draw(mine), nameAt) !== hash(draw(but({ name: 'Kestrel Arena' })), nameAt), boarded: hash(draw(mine), boardsAt) !== hash(draw(but({ boards: [] })), boardsAt),
+    crested: hash(draw(mine), crestAt) !== hash(draw(but({ crest: null })), crestAt), levels: new Set([1, 2, 3, 4, 5].map(l => hash(draw(but({ lvl: l })), big))).size };
+  const before = hash(cv, big), w0 = parseFloat(document.querySelector('#cpHots [data-bldg="stadium"]').style.width);
+  d.budget = 1e6; out.up = M.stadUpgrade(d); M.renderHub();
+  out.rebuilt = hash(cv, big) !== before && hash(cv, full) === hash(draw(but({ lvl: M.stadOf(d).lvl })), full);
+  out.wider = parseFloat(document.querySelector('#cpHots [data-bldg="stadium"]').style.width) > w0;
+  return out; });
+info('the campus: ' + JSON.stringify(r));
+ok(r.asClub && r.named && r.boarded && r.crested && r.levels === 5, 'the campus is the club\'s: its ground at level ' + r.lvl + ', ' + r.name + ' on it, its ' + r.boards + ' boards, its crest on the clubhouse; each level\'s ground its own');
+ok(r.up === null && r.rebuilt && r.wider, 'built up a level, the campus is drawn again with the bigger ground (and more of it to tap)');
+{ const tf = () => page.evaluate(() => { const m = new DOMMatrix(getComputedStyle(document.getElementById('cpWorld')).transform); return [m.a, m.e, m.f]; });
+  const at = await page.evaluate(() => { const b = document.querySelector('#cpHots [data-bldg="stadium"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
+  const m0 = await tf(); await page.mouse.click(at[0], at[1]); await page.waitForTimeout(90);
+  const mid = await page.evaluate(() => ({ sel: [...document.querySelectorAll('#chCampus .bldg.sel')].map(e => e.dataset.bldg).join(), tag: document.getElementById('cpTag').classList.contains('on') ? document.getElementById('cpTag').textContent : '' }));
+  const m1 = await tf(); await page.waitForSelector('#bldgPanel.show', { timeout: 2000 }); const title = await page.textContent('#bpTitle'), back = await page.textContent('#bldgPanel .bpTopBack');
+  await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(450); const m2 = await tf(), lit = await page.$$eval('#chCampus .bldg.sel', ns => ns.length);
+  ok(m1[0] > m0[0] && mid.sel === 'stadium' && /STADIUM/.test(mid.tag) && title === r.name.toUpperCase() && /CAMPUS/.test(back),
+    'the ground tapped on the campus: STADIUM lit, the camera in on it (x' + m1[0].toFixed(2) + ' from x' + m0[0].toFixed(2) + '), then ' + title + ', back to the ' + back.replace(/[^A-Z ]/g, '').trim());
+  ok(m2.join() === m0.join() && !lit, 'back out: the camera where it was, nothing lit'); }
 
 process.exitCode = rep.finish();
 await browser.close();

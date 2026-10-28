@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -93,7 +93,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,COLOURS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
     const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
@@ -119,9 +119,23 @@ for(const [w, h] of SIZES){
   await check('new career', ['#mgGo', '#mgrMaker [data-mm="cancel"]', '#mgName', '#mgClubIn']);
   await page.tap('#mgrMaker [data-mm="cancel"]'); await page.waitForTimeout(200);
   await newCareer(page);
-  await check('hub', ['#chBottom button', '#chCampus .bldg', '.chMenuBtn']);
+  await check('hub', ['#chBottom button', '#chCampus .bldg', '.chMenuBtn', '.cpStats', '#cpView']);
+  { // THE CAMPUS at 1x on a phone (no stretched pixels), its middle in the middle of the room it has, the strip whole;
+    // the menu down the left, or the right if Settings says so
+    await page.waitForTimeout(150);
+    const cp = async () => page.evaluate(() => { const v = document.getElementById('cpView').getBoundingClientRect(), m = new DOMMatrix(getComputedStyle(document.getElementById('cpWorld')).transform),
+      st = document.getElementById('cpStats'), nav = document.querySelector('.cpNav').getBoundingClientRect();
+      return { s: m.a, whole: Number.isInteger(m.e) && Number.isInteger(m.f), mid: [Math.round(m.e + (64 + 320) * m.a - v.width / 2), Math.round(m.f + (40 + 184) * m.a - v.height / 2)],
+        strip: st.scrollWidth <= st.clientWidth + 1, phase: document.getElementById('chPhase').textContent, right: nav.left > v.left }; });
+    const c = await cp();
+    ok(c.s === 1 && c.whole && Math.abs(c.mid[0]) <= 2 && Math.abs(c.mid[1]) <= 2 && c.strip && !c.right,
+      w + 'x' + h + ': the campus at 1x, its middle in the middle (' + c.mid + '), the menu on the left, the strip whole: ' + c.phase);
+    if(w === 844 && h === 390){ await page.evaluate(() => window.__MG.setPref('side', 'right')); await page.waitForTimeout(100); const r = await cp();
+      await page.evaluate(() => window.__MG.setPref('side', 'left'));
+      ok(r.right && r.s === 1 && Math.abs(r.mid[0]) <= 2, 'CAMPUS MENU: RIGHT puts the buildings down the right, the campus as it was'); }
+  }
   for(const b of ['office', 'market', 'scouting', 'academy', 'stadium', 'news', 'home']){
-    await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForTimeout(120);
+    await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
     const tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
       await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench']); }

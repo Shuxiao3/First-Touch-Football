@@ -123,11 +123,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
-  - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics and the
-    colours, kept in this browser (`ftc_prefs`), plus the button layout on a touch screen. The 92 feel dials are the game's
+  - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics, the
+    colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
+    plus the button layout on a touch screen. Settings also credits the campus's tilesets and the font. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
-  - **The buildings.** One line across the top: ◀ TOWN, the building, its tabs. A message shows as a toast along the
+  - **The buildings.** One line across the top: ◀ CAMPUS, the building, its tabs. A message shows as a toast along the
     bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages
     if it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over
     pages and has no long text on it: his figure, name, own position, style, age, stars, rating and potential on
@@ -869,7 +870,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     (none, a ball, a star, a crown, a tower, an anchor, a tree, a bird, a bolt, or the club's first letter), ringed in
     ink (in light, round a dark one). Its colours are the kit's until you pick your own. Every other club's is drawn
     from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
-    yours over the club's name in town. Your short name is yours alone: no other club is given it.
+    yours by the club's name on the campus and on its clubhouse and academy. Your short name is yours alone: no other club is given it.
   - **Money.** Tickets, concessions, the club's partners (local firms: $300 a week in League 2, more in each league
     up), TV, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
     winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
@@ -903,9 +904,21 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
       sponsor's name on it; its shirt may carry a sponsor too.
     - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
-  - **The town.** For now its buildings sit in a row. Manager's Office (squad and contracts, tactics, fixtures,
-    finances), Transfer Market, Scouting, Youth Academy, Stadium, Newsstand (news, all four tables, results, top
-    scorers) and Your House (your record). The walkable town on the tileset comes next.
+  - **The campus** is the hub: the club from above, in the town's tiles (see **The campus** under Sprites). The ground
+    is in the middle, the clubhouse (the Office) and the academy with its training pitch along the top, and down by the
+    road the market hall, the scouts' house, the plaza with the newsstand, and your house.
+    - The buildings are listed down the left (the right, if Settings says so), with a badge where something's
+      waiting: Office (squad and contracts, tactics, fixtures, finances), Market, Scouting, Academy, Stadium,
+      Newsstand (news, all four tables, results, top scorers) and Your House (your record). NEXT DAY, or SIMULATE
+      and PLAY, is at the foot. The season, the next match, the budget, the fans and the week's net run along the
+      campus's own foot, put shorter where there's less room.
+    - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
+      it, and you're in. ◀ CAMPUS takes the camera back out.
+    - It's drawn as the club is: the ground at the level it's built to, its name on a sign (on the press box at
+      level 2, on the south stand's roof from 3), the North Stand's name on its roof from level 3, your boards along
+      the touchline, and your crest on the clubhouse and the academy.
+    - On a phone it's at 1x, cut to its middle where there's less room (a smaller phone moves the club's name onto
+      it); a bigger screen shows the lawn, trees and road round it.
   - Careers save to three slots (`ft_mgr_slot1` to `3` in `localStorage`). Careers from the old player-manager
     mode (`ft_save_*`) aren't carried over.
 
@@ -1420,6 +1433,24 @@ python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9
 ```
 
 `index.html` keeps the sheets it was last embedded with until it is re-embedded with `--embed`.
+
+### The campus
+
+The career's campus (`assets/campus/`) is composed from tilesets the player supplied: the houses, offices, garden,
+harbour, station, industrial and tree sets by **TerribleJared**, with **VeonTrainer** and **Ekat99**, and the shop set
+with **HimuraKenshin2010**'s items. Thanks to them; they're credited in the game's Settings too. Nothing
+Pokémon-branded from the sets is used: the clubhouse's "PC" sign is painted over with its own clapboard, the stone
+house's shop board reads SCOUTS, and no Poké Balls, Ball-Mart signs, creatures or creature planters appear. The ground
+isn't in the sets; it's drawn in their palette, its roofs cut from the wide glass office's.
+
+`campus_1.png` is the whole campus (768 by 448: the 640 by 368 middle with a border of lawn, trees and road), its
+ground at level 1. `campus_2.png` to `campus_5.png` are each other level as a patch over it, the trees in its way gone
+with it, and `campus_levels.png` shows the five side by side. The game writes the ground's and the North Stand's names,
+the boards and your crest on it as it goes. The tilesets aren't in the repo, so rebuilding needs them:
+
+```sh
+python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS_ART and CAMPUS_META in classic.html
+```
 
 ## Tests
 

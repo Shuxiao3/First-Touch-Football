@@ -34,7 +34,7 @@ info('your game: ' + JSON.stringify(m));
 ok(d.roster.filter(p => p.apps === 1).length === 8, 'the eight who started have a game each');
 ok(d.week === 1 && d.ledger.length === 1, 'the week was paid');
 await page.click('#mrContinueBtn'); await page.waitForTimeout(150);
-ok(await page.isVisible('#careerHub') && /Matchday 2/.test(await page.textContent('#chMeta')), 'back in town for matchday 2');
+ok(await page.isVisible('#careerHub') && /Matchday 2/.test(await page.getAttribute('#chPhase', 'data-long')), 'back on the campus for matchday 2');
 
 process.exitCode = rep.finish();
 await browser.close();
