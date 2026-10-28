@@ -5424,7 +5424,19 @@
   // CROSSING stat -> accuracy of balls whipped into the box (pace auto-set to reach the target; loft fixed at 1.6).
   function crossAccOf(p){  return statLerp(statOf(p,'crossing',P.crossing.val), 0.2, 0.9); }   // Crossing stat -> accuracy
   function crossLoftOf(p){ return 1.6; }                 // loft fixed at 1.6 (not stat-driven)
-  function crossSpray(p){  return (1-crossAccOf(p))*0.20*(Math.random()-Math.random()); }       // signed angular error (most near the line, the worst as wide as ever)
+  // HOW FAR OUT: nothing's crossed from more than CROSS_MAX (24 m) from their byline -- further out the computer doesn't
+  // try one, yours is no cross (CROSS dimmed), and a team-mate won't cross it when you call for one -- and the further
+  // out than the six-yard box (CROSS_TRUE) it's struck, the less true it goes, for the best crosser too. crossSpray: its
+  // line (signed, radians; most near it), as wide as it always was from level with the six-yard box or nearer the byline,
+  // and getting on for three times as wide from 24 m out; crossOver: its weight (the share of its length it's over, or
+  // short), spot on from the six-yard box in, out by up to an eighth from 24 m (a fifth at Crossing 1)
+  const CROSS_MAX=24*MK, CROSS_TRUE=5.5*MK;
+  function crossOut(team,x){ return atkOf(team)>0 ? FW-x : x; }                        // how far x is from their byline
+  function crossFarOf(out){ return clamp((out-CROSS_TRUE)/(CROSS_MAX-CROSS_TRUE),0,1); }   // 0 level with the six-yard box or nearer .. 1 at 24 m out
+  function crossFar(team,x){ return crossFarOf(crossOut(team,x)); }
+  function crossOK(p){ return crossOut(p.team,ball.x)<=CROSS_MAX; }                    // the ball near enough their byline for p to cross it
+  function crossSpray(p,f){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*(Math.random()-Math.random()); }
+  function crossOver(p,f){ f=f||0; return f*(0.10+(1-crossAccOf(p))*0.12)*(Math.random()-Math.random()); }
   // HEADING stat -> header power, aerial-duel win rate (vs the opponent), and header accuracy.
   function headingOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.1, 1.0); }     // aerial-duel win value
   function headAccOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.2, 0.8); }     // header accuracy
@@ -5586,10 +5598,7 @@
     // a green teammate holding the ball in a wide/advanced area crosses toward YOU
     const holder = (ball.ownedBy&&ball.ownedBy.team==='G'&&ball.ownedBy!==controlled)?ball.ownedBy:null;
     if(!holder)return false;
-    const atk=atkOf(holder.team);
-    // only sensible if the holder is reasonably advanced (in the attacking half-ish)
-    const advanced = atk>0 ? holder.x>FW*0.45 : holder.x<FW*0.55;
-    if(!advanced)return false;
+    if(!crossOK(holder))return false;   // only from 24 m out or nearer their byline (see CROSS_MAX)
     crossToTarget(holder,controlled);
     holder.cmdShoot=0;
     lastGrade='CROSS!';gradeColor='#ffb43c';gradeFade=0.9;
@@ -5599,8 +5608,8 @@
     // lofted ball aimed at the requesting teammate's spot (lead their run a touch)
     const target={x:mate.x+mate.vx*0.3, y:mate.y+mate.vy*0.3};
     let dx=target.x-ball.x, dy=target.y-ball.y;
-    const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-    const aerr=crossSpray(p);
+    const d0=Math.hypot(dx,dy)||1;dx/=d0;dy/=d0;
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const G=520, T=clamp(0.6+d/2400,0.6,1.15);
@@ -5835,6 +5844,7 @@
   function crossPressBall(){
     const now=performance.now();
     if(crossPend&&now>crossPend.at){ crossFlush(); return; }   // the first one's moment is up: that one goes now
+    if(!crossOK(controlled)){ crossPend=null; return; }        // too far out to cross from: nothing
     crossLow=!!crossPend; crossPend=null;                      // the second tap of a double-tap: a low driven cross
     crossHeld=true; crossCharge=0; crossDown=now;
   }
@@ -5847,6 +5857,7 @@
   }
   function crossFlush(){ const cp=crossPend; crossPend=null; if(cp&&myBall()) cross(cp.charge,false); }
   function cross(charge,low){
+    if(!crossOK(controlled)) return;                            // (carried out past 24 m while it was held: no cross)
     if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>cross(charge,low)); return; }
     const c=clamp(charge||0,0,1), p=controlled, atk=atkOf(p.team), pick=crossPick(p,c,low);
     let tq=null, tx, ty;
@@ -5859,8 +5870,8 @@
     crossGoneAt=performance.now();
     if(low) lowCross(p,tq,tx,ty);
     else {
-      let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-      const aerr=crossSpray(p), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+      let dx=tx-ball.x, dy=ty-ball.y; const d0=Math.hypot(dx,dy)||1; dx/=d0; dy/=d0;
+      const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+crossOver(p,f));
       const G=520, T=clamp(0.7+0.0008*d,0.6,1.2), zH=PLAYER_H*1.15;
       curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,tx,ty,tq);   // (swinging: crossSwing)
       ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
@@ -5879,8 +5890,8 @@
   // they would a pass. Your Crossing aims it, a little more surely than a lofted one.
   const LOWX_V=680, LOWX_Z=9;
   function lowCross(p,q,tx,ty){
-    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=crossSpray(p)*0.8, ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
+    let dx=tx-ball.x, dy=ty-ball.y; const d0=Math.hypot(dx,dy)||1; dx/=d0; dy/=d0;
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f)*0.8, ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+0.8*crossOver(p,f));
     const T=Math.max(0.38+0.0006*d, d/LOWX_V), vz=(LOWX_Z+260*T*T)/T, vh=d/T/takeoffKeep(vz);   // (struck that bit harder for the grass at its take-off: takeoffKeep)
     ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=vz; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; ball.crossCurl=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team; ball.crossBy=null; ball.crossT=0;
@@ -6023,8 +6034,8 @@
     const cs=spot||crossSpot(p);
     const target = cs ? {x:cs.x, y:cs.y} : {x:atk>0?FW-BX*0.66:BX*0.66, y:YC};
     let dx=target.x-ball.x, dy=target.y-ball.y;
-    const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-    const aerr=crossSpray(p);
+    const d0=Math.hypot(dx,dy)||1;dx/=d0;dy/=d0;
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out: see CROSS_MAX)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     // It gets to the spot in T, coming down through head height there -- where the man attacking it meets it (see
@@ -8069,7 +8080,7 @@
     // would be first to a cross
     C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'composure',P.composure.val),0.94,1.06)*M.shoot;
     C.finLong=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4)*M.longShot;
-    C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1);
+    C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1); C.cAcc=crossAccOf(p);
     C.cs=C.u>FW*0.45?crossSpot(p):null;
     // how crowded his side is: theirs less ours (him aside) within 18 m of the ball
     C.crowd=0; for(const q of players) if(q!==p&&Math.hypot(q.x-ball.x,q.y-ball.y)<18*OBM) C.crowd+=q.team===p.team?-1:1;
@@ -8082,14 +8093,16 @@
   // post): is one of ours there as it drops, and one of theirs? Ours alone: his header, most of the time; theirs
   // there too: he mostly heads it away first (see aiBrain); nobody of ours: theirs. And how well he crosses. A header
   // that's ours is worth a good share of a goal -- more from by the byline, with their defenders turning to face
-  // their own goal, than from 25 m.
+  // their own goal, than from 24 m. Never from further out than that (CROSS_MAX), and the further out, the likelier
+  // it goes astray (crossSpray, crossOver): the more so the poorer he crosses.
   function obCrossAt(C,x,y){
     const dl=C.atk*(C.gx-x), cs=C.cs;
-    if(!cs||Math.abs(y-YC)<FH*0.2||dl>FW*0.28||dl<5) return null;
+    if(!cs||Math.abs(y-YC)<FH*0.2||dl>CROSS_MAX||dl<5) return null;
     const T=clamp(0.7+0.0008*Math.hypot(cs.x-x,cs.y-y),0.6,1.2);
     const ours=clamp(1-(cs.ours-C.M.crossLead-T-0.1)/0.4,0,1), theirs=clamp(1-(cs.theirs-T-0.1)/0.4,0,1);
     if(ours<0.25) return null;                                           // nobody of ours to get on the end of it
-    return {P:(0.05+0.85*ours*(1-0.75*theirs))*C.crs, v:0.2*C.M.cross*(1.2-0.4*clamp(dl/(FW*0.28),0,1))};
+    const astray=1-crossFarOf(dl)*(0.25+0.35*(1-C.cAcc));                  // (at 24 m: 0.72 of it at Crossing 10, 0.47 at 1)
+    return {P:(0.05+0.85*ours*(1-0.75*theirs))*C.crs*astray, v:0.2*C.M.cross*(1.2-0.4*clamp(dl/(FW*0.28),0,1))};
   }
   // THE URGE TO GET FORWARD: a side that's had it a while without getting anywhere starts to force it. Each side's
   // clock starts when it wins the ball and again whenever it gets it 8 m further up than it's been; a quarter of the
@@ -11362,7 +11375,7 @@
           btns.shoot.textContent = mine?'SHOOT':(oursHave?'SHOOT!':(strikeable?'SHOOT':'SLIDE'));
           btns.shoot.classList.toggle('mSlide',slide);
           btns.shoot.classList.toggle('mCmd',!mine&&oursHave); }
-        if(btns.cross){ const clr=clearMode(), on=clr?clearableBall():(mine||oursHave);   // own half: CLEAR
+        if(btns.cross){ const clr=clearMode(), on=clr?clearableBall():(mine||oursHave)&&crossOut('G',ball.x)<=CROSS_MAX;   // own half: CLEAR; more than 24 m out: no cross (dimmed)
           btns.cross.textContent = clr?'CLEAR':(mine?'CROSS':(oursHave?'CROSS!':'CROSS'));
           btns.cross.classList.toggle('dimBtn',!on);
           btns.cross.classList.toggle('mClear',clr);
@@ -12053,7 +12066,7 @@
     // the man you control: a solid green ring on the grass at his reach (Ball control), the only ring there is
     if(controlled) pixelRing(controlled.x,controlled.y,controlROf(controlled),'#9dff3c','rgba(14,58,30,.6)');
     // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
-    if(controlled&&(crossHeld||crossPend)&&myBall()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
+    if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     // your keeper with it: the same ring on the man he'll play it to (see keeperPlay) -- not you (PLAYER), nor a hoof
     if(gkHold&&keeperWaits(gkHold)){ const t=gkTarget(gkHold,gkIns(gkHold.team,'gkPass')); if(t&&t!==controlled) pixelRing(t.x,t.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     if(LAB.on) labDrawPitch();

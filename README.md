@@ -398,9 +398,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     waiting on, where it was aimed, and its flight with its shadow.
   - The computer crosses 1.4 s after the ball's put down, once his men have taken their spots. With CROSSER: YOU it
     waits for you: hold CROSS for the man you want (the amber ring), or double-tap it for a low cross.
-  - Chips: CROSSER (COMPUTER or YOU), FROM (the byline, or 8, 16 or 24 m out for an early ball), OURS (1-3 in the
-    box), THEIRS (0-3), KEEPER (on or off), plus the usual NEXT, TIME, NEW BALL and TUNE. TUNE has Crossing, Curve,
-    Heading, Off IQ, Def IQ and the keeper's reach and speed.
+  - Chips: CROSSER (COMPUTER or YOU), FROM (the byline, or 8, 16 or 24 m out for an early ball, as far out as anyone
+    crosses from), OURS (1-3 in the box), THEIRS (0-3), KEEPER (on or off), plus the usual NEXT, TIME, NEW BALL and
+    TUNE. TUNE has Crossing, Curve, Heading, Off IQ, Def IQ and the keeper's reach and speed.
   - Keys: `1`-`4` from, `C` crosser, `,` `.` ours, `[` `]` theirs, `B` keeper.
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
   in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
@@ -751,9 +751,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     spot or the far post for whoever can run onto it. It used to go to one of those three every time, for whoever
     was nearest as the crow flies. How soon a man gets there is worked out the way he'd run it: a beat to read it,
     then side-on watching it over a step or two, or turned and sprinting on a longer way.
-  - **How true it goes is his Crossing.** Most crosses go close to where they're aimed, and the worst still go as
-    wide as ever (up to 9° off at Crossing 1, 1° at 10). Measured in the Crossing Lab, 16 from 8 m out at each, they
-    came through head height about 0.55 m from where they were aimed at Crossing 8, and 1.6 m at Crossing 1.
+  - **How true it goes is his Crossing**, and how far out he crosses it from. From level with the six-yard box or
+    nearer the byline most crosses go close to where they're aimed, and the worst still go as wide as ever (up to 9°
+    off at Crossing 1, 1° at 10); further out they go wider (see **Crosses come from 24 m out at most**). Measured in
+    the Crossing Lab from the byline, they came through head height about 0.6 m from where they were aimed at
+    Crossing 8, and 1.4 m at Crossing 1.
   - **Our man heads it.** A man under a cross of ours no longer tries to bring it down at his feet instead of heading
     it. A man going for it who reads it poorly now waits where it comes down to his head, not where it lands (see
     **Off IQ meets the ball**).
@@ -766,16 +768,17 @@ The same game played like any other football game. It's a copy of `index.html` w
     (his read of it), worth up to a quarter of the duel either way, and nothing between two men level on them. That
     goes for your headers too.
   - **Measured in the Crossing Lab,** 16 crosses each from the computer at Crossing 8, the men in the box on the dials.
-    On average they came through head height 0.4 to 0.8 m from where they were aimed:
+    On average they came through head height 0.6 to 1.6 m from where they were aimed, the further out the wider:
 
     | From | Ours v theirs | Headed by ours | Cleared |
     | --- | --- | --- | --- |
     | 8 m out | 2 v 0 | 16 | 0 |
-    | 8 m out | 2 v 2 | 8 | 8 |
+    | 8 m out | 2 v 2 | 6 | 10 |
     | 8 m out | 3 v 3 | 13 | 3 |
-    | The byline | 1 v 1 | 15 | 1 |
-    | 16 m out | 3 v 2 | 11 | 5 |
+    | The byline | 1 v 1 | 14 | 2 |
+    | 16 m out | 3 v 2 | 7 | 9 |
     | 24 m out (early) | 2 v 0 | 16 | 0 |
+    | 24 m out (early) | 2 v 2 | 4 | 10 |
 
     The contested ones move by three or four from one run of 16 to the next. With one of theirs against one of
     ours, he goes out to the crosser. How many headers go in swings a lot from run to run, so it isn't shown here.
@@ -801,6 +804,37 @@ The same game played like any other football game. It's a copy of `index.html` w
     team-mate either way. There are fewer crosses because the computer now only crosses when a man of ours can be
     there to meet it, and more than half of them end in a header on goal, where it was one in four. Goals are up by
     about as much as one batch of games differs from the next.
+- **Crosses come from 24 m out at most, and go less true the further out.**
+  - Nothing's crossed from more than 24 m from their byline. The computer doesn't choose one from further out (it
+    would, from up to 29 m); your CROSS does nothing out there (it crossed from anywhere in their half; on a phone
+    it's dimmed now until the ball's 24 m out or nearer); and a team-mate you call for one doesn't cross it (he would
+    from about halfway on).
+  - The further out it's struck, the less true it goes, the best crosser's too: the computer's, yours (lofted or low)
+    and one you call for. From level with the six-yard box or nearer the byline it's as it was. From 24 m out its line
+    goes over twice as wide (2.9° off on average at Crossing 8, against 1.0° nearer in; 7.1° against 3.1° at Crossing
+    1), and its weight's out as well, up to an eighth of its length over or short (a fifth at Crossing 1), where nearer
+    in it's spot on. In between, in proportion.
+  - Measured in the Crossing Lab, the computer's crosses with two of ours in the box (with two of theirs and without;
+    96 to 144 from each spot at Crossing 8, 48 at Crossing 1): how far from where they were aimed they came through
+    head height on average.
+
+    | From | Crossing 8 | Crossing 1 |
+    | --- | --- | --- |
+    | The byline | 0.6 m | 1.4 m |
+    | 8 m out | 0.5 m | 1.5 m |
+    | 16 m out | 1.1 m | 2.5 m |
+    | 24 m out | 1.8 m | 4.1 m |
+
+    Before, it went as true from 24 m out as from the byline: 0.5-0.6 m at Crossing 8 and 1.4-1.8 m at Crossing 1
+    from anywhere. Ours still get to most of them, reading where it's going and going to it, but not all: from 24 m
+    out at Crossing 1 with nobody of theirs there, 10 of 24 went to nobody (1 before).
+  - The computer weighs it up: a cross is worth less to it the further out, the more so the poorer he crosses (from
+    24 m out about 0.7 of what it would be from nearer in at Crossing 10, half at Crossing 1), so he takes it on
+    toward the byline when he can.
+  - Over whole matches (computer against computer, four 24-minute games each, two with both sides on WING PLAY and
+    two on BALANCED, before → now): crosses 2.9 → 2.5 per 6 minutes; from within 8 m of the byline 35% → 53% of
+    them, from further out than 24 m 1 in 46 (from 28 m) → none; headed on goal by the side that crossed it 59% →
+    52%.
 - **The computer does skill moves.** Taking his man on, one of the computer's men with the moves (his skill stars)
   does one to get past him, only those his stars allow: a one-star man knocks it on past him; with more, a knock-on or
   a croqueta most, a drag-back with the man right on him, a roulette only when he's well the better of him, a Cruyff
@@ -999,7 +1033,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
-| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**.) |
+| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
 | `L` in your own half | **Clear** it instead: with the ball it's hoofed high and long at once; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
@@ -1012,7 +1046,7 @@ stick follows your thumb, so you can't run off its edge. A double-tap on the lef
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
-for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there. Anywhere else on the right half, off the buttons, is TRAP too.
+for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too.
 
 **Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
 and **drag** the way you want the ball to go. The trap is timed from the moment your finger lands,

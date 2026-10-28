@@ -2,11 +2,14 @@
 // them -- one man on his own in the middle of the box; two, one favouring each post; three, the posts and one in the
 // middle a little further out -- inside the posts, never out toward the crosser, and none of them pulled out of the box
 // to help the man on the ball. The computer crosses to a man (where he'll be as it gets there), not into a space nobody
-// gets to: from 8 m out with nobody on them, most are headed, a good crosser's coming closer to his man than a poor
-// one's; an early ball from 24 m finds the runs in behind. Two of theirs meet it in the air and clear a good share. The
-// CROSSING LAB: who crosses, from how far, how many of ours and of theirs, the keeper -- each ball called and tallied.
-// YOUR CROSS: how long you hold it picks the man it's for, nearest first -- a tap the near post, a long hold the far
-// post -- and a double-tap is a low driven cross: flat and quick, to his feet.
+// gets to: from the byline with nobody on them, most are headed, a good crosser's coming closer to his man than a poor
+// one's. Two of theirs meet it in the air and clear a good share. FROM HOW FAR: the further out it's crossed from, the
+// less true it goes -- an early ball from 24 m well off where it was aimed, against one from the byline -- and nothing's
+// crossed from more than 24 m out: the computer doesn't choose one from there, a team-mate you call for one doesn't
+// cross it, and your own CROSS does nothing. The CROSSING LAB: who crosses, from how far, how many of ours and of
+// theirs, the keeper -- each ball called and tallied. YOUR CROSS: how long you hold it picks the man it's for, nearest
+// first -- a tap the near post, a long hold the far post -- and a double-tap is a low driven cross: flat and quick, to
+// his feet.
 // On a copy of the game that lets the test reach the lab and the side's plan, the frames pumped (no vsync) -- and for
 // your own presses, which go by the clock, a second copy in real time.
 import { open } from './_harness.mjs';
@@ -18,7 +21,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={LAB, P, players:()=>players, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, PLAN:()=>PLAN, FW, FH, YC, MK, GOAL_W, atkOf, '
-  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe(), crossMen:()=>crossMen(controlled,false)};\n  const LAB_TITLE=');
+  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe(), crossMen:()=>crossMen(controlled,false), obCtx, obCrossAt, own, requestCross, crossSpray, crossOver, get CROSS_MAX(){ return CROSS_MAX; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-cross-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -63,18 +66,42 @@ const crosses = (o, n) => page.evaluate(({ o, n }) => new Promise(res => { const
     requestAnimationFrame(tick); })(); }), { o, n });
 const dial = await page.evaluate(() => window.__T.P.crossing.val);
 const N = 16;
-const good = await crosses({ crossing: 8, lab: { cFrom: 180, cAtk: 2, cDef: 0 } }, N);
-const poor = await crosses({ crossing: 1, lab: { cFrom: 180, cAtk: 2, cDef: 0 } }, N);
+const good = await crosses({ crossing: 8, lab: { cFrom: 25, cAtk: 2, cDef: 0 } }, N);
+const poor = await crosses({ crossing: 1, lab: { cFrom: 25, cAtk: 2, cDef: 0 } }, N);
 const early = await crosses({ crossing: 8, lab: { cFrom: 540, cAtk: 2, cDef: 0 } }, N);
 const marked = await crosses({ crossing: 8, lab: { cFrom: 180, cAtk: 2, cDef: 2 } }, N);
 await page.evaluate(v => { window.__T.P.crossing.val = v; }, dial);
 const hd = R => R.T.head, avg = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length), within = (a, m) => a.filter(v => v < m).length;
 const line = (k, R) => `${k}: ${hd(R)} of ${R.T.n} headed by ours (${R.T.goal} in), ${R.T.cleared} cleared, ${R.T.keeper} the keeper's, ${R.T.nobody} to nobody; ${within(R.miss, 2.2)} within heading reach of the man it was for (2.2 m), ${avg(R.miss).toFixed(1)} m from him on average (of the ${R.miss.length} that came near him at a heading height); ${avg(R.aim).toFixed(2)} m off where it was aimed`;
-for(const [k, R] of [['Crossing 8, 8 m out, 2 of ours, none of theirs', good], ['Crossing 1, the same', poor], ['Crossing 8, 24 m out (early)', early], ['Crossing 8, 8 m out, 2 v 2', marked]]) info(line(k, R));
+for(const [k, R] of [['Crossing 8, from the byline, 2 of ours, none of theirs', good], ['Crossing 1, the same', poor], ['Crossing 8, 24 m out (early)', early], ['Crossing 8, 8 m out, 2 v 2', marked]]) info(line(k, R));
 ok(hd(good) >= 0.7 * N && within(good.miss, 2.2) >= 0.7 * N, 'the computer crosses to a man: with nobody on them, 70% or more headed, and 70% or more come within heading reach of the man it was for');
-ok(avg(poor.aim) > avg(good.aim) * 1.8 && avg(good.aim) < 1, 'a good crosser puts it where he aims (' + avg(good.aim).toFixed(2) + ' m off at Crossing 8), a poor one well off it (' + avg(poor.aim).toFixed(2) + ' m at 1)');
-ok(hd(early) >= 0.55 * N, 'an early ball from 24 m out finds the runs in behind: ' + hd(early) + ' of ' + N + ' headed');
+ok(avg(poor.aim) > avg(good.aim) * 1.8 && avg(good.aim) < 1, 'a good crosser puts it where he aims (' + avg(good.aim).toFixed(2) + ' m off at Crossing 8, from the byline), a poor one well off it (' + avg(poor.aim).toFixed(2) + ' m at 1)');
+ok(hd(early) >= 0.55 * N && avg(early.aim) > avg(good.aim) * 1.5, 'an early ball from 24 m out still finds the runs in behind with nobody on them (' + hd(early) + ' of ' + N + ' headed), but goes less true: ' + avg(early.aim).toFixed(2) + ' m off where it was aimed, against ' + avg(good.aim).toFixed(2) + ' m from the byline');
 ok(marked.T.cleared + marked.T.keeper >= 3 && hd(marked) < hd(good), 'two of theirs meet it in the air and clear a good share (' + marked.T.cleared + ' of ' + N + ')');
+// how wide it goes, drawn 20,000 times: its line (the mean, and the worst, in degrees) and its weight (the mean share
+// it's over or short), from the byline (f 0) and from 24 m out (f 1), at Crossing 1, 8 and 10
+const spread = await page.evaluate(() => { const T = window.__T, p = T.controlled(), keep = T.P.crossing.val, out = {};
+  for(const c of [1, 8, 10]) for(const f of [0, 1]){ T.P.crossing.val = c; let a = 0, w = 0, o = 0; const n = 20000;
+    for(let i = 0; i < n; i++){ const e = Math.abs(T.crossSpray(p, f)); a += e; w = Math.max(w, e); o += Math.abs(T.crossOver(p, f)); }
+    out[c + (f ? ' at 24 m' : ' at the byline')] = { deg: +(a / n * 180 / Math.PI).toFixed(2), worst: +(w * 180 / Math.PI).toFixed(1), over: +(o / n * 100).toFixed(1) }; }
+  T.P.crossing.val = keep; return out; });
+info('how wide, by Crossing: ' + JSON.stringify(spread));
+const S = (c, at) => spread[c + (at ? ' at 24 m' : ' at the byline')];
+ok([1, 8, 10].every(c => S(c, 0).over === 0 && S(c, 1).deg > S(c, 0).deg * 2.2 && S(c, 1).over > 3) && S(10, 1).deg < S(8, 1).deg && S(8, 1).deg < S(1, 1).deg
+   && Math.abs(S(1, 0).worst - 9.2) < 0.4 && Math.abs(S(10, 0).worst - 1.1) < 0.2,
+  'from the byline as true as ever (the worst 9° off at Crossing 1, 1° at 10, the weight spot on); from 24 m out over twice as wide (' + S(8, 0).deg + '° to ' + S(8, 1).deg + '° on average at Crossing 8), and over or short, at every Crossing, the better crosser still the truer');
+// nobody crosses from more than 24 m out: the computer weighing one up from 23 m and from 25 m (two of ours in the box),
+// and a team-mate on the ball 30 m out and then 20 m out when you call for one
+const reach = await page.evaluate(() => { const T = window.__T, L = T.LAB;
+  Object.assign(L, { auto: false, cWho: 'you', cFrom: 180, cAtk: 2, cDef: 0, cKeep: true, ct: null }); T.cast(); T.serve();
+  const cr = T.controlled(), atk = T.atkOf(cr.team), gx = atk > 0 ? T.FW : 0, U = m => gx - atk * m * T.MK, out = { max: T.CROSS_MAX / T.MK };
+  out.ai23 = !!T.obCrossAt(T.obCtx(cr, atk, gx), U(23), cr.y); out.ai25 = !!T.obCrossAt(T.obCtx(cr, atk, gx), U(25), cr.y);
+  const mate = T.players().find(q => q.pRole === 'labAtk'), b = T.ball();
+  for(const m of [30, 20]){ b.ownedBy = null; mate.x = U(m); mate.y = cr.y; mate.vx = mate.vy = 0; T.own(mate, mate.r + b.r + 5); out['call' + m] = T.requestCross() && !b.ownedBy; }
+  return out; });
+info('from how far: ' + JSON.stringify(reach));
+ok(reach.max === 24 && reach.ai23 && !reach.ai25, 'the computer crosses from 23 m out, never from 25 m (24 m at most)');
+ok(!reach.call30 && reach.call20, 'called for, a team-mate crosses it from 20 m out, not from 30 m');
 
 // THE LAB ITSELF: its chips, and yours -- the computer leaves it to you (CROSSER: YOU), and your cross is called
 await page.evaluate(() => { const L = window.__T.LAB; L.auto = false; L.ct = null; });
@@ -122,6 +149,16 @@ ok(Y.dbl.low && Y.dbl.man === Y.dbl.men[0] && Y.dblHold.low && Y.dblHold.man ===
   'a double-tap is a low cross, to the man the second press picks (#' + Y.dbl.man + ' quick, #' + Y.dblHold.man + ' held)');
 ok(Y.dbl.peak < 1.8 && Y.dbl.peak < Y.tap.peak / 2 && Y.dbl.top > 25 && Y.dbl.near != null && Y.dbl.near < 1.5 && /^(goal|saved|shot|ours)$/.test(Y.dbl.result),
   'the low cross is flat and quick (up to ' + Y.dbl.peak + ' m high, ' + Y.dbl.top + ' m/s, against ' + Y.tap.peak + ' m lofted), and gets to his feet: ' + Y.dbl.result);
+// too far out: from 30 m your CROSS does nothing -- he keeps it; from 24 m it goes
+const farPress = async m => {
+  await page2.evaluate(m => { const T = window.__T, L = T.LAB; Object.assign(L, { auto: false, cWho: 'you', cFrom: m * T.MK, cAtk: 2, cDef: 0, cKeep: true }); L.ct = null; T.cast(); T.serve(); }, m);
+  await page2.waitForTimeout(1200);
+  await page2.keyboard.down('KeyL'); await page2.waitForTimeout(300); await page2.keyboard.up('KeyL'); await page2.waitForTimeout(900);
+  return page2.evaluate(() => { const T = window.__T; return { crossed: !!(T.LAB.rep && T.LAB.rep.cross), has: T.ball().ownedBy === T.controlled() }; });
+};
+const F30 = await farPress(30), F24 = await farPress(24);
+info('your CROSS from 30 m out: ' + JSON.stringify(F30) + '; from 24 m: ' + JSON.stringify(F24));
+ok(!F30.crossed && F30.has && F24.crossed, 'your CROSS from 30 m out does nothing (he keeps it); from 24 m out it crosses');
 
 process.exitCode = rep.finish();
 await R2.browser.close();
