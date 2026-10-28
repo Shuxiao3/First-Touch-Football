@@ -248,8 +248,9 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Not a sure thing.** A man standing in its way still cuts it out. Scripted, with a back line of three 7 to 11 m
     apart, our runner level with it, the passer 13 to 25 m back and, half the time, a holding man in between (400
     balls each): the runner got the old one 47% of the time at Curve 1 and 50% at Curve 10, with a quarter of them
-    running on out of play or dying; this one 53% and 58%, almost none going dead. In the computer's games it still
-    plays one now and then (12 to 16 in 20 minutes, about 13 m long).
+    running on out of play or dying; this one 53% and 58%, almost none going dead. In 20-minute computer-against-computer
+    games it plays a few more (15 to 20 a game, against 11 to 16), still about 13 m long, and about eight in ten reach
+    the runner, as before.
   - **Reading a ball along the grass.** A ball that skips but never gets 12 px up slows on the grass all the way; the
     game's reading of where the ball will be (the men cutting it out and going to meet it) had it flying free over the
     middle of its way. It reads it right now.
@@ -440,6 +441,29 @@ The same game played like any other football game. It's a copy of `index.html` w
     - A save from before keeps its way of playing, yours and every club's: TIKI-TAKA is CONTROL POSSESSION; a
       COUNTER is a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise; BALANCED with PRESS HIGH is
       GEGENPRESS; any other style keeps its name and now defends in its own block.
+    - **Measured.** Each style against a BALANCED side, the computer playing both sides, two 30-minute games with the
+      ends swapped (ARS v MCI), per 15 minutes of the style's side. Ball: its share of the time a man of either side
+      had it. Average pass, under 13 m, 25 m or more: of its passes that reached one of its own. Spread: how far apart
+      across the pitch its men were with the ball. Back line: how far its defenders were from their own goal without
+      it. Pressing: the seconds it spent pressing. Won back in 5 s: of the times it won the ball, how many came within
+      5 s of losing it.
+
+      | | Ball | Passes | Average pass | Under 13 m | 25 m or more | Shots | Shots against | Crosses | Spread | Back line | Pressing | Won back in 5 s |
+      |---|---|---|---|---|---|---|---|---|---|---|---|---|
+      | BALANCED | 48% | 164 | 20.1 m | 32% | 22% | 5.2 | 5.7 | 1.7 | 48.9 m | 33 m | 135 s | 22% |
+      | GEGENPRESS | 47% | 166 | 19.4 m | 39% | 20% | 8.5 | 8.2 | 5.0 | 47.3 m | 42 m | 194 s | 29% |
+      | CONTROL POSSESSION | 49% | 196 | 15.5 m | 49% | 13% | 7.2 | 6.2 | 1.0 | 47.5 m | 33 m | 149 s | 23% |
+      | WING PLAY | 51% | 166 | 21.1 m | 32% | 27% | 3.5 | 5.7 | 6.2 | 50.0 m | 33 m | 127 s | 27% |
+      | DIRECT | 34% | 117 | 21.0 m | 34% | 26% | 7.2 | 5.7 | 3.5 | 47.7 m | 33 m | 133 s | 20% |
+      | FLUID COUNTER | 51% | 172 | 20.3 m | 37% | 25% | 6.7 | 7.0 | 3.2 | 46.3 m | 32 m | 126 s | 35% |
+      | DIRECT COUNTER | 48% | 164 | 20.7 m | 29% | 23% | 4.5 | 6.2 | 1.7 | 45.8 m | 24 m | 91 s | 19% |
+
+      GEGENPRESS defends 9 m higher than anyone (42 m to BALANCED's 33), presses half as long again and wins more of
+      the ball back within 5 s of losing it (29% to 22%); its games are the most open, 8.5 shots a side. CONTROL
+      POSSESSION plays the most passes (196) and the shortest (15.5 m, half of them under 13 m, few long). WING PLAY
+      spreads widest and crosses most (6.2). DIRECT has the ball least (34%) and plays the fewest passes. DIRECT COUNTER
+      sits deepest (24 m) and narrowest and presses least. FLUID COUNTER wins the most back within 5 s (35%). Two games
+      a style, so a shot or two either way is noise.
   - **Your keeper waits for you.** In a match, with the ball in his hands your keeper plays it out when you press PASS
     (on a touch screen the button reads PASS), or by himself once he's had it 5 s; for the last 2 s of that a red
     stopwatch flashes over his head. Either way it goes where his PASS instruction says: PLAYER, to the man you're
