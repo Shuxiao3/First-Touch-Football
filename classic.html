@@ -1654,6 +1654,7 @@
   const postureOf=s=>STYLE_TAC[styleKey(s)].def;                  // (the block a style defends in)
   const counterPressOf=t=>{ const k=TAC[t]&&TAC[t].style; return k==='gegen'?5.0 : k==='control'?2.0 : 0; };   // (s: how long it goes straight back at the ball once it's lost it)
   const transitionT={G:0,R:0};   // counts down after a team wins the ball
+  let possTeam=null;              // the side that last had it at a man's feet (own): see own, A CHANGE OF HANDS
   const breakSt={G:{t0:-9,u:0},R:{t0:-9,u:0}};   // a counter-attacking side's break: when it won it, and how far up it's got the ball since
   // what each style does, with the ball and without it (shown under its buttons)
   const STYLE_BLURB={
@@ -6627,7 +6628,7 @@
   function feed(){
     ball.ownedBy=null;ball.cushBy=null;kickCharge=0;shootCharge=0;ball.z=0;ball.vz=0;
     scoredT=0;offsideT=0;offsidePass=null;gkHold=null;controllingKeeper=null;restartT=0;headerT=0;
-    ball.lastTouch=null;ball.shotBy=null;ball.shotT=0;ball.dribbler=null;ball.dribbleGrace=0;
+    ball.lastTouch=null;ball.shotBy=null;ball.shotT=0;ball.dribbler=null;ball.dribbleGrace=0; possTeam=null;
     keepers.forEach(k=>{k.mode='line';k.holdT=0;});
     // deliver straight to your player and put it under control
     ball.vx=ball.vy=0;
@@ -6646,7 +6647,7 @@
   }
   function executeRestart(){
     const {type,team,x,y}=restartInfo;
-    restartInfo=null;
+    restartInfo=null; possTeam=team;
     for(const p of players)if(p.team!==team)p.noTouchT=0.9;
     if(type==='goalkick'){
       const kp=keeperOf(team);
@@ -8850,9 +8851,13 @@
         if(bd>420) cover2=null;                                               // nobody near enough to cover in time
       }
       coverMem[p.team]={q:cover2,c};
+      // THE SWARM (GEGENPRESS, just after losing it: see cpSwarm)
+      const sw=cpSwarm(p.team,c,engager,cover2);
+      if(sw.press2===p){ p.dbgTag='SWARM-BALL'; p.pressRun=true; return steer(p,sw.p2.x,sw.p2.y,1.0); }
+      const swl=sw.cut.get(p); if(swl){ p.dbgTag='SWARM-LANE'; p.pressRun=true; return steer(p,swl.x,swl.y,1.0); }
       // PRESSING TOGETHER (see pressing): the man nearest it cuts out his easiest pass -- onto the lane to it, nearer the man it's for
       let cutter=null, lpt=null;
-      if(pressing(p.team) && engager){
+      if(pressing(p.team) && engager && !sw.on){
         let opt=null, od=1e9;
         for(const q of players){ if(q.team!==c.team||q===c) continue; const dq=dist(q,c); if(dq<450 && dq<od && laneClearance(c,q)>=0.5){ od=dq; opt=q; } }
         if(opt){ lpt={x:c.x+(opt.x-c.x)*0.62, y:c.y+(opt.y-c.y)*0.62}; let bd=1e9;
@@ -9205,7 +9210,25 @@
   // touchline at his shoulder -- and not otherwise. (Not up in their third unless we're a pressing side; a low block only
   // in our half.) It lasts a second and a half, then a breather: the man on him goes in, the next man cuts out his
   // easiest pass (see aiBrain), and the lines step up (see defBlock).
-  const pressSt={G:{until:-9,cd:-9,t:-1,on:false},R:{until:-9,cd:-9,t:-1,on:false}};
+  const pressSt={G:{until:-9,cd:-9,t:-1,on:false,swarm:-9},R:{until:-9,cd:-9,t:-1,on:false,swarm:-9}};
+  // THE SWARM (GEGENPRESS, just after losing it): the men within 18 m of the ball go straight back at it -- the nearest of
+  // them onto the man on it, from the side away from the first man there, and the next nearest onto his two easiest
+  // passes, nearer him than the man each is for. The back line stays a line (it steps up: see pressing).
+  const CP_REACH=400, swarmCache={G:null,R:null};
+  function cpSwarm(team,c,engager,cover2){
+    const S=swarmCache[team]; if(S&&S.t===simNow&&S.c===c) return S;
+    const out={t:simNow,c,on:false,press2:null,p2:null,cut:new Map()}; swarmCache[team]=out;
+    if(!(pressSt[team].swarm>simNow) || !engager || gkHold) return out;
+    out.on=true;
+    const free=teamOf(team).filter(q=>q!==engager&&q!==cover2&&q!==controlled&&q.state==='normal'&&q.role!=='DEF'&&dist(q,c)<CP_REACH);
+    let best=null, bd=1e9; for(const q of free){ const d=dist(q,c); if(d<bd){ bd=d; best=q; } }
+    if(best){ const ex=c.x-engager.x, ey=c.y-engager.y, el=Math.hypot(ex,ey)||1, r=c.r+best.r;
+      out.press2=best; out.p2={x:clamp(c.x+ex/el*r,40,FW-40), y:clamp(c.y+ey/el*r,40,FH-40)}; }
+    const opts=players.filter(q=>q.team===c.team&&q!==c&&dist(q,c)<450&&laneClearance(c,q)>=0.5).sort((a,b)=>dist(a,c)-dist(b,c)).slice(0,2);
+    for(const o of opts){ const lp={x:c.x+(o.x-c.x)*0.62, y:c.y+(o.y-c.y)*0.62}; let bq=null, bdd=380;
+      for(const q of free){ if(q===best||out.cut.has(q)) continue; const dd=Math.hypot(q.x-lp.x,q.y-lp.y); if(dd<bdd){ bdd=dd; bq=q; } }
+      if(bq) out.cut.set(bq,lp); }
+    return out; }
   function pressing(team){
     const S2=pressSt[team]; if(S2.t===simNow) return S2.on; S2.t=simNow; S2.on=false;
     const c=heldBy(); if(!c || c.team===team || gkHold){ S2.lastU=null; return false; }
@@ -9871,6 +9894,10 @@
   function own(p,carryDist,keepPos){
     const wasOwner=ball.ownedBy===p;
     const prevTeam=ball.lastTouch;
+    // A CHANGE OF HANDS: a loose ball of theirs picked up -- or theirs at a man's feet last, as when a tackle, a block or a
+    // first touch made it ours before one of ours had it at his feet (the last touch alone missed nearly all of those)
+    const lostBy=(prevTeam&&prevTeam!==p.team)?prevTeam:(possTeam&&possTeam!==p.team)?possTeam:null;
+    possTeam=p.team;
     const reGather=ball.dribbler===p&&ball.dribbleGrace>0;     // catching up with your own knock-on / trapped ball
     ball.ownedBy=p;
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;
@@ -9891,14 +9918,16 @@
       ball.y=p.y+Math.sin(p.carryAngle)*carryDist;
       ball.vx=p.vx;ball.vy=p.vy;
     }
-    if(prevTeam&&prevTeam!==p.team){
+    if(lostBy){
       transitionT[p.team]=(TAC[p.team].off==='counter')?4.0:2.0;   // counter-style teams get a LONGER window
       breakSt[p.team]={t0:simNow, u:atkOf(p.team)>0?ball.x:FW-ball.x};
       // did the LOSING team lose it in the opponent's half? (ball goal-side of halfway for them)
-      const lostAdv = prevTeam==='G' ? (ball.x-FW/2) : (FW/2-ball.x);  // >0 = in opp half
-      lostInOppHalf[prevTeam] = lostAdv>0;
-      // THE COUNTER-PRESS: a pressing side that's just lost it goes straight back at it, together, for three seconds
-      const cp=counterPressOf(prevTeam); if(cp>0){ pressSt[prevTeam].until=simNow+cp; pressSt[prevTeam].cd=simNow+cp+1.5; pressSt[prevTeam].t=-1; }   // (GEGENPRESS: five seconds; CONTROL POSSESSION: two)
+      const lostAdv = lostBy==='G' ? (ball.x-FW/2) : (FW/2-ball.x);  // >0 = in opp half
+      lostInOppHalf[lostBy] = lostAdv>0;
+      // THE COUNTER-PRESS: a side that's just lost it goes straight back at it, together -- GEGENPRESS for five seconds, the
+      // men near the ball swarming it (see cpSwarm), CONTROL POSSESSION for two
+      const cp=counterPressOf(lostBy); if(cp>0){ pressSt[lostBy].until=simNow+cp; pressSt[lostBy].cd=simNow+cp+1.5; pressSt[lostBy].t=-1;
+        if(TAC[lostBy].style==='gegen') pressSt[lostBy].swarm=simNow+cp; }
     }
     ball.lastTouch=p.team;
     if(!wasOwner){ if(ball.lastTouchP!==p){ ball.prevTouchP=ball.lastTouchP; } ball.lastTouchP=p; }
@@ -11004,7 +11033,7 @@
   }
   function resetKickoff(kickTeam){
     ball.x=FW/2;ball.y=FH/2;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;
-    ball.ownedBy=null;ball.cushBy=null;ball.lastTouch=null;
+    ball.ownedBy=null;ball.cushBy=null;ball.lastTouch=null; possTeam=null;
     offsidePass=null;gkHold=null;controllingKeeper=null;restartT=0;restartInfo=null;headerT=0;
     for(const p of players){
       if(p.slotDef) applySlot(p,p.slotDef);              // compact defensive shape -> both teams in their own halves

@@ -418,6 +418,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     - A save from before keeps its way of playing, yours and every club's: TIKI-TAKA is CONTROL POSSESSION; a
       COUNTER is a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise; BALANCED with PRESS HIGH is
       GEGENPRESS; any other style keeps its name and now defends in its own block.
+  - **Winning the ball back counts.** All a side does on winning it -- a counter's break, the men going up the pitch
+    at a sprint, the counter-press, a deep block noting that it lost the ball high -- starts when the ball changes
+    hands. That was read from the last touch alone, and a tackle, a block or a first touch makes the ball the
+    winners' before one of them has it at his feet, so it hardly ever started: over 12 minutes a GEGENPRESS side's
+    counter-press was on for 151 frames, about one loss's worth, against 4313 now. Now it's the side that last had
+    it at a man's feet that lost it; restarts and kick-offs are as they were.
   - **Instructions go with the position, not the player.** Pick a player in the pause menu or the Office and you
     get the instructions of the spot he's in. Whoever plays there follows them, swaps and subs included, and each shape
     keeps its own. What a spot can be told depends on what it is: with the ball in the attacking shape, without it in
