@@ -2,11 +2,10 @@
 // facing the byline, an inswinger facing back toward his own goal -- by more the higher his Curve, aimed so it still
 // comes down on the spot (on time, at head height); everyone reading it reads its swing. A curling cross is harder to
 // head clear (a weaker, wilder clearance, and less of a chance in a duel) and to claim (a little less reach for the
-// keeper). A through ball along the grass bends by the passer's Curve (see classic-through): to a man running across
-// its line, into his path (turned 7 to 14 degrees his way at Curve 10, hardly at all at 1); with a man of theirs on its
-// line, away from him, further at Curve 10 than at 1, and still to the spot; to a man running along its line with
-// nobody near, straight. A long ball over the top to a man running across bends a little into his path. And a shot's
-// curl is worked out as before.
+// keeper). A through ball to a man running across its line bends a little into his path (no more than 10 degrees: it
+// was a banana); one with a man of theirs on its line bends a little away from him, not round him; one to a man running
+// along its line goes straight. A long ball over the top to a man running across bends a little into his path too. And
+// a shot's curl is worked out as before.
 // On a copy of the game that lets the test set the scene and reach the cross, the passes and the reading of the ball.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -114,10 +113,10 @@ const P = {};
 for(const cv of [1, 10]){ P['x' + cv] = await thru(cv, 'across', false, false); P['a' + cv] = await thru(cv, 'along', false, false);
   P['l' + cv] = await thru(cv, 'along', true, false); P['o' + cv] = await thru(cv, 'across', false, true); }
 info('through balls: ' + Object.entries(P).map(([k, r]) => `${r.lob ? 'over the top' : 'along the grass'}, ${r.lane ? 'a man on its line' : 'run ' + r.run}, Curve ${r.cv}: ${r.spin ? 'bent' : 'straight'}, ${r.at ? 'got there ' + Math.round(r.at.miss) + ' px off, turned ' + Math.round(r.at.hd) + '° his way' : r.cutOut ? 'cut out' : 'never got there'}${r.lane ? ', ' + Math.round(r.near) + ' px off the man' : ''}`).join('; '));
-ok(P.x10.spin && P.x10.at && P.x10.at.hd >= 7 && P.x10.at.hd <= 14 && P.x10.at.miss < 15, 'a through ball to a man running across its line bends into his path at Curve 10 (gets there turned ' + (P.x10.at ? Math.round(P.x10.at.hd) : '-') + '° his way, by the passer\'s Curve)');
+ok(P.x10.spin && P.x10.at && P.x10.at.hd >= 5 && P.x10.at.hd <= 10 && P.x10.at.miss < 15, 'a through ball to a man running across its line bends a little into his path at Curve 10, no banana (gets there turned ' + (P.x10.at ? Math.round(P.x10.at.hd) : '-') + '° his way; it was 17°)');
 ok(P.x1.at && Math.abs(P.x1.at.hd) <= 3, '...hardly at all at Curve 1 (' + (P.x1.at ? Math.round(P.x1.at.hd) : '-') + '°)');
 ok(!P.a1.spin && !P.a10.spin && P.a10.at && P.a10.at.miss < 12, 'to a man running along its line it goes straight');
-ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.near > P.l1.near, 'with one of theirs on its line it bends away from him, further at Curve 10 than at 1: ' + Math.round(P.l10.near - P.l1.near) + ' px further off him (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + ') on a 12 m ball, still to the spot');
+ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.near > P.l1.near && P.l10.near - P.l1.near < 8, 'with one of theirs on its line it bends a little away from him, not round him: Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + '), still to the spot');
 ok(P.o10.spin && P.o10.at && P.o10.at.hd >= 5 && P.o10.at.hd <= 10 && P.o10.at.miss < 45, 'a long ball over the top to a man running across bends a little into his path and comes down by the spot (' + (P.o10.at ? Math.round(P.o10.at.miss) + ' px off, turned ' + Math.round(P.o10.at.hd) + '°' : '-') + ')');
 
 // A SHOT'S CURL is worked out as before
