@@ -3,7 +3,9 @@
 // so the stand shows. The specks are fixed to the pitch: pan the camera and the ground moves with it, pixel for pixel.
 // PITCH.enable(false) puts the vector pitch back. THE NET: a shot in goes all the way over the line into the net, which
 // gives where it's hit and holds it (never through it or out of the back), and it's a goal; wide of the post or over the
-// bar it comes back off the line. On a copy of the game that lets the test move the camera, redraw and set a shot up.
+// bar it comes back off the line. THE STANDS: each level's name panel is inside its strip and as tall as the letters
+// (five rows), and the Stadium's Stands tab gets a picture of each. On a copy of the game that lets the test move the
+// camera, redraw and set a shot up.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -50,6 +52,13 @@ ok(r.turf >= 3 && r.turf <= 12, 'the turf is a few mint shades, specked (' + r.t
 ok(r.panSame > 0.97, 'pan the camera and the ground moves with it, speck for speck (' + (r.panSame * 100).toFixed(1) + '% of a row matches)');
 ok([1, 3, 5].every(k => parseInt(r.offTop.slice(k, k + 2), 16) < 60), 'switched off, the old pitch is back: its night sky (' + r.offTop + ')');
 ok(['#2b7445', '#31814d', '#235c38'].includes(r.offTurf), '...and its dark green bands (' + r.offTurf + ')');
+// THE STANDS: a name on a panel off the top of the strip, or on one shorter than the letters, is cut
+const meta = JSON.parse(src.match(/const PITCH_ART_META = (\{.*\});/)[1]);
+const badPanel = Object.entries(meta.panels).filter(([, p]) => !(p.y >= 0 && p.h >= 5 && p.y + p.h <= meta.h && p.x >= 0 && p.x + p.w <= meta.w));
+ok(Object.keys(meta.panels).length === 5 && !badPanel.length, 'every level\'s name panel is inside its strip and five rows tall, the letters\' height ('
+  + (badPanel.map(([l, p]) => 'level ' + l + ': ' + JSON.stringify(p)).join('; ') || 'all five') + ')');
+const pics = await page.evaluate(() => [1, 2, 3, 4, 5].map(l => PITCH.picture({ lvl: l, boards: [], stand: 'North Stand' }, 190).length));
+ok(pics.every(n => n > 1000), 'the Stands tab gets a picture of every level (' + pics.join(', ') + ' characters of PNG)');
 // A TENTH SMALLER: a real pitch's shape (105 x 68) and markings at 22.5 px to its metre (it was 25, the men's) -- and the
 // camera as it was: the far touchline under the stand, the near one nine-tenths of the way down, the men as big as ever
 const sz = await page.evaluate(() => { const T = window.__T, cv = document.querySelector('canvas'), g = cv.getContext('2d'); PITCH.enable(true); T.cam(T.FW / 2); T.draw();

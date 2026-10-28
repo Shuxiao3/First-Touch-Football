@@ -422,11 +422,17 @@ The same game played like any other football game. It's a copy of `index.html` w
     the same line across the pitch, so every row's ground is worked out once and a frame only samples it; drawing a
     frame takes about a millisecond longer than the old vector pitch did. The specks are fixed to the pitch, so they
     travel with it as the camera pans.
-  - The far side is one strip: sky, trees past the ends of the stand, a floodlight at each corner, a timber stand
-    under a grey tiled roof with four terraces of fans and a picket fence, a paved track and the advertising boards.
-    It pans with the camera at the stand's own depth, a touch slower than the far touchline.
+  - The far side is a strip for each level a ground can be built to (see **The ground**): a metal bleacher at
+    halfway with trees all round and a white rail (1), a longer, taller one with a press box (2), a covered stand
+    most of the way along under a green roof (3), the timber stand the full length under a grey tiled roof, four
+    terraces of fans, a picket fence (4, the strip as it was), two tiers the full width with boxes between them
+    under a white truss roof (5). Each has sky, trees where the stand doesn't reach, and a paved track. It pans with
+    the camera at the stand's own depth, a touch slower than the far touchline.
+  - The game puts the boards along the front and the stand's name on its panel itself: the ground's own boards,
+    centred on halfway, and none on a new career's field; away from a career, the old stand with the game's words
+    on its boards.
   - The camera's far touchline is now 100 px down the screen instead of 64, so the stand shows over it.
-  - The strip comes from `python3 tools/sprites/make_pitch_art.py --embed-classic`. `PITCH.enable(false)` in the
+  - The strips come from `python3 tools/sprites/make_pitch_art.py --embed-classic`. `PITCH.enable(false)` in the
     console puts the old vector pitch back.
   - The labs' tally line sits on a dark pill now that it's over the turf rather than a night sky.
   The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
@@ -826,8 +832,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     He still had the ball after 26 of them. A winger against a defender closing him down, 8 runs each: at 9 against
     4 he did a move 8 times, got past 5 times and never lost it; at 7 against 6, 5 moves, 1 past, lost it 3 times;
     at 5 against 8 he never tried one.
-- **The career is a manager's career.** You don't play in it. On the first screen you name yourself and your club
-  and pick its colours. You start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
+- **The career is a manager's career.** You don't play in it. On the first screen, NEW CAREER, three tabs: CLUB, where
+  you name yourself and your club and give it a three-letter short name (it suggests one from the club's name,
+  shown on a scoreboard as you type); KIT, its colours; and CREST, its badge. START works from any of them. You
+  start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
   Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
   least; eight start, four are on the bench, and the rest wait in reserve. The game is buying and selling players:
   nobody's stats are built up by hand.
@@ -856,9 +864,45 @@ The same game played like any other football game. It's a copy of `index.html` w
     and fill their squads up every summer. Each has its own style, with shapes and widths to suit it: a wing side
     plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
     The better leagues have more control and gegenpressing sides, the lower ones more direct play and deep counters.
-  - **Money.** The stadium works as before: ticket price, seats, concessions, sponsor. Prize money comes at the
-    end of the season: $12,000 for winning League 2, up to $1.5m for the Premium League, less the lower you
-    finish. The broadcast share follows your league position, and the ground and the sponsor grow when you go up.
+  - **Crests.** Yours is 16 by 18 pixels: a shape (shield, round, classic, block, oval), a pattern in two colours
+    (plain, halves, stripes, hoops, sash, quarters, chevron, cross, border, top band) and an emblem in a third
+    (none, a ball, a star, a crown, a tower, an anchor, a tree, a bird, a bolt, or the club's first letter), ringed in
+    ink (in light, round a dark one). Its colours are the kit's until you pick your own. Every other club's is drawn
+    from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
+    yours over the club's name in town. Your short name is yours alone: no other club is given it.
+  - **Money.** Tickets, concessions, the club's partners (local firms: $300 a week in League 2, more in each league
+    up), TV, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
+    winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
+    your league position, and the partners' money grows when you go up. The ground doesn't.
+  - **The ground.** A new career's is a field with two metal bleachers, one down each side, and no boards: 1,800
+    seats. It's built up a level at a time in the Stadium building (its Stands tab), and only when you pay:
+
+    | Level | Seats | Boards | Costs |
+    | --- | --- | --- | --- |
+    | 1 Field & bleachers | 1,800 | 6 | (where you start) |
+    | 2 Big bleachers, a press box | 4,200 | 10 | $45,000 |
+    | 3 Covered stands, terraces behind the goals | 8,500 | 14 | $140,000 |
+    | 4 Four stands, floodlights | 16,000 | 18 | $380,000 |
+    | 5 Grand stadium, two tiers | 36,000 | 24 | $1,200,000 |
+
+    Promotion builds nothing: a bigger league brings more fans (and a sold-out ground lets you put the price up),
+    not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
+    Stands tab shows that stand as it is and as the next level would build it, with your boards and names on. The
+    building's door reads the ground's name.
+    - **Boards.** PUT ONE UP ($600 at level 1, more as the ground grows: $900, $1,400, $2,200, $3,500) and it's let to
+      an advertiser at once, by the week: $0.02 a head through the gate in League 2, up to $0.04 in the Premium
+      League. The advertisers' names go on the boards along the far touchline (up to 14 of them; the rest are round
+      the other sides).
+    - **Sponsors.** The shirt, the ground's name and each stand's (the North and South Stands; the East and West Ends
+      too from level 3) are for sale: FIND A SPONSOR and three bid, each a fee a week for one to three seasons (a
+      longer deal pays a little less a week). The same three till tomorrow, then new ones. Bids follow the league
+      (a shirt's about $380 a week in League 2, $14,000 in the Premium League), the ground's level, how full it is
+      and where you are in the table. A deal holds its fee wherever you go, and ends when its seasons are up (the
+      news says so, and the name goes back). The shirt sponsor's colours go on the kit, a patch on the chest; the
+      ground's name and the North Stand's go on the far stand and over the kick-off.
+    - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
+      sponsor's name on it; its shirt may carry a sponsor too.
+    - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
   - **The town.** For now its buildings sit in a row. Manager's Office (squad and contracts, tactics, fixtures,
     finances), Transfer Market, Scouting, Youth Academy, Stadium, Newsstand (news, all four tables, results, top
     scorers) and Your House (your record). The walkable town on the tileset comes next.
@@ -1371,7 +1415,7 @@ where the head sits in each cell) so each player can be put together and recolou
 ```sh
 python3 tools/sprites/make_player_sheet.py --embed-classic
 python3 tools/sprites/make_keeper_sheet.py --embed-classic
-python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch (assets/sprites/pitch_far.png)
+python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch, a strip a ground level (assets/sprites/pitch_far_1..5.png)
 python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9 frames (assets/sprites/ball_preview.png)
 ```
 
