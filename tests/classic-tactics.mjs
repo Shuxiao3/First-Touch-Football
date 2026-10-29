@@ -269,18 +269,18 @@ const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtac
   card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
 ok(mt.ghosts === 7 && mt.faces === mt.men && mt.men === 8 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
 const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent }));
-ok(pre.bench === 5 && /SUBS LEFT 2/.test(pre.head), 'the bench is five, and two subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
+ok(pre.bench === 5 && /SUBS LEFT 3/.test(pre.head), 'the bench is five, and three subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
 const offSi = await page.$eval('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[2].dataset.si));
 await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${offSi}"]`);
 const sub = await page.evaluate(offSi => { const T = window.__T, S = T.SUBS().G, p = T.players().find(q => q.team === 'G' && q.squadIdx === S.on[0]);
   return { used: S.used, off: S.off[0], name: p && p.pname, legs: p && p.stamina, head: document.getElementById('mtSubs').textContent }; }, offSi);
-ok(sub.used === 1 && sub.off === offSi && /\b/.test(sub.name || '') && (sub.name || '').endsWith(onName) && sub.legs === 1 && /SUBS LEFT 1/.test(sub.head),
+ok(sub.used === 1 && sub.off === offSi && /\b/.test(sub.name || '') && (sub.name || '').endsWith(onName) && sub.legs === 1 && /SUBS LEFT 2/.test(sub.head),
    'a sub by drag: ' + sub.name + ' on, fresh legs, ' + sub.head);
-// the second sub, then a third that isn't allowed
-for(const k of [3, 4]){ const si = await page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', (ns, k) => +ns[k].dataset.si, k); await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${si}"]`); await page.waitForTimeout(80); }
+// the second and third subs, then a fourth that isn't allowed
+for(const k of [3, 4, 5]){ const si = await page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', (ns, k) => +ns[k].dataset.si, k); await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${si}"]`); await page.waitForTimeout(80); }
 const sub3 = await page.evaluate(() => ({ used: window.__T.SUBS().G.used, head: document.getElementById('mtSubs').textContent, bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length }));
-ok(sub3.used === 2 && /SUBS LEFT 0/.test(sub3.head), 'a second sub, and no third: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
+ok(sub3.used === 3 && /SUBS LEFT 0/.test(sub3.head) && sub3.bench === 2, 'a second sub and a third, and no fourth: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
 await page.click('#mtacOv [data-mt="back"]'); await page.waitForTimeout(80); await page.click('#pauseMenu [data-pause="back"]');
 
 // what each position can be told, with the ball and without it

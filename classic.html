@@ -994,28 +994,25 @@
   #qsBtn b{ color:var(--acc); font-weight:400; }
   #qsBtn i{ font-style:normal; font-size:9px; color:var(--dim); }
   #qsWrap.hot #qsBtn{ color:var(--ink); box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); }
-  #qsDrop{ display:none; position:absolute; top:calc(100% + 6px); right:0; width:272px; padding:6px; flex-direction:column; gap:5px;
+  #qsDrop{ display:none; position:absolute; top:calc(100% + 4px); right:0; width:200px; padding:4px; flex-direction:column; gap:3px;
     background:rgba(20,26,44,.95); border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); z-index:6; }
   #qsWrap.open #qsDrop{ display:flex; animation:qsDrop .12s steps(3) both; }
   @keyframes qsDrop{ from{ transform:translateY(-8px); opacity:0; } to{ transform:none; opacity:1; } }
-  .qsHead{ display:flex; justify-content:space-between; padding:0 2px; font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); }
-  .qsHead b{ color:var(--acc); font-weight:400; }
-  .qsRow{ display:grid; grid-template-columns:1fr 12px 1fr; align-items:center; gap:6px; min-height:42px; padding:4px 8px; border:0;
-    border-radius:var(--r); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--btnLo); color:var(--ink2); cursor:pointer; text-align:left;
-    font:11px 'FTC Dot',monospace; }
+  .qsRow{ display:grid; grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr); align-items:center; gap:4px; min-height:28px; padding:2px 6px;
+    border:0; border-radius:var(--r); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--btnLo); color:var(--ink); cursor:pointer;
+    text-align:left; font:10px 'FTC Dot',monospace; }
+  .qsRow.plan{ box-shadow:inset 0 -2px 0 0 var(--btnLo), inset 3px 0 0 0 var(--acc); }
   .qsRow.tired{ box-shadow:inset 0 -2px 0 0 var(--btnLo), inset 3px 0 0 0 var(--warn); }
-  .qsRow > span{ display:flex; flex-direction:column; gap:3px; min-width:0; }
-  .qsRow .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
-  .qsRow .k{ font-size:9px; line-height:9px; color:var(--dim); white-space:nowrap; }
-  .qsRow .k em{ font-style:normal; color:var(--bad); } .qsRow .qsIn .k em{ color:var(--good); }
-  .qsRow .statBar{ flex:none; height:4px; }
-  .qsRow .ar{ color:var(--dim); text-align:center; }
   .qsRow.wait{ box-shadow:inset 0 -2px 0 0 var(--btnLo), inset 0 0 0 2px var(--acc); }
-  .qsNone{ padding:6px 4px; font:11px 'FTC Dot',monospace; color:var(--dim); }
-  .qsAll{ align-self:flex-end; min-height:30px; padding:0 10px; border:0; border-radius:var(--r); background:var(--btnLo); color:var(--ink2);
-    cursor:pointer; font:10px 'FTC Dot',monospace; letter-spacing:1px; }
-  #qsMsg{ display:none; position:absolute; top:calc(100% + 6px); right:0; white-space:nowrap; padding:5px 9px; border-radius:var(--r);
-    background:rgba(20,26,44,.92); box-shadow:var(--pxOut); font:11px 'FTC Dot',monospace; color:var(--good); }
+  .qsRow > span{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .qsRow .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .qsRow .statBar{ flex:none; height:2px; }
+  .qsRow .ar{ color:var(--dim); text-align:center; }
+  .qsNone{ padding:3px 4px; font:10px 'FTC Dot',monospace; color:var(--dim); }
+  .qsAll{ align-self:flex-end; min-height:18px; padding:0 4px; border:0; background:none; color:var(--dim); cursor:pointer;
+    font:9px 'FTC Dot',monospace; letter-spacing:1px; }
+  #qsMsg{ display:none; position:absolute; top:calc(100% + 4px); right:0; white-space:nowrap; padding:4px 8px; border-radius:var(--r);
+    background:rgba(20,26,44,.92); box-shadow:var(--pxOut); font:10px 'FTC Dot',monospace; color:var(--good); }
   #qsMsg.on{ display:block; }
   #labResult, .labTallyRow{ background:rgba(20,26,44,.9); border:0; border-radius:var(--r); box-shadow:var(--pxOut); }
   .bldg.sel, .exhClub.open, .labChip.on, .mkPick.on, .slotRow.sel, .pphase.active{ background:var(--rowOn); border-color:var(--acc); box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc); }
@@ -1109,6 +1106,19 @@
   .selRow.dropOver{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc); }
   .selRow.insA::before, .selRow.insB::after{ content:''; position:absolute; left:2px; right:2px; height:3px; background:var(--acc); pointer-events:none; }
   .selRow.insA::before{ top:-3px; } .selRow.insB::after{ bottom:-3px; }
+  /* the Subs tab (mgSubsTab): bars as the Selection tab's, to tap, not drag; the plan down the third column */
+  .qpRow{ min-height:0; display:flex; align-items:center; gap:6px; padding:0 8px; border:0; border-radius:var(--r); background:var(--row);
+    box-shadow:inset 0 -2px 0 0 var(--well); color:var(--ink); font-family:inherit; font-size:12px; line-height:1; text-align:left; cursor:pointer; position:relative; }
+  .qpRow .slK{ flex:none; width:15px; font:9px 'FTC Dot',monospace; color:var(--dim2); }
+  .qpRow .slNm{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .qpRow .slPos{ flex:none; min-width:22px; text-align:right; font:9px 'FTC Dot',monospace; color:var(--dim); }
+  .qpRow .qpTo{ flex:none; font:10px 'FTC Dot',monospace; color:var(--acc); }
+  .qpRow.on{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc); }
+  .qpRow.paired{ box-shadow:inset 0 -2px 0 0 var(--well), inset 3px 0 0 0 var(--acc); }
+  .qpRow:disabled{ opacity:.4; cursor:default; }
+  .qpRow.qpPair{ cursor:default; } .qpRow.qpPair.empty .slNm{ color:var(--dim2); }
+  .qpX{ flex:none; width:24px; align-self:stretch; border:0; background:none; color:var(--bad); font:11px 'FTC Dot',monospace; cursor:pointer; }
+  .qpHint{ grid-row:span 2; padding:4px 2px 0; font:10px/13px 'FTC Dot',monospace; color:var(--dim); }
   /* a man short of fresh: a thin bar along his bar's foot (the token's, on a tactics pitch), as full as he is fit */
   .slCond, .ptkCond{ position:absolute; left:6px; bottom:3px; height:2px; width:calc((100% - 12px) * var(--c)); background:var(--good); pointer-events:none; }
   .slCond.mid, .ptkCond.mid{ background:var(--warn); } .slCond.low, .ptkCond.low{ background:var(--bad); }
@@ -13270,7 +13280,7 @@
   // (one style, with the ball and without it), every man's card (with his stamina) and his spot's instructions. Drag a man onto another to swap their spots;
   // in a career match, drag one off the bench onto a man to bring him on (SUB_MAX a match; the man off can't come back).
   // The other side: look, don't touch. =====
-  const SUB_MAX=2;
+  const SUB_MAX=3;
   let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
   const MT={team:'G', phase:'atk', drop:null, sel:null};
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
@@ -13341,35 +13351,46 @@
     else { let hit=false; for(const ph of ['atk','def']){ const k=li[ph].indexOf(out); if(k>=0){ li[ph][k]=inn; hit=true; } } if(!hit) return false;
       const p=players.find(q=>q.team===t&&q.squadIdx===out); if(p){ applyEntry(p,e,inn); p.staminaCap=p.cond0||1; p.stamina=p.staminaCap; } }   // (on as fresh as he is)
     SUBS[t].used++; SUBS[t].off.push(out); SUBS[t].on.push(inn); return true; }
-  // ===== QUICK SUBS: at the top of the screen, left of your man's card, SUBS and how many you've left. It drops down
-  // your suggested subs -- your most tired men (his ceiling, staminaCap: what he can get his legs back to), each with
-  // the man on the bench who'd do his job best, when he would on his fresh legs against the tired man's -- and it drops
-  // down by itself the first time one of yours gets too tired (QS_TIRED), for a few seconds. Tap one and he's on
-  // there and then, as from the match's tactics -- it doesn't wait for a dead ball, a match has two or three (the
-  // goals, half time) -- or, the man coming off having the ball, as soon as he's played it. ALL SUBS opens the match's
-  // tactics. The keeper isn't one. =====
-  const QS_TIRED=0.6, QS_SHOW=6, QS_OPEN=10;                          // (his ceiling at 60%: about a tenth off his top speed; down by itself 6 s, opened 10)
-  const QS={open:false, autoT:0, told:new Set(), pend:null, msgT:0, key:''};
+  // ===== QUICK SUBS: at the top of the screen, left of your man's card, SUBS and how many you've left. Pressed, it drops
+  // down a short list, a sub a line: in a career match your planned subs first (the training pitch's Subs tab: see
+  // qsPlanned), then your most tired men (his ceiling, staminaCap: what he can get his legs back to), each with the man
+  // on the bench who'd do his job best, when he would on his fresh legs against the tired man's. It never drops down by
+  // itself: when one of yours gets too tired (QS_TIRED) the chip lights up, that's all. Tap a line and he's on there and
+  // then, as from the match's tactics -- it doesn't wait for a dead ball, a match has two or three (the goals, half
+  // time) -- or, the man coming off having the ball, as soon as he's played it. ALL SUBS opens the match's tactics.
+  // The keeper isn't one. =====
+  const QS_TIRED=0.6;                                                 // (his ceiling at 60%: about a tenth off his top speed)
+  const QS={open:false, pend:null, msgT:0, key:''};
   const qsLegs=c=>0.74+0.26*c;                                        // what his ceiling leaves of his top speed (stepOutfield's capFatigue)
   function qsLive(){ return SCREEN==='match'&&!LAB.on&&!practice&&!matchOver&&!!LINEUP.G&&!!SQUAD.G&&mtCanSub('G')&&mtBench('G').length>0; }
   function qsSlot(si){ const k=LINEUP.G.atk.indexOf(si), sl=k>=0?slotsFor('G',formFor('G','atk'),'atk')[k]:null; return sl?{role:sl.role,pos:sl.pos}:null; }
+  // your planned subs (a career's Subs tab: d.qsubs, pairs of roster ids) as this match has them: the man to come off
+  // still on the pitch, the one to come on still on the bench
+  function qsPlanned(){ const d=careerFix&&CAREER&&CAREER.data; if(!d||!Array.isArray(d.qsubs)) return [];
+    const siOf=id=>SQUAD.G.findIndex(e=>e&&e.ri!=null&&d.roster[e.ri]&&d.roster[e.ri].id===id), bench=mtBench('G');
+    return d.qsubs.map(q=>({out:siOf(q.off), inn:siOf(q.on)})).filter(s=>s.out>=0&&s.inn>=0&&bench.includes(s.inn)&&players.some(p=>p.team==='G'&&p.squadIdx===s.out)); }
   function qsSuggest(){
     const left=SUB_MAX-SUBS.G.used-(QS.pend?1:0); if(left<=0) return [];
-    const bench=mtBench('G').filter(si=>{ const e=SQUAD.G[si]; return e&&e.role!=='GK'&&!(QS.pend&&QS.pend.inn===si); });
-    const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&!(QS.pend&&QS.pend.out===p.squadIdx)).sort((a,b)=>(a.staminaCap??1)-(b.staminaCap??1));
-    const out=[], used=new Set();
-    for(const p of men){ const cap=p.staminaCap??1; if(out.length>=Math.min(3,left)||cap>=0.85) break;   // (nobody fresh needs taking off)
+    const n=Math.min(3,left), out=[], usedIn=new Set(), usedOut=new Set();
+    if(QS.pend){ usedIn.add(QS.pend.inn); usedOut.add(QS.pend.out); }
+    const line=(p,inn,planned)=>{ const si=p.squadIdx, cap=p.staminaCap??1, sl=qsSlot(si), eo=SQUAD.G[si], ei=SQUAD.G[inn]; if(!sl||!eo||!ei) return null;
+      usedIn.add(inn); usedOut.add(si); return {out:si, inn, cap, rOut:mtRating(eo,sl.role,sl.pos), rIn:mtRating(ei,sl.role,sl.pos), pos:sl.pos, tired:cap<QS_TIRED, planned}; };
+    for(const s of qsPlanned()){ if(out.length>=n) break; if(usedIn.has(s.inn)||usedOut.has(s.out)) continue;   // (yours first, tired or not)
+      const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out), r=p&&line(p,s.inn,true); if(r) out.push(r); }
+    const bench=mtBench('G').filter(si=>{ const e=SQUAD.G[si]; return e&&e.role!=='GK'&&!usedIn.has(si); });
+    const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&!usedOut.has(p.squadIdx)).sort((a,b)=>(a.staminaCap??1)-(b.staminaCap??1));
+    for(const p of men){ const cap=p.staminaCap??1; if(out.length>=n||cap>=0.85) break;   // (nobody fresh needs taking off)
       const sl=qsSlot(p.squadIdx), eo=SQUAD.G[p.squadIdx]; if(!sl||!eo) continue;
       const rOut=mtRating(eo,sl.role,sl.pos); let best=null, bv=rOut*qsLegs(cap)+1;   // (he has to be better than the tired man is now)
-      for(const si of bench){ if(used.has(si)) continue; const e=SQUAD.G[si], r=mtRating(e,sl.role,sl.pos), v=r*qsLegs(e.cond??1); if(v>bv){ bv=v; best={si,r}; } }
-      if(best){ used.add(best.si); out.push({out:p.squadIdx, inn:best.si, cap, rOut, rIn:best.r, pos:sl.pos, tired:cap<QS_TIRED}); } }
+      for(const si of bench){ if(usedIn.has(si)) continue; const e=SQUAD.G[si], r=mtRating(e,sl.role,sl.pos), v=r*qsLegs(e.cond??1); if(v>bv){ bv=v; best=si; } }
+      if(best!=null){ const r=line(p,best,false); if(r) out.push(r); } }
     return out; }
   function qsDo(s){ const eo=SQUAD.G[s.out], ei=SQUAD.G[s.inn]; QS.pend=null;
     if(!mtCanSub('G')||!eo||!ei||!matchSub('G',s.out,s.inn)) return;
-    QS.open=false; QS.autoT=0; QS.msgT=2.5; rpKey='';
+    QS.open=false; QS.msgT=2.5; rpKey='';
     document.getElementById('qsMsg').innerHTML=surname(ei.name)+' ON · '+surname(eo.name)+' OFF'; }
   function qsMake(s){ const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out);
-    if(p&&ball.ownedBy===p){ QS.pend=s; QS.autoT=0; return; }        // (not with the ball at his feet: once he's played it)
+    if(p&&ball.ownedBy===p){ QS.pend=s; return; }                    // (not with the ball at his feet: once he's played it)
     qsDo(s); }
   function qsRender(sug){ const w=document.getElementById('qsWrap'), left=SUB_MAX-SUBS.G.used;
     w.classList.toggle('open',QS.open); w.classList.toggle('hot',sug.some(s=>s.tired)||!!QS.pend); document.getElementById('qsBtn').disabled=!qsLive();
@@ -13377,33 +13398,30 @@
     document.getElementById('qsLeft').textContent=left;
     document.getElementById('qsMsg').classList.toggle('on',QS.msgT>0&&!QS.open);
     if(!QS.open) return;
+    // a line a sub: the man off (his stamina's ceiling under him) ▸ the man on; yours planned lit down the left, a tired
+    // man's amber, one waiting on the man off playing the ball ringed (… for ▸)
     const row=(s,wait)=>{ const eo=SQUAD.G[s.out], ei=SQUAD.G[s.inn], pc=Math.round(s.cap*100);
-      return '<button class="qsRow'+(s.tired?' tired':'')+(wait?' wait':'')+'" data-qs="'+s.out+':'+s.inn+'">'
-        +'<span class="qsOut"><span class="k"><em>OFF</em> '+s.pos+' '+s.rOut+'</span><span class="nm">#'+eo.num+' '+surname(eo.name)+'</span>'
-        +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">▸</span>'
-        +'<span class="qsIn"><span class="k"><em>ON</em> '+s.pos+' '+s.rIn+'</span><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span>'
-        +'<span class="k">'+(wait?'WHEN HE\'S PLAYED IT':'FRESH')+'</span></span></button>'; };
-    let h='<div class="qsHead"><span>QUICK SUBS</span><span><b>'+left+'</b> LEFT</span></div>';
-    if(QS.pend) h+=row(QS.pend,true);
-    h+=sug.map(s=>row(s,false)).join('')||(QS.pend?'':'<div class="qsNone">Nobody needs taking off yet.</div>');
-    document.getElementById('qsDrop').innerHTML=h+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }
-  // every frame of a match (from the HUD): show it or not, the man coming off once he's played it, the drop-down by
-  // itself for a man who's just got too tired, and drawn again only when something on it has changed
+      return '<button class="qsRow'+(s.planned?' plan':'')+(s.tired?' tired':'')+(wait?' wait':'')+'" data-qs="'+s.out+':'+s.inn+'" title="'+s.pos+' '+s.rOut+' ▸ '+s.rIn+'">'
+        +'<span class="qsOut"><span class="nm">#'+eo.num+' '+surname(eo.name)+'</span>'
+        +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">'+(wait?'…':'▸')+'</span>'
+        +'<span class="qsIn"><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span></span></button>'; };
+    const h=(QS.pend?row(QS.pend,true):'')+sug.map(s=>row(s,false)).join('');
+    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }
+  // every frame of a match (from the HUD): show it or not, the man coming off once he's played it, and drawn again only
+  // when something on it has changed
   function qsTick(dt){
     const w=document.getElementById('qsWrap'), live=qsLive();
     if(QS.msgT>0) QS.msgT-=dt;
     w.classList.toggle('on',live||QS.msgT>0);                         // (the last sub's word on who's on stays up its while)
-    if(!live){ QS.open=false; QS.pend=null; QS.autoT=0; const key='off|'+(QS.msgT>0); if(key!==QS.key){ QS.key=key; qsRender([]); } return; }
+    if(!live){ QS.open=false; QS.pend=null; const key='off|'+(QS.msgT>0); if(key!==QS.key){ QS.key=key; qsRender([]); } return; }
     if(QS.pend){ const p=players.find(q=>q.team==='G'&&q.squadIdx===QS.pend.out); if(!p||ball.ownedBy!==p) qsDo(QS.pend); }
     const sug=qsSuggest();
-    for(const s of sug) if(s.tired&&!QS.told.has(s.out)){ QS.told.add(s.out); if(!QS.open){ QS.open=true; QS.autoT=QS_SHOW; } }
-    if(QS.autoT>0){ QS.autoT-=dt; if(QS.autoT<=0) QS.open=false; }
     const key=[QS.open,!!QS.pend&&QS.pend.out,QS.msgT>0,SUBS.G.used,...sug.map(s=>s.out+'>'+s.inn+'@'+Math.round(s.cap*100))].join('|');
     if(key!==QS.key){ QS.key=key; qsRender(sug); } }
-  function qsReset(){ QS.open=false; QS.autoT=0; QS.told.clear(); QS.pend=null; QS.msgT=0; QS.key=''; }
+  function qsReset(){ QS.open=false; QS.pend=null; QS.msgT=0; QS.key=''; }
   document.getElementById('qsWrap').addEventListener('click',e=>{
     const b=e.target.closest('#qsBtn,[data-qs]'); if(!b) return; b.blur();
-    if(b.id==='qsBtn'){ QS.open=!QS.open; QS.autoT=QS.open?QS_OPEN:0; }   // (opened, it goes back up by itself if it's left 10 s)
+    if(b.id==='qsBtn') QS.open=!QS.open;                               // (only ever opened, and shut, by a press)
     else if(b.dataset.qs==='all'){ QS.open=false; closePause(); openMatchTac(); }
     else { const [out,inn]=b.dataset.qs.split(':').map(Number), s=qsSuggest().find(x=>x.out===out&&x.inn===inn)||(QS.pend&&QS.pend.out===out?QS.pend:null);
       if(s===QS.pend) QS.pend=null; else if(s) qsMake(s); }            // (the one waiting on him playing it: tap it again, and he stays on)
@@ -14819,6 +14837,35 @@
         +'<span class="slPos">'+(sl?sl.pos:natPos(p))+'</span><span class="slOvr">'+(sl?ovrAt(p,sl.role,sl.pos):p.ovr)+'</span>'+condBar(p,'slCond')+'</div>'; };
     const col=(g,hd,a,b)=>{ let h='<div class="selCol" data-grp="'+g+'"><div class="selHd">'+hd+'</div>'; for(let k=a;k<b;k++) h+=row(k); return h+'</div>'; };
     return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)+'</div></div>'; }
+  // ---- YOUR SUBS, PLANNED (the training pitch's Subs tab): up to SUB_MAX subs you'd make in the match, each a man on the
+  // pitch to come off and one on the bench to come on -- in it they're first on the quick subs list, ready to tap
+  // (qsPlanned). Tap a man on the pitch and one on the bench, either first, to pair them; a man paired again leaves his
+  // last pair; ✕ takes a pair off. A pair goes when either man's no longer on the pitch or the bench (see the Selection
+  // tab). The keepers aren't in it. Kept with the career (d.qsubs: the two men's ids).
+  function qpPlans(d){ const lu=ensureLineup(d), R=d.roster, id=ri=>R[ri]&&R[ri].id, xi=new Set(lu.atk.map(id)), bn=new Set(lu.bench.slice(0,BENCH_N).map(id));
+    const ok=q=>q&&xi.has(q.off)&&bn.has(q.on)&&(R.find(p=>p.id===q.on)||{}).role!=='GK';
+    return d.qsubs=(Array.isArray(d.qsubs)?d.qsubs:[]).filter(ok).slice(0,SUB_MAX); }
+  function mgSubsTab(d){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), plans=qpPlans(d), sel=MGUI.qpSel, byId=id=>R.find(p=>p.id===id);
+    const tag=id=>{ const p=byId(id); return p?'#'+(p.num||'')+' '+mgEsc(String(p.name||'').split(' ').slice(-1)[0]):''; };
+    const man=(ri,side,pos,pair)=>{ const p=R[ri]; if(!p) return ''; const gk=p.role==='GK', on=sel&&sel.side===side&&sel.id===p.id;
+      return '<button class="qpRow'+(on?' on':'')+(pair?' paired':'')+'" data-mg="qpick" data-side="'+side+'" data-qid="'+p.id+'"'+(gk?' disabled':'')+'>'
+        +'<span class="slNm">'+mgEsc(initName(p.name))+'</span><span class="slPos">'+pos+'</span>'
+        +(pair?'<span class="qpTo">'+(side==='xi'?'▸ '+tag(pair.on).split(' ')[0]:'◂ '+tag(pair.off).split(' ')[0])+'</span>':'')+condBar(p,'slCond')+'</button>'; };
+    const col=(hd,rows)=>'<div class="selCol"><div class="selHd">'+hd+'</div>'+rows+'</div>';
+    let plan=''; for(let k=0;k<SUB_MAX;k++){ const q=plans[k];
+      plan+=q?'<div class="qpRow qpPair"><span class="slK">'+(k+1)+'</span><span class="slNm">'+tag(q.off)+' ▸ '+tag(q.on)+'</span><button class="qpX" data-mg="qpdel" data-k="'+k+'" aria-label="take this sub off the plan">✕</button></div>'
+        :'<div class="qpRow qpPair empty"><span class="slK">'+(k+1)+'</span><span class="slNm">—</span></div>'; }
+    plan+='<div class="qpHint">'+(sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.':'Tap a man on the pitch, then one on the bench. In the match they\'re first on your quick subs.')+'</div>';
+    return '<div class="selB qpB"><div class="selCols" style="--rows:'+Math.max(lu.atk.length,BENCH_N,SUB_MAX+2)+'">'
+      +col('ON THE PITCH',lu.atk.map((ri,k)=>man(ri,'xi',A[k]?A[k].pos:natPos(R[ri]||{}),plans.find(q=>R[ri]&&q.off===R[ri].id))).join(''))
+      +col('THE BENCH',lu.bench.slice(0,BENCH_N).map(ri=>man(ri,'bench',natPos(R[ri]||{}),plans.find(q=>R[ri]&&q.on===R[ri].id))).join(''))
+      +col('QUICK SUBS · '+plans.length+' OF '+SUB_MAX,plan)+'</div></div>'; }
+  // a man of the pitch and one of the bench, tapped in turn: paired (taking the place of either's last pair)
+  function qpPair(d,off,on){ const plans=qpPlans(d), k=plans.findIndex(q=>q.off===off||q.on===on), q={off,on};
+    const rest=plans.filter(x=>x.off!==off&&x.on!==on);
+    if(k<0&&rest.length>=SUB_MAX) return 'Three planned: take one off first.';
+    if(k>=0){ plans[k]=q; d.qsubs=plans.filter((x,i)=>i===k||(x.off!==off&&x.on!==on)); } else d.qsubs=[...rest,q];
+    return null; }
   // a bar put down on another (list places from and to): on the pitch -- in goal or a spot -- or on anyone when he came off
   // it, the two change places, each taking the other's spots with the ball and without it; on the bench or in the rest,
   // coming from there, he goes in at that place and the men in between move along one
@@ -15069,7 +15116,7 @@
   // ---- the buildings: each door opens one of these screens ----
   const MG_BLDGS={
     club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
-    train:   {title:'TRAINING', sub:'the training pitch: your tactics, and who you take', tabs:['Tactics','Selection','Pitch']},
+    train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take, and your subs', tabs:['Tactics','Selection','Subs','Pitch']},
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'keeps your players going', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
@@ -15219,7 +15266,7 @@
       +'<div class="stadWhat">Trees, flowers, lamps, benches and the rest, bought one at a time and put wherever you like on the campus. They come with '+CLUB_LV[DECOR_CL].n.toLowerCase()+' (clubhouse '+DECOR_CL+').</div></div></div>'
       +'<button class="mgBtn bpPin" data-mg="goclub">◀ THE CLUBHOUSE</button>'; }
   // what's on screen (never saved): the man picked, a bid or deal in progress, list filters
-  const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, stadOffer:null};
+  const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, stadOffer:null, qpSel:null};
   const MG_ROLE_CHIPS=[['ALL','ALL'],['GK','GK'],['DEF','DEF'],['MID','MID'],['ATT','ATT']];
   function mgPhaseLabel(d){ return d.phase==='summer'?'Summer window · day '+d.day+'/'+MG_WINDOW.summer : d.phase==='winter'?'Winter window · day '+d.day+'/'+MG_WINDOW.winter
     : d.phase==='league'?'Matchday '+Math.min(d.md+1,MG_MD)+'/'+MG_MD : d.phase==='playoffs'?'Playoffs':'Season over'; }
@@ -15654,7 +15701,7 @@
     const t=b.tabs?(curTab[id]||b.tabs[0]):null;
     if(id==='club') h+=t==='Squad'?mgSquadTab(d):t==='News'?mgHeadlinesTab(d):t==='League'?mgTablesTab(d)+mgScorersTab(d)
       :t==='Fixtures'?mgFixturesTab(d)+'<div class="bpSect">THE RESULTS</div>'+mgResultsTab(d):mgClubTab(d);
-    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):renderTactics(d,tacPhase);
+    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):t==='Subs'?mgSubsTab(d):renderTactics(d,tacPhase);
     else if(id==='physio') h+=mgPhysioBody(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
@@ -15708,6 +15755,10 @@
       case 'dbuy': case 'dout': { const err=placeStart(d,ds.id,a==='dbuy'); if(err) say(err,'var(--bad)'); else return; break; }
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'var(--bad)':'var(--good)'); break; }
       case 'best8': mgAutoLineup(d); statViewRi=null; say('Your best eight are picked.','var(--good)'); break;
+      case 'qpick': { const side=ds.side, id=+ds.qid, sel=MGUI.qpSel;            // (the Subs tab: see mgSubsTab)
+        if(!sel||sel.side===side){ MGUI.qpSel=sel&&sel.id===id?null:{side,id}; break; }
+        const err=qpPair(d,side==='xi'?id:sel.id,side==='bench'?id:sel.id); MGUI.qpSel=null; if(err) say(err); break; }
+      case 'qpdel': { const plans=qpPlans(d); plans.splice(+ds.k,1); d.qsubs=plans; MGUI.qpSel=null; break; }
     }
     mgRerender();
     if(a==='sel'&&MGUI.sel){ const c=document.querySelector('#bpBody .mgCard'); if(c&&c.scrollIntoView&&!c.closest('.mgPane')) c.scrollIntoView({block:'nearest'}); } }

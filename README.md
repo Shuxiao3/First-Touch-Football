@@ -178,6 +178,12 @@ The same game played like any other football game. It's a copy of `index.html` w
       move along one: a man dragged up into the bench pushes its fifth out to the top of NOT TAKEN; dropped below
       a column's last bar, he goes to the end of it. Over a bar to swap with, it lights; where he'd go in, a line
       shows. The bar follows your finger, a little above it, so you can see what's under it.
+  - **Subs** (in a career, on the training pitch, next to Selection): your quick subs, planned before the match. Three
+    columns: the seven ON THE PITCH, THE BENCH's five, and QUICK SUBS -- up to three pairs, a man on the pitch to come
+    off and one on the bench to come on. Tap one of each (either first) to pair them; a man paired again leaves his
+    last pair for the new one, and ✕ takes a pair off. A paired man's bar is lit down its left edge with the other's
+    number. In the match they're first on your quick subs, ready to tap, tired or not. The career keeps them; a pair
+    goes when either man is no longer on the pitch or the bench (see Selection). The keepers aren't in it.
   - **The width shows on the pitch.** COMPACT draws each line's men closer together and WIDE spreads them, the lines
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
@@ -201,7 +207,7 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **In a match**, the pause menu is five buttons: TACTICS, SKILL MOVES, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's stamina on his card (and the two sides: the other team's
     men show their ratings only). Your five subs are on the bench: drag one onto a man to bring him on, on fresh
-    legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of five
+    legs. That's three subs a match (it was two), and a man taken off can't come back. Every exhibition club has a bench of five
     too (a keeper, a man for each line and another defender), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
   - **The match** has the score, the way you're kicking and the clock along the top, then, top right beside the
@@ -209,16 +215,19 @@ The same game played like any other football game. It's a copy of `index.html` w
     how far it can come back, as over his head) and his skill stars, lit gold up to his number, so you know what
     he can do with the ball. Switch and it's the new man's. A club's man in an exhibition has only his surname
     on his card, so the window gives him a first name, always the same one. No stars over anyone's head now.
-  - **Quick subs**, just left of your man's window: SUBS and how many you've left. Tap it and it drops down your
-    suggested subs -- your most tired men (by how far his stamina can come back, the red tick), each with the man
-    on the bench who'd do his job best, when on fresh legs he'd do it better than the tired man can now (his rating
-    at the spot, the tired man's taken down by what his legs have left). The first time one of yours gets too tired
-    -- his stamina only able to come back to 60%, about a tenth off his top speed -- it drops down by itself and the
-    chip lights up; leave it and it goes back up after six seconds (ten, if you opened it). Tap a row and he's on
-    there and then, as from TACTICS; a man coming off with the ball at his feet goes as soon as he's played it (tap
-    the row again and he stays on). It doesn't wait for the ball to go dead: a match has two or three dead balls,
-    the goals and half time, so a sub that waited for one could wait a half. ALL SUBS opens TACTICS for any other
-    sub. The keeper is never one of them. With no subs left it goes, and it isn't there in a lab.
+  - **Quick subs**, just left of your man's window: SUBS and how many you've left. Press it and a small list drops
+    down, a sub a line -- the man coming off, his stamina under him, ▸ the man coming on: in a career match your
+    planned subs first (Training's **Subs** tab), then your most tired men (by how far his stamina can come back, the
+    red tick), each with the man on the bench who'd do his job best, when on fresh legs he'd do it better than the
+    tired man can now (his rating at the spot, the tired man's taken down by what his legs have left). Three lines at
+    most: 200 px wide and under 120 high. It only ever drops down when you press it, and stays down until you press
+    it again. When one of yours gets too tired -- his stamina only able to come back to 60%, about a tenth off his
+    top speed -- the chip lights up amber, and that's all. Tap a line and he's on there and then, as from TACTICS; a
+    man coming off with the ball at his feet goes as soon as he's played it, his line ringed till then (tap it again
+    and he stays on). It doesn't wait for the ball to go dead: a match has two or three dead balls, the goals and half
+    time, so a sub that waited for one could wait a half. ALL SUBS opens TACTICS for any other sub. The keeper is never
+    one of them. With no subs left it goes, and it isn't there in a lab. (In v63 it was twice the size, and it dropped
+    down by itself.)
   - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
   - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
     phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
