@@ -48,9 +48,9 @@ const odds = (u, man, bc, cp, n = 800, back = false) => page.evaluate(({ u, man,
   const b = T.ball(); b.ownedBy = null; b.x = p.x - atk * 60; b.y = p.y; b.z = 0; b.vx = atk * 400; b.vy = 0;
   p.facing = { x: back ? atk : -atk, y: 0 };
   const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp });
-  const c = { PERFECT: 0, CLEAN: 0, LOOSE: 0, HEAVY: 0 };
-  for(let i = 0; i < n; i++){ const s = T.touchQuality(p, false); c[s > 0.8 ? 'PERFECT' : s > 0.55 ? 'CLEAN' : s > 0.3 ? 'LOOSE' : 'HEAVY']++; }
-  const out = { pressure: +T.touchPressure(p).toFixed(2), third: +T.finalThirdOf(p).toFixed(2), perfect: c.PERFECT / n, clean: (c.PERFECT + c.CLEAN) / n, heavy: c.HEAVY / n };
+  const c = { PERFECT: 0, CLEAN: 0, LOOSE: 0, HEAVY: 0 }; let sum = 0;
+  for(let i = 0; i < n; i++){ const s = T.touchQuality(p, false); sum += s; c[s > 0.8 ? 'PERFECT' : s > 0.55 ? 'CLEAN' : s > 0.3 ? 'LOOSE' : 'HEAVY']++; }
+  const out = { pressure: +T.touchPressure(p).toFixed(2), third: +T.finalThirdOf(p).toFixed(2), perfect: c.PERFECT / n, clean: (c.PERFECT + c.CLEAN) / n, heavy: c.HEAVY / n, mean: +(sum / n).toFixed(3) };
   p.stats = keep; return out; }, { u, man, bc, cp, n, back });
 const pc = v => Math.round(v * 100) + '%';
 await page.evaluate(() => window.__T.freeze());
@@ -68,9 +68,11 @@ const cpLo = await odds(0.25, 30, 6, 2), cpHi = await odds(0.25, 30, 6, 9), cpLo
 ok(cpHi.clean - cpLo.clean >= 0.2 && Math.abs(cpHiBack.clean - cpLoBack.clean) <= 0.05, 'Composure tells under pressure (2: ' + pc(cpLo.clean) + ', 9: ' + pc(cpHi.clean) + ' clean or better), not at the back with nobody near (' + pc(cpLoBack.clean) + ', ' + pc(cpHiBack.clean) + ')');
 const bcLo = await odds(0.25, 30, 2, 6), bcHi = await odds(0.25, 30, 9, 6);
 ok(bcHi.clean - bcLo.clean >= 0.2, 'so does Ball control (2: ' + pc(bcLo.clean) + ', 9: ' + pc(bcHi.clean) + ')');
-// SQUARE TO IT: the same man, his back to the ball as it reaches him (he didn't turn to it in time), takes it worse
+// SQUARE TO IT: the same man, his back to the ball as it reaches him (he didn't turn to it in time), takes it worse --
+// fewer perfect, and a worse touch on average (not fewer clean or better: square to it that's every one, and turned all
+// but a few in a thousand, so 800 tries came out level about one time in twenty)
 const backTurned = await odds(0.25, 0, 3, 3, 800, true);
-ok(backTurned.perfect <= backPoor.perfect - 0.25 && backTurned.clean < backPoor.clean, 'his back to the ball as it gets to him, the same man takes it worse: perfect ' + pc(backTurned.perfect) + ' (square to it ' + pc(backPoor.perfect) + '), clean or better ' + pc(backTurned.clean));
+ok(backTurned.perfect <= backPoor.perfect - 0.25 && backTurned.mean <= backPoor.mean - 0.05, 'his back to the ball as it gets to him, the same man takes it worse: perfect ' + pc(backTurned.perfect) + ' (square to it ' + pc(backPoor.perfect) + '), his touch ' + backTurned.mean + ' on average (' + backPoor.mean + '), clean or better ' + pc(backTurned.clean));
 
 // NO TIMING: a ball rolled to a man is taken as it arrives, nothing pressed. The spread off (First-touch spread 0), so
 // each touch is the likely one: PERFECT at the back with nobody near (dead at his feet); with a man on him in the final

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, GOAL_W, GOAL_H, atkOf, simNow:()=>simNow, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, MK, GOAL_W, GOAL_H, atkOf, simNow:()=>simNow, '
   + 'gkHold:()=>gkHold, setControlled, blockReachOf, swipeAcross, shootAt, proj, draw:()=>draw(), cam:v=>{ camX=v; }, stick:(x,y)=>{ window.__stick={x,y}; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
@@ -48,20 +48,20 @@ info('blocks: ' + JSON.stringify({ on, edge1, edge10 }));
 ok(on.blocked && on.out < 600, 'a shot struck through a defender is blocked: it comes off him at ' + on.out + ' px/s (struck at 950)');
 ok(edge10.blocked && !edge1.blocked && edge10.reach - edge1.reach <= 7, 'one passing 1 m off him: blocked at Def IQ 10 (reach ' + edge10.reach + ' px), not at 1 (' + edge1.reach + ' px)');
 
-// THE KEEPER CLOSES YOU DOWN: you, on the ball, running straight at their goal from 22 m out -- he comes off his line as
-// you come, then goes straight at the ball and takes it off you
+// THE KEEPER CLOSES YOU DOWN: you, on the ball, running straight at their goal from 25 m out (the pitch's metres: he
+// goes by the box, 16.5 m) -- he comes off his line as you come, then goes straight at the ball and takes it off you
 const kpr = await page.evaluate(() => {
   const T = window.__T, c = T.players().find(q => q.team === 'G'); T.setControlled(c); T.freeze();
   const atk = T.atkOf('G'), gx = atk > 0 ? T.FW : 0, kp = T.keepers().find(k => k.team !== 'G');
   window.__park([c]); kp.x = kp.homeX; kp.y = T.YC; kp.mode = 'line'; kp.diveT = 0; kp.groundT = 0;
-  c.x = gx - atk * 560; c.y = T.YC + 40; c.vx = c.vy = 0; c.state = 'normal';
+  c.x = gx - atk * 25 * T.MK; c.y = T.YC + 40; c.vx = c.vy = 0; c.state = 'normal';
   const b = T.ball(); b.ownedBy = c; b.dribbler = null; b.x = c.x + atk * 25; b.y = c.y; b.z = 0; b.vx = b.vy = 0; b.shotT = 0;
-  T.stick(atk, 0); let outAt450 = null;
-  return window.__until(5, () => T.gkHold() === kp ? { held: true } : undefined, () => { const bo = Math.abs(gx - b.x); if(outAt450 === null && bo < 450) outAt450 = Math.round(Math.abs(gx - kp.x)); })
-    .then(r => { T.stick(0, 0); return Object.assign(r || { held: false }, { ballOut: Math.round(Math.abs(gx - b.x)), kpOut: Math.round(Math.abs(gx - kp.x)), outAt450 }); });
+  T.stick(atk, 0); let outAt20 = null;
+  return window.__until(5, () => T.gkHold() === kp ? { held: true } : undefined, () => { const bo = Math.abs(gx - b.x); if(outAt20 === null && bo < 20 * T.MK) outAt20 = Math.round(Math.abs(gx - kp.x)); })
+    .then(r => { T.stick(0, 0); return Object.assign(r || { held: false }, { ballOut: Math.round(Math.abs(gx - b.x)), kpOut: Math.round(Math.abs(gx - kp.x)), outAt20 }); });
 });
 info('the keeper and you: ' + JSON.stringify(kpr));
-ok(kpr.outAt450 >= 40 && kpr.outAt450 <= 110, 'coming in on goal, the keeper comes off his line to narrow the angle (' + kpr.outAt450 + ' px out with you 18 m out)');
+ok(kpr.outAt20 >= 40 && kpr.outAt20 <= 110, 'coming in on goal, the keeper comes off his line to narrow the angle (' + kpr.outAt20 + ' px out with you 20 m out)');
 ok(kpr.held && kpr.kpOut > 120 && kpr.ballOut > 150, 'then he goes at the ball and takes it off you, ' + Math.round(kpr.kpOut / 25) + ' m off his line');
 
 // CROSSES: one whipped into his six-yard box he comes for and catches, over their heads; one to the edge of the box he

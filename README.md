@@ -754,13 +754,14 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Crosses find a man.** The computer's crosses went where nobody was. Measured over whole matches, the man a cross
   was for was within 1.5 m of it at head height a quarter of the time, and a fifth of them were headed by one of ours.
   - **Waiting in the box.** With the ball out wide in their third, the men going into the box take spots a cross can
-    find, all inside the posts (5 m either side of the middle). Before, a forward would come toward the man on the
-    ball, out past the near post.
+    find, all inside the posts (5.6 m either side of the middle: the goals are the men's size, not the pitch's). How
+    far out they wait goes by the pitch's markings, so it's the same spot in the box whatever the pitch's size. Before,
+    a forward would come toward the man on the ball, out past the near post.
 
     | In the box | Where they wait |
     | --- | --- |
     | One | The middle of the box, 9 m out |
-    | Two | One favouring each post: 3.6 m toward the ball's side and 7 m out, and 4.2 m to the far side and 8 m out |
+    | Two | One favouring each post: 4 m toward the ball's side and 7 m out, and 4.7 m to the far side and 8 m out |
     | Three | The two posts, and one in the middle 12 m out, far enough back that a cross to him clears the keeper |
     | Four | And one on the edge of the box, 16 m out, toward the ball's side |
 
@@ -1299,12 +1300,26 @@ test, and like the Trap Lab the values are the game's settings.
 
 - **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
   and possession-aware team phases, on a pitch shaped like a real one (105 × 68) and marked like one --
-  penalty areas, six-yard boxes, penalty spots and arcs, the centre circle and the corners -- at nine-tenths
-  of the men's size: they're 25 px to the metre, the pitch 22.5 (2362.5 × 1530; it was 2625 × 1700 at 25).
-  The goals are the men's size, so a little wider than real ones. The camera is as it was: it always shows
-  the full width, the far touchline under the stand and the near one nine-tenths of the way down the
-  screen (the lawn past it below), the men, the ball and the goals as big as ever, and it follows play along
-  the length.
+  penalty areas, six-yard boxes, penalty spots and arcs, the centre circle and the corners -- at 0.81 of the
+  men's size: they're 25 px to the metre, the pitch 20.25 (2126.25 × 1377). It was 2625 × 1700 at 25, then a
+  tenth smaller every way (2362.5 × 1530 at 22.5), and a tenth smaller again. What goes by the pitch shrinks with
+  it: its markings, where the men wait in the box for a cross, where the keeper starts coming off his line (5 m
+  outside his box) and how far out a cross can be struck from (24 m). What goes by the men doesn't: their size and
+  pace, how far they'll shoot and pass from, and the goals, the men's size, so a little wider than real ones. The camera is as it was: it always shows the full width, the far touchline
+  under the stand and the near one 0.81 of the way down the screen (the lawn past it below, under the
+  buttons), the men, the ball and the goals as big as ever, and it follows play along the length: at the
+  kick-off both penalty areas are in sight on a phone held sideways. The far stand's middle -- its name, its
+  boards -- is over the halfway line (it was drawn for the first pitch, and sat a little right of halfway).
+  - **What the smaller pitch did** (80 club pairings, each played on both pitches, every man on the computer,
+    6-minute matches): goals 2.56 a match → 3.02 (the median 2 → 3), shots 7.3 → 10.0, more from every distance
+    (under 11 m 1.8 → 2.1, 11 to 20 m 3.4 → 4.4, 20 m and more 2.1 → 3.5), a few more of them saved or missed (35%
+    scored → 30%). Pairing by pairing, +0.46 goals a match (95%: +0.01 to +0.99): more in 36, fewer in 26, the same
+    in 18; a run before the box spots went by the pitch's metres gave +0.55. The men run as fast as ever over less
+    ground, and how far they'll shoot and pass from is theirs, not the pitch's.
+- **Full time**: a goal in the last play (the advantage after the clock's run out) counts once and ends the match.
+  The ball's left in the net, and it used to count again every time the celebration ran out: on the full-time
+  screen the score kept climbing, and a career match, its result read a moment later, gave the scorers a goal or
+  two they never scored.
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a

@@ -2066,10 +2066,11 @@
     setStyle(tacTeam,b.dataset.otac);markTac();saveSettings();
   });
 
-  // ===== pitch: a real pitch's shape (105 x 68) and markings, at nine-tenths of the men's size -- the men are 25 px to
-  // the metre, the pitch 22.5 (it was 25: a tenth smaller every way, for the same men); the whole width stays in view =====
-  const PX_M=25, PITCH_K=0.9, MK=PX_M*PITCH_K;          // the men's metre, and the pitch's
-  const FW=105*MK, FH=68*MK;                             // (2362.5 x 1530; it was 2625 x 1700)
+  // ===== pitch: a real pitch's shape (105 x 68) and markings, at 0.81 of the men's size -- the men are 25 px to the
+  // metre, the pitch 20.25 (it was 25, then 22.5: a tenth smaller every way twice over, for the same men); the whole width
+  // stays in view =====
+  const PX_M=25, PITCH_K=0.81, MK=PX_M*PITCH_K;         // the men's metre, and the pitch's
+  const FW=105*MK, FH=68*MK;                             // (2126.25 x 1377; it was 2362.5 x 1530, and 2625 x 1700 before that)
   const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
   // the markings, a real pitch's at the pitch's metre: penalty area 16.5 x 40.32, goal area 5.5 x 18.32, the penalty
   // spot 11 out, the arc and the centre circle 9.15. (The goal is the men's size, so a little wider than a real one.)
@@ -2907,8 +2908,8 @@
   // PERSP 1: depth is spread evenly down the screen, so the middle of the pitch (and the goals on it) sits in the
   // middle between the touchlines; things further off are still drawn smaller
   const HORIZON=100, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;   // far touchline at 100: room for the stand
-  // VIEW_D: how deep the camera sees, the far touchline at HORIZON to NEAR_Y -- the old pitch's width, so the men, the
-  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes nine-tenths of the way down
+  // VIEW_D: how deep the camera sees, the far touchline at HORIZON to NEAR_Y -- the first pitch's width, so the men, the
+  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes 0.81 of the way down
   const VIEW_D=1700;
   let camHalf=(W/2)/NEAR_SCALE+14;
   let camMin=camHalf, camMax=FW-camHalf;
@@ -8564,11 +8565,13 @@
   // WAITING FOR A CROSS: with the ball out wide in their third, the men going in the box -- the forwards, a midfielder
   // told to get in it, the far winger come in to the back post -- wait where a cross can find them: one man on his own in
   // the middle of the box; two, one favouring each post; three, the posts and one in the middle a little further out,
-  // beyond where the keeper comes for it; a fourth at the edge of the box. (Spots: how far out, and how far across toward
-  // the ball's side, in px.) Whoever's nearest each spot takes it, and keeps it unless a swap saves a good few strides.
+  // beyond where the keeper comes for it; a fourth at the edge of the box. (Spots: how far out, in the pitch's metres --
+  // they go by its markings: the middle 9 m out, the posts 7 and 8, the back man 12, the fourth on the box's edge -- and
+  // how far across toward the ball's side, in px, by the posts.) Whoever's nearest each spot takes it, and keeps it
+  // unless a swap saves a good few strides.
   // None of them leaves the box to come and help the man on the ball (see planSupport) or goes on a run (planRun).
-  const BOX_SLOTS=[[['BOXMID',200,0]], [['NEARPOST',160,80],['FARPOST',185,-95]], [['NEARPOST',160,80],['FARPOST',185,-95],['BOXBACK',265,-10]],
-                   [['NEARPOST',160,80],['FARPOST',185,-95],['BOXBACK',265,-10],['BOXEDGE',370,70]]];
+  const BOX_SLOTS=[[['BOXMID',8.9*MK,0]], [['NEARPOST',7.1*MK,80],['FARPOST',8.2*MK,-95]], [['NEARPOST',7.1*MK,80],['FARPOST',8.2*MK,-95],['BOXBACK',11.8*MK,-10]],
+                   [['NEARPOST',7.1*MK,80],['FARPOST',8.2*MK,-95],['BOXBACK',11.8*MK,-10],['BOXEDGE',16.4*MK,70]]];
   const BOX_SPOT=new Set(['NEARPOST','FARPOST','BOXMID','BOXBACK','BOXEDGE']);
   function boxSlots(S,U,uOn,sc){
     const men=[]; for(const [q,a] of S.jobs) if(a.job==='BOX'||a.job==='BACKPOST'||a.job==='LATE') men.push(q);
@@ -11347,7 +11350,9 @@
         else { ball.x=gx-side*ball.r; ball.vx=-side*Math.abs(ball.vx)*0.55; ball.vy*=0.8; endCurve(); continue; }   // the wall
       }
       netStep(side,dt);
-      if(scoredT<=0&&!gkHold&&!ballFixed&&side*(ball.x-gx)>ball.r) goal(side);   // all of it over the line
+      if(scoredT<=0&&!matchOver&&!gkHold&&!ballFixed&&side*(ball.x-gx)>ball.r) goal(side);   // all of it over the line (not
+      // once it's over: a goal in the last play ends the match with the ball still in the net, and it used to count again
+      // every time the celebration ran out -- a phantom goal or two before a career's result was read, and more after)
     }
     netRelax(dt);
 
@@ -11932,6 +11937,9 @@
         for(let k=0;k<w-1;k++) ctx.fillRect(X+2,Y-h+k*2,2*(w-1-k),2);
       }
     }
+    // the far stand was drawn for the first pitch, 2625 long: it's put where its middle -- its name, its boards -- is over
+    // this one's halfway line (it used to sit where that pitch's was, a little right of this one's)
+    const STAND_OFF=(FW-2625)/2;
     function draw(){
       if(!(cfg.enabled&&cfg.ready)) return false;
       const M=PITCH_ART_META, top=HORIZON-2*M.h-14;
@@ -11941,7 +11949,7 @@
       ctx.save(); ctx.imageSmoothingEnabled=false;
       ctx.drawImage(off,0,0,W,H);
       if(top>0){ ctx.fillStyle='#a8d8f0'; ctx.fillRect(0,0,W,top); }
-      ctx.drawImage(cfg.strip, Math.round((W/2+(M.x0-camX)*M.k*2)/2)*2, top, M.w*2, M.h*2);
+      ctx.drawImage(cfg.strip, Math.round((W/2+(M.x0+STAND_OFF-camX)*M.k*2)/2)*2, top, M.w*2, M.h*2);
       flags();
       ctx.restore();
       return true;
@@ -11982,7 +11990,8 @@
     if(PITCH_ART && PITCH_ART_META.w){ const keys=Object.keys(PITCH_ART); let n=0;
       for(const k of keys){ const im=new Image(); im.onload=()=>{ cfg.strips[k]=im; if(++n===keys.length){ cfg.ground=MATCH_GROUND; compose(); cfg.ready=!!cfg.strip; } };
         im.onerror=()=>{ cfg.ready=false; }; im.src=PITCH_ART[k]; } }
-    return { draw, front, resize, cfg, setGround, picture, px3, px3w, get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, enable(v){ cfg.enabled=(v!==false); } };
+    return { draw, front, resize, cfg, setGround, picture, px3, px3w, get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, enable(v){ cfg.enabled=(v!==false); },
+      get standMid(){ const M=PITCH_ART_META; return M.x0+STAND_OFF+M.w/2/M.k; } };   // (the pitch x the far stand's middle is over)
   })();
   try{ window.PITCH=PITCH; }catch(e){}
   // ===== END PITCH ART =========================================================================
