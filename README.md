@@ -209,6 +209,16 @@ The same game played like any other football game. It's a copy of `index.html` w
     how far it can come back, as over his head) and his skill stars, lit gold up to his number, so you know what
     he can do with the ball. Switch and it's the new man's. A club's man in an exhibition has only his surname
     on his card, so the window gives him a first name, always the same one. No stars over anyone's head now.
+  - **Quick subs**, just left of your man's window: SUBS and how many you've left. Tap it and it drops down your
+    suggested subs -- your most tired men (by how far his stamina can come back, the red tick), each with the man
+    on the bench who'd do his job best, when on fresh legs he'd do it better than the tired man can now (his rating
+    at the spot, the tired man's taken down by what his legs have left). The first time one of yours gets too tired
+    -- his stamina only able to come back to 60%, about a tenth off his top speed -- it drops down by itself and the
+    chip lights up; leave it and it goes back up after six seconds (ten, if you opened it). Tap a row and he's on
+    there and then, as from TACTICS; a man coming off with the ball at his feet goes as soon as he's played it (tap
+    the row again and he stays on). It doesn't wait for the ball to go dead: a match has two or three dead balls,
+    the goals and half time, so a sub that waited for one could wait a half. ALL SUBS opens TACTICS for any other
+    sub. The keeper is never one of them. With no subs left it goes, and it isn't there in a lab.
   - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
   - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
     phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
@@ -1420,9 +1430,11 @@ test, and like the Trap Lab the values are the game's settings.
   tactic allows; it doesn't drop for a forward standing on it (he'd be offside), only the defender with a
   runner in his zone drops with him -- off where the run's taking him by the time he's there, as his Def IQ
   reads it (see the man pressing, below): into the space the runner's going into at 10, off where he is at
-  1. When he picks the runner up he holds his line a beat, a tenth of a second, before he turns and goes
-  with him (about a twentieth of a run in behind: half a stride on him for the runner); a man in front
-  of him he's been told to STEP UP to he goes to at once. A pressing side's man on his man in their build-up
+  1. When he picks the runner up holding his place in the line, he holds it a beat, a tenth of a second,
+  before he turns and goes with him (about a twentieth of a run in behind: half a stride on him for the
+  runner); one already pressing, shadowing or tracking a man goes with him at once, and so does one going
+  to a man in front of him he's been told to STEP UP to. (In v62 the beat caught a man already shadowing
+  the runner too, stopping him mid-run: about a metre and a half more than meant. v63 put that right.) A pressing side's man on his man in their build-up
   reads him the same way, without the beat. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. The midfield stays a
   line: a man of theirs sitting between our lines, the midfielder nearest him drops a couple of yards at most
@@ -1467,7 +1479,11 @@ test, and like the Trap Lab the values are the game's settings.
     1.30, pairing by pairing +0.09 (95%: -0.19 to +0.40), shots 4.5 → 4.8: up a little, not by enough to tell from
     chance in 80 matches. The beat is in those numbers too; on its own it's too small to measure in 80. (v61 scored
     1.21 here and 1.15 in its own measurement: the matches' randomness isn't seeded, so two runs of the same
-    version differ by about that much.)
+    version differ by about that much.) v62's beat caught too many defenders (see above); measured again on v63,
+    with it as meant, against the same v61 matches: through balls 4.4 a match, getting to the runner 63% (cut out
+    30%), 14% of them round their line and 71% of those getting there; a shot within 4 s of one getting to him
+    1.26 a match, a goal within 6 s 0.41; goals 1.26 a match, +0.05 on v61 pairing by pairing (95%: -0.21 to
+    +0.39). So it's the ball that gets there more often; some of v62's extra shots were probably the beat.
 - **Positional play (the neutral style)** — with the ball, a side on the neutral style plays off one plan
   for the whole team, and every man has a job in it. The centre-backs are the rest defence: level with
   the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and
@@ -1742,6 +1758,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, the first touch, the players' sprites and
+a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, quick subs, the first touch, the players' sprites and
 the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

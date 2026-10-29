@@ -115,13 +115,15 @@ const bl3u = bl3.map(j => j.u), bl3t = bl3.find(j => j.tr);
 ok(bl3t && Math.max(...bl3u) - Math.min(...bl3u) <= 2.3, `the midfield stays a line, the man on him no more than 2 m off it (${bl3u.join(', ')} m; he used to drop to ~65)`);
 
 // --- HOLDING THE LINE: City's forward going in behind at 8 m/s, 4 m in front of Liverpool's back line, in a centre-back's
-// zone: the centre-back holds his line a beat (a tenth of a second) before he turns and goes with him
+// zone, the centre-back holding his place in it: he holds his line a beat (a tenth of a second) before he turns and goes
+// with him. (One already pressing or shadowing the man goes with him at once: see classic-shots.mjs's runner into space.)
 const hold = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');
   const R = window.__men('R'), c = R.find(q => window.__pos(q, 'atk') === 'CM'), st = R.find(q => window.__pos(q, 'atk') === 'ST');
   const cb = window.__men('G').find(q => q.slotDef && q.slotDef.role === 'DEF');
   window.__give(c, 42, 16);
   const s0 = T.blockSpot(cb), [u0, w0] = window.__uw('R', s0.x, s0.y);
   window.__at(st, u0 - 4, w0); const a = T.atkOf('R'); st.vx = a * 8 * T.MK; st.seenVx = st.vx; st.vy = st.seenVy = 0;
+  cb.blockAt = T.simNow();   // (holding his place in the line when the run comes: see aiBrain)
   const at = () => { const s = T.blockSpot(cb), [u] = window.__uw('R', s.x, s.y); return { u: +u.toFixed(2), tr: !!s.track }; };
   T.adv(0.01); const h0 = at(); T.adv(0.06); const h1 = at(); T.adv(0.06); const h2 = at();
   return { line: +u0.toFixed(2), h0, h1, h2 }; });

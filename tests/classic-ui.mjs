@@ -442,7 +442,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
       chips: [...document.querySelectorAll('#readout .chip')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.id || e.textContent.trim().slice(0, 6)) }; });
   ok(g.left === 0 && Math.abs(g.width - 844) < 1 && Math.abs(g.height - 390) < 2 && g.W > 1100, 'the game fills the phone: ' + Math.round(g.width) + 'x' + Math.round(g.height) + ', ' + g.W + ' wide inside (no bands)');
   ok(g.inside, 'the buttons stand over the bottom-right corner of the pitch, as they did before the bands');
-  ok(String(g.chips) === 'rScore,rDir,⏱ 0:0,rPlayer,menuBtn' || (g.chips.length === 5 && g.chips[0] === 'rScore' && g.chips[3] === 'rPlayer' && g.chips[4] === 'menuBtn'), 'the HUD: score, direction, clock, your man\'s window, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
+  ok(g.chips.length === 6 && g.chips[0] === 'rScore' && g.chips[1] === 'rDir' && g.chips[3] === 'qsBtn' && g.chips[4] === 'rPlayer' && g.chips[5] === 'menuBtn', 'the HUD: score, direction, clock, quick subs, your man\'s window, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
   const e1 = await hudWin(page);
   ok(winOk(e1, false), 'an exhibition: his window says who he is -- a club\'s man has only his surname, so he\'s given a first name (' + e1.num + ' ' + e1.name + ' ' + e1.pos + ')' + (winOk(e1, false) ? '' : ' ' + JSON.stringify(e1)));
   // (looked at two frames on: a tired man standing gets it back quickly, and the game soon switches you to whoever's best placed)
