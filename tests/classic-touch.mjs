@@ -4,8 +4,9 @@
 // his Ball control and Composure. Nobody presses anything: you and the computer alike, it's taken as it arrives -- a
 // PERFECT touch dead at your feet, a worse one off you. The reach is smaller (18 to 32, was 25 to 45). A man the ball
 // is coming to turns his body to it, as quick as his Agility lets him, and moves however he must to get to it (slower
-// side-on, slower still backing off); one who hasn't got round to it takes it worse. On the pitch: one solid green
-// ring under the man you control (no dotted one), and the ball in whole pixels, as the players are. Above the waist the
+// side-on, slower still backing off); one who hasn't got round to it takes it worse. On the pitch: a dotted green ring
+// round the man you control at his reach (a ball touching it is in it), bright with the ball in it, and the ball in whole
+// pixels, as the players are. Above the waist the
 // touch is never PERFECT: chest high, it comes off him by his Ball control. And the directional first touch as it's
 // played on a phone, with real flicks on SKILL.
 // On a copy of the game that lets the test set the scene.
@@ -214,28 +215,42 @@ info('a first-time ball into space: ' + JSON.stringify(ot));
 ok(ot.switched && ot.wait >= 0.14 && ot.wait <= 0.36 && ot.held, 'a first-time pass into space puts you on the man best placed for it (he takes ' + ot.wait + ' s to see it\'s his)');
 ok(ot.inWait <= 8 && ot.after >= 60, '...he waits that beat, then goes to meet it (' + ot.inWait + ' px, then ' + ot.after + ' px), the stick you aimed it with left out of it');
 
-// ON THE PITCH: the man you control has one solid green ring at his reach; the ball is drawn in whole pixels
+// ON THE PITCH: the man you control has a dotted green ring round his reach (Ball control) -- a ball touching it is in
+// his reach -- bright with the ball in it, faint with it out of his reach; the ball is drawn in whole pixels
 const look = await page.evaluate(() => {
   const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team), cv = document.querySelector('canvas'), g = cv.getContext('2d'); T.freeze();
   for(const q of T.players()) if(q !== c){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = 90; }
   c.x = T.FW / 2; c.y = T.YC + 250; c.vx = c.vy = 0;
   const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.x = c.x + atk * 160; b.y = c.y - 160; b.vx = b.vy = 0; b.z = 0; b.vz = 0;
-  const hex = (x, y) => { const d = g.getImageData(x, y, 1, 1).data; return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join(''); };
-  T.cam(c.x); T.draw();   // (the camera on him, wherever the last scene left it)
-  const R = T.controlROf(c), ring = [];
-  // (the ring is snapped to the pitch's 2 px pixels: look within a pixel or two of where each point of it falls)
-  const near = (x, y) => { const d = g.getImageData(Math.round(x) - 3, Math.round(y) - 3, 7, 7).data; for(let i = 0; i < d.length; i += 4) if(d[i] === 0x9d && d[i + 1] === 0xff && d[i + 2] === 0x3c) return '#9dff3c'; return hex(Math.round(x), Math.round(y)); };
-  for(const a of [0, 0.5, 1.2, 1.9, 2.6, Math.PI]){ const s = T.proj(c.x + Math.cos(a) * R, c.y + Math.sin(a) * R); ring.push(near(s.x, s.y)); }
+  const G = [0x9d, 0xff, 0x3c], px = (x, y) => Array.from(g.getImageData(x, y, 1, 1).data.slice(0, 3)), isG = p => p.every((v, i) => v === G[i]);
+  const off = p => Math.hypot(p[0] - G[0], p[1] - G[1], p[2] - G[2]);
+  // the 2 px cells (the ring's snapped to them) where its points fall, at r round him, from a0 to a1
+  // (finely enough to land in every one of them: stepping over some, it could miss every other one, the dots)
+  const cellsAt = (r, a0, a1) => { const out = [], n = Math.ceil((a1 - a0) * 120); for(let i = 0; i <= n; i++){ const a = a0 + (a1 - a0) * i / n, s = T.proj(c.x + Math.cos(a) * r, c.y + Math.sin(a) * r), k = [Math.floor(s.x / 2) * 2, Math.floor(s.y / 2) * 2];
+    if(!out.some(e => e[0] === k[0] && e[1] === k[1])) out.push(k); } return out; };
+  T.cam(c.x);   // (the camera on him, wherever the last scene left it: before working out where on the screen it falls)
+  const R = T.controlROf(c), ring = cellsAt(R, 0, Math.PI);   // (its near side: the far side's behind him)
+  const side = atk > 0 ? [Math.PI - 0.6, Math.PI] : [0, 0.6];   // (on the side away from the ball, where it runs up the screen)
+  const read = () => { T.cam(c.x); T.draw(); return { ring: ring.map(([x, y]) => px(x, y)), at: [R - 8, R, R + 8].map(r => cellsAt(r, side[0], side[1]).filter(([x, y]) => isG(px(x, y))).length) }; };
+  b.x = c.x + atk * (R + b.r - 1); b.y = c.y;            // the ball just touching it: his to take
+  const inIt = read();
+  b.x = c.x + atk * 160; b.y = c.y - 160;                // 9 m off, out of his reach
+  const away = read();
+  const on = inIt.ring.map(isG), lit = away.ring.filter((p, i) => on[i]), gaps = away.ring.filter((p, i) => !on[i]).map(off).sort((x, y) => x - y);
   const s = T.proj(b.x, b.y, 0), box = g.getImageData(Math.round(s.x) - 12, Math.round(s.y) - 22, 24, 26).data, cols = new Set();
   for(let i = 0; i < box.length; i += 4) cols.add('#' + [box[i], box[i + 1], box[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''));
   SPRITE.disable(); T.draw();
   const box2 = g.getImageData(Math.round(s.x) - 12, Math.round(s.y) - 12, 24, 24).data, cols2 = new Set();
   for(let i = 0; i < box2.length; i += 4) cols2.add('#' + [box2[i], box2[i + 1], box2[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''));
   SPRITE.enable();
-  return { ring, pixel: ['#1c1c28', '#f8f8f4', '#2c2c3c'].filter(k => cols.has(k)), plain: cols2.has('#f4f7ee') };
+  const faint = lit.map(off).sort((x, y) => x - y);
+  return { cells: on.length, on: on.filter(Boolean).length, at: inIt.at, faintBright: lit.filter(isG).length, faint: Math.round(faint[faint.length >> 1]), grass: Math.round(gaps[gaps.length >> 1]),
+    pixel: ['#1c1c28', '#f8f8f4', '#2c2c3c'].filter(k => cols.has(k)), plain: cols2.has('#f4f7ee') };
 });
 info(JSON.stringify(look));
-ok(look.ring.every(h => h === '#9dff3c'), 'one solid green ring at his reach, all the way round its near side (' + look.ring.join(' ') + ')');
+ok(look.on >= look.cells * 0.3 && look.cells - look.on >= look.cells * 0.25, 'the man you control has a dotted green ring: ' + look.on + ' of the ' + look.cells + ' pixels round its near side lit');
+ok(look.at[1] >= 2 && look.at[0] === 0 && look.at[2] === 0, 'it\'s round his reach (Ball control: a ball touching it is in it), not inside it or out past it (' + look.at.join(' / ') + ' lit 8 px in, on it, 8 px out)');
+ok(look.faintBright === 0 && look.faint < look.grass - 25, 'bright with the ball in it, faint with it out of his reach (its dots ' + look.faint + ' off the bright green, the grass between them ' + look.grass + ')');
 ok(look.pixel.length === 3, 'the ball in whole pixels: its outline, white and patches (' + look.pixel.join(' ') + ')');
 ok(look.plain, 'with the sprites off, the plain round ball is back');
 // NO SKILL STARS OVER HIS HEAD: they're in your man's window at the top right now (see classic-ui) -- nothing gold over

@@ -30,7 +30,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={readSkill, skillFor, startSkill, mkSkill, setSkill:s=>{ skill=s; }, skill:()=>skill, grade:()=>lastGrade, controlled:()=>controlled, players:()=>players, keepers:()=>keepers, ball:()=>ball, simNow:()=>simNow, atkOf, FW, YC, proj, screenDirToPitch, SKILL_STARS, SKILL_NAME, '
+patch('  const LAB_TITLE=', '  window.__T={readSkill, skillFor, startSkill, mkSkill, cam:v=>{ camX=v; }, setSkill:s=>{ skill=s; }, skill:()=>skill, grade:()=>lastGrade, controlled:()=>controlled, players:()=>players, keepers:()=>keepers, ball:()=>ball, simNow:()=>simNow, atkOf, FW, YC, proj, screenDirToPitch, SKILL_STARS, SKILL_NAME, '
   + 'STAR_ODDS, starPot, starsAt, starLeague, get SKILL_CLIPS(){ return SKILL_CLIPS; }, get SKILL_DRAWS(){ return SKILL_DRAWS; }, SKILL_KINDS, clipSig:()=>hashStr(String(mkSkill)+String(skillStep)), hold:()=>holdMode, press:()=>{ skillG={t0:simNow, pts:[{x:500,y:300}], mouse:false}; }, release:()=>{ skillG=null; holdMode=null; }, nickWindowOf, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
 patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, careerStars, careerStarPot, starLeague, starsAt, natPos, mgAgeWorld, mgYouthIntake};\n  // ===== END MANAGER CAREER');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');
@@ -79,7 +79,7 @@ const DRAW = `((T, p, f, name) => { const a = T.proj(p.x, p.y), b = T.proj(p.x +
 await page.evaluate(`window.__SH = ${SHAPES}; window.__DRAW = ${DRAW};`);
 
 const gest = await page.evaluate(() => { const T = window.__T, p = T.controlled(), out = {}, keep = { x: p.x, y: p.y };
-  p.x = T.FW / 2; p.y = T.YC;
+  p.x = T.FW / 2; p.y = T.YC; T.cam(p.x);   // (the camera on him: off to one side, the way a stroke shows on the pitch leans)
   for(const [fx, fy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){
     const f = { x: fx, y: fy }, right = { x: -fy, y: fx }, key = fx > 0 ? 'E' : fx < 0 ? 'W' : fy > 0 ? 'S' : 'N';
     p.vx = fx * 150; p.vy = fy * 150; p.facing = { x: fx, y: fy };

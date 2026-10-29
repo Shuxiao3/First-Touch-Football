@@ -35,7 +35,9 @@ const scene = (how, secs, pressAt) => page.evaluate(({ how, secs, pressAt }) => 
   T.freeze(); T.gkSet(T.PI.G, 'gkPass', how);
   const gx = atk > 0 ? 0 : T.FW, spots = G.map((q, i) => ({ q, x: gx + atk * (300 + i * 150), y: T.YC + (i % 2 ? 1 : -1) * (120 + 40 * i) }));
   const place = () => { for(const s of spots){ s.q.x = s.x; s.q.y = s.y; s.q.vx = s.q.vy = 0; }
-    for(const [i, o] of R.entries()){ o.x = atk > 0 ? T.FW - 40 : 40; o.y = 60 + i * 40; o.vx = o.vy = 0; } };
+    // (theirs out of the way, in the far corner on the near side: the man furthest up is on the far side, and on a short
+    // pitch he'd be in their reach from the far end, and not open)
+    for(const [i, o] of R.entries()){ o.x = atk > 0 ? T.FW - 40 : 40; o.y = T.FH - 60 - i * 40; o.vx = o.vy = 0; } };
   place(); T.hold(kp); window.__sw = 0;
   const t0 = T.simNow(); let sw3 = 0, swEnd = 0, frames3 = 0, framesEnd = 0, out = null, want = null, pressed = false;
   (function tick(){
@@ -59,6 +61,7 @@ const near = c.out ? c.out.dists.indexOf(Math.min(...c.out.dists)) : -2;
 ok(c.out && c.out.rcv === near, 'CLOSEST OPEN: to the nearest of ours, with nobody near (man ' + (c.out && c.out.rcv) + ', the nearest ' + near + ')');
 // FARTHEST OPEN
 const f = await scene('farthest', 7, null);
+info('farthest: ' + JSON.stringify(f));
 const inRange = f.out ? f.out.dists.map((d, i) => [d, i]).filter(([d]) => d <= 1250) : [], far = inRange.length ? inRange.reduce((a, b) => b[0] > a[0] ? b : a)[1] : -2;
 ok(f.out && f.out.rcv === far && f.out.rcv !== near, 'FARTHEST OPEN: to the furthest of ours in his range (man ' + (f.out && f.out.rcv) + ', ' + (f.out ? Math.round(f.out.dists[f.out.rcv] / 22.5) : '-') + ' m away)');
 // PLAYER: the man you're playing as

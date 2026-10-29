@@ -2066,11 +2066,14 @@
     setStyle(tacTeam,b.dataset.otac);markTac();saveSettings();
   });
 
-  // ===== pitch: a real pitch's shape (105 x 68) and markings, at 0.81 of the men's size -- the men are 25 px to the
-  // metre, the pitch 20.25 (it was 25, then 22.5: a tenth smaller every way twice over, for the same men); the whole width
-  // stays in view =====
-  const PX_M=25, PITCH_K=0.81, MK=PX_M*PITCH_K;         // the men's metre, and the pitch's
-  const FW=105*MK, FH=68*MK;                             // (2126.25 x 1377; it was 2362.5 x 1530, and 2625 x 1700 before that)
+  // ===== pitch: a real pitch's markings at 0.729 of the men's size -- the men are 25 px to the metre, the pitch 18.225 --
+  // on a short one, 93 1/3 m by 68 (the laws' shortest is 90). It was 105 x 68 at 25 px to the metre, then a tenth smaller
+  // every way twice over (22.5, then 20.25), then a fifth shorter goal to goal and a tenth narrower: the markings and the
+  // width at a tenth smaller again, the length cut the rest of the way, so they stay round. The whole width stays in
+  // view =====
+  const PX_M=25, PITCH_K=0.729, MK=PX_M*PITCH_K;        // the men's metre, and the pitch's
+  const PITCH_LEN=105*0.8/0.9;                           // its length in its own metres (93 1/3; the width's 68)
+  const FW=PITCH_LEN*MK, FH=68*MK;                       // (1701 x 1239.3; it was 2126.25 x 1377, 2362.5 x 1530, and 2625 x 1700 first)
   const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
   // the markings, a real pitch's at the pitch's metre: penalty area 16.5 x 40.32, goal area 5.5 x 18.32, the penalty
   // spot 11 out, the arc and the centre circle 9.15. (The goal is the men's size, so a little wider than a real one.)
@@ -2909,7 +2912,7 @@
   // middle between the touchlines; things further off are still drawn smaller
   const HORIZON=100, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;   // far touchline at 100: room for the stand
   // VIEW_D: how deep the camera sees, the far touchline at HORIZON to NEAR_Y -- the first pitch's width, so the men, the
-  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes 0.81 of the way down
+  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes 0.729 of the way down
   const VIEW_D=1700;
   let camHalf=(W/2)/NEAR_SCALE+14;
   let camMin=camHalf, camMax=FW-camHalf;
@@ -12123,8 +12126,11 @@
     drawGoal(-1,false);drawGoal(1,false);
     }
 
-    // the man you control: a solid green ring on the grass at his reach (Ball control), the only ring there is
-    if(controlled) pixelRing(controlled.x,controlled.y,controlROf(controlled),'#9dff3c','rgba(14,58,30,.6)');
+    // the man you control: a dotted green ring on the grass round his reach (Ball control), the only ring there is -- a
+    // ball touching it is in his reach (its middle within his reach and the ball's own size: see attemptCaptures), and
+    // the ring's bright while one's in it, faint while it's out of his reach
+    if(controlled){ const R=controlROf(controlled), inIt=ball.z<26&&dist(controlled,ball)<R+ball.r;
+      ctx.save(); if(!inIt) ctx.globalAlpha=0.55; pixelRing(controlled.x,controlled.y,R,'#9dff3c','rgba(14,58,30,.6)',true); ctx.restore(); }
     // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
     if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     // your keeper with it: the same ring on the man he'll play it to (see keeperPlay) -- not you (PLAYER), nor a hoof
@@ -12716,15 +12722,16 @@
   }
 
   // A RING ON THE GRASS in the pitch's whole pixels (2 px, as the pitch art is drawn), round (cx,cy) at R on the pitch,
-  // with a dark edge under it if asked (it reads on the light turf)
-  function pixelRing(cx,cy,R,col,edge){
+  // with a dark edge under it if asked (it reads on the light turf); dotted if asked, every other pixel of it
+  function pixelRing(cx,cy,R,col,edge,dotted){
     const n=Math.max(32,Math.ceil(R*3.6)), seen=new Set(), pts=[];
     for(let i=0;i<n;i++){
       const a=i/n*Math.PI*2, s=proj(cx+Math.cos(a)*R,cy+Math.sin(a)*R), x=Math.floor(s.x/2), y=Math.floor(s.y/2), k=x*8192+y;
       if(!seen.has(k)){ seen.add(k); pts.push(x*2,y*2); }
     }
-    if(edge){ ctx.fillStyle=edge; for(let i=0;i<pts.length;i+=2) ctx.fillRect(pts[i],pts[i+1]+2,2,2); }
-    ctx.fillStyle=col; for(let i=0;i<pts.length;i+=2) ctx.fillRect(pts[i],pts[i+1],2,2);
+    const on=i=>!dotted||(i>>1)%2===0&&!(i===pts.length-2&&i>0);   // (not the last one next to the first)
+    if(edge){ ctx.fillStyle=edge; for(let i=0;i<pts.length;i+=2) if(on(i)) ctx.fillRect(pts[i],pts[i+1]+2,2,2); }
+    ctx.fillStyle=col; for(let i=0;i<pts.length;i+=2) if(on(i)) ctx.fillRect(pts[i],pts[i+1],2,2);
   }
   // THE BALL in whole pixels, as the players are: a 9x9 sprite at their scale, sitting on a pixel shadow. Six frames of
   // it turning as it rolls -- about one of its own five-fold axes, so the sixth comes round to the first -- and its
@@ -13239,7 +13246,7 @@
     const man={p:SK_MAN,x:L(0),y:L(1),an:F(i0,2),fr:F(i0,3),dir:F(i0,4)}, def={p:SK_DEF,x:L(5),y:L(6),an:F(i0,7),fr:F(i0,8),dir:F(i0,9)}, ball={x:L(10),y:L(11),z:Math.max(0,L(12))};
     for(const q of [def,man]){ const [sx,sy]=S(q.x,q.y); SPRITE.shadowTo(x,sx,sy,k); }
     { const [sx,sy]=S(ball.x,ball.y); BALL_ART.shadowTo(x,sx,sy,K,ball.z>4?clamp(1-ball.z/300,0.45,1):1); }
-    { const [sx,sy]=S(man.x,man.y); x.strokeStyle='#9dff3c'; x.lineWidth=Math.max(1,k*1.1); x.beginPath(); x.ellipse(sx,sy,9*k,3.6*k,0,0,Math.PI*2); x.stroke(); }
+    { const [sx,sy]=S(man.x,man.y); x.strokeStyle='#9dff3c'; x.lineWidth=Math.max(1,k*1.1); x.setLineDash([k*1.4,k*1.4]); x.beginPath(); x.ellipse(sx,sy,9*k,3.6*k,0,0,Math.PI*2); x.stroke(); x.setLineDash([]); }
     const draw=[{y:def.y,d:()=>skMan(x,def,S,k)},{y:man.y,d:()=>skMan(x,man,S,k)},
       {y:ball.y+0.5,d:()=>{ const [sx,sy]=S(ball.x,ball.y,ball.z); BALL_ART.drawTo(x,sx,sy,K,(ball.x+ball.y)/9); }}].sort((p,q)=>p.y-q.y);
     for(const o of draw) o.d(); }
