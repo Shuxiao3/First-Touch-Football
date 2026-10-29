@@ -227,7 +227,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   keeps running the way he was going for 0.25 s (the Switch: keep his run dial) before the stick takes him over, so
   the direction you held for the last man doesn't snap him round. You can also tap or click a team-mate
   to switch to him. On the left side of a phone screen the stick still starts too. A tap that isn't on one of your
-  men, a button or the stick does nothing: it used to switch player wherever you tapped on the right.
+  men, a button or the stick does nothing: it used to switch player wherever you tapped on the right. When one of
+  theirs crosses it, you're put straight on the man of yours marking the one it's for (within 3 m of him) -- unless
+  another of yours is clearly nearer where it comes through head height in or by your box (or where it comes down, if
+  it never does) -- and for a cross to nobody in particular, on whoever's nearest there.
 - **One-touch passing.** With a ball on its way to you, press PASS (`J`, or the PASS button, which reads 1-TOUCH),
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that
   way, and you're on the receiver. "That way" is the stick's direction as the ball reaches you. On a phone, swiping
@@ -1403,29 +1406,32 @@ test, and like the Trap Lab the values are the game's settings.
 - **Defending as a block** — out of possession a team defends in lines, not man for man. The back line holds
   one height, goal-side of the ball by a gap that shrinks as the ball comes closer and never higher than the
   tactic allows; it doesn't drop for a forward standing on it (he'd be offside), only the defender with a
-  runner in his zone drops with him. The midfield sits a gap in front and the forwards in front of that,
-  every line sliding across toward the ball. When the ball's lost, a defender or midfielder caught a long
-  way upfield sprints back goal-side of it; the rest jog back into shape, the forwards always (they save
-  their legs for the next attack). One man presses the ball, and keeps him until a teammate is clearly
-  better placed. He goes for where the man on the ball will be by the time he gets there, not where he is:
-  on along his run, as far as it would take him to get there flat out (up to a second and a half), as far as
-  his Def IQ reads it -- all of it at 10, so a man running across him or past him finds him in the space in
-  front of him, goal-side; none of it at 1, where he goes for where the man was (he sees him a beat late)
-  and is left behind. The same goes for him going in for the ball, the man stepping across to screen, one
-  getting back after he's been beaten and one dropping in front of a man through on goal. The next man sits
-  about 5 m behind him at an angle, on the inside, to cover if he's beaten (of a pair of centre-backs one
-  goes and the other covers). When the man on the ball is in trouble — a pass played back to him, a heavy
-  touch, his back to our goal with one of ours close, the touchline at his shoulder — the side presses
-  together for a second and a half: the man on him goes in, the nearest other man cuts out his easiest pass,
-  and the lines step up behind them (not in their third unless it's a pressing side; a low block only in its
-  own half). When they pass, a man who can get onto the ball's path before their receiver goes to cut it
-  out; otherwise the nearest closes the receiver down as the ball travels, to be on him for his first touch.
-  The block reads the ball a beat late (about a third of a second), and a run a beat late too, so quick
-  passing and well-timed runs can still open it up.
+  runner in his zone drops with him -- off where the run's taking him by the time he's there, as his Def IQ
+  reads it (see the man pressing, below): into the space the runner's going into at 10, off where he is at
+  1. A pressing side's man on his man in their build-up reads him the same way. The midfield sits a gap in
+  front and the forwards in front of that, every line sliding across toward the ball. When the ball's lost,
+  a defender or midfielder caught a long way upfield sprints back goal-side of it; the rest jog back into
+  shape, the forwards always (they save their legs for the next attack). One man presses the ball, and keeps
+  him until a teammate is clearly better placed. He goes for where the man on the ball will be by the time
+  he gets there, not where he is: on along his run, as far as it would take him to get there flat out (up to
+  a second and a half), as far as his Def IQ reads it -- all of it at 10, so a man running across him or
+  past him finds him in the space in front of him, goal-side; none of it at 1, where he goes for where the
+  man was (he sees him a beat late) and is left behind. The same goes for him going in for the ball, the man
+  stepping across to screen, one getting back after he's been beaten and one dropping in front of a man
+  through on goal. The next man sits about 5 m behind him at an angle, on the inside, to cover if he's
+  beaten (of a pair of centre-backs one goes and the other covers). When the man on the ball is in trouble —
+  a pass played back to him, a heavy touch, his back to our goal with one of ours close, the touchline at
+  his shoulder — the side presses together for a second and a half: the man on him goes in, the nearest
+  other man cuts out his easiest pass, and the lines step up behind them (not in their third unless it's a
+  pressing side; a low block only in its own half). When they pass, a man who can get onto the ball's path
+  before their receiver goes to cut it out; otherwise the nearest closes the receiver down as the ball
+  travels, to be on him for his first touch. The block reads the ball a beat late (about a third of a
+  second), and a run a beat late too, so quick passing and well-timed runs can still open it up.
   - **What reading the run did** (80 club pairings, each played before and after, every man on the computer,
     6-minute matches): goals 3.09 a match → 1.85, shots 8.7 → 5.3, goalless draws 13% → 18%, pairing by
     pairing -1.24 goals a match (95%: -1.65 to -0.82): a man running with it no longer gets past a defender
-    by running past where he's aiming.
+    by running past where he's aiming. Reading a runner off the ball the same way, after it, left it as it was
+    (1.89 a match; -0.04 to +0.42 either way, pairing by pairing).
 - **Positional play (the neutral style)** — with the ball, a side on the neutral style plays off one plan
   for the whole team, and every man has a job in it. The centre-backs are the rest defence: level with
   the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and

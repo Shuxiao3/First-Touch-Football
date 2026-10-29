@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, SHOTS AND THE KEEPER: a defender in a shot's way blocks it (how close it has to pass him is his
-// block reach, a little more or less for his Def IQ); a defender going at a man running across him reads the run by his
-// Def IQ (for the space in front of him at 10, where he was at 1); the keeper comes off his line to narrow the angle on a man coming
+// block reach, a little more or less for his Def IQ); a defender going at a man running across him, or tracking a runner
+// off the ball, reads the run by his Def IQ (for the space in front of him at 10, where he was at 1); their cross puts
+// you on the man marking the one it's for; the keeper comes off his line to narrow the angle on a man coming
 // in on goal, goes straight at the ball once he's close and takes it off him, and comes for a cross into his six-yard
 // box and catches it (one to the edge of the box he leaves); a swipe shot struck off the way the man is facing is
 // weaker and wilder; and the near post and side netting are drawn in front of a ball in the goal, not behind it.
@@ -14,7 +15,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, MK, GOAL_W, GOAL_H, atkOf, simNow:()=>simNow, '
-  + 'gkHold:()=>gkHold, setControlled, blockReachOf, swipeAcross, shootAt, proj, draw:()=>draw(), cam:v=>{ camX=v; }, stick:(x,y)=>{ window.__stick={x,y}; }, '
+  + 'gkHold:()=>gkHold, setControlled, blockReachOf, swipeAcross, shootAt, proj, blockSpot, aiCross, draw:()=>draw(), cam:v=>{ camX=v; }, stick:(x,y)=>{ window.__stick={x,y}; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
@@ -89,6 +90,57 @@ const read10 = await runRead(10), read1 = await runRead(1);
 info('reading your run: ' + JSON.stringify({ read10, read1 }));
 ok(read10.ahead >= 10 && read10.goalSide >= 0, 'at Def IQ 10 he goes for the space in front of you and stays there: ' + read10.ahead + ' px ahead of you along your run and ' + read10.goalSide + ' px goal-side, on average from half a second on');
 ok(read1.ahead <= -10 && read10.ahead - read1.ahead >= 40, '...at Def IQ 1 he goes where you were, and you\'re past him (' + read1.ahead + ' px)');
+
+// A RUNNER INTO SPACE, OFF THE BALL: you, without it, running in behind across one of their centre-backs' zone while a
+// team-mate holds it (one of theirs on him) -- at Def IQ 10 the centre-back goes with you off where the run's taking you,
+// dropping off into the space you're running into; at Def IQ 1 off where you are, and lets you right up to him
+const offBall = iq => page.evaluate(iq => {
+  const T = window.__T, atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
+  const o = G[1], c = G[0], m = R.find(q => q.role !== 'DEF') || R[0], d = R.find(q => q.role === 'DEF' && q !== m);
+  T.setControlled(o); T.freeze();
+  for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; k.vx = k.vy = 0; k.mode = 'line'; k.diveT = 0; k.groundT = 0; k.heldT = 0; k.claimCd = 2; }
+  const keep = { o: o.stats, d: d.stats }; o.stats = Object.assign({}, keep.o, { speed: 7, acceleration: 7 }); d.stats = Object.assign({}, keep.d, { defIQ: iq, speed: 9, acceleration: 7 });
+  const b = T.ball(), hold = () => { window.__park([c, o, m, d]);
+    c.x = T.FW / 2 - atk * 150; c.y = T.YC - 330; c.vx = c.vy = 0; c.state = 'normal';
+    m.x = c.x + atk * 60; m.y = c.y; m.vx = m.vy = 0; m.state = 'normal'; m.tackleCd = 99; m.noTouchT = 0.2;
+    b.ownedBy = c; b.dribbler = null; b.intendedRcv = null; b.thru = null; b.x = c.x + atk * 20; b.y = c.y; b.z = 0; b.vx = b.vy = b.vz = 0; b.shotT = 0; b.crossT = 0; };
+  hold();
+  // (he starts on his own spot in their back line, you 6 m upfield of it in his zone, running in behind across it)
+  o.x = T.FW / 2; o.y = 60; const sp0 = T.blockSpot(d);
+  d.x = sp0.x; d.y = sp0.y; d.vx = d.vy = 0; d.state = 'normal'; d.stamina = d.staminaCap = 1; d.tackleCd = 99;
+  o.x = sp0.x - atk * 150; o.y = sp0.y - 60; o.vx = atk * 150; o.vy = 80; o.seenVx = o.vx; o.seenVy = o.vy; o.state = 'normal'; o.stamina = o.staminaCap = 1; o.facing = { x: atk, y: 0 };
+  T.stick(atk * 0.88, 0.47); const t0 = T.simNow(), path = [];
+  return window.__until(1.4, () => undefined, () => { hold(); o.sprint = true; d.tackleCd = 99; d.noTouchT = 0.2;
+    const t = T.simNow() - t0, v = Math.hypot(o.vx, o.vy) || 1;
+    path.push({ t, ahead: Math.round(((d.x - o.x) * o.vx + (d.y - o.y) * o.vy) / v), goalSide: Math.round((d.x - o.x) * atk), tag: d.dbgTag }); })
+    .then(() => { T.stick(0, 0); o.stats = keep.o; d.stats = keep.d;
+      const late = path.filter(s => s.t >= 0.5), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
+      return { ahead: mean('ahead'), goalSide: mean('goalSide'), tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
+}, iq);
+const off10 = await offBall(10), off1 = await offBall(1);
+info('a runner into space: ' + JSON.stringify({ off10, off1 }));
+ok(/TRACK|PAIR/.test(off10.tags) && /TRACK|PAIR/.test(off1.tags), 'he picks up the runner in his zone (' + off10.tags + ' / ' + off1.tags + ')');
+ok(off10.ahead - off1.ahead >= 30 && off10.goalSide - off1.goalSide >= 30 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
+
+// THEIR CROSS: the moment one of theirs crosses it into your box, you're put on the man of yours marking the one it's
+// for -- or the one nearest where it comes through head height
+const xsw = await page.evaluate(() => {
+  const T = window.__T, atk = T.atkOf('G'), ownX = atk > 0 ? 0 : T.FW, G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
+  T.freeze(); window.__park([]); for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; k.mode = 'line'; k.heldT = 0; k.claimCd = 2; }
+  const w = R[0], tgt = R[1], far = G[0], mk = G[1], other = G[2]; T.setControlled(far);
+  far.x = T.FW / 2; far.y = T.YC; w.x = ownX + atk * 300; w.y = T.YC - 560; w.vx = w.vy = 0; w.state = 'normal';
+  tgt.x = ownX + atk * 190; tgt.y = T.YC + 20; tgt.vx = tgt.vy = 0;
+  mk.x = tgt.x - atk * 25; mk.y = tgt.y + 30; other.x = ownX + atk * 240; other.y = T.YC - 120;
+  const b = T.ball(); b.ownedBy = w; b.x = w.x; b.y = w.y + 20; b.z = 0; b.vx = b.vy = b.vz = 0;
+  T.aiCross(w, { x: tgt.x, y: tgt.y, who: tgt });
+  const onMarker = T.controlled() === mk;
+  // ...and one for nobody in particular: you're put on whoever's nearest where it comes down to head height
+  T.freeze(); T.setControlled(far); b.ownedBy = w; b.x = w.x; b.y = w.y + 20; b.z = 0; b.vx = b.vy = b.vz = 0;
+  T.aiCross(w, { x: other.x + atk * 20, y: other.y });
+  return { onMarker, onNearest: T.controlled() === other, was: G.indexOf(T.controlled()) };
+});
+info('their cross: ' + JSON.stringify(xsw));
+ok(xsw.onMarker && xsw.onNearest, 'their cross switches you: onto the man marking the one it\'s for, or (for nobody in particular) the one nearest where it comes through head height');
 
 // CROSSES: one whipped into his six-yard box he comes for and catches, over their heads; one to the edge of the box he
 // leaves

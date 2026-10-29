@@ -6078,6 +6078,23 @@
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.crossBy=p.team;ball.crossT=1.6;
     recordPassTeam(p.team,p); passPose(p);
+    if(p.team!=='G') crossSwitch(cs&&cs.who);   // (theirs, coming in at you: see crossSwitch)
+  }
+  // THEIR CROSS: the moment one of theirs crosses it you're put on the man of ours best placed to deal with it -- the one
+  // marking the man it's for (within 3 m of him), unless another of ours is clearly nearer where it comes through head
+  // height in or by our box (or, if it never does, where it comes down); else whoever's nearest there
+  function crossSwitch(who){
+    if(!canSwitch()||!controlled||controlled.team!=='G') return;
+    const ownGoalX=atkOf('G')>0?0:FW; let L=null;
+    for(let t=0.05;t<=2.4;t+=0.05){ const B=ballAt(t);
+      if(B.z>18&&B.z<AIR_REACH&&Math.abs(B.x-ownGoalX)<BX+90&&Math.abs(B.y-YC)<BY+100){ L=B; break; }
+      if(B.z<=0){ L=B; break; } }
+    if(!L) L=ballAt(1.2);
+    const mine=players.filter(q=>q.team==='G'&&q.state==='normal'), dL=q=>Math.hypot(q.x-L.x,q.y-L.y);
+    let near=null; for(const q of mine) if(!near||dL(q)<dL(near)) near=q;
+    let mark=null; if(who) for(const q of mine){ const d=dist(q,who); if(d<75&&(!mark||d<dist(mark,who))) mark=q; }
+    const q=mark&&dL(mark)<dL(near)+80 ? mark : near;
+    if(q&&q!==controlled) switchTo(q);
   }
 
   // ===== YOUR BALL, A TOUCH AWAY =====
@@ -9870,8 +9887,8 @@
       for(const P2 of pairs){ if(map.has(P2.q)||used.has(P2.o)) continue; map.set(P2.q,P2.o); used.add(P2.o); }
       markCache[p.team]={t:simNow,map}; }
     const o=map.get(p); if(!o) return null;
-    const b=(gkHold&&gkHold.team!==p.team)?gkHold:ball, dx=b.x-o.x, dy=b.y-o.y, l=Math.hypot(dx,dy)||1;
-    return {x:clamp(o.x+dx/l*42,40,FW-40), y:clamp(o.y+dy/l*42,40,FH-40)};
+    const b=(gkHold&&gkHold.team!==p.team)?gkHold:ball, r=readRun(p,o,o), dx=b.x-r.x, dy=b.y-r.y, l=Math.hypot(dx,dy)||1;   // (where he's going, as my Def IQ reads it)
+    return {x:clamp(r.x+dx/l*42,40,FW-40), y:clamp(r.y+dy/l*42,40,FH-40)};
   }
   const blockCache={G:null,R:null};
   function defBlock(team){
@@ -9939,9 +9956,12 @@
         if(uo<bu){ bu=uo; best=o; }
       }
       if(best){ const vu=B.atk>0?best.seenVx||0:-(best.seenVx||0);
+        // where I go with him: off where his run takes him by the time I'm there, as my Def IQ reads it (see readRun) --
+        // into the space he's running into at 10; off where he is at 1, left behind a man sprinting past
+        const rb=readRun(p,best,best), ru=B.U(rb.x);
         track=best;
-        if(step && bu>u-20){ u=bu-28; y=y+(best.y-y)*0.85; }                                   // stepped up: tight on him
-        else { u=Math.min(u, bu-(role==='DEF'?25+clamp(-vu*0.3,0,60):20)); y=y+(best.y-y)*(role==='DEF'?0.75:0.6); } }
+        if(step && bu>u-20){ u=ru-28; y=y+(rb.y-y)*0.85; }                                     // stepped up: tight on him
+        else { u=Math.min(u, ru-(role==='DEF'?25+clamp(-vu*0.3,0,60):20)); y=y+(rb.y-y)*(role==='DEF'?0.75:0.6); } }
     }
     u=Math.max(u,30);
     return {x:B.atk>0?u:FW-u, y:clamp(y,40,FH-40), track};
@@ -9961,12 +9981,10 @@
     const x=b.x+gx/gl*back, y=b.y+gy/gl*back;
     return {x:clamp(x,40,FW-40), y:clamp(y+(YC-y)*0.35,30,FH-30)};
   }
-  // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
-  // refreshes on a reaction interval and lags the carrier's true position/velocity.
-  // READING HIS RUN (Def IQ): where the man on the ball will be by the time I get to him, flat out -- on along his run,
-  // up to a second on -- so a man going at a runner takes up the space in front of him rather than chasing his heels.
-  // From `base` (where I'd go for him without reading it: where he is, or a beat behind that -- see perceived) on to
-  // that point by my Def IQ: none of the way at 1, all of it at 10.
+  // READING HIS RUN (Def IQ): where a man -- on the ball, or running into space without it -- will be by the time I get
+  // to him, flat out: on along his run, up to a second and a half on, so a man going at a runner takes up the space in
+  // front of him rather than chasing his heels. From `base` (where I'd go for him without reading it: where he is, or a
+  // beat behind that -- see perceived) on to that point by my Def IQ: none of the way at 1, all of it at 10.
   const RUN_READ_T=1.5;
   function runLeadT(p,c){
     const s=sprintSpeedOf(p), rx=c.x-p.x, ry=c.y-p.y, a=c.vx*c.vx+c.vy*c.vy-s*s, b=2*(rx*c.vx+ry*c.vy), cc=rx*rx+ry*ry;
@@ -9979,6 +9997,8 @@
     const iq=clamp((defIQof(p)-1)/9,0,1), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;
     return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
   }
+  // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
+  // refreshes on a reaction interval and lags the carrier's true position/velocity.
   function perceived(p,c,dt){
     p.reactT-=dt;
     if(!p.perc || p.reactT<=0){
