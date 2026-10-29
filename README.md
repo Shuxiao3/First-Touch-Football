@@ -902,6 +902,43 @@ The same game played like any other football game. It's a copy of `index.html` w
     side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
     at the higher seed's ground, then a final, with a shoot-out if it's level. The bottom three go down. There's no
     sack: however badly it goes, you carry on.
+  - **Fitness carries from one game to the next.** Every man has it (100%: fresh). A game costs him about a quarter of
+    it -- 22% with Stamina 10, up to 33% with Stamina 1, a point more a year past 30; taken off, 60% of that; brought
+    on, 40% -- and every day after it he gets some back: 4.5% a day with no physio, up to 7.5% with the best (the
+    computer's clubs: by their league, the Premium League's the best). A live match starts with it as his legs'
+    ceiling: a man 60% fit can't get past 60% of his legs all game (and comes back at half-time only as far as
+    that), so he's slower from the kick-off. In a simulated game he counts 15 points under his rating for all he's
+    short of fresh (at 80%, 3 under). The computer's clubs rest a tired man for one who's fresher and nearly as good;
+    who plays for you is yours (Training's Selection tab shows each man's fitness as a bar along his name, the
+    tactics pitch along his token, his card as FITNESS; the hub warns when some of your eight are under 70%).
+    - **A game a week, and they're fresh for it**, whatever the physio: a week's rest is more than a game costs. What a
+      man's fitness reads between games is what he'll start the next one with.
+    - **Two games a week, and only a good physio keeps up**: three days to the midweek game, four to the weekend's. In
+      the Premium League with the Champions League and the cups and no rotating, a side with no physio starts its
+      games about 73% fit on average, at worst under half; with the best, 98 to 99% (a season each, simulated). Even
+      then a man with poor Stamina, or past 30, can run down to 60% or so: a game costs him more than two days' rest
+      gives back, so rest him now and then.
+  - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
+    the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
+    too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,
+    its six best), with ten clubs from abroad (made up, around the Premium League's best, a new squad each season).
+    - **Every round is midweek**, after the league matchday its calendar says: the Champions League's six group
+      games after matchdays 1, 3, 5, 7, 9 and 11, its quarter-finals, semi-finals and final after 15, 18 and 23; the
+      Coco Cup's six rounds after 2, 6, 10, 12, 16 and 19; the Fashion Cup's five after 4, 8, 14, 17 and 21 (none
+      in the winter window). A cup game is next on the hub (COCO R32, CL G1 and so on) when you're in that midweek's
+      round; one you're not in is played straight after the weekend's game.
+    - **A tie is one game** at the home side's ground (the draw says who's at home), penalties if it's level. The
+      Coco Cup's first round is ten ties, its 22 best clubs through on a bye; the Fashion Cup's twelve, with four
+      byes. The Champions League draws four groups of four from four pots by strength; each plays the others home
+      and away, and each group's winners are at home in the quarter-finals to another group's runners-up.
+    - **The money**: the gate (or the away share) and a television bump for each game, and prize money for each round
+      won -- the Coco Cup $5,000 for the first up to $200,000 for the final, the Fashion Cup $20,000 up to $500,000;
+      the Champions League $300,000 to be in it, $40,000 a group game won, $200,000 for getting through, then
+      $350,000, $500,000 and $1.5m. No week's wages or partners' money: those are the league week's. The cup games
+      count as appearances; their goals aren't the league's.
+    - **Where to see them**: the Clubhouse's Fixtures tab says how far you are in each, your Champions League group's
+      table, and has your cup ties among the league's games; the match report, the season review and the news too.
+      A career from before the cups has none that season: they start with its next.
   - **Two men come to you in your first season.** After matchday 2 a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
@@ -1028,9 +1065,10 @@ The same game played like any other football game. It's a copy of `index.html` w
         instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
         the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
       - **The transfer market** is your phone, not a building on the campus: TRANSFERS in the menu, straight in.
-      - **The physio**: without one your men get back a quarter of the legs they've lost at half-time; with one, 35%
-        at level 1 up to 65% at 4, and through a game their legs go 8% slower a level (32% at 4). In a simulated
-        game it's worth a little: 0.4 a level on your side's rating.
+      - **The physio**: between games your men get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2%
+        at level 1 up to 7.5% at 4. Without one they get back a quarter of the legs they've lost at half-time; with
+        one, 35% at level 1 up to 65% at 4, and through a game their legs go 8% slower a level (32% at 4). In a
+        simulated game it's worth a little more: 0.4 a level on your side's rating.
       - **The scouts' house** is scouting (see **Scouting**): its level is the network's.
       - **The youth academy**: its first intake the day it opens, then one every summer; its level is its facilities'.
     - **Decorations** come with the clubhouse (level 3): DECORATE, at the campus's top, sells thirty -- thirteen

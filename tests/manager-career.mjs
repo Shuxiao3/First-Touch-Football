@@ -8,7 +8,9 @@
 // CLUBHOUSE and what it unlocks: a new career has the shed, the stadium and a rough training pitch; the transfer market
 // (your phone) and the physio are the first things to buy; each clubhouse after it needs the next league up and the
 // money, and opens the next buildings and levels (the stadium's too); the training pitch's level locks shapes, styles
-// and instructions; WHO YOU TAKE, its Selection tab's list (a bar dragged onto the pitch's part, or off it, changes
+// and instructions; FITNESS AND THE CUPS (a game's cost, a day's rest by the physio, League 2 league-only and always
+// fresh, the Championship's Coco and Fashion Cups midweek, the Premium League's Champions League, a busy season with no
+// physio against the best); WHO YOU TAKE, its Selection tab's list (a bar dragged onto the pitch's part, or off it, changes
 // places; on the bench or in the rest it goes in where it's put, the others moving along); the physio's level shows in
 // a match (half-time, tiring) and a simulated one; decorations bought one at a
 // time and put down anywhere free, moved, put away. Last, THE CAMPUS (the hub): drawn as the club has it -- the stadium
@@ -29,6 +31,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
+  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
@@ -513,6 +516,70 @@ const kid = await page.evaluate(() => { const d = __MG.d, p = d.roster.find(x =>
 ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Starts wide, cuts in/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
    && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'insidefwd' && kid.story === 2,
   'after the 5th, a wonderkid asks to join; WNG and INSIDE FORWARD picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
+
+// --- FITNESS AND THE CUPS: a man's fitness carries from one game to the next -- a game costs him a quarter of it or so,
+// a day's rest gives some back (more with a better physio) -- and a live match starts with it as his legs' ceiling.
+// League 2 plays only the league, a game a week, and your eight are fresh for every one. League 1 and up play the Coco
+// Cup, the Championship and up the Fashion Cup too, the Premium League's top six the Champions League (with ten from
+// abroad): each round midweek, after the league matchday its calendar says ------------------------------------------
+{ await create('Cup Town');
+const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
+  while(d.phase !== 'review' && n++ < 500){ if(M.mgWindowOpen(d)){ M.mgNextDay(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
+    kick.push(M.mgStarters(d).map(M.condOf)); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
+    if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('chPhase').textContent; }
+    M.mgPlayGame(d, null, null); if(g.kind === 'cup' && d.ledger[0] && d.ledger[0].cup) ledgerCup = true; }   // (the books keep the last twelve: looked at as it's played)
+  M.mgSave(d); M.renderHub(); const all = kick.flat();
+  return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
+    runs: (d.review && d.review.cups || []).map(x => x.join(' ')).join(', '), ledgerCup }; });
+r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { vet: 2, kid: 2 };
+  const p = d.roster[d.lineup.atk[0]]; M.condTire(p, 1); out.after = +M.condOf(p).toFixed(3);
+  d.lv.physio = 0; M.mgRest(d, 1); out.day0 = +(M.condOf(p) - out.after).toFixed(3);
+  d.lv.physio = 4; M.mgRest(d, 1); out.day4 = +(M.condOf(p) - out.after - out.day0).toFixed(3); d.lv.physio = 0;
+  p.cond = 0.6; out.entry = M.careerLineupYours(d).squad.find(e => e.lookKey === p.id).cond; delete p.cond;
+  out.in = ['coco', 'fashion', 'cl'].map(k => d.cup[k].in.includes(d.clubId) ? 1 : 0).join('');
+  return out; });
+let sn = await season();
+info('fitness: ' + JSON.stringify(r) + '; League 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low }));
+ok(r.after >= 0.6 && r.after <= 0.8 && r.day0 === 0.045 && r.day4 === 0.075 && r.entry === 0.6,
+  'a game costs a man ' + Math.round((1 - r.after) * 100) + '% of his fitness; a day\'s rest gives back 4.5% with no physio, 7.5% with the best; a live match takes his fitness with him (his legs\' ceiling)');
+ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low === 1 && sn.wins === '111',
+  'League 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for every one; the cups are played above it, each to a winner');
+
+await create('Cup City');
+r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
+  const other = d.div[3][0]; d.div[3][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 3; d.tier = 3;
+  for(const p of d.roster) p.ovr = Math.round(M.MG_LEVEL[3] + (p.ovr - 50) * 0.5);
+  M.mgAutoLineup(d); M.mgNewFixtures(d); M.mgCupsStart(d); const C = d.cup;
+  return { coco: [C.coco.in.length, C.coco.r[0].ties.length, C.coco.r[0].byes.length].join(), fashion: [C.fashion.in.length, C.fashion.r[0].ties.length, C.fashion.r[0].byes.length].join(),
+    cl: [C.cl.in.length, C.cl.gr.map(g => g.ids.length).join('+'), C.cl.in.filter(id => d.world.clubs[id].euro).length, C.cl.in.filter(id => d.div[4].includes(id)).length].join(),
+    in: ['coco', 'fashion', 'cl'].map(k => C[k].in.includes(d.clubId) ? 1 : 0).join(''), l2: d.div[1].some(id => C.coco.in.includes(id) || C.fashion.in.includes(id) || C.cl.in.includes(id)),
+    abroad: Object.values(d.world.clubs).filter(c => c.euro).every(c => !d.div[1].concat(d.div[2], d.div[3], d.div[4]).includes(c.id)), cal: __MG.CUP_CAL }; });
+const cal = r.cal; sn = await season();
+const cupAt = sn.seq.map((x, i) => [x, i]).filter(([x]) => /@/.test(x));
+const onCal = cupAt.every(([x, i]) => { const m = x.match(/^(\w+?)(\d+)@(\d+)$/), c = cal[m[3]]; return c && c[0] === m[1] && String(c[1]) === m[2] && sn.seq[i - 1] === 'l' + m[3]; });
+await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Fixtures")'); await page.waitForTimeout(80);
+const fxCup = await page.$$eval('#bpBody .mgFx.cup', ns => ns.map(n => n.querySelector('.md').textContent)); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
+info('Championship: ' + JSON.stringify({ r: { coco: r.coco, fashion: r.fashion, cl: r.cl, in: r.in }, cups: cupAt.map(x => x[0]), hub: sn.hub, runs: sn.runs, fxCup }));
+ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,10,6' && !r.l2 && r.abroad,
+  'the cups: the Coco Cup League 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the Championship and up (28: twelve ties, four byes), the Champions League six from the Premium League and ten from abroad in four groups of four; none for League 2, and the clubs from abroad in no league');
+ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.wins === '111' && /coco/.test(sn.runs) && /fashion/.test(sn.runs) && sn.ledgerCup && fxCup.length >= 1,
+  'in the Championship, the Coco and Fashion Cups (no Champions League): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
+  + sn.runs + '); every cup won by someone');
+
+const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
+  const other = d.div[4][0]; d.div[4][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 4; d.tier = 4;
+  for(const p of d.roster) p.ovr = Math.round(M.MG_LEVEL[4] + (p.ovr - 50) * 0.5);
+  d.lv.physio = phys; M.mgAutoLineup(d); M.mgNewFixtures(d); d.clQual = [d.clubId, ...d.div[4].filter(x => x !== d.clubId).slice(0, 5)]; M.mgCupsStart(d);
+  return d.cup.cl.in.includes(d.clubId); }, phys);
+await create('Busy Town'); const in0 = await busy(0), b0 = await season();
+await create('Busy Town'); const in4 = await busy(4), b4 = await season();
+info('a busy season: ' + JSON.stringify({ none: [b0.seq.length, b0.avg, b0.low], best: [b4.seq.length, b4.avg, b4.low] }));
+ok(in0 && in4 && b0.seq.filter(x => /^cl/.test(x)).length >= 6 && b0.avg < 0.9 && b0.low < 0.7 && b4.avg > 0.95 && b4.low > b0.low,
+  'the Premium League\'s top six in the Champions League (six group games and more, midweek): with no physio your eight start a game ' + Math.round(b0.avg * 100) + '% fit on average, down to '
+  + Math.round(b0.low * 100) + '%; with the best physio ' + Math.round(b4.avg * 100) + '% (the most tired ' + Math.round(b4.low * 100) + '%: a man with poor Stamina, or past 30, still runs down)');
+
+r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
+ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }
 
 process.exitCode = rep.finish();
 await browser.close();

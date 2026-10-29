@@ -658,6 +658,7 @@
   .mgFx{ display:flex; align-items:center; gap:10px; padding:5px 8px; border-bottom:1px solid var(--well); font-size:12px; color:var(--dim); }
   .mgFx.next{ background:rgb(var(--warnRGB) / .07); border-radius:6px; }
   .mgFx .md{ width:22px; color:var(--dim2); font-size:10px; }
+  .mgFx.cup .md{ width:auto; min-width:22px; white-space:nowrap; color:var(--acc); }   /* (a cup tie, midweek: COCO R32) */
   .mgFx .nm{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .mgFxBreak{ text-align:center; color:var(--dim2); font-size:10px; letter-spacing:1px; padding:6px 0; }
   .mgTbl{ width:100%; border-collapse:collapse; font-size:12px; }
@@ -1076,6 +1077,10 @@
   .selRow.dropOver{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc); }
   .selRow.insA::before, .selRow.insB::after{ content:''; position:absolute; left:2px; right:2px; height:3px; background:var(--acc); pointer-events:none; }
   .selRow.insA::before{ top:-3px; } .selRow.insB::after{ bottom:-3px; }
+  /* a man short of fresh: a thin bar along his bar's foot (the token's, on a tactics pitch), as full as he is fit */
+  .slCond, .ptkCond{ position:absolute; left:6px; bottom:3px; height:2px; width:calc((100% - 12px) * var(--c)); background:var(--good); pointer-events:none; }
+  .slCond.mid, .ptkCond.mid{ background:var(--warn); } .slCond.low, .ptkCond.low{ background:var(--bad); }
+  .ptkCond{ left:4px; bottom:2px; width:calc((100% - 8px) * var(--c)); }
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
   .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:clamp(66px,21%,84px); height:36px; border:0; border-radius:var(--r); padding:0 4px 0 5px; cursor:grab;
     --hw:calc(clamp(33px,10.5%,42px) + 2px); --hh:20px;   /* (half of him and his rim: his spot is kept this far inside the pitch -- see ptkAt) */
@@ -2720,7 +2725,7 @@
   }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=entry.style; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=entry.style; p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   function layoutTeam(team){
@@ -11102,8 +11107,8 @@
           // half-time breather: refill the live stamina bar, but the eroded max-stamina
           // CEILING only recovers 25% of what's been lost over the half.
           for(const q of players){
-            const cap=(q.staminaCap||1);
-            q.staminaCap=Math.min(1, cap + physioBack(q)*(1-cap));   // claw back a quarter of the loss (more with a physio)
+            const cap=(q.staminaCap||1), top=q.cond0||1;
+            q.staminaCap=Math.min(top, cap + physioBack(q)*Math.max(0,top-cap));   // claw back a quarter of the loss (more with a physio), as far as he came in with
             q.stamina=q.staminaCap;                          // top the bar up to the new ceiling
           }
           resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
@@ -11637,7 +11642,7 @@
     freePlay=false; const fb=document.getElementById('freeBtn'); if(fb)fb.textContent='FREE PLAY: OFF';
     gDir=1; buildTeams();                                   // fresh first-half layout (un-mirrors any 2nd-half ends)
     keepers.forEach((k,i)=>{ const sd=i===0?-1:1; k.side=sd; k.homeX=sd<0?26:FW-26; k.x=k.homeX; k.y=YC; });
-    for(const p of players){p.stamina=1;p.staminaCap=1;p.sprint=false;}
+    for(const p of players){p.staminaCap=p.cond0||1;p.stamina=p.staminaCap;p.sprint=false;}   // (a career man as fresh as he is: see FITNESS)
     resetKickoff('G');                                      // Green kicks off the match
     lastGrade='KICK OFF';gradeColor='#9dff3c';gradeFade=1.4;
     venueT=VENUE?2.4:0;
@@ -13105,7 +13110,7 @@
   function matchSub(t,out,inn){ const li=LINEUP[t], e=SQUAD[t][inn]; if(!e) return false;
     if(li.gk===out){ li.gk=inn; const kp=keepers.find(k=>k.team===t); if(kp) applyEntry(kp,e,inn); }
     else { let hit=false; for(const ph of ['atk','def']){ const k=li[ph].indexOf(out); if(k>=0){ li[ph][k]=inn; hit=true; } } if(!hit) return false;
-      const p=players.find(q=>q.team===t&&q.squadIdx===out); if(p){ applyEntry(p,e,inn); p.stamina=1; p.staminaCap=1; } }
+      const p=players.find(q=>q.team===t&&q.squadIdx===out); if(p){ applyEntry(p,e,inn); p.staminaCap=p.cond0||1; p.stamina=p.staminaCap; } }   // (on as fresh as he is)
     SUBS[t].used++; SUBS[t].off.push(out); SUBS[t].on.push(inn); return true; }
   function mtSwap(a,b){ const t=MT.team, li=LINEUP[t]; if(t!=='G'||a.si===b.si) return; const kinds=[a.kind,b.kind].sort().join('+');
     if(kinds==='field+field'){ const ph=MT.phase, i=li[ph].indexOf(a.si), j=li[ph].indexOf(b.si); if(i>=0&&j>=0) mtSwapPos(t,ph,i,j); }
@@ -13541,7 +13546,7 @@
     p.pot=Math.max(p.ovr,(p.pot||p.ovr)-2); p.age++; p.idle=(p.idle||0)+1; }
   function mgClub(d,id){ return (d.world.clubs[id])||null; }
   function mgPlayersOf(d,id){ return id===d.clubId?d.roster:((d.world.clubs[id]||{}).players||[]); }
-  function mgAiClubs(d){ return Object.values(d.world.clubs).filter(c=>c.id!==d.clubId); }
+  function mgAiClubs(d){ return Object.values(d.world.clubs).filter(c=>c.id!==d.clubId&&!c.euro); }   // (the clubs from abroad only play the Champions League)
   function mgNameOf(d,id){ const c=d.world.clubs[id]; return c?c.name:'?'; }
   // where a man is: his club (yours included), else the free agents or your academy
   function mgFind(d,pid){
@@ -13554,14 +13559,43 @@
   function mgWhen(d){ return d.phase==='summer'?'Summer':d.phase==='winter'?'Winter':d.phase==='playoffs'?'Playoffs':d.phase==='review'?'Season end':'MD '+d.md; }
   function mgWindowOpen(d){ return d.phase==='summer'||d.phase==='winter'; }
 
+  // ---- FITNESS (his condition, p.cond): how fresh a man is from one game to the next (1: fresh). A game costs him his
+  // share of condCost -- more with poor Stamina, more past 30, a sub's part of a game less -- and every day after it he
+  // gets some back: COND_DAY by your physio's level (a computer club's by its league: the bigger the club, the better
+  // its physio). He starts a live match with it as his legs' ceiling, and in a simulated one he counts COND_PEN below
+  // his rating for all he's short of fresh. With a game a week he's back by the next; with two -- the cups are
+  // midweek -- only a good physio keeps up.
+  const COND_DAY=[0.045,0.052,0.059,0.066,0.075], COND_MIN=0.35, COND_PEN=15;
+  const condOf=p=>p&&p.cond!=null?p.cond:1;
+  const condOvr=(p,v)=>(v!=null?v:p.ovr)-(1-condOf(p))*COND_PEN;   // what he's worth on the day
+  function condCost(p){ return clamp(0.22+0.012*(10-(mgStats(p).stamina||5))+0.01*Math.max(0,(p.age||25)-30),0.2,0.4); }
+  function condTire(p,share){ if(p&&share>0) p.cond=clamp(condOf(p)-condCost(p)*share,COND_MIN,1); }
+  function mgRest(d,days){ if(!(days>0)) return; const back=(p,r)=>{ if(p.cond==null) return; p.cond=Math.min(1,p.cond+r*days); if(p.cond>=1) delete p.cond; };
+    const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
+    for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
+  function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
+  // a computer club's eight for a game: its best keeper and best seven outfielders on the day (a tired man rested)
+  function mgPickEight(L){ const g=L.filter(p=>p.role==='GK').sort((a,b)=>condOvr(b)-condOvr(a)), o=L.filter(p=>p.role!=='GK').sort((a,b)=>condOvr(b)-condOvr(a));
+    const xi=[]; if(g[0]) xi.push(g[0]); xi.push(...o.slice(0,1+OUTFIELD-xi.length)); return xi; }
+  // who plays for a side: yours, the eight you picked; the computer's, its eight on the day
+  function mgSideOf(d,id){ return id===d.clubId?mgStarters(d):mgPickEight(mgPlayersOf(d,id)); }
+  // a game over: the men who played it pay for it. Yours after a live one by what they played (a man taken off 0.6 of
+  // it, one brought on 0.4), the side you played by its eight on the pitch
+  function mgTireGame(d,id,xi,live){
+    if(live&&SQUAD.G&&SQUAD.R){ const t=id===d.clubId?'G':'R', L=LINEUP[t], on=new Set([L.gk,...L.atk]), S=SUBS[t]||{on:[],off:[]}, P=mgPlayersOf(d,id);
+      SQUAD[t].forEach((e,si)=>{ const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return;
+        condTire(p,S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0); }); return; }   // (LINEUP is the eight at the end: a sub's in it)
+    for(const p of xi) condTire(p,1); }
+
   // ---- the season ----
   // each league home and away: 26 rounds of seven games, a game being [home, away, home goals, away goals]
   function mgNewFixtures(d){ d.lg={};
     for(const t of [1,2,3,4]){ const first=cwFixtures(mgShuffle(d.div[t].slice()));
       d.lg[t]={ ids:d.div[t].slice(), fx:first.map(day=>day.map(m=>[m[0],m[1],null,null])).concat(first.map(day=>day.map(m=>[m[1],m[0],null,null]))) }; } }
-  function mgTable(d,t){ const L=d.lg[t], T={};
-    for(const id of L.ids) T[id]={id,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};
-    for(const day of L.fx) for(const m of day){ if(m[2]==null) continue; const h=T[m[0]],a=T[m[1]]; if(!h||!a) continue;
+  function mgTable(d,t){ const L=d.lg[t]; return mgTableOf(L.ids,L.fx); }
+  function mgTableOf(ids,days){ const T={};   // (a league's, or a cup group's)
+    for(const id of ids) T[id]={id,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};
+    for(const day of days) for(const m of day){ if(m[2]==null) continue; const h=T[m[0]],a=T[m[1]]; if(!h||!a) continue;
       h.p++;a.p++;h.gf+=m[2];h.ga+=m[3];a.gf+=m[3];a.ga+=m[2];
       if(m[2]>m[3]){h.w++;h.pts+=3;a.l++;} else if(m[2]<m[3]){a.w++;a.pts+=3;h.l++;} else {h.d++;a.d++;h.pts++;a.pts++;} }
     return Object.values(T).map(r=>(r.gd=r.gf-r.ga,r)).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||(a.id<b.id?-1:1)); }
@@ -13579,15 +13613,16 @@
     const xi=[]; if(g[0]) xi.push(g[0]); xi.push(...o.slice(0,1+OUTFIELD-xi.length)); return xi; }
   function mgStarters(d){ const lu=ensureLineup(d); return [lu.gk,...lu.atk].map(i=>d.roster[i]).filter(Boolean); }
   // how good a side is on the day: the computer's clubs field their best eight; you field the eight you picked, each
-  // as good as he is in his spots (with the ball and without it: a man out of position plays below his rating)
+  // as good as he is in his spots (with the ball and without it: a man out of position plays below his rating), and
+  // each as fresh as he is (see FITNESS)
   // a side's strength in a simulated game: as on paper, and your physio's help on top
   function mgSimStr(d,id){ return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
-      let s=R[lu.gk]?ovrAt(R[lu.gk],'GK'):30;
-      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?0.5*(ovrAt(p,A[i]&&A[i].role,A[i]&&A[i].pos)+ovrAt(p,D[j]&&D[j].role,D[j]&&D[j].pos)):30; });
+      let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK')):30;
+      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?condOvr(p,0.5*(ovrAt(p,A[i]&&A[i].role,A[i]&&A[i].pos)+ovrAt(p,D[j]&&D[j].role,D[j]&&D[j].pos))):30; });
       return s/(1+OUTFIELD); }
-    const xi=mgEight(mgPlayersOf(d,id)); return xi.length?xi.reduce((a,p)=>a+p.ovr,0)/xi.length:40; }
+    const xi=mgPickEight(mgPlayersOf(d,id)); return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40; }
   function mgPois(l){ let L=Math.exp(-l),k=0,p=1; do{ k++; p*=Math.random(); }while(p>L); return Math.min(8,k-1); }
   function mgSimScore(sh,sa){ const x=(sh-sa)*0.056; return [mgPois(Math.max(0.25,1.54+x)), mgPois(Math.max(0.25,1.30-x))]; }   // (home side +0.12)
   // a game's appearances and goals for a side's men: a forward scores most often, a defender now and then, the keeper never
@@ -13596,27 +13631,35 @@
     for(let g=0;g<goals&&tot>0;g++){ let r=Math.random()*tot, i=0; while(i<L.length-1&&(r-=w[i])>0) i++; L[i].goals=(L[i].goals||0)+1; out.push(L[i]); }
     return out; }
   // yours: from the match you played (its goal log), else made up like everyone else's
-  function mgCreditYours(d,mine,logs){ const st=mgStarters(d);
-    if(!logs){ mine.scorers=mgCredit(st,mine.you).map(p=>p.name); return; }
+  // (cup: the game counts, the goals aren't the league's -- the scorers are named, not counted)
+  function mgCreditYours(d,mine,logs,cup){ const st=mgStarters(d);
+    if(!logs){ if(cup){ for(const p of st) p.apps=(p.apps||0)+1; mine.scorers=[]; return; } mine.scorers=mgCredit(st,mine.you).map(p=>p.name); return; }
     for(const p of st) p.apps=(p.apps||0)+1;
     for(const si of SUBS.G.on){ const e=SQUAD.G&&SQUAD.G[si], p=e&&e.ri!=null?d.roster[e.ri]:null; if(p&&!st.includes(p)) p.apps=(p.apps||0)+1; }   // and the subs who came on
     mine.scorers=[];
-    for(const g of logs){ if(g.team!=='G'||g.ownGoal) continue; const p=g.scorerRi!=null?d.roster[g.scorerRi]:null; if(p){ p.goals=(p.goals||0)+1; mine.scorers.push(p.name); } } }
+    for(const g of logs){ if(g.team!=='G'||g.ownGoal) continue; const p=g.scorerRi!=null?d.roster[g.scorerRi]:null; if(p){ if(!cup) p.goals=(p.goals||0)+1; mine.scorers.push(p.name); } } }
   // one round of league games everywhere: yours from `yours` ({score:[you,them], logs}) when you played it, the rest simulated
+  // (the rest comes after each game, up to the next: what a man's fitness reads between games is what he'll start the
+  // next one with -- see mgMidweek, and mgPlayGame, which plays a midweek you're not in straight after the weekend's)
   function mgMatchday(d,yours){ const md=d.md; let mine=null;
+    mgMidweek(d,null);   // (one left over, if there is: it's played before the weekend's)
     for(const t of [1,2,3,4]) for(const m of d.lg[t].fx[md]){ if(m[2]!=null) continue;
-      const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId;
-      if(mq&&yours){ m[2]=home?yours.score[0]:yours.score[1]; m[3]=home?yours.score[1]:yours.score[0]; }
+      const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]), live=!!(mq&&yours);
+      const ovrs=[Math.round(mgStrength(d,m[0])),Math.round(mgStrength(d,m[1]))];
+      if(live){ m[2]=home?yours.score[0]:yours.score[1]; m[3]=home?yours.score[1]:yours.score[0]; }
       else { const r=mgSimScore(mgSimStr(d,m[0]),mgSimStr(d,m[1])); m[2]=r[0]; m[3]=r[1]; }
       if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0];
-        mine={opp,home,you,them,win:you>them,draw:you===them,oppOvr:Math.round(mgStrength(d,opp)),competition:'league'};
-        mgCreditYours(d,mine,yours&&yours.logs); mgCredit(mgEight(mgPlayersOf(d,opp)),them); }
-      else { mgCredit(mgEight(mgPlayersOf(d,m[0])),m[2]); mgCredit(mgEight(mgPlayersOf(d,m[1])),m[3]); } }
-    d.md++;
+        mine={opp,home,you,them,win:you>them,draw:you===them,oppOvr:home?ovrs[1]:ovrs[0],competition:'league'};
+        mgCreditYours(d,mine,yours&&yours.logs); mgCredit(home?xa:xh,them); }
+      else { mgCredit(xh,m[2]); mgCredit(xa,m[3]); }
+      mgTireGame(d,m[0],xh,live); mgTireGame(d,m[1],xa,live); }
+    d.md++; mgRest(d,3);   // (three days to the midweek)
     return mine; }
   // your next game, league or playoff
   function mgNextGame(d){
-    if(d.phase==='league'){ const f=mgYourFixture(d); return f?{kind:'league',opp:f.opp,home:f.home,label:'Matchday '+(d.md+1)}:null; }
+    if(d.phase==='league'){ const c=mgYourCupTie(d), K=c&&CUP[c.s.key];
+      if(c) return {kind:'cup',key:c.s.key,r:c.s.r,opp:c.opp,home:c.home,label:K.name+' · '+K.rounds[c.s.r],short:K.short+' '+K.rs[c.s.r]};
+      const f=mgYourFixture(d); return f?{kind:'league',opp:f.opp,home:f.home,label:'Matchday '+(d.md+1)}:null; }
     if(d.phase==='playoffs'){ const f=mgYourPlayoff(d); return f?{kind:'playoff',opp:f.opp,home:f.home,label:d.poRound===0?'Playoff semi-final':'Playoff final'}:null; }
     return null; }
   // your game is over -- played (score + goal log) or simulated (no score): the round is finished everywhere, the
@@ -13624,12 +13667,13 @@
   function mgPlayGame(d,score,logs){
     const g=mgNextGame(d); if(!g) return null;
     const posBefore=mgPos(d), loyBefore=Math.round(d.loyalty||0), budBefore=d.budget, yours=score?{score,logs}:null;
-    const mine=g.kind==='league'?mgMatchday(d,yours):mgPlayoffRound(d,yours);
+    const mine=g.kind==='league'?mgMatchday(d,yours):g.kind==='cup'?mgMidweek(d,yours):mgPlayoffRound(d,yours);
     if(mine) applyLoyalty(d,mine);
-    const wk=applyWeek(d,mine);
+    const wk=g.kind==='cup'?applyCupGame(d,mine):applyWeek(d,mine);
     const rep={g,mine,wk,posBefore,posAfter:mgPos(d),loyDelta:Math.round(d.loyalty||0)-loyBefore,budBefore,live:!!score};
     if(mine) mgNews(d,g.label+': '+d.clubName+' '+mine.you+'–'+mine.them+' '+mgNameOf(d,mine.opp)+(mine.home?'':' (away)')+(mine.pens?(mine.through?', won on penalties':', lost on penalties'):'')+'.');
-    if(g.kind==='league') mgAfterRound(d); else mgAfterPlayoffRound(d);
+    if(g.kind==='league') mgAfterRound(d); else if(g.kind==='playoff') mgAfterPlayoffRound(d);
+    if(!mgYourCupTie(d)) mgMidweek(d,null);   // (a midweek you're not in is played now: your next game's the weekend's)
     return rep; }
   function mgAfterRound(d){
     mgStory(d);
@@ -13686,7 +13730,7 @@
 
   // ---- playoffs: 3rd v 6th and 4th v 5th, one game each at the higher seed's ground, then a final (not in the top league)
   function mgStartPlayoffs(d){
-    d.po={}; d.poRound=0; d.phase='playoffs';
+    d.po={}; d.poRound=0; d.phase='playoffs'; mgRest(d,4);   // (a week after the last league game: three days of it behind them)
     for(const t of [1,2,3]){ const s=mgTable(d,t).slice(2,6).map(r=>r.id); d.po[t]={seeds:s, semis:[[s[0],s[3],null,null,null],[s[1],s[2],null,null,null]], final:null, winner:null}; }
     mgNews(d,'The league season is over: '+d.clubName+' finished '+ordinal(mgPos(d))+'.');
     if(!mgYourPlayoff(d)) mgPlayoffsOut(d); }
@@ -13700,17 +13744,127 @@
   function mgPlayoffRound(d,yours){ let mine=null;
     for(const t of [1,2,3]){ const P=d.po[t];
       for(const m of (d.poRound===0?P.semis:[P.final])){ if(m[2]!=null) continue;
-        const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId;
+        const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]);
         mgTie(d,m,(mq&&yours)?(home?yours.score:[yours.score[1],yours.score[0]]):null);
         if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0], through=m[m[4]]===d.clubId;
           mine={opp,home,you,them,win:through,draw:you===them,pens:you===them,through,oppOvr:Math.round(mgStrength(d,opp)),competition:d.poRound===0?'playoff semi-final':'playoff final'};
-          mgCreditYours(d,mine,yours&&yours.logs); } }
+          mgCreditYours(d,mine,yours&&yours.logs); }
+        mgTireGame(d,m[0],xh,!!(mq&&yours)); mgTireGame(d,m[1],xa,!!(mq&&yours)); }
       if(d.poRound===0){ const a=P.semis[0][P.semis[0][4]], b=P.semis[1][P.semis[1][4]]; P.final=P.seeds.indexOf(a)<P.seeds.indexOf(b)?[a,b,null,null,null]:[b,a,null,null,null]; }
       else P.winner=P.final[P.final[4]]; }
-    d.poRound++;
+    d.poRound++; mgRest(d,4);   // (four days to the final)
     return mine; }
   function mgPlayoffsOut(d){ while(d.poRound<2) mgPlayoffRound(d,null); mgSeasonEnd(d); }
   function mgAfterPlayoffRound(d){ if(d.poRound>=2||!mgYourPlayoff(d)) mgPlayoffsOut(d); }
+
+  // ===== THE CUPS ====================================================================================================
+  // League 2's clubs play only the league. League 1's and up are in the COCO CUP (the league clubs' cup), the
+  // Championship's and up in the FASHION CUP too, and the Premium League's top six play the next season's CHAMPIONS
+  // LEAGUE with ten clubs from abroad: four groups of four, home and away, the top two through to the quarter-finals.
+  // Every other tie is one game at the home side's ground, penalties if it's level. A round is played midweek, three
+  // days after a league game and four before the next -- CUP_CAL: the league matchday it comes after -- so the higher
+  // up a club is, the more of its weeks have two games in them. Prize money for every round won (prize), the
+  // Champions League's for every group game won, getting through (through) and being in it (entry).
+  const CUP={
+    coco:   {name:'Coco Cup', short:'COCO', tiers:[2,3,4], byes:22, rounds:['First round','Round of 32','Round of 16','Quarter-final','Semi-final','Final'],
+             rs:['R1','R32','R16','QF','SF','FINAL'], prize:[5000,10000,20000,40000,80000,200000]},
+    fashion:{name:'Fashion Cup', short:'FASHION', tiers:[3,4], byes:4, rounds:['First round','Round of 16','Quarter-final','Semi-final','Final'],
+             rs:['R1','R16','QF','SF','FINAL'], prize:[20000,50000,100000,200000,500000]},
+    cl:     {name:'Champions League', short:'CL', rounds:['Group game 1','Group game 2','Group game 3','Group game 4','Group game 5','Group game 6','Quarter-final','Semi-final','Final'],
+             rs:['G1','G2','G3','G4','G5','G6','QF','SF','FINAL'], prize:[40000,40000,40000,40000,40000,40000,350000,500000,1500000], entry:300000, through:200000}};
+  const CUP_CAL={0:['cl',0],1:['coco',0],2:['cl',1],3:['fashion',0],4:['cl',2],5:['coco',1],6:['cl',3],7:['fashion',1],8:['cl',4],9:['coco',2],10:['cl',5],11:['coco',3],
+    13:['fashion',2],14:['cl',6],15:['coco',4],16:['fashion',3],17:['cl',7],18:['coco',5],20:['fashion',4],22:['cl',8]};   // (none after 12: the winter window)
+  // THE CLUBS FROM ABROAD: ten, made once, a squad each made afresh every season at their level (around the Premium
+  // League's best)
+  const EURO_CLUBS=[['Inter Vallera',6],['Real Montalba',5],['Dinamo Korvesk',4],['Olympia Thessara',3],['Sporting Lusano',2],['Union Brennstadt',1],
+    ['Athletic Corvara',0],['Lokomotiv Savro',-1],['Red Star Ardelia',-2],['FC Vestholm',-3]];
+  function mgEuro(d,fresh){ const W=d.world; W.euro=W.euro||[];
+    if(!W.euro.length) for(const [nm,b] of EURO_CLUBS){ const c=mgMakeClub(d,nm,4,b); c.euro=true; c.bias=b; W.euro.push(c.id); }
+    else if(fresh) for(const id of W.euro){ const c=W.clubs[id]; if(!c) continue; const lvl=MG_LEVEL[4]+(c.bias||0); c.players=[];
+      for(const role of MG_ROLES) c.players.push(mgNewPlayer(d,role,lvl-2+mgGauss()*3.2,mgAge())); mgNumber(c.players); }
+    return W.euro.filter(id=>W.clubs[id]); }
+  const cupBest=(d,ids)=>ids.slice().sort((a,b)=>mgStrength(d,b)-mgStrength(d,a));
+  function cupDraw(ids){ const a=mgShuffle(ids.slice()), t=[]; for(let i=0;i+1<a.length;i+=2) t.push([a[i],a[i+1],null,null,null]); return t; }
+  // a new season's cups: who's in each (the leagues as they now are), the first rounds drawn (the best clubs through to
+  // the second on a bye), the Champions League's groups drawn from four pots by strength
+  function mgCupsStart(d){ const C={s:d.season};
+    for(const k of ['coco','fashion']){ const K=CUP[k], ids=K.tiers.flatMap(t=>d.div[t]), S=cupBest(d,ids);
+      C[k]={in:ids, r:[{ties:cupDraw(S.slice(K.byes)), byes:S.slice(0,K.byes)}], win:null}; }
+    const q=(d.clQual||[]).filter(id=>d.world.clubs[id]&&d.div[4].includes(id)), q6=q.length===6?q:cupBest(d,d.div[4]).slice(0,6);
+    const all=q6.concat(mgEuro(d,true)).slice(0,16), S=cupBest(d,all), gr=[0,1,2,3].map(()=>({ids:[],fx:null}));
+    for(let p=0;p<4;p++) mgShuffle(S.slice(p*4,p*4+4)).forEach((id,i)=>gr[i].ids.push(id));
+    for(const g of gr){ const f=cwFixtures(g.ids); g.fx=f.map(day=>day.map(m=>[m[0],m[1],null,null])).concat(f.map(day=>day.map(m=>[m[1],m[0],null,null]))); }
+    C.cl={in:all, gr, ko:[], win:null};
+    d.cup=C; d.mw=-1;
+    for(const k of ['coco','fashion','cl']) if(C[k].in.includes(d.clubId)){
+      if(k==='cl'){ d.budget+=CUP.cl.entry; const G=gr.find(g=>g.ids.includes(d.clubId));
+        mgNews(d,d.clubName+' are in the Champions League ('+money(CUP.cl.entry)+'): drawn with '+G.ids.filter(x=>x!==d.clubId).map(x=>mgNameOf(d,x)).join(', ')+'.'); }
+      else { const t=C[k].r[0].ties.find(m=>m[0]===d.clubId||m[1]===d.clubId);
+        mgNews(d,CUP[k].name+' '+CUP[k].rounds[0].toLowerCase()+': '+(t?mgNameOf(d,t[0])+' v '+mgNameOf(d,t[1]):d.clubName+' are through to the '+CUP[k].rounds[1].toLowerCase()+' on a bye')+'.'); } } }
+  // the ties of a cup's round (the Champions League's group games, or its knock-out ties)
+  function cupTies(d,key,r){ const C=d.cup&&d.cup[key]; if(!C) return [];
+    if(key==='cl') return r<6?C.gr.flatMap(g=>g.fx[r]):(C.ko[r-6]||{ties:[]}).ties;
+    return (C.r[r]||{ties:[]}).ties; }
+  // the week's midweek, if it's due and not played: after league matchday g = md-1 -> {g, key, r} (key null: no cup)
+  function mgCupDue(d){ const g=d.md-1; if(d.phase!=='league'||g<0||(d.mw!=null&&d.mw>=g)) return null;
+    const c=d.cup&&!d.cup.off&&d.cup.s===d.season?CUP_CAL[g]:null; return {g,key:c?c[0]:null,r:c?c[1]:null}; }
+  function mgYourCupTie(d){ const s=mgCupDue(d); if(!s||!s.key) return null;
+    for(const m of cupTies(d,s.key,s.r)){ if(m[2]!=null) continue; if(m[0]===d.clubId) return {s,m,home:true,opp:m[1]}; if(m[1]===d.clubId) return {s,m,home:false,opp:m[0]}; }
+    return null; }
+  // THE MIDWEEK: the round (yours from `yours` when you played it, the rest simulated), then four days' rest to the
+  // weekend's league game -> yours
+  function mgMidweek(d,yours){ const s=mgCupDue(d); if(!s) return null; d.mw=s.g; let mine=null;
+    if(s.key){ for(const m of cupTies(d,s.key,s.r)){ if(m[2]!=null) continue; const r=mgCupGame(d,s.key,s.r,m,yours); if(r) mine=r; }
+      mgCupRoundDone(d,s.key,s.r,mine); }
+    mgRest(d,4); return mine; }
+  // one cup game: a knock-out tie level at the end goes to penalties (m[4]: which side went through)
+  function mgCupGame(d,key,r,m,yours){ const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, live=!!(mq&&yours), ko=key!=='cl'||r>=6;
+    const xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]), ovrs=[Math.round(mgStrength(d,m[0])),Math.round(mgStrength(d,m[1]))];
+    const sc=live?(home?yours.score:[yours.score[1],yours.score[0]]):mgSimScore(mgSimStr(d,m[0]),mgSimStr(d,m[1]));
+    m[2]=sc[0]; m[3]=sc[1]; if(ko) m[4]=sc[0]>sc[1]?0:sc[0]<sc[1]?1:(Math.random()<0.5?0:1);
+    let mine=null;
+    if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0], through=ko?m[m[4]]===d.clubId:null;
+      mine={opp,home,you,them,win:ko?through:you>them,draw:you===them,pens:ko&&you===them,through,oppOvr:home?ovrs[1]:ovrs[0],competition:'cup',cup:key,round:r};
+      mgCreditYours(d,mine,yours&&yours.logs,true); for(const p of home?xa:xh) p.apps=(p.apps||0)+1; }
+    else for(const p of xh.concat(xa)) p.apps=(p.apps||0)+1;   // (the cups' goals aren't counted: the league's scorers are the league's)
+    mgTireGame(d,m[0],xh,live); mgTireGame(d,m[1],xa,live);
+    return mine; }
+  const cupPay=(d,id,amt)=>{ if(id===d.clubId) d.budget+=amt; else { const c=d.world.clubs[id]; if(c&&!c.euro) c.budget+=amt; } };
+  // a round played: the money, who's through, the next round drawn -- or the winner
+  function mgCupRoundDone(d,key,r,mine){ const K=CUP[key], C=d.cup[key], you=d.clubId;
+    if(key==='cl'&&r<6){ for(const m of cupTies(d,key,r)){ if(m[2]>m[3]) cupPay(d,m[0],K.prize[r]); else if(m[3]>m[2]) cupPay(d,m[1],K.prize[r]); }
+      if(mine&&mine.win) mine.prize=K.prize[r];
+      if(r===5){ const T=C.gr.map(g=>mgTableOf(g.ids,g.fx).map(x=>x.id));   // the quarter-finals: each group's winners at home to another's runners-up
+        C.ko.push({ties:[[T[0][0],T[1][1]],[T[1][0],T[0][1]],[T[2][0],T[3][1]],[T[3][0],T[2][1]]].map(t=>[t[0],t[1],null,null,null])});
+        for(const t of C.ko[0].ties) for(const id of t.slice(0,2)) cupPay(d,id,K.through);
+        if(C.in.includes(you)){ const inQF=C.ko[0].ties.some(t=>t[0]===you||t[1]===you);
+          mgNews(d,inQF?d.clubName+' are through to the Champions League quarter-finals ('+money(K.through)+').':d.clubName+' are out of the Champions League in the group stage.');
+          if(mine&&inQF) mine.prize=(mine.prize||0)+K.through; } }
+      return; }
+    const R=key==='cl'?C.ko[r-6]:C.r[r], wins=R.ties.map(m=>m[m[4]]), on=wins.concat(R.byes||[]);
+    for(const id of wins) cupPay(d,id,K.prize[r]);
+    if(mine&&mine.through) mine.prize=K.prize[r];
+    if(on.length===1){ C.win=on[0]; mgNews(d,mgNameOf(d,on[0])+' win the '+K.name+'.'); return; }
+    const next=cupDraw(on); if(key==='cl') C.ko.push({ties:next}); else C.r.push({ties:next,byes:[]});
+    const yt=next.find(m=>m[0]===you||m[1]===you);
+    if(mine&&!mine.through) mgNews(d,d.clubName+' are out of the '+K.name+' ('+K.rounds[r].toLowerCase()+').');
+    if(yt) mgNews(d,K.name+' '+K.rounds[r+1].toLowerCase()+' draw: '+mgNameOf(d,yt[0])+' v '+mgNameOf(d,yt[1])+'.'); }
+  // how far you went in a cup this season: '' (not in it), 'WINNERS', 'FINAL', '<round>' (out in it), 'IN THE <round>'
+  function mgCupRun(d,key){ const C=d.cup&&d.cup.s===d.season&&d.cup[key], you=d.clubId; if(!C||!C.in.includes(you)) return '';
+    const K=CUP[key]; if(C.win===you) return 'WINNERS';
+    const rounds=key==='cl'?C.ko.map(k=>k.ties):C.r.map(x=>x.ties);
+    for(let i=rounds.length-1;i>=0;i--){ const m=rounds[i].find(t=>t[0]===you||t[1]===you); if(!m) continue; const ri=key==='cl'?i+6:i;
+      if(m[2]==null) return 'IN THE '+K.rounds[ri].toUpperCase();
+      return m[m[4]]===you?(ri===K.rounds.length-1?'WINNERS':'IN THE '+K.rounds[ri+1].toUpperCase()):(ri===K.rounds.length-1?'RUNNERS-UP':'OUT IN THE '+K.rounds[ri].toUpperCase()); }
+    if(key==='cl') return C.ko.length?'OUT IN THE GROUP STAGE':'IN THE GROUP STAGE';
+    return 'IN THE '+K.rounds[(C.r[0].byes||[]).includes(you)?1:0].toUpperCase(); }
+  // a cup game's money: the gate (or the away share) and the television's bump -- no week's wages or partners (those
+  // are the league week's) -- and the prize, if he won a round
+  function applyCupGame(d,mine){ const f=computeFinance(d), gate=mine?(mine.home?f.homeGate:f.awayGate):0, tv=mine?broadcastGameBump(d,mine):0, prize=(mine&&mine.prize)||0, income=gate+tv;
+    d.budget=(d.budget||0)+income; d.ledger=d.ledger||[];
+    d.ledger.unshift({week:d.week,season:d.season,income:income+prize,gate,tv,wages:0,net:income+prize,budget:Math.round(d.budget),cup:mine?CUP[mine.cup].short+' '+CUP[mine.cup].rs[mine.round]:'CUP'});
+    if(d.ledger.length>12) d.ledger.length=12; d.inRed=d.budget<0;
+    return {f,gate,tv,income,wages:0,prize,cup:true}; }
 
   // ---- the end of a season: who goes up and down, prize money, your record, then everyone a year older
   function mgSeasonEnd(d){
@@ -13727,6 +13881,9 @@
     for(const t of [1,2,3,4]) R.moves[t].table.forEach((id,i)=>{ const c=d.world.clubs[id]; if(c&&id!==d.clubId) c.budget+=mgRound(MG_PRIZE[t]*Math.pow((MG_CLUBS-i)/MG_CLUBS,1.6)); });
     const M=d.manager; M.history.push({season:d.season,club:d.clubName,tier:d.tier,pos,result:R.result}); if(pos===1) M.titles++; if(up) M.promotions++;
     const top=d.roster.slice().sort((a,b)=>(b.goals||0)-(a.goals||0))[0]; if(top&&top.goals) R.topScorer={name:top.name,goals:top.goals};
+    R.cups=['coco','fashion','cl'].map(k=>[k,mgCupRun(d,k)]).filter(x=>x[1]); R.cupWin={};
+    for(const k of ['coco','fashion','cl']){ const C=d.cup&&d.cup.s===d.season&&d.cup[k]; if(C&&C.win) R.cupWin[k]=C.win; }
+    d.clQual=R.moves[4].table.slice(0,6);   // (the Premium League's top six: next season's Champions League)
     mgAgeWorld(d,R);
     d.review=R; d.phase='review';
     mgNews(d,'Season '+d.season+' is over: '+d.clubName+' finished '+ordinal(pos)+' in '+MG_LEAGUE[d.tier]+' — '+R.result.toLowerCase()+'.'); }
@@ -13789,7 +13946,7 @@
     d.world.free=mgShuffle(d.world.free.filter(p=>(p.idle||0)<2)).slice(0,70);   // (two seasons without a club, and he's out of the game)
     mgSweepFree(d);
     for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++) d.world.free.push(mgNewFreeAgent(d));   // (the pool kept near sixty)
-    if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); d.top=Math.max(d.top||1,d.tier);
+    if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); mgFreshen(d); mgCupsStart(d); d.top=Math.max(d.top||1,d.tier);
     mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. The summer window is open for '+MG_WINDOW.summer+' days.');
     mgAiBids(d); }
 
@@ -13951,9 +14108,9 @@
         c.players.splice(c.players.indexOf(w),1); mgToFree(d,w,c); } }
   // the window moves on a day; after its last day it shuts
   function mgNextDay(d){ if(!mgWindowOpen(d)) return;
-    mgAiTrades(d);
+    mgAiTrades(d); if(d.phase==='winter') mgRest(d,3);   // (the winter break: three days' rest a day)
     if(d.day>=MG_WINDOW[d.phase]){ const summer=d.phase==='summer';
-      d.phase='league'; d.day=0; d.offers=[]; d.bidMemo={}; mgTopUpYours(d);
+      d.phase='league'; d.day=0; d.offers=[]; d.bidMemo={}; mgTopUpYours(d); mgMidweek(d,null);
       mgNews(d,summer?'The summer window has shut. The season starts.':'The window has shut.'); return; }
     d.day++; mgAiBids(d); }
 
@@ -14125,13 +14282,14 @@
   // if it has one of its men for it, else in one of his second ones (see POSITIONS); short of a position, the best man
   // left. (No shape: the first eight.)
   function careerSquad(club,form){
-    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p) });
+    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p) });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
-    const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||p.ovr>b.ovr)) b=p; if(b) used.add(b); return b; };
+    const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||condOvr(p)>condOvr(b))) b=p; if(b) used.add(b); return b; };
     const gk=best(p=>p.role==='GK')||best(()=>true);
-    // each spot to whoever's best in it (his rating there, a little extra in his own position): the best pairings first
+    // each spot to whoever's best in it on the day (his rating there, as fresh as he is, a little extra in his own
+    // position): the best pairings first
     const spots=careerSlots(form,'atk'), line=new Array(spots.length).fill(null), V=[];
-    for(const p of ps) if(!used.has(p)&&p.role!=='GK') spots.forEach((sl,si)=>V.push({p,si,v:ovrAt(p,sl.role,sl.pos)+(posFit(natPos(p),sl.pos)==='main'?1:0)}));
+    for(const p of ps) if(!used.has(p)&&p.role!=='GK') spots.forEach((sl,si)=>V.push({p,si,v:condOvr(p,ovrAt(p,sl.role,sl.pos))+(posFit(natPos(p),sl.pos)==='main'?1:0)}));
     V.sort((a,b)=>b.v-a.v);
     for(const c of V){ if(line[c.si]||used.has(c.p)) continue; line[c.si]=c.p; used.add(c.p); }
     for(let si=0;si<line.length;si++) if(!line[si]) line[si]=best(()=>true);  // (short of outfielders: anyone)
@@ -14217,7 +14375,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, five)
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p)}; });
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p)}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   // your side's shapes and spots changed in a match (the pause menu): the career keeps them
@@ -14257,9 +14415,10 @@
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, pos=ri===lu.gk?'GK':sl?sl.pos:null, at=role?ovrAt(p,role,pos):p.ovr, fc=fitCls(natPos(p),role,pos), sty=styleOf(p), st=mgStats(p);
     const instr=cardSide==='instr';
-    return '<div class="tbCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+    const c=condOf(p), legs='<div class="mtLegs"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
+    return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
-      +'</div>'
+      +legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' at '+natPos(p)+'</div>':'')+cardFlip()+'</div></div>'
       +(instr?'':sixHtml(st,p.role))+'</div>'+(instr?careerInstrBlock(d, ri, phase):''); }
   // an instruction for one of your spots (si: its index in that phase's shape)
@@ -14295,7 +14454,7 @@
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
     return '<button class="ptk'+fitCls(natPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
-      +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+'</button>'; }
+      +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
   // a small lit box off the bottom-right corner of the spot
   function ghostTok(L,T,num,name,k){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
@@ -14355,12 +14514,13 @@
   // the pitch (in their spots, with the ball), the five on the bench, then the rest, not taken -- wrapped into three columns
   // where its parts meet. No faces: a bar a man, his place in the list, his name, his position (on the pitch, the spot
   // he's in) and his rating (there). Drag a bar up or down (see selMove, and the drag below).
+  const condBar=(p,cls)=>{ const c=condOf(p); return c>=0.995?'':'<i class="'+cls+(c<0.65?' low':c<0.85?' mid':'')+'" style="--c:'+c.toFixed(3)+'"></i>'; };
   const initName=n=>{ const a=String(n||'').trim().split(/\s+/); return a.length>1?a[0].charAt(0)+'. '+a.slice(1).join(' '):(a[0]||''); };
   const selList=lu=>[lu.gk,...lu.atk,...lu.bench];
   function mgSelectTab(d){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), n8=1+lu.atk.length, L=selList(lu), nb=Math.min(L.length,n8+BENCH_N);
     const row=k=>{ const p=R[L[k]]; if(!p) return ''; const sl=k===0?{role:'GK',pos:'GK'}:k<n8?A[k-1]:null;
       return '<div class="selRow'+(sl?' slot'+fitCls(natPos(p),sl.role,sl.pos):'')+'" data-k="'+k+'"><span class="slK">'+(k+1)+'</span><span class="slNm">'+mgEsc(initName(p.name))+'</span>'
-        +'<span class="slPos">'+(sl?sl.pos:natPos(p))+'</span><span class="slOvr">'+(sl?ovrAt(p,sl.role,sl.pos):p.ovr)+'</span></div>'; };
+        +'<span class="slPos">'+(sl?sl.pos:natPos(p))+'</span><span class="slOvr">'+(sl?ovrAt(p,sl.role,sl.pos):p.ovr)+'</span>'+condBar(p,'slCond')+'</div>'; };
     const col=(g,hd,a,b)=>{ let h='<div class="selCol" data-grp="'+g+'"><div class="selHd">'+hd+'</div>'; for(let k=a;k<b;k++) h+=row(k); return h+'</div>'; };
     return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)+'</div></div>'; }
   // a bar put down on another (list places from and to): on the pitch -- in goal or a spot -- or on anyone when he came off
@@ -14496,19 +14656,25 @@
       for(const x of day){ if(x[0]===d.clubId||x[1]===d.clubId) continue; h+=row(mgEsc(mgNameOf(d,x[0]))+' v '+mgEsc(mgNameOf(d,x[1])), x[2]+' – '+x[3], false, '#cfe7d2'); }
       const dp=rep.posBefore-rep.posAfter;
       h+=row('League position', ordinal(rep.posAfter)+(dp?(dp>0?'  ▲'+dp:'  ▼'+(-dp)):''), true, dp>0?'var(--good)':dp<0?'var(--bad)':'var(--ink)');
+    } else if(g.kind==='cup'){ const K=CUP[g.key], last=g.r===K.rounds.length-1, ko=g.key!=='cl'||g.r>=6;
+      h+='<div class="mrSect">'+K.name.toUpperCase()+' · '+K.rounds[g.r].toUpperCase()+'</div>';
+      if(ko) h+=row(m.through?(last?'WINNERS of the '+K.name+'!':'Through to the '+K.rounds[g.r+1].toLowerCase()+'.'):'Out of the '+K.name+'.','',true,m.through?'var(--good)':'var(--bad)');
+      else { const G=d.cup.cl.gr.find(x=>x.ids.includes(d.clubId)); if(G) mgTableOf(G.ids,G.fx).forEach((r,i)=>{ h+=row((i+1)+'. '+mgEsc(mgNameOf(d,r.id)),r.pts+' pts',r.id===d.clubId,r.id===d.clubId?'var(--good)':'#cfe7d2'); });
+        if(g.r===5) h+=row(d.cup.cl.ko.length&&d.cup.cl.ko[0].ties.some(t=>t[0]===d.clubId||t[1]===d.clubId)?'Through to the quarter-finals.':'Out in the group stage.','',true); }
     } else {
       const P=d.po&&d.po[rep.g.kind==='playoff'?(d.review?d.review.tier:d.tier):d.tier];
       const msg=m.through?(P&&P.winner===d.clubId?'PROMOTED through the playoffs!':'Through to the playoff final.'):'Out of the playoffs.';
       h+='<div class="mrSect">PLAYOFFS</div>'+row(msg,'',true,m.through?'var(--good)':'var(--bad)');
     }
     h+='</div><div class="mrCol" data-pages="mr1"><div class="mrSect">FINANCES</div>';
-    h+=row('Partners',money(f.sponsorWk))+row('Broadcast / central',money(f.broadcastWk));
-    if(f.commercialWk>0) h+=row('Sponsors & boards',money(f.commercialWk));
+    if(!wk.cup){ h+=row('Partners',money(f.sponsorWk))+row('Broadcast / central',money(f.broadcastWk));
+      if(f.commercialWk>0) h+=row('Sponsors & boards',money(f.commercialWk)); }
     if(wk.tv>0) h+=row('Broadcast match bump','+'+money(wk.tv),false,'var(--warn)');
     h+=row(m.home?'Gate ('+f.attendance.toLocaleString()+' × $'+f.price+(f.cph>0?' + concessions':'')+')':'Away gate share',money(wk.gate));
-    h+=row('Wages','−'+money(wk.wages),false,'var(--bad)');
-    const net=wk.income-wk.wages;
-    h+='<div style="border-top:1px solid var(--well);margin:6px 0"></div>'+row('Net this week',(net>=0?'+':'')+money(net),true,net>=0?'var(--good)':'var(--bad)')+row('Budget',money(d.budget),true,d.budget>=0?'var(--good)':'var(--bad)');
+    if(wk.prize) h+=row('Prize money','+'+money(wk.prize),false,'var(--good)');
+    if(!wk.cup) h+=row('Wages','−'+money(wk.wages),false,'var(--bad)');
+    const net=wk.income+(wk.prize||0)-wk.wages;
+    h+='<div style="border-top:1px solid var(--well);margin:6px 0"></div>'+row(wk.cup?'This game':'Net this week',(net>=0?'+':'')+money(net),true,net>=0?'var(--good)':'var(--bad)')+row('Budget',money(d.budget),true,d.budget>=0?'var(--good)':'var(--bad)');
     h+='<div class="mrSect">FANS</div>'+row('This result',(rep.loyDelta>=0?'+':'')+rep.loyDelta.toLocaleString(),false,rep.loyDelta>=0?'var(--good)':'var(--bad)')+row('Fans',Math.round(d.loyalty||0).toLocaleString(),true,'var(--warn)');
     h+='</div></div><div class="mrFoot"><button class="mrContinue" id="mrContinueBtn">CONTINUE ▶</button></div></div>';
     el.innerHTML=h; el.style.display='block'; el.scrollTop=0;
@@ -14635,7 +14801,7 @@
   const BLD_NAME={club:'the clubhouse', train:'the training pitch', market:'the transfer market', physio:'the physio’s clinic', scouting:'the scouts’ house', academy:'the youth academy', stadium:'the stadium'};
   const BLD_WHAT={
     market:'Agents’ numbers on your phone: bid for any player at another club while a window’s open, sign free agents any time, and sell your own. Till you’re on it, there’s no buying or selling.',
-    physio:'Keeps your players going: at half-time they get back more of the legs they’ve lost, and built up they tire more slowly through a game. A little help in a simulated game too.',
+    physio:'Keeps your players going: fitter again sooner between games, more of their legs back at half-time, and built up they tire more slowly through a game. A little help in a simulated game too.',
     scouting:'Send scouts round a league to find out what its players are really worth, and grow the network. Till it’s up, a player at another club is a range of ratings, and you can’t scout him.',
     academy:'Youngsters of your own: a new intake every summer (the first the day it opens), and facilities to build up.'};
   const LOCK_SVG='<svg class="lkI" viewBox="0 0 8 10" aria-hidden="true"><path d="M2 4.5V3a2 2 0 0 1 4 0v1.5"/><rect x="1" y="4.5" width="6" height="5" rx="1"/></svg>';
@@ -14718,8 +14884,8 @@
   const PHYSIO_HT=[25,35,45,55,65], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];
   function mgPhysioBody(d){ const L=lvOf(d,'physio');
     return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.bld.physio,'b:physio')+'<div class="bpBuildTxt"><div class="bpSect">THE PHYSIO · LEVEL '+L+' OF 4</div>'
-      +finRow('Back at half-time',PHYSIO_HT[L]+'% of the legs they’ve lost')+finRow('Through a game',PHYSIO_WEAR[L]?'tiring '+PHYSIO_WEAR[L]+'% slower':'tiring as ever')+'</div></div>'
-      +lvlRows(d,'physio',4,k=>PHYSIO_HT[k]+'% back, '+PHYSIO_WEAR[k]+'% slower to tire')+lvlNext(d,'physio','BUILD IT UP'); }
+      +finRow('Between games',(COND_DAY[L]*100).toFixed(1)+'% fitter a day')+finRow('Back at half-time',PHYSIO_HT[L]+'% of the legs they’ve lost')+finRow('Through a game',PHYSIO_WEAR[L]?'tiring '+PHYSIO_WEAR[L]+'% slower':'tiring as ever')+'</div></div>'
+      +lvlRows(d,'physio',4,k=>(COND_DAY[k]*100).toFixed(1)+'% a day, '+PHYSIO_HT[k]+'% back, '+PHYSIO_WEAR[k]+'% slower to tire')+lvlNext(d,'physio','BUILD IT UP'); }
   // ---- the decorations: bought one at a time and put where you like on the lawn (not on a building, a plot or another
   // one), moved later, or put away in store. Each is [id, name, tab, price]
   const DECO_SHOP=[
@@ -14880,13 +15046,30 @@
       h+='</div>'; }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
     return mgPanes('<div class="sqList">'+h+'</div>', sel?'<button class="mgBtn sqBack" data-mg="sel" data-pid="'+MGUI.sel+'">◀ THE TEAM</button>'+mgCard(d,MGUI.sel):'', '', sel?'':mgSquadPitch(d)); }
-  function mgFixturesTab(d){ const L=d.lg[d.tier]; let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'—')+'</div><div class="mgList">';
-    L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId); if(!m) return; const home=m[0]===d.clubId, opp=home?m[1]:m[0]; let right;
-      if(m[2]!=null){ const you=home?m[2]:m[3], them=home?m[3]:m[2], r=you>them?'W':you<them?'L':'D'; right='<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+'</span>'; }
-      else right=(i===d.md&&d.phase==='league')?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+Math.round(mgStrength(d,opp))+'</span>';
-      h+='<div class="mgFx'+(i===d.md&&d.phase==='league'?' next':'')+'"><span class="md">'+(i+1)+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,opp))+'</span>'+right+'</div>';
+  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d); let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'—')+'</div>'+mgCupsSum(d)+'<div class="mgList">';
+    const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
+      return '<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+(pens!=null&&you===them?' P':'')+'</span>'; };
+    L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
+      if(m){ const home=m[0]===d.clubId, opp=home?m[1]:m[0], next=nx&&nx.kind==='league'&&i===d.md; let right;
+        if(m[2]!=null) right=res(home?m[2]:m[3],home?m[3]:m[2]);
+        else right=next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+Math.round(mgStrength(d,opp))+'</span>';
+        h+='<div class="mgFx'+(next?' next':'')+'"><span class="md">'+(i+1)+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,opp))+'</span>'+right+'</div>'; }
+      const c=CUP_CAL[i], C=c&&d.cup&&!d.cup.off&&d.cup.s===d.season&&d.cup[c[0]];   // (the midweek after it: your cup tie, if you're still in)
+      if(C&&C.in.includes(d.clubId)){ const K=CUP[c[0]], t=cupTies(d,c[0],c[1]).find(x=>x[0]===d.clubId||x[1]===d.clubId), run=mgCupRun(d,c[0]);
+        if(t){ const home=t[0]===d.clubId, next=nx&&nx.kind==='cup'&&nx.key===c[0]&&nx.r===c[1], ko=c[0]!=='cl'||c[1]>=6;
+          const right=t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+Math.round(mgStrength(d,home?t[1]:t[0]))+'</span>';
+          h+='<div class="mgFx cup'+(next?' next':'')+'"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,home?t[1]:t[0]))+'</span>'+right+'</div>'; }
+        else if(c[0]!=='cl'&&((C.r[c[1]]||{}).byes||[]).includes(d.clubId)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">a bye: through to the '+K.rounds[c[1]+1].toLowerCase()+'</span><span></span></div>';
+        else if(/^IN THE/.test(run)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">'+(K.rounds[c[1]].toLowerCase())+', not drawn yet</span><span></span></div>'; }
       if(i===MG_HALF-1) h+='<div class="mgFxBreak">— winter transfer window —</div>'; });
     return h+'</div>'; }
+  // the cups this season, a line each: how far you've gone in each you're in (your Champions League group's table too)
+  function mgCupsSum(d){ const C=d.cup, cur=C&&!C.off&&C.s===d.season; let h='';
+    if(!cur) return '<div class="mgHint">The cups start with next season.</div>';
+    for(const k of ['coco','fashion','cl']){ const run=mgCupRun(d,k); if(!run) continue;
+      h+=finRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),true,/WINNERS/.test(run)?'var(--good)':/^OUT|RUNNERS/.test(run)?'var(--bad)':'var(--ink)');
+      if(k==='cl'){ const G=C.cl.gr.find(g=>g.ids.includes(d.clubId)); if(G) mgTableOf(G.ids,G.fx).forEach((r,i)=>{ h+=finRow((i+1)+'. '+mgEsc(mgNameOf(d,r.id)),r.p+' played · '+r.pts+' pts',false,r.id===d.clubId?'var(--good)':'#cfe7d2'); }); } }
+    return h||'<div class="mgHint">'+(d.tier===1?'League 2 plays only the league: the Coco Cup comes with League 1.':'No cups for you this season.')+'</div>'; }
   function mgFinanceTab(d){ const f=computeFinance(d); let h=finRow('Budget',money(d.budget),true,d.budget<0?'var(--bad)':'var(--good)');
     if(d.budget<0) h+='<div class="mgHint" style="color:var(--bad)">In the red: you can’t buy or sign anyone until you’re back in the black. Selling still works.</div>';
     h+='<div class="bpSect">EVERY WEEK OF THE SEASON</div>'+finRow('Partners',money(f.sponsorWk))+finRow('Broadcast',money(f.broadcastWk))
@@ -14896,7 +15079,7 @@
     const T=(d.tx||[]).filter(x=>x.s===d.season), spent=T.filter(x=>x.dir==='in').reduce((a,x)=>a+x.fee,0), got=T.filter(x=>x.dir==='out').reduce((a,x)=>a+x.fee,0);
     h+='<div class="bpSect">TRANSFERS THIS SEASON</div>'+finRow('Spent',money(spent),false,'var(--bad)')+finRow('Received',money(got));
     for(const x of T) h+=finRow((x.dir==='in'?'IN · ':'OUT · ')+mgEsc(x.name)+' ('+mgEsc(x.club)+')',x.fee?money(x.fee):'free',false,x.dir==='in'?'var(--warn)':'var(--good)');
-    if((d.ledger||[]).length){ h+='<div class="bpSect">RECENT WEEKS</div>'; for(const w of d.ledger.slice(0,6)) h+=finRow('Week '+w.week+' · in '+money(w.income)+' · wages '+money(w.wages),(w.net>=0?'+':'')+money(w.net),false,w.net>=0?'var(--good)':'var(--bad)'); }
+    if((d.ledger||[]).length){ h+='<div class="bpSect">RECENT WEEKS</div>'; for(const w of d.ledger.slice(0,6)) h+=finRow((w.cup?w.cup:'Week '+w.week)+' · in '+money(w.income)+(w.cup?'':' · wages '+money(w.wages)),(w.net>=0?'+':'')+money(w.net),false,w.net>=0?'var(--good)':'var(--bad)'); }
     return h; }
 
   // ---- the market ----
@@ -14986,12 +15169,14 @@
     let h='<div class="mrHead"><div class="mrLabel">SEASON '+R.season+' · '+MG_LEAGUE[R.tier].toUpperCase()+'</div><div class="mrScore" style="color:'+(R.up||R.pos===1?'var(--good)':R.down?'var(--bad)':'var(--ink)')+'">'+ordinal(R.pos)+'</div>'
       +'<div class="mrLabel" style="font-size:13px;color:var(--ink)">'+R.result+'</div></div>';
     h+=finRow('Prize money','+'+money(R.prize),true)+(R.topScorer?finRow('Top scorer',mgEsc(R.topScorer.name)+' · '+R.topScorer.goals+' goals'):'');
+    for(const [k,run] of R.cups||[]) h+=finRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),false,/WINNERS/.test(run)?'var(--good)':'var(--ink)');
     h+=finRow('Next season',MG_LEAGUE[R.tier+(R.up?1:R.down?-1:0)],true,R.up?'var(--good)':R.down?'var(--bad)':'var(--ink)');
     h+='<div class="bpSect">YOUR SQUAD, A YEAR OLDER</div>';
     for(const g of R.grew) h+=finRow(mgEsc(g.name),g.from+' → '+g.to,false,g.to>g.from?'var(--good)':'var(--bad)');
     if(!R.grew.length) h+='<div class="mgHint">Nobody changed.</div>';
     h+=finRow('Contracts ended (now free agents)',names(R.expired),false,'var(--warn)')+finRow('Retired',names(R.retired),false,'#cfe7d2')+finRow('Left the academy',names(R.youthOut),false,'#cfe7d2');
     h+='<div class="bpSect">AROUND THE LEAGUES</div>';
+    for(const k of ['cl','fashion','coco']) if((R.cupWin||{})[k]) h+=finRow(CUP[k].name+' winners',mgEsc(mgNameOf(d,R.cupWin[k])),false,'var(--ink)');
     for(const t of [4,3,2,1]){ const mv=R.moves[t]; h+=finRow(MG_LEAGUE[t]+' champions',mgEsc(mgNameOf(d,mv.table[0])),false,'var(--ink)');
       if(mv.up.length) h+=finRow(' up',mv.up.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--good)');
       if(mv.down.length) h+=finRow(' down',mv.down.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--bad)'); }
@@ -15011,6 +15196,7 @@
     if(!gk||gk.role!=='GK') w.push(bad('No goalkeeper in goal — pick one in Training'));
     if((d.phase==='league'&&d.md>=MG_MD-6)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
     if(mgWindowOpen(d)&&(d.offers||[]).length) w.push(info(d.offers.length+' offer'+(d.offers.length>1?'s':'')+' for your players — see Transfers'));
+    { const tired=mgStarters(d).filter(p=>condOf(p)<0.7).length; if(tired&&(d.phase==='league'||d.phase==='playoffs')) w.push(info(tired+' of your eight '+(tired>1?'are':'is')+' tired — rest '+(tired>1?'them':'him')+' in Training')); }
     const wEl=document.getElementById('chWarn'); wEl.style.display=w.length?'block':'none'; wEl.innerHTML=w.join('  ·  ');
     const badge=(id,n)=>{ const el=document.querySelector('#chCampus [data-bldg="'+id+'"] .bBadge'); if(el){ el.textContent=n||''; el.style.display=n?'block':'none'; } };
     badge('market',mgWindowOpen(d)&&lvOf(d,'market')?(d.offers||[]).length:0); badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
@@ -15028,7 +15214,7 @@
     // along the campus's foot: where the season is and who's next (put shorter, if the strip's short of room), the money, the fans
     const ph=document.getElementById('chPhase'), what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'';
     ph.dataset.long='Season '+d.season+' · '+what+who; ph.dataset.mid=what+who;
-    ph.dataset.short=(g&&g.kind==='league'?'MD '+(d.md+1):what)+(g&&opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):'');
+    ph.dataset.short=(g&&g.kind==='league'?'MD '+(d.md+1):g&&g.short?g.short:what)+(g&&opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):'');
     cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); }
   // ---- THE CAMPUS VIEW: the picture fitted to the space beside the menu -- at 1x (or more, to fill a big screen), the
   // middle of it in the middle -- and its buildings to tap; a building opens with the camera going in on it, and coming
@@ -15138,6 +15324,7 @@
       if(B&&!all) for(const k in d.decor||{}) d.budget+=({potplants:600,trees_club:1600,trees_ground:1200,trees_walk:1600,trees_east:1800,westlawn:1400,lamps:2000,benches:900,beds:900,maple:3500,garden:1000,bikes:400})[k]||0;
       delete d.built; delete d.decor; }
     d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
+    if(!d.cup){ d.cup={s:d.season,off:true}; d.mw=d.md-1; }   // (a career from before the cups: they start with its next season)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     return d; }
   let curBldg=null; const curTab={};
@@ -15371,7 +15558,7 @@
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
-    mgAutoLineup(d); mgNewFixtures(d);
+    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d);
     mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. The summer window is open for '+MG_WINDOW.summer+' days.');
     mgAiBids(d);
     return d; }

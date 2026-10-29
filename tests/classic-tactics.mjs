@@ -225,6 +225,7 @@ ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.06, 'who defends where: h
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------
 await page.click('#bldgPanel .bpTopBack');
 for(let i = 0; i < 6 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(40); }
+await page.evaluate(id => { window.__S.d.roster.find(q => q.id === id).cond = 0.6; }, d.roster[posRi.st].id);   // (the striker 60% fit: a game too many)
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(600);
 const ids = { st: d.roster[posRi.st].id, cb: d.roster[posRi.cb].id, cm: d.roster[posRi.cm].id };
 const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = T.players().filter(p => p.team === 'G'), R = T.players().filter(p => p.team === 'R');
@@ -234,8 +235,10 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
   return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, gk: (T.PI().G.gk || {}).gkPass, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
     st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
     other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars),
+    legs: [by(ids.st).staminaCap, Math.min(...G.filter(p => p.lookKey !== ids.st).map(p => p.staminaCap))],
     want: G.map(p => { const S = window.__S, r = S.d.roster.find(q => q.id === p.lookKey); return r ? S.careerStars(r) : null; }) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
+ok(Math.abs(m.legs[0] - 0.6) < 0.03 && m.legs[1] > 0.97, 'a man 60% fit starts the match with his legs\' ceiling at ' + Math.round(m.legs[0] * 100) + '% (the fresh ones at ' + Math.round(m.legs[1] * 100) + '%)');
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
 ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
