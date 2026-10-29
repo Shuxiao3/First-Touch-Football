@@ -709,6 +709,18 @@ The same game played like any other football game. It's a copy of `index.html` w
     computer's games a curled long ball at Curve 10 now bends 15° on average, where it bent 36°. Whether a long ball
     gets there doesn't hang on Curve, though: with every man at Curve 10 or every man at 1, about nine in ten passes
     of 20 m or more reach one of ours.
+  - **The computer's through ball round their line.** A through ball to a man running in behind their back line
+    goes through a gap in it -- between two of their back line 3 m or more apart, or, the run being out past their
+    outside man, between him and the touchline -- and bends on round onto the runner along a steady arc (the same
+    turn every metre, however it slows), as much as that takes and as much as the passer's Curve gives him: 6° of
+    turn over its flight at Curve 1, 34° at 10 (over 15 m, from a few centimetres off the straight line to about a
+    metre). He chooses it on that path, not on a straight line through a man, so a passer who can bend it finds
+    balls in behind that one who can't misses: where the straight ball goes a couple of metres from one of theirs, a
+    Curve 10 passer bends it away from him and its chance of getting there goes from about 0.23 to 0.30; out wide,
+    with the runner outside their full-back, from 0.36 to 0.60. One he'd have to bend more than he can, he bends as
+    far as he can (or half that, if the full bend takes it onto the next man), or plays it straight. It's weighted
+    as any through ball is, a touch harder for the longer way round; everyone reading the ball reads the bend, and
+    a touch on the way ends it. Yours go where you drag them, as before.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for each position, as before.
 
@@ -1408,7 +1420,10 @@ test, and like the Trap Lab the values are the game's settings.
   tactic allows; it doesn't drop for a forward standing on it (he'd be offside), only the defender with a
   runner in his zone drops with him -- off where the run's taking him by the time he's there, as his Def IQ
   reads it (see the man pressing, below): into the space the runner's going into at 10, off where he is at
-  1. A pressing side's man on his man in their build-up reads him the same way. The midfield sits a gap in
+  1. When he picks the runner up he holds his line a beat, a tenth of a second, before he turns and goes
+  with him (about a twentieth of a run in behind: half a stride on him for the runner); a man in front
+  of him he's been told to STEP UP to he goes to at once. A pressing side's man on his man in their build-up
+  reads him the same way, without the beat. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. The midfield stays a
   line: a man of theirs sitting between our lines, the midfielder nearest him drops a couple of yards at most
   and stands in the pass from the ball into him, rather than dropping in front of him (that used to leave the
@@ -1445,6 +1460,14 @@ test, and like the Trap Lab the values are the game's settings.
     match). The block -- the midfield kept a line, its wide men covering who's actually out there -- took it to
     1.30 and about a shot a match off the side on the ball, most of it headers (2.0 a match → 1.1) and shots
     from under 11 m (1.8 → 1.1); the keeper's wait took it the rest of the way.
+  - **The through ball round their line, and the back line's beat** (v62; the same 80 club pairings, each played
+    on v61 and on v62): the computer's through balls 4.4 a match → 4.7, getting to the runner 57% → 64% (cut out
+    37% → 31%). 14% of them are bent round their line, 24° of turn on average, and 74% of those get to him. A shot
+    within 4 s of one getting to him, 1.19 a match → 1.51; a goal within 6 s, 0.33 → 0.45. Goals a match 1.21 →
+    1.30, pairing by pairing +0.09 (95%: -0.19 to +0.40), shots 4.5 → 4.8: up a little, not by enough to tell from
+    chance in 80 matches. The beat is in those numbers too; on its own it's too small to measure in 80. (v61 scored
+    1.21 here and 1.15 in its own measurement: the matches' randomness isn't seeded, so two runs of the same
+    version differ by about that much.)
 - **Positional play (the neutral style)** — with the ball, a side on the neutral style plays off one plan
   for the whole team, and every man has a job in it. The centre-backs are the rest defence: level with
   the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and
@@ -1719,6 +1742,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match), tactics, the shape with and without the ball, passing, the first touch, the players' sprites and
+a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, the first touch, the players' sprites and
 the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

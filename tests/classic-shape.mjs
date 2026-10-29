@@ -6,7 +6,8 @@
 // stays near a man of theirs left free out wide (and none of its wide men goes wider than the widest of theirs), and
 // with nobody out there it tucks in; out wide in their third the wide man on the ball's flank goes past the man on it
 // on the outside, not at him, and with the box short of men one central midfielder -- not both -- gets in it; a man of
-// theirs between the lines, the midfield keeps its line and stands in the pass into him. The
+// theirs between the lines, the midfield keeps its line and stands in the pass into him; a centre-back who picks up a
+// runner going in behind holds his line a beat before he goes with him. The
 // plan's and the block's spots read straight off a scene set up in a match. On a copy of the game that lets the test
 // set the scene.
 import { open } from './_harness.mjs';
@@ -20,7 +21,8 @@ const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, holderOf, teamPlan, PLAN:()=>PLAN, mkPlanState, '
   + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
-  + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } simNow+=0.5; }, '
+  + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
+  + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
   + 'setGk:k=>{ gkHold=k; ball.ownedBy=null; ball.x=k.x; ball.y=k.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-shape-')), 'classic.html');
 writeFileSync(copy, src);
@@ -111,6 +113,21 @@ const bl3 = await page.evaluate(() => { const T = window.__T; T.reset(); window.
 info('...their forward between the lines: ' + bl3.map(j => `${j.q} ${j.u},${j.w}${j.tr ? ' on ' + j.tr : ''}`).join(' | '));
 const bl3u = bl3.map(j => j.u), bl3t = bl3.find(j => j.tr);
 ok(bl3t && Math.max(...bl3u) - Math.min(...bl3u) <= 2.3, `the midfield stays a line, the man on him no more than 2 m off it (${bl3u.join(', ')} m; he used to drop to ~65)`);
+
+// --- HOLDING THE LINE: City's forward going in behind at 8 m/s, 4 m in front of Liverpool's back line, in a centre-back's
+// zone: the centre-back holds his line a beat (a tenth of a second) before he turns and goes with him
+const hold = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');
+  const R = window.__men('R'), c = R.find(q => window.__pos(q, 'atk') === 'CM'), st = R.find(q => window.__pos(q, 'atk') === 'ST');
+  const cb = window.__men('G').find(q => q.slotDef && q.slotDef.role === 'DEF');
+  window.__give(c, 42, 16);
+  const s0 = T.blockSpot(cb), [u0, w0] = window.__uw('R', s0.x, s0.y);
+  window.__at(st, u0 - 4, w0); const a = T.atkOf('R'); st.vx = a * 8 * T.MK; st.seenVx = st.vx; st.vy = st.seenVy = 0;
+  const at = () => { const s = T.blockSpot(cb), [u] = window.__uw('R', s.x, s.y); return { u: +u.toFixed(2), tr: !!s.track }; };
+  T.adv(0.01); const h0 = at(); T.adv(0.06); const h1 = at(); T.adv(0.06); const h2 = at();
+  return { line: +u0.toFixed(2), h0, h1, h2 }; });
+info('holding the line (his spot, in City\'s metres; on the runner?): at the line ' + hold.line + ' | picked up ' + JSON.stringify(hold.h0) + ' | 0.06 s on ' + JSON.stringify(hold.h1) + ' | 0.12 s on ' + JSON.stringify(hold.h2));
+ok(!hold.h0.tr && !hold.h1.tr && Math.abs(hold.h1.u - hold.line) < 0.3, 'a centre-back who picks up a runner going in behind holds his line a beat: not yet with him 0.06 s on');
+ok(hold.h2.tr && hold.h2.u > hold.line + 1, `...then turns and goes with him (by 0.12 s on, his spot ${(hold.h2.u - hold.line).toFixed(1)} m back toward his goal)`);
 
 // --- OUT WIDE IN THEIR THIRD: Liverpool's forward on it 74 m out, 19 m across; the winger behind him on that flank ---
 const ov = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', 30); window.__homeDef('R');
