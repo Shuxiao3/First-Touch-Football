@@ -1409,7 +1409,14 @@ test, and like the Trap Lab the values are the game's settings.
   runner in his zone drops with him -- off where the run's taking him by the time he's there, as his Def IQ
   reads it (see the man pressing, below): into the space the runner's going into at 10, off where he is at
   1. A pressing side's man on his man in their build-up reads him the same way. The midfield sits a gap in
-  front and the forwards in front of that, every line sliding across toward the ball. When the ball's lost,
+  front and the forwards in front of that, every line sliding across toward the ball. The midfield stays a
+  line: a man of theirs sitting between our lines, the midfielder nearest him drops a couple of yards at most
+  and stands in the pass from the ball into him, rather than dropping in front of him (that used to leave the
+  midfield in steps). Its wide men only go as wide as there's something to cover -- never wider than the
+  widest of theirs between our back line and the ball (a stride inside him), and in off the line with nobody
+  out there -- and the far one, the ball on the other flank, slides over with it but stays within about 10 m
+  of a man of theirs left free out there (one our other lines aren't on), so a switch doesn't find him alone;
+  the men between them are spaced evenly. When the ball's lost,
   a defender or midfielder caught a long way upfield sprints back goal-side of it; the rest jog back into
   shape, the forwards always (they save their legs for the next attack). One man presses the ball, and keeps
   him until a teammate is clearly better placed. He goes for where the man on the ball will be by the time
@@ -1432,12 +1439,31 @@ test, and like the Trap Lab the values are the game's settings.
     pairing -1.24 goals a match (95%: -1.65 to -0.82): a man running with it no longer gets past a defender
     by running past where he's aiming. Reading a runner off the ball the same way, after it, left it as it was
     (1.89 a match; -0.04 to +0.42 either way, pairing by pairing).
+  - **What the coaching did** (v61; 80 club pairings, each played on v60 and on v61, every man on the computer,
+    6-minute matches): goals 1.64 a match → 1.15, shots 5.6 → 4.6, goalless draws 21% → 35%, pairing by pairing
+    -0.49 goals a match (95%: -0.84 to -0.14). The attacking changes on their own left it where it was (1.66 a
+    match). The block -- the midfield kept a line, its wide men covering who's actually out there -- took it to
+    1.30 and about a shot a match off the side on the ball, most of it headers (2.0 a match → 1.1) and shots
+    from under 11 m (1.8 → 1.1); the keeper's wait took it the rest of the way.
 - **Positional play (the neutral style)** — with the ball, a side on the neutral style plays off one plan
   for the whole team, and every man has a job in it. The centre-backs are the rest defence: level with
   the ball in our third, further behind it in theirs (more of a gap the more men they've left up), and
-  always goal-side of their highest man. The holding midfielder is the pivot in front of them (with the
-  ball out wide in their third, he arrives late for the pull-back). The wide men hold the touchlines; the
-  far one comes in to the back post once the ball's out wide near their box. A back three with nobody
+  always goal-side of their highest man. Building from the back they split: a pair 17 m either side of the
+  middle, the outside men of a three 20 m (it was 13 and 15), leaning only a little toward the ball, and
+  closing up to the settled width as the ball goes past halfway. The holding midfielder is the pivot in
+  front of them, a little further off them while we build up (with the ball out wide in their third, he
+  arrives late for the pull-back). The wide men hold the touchlines, about level with the ball -- but while
+  we build up they don't come down to it: a winger holds on halfway (46 m out) and a wide midfielder just
+  short of it (38 m), and neither comes back into our third to offer himself (a man told to COME SHORT
+  excepted), so the build-up has depth and the forward isn't on his own up there. The other central
+  midfielders stand off our third too, between their lines. The far wide man comes in to the back post once
+  the ball's out wide near their box. With the man on the ball out wide on a wide man's flank in their third,
+  and the wide man level with him or behind, he goes past him -- 8 m outside him if there's 9 m between him
+  and the line, else 9 m inside him -- rather than straight at him, and the man on the ball leaves him that
+  lane (he cuts in, or holds it, rather than carrying it into the run; pushed out to the line anyway, the
+  runner goes round the back of him to the inside). Out there with fewer than two men going into the box,
+  the furthest-up central midfielder (on BALANCED crosses) gets in it too, through the gap between their
+  centre-backs -- one of them, not both. A back three with nobody
   wide ahead of it (3-2-2) sends its outside men up the flanks as wing-backs once the ball's out of its
   third, the middle one and the holder staying back (the far wing-back too while they've two or more
   men left up). One forward pins their last
@@ -1445,7 +1471,9 @@ test, and like the Trap Lab the values are the game's settings.
   other gets clearly higher: one comes short, the other goes); out wide in their third they go to the
   near and far posts. Around the man on the ball, two team-mates take up spots at clearly different
   angles (a triangle) where a pass reaches them before any opponent can get there: further forward
-  where it can be, best of all between their lines, about 12 m away, plus a way back when he's pressed.
+  where it can be, best of all between their lines, about 14 m away and never nearer than 9 m (a man that
+  close brings his marker into the space), plus a way back when he's pressed, properly behind him (5 m or
+  more).
   The men who can get there soonest go, without leaving a more important job. A spot that stops working
   is first put right with a step or two, and a set only changes when the ball goes to another man or
   a clearly better one turns up. Runs in behind are triggered: when the man on the ball is facing up,
@@ -1489,10 +1517,16 @@ test, and like the Trap Lab the values are the game's settings.
   a man to jump for, and come down beyond him. A header on goal follows the same rules for the
   computer's men as for yours: toward the side away from the keeper, but not right into the corner
   (you can't place a header like a shot), as true and as hard as the Heading stat makes it.
-- **The keeper's ball out** — on a goal kick the back line splits to the corners of the box and the
-  holding midfielder drops in front of them. The keeper plays it short only to a man who'll reach
+- **The keeper's ball out** — on a goal kick the back line splits to the corners of the box (21 m
+  either side of the middle, just inside its edge) and the holding midfielder stands 31 m out in
+  front of them; the other midfielders are up at 40 m, the wide men on halfway and the forward on their
+  line, so there's someone at every depth (it used to be the whole side inside 35 m but the forward).
+  The keeper plays it short only to a man who'll reach
   it before any of theirs can close him down, struck to arrive at him, and tells him it's his; he
-  waits a moment for his team to set if he has to. Nothing safe short, he goes long to a man who'll
+  waits a moment for his team to set if he has to. The computer's keeper gives his side up to 2.4 s
+  held to get there (while more than one of them is still on his way to his spot), unless one of
+  theirs is coming at him: it used to go out after a second or so, the side still bunched in front
+  of him. Nothing safe short, he goes long to a man who'll
   win or contest it, or into the open side of the pitch.
 - **Beating a tight press** — a sharp cut on the ball (55° or more, at pace) wrong-foots a defender
   who's right up against the man on it, or diving in at him: he stumbles and can't tackle for a
@@ -1685,5 +1719,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match), tactics, passing, the first touch, the players' sprites and the pitch. They need
+a played match), tactics, the shape with and without the ball, passing, the first touch, the players' sprites and
+the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
