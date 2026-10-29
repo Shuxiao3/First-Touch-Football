@@ -152,15 +152,29 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Tactics** (in a career, on the training pitch: its level decides which shapes, styles and instructions your side
     can have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
-    seven two to a line -- and BEST 8. Under the pitch, on one line, the bench: four men, the subs you'll have in a
-    match. After a thin line come the rest of the squad, in reserve, dimmed: drag one onto a man on the bench or the
-    pitch to swap them (BEST 8 puts the best four of the rest on the bench). The tokens narrow to fit; if they still
-    don't (a squad from before squads were capped), the reserves show a page at a time, with a small 1/2 ▶ button to
-    turn to the next, the bench's four always there, so the pitch never loses height. On the right, from under that
+    seven two to a line -- and BEST 8. Under the pitch, on one line, the bench: five men, the subs you'll have in a
+    match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
+    on the bench, to swap them. BEST 8 puts the next keeper first on the bench and the best four of the rest after
+    him. The tokens narrow to fit; if they still don't, they show a page at a time, with a small 1/2 ▶ button to
+    turn to the next, so the pitch never loses height. (The rest of the squad used to sit after the bench, in
+    reserve, dimmed: with squads of twenty that crammed the pitch's screen.) On the right, from under that
     row to the foot of the screen, the card of the man you tapped. Every man on the pitch shows his face (his own
     look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK)
     on top, his name and shirt number under them. The bench has the same two lines without the face, in a shorter box,
     so the pitch gets the height. The lines sit inside each token with room round them, clear of its edges.
+  - **Selection** (in a career, on the training pitch): who you take. The whole squad as one list, top to bottom:
+    the keeper, then the seven on the pitch (each beside the spot he's in, with the ball), the five on the bench,
+    then the rest, who aren't taken. It's wrapped into three columns where its parts meet -- ON THE PITCH, THE
+    BENCH, NOT TAKEN -- so a squad of twenty fits a phone held sideways without scrolling. No faces: a bar a man,
+    with his place in the list, his name, his position (on the pitch, the spot he plays) and his rating (there:
+    lime in a second position of his, amber out of position). Drag a bar up or down (or across) and put it down:
+    - **On the pitch's part** (the keeper or one of the seven), or anywhere if he came from there, the two change
+      places: he takes the other's spots, with the ball and without it, and the other takes his place in the list.
+      So a man dragged from NOT TAKEN onto your right back plays there, and the right back is not taken.
+    - **On the bench or in the rest**, coming from there, he goes in where you put him and the men in between
+      move along one: a man dragged up into the bench pushes its fifth out to the top of NOT TAKEN; dropped below
+      a column's last bar, he goes to the end of it. Over a bar to swap with, it lights; where he'd go in, a line
+      shows. The bar follows your finger, a little above it, so you can see what's under it.
   - **The width shows on the pitch.** COMPACT draws each line's men closer together and WIDE spreads them, the lines
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
@@ -183,9 +197,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     under the man, with his face, that you couldn't see.
   - **In a match**, the pause menu is five buttons: TACTICS, SKILL MOVES, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's stamina on his card (and the two sides: the other team's
-    men show their ratings only). Your four subs are on the bench: drag one onto a man to bring him on, on fresh
-    legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of four
-    too (a keeper and a man for each line), a little short of its starters.
+    men show their ratings only). Your five subs are on the bench: drag one onto a man to bring him on, on fresh
+    legs. That's two subs a match, and a man taken off can't come back. Every exhibition club has a bench of five
+    too (a keeper, a man for each line and another defender), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
   - **The match** has the score, the way you're kicking and the clock along the top, then, top right beside the
     menu, **your man's window**: his number, full name and position over his stamina bar (the red tick on it is
@@ -880,8 +894,9 @@ The same game played like any other football game. It's a copy of `index.html` w
   you name yourself and your club and give it a three-letter short name (it suggests one from the club's name,
   shown on a scoreboard as you type); KIT, its colours; and CREST, its badge. START works from any of them. You
   start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
-  Premium League), with a weak squad of 14 and $20,000. A squad is fifteen at most (every club's), twelve at
-  least; eight start, four are on the bench, and the rest wait in reserve. The game is buying and selling players:
+  Premium League), with a weak squad of 14 and $20,000. A squad is twenty at most (every club's), twelve at
+  least; eight start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
+  **Selection**). It was fifteen at most, with a bench of four. The game is buying and selling players:
   nobody's stats are built up by hand.
   - **The season.** 26 matchdays, home and away. You PLAY each one (the live match, in your colours, with the home
     side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
@@ -1005,7 +1020,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       | Scouts' house | $12,000 | $15,000 | $60,000 | |
       | Youth academy | $25,000 | $25,000 | $120,000 | |
 
-      - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays), and its
+      - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
+        taken: its Tactics and Selection tabs), and its
         level is what your side can be told: at 1 the 2-3-2, 3-2-2 and 2-2-3, the balanced and direct styles, and the
         keeper's pass; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter, and the support and runs
         instructions; 3 the 3-1-3, 1-4-2 and 4-1-2, control possession and direct counter, and the width and crosses

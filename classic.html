@@ -1060,6 +1060,22 @@
   .sqPitch .ptk .ptkName{ font-size:8px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
   .sqList .mgRow{ -webkit-touch-callout:none; touch-action:none; }   /* (a finger that moves on him carries him: see pxDrag) */
+  /* WHO YOU TAKE: the squad as one list wrapped into three columns -- the eight, the bench, the rest -- a bar a man */
+  .selB{ display:flex; flex-direction:column; height:100%; min-height:0; padding:8px 12px 10px; }
+  .selCols{ flex:1 1 auto; min-height:0; display:flex; gap:10px; }
+  .selCol{ flex:1 1 0; min-width:0; min-height:0; display:grid; grid-template-rows:auto repeat(var(--rows,8),minmax(18px,32px)); row-gap:3px; align-content:start; }   /* (as many rows in each: the same height in all three) */
+  .selHd{ font:10px/14px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); padding:0 2px 2px; }
+  .selRow{ min-height:0; display:flex; align-items:center; gap:6px; padding:0 8px; border-radius:var(--r); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well);
+    color:var(--ink); font-size:12px; line-height:1; cursor:grab; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; position:relative; }
+  .selRow .slK{ flex:none; width:15px; font:9px 'FTC Dot',monospace; color:var(--dim2); }
+  .selRow .slNm{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .selRow .slPos{ flex:none; min-width:22px; text-align:right; font:9px 'FTC Dot',monospace; color:var(--dim); }
+  .selRow .slOvr{ flex:none; min-width:18px; text-align:right; font:13px 'FTC Dot',monospace; color:var(--acc); }
+  .selRow.oop .slPos, .selRow.oop .slOvr{ color:var(--warn); } .selRow.sec .slOvr{ color:var(--good2); }
+  .selRow.lifted{ opacity:.35; } .selRow.pxGhost{ opacity:.85; }
+  .selRow.dropOver{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc); }
+  .selRow.insA::before, .selRow.insB::after{ content:''; position:absolute; left:2px; right:2px; height:3px; background:var(--acc); pointer-events:none; }
+  .selRow.insA::before{ top:-3px; } .selRow.insB::after{ bottom:-3px; }
   .pxGhost.mgRow{ position:fixed; z-index:400; pointer-events:none; overflow:hidden; box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc) !important; background:var(--rowOn); }
   .tacB1 .ptk, .sqPitch .ptk, .pxGhost.ptk{ position:absolute; transform:translate(-50%,-50%); width:clamp(66px,21%,84px); height:36px; border:0; border-radius:var(--r); padding:0 4px 0 5px; cursor:grab;
     --hw:calc(clamp(33px,10.5%,42px) + 2px); --hh:20px;   /* (half of him and his rim: his spot is kept this far inside the pitch -- see ptkAt) */
@@ -1100,8 +1116,6 @@
   .tbBench{ flex:none; display:flex; flex-wrap:wrap; gap:4px; align-items:center; padding:6px 0 0; }   /* (under the pitch: his card has the right side) */
   .benchPg{ flex:none; width:36px; height:34px; min-height:34px; padding:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:13px; line-height:1; cursor:pointer; }
   .benchPg i{ font-style:normal; font-size:9px; letter-spacing:0; }   /* (a bench with more men than its line: 1/2 ▶) */
-  .benchSep{ flex:none; width:2px; align-self:stretch; margin:3px 3px; background:var(--btnLo); }   /* (the bench's four | the men in reserve) */
-  .tbBench .ptk.res{ opacity:.62; }
   .tbBench .ptk{ position:relative; transform:none; flex:1 1 39px; min-width:39px; max-width:58px; height:34px; padding:0 3px; justify-content:center; }   /* (narrow enough for 8 on a line on a small phone; two lines tall, leaving the pitch the height) */
   .tbRight .mgCardHead{ margin-top:2px; margin-bottom:6px; } .tbRight .mgCardHead > .cardBody + div{ flex:1 1 auto; }
   .mgCardHead .mtLegs{ margin:3px 0 0; gap:6px; font-size:9px; } .mgCardHead .mtLegs .statBar{ height:6px; }
@@ -1520,21 +1534,19 @@
   let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
   function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; }
-  // THE BENCH ON ONE LINE, under the pitch: its four, then (in the Office) the men in reserve. If they don't all fit, the
-  // reserves go a page at a time with a small button that turns to the next (1/2 ▶, round to the first again) -- the
-  // four on the bench always there -- rather than a second line that would take the pitch's height
+  // THE BENCH ON ONE LINE, under the pitch: its five (a match's: who's left on it). If they don't all fit, they go a page
+  // at a time with a small button that turns to the next (1/2 ▶, round to the first again) rather than a second line that
+  // would take the pitch's height. (Who isn't taken at all is the Selection tab's, not the pitch's.)
   const BENCHPG={};   // the page each bench is on: the Office's, each team's in a match
   function fitBench(b){ if(!b.getClientRects().length) return;   // (not on the screen: laid out when it is)
-    const kids=[...b.children], T=kids.filter(e=>e.classList.contains('ptk')), Rv=T.filter(e=>e.classList.contains('res'));
+    const kids=[...b.children], T=kids.filter(e=>e.classList.contains('ptk'));
     let pg=kids.find(e=>e.classList.contains('benchPg'));
     for(const t of T) t.classList.remove('fitHide'); if(pg) pg.classList.add('fitHide'); b.dataset.bpages=1;
     if(!T.length) return; const cs=getComputedStyle(b), W=b.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0), gap=parseFloat(cs.columnGap)||4, min=parseFloat(getComputedStyle(T[0]).minWidth)||39;
-    const sepW=kids.filter(e=>e.classList.contains('benchSep')).reduce((a,e)=>a+e.getBoundingClientRect().width+gap,0);
-    if(T.length*min+(T.length-1)*gap+sepW<=W+0.5) return;
+    if(T.length*min+(T.length-1)*gap<=W+0.5) return;
     if(!pg){ pg=document.createElement('button'); pg.className='benchPg'; pg.dataset.benchgo='1'; b.appendChild(pg); }
-    const turn=Rv.length?Rv:T, keepW=Rv.length?(T.length-Rv.length)*(min+gap)+sepW:0;   // (the reserves turn; a bench of old, all of it)
-    const k=Math.max(1,Math.floor((W-keepW-BENCH_PG_W)/(min+gap))), pages=Math.ceil(turn.length/k), key=b.dataset.bench||'bench', p=BENCHPG[key]=clamp(BENCHPG[key]||0,0,pages-1);
-    turn.forEach((t,i)=>{ if(i<p*k||i>=p*k+k) t.classList.add('fitHide'); });
+    const k=Math.max(1,Math.floor((W-BENCH_PG_W)/(min+gap))), pages=Math.ceil(T.length/k), key=b.dataset.bench||'bench', p=BENCHPG[key]=clamp(BENCHPG[key]||0,0,pages-1);
+    T.forEach((t,i)=>{ if(i<p*k||i>=p*k+k) t.classList.add('fitHide'); });
     pg.classList.remove('fitHide'); pg.innerHTML='<i>'+(p+1)+'/'+pages+'</i>▶'; b.dataset.bpages=pages; }
   const BENCH_PG_W=36;   // (the button's width, as the CSS has it)
   document.addEventListener('click',e=>{ const g=e.target.closest('[data-benchgo]'); if(!g) return; e.stopPropagation(); e.preventDefault();
@@ -2472,10 +2484,10 @@
     });
     return xi.concat(clubBenchGen(club,xi));
   }
-  // THE BENCH: four more for every club -- a keeper, then a man for each line -- a little short of the starters, named
-  // from a pool of their own (dealt like the starters' names, so no two benches share one). A career club's bench is
-  // four too: four of the men not starting, the rest in reserve.
-  const BENCH_N=4;
+  // THE BENCH: five more for every club -- a keeper, then a man for each line, then another defender -- a little short of
+  // the starters, named from a pool of their own (dealt like the starters' names, so no two benches share one). A career
+  // club's bench is five too: the five after the eight in its selection list (see mgSelectTab), the rest not taken.
+  const BENCH_N=5;
   const BENCH_SURNAMES=['Abara','Adebayo','Aguilar','Ahlberg','Almeida','Amrani','Andersen','Arslan','Asante','Bakker','Barros','Bellamy','Benali','Bergman','Bianchi','Bjork','Boateng','Bondarenko','Brennan','Calloway','Carvalho','Castro','Celik','Chandler','Cisse','Coleman','Conti','Cruz','Dahl','Delgado','Demir','Diallo','Dorsey','Doyle','Dubois','Duarte','Eklund','Esposito','Falk','Ferreira','Fischer','Fofana','Gallo','Garrido','Giraud','Guerra','Halloran','Hansen','Haddad','Ibarra','Ivanov','Jensen','Jovic','Kaya','Keller','Kimura','Koroma','Kowalski','Kruger','Laine','Larsen','Lopes','Maddox','Marin','Medina','Moreno','Murray','Nakamura','Navarro','Nielsen','Nwosu','Okoro','Ortega','Osei','Pajic','Pereira','Petrov','Pires','Quinn','Rahimi','Ramos','Reyes','Rocha','Romero','Sadiq','Salazar','Santos','Schmidt','Serra','Sorensen','Sousa','Stone','Suzuki','Teixeira','Toure','Tran','Ulloa','Valdez','Vargas','Vidal','Vogel','Walsh','Weber','Yamada','Yusuf','Zielinski','Acheampong','Barrow','Cardoso','Danso','Ekberg','Farrell','Gomes','Holm','Ilic','Juarez','Kagawa','Lacroix','Mahrez','Nunes','Obi','Pacheco','Quaresma','Rask','Sala','Tiago','Ueda','Valente','Wiggins','Xavier','Yeboah','Zubiri',
     'Ashby','Brook','Carver','Dunne','Ellery','Foley','Grady','Hollis','Irwin','Jarvis','Kerr','Lowe','Mercer','Nash','Oakes','Price','Reid','Sutton','Tate','Vaughan','Whitby','Yardley','Bramble','Colby','Penrose'];
   const BENCH_NAME_DEAL=(()=>{ const taken=new Set(CLUB_SURNAMES), R=rng32(hashStr('ft-bench-names')), a=BENCH_SURNAMES.filter(n=>!taken.has(n));
@@ -13398,7 +13410,7 @@
           :            [['direct',.3],['neutral',.22],['dcounter',.18],['wing',.14],['fluid',.08],['gegen',.08]];
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
-  const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=15, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, fifteen at most
+  const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=20, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, twenty at most
   const MG_WINDOW={summer:5, winter:3};                  // days each transfer window stays open
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
@@ -13796,7 +13808,8 @@
     if(statViewRi!=null) statViewRi=null;
     return gone; }
   // the best eight for your shapes: the best keeper, then the spots with the ball filled best first -- whoever's best in a
-  // spot (his rating there, a little extra in his own position) -- then who defends where
+  // spot (his rating there, a little extra in his own position) -- then who defends where; and the bench, the next keeper
+  // and the best four after him
   function mgAutoLineup(d){ ensureForms(d); const R=d.roster, used=new Set();
     let gk=-1; R.forEach((p,i)=>{ if(gk<0||ovrAt(p,'GK')>ovrAt(R[gk],'GK')) gk=i; }); used.add(gk);
     const slots=careerSlots(d.formation,'atk'), atk=new Array(slots.length).fill(-1), V=[];
@@ -13804,7 +13817,9 @@
     V.sort((a,b)=>b.v-a.v);
     for(const c of V){ if(atk[c.si]>=0||used.has(c.i)) continue; atk[c.si]=c.i; used.add(c.i); }
     for(let si=0;si<atk.length;si++) if(atk[si]<0){ const i=R.findIndex((p,k)=>!used.has(k)); if(i>=0){ atk[si]=i; used.add(i); } }   // (keepers, if that's all there is)
-    d.lineup={gk, atk:atk.filter(i=>i>=0), def:[], bench:R.map((_,i)=>i).filter(i=>!used.has(i)).sort((a,b)=>R[b].ovr-R[a].ovr)};
+    const bench=R.map((_,i)=>i).filter(i=>!used.has(i)).sort((a,b)=>R[b].ovr-R[a].ovr), k2=bench.findIndex(i=>R[i].role==='GK');
+    if(k2>0) bench.unshift(bench.splice(k2,1)[0]);   // (the next keeper first on the bench, then the best of the rest)
+    d.lineup={gk, atk:atk.filter(i=>i>=0), def:[], bench};
     d.lineup.def=careerMapDef(d); }
   function mgGkCount(d){ return d.roster.filter(p=>p.role==='GK').length; }
   // can roster[idx] leave? (twelve men at least, and one keeper)
@@ -13930,7 +13945,7 @@
         if(!best||p.ovr>best.ovr){ best=p; bestClub=src; bestFee=fee; } }
       if(best) mgMoveAi(d,best,bestClub,b,bestFee); }
     for(const c of clubs){ mgRefill(d,c); mgTrimAi(d,c); } }
-  // a computer club over fifteen lets its weakest go (counting age), never its second keeper
+  // a computer club over twenty lets its weakest go (counting age), never its second keeper
   function mgTrimAi(d,c){
       while(c.players.length>MG_MAX){ const w=c.players.filter(p=>p.role!=='GK'||c.players.filter(x=>x.role==='GK').length>2).sort((a,b)=>(a.ovr-a.age*0.3)-(b.ovr-b.age*0.3))[0];
         c.players.splice(c.players.indexOf(w),1); mgToFree(d,w,c); } }
@@ -14200,7 +14215,7 @@
     for(const ph of ['atk','def']){ const k=lu[ph].indexOf(outRi); if(k>=0) lu[ph][k]=inRi; }
     const bk=lu.bench.indexOf(inRi); if(bk>=0) lu.bench[bk]=outRi; }
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
-    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, four)
+    const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, five)
     order.forEach((ri,i)=>sIdx[ri]=i);
     const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p)}; });
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
@@ -14276,9 +14291,9 @@
   // pitch a line spreads rather than its men overlap
   const ptkTop=(T,k)=>k?'calc(50% + '+k+' * max('+((T-50)/k).toFixed(2)+'%, var(--rowH)))':T.toFixed(1)+'%';
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
-  function tbTok(d, ri, L, T, kind, phase, slotRole, res, k, pos){ const p=d.roster[ri]; if(!p) return '';
+  function tbTok(d, ri, L, T, kind, phase, slotRole, k, pos){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
-    return '<button class="ptk'+fitCls(natPos(p),slotRole,pos)+(res?' res':'')+(ri===statViewRi?' statview':'')+'"'
+    return '<button class="ptk'+fitCls(natPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+'"'
       +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
       +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
@@ -14306,9 +14321,9 @@
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y,oslots[i]);
       h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k); }
-    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', false, 0, 'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, false, q.k, slots[i].pos); }
-    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.map((ri,k)=>(k===BENCH_N?'<i class="benchSep"></i>':'')+tbTok(d, ri, 0,0, 'bench', phase, null, k>=BENCH_N)).join('')+'</div></div>';   // (the bench under the pitch, four; then the men in reserve)
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', 0, 'GK');
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, q.k, slots[i].pos); }
+    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch, its five: who's taken at all is the Selection tab's)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
@@ -14336,6 +14351,26 @@
     } else if(kinds==='bench+field'){                                     // a sub on, for both phases
       subIn(d, a.kind==='bench'?a.ri:b.ri, a.kind==='field'?a.ri:b.ri);
     } else { const ia=lu.bench.indexOf(a.ri), ib=lu.bench.indexOf(b.ri); if(ia>=0&&ib>=0){ lu.bench[ia]=b.ri; lu.bench[ib]=a.ri; } } }
+  // ---- WHO YOU TAKE (the training pitch's Selection tab): the squad as one list, top to bottom -- the keeper, the seven on
+  // the pitch (in their spots, with the ball), the five on the bench, then the rest, not taken -- wrapped into three columns
+  // where its parts meet. No faces: a bar a man, his place in the list, his name, his position (on the pitch, the spot
+  // he's in) and his rating (there). Drag a bar up or down (see selMove, and the drag below).
+  const initName=n=>{ const a=String(n||'').trim().split(/\s+/); return a.length>1?a[0].charAt(0)+'. '+a.slice(1).join(' '):(a[0]||''); };
+  const selList=lu=>[lu.gk,...lu.atk,...lu.bench];
+  function mgSelectTab(d){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), n8=1+lu.atk.length, L=selList(lu), nb=Math.min(L.length,n8+BENCH_N);
+    const row=k=>{ const p=R[L[k]]; if(!p) return ''; const sl=k===0?{role:'GK',pos:'GK'}:k<n8?A[k-1]:null;
+      return '<div class="selRow'+(sl?' slot'+fitCls(natPos(p),sl.role,sl.pos):'')+'" data-k="'+k+'"><span class="slK">'+(k+1)+'</span><span class="slNm">'+mgEsc(initName(p.name))+'</span>'
+        +'<span class="slPos">'+(sl?sl.pos:natPos(p))+'</span><span class="slOvr">'+(sl?ovrAt(p,sl.role,sl.pos):p.ovr)+'</span></div>'; };
+    const col=(g,hd,a,b)=>{ let h='<div class="selCol" data-grp="'+g+'"><div class="selHd">'+hd+'</div>'; for(let k=a;k<b;k++) h+=row(k); return h+'</div>'; };
+    return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)+'</div></div>'; }
+  // a bar put down on another (list places from and to): on the pitch -- in goal or a spot -- or on anyone when he came off
+  // it, the two change places, each taking the other's spots with the ball and without it; on the bench or in the rest,
+  // coming from there, he goes in at that place and the men in between move along one
+  function selMove(d,from,to,swap){ const lu=ensureLineup(d), n8=1+lu.atk.length, L=selList(lu), a=L[from], b=L[to];
+    if(from===to||a==null||b==null) return false;
+    if(swap){ const f=x=>x===a?b:x===b?a:x; lu.gk=f(lu.gk); lu.atk=lu.atk.map(f); lu.def=lu.def.map(f); lu.bench=lu.bench.map(f); return true; }
+    if(from<n8||to<n8) return false;
+    const B=lu.bench, m=B.splice(from-n8,1)[0]; B.splice(to-n8,0,m); return true; }
   function rerenderOffice(){ if(curBldg==='train'||curBldg==='club') paintBuilding(); }
   function showNote(msg,color){ const el=document.getElementById('chNote'); if(!el)return; el.textContent=msg; el.style.color=color||'var(--warn)'; el.style.display='block'; clearTimeout(showNote._t); showNote._t=setTimeout(()=>{ el.style.display='none'; },6000); }
   // ---- Stadium screen ----
@@ -14572,7 +14607,7 @@
   // ---- the buildings: each door opens one of these screens ----
   const MG_BLDGS={
     club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
-    train:   {title:'TRAINING', sub:'the training pitch: your tactics', tabs:['Tactics','Pitch']},
+    train:   {title:'TRAINING', sub:'the training pitch: your tactics, and who you take', tabs:['Tactics','Selection','Pitch']},
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'keeps your players going', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
@@ -14831,8 +14866,8 @@
   // place goes to the man he replaces); tap a spot for that man's card
   function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
     let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
-    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', false, 0, 'GK');
-    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, false, q.k, slots[i].pos); }
+    const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', 0, 'GK');
+    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, q.k, slots[i].pos); }
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
@@ -15119,7 +15154,7 @@
     document.getElementById('bpTabs').innerHTML=b.tabs&&!off?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
     const body=document.getElementById('bpBody');
     if(top) fitForget(':'+id+'/');
-    body.innerHTML=renderBuildingBody(id); const panes=!!body.querySelector('.mgPanes,.tacB1'); body.classList.toggle('panes',panes);
+    body.innerHTML=renderBuildingBody(id); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes);
     if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
     foot.classList.toggle('on',foot.children.length>0);
@@ -15136,7 +15171,7 @@
     const t=b.tabs?(curTab[id]||b.tabs[0]):null;
     if(id==='club') h+=t==='Squad'?mgSquadTab(d):t==='News'?mgHeadlinesTab(d):t==='League'?mgTablesTab(d)+mgScorersTab(d)
       :t==='Fixtures'?mgFixturesTab(d)+'<div class="bpSect">THE RESULTS</div>'+mgResultsTab(d):mgClubTab(d);
-    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):renderTactics(d,tacPhase);
+    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):renderTactics(d,tacPhase);
     else if(id==='physio') h+=mgPhysioBody(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
@@ -15295,6 +15330,35 @@
       const kind=ri===lu.gk?'gk':lu.atk.includes(ri)?'field':'bench';
       careerSwap(d,{ri,kind},{ri:+tok.dataset.ri,kind:tok.dataset.tac},'atk'); MGUI.sel=null; mgSave(d); mgRerender(); },   // (the team stays up: you see him in his spot)
     cancel(){ mgRerender(); } });
+
+  // THE SELECTION LIST BY HAND: a finger that moves on a man's bar lifts it, and a copy follows the finger. Over the pitch's
+  // column -- or over anyone, when he's from it -- the bar under the finger lights: put him down and the two change places.
+  // Over the bench or the rest, from there, a line shows where he'd go in (below a column's last bar: its end).
+  (function(){ const root=document.getElementById('bldgPanel'); let st=null;
+    const quiet=()=>{ const f=e=>{ e.stopPropagation(); e.preventDefault(); }; addEventListener('click',f,{capture:true}); setTimeout(()=>removeEventListener('click',f,{capture:true}),60); };
+    const unmark=()=>document.querySelectorAll('#bpBody .selRow.dropOver,#bpBody .selRow.insA,#bpBody .selRow.insB').forEach(e=>e.classList.remove('dropOver','insA','insB'));
+    function aim(x,y){ const d=CAREER&&CAREER.data; if(!d) return null; const lu=ensureLineup(d), n8=1+lu.atk.length, n=n8+lu.bench.length, from=st.k;
+      const u=document.elementFromPoint(x,y), r=u&&u.closest('.selRow'), c=u&&u.closest('.selCol');
+      if(r&&root.contains(r)){ const k=+r.dataset.k; if(k===from) return null;
+        return k<n8||from<n8?{k,swap:true,el:r,cls:'dropOver'}:{k,swap:false,el:r,cls:k>from?'insB':'insA'}; }
+      if(c&&root.contains(c)&&from>=n8&&c.dataset.grp!=='xi'){ const rows=c.querySelectorAll('.selRow'), last=rows[rows.length-1], k=c.dataset.grp==='bench'?Math.min(n,n8+BENCH_N)-1:n-1;
+        if(last&&k>=n8&&k!==from) return {k,swap:false,el:last,cls:k>from?'insB':'insA'}; }
+      return null; }
+    root.addEventListener('pointerdown',e=>{ const el=e.target.closest('#bpBody .selRow'); if(!el||e.button>0) return;
+      st={el, k:+el.dataset.k, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', aim:null}; });
+    root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // (nothing scrolls under a bar you're carrying)
+    addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return;
+      if(!st.live){ if(Math.hypot(e.clientX-st.x0,e.clientY-st.y0)<(st.mouse?6:8)) return;
+        const r0=st.el.getBoundingClientRect(), g=st.el.cloneNode(true); st.dx=st.x0-r0.left-10; st.dy=st.y0-r0.top+r0.height*0.7;   // (up and to the right of where it was: the bar under the finger shows)
+        g.classList.add('pxGhost'); g.style.cssText='left:'+r0.left+'px;top:'+r0.top+'px;width:'+r0.width+'px;height:'+r0.height+'px';
+        document.body.appendChild(g); st.ghost=g; st.live=true; st.el.classList.add('lifted'); }
+      e.preventDefault(); st.ghost.style.left=(e.clientX-st.dx)+'px'; st.ghost.style.top=(e.clientY-st.dy)+'px';
+      const a=aim(e.clientX,e.clientY);
+      if((!a)!==(!st.aim)||(a&&(a.el!==st.aim.el||a.cls!==st.aim.cls))){ unmark(); st.aim=a; if(a) a.el.classList.add(a.cls); } },{passive:false});
+    const end=e=>{ if(!st||e.pointerId!==st.id) return; const s=st; st=null; if(!s.live) return;
+      s.ghost.remove(); s.el.classList.remove('lifted'); unmark(); quiet();
+      const d=CAREER&&CAREER.data; if(d&&s.aim&&e.type==='pointerup'&&selMove(d,s.k,s.aim.k,s.aim.swap)){ mgSave(d); rerenderOffice(); } };
+    addEventListener('pointerup',end); addEventListener('pointercancel',end); })();
 
   // ---- a new career: you, your club, its colours ----
   function mgNewCareer(o){ const ft=FIN_TIER[1];

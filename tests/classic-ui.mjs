@@ -3,7 +3,7 @@
 // pages (◀ 1 / 3 ▶): the start menu, Settings (a player's settings only: the feel dials are the game's own, a
 // developer's with ?dev), SKILL MOVES (every move over pages, its name whole, its drawing drawn and its clip playing; from
 // the pause menu too, the match waiting while it's open), the exhibition setup, a new career (Start on screen), the hub,
-// every building's tabs, the market's pages, the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
+// every building's tabs (the Selection tab's bars too), the market's pages, the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
 // (a dark outline, a light rim, rounded corners), in four colour schemes. A finger that moves on a man lifts him at once
 // (a tap just shows his card) and the stand-in follows it from where he was picked up; the men on the tactics pitch show
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
@@ -149,7 +149,7 @@ for(const [w, h] of SIZES){
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
     if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn']);
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
-      await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench']); }
+      await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench', '.selRow']); }
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
   await page.tap('#careerHub [data-hub="decor"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
@@ -281,7 +281,7 @@ for(const [w, h] of SIZES){
         return [(t.querySelector('.ptkPos') || {}).textContent || '', p.role === 'GK' ? 'GK' : p.subRole]; }),
       midStyles: Object.values(window.__MG.STYLES).filter(S => S.role === 'MID').map(S => S.sub + ' ' + S.name), wngNotAtt: all.filter(p => p.subRole === 'WNG' && p.role !== 'ATT').length,
       wm: all.filter(p => p.subRole === 'WM' && p.role === 'MID').length }; });
-  ok(own.toks.length >= 14 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating (' + own.toks.map(x => x[0]).join(' ') + ')');
+  ok(own.toks.length === 13 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating, the eight and the bench\'s five (' + own.toks.map(x => x[0]).join(' ') + ')');
   ok(!own.midStyles.some(x => /WNG|Winger/.test(x)) && !own.wngNotAtt && own.wm > 0, 'a winger is an attacker: no midfielder is a winger; wide midfielders are WM (' + own.wm + ' in the world; midfield styles ' + own.midStyles.join(', ') + ')');
   // THE CARD HAS TWO SIDES: his ratings (a category opens under the six) and his spot's instructions (no ratings), turned
   // over with one small button under his rating; his figure, name, rating and stars on top of both
@@ -325,7 +325,7 @@ for(const [w, h] of SIZES){
   await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150); room.squad = await pads('#bpBody .sqPitch .ptk');
   await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
   const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
-  ok(Object.values(room).every(v => v.n >= 6 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
+  ok(Object.values(room).every(v => v.n >= 5 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length }))), offMenu = await onScreen(page, ['.tbMenu .tbOpt']);
   ok(opts.length === 7 && opts.every(o => !o.i) && !offMenu.length, 'the style menu: seven names, no descriptions, all of it on the screen (' + opts.map(o => o.t).join(', ') + ')' + (offMenu.length ? ' -- ' + offMenu[0] : ''));
@@ -349,7 +349,7 @@ for(const [w, h] of SIZES){
     return { n: T.length, rows: new Set(T.map(t => Math.round(t.getBoundingClientRect().top))).size,
       inside: T.every(t => { const r = t.getBoundingClientRect(), n = t.querySelector('.ptkName').getBoundingClientRect(); return n.left >= r.left - 0.5 && n.right <= r.right + 0.5; }),
       clear: T.every(t => !hit(t.querySelector('.ptkNo').getBoundingClientRect(), t.querySelector('.ptkOvr').getBoundingClientRect())) }; });
-  ok(bench.n >= 6 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (' + bench.n + ' men), every name inside its token, the number clear of the rating');
+  ok(bench.n === 5 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (its ' + bench.n + ' men), every name inside its token, the number clear of the rating');
   await page.tap(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(100);
   const said = () => page.evaluate(() => /out of position|on the bench|in reserve|subbed off/.test(document.querySelector('#cTacRight .tbCard').textContent));
   const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), fs = e => parseFloat(getComputedStyle(e).fontSize), o = h.querySelector('.mgCardOvr');
@@ -378,8 +378,9 @@ for(const [w, h] of SIZES){
   await ctx.close(); }
 
 // A MAN'S CARD IN A BUILDING (the squad, the market, the academy) never goes over pages, either side -- his ratings (a
-// category open) or his deal -- and has no long text on it; and a big squad's bench stays on one line, a page at a time,
-// the pitch keeping its height -- on the shortest phone (844x340) and the narrowest (640x360)
+// category open) or his deal -- and has no long text on it; and a full squad's bench is its five on one line, the pitch
+// keeping its height, with everyone in the Selection tab's three columns, all on the screen -- on the shortest phone
+// (844x340) and the narrowest (640x360)
 for(const [w, h] of [[844, 340], [640, 360]]){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
@@ -411,14 +412,22 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);
   const redraw = async () => { await page.tap('#bpTabs .bpTab:text-is("Pitch")'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(250); };
   const bs = () => page.evaluate(() => { const B = document.querySelector('#bpBody .tbBench'), vis = [...B.querySelectorAll('.ptk')].filter(t => t.getClientRects().length), pg = B.querySelector('.benchPg');
-    return { men: B.querySelectorAll('.ptk').length, subs: vis.filter(t => !t.classList.contains('res')).length, res: vis.filter(t => t.classList.contains('res')).map(t => t.dataset.ri).join(), sep: !!B.querySelector('.benchSep'),
-      rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '', pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
-  await grow(15); await redraw(); const f = await bs();   // a full squad: eight on the pitch, the bench's four, three in reserve
-  ok(f.men === 7 && f.subs === 4 && f.res.split(',').length === 3 && f.sep && f.rows === 1 && !f.pager && f.pitch === pitch0,
-    w + 'x' + h + ': a full squad of 15: the bench\'s four, then the three in reserve after a line, all on one line with no pager, the pitch keeping its height (' + f.pitch + ' px)');
-  await grow(22); await redraw(); const b1 = await bs(); await page.tap('#bpBody .tbBench .benchPg'); await page.waitForTimeout(150); const b2 = await bs();   // (a squad from before the limit)
-  ok(b1.men === 14 && b1.rows === 1 && b1.subs === 4 && b2.subs === 4 && /^1\/\d/.test(b1.pager) && /^2\//.test(b2.pager) && b1.res !== b2.res && b1.pitch === pitch0 && b2.pitch === pitch0,
-    w + 'x' + h + ': a squad of 22 from before: the bench\'s four always there, the ten in reserve a page at a time (' + b1.pager + ', then ' + b2.pager + '), one line, the pitch keeping its height');
+    return { men: B.querySelectorAll('.ptk').length, rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '',
+      pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
+  // ...and the Selection tab: the whole squad, a bar a man in three columns (the eight, the bench, the rest), no faces,
+  // every bar the same height, all of them on the screen
+  const sel = async () => { await page.tap('#bpTabs .bpTab:text-is("Selection")'); await page.waitForTimeout(200);
+    const o = await page.evaluate(() => { const C = [...document.querySelectorAll('#bpBody .selCol')], rows = [...document.querySelectorAll('#bpBody .selRow')], hs = rows.map(r => r.getBoundingClientRect().height);
+      return { cols: C.map(c => c.dataset.grp + ' ' + c.querySelectorAll('.selRow').length).join(', '), order: rows.map(r => +r.dataset.k).every((k, i) => k === i), imgs: document.querySelectorAll('#bpBody .selB img').length,
+        h: [Math.round(Math.min(...hs)), Math.round(Math.max(...hs))], inside: rows.every(r => { const b = r.getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth; }) }; });
+    await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200); return o; };
+  await grow(20); await redraw(); const f = await bs(), s20 = await sel();   // a full squad: eight on the pitch, the bench's five, seven not taken
+  ok(f.men === 5 && f.rows === 1 && !f.pager && f.pitch === pitch0 && s20.cols === 'xi 8, bench 5, rest 7' && s20.order && !s20.imgs && s20.h[0] === s20.h[1] && s20.h[0] >= 20 && s20.inside,
+    w + 'x' + h + ': a full squad of 20: under the pitch just the bench\'s five, on one line with no pager, the pitch keeping its height (' + f.pitch + ' px); the Selection tab has all twenty, '
+    + s20.cols + ', in order, no faces, every bar ' + s20.h[0] + ' px tall and on the screen');
+  await grow(22); await redraw(); const b1 = await bs(), s22 = await sel();   // (a squad from before the limit)
+  ok(b1.men === 5 && b1.rows === 1 && !b1.pager && b1.pitch === pitch0 && s22.cols === 'xi 8, bench 5, rest 9' && s22.order && s22.h[0] === s22.h[1] && s22.h[0] >= 18 && s22.inside,
+    w + 'x' + h + ': a squad of 22 from before: still just the five under the pitch; the Selection tab\'s rest nine long, its bars ' + s22.h[0] + ' px, all on the screen');
   await ctx.close(); }
 
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons

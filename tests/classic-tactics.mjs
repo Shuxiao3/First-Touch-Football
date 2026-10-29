@@ -266,7 +266,7 @@ const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtac
   card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
 ok(mt.ghosts === 7 && mt.faces === mt.men && mt.men === 8 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
 const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent }));
-ok(pre.bench === 4 && /SUBS LEFT 2/.test(pre.head), 'the bench is four, and two subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
+ok(pre.bench === 5 && /SUBS LEFT 2/.test(pre.head), 'the bench is five, and two subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
 const offSi = await page.$eval('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[2].dataset.si));
 await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${offSi}"]`);
