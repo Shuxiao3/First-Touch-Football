@@ -60,22 +60,21 @@ ok(Object.keys(meta.panels).length === 5 && !badPanel.length, 'every level\'s na
   + (badPanel.map(([l, p]) => 'level ' + l + ': ' + JSON.stringify(p)).join('; ') || 'all five') + ')');
 const pics = await page.evaluate(() => [1, 2, 3, 4, 5].map(l => PITCH.picture({ lvl: l, boards: [], stand: 'North Stand' }, 190).length));
 ok(pics.every(n => n > 1000), 'the Stands tab gets a picture of every level (' + pics.join(', ') + ' characters of PNG)');
-// A FIFTH SHORTER, A TENTH NARROWER: a real pitch's markings at 18.225 px to its metre (25, the men's, at first, then
-// 22.5, then 20.25) on one 93 1/3 m long and 68 wide -- a fifth shorter goal to goal than the last (105 m at 20.25) and a
-// tenth narrower, the markings a tenth smaller with the width so they stay round -- and the camera as it was: the far
-// touchline under the stand, the near one 0.729 of the way down, the men as big as ever; the far stand's middle (its
-// name, its boards) over the halfway line
+// A TWENTIETH SHORTER: a real pitch's markings at 20.25 px to its metre (25, the men's, at first, then 22.5) on one
+// 99.75 m long and 68 wide -- the last one's width, and a twentieth shorter goal to goal (it was 105 m) -- and the camera
+// as it was: the far touchline under the stand, the near one 0.81 of the way down, the men as big as ever; the far
+// stand's middle (its name, its boards) over the halfway line
 const sz = await page.evaluate(() => { const T = window.__T, cv = document.querySelector('canvas'), g = cv.getContext('2d'); PITCH.enable(true); T.cam(T.FW / 2); T.draw();
   const near = T.proj(T.FW / 2, T.FH).y, x = Math.round(T.proj(T.FW / 2 + 300, T.FH).x);
   let line = -1; for(let y = Math.round(near) - 3; y <= Math.round(near) + 3; y++){ const d = g.getImageData(x, y, 1, 1).data; if(d[0] === 0xf4 && d[1] === 0xfb && d[2] === 0xf2) line = y; }
   return { FW: T.FW, FH: T.FH, mk: [[T.PA_D, 16.5], [T.PA_HW, 20.16], [T.GA_D, 5.5], [T.GA_HW, 9.16], [T.PEN_SPOT, 11], [T.CIRCLE_R, 9.15]].map(([v, m]) => +(v / T.FH * 68 / m).toFixed(6)),
     far: T.proj(T.FW / 2, 0).y, near: +near.toFixed(1), line, sMid: +T.proj(T.FW / 2, 765).scale.toFixed(4), goal: T.GOAL_W, stand: +PITCH.standMid.toFixed(1) }; });
 info('the pitch: ' + JSON.stringify(sz));
-ok(Math.abs(sz.FW / 2126.25 - 0.8) < 1e-9 && Math.abs(sz.FH / 1377 - 0.9) < 1e-9 && Math.abs(sz.FW / sz.FH - (105 * 0.8 / 0.9) / 68) < 1e-9,
-  'the pitch a fifth shorter goal to goal and a tenth narrower: ' + +sz.FW.toFixed(2) + ' x ' + +sz.FH.toFixed(2) + ' (93 1/3 m by 68; it was 2126.25 x 1377, 2362.5 x 1530, and 2625 x 1700)');
+ok(Math.abs(sz.FW / 2126.25 - 0.95) < 1e-9 && sz.FH === 1377 && Math.abs(sz.FW / sz.FH - 99.75 / 68) < 1e-9,
+  'the pitch a twentieth shorter goal to goal, as wide as it was: ' + +sz.FW.toFixed(2) + ' x ' + sz.FH + ' (99.75 m by 68; it was 2126.25 x 1377, 2362.5 x 1530, and 2625 x 1700)');
 ok(sz.mk.every(k => Math.abs(k - 1) < 1e-6), 'its markings a real pitch\'s at its metre, in proportion to its width: the box, the six-yard box, the spot, the circle');
-ok(sz.far === 100 && Math.abs(sz.near - (100 + 412 * 0.729)) < 0.5 && sz.line >= 0 && sz.sMid === +(0.55 + 0.5 * 765 / 1700).toFixed(4) && sz.goal === 227,
-  'the camera as it was: the far touchline at 100, the near one drawn at ' + sz.line + ' (was 512, then 471, then 434), the men and the goal as big as ever');
+ok(sz.far === 100 && Math.abs(sz.near - (100 + 412 * 0.81)) < 0.5 && sz.line >= 0 && sz.sMid === +(0.55 + 0.5 * 765 / 1700).toFixed(4) && sz.goal === 227,
+  'the camera as it was: the far touchline at 100, the near one drawn at ' + sz.line + ' (512 at first, then 471), the men and the goal as big as ever');
 ok(Math.abs(sz.stand - sz.FW / 2) < 1, 'the far stand\'s middle -- its name, its boards -- is over the halfway line (' + sz.stand + ', halfway ' + sz.FW / 2 + '; it was 131 px to the right, drawn for the first pitch)');
 
 // THE NET, in real frames: everyone out of the way, the ball struck at the goal on the right from x0 px out. Followed

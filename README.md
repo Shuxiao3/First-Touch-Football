@@ -1301,28 +1301,29 @@ test, and like the Trap Lab the values are the game's settings.
 
 ## What's in the engine
 
-- **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts,
-  and possession-aware team phases, on a pitch marked like a real one -- penalty areas, six-yard boxes, penalty
-  spots and arcs, the centre circle and the corners -- at 0.729 of the men's size: they're 25 px to the metre, the
-  pitch 18.225. It's a short pitch, 93 1/3 m by 68 (1701 × 1239.3; the laws' shortest is 90 m). It was a
-  full-length one, 105 × 68: 2625 × 1700 at 25, then a tenth smaller every way twice over (2362.5 × 1530 at 22.5,
-  2126.25 × 1377 at 20.25), then a fifth shorter goal to goal and a tenth narrower -- the markings a tenth smaller
-  with the width, so they stay round, and the length cut the rest of the way. What goes by the pitch shrinks with
-  it: its markings, where the men wait in the box for a cross, where the keeper starts coming off his line (5 m
-  outside his box) and how far out a cross can be struck from (24 m). What goes by the men doesn't: their size and
-  pace, how far they'll shoot and pass from, and the goals, the men's size, so a little wider than real ones. The
-  camera is as it was: it always shows the full width, the far touchline under the stand and the near one 0.729 of
-  the way down the screen (the lawn past it below, under the buttons, so your thumbs aren't over play by the near
-  touchline), the men, the ball and the goals as big as ever, and it follows play along the length: at the
-  kick-off both penalty areas are in sight on a phone held sideways. The far stand's middle -- its name, its
-  boards -- is over the halfway line (it was drawn for the first pitch, and sat a little right of halfway).
-  - **What the short pitch did** (80 club pairings, each played on v55's pitch and this one, every man on the
-    computer, 6-minute matches): goals 2.94 a match → 3.66 (the median 3 on both), shots 10.4 → 17.2, most of the
-    new ones from further out (20 m and more 3.7 → 8.2, 11 to 20 m 4.7 → 7.0, under 11 m 2.0 → 1.9), so fewer of
-    them go in (28% → 21%); seven goals or more in 9 of the 80 (1 before), the most 11. Pairing by pairing, +0.72
-    goals a match (95%: +0.20 to +1.29): more in 38, fewer in 23, the same in 19. The step before, a tenth smaller
-    every way, gave +0.46 (2.56 → 3.02 a match). The men run as fast as ever over less ground, and how far they'll
-    shoot and pass from is theirs, not the pitch's: from more of it, the goal's in their range.
+- **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts, and possession-aware team
+  phases, on a pitch marked like a real one -- penalty areas, six-yard boxes, penalty spots and arcs, the centre
+  circle and the corners -- at 0.81 of the men's size: they're 25 px to the metre, the pitch 20.25. It's 99.75 m
+  by 68 (2019.94 × 1377), a twentieth shorter than a full-length one. It was 105 × 68: 2625 × 1700 at 25, then a
+  tenth smaller every way twice over (2362.5 × 1530 at 22.5, 2126.25 × 1377 at 20.25), then a twentieth shorter
+  goal to goal. What goes by the pitch shrinks with it: its markings, where the men wait in the box for a cross,
+  where the keeper starts coming off his line (5 m outside his box) and how far out a cross can be struck from
+  (24 m). What goes by the men doesn't: their size and pace, how far they'll shoot and pass from, and the goals, the
+  men's size, so a little wider than real ones. The camera is as it was: it always shows the full width, the far
+  touchline under the stand and the near one 0.81 of the way down the screen (the lawn past it below, under the
+  buttons), the men, the ball and the goals as big as ever, and it follows play along the length: at the kick-off
+  both penalty areas are in sight on a phone held sideways. The far stand's middle -- its name, its boards -- is
+  over the halfway line (it was drawn for the first pitch, and sat a little right of halfway).
+  - **What the smaller pitch did** (a tenth smaller every way, v55; 80 club pairings, each played on both pitches,
+    every man on the computer, 6-minute matches): goals 2.56 a match → 3.02 (the median 2 → 3), shots 7.3 → 10.0,
+    more from every distance (under 11 m 1.8 → 2.1, 11 to 20 m 3.4 → 4.4, 20 m and more 2.1 → 3.5), a few more of
+    them saved or missed (35% scored → 30%). Pairing by pairing, +0.46 goals a match (95%: +0.01 to +0.99): more
+    in 36, fewer in 26, the same in 18. The men run as fast as ever over less ground, and how far they'll shoot
+    and pass from is theirs, not the pitch's.
+  - **Shorter still was too much.** A fifth shorter again and a tenth narrower (93 1/3 m by 68 at 18.225 px to the
+    metre, 1701 × 1239.3) was tried, in v56: 2.94 goals a match → 3.66 against v55's pitch, but shots 10.4 → 17.2,
+    most of the new ones from 20 m and more (3.7 → 8.2), and it played cramped. What's kept is a twentieth off the
+    length (not measured: too small a step to show in 80 matches).
 - **Full time**: a goal in the last play (the advantage after the clock's run out) counts once and ends the match.
   The ball's left in the net, and it used to count again every time the celebration ran out: on the full-time
   screen the score kept climbing, and a career match, its result read a moment later, gave the scorers a goal or
