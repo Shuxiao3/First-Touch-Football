@@ -2066,13 +2066,14 @@
     setStyle(tacTeam,b.dataset.otac);markTac();saveSettings();
   });
 
-  // ===== pitch: a real pitch's markings at 0.81 of the men's size -- the men are 25 px to the metre, the pitch 20.25 --
-  // on one 99.75 m by 68, a twentieth shorter than a full-length one. It was 105 x 68 at 25 px to the metre, then a tenth
-  // smaller every way twice over (22.5, then 20.25), then a twentieth shorter goal to goal. (A fifth shorter and a tenth
-  // narrower again, 93 1/3 m by 68 at 18.225, was tried and was too cramped.) The whole width stays in view =====
-  const PX_M=25, PITCH_K=0.81, MK=PX_M*PITCH_K;         // the men's metre, and the pitch's
-  const PITCH_LEN=105*0.95;                              // its length in its own metres (99.75; the width's 68)
-  const FW=PITCH_LEN*MK, FH=68*MK;                       // (2019.94 x 1377; it was 2126.25 x 1377, 2362.5 x 1530, and 2625 x 1700 first)
+  // ===== pitch: a real pitch's markings at nine-tenths of the men's size -- the men are 25 px to the metre, the pitch
+  // 22.5 -- on one 99.75 m by 68, a twentieth shorter than a full-length one. It was 105 x 68 at 25 px to the metre, then
+  // a tenth smaller every way, then a twentieth shorter goal to goal. (Smaller still was tried -- a tenth smaller every
+  // way again, and then a fifth shorter and a tenth narrower than that -- and taken back.) The whole width stays in
+  // view =====
+  const PX_M=25, PITCH_K=0.9, MK=PX_M*PITCH_K;          // the men's metre, and the pitch's
+  const PITCH_LEN=99.75;                                 // its length in its own metres, a twentieth off 105 (the width's 68)
+  const FW=PITCH_LEN*MK, FH=68*MK;                       // (2244.375 x 1530; it was 2362.5 x 1530, and 2625 x 1700 first)
   const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
   // the markings, a real pitch's at the pitch's metre: penalty area 16.5 x 40.32, goal area 5.5 x 18.32, the penalty
   // spot 11 out, the arc and the centre circle 9.15. (The goal is the men's size, so a little wider than a real one.)
@@ -2911,7 +2912,7 @@
   // middle between the touchlines; things further off are still drawn smaller
   const HORIZON=100, NEAR_Y=H-28, FAR_SCALE=0.55, NEAR_SCALE=1.05, PERSP=1.0;   // far touchline at 100: room for the stand
   // VIEW_D: how deep the camera sees, the far touchline at HORIZON to NEAR_Y -- the first pitch's width, so the men, the
-  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes 0.81 of the way down
+  // ball and the goals are drawn as big as ever, and the smaller pitch's near touchline comes nine-tenths of the way down
   const VIEW_D=1700;
   let camHalf=(W/2)/NEAR_SCALE+14;
   let camMin=camHalf, camMax=FW-camHalf;
