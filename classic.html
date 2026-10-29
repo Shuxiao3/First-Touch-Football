@@ -9457,7 +9457,7 @@
       coverMem[p.team]={q:cover2,c};
       // THE SWARM (GEGENPRESS, just after losing it: see cpSwarm)
       const sw=cpSwarm(p.team,c,engager,cover2);
-      if(sw.press2===p){ p.dbgTag='SWARM-BALL'; p.pressRun=true; return steer(p,sw.p2.x,sw.p2.y,1.0); }
+      if(sw.press2===p){ const rc=readRun(p,c,c); p.dbgTag='SWARM-BALL'; p.pressRun=true; return steer(p,sw.p2.x+rc.x-c.x,sw.p2.y+rc.y-c.y,1.0); }   // (on along his run: readRun)
       const swl=sw.cut.get(p); if(swl){ p.dbgTag='SWARM-LANE'; p.pressRun=true; return steer(p,swl.x,swl.y,1.0); }
       // PRESSING TOGETHER (see pressing): the man nearest it cuts out his easiest pass -- onto the lane to it, nearer the man it's for
       let cutter=null, lpt=null;
@@ -9473,11 +9473,12 @@
       if(cover2===p){ p.dbgTag='COVER2'; if(Math.hypot(p.x-cpt.x,p.y-cpt.y)>220) p.coverRun=true; return arrive(p,cpt.x,cpt.y); }   // (a long way off it: a short sprint, with legs to spare)
       if(coverMan===p){
         p.dbgTag='COVERBREAK';
-        // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time.
-        const gl=Math.hypot(ownGoalX-c.x,YC-c.y)||1;
-        const gx2=(ownGoalX-c.x)/gl, gy2=(YC-c.y)/gl;     // toward our goal from the carrier
+        // DROP INTO THE SHOOTING LANE in front of the carrier to block a shot & buy time -- in front of where he's
+        // going, as my Def IQ reads his run (see readRun)
+        const rc=readRun(p,c,c), gl=Math.hypot(ownGoalX-rc.x,YC-rc.y)||1;
+        const gx2=(ownGoalX-rc.x)/gl, gy2=(YC-rc.y)/gl;   // toward our goal from him
         const standoff=70;                                // sit just in front, between ball & goal
-        const tx=c.x+gx2*standoff, ty=c.y+gy2*standoff;
+        const tx=rc.x+gx2*standoff, ty=rc.y+gy2*standoff;
         // jockey here; only tackle if the ball is exposed and close
         if(p.tackleCd<=0&&p.state==='normal'&&ballExposure(c,p)>0.55&&dist(p,ball)<44&&Math.random()<0.05*iqDef(p,'tackleTiming')){
           slideAt(p,c);
@@ -9497,8 +9498,11 @@
         if(aggrOf(p)==='step') effTight=clamp(effTight+0.3,0,1);                 // told to step up: tighter on him
         const gl=Math.hypot(ownGoalX-c.x,YC-c.y)||1;
         const gx2=(ownGoalX-c.x)/gl, gy2=(YC-c.y)/gl;   // toward our own goal
-        // DELAYED, NOISY read of the carrier for shadowing (imperfect tracking)
-        const pc=perceived(p,c,dt);
+        // DELAYED, NOISY read of the carrier for shadowing (imperfect tracking) -- and how far on along his run I read him
+        // to be when I'm there (Def IQ: see readRun), from that (shadowing) or from where he is (going at him): the
+        // space in front of a runner, not his heels
+        const pc=perceived(p,c,dt), rpc=readRun(p,c,pc), rc=readRun(p,c,c);
+        const rgl=Math.hypot(ownGoalX-rpc.x,YC-rpc.y)||1, rgx=(ownGoalX-rpc.x)/rgl, rgy=(YC-rpc.y)/rgl;   // toward our goal from him, as read
         // carrier's motion relative to this defender
         const toD={x:p.x-c.x,y:p.y-c.y};
         const tl=Math.hypot(toD.x,toD.y)||1;
@@ -9538,15 +9542,16 @@
         // he can still go and win.)
         if(d<80 && atkC*(c.x-p.x)<0 && !(mode==='commit'&&showing)) p.engageCap=0.7;
         if(mode==='meet'){
-          const STANDOFF=40+30*(1-effTight);
-          tx=c.x+gx2*STANDOFF; ty=c.y+gy2*STANDOFF;
+          const STANDOFF=40+30*(1-effTight), mg=Math.hypot(ownGoalX-rc.x,YC-rc.y)||1;
+          tx=rc.x+(ownGoalX-rc.x)/mg*STANDOFF; ty=rc.y+(YC-rc.y)/mg*STANDOFF;
         } else if(mode==='block'){
           // get tight to his body, on the ball side, to block the turn — no standoff cushion.
           const bx=(ball.x-c.x), by=(ball.y-c.y); const bl=Math.hypot(bx,by)||1;
           tx=c.x+bx/bl*(c.r+p.r-2); ty=c.y+by/bl*(c.r+p.r-2);   // press onto the ball side of him
         } else if(mode==='commit'){
-          // attack the ball directly from the front
-          tx=ball.x;ty=ball.y;
+          // attack the ball directly from the front -- where it'll be, as I read his run (not where it was: a man
+          // sprinting past is gone by the time I get there)
+          tx=ball.x+rc.x-c.x; ty=ball.y+rc.y-c.y;
           if(p.tackleCd<=0&&p.state==='normal'){
             if(d<p.r+ball.r+10){ /* contact tackle handles it */ }
             else if(d<120&&(showing||ballAhead)&&Math.random()<(0.025+0.03*effTight)*iqDef(p,'tackleTiming')){
@@ -9557,14 +9562,14 @@
           // SAG OFF a bit and keep the body goal-side: don't sit right on top of the
           // carrier (easy to knock past) — hold a cushion on the line to our goal.
           const STANDOFF=(44+30*(1-effTight));
-          tx=pc.x+gx2*STANDOFF;ty=pc.y+gy2*STANDOFF;
+          tx=rpc.x+rgx*STANDOFF;ty=rpc.y+rgy*STANDOFF;
           if(p.tackleCd<=0&&p.state==='normal'&&exp>0.6&&d<40&&Math.random()<0.02+0.04*effTight){
             slideAt(p,c);
           }
         } else {
           // shadow/contain: sag further, jockey, stay goal-side and patient.
           const STANDOFF=85-30*effTight;                // a clear cushion when contained
-          tx=pc.x+gx2*STANDOFF;ty=pc.y+gy2*STANDOFF;
+          tx=rpc.x+rgx*STANDOFF;ty=rpc.y+rgy*STANDOFF;
           if(p.tackleCd<=0&&p.state==='normal'&&showing&&
              d<85&&Math.random()<0.012+0.03*effTight){
             slideAt(p,c);
@@ -9595,9 +9600,9 @@
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
           // aim for a point just goal-side of the carrier and beside him (the side I'm on), chasing hard --
-          // alongside him, not through his back
-          const side=Math.sign((p.x-c.x)*(-gy2)+(p.y-c.y)*gx2)||1;
-          const rtx=c.x+gx2*30-gy2*side*26, rty=c.y+gy2*30+gx2*side*26;
+          // alongside him, not through his back; on along his run as far as my Def IQ reads it (see readRun)
+          const side=Math.sign((p.x-c.x)*(-gy2)+(p.y-c.y)*gx2)||1, rc=readRun(p,c,c);
+          const rtx=rc.x+gx2*30-gy2*side*26, rty=rc.y+gy2*30+gx2*side*26;
           p.sprint = p.stamina>0.05; p.dbgTag='BEATEN'; p.dash=p.role!=='ATT';
           return steer(p,clamp(rtx,40,FW-40),clamp(rty,30,FH-30),1.0);
         }
@@ -9618,9 +9623,9 @@
           // holds its height behind them.
           const gl=Math.hypot(ourGoalX-c.x,YC-c.y)||1;
           const gx2=(ourGoalX-c.x)/gl, gy2=(YC-c.y)/gl;
-          const squeeze=clamp(200-dist(p,c)*0.4,50,170); p.dbgTag='SCREEN';
-          tx=c.x+gx2*squeeze*0.5;
-          ty=c.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
+          const squeeze=clamp(200-dist(p,c)*0.4,50,170), rc=readRun(p,c,c); p.dbgTag='SCREEN';
+          tx=rc.x+gx2*squeeze*0.5;
+          ty=rc.y+gy2*squeeze*0.25 + (p.homeY-YC)*0.3;
         } else if(TAC[p.team].def==='press' && p.role!=='DEF' && !spot.track && (atk>0?ball.x:FW-ball.x)>FW*0.6 && (mk=pressMark(p))){
           tx=mk.x; ty=mk.y; p.dbgTag='MARK';                // a pressing side, the ball in their third: on my man, ball side
         } else if(!spot.track && posOf(p,'def')==='CM' && ins(p,'cmDef')==='int' && dist(p,c)<560 && (mk=interceptLane(p,c))){
@@ -9958,6 +9963,22 @@
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
   // refreshes on a reaction interval and lags the carrier's true position/velocity.
+  // READING HIS RUN (Def IQ): where the man on the ball will be by the time I get to him, flat out -- on along his run,
+  // up to a second on -- so a man going at a runner takes up the space in front of him rather than chasing his heels.
+  // From `base` (where I'd go for him without reading it: where he is, or a beat behind that -- see perceived) on to
+  // that point by my Def IQ: none of the way at 1, all of it at 10.
+  const RUN_READ_T=1.5;
+  function runLeadT(p,c){
+    const s=sprintSpeedOf(p), rx=c.x-p.x, ry=c.y-p.y, a=c.vx*c.vx+c.vy*c.vy-s*s, b=2*(rx*c.vx+ry*c.vy), cc=rx*rx+ry*ry;
+    let t=RUN_READ_T;                                                  // (he's quicker than me and going away: as far on as it goes)
+    if(Math.abs(a)<1){ if(b<0) t=-cc/b; }
+    else { const D=b*b-4*a*cc; if(D>=0){ const r1=(-b-Math.sqrt(D))/(2*a), r2=(-b+Math.sqrt(D))/(2*a), m=Math.min(r1>0?r1:1e9, r2>0?r2:1e9); if(m<1e9) t=m; } }
+    return clamp(t,0,RUN_READ_T);
+  }
+  function readRun(p,c,base){
+    const iq=clamp((defIQof(p)-1)/9,0,1), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;
+    return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
+  }
   function perceived(p,c,dt){
     p.reactT-=dt;
     if(!p.perc || p.reactT<=0){

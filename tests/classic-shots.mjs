@@ -1,5 +1,6 @@
 // FOOTBALL CLASSIC, SHOTS AND THE KEEPER: a defender in a shot's way blocks it (how close it has to pass him is his
-// block reach, a little more or less for his Def IQ); the keeper comes off his line to narrow the angle on a man coming
+// block reach, a little more or less for his Def IQ); a defender going at a man running across him reads the run by his
+// Def IQ (for the space in front of him at 10, where he was at 1); the keeper comes off his line to narrow the angle on a man coming
 // in on goal, goes straight at the ball once he's close and takes it off him, and comes for a cross into his six-yard
 // box and catches it (one to the edge of the box he leaves); a swipe shot struck off the way the man is facing is
 // weaker and wilder; and the near post and side netting are drawn in front of a ball in the goal, not behind it.
@@ -63,6 +64,31 @@ const kpr = await page.evaluate(() => {
 info('the keeper and you: ' + JSON.stringify(kpr));
 ok(kpr.outAt20 >= 40 && kpr.outAt20 <= 110, 'coming in on goal, the keeper comes off his line to narrow the angle (' + kpr.outAt20 + ' px out with you 20 m out)');
 ok(kpr.held && kpr.kpOut > 120 && kpr.ballOut > 150, 'then he goes at the ball and takes it off you, ' + Math.round(kpr.kpOut / 25) + ' m off his line');
+
+// A DEFENDER READS YOUR RUN: you, on the ball, sprinting across the pitch past one of theirs a little in front of you
+// (nobody else near, him a little quicker) -- at Def IQ 10 he goes for where you're going, the space in front of you,
+// and stays in front of you, goal-side; at Def IQ 1 he goes for where you were, and you're past him
+const runRead = iq => page.evaluate(iq => {
+  const T = window.__T, c = T.players().find(q => q.team === 'G'); T.setControlled(c); T.freeze();
+  const atk = T.atkOf('G'), d = T.players().find(q => q.team === 'R' && q.role === 'DEF');
+  const keep = { c: c.stats, d: d.stats }; c.stats = Object.assign({}, keep.c, { speed: 7, acceleration: 7 }); d.stats = Object.assign({}, keep.d, { defIQ: iq, speed: 9, acceleration: 7 });
+  const park = () => window.__park([c, d]); park();
+  for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; k.vx = k.vy = 0; k.mode = 'line'; k.diveT = 0; k.groundT = 0; k.heldT = 0; k.claimCd = 2; }   // (home, and nobody's holding it)
+  c.x = T.FW / 2; c.y = T.YC - 280; c.vx = 0; c.vy = 150; c.state = 'normal'; c.facing = { x: 0, y: 1 }; c.stamina = c.staminaCap = 1;
+  d.x = c.x + atk * 200; d.y = c.y + 60; d.vx = d.vy = 0; d.state = 'normal'; d.stamina = d.staminaCap = 1; d.tackleCd = 99; d.perc = null;
+  const b = T.ball(); b.ownedBy = c; b.dribbler = null; b.x = c.x; b.y = c.y + 22; b.z = 0; b.vx = 0; b.vy = 150; b.vz = 0; b.shotT = 0;
+  T.stick(0, 1); const t0 = T.simNow(), path = [];
+  return window.__until(1.6, () => undefined, () => { park(); d.tackleCd = 99; d.noTouchT = 0.2; c.sprint = true;   // (you sprinting; he doesn't go in for it: where he goes is what's read)
+    const t = T.simNow() - t0, v = Math.hypot(c.vx, c.vy) || 1;
+    path.push({ t: +t.toFixed(2), ahead: Math.round(((d.x - c.x) * c.vx + (d.y - c.y) * c.vy) / v), goalSide: Math.round((d.x - c.x) * atk), gap: Math.round(Math.hypot(d.x - c.x, d.y - c.y)), tag: d.dbgTag }); })
+    .then(() => { T.stick(0, 0); c.stats = keep.c; d.stats = keep.d; const at = tt => path.find(s => s.t >= tt) || path[path.length - 1];
+      const late = path.filter(s => s.t >= 0.5), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
+      return { ahead: mean('ahead'), goalSide: mean('goalSide'), at3: at(0.3), at6: at(0.6), at10: at(1.0), end: path[path.length - 1], tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
+}, iq);
+const read10 = await runRead(10), read1 = await runRead(1);
+info('reading your run: ' + JSON.stringify({ read10, read1 }));
+ok(read10.ahead >= 10 && read10.goalSide >= 0, 'at Def IQ 10 he goes for the space in front of you and stays there: ' + read10.ahead + ' px ahead of you along your run and ' + read10.goalSide + ' px goal-side, on average from half a second on');
+ok(read1.ahead <= -10 && read10.ahead - read1.ahead >= 40, '...at Def IQ 1 he goes where you were, and you\'re past him (' + read1.ahead + ' px)');
 
 // CROSSES: one whipped into his six-yard box he comes for and catches, over their heads; one to the edge of the box he
 // leaves
