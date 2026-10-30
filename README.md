@@ -141,17 +141,19 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **The buildings.** One line across the top: ◀ CAMPUS, the building, its tabs. A message shows as a toast along the
     bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages if
     it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
-    has no long text on it: his figure, name, own position, style, age, stars, rating and potential on top, and one
-    small button under his rating (DEAL ▶, then RATINGS ▶) turns it over; the side you're on stays as you go from man
-    to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending, each the average of
+    has no long text on it: his figure, name, own position, style, age, stars, rating and potential (as you know it:
+    see **His story**) on top, and one small button under his rating (DEAL ▶, CAREER ▶, RATINGS ▶) turns it over to
+    its next side; the side you're on stays as you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending, each the average of
     its attributes, as in **The six** below; tap one and what it's made of opens under them, a coloured bar for each
     rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted
-    shows ? for each, with SCOUT HIM (once the scouts' house is built). The other side, his deal, has what he earns or
+    shows ? for each, with SCOUT HIM (once the scouts' house is built); one you have, what the reports say (see
+    **Scouting**). The second side, his deal, has what he earns or
     costs in a small grid, then what you can do about him, a line each: in the clubhouse's Squad tab his contract (a
     new deal, releasing him); in the market's Selling tab selling him (the two best bids, the transfer list); for
     another club's man the asking price, scouting him and your offer; for a free agent signing him; for a youngster
-    promoting him. In the Squad tab his card has the right side to itself (◀ THE TEAM, or a tap on him in the list,
-    for the little pitch), and the little pitch comes back as you pick a man up to drop on it.
+    promoting him. The third side is his career (see **His story**). In the Squad tab his card has the right side to
+    itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
+    a man up to drop on it.
   - **Tactics** (in a career, on the training pitch: its level decides which shapes, styles and instructions your side
     can have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
@@ -1031,6 +1033,23 @@ The same game played like any other football game. It's a copy of `index.html` w
       he's feeling and why (wants more games, his form, the results, his contract...), his fitness, the coaches' word
       on how he's coming on, and brings out a trait; it lifts him a little, more if he's low.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
+  - **His story.**
+    - **Potential is never a number**, not even your own men's: on their cards and in the lists it's a range round
+      it, the same every time you look -- 12 points wide with no coaches, down to 4 with a coach rated 10 (your best;
+      the academy's lads by its youth coach) -- and another club's man's by how well he's scouted (?, the league he
+      could reach, 10 wide, 6 wide). The wonderkid's ceiling comes as a range too.
+    - **His career** is his card's third side: his seasons, the latest first (this one so far, then the last three on
+      record: season and league, club, games, goals, assists, average rating), his last two moments, and for your own
+      man his games and goals for you. A season goes on record for every man who's played for you, and for anyone
+      who's won something; the moments are his debut, his first goal, his 50, 100, 200 games and 25, 50, 100 goals
+      for you, joining, leaving, being released, coming up from the academy, the armband, promotion, a title or a cup,
+      an award.
+    - **The season's awards**, in the review and the news: your league's Player of the Season (the best average,
+      from ten games rated), its best young player (21 or under), its top scorer, and your own Player of the Season
+      (from five).
+    - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS): the most games and goals for the club, the
+      youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
+      season; from your second the news says when one goes (in the first, every debut would be one).
   - **The staff and training focus.**
     - **Coaches**: fitness (his legs and his stamina), technique (his touch), tactics (his reading of the game and
       his composure), goalkeeping (a keeper's work), and the academy's youth coach -- one of each. The training pitch
@@ -1074,7 +1093,8 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Two men come to you in your first season.** After matchday 2 a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
-    join: 16, rated 60 to 69, with a ceiling of 85 to 90. You pick where he plays and his style (the card says what
+    join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a range six wide). You pick where he
+    plays and his style (the card says what
     each style does), and he signs for half his wage, to the end of the season after next. Both go straight into
     your squad, even a full one; a card on the hub tells you, and so does the news.
   - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
@@ -1103,11 +1123,22 @@ The same game played like any other football game. It's a copy of `index.html` w
       let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
       sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. A 60 in League 2 asks $550 a
       week and $6,600 to sign at 21, $390 and $2,300 at 25, and $220 at 29.
-  - **Scouting** needs the scouts' house built (see **The campus**). A player at another club shows a rating range
-    until you scout him: 8 points wide, 6 and then 2 as you grow your scouting network. One player costs $200 in
-    League 2, up to $6,000 in the Premium League. Or send your scouts round a league's goalkeepers, defenders,
-    midfielders or forwards. A scouted player shows his exact rating, potential and attributes. Reports last until the
-    end of the season.
+  - **Scouting** needs the scouts' house built (see **The campus**). What you know of a man at another club (or a
+    free agent) goes in levels, as far as your scouts' house's level:
+    - **None**: a rating range, 8 points wide, 6 and then 2 as you grow your scouting network; ? for the rest.
+    - **A report** (one scouting, $200 a man in League 2 up to $6,000 in the Premium League, or an assignment: your
+      scouts round a league's goalkeepers, defenders, midfielders or forwards): his exact rating and attributes, and
+      COULD BE -- the league his potential could take him to (a League 1 player, a Premium League star...).
+    - **A second** (SCOUT MORE on his card, a scouts' house at 2 or more): his potential within ten points, and the
+      two things about his character that stand out most, a word each -- WORK (a model pro, a hard worker, cuts
+      corners), LEARNS (quickly, slowly), BODY (robust, injury-prone), TEMPER (calm, volatile), DRIVE (ambitious,
+      content), LOYALTY (loyal, mercenary), GRIT (resilient, fragile), VOICE (a leader, quiet), SETTLES (anywhere,
+      slowly); nothing stands out in an ordinary man.
+    - **A third** (a scouts' house at 3): his potential within six points, and four things about him.
+    - **Playing against him** is half a report a game, up to two (short of a report, his rating's range narrows): your
+      league's regulars are known after you've played them twice. A man who's played for you, you know as well as a
+      second report when he goes. Each report loses a level when the season ends. The market's lists say SCOUTED (★
+      for a second report, ★★ for a third); the Scouting building's Reports tab has every man you've scouted.
   - **Players develop every third week**, not once a year. A man's 25 attributes are his own (saved with him, a
     letter a half point), and his rating is what they rate. Every third week each attribute moves along a hidden
     meter; when it fills he goes up half a point, when it empties he drops half a point. What you see is what plays.

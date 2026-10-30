@@ -1216,6 +1216,9 @@
   .mgFact span{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; }
   .mgFact b{ font-weight:400; color:var(--good); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mgAct{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; margin:6px 2px 0; }
+  .cvTab{ width:100%; border-collapse:collapse; font-size:11px; margin:2px 0 4px; } .cvTab th{ font:9px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; font-weight:400; text-align:right; padding:0 3px 2px; }
+  .cvTab td{ text-align:right; padding:1px 3px; color:var(--ink2); white-space:nowrap; } .cvTab th:nth-child(-n+2), .cvTab td:nth-child(-n+2){ text-align:left; } .cvTab tr.now td{ color:var(--good); }
+  .cvEv{ font-size:11px; color:var(--ink2); line-height:1.5; margin:0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .cvEv i{ font-style:normal; color:var(--dim); margin-right:6px; }
   .mgActL{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; margin-right:auto; }
   .mgActL b{ font-size:12px; color:var(--ink); letter-spacing:0; }
   .mgActC{ display:flex; align-items:center; gap:4px 6px; margin-left:auto; }
@@ -13969,17 +13972,104 @@
   function mgRated(d,p,r,g,big,gc,yours){ const a=yours&&hasTrait(p,d,'incon')?0.45:0.3;   // (the inconsistent: his form swings more)
     p.fm=p.fm==null?r:Math.round(((1-a)*p.fm+a*r)*100)/100; p.rs=Math.round(((p.rs||0)+r)*10)/10; p.rn=(p.rn||0)+1;
     if(g) p.wg=(p.wg||0)+g; if(big) p.wb=(p.wb||0)+1; if(gc===0&&(p.role==='GK'||p.role==='DEF')) p.cs=(p.cs||0)+1;
-    if(yours) RAT_NOW.push({name:p.name,num:p.num,r}); }
+    if(yours){ RAT_NOW.push({name:p.name,num:p.num,r}); clubApp(d,p,g||0); } }
   // a game's ratings, both sides (m: [home, away, their goals, ...]; live: the one you played)
   function mgRateGame(d,m,xh,xa,live,big){
-    const side=(id,xi,gf,gc)=>{ const res=gf>gc?1:gf<gc?-1:0, yours=id===d.clubId;
+    const side=(id,xi,gf,gc)=>{ const res=gf>gc?1:gf<gc?-1:0, yours=id===d.clubId, vs=!yours&&(m[0]===d.clubId||m[1]===d.clubId);   // (vs: against you -- you learn about him)
       if(live&&SQUAD.G&&SQUAD.R){ const t=yours?'G':'R', P=mgPlayersOf(d,id), S=SUBS[t]||{on:[],off:[]}, on=new Set([LINEUP[t].gk,...LINEUP[t].atk]);
         SQUAD[t].forEach((e,si)=>{ if(!(on.has(si)||S.on.includes(si)||S.off.includes(si))) return;
           const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return; const o=MSTAT[t][si]||{};
-          mgRated(d,p,mRate(p.role,o,res,gc),o.g||0,big,gc,yours); if(o.a) p.as=(p.as||0)+o.a; }); return; }
+          mgRated(d,p,mRate(p.role,o,res,gc),o.g||0,big,gc,yours); if(o.a) p.as=(p.as||0)+o.a; if(vs) knUp(d,p,knOf(d,p)+0.5,2); }); return; }
       const avg=xi.reduce((s,p)=>s+p.ovr,0)/Math.max(1,xi.length);
-      for(const p of xi){ const g=p._g||0; delete p._g; mgRated(d,p,mSimRate(p,avg,res,g,gc),g,big,gc,yours); } };
-    side(m[0],xh,m[2],m[3]); side(m[1],xa,m[3],m[2]); }
+      for(const p of xi){ const g=p._g||0; delete p._g; mgRated(d,p,mSimRate(p,avg,res,g,gc),g,big,gc,yours); if(vs) knUp(d,p,knOf(d,p)+0.5,2); } };
+    side(m[0],xh,m[2],m[3]); side(m[1],xa,m[3],m[2]);
+    if(m[0]===d.clubId) recWin(d,m[2],m[3],m[1]); else if(m[1]===d.clubId) recWin(d,m[3],m[2],m[0]); }
+
+  // ===== HIS STORY: his potential as you know it, his character as the scouts tell it, his career, the season's awards,
+  // the club's records =================================================================================================
+  // HIS POTENTIAL -- never the number. A range round it (where his id puts it, the same every time), w either side:
+  // your own men's by your best coach (6 with none, 2 with a 10; the academy's by its youth coach); a man you've
+  // scouted twice, 5; three times, 3. Scouted once, the league it could take him to; not at all, '?'.
+  const POT_BAND=[[86,'a Premium League star'],[79,'a Premium League player'],[71,'a Championship player'],[63,'a League 1 player'],[0,'a League 2 player']];
+  const potBand=p=>POT_BAND.find(b=>(p.pot||p.ovr)>=b[0])[1];
+  function potRange(p,w){ const pot=p.pot||p.ovr, off=(Math.imul(((p.id>>>0)||1)+977,2654435761)>>>0)%(2*w+1); let lo=pot-off, hi=lo+2*w;
+    if(hi>99){ lo-=hi-99; hi=99; } lo=Math.max(lo,Math.min(p.ovr,pot)); return [lo,Math.max(hi,lo+2)]; }
+  function potWYours(d,youth){ const best=(d.staff||[]).filter(c=>youth?c.k==='youth':c.k!=='youth').reduce((a,c)=>Math.max(a,c.r),0); return clamp(Math.round(6-0.4*best),2,6); }
+  // as text: a range, the league (not short), or '?'. f: what mgFind says of him (mine, youth...); short: a list's
+  function potTxt(d,p,f,short){ f=f||{}; const k=f.mine||f.youth?9:knOf(d,p);
+    if(k>=2){ const r=potRange(p,k===9?potWYours(d,!!f.youth):k>=3?3:5); return r[0]+'–'+r[1]; }
+    return k>=1&&!short?potBand(p):'?'; }
+  const potMid=(d,p,youth)=>{ const r=potRange(p,potWYours(d,youth)); return (r[0]+r[1])/2; };
+  const kidPot=A=>potRange({id:hashStr(A.name),pot:A.pot,ovr:A.ovr},3);   // (the wonderkid: what the club hears of him)
+  // HIS CHARACTER as the scouts tell it: the hidden values that stand out (2 or more from the middle), most first -- a
+  // few letters and a word each
+  const HV_SAY={pro:['WORK','hard worker','cuts corners'],lr:['LEARNS','quickly','slowly'],du:['BODY','robust','injury-prone'],te:['TEMPER','calm','volatile'],
+    am:['DRIVE','ambitious','content'],lo:['LOYALTY','loyal','mercenary'],rs:['GRIT','resilient','fragile'],ch:['VOICE','a leader','quiet'],ad:['SETTLES','anywhere','slowly']};
+  function hvSay(p,n){ const h=hvOf(p); return Object.keys(HV_SAY).map(k=>[k,h[k]-5.5]).filter(x=>Math.abs(x[1])>=2).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,n)
+    .map(([k,v])=>[HV_SAY[k][0],k==='pro'&&v>=3?'model pro':HV_SAY[k][v>0?1:2]]); }
+  // what the reports add to another club's man's card (or a free agent's): the league he could reach, or his
+  // character; and SCOUT MORE while your scouts' house can tell you more
+  function mgScoutFacts(d,p,f){ const k=knOf(d,p), L=lvOf(d,'scouting'); let h;
+    if(k<2) h=mgFact('COULD BE',potBand(p),'',true);
+    else { const S=hvSay(p,k>=3?4:2); h=S.length?S.map(x=>mgFact(x[0],x[1])).join(''):mgFact('CHARACTER','nothing stands out','',true); }
+    return '<div class="mgFacts">'+h+'</div>'+(L>k?'<div class="mgAct"><button class="mgBtn" data-mg="scout" data-pid="'+p.id+'">SCOUT MORE ('+money(mgScoutCost(d,p,f.club||null))+')</button></div>':''); }
+  // HIS CAREER, the card's third side: his seasons, the latest first (this one so far, then those on record -- a man
+  // who's played for you, or won something), the last of what's happened to him, and yours: his games and goals for you
+  const LG_SHORT={1:'L2',2:'L1',3:'CH',4:'PL'};
+  const clubCode=(d,id)=>((d.world.clubs[id]||{}).code)||'—';
+  function mgCareerSide(d,p,f){ const code=f.mine?clubCode(d,d.clubId):f.club?f.club.code:f.youth?'ACAD':'FREE', tier=f.mine?d.tier:f.club?f.club.tier:0;
+    const rows=[[d.season,code,tier,p.apps||0,p.goals||0,p.as||0,p.rn?Math.round(p.rs/p.rn*10):0]].concat((p.hist||[]).slice().reverse()).slice(0,4);
+    let h='<table class="cvTab"><tr><th>SEASON</th><th>CLUB</th><th>GP</th><th>G</th><th>A</th><th>AVG</th></tr>'
+      +rows.map((r,i)=>'<tr'+(i?'':' class="now"')+'><td>S'+r[0]+(LG_SHORT[r[2]]?' '+LG_SHORT[r[2]]:'')+'</td><td>'+mgEsc(r[1])+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td><td>'+r[5]+'</td><td>'+(r[6]?(r[6]/10).toFixed(1):'—')+'</td></tr>').join('')+'</table>';
+    const E=(p.evs||[]).slice(-2).reverse(); h+=E.map(e=>'<div class="cvEv"><i>S'+e[0]+'</i>'+mgEsc(e[1])+'</div>').join('');
+    if(f.mine) h+='<div class="mgFacts">'+mgFact('FOR '+mgEsc(code),(p.ca||0)+' games · '+(p.cg||0)+' goals','',true)+'</div>';
+    else if(rows.length<2&&!E.length) h+='<div class="cvEv">No record before this season</div>';
+    return h; }
+  // something that happened to him, for his card (his last twelve kept)
+  function careerEv(d,p,t){ (p.evs=p.evs||[]).push([d.season,t]); if(p.evs.length>12) p.evs.splice(0,p.evs.length-12); }
+  // ONE MORE GAME FOR THE CLUB (and his goals in it): his debut, his first goal, his fifties and hundreds -- and the
+  // club's records (most games, most goals, the youngest to play and to score), the news when one falls to a new man.
+  // They're kept from your first season; the news tells of them from your second (in the first, every debut is one).
+  const REC_N={ap:50,gl:20};   // (most games and goals make the news once a record is worth something)
+  const recNews=d=>((d.manager||{}).history||[]).length>0;
+  function clubApp(d,p,g){ const code=clubCode(d,d.clubId), R=d.rec=d.rec||{}; p.ca=(p.ca||0)+1;
+    if(p.ca===1){ careerEv(d,p,'Debut for '+code); if(!R.yd||p.age<R.yd.age){ const had=R.yd; R.yd={name:p.name,age:p.age,s:d.season}; if(had&&recNews(d)) mgNews(d,p.name+', '+p.age+', is the youngest ever to play for '+d.clubName+'.'); } }
+    if([50,100,200,300].includes(p.ca)) careerEv(d,p,p.ca+' games for '+code);
+    if(g>0){ const was=p.cg||0; p.cg=was+g;
+      if(!was){ careerEv(d,p,'First goal for '+code); if(!R.ys||p.age<R.ys.age){ const had=R.ys; R.ys={name:p.name,age:p.age,s:d.season}; if(had&&recNews(d)) mgNews(d,p.name+', '+p.age+', is the youngest ever to score for '+d.clubName+'.'); } }
+      for(const n of [25,50,100,200]) if(was<n&&p.cg>=n) careerEv(d,p,n+' goals for '+code); }
+    for(const [k,n] of [['ap',p.ca],['gl',p.cg||0]]) if(n>0&&(!R[k]||n>R[k].n)){ const had=R[k]; R[k]={id:p.id,name:p.name,n};
+      if(had&&had.id!==p.id&&n>=REC_N[k]&&recNews(d)) mgNews(d,p.name+' has '+(k==='ap'?'played more games':'scored more goals')+' for '+d.clubName+' than anyone: '+n+'.'); } }
+  function recWin(d,gf,ga,opp){ const R=d.rec=d.rec||{}, b=R.bw, mg=gf-ga; if(mg<=0) return;
+    if(!b||mg>b.gf-b.ga||(mg===b.gf-b.ga&&gf>b.gf)){ R.bw={gf,ga,opp:clubCode(d,opp),s:d.season}; if(b&&recNews(d)) mgNews(d,'A club record: '+d.clubName+'’s biggest win, '+gf+'–'+ga+'.'); } }
+  function recFee(d,k,p,fee){ const R=d.rec=d.rec||{}; if(!(fee>0)||(R[k]&&fee<=R[k].fee)) return; const had=R[k]; R[k]={name:p.name,fee,s:d.season};
+    if(had&&recNews(d)) mgNews(d,'A club record: '+(k==='fp'?'the most '+d.clubName+' have ever paid':'the most '+d.clubName+' have ever been paid')+', '+money(fee)+' for '+p.name+'.'); }
+  function mgRecordsHtml(d){ const R=d.rec||{}, who=(x,v)=>x?mgEsc(x.name)+' · '+v:'—';
+    return '<div class="bpSect">CLUB RECORDS</div>'+finRow('Most games',who(R.ap,R.ap&&R.ap.n))+finRow('Most goals',who(R.gl,R.gl&&R.gl.n))
+      +finRow('Youngest to play',who(R.yd,R.yd&&R.yd.age+' (S'+R.yd.s+')'))+finRow('Youngest to score',who(R.ys,R.ys&&R.ys.age+' (S'+R.ys.s+')'))
+      +finRow('Biggest win',R.bw?R.bw.gf+'–'+R.bw.ga+' v '+mgEsc(R.bw.opp)+' (S'+R.bw.s+')':'—')
+      +finRow('Record signing',who(R.fp,R.fp&&money(R.fp.fee)))+finRow('Record sale',who(R.fs,R.fs&&money(R.fs.fee))); }
+  // THE SEASON'S END, for the record: the awards -- your league's Player of the Season, its best young player (21 or
+  // under), both from ten games rated, its top scorer; your club's own Player of the Season, from five -- what your men
+  // won, and a line in each man's history: yours, and anyone with a story (who's played for you, or won something)
+  function mgSeasonStory(d,R){ const code=clubCode(d,d.clubId), lg=LG_SHORT[d.tier], avg=p=>p.rn?p.rs/p.rn:0, L=[];
+    for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)) L.push([p,id]);
+    const best=F=>L.filter(x=>F(x[0])).sort((a,b)=>avg(b[0])-avg(a[0])||(b[0].goals||0)-(a[0].goals||0))[0];
+    const pos=best(p=>(p.rn||0)>=10), yng=best(p=>(p.rn||0)>=10&&(p.age||25)<=21);
+    const top=L.filter(x=>(x[0].goals||0)>0).sort((a,b)=>(b[0].goals||0)-(a[0].goals||0)||avg(b[0])-avg(a[0]))[0];
+    const mine=d.roster.filter(p=>(p.rn||0)>=5).sort((a,b)=>avg(b)-avg(a))[0];
+    R.awards=[]; const give=(x,t,ev,v,news)=>{ if(!x) return; const [p,id]=x; R.awards.push({t,name:p.name,code:clubCode(d,id),v,you:id===d.clubId}); careerEv(d,p,ev);
+      if(news) mgNews(d,p.name+' ('+clubCode(d,id)+') is '+MG_LEAGUE[d.tier]+'’s '+t.toLowerCase()+' ('+v+').'); };
+    give(pos,'Player of the Season',lg+' Player of the Season',pos&&avg(pos[0]).toFixed(1),1);
+    give(yng,'Best young player',lg+' best young player',yng&&avg(yng[0]).toFixed(1),1);
+    give(top,'Top scorer',lg+' top scorer',top&&top[0].goals+' goals',1);
+    give(mine&&[mine,d.clubId],'Your Player of the Season',code+' Player of the Season',mine&&avg(mine).toFixed(1),0);
+    const won=[]; if(R.up) won.push('Promoted with '+code); if(R.pos===1) won.push('Won '+(d.tier>=3?'the ':'')+MG_LEAGUE[d.tier]);
+    for(const k in R.cupWin||{}) if(R.cupWin[k]===d.clubId) won.push('Won the '+CUP[k].name);
+    for(const p of d.roster) if(p.apps>0) for(const t of won) careerEv(d,p,t);
+    const line=(p,c,t)=>{ (p.hist=p.hist||[]).push([d.season,c,t,p.apps||0,p.goals||0,p.as||0,p.rn?Math.round(p.rs/p.rn*10):0]); if(p.hist.length>20) p.hist.shift(); };
+    for(const p of d.roster) line(p,code,d.tier);
+    for(const c of mgAiClubs(d)) for(const p of c.players) if((p.hist||p.evs)&&(p.apps||0)>0) line(p,c.code,c.tier); }
 
   // ===== THE STAFF AND TRAINING FOCUS ==================================================================================
   // Coaches: fitness (his legs and his stamina; fewer injuries, quicker recovery), technique (his touch), tactics (his
@@ -14064,7 +14154,7 @@
     if(!R.some(p=>p.id===d.vice)||d.vice===d.cap) d.vice=(by.find(p=>p.id!==d.cap)||by[0]).id; }
   function mgSetCaptain(d,pid,vice){ const p=d.roster.find(x=>x.id===pid); if(!p) return 'He is not in your squad.';
     if(vice){ if(d.cap===pid) return 'He’s your captain.'; if(d.vice===pid) return null; d.vice=pid; p.mor=clamp((p.mor??MOR0)+0.5,1,10); mgNews(d,p.name+' is '+d.clubName+'’s vice-captain.'); return null; }
-    if(d.cap===pid) return null; const was=d.cap; d.cap=pid; if(d.vice===pid) d.vice=was;
+    if(d.cap===pid) return null; const was=d.cap; d.cap=pid; if(d.vice===pid) d.vice=was; careerEv(d,p,'Captain of '+clubCode(d,d.clubId));
     p.mor=clamp((p.mor??MOR0)+1,1,10);
     for(const q of d.roster) if(q!==p&&hvOf(q).am>=7&&(q.age||25)>=27&&leadOf(q,d)>=leadOf(p,d)) q.mor=clamp((q.mor??MOR0)-1,1,10);   // (an ambitious senior passed over minds)
     mgNews(d,p.name+' is '+d.clubName+'’s new captain.'); return null; }
@@ -14483,7 +14573,7 @@
     const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
     p.name=A.name; if(role!=='GK'&&STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style)
     p.wage=mgRound(mgWage(p.ovr)*0.5); mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;
-    mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+p.pot+'.');
+    mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+kidPot(A).join('–')+'.');
     return null; }
   // the hub shows whichever of them is waiting to be seen
   function mgStoryShow(d){ const S=d.story, m=document.getElementById('storyModal'); if(!m) return;
@@ -14500,7 +14590,7 @@
     else if(S.kid===1){ const A=S.kidAsk, pos=MGUI.kidPos&&KID_POS.includes(MGUI.kidPos)?MGUI.kidPos:'STK', L=SUB_STYLES[pos]?[...new Set(SUB_STYLES[pos])]:[], sty=L.includes(MGUI.kidSty)?MGUI.kidSty:L[0];
       MGUI.kidPos=pos; MGUI.kidSty=sty;
       h='<div class="stTitle">A WONDERKID ASKS TO JOIN</div><div class="stMsg"><b>'+mgEsc(A.name)+'</b>, 16, has turned the big clubs down to play for '+mgEsc(d.clubName)
-        +'. He’s rated <b>'+A.ovr+'</b> now, with a ceiling of <b>'+A.pot+'</b>. Where does he play, and how?</div>'
+        +'. He’s rated <b>'+A.ovr+'</b> now, with a ceiling of <b>'+kidPot(A).join('–')+'</b>. Where does he play, and how?</div>'
         +'<div class="stLbl">POSITION</div><div class="stRow">'+KID_POS.map(k=>'<button class="mgChip'+(k===pos?' on':'')+'" data-st="pos" data-v="'+k+'">'+k+'</button>').join('')+'</div>'
         +'<div class="stLbl">STYLE</div><div class="stRow">'+(L.length?L.map(k=>'<button class="mgChip'+(k===sty?' on':'')+'" data-st="sty" data-v="'+k+'">'+STYLES[k].name.toUpperCase()+'</button>').join(''):'<span class="stBlurb">A keeper has no style to pick.</span>')+'</div>'
         +'<div class="stBlurb">'+(sty&&STYLES[sty]?mgEsc(STYLES[sty].blurb):'')+'</div>'
@@ -14671,6 +14761,7 @@
     R.cups=['coco','fashion','cl'].map(k=>[k,mgCupRun(d,k)]).filter(x=>x[1]); R.cupWin={};
     for(const k of ['coco','fashion','cl']){ const C=d.cup&&d.cup.s===d.season&&d.cup[k]; if(C&&C.win) R.cupWin[k]=C.win; }
     d.clQual=R.moves[4].table.slice(0,6);   // (the Premium League's top six: next season's Champions League)
+    mgSeasonStory(d,R);   // (the awards, what your men won, each man's season for the record: see HIS STORY)
     mgAgeWorld(d,R);
     d.review=R; d.phase='review';
     mgNews(d,'Season '+d.season+' is over: '+d.clubName+' finished '+ordinal(pos)+' in '+MG_LEAGUE[d.tier]+' — '+R.result.toLowerCase()+'.'); }
@@ -14684,7 +14775,7 @@
     for(const c of mgAiClubs(d)) c.players=c.players.filter(p=>!retires(p));
     d.world.free=d.world.free.filter(p=>!retires(p));
     // deals that run out with this season: yours leave unless you renewed them; the computer keeps the men it still wants
-    for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if((p.until||0)<=S){ R.expired.push(p.name); mgRosterRemove(d,i); mgToFree(d,p); } }
+    for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if((p.until||0)<=S){ R.expired.push(p.name); mgRosterRemove(d,i); mgToFree(d,p); careerEv(d,p,'Left '+clubCode(d,d.clubId)+' (free)'); } }
     for(const c of mgAiClubs(d)) for(const p of c.players.slice()){ if((p.until||0)>S) continue;
       if(p.age<33&&p.ovr>=MG_LEVEL[c.tier]-9){ p.until=S+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); }
       else { c.players.splice(c.players.indexOf(p),1); mgToFree(d,p,c); } }
@@ -14718,7 +14809,7 @@
     const nd={1:[],2:[],3:[],4:[]};
     for(const t of [1,2,3,4]){ const mv=R.moves[t]; for(const id of mv.table){ const nt=mv.up.includes(id)?t+1:mv.down.includes(id)?t-1:t; nd[nt].push(id); const c=d.world.clubs[id]; if(c) c.tier=nt; } }
     d.div=nd; d.tier=d.world.clubs[d.clubId].tier;
-    d.season++; d.md=0; d.phase='summer'; d.day=1; d.wkN=0; d.po=null; d.poRound=0; d.offers=[]; d.bidMemo={}; d.scouted={}; d.review=null;
+    d.season++; d.md=0; d.phase='summer'; d.day=1; d.wkN=0; d.po=null; d.poRound=0; d.offers=[]; d.bidMemo={}; knAge(d); d.review=null;
     const ft=FIN_TIER[d.tier]; d.sponsorWk=ft.sponsor; dealsExpire(d);   // (the partners' money is the league's; the ground stays as you built it)
     { const nb=LOYALTY_BASE[d.tier]||1000, cur=d.loyalty!=null?d.loyalty:nb; d.loyalty=Math.round(cur+(nb-cur)*0.3); }
     for(const c of mgAiClubs(d)){ c.budget=mgRound(Math.min(c.budget,MG_AI_BUDGET[c.tier]*1.5)+MG_AI_BUDGET[c.tier]*(0.4+Math.random()*0.4)); mgRefill(d,c); }   // (they pay no wages: what they hoard is capped)
@@ -14742,7 +14833,7 @@
            else { const b=lu.bench.indexOf(idx); if(b>=0) lu.bench.splice(b,1); } }
     R.splice(idx,1);
     const fx=i=>i>idx?i-1:i; lu.gk=fx(lu.gk); lu.atk=lu.atk.map(fx); lu.def=lu.def.map(fx); lu.bench=lu.bench.map(fx);
-    if(d.listed) delete d.listed[gone.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==gone.id);
+    if(d.listed) delete d.listed[gone.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==gone.id); knUp(d,gone,2,2);   // (you know him: he played for you)
     if(statViewRi!=null) statViewRi=null;
     return gone; }
   // the best eight for your shapes: the best keeper, then the spots with the ball filled best first -- whoever's best in a
@@ -14801,7 +14892,7 @@
     if(d.roster.length>=MG_MAX) return 'Your squad is full.';
     const p=f.p, c=f.club; c.players.splice(c.players.indexOf(p),1);
     d.budget-=fee; c.budget+=fee; p.wage=mgDemand(d,p,true); p.until=d.season+years-1; mgRosterAdd(d,p);
-    mgTx(d,'in',p,c.name,fee); mgNews(d,d.clubName+' sign '+p.name+' from '+c.name+' for '+money(fee)+'.');
+    mgTx(d,'in',p,c.name,fee); mgNews(d,d.clubName+' sign '+p.name+' from '+c.name+' for '+money(fee)+'.'); careerEv(d,p,'Joined '+clubCode(d,d.clubId)+' ('+money(fee)+')'); recFee(d,'fp',p,fee);
     return null; }
   function mgSignFree(d,pid,years){ const f=mgFind(d,pid); if(!f||!f.free) return 'He has signed somewhere else.'; if(!lvOf(d,'market')) return 'You’re not on the transfer market yet.';
     const p=f.p, no=mgWontCome(d,p); if(no) return no;
@@ -14809,7 +14900,7 @@
     if(d.budget<0&&d.roster.length>=MG_MIN) return 'You’re in the red: sell before you sign anyone.';
     const ask=mgFreeAsk(d,p); if(ask.fee>d.budget) return 'He wants '+money(ask.fee)+' to sign: you have '+money(d.budget)+'.';
     d.world.free.splice(d.world.free.indexOf(p),1); d.budget-=ask.fee; p.wage=ask.wage; p.until=d.season+years-1; p.idle=0; mgRosterAdd(d,p);
-    mgTx(d,'in',p,'free agent',ask.fee); mgNews(d,d.clubName+' sign free agent '+p.name+(ask.fee?' ('+money(ask.fee)+' to sign him)':'')+'.');
+    mgTx(d,'in',p,'free agent',ask.fee); mgNews(d,d.clubName+' sign free agent '+p.name+(ask.fee?' ('+money(ask.fee)+' to sign him)':'')+'.'); careerEv(d,p,'Joined '+clubCode(d,d.clubId)+(ask.fee?' ('+money(ask.fee)+')':' (free)'));
     return null; }
   function mgTx(d,dir,p,club,fee){ d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }
   // you selling: take a club's offer
@@ -14821,14 +14912,14 @@
     if(c.players.length>=MG_MAX){ d.offers=d.offers.filter(x=>x!==o); return c.name+'’s squad is full now.'; }
     const p=mgRosterRemove(d,idx); c.budget-=o.fee; d.budget+=o.fee;
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p);
-    mgTx(d,'out',p,c.name,o.fee); mgNews(d,p.name+' joins '+c.name+' from '+d.clubName+' for '+money(o.fee)+'.');
+    mgTx(d,'out',p,c.name,o.fee); mgNews(d,p.name+' joins '+c.name+' from '+d.clubName+' for '+money(o.fee)+'.'); careerEv(d,p,'Left for '+(c.code||'?')+' ('+money(o.fee)+')'); recFee(d,'fs',p,o.fee);
     return null; }
   function mgRejectOffer(d,oid){ d.offers=(d.offers||[]).filter(x=>x.id!==oid); }
   // let a man go: half of what's left on his deal is paid off
   function mgReleaseCost(d,p){ return mgRound(p.wage*((MG_MD-Math.min(d.md,MG_MD))+MG_MD*Math.max(0,(p.until||0)-d.season))*0.5); }
   function mgRelease(d,idx){ const p=d.roster[idx], why=mgCanLose(d,idx); if(why) return why;
     const cost=mgReleaseCost(d,p); if(cost>d.budget) return 'Paying off his contract costs '+money(cost)+'.';
-    d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.');
+    d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.'); careerEv(d,p,'Released by '+clubCode(d,d.clubId));
     return null; }
   // a new deal: `years` seasons from next season, at what he asks now
   const mgRenewWage=(d,p)=>mgRound(mgDemand(d,p,false)*(hasTrait(p,d,'loyal')?0.85:1));   // (a loyal servant renews for less)
@@ -14836,25 +14927,36 @@
     if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
     p.wage=mgRenewWage(d,p); p.until=d.season+years; p.mor=clamp((p.mor??MOR0)+0.5,1,10); mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
 
-  // ---- scouting: a man at another club shows a rating range until he's scouted ----
-  function mgKnown(d,p){ return !!(d.scouted&&d.scouted[p.id]); }
-  function mgRange(d,p){ const w=MG_SCOUT_W[Math.max(1,lvOf(d,'scouting'))], off=(Math.imul(p.id+d.season*7919,2654435761)>>>0)%(2*w+1);
+  // ---- scouting: what you know of a man at another club (d.kn, 0 to 3) ----
+  // 0, a rating range. 1 (a report), his exact rating and attributes, and the league his potential could take him to.
+  // 2, his potential within ten points, and the two things about his character that stand out most; 3, within six,
+  // and four. A report takes him up a level, as far as your scouts' house's level; playing against him, half of one a
+  // game, up to 2 (short of a report, it narrows his rating's range); a man who's played for you is a 2 when he goes.
+  // A report loses a level when the season ends.
+  // Nobody's exact potential is known -- your own men's neither: the coaches give it a range (see HIS STORY).
+  const knOf=(d,p)=>(d.kn&&d.kn[p.id])||0;
+  function mgKnown(d,p){ return knOf(d,p)>=1; }
+  function knUp(d,p,to,cap){ if(knOf(d,p)<cap){ d.kn=d.kn||{}; d.kn[p.id]=Math.round(Math.min(cap,to)*100)/100; } }
+  function knAge(d){ const K=d.kn||{}; for(const id in K){ K[id]=Math.round((K[id]-1)*100)/100; if(K[id]<=0) delete K[id]; } d.kn=K; }   // (the season's end)
+  const knTag=(d,p)=>{ const k=knOf(d,p); return k>=1?'<span class="mgTag on">SCOUTED'+(k>=3?' ★★':k>=2?' ★':'')+'</span>':''; };
+  function mgRange(d,p){ const w=Math.max(1,Math.round(MG_SCOUT_W[Math.max(1,lvOf(d,'scouting'))]*(1-Math.min(1,knOf(d,p))))), off=(Math.imul(p.id+d.season*7919,2654435761)>>>0)%(2*w+1);
     const lo=clamp(p.ovr-off,30,95); return [lo,lo+2*w]; }
   function mgScoutCost(d,p,club){ return MG_SCOUT_COST[club?club.tier:mgLevelTier(p.ovr)]; }
-  function mgScout(d,pid){ if(!lvOf(d,'scouting')) return 'Build the scouts’ house first.'; const f=mgFind(d,pid); if(!f) return 'He has gone.'; if(mgKnown(d,f.p)) return null;
+  function mgScout(d,pid){ const L=lvOf(d,'scouting'); if(!L) return 'Build the scouts’ house first.'; const f=mgFind(d,pid); if(!f) return 'He has gone.';
+    const k=knOf(d,f.p); if(k>=L) return L<3?'A bigger scouts’ house would find out more.':'Your scouts know all there is.';
     const cost=mgScoutCost(d,f.p,f.club); if(cost>d.budget) return 'Scouting him costs '+money(cost)+'.';
-    d.budget-=cost; d.scouted=d.scouted||{}; d.scouted[pid]=1; return null; }
+    d.budget-=cost; knUp(d,f.p,Math.floor(k)+1,L); return null; }
   // an assignment: every man in one position across a league
   function mgScoutGroup(d,tier,role){ if(!lvOf(d,'scouting')) return 'Build the scouts’ house first.'; const cost=MG_SCOUT_COST[tier]*6; if(cost>d.budget) return 'That assignment costs '+money(cost)+'.';
-    d.budget-=cost; d.scouted=d.scouted||{}; let n=0;
-    for(const id of d.div[tier]){ if(id===d.clubId) continue; for(const p of mgPlayersOf(d,id)) if(role==='ALL'||p.role===role){ d.scouted[p.id]=1; n++; } }
+    d.budget-=cost; const L=lvOf(d,'scouting'); let n=0;
+    for(const id of d.div[tier]){ if(id===d.clubId) continue; for(const p of mgPlayersOf(d,id)) if(role==='ALL'||p.role===role){ knUp(d,p,Math.floor(knOf(d,p))+1,L); n++; } }
     mgNews(d,'Your scouts report on '+n+' '+(role==='ALL'?'players':role+'s')+' in '+MG_LEAGUE[tier]+'.'); return null; }
 
   // ---- your academy ----
   function mgPromoteYouth(d,pid){ const i=(d.youth||[]).findIndex(p=>p.id===pid); if(i<0) return 'He has gone.';
     if(d.roster.length>=MG_MAX) return 'Your squad is full ('+MG_MAX+' players).';
     const p=d.youth.splice(i,1)[0]; p.wage=Math.max(30,mgRound(mgWage(p.ovr)*0.8)); p.until=d.season+2; mgRosterAdd(d,p);
-    mgNews(d,p.name+' ('+p.age+') steps up from the academy to the first team.'); return null; }
+    mgNews(d,p.name+' ('+p.age+') steps up from the academy to the first team.'); careerEv(d,p,'Up from the academy'); return null; }
   function mgReleaseYouth(d,pid){ d.youth=(d.youth||[]).filter(p=>p.id!==pid); }
 
   // ---- the computer clubs in a window: offers for your men, and deals between themselves ----
@@ -14871,7 +14973,6 @@
   function mgMoveAi(d,p,from,to,fee){
     if(from){ from.players.splice(from.players.indexOf(p),1); from.budget+=fee; } else d.world.free.splice(d.world.free.indexOf(p),1);
     to.budget-=fee; p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(to.players,p); to.players.push(p);
-    delete (d.scouted||{})[p.id];
     if(to.tier===d.tier||(from&&from.tier===d.tier)) mgNews(d,to.name+' sign '+p.name+(from?' from '+from.name+' for '+money(fee):' on a free')+'.'); }
   // the computer clubs' business among themselves (and with the free agents), a week's worth (k as for the bids)
   function mgAiTrades(d,k){ const clubs=mgAiClubs(d), F=d.world.free;
@@ -15701,7 +15802,7 @@
     else h+='<div class="stadWhat">It’s the best there is: everything’s open to you.</div></div></div>';
     h+='<div class="bpSect">EACH CLUBHOUSE</div><div class="bpLvl">';
     for(let k=1;k<CLUB_LV.length;k++) h+='<b class="'+(k===L?'now':'')+'">'+(k===L?'▶ ':'')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+(k===L?'now':'')+'">'+(k===1?'the stadium to '+STAD_CL.lastIndexOf(1)+', the physio, the transfer market':clubBringsTxt(k))+'</span>';
-    h+='</div><div class="bpSect">YOUR CAREER</div>'+mgProfileTab(d)+mgHistoryTab(d);
+    h+='</div><div class="bpSect">YOUR CAREER</div>'+mgProfileTab(d)+mgHistoryTab(d)+mgRecordsHtml(d);
     return h; }
   // ---- the training pitch's level: what each brings ----
   const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
@@ -15800,10 +15901,12 @@
     return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">THE WINDOW IS OPEN · '+(w>1?w+' WEEKS LEFT':'ITS LAST WEEK')+'</div>'
     :'<div class="mgSum">The transfer window is shut until the summer. Free agents can sign any time.</div>'; }
   // ONE MAN, CLOSE UP, as his tactics card is: his figure, name, own position, style, age, stars, rating and potential on
-  // top; one small button under his rating turns it over, his ratings (the six) or his deal (what he earns or costs, and
-  // what you can do about him, each on a line). It never goes over pages, and there's no long text on it.
+  // top; one small button under his rating turns it over: his ratings (the six), his deal (what he earns or costs, and
+  // what you can do about him, each on a line), his career (see HIS STORY). It never goes over pages, and there's no
+  // long text on it.
   let mgSide='rate';   // the side it shows -- it stays as you go from man to man
-  const mgFlip=()=>mgSide==='rate'?'<button class="cardFlip" data-mside="deal">DEAL ▶</button>':'<button class="cardFlip" data-mside="rate">RATINGS ▶</button>';
+  const MG_SIDES={rate:['deal','DEAL ▶'],deal:['career','CAREER ▶'],career:['rate','RATINGS ▶']};   // (each side's button: the next one)
+  const mgFlip=()=>{ const n=MG_SIDES[mgSide]||MG_SIDES.rate; return '<button class="cardFlip" data-mside="'+n[0]+'">'+n[1]+'</button>'; };
   const mgSixUnknown=p=>'<div class="six">'+(p.role==='GK'?SIX_GK:SIX).map(([k])=>'<span class="sixC unk"><b>?</b><i>'+k+'</i></span>').join('')+'</div>';
   const mgFact=(k,v,c,wide)=>'<div class="mgFact'+(wide?' wide':'')+'"><span>'+k+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+v+'</b></div>';
   const mgActRow=(label,ctl)=>'<div class="mgAct">'+(label?'<span class="mgActL">'+label+'</span>':'')+'<span class="mgActC">'+ctl+'</span></div>';   // (its controls wrap together)
@@ -15814,16 +15917,17 @@
     const where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier], wont=!f.mine&&!f.youth&&!!mgWontCome(d,p);
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
     const ciNow=f.mine&&MGUI.ci&&MGUI.ci.pid===p.id, ciBtn=f.mine&&!ciNow&&ciLeft(d)?'<button class="cardCi" data-mg="checkin" data-pid="'+p.id+'">CHECK IN</button>':'';   // (a Monday: see CHECKING ON HIM)
-    let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+    let h='<div class="mgCard" data-side="'+mgSide+'"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
       +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+(f.mine&&d.cap===p.id?' (C)':f.mine&&d.vice===p.id?' (VC)':'')+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+ciBtn+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div>'+mgFlip()+'</div></div>';
+      +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+potTxt(d,p,f,true)+'</div>'+mgFlip()+'</div></div>';
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
     if(f.mine){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
-    if(mgSide==='rate') h+=known?(ciNow?'<div class="ciBox">'+MGUI.ci.lines.map(l=>'<div>'+mgEsc(l)+'</div>').join('')+'</div>':sixHtml(mgStats(p),p.role))+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+((p.role==='GK'||p.role==='DEF')?mgFact('ASSISTS · CS',(p.as||0)+' · '+(p.cs||0)):mgFact('ASSISTS',String(p.as||0)))   // (his season, in short facts: a card's text stays short)
+    if(mgSide==='career') h+=mgCareerSide(d,p,f);
+    else if(mgSide==='rate') h+=known?(ciNow?'<div class="ciBox">'+MGUI.ci.lines.map(l=>'<div>'+mgEsc(l)+'</div>').join('')+'</div>':sixHtml(mgStats(p),p.role))+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+((p.role==='GK'||p.role==='DEF')?mgFact('ASSISTS · CS',(p.as||0)+' · '+(p.cs||0)):mgFact('ASSISTS',String(p.as||0)))   // (his season, in short facts: a card's text stays short)
         +mgFact('RATING · FORM',(p.rn?(p.rs/p.rn).toFixed(1):'—')+' · '+(p.fm!=null?p.fm.toFixed(1):'—'),p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'')
-        +mgFact('FOCUS','<button class="mgMini" data-mg="focus" data-pid="'+p.id+'">'+(p.fo&&DEV_FOCUS[p.fo]?DEV_FOCUS[p.fo]:'BALANCED')+'</button>')+'</div>':'')
+        +mgFact('FOCUS','<button class="mgMini" data-mg="focus" data-pid="'+p.id+'">'+(p.fo&&DEV_FOCUS[p.fo]?DEV_FOCUS[p.fo]:'BALANCED')+'</button>')+'</div>':f.youth?'':mgScoutFacts(d,p,f))
       :mgSixUnknown(p)+mgScoutBtn(d,p,f.club||null);
     else if(f.mine) h+=ctx==='sale'?mgSaleActions(d,p):mgContractActions(d,p);
     else if(f.youth) h+='<div class="mgFacts">'+mgFact('HE’D EARN',money(Math.max(30,mgRound(mgWage(p.ovr)*0.8)))+'/wk','',true)+'</div>'
@@ -15878,7 +15982,7 @@
       h+='<div class="bpSect">'+{GK:'GOALKEEPERS',DEF:'DEFENDERS',MID:'MIDFIELDERS',ATT:'FORWARDS'}[role]+'</div><div class="mgList">';
       for(const p of L){ const tags=(xi.has(p)?'<span class="mgTag on">XI</span>':subs.has(p)?'<span class="mgTag on">SUB</span>':'')+(d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':'')
           +((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'');
-        h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
+        h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+potTxt(d,p,{mine:true},true)+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
       h+='</div>'; }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
     return mgPanes('<div class="sqList">'+h+'</div>', sel?'<button class="mgBtn sqBack" data-mg="sel" data-pid="'+MGUI.sel+'">◀ THE TEAM</button>'+mgCard(d,MGUI.sel):'', '', sel?'':mgSquadPitch(d)); }
@@ -15924,12 +16028,12 @@
     const L=[]; for(const id of d.div[t]){ if(id===d.clubId) continue; const c=d.world.clubs[id]; for(const p of c.players) if(MGUI.role==='ALL'||p.role===MGUI.role) L.push([p,c]); }
     L.sort((a,b)=>mgSortOvr(d,b[0])-mgSortOvr(d,a[0]));
     h+='<div class="mgList">';
-    for(const [p,c] of L) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)});
+    for(const [p,c] of L) h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)});
     return mgPanes(h+'</div>', card); }
   function mgFreeTab(d){ let h='<div class="mgSum">Without a club: mostly old hands. The young ask more, and a fee to sign.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
     const L=d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a));
-    h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgFreeAskSeen(d,p).wage)+'/wk', sel:MGUI.sel===p.id, tags:(mgKnown(d,p)?'<span class="mgTag on">SCOUTED</span>':'')+mgTooBig(d,p)})).join('')+'</div>';
+    h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgFreeAskSeen(d,p).wage)+'/wk', sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)})).join('')+'</div>';
     return mgPanes(h, card); }
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
@@ -15944,18 +16048,20 @@
       tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
 
   // ---- scouting ----
-  function mgReportsTab(d){ const L=Object.keys(d.scouted||{}).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
-    let h='<div class="mgSum">'+L.length+' scouted this season. Reports go out of date when the season ends.</div>';
+  function mgReportsTab(d){ const K=d.kn||{}, L=Object.keys(K).filter(id=>K[id]>=1).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
+    let h='<div class="mgSum">'+L.length+' scouted. A report loses a level when the season ends.</div>';
     if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
-    return mgPanes(h+'<div class="mgList">'+L.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+f.p.pot+'</i>', club:f.club?f.club.code:'FREE',
+    return mgPanes(h+'<div class="mgList">'+L.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+potTxt(d,f.p,f,true)+'</i>', club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
       right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
       MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
-  function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: they report on every player in one position, and the reports last until the end of the season.</div>';
+  function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes.</div>';
     for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · '+money(c)+' EACH</div><div class="mgBtns">';
       for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>';
       h+='</div>'; }
     return h; }
-  function mgNetworkTab(d){ const L=lvOf(d,'scouting'); let h=finRow('Scouting network','level '+L+' of 3',true)+finRow('Unscouted ratings are within',MG_SCOUT_W[L]*2+' points');
+  const SCOUT_TELLS={1:'his rating; where he could get to',2:'his potential within ten; his character',3:'his potential within six; more of him'};
+  function mgNetworkTab(d){ const L=lvOf(d,'scouting'); let h=finRow('Scouting network','level '+L+' of 3',true)+finRow('Unscouted ratings are within',MG_SCOUT_W[L]*2+' points')
+      +finRow('Reports, at best',SCOUT_TELLS[L]||'—');
     if(L<3){ const c=bldCost('scouting',L+1), need=clubNeed('scouting',L+1), why=bldBlock(d,'scouting');
       if(lvOf(d,'club')<need) h+='<div class="stadWhat">Level '+(L+1)+' needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').</div>';
       h+='<button class="stadBtn" data-mg="up" data-b="scouting"'+(why?' disabled':'')+'>Grow the network to level '+(L+1)+' (ranges of '+MG_SCOUT_W[L+1]*2+')  —  '+money(c)+'</button>'; }
@@ -15964,7 +16070,7 @@
   // ---- the academy ----
   function mgProspectsTab(d){ const Y=d.youth||[]; let h='<div class="mgHint">Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.</div>';
     if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
-    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>b.pot-a.pot).map(p=>mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+p.pot+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
+    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+potTxt(d,p,{youth:true},true)+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
       MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgFacilitiesTab(d){ const L=lvOf(d,'academy'); let h=finRow('Academy','level '+L+' of 3',true)+finRow('Intake every summer',(2+L)+' youngsters');
     if(L<3){ const c=bldCost('academy',L+1), need=clubNeed('academy',L+1), why=bldBlock(d,'academy');
@@ -16004,9 +16110,10 @@
     const names=a=>a.length?a.map(mgEsc).join(', '):'—';
     let h='<div class="mrHead"><div class="mrLabel">SEASON '+R.season+' · '+MG_LEAGUE[R.tier].toUpperCase()+'</div><div class="mrScore" style="color:'+(R.up||R.pos===1?'var(--good)':R.down?'var(--bad)':'var(--ink)')+'">'+ordinal(R.pos)+'</div>'
       +'<div class="mrLabel" style="font-size:13px;color:var(--ink)">'+R.result+'</div></div>';
-    h+=finRow('Prize money','+'+money(R.prize),true)+(R.topScorer?finRow('Top scorer',mgEsc(R.topScorer.name)+' · '+R.topScorer.goals+' goals'):'');
+    h+=finRow('Prize money','+'+money(R.prize),true)+(R.topScorer?finRow('Your top scorer',mgEsc(R.topScorer.name)+' · '+R.topScorer.goals+' goals'):'');
     for(const [k,run] of R.cups||[]) h+=finRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),false,/WINNERS/.test(run)?'var(--good)':'var(--ink)');
     h+=finRow('Next season',MG_LEAGUE[R.tier+(R.up?1:R.down?-1:0)],true,R.up?'var(--good)':R.down?'var(--bad)':'var(--ink)');
+    if((R.awards||[]).length){ h+='<div class="bpSect">THE AWARDS · '+MG_LEAGUE[R.tier].toUpperCase()+'</div>'; for(const a of R.awards) h+=finRow(a.t,mgEsc(a.name)+' ('+mgEsc(a.code)+') · '+a.v,false,a.you?'var(--good)':'var(--ink)'); }
     h+='<div class="bpSect">YOUR SQUAD, A YEAR OLDER</div>';
     for(const g of R.grew) h+=finRow(mgEsc(g.name),g.from+' → '+g.to,false,g.to>g.from?'var(--good)':'var(--bad)');
     if(!R.grew.length) h+='<div class="mgHint">Nobody changed.</div>';
@@ -16152,7 +16259,7 @@
   function showHubScreen(){ SCREEN='hub'; document.getElementById('stageWrap').classList.add('menuMode'); document.getElementById('careerHub').classList.add('show'); renderHub(); cpFit(); }
   function openHub(key){ const d=readSave(key); if(!d||d.kind!=='manager') return; mgMigrate(d); CAREER={key,data:d};
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
-  function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.scouted=d.scouted||{}; d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
+  function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.kn=d.kn||{}; for(const id in d.scouted||{}) d.kn[id]=Math.max(d.kn[id]||0,1); delete d.scouted; d.rec=d.rec||{}; d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
     if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0; d.tm=d.tm??MOR0; mgCaptains(d);
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
@@ -16236,7 +16343,8 @@
       case 'sign': { if(!MGUI.deal||MGUI.deal.pid!==pid) break; const err=mgSignDeal(d,pid,MGUI.deal.fee,MGUI.years||2); MGUI.deal=null; MGUI.bid=null;
         say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'signfree': { const err=mgSignFree(d,pid,MGUI.years||2); say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
-      case 'scout': { const err=mgScout(d,pid); say(err||'Scouted: here’s what he’s really like.',err?'var(--bad)':'var(--good)'); break; }
+      case 'scout': { const err=mgScout(d,pid), f=mgFind(d,pid), k=f?Math.floor(knOf(d,f.p)):0;
+        say(err||['Scouted.','Scouted: his rating, and the league he could reach.','A closer look: his potential, roughly, and his character.','A full report: his potential within six, and more of him.'][k]||'Scouted.',err?'var(--bad)':'var(--good)'); break; }
       case 'csel': MGUI.csel=MGUI.csel===+ds.cid?null:+ds.cid; break;
       case 'chire': { const err=mgHireCoach(d,+ds.cid); say(err||'He starts on Monday.',err?'var(--bad)':'var(--good)'); break; }
       case 'cfire': { const err=mgReleaseCoach(d,+ds.cid); say(err||'He has gone.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.csel=null; break; }
@@ -16409,7 +16517,7 @@
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,boards:0,ads:[],deals:{},bids:{}}, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
-      listed:{}, offers:[], offerSeq:0, bidMemo:{}, scouted:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
+      listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;

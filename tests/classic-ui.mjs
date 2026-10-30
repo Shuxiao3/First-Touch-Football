@@ -378,8 +378,8 @@ for(const [w, h] of SIZES){
   ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 
-// A MAN'S CARD IN A BUILDING (the squad, the market, the academy) never goes over pages, either side -- his ratings (a
-// category open) or his deal -- and has no long text on it; and a full squad's bench is its five on one line, the pitch
+// A MAN'S CARD IN A BUILDING (the squad, the market, the academy) never goes over pages, any side -- his ratings (a
+// category open), his deal or his career -- and has no long text on it; and a full squad's bench is its five on one line, the pitch
 // keeping its height, with everyone in the Selection tab's three columns, all on the screen -- on the shortest phone
 // (844x340) and the narrowest (640x360)
 for(const [w, h] of [[844, 340], [640, 360]]){
@@ -398,7 +398,8 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
     const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
     for(const id of ids){ await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(80);
-      for(const side of ['rate', 'deal']){ const fl = await page.$(`.mgPaneR [data-mside="${side}"]`); if(fl){ await fl.tap(); await page.waitForTimeout(60); }
+      for(const side of ['rate', 'deal', 'career']){   // (his card's three sides: its button turns it to the next)
+        for(let i = 0; i < 3 && await page.$eval('.mgPaneR .mgCard', c => c.dataset.side).catch(() => side) !== side; i++){ const fl = await page.$('.mgPaneR .cardFlip'); if(!fl) break; await fl.tap(); await page.waitForTimeout(60); }
         const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.cut.length || r.flips !== 1) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
         if(side === 'rate' && await page.$('.mgPaneR [data-six="DEF"]')){ await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(60);
           const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
@@ -407,7 +408,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     M.bldUp(d, 'market'); M.bldUp(d, 'academy'); d.lv.train = 4; d.budget = 1e6; M.mgSave(d); M.renderHub(); });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await walk('club', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
-  ok(views.length >= 20 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, either side, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
+  ok(views.length >= 30 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, any of its three sides, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
   await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
   const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
   const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);
