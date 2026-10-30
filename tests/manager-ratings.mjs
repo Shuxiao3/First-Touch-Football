@@ -84,7 +84,7 @@ const nm = await K(`CAREER.data.roster.find(p=>p.rn>0&&p.role!=='GK').name`);
 await page.click(`#bpBody .mgRow:has-text("${nm}")`); await page.waitForTimeout(150);
 const card = await page.innerText('#bpBody .mgCard').catch(() => '');
 info('his card: ' + card.split('\n').filter(l => /GAMES|ASSISTS|RATING|CLEAN|\d/.test(l)).slice(-8).join(' | '));
-ok(/GAMES · GOALS\s*\d+ · \d+/.test(card) && /ASSISTS\s*\d+/.test(card) && /RATING · FORM/.test(card) && /\d\.\d · \d\.\d/.test(card), 'his card: this season\'s games, goals and assists, his average rating and his form');
+ok(/GAMES · GOALS\s*\d+ · \d+/.test(card) && /ASSISTS( · CS)?\s*\d+/.test(card) && /RATING · FORM/.test(card) && /\d\.\d · \d\.\d/.test(card), 'his card: this season\'s games, goals and assists, his average rating and his form');
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(x=>x.rn>0); const R={grew:[],retired:[],expired:[],youthOut:[]}; mgAgeWorld(d,R); return { rn:p.rn, rs:p.rs, as:p.as, apps:p.apps, fm:p.fm!=null }; })()`);
 ok(r.rn === 0 && r.rs === 0 && r.as === 0 && r.apps === 0 && r.fm, 'a new season: the numbers start again (his form carries on)');
 

@@ -13898,18 +13898,20 @@
     const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
     p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
     const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
-    const T=clamp(x.T*(0.75+0.05*h.pro+(r()-0.5)*(10.5-h.pro)*0.04)*(p.mor!=null?0.85+0.03*p.mor:1),0,1.2);   // (a professional trains as well every week; the others come and go; his mood steadies or upsets it)
+    const tc=(0.75+0.05*h.pro+(r()-0.5)*(10.5-h.pro)*0.04)*(p.mor!=null?0.85+0.03*p.mor:1);   // (a professional trains as well every week; the others come and go; his mood steadies or upsets it)
+    const Tg=g=>clamp((x.Tg?(x.Tg[g]??x.Tg.tec):x.T)*tc,0,1.2);   // (his training, kind by kind: yours by the pitch and its coach -- see THE STAFF)
     const fm=p.fm??FORM_BASE, P=h.pro/10, F=clamp((fm-5)/3,0,1);   // (his form: see MATCH RATINGS)
-    const W=0.375*T+0.3125*M+0.1875*P+0.125*F, inF=W/0.69*(M>=0.75&&d&&hasTrait(p,d,'ambit')?1.1:1), lrF=0.55+0.09*h.lr, ageE=devLate(p)?p.age-3:p.age, pg0=pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0);
+    const amb=M>=0.75&&d&&hasTrait(p,d,'ambit')?1.1:1, WG={}, IG={}; for(const g of ['phy','tec','men','gk']){ WG[g]=0.375*Tg(g)+0.3125*M+0.1875*P+0.125*F; IG[g]=WG[g]/0.69*amb; }
+    const fo=p.fo&&DEV_FOCUS[p.fo]?p.fo:null, lrF=0.55+0.09*h.lr, ageE=devLate(p)?p.age-3:p.age, pg0=pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0);
     for(let i=0;i<DEV_KEYS.length;i++){ const k=DEV_KEYS[i], g=devGroup(k), room=(cl[k]-st[k])*2;
       let gain=0;
       if(room>0){ const back=st[k]<bs[k], ag=back?Math.max(devAgeGrow(g,g==='men'?p.age:ageE),0.6):devAgeGrow(g,g==='men'?p.age:ageE);
-        gain=DEV_RATE*(room+1)*ag*inF*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1); }
+        gain=DEV_RATE*(room+1)*ag*IG[g]*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1)*(fo?(g===fo?1.25:0.9):1); }   // (his focus: more there, a little less elsewhere)
       if(p.inj&&(g==='phy'||g==='tec')) gain*=0.3;   // (injured: rehab, not training)
       if(room>0&&k==='shotAcc'&&p.wg) gain+=0.05*Math.sqrt(p.wg);            // (his goals: a little more finishing, each worth less)
       if(room>0&&k==='composure'&&p.wb) gain+=0.04*Math.min(p.wb,4);         // (big games: a little more composure)
       let drain=devAgeDrop(g,p.age)+(g==='phy'?(p.decl||0):0);   // (p.decl: a bad injury past 28 -- his legs go sooner)
-      if(!p.inj&&W<0.48&&(g==='phy'||g==='tec')) drain+=(0.48-W)*1.2;    // (bad weeks' training: his sharpness and his legs go)
+      if(!p.inj&&WG[g]<0.48&&(g==='phy'||g==='tec')) drain+=(0.48-WG[g])*1.2;    // (bad weeks' training: his sharpness and his legs go)
       if(fm<5.8&&(g==='tec'||g==='men')) drain+=(5.8-fm)*0.06;              // (poor form: his touch, his reading of the game, his composure)
       if((p.mor??MOR0)<4&&(g==='tec'||g==='men')) drain+=(4-p.mor)*0.04;    // (low morale, the same)
       pg[i]+=gain-drain;
@@ -13924,13 +13926,13 @@
     const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99));
     return p.ovr-was; }
   // what a side's training is worth (0 to 1): yours by the training pitch's level; the computer's by its league
-  const devTrainYours=d=>0.55+0.1*Math.max(1,lvOf(d,'train')), devTrainAi=c=>0.6+0.07*(c.tier||1);
+  const devTrainAi=c=>0.6+0.07*(c.tier||1);   // (yours: devTrainYours, by the pitch and the coaches)
   // EVERY THIRD WEEK, everyone: your squad, your academy (no games: its level's worth), the computer clubs', the free
   // agents (no club: little training, no games). Your squad's movers make the news (one line).
   function mgDevelop(d){ const up=[], down=[];
-    for(const p of d.roster){ const dl=devTick(d,p,{T:devTrainYours(d),gw:d.gw||0}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
+    const TY=devTrainYours(d); for(const p of d.roster){ const dl=devTick(d,p,{Tg:TY,gw:d.gw||0}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
     d.gw=0; const al=lvOf(d,'academy');
-    for(const p of d.youth||[]) devTick(d,p,{T:0.6+0.1*al,M:0.45+0.08*al});
+    const yc=coachOf(d,'youth'); for(const p of d.youth||[]) devTick(d,p,{T:0.6+0.1*al+(yc?0.04*yc.r:0),M:0.45+0.08*al});   // (the youth coach's work)
     for(const c of mgAiClubs(d)){ const T=devTrainAi(c); for(const p of c.players) devTick(d,p,{T,gw:c.gw||0}); c.gw=0; }
     for(const p of d.world.free) devTick(d,p,{T:0.35,M:0.15});
     if(up.length||down.length){ up.sort((a,b)=>b[1]-a[1]); down.sort((a,b)=>a[1]-b[1]);
@@ -13978,6 +13980,44 @@
       const avg=xi.reduce((s,p)=>s+p.ovr,0)/Math.max(1,xi.length);
       for(const p of xi){ const g=p._g||0; delete p._g; mgRated(d,p,mSimRate(p,avg,res,g,gc),g,big,gc,yours); } };
     side(m[0],xh,m[2],m[3]); side(m[1],xa,m[3],m[2]); }
+
+  // ===== THE STAFF AND TRAINING FOCUS ==================================================================================
+  // Coaches: fitness (his legs and his stamina; fewer injuries, quicker recovery), technique (his touch), tactics (his
+  // reading of the game and his composure), goalkeeping (a keeper's work), and the academy's youth coach. One of each.
+  // The training pitch has a post for each of its levels (the youth coach's is the academy's). A coach is rated 1 to 10;
+  // the better he is the more he costs, and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 for
+  // League 2, 10 for the Premium League). Your training of each kind of attribute is the pitch's (0.58 + 0.07 a level)
+  // and its coach's (0.04 a point above 1; 1.15 at most) -- a level-1 pitch and no coaches trains as it always did; a
+  // coach never makes it worse. New men to hire
+  // come round every four weeks. A man's FOCUS (his card) puts his training on one kind: a quarter more there, a tenth
+  // less elsewhere.
+  const DEV_FOCUS={phy:'PHYSICAL',tec:'TECHNIQUE',men:'MENTAL',gk:'KEEPING'};
+  const STAFF_KIND={fit:{n:'fitness',g:'phy'},tec:{n:'technique',g:'tec'},tac:{n:'tactics',g:'men'},gk:{n:'goalkeeping',g:'gk'},youth:{n:'youth',g:null}};
+  const staffCap=d=>4+1.5*d.tier, staffWage=r=>mgRound(50*Math.pow(1.45,r-1));
+  const coachOf=(d,k)=>(d.staff||[]).find(c=>c.k===k)||null;
+  const staffPosts=d=>Math.max(1,lvOf(d,'train')), youthPost=d=>lvOf(d,'academy')?1:0;
+  function devTrainYours(d){ const L=Math.max(1,lvOf(d,'train')), base=0.58+0.07*L, o={};
+    for(const k of ['fit','tec','tac','gk']){ const c=coachOf(d,k); o[STAFF_KIND[k].g]=Math.min(1.15,base+(c?0.04*(c.r-1):0)); } return o; }
+  function staffMake(d){ const k=mgPick(['fit','fit','tec','tec','tac','tac','gk']), r=clamp(Math.round((1.6+d.tier*1.4+mgGauss()*1.6)*2)/2,1,10);
+    return {id:(d.staffSeq=(d.staffSeq||0)+1),name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST),k,r,wage:mgRound(staffWage(r)*(0.9+Math.random()*0.2))}; }
+  function staffCands(d){ if(!d.cand||(d.weeks||0)-(d.cand.w||0)>=4){ const L=[]; for(let i=0;i<6;i++) L.push(staffMake(d)); if(lvOf(d,'academy')){ const y=staffMake(d); y.k='youth'; L.push(y); } d.cand={w:d.weeks||0,list:L}; } return d.cand.list; }
+  function mgHireCoach(d,cid){ const c=staffCands(d).find(x=>x.id===cid); if(!c) return 'He has gone.'; d.staff=d.staff||[];
+    if(coachOf(d,c.k)) return 'You have a '+STAFF_KIND[c.k].n+' coach.';
+    if(c.k==='youth'?!youthPost(d):d.staff.filter(x=>x.k!=='youth').length>=staffPosts(d)) return c.k==='youth'?'That needs the academy.':'No post free: the training pitch has '+staffPosts(d)+'.';
+    if(c.r>staffCap(d)) return 'He won’t come to '+MG_LEAGUE[d.tier]+'.';
+    if(d.budget<c.wage*4) return 'Not enough budget.';
+    d.staff.push(c); d.cand.list=d.cand.list.filter(x=>x!==c); mgNews(d,c.name+' joins '+d.clubName+' as '+STAFF_KIND[c.k].n+' coach.'); return null; }
+  function mgReleaseCoach(d,cid){ const c=(d.staff||[]).find(x=>x.id===cid); if(!c) return 'He has gone.'; d.budget-=c.wage*4; d.staff=d.staff.filter(x=>x!==c); mgNews(d,c.name+' leaves '+d.clubName+'.'); return null; }
+  // THE STAFF TAB: your posts and who's in them, then the men to hire; the one picked on the right
+  function mgStaffTab(d){ const C=staffCands(d), S=d.staff||[], sel=MGUI.csel, row=(c,mine)=>'<button class="mgRow'+(sel===c.id?' on':'')+'" data-mg="csel" data-cid="'+c.id+'"><span class="pos">'+c.k.toUpperCase()+'</span>'
+      +'<span class="nm">'+mgEsc(c.name)+' <span class="sub">'+STAFF_KIND[c.k].n+'</span></span><span class="ovr">'+c.r.toFixed(1)+'</span><span class="amt">'+(mine?money(c.wage)+'/wk':c.r>staffCap(d)?'won’t come':money(c.wage)+'/wk')+'</span></button>';
+    let h='<div class="mgHint">'+S.filter(c=>c.k!=='youth').length+' of '+staffPosts(d)+' posts filled'+(youthPost(d)?' · youth '+(coachOf(d,'youth')?'1':'0')+' of 1':'')+'</div><div class="mgList">'+S.map(c=>row(c,true)).join('')+'</div>';
+    h+='<div class="mgHint">TO HIRE · new men every four weeks</div><div class="mgList">'+C.map(c=>row(c,false)).join('')+'</div>';
+    const c=S.find(x=>x.id===sel)||C.find(x=>x.id===sel), mine=c&&S.includes(c);
+    const card=c?'<div class="mgCard"><div class="mgCardName">'+mgEsc(c.name)+'</div><div class="mgCardSub">'+STAFF_KIND[c.k].n+' coach · rated '+c.r.toFixed(1)+'</div>'
+      +'<div class="mgFacts">'+mgFact('WAGE',money(c.wage)+'/wk')+mgFact('TRAINS',c.k==='youth'?'the academy':DEV_FOCUS[STAFF_KIND[c.k].g])+'</div>'
+      +'<div class="mgAct">'+(mine?'<button class="mgBtn warn" data-mg="cfire" data-cid="'+c.id+'">RELEASE ('+money(c.wage*4)+')</button>':'<button class="mgBtn go" data-mg="chire" data-cid="'+c.id+'">HIRE</button>')+'</div></div>':'';
+    return mgPanes(h,card||'<div class="mgPick0">Tap a coach to see him here.</div>'); }
 
   // ===== CHARACTER AND MORALE ===========================================================================================
   // HIS CHARACTER, in words, never numbers: traits drawn from his hidden values, each with a good side and a cost (see
@@ -14080,6 +14120,7 @@
     let r=INJ_GAME*share*(1+2*(1-condOf(p)))*(1+0.08*Math.max(0,(p.age||25)-29))*(1.6-0.12*h.du);
     if(p.injB>0) r*=2.5;
     if(!c&&hasTrait(p,d,'determ')) r*=1.1;   // (he pushes too hard)
+    if(!c){ const fc=coachOf(d,'fit'); if(fc) r*=1-0.025*fc.r; }   // (the fitness coach: fewer)
     return r*(1-0.06*injPhysio(d,p,c)); }
   function injKind(p,u,train){ const h=hvOf(p), x=u+((p.age||25)>=30?0.06:0)+(5.5-h.du)*0.02-(train?0.25:0);
     return x<0.55?'knock':x<0.85?'strain':x<0.97?'tear':'serious'; }
@@ -14225,7 +14266,7 @@
   function condCost(p){ return clamp(0.22+0.012*(10-(mgStats(p).stamina||5))+0.01*Math.max(0,(p.age||25)-30),0.2,0.4); }
   function condTire(p,share){ if(p&&share>0) p.cond=clamp(condOf(p)-condCost(p)*share,COND_MIN,1); }
   function mgRest(d,days){ if(!(days>0)) return; const back=(p,r)=>{ if(p.cond==null) return; p.cond=Math.min(1,p.cond+r*days); if(p.cond>=1) delete p.cond; };
-    const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
+    const fc=coachOf(d,'fit'), yr=(COND_DAY[lvOf(d,'physio')]||COND_DAY[0])*(fc?1+0.02*fc.r:1); for(const p of d.roster) back(p,yr);   // (the fitness coach: quicker back)
     for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
   function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
   // A COMPUTER CLUB'S EIGHT FOR A GAME: its best keeper and seven best outfielders on the day -- but not always. Up to
@@ -14871,7 +14912,7 @@
   function money(n){ n=Math.round(n||0); return (n<0?'-$':'$')+Math.abs(n).toLocaleString(); }
   function computeFinance(d){
     const tier=d.tier||1, ft=FIN_TIER[tier]||FIN_TIER[1];
-    const wageWk=d.roster?d.roster.reduce((a,p)=>a+(p.wage||0),0):(d.wageWk||0);
+    const wageWk=(d.roster?d.roster.reduce((a,p)=>a+(p.wage||0),0):(d.wageWk||0))+(d.staff||[]).reduce((a,c)=>a+(c.wage||0),0);   // (and the coaches')
     const sponsorWk=d.sponsorWk!=null?d.sponsorWk:ft.sponsor;   // (the club's partners: local firms, by the league)
     const broadcastWk=broadcastFor(d);
     const capacity=d.stadium?STAD_LEVELS[d.stadium.lvl].cap:(d.capacity!=null?d.capacity:ft.capacity);
@@ -15563,7 +15604,7 @@
   // ---- the buildings: each door opens one of these screens ----
   const MG_BLDGS={
     club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
-    train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take, and your subs', tabs:['Tactics','Selection','Subs','Pitch']},
+    train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take, your subs and your coaches', tabs:['Tactics','Selection','Subs','Staff','Pitch']},
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'keeps your players going', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
@@ -15668,7 +15709,7 @@
       i=[...new Set(Object.keys(TRAIN_INSTR).filter(k=>TRAIN_INSTR[k]===lv&&k!=='gkPass').map(k=>INSTR[k].lbl.toLowerCase()))];
     return [f.join(', '), andList(s), i.length?andList(i)+' instructions':lv===1?'the keeper’s pass':''].filter(Boolean).join(' · '); }
   function mgTrainTab(d){ return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.train[lvOf(d,'train')],'train'+lvOf(d,'train'))
-      +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level opens more shapes, styles and instructions for your side.</div></div></div>'
+      +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level opens more shapes, styles and instructions, and a post for a coach (Staff).</div></div></div>'
       +lvlRows(d,'train',4,trainAdds)+lvlNext(d,'train','BUILD IT UP'); }   // (the levels and the price over pages, if they must)
   // ---- the physio ----
   const PHYSIO_HT=[25,35,45,55,65], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];
@@ -15780,9 +15821,9 @@
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div>'+mgFlip()+'</div></div>';
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
     if(f.mine){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
-    if(mgSide==='rate') h+=known?(ciNow?'<div class="ciBox">'+MGUI.ci.lines.map(l=>'<div>'+mgEsc(l)+'</div>').join('')+'</div>':sixHtml(mgStats(p),p.role))+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+mgFact('ASSISTS',String(p.as||0))   // (his season, in short facts: a card's text stays short)
-        +((p.role==='GK'||p.role==='DEF')?mgFact('CLEAN SHEETS',String(p.cs||0)):'')
-        +mgFact('RATING · FORM',(p.rn?(p.rs/p.rn).toFixed(1):'—')+' · '+(p.fm!=null?p.fm.toFixed(1):'—'),p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'',!(p.role==='GK'||p.role==='DEF'))+'</div>':'')
+    if(mgSide==='rate') h+=known?(ciNow?'<div class="ciBox">'+MGUI.ci.lines.map(l=>'<div>'+mgEsc(l)+'</div>').join('')+'</div>':sixHtml(mgStats(p),p.role))+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+((p.role==='GK'||p.role==='DEF')?mgFact('ASSISTS · CS',(p.as||0)+' · '+(p.cs||0)):mgFact('ASSISTS',String(p.as||0)))   // (his season, in short facts: a card's text stays short)
+        +mgFact('RATING · FORM',(p.rn?(p.rs/p.rn).toFixed(1):'—')+' · '+(p.fm!=null?p.fm.toFixed(1):'—'),p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'')
+        +mgFact('FOCUS','<button class="mgMini" data-mg="focus" data-pid="'+p.id+'">'+(p.fo&&DEV_FOCUS[p.fo]?DEV_FOCUS[p.fo]:'BALANCED')+'</button>')+'</div>':'')
       :mgSixUnknown(p)+mgScoutBtn(d,p,f.club||null);
     else if(f.mine) h+=ctx==='sale'?mgSaleActions(d,p):mgContractActions(d,p);
     else if(f.youth) h+='<div class="mgFacts">'+mgFact('HE’D EARN',money(Math.max(30,mgRound(mgWage(p.ovr)*0.8)))+'/wk','',true)+'</div>'
@@ -16161,7 +16202,7 @@
     const t=b.tabs?(curTab[id]||b.tabs[0]):null;
     if(id==='club') h+=t==='Squad'?mgSquadTab(d):t==='News'?mgHeadlinesTab(d):t==='League'?mgTablesTab(d)+mgScorersTab(d)
       :t==='Fixtures'?mgFixturesTab(d)+'<div class="bpSect">THE RESULTS</div>'+mgResultsTab(d):mgClubTab(d);
-    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):t==='Subs'?mgSubsTab(d):renderTactics(d,tacPhase);
+    else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):t==='Subs'?mgSubsTab(d):t==='Staff'?mgStaffTab(d):renderTactics(d,tacPhase);
     else if(id==='physio') h+=mgPhysioBody(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
@@ -16196,6 +16237,10 @@
         say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'signfree': { const err=mgSignFree(d,pid,MGUI.years||2); say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'scout': { const err=mgScout(d,pid); say(err||'Scouted: here’s what he’s really like.',err?'var(--bad)':'var(--good)'); break; }
+      case 'csel': MGUI.csel=MGUI.csel===+ds.cid?null:+ds.cid; break;
+      case 'chire': { const err=mgHireCoach(d,+ds.cid); say(err||'He starts on Monday.',err?'var(--bad)':'var(--good)'); break; }
+      case 'cfire': { const err=mgReleaseCoach(d,+ds.cid); say(err||'He has gone.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.csel=null; break; }
+      case 'focus': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const order=[null,'phy','tec','men'].concat(p.role==='GK'?['gk']:[]), i=order.indexOf(p.fo??null); p.fo=order[(i+1)%order.length]; break; }
       case 'checkin': { const r=mgCheckIn(d,pid); if(r.err) say(r.err,'var(--bad)'); else MGUI.ci={pid,lines:r.lines}; break; }
       case 'cap': case 'vice': { const err=mgSetCaptain(d,pid,a==='vice'); say(err||'Done.',err?'var(--bad)':'var(--good)'); break; }
       case 'renew': { const err=mgRenew(d,d.roster.findIndex(p=>p.id===pid),MGUI.years||2); say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
