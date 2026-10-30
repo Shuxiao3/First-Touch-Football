@@ -1056,27 +1056,33 @@ The same game played like any other football game. It's a copy of `index.html` w
       youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
       season; from your second the news says when one goes (in the first, every debut would be one).
   - **The staff and training focus.**
-    - **Coaches** each develop one kind of attribute: fitness the physical ones (speed, acceleration, agility,
-      stamina, strength), technique the technical ones (ball control, dribbling, passing, crossing, curve, shot power
-      and accuracy, long shots, heading, tackling, sliding), tactics the mental ones (Off IQ, Def IQ, composure,
-      interceptions), goalkeeping a keeper's (reflexes, reach, diving, distribution), and the academy's youth coach
-      its lads -- one of each. The training pitch
-      has a post for each of its levels (one at 1, four at 4); the youth coach has the academy's own post. The
-      Training building's **Staff** tab shows your posts and who's in them, and six men to hire (and a youth coach,
-      with an academy), new ones every four weeks.
+    - **Five coaches, a post for each from the start**, so it's never a choice of which -- only who's the best you
+      can get for each. Each develops one field: **fitness** (speed, acceleration, agility, stamina, strength),
+      **technical** (ball control, dribbling, passing, crossing, curve), **finishing** (shot accuracy and power, long
+      shots, heading, Off IQ, composure), **defending** (tackling, sliding, interceptions, Def IQ) and
+      **goalkeeping** (reflexes, reach, diving, distribution, a keeper's speed). With an academy there's a youth
+      coach too, in its own post. The Training building's **Staff** tab has a line for each post (vacant till
+      filled) and two men to hire for each (and a youth coach), new ones every four weeks.
     - **A coach** is rated 1 to 10 in half points; the better he is the more he costs (about $50 a week for a 1,
       $220 for a 5, $1,400 for a 10), and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 in
-      League 2, 10 in the Premium League). Hiring needs a free post and four weeks' wages in the budget; releasing
-      one pays him four weeks. Their wages go on the weekly bill with the players'.
-    - **What they do**: your training of each kind of attribute is the pitch's (0.58 + 0.07 a level: 0.65 at level
-      1, 0.86 at 4) and its coach's (0.04 a point above 1; 1.15 at most) -- a level-1 pitch and no coaches trains as
-      it always did, and a coach never makes it worse. A technique coach rated 8 at a level-4 pitch: 1.14 for the
-      touch, 0.86 for the rest. The youth coach makes a better academy (0.04 a point on its training). Coaches develop
-      players and nothing else: stamina on the day and injuries are the physio's (see **Injuries** and **The
-      campus**). A computer club trains by its league, as before.
-    - **A man's FOCUS** (RATINGS side of his card, a tap a step: BALANCED, PHYSICAL, TECHNIQUE, MENTAL, and a
-      keeper's KEEPING) puts his training on one kind: a quarter more there, a tenth less on the rest. His card's
-      season facts make room for it: ASSISTS · CS for a defender or keeper, RATING · FORM beside FOCUS.
+      League 2, 10 in the Premium League). Hiring needs the post empty (release the man in it first) and four
+      weeks' wages in the budget; releasing one pays him four weeks. Their wages go on the weekly bill.
+    - **What he's good and poor at**: each is strong in some of his field and weak in some of it, by his rating --
+      up to 3, two weak spots and nothing special; 4, one weak spot; 5, one of each; 6, one strength; 7 and 8, two
+      strengths; 9 and 10, three and no weak spot. His card says which (GOOD AT, POOR AT).
+    - **What they do**: your training of each attribute is the pitch's (0.58 + 0.07 a level: 0.65 at level 1, 0.86
+      at 4) and its coach's: 0.04 a point above 1 on each attribute of his field, a strength half as well again, a
+      weak spot not at all (1.3 at most). A level-1 pitch and no coaches trains as it always did, and a coach never
+      makes it worse. A finishing coach rated 8 at a level-4 pitch: 1.14 for shooting, Off IQ and composure, 1.28 for
+      his two strengths, 0.86 for everything else. The youth coach makes a better academy (0.04 a point on its
+      training). Coaches develop players and nothing else: stamina on the day and injuries are the physio's (see
+      **Injuries** and **The campus**). A computer club trains by its league, as before.
+    - **A man's FOCUS** (RATINGS side of his card, a tap a step: BALANCED, FITNESS, TECHNICAL, FINISHING, DEFENDING;
+      a keeper's BALANCED, FITNESS, KEEPING) puts his training on one coach's field: a quarter more there, a tenth
+      less on the rest. His card's season facts make room for it: ASSISTS · CS for a defender or keeper, RATING ·
+      FORM beside FOCUS.
+    - **A career saved before**: its tactics coach becomes the defending coach, every coach gets what he's good and
+      poor at, the men to hire are made again, and a focus on PHYSICAL becomes FITNESS (on MENTAL, BALANCED).
   - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
     the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
     too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,
@@ -1152,7 +1158,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     meter; when it fills he goes up half a point, when it empties he drops half a point. What you see is what plays.
     - **What fills it**: the room under the attribute's ceiling (his potential, shaped round his own strengths: he
       can reach it, never pass it, and growth slows as he gets near), his age, how good his training is (yours by
-      the training pitch's level and its coaches, kind by kind, and his focus: see THE STAFF AND TRAINING FOCUS; a
+      the training pitch's level and its coaches, attribute by attribute, and his focus: see THE STAFF AND TRAINING FOCUS; a
       computer club's by its league), how much he plays (his share of his side's games,
       with diminishing returns: half the games is three quarters of the good of all of them), his professionalism,
       how quickly he learns, how much the attribute matters where and how he plays (his role and his style: nobody
