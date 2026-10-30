@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__K={ ev:s=>eval(s) };\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgPlay, mgNextDay, mgNextGame, ensureLineup, mgSave};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgPlay, mgForward, mgNextGame, ensureLineup, mgSave};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-qsubs-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -140,9 +140,9 @@ ok(T3.plan === JSON.stringify([{ off: x1, on: b2 }, { off: x4, on: b3i }]), '...
 await pc.click('#bpBody .qpX >> nth=0'); await pc.waitForTimeout(80); const T4 = await tab();
 await tapRow('xi', 1); await tapRow('bench', 2); const T5 = await tab();
 ok(T4.plan === JSON.stringify([{ off: x4, on: b3i }]) && T5.plan === JSON.stringify([{ off: x4, on: b3i }, { off: x1, on: b2 }]), '✕ takes a pair off, and it can be made again');
-// the match: days on to the first game (a new career starts in the summer), the plan as it was, then kick-off
+// the match: weeks on to the first game (a new career starts in pre-season), the plan as it was, then kick-off
 await pc.click('#bldgPanel .bpTopBack'); await pc.waitForTimeout(100);
-const kept = await pc.evaluate(() => { const d = __MG.d, was = JSON.stringify(d.qsubs); let n = 0; while(!__MG.mgNextGame(d) && n++ < 400) __MG.mgNextDay(d); __MG.mgSave(d);
+const kept = await pc.evaluate(() => { const d = __MG.d, was = JSON.stringify(d.qsubs); let n = 0; while(!__MG.mgNextGame(d) && n++ < 400) __MG.mgForward(d); __MG.mgSave(d);
   return { days: n, same: JSON.stringify(d.qsubs) === was }; });
 await pc.evaluate(() => __MG.mgPlay(__MG.d)); await pc.waitForTimeout(1200);
 ok(kept.same && await pc.evaluate(() => window.__K.ev("SCREEN==='match'&&!!careerFix")), `the plan is kept with the career (${kept.days} days on to the first game), and it's a career match`);

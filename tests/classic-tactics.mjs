@@ -224,7 +224,7 @@ ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.06, 'who defends where: h
 
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------
 await page.click('#bldgPanel .bpTopBack');
-for(let i = 0; i < 6 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(40); }
+for(let i = 0; i < 8 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(40); }
 await page.evaluate(id => { window.__S.d.roster.find(q => q.id === id).cond = 0.6; }, d.roster[posRi.st].id);   // (the striker 60% fit: a game too many)
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(600);
 const ids = { st: d.roster[posRi.st].id, cb: d.roster[posRi.cb].id, cm: d.roster[posRi.cm].id };

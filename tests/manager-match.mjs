@@ -12,7 +12,7 @@ await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 await page.emulateMedia({ reducedMotion: 'reduce' });   // (the days just turn: NEXT DAY's sunset is manager-career.mjs's)
-for(let i = 0; i < 6 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(50); }
+for(let i = 0; i < 8 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(50); }
 info(await page.textContent('#chBottom'));
 
 const d0 = await page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));

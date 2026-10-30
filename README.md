@@ -936,8 +936,18 @@ The same game played like any other football game. It's a copy of `index.html` w
   least; eight start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
   **Selection**). It was fifteen at most, with a bench of four. The game is buying and selling players:
   nobody's stats are built up by hand.
-  - **The season.** 26 matchdays, home and away. You PLAY each one (the live match, in your colours, with the home
-    side in its home kit) or SIMULATE it. The top two go up. 3rd to 6th play off for a third place: one-game semis
+  - **The season runs a week at a time.** Three weeks of pre-season (no games), then 26 league weeks with a league
+    game every Saturday, home and away -- in some weeks a cup game on the Wednesday before it, never in the league's
+    first three weeks -- a week's winter break after week 13, the playoffs for those in them, and the season review.
+    - **Each week starts on a Monday**: your decisions (your team and tactics in Training, transfers while the window's
+      open, the clubhouse, the buildings; more to come), then FORWARD TO MATCHDAY (NEXT WEEK in a week without a game,
+      START THE SEASON after pre-season, BACK TO THE LEAGUE after the winter break). On the matchday's morning you PLAY
+      it (the live match, in your colours, with the home side in its home kit) or SIMULATE it, and after it you're on
+      the next Monday. In a week with a Wednesday cup game you go from it to Saturday morning (your team can still
+      change, for tired legs), then to Monday. League 2 has no cups, so never two games in a week.
+    - The days between go by on their own: the other clubs' games, your men getting their legs back. The money still
+      moves once a league game, as it did (a week without one costs and earns nothing).
+  - **The league.** The top two go up. 3rd to 6th play off for a third place: one-game semis
     at the higher seed's ground, then a final, with a shoot-out if it's level. The bottom three go down. There's no
     sack: however badly it goes, you carry on.
   - **Fitness carries from one game to the next.** Every man has it (100%: fresh). A game costs him about a quarter of
@@ -946,25 +956,25 @@ The same game played like any other football game. It's a copy of `index.html` w
     computer's clubs: by their league, the Premium League's the best). A live match starts with it as his legs'
     ceiling: a man 60% fit can't get past 60% of his legs all game (and comes back at half-time only as far as
     that), so he's slower from the kick-off. In a simulated game he counts 15 points under his rating for all he's
-    short of fresh (at 80%, 3 under). The computer's clubs rest a tired man for one who's fresher and nearly as good;
-    who plays for you is yours (Training's Selection tab shows each man's fitness as a bar along his name, the
+    short of fresh (at 80%, 3 under). Who plays for you is yours (Training's Selection tab shows each man's fitness as a bar along his name, the
     tactics pitch along his token, his card as FITNESS; the hub warns when some of your eight are under 70%).
     - **A game a week, and they're fresh for it**, whatever the physio: a week's rest is more than a game costs. What a
       man's fitness reads between games is what he'll start the next one with.
-    - **Two games a week, and only a good physio keeps up**: three days to the midweek game, four to the weekend's. In
+    - **Two games a week, and only a good physio keeps up**: four days from Saturday to the Wednesday game, three to
+      the next Saturday's. In
       the Premium League with the Champions League and the cups and no rotating, a side with no physio starts its
-      games about 73% fit on average, at worst under half; with the best, 98 to 99% (a season each, simulated). Even
+      games about 70% fit on average, at worst under half; with the best, 99% (a season each, simulated). Even
       then a man with poor Stamina, or past 30, can run down to 60% or so: a game costs him more than two days' rest
       gives back, so rest him now and then.
   - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
     the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
     too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,
     its six best), with ten clubs from abroad (made up, around the Premium League's best, a new squad each season).
-    - **Every round is midweek**, after the league matchday its calendar says: the Champions League's six group
-      games after matchdays 1, 3, 5, 7, 9 and 11, its quarter-finals, semi-finals and final after 15, 18 and 23; the
-      Coco Cup's six rounds after 2, 6, 10, 12, 16 and 19; the Fashion Cup's five after 4, 8, 14, 17 and 21 (none
-      in the winter window). A cup game is next on the hub (COCO R32, CL G1 and so on) when you're in that midweek's
-      round; one you're not in is played straight after the weekend's game.
+    - **Every round is on a Wednesday**, in the league week its calendar says: the Champions League's six group games
+      in weeks 4, 6, 8, 10, 12 and 14, its quarter-finals, semi-finals and final in 18, 21 and 26; the Coco Cup's six
+      rounds in weeks 5, 9, 13, 15, 19 and 22; the Fashion Cup's five in 7, 11, 17, 20 and 24 -- none in the league's
+      first three weeks. A cup game is the week's first matchday on the hub (COCO R32, CL G1 and so on) when you're in
+      that Wednesday's round; one you're not in is played on the way to Saturday.
     - **A tie is one game** at the home side's ground (the draw says who's at home), penalties if it's level. The
       Coco Cup's first round is ten ties, its 22 best clubs through on a bye; the Fashion Cup's twelve, with four
       byes. The Champions League draws four groups of four from four pots by strength; each plays the others home
@@ -983,12 +993,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     join: 16, rated 60 to 69, with a ceiling of 85 to 90. You pick where he plays and his style (the card says what
     each style does), and he signs for half his wage, to the end of the season after next. Both go straight into
     your squad, even a full one; a card on the hub tells you, and so does the news.
-  - **Transfer windows.** Five days in the summer before the season, and three at the winter break after matchday
-    13. NEXT DAY moves a window on. In a window you can bid for anyone at another club. His club takes the asking
+  - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
+    half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another club. His club takes the asking
     price, may take 85% or more (once), and turns down less. Then you agree his contract: 1 to 4 seasons at the
     wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price
-    (the market's Selling tab) and clubs bid for him every window day (now and then they bid for your best men
-    anyway); accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
+    (the market's Selling tab) and clubs bid for him -- most in pre-season and the winter break, now and then in the
+    weeks between (now and then they bid for your best men anyway); a bid stands for two weeks; accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
     can't buy or sign anyone until you're back in the black, but selling still works. All of it needs you on the
     transfer market first: your phone, $1,500 (see **The campus**); till then nobody's bought, sold or signed, and
     nobody bids for your men.
@@ -1018,8 +1028,18 @@ The same game played like any other football game. It's a copy of `index.html` w
     decline, and players retire from 34. Once it's built, the youth academy takes in 3 to 5 youngsters aged 16 or 17
     every summer, the first of them the day it opens (more and better as you build up its facilities). Promote them,
     or they leave at 19.
-  - **The computer clubs** buy from each other and from the free agents every window day, bid for your players,
-    and fill their squads up every summer. Each has its own style, with shapes and widths to suit it: a wing side
+  - **The computer clubs** buy from each other and from the free agents while the window's open (most of it in
+    pre-season and the winter break, a little in the weeks between), bid for your players, and fill their squads up
+    every summer.
+    - **Who they pick.** Their best keeper and seven best outfielders on the day, but not always. Up to three men too
+      tired for a game (under 90% fit; under 78% in a big one: the Champions League, a cup's last two rounds, the
+      playoffs) sit it out for a fresh man not much worse. Their young men (21 and under) get a start now and then in
+      the league, and three of them once the league's settled for the club (promotion sure -- in the Premium League a
+      Champions League place -- or the top six out of reach with relegation out of reach too: by the last few weeks a
+      good few clubs have nothing left to play for). In a cup below its level a club rests its regulars: two leagues
+      above the cup's lowest (the Premium League in the Coco Cup), four of its seven are youngsters (or the reserves),
+      a league above, one or two. The Champions League, a cup's last two rounds and the playoffs get their best.
+      When you play them live, the eight they picked are the eight you face. Each has its own style, with shapes and widths to suit it: a wing side
     plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
     The better leagues have more control and gegenpressing sides, the lower ones more direct play and deep counters.
   - **Crests.** Yours is 16 by 18 pixels: a shape (shield, round, classic, block, oval), a pattern in two colours
@@ -1120,14 +1140,15 @@ The same game played like any other football game. It's a copy of `index.html` w
     - The buildings are listed down the left (the right, if Settings says so): Clubhouse, Training, Stadium,
       Transfers, Physio, Scouting, Academy -- one to buy with its price, one not open yet with a lock and the
       clubhouse it needs, a badge where something's waiting (bids for your men in a window, the academy's
-      youngsters). NEXT DAY, or SIMULATE and PLAY, is at the foot. The season, the next match, the budget, the fans
+      youngsters). The week's button is at the foot: FORWARD TO MATCHDAY (or NEXT WEEK) on a Monday, SIMULATE and PLAY
+      on a matchday's morning. The week and its day, the next match, the budget, the fans
       and the week's net run along the campus's own foot, put shorter where there's less room.
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
       it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
-    - **The day's end.** NEXT DAY turns the day, and over the campus the sun goes down behind your stadium as it
-      stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new day written
-      over it: three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
+    - **The day's end.** When the week moves on (FORWARD TO MATCHDAY, NEXT WEEK) the sun goes down behind your
+      stadium as it stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new
+      day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
       doesn't see it.
     - It's drawn as the club is: the stadium at its level with its name on it (on the gate at levels 1 and 2, a board
       on the stand's roof at 3 and 4, big letters on the bowl at 5), the clubhouse at its level, each building or its
@@ -1788,7 +1809,7 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
-the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
+the labs, and Football Classic's manager career (a season a week at a time, promotion, the playoffs,
 a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites and
 the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

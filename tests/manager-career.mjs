@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, MANAGER CAREER: create a manager and club -- its short name (suggested from its name, or your own
-// three letters, no other club's) and its crest (made on the card) -- walk every building, buy, sell and sign in the
-// summer window, simulate a season through the winter window to the review, start the next one. Then, on a copy of
+// three letters, no other club's) and its crest (made on the card) -- walk every building, buy, sell and sign in
+// pre-season, simulate a season a week at a time (pre-season, the league's weeks, the winter break) to the review,
+// start the next one. Then, on a copy of
 // the game that lets the test reach the season code: a strong side is promoted (and lands in League 1 with a full
 // fixture list, its ground as it was), a top-six side plays the playoffs, the goals in a played match go to the men
 // who scored them, and THE GROUND: a field with two bleachers to start, built up a level at a time, boards let by the
@@ -26,7 +27,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const anchor = '  // ===== END MANAGER CAREER';
 if(src.split(anchor).length !== 2) throw new Error('instrumenting: anchor not found once: ' + anchor);
-src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgNextDay, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
+src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgForward, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
   + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
@@ -82,7 +83,7 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(cr.s === 1 && cr.p === 3 && cr.e === 2 && String(cr.c) === '#1d4fa3,#f2d23c,#ffb43c' && cr.l === 'F', 'your crest as you made it: ' + JSON.stringify(cr));
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
-ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the summer window open');
+ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the first Monday of pre-season');
 ok(!d.roster.some(p => p.stats), 'no stats in the save (they are rebuilt from the rating)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
@@ -135,19 +136,33 @@ d = await save();
 ok(Object.keys(d.listed).length === 1, 'one man on the transfer list: ' + await msg());
 await page.click('#bldgPanel .bpTopBack');
 
-// --- the window shuts, half a season, the winter window, the rest (each day just turning: the day's end is THE
-// CAMPUS's) --------------------------------------------------------------------------------------------------------------
+// --- THE WEEK: pre-season's three Mondays (NEXT WEEK), then the league's -- FORWARD TO MATCHDAY, Saturday morning's
+// SIMULATE / PLAY, the next Monday -- the winter break after week 13 (BACK TO THE LEAGUE, the window shut after it), the
+// rest (each week just turning: the day's end is THE CAMPUS's) ----------------------------------------------------------
 await page.emulateMedia({ reducedMotion: 'reduce' });
-for(let i = 0; i < 6 && !/PLAY/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(50); }
+const mid = () => page.getAttribute('#chPhase', 'data-mid');
+const wk0 = [await bottom(), await mid()];
+for(let i = 0; i < 4 && /NEXT WEEK|START THE SEASON/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(50); }
 d = await save();
-ok(d.phase === 'league' && d.md === 0 && d.offers.length === 0, 'the summer window shuts after its fifth day');
-for(let i = 0; i < 13; i++){ await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(30); }
+const mon1 = [await bottom(), await mid()];
+ok(/NEXT WEEK/.test(wk0[0]) && /Pre-season · week 1 of 3 · Monday/.test(wk0[1]) && d.phase === 'league' && d.md === 0 && d.wday === 'mon' && d.wkN === 4
+   && /FORWARD TO MATCHDAY/.test(mon1[0]) && /Week 1 of 26 · Monday/.test(mon1[1]) && await page.evaluate(() => __MG.mgWindowOpen(__MG.d)),
+  'three weeks of pre-season (' + wk0.join(' / ') + '), then the league\'s first Monday, the window still open: ' + mon1.join(' / '));
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(60);
+d = await save(); const sat1 = [await bottom(), await mid()];
+ok(d.wday === 'sat' && d.md === 0 && /SIMULATE/.test(sat1[0]) && /PLAY/.test(sat1[0]) && /^Saturday · Matchday 1\/26/.test(sat1[1]), 'FORWARD TO MATCHDAY: Saturday morning, PLAY or SIMULATE (' + sat1[1] + ')');
+await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(60);
 d = await save();
-ok(d.phase === 'winter' && d.md === 13, 'the winter window opens after matchday 13');
+ok(d.md === 1 && d.wday === 'mon' && d.wkN === 5 && /FORWARD TO MATCHDAY/.test(await bottom()), 'simulated: the next Monday (week ' + (d.md + 1) + ')');
+for(let i = 0; i < 12; i++){ await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(30); await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(30); }
+d = await save();
+ok(d.phase === 'winter' && d.md === 13 && d.wday === 'mon' && /BACK TO THE LEAGUE/.test(await bottom()) && await page.evaluate(() => __MG.mgWindowOpen(__MG.d)), 'the winter break after week 13, the window\'s last week: ' + await bottom());
 ok(d.lg[1].fx.slice(0, 13).every(day => day.every(m => m[2] != null)) && d.lg[4].fx[12].every(m => m[2] != null), 'thirteen rounds played in every league');
 ok(d.week === 13 && d.ledger.length === 12, 'a week paid per round');
-for(let i = 0; i < 4 && !/PLAY/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(50); }
-for(let i = 0; i < 16 && /SIMULATE/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(30); }
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(60);
+d = await save();
+ok(d.phase === 'league' && d.md === 13 && d.wday === 'mon' && d.offers.length === 0 && !(await page.evaluate(() => __MG.mgWindowOpen(__MG.d))), 'back to the league, the window shut till the summer');
+for(let i = 0; i < 40 && /FORWARD|SIMULATE/.test(await bottom()); i++){ const fw = /FORWARD/.test(await bottom()); await page.click('#chBottom [data-mg="' + (fw ? 'forward' : 'sim') + '"]'); await page.waitForTimeout(30); }
 for(let i = 0; i < 3 && !/REVIEW/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="continue"]'); await page.waitForTimeout(50); }
 d = await save();
 ok(d.phase === 'review' && d.review && d.review.pos >= 1, 'the season ends in the review: ' + (d.review && d.review.pos + ', ' + d.review.result));
@@ -155,14 +170,14 @@ await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(80);
 ok((await page.innerText('#bldgPanel')).includes('START SEASON 2'), 'the review offers season 2');
 await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
-ok(d.season === 2 && d.phase === 'summer' && [1, 2, 3, 4].every(t => d.div[t].length === 14), 'season 2: the summer window, four leagues of 14');
+ok(d.season === 2 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14), 'season 2: pre-season\'s first Monday, four leagues of 14');
 ok(d.manager.history.length === 1 && d.roster.every(p => p.apps === 0), 'season 1 is in your history, the season numbers start again');
 ok(d.roster.length >= 12 && d.roster.some(p => p.role === 'GK'), 'never short: ' + d.roster.length + ' men, a keeper among them');
 
 // --- promotion: a squad of 75s ---------------------------------------------------------------
 await create('Strong Town');
 let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) p.ovr = 75;
-  let n = 0; while(d.phase !== 'review' && n++ < 300){ if(M.mgWindowOpen(d)) M.mgNextDay(d); else M.mgPlayGame(d, null, null); }
+  let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
   M.mgSave(d); M.renderHub(); return { pos: d.review.pos, result: d.review.result, up: d.review.up }; });
 ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins League 2: ' + r.result);
 await page.click('#chBottom [data-mg="review"]'); await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
@@ -176,20 +191,23 @@ let po = null;
 for(let k = 0; k < 12 && !po; k++){
   await create('Playoff Rovers');
   po = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) p.ovr = 59;
-    let n = 0; while(d.phase !== 'playoffs' && d.phase !== 'review' && n++ < 300){ if(M.mgWindowOpen(d)) M.mgNextDay(d); else M.mgPlayGame(d, null, null); }
+    let n = 0; while(d.phase !== 'playoffs' && d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
     M.mgSave(d); M.renderHub(); return d.phase === 'playoffs' ? { pos: M.mgPos(d), g: M.mgNextGame(d) } : null; });
 }
 ok(po && po.g && po.g.label === 'Playoff semi-final', 'in the playoffs (' + (po && po.pos) + '), a semi-final to play');
 if(po){
+  const pob = await bottom(); await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(80);
+  ok(/FORWARD TO MATCHDAY/.test(pob) && /SIMULATE/.test(await bottom()), 'the playoffs\' week: its Monday, then Saturday\'s semi-final');
   await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(80);
   d = await save();
-  if(d.phase === 'playoffs'){ ok(d.po[1].final && d.po[1].final.includes(d.clubId), 'won the semi: into the final'); await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(80); d = await save(); }
+  if(d.phase === 'playoffs'){ ok(d.po[1].final && d.po[1].final.includes(d.clubId) && d.wday === 'mon', 'won the semi: into the final, the week after');
+    await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(80); await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(80); d = await save(); }
   ok(d.phase === 'review' && d.review.up === (d.po[1].winner === d.clubId), 'the playoff winner goes up: ' + d.review.result);
 }
 
 // --- a played match: the goals go to the men who scored them ------------------------------------------
 await create('Goal Town');
-r = await page.evaluate(() => { const M = __MG, d = M.d; while(M.mgWindowOpen(d)) M.mgNextDay(d);
+r = await page.evaluate(() => { const M = __MG, d = M.d; while(d.phase === 'summer') M.mgForward(d);
   const st = M.mgStarters(d), lu = d.lineup, a = lu.atk[lu.atk.length - 1], b = lu.atk[0];
   const logs = [{ team: 'G', scorerRi: a, scorerName: d.roster[a].name }, { team: 'G', scorerRi: a, scorerName: d.roster[a].name },
                 { team: 'G', scorerRi: b, scorerName: d.roster[b].name, ownGoal: false }, { team: 'R', scorerRi: null, scorerName: 'X' }];
@@ -437,28 +455,30 @@ ok(r.up === null && r.rebuilt, 'the stadium built up a level, drawn again at onc
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(100);
   ok(phone.open && phone.title === 'TRANSFERS' && phone.still, 'TRANSFERS: on your phone, open at once, the camera not moving'); }
 
-// --- THE DAY'S END: NEXT DAY sets the sun behind your stadium (the moon up and down, the sun up again) over the campus,
-// the menu waiting; it ends by itself, a tap ends it sooner, and it doesn't play for a player who asks for less motion ----
-await page.evaluate(() => { const d = __MG.d; d.phase = 'summer'; d.day = 1; __MG.mgSave(d); __MG.renderHub(); }); await page.waitForTimeout(80);
-await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(500);
-const scene = await page.evaluate(() => { const el = document.getElementById('cpDay'), cv = document.getElementById('cpDayCv'), g = cv.getContext('2d'), px = g.getImageData(0, 0, cv.width, cv.height).data, cols = new Set();
+// --- THE DAY'S END: a week moving on (NEXT WEEK, FORWARD TO MATCHDAY) sets the sun behind your stadium (the moon up and
+// down, the sun up again) over the campus, the menu waiting; it ends by itself, a tap ends it sooner, and it doesn't play
+// for a player who asks for less motion (in pre-season here: each press a week) -------------------------------------------
+const pre = () => page.evaluate(() => { const d = __MG.d; d.phase = 'summer'; d.day = 1; d.wday = 'mon'; __MG.mgSave(d); __MG.renderHub(); });
+await pre(); await page.waitForTimeout(80); const w0 = await page.evaluate(() => __MG.d.weeks);
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(500);
+const scene = await page.evaluate(w0 => { const el = document.getElementById('cpDay'), cv = document.getElementById('cpDayCv'), g = cv.getContext('2d'), px = g.getImageData(0, 0, cv.width, cv.height).data, cols = new Set();
   for(let i = 0; i < px.length; i += 4 * 97) cols.add(px[i] + ',' + px[i + 1] + ',' + px[i + 2]);
-  return { on: el.classList.contains('on'), cols: cols.size, waits: getComputedStyle(document.querySelector('#careerHub .cpNav')).pointerEvents === 'none', day: __MG.d.day }; });
+  return { on: el.classList.contains('on'), cols: cols.size, waits: getComputedStyle(document.querySelector('#careerHub .cpNav')).pointerEvents === 'none', wk: __MG.d.weeks - w0 }; }, w0);
 await page.waitForTimeout(3300);
 const after = await page.evaluate(() => ({ on: document.getElementById('cpDay').classList.contains('on'), label: document.getElementById('cpDayT').textContent, menu: getComputedStyle(document.querySelector('#careerHub .cpNav')).pointerEvents }));
-await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(300); await page.click('#cpDay'); await page.waitForTimeout(350);
-const tapped = await page.evaluate(() => ({ on: document.getElementById('cpDay').classList.contains('on'), day: __MG.d.day }));
-await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(200);
-await page.evaluate(() => document.querySelector('#chBottom [data-mg="nextday"]').click()); await page.waitForTimeout(60);   // (a key on it, the tap blocked)
-const twice = await page.evaluate(() => __MG.d.day); await page.keyboard.press('Escape'); await page.waitForTimeout(350);
-const escd = await page.evaluate(() => ({ on: document.getElementById('cpDay').classList.contains('on'), day: __MG.d.day, hub: document.getElementById('careerHub').classList.contains('show') }));
-await page.emulateMedia({ reducedMotion: 'reduce' }); await page.click('#chBottom [data-mg="nextday"]'); await page.waitForTimeout(150);
-const still = await page.evaluate(() => ({ on: document.getElementById('cpDay').classList.contains('on'), day: __MG.d.day }));
+await pre(); await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(300); await page.click('#cpDay'); await page.waitForTimeout(350);
+const tapped = await page.evaluate(w0 => ({ on: document.getElementById('cpDay').classList.contains('on'), wk: __MG.d.weeks - w0 }), w0);
+await pre(); await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(200);
+await page.evaluate(() => document.querySelector('#chBottom [data-mg="forward"]').click()); await page.waitForTimeout(60);   // (a key on it, the tap blocked)
+const twice = await page.evaluate(w0 => __MG.d.weeks - w0, w0); await page.keyboard.press('Escape'); await page.waitForTimeout(350);
+const escd = await page.evaluate(w0 => ({ on: document.getElementById('cpDay').classList.contains('on'), wk: __MG.d.weeks - w0, hub: document.getElementById('careerHub').classList.contains('show') }), w0);
+await pre(); await page.emulateMedia({ reducedMotion: 'reduce' }); await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
+const still = await page.evaluate(w0 => ({ on: document.getElementById('cpDay').classList.contains('on'), wk: __MG.d.weeks - w0 }), w0);
 info('the day\'s end: ' + JSON.stringify({ scene, after, tapped, twice, escd, still }));
-ok(scene.on && scene.cols > 20 && scene.waits && scene.day === 2 && !after.on && after.label === 'SUMMER WINDOW · DAY 2/5' && after.menu !== 'none',
-  'NEXT DAY: the day turns (day ' + scene.day + '), the sun goes down behind your stadium and comes up again (' + scene.cols + ' colours in it), the menu waiting; then ' + after.label + ', and it\'s gone');
-ok(!tapped.on && tapped.day === 3 && twice === 4 && !escd.on && escd.day === 4 && escd.hub && !still.on && still.day === 5,
-  'a tap ends it at once; NEXT DAY again while it plays does nothing, Escape ends it (still on the campus); with less motion asked for, it doesn\'t play (the day still turns)');
+ok(scene.on && scene.cols > 20 && scene.waits && scene.wk === 1 && !after.on && after.label === 'PRE-SEASON · WEEK 2 OF 3 · MONDAY' && after.menu !== 'none',
+  'NEXT WEEK: the week turns, the sun goes down behind your stadium and comes up again (' + scene.cols + ' colours in it), the menu waiting; then ' + after.label + ', and it\'s gone');
+ok(!tapped.on && tapped.wk === 2 && twice === 3 && !escd.on && escd.wk === 3 && escd.hub && !still.on && still.wk === 4,
+  'a tap ends it at once; NEXT WEEK again while it plays does nothing, Escape ends it (still on the campus); with less motion asked for, it doesn\'t play (the week still turns)');
 
 // --- FREE AGENTS: mostly old hands gone past their best, asking their wage; a younger man asks over the odds -- two and
 // a half times his wage at 21, sliding to his wage at 29 -- and up to twelve weeks of that to sign; none young with a
@@ -524,7 +544,7 @@ ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Starts wide, cuts in/.test(s
 // abroad): each round midweek, after the league matchday its calendar says ------------------------------------------
 { await create('Cup Town');
 const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
-  while(d.phase !== 'review' && n++ < 500){ if(M.mgWindowOpen(d)){ M.mgNextDay(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
+  while(d.phase !== 'review' && n++ < 500){ if(d.wday === 'mon'){ M.mgForward(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
     kick.push(M.mgStarters(d).map(M.condOf)); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
     if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('chPhase').textContent; }
     M.mgPlayGame(d, null, null); if(g.kind === 'cup' && d.ledger[0] && d.ledger[0].cup) ledgerCup = true; }   // (the books keep the last twelve: looked at as it's played)

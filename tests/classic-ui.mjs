@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, lvOf, mgNextDay, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -184,7 +184,7 @@ for(const [w, h] of SIZES){
     await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
-  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
+  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="forward"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
   const hw = await hudWin(page);
   ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
@@ -212,7 +212,7 @@ for(const [w, h] of SIZES){
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
-  await page.evaluate(() => { const M = __MG, d = M.d; let n = 0; while(d.phase !== 'review' && n++ < 300){ if(M.mgWindowOpen(d)) M.mgNextDay(d); else M.mgPlayGame(d, null, null); } M.mgSave(d); M.renderHub(); });
+  await page.evaluate(() => { const M = __MG, d = M.d; let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); } M.mgSave(d); M.renderHub(); });
   await page.tap('#chBottom [data-mg="review"]'); await page.waitForTimeout(200);
   const bad = await onScreen(page, ['#bpFoot [data-mg="newseason"]', '.bpTopBack', '#bpBody']);
   ok(!bad.length && await page.isVisible('#bpFoot [data-mg="newseason"]'), 'the season review: START SEASON 2 pinned on the screen' + (bad.length ? ' -- ' + bad.join(' | ') : ''));
@@ -364,7 +364,7 @@ for(const [w, h] of SIZES){
     return { n, views, bad }; };
   const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]');
   await page.tap('.bpTopBack'); await page.waitForTimeout(100);
-  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="nextday"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
+  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="forward"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
   const hw = await hudWin(page);
   ok(winOk(hw, true), '...in a match, your man\'s window at the top right beside the menu, his name whole (' + hw.num + ' ' + hw.name + ' ' + hw.pos + ')' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));

@@ -355,6 +355,7 @@
   .smPanel h3{font-family:'FTC Dot',monospace;color:var(--ink);font-size:18px;letter-spacing:1px;margin-bottom:16px;}
   .slotRow{display:flex;align-items:center;gap:8px;min-width:320px;margin-bottom:8px;}
   .slotRow .slotBtn{flex:1;text-align:left;font-size:13px;}
+  .slotNote{font-size:11px;color:var(--warn);margin:0 0 8px;max-width:340px;}
   .slotDel{font-size:12px;color:var(--bad);background:rgb(var(--badRGB) / .1);border:1px solid #5a2a26;border-radius:6px;padding:9px 11px;cursor:pointer;}
   .smBack{margin-top:14px;min-width:248px;}
   /* exhibition setup: two clubs, the player you control */
@@ -13759,7 +13760,14 @@
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
   const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=20, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, twenty at most
-  const MG_WINDOW={summer:5, winter:3};                  // days each transfer window stays open
+  // THE WEEK. A season runs a week at a time: three weeks of pre-season (no games), then a league game every Saturday --
+  // in some weeks a cup game on the Wednesday before it, never in the league's first three weeks -- with a week's winter
+  // break after week 13, the playoffs after week 26 for those in them, and the review. Each week starts on a Monday:
+  // your decisions, then on to the matchday (or the next week, if there's no game), where you play it or simulate it;
+  // after a Wednesday game, the Saturday; after Saturday's, the next Monday. The transfer window is open from the
+  // first week of pre-season to the end of the winter break.
+  const MG_WINDOW={summer:3, winter:1};                  // weeks: pre-season, and the winter break
+  const MG_SAVE_V=4;                                     // a career saved before the week (v3 and older) is cleared
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
   const MG_PRIZE={1:12000,2:45000,3:180000,4:1500000};   // for winning the league (less the lower you finish)
@@ -13899,8 +13907,9 @@
     p=(d.youth||[]).find(x=>x.id===pid); if(p) return {p,club:null,youth:true};
     return null; }
   function mgNews(d,txt){ d.news=d.news||[]; d.news.unshift({s:d.season,w:mgWhen(d),t:txt}); if(d.news.length>90) d.news.length=90; }
-  function mgWhen(d){ return d.phase==='summer'?'Summer':d.phase==='winter'?'Winter':d.phase==='playoffs'?'Playoffs':d.phase==='review'?'Season end':'MD '+d.md; }
-  function mgWindowOpen(d){ return d.phase==='summer'||d.phase==='winter'; }
+  function mgWhen(d){ return d.phase==='summer'?'Pre-season':d.phase==='winter'?'Winter break':d.phase==='playoffs'?'Playoffs':d.phase==='review'?'Season end':'MD '+d.md; }
+  // the window: from pre-season to the end of the winter break (the league's first half in between)
+  function mgWindowOpen(d){ return d.phase==='summer'||d.phase==='winter'||(d.phase==='league'&&d.md<MG_HALF); }
 
   // ---- FITNESS (his condition, p.cond): how fresh a man is from one game to the next (1: fresh). A game costs him his
   // share of condCost -- more with poor Stamina, more past 30, a sub's part of a game less -- and every day after it he
@@ -13917,11 +13926,45 @@
     const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
     for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
   function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
-  // a computer club's eight for a game: its best keeper and best seven outfielders on the day (a tired man rested)
-  function mgPickEight(L){ const g=L.filter(p=>p.role==='GK').sort((a,b)=>condOvr(b)-condOvr(a)), o=L.filter(p=>p.role!=='GK').sort((a,b)=>condOvr(b)-condOvr(a));
-    const xi=[]; if(g[0]) xi.push(g[0]); xi.push(...o.slice(0,1+OUTFIELD-xi.length)); return xi; }
-  // who plays for a side: yours, the eight you picked; the computer's, its eight on the day
-  function mgSideOf(d,id){ return id===d.clubId?mgStarters(d):mgPickEight(mgPlayersOf(d,id)); }
+  // A COMPUTER CLUB'S EIGHT FOR A GAME: its best keeper and seven best outfielders on the day -- but not always. Up to
+  // AI_ROT men too tired for it (fitness under AI_REST; AI_REST_BIG in a big game: the Champions League, a cup's last two
+  // rounds, the playoffs), the most tired first, sit it out for a fresh man not much worse (AI_ROT_GAP); and some of it
+  // goes to the young (AI_YOUNG and under, the best not already in it): one now and then in the league, three once the
+  // league is settled for the club (mgSettled), a side of them in a cup below its level -- four of the seven two leagues
+  // above the cup's lowest (the reserves, if it's short of youngsters), one or two a league above -- and none in a big
+  // game. ctx: {kind:'league'|'cup'|'playoff', key, r}; without it, the best eight (the side on paper)
+  const AI_REST=0.9, AI_REST_BIG=0.78, AI_ROT=3, AI_ROT_GAP=8, AI_YOUNG=21;
+  function mgBigGame(ctx){ return !!ctx&&(ctx.kind==='playoff'||(ctx.kind==='cup'&&(ctx.key==='cl'||ctx.r>=CUP[ctx.key].rounds.length-2))); }
+  function mgYoungStarts(d,club,ctx){ if(!ctx||!club||mgBigGame(ctx)) return 0;
+    if(ctx.kind==='cup'){ const gap=club.tier-Math.min(...(CUP[ctx.key].tiers||[club.tier])); return gap>=2?4:gap===1?(Math.random()<0.5?2:1):0; }
+    return mgSettled(d,club.id)?3:(Math.random()<0.25?1:0); }
+  function mgPickEight(L,ctx,d,club){ const by=(a,b)=>condOvr(b)-condOvr(a), young=p=>(p.age||25)<=AI_YOUNG;
+    const g=L.filter(p=>p.role==='GK').sort(by), o=L.filter(p=>p.role!=='GK').sort(by), xi=[]; if(g[0]) xi.push(g[0]);
+    const out=o.slice(0,1+OUTFIELD-xi.length);
+    if(ctx){ const line=mgBigGame(ctx)?AI_REST_BIG:AI_REST, tired=p=>condOf(p)<line;
+      if(xi[0]&&tired(xi[0])){ const k=g.find(p=>p!==xi[0]&&!tired(p)&&p.ovr>=xi[0].ovr-AI_ROT_GAP); if(k) xi[0]=k; }
+      let rot=0; for(const p of out.filter(tired).sort((a,b)=>condOf(a)-condOf(b))){ if(rot>=AI_ROT) break;
+        const k=o.find(q=>!out.includes(q)&&!tired(q)&&q.ovr>=p.ovr-AI_ROT_GAP); if(!k) continue; out[out.indexOf(p)]=k; rot++; } }
+    let n=d?mgYoungStarts(d,club,ctx)-out.filter(young).length:0;
+    if(n>0){ const add=o.filter(p=>!out.includes(p)&&young(p)).sort((a,b)=>b.ovr-a.ovr), keep=new Set(out.filter(young));
+      if(ctx.kind==='cup') add.push(...o.filter(p=>!out.includes(p)&&!young(p)));   // (a cup side short of youngsters: the reserves)
+      for(const k of add){ if(n<=0) break; const sw=out.filter(p=>!keep.has(p)).sort(by).pop(); if(!sw) break; out[out.indexOf(sw)]=k; keep.add(k); n--; } }
+    return xi.concat(out); }
+  // a computer club's league is settled when nothing it does can change where it finishes: promotion sure (in the
+  // Premium League, a Champions League place), or the top six out of reach and relegation out of reach too
+  function mgSettled(d,id){ const c=d.world.clubs[id]; if(!c||c.euro||!d.lg||!d.lg[c.tier]) return false;
+    const T=mgTable(d,c.tier), me=T.find(r=>r.id===id); if(!me) return false;
+    const max=r=>r.pts+3*(MG_MD-r.p), rest=T.filter(r=>r.id!==id);
+    if(rest.filter(r=>max(r)>=me.pts).length<(c.tier===4?6:2)) return true;
+    return rest.filter(r=>r.pts>max(me)).length>=6&&(c.tier===1||rest.filter(r=>max(r)<me.pts).length>=3); }
+  // who plays for a side: yours, the eight you picked; the computer's, its eight for the game -- in the game you play
+  // against it, the eight that played (MG_LIVE_XI, set as it kicks off)
+  let MG_LIVE_XI=null;
+  function mgSideOf(d,id,ctx){ if(id===d.clubId) return mgStarters(d);
+    const L=mgPlayersOf(d,id);
+    if(MG_LIVE_XI&&MG_LIVE_XI.id===id){ const xi=MG_LIVE_XI.ids.map(k=>L.find(p=>p.id===k)).filter(Boolean); if(xi.length) return xi; }
+    return mgPickEight(L,ctx,d,d.world.clubs[id]); }
+  const mgCtxOf=g=>g.kind==='cup'?{kind:'cup',key:g.key,r:g.r}:{kind:g.kind};
   // a game over: the men who played it pay for it. Yours after a live one by what they played (a man taken off 0.6 of
   // it, one brought on 0.4), the side you played by its eight on the pitch
   function mgTireGame(d,id,xi,live){
@@ -13958,8 +14001,11 @@
   // how good a side is on the day: the computer's clubs field their best eight; you field the eight you picked, each
   // as good as he is in his spots (with the ball and without it: a man out of position plays below his rating), and
   // each as fresh as he is (see FITNESS)
-  // a side's strength in a simulated game: as on paper, and your physio's help on top
-  function mgSimStr(d,id){ return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
+  // a side's strength in a simulated game: yours as on paper, with your physio's help on top; the computer's, the eight
+  // it picked for the game (xi), as fresh as they are
+  function mgSimStr(d,id,xi){ if(id!==d.clubId&&xi) return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40;
+    return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
+  const mgXiStr=(d,id,xi)=>id===d.clubId?mgStrength(d,id):mgSimStr(d,id,xi);   // (on the day, without the physio)
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
       let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK')):30;
@@ -13987,16 +14033,16 @@
   function mgMatchday(d,yours){ const md=d.md; let mine=null;
     mgMidweek(d,null);   // (one left over, if there is: it's played before the weekend's)
     for(const t of [1,2,3,4]) for(const m of d.lg[t].fx[md]){ if(m[2]!=null) continue;
-      const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]), live=!!(mq&&yours);
-      const ovrs=[Math.round(mgStrength(d,m[0])),Math.round(mgStrength(d,m[1]))];
+      const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, ctx={kind:'league'}, xh=mgSideOf(d,m[0],ctx), xa=mgSideOf(d,m[1],ctx), live=!!(mq&&yours);
+      const ovrs=[Math.round(mgXiStr(d,m[0],xh)),Math.round(mgXiStr(d,m[1],xa))];
       if(live){ m[2]=home?yours.score[0]:yours.score[1]; m[3]=home?yours.score[1]:yours.score[0]; }
-      else { const r=mgSimScore(mgSimStr(d,m[0]),mgSimStr(d,m[1])); m[2]=r[0]; m[3]=r[1]; }
+      else { const r=mgSimScore(mgSimStr(d,m[0],xh),mgSimStr(d,m[1],xa)); m[2]=r[0]; m[3]=r[1]; }
       if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0];
         mine={opp,home,you,them,win:you>them,draw:you===them,oppOvr:home?ovrs[1]:ovrs[0],competition:'league'};
         mgCreditYours(d,mine,yours&&yours.logs); mgCredit(home?xa:xh,them); }
       else { mgCredit(xh,m[2]); mgCredit(xa,m[3]); }
       mgTireGame(d,m[0],xh,live); mgTireGame(d,m[1],xa,live); }
-    d.md++; mgRest(d,3);   // (three days to the midweek)
+    d.md++;   // (the days after it: see the week)
     return mine; }
   // your next game, league or playoff
   function mgNextGame(d){
@@ -14008,6 +14054,7 @@
   // your game is over -- played (score + goal log) or simulated (no score): the round is finished everywhere, the
   // week is paid, the season moves on. -> what the report needs
   function mgPlayGame(d,score,logs){
+    if(d.wday==='mon'&&(d.phase==='league'||d.phase==='playoffs')) mgForward(d);   // (from the week's start: on to its first matchday)
     const g=mgNextGame(d); if(!g) return null;
     const posBefore=mgPos(d), loyBefore=Math.round(d.loyalty||0), budBefore=d.budget, yours=score?{score,logs}:null;
     const mine=g.kind==='league'?mgMatchday(d,yours):g.kind==='cup'?mgMidweek(d,yours):mgPlayoffRound(d,yours);
@@ -14016,12 +14063,55 @@
     const rep={g,mine,wk,posBefore,posAfter:mgPos(d),loyDelta:Math.round(d.loyalty||0)-loyBefore,budBefore,live:!!score};
     if(mine) mgNews(d,g.label+': '+d.clubName+' '+mine.you+'–'+mine.them+' '+mgNameOf(d,mine.opp)+(mine.home?'':' (away)')+(mine.pens?(mine.through?', won on penalties':', lost on penalties'):'')+'.');
     if(g.kind==='league') mgAfterRound(d); else if(g.kind==='playoff') mgAfterPlayoffRound(d);
-    if(!mgYourCupTie(d)) mgMidweek(d,null);   // (a midweek you're not in is played now: your next game's the weekend's)
+    mgAfterGame(d,g);
     return rep; }
   function mgAfterRound(d){
     mgStory(d);
-    if(d.md===MG_HALF){ d.phase='winter'; d.day=1; mgNews(d,'The mid-season transfer window is open for '+MG_WINDOW.winter+' days.'); mgAiBids(d); }
+    if(d.md===MG_HALF){ d.phase='winter'; d.day=1; mgNews(d,'The winter break: a week without a game, and the transfer window’s last.'); }
     else if(d.md>=MG_MD) mgStartPlayoffs(d); }
+
+  // ---- THE WEEK (see MG_WINDOW) ----
+  // d.wday: where the week is -- 'mon' (its start: your decisions), 'wed' (the morning of your cup game), 'sat' (the
+  // morning of your league or playoff game). d.wkN counts the season's weeks, d.weeks the career's.
+  const MG_DAY={mon:'Monday',wed:'Wednesday',sat:'Saturday'};
+  // a new week, its Monday. While the window's open the computer clubs do their business -- most of it in pre-season and
+  // the winter break, a little in the weeks between -- and bid for your men; a bid stands for two weeks
+  function mgWeekStart(d){ d.wday='mon'; d.wkN=(d.wkN||0)+1; d.weeks=(d.weeks||0)+1; d.bidMemo={};
+    if(!mgWindowOpen(d)) return;
+    d.offers=(d.offers||[]).filter(o=>d.wkN-(o.wk||d.wkN)<2);
+    const k=d.phase==='league'?0.15:1.5; mgAiTrades(d,k); mgAiBids(d,k); }
+  // the days go by: everyone gets his legs back
+  function mgDays(d,n){ mgRest(d,n); }
+  // FORWARD TO MATCHDAY (NEXT WEEK when there's no game): from Monday to the morning of your first game of the week --
+  // Wednesday's cup game, or Saturday's (a Wednesday round you're not in is played on the way) -- or, in a week without
+  // one, to the next Monday
+  function mgForward(d){ if(d.wday&&d.wday!=='mon') return;
+    if(d.phase==='league'){ mgDays(d,2); const due=mgCupDue(d);
+      if(due&&mgYourCupTie(d)){ d.wday='wed'; return; }
+      if(due) mgMidweek(d,null); mgDays(d,3); d.wday='sat'; return; }
+    if(d.phase==='playoffs'){ if(!mgYourPlayoff(d)){ mgPlayoffsOut(d); return; } mgDays(d,5); d.wday='sat'; return; }
+    if(d.phase==='summer'||d.phase==='winter') mgNextWeek(d); }
+  // a week without a game (pre-season, the winter break): its seven days, then the next Monday -- after pre-season's
+  // last week the league's first, after the winter break the league again, the window shut
+  function mgNextWeek(d){ mgDays(d,7);
+    if(d.phase==='summer'&&d.day<MG_WINDOW.summer) d.day++;
+    else if(d.phase==='summer'){ d.phase='league'; d.day=0; mgTopUpYours(d); mgNews(d,'Pre-season is over: the season starts on Saturday.'); }
+    else if(d.phase==='winter'){ d.phase='league'; d.day=0; d.offers=[]; mgTopUpYours(d); mgNews(d,'The winter break is over, and the transfer window has shut until the summer.'); }
+    mgWeekStart(d); }
+  // after your game: a Wednesday's, on to Saturday morning; a Saturday's, to next Monday (unless the season's over)
+  function mgAfterGame(d,g){ if(g.kind==='cup'){ mgDays(d,3); d.wday='sat'; return; }
+    if(d.phase!=='review'){ mgDays(d,2); mgWeekStart(d); } }
+  // which week it is, and its day: 'Week 5 of 26 · Saturday', 'Pre-season · week 2 of 3 · Monday'...
+  function mgPhaseLabel(d){ const day=MG_DAY[d.wday||'mon'];
+    return d.phase==='summer'?'Pre-season · week '+d.day+' of '+MG_WINDOW.summer+' · '+day : d.phase==='winter'?'Winter break · '+day
+      : d.phase==='league'?'Week '+Math.min(d.md+1,MG_MD)+' of '+MG_MD+' · '+day : d.phase==='playoffs'?'Playoffs · '+day:'Season over'; }
+  // the week, short: 'Week 5 · Mon', 'Pre-season 2/3'...
+  function mgWeekShort(d){ const dy=MG_DAY[d.wday||'mon'].slice(0,3);
+    return d.phase==='summer'?'Pre-season '+d.day+'/'+MG_WINDOW.summer:d.phase==='winter'?'Winter break':d.phase==='league'?'Week '+Math.min(d.md+1,MG_MD)+' · '+dy:d.phase==='playoffs'?'Playoffs · '+dy:'Season over'; }
+  // the Monday button's word
+  function mgForwardWord(d){ return d.phase==='summer'?(d.day<MG_WINDOW.summer?'NEXT WEEK':'START THE SEASON'):d.phase==='winter'?'BACK TO THE LEAGUE':'FORWARD TO MATCHDAY'; }
+  // how many weeks the window has left, this one counted
+  function mgWindowWeeks(d){ return d.phase==='summer'?MG_WINDOW.summer-d.day+1+MG_HALF+MG_WINDOW.winter:d.phase==='league'?MG_HALF-d.md+MG_WINDOW.winter:d.phase==='winter'?1:0; }
 
   // THE FIRST SEASON'S TWO ARRIVALS. After the 2nd game, a veteran of the top flight comes home to finish his career --
   // rated in the 70s, 33 to 35, his position and style anyone's guess -- on under a third of his wage, to the end of
@@ -14073,7 +14163,7 @@
 
   // ---- playoffs: 3rd v 6th and 4th v 5th, one game each at the higher seed's ground, then a final (not in the top league)
   function mgStartPlayoffs(d){
-    d.po={}; d.poRound=0; d.phase='playoffs'; mgRest(d,4);   // (a week after the last league game: three days of it behind them)
+    d.po={}; d.poRound=0; d.phase='playoffs';   // (a week after the last league game)
     for(const t of [1,2,3]){ const s=mgTable(d,t).slice(2,6).map(r=>r.id); d.po[t]={seeds:s, semis:[[s[0],s[3],null,null,null],[s[1],s[2],null,null,null]], final:null, winner:null}; }
     mgNews(d,'The league season is over: '+d.clubName+' finished '+ordinal(mgPos(d))+'.');
     if(!mgYourPlayoff(d)) mgPlayoffsOut(d); }
@@ -14082,20 +14172,20 @@
       if(m[0]===d.clubId) return {m,home:true,opp:m[1]}; if(m[1]===d.clubId) return {m,home:false,opp:m[0]}; }
     return null; }
   // one playoff game; level after it, a shoot-out. m[4]: which side went through (0 / 1)
-  function mgTie(d,m,sc){ const r=sc||mgSimScore(mgSimStr(d,m[0]),mgSimStr(d,m[1])); m[2]=r[0]; m[3]=r[1];
+  function mgTie(d,m,sc,xh,xa){ const r=sc||mgSimScore(mgSimStr(d,m[0],xh),mgSimStr(d,m[1],xa)); m[2]=r[0]; m[3]=r[1];
     m[4]=r[0]>r[1]?0:r[0]<r[1]?1:(Math.random()<0.5?0:1); return m[m[4]]; }
   function mgPlayoffRound(d,yours){ let mine=null;
     for(const t of [1,2,3]){ const P=d.po[t];
       for(const m of (d.poRound===0?P.semis:[P.final])){ if(m[2]!=null) continue;
-        const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]);
-        mgTie(d,m,(mq&&yours)?(home?yours.score:[yours.score[1],yours.score[0]]):null);
+        const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, ctx={kind:'playoff'}, xh=mgSideOf(d,m[0],ctx), xa=mgSideOf(d,m[1],ctx);
+        mgTie(d,m,(mq&&yours)?(home?yours.score:[yours.score[1],yours.score[0]]):null,xh,xa);
         if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0], through=m[m[4]]===d.clubId;
-          mine={opp,home,you,them,win:through,draw:you===them,pens:you===them,through,oppOvr:Math.round(mgStrength(d,opp)),competition:d.poRound===0?'playoff semi-final':'playoff final'};
+          mine={opp,home,you,them,win:through,draw:you===them,pens:you===them,through,oppOvr:Math.round(mgXiStr(d,opp,home?xa:xh)),competition:d.poRound===0?'playoff semi-final':'playoff final'};
           mgCreditYours(d,mine,yours&&yours.logs); }
         mgTireGame(d,m[0],xh,!!(mq&&yours)); mgTireGame(d,m[1],xa,!!(mq&&yours)); }
       if(d.poRound===0){ const a=P.semis[0][P.semis[0][4]], b=P.semis[1][P.semis[1][4]]; P.final=P.seeds.indexOf(a)<P.seeds.indexOf(b)?[a,b,null,null,null]:[b,a,null,null,null]; }
       else P.winner=P.final[P.final[4]]; }
-    d.poRound++; mgRest(d,4);   // (four days to the final)
+    d.poRound++;   // (the final's a week on: see the week)
     return mine; }
   function mgPlayoffsOut(d){ while(d.poRound<2) mgPlayoffRound(d,null); mgSeasonEnd(d); }
   function mgAfterPlayoffRound(d){ if(d.poRound>=2||!mgYourPlayoff(d)) mgPlayoffsOut(d); }
@@ -14115,8 +14205,10 @@
              rs:['R1','R16','QF','SF','FINAL'], prize:[20000,50000,100000,200000,500000]},
     cl:     {name:'Champions League', short:'CL', rounds:['Group game 1','Group game 2','Group game 3','Group game 4','Group game 5','Group game 6','Quarter-final','Semi-final','Final'],
              rs:['G1','G2','G3','G4','G5','G6','QF','SF','FINAL'], prize:[40000,40000,40000,40000,40000,40000,350000,500000,1500000], entry:300000, through:200000}};
-  const CUP_CAL={0:['cl',0],1:['coco',0],2:['cl',1],3:['fashion',0],4:['cl',2],5:['coco',1],6:['cl',3],7:['fashion',1],8:['cl',4],9:['coco',2],10:['cl',5],11:['coco',3],
-    13:['fashion',2],14:['cl',6],15:['coco',4],16:['fashion',3],17:['cl',7],18:['coco',5],20:['fashion',4],22:['cl',8]};   // (none after 12: the winter window)
+  // the cups' Wednesdays: CUP_CAL[g] is the round played on the Wednesday of league week g+2 (between matchdays g+1 and
+  // g+2) -- none in the first three weeks, the last in week 26
+  const CUP_CAL={2:['cl',0],3:['coco',0],4:['cl',1],5:['fashion',0],6:['cl',2],7:['coco',1],8:['cl',3],9:['fashion',1],10:['cl',4],11:['coco',2],12:['cl',5],13:['coco',3],
+    15:['fashion',2],16:['cl',6],17:['coco',4],18:['fashion',3],19:['cl',7],20:['coco',5],22:['fashion',4],24:['cl',8]};
   // THE CLUBS FROM ABROAD: ten, made once, a squad each made afresh every season at their level (around the Premium
   // League's best)
   const EURO_CLUBS=[['Inter Vallera',6],['Real Montalba',5],['Dinamo Korvesk',4],['Olympia Thessara',3],['Sporting Lusano',2],['Union Brennstadt',1],
@@ -14154,16 +14246,15 @@
   function mgYourCupTie(d){ const s=mgCupDue(d); if(!s||!s.key) return null;
     for(const m of cupTies(d,s.key,s.r)){ if(m[2]!=null) continue; if(m[0]===d.clubId) return {s,m,home:true,opp:m[1]}; if(m[1]===d.clubId) return {s,m,home:false,opp:m[0]}; }
     return null; }
-  // THE MIDWEEK: the round (yours from `yours` when you played it, the rest simulated), then four days' rest to the
-  // weekend's league game -> yours
+  // THE WEDNESDAY: the week's cup round (yours from `yours` when you played it, the rest simulated) -> yours
   function mgMidweek(d,yours){ const s=mgCupDue(d); if(!s) return null; d.mw=s.g; let mine=null;
     if(s.key){ for(const m of cupTies(d,s.key,s.r)){ if(m[2]!=null) continue; const r=mgCupGame(d,s.key,s.r,m,yours); if(r) mine=r; }
       mgCupRoundDone(d,s.key,s.r,mine); }
-    mgRest(d,4); return mine; }
+    return mine; }
   // one cup game: a knock-out tie level at the end goes to penalties (m[4]: which side went through)
   function mgCupGame(d,key,r,m,yours){ const mq=m[0]===d.clubId||m[1]===d.clubId, home=m[0]===d.clubId, live=!!(mq&&yours), ko=key!=='cl'||r>=6;
-    const xh=mgSideOf(d,m[0]), xa=mgSideOf(d,m[1]), ovrs=[Math.round(mgStrength(d,m[0])),Math.round(mgStrength(d,m[1]))];
-    const sc=live?(home?yours.score:[yours.score[1],yours.score[0]]):mgSimScore(mgSimStr(d,m[0]),mgSimStr(d,m[1]));
+    const ctx={kind:'cup',key,r}, xh=mgSideOf(d,m[0],ctx), xa=mgSideOf(d,m[1],ctx), ovrs=[Math.round(mgXiStr(d,m[0],xh)),Math.round(mgXiStr(d,m[1],xa))];
+    const sc=live?(home?yours.score:[yours.score[1],yours.score[0]]):mgSimScore(mgSimStr(d,m[0],xh),mgSimStr(d,m[1],xa));
     m[2]=sc[0]; m[3]=sc[1]; if(ko) m[4]=sc[0]>sc[1]?0:sc[0]<sc[1]?1:(Math.random()<0.5?0:1);
     let mine=null;
     if(mq){ const you=home?m[2]:m[3], them=home?m[3]:m[2], opp=home?m[1]:m[0], through=ko?m[m[4]]===d.clubId:null;
@@ -14282,7 +14373,7 @@
     const nd={1:[],2:[],3:[],4:[]};
     for(const t of [1,2,3,4]){ const mv=R.moves[t]; for(const id of mv.table){ const nt=mv.up.includes(id)?t+1:mv.down.includes(id)?t-1:t; nd[nt].push(id); const c=d.world.clubs[id]; if(c) c.tier=nt; } }
     d.div=nd; d.tier=d.world.clubs[d.clubId].tier;
-    d.season++; d.md=0; d.phase='summer'; d.day=1; d.po=null; d.poRound=0; d.offers=[]; d.bidMemo={}; d.scouted={}; d.review=null;
+    d.season++; d.md=0; d.phase='summer'; d.day=1; d.wkN=0; d.po=null; d.poRound=0; d.offers=[]; d.bidMemo={}; d.scouted={}; d.review=null;
     const ft=FIN_TIER[d.tier]; d.sponsorWk=ft.sponsor; dealsExpire(d);   // (the partners' money is the league's; the ground stays as you built it)
     { const nb=LOYALTY_BASE[d.tier]||1000, cur=d.loyalty!=null?d.loyalty:nb; d.loyalty=Math.round(cur+(nb-cur)*0.3); }
     for(const c of mgAiClubs(d)){ c.budget=mgRound(Math.min(c.budget,MG_AI_BUDGET[c.tier]*1.5)+MG_AI_BUDGET[c.tier]*(0.4+Math.random()*0.4)); mgRefill(d,c); }   // (they pay no wages: what they hoard is capped)
@@ -14290,8 +14381,8 @@
     mgSweepFree(d);
     for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++) d.world.free.push(mgNewFreeAgent(d));   // (the pool kept near sixty)
     if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); mgFreshen(d); mgCupsStart(d); d.top=Math.max(d.top||1,d.tier);
-    mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. The summer window is open for '+MG_WINDOW.summer+' days.');
-    mgAiBids(d); }
+    mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
+    mgWeekStart(d); }
 
   // ---- your squad: men in and out (the lineup keeps pointing at the right men) ----
   function mgRosterAdd(d,p){ p.num=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
@@ -14417,22 +14508,24 @@
   function mgReleaseYouth(d,pid){ d.youth=(d.youth||[]).filter(p=>p.id!==pid); }
 
   // ---- the computer clubs in a window: offers for your men, and deals between themselves ----
-  function mgAiBids(d){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0;
+  // the computer clubs' bids for your men, a week's worth (k: how busy the week is -- see mgWeekStart)
+  function mgAiBids(d,k){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0; k=k??1;
     const clubs=mgAiClubs(d);
     for(const p of d.roster){ const ask=d.listed&&d.listed[p.id], lt=mgLevelTier(p.ovr);
-      if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))) continue;
+      if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))*k) continue;
       const fee=ask?mgRound(ask*(0.82+Math.random()*0.26)):mgRound(mgValue(d,p)*(1+Math.random()*0.35));
       const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<MG_MAX&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
       if(!fits.length) continue;
-      const c=mgPick(fits); d.offers.push({id:++d.offerSeq,pid:p.id,club:c.id,fee});
+      const c=mgPick(fits); d.offers.push({id:++d.offerSeq,pid:p.id,club:c.id,fee,wk:d.wkN||0});
       mgNews(d,c.name+' bid '+money(fee)+' for '+p.name+'.'); } }
   function mgMoveAi(d,p,from,to,fee){
     if(from){ from.players.splice(from.players.indexOf(p),1); from.budget+=fee; } else d.world.free.splice(d.world.free.indexOf(p),1);
     to.budget-=fee; p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(to.players,p); to.players.push(p);
     delete (d.scouted||{})[p.id];
     if(to.tier===d.tier||(from&&from.tier===d.tier)) mgNews(d,to.name+' sign '+p.name+(from?' from '+from.name+' for '+money(fee):' on a free')+'.'); }
-  function mgAiTrades(d){ const clubs=mgAiClubs(d), F=d.world.free;
-    const n=5+Math.floor(Math.random()*5);
+  // the computer clubs' business among themselves (and with the free agents), a week's worth (k as for the bids)
+  function mgAiTrades(d,k){ const clubs=mgAiClubs(d), F=d.world.free;
+    const n=Math.round((5+Math.floor(Math.random()*5))*(k??1));
     for(let k=0;k<n;k++){ const b=mgPick(clubs), xi=mgEight(b.players); if(!xi.length) continue;
       const weak=xi.reduce((a,p)=>p.ovr<a.ovr?p:a,xi[0]); let best=null, bestClub=null, bestFee=0;
       for(let s=0;s<40;s++){ const src=Math.random()<0.25?null:mgPick(clubs); if(src===b) continue;
@@ -14449,13 +14542,6 @@
   function mgTrimAi(d,c){
       while(c.players.length>MG_MAX){ const w=c.players.filter(p=>p.role!=='GK'||c.players.filter(x=>x.role==='GK').length>2).sort((a,b)=>(a.ovr-a.age*0.3)-(b.ovr-b.age*0.3))[0];
         c.players.splice(c.players.indexOf(w),1); mgToFree(d,w,c); } }
-  // the window moves on a day; after its last day it shuts
-  function mgNextDay(d){ if(!mgWindowOpen(d)) return;
-    mgAiTrades(d); if(d.phase==='winter') mgRest(d,3);   // (the winter break: three days' rest a day)
-    if(d.day>=MG_WINDOW[d.phase]){ const summer=d.phase==='summer';
-      d.phase='league'; d.day=0; d.offers=[]; d.bidMemo={}; mgTopUpYours(d); mgMidweek(d,null);
-      mgNews(d,summer?'The summer window has shut. The season starts.':'The window has shut.'); return; }
-    d.day++; mgAiBids(d); }
 
   // ===== WAGE & FINANCE LOOP (deletable) ======================================================
   const FIN_TIER={
@@ -14624,8 +14710,8 @@
   // a club's eight for a match: in a shape, its keeper, then in each spot the man who's best there -- in his own position
   // if it has one of its men for it, else in one of his second ones (see POSITIONS); short of a position, the best man
   // left. (No shape: the first eight.)
-  function careerSquad(club,form){
-    const ps=club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p) });
+  function careerSquad(club,form,pool){   // (pool: the men it picked for the game, else its whole squad)
+    const ps=pool||club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p) });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
     const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||condOvr(p)>condOvr(b))) b=p; if(b) used.add(b); return b; };
     const gk=best(p=>p.role==='GK')||best(()=>true);
@@ -14985,7 +15071,7 @@
     TEAM.R={code:op.code,name:op.name,col:opKit[0],kit:withLogo(opKit,kitSponsorOf(op)),gk:gk.R,crest:crestFor(op)};
     const gr=g.home?groundOfYours(d):groundOfClub(op); setMatchGround(gr,gr.name);
     teamLabels(); try{ SPRITE.flush(); }catch(e){} }
-  function mgPlay(d){ const g=mgNextGame(d); if(!g) return;
+  function mgPlay(d){ if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return;
     if(d.roster.length<1+OUTFIELD){ showNote('You need eight players to play.','var(--bad)'); return; }
     const opp=d.world.clubs[g.opp];
     EXH.on=false; mgSetTeams(d,g);
@@ -14993,18 +15079,19 @@
     setStyle('G',d.style); setStyle('R',opp.style);
     const me=careerLineupYours(d); SQUAD.G=me.squad; LINEUP.G=me.lineup; myForm=d.formation; myFormDef=d.formDef; PI.G=piClean(d.pinstr); PI.R=piClean(null);
     rForm=cwFormFor(opp); rFormDef=defFormFor(rForm,postureOf(opp.style));             // they line up in their own shapes
-    SQUAD.R=careerSquad(opp,rForm); LINEUP.R=defaultLineup(); LINEUP.R.def=mapDefOrder('R',LINEUP.R.atk);
+    const oxi=mgPickEight(opp.players||[],mgCtxOf(g),d,opp); MG_LIVE_XI={id:opp.id,ids:oxi.map(p=>p.id)};   // (their eight for it: the same choice as a simulated game's)
+    SQUAD.R=careerSquad(opp,rForm,oxi); LINEUP.R=defaultLineup(); LINEUP.R.def=mapDefOrder('R',LINEUP.R.atk);
     careerFix={opp:g.opp, home:g.home, kind:g.kind, recorded:false, train:lvOf(d,'train'), physio:lvOf(d,'physio')};
     matchReturn='hub'; resumable=false;
     document.getElementById('stageWrap').classList.remove('menuMode'); hideHub(); hideStartMenu(); SCREEN='match'; newMatch(); }
   function finishCareerMatch(cf){ const d=CAREER&&CAREER.data; careerFix=null; if(!d) return;
-    const logs=goalLog.slice(), rep=mgPlayGame(d,[scoreG,scoreR],logs);
+    const logs=goalLog.slice(), rep=mgPlayGame(d,[scoreG,scoreR],logs); MG_LIVE_XI=null;
     mgSave(d);
     document.getElementById('stageWrap').classList.add('menuMode'); showHubScreen();
     if(rep&&rep.mine) mgShowReport(d,rep,logs); }
   function mgResultWord(m){ return m.pens?(m.through?'WON ON PENALTIES':'LOST ON PENALTIES'):m.win?'WON':m.draw?'DREW':'LOST'; }
   function mgResultCol(m){ return m.win?'var(--good)':(m.draw&&!m.pens)?'var(--warn)':'var(--bad)'; }
-  function mgSim(d){ const g=mgNextGame(d); if(!g) return;
+  function mgSim(d){ MG_LIVE_XI=null; if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return;
     const rep=mgPlayGame(d,null,null); mgSave(d); renderHub();
     const m=rep&&rep.mine; if(!m) return;
     showNote(g.label+': '+(m.home?'vs ':'@ ')+mgNameOf(d,m.opp)+'  '+mgResultWord(m)+' '+m.you+'-'+m.them+(g.kind==='league'?'  ·  now '+ordinal(rep.posAfter):''), mgResultCol(m)); }
@@ -15066,7 +15153,10 @@
   function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
   function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
-  function refreshMenuButtons(){
+  // careers saved before the week (v3 and older) are cleared -- the season runs in weeks now -- and LOAD / NEW GAME say so
+  function mgSweepOld(){ let n=0; for(const k of SAVE_ORDER){ const d=readSave(k); if(d&&d.kind==='manager'&&(d.v||0)<MG_SAVE_V){ deleteSave(k); n++; } }
+    if(n) try{ localStorage.setItem('ft_mgr_cleared','1'); }catch(e){} }
+  function refreshMenuButtons(){ mgSweepOld();
     const has=anySaves();
     document.querySelectorAll('#smItems .smBtn[data-needsave]').forEach(b=>b.classList.toggle('disabled',!has));
     document.getElementById('smResume').style.display=resumable?'block':'none';
@@ -15303,8 +15393,6 @@
   // what's on screen (never saved): the man picked, a bid or deal in progress, list filters
   const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, stadOffer:null, qpSel:null};
   const MG_ROLE_CHIPS=[['ALL','ALL'],['GK','GK'],['DEF','DEF'],['MID','MID'],['ATT','ATT']];
-  function mgPhaseLabel(d){ return d.phase==='summer'?'Summer window · day '+d.day+'/'+MG_WINDOW.summer : d.phase==='winter'?'Winter window · day '+d.day+'/'+MG_WINDOW.winter
-    : d.phase==='league'?'Matchday '+Math.min(d.md+1,MG_MD)+'/'+MG_MD : d.phase==='playoffs'?'Playoffs':'Season over'; }
   function mgOvrTxt(d,p){ if(mgKnown(d,p)) return String(p.ovr); const r=mgRange(d,p); return r[0]+'–'+r[1]; }
   function mgSortOvr(d,p){ if(mgKnown(d,p)) return p.ovr; const r=mgRange(d,p); return (r[0]+r[1])/2; }
   // what he'd ask: from his true rating once scouted, else from the middle of his range
@@ -15345,8 +15433,9 @@
   function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
     return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll" data-pages="L:'+k+'">'+left+'</div>'+(foot||'')+'</div>'
     +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
-  function mgWindowLine(d){ return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">'+(d.phase==='summer'?'SUMMER':'WINTER')+' WINDOW OPEN · DAY '+d.day+' OF '+MG_WINDOW[d.phase]+'</div>'
-    :'<div class="mgSum">The transfer window is shut'+(d.phase==='league'&&d.md<MG_HALF?' until the winter break (after matchday '+MG_HALF+')':' until the summer')+'. Free agents can sign any time.</div>'; }
+  function mgWindowLine(d){ const w=mgWindowWeeks(d);
+    return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">THE WINDOW IS OPEN · '+(w>1?w+' WEEKS LEFT':'ITS LAST WEEK')+'</div>'
+    :'<div class="mgSum">The transfer window is shut until the summer. Free agents can sign any time.</div>'; }
   // ONE MAN, CLOSE UP, as his tactics card is: his figure, name, own position, style, age, stars, rating and potential on
   // top; one small button under his rating turns it over, his ratings (the six) or his deal (what he earns or costs, and
   // what you can do about him, each on a line). It never goes over pages, and there's no long text on it.
@@ -15583,16 +15672,19 @@
       el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=lock?LOCK_SVG+need:!L?kPrice(bldCost(id,1)):''; }
     { const el=document.querySelector('#careerHub .cpDeco'), lock=lvOf(d,'club')<DECOR_CL; if(el){ el.classList.toggle('locked',lock); el.querySelector('.bPrice').innerHTML=lock?LOCK_SVG+DECOR_CL:''; }
       const mv=document.querySelector('#careerHub .cpMove'); if(mv) mv.style.display=(d.deco||[]).length?'':'none'; }
-    let b=''; const g=mgNextGame(d), opp=g&&mgClub(d,g.opp);
-    if(mgWindowOpen(d)){ const last=d.day>=MG_WINDOW[d.phase]; b='<button class="chPlay" data-mg="nextday">'+(last?(d.phase==='summer'?'START THE SEASON ▶':'BACK TO THE LEAGUE ▶'):'NEXT DAY ▶')+'</button>'; }
-    else if(d.phase==='review') b='<button class="chPlay" data-mg="review">SEASON REVIEW ▶</button>';
+    // the week's button: on a Monday, on to the matchday (or the next week); on a matchday's morning, play it or simulate it
+    let b=''; const g=mgNextGame(d), opp=g&&mgClub(d,g.opp), mon=d.wday!=='wed'&&d.wday!=='sat';
+    if(d.phase==='review') b='<button class="chPlay" data-mg="review">SEASON REVIEW ▶</button>';
+    else if(mon) b='<button class="chPlay" data-mg="forward">'+mgForwardWord(d)+' ▶</button>';
     else if(g) b='<button class="chBtn2" data-mg="sim">SIMULATE ⏭</button><button class="chPlay" data-mg="play">PLAY ▶</button>';
     else b='<button class="chPlay" data-mg="continue">CONTINUE ▶</button>';
     document.getElementById('chBottom').innerHTML=b;
-    // along the campus's foot: where the season is and who's next (put shorter, if the strip's short of room), the money, the fans
-    const ph=document.getElementById('chPhase'), what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'';
-    ph.dataset.long='Season '+d.season+' · '+what+who; ph.dataset.mid=what+who;
-    ph.dataset.short=(g&&g.kind==='league'?'MD '+(d.md+1):g&&g.short?g.short:what)+(g&&opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):'');
+    // along the campus's foot: the week and its day, and the game (on a Monday, the week's first) -- put shorter, if the
+    // strip's short of room -- the money, the fans
+    const ph=document.getElementById('chPhase'), wk=mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'', what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):'';
+    ph.dataset.long='Season '+d.season+' · '+wk+(g?' · '+(mon?'next: ':'')+what+who:'');
+    ph.dataset.mid=g&&!mon?MG_DAY[d.wday]+' · '+what+who:wk;
+    ph.dataset.short=g&&!mon?(g.kind==='league'?'MD '+(d.md+1):g.short)+(opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):''):mgWeekShort(d);
     cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); }
   // ---- THE CAMPUS VIEW: the picture fitted to the space beside the menu -- at 1x (or more, to fill a big screen), the
   // middle of it in the middle -- and its buildings to tap; a building opens with the camera going in on it, and coming
@@ -15689,6 +15781,7 @@
   function openHub(key){ const d=readSave(key); if(!d||d.kind!=='manager') return; mgMigrate(d); CAREER={key,data:d};
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
   function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.scouted=d.scouted||{}; d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
+    if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0;
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
@@ -15754,12 +15847,12 @@
     switch(a){
       case 'play': mgPlay(d); return;
       case 'sim': mgSim(d); return;
-      case 'nextday': { if(document.getElementById('careerHub').classList.contains('dayscene')) return;   // (one day's end at a time)
-        const was=d.phase; mgNextDay(d); mgSave(d); renderHub();
-        dayScene(d,()=>{ if(d.phase!==was) showNote(was==='summer'?'The window has shut: the season starts.':'The window has shut: back to the league.','var(--good)'); }); return; }
+      case 'forward': { if(document.getElementById('careerHub').classList.contains('dayscene')) return;   // (one at a time)
+        const was=d.phase; mgForward(d); mgSave(d); renderHub();
+        dayScene(d,()=>{ if(d.phase!==was) showNote(was==='summer'?'Pre-season is over: the season starts on Saturday.':was==='winter'?'The winter break is over and the window has shut: back to the league.':'The season is over.','var(--good)'); }); return; }
       case 'continue': if(d.phase==='playoffs') mgPlayoffsOut(d); mgSave(d); renderHub(); return;
       case 'review': openBuilding('review'); return;
-      case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+MG_LEAGUE[d.tier]+': the summer window is open.','var(--good)'); return;
+      case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+MG_LEAGUE[d.tier]+': pre-season, and the window is open.','var(--good)'); return;
       case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
       case 'bidstep': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), cur=MGUI.bid&&MGUI.bid.pid===pid?MGUI.bid.fee:ask;
         MGUI.bid={pid,fee:Math.max(mgRound(ask*0.5),mgRound(cur+(+ds.dir)*Math.max(10,ask*0.05)))}; break; }
@@ -15931,9 +16024,9 @@
 
   // ---- a new career: you, your club, its colours ----
   function mgNewCareer(o){ const ft=FIN_TIER[1];
-    const d={ v:3, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
+    const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
-      tier:1, season:1, phase:'summer', day:1, md:0, week:0,
+      tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,boards:0,ads:[],deals:{},bids:{}}, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, scouted:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
@@ -15941,8 +16034,9 @@
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d);
-    mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. The summer window is open for '+MG_WINDOW.summer+' days.');
-    mgAiBids(d);
+    mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
+    d.wkN=d.weeks=1; mgAiBids(d,1.5);   // (its first Monday: the world as made, the computer clubs' business from the next)
+    try{ localStorage.removeItem('ft_mgr_cleared'); }catch(e){}
     return d; }
   // the card: CLUB (your name, the club's, its short name for the scoreboard), KIT (its colours), CREST (shape,
   // pattern, emblem and their colours -- the kit's until you pick your own). START works from any of them.
@@ -16001,8 +16095,10 @@
     else if(t.id==='mgCode'){ const v=t.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3); if(t.value!==v) t.value=v; MM.code=v; MM.codeSet=v.length>0; }
     else return;
     mmLive(); });
-  function renderSlots(containerId,isNew){
+  function renderSlots(containerId,isNew){ mgSweepOld();
     const cont=document.getElementById(containerId); cont.innerHTML='';
+    let cleared=false; try{ cleared=!!localStorage.getItem('ft_mgr_cleared'); }catch(e){}
+    if(cleared){ const n=document.createElement('div'); n.className='slotNote'; n.textContent='Careers from before the season ran in weeks were cleared.'; cont.appendChild(n); }
     for(const label of ['1','2','3']){
       const key=SAVE_KEYS[label], d=readSave(key), ok=!!(d&&d.kind==='manager'), name='SLOT '+label;
       const row=document.createElement('div'); row.className='slotRow';
