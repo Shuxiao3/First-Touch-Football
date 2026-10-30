@@ -14072,8 +14072,10 @@
     for(const c of mgAiClubs(d)) for(const p of c.players) if((p.hist||p.evs)&&(p.apps||0)>0) line(p,c.code,c.tier); }
 
   // ===== THE STAFF AND TRAINING FOCUS ==================================================================================
-  // Coaches: fitness (his legs and his stamina; fewer injuries, quicker recovery), technique (his touch), tactics (his
-  // reading of the game and his composure), goalkeeping (a keeper's work), and the academy's youth coach. One of each.
+  // Coaches develop players, nothing else: fitness (his legs and his stamina), technique (his touch: passing, shooting,
+  // dribbling, crossing, tackling, heading), tactics (his reading of the game -- Off IQ, Def IQ -- his composure and his
+  // interceptions), goalkeeping (a keeper's work), and the academy's youth coach. One of each. (Stamina on the day and
+  // injuries are the physio's: see INJURIES.)
   // The training pitch has a post for each of its levels (the youth coach's is the academy's). A coach is rated 1 to 10;
   // the better he is the more he costs, and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 for
   // League 2, 10 for the Premium League). Your training of each kind of attribute is the pitch's (0.58 + 0.07 a level)
@@ -14196,42 +14198,47 @@
 
   // ===== INJURIES =========================================================================================================
   // A man can get hurt: mostly in a game, now and then in training. A full game's risk (INJ_GAME) goes up when he's tired,
-  // past 29, not durable (his hidden durability), or back from one inside three weeks; a better physio (a computer club's:
-  // by its league) brings it down. How bad: a knock (a few days), a strain (two to four weeks), a torn muscle (one to three
-  // months), now and then something serious (four to nine months) -- worse the older and the less durable; the physio
-  // gets him back sooner. Out, he can't play; back, he's short of fitness. From 28 a tear or worse takes something off his
-  // legs for good, and their decline comes on sooner and steeper.
-  const INJ_GAME=0.013, INJ_TRAIN=0.0015, INJ_BACK=21;   // (a full game's risk, a week's training's, the days after a comeback that are risky)
+  // past 29, not durable (his hidden durability), or back from one inside three weeks. How bad: a knock (a few days), a
+  // strain (two to four weeks), a torn muscle (one to three months), now and then something serious (four to nine
+  // months) -- worse the older and the less durable. Out, he can't play; back, he's short of fitness. From 28 a tear or
+  // worse takes something off his legs for good, and their decline comes on sooner and steeper.
+  // THE PHYSIO (a computer club's: by its league) is the one against them: each level is as good as a point more
+  // durability for everyone (PHYSIO_DU: fewer injuries, and lighter ones), gets a man back PHYSIO_HEAL sooner, and
+  // PHYSIO_FIT fitter. The coaches have nothing to do with it: they develop players (see THE STAFF).
+  const INJ_GAME=0.017, INJ_TRAIN=0.002, INJ_BACK=21, INJ_FIT=0.8;   // (a full game's risk, a week's training's, the days after a comeback that are risky, how fit he comes back)
+  const PHYSIO_DU=1, PHYSIO_HEAL=0.1, PHYSIO_FIT=0.04;   // (a physio level's worth: durability, days off an injury, fitness on his return)
   const INJ_DAYS={knock:[3,8], strain:[10,28], tear:[30,90], serious:[120,270]};
   const INJ_NAME={knock:'a knock', strain:'a strain', tear:'a torn muscle', serious:'a serious injury'};
   const injPhysio=(d,p,c)=>c?Math.min(4,c.tier||1):lvOf(d,'physio');   // (yours, or a computer club's by its league)
+  const injDu=(d,p,c)=>Math.min(10,hvOf(p).du+PHYSIO_DU*injPhysio(d,p,c));   // (his durability against injuries, the physio's help in it)
   let INJ_OFF=false;   // (a test that needs a match's men all fit can turn injuries off)
-  function injRisk(d,p,share,c){ if(INJ_OFF) return 0; const h=hvOf(p);
-    let r=INJ_GAME*share*(1+2*(1-condOf(p)))*(1+0.08*Math.max(0,(p.age||25)-29))*(1.6-0.12*h.du);
+  function injRisk(d,p,share,c){ if(INJ_OFF) return 0;
+    let r=INJ_GAME*share*(1+2*(1-condOf(p)))*(1+0.08*Math.max(0,(p.age||25)-29))*(1.6-0.12*injDu(d,p,c));
     if(p.injB>0) r*=2.5;
     if(!c&&hasTrait(p,d,'determ')) r*=1.1;   // (he pushes too hard)
-    if(!c){ const fc=coachOf(d,'fit'); if(fc) r*=1-0.025*fc.r; }   // (the fitness coach: fewer)
-    return r*(1-0.06*injPhysio(d,p,c)); }
-  function injKind(p,u,train){ const h=hvOf(p), x=u+((p.age||25)>=30?0.06:0)+(5.5-h.du)*0.02-(train?0.25:0);
+    return r; }
+  // how bad (u: the roll; du: his durability with the physio's help -- without it, his own)
+  function injKind(p,u,train,du){ const x=u+((p.age||25)>=30?0.06:0)+(5.5-(du??hvOf(p).du))*0.02-(train?0.25:0);
     return x<0.55?'knock':x<0.85?'strain':x<0.97?'tear':'serious'; }
   const injWeeks=days=>days<7?'a few days':Math.round(days/7)+' week'+(Math.round(days/7)>1?'s':''), injShort=days=>days<7?days+'d':Math.round(days/7)+'w';
   const INJ_NOW=[];   // (yours hurt in the game being played: for its report)
   // he's hurt: how long, his legs if it's bad and he's 28 or more, the news if he's yours
-  function injHurt(d,p,kind,c,how){ const [lo,hi]=INJ_DAYS[kind], days=Math.max(2,Math.round((lo+(hi-lo)*Math.random())*(1-0.07*injPhysio(d,p,c))));
+  function injHurt(d,p,kind,c,how){ const [lo,hi]=INJ_DAYS[kind], days=Math.max(2,Math.round((lo+(hi-lo)*Math.random())*(1-PHYSIO_HEAL*injPhysio(d,p,c))));
     p.inj={k:kind,d:days}; delete p.injB;
     if((kind==='tear'||kind==='serious')&&(p.age||25)>=28){ devInit(p); const st=devUnpack(p.at), bs=devUnpack(p.bs||p.at), legs=['speed','acceleration','agility','stamina'];
       for(const k of legs.slice(0,kind==='serious'?3:1)){ st[k]=Math.max(1,st[k]-0.5); bs[k]=Math.min(bs[k],st[k]); }
       p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
     if(!c){ mgNews(d,p.name+' is out for '+injWeeks(days)+' ('+INJ_NAME[kind]+(how?', '+how:'')+').'); INJ_NOW.push({name:p.name,num:p.num,k:kind,d:days}); } }
   // the days go by: the injured heal, the fit come out of their risky weeks
-  function injHeal(d,n){ const L=[...d.roster,...(d.youth||[]),...mgAiClubs(d).flatMap(c=>c.players)];
-    for(const p of L){ if(p.inj){ p.inj.d-=n; if(p.inj.d<=0){ delete p.inj; p.injB=INJ_BACK; p.cond=Math.min(condOf(p),0.8); } } else if(p.injB>0){ p.injB-=n; if(p.injB<=0) delete p.injB; } } }
+  function injHeal(d,n){ const heal=(p,L)=>{ if(p.inj){ p.inj.d-=n; if(p.inj.d<=0){ delete p.inj; p.injB=INJ_BACK; p.cond=Math.min(condOf(p),INJ_FIT+PHYSIO_FIT*L); } } else if(p.injB>0){ p.injB-=n; if(p.injB<=0) delete p.injB; } };
+    const L=lvOf(d,'physio'); for(const p of [...d.roster,...(d.youth||[])]) heal(p,L);   // (back as fit as his physio gets him)
+    for(const c of mgAiClubs(d)) for(const p of c.players) heal(p,injPhysio(d,p,c)); }
   // after a simulated game: each man who played it, at his share's risk
   function injAfterGame(d,id,men){ const c=id===d.clubId?null:d.world.clubs[id];
-    for(const [p,share] of men) if(!p.inj&&Math.random()<injRisk(d,p,share,c)) injHurt(d,p,injKind(p,Math.random()),c,'in a game'); }
+    for(const [p,share] of men) if(!p.inj&&Math.random()<injRisk(d,p,share,c)) injHurt(d,p,injKind(p,Math.random(),false,injDu(d,p,c)),c,'in a game'); }
   // a week's training: a knock now and then
-  function injTraining(d){ for(const p of d.roster) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,null)) injHurt(d,p,injKind(p,Math.random(),true),null,'in training');
-    for(const c of mgAiClubs(d)) for(const p of c.players) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,c)) injHurt(d,p,injKind(p,Math.random(),true),c); }
+  function injTraining(d){ for(const p of d.roster) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,null)) injHurt(d,p,injKind(p,Math.random(),true,injDu(d,p,null)),null,'in training');
+    for(const c of mgAiClubs(d)) for(const p of c.players) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,c)) injHurt(d,p,injKind(p,Math.random(),true,injDu(d,p,c)),c); }
   function mgWage(ovr){ return Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10); }
   // seasons left on his deal, this one included (0: out of contract)
   function mgLeft(d,p){ return Math.max(0,(p.until||0)-d.season+1); }
@@ -14356,7 +14363,7 @@
   function condCost(p){ return clamp(0.22+0.012*(10-(mgStats(p).stamina||5))+0.01*Math.max(0,(p.age||25)-30),0.2,0.4); }
   function condTire(p,share){ if(p&&share>0) p.cond=clamp(condOf(p)-condCost(p)*share,COND_MIN,1); }
   function mgRest(d,days){ if(!(days>0)) return; const back=(p,r)=>{ if(p.cond==null) return; p.cond=Math.min(1,p.cond+r*days); if(p.cond>=1) delete p.cond; };
-    const fc=coachOf(d,'fit'), yr=(COND_DAY[lvOf(d,'physio')]||COND_DAY[0])*(fc?1+0.02*fc.r:1); for(const p of d.roster) back(p,yr);   // (the fitness coach: quicker back)
+    const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
     for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
   function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
   // A COMPUTER CLUB'S EIGHT FOR A GAME: its best keeper and seven best outfielders on the day -- but not always. Up to
@@ -14407,7 +14414,7 @@
     if(live&&SQUAD.G&&SQUAD.R){ const t=id===d.clubId?'G':'R', L=LINEUP[t], on=new Set([L.gk,...L.atk]), S=SUBS[t]||{on:[],off:[]}, P=mgPlayersOf(d,id);
       SQUAD[t].forEach((e,si)=>{ const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return;
         const sh=S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0; condTire(p,sh); if(sh) p.mw=(p.mw||0)+sh; if(sh&&t==='G') p.wmw=(p.wmw||0)+sh;
-        if(HURT[t].has(si)&&!p.inj) injHurt(d,p,injKind(p,Math.random()),id===d.clubId?null:d.world.clubs[id],'in the game'); }); return; }   // (LINEUP is the eight at the end: a sub's in it)
+        if(HURT[t].has(si)&&!p.inj){ const c=id===d.clubId?null:d.world.clubs[id]; injHurt(d,p,injKind(p,Math.random(),false,injDu(d,p,c)),c,'in the game'); } }); return; }   // (LINEUP is the eight at the end: a sub's in it)
     for(const p of xi){ condTire(p,1); p.mw=(p.mw||0)+1; if(id===d.clubId) p.wmw=(p.wmw||0)+1; }
     const subs=devSimSubs(d,id,xi); injAfterGame(d,id,[...xi.map(p=>[p,1]),...subs.map(p=>[p,0.35])]); }
 
@@ -15707,7 +15714,7 @@
     club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
     train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take, your subs and your coaches', tabs:['Tactics','Selection','Subs','Staff','Pitch']},
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
-    physio:  {title:'PHYSIO', sub:'keeps your players going', tabs:null},
+    physio:  {title:'PHYSIO', sub:'stamina on match day, and injuries', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
     academy: {title:'ACADEMY', sub:'your own youngsters', tabs:['Prospects','Facilities']},
     stadium: {title:'STADIUM', sub:'tickets, stands, sponsors and the money', tabs:['Money','Stands','Sponsors','Concessions']},
@@ -15733,7 +15740,7 @@
   const BLD_NAME={club:'the clubhouse', train:'the training pitch', market:'the transfer market', physio:'the physio’s clinic', scouting:'the scouts’ house', academy:'the youth academy', stadium:'the stadium'};
   const BLD_WHAT={
     market:'Agents’ numbers on your phone: bid for any player at another club while a window’s open, sign free agents any time, and sell your own. Till you’re on it, there’s no buying or selling.',
-    physio:'Keeps your players going: fitter again sooner between games, more of their legs back at half-time, and built up they tire more slowly through a game. A little help in a simulated game too.',
+    physio:'Keeps your players going: they tire more slowly through a game, get more of their legs back at half-time and are fitter again sooner between games; and fewer injuries, lighter ones, back from them sooner and fitter.',
     scouting:'Send scouts round a league to find out what its players are really worth, and grow the network. Till it’s up, a player at another club is a range of ratings, and you can’t scout him.',
     academy:'Youngsters of your own: a new intake every summer (the first the day it opens), and facilities to build up.'};
   const LOCK_SVG='<svg class="lkI" viewBox="0 0 8 10" aria-hidden="true"><path d="M2 4.5V3a2 2 0 0 1 4 0v1.5"/><rect x="1" y="4.5" width="6" height="5" rx="1"/></svg>';
@@ -15813,11 +15820,15 @@
       +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level opens more shapes, styles and instructions, and a post for a coach (Staff).</div></div></div>'
       +lvlRows(d,'train',4,trainAdds)+lvlNext(d,'train','BUILD IT UP'); }   // (the levels and the price over pages, if they must)
   // ---- the physio ----
+  // THE PHYSIO: stamina on match day (tiring more slowly through a game, more of their legs back at half-time, fitter again
+  // between games) and injuries (fewer and lighter, back from one sooner and fitter: see INJURIES)
   const PHYSIO_HT=[25,35,45,55,65], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];
+  const physFewer=L=>Math.round((1-(1.6-0.12*Math.min(10,5.5+PHYSIO_DU*L))/(1.6-0.12*5.5))*100);   // (an ordinary man's injuries, fewer by)
   function mgPhysioBody(d){ const L=lvOf(d,'physio');
     return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.bld.physio,'b:physio')+'<div class="bpBuildTxt"><div class="bpSect">THE PHYSIO · LEVEL '+L+' OF 4</div>'
-      +finRow('Between games',(COND_DAY[L]*100).toFixed(1)+'% fitter a day')+finRow('Back at half-time',PHYSIO_HT[L]+'% of the legs they’ve lost')+finRow('Through a game',PHYSIO_WEAR[L]?'tiring '+PHYSIO_WEAR[L]+'% slower':'tiring as ever')+'</div></div>'
-      +lvlRows(d,'physio',4,k=>(COND_DAY[k]*100).toFixed(1)+'% a day, '+PHYSIO_HT[k]+'% back, '+PHYSIO_WEAR[k]+'% slower to tire')+lvlNext(d,'physio','BUILD IT UP'); }
+      +finRow('In a game',PHYSIO_WEAR[L]?'tiring '+PHYSIO_WEAR[L]+'% slower':'tiring as ever')+finRow('At half-time',PHYSIO_HT[L]+'% of lost legs back')+finRow('Between games',(COND_DAY[L]*100).toFixed(1)+'% fitter a day')
+      +finRow('Injuries',L?physFewer(L)+'% fewer, lighter':'as they come')+finRow('Back from one',(L?Math.round(PHYSIO_HEAL*L*100)+'% sooner, ':'')+Math.round((INJ_FIT+PHYSIO_FIT*L)*100)+'% fit')+'</div></div>'
+      +lvlRows(d,'physio',4,k=>PHYSIO_WEAR[k]+'% slower to tire · '+physFewer(k)+'% fewer injuries · back '+Math.round(PHYSIO_HEAL*k*100)+'% sooner')+lvlNext(d,'physio','BUILD IT UP'); }
   // ---- the decorations: bought one at a time and put where you like on the lawn (not on a building, a plot or another
   // one), moved later, or put away in store. Each is [id, name, tab, price]
   const DECO_SHOP=[

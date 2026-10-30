@@ -969,13 +969,18 @@ The same game played like any other football game. It's a copy of `index.html` w
       then a man with poor Stamina, or past 30, can run down to 60% or so: a game costs him more than two days' rest
       gives back, so rest him now and then.
   - **Injuries.** A man can get hurt -- mostly in a game, now and then in training. A full game costs a fresh,
-    ordinary man of 25 about a 1.2% chance; more when he's tired (2.2% at 60% fit), past 29, not durable (a hidden
-    value), or in the three weeks after he's back from one (x2.5); less with a better physio (a computer club's by its
-    league). In a season the four leagues have about 300 (five or six a club).
+    ordinary man of 25 about a 1.6% chance with no physio; more when he's tired (2.9% at 60% fit), past 29, not durable
+    (a hidden value), or in the three weeks after he's back from one (x2.5). In a season the four leagues have about
+    300 (five or six a club).
+    - **The physio is the one against them** (a computer club's by its league): each level is as good as a point more
+      durability for every man (to 10 at most) -- fewer injuries (an ordinary man's risk 1.6% a game with none, 1.4%,
+      1.2%, 1.0%, 0.8% with the best: half) and lighter ones -- gets a man back 10% sooner a level (40% with the
+      best), and back fitter (80% with none, 4% more a level: 96% with the best). The coaches have nothing to do
+      with injuries: they develop players.
     - **How bad**: a knock (3 to 8 days) more than half the time, a strain (10 to 28 days) three times in ten, a torn
       muscle (30 to 90 days) about one in eight, now and then something serious (four to nine months) -- worse the
-      older and the less durable; in training mostly knocks. The best physio gets a man back about a quarter sooner.
-      He heals by the day, and comes back 80% fit. From 28, a torn muscle or worse takes half a point off his legs for
+      older and the less durable; in training mostly knocks. He heals by the day, and comes back short of fitness
+      (see the physio, above). From 28, a torn muscle or worse takes half a point off his legs for
       good, and their decline comes on sooner and steeper; younger, it heals clean.
     - **Who plays**: the computer never picks a man who's hurt. Yours, if he's in your eight at kick-off (PLAY or
       SIMULATE), gives his place to the best fit off the bench -- a man of his line, the fittest -- and the hub says so;
@@ -1051,8 +1056,11 @@ The same game played like any other football game. It's a copy of `index.html` w
       youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
       season; from your second the news says when one goes (in the first, every debut would be one).
   - **The staff and training focus.**
-    - **Coaches**: fitness (his legs and his stamina), technique (his touch), tactics (his reading of the game and
-      his composure), goalkeeping (a keeper's work), and the academy's youth coach -- one of each. The training pitch
+    - **Coaches** each develop one kind of attribute: fitness the physical ones (speed, acceleration, agility,
+      stamina, strength), technique the technical ones (ball control, dribbling, passing, crossing, curve, shot power
+      and accuracy, long shots, heading, tackling, sliding), tactics the mental ones (Off IQ, Def IQ, composure,
+      interceptions), goalkeeping a keeper's (reflexes, reach, diving, distribution), and the academy's youth coach
+      its lads -- one of each. The training pitch
       has a post for each of its levels (one at 1, four at 4); the youth coach has the academy's own post. The
       Training building's **Staff** tab shows your posts and who's in them, and six men to hire (and a youth coach,
       with an academy), new ones every four weeks.
@@ -1063,9 +1071,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **What they do**: your training of each kind of attribute is the pitch's (0.58 + 0.07 a level: 0.65 at level
       1, 0.86 at 4) and its coach's (0.04 a point above 1; 1.15 at most) -- a level-1 pitch and no coaches trains as
       it always did, and a coach never makes it worse. A technique coach rated 8 at a level-4 pitch: 1.14 for the
-      touch, 0.86 for the rest. The fitness coach also means fewer injuries (2.5% fewer a point: a fifth at 8) and
-      quicker recovery between games (2% a point); the youth coach, a better academy (0.04 a point on its training).
-      A computer club trains by its league, as before.
+      touch, 0.86 for the rest. The youth coach makes a better academy (0.04 a point on its training). Coaches develop
+      players and nothing else: stamina on the day and injuries are the physio's (see **Injuries** and **The
+      campus**). A computer club trains by its league, as before.
     - **A man's FOCUS** (RATINGS side of his card, a tap a step: BALANCED, PHYSICAL, TECHNIQUE, MENTAL, and a
       keeper's KEEPING) puts his training on one kind: a quarter more there, a tenth less on the rest. His card's
       season facts make room for it: ASSISTS · CS for a defender or keeper, RATING · FORM beside FOCUS.
@@ -1265,10 +1273,12 @@ The same game played like any other football game. It's a copy of `index.html` w
         instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
         the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
       - **The transfer market** is your phone, not a building on the campus: TRANSFERS in the menu, straight in.
-      - **The physio**: between games your men get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2%
-        at level 1 up to 7.5% at 4. Without one they get back a quarter of the legs they've lost at half-time; with
-        one, 35% at level 1 up to 65% at 4, and through a game their legs go 8% slower a level (32% at 4). In a
-        simulated game it's worth a little more: 0.4 a level on your side's rating.
+      - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
+        (32% at 4); at half-time they get back a quarter of the legs they've lost without one, 35% at level 1 up to
+        65% at 4; between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
+        up to 7.5% at 4; in a simulated game it's worth 0.4 a level on your side's rating. Injuries: each level is a
+        point more durability for every man (fewer and lighter: half as many with the best), 10% sooner back, and 4%
+        fitter on his return (see **Injuries**). Its screen says all of it, level by level.
       - **The scouts' house** is scouting (see **Scouting**): its level is the network's.
       - **The youth academy**: its first intake the day it opens, then one every summer; its level is its facilities'.
     - **Decorations** come with the clubhouse (level 3): DECORATE, at the campus's top, sells thirty -- thirteen

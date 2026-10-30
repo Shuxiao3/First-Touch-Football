@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, INJURIES: a man can get hurt -- mostly in a game, now and then in training. The risk goes up when
-// he's tired, past 29, not durable (hidden), or just back from one; a better physio brings it down. A knock, a strain, a
-// torn muscle, now and then something serious, worse the older and the less durable, shorter with a better physio; from
+// he's tired, past 29, not durable (hidden), or just back from one; a better physio brings it down (a point more
+// durability for everyone a level). A knock, a strain, a torn muscle, now and then something serious, worse the older
+// and the less durable, lighter and shorter with a better physio, and back fitter; from
 // 28 a tear or worse takes something off his legs for good, and their decline comes sooner. He heals by the day and
 // comes back short of fitness. The computer never picks a man who's hurt; yours, if he's in your eight at kick-off, is
 // replaced by the best fit off the bench, and the injured aren't among the subs. A season of them, the news saying who.
@@ -52,6 +53,18 @@ ok(Math.abs(r.game.knock - 55) <= 6 && Math.abs(r.game.strain - 30) <= 6 && r.ga
 ok(r.knock.lo >= 2 && r.knock.hi <= 8 && r.strain.lo >= 10 && r.strain.hi <= 28 && r.tear.lo >= 30 && r.tear.hi <= 90 && r.serious.lo >= 120 && r.serious.hi <= 270,
   'out for: a knock ' + r.knock.lo + '-' + r.knock.hi + ' days, a strain ' + r.strain.lo + '-' + r.strain.hi + ', a tear ' + r.tear.lo + '-' + r.tear.hi + ', something serious ' + r.serious.lo + '-' + r.serious.hi);
 ok(r.tearPhys.mean < r.tear.mean * 0.8, 'the best physio gets a man back sooner (a tear: ' + r.tear.mean + ' days on average, ' + r.tearPhys.mean + ' with the best)');
+
+// --- the physio: each level a point more durability for everyone (fewer and lighter), back sooner and fitter -------------------
+r = await K(`(()=>{ const d=CAREER.data, p=XP(); delete p.injB; delete p.cond; const R=[0,1,2,3,4].map(L=>{ d.lv.physio=L; return injRisk(d,p,1,null); });
+  const N=6000, bad=L=>{ d.lv.physio=L; const du=injDu(d,p,null); let n=0; for(let i=0;i<N;i++){ const k=injKind(p,Math.random(),false,du); if(k==='tear'||k==='serious') n++; } return +(n/N*100).toFixed(1); };
+  const s0=bad(0), s4=bad(4), back=L=>{ d.lv.physio=L; const q=XP(); q.inj={k:'strain',d:1}; d.roster.push(q); injHeal(d,1); d.roster.pop(); return +condOf(q).toFixed(2); };
+  const b0=back(0), b4=back(4), hardy=XP(); hardy.hv='jjjjsjjjj'; d.lv.physio=4; const cap=injDu(d,hardy,null);
+  d.lv.physio=2; const screen=mgPhysioBody(d).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); d.lv.physio=0;
+  return { R:R.map(x=>+(x*100).toFixed(2)), ratio:+(R[4]/R[0]).toFixed(2), s0, s4, b0, b4, cap, screen }; })()`);
+info('the physio: ' + JSON.stringify(r));
+ok(r.R.every((v, i) => !i || v < r.R[i - 1]) && Math.abs(r.ratio - 0.49) < 0.02, 'each physio level is a point more durability for everyone: an ordinary man\'s risk a game ' + r.R.join('%, ') + '% at levels 0 to 4 (half at the best)');
+ok(r.s4 < r.s0 * 0.8 && r.b0 === 0.8 && r.b4 === 0.96 && r.cap === 10, 'lighter too (a tear or worse ' + r.s0 + '% of the time with none, ' + r.s4 + '% with the best), and back fitter (' + r.b0 + ', ' + r.b4 + ' with the best); nobody past 10');
+ok(/In a game tiring 16% slower/.test(r.screen) && /Injuries \d+% fewer, lighter/.test(r.screen) && /Back from one 20% sooner, 88% fit/.test(r.screen), 'the physio\'s screen says what it does: ' + r.screen.slice(r.screen.indexOf('THE PHYSIO'), r.screen.indexOf('THE PHYSIO') + 190));
 
 // --- late in a career: a bad one takes something off his legs, and they go sooner ------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, a=XP(30), b=XCL(a), a0=devUnpack(a.at), K4=['speed','acceleration','agility','stamina'];

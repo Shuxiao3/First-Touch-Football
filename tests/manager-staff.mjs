@@ -1,8 +1,9 @@
 // FOOTBALL CLASSIC, THE STAFF AND TRAINING FOCUS: coaches for fitness, technique, tactics and goalkeeping, a post for
 // each of the training pitch's levels, and the academy's youth coach. Rated 1 to 10, dearer the better, the best
 // won't come to a small club; hiring needs a free post, one of a kind, four weeks' wages in the budget; releasing one
-// pays four weeks. Their wages go on the bill. Your training of each kind of attribute is the pitch's and its coach's;
-// the fitness coach also means fewer injuries and quicker recovery, the youth coach a better academy. A man's FOCUS
+// pays four weeks. Their wages go on the bill. Your training of each kind of attribute is the pitch's and its coach's
+// (coaches develop players, nothing else: injuries and stamina on the day are the physio's), the youth coach a better
+// academy. A man's FOCUS
 // (his card) puts his training on one kind: more there, a little less elsewhere. The Staff tab and the cards fit a
 // phone. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
@@ -93,7 +94,7 @@ r = await K(`(()=>{ const d=CAREER.data, p=d.roster[3], S=d.staff; INJ_OFF=false
   d.staff=[{id:96,k:'youth',r:6,wage:100,name:'y'}]; mgDevelop(d); const y6=seen; devTick=keep; d.staff=S;
   return { r:+(r8/r0).toFixed(3), c0:+c0.toFixed(4), c8:+c8.toFixed(4), y0:+y0.toFixed(2), y6:+y6.toFixed(2) }; })()`);
 info('the fitness and youth coaches: ' + JSON.stringify(r));
-ok(r.r === 0.8 && r.c8 > r.c0, 'a fitness coach rated 8: a fifth fewer injuries (risk x' + r.r + '), quicker back between games (' + r.c8 + ' against ' + r.c0 + ' after a day)');
+ok(r.r === 1 && r.c8 === r.c0, 'a fitness coach develops a man\'s legs and nothing else: no fewer injuries (risk x' + r.r + '), no quicker back between games (' + r.c8 + ', ' + r.c0 + ' after a day) -- those are the physio\'s');
 ok(Math.abs(r.y6 - r.y0 - 0.24) < 0.001, 'a youth coach rated 6: the academy trains better (' + r.y0 + ' to ' + r.y6 + ')');
 
 // --- the Staff tab -----------------------------------------------------------------------------------------------------------------------
