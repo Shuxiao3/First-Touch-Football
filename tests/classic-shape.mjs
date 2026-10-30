@@ -19,7 +19,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, holderOf, teamPlan, PLAN:()=>PLAN, mkPlanState, '
-  + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, '
+  + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, setStyle, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
   + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
@@ -29,9 +29,11 @@ writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
-// Liverpool (2-2-3 with the ball, 2-4-1 without) v Manchester City (3-1-3 / 3-3-1), both BALANCED, nothing changed
-await page.evaluate(() => { const T = window.__T; T.EXH.you = 'LIV'; T.EXH.opp = 'MCI'; });
+// Liverpool (2-2-3 with the ball, 2-4-1 without) v Manchester City (3-1-3 / 3-3-1), both BALANCED (not their clubs' own
+// ways, GEGENPRESS and CONTROL POSSESSION: the shape as coached is the balanced one), nothing else changed
+await page.evaluate(() => { const T = window.__T; T.EXH.you = 'LIV'; T.EXH.opp = 'MCI'; localStorage.removeItem('ft_clubsq'); });
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(1500);
+await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); });
 await page.evaluate(() => { const T = window.__T, M = T.MK;
   // a scene: every outfield man at (u m from his own goal, w m across: + toward y=FH), the rest where they stand
   window.__at = (q, u, w) => { const a = T.atkOf(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; };

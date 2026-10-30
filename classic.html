@@ -377,6 +377,7 @@
   canvas.exhKit{width:64px;height:64px;image-rendering:pixelated;border:0;border-radius:0;box-shadow:none;background:none;}
   .exhName{font-family:'FTC Dot',monospace;font-size:15px;line-height:22px;height:22px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
   .exhMeta{font-size:10px;color:var(--dim);letter-spacing:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  .exhStyle{font:10px 'FTC Dot',monospace;color:var(--acc);letter-spacing:1px;white-space:nowrap;}   /* (how the club plays: its style) */
   .exhGrid{display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;width:100%;margin-top:8px;}
   .exhGrid.on{display:grid;}
   .exhChip{display:flex;align-items:center;gap:7px;border:1px solid var(--well);border-radius:7px;background:rgb(var(--accRGB) / .04);color:var(--ink2);font-family:inherit;font-size:11px;padding:6px 7px;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -1228,6 +1229,8 @@
   .mtacCard h3{ font-family:'FTC Dot',monospace; color:var(--ink); font-size:17px; letter-spacing:1px; text-shadow:2px 2px 0 var(--ol); }
   .mtacBody{ flex:1 1 auto; min-height:0; background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin); }
   .mtSubs{ font:11px 'FTC Dot',monospace; color:var(--acc); letter-spacing:1px; }
+  .mtKick{ display:none; flex:none; margin-left:6px; color:var(--accInk); background:var(--acc); }   /* (before kick-off only: #mtacOv.pre) */
+  #mtacOv.pre .mtKick{ display:block; }
   .mtacBody .ptk{ position:absolute; }
   .mtacBody .tbBench .ptk{ position:relative; }
   .tacB1 .ptk.dim{ opacity:.45; }
@@ -1311,6 +1314,7 @@
         <div class="exhGrid" id="exhGrid" data-pages="exhGrid"></div>
         <div class="exhGo">
           <button class="smBtn" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
+          <button class="smBtn" data-exh="tac" id="exhTac"><span class="mk">☰</span>TACTICS</button>
           <button class="smBtn" data-act="back"><span class="mk">◀</span>BACK</button>
         </div>
       </div>
@@ -1433,7 +1437,7 @@
 </div>
 <div id="mtacOv" class="pauseOv"><div class="mtacCard">
   <div class="bpHead"><button class="bpTopBack" data-mt="back">◀ BACK</button><h3>TACTICS</h3><span class="mtSubs" id="mtSubs"></span>
-    <div class="bpTabs" id="mtTeams"></div></div>
+    <div class="bpTabs" id="mtTeams"></div><button class="bpTab mtKick" data-mt="kick" id="mtKick">KICK OFF ▶</button></div>
   <div class="mtacBody" id="mtacBody"></div>
   <div class="bpMsg" id="mtMsg"></div>
 </div></div>
@@ -1836,6 +1840,7 @@
     fluid:   {off:'counter', def:'neutral',  brk:'fluid'},
     dcounter:{off:'counter', def:'lowblock', brk:'direct'}};
   const STYLE_LIST=[['neutral','BALANCED'],['gegen','GEGENPRESS'],['control','CONTROL POSSESSION'],['wing','WING PLAY'],['direct','DIRECT'],['fluid','FLUID COUNTER'],['dcounter','DIRECT COUNTER']];
+  const styleName=k=>(STYLE_LIST.find(s=>s[0]===k)||STYLE_LIST[0])[1];
   // a style as saved before the posture went into it (a style, and a posture beside it): tiki-taka keeps the ball now as
   // CONTROL POSSESSION, a counter that sat deep is a DIRECT COUNTER and one that didn't FLUID, and a balanced side that
   // pressed high GEGENPRESS; anything else, BALANCED
@@ -2483,27 +2488,29 @@
   // (a back four is two here, a front three three) -- its squad is made for it. The players are made up: the same
   // eight each time.
   const CLUB_LEAGUE='PREMIER LEAGUE · 2026/27';
+  // each club in its own shape and its own way of playing (style: see STYLE_TAC) -- yours too, until you change it
+  // (then it's kept with the club: clubSide, saveClubSides)
   const CLUBS=[
-    {id:'ARS',name:'Arsenal',           form:'2-2-3', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
-    {id:'AVL',name:'Aston Villa',       form:'2-4-1', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
-    {id:'BOU',name:'Bournemouth',       form:'2-3-2', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
-    {id:'BRE',name:'Brentford',         form:'3-2-2', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
-    {id:'BHA',name:'Brighton',          form:'2-4-1', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
-    {id:'CHE',name:'Chelsea',           form:'2-4-1', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
-    {id:'COV',name:'Coventry City',     form:'2-3-2', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
-    {id:'CRY',name:'Crystal Palace',    form:'3-3-1', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
-    {id:'EVE',name:'Everton',           form:'2-3-2', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
-    {id:'FUL',name:'Fulham',            form:'2-4-1', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
-    {id:'HUL',name:'Hull City',         form:'1-4-2', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
-    {id:'IPS',name:'Ipswich Town',      form:'3-3-1', str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
-    {id:'LEE',name:'Leeds United',      form:'2-2-3', str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
-    {id:'LIV',name:'Liverpool',         form:'2-2-3', str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
-    {id:'MCI',name:'Manchester City',   form:'3-1-3', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
-    {id:'MUN',name:'Manchester United', form:'3-3-1', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
-    {id:'NEW',name:'Newcastle United',  form:'2-3-2', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
-    {id:'NFO',name:'Nottingham Forest', form:'3-2-2', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
-    {id:'SUN',name:'Sunderland',        form:'3-3-1', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
-    {id:'TOT',name:'Tottenham Hotspur', form:'1-3-3', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
+    {id:'ARS',name:'Arsenal',           form:'2-2-3', style:'control', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
+    {id:'AVL',name:'Aston Villa',       form:'2-4-1', style:'fluid', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
+    {id:'BOU',name:'Bournemouth',       form:'2-3-2', style:'gegen', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
+    {id:'BRE',name:'Brentford',         form:'3-2-2', style:'direct', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
+    {id:'BHA',name:'Brighton',          form:'2-4-1', style:'control', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
+    {id:'CHE',name:'Chelsea',           form:'2-4-1', style:'wing', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
+    {id:'COV',name:'Coventry City',     form:'2-3-2', style:'neutral', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
+    {id:'CRY',name:'Crystal Palace',    form:'3-3-1', style:'dcounter', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
+    {id:'EVE',name:'Everton',           form:'2-3-2', style:'direct', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
+    {id:'FUL',name:'Fulham',            form:'2-4-1', style:'neutral', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
+    {id:'HUL',name:'Hull City',         form:'1-4-2', style:'neutral', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
+    {id:'IPS',name:'Ipswich Town',      form:'3-3-1', style:'control', str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
+    {id:'LEE',name:'Leeds United',      form:'2-2-3', style:'wing', str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
+    {id:'LIV',name:'Liverpool',         form:'2-2-3', style:'gegen', str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
+    {id:'MCI',name:'Manchester City',   form:'3-1-3', style:'control', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
+    {id:'MUN',name:'Manchester United', form:'3-3-1', style:'wing', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
+    {id:'NEW',name:'Newcastle United',  form:'2-3-2', style:'gegen', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
+    {id:'NFO',name:'Nottingham Forest', form:'3-2-2', style:'dcounter', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
+    {id:'SUN',name:'Sunderland',        form:'3-3-1', style:'fluid', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
+    {id:'TOT',name:'Tottenham Hotspur', form:'1-3-3', style:'wing', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
   ];
   const clubById=id=>CLUBS.find(c=>c.id===id)||null;
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
@@ -2570,16 +2577,21 @@
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
-      const f=formOKAtk(o.form,'2-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, pi:piClean(o.pi)};
+      const f=formOKAtk(o.form,'2-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, pi:piClean(o.pi),
+        style:STYLE_TAC[o.style]?o.style:null, width:o.width||null};
     }
-    return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form, dform:null, pi:piClean(null)};
+    return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form, dform:null, pi:piClean(null), style:null, width:null};
   }
   // a side cut to n men: its starters, and the first of the rest (the bench), the lineup renumbered to match
   function trimSide(o,n){ const li=o.lineup, xi=new Set([li.gk,...(li.atk||[])]), keep=[...xi].concat(o.squad.map((e,i)=>i).filter(i=>!xi.has(i))).slice(0,n).sort((a,b)=>a-b);
     const to={}; keep.forEach((i,k)=>to[i]=k); o.squad=keep.map(i=>o.squad[i]);
     li.gk=to[li.gk]; li.atk=(li.atk||[]).map(i=>to[i]); li.def=(li.def||li.atk).map(i=>to[i]); }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
-    all[EXH.play.you]={squad:SQUAD.G, lineup:LINEUP.G, form:myForm, dform:myFormDef, pi:piClean(PI.G)}; all[EXH.play.opp]={squad:SQUAD.R, lineup:LINEUP.R, form:rForm, dform:rFormDef, pi:piClean(PI.R)};
+    const side=(id,t,form,dform,pi)=>{ const o={squad:SQUAD[t], lineup:LINEUP[t], form, dform, pi:piClean(pi)}, c=clubById(id)||{};
+      if(TAC[t].style!==(c.style||'neutral')) o.style=TAC[t].style;                    // (kept only if it isn't the club's own)
+      if(JSON.stringify(widthObj(TAC[t].width))!==JSON.stringify(widthObj())) o.width=widthObj(TAC[t].width);
+      return o; };
+    all[EXH.play.you]=side(EXH.play.you,'G',myForm,myFormDef,PI.G); all[EXH.play.opp]=side(EXH.play.opp,'R',rForm,rFormDef,PI.R);
     localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
   // ---- CRESTS: a club's badge, 16 x 18 pixel art -- a shape, a pattern in the club's two colours, an emblem in a
   //      third, a dark outline. Yours is made on the NEW CAREER card; every other club's is drawn from its name and
@@ -13282,7 +13294,7 @@
   // The other side: look, don't touch. =====
   const SUB_MAX=3;
   let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
-  const MT={team:'G', phase:'atk', drop:null, sel:null};
+  const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false};
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
   const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
   function mtRating(e,role,pos){ return !e?0:rateAt(e.role,e.ovr,e.stats,natPos(e),role,pos); }
@@ -13295,7 +13307,7 @@
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,L,T,kind,role,k,pos){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);
-    return '<button class="ptk'+fitCls(natPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtCanSub(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
+    return '<button class="ptk'+fitCls(natPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
@@ -13335,9 +13347,25 @@
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
     document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
-    document.getElementById('mtSubs').textContent=mtBench('G').length||SUBS.G.used?'SUBS LEFT '+(SUB_MAX-SUBS.G.used):''; }
-  function openMatchTac(){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; menuOpen=true; document.getElementById('mtacOv').classList.add('on'); renderMatchTac(); }
-  function closeMatchTac(){ menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on'); if(SCREEN==='match') openPause(); }
+    document.getElementById('mtSubs').textContent=MT.pre?'BEFORE KICK-OFF':mtBench('G').length||SUBS.G.used?'SUBS LEFT '+(SUB_MAX-SUBS.G.used):''; }
+  // pre: before an exhibition's kick-off (kickOffExhibition) -- ◀ CLUBS back to the setup screen, KICK OFF ▶ to play, and a
+  // man off the bench for one in the team a change of team, not a sub (mtLineup)
+  function openMatchTac(pre){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.pre=!!pre; menuOpen=true;
+    const ov=document.getElementById('mtacOv'); ov.classList.add('on'); ov.classList.toggle('pre',MT.pre);
+    ov.querySelector('.bpTopBack').textContent=MT.pre?'◀ CLUBS':'◀ BACK'; renderMatchTac(); }
+  function closeMatchTac(){ if(MT.pre){ mtBackToClubs(); return; }
+    menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on'); if(SCREEN==='match') openPause(); }
+  function mtShut(){ MT.pre=false; MT.drop=null; menuOpen=false; document.getElementById('mtacOv').classList.remove('on','pre'); }
+  function mtKickOff(){ mtShut(); resetKickoff('G'); }                // (everyone in his spot in the shape you've picked)
+  function mtBackToClubs(){ mtShut(); showStartMenu(); startExhibition(); }
+  const mtBenchOK=t=>t==='G'&&(MT.pre||SUBS.G.used<SUB_MAX);           // (a man off the bench: before kick-off any, after it a sub)
+  // BEFORE KICK-OFF a man off the bench for one in the team is a change of team: the two swap (the other to the bench, and
+  // back again if you like), nothing counted. Kept with the side, as the shapes are.
+  function mtLineup(t,out,inn){ const li=LINEUP[t], e=SQUAD[t][inn]; if(!e) return false;
+    if(li.gk===out){ li.gk=inn; const kp=keepers.find(k=>k.team===t); if(kp) applyEntry(kp,e,inn); }
+    else { let hit=false; for(const ph of ['atk','def']){ const k=li[ph].indexOf(out); if(k>=0){ li[ph][k]=inn; hit=true; } } if(!hit) return false;
+      const p=players.find(q=>q.team===t&&q.squadIdx===out); if(p){ applyEntry(p,e,inn); p.staminaCap=p.cond0||1; p.stamina=p.staminaCap; } }
+    saveTeamSide(t); return true; }
   let _mtMsgT=null;
   function mtMsg(m,col){ const el=document.getElementById('mtMsg'); el.textContent=m; el.style.color=col||'var(--warn)'; el.classList.add('on'); clearTimeout(_mtMsgT); _mtMsgT=setTimeout(()=>el.classList.remove('on'),3500); }
   // two of your men swap spots in one shape, live (and a career or a club keeps it)
@@ -13428,18 +13456,19 @@
     QS.key=''; qsRender(qsLive()?qsSuggest():[]); });                  // (drawn now: with a menu up, the match -- and qsTick -- has stopped)
   function mtSwap(a,b){ const t=MT.team, li=LINEUP[t]; if(t!=='G'||a.si===b.si) return; const kinds=[a.kind,b.kind].sort().join('+');
     if(kinds==='field+field'){ const ph=MT.phase, i=li[ph].indexOf(a.si), j=li[ph].indexOf(b.si); if(i>=0&&j>=0) mtSwapPos(t,ph,i,j); }
-    else if(kinds==='bench+field'||kinds==='bench+gk'){ if(!mtCanSub(t)){ mtMsg('No subs left this match.'); return; }
-      const inn=a.kind==='bench'?a.si:b.si, out=a.kind==='bench'?b.si:a.si, eo=SQUAD[t][out], ei=SQUAD[t][inn];
+    else if(kinds==='bench+field'||kinds==='bench+gk'){ const inn=a.kind==='bench'?a.si:b.si, out=a.kind==='bench'?b.si:a.si, eo=SQUAD[t][out], ei=SQUAD[t][inn];
+      if(MT.pre){ if(mtLineup(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' in for '+(eo?eo.name:'')+' · no sub used','var(--good)'); } return; }
+      if(!mtCanSub(t)){ mtMsg('No subs left this match.'); return; }
       if(matchSub(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' · '+(SUB_MAX-SUBS[t].used)+' sub'+(SUB_MAX-SUBS[t].used===1?'':'s')+' left','var(--good)'); } }
     else if(kinds==='field+gk') mtMsg('Change your keeper with a sub off the bench.'); }
   document.getElementById('mtacOv').addEventListener('click',e=>{ const t=MT.team;
-    const b=e.target.closest('[data-mt]'); if(b){ if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; renderMatchTac(); return; } }
+    const b=e.target.closest('[data-mt]'); if(b){ if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='kick'){ mtKickOff(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; renderMatchTac(); return; } }
     const dd=e.target.closest('[data-mtdrop]'); if(dd){ if(!dd.disabled) MT.drop=MT.drop===dd.dataset.mtdrop?null:dd.dataset.mtdrop; renderMatchTac(); return; }
     if(MT.drop&&!e.target.closest('.tbMenu')){ MT.drop=null; renderMatchTac(); return; }
     const f=e.target.closest('[data-mtform]'); if(f){ MT.drop=null; if(!f.disabled){ setTeamForm(t,MT.phase,f.dataset.mtform); } renderMatchTac(); return; }
     const w=e.target.closest('[data-mtwidth]'); if(w){ MT.drop=null; setMenuWidth(t,MT.phase,+w.dataset.mtwidth); renderMatchTac(); return; }
     const s=e.target.closest('[data-mtstyle]'); if(s){ MT.drop=null; if(s.disabled){ renderMatchTac(); return; } setStyle(t,s.dataset.mtstyle);
-      if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.style; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); renderMatchTac(); return; }
+      if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.style; if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); if(EXH.on&&EXH.play) saveClubSides(); renderMatchTac(); return; }
     const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; renderMatchTac(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
@@ -13447,7 +13476,7 @@
     const mi=e.target.closest('[data-mi]'); if(mi){ if(mi.disabled) return; const li=LINEUP[t], k=li[MT.phase].indexOf(MT.sel); if(k>=0) setPosInstr(t,MT.phase,k,mi.dataset.mi,mi.dataset.v); renderMatchTac(); return; }
     const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; renderMatchTac(); return; } });
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
-    can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtCanSub(MT.team)); },
+    can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtBenchOK(MT.team)); },
     lift(el){ const e=SQUAD[MT.team][+el.dataset.si]; if(!e) return;
       for(const t of document.querySelectorAll('#mtacBody .ptk[data-si]')){ if(t===el) continue; t.classList.add('canswap'); const role=t.dataset.role, pos=t.dataset.pos;
         if(role){ const fc=fitCls(natPos(e),role,pos); t.dataset.fit=mtRating(e,role,pos); t.classList.toggle('fitOop',fc===' oop'); t.classList.toggle('fitSec',fc===' sec'); } } },
@@ -15049,9 +15078,10 @@
   function smHighlight(){ const all=[...document.querySelectorAll('#smItems .smBtn')]; const en=smEnabledBtns(); if(en.length){ smSel=((smSel%en.length)+en.length)%en.length; } all.forEach(b=>b.classList.remove('sel')); if(en[smSel])en[smSel].classList.add('sel'); }
   function showStartMenu(){ SCREEN='menu'; clearInputs(); hideHub(); document.getElementById('stageWrap').classList.add('menuMode'); sm.classList.add('show'); hideSubs(); refreshMenuButtons(); }
   function hideStartMenu(){ sm.classList.remove('show'); hideSubs(); }
-  // EXHIBITION: pick the two clubs (the setup screen), then kick off -- you're on whoever has the ball, and switch from there
+  // EXHIBITION: pick the two clubs (the setup screen), then kick off -- you're on whoever has the ball, and switch from there.
+  // Or TACTICS first: the match is set up and waits, its tactics screen up before kick-off (see openMatchTac's pre)
   function startExhibition(){ exhGridSide=null; renderExh(); showSub('exhPanel'); }
-  function kickOffExhibition(){
+  function kickOffExhibition(pre){
     resumable=false; matchReturn='menu'; CAREER=null; careerFix=null;
     EXH.on=true; EXH.play={you:EXH.you, opp:EXH.opp}; saveExh();
     const a=clubSide(EXH.you), b=clubSide(EXH.opp);
@@ -15059,9 +15089,12 @@
     myForm=a.form; rForm=b.form;                     // each club in its own shapes (its defending one picked for it if it has none yet)
     myFormDef=a.dform||defFormFor(a.form,TAC.G.def); rFormDef=b.dform||defFormFor(b.form,TAC.R.def);
     PI.G=piClean(a.pi); PI.R=piClean(b.pi);
+    setStyle('G',a.style||clubById(EXH.you).style||'neutral'); setStyle('R',b.style||clubById(EXH.opp).style||'neutral');   // (each its own way of playing)
+    TAC.G.width=widthObj(a.width); TAC.R.width=widthObj(b.width);
     LINEUP.G.def=mapDefOrder('G',LINEUP.G.atk); LINEUP.R.def=mapDefOrder('R',LINEUP.R.atk);
     setTeamsFromClubs();
     document.getElementById('stageWrap').classList.remove('menuMode'); hideSubs(); hideHub(); hideStartMenu(); SCREEN='match'; newMatch();
+    if(pre) openMatchTac(true);
   }
   // ----- the setup screen -----
   let exhGridSide=null;                       // 'G' / 'R' while picking that side's club from the full list
@@ -15072,7 +15105,8 @@
       +'<button class="exhClub'+(exhGridSide===t?' open':'')+'" data-exh="grid" data-side="'+t+'" title="pick from all the clubs">'
       +'<canvas class="exhKit" width="64" height="64" data-kit="'+kit.join(',')+'"></canvas>'
       +'<span class="exhName">'+club.name+'</span>'
-      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvr(side.squad,side.lineup)+' \u00b7 '+side.form+' \u00b7 '+kitKind(club,kit)+'</span></button>'
+      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvr(side.squad,side.lineup)+' \u00b7 '+side.form+' \u00b7 '+kitKind(club,kit)+'</span>'
+      +'<span class="exhStyle">'+styleName(side.style||club.style)+'</span></button>'
       +'<button class="exhArr" data-exh="next" data-side="'+t+'" aria-label="next club">\u25b6</button></div>';
   }
   function drawKitSwatch(cv,k){                // (no sprites yet) a plain shirt and shorts
@@ -15104,6 +15138,7 @@
     const b=e.target.closest('[data-exh]'); if(!b||b.disabled) return;
     const a=b.dataset.exh, t=b.dataset.side;
     if(a==='go'){ kickOffExhibition(); return; }
+    if(a==='tac'){ kickOffExhibition(true); return; }                 // (your tactics first: the match waits)
     if(a==='prev'||a==='next') exhCycle(t,a==='next'?1:-1);
     else if(a==='grid') exhGridSide=(exhGridSide===t)?null:t;
     else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }

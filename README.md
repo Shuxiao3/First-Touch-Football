@@ -1247,6 +1247,28 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   of a front three, wide midfielders in a midfield of three or four, wing-backs in a back three with
   nobody wide ahead of it (who go up the flanks with the ball). Change a shape in the match and the
   club keeps it. A club whose line-up you'd saved before clubs had shapes stays in its 2-3-2.
+- **Every club has its own way of playing** too -- its style, loosely after how it plays -- shown on the setup
+  screen under its shape, and each side plays its own (they all used to play whatever you'd last picked, BALANCED
+  unless you'd changed it):
+
+  | Style | Clubs |
+  |---|---|
+  | CONTROL POSSESSION | Arsenal, Brighton, Ipswich Town, Manchester City |
+  | GEGENPRESS | Bournemouth, Liverpool, Newcastle United |
+  | WING PLAY | Chelsea, Leeds United, Manchester United, Tottenham Hotspur |
+  | DIRECT | Brentford, Everton |
+  | FLUID COUNTER | Aston Villa, Sunderland |
+  | DIRECT COUNTER | Crystal Palace, Nottingham Forest |
+  | BALANCED | Coventry City, Fulham, Hull City |
+
+  Change your club's style or width (before kick-off or in the match) and the club keeps it, as it keeps a shape;
+  set it back to the club's own and nothing's kept as a change.
+- **TACTICS before kick-off.** Beside KICK OFF on the setup screen, TACTICS sets the match up and waits: its tactics
+  screen comes up before kick-off -- your shapes with the ball and without it, width, style, every man's card and
+  instructions, the other side's to look at. ◀ CLUBS goes back to the setup screen, KICK OFF ▶ plays it, everyone
+  in his spot in the shape you picked. A man off the bench dragged onto one in the team is a change of team there,
+  not a sub: the other goes to the bench (and back again if you like), and all three subs are still yours. It's all
+  kept with your club, as a change in the match is. KICK OFF on the setup screen still goes straight in.
 - The squads are made up: fixed names, numbers and stats for each club, with stronger squads for
   clubs that finished higher last season. Every outfielder has a **playing style** (shown under his
   name, with a line about it in the TACTICS menu), and his stats are built around it (see
@@ -1767,6 +1789,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season through both windows, promotion, the playoffs,
-a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, quick subs, the first touch, the players' sprites and
+a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites and
 the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
