@@ -28,7 +28,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const anchor = '  // ===== END MANAGER CAREER';
 if(src.split(anchor).length !== 2) throw new Error('instrumenting: anchor not found once: ' + anchor);
 src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgForward, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
-  + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
+  + 'mgMarketOpen, stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
@@ -48,7 +48,7 @@ async function create(club){
   await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', club);
   await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-  if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); });   // (its two arrivals: only Story Town's)
+  if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); });   // (its two arrivals: only Story Town's)
 }
 const msg = () => page.$eval('#bpMsg', e => e.classList.contains('on') ? e.textContent : '').catch(() => '');   // (a toast along the bottom)
 const bottom = () => page.textContent('#chBottom');
@@ -73,8 +73,8 @@ const crestTo = async (k, want) => { for(let i = 0; i < 12; i++){ const v = awai
 ok(await crestTo('s', 'ROUND') && await crestTo('p', 'HOOPS') && await crestTo('e', 'STAR'), 'the crest: round, hooped, a star');
 await page.click('#mgrMaker [data-mm="part"][data-i="2"]'); await page.click('#mgrMaker [data-mm="crc"][data-c="#ffb43c"]');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0}', 'a new career has its first season\'s two arrivals to come');
-await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); });   // (they're Story Town's, below)
+ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0,"phone":0}', 'a new career has its first season\'s two arrivals to come, and the phone call');
+await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); });   // (they're Story Town's, below)
 let d = await save();
 ok(d.kind === 'manager' && d.manager.name === 'Sam Okafor' && d.clubName === 'Fenmoor Athletic', 'saved: the manager and the club');
 ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
@@ -87,16 +87,18 @@ ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && d.day
 ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{25}$/.test(p.at) && /^[a-s]{25}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
-// --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market and
-// the physio are there to buy (their price in the menu); the scouts' house and the academy wait for the next clubhouses -
+// --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market is
+// your phone, not bought (it rings after your 2nd game); the physio, the scouts' house and the academy wait for the next
+// clubhouses ---------------------------------------------------------------------------------------------------------
 ok(JSON.stringify(d.lv) === '{"club":1,"train":1,"physio":0,"market":0,"scouting":0,"academy":0}' && d.deco.length === 0 && d.youth.length === 0,
   'a new career: the shed, the training pitch, nothing else built, nothing bought, no academy, so no youngsters');
 for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'academy']){
   await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
   const tabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent)), chip = await page.textContent(`#chCampus [data-bldg="${b}"] .bPrice`);
-  if(['market', 'physio'].includes(b)){ const btn = await page.textContent('#bpFoot [data-mg="up"]');
-    ok(!tabs.length && /GET ON IT|BUILD IT/.test(btn) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('unbuilt')), b + ': to buy -- ' + btn + ' (' + chip + ' in the menu)'); }
-  else if(['scouting', 'academy'].includes(b)){ const sect = await page.textContent('#bpBody .bpSect');
+  if(b === 'market'){ const sect = await page.textContent('#bpBody .bpSect'), body = await page.textContent('#bpBody');
+    ok(!tabs.length && sect === 'YOUR PHONE' && /hasn’t rung yet: it will after your second game/.test(body) && !(await page.$('#bpFoot [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
+      'market: your phone, not for sale -- it hasn\'t rung yet (locked in the menu)'); }
+  else if(['physio', 'scouting', 'academy'].includes(b)){ const sect = await page.textContent('#bpBody .bpSect');
     ok(!tabs.length && /COMES WITH CLUBHOUSE [23]/.test(sect) && await page.$('#bpFoot [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
       b + ': ' + sect.toLowerCase() + ' (' + chip + ' in the menu), and a way to the clubhouse'); }
   else { for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
@@ -105,9 +107,10 @@ for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'aca
 }
 
 // --- the market: scout, bid the asking price, sign him -----------------------------------------
-await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bpFoot [data-mg="up"]'); await page.waitForTimeout(80);
+await page.evaluate(() => { const M = __MG, d = M.d; M.mgMarketOpen(d); M.mgSave(d); M.renderHub(); });   // (the call: see THE FIRST SEASON'S TWO ARRIVALS)
+await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
 d = await save();
-ok(d.lv.market === 1 && d.budget === 18500 && await page.isVisible('#bldgPanel .bpTab:text-is("Search")'), 'on the transfer market for $1,500: its tabs open up');
+ok(d.lv.market === 1 && d.budget === 20000 && await page.isVisible('#bldgPanel .bpTab:text-is("Search")'), 'the phone\'s rung: on the transfer market, nothing paid, its tabs open up');
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 let signed = false;
 for(let i = 0; i < 10 && !signed; i++){                          // the first man who'd come and whom we can afford (page 1: ten men)
@@ -123,7 +126,7 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   if(await page.$('#bpBody [data-mg="sign"]')){ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(60); signed = /Signed/.test(await msg()); }
 }
 d = await save();
-ok(signed && d.roster.length === 15 && d.budget < 18500, 'signed a man for the asking price: squad 15, budget ' + d.budget);
+ok(signed && d.roster.length === 15 && d.budget < 20000, 'signed a man for the asking price: squad 15, budget ' + d.budget);
 const newMan = d.roster[14];
 ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(14) >= 5, 'he has a contract, and isn\'t taken till you pick him (the bench is five)');
 
@@ -256,7 +259,7 @@ ok(r.away.lvl === r.away.want && r.away.boards === r.away.wantB && r.away.venue 
 ok(r.left.length === 0 && r.mid === (r.ends[0] === r.ends[1] ? '' : r.ends[0] < r.ends[1] ? 'ground' : 'kit'), 'each deal runs out when its seasons are up (the shirt\'s after season ' + r.ends[0] + ', the name\'s after ' + r.ends[1] + ')');
 ok(r.old.lvl === 3 && r.old.cap === 8500 && r.fresh === 1, 'a save from before: the level that seats as many (6,000 -> covered stands, 8,500)');
 
-// --- THE CLUBHOUSE AND WHAT IT UNLOCKS: the market and the physio from the start; the next clubhouse only in the next
+// --- THE CLUBHOUSE AND WHAT IT UNLOCKS: the market not for sale (the phone), the physio with the cabin; the next clubhouse only in the next
 // league up, and then with the money; each one opens more (the scouts' house with the cabin, the academy and the
 // decorations with the clubhouse, the last levels with the hall), the stadium's levels too ------------------------------
 await create('Club Town');
@@ -264,9 +267,10 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.d
   const lv = () => JSON.stringify(d.lv), spend = f => { const b = d.budget, e = f(); return [e, b - d.budget]; };
   out.start = lv(); out.noScout = M.mgScout(d, him); d.budget = 1e7;
   out.scout0 = M.bldUp(d, 'scouting'); out.acad0 = M.bldUp(d, 'academy'); out.stad2 = M.bldUp(d, 'stadium'); out.stad3 = M.bldUp(d, 'stadium');
-  out.market = spend(() => M.bldUp(d, 'market')); out.physio = spend(() => M.bldUp(d, 'physio')); out.physio2 = M.bldUp(d, 'physio');
+  out.market = spend(() => M.bldUp(d, 'market')); out.physio = spend(() => M.bldUp(d, 'physio')); M.mgMarketOpen(d);
   out.club2 = M.bldUp(d, 'club'); d.top = 2; d.budget = 1000; out.club2poor = M.bldUp(d, 'club'); d.budget = 1e7;
   out.club2b = spend(() => M.bldUp(d, 'club')); out.scout = spend(() => M.bldUp(d, 'scouting')); out.scouted = M.mgScout(d, him);
+  out.phys1 = spend(() => M.bldUp(d, 'physio')); out.phys2 = spend(() => M.bldUp(d, 'physio')); out.phys3 = M.bldUp(d, 'physio');
   out.train2 = spend(() => M.bldUp(d, 'train')); out.train3 = M.bldUp(d, 'train'); out.stad3b = M.bldUp(d, 'stadium'); out.acad1 = M.bldUp(d, 'academy');
   d.top = 3; out.club3 = spend(() => M.bldUp(d, 'club')); out.acad = spend(() => M.bldUp(d, 'academy')); out.youth = d.youth.length; out.acad2 = M.bldUp(d, 'academy');
   d.top = 4; out.club4 = spend(() => M.bldUp(d, 'club')); out.club5 = M.bldUp(d, 'club');
@@ -281,10 +285,11 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.d
 info('the clubhouse: ' + JSON.stringify(r));
 ok(/needs clubhouse 2/.test(r.scout0) && /needs clubhouse 3/.test(r.acad0) && /needs clubhouse 2/.test(r.stad3) && r.stad2 === null && /scouts’ house/.test(r.noScout),
   'the shed: no scouts\' house (clubhouse 2) or academy (3), the stadium to level 2 but not 3, and no scouting');
-ok(r.market[0] === null && r.market[1] === 1500 && r.physio[0] === null && r.physio[1] === 5000 && /needs clubhouse 2/.test(r.physio2),
-  'the transfer market ($1,500) and the physio ($5,000) to start with; the physio\'s next level waits for clubhouse 2');
+ok(/phone rings after your second game/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
+  'in the shed the transfer market isn\'t for sale ("' + r.market[0] + '") and the physio waits for clubhouse 2');
 ok(/League 1/.test(r.club2) && /budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 30000,
   'the cabin: not before League 1 (' + r.club2 + '), then $30,000');
+ok(r.phys1[0] === null && r.phys1[1] === 5000 && r.phys2[1] === 15000 && /clubhouse 3/.test(r.phys3), 'the cabin brings the physio ($5,000) and its level 2 ($15,000); its 3rd waits for clubhouse 3');
 ok(r.scout[0] === null && r.scout[1] === 12000 && r.scouted === null && r.train2[1] === 10000 && /clubhouse 3/.test(r.train3) && r.stad3b === null && /clubhouse 3/.test(r.acad1),
   'with the cabin: the scouts\' house ($12,000) and scouting, the training pitch to level 2 ($10,000), the stadium to 3; not yet the academy');
 ok(r.club3[1] === 120000 && r.acad[0] === null && r.acad[1] === 25000 && r.youth > 0 && /clubhouse 4/.test(r.acad2),
@@ -437,8 +442,8 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, CM = M.CAMPUS_META, cv 
   M.mgSave(d); return out; });
 info('the campus: ' + JSON.stringify(r));
 ok(r.asClub && r.named && r.crested && r.levels === 5, 'the campus is the club\'s: its stadium at level ' + r.lvl + ' with ' + r.name + ' on its gate, its crest on the shed; each level of the stadium its own');
-ok(r.pieces === 'club,train,physio(plot)' && r.pieces2 === 'club,train,physio(plot),scouting(plot)' && r.pieces4 === 'club,train,physio,scouting,academy',
-  'what stands on it: the shed, the training pitch and the physio\'s plot; the scouts\' plot with the cabin; every building once it\'s up');
+ok(r.pieces === 'club,train' && r.pieces2 === 'club,train,physio(plot),scouting(plot)' && r.pieces4 === 'club,train,physio,scouting,academy',
+  'what stands on it: the shed and the training pitch; the physio\'s and the scouts\' plots with the cabin; every building once it\'s up');
 ok(r.club2 && r.coded && r.clubs === 4 && r.decoDrawn, 'the cabin drawn as soon as you move in, your letters on its board; four clubhouses, each its own; a decoration where it was put');
 ok(r.up === null && r.rebuilt, 'the stadium built up a level, drawn again at once');
 { const tf = () => page.evaluate(() => { const m = new DOMMatrix(getComputedStyle(document.getElementById('cpWorld')).transform); return [m.a, m.e, m.f]; });
@@ -506,7 +511,7 @@ ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 
   'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
 // signing a young one: his card says what he wants a week and to sign; SIGN HIM pays the fee
-await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 20000; M.bldUp(d, 'market'); M.mgSave(d); });
+await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 20000; M.mgMarketOpen(d); M.mgSave(d); });
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Free agents")'); await page.waitForTimeout(80);
 const fa = await page.evaluate(() => { const M = __MG, d = M.d;
   const p = d.world.free.find(q => q.age >= 21 && q.age <= 26) || Object.assign(d.world.free[0], { age: 23 });
@@ -526,11 +531,16 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 await create('Story Town');
 const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); M.mgSave(d); M.renderHub(); return d.md; }, n);
 const story = () => page.evaluate(() => ({ on: document.getElementById('storyModal').classList.contains('on'), text: document.querySelector('#storyModal .stCard').innerText.replace(/\s+/g, ' ') }));
-await games(1); const s1 = await story(); await games(1); const s2 = await story();
+await games(1); const s1 = await story(); await games(1); const ring = await story();
+await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(60); const call = await story();
+await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(60); const s2 = await story();
+const mk = await page.evaluate(() => ({ market: __MG.d.lv.market, budget: __MG.d.budget, news: __MG.d.news.some(n => /transfers go through your phone/.test(n.t)) }));
+ok(!s1.on && ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /TRANSFERS is open/.test(call.text) && mk.market === 1 && mk.news,
+  'after the 2nd game your phone rings -- ANSWER: the chairman, transfers go through it now ("' + call.text.slice(12, 90) + '..."); TRANSFERS is open, nothing paid');
 const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
 await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); const s3 = await story();
-ok(!s1.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
-  'after the 2nd game, a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
+ok(s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
+  'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
 await games(2); const s4 = await story(); await games(1); const s5 = await story();
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);
 const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();
@@ -553,7 +563,7 @@ const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], ki
   M.mgSave(d); M.renderHub(); const all = kick.flat();
   return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
     runs: (d.review && d.review.cups || []).map(x => x.join(' ')).join(', '), ledgerCup }; });
-r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { vet: 2, kid: 2 };
+r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { vet: 2, kid: 2, phone: 2 };
   const p = d.roster[d.lineup.atk[0]]; M.condTire(p, 1); out.after = +M.condOf(p).toFixed(3);
   d.lv.physio = 0; M.mgRest(d, 1); out.day0 = +(M.condOf(p) - out.after).toFixed(3);
   d.lv.physio = 4; M.mgRest(d, 1); out.day4 = +(M.condOf(p) - out.after - out.day0).toFixed(3); d.lv.physio = 0;
@@ -568,7 +578,7 @@ ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low >= 0.85 && sn.avg 
   'League 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; a man whose stamina has faded a little short: ' + Math.round(sn.low * 100) + '%); the cups are played above it, each to a winner');
 
 await create('Cup City');
-r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
+r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };
   const other = d.div[3][0]; d.div[3][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 3; d.tier = 3;
   for(const p of d.roster) M.mgSetOvr(p, Math.round(M.MG_LEVEL[3] + (p.ovr - 50) * 0.5));
   M.mgAutoLineup(d); M.mgNewFixtures(d); M.mgCupsStart(d); const C = d.cup;
@@ -588,7 +598,7 @@ ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.
   'in the Championship, the Coco and Fashion Cups (no Champions League): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
   + sn.runs + '); every cup won by someone');
 
-const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
+const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };
   const other = d.div[4][0]; d.div[4][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 4; d.tier = 4;
   for(const p of d.roster) M.mgSetOvr(p, Math.round(M.MG_LEVEL[4] + (p.ovr - 50) * 0.5));
   d.lv.physio = phys; M.mgAutoLineup(d); M.mgNewFixtures(d); d.clQual = [d.clubId, ...d.div[4].filter(x => x !== d.clubId).slice(0, 5)]; M.mgCupsStart(d);

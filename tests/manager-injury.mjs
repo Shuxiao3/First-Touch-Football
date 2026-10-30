@@ -31,7 +31,7 @@ await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(10
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Hurt Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2}; window.XP=(age,role)=>{ const p=mgNewPlayer(d,role||'MID',60,age||25,{sub:role==='GK'?'GK':'CM'}); p.hv='jjjjjjjjj'; return p; }; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; window.XP=(age,role)=>{ const p=mgNewPlayer(d,role||'MID',60,age||25,{sub:role==='GK'?'GK':'CM'}); p.hv='jjjjjjjjj'; return p; }; mgSave(d); return 1; })()`);
 
 // --- the risk ----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, R=(f)=>{ const p=XP(); f(p); return injRisk(d,p,1,null); };
@@ -102,7 +102,7 @@ info('a season: ' + JSON.stringify(r));
 ok(r.n >= 150 && r.n <= 500 && r.news === r.mine, 'a season: ' + r.n + ' injuries across the four leagues (about ' + (r.n / 56).toFixed(1) + ' a club), ' + r.mine + ' of yours, each in the news');
 
 // --- a live match: hurt in it ------------------------------------------------------------------------------------------------
-await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2,phone:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(1500);
 r = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3); hurtInMatch(p); p.sprint=true; return { cap:p.staminaCap, hurt:HURT.G.has(3), name:SQUAD.G[3].name }; })()`);

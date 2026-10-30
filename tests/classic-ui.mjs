@@ -25,7 +25,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -82,7 +82,7 @@ async function skillsPage(page){
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-  await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2 }; __MG.mgSave(d); }); }   // (the first season's two arrivals: manager-career's)
+  await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); }); }   // (the first season's two arrivals: manager-career's)
 
 for(const [w, h] of SIZES){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
@@ -147,6 +147,11 @@ for(const [w, h] of SIZES){
     if(!tabs.length && await page.$('#bpFoot [data-mg="up"]') && !(await page.$('#bpBody .bpLvl'))){   // (one to buy: what it'd cost, BUILD IT -- then its own screen)
       await check(b + ' / to buy', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="up"]']);
       await page.evaluate(() => { window.__MG.d.budget = 1e7; }); await page.tap('#bpFoot [data-mg="up"]'); await page.waitForTimeout(150);
+      tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
+    if(!tabs.length && b === 'market'){   // (your phone, before it rings: what it's for -- then the call, and its tabs)
+      await check(b + ' / before the call', ['.bpTopBack', '#bpBody']);
+      await page.evaluate(() => { const M = window.__MG; M.mgMarketOpen(M.d); M.mgSave(M.d); M.renderHub(); });
+      await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
     if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn']);
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
@@ -405,7 +410,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
           const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
     await page.tap('.bpTopBack'); await page.waitForTimeout(100); };
   await page.evaluate(() => { const M = window.__MG, d = M.d; d.budget = 1e7; d.top = 4; while(M.lvOf(d, 'club') < 3) M.bldUp(d, 'club');   // (on the market, and the academy, to look at its prospects)
-    M.bldUp(d, 'market'); M.bldUp(d, 'academy'); d.lv.train = 4; d.budget = 1e6; M.mgSave(d); M.renderHub(); });
+    M.mgMarketOpen(d); M.bldUp(d, 'academy'); d.lv.train = 4; d.budget = 1e6; M.mgSave(d); M.renderHub(); });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await walk('club', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
   ok(views.length >= 30 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, any of its three sides, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));

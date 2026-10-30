@@ -39,7 +39,7 @@ await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(10
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Week Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await K("CAREER.data.story={vet:2,kid:2}; CAREER.data.lv.market=1; mgSave(CAREER.data); renderHub();");
+await K("CAREER.data.story={vet:2,kid:2,phone:2}; CAREER.data.lv.market=1; mgSave(CAREER.data); renderHub();");
 let d = await save();
 const w1 = [await bottom(), await mid()];
 ok(d.v === 4 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && /NEXT WEEK/.test(w1[0]) && w1[1] === 'Pre-season · week 1 of 3 · Monday' && await K('mgWindowOpen(CAREER.data)'),

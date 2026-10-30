@@ -29,7 +29,7 @@ await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Story Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 // hidden values by letter, in the order lr pro ad rs du ch te am lo ('j' is 5.5)
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2}; window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); };
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); };
   window.CL=d.div[1].filter(id=>id!==d.clubId).map(id=>d.world.clubs[id]); mgSave(d); return 1; })()`);
 
 // --- scouting, in levels ----------------------------------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 // FOOTBALL CLASSIC, THE STAFF AND TRAINING FOCUS: five coaches -- fitness, technical, finishing, defending, goalkeeping --
-// a post each from the start (so only ever who's the best you can get for each), and the academy's youth coach. Rated
+// a post each from the start (so only ever who's the best you can get for each), and the academy's youth coach (its
+// COACH tab: never the first team's; good and poor at whole fields of his lads' game). Rated
 // 1 to 10, dearer the better, the best won't come to a small club; each good at some of his field and poor at some of
 // it by his rating (the poor two weak spots, the best three strengths). Hiring needs the post empty and four weeks'
 // wages in the budget; releasing one pays four weeks; their wages go on the bill. Training, attribute by attribute, is
@@ -30,27 +31,30 @@ await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Coach Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 // hidden values by letter, in the order lr pro ad rs du ch te am lo ('j' is 5.5)
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2}; window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); }; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); }; mgSave(d); return 1; })()`);
 
 // --- the five coaches' fields, and the men to hire ---------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data; d.lv.academy=0; d.cand=null; const L1=staffCands(d);
   d.lv.academy=1; d.cand=null; const L2=staffCands(d), w0=d.weeks; d.weeks=w0+3; const same=staffCands(d)===L2; d.weeks=w0+4; const fresh=staffCands(d)!==L2; d.weeks=w0;
   const all=L1.concat(L2), halves=all.every(c=>c.r>=1&&c.r<=10&&c.r*2===Math.round(c.r*2)), pay=all.every(c=>Math.abs(c.wage-staffWage(c.r))<=Math.max(10,staffWage(c.r)*0.2));
   const fields=STAFF_ORDER.map(k=>k+':'+COACH_AREA[k].length).join(' '), every=DEV_KEYS.every(k=>STAFF_ORDER.filter(a=>COACH_AREA[a].includes(k)).length===1);
+  const Y=youthCands(d);
   return { fields, every, heading:areaOf('heading'), offIQ:areaOf('offIQ'), defIQ:areaOf('defIQ'), n1:L1.length, per:STAFF_ORDER.map(k=>L1.filter(c=>c.k===k).length).join(','), youth1:L1.filter(c=>c.k==='youth').length,
-    n2:L2.length, youth2:L2.filter(c=>c.k==='youth').length, same, fresh, halves, pay, w:[staffWage(1),staffWage(5),staffWage(10)] }; })()`);
+    n2:L2.length, youth2:L2.filter(c=>c.k==='youth').length, ny:Y.length, yk:Y.every(c=>c.k==='youth'), same, fresh, halves, pay, w:[staffWage(1),staffWage(5),staffWage(10)] }; })()`);
 info('the fields and the men to hire: ' + JSON.stringify(r));
 ok(r.fields === 'fit:5 tec:5 fin:6 def:4 gk:5' && r.every && r.heading === 'fin' && r.offIQ === 'fin' && r.defIQ === 'def',
   'five coaches, every attribute in one field: fitness 5, technical 5, finishing 6 (heading, Off IQ and composure with the shooting), defending 4 (Def IQ, interceptions), goalkeeping 5');
-ok(r.n1 === 10 && r.per === '2,2,2,2,2' && r.youth1 === 0 && r.n2 === 11 && r.youth2 === 1 && r.same && r.fresh, 'two men to hire for each post (and a youth coach, with an academy); the same men for four weeks, then new ones');
+ok(r.n1 === 10 && r.per === '2,2,2,2,2' && r.youth1 === 0 && r.n2 === 10 && r.youth2 === 0 && r.ny === 2 && r.yk && r.same && r.fresh, 'two men to hire for each post, no youth coach among them (the academy has its own two); the same men for four weeks, then new ones');
 ok(r.halves && r.pay && r.w[0] < r.w[1] && r.w[1] < r.w[2], 'rated 1 to 10 in halves, the better the dearer (' + r.w.join(', ') + ' a week for a 1, a 5, a 10)');
 
 // --- what each is good and poor at, by his rating -----------------------------------------------------------------------------------
 r = await K(`(()=>{ const N={}, bad=[]; for(let rr=1;rr<=10;rr+=0.5) for(const k of STAFF_ORDER){ const c=coachSpec({id:1,k,r:rr,name:'x',wage:1}), all=c.up.concat(c.dn);
     if(!all.every(a=>COACH_AREA[k].includes(a))||new Set(all).size!==all.length) bad.push(k+rr); N[rr]=c.up.length+'/'+c.dn.length; }
-  return { N, bad }; })()`);
+  const y=coachSpec({id:2,k:'youth',r:9,name:'y',wage:1}), z=coachSpec({id:3,k:'youth',r:2,name:'z',wage:1}), fields=y.up.concat(y.dn,z.up,z.dn).every(a=>STAFF_ORDER.includes(a));
+  return { N, bad, y:y.up.length+'/'+y.dn.length, z:z.up.length+'/'+z.dn.length, fields }; })()`);
 info('strengths/weak spots by rating: ' + JSON.stringify(r.N));
 const want = { 1: '0/2', 3: '0/2', 3.5: '0/1', 4: '0/1', 4.5: '0/1', 5: '1/1', 5.5: '1/0', 6: '1/0', 6.5: '1/0', 7: '2/0', 8: '2/0', 8.5: '2/0', 9: '3/0', 10: '3/0' };
+ok(r.y === '3/0' && r.z === '0/2' && r.fields, 'a youth coach is good and poor at whole fields of his lads\' game, by his rating the same way (a 9: ' + r.y + ', a 2: ' + r.z + ')');
 ok(Object.entries(want).every(([k, v]) => r.N[k] === v) && !r.bad.length, 'what he\'s good and poor at, by his rating: up to 3, two weak spots and nothing special; 4, one weak spot; 5, one of each; 6, one strength; 7 and 8, two; 9 and 10, three and no weak spot -- all in his own field, none twice');
 
 // --- hiring and releasing ---------------------------------------------------------------------------------------------------------
@@ -98,13 +102,14 @@ ok(r.ffin.fin > r.plain.fin * 1.15 && r.ffin.fit < r.plain.fit && r.ffin.tec < r
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[3], S=d.staff; INJ_OFF=false; p.hv=HV({}); p.age=26; delete p.injB; delete p.cond; d.staff=[];
   const r0=injRisk(d,p,1,null); d.staff=[{id:95,k:'fit',r:8,wage:100,name:'f',up:[],dn:[]}]; const r8=injRisk(d,p,1,null);
   const rest=()=>{ for(const q of d.roster) q.cond=0.5; mgRest(d,1); return d.roster[3].cond; }; const c8=rest(); d.staff=[]; const c0=rest(); for(const q of d.roster) delete q.cond;
-  let seen=null; const keep=devTick; devTick=(d,p,x)=>{ if(seen==null&&(d.youth||[]).includes(p)) seen=x.T; return 0; };
+  let seen=null; const keep=devTick; devTick=(d,p,x)=>{ if(seen==null&&(d.youth||[]).includes(p)) seen=x.Tk.passAcc; return 0; };
   d.lv.academy=1; d.youth=d.youth&&d.youth.length?d.youth:[mgNewPlayer(d,'MID',45,16,{pot:70,sub:'CM'})]; mgDevelop(d); const y0=seen; seen=null;
   d.staff=[{id:96,k:'youth',r:6,wage:100,name:'y'}]; mgDevelop(d); const y6=seen; devTick=keep; d.staff=S;
-  return { r:+(r8/r0).toFixed(3), c0:+c0.toFixed(4), c8:+c8.toFixed(4), y0:+y0.toFixed(2), y6:+y6.toFixed(2) }; })()`);
+  d.staff=[{id:97,k:'youth',r:8,wage:100,name:'w',up:['fin'],dn:['gk']}]; const yt=youthTrain(d), f=v=>+v.toFixed(2); d.staff=S;
+  return { r:+(r8/r0).toFixed(3), c0:+c0.toFixed(4), c8:+c8.toFixed(4), y0:+y0.toFixed(2), y6:+y6.toFixed(2), spec:[yt.shotAcc,yt.passAcc,yt.gkReflex].map(f) }; })()`);
 info('the fitness and youth coaches: ' + JSON.stringify(r));
 ok(r.r === 1 && r.c8 === r.c0, 'a fitness coach develops a man\'s legs and nothing else: no fewer injuries (risk x' + r.r + '), no quicker back between games (' + r.c8 + ', ' + r.c0 + ' after a day) -- those are the physio\'s');
-ok(Math.abs(r.y6 - r.y0 - 0.24) < 0.001, 'a youth coach rated 6: the academy trains better (' + r.y0 + ' to ' + r.y6 + ')');
+ok(Math.abs(r.y6 - r.y0 - 0.24) < 0.001 && r.spec.join() === '1.18,1.02,0.7', 'a youth coach rated 6: the academy trains better (' + r.y0 + ' to ' + r.y6 + '); one rated 8 good at finishing and poor at keeping: ' + r.spec.join(', ') + ' (shooting, passing, a keeper\'s reflexes)');
 
 // --- a career saved before ---------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, S=d.staff, C=d.cand, p=d.roster[0], q=d.roster[1], f0=[p.fo,q.fo];
@@ -128,8 +133,8 @@ await page.click('#bpBody [data-mg="chire"]'); await page.waitForTimeout(150);
 r = await K(`(()=>{ const d=CAREER.data; return { n:d.staff.length, k:d.staff[0]&&d.staff[0].k }; })()`);
 const s1 = await page.evaluate(() => ({ hint: document.querySelector('#bpBody .mgHint').textContent.trim(), vac: document.querySelectorAll('#bpBody .mgRow.vac').length }));
 info('the Staff tab: ' + JSON.stringify({ s0, card: cardTxt.split('\n').join(' / '), s1 }));
-ok(tabs.join() === 'Tactics,Selection,Subs,Staff,Pitch' && s0.hint === '0 of 5 posts filled · youth 0 of 1' && s0.vac === 6 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
-   && r.n === 1 && r.k === 'fin' && /^1 of 5 posts filled/.test(s1.hint) && s1.vac === 5,
+ok(tabs.join() === 'Tactics,Selection,Subs,Staff,Pitch' && s0.hint === '0 of 5 posts filled' && s0.vac === 5 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
+   && r.n === 1 && r.k === 'fin' && s1.hint === '1 of 5 posts filled' && s1.vac === 4,
   'the Staff tab: ' + s0.hint + ', each post a line (vacant till filled); a man\'s card says what he\'s good and poor at; HIRE, and the post is his (' + s1.hint + ')');
 
 // ...and on a phone: the tab bar, a coach's card, a man's card with his FOCUS, all fit, nothing long on them
@@ -143,6 +148,21 @@ await page.evaluate(id => document.querySelector(`#bpBody .mgRow[data-cid="${id}
 const f1 = await fit(), rel = await page.textContent('#bpBody [data-mg="cfire"]').catch(() => '');
 info('640x360, a coach\'s card: ' + JSON.stringify(f1));
 ok(f1.fits && f1.tabs && !f1.long.length && !f1.cut.length && /RELEASE \(\$[\d,]+\)/.test(rel), '640x360: the five tabs fit, and a coach\'s card with what he\'s good and poor at, and RELEASE (' + rel + '), nothing long or cut on it');
+await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
+// the academy's COACH tab: the youth coach's post and the two men for it, what each is good and poor at (fields)
+await K(`(()=>{ const d=CAREER.data; d.lv.academy=1; d.lv.club=3; d.ycand=null; d.budget=1e6; const Y=youthCands(d); Y[0].r=5; delete Y[0].up; delete Y[0].dn; coachSpec(Y[0]); window.YCID=Y[0].id; mgSave(d); renderHub(); return 1; })()`);
+await page.click('#chCampus [data-bldg="academy"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(120);
+const atabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent.trim()));
+await page.click('#bldgPanel .bpTab:text-is("Coach")'); await page.waitForTimeout(150);
+const y0 = await page.textContent('#bpBody .mgHint'), yc = await K('window.YCID');
+await page.evaluate(id => document.querySelector(`#bpBody .mgRow[data-cid="${id}"]`).click(), yc); await page.waitForTimeout(120);
+const yf = await fit(), ycard = await page.innerText('#bpBody .mgPaneR .mgCard').catch(() => '');
+await page.click('#bpBody [data-mg="chire"]'); await page.waitForTimeout(150);
+const y1 = await page.textContent('#bpBody .mgHint'), yk = await K(`CAREER.data.staff.filter(c=>c.k==='youth').length`);
+info('the academy\'s coach: ' + JSON.stringify({ atabs, y0, card: ycard.split('\n').join(' / '), y1, yf }));
+ok(atabs.join() === 'Prospects,Coach,Facilities' && /No youth coach/.test(y0) && /youth coach · rated 5\.0/.test(ycard) && /GOOD AT/.test(ycard) && /POOR AT/.test(ycard) && /(Fitness|Technical|Finishing|Defending|Keeping)/.test(ycard)
+   && /trains the academy/.test(y1) && yk === 1 && yf.fits && !yf.long.length && !yf.cut.length,
+  'the academy\'s COACH tab: its own youth coach (' + y0.trim() + '), his card -- good and poor at whole fields -- fitting a phone, HIRE (' + y1.trim() + ')');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
 const ids = await K(`(()=>{ const d=CAREER.data, m=d.roster.find(p=>p.role==='MID'), g=d.roster.find(p=>p.role==='GK'); m.fo=null; g.fo=null; mgSave(d); return [m.id,g.id]; })()`);

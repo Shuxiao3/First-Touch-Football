@@ -170,6 +170,9 @@
   .stTitle{ font:15px 'FTC Dot',monospace; letter-spacing:1px; color:var(--acc); }
   .stMsg{ font-size:12px; line-height:1.4; color:var(--ink); }
   .stMsg b{ color:var(--acc); }
+  .stPhone{ display:flex; justify-content:center; margin:2px 0; } .stPhone svg{ width:30px; height:42px; fill:none; stroke:var(--acc); stroke-width:1.6; }
+  .stPhone.ring svg{ animation:phRing .45s ease-in-out infinite; transform-origin:50% 90%; } @keyframes phRing{ 0%,100%{ transform:rotate(0) } 25%{ transform:rotate(-14deg) } 75%{ transform:rotate(14deg) } }
+  @media (prefers-reduced-motion: reduce){ .stPhone.ring svg{ animation:none; } }
   .stLbl{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); }
   .stRow{ display:flex; flex-wrap:wrap; gap:5px; }
   .stRow .mgChip{ padding:7px 9px; }
@@ -13938,7 +13941,7 @@
   function mgDevelop(d){ const up=[], down=[];
     const TY=devTrainYours(d); for(const p of d.roster){ const dl=devTick(d,p,{Tk:TY,gw:d.gw||0}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
     d.gw=0; const al=lvOf(d,'academy');
-    const yc=coachOf(d,'youth'); for(const p of d.youth||[]) devTick(d,p,{T:0.6+0.1*al+(yc?0.04*yc.r:0),M:0.45+0.08*al});   // (the youth coach's work)
+    const YT=youthTrain(d); for(const p of d.youth||[]) devTick(d,p,{Tk:YT,M:0.45+0.08*al});   // (the academy's training: see youthTrain)
     for(const c of mgAiClubs(d)){ const T=devTrainAi(c); for(const p of c.players) devTick(d,p,{T,gw:c.gw||0}); c.gw=0; }
     for(const p of d.world.free) devTick(d,p,{T:0.35,M:0.15});
     if(up.length||down.length){ up.sort((a,b)=>b[1]-a[1]); down.sort((a,b)=>a[1]-b[1]);
@@ -14078,7 +14081,8 @@
   // Coaches develop players, nothing else -- five of them, a post each from the start, so it's only ever who's the best
   // you can get for each: fitness (speed, acceleration, agility, stamina, strength), technical (ball control, dribbling,
   // passing, crossing, curve), finishing (shooting, long shots, heading, Off IQ, composure), defending (tackling,
-  // sliding, interceptions, Def IQ) and goalkeeping (a keeper's work); and the academy's youth coach, once it's built.
+  // sliding, interceptions, Def IQ) and goalkeeping (a keeper's work). The academy has its own youth coach (its COACH
+  // tab: he never works with the first team), good and poor at whole fields of his lads' game.
   // (Stamina on the day and injuries are the physio's: see INJURIES.) A coach is rated 1 to 10; the better he is the more
   // he costs, and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 for League 2, 10 for the Premium
   // League). Each is good at some of his field and poor at some of it, by his rating (coachSpecN): up to 3, two weak
@@ -14097,35 +14101,41 @@
   const coachOf=(d,k)=>(d.staff||[]).find(c=>c.k===k)||null;
   const youthPost=d=>lvOf(d,'academy')?1:0;
   const coachSpecN=r=>[clamp(Math.round((r-4)/2),0,3),clamp(Math.round((6-r)/2),0,2)];   // (his strengths, his weak spots)
-  function coachSpec(c){ if(c.k==='youth'||!COACH_AREA[c.k]||c.up) return c; const [ns,nw]=coachSpecN(c.r), A=mgShuffle(COACH_AREA[c.k].slice()); c.up=A.slice(0,ns); c.dn=A.slice(ns,ns+nw); return c; }
+  function coachSpec(c){ const pool=c.k==='youth'?STAFF_ORDER:COACH_AREA[c.k]; if(!pool||c.up) return c;   // (the youth coach's are fields)
+    const [ns,nw]=coachSpecN(c.r), A=mgShuffle(pool.slice()); c.up=A.slice(0,ns); c.dn=A.slice(ns,ns+nw); return c; }
   const coachHelp=(c,k)=>{ const h=0.04*(c.r-1); return (c.up||[]).includes(k)?h*1.5:(c.dn||[]).includes(k)?0:h; };
+  // the academy's training, attribute by attribute: its level's (0.6 + 0.1 a level) and the youth coach's (0.04 a point;
+  // a field he's good at half as well again, one he's poor at not at all)
+  function youthTrain(d){ const base=0.6+0.1*lvOf(d,'academy'), c=coachOf(d,'youth'), o={};
+    for(const k of DEV_KEYS){ const a=areaOf(k); o[k]=Math.min(1.3,base+(c?0.04*c.r*((c.up||[]).includes(a)?1.5:(c.dn||[]).includes(a)?0:1):0)); } return o; }
   function devTrainYours(d){ const L=Math.max(1,lvOf(d,'train')), base=0.58+0.07*L, o={};
     for(const k of DEV_KEYS){ const c=coachOf(d,areaOf(k)); o[k]=Math.min(1.3,base+(c?coachHelp(c,k):0)); } return o; }
   function staffMake(d,k){ const r=clamp(Math.round((1.6+d.tier*1.4+mgGauss()*1.6)*2)/2,1,10);
     return coachSpec({id:(d.staffSeq=(d.staffSeq||0)+1),name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST),k,r,wage:mgRound(staffWage(r)*(0.9+Math.random()*0.2))}); }
   function staffCands(d){ if(!d.cand||(d.weeks||0)-(d.cand.w||0)>=4){ const L=[]; for(const k of STAFF_ORDER) for(let i=0;i<2;i++) L.push(staffMake(d,k));
-      if(lvOf(d,'academy')) L.push(staffMake(d,'youth')); d.cand={w:d.weeks||0,list:L}; } return d.cand.list; }
-  function mgHireCoach(d,cid){ const c=staffCands(d).find(x=>x.id===cid); if(!c) return 'He has gone.'; d.staff=d.staff||[];
+      d.cand={w:d.weeks||0,list:L}; } return d.cand.list; }
+  function youthCands(d){ if(!d.ycand||(d.weeks||0)-(d.ycand.w||0)>=4) d.ycand={w:d.weeks||0,list:[staffMake(d,'youth'),staffMake(d,'youth')]}; return d.ycand.list; }   // (the academy's: two every four weeks)
+  function mgHireCoach(d,cid){ const c=staffCands(d).concat(youthCands(d)).find(x=>x.id===cid); if(!c) return 'He has gone.'; d.staff=d.staff||[];
     if(coachOf(d,c.k)) return 'You have a '+STAFF_KIND[c.k].n+' coach: release him first.';
     if(c.k==='youth'&&!youthPost(d)) return 'That needs the academy.';
     if(c.r>staffCap(d)) return 'He won’t come to '+MG_LEAGUE[d.tier]+'.';
     if(d.budget<c.wage*4) return 'Not enough budget.';
-    d.staff.push(c); d.cand.list=d.cand.list.filter(x=>x!==c); mgNews(d,c.name+' joins '+d.clubName+' as '+STAFF_KIND[c.k].n+' coach.'); return null; }
+    d.staff.push(c); d.cand.list=d.cand.list.filter(x=>x!==c); d.ycand.list=d.ycand.list.filter(x=>x!==c); mgNews(d,c.name+' joins '+d.clubName+' as '+STAFF_KIND[c.k].n+' coach.'); return null; }
   function mgReleaseCoach(d,cid){ const c=(d.staff||[]).find(x=>x.id===cid); if(!c) return 'He has gone.'; d.budget-=c.wage*4; d.staff=d.staff.filter(x=>x!==c); mgNews(d,c.name+' leaves '+d.clubName+'.'); return null; }
-  // THE STAFF TAB: your five posts (and the youth coach's) and who's in each, then the men to hire; the one picked on the
-  // right, with what he's good and poor at
-  const coachChips=(lbl,L,cls)=>L&&L.length?'<div class="coChips '+cls+'"><span>'+lbl+'</span>'+L.map(k=>'<b>'+(STAT_LABEL[k]||k)+'</b>').join('')+'</div>':'';
-  function mgStaffTab(d){ const C=staffCands(d), S=d.staff||[], sel=MGUI.csel, kinds=STAFF_ORDER.concat(youthPost(d)?['youth']:[]);
+  // THE STAFF TAB (the training pitch): the five posts and who's in each, then the men to hire -- and the academy's COACH
+  // tab (youth), the same for its youth coach; the one picked on the right, with what he's good and poor at
+  const FIELD_LBL={fit:'Fitness',tec:'Technical',fin:'Finishing',def:'Defending',gk:'Keeping'};
+  const coachChips=(lbl,L,cls,youth)=>L&&L.length?'<div class="coChips '+cls+'"><span>'+lbl+'</span>'+L.map(k=>'<b>'+(youth?FIELD_LBL[k]:STAT_LABEL[k]||k)+'</b>').join('')+'</div>':'';
+  function mgStaffTab(d,youth){ const kinds=youth?['youth']:STAFF_ORDER, C=youth?youthCands(d):staffCands(d), S=(d.staff||[]).filter(c=>kinds.includes(c.k)), sel=MGUI.csel;
     const row=(c,mine)=>'<button class="mgRow'+(sel===c.id?' on':'')+'" data-mg="csel" data-cid="'+c.id+'"><span class="pos">'+c.k.toUpperCase()+'</span>'
       +'<span class="nm">'+mgEsc(c.name)+' <span class="sub">'+STAFF_KIND[c.k].n+'</span></span><span class="ovr">'+c.r.toFixed(1)+'</span><span class="amt">'+(mine?money(c.wage)+'/wk':c.r>staffCap(d)?'won’t come':money(c.wage)+'/wk')+'</span></button>';
     const vac=k=>'<div class="mgRow vac"><span class="pos">'+k.toUpperCase()+'</span><span class="nm">'+STAFF_KIND[k].n+' · vacant</span></div>';
-    let h='<div class="mgHint">'+S.filter(c=>c.k!=='youth').length+' of 5 posts filled'+(youthPost(d)?' · youth '+(coachOf(d,'youth')?'1':'0')+' of 1':'')+'</div>'
+    let h='<div class="mgHint">'+(youth?(S.length?'Your youth coach trains the academy’s lads.':'No youth coach: the lads train on their own.'):S.length+' of 5 posts filled')+'</div>'
       +'<div class="mgList">'+kinds.map(k=>{ const c=coachOf(d,k); return c?row(c,true):vac(k); }).join('')+'</div>';
     h+='<div class="mgHint">TO HIRE · new men every four weeks</div><div class="mgList">'+C.slice().sort((a,b)=>kinds.indexOf(a.k)-kinds.indexOf(b.k)||b.r-a.r).map(c=>row(c,false)).join('')+'</div>';
     const c=S.find(x=>x.id===sel)||C.find(x=>x.id===sel), mine=c&&S.includes(c);
     const card=c?'<div class="mgCard"><div class="mgCardName">'+mgEsc(c.name)+'</div><div class="mgCardSub">'+STAFF_KIND[c.k].n+' coach · rated '+c.r.toFixed(1)+'</div>'
-      +'<div class="mgFacts">'+mgFact('WAGE',money(c.wage)+'/wk','',true)+'</div>'
-      +(c.k==='youth'?'<div class="mgCardSub">he trains the academy’s lads</div>':coachChips('GOOD AT',c.up,'up')+coachChips('POOR AT',c.dn,'dn'))
+      +'<div class="mgFacts">'+mgFact('WAGE',money(c.wage)+'/wk','',true)+'</div>'+coachChips('GOOD AT',c.up,'up',youth)+coachChips('POOR AT',c.dn,'dn',youth)
       +'<div class="mgAct">'+(mine?'<button class="mgBtn warn" data-mg="cfire" data-cid="'+c.id+'">RELEASE ('+money(c.wage*4)+')</button>':'<button class="mgBtn go" data-mg="chire" data-cid="'+c.id+'">HIRE</button>')+'</div></div>':'';
     return mgPanes(h,card||'<div class="mgPick0">Tap a coach to see him here.</div>'); }
 
@@ -14584,9 +14594,12 @@
   // THE FIRST SEASON'S TWO ARRIVALS. After the 2nd game, a veteran of the top flight comes home to finish his career --
   // rated in the 70s, 33 to 35, his position and style anyone's guess -- on under a third of his wage, to the end of
   // next season. After the 5th, a 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
-  // choose where he plays and how (mgSignKid). story.vet / .kid: 0 to come, 1 to see (on the hub), 2 done.
+  // choose where he plays and how (mgSignKid). story.vet / .kid: 0 to come, 1 to see (on the hub), 2 done. And before
+  // them, after the 2nd game, your PHONE RINGS (story.phone, the same way): the chairman -- transfers go through it now,
+  // and TRANSFERS opens (mgMarketOpen). It's never bought.
   const KID_POS=['GK','CB','FB','DM','CM','WM','AM','WNG','STK'], SUB_ROLE={GK:'GK',CB:'DEF',FB:'DEF',DM:'MID',CM:'MID',WM:'MID',AM:'MID',WNG:'ATT',STK:'ATT'};
   function mgStory(d){ const S=d.story; if(!S) return;
+    if(!S.phone&&!lvOf(d,'market')&&d.md>=2) S.phone=1;
     if(!S.vet&&d.md>=2){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
       const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
       p.wage=mgRound(mgWage(p.ovr)*0.3); mgRosterAdd(d,p); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';
@@ -14600,14 +14613,19 @@
     p.wage=mgRound(mgWage(p.ovr)*0.5); mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+kidPot(A).join('–')+'.');
     return null; }
+  function mgMarketOpen(d){ d.lv.market=1; if(d.story) d.story.phone=2; mgNews(d,'The chairman calls: from now on, transfers go through your phone.'); }
   // the hub shows whichever of them is waiting to be seen
   function mgStoryShow(d){ const S=d.story, m=document.getElementById('storyModal'); if(!m) return;
-    const want=S&&S.vet===1?'vet':S&&S.kid===1?'kid':'';
+    const want=S&&S.phone===1?'phone':S&&S.vet===1?'vet':S&&S.kid===1?'kid':'';
     if(!want){ m.classList.remove('on'); return; }
     if(m.classList.contains('on')&&m.dataset.k===want) return;
     m.dataset.k=want; mgStoryPaint(d); m.classList.add('on'); }
   function mgStoryPaint(d){ const S=d.story, card=document.querySelector('#storyModal .stCard'); let h='';
-    if(S.vet===1){ const p=d.roster.find(x=>x.id===S.vetId);
+    if(S.phone===1) h=MGUI.phoneStep?'<div class="stTitle">THE CHAIRMAN</div><div class="stPhone">'+PHONE_SVG+'</div>'
+        +'<div class="stMsg">“Two games in, and the town’s talking. From now on, transfers go through this phone: agents, other clubs, free agents. Anyone you want to buy, sell or sign — make the call.”</div>'
+        +'<div class="stMsg"><b>TRANSFERS</b> is open now, in the menu.</div><div class="cfBtns"><button class="pauseBtn" data-st="phone">GOT IT</button></div>'
+      :'<div class="stTitle">YOUR PHONE IS RINGING</div><div class="stPhone ring">'+PHONE_SVG+'</div><div class="cfBtns"><button class="pauseBtn" data-st="answer">ANSWER</button></div>';
+    else if(S.vet===1){ const p=d.roster.find(x=>x.id===S.vetId);
       const nm=p&&p.role!=='GK'?((STYLES[p.style]||{}).name||p.subRole||''):'', what=p?(p.role==='GK'?'a goalkeeper':(/^[aeiou]/i.test(nm)?'an ':'a ')+nm.charAt(0).toLowerCase()+nm.slice(1)):'';
       h='<div class="stTitle">A HOMETOWN HERO COMES HOME</div><div class="stMsg">'+(p?'<b>'+mgEsc(p.name)+'</b>, '+p.age+(S.vetFrom?', once of '+mgEsc(S.vetFrom)+',':'')+' has come home to finish his career, and he'
         +'’ll take a pay cut to play for the club he grew up with: '+what+' rated <b>'+p.ovr+'</b>, on <b>'+money(p.wage)+'</b> a week to the end of next season.':'')+'</div>'
@@ -14623,7 +14641,9 @@
     card.innerHTML=h; }
   document.getElementById('storyModal').addEventListener('click',e=>{ const b=e.target.closest('[data-st]'), d=CAREER&&CAREER.data; if(!b||!d||!d.story) return;
     const a=b.dataset.st;
-    if(a==='ok'){ d.story.vet=2; mgSave(d); document.getElementById('storyModal').classList.remove('on'); mgStoryShow(d); renderHub(); }
+    if(a==='answer'){ MGUI.phoneStep=1; mgStoryPaint(d); }
+    else if(a==='phone'){ MGUI.phoneStep=0; mgMarketOpen(d); mgSave(d); document.getElementById('storyModal').classList.remove('on'); mgStoryShow(d); renderHub(); }
+    else if(a==='ok'){ d.story.vet=2; mgSave(d); document.getElementById('storyModal').classList.remove('on'); mgStoryShow(d); renderHub(); }
     else if(a==='pos'){ MGUI.kidPos=b.dataset.v; MGUI.kidSty=null; mgStoryPaint(d); }
     else if(a==='sty'){ MGUI.kidSty=b.dataset.v; mgStoryPaint(d); }
     else if(a==='sign'){ const err=mgSignKid(d,MGUI.kidPos||'STK',MGUI.kidSty); if(err){ showNote(err,'var(--bad)'); return; }
@@ -15734,15 +15754,15 @@
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'stamina on match day, and injuries', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
-    academy: {title:'ACADEMY', sub:'your own youngsters', tabs:['Prospects','Facilities']},
+    academy: {title:'ACADEMY', sub:'your own youngsters, and their coach', tabs:['Prospects','Coach','Facilities']},
     stadium: {title:'STADIUM', sub:'tickets, stands, sponsors and the money', tabs:['Money','Stands','Sponsors','Concessions']},
     review:  {title:'SEASON REVIEW', sub:'how the season went', tabs:null},
     decor:   {title:'DECORATE', sub:'trees, flowers and things for the campus', tabs:['Trees','Garden','Plaza']},
   };
   // THE CLUB'S BUILDINGS. The clubhouse is the club's keep: a new career has the shed, the stadium as it is and a rough
   // training pitch, and each clubhouse after it -- the next league up first, then the money -- lets the club put up more and
-  // build up what it has, as far as the lists say. The transfer market is your phone (bought once); the rest stand on the
-  // campus, on a plot till they're up.
+  // build up what it has, as far as the lists say. The transfer market is your phone (it rings after your 2nd game: see
+  // THE FIRST SEASON'S TWO ARRIVALS); the rest stand on the campus, on a plot till they're up.
   const CLUB_LV=[null,
     {n:'The shed', cost:0, tier:1},
     {n:'The cabin', cost:30000, tier:2},
@@ -15750,14 +15770,14 @@
     {n:'The hall', cost:450000, tier:4}];
   const BLD_LV={   // each building's levels (level 1 is putting it up): what it costs, and the clubhouse it needs
     train:   [null,{cost:0,cl:1},{cost:10000,cl:2},{cost:40000,cl:3},{cost:120000,cl:4}],
-    market:  [null,{cost:1500,cl:1}],
-    physio:  [null,{cost:5000,cl:1},{cost:15000,cl:2},{cost:45000,cl:3},{cost:130000,cl:4}],
+    market:  [null,{cost:0,cl:1,call:true}],   // (never bought: the phone rings)
+    physio:  [null,{cost:5000,cl:2},{cost:15000,cl:2},{cost:45000,cl:3},{cost:130000,cl:4}],
     scouting:[null,{cost:12000,cl:2},{cost:15000,cl:3},{cost:60000,cl:4}],
     academy: [null,{cost:25000,cl:3},{cost:25000,cl:4},{cost:120000,cl:4}]};
   const STAD_CL=[0,1,1,2,3,4], DECOR_CL=3;   // the clubhouse each level of the ground needs; the one the decorations come with
   const BLD_NAME={club:'the clubhouse', train:'the training pitch', market:'the transfer market', physio:'the physio’s clinic', scouting:'the scouts’ house', academy:'the youth academy', stadium:'the stadium'};
   const BLD_WHAT={
-    market:'Agents’ numbers on your phone: bid for any player at another club while a window’s open, sign free agents any time, and sell your own. Till you’re on it, there’s no buying or selling.',
+    market:'Agents’ numbers on your phone: bid for any player at another club while a window’s open, sign free agents any time, and sell your own. Till it rings, there’s no buying or selling.',
     physio:'Keeps your players going: they tire more slowly through a game, get more of their legs back at half-time and are fitter again sooner between games; and fewer injuries, lighter ones, back from them sooner and fitter.',
     scouting:'Send scouts round a league to find out what its players are really worth, and grow the network. Till it’s up, a player at another club is a range of ratings, and you can’t scout him.',
     academy:'Youngsters of your own: a new intake every summer (the first the day it opens), and facilities to build up.'};
@@ -15772,7 +15792,8 @@
     else { const cl=clubNeed(id,nx); if(lvOf(d,'club')<cl) return 'That needs clubhouse '+cl+' ('+CLUB_LV[cl].n.toLowerCase()+').'; }
     const c=bldCost(id,nx); if((d.budget||0)<c) return 'Not enough budget: it costs '+money(c)+'.'; return null; }
   // put a building up, or build it up a level (or move into the next clubhouse): an error, or null
-  function bldUp(d,id){ if(id==='stadium') return stadUpgrade(d); const why=bldBlock(d,id); if(why) return why;
+  function bldUp(d,id){ if(id==='stadium') return stadUpgrade(d); if(id==='market') return lvOf(d,'market')?'It’s as good as it gets.':'It isn’t bought: your phone rings after your second game.';
+    const why=bldBlock(d,id); if(why) return why;
     const nx=lvOf(d,id)+1; d.budget-=bldCost(id,nx); d.lv[id]=nx;
     if(id==='academy'&&nx===1&&!(d.youth||[]).length) mgYouthIntake(d);
     decoMakeRoom(d);
@@ -15782,7 +15803,7 @@
   // what a clubhouse brings: the buildings it lets you put up, the ones it lets you build up (and how far), the ground's
   // next level, the decorations
   function clubBrings(lv){ const put=[], more=[];
-    for(const id in BLD_LV) BLD_LV[id].forEach((x,k)=>{ if(!x||x.cl!==lv||(id==='train'&&k===1)) return; if(k===1) put.push(BLD_NAME[id]); else if(!more.some(m=>m[0]===id)) more.push([id,k]); });
+    for(const id in BLD_LV) BLD_LV[id].forEach((x,k)=>{ if(!x||x.cl!==lv||x.call||(id==='train'&&k===1)) return; if(k===1) put.push(BLD_NAME[id]); else if(!more.some(m=>m[0]===id)) more.push([id,k]); });
     for(const m of more){ let k=m[1]; while(BLD_LV[m[0]][k+1]&&BLD_LV[m[0]][k+1].cl===lv) k++; m[1]=k; }
     const st=STAD_LEVELS.map((x,k)=>k>1&&STAD_CL[k]===lv?k:0).filter(Boolean);
     return {put, more:more.map(([id,k])=>BLD_NAME[id].replace(/^the /,'')+' to '+k), stad:st, decor:DECOR_CL===lv}; }
@@ -15797,7 +15818,9 @@
   function bldPic(d,p,key){ const c=d.world.clubs[d.clubId]||{}, u=CAMPUS.preview(p,250,200,{crest:crestFor(c),code:c.code},key);
     return u?'<img class="bpBuildPic" src="'+u+'" alt="">':''; }
   // a building that isn't up: what it's for, and what it costs -- or the clubhouse it needs
-  function mgBuildBody(d,id){ const need=clubNeed(id,1), lock=lvOf(d,'club')<need, c=bldCost(id,1), ok=(d.budget||0)>=c;
+  function mgBuildBody(d,id){ if(id==='market') return '<div class="bpBuild fitWhole"><div class="bpPhone">'+PHONE_SVG+'</div><div class="bpBuildTxt"><div class="bpSect">YOUR PHONE</div>'
+      +'<div class="stadWhat">'+BLD_WHAT.market+'</div><div class="stadWhat">It hasn’t rung yet: it will after your second game.</div></div></div>';
+    const need=clubNeed(id,1), lock=lvOf(d,'club')<need, c=bldCost(id,1), ok=(d.budget||0)>=c;
     let h='<div class="bpBuild fitWhole">'+(id==='market'?'<div class="bpPhone">'+PHONE_SVG+'</div>':bldPic(d,CAMPUS_META.bld[id],'b:'+id))+'<div class="bpBuildTxt"><div class="bpSect">'+(lock?'COMES WITH CLUBHOUSE '+need:'NOT BUILT YET')+'</div>'
       +'<div class="stadWhat">'+BLD_WHAT[id]+'</div>';
     h+=lock?'<div class="stadWhat">It comes with '+CLUB_LV[need].n.toLowerCase()+' (clubhouse '+need+'), and costs '+money(c)+'.</div>'
@@ -15826,7 +15849,7 @@
         +'<button class="mgBtn go bpPin" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN — '+money(N.cost)+'</button>'; }
     else h+='<div class="stadWhat">It’s the best there is: everything’s open to you.</div></div></div>';
     h+='<div class="bpSect">EACH CLUBHOUSE</div><div class="bpLvl">';
-    for(let k=1;k<CLUB_LV.length;k++) h+='<b class="'+(k===L?'now':'')+'">'+(k===L?'▶ ':'')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+(k===L?'now':'')+'">'+(k===1?'the stadium to '+STAD_CL.lastIndexOf(1)+', the physio, the transfer market':clubBringsTxt(k))+'</span>';
+    for(let k=1;k<CLUB_LV.length;k++) h+='<b class="'+(k===L?'now':'')+'">'+(k===L?'▶ ':'')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+(k===L?'now':'')+'">'+(k===1?'the training pitch, the stadium to '+STAD_CL.lastIndexOf(1):clubBringsTxt(k))+'</span>';
     h+='</div><div class="bpSect">YOUR CAREER</div>'+mgProfileTab(d)+mgHistoryTab(d)+mgRecordsHtml(d);
     return h; }
   // ---- the training pitch's level: what each brings ----
@@ -16177,6 +16200,7 @@
     badge('market',mgWindowOpen(d)&&lvOf(d,'market')?(d.offers||[]).length:0); badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
     for(const id of ['market','physio','scouting','academy']){ const el=document.querySelector('#chCampus [data-bldg="'+id+'"]'); if(!el) continue;   // (a plot: its price; not yet: the clubhouse it needs)
       const L=lvOf(d,id), need=clubNeed(id,1), lock=!L&&lvOf(d,'club')<need, pc=el.querySelector('.bPrice');
+      if(id==='market'){ el.classList.toggle('unbuilt',false); el.classList.toggle('locked',!L); if(pc) pc.innerHTML=L?'':LOCK_SVG; continue; }   // (the phone: locked till it rings)
       el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=lock?LOCK_SVG+need:!L?kPrice(bldCost(id,1)):''; }
     { const el=document.querySelector('#careerHub .cpDeco'), lock=lvOf(d,'club')<DECOR_CL; if(el){ el.classList.toggle('locked',lock); el.querySelector('.bPrice').innerHTML=lock?LOCK_SVG+DECOR_CL:''; }
       const mv=document.querySelector('#careerHub .cpMove'); if(mv) mv.style.display=(d.deco||[]).length?'':'none'; }
@@ -16290,7 +16314,8 @@
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
   function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.kn=d.kn||{}; for(const id in d.scouted||{}) d.kn[id]=Math.max(d.kn[id]||0,1); delete d.scouted; d.rec=d.rec||{};
     for(const c of d.staff||[]){ if(c.k==='tac') c.k='def'; coachSpec(c); }   // (the coaches as they are now: see THE STAFF)
-    if(d.cand&&d.cand.list.some(c=>!STAFF_KIND[c.k]||(c.k!=='youth'&&!c.up))) d.cand=null;
+    if(d.cand&&d.cand.list.some(c=>!COACH_AREA[c.k]||!c.up)) d.cand=null;   // (the first team's men to hire: no youth coach among them)
+    d.story=d.story||{vet:2,kid:2}; if(lvOf(d,'market')) d.story.phone=2;   // (on the phone already: no call to come)
     for(const p of d.roster||[]){ if(p.fo==='phy') p.fo='fit'; else if(p.fo==='men') p.fo=null; } d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
     if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0; d.tm=d.tm??MOR0; mgCaptains(d);
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
@@ -16345,7 +16370,7 @@
     else if(id==='physio') h+=mgPhysioBody(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
-    else if(id==='academy') h+=t==='Facilities'?mgFacilitiesTab(d):mgProspectsTab(d);
+    else if(id==='academy') h+=t==='Facilities'?mgFacilitiesTab(d):t==='Coach'?mgStaffTab(d,true):mgProspectsTab(d);
     else if(id==='stadium') h+=renderStadiumTab(d,t);
     else if(id==='review') h+=mgReviewBody(d);
     else if(id==='decor') h+=mgDecorTab(d,t);
@@ -16550,7 +16575,7 @@
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,boards:0,ads:[],deals:{},bids:{}}, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);

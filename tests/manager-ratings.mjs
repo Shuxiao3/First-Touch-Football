@@ -29,7 +29,7 @@ await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(10
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Rated Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2}; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgSave(d); return 1; })()`);
 
 // --- the rating: what he did, his role's work, the result ------------------------------------------------------------------
 r = await K(`(()=>{ const R=(role,o,res,gc)=>mRate(role,o,res??0,gc??1);

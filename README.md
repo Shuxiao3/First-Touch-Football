@@ -1060,9 +1060,13 @@ The same game played like any other football game. It's a copy of `index.html` w
       can get for each. Each develops one field: **fitness** (speed, acceleration, agility, stamina, strength),
       **technical** (ball control, dribbling, passing, crossing, curve), **finishing** (shot accuracy and power, long
       shots, heading, Off IQ, composure), **defending** (tackling, sliding, interceptions, Def IQ) and
-      **goalkeeping** (reflexes, reach, diving, distribution, a keeper's speed). With an academy there's a youth
-      coach too, in its own post. The Training building's **Staff** tab has a line for each post (vacant till
-      filled) and two men to hire for each (and a youth coach), new ones every four weeks.
+      **goalkeeping** (reflexes, reach, diving, distribution, a keeper's speed). The Training building's **Staff**
+      tab has a line for each post (vacant till filled) and two men to hire for each, new ones every four weeks.
+    - **The academy's youth coach** is the academy's, never the first team's: its **Coach** tab, a post of his own,
+      two men to hire every four weeks. He's good and poor at whole fields of his lads' game (fitness, technical,
+      finishing, defending, keeping), by his rating the same way as the first team's coaches; he trains the academy
+      0.04 a point (a field he's good at half as well again, one he's poor at not at all) on top of its level's 0.6 +
+      0.1 a level.
     - **A coach** is rated 1 to 10 in half points; the better he is the more he costs (about $50 a week for a 1,
       $220 for a 5, $1,400 for a 10), and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 in
       League 2, 10 in the Premium League). Hiring needs the post empty (release the man in it first) and four
@@ -1074,8 +1078,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       at 4) and its coach's: 0.04 a point above 1 on each attribute of his field, a strength half as well again, a
       weak spot not at all (1.3 at most). A level-1 pitch and no coaches trains as it always did, and a coach never
       makes it worse. A finishing coach rated 8 at a level-4 pitch: 1.14 for shooting, Off IQ and composure, 1.28 for
-      his two strengths, 0.86 for everything else. The youth coach makes a better academy (0.04 a point on its
-      training). Coaches develop players and nothing else: stamina on the day and injuries are the physio's (see
+      his two strengths, 0.86 for everything else. Coaches develop players and nothing else: stamina on the day and injuries are the physio's (see
       **Injuries** and **The campus**). A computer club trains by its league, as before.
     - **A man's FOCUS** (RATINGS side of his card, a tap a step: BALANCED, FITNESS, TECHNICAL, FINISHING, DEFENDING;
       a keeper's BALANCED, FITNESS, KEEPING) puts his training on one coach's field: a quarter more there, a tenth
@@ -1104,7 +1107,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Where to see them**: the Clubhouse's Fixtures tab says how far you are in each, your Champions League group's
       table, and has your cup ties among the league's games; the match report, the season review and the news too.
       A career from before the cups has none that season: they start with its next.
-  - **Two men come to you in your first season.** After matchday 2 a veteran comes home: a man of 33 to 35, rated
+  - **Your phone rings after your second game.** It's the chairman: from now on transfers go through it -- agents,
+    other clubs, free agents -- and TRANSFERS opens in the menu (ANSWER, then GOT IT). The transfer market is never
+    bought.
+  - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
     join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a range six wide). You pick where he
@@ -1118,8 +1124,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     (the market's Selling tab) and clubs bid for him -- most in pre-season and the winter break, now and then in the
     weeks between (now and then they bid for your best men anyway); a bid stands for two weeks; accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
     can't buy or sign anyone until you're back in the black, but selling still works. All of it needs you on the
-    transfer market first: your phone, $1,500 (see **The campus**); till then nobody's bought, sold or signed, and
-    nobody bids for your men.
+    transfer market first: your phone, which rings after your second game (see above); till then nobody's bought,
+    sold or signed, and nobody bids for your men.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
   - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
@@ -1252,8 +1258,8 @@ The same game played like any other football game. It's a copy of `index.html` w
 
       | Clubhouse | Needs | Costs | Brings |
       | --- | --- | --- | --- |
-      | 1 The shed | | (where you start) | the transfer market and the physio; the stadium to level 2 |
-      | 2 The cabin | League 1 | $30,000 | the scouts' house; the training pitch and the physio to 2; the stadium to 3 |
+      | 1 The shed | | (where you start) | the training pitch; the stadium to level 2 |
+      | 2 The cabin | League 1 | $30,000 | the scouts' house and the physio (to 2); the training pitch to 2; the stadium to 3 |
       | 3 The clubhouse | the Championship | $120,000 | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
       | 4 The hall | the Premium League | $450,000 | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
 
@@ -1266,7 +1272,6 @@ The same game played like any other football game. It's a copy of `index.html` w
       | Building | 1 | 2 | 3 | 4 |
       | --- | --- | --- | --- | --- |
       | Training pitch | (where you start) | $10,000 | $40,000 | $120,000 |
-      | Transfer market | $1,500 | | | |
       | Physio | $5,000 | $15,000 | $45,000 | $130,000 |
       | Scouts' house | $12,000 | $15,000 | $60,000 | |
       | Youth academy | $25,000 | $25,000 | $120,000 | |
@@ -1278,7 +1283,8 @@ The same game played like any other football game. It's a copy of `index.html` w
         instructions; 3 the 3-1-3, 1-4-2 and 4-1-2, control possession and direct counter, and the width and crosses
         instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
         the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
-      - **The transfer market** is your phone, not a building on the campus: TRANSFERS in the menu, straight in.
+      - **The transfer market** is your phone, not a building on the campus, and not bought: it rings after your
+        second game, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
         (32% at 4); at half-time they get back a quarter of the legs they've lost without one, 35% at level 1 up to
         65% at 4; between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
