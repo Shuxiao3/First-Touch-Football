@@ -1012,8 +1012,9 @@ The same game played like any other football game. It's a copy of `index.html` w
       next to nothing left to grow into. Players out of contract, released or let go join them.
     - **No young man with a future is left without a club.** One of 24 or under whose ceiling is 5 or more above him
       is signed by a club at his ceiling's level the day he's free (yours included, if you let his deal run out).
-    - **A season without a club** he doesn't grow, and from 29 he loses a point more than age alone takes (rust);
-      after two seasons without one he's out of the game.
+    - **A season without a club** he hardly grows -- little training, no games -- and loses his sharpness and his
+      legs (rust: a point or two of his rating in a season, more for an older man); after two seasons without one
+      he's out of the game.
     - **What they ask.** From 29, his wage, as from anyone. Younger, he reckons he's worth more than the club that
       let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
       sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. A 60 in League 2 asks $550 a
@@ -1023,11 +1024,36 @@ The same game played like any other football game. It's a copy of `index.html` w
     League 2, up to $6,000 in the Premium League. Or send your scouts round a league's goalkeepers, defenders,
     midfielders or forwards. A scouted player shows his exact rating, potential and attributes. Reports last until the
     end of the season.
-  - **Ageing.** At the end of a season everyone is a year older. Players up to 25 grow towards their potential:
-    faster with 12 or more games that season, slower with fewer than 4. The late twenties hold, the thirties
-    decline, and players retire from 34. Once it's built, the youth academy takes in 3 to 5 youngsters aged 16 or 17
-    every summer, the first of them the day it opens (more and better as you build up its facilities). Promote them,
-    or they leave at 19.
+  - **Players develop every third week**, not once a year. A man's 25 attributes are his own (saved with him, a
+    letter a half point), and his rating is what they rate. Every third week each attribute moves along a hidden
+    meter; when it fills he goes up half a point, when it empties he drops half a point. What you see is what plays.
+    - **What fills it**: the room under the attribute's ceiling (his potential, shaped round his own strengths: he
+      can reach it, never pass it, and growth slows as he gets near), his age, how good his training is (your
+      training pitch's level; a computer club's by its league), how much he plays (his share of his side's games,
+      with diminishing returns: half the games is three quarters of the good of all of them), his professionalism,
+      how quickly he learns, how much the attribute matters where and how he plays (his role and his style: nobody
+      turns into an all-rounder), and his momentum -- a slow drift of good spells and bad. Your academy's youngsters
+      grow by its level; a man with no club, hardly at all.
+    - **What drains it**: age, by kind of attribute -- his legs (speed, acceleration, agility, stamina, strength)
+      grow to 24-26, hold, drop a little from 29 to 32 and more every year after; his touch fades from 31; his
+      reading of the game (Off IQ, Def IQ, composure) keeps growing into his thirties and never fades with age -- and
+      bad weeks: poor training (a man without a club, or one who barely plays at a poor club) loses his sharpness
+      and his legs. Below the best an attribute has ever been, it fills a good deal faster: a man gets back to a
+      level he's been at (not his legs, past 29).
+    - **His hidden values**, 1 to 10 in half points, are his from the start and never shown: how quickly he learns,
+      his professionalism (a professional trains as well every week; the others come and go), and the rest of his
+      character, for what's to come. One in sixteen grows late: his touch and his legs keep coming three years
+      longer.
+    - The dice are his own, the season's and the week's: reload a save and the same weeks come out the same.
+    - The season's end grows nobody now: everyone is a year older, and players retire from 34. The season review
+      says how far each of yours came. A line in the news every third week says which of your men moved. Once it's
+      built, the youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer, the first of them the day it
+      opens (more and better as you build up its facilities). Promote them, or they leave at 19.
+    - **The world stays the world.** A new man's prime is drawn round his league's level, and the young are made
+      short of it by what they have to grow into, so each generation peaks where the one before did. Twenty
+      seasons, simulated: each league's best eights stay within about four points of where they began, and the
+      number of men rated 85 or more stays between about 5 and 30 (before, the leagues climbed 7 to 11 points and
+      85+ men went from about 20 to 140).
   - **The computer clubs** buy from each other and from the free agents while the window's open (most of it in
     pre-season and the winter break, a little in the weeks between), bid for your players, and fill their squads up
     every summer.

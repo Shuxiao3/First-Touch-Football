@@ -78,7 +78,7 @@ ok(/shut until the summer/.test(wl), 'the market says the window\'s shut until t
 
 // --- a two-game week: a Premium League club in the Champions League, its first group game on week 4's Wednesday ----
 r = await K(`(()=>{ const d=CAREER.data; const other=d.div[4][0]; d.div[4][0]=d.clubId; d.div[1][d.div[1].indexOf(d.clubId)]=other; d.world.clubs[other].tier=1; d.world.clubs[d.clubId].tier=4; d.tier=4;
-  for(const p of d.roster) p.ovr=Math.round(MG_LEVEL[4]+(p.ovr-50)*0.5); mgAutoLineup(d); d.md=0; d.mw=-1; d.phase='league'; d.wday='mon'; mgNewFixtures(d);
+  for(const p of d.roster) mgSetOvr(p,Math.round(MG_LEVEL[4]+(p.ovr-50)*0.5)); mgAutoLineup(d); d.md=0; d.mw=-1; d.phase='league'; d.wday='mon'; mgNewFixtures(d);
   d.clQual=[d.clubId,...d.div[4].filter(x=>x!==d.clubId).slice(0,5)]; mgCupsStart(d); mgFreshen(d);
   const seen=[]; for(let i=0;i<12&&d.md<4;i++){ if(d.wday==='mon'){ const due=mgCupDue(d); seen.push('mon'+(d.md+1)+(due&&due.key?':'+due.key:'')); mgForward(d); } else { const g=mgNextGame(d); seen.push(d.wday+(d.md+1)+':'+g.kind); mgPlayGame(d,null,null); } }
   mgSave(d); renderHub(); return { seen, wday:d.wday, md:d.md }; })()`);

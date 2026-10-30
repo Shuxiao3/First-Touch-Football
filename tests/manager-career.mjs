@@ -31,7 +31,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'stadOf, stadUpgrade, boardBuy, dealBids, dealSign, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
-  + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
+  + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
   + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
@@ -84,7 +84,7 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
 ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the first Monday of pre-season');
-ok(!d.roster.some(p => p.stats), 'no stats in the save (they are rebuilt from the rating)');
+ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{25}$/.test(p.at) && /^[a-s]{25}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
 // --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market and
@@ -176,7 +176,7 @@ ok(d.roster.length >= 12 && d.roster.some(p => p.role === 'GK'), 'never short: '
 
 // --- promotion: a squad of 75s ---------------------------------------------------------------
 await create('Strong Town');
-let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) p.ovr = 75;
+let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) M.mgSetOvr(p, 75);
   let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
   M.mgSave(d); M.renderHub(); return { pos: d.review.pos, result: d.review.result, up: d.review.up }; });
 ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins League 2: ' + r.result);
@@ -190,7 +190,7 @@ ok(d.sponsorWk === 800 && d.stadium.lvl === 1 && d.capacity === 1800, 'the club\
 let po = null;
 for(let k = 0; k < 12 && !po; k++){
   await create('Playoff Rovers');
-  po = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) p.ovr = 59;
+  po = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) M.mgSetOvr(p, 59);
     let n = 0; while(d.phase !== 'playoffs' && d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
     M.mgSave(d); M.renderHub(); return d.phase === 'playoffs' ? { pos: M.mgPos(d), g: M.mgNextGame(d) } : null; });
 }
@@ -489,8 +489,10 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
   out.room = Math.max(0, ...F.filter(p => p.age <= 24).map(p => p.pot - p.ovr));
   const man = age => ({ ovr: 60, age, role: 'MID' }), ask = age => Object.assign(M.mgFreeAsk(d, man(age)), { fair: M.mgDemand(d, man(age), false) });
   Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33) });
-  const young = Object.assign(M.mgNewFreeAgent(d), { age: 22, ovr: 55, pot: 57 }), vet = Object.assign(M.mgNewFreeAgent(d), { age: 31, ovr: 60, pot: 60 });
-  M.mgIdleYear(young); M.mgIdleYear(vet); out.young = [young.age, young.ovr, young.pot, young.idle]; out.vet = [vet.age, vet.ovr, vet.pot, vet.idle];
+  const mk = (age, ovr) => { const p = M.mgNewFreeAgent(d); p.role = 'MID'; p.age = age; delete p.at; p.pot = ovr; p.ovr = ovr; M.mgSetOvr(p, ovr); return p; };
+  const young = mk(22, 55), vet = mk(31, 60), twin = JSON.parse(JSON.stringify(vet));   // (the vet's twin at a club: training and games)
+  for(let w = 1; w <= 10; w++){ d.weeks = 3 * w; M.devTick(d, young, { T: 0.35, M: 0.15 }); M.devTick(d, vet, { T: 0.35, M: 0.15 }); M.devTick(d, twin, { T: 0.75, gw: 3 }); twin.mw = 3; }
+  M.mgIdleYear(young); M.mgIdleYear(vet); out.young = [young.age, young.ovr, young.idle]; out.vet = [vet.age, vet.ovr, vet.idle, twin.ovr];
   const c = Object.values(d.world.clubs).find(k => k.id !== d.clubId && k.tier === 2), star = c.players[0];   // (a 21-year-old with a future, let go)
   Object.assign(star, { age: 21, ovr: 58, pot: 72 }); c.players.splice(0, 1); M.mgToFree(d, star, c);
   out.star = { free: d.world.free.includes(star), club: (Object.values(d.world.clubs).find(k => k.players.includes(star)) || {}).name || null };
@@ -500,8 +502,8 @@ ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n +
 ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.3 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.3
    && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
   'what they ask (a 60 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
-ok(String(r.young) === '23,55,55,1' && r.vet[0] === 32 && r.vet[1] <= 59 && r.vet[1] >= 57 && r.vet[2] === r.vet[1] && r.vet[3] === 1,
-  'a season without a club: the young man doesn\'t grow (55, his ceiling 57 down to 55), the old one loses a point more than age alone (60 to ' + r.vet[1] + ')');
+ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 && r.vet[1] < r.vet[3] && r.vet[1] < 60 && r.vet[2] === 1,
+  'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
 // signing a young one: his card says what he wants a week and to sign; SIGN HIM pays the fee
 await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 20000; M.bldUp(d, 'market'); M.mgSave(d); });
@@ -568,7 +570,7 @@ ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low === 1 && sn.wins =
 await create('Cup City');
 r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
   const other = d.div[3][0]; d.div[3][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 3; d.tier = 3;
-  for(const p of d.roster) p.ovr = Math.round(M.MG_LEVEL[3] + (p.ovr - 50) * 0.5);
+  for(const p of d.roster) M.mgSetOvr(p, Math.round(M.MG_LEVEL[3] + (p.ovr - 50) * 0.5));
   M.mgAutoLineup(d); M.mgNewFixtures(d); M.mgCupsStart(d); const C = d.cup;
   return { coco: [C.coco.in.length, C.coco.r[0].ties.length, C.coco.r[0].byes.length].join(), fashion: [C.fashion.in.length, C.fashion.r[0].ties.length, C.fashion.r[0].byes.length].join(),
     cl: [C.cl.in.length, C.cl.gr.map(g => g.ids.length).join('+'), C.cl.in.filter(id => d.world.clubs[id].euro).length, C.cl.in.filter(id => d.div[4].includes(id)).length].join(),
@@ -588,7 +590,7 @@ ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.
 
 const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };
   const other = d.div[4][0]; d.div[4][0] = d.clubId; d.div[1][d.div[1].indexOf(d.clubId)] = other; d.world.clubs[other].tier = 1; d.world.clubs[d.clubId].tier = 4; d.tier = 4;
-  for(const p of d.roster) p.ovr = Math.round(M.MG_LEVEL[4] + (p.ovr - 50) * 0.5);
+  for(const p of d.roster) M.mgSetOvr(p, Math.round(M.MG_LEVEL[4] + (p.ovr - 50) * 0.5));
   d.lv.physio = phys; M.mgAutoLineup(d); M.mgNewFixtures(d); d.clQual = [d.clubId, ...d.div[4].filter(x => x !== d.clubId).slice(0, 5)]; M.mgCupsStart(d);
   return d.cup.cl.in.includes(d.clubId); }, phys);
 await create('Busy Town'); const in0 = await busy(0), b0 = await season();

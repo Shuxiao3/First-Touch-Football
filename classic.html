@@ -13791,18 +13791,128 @@
   function mgRound(v){ const r=v>=1e6?1e5:v>=1e5?1e4:v>=1e4?1e3:v>=1e3?100:10; return Math.max(r,Math.round(v/r)*r); }
 
   // ---- players ----
-  // his stats: the role's averages moved to his rating, his style on top, then nudged until they rate exactly what he is
-  const MG_STATS=new Map();
-  function mgStats(p){
-    if(!p) return {};
-    const key=p.id+'|'+p.role+'|'+p.ovr+'|'+(p.style||'');
-    let s=MG_STATS.get(key); if(s) return s;
-    s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1));
+  // his stats as he's first made: the role's averages moved to his rating, his style on top, then nudged until they rate
+  // exactly what he is (from then on they're his own: see PLAYER DEVELOPMENT)
+  function mgDeriveStats(p){
+    const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1));
     if(p.style&&p.role!=='GK') cwStyleStats(p.role,s,p.style,p.ovr);
     const w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((a,b)=>w[a]-w[b]);   // the lightest stats first: small steps
     for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }
+    return s; }
+  // his stats: his own attributes (p.at), read once per string
+  const MG_STATS=new Map();
+  function mgStats(p){
+    if(!p) return {};
+    if(!p.at) devInit(p);
+    let s=MG_STATS.get(p.at); if(s) return s;
     if(MG_STATS.size>5000) MG_STATS.clear();
-    MG_STATS.set(key,s); return s; }
+    s=devUnpack(p.at); MG_STATS.set(p.at,s); return s; }
+  // ===== PLAYER DEVELOPMENT ======================================================================================
+  // A man's 25 attributes are his own (p.at, 1 to 10 in half points), not made up from his rating each time: his
+  // rating is worked out from them (cwOverall). Every third week (mgDevelop) each attribute moves along a hidden meter
+  // (p.pg: past +1 it goes up half a point, past -1 down half a point). What fills it: the room under its ceiling (p.cl,
+  // his potential -- hidden, shaped round his own strengths: he can reach it, never pass it), his age (each kind of
+  // attribute its own curve), how good his training is, how much he plays (with diminishing returns), his
+  // professionalism, his form, how quickly he learns, how much the attribute matters where he plays and how he plays,
+  // and his momentum (a slow drift of good spells and bad). What drains it: age -- from 29 his legs, from 32 his
+  // touch, reading the game never -- and bad weeks (poor training; poor form and low morale to come). Below the best
+  // it's ever been (p.bs) it fills a good deal faster: a man gets back to a level he's been at (not his legs, past 29).
+  // The dice are his own, the season's and the week's: a reload gives the same.
+  const DEV_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle',
+    'interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution'];   // (this order, in the strings)
+  const DEV_GROUP={speed:'phy',acceleration:'phy',agility:'phy',stamina:'phy',strength:'phy',keeperSpd:'phy',offIQ:'men',defIQ:'men',composure:'men',interceptions:'men',
+    gkReflex:'gk',gkReach:'gk',gkDiveRange:'gk',gkDistribution:'gk'};   // (the rest: 'tec', his touch)
+  const devGroup=k=>DEV_GROUP[k]||'tec';
+  const DEV_EVERY=3, DEV_RATE=0.045, DEV_BACK=2.5, DEV_MEN_EXTRA={offIQ:1,defIQ:1,composure:1,interceptions:0.5};
+  // the strings: a half point a letter ('a' is 1, 's' is 10); the meters two base-36 digits each
+  const devEnc=v=>String.fromCharCode(97+Math.round((clamp(v,1,10)-1)*2)), devDec=c=>1+(c.charCodeAt(0)-97)/2;
+  function devPack(st){ let s=''; for(const k of DEV_KEYS) s+=devEnc(st[k]??5.5); return s; }
+  function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); return o; }
+  function devPackPg(a){ return a.map(v=>Math.round((clamp(v,-1,1)+1)*600).toString(36).padStart(2,'0')).join(''); }
+  function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>s?parseInt(s.substr(i*2,2),36)/600-1:0); }
+  // HIS HIDDEN VALUES, 1 to 10 in half points, drawn from his seed when he's first seen: how quickly he learns (lr), his
+  // professionalism (pro), adaptability (ad), resilience (rs), durability (du), and his character -- charisma (ch),
+  // temperament (te: high is calm), ambition (am), loyalty (lo). Never shown as numbers.
+  const HV_KEYS=['lr','pro','ad','rs','du','ch','te','am','lo'];
+  function hvMake(p){ const r=cwMul(cwHash((p.seed>>>0)||1,'hv')), z=()=>(r()+r()+r()+r()-2)/0.577, te=z(), am=z();
+    const v={ lr:z(), pro:0.8*z()+0.4*te, ad:z(), rs:0.85*z()+0.3*te, du:z(), ch:z(), te, am, lo:0.9*z()-0.35*am };
+    return HV_KEYS.map(k=>devEnc(Math.round(clamp(5.5+1.8*v[k],1,10)*2)/2)).join(''); }
+  function hvOf(p){ if(!p.hv) p.hv=hvMake(p); const o={}; HV_KEYS.forEach((k,i)=>{ o[k]=devDec(p.hv[i]); }); return o; }
+  // one in sixteen grows late: his touch and his legs keep coming three years longer
+  const devLate=p=>cwHash((p.seed>>>0)||1,'late')%16===0;
+  // how much an attribute matters to him: by his role's rating weights, more for what his style is about
+  function devRel(p){ const w=OVR_W[p.role]||OVR_W.MID, mx=Math.max(...Object.values(w)), sd=(STYLES[p.style]&&STYLES[p.style].d)||{}, o={};
+    for(const k of DEV_KEYS){ let r=k in w?0.35+0.65*w[k]/mx:0.15; if(sd[k]>0) r=Math.min(1,r+0.25); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }
+  // his ceilings: his attributes as he's made, lifted (most where it matters to him) till they rate his potential;
+  // reading the game a point more besides (it grows with the years)
+  function devCeil(p,st){ const rel=devRel(p), T=Math.max(p.pot||p.ovr,p.ovr);
+    const at=lift=>{ const c={}; for(const k of DEV_KEYS) c[k]=Math.min(10,st[k]+lift*rel[k]+(DEV_MEN_EXTRA[k]||0)); return c; };
+    let lo=0, hi=6; for(let i=0;i<18;i++){ const m=(lo+hi)/2; if(cwOverall(p.role,at(m))<T) lo=m; else hi=m; }
+    const c=at(hi); for(const k of DEV_KEYS) c[k]=Math.max(st[k],Math.round(c[k]*2)/2); return c; }
+  // a man as first seen: his attributes from his rating (as they always were), his ceilings, his hidden values
+  function devInit(p){ if(!p||p.at) return; const st=mgDeriveStats(p);
+    p.at=devPack(st); p.cl=devPack(devCeil(p,st)); p.bs=p.at; p.pg=''; p.mo=0; hvOf(p);
+    p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+  // his rating set by hand (the board's signings, a test): every attribute that counts moved till it rates that
+  function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),30,95);
+    for(let it=0; it<400; it++){ const cur=cwOverall(p.role,st); if(cur===v) break; const up=cur<v, k=ks[it%ks.length]; st[k]=clamp(st[k]+(up?0.5:-0.5),1,10); }
+    const cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at); for(const k of DEV_KEYS){ cl[k]=Math.max(cl[k],st[k]); bs[k]=Math.max(bs[k],st[k]); }
+    p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
+  // the age curves: how much of his growth an attribute still has in it, and what age takes off it each tick (in half points)
+  function devAgeGrow(g,a){ if(g==='phy') return a<=21?1:a<=23?0.75:a<=26?0.35:a<=28?0.1:0;
+    if(g==='tec') return a<=21?1:a<=24?0.8:a<=27?0.4:a<=30?0.15:a<=32?0.05:0;
+    if(g==='men') return a<=21?0.6:a<=26?0.7:a<=30?0.5:a<=33?0.35:0.2;
+    return a<=21?0.9:a<=26?0.8:a<=30?0.4:a<=33?0.15:0; }
+  function devAgeDrop(g,a){ if(g==='phy') return a<29?0:a<=30?0.07:a<=32?0.09:a<=34?0.16:0.24;
+    if(g==='tec') return a<31?0:a===31?0.02:a<=34?0.06:0.12;
+    if(g==='gk') return a<32?0:a<=33?0.05:a<=35?0.1:0.16;
+    return 0; }
+  // the minutes a man got these weeks, as a share of his side's games, with diminishing returns: half of them is three
+  // quarters of the good of playing every one
+  const devMinutes=share=>1-Math.pow(1-clamp(share,0,1),2);
+  // ONE TICK for one man. x: {T: his training (0 to 1), gw: his side's games these weeks, M: minutes' worth when he has
+  // no side's games to count (pre-season, the academy, no club)} -> his rating's change
+  function devTick(d,p,x){ devInit(p); const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p);
+    const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
+    p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
+    const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
+    const T=clamp(x.T*(0.75+0.05*h.pro+(r()-0.5)*(10.5-h.pro)*0.04),0,1.2);   // (a professional trains as well every week; the others come and go)
+    const P=h.pro/10, F=0.6;   // (form: from match ratings, to come)
+    const W=0.375*T+0.3125*M+0.1875*P+0.125*F, inF=W/0.69, lrF=0.55+0.09*h.lr, ageE=devLate(p)?p.age-3:p.age;
+    for(let i=0;i<DEV_KEYS.length;i++){ const k=DEV_KEYS[i], g=devGroup(k), room=(cl[k]-st[k])*2;
+      let gain=0;
+      if(room>0){ const back=st[k]<bs[k], ag=back?Math.max(devAgeGrow(g,g==='men'?p.age:ageE),0.6):devAgeGrow(g,g==='men'?p.age:ageE);
+        gain=DEV_RATE*(room+1)*ag*inF*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1); }
+      let drain=devAgeDrop(g,p.age);
+      if(W<0.48&&(g==='phy'||g==='tec')) drain+=(0.48-W)*1.2;    // (bad weeks' training: his sharpness and his legs go)
+      pg[i]+=gain-drain;
+      while(pg[i]>=1&&st[k]<cl[k]){ st[k]+=0.5; pg[i]-=1; }
+      if(st[k]>=cl[k]&&pg[i]>0) pg[i]=0;   // (at his ceiling: no further)
+      while(pg[i]<=-1&&st[k]>1){ st[k]-=0.5; pg[i]+=1; }
+      pg[i]=clamp(pg[i],-0.99,0.99);
+      if(st[k]>bs[k]||(g==='phy'&&p.age>=29)) bs[k]=st[k]; }   // (his legs past 29: what's gone is gone)
+    p.at=devPack(st); p.bs=devPack(bs); p.pg=devPackPg(pg); p.mw=0;
+    const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99));
+    return p.ovr-was; }
+  // what a side's training is worth (0 to 1): yours by the training pitch's level; the computer's by its league
+  const devTrainYours=d=>0.55+0.1*Math.max(1,lvOf(d,'train')), devTrainAi=c=>0.6+0.07*(c.tier||1);
+  // EVERY THIRD WEEK, everyone: your squad, your academy (no games: its level's worth), the computer clubs', the free
+  // agents (no club: little training, no games). Your squad's movers make the news (one line).
+  function mgDevelop(d){ const up=[], down=[];
+    for(const p of d.roster){ const dl=devTick(d,p,{T:devTrainYours(d),gw:d.gw||0}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
+    d.gw=0; const al=lvOf(d,'academy');
+    for(const p of d.youth||[]) devTick(d,p,{T:0.6+0.1*al,M:0.45+0.08*al});
+    for(const c of mgAiClubs(d)){ const T=devTrainAi(c); for(const p of c.players) devTick(d,p,{T,gw:c.gw||0}); c.gw=0; }
+    for(const p of d.world.free) devTick(d,p,{T:0.35,M:0.15});
+    if(up.length||down.length){ up.sort((a,b)=>b[1]-a[1]); down.sort((a,b)=>a[1]-b[1]);
+      const say=([p,dl])=>p.name+' ('+(dl>0?'+':'')+dl+', '+p.ovr+')';
+      mgNews(d,'Three weeks on: '+[up.length?up.slice(0,3).map(say).join(', ')+(up.length>3?' and '+(up.length-3)+' more':'')+' up':'', down.length?down.slice(0,2).map(say).join(', ')+' down':''].filter(Boolean).join('; ')+'.'); } }
+  // a game's minutes: a side's game counted (gw), each man his share of it (mw) -- a sub of the computer's, now and then
+  // one of its youngsters, a third of one
+  function devGame(d,id,xi){ if(id===d.clubId) d.gw=(d.gw||0)+1; else { const c=d.world.clubs[id]; if(c) c.gw=(c.gw||0)+1; } }
+  function devSimSubs(d,id,xi){ const c=d.world.clubs[id]; if(!c||id===d.clubId) return;
+    const bench=c.players.filter(p=>!xi.includes(p)&&p.role!=='GK').sort((a,b)=>((a.age||25)<=AI_YOUNG?0:1)-((b.age||25)<=AI_YOUNG?0:1)||b.ovr-a.ovr);
+    for(const p of bench.slice(0,2)){ p.mw=(p.mw||0)+0.35; p.apps=(p.apps||0)+1; } }
   function mgWage(ovr){ return Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10); }
   // seasons left on his deal, this one included (0: out of contract)
   function mgLeft(d,p){ return Math.max(0,(p.until||0)-d.season+1); }
@@ -13812,7 +13922,11 @@
     return mgRound(2000*Math.pow(10,0.12*(p.ovr-55))*ageF*potF*(mgLeft(d,p)<=1?0.8:1)); }
   // the league a man's rating belongs in
   function mgLevelTier(ovr){ return ovr>=MG_LEVEL[4]-4?4:ovr>=MG_LEVEL[3]-4?3:ovr>=MG_LEVEL[2]-4?2:1; }
-  function mgPotFor(age,ovr){ const g=age<=18?10+Math.random()*16:age<=21?5+Math.random()*13:age<=24?1+Math.random()*8:age<=27?Math.random()*3:0; return Math.min(94,Math.round(ovr+g)); }
+  // the growth a young man has in him, on average just what he's short of a man of his level in his prime (see
+  // mgAgeOvr): some more, some less, so that a world's generations peak where the one before did
+  function mgPotFor(age,ovr){ const g=age<=18?4+Math.random()*12:age<=21?2+Math.random()*8:age<=24?Math.random()*5:age<=27?Math.random()*2:0; return Math.min(94,Math.round(ovr+g)); }
+  // a man made for a level (his prime's): the young that much short of it (they grow into it), the old past their best
+  function mgAgeOvr(lvl,age){ return lvl-(age<=18?10:age<=21?6:age<=24?2.5:age<=29?0:age===30?1:age===31?2:age===32?3:age===33?4.5:6); }
   function mgAge(){ return 18+Math.round((Math.random()+Math.random()+Math.random())/3*16); }
   function mgNewPlayer(d,role,ovr,age,o){ o=o||{};
     const sub=o.sub||cwSubRole(role,Math.random);
@@ -13821,6 +13935,7 @@
     if(role!=='GK') p.style=styleForSub(sub,Math.random());
     p.pot=o.pot!=null?Math.min(94,Math.max(p.ovr,Math.round(o.pot))):mgPotFor(age,p.ovr);
     p.wage=mgRound(mgWage(p.ovr)*(0.85+Math.random()*0.3));
+    devInit(p);                                                    // (his attributes, ceilings and hidden values: his own from now)
     careerStarPot(p);                                              // (his skill-star ceiling, by his position and potential)
     if(p.sp===5&&natPos(p)==='FB'&&mgFiveStarFB(d,p)) p.sp=4;      // (one five-star full-back in the world at most)
     return p; }
@@ -13855,7 +13970,7 @@
               budget:o.budget!=null?o.budget:mgRound(MG_AI_BUDGET[tier]*(0.6+Math.random()*0.8)), players:[] };
     c.code=o.code||mgCodeFor(d,name); if(o.crest) c.crest=o.crest; d.world.clubs[c.id]=c;
     const lvl=MG_LEVEL[tier]+(bias||0);
-    for(const role of MG_ROLES) c.players.push(mgNewPlayer(d,role,lvl-2+mgGauss()*3.2,mgAge()));
+    for(const role of MG_ROLES){ const age=mgAge(); c.players.push(mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age)); }
     mgNumber(c.players);
     return c; }
   function mgTownNames(n,used){ const out=[]; let t=0;
@@ -13891,10 +14006,9 @@
     const t=mgLevelTier(p.pot||p.ovr), C=mgAiClubs(d).filter(c=>c!==from&&c.players.length<MG_MAX&&Math.abs(c.tier-t)<=1);
     if(!C.length) return false; mgMoveAi(d,p,null,mgPick(C),0); return true; }
   function mgSweepFree(d){ for(const p of d.world.free.slice()) mgSnapUp(d,p,null); }
-  // a season without a club: he doesn't grow (no football), and from 29 he loses a point more than age alone takes
-  // (rust), his ceiling slipping two with it
-  function mgIdleYear(p){ const was=p.ovr; mgGrow(p); p.ovr=clamp(Math.min(p.ovr,was)-(p.age>=29?1:0),30,95);
-    p.pot=Math.max(p.ovr,(p.pot||p.ovr)-2); p.age++; p.idle=(p.idle||0)+1; }
+  // a season without a club: a year older, and a year further from the game (the rust is every third week's: little
+  // training and no games -- see mgDevelop)
+  function mgIdleYear(p){ p.age++; p.idle=(p.idle||0)+1; }
   function mgClub(d,id){ return (d.world.clubs[id])||null; }
   function mgPlayersOf(d,id){ return id===d.clubId?d.roster:((d.world.clubs[id]||{}).players||[]); }
   function mgAiClubs(d){ return Object.values(d.world.clubs).filter(c=>c.id!==d.clubId&&!c.euro); }   // (the clubs from abroad only play the Champions League)
@@ -13967,11 +14081,14 @@
   const mgCtxOf=g=>g.kind==='cup'?{kind:'cup',key:g.key,r:g.r}:{kind:g.kind};
   // a game over: the men who played it pay for it. Yours after a live one by what they played (a man taken off 0.6 of
   // it, one brought on 0.4), the side you played by its eight on the pitch
-  function mgTireGame(d,id,xi,live){
+  // a game's cost to the men who played it -- and its minutes, for their development (each man his share of the game,
+  // the side a game more; in a simulated game a couple of the computer's subs a third of one: see devSimSubs)
+  function mgTireGame(d,id,xi,live){ devGame(d,id);
     if(live&&SQUAD.G&&SQUAD.R){ const t=id===d.clubId?'G':'R', L=LINEUP[t], on=new Set([L.gk,...L.atk]), S=SUBS[t]||{on:[],off:[]}, P=mgPlayersOf(d,id);
       SQUAD[t].forEach((e,si)=>{ const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return;
-        condTire(p,S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0); }); return; }   // (LINEUP is the eight at the end: a sub's in it)
-    for(const p of xi) condTire(p,1); }
+        const sh=S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0; condTire(p,sh); if(sh) p.mw=(p.mw||0)+sh; }); return; }   // (LINEUP is the eight at the end: a sub's in it)
+    for(const p of xi){ condTire(p,1); p.mw=(p.mw||0)+1; }
+    devSimSubs(d,id,xi); }
 
   // ---- the season ----
   // each league home and away: 26 rounds of seven games, a game being [home, away, home goals, away goals]
@@ -14077,6 +14194,7 @@
   // a new week, its Monday. While the window's open the computer clubs do their business -- most of it in pre-season and
   // the winter break, a little in the weeks between -- and bid for your men; a bid stands for two weeks
   function mgWeekStart(d){ d.wday='mon'; d.wkN=(d.wkN||0)+1; d.weeks=(d.weeks||0)+1; d.bidMemo={};
+    if(d.weeks%DEV_EVERY===0) mgDevelop(d);   // (every third week: everyone's development)
     if(!mgWindowOpen(d)) return;
     d.offers=(d.offers||[]).filter(o=>d.wkN-(o.wk||d.wkN)<2);
     const k=d.phase==='league'?0.15:1.5; mgAiTrades(d,k); mgAiBids(d,k); }
@@ -14128,7 +14246,7 @@
   // the wonderkid signs, where (sub) and how (style) you chose: a three-season youth deal, half his wage
   function mgSignKid(d,sub,style){ const S=d.story, A=S&&S.kidAsk; if(!A||S.kid!==1) return 'He has gone.';
     const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
-    p.name=A.name; if(role!=='GK'&&STYLES[style]&&STYLES[style].sub===sub) p.style=style;
+    p.name=A.name; if(role!=='GK'&&STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style)
     p.wage=mgRound(mgWage(p.ovr)*0.5); mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+p.pot+'.');
     return null; }
@@ -14216,7 +14334,7 @@
   function mgEuro(d,fresh){ const W=d.world; W.euro=W.euro||[];
     if(!W.euro.length) for(const [nm,b] of EURO_CLUBS){ const c=mgMakeClub(d,nm,4,b); c.euro=true; c.bias=b; W.euro.push(c.id); }
     else if(fresh) for(const id of W.euro){ const c=W.clubs[id]; if(!c) continue; const lvl=MG_LEVEL[4]+(c.bias||0); c.players=[];
-      for(const role of MG_ROLES) c.players.push(mgNewPlayer(d,role,lvl-2+mgGauss()*3.2,mgAge())); mgNumber(c.players); }
+      for(const role of MG_ROLES){ const age=mgAge(); c.players.push(mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age)); } mgNumber(c.players); }
     return W.euro.filter(id=>W.clubs[id]); }
   const cupBest=(d,ids)=>ids.slice().sort((a,b)=>mgStrength(d,b)-mgStrength(d,a));
   function cupDraw(ids){ const a=mgShuffle(ids.slice()), t=[]; for(let i=0;i+1<a.length;i+=2) t.push([a[i],a[i+1],null,null,null]); return t; }
@@ -14321,19 +14439,11 @@
     mgAgeWorld(d,R);
     d.review=R; d.phase='review';
     mgNews(d,'Season '+d.season+' is over: '+d.clubName+' finished '+ordinal(pos)+' in '+MG_LEAGUE[d.tier]+' — '+R.result.toLowerCase()+'.'); }
-  // a year on a man: the young grow towards their potential (more if they played), the late twenties hold, the thirties fade
-  function mgGrow(p,bonus){ const a=p.age, gap=Math.max(0,(p.pot||p.ovr)-p.ovr), apps=p.apps||0; let dl;
-    if(a<=25){ dl=Math.round(gap*(a<=21?0.22:0.18)+Math.random()*gap*0.25)+(apps>=12?1:0)-(apps<4&&!bonus?1:0)+(bonus||0); dl=clamp(dl,0,gap); }
-    else if(a<=29) dl=Math.min(gap,Math.floor(Math.random()*3)-1);
-    else if(a<=32) dl=-Math.floor(Math.random()*3);
-    else dl=-1-Math.floor(Math.random()*4);
-    p.ovr=clamp(p.ovr+dl,30,95); if(a>=29||p.pot<p.ovr) p.pot=p.ovr;
-    return dl; }
   function mgAgeWorld(d,R){ const S=d.season, retires=p=>p.age>=37||(p.age>=35&&Math.random()<0.5)||(p.age>=34&&Math.random()<0.2);
-    for(const p of d.roster){ const was=p.ovr, ws=careerStars(p); mgGrow(p); p.age++; if(p.ovr!==was) R.grew.push({name:p.name,from:was,to:p.ovr});
+    for(const p of d.roster){ const was=p.s0??p.ovr, ws=careerStars(p); p.age++; if(p.ovr!==was) R.grew.push({name:p.name,from:was,to:p.ovr});   // (his season: see PLAYER DEVELOPMENT)
       const ns=careerStars(p); if(ns!==ws) mgNews(d,p.name+(ns>ws?' has grown into another skill star (':' has lost a skill star (')+'\u2605'.repeat(ns)+').'); }   // (his stars come with age: see starsAt)
-    for(const p of (d.youth||[])){ mgGrow(p,1); p.age++; }
-    for(const c of mgAiClubs(d)) for(const p of c.players){ mgGrow(p); p.age++; }
+    for(const p of (d.youth||[])) p.age++;
+    for(const c of mgAiClubs(d)) for(const p of c.players) p.age++;
     for(const p of d.world.free) mgIdleYear(p);
     for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if(retires(p)){ R.retired.push(p.name); mgRosterRemove(d,i); } }
     for(const c of mgAiClubs(d)) c.players=c.players.filter(p=>!retires(p));
@@ -14353,14 +14463,14 @@
     while(c.players.length<MG_SQUAD||c.players.filter(p=>p.role==='GK').length<2){
       const role=c.players.filter(p=>p.role==='GK').length<2?'GK':mgNeedRole(c.players);
       const fa=d.world.free.filter(p=>p.role===role&&Math.abs(mgLevelTier(p.ovr)-c.tier)<=1&&p.ovr>=lvl-10).sort((a,b)=>b.ovr-a.ovr)[0];
-      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else p=mgNewPlayer(d,role,lvl-5+mgGauss()*3,17+Math.floor(Math.random()*5));
+      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=17+Math.floor(Math.random()*5); p=mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age); }   // (a youngster with the league's prime in him, give or take: as the world began)
       p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); } }
   // never short: under twelve men (or with no keeper) the board signs free agents on one-year deals
   function mgTopUpYours(d){ const lvl=MG_LEVEL[d.tier];
     while(d.roster.length<MG_MIN||!d.roster.some(p=>p.role==='GK')){
       const role=d.roster.some(p=>p.role==='GK')?mgNeedRole(d.roster):'GK';
       const fa=d.world.free.filter(p=>p.role===role&&mgLevelTier(p.ovr)<=d.tier).sort((a,b)=>Math.abs(a.ovr-(lvl-5))-Math.abs(b.ovr-(lvl-5)))[0];
-      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else p=mgNewPlayer(d,role,lvl-6+mgGauss()*2,19+Math.floor(Math.random()*12));
+      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=19+Math.floor(Math.random()*12); p=mgNewPlayer(d,role,mgAgeOvr(lvl-6+mgGauss()*2,age),age); }
       p.until=d.season; p.wage=mgRound(mgWage(p.ovr)); mgRosterAdd(d,p);
       mgNews(d,'The board signed '+p.name+' ('+p.role+', '+p.ovr+') on a one-year deal to make up the numbers.'); } }
   function mgYouthIntake(d){ const L=Math.max(1,lvOf(d,'academy')), n=2+L; d.youth=d.youth||[]; let got=0;
@@ -14381,11 +14491,12 @@
     mgSweepFree(d);
     for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++) d.world.free.push(mgNewFreeAgent(d));   // (the pool kept near sixty)
     if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); mgFreshen(d); mgCupsStart(d); d.top=Math.max(d.top||1,d.tier);
+    for(const p of d.roster) p.s0=p.ovr;   // (where each man starts the season: the review says how far he came)
     mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
     mgWeekStart(d); }
 
   // ---- your squad: men in and out (the lineup keeps pointing at the right men) ----
-  function mgRosterAdd(d,p){ p.num=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
+  function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
   // takes roster[idx] out: his place in the eight goes to the first sub who plays there (else the first sub)
   function mgRosterRemove(d,idx){ const lu=ensureLineup(d), R=d.roster, gone=R[idx]; if(!gone) return null;
     const sub=role=>{ let k=lu.bench.findIndex(i=>R[i]&&R[i].role===role); if(k<0&&role!=='GK') k=lu.bench.findIndex(i=>R[i]&&R[i].role!=='GK'); if(k<0&&lu.bench.length) k=0; return k<0?null:lu.bench.splice(k,1)[0]; };
@@ -15782,6 +15893,7 @@
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
   function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.scouted=d.scouted||{}; d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
     if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0;
+    for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
@@ -16033,7 +16145,7 @@
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
-    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d);
+    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster) p.s0=p.ovr;
     mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
     d.wkN=d.weeks=1; mgAiBids(d,1.5);   // (its first Monday: the world as made, the computer clubs' business from the next)
     try{ localStorage.removeItem('ft_mgr_cleared'); }catch(e){}
