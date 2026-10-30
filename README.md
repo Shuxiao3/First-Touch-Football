@@ -1004,6 +1004,33 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Where you see it**: the report lists your men's ratings, the best starred; his card has THIS SEASON (games,
       goals, assists, a keeper's or defender's clean sheets) and RATING · FORM (his season's average, his form). The
       numbers start again each season; his form carries on.
+  - **Character and morale.**
+    - **Traits** are a man's character in a few words, never numbers: drawn from his hidden values, each with a good
+      side and a cost. Natural Leader (steadies a bad run; his moods spread), Charismatic, Calm Under Pressure,
+      Hot-Headed (higher highs, lower lows), Highly Ambitious (grows fastest when he plays; the bench eats at him),
+      Loyal Servant (three seasons at the club: renews for less, won't want to go), Quiet Professional, Poor Trainer,
+      Determined (bounces back fast; pushes too hard -- a little more injury risk), Easily Frustrated, Team Player,
+      Inconsistent (his form swings). A man has none to a few. Yours come out over his first weeks at the club, one
+      every four weeks, and on his card (a touch on one says both sides of it).
+    - **Morale**, 1 to 10 (6.5 settled): each of yours his own, the side its own. After each game the side moves by
+      the result against what was expected -- beating a better side lifts it most, a shock defeat sinks it -- its
+      falls softened by a leader with the armband (a Natural Leader by about four tenths, the vice for the captain
+      when he's out) and sharpened by a hot-head's. Every Monday each man moves by the week's minutes against what he
+      expects (the better and the more ambitious expect more, a team player less; the easily frustrated mind most),
+      his form, the side's mood pulling at his, and his resilience bringing him back to settled; the side by its
+      men's. Promotion, a title or a cup lifts it; going down sinks it.
+    - **What it does**: on match day (that game only, played or simulated) high morale is a little more stamina and
+      composure (+0.5, +1 at the very top); low, less of those and of his reading of the game (-0.5, -1.5 at rock
+      bottom). In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
+      unhappy, ambitious man asks to leave: the news says so, clubs bid for him as if he were listed, and he won't
+      renew till he's settled. Putting a man on the transfer list upsets him; a new deal lifts him.
+    - **The captain and his vice**: the side's strongest leaders (charisma, with a little for experience) till you
+      name them on the DEAL side of a man's card (ARMBAND: C or VC). Named, he's lifted; an ambitious senior passed
+      over minds. (C) and (VC) by their names.
+    - **Checking on a man**: two a week, on its Monday -- CHECK-INS on the hub, CHECK IN on his card. It says how
+      he's feeling and why (wants more games, his form, the results, his contract...), his fitness, the coaches' word
+      on how he's coming on, and brings out a trait; it lifts him a little, more if he's low.
+    - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
   - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
     the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
     too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,

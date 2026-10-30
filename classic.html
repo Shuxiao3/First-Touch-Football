@@ -356,6 +356,10 @@
   .slotRow{display:flex;align-items:center;gap:8px;min-width:320px;margin-bottom:8px;}
   .slotRow .slotBtn{flex:1;text-align:left;font-size:13px;}
   .slotNote{font-size:11px;color:var(--warn);margin:0 0 8px;max-width:340px;}
+  .mgTraits{ display:flex; flex-wrap:wrap; gap:3px; margin-top:2px; } .trTag{ font-size:9px; padding:1px 4px; border:1px solid var(--line,#3a4a33); border-radius:3px; color:var(--ink); white-space:nowrap; }
+  .ciBox{ font-size:11px; line-height:1.5; padding:4px 0; } .ciBox div:first-child{ color:var(--warn); }
+  .mgMini{ font:inherit; font-size:10px; padding:0 5px; margin-left:3px; border:1px solid var(--line,#3a4a33); border-radius:3px; background:transparent; color:var(--ink); cursor:pointer; }
+  .cardCi{ font:inherit; font-size:10px; margin-top:2px; padding:1px 6px; display:block; border:1px solid var(--warn); border-radius:3px; background:transparent; color:var(--warn); cursor:pointer; }
   .mgInj{ color:var(--bad); font-size:10px; margin-left:5px; font-weight:400; } .injX{ color:var(--bad); font-weight:400; margin-right:3px; }
   .ptk.inj{ opacity:.55; } .ptk.inj .ptkName::before{ content:'✚ '; color:var(--bad); } .selRow.inj{ opacity:.6; }
   .slotDel{font-size:12px;color:var(--bad);background:rgb(var(--badRGB) / .1);border:1px solid #5a2a26;border-radius:6px;padding:9px 11px;cursor:pointer;}
@@ -13894,9 +13898,9 @@
     const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
     p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
     const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
-    const T=clamp(x.T*(0.75+0.05*h.pro+(r()-0.5)*(10.5-h.pro)*0.04),0,1.2);   // (a professional trains as well every week; the others come and go)
+    const T=clamp(x.T*(0.75+0.05*h.pro+(r()-0.5)*(10.5-h.pro)*0.04)*(p.mor!=null?0.85+0.03*p.mor:1),0,1.2);   // (a professional trains as well every week; the others come and go; his mood steadies or upsets it)
     const fm=p.fm??FORM_BASE, P=h.pro/10, F=clamp((fm-5)/3,0,1);   // (his form: see MATCH RATINGS)
-    const W=0.375*T+0.3125*M+0.1875*P+0.125*F, inF=W/0.69, lrF=0.55+0.09*h.lr, ageE=devLate(p)?p.age-3:p.age;
+    const W=0.375*T+0.3125*M+0.1875*P+0.125*F, inF=W/0.69*(M>=0.75&&d&&hasTrait(p,d,'ambit')?1.1:1), lrF=0.55+0.09*h.lr, ageE=devLate(p)?p.age-3:p.age, pg0=pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0);
     for(let i=0;i<DEV_KEYS.length;i++){ const k=DEV_KEYS[i], g=devGroup(k), room=(cl[k]-st[k])*2;
       let gain=0;
       if(room>0){ const back=st[k]<bs[k], ag=back?Math.max(devAgeGrow(g,g==='men'?p.age:ageE),0.6):devAgeGrow(g,g==='men'?p.age:ageE);
@@ -13907,12 +13911,14 @@
       let drain=devAgeDrop(g,p.age)+(g==='phy'?(p.decl||0):0);   // (p.decl: a bad injury past 28 -- his legs go sooner)
       if(!p.inj&&W<0.48&&(g==='phy'||g==='tec')) drain+=(0.48-W)*1.2;    // (bad weeks' training: his sharpness and his legs go)
       if(fm<5.8&&(g==='tec'||g==='men')) drain+=(5.8-fm)*0.06;              // (poor form: his touch, his reading of the game, his composure)
+      if((p.mor??MOR0)<4&&(g==='tec'||g==='men')) drain+=(4-p.mor)*0.04;    // (low morale, the same)
       pg[i]+=gain-drain;
       while(pg[i]>=1&&st[k]<cl[k]){ st[k]+=0.5; pg[i]-=1; }
       if(st[k]>=cl[k]&&pg[i]>0) pg[i]=0;   // (at his ceiling: no further)
       while(pg[i]<=-1&&st[k]>1){ st[k]-=0.5; pg[i]+=1; }
       pg[i]=clamp(pg[i],-0.99,0.99);
       if(st[k]>bs[k]||(g==='phy'&&p.age>=29)) bs[k]=st[k]; }   // (his legs past 29: what's gone is gone)
+    p.ld=Math.round((pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0)-pg0)*100)/100;   // (how he came on, these weeks: for the coaches' word)
     p.at=devPack(st); p.bs=devPack(bs); p.pg=devPackPg(pg); p.mw=0; p.wg=0; p.wb=0;
     if(p.fm!=null) p.fm=Math.round((FORM_BASE+(p.fm-FORM_BASE)*0.85)*100)/100;   // (form fades back without games to keep it)
     const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99));
@@ -13958,7 +13964,8 @@
     if(p.role==='GK'||p.role==='DEF') r+=gc===0?0.5:-0.2*Math.min(gc,4);
     return clamp(Math.round(r*10)/10,3,10); }
   const RAT_NOW=[];   // (your men's ratings in the game being played: for its report)
-  function mgRated(d,p,r,g,big,gc,yours){ p.fm=p.fm==null?r:Math.round((0.7*p.fm+0.3*r)*100)/100; p.rs=Math.round(((p.rs||0)+r)*10)/10; p.rn=(p.rn||0)+1;
+  function mgRated(d,p,r,g,big,gc,yours){ const a=yours&&hasTrait(p,d,'incon')?0.45:0.3;   // (the inconsistent: his form swings more)
+    p.fm=p.fm==null?r:Math.round(((1-a)*p.fm+a*r)*100)/100; p.rs=Math.round(((p.rs||0)+r)*10)/10; p.rn=(p.rn||0)+1;
     if(g) p.wg=(p.wg||0)+g; if(big) p.wb=(p.wb||0)+1; if(gc===0&&(p.role==='GK'||p.role==='DEF')) p.cs=(p.cs||0)+1;
     if(yours) RAT_NOW.push({name:p.name,num:p.num,r}); }
   // a game's ratings, both sides (m: [home, away, their goals, ...]; live: the one you played)
@@ -13971,6 +13978,91 @@
       const avg=xi.reduce((s,p)=>s+p.ovr,0)/Math.max(1,xi.length);
       for(const p of xi){ const g=p._g||0; delete p._g; mgRated(d,p,mSimRate(p,avg,res,g,gc),g,big,gc,yours); } };
     side(m[0],xh,m[2],m[3]); side(m[1],xa,m[3],m[2]); }
+
+  // ===== CHARACTER AND MORALE ===========================================================================================
+  // HIS CHARACTER, in words, never numbers: traits drawn from his hidden values, each with a good side and a cost (see
+  // TRAITS). A man has none to a few. Yours come out over his first weeks at the club -- one every four weeks -- and
+  // sooner when you check on him; another club's aren't known.
+  const TRAITS=[
+    {k:'leader',n:'Natural Leader',t:h=>h.ch>=7.5&&h.te>=6,up:'steadies a bad run',down:'his moods spread'},
+    {k:'charis',n:'Charismatic',t:h=>h.ch>=7.5&&h.te<6,up:'lifts the room',down:'the room has his moods'},
+    {k:'calm',n:'Calm Under Pressure',t:h=>h.te>=8,up:'bad runs don’t get to him',down:'nor do good ones lift him'},
+    {k:'hot',n:'Hot-Headed',t:h=>h.te<=3,up:'higher highs',down:'lower lows'},
+    {k:'ambit',n:'Highly Ambitious',t:h=>h.am>=8,up:'grows fastest when he plays',down:'the bench eats at him'},
+    {k:'loyal',n:'Loyal Servant',t:(h,p,d)=>h.lo>=7.5&&!!d&&p.since!=null&&d.season-p.since>=3,up:'renews for less',down:'won’t want to go'},
+    {k:'quiet',n:'Quiet Professional',t:h=>h.pro>=7.5&&h.ch<=4,up:'trains well every week',down:'no voice in the room'},
+    {k:'poor',n:'Poor Trainer',t:h=>h.pro<=3,up:'little gets to him',down:'wastes what he has'},
+    {k:'determ',n:'Determined',t:h=>h.rs>=7.5&&h.am>=6,up:'bounces back fast',down:'pushes too hard'},
+    {k:'frust',n:'Easily Frustrated',t:h=>h.am>=7&&h.te<=4,up:'hungry for it',down:'sulks when left out'},
+    {k:'team',n:'Team Player',t:h=>h.am<=4.5&&h.lo>=6&&h.te>=5,up:'happy in any role',down:'not driven to be the best'},
+    {k:'incon',n:'Inconsistent',t:h=>h.te<=3.5&&h.rs<=4,up:'a match-winner on his day',down:'his form swings'}];
+  function traitsOf(p,d){ const h=hvOf(p); return TRAITS.filter(t=>t.t(h,p,d)); }
+  const hasTrait=(p,d,k)=>traitsOf(p,d).some(t=>t.k===k);
+  // MORALE, 1 to 10 (6.5 settled): each of yours his own (p.mor), the side its own (d.tm). What it does on match day: high,
+  // a little more stamina and composure (more at the very top); low, less of those and of his reading of the game -- a
+  // lot less at rock bottom (that game only, played or simulated). In training it steadies or upsets him, and a long low
+  // costs his touch and his reading of the game. An unhappy, ambitious man asks to leave.
+  const MOR0=6.5;
+  const morWord=m=>m>=8.5?'Delighted':m>=7?'Content':m>=5.5?'Settled':m>=4?'Unsettled':'Unhappy';
+  const tmWord=m=>m>=8?'buoyant':m>=6.5?'in good heart':m>=5?'settled':m>=3.5?'uneasy':'low';
+  function morDeltas(m){ m=m??MOR0; return m>=9.5?{stamina:1,composure:1}:m>=8?{stamina:0.5,composure:0.5}:m<=1.5?{stamina:-1.5,composure:-1.5,offIQ:-1.5,defIQ:-1.5}:m<=3.5?{stamina:-0.5,composure:-0.5,offIQ:-0.5,defIQ:-0.5}:null; }
+  function morStats(p,st){ const dl=morDeltas(p.mor); if(!dl) return Object.assign({},st); const o=Object.assign({},st); for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10); return o; }
+  const morOvr=p=>{ const dl=morDeltas(p.mor); if(!dl) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st))-cwOverall(p.role,st); };
+  // how far a man's mood moves: his temperament (the calm least, the hot-headed most)
+  function morSwing(p,d){ const h=hvOf(p); let s=1.3-0.08*h.te; if(hasTrait(p,d,'calm')) s*=0.6; if(hasTrait(p,d,'hot')) s*=1.5; return clamp(s,0.4,2.2); }
+  // ...and the side's: its men's temperament, softened by its leaders -- the captain's character most, the vice's half
+  // (in for him when he isn't playing)
+  function tmSwing(d){ const R=d.roster; if(!R.length) return 1; let s=1.3-0.06*R.reduce((a,p)=>a+hvOf(p).te,0)/R.length;
+    const lu=ensureLineup(d), on=new Set([lu.gk,...lu.atk].map(ri=>R[ri]&&R[ri].id)), cap=R.find(p=>p.id===d.cap), vc=R.find(p=>p.id===d.vice);
+    const lead=(p,w)=>{ if(!p) return; if(hasTrait(p,d,'leader')) s*=1-0.4*w; else if(hasTrait(p,d,'charis')) s*=1-0.2*w; if(hasTrait(p,d,'hot')) s*=1+0.3*w; };
+    if(cap&&on.has(cap.id)){ lead(cap,1); lead(vc,0.5); } else lead(vc,1);
+    return clamp(s,0.4,1.8); }
+  const leadOf=(p,d)=>hvOf(p).ch+Math.min(Math.max(0,(p.age||25)-21),8)*0.12+(hasTrait(p,d,'leader')?1:0);
+  // THE CAPTAIN AND HIS VICE: yours to name (his card); till you do, the side's strongest leaders
+  function mgCaptains(d){ const R=d.roster; if(!R.length) return; const by=R.slice().sort((a,b)=>leadOf(b,d)-leadOf(a,d));
+    if(!R.some(p=>p.id===d.cap)) d.cap=by[0].id;
+    if(!R.some(p=>p.id===d.vice)||d.vice===d.cap) d.vice=(by.find(p=>p.id!==d.cap)||by[0]).id; }
+  function mgSetCaptain(d,pid,vice){ const p=d.roster.find(x=>x.id===pid); if(!p) return 'He is not in your squad.';
+    if(vice){ if(d.cap===pid) return 'He’s your captain.'; if(d.vice===pid) return null; d.vice=pid; p.mor=clamp((p.mor??MOR0)+0.5,1,10); mgNews(d,p.name+' is '+d.clubName+'’s vice-captain.'); return null; }
+    if(d.cap===pid) return null; const was=d.cap; d.cap=pid; if(d.vice===pid) d.vice=was;
+    p.mor=clamp((p.mor??MOR0)+1,1,10);
+    for(const q of d.roster) if(q!==p&&hvOf(q).am>=7&&(q.age||25)>=27&&leadOf(q,d)>=leadOf(p,d)) q.mor=clamp((q.mor??MOR0)-1,1,10);   // (an ambitious senior passed over minds)
+    mgNews(d,p.name+' is '+d.clubName+'’s new captain.'); return null; }
+  // after each of your games: the side by the result against what was expected (beating a better side lifts it most),
+  // its leaders softening the falls
+  function morAfterGame(d,mine){ if(!mine) return;
+    const exp=clamp(0.5+(mgStrength(d,d.clubId)-(mine.oppOvr||60))*0.03,0.1,0.9), got=mine.win?1:mine.draw?0.5:0;
+    let dt=(got-exp)*1.4; dt*=dt<0?tmSwing(d):0.9+0.1*tmSwing(d);
+    d.tm=clamp(Math.round(((d.tm??MOR0)+dt)*100)/100,1,10); }
+  // EVERY MONDAY, each of yours: the week's minutes against what he expects (the better and the more ambitious expect
+  // more, a team player less; the frustrated mind most), his form, the side's mood pulling at his, his resilience
+  // bringing him back to settled -- and the side's by its men's (an unhappy man drags it, its leaders lift it)
+  function morWeek(d){ const R=d.roster; if(!R.length) return; const avg=R.reduce((a,p)=>a+p.ovr,0)/R.length, gw=d.mgw||0;
+    for(const p of R){ const h=hvOf(p), m=p.mor??MOR0;
+      const expect=clamp(0.55+(p.ovr-avg)*0.05+(h.am-5.5)*0.05-(hasTrait(p,d,'team')?0.15:0),0.05,1), share=gw?Math.min(1,(p.wmw||0)/gw):expect;
+      let dm=(share-expect)*(share<expect&&hasTrait(p,d,'frust')?0.9:0.6)+((p.fm??FORM_BASE)-FORM_BASE)*0.2+((d.tm??MOR0)-m)*0.12-(p.inj?0.05:0);
+      dm*=morSwing(p,d);
+      const back=(MOR0-m)*0.06*(0.6+h.rs/10)*(hasTrait(p,d,'determ')?1.6:1);
+      p.mor=clamp(Math.round((m+dm+back)*100)/100,1,10); p.wmw=0; p.kw=(p.kw||0)+1; if(p.kw%4===0) p.kt=(p.kt||0)+1;   // (a trait comes out every four weeks)
+      if(p.mor<=3.5&&h.am>=7&&!p.wantsOut&&Math.random()<0.25){ p.wantsOut=true; mgNews(d,p.name+' wants to leave '+d.clubName+'.'); }
+      else if(p.wantsOut&&p.mor>=5.5){ delete p.wantsOut; mgNews(d,p.name+' has settled: he wants to stay.'); } }
+    d.mgw=0;
+    const men=R.reduce((a,p)=>a+(p.mor??MOR0),0)/R.length, lead=R.filter(p=>hasTrait(p,d,'leader')||hasTrait(p,d,'charis')).length, out=R.filter(p=>p.wantsOut).length;
+    d.tm=clamp(Math.round(((d.tm??MOR0)*0.75+men*0.25+Math.min(lead,3)*0.05-out*0.15)*100)/100,1,10); }
+  // CHECKING ON HIM: two a week, on its Monday -- how he's feeling and why, his fitness, the coaches' word on how he's
+  // coming on, a little more of his character; it lifts him a little (more if he needs it) -> {lines} or {err}
+  const CI_MAX=2;
+  function ciLeft(d){ return d.wday!=='mon'||d.phase==='review'?0:Math.max(0,CI_MAX-((d.ci&&d.ci.w===d.weeks)?d.ci.ids.length:0)); }
+  function mgCheckIn(d,pid){ const p=d.roster.find(x=>x.id===pid); if(!p) return {err:'He is not in your squad.'};
+    if(d.wday!=='mon'||d.phase==='review') return {err:'Check on him on a Monday.'};
+    if(!d.ci||d.ci.w!==d.weeks) d.ci={w:d.weeks,ids:[]};
+    if(d.ci.ids.includes(pid)) return {err:'You’ve seen him this week.'}; if(d.ci.ids.length>=CI_MAX) return {err:'That’s your two this week.'};
+    d.ci.ids.push(pid); const h=hvOf(p), m=p.mor??MOR0, lu=ensureLineup(d), inXI=[lu.gk,...lu.atk].some(ri=>d.roster[ri]===p);
+    const why=p.wantsOut?'wants to leave':p.inj?'hates being injured':m<5.5&&!inXI&&h.am>=6?'wants more games':(p.fm??FORM_BASE)<5.8?'his form gets to him':(d.tm??MOR0)<4.5?'results get to him':(p.until||0)<=d.season?'his contract':m>=7?'loving his football':m<5.5?'something on his mind':'all’s well';
+    const ld=p.ld??0, coach=ld>=1.2?'Sharp in training':ld<=-0.6?'Off the pace in training':'Steady in training';
+    const tr=traitsOf(p,d), known=p.kt||0; let trait=null; if(known<tr.length){ p.kt=known+1; trait=tr[known]; }
+    p.mor=clamp(Math.round((m+(m<4?0.8:0.3))*100)/100,1,10);
+    return { lines:[morWord(m)+' · '+why, p.inj?'Injured · '+injWeeks(p.inj.d)+' to go':'Fitness '+Math.round(condOf(p)*100)+'%', coach].concat(trait?['✓ '+trait.n]:[]) }; }
 
   // ===== INJURIES =========================================================================================================
   // A man can get hurt: mostly in a game, now and then in training. A full game's risk (INJ_GAME) goes up when he's tired,
@@ -13987,6 +14079,7 @@
   function injRisk(d,p,share,c){ if(INJ_OFF) return 0; const h=hvOf(p);
     let r=INJ_GAME*share*(1+2*(1-condOf(p)))*(1+0.08*Math.max(0,(p.age||25)-29))*(1.6-0.12*h.du);
     if(p.injB>0) r*=2.5;
+    if(!c&&hasTrait(p,d,'determ')) r*=1.1;   // (he pushes too hard)
     return r*(1-0.06*injPhysio(d,p,c)); }
   function injKind(p,u,train){ const h=hvOf(p), x=u+((p.age||25)>=30?0.06:0)+(5.5-h.du)*0.02-(train?0.25:0);
     return x<0.55?'knock':x<0.85?'strain':x<0.97?'tear':'serious'; }
@@ -14179,12 +14272,12 @@
   // it, one brought on 0.4), the side you played by its eight on the pitch
   // a game's cost to the men who played it -- and its minutes, for their development (each man his share of the game,
   // the side a game more; in a simulated game a couple of the computer's subs a third of one: see devSimSubs)
-  function mgTireGame(d,id,xi,live){ devGame(d,id);
+  function mgTireGame(d,id,xi,live){ devGame(d,id); if(id===d.clubId) d.mgw=(d.mgw||0)+1;
     if(live&&SQUAD.G&&SQUAD.R){ const t=id===d.clubId?'G':'R', L=LINEUP[t], on=new Set([L.gk,...L.atk]), S=SUBS[t]||{on:[],off:[]}, P=mgPlayersOf(d,id);
       SQUAD[t].forEach((e,si)=>{ const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return;
-        const sh=S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0; condTire(p,sh); if(sh) p.mw=(p.mw||0)+sh;
+        const sh=S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0; condTire(p,sh); if(sh) p.mw=(p.mw||0)+sh; if(sh&&t==='G') p.wmw=(p.wmw||0)+sh;
         if(HURT[t].has(si)&&!p.inj) injHurt(d,p,injKind(p,Math.random()),id===d.clubId?null:d.world.clubs[id],'in the game'); }); return; }   // (LINEUP is the eight at the end: a sub's in it)
-    for(const p of xi){ condTire(p,1); p.mw=(p.mw||0)+1; }
+    for(const p of xi){ condTire(p,1); p.mw=(p.mw||0)+1; if(id===d.clubId) p.wmw=(p.wmw||0)+1; }
     const subs=devSimSubs(d,id,xi); injAfterGame(d,id,[...xi.map(p=>[p,1]),...subs.map(p=>[p,0.35])]); }
 
   // ---- the season ----
@@ -14222,8 +14315,8 @@
   const mgXiStr=(d,id,xi)=>id===d.clubId?mgStrength(d,id):mgSimStr(d,id,xi);   // (on the day, without the physio)
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
-      let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK')):30;
-      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?condOvr(p,0.5*(ovrAt(p,A[i]&&A[i].role,A[i]&&A[i].pos)+ovrAt(p,D[j]&&D[j].role,D[j]&&D[j].pos))):30; });
+      let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK'))+morOvr(R[lu.gk]):30;
+      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?condOvr(p,0.5*(ovrAt(p,A[i]&&A[i].role,A[i]&&A[i].pos)+ovrAt(p,D[j]&&D[j].role,D[j]&&D[j].pos)))+morOvr(p):30; });
       return s/(1+OUTFIELD); }
     const xi=mgPickEight(mgPlayersOf(d,id)); return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40; }
   function mgPois(l){ let L=Math.exp(-l),k=0,p=1; do{ k++; p*=Math.random(); }while(p>L); return Math.min(8,k-1); }
@@ -14274,7 +14367,7 @@
     if(!score) mgFitXI(d);   // (a simulated game: nobody hurt in your eight -- a live one's was made fit at kick-off)
     const posBefore=mgPos(d), loyBefore=Math.round(d.loyalty||0), budBefore=d.budget, yours=score?{score,logs}:null; INJ_NOW.length=0; RAT_NOW.length=0;
     const mine=g.kind==='league'?mgMatchday(d,yours):g.kind==='cup'?mgMidweek(d,yours):mgPlayoffRound(d,yours);
-    if(mine) applyLoyalty(d,mine);
+    if(mine){ applyLoyalty(d,mine); morAfterGame(d,mine); }
     const wk=g.kind==='cup'?applyCupGame(d,mine):applyWeek(d,mine);
     const rep={g,mine,wk,posBefore,posAfter:mgPos(d),loyDelta:Math.round(d.loyalty||0)-loyBefore,budBefore,live:!!score,inj:INJ_NOW.slice(),rat:RAT_NOW.slice().sort((a,b)=>b.r-a.r)};
     if(mine) mgNews(d,g.label+': '+d.clubName+' '+mine.you+'–'+mine.them+' '+mgNameOf(d,mine.opp)+(mine.home?'':' (away)')+(mine.pens?(mine.through?', won on penalties':', lost on penalties'):'')+'.');
@@ -14295,6 +14388,7 @@
   function mgWeekStart(d){ d.wday='mon'; d.wkN=(d.wkN||0)+1; d.weeks=(d.weeks||0)+1; d.bidMemo={};
     if(d.weeks%DEV_EVERY===0) mgDevelop(d);   // (every third week: everyone's development)
     injTraining(d);                           // (a week's training: a knock now and then)
+    morWeek(d); mgCaptains(d);                // (your men's moods, and the side's)
     if(!mgWindowOpen(d)) return;
     d.offers=(d.offers||[]).filter(o=>d.wkN-(o.wk||d.wkN)<2);
     const k=d.phase==='league'?0.15:1.5; mgAiTrades(d,k); mgAiBids(d,k); }
@@ -14592,11 +14686,12 @@
     for(let i=0,n=Math.max(10,60-d.world.free.length);i<n;i++) d.world.free.push(mgNewFreeAgent(d));   // (the pool kept near sixty)
     if(lvOf(d,'academy')) mgYouthIntake(d); mgTopUpYours(d); mgNewFixtures(d); mgFreshen(d); mgCupsStart(d); d.top=Math.max(d.top||1,d.tier);
     for(const p of d.roster) p.s0=p.ovr;   // (where each man starts the season: the review says how far he came)
+    d.tm=clamp((d.tm??MOR0)+(R.up?1.5:R.down?-1.5:0)+Object.values(R.cupWin||{}).filter(id=>id===d.clubId).length*0.5,1,10);
     mgNews(d,'Season '+d.season+': '+d.clubName+' are in '+MG_LEAGUE[d.tier]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
     mgWeekStart(d); }
 
   // ---- your squad: men in and out (the lineup keeps pointing at the right men) ----
-  function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
+  function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; p.since=d.season; p.mor=Math.min(10,(p.mor??MOR0)+0.5); p.kt=0; p.kw=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
   // takes roster[idx] out: his place in the eight goes to the first sub who plays there (else the first sub)
   function mgRosterRemove(d,idx){ const lu=ensureLineup(d), R=d.roster, gone=R[idx]; if(!gone) return null;
     const sub=role=>{ let k=lu.bench.findIndex(i=>R[i]&&R[i].role===role); if(k<0&&role!=='GK') k=lu.bench.findIndex(i=>R[i]&&R[i].role!=='GK'); if(k<0&&lu.bench.length) k=0; return k<0?null:lu.bench.splice(k,1)[0]; };
@@ -14680,6 +14775,7 @@
   function mgAcceptOffer(d,oid){ const o=(d.offers||[]).find(x=>x.id===oid); if(!o) return 'That offer has gone.';
     const idx=d.roster.findIndex(p=>p.id===o.pid), c=d.world.clubs[o.club]; if(idx<0||!c) return 'That offer has gone.';
     const why=mgCanLose(d,idx); if(why) return why;
+    if(hasTrait(d.roster[idx],d,'loyal')&&!d.roster[idx].wantsOut&&Math.random()<0.5){ d.offers=d.offers.filter(x=>x!==o); return d.roster[idx].name+' doesn’t want to go.'; }
     if(c.budget<o.fee){ d.offers=d.offers.filter(x=>x!==o); return c.name+' can’t find the money any more.'; }
     if(c.players.length>=MG_MAX){ d.offers=d.offers.filter(x=>x!==o); return c.name+'’s squad is full now.'; }
     const p=mgRosterRemove(d,idx); c.budget-=o.fee; d.budget+=o.fee;
@@ -14694,8 +14790,10 @@
     d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.');
     return null; }
   // a new deal: `years` seasons from next season, at what he asks now
+  const mgRenewWage=(d,p)=>mgRound(mgDemand(d,p,false)*(hasTrait(p,d,'loyal')?0.85:1));   // (a loyal servant renews for less)
   function mgRenew(d,idx,years){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
-    p.wage=mgDemand(d,p,false); p.until=d.season+years; mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
+    if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
+    p.wage=mgRenewWage(d,p); p.until=d.season+years; p.mor=clamp((p.mor??MOR0)+0.5,1,10); mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
 
   // ---- scouting: a man at another club shows a rating range until he's scouted ----
   function mgKnown(d,p){ return !!(d.scouted&&d.scouted[p.id]); }
@@ -14722,7 +14820,7 @@
   // the computer clubs' bids for your men, a week's worth (k: how busy the week is -- see mgWeekStart)
   function mgAiBids(d,k){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0; k=k??1;
     const clubs=mgAiClubs(d);
-    for(const p of d.roster){ const ask=d.listed&&d.listed[p.id], lt=mgLevelTier(p.ovr);
+    for(const p of d.roster){ const ask=(d.listed&&d.listed[p.id])||(p.wantsOut?mgValue(d,p):0), lt=mgLevelTier(p.ovr);   // (one who wants out: as if he were listed)
       if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))*k) continue;
       const fee=ask?mgRound(ask*(0.82+Math.random()*0.26)):mgRound(mgValue(d,p)*(1+Math.random()*0.35));
       const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<MG_MAX&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
@@ -15024,7 +15122,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.filter(ri=>R[ri]&&!R[ri].inj).slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, five fit ones)
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:Object.assign({},mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null)}; });
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:morStats(p,mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null)}; });   // (his mood's in his legs and his head today: see MORALE)
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   // your side's shapes and spots changed in a match (the pause menu): the career keeps them
@@ -15674,13 +15772,15 @@
   function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p);
     const where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier], wont=!f.mine&&!f.youth&&!!mgWontCome(d,p);
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
+    const ciNow=f.mine&&MGUI.ci&&MGUI.ci.pid===p.id, ciBtn=f.mine&&!ciNow&&ciLeft(d)?'<button class="cardCi" data-mg="checkin" data-pid="'+p.id+'">CHECK IN</button>':'';   // (a Monday: see CHECKING ON HIM)
     let h='<div class="mgCard"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
-      +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+      +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+(f.mine&&d.cap===p.id?' (C)':f.mine&&d.vice===p.id?' (VC)':'')+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+sty.name:'')+' · age '+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
-      +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
+      +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+ciBtn+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+(known?p.pot:'?')+'</div>'+mgFlip()+'</div></div>';
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
-    if(mgSide==='rate') h+=known?sixHtml(mgStats(p),p.role)+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+mgFact('ASSISTS',String(p.as||0))   // (his season, in short facts: a card's text stays short)
+    if(f.mine){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
+    if(mgSide==='rate') h+=known?(ciNow?'<div class="ciBox">'+MGUI.ci.lines.map(l=>'<div>'+mgEsc(l)+'</div>').join('')+'</div>':sixHtml(mgStats(p),p.role))+(f.mine?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+mgFact('ASSISTS',String(p.as||0))   // (his season, in short facts: a card's text stays short)
         +((p.role==='GK'||p.role==='DEF')?mgFact('CLEAN SHEETS',String(p.cs||0)):'')
         +mgFact('RATING · FORM',(p.rn?(p.rs/p.rn).toFixed(1):'—')+' · '+(p.fm!=null?p.fm.toFixed(1):'—'),p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'',!(p.role==='GK'||p.role==='DEF'))+'</div>':'')
       :mgSixUnknown(p)+mgScoutBtn(d,p,f.club||null);
@@ -15693,9 +15793,10 @@
   // HIS CONTRACT (the squad): what he earns and is worth, how long he's signed for; a new deal; letting him go
   function mgContractActions(d,p){ const left=mgLeft(d,p), ends=p.until<=d.season;
     let h='<div class="mgFacts">'+mgFact('WAGE',money(p.wage)+'/wk')+mgFact('VALUE',money(mgValue(d,p)))
-      +mgFact('CONTRACT',ends?'ends this season':left+' more season'+(left>1?'s':''),ends?'var(--warn)':'',true)
+      +mgFact('CONTRACT',ends?'ends now':left+' season'+(left>1?'s':''),ends?'var(--warn)':'')
+      +mgFact('ARMBAND',d.cap===p.id?'★ CAPTAIN':(d.vice===p.id?'VICE ':'<button class="mgMini" data-mg="vice" data-pid="'+p.id+'">VC</button>')+'<button class="mgMini" data-mg="cap" data-pid="'+p.id+'">C</button>')
       +(d.listed[p.id]?mgFact('ON THE LIST',money(d.listed[p.id]),'var(--warn)',true):'')+'</div>';
-    h+=mgActRow('NEW DEAL <b>'+money(mgDemand(d,p,false))+'/wk</b>',mgYears()+'<button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE</button>');
+    h+=mgActRow('NEW DEAL <b>'+money(mgRenewWage(d,p))+'/wk</b>',mgYears()+'<button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE</button>');
     return h+'<div class="mgAct"><button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
   // SELLING HIM (the market): what he's worth, the best two bids for him, the transfer list
   function mgSaleActions(d,p){ let h='<div class="mgFacts">'+mgFact('VALUE',money(mgValue(d,p)))+mgFact('WAGE',money(p.wage)+'/wk')+'</div>';
@@ -15891,6 +15992,8 @@
     if((d.phase==='league'&&d.md>=MG_MD-6)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
     if(mgWindowOpen(d)&&(d.offers||[]).length) w.push(info(d.offers.length+' offer'+(d.offers.length>1?'s':'')+' for your players — see Transfers'));
     { const tired=mgStarters(d).filter(p=>condOf(p)<0.7).length; if(tired&&(d.phase==='league'||d.phase==='playoffs')) w.push(info(tired+' of your eight '+(tired>1?'are':'is')+' tired — rest '+(tired>1?'them':'him')+' in Training')); }
+    { const tm=d.tm??MOR0; if(tm<4.5||tm>=8) w.push((tm<4.5?bad:info)('The dressing room is '+tmWord(tm))); }
+    { const out=d.roster.filter(p=>p.wantsOut); if(out.length) w.push(info(out.map(p=>surname(p.name)).join(', ')+(out.length>1?' want':' wants')+' to leave')); }
     { const hurt=d.roster.filter(p=>p.inj); if(hurt.length) w.push(bad('✚ '+hurt.map(p=>surname(p.name)+' '+injShort(p.inj.d)).join(', ')+(mgStarters(d).some(p=>p.inj)?' — in your eight':''))); }
     const wEl=document.getElementById('chWarn'); wEl.style.display=w.length?'block':'none'; wEl.innerHTML=w.join('  ·  ');
     const badge=(id,n)=>{ const el=document.querySelector('#chCampus [data-bldg="'+id+'"] .bBadge'); if(el){ el.textContent=n||''; el.style.display=n?'block':'none'; } };
@@ -15903,7 +16006,7 @@
     // the week's button: on a Monday, on to the matchday (or the next week); on a matchday's morning, play it or simulate it
     let b=''; const g=mgNextGame(d), opp=g&&mgClub(d,g.opp), mon=d.wday!=='wed'&&d.wday!=='sat';
     if(d.phase==='review') b='<button class="chPlay" data-mg="review">SEASON REVIEW ▶</button>';
-    else if(mon) b='<button class="chPlay" data-mg="forward">'+mgForwardWord(d)+' ▶</button>';
+    else if(mon) b=(ciLeft(d)?'<button class="chBtn2" data-mg="checkins">CHECK-INS '+ciLeft(d)+'</button>':'')+'<button class="chPlay" data-mg="forward">'+mgForwardWord(d)+' ▶</button>';
     else if(g) b='<button class="chBtn2" data-mg="sim">SIMULATE ⏭</button><button class="chPlay" data-mg="play">PLAY ▶</button>';
     else b='<button class="chPlay" data-mg="continue">CONTINUE ▶</button>';
     document.getElementById('chBottom').innerHTML=b;
@@ -16009,7 +16112,7 @@
   function openHub(key){ const d=readSave(key); if(!d||d.kind!=='manager') return; mgMigrate(d); CAREER={key,data:d};
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
   function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.scouted=d.scouted||{}; d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
-    if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0;
+    if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0; d.tm=d.tm??MOR0; mgCaptains(d);
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
@@ -16081,8 +16184,9 @@
         dayScene(d,()=>{ if(d.phase!==was) showNote(was==='summer'?'Pre-season is over: the season starts on Saturday.':was==='winter'?'The winter break is over and the window has shut: back to the league.':'The season is over.','var(--good)'); }); return; }
       case 'continue': if(d.phase==='playoffs') mgPlayoffsOut(d); mgSave(d); renderHub(); return;
       case 'review': openBuilding('review'); return;
+      case 'checkins': MGUI.ci=null; curTab.club='Squad'; openBuilding('club'); return;
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+MG_LEAGUE[d.tier]+': pre-season, and the window is open.','var(--good)'); return;
-      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
+      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; MGUI.ci=null; break;
       case 'bidstep': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), cur=MGUI.bid&&MGUI.bid.pid===pid?MGUI.bid.fee:ask;
         MGUI.bid={pid,fee:Math.max(mgRound(ask*0.5),mgRound(cur+(+ds.dir)*Math.max(10,ask*0.05)))}; break; }
       case 'bid': { const f=mgFind(d,pid); if(!f||!f.club) break; const fee=MGUI.bid&&MGUI.bid.pid===pid?MGUI.bid.fee:mgAsk(d,f.p,f.club), r=mgBid(d,pid,fee);
@@ -16092,10 +16196,12 @@
         say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'signfree': { const err=mgSignFree(d,pid,MGUI.years||2); say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'scout': { const err=mgScout(d,pid); say(err||'Scouted: here’s what he’s really like.',err?'var(--bad)':'var(--good)'); break; }
+      case 'checkin': { const r=mgCheckIn(d,pid); if(r.err) say(r.err,'var(--bad)'); else MGUI.ci={pid,lines:r.lines}; break; }
+      case 'cap': case 'vice': { const err=mgSetCaptain(d,pid,a==='vice'); say(err||'Done.',err?'var(--bad)':'var(--good)'); break; }
       case 'renew': { const err=mgRenew(d,d.roster.findIndex(p=>p.id===pid),MGUI.years||2); say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
       case 'liststep': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), cur=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:v;
         MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRound(cur+(+ds.dir)*Math.max(10,v*0.1)))}; break; }
-      case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }
+      case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } if(!d.listed[pid]) p.mor=clamp((p.mor??MOR0)-1,1,10); d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }
       case 'unlist': delete d.listed[pid]; say('Taken off the transfer list.'); break;
       case 'release': { const i=d.roster.findIndex(p=>p.id===pid), p=d.roster[i]; if(!p) break; const why=mgCanLose(d,i); if(why){ say(why,'var(--bad)'); break; }
         showConfirm('Release '+p.name+'? Paying off his contract costs '+money(mgReleaseCost(d,p))+'.',()=>{ const err=mgRelease(d,d.roster.findIndex(x=>x.id===pid)); if(!err) MGUI.sel=null; say(err||p.name+' has been released.',err?'var(--bad)':'var(--good)'); mgRerender(); },{yes:'Release',danger:true});
@@ -16262,7 +16368,7 @@
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0} };
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
-    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster) p.s0=p.ovr;
+    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);
     mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
     d.wkN=d.weeks=1; mgAiBids(d,1.5);   // (its first Monday: the world as made, the computer clubs' business from the next)
     try{ localStorage.removeItem('ft_mgr_cleared'); }catch(e){}
