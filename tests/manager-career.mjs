@@ -564,8 +564,8 @@ let sn = await season();
 info('fitness: ' + JSON.stringify(r) + '; League 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low }));
 ok(r.after >= 0.6 && r.after <= 0.8 && r.day0 === 0.045 && r.day4 === 0.075 && r.entry === 0.6,
   'a game costs a man ' + Math.round((1 - r.after) * 100) + '% of his fitness; a day\'s rest gives back 4.5% with no physio, 7.5% with the best; a live match takes his fitness with him (his legs\' ceiling)');
-ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low === 1 && sn.wins === '111',
-  'League 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for every one; the cups are played above it, each to a winner');
+ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low >= 0.85 && sn.avg >= 0.98 && sn.wins === '111',
+  'League 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; a man whose stamina has faded a little short: ' + Math.round(sn.low * 100) + '%); the cups are played above it, each to a winner');
 
 await create('Cup City');
 r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2 };

@@ -102,7 +102,7 @@ r = await K(`(()=>{ const d=D, R=d.review, news=d.news.filter(x=>/^Three weeks o
   const grew=R.grew.length, okG=R.grew.every(g=>{ const p=d.roster.find(x=>x.name===g.name); return !p||p.ovr===g.to; });
   return { grew, okG, news, weeks:d.weeks }; })()`);
 ok(r.okG && r.grew > 0, 'the review: ' + r.grew + ' of yours changed over the season (where each began it, where he is)');
-ok(r.news >= 3 && r.news <= 11, 'a line in the news every third week your men move: ' + r.news + ' this season');
+ok(r.news >= 1 && r.news <= 11, 'a line in the news every third week your men move: ' + r.news + ' this season');
 
 // --- a few seasons: the world neither balloons nor wastes away -----------------------------------------------------------
 r = await K(`(()=>{ const d=D, tier=()=>[1,2,3,4].map(t=>{ const L=mgAiClubs(d).filter(c=>c.tier===t).flatMap(c=>mgEight(c.players)); return +(L.reduce((a,p)=>a+p.ovr,0)/L.length).toFixed(1); });

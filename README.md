@@ -985,6 +985,25 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Where you see it**: ✚ and the weeks out by his name in the squad lists and Training's Selection list, his
       token on the tactics pitch faded, ✚ INJURED · a strain · 2 weeks on his card, the hub (✚ and who, and whether
       he's in your eight), and the news.
+  - **Match ratings and form.** Every man who plays gets a rating for the game, 3 to 10 (6 an ordinary one).
+    - **In a game you play** it comes from what he did in it, counted as it happens: passes tried and found, shots
+      and on target, goals, assists, tackles won, interceptions, the ball lost, a keeper's saves. His role's work
+      counts most -- a forward's shots and goals, a midfielder's passes found, a defender's tackles and
+      interceptions, a keeper's saves -- and each goal counts less than the one before (one 7.2, two 7.9, three 8.4
+      for a forward); the result counts (a win about seven tenths above a loss), and for the back and the keeper
+      the goals let in (a clean sheet half a point). An own goal costs a point.
+    - **In a simulated game** it's guessed: how good he is beside his side, the result, his goals and the luck of
+      the day. Most goals have an assist (three in four).
+    - **His form** is the drift of his last few ratings; it fades back to ordinary without games to keep it. It
+      counts in his development: in good form he grows faster (twins at 19, a season: 13.8 half points against 7.9);
+      in poor form his touch, his reading of the game and his composure slip (not his legs).
+    - **What match actions build** is only two things: his goals a little more finishing (each worth less -- five
+      goals in three weeks against one is no more growth all told) and big games (the Champions League, a cup's last
+      two rounds, the playoffs) a little more composure. Funnelling everything through one man doesn't make him a
+      star.
+    - **Where you see it**: the report lists your men's ratings, the best starred; his card has THIS SEASON (games,
+      goals, assists, a keeper's or defender's clean sheets) and RATING · FORM (his season's average, his form). The
+      numbers start again each season; his form carries on.
   - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
     the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
     too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,
