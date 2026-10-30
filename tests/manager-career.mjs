@@ -234,7 +234,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, S = M.stadOf(d), out = 
   out.again = M.dealSign(d, 'kit', 1);
   M.dealBids(d, 'ground'); out.gsign = M.dealSign(d, 'ground', 0); out.gname = M.groundOfYours(d).name; out.gwant = S.deals.ground && S.deals.ground.ground;
   M.dealBids(d, 'E'); out.east = M.dealSign(d, 'E', 0);
-  const f2 = M.computeFinance(d); out.dealsWk = f2.dealsWk; out.sumWk = [S.deals.kit.wk + S.deals.ground.wk, f2.poolWk, f2.sponsorWk + f2.broadcastWk + f2.boardsWk + f2.dealsWk];
+  const f2 = M.computeFinance(d); out.dealsWk = f2.dealsWk; out.sumWk = [S.deals.kit.wk + S.deals.ground.wk, f2.poolWk, f2.sponsorWk + f2.broadcastWk + f2.boardsWk + f2.dealsWk + f2.shirtWk];
   const opp = d.div[1].find(id => id !== d.clubId);
   M.mgSetTeams(d, { opp, home: true }); out.home = { lvl: M.G.lvl, boards: M.G.boards.length, venue: M.V, kit: M.T.G.kit.slice() };
   M.mgSetTeams(d, { opp, home: false }); const theirs = M.groundOfClub(d.world.clubs[opp]); out.away = { lvl: M.G.lvl, want: theirs.lvl, boards: M.G.boards.length, wantB: theirs.boards.length, venue: M.V, name: theirs.name };
@@ -246,14 +246,14 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, S = M.stadOf(d), out = 
   out.kitCol = S.deals.kit ? null : 'gone';
   return out; });
 info('the ground: ' + JSON.stringify(r));
-ok(r.start.lvl === 1 && r.start.cap === 1800 && r.start.boards === 0 && r.start.deals === 0, 'a new career\'s ground: a field with two bleachers, 1,800 seats, no boards, no sponsors');
+ok(r.start.lvl === 1 && r.start.cap === 1800 && r.start.boards === 6 && r.start.deals === 0, 'a new career\'s ground: a field with two bleachers, 1,800 seats, its six boards, no sponsors');
 ok(r.poor && r.up === null && r.lvl2.lvl === 2 && r.lvl2.cap === 4200 && r.lvl2.cost === 45000, 'the next level (big bleachers, 4,200 seats) costs $45,000 -- and waits till you have it');
-ok(r.board === null && r.boardCost === 900 && r.boardWk === Math.round(r.att * 0.02) && r.boardsN === 10 && r.full,
-  'a board costs $900 at level 2 and is let at once (' + r.boardWk + ' a week, by the crowd); room for ten, then no more');
+ok(/come with the stands/.test(r.board) && r.boardCost === 0 && r.boardWk === Math.round(10 * r.att * 0.02) && r.boardsN === 10 && /come with the stands/.test(r.full),
+  'the boards come with the stands: ten at level 2, each let at once (' + r.boardWk + ' a week, by the crowd), none to buy');
 ok(r.bids.length === 3 && r.same && r.sign === null && r.deal && r.deal.until === 1 + r.deal.yrs - 1 && r.again,
   'three bids for the shirt (' + r.bids.join(', ') + '), the same till tomorrow; one signed, and then it\'s taken');
 ok(r.gsign === null && r.gname === r.gwant && r.east, 'the ground renamed for its sponsor (' + r.gname + '); no East End to name at level 2');
-ok(r.sumWk[1] === r.sumWk[2] && r.dealsWk === r.sumWk[0], 'the deals paid every week, with the partners, TV and boards');
+ok(r.sumWk[1] === r.sumWk[2] && r.dealsWk === r.sumWk[0], 'the deals paid every week, with the partners, TV, boards and shirt sales');
 ok(r.home.lvl === 2 && r.home.boards === 10 && r.home.venue === r.gname && r.home.kit.length === 5, 'at home: your stand drawn, your boards up, at ' + r.home.venue + ', the sponsor on the shirt');
 ok(r.away.lvl === r.away.want && r.away.boards === r.away.wantB && r.away.venue === r.away.name, 'away: their ground (' + r.away.name + ', level ' + r.away.lvl + ')');
 ok(r.left.length === 0 && r.mid === (r.ends[0] === r.ends[1] ? '' : r.ends[0] < r.ends[1] ? 'ground' : 'kit'), 'each deal runs out when its seasons are up (the shirt\'s after season ' + r.ends[0] + ', the name\'s after ' + r.ends[1] + ')');

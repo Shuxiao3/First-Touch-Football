@@ -83,7 +83,7 @@ r = await K(`(()=>{ const d=CAREER.data, p=d.roster[4]; p.hv=HV({am:8.5}); let w
 ok(r.news && r.weeks < 30 && r.bids >= 1 && /won’t sign/.test(r.renew) && r.settled, 'an unhappy, ambitious man asks to leave (' + r.weeks + ' weeks): the news says so, clubs bid for him as if he were listed (' + r.bids + '), he won\'t renew ("' + r.renew + '"); happy again, he settles');
 
 // --- the loyal servant ----------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, p=d.roster[5]; p.hv=HV({lo:8.5}); p.since=d.season-4; const full=mgDemand(d,p,false), w=mgRenewWage(d,p); let kept=0;
+r = await K(`(()=>{ const d=CAREER.data, p=d.roster[5]; p.hv=HV({lo:8.5}); p.since=d.season-4; p.ovr=Math.max(p.ovr,62); const full=mgDemand(d,p,false), w=mgRenewWage(d,p); let kept=0;   // (good enough to ask more than the least wage: 15% off shows)
   for(let i=0;i<40;i++){ const c=mgAiClubs(d).find(k=>k.budget>100000&&k.players.length<MG_MAX)||mgAiClubs(d)[0]; c.budget=Math.max(c.budget,1e7); d.offers=[{id:9000+i,pid:p.id,club:c.id,fee:1000,wk:d.wkN}]; const err=mgAcceptOffer(d,9000+i);
     if(err&&/doesn’t want to go/.test(err)) kept++; else if(!err){ const k=Object.values(d.world.clubs).find(x=>x.players.includes(p)); k.players.splice(k.players.indexOf(p),1); mgRosterAdd(d,p); p.since=d.season-4; } }
   return { full, w, kept }; })()`);

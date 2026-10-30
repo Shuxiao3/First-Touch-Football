@@ -1211,12 +1211,16 @@ The same game played like any other football game. It's a copy of `index.html` w
     from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
     yours by the club's name on the campus and on its clubhouse and academy. Your short name is yours alone: no other club is given it.
   - **Money.** Tickets, concessions, the club's partners (local firms: $300 a week in League 2, more in each league
-    up), TV, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
+    up), TV, shirt sales, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
     winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the ticket price, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks).
-  - **The ground.** A new career's is a field with two metal bleachers, one down each side, and no boards: 1,800
+    - **Shirt sales** are passive: paid with the rest of each week's money, home or away. Your fans buy the shirt --
+      $0.22 a fan a week in League 2, up to $0.36 in the Premium League (a new career's 1,000 fans: about $200 a
+      week) -- more with a star (4% for every point your best man is above the league's level, from 15% less to 60%
+      more) and with a happy dressing room (6% a point of the side's mood either side of settled).
+  - **The ground.** A new career's is a field with two metal bleachers, one down each side, and its six boards: 1,800
     seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
     far as your clubhouse lets you (see **The campus**):
 
@@ -1232,17 +1236,25 @@ The same game played like any other football game. It's a copy of `index.html` w
     not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
     Stands tab shows that stand as it is and as the next level would build it, with your boards and names on. The
     building's door reads the ground's name.
-    - **Boards.** PUT ONE UP ($600 at level 1, more as the ground grows: $900, $1,400, $2,200, $3,500) and it's let to
-      an advertiser at once, by the week: $0.02 a head through the gate in League 2, up to $0.04 in the Premium
+    - **Boards** come with the stands -- as many as its level has (6, 10, 14, 18, 24), never bought -- each let to an
+      advertiser at once, by the week: $0.02 a head through the gate in League 2, up to $0.04 in the Premium
       League. The advertisers' names go on the boards along the far touchline (up to 14 of them; the rest are round
       the other sides).
     - **Sponsors.** The shirt, the ground's name and each stand's (the North and South Stands; the East and West Ends
-      too from level 3) are for sale: FIND A SPONSOR and three bid, each a fee a week for one to three seasons (a
-      longer deal pays a little less a week). The same three till tomorrow, then new ones. Bids follow the league
+      too from level 3) are for sale: FIND A SPONSOR and three bid, each a base fee a week for one to three seasons (a
+      longer deal pays a little less a week) and a bonus. The same three till tomorrow, then new ones. Bids follow the league
       (a shirt's about $380 a week in League 2, $14,000 in the Premium League), the ground's level, how full it is
       and where you are in the table. A deal holds its fee wherever you go, and ends when its seasons are up (the
       news says so, and the name goes back). The shirt sponsor's colours go on the kit, a patch on the chest; the
       ground's name and the North Stand's go on the far stand and over the kick-off.
+    - **A sponsor's bonus**, paid at the season's end for hitting its target in the league -- one to three tiers, the
+      highest reached paying, a harder one more (one tier: 8 weeks of its fee; two: 4 and 10; three: 3, 7 and 12).
+      A shirt sponsor asks for a finish (top 10, top 6, top 2) or wins (9, 12, 15); the ground's for full crowds (the
+      season's home games, 55%, 75% or 95% of the seats on average); a stand's for goals (35, 42, 48), clean sheets
+      (6, 8, 10) or crowds. (A typical season is 10 wins, 36 goals, 6 clean sheets; the champions', 16, 48, 10.) Each
+      offer shows its bonus (BONUS · top 10 +$990 · top 6 +$2.3K · top 2 +$4.0K), each deal where you stand as the
+      season goes, the season's review the bonuses paid (SPONSORS' BONUSES), and the news. The base is about 15%
+      under what a deal paid before bonuses came in: a middling season comes out about even, a good one ahead.
     - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
       sponsor's name on it; its shirt may carry a sponsor too.
     - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
