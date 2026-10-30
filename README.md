@@ -966,6 +966,25 @@ The same game played like any other football game. It's a copy of `index.html` w
       games about 70% fit on average, at worst under half; with the best, 99% (a season each, simulated). Even
       then a man with poor Stamina, or past 30, can run down to 60% or so: a game costs him more than two days' rest
       gives back, so rest him now and then.
+  - **Injuries.** A man can get hurt -- mostly in a game, now and then in training. A full game costs a fresh,
+    ordinary man of 25 about a 1.2% chance; more when he's tired (2.2% at 60% fit), past 29, not durable (a hidden
+    value), or in the three weeks after he's back from one (x2.5); less with a better physio (a computer club's by its
+    league). In a season the four leagues have about 300 (five or six a club).
+    - **How bad**: a knock (3 to 8 days) more than half the time, a strain (10 to 28 days) three times in ten, a torn
+      muscle (30 to 90 days) about one in eight, now and then something serious (four to nine months) -- worse the
+      older and the less durable; in training mostly knocks. The best physio gets a man back about a quarter sooner.
+      He heals by the day, and comes back 80% fit. From 28, a torn muscle or worse takes half a point off his legs for
+      good, and their decline comes on sooner and steeper; younger, it heals clean.
+    - **Who plays**: the computer never picks a man who's hurt. Yours, if he's in your eight at kick-off (PLAY or
+      SIMULATE), gives his place to the best fit off the bench -- a man of his line, the fittest -- and the hub says so;
+      nobody hurt is among the subs.
+    - **In a match you play**, a man can get hurt in it: he slows (his legs' ceiling down to 40%), can't sprint, and
+      doesn't get better at half-time. ✚ HE'S HURT comes up by the quick subs, and he tops their list with the best
+      man to take off for (the chip lights; it never drops down on its own). With no subs left he plays on. The
+      report lists him. In a simulated game it's a roll for each man at his share of it.
+    - **Where you see it**: ✚ and the weeks out by his name in the squad lists and Training's Selection list, his
+      token on the tactics pitch faded, ✚ INJURED · a strain · 2 weeks on his card, the hub (✚ and who, and whether
+      he's in your eight), and the news.
   - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
     the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
     too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,

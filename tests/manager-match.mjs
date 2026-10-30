@@ -2,7 +2,13 @@
 // against the opposition's, and the report afterwards has the score, the rest of the round, the money and the fans;
 // the round is recorded in every league.
 import { open } from './_harness.mjs';
-const CLASSIC = 'file://' + new URL('../classic.html', import.meta.url).pathname;
+import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+// (on a copy with injuries off: a man hurt in it would change who plays -- manager-injury.mjs is injuries' test)
+const src = readFileSync(new URL('../classic.html', import.meta.url), 'utf8').replace('  let INJ_OFF=false;', '  let INJ_OFF=true;');
+if(!/let INJ_OFF=true;/.test(src)) throw new Error('instrumenting: INJ_OFF not found');
+const CLASSIC = 'file://' + join(mkdtempSync(join(tmpdir(), 'ftf-mm-')), 'classic.html'); writeFileSync(new URL(CLASSIC), src);
 
 const { browser, page, rep } = await open({ fastFrames: true, url: CLASSIC });
 const { ok, info } = rep;

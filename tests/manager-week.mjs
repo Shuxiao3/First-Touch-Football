@@ -99,7 +99,7 @@ ok(/FORWARD TO MATCHDAY/.test(m4[0]) && /next: Champions League · Group game 1/
   'week 4 on the hub: Monday (' + m4[1].replace(/^Season \d+ · /, '') + '), Wednesday morning (' + wed[1] + '), Saturday morning (' + sat[1] + '), then Monday');
 
 // --- the computer clubs' eight (everyone fresh, chance taken out: no youngster drawn for an ordinary league game) ---
-r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; mgFreshen(d);
+r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; mgFreshen(d); for(const c of mgAiClubs(d)) for(const p of c.players) delete p.inj;   // (everyone fit too)
   const pl=d.div[4].map(id=>d.world.clubs[id]).filter(c=>c&&c.id!==d.clubId), c=pl[0];
   const diff=(k,ctx)=>{ const base=mgPickEight(k.players), x=mgPickEight(k.players,ctx,d,k); return { n:x.filter(p=>!base.includes(p)).length, base, x }; };
   // the tired: his best eight at 80% -- some rest for fresh men not much worse, three at most; in a big game (78%) they play
@@ -113,7 +113,7 @@ r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; 
   const out={ tired, coco, l1chg:sum(l1,{kind:'cup',key:'coco',r:0}), final:sum(pl,{kind:'cup',key:'coco',r:5}), cl:sum(pl,{kind:'cup',key:'cl',r:0}), league:sum(pl,{kind:'league'}) };
   Math.random=rnd; return out; })()`);
 info('their eight: ' + JSON.stringify(r));
-ok(r.tired.league >= 1 && r.tired.league <= 3 && r.tired.fresh && r.tired.big === 0, 'his best eight at 80% for a league game: ' + r.tired.league + ' rested for fresh men (three at most); in a big game they play');
+ok(r.tired.league >= 1 && r.tired.league <= 4 && r.tired.fresh && r.tired.big === 0, 'his best eight at 80% for a league game: ' + r.tired.league + ' rested for fresh men (three outfielders at most, and the keeper if there\'s another); in a big game they play');
 ok(r.coco.every(n => n >= 4) && r.l1chg === 0 && r.final === 0 && r.cl === 0 && r.league === 0,
   'the Premium League in the Coco Cup: four of the seven youngsters or reserves (' + r.coco.join(',') + '); League 1 in it, the final, the Champions League, an ordinary league game when fresh: the best');
 
