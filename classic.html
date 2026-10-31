@@ -1267,7 +1267,7 @@
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
     <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L cross (hold it longer for a man further across; double-tap: a low driven cross), CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move, read against the way he's going (a flick ahead = flick, back = drag-back, L = croqueta, circle = roulette, hook = Cruyff turn, back then ahead = rainbow, ahead then back = sombrero, out and back = elastico, loop then a line = heel flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
-    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball led that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
+    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball into his run, leaned that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
 
@@ -6309,10 +6309,27 @@
   // Pace along the ground that carries a lofted ball (vz = 260*T) d in T seconds: there's no drag in the air,
   // but the grass still drags at it for the few frames it's under 12 px on the way up.
   function loftVh(d,T){ const k=-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)); return d/T*Math.exp(k*12/(260*T)); }
-  // THROUGH BALL: played into the space ahead of `mate`, the way the drag pointed, and weighted so they
-  // run onto it -- along the grass dying on the spot as they get there, or (lofted) over the top to drop there.
+  // THROUGH BALL: played into the space ahead of `mate` and weighted so they run onto it -- along the grass dying on the
+  // spot as they get there, or (lofted) over the top to drop there. WHERE (v80): into his path -- the way he's already
+  // going (to the spot he's running to, or the way he's running) -- and the drag only leans it: half its angle off his
+  // line, THRU_LEAN at most either side. A man standing still is played into the space the drag points at, as before
+  // (and one barely moving, part way between the two).
+  const THRU_LEAN=25*Math.PI/180;
+  function thruDir(mate,u){
+    const atk=atkOf(mate.team), sp=Math.hypot(mate.vx,mate.vy), rt=mate.runTarget;
+    let gx=0, gy=0, w=0;
+    const rx=rt?(rt.lx??rt.x):0, ry=rt?(rt.ly??rt.y):0;                                       // (the spot he's running to -- a run's landing, past its arc along their line)
+    if(rt && Math.hypot(rx-mate.x,ry-mate.y)>40){ gx=rx-mate.x; gy=ry-mate.y; w=1; }
+    else if(sp>40){ gx=mate.vx; gy=mate.vy; w=clamp(sp/(0.6*runSpeedOf(mate)),0,1); }       // (the way he's running)
+    const gl=Math.hypot(gx,gy); if(w>0 && atk*gx/gl<-0.2) w=0;                               // (not coming back to the ball: a through ball's forward)
+    if(w<=0) return {x:u.x, y:u.y, w:0};
+    gx/=gl; gy/=gl;
+    let da=Math.atan2(u.y,u.x)-Math.atan2(gy,gx); da=Math.atan2(Math.sin(da),Math.cos(da));    // (the drag, off his line)
+    const lim=THRU_LEAN+(Math.PI-THRU_LEAN)*(1-w), a=clamp(da*(0.5+0.5*(1-w)),-lim,lim), c=Math.cos(a), sn=Math.sin(a);
+    return {x:gx*c-gy*sn, y:gx*sn+gy*c, w};
+  }
   function thruBall(p,mate,drag,loft){
-    const u=screenDirToPitch(drag.dx,drag.dy,mate.y);
+    const u=thruDir(mate,screenDirToPitch(drag.dx,drag.dy,mate.y));
     const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
     let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
@@ -9158,13 +9175,13 @@
       const rs=Math.sign(R.y-YC); if(c!==gkHold && rs===Math.sign(c.y-YC) && Math.abs(c.y-YC)>FH*0.18 && Math.abs(R.y-c.y)<5*MK && U(q.x)<U(c.x)+60){ R.y=YC+rs*(rs*(c.y-YC)-9*MK); R.inside=true; }
       let rx=onLine?R.x:U(uol-30); if(R.inside && c!==gkHold && rs*(q.y-c.y)>-3*MK && Math.hypot(q.x-c.x,q.y-c.y)<8*MK) rx=c.x-atk*2*MK;
       if(R.third) R.x=rx;                                                           // (the third man: up to their line, as it moves)
-      S.jobs.set(q,{x:rx, y:R.y, job:'RUN', sprint:true}); }
+      S.jobs.set(q,{x:rx, y:R.y, job:'RUN', sprint:true, lx:R.x, ly:R.y}); }   // (lx, ly: where the run's going, past the arc along their line)
   }
   // a man following the plan: his job, his spot -- eased toward it (~0.25 s), so a spot that flickers for a moment doesn't
   // turn him round -- or, on a run, straight there (the man on the ball looks for the runner: see ON THE BALL)
   function followPlan(p,a,dt){
     p.dbgTag=a.job; p.planned=true; p.planSprint=!!a.sprint;
-    p.runTarget = a.job==='RUN' ? {x:a.x,y:a.y} : null;
+    p.runTarget = a.job==='RUN' ? {x:a.x,y:a.y,lx:a.lx,ly:a.ly} : null;
     if(a.job==='RUN' || !(p.ptT>simNow-0.25)){ p.ptx=a.x; p.pty=a.y; }
     else { const k=1-Math.exp(-(dt||1/60)/0.25); p.ptx+=(a.x-p.ptx)*k; p.pty+=(a.y-p.pty)*k; }
     p.ptT=simNow;

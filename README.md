@@ -367,7 +367,8 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
 - **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
-  the space ahead of the man. The lofted through ball is unchanged.
+  the space ahead of the man. The lofted through ball is unchanged. (Where yours goes: into the runner's path, the drag
+  leaning it -- see *Controls*.)
 - **The computer's through ball** along the grass is struck to die where the runner will be, but never harder than
   900 px/s (the Computer through ball dial; it was 1500, quicker than anyone could get across to). A long one would
   need more, so it gets there after him or not at all, and he doesn't play it. It's harder to judge than a pass
@@ -1480,8 +1481,12 @@ into a pass. Running with the ball never sets that off.
 way you're facing): the longer it is, the more it's lifted, but never so hard it arrives too hot to
 control. **Double-tap** it for a **lofted pass** (the button reads LOB on the second
 tap). **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
-it, and the drag picks where in front of them it goes — the ball is played into that space,
-weighted so they run onto it as it gets there, and the receiver sprints for it. The spot it was
+it. To a man on a run it's played into his path, where he's already going (the spot he's running to,
+or the way he's running), and the drag only leans it: half the drag's angle off his line, 25° at most
+either side. Drag along his run and it goes dead along it; drag across it and it leans that way, still
+in front of him. To a man standing still the drag picks where in front of him it goes, as it used to,
+and to one only just moving, something in between (v80). It's weighted so they run onto it as it gets
+there, and the receiver sprints for it. The spot it was
 played to flashes on the pitch. Drag on the second tap of a double-tap for a lofted through ball
 over the top. (A quick tap waits ~0.15 s before it goes, to see whether a second tap is coming;
 a held pass, a drag and a double-tap go at once.)

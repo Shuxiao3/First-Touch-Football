@@ -36,7 +36,7 @@ await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector
 await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); });
 await page.evaluate(() => { const T = window.__T, M = T.MK;
   // a scene: every outfield man at (u m from his own goal, w m across: + toward y=FH), the rest where they stand
-  window.__at = (q, u, w) => { const a = T.atkOf(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; };
+  window.__at = (q, u, w) => { const a = T.atkOf(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.seenVx = q.seenVy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; };   // (still: and read as still -- seenVx -- not as he was moving in the frames before)
   window.__uw = (team, x, y) => { const a = T.atkOf(team); return [(a > 0 ? x : T.FW - x) / M, (y - T.YC) / M]; };
   window.__men = team => T.players().filter(q => q.team === team && !q.benched);
   window.__pos = (q, ph) => T.posOf(q, ph);

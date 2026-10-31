@@ -4,8 +4,9 @@
 // the gap in their line in his own channel, not off towards a bigger one on the far side; a run that would land near their
 // goal goes in towards it, into the box, not on down the line; the man who's just played it forward goes again; a
 // forward's run across their line takes a midfielder told to RUN IN BEHIND into the lane it emptied (THE THIRD MAN); the
-// ball through to the box (or near it, in the middle) takes the wide men in at the back post. The plan's jobs read
-// straight off a scene set up in a match. On a copy of the game that lets the test set the scene.
+// ball through to the box (or near it, in the middle) takes the wide men in at the back post. YOUR THROUGH BALL (v80): into
+// the runner's path, where he's already going, the drag only leaning it (up to 25 degrees off his line); a man standing
+// still gets it where the drag points. The plan's jobs read straight off a scene set up in a match. On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -15,7 +16,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, teamPlan, PLAN:()=>PLAN, mkPlanState, PI:()=>PI, '
-  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, EXH, simNow:()=>simNow, setStyle, '
+  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, EXH, simNow:()=>simNow, setStyle, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } '
   + 'for(const q of players){ q.runSeen=null; q.runCd=0; q.gapRun=0; } ball.thru=null; ball.intendedRcv=null; ball.passerRef=null; simNow+=0.5; }, '
@@ -139,6 +140,31 @@ r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearI
   return { w: p.jobs.filter(j => j.pos === 'W'), p }; });
 info('a ball through to the striker, 19 m out in the middle: ' + show(r.p));
 ok(r.w.length === 2 && r.w.every(j => j.job === 'BACKPOST' && Math.abs(j.w) < 14), `both wide men go in at the back post, in the box, not out on their touchlines (${r.w.map(j => j.job + ' ' + j.u + ',' + j.w).join(' / ')})`);
+
+// --- YOUR THROUGH BALL: into his path, the drag only leaning it ------------------------------------------------------------
+r = await page.evaluate(() => { const T = window.__T, deg = (a, b) => Math.round(Math.acos(Math.max(-1, Math.min(1, a.x * b.x + a.y * b.y))) * 57.3), side = (a, b) => Math.sign(a.x * b.y - a.y * b.x);
+  T.reset(); window.__clearIns(); window.__liv(); window.__city(28, [-10, 2, 12], 40);
+  const cm = window.__by('G', 'CM', 'atk', 1), w = window.__by('G', 'W', 'atk', 1), a = T.atkOf('G');
+  window.__at(cm, 52, 0); window.__at(w, 60, 20);
+  // him on a run: in behind, on a diagonal in towards goal (his landing past their line, 12 m across)
+  const L = { x: a > 0 ? 82 * T.MK : T.FW - 82 * T.MK, y: T.YC + 12 * T.MK }, gl = Math.hypot(L.x - w.x, L.y - w.y), g = { x: (L.x - w.x) / gl, y: (L.y - w.y) / gl };
+  w.runTarget = { x: L.x, y: L.y, lx: L.x, ly: L.y }; w.vx = g.x * 200; w.vy = g.y * 200;
+  const flick = ang => { const c = Math.cos(ang), s = Math.sin(ang); return { x: g.x * c - g.y * s, y: g.x * s + g.y * c }; };   // (a drag, on the pitch, that far off his line)
+  const out = {};
+  for(const [k, ang] of [['along', 0], ['20', 20], ['across', 90], ['back', 170]]){ const u = flick(ang / 57.3), d = T.thruDir(w, u); out[k] = { off: deg(d, g), lean: side(g, d), toward: side(g, u) }; }
+  // standing still: the drag's way
+  w.runTarget = null; w.vx = w.vy = 0; const u = flick(70 / 57.3), d0 = T.thruDir(w, u); out.still = { off: deg(d0, u) };
+  // the whole pass, a real drag across his run: where it's played to
+  w.runTarget = { x: L.x, y: L.y, lx: L.x, ly: L.y }; w.vx = g.x * 200; w.vy = g.y * 200; window.__give(cm);
+  let drag = null; for(let k = 0; k < 360 && !drag; k += 1){ const dx = Math.cos(k / 57.3) * 60, dy = Math.sin(k / 57.3) * 60, pd = T.screenDirToPitch(dx, dy, w.y); if(deg(pd, flick(90 / 57.3)) <= 1) drag = { dx, dy }; }
+  T.thruBall(cm, w, drag, false); const B = T.ball(), tv = { x: B.thru.x - w.x, y: B.thru.y - w.y }, tl = Math.hypot(tv.x, tv.y);
+  out.played = { off: deg({ x: tv.x / tl, y: tv.y / tl }, g), ahead: Math.round(tl / T.MK * 10) / 10, rcv: B.intendedRcv === w };
+  return out; });
+info('your through ball (degrees off his run): ' + JSON.stringify(r));
+ok(r.along.off === 0 && r['20'].off === 10 && r.across.off === 25 && r.across.lean === r.across.toward && r.back.off === 25,
+  `to a man on his run it goes where he's going: dragged along his run, dead along it; 20 degrees off it, ${r['20'].off}; straight across it, ${r.across.off} (the drag's way, no more); even back the other way, ${r.back.off}`);
+ok(r.still.off === 0, `to a man standing still it goes where the drag points (${r.still.off} degrees off it), as before`);
+ok(r.played.rcv && r.played.off <= 26 && r.played.ahead > 4, `played, with a drag straight across his run: ${r.played.ahead} m ahead of him, ${r.played.off} degrees off his run (it went straight across)`);
 
 process.exitCode = rep.finish();
 await browser.close();
