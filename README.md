@@ -104,6 +104,40 @@ The same game played like any other football game. It's a copy of `index.html` w
   so with him 8 m out, leaning to his near post as before. Once the man is close (7 m), with none of his own
   between them, he goes straight at the ball, and at the man's feet he takes it off him. His reach and a dive at the
   feet (Diving) decide how close that is. Out closing a man down he can leave his posts, anywhere in his box.
+- **Going down big (v78).** Out at one of theirs -- closing down the man on the ball, or running at a loose ball one
+  of theirs is getting to -- and that man shoots from within 10 m of him, the keeper goes down low and makes himself as
+  big as he can: one knee down, the other leg out, arms spread. Down there he's a wall across the shot's way, as high
+  as he stands: just his body as he starts going down (coming out at a man, he isn't set), and once he's all the way
+  down his reach and a quarter of his dive (1.9 m either side for an average side's keeper; 1 m at Reach and Diving
+  1, 2.3 m at 10). Getting down is his timing and his Reflexes: he reads the strike, and as often as not he's a moment
+  late (up to 0.14 s, less the better his Reflexes), then he takes 0.24 s (Reflexes 1) to 0.12 s (10) to get all the
+  way down. So from close in a shot can be past him before he's down, and from further out one into the corner is
+  past the end of him.
+  - **It comes back off him, never held**, however soft: back out the way it came at a third to a half of its pace, up
+    off the turf and off to one side -- out wide, away from the middle of the goal, the better his Handling (as with a
+    save he can't hold: 95% of them at Handling 10, a little over half at 1). The shot's over and it's anyone's ball,
+    the shooter's as likely as anyone's.
+  - **One past the end of him, or over him, goes on**, and he's no help with it: he's down 0.7 s and takes 0.45 s more to
+    get up. A man shooting from further away than 10 m he stays up for and dives at, as before.
+  - Drawn with two new rows of the keepers' sheet (below): going down, then spread, and half up again as he gets up.
+  - Before, he stayed up and his reach was looked at frame by frame, which a hard shot from close can step past. His
+    wall is looked at all along the ball's way.
+  - **One on one**, measured: a forward (an average side's) running at goal from 24 m with you on the stick, the keeper
+    (an average side's) doing what he does -- coming out, closing him down -- and from the spot the forward shoots as
+    you would, low into a corner, full power, either side in turn:
+
+    | He shoots from | The keeper, from him | v77 | v78 |
+    | --- | --- | --- | --- |
+    | 11 m out, in the middle | 3.7 m (down big) | 72% | 39% |
+    | 12 m, in the middle | 6.2 m (down big) | 67% | 54% |
+    | 12 m, 4.5 m off the middle | 7.1 m (down big) | 75% | 48% |
+    | 13 m, in the middle | 8.3 m (down big) | 78% | 70% |
+    | 14 m, 4.5 m off the middle | 10.2 m (down big, just) | 78% | 65% |
+    | 15 m, in the middle | 11 m (he stays up and dives) | 70% | 55% |
+
+    60 shots a row on v77; 120 on v78 (60 for the last two). Give or take 5 to 7 points. From any nearer the keeper
+    has it off his feet first. So a one on one is a contest now, not a goal: let the keeper get out to you and down in
+    time and fewer than two in five go in; hit it while he's still coming and one into the corner beats him.
 - **The keeper claims crosses.** A cross into his six-yard box, or just past it, that he can get to while it's
   within his reach (hands up, a little higher than the bar), he comes for, over everyone's heads: the men going up
   for it leave it to him. One that comes down further out he leaves to his defenders.
@@ -134,6 +168,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Long shots keep their pace.** The Long Shots stat still decides how true a shot from distance flies, but it
     takes off only half the pace it used to, so one on target from 20 m is hit hard enough to beat a keeper at full
     stretch.
+- **He dives a tenth further (v78).** Diving 1 to 10 flings him 33 to 110 (it was 30 to 100): a little quicker across
+  his goal, and the same dive is less of a stretch, so a little less often beaten at his fingertips (see above) and a
+  little more often held by very safe hands. It's a tad, as asked: shots he has to dive for go in a little less often
+  (below).
 - **Following a shot in.** When a team-mate shoots, the computer's forwards and midfielders in and around the box go
   in after it, to 5 to 8 m out on the side it's going, for whatever the keeper can't hold.
 - **What v77 did to the score** (the keeper's hands, long shots, following in, and the reads below; 84 club pairings,
@@ -148,6 +186,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     the computer's way with nobody else about), it came out a little higher from wide of the posts 18-23 m out -- and
     put in, the computer shot from there three times a match instead of under twice, where in a match those go in
     one time in fifty, and scored 1.43 a match. So long shots are more dangerous when it takes them, not more often.
+- **What v78 did to the score** (going down big and the dive; the same 84 club pairings, every man on the computer,
+  6-minute matches, against v77). Run twice -- once with his wall starting at his reach, once as it's shipped,
+  starting at his body -- goals came to 2.23 and 2.01 a match, against 2.31: about 2.1, each give or take 0.2, so
+  likely a little fewer than before, and nearly all of it from further out. From 20-25 m 13% of shots went in on
+  v77, 3% now (90 shots); from 16-20 m 46% → 38%; from 12-16 m 54% → 51%. Goalless draws 14% → 19%, five goals or
+  more 12% → 11%. The keeper goes down big about once a match and stops about one in four of those with his wall;
+  two in five go in anyway (the computer's forwards go for the corners).
 - **No corners, no goal kicks.** Wide of a post or over the bar the ball still comes back off the line (see the net,
   above). Should one ever get past it, it's a goal kick for the side whose goal it is -- in either half: the old rule
   had the ends the wrong way round after half-time.
@@ -1973,11 +2018,13 @@ and his top, socks, shorts and trim recoloured in the game — the top to the te
 | 24–31 | hold | 1 | the ball gathered into his chest (the ball itself isn't drawn meanwhile) |
 | 32–39 | kick | 1 | just after he's sent it out, toward where it went |
 | 40–43 | dive | 2 | the stretch, then down on the turf: up the screen and down it, facing E, then facing W |
+| 44–45 | spread | 2 | going down big at a man (v78): going down, then spread -- one knee down, the other leg out, arms wide; the right knee down for the keeper facing E, mirrored for the one facing W |
 
 A dive along the goal line runs toward or away from this camera, so the stretch goes forward as
 well, climbing toward the top corner or dropping toward the bottom one, and reads at full length.
 The head is bigger than the arms can reach past, so the gloves are painted in front of the face, as
-a pixel artist would. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
+a pixel artist would. The spread is drawn facing us whichever way he faces: side on, a man down on one knee
+with his arms out reads as a man standing. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
 
 Football Classic (`classic.html`) takes the same art split into parts (a body sheet, every hairstyle's head, and
 where the head sits in each cell) so each player can be put together and recoloured. Write them in with:

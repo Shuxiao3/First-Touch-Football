@@ -19,7 +19,7 @@
     "N",
     "NE"
   ],
-  "direction_note": "row = anim.row + direction index (snap8 order) for every animation but dive, whose four rows are listed under it",
+  "direction_note": "row = anim.row + direction index (snap8 order) for every animation but dive and spread, whose rows are listed under them",
   "animations": {
     "ready": {
       "row": 0,
@@ -84,6 +84,20 @@
         "down the screen, facing E",
         "up the screen, facing W",
         "down the screen, facing W"
+      ]
+    },
+    "spread": {
+      "row": 44,
+      "frames": 2,
+      "fps": 8,
+      "loop": false,
+      "frame_names": [
+        "going down",
+        "spread"
+      ],
+      "rows": [
+        "right knee down",
+        "left knee down"
       ]
     }
   },

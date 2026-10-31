@@ -14,6 +14,8 @@ dives to either side (stretched in the air, then down on the turf).
 Sheet layout, 32x32 cells, rows animation-major like the player sheet:
     ready, shuffle, run, hold, kick -- 8 rows each, directions in snap8 order (E, SE, S, SW, W, NW, N, NE)
     dive -- 4 rows: up the screen facing E, down the screen facing E, then the same two facing W
+    spread -- 2 rows: going down big at a man he's run out to, turned to us so the spread shows -- the right knee
+              down, then the same mirrored (the left)
 The keeper's top, shorts and trim are recoloured in the game by exact palette swap, like the kits.
 """
 import json
@@ -182,6 +184,20 @@ def render_dive(up):
     return out, (0, 0)
 
 
+def anim_spread():
+    """going down big at a man he's run out to, as the shot comes: the knees dropping and the arms opening, then
+    down low and as big as he can make himself -- one knee down, the other leg out wide, arms spread out over them.
+    Drawn facing us (S): side-on, from this camera, a spread across the goal is all foreshortening and reads as a man
+    standing (the dive cheats the same way)"""
+    going = P(lean=18, root=(0, 0.3, -2.6),
+              R=dict(flex=34, knee=70, ankle=12, abd=30, toe=14), L=dict(flex=30, knee=64, ankle=12, abd=36, toe=14),
+              aR=dict(flex=30, abd=54, elbow=26), aL=dict(flex=30, abd=54, elbow=26))
+    spread = P(lean=14, root=(0, 0.4, -3.9),
+               R=dict(flex=-10, knee=96, ankle=10, abd=8, toe=0), L=dict(flex=20, knee=20, ankle=14, abd=74, toe=16),
+               aR=dict(flex=16, abd=78, elbow=8), aL=dict(flex=16, abd=78, elbow=8))
+    return [going, spread]
+
+
 # name, poses, suggested fps, what each frame is
 ANIMS8 = [
     ('ready', anim_ready, 1, ['set']),
@@ -192,6 +208,8 @@ ANIMS8 = [
 ]
 DIVE_ROWS = [('up', 'E'), ('down', 'E'), ('up', 'W'), ('down', 'W')]
 DIVE_FRAMES = ['in the air', 'down']
+SPREAD_ROWS = ['right knee down', 'left knee down']
+SPREAD_FRAMES = ['going down', 'spread']
 STEADY_HEAD = {'ready', 'shuffle', 'run'}
 
 
@@ -228,6 +246,11 @@ def build_sheet(log=None):
         if facing == 'W':
             cells = [c[:, ::-1].copy() for c in cells]
         rows.append(pad(cells))
+    spread, shift = render_row('spread', anim_spread(), 'S')       # (the left knee: the same, mirrored)
+    if log is not None and shift != (0, 0):
+        log.append(('spread', 'S', shift))
+    for i, _ in enumerate(SPREAD_ROWS):
+        rows.append(pad(spread if i == 0 else [c[:, ::-1].copy() for c in spread]))
     return np.concatenate(rows, axis=0)
 
 
@@ -240,14 +263,16 @@ def sheet_meta():
         row += len(pl.DIRS)
     anims['dive'] = {'row': row, 'frames': 2, 'fps': 2, 'loop': False, 'frame_names': DIVE_FRAMES,
                      'rows': ['%s the screen, facing %s' % w for w in DIVE_ROWS]}
+    anims['spread'] = {'row': row + len(DIVE_ROWS), 'frames': 2, 'fps': 8, 'loop': False, 'frame_names': SPREAD_FRAMES,
+                       'rows': list(SPREAD_ROWS)}
     return {
         'image': 'keeper_sheet.png',
         'frame': {'w': CELL, 'h': CELL},
         'columns': 4,
         'anchor': {'x': int(pl.CX), 'y': int(pl.GY)},
         'directions': pl.DIRS,
-        'direction_note': 'row = anim.row + direction index (snap8 order) for every animation but dive, '
-                          'whose four rows are listed under it',
+        'direction_note': 'row = anim.row + direction index (snap8 order) for every animation but dive and spread, '
+                          'whose rows are listed under them',
         'animations': anims,
         'palette': {m: ['#%02x%02x%02x' % c for c in pl.RAMPS[m]] for m in ('shirt', 'trim', 'shorts', 'boots')},
         'palette_note': 'ramps are [line, shadow, base, light]; socks use the shirt ramp. The game swaps '
@@ -261,7 +286,7 @@ def preview(sheet, path, z=3):
     C, lab, top = CELL * z, 70, 18
     blocks = [(n, meta['animations'][n]) for n, _, _, _ in ANIMS8]
     width = lab + sum(a['frames'] * C + 12 for _, a in blocks)
-    height = top + len(pl.DIRS) * C + 30 + top + 4 * C + 8
+    height = top + len(pl.DIRS) * C + 30 + top + 4 * C + 8 + 30 + C + 8
     img = Image.new('RGBA', (width, height), (16, 28, 20, 255))
     d = ImageDraw.Draw(img)
     for di, dn in enumerate(pl.DIRS):
@@ -288,6 +313,17 @@ def preview(sheet, path, z=3):
             cell = Image.fromarray(sheet[r * CELL:(r + 1) * CELL, f * CELL:(f + 1) * CELL], 'RGBA')
             img.alpha_composite(cell.resize((C, C), Image.NEAREST), (x0, y0))
         d.text((lab + i * 2 * (C + 4), y + C + 2), label.replace('the screen, ', ''), fill=(157, 255, 60, 255))
+    y += C + 30
+    d.text((8, y - 14), 'spread', fill=(233, 245, 236, 255))
+    a = meta['animations']['spread']
+    for i, label in enumerate(a['rows']):
+        for f in range(2):
+            x0, y0 = lab + (i * 2 + f) * (C + 4), y
+            d.rectangle([x0, y0, x0 + C - 1, y0 + C - 1], fill=(49, 129, 77, 255) if f % 2 else (43, 116, 69, 255))
+            r = a['row'] + i
+            cell = Image.fromarray(sheet[r * CELL:(r + 1) * CELL, f * CELL:(f + 1) * CELL], 'RGBA')
+            img.alpha_composite(cell.resize((C, C), Image.NEAREST), (x0, y0))
+        d.text((lab + i * 2 * (C + 4), y + C + 2), label, fill=(157, 255, 60, 255))
     img.save(path)
 
 

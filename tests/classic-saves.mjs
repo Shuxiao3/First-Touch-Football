@@ -5,7 +5,10 @@
 // once -- and our men in and around the box follow a shot in. Defenders read a man's run a little less (95% of it on
 // the ball, 90% off it, at Def IQ 10) and less again tired. Handling is a keeper's stat like the rest (his six, his
 // rating, a side's men). The end lines: a ball can't go out over them, but if it did it'd be a goal kick for the side
-// whose goal it is, either half -- no corners. On a copy of the game that lets the test set the scene.
+// whose goal it is, either half -- no corners. GOING DOWN BIG (v78): out at a man who shoots from close, the keeper goes
+// down low and wide -- a wall across the shot's way, wider than his reach once he's all the way down, as high as he stands
+// -- and what hits it comes back off him, never held: out wide the better his Handling. And he dives a tenth further (Diving
+// 33 to 110). On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -16,10 +19,12 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, P, FW, FH, YC, MK, GOAL_W, ARCH, OVR_W, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
   + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, checkOutOfPlay, rs:()=>restartInfo, switchEnds, setControlled, shootAt, '
-  + 'overallOf, gkHandlingFor, sixHtml, genStyledStats, rng32, '
+  + 'overallOf, gkHandlingFor, sixHtml, genStyledStats, rng32, divingOf, reflexOf, spreadWidth, spreadBlock, spreadHalf:k=>spreadHalf(k), spreadGrow:k=>spreadGrow(k), '
+  + 'SP:()=>({H:SPREAD_H, R:SPREAD_RANGE, DIVE:SPREAD_DIVE, LATE:SPREAD_LATE, T:SPREAD_T, DOWN:SPREAD_DOWN}), pal:()=>KEEPER_SHEET_PAL, PX_M, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    const h=handlingOf(kp), S=saveStretch(kp,dx,dy), shot=ball.shotT>0, by=ball.lastTouchP, dived=kp.diveT>0;\n',
   '    const h=handlingOf(kp), S=saveStretch(kp,dx,dy), shot=ball.shotT>0, by=ball.lastTouchP, dived=kp.diveT>0;\n    window.__ksIn={h:+h.toFixed(2),S:+S.toFixed(2),v:Math.round(v)};\n');
+patch("if(LAB.on) labOnSave('down big, blocked');", "window.__spread=(window.__spread||0)+1; if(LAB.on) labOnSave('down big, blocked');");   // (each time his wall stops one)
 patch('  function keeperSave(kp,dx,dy,v){\n', '  function keeperSave(kp,dx,dy,v){ const k=keeperSave0(kp,dx,dy,v); window.__ks=k; return k; }\n  function keeperSave0(kp,dx,dy,v){\n');   // (what each save came to, wherever he made it)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-saves-')), 'classic.html');
 writeFileSync(copy, src);
@@ -34,7 +39,7 @@ await page.evaluate(() => { const T = window.__T;
       if(T.simNow() - t0 > secs || performance.now() - w0 > 15000) return res(null); requestAnimationFrame(tick); })(); });
   // their keeper on his line, everything reset; his Handling set (a stat 1 to 10)
   window.__kp = hand => { const kp = T.keepers().find(k => k.team !== 'G'); T.freeze();
-    kp.x = kp.homeX; kp.y = T.YC; kp.vx = kp.vy = 0; kp.mode = 'line'; kp.diveT = 0; kp.groundT = 0; kp.heldT = 0; kp.claimCd = 0; kp.reactT = 0; kp.threatActive = false; kp.beatT = 0; kp.charging = false; kp.gkRoaming = false;
+    kp.x = kp.homeX; kp.y = T.YC; kp.vx = kp.vy = 0; kp.mode = 'line'; kp.diveT = 0; kp.groundT = 0; kp.heldT = 0; kp.claimCd = 0; kp.reactT = 0; kp.threatActive = false; kp.beatT = 0; kp.charging = false; kp.gkRoaming = false; kp.spreadT = 0; kp.spreadDn = 0; kp.closeT = -9;
     kp.stats = Object.assign({}, kp.stats, { gkHandling: hand, gkReach: 5.5, gkReflex: 5.5, gkDiveRange: 5.5, keeperSpd: 5.5 }); return kp; }; });
 
 // --- THE HOLD WINDOW (holdOdds: h his Handling 0..1, v the shot's pace, S how far out to it 0..1) ----------------------------
@@ -57,11 +62,11 @@ const shotAt = (hand, pace, off, n, from, react) => page.evaluate(async ({ hand,
     out[k || 'none'] = (out[k || 'none'] || 0) + 1; ins = window.__ksIn || ins; }
   return { out, ins };
 }, { hand, pace, off, n, from, react });
-const at1 = await shotAt(1, 420, 0, 6), at10f = await shotAt(10, 700, 0, 6), at1f = await shotAt(1, 700, 0, 6), tips = await shotAt(10, 700, 'tips', 6, 8, true);
+const at1 = await shotAt(1, 420, 0, 6), at10f = await shotAt(10, 700, 0, 6), at1f = await shotAt(1, 700, 0, 6), tips = await shotAt(10, 700, 'tips', 6, 7, true);
 info('at him: ' + JSON.stringify({ at1, at10f, at1f, tips }));
 ok((at1.out.hold || 0) + (at1.out.claimed || 0) === 6, 'a soft shot straight at a Handling 1 keeper: held, every time');
 ok(at10f.out.hold === 6 && !at1f.out.hold, 'a hard one straight at him (700 px/s): Handling 10 holds it every time, Handling 1 never does');
-ok(!tips.out.hold && Object.values(tips.out).reduce((a, b) => a + b, 0) === 6 && tips.ins.S >= 0.8, 'a hard one from 8 m passing at the end of his reach, too quick to get across to: even Handling 10 can\'t hold it (' + JSON.stringify(tips.out) + ', ' + tips.ins.S + ' of the way out)');
+ok(!tips.out.hold && Object.values(tips.out).reduce((a, b) => a + b, 0) === 6 && tips.ins.S >= 0.8, 'a hard one from 7 m passing at the end of his reach, too quick to get across to: even Handling 10 can\'t hold it (' + JSON.stringify(tips.out) + ', ' + tips.ins.S + ' of the way out)');
 
 // --- WHERE IT GOES: wide of his post the better his Handling, in front of him the worse; never in -----------------------
 const rebound = hand => page.evaluate(hand => { const T = window.__T, R = { wide: 0, front: 0, inside: 0, n: 0, short: 0 };
@@ -94,6 +99,70 @@ r = await page.evaluate(() => { const T = window.__T, B = T.beatOdds;
 info('fingertips: ' + JSON.stringify(r));
 ok(r.odds.body === 0 && r.odds.slow === 0 && r.odds.full1 === 0.6 && r.odds.full10 === 0.36 && r.odds.part > 0 && r.odds.part < 0.2 && r.odds.dive > 0.05 && r.odds.dive < 0.15, 'never at his body or from a soft one; a hard one (800 px/s as it gets to him) at full stretch beats him up to 60% of the time at Handling 1, 36% at 10; a long dive to a 730 px/s shot, an average keeper (7): ' + r.odds.dive);
 ok(r.beat >= 140 && r.beat <= 220 && r.on === r.beat, 'and in the match: ' + r.beat + ' of 300 of the hardest at his fingertips (Handling 1) went on, slower, still a shot');
+
+// --- GOING DOWN BIG: out at a man who shoots from close -- down low and wide, and it comes back off him -----------------
+r = await page.evaluate(() => { const T = window.__T, kp = window.__kp(5.5), S = T.SP(), st = (k, v) => { kp.stats = Object.assign({}, kp.stats, { [k]: v }); };
+  st('gkDiveRange', 1); const d1 = T.divingOf(kp); st('gkDiveRange', 10); const d10 = T.divingOf(kp);
+  kp.stats = Object.assign({}, T.ARCH.GK); const reach = T.reachOf(kp), half = T.spreadHalf(kp);
+  st('gkReflex', 1); const g1 = T.spreadGrow(kp); st('gkReflex', 10); const g10 = T.spreadGrow(kp); kp.stats = Object.assign({}, T.ARCH.GK);
+  kp.spreadAt = T.simNow() + 0.05; const w0 = T.spreadWidth(kp); kp.spreadAt = T.simNow() - 5; const w1 = T.spreadWidth(kp);
+  return { d1, d10, body: kp.r, reach: +reach.toFixed(1), half: +half.toFixed(1), g1: +g1.toFixed(3), g10: +g10.toFixed(3), w0: +w0.toFixed(1), w1: +w1.toFixed(1), S, m: +(S.R / T.MK).toFixed(1) }; });
+info('down big, the numbers: ' + JSON.stringify(r));
+ok(r.d1 === 33 && r.d10 === 110, 'he dives a tenth further than he did: Diving 1 to 10 is 33 to 110 (it was 30 to 100)');
+ok(r.w0 === r.body && r.w1 === r.half && r.half > r.reach * 1.8 && r.g1 === 0.24 && r.g10 === 0.12 && r.S.H === 34 && r.m === 10,
+  'going down he\'s just his body either side (' + r.body + ' px: out at a man he isn\'t set), then his reach (' + r.reach + ') and a quarter of his dive (' + r.half + ' px all the way down, an average side\'s keeper): all the way down in 0.24 s at Reflexes 1, 0.12 at 10; as high as he stands; for a man within ' + r.m + ' m');
+
+const downBig = (kind, n) => page.evaluate(async ({ kind, n }) => {
+  const T = window.__T, out = { n: 0, down: 0, blocked: 0, held: 0, back: 0, slower: 0, past: 0, frames: {} }, rows = T.pal().rows;
+  for(let i = 0; i < n; i++){ const kp = window.__kp(5.5), atk = T.atkOf('G'), gx = atk > 0 ? T.FW : 0, b = T.ball();
+    kp.stats = Object.assign({}, T.ARCH.GK);
+    const sh = T.players().find(q => q.team === 'G' && q.role === 'ATT') || T.players().find(q => q.team === 'G');
+    window.__park([sh]); T.setControlled(sh); window.__spread = 0;
+    sh.x = gx - atk * (kind === 'far' ? 17 : 11) * T.MK; sh.y = T.YC; sh.vx = sh.vy = 0; sh.state = 'normal'; sh.noTouchT = 0;
+    kp.x = kind === 'far' ? kp.homeX - atk * 3 * T.MK : sh.x + atk * 5 * T.MK; kp.y = T.YC;
+    b.ownedBy = sh; b.dribbler = null; b.x = sh.x + atk * 20; b.y = sh.y; b.z = 0; b.vx = b.vy = b.vz = 0; b.shotT = 0; b.shotBy = null; b.lastTouch = 'G'; b.lastTouchP = sh;
+    await window.__until(0.1, () => undefined);                         // (a few frames on the ball: he's out at him)
+    // the shot, along the pitch: at him (inside his reach), past the end of him even all the way down, or over him
+    const lat = kind === 'past' ? T.spreadHalf(kp) + b.r + 14 : (i % 2 ? 1 : -1) * 0.6 * kp.r;
+    b.ownedBy = null; b.x = sh.x + atk * 20; b.y = kp.y + lat; b.vx = atk * 800; b.vy = 0; b.z = kind === 'over' ? 40 : 3; b.vz = kind === 'over' ? 120 : 20;
+    b.shotT = 1.1; b.shotBy = 'G'; b.lastTouch = 'G'; b.lastTouchP = sh; b.curveSpinT = 0;
+    let down = false, held = false;
+    const k = await window.__until(1, () => window.__spread ? 'blocked' : atk * (b.x - kp.x) > 40 ? 'past' : undefined,
+      () => { if(kp.spreadT > 0){ if(!down){ const f = SPRITE.pickKeeper(kp); out.frames[f.join(':')] = (out.frames[f.join(':')] || 0) + 1; } down = true; } if(T.gkHold()) held = true; });
+    out.n++; if(down) out.down++; if(held) out.held++; if(k === 'past') out.past++;
+    if(k === 'blocked'){ out.blocked++; if(b.vx * atk < 0 && b.shotT === 0) out.back++; if(Math.hypot(b.vx, b.vy) <= 0.56 * 800) out.slower++; }
+    const f1 = SPRITE.pickKeeper(kp); if(down) out.frames['after ' + f1.join(':')] = (out.frames['after ' + f1.join(':')] || 0) + 1; }
+  out.row = rows.spread; return out; }, { kind, n });
+const atHim = await downBig('at', 6), pastHim = await downBig('past', 4), overHim = await downBig('over', 4), farOut = await downBig('far', 4);
+info('down big: ' + JSON.stringify({ atHim, pastHim, overHim, farOut }));
+ok(atHim.down === 6 && atHim.blocked === 6 && atHim.held === 0 && atHim.back === 6 && atHim.slower === 6,
+  'out at a man 11 m out who shoots at him (at his body) from 5 m: he goes down big, and every one comes back off him, back out the way it came and slower -- never held');
+ok(pastHim.down === 4 && pastHim.blocked === 0 && pastHim.past === 4 && overHim.down === 4 && overHim.blocked === 0 && overHim.past === 4,
+  'one past the end of him, even all the way down, goes on; so does one over him (higher than he stands)');
+ok(farOut.down === 0, 'a man shooting from 17 m, him 3 m off his line: too far to go down at -- he stays up for it');
+const sp = atHim.row;
+ok(Object.keys(atHim.frames).every(k => k.startsWith('after ') ? +k.split(' ')[1].split(':')[0] === sp || +k.split(' ')[1].split(':')[0] === sp + 1 : +k.split(':')[0] === sp || +k.split(':')[0] === sp + 1),
+  'drawn down big from the moment he goes, and still as it comes off him: the sheet\'s spread rows (' + sp + ', ' + (sp + 1) + ')');
+
+r = await page.evaluate(() => { const T = window.__T, kp = window.__kp(5.5), sp = T.pal().rows.spread, side = kp.side < 0 ? 0 : 1, pk = () => SPRITE.pickKeeper(kp).join(':');
+  kp.spreadN = { x: 1, y: 0 }; kp.spreadT = 0.6; kp.spreadAt = T.simNow() + 0.05; const going = pk(); kp.spreadAt = T.simNow() - 1; const spread = pk();
+  kp.spreadT = 0; kp.spreadDn = 0.4; const up1 = pk(); kp.spreadDn = 0.1; const up2 = pk(); kp.spreadDn = 0; kp.groundT = 0; const up = pk(); window.__kp(5.5);
+  return { going, spread, up1, up2, up, want: [sp + side + ':0', sp + side + ':1'] }; });
+info('down big, the frames: ' + JSON.stringify(r));
+ok(r.going === r.want[0] && r.spread === r.want[1] && r.up1 === r.want[1] && r.up2 === r.want[0] && !r.up.startsWith(r.want[0].split(':')[0] + ':'),
+  'going down, then spread till he\'s getting up, half up, and up again: frames ' + [r.going, r.spread, r.up1, r.up2, r.up].join(' > '));
+
+// where it goes off him: back out, off to one side -- out wide (away from the middle) the better his Handling
+const offHim = hand => page.evaluate(hand => { const T = window.__T, R = { n: 0, out: 0, back: 0, held: 0 }, dt = 1 / 60;
+  for(let i = 0; i < 300; i++){ const kp = window.__kp(hand), atk = T.atkOf('G'), gx = atk > 0 ? T.FW : 0, b = T.ball(), sd = i % 2 ? 1 : -1;
+    kp.x = gx - atk * 6 * T.MK; kp.y = T.YC + sd * 60; kp.spreadT = 0.5; kp.spreadAt = T.simNow() - 1; kp.spreadN = { x: -atk, y: 0 };
+    b.ownedBy = null; b.x = kp.x - atk * 4; b.y = kp.y + (Math.random() * 2 - 1) * 15; b.z = 3; b.vx = atk * 800; b.vy = 0; b.vz = 0; b.shotT = 1.1; b.shotBy = 'G'; b.lastTouch = 'G';
+    T.spreadBlock(b.x - b.vx * dt * 3, b.y); R.n++; if(b.shotT === 0 && b.vx * atk < 0) R.back++; if(b.vy * sd > 0) R.out++; if(T.gkHold()) R.held++; }
+  window.__kp(5.5); return R; }, hand);
+const off1 = await offHim(1), off10 = await offHim(10);
+info('off him (of 300, out wide / back out): ' + JSON.stringify({ off1, off10 }));
+ok(off1.back === 300 && off10.back === 300 && off1.held + off10.held === 0, 'whatever hits him down there comes back out, the shot over -- never held, however safe his hands');
+ok(off10.out >= 265 && off1.out >= 140 && off1.out <= 205, 'and off to one side: out wide (away from the middle of the goal) ' + off10.out + ' of 300 at Handling 10, ' + off1.out + ' at 1 (about as often as not)');
 
 // --- FOLLOWING IT IN: a team-mate's shot, and our man in the box goes in after it -----------------------------------------
 r = await page.evaluate(async () => { const T = window.__T, atk = T.atkOf('G'), gx = atk > 0 ? T.FW : 0, kp = window.__kp(5.5);
