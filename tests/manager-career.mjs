@@ -84,7 +84,7 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
 ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the first Monday of pre-season');
-ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{25}$/.test(p.at) && /^[a-s]{25}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
+ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{26}$/.test(p.at) && /^[a-s]{26}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
 // --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market is

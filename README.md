@@ -114,6 +114,43 @@ The same game played like any other football game. It's a copy of `index.html` w
     only just gets there, at the end of his reach, or one of theirs is up with him and it isn't dropping into his
     midriff, he punches it clear: up and away to the side it's on, 12 to 18 m, nobody's ball. The Crossing Lab calls
     it PUNCHED CLEAR.
+- **The keeper's hands (Handling).** Whatever shot he gets to -- on his line, at the end of a dive, or coming for it --
+  he holds only if it's slow enough as it reaches him and close enough to his body. How slow and how close is his
+  **Handling**, a keeper's stat like the rest (1 to 10; an average side's keeper has 7): up to 430 px/s right at him at
+  1 (a header, a scuff), up to 760 and a good way out toward his fingertips at 10. A struck shot flies, and gets to him
+  nearly as hard as it was hit, 700 to 800 px/s, so an average keeper parries almost any struck shot even straight
+  at him and holds headers and soft ones; at 10 he holds about half the hard ones at him. A dive is a stretch, so only very safe hands hold a diving save, and a
+  slow one at that; a curling shot is harder to hold. At the edge of the window it's even money. A slow one -- a
+  header, a scuff -- he goes to, as before, and has it if he gets there.
+  - **What he can't hold he pushes away**: wide of his near post the better his Handling (15% of them at 1, half at
+    5.5, 90% at 10) -- off the line beside the goal and back out wide, away from the danger -- and out in front of
+    him the worse, for whoever's first to it. Either way the shot's over: it's anyone's ball, the shooter's
+    team-mates' too, and he can't claim it back for a moment (getting up, or set again). Before, a shot he got to
+    came off him anywhere at random -- or, if it came within a stride of him, he simply held it, however hard it was.
+  - **A stretch isn't always enough.** A hard shot he only gets to at a stretch -- a dive, or the end of his reach --
+    can go on in anyway, slower and pushed a little further from him: the further he's had to go and the harder it's
+    hit, the likelier, up to 60% at his fingertips to one at 800 px/s (36% at Handling 10). A long dive to a forward's
+    shot beats an average keeper about one time in eleven; one at his body, or a soft one, never.
+  - **Long shots keep their pace.** The Long Shots stat still decides how true a shot from distance flies, but it
+    takes off only half the pace it used to, so one on target from 20 m is hit hard enough to beat a keeper at full
+    stretch.
+- **Following a shot in.** When a team-mate shoots, the computer's forwards and midfielders in and around the box go
+  in after it, to 5 to 8 m out on the side it's going, for whatever the keeper can't hold.
+- **What v77 did to the score** (the keeper's hands, long shots, following in, and the reads below; 84 club pairings,
+  every man on the computer, 6-minute matches, against the same 84 on v76): goals 1.99 a match → 2.31, goalless draws
+  18% → 14%, five goals or more 5% → 12%. Shots from 20-25 m go in 13% of the time (2% before), from further out 3%
+  (none in 137 before). Like any 84 matches it's give or take about 0.3 a match.
+  - **His positioning is as it was**: he still comes for a ball near him, a shot included, and for a slow one in his
+    box; only what happens when he gets to it is new. Sending every shot to a keeper on his line, diving, made him
+    better at close range than he'd ever been (headers from 8-12 m went in 27% of the time, not 49%, and the score fell
+    to 1.77 a match), so he doesn't.
+  - **The computer's chance table is as it was.** Measured again with the new keeper (the same 32 shots a spot, struck
+    the computer's way with nobody else about), it came out a little higher from wide of the posts 18-23 m out -- and
+    put in, the computer shot from there three times a match instead of under twice, where in a match those go in
+    one time in fifty, and scored 1.43 a match. So long shots are more dangerous when it takes them, not more often.
+- **No corners, no goal kicks.** Wide of a post or over the bar the ball still comes back off the line (see the net,
+  above). Should one ever get past it, it's a goal kick for the side whose goal it is -- in either half: the old rule
+  had the ends the wrong way round after half-time.
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
@@ -756,6 +793,8 @@ The same game played like any other football game. It's a copy of `index.html` w
 
   Agility went from Physical to Pace (it's how he turns on the run), Heading from Defending to Physical (it's a duel
   at both ends) and Curve from Shooting to Technique (it bends his crosses and passes as well as his shots).
+  A keeper's six: DIV Diving, REF Reflexes, REA Reach, SPD Speed, KIC Kicking (distribution, ball control,
+  composure) and HAN Handling (v77; composure and ball control were a CMP of their own).
 - **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
   yours when you've passed to him and left the stick alone.
   - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
@@ -1060,7 +1099,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       can get for each. Each develops one field: **fitness** (speed, acceleration, agility, stamina, strength),
       **technical** (ball control, dribbling, passing, crossing, curve), **finishing** (shot accuracy and power, long
       shots, heading, Off IQ, composure), **defending** (tackling, sliding, interceptions, Def IQ) and
-      **goalkeeping** (reflexes, reach, diving, distribution, a keeper's speed). The Training building's **Staff**
+      **goalkeeping** (reflexes, reach, diving, handling, distribution, a keeper's speed). The Training building's **Staff**
       tab has a line for each post (vacant till filled) and two men to hire for each, new ones every four weeks.
     - **The academy's youth coach** is the academy's, never the first team's: its **Coach** tab, a post of his own,
       two men to hire every four weeks. He's good and poor at whole fields of his lads' game (fitness, technical,
@@ -1159,7 +1198,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       league's regulars are known after you've played them twice. A man who's played for you, you know as well as a
       second report when he goes. Each report loses a level when the season ends. The market's lists say SCOUTED (★
       for a second report, ★★ for a third); the Scouting building's Reports tab has every man you've scouted.
-  - **Players develop every third week**, not once a year. A man's 25 attributes are his own (saved with him, a
+  - **Players develop every third week**, not once a year. A man's 26 attributes are his own (saved with him, a
     letter a half point), and his rating is what they rate. Every third week each attribute moves along a hidden
     meter; when it fills he goes up half a point, when it empties he drops half a point. What you see is what plays.
     - **What fills it**: the room under the attribute's ceiling (his potential, shaped round his own strengths: he
@@ -1547,7 +1586,7 @@ swipes.
 | KEEPER | `B` | On or off |
 | NEXT · TIME | `Q` · `Z` | A new ball after each shot or only on cue · 1×, ½×, ¼× |
 | ▶ NEW BALL | `R` | Reset now |
-| ⚙ TUNE | `T` | Shot power, accuracy, curve and long shots; the swipe's curl, the flick for full power and the bend for full spin; the keeper's reflexes, reach and diving |
+| ⚙ TUNE | `T` | Shot power, accuracy, curve and long shots; the swipe's curl, the flick for full power and the bend for full spin; the keeper's reflexes, reach, diving and handling |
 
 In both labs your player uses the dials (not their own stats), so what you tune is what you
 test, and like the Trap Lab the values are the game's settings.
@@ -1676,7 +1715,7 @@ test, and like the Trap Lab the values are the game's settings.
   shape, the forwards always (they save their legs for the next attack). One man presses the ball, and keeps
   him until a teammate is clearly better placed. He goes for where the man on the ball will be by the time
   he gets there, not where he is: on along his run, as far as it would take him to get there flat out (up to
-  a second and a half), as far as his Def IQ reads it -- all of it at 10, so a man running across him or
+  a second and a half), as far as his Def IQ reads it -- 95% of it at 10, so a man running across him or
   past him finds him in the space in front of him, goal-side; none of it at 1, where he goes for where the
   man was (he sees him a beat late) and is left behind. The same goes for him going in for the ball, the man
   stepping across to screen, one getting back after he's been beaten and one dropping in front of a man
@@ -1689,6 +1728,9 @@ test, and like the Trap Lab the values are the game's settings.
   before their receiver goes to cut it out; otherwise the nearest closes the receiver down as the ball
   travels, to be on him for his first touch. The block reads the ball a beat late (about a third of a
   second), and a run a beat late too, so quick passing and well-timed runs can still open it up.
+  - **A tired man reads it worse** (v77). The read falls off twice as fast as his legs: a man a tenth off his top
+    speed (stamina low, or worn down over the match) reads a fifth less of the run, never less than 40% of what he
+    would fresh. A runner off the ball he reads 90% of the way at Def IQ 10, the man on it 95% (it was all of both).
   - **What reading the run did** (80 club pairings, each played before and after, every man on the computer,
     6-minute matches): goals 3.09 a match → 1.85, shots 8.7 → 5.3, goalless draws 13% → 18%, pairing by
     pairing -1.24 goals a match (95%: -1.65 to -0.82): a man running with it no longer gets past a defender

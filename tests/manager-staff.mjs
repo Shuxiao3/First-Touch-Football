@@ -42,8 +42,8 @@ r = await K(`(()=>{ const d=CAREER.data; d.lv.academy=0; d.cand=null; const L1=s
   return { fields, every, heading:areaOf('heading'), offIQ:areaOf('offIQ'), defIQ:areaOf('defIQ'), n1:L1.length, per:STAFF_ORDER.map(k=>L1.filter(c=>c.k===k).length).join(','), youth1:L1.filter(c=>c.k==='youth').length,
     n2:L2.length, youth2:L2.filter(c=>c.k==='youth').length, ny:Y.length, yk:Y.every(c=>c.k==='youth'), same, fresh, halves, pay, w:[staffWage(1),staffWage(5),staffWage(10)] }; })()`);
 info('the fields and the men to hire: ' + JSON.stringify(r));
-ok(r.fields === 'fit:5 tec:5 fin:6 def:4 gk:5' && r.every && r.heading === 'fin' && r.offIQ === 'fin' && r.defIQ === 'def',
-  'five coaches, every attribute in one field: fitness 5, technical 5, finishing 6 (heading, Off IQ and composure with the shooting), defending 4 (Def IQ, interceptions), goalkeeping 5');
+ok(r.fields === 'fit:5 tec:5 fin:6 def:4 gk:6' && r.every && r.heading === 'fin' && r.offIQ === 'fin' && r.defIQ === 'def',
+  'five coaches, every attribute in one field: fitness 5, technical 5, finishing 6 (heading, Off IQ and composure with the shooting), defending 4 (Def IQ, interceptions), goalkeeping 6 (Handling too)');
 ok(r.n1 === 10 && r.per === '2,2,2,2,2' && r.youth1 === 0 && r.n2 === 10 && r.youth2 === 0 && r.ny === 2 && r.yk && r.same && r.fresh, 'two men to hire for each post, no youth coach among them (the academy has its own two); the same men for four weeks, then new ones');
 ok(r.halves && r.pay && r.w[0] < r.w[1] && r.w[1] < r.w[2], 'rated 1 to 10 in halves, the better the dearer (' + r.w.join(', ') + ' a week for a 1, a 5, a 10)');
 

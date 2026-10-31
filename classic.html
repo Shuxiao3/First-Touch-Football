@@ -1733,9 +1733,10 @@
     headClear:{val:470,min:200,max:800,step:10,label:'Heading: clearance dist',hint:'How far a DEFENSIVE header is booted clear toward a teammate. Still a separate dial — give endpoints to fold it into the Heading stat.'},
     keeperSpd: {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper speed (stat 1–10)',hint:'Keeper movement as a 1–10 stat. 1 = 80, 10 = 140. How fast they shuffle on the line and come out.'},
     gkReach:   {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reach (stat 1–10)',hint:'Save radius — how far the keeper grabs or parries a shot WITHOUT diving, as a 1–10 stat. 1 = 14, 10 = 24.'},
-    gkReflex:  {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reflexes (stat 1–10)',hint:'How fast the keeper reacts when a shot is struck — a shorter delay before it can move or dive. 1 = 0.00 (sluggish), 10 = 0.60 (sharp). If it gets any touch, it saves automatically.'},
+    gkReflex:  {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reflexes (stat 1–10)',hint:'How fast the keeper reacts when a shot is struck — a shorter delay before it can move or dive. 1 = 0.00 (sluggish), 10 = 0.60 (sharp). '},
     gkDistribution:{val:5.5, min:1, max:10, step:0.1, label:'Keeper distribution (stat 1–10)',hint:'Keeper throwing & kicking as a 1–10 stat. Higher = more pace, sharper accuracy, flatter short balls and bigger lofted long balls. 1 = 0.9 power / 0.5 accuracy; 10 = 1.4 power / 0.9 accuracy.'},
     gkDiveRange:{val:5.5, min:1,   max:10,  step:0.1, label:'Keeper diving (stat 1–10)',hint:'How explosively far the keeper springs when diving, as a 1–10 stat. 1 = 30, 10 = 100. High = flings right across the goal to tip corners wide.'},
+    gkHandling:{val:5.5, min:1,   max:10,  step:0.1, label:'Keeper handling (stat 1–10)',hint:'How well the keeper holds on to what he gets to, as a 1–10 stat. He holds a shot only if it is slow enough as it gets to him and close enough to his body: 1 = up to 430 px/s right at him, 10 = up to 760 and further out (a dive is a stretch). One he can’t hold he pushes away: wide of his post the better his handling, out in front of him the worse.'},
     strengthG: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — your team (1–10)',hint:'Your team strength stat (baseline). 1 = 0.1 (weak, easily shoved); 10 = 1.0 (dominant). Compare against the opponent.'},
     strengthR: {val:5.5, min:1,   max:10,  step:0.1,label:'Strength — opponent (1–10)',hint:'Opponent strength stat, for comparison. 1 = 0.1, 10 = 1.0. Higher = they win more duels against you.'},
     dribbling: {val:5.5, min:1,   max:10,  step:0.1,label:'Dribbling (stat 1–10)',hint:'Close control on the ball. 1 = lose 40% speed / 40% accel / 60% agility while carrying; 10 = lose only 10% / 10% / 20%. Baseline for all players.'},
@@ -2077,14 +2078,14 @@
     standtackle:['tackle','dribbling'],
     intercept:['interceptions','pressTight'],
     passing:  ['passLoft','passPace','passAcc'],
-    shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','keeperSpd'],
-    keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach'],
+    shooting: ['shotPower','shotAcc','longShots','curve','gkReach','gkReflex','gkDiveRange','gkHandling','keeperSpd'],
+    keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach','gkHandling'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
-    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange'],
+    shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange','gkHandling'],
     crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
   };
   // pin the IQ dials to the top of the settings panel
@@ -2209,17 +2210,17 @@
   const SQUAD_V=1;
   let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false;
   const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
-  const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution'];
+  const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const ALL_STAT_KEYS=[...OUT_KEYS,...GK_KEYS];
-  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Passing',composure:'Composure',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution'};
+  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Passing',composure:'Composure',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution',gkHandling:'GK handling'};
   const ARCH={
-    GK:{keeperSpd:6.5,gkReflex:7,gkReach:7,gkDiveRange:7,gkDistribution:6.5,speed:5,acceleration:5,agility:5.5,stamina:6,strength:6,ballControl:5,dribbling:3.5,passAcc:5.5,composure:6.5,crossing:3,heading:5,slideTackle:3,tackle:4,interceptions:5,offIQ:5,defIQ:5.5,shotPower:4,curve:3,longShots:3,shotAcc:3},
-    DEF:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,speed:6,acceleration:6,agility:5.5,stamina:6.5,strength:7,ballControl:5.5,dribbling:4.5,passAcc:6,composure:6,crossing:4.5,heading:7,slideTackle:7,tackle:7.5,interceptions:7.5,offIQ:5,defIQ:7.5,shotPower:4.5,curve:4,longShots:4,shotAcc:4.5},
-    MID:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,speed:6,acceleration:6,agility:6.5,stamina:7.5,strength:5.5,ballControl:7,dribbling:6.5,passAcc:7.5,composure:6.5,crossing:6,heading:5,slideTackle:5,tackle:5.5,interceptions:6,offIQ:7,defIQ:6,shotPower:6,curve:6,longShots:6,shotAcc:6},
-    ATT:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,speed:7.5,acceleration:7.5,agility:7.5,stamina:6,strength:5.5,ballControl:7,dribbling:7.5,passAcc:6,composure:7,crossing:6,heading:6.5,slideTackle:3,tackle:3.5,interceptions:4,offIQ:7,defIQ:4.5,shotPower:7,curve:6,longShots:6.5,shotAcc:7.5}
+    GK:{keeperSpd:6.5,gkReflex:7,gkReach:7,gkDiveRange:7,gkDistribution:6.5,gkHandling:7,speed:5,acceleration:5,agility:5.5,stamina:6,strength:6,ballControl:5,dribbling:3.5,passAcc:5.5,composure:6.5,crossing:3,heading:5,slideTackle:3,tackle:4,interceptions:5,offIQ:5,defIQ:5.5,shotPower:4,curve:3,longShots:3,shotAcc:3},
+    DEF:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:5.5,stamina:6.5,strength:7,ballControl:5.5,dribbling:4.5,passAcc:6,composure:6,crossing:4.5,heading:7,slideTackle:7,tackle:7.5,interceptions:7.5,offIQ:5,defIQ:7.5,shotPower:4.5,curve:4,longShots:4,shotAcc:4.5},
+    MID:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:6.5,stamina:7.5,strength:5.5,ballControl:7,dribbling:6.5,passAcc:7.5,composure:6.5,crossing:6,heading:5,slideTackle:5,tackle:5.5,interceptions:6,offIQ:7,defIQ:6,shotPower:6,curve:6,longShots:6,shotAcc:6},
+    ATT:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:7.5,acceleration:7.5,agility:7.5,stamina:6,strength:5.5,ballControl:7,dribbling:7.5,passAcc:6,composure:7,crossing:6,heading:6.5,slideTackle:3,tackle:3.5,interceptions:4,offIQ:7,defIQ:4.5,shotPower:7,curve:6,longShots:6.5,shotAcc:7.5}
   };
   const OVR_W={
-    GK:{gkReflex:3,gkReach:3,gkDiveRange:2,keeperSpd:1,gkDistribution:2},
+    GK:{gkReflex:3,gkReach:3,gkDiveRange:2,gkHandling:2,keeperSpd:1,gkDistribution:2},
     DEF:{defIQ:3,tackle:3,interceptions:3,slideTackle:2,strength:2,heading:2,speed:2,composure:1,passAcc:1,stamina:1,agility:1,acceleration:1},
     MID:{passAcc:3,offIQ:3,stamina:2,ballControl:2,dribbling:2,agility:2,composure:2,defIQ:1,interceptions:1,shotAcc:1,speed:1,longShots:1},
     ATT:{shotAcc:3,dribbling:3,shotPower:2,speed:2,acceleration:2,agility:2,composure:2,offIQ:2,ballControl:2,longShots:1,heading:1}
@@ -2445,9 +2446,13 @@
   // as much on pace). R: a 0..1 random source; shift: added to everything (a club's strength).
   function genStyledStats(role,style,R,shift){
     const st={}, d=(STYLES[style]&&STYLES[style].d)||{};
-    for(const k of ALL_STAT_KEYS){ const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
+    for(const k of ALL_STAT_KEYS){ if(k==='gkHandling') continue; const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
       const m=ARCH[role][k]+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);
       st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*sp)*2)/2)); }
+    // (Handling came later than the rest: its spread from a hash of his other stats, not from R -- so every club's men
+    // keep the stats they had)
+    const hj=hashStr(ALL_STAT_KEYS.map(k=>st[k]).join(','))/4294967296;
+    st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+(hj*2-1)*1.5)*2)/2));
     return st;
   }
   // the styles a lineup slot calls for (index into SQUAD_ROLES; the default 2-3-2 puts squad men 3 and 5 out
@@ -2473,6 +2478,11 @@
   }
   const NAMES=['Vega','Brandt','Okafor','Sato','Lindqvist','Moreau','Adeyemi','Ferraro','Novak','Costa','Haines','Reuben','Mbeki','Ericsson','Volkov','Ishida','Caro','Pulis','Soto','Friel','Tanaka','Olsen','Bauer','Naranjo','Esposito','Hale','Drummond','Cisse','Holt','Marek','Dietz','Quill'];
   const PERS3=['passive','default','aggressive'];
+  // HANDLING FOR A MAN MADE BEFORE IT (a side kept, a career's man): the rest of his keeping as it weighs in his rating, so
+  // the rating doesn't move
+  function gkHandlingFor(st){ const w=OVR_W.GK; let s=0,t=0; for(const k in w) if(k!=='gkHandling'){ s+=(+st[k]||5.5)*w[k]; t+=w[k]; }
+    return clamp(Math.round(s/t*2)/2,1,10); }
+  function gkHandlingFill(st){ if(st&&st.gkHandling==null) st.gkHandling=gkHandlingFor(st); return st; }
   function overallOf(entry){ const w=OVR_W[entry.role]||OVR_W.MID; let sum=0,wt=0; for(const k in w){ sum+=(entry.stats[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(sum/wt*10))); }
   const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
   // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in
@@ -2594,6 +2604,7 @@
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
+      for(const e of o.squad) if(e&&e.stats) gkHandlingFill(e.stats);                                                            // (and before Handling)
       const f=formOKAtk(o.form,'2-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, pi:piClean(o.pi),
         style:STYLE_TAC[o.style]?o.style:null, width:o.width||null};
     }
@@ -2784,7 +2795,7 @@
   function normalizeSquads(){
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
       topUpSquad(SQUAD[t]);
-      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ;
+      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; gkHandlingFill(e.stats);
         if(!e.style && !e.me && e.role!=='GK' && ARCH[e.role]) e.style=inferStyle(e.role,e.subRole,e.stats); for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
       const li=LINEUP[t];
       if(li){ if(li.out&&!li.atk){ li.atk=li.out.slice(); li.def=li.out.slice(); delete li.out; }
@@ -4283,7 +4294,7 @@
     ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
     passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
-    gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',
+    gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',gkHandling:'Keeper handling',
     skCutPop:'Knock-on · push',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
     skSpinDist:'Spin · distance',skCroqDist:'Croqueta · distance',skSpinT:'Spin · time',skCroqT:'Croqueta · time',skCutT:'Knock-on · time',
     dribbling:'Your dribbling',agility:'Agility (his and yours)',tackle:'His tackling'};
@@ -4321,7 +4332,8 @@
     swipeBow:'How far a swipe has to bow for full spin. A quarter of this reads as straight.',
     gkReflex:'Their keeper\'s reflexes (1 to 10): how soon they react to the strike.',
     gkReach:'Their keeper\'s reach (1 to 10): how far they get to a shot without diving.',
-    gkDiveRange:'Their keeper\'s diving (1 to 10): how far they fling themselves.'};
+    gkDiveRange:'Their keeper\'s diving (1 to 10): how far they fling themselves.',
+    gkHandling:'Their keeper\'s handling (1 to 10): how hard a shot they hold, and where one they can\'t goes.'};
   function labDialTxt(k){
     const v=P[k].val;
     if(k==='skCutPop') return '+'+v+' px/s';
@@ -4343,7 +4355,7 @@
     if(k==='lobCheck') return Math.round(v*100)+'%';
     if(k==='swipePow') return v.toFixed(1)+' /s';
     if(k==='swipeBow') return Math.round(v*100)+'% of its length';
-    if(['passAcc','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange'].includes(k)) return v.toFixed(1);
+    if(['passAcc','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange','gkHandling'].includes(k)) return v.toFixed(1);
     if(k==='gatherR') return v+' (reach '+Math.round(controlROf({stats:{}}))+')';
     if(k==='ftPush') return v+' (≈'+(v/controlROf({stats:{}})).toFixed(1)+' rings)';
     if(k==='ftErr') return v+'°';
@@ -4645,7 +4657,7 @@
   function shootLabSetup(){
     // you shoot off the shot dials, their keeper saves off the keeper dials
     controlled.stats=Object.assign({},controlled.stats,{shotPower:undefined,shotAcc:undefined,curve:undefined,longShots:undefined,composure:undefined});
-    const kp=slKeeper(); if(kp) kp.stats=Object.assign({},kp.stats,{gkReflex:undefined,gkReach:undefined,gkDiveRange:undefined});
+    const kp=slKeeper(); if(kp) kp.stats=Object.assign({},kp.stats,{gkReflex:undefined,gkReach:undefined,gkDiveRange:undefined,gkHandling:undefined});
     let n=0; for(const q of players){ if(q===controlled) continue; q.x=q.team==='G'?60:260; q.y=60+(n++)*36; }   // everyone well out of it
     shootLabServe();
   }
@@ -5638,6 +5650,9 @@
   // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/134, 10 => 166/228)
   function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
   function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),134, 228); }
+  // HIS LEGS: what tiredness leaves of his top speed -- his stamina now, and the ceiling the match has worn it down to
+  // (see stepOutfield): 1 fresh, about 0.9 a tired man, 0.64 at the very worst
+  function legsOf(p){ return (0.78+0.22*clamp(p.stamina??1,0,1))*(0.74+0.26*(p.staminaCap??1)); }
   // ACCELERATION stat -> the accel coefficient (endpoints: 1 => 0.05, 10 => 0.5)
   function accelStatOf(p){   return statLerp(statOf(p,'acceleration', P.accel.val),0.05,0.5); }
   // AGILITY stat -> the agility coefficient (endpoints: 1 => 0.2, 10 => 0.5)
@@ -6751,7 +6766,8 @@
   // drift. Quality of aiming at a corner = can the keeper physically reach it before the ball (reaction gap +
   // footwork at keeper speed + dive range + grab radius, vs his distance to that corner) AND is the lane to it
   // unblocked by a defender. No finishing/keeping roll: the keeper saves whatever it can reach. Returns the full
-  // breakdown for BOTH corners plus which one the AI would pick (top on no-keeper / tie).
+  // breakdown for BOTH corners plus which one the AI would pick (top on no-keeper / tie). (What he does with one he gets
+  // to -- holds it, pushes it away, or is beaten at full stretch -- is his Handling: keeperSave.)
   function evalShotCorners(p, atkSide, charge, ox, oy){
     const gx = atkSide>0 ? FW : 0;
     const corner = GOAL_W/2 - 10;
@@ -6786,7 +6802,7 @@
     // un-aimed / AI shots: score the shot to EACH corner and aim at the higher-quality one.
     // Corner quality = can the keeper physically get there before the ball (reaction gap + footwork
     // at keeper speed + dive range + grab radius, vs his distance to that corner), AND is the lane to
-    // it unblocked by a defender. There is no finishing/keeping roll — the keeper saves whatever it reaches.
+    // it unblocked by a defender. (Reaching it isn't always saving it: see keeperSave.)
     if(!(manual&&aimed)){
       const ev=evalShotCorners(p, atkSide, charge);   // per-corner quality model (shared with the DBG overlay)
       ty = ev[ev.pick].ty;                            // aim the higher-quality corner (top on no keeper / tie)
@@ -6823,11 +6839,12 @@
     const dGoalAbs2 = Math.hypot(gx-ball.x, YC-ball.y);      // true distance to goal centre (wide shots travel further)
     const longRange = clamp((dGoalAbs2-330)/370, 0, 1);      // 0 at the box edge, full penalty by 700 out
     const longPen   = longRange*(1-longShotsOf(p));            // 0 = no penalty .. up to ~0.9 at range with a low stat
-    // a low dial from distance both sprays the ball wide (even for accurate shooters) and saps real pace
+    // a low dial from distance both sprays the ball wide (even for accurate shooters) and saps a little pace (LONG_PACE: a
+    // long shot's struck hard enough to beat a keeper at full stretch -- see keeperSave -- if it's on target)
     const dev=((1-effAcc)*(0.05+0.13*charge)*(1+longPen*1.5) + longPen*0.14)*(Math.random()*2-1);
     const ca=Math.cos(dev),sa=Math.sin(dev);
     let ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const speed=shotPowerOf(p)*(0.68+0.32*charge)*(1-longPen*0.60)*(1-0.45*Math.min(1,xb));
+    const speed=shotPowerOf(p)*(0.68+0.32*charge)*(1-longPen*LONG_PACE)*(1-0.45*Math.min(1,xb));
     // SWIPE CURL (touch): the swipe's bow sets the spin (-1..1, sign = which way it bends; Curve stat sets how
     // hard). Struck out to the side the swipe bowed by exactly what the curl will swing back, so it bends
     // round onto the spot the swipe pointed at instead of curling off it.
@@ -6855,6 +6872,7 @@
     recordPassTeam(p.team,p);
     if(LAB.on&&manual) labOnShot({ty,charge,aimed,spin,swipe:spin!==undefined,first:accMul!==undefined});
   }
+  const LONG_PACE=0.3;
   const SWIPE_SPIN_T=1.1;               // how long a swiped shot keeps bending (s) -- as long as a held K+Up/Down can
   // Which way (radians, signed) a curling ball's line has swung by the time it has run `range`: fly it
   // as the physics step does (gravity and bounces, drag only near the grass -- a live shot's light drag
@@ -7343,17 +7361,11 @@
       doRestart('kickin',team,clamp(ball.x,30,FW-30),ball.y<0?16:FH-16);
       return;
     }
-    // end lines (outside the goal mouth or over the bar)
-    if(ball.x<-6){
-      // left end = green's defended end
-      if(last==='G')doRestart('corner','R',16,ball.y<YC?16:FH-16);
-      else doRestart('goalkick','G',60,YC);
-      return;
-    }
-    if(ball.x>FW+6){
-      if(last==='R')doRestart('corner','G',FW-16,ball.y<YC?16:FH-16);
-      else doRestart('goalkick','R',FW-60,YC);
-    }
+    // end lines: wide of a post or over the bar the ball comes back off the line (the goal check in the physics step), so
+    // it never gets here -- should it, a goal kick for the side whose goal it is (the one attacking the other way: they
+    // change ends at half-time). There are no corners.
+    if(ball.x<-6||ball.x>FW+6){ const left=ball.x<0, t=(atkOf('G')>0)===left?'G':'R';
+      doRestart('goalkick',t,left?60:FW-60,YC); }
   }
 
   // ===== AI =====
@@ -9222,6 +9234,15 @@
       }
     }
 
+    // --- FOLLOWING IT IN: a team-mate's shot on its way -> our forwards and midfielders in and around their box go in
+    // after it, to 5-8 m out on the side it's going, for whatever the keeper can't hold (see keeperSave) ---
+    if(ball.shotT>0 && ball.shotBy===p.team && !ball.ownedBy && !gkHold && p!==controlled && p!==ball.lastTouchP && p.state==='normal' &&
+       (p.role==='ATT'||p.role==='MID') && Math.abs(goalX-p.x)<BX+180 && Math.abs(p.y-YC)<BY+60){
+      const ty=clamp(Math.abs(ball.vx)>1?ball.y+ball.vy*(goalX-ball.x)/ball.vx:ball.y, YC-GOAL_W*0.45, YC+GOAL_W*0.45);   // (where it's going)
+      const fx=goalX-atk*(5+((p.num||0)%3)*1.5)*MK, fy=ty+clamp((p.y-ty)*0.5,-80,80);
+      p.dbgTag='FOLLOW-IN'; p.runTarget=null; p.sprint=p.stamina>0.1;
+      return steer(p,fx,fy,1.0);
+    }
     if(gkHold&&gkHold.team!==p.team){
       p.runTarget=null;
       if(TAC[p.team].def==='press' && p.role!=='DEF'){ const mk=pressMark(p);   // a pressing side: on the men he could roll it to
@@ -10051,7 +10072,7 @@
       for(const P2 of pairs){ if(map.has(P2.q)||used.has(P2.o)) continue; map.set(P2.q,P2.o); used.add(P2.o); }
       markCache[p.team]={t:simNow,map}; }
     const o=map.get(p); if(!o) return null;
-    const b=(gkHold&&gkHold.team!==p.team)?gkHold:ball, r=readRun(p,o,o), dx=b.x-r.x, dy=b.y-r.y, l=Math.hypot(dx,dy)||1;   // (where he's going, as my Def IQ reads it)
+    const b=(gkHold&&gkHold.team!==p.team)?gkHold:ball, r=readRun(p,o,o,true), dx=b.x-r.x, dy=b.y-r.y, l=Math.hypot(dx,dy)||1;   // (where he's going, as my Def IQ reads it)
     return {x:clamp(r.x+dx/l*42,40,FW-40), y:clamp(r.y+dy/l*42,40,FH-40)};
   }
   const blockCache={G:null,R:null};
@@ -10154,7 +10175,7 @@
       if(best){ const vu=B.atk>0?best.seenVx||0:-(best.seenVx||0);
         // where I go with him: off where his run takes him by the time I'm there, as my Def IQ reads it (see readRun) --
         // into the space he's running into at 10; off where he is at 1, left behind a man sprinting past
-        const rb=readRun(p,best,best), ru=B.U(rb.x);
+        const rb=readRun(p,best,best,true), ru=B.U(rb.x);
         track=best;
         if(step && bu>u-20){ u=ru-28; y=y+(rb.y-y)*0.85; }                                     // stepped up: tight on him
         else if(role==='DEF'){ u=Math.min(u, ru-25-clamp(-vu*0.3,0,60)); y=y+(rb.y-y)*0.75; }
@@ -10182,8 +10203,9 @@
   // READING HIS RUN (Def IQ): where a man -- on the ball, or running into space without it -- will be by the time I get
   // to him, flat out: on along his run, up to a second and a half on, so a man going at a runner takes up the space in
   // front of him rather than chasing his heels. From `base` (where I'd go for him without reading it: where he is, or a
-  // beat behind that -- see perceived) on to that point by my Def IQ: none of the way at 1, all of it at 10.
-  const RUN_READ_T=1.5;
+  // beat behind that -- see perceived) on to that point by my Def IQ: none of the way at 1, at 10 most of it -- 95% of a
+  // man's on the ball, 90% of a runner's off it (RUN_READ) -- and less the more tired I am (readLegs).
+  const RUN_READ_T=1.5, RUN_READ={ball:0.95, off:0.9};
   // HOLDING THE LINE: a man of the back line who picks up a runner off the ball while he's holding his place in it
   // holds it a beat before he turns and goes with him (blockSpot) -- a tenth of a second, about a twentieth of a run in
   // behind; one already pressing, shadowing or tracking a man goes with him at once
@@ -10195,8 +10217,11 @@
     else { const D=b*b-4*a*cc; if(D>=0){ const r1=(-b-Math.sqrt(D))/(2*a), r2=(-b+Math.sqrt(D))/(2*a), m=Math.min(r1>0?r1:1e9, r2>0?r2:1e9); if(m<1e9) t=m; } }
     return clamp(t,0,RUN_READ_T);
   }
-  function readRun(p,c,base){
-    const iq=clamp((defIQof(p)-1)/9,0,1), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;
+  // a tired head reads it worse: the read falls off twice as fast as his legs (legsOf) -- a tenth off his top speed, a
+  // fifth off his read; never under 40% of it
+  function readLegs(p){ return clamp(1-2*(1-legsOf(p)),0.4,1); }
+  function readRun(p,c,base,off){   // (off: a runner without the ball)
+    const iq=clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;
     return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
@@ -10260,7 +10285,7 @@
     // cap 0.45 (floor) -> ~0.86.
     const capFatigue = 0.74 + 0.26*p.staminaCap;
     // base top speed scales with current stamina AND the eroded ceiling
-    const fatigue = (0.78 + 0.22*p.stamina) * capFatigue;   // 1.0 fresh .. lower when tired/worn
+    const fatigue = legsOf(p);                               // 1.0 fresh .. lower when tired/worn (capFatigue in it)
     // base top speed: separate dials for non-sprint (jog/run) and sprint top speed.
     // both scale with current stamina AND the eroded ceiling.
     const sprintingNow = wantSprint && !empty;
@@ -10933,7 +10958,7 @@
   function keeperOnIt(){ for(const k of keepers) if(k.mode==='claimX'&&Math.hypot(ball.x-k.x,ball.y-k.y)<reachOf(k)+ball.r+14) return true; return false; }
   function keeperUpdate(kp,dt){
     if(kp.benched){ kp.x=kp.homeX+kp.side*90; kp.y=-80; kp.diveT=0; kp.groundT=0; return; }   // Shooting Lab, keeper off: nowhere near it
-    kp.claimCd-=dt; if(kp.punchT>0) kp.punchT-=dt;
+    kp.claimCd-=dt; if(kp.punchT>0) kp.punchT-=dt; if(kp.beatT>0) kp.beatT-=dt;
     if(kp.diveT>0){ kp.diveT-=dt; if(kp.diveT<=0 && kp.groundT<=0) kp.groundT=0.5; }   // after the dive, lie down ~0.5s
     else if(kp.groundT>0){ kp.groundT-=dt; }
     const spd=keeperSpdOf(kp);
@@ -10979,6 +11004,7 @@
       }
       if(dist(kp,ball)<kp.r+ball.r+6&&ball.z<34){
         const inBox=Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW;      // hands: anywhere in his penalty area
+        if(ball.shotT>0&&ball.shotBy!==kp.team&&inBox&&!(kp.beatT>0)){ kp.gkRoaming=false; kp.mode='line'; keeperSave(kp,ball.x-kp.x,ball.y-kp.y,Math.hypot(ball.vx,ball.vy)); return; }   // (a shot: the save, as on his line)
         if(kp.gkRoaming&&!inBox){
           // Outside the box: boot it upfield rather than hold and distribute
           ball.vx=-kp.side*720; ball.vy=(kp.y-YC)*0.3+(Math.random()-0.5)*180;
@@ -11116,13 +11142,14 @@
     if(!ball.ownedBy&&!gkHold&&kp.claimCd<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&ball.z<60){
       const ballSpd=Math.hypot(ball.vx,ball.vy);
       const inArea=Math.abs(ball.x-glX)<PA_D&&Math.abs(ball.y-YC)<PA_HW;      // a loose ball in his penalty area
-      if(inArea&&ballSpd<420){
+      if(inArea&&ballSpd<420){   // (a slow shot too -- a header, a scuff: he goes to it, and has it if he gets there: see keeperSave)
         const dK=dist(kp,ball);
         let dOpp=1e9;
         for(const q of players)if(q.team!==kp.team)dOpp=Math.min(dOpp,dist(q,ball));
         if(dK<dOpp+50)kp.mode='claim';            // gather it whenever we're roughly level with the nearest attacker
       }
-      // RIGHT NEXT TO ME: a loose ball within arm's reach -> always claim, bypassing area/pace gates.
+      // RIGHT NEXT TO ME: a loose ball within arm's reach -> always claim, bypassing area/pace gates (a shot too: when it
+      // gets to him, what he does with it is keeperSave)
       if(ball.z<34 && dist(kp,ball) < reachOf(kp)+ball.r+26) kp.mode='claim';
       // DEFENSIVE THIRD ROAM: keeper sweeps out for a free ball OUTSIDE the box when it can win the race.
       const inDefThird=kp.side<0?ball.x<FW/3:ball.x>FW*2/3;
@@ -11150,14 +11177,15 @@
       const halfBody = 18;                                    // also commit for a ball ~half a body off the post
       const onTargetish = incoming && tX>0 && tX<0.9 && Math.abs(yAt-YC) < GOAL_W/2 + halfBody;
 
-      // DIVE when stepping can't reach in time but a dive might. No save roll: if the dive physically
-      // reaches the ball it saves, otherwise the ball beats it. Can't be launched during the reaction gap.
+      // DIVE when stepping can't reach in time but a dive might: if it gets him to the ball he gets a hand to it, and what
+      // comes of that is the save (keeperSave). Can't be launched during the reaction gap.
       if(onTargetish && !frozen && kp.diveT<=0 && ballSpd>240){
         const need    = Math.abs(yAt - kp.y);
         const canStep = spd*Math.max(tX,0);                   // ground it can cover by stepping in time
         if(need > canStep + reach){                            // can't get there by stepping -> dive
           kp.diveDir = (yAt>=kp.y?1:-1);
           kp.diveY   = clamp(yAt, YC-GOAL_W/2-40, YC+GOAL_W/2+40);   // fling toward where the ball will cross
+          kp.diveY0  = kp.y;                                   // (from where: how far he's flung himself -- saveStretch)
           kp.diveT   = Math.max(tX+0.06, 0.18);               // runs until ~the ball arrives
         }
       }
@@ -11167,30 +11195,73 @@
         kp.y+=clamp(kp.diveY-kp.y,-diveSpd*dt,diveSpd*dt);
       }
 
-      // ---- SAVE: automatic whenever the body can physically touch the ball (the dive just gets it there) ----
+      // ---- THE SAVE: whenever his body can get to the ball (the dive gets him there) -- see keeperSave ----
       const dx=ball.x-kp.x,dy=ball.y-kp.y;
       const canSave = Math.hypot(dx,dy) < reach+ball.r;
-      if(canSave && incoming){
-        const r=Math.random();
-        let outAway, sideKick, popUp;
-        if(r<0.34){ outAway=0.55+Math.random()*0.35; sideKick=(Math.random()*2-1)*260; popUp=60+Math.random()*90; }
-        else if(r<0.67){ outAway=0.25+Math.random()*0.30; const dir=(dy>=0?1:-1)*(Math.random()<0.7?1:-1); sideKick=dir*(300+Math.random()*340); popUp=70+Math.random()*120; }
-        else { outAway=0.15+Math.random()*0.25; sideKick=(Math.random()*2-1)*420; popUp=40+Math.random()*70; }
-        ball.vx=-Math.sign(ball.vx)*Math.abs(ball.vx)*outAway*(0.8+Math.random()*0.4);
-        ball.vy=dy*3 + sideKick + (Math.random()*2-1)*120;
-        ball.vz=Math.max(ball.vz*0.4, popUp);
-        ball.x=kp.x-kp.side*(reach+ball.r+3);
-        ball.cushBy=null;offsidePass=null;
-        ball.lastTouch=kp.team;
-        endCurve();                       // parried -> curve stops
-        if(ball.shotT>0){ mStat(ball.lastTouchP,'son'); mStat(kp,'sav'); }
-        if(ball.shotT>0 && meIs(ball.lastTouchP)) meBump('shotsOn');
-        lastGrade = (kp.diveT>0)?'DIVING SAVE!':'SAVED!'; gradeColor='#ffb43c'; gradeFade=1.4;
-        if(LAB.on) labOnSave(kp.diveT>0?'diving save':'parried');
-        if(practice==='keeper') kdSaves++;
-        if(kp.diveT>0){ kp.diveT=0; kp.groundT=0.5; }   // saved from the dive -> go to ground ~0.5s
-      }
+      const across = ball.shotT>0 && ball.shotBy!==kp.team && ballSpd>120 && ball.z<GOAL_H*0.9;   // (a shot from by the byline comes across him more than at him)
+      if(canSave && (incoming||across) && !(kp.beatT>0)) keeperSave(kp,dx,dy,ballSpd);
     }
+  }
+  // THE SAVE. His body's got to the ball (the dive got him there): does he hold it, push it away -- or, a hard one at full
+  // stretch, not stop it at all? His Handling, and the shot:
+  //  - HOLD: only a shot slow enough and close enough to his body -- how slow and how close is his Handling (GK_HOLD_V,
+  //    its pace as it gets to him: up to 430 px/s at 1, 760 at 10 -- a struck shot flies, and gets to him nearly as hard
+  //    as it was hit, 650-800 from a forward; GK_HOLD_S: a third of the way out to his fingertips at 1, more than two
+  //    thirds at 10). A dive is a stretch (GK_DIVE_S of the way out at least, or the share of his dive he's used), and a curling shot
+  //    is harder to hold. At the edge of either it's even money.
+  //  - PUSH IT AWAY, one he can't hold: wide of his near post (GK_WIDE: 15% of them at Handling 1, 90% at 10) -- off the
+  //    line beside the goal and back out wide, away from the danger -- else out in front of him, for whoever's first to
+  //    it. The shot's over: it's anyone's ball, and he can't claim it back for a moment (getting up, or set again).
+  //  - NOT ENOUGH: a hard shot he only gets to at a stretch -- a dive, or the end of his reach -- can go on in anyway,
+  //    slower, a little further from him (GK_BEAT: the further he's had to go and the harder it's hit, the likelier: none
+  //    at GK_DIVE_S, up to 60% at his fingertips to one at 800 px/s; less the better his Handling).
+  const GK_HOLD_V=[430,760], GK_HOLD_S=[0.35,0.7], GK_DIVE_S=0.6, GK_WIDE=[0.15,0.9], GK_BEAT={s0:0.6,v0:450,v1:800,p:0.6};
+  function handlingOf(kp){ return clamp((statOf(kp,'gkHandling',P.gkHandling.val)-1)/9,0,1); }
+  // how far out he is to it: 0 right at him, 1 at his fingertips -- how far from him its line passes (across it, not
+  // along it: one coming straight at him touches his reach first in front of him)
+  function saveStretch(kp,dx,dy){ const R=reachOf(kp)+ball.r, sp=Math.hypot(ball.vx,ball.vy), off=sp>1?Math.abs(dx*ball.vy-dy*ball.vx)/sp:Math.hypot(dx,dy);
+    let s=clamp(off/R,0,1);
+    if(kp.diveT>0) s=Math.max(s,GK_DIVE_S,clamp(Math.abs(kp.y-(kp.diveY0??kp.y))/(divingOf(kp)+R),0,1));
+    return s; }
+  // the chance he holds it, and the chance a hard one at his fingertips beats him (h: his Handling, 0 to 1)
+  function holdOdds(h,v,S,curl){ const vMax=(GK_HOLD_V[0]+(GK_HOLD_V[1]-GK_HOLD_V[0])*h)*(curl?0.85:1), sMax=GK_HOLD_S[0]+(GK_HOLD_S[1]-GK_HOLD_S[0])*h-(curl?0.05:0);
+    return clamp(0.5+Math.min((vMax-v)/90,(sMax-S)/0.12),0,1); }
+  function beatOdds(h,v,S){ return GK_BEAT.p*clamp((S-GK_BEAT.s0)/(1-GK_BEAT.s0),0,1)*clamp((v-GK_BEAT.v0)/(GK_BEAT.v1-GK_BEAT.v0),0,1)*(1-0.4*h); }
+  function keeperSave(kp,dx,dy,v){
+    const h=handlingOf(kp), S=saveStretch(kp,dx,dy), shot=ball.shotT>0, by=ball.lastTouchP, dived=kp.diveT>0;
+    const saved=()=>{ if(shot){ mStat(by,'son'); mStat(kp,'sav'); if(meIs(by)) meBump('shotsOn'); } if(practice==='keeper') kdSaves++; };
+    endCurve(); offsidePass=null; ball.cushBy=null;
+    if(Math.random()<holdOdds(h,v,S,ball.curveSpinT>0)){                      // HELD
+      saved(); kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
+      ball.vx=ball.vy=ball.vz=0; ball.lastTouch=kp.team; ball.shotT=0; ball.shotBy=null; ball.crossT=0; ball.crossBy=null;
+      if(dived){ kp.diveT=0; kp.groundT=0.5; }
+      lastGrade='CAUGHT!'; gradeColor='#ffb43c'; gradeFade=1.3;
+      if(LAB.on) labOnSave('caught');
+      return 'hold'; }
+    const sg=Math.sign(dy)||Math.sign(ball.y-YC)||(Math.random()<0.5?-1:1), R=reachOf(kp)+ball.r;   // (the side of him it's on)
+    if(Math.random()<beatOdds(h,v,S)){                                          // NOT ENOUGH: on it goes
+      const k=0.7+0.2*Math.random(), sp=Math.hypot(ball.vx,ball.vy);
+      ball.vx*=k; ball.vy=ball.vy*k+sg*sp*k*(0.03+0.07*Math.random());
+      kp.beatT=0.3; kp.claimCd=Math.max(kp.claimCd,0.5); if(dived){ kp.diveT=0; kp.groundT=0.6; }
+      lastGrade='FINGERTIPS…'; gradeColor='#ffb43c'; gradeFade=0.9;
+      return 'beaten'; }
+    saved();                                                                   // PUSHED AWAY
+    const wide=Math.random()<GK_WIDE[0]+(GK_WIDE[1]-GK_WIDE[0])*h, glX=kp.side<0?0:FW;
+    if(wide){   // round his near post: across to the line outside it (never inside it), and back off it out wide
+      ball.x=kp.x; ball.y=kp.y+sg*(R+3);
+      const ty=YC+sg*(GOAL_W/2+30+60*Math.random()), ux=glX-ball.x, uy=ty-ball.y, l=Math.hypot(ux,uy)||1, sp=v*(0.35+0.25*Math.random());
+      ball.vx=ux/l*sp; ball.vy=uy/l*sp; ball.vz=60+80*Math.random();
+    } else {    // out in front of him, leaning the side it hit him
+      ball.x=kp.x-kp.side*(R+3);
+      const a=(Math.random()*2-1)*0.9+sg*0.25, sp=v*(0.2+0.25*Math.random());
+      ball.vx=-kp.side*Math.cos(a)*sp; ball.vy=Math.sin(a)*sp; ball.vz=40+90*Math.random();
+    }
+    ball.lastTouch=kp.team;   // (the shooter's still the last man to it: one that goes in off him is his goal, not an own goal)
+    ball.shotT=0; ball.shotBy=null; ball.crossT=0; ball.crossBy=null;   // (the shot's over: a loose ball, anyone's)
+    kp.claimCd=Math.max(kp.claimCd,dived?0.4:0.6); if(dived){ kp.diveT=0; kp.groundT=0.5; }   // (down, or set again: a moment)
+    lastGrade=dived?'DIVING SAVE!':wide?'PUSHED WIDE!':'PARRIED!'; gradeColor='#ffb43c'; gradeFade=1.4;
+    if(LAB.on) labOnSave((dived?'diving, ':'')+(wide?'pushed wide':'parried'));
+    return wide?'wide':'front';
   }
 
   const GK_POWER=520;   // keeper distribution pace, independent of outfield kick power
@@ -13840,7 +13911,7 @@
     if(MG_STATS.size>5000) MG_STATS.clear();
     s=devUnpack(p.at); MG_STATS.set(p.at,s); return s; }
   // ===== PLAYER DEVELOPMENT ======================================================================================
-  // A man's 25 attributes are his own (p.at, 1 to 10 in half points), not made up from his rating each time: his
+  // A man's 26 attributes are his own (p.at, 1 to 10 in half points), not made up from his rating each time: his
   // rating is worked out from them (cwOverall). Every third week (mgDevelop) each attribute moves along a hidden meter
   // (p.pg: past +1 it goes up half a point, past -1 down half a point). What fills it: the room under its ceiling (p.cl,
   // his potential -- hidden, shaped round his own strengths: he can reach it, never pass it), his age (each kind of
@@ -13851,17 +13922,18 @@
   // it's ever been (p.bs) it fills a good deal faster: a man gets back to a level he's been at (not his legs, past 29).
   // The dice are his own, the season's and the week's: a reload gives the same.
   const DEV_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle',
-    'interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution'];   // (this order, in the strings)
+    'interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];   // (this order, in the strings: Handling
+    // last, as it came last -- a string from before has 25, and devUnpack gives it his Handling from the rest of his keeping)
   const DEV_GROUP={speed:'phy',acceleration:'phy',agility:'phy',stamina:'phy',strength:'phy',keeperSpd:'phy',offIQ:'men',defIQ:'men',composure:'men',interceptions:'men',
-    gkReflex:'gk',gkReach:'gk',gkDiveRange:'gk',gkDistribution:'gk'};   // (the rest: 'tec', his touch)
+    gkReflex:'gk',gkReach:'gk',gkDiveRange:'gk',gkDistribution:'gk',gkHandling:'gk'};   // (the rest: 'tec', his touch)
   const devGroup=k=>DEV_GROUP[k]||'tec';
   const DEV_EVERY=3, DEV_RATE=0.045, DEV_BACK=2.5, DEV_MEN_EXTRA={offIQ:1,defIQ:1,composure:1,interceptions:0.5};
   // the strings: a half point a letter ('a' is 1, 's' is 10); the meters two base-36 digits each
   const devEnc=v=>String.fromCharCode(97+Math.round((clamp(v,1,10)-1)*2)), devDec=c=>1+(c.charCodeAt(0)-97)/2;
   function devPack(st){ let s=''; for(const k of DEV_KEYS) s+=devEnc(st[k]??5.5); return s; }
-  function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); return o; }
+  function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); if(s.length<DEV_KEYS.length) o.gkHandling=gkHandlingFor(o); return o; }
   function devPackPg(a){ return a.map(v=>Math.round((clamp(v,-1,1)+1)*600).toString(36).padStart(2,'0')).join(''); }
-  function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>s?parseInt(s.substr(i*2,2),36)/600-1:0); }
+  function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>{ const v=s?parseInt(s.substr(i*2,2),36):NaN; return isFinite(v)?v/600-1:0; }); }
   // HIS HIDDEN VALUES, 1 to 10 in half points, drawn from his seed when he's first seen: how quickly he learns (lr), his
   // professionalism (pro), adaptability (ad), resilience (rs), durability (du), and his character -- charisma (ch),
   // temperament (te: high is calm), ambition (am), loyalty (lo). Never shown as numbers.
@@ -14094,7 +14166,7 @@
   // come round every four weeks. A man's FOCUS (his card) puts his training on one coach's field: a quarter more there,
   // a tenth less elsewhere.
   const COACH_AREA={fit:['speed','acceleration','agility','stamina','strength'],tec:['ballControl','dribbling','passAcc','crossing','curve'],
-    fin:['shotAcc','shotPower','longShots','heading','offIQ','composure'],def:['tackle','slideTackle','interceptions','defIQ'],gk:['gkReflex','gkReach','gkDiveRange','gkDistribution','keeperSpd']};
+    fin:['shotAcc','shotPower','longShots','heading','offIQ','composure'],def:['tackle','slideTackle','interceptions','defIQ'],gk:['gkReflex','gkReach','gkDiveRange','gkHandling','gkDistribution','keeperSpd']};
   const STAFF_ORDER=['fit','tec','fin','def','gk'], areaOf=k=>STAFF_ORDER.find(a=>COACH_AREA[a].includes(k))||'tec';
   const DEV_FOCUS={fit:'FITNESS',tec:'TECHNICAL',fin:'FINISHING',def:'DEFENDING',gk:'KEEPING'};
   const STAFF_KIND={fit:{n:'fitness'},tec:{n:'technical'},fin:{n:'finishing'},def:{n:'defending'},gk:{n:'goalkeeping'},youth:{n:'youth'}};
@@ -14611,6 +14683,9 @@
   function mgSignKid(d,sub,style){ const S=d.story, A=S&&S.kidAsk; if(!A||S.kid!==1) return 'He has gone.';
     const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
     p.name=A.name; if(role!=='GK'&&STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style)
+    if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
+      for(let i=0;i<300&&cwOverall(p.role,cl)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
+      p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
     p.wage=mgRound(mgWage(p.ovr)*0.5); mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+(role==='GK'?'a keeper':(STYLES[p.style]||{}).name||sub)+', rated '+p.ovr+', a ceiling of '+kidPot(A).join('–')+'.');
     return null; }
@@ -15971,7 +16046,7 @@
   // passes alike; delivery and vision; finishing; winning it back)
   const SIX=[['PAC','Pace',['speed','acceleration','agility']],['PHY','Physical',['strength','stamina','heading']],['TEC','Technique',['ballControl','dribbling','composure','curve']],
     ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ']]];
-  const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution']],['CMP','Composure',['composure','ballControl']]];
+  const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution','ballControl','composure']],['HAN','Handling',['gkHandling']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
   function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }
   function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
@@ -16356,6 +16431,7 @@
     for(const p of d.roster||[]){ if(p.fo==='phy') p.fo='fit'; else if(p.fo==='men') p.fo=null; } d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
     if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0; d.tm=d.tm??MOR0; mgCaptains(d);
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
+      else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)

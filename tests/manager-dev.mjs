@@ -1,4 +1,4 @@
-// FOOTBALL CLASSIC, PLAYER DEVELOPMENT: a man's 25 attributes are his own (stored, a letter a half point) and his
+// FOOTBALL CLASSIC, PLAYER DEVELOPMENT: a man's 26 attributes are his own (stored, a letter a half point) and his
 // rating is what they rate; every third week each moves along a hidden meter -- filled by the room under its ceiling
 // (his potential, hidden: reached, never passed), his age, his training, his minutes (diminishing returns), his
 // professionalism, how quickly he learns, how much it matters to him, and his momentum; drained by age (his legs from 29,
@@ -30,7 +30,7 @@ await K(`(()=>{ window.D=mgNewCareer({slot:'1',manager:'T',clubName:'Dev Town',c
 
 // --- stored attributes -----------------------------------------------------------------------------------------
 r = await K(`(()=>{ const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free];
-  const okAt=all.every(p=>/^[a-s]{25}$/.test(p.at)&&/^[a-s]{25}$/.test(p.cl)&&/^[a-s]{25}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));
+  const okAt=all.every(p=>/^[a-s]{26}$/.test(p.at)&&/^[a-s]{26}$/.test(p.cl)&&/^[a-s]{26}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));
   const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at)),30,95)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)));
   const under=all.every(p=>{ const a=devUnpack(p.at), c=devUnpack(p.cl); return DEV_KEYS.every(k=>c[k]>=a[k]); });
   const hv=all.flatMap(p=>Object.values(hvOf(p))), hvMean=hv.reduce((a,b)=>a+b,0)/hv.length;
@@ -41,6 +41,18 @@ info('attributes: ' + JSON.stringify(r));
 ok(r.okAt && r.rates && r.pot && r.under, 'all ' + r.n + ' men: their own attributes, ceilings, bests and hidden values stored; the rating what the attributes rate, the potential what the ceilings rate, every attribute at or under its ceiling');
 ok(r.hvMin >= 1 && r.hvMax <= 10 && Math.abs(r.hvMean - 5.5) < 0.4, 'the hidden values 1 to 10 in half points, about 5.5 on average (' + r.hvMean + ')');
 ok(r.plays, 'what\'s stored is what plays: an attribute changed, his card and his match entry change with it');
+
+// --- a career from before Handling (v77): 25 letters a man -- his Handling from the rest of his keeping, his rating as it was
+r = await K(`(()=>{ const ps=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players)].filter(p=>p.role==='GK').slice(0,6), cut=s=>s.slice(0,25);
+  const w0=Object.fromEntries(Object.entries(OVR_W.GK).filter(([k])=>k!=='gkHandling')), old=st=>{ let s=0,n=0; for(const k in w0){ s+=st[k]*w0[k]; n+=w0[k]; } return Math.round(s/n*10); };   // (his rating as it was then: no Handling in it)
+  const was=ps.map(p=>({ ovr:p.ovr, at:p.at, pg:p.pg })); for(const p of ps){ p.ovr=old(devUnpack(p.at)); p.at=cut(p.at); p.cl=cut(p.cl); p.bs=cut(p.bs); if(p.pg) p.pg=p.pg.slice(0,50); }
+  const read=ps.map(p=>{ const a=devUnpack(p.at); return a.gkHandling===gkHandlingFor(a)&&Math.abs(cwOverall(p.role,a)-p.ovr)<=1; });
+  mgMigrate(D);
+  const len=ps.every(p=>p.at.length===26&&p.cl.length===26&&p.bs.length===26&&(!p.pg||p.pg.length===52)), same=ps.every((p,i)=>p.at.slice(0,25)===was[i].at.slice(0,25));
+  const rate=ps.every(p=>Math.abs(cwOverall(p.role,devUnpack(p.at))-p.ovr)<=1), meters=ps.every(p=>devUnpackPg(p.pg).every(v=>isFinite(v)));
+  return { n:ps.length, read:read.every(Boolean), len, same, rate, meters, h:ps.map(p=>devUnpack(p.at).gkHandling) }; })()`);
+info('from before Handling: ' + JSON.stringify(r));
+ok(r.n >= 6 && r.read && r.len && r.same && r.rate && r.meters, 'a career saved before Handling: each man\'s from the rest of his keeping (keepers ' + r.h.join(', ') + '), his rating as it was; stored as 26 again, the rest untouched');
 
 // --- every third week; the same dice on a reload ------------------------------------------------------------------
 r = await K(`(()=>{ const d=D, seen=[]; d.lv.market=0;
