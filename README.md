@@ -1834,6 +1834,43 @@ test, and like the Trap Lab the values are the game's settings.
   unpressed, with room behind their line, the man best placed (the forward on their line first) arcs
   along it and goes; two at most, down different lanes. Nobody stands within about 7 m of a team-mate,
   and only runs, and getting up the pitch after winning it back, are at a sprint.
+- **Runs in behind, as coached (v79)** -- from the runs drawn on the coaching page:
+  - **Anticipation.** The runs go as a pass is played forward to a team-mate, not once he has it: the runner
+    gets to their line in his lane and waits there, onside, while the ball's on its way, and goes as it
+    arrives. Not for a ball played back. The next run follows him a moment later (a third of a second for a
+    balanced side), not a second later.
+  - **A run carries on** when the ball's moved on to another team-mate who can still find him: he and the
+    spot he's running to are within that man's passing range, give or take half as much again. Before, a
+    pass to anyone else called it off.
+  - **His own channel.** A wide man runs into the gap in their line he's in (a stride in from the man at its
+    edge), or the nearest one, never more than a quarter of the pitch across. Before, the biggest gap won,
+    often one on the far side, and that ruled him out of running at all. A forward bends in a little, and
+    four tenths of the way towards the man of theirs who's stepped out of their line to the ball: into the
+    space behind him.
+  - **In towards goal.** A wide man's run that would land within 22 m of their goal goes in towards it,
+    into the box: no further across than 12 m from the middle landing 8 m out, 20 m landing 20 m out. It
+    no longer goes on down his touchline. An overlap, or a man told to stay wide, still goes down the line.
+  - **He goes again.** The man who's just played it forward is the first to run: a forward, a wide man, or
+    a midfielder told to run in behind.
+  - **The third man.** A forward's run across their line (more than 5 m across) empties his lane. A
+    midfielder told to RUN IN BEHIND goes into it, up to their line, for the pass into the space it's left.
+    One told to stay back, or balanced, gives the man on the ball the pass level with him or behind him
+    instead.
+  - **In at the back post.** With the ball, or a ball through (where it's going), within 26 m of their goal
+    and no wider than the box, the wide man away from it goes in at the back post, behind his man, instead
+    of out on his touchline. With the ball in the middle, both wide men do. This is read off the ball
+    itself, not the slow read of the play, and he isn't pulled back out of the box to offer a pass.
+  - **Replayed from the page's moments** (each put back as captured, four times over): the computer's man
+    now runs within 16 degrees of five of the ten drawn runs, against two before. The striker
+    behind the centre-back stepping out: 11 degrees off, 16 m along it in 2 s (28, 12 m). The wide man in
+    behind the wide midfielder: 4 degrees, 8 m (he didn't go). The far winger with the ball through to the
+    box: 27 degrees, 9 m (he went backwards). The wide man in behind the full-back: 14 degrees, 14 m (26,
+    8 m). The wide man at the open space beside their centre-back: 16 degrees, 10 m (34, 8 m). The passer
+    on the counter goes again: 67 degrees, 5 m (110 degrees, none).
+  - **What it did to the score** (the same 84 club pairings, every man on the computer, 6-minute matches,
+    against v78): goals 2.17 a match → 2.46, give or take about 0.2 each. Shots 7.1 → 7.7 a match, and
+    those from 12-16 m out 1.8 → 2.5 a match, going in as often (39%). Offsides 0.18 → 0.20 a match: the
+    waiting on the line keeps them onside. The keepers went down big 0.8 → 1.5 times a match.
 - **Taking up a position** — a computer player heading for a position eases off over the last few metres
   instead of charging past it, and moves with a position that's on the move (following the ball,
   tracking a runner) at its pace. Only the man going for the ball, the presser and a runner go flat out.
@@ -2075,6 +2112,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season a week at a time, promotion, the playoffs,
-a played match), tactics, the shape with and without the ball, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites and
+a played match), tactics, the shape with and without the ball, runs in behind, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites and
 the pitch. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).
