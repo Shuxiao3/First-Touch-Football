@@ -58,7 +58,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     of it, or one up to 32 m off who's free (nobody within 4 m) with the way to him clear, turns to face the ball,
     so he's ready for the pass. A man making a run keeps facing his run.
   - **A through ball** the runner meets where it's played: out in front of him, he runs onto it flat out. If it
-    comes to his side or from behind, he has to check, turn and face it.
+    comes to his side, he has to check, turn and face it.
+  - **Over his head, he runs on (v81).** A ball played on ahead of a man on his way, through or in the air, comes from
+    behind him: he keeps running on to where he'll take it, in front of him, and doesn't turn round to watch it come.
+    Only one coming down on him, or stopping at his feet, does he turn to. Before, he turned round and back-pedalled
+    at half pace or less for most of its flight, so the man marking him usually got there first. One through along the
+    grass that catches him up from behind, the way he's running, he takes in his stride. It no longer comes off his back.
   - **A man going after a ball that's running away from him** chases it. A man darting across to cut out their
     pass goes flat out for the spot and stretches for it as he gets there.
   - **Turned away from it, he can't take it.** If the ball is behind him as it reaches him (more than 110° from the
@@ -367,8 +372,8 @@ The same game played like any other football game. It's a copy of `index.html` w
 - **Touch passing.** With the ball, a quick tap or click on a team-mate passes to him, struck for how far away he is.
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
 - **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
-  the space ahead of the man. The lofted through ball is unchanged. (Where yours goes: into the runner's path, the drag
-  leaning it -- see *Controls*.)
+  the space ahead of the man. Yours are always along the grass (v81: no lofted through ball). The computer's lofted
+  through ball is unchanged. (Where yours goes: into the runner's path, the drag leaning it -- see *Controls*.)
 - **The computer's through ball** along the grass is struck to die where the runner will be, but never harder than
   900 px/s (the Computer through ball dial; it was 1500, quicker than anyone could get across to). A long one would
   need more, so it gets there after him or not at all, and he doesn't play it. It's harder to judge than a pass
@@ -1482,13 +1487,13 @@ way you're facing): the longer it is, the more it's lifted, but never so hard it
 control. **Double-tap** it for a **lofted pass** (the button reads LOB on the second
 tap). **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
 it. To a man on a run it's played into his path, where he's already going (the spot he's running to,
-or the way he's running), and the drag only leans it: half the drag's angle off his line, 25° at most
-either side. Drag along his run and it goes dead along it; drag across it and it leans that way, still
-in front of him. To a man standing still the drag picks where in front of him it goes, as it used to,
+or the way he's running), and the drag only leans it: a third of the drag's angle off his line, 15° at
+most either side (v81; it was half, and 25°). Drag along his run and it goes dead along it; drag across
+it and it leans that way, still in front of him. To a man standing still the drag picks where in front of him it goes, as it used to,
 and to one only just moving, something in between (v80). It's weighted so they run onto it as it gets
 there, and the receiver sprints for it. The spot it was
-played to flashes on the pitch. Drag on the second tap of a double-tap for a lofted through ball
-over the top. (A quick tap waits ~0.15 s before it goes, to see whether a second tap is coming;
+played to flashes on the pitch. A through ball is always along the grass: a drag on the second tap of a
+double-tap plays the same one (there's no lofted through ball, v81). (A quick tap waits ~0.15 s before it goes, to see whether a second tap is coming;
 a held pass, a drag and a double-tap go at once.)
 
 **Swipe to shoot** — (Football Classic: swipe the way your man is facing. Up to 25° off it costs nothing; further

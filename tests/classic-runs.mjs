@@ -4,9 +4,11 @@
 // the gap in their line in his own channel, not off towards a bigger one on the far side; a run that would land near their
 // goal goes in towards it, into the box, not on down the line; the man who's just played it forward goes again; a
 // forward's run across their line takes a midfielder told to RUN IN BEHIND into the lane it emptied (THE THIRD MAN); the
-// ball through to the box (or near it, in the middle) takes the wide men in at the back post. YOUR THROUGH BALL (v80): into
-// the runner's path, where he's already going, the drag only leaning it (up to 25 degrees off his line); a man standing
-// still gets it where the drag points. The plan's jobs read straight off a scene set up in a match. On a copy of the game that lets the test set the scene.
+// ball through to the box (or near it, in the middle) takes the wide men in at the back post. YOUR THROUGH BALL (v80, v81):
+// into the runner's path, where he's already going, the drag only leaning it (a third of its angle off his line, 15 degrees
+// at most); a man standing still gets it where the drag points. A BALL OVER HIS HEAD (v81): played on ahead of a man on
+// his way, he runs on to it -- he doesn't turn round to watch it come -- and gets it; one through along the grass that
+// catches him up he takes in his stride. The plan's jobs read straight off a scene set up in a match. On a copy of the game that lets the test set the scene.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -16,7 +18,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, teamPlan, PLAN:()=>PLAN, mkPlanState, PI:()=>PI, '
-  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, EXH, simNow:()=>simNow, setStyle, '
+  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, watchBall, onAhead, inStride, controlled:()=>controlled, setControlled, EXH, simNow:()=>simNow, setStyle, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } '
   + 'for(const q of players){ q.runSeen=null; q.runCd=0; q.gapRun=0; } ball.thru=null; ball.intendedRcv=null; ball.passerRef=null; simNow+=0.5; }, '
@@ -161,10 +163,41 @@ r = await page.evaluate(() => { const T = window.__T, deg = (a, b) => Math.round
   out.played = { off: deg({ x: tv.x / tl, y: tv.y / tl }, g), ahead: Math.round(tl / T.MK * 10) / 10, rcv: B.intendedRcv === w };
   return out; });
 info('your through ball (degrees off his run): ' + JSON.stringify(r));
-ok(r.along.off === 0 && r['20'].off === 10 && r.across.off === 25 && r.across.lean === r.across.toward && r.back.off === 25,
+ok(r.along.off === 0 && r['20'].off === 7 && r.across.off === 15 && r.across.lean === r.across.toward && r.back.off === 15,
   `to a man on his run it goes where he's going: dragged along his run, dead along it; 20 degrees off it, ${r['20'].off}; straight across it, ${r.across.off} (the drag's way, no more); even back the other way, ${r.back.off}`);
 ok(r.still.off === 0, `to a man standing still it goes where the drag points (${r.still.off} degrees off it), as before`);
-ok(r.played.rcv && r.played.off <= 26 && r.played.ahead > 4, `played, with a drag straight across his run: ${r.played.ahead} m ahead of him, ${r.played.off} degrees off his run (it went straight across)`);
+ok(r.played.rcv && r.played.off <= 16 && r.played.ahead > 4, `played, with a drag straight across his run: ${r.played.ahead} m ahead of him, ${r.played.off} degrees off his run (it went straight across)`);
+
+// --- A BALL OVER HIS HEAD: he runs on to it, he doesn't turn round to it ------------------------------------------------
+r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(12, [-12, 0, 12], 24);
+  const cm = window.__by('G', 'CM', 'atk', 1), w = window.__by('G', 'W', 'atk', 1), a = T.atkOf('G'), b = T.ball();
+  window.__at(cm, 40, 8); window.__at(w, 50, 8); w.vx = a * 230; w.vy = 0; w.facing = { x: a, y: 0 };
+  // in the air from behind him: coming down 9 m in front of him, or right on him
+  const loft = ahead => { b.ownedBy = null; b.dribbler = null; b.x = w.x - a * 120; b.y = w.y; b.z = 30; b.vz = 120; const t = (120 + Math.sqrt(120 * 120 + 2 * 520 * 30)) / 520;
+    b.vx = a * (120 + ahead * T.MK) / t; b.vy = 0; b.intendedRcv = w; b.lastTouch = 'G'; b.thru = null; };
+  loft(9); const over = { watch: T.watchBall(w, a, 0), ahead: T.onAhead(w) };
+  loft(0); const onHim = { watch: T.watchBall(w, a, 0), ahead: T.onAhead(w) };
+  // along the grass, through to him, catching him up from behind the way he's running
+  b.z = 0; b.vz = 0; b.x = w.x - a * 20; b.vx = a * 520; b.thru = { x: w.x + a * 9 * T.MK, y: w.y, until: T.simNow() + 2 };
+  const stride = { inStride: T.inStride(w), watch: T.watchBall(w, a, 0) };
+  return { over, onHim, stride }; });
+info('a ball over his head / on him / through along the grass: ' + JSON.stringify(r));
+ok(r.over.ahead && !r.over.watch, 'a ball over his head coming down 9 m in front of him: he runs on to it, and doesn\'t turn round to watch it (it was: turned to it, slower, back-pedalling)');
+ok(!r.onHim.ahead, 'one coming down right on him he still turns to');
+ok(r.stride.inStride && !r.stride.watch, 'one through along the grass catching him up from behind the way he\'s running: he takes it in his stride, not off his back');
+
+r = await page.evaluate(() => new Promise(res => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(10, [-14, 0, 14], 22);
+  const cm = window.__by('G', 'CM', 'atk', 1), w = window.__by('G', 'W', 'atk', 1), a = T.atkOf('G'), b = T.ball(), t0 = T.simNow();
+  window.__at(cm, 36, 8); window.__at(w, 52, 8); const x0 = w.x; w.vx = a * 220; w.vy = 0; w.facing = { x: a, y: 0 }; w.runTarget = { x: w.x + a * 400, y: w.y, lx: w.x + a * 400, ly: w.y };
+  window.__give(cm); T.setControlled(window.__by('G', 'CB', 'atk', 0));       // (the computer runs him, not you: you're on a centre-back out of it)
+  T.thruBall(cm, w, { dx: a * 60, dy: 0 }, true);                              // (lofted, over his head: the computer can still play one)
+  let back = 0, minV = 1e9, n = 0;
+  (function tick(){ const B = T.ball(); if(B.z > 0 && B.ownedBy !== w && Math.hypot(B.x - w.x, B.y - w.y) > 3 * T.MK){ n++; if(w.facing.x * a < 0) back++; minV = Math.min(minV, a * w.vx); }   // (in flight, till it's on him)
+    const got = T.ball().ownedBy === w, t = T.simNow() - t0;
+    if(got || t > 3.5) return res({ got, t: +t.toFixed(2), back, n, minV: Math.round(minV), ran: Math.round(a * (w.x - x0) / T.MK) });
+    requestAnimationFrame(tick); })(); }));
+info('a ball lofted over his head, him sprinting on: ' + JSON.stringify(r));
+ok(r.got && r.n > 10 && r.back === 0 && r.minV > 150, `played over his head from 16 m behind him as he sprints on: he never turns round while it's in the air (${r.back} of ${r.n} frames facing back), keeps going (never under ${r.minV} px/s forward), and has it at ${r.t} s, ${r.ran} m on`);
 
 process.exitCode = rep.finish();
 await browser.close();
