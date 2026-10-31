@@ -2984,7 +2984,13 @@
   let kdShots=0,kdSaves=0,kdGoals=0,kdGoalLock=false;        // keeper-drill running tally (+ re-trigger lock)
   const halfLenSec=()=>Math.max(60,(P.halfMin?P.halfMin.val:3)*60);   // real seconds per half, from the Half length setting
   let matchClock=0, half=1, matchOver=false, breakT=0;  // breakT freezes play at half/full time
-  let ftPending=false, ftShot=false, ftLastTeam=null, ftT0=0;   // 2nd-half "play the advantage" past full time (since ftT0)
+  // THE END-OF-HALF ADVANTAGE: once the clock's run out, at half time as at full time, play goes on while there's an
+  // attack on, and the half ends when it's dead (see advOver). ADV: since when (t0), whose attack it is (side), the
+  // furthest up the pitch it's got (best), since when they've had it (theirsT) and since when it's been back in our
+  // own half (ownT)
+  let advOn=false;
+  const ADV={t0:0, side:null, best:0, theirsT:null, ownT:null};
+  const ADV_MAX=20, ADV_HOLD=1.0, ADV_BACK=0.3, ADV_OWN=5;     // s; s; of the pitch's length; s (see advOver)
   let offsidePass=null;
   let restartT=0,restartInfo=null,restartLabel='';
   let headerT=0, defHeaderT=0;
@@ -3697,7 +3703,7 @@
   document.getElementById('c').addEventListener('click',()=>{ if(matchOver && !careerFix)newMatch(); });
   function applyFreePlayState(){
     document.getElementById('freeBtn').textContent='FREE PLAY: '+(freePlay?'ON':'OFF');
-    if(freePlay){ gDir=1; ftPending=false; ftShot=false; ftLastTeam=null; keepers.forEach((k,i)=>{ const sd=i===0?-1:1; k.side=sd; k.homeX=sd<0?26:FW-26; }); }
+    if(freePlay){ gDir=1; advOn=false; keepers.forEach((k,i)=>{ const sd=i===0?-1:1; k.side=sd; k.homeX=sd<0?26:FW-26; }); }
     resetKickoff();
     if(freePlay){
       // give the controlled player the ball at center, facing the right goal
@@ -3723,7 +3729,7 @@
     practice = (name==='off') ? null : name;
     prioritizeDials(practice);                          // float the relevant sliders to the top
     matchOver=false; breakT=0; half=1; matchClock=0;    // scenario mode = endless, no clock/halves
-    ftPending=false; ftShot=false; ftLastTeam=null;
+    advOn=false;
     gDir=1;                                              // always practice in the first-half orientation
     keepers.forEach((k,i)=>{ const sd=i===0?-1:1; k.side=sd; k.homeX=sd<0?26:FW-26; k.x=k.homeX; k.y=YC; });
     freePlay = false;
@@ -6898,7 +6904,6 @@
     ball.ownedBy=null;p.noTouchT=0.3;
     ball.lastTouch=p.team;
     ball.shotBy=p.team;ball.shotT=1.1;            // live shot: own team won't intercept in the box
-    if(ftPending) ftShot=true;                    // a shot at full time -> the match ends once it plays out
     // apply the AI curl decided above (bends out to the chosen corner, past a committed keeper)
     if(curlSpin!==0){ ball.curveSpin=curlSpin; ball.curveSpinT=manual?SWIPE_SPIN_T:0.9; ball.curveK=curlK; ball.arcK=0; }
     else { ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; }
@@ -11584,32 +11589,12 @@
     if(breakT>0){ breakT-=dt; if(breakT<=0&&!matchOver){ /* resume after break */ } }
     const playRunning = !matchOver && breakT<=0 && scoredT<=0 && offsideT<=0;
     if(playRunning && !practice){
-      if(!ftPending) matchClock+=dt;                 // clock freezes once we're playing the full-time advantage
-      if(matchClock>=halfLenSec()){
-        if(half===1){
-          half=2; matchClock=0; breakT=2.2;
-          // half-time breather: refill the live stamina bar, but the eroded max-stamina
-          // CEILING only recovers 25% of what's been lost over the half.
-          for(const q of players){
-            if(q.squadIdx!=null&&HURT[q.team]&&HURT[q.team].has(q.squadIdx)) continue;   // (hurt: no better after the break)
-            const cap=(q.staminaCap||1), top=q.cond0||1;
-            q.staminaCap=Math.min(top, cap + physioBack(q)*Math.max(0,top-cap));   // claw back a quarter of the loss (more with a physio), as far as he came in with
-            q.stamina=q.staminaCap;                          // top the bar up to the new ceiling
-          }
-          resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
-          switchEnds();                 // swap which goal each team attacks
-          resetKickoff('R');            // the team that didn't start (Red) kicks off the second half
-        } else if(!matchOver && !ftPending){
-          // SECOND-HALF full time: don't blow the whistle yet — play the advantage out
-          ftPending=true; ftShot=false; ftLastTeam = ball.ownedBy ? ball.ownedBy.team : null; ftT0=simNow;
-          lastGrade='FULL TIME — ADVANTAGE'; gradeColor='#ffb43c'; gradeFade=2.4;
-        }
+      if(!advOn) matchClock+=dt;                     // (the clock stops while the advantage is played)
+      if(matchClock>=halfLenSec() && !advOn && !matchOver){
+        // the clock's run out: no whistle yet if there's an attack on -- play the advantage out
+        advStart(); lastGrade=(half===1?'HALF TIME':'FULL TIME')+' — ADVANTAGE'; gradeColor='#ffb43c'; gradeFade=2.4;
       }
-      // while the advantage is live, end the match the instant the attack dies (see ftEvaluateEnd)
-      if(ftPending && !matchOver && ftEvaluateEnd()){
-        matchOver=true; breakT=1e9;
-        lastGrade='FULL TIME'; gradeColor='#9dff3c'; gradeFade=3.0;
-      }
+      if(advOn && !matchOver && advOver()) endHalf();   // the attack's dead: the whistle
     }
 
     const seeK=1-Math.exp(-dt/0.35);
@@ -11840,7 +11825,7 @@
     netRelax(dt);
 
     if(scoredT>0){scoredT-=dt;if(scoredT<=0){
-      if(ftPending){ matchOver=true; breakT=1e9; lastGrade='FULL TIME'; gradeColor='#9dff3c'; gradeFade=3.0; }
+      if(advOn) endHalf();                         // a goal in the last play: the whistle once it's celebrated
       else if(freePlay){ resetKickoff(); const p=controlled;p.x=FW*0.5;p.y=YC;own(p,p.r+ball.r+5);p.facing={x:atkOf('G'),y:0}; }
       else resetKickoff(lastConceder||'G');     // the team that conceded restarts
     }}
@@ -11894,7 +11879,7 @@
       const lbl = LAB_PRACTICE[practice] ? LAB_TITLE[LAB_PRACTICE[practice]]
                 : practice ? 'PRACTICE'
                 : matchOver ? 'FULL TIME'
-                : ftPending ? 'FULL TIME +ADV'
+                : advOn ? (half===1?'HALF TIME':'FULL TIME')+' +ADV'
                 : breakT>0&&half===2 ? 'HALF TIME'
                 : mm+':'+String(ss).padStart(2,'0');
       document.getElementById('rClock').textContent=lbl;
@@ -12127,7 +12112,7 @@
     meMatch=null; SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}}; qsReset(); HURT.G.clear(); HURT.R.clear(); MSTAT.G={}; MSTAT.R={};
     goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0;
     ball.lastTouchP=null;ball.prevTouchP=null;
-    ftPending=false;ftShot=false;ftLastTeam=null;
+    advOn=false;
     freePlay=false; const fb=document.getElementById('freeBtn'); if(fb)fb.textContent='FREE PLAY: OFF';
     gDir=1; buildTeams();                                   // fresh first-half layout (un-mirrors any 2nd-half ends)
     keepers.forEach((k,i)=>{ const sd=i===0?-1:1; k.side=sd; k.homeX=sd<0?26:FW-26; k.x=k.homeX; k.y=YC; });
@@ -12148,36 +12133,61 @@
     }
     keepers.forEach(k=>{ k.homeX=FW-k.homeX; k.side=-k.side; k.x=k.homeX; k.y=YC; });
   }
-  // FULL-TIME ADVANTAGE: once the 2nd-half clock expires, play continues until the attack dies.
-  function ftThird(x,dir){ const f=dir>0?x/FW:1-x/FW; return f>2/3?'att':(f<1/3?'def':'mid'); } // own goal=0 .. attacking goal=1
-  function ftEvaluateEnd(){
-    // 1) a SHOT was taken since full time -> end once it has finished playing out (goal, save, or wide)
-    if(ftShot){
-      if(scoredT>0) return false;          // a goal is being celebrated -> wait for the flash to finish
-      if(ball.shotT>0) return false;       // shot still live
-      return true;
-    }
-    if(simNow-ftT0>12) return true;        // 4) and the referee won't wait for ever: a side keeping it up there gets 12 s
-    const owner=ball.ownedBy;
-    if(owner){
-      const t=owner.team, dir=atkOf(t), third=ftThird(ball.x,dir);
-      if(ftLastTeam && t!==ftLastTeam){    // possession just CHANGED hands
-        ftLastTeam=t;
-        return third!=='att';              // regained outside their own attacking third -> end
+  // THE END-OF-HALF ADVANTAGE (see ADV): the attack is the side's that had the ball as the clock ran out, and it's
+  // dead once
+  //  - they've won it and kept it a moment (ADV_HOLD), or got it out of our attacking third (won in their own
+  //    attacking third, it's their attack now, to finish),
+  //  - their keeper has it, or it's gone out and it's theirs (or ours, back in our own half),
+  //  - we've taken it back into our own third, or into our own half well short of where we'd got (ADV_BACK), or been
+  //    back in our own half a while (ADV_OWN): no attack on,
+  //  - they've knocked it loose and cleared it out of our attacking half,
+  //  - or the referee's waited long enough (ADV_MAX).
+  // A shot plays out, and so does whatever comes of it: a save that isn't held, a block, a rebound.
+  // (v81 played it at full time only, and ended it at the first step back in midfield, the first ball played back, or
+  // the moment a shot was saved: on average 1.3 s after the clock ran out.)
+  function advU(team,x){ return (atkOf(team)>0?x:FW-x)/FW; }       // how far up the pitch, toward the goal it attacks: 0..1
+  function advStart(){
+    const o=ball.ownedBy; advOn=true; ADV.t0=simNow; ADV.side=o?o.team:(ball.lastTouch||null);
+    ADV.best=ADV.side?advU(ADV.side,ball.x):0; ADV.theirsT=null; ADV.ownT=null;
+  }
+  function advOver(){
+    if(ball.shotT>0) return false;                                   // a shot on its way: it plays out
+    if(simNow-ADV.t0>ADV_MAX) return true;
+    let S=ADV.side; if(!S) return true;
+    if(gkHold&&gkHold.team!==S) return true;                          // their keeper has it
+    if(restartInfo) return restartInfo.team!==S||advU(S,restartInfo.x)<0.5;   // out of play: theirs, or ours back in our half
+    const o=ball.ownedBy;
+    if(o&&o.team!==S){
+      if(advU(S,ball.x)<1/3){ S=ADV.side=o.team; ADV.best=0; ADV.theirsT=null; ADV.ownT=null; }   // won in their attacking third: theirs to finish
+      else if(ADV.theirsT===null) ADV.theirsT=simNow;
+    } else if(o) ADV.theirsT=null;                                   // (back with us)
+    const u=advU(S,ball.x);
+    if(ADV.theirsT!==null && (simNow-ADV.theirsT>=ADV_HOLD || u<2/3)) return true;   // they've won it
+    ADV.best=Math.max(ADV.best,u);
+    if(u<0.5){ if(ADV.ownT===null) ADV.ownT=simNow; if(simNow-ADV.ownT>ADV_OWN) return true; } else ADV.ownT=null;
+    if(o||ball.lastTouch===S) return u<1/3 || (u<0.5 && u<ADV.best-ADV_BACK);   // back in our own third, or turned back into our own half
+    return u<0.5 && ball.vx*atkOf(S)<0;                               // they've knocked it loose: cleared out of our attacking half
+  }
+  // the whistle: half time (the break, the bars topped up, ends changed, Red kicks off), or full time
+  function endHalf(){
+    advOn=false;
+    if(half===1){
+      half=2; matchClock=0; breakT=2.2;
+      // half-time breather: refill the live stamina bar, but the eroded max-stamina
+      // CEILING only recovers 25% of what's been lost over the half.
+      for(const q of players){
+        if(q.squadIdx!=null&&HURT[q.team]&&HURT[q.team].has(q.squadIdx)) continue;   // (hurt: no better after the break)
+        const cap=(q.staminaCap||1), top=q.cond0||1;
+        q.staminaCap=Math.min(top, cap + physioBack(q)*Math.max(0,top-cap));   // claw back a quarter of the loss (more with a physio), as far as he came in with
+        q.stamina=q.staminaCap;                          // top the bar up to the new ceiling
       }
-      ftLastTeam=t;
-      if(third==='def') return true;       // 2) the team in possession is in their own back third
-      if(third==='att') return false;      // attacking third: only a shot or a turnover ends it
-      return owner.vx*dir < -20;           // 3) middle third: moving BACKWARD ends it (sideways/forward is fine)
+      resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
+      switchEnds();                 // swap which goal each team attacks
+      resetKickoff('R');            // the team that didn't start (Red) kicks off the second half
+      return;
     }
-    // ball loose / pass in flight: judge a clear backward pass or clearance; otherwise keep waiting
-    const t=ball.lastTouch;
-    if(!t) return false;
-    if(Math.hypot(ball.vx,ball.vy)<40) return false;     // settling, not a real pass
-    const dir=atkOf(t), third=ftThird(ball.x,dir);
-    if(third==='att') return false;        // played forward into their attacking third -> live
-    if(third==='def') return true;         // played back into their own third
-    return ball.vx*dir < -20;              // middle-third backward pass -> end
+    matchOver=true; breakT=1e9;
+    lastGrade='FULL TIME'; gradeColor='#9dff3c'; gradeFade=3.0;
   }
   function resetKickoff(kickTeam){
     ball.x=FW/2;ball.y=FH/2;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;

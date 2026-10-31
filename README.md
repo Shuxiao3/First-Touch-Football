@@ -1667,10 +1667,30 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
-- **Full time**: a goal in the last play (the advantage after the clock's run out) counts once and ends the match.
-  The ball's left in the net, and it used to count again every time the celebration ran out: on the full-time
-  screen the score kept climbing, and a career match, its result read a moment later, gave the scorers a goal or
-  two they never scored.
+- **The advantage at the end of each half (v82).** When the clock runs out, the referee doesn't blow while there's an
+  attack on: at half time as at full time, play goes on (HALF TIME +ADV, FULL TIME +ADV on the clock) until it's dead.
+  The attack is the side's that had the ball as the clock ran out, and it's over once:
+  - **they've won it** and kept it a second (in our attacking third: a second to win it straight back), or won it
+    anywhere else. Won in their own attacking third, it's their attack now, to finish.
+  - **their keeper has it**, or it's gone out and it's theirs (or ours, back in our own half).
+  - **we've gone back**: into our own third, into our own half 30 m and more short of where we'd got, or been in our
+    own half 5 s.
+  - **it's been cleared**: knocked loose by them and out of our attacking half.
+  - **20 s have gone**, whatever's on.
+
+  A shot plays out, past the 20 s too, and so does whatever comes of it: a save that isn't held, a block, the
+  rebound. With no attack on as the clock runs out, the whistle goes at once.
+  - **Before**, there was no advantage at half time at all, and at full time it ended at the first step back in
+    midfield, the first ball played back, or the moment a shot was saved: 1.3 s after the clock ran out, on average.
+    Measured on computer-v-computer matches, starting an end of half every 3 s of ordinary play (40 matches, 4,700
+    of them) and judging each by both rules: v81's let 3.2 goals in 100 be scored, and cut off 2.8 in 100 attacks
+    that went on to score within 12 s, nearly as many. Now 6.2 in 100 are scored (+2.9; 95%: +2.1 to +3.9), and 0.7
+    cut off. With two ends of half a match where there was one, that's about 0.09 more goals a match. In 24 matches
+    played through, 36 of the 48 ends of half had an attack to play on; it went on from 0.1 s to the full 20 s,
+    5.5 s in the middle, and 3 goals came in them.
+  - **A goal in the last play counts once**, and then it's half time or full time. The ball's left in the net, and at
+    full time it used to count again every time the celebration ran out: on the full-time screen the score kept
+    climbing, and a career match, its result read a moment later, gave the scorers a goal or two they never scored.
 - **Per-player stats** — 20 outfield attributes plus 5 goalkeeper attributes. Everything
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
@@ -2122,6 +2142,6 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 `tests/` holds optional end-to-end tests that drive the real UI in headless Chromium —
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season a week at a time, promotion, the playoffs,
-a played match), tactics, the shape with and without the ball, runs in behind, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites and
-the pitch. They need
+a played match), tactics, the shape with and without the ball, runs in behind, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites,
+the pitch and the advantage at the end of each half. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

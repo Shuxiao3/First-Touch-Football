@@ -110,7 +110,7 @@ await page.waitForTimeout(700);
 const live = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3), sug=qsSuggest(); return { cap:+p.staminaCap.toFixed(2), first:sug[0]&&sug[0].out, hot:document.getElementById('qsWrap').classList.contains('hot'), open:document.getElementById('qsWrap').classList.contains('open'), msg:document.getElementById('qsMsg').textContent }; })()`);
 info('hurt in a live match: ' + JSON.stringify({ r, live }));
 ok(r.hurt && live.cap <= 0.4 && live.first === 3 && live.hot && !live.open && /IS HURT/.test(live.msg), 'hurt in the match: his legs\' ceiling at ' + Math.round(live.cap * 100) + '%, first on the quick subs, the chip lit (not dropped down): "' + live.msg + '"');
-await K(`(()=>{ half=1; matchClock=halfLenSec(); return 1; })()`); await page.waitForTimeout(2600);
+await K(`(()=>{ half=1; ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; ball.vx=ball.vy=0; matchClock=halfLenSec(); return 1; })()`); await page.waitForTimeout(2600);   // (nobody's ball as the clock runs out: no advantage to play, the whistle at once)
 const ht = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3); return { half, cap:p?+p.staminaCap.toFixed(2):null }; })()`);
 ok(ht.half === 2 && ht.cap !== null && ht.cap <= 0.4, 'half-time: the others get some of their legs back, he doesn\'t (' + Math.round(ht.cap * 100) + '%)');
 await K(`(()=>{ finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);

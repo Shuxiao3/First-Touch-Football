@@ -17,7 +17,7 @@ const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('
 patch('  const LAB_TITLE=', '  window.__T={cam:v=>{ if(v!=null) camX=v; return camX; }, draw:()=>draw(), HORIZON, FAR_SCALE, NEAR_SCALE, NEAR_Y, FH, proj, PA_D, PA_HW, GA_D, GA_HW, PEN_SPOT, CIRCLE_R, '
   + 'ball:()=>ball, net:()=>NET, scored:()=>scoredT, score:()=>scoreG+scoreR, simNow:()=>simNow, players:()=>players, keepers:()=>keepers, '
   + 'FW, YC, GOAL_W, GOAL_H, NET_D, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; }, over:()=>matchOver, '
-  + 'endgame:()=>{ half=2; matchClock=halfLenSec()+1; ftPending=true; ftShot=true; ftT0=simNow; ftLastTeam=null; }};\n  const LAB_TITLE=');
+  + 'endgame:()=>{ half=2; matchClock=halfLenSec()+1; advStart(); }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pitch-')), 'classic.html');
 writeFileSync(copy, src);
 
