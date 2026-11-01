@@ -31,7 +31,7 @@ await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(10
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Hurt Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; window.XP=(age,role)=>{ const p=mgNewPlayer(d,role||'MID',60,age||25,{sub:role==='GK'?'GK':'CM'}); p.hv='jjjjjjjjj'; return p; }; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); window.XP=(age,role)=>{ const p=mgNewPlayer(d,role||'MID',60,age||25,{sub:role==='GK'?'GK':'CM'}); p.hv='jjjjjjjjj'; return p; }; mgSave(d); return 1; })()`);
 
 // --- the risk ----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, R=(f)=>{ const p=XP(); f(p); return injRisk(d,p,1,null); };

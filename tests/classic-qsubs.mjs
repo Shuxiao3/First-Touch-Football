@@ -121,6 +121,7 @@ pc.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
 await pc.click('#smItems [data-act="new"]'); await pc.waitForTimeout(150); await pc.click('#newSlotList .slotBtn >> nth=0');
 await pc.waitForSelector('#mgrMaker.on', { timeout: 4000 }); await pc.fill('#mgName', 'Sam Okafor'); await pc.fill('#mgClubIn', 'Fenmoor Athletic');
 await pc.click('#mgGo'); await pc.waitForSelector('#careerHub.show', { timeout: 8000 }); await pc.waitForTimeout(300);
+if(await pc.isVisible('#storyModal.on')){ await pc.click('#storyModal [data-st="answer"]'); await pc.waitForTimeout(40); await pc.click('#storyModal [data-st="phone"]'); await pc.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
 await pc.click('#chCampus [data-bldg="train"]'); await pc.waitForSelector('#bldgPanel.show'); await pc.click('#bldgPanel .bpTab:text-is("Subs")'); await pc.waitForTimeout(120);
 const tab = () => pc.evaluate(() => ({ plan: JSON.stringify(__MG.d.qsubs || []), pairs: [...document.querySelectorAll('#bpBody .qpPair:not(.empty) .slNm')].map(e => e.textContent),
   head: [...document.querySelectorAll('#bpBody .selHd')].map(e => e.textContent), xi: document.querySelectorAll('#bpBody .qpRow[data-side="xi"]').length,

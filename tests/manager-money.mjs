@@ -26,7 +26,7 @@ await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(10
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Money Town');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgSave(d); return 1; })()`);
 
 // --- shirt sales ---------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d), s=shirtSales(d), L0=d.loyalty, tm0=d.tm;

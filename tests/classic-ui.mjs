@@ -82,7 +82,7 @@ async function skillsPage(page){
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-  await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); }); }   // (the first season's two arrivals: manager-career's)
+  await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); }); }   // (the first season's two arrivals: manager-career's)
 
 for(const [w, h] of SIZES){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });

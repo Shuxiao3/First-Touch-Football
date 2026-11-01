@@ -48,7 +48,7 @@ async function create(club){
   await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', club);
   await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-  if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); });   // (its two arrivals: only Story Town's)
+  if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); });   // (its two arrivals: only Story Town's)
 }
 const msg = () => page.$eval('#bpMsg', e => e.classList.contains('on') ? e.textContent : '').catch(() => '');   // (a toast along the bottom)
 const bottom = () => page.textContent('#chBottom');
@@ -73,8 +73,8 @@ const crestTo = async (k, want) => { for(let i = 0; i < 12; i++){ const v = awai
 ok(await crestTo('s', 'ROUND') && await crestTo('p', 'HOOPS') && await crestTo('e', 'STAR'), 'the crest: round, hooped, a star');
 await page.click('#mgrMaker [data-mm="part"][data-i="2"]'); await page.click('#mgrMaker [data-mm="crc"][data-c="#ffb43c"]');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
-ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0,"phone":0}', 'a new career has its first season\'s two arrivals to come, and the phone call');
-await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); });   // (they're Story Town's, below)
+ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0,"phone":1}', 'a new career has its first season\'s two arrivals to come, and the phone ringing (the window\'s first day)');
+await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); });   // (they're Story Town's, below)
 let d = await save();
 ok(d.kind === 'manager' && d.manager.name === 'Sam Okafor' && d.clubName === 'Fenmoor Athletic', 'saved: the manager and the club');
 ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
@@ -88,7 +88,7 @@ ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{26}$/.test(p.at) 
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
 // --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market is
-// your phone, not bought (it rings after your 2nd game); the physio, the scouts' house and the academy wait for the next
+// your phone, not bought (it rings on the first day of pre-season); the physio, the scouts' house and the academy wait for the next
 // clubhouses ---------------------------------------------------------------------------------------------------------
 ok(JSON.stringify(d.lv) === '{"club":1,"train":1,"physio":0,"market":0,"scouting":0,"academy":0}' && d.deco.length === 0 && d.youth.length === 0,
   'a new career: the shed, the training pitch, nothing else built, nothing bought, no academy, so no youngsters');
@@ -96,7 +96,7 @@ for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'aca
   await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
   const tabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent)), chip = await page.textContent(`#chCampus [data-bldg="${b}"] .bPrice`);
   if(b === 'market'){ const sect = await page.textContent('#bpBody .bpSect'), body = await page.textContent('#bpBody');
-    ok(!tabs.length && sect === 'YOUR PHONE' && /hasn’t rung yet: it will after your second game/.test(body) && !(await page.$('#bpFoot [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
+    ok(!tabs.length && sect === 'YOUR PHONE' && /hasn’t rung yet: it will when the transfer window opens/.test(body) && !(await page.$('#bpFoot [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
       'market: your phone, not for sale -- it hasn\'t rung yet (locked in the menu)'); }
   else if(['physio', 'scouting', 'academy'].includes(b)){ const sect = await page.textContent('#bpBody .bpSect');
     ok(!tabs.length && /COMES WITH CLUBHOUSE [23]/.test(sect) && await page.$('#bpFoot [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
@@ -106,7 +106,7 @@ for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'aca
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(50);
 }
 
-// --- the market: scout, bid the asking price, sign him -----------------------------------------
+// --- the market: scout, bid a quarter over the asking price (they take that there and then), sign him ---------------
 await page.evaluate(() => { const M = __MG, d = M.d; M.mgMarketOpen(d); M.mgSave(d); M.renderHub(); });   // (the call: see THE FIRST SEASON'S TWO ARRIVALS)
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
 d = await save();
@@ -120,13 +120,14 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   const ask = +(card.match(/ASKING\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
   if(i === 0) ok(!(await page.$('#bpBody [data-mg="scout"]')) && /scouts’ house/.test(await page.textContent('#bpBody')), 'no scouts\' house: his rating a range, and no SCOUT HIM');
   if(/won’t drop/.test(card) || ask > 15000){ await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); continue; }
+  for(let k = 0; k < 5; k++){ await page.click('#bpBody [data-mg="bidstep"][data-dir="1"]'); await page.waitForTimeout(20); }   // (+5% a tap)
   if(await page.$('#bpBody [data-mg="scout"]')){ await page.click('#bpBody [data-mg="scout"]'); await page.waitForTimeout(60); ok(/Scouted/.test(await msg()), 'scouted: ' + await msg()); }
   await page.click('#bpBody [data-mg="bid"]'); await page.waitForTimeout(60);
   info(await msg());
   if(await page.$('#bpBody [data-mg="sign"]')){ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(60); signed = /Signed/.test(await msg()); }
 }
 d = await save();
-ok(signed && d.roster.length === 15 && d.budget < 20000, 'signed a man for the asking price: squad 15, budget ' + d.budget);
+ok(signed && d.roster.length === 15 && d.budget < 20000, 'signed a man for a quarter over the asking price: squad 15, budget ' + d.budget);
 const newMan = d.roster[14];
 ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(14) >= 5, 'he has a contract, and isn\'t taken till you pick him (the bench is five)');
 
@@ -285,7 +286,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.d
 info('the clubhouse: ' + JSON.stringify(r));
 ok(/needs clubhouse 2/.test(r.scout0) && /needs clubhouse 3/.test(r.acad0) && /needs clubhouse 2/.test(r.stad3) && r.stad2 === null && /scouts’ house/.test(r.noScout),
   'the shed: no scouts\' house (clubhouse 2) or academy (3), the stadium to level 2 but not 3, and no scouting');
-ok(/phone rings after your second game/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
+ok(/phone rings on the first day of pre-season/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
   'in the shed the transfer market isn\'t for sale ("' + r.market[0] + '") and the physio waits for clubhouse 2');
 ok(/League 1/.test(r.club2) && /budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 30000,
   'the cabin: not before League 1 (' + r.club2 + '), then $30,000');
@@ -531,15 +532,16 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 await create('Story Town');
 const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); M.mgSave(d); M.renderHub(); return d.md; }, n);
 const story = () => page.evaluate(() => ({ on: document.getElementById('storyModal').classList.contains('on'), text: document.querySelector('#storyModal .stCard').innerText.replace(/\s+/g, ' ') }));
-await games(1); const s1 = await story(); await games(1); const ring = await story();
+const ring = await story();
 await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(60); const call = await story();
-await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(60); const s2 = await story();
+await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(60); const s1 = await story();
 const mk = await page.evaluate(() => ({ market: __MG.d.lv.market, budget: __MG.d.budget, news: __MG.d.news.some(n => /transfers go through your phone/.test(n.t)) }));
-ok(!s1.on && ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /TRANSFERS is open/.test(call.text) && mk.market === 1 && mk.news,
-  'after the 2nd game your phone rings -- ANSWER: the chairman, transfers go through it now ("' + call.text.slice(12, 90) + '..."); TRANSFERS is open, nothing paid');
+ok(ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /Pre-season starts today/.test(call.text) && /TRANSFERS is open/.test(call.text) && !s1.on && mk.market === 1 && mk.news,
+  'on the first day of pre-season your phone rings -- ANSWER: the chairman, transfers go through it now ("' + call.text.slice(12, 90) + '..."); TRANSFERS is open, nothing paid');
+await games(1); const s1b = await story(); await games(1); const s2 = await story();
 const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
 await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); const s3 = await story();
-ok(s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
+ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
   'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
 await games(2); const s4 = await story(); await games(1); const s5 = await story();
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);

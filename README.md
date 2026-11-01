@@ -1197,9 +1197,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **Where to see them**: the Clubhouse's Fixtures tab says how far you are in each, your Champions League group's
       table, and has your cup ties among the league's games; the match report, the season review and the news too.
       A career from before the cups has none that season: they start with its next.
-  - **Your phone rings after your second game.** It's the chairman: from now on transfers go through it -- agents,
-    other clubs, free agents -- and TRANSFERS opens in the menu (ANSWER, then GOT IT). The transfer market is never
-    bought.
+  - **Your phone rings on the first day of pre-season (v83)**, the window's first day: it's the chairman -- from now
+    on transfers go through it (agents, other clubs, free agents) -- and TRANSFERS opens in the menu (ANSWER, then GOT
+    IT). The transfer market is never bought. (It used to ring after your second game.)
   - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
@@ -1208,14 +1208,46 @@ The same game played like any other football game. It's a copy of `index.html` w
     each style does), and he signs for half his wage, to the end of the season after next. Both go straight into
     your squad, even a full one; a card on the hub tells you, and so does the news.
   - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
-    half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another club. His club takes the asking
-    price, may take 85% or more (once), and turns down less. Then you agree his contract: 1 to 4 seasons at the
-    wage he asks. A man rated two leagues above yours won't come. Put a man on the transfer list at your price
+    half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another
+    club (see **Bids** and **What a club asks**). Once a fee's agreed you agree his contract: 1 to 4 seasons at the
+    wage he asks, which isn't up for haggling (see **Wages**). A man rated two leagues above yours won't come. Put a man on the transfer list at your price
     (the market's Selling tab) and clubs bid for him -- most in pre-season and the winter break, now and then in the
     weeks between (now and then they bid for your best men anyway); a bid stands for two weeks; accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
     can't buy or sign anyone until you're back in the black, but selling still works. All of it needs you on the
-    transfer market first: your phone, which rings after your second game (see above); till then nobody's bought,
-    sold or signed, and nobody bids for your men.
+    transfer market first: your phone, which rings on the first day of pre-season (see above); till then nobody's
+    bought, sold or signed, and nobody bids for your men.
+  - **Bids (v83)** aren't a yes or no on the spot. A bid a quarter or more over the club's asking price they take
+    there and then. Over it, as often as not, though they may sit on it to see who else comes in. From 85% of it
+    up, they make you wait while they hear the other offers, and answer on Monday:
+    - **yes**, if they like yours (always, if it's over their price and nobody's bid more);
+    - **the price they want**, if it isn't enough;
+    - **more, with another club in for him**, who's bid more than you. Another club is likelier to come in for a
+      young man (23 and under) and one a bigger league would want. Match their price (the other club's bid and 5%)
+      inside the week and he's yours; leave it, and he goes to them.
+
+    Under 85% they turn it down at once and say roughly what it would take. A counter stands a week: meet it (MEET
+    IT) and he's yours; bid between and they think again; WALK AWAY to drop it. An agreed fee stands until the window
+    shuts. On his card: AGREED (sign him), YOUR BID (they answer on Monday), THEY WANT (and whether another club's
+    in). The Offers tab lists your bids, as well as the clubs' bids for your men. The window shutting ends them all.
+  - **What a club asks (v83)**: each club prices its own men, no two quite alike.
+    - **His rating and his age**: the younger the dearer. A man rated 60 asks about 2.4 times as much at 19 as at 29,
+      four times as much as at 33.
+    - **His potential, as far as the club's scouts can see it.** Each club has its own scouts, better as a rule the
+      higher its league, with plenty either way. A club with poor scouts prices a man on what he is now, whatever he
+      might become; one with good scouts prices what he could be too. A 19-year-old rated 60 with a ceiling of 85
+      asks about the same as one with a ceiling of 60 at a club with no eye for it, and over twice as much at one
+      with the best.
+    - **Its temperament**: 0.85 to 1.25 times the rest, its own. More for one of its first eight, less in the last
+      season of his deal.
+    - **A small club is nobody's fool.** A man in fine form (7.2 and up) gets noticed, as a good scout would see him.
+      Two bids or more over its price for him -- yours, or another club's -- and it knows it has a gem: it sees all
+      of his potential, and asks more than the best of them. What it's heard is forgotten when the window shuts.
+  - **Wages (v83)** are set by how good a man is when he signs (the wage a man of his rating earns), not haggled
+    over, and they stay put. A man who's come on a lot -- worth 30% more than he's paid, with more than this season
+    left on his deal -- asks for a new one: WANTS A NEW DEAL on the squad list, HE WANTS A NEW DEAL on his card, and
+    the news says so. GIVE IT HIM (his new wage from now, the deal no shorter than the one he's on), or NOT NOW: that
+    stings, a point off his mood, and he asks again in eight weeks. Leave him waiting, and every three weeks it costs
+    him a point: twice, and then he stops asking (he won't forget it) and asks again eight weeks on.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
   - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
@@ -1385,8 +1417,8 @@ The same game played like any other football game. It's a copy of `index.html` w
         instructions; 3 the 3-1-3, 1-4-2 and 4-1-2, control possession and direct counter, and the width and crosses
         instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
         the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
-      - **The transfer market** is your phone, not a building on the campus, and not bought: it rings after your
-        second game, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
+      - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
+        day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
         (32% at 4); at half-time they get back a quarter of the legs they've lost without one, 35% at level 1 up to
         65% at 4; between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1

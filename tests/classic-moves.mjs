@@ -297,6 +297,7 @@ ok(ages.one, 'a one-star man is one star at any age; with no age (an exhibition 
 // --- IN A NEW CAREER'S WORLD ----------------------------------------------------------------------------------------
 await cp.click('#smItems [data-act="new"]'); await cp.waitForTimeout(200); await cp.click('#newSlotList .slotBtn >> nth=1'); await cp.waitForTimeout(300);
 await cp.fill('#mgName', 'Sam Okafor'); await cp.fill('#mgClubIn', 'Fenmoor Athletic'); await cp.click('#mgGo'); await cp.waitForSelector('#careerHub.show', { timeout: 8000 });
+if(await cp.isVisible('#storyModal.on')){ await cp.click('#storyModal [data-st="answer"]'); await cp.waitForTimeout(40); await cp.click('#storyModal [data-st="phone"]'); await cp.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
 const world = await cp.evaluate(() => { const S = window.__S, d = S.d, o = { men: 0, gk: true, cb: true, cur: true, low5: 0, fives: [], young: 0, youngShort: true, prime: true };
   for(const t of [1, 2, 3, 4]) for(const id of d.div[t]){ const ps = id === d.clubId ? d.roster : d.world.clubs[id].players;
     for(const p of ps){ o.men++; const sp = S.careerStarPot(p), s = S.careerStars(p);

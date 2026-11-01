@@ -45,6 +45,7 @@ await page.click('#newSlotList .slotBtn >> nth=0');
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+if(await page.isVisible('#storyModal.on')){ await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
 await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once, the days just turn)
 await page.evaluate(() => { const d = window.__S.d; d.lv.train = 4; window.__S.mgSave(d); });   // (every shape, style and instruction: the training pitch's locks are manager-career.mjs's)
 await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(100);
