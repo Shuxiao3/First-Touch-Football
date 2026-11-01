@@ -527,14 +527,16 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **RUN TOUCH and SPRINT TOUCH** (v92) set how far each touch goes on ahead of your man (see **Dribbling (v90)**
     under What's in the engine): running, and knocked on at a sprint. Each goes from half as far as it plays to twice
     as far, in steps: ×0.5, ×0.75, ×1 (to start with), ×1.25, ×1.5, ×2. The chip shows it in metres for your man in
-    the clear. At ×1 that's his Dribbling's, whatever his pace (v95): 1 m running and 2 m sprinting at Dribbling 1,
-    0.65 m and 1.5 m at 5.5, 0.3 m and 1 m at 10. A tap takes it a step longer, round to ×0.5 after ×2; `]` and
+    the clear, to the centimetre under a metre (v98). At ×1 that's his Dribbling's, whatever his pace (v98): 0.3 m
+    running and 1 m sprinting at Dribbling 1, 0.2 m and 0.75 m at 5.5, 0.1 m and 0.5 m at 10 (v95's were 1 m and 2 m,
+    0.65 m and 1.5 m, 0.3 m and 1 m). A tap takes it a step longer, round to ×0.5 after ×2; `]` and
     `[`, or `.` and `,`, take it a step either way, no further than either end. Neither serves a new ball, so you can
     change it in the middle of a run. They're kept in this browser, and they're how everyone dribbles everywhere -- in
-    matches too, the computer's men as well as yours. (Set before v95, they were on other touch lengths, so v95
-    starts them again at ×1.) Measured in the lab with a man up to speed in the clear: running at Dribbling 10, his
-    touches went 0.30 m on at ×1 (the chip said 0.3 M), two a second, and 0.60 m at ×2; flat out, 1.00 m at Dribbling
-    10 (1.0 M) and 2.3 to 2.5 m at 1 (2.0 M: a poor dribbler's touches vary by up to two-fifths either way).
+    matches too, the computer's men as well as yours. (Set before v98, they were on other touch lengths, so v98
+    starts them again at ×1, as v95 did.) Measured in the lab with a man up to speed in the clear (v98): running at
+    Dribbling 10, his touches went 0.10 m on at ×1 (the chip said 0.10 M), about two a second, and 0.20 m at ×2; flat
+    out, 0.49 m at Dribbling 10 (0.50 M) and 0.92 m at 1 (1.0 M: a poor dribbler's touches vary by up to two-fifths
+    either way).
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
     the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Agility and
     Tackling baselines (your man's Dribbling is the DRIBBLING chip's).
@@ -1724,7 +1726,7 @@ test, and like the Trap Lab the values are the game's settings.
   it -- your man and theirs -- and once it's at his feet he takes it the way you push. Held close at a run it stays
   inside his touch (up to 0.13 m further on than stood, where it was 0.27 m). And a touch from his boots goes as far on
   as one did from where touches went from before v96, 1.16 m off him: the knock-on is as it was -- at Dribbling 5.5
-  running, out to about 2.1 m and back -- it just starts from his feet.
+  running, out to about 2.1 m and back on v97's touch lengths (1.7 m on v98's) -- it just starts from his feet.
   - **Driven as a player does** (the stick another way every 0.3 to 0.9 s, now and then let go or sprinting, 24 s,
     three times over, the same on each): the ball off his feet beside or behind him at a run, never (v96: 5% to 9% of
     the time); well out ahead of him in a knock-on, 15% to 24% of the time (v95: 14% to 22%; v96: 2% to 8%); 39 to 47
@@ -1738,7 +1740,8 @@ test, and like the Trap Lab the values are the game's settings.
   up to 0.13 m further on at a run (v97; it was 0.27 m), and drawn in to under 0.5 m as he turns, so it goes round with his feet rather
   than round a ring (it used to be held 1.1 m off, out on the edge of his dotted ring, and swung round it as he
   turned). Running with it, every touch is from his feet -- the ball within 0.84 m of where he stands, in front of him
-  -- and goes on ahead from there (at Dribbling 10 running, out to about 1.7 m and back: as far as before, since v97);
+  -- and goes on ahead from there (at Dribbling 10 running, out to about 1.7 m and back on v97's touch lengths, 1.5 m on
+  v98's);
   none is knocked on from out where his reach ends, as one could be before when he changed his mind or eased off. Off his feet but close (1.16 m)
   he gathers it in. Further off but in his reach while he's holding it close (stood or easing off, about to pass,
   shoot or cross, or with one of theirs about to be on him), he draws it back to his boots with his sole -- a roll at
@@ -1756,10 +1759,16 @@ test, and like the Trap Lab the values are the game's settings.
     match, the ball changing sides 31.6 and 32.9 times, passes 166 and 167 (87% and 89% finding their man). A few more
     of the times it changes sides are tackles (14.5 a match, against 10.5) and there are a few fewer shots (3.7, against
     4.5).
-- **Touch lengths (v92, v94, v95).** How far a touch goes on (see **Dribbling (v90)**) is his Dribbling's, whatever
-  his Speed (v94; before, a quicker man's went further): at a run, 1 m clear of him at Dribbling 1 down to 0.3 m at
-  10; flat out, 2 m down to 1 m; and in between, in between (0.65 m and 1.5 m at 5.5). (v95's; v94's were 1.1 m and
-  3 m at Dribbling 1, 0.6 m and 1.5 m at 10.) Part way from his running pace
+- **Touch lengths (v92, v94, v95, v98).** How far a touch goes on (see **Dribbling (v90)**) is his Dribbling's,
+  whatever his Speed (v94; before, a quicker man's went further): at a run, 0.3 m clear of him at Dribbling 1 down to
+  0.1 m at 10; flat out, 1 m down to 0.5 m; and in between, in between (0.2 m and 0.75 m at 5.5). (v98's; v95's were
+  1 m and 2 m at Dribbling 1, 0.3 m and 1 m at 10; v94's 1.1 m and 3 m, 0.6 m and 1.5 m.) A touch is as short as that
+  -- no floor under it but a nudge (v98; it was 0.27 m) -- and the Dribble Lab's chips show it to the centimetre under
+  a metre (0.10 M, 0.13 M). Measured in play, the ball out ahead of him at its furthest, running: 1.5 m at Dribbling
+  10, 1.7 m at 5.5, 1.9 m at 1 (v97: 1.7, 2.1, 2.3 m); flat out at 5.5, 2.2 m (3.1 m). With it closer to him, it's
+  harder to take off him: over 24 computer-v-computer matches (6 minutes, STAR), 8.4 tackles a match (v97 12.2, v95
+  10.5), the ball changing sides 28.9 times (33.4, 31.6), 173 passes at 89.3% (164, 166), 3.9 shots, 0.88 goals (0.86
+  on v95). Part way from his running pace
   to his sprint, it's part way between; slower than a run, it's shorter (half as far at half his running pace, never
   under 0.45 of it). His running and sprinting pace are as he is now: tired, both are slower, and flat out still
   gets a sprint's touch. RUN TOUCH and SPRINT TOUCH, set in the Dribble Lab, multiply the two (×0.5 to ×2) before a
@@ -1786,8 +1795,8 @@ test, and like the Trap Lab the values are the game's settings.
   slows as a loose ball would, he goes on to it, and when he's on it the next touch goes. It's still his ball the whole
   time, and it's never pulled back to him on a string (it used to be knocked a stride ahead, let go, and snapped back to
   his feet when he got near it). How far a touch goes is his Dribbling's (v94; it was his pace and his Dribbling):
-  running, 0.3 m clear of him at Dribbling 10 and 1 m at 1 (v95), and a poor dribbler's vary far more (a couple of
-  centimetres either way at 10, about 0.2 m at 1); sprinting, it's knocked on 1 m at 10 and 2 m at 1 (see **Touch
+  running, 0.1 m clear of him at Dribbling 10 and 0.3 m at 1 (v98), and a poor dribbler's vary far more (a centimetre
+  either way at 10, about 0.1 m at 1); sprinting, it's knocked on 0.5 m at 10 and 1 m at 1 (see **Touch
   lengths**).
   With one of theirs coming at him he keeps it closer, the better he is the closer (where
   they'll both be in half a second: from 7 m off, closer and closer, down to a twentieth of the touch at Dribbling 10
