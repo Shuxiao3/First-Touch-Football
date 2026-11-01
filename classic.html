@@ -11290,7 +11290,10 @@
     if(!ball.ownedBy&&!gkHold&&kp.claimCd<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&ball.z<60){
       const ballSpd=Math.hypot(ball.vx,ball.vy);
       const inArea=Math.abs(ball.x-glX)<PA_D&&Math.abs(ball.y-YC)<PA_HW;      // a loose ball in his penalty area
-      if(inArea&&ballSpd<420){   // (a slow shot too -- a header, a scuff: he goes to it, and has it if he gets there: see keeperSave)
+      // (but not a cross of theirs still up at their heads: that one he came for, or he's set on his line for the header --
+      // running out under it, he'd neither have it nor be there for the header: v85)
+      const liveX=ball.crossT>0&&ball.crossBy&&ball.crossBy!==kp.team&&ball.z>=34;
+      if(inArea&&ballSpd<420&&!liveX){   // (a slow shot too -- a header, a scuff: he goes to it, and has it if he gets there: see keeperSave)
         const dK=dist(kp,ball);
         let dOpp=1e9;
         for(const q of players)if(q.team!==kp.team)dOpp=Math.min(dOpp,dist(q,ball));
