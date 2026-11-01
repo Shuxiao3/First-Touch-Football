@@ -511,19 +511,34 @@ The same game played like any other football game. It's a copy of `index.html` w
   - The defender sees the ball 0.2 s late and lunges at it when he's close (about 2.3 m, 2.8 m when pressing). The
     lunge is a 0.22 s burst at where he saw it, and it wins the ball if it's showing when he gets there. He then
     needs 0.45 s to recover.
-  - Each move you made is listed with its timing against his lunge, e.g. "he lunged 83 ms later" or "17 ms after he
-    lunged". The tally counts runs, beats, tackles, and for each move how often it was the one that got you past.
+  - **The box** (top left, under the chips; v92) says how your last run went -- BEAT HIM and how long it took,
+    TACKLED, LOST IT or TOO SLOW -- and how many runs you've beaten him in so far (`clear` starts the count again).
+    That's all it says; before your first run, it says how to do a move. (It used to sit across the middle of the
+    screen, listing each move timed against his lunge, with a line of totals under it.)
   - Measured against a closing defender from 10 m: a croqueta started 4.4 m from him beat him 6 times in 8, at 3.6 m
     8 in 8, at 2.8 m 3 in 8, and from 5.2 m or further, or once he'd lunged, never. A rainbow started 5.6 to 6.8 m
     from him beat him 7 times in 12, and from 8 m or further, or at 4.4 m, never.
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
-    (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
+    (whether he slides in), DRIBBLING, RUN TOUCH and SPRINT TOUCH (below), plus the usual NEXT, TIME, NEW BALL and
+    TUNE.
+  - **DRIBBLING** (v92) is your man's Dribbling in the lab: 1, 3, 5.5 (to start with), 8 or 10. A tap (or `V`) takes
+    it to the next one and serves a new ball.
+  - **RUN TOUCH and SPRINT TOUCH** (v92) set how far each touch goes on ahead of your man (see **Dribbling (v90)**
+    under What's in the engine): running, and knocked on at a sprint. Each goes from half as far as it played in v91
+    to twice as far, in steps: ×0.5, ×0.75, ×1 (to start with), ×1.25, ×1.5, ×2. The chip shows it in metres for
+    your man in the clear: at Dribbling 5.5 and ×1, from 0.56 m running and 2.3 m sprinting for the slowest man (Speed
+    1) to 0.97 m and 3.8 m for the quickest (10). The better his Dribbling, the shorter both are (at 10, about a fifth
+    shorter than at 5.5). A tap takes it a step longer, round to ×0.5 after ×2; `]` and `[`, or `.` and `,`, take it
+    a step either way, no further than either end. Neither serves a new ball, so you can change it in the middle of a
+    run. They're kept in this browser, and they're how everyone dribbles everywhere -- in matches too, the computer's
+    men as well as yours. Measured in the lab with a man up to speed in the clear at Dribbling 10: his touches went
+    0.57 m on at ×1 (the chip said 0.6 M) and 1.13 m at ×2; a quicker man's went 0.68 m (0.7 M) and 1.35 m.
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
-    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
-    A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
-    as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
-    measured).
-  - Keys: `1`-`3` distance, `B` defender, `C` slides.
+    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Agility and
+    Tackling baselines (your man's Dribbling is the DRIBBLING chip's).
+    A move's time and distance are the dials' at Dribbling 10. At Dribbling 5.5 a move takes 1.23 times as long and
+    goes 85% as far, so set DRIBBLING to 10 for moves as quick as they were (and as the timings above were measured).
+  - Keys: `1`-`3` distance, `B` defender, `C` slides, `V` Dribbling, `[` `]` run touch, `,` `.` sprint touch.
 
 - **Crossing Lab.** A cross from out on the right, over and over: the computer's, to watch who he picks and how true it
   goes, or yours. Everyone in the box is the computer, exactly as in a match; the lab only clears everyone else off
@@ -1699,6 +1714,10 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Your touch lengths (v92).** How far a touch goes on (see **Dribbling (v90)**) comes in two parts: what it goes
+  at his running pace, and what it's knocked on past that at a sprint. RUN TOUCH and SPRINT TOUCH, set in the Dribble
+  Lab, multiply them (×0.5 to ×2; at ×1 it plays as in v91) before a man of theirs coming at him tightens it and before
+  the touch's own wobble. They're kept in this browser with your settings, and they play for everyone in every match.
 - **After a tackle (v91).** When your man wins the ball off one of theirs with a standing tackle -- or nicks a touch of
   his out in front of him; not with a slide -- then as soon as he has it he gets his back to the man he took it from,
   the ball tight at his feet on his far side, for a split second. That man can't just get up and take it straight back

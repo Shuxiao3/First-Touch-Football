@@ -855,6 +855,12 @@
   .labTallyRow{display:flex;gap:6px;align-items:baseline;justify-content:center;font-size:9.5px;color:var(--ink-dim);
     text-shadow:0 1px 2px #000;flex-wrap:wrap;background:rgba(8,14,9,.72);border-radius:6px;padding:1px 8px;}   /* a pill: it sits on the turf now */
   .labClear{pointer-events:auto;font-family:inherit;font-size:9px;color:var(--dim);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
+  /* the Dribble Lab's box: off to the left, under the chips -- the last run and the tally, nothing more (v92) */
+  #stageWrap[data-labkind="dribble"] #labResult{align-self:flex-start;text-align:left;padding:4px 10px 5px;max-width:min(240px,42%);white-space:normal;}
+  #stageWrap[data-labkind="dribble"] #labResult .dlRes{font-size:13px;letter-spacing:1px;}
+  #stageWrap[data-labkind="dribble"] #labResult .dlTally{display:block;font-size:9px;color:var(--ink-dim);margin-top:1px;}
+  #stageWrap[data-labkind="dribble"] #labResult .dlHow{font-size:9.5px;color:var(--ink-dim);}
+  #stageWrap[data-labkind="dribble"] .labTallyRow{display:none;}
   #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow:hidden;
     background:rgba(8,14,9,.93);border:1px solid var(--edge);border-radius:8px;padding:9px 12px 12px;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .ltHead{display:flex;justify-content:space-between;align-items:center;font-family:'FTC Dot',monospace;font-size:12px;
@@ -870,7 +876,7 @@
     #stageWrap.labTuneOpen #labResult, #stageWrap.labTuneOpen .labTallyRow{display:none;}
     .lgBox{height:36px;}
     #labLow{bottom:16px;left:8px;width:min(220px,36%);}
-    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="dribble"] #labResult, #stageWrap[data-labkind="cross"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
+    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="cross"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
     #stageWrap.labTuneOpen #labLow{display:none !important;}
   }
   /* ===== PIXEL THEME ===================================================================================================
@@ -1400,6 +1406,9 @@
       <button class="labChip" data-kinds="dribble" data-lab="ddef"><i>DEFENDER</i><b id="labDDefV">CLOSES</b><kbd>B</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="ddist"><i>FROM</i><b id="labDDistV">10 M</b><kbd>1-3</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="dslide"><i>SLIDES</i><b id="labDSlideV">OFF</b><kbd>C</kbd></button>
+      <button class="labChip" data-kinds="dribble" data-lab="ddrib"><i>DRIBBLING</i><b id="labDDribV">5.5</b><kbd>V</kbd></button>
+      <button class="labChip" data-kinds="dribble" data-lab="drun"><i>RUN TOUCH</i><b id="labDRunV">0.8 M</b><kbd>[ ]</kbd></button>
+      <button class="labChip" data-kinds="dribble" data-lab="dsprint"><i>SPRINT TOUCH</i><b id="labDSprintV">3 M</b><kbd>, .</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="cwho"><i>CROSSER</i><b id="labCWhoV">COMPUTER</b><kbd>C</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="cfrom"><i>FROM</i><b id="labCFromV">8 M OUT</b><kbd>1-4</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="catk"><i>OURS</i><b id="labCAtkV">2</b><kbd>, .</kbd></button>
@@ -1897,7 +1906,7 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal'};
+  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', dRun:1, dSprint:1};   // (dRun, dSprint: the Dribble Lab's touch lengths)
   const THEMES=['blue','ruby','silver','mint'];
   try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
@@ -2111,7 +2120,7 @@
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
-    dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
+    dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','agility','tackle'],   // (your Dribbling: the lab's chip)
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange','gkHandling'],
     crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
   };
@@ -4010,7 +4019,7 @@
     // SHOOTING LAB: how far out and how wide you shoot from, keeper on/off; recent shots for the goal panel
     sDist:260, sAng:0, sKeep:true, st:null, shots:[],
     // DRIBBLE LAB: how the defender plays you, how far off he starts, whether he slides; the tally
-    dDef:'close', dDist:250, dSlide:false, dt:null,
+    dDef:'close', dDist:250, dSlide:false, dt:null, dDrib:5.5,
     // CROSSING LAB: who crosses, from how far out, how many of ours and of theirs in the box, the keeper; the tally
     cWho:'ai', cFrom:180, cAtk:2, cDef:2, cKeep:true, ct:null, cAll:null,
     trail:[]                              // the ball's path for the pass/shot in play (drawn on the pitch)
@@ -4961,7 +4970,7 @@
   function dlDef(){ return players.find(q=>q.pRole==='labDribDef'); }
   function dribLabSetup(){
     const reds=redList(), D=reds[0];
-    controlled.stats=Object.assign({},controlled.stats,{dribbling:undefined,agility:undefined});   // you dribble off the dials...
+    controlled.stats=Object.assign({},controlled.stats,{dribbling:LAB.dDrib,agility:undefined});   // you dribble at the chip's Dribbling (agility off the dials)...
     if(D){ D.pRole='labDribDef'; D.stats=Object.assign({},D.stats,{agility:undefined,tackle:undefined}); }   // ...and he defends off them
     let n=0; for(const q of players){ if(q===controlled||q===D) continue; q.x=q.team==='G'?60:FW-60; q.y=60+(n++)*30; }
     keepers.forEach(k=>{ k.benched=true; });
@@ -4975,6 +4984,7 @@
     for(const q of [you,D]){ q.vx=q.vy=0; q.state='normal'; q.stateT=0; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.tackleCd=0; q.beatenCd=0; q.runTarget=null; q.stamina=q.staminaCap=1; }
     D.lungeT=0; D.recoverT=0; ftAim=null;
     you.stars=5;                                                       // (every move, to practise them all)
+    you.stats=Object.assign({},you.stats,{dribbling:LAB.dDrib});       // (your Dribbling: the chip's)
     you.x=FW/2-atk*260; you.y=YC; you.facing={x:atk,y:0};
     D.x=you.x+atk*LAB.dDist; D.y=YC; D.facing={x:-atk,y:0};
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
@@ -5015,12 +5025,6 @@
     return true;
   }
   function dribLabOnMove(kind){ const r=LAB.rep; if(!r||r.done) return; r.moves.push({kind,t:simNow-r.t0}); LAB.dirty=true; }
-  // a move against his lunges: how long after the last one it came (null: he hadn't gone), or how soon he went after it
-  function dlTiming(r,m){
-    let after=null, before=null;
-    for(const t of r.lunges){ const d=m.t-t; if(d>=0&&d<0.8&&(after==null||d<after)) after=d; if(d<0&&d>-0.6&&(before==null||-d<before)) before=-d; }
-    return {after,before};
-  }
   function dribLabStep(dt,rdt){
     const r=LAB.rep, you=controlled, D=dlDef();
     if(r&&!r.done&&D){
@@ -5050,15 +5054,28 @@
       case 'Digit1': case 'Digit2': case 'Digit3': LAB.dDist=DL_DISTS[+code.slice(5)-1][0]; break;
       case 'KeyB': { const vs=DL_DEFS.map(a=>a[0]); LAB.dDef=vs[(vs.indexOf(LAB.dDef)+1)%vs.length]; break; }
       case 'KeyC': LAB.dSlide=!LAB.dSlide; break;
+      case 'KeyV': LAB.dDrib=DL_DRIBS[(DL_DRIBS.indexOf(LAB.dDrib)+1)%DL_DRIBS.length]; break;
+      case 'BracketLeft': case 'BracketRight': dlTouchStep('dRun',code==='BracketRight'?1:-1,false); LAB.dirty=true; return true;   // (no new ball: just the touch)
+      case 'Comma': case 'Period': dlTouchStep('dSprint',code==='Period'?1:-1,false); LAB.dirty=true; return true;
       default: return false;
     }
     dribLabServe(); LAB.dirty=true; return true;
   }
+  // your touch lengths: a step along (RUN TOUCH, SPRINT TOUCH), kept in this browser -- by a tap round to the shortest
+  // after the longest, by the keys no further than either end
+  const DL_DRIBS=[1,3,5.5,8,10], DL_TOUCH_K=[0.5,0.75,1,1.25,1.5,2];
+  function dlTouchStep(k,d,wrap){ const i=DL_TOUCH_K.indexOf(PREFS[k]), j=i<0?DL_TOUCH_K.indexOf(1):i, n=DL_TOUCH_K.length;
+    PREFS[k]=DL_TOUCH_K[wrap?(j+d+n)%n:clamp(j+d,0,n-1)]; savePrefs(); }
+  // how far a touch goes on ahead of your man, running and sprinting (in the clear, as it's meant to: metres)
+  function dlTouchM(p,sprint){ return dribTouchBase(p,sprint?sprintSpeedOf(p):runSpeedOf(p))/MK; }
   function dribLabChip(act){
     const nextOf=(arr,v)=>{ const vs=arr.map(a=>a[0]); return vs[(vs.indexOf(v)+1)%vs.length]; };
     if(act==='ddef') LAB.dDef=nextOf(DL_DEFS,LAB.dDef);
     else if(act==='ddist') LAB.dDist=nextOf(DL_DISTS,LAB.dDist);
     else if(act==='dslide') LAB.dSlide=!LAB.dSlide;
+    else if(act==='ddrib') LAB.dDrib=DL_DRIBS[(DL_DRIBS.indexOf(LAB.dDrib)+1)%DL_DRIBS.length];
+    else if(act==='drun'){ dlTouchStep('dRun',1,true); return true; }               // (no new ball: just the touch)
+    else if(act==='dsprint'){ dlTouchStep('dSprint',1,true); return true; }
     else return false;
     dribLabServe(); return true;
   }
@@ -5069,35 +5086,19 @@
     document.getElementById('labDDefV').textContent=plName(DL_DEFS,LAB.dDef);
     document.getElementById('labDDistV').textContent=plName(DL_DISTS,LAB.dDist);
     document.getElementById('labDSlideV').textContent=LAB.dSlide?'ON':'OFF';
-    const r=LAB.rep, shown=r&&(r.moves.length||r.done)?r:LAB.last;
-    labEl.labResult.innerHTML=shown&&(shown.moves.length||shown.done)?dribLabText(shown):dribLabHint();
-    labEl.labTally.textContent=dribLabTallyText();
+    const you=controlled, m1=v=>v.toFixed(v<10?1:0)+' M';
+    document.getElementById('labDDribV').textContent=String(LAB.dDrib);
+    document.getElementById('labDRunV').textContent=m1(dlTouchM(you,false));
+    document.getElementById('labDSprintV').textContent=m1(dlTouchM(you,true));
+    labEl.labResult.innerHTML=dribLabBox();
   }
-  function dribLabHint(){
-    return (isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')
-      +' a move, ahead being the way he\'s going. Get past him with the ball.';
-  }
-  function dribLabText(r){
-    const head=`<span class="lsv">${plName(DL_DEFS,r.def)} · ${plName(DL_DISTS,r.d).toLowerCase()} off${r.slide?' · slides':''}</span>`;
-    const mv=r.moves.map(m=>{ const T=dlTiming(r,m);
-      const when=T.after!=null?`${Math.round(T.after*1000)} ms after he lunged`:T.before!=null?`he lunged ${Math.round(T.before*1000)} ms later`:'he hadn\'t gone';
-      return `<b style="color:#78c8ff">${SKILL_NAME[m.kind]}</b> ${m.t.toFixed(1)}s (${when})`; }).join(' → ');
-    const lg=r.lunges.length?` · he lunged ${r.lunges.length}×`:'';
-    const how=(mv||'no skill moves')+lg;
-    if(!r.done) return `${head} ${how} → …`;
-    const c=DL_COL[r.result];
-    const res=r.result==='beat'?`BEAT HIM in ${(r.endT-r.t0).toFixed(1)} s`:r.result==='tackled'?'TACKLED':r.result==='time'?'TOO SLOW (10 s)':'LOST IT';
-    return `${head} ${how} → <b style="color:${c}">${res}</b>`;
-  }
-  function dribLabTallyText(){
-    const T=dribLabTally();
-    if(!T.n) return LAB.auto?'no runs yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
-                             :'no runs yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
-    const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
-    if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
-    for(const k of SKILL_KINDS){ const m=T.mv[k]; if(m&&m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
-    if(T.beat) parts.push('avg '+(T.beatT/T.beat).toFixed(1)+' s to beat him');
-    return parts.join(' · ');
+  // THE BOX (top left): how the last run went, and how many you've beaten him -- that's all; before any, what to do
+  function dribLabBox(){
+    const T=dribLabTally(), r=LAB.rep, last=r&&r.done?r:LAB.last;
+    if(!last) return '<span class="dlHow">'+(isTouch?'Draw a move from <b>SKILL</b>':'Hold the <b>mouse button</b> and draw a move')+' to get past him</span>';
+    const res=last.result==='beat'?'BEAT HIM':last.result==='tackled'?'TACKLED':last.result==='time'?'TOO SLOW':'LOST IT';
+    return '<b class="dlRes" style="color:'+DL_COL[last.result]+'">'+res+'</b>'+(last.result==='beat'?' <span class="lsv">'+(last.endT-last.t0).toFixed(1)+' s</span>':'')
+      +'<span class="dlTally">'+T.beat+' of '+T.n+' beaten <button class="labClear" data-lab="clear" title="Clear the tally (X)">clear</button></span>';
   }
   function dribLabCamX(){
     const D=dlDef(), you=controlled, mid=D?(you.x+D.x)/2:you.x;
@@ -11162,12 +11163,19 @@
     for(const o of players){ if(o.team===p.team||o.state!=='normal') continue;
       const d=Math.hypot(o.x+o.vx*0.5-(p.x+p.vx*0.5),o.y+o.vy*0.5-(p.y+p.vy*0.5)); if(d<near) near=d; }
     return clamp(1-(near-2.5*MK)/(4.5*MK),0,1); }
+  // a touch's length before a man of theirs near him or its own wobble: his pace (vp) and his Dribbling -- the running
+  // part (a touch at his running pace) and, past it, the sprint's knock-on -- each times your RUN TOUCH and SPRINT TOUCH
+  // (set in the Dribble Lab, kept in this browser: 1 as it plays)
+  function dribTouchBase(p,vp){
+    const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1), run=runSpeedOf(p), rk=PREFS.dRun||1, sk=PREFS.dSprint||1;
+    return (Math.max(7*rk,0.12*vp*rk)+Math.max(0,vp-run)*0.8*sk)*(1.35-0.5*drib)*(P.knockOn.val/120);
+  }
   function dribbleTouchLen(p,vp){
-    const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1), run=runSpeedOf(p);
+    const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1);
     // a man of theirs coming close: he keeps it closer -- the better he is, the closer (dribPress: a touch a fifth of what
     // it would be at Dribbling 1 and a twentieth at 10 with one about to be on him; with one closer still, it's at his feet)
     const tight=1-dribPress(p)*(0.8+0.15*drib);
-    const D=(Math.max(7,0.12*vp)+Math.max(0,vp-run)*0.8)*(1.35-0.5*drib)*tight*(P.knockOn.val/120);
+    const D=dribTouchBase(p,vp)*tight;
     return D*(1+(0.08+0.32*(1-drib))*(P.knockVar.val/0.8)*(Math.random()*2-1));
   }
   // the way he wants to go with it: your stick, or the way the computer's man is facing
