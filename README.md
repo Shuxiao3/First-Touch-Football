@@ -1718,6 +1718,23 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Tapped along under pressure (v99).** Running with it with one of theirs within 3.6 m of him (where they'd both
+  be in half a second), the ball is held at his feet -- that's what makes it hard to take off him -- but it used to sit
+  there dead. In simulated matches with your man driven by the stick, 27% to 30% of the time he ran with the ball it
+  didn't move at his feet at all, and with a defender tracking him a step off it stayed that way for up to 7 s at a
+  time: it looked stuck to his boots, and moving didn't shift it. Now it's tapped along: every 3 m he covers it's
+  pushed out a little -- quickly, a moment out there, then drawn back as he runs on to it -- out to about 1.3 m off him
+  at Dribbling 1 and 1.1 m at 10 (the better the tighter). It's still held: as hard to take, and it turns with his
+  feet, with no tap while he turns hard. Held for a pass, cross, shot or move of yours, with SKILL held, or guarding
+  it after a tackle, it stays tight.
+  - **Measured.** The same simulated matches: frames where the ball's distance from him changed by under 0.13 m in
+    0.6 s as he ran -- frozen to the eye -- 27% to 30% on v98 (38 spells over 0.8 s, the longest 6.8 s), none now. With
+    one of theirs going with him 1.6 m off in the Dribble Lab: v98's ball at 0.81 m the whole way; now 1.0 m to 1.4 m
+    at Dribbling 1, 1.0 m to 1.3 m at 5.5, 1.0 m to 1.2 m at 10, a tap every half second. Letting it go out with real
+    touches under pressure instead was tried and dropped: the computer's men lost it four times as often (35 tackles a
+    match instead of 8), chasing their own touches into the man on them. Computer against computer, 72 matches:
+    tackles 7.0 a match (v98 8.4), the ball changing sides 25 times (28.9), passes 165 at 88.9% (173), goals 0.93
+    (0.88).
 - **Off his feet, he goes to it (v97).** v96 left a gap. Running with it, a ball 0.84 m to 1.16 m off him that wasn't
   in front of him -- just off his feet beside or behind him, as when it had just been played to him, or he turned, or
   changed his mind -- was nobody's: too far off to be at his feet, too near for him to go after it. So he ran on
@@ -1736,7 +1753,7 @@ test, and like the Trap Lab the values are the game's settings.
     men no longer running on without it; passes 164 (88.9% finding their man; 166 at 86.8%, 167 at 88.8%), the ball
     changing sides 33.4 times (31.6, 32.9), goals 1.12 (0.86, 0.92: within what 24 matches can tell).
 - **The ball at his feet (v96).** In control of it -- stood, easing off, about to pass, shoot or cross, or with one of
-  theirs about to be on him -- the ball is at his boots: 0.67 m from where he stands (its edge a step off his feet),
+  theirs about to be on him (tapped along, since v99) -- the ball is at his boots: 0.67 m from where he stands (its edge a step off his feet),
   up to 0.13 m further on at a run (v97; it was 0.27 m), and drawn in to under 0.5 m as he turns, so it goes round with his feet rather
   than round a ring (it used to be held 1.1 m off, out on the edge of his dotted ring, and swung round it as he
   turned). Running with it, every touch is from his feet -- the ball within 0.84 m of where he stands, in front of him
@@ -1800,8 +1817,8 @@ test, and like the Trap Lab the values are the game's settings.
   lengths**).
   With one of theirs coming at him he keeps it closer, the better he is the closer (where
   they'll both be in half a second: from 7 m off, closer and closer, down to a twentieth of the touch at Dribbling 10
-  and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, close control as it always was. Slow or
-  stood, it's at his feet too.
+  and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, held -- tapped along at a run (v99:
+  see **Tapped along under pressure (v99)**). Slow or stood, it's at his feet too.
   - **Where it goes.** Push the stick another way: with the ball at his feet in front of him he takes it that way at
     once; with it off his feet -- further on, or beside or behind him -- he goes to it first (since v96 he never
     touches it on from out where his reach ends, and since v97 never runs on without it).
