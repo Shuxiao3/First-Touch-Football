@@ -1699,6 +1699,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The magnet (v88).** The ball loose a stride or two from your man (within 2.6 m) -- your own knock-on or a heavy
+  touch, one that's come off him, one knocked loose -- and he's drawn to it until it's at his feet. Whichever way you're
+  pushing, he bends toward it: a quarter of the way at the edge of the pull, up to 60% right by it, half that if you're
+  pushing away from it. With the stick left alone he goes to it. It doesn't pull him toward a shot or a cross, our pass
+  on its way to someone else, a ball going away from him quicker than he can run, or one of theirs knocked on in their
+  own stride. It only steers him: the ball's never his until it's at his feet. (You'd run on thinking you had it, and
+  one of theirs would pick it up.)
 - **The keeper's way to a cross (v87).** Deciding whether to come for a cross, the keeper now looks at his way to where
   he'd take it. He can't go through one of theirs: one in his way he has to go round (it costs him time, about a quarter
   of a second); two or more and it's shut, and he won't go. Nor will he go for one dropping among two or more of theirs

@@ -5549,8 +5549,31 @@
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
-    if(!ix&&!iy&&controlled&&myLooseBall()&&ball.z<12){ const dx=ball.x-controlled.x, dy=ball.y-controlled.y, d=Math.hypot(dx,dy)||1; return {ix:dx/d, iy:dy/d}; }
+    const mg=magnetPull(controlled,ix,iy); if(mg) return mg;            // (a loose ball by you: see MAGNET)
     return{ix,iy};
+  }
+  // THE MAGNET (v88): the ball loose a stride or two from your man -- your own knock-on or a heavy touch, one that's come
+  // off him, one knocked loose -- and he's drawn to it till it's at his feet. Whichever way you're pushing he bends toward
+  // it (MAG_K: a little at the edge of the pull, more the nearer it is; less if you're pushing away from it), and with the
+  // stick left alone he goes to it. Not a shot or a cross, nor our pass on its way to someone else, nor a ball going away
+  // from him quicker than he can run, nor one of theirs knocked on in their own stride. It's never his till it's at his
+  // feet: the magnet only steers him.
+  const MAG_R=2.6*MK, MAG_K=[0.25,0.6], MAG_FAST=380;
+  function magnetPull(p,ix,iy){
+    if(!p||ball.ownedBy||gkHold||ball.z>=24||p.state!=='normal'||skillOf(p)||LAB.on) return null;
+    if(ball.shotT>0||ball.crossT>0) return null;                                        // (a shot or a cross on its way)
+    const r=ball.intendedRcv; if(r&&r!==p&&ball.lastTouch===r.team) return null;        // (a pass on its way to someone else)
+    if(ball.dribbler&&ball.dribbler!==p&&ball.dribbleGrace>0) return null;              // (someone else's knock-on: his, or one of theirs in his stride)
+    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
+    if(d>MAG_R||d<1) return null;
+    const ux=dx/d, uy=dy/d, bs=Math.hypot(ball.vx,ball.vy);
+    if(bs>MAG_FAST&&!(ball.dribbler===p&&ball.dribbleGrace>0)) return null;             // (a ball hit, not a loose one)
+    if((ball.vx*ux+ball.vy*uy)>sprintSpeedOf(p)*0.9) return null;                       // (going away from him quicker than he can run)
+    if(!ix&&!iy) return {ix:ux, iy:uy};                                                 // (stick alone: he goes to it)
+    const into=ix*ux+iy*uy, near=1-d/MAG_R;
+    let k=MAG_K[0]+(MAG_K[1]-MAG_K[0])*near; if(into<0) k*=0.5;                          // (pushing away from it: less)
+    let mx=ix*(1-k)+ux*k, my=iy*(1-k)+uy*k; const ml=Math.hypot(mx,my)||1;
+    const il=Math.hypot(ix,iy); return {ix:mx/ml*il, iy:my/ml*il};
   }
 
   // PASS ACCURACY stat (1..10) -> short-pass accuracy (0.92=>1, 0.97=>10) and long-pass accuracy
