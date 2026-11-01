@@ -1699,6 +1699,30 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Dribbling (v90).** Running with the ball, each touch goes on ahead of your man and waits for him: it rolls on and
+  slows as a loose ball would, he goes on to it, and when he's on it the next touch goes. It's still his ball the whole
+  time, and it's never pulled back to him on a string (it used to be knocked a stride ahead, let go, and snapped back to
+  his feet when he got near it). How far a touch goes is his pace and his Dribbling: running, up to about 1 m clear of
+  him at Dribbling 10 and 1.4 m at 1, and a poor dribbler's vary far more (a few centimetres either way at 10, about
+  0.2 m at 1); sprinting, it's knocked on 3 m and more. With one of theirs coming at him he keeps it closer, the better he is the closer (where
+  they'll both be in half a second: from 7 m off, closer and closer, down to a twentieth of the touch at Dribbling 10
+  and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, close control as it always was. Slow or
+  stood, it's at his feet too.
+  - **Where it goes.** Push the stick another way: with the ball still in his reach he takes it that way at once; with
+    it further on, he goes on to it first. Either way the touch goes as far round from his run as one touch takes it
+    (57° at Dribbling 1 up to 92° at 10, a third less flat out, and less turning into a stronger man on him), so a sharp
+    turn takes a touch or two. Ease off with it in his reach and he takes another, gentler touch. Let go of the stick
+    and he goes on to it and stops with it at his feet.
+  - **Passing, shooting, crossing or a move with it out ahead** goes when he's on it (asked for up to a second before).
+    While one's coming, he doesn't knock it on again.
+  - **Out in front it's on show.** One of theirs who gets to it first takes it, as he'd take a loose ball, and our man,
+    who wasn't touched, stays on his feet; the further ahead of him it is, the surer. At his feet, a tackle is as it
+    was. Only if it gets right away from him (1.5 m past where the touch should have got to: he's held off it, say) is
+    it a loose ball, his touch, for him to go and get (the magnet draws him to it).
+  - **The computer's men dribble the same way,** and get on to their touch before they do anything else with it.
+  - **Measured** (computer against computer, six 6-minute matches each way, everyone dribbling): the ball changed sides
+    35 times a match, against 25.5 before -- a touch out in front can be nicked -- and there were more shots (5.7 a match
+    against 3.2) and goals (11 against 5). Passing held up (89% found their man, against 85%).
 - **Difficulty (v89).** Five levels -- RELAXED, NORMAL, PRO, STAR and CHAMPION -- a row in SETTINGS, and a tap on the
   chip under the title on the exhibition screen (it goes on to the next, CHAMPION round to RELAXED). A fresh browser
   starts at NORMAL; it's kept. STAR is the computer at full strength, as it always played; CHAMPION a notch past it. It
@@ -1807,8 +1831,8 @@ test, and like the Trap Lab the values are the game's settings.
   playing style; see [Playing styles](#playing-styles).
 - **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.4 m/s
   flat out at 1, up to 6.6 and 9.1 m/s at 10. With the ball at his feet he's slower, by a fifth at
-  Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
-  it, and running with it at a jog tires him a little (well under half what it once did); without the
+  Dribbling 1 and a twentieth at 10 (his touch out ahead of him doesn't slow him: see Dribbling). Sprinting with it
+  tires him a little more than sprinting without it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
   him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
 - **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
@@ -1872,7 +1896,7 @@ test, and like the Trap Lab the values are the game's settings.
   next attack. By full time a side has used a good part of its legs (the ceiling on its stamina is
   around 0.6–0.75), not all of them.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
-  knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
+  touches it on ahead of him (still his: see Dribbling), and a pass takes a moment to arrive; through both it's still
   his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a
   block. Only the man it's for goes after it. It's nobody's ball only after a tackle or a deflection, a
   clearance, or a pass that's gone astray. Each side's shape shifts off where it sees the ball, a beat
