@@ -1730,7 +1730,7 @@
     heading:{val:5.5,min:1,max:10,step:0.1,label:'Heading (stat 1–10)',hint:'Attacking headers: power (1≈200 → 10≈500 px/s), aerial-duel win rate vs the opponent (1≈0.1 → 10≈1.0), and accuracy (1≈0.2 → 10≈0.8).'},
     passLoft:{val:2.1,min:0.3,max:2.5,step:0.05,label:'Pass loft',hint:'Universal multiplier on pass arc (a normal pass, yours and the AI\'s). 1.0 = calibrated to land at the receiver. Higher = floatier; lower = flatter and faster through the air. A double-tapped lofted pass has its own hang-time dial.'},
     passPace:{val:1,min:0.7,max:1.4,step:0.02,label:'Pass pace ×',hint:'How firmly a normal pass is struck, yours and the AI\'s. 1 = solved to reach the receiver with some zip left. Higher = it gets there sooner but arrives harder to control; lower = softer and slower.'},
-    headClear:{val:470,min:200,max:800,step:10,label:'Heading: clearance dist',hint:'How far a DEFENSIVE header is booted clear toward a teammate. Still a separate dial — give endpoints to fold it into the Heading stat.'},
+    headClear:{val:470,min:200,max:800,step:10,label:'Heading: clearance dist',hint:'How far a DEFENSIVE header goes, by the Heading stat (470 = as it plays: from 8 m out, stopping ~13 m away at Heading 3, ~17 m at 5.5, ~21 m at 9). A header is not a boot: never as far as a kick.'},
     keeperSpd: {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper speed (stat 1–10)',hint:'Keeper movement as a 1–10 stat. 1 = 80, 10 = 140. How fast they shuffle on the line and come out.'},
     gkReach:   {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reach (stat 1–10)',hint:'Save radius — how far the keeper grabs or parries a shot WITHOUT diving, as a 1–10 stat. 1 = 14, 10 = 24.'},
     gkReflex:  {val:5.5, min:1,   max:10,  step:0.1, label:'Keeper reflexes (stat 1–10)',hint:'How fast the keeper reacts when a shot is struck — a shorter delay before it can move or dive. 1 = 0.00 (sluggish), 10 = 0.60 (sharp). '},
@@ -5564,7 +5564,9 @@
   // HEADING stat -> header power, aerial-duel win rate (vs the opponent), and header accuracy.
   function headingOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.1, 1.0); }     // aerial-duel win value
   function headAccOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.2, 0.8); }     // header accuracy
-  function headClearOf(p){ return P.headClear.val; }     // defensive clearance distance (still a dial)
+  // defensive clearance: how hard he heads it away, by his Heading (and the dial): the forehead, not a boot -- from 8 m
+  // out it stops ~13 m away at Heading 3, ~17 m at 5.5, ~21 m at 9 (v85: it was the dial alone, and went 20-40 m)
+  function headClearOf(p){ return (headPowerOf(p)*0.5+110)*(P.headClear.val/470); }
   function headPowerOf(p){ return statLerp(statOf(p,'heading',P.heading.val), 200, 500); }     // attacking header launch power
   // PASS spray: a signed angular error (radians). Base drift from the passer's short-pass accuracy,
   // PLUS a distance term that grows sharply as their long-pass accuracy drops. shortOverride lets a
@@ -6117,18 +6119,18 @@
   // 10, on what his Shot power gives it) and the more surely and truly it finds a team-mate upfield -- one within reach,
   // ahead of him and free of theirs where it drops (cone: how far off the way it was going he'll look; T: its flight
   // time). -> {dx,dy}: the way it goes; D: how far; err: its spread (radians); q: the man it's for, if any.
-  function clearTarget(p,dx,dy,cone,Dmax,T){
-    const atk=atkOf(p.team), a0=Math.atan2(dy,dx); let best=null, bs=-1e9;
+  function clearTarget(p,dx,dy,cone,Dmax,T,dmin){
+    const atk=atkOf(p.team), a0=Math.atan2(dy,dx), d0=dmin??240; let best=null, bs=-1e9;   // (dmin: the nearest he'll look -- a header's nearer)
     for(const q of teamOf(p.team)){ if(q===p||q.state!=='normal') continue;
       const lx=q.x+(q.vx||0)*0.6, ly=q.y+(q.vy||0)*0.6, ex=lx-p.x, ey=ly-p.y, d=Math.hypot(ex,ey);
-      if(atk*ex<180 || d<240 || d>Dmax*1.1) continue;
+      if(atk*ex<d0*0.75 || d<d0 || d>Dmax*1.1) continue;
       let da=Math.abs(Math.atan2(ey,ex)-a0); if(da>Math.PI) da=2*Math.PI-da; if(da>cone) continue;
       const spare=oppTimeTo(p.team,lx,ly)-T;
       const sc=clamp(spare,-1,1.5)*2 + atk*ex/600 - da*0.5;
       if(spare>-0.2 && sc>bs){ bs=sc; best={q,x:lx,y:ly,d}; } }
     return best; }
   function clearAim(p,dx,dy,cone,T){
-    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), Dmax=statLerp(statOf(p,'shotPower',P.shotPower.val),470,610)*(0.85+0.45*iq);
+    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), Dmax=statLerp(statOf(p,'shotPower',P.shotPower.val),580,680)*(0.85+0.45*iq);   // (v85: a good one stops round halfway)
     const tg=Math.random()<0.25+0.75*iq ? clearTarget(p,dx,dy,cone,Dmax,T) : null;
     if(tg) return {dx:(tg.x-p.x)/tg.d, dy:(tg.y-p.y)/tg.d, D:clamp(tg.d,300,Dmax), err:0.02+0.06*(1-iq), q:tg.q};
     return {dx, dy, D:Dmax, err:0.02+0.06*(1-iq), q:null};
@@ -6655,8 +6657,8 @@
     if(LAB.on&&LAB.kind==='cross') crossLabOnHead(p,'clear');
     const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), cq=crossCurlQ();   // (a curling cross: up to a fifth less far, twice as wild)
     let dx=atkOf(p.team), dy=(ball.y>=YC?1:-1)*0.6; const l=Math.hypot(dx,dy); dx/=l; dy/=l;
-    const sp=(headPowerOf(p)*0.8+120)*(0.9+0.25*iq)*(1-0.2*cq);
-    const tg=Math.random()<(0.15+0.6*iq)*(1-0.5*cq) ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77) : null;   // (in the air ~0.77 s)
+    const sp=headClearOf(p)*(0.9+0.25*iq)*(1-0.2*cq);
+    const tg=Math.random()<(0.15+0.6*iq)*(1-0.5*cq) ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77,sp*0.35) : null;   // (in the air ~0.77 s; a man nearer than a kick's)
     if(tg){ dx=(tg.x-p.x)/tg.d; dy=(tg.y-p.y)/tg.d; }
     const err=(0.04+0.12*(1-iq))*(1+cq)*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
     ball.vx=(dx*ca-dy*sa)*sp; ball.vy=(dx*sa+dy*ca)*sp; ball.vz=200;
@@ -6742,7 +6744,7 @@
       const ca=Math.cos(dev),sa=Math.sin(dev);
       const cx=dxh*ca-dyh*sa, cy=dxh*sa+dyh*ca;
       const incoming=Math.hypot(ball.vx,ball.vy);
-      const speed=(headClearOf(p)+incoming*0.25)*(0.9+0.25*diq);     // how far you head it out (the dial, and Def IQ)
+      const speed=(headClearOf(p)+incoming*0.08)*(0.9+0.25*diq);     // how far you head it out (Heading, a little of the cross's pace, and Def IQ)
       ball.vx=cx*speed; ball.vy=cy*speed;
       ball.vz=180;                             // headed up & away
       ball.cushBy=null;ball.ownedBy=null;ball.lastTouch=p.team;ball.crossT=0;
@@ -7249,7 +7251,9 @@
       if(d<min&&d>0.001){
         const nx=(b.x-a.x)/d,ny=(b.y-a.y)/d,overlap=(min-d);
         const sa=holdStrength(a), sb=holdStrength(b), sa3=sa*sa*sa, sb3=sb*sb*sb;   // (a man shielding it is planted)
-        const aShare=clamp(sb3/(sa3+sb3),0.04,0.96), bShare=1-aShare;     // (the stronger holds his ground)
+        let aShare=clamp(sb3/(sa3+sb3),0.04,0.96);                       // (the stronger holds his ground)
+        if(a.team===b.team&&(a.mode==='claimX'||b.mode==='claimX')) aShare=a.mode==='claimX'?0:1;   // (a keeper coming for a cross: his own men make way)
+        const bShare=1-aShare;
         a.x-=nx*overlap*aShare; a.y-=ny*overlap*aShare;
         b.x+=nx*overlap*bShare; b.y+=ny*overlap*bShare;
         // THE BARGE: the stronger man's speed into the contact knocks the weaker one off his line (outfield only)
@@ -9244,7 +9248,7 @@
       const H=crossDefend(p,ownGoalX,atk);
       if(H){
         p.aerialT=simNow;
-        if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt()){
+        if(dist(p,ball)<48&&p.z<=0&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt(p.team)){
           if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
           const r=aerialRival(p);
           if(r&&Math.random()>1-aerialOdds(r,p)-CURL_HEAD*crossCurlQ()){ if(r!==controlled) headOnGoal(r); }   // (yours: your K does it; a curling one's harder)
@@ -11030,25 +11034,45 @@
   function cageKeeper(kp,out){
     if(kp.diveT>0||kp.groundT>0) return;                 // mid-dive: let the lunge extend past the post
     const gl=kp.side<0?0:FW, maxOut=out?PA_D:120;        // never stray more than ~120px off the goal line (out closing a man down: his box)
-    kp.x = kp.side<0 ? clamp(kp.x,gl,gl+maxOut) : clamp(kp.x,gl-maxOut,gl);
     const lim=out?PA_HW-kp.r:GOAL_W/2-kp.r;              // and never sit outside the posts laterally (or his box)
-    kp.y = clamp(kp.y, YC-lim, YC+lim);
+    // (but caught well outside it -- he'd come for a cross, and there's a shot on: see the return -- he isn't put back in
+    // it at a jump: he gets back himself, as he tracks the ball)
+    if(Math.abs(kp.x-gl)<=maxOut+8) kp.x = kp.side<0 ? clamp(kp.x,gl,gl+maxOut) : clamp(kp.x,gl-maxOut,gl);
+    if(Math.abs(kp.y-YC)<=lim+8) kp.y = clamp(kp.y, YC-lim, YC+lim);
   }
   // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
   // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
-  // flies (see the physics step).
+  // flies (see the physics step). Deciding to come, he takes a moment to read it (0.12 s); once he's coming (committed),
+  // he's reading it all the way -- and a ball at his hands now counts (v85: it used to look only ahead, a moment's read
+  // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
+  // whole of his box (a ball he's already gone for).
   const GK_CLAIM_H=PLAYER_H*2.4;
-  function crossClaim(kp){
+  function crossClaim(kp,committed,wide){
     const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
-    for(let t=0.04;t<=1.6;t+=0.04){
+    const react=committed?0:0.12, dX=wide?PA_D:GA_D+80, dY=wide?PA_HW:GA_HW+60;
+    for(let t=committed?0:0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach
-      const B=ballAt(t), x=B.x, y=B.y;                                 // (its curl too)
-      if(Math.abs(x-glX)>GA_D+80||Math.abs(y-YC)>GA_HW+60) continue;   // outside his patch
-      if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+0.12<=t) return {x,y,t};   // (a moment to read it)
+      const B=t>0?ballAt(t):{x:ball.x,y:ball.y}, x=B.x, y=B.y;         // (its curl too)
+      if(Math.abs(x-glX)>dX||Math.abs(y-YC)>dY) continue;              // outside his patch
+      if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+react<=t) return {x,y,t};
     }
     return null;
   }
+  // AT HIS HANDS (a cross he's come for, or a ball in the air he's gone at): catch it or punch it -- by the nearest he can
+  // get it to his body in the next moment (it coming on, him going to it, while it's still up), he's comfortable and
+  // catches it, or only gets there at the end of his reach, and punches it clear; and with one of theirs up with him, he
+  // punches anything that isn't already in his midriff. -> true if he's dealt with it
+  function gkTakeCross(kp,spd){
+    const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ()), dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
+    if(!(dd<R&&ball.z<=GK_CLAIM_H+8)) return false;
+    let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*1.25*t)); }
+    const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50);
+    if(far>0.8||(rival&&dd/R>0.3)){ keeperPunch(kp); return true; }
+    kp.gkRoaming=false; kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
+    ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
+    lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
+    return true; }
   // A PUNCH: off his fists, up and away to the side the ball's on, 12 to 18 m out of the danger, nobody's ball. The cross is
   // dead; he heads back to his line.
   function keeperPunch(kp){
@@ -11060,8 +11084,12 @@
     lastGrade='PUNCHED'; gradeColor='#ffb43c'; gradeFade=1.2;
     if(LAB.on&&LAB.kind==='cross'&&LAB.rep&&LAB.rep.cross) crossLabFinish('punched');
   }
-  // a keeper coming for a cross is at it: the men going up for it leave it to him
-  function keeperOnIt(){ for(const k of keepers) if(k.mode==='claimX'&&Math.hypot(ball.x-k.x,ball.y-k.y)<reachOf(k)+ball.r+14) return true; return false; }
+  // a keeper coming for a cross is at it: the men going up for it leave it to him -- and his own (team: whose man it
+  // is) leave it to him a moment sooner, once he's nearly there and calling for it (v85: one of ours nodded it off his
+  // fingertips, feebly, to one of theirs)
+  function keeperOnIt(team){ for(const k of keepers) if(k.mode==='claimX'){
+    if(Math.hypot(ball.x-k.x,ball.y-k.y)<reachOf(k)+ball.r+14) return true;
+    if(k.team===team){ const cs=crossClaim(k,true); if(cs&&cs.t<=0.3) return true; } } return false; }
   function keeperUpdate(kp,dt){
     if(kp.benched){ kp.x=kp.homeX+kp.side*90; kp.y=-80; kp.diveT=0; kp.groundT=0; return; }   // Shooting Lab, keeper off: nowhere near it
     kp.claimCd-=dt; if(kp.punchT>0) kp.punchT-=dt; if(kp.beatT>0) kp.beatT-=dt; if(kp.spreadDn>0) kp.spreadDn-=dt;
@@ -11106,10 +11134,15 @@
       } else {
         if(Math.abs(ball.x-gl)>PA_D+40){ kp.mode='return';return; }   // left his penalty area: back to the line
       }
-      const dx=ball.x-kp.x,dy=ball.y-kp.y,l=Math.hypot(dx,dy)||1;
+      // a ball in the air: where it comes down within his reach (he's reading it), not where it is -- running at where it
+      // is, he ran in under it and it dropped behind him (v85)
+      // (and one he can't get at his hands, where it lands)
+      const air=ball.z>8&&!kp.gkRoaming; let tx=ball.x, ty=ball.y;
+      if(air){ const cs=crossClaim(kp,true,true), L=cs||ballAt((ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+1040*ball.z)))/520); tx=L.x; ty=L.y; }
+      const dx=tx-kp.x,dy=ty-kp.y,l=Math.hypot(dx,dy)||1, mvc=Math.min(l,spd*1.12*dt);
       if(players.some(q=>q.team!==kp.team&&q.state==='normal'&&Math.hypot(q.x-ball.x,q.y-ball.y)<3*PX_M)) kp.closeT=simNow;   // (one of theirs at it: see spreadBlock)
-      kp.x+=dx/l*spd*1.12*dt;
-      kp.y+=dy/l*spd*1.12*dt;
+      kp.x+=dx/l*mvc;
+      kp.y+=dy/l*mvc;
       // Clamp movement to his zone: the whole of his penalty area, or out to his third when sweeping
       if(kp.gkRoaming){
         kp.x=kp.side<0?clamp(kp.x,gl,FW/3):clamp(kp.x,FW*2/3,gl);
@@ -11118,6 +11151,7 @@
         kp.x=kp.side<0?clamp(kp.x,gl,gl+PA_D):clamp(kp.x,gl-PA_D,gl);
         kp.y=clamp(kp.y,YC-(PA_HW-kp.r),YC+(PA_HW-kp.r));
       }
+      if(air&&ball.z>=34&&ball.shotT<=0&&Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW&&gkTakeCross(kp,spd)) return;   // (up at his hands, in his box)
       if(dist(kp,ball)<kp.r+ball.r+6&&ball.z<34){
         const inBox=Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW;      // hands: anywhere in his penalty area
         if(ball.shotT>0&&ball.shotBy!==kp.team&&inBox&&!(kp.beatT>0)){ kp.gkRoaming=false; kp.mode='line'; keeperSave(kp,ball.x-kp.x,ball.y-kp.y,Math.hypot(ball.vx,ball.vy)); return; }   // (a shot: the save, as on his line)
@@ -11145,6 +11179,9 @@
     // -- he comes for it (from his line, or on his way back to it) and catches it, over their heads
     if((kp.mode==='line'||kp.mode==='return')&&kp.claimCd<=0&&ball.crossT>0&&ball.crossBy&&ball.crossBy!==kp.team&&!ball.ownedBy&&!gkHold&&ball.z>0
        &&kp.diveT<=0&&kp.groundT<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&!(LAB.on&&LAB.kind==='shoot')&&crossClaim(kp)) kp.mode='claimX';
+    // (a shot on him as he gets back -- one of theirs heading it on after he's come for it: he's set for it where he is,
+    // and saves what he can -- see the save, below. v85: on his way back he was a spectator)
+    if(kp.mode==='return'&&ball.shotT>0&&ball.shotBy&&ball.shotBy!==kp.team&&!ball.ownedBy&&!gkHold&&scoredT<=0) kp.mode='line';
     if(kp.mode==='return'){
       kp.x+=clamp(kp.homeX-kp.x,-spd*dt,spd*dt);
       kp.y+=clamp(YC-kp.y,-spd*dt,spd*dt);
@@ -11152,23 +11189,14 @@
       return;
     }
     if(kp.mode==='claimX'){
-      const cs=(!ball.ownedBy&&!gkHold&&scoredT<=0&&offsideT<=0&&restartT<=0)?crossClaim(kp):null;
+      const live=!ball.ownedBy&&!gkHold&&scoredT<=0&&offsideT<=0&&restartT<=0;
+      if(live&&gkTakeCross(kp,spd)) return;                             // (at his hands: his)
+      const cs=live?crossClaim(kp,true):null;
       if(!cs){ kp.mode='return'; return; }                // (headed on, cleared, or he can't get there now)
       const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
       kp.x+=dx/l*mv; kp.y+=dy/l*mv;
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
-      const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ()), dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
-      if(dd<R&&ball.z<=GK_CLAIM_H+8){
-        // CATCH IT OR PUNCH IT: by the nearest he can get it to his body in the next moment (it coming on, him going to it,
-        // while it's still up), he's comfortable and catches it -- or only gets there at the end of his reach, and punches
-        // it clear; and with one of theirs up with him, he punches anything that isn't already in his midriff
-        let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*1.25*t)); }
-        const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50);
-        if(far>0.8||(rival&&dd/R>0.3)){ keeperPunch(kp); return; }
-        kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
-        ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
-        lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
-      }
+      gkTakeCross(kp,spd);
       return;
     }
 

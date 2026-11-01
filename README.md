@@ -1699,6 +1699,26 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Clearances and crosses (v85).**
+  - **A header is a forehead, not a boot.** How far a defensive header goes is the man's Heading now (it was a dial
+    alone). From 8 m out in front of his own goal, the computer's stops some 13 m away at Heading 3, 17 m at 5.5 and
+    22 m at 9 (it was 18 / 23 / 32 m). Yours (J) goes a little further, off a cross with pace on it: 15 / 19 / 24 m (it
+    was 33 / 36 / 39 m -- a quarter of the cross's pace went into it, now a twelfth). A header looks for a team-mate
+    nearer than a kick does.
+  - **A clearance by foot carries to about halfway.** From 8 m out it stops 34 m away rated 3 in Shot power and Def
+    IQ, 41 m at 5.5 (halfway is 42 m on) and 51 m at 9 (it was 29 / 35 / 43 m).
+  - **A keeper coming for a cross gets it.** He used to read where a cross would come down only ahead of him, and only
+    after a moment's read. Going in under one coming across him, that read ran out just before he got there (it would
+    never come down within his reach after another moment), so he turned back for his line as it reached his hands, and
+    one of theirs headed it into the goal he'd left. Now, once he's coming, he's reading it all the way, and a ball at
+    his hands is his: caught when he's comfortable, punched at a stretch or with one of theirs up with him. His own men
+    leave it to him once he's nearly there and calling for it, and make way for him (they were nodding it off his
+    fingertips, and blocking his run). A loose ball in the air in his box, he goes to where it comes down, not where it
+    is. And on his way back to his line he's still a keeper: a shot on him he saves if he can (he was a spectator), and
+    he isn't jerked back to his line in a frame -- he gets back himself.
+  - **Measured:** their crosses into our box from the byline and from 18 m out on the wing, toward 7, 9, 11 and 13 m
+    out, one of theirs attacking each and one of ours marking him, 16 of each (128 in all). Goals 41 → 17. He came for
+    35 → 42 of them; of those he let in 23 → 0, and got (caught or punched) 5 → 42.
 - **The kick-off (v84)** -- at the start, after a goal (the side that conceded) and to start the second half (Red):
   everyone is in his own half, a metre short of halfway at least, and the side not kicking off is outside the
   centre circle. The kicking side's most advanced man in the middle stands over the ball on the spot. Play holds
