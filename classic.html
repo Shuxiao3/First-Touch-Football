@@ -1482,7 +1482,7 @@
 <div id="layoutEd">
   <div class="leStage" id="leStage">
     <div class="leZone leL"><b>MOVE</b><span>drag anywhere on this side</span></div>
-    <div class="leZone leR"><b>SWITCH</b><span>tap a team-mate: switch to him (or pass to him, with the ball) · tap anywhere else to switch</span></div>
+    <div class="leZone leR"><b>SWITCH</b><span>tap a team-mate: switch to him (or pass to him, with the ball) · tap anywhere else to switch · hold SWITCH: your man jockeys by himself</span></div>
     <div class="leB" data-k="kick">PASS</div><div class="leB" data-k="shoot">SHOOT</div><div class="leB" data-k="cross">CROSS</div><div class="leB" data-k="skill">SKILL</div>
   </div>
   <div class="leBar">
@@ -1582,7 +1582,7 @@
     other way. <b>Tactics</b> for both teams (press / neutral / low block · neutral / wing / counter). <b>L</b> crosses
     when you have the ball, or <b>requests a cross</b> when you don\u2019t (a wide teammate whips it toward you); in
     your own half it <b>clears</b> instead (first time, no control needed) ·
-    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · J or SPACE switches player (towards the way you're pushing), or click one. <b>FREE PLAY</b> for shooting practice.
+    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · J or SPACE switches player (towards the way you're pushing), or click one; hold J while they have it and your man jockeys the man on the ball by himself (AUTO DEFEND). <b>FREE PLAY</b> for shooting practice.
   </p>
 </div>
 
@@ -2850,6 +2850,57 @@
     }
   }
   const canSwitch=()=>!LAB.on&&!practice&&!matchOver;
+  // AUTO DEFEND (v86): HOLD SWITCH -- J, or the PASS/SWITCH button -- while they have it, and your man defends by
+  // himself. He JOCKEYS the man on the ball: goal-side of him, a few metres off (never tight: AD_GAP), square to him,
+  // shuffling with him rather than diving in -- and out wide, where a cross is on, he's across into its way to block it
+  // (see crossBlock). How well is his Def IQ: how soon and how truly he reads the man (the computer's own reads:
+  // perceived, readRun), how near the right spot he holds (AD_ERR off it at Def IQ 1, on it at 10), how quickly he
+  // turns to face him. He never tackles by himself -- that's still yours -- and a man jockeyed can still go past him.
+  // Let go and he's yours again. A quick tap is still a switch (on release: AD_HOLD tells a tap from a hold).
+  const AD_HOLD=0.22, AD_GAP=[100,68], AD_ERR=40, AD_CROSS=0.7;   // (s; px off him at Def IQ 1 and 10; px; how much nearer, in a cross's way)
+  let adHold=null;           // the SWITCH press in progress: {t (ms), src: 'key' | 'touch', id, x, y, moved}
+  function adPress(src,id,x,y){ if(!canSwitch()||!controlled) return; adHold={t:performance.now(),src,id,x,y,moved:false}; }
+  const adLong=h=>!!h&&!h.moved&&performance.now()-h.t>=AD_HOLD*1000;
+  function adRelease(src,id){ const h=adHold; if(!h||h.src!==src||(id!=null&&h.id!==id)) return null; adHold=null; if(controlled&&controlled.adOn){ controlled.adOn=false; controlled.sprint=false; } return h; }
+  // their man to defend against: on the ball, knocking it on, or the man their pass is going to
+  function adMan(){
+    const me=controlled; if(!me||gkHold) return null;
+    const o=ball.ownedBy; if(o) return o.team!==me.team?o:null;
+    if(ball.dribbler&&ball.dribbler.team!==me.team&&ball.dribbleGrace>0) return ball.dribbler;
+    const r=ball.intendedRcv; return r&&r.team!==me.team&&ball.lastTouch===r.team?r:null;
+  }
+  // the way he stands off the man: toward our goal; out wide in our end, where a cross is on, across into its way -- on
+  // the line from the ball toward the near side of the penalty spot
+  function adWay(p,c,rc){
+    const atk=atkOf(p.team), ownX=atk>0?0:FW, gl=Math.hypot(ownX-rc.x,YC-rc.y)||1;
+    let ux=(ownX-rc.x)/gl, uy=(YC-rc.y)/gl;
+    const wide=clamp((Math.abs(c.y-YC)-PA_HW*0.6)/(PA_HW*0.5),0,1)*clamp((CROSS_MAX+4*MK-Math.abs(c.x-ownX))/(6*MK),0,1);
+    if(wide>0){ const tx=ownX+atk*9*MK, ty=YC+Math.sign(c.y-YC)*2*MK, tl=Math.hypot(tx-rc.x,ty-rc.y)||1;
+      ux=ux*(1-wide)+(tx-rc.x)/tl*wide; uy=uy*(1-wide)+(ty-rc.y)/tl*wide; const l=Math.hypot(ux,uy)||1; ux/=l; uy/=l; }
+    return {ux,uy,wide};
+  }
+  function autoDefIntent(dt){
+    const p=controlled; if(!p) return null;
+    p.adFace=null;
+    const c=adLong(adHold)&&p.state==='normal'&&!skillOf(p)?adMan():null;
+    if(!c){ p.adOn=false; return null; }
+    const iq=clamp((defIQof(p)-1)/9,0,1);
+    const pc=perceived(p,c,dt), rc=readRun(p,c,pc);                    // where he reads the man (and his run) to be
+    const W=adWay(p,c,rc), gap=(AD_GAP[0]+(AD_GAP[1]-AD_GAP[0])*iq)*(1-(1-AD_CROSS)*W.wide);
+    if(!(p.adErrT>simNow)){ const a=Math.random()*Math.PI*2, m=AD_ERR*(1-iq)*Math.sqrt(Math.random());   // (off the right spot: Def IQ)
+      p.adErr={x:Math.cos(a)*m, y:Math.sin(a)*m}; p.adErrT=simNow+0.45+Math.random()*0.3; }
+    let tx=clamp(rc.x+W.ux*gap+p.adErr.x,p.r,FW-p.r), ty=clamp(rc.y+W.uy*gap+p.adErr.y,p.r,FH-p.r);
+    // ROUND HIM, NOT THROUGH HIM: with his spot on the other side of the man, he goes round at the jockey's distance --
+    // straight there, he'd walk through the man and the ball at his feet
+    const dc=Math.hypot(p.x-c.x,p.y-c.y);
+    if(dc<gap*2.2){ const a0=Math.atan2(p.y-c.y,p.x-c.x); let da=Math.atan2(ty-c.y,tx-c.x)-a0; while(da>Math.PI)da-=2*Math.PI; while(da<-Math.PI)da+=2*Math.PI;
+      if(Math.abs(da)>0.9){ const a1=a0+Math.sign(da)*0.9, R=Math.max(gap,Math.min(dc,gap*1.4)); tx=c.x+Math.cos(a1)*R; ty=c.y+Math.sin(a1)*R; } }
+    const far=Math.hypot(tx-p.x,ty-p.y);
+    p.adOn=true; p.adSpot={x:tx,y:ty,wide:W.wide};
+    p.sprint=far>7*MK&&p.stamina>0.15;                                   // (a long way off it: he gets there first)
+    if(far<5*MK) p.adFace={x:c.x,y:c.y};                                  // (there: square to him, shuffling -- see stepOutfield)
+    return arrive(p,tx,ty);
+  }
   // the team-mate best placed for the ball: nearest to where it'll be a moment from now
   function switchTarget(){
     const t=0.35, bx=ball.x+ball.vx*t, by=ball.y+ball.vy*t;
@@ -3035,7 +3086,7 @@
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
         else if(incomingAny())queueOneTouch();         // it's on its way to you -> pass it first time when it gets there
         else if(gkHold&&gkHold.team==='G')callPass();  // your keeper has it -> he plays it out (his PASS instruction: keeperPlay)
-        else switchPlayer();                           // defending -> SWITCH (to the man the way you're pushing)
+        else adPress('key');                           // defending -> SWITCH on release (to the man the way you're pushing); held, AUTO DEFEND
       }
       if(e.code==='Digit0'||e.code==='Numpad0'){
         if(practice) startPractice(practice);   // re-arm the current drill
@@ -3066,7 +3117,7 @@
     if(SCREEN!=='match') return;
     keys[e.code]=false;
     if(e.code==='Space')trapHeld=false;
-    if(e.code==='KeyJ')passRelease();
+    if(e.code==='KeyJ'){ const h=adRelease('key'); if(h&&!adLong(h)) switchPlayer(); passRelease(); }   // (a tap: SWITCH; a hold was AUTO DEFEND)
     if(e.code==='KeyK'){ if(practice!=='keeper') releaseShoot(); }
     if(e.code==='KeyL'){clearHeld=false;crossRelease();}
     // releasing all movement keys ends the sprint
@@ -3126,7 +3177,7 @@
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it (your keeper: PASS, he plays it out)
         else if(incomingAny()){ queueOneTouch(); otTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }               // on its way to you: ONE-TOUCH pass (swipe off it to aim it)
-        else if(canSwitch()){ swTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }   // SWITCH: on release -- a tap goes the stick's way, a swipe off it that way
+        else if(canSwitch()){ swTouch={id:t.identifier,x:t.clientX,y:t.clientY}; adPress('touch',t.identifier,t.clientX,t.clientY); }   // SWITCH: on release -- a tap goes the stick's way, a swipe off it that way; held, AUTO DEFEND
         else { pressTrap(); trapHeld=true; if(trapTouchId===null){ trapTouchId=t.identifier; trapDragStart(t); } }   // (a lab) TRAP
         // (no first-time pass off this button: an arriving ball is always "strikeable", so it would
         //  turn a TRAP tap into a kick right as the ball reaches you)
@@ -3181,6 +3232,7 @@
       if(swipe&&t.identifier===trapTouchId) swipePoint(swipe,t,evT(e));
       else if(t.identifier===trapTouchId) trapDragMove(t);
       if(passDown&&passDown.pts&&t.identifier===kickTouchId){ passDown.lx=t.clientX; passDown.ly=t.clientY; swipePoint(passDown,t,evT(e)); }
+      if(adHold&&adHold.src==='touch'&&t.identifier===adHold.id&&!adHold.moved&&!adLong(adHold)&&Math.hypot(t.clientX-adHold.x,t.clientY-adHold.y)>=18) adHold.moved=true;   // (a swipe off SWITCH: a switch that way, not a hold)
     }
     e.preventDefault();},{passive:false});
   function endT(e){for(const t of e.changedTouches){
@@ -3194,8 +3246,8 @@
     if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
     if(t.identifier===skillTouchId){skillTouchId=null; if(e.type!=='touchcancel'&&touchLive()) skillGMove(t.clientX,t.clientY); skillGEnd(e.type==='touchcancel'||!touchLive());}
     if(otTouch&&t.identifier===otTouch.id){ if(e.type!=='touchcancel'&&touchLive()) otSwipe(t); otTouch=null; }
-    if(swTouch&&t.identifier===swTouch.id){ const w=swTouch; swTouch=null;
-      if(e.type!=='touchcancel'&&touchLive()){ const dx=t.clientX-w.x, dy=t.clientY-w.y;
+    if(swTouch&&t.identifier===swTouch.id){ const w=swTouch, h=adRelease('touch',t.identifier); swTouch=null;
+      if(e.type!=='touchcancel'&&touchLive()&&!adLong(h)){ const dx=t.clientX-w.x, dy=t.clientY-w.y;
         if(Math.hypot(dx,dy)>=18){ const r=rect(), u=screenDirToPitch(dx*W/r.width,dy*H/r.height,controlled.y); switchPlayer(u.x,u.y); }
         else switchPlayer(); } }
     if(t.identifier===kickTouchId){kickTouchId=null;if(passDown&&passDown.pts){passDown.lx=t.clientX;passDown.ly=t.clientY;}passRelease();}
@@ -10507,7 +10559,7 @@
       // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging; one watching
       // the ball faces it: below)
       const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
-      if(!watch && !held && (!softIn || nsp>30 || il2>=0.35)){
+      if(!watch && !held && !p.adFace && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
       }
@@ -10521,6 +10573,14 @@
       const vs=Math.hypot(p.vx,p.vy);               // ...and off his front he's slower
       if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; if(c<0.5) MAX=Math.min(MAX,runSpeedOf(p)*fatigue); MAX*=pedalOf(p,c); }
     }
+    if(p.adFace&&!watch){                           // JOCKEYING (AUTO DEFEND): square to the man as quickly as he reads it (Def IQ), and off his front he's slower
+      const tx=p.adFace.x-p.x, ty=p.adFace.y-p.y, f=p.facing||{x:atkOf(p.team),y:0};
+      if(Math.hypot(tx,ty)>1){ const a0=Math.atan2(f.y,f.x); let dd=Math.atan2(ty,tx)-a0; while(dd>Math.PI)dd-=Math.PI*2; while(dd<-Math.PI)dd+=Math.PI*2;
+        const mx=statLerp(defIQof(p),3.4,9.5)*P.bodyTurn.val*capFatigue*dt, a=a0+clamp(dd,-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
+      const vs=Math.hypot(p.vx,p.vy);
+      if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; MAX=Math.min(MAX,runSpeedOf(p)*fatigue)*pedalOf(p,c); }
+    }
+    p.adFace=null;                                  // (set again next frame while he's still at it: autoDefIntent)
     if(held==='strafe'){                            // strafing: the way he faced kept, slower ahead, less across, less again backing up
       const F=holdMode.face, vs=Math.hypot(p.vx,p.vy); p.facing={x:F.x,y:F.y};
       if(vs>1) MAX=Math.min(MAX,runSpeedOf(p)*fatigue*STRAFE_K*(0.75+0.25*(p.vx*F.x+p.vy*F.y)/vs)); }
@@ -10645,6 +10705,25 @@
     ball.shotT=0; ball.shotBy=null; hit.noTouchT=0.3;
     lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
     if(LAB.on&&LAB.kind==='shoot') labOnSave('blocked');
+  }
+  // CROSS BLOCKS (v86): a cross, just struck and on its way up, that passes close enough to one of theirs below his
+  // shoulders comes off him, as a shot does (blockShots: his block reach, Def IQ) -- a man stood in its way a few
+  // metres off the crosser gets something on it; further off, it's over him. Only on the way up, in its first CROSS_BLOCK_T.
+  const CROSS_BLOCK_T=0.4;
+  function crossBlock(x0,y0){
+    if(!(ball.crossT>1.6-CROSS_BLOCK_T)||!ball.crossBy||ball.ownedBy||gkHold||scoredT>0||ball.z>=PLAYER_H*1.3||ball.vz<=0) return;
+    const sx=ball.x-x0, sy=ball.y-y0, L2=sx*sx+sy*sy;
+    let hit=null, ht=2;
+    for(const q of players){
+      if(q.team===ball.crossBy||q.noTouchT>0||q.benched||(q.state!=='normal'&&q.state!=='slide')) continue;
+      const t=L2>0?clamp(((q.x-x0)*sx+(q.y-y0)*sy)/L2,0,1):1, cx=x0+sx*t, cy=y0+sy*t;
+      if(Math.hypot(q.x-cx,q.y-cy)<blockReachOf(q)&&t<ht){ ht=t; hit=q; } }
+    if(!hit) return;
+    ball.x=x0+sx*ht; ball.y=y0+sy*ht;
+    deflectOff(hit,0.3,0.6);
+    ball.crossT=0; ball.crossBy=null; hit.noTouchT=0.3;
+    lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
+    if(LAB.on&&LAB.kind==='cross'&&LAB.rep&&LAB.rep.cross) crossLabFinish('blocked');
   }
   // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
@@ -11659,7 +11738,8 @@
     if(crossHeld&&myBall())crossCharge=clamp(crossCharge+dt/0.7,0,1);
 
     if(LAB.on) labStep(dt,rdt);
-    const hi=humanIntent();
+    let hi=humanIntent();
+    { const ad=autoDefIntent(dt); if(ad) hi=ad; }                       // (SWITCH held, defending: AUTO DEFEND)
     updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || kickT>0 || matchOver;
     if(!frozen) for(const p of players){
@@ -11817,6 +11897,7 @@
       }
       ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
       blockShots(ball.x-ball.vx*dt,ball.y-ball.vy*dt);
+      crossBlock(ball.x-ball.vx*dt,ball.y-ball.vy*dt);    // (a cross into a man in its way: see crossBlock)
       spreadBlock(ball.x-ball.vx*dt,ball.y-ball.vy*dt);   // (a keeper down big in its way: see spreadBlock)
       // a live shot skids with much less drag so it carries to goal; normal balls use full friction
       const fcoef = ball.shotT>0 ? P.friction.val*0.3 : P.friction.val;
@@ -11931,7 +12012,7 @@
           const lockT = false;
           const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=P.passDrag.val;
           const gkYours=!!gkHold&&gkHold.team==='G'&&keeperWaits(gkHold);   // (your keeper's ball: PASS plays it out -- see keeperPlay)
-          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : gkYours ? 'PASS' : (oursHave?'CALL':incomingAny()?'1-TOUCH':'SWITCH');
+          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : gkYours ? 'PASS' : (oursHave?'CALL':incomingAny()?'1-TOUCH':controlled&&controlled.adOn?'DEFEND':'SWITCH');
           btns.kick.classList.toggle('mCall', !mine && !gkYours && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
         }

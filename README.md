@@ -1699,6 +1699,18 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Auto defend (v86).** Hold SWITCH -- J, or the PASS/SWITCH button -- while they have it, and your man defends by
+  himself (the button says DEFEND). He jockeys the man on the ball: goal-side of him and a few metres off -- about 4.4 m
+  at Def IQ 1 down to 3 m at 10, never tight -- square to him, shuffling with him rather than diving in, and going round
+  him rather than through him to get there. Out wide in our end, where a cross is on, he's across into its way instead,
+  nearer him (about 2.5 m), between the ball and the box. How well is his Def IQ: how soon and how truly he reads the man
+  (the computer's own reads), how near the right spot he holds (up to 1.8 m off it at 1, on it at 10), and how quickly he
+  turns to face him. He never tackles by himself -- that's still yours (SLIDE, or step in) -- and a man jockeyed can still
+  go past him. Let go and he's yours again. A quick tap is still a switch (now on release, as on the touch button).
+  - **Crosses can be blocked.** A cross struck into a man stood in its way, while it's still on its way up and below his
+    shoulders, comes off him as a blocked shot does (his block reach, Def IQ): a few metres off the crosser he gets
+    something on it; further off, it's over him. (The computer's crossers already thought twice with a man right in
+    front of them.)
 - **Clearances and crosses (v85).**
   - **A header is a forehead, not a boot.** How far a defensive header goes is the man's Heading now (it was a dial
     alone). From 8 m out in front of his own goal, the computer's stops some 13 m away at Heading 3, 17 m at 5.5 and
