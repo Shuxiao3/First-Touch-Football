@@ -3,8 +3,10 @@
 // whoever his PASS instruction says: PLAYER (the man you're playing as), CLOSEST OPEN, FARTHEST OPEN or HOOF IT. The
 // computer's keeper plays it out himself, as before. IN THE AIR no man gets to a ball higher than a keeper: a header
 // tops out at 61 px (Heading 10, at the top of his leap), the keeper's hands at 82; and a keeper coming for a cross
-// catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. On a copy of the
-// game that lets the test set the scene, give the keeper the ball and count the stopwatch's frames.
+// catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. HIS WAY TO IT
+// (v87): three of theirs stood across his way to it and he doesn't come (he can't go through them); two of ours on his
+// line, and he does -- they're shoved aside, off it, not on ahead of him. On a copy of the game that lets the test set
+// the scene, give the keeper the ball and count the stopwatch's frames.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -14,12 +16,13 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, simNow:()=>simNow, gkHold:()=>gkHold, PI, gkSet, gkTarget, '
-  + 'GK:()=>[GK_WAIT,GK_WARN], FW, FH, YC, atkOf, tryHeaderContact, tryDefHeaderContact, aiCross, GKH:()=>GK_CLAIM_H, '
+  + 'GK:()=>[GK_WAIT,GK_WARN], FW, FH, YC, atkOf, tryHeaderContact, tryDefHeaderContact, aiCross, crossClaim, GKH:()=>GK_CLAIM_H, '
   + 'ht:v=>{ if(v!=null) headerT=v; return headerT; }, dht:v=>{ if(v!=null) defHeaderT=v; return defHeaderT; }, drop:()=>{ gkHold=null; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }, '
   + 'hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
 patch('  function drawStopwatch(x,y){', '  function drawStopwatch(x,y){ window.__sw=(window.__sw||0)+1;');
 patch('  function keeperPunch(kp){\n', '  function keeperPunch(kp){\n    window.__punch=(window.__punch||0)+1;\n');
+patch('      else{\n        let ai=aiBrain(p,dt);', '      else if(p.__hold){ p.vx=p.vy=0; }\n      else{\n        let ai=aiBrain(p,dt);');   // (a man the test stands still)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-gk-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -111,6 +114,37 @@ const cross = rival => page.evaluate(rival => new Promise(res => { const T = win
 const alone = await cross(false), contested = await cross(true);
 info('a cross into the six-yard box: ' + JSON.stringify(alone) + '; with one of theirs up with him: ' + JSON.stringify(contested));
 ok(alone.how === 'caught' && contested.how === 'punched', 'the keeper catches a cross he\'s comfortably under, and punches it with one of theirs up with him');
+
+// HIS WAY TO IT: the same cross; where he'd take it read first, with nobody about; then men stood still in his way: three
+// of theirs abreast across his line to it, half way and a body's width apart -- or two of ours on it, 40% and 70% of the
+// way. Did he come (claimX), what came of it, and (ours) how far each was moved off his line and how far along it
+const way = who => page.evaluate(who => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), b = T.ball(); T.freeze(); window.__punch = 0;
+  const R = T.players().filter(q => q.team === 'R' && q.role !== 'G'), G = T.players().filter(q => q.team === 'G'), cr = R[0], out = -kp.side, gx = kp.side < 0 ? 0 : T.FW;
+  const men = who ? (who === 'R' ? R.slice(1, 4) : G.slice(0, 2)) : [];
+  const park = () => { for(const q of T.players()) if(q !== cr && !men.includes(q)){ q.x = T.FW / 2 + out * 400 + (q.team === 'R' ? 0 : 60); q.y = 60; q.vx = q.vy = 0; } };
+  T.drop(); park(); Object.assign(kp, { x: kp.homeX, y: T.YC, mode: 'line', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0, runDir: null });
+  cr.x = gx + out * 30; cr.y = T.YC + 520; cr.vx = cr.vy = 0; cr.facing = { x: -out, y: 0 };
+  for(const q of men){ q.x = T.FW / 2; q.y = 40; q.vx = q.vy = 0; }
+  Object.assign(b, { ownedBy: null, dribbler: null, x: cr.x, y: cr.y - 20, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0 });
+  T.aiCross(cr, { x: gx + out * 90, y: T.YC + 30, who: null });
+  let cs = null; for(let k = 0; k < 12 && !cs; k++) cs = T.crossClaim(kp);   // (where he'd go for it, nobody about)
+  if(!cs) return res({ cs: null });
+  const ux = (cs.x - kp.x), uy = (cs.y - kp.y), L = Math.hypot(ux, uy), sp = men.map((q, i) => {
+    if(who === 'R'){ const k = (i - 1) * 26 / L; q.x = kp.x + ux * 0.5 + uy * k; q.y = kp.y + uy * 0.5 - ux * k; }   // (abreast, across his line)
+    else { const f = i ? 0.7 : 0.4; q.x = kp.x + ux * f; q.y = kp.y + uy * f; }
+    q.__hold = true; return { x: q.x, y: q.y }; });
+  const t0 = T.simNow(); let came = false;
+  (function tick(){ park(); cr.x = gx + out * 30; cr.y = T.YC + 520; if(kp.mode === 'claimX') came = true;
+    const how = T.gkHold() === kp ? 'caught' : window.__punch ? 'punched' : T.simNow() - t0 > 2.5 ? 'neither' : null;
+    if(!how) return requestAnimationFrame(tick);
+    const moved = men.map((q, i) => { const dx = q.x - sp[i].x, dy = q.y - sp[i].y; return { side: +(Math.abs(dx * uy - dy * ux) / L / 22.5).toFixed(2), on: +((dx * ux + dy * uy) / L / 22.5).toFixed(2) }; });
+    for(const q of men) q.__hold = false;
+    res({ came, how, run: +(L / 22.5).toFixed(1), moved }); })(); }), who);
+const clear = await way(null), theirs = await way('R'), ours = await way('G');
+info('his way to it: clear ' + JSON.stringify(clear) + '; three of theirs across it ' + JSON.stringify(theirs) + '; two of ours on it ' + JSON.stringify(ours));
+ok(clear.came && clear.how === 'caught', 'nobody in his way: he comes for it, and has it (a ' + clear.run + ' m run)');
+ok(!theirs.came, 'three of theirs stood across his way: he doesn\'t come -- he can\'t go through them');
+ok(ours.came && ours.how === 'caught' && ours.moved.every(m => m.side > 0.5 && m.side > Math.abs(m.on)), 'two of ours in his way: he comes, and has it -- each shoved aside, off his line (' + ours.moved.map(m => m.side + ' m aside, ' + m.on + ' m on').join('; ') + ')');
 
 process.exitCode = rep.finish();
 await browser.close();

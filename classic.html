@@ -7300,11 +7300,19 @@
     for(let i=0;i<solids.length;i++)for(let j=i+1;j<solids.length;j++){
       const a=solids[i],b=solids[j];
       let d=dist(a,b); const min=a.r+b.r+2;
+      // A KEEPER COMING FOR A CROSS, AND ONE OF HIS OWN IN HIS WAY (v87): the man's shoved aside -- off the line of his run,
+      // to whichever side of it he's on -- not on ahead of him; and a touch before the keeper's on him (he's calling)
+      const kc=a.team===b.team?(a.mode==='claimX'?a:b.mode==='claimX'?b:null):null;
+      if(kc&&kc.runDir&&d<min+8){ const m=kc===a?b:a, u=kc.runDir, rx=m.x-kc.x, ry=m.y-kc.y, along=rx*u.x+ry*u.y, side=rx*u.y-ry*u.x;
+        if(along>-4){ const sg=side>=0?1:-1, need=Math.sqrt(Math.max(0,(min+8)*(min+8)-along*along))-Math.abs(side);
+          if(need>0){ m.x+=u.y*sg*need; m.y+=-u.x*sg*need; m.vx+=u.y*sg*60; m.vy+=-u.x*sg*60; }
+          continue; } }
       if(d<min&&d>0.001){
         const nx=(b.x-a.x)/d,ny=(b.y-a.y)/d,overlap=(min-d);
         const sa=holdStrength(a), sb=holdStrength(b), sa3=sa*sa*sa, sb3=sb*sb*sb;   // (a man shielding it is planted)
         let aShare=clamp(sb3/(sa3+sb3),0.04,0.96);                       // (the stronger holds his ground)
-        if(a.team===b.team&&(a.mode==='claimX'||b.mode==='claimX')) aShare=a.mode==='claimX'?0:1;   // (a keeper coming for a cross: his own men make way)
+        if(kc) aShare=a===kc?0:1;                                          // (a keeper coming for a cross: his own men make way)
+        else if(a.mode==='claimX'||b.mode==='claimX') aShare=a.mode==='claimX'?Math.max(aShare,0.75):Math.min(aShare,0.25);   // (...and one of theirs he can't go through: he's held up)
         const bShare=1-aShare;
         a.x-=nx*overlap*aShare; a.y-=ny*overlap*aShare;
         b.x+=nx*overlap*bShare; b.y+=ny*overlap*bShare;
@@ -11130,6 +11138,33 @@
   // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
   // whole of his box (a ball he's already gone for).
   const GK_CLAIM_H=PLAYER_H*2.4, GK_READ=[0.32,0.2];
+  // HIS WAY TO IT (v87): the run from where he is to where he'd take it (his body to within his reach of it), and the
+  // men in the way. He can't go through one of theirs: one in his way, he has to go round (GK_ROUND: a stride and a half
+  // more, and a check in his run); two or more, and it's shut -- he can't get there, and won't go. Nor will he go for one
+  // dropping among two or more of theirs (GK_CROWD of where he'd take it, as they'll be by then): too many people there.
+  // One of ours he shoulders aside (GK_SHOVE: barely a check -- see separateBodies). Where each man will be as the keeper
+  // gets level with him, as he's going now (a short look ahead); a man down still takes up the ground. -> the time it
+  // costs (s), or Infinity. committed: he's on his way already -- only a man of theirs right in his way now stops him (he
+  // isn't put off by where one might get to).
+  const GK_ROUND=0.28, GK_SHOVE=0.05, GK_LANE=4, GK_CROWD=2*MK;
+  function gkPath(kp,x,y,reach,v,committed){
+    const dx=x-kp.x, dy=y-kp.y, L=Math.hypot(dx,dy), run=L-reach;
+    if(run<=0) return 0;
+    const ux=dx/L, uy=dy/L; let cost=0, theirs=0, there=0;
+    for(const o of players){
+      if(o.benched) continue;
+      if(!committed&&o.team!==kp.team){ const la=Math.min(L/v,0.5);       // (round where he'd take it: a crowd of theirs?)
+        if(Math.hypot(o.x+(o.vx||0)*la-x,o.y+(o.vy||0)*la-y)<GK_CROWD&&++there>=2) return Infinity; }
+      const tAt=Math.max(0,((o.x-kp.x)*ux+(o.y-kp.y)*uy))/v, la=committed?0:Math.min(tAt,0.5);
+      const ox=o.x+(o.vx||0)*la, oy=o.y+(o.vy||0)*la, s=(ox-kp.x)*ux+(oy-kp.y)*uy;
+      if(s<0||s>run+o.r) continue;                                    // (behind him, or past where he'd take it)
+      if(Math.abs((ox-kp.x)*uy-(oy-kp.y)*ux)>=kp.r+o.r+GK_LANE) continue;   // (clear of his line)
+      if(o.team===kp.team){ cost+=GK_SHOVE; continue; }
+      if(++theirs>=2) return Infinity;
+      cost+=GK_ROUND;
+    }
+    return committed&&theirs?Infinity:cost;
+  }
   function crossClaim(kp,committed,wide){
     const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
     const react=committed?0:GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6, dX=wide?PA_D:committed?GA_D+80:GA_D+MK, dY=wide?PA_HW:GA_HW+60, lo=committed?0:AIR_REACH;
@@ -11139,7 +11174,10 @@
       if(z<lo){ if(ball.vz-520*t<=0) return null; continue; }          // (deciding to come: only while it's over their heads -- a ball that's his)
       const B=t>0?ballAt(t):{x:ball.x,y:ball.y}, x=B.x, y=B.y;         // (its curl too)
       if(Math.abs(x-glX)>dX||Math.abs(y-YC)>dY) continue;              // outside his patch
-      if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+react<=t) return {x,y,t};
+      const run=Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+react;
+      if(run>t) continue;
+      const way=gkPath(kp,x,y,reach,v,committed);                         // (and his way to it: see gkPath)
+      if(run+way<=t) return {x,y,t};
     }
     return null;
   }
@@ -11278,7 +11316,7 @@
       const cs=live?crossClaim(kp,true):null;
       if(!cs){ kp.mode='return'; return; }                // (headed on, cleared, or he can't get there now)
       const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
-      kp.x+=dx/l*mv; kp.y+=dy/l*mv;
+      kp.x+=dx/l*mv; kp.y+=dy/l*mv; kp.runDir={x:dx/l,y:dy/l};             // (the way he's going: his own men shoved off it, see separateBodies)
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
       gkTakeCross(kp,spd);
       return;

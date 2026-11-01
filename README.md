@@ -1699,6 +1699,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The keeper's way to a cross (v87).** Deciding whether to come for a cross, the keeper now looks at his way to where
+  he'd take it. He can't go through one of theirs: one in his way he has to go round (it costs him time, about a quarter
+  of a second); two or more and it's shut, and he won't go. Nor will he go for one dropping among two or more of theirs
+  (within 2 m of where he'd take it, as they'll be by then): too many people there. Once he's coming, a man of theirs
+  stepping into his way stops him and he gets back to his line. Running into one of theirs he's held up (he takes most of
+  the bump); one of ours he shoulders aside, off the line of his run to the side the man's on (not on ahead of him), a
+  touch before he's on him -- he's calling for it.
 - **Auto defend (v86).** Hold SWITCH -- J, or the PASS/SWITCH button -- while they have it, and your man defends by
   himself (the button says DEFEND). He jockeys the man on the ball: goal-side of him and a few metres off -- about 4.4 m
   at Def IQ 1 down to 3 m at 10, never tight -- square to him, shuffling with him rather than diving in, and going round
