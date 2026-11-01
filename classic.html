@@ -11042,16 +11042,18 @@
   }
   // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
   // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
-  // flies (see the physics step). Deciding to come, he takes a moment to read it (0.12 s), and comes only for a ball he'll
-  // have while it's still over their heads (AIR_REACH: as high as the computer's men go up for one) -- one that's his,
-  // not one he'd have to fight them for (v85: a good cross to a man is a man's ball). Once he's coming (committed),
-  // he's reading it all the way -- and a ball at his hands now counts (v85: it used to look only ahead, a moment's read
+  // flies (see the physics step). DECIDING TO COME (v85) he takes a moment to read it -- GK_READ, his Reflexes: 0.32 s at
+  // 1, 0.26 at 5.5, 0.2 at 10 (it was 0.12 for everyone) -- and comes only for one that drops in his six-yard box or a
+  // metre past it while it's still over their heads (AIR_REACH: as high as the computer's men go up for one): a ball
+  // that's his, not one he'd have to fight them for. A good cross, whipped in to a man, is the man's; one that hangs, or
+  // drifts in on him, is the keeper's. ONCE HE'S COMING (committed) he's reading it all the way, out to his patch (the
+  // six-yard box and a little more) -- and a ball at his hands now counts (it used to look only ahead, a moment's read
   // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
   // whole of his box (a ball he's already gone for).
-  const GK_CLAIM_H=PLAYER_H*2.4;
+  const GK_CLAIM_H=PLAYER_H*2.4, GK_READ=[0.32,0.2];
   function crossClaim(kp,committed,wide){
     const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
-    const react=committed?0:0.12, dX=wide?PA_D:GA_D+80, dY=wide?PA_HW:GA_HW+60, lo=committed?0:AIR_REACH;
+    const react=committed?0:GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6, dX=wide?PA_D:committed?GA_D+80:GA_D+MK, dY=wide?PA_HW:GA_HW+60, lo=committed?0:AIR_REACH;
     for(let t=committed?0:0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach

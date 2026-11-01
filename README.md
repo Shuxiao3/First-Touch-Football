@@ -1712,13 +1712,19 @@ test, and like the Trap Lab the values are the game's settings.
     never come down within his reach after another moment), so he turned back for his line as it reached his hands, and
     one of theirs headed it into the goal he'd left. Now, once he's coming, he's reading it all the way, and a ball at
     his hands is his: caught when he's comfortable, punched at a stretch or with one of theirs up with him. His own men
-    leave it to him once he's nearly there and calling for it, and make way for him (they were nodding it off his
-    fingertips, and blocking his run). A loose ball in the air in his box, he goes to where it comes down, not where it
-    is. And on his way back to his line he's still a keeper: a shot on him he saves if he can (he was a spectator), and
-    he isn't jerked back to his line in a frame -- he gets back himself.
+    leave it to him once he's nearly there, and make way for him (they were nodding it off his fingertips, and blocking
+    his run). And on his way back to his line he's still a keeper: a shot on him he saves if he can (he was a
+    spectator), and he isn't jerked back to his line in a frame -- he gets back himself.
+  - **He comes for the ones that are his.** Deciding to come he takes a moment to read it -- his Reflexes: 0.32 s at 1,
+    0.26 s at 5.5, 0.2 s at 10 (it was 0.12 s for everyone) -- and comes only for a ball dropping in his six-yard box
+    or a metre past it while it's still over their heads. A good cross whipped in to a man is the man's; one that
+    hangs, or drifts in on him, is the keeper's. In the Crossing Lab a Crossing 8 man's crosses from the byline to his
+    two forwards are all headed (16 of 16); a Crossing 1 man's, the keeper has 5 of 16. And while a cross of theirs is
+    still up at their heads he doesn't go after it as a loose ball (he'd run out under it, neither having it nor there
+    for the header): he came for it, or he's set on his line.
   - **Measured:** their crosses into our box from the byline and from 18 m out on the wing, toward 7, 9, 11 and 13 m
-    out, one of theirs attacking each and one of ours marking him, 16 of each (128 in all). Goals 41 → 17. He came for
-    35 → 42 of them; of those he let in 23 → 0, and got (caught or punched) 5 → 42.
+    out, one of theirs attacking each and one of ours marking him, 16 of each (128 in all). Goals 41 → 10. He came for
+    35 → 18 of them; of those he let in 23 → 0, and had (caught or punched) 5 → 14 -- the rest we cleared.
 - **The kick-off (v84)** -- at the start, after a goal (the side that conceded) and to start the second half (Red):
   everyone is in his own half, a metre short of halfway at least, and the side not kicking off is outside the
   centre circle. The kicking side's most advanced man in the middle stands over the ball on the spot. Play holds

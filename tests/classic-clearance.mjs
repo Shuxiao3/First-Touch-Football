@@ -3,9 +3,10 @@
 // across at 700 px/s -- and never as far as a kick. A CLEARANCE BY FOOT carries to about halfway: short of it for a
 // man rated low in Shot power and Def IQ, past it for one rated high. A KEEPER COMING FOR A CROSS gets it: a ball at
 // his hands as he gets under it is his (it used to drop behind him -- his read of where it would come down ran out a
-// moment before he got there, and he turned back for his line); and over a run of crosses into his six-yard box,
-// one of theirs attacking each, he never comes for one and concedes. On a copy of the game that lets the test set the
-// scene: everyone else held out of the way, the clock held (no half time in the middle of it).
+// moment before he got there, and he turned back for his line); over a run of crosses toward 7 m out, one of theirs
+// attacking each, he never comes for one and concedes, and gets the ones he comes for; and a ball that drops in his
+// six-yard box he comes for, and has. On a copy of the game that lets the test set the scene: everyone else held out
+// of the way, the clock held (no half time in the middle of it).
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -82,10 +83,11 @@ info('at his hands, too late to read where it comes down: ' + JSON.stringify(ah)
 ok(ah.unread && ah.how === 'caught' && ahc.how === 'punched', 'a cross at his hands as he gets under it is his: caught, or punched with one of theirs with him (not left to drop behind him)');
 
 // A RUN OF CROSSES: their man whips it in from the byline (or from 18 m out on the wing) toward 7 m out, one of theirs
-// attacking it and one of ours marking him (yours); everyone else parked. From the byline he comes for nearly every one;
-// he never comes for one and lets it in; and he gets most of the ones he comes for. (v84: 9 of 10 from the byline went
-// in after he'd come for it.)
-const crosses = (fx, fy, D, N) => page.evaluate(({ fx, fy, D, N }) => new Promise(res => { const T = window.__T, b = T.ball(); window.__aiAll = true;
+// attacking it and one of ours marking him (yours); everyone else parked. He never comes for one (claimX, before any
+// header of theirs) and lets it in, and he gets the ones he comes for. (v84: 9 of 10 from the byline went in after he'd
+// come for it.) And A BALL INTO HIS SIX-YARD
+// BOX -- from the byline toward 4.5 m out, their man well behind it -- he comes for, and has.
+const crosses = (fx, fy, D, N, far) => page.evaluate(({ fx, fy, D, N, far }) => new Promise(res => { const T = window.__T, b = T.ball(); window.__aiAll = true;
   const kp = T.keepers().find(k => k.team === 'G'), out = -kp.side, gx = kp.side < 0 ? 0 : T.FW, MK = T.MK;
   const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
   const cr = R.find(q => q.role === 'MID') || R[0], att = R.find(q => q.role === 'ATT') || R[1], mk = G.find(q => q.role === 'DEF') || G[0];
@@ -96,21 +98,21 @@ const crosses = (fx, fy, D, N) => page.evaluate(({ fx, fy, D, N }) => new Promis
     Object.assign(kp, { x: kp.homeX, y: T.YC, mode: 'line', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0, spreadT: 0, spreadDn: 0, closeT: -9, gkRoaming: false });
     const spot = { x: gx + out * D * MK, y: T.YC + sd * MK };
     Object.assign(cr, { x: gx + out * fx * MK, y: T.YC + sd * fy * MK, vx: 0, vy: 0, state: 'normal', facing: { x: -out, y: 0 } });
-    Object.assign(att, { x: spot.x + out * 5 * MK, y: spot.y + sd * 3 * MK, vx: 0, vy: 0, state: 'normal', z: 0 });
+    Object.assign(att, { x: spot.x + out * (far ? 9 : 5) * MK, y: spot.y + sd * 3 * MK, vx: 0, vy: 0, state: 'normal', z: 0 });
     Object.assign(mk, { x: att.x - out * 1.2 * MK, y: att.y, vx: 0, vy: 0, state: 'normal', z: 0 });
     Object.assign(b, { ownedBy: null, dribbler: null, x: cr.x, y: cr.y - sd * 20, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0, lastTouch: 'R' });
     const s0 = T.score()[1]; T.aiCross(cr, { x: spot.x, y: spot.y, who: att }); const t0 = T.simNow(); let came = false, hdr = false;
-    (function tick(){ if(b.shotT > 0 && b.lastTouch === 'R') hdr = true; if(!hdr && b.z > 20 && (kp.mode === 'claimX' || kp.mode === 'claim')) came = true;
+    (function tick(){ if(b.shotT > 0 && b.lastTouch === 'R') hdr = true; if(!hdr && kp.mode === 'claimX') came = true;
       const how = T.score()[1] > s0 ? 'goal' : T.gkHold() === kp ? 'caught' : window.__punch ? 'punched' : (T.stopped() || T.simNow() - t0 > 3.5) ? 'other' : null;
       if(how){ const k = (came ? 'came:' : '') + how; tally[k] = (tally[k] || 0) + 1; return one(); }
       requestAnimationFrame(tick); })(); };
-  one(); }), { fx, fy, D, N });
-const byl = await crosses(1.5, 23, 7, 10), deep = await crosses(18, 26, 7, 10);
-info('crosses toward 7 m out, from the byline: ' + JSON.stringify(byl) + '; from 18 m out on the wing: ' + JSON.stringify(deep));
+  one(); }), { fx, fy, D, N, far });
+const byl = await crosses(1.5, 23, 7, 10), deep = await crosses(18, 26, 7, 10), six = await crosses(1.5, 23, 4.5, 6, true);
+info('crosses toward 7 m out, from the byline: ' + JSON.stringify(byl) + '; from 18 m out on the wing: ' + JSON.stringify(deep) + '; into his six-yard box: ' + JSON.stringify(six));
 const came = t => Object.entries(t).filter(([k]) => k.startsWith('came:')).reduce((s, [, n]) => s + n, 0), got = t => (t['came:caught'] || 0) + (t['came:punched'] || 0);
-ok(came(byl) >= 7, 'from the byline he comes for nearly every one (' + came(byl) + ' of 10: one that\'s off target, he leaves)');
-ok(!byl['came:goal'] && !deep['came:goal'], 'he never comes for one and lets it in');
-ok(got(byl) + got(deep) >= 0.8 * (came(byl) + came(deep)), 'and he gets most of the ones he comes for (' + (got(byl) + got(deep)) + ' of ' + (came(byl) + came(deep)) + ', caught or punched)');
+ok(!byl['came:goal'] && !deep['came:goal'] && !six['came:goal'], 'he never comes for one and lets it in');
+ok(got(byl) + got(deep) >= 0.8 * (came(byl) + came(deep)), 'he gets the ones he comes for (' + (got(byl) + got(deep)) + ' of ' + (came(byl) + came(deep)) + ' toward 7 m, caught or punched; the rest he leaves to us, set on his line)');
+ok(came(six) >= 5 && got(six) >= 5, 'a ball dropping in his six-yard box he comes for, and has (' + got(six) + ' of 6)');
 
 process.exitCode = rep.finish();
 await browser.close();
