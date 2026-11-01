@@ -73,13 +73,14 @@ const clr = await page.evaluate(() => { const T = window.__T, p = T.players().fi
 info('a headed clearance: ' + Math.round(clr[0]) + ' px/s off a straight cross, ' + Math.round(clr[1]) + ' off a curling one');
 ok(Math.abs(clr[1] / clr[0] - 0.8) < 0.01, 'off a curling cross a headed clearance goes a fifth less far');
 
-// HARDER TO CLAIM: a cross dropping past the keeper (from just under where he can claim it, nearly still) as far off as
-// he can just get to before it lands -- he comes for it straight, and not if it's curling all the way
+// HARDER TO CLAIM: a cross dropping past the keeper as he comes for it (from just under where he can claim it, nearly
+// still) as far off as he can just get to before it lands -- he has it straight, and not if it's curling all the way.
+// (Coming for it: committed, reading it all the way. Whether he comes at all is his read of it -- v85: see crossClaim.)
 const cl = await page.evaluate(() => { const T = window.__T, kp = T.keepers()[0], b = T.ball(), out = {}; T.freeze();
   const glX = kp.side < 0 ? 0 : T.FW, z0 = T.CH() - 4, tEnd = Math.sqrt(z0 / 260), reach = T.reachOf(kp) + b.r, v = T.keeperSpdOf(kp) * 1.25;
-  const L = reach + v * (tEnd - 0.12 - 0.05);                                   // (he'd be there with 0.05 s to spare)
+  const L = reach + v * (tEnd - 0.05);                                          // (he'd be there with 0.05 s to spare)
   for(const k of [0, 1]){ kp.x = glX - kp.side * 30; kp.y = T.YC; b.ownedBy = null; b.x = kp.x; b.y = kp.y + L; b.z = z0; b.vx = 1; b.vy = 0; b.vz = 0;
-    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB()[1]; b.curveSpinT = 0; out[k] = !!T.crossClaim(kp); }
+    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB()[1]; b.curveSpinT = 0; out[k] = !!T.crossClaim(kp, true); }
   b.crossT = 0; b.crossBy = null; b.z = 0; b.x = T.FW / 2; b.y = T.YC; return out; });
 info('a cross he can just get to: ' + (cl[0] ? 'claimed' : 'left') + ' straight, ' + (cl[1] ? 'claimed' : 'left') + ' curling');
 ok(cl[0] && !cl[1], 'a curling cross is a little harder for the keeper to claim: one he\'d just get to straight, he can\'t');
