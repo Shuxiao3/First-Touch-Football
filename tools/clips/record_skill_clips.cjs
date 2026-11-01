@@ -28,7 +28,8 @@ const patch = (a, b) => { if(rec.split(a).length !== 2) throw new Error('anchor 
 patch('  const LAB_TITLE=', '  window.__T={mkSkill, sig:()=>hashStr(String(mkSkill)+String(skillStep)), setSkill:s=>{ skill=s; }, skill:()=>skill, recv:()=>recvAuto, controlled:()=>controlled, players:()=>players, keepers:()=>keepers, ball:()=>ball, simNow:()=>simNow, atkOf, FW, YC, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; oneTouch=null; ftAim=null; recvAuto=null; skill=null; skillCd=0; }};\n  const LAB_TITLE=');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    return false;\n');
-patch('  function humanIntent(){\n', '  function humanIntent(){\n    if(window.__stick) return {ix:window.__stick.x, iy:window.__stick.y};\n');
+patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',   // (the stick held as yours would be: the rest of
+  '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   //  your intent as it plays -- on to his touch first)
 const tmp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'ftf-clips-')), 'classic.html');
 fs.writeFileSync(tmp, rec);
 
@@ -67,7 +68,8 @@ fs.writeFileSync(tmp, rec);
         if(started != null) window.__stick = T.skill() || T.recv() ? null : o.go ? { x: o.go[0] * atk, y: o.go[1] * atk } : { x: p.facing.x, y: p.facing.y };   // (none while the move's on, or he's going to it)
         if(tick++ % 2 === 0){ const m = rel(p.x, p.y), q = rel(d.x, d.y), w = rel(b.x, b.y); f.push(m[0], m[1], ...spr(p), q[0], q[1], ...spr(d), w[0], w[1], R(b.z)); }
         if(started != null && !T.skill() && t > started + 0.05){ if(b.ownedBy !== p) back = null; else if(back == null) back = t; }   // (on it, and staying on it)
-        if(t < (back != null ? back + 0.55 : started != null ? started + 2.8 : 9)) return requestAnimationFrame(step);
+        const atFeet = Math.hypot(b.x - p.x, b.y - p.y) <= 26;   // (and it ends with it at his feet: not out ahead of him mid-touch)
+        if(t < (back != null ? (t < back + 0.55 || !atFeet ? Math.min(back + 1.5, t + 1) : back + 0.55) : started != null ? started + 2.8 : 9)) return requestAnimationFrame(step);
         window.__stick = null; res(f); })(); }), { kind, o }) };
     const n = clips[kind].f.length / 13; console.log(kind.padEnd(9), n + ' frames (' + (n / 30).toFixed(2) + ' s)');
   }
