@@ -1709,7 +1709,7 @@
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
     composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
-    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'How far each dribble touch goes on ahead (120 = as it plays: 1.1 m clear of him running at Dribbling 1 down to 0.6 m at 10, and 3 m down to 1.5 m at a sprint). Bigger = longer touches.'},
+    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'How far each dribble touch goes on ahead (120 = as it plays: 1 m clear of him running at Dribbling 1 down to 0.3 m at 10, and 2 m down to 1 m at a sprint). Bigger = longer touches.'},
     knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'How much each touch varies, in length and line (0.8 = as it plays: +-8% at Dribbling 10, +-40% at 1). Higher = looser, less predictable dribbling.'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
     accel:     {val:5.5, min:1,   max:10,  step:0.1, label:'Acceleration (stat 1–10)',hint:'Outfielder acceleration as a 1–10 stat. 1 = 0.05 (sluggish off the mark); 10 = 0.50 (explosive). Baseline for all players.'},
@@ -1909,7 +1909,8 @@
   const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', touchRun:1, touchSprint:1};   // (touchRun, touchSprint: the Dribble Lab's touch lengths, x1 as it plays)
   const THEMES=['blue','ruby','silver','mint'];
   try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
-  delete PREFS.dRun; delete PREFS.dSprint;   // (v92's touch lengths, set on the touches before v94's: back to x1)
+  delete PREFS.dRun; delete PREFS.dSprint;   // (v92's touch lengths, set on the touches before v94's: gone)
+  if(PREFS.touchV!==95){ PREFS.touchRun=1; PREFS.touchSprint=1; PREFS.touchV=95; }   // (RUN/SPRINT TOUCH set on another version's touch lengths: back to x1)
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
   // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
@@ -11165,14 +11166,14 @@
     for(const o of players){ if(o.team===p.team||o.state!=='normal') continue;
       const d=Math.hypot(o.x+o.vx*0.5-(p.x+p.vx*0.5),o.y+o.vy*0.5-(p.y+p.vy*0.5)); if(d<near) near=d; }
     return clamp(1-(near-2.5*MK)/(4.5*MK),0,1); }
-  // a touch's length before a man of theirs near him or its own wobble (v94): his Dribbling's, whatever his pace -- at a
-  // run, 1.1 m clear of him at Dribbling 1 down to 0.6 m at 10; flat out, 3 m down to 1.5 m; part way from his running
+  // a touch's length before a man of theirs near him or its own wobble (v94, v95): his Dribbling's, whatever his pace --
+  // at a run, 1 m clear of him at Dribbling 1 down to 0.3 m at 10; flat out, 2 m down to 1 m; part way from his running
   // pace to his sprint (vp, the pace he'll be going), part way between; slower than a run, shorter, down to under half.
   // (His running and sprinting pace as he is now: tired, both are slower, and flat out is still flat out.)
   // Each times your RUN TOUCH and SPRINT TOUCH (set in the Dribble Lab, kept in this browser: 1 as it plays)
   function dribTouchBase(p,vp){
     const dr=statOf(p,'dribbling',P.dribbling.val), legs=legsOf(p), run=runSpeedOf(p)*legs, spr=sprintSpeedOf(p)*legs;
-    const R=statLerp(dr,1.1,0.6)*MK*(PREFS.touchRun||1), S=Math.max(R,statLerp(dr,3,1.5)*MK*(PREFS.touchSprint||1));
+    const R=statLerp(dr,1,0.3)*MK*(PREFS.touchRun||1), S=Math.max(R,statLerp(dr,2,1)*MK*(PREFS.touchSprint||1));
     const D=vp<=run?R*clamp(vp/run,0.45,1):R+(S-R)*clamp((vp-run)/Math.max(1,spr-run),0,1);
     return D*(P.knockOn.val/120);
   }
