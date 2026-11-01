@@ -11042,17 +11042,20 @@
   }
   // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
   // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
-  // flies (see the physics step). Deciding to come, he takes a moment to read it (0.12 s); once he's coming (committed),
+  // flies (see the physics step). Deciding to come, he takes a moment to read it (0.12 s), and comes only for a ball he'll
+  // have while it's still over their heads (AIR_REACH: as high as the computer's men go up for one) -- one that's his,
+  // not one he'd have to fight them for (v85: a good cross to a man is a man's ball). Once he's coming (committed),
   // he's reading it all the way -- and a ball at his hands now counts (v85: it used to look only ahead, a moment's read
   // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
   // whole of his box (a ball he's already gone for).
   const GK_CLAIM_H=PLAYER_H*2.4;
   function crossClaim(kp,committed,wide){
     const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
-    const react=committed?0:0.12, dX=wide?PA_D:GA_D+80, dY=wide?PA_HW:GA_HW+60;
+    const react=committed?0:0.12, dX=wide?PA_D:GA_D+80, dY=wide?PA_HW:GA_HW+60, lo=committed?0:AIR_REACH;
     for(let t=committed?0:0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach
+      if(z<lo){ if(ball.vz-520*t<=0) return null; continue; }          // (deciding to come: only while it's over their heads -- a ball that's his)
       const B=t>0?ballAt(t):{x:ball.x,y:ball.y}, x=B.x, y=B.y;         // (its curl too)
       if(Math.abs(x-glX)>dX||Math.abs(y-YC)>dY) continue;              // outside his patch
       if(Math.max(0,Math.hypot(x-kp.x,y-kp.y)-reach)/v+react<=t) return {x,y,t};
