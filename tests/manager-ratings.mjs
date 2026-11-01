@@ -43,7 +43,8 @@ ok(r.def >= 7.5 && r.defBad < 5 && r.gk >= 8 && r.og < 6 && r.worst === 3 && r.b
 // --- a game you play: what each man did is counted, and rated -------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
-await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(15000);
+await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(3000);
+for(let i = 0; i < 37; i++){ const n = await K(`Object.values(MSTAT.G).concat(Object.values(MSTAT.R)).reduce((a,o)=>a+(o.pa||0),0)`).catch(() => 0); if(n >= 2) break; await page.waitForTimeout(1000); }   // (a few passes in: since v84 they kick off from their own halves, so it can take a while)
 r = await K(`(()=>{ const G=MSTAT.G, R=MSTAT.R, sum=(S,k)=>Object.values(S).reduce((a,o)=>a+(o[k]||0),0); return { men:Object.keys(G).length+Object.keys(R).length, pa:sum(G,'pa')+sum(R,'pa'), pc:sum(G,'pc')+sum(R,'pc') }; })()`);
 ok(r.men >= 2 && r.pa >= 2 && r.pc >= 1 && r.pc <= r.pa, 'live, what each man does is counted: ' + r.men + ' men on the ball, ' + r.pa + ' passes, ' + r.pc + ' found');
 await K(`(()=>{ const t=players.find(q=>q.team==='G'&&q.squadIdx===LINEUP.G.atk[0]); for(let i=0;i<3;i++) mStat(t,'tk'); finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);

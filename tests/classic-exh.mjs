@@ -66,12 +66,13 @@ const sw = await K(`({ inTeam:LINEUP.G.atk.includes(${inn}), outBench:mtBench('G
 ok(sw.inTeam && sw.onPitch && sw.outBench && sw.used === 0 && /no sub used/.test(sw.msg), `a man off the bench onto one in the team: in the team, the other on the bench, no sub used ("${sw.msg}")`);
 // KICK OFF ▶: the match goes, everyone in his spot in the shape picked (kicked off, and read in the same moment: its
 // button is tapped on the phone below)
-const k0 = await K(`(()=>{ mtKickOff(); const G=players.filter(p=>p.team==='G'), off=G.filter(p=>ball.ownedBy!==p&&controlled!==p).map(p=>Math.hypot(p.x-p.homeX,p.y-p.homeY));
+const k0 = await K(`(()=>{ mtKickOff(); const G=players.filter(p=>p.team==='G'), a=atkOf('G'), lim=FW/2-a*MK;   // (a spot past halfway: held a metre short of it, his own half -- see THE KICK-OFF)
+  const off=G.filter(p=>ball.ownedBy!==p&&controlled!==p).map(p=>Math.hypot(p.x-(a*(p.homeX-lim)>0?lim:p.homeX),p.y-p.homeY));
   const lines=[0,0,0]; for(const p of G){ const l=p.slotAtk&&p.slotAtk.role; lines[l==='DEF'?0:l==='MID'?1:2]++; }
   return { menu:menuOpen, ov:document.getElementById('mtacOv').classList.contains('on'), worst:Math.round(Math.max(...off)), t:simNow, lines:lines.join('-') }; })()`);
 await page.waitForTimeout(700); const k1 = await K('({ t:simNow, style:TAC.G.style, R:TAC.R.style })');
 ok(!k0.menu && !k0.ov && k1.t > k0.t && k1.style === 'wing' && k1.R === 'control', 'KICK OFF ▶: the match goes, in your style, City in theirs');
-ok(k0.worst === 0 && k0.lines === '2-3-2', `...kicking off with everyone in his spot, the side in the shape you picked (${k0.lines} with the ball)`);
+ok(k0.worst === 0 && k0.lines === '2-3-2', `...kicking off with everyone in his spot (his own half), the side in the shape you picked (${k0.lines} with the ball)`);
 // kept with the club: the setup screen says so, the opponent's as it was
 await K('pauseFromMatch()'); await page.waitForTimeout(150);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');

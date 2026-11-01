@@ -1699,6 +1699,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The kick-off (v84)** -- at the start, after a goal (the side that conceded) and to start the second half (Red):
+  everyone is in his own half, a metre short of halfway at least, and the side not kicking off is outside the
+  centre circle. The kicking side's most advanced man in the middle stands over the ball on the spot. Play holds
+  0.8 s (nobody moves, and the clock doesn't run), then he rolls it back to a team-mate -- the one nearest a spot ten
+  metres behind the ball, in the middle -- and it's on. Yours, you're put on the man it's going to. (Before, the
+  forwards stood where their shape without the ball put them, up to 6 m into the other half and inside the circle,
+  and the man on the ball -- a centre-back at times -- could set off with it at once.)
 - **The advantage at the end of each half (v82).** When the clock runs out, the referee doesn't blow while there's an
   attack on: at half time as at full time, play goes on (HALF TIME +ADV, FULL TIME +ADV on the clock) until it's dead.
   The attack is the side's that had the ball as the clock ran out, and it's over once:
@@ -2175,5 +2182,5 @@ python3 -I tools/campus/make_campus.py <tilesets dir> --embed-classic   # CAMPUS
 creation through to the House, a played career match, a five-match season, the exhibition setup,
 the labs, and Football Classic's manager career (a season a week at a time, promotion, the playoffs,
 a played match), tactics, the shape with and without the ball, runs in behind, passing, the computer's through ball round their line, quick subs, an exhibition's sides and its tactics before kick-off, the first touch, the players' sprites,
-the pitch and the advantage at the end of each half. They need
+the pitch, the kick-off and the advantage at the end of each half. They need
 Playwright; the game itself stays dependency-free. See [tests/README.md](tests/README.md).

@@ -18,7 +18,7 @@ const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('
 patch('  const LAB_TITLE=', '  window.__T={ball:()=>ball, players:()=>players, keepers:()=>keepers, simNow:()=>simNow, setNow:v=>{ simNow=v; }, FW, FH, YC, atkOf, '
   + 'adv:()=>({on:advOn, side:ADV.side, best:ADV.best}), advStart, advOver, ADV_MAX, ADV_HOLD, ADV_OWN, gk:k=>{ gkHold=k; }, restart:r=>{ restartInfo=r; }, '
   + 'half:()=>half, over:()=>matchOver, score:()=>scoreG+scoreR, breakT:()=>breakT, scored:()=>scoredT, runout:()=>{ matchClock=halfLenSec()-0.05; }, newMatch:()=>newMatch(), '
-  + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; restartInfo=null; }};\n  const LAB_TITLE=');
+  + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; restartInfo=null; kickT=0; kickBy=null; kickTo=null; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-adv-')), 'classic.html');
 writeFileSync(copy, src);
 

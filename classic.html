@@ -2980,6 +2980,8 @@
   let crossHeld=false,crossCharge=0,crossPend=null,crossLow=false,crossDown=0,crossGoneAt=-1e9;   // (crossPend/crossLow: a tap waiting for a second, the second of a double-tap -- see crossPressBall)
   let clearArm=0,clearHeld=false,clearT0=0;   // CLEAR (own half): while armed, the next ball to reach you is hoofed away first time
   let scoredT=0,scoreG=0,scoreR=0,offsideT=0,offSpot=null;
+  // THE KICK-OFF (see resetKickoff): play holds this long, then the man on the spot rolls it back to a team-mate
+  const KICK_HOLD=0.8; let kickT=0, kickBy=null, kickTo=null;
   let goalLog=[];
   let kdShots=0,kdSaves=0,kdGoals=0,kdGoalLock=false;        // keeper-drill running tally (+ re-trigger lock)
   const halfLenSec=()=>Math.max(60,(P.halfMin?P.halfMin.val:3)*60);   // real seconds per half, from the Half length setting
@@ -11587,7 +11589,7 @@
 
     // ----- MATCH CLOCK -----
     if(breakT>0){ breakT-=dt; if(breakT<=0&&!matchOver){ /* resume after break */ } }
-    const playRunning = !matchOver && breakT<=0 && scoredT<=0 && offsideT<=0;
+    const playRunning = !matchOver && breakT<=0 && scoredT<=0 && offsideT<=0 && kickT<=0;
     if(playRunning && !practice){
       if(!advOn) matchClock+=dt;                     // (the clock stops while the advantage is played)
       if(matchClock>=halfLenSec() && !advOn && !matchOver){
@@ -11623,7 +11625,7 @@
     if(LAB.on) labStep(dt,rdt);
     const hi=humanIntent();
     updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
-    const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || matchOver;
+    const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || kickT>0 || matchOver;
     if(!frozen) for(const p of players){
       if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
       else if(practice && !p.labAI && practiceStep(p,dt)){ /* scripted helper handled */ }
@@ -11831,6 +11833,8 @@
     }}
     // a restart (see doRestart): play holds a moment, then it's taken
     if(restartT>0){ restartT-=dt; if(restartT<=0){ restartT=0; if(restartInfo) executeRestart(); } }
+    if(kickT>0&&ball.ownedBy!==kickBy){ kickT=0; kickBy=null; kickTo=null; }                     // (played already -- yours, say: it's on)
+    if(kickT>0&&breakT<=0&&scoredT<=0&&!matchOver){ kickT-=dt; if(kickT<=0){ kickT=0; kickOffPass(); } }   // (the kick-off: see resetKickoff)
     if(offsideT>0){offsideT-=dt;
       if(offsideT<=0&&offSpot){
         // indirect free kick to the DEFENDING team at the offence spot
@@ -12189,26 +12193,43 @@
     matchOver=true; breakT=1e9;
     lastGrade='FULL TIME'; gradeColor='#9dff3c'; gradeFade=3.0;
   }
+  // THE KICK-OFF (the start, the second half, after a goal; v84): everyone in his own half -- a metre short of halfway
+  // at least -- and the side not kicking off outside the centre circle; the kicking side's most advanced man in the
+  // middle on the ball at the spot. Play holds a moment (KICK_HOLD), nobody moving, then he rolls it back to a team-mate
+  // (the one nearest ten metres behind the ball, in the middle) and it's on -- yours: you're put on the man it's going to.
+  // (Before, the forwards stood where their shape without the ball put them, up to 6 m into the other half and inside
+  // the circle, and the man on the ball -- anyone, a centre-back at times -- could set off with it at once.)
   function resetKickoff(kickTeam){
     ball.x=FW/2;ball.y=FH/2;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;
     ball.ownedBy=null;ball.cushBy=null;ball.lastTouch=null; possTeam=null;
     offsidePass=null;gkHold=null;controllingKeeper=null;restartT=0;restartInfo=null;headerT=0;
+    kickT=0; kickBy=null; kickTo=null;
     for(const p of players){
       if(p.slotDef) applySlot(p,p.slotDef);              // compact defensive shape -> both teams in their own halves
       p.x=p.homeX;p.y=p.homeY;p.vx=p.vy=0;p.z=0;p.vz=0;
       p.state='normal';p.stateT=0;p.noTouchT=0;p.tackleCd=0;
       p.runTarget=null;p.runT=0;
       p.facing={x:atkOf(p.team),y:0};
+      const a=atkOf(p.team), lim=FW/2-a*MK; if(a*(p.x-lim)>0) p.x=lim;   // (in his own half)
+      if(kickTeam&&p.team!==kickTeam){ const dx=p.x-FW/2, dy=p.y-YC, dd=Math.hypot(dx,dy), R=CIRCLE_R+MK;   // (and outside the circle)
+        if(dd<R){ if(dd<1){ p.x=FW/2-a*R; p.y=YC; } else { p.x=FW/2+dx/dd*R; p.y=YC+dy/dd*R; } } }
     }
     keepers.forEach(k=>{k.x=k.homeX;k.y=YC;k.mode='line';k.holdT=0;k.claimCd=0;});
     if(kickTeam){
-      // the kicking team takes the ball at the halfway line; everyone else stays in their half
-      const taker=(controlled&&controlled.team===kickTeam)?controlled
-        :players.filter(p=>p.team===kickTeam).sort((a,b)=>Math.abs(a.homeY-YC)-Math.abs(b.homeY-YC))[0];
-      if(taker){ taker.x=FW/2-atkOf(kickTeam)*12; taker.y=YC; taker.vx=taker.vy=0; own(taker,taker.r+ball.r+5); ball.lastTouch=kickTeam; }
+      const a=atkOf(kickTeam), mine=players.filter(p=>p.team===kickTeam);
+      const mid=mine.filter(p=>Math.abs(p.y-YC)<FH*0.22), taker=(mid.length?mid:mine).sort((p,q)=>a*(q.x-p.x)||Math.abs(p.y-YC)-Math.abs(q.y-YC))[0];
+      if(taker){ taker.x=FW/2-a*12; taker.y=YC; taker.vx=taker.vy=0; own(taker,taker.r+ball.r+5); ball.lastTouch=kickTeam;
+        const bx=FW/2-a*10*MK, behind=mine.filter(p=>p!==taker&&a*(p.x-FW/2)<-3*MK);
+        kickTo=(behind.length?behind:mine.filter(p=>p!==taker)).sort((p,q)=>Math.hypot(p.x-bx,p.y-YC)-Math.hypot(q.x-bx,q.y-YC))[0]||null;
+        kickBy=taker; kickT=KICK_HOLD; }
       possConfTeam=kickTeam; possFlipT=0;
     }
   }
+  // the hold's over: he rolls it back to his team-mate (unless it's gone from him already)
+  function kickOffPass(){ const p=kickBy, q=kickTo; kickBy=null; kickTo=null;
+    if(!p||!q||ball.ownedBy!==p||!players.includes(q)) return;
+    p.facing={x:q.x-p.x,y:q.y-p.y}; passTo(p,q);
+    if(q.team==='G') passSwitch(q); }
 
   // ===== render =====
   function line(x1,y1,x2,y2){
