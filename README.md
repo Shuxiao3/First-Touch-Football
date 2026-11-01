@@ -220,8 +220,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
-  - **Settings** are a player's: match length, how good exhibition opponents are, pixel or simple graphics, the
-    colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
+  - **Settings** are a player's: match length, how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
+    graphics, the colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
     plus the button layout on a touch screen. Settings also credits the campus's tilesets and the font. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
@@ -1699,6 +1699,25 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Difficulty (v89).** Five levels -- RELAXED, NORMAL, PRO, STAR and CHAMPION -- a row in SETTINGS, and a tap on the
+  chip under the title on the exhibition screen (it goes on to the next, CHAMPION round to RELAXED). A fresh browser
+  starts at NORMAL; it's kept. STAR is the computer at full strength, as it always played; CHAMPION a notch past it. It
+  turns the computer's side only, never your own men, and not the labs or drills. What it turns, for the computer's men
+  (RELAXED / NORMAL / PRO / STAR / CHAMPION):
+  - how far along your man's run they read him (their Def IQ's read × 0.45 / 0.65 / 0.85 / 1 / 1.12), and how loosely
+    they track the man on the ball and how long they take to come to after a touch (× 1.7 / 1.35 / 1.12 / 1 / 0.88);
+  - how often they take a chance to press together (40% / 65% / 85% / always / always, and for longer);
+  - how keen they are to go to ground, and how surely a tackle at the ball wins it (× 0.5 / 0.7 / 0.87 / 1 / 1.12);
+  - how wide their passes and crosses go (× 1.7 / 1.35 / 1.12 / 1 / 0.88) and how true their shots fly (accuracy ×
+    0.72 / 0.84 / 0.93 / 1 / 1.06);
+  - how noisy their choices on the ball are (× 4 / 2.5 / 1.5 / 1 / 0.7) and how long they look before playing it
+    (× 1.5 / 1.25 / 1.1 / 1 / 0.9);
+  - how far they stretch to cut out your pass (× 0.8 / 0.88 / 0.95 / 1 / 1.05).
+
+  On RELAXED and NORMAL there's a hand on their crosses too: your man heads one clear himself if you don't (as the
+  computer's marker would, when he's under it and their man doesn't beat him to it), and with the stick left alone he
+  goes to meet it. (Their crosses were where the computer was hardest to play against: its markers head them clear
+  by themselves, yours only if you time it.)
 - **The magnet (v88).** The ball loose a stride or two from your man (within 2.6 m) -- your own knock-on or a heavy
   touch, one that's come off him, one knocked loose -- and he's drawn to it until it's at his feet. Whichever way you're
   pushing, he bends toward it: a quarter of the way at the edge of the pull, up to 60% right by it, half that if you're

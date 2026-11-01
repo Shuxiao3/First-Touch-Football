@@ -5,7 +5,7 @@
 // is a change of team, not a sub; your shape and style there are kept with your club, and the match kicks off with
 // everyone in his spot in the shape you picked. A style back at the club's own isn't kept as a change.
 // On a copy of the game that lets the test reach the match.
-import { open } from './_harness.mjs';
+import { open, STAR } from './_harness.mjs';
 import { devices } from 'playwright';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -93,7 +93,7 @@ await browser.close();
 
 // ON A PHONE: TACTICS, the screen and its KICK OFF on it, a tap kicks off
 const { chromium } = await import('playwright');
-const b2 = await chromium.launch(), ctx = await b2.newContext({ ...devices['iPhone 14 landscape'] }), ph = await ctx.newPage();
+const b2 = await chromium.launch(), ctx = await b2.newContext({ ...devices['iPhone 14 landscape'] }); await ctx.addInitScript(STAR); const ph = await ctx.newPage();
 await ph.goto('file://' + copy); await ph.waitForTimeout(700);
 await ph.tap('#smItems [data-act="exhibition"]'); await ph.waitForSelector('#exhPanel.show');
 const eb = await ph.evaluate(() => [...document.querySelectorAll('#exhPanel .exhGo .smBtn')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.trim(), ok: r.right <= innerWidth && r.bottom <= innerHeight && r.height >= 30 }; }));

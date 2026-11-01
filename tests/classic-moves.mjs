@@ -22,7 +22,7 @@
 // game by tools/clips/record_skill_clips.cjs) is as old as the moves' code, ends with him on the ball, and shows the move.
 // On a copy of the game that lets the test reach the moves and the stars, its frames stepped at a steady 60 a second.
 import { chromium } from 'playwright';
-import { reporter } from './_harness.mjs';
+import { reporter, STAR } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -40,7 +40,7 @@ writeFileSync(copy, src);
 
 const browser = await chromium.launch();
 const rep = reporter(), { ok, info } = rep;
-const newPage = async () => { const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
+const newPage = async () => { const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } }); await page.addInitScript(STAR);
   page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if(m.type() === 'error') rep.errs.push('CONSOLE: ' + m.text()); });
   return page; };

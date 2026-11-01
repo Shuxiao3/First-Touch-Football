@@ -15,7 +15,7 @@
 // man's window (his number, full name and position, his stamina and skill stars: top right beside the menu, at every
 // size) and the menu.
 import { chromium } from 'playwright';
-import { reporter } from './_harness.mjs';
+import { reporter, STAR } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -85,7 +85,7 @@ async function newCareer(page){
   await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); }); }   // (the first season's two arrivals: manager-career's)
 
 for(const [w, h] of SIZES){
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700);
   const fails = [], check = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) fails.push(what + ': ' + bad.slice(0, 2).join('; ')); };
@@ -95,13 +95,14 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
     const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && radius >= 8 && btnR >= 5, 'the menus are framed in pixels: a dark outline, a light rim, rounded corners (' + radius + ' / ' + btnR + ' px)');
     const look = async () => page.evaluate(() => ({ theme: document.documentElement.dataset.theme || 'blue', btn: getComputedStyle(document.querySelector('#setRows .setOpt:not(.on)')).backgroundImage.slice(0, 40),
       font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }));
+    for(let i = 0; i < 3 && !(await page.isVisible('#setRows [data-pref="theme"][data-val="ruby"]')); i++){ await page.tap('#settingsOverlay [data-fitgo="1"]'); await page.waitForTimeout(150); }   // (on a phone, COLOURS is over the page)
     const l0 = await look(); await page.tap('#setRows [data-pref="theme"][data-val="ruby"]'); await page.waitForTimeout(100); const l1 = await look();
     await page.tap('#setRows [data-pref="theme"][data-val="blue"]'); await page.waitForTimeout(100); const l2 = await look();
     ok(l0.theme === 'blue' && l1.theme === 'ruby' && l1.btn !== l0.btn && l2.btn === l0.btn, 'COLOURS swaps the scheme (blue -> ruby -> blue): ' + l0.btn + ' / ' + l1.btn);
@@ -215,7 +216,7 @@ for(const [w, h] of SIZES){
 }
 
 // THE SEASON REVIEW: a long page of the season -- START SEASON 2 stays on the screen (844x340)
-{ const ctx = await browser.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true });
+{ const ctx = await browser.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   await page.evaluate(() => { const M = __MG, d = M.d; let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); } M.mgSave(d); M.renderHub(); });
@@ -388,7 +389,7 @@ for(const [w, h] of SIZES){
 // keeping its height, with everyone in the Selection tab's three columns, all on the screen -- on the shortest phone
 // (844x340) and the narrowest (640x360)
 for(const [w, h] of [[844, 340], [640, 360]]){
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
   const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   const R = await page.evaluate(() => { const d = window.__MG.d, R = d.roster, other = Object.values(d.world.clubs).filter(c => c.id !== d.clubId);

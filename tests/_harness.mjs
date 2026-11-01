@@ -23,9 +23,14 @@ export function reporter(){
   };
 }
 
+// DIFFICULTY (v89): a test plays the computer at STAR -- full strength, as it always played -- unless it sets a level
+// itself (a fresh browser starts at NORMAL). Run before every page load, as an init script.
+export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; if(!o.diff){ o.diff = 'star'; localStorage.setItem('ftc_prefs', JSON.stringify(o)); } }catch(e){} };
+
 export async function open({ fastFrames = false, url = GAME } = {}){
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
+  await page.addInitScript(STAR);
   const rep = reporter();
   page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if(m.type() === 'error') rep.errs.push('CONSOLE: ' + m.text()); });

@@ -7,7 +7,7 @@
 // it's never there in a lab. A tap on it is a tap on it, not on the game. ALL SUBS opens the match's tactics. The Subs
 // tab: tap a man on the pitch and one on the bench to pair them, up to three; in the match they're first on the list.
 // On a copy of the game that lets the test reach the match's men and its subs, and the career.
-import { open } from './_harness.mjs';
+import { open, STAR } from './_harness.mjs';
 import { devices } from 'playwright';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -92,7 +92,7 @@ await browser.close();
 // ON A PHONE: a tap on the chip opens it and isn't a tap on the game; it's small there too; ALL SUBS opens the match's
 // tactics; in a lab it's never there
 const { chromium } = await import('playwright');
-const b3 = await chromium.launch(), ctx = await b3.newContext({ ...devices['iPhone 14 landscape'] }), ph = await ctx.newPage();
+const b3 = await chromium.launch(), ctx = await b3.newContext({ ...devices['iPhone 14 landscape'] }); await ctx.addInitScript(STAR); const ph = await ctx.newPage();
 await ph.goto('file://' + copy); await ph.waitForTimeout(800);
 await ph.tap('#smItems [data-act="exhibition"]'); await ph.waitForSelector('#exhPanel.show'); await ph.tap('#exhGo'); await ph.waitForTimeout(1200);
 const KP = s => ph.evaluate(s => window.__K.ev(s), s);

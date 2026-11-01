@@ -374,6 +374,7 @@
   #exhPanel .exhGo{flex:none;}
   #exhPanel h3{margin-bottom:4px;}
   .exhLeague{font-size:10px;letter-spacing:3px;color:var(--dim2);margin-bottom:10px;}
+  .exhDiff{font:inherit;letter-spacing:inherit;color:var(--phosphor);background:none;border:1px solid var(--phosphor-dim);padding:1px 6px;cursor:pointer;}
   .exhTeams{display:flex;align-items:stretch;justify-content:center;gap:8px;width:100%;}
   .exhSide{flex:1 1 0;min-width:0;border:1px solid var(--well);border-radius:10px;padding:7px 6px 6px;background:rgb(var(--accRGB) / .04);}
   .exhSide.you{border-color:var(--phosphor-dim);}
@@ -1896,10 +1897,36 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left'};
+  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal'};
   const THEMES=['blue','ruby','silver','mint'];
   try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
+  // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
+  // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
+  // always have, and the labs and drills are as they were. What each turns, for the computer's men:
+  //  read   -- how far along your man's run they read him (readRun: Def IQ's read, times this)
+  //  react  -- how long between their reads of the man on the ball, how loosely they track him (perceived), and how long
+  //            they take to come to after a touch
+  //  press  -- how often a chance to press together is taken (pressing), and (past 1) for how long
+  //  tackle -- how keen they are to go to ground (their slide rolls), and how surely a tackle at the ball wins it
+  //  spray  -- how wide their passes and crosses go (passSpray, crossSpray, crossOver: times this)
+  //  shot   -- how true their shots fly (shootAt: their accuracy, times this)
+  //  think  -- the noise on how they weigh up what to do on the ball (obChoose: Off IQ's, times this)
+  //  slow   -- how long they look before they do anything with it (obStart)
+  //  reach  -- how far they stretch to cut out your pass (attemptCaptures)
+  //  assist -- RELAXED and NORMAL: on their cross your man heads it clear himself, as the computer's marker would, if you
+  //            don't; and with the stick left alone, he goes to meet it
+  const DIFF_KEYS=['relaxed','normal','pro','star','champion'];
+  const DIFFS={
+    relaxed: {read:0.45,react:1.7, press:0.4, tackle:0.5, spray:1.7, shot:0.72,think:4,  slow:1.5, reach:0.8, assist:true},
+    normal:  {read:0.65,react:1.35,press:0.65,tackle:0.7, spray:1.35,shot:0.84,think:2.5,slow:1.25,reach:0.88,assist:true},
+    pro:     {read:0.85,react:1.12,press:0.85,tackle:0.87,spray:1.12,shot:0.93,think:1.5,slow:1.1, reach:0.95,assist:false},
+    star:    {read:1,   react:1,   press:1,   tackle:1,   spray:1,   shot:1,   think:1,  slow:1,   reach:1,   assist:false},
+    champion:{read:1.12,react:0.88,press:1.2, tackle:1.12,spray:0.88,shot:1.06,think:0.7,slow:0.9, reach:1.05,assist:false}};
+  const DIFF_NAMES={relaxed:'RELAXED',normal:'NORMAL',pro:'PRO',star:'STAR',champion:'CHAMPION'};
+  const diffOf=()=>DIFFS[PREFS.diff]||DIFFS.normal;
+  const cpuT=t=>(t==='R'&&!LAB.on&&!practice)?diffOf():DIFFS.star;      // (the computer's side, in a match)
+  const cpu=p=>cpuT(p&&p.team);
   function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||3),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
     try{ SPRITE.enable(PREFS.art!==false); PITCH.enable(PREFS.art!==false); }catch(e){}
     applyTheme(); try{ document.getElementById('careerHub').classList.toggle('cpRight',PREFS.side==='right'); }catch(e){} }
@@ -5550,7 +5577,30 @@
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
     const mg=magnetPull(controlled,ix,iy); if(mg) return mg;            // (a loose ball by you: see MAGNET)
+    if(!ix&&!iy&&assistOn()){ const c=controlled, H=assistSpot(c);       // (DIFFICULTY's assist: he goes to meet their cross)
+      if(H){ const dx=H.x-c.x, dy=H.y-c.y, d=Math.hypot(dx,dy); if(d>10) return {ix:dx/d, iy:dy/d}; } }
     return{ix,iy};
+  }
+  // DIFFICULTY's ASSIST (RELAXED, NORMAL): their cross on its way in, your man going for it -- the stick left alone, he
+  // goes to meet it (humanIntent); at his head, he heads it clear himself if you haven't (J), as the computer's marker
+  // would -- a duel with one of theirs up with him, as theirs is (aerialRival)
+  function assistOn(){ const c=controlled; return !!c&&c.team==='G'&&diffOf().assist&&!LAB.on&&!practice&&ball.crossT>0&&!!ball.crossBy&&ball.crossBy!==c.team&&!ball.ownedBy&&!gkHold&&c.state==='normal'; }
+  // where your man meets it: the first point of its flight through head height in or by our box he can get to (the
+  // computer's own reading of it: crossDefT), a step goal-side of it -- or where it'll land, by our box (crossDefend, as
+  // the computer's men have it, leaves you out: you're yours to steer)
+  function assistSpot(c){
+    const atk=atkOf(c.team), own=atk>0?0:FW; crossDefend(c,own,atk);
+    const C=dCrossCache; if(C.team!==c.team||!C.F) return null;
+    const tE=crossDefT(c,C.F); if(tE!==null){ for(const g of C.F) if(g.t===tE) return {x:g.x-atk*12, y:g.y}; }
+    return C.L&&Math.abs(C.L.x-own)<BX+80&&Math.abs(C.L.y-YC)<BY+60 ? {x:C.L.x-atk*24, y:C.L.y} : null;
+  }
+  function assistHeader(){
+    const p=controlled; if(!assistOn()||defHeaderT>0||p.z>0) return;
+    if(!(dist(p,ball)<48&&ball.z>18&&ball.z<AIR_REACH&&!keeperOnIt(p.team))) return;
+    if(ball.z>30){ p.vz=headJumpVz(p); p.z=0.1; }
+    const r=aerialRival(p);
+    if(r&&Math.random()>1-aerialOdds(r,p)-CURL_HEAD*crossCurlQ()) headOnGoal(r);
+    else headClear(p);
   }
   // THE MAGNET (v88): the ball loose a stride or two from your man -- your own knock-on or a heavy touch, one that's come
   // off him, one knocked loose -- and he's drawn to it till it's at his feet. Whichever way you're pushing he bends toward
@@ -5634,8 +5684,8 @@
   function crossFarOf(out){ return clamp((out-CROSS_TRUE)/(CROSS_MAX-CROSS_TRUE),0,1); }   // 0 level with the six-yard box or nearer .. 1 at 24 m out
   function crossFar(team,x){ return crossFarOf(crossOut(team,x)); }
   function crossOK(p){ return crossOut(p.team,ball.x)<=CROSS_MAX; }                    // the ball near enough their byline for p to cross it
-  function crossSpray(p,f){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*(Math.random()-Math.random()); }
-  function crossOver(p,f){ f=f||0; return f*(0.10+(1-crossAccOf(p))*0.12)*(Math.random()-Math.random()); }
+  function crossSpray(p,f){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*cpu(p).spray*(Math.random()-Math.random()); }
+  function crossOver(p,f){ f=f||0; return f*(0.10+(1-crossAccOf(p))*0.12)*cpu(p).spray*(Math.random()-Math.random()); }
   // HEADING stat -> header power, aerial-duel win rate (vs the opponent), and header accuracy.
   function headingOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.1, 1.0); }     // aerial-duel win value
   function headAccOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.2, 0.8); }     // header accuracy
@@ -5651,7 +5701,7 @@
     const la = longAccOf(p);
     const base   = (1-sa)*0.06;
     const longErr= (1-la)*clamp((d-250)/650,0,1)*0.45;   // big spread: up to ~25° at the worst
-    return (base+longErr)*(1+poiseLoss(p)*0.9)*(Math.random()*2-1);   // composure: pressure widens the spray
+    return (base+longErr)*(1+poiseLoss(p)*0.9)*cpu(p).spray*(Math.random()*2-1);   // composure: pressure widens the spray (and DIFFICULTY, the computer's)
   }
   // TURNING AND PASSING: a pass played the moment he's turned to face it goes less true than one he's been lined up for.
   // His facing, read over the last ~0.3 s (faceAvg: midway through a turn it's short, about square), against the way the
@@ -6952,7 +7002,7 @@
     dx/=distG;dy/=distG;
     const ftMul = (accMul!==undefined)?accMul:1;             // first-touch strikes are less accurate
     const xb=clamp(across||0,0,1.5);                          // struck across his body (a swipe off his line: swipeAcross)
-    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p)*0.25)*(1-0.8*Math.min(1,xb)),0,1);   // composure: pressure saps shot accuracy
+    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p)*0.25)*(1-0.8*Math.min(1,xb))*cpu(p).shot,0,1);   // composure: pressure saps shot accuracy (and DIFFICULTY, the computer's)
     // LONG SHOTS: shots from beyond the box edge lose pace and accuracy unless the dial is high.
     const dGoalAbs2 = Math.hypot(gx-ball.x, YC-ball.y);      // true distance to goal centre (wide shots travel further)
     const longRange = clamp((dGoalAbs2-330)/370, 0, 1);      // 0 at the box edge, full penalty by 700 out
@@ -7251,7 +7301,7 @@
         if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
         if(shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier))continue;   // shielding: only from where the ball shows
         if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
-        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2),0,0.98)){ winBall(p,carrier); return; }
+        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2)+(1-cpu(p).tackle)*0.25,0,0.98)){ winBall(p,carrier); return; }   // (DIFFICULTY: harder for the computer the easier)
         // shielded: bodies just bump, no turnover (collision handles spacing)
       }
       // SHIELD / TURN BATTLE (strength): if I'm tight to a shielding carrier and he's trying to
@@ -7265,7 +7315,7 @@
         if(turning && cSpeed<140){
           // strength-weighted contest, sampled at a modest rate so it plays out over a moment
           const odds=duelOdds(strengthOf(p),holdStrength(carrier));   // P(defender wins)
-          if(Math.random() < odds*0.06){
+          if(Math.random() < odds*0.06*cpu(p).tackle){
             // defender muscles across and steals it as the carrier exposes it
             p.facing={x:(carrier.x-p.x)/(bodyGap||1),y:(carrier.y-p.y)/(bodyGap||1)};
             winBall(p,carrier);
@@ -8698,7 +8748,7 @@
   const FT_XG=0.3;
   function ftFinishOf(p){ return clamp((statOf(p,'offIQ',P.offIQ.val)-5.5)/3.5,0,1); }
   function obChoose(p,ob,opts,looking,C){
-    const iq=statOf(p,'offIQ',P.offIQ.val), sdA=statLerp(iq,0.0015,0.0002), sdR=statLerp(iq,0.12,0.02);
+    const iq=statOf(p,'offIQ',P.offIQ.val), th=cpu(p).think, sdA=statLerp(iq,0.0015,0.0002)*th, sdR=statLerp(iq,0.12,0.02)*th;   // (DIFFICULTY: the computer's choices noisier the easier)
     let keep=-1e9; for(const o of opts) if(!o.rel&&o.ev>keep) keep=o.ev;
     const firstTime=ob.pressed?0:0.006+0.8*Math.max(0,keep);
     let best=null, bs=-1e9;
@@ -8716,7 +8766,7 @@
   }
   function obStart(p,C){
     const base=p.team==='G'?P.mateThink.val:P.aiThink.val, pr=C.prD<80?0.3:C.prD<150?0.6:1;
-    return {since:simNow, seen:simNow, look:simNow+base*statLerp(statOf(p,'offIQ',P.offIQ.val),1.25,0.75)*pr*C.M.tempo,
+    return {since:simNow, seen:simNow, look:simNow+base*statLerp(statOf(p,'offIQ',P.offIQ.val),1.25,0.75)*pr*C.M.tempo*cpu(p).slow,
             next:simNow, scanT:-9, plan:null, pressed:C.prD<70, done:false};
   }
   // the AI's own clearance: high and long, up toward the touchline
@@ -9869,7 +9919,7 @@
         const standoff=70;                                // sit just in front, between ball & goal
         const tx=rc.x+gx2*standoff, ty=rc.y+gy2*standoff;
         // jockey here; only tackle if the ball is exposed and close
-        if(p.tackleCd<=0&&p.state==='normal'&&ballExposure(c,p)>0.55&&dist(p,ball)<44&&Math.random()<0.05*iqDef(p,'tackleTiming')){
+        if(p.tackleCd<=0&&p.state==='normal'&&ballExposure(c,p)>0.55&&dist(p,ball)<44&&Math.random()<0.05*iqDef(p,'tackleTiming')*cpu(p).tackle){
           slideAt(p,c);
         }
         p.sprint = p.stamina>0.12; p.dash=true;
@@ -9943,7 +9993,7 @@
           tx=ball.x+rc.x-c.x; ty=ball.y+rc.y-c.y;
           if(p.tackleCd<=0&&p.state==='normal'){
             if(d<p.r+ball.r+10){ /* contact tackle handles it */ }
-            else if(d<120&&(showing||ballAhead)&&Math.random()<(0.025+0.03*effTight)*iqDef(p,'tackleTiming')){
+            else if(d<120&&(showing||ballAhead)&&Math.random()<(0.025+0.03*effTight)*iqDef(p,'tackleTiming')*cpu(p).tackle){
               slideAt(p,c);
             }
           }
@@ -9952,7 +10002,7 @@
           // carrier (easy to knock past) — hold a cushion on the line to our goal.
           const STANDOFF=(44+30*(1-effTight));
           tx=rpc.x+rgx*STANDOFF;ty=rpc.y+rgy*STANDOFF;
-          if(p.tackleCd<=0&&p.state==='normal'&&exp>0.6&&d<40&&Math.random()<0.02+0.04*effTight){
+          if(p.tackleCd<=0&&p.state==='normal'&&exp>0.6&&d<40&&Math.random()<(0.02+0.04*effTight)*cpu(p).tackle){
             slideAt(p,c);
           }
         } else {
@@ -9960,7 +10010,7 @@
           const STANDOFF=85-30*effTight;                // a clear cushion when contained
           tx=rpc.x+rgx*STANDOFF;ty=rpc.y+rgy*STANDOFF;
           if(p.tackleCd<=0&&p.state==='normal'&&showing&&
-             d<85&&Math.random()<0.012+0.03*effTight){
+             d<85&&Math.random()<(0.012+0.03*effTight)*cpu(p).tackle){
             slideAt(p,c);
           }
         }
@@ -10234,7 +10284,8 @@
     if(simNow<S2.until) return S2.on=true;
     if(simNow<S2.cd) return false;
     // A MID BLOCK SPRINGS as the ball comes into the middle third: carried or played in, it goes at it together
-    if(dtac==='neutral' && prevU!=null && prevU>FW*0.64 && uBall<=FW*0.64 && uBall>FW*0.34){ S2.until=simNow+1.4; S2.cd=simNow+3.6; return S2.on=true; }
+    const pk=cpuT(team).press;                                             // (DIFFICULTY: how often it takes the chance to press)
+    if(dtac==='neutral' && prevU!=null && prevU>FW*0.64 && uBall<=FW*0.64 && uBall>FW*0.34){ if(Math.random()>pk){ S2.cd=simNow+1.5; return false; } S2.until=simNow+1.4*Math.max(1,pk); S2.cd=simNow+3.6; return S2.on=true; }
     if((dtac!=='press' && uBall>FW*0.70) || (dtac==='lowblock' && uBall>FW*0.5)) return false;
     let near=1e9; for(const q of teamOf(team)) near=Math.min(near,dist(q,c));
     const cAtk=atkOf(c.team), lp=ball.lastTouchP;
@@ -10242,7 +10293,7 @@
     const heavy      = !ball.ownedBy && c===ball.dribbler && ball.dribbleGrace>0 && dist(c,ball)>75 && near<220;
     const facingBack = ball.ownedBy===c && c.facing && cAtk*c.facing.x<-0.5 && near<200;
     const touchline  = Math.abs(c.y-YC)>FH*0.40 && near<180;
-    if(backPass||heavy||facingBack||touchline){ S2.until=simNow+1.6; S2.cd=simNow+3.2; return S2.on=true; }
+    if(backPass||heavy||facingBack||touchline){ if(Math.random()>pk){ S2.cd=simNow+1.5; return false; } S2.until=simNow+1.6*Math.max(1,pk); S2.cd=simNow+3.2; return S2.on=true; }
     return false;
   }
   // THE HIGH PRESS ON THEIR BUILD-UP: with the ball in their third (or with their keeper), our forwards and midfielders each
@@ -10408,7 +10459,7 @@
   // fifth off his read; never under 40% of it
   function readLegs(p){ return clamp(1-2*(1-legsOf(p)),0.4,1); }
   function readRun(p,c,base,off){   // (off: a runner without the ball)
-    const iq=clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;
+    const iq=Math.min(0.98,clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p)*cpu(p).read), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;   // (cpu: DIFFICULTY)
     return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
@@ -10417,12 +10468,12 @@
     p.reactT-=dt;
     if(!p.perc || p.reactT<=0){
       // re-read: snapshot the carrier with a little positional jitter and stale velocity
-      const jit=22;
+      const jit=22*cpu(p).react;                       // (DIFFICULTY: looser the easier)
       p.jitterX=(Math.random()*2-1)*jit;
       p.jitterY=(Math.random()*2-1)*jit;
       p.perc={x:c.x,y:c.y,vx:c.vx,vy:c.vy};
       // reaction interval: ~0.13–0.28s, sharper defenders (higher pressTight) react faster
-      p.reactT=0.13+Math.random()*0.15 - 0.06*P.pressTight.val;
+      p.reactT=(0.13+Math.random()*0.15 - 0.06*P.pressTight.val)*cpu(p).react;
     }
     // ease the perceived position toward the (stale) read, so movement is smooth but laggy
     const k=Math.min(1,dt*9);
@@ -10848,7 +10899,7 @@
     ball.dribbler=p; ball.dribbleGrace=0.85;   // still your ball: it's yours again once it's in your reach (see attemptCaptures)
     p.noTouchT=0.12+0.2*(1-s);
     // a computer player doesn't know where its touch went any sooner than you would (see the AI step)
-    if(p!==controlled) p.touchLagT=P.aiReact.val*statLerp(statOf(p,'agility',P.agility.val),1.25,0.75);
+    if(p!==controlled) p.touchLagT=P.aiReact.val*statLerp(statOf(p,'agility',P.agility.val),1.25,0.75)*cpu(p).react;
     if(p===controlled){
       p.passLockT=(P.passLock?P.passLock.val:0.25);
       touchGraded(s);
@@ -10941,7 +10992,7 @@
       const intercept=!!(passerTeam&&p.team!==passerTeam);
       if(intercept&&ball.shotT>0&&ball.shotBy&&ball.shotBy!==p.team&&ballSp>=450) continue;   // (a live shot: blockShots)
       let myR=intercept
-        ? winReachR(p)*(0.45+0.55*interceptReachOf(p))    // defender intercept reach (Interceptions stat)
+        ? winReachR(p)*(0.45+0.55*interceptReachOf(p))*cpu(p).reach    // defender intercept reach (Interceptions stat; DIFFICULTY)
         : controlROf(p);
       // DRIBBLE EXPOSURE: while the ball is knocked ahead of a dribbler, a defender's window to
       // nick it GROWS with how far the ball has run from the carrier — loose touches get punished.
@@ -11801,6 +11852,7 @@
     if(LAB.on) labStep(dt,rdt);
     let hi=humanIntent();
     { const ad=autoDefIntent(dt); if(ad) hi=ad; }                       // (SWITCH held, defending: AUTO DEFEND)
+    if(!(offsideT>0||restartT>0||scoredT>0||breakT>0||kickT>0||matchOver)) assistHeader();   // (DIFFICULTY's assist: their cross, at your man's head)
     updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || kickT>0 || matchOver;
     if(!frozen) for(const p of players){
@@ -13964,6 +14016,7 @@
   // SETTINGS: what a player sets, one row each (see PREFS); a developer can open the feel dials under it (see DEV)
   const SET_ROWS=[
     ['halfMin','MATCH LENGTH',[[3,'3 MIN'],[4,'4 MIN'],[5,'5 MIN']],'a half; the clock still reads 1–90'],
+    ['diff','DIFFICULTY',DIFF_KEYS.map(k=>[k,DIFF_NAMES[k]]),'how well the computer plays'],
     ['oppShift','EXHIBITION OPPONENTS',[[-3,'PUB'],[-1.5,'EASY'],[0,'NORMAL'],[1.5,'HARD'],[3,'ELITE']],'their stats, against the clubs as they are (career matches are as they are)'],
     ['art','GRAPHICS',[[true,'PIXEL ART'],[false,'SIMPLE']],'pixel players, pitch and ball, or plain shapes'],
     ['theme','COLOURS',[['blue','BLUE'],['ruby','RUBY'],['silver','SILVER'],['mint','MINT']],'the menus'],
@@ -13971,7 +14024,7 @@
   function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
     el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
       +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
-  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side')?raw:+raw; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
+  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side'||k==='diff')?raw:+raw; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
   function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
     if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
     else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
@@ -16275,7 +16328,7 @@
     g.fillStyle=k[2]; g.fillRect(w*0.3,h*0.6,w*0.4,h*0.22);
   }
   function renderExh(){
-    document.getElementById('exhLeague').textContent=CLUB_LEAGUE;
+    document.getElementById('exhLeague').innerHTML=CLUB_LEAGUE+' · <button class="exhDiff" data-exh="diff">'+DIFF_NAMES[PREFS.diff in DIFFS?PREFS.diff:'normal']+' ▸</button>';
     for(const t of ['G','R']){ const el=document.getElementById('exhSide'+t); el.innerHTML=exhSideHTML(t); el.classList.toggle('you',t==='G'); }
     document.querySelectorAll('#exhPanel canvas.exhKit').forEach(cv=>{ const k=cv.dataset.kit.split(','); if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); });
     const grid=document.getElementById('exhGrid');
@@ -16301,6 +16354,7 @@
     if(a==='prev'||a==='next') exhCycle(t,a==='next'?1:-1);
     else if(a==='grid') exhGridSide=(exhGridSide===t)?null:t;
     else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }
+    else if(a==='diff'){ const i=DIFF_KEYS.indexOf(PREFS.diff); PREFS.diff=DIFF_KEYS[(i+1)%DIFF_KEYS.length]; savePrefs(); try{ renderSetRows(); }catch(_){} }   // (the difficulty: tap through them)
     saveExh(); renderExh();
   });
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }
