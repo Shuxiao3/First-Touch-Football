@@ -3445,7 +3445,33 @@
     if(!holdMode||holdMode.p!==p||holdMode.kind!==kind){
       holdMode={p, kind, face:{x:p.facing.x,y:p.facing.y}, aim:null, since:simNow};
       if(kind==='shield'&&shieldFrom(p)){ lastGrade='SHIELD'; gradeColor='#78c8ff'; gradeFade=0.6; } } }
-  const shieldingNow=c=>!!holdMode&&holdMode.p===c&&holdMode.kind==='shield'&&ball.ownedBy===c;
+  // AFTER A TACKLE (v91): your man, having won it off one of theirs with a standing tackle -- or nicked a touch of his
+  // out in front of him; not a slide -- gets his back to that man as soon as he has it, the ball tight at his feet on his
+  // far side, for a split second: so the man he took it from can't just get up and take it straight back. How quickly
+  // he turns, for how long, and how little of the ball he shows him are his Def IQ: 7 to 14 radians a second, 0.6 s to
+  // 1 s, and the man can only nick it from within 60 degrees of where the ball is down to 30 (as a top dribbler
+  // shields it) -- a poor one, slow round, can still have it nicked off him by a man quick round him to the ball. The
+  // stick still moves him, only not back into that man (across him instead); left alone, he stands and turns.
+  const GUARD_T=[0.6,1.0], GUARD_TURN=[7,14], GUARD_NICK=[60,30];
+  const guardOn=p=>!!p&&!!p.guard&&p===controlled&&ball.ownedBy===p&&simNow<p.guard.until&&p.state==='normal';
+  function guardMark(t,carrier){ if(t&&carrier&&t.state!=='slide'){ t.guardFrom=carrier; t.guardWon=simNow; } }
+  function startGuard(p){
+    if(!p||!p.guardFrom) return;
+    if(simNow-p.guardWon>1.2){ p.guardFrom=null; return; }                // (long since: a ball he's come by some other way)
+    if(p!==controlled||ball.ownedBy!==p) return;
+    const iq=defIQof(p);
+    p.guard={from:p.guardFrom, at:simNow, until:simNow+statLerp(iq,GUARD_T[0],GUARD_T[1]), rate:statLerp(iq,GUARD_TURN[0],GUARD_TURN[1]),
+      nick:statLerp(iq,GUARD_NICK[0],GUARD_NICK[1])*Math.PI/180};
+    p.guardFrom=null; }
+  // his stick while he's at it: not back into the man he took it from -- across him instead
+  function guardIntent(p,ix,iy){
+    if(!guardOn(p)||(!ix&&!iy)) return null;
+    const o=p.guard.from, dx=p.x-o.x, dy=p.y-o.y, dl=Math.hypot(dx,dy)||1, ux=dx/dl, uy=dy/dl, into=ix*ux+iy*uy;
+    if(into>=0) return null;                                              // (away from him, or across: as you push)
+    const il=Math.hypot(ix,iy), px=ix-into*ux, py=iy-into*uy, pl=Math.hypot(px,py);
+    return pl>0.15*il?{ix:px/pl*il, iy:py/pl*il}:{ix:0,iy:0};
+  }
+  const shieldingNow=c=>(!!holdMode&&holdMode.p===c&&holdMode.kind==='shield'&&ball.ownedBy===c)||guardOn(c);
   const holdStrength=c=>strengthOf(c)+(shieldingNow(c)?SHIELD_PLANT:0);
   function shieldFrom(p){ let o=null, od=SHIELD_SEE;
     for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const d=dist(p,q); if(d<od){ od=d; o=q; } }
@@ -3459,7 +3485,8 @@
     const mx=statLerp(iq,2.5,8)*dt, a=a0+clamp(skillTurn(a0,H.aim),-mx,mx);
     p.facing={x:Math.cos(a),y:Math.sin(a)}; }
   // how far round from the ball a man can nick it off a man shielding it (radians): his Dribbling and Ball control
-  function nickWindowOf(c){ return statLerp((statOf(c,'dribbling',P.dribbling.val)+statOf(c,'ballControl',P.ballControl.val))/2,NICK_W[0],NICK_W[1])*Math.PI/180; }
+  function nickWindowOf(c){ const w=statLerp((statOf(c,'dribbling',P.dribbling.val)+statOf(c,'ballControl',P.ballControl.val))/2,NICK_W[0],NICK_W[1])*Math.PI/180;
+    return guardOn(c)?Math.min(w,c.guard.nick):w; }                       // (after a tackle: his Def IQ's, if that's better -- AFTER A TACKLE)
   function nickAngle(c,o){ const ax=o.x-c.x, ay=o.y-c.y, bx=ball.x-c.x, by=ball.y-c.y, l=(Math.hypot(ax,ay)*Math.hypot(bx,by))||1;
     return Math.acos(clamp((ax*bx+ay*by)/l,-1,1)); }
   const SKILL_NAME={knock:'KNOCK-ON',dragback:'DRAG-BACK',croq:'CROQUETA',spin:'ROULETTE',cruyff:'CRUYFF TURN',rainbow:'RAINBOW',sombrero:'SOMBRERO',elastico:'ELASTICO',heel:'HEEL FLICK'};
@@ -5578,6 +5605,7 @@
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
+    const gd=guardIntent(controlled,ix,iy); if(gd) return gd;           // (just won it: not back into the man he took it from -- AFTER A TACKLE)
     const dr=dribbleSteer(controlled,ix,iy); if(dr) return dr;          // (his touch out ahead of him: on to it -- DRIBBLING)
     const mg=magnetPull(controlled,ix,iy); if(mg) return mg;            // (a loose ball by you: see MAGNET)
     if(!ix&&!iy&&assistOn()){ const c=controlled, H=assistSpot(c);       // (DIFFICULTY's assist: he goes to meet their cross)
@@ -7279,12 +7307,13 @@
   function stealTouch(t,carrier){
     carrier.noTouchT=0.7; t.noTouchT=0; ball.lastTouch=t.team; offsidePass=null;   // (done: a moment before he can get back at it)
     ball.vx=t.vx; ball.vy=t.vy; ball.vz=0;                 // (stopped at his feet, going his way -- not rolling on past him)
-    own(t,0,true);
+    guardMark(t,carrier); own(t,0,true);
     mStat(t,'tk'); mStat(carrier,'lost'); if(meIs(t)) meBump('tackles'); if(meIs(carrier)) meBump('lost');
     if(t===controlled){lastGrade='NICKED IT!';gradeColor='#9dff3c';gradeFade=1.2;}
     else if(carrier===controlled){lastGrade='NICKED OFF YOU';gradeColor='#ff5a4d';gradeFade=1.2;}
   }
   function winBall(t,carrier){
+    guardMark(t,carrier);                                                 // (a standing tackle: he'll guard it when he has it -- AFTER A TACKLE)
     ball.ownedBy=null;
     carrier.noTouchT=0.7;
     carrier.state='stumble';carrier.stateT=0.5;
@@ -10658,7 +10687,7 @@
       // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging; one watching
       // the ball faces it: below)
       const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
-      if(!watch && !held && !p.adFace && (!softIn || nsp>30 || il2>=0.35)){
+      if(!watch && !held && !p.adFace && !guardOn(p) && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
       }
@@ -10680,6 +10709,10 @@
       if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; MAX=Math.min(MAX,runSpeedOf(p)*fatigue)*pedalOf(p,c); }
     }
     p.adFace=null;                                  // (set again next frame while he's still at it: autoDefIntent)
+    if(guardOn(p)){                                 // AFTER A TACKLE: his back to the man he took it from, as quickly as his Def IQ has it
+      const G=p.guard, o=G.from, a0=Math.atan2(p.facing.y,p.facing.x); let want=Math.atan2(p.y-o.y,p.x-o.x);
+      const il=Math.hypot(ix,iy); if(il>0.2){ const ia=Math.atan2(iy,ix); if(Math.abs(skillTurn(want,ia))<1.1) want=ia; }   // (pushing away from him, or across: that way)
+      const mx=G.rate*dt, a=a0+clamp(skillTurn(a0,want),-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
     if(held==='strafe'){                            // strafing: the way he faced kept, slower ahead, less across, less again backing up
       const F=holdMode.face, vs=Math.hypot(p.vx,p.vy); p.facing={x:F.x,y:F.y};
       if(vs>1) MAX=Math.min(MAX,runSpeedOf(p)*fatigue*STRAFE_K*(0.75+0.25*(p.vx*F.x+p.vy*F.y)/vs)); }
@@ -11105,6 +11138,7 @@
       if(p.team==='G'&&p!==controlled){ setControlled(p); }
       else if(p.team!=='G'&&prevTeam==='G') autoDefSwitch();
     }
+    startGuard(p);                                                        // (just won it off one of theirs: AFTER A TACKLE)
   }
 
   // DRIBBLING (v90): on the move, each touch goes on ahead of him and waits. How far is his pace and his Dribbling: at
@@ -11175,7 +11209,7 @@
       ball.x=p.x+atk*cd; ball.y=p.y; ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
       return;
     }
-    if(holdMode&&holdMode.p===p&&dist(p,ball)<=controlROf(p)+ball.r+4){   // SKILL held (strafing or shielding): tight at his feet, the way he faces (out ahead: when he's on it)
+    if(((holdMode&&holdMode.p===p)||guardOn(p))&&dist(p,ball)<=controlROf(p)+ball.r+4){   // SKILL held (strafing or shielding), or guarding it after a tackle: tight at his feet, the way he faces (out ahead: when he's on it)
       const f=p.facing, cd=p.r+ball.r+3, k=320, c=2*Math.sqrt(k), cx=p.x+f.x*cd, cy=p.y+f.y*cd;
       p.carryAngle=Math.atan2(f.y,f.x); p.stepPhase=0;
       ball.vx+=((cx-ball.x)*k-ball.vx*c)*dt; ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
