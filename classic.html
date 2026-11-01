@@ -3457,11 +3457,12 @@
   // AFTER A TACKLE (v91): your man, having won it off one of theirs with a standing tackle -- or nicked a touch of his
   // out in front of him; not a slide -- gets his back to that man as soon as he has it, the ball tight at his feet on his
   // far side, for a split second: so the man he took it from can't just get up and take it straight back. How quickly
-  // he turns, for how long, and how little of the ball he shows him are his Def IQ: 7 to 14 radians a second, 0.6 s to
-  // 1 s, and the man can only nick it from within 60 degrees of where the ball is down to 30 (as a top dribbler
-  // shields it) -- a poor one, slow round, can still have it nicked off him by a man quick round him to the ball. The
-  // stick still moves him, only not back into that man (across him instead); left alone, he stands and turns.
-  const GUARD_T=[0.6,1.0], GUARD_TURN=[7,14], GUARD_NICK=[60,30];
+  // he turns, for how long, and how little of the ball he shows him are his Def IQ: 7 to 14 radians a second, 0.3 s to
+  // 0.6 s (v93: it was 0.6 s to 1 s), and the man can only nick it from within 60 degrees of where the ball is down to
+  // 30 (as a top dribbler shields it) -- a poor one, slow round, can still have it nicked off him by a man quick round
+  // him to the ball. The stick still moves him, only not back into that man (across him instead); left alone, he stands
+  // and turns.
+  const GUARD_T=[0.3,0.6], GUARD_TURN=[7,14], GUARD_NICK=[60,30];
   const guardOn=p=>!!p&&!!p.guard&&p===controlled&&ball.ownedBy===p&&simNow<p.guard.until&&p.state==='normal';
   function guardMark(t,carrier){ if(t&&carrier&&t.state!=='slide'){ t.guardFrom=carrier; t.guardWon=simNow; } }
   function startGuard(p){

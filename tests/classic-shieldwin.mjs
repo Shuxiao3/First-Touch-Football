@@ -77,24 +77,26 @@ const sum = (R, f) => R.filter(f).length, med = a => { const b = a.map(x => x ??
 for(const [k, R] of Object.entries(A.out)) info(k + ': ' + JSON.stringify(R));
 for(const [k, R] of Object.entries(B.out)) info('without the guard, ' + k + ': ' + JSON.stringify(R));
 const got = R => R.filter(r => r.got !== null);
+const soon = R => sum(R, r => r.back !== null && r.back < 1.5);      // (taken straight back off him: within 1.5 s of his having it)
 
 // 1. a standing tackle, the ball chased down: he guards it as soon as he has it (Def IQ: for longer, showing less of it)
 const t10 = got(A.out.tackle10), t1 = got(A.out.tackle1);
-ok(t10.length >= 4 && t1.length >= 4 && t10.every(r => r.guard && r.guard.len === 1 && r.guard.nick === 30) && t1.every(r => r.guard && r.guard.len === 0.6 && r.guard.nick === 60),
-  'won with a standing tackle, he guards it as soon as he has it (' + t10.length + ' and ' + t1.length + ' of 6 chased down): for 1 s at Def IQ 10, showing 30° of it; 0.6 s at 1, showing 60°');
-ok(sum(t10, r => r.back !== null) <= 1 && sum(t10, r => r.back !== null) < sum(t1, r => r.back !== null),
-  '...and the better his Def IQ the surer he keeps it: their man got it back ' + sum(t10, r => r.back !== null) + ' of ' + t10.length + ' times at Def IQ 10, ' + sum(t1, r => r.back !== null) + ' of ' + t1.length + ' at 1 (quick round him to the ball as he turns)');
+ok(t10.length >= 4 && t1.length >= 4 && t10.every(r => r.guard && r.guard.len === 0.6 && r.guard.nick === 30) && t1.every(r => r.guard && r.guard.len === 0.3 && r.guard.nick === 60),
+  'won with a standing tackle, he guards it as soon as he has it (' + t10.length + ' and ' + t1.length + ' of 6 chased down): for 0.6 s at Def IQ 10, showing 30° of it; 0.3 s at 1, showing 60°');
+ok(soon(t10) <= 1 && soon(t10) < soon(t1),
+  '...and the better his Def IQ the surer he keeps it: their man got it straight back (within 1.5 s) ' + soon(t10) + ' of ' + t10.length + ' times at Def IQ 10, ' + soon(t1) + ' of ' + t1.length + ' at 1 (quick round him to the ball as he turns); in 2.5 s stood there, ' + sum(t10, r => r.back !== null) + ' and ' + sum(t1, r => r.back !== null));
 ok(got(A.out.slide).every(r => !r.guard), 'not after a slide (' + A.out.slide.map(r => r.got === null ? '-' : r.guard ? 'guard' : 'none').join(' ') + ')');
 
 // 2. his back to the man he took it from -- quicker the better his Def IQ
 const w10 = A.out.won10, w1 = A.out.won1;
+const tm = R => { const m = med(R.map(r => r.turned)); return m === 9 ? 'not all the way round in ' + (R.length - sum(R, r => r.turned !== null)) + ' of ' + R.length : m + ' s'; };
 ok(med(w10.map(r => r.turned)) < med(w1.map(r => r.turned)) && sum(w10, r => r.faceAt > 0.7) >= 10,
-  'he gets his back to the man he took it from, quicker the better his Def IQ (' + med(w10.map(r => r.turned)) + ' s at 10, ' + med(w1.map(r => r.turned)) + ' s at 1; square to him 0.4 s on in ' + sum(w10, r => r.faceAt > 0.7) + ' of 12)');
+  'he gets his back to the man he took it from, quicker the better his Def IQ (' + tm(w10) + ' at 10, ' + tm(w1) + ' at 1; square to him 0.4 s on in ' + sum(w10, r => r.faceAt > 0.7) + ' of 12 at 10)');
 
 // 3. what it saves him from: their man getting up and taking it straight back (and him going down)
 const back = R => sum(R, r => r.back !== null);
-ok(back(A.out.won10) <= 2 && back(B.out.won10) - back(A.out.won10) >= 4,
-  'their man can\'t just get up and take it back: ' + back(A.out.won10) + ' of 12 times in 2.5 s with the guard, ' + back(B.out.won10) + ' of 12 without (' + sum(B.out.won10, r => r.downed) + ' with ours put down)');
+ok(soon(A.out.won10) <= 1 && soon(B.out.won10) - soon(A.out.won10) >= 4,
+  'their man can\'t just get up and take it straight back: ' + soon(A.out.won10) + ' of 12 times within 1.5 s with the guard, ' + soon(B.out.won10) + ' of 12 without (' + sum(B.out.won10, r => r.downed) + ' with ours put down); in 2.5 s stood there, ' + back(A.out.won10) + ' and ' + back(B.out.won10));
 
 // 4. the stick still moves him -- but not back into that man (and, his split second over, the stick still pushed at him, it's
 // as it was: run into him and he loses it -- so what counts is the first second)

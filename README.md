@@ -1723,8 +1723,11 @@ test, and like the Trap Lab the values are the game's settings.
   the ball tight at his feet on his far side, for a split second. That man can't just get up and take it straight back
   off him: he can only nick it from where the ball shows. How quickly your man turns, how long he keeps at it and how
   little of the ball he shows are his Def IQ: 7 to 14 radians a second (a half-turn in 0.45 s at 1, 0.22 s at 10),
-  0.6 s to 1 s, and from within 60 degrees of the ball down to 30 (as a top dribbler shields it) -- so a poor one, slow
-  round, can still have it nicked off him by a man quick round him to the ball. The stick still moves
+  0.3 s to 0.6 s (v93; it was 0.6 s to 1 s), and from within 60 degrees of the ball down to 30 (as a top dribbler
+  shields it) -- so a poor one, slow round, can still have it nicked off him by a man quick round him to the ball. At
+  Def IQ 1 the guard is over before he's all the way round, so he has to move off with it: left stood there, the man
+  he took it from got it back every time, mostly 0.8 to 1.5 s after (0.7 to 0.95 s with no guard at all). At 10
+  he's round in 0.17 s, and nobody got it back within 2 s (left stood there longer, some did). The stick still moves
   him -- only not back into that man, across him instead; left alone, he stands and turns.
 - **Dribbling (v90).** Running with the ball, each touch goes on ahead of your man and waits for him: it rolls on and
   slows as a loose ball would, he goes on to it, and when he's on it the next touch goes. It's still his ball the whole
