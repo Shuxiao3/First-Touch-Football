@@ -102,7 +102,7 @@ ok(rel.ownedPct === 100 && rel.end.gap <= rel.end.reach && rel.end.sp < 0.3 && r
 const pass = await play({ drib: 5.5, secs: 2.6, mate: true }, [[0, down(fwd)], [520, down('KeyJ')], [60, up('KeyJ')], [1300, up(fwd)]]);
 const kick = pass.ev.find(e => e.own !== 'me');
 info('J tapped with it out ahead: ' + JSON.stringify(pass.ev) + ', ' + JSON.stringify(pass.end));
-ok(!!kick && kick.gapBefore <= kick.reach + 0.05 && pass.ev.some(e => e.own === 'G'), 'a pass asked for with it out ahead goes when he\'s on it (struck ' + (kick && kick.gapBefore) + ' m off him, his reach ' + (kick && kick.reach) + ' m, at ' + (kick && kick.t) + ' s) and finds the man');
+ok(!!kick && kick.gapBefore <= kick.reach + 0.18 && pass.ev.some(e => e.own === 'G'), 'a pass asked for with it out ahead goes when he\'s on it (struck ' + (kick && kick.gapBefore) + ' m off him, his reach ' + (kick && kick.reach) + ' m -- the game\'s "on it" is his reach and 4 px, 0.18 m -- at ' + (kick && kick.t) + ' s) and finds the man');
 
 // 7. ONE OF THEIRS WHO GETS TO A TOUCH OUT AHEAD OF OUR MAN (stood well off; once it's out of our man's reach, put in its
 // way, a metre on from it): he takes it -- and ours, never touched, stays on his feet. (Knocked on at a sprint: since v96

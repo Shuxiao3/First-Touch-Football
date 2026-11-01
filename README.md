@@ -1716,13 +1716,30 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Off his feet, he goes to it (v97).** v96 left a gap. Running with it, a ball 0.84 m to 1.16 m off him that wasn't
+  in front of him -- just off his feet beside or behind him, as when it had just been played to him, or he turned, or
+  changed his mind -- was nobody's: too far off to be at his feet, too near for him to go after it. So he ran on
+  without it, or stuttered at it, and it looked as if it had come loose as he moved off; the computer's men did the
+  same, out to the edge of their reach. Now, whenever it's off his feet and not rolling on ahead of his run, he goes to
+  it -- your man and theirs -- and once it's at his feet he takes it the way you push. Held close at a run it stays
+  inside his touch (up to 0.13 m further on than stood, where it was 0.27 m). And a touch from his boots goes as far on
+  as one did from where touches went from before v96, 1.16 m off him: the knock-on is as it was -- at Dribbling 5.5
+  running, out to about 2.1 m and back -- it just starts from his feet.
+  - **Driven as a player does** (the stick another way every 0.3 to 0.9 s, now and then let go or sprinting, 24 s,
+    three times over, the same on each): the ball off his feet beside or behind him at a run, never (v96: 5% to 9% of
+    the time); well out ahead of him in a knock-on, 15% to 24% of the time (v95: 14% to 22%; v96: 2% to 8%); 39 to 47
+    touches (v96: 23 to 31; v95's 153 to 224 were mostly touches from out at the edge of his reach).
+  - **Measured** (computer against computer, 6-minute matches at STAR, 24 on v97 against 36 on v95 and 24 on v96):
+    tackles 12.2 a match (v95 10.5, v96 14.5) and shots 4.0 (4.5, 3.7) -- back most of the way, with the computer's
+    men no longer running on without it; passes 164 (88.9% finding their man; 166 at 86.8%, 167 at 88.8%), the ball
+    changing sides 33.4 times (31.6, 32.9), goals 1.12 (0.86, 0.92: within what 24 matches can tell).
 - **The ball at his feet (v96).** In control of it -- stood, easing off, about to pass, shoot or cross, or with one of
   theirs about to be on him -- the ball is at his boots: 0.67 m from where he stands (its edge a step off his feet),
-  up to 0.27 m further on at a run, and drawn in to under 0.5 m as he turns, so it goes round with his feet rather
+  up to 0.13 m further on at a run (v97; it was 0.27 m), and drawn in to under 0.5 m as he turns, so it goes round with his feet rather
   than round a ring (it used to be held 1.1 m off, out on the edge of his dotted ring, and swung round it as he
   turned). Running with it, every touch is from his feet -- the ball within 0.84 m of where he stands, in front of him
-  -- and goes on ahead from there (at Dribbling 10 running, out to about 1.3 m and back); none is knocked on from out
-  where his reach ends, as one could be before when he changed his mind or eased off. Off his feet but close (1.16 m)
+  -- and goes on ahead from there (at Dribbling 10 running, out to about 1.7 m and back: as far as before, since v97);
+  none is knocked on from out where his reach ends, as one could be before when he changed his mind or eased off. Off his feet but close (1.16 m)
   he gathers it in. Further off but in his reach while he's holding it close (stood or easing off, about to pass,
   shoot or cross, or with one of theirs about to be on him), he draws it back to his boots with his sole -- a roll at
   3 m/s, not a snap on a string; out of his reach it rolls on, and he goes to it. A ball given him
@@ -1777,7 +1794,8 @@ test, and like the Trap Lab the values are the game's settings.
   and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, close control as it always was. Slow or
   stood, it's at his feet too.
   - **Where it goes.** Push the stick another way: with the ball at his feet in front of him he takes it that way at
-    once; with it further on, he goes on to it first (since v96 he never touches it on from out where his reach ends).
+    once; with it off his feet -- further on, or beside or behind him -- he goes to it first (since v96 he never
+    touches it on from out where his reach ends, and since v97 never runs on without it).
     Either way the touch goes as far round from his run as one touch takes it (57° at Dribbling 1 up to 92° at 10, a
     third less flat out, and less turning into a stronger man on him), so a sharp turn takes a touch or two; with it at
     his feet beside or behind him, he brings it round in front first. Ease off and it rolls on, and he goes on to it;

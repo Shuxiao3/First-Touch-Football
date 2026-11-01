@@ -125,7 +125,9 @@ const avgOff = R => ({ ahead: Math.round(R.reduce((a, r) => a + r.ahead, 0) / R.
 const off10 = avgOff(offs[10]), off1 = avgOff(offs[1]);
 info('a runner into space: ' + JSON.stringify({ off10, off1 }));
 ok(/TRACK|PAIR/.test(off10.tags) && /TRACK|PAIR/.test(off1.tags), 'he picks up the runner in his zone (' + off10.tags + ' / ' + off1.tags + ')');
-ok(off10.ahead - off1.ahead >= 25 && off10.goalSide - off1.goalSide >= 25 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average over four runs (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
+// (the gap between the two is about 25 px both ways -- measured on v95, v96 and v97, run alone, 20 to 34 from one set of
+// four runs to the next -- so 15, which a Def IQ that no longer counted would miss by far, and noise wouldn't)
+ok(off10.ahead - off1.ahead >= 15 && off10.goalSide - off1.goalSide >= 15 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average over four runs (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
 
 // THEIR CROSS: the moment one of theirs crosses it into your box, you're put on the man of yours marking the one it's
 // for -- or the one nearest where it comes through head height

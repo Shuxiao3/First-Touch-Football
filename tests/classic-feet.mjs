@@ -2,7 +2,10 @@
 // stands), not out on a ring round him; turning with it held there, it goes round with his feet; running with it, every
 // touch is from his feet (DRIB_TOUCH) -- never knocked on from out where his reach ends -- and the ball still goes on
 // ahead between touches; letting go of the stick, it ends at his boots; a tackle still finds it where it did (out where
-// it was held before); and a move begun with it at his boots starts from there, no jump.
+// it was held before); and a move begun with it at his boots starts from there, no jump. And (v97) the ball off his feet
+// is never left: beside him with the stick pushed away, or his touch out ahead with the stick pulled back, he goes to it
+// and takes it with him (it was nobody's, 0.84 to 1.16 m off him: he ran on without it) -- and a touch from his boots
+// goes as far on as one did from where touches went from before v96 (the knock-on as it was).
 // In the Dribble Lab, on a copy of the game that lets the test reach the man, hold the stick and PASS, and see each touch.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -13,7 +16,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, ball:()=>ball, LAB, MK, simNow:()=>simNow, atkOf, dlDef, controlROf, tackleSpot, mkSkill, '
-  + 'setSkill:s=>{ skill=s; }, skill:()=>skill, kick:v=>{ kickHeld=!!v; }, feet:()=>({AT_FEET, AT_FEET_RUN, DRIB_TOUCH, DRIB_GATHER})};\n  const LAB_TITLE=');
+  + 'setSkill:s=>{ skill=s; }, skill:()=>skill, kick:v=>{ kickHeld=!!v; }, feet:()=>({AT_FEET, AT_FEET_RUN, DRIB_TOUCH, DRIB_GATHER, KNOCK_FROM:typeof KNOCK_FROM!=="undefined"?KNOCK_FROM:null})};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
 patch('  function dribbleTouch(p,vp,cap=9.5){\n', '  function dribbleTouch(p,vp,cap=9.5){\n    if(window.__touches&&p===controlled) window.__touches.push({t:simNow, gap:dist(p,ball)});\n');   // (each touch, and how far off him the ball was)
@@ -32,6 +35,7 @@ const scene = (o) => page.evaluate(o => new Promise(res => { const T = window.__
   document.querySelector('#labHud [data-lab="go"]').click();
   const me = T.controlled(), b = T.ball(), D = T.dlDef(), atk = T.atkOf(me.team);
   D.x = me.x + atk * 1300; window.__touches = [];
+  if(o.beside){ b.x = me.x; b.y = me.y - o.beside; b.vx = b.vy = 0; }        // (his, off his feet to his left: o.beside px)
   const dirs = { fwd: { x: atk, y: 0 }, back: { x: -atk, y: 0 }, side: { x: 0, y: 1 } };
   const t0 = T.simNow(), frames = []; let step = 0, tStep = t0;
   (function tick(){ const t = T.simNow();
@@ -41,7 +45,9 @@ const scene = (o) => page.evaluate(o => new Promise(res => { const T = window.__
       return res({ frames, touches: window.__touches.map(x => ({ t: +(x.t - t0).toFixed(2), gap: x.gap })), end: { gap: Math.hypot(bx, by), sp: Math.hypot(me.vx, me.vy), inFront: (f.x * bx + f.y * by) / bl },
         mine: b.ownedBy === me || b.dribbler === me }); }
     const s = o.steps[step]; window.__stick = s[1] ? dirs[s[1]] : null; T.kick(!!s[2]);
-    frames.push({ t: +(t - t0).toFixed(3), step, gap: Math.hypot(b.x - me.x, b.y - me.y), sp: Math.hypot(me.vx, me.vy), own: b.ownedBy === me });
+    const gp = Math.hypot(b.x - me.x, b.y - me.y), spd = Math.hypot(me.vx, me.vy), st = o.steps[step][1] && dirs[o.steps[step][1]];
+    frames.push({ t: +(t - t0).toFixed(3), step, gap: gp, sp: spd, own: b.ownedBy === me, ahead: spd > 30 ? ((b.x - me.x) * me.vx + (b.y - me.y) * me.vy) / ((gp * spd) || 1) : null,
+      along: st && spd > 30 ? (me.vx * st.x + me.vy * st.y) / spd : null, touchAt: me.touchAt, lead: me.touchLead });
     requestAnimationFrame(tick); })(); }), o);
 const maxOf = (a, f) => a.reduce((x, y) => Math.max(x, f(y)), -Infinity), minOf = (a, f) => a.reduce((x, y) => Math.min(x, f(y)), Infinity);
 
@@ -96,6 +102,38 @@ const mv = await page.evaluate(() => new Promise(res => { const T = window.__T, 
     res({ g0, first, maxStep, frames: n, done: !T.skill() }); })(); }));
 info('a croqueta begun at his boots: ' + JSON.stringify(mv));
 ok(mv.first.jump <= 5 && mv.done, 'a move begun with it at his boots starts from there: the ball ' + m(mv.first.jump) + ' on in the first frame (from ' + m(mv.g0) + ' off him), and the move goes through');
+
+// 8. OFF HIS FEET BESIDE HIM (1.05 m to his left, his), THE STICK PUSHED THE OTHER WAY: he goes to it and takes it with
+//    him -- it's never left beside or behind him off his feet as he runs (v96 ran on without it: nobody's at 0.84 to
+//    1.16 m), and in under a second and a half he's going the way you push with the ball ahead of him
+const deadT = (fr, F) => { let worst = 0, run = 0, last = null;          // (the longest spell off his feet beside or behind him at a run)
+  for(const f of fr){ const dead = f.own && f.sp > 60 && f.gap > F.DRIB_TOUCH && f.ahead !== null && f.ahead < 0.5;
+    if(dead){ run += last === null ? 0 : f.t - last; worst = Math.max(worst, run); } else run = 0; last = f.t; } return worst; };
+const away = await scene({ beside: 1.05 * MK, steps: [[1.6, 'side']] });
+const awayGot = away.frames.find(f => f.gap <= F.DRIB_TOUCH + 0.5), awayOn = away.frames.find(f => f.t > 0.2 && f.along > 0.85 && f.ahead > 0.8 && f.gap > F.DRIB_TOUCH);
+const awayDead = deadT(away.frames, F), awayMax = maxOf(away.frames.filter(f => !awayGot || f.t <= awayGot.t), f => f.gap);
+info('off his feet beside him, the stick pushed away: at his feet at ' + (awayGot ? awayGot.t + ' s' : 'never') + ' (furthest off him till then ' + m(awayMax) + '), going your way with it ahead of him at ' + (awayOn ? awayOn.t + ' s' : 'never') + '; longest off his feet beside or behind him at a run ' + awayDead.toFixed(2) + ' s');
+ok(!!awayGot && awayGot.t < 0.6 && awayMax <= 1.25 * MK && !!awayOn && awayOn.t < 1.5 && awayDead <= 0.15 && away.mine,
+  'the ball off his feet beside him and the stick pushed away, he goes to it (at his feet at ' + (awayGot && awayGot.t) + ' s, never more than ' + m(awayMax) + ' off him) and takes it your way (' + (awayOn && awayOn.t) + ' s) -- not left beside or behind him (' + awayDead.toFixed(2) + ' s at most)');
+
+// 9. THE STICK PULLED BACK WITH HIS TOUCH OUT AHEAD (Dribbling 5.5): he goes on to it, turns with it at his feet and
+//    comes back with it -- never off his feet beside or behind him as he runs, never stuttering at it
+const rev = await scene({ steps: [[1.0, 'fwd'], [2.0, 'back']] });
+const revDead = deadT(rev.frames, F), revBack = rev.frames.find(f => f.step === 1 && f.along > 0.85 && f.ahead > 0.8), revT = rev.frames.find(f => f.step === 1).t;
+const flips = rev.frames.filter((f, i) => i && f.step === 1 && f.sp > 20 && rev.frames[i - 1].sp > 20 && f.along !== null && rev.frames[i - 1].along !== null && Math.sign(f.along) !== Math.sign(rev.frames[i - 1].along)).length;
+info('the stick pulled back with it out ahead: going back with it ahead of him ' + (revBack ? (revBack.t - revT).toFixed(2) + ' s after' : 'never') + '; longest off his feet beside or behind him at a run ' + revDead.toFixed(2) + ' s; his way flipped ' + flips + ' times');
+ok(!!revBack && revBack.t - revT < 1.6 && revDead <= 0.15 && flips <= 2 && rev.mine,
+  'the stick pulled back with his touch out ahead, he goes on to it, turns with it and comes back with it (' + (revBack && (revBack.t - revT).toFixed(2)) + ' s) -- never left beside or behind him (' + revDead.toFixed(2) + ' s at most), no stutter (' + flips + ' changes of way)');
+
+// 10. THE KNOCK-ON from his boots goes as far on as it did from where touches went from before v96 (KNOCK_FROM): running at
+//     Dribbling 5.5, each touch takes it out to KNOCK_FROM and the touch's length off him, give or take
+const kn = await scene({ steps: [[3.2, 'fwd']] });
+const knocks = []; { let cur = null;
+  for(const f of kn.frames){ if(f.touchAt != null && (!cur || f.touchAt !== cur.at)){ if(cur && cur.t0 > 0.8) knocks.push(cur); cur = { at: f.touchAt, t0: f.t, lead: f.lead, max: 0 }; }
+    if(cur) cur.max = Math.max(cur.max, f.gap); } }
+const knR = knocks.map(k => k.max / (F.KNOCK_FROM + k.lead - 20)), knAvg = knR.reduce((a, b) => a + b, 0) / (knR.length || 1);
+info('the knock-on at Dribbling 5.5: out to ' + knocks.map(k => m(k.max) + ' (its length ' + m(k.lead - 20) + ')').join(', ') + ' -- ' + knAvg.toFixed(2) + ' of ' + m(F.KNOCK_FROM) + ' and its length');
+ok(knocks.length >= 2 && knAvg > 0.85 && knAvg < 1.3 && kn.mine, 'a touch from his boots goes as far on as one did from ' + m(F.KNOCK_FROM) + ' off him (out to ' + knocks.map(k => m(k.max)).join(', ') + ': ' + knAvg.toFixed(2) + ' of that) -- the knock-on as it was');
 
 process.exitCode = rep.finish();
 await browser.close();
