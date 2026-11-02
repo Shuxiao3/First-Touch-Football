@@ -1718,6 +1718,28 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Your man keeps touching it on under pressure (v100).** The ball still looked stuck to his foot, most of all
+  just after he'd taken a pass or brought it under control, and never in the Dribble Lab. Simulated receptions found
+  why: a pass to your man with one of theirs closing in 2.5 m to 5 m off, and him going on with it, had him holding it
+  at his feet -- tapped along (v99), but never actually touched -- for 1.2 s to 1.6 s after he had it (with nobody
+  near, never). In the Dribble Lab the defender stands until you're about 4 m from him, so it hardly ever happened
+  there. Now your man isn't held at all with one of theirs about to be on him: he keeps touching it on, the touches
+  shorter the closer that man (see **Touch lengths**) -- out to about 1.5 m off him and back, against 1.7 m in the
+  clear -- and while it's in his reach it's as hard to take as one held at his feet; further out, it's a touch out
+  ahead, anyone's who gets to it. Held for a pass, cross, shot or move of yours, with SKILL held, or guarding it
+  after a tackle, it stays tight as before. The computer's men are still held and tapped along under pressure: let
+  go, they chased their own touches into the man on them and lost it four times as often (see **Tapped along under
+  pressure (v99)**).
+  - **Measured.** Passes to your man with one of theirs closing in 2.5 m to 5 m off: of the receptions he came away
+    with, every one on v99 (3 of 3) had him holding it with no touch for 1.2 s to 1.6 s; now none (0 of 6), his first
+    touch 0.07 s to 0.27 s after he had it. Taking it straight at the man arriving, he's bundled off it within 0.4 s
+    about as often as before (4 of 7 on v99, 9 of 15 now). Simulated matches with your man on a stick script (running
+    at their goal, a new line every 0.4 s to 1.3 s, sprinting a third of the time): held with no touch for 0.8 s or
+    more as he ran, 54 times in 4 matches on v99 (118 s in all, the longest 6.9 s, all but one with one of theirs about
+    to be on him) and 3 times in 8 now (3.1 s, the longest 1.2 s); 2.3 touches a second on the ball (0.8 to 0.9). He's
+    robbed more often, 38 times a minute on the ball against 32.5 (8 matches each) -- nearly all standing tackles, not
+    touches nicked out of his reach -- with a script that runs straight into men a player would go round. Move clips
+    re-recorded (each starts with a run at one of theirs 3 m ahead).
 - **Tapped along under pressure (v99).** Running with it with one of theirs within 3.6 m of him (where they'd both
   be in half a second), the ball is held at his feet -- that's what makes it hard to take off him -- but it used to sit
   there dead. In simulated matches with your man driven by the stick, 27% to 30% of the time he ran with the ball it
@@ -1753,7 +1775,7 @@ test, and like the Trap Lab the values are the game's settings.
     men no longer running on without it; passes 164 (88.9% finding their man; 166 at 86.8%, 167 at 88.8%), the ball
     changing sides 33.4 times (31.6, 32.9), goals 1.12 (0.86, 0.92: within what 24 matches can tell).
 - **The ball at his feet (v96).** In control of it -- stood, easing off, about to pass, shoot or cross, or with one of
-  theirs about to be on him (tapped along, since v99) -- the ball is at his boots: 0.67 m from where he stands (its edge a step off his feet),
+  theirs about to be on him (the computer's man, tapped along since v99; yours keeps touching it on, since v100) -- the ball is at his boots: 0.67 m from where he stands (its edge a step off his feet),
   up to 0.13 m further on at a run (v97; it was 0.27 m), and drawn in to under 0.5 m as he turns, so it goes round with his feet rather
   than round a ring (it used to be held 1.1 m off, out on the edge of his dotted ring, and swung round it as he
   turned). Running with it, every touch is from his feet -- the ball within 0.84 m of where he stands, in front of him
@@ -1817,8 +1839,9 @@ test, and like the Trap Lab the values are the game's settings.
   lengths**).
   With one of theirs coming at him he keeps it closer, the better he is the closer (where
   they'll both be in half a second: from 7 m off, closer and closer, down to a twentieth of the touch at Dribbling 10
-  and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, held -- tapped along at a run (v99:
-  see **Tapped along under pressure (v99)**). Slow or stood, it's at his feet too.
+  and a fifth at 1), and with one about to be on him (3.6 m) the computer's man has it at his feet, held -- tapped
+  along at a run (v99: see **Tapped along under pressure (v99)**) -- while yours keeps touching it on, these short
+  touches (v100: see **Your man keeps touching it on under pressure (v100)**). Slow or stood, it's at his feet too.
   - **Where it goes.** Push the stick another way: with the ball at his feet in front of him he takes it that way at
     once; with it off his feet -- further on, or beside or behind him -- he goes to it first (since v96 he never
     touches it on from out where his reach ends, and since v97 never runs on without it).

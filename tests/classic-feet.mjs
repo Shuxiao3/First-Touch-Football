@@ -5,9 +5,9 @@
 // it was held before); and a move begun with it at his boots starts from there, no jump. And (v97) the ball off his feet
 // is never left: beside him with the stick pushed away, or his touch out ahead with the stick pulled back, he goes to it
 // and takes it with him (it was nobody's, 0.84 to 1.16 m off him: he ran on without it) -- and a touch from his boots
-// goes as far on as one did from where touches went from before v96 (the knock-on as it was). And (v99) with one of
-// theirs tracking him a step off, it's held at his feet but tapped along -- out and back every few strides, never
-// frozen there (it used to sit dead at his boots for as long as that man was there).
+// goes as far on as one did from where touches went from before v96 (the knock-on as it was). And (v100) with one of
+// theirs tracking him a step off, he keeps touching it on -- every touch from his feet, never frozen there (v98 held
+// it dead at his boots for as long as that man was there; v99 held it and tapped it along, with no touch).
 // In the Dribble Lab, on a copy of the game that lets the test reach the man, hold the stick and PASS, and see each touch.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -139,16 +139,15 @@ info('the knock-on at Dribbling 5.5: out to ' + knocks.map(k => m(k.max) + ' (it
 ok(knocks.length >= 2 && knAvg > 0.85 && knAvg < 1.3 && kn.mine, 'a touch from his boots goes as far on as one did from ' + m(F.KNOCK_FROM) + ' off him (out to ' + knocks.map(k => m(k.max)).join(', ') + ': ' + knAvg.toFixed(2) + ' of that) -- the knock-on as it was');
 
 // 11. ONE OF THEIRS TRACKING HIM A STEP OFF (1.6 m beside him, going with him) as he runs with it at Dribbling 5.5: he
-//     holds it -- it's kept at his feet, as hard to take as ever -- but tapped along: pushed out and drawn back as he runs,
-//     every few strides, never frozen there (it used to sit dead at his boots for as long as that man was there: in
-//     matches, spells of up to 8 s)
+//     keeps touching it on -- short touches, every one from his feet -- never frozen at his boots, and keeps it. (v98
+//     held it dead at his feet for as long as that man was there; v99 held it and tapped it along, but never touched
+//     it, and in matches, taking a pass with one of theirs coming, it looked stuck to his foot.)
 const trk = await scene({ track: 1.6 * MK, steps: [[3.2, 'fwd']] });
-const kf = trk.frames.filter(f => f.t > 0.8 && f.sp > 100), kg = kf.map(f => f.gap);
+const kf = trk.frames.filter(f => f.t > 0.8 && f.sp > 100), kg = kf.map(f => f.gap), kt = trk.touches.filter(x => x.t > 0.8);
 let frozen = 0; for(let i = 0; i < kf.length; i++){ const w = kf.filter(f => f.t >= kf[i].t - 0.6 && f.t <= kf[i].t); if(kf[i].t - kf[0].t > 0.6 && Math.max(...w.map(f => f.gap)) - Math.min(...w.map(f => f.gap)) < 3) frozen++; }
-let peaks = 0; for(let i = 2; i < kg.length - 2; i++) if(kg[i] >= kg[i - 1] && kg[i] >= kg[i + 1] && kg[i] > kg[i - 2] && kg[i] > kg[i + 2] && kg[i] - Math.min(...kg) > 3) peaks++;
-const swing = Math.max(...kg) - Math.min(...kg);
-info('one of theirs tracking him 1.6 m off: the ball ' + m(Math.min(...kg)) + ' to ' + m(Math.max(...kg)) + ' from him, ' + peaks + ' taps out in ' + (kf.length ? (kf[kf.length - 1].t - kf[0].t).toFixed(1) : 0) + ' s; frames frozen (under 0.13 m of change in 0.6 s) ' + frozen + '; real touches ' + trk.touches.filter(x => x.t > 0.8).length);
-ok(kf.length > 30 && swing >= 0.15 * MK && peaks >= 3 && frozen === 0 && trk.mine, 'with one of theirs tracking him a step off he keeps it at his feet but taps it along -- ' + peaks + ' taps, ' + m(Math.min(...kg)) + ' to ' + m(Math.max(...kg)) + ' off him, never frozen there -- and keeps it');
+const kSpan = kf.length ? (kf[kf.length - 1].t - kf[0].t).toFixed(1) : 0;
+info('one of theirs tracking him 1.6 m off: ' + kt.length + ' touches in ' + kSpan + ' s (at ' + kt.map(x => x.t.toFixed(2)).join(', ') + ' s, from ' + kt.map(x => m(x.gap)).join(', ') + ' off him); the ball ' + m(Math.min(...kg)) + ' to ' + m(Math.max(...kg)) + ' from him; frames frozen (under 0.13 m of change in 0.6 s) ' + frozen);
+ok(kf.length > 30 && kt.length >= 3 && kt.every(x => x.gap <= F.DRIB_TOUCH + 1) && frozen === 0 && trk.mine, 'with one of theirs tracking him a step off he keeps touching it on -- ' + kt.length + ' touches in ' + kSpan + ' s, every one from his feet, the ball ' + m(Math.min(...kg)) + ' to ' + m(Math.max(...kg)) + ' off him, never frozen there -- and keeps it');
 
 process.exitCode = rep.finish();
 await browser.close();
