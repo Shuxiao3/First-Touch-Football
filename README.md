@@ -1346,11 +1346,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     IT). The transfer market is never bought. (It used to ring after your second game.)
   - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
-    to the end of next season. Where he plays and how are the luck of the draw. After matchday 5 a wonderkid asks to
-    join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a range six wide). You pick where he
-    plays and his style (the card says what
-    each style does), and he signs for half his wage, to the end of the season after next. Both go straight into
-    your squad, even a full one; a card on the hub tells you, and so does the news.
+    to the end of next season. He came home to play, not for the money: he never asks for a new deal, however well
+    he does, and a new one keeps him on what he's on (v109). Where he plays and how are the luck of the draw. After
+    matchday 5 a wonderkid asks to join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a
+    range six wide). You pick where he plays and his style (the card says what each style does), and he signs for
+    half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
+    Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
   - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
     half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another
     club (see **Bids** and **What a club asks**). Once a fee's agreed you agree his contract: 1 to 4 seasons at the
@@ -1399,6 +1400,23 @@ The same game played like any other football game. It's a copy of `index.html` w
     the news says so. GIVE IT HIM (his new wage from now, the deal no shorter than the one he's on), or NOT NOW: that
     stings, a point off his mood, and he asks again in eight weeks. Leave him waiting, and every three weeks it costs
     him a point: twice, and then he stops asking (he won't forget it) and asks again eight weeks on.
+    - **Who asks, when, and for what (v109)** is his age and his season. The young are modest: a man of 22 or under
+      doesn't ask in his first season with you (the wonderkid signs for half his wage, and waits his turn); a man of
+      20 or under asks only once what he could get is 60% over his wage (at 21 and 22, 45%), and asks for 12% under
+      it (6%), though never for less than he's on -- "would like a new deal". A man in his prime (24 to 29) knows his
+      worth: he asks once it's 20% over, and for 5% more than it -- "knows what he's worth now". A fine season brings
+      it on sooner still and dearer: up to 15 points off when he asks and 15% on what he asks for -- "has had a fine
+      season". A fine season is measured against what's usual for his place in the side, about the best one in seven
+      in his league: goals and half his assists (a forward 14, the most at 19; a midfielder 11; a defender 4.5), a
+      keeper's or defender's clean sheets (9), or a Player of the Month or Year. This season's counts, and early in a
+      new season so does last season's, fading over the first fifteen games. Ratings don't come into it: a game you
+      play rates a man by what he did in it, a simulated one by a rougher sum, and they come out differently. At 23,
+      and from 30 on, it's as it was: 30% over, for what he'd get. A new deal you offer him yourself is on the same
+      terms. (A man in his prime after a great season can ask once he's worth just 5% over his wage, for a fifth more
+      than it; a lad of 20 waits till he's worth 60% more, and asks for less than he could get.) Two seasons
+      simulated from a new career, four careers each: in v108 the veteran asked in every one, for 3.6 to 4.2 times his
+      wage, and none to two others did; in v109 he never does, and one or two men ask, all in their prime, for 22% to
+      33% more.
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent. Releasing a player pays off half of what's left on his deal.
   - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
@@ -1888,6 +1906,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Contracts by age and season (v109).** The hometown hero who came home cheap never asks for a new deal (and a new
+  one keeps him on what he's on). Everyone else asks by his age and his season: the young modestly -- not in their
+  first season with you, later, and for less than they could get -- a man in his prime sooner and for a bit more, and
+  one coming off a fine season (goals, clean sheets or an award, against what's usual for his position) soonest and
+  for most. See **Who asks, when, and for what**.
 - **Tickets, bids and the clubhouse (v108).** Tickets start at $7 in League 2 (the going rate, $10 to $20 up the
   leagues), and as the ground grows each stand has its own price and there are seats to sell at a premium -- VIP seats,
   executive boxes, the members' club. Your budget is on every transfers tab, and the new Bids tab keeps every bid

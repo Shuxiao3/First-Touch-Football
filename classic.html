@@ -14862,7 +14862,7 @@
     const won=[]; if(R.up) won.push('Promoted with '+code); if(R.pos===1) won.push('Won '+(d.tier>=3?'the ':'')+MG_LEAGUE[d.tier]);
     for(const k in R.cupWin||{}) if(R.cupWin[k]===d.clubId) won.push('Won the '+CUP[k].name);
     for(const p of d.roster) if(p.apps>0) for(const t of won) careerEv(d,p,t);
-    const line=(p,c,t)=>{ (p.hist=p.hist||[]).push([d.season,c,t,p.apps||0,p.goals||0,p.as||0,p.rn?Math.round(p.rs/p.rn*10):0]); if(p.hist.length>20) p.hist.shift(); };
+    const line=(p,c,t)=>{ (p.hist=p.hist||[]).push([d.season,c,t,p.apps||0,p.goals||0,p.as||0,p.rn?Math.round(p.rs/p.rn*10):0,p.cs||0]); if(p.hist.length>20) p.hist.shift(); };   // (v109: and his clean sheets)
     for(const p of d.roster) line(p,code,d.tier);
     for(const c of mgAiClubs(d)) for(const p of c.players) if((p.hist||p.evs)&&(p.apps||0)>0) line(p,c.code,c.tier); }
 
@@ -15654,7 +15654,8 @@
 
   // THE FIRST SEASON'S TWO ARRIVALS. After the 2nd game, a veteran of the top flight comes home to finish his career --
   // rated in the 70s, 33 to 35, his position and style anyone's guess -- on under a third of his wage, to the end of
-  // next season. After the 5th, a 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
+  // next season (p.hometown, v109: he never asks for a new deal, and renews on what he's on). After the 5th, a
+  // 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
   // choose where he plays and how (mgSignKid). story.vet / .kid: 0 to come, 1 to see (on the hub), 2 done. And before
   // them, on the first day of pre-season -- the window's first -- your PHONE RINGS (story.phone, the same way): the
   // chairman -- transfers go through it now, and TRANSFERS opens (mgMarketOpen). It's never bought.
@@ -15663,7 +15664,7 @@
     if(!S.phone&&!lvOf(d,'market')&&mgWindowOpen(d)) S.phone=1;
     if(!S.vet&&d.md>=2){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
       const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
-      p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=15; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
+      p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=15; p.hometown=true; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
       mgNews(d,p.name+' ('+p.age+'), once of '+(S.vetFrom||'the top flight')+', comes home to '+d.clubName+' on a fraction of his wage.'); }
     if(!S.kid&&d.md>=5){ S.kid=1; S.kidAsk={name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), ovr:60+Math.floor(Math.random()*10), pot:85+Math.floor(Math.random()*6)};
       mgNews(d,'A 16-year-old, '+S.kidAsk.name+', has asked to join '+d.clubName+'.'); } }
@@ -16408,25 +16409,54 @@
     d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.'); careerEv(d,p,'Released by '+clubCode(d,d.clubId));
     return null; }
   // a new deal: `years` seasons from next season, at what he asks now (and never shorter than the one he's on)
-  const mgRenewWage=(d,p)=>mgRound(mgDemand(d,p,false)*(hasTrait(p,d,'loyal')?0.85:1));   // (a loyal servant renews for less)
+  // HOW HARD A MAN PUSHES FOR A NEW DEAL (v109): his age and his season. The young are modest -- a man of 22 or
+  // under doesn't ask in his first season with you (the wonderkid signs for half his wage: he waits his turn); a man
+  // of 20 or under asks only once what he could get is 60% over his wage (21 and 22: 45%), and asks for 12% under it
+  // (6%), though never for less than he's on. A man in his prime (24 to 29) knows his worth -- he asks once it's 20%
+  // over, and for 5% more than it; and a fine season brings it on sooner still and dearer: up to 15 points off when he
+  // asks, and 15% on what for. A FINE SEASON (cForm, 0 to 1; a half is a fine one) is against what's usual for his
+  // place in the side -- about the best one in seven in his league: his goals and half his assists (a forward 14 for a
+  // fine season and 19 the most, nothing under 9; a midfielder 11 and 15; a defender 4.5 and 7), a keeper's or
+  // defender's clean sheets (9 and 12), or a Player of the Month or Year (three quarters) -- this season's, or early in
+  // a new one (fading over its first 15 games) last season's. Not his ratings: a game you play rates a man by what he
+  // did in it, a simulated one by a rougher sum, and they come out differently. 23, and 30 on, as before: 30% over,
+  // for what he'd get. The hometown hero (p.hometown) never asks, and renews on what he's on. mgMarketWage: what he'd
+  // get (a loyal servant renews for less); mgRenewWage: what he'd sign for now.
+  const CFORM={ATT:{ga:[14,19]}, MID:{ga:[11,15]}, DEF:{ga:[4.5,7],cs:[9,12]}, GK:{cs:[9,12]}};
+  function cForm(d,p){ const C=CFORM[p.role]||CFORM.MID, lin=(x,v)=>v?clamp(0.5+0.5*(x-v[0])/(v[1]-v[0]),0,1):0,
+      hon=s=>(p.evs||[]).some(e=>e[0]===s&&/Player of the (Month|Year)/.test(e[1]))?0.75:0,
+      f=(ga,cs,s)=>Math.max(lin(ga,C.ga),lin(cs,C.cs),hon(s));
+    const now=f((p.goals||0)+0.5*(p.as||0),p.cs||0,d.season);
+    const h=(p.hist||[]).slice(-1)[0], last=h&&h[0]===(d.season||1)-1&&h[3]>=8?f(h[4]+0.5*h[5],h[7]||0,h[0]):0;   // (h[7]: clean sheets, from v109)
+    return Math.max(now, last*clamp(1-(p.rn||0)/15,0,1)); }
+  function cPush(d,p){ const a=p.age||25, young=a<=20?1:a<=22?0.5:0, prime=a>=24&&a<=29?1:0, form=cForm(d,p);
+    return { at:1.3+0.3*young-0.1*prime-0.15*form, ask:1-0.12*young+0.05*prime+0.15*form, form, young, prime }; }
+  const mgMarketWage=(d,p)=>mgRound(mgDemand(d,p,false)*(hasTrait(p,d,'loyal')?0.85:1));   // (a loyal servant renews for less)
+  const mgRenewWage=(d,p)=>{ if(p.hometown) return p.wage; const m=mgMarketWage(d,p);   // (a young man's modesty never takes him under what he's on)
+    return mgRound(Math.max(m*cPush(d,p).ask, Math.min(m,p.wage||0))); };
   function mgRenew(d,idx,years){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
     if(p.loan) return p.name+' is on loan: his contract is '+mgNameOf(d,p.loan.from)+'’s.';
     if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
     p.wage=mgRenewWage(d,p); p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5),1,10); delete p.cAsk;
     mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
   // A MAN WHO'S COME ON (v83): a wage is set by how good a man is when he signs, and it stays put. Once he's worth a good
-  // deal more than he's paid -- what he'd ask now 30% over it -- with more than this season left on his deal, he asks for
-  // a new one (p.cAsk). Give it him, or say not now: that stings (a point off his mood), and he asks again in eight
+  // deal more than he's paid -- what he'd get now 30% over it, more for the young and less in his prime or after a fine
+  // season (v109: see cPush) -- with more than this season left on his deal, he asks for a new one (p.cAsk), at what he'd
+  // sign for (mgRenewWage). Give it him, or say not now: that stings (a point off his mood), and he asks again in eight
   // weeks. Leave him waiting, and every three weeks it costs him a point -- twice; then he stops asking, and asks again
   // eight weeks on.
-  function mgContractAsks(d){ for(const p of d.roster){ if(p.wantsOut||p.loan) continue; const want=mgRenewWage(d,p);
-      if(p.cAsk){ if(want<p.wage*1.15){ delete p.cAsk; continue; } p.cAsk.wage=want;
+  function mgContractAsks(d){ for(const p of d.roster){ if(p.wantsOut||p.loan) continue;
+      if(p.hometown){ delete p.cAsk; continue; }                                        // (the hometown hero: he came home to play, not for the money)
+      const mkt=mgMarketWage(d,p), P=cPush(d,p), want=mgRenewWage(d,p);
+      if(p.cAsk){ if(mkt<p.wage*1.15){ delete p.cAsk; continue; } p.cAsk.wage=want;
         if((d.weeks||0)-p.cAsk.wk>=3){ p.cAsk.wk=d.weeks||0; p.cAsk.n=(p.cAsk.n||0)+1; p.mor=clamp((p.mor??MOR0)-1,1,10);
           if(p.cAsk.n>=2){ delete p.cAsk; p.cNot=(d.weeks||0)+8; mgNews(d,p.name+' has stopped asking for a new deal. He won’t forget it.'); }
           else mgNews(d,p.name+' is still waiting for a new deal, and he isn’t happy.'); }
         continue; }
       if(p.cNot&&(d.weeks||0)<p.cNot) continue;
-      if(mgLeft(d,p)>=2&&want>=p.wage*1.3){ p.cAsk={wage:want,wk:d.weeks||0}; mgNews(d,p.name+' has come on a lot, and wants a new deal: '+money(want)+' a week.'); } } }
+      if(P.young&&(p.since??0)>=(d.season||1)) continue;                                // (the young: not in his first season with you)
+      if(mgLeft(d,p)>=2&&mkt>=p.wage*P.at){ p.cAsk={wage:want,wk:d.weeks||0};
+        mgNews(d,p.name+(P.form>=0.5?' has had a fine season, and wants a new deal: ':P.young?' has come on, and would like a new deal: ':P.prime?' knows what he’s worth now, and wants a new deal: ':' has come on a lot, and wants a new deal: ')+money(want)+' a week.'); } } }
   function mgContractNo(d,pid){ const p=d.roster.find(x=>x.id===pid); if(!p||!p.cAsk) return 'He isn’t asking.';
     delete p.cAsk; p.cNot=(d.weeks||0)+8; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' is told he’ll have to wait for a new deal.'); return null; }
 
@@ -18020,6 +18050,7 @@
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     if(!d.tk108){ if([3,5,8,14].includes(d.ticketPrice)) d.ticketPrice=null; d.tk108=true; } d.seats=d.seats||{};   // (v108, once: a price left at the old going rate follows the new one)
+    { const v=d.story&&d.story.vetId!=null&&(d.roster||[]).find(p=>p.id===d.story.vetId); if(v&&!v.hometown){ v.hometown=true; delete v.cAsk; } }   // (v109: the hometown hero, from before)
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
     for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)

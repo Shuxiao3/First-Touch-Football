@@ -146,9 +146,9 @@ ok(hist.log.includes(r.name + ':signed') && hist.log.includes(r2.name + ':walked
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 
 // --- A MAN WHO'S COME ON asks for a new deal -------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, out={}, R=d.roster.filter(p=>p.role!=='GK'), p=R[0], q=R[1];
+r = await K(`(()=>{ const d=CAREER.data, out={}, R=d.roster.filter(p=>p.role!=='GK'&&p.age>=23), p=R[0], q=R[1];   /* (v109: the young don't ask in their first season with you) */
   for(const x of [p,q]){ x.until=d.season+2; x.ovr+=8; delete x.wantsOut; x.mor=6.5; }
-  d.news=[]; mgContractAsks(d); out.asked=!!p.cAsk&&!!q.cAsk; out.news=d.news.map(n=>n.t).filter(t=>/wants a new deal/.test(t)&&(t.startsWith(p.name+' ')||t.startsWith(q.name+' '))).length;   /* (theirs: another of the squad may have come on enough to ask too) */
+  d.news=[]; mgContractAsks(d); out.asked=!!p.cAsk&&!!q.cAsk; out.news=d.news.map(n=>n.t).filter(t=>/a new deal: /.test(t)&&(t.startsWith(p.name+' ')||t.startsWith(q.name+' '))).length;   /* (theirs: another of the squad may have come on enough to ask too) */
   out.want=p.cAsk&&p.cAsk.wage; out.wage=p.wage;
   // not now (p): a point off, and no asking again for eight weeks -- checked as the weeks go by below
   const m1=p.mor; out.no=mgContractNo(d,p.id); out.noMor=[m1,p.mor]; const no0=d.weeks||0;
@@ -167,6 +167,55 @@ ok(r.waited[1] === r.waited[0] - 1, 'left waiting three weeks: a point off his m
 ok(r.gaveUp.mor[1] === r.gaveUp.mor[0] - 1 && !r.gaveUp.asking && r.gaveUp.back === 8, 'three more: another point, and he stops asking -- till eight weeks on (' + r.gaveUp.mor.join(' -> ') + ')');
 ok(!r.no && r.noMor[1] === r.noMor[0] - 1 && !r.again3 && r.again9, 'NOT NOW: a point off, and he asks again eight weeks on (not at three)');
 ok(!r.give.err && r.give.wage === r.give.want && r.give.until === r.give.u0 && !r.give.asked, 'GIVE IT HIM: his new wage (' + r.give.wage + '), his deal no shorter, the ask settled');
+
+// --- WHO ASKS, WHEN, AND FOR WHAT (v109): the young are modest, a man in his prime knows his worth, a fine season more so;
+// the hometown hero never asks ---------------------------------------------------------------------------------------
+r = await K(`(()=>{ const d=CAREER.data, base=d.roster.find(p=>p.role!=='GK'&&!p.loan&&!p.hometown&&!hasTrait(p,d,'loyal')), keep=JSON.parse(JSON.stringify(base)), out={};
+  const at=(age,form,over)=>{ Object.assign(base,{age, ovr:70, rn:10, rs:62, goals:form?19:0, as:0, cs:0, hist:[], evs:[], until:d.season+2, since:d.season-1, loan:null});   /* (rated 70: worth hundreds a week, so the steps show through the rounding) */ delete base.cAsk; delete base.cNot; delete base.wantsOut;
+    const mkt=mgMarketWage(d,base); base.wage=Math.round(mkt/over); const top0=d.news[0]; mgContractAsks(d); const P=cPush(d,base), fresh=[];
+    for(const x of d.news){ if(x===top0) break; fresh.push(x); }   /* (what's new -- the news is kept to 90 -- and his: another may have asked too) */
+    const his=fresh.find(x=>x.t.startsWith(base.name+' '));
+    return { at:+P.at.toFixed(2), ask:+P.ask.toFixed(2), asked:!!base.cAsk, want:base.cAsk?base.cAsk.wage:null, mkt, said:his?his.t:'' }; };
+  out.y20=at(20,false,1.5); out.y22=at(22,false,1.5); out.a23=at(23,false,1.5); out.p27=at(27,false,1.5); out.p27f=at(27,true,1.5); out.v32=at(32,false,1.5);
+  out.p27lo=at(27,false,1.25); out.a23lo=at(23,false,1.25); out.p27flo=at(27,true,1.1);
+  for(const k of Object.keys(keep)) base[k]=keep[k]; for(const k of ['cAsk','cNot']) if(!(k in keep)) delete base[k]; return out; })()`);
+info('who asks (what he\'d get 50% over his wage, then 25%, then 10%): ' + JSON.stringify(Object.fromEntries(Object.entries(r).map(([k, v]) => [k, [v.at, v.ask, v.asked, v.want, v.mkt]]))));
+const near = (a, b) => Math.abs(a - b) <= (b >= 1e5 ? 1e4 : b >= 1e4 ? 1e3 : b >= 1e3 ? 100 : 10) / 2 + 1;   // (wages are rounded: to $10 under $1,000, $100 under $10,000...)
+ok(!r.y20.asked && r.y22.asked && near(r.y22.want, r.y22.mkt * 0.94) && r.a23.asked && near(r.a23.want, r.a23.mkt) && /would like a new deal/.test(r.y22.said),
+  'the young are modest: worth half as much again as his wage, a man of 20 doesn\'t ask yet; at 22 he does -- for 6% under what he\'d get ($' + r.y22.want + ' of $' + r.y22.mkt + ')');
+ok(r.p27.asked && near(r.p27.want, r.p27.mkt * 1.05) && r.p27lo.asked && !r.a23lo.asked && /knows what he.s worth/.test(r.p27.said),
+  'in his prime he knows his worth: he asks sooner (a quarter over his wage at 27, not at 23) and for 5% more than it ($' + r.p27.want + ' of $' + r.p27.mkt + ')');
+ok(r.p27f.asked && near(r.p27f.want, r.p27f.mkt * 1.2) && r.p27flo.asked && /fine season/.test(r.p27f.said) && r.v32.asked && near(r.v32.want, r.v32.mkt),
+  'after a fine season (19 goals) sooner still -- a tenth over his wage is enough -- and for a fifth more ($' + r.p27f.want + '); a man of 32 as before ($' + r.v32.want + ')');
+// the wonderkid: signs for half his wage -- worth twice that the day he signs -- and waits his first season out
+r = await K(`(()=>{ const d=CAREER.data, S=d.story; S.kid=1; S.kidAsk={name:'Tobi Wonder', ovr:64, pot:88}; const err=mgSignKid(d,'CM'), k=d.roster.find(p=>p.id===S.kidId);
+  delete k.cAsk; delete k.cNot; mgContractAsks(d); const first=!!k.cAsk, mkt=mgMarketWage(d,k), wage=k.wage;
+  k.since=d.season-1; mgContractAsks(d); const next=k.cAsk?k.cAsk.wage:null, said=(d.news.find(x=>x.t.startsWith(k.name+' ')&&/a new deal/.test(x.t))||{t:''}).t;
+  return { err, first, next, mkt, wage, said }; })()`);
+ok(!r.err && !r.first && r.mkt >= r.wage * 1.6 && r.next && r.next < r.mkt && r.next >= r.wage && /would like a new deal/.test(r.said),
+  'the wonderkid signs for half his wage (on $' + r.wage + ', worth $' + r.mkt + ') and doesn\'t ask in his first season; in his second he would like a new deal, for less than he could get ($' + r.next + ')');
+// last season's: early in a new one it still counts, and fades as the games go by
+r = await K(`(()=>{ const d=CAREER.data, base=d.roster.find(p=>p.role!=='GK'&&!p.loan&&!p.hometown), keep=JSON.parse(JSON.stringify(base));
+  Object.assign(base,{age:27, rn:0, rs:0, goals:0, as:0, cs:0, evs:[], hist:[[d.season-1,'X',1,30,19,0,64,0]]}); const a=+cForm(d,base).toFixed(2);
+  Object.assign(base,{rn:8, rs:52}); const b=+cForm(d,base).toFixed(2); Object.assign(base,{rn:16, rs:104}); const c=+cForm(d,base).toFixed(2);
+  for(const k of Object.keys(keep)) base[k]=keep[k]; return { a, b, c }; })()`);
+// what makes a fine season: against what's usual for his place -- goals for a forward, fewer for a midfielder, fewer
+// still for a defender, clean sheets for a keeper or defender; a Player of the Month; not his ratings
+const fine = await K(`(()=>{ const d=CAREER.data, base=d.roster.find(p=>!p.loan&&!p.hometown), keep=JSON.parse(JSON.stringify(base)), f=(role,o)=>{ Object.assign(base,{role, rn:10, rs:62, goals:0, as:0, cs:0, evs:[], hist:[]},o); return +cForm(d,base).toFixed(2); };
+  const out={ att10:f('ATT',{goals:10}), att14:f('ATT',{goals:14}), att19:f('ATT',{goals:19}), mid11:f('MID',{goals:9,as:4}), def5:f('DEF',{goals:4,as:1}), def9cs:f('DEF',{cs:9}),
+    gk12cs:f('GK',{cs:12}), gk20g:f('GK',{goals:20}), rated:f('MID',{rn:10, rs:80}), potm:f('MID',{evs:[[d.season,'L2 Player of the Month']]}), potmOld:f('MID',{evs:[[d.season-1,'L2 Player of the Month']]}) };
+  for(const k of Object.keys(keep)) base[k]=keep[k]; return out; })()`);
+info('a fine season: ' + JSON.stringify(fine));
+ok(fine.att10 === 0.1 && fine.att14 === 0.5 && fine.att19 === 1 && fine.mid11 === 0.5 && fine.def5 === 0.5 && fine.def9cs === 0.5 && fine.gk12cs === 1 && fine.gk20g === 0 && fine.rated === 0 && fine.potm === 0.75 && fine.potmOld === 0,
+  'a fine season is against his place in the side: a forward\'s 14 goals (10 isn\'t), a midfielder\'s 9 and 4 assists, a defender\'s 4 and 1 or 9 clean sheets, a keeper\'s clean sheets (not goals); a Player of the Month this season; not his average rating (8.0 alone counts for nothing)');
+ok(r.a === 1 && r.b > 0 && r.b < r.a && r.c === 0, 'a fine season last time counts early in the next (' + r.a + '), less as this one\'s games go by (' + r.b + ' after 8), and not at all after 15 (' + r.c + ')');
+// the hometown hero: comes home cheap, never asks however he plays, and renews on what he's on
+r = await K(`(()=>{ const d=CAREER.data; d.story.vet=0; d.md=Math.max(d.md||0,2); mgStory(d); const v=d.roster.find(p=>p.id===d.story.vetId);
+  v.until=d.season+2; v.ovr+=8; Object.assign(v,{rn:10, rs:80, goals:20, cs:12}); delete v.cAsk; delete v.cNot; mgContractAsks(d); const asked=!!v.cAsk, w0=v.wage, renew=mgRenewWage(d,v), mkt=mgMarketWage(d,v);
+  const old=JSON.parse(JSON.stringify(d)), ov=old.roster.find(p=>p.id===d.story.vetId); delete ov.hometown; ov.cAsk={wage:999,wk:0}; mgMigrate(old);
+  return { home:!!v.hometown, asked, w0, renew, mkt, mig:!!ov.hometown && !ov.cAsk }; })()`);
+ok(r.home && !r.asked && r.renew === r.w0 && r.mkt > r.w0 * 3 && r.mig,
+  'the hometown hero (on $' + r.w0 + ' a week, worth $' + r.mkt + '): eight points better and a fine season, and he never asks for a new deal; a new one keeps him on what he\'s on; a career from before has him so too');
 
 process.exitCode = rep.finish();
 await browser.close();
