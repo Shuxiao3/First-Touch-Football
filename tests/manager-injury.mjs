@@ -119,7 +119,7 @@ ok(r.inj && /INJURED/.test(r.report) && r.report.includes(r.inj ? 'week' : 'x') 
 
 // --- marked everywhere ---------------------------------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; for(const p of d.roster){ delete p.inj; } const lu=ensureLineup(d); d.roster[lu.atk[0]].inj={k:'strain',d:15}; window.HURTNAME=d.roster[lu.atk[0]].name; mgSave(d); renderHub(); return 1; })()`);
-await page.click('#matchReport .mrContinue').catch(() => {}); await page.waitForTimeout(200);
+await page.click('#mrNextBtn').catch(() => {}); await page.waitForTimeout(100); await page.click('#mrContinueBtn').catch(() => {}); await page.waitForTimeout(200);
 const warn = await page.textContent('#chWarn');
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(150);
 const tok = await page.$$eval('#bpBody .ptk.inj', ns => ns.length);

@@ -60,8 +60,8 @@ const base = await K('LOYALTY_BASE[CAREER.data.tier]');
 ok(Math.abs((r.tm - tm0) - (fx.tm || 0)) < 0.011 && Math.abs((r.fans - fans0) - Math.round(base * (fx.fans || 0) / 100)) < 0.01 && /^You said “/.test(said),
   'an answer moves what it says it does (' + JSON.stringify(fx) + ': morale ' + tm0 + ' -> ' + r.tm + ', fans ' + fans0 + ' -> ' + r.fans + '), and the paper says how it went down ("' + said.slice(0, 70) + '...")');
 for(let i = 0; i < 6 && await on('pressModal'); i++){ const b = await page.$('#pressModal [data-pr="next"]') || await page.$('#pressModal [data-pr="ans"]'); await b.click(); await page.waitForTimeout(80); }
-r = await K(`(()=>{ const d=CAREER.data; return { press:d.press, pile:document.getElementById('pileModal').classList.contains('on') }; })()`);
-ok(!(await on('pressModal')) && r.press === null && r.pile, 'that\'s all: the press conference over, the Monday papers come up');
+r = await K(`(()=>{ const d=CAREER.data, b=document.querySelector('#careerHub .cpPapers'); return { press:d.press, pile:document.getElementById('pileModal').classList.contains('on'), side:!!b&&getComputedStyle(b).display!=='none', left:pileLeft(d).length }; })()`);
+ok(!(await on('pressModal')) && r.press === null && !r.pile && r.side && r.left > 0, 'that\'s all: the press conference over, and the Monday papers wait off to the side (PAPERS, ' + r.left + ')');
 await K(`(()=>{ pileHide(); const d=CAREER.data; d.pile=null; d.rival=d.div[d.tier].find(id=>id!==d.clubId&&id!==mgNextGame(d).opp); return 1; })()`);
 const s0 = await K(`(()=>{ const d=CAREER.data; mgSim(d); return { tm:d.tm, fans:d.loyalty, q:d.press&&d.press.qs.length }; })()`); await page.waitForTimeout(100);
 await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(80);
@@ -71,7 +71,7 @@ ok(s0.q >= 1 && r.tm === s0.tm && r.fans === s0.fans && r.press === null && !(aw
 // --- A WINDFALL, THE COMMUNITY --------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, R=Math.random; Math.random=()=>0.05; const b0=d.budget, w=wkWindfall(d); Math.random=R; return { w, b0, b1:d.budget, range:WINDFALL_AMT[d.tier] }; })()`);
 ok(r.w && r.b1 - r.b0 === r.w.amt && r.w.amt >= r.range[0] && r.w.amt <= r.range[1] && r.w.txt.includes('$'), 'a windfall: ' + (r.w && r.w.title) + ' -- "' + (r.w && r.w.txt) + '", in the bank at once');
-await K(`(()=>{ const d=CAREER.data; d.budget=50000; pileBuild(d,{dev:null, comm:{ck:'kits', cost:600}}); d.pile.opened=false; mgSave(d); renderHub(); return 1; })()`); await page.waitForTimeout(120);
+await K(`(()=>{ const d=CAREER.data; d.budget=50000; pileBuild(d,{dev:null, comm:{ck:'kits', cost:600}}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); return 1; })()`); await page.waitForTimeout(120);
 for(let i = 0; i < 12 && !/THE COMMUNITY/.test(await page.innerText('#pileModal .plStamp').catch(() => '')); i++){ const b = await page.$('#pileModal .plBtns [data-pile="next"]') || await page.$('#pileModal .plBtns [data-pile="later"]'); if(!b) break; await b.click(); await page.waitForTimeout(60); }
 const commTxt = await page.innerText('#pileModal .plPaper').catch(() => '');
 const c0 = await K(`(()=>{ const d=CAREER.data; return { b:d.budget, f:d.loyalty, n:commFans(d,COMMUNITY.find(c=>c.k==='kits')) }; })()`);
@@ -124,7 +124,7 @@ await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); return 1; })()`);
 r = await K(`(()=>{ const d=CAREER.data; return { back:pileLeft(d).filter(x=>x.k==='loanback').map(x=>pileBody(d,x)[0]), rival:d.div[d.tier].includes(d.rival) }; })()`);
 ok(r.back.length === 1 && /is back from his loan at /.test(r.back[0]) && r.rival, 'the new season\'s first papers: "' + r.back[0] + '"; and a rival in the league you\'re in now');
 // the market: LOAN HIM on another club's man; the papers' loan calls
-r = await K(`(()=>{ const d=CAREER.data, R=Math.random; Math.random=()=>0.01; const L=wkLoans(d); Math.random=R; d.wday='mon'; pileBuild(d,{dev:null, loans:L}); d.pile.opened=false; renderHub();
+r = await K(`(()=>{ const d=CAREER.data, R=Math.random; Math.random=()=>0.01; const L=wkLoans(d); Math.random=R; d.wday='mon'; pileBuild(d,{dev:null, loans:L}); d.pile.opened=false; renderHub(); pileShow(d,true);
   return L.map(x=>x.k).join(' '); })()`);
 await page.waitForTimeout(120);
 let loanTxt = '';

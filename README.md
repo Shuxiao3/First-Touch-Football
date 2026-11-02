@@ -317,7 +317,30 @@ The same game played like any other football game. It's a copy of `index.html` w
     time, so a sub that waited for one could wait a half. ALL SUBS opens TACTICS for any other sub. The keeper is never
     one of them. With no subs left it goes, and it isn't there in a lab. (In v63 it was twice the size, and it dropped
     down by itself.)
-  - **The match report** is the score along the top, two columns under it, and CONTINUE pinned bottom right.
+  - **The match report** (v106), after a career match you played, is two screens. THE RESULT: the score between
+    the two clubs with their crests, each side's goals -- the minute, the scorer, who made it -- anyone hurt, and
+    where it leaves you (the league position and how it moved; through or out of a cup; the playoffs); NEXT. YOUR
+    PLAYERS: a row for every one of yours who played -- his rating, goals, assists, passes found of those tried and the
+    share, shots on target of his shots, tackles won, interceptions, a keeper's saves -- your best on the day starred;
+    CONTINUE. Back at the club, after the press conference: THE MONEY (see the manager career).
+  - **The goal, celebrated** (v106). A goal of theirs: GOAL, big in the middle of the screen with the score under it,
+    and play held a moment as before. One of yours: GOAL! grander -- gold, bigger, the scorer's name under it -- and
+    the scorer wheels away toward the corner flag at the end he scored at (top left or top right, in front of the far
+    stand), his team-mates after him, the camera with them, and they celebrate as big as the goal was:
+    - *small* -- an early goal, one more on top of a lead, or a consolation: he runs a few strides toward the corner
+      (8 m at most), the two nearest get to him, a hop or two. Play's held 2.8 s.
+    - *big* -- a goal that makes it level or puts you in front in the second half (EQUALISER! / IN FRONT!): off toward
+      the flag (16 m at most), every team-mate after him, jumping round him as they get there, a little confetti and
+      the cameras flashing in the stand. 4.6 s.
+    - *epic* -- the winner at the death (level, in the last twelfth of the match or the advantage at its end):
+      WINNER!, a knee slide toward the flag, the whole team on him -- the keeper running up from his goal too -- confetti
+      everywhere. 6.8 s.
+    The clock is stopped through it, as for any goal, and the side that conceded kicks off after it.
+  - **Sim the rest** (v106). The pause menu's SIM THE REST (it asks first, the match waiting): the rest of the match
+    simulated from where it stands -- the time left of both halves, each side's men on the pitch now (their ratings),
+    the goals a simulated game gives for that much of a match (the home side a little more), the scorers picked as a
+    simulated game picks them (a forward most often, a defender now and then, the keeper never) with an assist three
+    times in four, at times in what was left -- and it's full time. In a career the report and the money follow.
   - **As wide as the phone.** The game screen's height is fixed and its width follows your screen's shape, so a
     phone held sideways sees more of the pitch across (1169 wide at 844×390) instead of black bands either side.
     The buttons stand over the pitch's bottom-right corner, the stick starts anywhere on the left, and buttons
@@ -1128,8 +1151,10 @@ The same game played like any other football game. It's a copy of `index.html` w
       aren't asking for something else each ask for a word. TALK TO HIM and it says how he's feeling and why (wants
       more games, his form, the results, his contract...), his fitness, the coaches' word on how he's coming on, and
       brings out a trait; it lifts him a little, more if he's low.
-    - **The Monday papers** (v103). Each Monday the week's papers are on your desk, a pile to go through, opening by
-      itself over the hub (after the phone, the hometown hero or the wonderkid; never over the day going by), a paper
+    - **The Monday papers** (v103). Each Monday the week's papers are on your desk, a pile to go through -- since v106
+      waiting off to the side for you: PAPERS on the campus's top bar, how many there are in an orange box on its
+      corner (it pops in when they come, and the button glows till you've opened them; v103 to v105 opened the pile by
+      itself over the hub, after the phone, the hometown hero or the wonderkid, never over the day going by) -- a paper
       at a time, the side's morale and how it's moved over the pile. First the dressing room: its mood now and last
       Monday, who's happier and who's less happy, who wants to leave and who's settled. Then what needs deciding,
       each with its buttons: a club's bid for one of yours (ACCEPT, REJECT), a club's answer to your bid (SIGN HIM on
@@ -1139,10 +1164,10 @@ The same game played like any other football game. It's a copy of `index.html` w
       the physio's (who's hurt, how and for how long, who's fit again), the coaches' every third week (who's coming
       on, who's going back), the scouts' (with a scouts' house and the window open: three men worth a look, LOOK to
       go to him in the market), your next game (where, their place and form, their top scorer) and the week's money.
-      LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS on the hub (with how many are left) opens
-      it again. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
-      yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
-      the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile.
+      LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS (with how many are left) opens it again. A
+      decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of yours or a
+      sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else -- the market, the
+      stadium, the clubhouse -- and done there instead, it's gone from the pile.
       Since v105 the dressing room's paper is every man in it: the side's mood and how it's moved, then each man's
       mood and how far it's moved since last Monday (the happiest first; one who wants out in red), then who wants to
       leave and who's settled. And the club shop's paper comes before the week's money: the week's shirt sales, the
@@ -1156,13 +1181,19 @@ The same game played like any other football game. It's a copy of `index.html` w
       day has everyone on nothing. NEXT and it's read; the table's in the Clubhouse's League tab too.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
   - **The press conference** (v104). After each of your games, played or simulated, the press want a word -- its own
-    screen, after the match report and before the Monday papers. Two questions: the result's (a derby's, a cup tie's,
-    a big win's or a heavy defeat's its own), then one of your men's (one who went off hurt, two goals or the day's
-    best rating, one who's not been playing) or the run's (three wins in a row, top of the league). Three answers each,
-    and each moves something a little: the dressing room ("All of them. The lads were brilliant."), a man ("He's the
-    best I've worked with."), the fans ("This one's for the fans."), sometimes one up and another down ("I'm sorry. We
-    owe them one.": the fans like it, the dressing room doesn't). After each, what came of it. SEND THE ASSISTANT and
-    nothing's said, nothing moves.
+    screen, after the match report and before the money and the Monday papers -- in a press room drawn beside the
+    questions as big as the club's league (v106): League 2's a back room -- a painted wall with a damp patch, a small
+    window, a calendar, a folding table, one microphone, a plastic cup, two reporters; League 1 a banner in the club's
+    colours, a cloth on the table, two microphones, four reporters with their hands up; the Championship the sponsors'
+    wall, a name plate, three microphones, a TV camera and the odd flash; the Premium League (and any Champions League
+    night, under its stars) the full room -- a long table, a row of microphones, two rows of reporters, TV cameras at
+    the sides, photographers at the front and their cameras going off (small flashes; none with reduced motion). Two
+    questions: the result's (a derby's, a cup tie's, a big win's or a heavy defeat's its own), then one of your men's
+    (one who went off hurt, two goals or the day's best rating, one who's not been playing) or the run's (three wins in
+    a row, top of the league). Three answers each, and each moves something a little: the dressing room ("All of them.
+    The lads were brilliant."), a man ("He's the best I've worked with."), the fans ("This one's for the fans."),
+    sometimes one up and another down ("I'm sorry. We owe them one.": the fans like it, the dressing room doesn't).
+    After each, what came of it. SEND THE ASSISTANT and nothing's said, nothing moves.
   - **The week's events** (v104), in the Monday papers:
     - **Windfalls**, about one Monday in ten (not in a career's first weeks): money nobody planned on -- a will, a
       council grant, the supporters' lottery win, an insurance payout, the TV picking your game, a benefactor, a
@@ -1433,6 +1464,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the ticket price, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks).
+    - **The money** (v106), back at the club after a match you played, after the press conference: a line at a time,
+      each figure counting up -- where the bank stood before the game, what the game brought in (the gate or your
+      share of it, the TV, the week's partners, sponsors and boards; a cup's prize), the wages out, and where it
+      stands now, as the books have it; and the fans the result brought. The Monday's shirt sales come after, in the
+      papers.
     - **Shirt sales** come in at the start of each week, on its Monday (v105: they used to come with a matchday's
       money), every week of the year, pre-season and the winter break too, and the Monday papers say what came in
       (THE CLUB SHOP: the week's sales, the best sellers, the season's shirts so far). Your fans buy the shirt --
@@ -1522,11 +1558,12 @@ The same game played like any other football game. It's a copy of `index.html` w
 
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
         taken: its Tactics and Selection tabs), and its
-        level is what your side can be told: at 1 the 2-3-2, 3-2-2 and 2-2-3, the balanced and direct styles, and the
-        keeper's pass; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter, and the support and runs
-        instructions; 3 the 3-1-3, 1-4-2 and 4-1-2, control possession and direct counter, and the width and crosses
-        instructions; 4 the 1-3-3, gegenpress, and the defending ones (aggression, cover, defending). The rest are on
-        the menus, locked, each with the level it needs -- in a match's tactics too. Width is always yours.
+        level is what shapes and styles your side can have: at 1 the 2-3-2, 3-2-2 and 2-2-3 and the balanced and direct
+        styles; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter; 3 the 3-1-3, 1-4-2 and 4-1-2, control
+        possession and direct counter; 4 the 1-3-3 and gegenpress. The rest are on the menus, locked, each with the
+        level it needs -- in a match's tactics too. Width is always yours, and so (v106) is every player instruction,
+        from the first day: before, they came with the levels (support and runs at 2, width and crosses at 3, the
+        defending ones at 4).
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
         day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
@@ -1809,6 +1846,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Full time, and the goals (v106).** Your goals celebrated as big as they are (an early one, an equaliser or a lead
+  in the second half, the winner at the death), theirs a plain GOAL; SIM THE REST in the pause menu; the match report
+  in two screens (the result, then your players' numbers) and THE MONEY back at the club; the press conference in a
+  press room drawn for your league; the Monday papers waiting off to the side (PAPERS, an orange count); every player
+  instruction open from the start; and back from v91, after a standing tackle your man shields it from the man he
+  took it from (see **After a tackle**). See **The match report**, **The goal, celebrated** and **Sim the rest** in
+  the match section, and **The press conference** and **The money** under the manager career.
 - **Deadline day and the fans (v105).** Every man has a popularity, on his card; your most popular bring more
   through the gate and sell the shirts, which come in each Monday now, not with a matchday's money. The morning of
   each of your games, the table (the matchday paper); each Monday, the dressing room man by man. The winter break's
@@ -1852,6 +1896,17 @@ test, and like the Trap Lab the values are the game's settings.
   computer's marker would, when he's under it and their man doesn't beat him to it), and with the stick left alone he
   goes to meet it. (Their crosses were where the computer was hardest to play against: its markers head them clear
   by themselves, yours only if you time it.)
+- **After a tackle (v91; back in v106).** When your man wins the ball off one of theirs with a standing tackle -- not
+  with a slide -- then as soon as he has it he gets his back to the man he took it from, the ball tight at his feet on
+  his far side, for a split second. That man can't just get up and take it straight back off him: he can only nick it
+  from where the ball shows. How quickly your man turns, how long he keeps at it and how little of the ball he shows
+  are his Def IQ: 7 to 14 radians a second (a half-turn in 0.45 s at 1, 0.22 s at 10), 0.3 s to 0.6 s (v93), and from
+  within 60 degrees of the ball down to 30 (as a top dribbler shields it) -- so a poor one, slow round, can still have
+  it nicked off him by a man quick round him to the ball. The stick still moves him -- only not back into that man,
+  across him instead; left alone, he stands and turns. v102 took it out with v90's dribbling; v106 puts it back on
+  the dribbling as it is (v89's). Measured on it (classic-shieldwin): at Def IQ 10 he's round in 0.17 s and the man he
+  took it from got it straight back (within 1.5 s) 0 times in 12, against 12 in 12 with no guard; at Def IQ 1, 5 times
+  in 6 after a tackle.
 - **The magnet (v88).** The ball loose a stride or two from your man (within 2.6 m) -- your own knock-on or a heavy
   touch, one that's come off him, one knocked loose -- and he's drawn to it until it's at his feet. Whichever way you're
   pushing, he bends toward it: a quarter of the way at the edge of the pull, up to 60% right by it, half that if you're

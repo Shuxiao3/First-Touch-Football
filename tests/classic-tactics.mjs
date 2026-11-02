@@ -264,7 +264,7 @@ ok(iq.own.join() === iq.base.join() && iq.secAtk[0] < iq.base[0] && iq.secAtk[1]
 // SUBS: the pause menu's TACTICS, then a man off the bench dragged onto one of yours -- he comes on, on fresh legs
 await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
 const pm = await page.$$eval('#pauseGrid [data-pause]', ns => ns.filter(n => getComputedStyle(n).display !== 'none').map(n => n.dataset.pause));
-ok(String(pm) === 'tactics,skills,settings,exit,back' && !(await page.$('#pauseQuick')), 'the pause menu: TACTICS, SKILL MOVES, SETTINGS, EXIT, BACK (no quick row)');
+ok(String(pm) === 'tactics,skills,settings,exit,simrest,back' && !(await page.$('#pauseQuick')), 'the pause menu: TACTICS, SKILL MOVES, SETTINGS, EXIT, SIM THE REST (v106), BACK (no quick row)');
 await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(150);
 const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .tpitch .ptk img.ptkFace').length,
   men: document.querySelectorAll('#mtacBody .tpitch .ptk').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk img').length,

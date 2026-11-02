@@ -32,8 +32,10 @@ const t0 = Date.now();
 await page.waitForSelector('#matchReport', { state: 'visible', timeout: 240000 });
 info('the match took ' + Math.round((Date.now() - t0) / 1000) + 's');
 const text = await page.innerText('#matchReport');
-ok(/MATCHDAY 1/.test(text) && /THE REST OF THE ROUND/.test(text) && /League position/.test(text), 'the report: the round and the table');
-ok(/FINANCES/.test(text) && /Net this week/.test(text) && /FANS/.test(text), 'the report: the money and the fans');
+ok(/MATCHDAY 1/.test(text) && /\d+ – \d+/.test(text) && /League position/.test(text) && /NEXT/.test(text), 'the report, THE RESULT (v106): the score between the two clubs, the goals, where it leaves you, NEXT');
+await page.click('#mrNextBtn'); await page.waitForTimeout(120);
+const text2 = await page.innerText('#matchReport');
+ok(/YOUR PLAYERS/.test(text2) && /RATING/.test(text2) && /PASSES/.test(text2) && /SHOTS/.test(text2) && /TACKLES/.test(text2) && /YOUR BEST/.test(text2), 'NEXT: YOUR PLAYERS -- each one\'s rating, goals, assists, passes, shots, tackles; your best starred');
 
 const d = await page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 ok(d.md === 1 && [1, 2, 3, 4].every(t => d.lg[t].fx[0].every(m => m[2] != null)), 'matchday 1 recorded in every league');
@@ -41,7 +43,12 @@ const m = d.lg[1].fx[0].find(x => x[0] === d.clubId || x[1] === d.clubId);
 info('your game: ' + JSON.stringify(m));
 ok(d.roster.filter(p => p.apps === 1).length === 8, 'the eight who started have a game each');
 ok(d.week === 1 && d.ledger.length === 1, 'the week was paid');
-await page.click('#mrContinueBtn'); await page.waitForTimeout(150);
+await page.click('#mrContinueBtn'); await page.waitForTimeout(250);
+await page.evaluate(() => { const b = document.querySelector('#pressModal.on [data-pr="skip"]'); if(b) b.click(); }); await page.waitForTimeout(250);   // (the press first)
+const money = await page.innerText('#moneyModal').catch(() => '');
+ok(/THE MONEY/.test(money) && /Before the game/.test(money) && /From the game/.test(money) && /Wages/.test(money) && /Now in the bank/.test(money) && /fans/.test(money),
+  'back at the club, after the press: THE MONEY -- before the game, from it, the wages, now in the bank, and the fans');
+await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(150);
 ok(await page.isVisible('#careerHub') && /Matchday 2/.test(await page.getAttribute('#chPhase', 'data-long')), 'back on the campus for matchday 2');
 
 process.exitCode = rep.finish();

@@ -197,7 +197,7 @@ for(const [w, h] of SIZES){
   ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await mcheck('pause', ['#pauseGrid .pauseBtn']);
-  if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: five buttons, no quick-tactics row');
+  if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: six buttons (SIM THE REST among them, v106), no quick-tactics row');
   await page.tap('#pauseGrid [data-pause="skills"]'); await page.waitForTimeout(300);
   await mcheck('skill moves, in a match', ['#skillsOverlay .pauseTitle', '#skGrid .skCard', '[data-skclose]']);
   { const t0 = await page.evaluate(() => window.__T.sim()); await page.waitForTimeout(400); const t1 = await page.evaluate(() => window.__T.sim());
@@ -210,7 +210,9 @@ for(const [w, h] of SIZES){
   ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip != null && Math.abs(lg.bar - lg.flip) <= 1, w + 'x' + h + ': his card in a match: STAMINA and a bar, no figure, the button level with the bar\'s foot (' + lg.bar + ' / ' + lg.flip + ')');
   await page.tap('#mtacOv [data-mt="back"]'); await page.waitForTimeout(100); await page.tap('#pauseGrid [data-pause="back"]');
   await page.evaluate(() => window.__T.end()); await page.waitForTimeout(400);
-  await mcheck('match report', ['#mrContinueBtn', '#matchReport .mrScore']);
+  await mcheck('match report', ['#mrNextBtn', '#matchReport .mrScore']);                     // (v106: THE RESULT, then NEXT)
+  await page.tap('#mrNextBtn'); await page.waitForTimeout(150);
+  await mcheck('match report, your players', ['#mrContinueBtn', '#matchReport .mrStats']);   //  (YOUR PLAYERS, then CONTINUE)
   ok(!mf.length, w + 'x' + h + ': the pause menu, the match\'s tactics and the report fit' + (mf.length ? ' -- ' + mf.slice(0, 3).join(' | ') : ''));
   await ctx.close();
 }

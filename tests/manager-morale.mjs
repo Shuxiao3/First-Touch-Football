@@ -107,10 +107,11 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await K(`(()=>{ const d=CAREER.data; d.phase='league'; d.wday='mon'; d.bids=[]; d.offers=[]; d.spOff=[]; for(const p of d.roster){ p.kt=0; p.mor=6.5; delete p.cAsk; delete p.wantsOut; }
   d.roster[2].hv=HV({ch:8,te:7}); d.roster[2].mor=3; d.roster[3].mor=4.6; d.roster[4].mor=4.2; d.roster[5].mor=4.9; pileBuild(d,{dev:null}); mgSave(d); renderHub(); return 1; })()`);
 await page.waitForTimeout(150);
-r = await K(`(()=>{ const d=CAREER.data, W=pileLeft(d).filter(x=>x.k==='word'); return { words:W.map(x=>d.roster.findIndex(p=>p.id===x.pid)), modal:document.getElementById('pileModal').classList.contains('on'), btn:document.getElementById('chBottom').textContent }; })()`);
+r = await K(`(()=>{ const d=CAREER.data, W=pileLeft(d).filter(x=>x.k==='word'), b=document.querySelector('#careerHub .cpPapers'); return { words:W.map(x=>d.roster.findIndex(p=>p.id===x.pid)), modal:document.getElementById('pileModal').classList.contains('on'), side:!!b&&getComputedStyle(b).display!=='none', n:+document.getElementById('cpPapersN').textContent, left:pileLeft(d).length }; })()`);
 info('the papers: ' + JSON.stringify(r));
-ok(r.modal && /PAPERS \d/.test(r.btn) && r.words.length === 2 && r.words[0] === 2 && r.words[1] === 4,
-  'a Monday: the papers open by themselves (PAPERS on the hub too), and the two unhappiest each ask for a word -- ' + r.words.join(' and ') + ', not the third');
+await page.click('#careerHub .cpPapers'); await page.waitForTimeout(150);
+ok(!r.modal && r.side && r.n === r.left && await K(`document.getElementById('pileModal').classList.contains('on')`) && r.words.length === 2 && r.words[0] === 2 && r.words[1] === 4,
+  'a Monday: the papers wait off to the side (PAPERS, ' + r.n + ' in its box), open when pressed, and the two unhappiest each ask for a word -- ' + r.words.join(' and ') + ', not the third');
 const n2 = await K('CAREER.data.roster[2].name');
 for(let i = 0; i < 12; i++){   // (through the pile to his paper)
   const top = await page.textContent('#pileModal .plPaper');

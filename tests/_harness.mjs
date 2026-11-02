@@ -36,6 +36,10 @@ export async function pileAside(page){
   await page.addLocatorHandler(page.locator('#pileModal.on'), async () => {
     await page.evaluate(() => { const x = document.querySelector('#pileModal.on [data-pile="close"]'); if(x) x.click(); else { const m = document.getElementById('pileModal'); if(m) m.classList.remove('on'); } });
   });
+  // (and THE MONEY back at the club after a match you played, v106: CONTINUE)
+  await page.addLocatorHandler(page.locator('#moneyModal.on'), async () => {
+    await page.evaluate(() => { const x = document.querySelector('#moneyModal.on [data-mn="go"]'); if(x) x.click(); else { const m = document.getElementById('moneyModal'); if(m) m.classList.remove('on'); } });
+  });
   // (and THE PRESS CONFERENCE after a game, v104: SEND THE ASSISTANT)
   await page.addLocatorHandler(page.locator('#pressModal.on'), async () => {
     await page.evaluate(() => { const x = document.querySelector('#pressModal.on [data-pr="skip"]') || document.querySelector('#pressModal.on [data-pr="next"]'); if(x) x.click(); else { const m = document.getElementById('pressModal'); if(m) m.classList.remove('on'); } });

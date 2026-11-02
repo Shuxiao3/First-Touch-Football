@@ -48,7 +48,8 @@ for(let i = 0; i < 37; i++){ const n = await K(`Object.values(MSTAT.G).concat(Ob
 r = await K(`(()=>{ const G=MSTAT.G, R=MSTAT.R, sum=(S,k)=>Object.values(S).reduce((a,o)=>a+(o[k]||0),0); return { men:Object.keys(G).length+Object.keys(R).length, pa:sum(G,'pa')+sum(R,'pa'), pc:sum(G,'pc')+sum(R,'pc') }; })()`);
 ok(r.men >= 2 && r.pa >= 2 && r.pc >= 1 && r.pc <= r.pa, 'live, what each man does is counted: ' + r.men + ' men on the ball, ' + r.pa + ' passes, ' + r.pc + ' found');
 await K(`(()=>{ const t=players.find(q=>q.team==='G'&&q.squadIdx===LINEUP.G.atk[0]); for(let i=0;i<3;i++) mStat(t,'tk'); finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);
-r = await K(`(()=>{ const d=CAREER.data, rated=d.roster.filter(p=>p.rn===1), rep=document.getElementById('matchReport').innerText; return { n:rated.length, fm:rated.every(p=>p.fm===p.rs), rep:/RATINGS/.test(rep)&&/★/.test(rep) }; })()`);
+await page.click('#mrNextBtn').catch(() => {}); await page.waitForTimeout(120);   // (v106: YOUR PLAYERS, the report's second screen)
+r = await K(`(()=>{ const d=CAREER.data, rated=d.roster.filter(p=>p.rn===1), rep=document.getElementById('matchReport').innerText; return { n:rated.length, fm:rated.every(p=>p.fm===p.rs), rep:/RATING/.test(rep)&&/★/.test(rep) }; })()`);
 ok(r.n >= 8 && r.fm && r.rep, 'after it: ' + r.n + ' of yours rated (his form begins with it), and the report has the ratings, the best starred');
 
 // --- simulated games: guessed, the winners rated above the losers --------------------------------------------------------------
@@ -78,7 +79,7 @@ ok(r.sAcc > r.tAcc && r.sGain < r.tGain * 1.15, 'five goals a three weeks agains
 ok(r.fade < 9 && r.fade > 6.6, 'form fades back without games to keep it (9 to ' + r.fade + ')');
 
 // --- his season on his card ------------------------------------------------------------------------------------------------------
-await page.click('#matchReport .mrContinue').catch(() => {}); await page.waitForTimeout(200);
+await page.click('#mrContinueBtn').catch(() => {}); await page.waitForTimeout(200);
 await K(`(()=>{ const d=CAREER.data; mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(120);
 const nm = await K(`CAREER.data.roster.find(p=>p.rn>0&&p.role!=='GK').name`);

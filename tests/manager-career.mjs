@@ -303,7 +303,7 @@ ok(r.club4[1] === 450000 && /as good as it gets/.test(r.club5) && r.full === '{"
 ok(r.pre === '{"club":4,"train":4,"physio":0,"market":1,"scouting":2,"academy":3}' && r.v49[0] === '{"club":1,"train":1,"physio":0,"market":1,"scouting":1,"academy":0}' && r.v49[1] === 2400,
   'careers from before: one built up keeps it all (the hall, its scouting and academy as they were); one that had only begun starts in the shed, its plants\' money back ($2,400)');
 
-// --- THE TRAINING PITCH: its level locks shapes, styles and instructions (your side's, in a career) -------------------
+// --- THE TRAINING PITCH: its level locks shapes and styles (your side's, in a career); the instructions are all open (v106) --
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); });
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const locks = async () => { const o = {};
@@ -319,8 +319,8 @@ await page.evaluate(() => { const d = __MG.d; d.lv.train = 4; __MG.mgSave(d); })
 const l4 = await locks();
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 info('training locks: ' + JSON.stringify({ l1, lt1, l4 }));
-ok(l1.forms.length === 7 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRECT/.test(l1.free) && String(lt1) === '4,4,4,0' && /locked/.test(l1.instr),
-  'training pitch level 1: three shapes (the other seven locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), instructions locked (' + l1.instr + ')');
+ok(l1.forms.length === 7 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRECT/.test(l1.free) && String(lt1) === '4,4,0,0' && !/locked/.test(l1.instr) && l1.instr.length > 0,
+  'training pitch level 1: three shapes (the other seven locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), and every instruction open from the start (v106: ' + l1.instr + ')');
 ok(!l4.forms.length && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: every shape, style and instruction');
 
 // --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty at most) as one list, wrapped in three columns:

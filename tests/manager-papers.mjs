@@ -41,17 +41,23 @@ r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); return { pile:pileLeft(d).
 ok(r.pile === 0 && !r.modal && !/PAPERS/.test(r.btn) && /NEXT WEEK/.test(r.btn) && r.boards === 1 && r.ads === 0 && r.offers === 0,
   'a new career\'s first Monday: no papers yet (' + r.btn.trim() + '), one bare board, no sponsor offers');
 
-// --- a week on: the pile, the dressing room first; it opens by itself, ✕ puts it aside, PAPERS brings it back -----------------
+// --- a week on: the pile waits off to the side (v106: PAPERS on the campus, its count in an orange box); pressed, the
+// dressing room first; ✕ puts it aside, PAPERS brings it back -------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; d.roster[0].mor=8.5; d.roster[1].mor=2.9; mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.waitForTimeout(150);
-r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { kinds:L.map(x=>x.k), head:document.querySelector('#pileModal .plHead').textContent, btn:document.getElementById('chBottom').textContent, wk:mgWeekShort(d) }; })()`);
+const side = await K(`(()=>{ const d=CAREER.data, b=document.querySelector('#careerHub .cpPapers'), n=document.getElementById('cpPapersN');
+  return { modal:document.getElementById('pileModal').classList.contains('on'), shown:!!b&&getComputedStyle(b).display!=='none', n:n&&n.textContent, left:pileLeft(d).length, fresh:!!b&&b.classList.contains('fresh'), btn:document.getElementById('chBottom').textContent }; })()`);
+ok(!side.modal && side.shown && +side.n === side.left && side.left > 0 && side.fresh && !/PAPERS/.test(side.btn),
+  'a week on: the papers wait off to the side, not over the hub -- PAPERS on the campus, ' + side.n + ' in its orange box, glowing till they\'re opened');
+await page.click('#careerHub .cpPapers'); await page.waitForTimeout(150);
+r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { kinds:L.map(x=>x.k), head:document.querySelector('#pileModal .plHead').textContent, wk:mgWeekShort(d), fresh:document.querySelector('#careerHub .cpPapers').classList.contains('fresh') }; })()`);
 const first = await top();
 info('the first pile: ' + JSON.stringify({ r, first }));
-ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /Team morale \d+\.\d/.test(first) && /MORALE \d+\.\d/.test(r.head) && /TO GO/.test(r.head) && /PAPERS \d/.test(r.btn),
-  'a week on (' + r.wk + '): the papers open by themselves, the dressing room on top ("' + first.split('\n')[1] + '"), the side\'s morale over the pile, PAPERS on the hub');
+ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /Team morale \d+\.\d/.test(first) && /MORALE \d+\.\d/.test(r.head) && /TO GO/.test(r.head) && !r.fresh,
+  'PAPERS pressed (' + r.wk + '): the dressing room on top ("' + first.split('\n')[1] + '"), the side\'s morale over the pile, and the button\'s glow gone');
 await press('close');
 r = await K(`(()=>{ const d=CAREER.data; renderHub(); return { modal:document.getElementById('pileModal').classList.contains('on'), left:pileLeft(d).length }; })()`);
-await page.click('#chBottom [data-mg="papers"]'); await page.waitForTimeout(120);
+await page.click('#careerHub .cpPapers'); await page.waitForTimeout(120);
 ok(!r.modal && r.left > 0 && await modal(), '✕ puts them aside -- they don\'t open again by themselves -- and PAPERS brings them back');
 
 // --- the decisions: a club's bid for one of yours, your bid answered, a sponsor, a new deal, one who wants out -------------------
@@ -61,7 +67,7 @@ await K(`(()=>{ const d=CAREER.data, R=d.roster, cl=d.div[1].filter(id=>id!==d.c
   window.__tp=tp.id; d.spOff=[spOfferFor(d,'board',new Set())];
   for(const p of R){ delete p.wantsOut; delete p.cAsk; }   // (nobody else asking for anything this week)
   R[7].cAsk={wage:mgRenewWage(d,R[7]),wk:d.weeks}; R[8].wantsOut=true; R[8].mor=3.2; R[9].wantsOut=true; R[9].mor=3.4;
-  pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); return 1; })()`);
+  pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); return 1; })()`);
 await page.waitForTimeout(120);
 r = await K(`(()=>{ const d=CAREER.data; return pileLeft(d).map(x=>x.k); })()`);
 info('the pile: ' + r.join(', '));
@@ -111,17 +117,17 @@ info('they want out: ' + JSON.stringify({ before: outA, oTxt: oTxt.split('\n').s
 ok(/HE WANTS TO LEAVE/.test(oTxt) && r.some(x => x.m > outA.find(y => y.n === x.n).m + 1 && !x.listed) && r.some(x => x.listed), 'one who wants out: TALK HIM ROUND lifts him (he says how he is); the other, LIST HIM, and he\'s on the transfer list');
 r = await K(`(()=>{ const d=CAREER.data; return { left:pileLeft(d).map(x=>x.k), modal:document.getElementById('pileModal').classList.contains('on') }; })()`);
 while((await K('pileLeft(CAREER.data).length')) > 0 && await modal()) await page.click('#pileModal .plBtns button:first-child').catch(() => {});
-ok(!(await modal()) && (await K('pileLeft(CAREER.data).length')) === 0 && !/PAPERS/.test(await page.textContent('#chBottom')), 'the last one done: the pile\'s gone, and so is PAPERS on the hub');
+ok(!(await modal()) && (await K('pileLeft(CAREER.data).length')) === 0 && await K(`getComputedStyle(document.querySelector('#careerHub .cpPapers')).display==='none'`), 'the last one done: the pile\'s gone, and so is PAPERS on the campus');
 
 // --- LATER, and a decision left for next week -----------------------------------------------------------------------------------
-await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; d.spOff=[]; pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; d.spOff=[]; pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); return 1; })()`);
 await page.waitForTimeout(100);
 await toPaper(/bid \$2,000/); await press('later');
 r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return L.map(x=>x.k); })()`);
 ok(r[r.length - 1] === 'offer' && r[0] !== 'offer', 'LATER: to the bottom of the pile (' + r.join(' ') + ')');
 await press('close');
 r = await K(`(()=>{ const d=CAREER.data; d.wday='sat'; renderHub(); const sat={left:pileLeft(d).length, modal:document.getElementById('pileModal').classList.contains('on')};
-  d.wday='mon'; d.weeks++; d.wkN++; pileBuild(d,{dev:null}); d.pile.opened=false; renderHub(); const x=pileLeft(d).find(y=>y.k==='offer'); return { sat, again:!!x, fresh:x&&x.fresh }; })()`);
+  d.wday='mon'; d.weeks++; d.wkN++; pileBuild(d,{dev:null}); d.pile.opened=false; renderHub(); pileShow(d,true); const x=pileLeft(d).find(y=>y.k==='offer'); return { sat, again:!!x, fresh:x&&x.fresh }; })()`);
 await page.waitForTimeout(100);
 await toPaper(/bid \$2,000/); const still = await top();
 ok(r.sat.left === 0 && !r.sat.modal && r.again && !r.fresh && /STILL WAITING/.test(still), 'not on a matchday; a bid you left is in next Monday\'s pile while it stands, STILL WAITING');
@@ -130,7 +136,7 @@ await press('reject');
 // --- the reports: the physio, the coaches, the next game, the week's money --------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; INJ_OFF=false; d.phase='league'; const p=d.roster[2]; injHurt(d,p,'strain',null,'in training'); const q=d.roster[4]; q.inj={k:'knock',d:2}; injHeal(d,3);
   const dev={up:[[d.roster[0].id,2],[d.roster[1].id,1]], down:[[d.roster[3].id,-1]]}; d.ledger.unshift({week:(d.week||0)+1,season:d.season,income:4000,gate:3000,tv:0,wages:1100,net:2900,budget:Math.round(d.budget)});
-  pileBuild(d,{dev}); d.pile.opened=false; mgSave(d); renderHub(); INJ_OFF=true; return 1; })()`);
+  pileBuild(d,{dev}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); INJ_OFF=true; return 1; })()`);
 await page.waitForTimeout(100);
 const reports = {};
 for(const [k, re] of [['phys', /THE PHYSIO/], ['dev', /THE COACHES/], ['next', /NEXT UP/], ['money', /THE WEEK’S MONEY/]]){ if(await toPaper(re)) reports[k] = (await top()).split('\n').slice(1).join(' / '); }
@@ -150,7 +156,7 @@ ok(r.seen.length >= 1 && r.first <= 8 && r.seen.every(t => /, local, \$\d+\)/.te
 
 // --- on a phone held sideways: the paper and its buttons fit ------------------------------------------------------------------------
 await page.setViewportSize({ width: 844, height: 390 });
-await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.spOff=[spOfferFor(d,'board',new Set())]; d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; pileBuild(d,{dev:null}); d.pile.opened=false; renderHub(); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.spOff=[spOfferFor(d,'board',new Set())]; d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; pileBuild(d,{dev:null}); d.pile.opened=false; renderHub(); pileShow(d,true); return 1; })()`);
 await page.waitForTimeout(150);
 const fits = [];
 for(let i = 0; i < 6 && await modal(); i++){

@@ -43,10 +43,10 @@ r = await K(`(()=>{ const d=CAREER.data, b=Object.assign({},d.roster[1],{id:-7,r
     years:T({since:d.season-2},1)-T({},1), cap:T({id:d.cap},1)-T({},1) }; })()`);
 ok(r.up === 25 && r.goals === 6 && r.form === 12 && r.hg === 6 && r.fame === 10 && r.young === 4 && r.years === 6 && r.cap === 5,
   'what the fans make of a man: 2.5 a point over his league\'s level (+' + r.up + ' at ten), 1.5 a goal (+' + r.goals + ' for four), his form (+' + r.form + ' at 7.5), the academy (+' + r.hg + '), his honours (+' + r.fame + '), young and good (+' + r.young + '), his years with you (+' + r.years + ' for two), the armband (+' + r.cap + ')');
-r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2], t=popTarget(d,p,d.tier,true); p.pop=t-20; popWeek(d); const a=p.pop;
+r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2], t=popTarget(d,p,d.tier,true), s=t>=21?t-20:t+20; p.pop=s; popWeek(d); const a=p.pop;   /* (20 off it, under or over, clear of the floor at 1) */
   const q=mgNewPlayer(d,'MID',60,24,{until:d.season+1}); mgRosterAdd(d,q); const tq=popTarget(d,q,d.tier,true), pq=q.pop; mgRosterRemove(d,d.roster.indexOf(q));
-  return { moved:+(a-(t-20)).toFixed(2), pq, tq:+(tq-8).toFixed(1) }; })()`);
-ok(Math.abs(r.moved - 4) < 0.11 && Math.abs(r.pq - r.tq) < 0.11, 'a man of yours goes a fifth of the way to it each Monday (20 under: +' + r.moved + '), and a new man starts eight under it (' + r.pq + ')');
+  return { moved:+Math.abs(a-s).toFixed(2), pq, tq:+(tq-8).toFixed(1) }; })()`);
+ok(Math.abs(r.moved - 4) < 0.11 && Math.abs(r.pq - r.tq) < 0.11, 'a man of yours goes a fifth of the way to it each Monday (20 off it: ' + r.moved + '), and a new man starts eight under it (' + r.pq + ')');
 r = await K(`(()=>{ const d=CAREER.data; d.potm={s:d.season, snap:{}}; for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)){ p.rn=0; p.rs=0; p.goals=0; }
   const me=d.roster.find(p=>!p.loan); me.rn=4; me.rs=33; me.goals=3; popOf(d,me); const p0=me.pop, f0=me.fame||0; d.wkLog={}; mgPotm(d); const potm=[+(me.pop-p0).toFixed(1), +((me.fame||0)-f0).toFixed(1), !!(d.wkLog.potm&&d.wkLog.potm.you)];
   const st=d.roster[3]; popOf(d,st); const s0=st.pop; d.press={qs:[{q:'?', a:[{t:'He’s the best I’ve worked with.', fx:{pop:[st.id,3]}}]}], i:0}; const said=pressAnswer(d,0); d.press=null;
@@ -103,8 +103,11 @@ ok(r.phase === 'winter' && r.kinds[0] === 'mor' && r.kinds[1] === 'deadline' && 
   'the winter break\'s Monday is DEADLINE DAY: its paper after the dressing room ("' + r.text.replace(/<[^>]+>/g, '').slice(0, 90) + '..."), on the hub too, and TO THE MARKET');
 await aside();
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).filter(c=>c.tier===d.tier).sort((a,b)=>b.players.length-a.players.length)[0], p=c.players.slice().sort((a,b)=>b.ovr-a.ovr)[0];
-  const a1=mgAsk(d,p,c); d.phase='league'; const a0=mgAsk(d,p,c); d.phase='winter'; return { a0, a1, r:a1/a0 }; })()`);
-ok(r.r > 0.8 && r.r < 0.9, 'the sellers cut their prices: ' + r.a0 + ' in a window week, ' + r.a1 + ' on deadline day');
+  const a1=mgAsk(d,p,c); d.phase='league'; const a0=mgAsk(d,p,c); d.phase='winter'; return { a0, a1, dd:DD_ASK }; })()`);
+// (each price is rounded -- to the 1000 between 10,000 and 100,000 -- so the cut is DD_ASK of the price give or take half a step of each)
+const step = v => v >= 1e6 ? 1e5 : v >= 1e5 ? 1e4 : v >= 1e4 ? 1e3 : v >= 1e3 ? 100 : 10;
+ok(r.dd > 0.8 && r.dd < 0.9 && r.a1 < r.a0 && Math.abs(r.a1 - r.a0 * r.dd) <= r.dd * step(r.a0) / 2 + step(r.a1) / 2,
+  'the sellers cut their prices (' + Math.round((1 - r.dd) * 100) + '%): ' + r.a0 + ' in a window week, ' + r.a1 + ' on deadline day');
 r = await K(`(()=>{ const d=CAREER.data; d.budget=Math.max(d.budget,5e5); const out=[];
   for(const c of mgAiClubs(d).filter(c=>c.tier===d.tier&&c.players.length>13)){ const e8=mgEight(c.players), p=c.players.find(p=>!e8.includes(p)&&!p.loan&&p.role!=='GK'); if(!p||mgWontCome(d,p)) continue;
     const res=mgBid(d,p.id,mgRound(mgAsk(d,p,c)*0.93)), B=mgBidOf(d,p.id); out.push([res.ok?'ok':res.more?'more':res.wait?'wait':'no', B&&B.st]); if(out.length>=5) break; }
