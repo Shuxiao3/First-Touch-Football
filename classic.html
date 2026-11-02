@@ -786,6 +786,25 @@
   /* tactics: the two phases, the hints, out-of-position men, skill stars, instructions */
   .phTabs{ display:flex; gap:6px; justify-content:center; margin:0 auto 10px; max-width:360px; }
   .phTab{ flex:1; font-family:'FTC Dot',monospace; font-size:12px; letter-spacing:.5px; color:var(--dim); background:rgb(var(--accRGB) / .05); border:1px solid var(--well); border-radius:8px; padding:9px 6px; cursor:pointer; }
+  .tkTbl{ display:flex; flex-direction:column; gap:2px; margin:4px 0 6px; }
+  .tkRow{ display:flex; align-items:center; gap:10px; padding:1px 4px; border-top:1px solid var(--well); line-height:1.25; }
+  .tkRow.prem{ background:rgb(255 207 63 / .06); }
+  .tkRow .tkN{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; font-size:12px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tkRow .tkN i, .tkRow .tkS i{ font-style:normal; font-size:10px; color:var(--dim); }
+  .tkRow .tkP{ flex:none; display:flex; align-items:center; gap:6px; }
+  .tkRow .tkP b{ min-width:44px; text-align:center; font-family:'FTC Dot',monospace; font-size:14px; color:var(--good); }
+  .tkRow .tkB{ margin:0; min-width:30px; min-height:30px; padding:0; }
+  .tkRow .tkS{ flex:none; width:118px; display:flex; flex-direction:column; align-items:flex-end; font-family:'FTC Dot',monospace; font-size:11px; color:var(--ink2); }
+  .mkLine{ display:flex; justify-content:space-between; align-items:baseline; gap:4px 12px; flex-wrap:wrap; }
+  .mkBud{ color:var(--ink2); white-space:nowrap; letter-spacing:.5px; }
+  .mgOffer.mgBidLive{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:5px 8px; margin:4px 0; line-height:1.3; }
+  .mgOffer.mgBidLive > div:first-child{ flex:1 1 auto; min-width:0; }
+  .mgOffer.mgBidLive .mgBtns{ flex:none; margin:0; flex-wrap:nowrap; }
+  .mgOffer.mgBidLive .mgBtn{ white-space:nowrap; }
+  .mgBidRow{ display:flex; align-items:baseline; gap:8px; padding:4px 2px; border-top:1px solid var(--well); font-size:12px; }
+  .mgBidRow .who{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mgBidRow .fee{ flex:none; color:var(--ink2); font-family:'FTC Dot',monospace; }
+  .mgBidRow .out{ flex:none; font-family:'FTC Dot',monospace; font-size:10px; letter-spacing:.5px; text-align:right; max-width:52%; }
   .phTab.on{ color:var(--accInk); background:var(--acc); border-color:var(--acc); font-weight:700; }
   .formBtn[disabled]{ opacity:.3; cursor:default; }
   .tacHint{ color:var(--dim2); font-size:10.5px; line-height:1.5; text-align:center; max-width:360px; margin:6px auto 10px; }
@@ -15983,7 +16002,7 @@
       case 'accept': err=mgAcceptOffer(d,x.oid); x.done=true; if(!err) showNote('Sold.','var(--good)'); break;
       case 'reject': mgRejectOffer(d,x.oid); x.done=true; break;
       case 'sign': { const Bd=mgBidOf(d,x.pid); err=Bd?mgSignDeal(d,x.pid,Bd.fee,MGUI.years||2):'That deal has gone.'; if(!err){ x.done=true; showNote('Signed! He joins your squad.','var(--good)'); } break; }
-      case 'walk': d.bids=(d.bids||[]).filter(y=>y.pid!==x.pid); x.done=true; break;
+      case 'walk': { const Bw=mgBidOf(d,x.pid); if(Bw) bidLog(d,Bw,'walked'); d.bids=(d.bids||[]).filter(y=>y.pid!==x.pid); x.done=true; break; }
       case 'meet': { const Bd=mgBidOf(d,x.pid); if(!Bd){ x.done=true; break; } const r=mgBid(d,x.pid,Bd.ask); if(!r.ok&&!r.wait&&!r.more) err=r.msg; else MGUI.years=2; break; }
       case 'spsign': err=spSign(d,x.oid); x.done=true; if(!err) showNote('Signed.','var(--good)'); break;
       case 'spno': spDecline(d,x.oid); x.done=true; break;
@@ -16321,7 +16340,7 @@
     if(B&&B.st==='wait') return {msg:c.name+' are still weighing up your '+money(B.fee)+': an answer on Monday.'};
     if(B&&B.st==='more'&&fee>=B.ask){ mgBidSet(d,f,fee,'yes'); mgNews(d,c.name+' accept '+money(fee)+' for '+p.name+'.'); return {ok:true}; }
     const ask=mgAsk(d,p,c), r=fee/ask; mgBidSeen(p,fee,ask);
-    if(r<0.85){ d.bids=(d.bids||[]).filter(b=>b.pid!==pid); return {msg:c.name+' turn it down: it’d take around '+money(ask)+'.'}; }
+    if(r<0.85){ d.bids=(d.bids||[]).filter(b=>b.pid!==pid); bidLog(d,{pid,club:c.id,fee,ask},'no'); return {msg:c.name+' turn it down: it’d take around '+money(ask)+'.'}; }
     if(r>=1.25||(r>=1&&Math.random()<0.5)){ mgBidSet(d,f,fee,'yes'); mgNews(d,c.name+' accept '+money(fee)+' for '+p.name+'.'); return {ok:true}; }
     const W=mgBidSet(d,f,fee,'wait');
     if(isDeadline(d)){ mgBidAnswer(d,W,p,c); return W.st==='yes'?{ok:true}:{more:true, msg:c.name+' want '+money(W.ask)+' for '+p.name+(W.rival?': another club’s in for him':'')+'. Meet it before the window shuts tonight.'}; }   // (DEADLINE DAY: no Monday to wait for)
@@ -16330,13 +16349,13 @@
   // Monday: the clubs answer (see YOUR BIDS)
   function mgBidReplies(d){ const L=d.bids||[]; if(!L.length) return;
     for(const B of L){ const f=mgFind(d,B.pid);
-      if(!f||!f.club||f.mine||f.club.id!==B.club){ B.st='gone'; if(f&&f.p){ mgNews(d,f.p.name+' has moved on: your bid for him is off.'); wkLog(d).bidoff.push(f.p.name+' has moved on: your bid for him is off.'); } continue; }
+      if(!f||!f.club||f.mine||f.club.id!==B.club){ B.st='gone'; if(!(f&&f.mine)) bidLog(d,B,'moved'); if(f&&f.p){ mgNews(d,f.p.name+' has moved on: your bid for him is off.'); wkLog(d).bidoff.push(f.p.name+' has moved on: your bid for him is off.'); } continue; }
       const p=f.p, c=f.club;
-      if(!mgWindowOpen(d)){ mgNews(d,'The window has shut: your '+(B.st==='yes'?'deal':'bid')+' for '+p.name+' is off.'); wkLog(d).bidoff.push('The window has shut: your '+(B.st==='yes'?'deal':'bid')+' for '+p.name+' is off.'); B.st='gone'; continue; }
+      if(!mgWindowOpen(d)){ mgNews(d,'The window has shut: your '+(B.st==='yes'?'deal':'bid')+' for '+p.name+' is off.'); wkLog(d).bidoff.push('The window has shut: your '+(B.st==='yes'?'deal':'bid')+' for '+p.name+' is off.'); bidLog(d,B,'shut'); B.st='gone'; continue; }
       if(B.st==='wait') mgBidAnswer(d,B,p,c);
       else if(B.st==='more'&&(d.weeks||0)-B.wk>=1){ const to=B.rival&&d.world.clubs[B.rival];
-        if(to&&to.budget>=B.rf&&to.players.length<MG_MAX&&c.players.length>MG_MIN){ mgMoveAi(d,p,c,to,B.rf); mgNews(d,p.name+' joins '+to.name+' for '+money(B.rf)+' instead.'); wkLog(d).bidoff.push(p.name+' joins '+to.name+' for '+money(B.rf)+' instead of you.'); }
-        else { mgNews(d,c.name+' have given up waiting: your bid for '+p.name+' is off.'); wkLog(d).bidoff.push(c.name+' have given up waiting: your bid for '+p.name+' is off.'); }
+        if(to&&to.budget>=B.rf&&to.players.length<MG_MAX&&c.players.length>MG_MIN){ bidLog(d,B,'rival',{to:to.name, rf:B.rf}); mgMoveAi(d,p,c,to,B.rf); mgNews(d,p.name+' joins '+to.name+' for '+money(B.rf)+' instead.'); wkLog(d).bidoff.push(p.name+' joins '+to.name+' for '+money(B.rf)+' instead of you.'); }
+        else { bidLog(d,B,'gaveup'); mgNews(d,c.name+' have given up waiting: your bid for '+p.name+' is off.'); wkLog(d).bidoff.push(c.name+' have given up waiting: your bid for '+p.name+' is off.'); }
         B.st='gone'; } }
     d.bids=L.filter(B=>B.st!=='gone'); }
   // a bid they've weighed up: yes; or another club's in for him and has bid more (match it); or they want more
@@ -16359,7 +16378,7 @@
     const p=f.p, c=f.club; c.players.splice(c.players.indexOf(p),1);
     d.budget-=fee; c.budget+=fee; p.wage=mgDemand(d,p,true); p.until=d.season+years-1; delete p.bb; mgRosterAdd(d,p);
     mgTx(d,'in',p,c.name,fee); mgNews(d,d.clubName+' sign '+p.name+' from '+c.name+' for '+money(fee)+'.'); careerEv(d,p,'Joined '+clubCode(d,d.clubId)+' ('+money(fee)+')'); recFee(d,'fp',p,fee);
-    d.bids=(d.bids||[]).filter(b=>b.pid!==pid); delete p.mk;
+    bidLog(d,{pid,club:c.id,fee},'signed'); d.bids=(d.bids||[]).filter(b=>b.pid!==pid); delete p.mk;
     return null; }
   function mgSignFree(d,pid,years){ const f=mgFind(d,pid); if(!f||!f.free) return 'He has signed somewhere else.'; if(!lvOf(d,'market')) return 'You’re not on the transfer market yet.';
     const p=f.p, no=mgWontCome(d,p); if(no) return no;
@@ -16480,10 +16499,10 @@
 
   // ===== WAGE & FINANCE LOOP (deletable) ======================================================
   const FIN_TIER={
-    1:{sponsor:300, capacity:1800,  price:3,  debtLimit:3000},
-    2:{sponsor:800, capacity:6000,  price:5,  debtLimit:9000},
-    3:{sponsor:2200,capacity:14000, price:8,  debtLimit:25000},
-    4:{sponsor:9000,capacity:35000, price:14, debtLimit:120000}
+    1:{sponsor:300, capacity:1800,  price:7,  debtLimit:3000},     // (price: the going rate for a seat -- v108; it was 3, 5, 8 and 14)
+    2:{sponsor:800, capacity:6000,  price:10, debtLimit:9000},
+    3:{sponsor:2200,capacity:14000, price:14, debtLimit:25000},
+    4:{sponsor:9000,capacity:35000, price:20, debtLimit:120000}
   };
   // pooled (away-revenue analogue): paid EVERY week, scales with tier + league position
   const TIER_BROADCAST={1:150,2:500,3:1800,4:15000};
@@ -16533,18 +16552,56 @@
     const W=d.roster.map(p=>[p.id,Math.pow(popOf(d,p),2)]).sort((a,b)=>b[1]-a[1]), sum=W.reduce((a,x)=>a+x[1],0)||1;
     d.shirtSeason=(d.shirtSeason&&d.shirtSeason.s===d.season?d.shirtSeason:{s:d.season,n:0}); d.shirtSeason.n+=s.wk;
     return {wk:s.wk, top:W.slice(0,3).map(([id,v])=>[id,Math.round(v/sum*100)]), season:d.shirtSeason.n}; }
+  // TICKETS (v108). The going rate for a seat in a league is FIN_TIER's price: $7 in League 2, $10, $14, $20 (it was $3,
+  // $5, $8 and $14). The field and bleachers: one price for the lot (d.ticketPrice). From the big bleachers on, each stand
+  // its own (d.seats): the main stand (North) at a fifth over the going rate, the South at it, the ends at four-fifths
+  // (three-quarters while they're open terraces) -- and seats sold at a premium come with the ground: VIP seats in the
+  // main stand (60 with the big bleachers, 150 covered, 300 with four stands, 600 in the grand stadium) at four times the
+  // going rate; executive boxes (12 of ten seats with four stands, 30 in the grand stadium) at fourteen times; the
+  // members' club (800, the grand stadium) at seven. A price you've never touched follows the going rate -- up a league,
+  // up it goes. THE CROWD: the fans who'd come at the going rate (loyalty times your stars' draw) share out over the
+  // stands by their seats, each stand's thinning the dearer it is against its own rate (and fuller the cheaper, to its
+  // seats); the premium seats sell to the money in the town -- the higher the league and the bigger the club's following,
+  // the more -- and mind the price more. Each section: {id, n, cap, price, fair, want, att, prem}.
+  const SEAT_SHARE={1:{B:1}, 2:{N:0.5,S:0.5}, 3:{N:0.36,S:0.36,E:0.14,W:0.14}, 4:{N:0.3,S:0.3,E:0.2,W:0.2}, 5:{N:0.28,S:0.28,E:0.22,W:0.22}};
+  const SEAT_RATE={B:1, N:1.2, S:1, E:0.8, W:0.8};
+  const SEAT_PREM={vip:{n:'VIP seats', x:4, cap:{2:60,3:150,4:300,5:600}}, box:{n:'Executive boxes', x:14, cap:{4:120,5:300}}, club:{n:'The members’ club', x:7, cap:{5:800}}};
+  const goingRate=d=>(FIN_TIER[d.tier]||FIN_TIER[1]).price;
+  function seatFair(d,id,lv){ const g=goingRate(d); return SEAT_PREM[id]?g*SEAT_PREM[id].x:g*((id==='E'||id==='W')&&lv===3?0.75:(SEAT_RATE[id]||1)); }
+  function seatPrice(d,id,lv){ const own=id==='B'?d.ticketPrice:(d.seats||{})[id]; return own!=null?own:Math.max(1,Math.round(seatFair(d,id,lv))); }
+  function seatPlan(d){ const lv=d.stadium?stadOf(d).lvl:1, cap=STAD_LEVELS[lv].cap, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[d.tier||1]||1000), W=L*popDraw(d), out=[];
+    const prem=Object.keys(SEAT_PREM).filter(k=>SEAT_PREM[k].cap[lv]), pcap=prem.reduce((a,k)=>a+SEAT_PREM[k].cap[lv],0), sh=SEAT_SHARE[lv];
+    for(const id in sh){ const c=Math.round(cap*sh[id])-(id==='N'?pcap:0), fair=seatFair(d,id,lv), price=seatPrice(d,id,lv), want=W*sh[id]*Math.pow(fair/Math.max(1,price),1.1);
+      out.push({id, n:id==='B'?'The bleachers':(d.stadium?standName(d,id):id), cap:c, price, fair, want, att:Math.min(c,Math.round(want)), prem:false}); }
+    const app=clamp(0.2+0.2*((d.tier||1)-1)+0.25*clamp(L/cap,0,1.5),0.15,1.1);       // (how much of the premium the town will take at the going rate)
+    for(const k of prem){ const c=SEAT_PREM[k].cap[lv], fair=seatFair(d,k,lv), price=seatPrice(d,k,lv), want=c*app*Math.pow(fair/Math.max(1,price),1.4);
+      out.push({id:k, n:SEAT_PREM[k].n, cap:c, price, fair, want, att:Math.min(c,Math.round(want)), prem:true}); }
+    return out; }
+  // the stands' prices against their going rates, by their seats: 1 at the going rate (the fans' view of it: see applyLoyalty)
+  function seatPriceRatio(d){ const st=seatPlan(d).filter(x=>!x.prem), c=st.reduce((a,x)=>a+x.cap,0)||1; return st.reduce((a,x)=>a+x.cap*x.price/Math.max(1,x.fair),0)/c; }
+  // what the next ground brings in seats to sell
+  function seatNext(lv){ return lv===1?'The big bleachers bring a price for each stand, and 60 VIP seats.':lv===2?'Covered stands bring the two ends and 150 VIP seats.'
+    :lv===3?'Four stands bring 300 VIP seats and twelve executive boxes.':lv===4?'The grand stadium brings 600 VIP seats, thirty boxes and the members’ club.':''; }
+  // the stadium's tickets: each section, its seats, its price (− / +), what it'll sell and what that takes (v108)
+  function seatTable(d,f){ const lv=stadOf(d).lvl, R=f.seats; let h='<div class="bpSect">TICKETS · '+money(f.ticketGate)+' A HOME GAME</div><div class="tkTbl">';
+    for(const x of R){ const pct=x.cap?Math.round(x.att/x.cap*100):0;
+      h+='<div class="tkRow'+(x.prem?' prem':'')+'" data-seat="'+x.id+'"><span class="tkN">'+mgEsc(x.n)+'<i>'+x.cap.toLocaleString()+' seats · rate $'+Math.round(x.fair)+'</i></span>'
+        +'<span class="tkP"><button class="chBtn2 tkB" data-stad="seat-" data-id="'+x.id+'">−</button><b>$'+x.price+'</b><button class="chBtn2 tkB" data-stad="seat+" data-id="'+x.id+'">+</button></span>'
+        +'<span class="tkS"><span><b style="color:'+(pct>=95?'var(--good)':pct<50?'var(--warn)':'var(--ink)')+'">'+pct+'%</b> · '+x.att.toLocaleString()+'</span><i>'+money(Math.round(x.price*x.att))+'</i></span></div>'; }
+    h+='</div><div class="stadWhat">'+(lv===1?'One price for the bleachers: the going rate in '+MG_LEAGUE[d.tier]+' is $'+goingRate(d)+'. ':'Each stand priced on its own: the dearer against its rate, the emptier it is. ')
+      +seatNext(lv)+'</div><button class="stadBtn" data-stad="seatrate">BACK TO THE GOING RATE</button>';
+    return h; }
   function computeFinance(d){
     const tier=d.tier||1, ft=FIN_TIER[tier]||FIN_TIER[1];
     const wageWk=(d.roster?d.roster.reduce((a,p)=>a+(p.wage||0),0):(d.wageWk||0))+(d.staff||[]).reduce((a,c)=>a+(c.wage||0),0);   // (and the coaches')
     const sponsorWk=d.sponsorWk!=null?d.sponsorWk:ft.sponsor;   // (the club's partners: local firms, by the league)
     const broadcastWk=broadcastFor(d);
     const capacity=d.stadium?STAD_LEVELS[d.stadium.lvl].cap:(d.capacity!=null?d.capacity:ft.capacity);
-    const price=d.ticketPrice!=null?d.ticketPrice:ft.price;
     const L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[tier]||1000);
-    const fair=ft.price, priceFac=Math.pow(fair/Math.max(1,price),1.1);
-    const draw=popDraw(d), want=L*priceFac*draw;   // (v105: your most popular men bring more through the gate)
-    const rawDemand=capacity?want/capacity:0;
-    const attendance=Math.min(capacity,Math.round(want));
+    const draw=popDraw(d), seats=seatPlan(d);   // (v105: your most popular men bring more through the gate; v108: stand by stand -- see TICKETS)
+    const stands=seats.filter(x=>!x.prem), price=stands[0].price;
+    const attendance=seats.reduce((a,x)=>a+x.att,0), standCap=stands.reduce((a,x)=>a+x.cap,0);
+    const rawDemand=standCap?stands.reduce((a,x)=>a+x.want,0)/standCap:0;
     const pct=capacity?attendance/capacity:0;
     const boardsWk=d.stadium?(d.stadium.ads||[]).reduce((a,x)=>a+(x.wk||0),0):0;                            // the boards: each sponsor's fee (v103)
     const dealsWk=d.stadium?Object.values(d.stadium.deals||{}).reduce((a,x)=>a+(x.wk||0),0):0;               // the shirt, the ground's name, the stands'
@@ -16552,8 +16609,9 @@
     const poolWk=sponsorWk+broadcastWk+commercialWk+shirtWk;   // a week's (home or away; the shirts on its Monday -- see shirtWeek)
     const cph=concPerHead(d);
     const loyMult=clamp(0.5+L/(capacity*1.2),0.4,1.8);
-    const concRevenue=Math.round(attendance*cph*loyMult);
-    const homeGate=Math.round(price*attendance)+concRevenue;   // HOME games only
+    const concRevenue=Math.round(seats.reduce((a,x)=>a+x.att*(x.prem?3:1),0)*cph*loyMult);   // (the premium seats' heads spend three times as much)
+    const ticketGate=seats.reduce((a,x)=>a+x.price*x.att,0);
+    const homeGate=Math.round(ticketGate)+concRevenue;   // HOME games only
     const awayGate=Math.round(homeGate*0.35);          // your cut of receipts as the VISITING side (away games)
     const netAway=poolWk+awayGate-wageWk;              // a typical away week now nets pool + away gate - wages
     const netHome=poolWk+homeGate-wageWk;
@@ -16561,7 +16619,7 @@
     const incomeAvg=poolWk+Math.round((homeGate+awayGate)/2);   // ~half home, half away -> typical weekly income
     const netAvg=incomeAvg-wageWk;
     return { wageWk, sponsorWk, broadcastWk, boardsWk, dealsWk, commercialWk, shirtWk, poolWk, capacity, price, loyalty:L, loyMult, demand:pct, rawDemand, attendance,
-             cph, concRevenue, homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, canPrice:rawDemand>=0.85, soldOut:rawDemand>=1 };
+             cph, concRevenue, homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, canPrice:true, soldOut:rawDemand>=1, seats, ticketGate:Math.round(ticketGate) };
   }
   // a week of the season: the pool, the gate (home or away) and any TV bump in, the wages out. -> what it came to
   function applyWeek(d, mine){
@@ -16587,8 +16645,8 @@
   // come in the Monday papers (see THE MONDAY PAPERS), a firm calling about a place now and then (spOffers): first the
   // businesses round the corner -- a coffee shop, the tyre place, the bakery -- and the bigger the club gets (spStanding:
   // its league most of all, its fans, its ground, its place) the bigger the firms -- the town's, the region's, the
-  // country's, the world's -- and the more they pay. Boards come with the stands; the shirt is open to sponsors from
-  // your second season (sooner if the town's firms are calling already), the stands' names once there are covered
+  // country's, the world's -- and the more they pay. Boards come with the stands; the shirt is open to sponsors once
+  // the club has moved into the cabin (clubhouse 2; v108 -- it was the second season), the stands' names once there are covered
   // stands, the ground's once there are four. A deal pays its fee every week to the end of its last season; the shirt's,
   // the ground's and a stand's, from a town firm up, a bonus at the season's end too for hitting a target (see A
   // SPONSOR'S BONUS). An offer stands two weeks.
@@ -16657,7 +16715,7 @@
   function spOpen(d,k){ const S=stadOf(d);
     if(k==='board') return S.ads.length<S.boards;
     if(S.deals[k]) return false;
-    if(k==='kit') return (d.season||1)>(d.firstSeason||0)||spStanding(d)>=22;
+    if(k==='kit') return lvOf(d,'club')>=2;                                            // (v108: with the cabin -- it was the second season)
     if(k==='ground') return S.lvl>=4;
     return S.lvl>=3&&stadStands(d).some(x=>x.id===k); }
   // one firm's offer for a place: one of the size the club is now (now and then a bigger one takes a punt, or a smaller
@@ -16744,13 +16802,12 @@
     return sched; }
   function applyLoyalty(d, mine){ const tier=d.tier||1, baseL=LOYALTY_BASE[tier]||1000;
     if(d.loyalty==null) d.loyalty=baseL;
-    const ft=FIN_TIER[tier]||FIN_TIER[1], fair=ft.price, price=stadPrice(d);
     const pos=d.lg?mgPos(d):0, posFac=pos>0?1+(MG_CLUBS-pos)/MG_CLUBS*0.5:1;
     d.loyalty += (baseL*posFac - d.loyalty)*0.05;
     const won=mine.win, lost=!mine.win&&!mine.draw;
     if(won){ d.loyalty+=baseL*0.03; if(mine.home) d.loyalty+=baseL*0.01; d.streak=(d.streak||0)+1; if(d.streak>=3) d.loyalty+=baseL*0.02; }
     else { if(lost) d.loyalty-=baseL*0.015; d.streak=0; }
-    const pr=price/Math.max(1,fair);
+    const pr=seatPriceRatio(d);                    // (v108: the stands' prices against their going rates, by their seats)
     if(pr<1) d.loyalty+=baseL*0.02*(1-pr);
     else d.loyalty-=baseL*0.025*(pr-1)*(lost?2:1);
     const oppOvr=mine.oppOvr||60, comp=mine.competition||'league';
@@ -17071,7 +17128,7 @@
         h+='<div class="stadWhat">Next, '+nx.what+': '+nx.cap.toLocaleString()+' seats, '+nx.boards+' boards'+(nx.ends&&!L.ends?', and two more stands to name':'')+'.</div>';
         if(lock) h+='<div class="stadWhat" style="color:var(--warn)">It needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').</div>';
         h+='<button class="stadBtn" data-stad="upgrade"'+(ok?'':' disabled')+'>BUILD IT  —  '+money(nx.cost)+'</button>';
-        h+='<div class="stadWhat">A bigger ground is harder to fill, and the price can only go up while it’s 85% full. You have '+Math.round(f.loyalty).toLocaleString()+' fans; '+(f.rawDemand>=1?'you’re turning some away.':'there are seats to spare.')+'</div>'; }
+        h+='<div class="stadWhat">A bigger ground is harder to fill. You have '+Math.round(f.loyalty).toLocaleString()+' fans; '+(f.rawDemand>=1?'you’re turning some away.':'there are seats to spare.')+' '+seatNext(S.lvl)+'</div>'; }
       else h+='<div class="stadWhat">It can’t get any bigger.</div>';
     } else if(tab==='Sponsors'){
       // the boards and the places, who has each and what it pays; then the offers waiting (they come in the Monday
@@ -17084,7 +17141,7 @@
         return '<div class="spRow"><span class="k">'+lbl+'</span>'+(x?spChip(x.sp)+'<span class="v">'+mgEsc(k==='ground'?x.ground:x.sp.name)+'</span><span class="amt">'+money(x.wk)+'/wk · till S'+x.until+'</span>'
           :'<span class="v dim">'+mgEsc(shut||'Free: no sponsor yet')+'</span>')+'</div>'
           +(x&&x.m?'<div class="spBonus">BONUS · '+dealMetTxt(x.m)+dealNowTxt(d,x.m.k)+'</div>':''); };
-      h+=row('kit','SHIRT',S.deals.kit||spOpen(d,'kit')?'':'Open to sponsors from your second season');
+      h+=row('kit','SHIRT',S.deals.kit||spOpen(d,'kit')?'':'Open to sponsors once you move into the cabin (clubhouse 2)');
       if(S.lvl>=3) for(const st of stadStands(d)) h+=row(st.id,st.n.toUpperCase());
       else { for(const st of stadStands(d)) if(S.deals[st.id]) h+=row(st.id,st.n.toUpperCase()); h+=row('_','STANDS','Their names, once there are covered stands'); }
       h+=row('ground','GROUND',S.deals.ground||S.lvl>=4?'':groundName(d)+': its name, once there are four stands');
@@ -17107,16 +17164,16 @@
       h+=finRow('Capacity', f.capacity.toLocaleString()+' · '+L.n.toLowerCase());
       h+=finRow('Projected attendance', f.attendance.toLocaleString()+' · '+Math.round(f.demand*100)+'%'+(f.soldOut?'  SOLD OUT':''));
       h+=finRow('Home gate / home game', money(f.homeGate));
-      const price=stadPrice(d);
-      h+='<div style="margin:14px 0 6px;color:#7f9a6f;font-size:10px;letter-spacing:1px">TICKET PRICE</div>';
-      h+='<div style="display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:4px"><button class="chBtn2" data-stad="price-" style="margin:0">−</button><div style="font-size:24px;font-weight:700;color:var(--good);min-width:74px;text-align:center">$'+price+'</div><button class="chBtn2" data-stad="price+" style="margin:0'+(f.canPrice?'':';opacity:.4')+'">+</button></div>';
-      h+='<div style="text-align:center;color:#6f8a5f;font-size:10px">'+(f.canPrice?'Demand is strong — you can raise the price.':'Raise the price only when projected attendance is 85%+. (You can always lower it.)')+'</div>';
+      h+=seatTable(d,f);
       h+='<div class="bpSect">THE BOOKS</div>'+mgFinanceTab(d);
     }
     if(stadNote){ h+='<div style="text-align:center;color:var(--bad);font-size:11px;margin-top:10px">'+stadNote+'</div>'; stadNote=''; }
     return h; }
   function applyStadium(action, ds){ const d=CAREER&&CAREER.data; if(!d)return; let err=null;
-    if(action==='price-'){ d.ticketPrice=Math.max(2,stadPrice(d)-1); }
+    if(action==='seat-'||action==='seat+'){ const id=ds.id, lv=stadOf(d).lvl, fair=seatFair(d,id,lv), step=Math.max(1,Math.round(fair*0.05)), np=clamp(seatPrice(d,id,lv)+(action==='seat+'?step:-step),1,Math.max(2,Math.round(fair*4)));
+      if(id==='B') d.ticketPrice=np; else { d.seats=d.seats||{}; d.seats[id]=np; } }
+    else if(action==='seatrate'){ d.ticketPrice=null; d.seats={}; }
+    else if(action==='price-'){ d.ticketPrice=Math.max(2,stadPrice(d)-1); }
     else if(action==='price+'){ if(computeFinance(d).canPrice){ d.ticketPrice=stadPrice(d)+1; } else { stadNote='Projected attendance must be 85%+ to raise the price.'; } }
     else if(action==='upgrade') err=stadUpgrade(d);
     else if(action==='board') err=boardBuy(d);
@@ -17339,7 +17396,7 @@
   const MG_BLDGS={
     club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
     train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take, your subs and your coaches', tabs:['Tactics','Selection','Subs','Staff','Pitch']},
-    market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Free agents','Offers','Selling']},
+    market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Bids','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'stamina on match day, and injuries', tabs:null},
     scouting:{title:'SCOUTING', sub:'what a player is really worth', tabs:['Reports','Assignments','Network']},
     academy: {title:'ACADEMY', sub:'your own youngsters, and their coach', tabs:['Prospects','Coach','Facilities']},
@@ -17348,8 +17405,9 @@
     decor:   {title:'DECORATE', sub:'trees, flowers and things for the campus', tabs:['Trees','Garden','Plaza']},
   };
   // THE CLUB'S BUILDINGS. The clubhouse is the club's keep: a new career has the shed, the stadium as it is and a rough
-  // training pitch, and each clubhouse after it -- the next league up first, then the money -- lets the club put up more and
-  // build up what it has, as far as the lists say. The transfer market is your phone (it rings after your 2nd game: see
+  // training pitch, and each clubhouse after it -- the money's all it takes (v108: it used to wait for the next league up
+  // too) -- lets the club put up more and build up what it has, as far as the lists say; the cabin opens the shirt to
+  // sponsors. The transfer market is your phone (it rings after your 2nd game: see
   // THE FIRST SEASON'S TWO ARRIVALS); the rest stand on the campus, on a plot till they're up.
   const CLUB_LV=[null,
     {n:'The shed', cost:0, tier:1},
@@ -17376,8 +17434,7 @@
   function clubNeed(id,lv){ return id==='stadium'?(STAD_CL[lv]||0):id==='decor'?DECOR_CL:id==='club'?0:(BLD_LV[id][lv]?BLD_LV[id][lv].cl:0); }
   // what stands in the way of a building's next level (or the next clubhouse): a line saying so, or null
   function bldBlock(d,id){ const nx=lvOf(d,id)+1; if(nx>bldMax(id)) return 'It’s as good as it gets.';
-    if(id==='club'){ const C=CLUB_LV[nx]; if((d.top||d.tier||1)<C.tier) return C.n+' needs '+MG_LEAGUE[C.tier]+': win promotion to it first.'; }
-    else { const cl=clubNeed(id,nx); if(lvOf(d,'club')<cl) return 'That needs clubhouse '+cl+' ('+CLUB_LV[cl].n.toLowerCase()+').'; }
+    if(id!=='club'){ const cl=clubNeed(id,nx); if(lvOf(d,'club')<cl) return 'That needs clubhouse '+cl+' ('+CLUB_LV[cl].n.toLowerCase()+').'; }
     const c=bldCost(id,nx); if((d.budget||0)<c) return 'Not enough budget: it costs '+money(c)+'.'; return null; }
   // put a building up, or build it up a level (or move into the next clubhouse): an error, or null
   function bldUp(d,id){ if(id==='stadium') return stadUpgrade(d); if(id==='market') return lvOf(d,'market')?'It’s as good as it gets.':'It isn’t bought: your phone rings on the first day of pre-season.';
@@ -17400,6 +17457,7 @@
     if(B.more.length) L.push('build up the '+B.more.join(', the '));
     if(B.stad.length) L.push('the stadium to '+B.stad.join(' and '));
     if(B.decor) L.push('decorations');
+    if(lv===2) L.push('the shirt open to sponsors');
     return L.join('; '); }
   // a building's picture for its screen: the piece itself (with your crest), or the phone
   const PHONE_SVG='<svg viewBox="0 0 24 34"><rect x="2" y="1" width="20" height="32" rx="3"/><rect x="4.5" y="5" width="15" height="22"/><line x1="9" y1="30" x2="15" y2="30"/></svg>';
@@ -17431,7 +17489,7 @@
   function mgClubTab(d){ const L=lvOf(d,'club'), C=CLUB_LV[L], N=CLUB_LV[L+1];
     let h='<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.club[L],'club'+L)+'<div class="bpBuildTxt"><div class="bpSect">'+C.n.toUpperCase()+' · CLUBHOUSE '+L+' OF 4</div>';
     if(N){ const why=bldBlock(d,'club');
-      h+='<div class="stadWhat">Next, '+N.n.toLowerCase()+' (it needs '+MG_LEAGUE[N.tier]+'): '+clubBringsTxt(L+1)+'.</div>'
+      h+='<div class="stadWhat">Next, '+N.n.toLowerCase()+': '+clubBringsTxt(L+1)+'.</div>'
         +finRow('It costs',money(N.cost),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,(d.budget||0)>=N.cost?'var(--good)':'var(--bad)')
         +(why&&!/budget/.test(why)?'<div class="stadWhat" style="color:var(--warn)">'+why+'</div>':'')+'</div></div>'
         +'<button class="mgBtn go bpPin" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN — '+money(N.cost)+'</button>'; }
@@ -17536,9 +17594,11 @@
   function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
     return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll" data-pages="L:'+k+'">'+left+'</div>'+(foot||'')+'</div>'
     +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
-  function mgWindowLine(d){ const w=mgWindowWeeks(d);
-    return mgWindowOpen(d)?'<div class="mgSum" style="color:var(--good)">THE WINDOW IS OPEN · '+(w>1?w+' WEEKS LEFT':'ITS LAST WEEK')+'</div>'
-    :'<div class="mgSum">The transfer window is shut until the summer. Free agents can sign any time.</div>'; }
+  // the top of every transfers tab: the window, and the money you have (v108) -- what's agreed and not yet paid too
+  function mgWindowLine(d){ const w=mgWindowWeeks(d), b=Math.round(d.budget||0), agreed=(d.bids||[]).filter(x=>x.st==='yes').reduce((a,x)=>a+x.fee,0);
+    const bud='<span class="mkBud">BUDGET <b style="color:'+(b<0?'var(--bad)':'var(--good)')+'">'+money(b)+'</b>'+(agreed?' · '+money(agreed)+' agreed':'')+'</span>';
+    return mgWindowOpen(d)?'<div class="mgSum mkLine"><span style="color:var(--good)">THE WINDOW IS OPEN · '+(w>1?w+' WEEKS LEFT':'ITS LAST WEEK')+'</span>'+bud+'</div>'
+    :'<div class="mgSum mkLine"><span>The window is shut until the summer. Free agents can sign any time.</span>'+bud+'</div>'; }
   // ONE MAN, CLOSE UP, as his tactics card is: his figure, name, own position, style, age, stars, rating and potential on
   // top; one small button under his rating turns it over: his ratings (the six), his deal (what he earns or costs, and
   // what you can do about him, each on a line), his career (see HIS STORY). It never goes over pages, and there's no
@@ -17680,23 +17740,44 @@
     for(const [p,c] of L){ const B=mgBidOf(d,p.id); h+=mgRow(d,p,{ovr:mgOvrTxt(d,p), club:c.code, right:money(mgAsk(d,p,c)), sel:MGUI.sel===p.id,
       tags:knTag(d,p)+mgTooBig(d,p)+(B?'<span class="mgTag'+(B.st==='more'?' bad':' on')+'">'+({yes:'AGREED',wait:'BID IN',more:'THEY WANT MORE'}[B.st]||'')+'</span>':'')}); }
     return mgPanes(h+'</div>', card); }
-  function mgFreeTab(d){ let h='<div class="mgSum">Without a club: mostly old hands. The young ask more, and a fee to sign.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
+  function mgFreeTab(d){ let h=mgWindowLine(d)+'<div class="mgSum">Without a club: mostly old hands. The young ask more, and a fee to sign.</div>'+mgChips('role',MG_ROLE_CHIPS,MGUI.role);
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
     const L=d.world.free.filter(p=>MGUI.role==='ALL'||p.role===MGUI.role).sort((a,b)=>mgSortOvr(d,b)-mgSortOvr(d,a));
     h+='<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:mgOvrTxt(d,p), right:money(mgFreeAskSeen(d,p).wage)+'/wk', sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)})).join('')+'</div>';
     return mgPanes(h, card); }
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
-    const Y=(d.bids||[]).map(b=>({b,f:mgFind(d,b.pid)})).filter(x=>x.f&&x.f.club&&!x.f.mine);
-    if(Y.length){ h+='<div class="bpSect">YOUR BIDS</div>';
-      for(const {b,f} of Y) h+='<div class="mgOffer fitWhole"><div><b>'+mgEsc(f.p.name)+'</b> <span class="mgCardSub">('+mgEsc(f.club.name)+')</span> · you bid <b>'+money(b.fee)+'</b> · '
-        +(b.st==='yes'?'<b style="color:var(--good)">AGREED</b>: sign him from his card':b.st==='wait'?'they answer on Monday':'<b style="color:var(--warn)">they want '+money(b.ask)+'</b>'+(b.rival?' (another club’s in)':''))+'</div>'
-        +'<div class="mgBtns"><button class="mgBtn" data-mg="bidgo" data-pid="'+b.pid+'">HIS CARD</button></div></div>';
-      h+='<div class="bpSect">FOR YOUR MEN</div>'; }
+    const nb=(d.bids||[]).length; if(nb) h+='<div class="mgHint">Your own bids ('+nb+' out) are in Bids.</div>';
+    h+='<div class="bpSect">FOR YOUR MEN</div>';
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
     for(const o of O){ const p=d.roster.find(x=>x.id===o.pid), c=d.world.clubs[o.club];
       h+='<div class="mgOffer fitWhole"><div><b>'+mgEsc(c.name)+'</b> <span class="mgCardSub">('+MG_LEAGUE[c.tier]+')</span> bid <b style="color:var(--warn)">'+money(o.fee)+'</b> for <b>'+mgEsc(p.name)+'</b></div>'
         +'<div class="mgCardSub">'+(p.subRole||p.role)+' · '+p.ovr+' · age '+p.age+' · value '+money(mgValue(d,p))+(d.listed[p.id]?' · you asked '+money(d.listed[p.id]):'')+'</div>'
         +'<div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
+    return h; }
+  // YOUR BIDS (v108): every bid you've placed -- the ones still out (waiting on Monday, agreed and to be signed, or a
+  // price they've come back with: meet it or walk away, here or on his card), then how each one you've had ended, the
+  // newest first (bidLog): signed, turned down at once, walked away, the window shut, he moved on, another club got him,
+  // they gave up waiting. And this season's: how many, how many signed, what it cost.
+  const BID_OUT={signed:['SIGNED','var(--good)'], no:['TURNED DOWN','var(--bad)'], walked:['YOU WALKED AWAY','var(--dim)'], shut:['THE WINDOW SHUT','var(--dim)'],
+    moved:['HE MOVED ON','var(--dim)'], rival:['WENT ELSEWHERE','var(--warn)'], gaveup:['THEY GAVE UP WAITING','var(--warn)']};
+  function bidLog(d,B,out,o){ const f=mgFind(d,B.pid), c=d.world.clubs[B.club]; d.bidLog=d.bidLog||[];
+    d.bidLog.unshift(Object.assign({pid:B.pid, name:f&&f.p?f.p.name:'?', club:c?c.name:'?', fee:B.fee, ask:B.ask||null, out, wk:d.weeks||0, season:d.season||1},o||{}));
+    if(d.bidLog.length>60) d.bidLog.length=60; }
+  function mgBidsTab(d){ let h=mgWindowLine(d);
+    const live=(d.bids||[]).map(b=>({b,f:mgFind(d,b.pid)})).filter(x=>x.f&&x.f.club&&!x.f.mine), log=d.bidLog||[], S=d.season||1;
+    const now=log.filter(e=>e.season===S), got=now.filter(e=>e.out==='signed');
+    h+='<div class="mgSum">This season: '+(now.length+live.length)+' bid'+(now.length+live.length===1?'':'s')+' · '+got.length+' signed'+(got.length?' for '+money(got.reduce((a,e)=>a+e.fee,0)):'')+'</div>';
+    h+='<div class="bpSect">OUT NOW · '+live.length+'</div>';
+    if(!live.length) h+='<div class="mgHint">'+(mgWindowOpen(d)?'No bids out. Find a man in Search and bid from his card.':'No bids out: the window’s shut.')+'</div>';
+    for(const {b,f} of live){ const st=b.st==='yes'?'<b style="color:var(--good)">AGREED</b>: sign him':b.st==='wait'?'an answer on Monday':'<b style="color:var(--warn)">THEY WANT '+money(b.ask)+'</b>'+(b.rival?' · a rival’s in':'');
+      h+='<div class="mgOffer fitWhole mgBidLive"><div><b>'+mgEsc(f.p.name)+'</b> <span class="mgCardSub">'+mgEsc(f.club.code||f.club.name)+'</span> · bid <b>'+money(b.fee)+'</b> · '+st+'</div>'
+        +'<div class="mgBtns">'+(b.st==='more'?'<button class="mgBtn go" data-mg="meet" data-pid="'+b.pid+'">MEET IT</button><button class="mgBtn warn" data-mg="walk" data-pid="'+b.pid+'">WALK AWAY</button>':'')
+        +'<button class="mgBtn" data-mg="bidgo" data-pid="'+b.pid+'">HIS CARD</button></div></div>'; }
+    h+='<div class="bpSect">HOW THEY WENT</div>';
+    if(!log.length) h+='<div class="mgHint">None yet.</div>';
+    for(const e of log.slice(0,24)){ const o=BID_OUT[e.out]||[e.out.toUpperCase(),'var(--dim)'];
+      const more=e.out==='signed'?' for '+money(e.fee):e.out==='no'&&e.ask?' · they’d want ~'+money(e.ask):e.out==='rival'&&e.to?': '+mgEsc(e.to)+(e.rf?' paid '+money(e.rf):''):'';
+      h+='<div class="mgBidRow"><span class="who"><b>'+mgEsc(e.name)+'</b> <span class="mgCardSub">'+mgEsc(e.club)+' · S'+e.season+'</span></span><span class="fee">'+money(e.fee)+'</span><span class="out" style="color:'+o[1]+'">'+o[0]+more+'</span></div>'; }
     return h; }
   function mgSellingTab(d){ let h=mgWindowLine(d)+'<div class="mgHint">Pick a man to put him on the transfer list at your price. Clubs bid for listed men every day a window is open, and now and then for your best men anyway.</div>';
     const L=d.roster.filter(p=>!p.loan).sort((a,b)=>(d.listed[b.id]?1:0)-(d.listed[a.id]?1:0)||mgValue(d,b)-mgValue(d,a));
@@ -17938,6 +18019,7 @@
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
+    if(!d.tk108){ if([3,5,8,14].includes(d.ticketPrice)) d.ticketPrice=null; d.tk108=true; } d.seats=d.seats||{};   // (v108, once: a price left at the old going rate follows the new one)
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
     for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)
@@ -17987,7 +18069,7 @@
       :t==='Fixtures'?mgFixturesTab(d)+'<div class="bpSect">THE RESULTS</div>'+mgResultsTab(d):mgClubTab(d);
     else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):t==='Subs'?mgSubsTab(d):t==='Staff'?mgStaffTab(d):renderTactics(d,tacPhase);
     else if(id==='physio') h+=mgPhysioBody(d);
-    else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):mgSearchTab(d);
+    else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):t==='Bids'?mgBidsTab(d):mgSearchTab(d);
     else if(id==='scouting') h+=t==='Assignments'?mgAssignTab(d):t==='Network'?mgNetworkTab(d):mgReportsTab(d);
     else if(id==='academy') h+=t==='Facilities'?mgFacilitiesTab(d):t==='Coach'?mgStaffTab(d,true):mgProspectsTab(d);
     else if(id==='stadium') h+=renderStadiumTab(d,t);
@@ -18018,7 +18100,7 @@
         if(r.ok){ MGUI.years=2; say(f.club.name+' accept '+money(fee)+'. Now agree his contract.','var(--good)'); }
         else if(r.wait) say('Bid in: '+f.club.name+' will answer on Monday.','var(--warn)'); else say(r.msg,r.more?'var(--warn)':'var(--bad)'); break; }
       case 'bidgo': { const f=mgFind(d,pid); curTab.market='Search'; openBuilding('market'); MGUI.sel=pid; if(f&&f.club) MGUI.tier=f.club.tier; paintBuilding(); return; }
-      case 'walk': { d.bids=(d.bids||[]).filter(b=>b.pid!==pid); MGUI.bid=null; say('You walk away.',''); break; }
+      case 'walk': { const Bw=mgBidOf(d,pid); if(Bw) bidLog(d,Bw,'walked'); d.bids=(d.bids||[]).filter(b=>b.pid!==pid); MGUI.bid=null; say('You walk away.',''); break; }
       case 'yrs': MGUI.years=clamp((MGUI.years||2)+(+ds.dir),1,4); break;
       case 'sign': { const B=mgBidOf(d,pid); if(!B||B.st!=='yes') break; const err=mgSignDeal(d,pid,B.fee,MGUI.years||2); MGUI.bid=null;
         say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
@@ -18197,7 +18279,7 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:ft.price, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
+      budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0, concOwned:{},
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0} };

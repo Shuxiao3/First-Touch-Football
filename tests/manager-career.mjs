@@ -230,7 +230,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, S = M.stadOf(d), out = 
   const b0 = d.budget; out.board = M.boardBuy(d); out.boardCost = b0 - d.budget; out.boardsN = S.boards; out.bare = M.computeFinance(d).boardsWk;
   const ob = offer('board'); out.bsign = M.spSign(d, ob.id); out.bagain = M.spSign(d, ob.id); out.boardWk = [ob.wk, M.computeFinance(d).boardsWk, S.ads.length];
   out.kitShut = M.spOpen(d, 'kit'); const ok0 = offer('kit'); out.kitNo = M.spSign(d, ok0.id);
-  d.season = 2; out.kitOpen = M.spOpen(d, 'kit'); const ok1 = offer('kit'); out.sign = M.spSign(d, ok1.id); out.deal = S.deals.kit && { wk: S.deals.kit.wk, until: S.deals.kit.until, yrs: ok1.yrs, s: d.season };
+  d.season = 2; out.kitStill = M.spOpen(d, 'kit'); d.lv = d.lv || {}; d.lv.club = 2; out.kitOpen = M.spOpen(d, 'kit'); const ok1 = offer('kit');   /* (v108: the cabin opens the shirt, not the second season) */ out.sign = M.spSign(d, ok1.id); out.deal = S.deals.kit && { wk: S.deals.kit.wk, until: S.deals.kit.until, yrs: ok1.yrs, s: d.season };
   const ok2 = offer('kit'); out.again = M.spSign(d, ok2.id);
   const oe = offer('E'); out.east = M.spSign(d, oe.id);
   S.lvl = 4; const og = offer('ground'); out.gsign = M.spSign(d, og.id); out.gname = M.groundOfYours(d).name; out.gwant = og.ground;
@@ -251,8 +251,8 @@ ok(r.start.lvl === 1 && r.start.cap === 1800 && r.start.boards === 1 && r.start.
 ok(r.poor && r.up === null && r.lvl2.lvl === 2 && r.lvl2.cap === 4200 && r.lvl2.cost === 45000, 'the next level (big bleachers, 4,200 seats) costs $45,000 -- and waits till you have it');
 ok(/come with the stands/.test(r.board) && r.boardCost === 0 && r.boardsN === 3 && r.bare === 0, 'the boards come with the stands: three at level 2, bare, none to buy');
 ok(r.bsign === null && /gone/.test(r.bagain) && r.boardWk[0] === r.boardWk[1] && r.boardWk[2] === 1, 'a local firm\'s offer for a board signed: its fee (' + r.boardWk[0] + ') every week; the same offer twice, no');
-ok(!r.kitShut && /isn’t open/.test(r.kitNo) && r.kitOpen && r.sign === null && r.deal && r.deal.until === r.deal.s + r.deal.yrs - 1 && /already/.test(r.again),
-  'the shirt: shut to sponsors in the first season ("' + r.kitNo + '"), open in the second; one signed, and then it\'s taken');
+ok(!r.kitShut && /isn’t open/.test(r.kitNo) && !r.kitStill && r.kitOpen && r.sign === null && r.deal && r.deal.until === r.deal.s + r.deal.yrs - 1 && /already/.test(r.again),
+  'the shirt: shut to sponsors on the shed ("' + r.kitNo + '") and still in the second season; open once you move into the cabin (v108); one signed, and then it\'s taken');
 ok(/isn’t open/.test(r.east) && r.gsign === null && r.gname === r.gwant, 'no East End to name at level 2; with four stands, the ground renamed for its sponsor (' + r.gname + ')');
 ok(r.sumWk[1] === r.sumWk[2] && r.dealsWk === r.sumWk[0], 'the deals paid every week, with the partners, TV, boards and shirt sales');
 ok(r.home.lvl === 4 && r.home.boards === r.home.want && r.home.bare === r.home.want - 1 && r.home.venue === r.gname && r.home.kit.length === 5,
@@ -263,8 +263,8 @@ ok(r.left.length === 0 && r.mid === (r.ends[0] === r.ends[1] ? '' : r.ends[0] < 
 ok(r.old.lvl === 3 && r.old.cap === 8500 && r.fresh === 1, 'a save from before: the level that seats as many (6,000 -> covered stands, 8,500)');
 ok(r.was.ads.length === 1 && /\$20 till S3$/.test(r.was.ads[0]) && !r.was.bids, 'a save from before v103: its boards let at once become deals to its season\'s end, as many as the ground has now (' + r.was.ads[0] + ')');
 
-// --- THE CLUBHOUSE AND WHAT IT UNLOCKS: the market not for sale (the phone), the physio with the cabin; the next clubhouse only in the next
-// league up, and then with the money; each one opens more (the scouts' house with the cabin, the academy and the
+// --- THE CLUBHOUSE AND WHAT IT UNLOCKS: the market not for sale (the phone), the physio with the cabin; the next clubhouse for the
+// money alone (v108: it used to need the next league up too) -- all of them in League 2; each one opens more (the scouts' house with the cabin, the academy and the
 // decorations with the clubhouse, the last levels with the hall), the stadium's levels too ------------------------------
 await create('Club Town');
 r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.div[1].find(id => id !== d.clubId)].players[0].id, out = {};
@@ -272,12 +272,12 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.d
   out.start = lv(); out.noScout = M.mgScout(d, him); d.budget = 1e7;
   out.scout0 = M.bldUp(d, 'scouting'); out.acad0 = M.bldUp(d, 'academy'); out.stad2 = M.bldUp(d, 'stadium'); out.stad3 = M.bldUp(d, 'stadium');
   out.market = spend(() => M.bldUp(d, 'market')); out.physio = spend(() => M.bldUp(d, 'physio')); M.mgMarketOpen(d);
-  out.club2 = M.bldUp(d, 'club'); d.top = 2; d.budget = 1000; out.club2poor = M.bldUp(d, 'club'); d.budget = 1e7;
+  d.budget = 1000; out.club2poor = M.bldUp(d, 'club'); d.budget = 1e7; out.tier = d.tier; out.top = d.top || d.tier;
   out.club2b = spend(() => M.bldUp(d, 'club')); out.scout = spend(() => M.bldUp(d, 'scouting')); out.scouted = M.mgScout(d, him);
   out.phys1 = spend(() => M.bldUp(d, 'physio')); out.phys2 = spend(() => M.bldUp(d, 'physio')); out.phys3 = M.bldUp(d, 'physio');
   out.train2 = spend(() => M.bldUp(d, 'train')); out.train3 = M.bldUp(d, 'train'); out.stad3b = M.bldUp(d, 'stadium'); out.acad1 = M.bldUp(d, 'academy');
-  d.top = 3; out.club3 = spend(() => M.bldUp(d, 'club')); out.acad = spend(() => M.bldUp(d, 'academy')); out.youth = d.youth.length; out.acad2 = M.bldUp(d, 'academy');
-  d.top = 4; out.club4 = spend(() => M.bldUp(d, 'club')); out.club5 = M.bldUp(d, 'club');
+  out.club3 = spend(() => M.bldUp(d, 'club')); out.acad = spend(() => M.bldUp(d, 'academy')); out.youth = d.youth.length; out.acad2 = M.bldUp(d, 'academy');
+  out.club4 = spend(() => M.bldUp(d, 'club')); out.club5 = M.bldUp(d, 'club');
   for(const id of ['train', 'train', 'physio', 'physio', 'physio', 'scouting', 'scouting', 'academy', 'academy', 'stadium', 'stadium']) M.bldUp(d, id);
   out.full = lv() + ' stadium ' + M.stadOf(d).lvl; out.more = ['train', 'physio', 'scouting', 'academy', 'stadium'].map(id => M.bldUp(d, id)).filter(Boolean).length;
   out.news = d.news.slice(0, 40).map(n => n.t).filter(t => /move into|open the|build up/.test(t)).length;
@@ -291,8 +291,8 @@ ok(/needs clubhouse 2/.test(r.scout0) && /needs clubhouse 3/.test(r.acad0) && /n
   'the shed: no scouts\' house (clubhouse 2) or academy (3), the stadium to level 2 but not 3, and no scouting');
 ok(/phone rings on the first day of pre-season/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
   'in the shed the transfer market isn\'t for sale ("' + r.market[0] + '") and the physio waits for clubhouse 2');
-ok(/League 1/.test(r.club2) && /budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 30000,
-  'the cabin: not before League 1 (' + r.club2 + '), then $30,000');
+ok(/budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 30000 && r.tier === 1 && r.top === 1,
+  'the cabin: for the money alone, in League 2 (never promoted) -- $30,000 (v108: it used to wait for League 1)');
 ok(r.phys1[0] === null && r.phys1[1] === 5000 && r.phys2[1] === 15000 && /clubhouse 3/.test(r.phys3), 'the cabin brings the physio ($5,000) and its level 2 ($15,000); its 3rd waits for clubhouse 3');
 ok(r.scout[0] === null && r.scout[1] === 12000 && r.scouted === null && r.train2[1] === 10000 && /clubhouse 3/.test(r.train3) && r.stad3b === null && /clubhouse 3/.test(r.acad1),
   'with the cabin: the scouts\' house ($12,000) and scouting, the training pitch to level 2 ($10,000), the stadium to 3; not yet the academy');

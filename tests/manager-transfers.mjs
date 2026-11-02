@@ -101,7 +101,7 @@ ok(r.rival.st === 'more' && r.rival.rivalClub && r.rival.ask > r.rival.rf && r.r
 ok(r.rivalAfter.gone && r.rivalAfter.club === r.rival.rivalClub && r.rivalAfter.club !== r.rivalAfter.from, 'left a week: he joins the other club');
 ok(r.shut, 'the window shuts: the bid is off');
 
-// --- ON HIS CARD: bid near their price, and it waits; the Offers tab lists your bids ---------------------------------------
+// --- ON HIS CARD: bid near their price, and it waits; the Bids tab lists your bids (v108; it was the Offers tab) -----------
 r = await K(`(()=>{ const d=CAREER.data; for(const c of mgAiClubs(d)){ if(c.tier!==d.tier||c.players.length<14) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!mgBidOf(d,x.id)); if(p){ MGUI.sel=p.id; MGUI.tier=c.tier; MGUI.bid={pid:p.id,fee:mgRound(mgAsk(d,p,c)*0.9)}; return {id:p.id, name:p.name}; } } })()`);
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 await K(`(()=>{ const d=CAREER.data; MGUI.sel=${r.id}; MGUI.bid={pid:${r.id},fee:mgRound(mgAsk(d,mgFind(d,${r.id}).p,mgFind(d,${r.id}).club)*0.9)}; mgRerender(); return 1; })()`); await page.waitForTimeout(60);
@@ -111,10 +111,10 @@ await K(`(()=>{ window.__rnd=Math.random; Math.random=()=>0.99; return 1; })()`)
 await page.click('#bpBody [data-mg="bid"]'); await page.waitForTimeout(60);
 await K(`(()=>{ Math.random=window.__rnd; return 1; })()`);
 const after = await page.innerText('#bpBody .mgCard');
-await page.click('#bldgPanel .bpTab:text-is("Offers")'); await page.waitForTimeout(80);
-const offers = await page.innerText('#bpBody');
-ok(/ASKING/.test(before) && /YOUR BID/.test(after) && /answer on Monday/.test(after) && /YOUR BIDS/.test(offers) && offers.includes(r.name) && /answer on Monday/.test(offers),
-  'on his card: ASKING, then your bid in -- "they answer on Monday"; the Offers tab lists it under YOUR BIDS');
+await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
+const offers = await page.innerText('#bpBody'), bud = await K(`'$'+Math.round(CAREER.data.budget).toLocaleString()`);
+ok(/ASKING/.test(before) && /YOUR BID/.test(after) && /answer on Monday/.test(after) && /OUT NOW/.test(offers) && offers.includes(r.name) && /answer on Monday/.test(offers) && /BUDGET/.test(offers) && offers.includes(bud),
+  'on his card: ASKING, then your bid in -- "they answer on Monday"; the Bids tab lists it (OUT NOW), your budget on its top line (' + bud + ')');
 // Monday's answer, a counter: THEY WANT on his card -- MEET IT, AGREED, SIGN HIM
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 await K(`(()=>{ const d=CAREER.data, B=mgBidOf(d,${r.id}); B.st='more'; B.ask=mgRound(B.fee*1.15); B.rival=null; MGUI.sel=${r.id}; MGUI.bid=null; mgRerender(); return 1; })()`); await page.waitForTimeout(60);
@@ -127,16 +127,22 @@ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(80);
 const signedUI = await K(`(()=>{ const d=CAREER.data; return { mine:d.roster.some(p=>p.id===${r.id}), bid:!!mgBidOf(d,${r.id}) }; })()`);
 ok(/THEY WANT/.test(counter) && /MEET IT/.test(counter) && /WALK AWAY/.test(counter) && /AGREED/.test(agreed) && signedUI.mine && !signedUI.bid,
   'a counter on his card (THEY WANT, MEET IT, WALK AWAY); MEET IT: AGREED; SIGN HIM: he\'s yours');
-// another counter: WALK AWAY drops it; and from the Offers tab, HIS CARD
+// another counter: WALK AWAY drops it; and from the Bids tab, HIS CARD
 const r2 = await K(`(()=>{ const d=CAREER.data; for(const c of mgAiClubs(d)){ if(c.tier!==d.tier||c.players.length<14) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!mgBidOf(d,x.id)); if(p){
   mgBidSet(d,{p,club:c},mgRound(mgAsk(d,p,c)*0.9),'more',{ask:mgAsk(d,p,c),rival:null}); MGUI.sel=null; return {id:p.id, name:p.name}; } } })()`);
-await page.click('#bldgPanel .bpTab:text-is("Offers")'); await page.waitForTimeout(80);
+await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
 await page.click(`#bpBody [data-mg="bidgo"][data-pid="${r2.id}"]`); await page.waitForTimeout(120);
 if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }
 const viaOffers = { tab: await page.textContent('#bldgPanel .bpTab.on').catch(() => ''), card: await page.innerText('#bpBody .mgCard') };
 await page.click('#bpBody [data-mg="walk"]'); await page.waitForTimeout(60);
 const walked = await K(`!!mgBidOf(CAREER.data,${r2.id})`);
-ok(viaOffers.card.includes(r2.name) && /THEY WANT/.test(viaOffers.card) && !walked, 'from the Offers tab, HIS CARD opens his card in Search (' + viaOffers.tab + '); WALK AWAY drops the bid');
+ok(viaOffers.card.includes(r2.name) && /THEY WANT/.test(viaOffers.card) && !walked, 'from the Bids tab, HIS CARD opens his card in Search (' + viaOffers.tab + '); WALK AWAY drops the bid');
+// the Bids tab's history (v108): the one you signed, and the one you walked away from -- and the season's count
+await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
+const hist = await K(`(()=>{ const L=CAREER.data.bidLog||[]; return { log:L.slice(0,4).map(e=>e.name+':'+e.out), txt:document.getElementById('bpBody').textContent }; })()`);   // (all its pages)
+info('the bids log: ' + JSON.stringify(hist.log) + ' -- ' + (hist.txt.match(/This season:[^·]*·[^·A-Z]*/) || [''])[0]);
+ok(hist.log.includes(r.name + ':signed') && hist.log.includes(r2.name + ':walked') && /HOW THEY WENT/.test(hist.txt) && /SIGNED/.test(hist.txt) && /YOU WALKED AWAY/.test(hist.txt) && /This season: \d+ bids? · \d+ signed/.test(hist.txt),
+  'the Bids tab keeps how each one went: ' + r.name + ' SIGNED, ' + r2.name + ' YOU WALKED AWAY; and the season\'s bids and signings');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 
 // --- A MAN WHO'S COME ON asks for a new deal -------------------------------------------------------------------------------

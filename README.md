@@ -1372,7 +1372,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     Under 85% they turn it down at once and say roughly what it would take. A counter stands a week: meet it (MEET
     IT) and he's yours; bid between and they think again; WALK AWAY to drop it. An agreed fee stands until the window
     shuts. On his card: AGREED (sign him), YOUR BID (they answer on Monday), THEY WANT (and whether another club's
-    in). The Offers tab lists your bids, as well as the clubs' bids for your men. The window shutting ends them all.
+    in). The window shutting ends them all.
+  - **Your bids, and your budget (v108).** The top line of every transfers tab has your budget (and, once a fee's
+    agreed, what's agreed and not yet paid) beside the window. The Bids tab has every bid you've placed: those out
+    now -- waiting on Monday, agreed (sign him), or a price they've come back with (MEET IT and WALK AWAY right
+    there) with HIS CARD -- then how each one went, the newest first: SIGNED (and for what), TURNED DOWN (and what
+    they'd want), YOU WALKED AWAY, WENT ELSEWHERE (who, for what), THEY GAVE UP WAITING, HE MOVED ON, THE WINDOW
+    SHUT; and the season's count, how many signed and what they cost. (Until v108 your live bids sat at the top of
+    the Offers tab and went from sight once they were over.)
   - **What a club asks (v83)**: each club prices its own men, no two quite alike.
     - **His rating and his age**: the younger the dearer. A man rated 60 asks about 2.4 times as much at 19 as at 29,
       four times as much as at 33.
@@ -1480,8 +1487,25 @@ The same game played like any other football game. It's a copy of `index.html` w
     up), TV, shirt sales, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
     winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
-    has it all: the gate and the ticket price, then the books (the budget, every week of the season, matchdays, the
+    has it all: the gate and the tickets, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks).
+    - **Tickets (v108).** The going rate for a seat is $7 in League 2, $10 in League 1, $14 in the Championship and
+      $20 in the Premium League (it was $3, $5, $8 and $14), and a new career starts on it. With the field and
+      bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main stand (the
+      North) a fifth over the going rate, the South at it, the ends a fifth under (a quarter while they're open
+      terraces) -- and seats sold at a premium come with the ground: VIP seats in the main stand (60 with the big
+      bleachers, 150 covered, 300 with four stands, 600 in the grand stadium) at four times the going rate,
+      executive boxes (twelve of ten seats with four stands, thirty in the grand stadium) at fourteen times, and the
+      members' club (800 seats, the grand stadium) at seven. The fans who'd come at the going rate share out over
+      the stands by their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to
+      its seats); the premium seats sell to the money in the town -- about a fifth of them in League 2, all of them
+      in the Premium League -- and mind the price more. The fans see the prices too: dearer than the going rate,
+      their loyalty slips (more after a defeat); cheaper, it grows. A price you've never touched goes up with the
+      going rate when you're promoted; one you've set stays. On the Money tab, each section: its seats and going
+      rate, its price with − and +, how full it'll be, how many and what it takes; and BACK TO THE GOING RATE.
+      (There's no longer a rule that the price can only go up while the ground's 85% full.) A save from before v108
+      left at the old going rate moves to the new one. In money: a first season in League 2 now ends with $140,000
+      to $172,000 in the bank, against $84,000 to $87,000 on v107 (three simulated seasons each).
     - **The money** (v106), back at the club after a match you played, after the press conference: a line at a time,
       each figure counting up -- where the bank stood before the game, what the game brought in (the gate or your
       share of it, the TV, the week's partners, sponsors and boards; a cup's prize), the wages out, and where it
@@ -1521,8 +1545,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       a week from a town firm, up to $950 to $2,600 from a global brand; the shirt $60 to $160 from a local business,
       $8,000 to $20,000 from a global brand), now and then a bigger firm taking a punt or a smaller one calling.
       Where they can go: boards, as many as the ground's level has (1, 3, 6, 10, 16), never bought, bare till
-      someone takes them (YOUR AD HERE on the far stand); the shirt from your second season (sooner if the town's
-      firms are calling already); the stands' names once there are covered stands (level 3: the North and South
+      someone takes them (YOUR AD HERE on the far stand); the shirt once you've moved into the cabin (clubhouse 2;
+      v108 -- it was from your second season); the stands' names once there are covered stands (level 3: the North and South
       Stands, the East and West Ends); the ground's name once there are four (level 4; never a corner shop's). A
       deal holds its fee wherever you go, and ends when its seasons are up (the news says so, the name goes back,
       the board comes down, and the Monday papers say so too). The Sponsors tab in the Stadium shows each board and
@@ -1551,15 +1575,15 @@ The same game played like any other football game. It's a copy of `index.html` w
     physio's clinic to its right, the scouts' house and the academy under them, each on a roped-off plot till it's
     up. No paths, and no trees but the ones you buy.
     - **The clubhouse** is the club's keep, as a town hall is in a building game: a new career has the shed, the
-      stadium and a rough training pitch, and each clubhouse after it -- the next league up first (reached once is
-      enough), then the money -- lets you put up more and build up what you have:
+      stadium and a rough training pitch, and each clubhouse after it -- for the money alone (v108: it used to need
+      the next league up first) -- lets you put up more and build up what you have:
 
-      | Clubhouse | Needs | Costs | Brings |
-      | --- | --- | --- | --- |
-      | 1 The shed | | (where you start) | the training pitch; the stadium to level 2 |
-      | 2 The cabin | League 1 | $30,000 | the scouts' house and the physio (to 2); the training pitch to 2; the stadium to 3 |
-      | 3 The clubhouse | the Championship | $120,000 | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
-      | 4 The hall | the Premium League | $450,000 | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
+      | Clubhouse | Costs | Brings |
+      | --- | --- | --- |
+      | 1 The shed | (where you start) | the training pitch; the stadium to level 2 |
+      | 2 The cabin | $30,000 | the scouts' house and the physio (to 2); the training pitch to 2; the stadium to 3; the shirt open to sponsors |
+      | 3 The clubhouse | $120,000 | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
+      | 4 The hall | $450,000 | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
 
       Its screen: the next clubhouse and what it brings, then your career (your record, season by season); the
       squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
@@ -1864,6 +1888,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Tickets, bids and the clubhouse (v108).** Tickets start at $7 in League 2 (the going rate, $10 to $20 up the
+  leagues), and as the ground grows each stand has its own price and there are seats to sell at a premium -- VIP seats,
+  executive boxes, the members' club. Your budget is on every transfers tab, and the new Bids tab keeps every bid
+  you've placed and how it went. Every clubhouse is for the money alone (no promotion needed), and the cabin opens the
+  shirt to sponsors. See **Tickets**, **Your bids, and your budget** and **The clubhouse**.
 - **Crosses, clearances and keepers (v107).** A poor crosser comes up short: he hasn't the power to whip one in, so his
   miss on a cross's weight is mostly short (three times in four at Crossing 1), where it used to go as far as a good
   one's and, missing its man, carry on to the far side. Your clearance charges: with the ball at your feet in your own
