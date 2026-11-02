@@ -1932,6 +1932,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The computer goes forward (v111).** It kept giving the ball back: forward a little, then back, and back again
+  whenever it was pressed. A ball back now costs more than the ground it gives up -- more in the other half, more with
+  a man on him there, more straight after a ball forward -- and ground counts for more. Its balls back are down from
+  about half its passes to a third (in the other half, from seven in ten to under half); it has about twice the shots
+  and more of the goals. See **Going forward** under the computer's man on the ball.
 - **Contract talks, deals running out, the Golden Boot and Glove, $5 tickets, more youngsters (v110).** Offer a man
   less than he asks, or a longer deal for less: he signs, comes back with a figure (MEET IT), or walks out -- the young
   give the most, a man after a fine season the least, a longer deal is worth most to the older man (see **Contract
@@ -2167,6 +2172,24 @@ test, and like the Trap Lab the values are the game's settings.
     sticks with a choice for a moment rather than changing his mind every frame.
   - A side that's had the ball a while without getting forward starts to force it (sooner for a direct
     side, later for tiki-taka).
+  - **Going forward (v111).** He used to give the ball back nearly half the time: seven passes in ten
+    in the other half, six in ten with a man on him, six in ten straight after a ball forward -- a ball
+    back was all but safe and the ground it gave up cost next to nothing. Now ground counts for more (the
+    urge to get forward is never below 0.4 of its full pull, and every metre gained or given up counts
+    2.4 times what it did), and a ball back costs more than the ground it gives up: 0.85 of its worth in
+    his own half, 0.72 in theirs, 0.61 there with a man within 4 m of him, and 0.85 again within 3 s of
+    his side's last ball forward. A cutback into their box isn't a ball back. Measured over computer v
+    computer matches (ten minutes each, four a style pairing):
+
+    | Styles | Balls back | in the other half | with a man on him | after a ball forward | Shots a side | Goals a match |
+    |---|---|---|---|---|---|---|
+    | Control v control | 46% → 35% | 68% → 45% | 61% → 45% | 60% → 47% | 3.0 → 5.1 | 1.4 → 2.0 |
+    | Balanced v balanced | 51% → 34% | 70% → 50% | 67% → 43% | 65% → 43% | 3.1 → 6.4 | 1.0 → 2.3 |
+    | Direct v wing | 46% → 32% | 70% → 46% | 61% → 40% | 62% → 34% | 2.6 → 5.5 | 1.8 → 2.3 |
+    | Gegenpress v counter | 43% → 25% | 68% → 38% | 60% → 33% | 57% → 24% | 4.9 → 7.0 | 3.0 → 4.8 |
+
+    Its passes find a man a little less often (about 85% against 87%), and each style keeps its own
+    character against the others.
   - A lower Off IQ misjudges the options more, and the side's way of playing and the man's own style
     tilt them (see [Playing styles](#playing-styles)).
   - Press ` (backquote) for the debug overlay: it shows the man on the ball's five best options, as he

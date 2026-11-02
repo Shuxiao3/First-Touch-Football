@@ -8636,15 +8636,21 @@
   // clock starts when it wins the ball and again whenever it gets it 8 m further up than it's been; a quarter of the
   // urge is always there, the rest builds over its patience. Every option is credited with the ground it gains (and
   // charged for ground it gives up) at that rate.
-  const obPoss={G:{t:-9,u:0,last:-9},R:{t:-9,u:0,last:-9}};
+  // THE COMPUTER'S APPETITE FOR GOING FORWARD (v111). It used to give the ball back nearly half the time (seven in ten in
+  // the other half, six in ten with a man on him, six in ten straight after a ball forward): a ball back was all but safe
+  // and the ground it gave up cost next to nothing. Now ground counts for more (gain, and the urge never below urge0), and
+  // a ball back costs more than the ground it gives up -- back: in our half; backHigh: in theirs; backPressed: in theirs
+  // with a man on him; backAfter: within 3 s of our last ball forward. A cutback into their box isn't a ball back.
+  const OB_AGGR={gain:0.06, urge0:0.4, back:0.85, backHigh:0.72, backPressed:0.85, backAfter:0.85};
+  const obPoss={G:{t:-9,u:0,last:-9,fwdT:-9},R:{t:-9,u:0,last:-9,fwdT:-9}};
   function obUrge(p,C){
     const S=obPoss[p.team], O=obPoss[C.opp];
     if(O.last>S.last||simNow-S.last>3){ S.t=simNow; S.u=C.u; }
     S.last=simNow;
     if(C.u>S.u+8*OBM){ S.t=simNow; S.u=C.u; }
-    return clamp(0.25+(simNow-S.t-C.M.patience*0.4)/C.M.patience,0.25,1);
+    return clamp(OB_AGGR.urge0+(simNow-S.t-C.M.patience*0.4)/C.M.patience,OB_AGGR.urge0,1);
   }
-  function obGain(C,x){ return 0.025*C.urge*C.M.gain*((C.atk>0?x:FW-x)-C.u)/FW; }
+  function obGain(C,x){ return OB_AGGR.gain*C.urge*C.M.gain*((C.atk>0?x:FW-x)-C.u)/FW; }
   // a pass to q (a team-mate, or our keeper)
   function obPassOpt(p,q,C){
     const L=passLead(p,q), tx=L.x, ty=L.y, dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
@@ -8717,6 +8723,8 @@
     if(fwdD>250 && posOf(q,'atk')==='ST' && ins(q,'stRuns')==='target') v*=1.15;   // up to the target man
     if(lob) v*=0.85;                                                    // switched out wide he's on his own: nobody close to play with
     if(q.num==null) v*=0.6;                                             // our keeper: he'll often have to kick it long
+    if(fwdD<-3*OBM&&!(Math.abs(C.gx-tx)<BX+80&&Math.abs(ty-YC)<BY+10)){ const high=C.u>FW*0.5;   // A BALL BACK (v111: see OB_AGGR)
+      v*=high?OB_AGGR.backHigh:OB_AGGR.back; if(high&&C.prD<4*OBM) v*=OB_AGGR.backPressed; if(simNow-obPoss[p.team].fwdT<3) v*=OB_AGGR.backAfter; }
     v+=obGain(C,tx);
     const loss=obVal(C.opp,cx,cy)*C.M.risk;
     return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob, arc};
@@ -8961,6 +8969,7 @@
     const ob=p.ob; p.dbgTag='OB-'+o.kind.toUpperCase();
     if(o.kind==='pass'){
       const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
+      if(C.atk*(o.tx-p.x)>3*OBM) obPoss[p.team].fwdT=simNow;            // (a ball forward: see OB_AGGR's backAfter)
       if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru,o.arc); else if(o.lob) obLobBall(p,o.q,o.tx,o.ty); else passTo(p,o.q);
       ob.done=true;
       if(deepWide&&Math.abs(C.gx-o.tx)<BX+80&&Math.abs(o.ty-YC)<BY+10&&C.atk*(o.tx-p.x)<=40){ lastGrade='CUTBACK'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0; }
