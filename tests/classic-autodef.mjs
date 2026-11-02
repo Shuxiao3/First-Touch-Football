@@ -2,7 +2,7 @@
 // the man on the ball, goal-side of him and a few metres off (never tight), square to him, and never tackles by himself;
 // out wide in our end, where a cross is on, he's across into its way. A quick tap is still a switch; let go of a hold and
 // he's yours again (no switch). The higher his Def IQ, the truer he holds the spot as the man moves. And a cross struck
-// into a man stood in its way a few metres off the crosser is blocked; one with him further off goes over him.
+// into a man stood in its way a few metres off the crosser stops on him; one with him further off goes over him.
 // On a copy of the game that lets the test script the man on the ball (he goes where the test says, the ball at his feet).
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -101,18 +101,23 @@ await releaseJ(); await page.waitForTimeout(100);
 info('out wide: ' + JSON.stringify(w) + ' (his distance off the man; how far off the line from the ball to the box he is, degrees)');
 ok(w.deg < 20 && w.d >= 1.5 && w.d < 3.6, 'out wide he\'s across into the cross\'s way (' + w.deg + '° off the line to the box, ' + w.d + ' m off the man)');
 
-// 5. THE CROSS BLOCK: the man on the ball crosses toward the penalty spot with ours stood in its way, 2.5 m off him and
-// 8 m off him -- blocked from 2.5 m, over him from 8 (three each)
+// 5. THE CROSS BLOCK: the man on the ball crosses toward the penalty spot with ours stood in its way (yours: their cross
+// puts you on him), three each. 3 m off him it's blocked: it's up past his shins as it gets near him, so he can't take it, and
+// it hasn't swung wide of him yet. 2.5 m off it stops on him, blocked or ('met') a touch from him: it can still be at his shins
+// as it comes into his reach, a frame earlier than his block would get it (one cross in six or so, by the crosser and the
+// frame). 8 m off, it's over him.
 const cross = (gapM) => page.evaluate(gapM => new Promise(res => { const T = window.__T, MK = T.MK; window.__scene({ x: 6, y: 24, dx: 0, dy: 0, iq: 6 }); window.__unscript();
   const S = window.__sc, me = S.me, c = S.c, b = T.ball(), tx = S.ownX + S.atk * 11 * MK, ty = T.YC, d = Math.hypot(tx - c.x, ty - c.y);
   me.x = c.x + (tx - c.x) / d * gapM * MK; me.y = c.y + (ty - c.y) / d * gapM * MK; me.vx = me.vy = 0; me.noTouchT = 0;
   T.setControlled(T.players().find(q => q.team === 'G' && q !== me)); T.setGrade('');
   T.aiCross(c, { x: tx, y: ty, who: null }); const t0 = T.simNow();
-  (function tick(){ if(T.grade() === 'BLOCKED!') return res('blocked'); if(T.simNow() - t0 > 0.8) return res(b.z > 0 ? 'over' : 'on'); requestAnimationFrame(tick); })(); }), gapM);
-const near = [], far = [];
-for(let i = 0; i < 3; i++){ near.push(await cross(2.5)); far.push(await cross(8)); }
-info('a cross with ours in its way: 2.5 m off the crosser ' + JSON.stringify(near) + ', 8 m off ' + JSON.stringify(far));
-ok(near.every(r => r === 'blocked'), 'a cross struck into a man stood in its way a few metres off is blocked');
+  (function tick(){ if(T.grade() === 'BLOCKED!') return res('blocked'); if(b.lastTouch === 'G' && Math.hypot(b.x - me.x, b.y - me.y) < 2.2 * MK) return res('met');
+    if(T.simNow() - t0 > 0.8) return res(b.z > 0 ? 'over' : 'on'); requestAnimationFrame(tick); })(); }), gapM);
+const near = [], block = [], far = [];
+for(let i = 0; i < 3; i++){ near.push(await cross(2.5)); block.push(await cross(3)); far.push(await cross(8)); }
+info('a cross with ours in its way: 2.5 m off the crosser ' + JSON.stringify(near) + ', 3 m off ' + JSON.stringify(block) + ', 8 m off ' + JSON.stringify(far));
+ok(block.every(r => r === 'blocked'), 'a cross struck into a man stood in its way a few metres off is blocked');
+ok(near.every(r => r === 'blocked' || r === 'met'), 'nearer still, it stops on him (blocked, or he gets a touch on it)');
 ok(far.every(r => r !== 'blocked'), 'with him 8 m off, it\'s over him');
 
 process.exitCode = rep.finish();
