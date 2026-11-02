@@ -217,5 +217,10 @@ r = await K(`(()=>{ const d=CAREER.data; d.story.vet=0; d.md=Math.max(d.md||0,2)
 ok(r.home && !r.asked && r.renew === r.w0 && r.mkt > r.w0 * 3 && r.mig,
   'the hometown hero (on $' + r.w0 + ' a week, worth $' + r.mkt + '): eight points better and a fine season, and he never asks for a new deal; a new one keeps him on what he\'s on; a career from before has him so too');
 
+// ...and he's never a keeper: forty homecomings, not one in goal (with a keeper one time in eight, as before v109, all forty
+// would miss the goal one time in two hundred)
+r = await K(`(()=>{ const d=CAREER.data, roles={}; for(let i=0;i<40;i++){ d.story.vet=0; mgStory(d); const v=d.roster.find(p=>p.id===d.story.vetId); roles[v.role]=(roles[v.role]||0)+1; mgRosterRemove(d,d.roster.indexOf(v)); } return roles; })()`);
+ok(!r.GK && Object.values(r).reduce((a, b) => a + b, 0) === 40 && Object.keys(r).length >= 2, 'the hometown hero is never a keeper: forty homecomings, ' + JSON.stringify(r));
+
 process.exitCode = rep.finish();
 await browser.close();

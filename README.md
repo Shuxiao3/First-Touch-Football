@@ -1347,8 +1347,8 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
     70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. He came home to play, not for the money: he never asks for a new deal, however well
-    he does, and a new one keeps him on what he's on (v109). Where he plays and how are the luck of the draw. After
-    matchday 5 a wonderkid asks to join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a
+    he does, and a new one keeps him on what he's on (v109). Where he plays and how are the luck of the draw, but
+    he's never a keeper (v109). After matchday 5 a wonderkid asks to join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a
     range six wide). You pick where he plays and his style (the card says what each style does), and he signs for
     half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
     Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
@@ -1907,7 +1907,7 @@ test, and like the Trap Lab the values are the game's settings.
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
 - **Contracts by age and season (v109).** The hometown hero who came home cheap never asks for a new deal (and a new
-  one keeps him on what he's on). Everyone else asks by his age and his season: the young modestly -- not in their
+  one keeps him on what he's on), and he's never a keeper. Everyone else asks by his age and his season: the young modestly -- not in their
   first season with you, later, and for less than they could get -- a man in his prime sooner and for a bit more, and
   one coming off a fine season (goals, clean sheets or an award, against what's usual for his position) soonest and
   for most. See **Who asks, when, and for what**.

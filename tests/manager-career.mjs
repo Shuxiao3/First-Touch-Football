@@ -454,7 +454,8 @@ ok(r.up === null && r.rebuilt, 'the stadium built up a level, drawn again at onc
   const at = await page.evaluate(() => { const b = document.querySelector('#cpHots [data-bldg="stadium"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
   const m0 = await tf(); await page.mouse.click(at[0], at[1]); await page.waitForTimeout(90);
   const mid = await page.evaluate(() => ({ sel: [...document.querySelectorAll('#chCampus .bldg.sel')].map(e => e.dataset.bldg).join(), tag: document.getElementById('cpTag').classList.contains('on') ? document.getElementById('cpTag').textContent : '' }));
-  const m1 = await tf(); await page.waitForSelector('#bldgPanel.show', { timeout: 2000 }); const title = await page.textContent('#bpTitle'), back = await page.textContent('#bldgPanel .bpTopBack');
+  let m1 = await tf(); for(let i = 0; i < 30 && m1[0] <= m0[0]; i++){ await page.waitForTimeout(50); m1 = await tf(); }   // (under load the zoom can take a frame or two to start)
+  await page.waitForSelector('#bldgPanel.show', { timeout: 2000 }); const title = await page.textContent('#bpTitle'), back = await page.textContent('#bldgPanel .bpTopBack');
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(450); const m2 = await tf(), lit = await page.$$eval('#chCampus .bldg.sel', ns => ns.length);
   ok(m1[0] > m0[0] && mid.sel === 'stadium' && /STADIUM/.test(mid.tag) && title === r.name.toUpperCase() && /CAMPUS/.test(back),
     'the ground tapped on the campus: STADIUM lit, the camera in on it (x' + m1[0].toFixed(2) + ' from x' + m0[0].toFixed(2) + '), then ' + title + ', back to the ' + back.replace(/[^A-Z ]/g, '').trim());
@@ -542,10 +543,10 @@ const mk = await page.evaluate(() => ({ market: __MG.d.lv.market, budget: __MG.d
 ok(ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /Pre-season starts today/.test(call.text) && /TRANSFERS is open/.test(call.text) && !s1.on && mk.market === 1 && mk.news,
   'on the first day of pre-season your phone rings -- ANSWER: the chairman, transfers go through it now ("' + call.text.slice(12, 90) + '..."); TRANSFERS is open, nothing paid');
 await games(1); const s1b = await story(); await games(1); const s2 = await story();
-const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
+const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, role: p.role, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
 await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); const s3 = await story();
-ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
-  'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
+ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.role !== 'GK' && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
+  'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', ' + vet.role + ' (never a keeper), on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
 await games(2); const s4 = await story(); await games(1); const s5 = await story();
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);
 const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();

@@ -15653,16 +15653,17 @@
   function mgWindowWeeks(d){ return d.phase==='summer'?MG_WINDOW.summer-d.day+1+MG_HALF+MG_WINDOW.winter:d.phase==='league'?MG_HALF-d.md+MG_WINDOW.winter:d.phase==='winter'?1:0; }
 
   // THE FIRST SEASON'S TWO ARRIVALS. After the 2nd game, a veteran of the top flight comes home to finish his career --
-  // rated in the 70s, 33 to 35, his position and style anyone's guess -- on under a third of his wage, to the end of
-  // next season (p.hometown, v109: he never asks for a new deal, and renews on what he's on). After the 5th, a
-  // 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
+  // rated in the 70s, 33 to 35, his position (never in goal) and style anyone's guess -- on under a third of his wage,
+  // to the end of next season (p.hometown, v109: he never asks for a new deal, and renews on what he's on). After
+  // the 5th, a 16-year-old wonderkid asks to join -- in the 60s now, a ceiling of 85 to 90 -- and you
   // choose where he plays and how (mgSignKid). story.vet / .kid: 0 to come, 1 to see (on the hub), 2 done. And before
   // them, on the first day of pre-season -- the window's first -- your PHONE RINGS (story.phone, the same way): the
   // chairman -- transfers go through it now, and TRANSFERS opens (mgMarketOpen). It's never bought.
   const KID_POS=['GK','CB','FB','DM','CM','WM','AM','WNG','STK'], SUB_ROLE={GK:'GK',CB:'DEF',FB:'DEF',DM:'MID',CM:'MID',WM:'MID',AM:'MID',WNG:'ATT',STK:'ATT'};
   function mgStory(d){ const S=d.story; if(!S) return;
     if(!S.phone&&!lvOf(d,'market')&&mgWindowOpen(d)) S.phone=1;
-    if(!S.vet&&d.md>=2){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
+    if(!S.vet&&d.md>=2){ const role=mgPick(['DEF','DEF','MID','MID','MID','ATT','ATT']),   // (v109: never a keeper)
+         from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
       const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
       p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=15; p.hometown=true; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
       mgNews(d,p.name+' ('+p.age+'), once of '+(S.vetFrom||'the top flight')+', comes home to '+d.clubName+' on a fraction of his wage.'); }
