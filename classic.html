@@ -12473,7 +12473,7 @@
     if((d0===-1||d0===0)&&half===2) return 'big';
     return 'small'; }
   function celebStart(tier,hero,d0){
-    const G=players.filter(p=>p.team==='G'), atk=atkOf('G'), m=2.5*MK, C={team:'G', tier, t:0, men:[], conf:[], flash:[], d0};
+    const G=players.filter(p=>p.team==='G'), atk=atkOf('G'), m=2.5*MK, C={team:'G', tier, t:0, men:[], conf:[], flash:[], d0, still:(()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } })()};
     if(!hero||hero.team!=='G') hero=G.slice().sort((a,b)=>dist(a,ball)-dist(b,ball))[0];
     if(!hero) return C;
     const cx=atk>0?FW-m:m, cy=m*1.3;                                      // by the corner flag at the end he scored at, in front of the far stand
@@ -12493,7 +12493,7 @@
   // a frame of it: everyone in it runs to his place round the scorer (the scorer to the spot), and once there, hops
   function celebStep(dt){ const C=celeb; if(!C) return; C.t+=dt;
     for(const f of C.flash) f.t-=dt; C.flash=C.flash.filter(f=>f.t>0);
-    if(C.tier!=='small'&&Math.random()<dt*(C.tier==='epic'?9:4)) C.flash.push({x:Math.random()*W, y:HORIZON-60+Math.random()*50, t:0.14, r:5+Math.random()*7});   // (the cameras in the stand)
+    if((C.tier==='big'||C.tier==='epic')&&!C.still&&Math.random()<dt*(C.tier==='epic'?9:4)) C.flash.push({x:Math.random()*W, y:HORIZON-60+Math.random()*50, t:0.14, r:5+Math.random()*7});   // (the cameras in the stand: your big goals; none with reduced motion)
     for(const q of C.conf){ q.vy=Math.min(q.vy+22*dt,150); q.vx+=Math.sin(C.t*3+q.r)*12*dt; q.x+=q.vx*dt; q.y+=q.vy*dt; q.r+=q.vr*dt; }
     if(C.team!=='G') return;
     for(const M of C.men){ const p=M.p; if(C.t<M.go) continue;             // (the others a beat behind him)

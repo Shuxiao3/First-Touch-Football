@@ -335,7 +335,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     - *epic* -- the winner at the death (level, in the last twelfth of the match or the advantage at its end):
       WINNER!, a knee slide toward the flag, the whole team on him -- the keeper running up from his goal too -- confetti
       everywhere. 6.8 s.
-    The clock is stopped through it, as for any goal, and the side that conceded kicks off after it.
+    The clock is stopped through it, as for any goal, and the side that conceded kicks off after it. The cameras
+    only go off for your big and epic goals, and with reduced motion not at all.
   - **Sim the rest** (v106). The pause menu's SIM THE REST (it asks first, the match waiting): the rest of the match
     simulated from where it stands -- the time left of both halves, each side's men on the pitch now (their ratings),
     the goals a simulated game gives for that much of a match (the home side a little more), the scorers picked as a

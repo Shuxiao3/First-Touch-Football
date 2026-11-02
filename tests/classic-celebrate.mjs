@@ -35,7 +35,7 @@ const goal = o => page.evaluate(o => new Promise(res => { const T = window.__T, 
     run: C && C.sx != null ? +(Math.hypot(C.sx - x0, C.sy - y0) / T.MK).toFixed(1) : null, slid: false, arrived: 0, maxZ: 0, clockMoved: false, t0: T.simNow() };
   const want = C && C.sx != null ? { x: C.sx, y: C.sy } : null, hero = C && C.hero;
   (function tick(){ const c = T.celeb();
-    if(c){ if(hero && hero.celebSlide) out.slid = true; out.maxZ = Math.max(out.maxZ, ...T.players().map(p => p.z || 0)); if(T.clock() !== clk0) out.clockMoved = true;
+    if(c){ out.flashes = Math.max(out.flashes || 0, c.flash.length); if(hero && hero.celebSlide) out.slid = true; out.maxZ = Math.max(out.maxZ, ...T.players().map(p => p.z || 0)); if(T.clock() !== clk0) out.clockMoved = true;
       if(want && hero) out.heroGap = +Math.hypot(hero.x - want.x, hero.y - want.y).toFixed(1);
       if(c.men) out.arrived = c.men.filter(M => Math.hypot(M.p.x - (c.sx + M.ox), M.p.y - (c.sy + M.oy)) < 10).length; }
     if(T.scoredT() > 0) return requestAnimationFrame(tick);
@@ -45,21 +45,27 @@ const goal = o => page.evaluate(o => new Promise(res => { const T = window.__T, 
 const L = await page.evaluate(() => window.__T.halfLenSec());
 const th = await goal({ half: 1, clock: 40, g: 0, r: 0, theirs: true });
 info('theirs: ' + JSON.stringify(th));
-ok(th.team === 'R' && th.men === 0 && th.held === 1.8 && th.after.kicker === 'G' && !th.clockMoved, 'a goal of theirs: GOAL, play held ' + th.held + ' s (nobody celebrating), then you kick off; the clock stopped');
+ok(th.team === 'R' && th.men === 0 && th.held === 1.8 && th.after.kicker === 'G' && !th.clockMoved && !th.flashes, 'a goal of theirs: GOAL, play held ' + th.held + ' s (nobody celebrating, no cameras going off), then you kick off; the clock stopped');
 const sm = await goal({ half: 1, clock: 20, g: 0, r: 0 });
 info('small: ' + JSON.stringify(sm));
 ok(sm.tier === 'small' && sm.men === 3 && sm.run <= 8.05 && sm.held === 2.8 && sm.arrived >= 2 && sm.maxZ > 2 && sm.conf === 0,
   'an early one of yours (small): the scorer ' + sm.run + ' m toward the corner, the two nearest to him (' + sm.arrived + ' of 3 got there), a hop; held ' + sm.held + ' s');
 const bg = await goal({ half: 2, clock: L / 2, g: 1, r: 2 });
 info('big: ' + JSON.stringify(bg));
-ok(bg.tier === 'big' && bg.men === 7 && bg.run <= 16.05 && bg.held === 4.6 && bg.heroGap < 3 && bg.arrived >= 4 && bg.conf > 0 && !bg.keeper,
-  'an equaliser in the second half (big): off toward the flag (' + bg.run + ' m), all ' + (bg.men - 1) + ' team-mates after him (' + bg.arrived + ' of ' + bg.men + ' there by the end), confetti; held ' + bg.held + ' s');
+ok(bg.tier === 'big' && bg.men === 7 && bg.run <= 16.05 && bg.held === 4.6 && bg.heroGap < 3 && bg.arrived >= 4 && bg.conf > 0 && bg.flashes > 0 && !sm.flashes && !bg.keeper,
+  'an equaliser in the second half (big): off toward the flag (' + bg.run + ' m), all ' + (bg.men - 1) + ' team-mates after him (' + bg.arrived + ' of ' + bg.men + ' there by the end), confetti, the cameras in the stand (none for the small one); held ' + bg.held + ' s');
 const ep = await goal({ half: 2, clock: L - 4, g: 2, r: 2 });
 info('epic: ' + JSON.stringify(ep));
 ok(ep.tier === 'epic' && ep.keeper && ep.slid && ep.held === 6.8 && ep.conf > bg.conf && ep.heroGap < 3,
   'the winner at the death (epic): a knee slide, the whole team and the keeper up from his goal, more confetti; held ' + ep.held + ' s');
 ok([th, sm, bg, ep].every(r => !r.after.celeb && r.after.z === 0 && !r.after.slide && !r.clockMoved && r.after.kicker === (r === th ? 'G' : 'R')),
   'after each: nobody left in the air or on his knees, the clock never moved, and the side that conceded kicks off');
+
+// with reduced motion: the same goal, and no cameras going off
+await page.emulateMedia({ reducedMotion: 'reduce' });
+const still = await goal({ half: 2, clock: L - 4, g: 2, r: 2 });
+await page.emulateMedia({ reducedMotion: 'no-preference' });
+ok(still.tier === 'epic' && !still.flashes && ep.flashes > 0, 'with reduced motion: the winner at the death without the cameras going off (' + (ep.flashes || 0) + ' at once without it, ' + (still.flashes || 0) + ' with it)');
 
 // SIM THE REST: from a goal down at half time, straight to full time
 const sr = await page.evaluate(() => { const T = window.__T, L = T.halfLenSec(); T.freeze(); T.reopen(); T.set({ half: 1, clock: L * 0.5, g: 0, r: 1 }); const n0 = T.log().length, s0 = T.score();

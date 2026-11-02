@@ -142,7 +142,7 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 // --- A MAN WHO'S COME ON asks for a new deal -------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, out={}, R=d.roster.filter(p=>p.role!=='GK'), p=R[0], q=R[1];
   for(const x of [p,q]){ x.until=d.season+2; x.ovr+=8; delete x.wantsOut; x.mor=6.5; }
-  d.news=[]; mgContractAsks(d); out.asked=!!p.cAsk&&!!q.cAsk; out.news=d.news.map(n=>n.t).filter(t=>/wants a new deal/.test(t)).length;
+  d.news=[]; mgContractAsks(d); out.asked=!!p.cAsk&&!!q.cAsk; out.news=d.news.map(n=>n.t).filter(t=>/wants a new deal/.test(t)&&(t.startsWith(p.name+' ')||t.startsWith(q.name+' '))).length;   /* (theirs: another of the squad may have come on enough to ask too) */
   out.want=p.cAsk&&p.cAsk.wage; out.wage=p.wage;
   // not now (p): a point off, and no asking again for eight weeks -- checked as the weeks go by below
   const m1=p.mor; out.no=mgContractNo(d,p.id); out.noMor=[m1,p.mor]; const no0=d.weeks||0;
