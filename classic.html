@@ -191,6 +191,7 @@
   .plLine{ font-size:12px; line-height:1.45; } .plLine b{ color:#1f2340; } .plLine .up{ color:#0e7a3c; } .plLine .dn{ color:#a82028; } .plLine .dim{ color:#7a7262; }
   .plRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; line-height:1.35; padding:3px 0; border-top:1px dotted #d9d1b6; }
   .plRow button{ font:11px 'FTC Dot',monospace; color:#1f2340; background:#fffdf6; border:1px solid #b9b195; border-radius:6px; padding:3px 8px; cursor:pointer; }
+  .plRowBtns{ display:flex; gap:6px; flex:0 0 auto; }
   .plYrs{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font:11px 'FTC Dot',monospace; color:#1f2340; }
   .plYrs button{ font:12px 'FTC Dot',monospace; width:26px; height:24px; color:#1f2340; background:#fffdf6; border:1px solid #b9b195; border-radius:6px; cursor:pointer; }
   .mgPop b{ color:var(--acc); font-weight:400; }
@@ -14840,16 +14841,19 @@
       +finRow('Record signing',who(R.fp,R.fp&&money(R.fp.fee)))+finRow('Record sale',who(R.fs,R.fs&&money(R.fs.fee))); }
   // THE SEASON'S END, for the record: the awards -- your league's Player of the Year (v104; its Player of the Season
   // before: yours, and a prize -- see THE PLAYER OF THE MONTH), its best young player (21 or under), both from ten games
-  // rated, its top scorer; your club's own Player of the Year, from five -- what your men
+  // rated; THE GOLDEN BOOT, its top scorer, and THE GOLDEN GLOVE, the keeper with the most clean sheets from ten games
+  // (v110: yours, twice a Player of the Month's prize and 4% more fans); your club's own Player of the Year, from
+  // five -- what your men
   // won, and a line in each man's history: yours, and anyone with a story (who's played for you, or won something)
   function mgSeasonStory(d,R){ const code=clubCode(d,d.clubId), lg=LG_SHORT[d.tier], avg=p=>p.rn?p.rs/p.rn:0, L=[];
     for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)) L.push([p,id]);
     const best=F=>L.filter(x=>F(x[0])).sort((a,b)=>avg(b[0])-avg(a[0])||(b[0].goals||0)-(a[0].goals||0))[0];
     const pos=best(p=>(p.rn||0)>=10), yng=best(p=>(p.rn||0)>=10&&(p.age||25)<=21);
-    const top=L.filter(x=>(x[0].goals||0)>0).sort((a,b)=>(b[0].goals||0)-(a[0].goals||0)||avg(b[0])-avg(a[0]))[0];
+    const top=L.filter(x=>(x[0].goals||0)>0).sort((a,b)=>(b[0].goals||0)-(a[0].goals||0)||(b[0].as||0)-(a[0].as||0)||avg(b[0])-avg(a[0]))[0];
+    const glove=L.filter(x=>x[0].role==='GK'&&(x[0].rn||0)>=10&&(x[0].cs||0)>0).sort((a,b)=>(b[0].cs||0)-(a[0].cs||0)||avg(b[0])-avg(a[0]))[0];
     const mine=d.roster.filter(p=>(p.rn||0)>=5).sort((a,b)=>avg(b)-avg(a))[0];
     R.awards=[]; const give=(x,t,ev,v,news)=>{ if(!x) return; const [p,id]=x; R.awards.push({t,name:p.name,code:clubCode(d,id),v,you:id===d.clubId}); careerEv(d,p,ev);
-      if(news) mgNews(d,p.name+' ('+clubCode(d,id)+') is '+MG_LEAGUE[d.tier]+'’s '+t.toLowerCase()+' ('+v+').'); };
+      if(news) mgNews(d,p.name+' ('+clubCode(d,id)+')'+(/^Golden/.test(t)?' wins '+MG_LEAGUE[d.tier]+'’s '+t:' is '+MG_LEAGUE[d.tier]+'’s '+t.toLowerCase())+' ('+v+').'); };
     give(pos,'Player of the Year',lg+' Player of the Year',pos&&avg(pos[0]).toFixed(1),1);
     if(pos&&pos[1]===d.clubId){ const base=LOYALTY_BASE[d.tier]||1000, prize=(POTM_PRIZE[d.tier]||POTM_PRIZE[1])*4, fans=Math.round(base*0.08), p=pos[0];   // (yours: THE PLAYER OF THE YEAR's prize)
       d.budget+=prize; d.loyalty=(d.loyalty??base)+fans; p.mor=clamp((p.mor??MOR0)+1.5,1,10); R.poty={name:p.name, prize, fans};
@@ -14857,7 +14861,13 @@
     if(pos) popBump(d,pos[0],20,10);   // (POPULARITY: the year's best is famous for it)
     if(pos) wkLog(d).poty={pid:pos[0].id, name:pos[0].name, club:mgNameOf(d,pos[1]), avg:Math.round(avg(pos[0])*10)/10, n:pos[0].rn||0, g:pos[0].goals||0, you:pos[1]===d.clubId, prize:R.poty&&R.poty.prize, fans:R.poty&&R.poty.fans};
     give(yng,'Best young player',lg+' best young player',yng&&avg(yng[0]).toFixed(1),1);
-    give(top,'Top scorer',lg+' top scorer',top&&top[0].goals+' goals',1);
+    give(top,'Golden Boot',lg+' Golden Boot',top&&top[0].goals+' goals',1);
+    give(glove,'Golden Glove',lg+' Golden Glove',glove&&glove[0].cs+' clean sheet'+(glove[0].cs>1?'s':''),1);
+    { const gold={}; for(const [k,x,n] of [['boot',top,top&&top[0].goals],['glove',glove,glove&&glove[0].cs]]){ if(!x) continue; const [p,id]=x, you=id===d.clubId; popBump(d,p,15,8);   // (POPULARITY: famous for it)
+        const g=gold[k]={pid:p.id, name:p.name, club:mgNameOf(d,id), n, you};
+        if(you){ const base=LOYALTY_BASE[d.tier]||1000; g.prize=(POTM_PRIZE[d.tier]||POTM_PRIZE[1])*2; g.fans=Math.round(base*0.04); d.budget+=g.prize; d.loyalty=(d.loyalty??base)+g.fans; p.mor=clamp((p.mor??MOR0)+1,1,10);
+          mgNews(d,'The league pays '+d.clubName+' '+money(g.prize)+' for '+p.name+'’s '+(k==='boot'?'Golden Boot':'Golden Glove')+'.'); } }
+      if(gold.boot||gold.glove) wkLog(d).gold=gold; }   // (the summer's first papers: THE LEAGUE)
     give(mine&&[mine,d.clubId],'Your Player of the Year',code+' Player of the Year',mine&&avg(mine).toFixed(1),0);
     const won=[]; if(R.up) won.push('Promoted with '+code); if(R.pos===1) won.push('Won '+(d.tier>=3?'the ':'')+MG_LEAGUE[d.tier]);
     for(const k in R.cupWin||{}) if(R.cupWin[k]===d.clubId) won.push('Won the '+CUP[k].name);
@@ -15065,7 +15075,9 @@
   function mgPotFor(age,ovr){ const g=age<=18?4+Math.random()*12:age<=21?2+Math.random()*8:age<=24?Math.random()*5:age<=27?Math.random()*2:0; return Math.min(94,Math.round(ovr+g)); }
   // a man made for a level (his prime's): the young that much short of it (they grow into it), the old past their best
   function mgAgeOvr(lvl,age){ return lvl-(age<=18?10:age<=21?6:age<=24?2.5:age<=29?0:age===30?1:age===31?2:age===32?3:age===33?4.5:6); }
-  function mgAge(){ return 18+Math.round((Math.random()+Math.random()+Math.random())/3*16); }
+  // a man's age as the world is made: about one in five a youngster of 17 to 22 (v110: three in ten of them in all, with
+  // the rest; it was one in ten), the others 18 to 34, most about 26
+  function mgAge(){ return Math.random()<0.22?17+Math.floor(Math.random()*6):18+Math.round((Math.random()+Math.random()+Math.random())/3*16); }
   function mgNewPlayer(d,role,ovr,age,o){ o=o||{};
     const sub=o.sub||cwSubRole(role,Math.random);
     const p={ id:d.world.nextId++, name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), role, subRole:sub, age, ovr:clamp(Math.round(ovr),30,95), pot:0, wage:0,
@@ -15363,7 +15375,7 @@
   // that fell through and sponsors' deals that ran out. A decision stays in the pile till you make it or it's gone (an
   // offer lapses, a bid's off) -- next Monday's pile has it again if it's still there; LATER puts it to the bottom. What
   // you decide there is decided as it would be in the market, the stadium or the clubhouse.
-  const PILE_ORDER=['mor','deadline','potm','poty','windfall','offer','bid','bboffer','loanout','loanin','sponsor','contract','out','word','comm','bbback','bbend','cup','derby','bidoff','spend','loanback','phys','dev','scout','next','shirts','money','table'];
+  const PILE_ORDER=['mor','deadline','potm','poty','gold','windfall','offer','bid','bboffer','loanout','loanin','sponsor','contract','ending','out','word','comm','bbback','bbend','cup','derby','bidoff','spend','loanback','phys','dev','scout','next','shirts','money','table'];
   function wkLog(d){ const L=d.wkLog=d.wkLog||{}; for(const k of ['hurt','back','bidoff','cup','loanback']) L[k]=L[k]||[]; return L; }   // (what happens between Mondays, for the next pile)
   function pileBuild(d,ev){ const L=[], add=(k,o)=>L.push(Object.assign({id:(d.pileSeq=(d.pileSeq||0)+1),k},o||{})), R=d.roster, lg=wkLog(d), was=d.pileMor||{}, out0=new Set(d.pileOut||[]);
     // the dressing room: the side's mood, last Monday's and now; who's moved most; who wants out, and who's settled
@@ -15381,12 +15393,13 @@
     for(const x of (ev&&ev.loans)||[]) add(x.k,x);
     if(ev&&ev.comm) add('comm',ev.comm);
     for(const p of R) if(p.cAsk) add('contract',{pid:p.id});
+    { const E=pileEndingDue(d)?mgEnding(d):[]; if(E.length) add('ending',{pids:E.map(p=>p.id)}); }   // (v110: DEALS RUNNING OUT)
     for(const p of R) if(p.wantsOut) add('out',{pid:p.id});
     { const busy=new Set(L.filter(x=>x.pid!=null).map(x=>x.pid));   // (a word: the two unhappiest who aren't asking for something already)
       for(const p of R.filter(p=>!busy.has(p.id)&&(p.mor??MOR0)<5).sort((a,b)=>(a.mor??MOR0)-(b.mor??MOR0)).slice(0,2)) add('word',{pid:p.id, why:mgWhy(d,p)}); }
     // to read
     for(const t of lg.bidoff) add('bidoff',{txt:t});
-    if(lg.potm) add('potm',lg.potm); if(lg.poty) add('poty',lg.poty); if(ev&&ev.wind) add('windfall',ev.wind);
+    if(lg.potm) add('potm',lg.potm); if(lg.poty) add('poty',lg.poty); if(lg.gold) add('gold',lg.gold); if(ev&&ev.wind) add('windfall',ev.wind);
     for(const c of lg.cup) add('cup',c); for(const x of lg.loanback) add('loanback',x);
     for(const g of d.spGone||[]) add('spend',{name:g.name, place:g.k});
     if(lg.hurt.length||lg.back.length||R.some(p=>p.inj)) add('phys',{hurt:lg.hurt.slice(), back:lg.back.slice()});
@@ -15405,6 +15418,7 @@
     if(x.k==='bid'){ const B=mgBidOf(d,x.pid); return !!B&&(B.st==='yes'||B.st==='more'); }
     if(x.k==='sponsor') return (d.spOff||[]).some(o=>o.id===x.oid);
     if(x.k==='contract'){ const p=d.roster.find(q=>q.id===x.pid); return !!p&&!!p.cAsk; }
+    if(x.k==='ending') return mgEnding(d).some(p=>(x.pids||[]).includes(p.id));
     if(x.k==='out'||x.k==='word') return d.roster.some(q=>q.id===x.pid);
     if(x.k==='loanout'){ const p=d.roster.find(q=>q.id===x.pid); return !!p&&!p.loan&&mgWindowOpen(d)&&!!d.world.clubs[x.cid]; }
     if(x.k==='loanin'){ const f=mgFind(d,x.pid); return !!f&&!!f.club&&f.club.id===x.cid&&!mgLoanWhy(d,f.p,f.club); }
@@ -15811,7 +15825,7 @@
 
   // ---- THE MONDAY PAPERS, on the desk: the pile opens by itself on a Monday -- after the phone, the hometown hero or the
   // wonderkid, never over the day going by -- a paper at a time; ✕ leaves the rest for later (PAPERS, on the hub) ----
-  const PILE_STAMP={mor:'THE DRESSING ROOM', offer:'A BID FOR ONE OF YOURS', bid:'YOUR BID', sponsor:'A SPONSOR CALLS', contract:'A NEW DEAL', out:'HE WANTS TO LEAVE',
+  const PILE_STAMP={mor:'THE DRESSING ROOM', offer:'A BID FOR ONE OF YOURS', bid:'YOUR BID', sponsor:'A SPONSOR CALLS', contract:'A NEW DEAL', ending:'DEALS RUNNING OUT', gold:'THE LEAGUE', out:'HE WANTS TO LEAVE',
     word:'A WORD', bidoff:'YOUR BID', spend:'SPONSORS', phys:'THE PHYSIO', dev:'THE COACHES', scout:'THE SCOUTS', next:'NEXT UP', money:'THE WEEK’S MONEY',
     potm:'THE LEAGUE', poty:'THE LEAGUE', windfall:'GOOD NEWS', comm:'THE COMMUNITY', cup:'THE CUP DRAW', derby:'DERBY WEEK', loanout:'A LOAN', loanin:'A LOAN', loanback:'BACK FROM LOAN',
     deadline:'DEADLINE DAY', bboffer:'A BUYBACK DEAL', bbback:'THE BUYBACK CLAUSE', bbend:'THE BUYBACK CLAUSE', shirts:'THE CLUB SHOP', table:'MATCHDAY'};
@@ -15838,6 +15852,7 @@
   function pileHide(){ const m=document.getElementById('pileModal'); if(m) m.classList.remove('on'); }
   const pileNm=(d,pid)=>{ const p=d.roster.find(q=>q.id===pid); return p?mgEsc(p.name):'—'; };
   const pileDelta=v=>(v>0?'<span class="up">+':'<span class="dn">')+v.toFixed(1)+'</span>';
+  const pileOffer=(d,p)=>'<div class="plYrs">OR OFFER <button data-pile="ofr" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(cOfferOf(d,p))+' A WEEK</b><button data-pile="ofr" data-dir="1" data-pid="'+p.id+'">+</button></div>';
   const pileYears=(d,lbl)=>'<div class="plYrs">'+lbl+' <button data-pile="yrs" data-dir="-1">−</button><b>'+(MGUI.years||2)+' SEASON'+((MGUI.years||2)>1?'S':'')+'</b><button data-pile="yrs" data-dir="1">+</button></div>';
   // one paper: [its title, its lines, its buttons ([label, action, wide?])]
   function pileBody(d,x){ const L=[], B=[], next=()=>B.push(['NEXT ▶','next']), later=()=>B.push(['LATER','later',0]);
@@ -15903,11 +15918,27 @@
         L.push('<span class="dim">The offer stands to '+((d.weeks||0)-o.at>=1?'the end of this week':'next Monday')+'.</span>');
         B.push(['SIGN','spsign'],['NO THANKS','spno']); later();
         return [spChip(o.sp)+' '+mgEsc(o.sp.name),L,B]; }
-      case 'contract': { const p=P;
+      case 'contract': { const p=P, T=cTalkOf(d,p), ban=cTalkBan(d,p);
         L.push('He’s on '+money(p.wage)+' a week to S'+(p.until||d.season)+', and asks for <b>'+money(mgRenewWage(d,p))+'</b>.');
-        L.push('<span class="dim">Say not now and he’ll mind, and ask again in eight weeks.</span>');
-        L.push(pileYears(d,'A NEW DEAL, FROM NEXT SEASON:')); B.push(['GIVE IT HIM','renew'],['NOT NOW','cnot']); later();
+        L.push('<span class="dim">'+cGiveTxt(d,p)+' Say not now and he’ll mind, and ask again in eight weeks.</span>');
+        L.push(pileYears(d,'A NEW DEAL, FROM NEXT SEASON:'));
+        if(T) L.push('<b>He’ll sign for '+money(T.cnt)+' a week</b>, for '+T.y+' season'+(T.y>1?'s':'')+'.');
+        if(!ban) L.push(pileOffer(d,p));
+        B.push(T?['MEET IT','meetc']:['GIVE IT HIM','renew']); if(!ban) B.push(['OFFER','offer']); B.push(['NOT NOW','cnot']); later();
         return [mgEsc(p.name)+' has come on, and wants a new deal',L,B]; }
+      case 'ending': { const E=mgEnding(d).filter(p=>(x.pids||[]).includes(p.id));
+        if(!E.length){ L.push('<span class="dim">All settled.</span>'); next(); return ['Deals running out',L,B]; }
+        for(const p of E.slice(0,4)) L.push('<div class="plRow"><span><b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · '+p.age+' · '+(p.hometown?'on ':'asks ')+money(mgRenewWage(d,p))+'</span><span class="plRowBtns"><button data-pile="erenew" data-x="'+x.id+'" data-pid="'+p.id+'">RENEW</button><button data-pile="ego" data-x="'+x.id+'" data-pid="'+p.id+'">LET GO</button></span></div>');
+        if(E.length>4) L.push('<span class="dim">…and '+(E.length-4)+' more.</span>');
+        L.push(pileYears(d,'A NEW DEAL, FROM NEXT SEASON:'));
+        L.push('<span class="dim">Left alone, each goes on a free when the season ends. Or talk terms on his card.</span>');
+        B.push(['TALK TERMS','eterms']); later();
+        return [(E.length>1?E.length+' deals end':'A deal ends')+' with this season',L,B]; }
+      case 'gold': { const yours=['boot','glove'].some(k=>x[k]&&x[k].you);
+        for(const [k,t,u] of [['boot','The Golden Boot','goal'],['glove','The Golden Glove','clean sheet']]){ const g=x[k]; if(!g) continue;
+          L.push('<b>'+t+'</b>: '+mgEsc(g.name)+' · '+mgEsc(g.club)+' · '+g.n+' '+u+(g.n>1?'s':''));
+          if(g.you) L.push('<span class="up">Yours!</span> The league pays <b>'+money(g.prize)+'</b>, and the fans love it: <span class="up">+'+g.fans+' fans</span>.'); }
+        next(); return [(yours?'Yours! ':'')+[x.boot&&'The Golden Boot',x.glove&&(x.boot?'the':'The')+' Golden Glove'].filter(Boolean).join(' and '),L,B]; }
       case 'out': { const p=P;
         if(x.res){ L.push(...x.res.map(t=>mgEsc(t))); next(); return [mgEsc(p.name),L,B]; }
         L.push(morWord(p.mor??MOR0)+' · '+mgWhy(d,p)+(d.listed&&d.listed[p.id]?' · <b>on the transfer list</b>':''));
@@ -15994,6 +16025,7 @@
     const a=b.dataset.pile; let err=null;
     if(a==='close'){ d.pile.opened=true; pileHide(); renderHub(); return; }
     if(a==='yrs'){ MGUI.years=clamp((MGUI.years||2)+(+b.dataset.dir),1,4); pilePaint(d); return; }
+    if(a==='ofr'){ const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q) cOfferStep(d,q,+b.dataset.dir); pilePaint(d); return; }
     if(a==='look'){ const pid=+b.dataset.pid, f=mgFind(d,pid); pileHide(); curTab.market='Search'; openBuilding('market'); MGUI.sel=pid; if(f&&f.club) MGUI.tier=f.club.tier; paintBuilding(); return; }
     const x=d.pile.list.find(y=>y.id===+b.dataset.x); if(!x) return;
     if(a==='market'){ x.done=true; mgSave(d); pileHide(); curTab.market='Search'; openBuilding('market'); paintBuilding(); return; }   // (DEADLINE DAY: to the market)
@@ -16010,6 +16042,13 @@
       case 'spno': spDecline(d,x.oid); x.done=true; break;
       case 'renew': if(P){ err=mgRenew(d,d.roster.indexOf(P),MGUI.years||2); if(!err){ x.done=true; showNote(P.name+' has signed a new deal.','var(--good)'); } } break;
       case 'cnot': err=mgContractNo(d,x.pid); x.done=true; break;
+      case 'offer': if(P){ const r=mgOffer(d,P.id,cOfferOf(d,P),MGUI.years||2); if(r.msg) err=r.msg;
+          else if(r.ok){ x.done=true; MGUI.offer=null; showNote(P.name+' signs for '+money(r.wage)+' a week.','var(--good)'); }
+          else if(r.sulk){ x.done=true; showNote(r.say,'var(--bad)'); } } break;   // (a counter: the paper's MEET IT)
+      case 'meetc': if(P){ err=mgMeetC(d,P.id); if(!err){ x.done=true; MGUI.offer=null; showNote(P.name+' has signed a new deal.','var(--good)'); } } break;
+      case 'erenew': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q){ err=mgRenew(d,d.roster.indexOf(q),MGUI.years||2); if(!err) showNote(q.name+' has signed a new deal.','var(--good)'); } if(!pileLive(d,x)) x.done=true; break; }
+      case 'ego': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q) mgLetGo(d,q); if(!pileLive(d,x)) x.done=true; break; }
+      case 'eterms': { const q=mgEnding(d).find(y=>(x.pids||[]).includes(y.id)); pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=q?q.id:null; mgSide='deal'; paintBuilding(); return; }   // (to his card, its deal side)
       case 'list': if(P&&lvOf(d,'market')){ d.listed[P.id]=mgValue(d,P); P.mor=clamp((P.mor??MOR0)+0.5,1,10); mgNews(d,P.name+' is on the transfer list, as he wanted.'); } x.done=true; break;   // (what he asked for: it lifts him a little)
       case 'round': if(P){ const m0=P.mor??MOR0; P.mor=clamp(Math.round((m0+1.2+hvOf(P).rs*0.06)*100)/100,1,10);   // (the steadier he is, the more he hears)
           if(P.mor>=5.5){ delete P.wantsOut; mgNews(d,P.name+' has settled: he wants to stay.'); x.res=['You talked him round: he wants to stay.']; }
@@ -16418,14 +16457,15 @@
   // asks, and 15% on what for. A FINE SEASON (cForm, 0 to 1; a half is a fine one) is against what's usual for his
   // place in the side -- about the best one in seven in his league: his goals and half his assists (a forward 14 for a
   // fine season and 19 the most, nothing under 9; a midfielder 11 and 15; a defender 4.5 and 7), a keeper's or
-  // defender's clean sheets (9 and 12), or a Player of the Month or Year (three quarters) -- this season's, or early in
+  // defender's clean sheets (9 and 12), or an honour -- a Player of the Month or Year, a Golden Boot or Glove (three
+  // quarters) -- this season's, or early in
   // a new one (fading over its first 15 games) last season's. Not his ratings: a game you play rates a man by what he
   // did in it, a simulated one by a rougher sum, and they come out differently. 23, and 30 on, as before: 30% over,
   // for what he'd get. The hometown hero (p.hometown) never asks, and renews on what he's on. mgMarketWage: what he'd
   // get (a loyal servant renews for less); mgRenewWage: what he'd sign for now.
   const CFORM={ATT:{ga:[14,19]}, MID:{ga:[11,15]}, DEF:{ga:[4.5,7],cs:[9,12]}, GK:{cs:[9,12]}};
   function cForm(d,p){ const C=CFORM[p.role]||CFORM.MID, lin=(x,v)=>v?clamp(0.5+0.5*(x-v[0])/(v[1]-v[0]),0,1):0,
-      hon=s=>(p.evs||[]).some(e=>e[0]===s&&/Player of the (Month|Year)/.test(e[1]))?0.75:0,
+      hon=s=>(p.evs||[]).some(e=>e[0]===s&&/Player of the (Month|Year)|Golden (Boot|Glove)/.test(e[1]))?0.75:0,
       f=(ga,cs,s)=>Math.max(lin(ga,C.ga),lin(cs,C.cs),hon(s));
     const now=f((p.goals||0)+0.5*(p.as||0),p.cs||0,d.season);
     const h=(p.hist||[]).slice(-1)[0], last=h&&h[0]===(d.season||1)-1&&h[3]>=8?f(h[4]+0.5*h[5],h[7]||0,h[0]):0;   // (h[7]: clean sheets, from v109)
@@ -16435,10 +16475,11 @@
   const mgMarketWage=(d,p)=>mgRound(mgDemand(d,p,false)*(hasTrait(p,d,'loyal')?0.85:1));   // (a loyal servant renews for less)
   const mgRenewWage=(d,p)=>{ if(p.hometown) return p.wage; const m=mgMarketWage(d,p);   // (a young man's modesty never takes him under what he's on)
     return mgRound(Math.max(m*cPush(d,p).ask, Math.min(m,p.wage||0))); };
-  function mgRenew(d,idx,years){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
+  function mgRenew(d,idx,years,wage){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
     if(p.loan) return p.name+' is on loan: his contract is '+mgNameOf(d,p.loan.from)+'’s.';
     if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
-    p.wage=mgRenewWage(d,p); p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5),1,10); delete p.cAsk;
+    const ask=mgRenewWage(d,p), w=wage!=null?Math.min(mgRound(wage),ask):ask;   // (v110: what was agreed in talks, never over his ask; less pleased under it)
+    p.wage=w; p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5)*(w<ask?0.5:1),1,10); delete p.cAsk; delete p.cTalk; delete p.cGo;
     mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
   // A MAN WHO'S COME ON (v83): a wage is set by how good a man is when he signs, and it stays put. Once he's worth a good
   // deal more than he's paid -- what he'd get now 30% over it, more for the young and less in his prime or after a fine
@@ -16459,7 +16500,41 @@
       if(mgLeft(d,p)>=2&&mkt>=p.wage*P.at){ p.cAsk={wage:want,wk:d.weeks||0};
         mgNews(d,p.name+(P.form>=0.5?' has had a fine season, and wants a new deal: ':P.young?' has come on, and would like a new deal: ':P.prime?' knows what he’s worth now, and wants a new deal: ':' has come on a lot, and wants a new deal: ')+money(want)+' a week.'); } } }
   function mgContractNo(d,pid){ const p=d.roster.find(x=>x.id===pid); if(!p||!p.cAsk) return 'He isn’t asking.';
-    delete p.cAsk; p.cNot=(d.weeks||0)+8; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' is told he’ll have to wait for a new deal.'); return null; }
+    delete p.cAsk; delete p.cTalk; p.cNot=(d.weeks||0)+8; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' is told he’ll have to wait for a new deal.'); return null; }
+  // CONTRACT TALKS (v110): offer a man less than he asks (OR OFFER, a step at a time down from his ask), or a longer deal
+  // for less. The least he'd take (cFloor) is his ask less his give: the young the most (15% at 20 or under, 10% at 21
+  // and 22), anyone else 5%, a fine season taking up to 3 points off it; a Loyal Servant gives 5 more, the Highly
+  // Ambitious 3 less; a happy man (7 or more) 3 more, an unhappy one (under 4.5) 4 less. A season over two is worth
+  // something to him -- 6% at 30 or more, 3% from 23 to 29, 1% at 22 or under -- and a one-season deal costs that much
+  // more. Never under what he's on, when he's worth more. At or over the least he'd take, he signs for what you offered.
+  // Under it by up to 8% of his ask, he comes back with a figure halfway from it to his ask, that week's (MEET IT -- or
+  // offer again, and under the least he'd take a second time he's had enough). Further under: an insult -- a point off
+  // his mood, no talk of terms for four weeks (and if he was asking, he stops, as for NOT NOW). His ask in full (GIVE IT
+  // HIM, AGREE) is always there.
+  function cFloor(d,p,years){ const ask=mgRenewWage(d,p), P=cPush(d,p), a=p.age||25, m=p.mor??MOR0;
+    let f=0.95-0.10*P.young+0.03*P.form-(hasTrait(p,d,'loyal')?0.05:0)+(hasTrait(p,d,'ambit')?0.03:0)-(m>=7?0.03:0)+(m<4.5?0.04:0);
+    f-=(a>=30?0.06:a<=22?0.01:0.03)*((years||2)-2);
+    let w=mgRound(ask*Math.min(1,f)); if(ask>=(p.wage||0)) w=Math.max(w,p.wage||0); return Math.min(w,ask); }
+  const cOfferOf=(d,p)=>MGUI.offer&&MGUI.offer.pid===p.id?MGUI.offer.w:mgRenewWage(d,p);
+  function cOfferStep(d,p,dir){ const ask=mgRenewWage(d,p); MGUI.offer={pid:p.id, w:clamp(mgRound(cOfferOf(d,p)+dir*Math.max(10,ask*0.05)),mgRound(ask*0.5),ask)}; }
+  const cTalkOf=(d,p)=>p.cTalk&&p.cTalk.wk===(d.weeks||0)?p.cTalk:null, cTalkBan=(d,p)=>p.cTalkNo&&(d.weeks||0)<p.cTalkNo?p.cTalkNo-(d.weeks||0):0;
+  function cGiveTxt(d,p){ const P=cPush(d,p), a=p.age||25;
+    return P.form>=0.5?'After a season like his, he won’t go far under it.':P.young?'Young and keen: he might take a little less.':a>=30?'At his age a longer deal means more to him.':P.prime?'In his prime, he knows his worth.':'He might take a little less.'; }
+  function mgOffer(d,pid,w,years){ const p=d.roster.find(x=>x.id===pid); if(!p) return {msg:'He is not in your squad.'};
+    if(p.loan) return {msg:p.name+' is on loan: his contract is '+mgNameOf(d,p.loan.from)+'’s.'};
+    if(p.wantsOut) return {msg:p.name+' won’t sign: he wants to leave.'};
+    const ban=cTalkBan(d,p); if(ban) return {msg:p.name+' won’t talk terms for '+ban+' more week'+(ban>1?'s':'')+'.'};
+    const ask=mgRenewWage(d,p), y=years||2, fl=cFloor(d,p,y), T=cTalkOf(d,p); w=mgRound(Math.min(w,ask));
+    if(w>=fl){ mgRenew(d,d.roster.indexOf(p),y,w); return {ok:true, wage:p.wage}; }
+    if(!T&&fl-w<=ask*0.08){ p.cTalk={cnt:Math.min(ask,Math.max(fl,mgRound(fl+(ask-fl)*0.5))), y, wk:d.weeks||0}; return {counter:p.cTalk.cnt}; }
+    delete p.cTalk; p.mor=clamp((p.mor??MOR0)-1,1,10); p.cTalkNo=(d.weeks||0)+4; if(p.cAsk){ delete p.cAsk; p.cNot=(d.weeks||0)+8; }
+    const say=p.name+(T?' has had enough of haggling':' took that as an insult')+': no talk of terms for four weeks.'; mgNews(d,say); return {sulk:true, say}; }
+  function mgMeetC(d,pid){ const p=d.roster.find(x=>x.id===pid), T=p&&cTalkOf(d,p); if(!T) return 'He isn’t waiting on an answer.'; return mgRenew(d,d.roster.indexOf(p),T.y,T.cnt); }
+  // DEALS RUNNING OUT (v110): your men whose deals end with this season, not let go -- a paper of them at the winter
+  // break, in the league's last four weeks and through the playoffs: RENEW (what he asks), LET GO, or talk terms
+  const mgEnding=d=>d.roster.filter(p=>(p.until||0)<=d.season&&!p.loan&&p.cGo!==d.season);
+  const pileEndingDue=d=>d.phase==='winter'||(d.phase==='league'&&d.md>=MG_MD-4)||d.phase==='playoffs';
+  function mgLetGo(d,p){ p.cGo=d.season; mgNews(d,p.name+' will leave when his deal ends.'); }
 
   // ---- scouting: what you know of a man at another club (d.kn, 0 to 3) ----
   // 0, a rating range. 1 (a report), his exact rating and attributes, and the league his potential could take him to.
@@ -16530,7 +16605,7 @@
 
   // ===== WAGE & FINANCE LOOP (deletable) ======================================================
   const FIN_TIER={
-    1:{sponsor:300, capacity:1800,  price:7,  debtLimit:3000},     // (price: the going rate for a seat -- v108; it was 3, 5, 8 and 14)
+    1:{sponsor:300, capacity:1800,  price:5,  debtLimit:3000},     // (price: the going rate for a seat -- v108; it was 3, 5, 8 and 14; League 2's $7 is $5 from v110)
     2:{sponsor:800, capacity:6000,  price:10, debtLimit:9000},
     3:{sponsor:2200,capacity:14000, price:14, debtLimit:25000},
     4:{sponsor:9000,capacity:35000, price:20, debtLimit:120000}
@@ -17675,6 +17750,10 @@
       +(p.bb?mgFact('BUYBACK',clubCode(d,p.bb.cid)+' · '+money(p.bb.fee)+' · to S'+p.bb.until,'var(--warn)',true):'')+'</div>';   // (A BUYBACK CLAUSE: who, for what, till when)
     if(p.cAsk) h+=mgActRow('<span style="color:var(--warn)">HE WANTS A NEW DEAL</span> <b>'+money(mgRenewWage(d,p))+'/wk</b>',mgYears()+'<button class="mgBtn go" data-mg="renew" data-pid="'+p.id+'">GIVE IT HIM</button><button class="mgBtn warn" data-mg="cnot" data-pid="'+p.id+'">NOT NOW</button>');
     else h+=mgActRow('NEW DEAL <b>'+money(mgRenewWage(d,p))+'/wk</b>',mgYears()+'<button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE</button>');
+    { const T=cTalkOf(d,p), ban=cTalkBan(d,p);   // (v110: CONTRACT TALKS)
+      if(T) h+=mgActRow('<span style="color:var(--warn)">HE’LL SIGN FOR</span> <b>'+money(T.cnt)+'/wk</b> · '+T.y+' season'+(T.y>1?'s':''),'<button class="mgBtn go" data-mg="meetc" data-pid="'+p.id+'">MEET IT</button>');
+      h+=ban?mgActRow('<span style="color:var(--bad)">NO TALK OF TERMS</span> for '+ban+' week'+(ban>1?'s':''),'')
+        :mgActRow('OR OFFER',mgStep('ofr',money(cOfferOf(d,p))+'/wk')+'<button class="mgBtn" data-mg="offer" data-pid="'+p.id+'">OFFER</button>'); }
     return h+'<div class="mgAct"><button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
   // SELLING HIM (the market): what he's worth, the best two bids for him, the transfer list
   function mgSaleActions(d,p){ let h='<div class="mgFacts">'+mgFact('VALUE',money(mgValue(d,p)))+mgFact('WAGE',money(p.wage)+'/wk')+'</div>';
@@ -18146,6 +18225,11 @@
       case 'cap': case 'vice': { const err=mgSetCaptain(d,pid,a==='vice'); say(err||'Done.',err?'var(--bad)':'var(--good)'); break; }
       case 'renew': { const err=mgRenew(d,d.roster.findIndex(p=>p.id===pid),MGUI.years||2); say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
       case 'cnot': { const err=mgContractNo(d,pid); say(err||'He’ll have to wait. He isn’t pleased.',err?'var(--bad)':'var(--warn)'); break; }
+      case 'ofr': { const p=d.roster.find(x=>x.id===pid); if(p) cOfferStep(d,p,+ds.dir); break; }
+      case 'offer': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const r=mgOffer(d,pid,cOfferOf(d,p),MGUI.years||2);
+        if(r.msg) say(r.msg,'var(--bad)'); else if(r.ok){ MGUI.offer=null; say(p.name+' signs for '+money(r.wage)+' a week.','var(--good)'); }
+        else if(r.counter) say(p.name+' comes back: he’ll sign for '+money(r.counter)+' a week.','var(--warn)'); else say(r.say,'var(--bad)'); break; }
+      case 'meetc': { const err=mgMeetC(d,pid); if(!err) MGUI.offer=null; say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
       case 'liststep': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), cur=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:v;
         MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRound(cur+(+ds.dir)*Math.max(10,v*0.1)))}; break; }
       case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } if(!d.listed[pid]) p.mor=clamp((p.mor??MOR0)-1,1,10); d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }

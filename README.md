@@ -1177,19 +1177,21 @@ The same game played like any other football game. It's a copy of `index.html` w
       Monday, who's happier and who's less happy, who wants to leave and who's settled. Then what needs deciding,
       each with its buttons: a club's bid for one of yours (ACCEPT, REJECT), a club's answer to your bid (SIGN HIM on
       the seasons you set, or MEET their price, or WALK AWAY), a sponsor's offer (SIGN, NO THANKS -- see **Sponsors**),
-      a man who's come on and wants a new deal (GIVE IT HIM, NOT NOW), one who wants to leave (TALK HIM ROUND, LIST
-      HIM), one who wants a word. Then the reports: bids of yours that fell through, sponsors' deals that ran out,
-      the physio's (who's hurt, how and for how long, who's fit again), the coaches' every third week (who's coming
-      on, who's going back), the scouts' (with a scouts' house and the window open: three men worth a look, LOOK to
-      go to him in the market), your next game (where, their place and form, their top scorer) and the week's money.
-      LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS (with how many are left) opens it again. A
-      decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of yours or a
-      sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else -- the market, the
-      stadium, the clubhouse -- and done there instead, it's gone from the pile.
-      Since v105 the dressing room's paper is every man in it: the side's mood and how it's moved, then each man's
-      mood and how far it's moved since last Monday (the happiest first; one who wants out in red), then who wants to
-      leave and who's settled. And the club shop's paper comes before the week's money: the week's shirt sales, the
-      three best sellers and the season's shirts so far (see **Popularity** and **Shirt sales**).
+      a man who's come on and wants a new deal (GIVE IT HIM, OR OFFER less, NOT NOW -- see **Contract talks**), the
+      deals running out (v110: at the winter break, in the league's last four weeks and through the playoffs, your men
+      whose deals end with the season, each with RENEW and LET GO, and TALK TERMS to his card), one who wants to leave
+      (TALK HIM ROUND, LIST HIM), one who wants a word. Then the reports: bids of yours that fell through, sponsors'
+      deals that ran out, the physio's (who's hurt, how and for how long, who's fit again), the coaches' every third
+      week (who's coming on, who's going back), the scouts' (with a scouts' house and the window open: three men worth
+      a look, LOOK to go to him in the market), your next game (where, their place and form, their top scorer) and the
+      week's money. LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS (with how many are left) opens
+      it again. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
+      yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
+      the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile. Since v105 the
+      dressing room's paper is every man in it: the side's mood and how it's moved, then each man's mood and how far
+      it's moved since last Monday (the happiest first; one who wants out in red), then who wants to leave and who's
+      settled. And the club shop's paper comes before the week's money: the week's shirt sales, the three best sellers
+      and the season's shirts so far (see **Popularity** and **Shirt sales**).
     - **The matchday paper** (v105). The morning of each of your games -- a Saturday's league or playoff game, a
       Wednesday's cup tie (CUP DAY) -- the table, on a small pile of its own that opens by itself over the hub: every
       club's place, goal difference and points in two columns, who's gone up or down since the last round (▲ ▼), the
@@ -1282,10 +1284,14 @@ The same game played like any other football game. It's a copy of `index.html` w
       for you, joining, leaving, being released, coming up from the academy, the armband, promotion, a title or a cup,
       an award.
     - **The season's awards**, in the review and the news: your league's Player of the Year (the best average, from
-      ten games rated; v104, its Player of the Season before), its best young player (21 or under), its top scorer,
-      and your own Player of the Year (from five). The league's Player of the Year one of yours: the league pays the
-      club four times the month's prize ($10,000 in League 2, up to $160,000 in the Premium League), the fans love it
-      (8% more of the league's usual following) and he's lifted -- in the review, the news and the next Monday papers.
+      ten games rated; v104, its Player of the Season before), its best young player (21 or under), the Golden Boot
+      (its top scorer, assists then rating to split a tie) and the Golden Glove (v110: the keeper with the most clean
+      sheets, from ten games), and your own Player of the Year (from five). The league's Player of the Year one of
+      yours: the league pays the club four times the month's prize ($10,000 in League 2, up to $160,000 in the Premium
+      League), the fans love it (8% more of the league's usual following) and he's lifted -- in the review, the news
+      and the next Monday papers. The Golden Boot or Glove one of yours: twice the month's prize ($5,000 in League 2),
+      4% more fans, a lift; either way the winners are famous for it, and on the summer's first paper (THE LEAGUE).
+      Any of these honours counts as a fine season when a man asks for a new deal.
     - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS): the most games and goals for the club, the
       youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
       season; from your second the news says when one goes (in the first, every debut would be one).
@@ -1417,8 +1423,25 @@ The same game played like any other football game. It's a copy of `index.html` w
       simulated from a new career, four careers each: in v108 the veteran asked in every one, for 3.6 to 4.2 times his
       wage, and none to two others did; in v109 he never does, and one or two men ask, all in their prime, for 22% to
       33% more.
+    - **Contract talks (v110).** On his card's deal side (OR OFFER, − / +, a step of a twentieth of his ask at a
+      time) or on his paper, offer him less than he asks, or a longer deal for less. The least he'd take is his ask
+      less his give: 15% at 20 or under, 10% at 21 and 22, 5% for anyone else, a fine season taking up to 3 points off
+      it; a Loyal Servant gives 5 more and the Highly Ambitious 3 less; a happy man (7 or more) 3 more, an unhappy one
+      (under 4.5) 4 less. A season over two is worth something to him -- 6% at 30 or more, 3% from 23 to 29, 1% at 22 or
+      under -- and a one-season deal costs that much more. Never under what he's on, when he's worth more. At or over
+      the least he'd take, he signs for what you offered (pleased, if less than with his ask). Under it by up to 8% of
+      his ask, he comes back that week with a figure halfway from it to his ask: MEET IT, or offer again -- and under it
+      a second time he's had enough. Further under is an insult. Either way he walks out: a point off his mood, no talk
+      of terms for four weeks (NO TALK OF TERMS on his card), and if he was asking he stops, as for NOT NOW. His ask in
+      full (GIVE IT HIM, AGREE) is always there. The paper says roughly how far he'd go ("Young and keen: he might take
+      a little less"; "After a season like his, he won't go far under it").
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
-    leaves as a free agent. Releasing a player pays off half of what's left on his deal.
+    leaves as a free agent; since v110 the Monday papers say so first (DEALS RUNNING OUT, above), and LET GO tells a
+    man you won't keep him. A new career's men start on deals of one to three seasons, so about a third end with the
+    first. Releasing a player pays off half of what's left on his deal.
+  - **Squads, as the world is made** (v110): about three men in ten are youngsters of 17 to 22 (it was one in ten),
+    the rest 18 to 34, most about 26 -- a new squad of fourteen has two to five of them, rated under what they'll
+    become; across the league about three in ten.
   - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
     standard, the best of them kept in the pool from one summer to the next and the young ones growing while they
     waited, all for an ordinary wage.
@@ -1507,23 +1530,23 @@ The same game played like any other football game. It's a copy of `index.html` w
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the tickets, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks).
-    - **Tickets (v108).** The going rate for a seat is $7 in League 2, $10 in League 1, $14 in the Championship and
-      $20 in the Premium League (it was $3, $5, $8 and $14), and a new career starts on it. With the field and
-      bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main stand (the
-      North) a fifth over the going rate, the South at it, the ends a fifth under (a quarter while they're open
-      terraces) -- and seats sold at a premium come with the ground: VIP seats in the main stand (60 with the big
-      bleachers, 150 covered, 300 with four stands, 600 in the grand stadium) at four times the going rate,
-      executive boxes (twelve of ten seats with four stands, thirty in the grand stadium) at fourteen times, and the
-      members' club (800 seats, the grand stadium) at seven. The fans who'd come at the going rate share out over
-      the stands by their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to
-      its seats); the premium seats sell to the money in the town -- about a fifth of them in League 2, all of them
-      in the Premium League -- and mind the price more. The fans see the prices too: dearer than the going rate,
-      their loyalty slips (more after a defeat); cheaper, it grows. A price you've never touched goes up with the
-      going rate when you're promoted; one you've set stays. On the Money tab, each section: its seats and going
-      rate, its price with − and +, how full it'll be, how many and what it takes; and BACK TO THE GOING RATE.
-      (There's no longer a rule that the price can only go up while the ground's 85% full.) A save from before v108
-      left at the old going rate moves to the new one. In money: a first season in League 2 now ends with $140,000
-      to $172,000 in the bank, against $84,000 to $87,000 on v107 (three simulated seasons each).
+    - **Tickets (v108).** The going rate for a seat is $5 in League 2 (v110; $7 in v108), $10 in League 1, $14 in the
+      Championship and $20 in the Premium League (it was $3, $5, $8 and $14), and a new career starts on it. With the
+      field and bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main
+      stand (the North) a fifth over the going rate, the South at it, the ends a fifth under (a quarter while they're
+      open terraces) -- and seats sold at a premium come with the ground: VIP seats in the main stand (60 with the big
+      bleachers, 150 covered, 300 with four stands, 600 in the grand stadium) at four times the going rate, executive
+      boxes (twelve of ten seats with four stands, thirty in the grand stadium) at fourteen times, and the members'
+      club (800 seats, the grand stadium) at seven. The fans who'd come at the going rate share out over the stands by
+      their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to its seats); the
+      premium seats sell to the money in the town -- about a fifth of them in League 2, all of them in the Premium
+      League -- and mind the price more. The fans see the prices too: dearer than the going rate, their loyalty slips
+      (more after a defeat); cheaper, it grows. A price you've never touched goes up with the going rate when you're
+      promoted; one you've set stays. On the Money tab, each section: its seats and going rate, its price with − and
+      +, how full it'll be, how many and what it takes; and BACK TO THE GOING RATE. (There's no longer a rule that the
+      price can only go up while the ground's 85% full.) A save from before v108 left at the old going rate moves to
+      the new one. In money: a first season in League 2 now ends with $140,000 to $172,000 in the bank, against
+      $84,000 to $87,000 on v107 (three simulated seasons each).
     - **The money** (v106), back at the club after a match you played, after the press conference: a line at a time,
       each figure counting up -- where the bank stood before the game, what the game brought in (the gate or your
       share of it, the TV, the week's partners, sponsors and boards; a cup's prize), the wages out, and where it
@@ -1906,6 +1929,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Contract talks, deals running out, the Golden Boot and Glove, $5 tickets, more youngsters (v110).** Offer a man
+  less than he asks, or a longer deal for less: he signs, comes back with a figure (MEET IT), or walks out -- the young
+  give the most, a man after a fine season the least, a longer deal is worth most to the older man (see **Contract
+  talks**). A Monday paper of the deals that end with the season, at the winter break and in its last weeks: RENEW,
+  LET GO, TALK TERMS. The Golden Boot (the league's top scorer, the old top scorer's award) and the Golden Glove (its
+  keeper with the most clean sheets), with a prize when they're yours. League 2's going rate for a seat is $5: a first
+  season ends with $106,000 to $146,000 in the bank, against $143,000 to $189,000 at v108's $7 and $84,000 to $87,000
+  before (three simulated seasons each). And a new world is about three in ten youngsters of 17 to 22, against one in
+  ten.
 - **Contracts by age and season (v109).** The hometown hero who came home cheap never asks for a new deal (and a new
   one keeps him on what he's on), and he's never a keeper. Everyone else asks by his age and his season: the young modestly -- not in their
   first season with you, later, and for less than they could get -- a man in his prime sooner and for a bit more, and
