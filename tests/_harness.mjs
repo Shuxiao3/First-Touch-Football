@@ -27,13 +27,18 @@ export function reporter(){
 // itself (a fresh browser starts at NORMAL). Run before every page load, as an init script.
 export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; if(!o.diff){ o.diff = 'star'; localStorage.setItem('ftc_prefs', JSON.stringify(o)); } }catch(e){} };
 
-// THE MONDAY PAPERS (v103) open over the career hub each Monday. A test of the career that isn't about them puts them
-// aside -- the ✕, as a player would -- whenever they're in the way of a click: the manager tests by default, others
+// THE MONDAY PAPERS (v103) open over the career hub each Monday, and THE PRESS CONFERENCE after each game (v104). A test
+// of the career that isn't about them puts them aside -- the ✕, or the assistant sent, as a player would -- whenever
+// they're in the way of a click: the manager tests by default, others
 // with papers: 'aside' (or pileAside on a page of their own); papers: true leaves them be (a test of the pile itself).
 // Tests that never reach a career have no handler at all: nothing between a click and a match.
 export async function pileAside(page){
   await page.addLocatorHandler(page.locator('#pileModal.on'), async () => {
     await page.evaluate(() => { const x = document.querySelector('#pileModal.on [data-pile="close"]'); if(x) x.click(); else { const m = document.getElementById('pileModal'); if(m) m.classList.remove('on'); } });
+  });
+  // (and THE PRESS CONFERENCE after a game, v104: SEND THE ASSISTANT)
+  await page.addLocatorHandler(page.locator('#pressModal.on'), async () => {
+    await page.evaluate(() => { const x = document.querySelector('#pressModal.on [data-pr="skip"]') || document.querySelector('#pressModal.on [data-pr="next"]'); if(x) x.click(); else { const m = document.getElementById('pressModal'); if(m) m.classList.remove('on'); } });
   });
 }
 

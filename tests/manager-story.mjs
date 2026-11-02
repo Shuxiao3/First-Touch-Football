@@ -113,16 +113,16 @@ r = await K(`(()=>{ const d=CAREER.data, A=CL[6].players, B=CL[7].players, X=A.f
   return { aw:R.awards.map(a=>[a.t,a.name===X.name?'X':a.name===Y.name?'Y':a.name===Z.name?'Z':a.name===W.name?'W':a.name,a.v,a.you]), news:d.news.filter(n=>/League 2’s/.test(n.t)).map(n=>n.t),
     xev:X.evs.map(e=>e[1]), xh:X.hist, wev:W.evs.map(e=>e[1]), wh:W.hist&&W.hist[W.hist.length-1], all:d.roster.every(p=>p.hist&&p.hist.length&&p.hist[p.hist.length-1][0]===d.season), zh:!!Z.hist }; })()`);
 info('the season\'s end: ' + JSON.stringify(r));
-ok(r.aw.map(a => a.slice(0, 3).join(' ')).join(' | ') === 'Player of the Season X 8.1 | Best young player Y 7.6 | Top scorer Z 31 goals | Your Player of the Season W 9.0' && r.aw[3][3] === true,
-  'the awards: the league\'s Player of the Season (from ten games), its best young player (21 or under), its top scorer, and your own Player of the Season (from five)');
-ok(r.news.length === 3 && /is League 2’s player of the season \(8\.1\)/.test(r.news.join()) && r.xev.includes('L2 Player of the Season') && r.wev.includes('STO Player of the Season'),
-  'the league\'s three in the news; on their records ("L2 Player of the Season", "STO Player of the Season")');
+ok(r.aw.map(a => a.slice(0, 3).join(' ')).join(' | ') === 'Player of the Year X 8.1 | Best young player Y 7.6 | Top scorer Z 31 goals | Your Player of the Year W 9.0' && r.aw[3][3] === true,
+  'the awards: the league\'s Player of the Year (from ten games), its best young player (21 or under), its top scorer, and your own Player of the Year (from five)');
+ok(r.news.length === 3 && /is League 2’s player of the year \(8\.1\)/.test(r.news.join()) && r.xev.includes('L2 Player of the Year') && r.wev.includes('STO Player of the Year'),
+  'the league\'s three in the news; on their records ("L2 Player of the Year", "STO Player of the Year")');
 ok(r.all && r.wh[0] === 1 && r.wh[1] === 'STO' && r.wh[3] === 8 && r.wh[6] === 90 && r.xh && r.xh[0][3] === 20 && r.xh[0][6] === 81 && r.zh,
   'a season\'s line for each of your men (' + JSON.stringify(r.wh) + ') and for the award winners elsewhere (' + JSON.stringify(r.xh[0]) + ')');
 await page.click('#chCampus [data-bldg="review"]').catch(() => {}); await page.waitForTimeout(200);
 let txt = await page.textContent('#bpBody').catch(() => '');
 if(!/THE AWARDS/.test(txt)){ await K(`(()=>{ openBuilding('review'); return 1; })()`); await page.waitForTimeout(200); txt = await page.textContent('#bpBody').catch(() => ''); }
-ok(/THE AWARDS · LEAGUE 2/.test(txt) && /Player of the Season/.test(txt) && /Your top scorer|Top scorer/.test(txt), 'the season\'s review: THE AWARDS, with your own top scorer');
+ok(/THE AWARDS · LEAGUE 2/.test(txt) && /Player of the Year/.test(txt) && /Your top scorer|Top scorer/.test(txt), 'the season\'s review: THE AWARDS, with your own top scorer');
 await K(`(()=>{ hideBldg(); return 1; })()`).catch(() => {});
 r = await K(`(()=>{ const d=CAREER.data, W=d.roster.find(p=>p.hist&&p.hist.length); mgNewSeason(d); return { s:d.season, apps:W.apps, rn:W.rn, kept:W.hist.length>=1 }; })()`);
 ok(r.s === 2 && r.apps === 0 && r.rn === 0 && r.kept, 'a new season: the numbers start again, the record stays');

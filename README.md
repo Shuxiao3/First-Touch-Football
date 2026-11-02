@@ -1144,6 +1144,43 @@ The same game played like any other football game. It's a copy of `index.html` w
       yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
       the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
+  - **The press conference** (v104). After each of your games, played or simulated, the press want a word -- its own
+    screen, after the match report and before the Monday papers. Two questions: the result's (a derby's, a cup tie's,
+    a big win's or a heavy defeat's its own), then one of your men's (one who went off hurt, two goals or the day's
+    best rating, one who's not been playing) or the run's (three wins in a row, top of the league). Three answers each,
+    and each moves something a little: the dressing room ("All of them. The lads were brilliant."), a man ("He's the
+    best I've worked with."), the fans ("This one's for the fans."), sometimes one up and another down ("I'm sorry. We
+    owe them one.": the fans like it, the dressing room doesn't). After each, what came of it. SEND THE ASSISTANT and
+    nothing's said, nothing moves.
+  - **The week's events** (v104), in the Monday papers:
+    - **Windfalls**, about one Monday in ten (not in a career's first weeks): money nobody planned on -- a will, a
+      council grant, the supporters' lottery win, an insurance payout, the TV picking your game, a benefactor, a
+      sponsored walk, an old sell-on clause -- $1,500 to $6,000 in League 2, up to $30,000 to $120,000 in the
+      Premium League, in the bank at once.
+    - **The community**, about one Monday in six: the town asks something of the club -- a coaching day at the
+      primary school, a charity match for the hospital, a visit to the children's ward, a youth club's kits, an open
+      training day, a collection for the food bank. YES and the fans think more of the club (1.5% to 3% more of the
+      league's usual following), sometimes the dressing room too; some cost money (by the league), some a little of
+      your eight's legs. NOT THIS TIME, and nothing happens.
+    - **The derby**: a club in your league is your rival, the club down the road (picked when a career starts, and
+      again in a season they're not in your league). The week you play them the papers build it up (where they are,
+      their form, your record against them); the result counts 1.6 times as much in the dressing room and with the
+      fans, win or lose, and a home derby fills the ground (a quarter more at the gate). The press conference after
+      it has its own question.
+    - **The cups' draws**: your first round (or a bye, or the Champions League group), and after each round you're
+      through, the next draw -- who, home or away, the Wednesday it's on and what winning it pays; or that you're out.
+    - **Loans**, in the transfer window: a club wants one of your fringe men (out of your eight, 24 or under or
+      not happy) to the end of the season and pays his wages -- LET HIM GO and he plays there and comes back when the
+      season's over; or lends you one of theirs out of their eight for a share of his wage (30% to all of it, the
+      better he is to them the more) -- TAKE HIM. LOAN HIM on another club's man in the market asks for one yourself
+      (a man out of their eight, the window open, room in your squad). A man on loan isn't his club's to sell,
+      release, renew or lend again till he's back, and nobody bids for him (the transfer list says who of yours is
+      out on loan, and doesn't list the man you have on loan; his card says ON LOAN). Everyone goes back at the
+      season's end: in the review, and the Monday papers say how yours did.
+    - **The Player of the Month**: every four league weeks, your league's best over them (three games rated at
+      least; the best average rating, goals to split a tie). One of yours: the league pays the club ($2,500 in
+      League 2, $6,000, $15,000, $40,000 in the Premium League), the fans love it (3% more of the league's usual
+      following) and he's lifted. Another club's: the papers say who, and who your best was.
   - **His story.**
     - **Potential is never a number**, not even your own men's: on their cards and in the lists it's a range round
       it, the same every time you look -- 12 points wide with no coaches, down to 4 with a coach rated 10 (your best;
@@ -1155,9 +1192,11 @@ The same game played like any other football game. It's a copy of `index.html` w
       who's won something; the moments are his debut, his first goal, his 50, 100, 200 games and 25, 50, 100 goals
       for you, joining, leaving, being released, coming up from the academy, the armband, promotion, a title or a cup,
       an award.
-    - **The season's awards**, in the review and the news: your league's Player of the Season (the best average,
-      from ten games rated), its best young player (21 or under), its top scorer, and your own Player of the Season
-      (from five).
+    - **The season's awards**, in the review and the news: your league's Player of the Year (the best average, from
+      ten games rated; v104, its Player of the Season before), its best young player (21 or under), its top scorer,
+      and your own Player of the Year (from five). The league's Player of the Year one of yours: the league pays the
+      club four times the month's prize ($10,000 in League 2, up to $160,000 in the Premium League), the fans love it
+      (8% more of the league's usual following) and he's lifted -- in the review, the news and the next Monday papers.
     - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS): the most games and goals for the club, the
       youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
       season; from your second the news says when one goes (in the first, every debut would be one).
@@ -1727,6 +1766,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The press conference and the week's events (v104).** After each of your games, a press conference of its own:
+  two questions, three answers each, moving the dressing room, a man or the fans. And in the Monday papers:
+  windfalls, the community's asks, the derby against your rival (counting more, a fuller gate), the cups' draws, loans
+  both ways, and the Player of the Month and of the Year (yours: a prize for the club, more fans). See **The press
+  conference** and **The week's events** under the manager career.
 - **The Monday papers, and sponsors who come to you (v103).** The check-ins are gone: each Monday the week's papers
   are on your desk instead -- the dressing room's mood and how it's moved, every decision the week has brought (bids
   for your men, answers to your bids, sponsors' offers, new deals, men who want out or want a word) and the reports

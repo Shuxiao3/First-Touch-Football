@@ -67,7 +67,7 @@ r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), was={tier:d.tier, lvl:S.lv
 info('who calls: ' + JSON.stringify(r));
 ok(r.st[0] === 0 && r.loc.sz === '0' && r.loc.fee && !r.loc.bonus && r.loc.yrs && r.loc.trades && r.loc.short,
   'a new club: only local businesses call (' + r.loc.names.join(', ') + '), $15 to $40 a week for a board, to the season\'s end, no bonus');
-ok(r.st[1] > 22 && r.town.sz > r.town.n * 0.5 && r.st[2] > 88 && /4/.test(r.top.sz) && r.top.fee >= 2000,
+ok(r.st[1] > 22 && r.town.sz > r.town.n * 0.5 && r.st[2] > 88 && /4/.test(r.top.sz) && r.top.fee >= 1800,   // (a national company's $2,000 and up, a three-season deal a tenth less a week)
   'a league up and a bigger ground, mostly the town\'s firms (' + r.town.sz + ' of ' + r.town.n + '); at the top with a grand stadium, national companies and global brands (sizes ' + r.top.sz + '), the shirt for ' + r.top.fee + ' a week and up');
 ok(r.metOk && r.base && r.tiers === '1,2,3' && r.harder && /pos/.test(r.kinds) && /crowd/.test(r.kinds) && /goals|cs/.test(r.kinds) && r.gname,
   'from a town firm up, a base fee and a bonus for a target: the shirt\'s a finish or wins, the ground\'s full crowds, a stand\'s goals, clean sheets or crowds (' + r.kinds + '); one to three tiers, each harder one paying more');
