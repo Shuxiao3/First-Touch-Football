@@ -91,15 +91,16 @@ ok(r.insult.sulk && r.insult.mor === -1 && !r.insult.asking && r.insult.cNot ===
 const card = async pid => { await K(`(()=>{ pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=${pid}; MGUI.offer=null; MGUI.msg=''; mgSide='deal'; paintBuilding(); return 1; })()`); await page.waitForTimeout(150); };   // (his card's deal side)
 const cardTxt = () => page.textContent('#bpBody');
 const ids = await K(`(()=>{ const d=CAREER.data, R=d.roster.filter(q=>q.role!=='GK'&&!q.loan); PLAIN(R[4],{age:20}); PLAIN(R[5],{age:27,goals:19}); PLAIN(R[6],{age:27}); return [R[4].id,R[5].id,R[6].id]; })()`);
+const dealBtn = () => page.$eval('#bpBody [data-mg="renew"], #bpBody [data-mg="offer"], #bpBody [data-mg="meetc"]', b => b.textContent.trim()).catch(() => '');
 await card(ids[0]);
-let t0 = await cardTxt();
+let t0 = await cardTxt(); const b0 = await dealBtn();
 const askY = await K(`mgRenewWage(CAREER.data, CAREER.data.roster.find(p=>p.id===${ids[0]}))`);
 await click('#bpBody [data-mg="ofr"][data-dir="-1"]');
-const stepped = await K(`MGUI.offer&&MGUI.offer.w`);
+const stepped = await K(`MGUI.offer&&MGUI.offer.w`), b1 = await dealBtn();
 await click('#bpBody [data-mg="offer"]');
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.id===${ids[0]}); return { wage:p.wage, msg:MGUI.msg, until:p.until-d.season }; })()`);
-ok(/OR OFFER/.test(t0) && t0.includes('$' + askY.toLocaleString('en-US') + '/wk') && stepped < askY && r.wage === stepped && /signs for/.test(r.msg),
-  'his card: OR OFFER at his ask ($' + askY + '), − takes it down ($' + stepped + '); OFFER, and a lad of 20 signs for it ("' + r.msg + '")');
+ok(/NEW DEAL/.test(t0) && t0.includes('$' + askY.toLocaleString('en-US') + '/wk') && b0 === 'AGREE' && b1 === 'OFFER' && stepped < askY && r.wage === stepped && /signs for/.test(r.msg),
+  'his card: the wage in his NEW DEAL row at his ask ($' + askY + ', AGREE); − takes it down ($' + stepped + ') and it\'s OFFER; a lad of 20 signs for it ("' + r.msg + '")');
 await card(ids[1]);
 await click('#bpBody [data-mg="ofr"][data-dir="-1"]'); await click('#bpBody [data-mg="offer"]');
 const t1 = await cardTxt(); const msg1 = await K('MGUI.msg');
@@ -111,9 +112,9 @@ ok(/comes back: he’ll sign for/.test(msg1) && /HE’LL SIGN FOR/.test(t1) && h
 await card(ids[2]);
 for(let i = 0; i < 7; i++) await click('#bpBody [data-mg="ofr"][data-dir="-1"]');
 await click('#bpBody [data-mg="offer"]');
-const t2 = await cardTxt(), noOffer = !(await page.$('#bpBody [data-mg="offer"]')), msg2 = await K('MGUI.msg');
-ok(/insult/.test(msg2) && /NO TALK OF TERMS/.test(t2) && /4 weeks/.test(t2) && noOffer,
-  'seven steps down (65% of his ask): an insult -- NO TALK OF TERMS for 4 weeks on his card, and no OFFER till then');
+const t2 = await cardTxt(), noOffer = !(await page.$('#bpBody [data-mg="offer"]')) && !(await page.$('#bpBody [data-mg="ofr"]')), msg2 = await K('MGUI.msg'), b2 = await dealBtn();
+ok(/insult/.test(msg2) && /NO TALKS 4 WK/.test(t2) && noOffer && b2 === 'AGREE',
+  'seven steps down (65% of his ask): an insult -- NO TALKS 4 WK on his card, his ask fixed (AGREE still there), no − / + or OFFER till then');
 await K(`(()=>{ hideBldg(); return 1; })()`).catch(() => {});
 
 // --- ON HIS PAPER: a man asking, OR OFFER on the paper; a figure, MEET IT ----------------------------------------------------
@@ -157,9 +158,9 @@ ok(r.renewed === 2 && r.wage === r.ask && r.gone && r.news.some(t => /will leave
   'RENEW: a new deal at what he asks, two seasons on; LET GO: he\'ll leave when his deal ends (the news says so); each off the paper, one left');
 await click('#pileModal .plBtns [data-pile="eterms"]');
 await page.waitForSelector('#bldgPanel.show', { timeout: 2000 });
-r = await K(`(()=>{ const d=CAREER.data; return { sel:MGUI.sel, tab:curTab.club, card:document.getElementById('bpBody').textContent, live:pileLeft(d).some(x=>x.k==='ending') }; })()`);
-ok(r.sel === ends[2] && r.tab === 'Squad' && /OR OFFER/.test(r.card) && /ends now/.test(r.card) && r.live,
-  'TALK TERMS: to his card in the clubhouse (his deal "ends now", OR OFFER there); the paper waits for him');
+r = await K(`(()=>{ const d=CAREER.data; return { sel:MGUI.sel, tab:curTab.club, card:document.getElementById('bpBody').textContent, ofr:!!document.querySelector('#bpBody [data-mg="ofr"]'), live:pileLeft(d).some(x=>x.k==='ending') }; })()`);
+ok(r.sel === ends[2] && r.tab === 'Squad' && r.ofr && /NEW DEAL/.test(r.card) && /ends now/.test(r.card) && r.live,
+  'TALK TERMS: to his card in the clubhouse, its deal side (his deal "ends now", the wage in his NEW DEAL row to step down); the paper waits for him');
 await K(`(()=>{ hideBldg(); return 1; })()`).catch(() => {});
 
 // --- THE GOLDEN BOOT, one of yours: the league's prize, and on the summer's first paper ----------------------------------------

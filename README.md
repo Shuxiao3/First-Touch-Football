@@ -1423,18 +1423,21 @@ The same game played like any other football game. It's a copy of `index.html` w
       simulated from a new career, four careers each: in v108 the veteran asked in every one, for 3.6 to 4.2 times his
       wage, and none to two others did; in v109 he never does, and one or two men ask, all in their prime, for 22% to
       33% more.
-    - **Contract talks (v110).** On his card's deal side (OR OFFER, − / +, a step of a twentieth of his ask at a
-      time) or on his paper, offer him less than he asks, or a longer deal for less. The least he'd take is his ask
+    - **Contract talks (v110).** On his card's deal side -- the wage in his new-deal row steps down from his ask with
+      − / +, a twentieth of it at a time: AGREE (GIVE IT HIM, if he's asking) at his ask, OFFER under it -- or on his
+      paper (OR OFFER, − / +), offer him less than he asks, or a longer deal for less. The least he'd take is his ask
       less his give: 15% at 20 or under, 10% at 21 and 22, 5% for anyone else, a fine season taking up to 3 points off
       it; a Loyal Servant gives 5 more and the Highly Ambitious 3 less; a happy man (7 or more) 3 more, an unhappy one
-      (under 4.5) 4 less. A season over two is worth something to him -- 6% at 30 or more, 3% from 23 to 29, 1% at 22 or
-      under -- and a one-season deal costs that much more. Never under what he's on, when he's worth more. At or over
-      the least he'd take, he signs for what you offered (pleased, if less than with his ask). Under it by up to 8% of
-      his ask, he comes back that week with a figure halfway from it to his ask: MEET IT, or offer again -- and under it
-      a second time he's had enough. Further under is an insult. Either way he walks out: a point off his mood, no talk
-      of terms for four weeks (NO TALK OF TERMS on his card), and if he was asking he stops, as for NOT NOW. His ask in
-      full (GIVE IT HIM, AGREE) is always there. The paper says roughly how far he'd go ("Young and keen: he might take
-      a little less"; "After a season like his, he won't go far under it").
+      (under 4.5) 4 less. A season over two is worth something to him -- 6% at 30 or more, 3% from 23 to 29, 1% at 22
+      or under -- and a one-season deal costs that much more. Never under what he's on, when he's worth more. At or
+      over the least he'd take, he signs for what you offered (pleased, if less than with his ask). Under it by up to
+      8% of his ask, he comes back that week with a figure halfway from it to his ask (HE'LL SIGN FOR, in its own row
+      on his card in RELEASE HIM's place that week, and on his paper): MEET IT, or offer again -- and under it a
+      second time he's had enough. Further under is an insult. Either way he walks out: a point off his mood, no talk
+      of terms for four weeks (NO TALKS on his card, the wage his ask), and if he was asking he stops, as for NOT NOW.
+      His ask in full (GIVE IT HIM, AGREE) is always there. NOT NOW sits beside RELEASE HIM, so the card has no more
+      rows than before and still fits the smallest phones without paging. The paper says roughly how far he'd go
+      ("Young and keen: he might take a little less"; "After a season like his, he won't go far under it").
   - **Contracts.** Every deal runs to the end of a season. Renew it in the clubhouse before it ends, or the player
     leaves as a free agent; since v110 the Monday papers say so first (DEALS RUNNING OUT, above), and LET GO tells a
     man you won't keep him. A new career's men start on deals of one to three seasons, so about a third end with the

@@ -1325,6 +1325,8 @@
   .mgActC{ display:flex; align-items:center; gap:4px 6px; margin-left:auto; }
   .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
+  .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
+  .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
   @media (max-height:360px), (max-width:700px){ .mgPaneR .cardBody{ width:26px; height:40px; } .mgPaneR .mgCardName{ font-size:15px; } .mgPaneR .mgCardHead{ gap:8px; } }
   .cardEnd{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
   .cardFlip{ width:62px; min-height:20px; padding:0; text-align:center; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'FTC Dot',monospace; white-space:nowrap;
@@ -17748,13 +17750,17 @@
       +mgFact('ARMBAND',d.cap===p.id?'★ CAPTAIN':(d.vice===p.id?'VICE ':'<button class="mgMini" data-mg="vice" data-pid="'+p.id+'">VC</button>')+'<button class="mgMini" data-mg="cap" data-pid="'+p.id+'">C</button>')
       +(d.listed[p.id]?mgFact('ON THE LIST',money(d.listed[p.id]),'var(--warn)',true):'')
       +(p.bb?mgFact('BUYBACK',clubCode(d,p.bb.cid)+' · '+money(p.bb.fee)+' · to S'+p.bb.until,'var(--warn)',true):'')+'</div>';   // (A BUYBACK CLAUSE: who, for what, till when)
-    if(p.cAsk) h+=mgActRow('<span style="color:var(--warn)">HE WANTS A NEW DEAL</span> <b>'+money(mgRenewWage(d,p))+'/wk</b>',mgYears()+'<button class="mgBtn go" data-mg="renew" data-pid="'+p.id+'">GIVE IT HIM</button><button class="mgBtn warn" data-mg="cnot" data-pid="'+p.id+'">NOT NOW</button>');
-    else h+=mgActRow('NEW DEAL <b>'+money(mgRenewWage(d,p))+'/wk</b>',mgYears()+'<button class="mgBtn" data-mg="renew" data-pid="'+p.id+'">AGREE</button>');
-    { const T=cTalkOf(d,p), ban=cTalkBan(d,p);   // (v110: CONTRACT TALKS)
-      if(T) h+=mgActRow('<span style="color:var(--warn)">HE’LL SIGN FOR</span> <b>'+money(T.cnt)+'/wk</b> · '+T.y+' season'+(T.y>1?'s':''),'<button class="mgBtn go" data-mg="meetc" data-pid="'+p.id+'">MEET IT</button>');
-      h+=ban?mgActRow('<span style="color:var(--bad)">NO TALK OF TERMS</span> for '+ban+' week'+(ban>1?'s':''),'')
-        :mgActRow('OR OFFER',mgStep('ofr',money(cOfferOf(d,p))+'/wk')+'<button class="mgBtn" data-mg="offer" data-pid="'+p.id+'">OFFER</button>'); }
-    return h+'<div class="mgAct"><button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
+    // CONTRACT TALKS on his card (v110), in the row it always had: the wage steps down from his ask (− / +) -- at his ask
+    // it's AGREE (GIVE IT HIM), under it OFFER; his figure, when he's come back with one, in the release button's row
+    // while it stands; no talk of terms, the wage his ask and a word in red. (No row more: the card never pages.)
+    const ask=mgRenewWage(d,p), T=cTalkOf(d,p), ban=cTalkBan(d,p), off=ban?ask:Math.min(cOfferOf(d,p),ask), under=off<ask;
+    const wage=ban?'<b>'+money(ask)+'/wk</b> <span style="color:var(--bad)">NO TALKS '+ban+' WK</span>'
+      :'<span class="cWage"><button class="mgAdj cAdj" data-mg="ofr" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(off)+'/wk</b><button class="mgAdj cAdj" data-mg="ofr" data-dir="1" data-pid="'+p.id+'"'+(under?'':' disabled')+'>+</button></span>';
+    const go=under?'<button class="mgBtn go" data-mg="offer" data-pid="'+p.id+'">OFFER</button>':'<button class="mgBtn'+(p.cAsk?' go':'')+'" data-mg="renew" data-pid="'+p.id+'">'+(p.cAsk?'GIVE IT HIM':'AGREE')+'</button>';
+    const no=p.cAsk?'<button class="mgBtn warn" data-mg="cnot" data-pid="'+p.id+'">NOT NOW</button>':'';   // (NOT NOW beside RELEASE: the deal's row stays narrow enough for the narrowest phone)
+    h+=mgActRow((p.cAsk?'<span style="color:var(--warn)">HE WANTS A NEW DEAL</span> ':'NEW DEAL ')+wage,mgYears()+go);
+    if(T) return h+mgActRow('<span style="color:var(--warn)">HE’LL SIGN FOR</span> <b>'+money(T.cnt)+'/wk</b>','<button class="mgBtn go" data-mg="meetc" data-pid="'+p.id+'">MEET IT</button>');   // (the week he waits on his figure: for the seasons offered, above)
+    return h+'<div class="mgAct">'+no+'<button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
   // SELLING HIM (the market): what he's worth, the best two bids for him, the transfer list
   function mgSaleActions(d,p){ let h='<div class="mgFacts">'+mgFact('VALUE',money(mgValue(d,p)))+mgFact('WAGE',money(p.wage)+'/wk')+'</div>';
     const O=(d.offers||[]).filter(o=>o.pid===p.id&&d.world.clubs[o.club]).sort((a,b)=>b.fee-a.fee);
