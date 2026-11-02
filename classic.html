@@ -3135,7 +3135,7 @@
   let windUp=null;                    // the shot wind-up you started: when, and which defenders were goal-side then
   let curveArmed=false,curveT=0,curveActive=0;
   let crossHeld=false,crossCharge=0,crossPend=null,crossLow=false,crossDown=0,crossGoneAt=-1e9;   // (crossPend/crossLow: a tap waiting for a second, the second of a double-tap -- see crossPressBall)
-  let clearArm=0,clearHeld=false,clearT0=0;   // CLEAR (own half): while armed, the next ball to reach you is hoofed away first time
+  let clearArm=0,clearHeld=false,clearT0=0,clearCharge=0,clearFeet=false;   // (clearCharge: how far a held CLEAR has charged, 0..1; clearFeet: it's at your feet, away on release -- v107)   // CLEAR (own half): while armed, the next ball to reach you is hoofed away first time
   let scoredT=0,scoreG=0,scoreR=0,offsideT=0,offSpot=null;
   // THE KICK-OFF (see resetKickoff): play holds this long, then the man on the spot rolls it back to a team-mate
   const KICK_HOLD=0.8; let kickT=0, kickBy=null, kickTo=null;
@@ -3225,7 +3225,7 @@
     if(e.code==='Space')trapHeld=false;
     if(e.code==='KeyJ'){ const h=adRelease('key'); if(h&&!adLong(h)) switchPlayer(); passRelease(); }   // (a tap: SWITCH; a hold was AUTO DEFEND)
     if(e.code==='KeyK'){ if(practice!=='keeper') releaseShoot(); }
-    if(e.code==='KeyL'){clearHeld=false;crossRelease();}
+    if(e.code==='KeyL'){clearRelease();crossRelease();}
     // releasing all movement keys ends the sprint
     if(MOVE_OK(e.code)){
       const anyMove=keys['KeyW']||keys['KeyS']||keys['KeyA']||keys['KeyD']||
@@ -3349,7 +3349,7 @@
     if(t.identifier===padId){padId=null;pdx=pdy=0;pad.style.display='none';padSprint=padSprintOn=false;pad.classList.remove('sprint');if(controlled)controlled.sprint=false;}
     if(t.identifier===trapTouchId){trapTouchId=null;trapHeld=false;
       if(swipe){ const s=swipe; swipe=null; if(e.type!=='touchcancel'&&touchLive()){ swipePoint(s,t,evT(e)); swipeRelease(s); } else if(swipeTrail) swipeTrail.endT=performance.now(); }}
-    if(t.identifier===clearTouchId){clearTouchId=null;clearHeld=false;}
+    if(t.identifier===clearTouchId){clearTouchId=null; if(e.type!=='touchcancel'&&touchLive()) clearRelease(); else { clearHeld=false; clearFeet=false; clearCharge=0; }}
     if(t.identifier===skillTouchId){skillTouchId=null; if(e.type!=='touchcancel'&&touchLive()) skillGMove(t.clientX,t.clientY); skillGEnd(e.type==='touchcancel'||!touchLive());}
     if(otTouch&&t.identifier===otTouch.id){ if(e.type!=='touchcancel'&&touchLive()) otSwipe(t); otTouch=null; }
     if(swTouch&&t.identifier===swTouch.id){ const w=swTouch, h=adRelease('touch',t.identifier); swTouch=null;
@@ -5785,14 +5785,23 @@
   // out than the six-yard box (CROSS_TRUE) it's struck, the less true it goes, for the best crosser too. crossSpray: its
   // line (signed, radians; most near it), as wide as it always was from level with the six-yard box or nearer the byline,
   // and getting on for three times as wide from 24 m out; crossOver: its weight (the share of its length it's over, or
-  // short), spot on from the six-yard box in, out by up to an eighth from 24 m (a fifth at Crossing 1)
+  // short). A poor crosser hasn't the power to whip one in (v107): his miss is mostly short -- at Crossing 1 three times
+  // in four, by up to CROSS_SHORT of the way, the other time over by up to CROSS_LONG -- where a good one's is spot on
+  // from the six-yard box in. And the further out it's struck the more it's out either way, for the best crosser too
+  // (an eighth from 24 m; a fifth at Crossing 1, mostly short). (It used to be over as often as short, and only from
+  // further out; from the byline a poor crosser's ball went as far as a good one's, and missed its man to carry on to
+  // the far touchline.)
   const CROSS_MAX=24*MK, CROSS_TRUE=5.5*MK;
   function crossOut(team,x){ return atkOf(team)>0 ? FW-x : x; }                        // how far x is from their byline
   function crossFarOf(out){ return clamp((out-CROSS_TRUE)/(CROSS_MAX-CROSS_TRUE),0,1); }   // 0 level with the six-yard box or nearer .. 1 at 24 m out
   function crossFar(team,x){ return crossFarOf(crossOut(team,x)); }
   function crossOK(p){ return crossOut(p.team,ball.x)<=CROSS_MAX; }                    // the ball near enough their byline for p to cross it
   function crossSpray(p,f){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*cpu(p).spray*(Math.random()-Math.random()); }
-  function crossOver(p,f){ f=f||0; return f*(0.10+(1-crossAccOf(p))*0.12)*cpu(p).spray*(Math.random()-Math.random()); }
+  const CROSS_SHORT=0.22, CROSS_LONG=0.08;
+  function crossOver(p,f){ f=f||0; const a=crossAccOf(p), w=clamp((0.9-a)/0.7,0,1), far=f*(0.10+(1-a)*0.12), tri=()=>Math.abs(Math.random()-Math.random());
+    const short=Math.random()<0.5+0.25*w;                                                // (a poor crosser: mostly short)
+    const m=(short ? CROSS_SHORT*w*Math.random()+far*tri() : CROSS_LONG*w*Math.random()+far*(1-0.5*w)*tri())*cpu(p).spray;
+    return short ? -m : m; }
   // HEADING stat -> header power, aerial-duel win rate (vs the opponent), and header accuracy.
   function headingOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.1, 1.0); }     // aerial-duel win value
   function headAccOf(p){   return statLerp(statOf(p,'heading',P.heading.val), 0.2, 0.8); }     // header accuracy
@@ -6277,11 +6286,16 @@
     lastGrade='LOW CROSS'; gradeColor='#9dff3c'; gradeFade=1.0;
   }
   // ===== CLEARANCE: in your own half the cross button clears the ball instead =====
-  // With it at your feet it's hoofed away at once; if it's loose (rolling or dropping toward you) the press
-  // ARMS a first-time clearance that goes the moment the ball is in reach -- no trap, no control. A ball
-  // over your head you jump and head clear. Holding the button keeps it armed -- for a while, not for good:
-  // no standing in a passing lane auto-hoofing everything that comes by.
+  // With it at your feet you charge it (v107): hold the button and the meter round your man fills (CLEAR_FILL), and it
+  // goes as you let go -- a tap a short way (CLEAR_MIN of how far he can clear one: 9-16 m), held full the whole way (as
+  // every clearance went before, 22-39 m by his Shot power and Def IQ), higher and longer the harder it's struck. If it's
+  // loose (rolling or dropping toward you) the press ARMS a first-time clearance that goes the moment the ball is in
+  // reach -- no trap, no control -- the whole way if you're still holding the button then, as far as you'd charged it if
+  // you'd let go. A ball over your head you jump and head clear: one press, no charge (how far is his Heading's).
+  // Holding the button keeps it armed -- for a while, not for good: no standing in a passing lane auto-hoofing
+  // everything that comes by.
   const CLEAR_ARM=0.8, CLEAR_HOLD=2.0;  // how long a press stays armed; the most a held press does (s)
+  const CLEAR_FILL=0.6, CLEAR_MIN=0.4;  // the charge: how long to fill it (s); a tap's share of the full distance
   function inOwnHalf(p){ return atkOf(p.team)>0 ? p.x<FW/2 : p.x>FW/2; }
   function clearMode(){ return !!controlled && !LAB.on && inOwnHalf(controlled); }
   // something to clear: the ball at your feet, or loose (not held, not in an opponent's dribble)
@@ -6293,9 +6307,24 @@
   // returns false when there's nothing to clear, so the caller can fall through (L still slides at a carrier)
   function pressClear(){
     if(!clearableBall()) return false;
-    if(ball.ownedBy===controlled){ clearBall(controlled,false); return true; }
-    clearArm=CLEAR_ARM; clearHeld=true; clearT0=simNow;
+    clearCharge=0; clearHeld=true; clearT0=simNow;
+    if(myBall()){ clearFeet=true; clearArm=0; return true; }          // yours (at your feet, or a touch away): charge it -- away when you let go
+    clearFeet=false; clearArm=CLEAR_ARM;
     return true;
+  }
+  // the button let go: a charged clearance goes (as hard as it's charged); an armed one stays armed a moment, at the
+  // charge it has now
+  function clearRelease(){
+    const was=clearHeld, c=clearCharge; clearHeld=false;
+    if(!clearFeet) return;
+    clearFeet=false; clearCharge=0;
+    if(was) clearGo(c);
+  }
+  function clearGo(c){
+    const p=controlled; if(!p||!clearMode()) return;
+    if(scoredT>0||offsideT>0||restartT>0||breakT>0||matchOver) return;
+    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>clearGo(c)); return; }
+    clearBall(p,false,c);
   }
   function tryClear(dt){
     if(clearArm<=0) return;
@@ -6304,7 +6333,7 @@
     if(clearHeld&&simNow-clearT0<CLEAR_HOLD) clearArm=Math.max(clearArm,0.2);
     clearArm-=dt;
     if(scoredT>0||offsideT>0||restartT>0||breakT>0||matchOver) return;
-    if(ball.ownedBy===p){ clearBall(p,false); return; }                 // it came to your feet: away it goes
+    if(ball.ownedBy===p){ clearBall(p,false,clearHeld?1:clearCharge); return; }   // it came to your feet: away it goes
     if(p.noTouchT>0||p.state!=='normal') return;
     const d=dist(p,ball);
     if(ball.z>AIR_REACH){                                                // over your head: jump and head it clear
@@ -6321,10 +6350,10 @@
     const reach = ball.z<12 ? controlROf(p)+ball.r : controlROf(p)*0.9;
     if(d>=reach) return;
     if(checkOffsideTouch(p)){ clearArm=0; clearHeld=false; return; }
-    clearBall(p,true);
+    clearBall(p,true,clearHeld?1:clearCharge);                           // (still holding: the whole way; let go: as far as it was charged)
   }
-  function clearBall(p,firstTime){
-    const atk=atkOf(p.team);
+  function clearBall(p,firstTime,charge){
+    const atk=atkOf(p.team), c=charge==null?1:clamp(charge,0,1), k=CLEAR_MIN+(1-CLEAR_MIN)*c, T=0.75+0.55*c;   // (a tap: short and low; full: high and long)
     // aim: the stick, unless it points back at your own goal; otherwise up and out toward your touchline
     let dx=curIx, dy=curIy; const il=Math.hypot(dx,dy), stick=il>0.3 && atk*dx/il>-0.2;
     if(stick){ dx/=il; dy/=il; }
@@ -6333,18 +6362,17 @@
     // struck first time off a ball fizzing at you, it's less clean: wider, and sometimes it doesn't carry
     const awk=firstTime ? clamp(Math.hypot(ball.vx-p.vx,ball.vy-p.vy)/cleanSpdOf(p)-0.4,0,1) : 0;
     // DEF IQ: how far it can go, and how surely it finds a team-mate upfield (the way the stick points, or anywhere upfield)
-    const C=clearAim(p,dx,dy,stick?0.6:1.1,1.3); dx=C.dx; dy=C.dy;
+    const C=clearAim(p,dx,dy,stick?0.6:1.1,T,k); dx=C.dx; dy=C.dy;
     const err=(C.err+0.14*awk)*(Math.random()*2-1);
     const ca=Math.cos(err), sa=Math.sin(err);
     const cx=dx*ca-dy*sa, cy=dx*sa+dy*ca;
     const D=C.D*(1-0.25*awk*Math.random());                             // where it first comes down
-    const T=1.3;                                                         // high and long: over everyone's head
     ball.vx=cx*D/T; ball.vy=cy*D/T; ball.vz=520*T/2; ball.z=Math.max(ball.z,1);
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=C.q; ball.rcvRunner=false;
     ball.crossBy=null; ball.crossT=0; ball.shotBy=null; ball.shotT=0;
     p.noTouchT=0.35; ball.lastTouch=p.team;
     endCurve(); recordPassTeam(p.team,p); passPose(p);
-    clearArm=0; clearHeld=false; trapping=0; crossHeld=false; crossCharge=0; crossPend=null; crossLow=false;
+    clearArm=0; clearHeld=false; clearCharge=0; clearFeet=false; trapping=0; crossHeld=false; crossCharge=0; crossPend=null; crossLow=false;
     lastGrade='CLEARED!'; gradeColor='#9dff3c'; gradeFade=1.0;
   }
   // A CLEARANCE AND DEF IQ: the better a man reads the game, the further his clearance can go (x0.85 at Def IQ 1, x1.3 at
@@ -6361,10 +6389,10 @@
       const sc=clamp(spare,-1,1.5)*2 + atk*ex/600 - da*0.5;
       if(spare>-0.2 && sc>bs){ bs=sc; best={q,x:lx,y:ly,d}; } }
     return best; }
-  function clearAim(p,dx,dy,cone,T){
-    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), Dmax=statLerp(statOf(p,'shotPower',P.shotPower.val),580,680)*(0.85+0.45*iq);   // (v85: a good one stops round halfway)
+  function clearAim(p,dx,dy,cone,T,k){
+    const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), Dmax=statLerp(statOf(p,'shotPower',P.shotPower.val),580,680)*(0.85+0.45*iq)*(k??1);   // (v85: a good one stops round halfway; k: how hard it's struck, v107)
     const tg=Math.random()<0.25+0.75*iq ? clearTarget(p,dx,dy,cone,Dmax,T) : null;
-    if(tg) return {dx:(tg.x-p.x)/tg.d, dy:(tg.y-p.y)/tg.d, D:clamp(tg.d,300,Dmax), err:0.02+0.06*(1-iq), q:tg.q};
+    if(tg) return {dx:(tg.x-p.x)/tg.d, dy:(tg.y-p.y)/tg.d, D:clamp(tg.d,Math.min(300,Dmax),Dmax), err:0.02+0.06*(1-iq), q:tg.q};
     return {dx, dy, D:Dmax, err:0.02+0.06*(1-iq), q:null};
   }
   // AI cross: a wide/advanced AI carrier whips it into the box toward a teammate
@@ -6625,7 +6653,7 @@
   // to 14 px (Heading 10) -- a quarter to two-fifths of his height. The header's reach above his head does the rest.
   function headJumpVz(p){ return Math.sqrt(2*700*statLerp(statOf(p,'heading',P.heading.val),8,14)); }
   // HOW HIGH A MAN CAN HEAD IT: the top of his head where he is (on the ground or up in his leap) and HEAD_UP over it at a
-  // stretch -- 61 px at the very most (Heading 10, at the top of his leap), well under a keeper's hands (GK_CLAIM_H, 82 px):
+  // stretch -- 61 px at the very most (Heading 10, at the top of his leap), well under a keeper's hands (GK_CLAIM_H, 78 px):
   // no man but a keeper ever gets to a ball higher than a keeper could. (It was 51 px over his head: up to 97.)
   const HEAD_UP=15;
   function headTop(p){ return (p.z||0)+PLAYER_H*0.95; }
@@ -11316,15 +11344,20 @@
   }
   // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
   // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
-  // flies (see the physics step). DECIDING TO COME (v85) he takes a moment to read it -- GK_READ, his Reflexes: 0.32 s at
-  // 1, 0.26 at 5.5, 0.2 at 10 (it was 0.12 for everyone) -- and comes only for one that drops in his six-yard box or a
-  // metre past it while it's still over their heads (AIR_REACH: as high as the computer's men go up for one): a ball
-  // that's his, not one he'd have to fight them for. A good cross, whipped in to a man, is the man's; one that hangs, or
+  // flies (see the physics step). DECIDING TO COME (v85) he takes a moment to read it -- GK_READ, his Reflexes: 0.4 s at
+  // 1, 0.33 at 5.5, 0.26 at 10 (v107; it was 0.32 to 0.2, and 0.12 for everyone before v85) -- and comes only for one that
+  // drops in his six-yard box (or half a metre past it, and not much wider: v107, it was a metre deeper and 2.7 m wider)
+  // while it's still over their heads (AIR_REACH: as high as the computer's men go up for one): a ball that's his, not
+  // one he'd have to fight them for. v107 also has him wait for it to come down a little more (GK_CLAIM_H: 3.1 m, it was
+  // 3.3 -- still over any man's head), off his line a touch slower (GK_RUN: 1.2 times his Speed, it was 1.25) and
+  // getting a hand to it a touch less far (GK_GRAB, 0.92 of his reach): crosses are headed more, his and theirs, and
+  // he mops up fewer (in the Crossing Lab, one in eighteen against one in seven; your cross to your nearest man, 11 in
+  // 40 against 26). A good cross, whipped in to a man, is the man's; one that hangs, or
   // drifts in on him, is the keeper's. ONCE HE'S COMING (committed) he's reading it all the way, out to his patch (the
   // six-yard box and a little more) -- and a ball at his hands now counts (it used to look only ahead, a moment's read
   // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
   // whole of his box (a ball he's already gone for).
-  const GK_CLAIM_H=PLAYER_H*2.4, GK_READ=[0.32,0.2];
+  const GK_CLAIM_H=PLAYER_H*2.3, GK_READ=[0.4,0.26], GK_RUN=1.2, GK_GRAB=0.92;
   // HIS WAY TO IT (v87): the run from where he is to where he'd take it (his body to within his reach of it), and the
   // men in the way. He can't go through one of theirs: one in his way, he has to go round (GK_ROUND: a stride and a half
   // more, and a check in his run); two or more, and it's shut -- he can't get there, and won't go. Nor will he go for one
@@ -11353,8 +11386,8 @@
     return committed&&theirs?Infinity:cost;
   }
   function crossClaim(kp,committed,wide){
-    const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*1.25, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ());   // (a curling one's harder to claim)
-    const react=committed?0:GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6, dX=wide?PA_D:committed?GA_D+80:GA_D+MK, dY=wide?PA_HW:GA_HW+60, lo=committed?0:AIR_REACH;
+    const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*GK_RUN, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ())*GK_GRAB;   // (a curling one's harder to claim)
+    const react=committed?0:GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6, dX=wide?PA_D:committed?GA_D+80:GA_D+MK*0.5, dY=wide?PA_HW:committed?GA_HW+60:GA_HW+40, lo=committed?0:AIR_REACH;
     for(let t=committed?0:0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach
@@ -11373,9 +11406,9 @@
   // catches it, or only gets there at the end of his reach, and punches it clear; and with one of theirs up with him, he
   // punches anything that isn't already in his midriff. -> true if he's dealt with it
   function gkTakeCross(kp,spd){
-    const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ()), dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
+    const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())*GK_GRAB, dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
     if(!(dd<R&&ball.z<=GK_CLAIM_H+8)) return false;
-    let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*1.25*t)); }
+    let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*GK_RUN*t)); }
     const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50);
     if(far>0.8||(rival&&dd/R>0.3)){ keeperPunch(kp); return true; }
     kp.gkRoaming=false; kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
@@ -11502,7 +11535,7 @@
       if(live&&gkTakeCross(kp,spd)) return;                             // (at his hands: his)
       const cs=live?crossClaim(kp,true):null;
       if(!cs){ kp.mode='return'; return; }                // (headed on, cleared, or he can't get there now)
-      const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*1.25*dt);
+      const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*GK_RUN*dt);
       kp.x+=dx/l*mv; kp.y+=dy/l*mv; kp.runDir={x:dx/l,y:dy/l};             // (the way he's going: his own men shoved off it, see separateBodies)
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
       gkTakeCross(kp,spd);
@@ -11961,6 +11994,8 @@
     }
     if(shootHeld&&myBall())shootCharge=clamp(shootCharge+dt/0.57,0,1);
     if(crossHeld&&myBall())crossCharge=clamp(crossCharge+dt/0.7,0,1);
+    if(clearFeet&&!myBall()){ clearFeet=false; clearHeld=false; clearCharge=0; }          // (lost it winding up: nothing)
+    if(clearHeld&&(clearFeet||clearArm>0)) clearCharge=clamp(clearCharge+dt/CLEAR_FILL,0,1);
 
     if(LAB.on) labStep(dt,rdt);
     let hi=humanIntent();
@@ -13433,7 +13468,7 @@
       if(inMove) return ['run', Math.floor(mv.t/0.07)%4, dx, dy];   // feet going, body turned the move's way
       if(p===controlled&&ball.ownedBy===p){                // your build-up while the button is held
         if(shootCharge>0.02) return ['shoot',0,(atkOf(p.team)>0?FW:0)-p.x,YC-p.y];
-        if(kickCharge>0.02||crossCharge>0.02) return ['pass',0,dx,dy];
+        if(kickCharge>0.02||crossCharge>0.02||(clearFeet&&clearCharge>0.02)) return ['pass',0,dx,dy];
       }
       if(p.z>2) return ['run',1,dx,dy];                    // airborne: the passing (flight) frame
       if(sp<14) return ['idle',0,dx,dy];
@@ -13807,10 +13842,10 @@
       ctx.fillStyle = spinning ? '#ffb43c' : '#10130f';   // amber when spinning, dark otherwise
       ctx.fill();
     }
-    const ch=Math.max(kickCharge,shootCharge,crossCharge);
-    if(ball.ownedBy===controlled&&ch>0.02){
+    const clr=clearHeld&&(clearFeet||clearArm>0)?clearCharge:0, ch=Math.max(kickCharge,shootCharge,crossCharge,clr);
+    if((ball.ownedBy===controlled||clr>0.02)&&ch>0.02){
       ctx.beginPath();ctx.arc(s.x,s.y,rr+5,-Math.PI/2,-Math.PI/2+Math.PI*2*ch);
-      ctx.strokeStyle=shootCharge>0.02?'#ff5a4d':crossCharge>0.02?'#ffb43c':'#9dff3c';
+      ctx.strokeStyle=shootCharge>0.02?'#ff5a4d':crossCharge>0.02?'#ffb43c':clr>0.02?'#7fd8ff':'#9dff3c';
       ctx.lineWidth=3;ctx.stroke();
     }
     // CURVE ACTIVE indicator — a bright curved arrow on the bending side
@@ -17211,7 +17246,7 @@
     if(b.dataset.cf==='yes'){ const f=_cfYes; hideConfirm(); if(f)f(); } else hideConfirm(); });
   // ===== END MANAGER CAREER ===================================================================
 
-  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
+  function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;clearCharge=0;clearFeet=false;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
   function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
   // careers saved before the week (v3 and older) are cleared -- the season runs in weeks now -- and LOAD / NEW GAME say so

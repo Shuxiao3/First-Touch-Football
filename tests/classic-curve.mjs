@@ -15,8 +15,8 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, P, FW, FH, YC, atkOf, simNow:()=>simNow, STAT_LABEL, '
-  + 'aiCross, ballAt, crossCurlQ, headClear, obThruBall, obLobBall, curlSwing, crossClaim, reachOf, keeperSpdOf, CB:()=>CROSS_BEND, PB:()=>PASS_BEND, CH:()=>GK_CLAIM_H, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, P, FW, FH, YC, MK, atkOf, simNow:()=>simNow, STAT_LABEL, '
+  + 'aiCross, ballAt, crossCurlQ, headClear, obThruBall, obLobBall, curlSwing, crossClaim, reachOf, keeperSpdOf, CB:()=>CROSS_BEND, PB:()=>PASS_BEND, CH:()=>GK_CLAIM_H, GR:()=>[GK_RUN,GK_GRAB], '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');   // (the scenes' runners are beyond everyone)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-curve-')), 'classic.html');
@@ -77,12 +77,13 @@ ok(Math.abs(clr[1] / clr[0] - 0.8) < 0.01, 'off a curling cross a headed clearan
 // still) as far off as he can just get to before it lands -- he has it straight, and not if it's curling all the way.
 // (Coming for it: committed, reading it all the way. Whether he comes at all is his read of it -- v85: see crossClaim.)
 const cl = await page.evaluate(() => { const T = window.__T, kp = T.keepers()[0], b = T.ball(), out = {}; T.freeze();
-  const glX = kp.side < 0 ? 0 : T.FW, z0 = T.CH() - 4, tEnd = Math.sqrt(z0 / 260), reach = T.reachOf(kp) + b.r, v = T.keeperSpdOf(kp) * 1.25;
-  const L = reach + v * (tEnd - 0.05);                                          // (he'd be there with 0.05 s to spare)
-  for(const k of [0, 1]){ kp.x = glX - kp.side * 30; kp.y = T.YC; b.ownedBy = null; b.x = kp.x; b.y = kp.y + L; b.z = z0; b.vx = 1; b.vy = 0; b.vz = 0;
-    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB()[1]; b.curveSpinT = 0; out[k] = !!T.crossClaim(kp, true); }
+  const glX = kp.side < 0 ? 0 : T.FW, z0 = T.CH() - 4;
+  const at = (L, k) => { kp.x = glX - kp.side * 30; kp.y = T.YC; b.ownedBy = null; b.x = kp.x; b.y = kp.y + L; b.z = z0; b.vx = 1; b.vy = 0; b.vz = 0;
+    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB()[1]; b.curveSpinT = 0; return !!T.crossClaim(kp, true); };
+  let lo = 0, hi = 400; for(let i = 0; i < 30; i++){ const m = (lo + hi) / 2; if(at(m, 0)) lo = m; else hi = m; }   // (the furthest off he can just get to it, straight)
+  out.L = +(lo / T.MK).toFixed(2); for(const k of [0, 1]) out[k] = at(lo, k);
   b.crossT = 0; b.crossBy = null; b.z = 0; b.x = T.FW / 2; b.y = T.YC; return out; });
-info('a cross he can just get to: ' + (cl[0] ? 'claimed' : 'left') + ' straight, ' + (cl[1] ? 'claimed' : 'left') + ' curling');
+info('a cross he can just get to (' + cl.L + ' m off): ' + (cl[0] ? 'claimed' : 'left') + ' straight, ' + (cl[1] ? 'claimed' : 'left') + ' curling');
 ok(cl[0] && !cl[1], 'a curling cross is a little harder for the keeper to claim: one he\'d just get to straight, he can\'t');
 
 // THROUGH BALLS: the computer's, 11 m into the path of a runner, struck true. He runs across its line at 60°, or

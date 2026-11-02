@@ -21,7 +21,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={LAB, P, players:()=>players, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, PLAN:()=>PLAN, FW, FH, YC, MK, GOAL_W, atkOf, '
-  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe(), crossMen:()=>crossMen(controlled,false), obCtx, obCrossAt, own, requestCross, crossSpray, crossOver, get CROSS_MAX(){ return CROSS_MAX; }};\n  const LAB_TITLE=');
+  + 'cast:()=>crossLabCast(), serve:()=>crossLabServe(), crossMen:()=>crossMen(controlled,false), obCtx, obCrossAt, own, requestCross, crossSpray, crossOver, crossYou:c=>cross(c,false), mine:()=>ball.ownedBy===controlled, get CROSS_MAX(){ return CROSS_MAX; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-cross-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -78,18 +78,33 @@ ok(hd(good) >= 0.7 * N && within(good.miss, 2.2) >= 0.7 * N, 'the computer cross
 ok(avg(poor.aim) > avg(good.aim) * 1.8 && avg(good.aim) < 1, 'a good crosser puts it where he aims (' + avg(good.aim).toFixed(2) + ' m off at Crossing 8, from the byline), a poor one well off it (' + avg(poor.aim).toFixed(2) + ' m at 1)');
 ok(hd(early) >= 0.55 * N && avg(early.aim) > avg(good.aim) * 1.5, 'an early ball from 24 m out still finds the runs in behind with nobody on them (' + hd(early) + ' of ' + N + ' headed), but goes less true: ' + avg(early.aim).toFixed(2) + ' m off where it was aimed, against ' + avg(good.aim).toFixed(2) + ' m from the byline');
 ok(marked.T.cleared + marked.T.keeper + (marked.T.punched || 0) >= 3 && hd(marked) < hd(good), 'two of theirs meet it in the air and clear a good share (' + marked.T.cleared + ' of ' + N + (marked.T.punched ? ', and ' + marked.T.punched + ' punched' : '') + ')');
+// THE KEEPER (v107): your cross to the nearest of your men in the box, two of ours and two of theirs, from the byline --
+// one he used to come off his line for two times in three. He waits for it to come down more, reads it longer, is a
+// touch slower off his line, gets a hand to it a touch less far, and comes only for one dropping in his six-yard box.
+const yoursNear = await page.evaluate(n => new Promise(res => { const T = window.__T, L = T.LAB; T.P.crossing.val = 8;
+  Object.assign(L, { auto: true, cWho: 'you', cKeep: true, ct: null, cFrom: 25, cAtk: 2, cDef: 2 }); T.cast(); T.serve();
+  const w0 = performance.now();
+  (function tick(){ const r = L.rep; if(r && !r.cross && !r.done && T.simNow() - r.t0 >= 1.4 && T.mine()) T.crossYou(0);
+    if((L.ct && L.ct.n >= n) || performance.now() - w0 > 150000){ L.auto = false; return res(Object.assign({}, L.ct)); } requestAnimationFrame(tick); })(); }), 30);
+info('your cross to your nearest man, 2 v 2 from the byline: ' + JSON.stringify(yoursNear));
+const kpN = yoursNear.keeper + (yoursNear.punched || 0);
+ok(yoursNear.n >= 30 && kpN <= 14 && yoursNear.head + yoursNear.cleared > kpN,
+  'your cross to your nearest man: the keeper has ' + kpN + ' of ' + yoursNear.n + ' (two in three before v107) -- the rest headed, by ours (' + yoursNear.head + ') or cleared (' + yoursNear.cleared + ')');
+
 // how wide it goes, drawn 20,000 times: its line (the mean, and the worst, in degrees) and its weight (the mean share
-// it's over or short), from the byline (f 0) and from 24 m out (f 1), at Crossing 1, 8 and 10
+// it's over or short, and how often short), from the byline (f 0) and from 24 m out (f 1), at Crossing 1, 8 and 10
 const spread = await page.evaluate(() => { const T = window.__T, p = T.controlled(), keep = T.P.crossing.val, out = {};
-  for(const c of [1, 8, 10]) for(const f of [0, 1]){ T.P.crossing.val = c; let a = 0, w = 0, o = 0; const n = 20000;
-    for(let i = 0; i < n; i++){ const e = Math.abs(T.crossSpray(p, f)); a += e; w = Math.max(w, e); o += Math.abs(T.crossOver(p, f)); }
-    out[c + (f ? ' at 24 m' : ' at the byline')] = { deg: +(a / n * 180 / Math.PI).toFixed(2), worst: +(w * 180 / Math.PI).toFixed(1), over: +(o / n * 100).toFixed(1) }; }
+  for(const c of [1, 8, 10]) for(const f of [0, 1]){ T.P.crossing.val = c; let a = 0, w = 0, o = 0, sh = 0; const n = 20000;
+    for(let i = 0; i < n; i++){ const e = Math.abs(T.crossSpray(p, f)); a += e; w = Math.max(w, e); const ov = T.crossOver(p, f); o += Math.abs(ov); if(ov < 0) sh++; }
+    out[c + (f ? ' at 24 m' : ' at the byline')] = { deg: +(a / n * 180 / Math.PI).toFixed(2), worst: +(w * 180 / Math.PI).toFixed(1), over: +(o / n * 100).toFixed(1), short: +(sh / n).toFixed(2) }; }
   T.P.crossing.val = keep; return out; });
 info('how wide, by Crossing: ' + JSON.stringify(spread));
 const S = (c, at) => spread[c + (at ? ' at 24 m' : ' at the byline')];
-ok([1, 8, 10].every(c => S(c, 0).over === 0 && S(c, 1).deg > S(c, 0).deg * 2.2 && S(c, 1).over > 3) && S(10, 1).deg < S(8, 1).deg && S(8, 1).deg < S(1, 1).deg
-   && Math.abs(S(1, 0).worst - 9.2) < 0.4 && Math.abs(S(10, 0).worst - 1.1) < 0.2,
-  'from the byline as true as ever (the worst 9° off at Crossing 1, 1° at 10, the weight spot on); from 24 m out over twice as wide (' + S(8, 0).deg + '° to ' + S(8, 1).deg + '° on average at Crossing 8), and over or short, at every Crossing, the better crosser still the truer');
+ok([1, 8, 10].every(c => S(c, 1).deg > S(c, 0).deg * 2.2 && S(c, 1).over > 3) && S(10, 1).deg < S(8, 1).deg && S(8, 1).deg < S(1, 1).deg
+   && Math.abs(S(1, 0).worst - 9.2) < 0.4 && Math.abs(S(10, 0).worst - 1.1) < 0.2 && S(10, 0).over === 0,
+  'from the byline its line as true as ever (the worst 9° off at Crossing 1, 1° at 10) and a good crosser\'s weight spot on; from 24 m out over twice as wide (' + S(8, 0).deg + '° to ' + S(8, 1).deg + '° on average at Crossing 8), and over or short, at every Crossing, the better crosser still the truer');
+ok(S(1, 0).short > 0.7 && S(1, 0).short < 0.8 && S(1, 0).over > 7 && S(1, 0).over < 12 && S(8, 0).over < 3 && S(1, 1).short > 0.65 && Math.abs(S(10, 1).short - 0.5) < 0.04 && S(1, 1).over > S(10, 1).over * 2,
+  'a poor crosser hasn\'t the power: from the byline his ball is off its weight by ' + S(1, 0).over + '% on average at Crossing 1, short ' + Math.round(S(1, 0).short * 100) + '% of the time (' + S(8, 0).over + '% at 8, nothing at 10); from 24 m out short ' + Math.round(S(1, 1).short * 100) + '% of the time at 1, as often over as short at 10');
 // nobody crosses from more than 24 m out: the computer weighing one up from 23 m and from 25 m (two of ours in the box),
 // and a team-mate on the ball 30 m out and then 20 m out when you call for one
 const reach = await page.evaluate(() => { const T = window.__T, L = T.LAB;

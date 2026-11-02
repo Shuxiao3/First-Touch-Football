@@ -143,11 +143,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     60 shots a row on v77; 120 on v78 (60 for the last two). Give or take 5 to 7 points. From any nearer the keeper
     has it off his feet first. So a one on one is a contest now, not a goal: let the keeper get out to you and down in
     time and fewer than two in five go in; hit it while he's still coming and one into the corner beats him.
-- **The keeper claims crosses.** A cross into his six-yard box, or just past it, that he can get to while it's
-  within his reach (hands up, a little higher than the bar), he comes for, over everyone's heads: the men going up
-  for it leave it to him. One that comes down further out he leaves to his defenders.
+- **The keeper claims crosses.** A cross into his six-yard box (or half a metre past it), that he can get to while
+  it's within his reach (hands up, a little higher than the bar), he comes for, over everyone's heads: the men going
+  up for it leave it to him. One that comes down further out he leaves to his defenders. (v107: a little less of
+  everything -- see **He comes for the ones that are his**.)
   - **Nobody reaches higher than a keeper.** A header tops out at the top of a man's head and a little over it at
-    a stretch: 61 px at the very most (Heading 10, at the top of his leap; 47 standing), against the keeper's 82.
+    a stretch: 61 px at the very most (Heading 10, at the top of his leap; 47 standing), against the keeper's 78
+    (82 before v107).
     Yours used to reach 51 px over your head, up to 97 px, and your clearing header 87 px, over the keeper's hands.
   - **Catch it or punch it.** Comfortably under it (it'll come to his body, him going to it), he catches it. If he
     only just gets there, at the end of his reach, or one of theirs is up with him and it isn't dropping into his
@@ -780,6 +782,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     Squad tab you can drop a man from the list onto a small pitch above his card.
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
   pitch. That covers your CLEAR, the computer's clearances and headed clearances.
+  - **Your clearance, charged (v107).** With the ball at your feet in your own half, CLEAR (`L`, or CROSS on a phone)
+    charges it: hold it and the meter round your man fills (blue, 0.6 s to full), and it goes as you let go. A tap
+    clears it a short way and low -- two-fifths of how far he can clear one, rated 5.5 coming down some 11 m on and
+    1.4 m up at the top -- a quarter charged 15 m, held full the whole way, high (28 m on, 4.2 m up, rolling on to
+    about halfway: as every clearance went before). A loose ball coming at you, the press arms a first-time clearance
+    as before: still holding as it reaches you, it goes the whole way; let go, as far as you'd charged it. Headed
+    clearances are one press, no charge: how far is his Heading.
   - **How far.** A kicked clearance can carry ×0.85 of what Shot power gives it at Def IQ 1, and ×1.3 at 10: for a
     man with Shot power 4.5, about 18 m against 27 m.
   - **Where to.** It looks for a free team-mate upfield within reach 25% of the time at Def IQ 1, and every time at
@@ -988,8 +997,16 @@ The same game played like any other football game. It's a copy of `index.html` w
   - The further out it's struck, the less true it goes, the best crosser's too: the computer's, yours (lofted or low)
     and one you call for. From level with the six-yard box or nearer the byline it's as it was. From 24 m out its line
     goes over twice as wide (2.9° off on average at Crossing 8, against 1.0° nearer in; 7.1° against 3.1° at Crossing
-    1), and its weight's out as well, up to an eighth of its length over or short (a fifth at Crossing 1), where nearer
-    in it's spot on. In between, in proportion.
+    1), and its weight's out as well, up to an eighth of its length over or short (a fifth at Crossing 1). In between,
+    in proportion.
+  - **A poor crosser comes up short (v107).** He hasn't the power to whip one in, so his miss on its weight is mostly
+    short: at Crossing 1 three times in four, by up to 22% of the way (9% off on average from the byline), and the
+    other time over by up to 8%; from 24 m out short two times in three. A good crosser's weight is spot on from the
+    byline (Crossing 10 exactly, 1.7% off at Crossing 8), and from 24 m out as often over as short. Before, a poor
+    crosser's ball from the byline went as far as a good one's, and when it missed its man it carried on, bouncing,
+    to the far side: an unmet cross to the far post came to rest some 19 m past it. Now his come through head height
+    1.7-2.6 m short of the man from the byline (3.5-4.8 m from 24 m out) and stop 7-15 m past the spot on average. (A
+    cross nobody meets, a good one included, still bounces on: that's the ball, as for any lofted ball.)
   - Measured in the Crossing Lab, the computer's crosses with two of ours in the box (with two of theirs and without;
     96 to 144 from each spot at Crossing 8, 48 at Crossing 1): how far from where they were aimed they came through
     head height on average.
@@ -1622,7 +1639,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
-| `L` in your own half | **Clear** it instead: with the ball it's hoofed high and long at once; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline |
+| `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
 
@@ -1847,6 +1864,14 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Crosses, clearances and keepers (v107).** A poor crosser comes up short: he hasn't the power to whip one in, so his
+  miss on a cross's weight is mostly short (three times in four at Crossing 1), where it used to go as far as a good
+  one's and, missing its man, carry on to the far side. Your clearance charges: with the ball at your feet in your own
+  half, hold CLEAR and the blue meter fills -- a tap a short way and low, full the whole way and high (headers stay one
+  press). And keepers come for fewer crosses: a little on every count -- it has to come down more, he reads it longer,
+  he's slower off his line, he gets a hand to it less far, and only a ball dropping in his six-yard box is his -- so
+  more crosses are headed, at both ends. See **A poor crosser comes up short**, **Your clearance, charged** and **He
+  comes for the ones that are his**.
 - **Full time, and the goals (v106).** Your goals celebrated as big as they are (an early one, an equaliser or a lead
   in the second half, the winner at the death), theirs a plain GOAL; SIM THE REST in the pause menu; the match report
   in two screens (the result, then your players' numbers) and THE MONEY back at the club; the press conference in a
@@ -1950,13 +1975,21 @@ test, and like the Trap Lab the values are the game's settings.
     leave it to him once he's nearly there, and make way for him (they were nodding it off his fingertips, and blocking
     his run). And on his way back to his line he's still a keeper: a shot on him he saves if he can (he was a
     spectator), and he isn't jerked back to his line in a frame -- he gets back himself.
-  - **He comes for the ones that are his.** Deciding to come he takes a moment to read it -- his Reflexes: 0.32 s at 1,
-    0.26 s at 5.5, 0.2 s at 10 (it was 0.12 s for everyone) -- and comes only for a ball dropping in his six-yard box
-    or a metre past it while it's still over their heads. A good cross whipped in to a man is the man's; one that
-    hangs, or drifts in on him, is the keeper's. In the Crossing Lab a Crossing 8 man's crosses from the byline to his
-    two forwards are all headed (16 of 16); a Crossing 1 man's, the keeper has 5 of 16. And while a cross of theirs is
-    still up at their heads he doesn't go after it as a loose ball (he'd run out under it, neither having it nor there
-    for the header): he came for it, or he's set on his line.
+  - **He comes for the ones that are his.** Deciding to come he takes a moment to read it -- his Reflexes: 0.4 s at 1,
+    0.33 s at 5.5, 0.26 s at 10 (v107; it was 0.32 / 0.26 / 0.2, and 0.12 s for everyone before v85) -- and comes only
+    for a ball dropping in his six-yard box or half a metre past it (v107: it was a metre past, and 2.7 m wider) while
+    it's still over their heads. Since v107 he also waits for it to come down a little more (3.1 m up, it was 3.3 --
+    still over any man's head), comes off his line a touch slower (1.2 times his Speed, it was 1.25) and gets a hand to
+    it a touch less far (0.92 of his reach): more crosses are headed, by the attackers and away by the defenders, and
+    fewer are his. In the Crossing Lab, 40 crosses in each of eight set-ups, he had 18 of 320 against 47 on v106; your
+    cross to your nearest man in the box, two of ours and two of theirs, 11 of 40 against 26 (the defenders headed 149
+    away against 124, the attackers 153 against 148). Of three settings tried between, this one still leaves him the
+    balls that are his; taken further he hardly came at all (1 of 320). A ball dropping in his six-yard box he still
+    comes for and has (6 of 6). A good cross whipped in to a man is the man's; one that hangs, or drifts in on him, is
+    the keeper's. (v85, in the Crossing Lab: a Crossing 8 man's crosses from the byline to his two forwards all headed,
+    16 of 16; a Crossing 1 man's, the keeper 5 of 16.) And while a cross of theirs is still up at their heads he doesn't
+    go after it as a loose ball (he'd run out under it, neither having it nor there for the header): he came for it, or
+    he's set on his line.
   - **Measured:** their crosses into our box from the byline and from 18 m out on the wing, toward 7, 9, 11 and 13 m
     out, one of theirs attacking each and one of ours marking him, 16 of each (128 in all). Goals 41 → 10. He came for
     35 → 18 of them; of those he let in 23 → 0, and had (caught or punched) 5 → 14 -- the rest we cleared.

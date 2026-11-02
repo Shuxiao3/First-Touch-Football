@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, setControlled, headClear, clearBall, tryDefHeaderContact, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, setControlled, headClear, clearBall, tryDefHeaderContact, own, pressClear, clearRelease, charge:()=>clearCharge, '
   + 'crossClaim, aiCross, reachOf, dht:v=>{ if(v!=null) defHeaderT=v; return defHeaderT; }, FW, FH, YC, MK, PLAYER_H, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
   + 'drop:()=>{ gkHold=null; }, score:()=>[scoreG,scoreR], stopped:()=>restartT>0||scoredT>0, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; matchClock=0; }};\n  const LAB_TITLE=');
@@ -60,6 +60,27 @@ ok(D['head:low'] < D['head:mid'] && D['head:mid'] < D['head:high'] && D['yours:l
 ok(['low', 'mid', 'high'].every(l => D['foot:' + l] > D['head:' + l] + 10 && D['foot:' + l] > D['yours:' + l] + 8), 'a header never goes as far as a kick');
 ok(Math.abs(D['foot:mid'] - halfway) < 6 && D['foot:low'] < halfway - 3 && D['foot:low'] > 26 && D['foot:high'] > halfway + 2 && D['foot:high'] < halfway + 14,
   'a clearance by foot carries to about halfway (' + D['foot:mid'] + ' m at 5.5), short of it rated low (' + D['foot:low'] + ' m), past it rated high (' + D['foot:high'] + ' m)');
+
+// CHARGED (v107): yours, at your feet in your own half -- CLEAR (L) charges it, the meter filling in 0.6 s, and it goes as
+// you let go: a tap a short way, low; held full the whole way, high (as every clearance went before). Pressed, the frames
+// let run till it's charged to `to` (0: let go at once), let go; where it first comes down and where it stops, from 8 m
+// out, rated 5.5; and how high it went.
+const charged = to => page.evaluate(to => new Promise(res => { const T = window.__T, b = T.ball(), a = T.atkOf('G'), gx = a > 0 ? 0 : T.FW;
+  const p = T.players().find(q => q.team === 'G' && q.role === 'DEF'), others = T.players().filter(q => q !== p);
+  const park = () => { others.forEach((q, i) => { q.x = T.FW / 2 + (i % 2 ? 1 : -1) * 6 * T.MK; q.y = 20 + 6 * i; q.vx = q.vy = 0; }); for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; } };
+  const keep = p.stats; p.stats = Object.assign({}, keep, { defIQ: 5.5, shotPower: 5.5 });
+  T.freeze(); park(); T.setControlled(p); p.x = gx + a * 8 * T.MK; p.y = T.YC; p.vx = p.vy = 0; p.z = 0; p.vz = 0; p.state = 'normal'; p.noTouchT = 0; p.facing = { x: a, y: 0 };
+  Object.assign(b, { ownedBy: null, dribbler: null, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0 }); T.own(p, p.r + b.r + 5);
+  const pressed = T.pressClear(), x0 = b.x, y0 = b.y; let gone = false, t0 = 0, top = 0, land = null, ch = 0;
+  (function tick(){ park(); if(!gone){ p.vx = p.vy = 0; ch = T.charge(); if(ch >= to){ T.clearRelease(); gone = true; t0 = T.simNow(); } return requestAnimationFrame(tick); }
+    top = Math.max(top, b.z); if(land == null && b.z <= 0.5 && T.simNow() - t0 > 0.1) land = Math.hypot(b.x - x0, b.y - y0) / T.MK;
+    if((Math.hypot(b.vx, b.vy) < 15 && b.z <= 1 && T.simNow() - t0 > 0.3) || T.stopped() || T.simNow() - t0 > 8){ p.stats = keep;
+      return res({ pressed, charge: +ch.toFixed(2), land: land && +land.toFixed(1), stop: +(Math.hypot(b.x - x0, b.y - y0) / T.MK).toFixed(1), top: +(top / 25).toFixed(1) }); }
+    requestAnimationFrame(tick); })(); }), to);
+const CT = { tap: await charged(0), quarter: await charged(0.25), full: await charged(1) };
+info('your clearance, charged (first down / stops / how high, m): ' + JSON.stringify(CT));
+ok(CT.tap.pressed && CT.tap.land < 0.55 * CT.full.land && CT.tap.land > 6 && CT.tap.land < CT.quarter.land && CT.quarter.land < CT.full.land && CT.tap.top < CT.full.top / 1.8 && Math.abs(CT.full.stop - D['foot:mid']) < 6,
+  'CLEAR at your feet charges: a tap goes a short way and low (down ' + CT.tap.land + ' m on, ' + CT.tap.top + ' m up), a quarter charged further (' + CT.quarter.land + ' m), full the whole way (' + CT.full.land + ' m, ' + CT.full.top + ' m up; stops ' + CT.full.stop + ' m on, as a clearance always did)');
 
 // AT HIS HANDS: our keeper come for a cross, five metres off his line, the ball right by him at 60 px and dropping, going
 // across him -- too late now to read where it'll come down (it never will, in his reach, after he's had a moment to
