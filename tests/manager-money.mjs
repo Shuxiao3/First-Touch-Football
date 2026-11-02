@@ -33,11 +33,11 @@ await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(
 // --- shirt sales ---------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d), s=shirtSales(d), L0=d.loyalty, tm0=d.tm;
   const at=o=>{ Object.assign(d,o); const v=shirtSales(d).wk; d.loyalty=L0; d.tm=tm0; return v; };
-  const best=d.roster.reduce((a,p)=>p.ovr>a.ovr?p:a,d.roster[0]), o0=best.ovr; best.ovr=MG_LEVEL[d.tier]+10; const star=shirtSales(d).wk; best.ovr=o0;
+  const best=popTop(d,1)[0], p0=best.pop; best.pop=95; const star=shirtSales(d).wk; best.pop=p0;   // (v105: a star is a man the fans love -- his popularity)
   return { wk:f.shirtWk, s, more:at({loyalty:L0*2}), happy:at({tm:9}), low:at({tm:2}), star, pool:f.poolWk===f.sponsorWk+f.broadcastWk+f.commercialWk+f.shirtWk }; })()`);
 info('shirt sales: ' + JSON.stringify(r));
-ok(r.wk > 0 && r.wk === r.s.wk && r.pool && Math.abs(r.more - 2 * r.wk) <= 2, 'shirt sales: ' + r.wk + ' a week from ' + Math.round(r.s.fans) + ' fans, paid with the rest of each week\'s money; twice the fans, twice the sales (' + r.more + ')');
-ok(r.star > r.wk && r.happy > r.wk && r.low < r.wk, 'a star sells shirts (' + r.star + ' with a man ten above the league), a happy club more (' + r.happy + '), an unhappy one fewer (' + r.low + ')');
+ok(r.wk > 0 && r.wk === r.s.wk && r.pool && Math.abs(r.more - 2 * r.wk) <= 2, 'shirt sales: ' + r.wk + ' a week from ' + Math.round(r.s.fans) + ' fans, counted in a typical week (paid each Monday since v105: see manager-deadline); twice the fans, twice the sales (' + r.more + ')');
+ok(r.star > r.wk && r.happy > r.wk && r.low < r.wk, 'a star sells shirts (' + r.star + ' with a man the fans idolise, popularity 95), a happy club more (' + r.happy + '), an unhappy one fewer (' + r.low + ')');
 
 // --- the boards come with the stands: one round a new ground, bare, and nobody calling yet (v103) -------------------------
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), b0=S.boards, ads0=S.ads.length, offers0=(d.spOff||[]).length, deals0=Object.keys(S.deals).length, buy=boardBuy(d), wk0=computeFinance(d).boardsWk, drawn=groundOfYours(d).boards.map(b=>b.short);
@@ -104,9 +104,9 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 // the review and the books
 r = await K(`(()=>{ const d=CAREER.data; d.review={season:d.season,tier:d.tier,pos:4,result:'STAYED UP',prize:1000,grew:[],expired:[],retired:[],youthOut:[],moves:{1:{table:d.div[1],up:[],down:[]},2:{table:d.div[2],up:[],down:[]},3:{table:d.div[3],up:[],down:[]},4:{table:d.div[4],up:[],down:[]}},
     bonus:[{sp:'Apex Motors',lbl:'top 6',amt:2800},{sp:'Kestrel Bank',lbl:'not 75% full',amt:0}]}; const h=mgReviewBody(d).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); const b=mgFinanceTab(d).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); d.review=null;
-  return { review:h.slice(h.indexOf('SPONSORS'),h.indexOf('SPONSORS')+90), books:/Shirt sales \\$[\\d,]+/.test(b) }; })()`);
+  return { review:h.slice(h.indexOf('SPONSORS'),h.indexOf('SPONSORS')+90), books:/Shirt sales \\(each Monday\\) \\$[\\d,]+/.test(b) }; })()`);   // (v105: the shirts are each Monday's)
 info('the review and the books: ' + JSON.stringify(r));
-ok(/SPONSORS’ BONUSES Apex Motors · top 6 \+\$2,800 Kestrel Bank · not 75% full —/.test(r.review) && r.books, 'the season\'s review lists the sponsors\' bonuses; the books, the shirt sales');
+ok(/SPONSORS’ BONUSES Apex Motors · top 6 \+\$2,800 Kestrel Bank · not 75% full —/.test(r.review) && r.books, 'the season\'s review lists the sponsors\' bonuses; the books, the shirt sales (each Monday)');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

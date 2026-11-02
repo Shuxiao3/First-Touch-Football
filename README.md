@@ -1143,6 +1143,17 @@ The same game played like any other football game. It's a copy of `index.html` w
       it again. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
       yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
       the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile.
+      Since v105 the dressing room's paper is every man in it: the side's mood and how it's moved, then each man's
+      mood and how far it's moved since last Monday (the happiest first; one who wants out in red), then who wants to
+      leave and who's settled. And the club shop's paper comes before the week's money: the week's shirt sales, the
+      three best sellers and the season's shirts so far (see **Popularity** and **Shirt sales**).
+    - **The matchday paper** (v105). The morning of each of your games -- a Saturday's league or playoff game, a
+      Wednesday's cup tie (CUP DAY) -- the table, on a small pile of its own that opens by itself over the hub: every
+      club's place, goal difference and points in two columns, who's gone up or down since the last round (▲ ▼), the
+      places that go up (green), to the playoffs (gold) and down (red) marked down the side, yours shaded and today's
+      opponents in red. Over it, where you stand ("5th in League 2, 18 points"), today's game (where, and their
+      place), and in a line how far you are off the top, the top two, the playoffs or the drop. The season's first
+      day has everyone on nothing. NEXT and it's read; the table's in the Clubhouse's League tab too.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
   - **The press conference** (v104). After each of your games, played or simulated, the press want a word -- its own
     screen, after the match report and before the Monday papers. Two questions: the result's (a derby's, a cup tie's,
@@ -1181,6 +1192,35 @@ The same game played like any other football game. It's a copy of `index.html` w
       least; the best average rating, goals to split a tie). One of yours: the league pays the club ($2,500 in
       League 2, $6,000, $15,000, $40,000 in the Premium League), the fans love it (3% more of the league's usual
       following) and he's lifted. Another club's: the papers say who, and who your best was.
+    - **Deadline day** (v105): the winter break's Monday is the window's last day -- it shuts when the week's done,
+      till the summer -- and its paper comes straight after the dressing room's (the hub says so too). The clubs
+      that still need someone are desperate: the bids for your men come thick and fast (two-thirds more than in a
+      pre-season week), a fifth over the usual fee, and three times in five a bigger club comes in late for one of
+      your best three, at half as much again as he's worth or more (A DEADLINE-DAY BID). The sellers cut their prices
+      (15% under), and a bid you make is answered there and then -- yes, or what they want (a counter to meet before
+      the window shuts) -- with no Monday left to wait for. TO THE MARKET goes straight there.
+    - **A youngster on a buyback clause** (v105): now and then in a window (about one week in five of pre-season
+      and the winter break, one in sixteen of the league's first half) a bigger club -- a league or more above yours;
+      in the Premium League, one of its top five -- offers you a youngster it has no use for yet: 21 or under, out of
+      its eight, too raw for its first team or not doing it there, no worse than your weakest in his part of the side
+      less two, with more to come, at a fee you can find. A fifth under their price, on a buyback clause: at the start
+      of either window, to the end of next season, they can have him back for twice what you paid -- and they will if
+      he's come on (four points or more, and within five of their league's level): he goes, the money comes in, and
+      the papers say so. If they never do, the clause runs out and he's all yours. SIGN HIM (on the seasons you set),
+      NO THANKS or LATER; the clause is on the DEAL side of his card (BUYBACK: who, for what, till when).
+  - **Popularity** (v105). Every man has one, 1 to 99, on his card under his position: how much the fans think of
+    him. It comes of how good he is against his league (2.5 a point either side of its level), his season (1.5 a
+    goal to 15, a little for assists and, for a keeper or a defender, clean sheets; his form: his average rating,
+    from three games, up to 12 for 7.5), his years at the club (3 a season, to 12), the armband (5), coming up
+    through your academy (6), being a bright young thing (4: 21 or under and near the league's level), and his
+    honours (to 30: the hometown hero comes with 15, the wonderkid with 8, a Player of the Month adds 5 and of the
+    Year 10, the manager's praise a little; a fifth of it fades each summer). A man of yours goes a fifth of the way
+    to that each Monday, and an honour lifts him at once too (the Player of the Month 10, of the Year 20; "He's the
+    best I've worked with." at a press conference 3, "He can do a lot better." 2 off; a goal in a derby 1.5, 3 in a
+    win). A new man starts eight under it: he has to win the fans over (the hometown hero needn't). Anyone else's is
+    what it comes to at his club.
+    - **Your three most popular** bring people through the gate -- from 40 between them, 1% more for every 3
+      points, up to 20% (the books say so: "Your stars' draw") -- and sell the shirts (see **Shirt sales**).
   - **His story.**
     - **Potential is never a number**, not even your own men's: on their cards and in the lists it's a range round
       it, the same every time you look -- 12 points wide with no coaches, down to 4 with a coach rated 10 (your best;
@@ -1393,10 +1433,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the ticket price, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks).
-    - **Shirt sales** are passive: paid with the rest of each week's money, home or away. Your fans buy the shirt --
+    - **Shirt sales** come in at the start of each week, on its Monday (v105: they used to come with a matchday's
+      money), every week of the year, pre-season and the winter break too, and the Monday papers say what came in
+      (THE CLUB SHOP: the week's sales, the best sellers, the season's shirts so far). Your fans buy the shirt --
       $0.22 a fan a week in League 2, up to $0.36 in the Premium League (a new career's 1,000 fans: about $200 a
-      week) -- more with a star (4% for every point your best man is above the league's level, from 15% less to 60%
-      more) and with a happy dressing room (6% a point of the side's mood either side of settled).
+      week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity: from 15%
+      less to 60% more; see **Popularity**) and with a happy dressing room (6% a point of the side's mood either side
+      of settled). Who sells the most is shared out by popularity, squared.
   - **The ground.** A new career's is a field with two metal bleachers, one down each side, and one board -- bare
     (YOUR AD HERE) -- round the pitch: 1,800 seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
     far as your clubhouse lets you (see **The campus**):
@@ -1766,6 +1809,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Deadline day and the fans (v105).** Every man has a popularity, on his card; your most popular bring more
+  through the gate and sell the shirts, which come in each Monday now, not with a matchday's money. The morning of
+  each of your games, the table (the matchday paper); each Monday, the dressing room man by man. The winter break's
+  Monday is deadline day (desperate clubs, cheaper sellers, every bid answered there and then, a bigger club's late
+  bid), and a bigger club may offer you a youngster on a buyback clause. See **Popularity**, **The matchday
+  paper**, **Deadline day** and **A youngster on a buyback clause** under the manager career.
 - **The press conference and the week's events (v104).** After each of your games, a press conference of its own:
   two questions, three answers each, moving the dressing room, a man or the fans. And in the Monday papers:
   windfalls, the community's asks, the derby against your rival (counting more, a fuller gate), the cups' draws, loans
