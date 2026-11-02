@@ -99,13 +99,10 @@ ok(soon(A.out.won10) <= 1 && soon(B.out.won10) - soon(A.out.won10) >= 4,
   'their man can\'t just get up and take it straight back: ' + soon(A.out.won10) + ' of 12 times within 1.5 s with the guard, ' + soon(B.out.won10) + ' of 12 without (' + sum(B.out.won10, r => r.downed) + ' with ours put down); in 2.5 s stood there, ' + back(A.out.won10) + ' and ' + back(B.out.won10));
 
 // 4. the stick still moves him -- but not back into that man (and, his split second over, the stick still pushed at him, it's
-// as it was: run into him and he loses it). Since v96 the ball goes round with his feet, so pushed on into him he takes it
-// into him with him, and it can be nicked a quarter of a second after the guard's over -- before, it was left behind him
-// and that man had to get round him to it, never inside the first second. What counts now is that the guard still saves
-// it: lost in the first second less often than with no guard at all (24 of each, under load: 4 against 16; v95, 0 and 11)
+// as it was: run into him and he loses it -- so what counts is the first second)
 const at = A.out.at, atB = B.out.at, early = R => sum(R, r => r.back !== null && r.back < 1);
-ok(at.every(r => r.moved !== null && r.moved < 0.4) && med(atB.map(r => r.moved)) - med(at.map(r => r.moved)) >= 0.6 && early(at) < early(atB),
-  'with the stick pushed at their man he doesn\'t go back into him (' + med(at.map(r => r.moved)) + ' m toward him in 0.4 s; ' + med(atB.map(r => r.moved)) + ' m without the guard), and the guard still saves it (lost in the first second ' + early(at) + ' of 12 times, ' + early(atB) + ' without it)');
+ok(at.every(r => r.moved !== null && r.moved < 0.4) && med(atB.map(r => r.moved)) - med(at.map(r => r.moved)) >= 0.6 && early(at) <= 1,
+  'with the stick pushed at their man he doesn\'t go back into him (' + med(at.map(r => r.moved)) + ' m toward him in 0.4 s; ' + med(atB.map(r => r.moved)) + ' m without the guard), and keeps it through it (lost in the first second ' + early(at) + ' of 12 times, ' + early(atB) + ' without)');
 
 process.exitCode = A.rep.finish();
 await A.browser.close();

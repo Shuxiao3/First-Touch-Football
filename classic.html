@@ -1709,7 +1709,7 @@
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
     composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
-    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'How far each dribble touch goes on ahead (120 = as it plays: 0.3 m clear of him running at Dribbling 1 down to 0.1 m at 10, and 1 m down to 0.5 m at a sprint). Bigger = longer touches.'},
+    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'How far each dribble touch goes on ahead (120 = as it plays: 1 m clear of him running at Dribbling 1 down to 0.3 m at 10, and 2 m down to 1 m at a sprint). Bigger = longer touches.'},
     knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'How much each touch varies, in length and line (0.8 = as it plays: +-8% at Dribbling 10, +-40% at 1). Higher = looser, less predictable dribbling.'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
     accel:     {val:5.5, min:1,   max:10,  step:0.1, label:'Acceleration (stat 1–10)',hint:'Outfielder acceleration as a 1–10 stat. 1 = 0.05 (sluggish off the mark); 10 = 0.50 (explosive). Baseline for all players.'},
@@ -1910,7 +1910,7 @@
   const THEMES=['blue','ruby','silver','mint'];
   try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
   delete PREFS.dRun; delete PREFS.dSprint;   // (v92's touch lengths, set on the touches before v94's: gone)
-  if(PREFS.touchV!==98){ PREFS.touchRun=1; PREFS.touchSprint=1; PREFS.touchV=98; }   // (RUN/SPRINT TOUCH set on another version's touch lengths: back to x1)
+  if(PREFS.touchV!==95){ PREFS.touchRun=1; PREFS.touchSprint=1; PREFS.touchV=95; }   // (RUN/SPRINT TOUCH set on another version's touch lengths: back to x1)
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
   // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
@@ -3367,7 +3367,7 @@
   }
   function swipeShoot(sw){
     const p=controlled, atk=atkOf(p.team);
-    if(ball.ownedBy===p){ ball.x=p.x+atk*(AT_FEET+2); ball.y=p.y; }   // strike it from in front, as a held K shot does
+    if(ball.ownedBy===p){ ball.x=p.x+atk*(p.r+ball.r+4); ball.y=p.y; }   // strike it from in front, as a held K shot does
     shootAt(p,atk,sw.aim,sw.charge,0,undefined,sw.spin,sw.dir?swipeAcross(p,sw.dir):0);
     ball.dribbler=null; ball.dribbleGrace=0;
     curveArmed=!!sw.kb; curveT=sw.kb?1.1:0; trapping=0; shootHeld=false; shootCharge=0; windUp=null;   // (a K shot can still be bent)
@@ -3717,8 +3717,6 @@
       if(u>=1){ const db={x:f.x*0.85+right.x*sk.s*0.53,y:f.y*0.85+right.y*sk.s*0.53}, g={x:f.x*0.85-right.x*sk.s*0.53,y:f.y*0.85-right.y*sk.s*0.53};
         out={g,keep:Math.max(sk.sp0,runSpeedOf(p)*0.95),loose:{d:db,v:200*sk.r,vz:50,grace:1.1,nt:0.25,auto:true,go:0.4}}; }
     }
-    if(sk.eb0==null) sk.eb0=sk.kind==='spin'?{x:0,y:0}:{x:ball.x-bx,y:ball.y-by};   // (where the ball was as he began it, off where the move has it --
-    { const kb=1-clamp(u/0.2,0,1); bx+=sk.eb0.x*kb; by+=sk.eb0.y*kb; }                  //  at his boots: AT HIS FEET -- gone by a fifth of the way in)
     p.x=clamp(x,p.r,FW-p.r); p.y=clamp(y,p.r,FH-p.r); sk.px=p.x; sk.py=p.y;
     const bvx=sk.pbx!=null?(bx-sk.pbx)/Math.max(dt,1e-3):p.vx, bvy=sk.pbx!=null?(by-sk.pby)/Math.max(dt,1e-3):p.vy; sk.pbx=bx; sk.pby=by;   // (the ball's own way: it isn't always his)
     ball.x=clamp(bx,ball.r,FW-ball.r); ball.y=clamp(by,ball.r,FH-ball.r); ball.vx=bvx; ball.vy=bvy; ball.z=bz; ball.vz=0;
@@ -4994,7 +4992,7 @@
     D.x=you.x+atk*LAB.dDist; D.y=YC; D.facing={x:-atk,y:0};
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
     ball.shotBy=null; ball.shotT=0; ball.crossBy=null; ball.crossT=0; endCurve(); offsidePass=null; ball.z=0; ball.vz=0;
-    ball.x=you.x; ball.y=you.y; own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;   // (at his feet, in front of him)
+    own(you,you.r+ball.r+5); you.passLockT=0; ball.lastTouch=you.team;
     kickHeld=shootHeld=crossHeld=false;crossPend=null;crossLow=false; kickCharge=shootCharge=crossCharge=0; passPend=null; passDown=null; windUp=null; swipeShot=null;
     LAB.rep={t0:simNow, def:LAB.dDef, d:LAB.dDist, slide:LAB.dSlide, start:{x:you.x,y:you.y}, moves:[], lunges:[], seen:[], looseT:0, done:false, result:null};
     LAB.dirty=true;
@@ -5091,7 +5089,7 @@
     document.getElementById('labDDefV').textContent=plName(DL_DEFS,LAB.dDef);
     document.getElementById('labDDistV').textContent=plName(DL_DISTS,LAB.dDist);
     document.getElementById('labDSlideV').textContent=LAB.dSlide?'ON':'OFF';
-    const you=controlled, m1=v=>v.toFixed(v<1?2:v<10?1:0)+' M';   // (under a metre to the centimetre: 0.10 M and 0.13 M aren't the same touch -- v98)
+    const you=controlled, m1=v=>v.toFixed(v<10?1:0)+' M';
     document.getElementById('labDDribV').textContent=String(LAB.dDrib);
     document.getElementById('labDRunV').textContent=m1(dlTouchM(you,false));
     document.getElementById('labDSprintV').textContent=m1(dlTouchM(you,true));
@@ -6923,7 +6921,7 @@
       if(myBall()) swipeShot={aim:Math.max(-1,Math.min(1,curIy)),charge:shootCharge,t:ball.ownedBy===controlled?1.0:0.6,kb:true};
       shootCharge=0; return;
     }
-    { const atk=atkOf(controlled.team); ball.x=controlled.x+atk*(AT_FEET+2); ball.y=controlled.y; }
+    { const atk=atkOf(controlled.team); ball.x=controlled.x+atk*(controlled.r+ball.r+4); ball.y=controlled.y; }
     shootAt(controlled,atkOf(controlled.team),Math.max(-1,Math.min(1,curIy)),shootCharge);
     shootCharge=0;
     curveArmed=true;curveT=1.1;              // can curve for a short window
@@ -7343,11 +7341,10 @@
       if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0||p.soldT>simNow)continue;   // (sold by a skill move: skillSells)
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
-      const tg=tackleGap(carrier), far=tg>controlROf(carrier)+ball.r+4;   // (his touch out ahead of him: nothing of him between it and anyone -- DRIBBLING;
-      const tp=far?ball:tackleSpot(carrier);                              //  how far out, where it was before v96 -- AT HIS FEET)
-      if(Math.hypot(p.x-tp.x,p.y-tp.y)<p.r+ball.r+Math.max(0,tackleReachOf(p)-(far?0:shieldCushion(carrier,p)))){   // (his reach doesn't count through the cushion)
+      const far=dist(carrier,ball)>controlROf(carrier)+ball.r+4;   // (his touch out ahead of him: nothing of him between it and anyone -- DRIBBLING)
+      if(dist(p,ball)<p.r+ball.r+Math.max(0,tackleReachOf(p)-(far?0:shieldCushion(carrier,p)))){   // (his reach doesn't count through the cushion)
         // can only take it cleanly if the ball is showing (not shielded by the body)
-        const exp=far?Math.max(ballExposure(carrier,p),clamp((tg-controlROf(carrier)-ball.r-4)/(2*MK),0,1)):ballExposure(carrier,p);   // (out ahead: the further, the more it's anyone's)
+        const exp=far?Math.max(ballExposure(carrier,p),clamp((dist(carrier,ball)-controlROf(carrier)-ball.r-4)/(2*MK),0,1)):ballExposure(carrier,p);   // (out ahead: the further, the more it's anyone's)
         if(!far&&isBehind(carrier,p))continue;                   // can't nick it from straight behind
         if(!far&&shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier))continue;   // shielding: only from where the ball shows
         if(!far&&shotWindUpSafe(carrier,p))continue;             // ...or from behind / alongside while you wind up a shot
@@ -7489,15 +7486,14 @@
     const reach=lungeDist+contact;                           // furthest the *centre+reach* can win it
     // lead the ball over the time it actually takes the (decelerating) lunge to cover the gap
     const avgSpd=lungeDist/Math.max(T,1e-3);
-    const b0=carrier&&ball.ownedBy===carrier?tackleSpot(carrier):ball;   // (the ball on him where it was before v96: see tackleSpot)
-    const d0=Math.hypot(b0.x-p.x, b0.y-p.y);
+    const d0=Math.hypot(ball.x-p.x, ball.y-p.y);
     const leadT=clamp(d0/Math.max(avgSpd,1), 0, T+0.05);
     // Def IQ AIM: low IQ aims where the ball WAS (a random lag into the past -> lands behind a mover);
     // high IQ aims where it's GOING (full lead). Blend by Def IQ.
     const lag=-P.defIQtime.val*Math.random();              // 0..lagMax seconds in the PAST
     const tEff=statLerp(defIQof(p), lag, leadT);           // IQ1 -> where it was, IQ10 -> where it's going
     const cvx=carrier?carrier.vx:ball.vx, cvy=carrier?carrier.vy:ball.vy;
-    const px=b0.x+cvx*tEff, py=b0.y+cvy*tEff;
+    const px=ball.x+cvx*tEff, py=ball.y+cvy*tEff;
     const ld=Math.hypot(px-p.x, py-p.y)||1;
     if(ld>reach) return;                                     // can't reach the meeting point -> keep closing
     p.slideShort=statLerp(defIQof(p),0.20,0)*Math.random();  // low Def IQ: actual lunge comes up to 20% short (random)
@@ -7516,8 +7512,7 @@
   }
   function slideContact(p){
     if(gkHold||restartT>0)return;
-    { const c0=ball.ownedBy, tp=c0&&c0.team!==p.team&&dist(c0,ball)<=controlROf(c0)+ball.r+4?tackleSpot(c0):ball;   // (at his feet: where a slide finds it -- AT HIS FEET)
-      if(Math.hypot(p.x-tp.x,p.y-tp.y)>p.r+ball.r+10*slideHitOf(p)||ball.z>26)return; }
+    if(dist(p,ball)>p.r+ball.r+10*slideHitOf(p)||ball.z>26)return;
     const carrier=ball.ownedBy;
     if(carrier&&carrier!==p&&carrier.team!==p.team&&!p.slideTried){
       p.slideTried=true;
@@ -8901,8 +8896,7 @@
     if(!ob||ob.done||simNow-ob.seen>0.7) ob=p.ob=obStart(p,C);         // a new spell on the ball
     ob.seen=simNow;
     if(p.takeOn&&simNow-p.takeOn.at>0.1) p.takeOn=null;                  // (he lost it since)
-    const bg=dist(p,ball), bsp=Math.hypot(p.vx,p.vy), bAhead=bsp>30?((ball.x-p.x)*p.vx+(ball.y-p.y)*p.vy)/((bg*bsp)||1):1;
-    if(bg>controlROf(p)+ball.r+4||(bg>DRIB_TOUCH&&bAhead<0.5&&!(p.tapOK&&p.atFeet===1&&bg<=DRIB_GATHER+TAP_AMP[0]))){ if(p.takeOn) p.takeOn.at=simNow; p.dbgTag='OB-TOUCH';   // (his touch out ahead: on to it first -- DRIBBLING; off his feet beside or behind him: to it, not on without it -- v97)
+    if(dist(p,ball)>controlROf(p)+ball.r+4){ if(p.takeOn) p.takeOn.at=simNow; p.dbgTag='OB-TOUCH';   // (his touch out ahead: on to it first -- DRIBBLING)
       return steer(p,ball.x+ball.vx*0.15,ball.y+ball.vy*0.15); }
     if(p.takeOn&&p.takeOn.phase!=='go'){ const r=obTakeOnStep(p,dt,C); if(r) return r; }   // committed: past him first
     if(C.prD<70) ob.pressed=true;
@@ -10003,8 +9997,8 @@
         const tl=Math.hypot(toD.x,toD.y)||1;
         const closing=(c.vx*toD.x+c.vy*toD.y)/tl;        // + = carrier coming AT me
         const cSpeed=Math.hypot(c.vx,c.vy);
-        const bs=ball.ownedBy===c?tackleSpot(c):ball, d=Math.hypot(p.x-bs.x,p.y-bs.y);   // (the ball on him where it was before v96: see tackleSpot)
-        const ballAhead=ballGapOf(c)>c.r+ball.r+20;          // (where it was before v96: see tackleSpot)
+        const d=dist(p,ball);
+        const ballAhead=dist(c,ball)>c.r+ball.r+20;
         const exp=ballExposure(c,p);                      // is the ball showing to me?
         const showing=exp>0.5;
 
@@ -10022,7 +10016,7 @@
         // doesn't matter here, every defender tries to deny the turn. The turn itself is then a
         // STRENGTH battle (handled in contactTackles): if I'm stronger I can nick it as he turns;
         // if he's stronger he turns away and keeps it.
-        const shieldingMe = exp<0.45 && cSpeed<120 && ballGapOf(c)<c.r+ball.r+22;
+        const shieldingMe = exp<0.45 && cSpeed<120 && dist(c,ball)<c.r+ball.r+22;
         if(shieldingMe && mode!=='commit'){
           mode='block';
         }
@@ -10046,7 +10040,7 @@
         } else if(mode==='commit'){
           // attack the ball directly from the front -- where it'll be, as I read his run (not where it was: a man
           // sprinting past is gone by the time I get there)
-          tx=bs.x+rc.x-c.x; ty=bs.y+rc.y-c.y;
+          tx=ball.x+rc.x-c.x; ty=ball.y+rc.y-c.y;
           if(p.tackleCd<=0&&p.state==='normal'){
             if(d<p.r+ball.r+10){ /* contact tackle handles it */ }
             else if(d<120&&(showing||ballAhead)&&Math.random()<(0.025+0.03*effTight)*iqDef(p,'tackleTiming')*cpu(p).tackle){
@@ -11047,7 +11041,6 @@
       if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<controlROf(p)+ball.r){
         if(checkOffsideTouch(p))return;
         endCurve(); own(p,0,true);                         // (where it is: no snap back to his feet -- DRIBBLING)
-        ball.vx=p.vx+(ball.vx-p.vx)*0.3; ball.vy=p.vy+(ball.vy-p.vy)*0.3;   // (his first touch on it cushions it: rolling on with him, not off on its own way -- AT HIS FEET)
         return;
       }
       const intercept=!!(passerTeam&&p.team!==passerTeam);
@@ -11126,11 +11119,10 @@
       // carry angle at it, so a loose touch isn't magically re-centered to the feet.
       p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x);
     } else {
-      p.carryAngle=ownLob&&psp>30?Math.atan2(p.vy,p.vx):Math.hypot(ball.x-p.x,ball.y-p.y)<4&&p.facing?Math.atan2(p.facing.y,p.facing.x):Math.atan2(ball.y-p.y,ball.x-p.x);   // (his own lob: taken in his stride, the way he's going; one put where he stands: the way he faces)
+      p.carryAngle=ownLob&&psp>30?Math.atan2(p.vy,p.vx):Math.atan2(ball.y-p.y,ball.x-p.x);   // (his own lob: taken in his stride, the way he's going)
       if(ownLob&&psp>30) p.facing={x:p.vx/psp,y:p.vy/psp};
-      const cd=Math.min(carryDist,AT_FEET);                       // (at his boots: AT HIS FEET)
-      ball.x=p.x+Math.cos(p.carryAngle)*cd;
-      ball.y=p.y+Math.sin(p.carryAngle)*cd;
+      ball.x=p.x+Math.cos(p.carryAngle)*carryDist;
+      ball.y=p.y+Math.sin(p.carryAngle)*carryDist;
       ball.vx=p.vx;ball.vy=p.vy;
     }
     if(lostBy){
@@ -11166,70 +11158,29 @@
   // can take it, as at his feet (contactTackles) -- and out in front of him it's on show. Only if it gets away from him
   // (1.5 m past the touch: held off it, or it's run on) is it a loose ball, his touch, for him to go and get. Slow or
   // stood, it's at his feet; a pass, cross, shot or move asked for while it's out ahead goes when he's on it.
-  const DRIB_MOVE=40, DRIB_SLACK=1.5*MK;
-  // THE BALL AT HIS FEET (v96): on it and in control of it, it's at his boots -- AT_FEET from where he stands (its edge a
-  // step off his feet), a little further on at a run (up to AT_FEET_RUN more: still inside DRIB_TOUCH, v97), and drawn in
-  // as he turns, so it goes round with his feet rather than round a ring; a touch goes from there (DRIB_TOUCH: when he's
-  // on it), never from out where his reach ends -- and it goes as far on as one from where touches went before v96
-  // (KNOCK_FROM: the knock-on as it was, from his boots; v97). Off his feet and not rolling on ahead of his run, he goes
-  // to it (v97: your man -- dribbleSteer -- and theirs -- onBall); slowing or stood with it off his feet but close
-  // (DRIB_GATHER), he gathers it in; further but in his reach as he eases off, he draws it back with his sole (DRIB_DRAW:
-  // a roll, not a string); out of his reach it rolls, and he goes to it. (A tackle still finds it as far out as it was
-  // held before: see tackleSpot.)
-  const AT_FEET=15, AT_FEET_RUN=3, DRIB_TOUCH=19, DRIB_GATHER=26, DRIB_DRAW=3*MK, KNOCK_FROM=26;
-  // TAPPED ALONG (v99): the computer's man, held at his feet at a run because one of theirs is about to be on him, isn't
-  // carried dead: every TAP_STRIDE of ground he covers it's pushed a little on (TAP_AMP: 14 px at Dribbling 1 down to
-  // 8 px at 10, the better the tighter: out to about 1.3 m and 1.1 m off him) -- quickly, a moment out there, then drawn
-  // back as he runs on to it -- small touches you can see. It stays with him (the hold: as hard to take off him, and it
-  // turns with his feet), and there's none as he turns hard. Held for a pass, cross, shot or move of yours to come, it
-  // stays tight. (Before, with one of theirs within 3.6 m it sat stuck at his boots: in matches, 44% of the time a man
-  // ran with the ball, and with one tracking him a step off, up to 8 s at a time.)
-  // YOUR MAN UNDER PRESSURE (v100) isn't held at all: he keeps touching it on, the touches shorter (dribbleTouchLen),
-  // and the ball on its way out counts as held for anyone trying to take it (tackleSpot) until it's out of his reach.
-  // Held and tapped, it sat at his feet with no touch for a second or two whenever he'd just been passed it with a man
-  // closing in -- stuck to his foot. (The computer's men stay held: let go, they chased their own touches into the man
-  // on them and lost it four times as often.)
-  const TAP_STRIDE=3*MK, TAP_AMP=[14,8];
-  function tapRoom(p,speed,moving){ return speed>DRIB_MOVE&&moving?statLerp(statOf(p,'dribbling',P.dribbling.val),TAP_AMP[0],TAP_AMP[1]):0; }   // (how much further out a tap takes it, still held)
-  // where a tackle (and the computer's defender, sizing him up) finds the ball on a man: where it was before v96, so
-  // taking it off him is as it was -- held at his feet (atFeet 1: see carry), where the old hold had it: its
-  // body-and-a-step (25 px, a little more at a run) the way the ball is from him, trailing his own way as it did (0.12 s
-  // of his pace) -- as is your man's touch with one of theirs about to be on him (v100); touched on (0), 7 px further than
-  // it is (the touches went from 7 px further out); off his feet and not
-  // touched on (2): in his reach, being drawn back to his boots, as held (the old hold had it back at once); further,
-  // where it is. In a move, where it is.
-  function tackleSpot(c){ if(skillOf(c)) return ball;
-    const d=dist(c,ball), ux=(ball.x-c.x)/(d||1), uy=(ball.y-c.y)/(d||1);
-    if(c.atFeet===2&&d>controlROf(c)+ball.r) return ball;
-    if(c.atFeet===0) return {x:c.x+ux*(d+7), y:c.y+uy*(d+7)};
-    const t=c.r+ball.r+5+Math.hypot(c.vx,c.vy)/300*12;
-    return {x:c.x+ux*t-c.vx*0.12, y:c.y+uy*t-c.vy*0.12}; }
-  function tackleGap(c){ const s=tackleSpot(c); return Math.hypot(s.x-c.x,s.y-c.y); }
-  function ballGapOf(c){ return ball.ownedBy===c?tackleGap(c):dist(c,ball); }
+  const DRIB_MOVE=40, DRIB_FEET=6, DRIB_SLACK=1.5*MK;
   function dribbleRoll(dt){ const k=Math.pow(1-clamp(P.friction.val,0.001,0.999),dt*3.2); ball.vx*=k; ball.vy*=k; ball.z=0; ball.vz=0; }
   // how close they're coming: where they'll both be in half a second -- 1 with one of theirs within 2.5 m of him then
-  // (at 3.6 m or nearer the computer's man keeps it at his feet: carry -- tapped along at a run, v99; your man keeps
-  // touching it on, v100), nothing from 7 m
+  // (at 3.6 m or nearer he keeps it at his feet: carry), nothing from 7 m
   function dribPress(p){ let near=1e9;
     for(const o of players){ if(o.team===p.team||o.state!=='normal') continue;
       const d=Math.hypot(o.x+o.vx*0.5-(p.x+p.vx*0.5),o.y+o.vy*0.5-(p.y+p.vy*0.5)); if(d<near) near=d; }
     return clamp(1-(near-2.5*MK)/(4.5*MK),0,1); }
-  // a touch's length before a man of theirs near him or its own wobble (v94, v95, v98): his Dribbling's, whatever his pace --
-  // at a run, 0.3 m clear of him at Dribbling 1 down to 0.1 m at 10; flat out, 1 m down to 0.5 m; part way from his running
+  // a touch's length before a man of theirs near him or its own wobble (v94, v95): his Dribbling's, whatever his pace --
+  // at a run, 1 m clear of him at Dribbling 1 down to 0.3 m at 10; flat out, 2 m down to 1 m; part way from his running
   // pace to his sprint (vp, the pace he'll be going), part way between; slower than a run, shorter, down to under half.
   // (His running and sprinting pace as he is now: tired, both are slower, and flat out is still flat out.)
   // Each times your RUN TOUCH and SPRINT TOUCH (set in the Dribble Lab, kept in this browser: 1 as it plays)
   function dribTouchBase(p,vp){
     const dr=statOf(p,'dribbling',P.dribbling.val), legs=legsOf(p), run=runSpeedOf(p)*legs, spr=sprintSpeedOf(p)*legs;
-    const R=statLerp(dr,0.3,0.1)*MK*(PREFS.touchRun||1), S=Math.max(R,statLerp(dr,1,0.5)*MK*(PREFS.touchSprint||1));
+    const R=statLerp(dr,1,0.3)*MK*(PREFS.touchRun||1), S=Math.max(R,statLerp(dr,2,1)*MK*(PREFS.touchSprint||1));
     const D=vp<=run?R*clamp(vp/run,0.45,1):R+(S-R)*clamp((vp-run)/Math.max(1,spr-run),0,1);
     return D*(P.knockOn.val/120);
   }
   function dribbleTouchLen(p,vp){
     const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1);
     // a man of theirs coming close: he keeps it closer -- the better he is, the closer (dribPress: a touch a fifth of what
-    // it would be at Dribbling 1 and a twentieth at 10 with one about to be on him; with one closer still, the computer's
-    // man holds it at his feet -- yours keeps touching it on, these short touches: see YOUR MAN UNDER PRESSURE)
+    // it would be at Dribbling 1 and a twentieth at 10 with one about to be on him; with one closer still, it's at his feet)
     const tight=1-dribPress(p)*(0.8+0.15*drib);
     const D=dribTouchBase(p,vp)*tight;
     return D*(1+(0.08+0.32*(1-drib))*(P.knockVar.val/0.8)*(Math.random()*2-1));
@@ -11242,12 +11193,11 @@
     const va=Math.atan2(p.vy,p.vx), want=dribWantAng(p);
     let turn=want-va; while(turn>Math.PI)turn-=2*Math.PI; while(turn<-Math.PI)turn+=2*Math.PI;
     const mt=(1+0.6*drib)*(free>run*1.02?0.65:1)*clamp(cap/9.5,0.1,1); turn=clamp(turn,-mt,mt);
-    const D=Math.max(1,dribbleTouchLen(p,free)*(1-0.35*Math.abs(turn)/(Math.PI/2))), L=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999))), u=Math.max(30,free*Math.cos(turn));   // (D: no more than a nudge's floor -- a 0.1 m touch is a 0.1 m touch, v98)
+    const D=Math.max(6,dribbleTouchLen(p,free)*(1-0.35*Math.abs(turn)/(Math.PI/2))), L=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999))), u=Math.max(30,free*Math.cos(turn));
     // how hard: so that, him going on at u and it slowing on the grass (L), it gets D ahead of him at the most -- its lead
     // (v0/L)(1-e^-Lt) - u t is greatest as it slows to his pace: (v0-u)/L - (u/L) ln(v0/u) = D, solved for v0
-    const Dk=D+Math.max(0,KNOCK_FROM-dist(p,ball));      // (from his boots, as far on as a touch from where they went from before v96: the knock-on as it was -- v97)
     let lo=u, hi=u+5000;
-    for(let i=0;i<36;i++){ const m=(lo+hi)/2, g=(m-u)/L-(u/L)*Math.log(m/u); if(g<Dk) lo=m; else hi=m; }
+    for(let i=0;i<36;i++){ const m=(lo+hi)/2, g=(m-u)/L-(u/L)*Math.log(m/u); if(g<D) lo=m; else hi=m; }
     const v0=(lo+hi)/2, ang=va+turn+(0.03+0.15*(1-drib))*(P.knockVar.val/0.8)*(Math.random()*2-1);
     ball.vx=Math.cos(ang)*v0; ball.vy=Math.sin(ang)*v0; ball.z=0; ball.vz=0;
     p.carryAngle=ang; p.touchLead=D+p.r+ball.r; p.touchAt=simNow; p.touchU=u; p.stepPhase=0;
@@ -11259,7 +11209,7 @@
   function dribbleSteer(p,ix,iy){
     if(!p||ball.ownedBy!==p||p.state!=='normal'||skillOf(p)) return null;
     const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
-    if(d<=DRIB_TOUCH||(p.tapOK&&p.atFeet===1&&d<=DRIB_GATHER+TAP_AMP[0])) return null;   // (off his feet: he goes to it -- v97; it was from DRIB_GATHER, and in between he ran on without it. Held at his feet -- tapped along -- it comes with him)
+    if(d<=p.r+ball.r+DRIB_FEET) return null;
     const t=Math.min(0.4,d/Math.max(80,Math.hypot(p.vx,p.vy))), tx=dx+ball.vx*t, ty=dy+ball.vy*t, tl=Math.hypot(tx,ty)||1, il=Math.hypot(ix,iy);
     return {ix:tx/tl*(il||1), iy:ty/tl*(il||1), dribIdle:!il};
   }
@@ -11270,13 +11220,13 @@
       const atk=atkOf(p.team);
       p.carryAngle = atk>0?0:Math.PI;
       p.facing={x:atk,y:0};
-      const cd=AT_FEET+2;
-      ball.x=p.x+atk*cd; ball.y=p.y; ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0; p.atFeet=1; p.tapOK=false;
+      const cd=p.r+ball.r+4;
+      ball.x=p.x+atk*cd; ball.y=p.y; ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
       return;
     }
     if(((holdMode&&holdMode.p===p)||guardOn(p))&&dist(p,ball)<=controlROf(p)+ball.r+4){   // SKILL held (strafing or shielding), or guarding it after a tackle: tight at his feet, the way he faces (out ahead: when he's on it)
-      const f=p.facing, cd=AT_FEET+1, k=320, c=2*Math.sqrt(k), cx=p.x+f.x*cd, cy=p.y+f.y*cd;
-      p.carryAngle=Math.atan2(f.y,f.x); p.stepPhase=0; p.atFeet=1; p.tapOK=false;
+      const f=p.facing, cd=p.r+ball.r+3, k=320, c=2*Math.sqrt(k), cx=p.x+f.x*cd, cy=p.y+f.y*cd;
+      p.carryAngle=Math.atan2(f.y,f.x); p.stepPhase=0;
       ball.vx+=((cx-ball.x)*k-ball.vx*c)*dt; ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
       return;
     }
@@ -11311,41 +11261,41 @@
     if(!isFinite(p.carryAngle)) p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x)||0;
     const turning=Math.min(Math.abs(d),1.2);
     const speed=Math.hypot(p.vx,p.vy);
-    { const gap=dist(p,ball), reach=controlROf(p)+ball.r;                                      // (DRIBBLING: see dribbleTouch; AT HIS FEET: see AT_FEET)
-      if(gap>(p.touchLead||reach)+DRIB_SLACK){ p.atFeet=0; looseTouch(p); return; }          // (it's got away from him -- held off it, or it's run on: his to go and get)
-      const you=p===controlled, btn=you&&(kickHeld||crossHeld||!!actQ||!!swipeShot), pressed=dribPress(p)>0.75;
-      const setting=btn||(pressed&&!you);                                                      // (a pass, a cross, a shot or a move to come, or -- the computer's man -- one of theirs about to be on him: at his feet)
-      p.tapOK=pressed&&!btn&&!you;                                                             // (...the man about to be on him: tapped along at a run, not dead -- see TAP_STRIDE)
-      p.atFeet=you&&pressed&&gap<=reach?1:0;                                                   // (YOUR MAN UNDER PRESSURE, v100: he keeps touching it on -- short touches, see dribbleTouchLen -- and in his reach it's as hard to get at as one held at his feet: see tackleSpot. Out of it, it's a touch out ahead, anyone's who gets there)
+    { const gap=dist(p,ball), feet=p.r+ball.r+DRIB_FEET, reach=controlROf(p)+ball.r;          // (DRIBBLING: see dribbleTouch)
+      if(gap>(p.touchLead||reach)+DRIB_SLACK){ looseTouch(p); return; }                      // (it's got away from him -- held off it, or it's run on: his to go and get)
+      const setting=(p===controlled&&(kickHeld||crossHeld||!!actQ||!!swipeShot))||dribPress(p)>0.75;   // (a pass, a cross, a shot or a move to come, or one of theirs about to be on him: at his feet)
       if(speed>DRIB_MOVE&&moving&&!setting){
         const ux=(ball.x-p.x)/(gap||1), uy=(ball.y-p.y)/(gap||1), closing=(p.vx-ball.vx)*ux+(p.vy-ball.vy)*uy;
-        const ahead=(p.vx*ux+p.vy*uy)/speed;                                                    // (1: dead ahead of his run)
-        if(gap>DRIB_TOUCH||(ahead>0.5&&closing<0)){ dribbleRoll(dt); return; }                  // (on its way, or not at his feet yet: rolling on, waiting for him -- he
-                                                                                                //  never touches it on from further off)
-        if(ahead>0.5&&simNow-(p.touchAt??-9)>0.1){ dribbleTouch(p,speed,turnCap); return; }    // (he's on it, at his feet, in front of him: the next touch)
-      }                                                                                        // (at his feet beside or behind him, or just touched: he has it there -- below)
-      if(gap>DRIB_GATHER+(p.tapOK?tapRoom(p,speed,moving):0)){ p.atFeet=2;                    // (off his feet as he eases off: his -- in his reach, he draws it back to his
-        if(gap>reach){ dribbleRoll(dt); return; }                                              //  boots with his sole, a roll at DRIB_DRAW, not snapped back on a string;
-        const ux=(p.x-ball.x)/gap, uy=(p.y-ball.y)/gap, tvx=p.vx+ux*DRIB_DRAW, tvy=p.vy+uy*DRIB_DRAW, k=Math.min(1,dt*8);   // further, it rolls on and
-        ball.vx+=(tvx-ball.vx)*k; ball.vy+=(tvy-ball.vy)*k; ball.z=0; ball.vz=0; return; }      //  he goes to it)
+        if(gap<=feet&&closing>=0){ dribbleTouch(p,speed,turnCap); return; }                 // (he's on it: the next touch)
+        if(gap<=reach&&simNow-(p.touchAt??-9)>0.15){                                           // (still in his reach, and he wants it elsewhere
+          const bs=Math.hypot(ball.vx,ball.vy); let off=0;                                     //  or he's eased off: another touch, from where it is)
+          if(bs>20){ off=dribWantAng(p)-Math.atan2(ball.vy,ball.vx); while(off>Math.PI)off-=2*Math.PI; while(off<-Math.PI)off+=2*Math.PI; off=Math.abs(off); }
+          if(off>0.6||speed<(p.touchU||speed)*0.75){ dribbleTouch(p,speed,turnCap); return; } }
+        dribbleRoll(dt); return;                                                               // (on its way: rolling on, waiting for him)
+      }
+      if(gap>reach){ dribbleRoll(dt); return; }                                                // (out ahead of him as he eases off: his, rolling on till he's on it)
     }
-    let tap=0;                                                                                 // (TAPPED ALONG: see TAP_STRIDE)
-    if(p.tapOK&&speed>DRIB_MOVE&&moving){ p.tapPh=((p.tapPh||0)+speed*dt/TAP_STRIDE)%1; const ph=p.tapPh;
-      tap=(ph<0.15?Math.sin(ph/0.15*Math.PI/2):ph<0.4?1:Math.cos((ph-0.4)/0.6*Math.PI/2))*statLerp(statOf(p,'dribbling',P.dribbling.val),TAP_AMP[0],TAP_AMP[1])*(1-turning/1.2); }   // (out quickly, a moment there, back as he runs on to it)
-    const carryDist=(AT_FEET+AT_FEET_RUN*clamp(speed/300,0,1))*(1-0.27*turning/1.2)+tap;       // (AT HIS FEET: at his boots, a little on at a run, drawn in as he turns -- and tapped along)
-    p.atFeet=1;
+    const carryDist=p.r+ball.r+5+(speed/300)*12;
     const cx=p.x+Math.cos(p.carryAngle)*carryDist;
     const cy=p.y+Math.sin(p.carryAngle)*carryDist;
     const k=280,c=2*Math.sqrt(k);
-    if(isFinite(cx)&&isFinite(cy)){                                                            // (damped against his own way: with him as he goes -- AT HIS FEET)
-      ball.vx+=((cx-ball.x)*k-(ball.vx-p.vx)*c)*dt;
-      ball.vy+=((cy-ball.y)*k-(ball.vy-p.vy)*c)*dt;
+    if(isFinite(cx)&&isFinite(cy)){
+      ball.vx+=((cx-ball.x)*k-ball.vx*c)*dt;
+      ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
     }
 
     p.stepPhase=0;
 
     if(turning>0.25){ball.vx*=(1-0.12*turning);ball.vy*=(1-0.12*turning);}
     if(!moving&&speed<20){ball.vx*=0.55;ball.vy*=0.55;}
+    // gentle leash only for slow close control; fast touches have already released
+    const g2=dist(p,ball);
+    const maxLeash=carryDist+40;
+    if(g2>maxLeash){
+      const nx=(ball.x-p.x)/g2,ny=(ball.y-p.y)/g2;
+      ball.x=p.x+nx*maxLeash;ball.y=p.y+ny*maxLeash;
+      ball.vx*=0.85;ball.vy*=0.85;
+    }
   }
 
   // ===== keepers =====
@@ -14203,7 +14153,7 @@
   // to draw for it and a clip of a man doing it. The clips are the game's own: tools/clips/record_skill_clips.cjs records
   // each move as a match plays it (a man running at one of theirs 3 m ahead, the move, and on), every 1/30 s -- where he
   // and that man are, their sprites' frames, and the ball -- and they're played back here with the game's sprites. =====
-  const SKILL_CLIPS = {"sig":1135808770,"knock":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-36,0,1,0,0,70,6,0,0,4,-21,0,0,-32,0,1,0,0,70,6,0,0,4,-17,0,0,-28,0,1,0,0,70,6,0,0,4,-13,0,0,-24,0,1,1,0,70,6,0,0,4,-4,0,0,-19,0,1,1,0,70,6,0,0,4,3,0,0,-15,0,1,1,0,70,6,0,0,4,10,-1,0,-11,0,1,2,0,70,6,0,0,4,17,-1,0,-7,0,1,2,0,70,6,0,0,4,23,-1,0,-3,0,1,2,0,70,6,0,0,4,29,-1,0,1,0,1,0,0,70,6,0,0,4,34,-1,0,5,-1,1,0,0,70,6,0,0,4,31,-1,0,9,-1,1,0,0,70,6,0,0,4,36,-1,0,14,-1,1,1,0,70,6,0,0,4,41,-1,0,18,-1,1,2,7,70,6,0,0,5,48,-4,1,22,-3,1,3,7,70,6,0,0,5,57,-10,0,26,-5,1,3,7,70,6,0,0,6,65,-15,0,30,-8,1,3,7,70,6,0,0,6,74,-19,0,34,-10,1,0,7,70,6,0,0,6,81,-23,0,38,-12,1,0,7,70,6,0,0,7,88,-27,0,42,-15,1,0,7,70,6,0,0,7,94,-31,0,46,-17,1,1,7,70,6,0,0,7,100,-35,0,50,-19,1,1,7,70,6,0,0,7,106,-38,0,54,-22,1,1,7,70,6,0,0,7,111,-41,0,58,-24,1,2,7,70,6,0,0,7,116,-43,0,62,-26,1,2,7,70,6,0,0,7,120,-46,0,66,-28,1,2,0,70,6,0,0,7,124,-48,0,70,-30,1,3,0,70,6,0,0,7,128,-51,0,75,-32,1,3,0,70,6,0,0,7,132,-53,0,79,-33,1,3,0,70,6,0,0,7,135,-55,0,83,-35,1,0,0,70,6,0,0,7,138,-56,0,87,-37,1,0,0,70,6,0,0,7,141,-58,0,92,-38,1,0,0,70,6,0,0,7,143,-59,0,96,-40,1,1,0,70,6,0,0,7,146,-61,0,100,-42,1,1,7,70,6,0,0,7,148,-62,0,105,-44,1,1,7,70,6,0,0,7,150,-63,0,109,-45,1,2,7,70,6,0,0,7,152,-64,0,113,-47,1,2,7,70,6,0,0,7,154,-66,0,117,-49,1,2,7,70,6,0,0,7,156,-67,0,121,-51,1,3,7,70,6,0,0,7,159,-68,0,125,-52,1,3,7,70,6,0,0,7,162,-69,0,129,-54,1,3,7,70,6,0,0,7,165,-71,0,133,-56,1,0,7,70,6,0,0,7,168,-72,0,136,-57,1,0,7,70,6,0,0,7,170,-73,0,140,-59,1,0,7,70,6,0,0,7,172,-74,0,144,-61,1,0,7,70,6,0,0,7,174,-75,0,148,-63,1,1,7,70,6,0,0,7,176,-76,0,151,-64,1,1,7,70,6,0,0,7,178,-77,0,155,-66,1,1,7,70,6,0,0,7,180,-77,0,159,-68,1,2,7,70,6,0,0,7,182,-78,0,163,-69,1,2,7,70,6,0,0,7,183,-79,0,166,-71,1,2,7,70,6,0,0,7,187,-81,0,170,-73,1,3,7,70,6,0,0,7,194,-85,0,174,-75,1,3,7,70,6,0,0,7,200,-88,0,178,-77,1,3,7,70,6,0,0,7,205,-91,0,181,-78,1,3,7,70,6,0,0,7,210,-94,0,185,-80,1,0,7,70,6,0,0,7,215,-97,0,188,-82,1,0,7,70,6,0,0,7,220,-99,0,192,-84,1,0,7,70,6,0,0,7,224,-101,0,196,-86,1,1,7,70,6,0,0,7,228,-104,0,199,-88,1,1,7,70,6,0,0,7,232,-105,0,203,-90,1,1,7,70,6,0,0,7,235,-107,0,207,-92,1,1,7,70,6,0,0,7,238,-109,0,210,-94,1,2,7,70,6,0,0,7,241,-111,0,214,-96,1,2,7,70,6,0,0,7,244,-112,0,217,-98,1,2,7,70,6,0,0,7,246,-113,0,221,-100,1,3,7,70,6,0,0,7,248,-115,0,225,-102,1,3,7,70,6,0,0,7,250,-116,0,228,-104,1,3,7,70,6,0,0,7,252,-117,0,232,-106,1,3,7,70,6,0,0,7,254,-118,0]},"dragback":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-36,0,1,0,0,70,6,0,0,4,-21,0,0,-32,0,1,0,0,70,6,0,0,4,-17,0,0,-28,0,1,1,0,70,6,0,0,4,-13,0,0,-24,0,1,1,0,70,6,0,0,4,-4,0,0,-19,0,1,1,0,70,6,0,0,4,3,0,0,-15,0,1,2,0,70,6,0,0,4,10,0,0,-11,0,1,2,0,70,6,0,0,4,17,-1,0,-7,0,1,2,0,70,6,0,0,4,23,-1,0,-3,0,1,2,0,70,6,0,0,4,29,-1,0,1,0,1,0,0,70,6,0,0,4,34,-1,0,5,0,1,0,0,70,6,0,0,4,33,-1,0,9,0,1,0,0,70,6,0,0,4,30,0,0,13,0,1,1,0,70,6,0,0,4,28,1,0,16,-1,1,1,0,70,6,0,0,4,25,2,0,18,-1,1,2,0,70,6,0,0,4,21,3,0,20,-1,1,2,1,70,6,0,0,4,16,4,0,22,-1,1,3,2,70,6,0,0,4,11,5,0,23,-1,1,3,2,70,6,0,0,4,7,6,0,23,-1,1,0,3,70,6,0,0,4,3,7,0,23,-1,1,0,3,70,6,0,0,4,0,8,0,23,-1,1,1,4,70,6,0,0,4,-1,8,0,22,0,1,3,4,70,6,0,0,4,-1,8,0,18,1,1,3,4,70,6,0,0,4,-1,8,0,14,2,1,3,4,70,6,0,0,4,-8,11,0,11,4,1,0,4,70,6,0,0,4,-15,13,0,7,5,1,0,4,70,6,0,0,4,-21,15,0,3,7,1,0,4,70,6,0,0,4,-26,17,0,-1,8,1,1,4,70,6,0,0,4,-31,19,0,-5,10,1,1,4,70,6,0,0,4,-36,21,0,-9,11,1,1,4,70,6,0,0,4,-41,23,0,-13,12,1,1,4,70,6,0,0,4,-45,24,0,-16,14,1,2,4,70,6,0,0,4,-49,26,0,-20,15,1,2,4,70,6,0,0,4,-52,27,0,-24,17,1,2,4,70,6,0,0,4,-55,28,0,-28,18,1,3,4,70,6,0,0,4,-59,30,0,-32,20,1,3,4,70,6,0,0,4,-61,31,0,-36,21,1,3,4,70,6,0,0,4,-64,32,0,-39,22,1,0,4,70,6,0,0,4,-66,33,0,-43,24,1,0,4,70,6,0,0,4,-69,33,0,-47,25,1,0,4,70,6,0,0,4,-71,34,0]},"croq":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-36,0,1,1,0,70,6,0,0,4,-21,0,0,-32,0,1,1,0,70,6,0,0,4,-17,0,0,-28,0,1,1,0,70,6,0,0,4,-13,0,0,-24,0,1,2,0,70,6,0,0,4,-4,0,0,-19,0,1,2,0,70,6,0,0,4,3,0,0,-15,0,1,2,0,70,6,0,0,4,10,0,0,-11,0,1,2,0,70,6,0,0,4,17,0,0,-7,0,1,3,0,70,6,0,0,4,23,1,0,-3,0,1,3,0,70,6,0,0,4,29,1,0,1,0,1,0,0,70,6,0,0,4,34,1,0,3,1,1,0,0,70,6,0,0,4,29,-5,0,5,4,1,0,0,70,6,0,0,4,25,-5,0,7,8,1,1,0,70,6,0,0,4,29,5,0,9,13,1,1,0,70,6,0,0,4,31,14,0,11,19,1,2,0,70,6,0,0,3,33,24,0,13,25,1,2,0,70,6,0,0,3,35,33,0,15,30,1,3,0,70,6,0,0,3,37,42,0,17,35,1,3,0,70,6,0,0,3,39,49,0,19,39,1,0,0,70,6,0,0,3,41,54,0,21,41,1,0,0,70,6,0,0,3,43,56,0,23,41,1,3,0,70,6,0,0,3,46,54,0,27,41,1,0,0,70,6,0,0,3,49,52,0,32,41,1,0,0,70,6,0,0,2,52,50,0,36,41,1,0,0,70,6,0,0,2,55,49,0,40,41,1,1,0,70,6,0,0,2,62,48,0,44,41,1,1,0,70,6,0,0,2,69,47,0,48,41,1,1,0,70,6,0,0,2,75,47,0,52,41,1,1,0,70,6,0,0,2,81,46,0,56,41,1,2,0,70,6,0,0,2,86,46,0,60,42,1,2,0,70,6,0,0,1,91,46,0,64,42,1,2,0,70,6,0,0,1,96,45,0,69,42,1,3,0,70,6,0,0,1,100,45,0,73,42,1,3,0,70,6,0,0,1,104,45,0,77,42,1,3,0,70,6,0,0,1,108,44,0,81,42,1,3,0,70,6,0,0,1,112,44,0,85,42,1,0,0,70,6,0,0,1,115,44,0,89,42,1,0,0,70,6,0,0,1,118,43,0,93,42,1,0,0,70,6,0,0,1,121,43,0,97,42,1,1,0,70,6,0,0,1,123,43,0]},"spin":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-36,0,1,1,0,70,6,0,0,4,-21,0,0,-32,0,1,1,0,70,6,0,0,4,-17,0,0,-28,0,1,2,0,70,6,0,0,4,-13,0,0,-24,0,1,2,0,70,6,0,0,4,-4,0,0,-19,0,1,2,0,70,6,0,0,4,3,1,0,-15,0,1,3,0,70,6,0,0,4,10,1,0,-11,0,1,3,0,70,6,0,0,4,17,1,0,-7,0,1,3,0,70,6,0,0,4,23,1,0,-3,0,1,3,0,70,6,0,0,4,29,2,0,1,1,1,0,0,70,6,0,0,4,34,2,0,1,-3,1,0,0,70,6,0,0,4,32,0,0,1,-11,1,0,1,70,6,0,0,4,27,-2,0,3,-20,1,1,1,70,6,0,0,4,22,-5,0,8,-27,1,1,1,70,6,0,0,4,17,-8,0,12,-31,1,2,2,70,6,0,0,4,14,-10,0,14,-32,1,2,2,70,6,0,0,4,13,-10,0,17,-32,1,3,2,70,6,0,0,4,14,-10,0,24,-30,1,3,3,70,6,0,0,4,14,-11,0,32,-25,1,0,3,70,6,0,0,4,15,-12,0,36,-18,1,0,4,70,6,0,0,4,15,-13,0,37,-13,1,1,4,70,6,0,0,4,15,-13,0,37,-13,1,1,4,70,6,0,0,4,15,-16,0,39,-15,1,2,4,70,6,0,0,5,19,-27,0,41,-19,1,2,5,70,6,0,0,5,29,-40,0,44,-24,1,3,6,70,6,0,0,5,43,-50,0,47,-29,1,3,6,70,6,0,0,6,56,-53,0,49,-33,1,0,7,70,6,0,0,6,65,-51,0,50,-35,1,0,7,70,6,0,0,6,68,-50,0,52,-36,1,0,7,70,6,0,0,6,68,-51,0,55,-39,1,0,7,70,6,0,0,6,71,-55,0,58,-42,1,0,7,70,6,0,0,6,76,-60,0,61,-45,1,1,7,70,6,0,0,6,81,-64,0,64,-48,1,1,7,70,6,0,0,6,85,-69,0,67,-51,1,1,7,70,6,0,0,6,89,-73,0,70,-53,1,2,7,70,6,0,0,6,93,-76,0,72,-56,1,2,7,70,6,0,0,6,96,-80,0,75,-59,1,2,7,70,6,0,0,6,99,-83,0,78,-62,1,2,7,70,6,0,0,6,102,-86,0,81,-65,1,3,7,70,6,0,0,6,105,-89,0,84,-68,1,3,7,70,6,0,0,6,108,-91,0,87,-71,1,3,7,70,6,0,0,6,110,-94,0,90,-74,1,0,7,70,6,0,0,6,112,-96,0,93,-77,1,0,7,70,6,0,0,7,114,-98,0,96,-80,1,0,7,70,6,0,0,7,116,-100,0,99,-82,1,1,7,70,6,0,0,7,118,-102,0,102,-85,1,1,7,70,6,0,0,7,119,-103,0]},"cruyff":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-36,0,1,1,0,70,6,0,0,4,-21,0,0,-32,0,1,2,0,70,6,0,0,4,-17,0,0,-28,0,1,2,0,70,6,0,0,4,-13,0,0,-24,0,1,2,0,70,6,0,0,4,-4,0,0,-19,0,1,2,0,70,6,0,0,4,3,-1,0,-15,0,1,3,0,70,6,0,0,4,10,-1,0,-11,0,1,3,0,70,6,0,0,4,17,-2,0,-7,0,1,3,0,70,6,0,0,4,23,-2,0,-3,-1,1,0,0,70,6,0,0,4,29,-2,0,1,-1,1,0,0,70,6,0,0,4,34,-3,0,5,-1,1,0,0,70,6,0,0,4,34,-1,0,9,-1,1,0,0,70,6,0,0,4,32,2,0,13,-1,1,1,0,70,6,0,0,4,32,7,0,16,-2,1,1,0,70,6,0,0,4,32,11,0,19,-2,1,2,0,70,6,0,0,4,30,15,0,21,-2,1,2,0,70,6,0,0,4,27,18,0,23,-2,1,3,0,70,6,0,0,4,24,20,0,24,-2,1,3,1,70,6,0,0,4,20,20,0,25,-2,1,0,1,70,6,0,0,4,17,20,0,26,-2,1,0,2,70,6,0,0,4,14,19,0,26,-2,1,1,2,70,6,0,0,4,12,18,0,26,-2,1,1,3,70,6,0,0,4,11,18,0,26,-2,1,0,3,70,6,0,0,4,11,19,0,24,1,1,0,3,70,6,0,0,4,10,20,0,21,5,1,0,3,70,6,0,0,4,9,21,0,19,8,1,1,3,70,6,0,0,4,6,25,0,16,11,1,1,3,70,6,0,0,4,2,31,0,14,14,1,1,3,70,6,0,0,3,-2,37,0,12,18,1,2,3,70,6,0,0,3,-6,42,0,9,21,1,2,3,70,6,0,0,3,-9,47,0,7,24,1,2,3,70,6,0,0,3,-12,51,0,4,28,1,3,3,70,6,0,0,3,-15,55,0,2,31,1,3,3,70,6,0,0,3,-18,59,0,0,35,1,3,3,70,6,0,0,3,-20,63,0,-3,38,1,3,3,70,6,0,0,3,-22,66,0,-5,41,1,0,3,70,6,0,0,3,-25,69,0,-7,45,1,0,3,70,6,0,0,3,-27,72,0,-10,48,1,0,3,70,6,0,0,3,-28,74,0,-12,51,1,1,3,70,6,0,0,3,-30,77,0,-15,55,1,1,3,70,6,0,0,3,-32,79,0,-17,58,1,1,3,70,6,0,0,3,-33,81,0,-19,61,1,1,3,70,6,0,0,3,-35,83,0]},"rainbow":{"fps":30,"f":[-40,0,1,2,0,70,14,0,0,4,-26,0,0,-36,0,1,2,0,70,14,0,0,4,-21,0,0,-32,0,1,2,0,70,14,0,0,4,-17,0,0,-28,0,1,3,0,70,14,0,0,4,-13,0,0,-24,0,1,3,0,70,14,0,0,4,-4,1,0,-19,0,1,3,0,70,14,0,0,4,3,1,0,-15,0,1,0,0,70,14,0,0,4,10,2,0,-11,0,1,0,0,70,14,0,0,4,17,2,0,-7,1,1,0,0,70,14,0,0,4,23,3,0,-3,1,1,0,0,70,14,0,0,4,29,3,0,1,1,1,0,0,70,14,0,0,4,34,4,0,5,1,1,0,0,70,14,0,0,4,34,3,0,9,2,1,0,0,70,14,0,0,4,33,3,0,13,2,1,1,0,70,14,0,0,4,34,3,0,17,2,1,1,0,70,14,0,0,4,33,3,1,20,2,1,2,0,70,14,0,0,4,33,3,2,23,2,1,2,0,70,14,0,0,4,31,3,4,26,3,1,3,0,70,14,0,0,4,30,3,6,28,3,1,3,0,70,14,0,0,4,29,3,9,30,3,1,0,0,70,14,0,0,4,27,3,12,32,3,1,0,0,70,14,0,0,4,27,3,15,34,3,1,1,0,70,14,0,0,4,27,3,17,35,3,1,1,0,70,14,0,0,4,28,3,18,39,3,1,1,0,70,14,0,0,4,33,3,28,45,4,1,1,7,70,14,0,0,4,38,3,37,48,2,1,2,7,70,14,0,0,4,44,4,45,49,0,1,2,7,70,14,0,0,5,49,4,53,51,-2,1,3,0,70,14,0,0,5,54,4,60,54,-5,1,3,0,70,14,0,0,5,59,5,67,59,-8,1,3,0,70,14,0,0,5,64,5,73,64,-11,1,0,0,70,14,0,0,6,69,5,78,71,-12,1,0,0,70,14,0,0,7,74,6,83,77,-11,1,1,0,70,14,0,0,7,79,6,88,83,-11,1,1,0,70,14,0,0,7,84,6,91,89,-10,1,2,0,70,14,0,0,0,89,7,95,96,-9,1,2,0,70,14,0,0,0,94,7,97,102,-8,1,3,0,70,14,0,0,0,99,7,99,108,-6,1,3,0,70,14,0,0,0,104,8,101,114,-5,1,3,0,70,14,0,0,0,110,8,102,120,-4,1,0,1,70,14,0,0,0,115,8,102,126,-3,1,0,1,70,14,0,0,0,120,9,102,131,-2,1,1,2,70,14,0,0,0,125,9,101,134,-1,1,1,2,70,14,0,0,0,130,9,100,138,-1,1,1,2,70,14,0,0,0,135,9,98,143,0,1,2,0,70,14,0,0,0,140,10,95,149,1,1,2,0,70,14,0,0,0,145,10,92,155,3,1,2,1,70,14,0,0,0,150,10,88,161,4,1,3,1,70,14,0,0,0,155,11,84,165,5,1,3,2,70,14,0,0,0,160,11,79,169,6,1,3,2,70,14,0,0,0,165,11,74,172,6,1,0,2,70,14,0,0,0,171,12,67,176,7,1,0,0,70,14,0,0,0,176,12,61,182,8,1,0,0,70,14,0,0,0,181,12,54,188,10,1,1,1,70,14,0,0,0,186,13,46,194,11,1,1,1,70,14,0,0,0,191,13,38,200,12,1,2,1,70,14,0,0,0,196,13,29,203,13,1,2,2,70,14,0,0,0,201,14,19,206,13,1,2,2,70,14,0,0,0,206,14,9,208,14,1,2,0,70,14,0,0,0,208,15,0,212,14,1,3,0,70,14,0,0,0,209,16,4,217,15,1,3,0,70,14,0,0,0,212,18,8,223,15,1,3,0,70,14,0,0,0,217,20,12,228,15,1,0,0,70,14,0,0,0,223,22,14,234,15,1,0,0,70,14,0,0,0,230,23,16,240,15,1,1,0,70,14,0,0,0,237,24,18,245,16,1,1,0,70,14,0,0,0,246,24,19,251,16,1,1,0,70,14,0,0,0,255,23,19,257,16,1,2,0,70,14,0,0,0,264,21,19,262,16,1,2,0,70,14,0,0,0,273,20,0,268,16,1,3,0,70,14,0,0,0,282,18,0,273,16,1,3,0,70,14,0,0,0,289,17,0,279,16,1,3,0,70,14,0,0,0,296,16,0,285,16,1,0,0,70,14,0,0,0,303,15,0,290,16,1,0,0,70,14,0,0,0,309,13,0,296,15,1,1,0,70,14,0,0,0,315,12,0]},"sombrero":{"fps":30,"f":[0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,1,0,0,-34,6,0,0,0,19,0,0,0,0,1,0,0,-34,6,0,0,0,24,0,3,0,0,1,1,0,-34,6,0,0,0,19,0,7,0,0,1,1,0,-34,6,0,0,0,16,0,11,0,0,1,2,0,-34,6,0,0,0,14,0,16,0,0,1,2,0,-34,6,0,0,0,12,0,19,0,0,1,0,3,-34,6,0,0,0,11,0,24,-3,4,1,0,2,-34,6,0,0,0,8,0,32,-5,7,1,0,2,-34,6,0,0,0,5,0,39,-8,11,1,0,2,-34,6,0,0,0,2,0,45,-9,14,1,1,1,-34,6,0,0,0,-1,0,51,-10,17,1,1,1,-34,6,0,0,0,-4,0,56,-12,20,1,1,0,-34,6,0,0,0,-7,0,61,-14,23,1,1,0,-34,6,0,0,0,-10,0,65,-15,25,1,2,0,-34,6,0,0,0,-13,0,69,-17,28,1,2,7,-34,6,0,0,0,-15,0,72,-19,29,1,2,7,-34,6,0,0,0,-18,0,74,-22,30,1,2,6,-34,6,0,0,7,-21,0,76,-25,31,1,2,6,-34,6,0,0,7,-24,0,77,-29,31,1,3,6,-34,6,0,0,7,-27,0,78,-32,31,1,3,6,-34,6,0,0,7,-30,0,78,-36,32,1,3,6,-34,6,0,0,6,-33,0,78,-39,31,1,0,6,-34,6,0,0,6,-36,0,76,-43,30,1,0,6,-34,6,0,0,5,-39,0,75,-47,28,1,0,6,-34,6,0,0,5,-42,0,73,-50,26,1,0,6,-34,6,0,0,5,-45,0,70,-53,24,1,1,6,-34,6,0,0,5,-48,0,66,-56,21,1,1,6,-34,6,0,0,4,-51,0,63,-59,19,1,1,6,-34,6,0,0,4,-54,0,58,-62,16,1,2,6,-34,6,0,0,4,-57,0,53,-65,13,1,2,6,-34,6,0,0,4,-60,0,47,-68,10,1,2,7,-34,6,0,0,4,-63,0,41,-71,8,1,2,7,-34,6,0,0,4,-66,0,34,-73,5,1,3,7,-34,6,0,0,4,-68,0,27,-75,3,1,3,7,-34,6,0,0,4,-71,0,19,-77,2,1,3,7,-34,6,0,0,4,-74,0,10,-78,0,1,3,5,-34,6,0,0,4,-75,-1,1,-79,-1,1,3,5,-34,6,0,0,4,-74,-4,2,-79,-2,1,3,5,-34,6,0,0,4,-72,-7,6,-80,-4,1,3,6,-34,6,0,0,5,-71,-10,9,-80,-6,1,0,6,-34,6,0,0,5,-70,-13,11,-80,-9,1,0,6,-34,6,0,0,5,-69,-16,0,-79,-13,1,0,6,-34,6,0,0,5,-66,-20,0,-77,-17,1,0,7,-34,6,0,0,5,-60,-23,0,-75,-20,1,1,7,-34,6,0,0,5,-55,-27,0,-72,-23,1,1,7,-34,6,0,0,5,-50,-30,0,-69,-26,1,1,7,-34,6,0,0,6,-46,-33,0,-66,-28,1,2,7,-34,6,0,0,6,-42,-36,0,-63,-31,1,2,7,-34,6,0,0,6,-38,-38,0,-59,-33,1,2,7,-34,6,0,0,6,-34,-41,0,-56,-35,1,2,7,-34,6,0,0,6,-31,-43,0,-52,-37,1,3,7,-34,6,0,0,6,-28,-45,0,-49,-39,1,3,7,-34,6,0,0,6,-25,-47,0]},"elastico":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-36,0,1,3,0,70,6,0,0,4,-21,0,0,-32,0,1,0,0,70,6,0,0,4,-17,0,0,-28,0,1,0,0,70,6,0,0,4,-13,0,0,-24,0,1,0,0,70,6,0,0,4,-5,0,0,-19,0,1,1,0,70,6,0,0,4,3,0,0,-15,0,1,1,0,70,6,0,0,4,10,0,0,-11,0,1,1,0,70,6,0,0,4,17,1,0,-7,0,1,2,0,70,6,0,0,4,23,1,0,-3,0,1,2,0,70,6,0,0,4,29,1,0,1,0,1,0,0,70,6,0,0,4,34,1,0,3,2,1,0,0,70,6,0,0,4,25,4,0,6,3,1,0,0,70,6,0,0,4,28,7,0,8,4,1,1,0,70,6,0,0,4,30,11,0,11,4,1,1,0,70,6,0,0,4,33,15,0,13,5,1,2,0,70,6,0,0,4,35,18,0,16,5,1,2,0,70,6,0,0,3,38,20,0,18,5,1,3,0,70,6,0,0,3,40,20,0,21,4,1,2,7,70,6,0,0,4,46,15,5,25,1,1,3,7,70,6,0,0,4,52,10,8,28,-2,1,3,7,70,6,0,0,4,57,5,10,31,-5,1,3,7,70,6,0,0,5,61,2,0,35,-7,1,0,7,70,6,0,0,5,64,-1,0,39,-9,1,0,7,70,6,0,0,6,67,-4,0,42,-11,1,0,7,70,6,0,0,6,70,-7,0,46,-12,1,0,0,70,6,0,0,6,73,-9,0,50,-14,1,1,0,70,6,0,0,6,75,-12,0,54,-15,1,1,0,70,6,0,0,6,78,-14,0,57,-17,1,1,0,70,6,0,0,7,80,-16,0,61,-19,1,2,0,70,6,0,0,7,82,-18,0,65,-20,1,2,0,70,6,0,0,7,87,-22,0,69,-21,1,2,0,70,6,0,0,7,92,-26,0,72,-23,1,2,7,70,6,0,0,7,97,-30,0,76,-25,1,3,7,70,6,0,0,7,101,-33,0,80,-27,1,3,7,70,6,0,0,7,105,-37,0,83,-28,1,3,7,70,6,0,0,7,109,-40,0,87,-30,1,0,7,70,6,0,0,7,112,-42,0,91,-32,1,0,7,70,6,0,0,7,115,-45,0,94,-35,1,0,7,70,6,0,0,7,118,-47,0,98,-37,1,0,7,70,6,0,0,7,121,-50,0,101,-39,1,1,7,70,6,0,0,7,124,-52,0]},"heel":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-36,0,1,1,0,70,6,0,0,4,-21,0,0,-32,0,1,2,0,70,6,0,0,4,-17,0,0,-28,0,1,2,0,70,6,0,0,4,-13,0,0,-24,0,1,2,0,70,6,0,0,4,-5,1,0,-19,0,1,2,0,70,6,0,0,4,3,1,0,-15,0,1,3,0,70,6,0,0,4,10,2,0,-11,0,1,3,0,70,6,0,0,4,17,2,0,-7,1,1,3,0,70,6,0,0,4,23,3,0,-3,1,1,0,0,70,6,0,0,4,29,3,0,1,1,1,0,0,70,6,0,0,4,34,4,0,5,1,1,0,0,70,6,0,0,4,31,4,0,9,2,1,0,0,70,6,0,0,4,29,7,0,12,2,1,1,0,70,6,0,0,4,27,10,0,15,2,1,1,0,70,6,0,0,4,25,14,0,18,2,1,2,0,70,6,0,0,4,22,17,0,20,2,1,2,0,70,6,0,0,4,19,20,0,22,2,1,3,0,70,6,0,0,4,17,22,0,24,3,1,3,0,70,6,0,0,4,18,23,0,27,2,1,0,7,70,6,0,0,3,23,26,2,31,-1,1,0,7,70,6,0,0,3,27,29,3,35,-3,1,1,0,70,6,0,0,3,31,32,3,39,-5,1,1,0,70,6,0,0,3,35,34,2,42,-7,1,1,0,70,6,0,0,3,39,37,1,46,-9,1,2,1,70,6,0,0,3,42,39,0,49,-11,1,2,1,70,6,0,0,3,45,41,0,52,-13,1,2,2,70,6,0,0,3,48,43,0,55,-14,1,2,2,70,6,0,0,3,50,45,0,57,-16,1,3,2,70,6,0,0,3,53,47,0,60,-18,1,3,2,70,6,0,0,2,55,49,0,63,-19,1,3,2,70,6,0,0,2,57,50,0,65,-20,1,3,2,70,6,0,0,2,59,51,0,67,-20,1,3,2,70,6,0,0,2,61,53,0,69,-20,1,3,2,70,6,0,0,2,63,54,0,71,-19,1,0,2,70,6,0,0,2,64,55,0,74,-19,1,0,2,70,6,0,0,2,66,56,0,77,-18,1,0,2,70,6,0,0,2,67,57,0,80,-17,1,0,2,70,6,0,0,2,68,58,0,82,-15,1,1,2,70,6,0,0,2,69,59,0,85,-14,1,1,2,70,6,0,0,2,70,60,0,87,-12,1,1,2,70,6,0,0,2,71,60,0,90,-9,1,2,2,70,6,0,0,2,72,61,0,92,-6,1,2,2,70,6,0,0,2,73,62,0,94,-3,1,2,2,70,6,0,0,2,74,62,0,95,1,1,3,2,70,6,0,0,2,75,63,0,96,6,1,3,2,70,6,0,0,2,75,63,0,95,10,1,3,2,70,6,0,0,2,76,64,0,95,15,1,0,2,70,6,0,0,2,77,64,0,93,19,1,0,2,70,6,0,0,2,77,64,0,92,24,1,0,2,70,6,0,0,2,78,65,0,91,28,1,1,2,70,6,0,0,2,77,67,0,89,32,1,1,2,70,6,0,0,2,77,70,0,88,36,1,1,2,70,6,0,0,2,76,72,0,87,40,1,2,2,70,6,0,0,2,75,75,0,86,44,1,2,2,70,6,0,0,2,75,77,0,85,48,1,2,2,70,6,0,0,2,74,79,0,83,52,1,3,2,70,6,0,0,2,74,81,0,82,55,1,3,2,70,6,0,0,2,73,83,0,81,59,1,3,2,70,6,0,0,2,73,85,0,80,63,1,3,2,70,6,0,0,2,72,87,0,79,67,1,0,2,70,6,0,0,2,72,88,0,77,71,1,0,2,70,6,0,0,2,73,89,0,77,75,1,0,2,70,6,0,0,2,76,90,0,77,78,1,0,2,70,6,0,0,2,80,90,0,77,82,1,1,2,70,6,0,0,2,84,90,0,79,85,1,1,1,70,6,0,0,2,88,91,0,81,89,1,1,1,70,6,0,0,2,91,93,0]}};
+  const SKILL_CLIPS = {"sig":3816971814,"knock":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-21,0,0,-30,0,1,0,0,70,6,0,0,4,-15,0,0,-25,0,1,1,0,70,6,0,0,4,-10,0,0,-19,0,1,1,0,70,6,0,0,4,-5,0,0,-14,0,1,1,0,70,6,0,0,4,13,0,0,-9,0,1,2,0,70,6,0,0,4,16,0,0,-4,0,1,2,0,70,6,0,0,4,19,0,0,1,0,1,0,0,70,6,0,0,4,22,0,0,6,0,1,0,0,70,6,0,0,4,34,0,0,11,0,1,0,0,70,6,0,0,4,39,0,0,16,0,1,2,7,70,6,0,0,4,47,-3,1,21,-3,1,3,7,70,6,0,0,5,58,-9,0,26,-5,1,3,7,70,6,0,0,6,68,-15,0,30,-8,1,0,7,70,6,0,0,6,77,-21,0,35,-11,1,0,7,70,6,0,0,7,86,-26,0,40,-13,1,0,7,70,6,0,0,7,94,-30,0,45,-16,1,1,7,70,6,0,0,7,101,-34,0,49,-19,1,1,7,70,6,0,0,7,108,-38,0,54,-22,1,2,7,70,6,0,0,7,115,-42,0,59,-24,1,2,7,70,6,0,0,7,121,-46,0,63,-27,1,2,7,70,6,0,0,7,126,-49,0,68,-29,1,3,7,70,6,0,0,7,131,-52,0,73,-32,1,3,7,70,6,0,0,7,136,-55,0,78,-34,1,3,7,70,6,0,0,7,141,-57,0,83,-36,1,0,0,70,6,0,0,7,145,-59,0,88,-38,1,0,0,70,6,0,0,7,149,-62,0,93,-40,1,1,0,70,6,0,0,7,152,-64,0,98,-42,1,1,0,70,6,0,0,7,156,-66,0,103,-44,1,1,0,70,6,0,0,7,159,-67,0,108,-46,1,2,7,70,6,0,0,7,162,-69,0,113,-48,1,2,7,70,6,0,0,7,164,-71,0,118,-50,1,3,7,70,6,0,0,7,167,-72,0,123,-52,1,3,7,70,6,0,0,7,169,-73,0,128,-55,1,3,7,70,6,0,0,7,171,-75,0,133,-57,1,0,7,70,6,0,0,7,173,-76,0,138,-59,1,0,7,70,6,0,0,7,175,-77,0,143,-61,1,0,7,70,6,0,0,7,168,-73,0,147,-63,1,1,7,70,6,0,0,7,170,-75,0,152,-66,1,1,7,70,6,0,0,7,172,-76,0,156,-68,1,2,7,70,6,0,0,7,174,-78,0,161,-70,1,2,7,70,6,0,0,7,177,-80,0,165,-73,1,2,7,70,6,0,0,7,181,-82,0,170,-75,1,3,7,70,6,0,0,7,185,-84,0,174,-78,1,3,7,70,6,0,0,7,189,-86,0,179,-80,1,3,7,70,6,0,0,7,193,-88,0,183,-83,1,0,7,70,6,0,0,7,197,-91,0,188,-85,1,0,7,70,6,0,0,7,201,-93,0,192,-88,1,0,7,70,6,0,0,7,216,-102,0,196,-90,1,1,7,70,6,0,0,7,218,-103,0,201,-93,1,1,7,70,6,0,0,7,220,-104,0,205,-96,1,2,7,70,6,0,0,7,223,-106,0,210,-98,1,2,7,70,6,0,0,7,226,-108,0,214,-101,1,2,7,70,6,0,0,7,230,-110,0,219,-103,1,3,7,70,6,0,0,7,233,-112,0]},"dragback":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-21,-2,0,-30,0,1,0,0,70,6,0,0,4,-16,-2,0,-25,0,1,0,0,70,6,0,0,4,-10,-2,0,-19,0,1,0,0,70,6,0,0,4,-5,-1,0,-14,0,1,1,0,70,6,0,0,4,13,-2,0,-9,0,1,1,0,70,6,0,0,4,16,-2,0,-4,0,1,1,0,70,6,0,0,4,19,-1,0,1,0,1,0,0,70,6,0,0,4,22,-1,0,6,0,1,0,0,70,6,0,0,4,31,0,0,11,0,1,0,0,70,6,0,0,4,30,1,0,15,0,1,1,0,70,6,0,0,4,27,2,0,18,0,1,1,0,70,6,0,0,4,23,4,0,21,0,1,2,1,70,6,0,0,4,17,5,0,23,0,1,2,2,70,6,0,0,4,12,6,0,24,0,1,3,2,70,6,0,0,4,6,7,0,24,0,1,3,3,70,6,0,0,4,2,8,0,24,0,1,0,3,70,6,0,0,4,0,8,0,24,0,1,2,4,70,6,0,0,4,0,9,0,21,1,1,2,4,70,6,0,0,4,-1,9,0,16,3,1,2,4,70,6,0,0,4,-4,10,0,11,5,1,3,4,70,6,0,0,4,-7,11,0,6,6,1,3,4,70,6,0,0,4,-11,12,0,1,8,1,3,4,70,6,0,0,4,-15,14,0,-3,10,1,0,4,70,6,0,0,4,-19,15,0,-8,11,1,0,4,70,6,0,0,4,-24,17,0,-13,13,1,1,4,70,6,0,0,4,-28,18,0,-18,15,1,1,4,70,6,0,0,4,-33,20,0,-23,17,1,1,4,70,6,0,0,4,-37,22,0,-28,18,1,2,4,70,6,0,0,4,-54,27,0,-32,20,1,2,4,70,6,0,0,4,-56,28,0,-37,22,1,2,4,70,6,0,0,4,-59,29,0,-42,23,1,3,4,70,6,0,0,4,-61,30,0,-47,25,1,3,4,70,6,0,0,4,-65,31,0,-52,27,1,0,4,70,6,0,0,4,-69,33,0,-56,28,1,0,4,70,6,0,0,4,-73,34,0]},"croq":{"fps":30,"f":[-40,0,1,0,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-30,3,0,-30,0,1,1,0,70,6,0,0,4,-35,7,0,-25,0,1,1,0,70,6,0,0,4,-36,11,0,-19,0,1,1,0,70,6,0,0,4,-34,15,0,-14,0,1,2,0,70,6,0,0,4,-30,17,0,-9,0,1,2,0,70,6,0,0,4,-28,19,0,-4,0,1,3,0,70,6,0,0,4,-26,21,0,1,0,1,0,0,70,6,0,0,4,-21,23,0,4,2,1,0,0,70,6,0,0,4,26,-8,0,6,6,1,0,0,70,6,0,0,4,28,1,0,9,12,1,1,0,70,6,0,0,4,31,12,0,11,19,1,1,0,70,6,0,0,3,34,24,0,14,27,1,2,0,70,6,0,0,3,36,36,0,16,34,1,2,0,70,6,0,0,3,39,47,0,19,40,1,3,0,70,6,0,0,3,41,55,0,22,44,1,3,0,70,6,0,0,3,44,60,0,24,46,1,0,0,70,6,0,0,3,46,61,0,28,46,1,3,0,70,6,0,0,2,50,57,0,33,46,1,0,0,70,6,0,0,2,53,54,0,38,46,1,0,0,70,6,0,0,2,57,52,0,43,46,1,0,0,70,6,0,0,2,61,50,0,48,46,1,1,0,70,6,0,0,2,65,49,0,54,46,1,1,0,70,6,0,0,2,70,48,0,59,46,1,1,0,70,6,0,0,2,75,47,0,64,46,1,2,0,70,6,0,0,2,80,47,0,69,46,1,2,0,70,6,0,0,2,85,47,0,74,46,1,2,0,70,6,0,0,1,90,46,0,79,46,1,3,0,70,6,0,0,1,107,47,0,84,46,1,3,0,70,6,0,0,1,110,47,0,89,46,1,0,0,70,6,0,0,1,112,46,0,94,46,1,0,0,70,6,0,0,1,115,46,0,100,46,1,0,0,70,6,0,0,1,119,46,0,105,46,1,1,0,70,6,0,0,1,123,46,0,110,46,1,1,0,70,6,0,0,1,127,46,0]},"spin":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-21,0,0,-30,0,1,2,0,70,6,0,0,4,-15,0,0,-25,0,1,2,0,70,6,0,0,4,-10,0,0,-19,0,1,3,0,70,6,0,0,4,-5,0,0,-14,0,1,3,0,70,6,0,0,4,12,0,0,-9,0,1,0,0,70,6,0,0,4,15,0,0,-4,0,1,0,0,70,6,0,0,4,17,0,0,1,0,1,0,0,70,6,0,0,4,21,0,0,0,-4,1,0,0,70,6,0,0,4,19,-2,0,1,-15,1,0,1,70,6,0,0,4,17,-5,0,4,-25,1,1,1,70,6,0,0,4,15,-8,0,10,-31,1,1,2,70,6,0,0,4,13,-11,0,13,-33,1,2,2,70,6,0,0,4,13,-11,0,16,-33,1,2,2,70,6,0,0,4,13,-11,0,25,-31,1,3,3,70,6,0,0,4,14,-13,0,33,-24,1,3,3,70,6,0,0,4,14,-14,0,36,-17,1,0,4,70,6,0,0,4,14,-14,0,36,-14,1,0,4,70,6,0,0,4,14,-15,0,38,-17,1,1,4,70,6,0,0,5,18,-28,0,41,-23,1,1,5,70,6,0,0,5,29,-45,0,44,-29,1,2,6,70,6,0,0,6,47,-56,0,48,-35,1,2,6,70,6,0,0,6,61,-58,0,50,-39,1,3,7,70,6,0,0,6,68,-56,0,51,-40,1,0,7,70,6,0,0,6,67,-57,0,54,-44,1,1,7,70,6,0,0,6,69,-59,0,58,-47,1,1,7,70,6,0,0,6,71,-61,0,61,-51,1,1,7,70,6,0,0,6,74,-64,0,65,-55,1,2,7,70,6,0,0,6,77,-67,0,68,-58,1,2,7,70,6,0,0,6,80,-70,0,72,-62,1,2,7,70,6,0,0,6,84,-73,0,76,-65,1,3,7,70,6,0,0,6,87,-77,0,79,-69,1,3,7,70,6,0,0,6,91,-80,0,83,-73,1,0,7,70,6,0,0,6,94,-84,0,87,-76,1,0,7,70,6,0,0,6,98,-87,0,90,-80,1,0,7,70,6,0,0,6,110,-99,0,94,-83,1,1,7,70,6,0,0,6,112,-101,0,97,-87,1,1,7,70,6,0,0,6,113,-103,0,101,-91,1,1,7,70,6,0,0,6,116,-105,0,105,-94,1,2,7,70,6,0,0,7,118,-108,0,108,-98,1,2,7,70,6,0,0,7,121,-111,0,112,-102,1,2,7,70,6,0,0,7,124,-114,0]},"cruyff":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,3,0,70,6,0,0,4,-22,-3,0,-30,0,1,3,0,70,6,0,0,4,-17,-4,0,-25,0,1,0,0,70,6,0,0,4,-12,-4,0,-19,0,1,0,0,70,6,0,0,4,-6,-3,0,-14,0,1,0,0,70,6,0,0,4,13,-5,0,-9,0,1,1,0,70,6,0,0,4,16,-5,0,-4,0,1,1,0,70,6,0,0,4,18,-3,0,1,0,1,0,0,70,6,0,0,4,21,-2,0,6,0,1,0,0,70,6,0,0,4,32,2,0,11,0,1,0,0,70,6,0,0,4,33,7,0,15,0,1,1,0,70,6,0,0,4,33,12,0,19,0,1,1,0,70,6,0,0,4,31,17,0,22,0,1,2,0,70,6,0,0,4,28,21,0,24,0,1,2,0,70,6,0,0,4,24,22,0,26,0,1,3,1,70,6,0,0,4,20,22,0,27,0,1,3,2,70,6,0,0,4,17,21,0,27,0,1,0,2,70,6,0,0,4,14,20,0,27,0,1,0,3,70,6,0,0,4,12,20,0,27,0,1,2,3,70,6,0,0,4,12,21,0,24,4,1,2,3,70,6,0,0,4,10,23,0,21,8,1,2,3,70,6,0,0,4,9,25,0,18,12,1,3,3,70,6,0,0,4,7,28,0,15,16,1,3,3,70,6,0,0,4,4,31,0,12,20,1,3,3,70,6,0,0,4,2,34,0,9,24,1,0,3,70,6,0,0,3,-1,38,0,6,29,1,0,3,70,6,0,0,3,-4,42,0,3,33,1,0,3,70,6,0,0,3,-7,45,0,0,37,1,1,3,70,6,0,0,3,-10,49,0,-3,41,1,1,3,70,6,0,0,3,-13,53,0,-6,45,1,2,3,70,6,0,0,3,-23,67,0,-9,49,1,2,3,70,6,0,0,3,-24,69,0,-12,53,1,2,3,70,6,0,0,3,-26,71,0,-15,57,1,3,3,70,6,0,0,3,-28,74,0,-18,61,1,3,3,70,6,0,0,3,-30,76,0,-22,65,1,3,3,70,6,0,0,3,-32,80,0,-25,69,1,0,3,70,6,0,0,3,-35,83,0]},"rainbow":{"fps":30,"f":[-40,0,1,0,0,70,14,0,0,4,-26,0,0,-35,0,1,0,0,70,14,0,0,4,-28,4,0,-30,0,1,1,0,70,14,0,0,4,-30,10,0,-25,0,1,1,0,70,14,0,0,4,-29,14,0,-19,0,1,1,0,70,14,0,0,4,-24,17,0,-14,0,1,2,0,70,14,0,0,4,-21,23,0,-9,0,1,2,0,70,14,0,0,4,-19,24,0,-4,0,1,2,0,70,14,0,0,4,-15,26,0,1,0,1,0,0,70,14,0,0,4,-10,26,0,6,0,1,0,0,70,14,0,0,4,32,0,0,11,0,1,0,0,70,14,0,0,4,34,0,0,16,0,1,1,0,70,14,0,0,4,34,0,1,20,0,1,1,0,70,14,0,0,4,34,0,2,24,0,1,2,0,70,14,0,0,4,33,0,4,27,0,1,2,0,70,14,0,0,4,31,0,6,30,0,1,3,0,70,14,0,0,4,30,0,10,33,0,1,3,0,70,14,0,0,4,29,0,13,35,0,1,0,0,70,14,0,0,4,28,0,16,37,0,1,0,0,70,14,0,0,4,30,0,18,39,0,1,3,0,70,14,0,0,4,34,0,23,46,0,1,3,0,70,14,0,0,5,40,0,32,50,-3,1,0,1,70,14,0,0,5,47,0,41,53,-7,1,0,1,70,14,0,0,5,53,0,49,58,-10,1,1,7,70,14,0,0,5,59,0,56,64,-12,1,1,0,70,14,0,0,6,65,0,63,71,-15,1,2,0,70,14,0,0,6,71,0,70,79,-16,1,2,0,70,14,0,0,7,78,0,76,86,-17,1,3,0,70,14,0,0,7,84,0,81,93,-18,1,3,0,70,14,0,0,7,90,0,86,101,-18,1,0,0,70,14,0,0,7,96,0,90,108,-18,1,0,1,70,14,0,0,7,103,0,93,115,-17,1,1,1,70,14,0,0,0,109,0,96,120,-17,1,1,1,70,14,0,0,0,115,0,98,125,-17,1,1,2,70,14,0,0,0,121,0,100,129,-16,1,2,0,70,14,0,0,0,127,0,101,136,-15,1,2,0,70,14,0,0,0,134,0,102,144,-15,1,3,0,70,14,0,0,0,140,0,102,151,-14,1,3,1,70,14,0,0,0,146,0,101,158,-13,1,0,1,70,14,0,0,0,152,0,100,163,-12,1,0,2,70,14,0,0,0,159,0,99,168,-12,1,1,2,70,14,0,0,0,165,0,96,173,-11,1,1,0,70,14,0,0,0,171,0,94,179,-10,1,1,0,70,14,0,0,0,177,0,90,187,-9,1,2,1,70,14,0,0,0,183,0,86,194,-8,1,2,1,70,14,0,0,0,190,0,81,200,-7,1,3,1,70,14,0,0,0,196,0,76,205,-7,1,3,2,70,14,0,0,0,202,0,71,209,-6,1,0,2,70,14,0,0,0,208,0,64,215,-5,1,0,0,70,14,0,0,0,215,0,57,222,-4,1,0,0,70,14,0,0,0,221,0,50,229,-3,1,1,1,70,14,0,0,0,227,0,42,236,-3,1,1,1,70,14,0,0,0,233,0,33,242,-2,1,2,2,70,14,0,0,0,240,0,24,246,-1,1,2,2,70,14,0,0,0,246,0,14,250,-1,1,2,0,70,14,0,0,0,277,3,4,254,0,1,3,0,70,14,0,0,0,279,3,2,260,0,1,3,0,70,14,0,0,0,281,2,6,267,1,1,0,0,70,14,0,0,0,285,2,10,274,1,1,0,0,70,14,0,0,0,290,1,13,281,1,1,1,0,70,14,0,0,0,296,1,15,287,1,1,1,0,70,14,0,0,0,302,1,17,294,1,1,2,0,70,14,0,0,0,308,1,18,301,1,1,2,0,70,14,0,0,0,314,1,19,308,1,1,3,0,70,14,0,0,0,322,1,19,315,1,1,3,0,70,14,0,0,0,329,1,19,323,2,1,0,0,70,14,0,0,0,336,0,19,330,2,1,0,0,70,14,0,0,0,343,0,17,337,2,1,1,0,70,14,0,0,0,350,0,15,344,2,1,1,0,70,14,0,0,0,357,-1,13,352,2,1,2,0,70,14,0,0,0,364,-1,13,359,2,1,2,0,70,14,0,0,0,371,-1,12,366,2,1,3,0,70,14,0,0,0,378,-2,11,373,2,1,3,0,70,14,0,0,0,385,-2,9,380,2,1,0,0,70,14,0,0,0,405,-9,7,387,2,1,0,0,70,14,0,0,0,409,-7,3,394,2,1,1,0,70,14,0,0,0,413,-5,0,401,2,1,1,0,70,14,0,0,0,418,-3,1,407,2,1,2,0,70,14,0,0,0,423,-2,2,414,2,1,2,0,70,14,0,0,0,429,-1,2,421,2,1,3,0,70,14,0,0,0,435,0,2,428,2,1,3,0,70,14,0,0,0,441,0,1,435,2,1,0,0,70,14,0,0,0,463,-1,0,441,2,1,0,0,70,14,0,0,0,467,0,0,448,2,1,1,0,70,14,0,0,0,470,0,0,455,2,1,1,0,70,14,0,0,0,474,1,0,462,2,1,2,0,70,14,0,0,0,479,1,0,468,2,1,2,0,70,14,0,0,0,484,1,0,475,2,1,3,0,70,14,0,0,0,490,1,0,482,2,1,3,0,70,14,0,0,0,496,1,0,489,2,1,0,0,70,14,0,0,0,502,1,0]},"sombrero":{"fps":30,"f":[0,0,0,0,0,-34,6,0,0,0,14,0,0,0,0,0,0,0,-34,6,0,0,0,15,0,0,0,0,0,0,0,-34,6,0,0,0,16,0,0,0,0,0,0,0,-34,6,0,0,0,17,0,0,0,0,0,0,0,-34,6,0,0,0,18,0,0,0,0,0,0,0,-34,6,0,0,0,19,0,0,0,0,0,0,0,-34,6,0,0,0,19,0,0,0,0,0,0,0,-34,6,0,0,0,20,0,0,0,0,0,0,0,-34,6,0,0,0,21,0,0,0,0,0,0,0,-34,6,0,0,0,21,0,0,0,0,0,0,0,-34,6,0,0,0,22,0,0,0,0,1,0,0,-34,6,0,0,0,22,0,0,0,0,1,0,0,-34,6,0,0,0,23,0,2,0,0,1,0,0,-34,6,0,0,0,20,0,6,0,0,1,1,0,-34,6,0,0,0,16,0,12,0,0,1,1,0,-34,6,0,0,0,13,0,17,0,0,1,2,0,-34,6,0,0,0,12,0,20,-2,2,1,0,3,-34,6,0,0,0,10,0,28,-5,6,1,0,2,-34,6,0,0,0,7,0,35,-8,10,1,0,2,-34,6,0,0,0,4,0,42,-9,15,1,1,1,-34,6,0,0,0,1,0,48,-10,20,1,1,1,-34,6,0,0,0,-2,0,54,-11,24,1,1,1,-34,6,0,0,0,-5,0,59,-13,28,1,2,0,-34,6,0,0,0,-8,0,63,-15,31,1,2,0,-34,6,0,0,0,-11,0,67,-17,34,1,2,0,-34,6,0,0,0,-14,0,70,-19,36,1,2,7,-34,6,0,0,0,-17,0,73,-22,38,1,3,7,-34,6,0,0,7,-20,0,75,-25,39,1,3,6,-34,6,0,0,7,-23,0,77,-30,39,1,3,6,-34,6,0,0,7,-26,0,78,-34,38,1,0,6,-34,6,0,0,7,-29,0,78,-38,36,1,0,6,-34,6,0,0,6,-32,0,78,-42,34,1,0,6,-34,6,0,0,6,-35,0,77,-46,31,1,1,6,-34,6,0,0,5,-38,0,76,-49,29,1,1,6,-34,6,0,0,5,-41,0,74,-53,26,1,1,6,-34,6,0,0,5,-43,0,71,-56,23,1,2,6,-34,6,0,0,5,-46,0,68,-60,20,1,2,7,-34,6,0,0,4,-49,0,65,-63,16,1,2,7,-34,6,0,0,4,-52,0,60,-66,13,1,3,7,-34,6,0,0,4,-55,0,56,-69,10,1,3,7,-34,6,0,0,4,-58,0,50,-72,7,1,3,7,-34,6,0,0,4,-61,0,44,-74,4,1,3,7,-34,6,0,0,4,-64,0,38,-76,2,1,0,0,-34,6,0,0,4,-67,0,30,-78,1,1,0,0,-34,6,0,0,4,-70,0,23,-79,0,1,0,0,-34,6,0,0,4,-73,0,15,-79,-1,1,0,5,-34,6,0,0,5,-96,-20,6,-80,-2,1,0,5,-34,6,0,0,5,-97,-21,0,-82,-4,1,0,5,-34,6,0,0,5,-98,-22,4,-86,-8,1,0,5,-34,6,0,0,5,-99,-23,7,-89,-12,1,1,5,-34,6,0,0,5,-102,-26,10,-92,-16,1,1,5,-34,6,0,0,5,-104,-29,12,-96,-19,1,1,5,-34,6,0,0,5,-107,-32,14,-99,-23,1,2,5,-34,6,0,0,5,-110,-35,15,-103,-27,1,2,5,-34,6,0,0,5,-114,-39,15,-106,-31,1,2,5,-34,6,0,0,5,-117,-43,15,-109,-34,1,3,5,-34,6,0,0,5,-120,-46,14,-113,-38,1,3,5,-34,6,0,0,5,-123,-50,13,-116,-42,1,3,5,-34,6,0,0,5,-127,-54,11,-120,-46,1,0,5,-34,6,0,0,5,-138,-65,8,-123,-50,1,0,5,-34,6,0,0,5,-139,-67,5,-127,-53,1,0,5,-34,6,0,0,5,-141,-69,2,-130,-57,1,1,5,-34,6,0,0,5,-143,-72,1]},"elastico":{"fps":30,"f":[-40,0,1,1,0,70,6,0,0,4,-26,0,0,-35,0,1,2,0,70,6,0,0,4,-29,-4,0,-30,0,1,2,0,70,6,0,0,4,-31,-9,0,-25,0,1,2,0,70,6,0,0,4,-30,-14,0,-20,0,1,3,0,70,6,0,0,4,-26,-17,0,-15,0,1,3,0,70,6,0,0,4,-20,-19,0,-9,0,1,3,0,70,6,0,0,4,-12,-18,0,-4,0,1,0,0,70,6,0,0,4,-6,-25,0,1,0,1,0,0,70,6,0,0,5,-4,-26,0,4,1,1,0,0,70,6,0,0,4,26,4,0,7,2,1,0,0,70,6,0,0,4,29,8,0,10,3,1,1,0,70,6,0,0,4,32,12,0,13,4,1,1,0,70,6,0,0,4,35,16,0,16,4,1,2,0,70,6,0,0,4,38,18,0,19,4,1,0,7,70,6,0,0,4,44,15,3,23,1,1,0,7,70,6,0,0,4,50,9,6,27,-3,1,1,7,70,6,0,0,4,57,4,9,31,-6,1,1,7,70,6,0,0,5,57,-2,11,35,-10,1,2,7,70,6,0,0,5,59,-4,13,39,-13,1,2,7,70,6,0,0,5,61,-7,13,43,-16,1,2,7,70,6,0,0,6,63,-13,14,47,-19,1,3,7,70,6,0,0,6,65,-19,14,51,-22,1,3,7,70,6,0,0,6,67,-25,13,55,-26,1,3,7,70,6,0,0,6,70,-30,12,59,-29,1,0,7,70,6,0,0,6,73,-34,10,63,-32,1,0,7,70,6,0,0,6,77,-39,7,67,-35,1,0,7,70,6,0,0,6,80,-42,4,71,-38,1,1,7,70,6,0,0,6,84,-46,0,75,-41,1,1,7,70,6,0,0,6,88,-49,1,79,-44,1,2,7,70,6,0,0,7,101,-58,2,83,-47,1,2,7,70,6,0,0,7,103,-60,2,87,-50,1,2,7,70,6,0,0,7,105,-62,2,91,-53,1,3,7,70,6,0,0,7,107,-64,2,95,-56,1,3,7,70,6,0,0,7,110,-67,1]},"heel":{"fps":30,"f":[-40,0,1,3,0,70,6,0,0,4,-26,0,0,-35,0,1,0,0,70,6,0,0,4,-22,-2,0,-30,0,1,0,0,70,6,0,0,4,-16,-3,0,-25,0,1,0,0,70,6,0,0,4,-11,-2,0,-20,0,1,1,0,70,6,0,0,4,-5,-2,0,-15,0,1,1,0,70,6,0,0,4,0,-1,0,-9,0,1,2,0,70,6,0,0,4,18,-2,0,-4,0,1,2,0,70,6,0,0,4,21,-2,0,1,0,1,0,0,70,6,0,0,4,23,-1,0,6,0,1,0,0,70,6,0,0,4,30,2,0,10,0,1,0,0,70,6,0,0,4,30,5,0,14,0,1,1,0,70,6,0,0,4,27,9,0,18,0,1,1,0,70,6,0,0,4,24,14,0,21,0,1,2,0,70,6,0,0,4,21,17,0,23,0,1,2,0,70,6,0,0,4,19,20,0,25,0,1,3,0,70,6,0,0,4,20,20,0,28,-1,1,2,7,70,6,0,0,4,27,23,2,33,-4,1,3,7,70,6,0,0,3,32,27,3,38,-7,1,3,7,70,6,0,0,3,37,30,3,42,-10,1,0,7,70,6,0,0,3,41,32,2,47,-13,1,0,0,70,6,0,0,3,45,35,1,51,-15,1,0,0,70,6,0,0,3,49,37,0,55,-18,1,1,0,70,6,0,0,3,53,40,0,59,-21,1,1,1,70,6,0,0,2,56,42,0,63,-23,1,1,1,70,6,0,0,2,59,44,0,66,-25,1,2,2,70,6,0,0,2,62,45,0,69,-27,1,2,2,70,6,0,0,2,65,47,0,72,-29,1,2,2,70,6,0,0,2,67,49,0,75,-30,1,2,2,70,6,0,0,2,69,50,0,78,-30,1,3,2,70,6,0,0,2,71,51,0,80,-30,1,3,2,70,6,0,0,2,73,53,0,82,-29,1,3,2,70,6,0,0,2,75,54,0,85,-27,1,3,2,70,6,0,0,2,77,55,0,87,-23,1,0,2,70,6,0,0,2,79,56,0,89,-18,1,0,2,70,6,0,0,2,80,57,0,91,-13,1,0,2,70,6,0,0,2,81,58,0,92,-8,1,1,2,70,6,0,0,2,83,58,0,94,-3,1,1,2,70,6,0,0,2,84,59,0,96,2,1,1,2,70,6,0,0,2,85,60,0,96,7,1,2,2,70,6,0,0,2,86,60,0,96,12,1,2,2,70,6,0,0,2,87,61,0,96,18,1,3,2,70,6,0,0,2,88,62,0,96,23,1,3,2,70,6,0,0,2,89,62,0,96,28,1,3,2,70,6,0,0,1,91,54,0,97,32,1,0,2,70,6,0,0,1,92,56,0,99,37,1,0,1,70,6,0,0,1,95,58,0,102,41,1,0,1,70,6,0,0,1,100,59,0,106,44,1,1,1,70,6,0,0,1,106,60,0,110,47,1,1,1,70,6,0,0,1,114,59,0,115,49,1,1,0,70,6,0,0,1,122,57,0,119,51,1,2,0,70,6,0,0,1,129,55,0,124,52,1,2,0,70,6,0,0,1,136,54,0,129,52,1,2,0,70,6,0,0,1,142,53,0,134,53,1,3,0,70,6,0,0,1,148,53,0,139,53,1,3,0,70,6,0,0,1,167,53,0,145,54,1,0,0,70,6,0,0,1,170,53,0,150,54,1,0,0,70,6,0,0,1,172,53,0,155,54,1,0,0,70,6,0,0,1,175,53,0,160,54,1,1,0,70,6,0,0,1,179,54,0,165,54,1,1,0,70,6,0,0,1,183,54,0]}};
   // what to draw, as for a man running to the right: u ahead, v across (+ his right, down the screen) -- the moves the clips
   // show: the croqueta to his right, the roulette clockwise, the elastico back to his left, the heel flick's ball to his right
   // (the sombrero as he does it with his back to the man: popped on a little, then back over his head)

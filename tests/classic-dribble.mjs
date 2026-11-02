@@ -102,13 +102,12 @@ ok(rel.ownedPct === 100 && rel.end.gap <= rel.end.reach && rel.end.sp < 0.3 && r
 const pass = await play({ drib: 5.5, secs: 2.6, mate: true }, [[0, down(fwd)], [520, down('KeyJ')], [60, up('KeyJ')], [1300, up(fwd)]]);
 const kick = pass.ev.find(e => e.own !== 'me');
 info('J tapped with it out ahead: ' + JSON.stringify(pass.ev) + ', ' + JSON.stringify(pass.end));
-ok(!!kick && kick.gapBefore <= kick.reach + 0.18 && pass.ev.some(e => e.own === 'G'), 'a pass asked for with it out ahead goes when he\'s on it (struck ' + (kick && kick.gapBefore) + ' m off him, his reach ' + (kick && kick.reach) + ' m -- the game\'s "on it" is his reach and 4 px, 0.18 m -- at ' + (kick && kick.t) + ' s) and finds the man');
+ok(!!kick && kick.gapBefore <= kick.reach + 0.05 && pass.ev.some(e => e.own === 'G'), 'a pass asked for with it out ahead goes when he\'s on it (struck ' + (kick && kick.gapBefore) + ' m off him, his reach ' + (kick && kick.reach) + ' m, at ' + (kick && kick.t) + ' s) and finds the man');
 
 // 7. ONE OF THEIRS WHO GETS TO A TOUCH OUT AHEAD OF OUR MAN (stood well off; once it's out of our man's reach, put in its
-// way, a metre on from it): he takes it -- and ours, never touched, stays on his feet. (Knocked on at a sprint: since v96
-// a running touch goes from his boots, and at Dribbling 5.5 it doesn't get out of his reach.) And running with it
-// straight at one stood in his way (6 m on), it's at our man's feet as he gets to him: a tackle, if it comes, is at his feet.
-const def = await play({ drib: 5.5, secs: 2, sprint: true, def: { x: 30, y: 12, into: true } }, [[0, down(fwd)], [0, down('ShiftLeft')]]);
+// way, a metre on from it): he takes it -- and ours, never touched, stays on his feet. And running with it straight at one
+// stood in his way (6 m on), it's at our man's feet as he gets to him: a tackle, if it comes, is at his feet.
+const def = await play({ drib: 5.5, secs: 2, def: { x: 30, y: 12, into: true } }, [[0, down(fwd)]]);
 const took = def.ev.find(e => e.own === 'R');
 info('one of theirs in the way of a touch out ahead: ' + JSON.stringify(def.ev));
 ok(!!took && took.gapBefore > took.reach && took.state === 'normal', 'one of theirs who gets to a touch out ahead of our man takes it (' + (took && took.gapBefore) + ' m off him), and ours stays on his feet');

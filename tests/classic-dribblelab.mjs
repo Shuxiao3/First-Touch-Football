@@ -1,6 +1,6 @@
-// FOOTBALL CLASSIC, THE DRIBBLE LAB'S CONTROLS (v92) AND THE TOUCH LENGTHS (v94, v95, v98): a DRIBBLING chip sets your
-// man's Dribbling (1, 3, 5.5, 8, 10; V); how far a touch goes on ahead of him is his Dribbling's, whatever his pace --
-// 0.3 m running and 1 m at a sprint at Dribbling 1, down to 0.1 m and 0.5 m at 10 (v98); RUN TOUCH and SPRINT TOUCH take
+// FOOTBALL CLASSIC, THE DRIBBLE LAB'S CONTROLS (v92) AND THE TOUCH LENGTHS (v94, v95): a DRIBBLING chip sets your man's
+// Dribbling (1, 3, 5.5, 8, 10; V); how far a touch goes on ahead of him is his Dribbling's, whatever his pace -- 1 m
+// running and 2 m at a sprint at Dribbling 1, down to 0.3 m and 1 m at 10 (v95); RUN TOUCH and SPRINT TOUCH take
 // those from half as far to twice as far (shown in metres for him; [ ] and , . on a keyboard), kept in this browser
 // and played everywhere; and the box with how the run went is off to the top left, under the chips: the result and the
 // tally, nothing more.
@@ -25,7 +25,7 @@ const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
 const toLab = async (pg) => { await pg.evaluate(() => document.querySelector('#smItems [data-act="dribblelab"]').click()); await pg.waitForTimeout(1500); };
 await toLab(page);
-const m1 = v => v.toFixed(v < 1 ? 2 : v < 10 ? 1 : 0) + ' M';   // (as the chips show it: under a metre, to the centimetre -- v98)
+const m1 = v => v.toFixed(v < 10 ? 1 : 0) + ' M';          // (as the chips show it)
 const chip = (k) => page.textContent('#labHud [data-lab="' + k + '"] b');
 const chips = async () => ({ run: await chip('drun'), sprint: await chip('dsprint') });
 const state = () => page.evaluate(() => { const T = window.__T, c = T.controlled();
@@ -33,20 +33,20 @@ const state = () => page.evaluate(() => { const T = window.__T, c = T.controlled
 const settle = () => page.waitForTimeout(150);
 const near = (a, b, e = 0.005) => Math.abs(a - b) < e;
 
-// 1. THE CHIPS: there, and what they say is what he plays at (Dribbling 5.5: 0.2 m running, 0.75 m at a sprint)
+// 1. THE CHIPS: there, and what they say is what he plays at (Dribbling 5.5: 0.65 m running, 1.5 m at a sprint)
 const c0 = { drib: await chip('ddrib'), ...await chips() }, s0 = await state();
 info('the chips: ' + JSON.stringify(c0) + '; his: Dribbling ' + s0.drib + ', touches ' + s0.run.toFixed(2) + ' m running, ' + s0.sprint.toFixed(2) + ' m sprinting');
-ok(c0.drib === '5.5' && s0.drib === 5.5 && c0.run === m1(s0.run) && c0.sprint === m1(s0.sprint) && near(s0.run, 0.2) && near(s0.sprint, 0.75) && s0.touchRun === 1 && s0.touchSprint === 1,
+ok(c0.drib === '5.5' && s0.drib === 5.5 && c0.run === m1(s0.run) && c0.sprint === m1(s0.sprint) && near(s0.run, 0.65) && near(s0.sprint, 1.5) && s0.touchRun === 1 && s0.touchSprint === 1,
   'the Dribble Lab has a DRIBBLING chip (' + c0.drib + ': his Dribbling), a RUN TOUCH (' + c0.run + ') and a SPRINT TOUCH (' + c0.sprint + ') -- how far his touches go on, for him');
 
-// 2. DRIBBLING: a tap takes it on (5.5 -> 8), and V round the rest -- and the touch lengths are Dribbling's: 0.1 m running
-//    and 0.5 m at a sprint at 10, 0.3 m and 1 m at 1
+// 2. DRIBBLING: a tap takes it on (5.5 -> 8), and V round the rest -- and the touch lengths are Dribbling's: 0.3 m running
+//    and 1 m at a sprint at 10, 1 m and 2 m at 1
 await page.click('#labHud [data-lab="ddrib"]'); await settle();
 const s8 = await state(), seen = [s8.drib], at = {};
 for(let i = 0; i < 4; i++){ await page.keyboard.press('KeyV'); await page.waitForTimeout(80); const s = await state(); seen.push(s.drib); at[s.drib] = { ...s, chips: await chips() }; }
 info('Dribbling, tapped then V four times: ' + seen.join(' → ') + '; at 10: ' + JSON.stringify(at[10].chips) + ', at 1: ' + JSON.stringify(at[1].chips));
 ok(s8.drib === 8 && seen.join(',') === '8,10,1,3,5.5', 'a tap on DRIBBLING sets his Dribbling (5.5 → 8), V takes it round (' + seen.join(' → ') + ')');
-ok(near(at[10].run, 0.1) && near(at[10].sprint, 0.5) && near(at[1].run, 0.3) && near(at[1].sprint, 1) && at[10].chips.run === '0.10 M' && at[10].chips.sprint === '0.50 M' && at[1].chips.run === '0.30 M' && at[1].chips.sprint === '1.0 M'
+ok(near(at[10].run, 0.3) && near(at[10].sprint, 1) && near(at[1].run, 1) && near(at[1].sprint, 2) && at[10].chips.run === '0.3 M' && at[10].chips.sprint === '1.0 M' && at[1].chips.run === '1.0 M' && at[1].chips.sprint === '2.0 M'
   && s8.run < s0.run && s8.run > at[10].run,
   'his touches are his Dribbling\'s: at 10, ' + at[10].chips.run + ' running and ' + at[10].chips.sprint + ' at a sprint; at 1, ' + at[1].chips.run + ' and ' + at[1].chips.sprint + ' (at 8, ' + s8.run.toFixed(2) + ' m running)');
 
@@ -98,11 +98,11 @@ const f10 = await inPlay({ drib: 10, run: 1, sprint: 1, secs: 5, flat: true }), 
 const h10 = steady(f10), h1 = steady(f1), j10 = avg(h10), j1 = avg(h1);
 info('his touches flat out (m clear of him; t s, pace/sprinting pace): at Dribbling 10 ' + JSON.stringify(f10.out) + ' (the chip: ' + f10.chipM.toFixed(2) + ' m)');
 info('                                                     at Dribbling 1 ' + JSON.stringify(f1.out) + ' (the chip: ' + f1.chipM.toFixed(2) + ' m)');
-ok(h10.length >= 2 && h1.length >= 2 && near(f10.chipM, 0.5) && near(f1.chipM, 1) && Math.abs(j10 / f10.chipM - 1) < 0.15 && Math.abs(j1 / f1.chipM - 1) < 0.35 && j1 > j10 * 1.4 && !f10.lost && !f1.lost,
+ok(h10.length >= 2 && h1.length >= 2 && near(f10.chipM, 1) && near(f1.chipM, 2) && Math.abs(j10 / f10.chipM - 1) < 0.15 && Math.abs(j1 / f1.chipM - 1) < 0.35 && j1 > j10 * 1.4 && !f10.lost && !f1.lost,
   '...and flat out, ' + j10.toFixed(2) + ' m on at Dribbling 10 (' + m1(f10.chipM) + ') and ' + j1.toFixed(2) + ' m at 1 (' + m1(f1.chipM) + ', a poor dribbler\'s touches the more uneven), still his');
 
-// 5. KEPT: , and . step SPRINT TOUCH too; a reload, and both are as you left them -- but settings from before v98 (v92's,
-//    v94's and v95's to v97's), set on other touch lengths, go: back to x1
+// 5. KEPT: , and . step SPRINT TOUCH too; a reload, and both are as you left them -- but settings from before v95 (v92's
+//    and v94's), set on other touch lengths, go: back to x1
 await page.keyboard.press('Period'); await settle(); await page.keyboard.press('Period'); await settle(); await page.keyboard.press('Comma'); await settle();
 const before = await state();
 await page.reload(); await page.waitForTimeout(700); await toLab(page);
@@ -113,7 +113,7 @@ ok(before.touchRun === 0.5 && before.touchSprint === 1.5 && kept.touchRun === 0.
 await page.evaluate(() => localStorage.setItem('ftc_prefs', JSON.stringify({ diff: 'star', dRun: 2, dSprint: 0.5, touchRun: 0.5, touchSprint: 2 })));
 await page.reload(); await page.waitForTimeout(700); await toLab(page);
 const mig = await page.evaluate(() => { const P = window.__T.PREFS; return { touchRun: P.touchRun, touchSprint: P.touchSprint, old: 'dRun' in P || 'dSprint' in P }; });
-ok(mig.touchRun === 1 && mig.touchSprint === 1 && !mig.old, 'touch settings from before v98 (v92\'s ×2 / ×0.5, v94\'s and on ×0.5 / ×2, on other touch lengths) are dropped: ×' + mig.touchRun + ' / ×' + mig.touchSprint);
+ok(mig.touchRun === 1 && mig.touchSprint === 1 && !mig.old, 'touch settings from before v95 (v92\'s ×2 / ×0.5, v94\'s ×0.5 / ×2, on other touch lengths) are dropped: ×' + mig.touchRun + ' / ×' + mig.touchSprint);
 
 // 6. THE BOX: off to the top left, under the chips -- the result and the tally, nothing more (and on a phone)
 const boxAfterRun = async (pg) => {
