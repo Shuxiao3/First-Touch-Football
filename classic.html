@@ -855,12 +855,6 @@
   .labTallyRow{display:flex;gap:6px;align-items:baseline;justify-content:center;font-size:9.5px;color:var(--ink-dim);
     text-shadow:0 1px 2px #000;flex-wrap:wrap;background:rgba(8,14,9,.72);border-radius:6px;padding:1px 8px;}   /* a pill: it sits on the turf now */
   .labClear{pointer-events:auto;font-family:inherit;font-size:9px;color:var(--dim);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;}
-  /* the Dribble Lab's box: off to the left, under the chips -- the last run and the tally, nothing more (v92) */
-  #stageWrap[data-labkind="dribble"] #labResult{align-self:flex-start;text-align:left;padding:4px 10px 5px;max-width:min(240px,42%);white-space:normal;}
-  #stageWrap[data-labkind="dribble"] #labResult .dlRes{font-size:13px;letter-spacing:1px;}
-  #stageWrap[data-labkind="dribble"] #labResult .dlTally{display:block;font-size:9px;color:var(--ink-dim);margin-top:1px;}
-  #stageWrap[data-labkind="dribble"] #labResult .dlHow{font-size:9.5px;color:var(--ink-dim);}
-  #stageWrap[data-labkind="dribble"] .labTallyRow{display:none;}
   #labTune{position:absolute;top:42px;right:10px;bottom:10px;width:min(280px, 46%);z-index:7;overflow:hidden;
     background:rgba(8,14,9,.93);border:1px solid var(--edge);border-radius:8px;padding:9px 12px 12px;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
   .ltHead{display:flex;justify-content:space-between;align-items:center;font-family:'FTC Dot',monospace;font-size:12px;
@@ -876,7 +870,7 @@
     #stageWrap.labTuneOpen #labResult, #stageWrap.labTuneOpen .labTallyRow{display:none;}
     .lgBox{height:36px;}
     #labLow{bottom:16px;left:8px;width:min(220px,36%);}
-    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="cross"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
+    #stageWrap[data-labkind="pass"] #labResult, #stageWrap[data-labkind="shoot"] #labResult, #stageWrap[data-labkind="dribble"] #labResult, #stageWrap[data-labkind="cross"] #labResult{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;}
     #stageWrap.labTuneOpen #labLow{display:none !important;}
   }
   /* ===== PIXEL THEME ===================================================================================================
@@ -1406,9 +1400,6 @@
       <button class="labChip" data-kinds="dribble" data-lab="ddef"><i>DEFENDER</i><b id="labDDefV">CLOSES</b><kbd>B</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="ddist"><i>FROM</i><b id="labDDistV">10 M</b><kbd>1-3</kbd></button>
       <button class="labChip" data-kinds="dribble" data-lab="dslide"><i>SLIDES</i><b id="labDSlideV">OFF</b><kbd>C</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="ddrib"><i>DRIBBLING</i><b id="labDDribV">5.5</b><kbd>V</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="drun"><i>RUN TOUCH</i><b id="labDRunV">0.8 M</b><kbd>[ ]</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="dsprint"><i>SPRINT TOUCH</i><b id="labDSprintV">3 M</b><kbd>, .</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="cwho"><i>CROSSER</i><b id="labCWhoV">COMPUTER</b><kbd>C</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="cfrom"><i>FROM</i><b id="labCFromV">8 M OUT</b><kbd>1-4</kbd></button>
       <button class="labChip" data-kinds="cross" data-lab="catk"><i>OURS</i><b id="labCAtkV">2</b><kbd>, .</kbd></button>
@@ -1709,8 +1700,8 @@
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
     composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
-    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'How far each dribble touch goes on ahead (120 = as it plays: 1 m clear of him running at Dribbling 1 down to 0.3 m at 10, and 2 m down to 1 m at a sprint). Bigger = longer touches.'},
-    knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'How much each touch varies, in length and line (0.8 = as it plays: +-8% at Dribbling 10, +-40% at 1). Higher = looser, less predictable dribbling.'},
+    knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'Forward nudge per dribble stride. Bigger = the ball rolls much further out ahead.'},
+    knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'Random spread on each touch. Higher = looser, less predictable dribbling.'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
     accel:     {val:5.5, min:1,   max:10,  step:0.1, label:'Acceleration (stat 1–10)',hint:'Outfielder acceleration as a 1–10 stat. 1 = 0.05 (sluggish off the mark); 10 = 0.50 (explosive). Baseline for all players.'},
     agility:   {val:5.5, min:1,   max:10,  step:0.1, label:'Agility (stat 1–10)',hint:'How fast players turn / change direction. 1 = 0.20 (wide, sluggish turns); 10 = 0.50 (sharp, snappy). Baseline for all players.'},
@@ -1906,11 +1897,9 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', touchRun:1, touchSprint:1};   // (touchRun, touchSprint: the Dribble Lab's touch lengths, x1 as it plays)
+  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal'};
   const THEMES=['blue','ruby','silver','mint'];
   try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
-  delete PREFS.dRun; delete PREFS.dSprint;   // (v92's touch lengths, set on the touches before v94's: gone)
-  if(PREFS.touchV!==95){ PREFS.touchRun=1; PREFS.touchSprint=1; PREFS.touchV=95; }   // (RUN/SPRINT TOUCH set on another version's touch lengths: back to x1)
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
   // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
@@ -2122,7 +2111,7 @@
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
-    dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','agility','tackle'],   // (your Dribbling: the lab's chip)
+    dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange','gkHandling'],
     crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
   };
@@ -3352,7 +3341,7 @@
     const sw=readSwipe(s);
     if(!sw) return;
     if(tr) tr.shot=true;
-    swipeShot=Object.assign(sw,{t:ball.ownedBy===controlled?1.0:0.4});
+    swipeShot=Object.assign(sw,{t:0.4});
     swipeStep(0);                                                     // the ball's still yours: shoot now
   }
   // a read swipe fires the moment the ball is at your feet (or knocked on but still within your reach),
@@ -3361,7 +3350,7 @@
     if(!swipeShot) return;
     const p=controlled;
     const inReach=!ball.ownedBy&&!gkHold&&ball.dribbler===p&&ball.dribbleGrace>0&&ball.z<26&&p.noTouchT<=0&&dist(p,ball)<=controlROf(p)+ball.r+4;
-    if((ball.ownedBy===p&&dist(p,ball)<=controlROf(p)+ball.r+4)||inReach){ const sw=swipeShot; swipeShot=null; swipeShoot(sw); return; }   // (his touch out ahead: when he's on it)
+    if(ball.ownedBy===p||inReach){ const sw=swipeShot; swipeShot=null; swipeShoot(sw); return; }
     swipeShot.t-=dt;
     if(swipeShot.t<=0||gkHold||(ball.ownedBy&&ball.ownedBy!==p)||(!ball.ownedBy&&ball.dribbler!==p)) swipeShot=null;
   }
@@ -3456,34 +3445,7 @@
     if(!holdMode||holdMode.p!==p||holdMode.kind!==kind){
       holdMode={p, kind, face:{x:p.facing.x,y:p.facing.y}, aim:null, since:simNow};
       if(kind==='shield'&&shieldFrom(p)){ lastGrade='SHIELD'; gradeColor='#78c8ff'; gradeFade=0.6; } } }
-  // AFTER A TACKLE (v91): your man, having won it off one of theirs with a standing tackle -- or nicked a touch of his
-  // out in front of him; not a slide -- gets his back to that man as soon as he has it, the ball tight at his feet on his
-  // far side, for a split second: so the man he took it from can't just get up and take it straight back. How quickly
-  // he turns, for how long, and how little of the ball he shows him are his Def IQ: 7 to 14 radians a second, 0.3 s to
-  // 0.6 s (v93: it was 0.6 s to 1 s), and the man can only nick it from within 60 degrees of where the ball is down to
-  // 30 (as a top dribbler shields it) -- a poor one, slow round, can still have it nicked off him by a man quick round
-  // him to the ball. The stick still moves him, only not back into that man (across him instead); left alone, he stands
-  // and turns.
-  const GUARD_T=[0.3,0.6], GUARD_TURN=[7,14], GUARD_NICK=[60,30];
-  const guardOn=p=>!!p&&!!p.guard&&p===controlled&&ball.ownedBy===p&&simNow<p.guard.until&&p.state==='normal';
-  function guardMark(t,carrier){ if(t&&carrier&&t.state!=='slide'){ t.guardFrom=carrier; t.guardWon=simNow; } }
-  function startGuard(p){
-    if(!p||!p.guardFrom) return;
-    if(simNow-p.guardWon>1.2){ p.guardFrom=null; return; }                // (long since: a ball he's come by some other way)
-    if(p!==controlled||ball.ownedBy!==p) return;
-    const iq=defIQof(p);
-    p.guard={from:p.guardFrom, at:simNow, until:simNow+statLerp(iq,GUARD_T[0],GUARD_T[1]), rate:statLerp(iq,GUARD_TURN[0],GUARD_TURN[1]),
-      nick:statLerp(iq,GUARD_NICK[0],GUARD_NICK[1])*Math.PI/180};
-    p.guardFrom=null; }
-  // his stick while he's at it: not back into the man he took it from -- across him instead
-  function guardIntent(p,ix,iy){
-    if(!guardOn(p)||(!ix&&!iy)) return null;
-    const o=p.guard.from, dx=p.x-o.x, dy=p.y-o.y, dl=Math.hypot(dx,dy)||1, ux=dx/dl, uy=dy/dl, into=ix*ux+iy*uy;
-    if(into>=0) return null;                                              // (away from him, or across: as you push)
-    const il=Math.hypot(ix,iy), px=ix-into*ux, py=iy-into*uy, pl=Math.hypot(px,py);
-    return pl>0.15*il?{ix:px/pl*il, iy:py/pl*il}:{ix:0,iy:0};
-  }
-  const shieldingNow=c=>(!!holdMode&&holdMode.p===c&&holdMode.kind==='shield'&&ball.ownedBy===c)||guardOn(c);
+  const shieldingNow=c=>!!holdMode&&holdMode.p===c&&holdMode.kind==='shield'&&ball.ownedBy===c;
   const holdStrength=c=>strengthOf(c)+(shieldingNow(c)?SHIELD_PLANT:0);
   function shieldFrom(p){ let o=null, od=SHIELD_SEE;
     for(const q of players){ if(q.team===p.team||q.state!=='normal') continue; const d=dist(p,q); if(d<od){ od=d; o=q; } }
@@ -3497,8 +3459,7 @@
     const mx=statLerp(iq,2.5,8)*dt, a=a0+clamp(skillTurn(a0,H.aim),-mx,mx);
     p.facing={x:Math.cos(a),y:Math.sin(a)}; }
   // how far round from the ball a man can nick it off a man shielding it (radians): his Dribbling and Ball control
-  function nickWindowOf(c){ const w=statLerp((statOf(c,'dribbling',P.dribbling.val)+statOf(c,'ballControl',P.ballControl.val))/2,NICK_W[0],NICK_W[1])*Math.PI/180;
-    return guardOn(c)?Math.min(w,c.guard.nick):w; }                       // (after a tackle: his Def IQ's, if that's better -- AFTER A TACKLE)
+  function nickWindowOf(c){ return statLerp((statOf(c,'dribbling',P.dribbling.val)+statOf(c,'ballControl',P.ballControl.val))/2,NICK_W[0],NICK_W[1])*Math.PI/180; }
   function nickAngle(c,o){ const ax=o.x-c.x, ay=o.y-c.y, bx=ball.x-c.x, by=ball.y-c.y, l=(Math.hypot(ax,ay)*Math.hypot(bx,by))||1;
     return Math.acos(clamp((ax*bx+ay*by)/l,-1,1)); }
   const SKILL_NAME={knock:'KNOCK-ON',dragback:'DRAG-BACK',croq:'CROQUETA',spin:'ROULETTE',cruyff:'CRUYFF TURN',rainbow:'RAINBOW',sombrero:'SOMBRERO',elastico:'ELASTICO',heel:'HEEL FLICK'};
@@ -3573,14 +3534,12 @@
   function skillReady(){
     const p=controlled;
     if(!p||p.state!=='normal'||skill||skillCd>0||restartT>0||scoredT>0||offsideT>0||gkHold||matchOver) return false;
-    if(ball.ownedBy===p) return dist(p,ball)<controlROf(p)+ball.r+10;   // (his touch out ahead: not till he's on it -- startSkill holds it)
+    if(ball.ownedBy===p) return true;
     if(myLooseBall()&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10){ own(p,p.r+ball.r+5); return true; }   // your own touch, a step away: take it
     return false;
   }
   function startSkill(g){
-    const p=controlled; if(!g) return false;
-    if(p&&ball.ownedBy===p&&!skill&&dist(p,ball)>=controlROf(p)+ball.r+10&&skillFor(p,g)){ queueAtFeet(()=>startSkill(g)); return true; }   // (his touch out ahead: the move as he gets to it)
-    if(!skillReady()) return false;
+    const p=controlled; if(!g||!skillReady()) return false;
     const m=skillFor(p,g); if(!m) return false;
     const need=SKILL_STARS[m.kind]||1;
     if((p.stars||1)<need){ lastGrade=SKILL_NAME[m.kind]+' '+'★'.repeat(need)+' ONLY'; gradeColor='#8a9580'; gradeFade=1.0; return false; }   // above his stars
@@ -4022,7 +3981,7 @@
     // SHOOTING LAB: how far out and how wide you shoot from, keeper on/off; recent shots for the goal panel
     sDist:260, sAng:0, sKeep:true, st:null, shots:[],
     // DRIBBLE LAB: how the defender plays you, how far off he starts, whether he slides; the tally
-    dDef:'close', dDist:250, dSlide:false, dt:null, dDrib:5.5,
+    dDef:'close', dDist:250, dSlide:false, dt:null,
     // CROSSING LAB: who crosses, from how far out, how many of ours and of theirs in the box, the keeper; the tally
     cWho:'ai', cFrom:180, cAtk:2, cDef:2, cKeep:true, ct:null, cAll:null,
     trail:[]                              // the ball's path for the pass/shot in play (drawn on the pitch)
@@ -4973,7 +4932,7 @@
   function dlDef(){ return players.find(q=>q.pRole==='labDribDef'); }
   function dribLabSetup(){
     const reds=redList(), D=reds[0];
-    controlled.stats=Object.assign({},controlled.stats,{dribbling:LAB.dDrib,agility:undefined});   // you dribble at the chip's Dribbling (agility off the dials)...
+    controlled.stats=Object.assign({},controlled.stats,{dribbling:undefined,agility:undefined});   // you dribble off the dials...
     if(D){ D.pRole='labDribDef'; D.stats=Object.assign({},D.stats,{agility:undefined,tackle:undefined}); }   // ...and he defends off them
     let n=0; for(const q of players){ if(q===controlled||q===D) continue; q.x=q.team==='G'?60:FW-60; q.y=60+(n++)*30; }
     keepers.forEach(k=>{ k.benched=true; });
@@ -4987,7 +4946,6 @@
     for(const q of [you,D]){ q.vx=q.vy=0; q.state='normal'; q.stateT=0; q.z=0; q.vz=0; q.sprint=false; q.noTouchT=0; q.touchLagT=0; q.tackleCd=0; q.beatenCd=0; q.runTarget=null; q.stamina=q.staminaCap=1; }
     D.lungeT=0; D.recoverT=0; ftAim=null;
     you.stars=5;                                                       // (every move, to practise them all)
-    you.stats=Object.assign({},you.stats,{dribbling:LAB.dDrib});       // (your Dribbling: the chip's)
     you.x=FW/2-atk*260; you.y=YC; you.facing={x:atk,y:0};
     D.x=you.x+atk*LAB.dDist; D.y=YC; D.facing={x:-atk,y:0};
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=null; ball.passerRef=null; ball.thru=null; ball.lob=null;
@@ -5028,6 +4986,12 @@
     return true;
   }
   function dribLabOnMove(kind){ const r=LAB.rep; if(!r||r.done) return; r.moves.push({kind,t:simNow-r.t0}); LAB.dirty=true; }
+  // a move against his lunges: how long after the last one it came (null: he hadn't gone), or how soon he went after it
+  function dlTiming(r,m){
+    let after=null, before=null;
+    for(const t of r.lunges){ const d=m.t-t; if(d>=0&&d<0.8&&(after==null||d<after)) after=d; if(d<0&&d>-0.6&&(before==null||-d<before)) before=-d; }
+    return {after,before};
+  }
   function dribLabStep(dt,rdt){
     const r=LAB.rep, you=controlled, D=dlDef();
     if(r&&!r.done&&D){
@@ -5057,28 +5021,15 @@
       case 'Digit1': case 'Digit2': case 'Digit3': LAB.dDist=DL_DISTS[+code.slice(5)-1][0]; break;
       case 'KeyB': { const vs=DL_DEFS.map(a=>a[0]); LAB.dDef=vs[(vs.indexOf(LAB.dDef)+1)%vs.length]; break; }
       case 'KeyC': LAB.dSlide=!LAB.dSlide; break;
-      case 'KeyV': LAB.dDrib=DL_DRIBS[(DL_DRIBS.indexOf(LAB.dDrib)+1)%DL_DRIBS.length]; break;
-      case 'BracketLeft': case 'BracketRight': dlTouchStep('touchRun',code==='BracketRight'?1:-1,false); LAB.dirty=true; return true;   // (no new ball: just the touch)
-      case 'Comma': case 'Period': dlTouchStep('touchSprint',code==='Period'?1:-1,false); LAB.dirty=true; return true;
       default: return false;
     }
     dribLabServe(); LAB.dirty=true; return true;
   }
-  // your touch lengths: a step along (RUN TOUCH, SPRINT TOUCH), kept in this browser -- by a tap round to the shortest
-  // after the longest, by the keys no further than either end
-  const DL_DRIBS=[1,3,5.5,8,10], DL_TOUCH_K=[0.5,0.75,1,1.25,1.5,2];
-  function dlTouchStep(k,d,wrap){ const i=DL_TOUCH_K.indexOf(PREFS[k]), j=i<0?DL_TOUCH_K.indexOf(1):i, n=DL_TOUCH_K.length;
-    PREFS[k]=DL_TOUCH_K[wrap?(j+d+n)%n:clamp(j+d,0,n-1)]; savePrefs(); }
-  // how far a touch goes on ahead of your man, running and sprinting (in the clear, as it's meant to: metres)
-  function dlTouchM(p,sprint){ return dribTouchBase(p,(sprint?sprintSpeedOf(p):runSpeedOf(p))*legsOf(p))/MK; }
   function dribLabChip(act){
     const nextOf=(arr,v)=>{ const vs=arr.map(a=>a[0]); return vs[(vs.indexOf(v)+1)%vs.length]; };
     if(act==='ddef') LAB.dDef=nextOf(DL_DEFS,LAB.dDef);
     else if(act==='ddist') LAB.dDist=nextOf(DL_DISTS,LAB.dDist);
     else if(act==='dslide') LAB.dSlide=!LAB.dSlide;
-    else if(act==='ddrib') LAB.dDrib=DL_DRIBS[(DL_DRIBS.indexOf(LAB.dDrib)+1)%DL_DRIBS.length];
-    else if(act==='drun'){ dlTouchStep('touchRun',1,true); return true; }               // (no new ball: just the touch)
-    else if(act==='dsprint'){ dlTouchStep('touchSprint',1,true); return true; }
     else return false;
     dribLabServe(); return true;
   }
@@ -5089,19 +5040,35 @@
     document.getElementById('labDDefV').textContent=plName(DL_DEFS,LAB.dDef);
     document.getElementById('labDDistV').textContent=plName(DL_DISTS,LAB.dDist);
     document.getElementById('labDSlideV').textContent=LAB.dSlide?'ON':'OFF';
-    const you=controlled, m1=v=>v.toFixed(v<10?1:0)+' M';
-    document.getElementById('labDDribV').textContent=String(LAB.dDrib);
-    document.getElementById('labDRunV').textContent=m1(dlTouchM(you,false));
-    document.getElementById('labDSprintV').textContent=m1(dlTouchM(you,true));
-    labEl.labResult.innerHTML=dribLabBox();
+    const r=LAB.rep, shown=r&&(r.moves.length||r.done)?r:LAB.last;
+    labEl.labResult.innerHTML=shown&&(shown.moves.length||shown.done)?dribLabText(shown):dribLabHint();
+    labEl.labTally.textContent=dribLabTallyText();
   }
-  // THE BOX (top left): how the last run went, and how many you've beaten him -- that's all; before any, what to do
-  function dribLabBox(){
-    const T=dribLabTally(), r=LAB.rep, last=r&&r.done?r:LAB.last;
-    if(!last) return '<span class="dlHow">'+(isTouch?'Draw a move from <b>SKILL</b>':'Hold the <b>mouse button</b> and draw a move')+' to get past him</span>';
-    const res=last.result==='beat'?'BEAT HIM':last.result==='tackled'?'TACKLED':last.result==='time'?'TOO SLOW':'LOST IT';
-    return '<b class="dlRes" style="color:'+DL_COL[last.result]+'">'+res+'</b>'+(last.result==='beat'?' <span class="lsv">'+(last.endT-last.t0).toFixed(1)+' s</span>':'')
-      +'<span class="dlTally">'+T.beat+' of '+T.n+' beaten <button class="labClear" data-lab="clear" title="Clear the tally (X)">clear</button></span>';
+  function dribLabHint(){
+    return (isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')
+      +' a move, ahead being the way he\'s going. Get past him with the ball.';
+  }
+  function dribLabText(r){
+    const head=`<span class="lsv">${plName(DL_DEFS,r.def)} · ${plName(DL_DISTS,r.d).toLowerCase()} off${r.slide?' · slides':''}</span>`;
+    const mv=r.moves.map(m=>{ const T=dlTiming(r,m);
+      const when=T.after!=null?`${Math.round(T.after*1000)} ms after he lunged`:T.before!=null?`he lunged ${Math.round(T.before*1000)} ms later`:'he hadn\'t gone';
+      return `<b style="color:#78c8ff">${SKILL_NAME[m.kind]}</b> ${m.t.toFixed(1)}s (${when})`; }).join(' → ');
+    const lg=r.lunges.length?` · he lunged ${r.lunges.length}×`:'';
+    const how=(mv||'no skill moves')+lg;
+    if(!r.done) return `${head} ${how} → …`;
+    const c=DL_COL[r.result];
+    const res=r.result==='beat'?`BEAT HIM in ${(r.endT-r.t0).toFixed(1)} s`:r.result==='tackled'?'TACKLED':r.result==='time'?'TOO SLOW (10 s)':'LOST IT';
+    return `${head} ${how} → <b style="color:${c}">${res}</b>`;
+  }
+  function dribLabTallyText(){
+    const T=dribLabTally();
+    if(!T.n) return LAB.auto?'no runs yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
+                             :'no runs yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
+    if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
+    for(const k of SKILL_KINDS){ const m=T.mv[k]; if(m&&m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
+    if(T.beat) parts.push('avg '+(T.beatT/T.beat).toFixed(1)+' s to beat him');
+    return parts.join(' · ');
   }
   function dribLabCamX(){
     const D=dlDef(), you=controlled, mid=D?(you.x+D.x)/2:you.x;
@@ -5609,8 +5576,6 @@
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
-    const gd=guardIntent(controlled,ix,iy); if(gd) return gd;           // (just won it: not back into the man he took it from -- AFTER A TACKLE)
-    const dr=dribbleSteer(controlled,ix,iy); if(dr) return dr;          // (his touch out ahead of him: on to it -- DRIBBLING)
     const mg=magnetPull(controlled,ix,iy); if(mg) return mg;            // (a loose ball by you: see MAGNET)
     if(!ix&&!iy&&assistOn()){ const c=controlled, H=assistSpot(c);       // (DIFFICULTY's assist: he goes to meet their cross)
       if(H){ const dx=H.x-c.x, dy=H.y-c.y, d=Math.hypot(dx,dy); if(d>10) return {ix:dx/d, iy:dy/d}; } }
@@ -6163,7 +6128,7 @@
   function crossFlush(){ const cp=crossPend; crossPend=null; if(cp&&myBall()) cross(cp.charge,false); }
   function cross(charge,low){
     if(!crossOK(controlled)) return;                            // (carried out past 24 m while it was held: no cross)
-    if(!gatherForAction()){ if(myBall()) queueAtFeet(()=>cross(charge,low)); return; }
+    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>cross(charge,low)); return; }
     const c=clamp(charge||0,0,1), p=controlled, atk=atkOf(p.team), pick=crossPick(p,c,low);
     let tq=null, tx, ty;
     if(pick){ tq=pick.q; tx=pick.x; ty=pick.y; }
@@ -6380,16 +6345,16 @@
   // take it back if it's in reach (the carry would on the next frame anyway); true if it's at your feet now
   function gatherForAction(){
     const p=controlled;
-    if(ball.ownedBy===p) return dist(p,ball)<=controlROf(p)+ball.r+4;   // (a touch out ahead of him: when he's on it -- DRIBBLING)
+    if(ball.ownedBy===p) return true;
     if(!myLooseBall()||p.noTouchT>0) return false;
     if(ball.z<26&&dist(p,ball)<=controlROf(p)+ball.r+4){ own(p,0,true); return true; }
     return false;
   }
-  function queueAtFeet(fn){ actQ={fn,until:simNow+1.0}; }
+  function queueAtFeet(fn){ actQ={fn,until:simNow+0.6}; }
   function actStep(){
     if(!actQ) return;
     if(gatherForAction()){ const q=actQ; actQ=null; q.fn(); }
-    else if(simNow>actQ.until||!myBall()) actQ=null;
+    else if(simNow>actQ.until||!myLooseBall()) actQ=null;
   }
 
   // ===== PASSING =====
@@ -6424,7 +6389,7 @@
   // The pass itself. o.loft: in the air, over them; o.thru: {dx,dy} a screen direction to play it through.
   function doPass(charge,o){
     o=o||{};
-    if(!gatherForAction()){ if(myBall()) queueAtFeet(()=>doPass(charge,o)); return; }
+    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>doPass(charge,o)); return; }
     const p=controlled;
     const atk=atkOf(p.team);
 
@@ -6918,7 +6883,7 @@
     if(curveArmed){return;}                 // K released after curving; ignore
     shootHeld=false;
     if(!gatherForAction()){                 // a touch away and out of reach: it goes when it's back at your feet
-      if(myBall()) swipeShot={aim:Math.max(-1,Math.min(1,curIy)),charge:shootCharge,t:ball.ownedBy===controlled?1.0:0.6,kb:true};
+      if(myLooseBall()) swipeShot={aim:Math.max(-1,Math.min(1,curIy)),charge:shootCharge,t:0.6,kb:true};
       shootCharge=0; return;
     }
     { const atk=atkOf(controlled.team); ball.x=controlled.x+atk*(controlled.r+ball.r+4); ball.y=controlled.y; }
@@ -7306,18 +7271,7 @@
     return (dx*f.x+dy*f.y)/l<0.5;
   }
 
-  // HIS TOUCH, GOT TO FIRST (v90): one of theirs on to the ball out ahead of the man dribbling -- he takes it, as he'd
-  // take a loose ball; the dribbler, who wasn't touched, stays on his feet
-  function stealTouch(t,carrier){
-    carrier.noTouchT=0.7; t.noTouchT=0; ball.lastTouch=t.team; offsidePass=null;   // (done: a moment before he can get back at it)
-    ball.vx=t.vx; ball.vy=t.vy; ball.vz=0;                 // (stopped at his feet, going his way -- not rolling on past him)
-    guardMark(t,carrier); own(t,0,true);
-    mStat(t,'tk'); mStat(carrier,'lost'); if(meIs(t)) meBump('tackles'); if(meIs(carrier)) meBump('lost');
-    if(t===controlled){lastGrade='NICKED IT!';gradeColor='#9dff3c';gradeFade=1.2;}
-    else if(carrier===controlled){lastGrade='NICKED OFF YOU';gradeColor='#ff5a4d';gradeFade=1.2;}
-  }
   function winBall(t,carrier){
-    guardMark(t,carrier);                                                 // (a standing tackle: he'll guard it when he has it -- AFTER A TACKLE)
     ball.ownedBy=null;
     carrier.noTouchT=0.7;
     carrier.state='stumble';carrier.stateT=0.5;
@@ -7341,14 +7295,13 @@
       if(p.team===carrier.team||p.state!=='normal'||p.noTouchT>0||p.soldT>simNow)continue;   // (sold by a skill move: skillSells)
       const bodyGap=dist(p,carrier);
       const inBody=bodyGap<p.r+carrier.r+6;          // pressed up against him
-      const far=dist(carrier,ball)>controlROf(carrier)+ball.r+4;   // (his touch out ahead of him: nothing of him between it and anyone -- DRIBBLING)
-      if(dist(p,ball)<p.r+ball.r+Math.max(0,tackleReachOf(p)-(far?0:shieldCushion(carrier,p)))){   // (his reach doesn't count through the cushion)
+      if(dist(p,ball)<p.r+ball.r+Math.max(0,tackleReachOf(p)-shieldCushion(carrier,p))){   // (his reach doesn't count through the cushion)
         // can only take it cleanly if the ball is showing (not shielded by the body)
-        const exp=far?Math.max(ballExposure(carrier,p),clamp((dist(carrier,ball)-controlROf(carrier)-ball.r-4)/(2*MK),0,1)):ballExposure(carrier,p);   // (out ahead: the further, the more it's anyone's)
-        if(!far&&isBehind(carrier,p))continue;                   // can't nick it from straight behind
-        if(!far&&shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier))continue;   // shielding: only from where the ball shows
-        if(!far&&shotWindUpSafe(carrier,p))continue;             // ...or from behind / alongside while you wind up a shot
-        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2)+(1-cpu(p).tackle)*0.25,0,0.98)){ if(far) stealTouch(p,carrier); else winBall(p,carrier); return; }   // (DIFFICULTY: harder for the computer the easier)
+        const exp=ballExposure(carrier,p);
+        if(isBehind(carrier,p))continue;                         // can't nick it from straight behind
+        if(shieldingNow(carrier)&&nickAngle(carrier,p)>nickWindowOf(carrier))continue;   // shielding: only from where the ball shows
+        if(shotWindUpSafe(carrier,p))continue;                   // ...or from behind / alongside while you wind up a shot
+        if(exp>clamp(tackleExpOf(p)+dribShieldOf(carrier)-statLerp(defIQof(p),0,0.2)+(1-cpu(p).tackle)*0.25,0,0.98)){ winBall(p,carrier); return; }   // (DIFFICULTY: harder for the computer the easier)
         // shielded: bodies just bump, no turnover (collision handles spacing)
       }
       // SHIELD / TURN BATTLE (strength): if I'm tight to a shielding carrier and he's trying to
@@ -8692,7 +8645,6 @@
   // nobody behind him to pick it up; an elastico, or a heel flick round him close up. (The sombrero isn't for a man in
   // front of him: see aiSombrero.) `only`: that move and no other.
   function aiSkillMove(p,d,side,C,clear,only){
-    if(ball.ownedBy===p&&dist(p,ball)>controlROf(p)+ball.r+10) return null;   // (his touch out ahead: not till he's on it)
     if(ball.ownedBy!==p){ if(ball.dribbler===p&&ball.z<12&&dist(p,ball)<controlROf(p)+ball.r+10) own(p,p.r+ball.r+5); else return null; }   // (his own touch a step away: on it)
     if(Math.abs(p.y-d.y)>12) side=Math.sign(p.y-d.y);                 // away from the side he's on now -- unless that's off the pitch
     if(p.y+side*90<45||p.y+side*90>FH-45) side=-side;
@@ -8896,8 +8848,6 @@
     if(!ob||ob.done||simNow-ob.seen>0.7) ob=p.ob=obStart(p,C);         // a new spell on the ball
     ob.seen=simNow;
     if(p.takeOn&&simNow-p.takeOn.at>0.1) p.takeOn=null;                  // (he lost it since)
-    if(dist(p,ball)>controlROf(p)+ball.r+4){ if(p.takeOn) p.takeOn.at=simNow; p.dbgTag='OB-TOUCH';   // (his touch out ahead: on to it first -- DRIBBLING)
-      return steer(p,ball.x+ball.vx*0.15,ball.y+ball.vy*0.15); }
     if(p.takeOn&&p.takeOn.phase!=='go'){ const r=obTakeOnStep(p,dt,C); if(r) return r; }   // committed: past him first
     if(C.prD<70) ob.pressed=true;
     // SETTING HIMSELF for a pass he'd otherwise play across his body (see turnWorst): he turns to face it, and plays it
@@ -10340,7 +10290,7 @@
     let near=1e9; for(const q of teamOf(team)) near=Math.min(near,dist(q,c));
     const cAtk=atkOf(c.team), lp=ball.lastTouchP;
     const backPass   = !ball.ownedBy && c===ball.intendedRcv && lp && lp!==c && lp.team===c.team && cAtk*(lp.x-c.x)>150;
-    const heavy      = ((!ball.ownedBy && c===ball.dribbler && ball.dribbleGrace>0) || ball.ownedBy===c) && dist(c,ball)>75 && near<220;
+    const heavy      = !ball.ownedBy && c===ball.dribbler && ball.dribbleGrace>0 && dist(c,ball)>75 && near<220;
     const facingBack = ball.ownedBy===c && c.facing && cAtk*c.facing.x<-0.5 && near<200;
     const touchline  = Math.abs(c.y-YC)>FH*0.40 && near<180;
     if(backPass||heavy||facingBack||touchline){ if(Math.random()>pk){ S2.cd=simNow+1.5; return false; } S2.until=simNow+1.6*Math.max(1,pk); S2.cd=simNow+3.2; return S2.on=true; }
@@ -10561,7 +10511,7 @@
     // --- STAMINA & SPRINT ---
     const moving = !!(ix||iy);
     const softIn = p.arSoft; p.arSoft=false;        // (this frame's input is a computer player easing into position: see arrive)
-    const hasBall = (ball.ownedBy===p)&&dist(p,ball)<=controlROf(p)+ball.r+4;   // (at his feet: his touch out ahead doesn't slow him -- DRIBBLING)
+    const hasBall = (ball.ownedBy===p);
     const held = holdMode&&holdMode.p===p ? holdMode.kind : p===controlled&&holdPending() ? 'pending' : null;   // (SKILL held: see HOLD_T)
     if(careerFix&&!matchOver&&p.squadIdx!=null&&SQUAD[p.team]){ const e=SQUAD[p.team][p.squadIdx]; if(e&&e.risk&&!HURT[p.team].has(p.squadIdx)&&Math.random()<e.risk*dt/(2*halfLenSec())) hurtInMatch(p); }
     const hurt = p.squadIdx!=null && HURT[p.team] && HURT[p.team].has(p.squadIdx);   // (hurt: no sprinting -- see INJURIES)
@@ -10691,7 +10641,7 @@
       // (a man easing into position -- see arrive -- faces the way he's going, not the way he's nudging; one watching
       // the ball faces it: below)
       const nsp=Math.hypot(p.vx,p.vy), il2=Math.hypot(ix,iy);
-      if(!watch && !held && !p.adFace && !guardOn(p) && (!softIn || nsp>30 || il2>=0.35)){
+      if(!watch && !held && !p.adFace && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy))p.facing={x:fxx,y:fyy};
       }
@@ -10713,10 +10663,6 @@
       if(vs>8){ const c=(p.vx*p.facing.x+p.vy*p.facing.y)/vs; MAX=Math.min(MAX,runSpeedOf(p)*fatigue)*pedalOf(p,c); }
     }
     p.adFace=null;                                  // (set again next frame while he's still at it: autoDefIntent)
-    if(guardOn(p)){                                 // AFTER A TACKLE: his back to the man he took it from, as quickly as his Def IQ has it
-      const G=p.guard, o=G.from, a0=Math.atan2(p.facing.y,p.facing.x); let want=Math.atan2(p.y-o.y,p.x-o.x);
-      const il=Math.hypot(ix,iy); if(il>0.2){ const ia=Math.atan2(iy,ix); if(Math.abs(skillTurn(want,ia))<1.1) want=ia; }   // (pushing away from him, or across: that way)
-      const mx=G.rate*dt, a=a0+clamp(skillTurn(a0,want),-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }
     if(held==='strafe'){                            // strafing: the way he faced kept, slower ahead, less across, less again backing up
       const F=holdMode.face, vs=Math.hypot(p.vx,p.vy); p.facing={x:F.x,y:F.y};
       if(vs>1) MAX=Math.min(MAX,runSpeedOf(p)*fatigue*STRAFE_K*(0.75+0.25*(p.vx*F.x+p.vy*F.y)/vs)); }
@@ -11040,7 +10986,7 @@
       const mine=ball.dribbler===p&&ball.dribbleGrace>0;
       if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<controlROf(p)+ball.r){
         if(checkOffsideTouch(p))return;
-        endCurve(); own(p,0,true);                         // (where it is: no snap back to his feet -- DRIBBLING)
+        endCurve(); own(p,p.r+ball.r+5);
         return;
       }
       const intercept=!!(passerTeam&&p.team!==passerTeam);
@@ -11104,7 +11050,7 @@
     possTeam=p.team;
     const reGather=ball.dribbler===p&&ball.dribbleGrace>0;     // catching up with your own knock-on / trapped ball
     const ownLob=ball.selfLob===p, psp=Math.hypot(p.vx,p.vy);   // (one he's flicked up over a man and run on to: dropping at his feet as he goes)
-    ball.ownedBy=p; p.touchLead=null;
+    ball.ownedBy=p;
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;ball.selfLob=null;
     p.touchLagT=0;
     if(!wasOwner){
@@ -11142,81 +11088,12 @@
       if(p.team==='G'&&p!==controlled){ setControlled(p); }
       else if(p.team!=='G'&&prevTeam==='G') autoDefSwitch();
     }
-    startGuard(p);                                                        // (just won it off one of theirs: AFTER A TACKLE)
   }
 
-  // DRIBBLING (v90): on the move, each touch goes on ahead of him and waits. How far is his pace and his Dribbling: at
-  // Dribbling 5.5 it gets up to about 1.2 m clear of him running, well under 1 m jogging, 3 m and more knocked on at a
-  // sprint -- the better he is, the shorter and the more even (x0.85 and +-8% at 10, x1.35 and +-40% at 1), and with a
-  // man of theirs coming close, closer (the better he is, the closer: dribbleTouchLen), and with one about to be on him
-  // it's at his feet, as close control always was (dribPress); the Knock-on dials stretch both. It rolls on and
-  // slows as a loose ball would, still his ball, and he goes on to it (you: dribbleSteer); when he's on it the next
-  // touch goes, the way he wants to go (your stick; the computer's man, the way he's facing), as far round from his run
-  // as one touch takes it (57 degrees at Dribbling 1 to 92 at 10, a third less flat out, and less turning into a
-  // stronger man on him), shorter for the turn -- and while it's still in his reach, wanting it another way or easing
-  // off, he takes another touch from where it is. It's never pulled back to him. One of theirs who gets to it out there
-  // can take it, as at his feet (contactTackles) -- and out in front of him it's on show. Only if it gets away from him
-  // (1.5 m past the touch: held off it, or it's run on) is it a loose ball, his touch, for him to go and get. Slow or
-  // stood, it's at his feet; a pass, cross, shot or move asked for while it's out ahead goes when he's on it.
-  const DRIB_MOVE=40, DRIB_FEET=6, DRIB_SLACK=1.5*MK;
-  function dribbleRoll(dt){ const k=Math.pow(1-clamp(P.friction.val,0.001,0.999),dt*3.2); ball.vx*=k; ball.vy*=k; ball.z=0; ball.vz=0; }
-  // how close they're coming: where they'll both be in half a second -- 1 with one of theirs within 2.5 m of him then
-  // (at 3.6 m or nearer he keeps it at his feet: carry), nothing from 7 m
-  function dribPress(p){ let near=1e9;
-    for(const o of players){ if(o.team===p.team||o.state!=='normal') continue;
-      const d=Math.hypot(o.x+o.vx*0.5-(p.x+p.vx*0.5),o.y+o.vy*0.5-(p.y+p.vy*0.5)); if(d<near) near=d; }
-    return clamp(1-(near-2.5*MK)/(4.5*MK),0,1); }
-  // a touch's length before a man of theirs near him or its own wobble (v94, v95): his Dribbling's, whatever his pace --
-  // at a run, 1 m clear of him at Dribbling 1 down to 0.3 m at 10; flat out, 2 m down to 1 m; part way from his running
-  // pace to his sprint (vp, the pace he'll be going), part way between; slower than a run, shorter, down to under half.
-  // (His running and sprinting pace as he is now: tired, both are slower, and flat out is still flat out.)
-  // Each times your RUN TOUCH and SPRINT TOUCH (set in the Dribble Lab, kept in this browser: 1 as it plays)
-  function dribTouchBase(p,vp){
-    const dr=statOf(p,'dribbling',P.dribbling.val), legs=legsOf(p), run=runSpeedOf(p)*legs, spr=sprintSpeedOf(p)*legs;
-    const R=statLerp(dr,1,0.3)*MK*(PREFS.touchRun||1), S=Math.max(R,statLerp(dr,2,1)*MK*(PREFS.touchSprint||1));
-    const D=vp<=run?R*clamp(vp/run,0.45,1):R+(S-R)*clamp((vp-run)/Math.max(1,spr-run),0,1);
-    return D*(P.knockOn.val/120);
-  }
-  function dribbleTouchLen(p,vp){
-    const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1);
-    // a man of theirs coming close: he keeps it closer -- the better he is, the closer (dribPress: a touch a fifth of what
-    // it would be at Dribbling 1 and a twentieth at 10 with one about to be on him; with one closer still, it's at his feet)
-    const tight=1-dribPress(p)*(0.8+0.15*drib);
-    const D=dribTouchBase(p,vp)*tight;
-    return D*(1+(0.08+0.32*(1-drib))*(P.knockVar.val/0.8)*(Math.random()*2-1));
-  }
-  // the way he wants to go with it: your stick, or the way the computer's man is facing
-  function dribWantAng(p){ const f=p.facing||{x:1,y:0}; return (p===controlled&&(curIx||curIy))?Math.atan2(curIy,curIx):Math.atan2(f.y,f.x); }
-  function dribbleTouch(p,vp,cap=9.5){
-    const drib=clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1), run=runSpeedOf(p);
-    const free=vp/(1-dribSpeedPenOf(p));     // (the pace he'll be going once it's off his feet: carrying it slows him only while it's at them)
-    const va=Math.atan2(p.vy,p.vx), want=dribWantAng(p);
-    let turn=want-va; while(turn>Math.PI)turn-=2*Math.PI; while(turn<-Math.PI)turn+=2*Math.PI;
-    const mt=(1+0.6*drib)*(free>run*1.02?0.65:1)*clamp(cap/9.5,0.1,1); turn=clamp(turn,-mt,mt);
-    const D=Math.max(6,dribbleTouchLen(p,free)*(1-0.35*Math.abs(turn)/(Math.PI/2))), L=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999))), u=Math.max(30,free*Math.cos(turn));
-    // how hard: so that, him going on at u and it slowing on the grass (L), it gets D ahead of him at the most -- its lead
-    // (v0/L)(1-e^-Lt) - u t is greatest as it slows to his pace: (v0-u)/L - (u/L) ln(v0/u) = D, solved for v0
-    let lo=u, hi=u+5000;
-    for(let i=0;i<36;i++){ const m=(lo+hi)/2, g=(m-u)/L-(u/L)*Math.log(m/u); if(g<D) lo=m; else hi=m; }
-    const v0=(lo+hi)/2, ang=va+turn+(0.03+0.15*(1-drib))*(P.knockVar.val/0.8)*(Math.random()*2-1);
-    ball.vx=Math.cos(ang)*v0; ball.vy=Math.sin(ang)*v0; ball.z=0; ball.vz=0;
-    p.carryAngle=ang; p.touchLead=D+p.r+ball.r; p.touchAt=simNow; p.touchU=u; p.stepPhase=0;
-  }
-  // off him and away: a loose ball, his touch (a moment for him to get to it -- see attemptCaptures)
-  function looseTouch(p){ ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0; p.touchLead=null; }
-  // your man with his touch out ahead of him: he goes on to it, whichever way you're pushing -- where you push is where the
-  // next touch goes (dribbleTouch) -- and with the stick left alone he still goes and gets it
-  function dribbleSteer(p,ix,iy){
-    if(!p||ball.ownedBy!==p||p.state!=='normal'||skillOf(p)) return null;
-    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
-    if(d<=p.r+ball.r+DRIB_FEET) return null;
-    const t=Math.min(0.4,d/Math.max(80,Math.hypot(p.vx,p.vy))), tx=dx+ball.vx*t, ty=dy+ball.vy*t, tl=Math.hypot(tx,ty)||1, il=Math.hypot(ix,iy);
-    return {ix:tx/tl*(il||1), iy:ty/tl*(il||1), dribIdle:!il};
-  }
   function carry(p,dt,moving){
     // PLANT TO SHOOT: while charging a shot, hold the ball in front toward goal so a trailing
     // defender can't poke the wind-up from behind, and the shot launches from in front of you.
-    if(p===controlled && shootHeld && ball.ownedBy===p && dist(p,ball)<=controlROf(p)+ball.r+4){   // (out ahead of him: when he's on it)
+    if(p===controlled && shootHeld && ball.ownedBy===p){
       const atk=atkOf(p.team);
       p.carryAngle = atk>0?0:Math.PI;
       p.facing={x:atk,y:0};
@@ -11224,7 +11101,7 @@
       ball.x=p.x+atk*cd; ball.y=p.y; ball.vx=p.vx; ball.vy=p.vy; ball.z=0; ball.vz=0;
       return;
     }
-    if(((holdMode&&holdMode.p===p)||guardOn(p))&&dist(p,ball)<=controlROf(p)+ball.r+4){   // SKILL held (strafing or shielding), or guarding it after a tackle: tight at his feet, the way he faces (out ahead: when he's on it)
+    if(holdMode&&holdMode.p===p){                  // SKILL held (strafing or shielding): tight at his feet, the way he faces
       const f=p.facing, cd=p.r+ball.r+3, k=320, c=2*Math.sqrt(k), cx=p.x+f.x*cd, cy=p.y+f.y*cd;
       p.carryAngle=Math.atan2(f.y,f.x); p.stepPhase=0;
       ball.vx+=((cx-ball.x)*k-ball.vx*c)*dt; ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
@@ -11261,20 +11138,6 @@
     if(!isFinite(p.carryAngle)) p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x)||0;
     const turning=Math.min(Math.abs(d),1.2);
     const speed=Math.hypot(p.vx,p.vy);
-    { const gap=dist(p,ball), feet=p.r+ball.r+DRIB_FEET, reach=controlROf(p)+ball.r;          // (DRIBBLING: see dribbleTouch)
-      if(gap>(p.touchLead||reach)+DRIB_SLACK){ looseTouch(p); return; }                      // (it's got away from him -- held off it, or it's run on: his to go and get)
-      const setting=(p===controlled&&(kickHeld||crossHeld||!!actQ||!!swipeShot))||dribPress(p)>0.75;   // (a pass, a cross, a shot or a move to come, or one of theirs about to be on him: at his feet)
-      if(speed>DRIB_MOVE&&moving&&!setting){
-        const ux=(ball.x-p.x)/(gap||1), uy=(ball.y-p.y)/(gap||1), closing=(p.vx-ball.vx)*ux+(p.vy-ball.vy)*uy;
-        if(gap<=feet&&closing>=0){ dribbleTouch(p,speed,turnCap); return; }                 // (he's on it: the next touch)
-        if(gap<=reach&&simNow-(p.touchAt??-9)>0.15){                                           // (still in his reach, and he wants it elsewhere
-          const bs=Math.hypot(ball.vx,ball.vy); let off=0;                                     //  or he's eased off: another touch, from where it is)
-          if(bs>20){ off=dribWantAng(p)-Math.atan2(ball.vy,ball.vx); while(off>Math.PI)off-=2*Math.PI; while(off<-Math.PI)off+=2*Math.PI; off=Math.abs(off); }
-          if(off>0.6||speed<(p.touchU||speed)*0.75){ dribbleTouch(p,speed,turnCap); return; } }
-        dribbleRoll(dt); return;                                                               // (on its way: rolling on, waiting for him)
-      }
-      if(gap>reach){ dribbleRoll(dt); return; }                                                // (out ahead of him as he eases off: his, rolling on till he's on it)
-    }
     const carryDist=p.r+ball.r+5+(speed/300)*12;
     const cx=p.x+Math.cos(p.carryAngle)*carryDist;
     const cy=p.y+Math.sin(p.carryAngle)*carryDist;
@@ -11284,7 +11147,23 @@
       ball.vy+=((cy-ball.y)*k-ball.vy*c)*dt;
     }
 
-    p.stepPhase=0;
+    if(speed>30){
+      p.stepPhase+=speed*dt;
+      if(p.stepPhase>=56){
+        p.stepPhase-=56;
+        const vmag=P.knockOn.val*(1+(Math.random()*2-1)*P.knockVar.val);
+        const vang=p.carryAngle+(Math.random()*2-1)*P.knockVar.val*0.5;
+        // KNOCK IT AHEAD AND RELEASE: ball travels faster than you, you chase it
+        ball.vx=Math.cos(vang)*vmag+p.vx;
+        ball.vy=Math.sin(vang)*vmag+p.vy;
+        ball.ownedBy=null;            // momentary loss of control
+        p.noTouchT=0.0;
+        ball.dribbler=p;              // it's still "your" touch...
+        ball.dribbleGrace=0.85;       // ...for a short window, to run onto (it's yours again anywhere in your reach)
+        p.stepPhase=0;
+        return;
+      }
+    } else p.stepPhase=0;
 
     if(turning>0.25){ball.vx*=(1-0.12*turning);ball.vy*=(1-0.12*turning);}
     if(!moving&&speed<20){ball.vx*=0.55;ball.vy*=0.55;}
@@ -11971,10 +11850,10 @@
     if(crossHeld&&myBall())crossCharge=clamp(crossCharge+dt/0.7,0,1);
 
     if(LAB.on) labStep(dt,rdt);
-    let hi=humanIntent();                                             // (his touch out ahead of him: dribbleSteer)
+    let hi=humanIntent();
     { const ad=autoDefIntent(dt); if(ad) hi=ad; }                       // (SWITCH held, defending: AUTO DEFEND)
     if(!(offsideT>0||restartT>0||scoredT>0||breakT>0||kickT>0||matchOver)) assistHeader();   // (DIFFICULTY's assist: their cross, at your man's head)
-    updateHold(!!((hi.ix||hi.iy)&&!hi.dribIdle));                    // (SKILL held: strafing or shielding)
+    updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
     const frozen = offsideT>0 || restartT>0 || scoredT>0 || breakT>0 || kickT>0 || matchOver;
     if(!frozen) for(const p of players){
       if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
@@ -12098,7 +11977,7 @@
     if(ball.ownedBy){
       const p=ball.ownedBy;
       if(p.state!=='normal')ball.ownedBy=null;
-      else if(!skillOf(p)) carry(p,dt,p===controlled?!!((hi.ix||hi.iy)&&!hi.dribIdle):true);   // (a skill move places the ball itself)
+      else if(!skillOf(p)) carry(p,dt,p===controlled?(hi.ix||hi.iy):true);   // (a skill move places the ball itself)
     }
     nanChk('carry');
       contactTackles();

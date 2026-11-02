@@ -72,7 +72,7 @@ ok(g.goals === 1 && g.team && gw.over === 0 && gw.circle === 0 && gw.taker && gs
 
 // THE SECOND HALF: after the break, Red kick off, the same way
 const [h, hw, hs] = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(); T.resetKickoff(); b.ownedBy = null; b.lastTouch = null; b.vx = b.vy = 0; T.runout(); const t0 = T.simNow();
-  (function tick(){ if(T.half() === 1 && T.simNow() - t0 < 24) return requestAnimationFrame(tick);   // (the clock run out: an attack on plays out first -- the end-of-half advantage, up to 20 s)
+  (function tick(){ if(T.half() === 1 && T.simNow() - t0 < 2) return requestAnimationFrame(tick);
     (function wait(){ if(T.breakT() > 0) return requestAnimationFrame(wait); const k = T.kick(), h = { half: T.half(), team: k.by && k.by.team, hold: k.t };
       const w = window.__where('R'); window.__watch().then(s => res([h, w, s])); })(); })(); }));
 info('the second half: ' + JSON.stringify({ h, hw, played: hs.played }));

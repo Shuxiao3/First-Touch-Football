@@ -511,35 +511,19 @@ The same game played like any other football game. It's a copy of `index.html` w
   - The defender sees the ball 0.2 s late and lunges at it when he's close (about 2.3 m, 2.8 m when pressing). The
     lunge is a 0.22 s burst at where he saw it, and it wins the ball if it's showing when he gets there. He then
     needs 0.45 s to recover.
-  - **The box** (top left, under the chips; v92) says how your last run went -- BEAT HIM and how long it took,
-    TACKLED, LOST IT or TOO SLOW -- and how many runs you've beaten him in so far (`clear` starts the count again).
-    That's all it says; before your first run, it says how to do a move. (It used to sit across the middle of the
-    screen, listing each move timed against his lunge, with a line of totals under it.)
+  - Each move you made is listed with its timing against his lunge, e.g. "he lunged 83 ms later" or "17 ms after he
+    lunged". The tally counts runs, beats, tackles, and for each move how often it was the one that got you past.
   - Measured against a closing defender from 10 m: a croqueta started 4.4 m from him beat him 6 times in 8, at 3.6 m
     8 in 8, at 2.8 m 3 in 8, and from 5.2 m or further, or once he'd lunged, never. A rainbow started 5.6 to 6.8 m
     from him beat him 7 times in 12, and from 8 m or further, or at 4.4 m, never.
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
-    (whether he slides in), DRIBBLING, RUN TOUCH and SPRINT TOUCH (below), plus the usual NEXT, TIME, NEW BALL and
-    TUNE.
-  - **DRIBBLING** (v92) is your man's Dribbling in the lab: 1, 3, 5.5 (to start with), 8 or 10. A tap (or `V`) takes
-    it to the next one and serves a new ball.
-  - **RUN TOUCH and SPRINT TOUCH** (v92) set how far each touch goes on ahead of your man (see **Dribbling (v90)**
-    under What's in the engine): running, and knocked on at a sprint. Each goes from half as far as it plays to twice
-    as far, in steps: ×0.5, ×0.75, ×1 (to start with), ×1.25, ×1.5, ×2. The chip shows it in metres for your man in
-    the clear. At ×1 that's his Dribbling's, whatever his pace (v95): 1 m running and 2 m sprinting at Dribbling 1,
-    0.65 m and 1.5 m at 5.5, 0.3 m and 1 m at 10. A tap takes it a step longer, round to ×0.5 after ×2; `]` and
-    `[`, or `.` and `,`, take it a step either way, no further than either end. Neither serves a new ball, so you can
-    change it in the middle of a run. They're kept in this browser, and they're how everyone dribbles everywhere -- in
-    matches too, the computer's men as well as yours. (Set before v95, they were on other touch lengths, so v95
-    starts them again at ×1.) Measured in the lab with a man up to speed in the clear: running at Dribbling 10, his
-    touches went 0.30 m on at ×1 (the chip said 0.3 M), two a second, and 0.60 m at ×2; flat out, 1.00 m at Dribbling
-    10 (1.0 M) and 2.3 to 2.5 m at 1 (2.0 M: a poor dribbler's touches vary by up to two-fifths either way).
+    (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
-    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Agility and
-    Tackling baselines (your man's Dribbling is the DRIBBLING chip's).
-    A move's time and distance are the dials' at Dribbling 10. At Dribbling 5.5 a move takes 1.23 times as long and
-    goes 85% as far, so set DRIBBLING to 10 for moves as quick as they were (and as the timings above were measured).
-  - Keys: `1`-`3` distance, `B` defender, `C` slides, `V` Dribbling, `[` `]` run touch, `,` `.` sprint touch.
+    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+    A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
+    as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
+    measured).
+  - Keys: `1`-`3` distance, `B` defender, `C` slides.
 
 - **Crossing Lab.** A cross from out on the right, over and over: the computer's, to watch who he picks and how true it
   goes, or yours. Everyone in the box is the computer, exactly as in a match; the lab only clears everyone else off
@@ -1715,61 +1699,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
-- **Dribbling as it was in v95 (v101).** v96 to v100 changed dribbling and were all taken back out: the ball kept
-  at his boots with touches only from his feet (v96), going to it whenever it was off his feet and a knock-on from
-  his boots (v97), touch lengths of 0.1 m / 0.5 m at Dribbling 10 and 0.3 m / 1 m at 1 (v98), the ball tapped along
-  under pressure (v99), and your man touching it on under pressure (v100). It was more fun with the ball knocked away
-  from him, as here. Everything about dribbling below is v95's, touch lengths included. Two test fixes from those
-  versions stay: classic-crossing's low-cross check takes up to four crosses (the keeper claims about one in four),
-  and classic-shots' Def IQ runner check asks for 15 px, not 25 (it failed about half the time on v95).
-- **Touch lengths (v92, v94, v95).** How far a touch goes on (see **Dribbling (v90)**) is his Dribbling's, whatever
-  his Speed (v94; before, a quicker man's went further): at a run, 1 m clear of him at Dribbling 1 down to 0.3 m at
-  10; flat out, 2 m down to 1 m; and in between, in between (0.65 m and 1.5 m at 5.5). (v95's; v94's were 1.1 m and
-  3 m at Dribbling 1, 0.6 m and 1.5 m at 10.) Part way from his running pace
-  to his sprint, it's part way between; slower than a run, it's shorter (half as far at half his running pace, never
-  under 0.45 of it). His running and sprinting pace are as he is now: tired, both are slower, and flat out still
-  gets a sprint's touch. RUN TOUCH and SPRINT TOUCH, set in the Dribble Lab, multiply the two (×0.5 to ×2) before a
-  man of theirs coming at him tightens it and before the touch's own wobble. They're kept in this browser with your
-  settings, and they play for everyone in every match. Measured over 12 computer-v-computer matches each (6 minutes,
-  STAR), v93's touches against v94's: goals 7 and 9, shots 57 and 53, the ball changing sides 340 and 381 times (with
-  more of it at his feet, a standing tackle gets to it more: 136 and 150).
-- **After a tackle (v91).** When your man wins the ball off one of theirs with a standing tackle -- or nicks a touch of
-  his out in front of him; not with a slide -- then as soon as he has it he gets his back to the man he took it from,
-  the ball tight at his feet on his far side, for a split second. That man can't just get up and take it straight back
-  off him: he can only nick it from where the ball shows. How quickly your man turns, how long he keeps at it and how
-  little of the ball he shows are his Def IQ: 7 to 14 radians a second (a half-turn in 0.45 s at 1, 0.22 s at 10),
-  0.3 s to 0.6 s (v93; it was 0.6 s to 1 s), and from within 60 degrees of the ball down to 30 (as a top dribbler
-  shields it) -- so a poor one, slow round, can still have it nicked off him by a man quick round him to the ball. At
-  Def IQ 1 the guard is over before he's all the way round, so he has to move off with it: left stood there, the man
-  he took it from got it back every time, 0.7 to 2 s after he had it (0.7 to 0.95 s with no guard at all). At 10
-  he's round in 0.17 s, and nobody got it back within 1.5 s (left stood there for 2 s, a few did). The stick still moves
-  him -- only not back into that man, across him instead; left alone, he stands and turns.
-- **Dribbling (v90).** Running with the ball, each touch goes on ahead of your man and waits for him: it rolls on and
-  slows as a loose ball would, he goes on to it, and when he's on it the next touch goes. It's still his ball the whole
-  time, and it's never pulled back to him on a string (it used to be knocked a stride ahead, let go, and snapped back to
-  his feet when he got near it). How far a touch goes is his Dribbling's (v94; it was his pace and his Dribbling):
-  running, 0.3 m clear of him at Dribbling 10 and 1 m at 1 (v95), and a poor dribbler's vary far more (a couple of
-  centimetres either way at 10, about 0.2 m at 1); sprinting, it's knocked on 1 m at 10 and 2 m at 1 (see **Touch
-  lengths**).
-  With one of theirs coming at him he keeps it closer, the better he is the closer (where
-  they'll both be in half a second: from 7 m off, closer and closer, down to a twentieth of the touch at Dribbling 10
-  and a fifth at 1), and with one about to be on him (3.6 m) it's at his feet, close control as it always was. Slow or
-  stood, it's at his feet too.
-  - **Where it goes.** Push the stick another way: with the ball still in his reach he takes it that way at once; with
-    it further on, he goes on to it first. Either way the touch goes as far round from his run as one touch takes it
-    (57° at Dribbling 1 up to 92° at 10, a third less flat out, and less turning into a stronger man on him), so a sharp
-    turn takes a touch or two. Ease off with it in his reach and he takes another, gentler touch. Let go of the stick
-    and he goes on to it and stops with it at his feet.
-  - **Passing, shooting, crossing or a move with it out ahead** goes when he's on it (asked for up to a second before).
-    While one's coming, he doesn't knock it on again.
-  - **Out in front it's on show.** One of theirs who gets to it first takes it, as he'd take a loose ball, and our man,
-    who wasn't touched, stays on his feet; the further ahead of him it is, the surer. At his feet, a tackle is as it
-    was. Only if it gets right away from him (1.5 m past where the touch should have got to: he's held off it, say) is
-    it a loose ball, his touch, for him to go and get (the magnet draws him to it).
-  - **The computer's men dribble the same way,** and get on to their touch before they do anything else with it.
-  - **Measured** (computer against computer, six 6-minute matches each way, everyone dribbling): the ball changed sides
-    35 times a match, against 25.5 before -- a touch out in front can be nicked -- and there were more shots (5.7 a match
-    against 3.2) and goals (11 against 5). Passing held up (89% found their man, against 85%).
+- **Back to v89 (v102).** Everything from v90 to v101 was taken back out, and the game is v89's again: v90's
+  dribbling (each touch going on ahead and waiting for him) and v94-v95's touch lengths by Dribbling; v91 and v93's
+  guard after a standing tackle; v92's Dribble Lab controls (the DRIBBLING, RUN TOUCH and SPRINT TOUCH chips and the
+  result box at the top left); and v96-v100's dribbling, already reverted in v101. The tests that came with them
+  (classic-dribble, classic-dribblelab, classic-shieldwin) went too. One test fix stays: classic-crossing's low-cross
+  check takes up to four crosses (the keeper claims about one in four).
 - **Difficulty (v89).** Five levels -- RELAXED, NORMAL, PRO, STAR and CHAMPION -- a row in SETTINGS, and a tap on the
   chip under the title on the exhibition screen (it goes on to the next, CHAMPION round to RELAXED). A fresh browser
   starts at NORMAL; it's kept. STAR is the computer at full strength, as it always played; CHAMPION a notch past it. It
@@ -1878,8 +1813,8 @@ test, and like the Trap Lab the values are the game's settings.
   playing style; see [Playing styles](#playing-styles).
 - **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.4 m/s
   flat out at 1, up to 6.6 and 9.1 m/s at 10. With the ball at his feet he's slower, by a fifth at
-  Dribbling 1 and a twentieth at 10 (his touch out ahead of him doesn't slow him: see Dribbling). Sprinting with it
-  tires him a little more than sprinting without it, and running with it at a jog tires him a little (well under half what it once did); without the
+  Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
+  it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
   him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
 - **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
@@ -1943,7 +1878,7 @@ test, and like the Trap Lab the values are the game's settings.
   next attack. By full time a side has used a good part of its legs (the ceiling on its stamina is
   around 0.6–0.75), not all of them.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
-  touches it on ahead of him (still his: see Dribbling), and a pass takes a moment to arrive; through both it's still
+  knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
   his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a
   block. Only the man it's for goes after it. It's nobody's ball only after a tackle or a deflection, a
   clearance, or a pass that's gone astray. Each side's shape shifts off where it sees the ball, a beat

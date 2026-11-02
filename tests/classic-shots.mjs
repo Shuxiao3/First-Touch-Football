@@ -117,17 +117,10 @@ const offBall = iq => page.evaluate(iq => {
       const late = path.filter(s => s.t >= 0.5), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
       return { ahead: mean('ahead'), goalSide: mean('goalSide'), tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
 }, iq);
-// (each run's a little different -- his read is a noisy one, and the scenes before leave their marks -- so a run first,
-// not counted, then four of each, turn about, and the averages)
-await offBall(10);
-const offs = { 10: [], 1: [] }; for(const iq of [10, 1, 10, 1, 10, 1, 10, 1]) offs[iq].push(await offBall(iq));
-const avgOff = R => ({ ahead: Math.round(R.reduce((a, r) => a + r.ahead, 0) / R.length), goalSide: Math.round(R.reduce((a, r) => a + r.goalSide, 0) / R.length), tags: [...new Set(R.flatMap(r => r.tags.split(' ')))].join(' ') });
-const off10 = avgOff(offs[10]), off1 = avgOff(offs[1]);
+const off10 = await offBall(10), off1 = await offBall(1);
 info('a runner into space: ' + JSON.stringify({ off10, off1 }));
 ok(/TRACK|PAIR/.test(off10.tags) && /TRACK|PAIR/.test(off1.tags), 'he picks up the runner in his zone (' + off10.tags + ' / ' + off1.tags + ')');
-// (the gap between the two is about 25 px both ways -- measured on v95, v96 and v97, run alone, 20 to 34 from one set of
-// four runs to the next -- so 15, which a Def IQ that no longer counted would miss by far, and noise wouldn't)
-ok(off10.ahead - off1.ahead >= 15 && off10.goalSide - off1.goalSide >= 15 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average over four runs (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
+ok(off10.ahead - off1.ahead >= 30 && off10.goalSide - off1.goalSide >= 30 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
 
 // THEIR CROSS: the moment one of theirs crosses it into your box, you're put on the man of yours marking the one it's
 // for -- or the one nearest where it comes through head height

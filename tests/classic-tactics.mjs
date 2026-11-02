@@ -201,11 +201,8 @@ const marks = await page.evaluate(() => { const S = window.__S, d = S.d, out = {
   for(const el of document.querySelectorAll('#bpBody .tpitch .ptk[data-pos]')){ const p = d.roster[+el.dataset.ri], f = S.posFit(S.natPos(p), el.dataset.pos), want = el.dataset.pos === 'GK' ? '' : { main: '', second: 'sec', out: 'oop' }[f];
     const has = el.classList.contains('oop') ? 'oop' : el.classList.contains('sec') ? 'sec' : ''; out.n++; if(has !== want) out.bad.push(S.natPos(p) + '@' + el.dataset.pos + ':' + has); }
   // one man, his rating in each position: his own, a second one, out of it
-  // (a centre-back: at CB, at full-back, wide in midfield; with none in a squad made at random, a full-back: at FB, at CB,
-  // in central midfield)
-  const p = d.roster.find(q => S.natPos(q) === 'CB') || d.roster.find(q => S.natPos(q) === 'FB'), cb = S.natPos(p) === 'CB';
-  out.rate = cb ? [p.ovr, S.ovrAt(p, 'DEF', 'CB'), S.ovrAt(p, 'DEF', 'FB'), S.ovrAt(p, 'MID', 'WM'), 'CB', 'CB / FB / WM']
-                : [p.ovr, S.ovrAt(p, 'DEF', 'FB'), S.ovrAt(p, 'DEF', 'CB'), S.ovrAt(p, 'MID', 'CM'), 'FB', 'FB / CB / CM'];
+  const p = d.roster.find(q => S.natPos(q) === 'CB') || d.roster.find(q => q.role === 'DEF');
+  out.rate = [p.ovr, S.ovrAt(p, 'DEF', 'CB'), S.ovrAt(p, 'DEF', 'FB'), S.ovrAt(p, 'MID', 'WM'), S.natPos(p)];
   // the computer's clubs: how their men fit the spots they're picked for
   const n = { main: 0, second: 0, out: 0 }, nd = { main: 0, second: 0, out: 0 }; for(const c of S.mgAiClubs(d)){ const f = S.cwFormFor(c), sq = S.careerSquad(c, f), sp = S.careerSlots(f, 'atk');
     sq.slice(1).forEach((e, i) => n[S.posFit(S.natPos(e), sp[i].pos)]++);
@@ -218,7 +215,7 @@ const marks = await page.evaluate(() => { const S = window.__S, d = S.d, out = {
   const hold = { formation: '2-3-2', formDef: '3-3-1', lineup: { atk: [0, 1, 2, 3, 4, 5, 6] }, roster: ['CB', 'CB', 'DM', 'CM', 'WM', 'STK', 'STK'].map(sub => ({ role: sub === 'CB' ? 'DEF' : sub === 'STK' ? 'ATT' : 'MID', subRole: sub })) };
   const hp = S.careerSlots('3-3-1', 'def'), hm = S.careerMapDef(hold); out.hold = [hp[hm.indexOf(2)].pos, hp[hm.indexOf(3)].pos];
   return out; });
-info('your tactics pitch: ' + marks.n + ' tokens' + (marks.bad.length ? ', wrong: ' + marks.bad.join(' ') : '') + '; a ' + marks.rate[4] + ' rated ' + marks.rate[0] + ': ' + marks.rate.slice(1, 4).join(' / ') + ' at ' + marks.rate[5] + '; the computer\'s clubs\' men in their spots: ' + JSON.stringify(marks.clubs));
+info('your tactics pitch: ' + marks.n + ' tokens' + (marks.bad.length ? ', wrong: ' + marks.bad.join(' ') : '') + '; a ' + marks.rate[4] + ' rated ' + marks.rate[0] + ': ' + marks.rate.slice(1, 4).join(' / ') + ' at CB / FB / WM; the computer\'s clubs\' men in their spots: ' + JSON.stringify(marks.clubs));
 ok(marks.n >= 8 && !marks.bad.length, 'on the tactics pitch a man in a second position of his has his rating in lime, one out of position in amber, one in his own as it was');
 ok(marks.rate[1] === marks.rate[0] && marks.rate[2] < marks.rate[0] && marks.rate[0] - marks.rate[2] <= 3 && marks.rate[3] < marks.rate[2],
   'his rating: his own in his own position (' + marks.rate[1] + '), a little less in a second (' + marks.rate[2] + '), less again out of position (' + marks.rate[3] + ')');
