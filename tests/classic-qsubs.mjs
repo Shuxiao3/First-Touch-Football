@@ -22,7 +22,7 @@ patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&C
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-qsubs-')), 'classic.html');
 writeFileSync(copy, src);
 
-const { browser, page, rep } = await open({ url: 'file://' + copy });
+const { browser, page, rep } = await open({ url: 'file://' + copy, papers: true });   // (an exhibition: no Monday papers to put aside, and nothing between a click and the match)
 const { ok, info } = rep;
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 const simFor = async secs => { const t0 = await K('simNow'); await page.waitForFunction(t => window.__K.ev('simNow') > t, t0 + secs, { timeout: 60000, polling: 100 }); };   // (that much of the match, however fast it runs)
@@ -116,7 +116,7 @@ await b3.close();
 // A CAREER: the training pitch's Subs tab -- tap a man on the pitch and one on the bench to pair them; pair him again and
 // the new pair takes the old one's place; ✕ takes one off; up to three. Then the match: your pairs first on the list,
 // nobody tired, and a tap on one is that sub
-const { browser: b4, page: pc, rep: r4 } = await open({ url: 'file://' + copy });
+const { browser: b4, page: pc, rep: r4 } = await open({ url: 'file://' + copy, papers: 'aside' });   // (a career: its Monday papers put aside)
 pc.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
 await pc.click('#smItems [data-act="new"]'); await pc.waitForTimeout(150); await pc.click('#newSlotList .slotBtn >> nth=0');
 await pc.waitForSelector('#mgrMaker.on', { timeout: 4000 }); await pc.fill('#mgName', 'Sam Okafor'); await pc.fill('#mgClubIn', 'Fenmoor Athletic');

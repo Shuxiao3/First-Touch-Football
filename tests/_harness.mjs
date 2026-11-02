@@ -27,10 +27,22 @@ export function reporter(){
 // itself (a fresh browser starts at NORMAL). Run before every page load, as an init script.
 export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; if(!o.diff){ o.diff = 'star'; localStorage.setItem('ftc_prefs', JSON.stringify(o)); } }catch(e){} };
 
-export async function open({ fastFrames = false, url = GAME } = {}){
+// THE MONDAY PAPERS (v103) open over the career hub each Monday. A test of the career that isn't about them puts them
+// aside -- the ✕, as a player would -- whenever they're in the way of a click: the manager tests by default, others
+// with papers: 'aside' (or pileAside on a page of their own); papers: true leaves them be (a test of the pile itself).
+// Tests that never reach a career have no handler at all: nothing between a click and a match.
+export async function pileAside(page){
+  await page.addLocatorHandler(page.locator('#pileModal.on'), async () => {
+    await page.evaluate(() => { const x = document.querySelector('#pileModal.on [data-pile="close"]'); if(x) x.click(); else { const m = document.getElementById('pileModal'); if(m) m.classList.remove('on'); } });
+  });
+}
+
+export async function open({ fastFrames = false, url = GAME, papers } = {}){
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
   await page.addInitScript(STAR);
+  const career = /(^|[\/\\])manager-[^\/\\]*$/.test(process.argv[1] || '');
+  if(papers === 'aside' || (papers === undefined && career)) await pileAside(page);
   const rep = reporter();
   page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if(m.type() === 'error') rep.errs.push('CONSOLE: ' + m.text()); });

@@ -1124,9 +1124,25 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **The captain and his vice**: the side's strongest leaders (charisma, with a little for experience) till you
       name them on the DEAL side of a man's card (ARMBAND: C or VC). Named, he's lifted; an ambitious senior passed
       over minds. (C) and (VC) by their names.
-    - **Checking on a man**: two a week, on its Monday -- CHECK-INS on the hub, CHECK IN on his card. It says how
-      he's feeling and why (wants more games, his form, the results, his contract...), his fitness, the coaches' word
-      on how he's coming on, and brings out a trait; it lifts him a little, more if he's low.
+    - **A word with him** (v103; v70's check-ins before): in the Monday papers (below), the two unhappiest men who
+      aren't asking for something else each ask for a word. TALK TO HIM and it says how he's feeling and why (wants
+      more games, his form, the results, his contract...), his fitness, the coaches' word on how he's coming on, and
+      brings out a trait; it lifts him a little, more if he's low.
+    - **The Monday papers** (v103). Each Monday the week's papers are on your desk, a pile to go through, opening by
+      itself over the hub (after the phone, the hometown hero or the wonderkid; never over the day going by), a paper
+      at a time, the side's morale and how it's moved over the pile. First the dressing room: its mood now and last
+      Monday, who's happier and who's less happy, who wants to leave and who's settled. Then what needs deciding,
+      each with its buttons: a club's bid for one of yours (ACCEPT, REJECT), a club's answer to your bid (SIGN HIM on
+      the seasons you set, or MEET their price, or WALK AWAY), a sponsor's offer (SIGN, NO THANKS -- see **Sponsors**),
+      a man who's come on and wants a new deal (GIVE IT HIM, NOT NOW), one who wants to leave (TALK HIM ROUND, LIST
+      HIM), one who wants a word. Then the reports: bids of yours that fell through, sponsors' deals that ran out,
+      the physio's (who's hurt, how and for how long, who's fit again), the coaches' every third week (who's coming
+      on, who's going back), the scouts' (with a scouts' house and the window open: three men worth a look, LOOK to
+      go to him in the market), your next game (where, their place and form, their top scorer) and the week's money.
+      LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS on the hub (with how many are left) opens
+      it again. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
+      yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
+      the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
   - **His story.**
     - **Potential is never a number**, not even your own men's: on their cards and in the lists it's a range round
@@ -1342,34 +1358,45 @@ The same game played like any other football game. It's a copy of `index.html` w
       $0.22 a fan a week in League 2, up to $0.36 in the Premium League (a new career's 1,000 fans: about $200 a
       week) -- more with a star (4% for every point your best man is above the league's level, from 15% less to 60%
       more) and with a happy dressing room (6% a point of the side's mood either side of settled).
-  - **The ground.** A new career's is a field with two metal bleachers, one down each side, and its six boards: 1,800
-    seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
+  - **The ground.** A new career's is a field with two metal bleachers, one down each side, and one board -- bare
+    (YOUR AD HERE) -- round the pitch: 1,800 seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
     far as your clubhouse lets you (see **The campus**):
 
     | Level | Seats | Boards | Costs | Needs |
     | --- | --- | --- | --- | --- |
-    | 1 Field & bleachers | 1,800 | 6 | (where you start) | |
-    | 2 Big bleachers, a press box | 4,200 | 10 | $45,000 | the shed |
-    | 3 Covered stands, terraces behind the goals | 8,500 | 14 | $140,000 | the cabin |
-    | 4 Four stands, floodlights | 16,000 | 18 | $380,000 | the clubhouse |
-    | 5 Grand stadium, two tiers | 36,000 | 24 | $1,200,000 | the hall |
+    | 1 Field & bleachers | 1,800 | 1 | (where you start) | |
+    | 2 Big bleachers, a press box | 4,200 | 3 | $45,000 | the shed |
+    | 3 Covered stands, terraces behind the goals | 8,500 | 6 | $140,000 | the cabin |
+    | 4 Four stands, floodlights | 16,000 | 10 | $380,000 | the clubhouse |
+    | 5 Grand stadium, two tiers | 36,000 | 16 | $1,200,000 | the hall |
 
     Promotion builds nothing: a bigger league brings more fans (and a sold-out ground lets you put the price up),
     not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
     Stands tab shows that stand as it is and as the next level would build it, with your boards and names on. The
     building's door reads the ground's name.
-    - **Boards** come with the stands -- as many as its level has (6, 10, 14, 18, 24), never bought -- each let to an
-      advertiser at once, by the week: $0.02 a head through the gate in League 2, up to $0.04 in the Premium
-      League. The advertisers' names go on the boards along the far touchline (up to 14 of them; the rest are round
-      the other sides).
-    - **Sponsors.** The shirt, the ground's name and each stand's (the North and South Stands; the East and West Ends
-      too from level 3) are for sale: FIND A SPONSOR and three bid, each a base fee a week for one to three seasons (a
-      longer deal pays a little less a week) and a bonus. The same three till tomorrow, then new ones. Bids follow the league
-      (a shirt's about $380 a week in League 2, $14,000 in the Premium League), the ground's level, how full it is
-      and where you are in the table. A deal holds its fee wherever you go, and ends when its seasons are up (the
-      news says so, and the name goes back). The shirt sponsor's colours go on the kit, a patch on the chest; the
-      ground's name and the North Stand's go on the far stand and over the kick-off.
-    - **A sponsor's bonus**, paid at the season's end for hitting its target in the league -- one to three tiers, the
+    - **Sponsors** (v103) come to you: nobody's heard of a new club. It starts with its one board bare and no
+      offers; they come in the Monday papers, a firm calling about a free place now and then (the longer it's been
+      free, the likelier -- a new club's first call usually comes in its first few weeks), two at most in a week,
+      each offer standing two weeks. Who calls is the club's size -- its league most of all, then its fans against
+      what its league's clubs have, its ground and where it stands in the table: first the businesses round the
+      corner (a coffee shop, the tyre place, the bakery, the barber's: $15 to $40 a week for a board, to the end of
+      the season), then the town's firms (car dealers, builders, solicitors) a league up, regional companies, national
+      companies, and global brands at the top with a grand stadium -- each size paying more (a board $40 to $110
+      a week from a town firm, up to $950 to $2,600 from a global brand; the shirt $60 to $160 from a local business,
+      $8,000 to $20,000 from a global brand), now and then a bigger firm taking a punt or a smaller one calling.
+      Where they can go: boards, as many as the ground's level has (1, 3, 6, 10, 16), never bought, bare till
+      someone takes them (YOUR AD HERE on the far stand); the shirt from your second season (sooner if the town's
+      firms are calling already); the stands' names once there are covered stands (level 3: the North and South
+      Stands, the East and West Ends); the ground's name once there are four (level 4; never a corner shop's). A
+      deal holds its fee wherever you go, and ends when its seasons are up (the news says so, the name goes back,
+      the board comes down, and the Monday papers say so too). The Sponsors tab in the Stadium shows each board and
+      place, who has it, the offers waiting (SIGN, NO) and who's calling now; the advertisers' names go on the boards
+      along the far touchline, the shirt sponsor's colours on the kit (a patch on the chest), the ground's name and
+      the North Stand's on the far stand and over the kick-off. The club's partners still pay their share every week,
+      as before. (On a new club's first season this is about $25,000 less than signing everything there was on the
+      first day used to bring; a first season still ends well in the black.)
+    - **A sponsor's bonus** (the shirt's, the ground's and a stand's, from a town firm up), paid at the season's end
+      for hitting its target in the league -- one to three tiers, the
       highest reached paying, a harder one more (one tier: 8 weeks of its fee; two: 4 and 10; three: 3, 7 and 12).
       A shirt sponsor asks for a finish (top 10, top 6, top 2) or wins (9, 12, 15); the ground's for full crowds (the
       season's home games, 55%, 75% or 95% of the seats on average); a stand's for goals (35, 42, 48), clean sheets
@@ -1379,7 +1406,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       under what a deal paid before bonuses came in: a middling season comes out about even, a good one ahead.
     - **Away**, a club's ground is about as big as its league's tend to be, every board let, now and then a
       sponsor's name on it; its shirt may carry a sponsor too.
-    - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500).
+    - A save from before gets the level that seats as many as it had (6,000 seats: covered stands, 8,500); one from
+      before v103 keeps as many of its boards as the ground has now, each paying what it did to its season's end.
   - **The campus** is the hub: the club from above, in the tilesets' tiles (see **The campus** under Sprites), all
     lawn. The stadium runs along the top and off it: drawn as big as a stadium is beside a clubhouse, so what shows is
     its outside -- the fence and the back of a bleacher at level 1, up to the bowl's two tiers at 5 -- with the pitch
@@ -1699,6 +1727,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The Monday papers, and sponsors who come to you (v103).** The check-ins are gone: each Monday the week's papers
+  are on your desk instead -- the dressing room's mood and how it's moved, every decision the week has brought (bids
+  for your men, answers to your bids, sponsors' offers, new deals, men who want out or want a word) and the reports
+  (the physio's, the coaches', the scouts', the next game, the week's money): see **The Monday papers** under the
+  manager career. And a new club starts with one bare board and nobody calling: the businesses round the corner
+  call first, bigger firms as the club grows, and the shirt, the stands' names and the ground's open up as it does
+  (see **Sponsors** under The ground).
 - **Back to v89 (v102).** Everything from v90 to v101 was taken back out, and the game is v89's again: v90's
   dribbling (each touch going on ahead and waiting for him) and v94-v95's touch lengths by Dribbling; v91 and v93's
   guard after a standing tackle; v92's Dribble Lab controls (the DRIBBLING, RUN TOUCH and SPRINT TOUCH chips and the

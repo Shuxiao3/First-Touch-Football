@@ -21,7 +21,7 @@ patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CA
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
 
-const { browser, page, rep } = await open({ url: 'file://' + copy });
+const { browser, page, rep } = await open({ url: 'file://' + copy, papers: 'aside' });   // (a career: its Monday papers put aside)
 const { ok, info } = rep;
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 

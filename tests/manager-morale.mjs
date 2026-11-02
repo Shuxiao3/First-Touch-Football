@@ -1,11 +1,12 @@
 // FOOTBALL CLASSIC, CHARACTER AND MORALE: traits drawn from a man's hidden values (never his numbers), each with a good
-// side and a cost, coming out over his first weeks at the club and sooner when you check on him. Morale, his and the
+// side and a cost, coming out over his first weeks at the club and sooner when you talk to him. Morale, his and the
 // side's: the side moves with results against what was expected, softened by a leader's armband and sharpened by a
 // hot-head's; each man by his minutes against what he expects, his form, the side's mood, his resilience. Match day:
 // high, a little more stamina and composure; low, less of those and of his reading of the game (a lot less at rock
 // bottom), played or simulated. A long low costs his touch in training. An unhappy, ambitious man asks to leave (the
 // market comes for him, he won't renew); a loyal servant renews for less and may not go. The captain and his vice: the
-// side's strongest leaders till you name them. Two check-ins a Monday. On a copy of the game that lets the test reach it.
+// side's strongest leaders till you name them. A word with him (v103, in place of the check-ins): an unhappy man asks
+// for one in the Monday papers, the two unhappiest a week. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -19,7 +20,7 @@ patch('  // ===== END MANAGER CAREER', '  window.__K={ ev:s=>eval(s) };\n  // ==
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mor-')), 'classic.html');
 writeFileSync(copy, src);
 
-const { browser, page, rep } = await open({ url: 'file://' + copy });
+const { browser, page, rep } = await open({ url: 'file://' + copy, papers: true });   // (it goes through the Monday papers itself)
 const { ok, info } = rep;
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 let r;
@@ -101,22 +102,31 @@ await page.click(`#bpBody .mgRow:has-text("${capName}")`); await page.waitForTim
 const head = await page.textContent('#bpBody .mgCardName');
 ok(/\(C\)$/.test(head.trim()), 'his card says so: ' + head.trim());
 
-// --- check-ins: two a Monday --------------------------------------------------------------------------------------------------------
+// --- a word with him: the Monday papers, the two unhappiest a week (v103; the check-ins before) -------------------------------
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
-await K(`(()=>{ const d=CAREER.data; d.phase='league'; d.wday='mon'; d.ci=null; for(const p of d.roster){ p.kt=0; p.mor=6.5; } d.roster[2].hv=HV({ch:8,te:7}); d.roster[2].mor=3; mgSave(d); renderHub(); return 1; })()`);
-const btn = await page.textContent('#chBottom');
-ok(/CHECK-INS 2/.test(btn), 'a Monday on the hub: CHECK-INS 2 beside the week\'s button');
-await page.click('#chBottom [data-mg="checkins"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(120);
+await K(`(()=>{ const d=CAREER.data; d.phase='league'; d.wday='mon'; d.bids=[]; d.offers=[]; d.spOff=[]; for(const p of d.roster){ p.kt=0; p.mor=6.5; delete p.cAsk; delete p.wantsOut; }
+  d.roster[2].hv=HV({ch:8,te:7}); d.roster[2].mor=3; d.roster[3].mor=4.6; d.roster[4].mor=4.2; d.roster[5].mor=4.9; pileBuild(d,{dev:null}); mgSave(d); renderHub(); return 1; })()`);
+await page.waitForTimeout(150);
+r = await K(`(()=>{ const d=CAREER.data, W=pileLeft(d).filter(x=>x.k==='word'); return { words:W.map(x=>d.roster.findIndex(p=>p.id===x.pid)), modal:document.getElementById('pileModal').classList.contains('on'), btn:document.getElementById('chBottom').textContent }; })()`);
+info('the papers: ' + JSON.stringify(r));
+ok(r.modal && /PAPERS \d/.test(r.btn) && r.words.length === 2 && r.words[0] === 2 && r.words[1] === 4,
+  'a Monday: the papers open by themselves (PAPERS on the hub too), and the two unhappiest each ask for a word -- ' + r.words.join(' and ') + ', not the third');
 const n2 = await K('CAREER.data.roster[2].name');
-await page.click(`#bpBody .mgRow:has-text("${n2}")`); await page.waitForTimeout(120);
-await page.click('#bpBody [data-mg="checkin"]'); await page.waitForTimeout(150);
-const box = await page.innerText('#bpBody .ciBox').catch(() => '');
-r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2]; return { mor:p.mor, kt:p.kt, left:ciLeft(d) }; })()`);
-info('a check-in: ' + JSON.stringify({ box, r }));
-ok(/^Unhappy · /.test(box) && /Fitness \d+%/.test(box) && /in training/.test(box) && /✓ Natural Leader/.test(box) && r.mor === 3.8 && r.kt === 1 && r.left === 1,
-  'checking on an unhappy man: how he\'s feeling and why, his fitness, the coaches\' word, a trait out ("' + box.split('\n').join(' / ') + '"); it lifts him (3 to ' + r.mor + '); one left');
-r = await K(`(()=>{ const d=CAREER.data; const a=mgCheckIn(d,d.roster[2].id), b=mgCheckIn(d,d.roster[3].id), c=mgCheckIn(d,d.roster[4].id); d.wday='sat'; const e=mgCheckIn(d,d.roster[5].id); d.wday='mon'; return [a.err,b.err||'ok',c.err,e.err]; })()`);
-ok(/seen him/.test(r[0]) && r[1] === 'ok' && /your two/.test(r[2]) && /Monday/.test(r[3]), 'the same man twice, no; a second, yes; a third, no ("' + r[2] + '"); not on a matchday ("' + r[3] + '")');
+for(let i = 0; i < 12; i++){   // (through the pile to his paper)
+  const top = await page.textContent('#pileModal .plPaper');
+  if(top.includes(n2 + ' would like a word')) break;
+  await page.click('#pileModal .plBtns [data-pile="next"], #pileModal .plBtns [data-pile="later"]'); await page.waitForTimeout(80); }
+const ask = await page.innerText('#pileModal .plPaper');
+await page.click('#pileModal .plBtns [data-pile="talk"]'); await page.waitForTimeout(120);
+const box = await page.innerText('#pileModal .plPaper');
+r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2]; return { mor:p.mor, kt:p.kt }; })()`);
+info('a word: ' + JSON.stringify({ ask, box, r }));
+ok(/would like a word/.test(ask) && /Unhappy · /.test(box) && /Fitness \d+%/.test(box) && /in training/.test(box) && /✓ Natural Leader/.test(box) && r.mor === 3.8 && r.kt === 1,
+  'talking to an unhappy man: how he\'s feeling and why, his fitness, the coaches\' word, a trait out ("' + box.split('\n').slice(2).join(' / ') + '"); it lifts him (3 to ' + r.mor + ')');
+r = await K(`(()=>{ const d=CAREER.data; d.wday='sat'; renderHub(); const sat={left:pileLeft(d).length, modal:document.getElementById('pileModal').classList.contains('on')}; d.wday='mon'; pileHide(); renderHub(); return sat; })()`);
+ok(r.left === 0 && !r.modal, 'not on a matchday: the papers are Monday\'s');
+await K(`(()=>{ pileHide(); curTab.club='Squad'; openBuilding('club'); return 1; })()`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(150);
+await page.click(`#bpBody .mgRow:has-text("${n2}")`); await page.waitForTimeout(150);
 const longest = await page.$$eval('#bpBody .mgCard *', ns => Math.max(...ns.filter(e => !e.children.length).map(e => e.textContent.trim().length)));
 ok(longest <= 32, 'nothing on the card longer than a short line (' + longest + ' characters)');
 

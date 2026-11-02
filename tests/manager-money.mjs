@@ -1,8 +1,10 @@
 // FOOTBALL CLASSIC, THE MONEY: shirt sales (passive, with each week's money: your fans, a star, the club's mood); the
-// boards come with the stands (as many as the ground's level has, each let at once -- never bought); and a sponsor's
-// deal pays a base fee every week and a bonus at the season's end for hitting its target -- a league finish, wins,
-// goals, clean sheets or full crowds, in one to three tiers, the highest reached paying -- shown on its offer, by the
-// deal through the season, and in the season's review. On a copy of the game that lets the test reach it.
+// boards come with the stands, bare to start -- one round a new ground, nobody on it and no offers (v103) -- and the
+// sponsors who call are the club's size: local businesses for a new club (a coffee shop, the tyre place), the town's
+// firms a league up, national companies and global brands at the top, each paying its size's fee; and a sponsor's
+// deal pays a base fee every week and, from a town firm up, a bonus at the season's end for hitting its target -- a
+// league finish, wins, goals, clean sheets or full crowds, in one to three tiers, the highest reached paying -- shown on
+// its offer, by the deal through the season, and in the season's review. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -37,25 +39,38 @@ info('shirt sales: ' + JSON.stringify(r));
 ok(r.wk > 0 && r.wk === r.s.wk && r.pool && Math.abs(r.more - 2 * r.wk) <= 2, 'shirt sales: ' + r.wk + ' a week from ' + Math.round(r.s.fans) + ' fans, paid with the rest of each week\'s money; twice the fans, twice the sales (' + r.more + ')');
 ok(r.star > r.wk && r.happy > r.wk && r.low < r.wk, 'a star sells shirts (' + r.star + ' with a man ten above the league), a happy club more (' + r.happy + '), an unhappy one fewer (' + r.low + ')');
 
-// --- the boards come with the stands ----------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), b0=S.boards, ads0=S.ads.length, uniq=new Set(S.ads.map(a=>a.short)).size===S.ads.length, buy=boardBuy(d), wk0=computeFinance(d).boardsWk;
-  d.budget=1e6; const up=stadUpgrade(d); const S2=stadOf(d); return { b0, ads0, uniq, buy, wk0, up, b1:S2.boards, ads1:S2.ads.length, lvl:S2.lvl }; })()`);
+// --- the boards come with the stands: one round a new ground, bare, and nobody calling yet (v103) -------------------------
+r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), b0=S.boards, ads0=S.ads.length, offers0=(d.spOff||[]).length, deals0=Object.keys(S.deals).length, buy=boardBuy(d), wk0=computeFinance(d).boardsWk, drawn=groundOfYours(d).boards.map(b=>b.short);
+  d.budget=1e6; const up=stadUpgrade(d); const S2=stadOf(d); return { b0, ads0, offers0, deals0, buy, wk0, drawn, kit:spOpen(d,'kit'), stand:spOpen(d,'N'), ground:spOpen(d,'ground'), up, b1:S2.boards, ads1:S2.ads.length, lvl:S2.lvl, drawn1:groundOfYours(d).boards.length }; })()`);
 info('the boards: ' + JSON.stringify(r));
-ok(r.b0 === 6 && r.ads0 === 6 && r.uniq && /come with the stands/.test(r.buy) && r.wk0 > 0 && r.up === null && r.lvl === 2 && r.b1 === 10 && r.ads1 === 10,
-  'the boards come with the stands: 6 round a new ground, each let at once (' + r.wk0 + ' a week), none to buy ("' + r.buy + '"); the next level, 10');
+ok(r.b0 === 1 && r.ads0 === 0 && r.offers0 === 0 && r.deals0 === 0 && r.wk0 === 0 && r.drawn.join() === 'YOUR AD HERE' && /come with the stands/.test(r.buy),
+  'a new career\'s ground: one board round the pitch, bare ("' + r.drawn[0] + '"), nothing coming in from it, no sponsors and no offers; none to buy');
+ok(!r.kit && !r.stand && !r.ground && r.up === null && r.lvl === 2 && r.b1 === 3 && r.ads1 === 0 && r.drawn1 === 3,
+  'the shirt, the stands\' names and the ground\'s not open to sponsors yet; a bigger ground, more boards (3 at level 2), bare till someone takes them');
 
-// --- a sponsor's offer: a base fee and a bonus, in tiers ----------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, kinds=['kit','ground','N'], out={}, all=[];
-  for(let day=0;day<12;day++){ d.day=day; for(const k of kinds){ const L=dealBids(d,k); for(const b of L){ all.push([k,b]); } } }
+// --- who calls: the club's size -- local businesses first, then bigger and bigger ----------------------------------------
+r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), was={tier:d.tier, lvl:S.lvl, loy:d.loyalty, md:d.md};
+  const gen=(k,n)=>{ const L=[]; for(let i=0;i<n;i++){ const o=spOfferFor(d,k,new Set()); if(o) L.push(o); } return L; }, out={};
+  const at=(tier,lvl,fans)=>{ d.tier=tier; S.lvl=lvl; d.loyalty=Math.round((LOYALTY_BASE[tier]||1000)*fans); d.md=0; return Math.round(spStanding(d)*10)/10; };
+  out.st=[at(1,1,1)]; const loc=gen('board',80); out.loc={sz:[...new Set(loc.map(o=>o.sz))].join(), names:loc.slice(0,4).map(o=>o.sp.name+' $'+o.wk), fee:loc.every(o=>o.wk>=15&&o.wk<=40), bonus:loc.some(o=>o.m), yrs:loc.every(o=>o.yrs===1),
+    trades:loc.every(o=>SP_SIZES[0].b.some(t=>o.sp.name.endsWith(' '+t))), short:loc.every(o=>o.sp.short.length<=12)};
+  out.st.push(at(2,2,1)); const town=gen('board',80); out.town={sz:town.filter(o=>o.sz===1).length, n:town.length};
+  out.st.push(at(4,5,2)); const top=gen('kit',60); out.top={sz:[...new Set(top.map(o=>o.sz))].sort().join(), fee:Math.min(...top.map(o=>o.wk))};
+  // the places' bonuses, from a town firm up
+  at(3,4,1); const kinds=['kit','ground','N'], all=[]; for(const k of kinds) for(const o of gen(k,40)) all.push([k,o]);
   const pick={kit:DEAL_PICK.kit, ground:DEAL_PICK.ground, N:DEAL_PICK.stand};
-  out.n=all.length; out.metOk=all.every(([k,b])=>b.m&&pick[k].includes(b.m.k)); out.tiers=[...new Set(all.map(([k,b])=>b.m.t.length))].sort().join();
-  out.harder=all.every(([k,b])=>b.m.t.every((x,i,A)=>!i||(x[1]>A[i-1][1]&&(b.m.k==='pos'?x[0]<A[i-1][0]:x[0]>A[i-1][0]))));
-  out.kinds=[...new Set(all.map(([k,b])=>b.m.k))].sort().join(); out.base=all.every(([k,b])=>b.wk>0);
-  const kit=all.find(([k,b])=>k==='kit'&&b.m.t.length===3)[1]; out.kit={wk:kit.wk, t:kit.m.t, txt:dealMetTxt(kit.m)};
-  return out; })()`);
-info('the offers: ' + JSON.stringify(r));
-ok(r.metOk && r.base && r.tiers === '1,2,3' && r.harder && /pos/.test(r.kinds) && /crowd/.test(r.kinds) && /goals|cs/.test(r.kinds),
-  'every offer a base fee and a bonus for a target: the shirt\'s a finish or wins, the ground\'s full crowds, a stand\'s goals, clean sheets or crowds (' + r.kinds + '); one to three tiers, each harder one paying more');
+  out.metOk=all.every(([k,o])=>o.m&&pick[k].includes(o.m.k)); out.tiers=[...new Set(all.map(([k,o])=>o.m.t.length))].sort().join();
+  out.harder=all.every(([k,o])=>o.m.t.every((x,i,A)=>!i||(x[1]>A[i-1][1]&&(o.m.k==='pos'?x[0]<A[i-1][0]:x[0]>A[i-1][0]))));
+  out.kinds=[...new Set(all.map(([k,o])=>o.m.k))].sort().join(); out.base=all.every(([k,o])=>o.wk>0); out.gname=all.filter(([k])=>k==='ground').every(([k,o])=>o.ground&&o.sz>=1);
+  const kit=all.find(([k,o])=>k==='kit'&&o.m.t.length===3)[1]; out.kit={wk:kit.wk, t:kit.m.t, txt:dealMetTxt(kit.m)};
+  d.tier=was.tier; S.lvl=was.lvl; d.loyalty=was.loy; d.md=was.md; return out; })()`);
+info('who calls: ' + JSON.stringify(r));
+ok(r.st[0] === 0 && r.loc.sz === '0' && r.loc.fee && !r.loc.bonus && r.loc.yrs && r.loc.trades && r.loc.short,
+  'a new club: only local businesses call (' + r.loc.names.join(', ') + '), $15 to $40 a week for a board, to the season\'s end, no bonus');
+ok(r.st[1] > 22 && r.town.sz > r.town.n * 0.5 && r.st[2] > 88 && /4/.test(r.top.sz) && r.top.fee >= 2000,
+  'a league up and a bigger ground, mostly the town\'s firms (' + r.town.sz + ' of ' + r.town.n + '); at the top with a grand stadium, national companies and global brands (sizes ' + r.top.sz + '), the shirt for ' + r.top.fee + ' a week and up');
+ok(r.metOk && r.base && r.tiers === '1,2,3' && r.harder && /pos/.test(r.kinds) && /crowd/.test(r.kinds) && /goals|cs/.test(r.kinds) && r.gname,
+  'from a town firm up, a base fee and a bonus for a target: the shirt\'s a finish or wins, the ground\'s full crowds, a stand\'s goals, clean sheets or crowds (' + r.kinds + '); one to three tiers, each harder one paying more');
 ok(r.kit.t.map(x => x[1]).join() === [3, 7, 12].map(w => Math.max(10, Math.round(r.kit.wk * w / 10) * 10)).join(), 'a three-tier bonus: 3, 7 and 12 weeks of its fee (' + r.kit.txt + ', on ' + r.kit.wk + ' a week)');
 
 // --- the season: where you stand, the bonus, the review --------------------------------------------------------------------------
@@ -76,16 +91,15 @@ ok(r.crowd[0] === 1 && r.crowd[1] === 1 && r.crowd[2] === r.crowd[3], 'the home 
 await K(`(()=>{ const d=CAREER.data; d.crowd={n:2,sum:1.4}; d.md=3; mgSave(d); renderHub(); return 1; })()`);   // (three games in: where you stand)
 await page.click('#chCampus [data-bldg="stadium"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Sponsors")'); await page.waitForTimeout(150);
 const deals = await page.$$eval('#bpBody .spBonus', ns => ns.map(n => n.textContent));
-const boards = await page.textContent('#bpBody').then(t => (t.match(/BOARDS[^$]*\$[\d,]+\/wk/) || [''])[0]);
+const boards = await page.textContent('#bpBody').then(t => (t.match(/BOARDS\s*\d+ of \d+ taken[^$]*\$[\d,]+\/wk/) || [''])[0]);
 const putUp = await page.$('#bpBody [data-stad="board"]');
-await K(`(()=>{ const d=CAREER.data; delete stadOf(d).deals.N; MGUI.stadOffer='N'; mgSave(d); return 1; })()`);
+await K(`(()=>{ const d=CAREER.data, S=stadOf(d); delete S.deals.N; d.tier=2; const bonused=k=>{ for(let i=0;i<40;i++){ const o=spOfferFor(d,k,new Set()); if(o&&o.m) return o; } }; d.spOff=[bonused('N'), bonused('kit')]; d.tier=1; mgSave(d); return 1; })()`);   // (two from town firms: a smaller one, now and then, has no bonus)
 await page.click('#bldgPanel .bpTab:text-is("Sponsors")'); await page.waitForTimeout(150);
-const offers = await page.$$eval('#bpBody .spBonus', ns => ns.map(n => n.textContent));
+const offers = await page.$$eval('#bpBody .spRow:has([data-stad="spsign"]) + .spBonus', ns => ns.map(n => n.textContent));
 info('the Sponsors tab: ' + JSON.stringify({ deals, boards, offers }));
-ok(deals.some(t => /^BONUS · top 10 \+\$1\.2K · top 6 \+\$2\.8K · top 2 \+\$4\.8K · now \d+(st|nd|rd|th)$/.test(t)) && deals.some(t => /75% full \+\$2\.4K · now 70% full/.test(t)) && /round the ground/.test(boards) && !putUp,
-  'the Sponsors tab: each deal\'s bonus and where you stand ("' + deals[0] + '"), the boards round the ground with no buying');
-ok(offers.length === 3 && offers.every(t => /^BONUS · /.test(t)), 'each offer says its bonus ("' + offers[0] + '")');
-await K(`(()=>{ MGUI.stadOffer=null; return 1; })()`);
+ok(deals.some(t => /^BONUS · top 10 \+\$1\.2K · top 6 \+\$2\.8K · top 2 \+\$4\.8K · now \d+(st|nd|rd|th)$/.test(t)) && deals.some(t => /75% full \+\$2\.4K · now 70% full/.test(t)) && /of \d+ taken/.test(boards) && !putUp,
+  'the Sponsors tab: each deal\'s bonus and where you stand ("' + deals[0] + '"), the boards (' + boards.replace(/\s+/g, ' ') + ') with no buying');
+ok(offers.length === 2 && offers.every(t => /^BONUS · /.test(t)), 'the offers waiting, each with its bonus ("' + offers[0] + '")');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 // the review and the books
 r = await K(`(()=>{ const d=CAREER.data; d.review={season:d.season,tier:d.tier,pos:4,result:'STAYED UP',prize:1000,grew:[],expired:[],retired:[],youthOut:[],moves:{1:{table:d.div[1],up:[],down:[]},2:{table:d.div[2],up:[],down:[]},3:{table:d.div[3],up:[],down:[]},4:{table:d.div[4],up:[],down:[]}},

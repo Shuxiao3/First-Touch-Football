@@ -15,7 +15,7 @@
 // man's window (his number, full name and position, his stamina and skill stars: top right beside the menu, at every
 // size) and the menu.
 import { chromium } from 'playwright';
-import { reporter, STAR } from './_harness.mjs';
+import { reporter, STAR, pileAside } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -86,7 +86,7 @@ async function newCareer(page){
 
 for(const [w, h] of SIZES){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700);
   const fails = [], check = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) fails.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   await check('start menu', ['#smItems .smBtn']);
@@ -191,7 +191,7 @@ for(const [w, h] of SIZES){
     await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
-  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="forward"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
+  for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
   const hw = await hudWin(page);
   ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
@@ -217,7 +217,7 @@ for(const [w, h] of SIZES){
 
 // THE SEASON REVIEW: a long page of the season -- START SEASON 2 stays on the screen (844x340)
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   await page.evaluate(() => { const M = __MG, d = M.d; let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); } M.mgSave(d); M.renderHub(); });
   await page.tap('#chBottom [data-mg="review"]'); await page.waitForTimeout(200);
@@ -227,7 +227,7 @@ for(const [w, h] of SIZES){
 
 // A FINGER: touch a man and move, and he's up at once -- no hold (a tap only shows his card) -- the tactics, on a real touch
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page); await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });
   await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
@@ -342,7 +342,7 @@ for(const [w, h] of SIZES){
 // his card fits its box, every man's (his ratings with DEF open, his instructions), with the longest name put out of
 // position: his name on one line, his rating amber, and no line of text saying so (nor "on the bench") -- Office and match
 { const ctx = await browser.newContext({ viewport: { width: 640, height: 360 }, isMobile: true, hasTouch: true });
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   const ri = await page.evaluate(() => { const d = window.__MG.d, lu = d.lineup, on = new Set(lu.atk.concat([lu.gk]));
     const L = ['Kieran Whitlock', 'Tyrese Beaumont', 'Callum Oyelaran', 'Marco Devreese', 'Leo Ahlberg', 'Iker Castillo', 'Yuki Sandoval', 'Dani Bondarenko'];
@@ -371,7 +371,7 @@ for(const [w, h] of SIZES){
     return { n, views, bad }; };
   const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]');
   await page.tap('.bpTopBack'); await page.waitForTimeout(100);
-  for(let i = 0; i < 8; i++){ const nd = await page.$('#chBottom [data-mg="forward"]'); if(!nd) break; await nd.tap(); await page.waitForTimeout(100); }
+  for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
   const hw = await hudWin(page);
   ok(winOk(hw, true), '...in a match, your man\'s window at the top right beside the menu, his name whole (' + hw.num + ' ' + hw.name + ' ' + hw.pos + ')' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
@@ -390,7 +390,7 @@ for(const [w, h] of SIZES){
 // (844x340) and the narrowest (640x360)
 for(const [w, h] of [[844, 340], [640, 360]]){
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   const R = await page.evaluate(() => { const d = window.__MG.d, R = d.roster, other = Object.values(d.world.clubs).filter(c => c.id !== d.clubId);
     d.listed[R[3].id] = 900; d.offers = d.offers || []; d.offerSeq = d.offerSeq || 0;   // a man listed, a man with three bids, the longest name
@@ -442,7 +442,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
 // stand over its bottom-right corner where they always did, the stick starts anywhere on the left, and the HUD is
 // the score, the way you're kicking, the clock, your man's window and the menu
 { const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
-  const page = await ctx.newPage(); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
+  const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700);
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(250); await page.tap('#exhGo'); await page.waitForTimeout(1200);
   const g = await page.evaluate(() => { const s = document.getElementById('stageWrap').getBoundingClientRect(), c = document.getElementById('c'), b = ['kickBtn','shootBtn','crossBtn','skillBtn'].map(id => document.getElementById(id).getBoundingClientRect());
