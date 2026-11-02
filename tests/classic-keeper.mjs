@@ -103,6 +103,7 @@ const cross = rival => page.evaluate(rival => new Promise(res => { const T = win
   const park = () => { for(const q of T.players()) if(q !== cr && !(rival && q === att)){ q.x = T.FW / 2 + out * 400 + (q.team === 'R' ? 0 : 60); q.y = 60; q.vx = q.vy = 0; } };
   T.drop(); park(); Object.assign(kp, { x: kp.homeX, y: T.YC, mode: 'line', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0 });
   cr.x = gx + out * 30; cr.y = T.YC + 520; cr.vx = cr.vy = 0; cr.facing = { x: -out, y: 0 };
+  cr.stats = Object.assign({}, cr.stats, { crossing: 10, curve: 1 });   // (a true ball to the spot: since v107 a lesser crosser's can drop short, out of the keeper's patch)
   Object.assign(b, { ownedBy: null, dribbler: null, x: cr.x, y: cr.y - 20, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0 });
   T.aiCross(cr, { x: gx + out * 90, y: T.YC + 30, who: null }); const t0 = T.simNow();
   (function tick(){ park(); cr.x = gx + out * 30; cr.y = T.YC + 520;
@@ -124,6 +125,7 @@ const way = who => page.evaluate(who => new Promise(res => { const T = window.__
   const park = () => { for(const q of T.players()) if(q !== cr && !men.includes(q)){ q.x = T.FW / 2 + out * 400 + (q.team === 'R' ? 0 : 60); q.y = 60; q.vx = q.vy = 0; } };
   T.drop(); park(); Object.assign(kp, { x: kp.homeX, y: T.YC, mode: 'line', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0, runDir: null });
   cr.x = gx + out * 30; cr.y = T.YC + 520; cr.vx = cr.vy = 0; cr.facing = { x: -out, y: 0 };
+  cr.stats = Object.assign({}, cr.stats, { crossing: 10, curve: 1 });   // (a true ball to the spot: since v107 a lesser crosser's can drop short, out of the keeper's patch)
   for(const q of men){ q.x = T.FW / 2; q.y = 40; q.vx = q.vy = 0; }
   Object.assign(b, { ownedBy: null, dribbler: null, x: cr.x, y: cr.y - 20, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0 });
   T.aiCross(cr, { x: gx + out * 90, y: T.YC + 30, who: null });

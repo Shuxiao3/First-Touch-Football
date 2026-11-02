@@ -26,7 +26,9 @@ const top = () => page.innerText('#pileModal .plPaper').catch(() => '');
 const modal = () => page.evaluate(() => document.getElementById('pileModal').classList.contains('on'));
 const press = async a => { await page.click('#pileModal [data-pile="' + a + '"]'); await page.waitForTimeout(80); };
 // through the pile (NEXT, or LATER for a decision) till the paper on top says `re`
-const toPaper = async re => { for(let i = 0; i < 16; i++){ if(re.test(await top())) return true; const b = await page.$('#pileModal .plBtns [data-pile="next"]') || await page.$('#pileModal .plBtns [data-pile="later"]'); if(!b) return false; await b.click(); await page.waitForTimeout(70); } return false; };
+// (each click waits for the paper on top to change, so a slow page under load can't skip one)
+const toPaper = async re => { for(let i = 0; i < 16; i++){ const t = await top(); if(re.test(t)) return true; const b = await page.$('#pileModal .plBtns [data-pile="next"]') || await page.$('#pileModal .plBtns [data-pile="later"]'); if(!b) return false; await b.click();
+  for(let w = 0; w < 30 && (await top()) === t; w++) await page.waitForTimeout(50); } return false; };
 let r;
 await page.emulateMedia({ reducedMotion: 'reduce' });
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
@@ -138,13 +140,18 @@ await K(`(()=>{ const d=CAREER.data; INJ_OFF=false; d.phase='league'; const p=d.
   const dev={up:[[d.roster[0].id,2],[d.roster[1].id,1]], down:[[d.roster[3].id,-1]]}; d.ledger.unshift({week:(d.week||0)+1,season:d.season,income:4000,gate:3000,tv:0,wages:1100,net:2900,budget:Math.round(d.budget)});
   pileBuild(d,{dev}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); INJ_OFF=true; return 1; })()`);
 await page.waitForTimeout(100);
-const reports = {};
-for(const [k, re] of [['phys', /THE PHYSIO/], ['dev', /THE COACHES/], ['next', /NEXT UP/], ['money', /THE WEEK’S MONEY/]]){ if(await toPaper(re)) reports[k] = (await top()).split('\n').slice(1).join(' / '); }
+// one pass through the pile, each report taken as it comes up (when the next game is against the rival it's DERBY WEEK, which
+// sits higher in the pile, so the pile isn't searched report by report)
+const reports = {}, want = [['phys', /THE PHYSIO/], ['dev', /THE COACHES/], ['next', /NEXT UP|DERBY WEEK/], ['money', /THE WEEK’S MONEY/]];
+for(let i = 0; i < 20 && Object.keys(reports).length < want.length; i++){ const t = await top();
+  for(const [k, re] of want) if(!reports[k] && re.test(t)) reports[k] = t.split('\n').slice(1).join(' / ');
+  const b = await page.$('#pileModal .plBtns [data-pile="next"]') || await page.$('#pileModal .plBtns [data-pile="later"]'); if(!b) break; await b.click();
+  for(let w = 0; w < 30 && (await top()) === t; w++) await page.waitForTimeout(50); }
 info('the reports: ' + JSON.stringify(reports));
 const n2 = await K('CAREER.data.roster[2].name'), n4 = await K('CAREER.data.roster[4].name');
 ok(reports.phys && reports.phys.includes(n2 + ': a strain, in training') && reports.phys.includes(n4 + ' is fit again'), 'the physio: who\'s hurt, how and for how long, who\'s fit again');
 ok(reports.dev && /Coming on: .+ \+2 → \d+/.test(reports.dev) && /Going back: .+ -1 → \d+/.test(reports.dev), 'the coaches, every third week: who\'s coming on and who\'s going back');
-ok(reports.next && /^(At home to|Away at) /.test(reports.next) && /Matchday 1/.test(reports.next), 'the next game: who, where (' + (reports.next || '').split(' / ')[0] + ')');
+ok(reports.next && /^(Derby week: )?(At home to|Away at|at home to|away at) /.test(reports.next) && /Matchday 1/.test(reports.next), 'the next game: who, where (' + (reports.next || '').split(' / ')[0] + ')');
 ok(reports.money && /In \$4,000 · wages out \$1,100 · \+\$2,900/.test(reports.money), 'the week\'s money: in, out, and in the bank');
 
 // --- sponsors over the weeks: the businesses round the corner call about the board ------------------------------------------------
