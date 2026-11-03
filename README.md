@@ -231,8 +231,13 @@ The same game played like any other football game. It's a copy of `index.html` w
     bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages if
     it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
     has no long text on it: his figure, name, own position, style, age, stars, rating and potential (as you know it:
-    see **His story**) on top, and one small button under his rating (DEAL ▶, CAREER ▶, RATINGS ▶) turns it over to
-    its next side; the side you're on stays as you go from man to man. One side has his six numbers (pace, physical, technique, passing, shooting, defending, each the average of
+    see **His story**) on top, then the spots he plays (v116): PLAYS and the ones that are his own, lit green, ALSO and
+    the ones he can play well enough (a second position: a little off his reading of the game), outlined -- e.g. a
+    full-back PLAYS FB ALSO WM CB -- and his popularity under his potential. Along the card's foot, a tab for each side
+    -- RATINGS, DEAL, CAREER, PERSONALITY (v116: in the Squad tab ◀ TEAM first, back to the little pitch) -- the one
+    showing lit; the side you're on stays as you go from man to man. (Before v116 one small button under his rating,
+    DEAL ▶ and so on, turned it a side at a time.) His trait tags show on his ratings side, and while one of the six is
+    open his season's facts give way to it. One side has his six numbers (pace, physical, technique, passing, shooting, defending, each the average of
     its attributes, as in **The six** below; tap one and what it's made of opens under them, a coloured bar for each
     rating, tap it again to shut it), and for your own man his games and goals this season; a man you haven't scouted
     shows ? for each, with SCOUT HIM (once the scouts' house is built); one you have, what the reports say (see
@@ -240,13 +245,18 @@ The same game played like any other football game. It's a copy of `index.html` w
     costs in a small grid, then what you can do about him, a line each: in the clubhouse's Squad tab his contract (a
     new deal, releasing him); in the market's Selling tab selling him (the two best bids, the transfer list); for
     another club's man the asking price, scouting him and your offer; for a free agent signing him; for a youngster
-    promoting him. The third side is his career (see **His story**). In the Squad tab his card has the right side to
-    itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
+    promoting him. The third side is his career (see **His story**). The fourth, his personality (v116): his mood,
+    then his character in words, never numbers, two to a line -- TEMPER (explosive, volatile, even, calm, ice cool),
+    WORK (lazy to model pro), LEARNS, DRIVE, LOYALTY, VOICE, GRIT, BODY and SETTLES -- then the traits that have come
+    out, each with its good side and its cost (see **Character and morale**). That's yours and your academy's, whom you
+    know; another club's man shows what your scouts have found stands out about him, and SCOUT HIM or SCOUT MORE.
+    In the Squad tab his card has the right side to
+    itself (◀ TEAM in its tabs, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
     a man up to drop on it.
   - **Tactics** (in a career, on the training pitch: its level decides which shapes and styles your side can have; see
     **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
-    seven two to a line -- and BEST 8. Under the pitch, on one line, the bench: five men, the subs you'll have in a
+    seven two to a line -- and, at its end, INSTRUCTIONS and BEST 8 (v116: INSTRUCTIONS was a button on his card). Under the pitch, on one line, the bench: five men, the subs you'll have in a
     match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
     on the bench, to swap them. BEST 8 puts the next keeper first on the bench and the best four of the rest after
     him. The tokens narrow to fit; if they still don't, they show a page at a time, with a small 1/2 ▶ button to
@@ -256,10 +266,11 @@ The same game played like any other football game. It's a copy of `index.html` w
     look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK)
     on top, his name and shirt number under them. The bench has the same two lines without the face, in a shorter box,
     so the pitch gets the height. The lines sit inside each token with room round them, clear of its edges.
-  - **Selection** (in a career, on the training pitch): who you take. The whole squad as one list, top to bottom:
-    the keeper, then the seven on the pitch (each beside the spot he's in, with the ball), the five on the bench,
-    then the rest, who aren't taken. It's wrapped into three columns where its parts meet -- ON THE PITCH, THE
-    BENCH, NOT TAKEN -- so a squad of twenty fits a phone held sideways without scrolling. No faces: a bar a man,
+  - **Selection** (in a career, on the training pitch): who you take, and your quick subs. The whole squad as one
+    list, top to bottom: the keeper, then the seven on the pitch (each beside the spot he's in, with the ball), the
+    five on the bench, then the rest, who aren't taken. It's wrapped into three columns where its parts meet -- ON THE
+    PITCH, THE BENCH, NOT TAKEN -- so a squad of twenty fits a phone held sideways without scrolling; the fourth is
+    QUICK SUBS (below). No faces: a bar a man,
     with his place in the list, his name, his position (on the pitch, the spot he plays) and his rating (there:
     lime in a second position of his, amber out of position). Drag a bar up or down (or across) and put it down:
     - **On the pitch's part** (the keeper or one of the seven), or anywhere if he came from there, the two change
@@ -269,28 +280,29 @@ The same game played like any other football game. It's a copy of `index.html` w
       move along one: a man dragged up into the bench pushes its fifth out to the top of NOT TAKEN; dropped below
       a column's last bar, he goes to the end of it. Over a bar to swap with, it lights; where he'd go in, a line
       shows. The bar follows your finger, a little above it, so you can see what's under it.
-  - **Subs** (in a career, on the training pitch, next to Selection): your quick subs, planned before the match. Three
-    columns: the seven ON THE PITCH, THE BENCH's five, and QUICK SUBS -- up to three pairs, a man on the pitch to come
-    off and one on the bench to come on. Tap one of each (either first) to pair them; a man paired again leaves his
-    last pair for the new one, and ✕ takes a pair off. A paired man's bar is lit down its left edge with the other's
-    number. In the match they're first on your quick subs, ready to tap, tired or not. The career keeps them; a pair
-    goes when either man is no longer on the pitch or the bench (see Selection). The keepers aren't in it.
+    - **QUICK SUBS** (v116: they had a Subs tab of their own): your quick subs, planned before the match -- up to
+      three pairs, a man on the pitch to come off and one on the bench to come on, down the fourth column. Tap a bar
+      on the pitch and one on the bench (either first; the first lights) to pair them -- a tap, where a drag moves
+      him; a man paired again leaves his last pair for the new one, and ✕ takes a pair off. A paired man's bar is
+      marked, with the other's number. In the match they're first on your quick subs, ready to tap, tired or not --
+      and one of yours hurt comes off for his. The career keeps them; a pair goes when either man is no longer on
+      the pitch or the bench. The keepers aren't in it.
   - **The width shows on the pitch.** COMPACT draws each line's men closer together and WIDE spreads them, the lines
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
     the keeper and the three lines close up, a man's width each, rather than overlap -- in a match's tactics and the
     Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
-  - **The right-hand side has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then
-    ◀ PLAYER). One is his card: all of him, head to toe (a keeper in a keeper's top), his name, his own position,
-    style, age, skill stars and rating (lime in a second position of his, amber out of position: no line of text says
+  - **The right-hand side has two sides**: INSTRUCTIONS, up in the top row left of BEST 8 (lit while they're up;
+    a tap on it again, or on a man, and it's his card), turns it over (v116: it was a small button on his card,
+    INSTRUCTIONS ▶, then ◀ PLAYER). One is his card: all of him, head to toe (a keeper in a keeper's top), his name, his
+    own position, style, age, skill stars, the spots he plays (PLAYS, ALSO: as on a building's card) and rating (lime in a second position of his, amber out of position: no line of text says
     so, nor that he's on the bench), and in a match his stamina: the word and a bar, no figure; under it the six (tap
     one and what it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone
     360 px tall or less a category of four ratings puts them two to a line). The other is the TEAM's instructions for
-    the phase you're looking at (v112: see **Team instructions**) -- the same whichever man you tapped. The side you're
-    on stays as you tap from man to man. Neither goes over pages: each has the whole right-hand side, and everything on
-    it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
-    a narrow one (700 px wide or less) his name stays on one line. The button that turns it over sits under his
-    rating, its foot level with the foot of his stamina bar.
+    the phase you're looking at (v112: see **Team instructions**) -- the same whichever man you tapped. Neither goes
+    over pages: each has the whole right-hand side, and everything on it fits, down to 640×360. On a short phone his
+    figure and name are drawn a little smaller; on a narrow one (700 px wide or less) his name stays on one line. A
+    match's tactics have INSTRUCTIONS at the top row's end too, for your side.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
     shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
     BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
@@ -688,10 +700,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     far up as it would go, a clearance.) A goal kick is the same, kicked -- the
     ball's on the ground, so the stick turns him but he stays at it. He still has 5 s: for the last 2 s a red
     stopwatch flashes over his head, and when it's up it goes to the man you've got lit (with nobody lit, where the
-    side's BUILD-UP says). Before v114 you were left on an outfielder and PASS played it out by the BUILD-UP --
-    SHORT to the nearest free man, MIXED to you, LONG up to the forwards; the computer's keeper still plays it so:
-    LONG kicks it up to a man who can win it (with nobody, after a moment, up the emptier side anyway), SHORT and
-    MIXED find a man near him when one's free (SHORT, made to play it, takes a closer call before going long).
+    side's style says). Before v114 you were left on an outfielder and PASS played it out by the BUILD-UP -- short to
+    the nearest free man, mixed to you, long up to the forwards; the computer's keeper still plays it so, by his
+    side's style since v116 (the BUILD-UP instruction is gone: CONTROL POSSESSION plays it short, DIRECT and DIRECT
+    COUNTER long, the rest mixed): long kicks it up to a man who can win it (with nobody, after a moment, up the
+    emptier side anyway), short and mixed find a man near him when one's free (short, made to play it, takes a closer
+    call before going long).
   - **The keeper and the rules (v113).** His hands only in his own penalty area -- and never to a ball a team-mate
     has kicked to him on purpose (a pass, a cross, a clearance), unless someone else has touched it since (one of
     theirs, a deflection) or it came off a team-mate's head (a header isn't a kick). Anywhere else he plays it with
@@ -705,7 +719,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       yourself (he's one of the men your pass can pick out), and he comes for it -- your pass doesn't put you on
       him until it's at his feet.
     - **The computer's at his feet**: a touch to settle it, then a short ball to a man of his who's free -- or, one
-      of yours closing in (7 m), or its BUILD-UP LONG, kicked up the pitch; with nobody free, a moment, then long.
+      of yours closing in (7 m), or a side that goes long (DIRECT, DIRECT COUNTER), kicked up the pitch; with nobody
+      free, a moment, then long.
       He never sits on it: one of yours stood off him gets it played past him (and see **nobody sits on it for
       free** under the line of engagement).
     - **A goal kick** sits on the ground in front of him and is kicked, short or long -- never thrown, never in his
@@ -717,7 +732,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     counter-press was on for 151 frames, about one loss's worth, against 4313 now. Now it's the side that last had
     it at a man's feet that lost it; restarts and kick-offs are as they were.
   - **Team instructions (v112).** One set for the whole side, by its lines -- not a man's, nor a spot's -- on the other
-    side of the right-hand column (INSTRUCTIONS ▶), for the phase you're looking at. Each setting is a row; under them,
+    side of the right-hand column (INSTRUCTIONS, at the top row's end left of BEST 8: v116), for the phase you're
+    looking at. Each setting is a row; under them,
     a line saying what the one you touched last does. A career keeps your side's, an exhibition club its own (only
     where you've changed its style's), and picking a style sets that style's (see below); then change them as you like.
     - **Without the ball**, first a little pitch of their own, to scale, our goal on the left: the DEFENSIVE LINE (how
@@ -744,20 +760,20 @@ The same game played like any other football game. It's a copy of `index.html` w
       sits on it for free: a man who keeps the ball within 5 m of where he had it for 3 s gets the nearest of theirs
       out to him wherever their line is (about 1 to 8 s more, by how deep they sit) -- without it, a man stood still
       on the ball in his own half kept it all day.
-    - **With the ball**: BUILD-UP (SHORT, MIXED, LONG: the computer's keeper's ball, and yours when his time's up with nobody lit -- see **Your keeper with it in his hands** -- and the
-      computer's, and how the back line moves it on: SHORT plays it safe and short from the back, LONG looks long);
-      DEFENDERS (STAY BACK, SUPPORT, PUSH UP: the full-backs staying in the back line, joining the midfield in their third
+    - **With the ball**: DEFENDERS (STAY BACK, SUPPORT, PUSH UP: the full-backs staying in the back line, joining the midfield in their third
       as before, or up from the build-up and overlapping, the centre-backs closer to the play); MIDFIELD (STAY BEHIND:
       the central midfielders behind the ball, waiting at the edge of the box for a cross; BALANCED; GET FORWARD: one
       holds, the others run in behind and get in the box); FORWARDS (COME SHORT: the strikers drop between their lines
       for it to feet; BALANCED: one pins their line, the other comes short; IN BEHIND: on their last man, running in
       behind, and going again sooner); WIDE MEN (TO FEET, BALANCED, IN BEHIND: the wingers and wide midfielders coming
-      to the ball or running in behind).
+      to the ball or running in behind). How the side plays out from the back -- the keeper's ball, and how the back
+      line moves it on -- was BUILD-UP (SHORT, MIXED, LONG); since v116 it isn't an instruction but the style's:
+      CONTROL POSSESSION short, DIRECT and DIRECT COUNTER long, the rest mixed.
     - **What a style sets.** BALANCED, WING PLAY and FLUID COUNTER: the back line at 32 m and the line of engagement at
       54 m (where the old mid block stood), everything else BALANCED (and the defenders HOLD THE LINE, the forwards
       DEFEND THE LINE, the full-backs SUPPORT). GEGENPRESS: 46 m and 68 m, both lines TACKLE, the forwards PRESS UP.
-      DIRECT COUNTER: 20 m and 34 m, the midfield on the line of engagement, BUILD-UP LONG. CONTROL POSSESSION:
-      BUILD-UP SHORT. DIRECT: BUILD-UP LONG. The computer's clubs play their style's -- they used to have no
+      DIRECT COUNTER: 20 m and 34 m, the midfield on the line of engagement (and long from the back, as DIRECT;
+      CONTROL POSSESSION short: the style's own, no instruction since v116). The computer's clubs play their style's -- they used to have no
       instructions at all. (The block the old code still reads -- high press, mid block, low block -- follows them: a
       high one with the forwards pressing up and the line of engagement at 62 m or more, a low one with the back line
       at 24 m or less.)
@@ -1409,6 +1425,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     range six wide). You pick where he plays and his style (the card says what each style does), and he signs for
     half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
     Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
+  - **Finding a man (v116).** The market's Search tab lists a league's men (◀ ▶ for another league), filtered and
+    sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, DM,
+    CM, AM, WM, WNG, STK), TYPE (his archetype -- a position's own once one's picked, and picking one picks its
+    position), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
+    closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE youngest first), and IN BUDGET, only
+    the men you could pay for. (Before v116: the league and ALL, GK, DEF, MID or ATT, by rating.)
   - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
     half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another
     club (see **Bids** and **What a club asks**). Once a fee's agreed you agree his contract: 1 to 4 seasons at the
@@ -1428,9 +1450,17 @@ The same game played like any other football game. It's a copy of `index.html` w
       inside the week and he's yours; leave it, and he goes to them.
 
     Under 85% they turn it down at once and say roughly what it would take. A counter stands a week: meet it (MEET
-    IT) and he's yours; bid between and they think again; WALK AWAY to drop it. An agreed fee stands until the window
-    shuts. On his card: AGREED (sign him), YOUR BID (they answer on Monday), THEY WANT (and whether another club's
-    in). The window shutting ends them all.
+    IT) and he's yours; WALK AWAY to drop it; or haggle. An agreed fee stands until the window shuts. On his card:
+    AGREED (sign him), YOUR BID (they answer on Monday), THEY WANT (and whether another club's in). The window
+    shutting ends them all.
+    - **Haggling (v116).** Their figure isn't take it or leave it. COUNTER -- on his card, or on their paper on
+      Monday -- with a fee between your last bid and their figure (− / +, a fortieth of it at a time; it starts
+      halfway), and they answer there and then: at or over what they'd settle for and he's yours; short of it, they
+      come down part of the way to you (a third to a half of the gap). What they'd settle for is 86% to 96% of their
+      figure, the greedier the club the less it gives; with another club in for him, never under that club's bid.
+      They'll come down three times at most -- the third, or reaching what they'd settle for, is their last word, and
+      after it only MEET IT or WALK AWAY. A counter no higher than you bid before moves nothing. (Before v116 you met
+      their figure or walked away; a lower bid meant waiting for Monday again.)
   - **Your bids, and your budget (v108).** The top line of every transfers tab has your budget (and, once a fee's
     agreed, what's agreed and not yet paid) beside the window. The Bids tab has every bid you've placed: those out
     now -- waiting on Monday, agreed (sign him), or a price they've come back with (MEET IT and WALK AWAY right
@@ -1439,6 +1469,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     SHUT; and the season's count, how many signed and what they cost. (Until v108 your live bids sat at the top of
     the Offers tab and went from sight once they were over.)
   - **What a club asks (v83)**: each club prices its own men, no two quite alike.
+    - **His position (v116)**, as the real market has it: goals cost the most. An attacker (a striker or a winger)
+      asks 30% more than a midfielder of the same rating and age, a defender a fifth less, a keeper a third less --
+      a 25-year-old rated 66 in League 2 about $57,000 as a striker, $44,000 in midfield, $35,000 at centre-back,
+      $29,000 in goal. What he's worth to you (his VALUE) goes the same way.
     - **His rating and his age**: the younger the dearer. A man rated 60 asks about 2.4 times as much at 19 as at 29,
       four times as much as at 33.
     - **His potential, as far as the club's scouts can see it.** Each club has its own scouts, better as a rule the
@@ -1578,12 +1612,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     ink (in light, round a dark one). Its colours are the kit's until you pick your own. Every other club's is drawn
     from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
     yours by the club's name on the campus and on its clubhouse and academy. Your short name is yours alone: no other club is given it.
-  - **Money.** Tickets, concessions, the club's partners (local firms: $300 a week in League 2, more in each league
+  - **Money.** Tickets, the club's partners (local firms: $300 a week in League 2, more in each league
     up), TV, shirt sales, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
     winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the tickets, then the books (the budget, every week of the season, matchdays, the
-    season's transfers, the last few weeks).
+    season's transfers, the last few weeks). (Until v116 there were concessions too -- food and drink stalls, a
+    megastore and a jersey stand, bought on a Concessions tab for a little more from each head at home games; they're
+    gone, and a career that had built them got what they cost back.)
     - **Tickets (v108).** The going rate for a seat is $5 in League 2 (v110; $7 in v108), $10 in League 1, $14 in the
       Championship and $20 in the Premium League (it was $3, $5, $8 and $14), and a new career starts on it. With the
       field and bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main
@@ -1982,6 +2018,32 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v116: a career batch, and two fixes.**
+  - **Hurt men come off.** One of your eight hurt between games is out of the side there and then, the best fit off
+    the bench in his place (the news says who); hurt in a live match, he comes off at once for your planned quick sub
+    for him, else the bench's best at his spot (once he's played the ball, if he has it) -- with no subs left he plays
+    on, slowed. They used to stay on, slowed, until you subbed them.
+  - **Quick subs on the Selection tab** (the Subs tab is gone): its fourth column, tap a man on the pitch and one on
+    the bench. INSTRUCTIONS is up in the tactics' top row, left of BEST 8, not on a man's card.
+  - **No BUILD-UP instruction**: how a side plays out from the back comes with its style (CONTROL POSSESSION short,
+    DIRECT and DIRECT COUNTER long, the rest mixed).
+  - **The market**: prices by position (attackers 30% over midfielders, defenders a fifth under, keepers a third);
+    haggling over a club's figure (COUNTER: they come down part of the way, three times at most); the Search tab
+    filtered and sorted by position, type, rating, potential, price and age, and IN BUDGET.
+  - **The player card**: the spots a man plays (PLAYS, ALSO) on every card, and a fourth side, his personality; its
+    sides a tab each along its foot (RATINGS, DEAL, CAREER, PERSONALITY), in place of the small DEAL ▶ button under his
+    rating. A new DM archetype, the Deep creator. The Stadium's concessions are gone.
+  - **The computer's shield no longer spins the ball round him.** A computer man shielding it turned his body -- and
+    so the ball, which follows his facing -- straight to wherever he wanted every frame, so the ball swung round him
+    with no turn at all; a take-on's cut set the ball's angle outright too. Now his shield turns at the rate yours does
+    (by his Off IQ: 2.5 to 8 radians a second) and the cut turns the ball as any turn does. In two computer matches,
+    shielding: 85 frames turning faster than a man can, 17 of them outright jumps, before; 5 and none after. The cut:
+    none of either after.
+  - **A header is the header's goal.** A header or a first-time volley didn't count as a touch of the man who struck
+    it, so a goal headed in from a cross could go down as the crosser's (and the cross never as an assist). Every
+    deliberate strike now counts as the striker's touch: in a Star-level test nine headed goals of nine went to the
+    header, each with the crosser's assist (the build before: seven of seven credited, but no assists; on Normal two
+    of four).
 - **The keeper's long ball (v115).** His CLEAR isn't a defender's clearance any more: it's a long pass, pinged to the
   man you're aiming at -- the stick picks him as it would a pass, the further on the better, out to 60 m -- on a
   lofted pass's flight, and you go with it. On a touch screen the button reads LONG when you're on him with it.
@@ -2474,7 +2536,7 @@ test, and like the Trap Lab the values are the game's settings.
   side a back three); an opponent picks its starters to fit it, and the office shows your next
   opponent's shape. Create-a-pro with stat trees, a 4-tier league world with simulated
   fixtures and tables, promotion/relegation, finance (gate receipts, sponsors, broadcast,
-  concessions, wages), stadium upgrades, loyalty, and week-by-week progression.
+  wages), stadium upgrades, loyalty, and week-by-week progression.
 - **Timing-only trapping** — a trap is a bounce off a round body. Square on, the ball pops
   slightly up and back the way it came; stand off its line and it glances away from the side
   you're on. Timing sets how much pace the bounce keeps (never more than it arrived with). A
@@ -2520,6 +2582,7 @@ with his build. Ratings come out about the same across styles; what changes is t
 | Full-back | Full-back | 6.5 | stamina, crossing |
 | | Wing-back | 7.5 | crossing, dribbling, engine (defends less) |
 | Midfield | Anchor (DM) | 4.5 | tackling, interceptions, strength |
+| | Deep creator (DM, v116) | 5 | long passing, composure, reading the game |
 | | Playmaker (CM) | 4.5 | passing, vision, bend |
 | | Box-to-box (CM) | 5.5 | stamina, tackling, shooting |
 | | Creator (AM) | 5.5 | dribbling, the killer ball, shooting |
@@ -2532,11 +2595,14 @@ with his build. Ratings come out about the same across styles; what changes is t
 | | Winger | 8 | dribbling, crossing |
 | | Speedster | 8.5 | pace, runs in behind |
 
-The style also shapes how a player is used: an Anchor is the one who holds in midfield, speedsters,
+A DM in a career is an Anchor two times in three and a Deep creator the third (v116; an exhibition's squads have
+none yet: theirs are as they were). The style also shapes how a player is used: an Anchor or a Deep creator is the
+one who holds in midfield, speedsters,
 wingers and wide runners make runs in behind sooner and from further out, and a target man stays on the line.
 On the ball it tilts his choices: wingers, wide runners and inside forwards fancy taking their man on (an inside
-forward a shot too), a speedster running with it, a playmaker or creator the ball through, a poacher a
-shot; a target man holds it up, and a stopper or an anchor keeps it simple. The side's way of playing
+forward a shot too), a speedster running with it, a playmaker or creator the ball through, a deep creator the
+long ball forward from deep (never a dribble), a poacher a shot; a target man holds it up, and a stopper or an
+anchor keeps it simple. The side's way of playing
 tilts them too: tiki-taka keeps the ball and passes quickly, direct looks forward first and further, a
 wing side crosses more, and a counter goes quickly while the break is on.
 In a career, each sub-role (CB, FB, DM, CM, WM, AM, STK, WNG) has its styles; players signed before

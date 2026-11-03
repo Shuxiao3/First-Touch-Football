@@ -80,7 +80,8 @@ ok(r.two === 'WORK model pro | BODY injury-prone' && r.four === 'WORK model pro 
    && r.low === 'VOICE quiet | LOYALTY mercenary | LEARNS slowly', 'his character in a few words, what stands out most first: two at a second report, four at a third; nothing stands out in an ordinary man');
 
 // --- one more game for the club; the club's records ----------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, R=d.rec; d.news=[]; const t=mgNewPlayer(d,'MID',50,17,{pot:60,sub:'CM'}); t.name='Tom Early'; t.id=999950; clubApp(d,t,1);
+// (the youngest records cleared first: a new career's squad can have had a 17-year-old play already)
+r = await K(`(()=>{ const d=CAREER.data, R=d.rec; d.news=[]; delete R.yd; delete R.ys; const t=mgNewPlayer(d,'MID',50,17,{pot:60,sub:'CM'}); t.name='Tom Early'; t.id=999950; clubApp(d,t,1);
   const quiet={news:d.news.length,yd:R.yd.name,ys:R.ys.name};   // (your first season: kept, not in the news)
   d.manager.history.push({season:0,club:d.clubName,tier:1,pos:8,result:'STAYED UP'});   // (a season behind you: the news tells of them now)
   const a=mgNewPlayer(d,'MID',55,16,{pot:72,sub:'CM'}); a.name='Kit Young'; a.until=d.season+3; mgRosterAdd(d,a); const yd0=R.yd&&R.yd.age; d.news=[];
@@ -137,18 +138,40 @@ for(const [w, h] of [[640, 360], [844, 340]]){
   await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(200);
   await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
   await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), kid); await page.waitForTimeout(150);
-  for(let i = 0; i < 3 && await page.$eval('.mgPaneR .mgCard', c => c.dataset.side) !== 'rate'; i++){ await page.click('.mgPaneR .cardFlip'); await page.waitForTimeout(80); }   // (the side it was left on: back to his ratings)
-  const flips = [];
-  for(let i = 0; i < 4; i++){ const s = await page.$eval('.mgPaneR .mgCard', c => c.dataset.side); flips.push(s + ':' + (await page.textContent('.mgPaneR .cardFlip')).trim()); if(s === 'career') break; await page.click('.mgPaneR .cardFlip'); await page.waitForTimeout(100); }
+  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(80);   // (the side it was left on: back to his ratings)
+  // HIS CARD'S SIDES (v116): a tab each along its foot -- in the Squad tab ◀ TEAM first -- the one showing lit
+  const tabsOf = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), S = P.querySelector('.mgSides'), b = S ? [...S.querySelectorAll('button')] : [];
+    return { tabs: b.map(n => n.textContent.trim() + (n.classList.contains('on') ? '*' : '')), foot: !!S && Math.abs(S.getBoundingClientRect().bottom - (P.getBoundingClientRect().bottom - parseFloat(getComputedStyle(P).paddingBottom))) <= 1,
+      h: b.length ? Math.round(Math.min(...b.map(n => n.getBoundingClientRect().height))) : 0 }; });
+  const T0 = await tabsOf(), flips = [];
+  for(const k of ['rate', 'deal', 'career', 'mind']){ await page.click(`.mgPaneR .mgSides [data-mside="${k}"]`); await page.waitForTimeout(100); flips.push(await page.$eval('.mgPaneR .mgCard', c => c.dataset.side)); }
+  info(w + 'x' + h + ' his card\'s tabs: ' + JSON.stringify({ T0, flips }));
+  ok(T0.tabs.join('|') === '◀ TEAM|RATINGS*|DEAL|CAREER|PERSONALITY' && T0.foot && T0.h >= 28 && flips.join() === 'rate,deal,career,mind',
+    w + 'x' + h + ': his card\'s sides a tab each along its foot (' + T0.tabs.join(' ') + ', ' + T0.h + ' px tall), each a tap away');
+  await page.click('.mgPaneR .mgSides [data-mside="career"]'); await page.waitForTimeout(100);
+  // ...and one more: HIS PERSONALITY (v116) -- his mood, his character in words two to a line, his traits as they've come out
+  const mindOf = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
+    return { side: c.dataset.side, lit: (c.querySelector('.mgSideT.on') || {}).textContent, facts: [...c.querySelectorAll('.mgFact')].map(e => e.querySelector('span').textContent + ':' + e.querySelector('b').textContent),
+      tr: [...c.querySelectorAll('.mindT')].map(e => e.textContent), ev: [...c.querySelectorAll('.cvEv')].map(e => e.textContent), tags: c.querySelectorAll('.mgTraits').length,
+      pos: (c.querySelector('.posRow') || {}).textContent || '', fits: P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1,
+      cut: [...c.querySelectorAll('.mgFact b, .mindT span, .cvEv')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) }; });
+  await page.click('.mgPaneR .mgSides [data-mside="mind"]'); await page.waitForTimeout(100); const mind = await mindOf();
+  info(w + 'x' + h + ' his personality: ' + JSON.stringify(mind));
+  ok(mind.side === 'mind' && mind.lit === 'PERSONALITY' && mind.facts.length === 10 && /^MOOD:/.test(mind.facts[0]) && ['TEMPER', 'WORK', 'LEARNS', 'DRIVE', 'LOYALTY', 'VOICE', 'GRIT', 'BODY', 'SETTLES'].every(k => mind.facts.some(f => f.startsWith(k + ':')))
+     && !mind.facts.some(f => /\d/.test(f.split(':')[1])) && (mind.tr.length > 0 || mind.ev.length === 1) && !mind.tags && /^PLAYS/.test(mind.pos) && mind.fits && !mind.cut.length,
+    w + 'x' + h + ': PERSONALITY: his mood and his character in words, never numbers (' + mind.facts.slice(0, 4).join(', ') + '...), his traits (' + (mind.tr.join(' / ') || mind.ev[0]) + '), all on the card');
+  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(100); const back = await page.$eval('.mgPaneR .mgCard', c => c.dataset.side);
+  ok(back === 'rate', '...and RATINGS turns it back to his ratings');
+  await page.click('.mgPaneR .mgSides [data-mside="career"]'); await page.waitForTimeout(80);   // (back to his career, for the checks below)
   const cv = await page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
     return { fits: P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, rows: [...c.querySelectorAll('.cvTab tr')].map(t => t.textContent.trim()), now: !!c.querySelector('.cvTab tr.now'),
       ev: [...c.querySelectorAll('.cvEv')].map(e => e.textContent), fact: [...c.querySelectorAll('.mgFact')].map(e => e.textContent),
       long: [...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32).map(e => e.textContent.trim()),
       cut: [...c.querySelectorAll('.mgFact b, .cvEv')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent), pot: (c.querySelector('.cardEnd .mgCardSub') || {}).textContent }; });
   info(w + 'x' + h + ' his career: ' + JSON.stringify(Object.assign({ flips }, cv)));
-  ok(flips.join(' > ') === 'rate:DEAL ▶ > deal:CAREER ▶ > career:RATINGS ▶' && cv.rows.length === 5 && cv.now && cv.rows[1].replace(/\s/g, '') === 'S6L2STO7216.9' && cv.rows[2].replace(/\s/g, '') === 'S5PLSTO251556.9'
+  ok(cv.rows.length === 5 && cv.now && cv.rows[1].replace(/\s/g, '') === 'S6L2STO7216.9' && cv.rows[2].replace(/\s/g, '') === 'S5PLSTO251556.9'
      && cv.ev.join('|') === 'S5L2 best young player|S4Won the Champions League' && /^FOR STO/.test(cv.fact[0]) && /^potential \d+–\d+$/.test(cv.pot),
-    w + 'x' + h + ': his card turns RATINGS > DEAL > CAREER; his career: this season and his last three (' + cv.rows.slice(1, 3).join(' / ') + '), his last two moments, his games and goals for you; his potential a range (' + cv.pot + ')');
+    w + 'x' + h + ': his career: this season and his last three (' + cv.rows.slice(1, 3).join(' / ') + '), his last two moments, his games and goals for you; his potential a range (' + cv.pot + ')');
   ok(cv.fits && !cv.long.length && !cv.cut.length, w + 'x' + h + ': his career fits the card, nothing long or cut on it' + (cv.fits && !cv.long.length && !cv.cut.length ? '' : ' ' + JSON.stringify(cv)));
   const pots = await page.$$eval('.mgPaneL .mgRow .pot', ns => ns.map(n => n.textContent));
   ok(pots.length >= 12 && pots.every(t => /^\d+–\d+$/.test(t)), w + 'x' + h + ': the squad list\'s potentials, ranges all (' + pots.slice(0, 3).join(', ') + '...)');
@@ -160,7 +183,7 @@ r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).find(k=>k.tier===d.tier)
 const pid = r;
 await page.click('#chCampus [data-bldg="scouting"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Reports")'); await page.waitForTimeout(150);
 const look = async () => { await page.evaluate(id => { const n = document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`); n.click(); }, pid); await page.waitForTimeout(150);
-  for(let i = 0; i < 3 && await page.$eval('.mgPaneR .mgCard', c => c.dataset.side) !== 'rate'; i++){ await page.click('.mgPaneR .cardFlip'); await page.waitForTimeout(80); }
+  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(80);
   return page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
     return { fits: P.scrollHeight <= P.clientHeight + 1, facts: [...c.querySelectorAll('.mgFact')].map(e => e.textContent), more: (c.querySelector('[data-mg="scout"]') || {}).textContent || '', pot: c.querySelector('.cardEnd .mgCardSub').textContent,
       cut: [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) }; }); };

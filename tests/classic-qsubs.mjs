@@ -1,11 +1,11 @@
 // FOOTBALL CLASSIC, QUICK SUBS: at the top of the screen, left of your man's card, SUBS and how many you've left (three
 // a match). Pressed -- and only pressed: it never drops down by itself, and stays down until you press it again -- it
-// drops down a short list, a sub a line, small: in a career match your planned subs first (the training pitch's Subs
-// tab), then your most tired men, each with the man on the bench who'd do his job best on fresh legs. When one of yours
+// drops down a short list, a sub a line, small: in a career match your planned subs first (the training pitch's
+// Selection tab), then your most tired men, each with the man on the bench who'd do his job best on fresh legs. When one of yours
 // gets too tired the chip lights up. A tap makes the sub there and then (the man on fresh legs, one fewer, the man off
 // gone for good); one coming off with the ball at his feet goes once he's played it. With no subs left it's gone, and
-// it's never there in a lab. A tap on it is a tap on it, not on the game. ALL SUBS opens the match's tactics. The Subs
-// tab: tap a man on the pitch and one on the bench to pair them, up to three; in the match they're first on the list.
+// it's never there in a lab. A tap on it is a tap on it, not on the game. ALL SUBS opens the match's tactics. The
+// Selection tab: tap a man on the pitch and one on the bench to pair them, up to three; in the match they're first.
 // On a copy of the game that lets the test reach the match's men and its subs, and the career.
 import { open, STAR } from './_harness.mjs';
 import { devices } from 'playwright';
@@ -113,30 +113,32 @@ await KP('LAB.on=false');
 ok(lab === 'none', 'in a lab it isn\'t there');
 await b3.close();
 
-// A CAREER: the training pitch's Subs tab -- tap a man on the pitch and one on the bench to pair them; pair him again and
-// the new pair takes the old one's place; ✕ takes one off; up to three. Then the match: your pairs first on the list,
-// nobody tired, and a tap on one is that sub
+// A CAREER: the training pitch's Selection tab, its QUICK SUBS column -- tap a man on the pitch and one on the bench to
+// pair them; pair him again and the new pair takes the old one's place; ✕ takes one off; up to three. Then the match:
+// your pairs first on the list, nobody tired, and a tap on one is that sub
 const { browser: b4, page: pc, rep: r4 } = await open({ url: 'file://' + copy, papers: 'aside' });   // (a career: its Monday papers put aside)
 pc.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
 await pc.click('#smItems [data-act="new"]'); await pc.waitForTimeout(150); await pc.click('#newSlotList .slotBtn >> nth=0');
 await pc.waitForSelector('#mgrMaker.on', { timeout: 4000 }); await pc.fill('#mgName', 'Sam Okafor'); await pc.fill('#mgClubIn', 'Fenmoor Athletic');
 await pc.click('#mgGo'); await pc.waitForSelector('#careerHub.show', { timeout: 8000 }); await pc.waitForTimeout(300);
 if(await pc.isVisible('#storyModal.on')){ await pc.click('#storyModal [data-st="answer"]'); await pc.waitForTimeout(40); await pc.click('#storyModal [data-st="phone"]'); await pc.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
-await pc.click('#chCampus [data-bldg="train"]'); await pc.waitForSelector('#bldgPanel.show'); await pc.click('#bldgPanel .bpTab:text-is("Subs")'); await pc.waitForTimeout(120);
+await pc.click('#chCampus [data-bldg="train"]'); await pc.waitForSelector('#bldgPanel.show'); const noSubs = !(await pc.$('#bldgPanel .bpTab:text-is("Subs")')); await pc.click('#bldgPanel .bpTab:text-is("Selection")'); await pc.waitForTimeout(120);
 const tab = () => pc.evaluate(() => ({ plan: JSON.stringify(__MG.d.qsubs || []), pairs: [...document.querySelectorAll('#bpBody .qpPair:not(.empty) .slNm')].map(e => e.textContent),
-  head: [...document.querySelectorAll('#bpBody .selHd')].map(e => e.textContent), xi: document.querySelectorAll('#bpBody .qpRow[data-side="xi"]').length,
-  bench: document.querySelectorAll('#bpBody .qpRow[data-side="bench"]').length, gkOff: [...document.querySelectorAll('#bpBody .qpRow[data-side="bench"]')].filter(b => b.disabled).length }));
-const id = (side, k) => pc.$eval(`#bpBody .qpRow[data-side="${side}"] >> nth=${k}`, e => +e.dataset.qid).catch(() => pc.$$eval(`#bpBody .qpRow[data-side="${side}"]`, (ns, k) => +ns[k].dataset.qid, k));
-const tapRow = async (side, k) => { await pc.click(`#bpBody .qpRow[data-side="${side}"] >> nth=${k}`); await pc.waitForTimeout(80); };
+  head: [...document.querySelectorAll('#bpBody .selHd')].map(e => e.textContent), xi: document.querySelectorAll('#bpBody .selRow[data-side="xi"]').length,
+  bench: document.querySelectorAll('#bpBody .selRow[data-side="bench"]').length, benchAll: document.querySelectorAll('#bpBody .selCol[data-grp="bench"] .selRow').length,
+  gkOff: [...document.querySelectorAll('#bpBody .selCol[data-grp="bench"] .selRow:not([data-side])')].filter(r => r.querySelector('.slPos').textContent === 'GK').length,
+  lit: document.querySelectorAll('#bpBody .selRow.qpOn').length, paired: document.querySelectorAll('#bpBody .selRow.paired').length }));
+const id = (side, k) => pc.$$eval(`#bpBody .selRow[data-side="${side}"]`, (ns, k) => +ns[k].dataset.qid, k);
+const tapRow = async (side, k) => { await pc.click(`#bpBody .selRow[data-side="${side}"] >> nth=${k}`); await pc.waitForTimeout(80); };
 let T0 = await tab();
-ok(T0.xi === 7 && T0.bench === 5 && T0.gkOff === 1 && T0.head.join('|') === 'ON THE PITCH|THE BENCH|QUICK SUBS · 0 OF 3' && T0.pairs.length === 0,
-  'the Subs tab: the seven on the pitch, the bench\'s five (its keeper not to be had), and QUICK SUBS · 0 OF 3');
+ok(noSubs && T0.xi === 7 && T0.benchAll === 5 && T0.bench === 4 && T0.gkOff === 1 && T0.head.join('|') === 'ON THE PITCH|THE BENCH|NOT TAKEN|QUICK SUBS · 0 OF 3' && T0.pairs.length === 0,
+  'no Subs tab: the Selection tab\'s seven on the pitch and the bench\'s five (its keeper not to be had) to tap, and QUICK SUBS · 0 OF 3 down its fourth column');
 const x1 = await id('xi', 1), b1 = await id('bench', 1), b2 = await id('bench', 2), x4 = await id('xi', 4), b3i = await id('bench', 3);
-await tapRow('xi', 1); await tapRow('bench', 1); let T1 = await tab();
+await tapRow('xi', 1); const Tl = await tab(); await tapRow('bench', 1); let T1 = await tab();
 await tapRow('xi', 1); await tapRow('bench', 2); let T2 = await tab();
 await tapRow('bench', 3); await tapRow('xi', 4); let T3 = await tab();
-info('Subs tab: ' + JSON.stringify({ T1: T1.pairs, T2: T2.pairs, T3: T3.pairs, plan: T3.plan }));
-ok(T1.plan === JSON.stringify([{ off: x1, on: b1 }]) && T1.head[2] === 'QUICK SUBS · 1 OF 3', 'a man on the pitch, then one on the bench: paired (' + T1.pairs[0] + ')');
+info('Selection tab, quick subs: ' + JSON.stringify({ T1: T1.pairs, T2: T2.pairs, T3: T3.pairs, plan: T3.plan }));
+ok(Tl.lit === 1 && T1.lit === 0 && T1.paired === 2 && T1.plan === JSON.stringify([{ off: x1, on: b1 }]) && T1.head[3] === 'QUICK SUBS · 1 OF 3', 'a man on the pitch (lit), then one on the bench: paired, the two bars marked (' + T1.pairs[0] + ')');
 ok(T2.plan === JSON.stringify([{ off: x1, on: b2 }]), '...paired again with another, the new pair takes the old one\'s place');
 ok(T3.plan === JSON.stringify([{ off: x1, on: b2 }, { off: x4, on: b3i }]), '...and the bench first, then the pitch, pairs them just the same (' + T3.pairs.join(' | ') + ')');
 await pc.click('#bpBody .qpX >> nth=0'); await pc.waitForTimeout(80); const T4 = await tab();

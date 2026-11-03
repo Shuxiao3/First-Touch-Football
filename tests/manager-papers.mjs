@@ -87,7 +87,15 @@ r = await K(`(()=>{ const d=CAREER.data; return { offers:d.offers.length, still:
 ok(r.offers === 0 && r.still, 'REJECT turns it down: he stays');
 // your bid: they want more -- meet it, then sign him
 await toPaper(/want \$[\d,]+ for/);
-const bidTxt = await top(); await press('meet');
+const bidTxt = await top();
+// HAGGLING (v116): COUNTER on the paper -- a fee between yours and theirs; short of what they'd settle for, they come down
+const hag0 = await K(`(()=>{ const B=mgBidOf(CAREER.data,window.__tp); B.lo=mgRound(B.fee+(B.ask-B.fee)*0.9); return { ask:B.ask, fee:B.fee }; })()`);   // (what they'd settle for, set high for the test)
+await page.click('#pileModal [data-pile="cfee"][data-dir="1"]'); await page.waitForTimeout(60); await press('counter');
+const hag1 = await K(`(()=>{ const B=mgBidOf(CAREER.data,window.__tp); return { ask:B.ask, fee:B.fee, st:B.st }; })()`), bidTxt2 = await top();
+info('haggled on the paper: ' + JSON.stringify({ hag0, hag1, title: bidTxt2.split('\n')[0] }));
+ok(/COUNTER/.test(bidTxt) && hag1.st === 'more' && hag1.fee > hag0.fee && hag1.ask < hag0.ask && hag1.ask > hag1.fee && bidTxt2.includes('$' + hag1.ask.toLocaleString()),
+  'their figure on the paper, with COUNTER: a fee between, and they come down (' + hag0.ask + ' to ' + hag1.ask + ' for your ' + hag1.fee + ')');
+await press('meet');
 const yes = await top();   // (then two seasons to three)
 await page.click('#pileModal [data-pile="yrs"][data-dir="1"]'); await page.waitForTimeout(60);
 await press('sign');

@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, setControlled, aiCross, passSpray, crossSpray, readRun, cpu, PREFS, DIFFS, '
-  + 'FW, FH, YC, MK, atkOf, simNow:()=>simNow, score:()=>[scoreG,scoreR], drop:()=>{ gkHold=null; }, stopped:()=>restartT>0||scoredT>0, '
+  + 'FW, FH, YC, MK, atkOf, simNow:()=>simNow, score:()=>[scoreG,scoreR], goals:()=>goalLog, drop:()=>{ gkHold=null; }, stopped:()=>restartT>0||scoredT>0, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; matchClock=0; switchLock=null; }};\n  const LAB_TITLE=');
 patch('  function headClear(p){\n', '  function headClear(p){\n    if(p===controlled) window.__hcMine=(window.__hcMine||0)+1;\n');   // (your man's own headers clear)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-diff-')), 'classic.html');
@@ -75,7 +75,7 @@ const crosses = (diff, N) => page.evaluate(({ diff, N }) => new Promise(res => {
   const kp = T.keepers().find(k => k.team === 'G'), out = -kp.side, gx = kp.side < 0 ? 0 : T.FW, MK = T.MK;
   const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
   const cr = R.find(q => q.role === 'MID') || R[0], att = R.find(q => q.role === 'ATT') || R[1], mk = G.find(q => q.role === 'DEF') || G[0];
-  T.setControlled(mk); const tally = { cleared: 0, goal: 0, n: 0 }; let i = 0;
+  T.setControlled(mk); const tally = { cleared: 0, goal: 0, n: 0, theirs: 0, assist: 0 }; let i = 0; const nm = q => q.pname || q.name;
   const one = () => { if(i >= N) return res(tally); const sd = i++ % 2 ? 1 : -1;
     T.freeze(); T.drop();
     for(const q of T.players()) if(q !== cr && q !== att && q !== mk){ q.x = T.FW / 2 + out * 300 + (q.team === 'R' ? 0 : 60); q.y = 60; q.vx = q.vy = 0; q.state = 'normal'; }
@@ -88,11 +88,13 @@ const crosses = (diff, N) => page.evaluate(({ diff, N }) => new Promise(res => {
     const s0 = T.score()[1], h0 = window.__hcMine || 0; T.aiCross(cr, { x: spot.x, y: spot.y, who: att }); const t0 = T.simNow(); let cl = false;
     (function tick(){ if((window.__hcMine || 0) > h0) cl = true;
       const done = T.score()[1] > s0 ? 'goal' : (T.stopped() || T.simNow() - t0 > 3) ? 'other' : null;
-      if(done){ tally.n++; if(done === 'goal') tally.goal++; if(cl) tally.cleared++; return one(); }
+      if(done){ tally.n++; if(done === 'goal'){ tally.goal++; const g = T.goals()[T.goals().length - 1];   // (a headed goal: the header's, the cross his assist -- v116)
+          if(g && g.scorerName === nm(att)) tally.theirs++; if(g && g.assistName === nm(cr)) tally.assist++; } if(cl) tally.cleared++; return one(); }
       requestAnimationFrame(tick); })(); };
   one(); }), { diff, N });
 const nrm = await crosses('normal', 16), star = await crosses('star', 16);
 info('their crosses, our marker (yours) left alone -- NORMAL: ' + JSON.stringify(nrm) + '; STAR: ' + JSON.stringify(star));
+ok(star.goal >= 3 && star.theirs === star.goal && star.assist === star.goal, 'a goal headed in from their cross is the header\'s, the cross his assist (' + star.theirs + ' and ' + star.assist + ' of ' + star.goal + ' headed in) -- it was the crosser\'s');
 ok(nrm.cleared >= 4 && star.cleared === 0 && nrm.goal < star.goal, 'on NORMAL your man heads their cross clear himself if you don\'t (' + nrm.cleared + ' of 16, ' + nrm.goal + ' in); at STAR he doesn\'t (' + star.cleared + ', ' + star.goal + ' in)');
 
 process.exitCode = rep.finish();

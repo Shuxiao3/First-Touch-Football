@@ -39,7 +39,7 @@ await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector
 // came down; and how many frames the stopwatch showed in his first 3 s and after.
 const yours = (act, dir) => page.evaluate(({ act, dir }) => new Promise(res => {
   const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
-  T.freeze(); T.TI().G.build = 'short';
+  T.freeze();
   const gx = atk > 0 ? 0 : T.FW, spots = G.map((q, i) => ({ q, x: gx + atk * (300 + i * 150), y: T.YC + (i % 2 ? 1 : -1) * (120 + 40 * i) }));
   const place = () => { for(const s of spots){ s.q.x = s.x; s.q.y = s.y; s.q.vx = s.q.vy = 0; }
     for(const [i, o] of R.entries()){ o.x = atk > 0 ? T.FW - 40 : 40; o.y = T.FH - 60 - i * 40; o.vx = o.vy = 0; } };

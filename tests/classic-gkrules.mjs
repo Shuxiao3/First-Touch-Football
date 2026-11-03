@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, now:()=>simNow, atkOf, FW, YC, MK, PA_D, controlled:()=>controlled, gkHold:()=>gkHold, passTo, own, setControlled, setTI:(t,o)=>setTI(t,Object.assign(tiDefault(TAC[t].style),o)),\n'
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, now:()=>simNow, atkOf, FW, YC, MK, PA_D, controlled:()=>controlled, gkHold:()=>gkHold, passTo, own, setControlled, setStyle, TAC, setTI:(t,o)=>setTI(t,Object.assign(tiDefault(TAC[t].style),o)),\n'
   + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; matchClock=0; half=1; matchOver=false; breakT=0; advOn=false; kickT=0; }, grade:()=>lastGrade,\n'
   + '    goalKick:t=>{ restartInfo={type:"goalkick",team:t,x:0,y:YC}; executeRestart(); }};\n  const LAB_TITLE=');
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');
@@ -156,9 +156,11 @@ info('the computer\'s keeper with a team-mate\'s ball at his feet -- free: ' + J
 ok(free.feet && !free.hands && !free.long && free.to === 'R', 'the computer\'s keeper, nobody near him: a short ball to one of his own (' + free.t + ' s)');
 ok(pr.feet && !pr.hands && pr.long && pr.t < 1.5, 'one of yours closing him down: he kicks it long (' + pr.t + ' s)');
 // --- A GOAL KICK: on the ground in front of him, not in his gloves; kicked -- short along the grass, never thrown ------
+// (short or long by the side's style: CONTROL POSSESSION plays it out short, DIRECT goes long -- v116, buildOf)
+const styleR0 = await page.evaluate(() => window.__T.TAC.R.style);
 const gk = build => page.evaluate(build => new Promise(res => { const T = window.__T, M = T.MK, b = T.ball(), kp = T.keepers().find(k => k.team === 'R'), atk = T.atkOf('R'), gl = atk > 0 ? 0 : T.FW;
   const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
-  T.freeze(); T.setTI('R', { build }); for(const k of T.keepers()) Object.assign(k, { mode: 'line', holdT: 0, heldT: 0, gkRoaming: false, charging: false });
+  T.freeze(); T.setStyle('R', build === 'short' ? 'control' : 'direct'); for(const k of T.keepers()) Object.assign(k, { mode: 'line', holdT: 0, heldT: 0, gkRoaming: false, charging: false });
   G.forEach((q, i) => Object.assign(q, { x: T.FW / 2 + atk * 15 * M, y: 100 + i * 150, vx: 0, vy: 0 }));
   R.forEach((q, i) => Object.assign(q, { x: gl + atk * (14 + i * 5) * M, y: 150 + i * 200, vx: 0, vy: 0 }));
   window.__K = { kick: 0, short: 0, from: null }; T.goalKick('R'); const t0 = T.now(); let frames = 0, onGround = true, gone = false;
@@ -167,10 +169,10 @@ const gk = build => page.evaluate(build => new Promise(res => { const T = window
     else gone = true;
     if(gone || t > 8) return res({ onGround: onGround && frames > 5, from: window.__K.from, kick: window.__K.kick, short: window.__K.short, t: +t.toFixed(2) });
     requestAnimationFrame(tick); })(); }), build);
-const gkS = await gk('short'), gkL = await gk('long');
-info('a goal kick, told SHORT: ' + JSON.stringify(gkS) + '; told LONG: ' + JSON.stringify(gkL));
+const gkS = await gk('short'), gkL = await gk('long'); await page.evaluate(s => window.__T.setStyle('R', s), styleR0);
+info('a goal kick, CONTROL POSSESSION: ' + JSON.stringify(gkS) + '; DIRECT: ' + JSON.stringify(gkL));
 ok(gkS.onGround && gkS.short === 1 && gkS.from === 0 && gkL.onGround && gkL.kick === 1 && gkL.from === 0,
-  'a goal kick sits on the ground in front of him, not in his gloves, and is struck off the ground -- SHORT to a man near him, LONG up the pitch -- never thrown');
+  'a goal kick sits on the ground in front of him, not in his gloves, and is struck off the ground -- CONTROL POSSESSION short to a man near him, DIRECT long up the pitch -- never thrown');
 // YOUR GOAL KICK: you're on him; the stick turns him (he stays at the ball); PASS, a pass kicked along the grass to the
 // man that way, off the ground -- and you go with it
 const yg1 = await page.evaluate(() => new Promise(res => { const T = window.__T, M = T.MK, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), gl = atk > 0 ? 0 : T.FW;

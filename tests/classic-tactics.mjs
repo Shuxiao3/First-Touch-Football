@@ -115,10 +115,11 @@ await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
 ok(d.roster[d.lineup.gk].role === 'GK', 'PICK MY BEST EIGHT puts a keeper back in goal');
 
-// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): his card turned over (INSTRUCTIONS ▶) is the team's for the
-// phase -- with the ball BUILD-UP, DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN; without it the lines' own pitch (the
-// defensive line and the line of engagement, to drag: in range, never closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF
-// TACKLES, MID TACKLES and FORWARDS -- the same whichever man you tapped, kept with the career, a style's own when it's picked
+// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): INSTRUCTIONS, up in the top row left of BEST 8 (v116), puts
+// the team's for the phase where his card was, and lights up -- with the ball DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN
+// (no BUILD-UP since v116: it comes with the style); without it the lines' own pitch (the defensive line and the line of
+// engagement, to drag: in range, never closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF TACKLES, MID TACKLES and
+// FORWARDS. A man tapped: his card again. Kept with the career, a style's own when it's picked
 const tap = async ri => { await page.click(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(60); };
 const panel = () => page.evaluate(() => { const P = document.querySelector('#cTacRight .tiPanel'); return P ? { head: P.querySelector('.tiHead').textContent,
   rows: [...P.querySelectorAll('.tiRow .tiLbl')].map(n => n.textContent), on: [...P.querySelectorAll('.tiOpt.on')].map(n => n.dataset.cti + '=' + n.dataset.v),
@@ -126,14 +127,18 @@ const panel = () => page.evaluate(() => { const P = document.querySelector('#cTa
 const cti = async (k, v) => { await page.click(`#cTacRight [data-cti="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
-await tap(lu.atk[5]); await page.click('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(60);
-let pn = await panel();
-ok(pn && String(pn.rows) === 'BUILD-UP,DEFENDERS,MIDFIELD,FORWARDS,WIDE MEN' && /WITH THE BALL/.test(pn.head) && !pn.pitch, 'his card turned over: the team\'s instructions with the ball -- ' + (pn && pn.rows.join(', ')));
-await cti('build', 'long'); await cti('aruns', 'run'); await cti('wide', 'feet');
+const insB = () => page.evaluate(() => { const top = document.querySelector('#bpBody .tbTop'), b = top && top.querySelector('.tbIns'), bs = top && top.querySelector('.tbBest');
+  return { lit: !!(b && b.classList.contains('go')), left: !!(b && bs && b.nextElementSibling === bs && b.getBoundingClientRect().right <= bs.getBoundingClientRect().left),
+    flips: document.querySelectorAll('#cTacRight [data-cside]').length, card: !!document.querySelector('#cTacRight .mgCardHead') }; });
+await tap(lu.atk[5]); const ib0 = await insB(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60);
+let pn = await panel(); const ib1 = await insB();
+ok(!ib0.lit && ib0.left && !ib0.flips && ib0.card && ib1.lit && pn && String(pn.rows) === 'DEFENDERS,MIDFIELD,FORWARDS,WIDE MEN' && /WITH THE BALL/.test(pn.head) && !pn.pitch,
+  'INSTRUCTIONS, in the top row just left of BEST 8 (nothing on his card turns it over): lit, the team\'s instructions with the ball where his card was, no BUILD-UP -- ' + (pn && pn.rows.join(', ')));
+await cti('aruns', 'run'); await cti('wide', 'feet');
 pn = await panel();
 ok(/^WIDE MEN: /.test(pn.note), 'the note under them is the last one touched: ' + pn.note);
-await tap(lu.atk[4]); pn = await panel();
-ok(pn && pn.on.includes('build=long') && pn.on.includes('aruns=run') && pn.on.includes('wide=feet'), 'another man tapped: the same set, the team\'s -- ' + (pn && pn.on.join(' ')));
+await tap(lu.atk[4]); const ib2 = await insB(), pn2 = await panel(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); pn = await panel();
+ok(!ib2.lit && ib2.card && !pn2 && pn && pn.on.includes('aruns=run') && pn.on.includes('wide=feet'), 'a man tapped: his card, INSTRUCTIONS unlit; INSTRUCTIONS again: the same set, the team\'s -- ' + (pn && pn.on.join(' ')));
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);
 pn = await panel();
 ok(pn && String(pn.rows) === 'ENGAGE WITH,DEFENDERS,DEF TACKLES,MID TACKLES,FORWARDS' && pn.pitch && /WITHOUT THE BALL/.test(pn.head), 'without the ball: the lines\' pitch, then ' + (pn && pn.rows.join(', ')));
@@ -151,10 +156,11 @@ ok(l1.join() === '46,74' && l2.join() === '50,74' && l3.join() === '50,64' && St
 await cti('eng', 'mid'); await cti('dline', 'trap'); await cti('dtk', 'front');
 d = await save();
 const tiKeep = d.ti;
-ok(tiKeep.eng === 'mid' && tiKeep.dline === 'trap' && tiKeep.dtk === 'front' && tiKeep.mtk === 'tackle' && tiKeep.aline === 'press' && tiKeep.build === 'long' && tiKeep.aruns === 'run' && tiKeep.wide === 'feet',
+ok(tiKeep.eng === 'mid' && tiKeep.dline === 'trap' && tiKeep.dtk === 'front' && tiKeep.mtk === 'tackle' && tiKeep.aline === 'press' && !('build' in tiKeep) && tiKeep.aruns === 'run' && tiKeep.wide === 'feet',
   'kept with the career: ' + JSON.stringify(tiKeep));
 const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
-await page.click('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(60);
+await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); const ib3 = await insB();
+ok(!ib3.lit && ib3.card, 'INSTRUCTIONS tapped again: his card back, the button unlit');
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);   // (back to the shape with the ball)
 
 // a drag's fits and swaps

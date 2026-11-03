@@ -3,8 +3,8 @@
 // which line stands on the line of engagement (the forwards, the midfield between them and the back line; or the
 // midfield, the forwards ahead of it), what the back line does about a runner (HOLD THE LINE, OFFSIDE TRAP, FOLLOW
 // RUNNERS, PRESS UP), how the back and middle lines go into a man (STAY IN FRONT, BALANCED, TACKLE), and what the forwards
-// do (CONSERVE, DEFEND THE LINE, PRESS UP). WITH IT: the BUILD-UP (SHORT, MIXED, LONG), how far each line goes forward and
-// what the wide men look for. A style picked sets its own. Here: the lines' rules; where the block stands for them; the
+// do (CONSERVE, DEFEND THE LINE, PRESS UP). WITH IT: how far each line goes forward and what the wide men look for. A
+// style picked sets its own -- and how the side plays out from the back is its style's (v116: no BUILD-UP to set). Here: the lines' rules; where the block stands for them; the
 // panel on the smallest phones; and computer v computer matches (every man on the computer, a virtual clock), one side
 // told one thing and then another, the other side on its defaults. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, gkHold:()=>gkHold, ball:()=>ball, now:()=>simNow, atkOf, heldBy, FW, MK, YC, over:()=>matchOver, setStyle, TI:()=>TI, TAC, tiDefault, tiLines, tiSet, tiPosture, own, setControlled, SIT:()=>SIT,\n'
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, gkHold:()=>gkHold, ball:()=>ball, now:()=>simNow, atkOf, heldBy, FW, MK, YC, over:()=>matchOver, setStyle, buildOfStyle, TI:()=>TI, TAC, tiDefault, tiLines, tiSet, tiPosture, own, setControlled, SIT:()=>SIT,\n'
   + '    setTI:(t,o)=>{ setTI(t,Object.assign(tiDefault(TAC[t].style),o)); }, block:t=>{ blockCache[t]=null; return defBlock(t); }, seen:(t,x,y)=>{ const e=seenBall(t); e.x=x; e.y=y; },\n'
   + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; },\n'
   + '    hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
@@ -43,7 +43,8 @@ const kickOff = async () => { await page.goto('file://' + copy); await page.wait
 await kickOff();
 const R = await page.evaluate(() => { const T = window.__T, L = (o, k) => { const x = Object.assign({}, o); T.tiLines(x, k); return [x.dl, x.loe]; };
   const out = { lines: { upInto: L({ dl: 48, loe: 54 }, 'dl'), downInto: L({ dl: 40, loe: 30 }, 'loe'), tooHigh: L({ dl: 80, loe: 99 }), tooLow: L({ dl: 2, loe: 9 }) } };
-  out.styles = {}; for(const s of ['neutral', 'gegen', 'dcounter', 'control', 'direct']){ const d = T.tiDefault(s); out.styles[s] = [d.dl, d.loe, d.eng, d.aline, d.dtk, d.build].join('/'); }
+  out.styles = {}; for(const s of ['neutral', 'gegen', 'dcounter', 'control', 'direct']){ const d = T.tiDefault(s); out.styles[s] = [d.dl, d.loe, d.eng, d.aline, d.dtk, T.buildOfStyle(s)].join('/'); }
+  out.noBuild = !('build' in T.tiDefault('control')) && !('build' in T.tiDefault('direct'));
   // the block with the ball far off (their keeper's end), each way of standing on the line of engagement
   T.freeze(); const atk = T.atkOf('G'), far = atk > 0 ? T.FW - 60 : 60, m = u => +(u / T.MK).toFixed(1);
   const at = o => { T.setTI('G', o); T.seen('G', far, T.FW / 2 > 0 ? 765 : 765); const B = T.block('G'); return [m(B.uD), m(B.uM), m(B.uF)]; };
@@ -53,8 +54,8 @@ const R = await page.evaluate(() => { const T = window.__T, L = (o, k) => { cons
 info('lines: ' + JSON.stringify(R.lines) + ' -- styles: ' + JSON.stringify(R.styles) + ' -- block (back, middle, first, m): ' + JSON.stringify(R.block));
 ok(R.lines.upInto.join() === '40,54' && R.lines.downInto.join() === '40,54' && R.lines.tooHigh.join() === '50,80' && R.lines.tooLow.join() === '15,30',
   'the lines: the back line pushed up into the line of engagement stops 14 m short, the line of engagement pulled down into it the same; neither goes past its range (back 15-50 m, engagement 30-80 m)');
-ok(R.styles.neutral === '32/54/fwd/line/bal/mixed' && R.styles.gegen === '46/68/fwd/press/tackle/mixed' && R.styles.dcounter === '20/34/mid/line/bal/long' && R.styles.control.endsWith('/short') && R.styles.direct.endsWith('/long'),
-  'a style picked sets its own: BALANCED a mid block, GEGENPRESS high and at them, DIRECT COUNTER deep with the midfield on its line, CONTROL short from the back, DIRECT long: ' + JSON.stringify(R.styles));
+ok(R.noBuild && R.styles.neutral === '32/54/fwd/line/bal/mixed' && R.styles.gegen === '46/68/fwd/press/tackle/mixed' && R.styles.dcounter === '20/34/mid/line/bal/long' && R.styles.control.endsWith('/short') && R.styles.direct.endsWith('/long'),
+  'a style picked sets its own: BALANCED a mid block, GEGENPRESS high and at them, DIRECT COUNTER deep with the midfield on its line; and plays out from the back its way, no BUILD-UP to set -- CONTROL short, DIRECT and DIRECT COUNTER long, the rest mixed: ' + JSON.stringify(R.styles));
 const near = (a, b, e) => Math.abs(a - b) <= (e || 0.6);
 ok(near(R.block.fwd[0], 30) && near(R.block.fwd[2], 56) && near(R.block.fwd[1], 43) && near(R.block.mid[1], 56) && near(R.block.mid[2], 62) && near(R.block.midPress[2], 66.5)
    && near(R.block.deep[0], 18) && near(R.block.deep[2], 36) && near(R.block.high[0], 46) && near(R.block.high[2], 70),
@@ -100,18 +101,19 @@ ok(mean(high, r => r.line) - mean(deep, r => r.line) > 12, 'the lines set the bl
 const tk = await runs({ dtk: 'tackle', mtk: 'tackle' }, 2), fr = await runs({ dtk: 'front', mtk: 'front' }, 2);
 info('tackles a match: TACKLE ' + mean(tk, r => r.M.tk.G) + ', STAY IN FRONT ' + mean(fr, r => r.M.tk.G));
 ok(mean(tk, r => r.M.tk.G) > 2 * mean(fr, r => r.M.tk.G), 'TACKLE goes in more than twice as often as STAY IN FRONT (' + mean(tk, r => r.M.tk.G) + ' a match against ' + mean(fr, r => r.M.tk.G) + ')');
-// THE BUILD-UP, the computer's keeper: given the ball three times each way, the men where the kick-off put them. Told LONG
-// he kicks it (gkLaunch: up to a man who can win it, or with nobody, after a moment, up the emptier side); told SHORT he
-// throws or rolls it to a man near him (gkShort). (Your keeper's, as you press PASS: classic-keeper.mjs.)
+// THE BUILD-UP, the computer's keeper -- his style's (v116): given the ball three times each way, the men where the
+// kick-off put them. DIRECT, he kicks it (gkLaunch: up to a man who can win it, or with nobody, after a moment, up the
+// emptier side); CONTROL POSSESSION, he throws or rolls it to a man near him (gkShort). (Your keeper's, as you press
+// PASS: classic-keeper.mjs.)
 await kickOff();
-const bu = await page.evaluate(async () => { const T = window.__T, kp = T.keepers().find(k => k.team === 'R'), out = {};
-  for(const b of ['long', 'short']){ T.setTI('R', { build: b }); window.__K = { kick: 0, throw: 0 };
+const bu = await page.evaluate(async () => { const T = window.__T, kp = T.keepers().find(k => k.team === 'R'), out = {}, s0 = T.TAC.R.style;
+  for(const b of ['long', 'short']){ T.setStyle('R', b === 'long' ? 'direct' : 'control'); window.__K = { kick: 0, throw: 0 };
     for(let i = 0; i < 3; i++){ T.freeze(); T.hold(kp); const t0 = T.now();
       await new Promise(res => { (function tick(){ if(T.gkHold() !== kp || T.now() - t0 > 9) return res(); requestAnimationFrame(tick); })(); }); }
     out[b] = [window.__K.kick, window.__K.throw]; }
-  return out; });
-info('the computer\'s keeper, three balls each way (kicked, thrown): told LONG ' + bu.long + ', told SHORT ' + bu.short);
-ok(bu.long.join() === '3,0' && bu.short.join() === '0,3', 'BUILD-UP: told LONG the keeper kicks it long every time (' + bu.long + '), told SHORT he plays it short every time (' + bu.short + ')');
+  T.setStyle('R', s0); return out; });
+info('the computer\'s keeper, three balls each way (kicked, thrown): DIRECT ' + bu.long + ', CONTROL POSSESSION ' + bu.short);
+ok(bu.long.join() === '3,0' && bu.short.join() === '0,3', 'the build-up by the style: DIRECT, the keeper kicks it long every time (' + bu.long + '); CONTROL POSSESSION, he plays it short every time (' + bu.short + ')');
 const wf = await runs({ wide: 'feet' }, 2), wr = await runs({ wide: 'run' }, 2);   // (two matches each: one alone is noisy)
 info('runs in behind a match, the wide men\'s (all of the side\'s): TO FEET ' + mean(wf, r => r.M.wruns.G) + ' (' + mean(wf, r => r.M.runs.G) + '), IN BEHIND ' + mean(wr, r => r.M.wruns.G) + ' (' + mean(wr, r => r.M.runs.G) + ')');
 ok(mean(wr, r => r.M.wruns.G) > 1.5 * mean(wf, r => r.M.wruns.G), 'the wide men told IN BEHIND make far more runs in behind than told TO FEET (' + mean(wr, r => r.M.wruns.G) + ' a match against ' + mean(wf, r => r.M.wruns.G) + ')');

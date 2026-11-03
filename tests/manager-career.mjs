@@ -311,7 +311,7 @@ const locks = async () => { const o = {};
   await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60); o.styles = await page.$$eval('#bpBody .tbOpt.locked', ns => ns.length);
   o.free = await page.$$eval('#bpBody .tbOpt:not(.locked)', ns => ns.map(n => n.textContent).join()); await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60);
   await page.click('#bpBody .tpitch .ptk[data-tac="field"] >> nth=2'); await page.waitForTimeout(60);
-  if(await page.$('#cTacRight button[data-cside="instr"]')){ await page.click('#cTacRight button[data-cside="instr"]'); await page.waitForTimeout(60); }
+  if(await page.$('#bpBody .tbTop .tbIns[data-cside="instr"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (INSTRUCTIONS, up in the top row: v116)
   o.instr = await page.$$eval('#cTacRight .tiRow', ns => ns.map(n => (n.querySelector('.locked, [disabled]') ? 'locked ' : '') + n.querySelector('.tiLbl').textContent).join(', '));   // (v112: the team's instructions)
   return o; };
 const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '1-3-3'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });
@@ -338,7 +338,7 @@ const selDrag = async (a, b, below) => { const box = k => page.$eval(`#bpBody .s
   for(let i = 1; i <= 6; i++) await page.mouse.move(A.x + (B.x - A.x) * i / 6, A.y + (B.y + (below ? B.h : 0) - A.y) * i / 6);
   const mark = await page.$$eval('#bpBody .selRow.dropOver, #bpBody .selRow.insA, #bpBody .selRow.insB', ns => ns.map(n => n.dataset.k + (n.classList.contains('dropOver') ? ' swap' : n.classList.contains('insA') ? ' above' : ' below')).join());
   await page.mouse.up(); await page.waitForTimeout(80); return mark; };
-const lay = await page.evaluate(() => ({ cols: [...document.querySelectorAll('#bpBody .selCol')].map(c => c.dataset.grp + ' ' + [...c.querySelectorAll('.selRow')].map(x => x.dataset.k).join(' ')),
+const lay = await page.evaluate(() => ({ cols: [...document.querySelectorAll('#bpBody .selCol:not(.qpCol)')].map(c => c.dataset.grp + ' ' + [...c.querySelectorAll('.selRow')].map(x => x.dataset.k).join(' ')),
   imgs: document.querySelectorAll('#bpBody .selB img').length, top: document.querySelector('#bpBody .selRow[data-k="0"] .slPos').textContent }));
 const S0 = await selLu(), m1 = await selDrag(15, 2), S1 = await selLu();             // one not taken onto the pitch: they change places
 const m2 = await selDrag(11, 8), S2 = await selLu();                                 // the bench's fourth to its first: the others along one

@@ -56,6 +56,8 @@ r = await K(`(()=>{ const d=CAREER.data, C=mgAiClubs(d), a=C[0], b=C[1];
   const g=man(19,85); a.players.push(g); const s0=a.sc; a.sc=0; out.gem0=mgAsk(d,g,a); mgBidSeen(g,out.gem0*1.1,out.gem0); out.gem1=mgAsk(d,g,a);
   mgBidSeen(g,out.gem0*1.3,out.gem0); out.gem2=mgAsk(d,g,a); out.mk=g.mk; a.players.pop(); a.sc=s0;
   out.eyes=C.map(c=>mgClubEye(c).sc); out.temps=C.map(c=>c.gr);
+  const as=(role,sub)=>{ const p=mgNewPlayer(d,role,66,25,{sub,pot:66,until:d.season+2}); p.ovr=66; p.pot=66; return p; }, ps=[['ATT','ST'],['MID','CM'],['DEF','CB'],['GK','GK']].map(x=>as(...x));
+  out.pos=ps.map(p=>at(a,0.5,1,p)); out.posVal=ps.map(p=>mgValue(d,p));
   return out; })()`);
 info('asks: ' + JSON.stringify(r));
 ok(r.age[0] > r.age[1] && r.age[1] > r.age[2] && r.age[2] > r.age[3], 'the younger the dearer: the same man, rated 60, at 19, 24, 29 and 33: ' + r.age.join(', '));
@@ -63,6 +65,8 @@ ok(r.poorScouts[0] === r.poorScouts[1], 'a club with poor scouts prices a 19-yea
 ok(r.goodScouts[1] > r.goodScouts[0] * 1.8, 'one with good scouts on what he could be: ' + r.goodScouts.join(' -> '));
 ok(r.form[1] > r.form[0], 'a man in fine form gets noticed, even by poor scouts: ' + r.form.join(' -> '));
 ok(r.temper[0] !== r.temper[1] && new Set(r.temps).size > 1 && new Set(r.eyes).size > 1, 'no two clubs quite alike: the same man ' + r.temper.join(' or ') + ' (temperaments ' + r.temps.slice(0, 5).join(', ') + '...; scouts ' + r.eyes.slice(0, 5).join(', ') + '...)');
+ok(r.pos[0] > r.pos[1] && r.pos[1] > r.pos[2] && r.pos[2] > r.pos[3] && r.posVal[0] > r.posVal[1] && r.posVal[1] > r.posVal[2] && r.posVal[2] > r.posVal[3] && r.pos[0] >= r.pos[1] * 1.25 && r.pos[3] <= r.pos[1] * 0.7,
+  'by position, as the real market has it: the same man, rated 66 at 25, asked ' + r.pos.join(', ') + ' as a striker, a midfielder, a centre-back and a keeper (worth to you ' + r.posVal.join(', ') + ')');
 ok(r.gem1 === r.gem0 && r.mk.n === 2 && r.gem2 >= r.gem0 * 1.3 * 1.08 - 10, 'one bid over their price changes nothing (' + r.gem1 + '); a second, and they know they have a gem: ' + r.gem2 + ', over the best bid');
 
 // --- YOUR BIDS ------------------------------------------------------------------------------------------------------------
@@ -137,6 +141,69 @@ const viaOffers = { tab: await page.textContent('#bldgPanel .bpTab.on').catch(()
 await page.click('#bpBody [data-mg="walk"]'); await page.waitForTimeout(60);
 const walked = await K(`!!mgBidOf(CAREER.data,${r2.id})`);
 ok(viaOffers.card.includes(r2.name) && /THEY WANT/.test(viaOffers.card) && !walked, 'from the Bids tab, HIS CARD opens his card in Search (' + viaOffers.tab + '); WALK AWAY drops the bid');
+// HAGGLING (v116): their figure isn't take it or leave it -- a counter between yours and theirs, answered there and then
+const hg = await K(`(()=>{ const d=CAREER.data, out={}; d.budget=5e6;
+  const set=()=>{ for(const c of mgAiClubs(d)){ if(c.tier!==d.tier||c.players.length<14) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!mgBidOf(d,x.id)&&!x.loan);
+    if(p){ mgBidSet(d,{p,club:c},40000,'more',{ask:50000,rival:null}); return mgBidOf(d,p.id); } } };   // (round figures, for the test)
+  let B=set(); const pid=B.pid, a0=B.ask, f0=B.fee; out.a0=a0; out.f0=f0;
+  out.same=mgCounter(d,pid,f0); out.sameSt=mgBidOf(d,pid).st;                                  // no more than you bid before: nothing moves
+  B.lo=43000;                                                                                     // (what they'd settle for, set for the test)
+  const c1=41200; out.r1=mgCounter(d,pid,c1); B=mgBidOf(d,pid); out.a1=B.ask; out.c1=c1; out.st1=B.st;
+  out.r2=mgCounter(d,pid,41800); B=mgBidOf(d,pid); out.a2=B.ask;
+  out.r3=mgCounter(d,pid,42400); B=mgBidOf(d,pid); out.a3=B.ask; out.firm=!!B.firm;
+  out.r4=mgCounter(d,pid,B.ask-mgRound(B.ask*0.01)); out.st4=mgBidOf(d,pid).st;                // their last word: no more of it
+  out.lastLo=out.a3>=B.lo;
+  let C=set(); C.lo=46000; out.ok=mgCounter(d,C.pid,C.lo); out.okSt=mgBidOf(d,C.pid).st; out.okFee=mgBidOf(d,C.pid).fee; out.lo=C.lo;   // at what they'd settle for: a deal
+  let R=set(); R.rival=mgAiClubs(d)[1].id; R.rf=47600; out.rv=mgCounter(d,R.pid,46000); out.rvLo=R.lo; out.rf=R.rf; out.rvSt=mgBidOf(d,R.pid).st;   // another club in: never under its fee
+  for(const x of [pid,C.pid,R.pid]) d.bids=d.bids.filter(b=>b.pid!==x);
+  return JSON.parse(JSON.stringify(out)); })()`);
+info('haggling: ' + JSON.stringify(hg));
+ok(hg.same.more && /no more than you bid/.test(hg.same.msg) && hg.sameSt === 'more', 'a counter no higher than your bid: nothing moves ("' + hg.same.msg + '")');
+ok(hg.r1.more && hg.st1 === 'more' && hg.a1 < hg.a0 && hg.a1 > hg.c1 && hg.a2 < hg.a1 && hg.a3 <= hg.a2 && hg.firm && hg.lastLo,
+  'a counter between: they come down part of the way (' + hg.a0 + ' > ' + hg.a1 + ' > ' + hg.a2 + ' > ' + hg.a3 + '), never under what they\'d settle for; the third is their last word');
+ok(/won’t move/.test(hg.r4.msg) && hg.st4 === 'more', '...after it, they won\'t move ("' + hg.r4.msg + '")');
+ok(hg.ok.ok && hg.okSt === 'yes' && hg.okFee === hg.lo, 'a counter at what they\'d settle for: they accept (' + hg.okFee + ')');
+ok(hg.rv.more && hg.rvLo >= hg.rf && hg.rvSt === 'more', 'another club in for him: never under its fee (' + hg.rf + ': they\'d settle for ' + hg.rvLo + ')');
+// ...and on his card: COUNTER, its fee between theirs and yours, + and −, answered there and then
+const r3 = await K(`(()=>{ const d=CAREER.data; for(const c of mgAiClubs(d)){ if(c.tier!==d.tier||c.players.length<14) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!mgBidOf(d,x.id)&&!x.loan); if(p){
+  mgBidSet(d,{p,club:c},40000,'more',{ask:50000,rival:null}); const B=mgBidOf(d,p.id); B.lo=49500; MGUI.sel=p.id; MGUI.tier=c.tier; MGUI.bid=null; mgRerender(); return {id:p.id, ask:B.ask, fee:B.fee}; } } })()`);
+await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
+await K(`(()=>{ MGUI.sel=${r3.id}; mgRerender(); return 1; })()`); await page.waitForTimeout(60);
+if(!(await page.$('#bpBody [data-mg="counter"]'))){ await page.click('#bpBody .mgPaneR .mgSides [data-mside="deal"]'); await page.waitForTimeout(60); }   // (to his deal side: its tab)
+const cardH = await page.innerText('#bpBody .mgCard'); await page.click('#bpBody .mgStep [data-mg="bidstep"][data-dir="1"]'); await page.waitForTimeout(50);
+const stepped = await K(`MGUI.bid&&MGUI.bid.fee`); await page.click('#bpBody [data-mg="counter"]'); await page.waitForTimeout(80);
+const cardH2 = { msg: await page.textContent('#bpMsg').catch(() => ''), B: await K(`(()=>{ const B=mgBidOf(CAREER.data,${r3.id}); return B&&{ask:B.ask, fee:B.fee, st:B.st}; })()`) };
+info('haggling on his card: ' + JSON.stringify({ r3, stepped, cardH2 }));
+ok(/THEY WANT/.test(cardH) && /COUNTER/.test(cardH) && cardH.includes('$45,000') && stepped === 46300 && stepped <= r3.ask
+   && cardH2.B && cardH2.B.st === 'more' && cardH2.B.ask < r3.ask && cardH2.B.fee === stepped && /come down/.test(cardH2.msg),
+  'on his card: THEY WANT, and COUNTER with a fee between (' + stepped + ' after a +): they come down there and then ("' + cardH2.msg + '")');
+await K(`(()=>{ const d=CAREER.data; d.bids=d.bids.filter(b=>b.pid!==${r3.id}); MGUI.sel=null; return 1; })()`);
+// THE SEARCH'S FILTERS (v116): POSITION, TYPE, SORT (rating, potential, price either way, age) and IN BUDGET
+await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
+await K(`(()=>{ const d=CAREER.data; d.budget=20000; Object.assign(MGUI,{mpos:'ALL',arch:'ALL',sort:'ovr',cheap:false,drop:null,sel:null}); mgRerender(); return 1; })()`); await page.waitForTimeout(60);
+const rows = () => page.evaluate(() => [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r => ({ id: +r.dataset.pid, pos: r.querySelector('.pos').textContent, amt: +r.querySelector('.amt').textContent.replace(/[^\d]/g, ''), ovr: r.querySelector('.ovr').textContent })));
+const pick = async (k, v) => { await page.click(`#bpBody [data-mg="mdrop"][data-k="${k}"]`); await page.waitForTimeout(60); const opts = await page.$$eval('#bpBody .mkMenu [data-mg="filt"]', ns => ns.map(n => n.textContent));
+  await page.click(`#bpBody .mkMenu [data-mg="filt"][data-k="${k}"][data-v="${v}"]`); await page.waitForTimeout(80); return opts; };
+const all0 = await rows();
+const posOpts = await pick('mpos', 'DM'); const dm = await rows();
+const typeOpts = await pick('arch', 'deepcreator'); const dc = await rows(), dcStyles = await K(`(()=>{ const d=CAREER.data; return ${JSON.stringify((await rows()).map(r => r.id))}.map(id=>mgFind(d,id).p.style); })()`);
+const posAfter = await K('MGUI.mpos');
+await pick('arch', 'ALL'); await pick('mpos', 'ALL');
+await pick('sort', 'cheap'); const cheap = await rows();
+await pick('sort', 'dear'); const dear = await rows();
+await pick('sort', 'age'); const ages = await K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgFind(d,+r.dataset.pid).p.age); })()`);
+await K(`(()=>{ const d=CAREER.data, L=mgAiClubs(d).filter(c=>c.tier===(MGUI.tier||d.tier)).flatMap(c=>c.players); for(const p of L.slice(0,4)){ d.kn=d.kn||{}; d.kn[p.id]=2; } return 1; })()`);
+await pick('sort', 'pot'); const pot = await rows(), potKnown = await K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgPotSort(d,mgFind(d,+r.dataset.pid).p)); })()`);
+await pick('sort', 'ovr'); await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(80); const inBud = await rows(), budNow = await K('CAREER.data.budget');
+await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(60);
+const asc = a => a.every((v, i) => !i || a[i - 1] <= v), desc = a => a.every((v, i) => !i || a[i - 1] >= v);
+info('the Search\'s filters: ' + JSON.stringify({ all: all0.length, dm: dm.length, dc: dc.length, posOpts, typeOpts, posAfter, cheap: cheap.slice(0, 4).map(r => r.amt), dear: dear.slice(0, 4).map(r => r.amt), ages: ages.slice(0, 6), pot: pot.slice(0, 5).map(r => r.ovr), inBud: inBud.length }));
+ok(posOpts.join() === 'ALL,GK,CB,FB,DM,CM,AM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'DM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + '); DM, and only DMs (' + dm.length + ' of ' + all0.length + ')');
+ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
+  'TYPE: a DM\'s are the Anchor and the Deep creator (v116); Deep creator, and only they (' + dc.length + ')');
+ok(asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && cheap.length === all0.length, 'SORT: the price cheapest first and dearest first, and age youngest first');
+ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^POT/.test(pot[0].ovr), 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list (' + pot[0].ovr + '); the rest after');
+ok(inBud.length > 0 && inBud.length < all0.length && inBud.every(r => r.amt <= budNow), 'IN BUDGET: only the men you could pay for (' + inBud.length + ', all at or under ' + budNow + ')');
 // the Bids tab's history (v108): the one you signed, and the one you walked away from -- and the season's count
 await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
 const hist = await K(`(()=>{ const L=CAREER.data.bidLog||[]; return { log:L.slice(0,4).map(e=>e.name+':'+e.out), txt:document.getElementById('bpBody').textContent }; })()`);   // (all its pages)

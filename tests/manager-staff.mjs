@@ -133,7 +133,7 @@ await page.click('#bpBody [data-mg="chire"]'); await page.waitForTimeout(150);
 r = await K(`(()=>{ const d=CAREER.data; return { n:d.staff.length, k:d.staff[0]&&d.staff[0].k }; })()`);
 const s1 = await page.evaluate(() => ({ hint: document.querySelector('#bpBody .mgHint').textContent.trim(), vac: document.querySelectorAll('#bpBody .mgRow.vac').length }));
 info('the Staff tab: ' + JSON.stringify({ s0, card: cardTxt.split('\n').join(' / '), s1 }));
-ok(tabs.join() === 'Tactics,Selection,Subs,Staff,Pitch' && s0.hint === '0 of 5 posts filled' && s0.vac === 5 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
+ok(tabs.join() === 'Tactics,Selection,Staff,Pitch' && s0.hint === '0 of 5 posts filled' && s0.vac === 5 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
    && r.n === 1 && r.k === 'fin' && s1.hint === '1 of 5 posts filled' && s1.vac === 4,
   'the Staff tab: ' + s0.hint + ', each post a line (vacant till filled); a man\'s card says what he\'s good and poor at; HIRE, and the post is his (' + s1.hint + ')');
 

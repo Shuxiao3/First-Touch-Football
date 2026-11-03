@@ -77,10 +77,15 @@ ok(r.lost === 0.5 && r.decl > 0 && r.fallA > r.fallB + 0.5 && r.young === 0,
   'a torn muscle at 30: half a point off his legs at once, and in the season after they fall ' + r.fallA + ' half points against his uninjured twin\'s ' + r.fallB + '; at 24 it heals clean');
 
 // --- healing -----------------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, p=d.roster[3]; injHurt(d,p,'strain',null,'in training'); const days=p.inj.d, news=d.news[0].t;
+r = await K(`(()=>{ const d=CAREER.data, p=d.roster[3]; injHurt(d,p,'strain',null,'in training'); const days=p.inj.d;
+  const news=(d.news.slice(0,3).map(n=>n.t).find(t=>/is out for/.test(t)))||d.news[0].t;
   mgDays(d,days-1); const still=!!p.inj; mgDays(d,1); const healed=!p.inj, back=p.injB, cond=condOf(p); mgDays(d,INJ_BACK); return { days, news, still, healed, back, cond, clear:!p.injB }; })()`);
 ok(r.still && r.healed && r.back === 21 && r.cond <= 0.8 && r.clear && /is out for \d+ weeks? \(a strain, in training\)/.test(r.news),
   'hurt (the news: "' + r.news + '"), he heals by the day: out ' + r.days + ' days, back a short of fitness (' + Math.round(r.cond * 100) + '%), three risky weeks after it');
+// (v116) one of your eight hurt between games: out of the side there and then
+r = await K(`(()=>{ const d=CAREER.data, lu=ensureLineup(d), ri=lu.atk[2], p=d.roster[ri]; d.news=[]; injHurt(d,p,'knock',null,'in training');
+  const l2=ensureLineup(d), rep=(d.news.map(n=>n.t).find(t=>/takes his place in the side/.test(t)))||''; const out={ out8:!l2.atk.includes(ri)&&l2.gk!==ri, inn:l2.atk[2]!==ri&&!d.roster[l2.atk[2]].inj, rep }; delete p.inj; delete p.injB; return out; })()`);
+ok(r.out8 && r.inn && /takes his place in the side/.test(r.rep), 'one of your eight hurt: out of it there and then, the best fit off the bench in his place, and the news says so ("' + r.rep + '")');
 
 // --- who plays: never a hurt man for the computer; yours replaced at kick-off, none on the bench -------------------------------
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d)[0], best=mgEight(c.players), hurt=best[3]; hurt.inj={k:'strain',d:14};
@@ -101,21 +106,34 @@ r = await K(`(()=>{ const d=CAREER.data; d.news.length=0; let n=0, mine=0; const
 info('a season: ' + JSON.stringify(r));
 ok(r.n >= 150 && r.n <= 500 && r.news === r.mine, 'a season: ' + r.n + ' injuries across the four leagues (about ' + (r.n / 56).toFixed(1) + ' a club), ' + r.mine + ' of yours, each in the news');
 
-// --- a live match: hurt in it ------------------------------------------------------------------------------------------------
-await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2,phone:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
+// --- a live match: hurt in it -- v116: yours comes off there and then for your planned man for him, else the bench's
+// best at his spot; with no subs left he plays on, slowed ---------------------------------------------------------------------
+await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2,phone:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } d.qsubs=[]; INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(1500);
-r = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3); hurtInMatch(p); p.sprint=true; return { cap:p.staminaCap, hurt:HURT.G.has(3), name:SQUAD.G[3].name }; })()`);
+const hurtMan = (pick, plan) => K(`(()=>{ const d=CAREER.data, rid=si=>d.roster[SQUAD.G[si].ri].id;
+  const p=players.filter(q=>q.team==='G'&&!HURT.G.has(q.squadIdx)&&qsSlot(q.squadIdx))[${pick}], si=p.squadIdx, sl=qsSlot(si);
+  const val=b=>{ const e=SQUAD.G[b]; return mtRating(e,sl.role,sl.pos)*qsLegs(e.cond??1); }, bench=mtBench('G').filter(b=>SQUAD.G[b].role!=='GK'&&!HURT.G.has(b)).sort((a,b)=>val(a)-val(b));
+  const worst=bench[0], best=bench[bench.length-1]; if(${plan}) d.qsubs=[{off:rid(si), on:rid(worst)}];
+  if(ball.ownedBy===p||ball.dribbler===p){ ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; }
+  const name=SQUAD.G[si].name; hurtInMatch(p); const q=players.find(x=>x.team==='G'&&x.squadIdx===si);
+  return { si, name, worst, best, hurt:HURT.G.has(si), on:!!q, cap:q?+q.staminaCap.toFixed(2):null, worstOn:players.some(x=>x.team==='G'&&x.squadIdx===worst), bestOn:players.some(x=>x.team==='G'&&x.squadIdx===best),
+    used:SUBS.G.used, msg:document.getElementById('qsMsg').textContent }; })()`);
+const h1 = await hurtMan(1, true), h2 = await hurtMan(2, false);
+await K(`(()=>{ SUBS.G.used=SUB_MAX; return 1; })()`); const h3 = await hurtMan(0, false);
 await page.waitForTimeout(700);
-const live = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3), sug=qsSuggest(); return { cap:+p.staminaCap.toFixed(2), first:sug[0]&&sug[0].out, hot:document.getElementById('qsWrap').classList.contains('hot'), open:document.getElementById('qsWrap').classList.contains('open'), msg:document.getElementById('qsMsg').textContent }; })()`);
-info('hurt in a live match: ' + JSON.stringify({ r, live }));
-ok(r.hurt && live.cap <= 0.4 && live.first === 3 && live.hot && !live.open && /IS HURT/.test(live.msg), 'hurt in the match: his legs\' ceiling at ' + Math.round(live.cap * 100) + '%, first on the quick subs, the chip lit (not dropped down): "' + live.msg + '"');
+const live = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${h3.si}); return { cap:p?+p.staminaCap.toFixed(2):null, sprint:!!(p&&p.sprint) }; })()`);
+info('hurt in a live match: ' + JSON.stringify({ h1, h2, h3, live }));
+ok(h1.hurt && !h1.on && h1.worstOn && h1.worst !== h1.best && h1.used === 1 && /✚ .* HURT · .* ON/.test(h1.msg),
+  'hurt in the match, one of yours comes off there and then -- for the man you planned for him (the bench\'s weakest at his spot, not its best): "' + h1.msg + '"');
+ok(h2.hurt && !h2.on && h2.bestOn && h2.used === 2, '...with no plan for him, the bench\'s best at his spot comes on (one more sub used: ' + h2.used + ')');
+ok(h3.hurt && h3.on && live.cap !== null && live.cap <= 0.4 && h3.used === 3, '...and with no subs left he plays on, slowed (his legs\' ceiling at ' + Math.round((live.cap || 0) * 100) + '%)');
 await K(`(()=>{ half=1; ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; ball.vx=ball.vy=0; matchClock=halfLenSec(); return 1; })()`); await page.waitForTimeout(2600);   // (nobody's ball as the clock runs out: no advantage to play, the whistle at once)
-const ht = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===3); return { half, cap:p?+p.staminaCap.toFixed(2):null }; })()`);
+const ht = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${h3.si}); return { half, cap:p?+p.staminaCap.toFixed(2):null }; })()`);
 ok(ht.half === 2 && ht.cap !== null && ht.cap <= 0.4, 'half-time: the others get some of their legs back, he doesn\'t (' + Math.round(ht.cap * 100) + '%)');
 await K(`(()=>{ finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);
-r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(x=>x.name===${JSON.stringify(r.name)}); return { inj:p&&p.inj, report:document.getElementById('matchReport').innerText }; })()`);
-ok(r.inj && /INJURED/.test(r.report) && r.report.includes(r.inj ? 'week' : 'x') || (r.inj && r.inj.d < 7 && /INJURED/.test(r.report)), 'after it, the injury is his (' + (r.inj ? r.inj.k + ', ' + r.inj.d + ' days' : 'none') + '), and the report lists it');
+r = await K(`(()=>{ const d=CAREER.data, f=n=>{ const p=d.roster.find(x=>x.name===n); return p&&p.inj; }; return { inj:f(${JSON.stringify(h1.name)}), all:[${JSON.stringify(h1.name)},${JSON.stringify(h2.name)},${JSON.stringify(h3.name)}].filter(f).length, report:document.getElementById('matchReport').innerText }; })()`);
+ok(r.inj && r.all === 3 && /INJURED/.test(r.report), 'after it, the injuries are theirs, the three of them (his: ' + (r.inj ? r.inj.k + ', ' + r.inj.d + ' days' : 'none') + '), and the report lists them');
 
 // --- marked everywhere ---------------------------------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; for(const p of d.roster){ delete p.inj; } const lu=ensureLineup(d); d.roster[lu.atk[0]].inj={k:'strain',d:15}; window.HURTNAME=d.roster[lu.atk[0]].name; mgSave(d); renderHub(); return 1; })()`);

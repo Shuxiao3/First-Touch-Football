@@ -65,6 +65,10 @@ const winOk = (v, full) => v.num === '#' + v.cNum && (full ? v.name === v.cName 
   && Math.abs(v.fill - v.cSt) <= 0.02 && !v.cut && v.top <= 12 && v.gap >= 0 && v.gap <= 10 && v.level && v.inside && !v.over;
 const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
   return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);
+// INSTRUCTIONS up in a tactics screen's top row (v116: not on his card): lit or not, and just left of BEST 8 where there's one
+const insTop = (page, root) => page.evaluate(root => { const top = document.querySelector(root + ' .tbTop'), b = top && top.querySelector('.tbIns'), bs = top && top.querySelector('.tbBest'), r = b && b.getBoundingClientRect();
+  return { there: !!b, lit: !!(b && b.classList.contains('go')), text: b ? b.textContent : '', inside: !!r && r.right <= innerWidth && r.left >= 0,
+    left: !!b && (!bs || (b.nextElementSibling === bs && r.right <= bs.getBoundingClientRect().left && Math.abs(r.top - bs.getBoundingClientRect().top) < 2)) }; }, root);
 // THE SKILL MOVES PAGE as it is on the screen: each page's moves (▶ to the next), any whose name or card is cut off, and
 // whether each move showing has its drawing drawn and its clip moving
 async function skillsPage(page){
@@ -182,7 +186,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){   // A LONG LIST GOES OVER PAGES: the market's, with ◀ 1 / n ▶ under it -- ▶ turns the page, the filters stay
     await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
     const pg = () => page.evaluate(() => { const b = document.querySelector('#bpBody .mgPaneL [data-pages]'), rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length);
-      return { at: (b.querySelector('.fitPager b') || {}).textContent || '', rows: rows.length, first: rows[0] && rows[0].dataset.pid, filters: !!b.querySelector('.mgFilters:not(.fitHide) [data-k="role"]'),
+      return { at: (b.querySelector('.fitPager b') || {}).textContent || '', rows: rows.length, first: rows[0] && rows[0].dataset.pid, filters: !!b.querySelector('.mgFilters:not(.fitHide) [data-k="mpos"]'),   /* (v116: the POSITION drop-down, where the ALL GK DEF MID ATT chips were) */
         fits: rows.every(r => r.getBoundingClientRect().bottom <= b.querySelector('.fitPager').getBoundingClientRect().top + 1) }; });
     const p1 = await pg(); await page.tap('#bpBody .mgPaneL .fitPager [data-fitgo="1"]'); await page.waitForTimeout(120); const p2 = await pg();
     info('the market list: ' + JSON.stringify({ p1, p2 }));
@@ -206,8 +210,8 @@ for(const [w, h] of SIZES){
     ok(t0 === t1 && menu, w + 'x' + h + ': SKILL MOVES from the pause menu: the match waits while it\'s open, and BACK goes back to the menu'); }
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
   await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtacBody .tbDrop', '#mtacBody .tbBench']);
-  const lg = await legsRow(page, '#mtacBody');
-  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip != null && Math.abs(lg.bar - lg.flip) <= 1, w + 'x' + h + ': his card in a match: STAMINA and a bar, no figure, the button level with the bar\'s foot (' + lg.bar + ' / ' + lg.flip + ')');
+  const lg = await legsRow(page, '#mtacBody'), it = await insTop(page, '#mtacBody');
+  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip == null && it.there && it.inside && !it.lit, w + 'x' + h + ': his card in a match: STAMINA and a bar, no figure, nothing on it to turn it over (INSTRUCTIONS is up in the top row)');
   await page.tap('#mtacOv [data-mt="back"]'); await page.waitForTimeout(100); await page.tap('#pauseGrid [data-pause="back"]');
   await page.evaluate(() => window.__T.end()); await page.waitForTimeout(400);
   await mcheck('match report', ['#mrNextBtn', '#matchReport .mrScore']);                     // (v106: THE RESULT, then NEXT)
@@ -293,8 +297,8 @@ for(const [w, h] of SIZES){
   ok(own.toks.length === 13 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating, the eight and the bench\'s five (' + own.toks.map(x => x[0]).join(' ') + ')');
   ok(!own.midStyles.some(x => /WNG|Winger/.test(x)) && !own.wngNotAtt && own.wm > 0, 'a winger is an attacker: no midfielder is a winger; wide midfielders are WM (' + own.wm + ' in the world; midfield styles ' + own.midStyles.join(', ') + ')');
   // THE RIGHT COLUMN HAS TWO SIDES: his card (his figure, name, rating and stars, and his ratings: a category opens under the
-  // six) and, turned over with one small button under his rating, the TEAM's instructions (v112: no man's own) -- no
-  // ratings, a row a setting and the one note for the row last touched -- with a button back to him
+  // six) and, with INSTRUCTIONS up in the top row left of BEST 8 (v116: before, a button on his card turned it over), the
+  // TEAM's instructions (v112: no man's own) -- no ratings, a row a setting and the one note for the row last touched
   const side = () => page.evaluate(() => { const flips = [...document.querySelectorAll('#cTacRight button[data-cside]')], f = flips[0], fr = f && f.getBoundingClientRect(), o = document.querySelector('#cTacRight .mgCardOvr');
     return { six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixOpen .statRow').length,
       instr: document.querySelectorAll('#cTacRight .tiRow').length, head: (document.querySelector('#cTacRight .tiHead') || {}).textContent || '', notes: document.querySelectorAll('#cTacRight .tiNote').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
@@ -308,14 +312,15 @@ for(const [w, h] of SIZES){
   await page.tap('#bpBody .tpitch .ptk[data-tac="field"] >> nth=6'); await page.waitForTimeout(150);
   const s1 = await side(); await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(150); const s2 = await side();
   for(let i = 0; i < 5; i++){ const pv = await page.$('#cTacRight .fitPager [data-fitgo="-1"]:not([disabled])'); if(!pv) break; await pv.tap(); await page.waitForTimeout(60); }   // (back to the six)
-  await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(100); await page.tap('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(150); const s3 = await side();
-  await page.tap('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(100);
-  info('the card: ' + JSON.stringify({ s1, s2, s3 }));
-  ok(s1.flips === 1 && s1.small && s1.under && /INSTRUCTIONS/.test(s1.flip) && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
-    'his card: his figure, rating and stars, the six, and one small button under his rating (' + s1.flip + ')');
+  const i1 = await insTop(page, '#bpBody');
+  await page.tap('#cTacRight [data-six="DEF"]'); await page.waitForTimeout(100); await page.tap('#bpBody .tbTop .tbIns'); await page.waitForTimeout(150); const s3 = await side(), i3 = await insTop(page, '#bpBody');
+  await page.tap('#bpBody .tbTop .tbIns'); await page.waitForTimeout(100); const i4 = await insTop(page, '#bpBody'), s4 = await side();
+  info('the card: ' + JSON.stringify({ s1, s2, s3, i1, i3 }));
+  ok(s1.flips === 0 && i1.there && i1.left && i1.inside && !i1.lit && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
+    'his card: his figure, rating and stars, the six -- nothing on it to turn it over: INSTRUCTIONS is up in the top row, just left of BEST 8');
   ok(s2.six === 6 && s2.det === 4 && s2.seen && s2.bars === 4 && /DEFENDING/.test(s2.hd) && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, its name and a coloured bar for each rating, all of it on the card, no pages (DEF: ' + s2.det + ' ratings, ' + s2.bars + ' bars)');
-  ok(s3.flips === 1 && /PLAYER/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr === 5 && /^TEAM/.test(s3.head) && s3.notes === 1,
-    'turned over: the team\'s instructions (' + s3.head + ': ' + s3.instr + ' rows and one note), no ratings, the button back to him (' + s3.flip + ')');
+  ok(i3.lit && s3.flips === 0 && s3.six === 0 && !s3.det && s3.instr === 4 && /^TEAM/.test(s3.head) && s3.notes === 1 && !i4.lit && s4.six === 6,
+    'INSTRUCTIONS, lit: the team\'s instructions where his card was (' + s3.head + ': ' + s3.instr + ' rows and one note), no ratings; tapped again, his card');
   ok(!s1.paged && !s3.paged && s1.fits && s3.fits && !s3.desc, 'neither side goes over pages: all of it on the screen');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
@@ -366,16 +371,16 @@ for(const [w, h] of SIZES){
   const oopSaid = await said(); await page.tap('#bpBody .tbBench .ptk >> nth=0'); await page.waitForTimeout(100); const benchSaid = await said();
   ok(head.oneLine && head.whole && head.amber && !oopSaid && !benchSaid, '...the longest name out of position: "' + head.name + '" whole on one line, his rating amber, and no line saying he\'s out of position (nor, for a man on the bench, that he\'s on it)');
   const fits = sel => page.evaluate(sel => { const b = document.querySelector(sel); return b.scrollHeight <= b.clientHeight + 1 && !b.querySelector('.fitPager'); }, sel);
-  const walk = async (sel, toks) => { const n = await page.$$eval(toks, ns => ns.length), bad = []; let views = 0;
+  const walk = async (sel, toks, ins) => { const n = await page.$$eval(toks, ns => ns.length), bad = []; let views = 0;
     for(let i = 0; i < n; i++){ await page.tap(`${toks} >> nth=${i}`); await page.waitForTimeout(60);
       if(await page.$(sel + ' [data-six="DEF"]')){ await page.tap(sel + ' [data-six="DEF"]'); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' DEF'); await page.tap(sel + ' [data-six="DEF"]'); await page.waitForTimeout(40); }
-      const fl = await page.$(sel + ' button[data-cside="instr"]'); if(fl){ await fl.tap(); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' instr'); await page.tap(sel + ' button[data-cside="rate"]'); await page.waitForTimeout(40); } }
+      const fl = await page.$(ins + '[data-cside="instr"]'); if(fl){ await fl.tap(); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' instr'); await page.tap(ins); await page.waitForTimeout(40); } }
     return { n, views, bad }; };
-  const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]');
+  const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]', '#bpBody .tbTop .tbIns');
   // (and the team's instructions without the ball: the lines' pitch above the rows -- the tallest of them)
-  await page.tap('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(100); await page.tap('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(150);
+  await page.tap('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(100); await page.tap('#bpBody .tbTop .tbIns'); await page.waitForTimeout(150);
   if(!await fits('#cTacRight') || !(await page.$('#cTacRight .tiPitch'))) wo.bad.push('team without the ball'); else wo.views++;
-  await page.tap('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(80); await page.tap('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(100);
+  await page.tap('#bpBody .tbTop .tbIns'); await page.waitForTimeout(80); await page.tap('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(100);
   await page.tap('.bpTopBack'); await page.waitForTimeout(100);
   for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
@@ -383,10 +388,10 @@ for(const [w, h] of SIZES){
   ok(winOk(hw, true), '...in a match, your man\'s window at the top right beside the menu, his name whole (' + hw.num + ' ' + hw.name + ' ' + hw.pos + ')' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
-  const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk');
-  const lg = await legsRow(page, '#mtacOv .tbRight'), mp = await apart(page, '#mtacOv .tpitch');
-  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && Math.abs(lg.bar - lg.flip) <= 1 && mp.n === 8 && !mp.over && !mp.out,
-    '...in a match his card: STAMINA and a bar, no figure, the button level with its foot (' + lg.bar + ' / ' + lg.flip + '); the match\'s pitch: nobody overlaps or hangs off it');
+  const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk', '#mtacOv .tbTop .tbIns');
+  const lg = await legsRow(page, '#mtacOv .tbRight'), mp = await apart(page, '#mtacOv .tpitch'), mi = await insTop(page, '#mtacOv');
+  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip == null && mi.there && mi.inside && mp.n === 8 && !mp.over && !mp.out,
+    '...in a match his card: STAMINA and a bar, no figure, INSTRUCTIONS up in the top row; the match\'s pitch: nobody overlaps or hangs off it');
   ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 
@@ -403,16 +408,17 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     for(const [k, fee] of [[0, 12500], [1, 9800], [2, 9000]]) d.offers.push({ id: ++d.offerSeq, pid: R[5].id, club: other[k].id, fee });
     R[0].name = 'Samuel Lindqvist'; window.__MG.mgSave(d); return R.map(p => String(p.id)); });
   const card = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P && P.querySelector('.mgCard');
-    return { fits: !!P && P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, paged: !!(P && P.querySelector('.fitPager')), flips: c ? c.querySelectorAll('.cardFlip').length : 0,
+    return { fits: !!P && P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, paged: !!(P && P.querySelector('.fitPager')), flips: c ? c.querySelectorAll('.mgSides [data-mside]').length : 0, tabsIn: (t => !!t && !!P && t.getBoundingClientRect().bottom <= P.getBoundingClientRect().bottom + 1)(c && c.querySelector('.mgSides')),
+      tabH: c && c.querySelector('.mgSideT') ? Math.round(c.querySelector('.mgSideT').getBoundingClientRect().height) : 0, tabCut: c ? [...c.querySelectorAll('.mgSideT')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [],
       long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'],
       cut: c ? [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [] }; });
   const views = [], bad = [];
   const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
     const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
     for(const id of ids){ await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(80);
-      for(const side of ['rate', 'deal', 'career']){   // (his card's three sides: its button turns it to the next)
-        for(let i = 0; i < 3 && await page.$eval('.mgPaneR .mgCard', c => c.dataset.side).catch(() => side) !== side; i++){ const fl = await page.$('.mgPaneR .cardFlip'); if(!fl) break; await fl.tap(); await page.waitForTimeout(60); }
-        const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.cut.length || r.flips !== 1) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
+      for(const side of ['rate', 'deal', 'career', 'mind']){   // (his card's four sides, a tab each along its foot: v116)
+        const tb = await page.$(`.mgPaneR .mgSides [data-mside="${side}"]`); if(tb){ await tb.tap(); await page.waitForTimeout(60); }
+        const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.cut.length || r.flips !== 4 || !r.tabsIn || r.tabH < 28 || r.tabCut.length) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));
         if(side === 'rate' && await page.$('.mgPaneR [data-six="DEF"]')){ await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(60);
           const r2 = await card(); views.push(r2); if(!r2.fits || r2.paged) bad.push(tab + ' DEF open'); await page.tap('.mgPaneR [data-six="DEF"]'); await page.waitForTimeout(40); } } }
     await page.tap('.bpTopBack'); await page.waitForTimeout(100); };
@@ -420,7 +426,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     M.mgMarketOpen(d); M.bldUp(d, 'academy'); d.lv.train = 4; d.budget = 1e6; M.mgSave(d); M.renderHub(); });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await walk('club', 'Squad', [R[0], R[3], R[5]]); await walk('market', 'Selling', [R[3], R[5]]); await walk('market', 'Search'); await walk('market', 'Free agents'); await walk('academy', 'Prospects');
-  ok(views.length >= 30 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, any of its three sides, no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
+  ok(views.length >= 30 && !bad.length, w + 'x' + h + ': a man\'s card in a building never goes over pages, any of its four sides, its tabs along its foot (28 px and taller, every label whole), no long text on it, no fact cut short (' + views.length + ' views: the squad, selling with three bids, the market, free agents, the academy)' + (bad.length ? ' -- ' + bad.slice(0, 2).join(' | ') : ''));
   await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
   const pitch0 = await page.$eval('#bpBody .tpitch', e => Math.round(e.getBoundingClientRect().height));
   const grow = n => page.evaluate(n => { const d = window.__MG.d; let id = 990000 + d.roster.length; while(d.roster.length < n){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 14])); p.id = ++id; p.num = d.roster.length + 1; d.roster.push(p); d.lineup.bench.push(d.roster.length - 1); } window.__MG.mgSave(d); }, n);
@@ -428,10 +434,10 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   const bs = () => page.evaluate(() => { const B = document.querySelector('#bpBody .tbBench'), vis = [...B.querySelectorAll('.ptk')].filter(t => t.getClientRects().length), pg = B.querySelector('.benchPg');
     return { men: B.querySelectorAll('.ptk').length, rows: new Set(vis.map(t => Math.round(t.getBoundingClientRect().top))).size, pager: pg && pg.getClientRects().length ? pg.textContent : '',
       pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
-  // ...and the Selection tab: the whole squad, a bar a man in three columns (the eight, the bench, the rest), no faces,
-  // every bar the same height, all of them on the screen
+  // ...and the Selection tab: the whole squad, a bar a man in three columns (the eight, the bench, the rest; the fourth
+  // is the quick subs), no faces, every bar the same height, all of them on the screen
   const sel = async () => { await page.tap('#bpTabs .bpTab:text-is("Selection")'); await page.waitForTimeout(200);
-    const o = await page.evaluate(() => { const C = [...document.querySelectorAll('#bpBody .selCol')], rows = [...document.querySelectorAll('#bpBody .selRow')], hs = rows.map(r => r.getBoundingClientRect().height);
+    const o = await page.evaluate(() => { const C = [...document.querySelectorAll('#bpBody .selCol:not(.qpCol)')], rows = [...document.querySelectorAll('#bpBody .selRow')], hs = rows.map(r => r.getBoundingClientRect().height);
       return { cols: C.map(c => c.dataset.grp + ' ' + c.querySelectorAll('.selRow').length).join(', '), order: rows.map(r => +r.dataset.k).every((k, i) => k === i), imgs: document.querySelectorAll('#bpBody .selB img').length,
         h: [Math.round(Math.min(...hs)), Math.round(Math.max(...hs))], inside: rows.every(r => { const b = r.getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth; }) }; });
     await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200); return o; };
