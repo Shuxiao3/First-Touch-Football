@@ -243,8 +243,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     promoting him. The third side is his career (see **His story**). In the Squad tab his card has the right side to
     itself (◀ THE TEAM, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
     a man up to drop on it.
-  - **Tactics** (in a career, on the training pitch: its level decides which shapes, styles and instructions your side
-    can have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
+  - **Tactics** (in a career, on the training pitch: its level decides which shapes and styles your side can have; see
+    **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
     seven two to a line -- and BEST 8. Under the pitch, on one line, the bench: five men, the subs you'll have in a
     match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
@@ -280,15 +280,15 @@ The same game played like any other football game. It's a copy of `index.html` w
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
     the keeper and the three lines close up, a man's width each, rather than overlap -- in a match's tactics and the
     Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
-  - **His card has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then RATINGS
-    ▶, one size either way). The top is the same on both: all of him, head to toe (a keeper in a keeper's top),
-    his name, his own position, style, age, skill stars and rating (lime in a second position of his, amber out of position: no line of text says so,
-    nor that he's on the bench), and in a match his stamina: the word and a bar, no figure. Under it, the ratings side has the six (tap one and what
-    it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone 360 px tall
-    or less a category of four ratings puts them two to a line); the other has his spot's instructions for
-    the phase you're looking at, just each one's name and its options, no descriptions, and no ratings. The side
-    you're on stays as you tap from man to man. His card never goes over pages: it has the whole right-hand side,
-    and everything on it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
+  - **The right-hand side has two sides**, turned over with one small button under his rating (INSTRUCTIONS ▶, then
+    ◀ PLAYER). One is his card: all of him, head to toe (a keeper in a keeper's top), his name, his own position,
+    style, age, skill stars and rating (lime in a second position of his, amber out of position: no line of text says
+    so, nor that he's on the bench), and in a match his stamina: the word and a bar, no figure; under it the six (tap
+    one and what it's made of opens under them: its name and a row for each rating, with a coloured bar; on a phone
+    360 px tall or less a category of four ratings puts them two to a line). The other is the TEAM's instructions for
+    the phase you're looking at (v112: see **Team instructions**) -- the same whichever man you tapped. The side you're
+    on stays as you tap from man to man. Neither goes over pages: each has the whole right-hand side, and everything on
+    it fits, down to 640×360. On a short phone his figure and name are drawn a little smaller; on
     a narrow one (700 px wide or less) his name stays on one line. The button that turns it over sits under his
     rating, its foot level with the foot of his stamina bar.
   - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
@@ -630,8 +630,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     TIKI-TAKA). The STYLE menu, on both tabs, has the seven two to a line; a match's tactics have the same.
     - **BALANCED**: positional play. Wide men on the touchlines, a forward pinning their back line, two men always
       open for a pass, and runs in behind when the man on the ball can find them. Without it, a compact block around
-      halfway that goes at the ball together as it comes into the middle third, the forwards screening the pass into
-      midfield.
+      halfway that goes at the ball together as it comes over its line of engagement, the forwards screening the pass
+      into midfield. (v112: each style's block is now its team instructions -- its lines, its press, its tackling: see
+      **Team instructions** -- set as the style's picked, and yours to change.)
     - **GEGENPRESS**: win it high and go. A high line; when they play out from the back the forwards and midfielders
       mark their men; and when it loses the ball the whole side goes straight back at it, together, for five seconds.
       With the ball it's quick and forward, men running in behind, and straight at them when it's won high.
@@ -678,61 +679,85 @@ The same game played like any other football game. It's a copy of `index.html` w
       or two either way is noise.
   - **Your keeper waits for you.** In a match, with the ball in his hands your keeper plays it out when you press PASS
     (on a touch screen the button reads PASS), or by himself once he's had it 5 s; for the last 2 s of that a red
-    stopwatch flashes over his head. Either way it goes where his PASS instruction says: PLAYER, to the man you're
-    playing as (what calling for it always did); CLOSEST OPEN or FARTHEST OPEN, to the nearest or the furthest of ours,
-    up to 55 m away, that the ball gets to with time to spare before any of theirs, the man it's for with an amber ring
-    while the keeper holds it; HOOF IT, as far up as it goes, to the one of ours furthest up the pitch, marked or not.
-    With nobody open he kicks it long. He used to play it out on his own after about a second. The computer's keeper
-    still does.
+    stopwatch flashes over his head. Either way it goes where the side's BUILD-UP says (team instructions, v112):
+    SHORT, to the nearest of ours, up to 55 m away, that the ball gets to with time to spare before any of theirs, the
+    man it's for with an amber ring while the keeper holds it; MIXED, to the man you're playing as (what calling for it
+    always did); LONG, as far up as it goes, to the one of ours furthest up the pitch, marked or not. With nobody open
+    he kicks it long. (Before v112 it was his own PASS instruction, which had a FARTHEST OPEN too.) He used to play it
+    out on his own after about a second. The computer's keeper still does -- by its side's BUILD-UP: LONG kicks it up
+    to a man who can win it (with nobody, after a moment, up the emptier side anyway), SHORT and MIXED find a man near
+    him when one's free (SHORT, made to play it, takes a closer call before going long).
   - **Winning the ball back counts.** All a side does on winning it -- a counter's break, the men going up the pitch
     at a sprint, the counter-press, a deep block noting that it lost the ball high -- starts when the ball changes
     hands. That was read from the last touch alone, and a tackle, a block or a first touch makes the ball the
     winners' before one of them has it at his feet, so it hardly ever started: over 12 minutes a GEGENPRESS side's
     counter-press was on for 151 frames, about one loss's worth, against 4313 now. Now it's the side that last had
     it at a man's feet that lost it; restarts and kick-offs are as they were.
-  - **Instructions go with the position, not the player.** Pick a player in the pause menu or in Training and you
-    get the instructions of the spot he's in. Whoever plays there follows them, swaps and subs included, and each shape
-    keeps its own. What a spot can be told depends on what it is: with the ball in the attacking shape, without it in
-    the defending one.
-    - **Centre-back**: both of a back two, all three of a back three (except in 3-2-2, where it's the middle one), the
-      middle two of a back four, and a lone defender. With the ball, WIDTH (NORMAL / WIDE: the one away from the ball
-      splits wider from his partner) and SUPPORT (NORMAL / PUSH UP: closer to the play in the middle and final thirds,
-      past halfway once the ball's deep in their third / STAY BACK, against the counter). Without it, AGGRESSION (STEP
-      UP: out to the ball, and to a man dropping in front of him, when they're near him / HOLD THE LINE).
-    - **Full-back**: the outside men of a back four, and of 3-2-2's three. With the ball, RUNS (STAY BACK / SUPPORT: up
-      into midfield once we're in their third / ATTACKING: in midfield from the build-up, overlapping nearer their
-      goal). Without it, AGGRESSION (STEP UP / HOLD THE LINE).
-    - **Central midfielder**: both of a midfield two, the middle two of a four, the middle one of a three, or a lone
-      one. With the ball, SUPPORT (STAY BACK / BALANCED / RUN IN BEHIND) and CROSSES (EDGE OF THE BOX / BALANCED /
-      INTO THE BOX, with the ball out wide in their third). Without it, COVER (COVER CENTRE / COVER WING: across to
-      the ball's flank once it's out wide) and DEFENDING (BALANCED / INTERCEPT: in the passing lanes near the ball,
-      reading passes sooner).
-    - **Left or right midfielder**: the outside men of a midfield three or four. With the ball, SUPPORT (COME SHORT /
-      BALANCED / FORWARD: a midfielder in the build-up and a winger nearer their goal, running in behind, cutting in if
-      he's narrow and overlapping if he's wide) and WIDTH (NARROW / BALANCED / WIDE). Without it, DEFENDING (STEP UP /
-      HOLD THE LINE).
-    - **Winger**: the outside men of a front three. With the ball, SUPPORT (RUN IN BEHIND / BALANCED / COME SHORT) and
-      WIDTH (CUT INSIDE / BALANCED / STAY WIDE). Without it, DEFENDING (COME BACK / BALANCED / STAY UP).
-    - **Striker**: both of a front two, the middle one of a three, or a lone one. With the ball, WIDTH (CENTRAL /
-      BALANCED / WIDE) and RUNS (RUN IN BEHIND / BALANCED / TARGET MAN: up and central, holding it up / FALSE NINE:
-      dropping into midfield). Without it, DEFENDING (COME BACK / BALANCED / STAY FORWARD).
-    - **Keeper**: his own, whatever the shape, on either tab: PASS (PLAYER / CLOSEST OPEN / FARTHEST OPEN / HOOF IT),
-      who he plays it to. See **Your keeper waits for you**.
+  - **Team instructions (v112).** One set for the whole side, by its lines -- not a man's, nor a spot's -- on the other
+    side of the right-hand column (INSTRUCTIONS ▶), for the phase you're looking at. Each setting is a row; under them,
+    a line saying what the one you touched last does. A career keeps your side's, an exhibition club its own (only
+    where you've changed its style's), and picking a style sets that style's (see below); then change them as you like.
+    - **Without the ball**, first a little pitch of their own, to scale, our goal on the left: the DEFENSIVE LINE (how
+      high the back line holds, with the ball far off) and the LINE OF ENGAGEMENT (where the side starts to go at it),
+      each a line to drag -- a finger anywhere on the pitch takes the nearer one -- with its distance from our goal on
+      it, and dots for where the three lines stand. The back line goes from 15 m to 50 m, the line of engagement from
+      30 m to 80 m, and never closer to the other than 14 m: dragged into it, a line stops. Then the rows: ENGAGE WITH
+      (FORWARDS: the forwards on the line of engagement, the midfield halfway between them and the back line; MIDFIELD:
+      the midfield on it, the forwards a few yards ahead, further if they're told to PRESS UP); DEFENDERS (HOLD THE
+      LINE: their height held, and a runner picked up a beat late, as before; OFFSIDE TRAP: with the man on the ball
+      facing them, free to pick a pass, and one of theirs on their line, they step up together 3.5 m for a moment --
+      leave a man on the old line and he's off when it's played; they don't track runners, they leave them to the
+      flag; FOLLOW RUNNERS: a runner picked up from further, at once, from a wider zone, and gone with across the pitch;
+      PRESS UP: out to a man dropping in front of them, tight); DEF TACKLES and MID TACKLES (STAY IN FRONT: goal-side,
+      a yard further off, and in only when the ball's there to win -- not at a man running at him; BALANCED: as before;
+      TACKLE: tighter, and in for it half as often again); FORWARDS (CONSERVE: up the pitch for the ball out, no sprint
+      back; DEFEND THE LINE: on the line of engagement, in the way of the passes into midfield; PRESS UP: at the ball
+      beyond the line, and on the men it could go to).
+    - **The line of engagement, in the match.** With the ball beyond it (and a stride, 10 m), nobody goes and gets it:
+      the man nearest waits on his line, in the lane between his place in it and the man on the ball, and the block
+      waits with him; the ball coming over it springs the block, all of it at once (it used to be the middle third,
+      for every side). Only forwards told to PRESS UP go beyond it. A man a long way upfield of his place in the block
+      (15 m; a forward told to DEFEND THE LINE 18 m) gets back at a sprint, so a deep block forms quickly.
+    - **With the ball**: BUILD-UP (SHORT, MIXED, LONG: your keeper's ball -- see **Your keeper waits for you** -- and the
+      computer's, and how the back line moves it on: SHORT plays it safe and short from the back, LONG looks long);
+      DEFENDERS (STAY BACK, SUPPORT, PUSH UP: the full-backs staying in the back line, joining the midfield in their third
+      as before, or up from the build-up and overlapping, the centre-backs closer to the play); MIDFIELD (STAY BEHIND:
+      the central midfielders behind the ball, waiting at the edge of the box for a cross; BALANCED; GET FORWARD: one
+      holds, the others run in behind and get in the box); FORWARDS (COME SHORT: the strikers drop between their lines
+      for it to feet; BALANCED: one pins their line, the other comes short; IN BEHIND: on their last man, running in
+      behind, and going again sooner); WIDE MEN (TO FEET, BALANCED, IN BEHIND: the wingers and wide midfielders coming
+      to the ball or running in behind).
+    - **What a style sets.** BALANCED, WING PLAY and FLUID COUNTER: the back line at 32 m and the line of engagement at
+      54 m (where the old mid block stood), everything else BALANCED (and the defenders HOLD THE LINE, the forwards
+      DEFEND THE LINE, the full-backs SUPPORT). GEGENPRESS: 46 m and 68 m, both lines TACKLE, the forwards PRESS UP.
+      DIRECT COUNTER: 20 m and 34 m, the midfield on the line of engagement, BUILD-UP LONG. CONTROL POSSESSION:
+      BUILD-UP SHORT. DIRECT: BUILD-UP LONG. The computer's clubs play their style's -- they used to have no
+      instructions at all. (The block the old code still reads -- high press, mid block, low block -- follows them: a
+      high one with the forwards pressing up and the line of engagement at 62 m or more, a low one with the back line
+      at 24 m or less.)
+    - **Measured** in computer v computer matches (Arsenal against Aston Villa, ten minutes, three a setting, Arsenal
+      told one thing, Villa on BALANCED's). Without the ball -- with Villa on it a while in their own half:
 
-    The defaults (BALANCED, NORMAL, SUPPORT for a full-back's runs, HOLD THE LINE and COVER CENTRE) play as before,
-    with two exceptions. A 3-2-2's full-backs used to go up their flanks from the middle third and now, on SUPPORT,
-    wait until we're in their third. And WING PLAY's overlap is a full-back's only, so a centre-back of a back two no
-    longer goes. A central midfielder told to RUN IN BEHIND never holds; if he's the only central one, the side plays
-    without a holder. Each setting has a line under it saying what it does. A career keeps your positions'
-    instructions, and an exhibition club keeps them with its squad. The per-player instructions of the last version
-    are gone. Measured in 10-minute computer-against-computer games, against the same side left on the defaults:
-    - **Strikers.** One told to RUN IN BEHIND is on their last line for 66% of his side's possession (38% otherwise),
-      and a TARGET MAN 62%. A FALSE NINE plays 6.6 m deeper.
-    - **Central midfielders.** One told to STAY BACK holds 73% of the time (40%), and one told to RUN IN BEHIND
-      (and INTO THE BOX for crosses) plays 13 m further up.
-    - **Wide men and full-backs.** A full-back told ATTACKING is up his flank 41% of the time (9%) and 7 m wider. A
-      wide midfielder told NARROW plays 6 m narrower; a winger told to CUT INSIDE plays 9 m narrower and one told to
-      STAY WIDE 3 m wider.
+      | Arsenal told | Back line | Midfield | Forwards | A man on theirs on the ball | Won it in their half |
+      |---|---|---|---|---|---|
+      | BALANCED's (32 m, 54 m) | 30 m | 46 m | 58 m | 16% | 10 |
+      | Lines deep (18 m, 36 m) | 21 m | 40 m | 51 m | 2% | 9 |
+      | Lines high (46 m, 70 m) | 42 m | 56 m | 65 m | 34% | 22 |
+      | ENGAGE WITH MIDFIELD | 30 m | 54 m | 61 m | 31% | 25 |
+      | FORWARDS PRESS UP | 31 m | 47 m | 60 m | 20% | 18 |
+      | GEGENPRESS's | 40 m | 55 m | 63 m | 36% | 22 |
+      | DIRECT COUNTER's | 20 m | 42 m | 52 m | 4% | 10 |
+
+      (Three matches' worth; the lines measured where they stand, the defenders' mean.) Both TACKLES at TACKLE: 99
+      tackles in three matches, against 54; at STAY IN FRONT, 36. DEFENDERS PRESS UP: 73 tackles, the back line 1.5 m
+      higher. The OFFSIDE TRAP: with Villa on it in midfield, the back line 2.5 m higher, and two offsides in three
+      matches (the computer won't play a ball to a man it can see is off, so it's your passes it catches). FOLLOW
+      RUNNERS is the subtle one: the nearest defender half a metre nearer a runner in mid-run. CONSERVE plays as DEFEND
+      THE LINE in a mid block (the forwards are up anyway); in a deep one its forwards stay up for the ball out. With the
+      ball: runs in behind in three matches -- BALANCED's 319, the WIDE MEN TO FEET 178 and IN BEHIND 342, the
+      FORWARDS COME SHORT 255 (the strikers 9 m deeper) and IN BEHIND 350, the MIDFIELD GET FORWARD 356; STAY BEHIND
+      keeps the central midfielders 5 m deeper; DEFENDERS PUSH UP has the centre-backs 1.5 m further up and STAY BACK
+      3 m further back. The computer's keeper told LONG kicks it every time, told SHORT throws or rolls it.
     - **Centre-backs.** One told to STAY BACK sits 2.4 m further behind the ball once it's past our third.
     - **Without the ball.**
       - A centre-back told to STEP UP picks up a man 16% of the time (4%); a wide midfielder told to, 33% (14%).
@@ -1647,9 +1672,8 @@ The same game played like any other football game. It's a copy of `index.html` w
         level is what shapes and styles your side can have: at 1 the 2-3-2, 3-2-2 and 2-2-3 and the balanced and direct
         styles; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter; 3 the 3-1-3, 1-4-2 and 4-1-2, control
         possession and direct counter; 4 the 1-3-3 and gegenpress. The rest are on the menus, locked, each with the
-        level it needs -- in a match's tactics too. Width is always yours, and so (v106) is every player instruction,
-        from the first day: before, they came with the levels (support and runs at 2, width and crosses at 3, the
-        defending ones at 4).
+        level it needs -- in a match's tactics too. Width is always yours, and so are the team instructions (v112), from
+        the first day (before them every player instruction was, from v106; before that they came with the levels).
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
         day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
@@ -1820,8 +1844,8 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   Change your club's style or width (before kick-off or in the match) and the club keeps it, as it keeps a shape;
   set it back to the club's own and nothing's kept as a change.
 - **TACTICS before kick-off.** Beside KICK OFF on the setup screen, TACTICS sets the match up and waits: its tactics
-  screen comes up before kick-off -- your shapes with the ball and without it, width, style, every man's card and
-  instructions, the other side's to look at. ◀ CLUBS goes back to the setup screen, KICK OFF ▶ plays it, everyone
+  screen comes up before kick-off -- your shapes with the ball and without it, width, style, every man's card and the
+  team's instructions, the other side's to look at. ◀ CLUBS goes back to the setup screen, KICK OFF ▶ plays it, everyone
   in his spot in the shape you picked. A man off the bench dragged onto one in the team is a change of team there,
   not a sub: the other goes to the bench (and back again if you like), and all three subs are still yours. It's all
   kept with your club, as a change in the match is. KICK OFF on the setup screen still goes straight in.
@@ -1932,6 +1956,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **Team instructions (v112).** Every man's -- every spot's -- instructions are gone; the side has one set, by its
+  lines. Without the ball: the defensive line and the line of engagement, dragged on a little pitch of their own (never
+  closer than 14 m), which line stands on the line of engagement (the forwards or the midfield), what the back line does
+  (HOLD THE LINE, OFFSIDE TRAP, FOLLOW RUNNERS, PRESS UP), how the back line and the midfield go into a tackle (STAY IN
+  FRONT, BALANCED, TACKLE), and what the forwards do (CONSERVE, DEFEND THE LINE, PRESS UP). With it: the BUILD-UP
+  (SHORT, MIXED, LONG -- your keeper's ball as well, in place of his PASS), how far the defenders, the midfield and the
+  forwards go forward, and what the wide men look for (TO FEET, IN BEHIND). A style picked sets its own; the computer's
+  clubs play their style's. Beyond the line of engagement nobody goes and gets it; the ball coming over it springs the
+  block. See **Team instructions**.
 - **The computer goes forward (v111).** It kept giving the ball back: forward a little, then back, and back again
   whenever it was pressed. A ball back now costs more than the ground it gives up -- more in the other half, more with
   a man on him there, more straight after a ball forward -- and ground counts for more. Its balls back are down from
@@ -1968,7 +2001,7 @@ test, and like the Trap Lab the values are the game's settings.
   in the second half, the winner at the death), theirs a plain GOAL; SIM THE REST in the pause menu; the match report
   in two screens (the result, then your players' numbers) and THE MONEY back at the club; the press conference in a
   press room drawn for your league; the Monday papers waiting off to the side (PAPERS, an orange count); every player
-  instruction open from the start; and back from v91, after a standing tackle your man shields it from the man he
+  instruction open from the start (they're the team's now: v112); and back from v91, after a standing tackle your man shields it from the man he
   took it from (see **After a tackle**). See **The match report**, **The goal, celebrated** and **Sim the rest** in
   the match section, and **The press conference** and **The money** under the manager career.
 - **Deadline day and the fans (v105).** Every man has a popularity, on his card; your most popular bring more

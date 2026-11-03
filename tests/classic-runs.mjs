@@ -3,7 +3,7 @@
 // then goes; a run carries on when the ball's moved on to another team-mate who can still find him; a wide man runs into
 // the gap in their line in his own channel, not off towards a bigger one on the far side; a run that would land near their
 // goal goes in towards it, into the box, not on down the line; the man who's just played it forward goes again; a
-// forward's run across their line takes a midfielder told to RUN IN BEHIND into the lane it emptied (THE THIRD MAN); the
+// forward's run across their line takes a midfielder into the lane it emptied, the midfield told to GET FORWARD (THE THIRD MAN); the
 // ball through to the box (or near it, in the middle) takes the wide men in at the back post. YOUR THROUGH BALL (v80, v81):
 // into the runner's path, where he's already going, the drag only leaning it (a third of its angle off his line, 15 degrees
 // at most); a man standing still gets it where the drag points. A BALL OVER HIS HEAD (v81): played on ahead of a man on
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, teamPlan, PLAN:()=>PLAN, mkPlanState, PI:()=>PI, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, teamPlan, PLAN:()=>PLAN, mkPlanState, TI:()=>TI, tiDefault, '
   + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, watchBall, onAhead, inStride, controlled:()=>controlled, setControlled, EXH, simNow:()=>simNow, setStyle, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } '
@@ -38,8 +38,9 @@ await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
   window.__uw = (team, x, y) => { const a = T.atkOf(team); return [+((a > 0 ? x : T.FW - x) / M).toFixed(1), +((y - T.YC) / M).toFixed(1)]; };
   window.__men = team => T.players().filter(q => q.team === team && !q.benched);
   window.__by = (team, pos, ph, i) => window.__men(team).filter(q => T.posOf(q, ph || 'atk') === pos).sort((a, b) => a.homeY - b.homeY)[i || 0];
-  window.__ins = (q, k, v) => { const sl = q.slotAtk, PI = T.PI(); const t = PI[q.team] || (PI[q.team] = {}); const ph = t.atk || (t.atk = {}); const f = ph[sl.form] || (ph[sl.form] = {}); f[sl.si] = Object.assign({}, f[sl.si], { [k]: v }); };
-  window.__clearIns = () => { const PI = T.PI(); for(const t of ['G', 'R']) if(PI[t]) PI[t].atk = {}; };
+  // (v112: instructions are the team's -- its lines' -- not a man's: TEAM.G.<key> = setting; cleared, the side's style's own)
+  window.__ti = (k, v) => { T.TI().G[k] = v; };
+  window.__clearIns = () => { for(const t of ['G', 'R']){ const d = T.tiDefault('neutral'); for(const k in d) T.TI()[t][k] = d[k]; } };
   // City's block: three across their line (u from their goal), three in front of it, the forward up; their keeper on his line
   window.__city = (uLine, ws, uMid) => { const R = window.__men('R'), back = R.filter(q => T.posOf(q, 'def') === 'CB'), rest = R.filter(q => !back.includes(q));
     back.forEach((q, i) => window.__at(q, uLine, ws[i]));
@@ -105,7 +106,7 @@ ok(r.old !== null && Math.abs(r.old - 29) > 17 && r.now !== null && Math.abs(r.n
 r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(17, [-12, -2, 6], 27);
   const cm = window.__by('G', 'CM', 'atk', 1), st = window.__by('G', 'ST'), wr = window.__by('G', 'W', 'atk', 1), wl = window.__by('G', 'W', 'atk', 0);
   window.__at(cm, 66, 11); window.__at(st, 64, -12); window.__at(wl, 55, -28); window.__at(wr, 74, 26);
-  window.__ins(st, 'stRuns', 'target'); window.__ins(wl, 'wSupport', 'short');   // (him the only one to go)
+  st.runCd = 9; wl.runCd = 9;   // (him the only one to go: the others just gone, and not yet ready to go again)
   window.__give(cm); const p = window.__plan(); const run = p.jobs.find(j => j.job === 'RUN'); return { run, p, runs: p.runs, uol: p.uol }; });
 info('their line 17 m out, the right winger 26 m across: ' + show(r.p));
 ok(r.run && r.run.pos === 'W' && Math.abs(r.run.w) < 26 - 4, `his run goes in towards their goal, not on down his touchline: landing ${r.run && r.run.w} m across (he's 26 m across)`);
@@ -123,15 +124,15 @@ r = await page.evaluate(() => { const T = window.__T; const go = runIns => { T.r
     const cb = window.__by('G', 'CB', 'atk', 0), st = window.__by('G', 'ST'), wl = window.__by('G', 'W', 'atk', 0), wr = window.__by('G', 'W', 'atk', 1);
     const h = T.holderOf('G'), all = window.__men('G').filter(q => T.posOf(q, 'atk') === 'CM'), cms = [all.find(q => q === h) || all[0], all.find(q => q !== h) || all[1]];   // (the holder plays it; the other's the third man)
     window.__at(cb, 36, 0); window.__at(cms[0], 52, -6); window.__at(cms[1], 60, 12); window.__at(st, 66, 19); window.__at(wl, 50, -28); window.__at(wr, 50, 30);
-    window.__ins(st, 'stRuns', 'run'); window.__ins(wl, 'wSupport', 'short'); window.__ins(wr, 'wSupport', 'short');
-    if(runIns) window.__ins(cms[1], 'cmSupport', 'run');
+    window.__ti('aruns', 'run'); window.__ti('wide', 'feet');   // (the forwards IN BEHIND, the wide men TO FEET)
+    if(runIns) window.__ti('mruns', 'fwd');                      // (the midfield told to GET FORWARD: the one who isn't holding goes)
     window.__give(cms[0]); const p = window.__plan(); return { runs: p.runs, jobs: p.jobs.filter(j => j.job === 'RUN'), cm: window.__nm(cms[1]), st: window.__nm(st), stAt: 19 }; };
   return { run: go(true), bal: go(false) }; });
 info('third man (told to run in behind): ' + JSON.stringify(r.run.runs) + ' ' + JSON.stringify(r.run.jobs) + ' | balanced: ' + JSON.stringify(r.bal.runs));
 const third = r.run.runs.find(R => R.third), thirdJob = third && r.run.jobs.find(j => j.q === third.q), stJob = r.run.jobs.find(j => j.q === r.run.st);
 ok(stJob && Math.abs(stJob.w - r.run.stAt) > 5 && third && third.q === r.run.cm && thirdJob && Math.abs(thirdJob.w - r.run.stAt) < 3,
-  `the striker runs in across their line (to ${stJob && stJob.w} m across, from ${r.run.stAt}), and ${r.run.cm}, told to run in behind, goes into the lane he left (${thirdJob && thirdJob.w} m across)`);
-ok(!r.bal.runs.some(R => R.third), `told BALANCED, he doesn't: he gives the man on the ball a pass instead (runs: ${r.bal.runs.map(R => R.q).join(', ')})`);
+  `the striker runs in across their line (to ${stJob && stJob.w} m across, from ${r.run.stAt}), and ${r.run.cm}, the midfield told to GET FORWARD, goes into the lane he left (${thirdJob && thirdJob.w} m across)`);
+ok(!r.bal.runs.some(R => R.third), `the midfield BALANCED, he doesn't: he gives the man on the ball a pass instead (runs: ${r.bal.runs.map(R => R.q).join(', ')})`);
 
 // --- IN AT THE BACK POST: a ball through to the edge of their box, in the middle -- the wide men go in --------------------
 r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(24, [-8, 2, 12], 34);

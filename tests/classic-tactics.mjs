@@ -1,7 +1,7 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
 // never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, seven styles each
-// with its own block without the ball (no posture to set), anyone in any position (the keeper too), instructions by position (each spot's own, kept when
-// the men in it change; a midfielder told to run in behind gives up holding), the keeper's own (PASS), skill stars in
+// with its own block without the ball (no posture to set), anyone in any position (the keeper too), the team's instructions
+// (v112: no man's or spot's own -- the lines to drag, a style's own set, kept with the career, the same in the match), skill stars in
 // the match (each man's own, one to five: which moves each allows is classic-moves.mjs), and POSITIONS: a man's own (a
 // holding or attacking midfielder's CM's too), his second ones (CB: FB; FB: WM, CB; CM: WM; DM: CB; AM: WM, W, ST; WM:
 // FB, W; W: WM, ST; ST: W) and the rest -- what each costs his Off IQ and Def IQ in a match (the spot with the ball his
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={statOf, posPenOf, natPos, posFit, FIT_PEN, rateAt, players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, ins, instrKeysFor, PI:()=>PI, piSet, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={statOf, posPenOf, natPos, posFit, FIT_PEN, rateAt, players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, TI:()=>TI, tiDefault, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
 patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, mgSave, careerStars, natPos, posFit, ovrAt, careerSquad, careerSlots, cwFormFor, mgAiClubs, careerMapDef, defFormFor, postureOf};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
@@ -115,53 +115,47 @@ await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
 ok(d.roster[d.lineup.gk].role === 'GK', 'PICK MY BEST EIGHT puts a keeper back in goal');
 
-// instructions by position (2-2-3 with the ball: CB CB CM CM W ST W; 3-3-1 without it: CB CB CB WM CM WM ST)
+// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): his card turned over (INSTRUCTIONS ▶) is the team's for the
+// phase -- with the ball BUILD-UP, DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN; without it the lines' own pitch (the
+// defensive line and the line of engagement, to drag: in range, never closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF
+// TACKLES, MID TACKLES and FORWARDS -- the same whichever man you tapped, kept with the career, a style's own when it's picked
 const tap = async ri => { await page.click(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(60); };
-const panel = () => page.evaluate(() => ({ head: (document.querySelector('#cTacRight .instrHead') || {}).textContent || '',
-  groups: [...document.querySelectorAll('#cTacRight .instrGrpLbl')].map(n => n.textContent),
-  on: [...document.querySelectorAll('#cTacRight .iOpt.on')].map(n => n.dataset.ci + '=' + n.dataset.v) }));
-const ci = async (k, v) => { await page.click(`#cTacRight [data-ci="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
+const panel = () => page.evaluate(() => { const P = document.querySelector('#cTacRight .tiPanel'); return P ? { head: P.querySelector('.tiHead').textContent,
+  rows: [...P.querySelectorAll('.tiRow .tiLbl')].map(n => n.textContent), on: [...P.querySelectorAll('.tiOpt.on')].map(n => n.dataset.cti + '=' + n.dataset.v),
+  pitch: !!P.querySelector('.tiPitch'), tags: [...P.querySelectorAll('.tiTag')].map(n => n.textContent), note: P.querySelector('.tiNote').textContent } : null; });
+const cti = async (k, v) => { await page.click(`#cTacRight [data-cti="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
-await tap(lu.atk[5]); await page.click('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(60);   // (his card turned over: the INSTRUCTIONS side, kept from man to man)
+await tap(lu.atk[5]); await page.click('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(60);
 let pn = await panel();
-ok(String(pn.groups) === 'WIDTH,RUNS' && !pn.head, 'the striker\'s instructions with the ball, on his card without a heading: ' + pn.groups.join(', '));
-await ci('stRuns', 'false9'); await ci('stWidth', 'wide');
+ok(pn && String(pn.rows) === 'BUILD-UP,DEFENDERS,MIDFIELD,FORWARDS,WIDE MEN' && /WITH THE BALL/.test(pn.head) && !pn.pitch, 'his card turned over: the team\'s instructions with the ball -- ' + (pn && pn.rows.join(', ')));
+await cti('build', 'long'); await cti('aruns', 'run'); await cti('wide', 'feet');
+pn = await panel();
+ok(/^WIDE MEN: /.test(pn.note), 'the note under them is the last one touched: ' + pn.note);
 await tap(lu.atk[4]); pn = await panel();
-ok(String(pn.groups) === 'SUPPORT,WIDTH', 'the left winger\'s: ' + pn.groups.join(', '));
-await ci('wWidth', 'inside');
+ok(pn && pn.on.includes('build=long') && pn.on.includes('aruns=run') && pn.on.includes('wide=feet'), 'another man tapped: the same set, the team\'s -- ' + (pn && pn.on.join(' ')));
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);
-await tap(lu.def[0]); pn = await panel();
-ok(String(pn.groups) === 'AGGRESSION', 'a centre-back\'s without it: ' + pn.groups.join(', '));
-await ci('cbAggr', 'step');
-await tap(lu.def[4]); pn = await panel();
-ok(String(pn.groups) === 'COVER,DEFENDING', 'the central midfielder\'s: ' + pn.groups.join(', '));
-await ci('cmCover', 'wing'); await ci('cmDef', 'int');
-await tap(lu.def[6]); await ci('stDef', 'up');
+pn = await panel();
+ok(pn && String(pn.rows) === 'ENGAGE WITH,DEFENDERS,DEF TACKLES,MID TACKLES,FORWARDS' && pn.pitch && /WITHOUT THE BALL/.test(pn.head), 'without the ball: the lines\' pitch, then ' + (pn && pn.rows.join(', ')));
+ok(String(pn.tags) === 'DEF 46 m,ENGAGE 68 m' && pn.on.includes('dtk=tackle') && pn.on.includes('mtk=tackle') && pn.on.includes('aline=press'), 'GEGENPRESS picked, its instructions came with it: ' + pn.tags.join(', ') + ' -- ' + pn.on.join(' '));
+// the lines dragged: the line of engagement up to 74 m; the back line up into it stops at 50 m (as high as it goes); the line
+// of engagement back down into it stops 14 m in front of it
+const dragLine = async (fromM, toM) => { const b = await page.$eval('#cTacRight .tiPitch', e => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+  const X = m => b.x + b.w * m / 99.75; await page.mouse.move(X(fromM), b.y + b.h / 2); await page.mouse.down(); await page.mouse.move(X(toM), b.y + b.h / 2, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(80); };
+await dragLine(68, 74); d = await save(); const l1 = [d.ti.dl, d.ti.loe];
+await dragLine(46, 72); d = await save(); const l2 = [d.ti.dl, d.ti.loe];
+await dragLine(74, 40); d = await save(); const l3 = [d.ti.dl, d.ti.loe];
+pn = await panel();
+ok(l1.join() === '46,74' && l2.join() === '50,74' && l3.join() === '50,64' && String(pn.tags) === 'DEF 50 m,ENGAGE 64 m',
+  'the lines dragged: the line of engagement up (' + l1 + '), the back line up into it stopping at its highest (' + l2 + '), the line of engagement down into it stopping 14 m short (' + l3 + ')');
+await cti('eng', 'mid'); await cti('dline', 'trap'); await cti('dtk', 'front');
 d = await save();
-const PIc = d.pinstr;
-ok(JSON.stringify(PIc.atk['2-2-3'][5]) === '{"stRuns":"false9","stWidth":"wide"}' && JSON.stringify(PIc.atk['2-2-3'][4]) === '{"wWidth":"inside"}', 'saved with the ball: ' + JSON.stringify(PIc.atk));
-ok(PIc.def['3-3-1'][0].cbAggr === 'step' && PIc.def['3-3-1'][4].cmCover === 'wing' && PIc.def['3-3-1'][4].cmDef === 'int' && PIc.def['3-3-1'][6].stDef === 'up', 'saved without it: ' + JSON.stringify(PIc.def));
-await ci('stDef', 'bal');
-d = await save();
-ok(!d.pinstr.def['3-3-1'][6], 'back to BALANCED: nothing kept');
-// THE KEEPER'S OWN: PASS (who he plays it to when you press PASS, or when his time's up), on either tab
-await tap(lu.gk); pn = await panel();
-const gkOpts = await page.$$eval('#cTacRight [data-cgi="gkPass"]', ns => ns.map(n => n.textContent));
-const gkOn = await page.$eval('#cTacRight [data-cgi="gkPass"].on', n => n.textContent);
-ok(String(pn.groups) === 'PASS' && String(gkOpts) === 'PLAYER,CLOSEST OPEN,FARTHEST OPEN,HOOF IT' && gkOn === 'PLAYER', 'the keeper\'s instructions: PASS -- ' + gkOpts.join(' / ') + ' (' + gkOn + ' to start with)');
-await page.click('#cTacRight [data-cgi="gkPass"][data-v="farthest"]'); await page.waitForTimeout(60);
-d = await save();
-ok(d.pinstr.gk && d.pinstr.gk.gkPass === 'farthest' && (await page.$eval('#cTacRight [data-cgi="gkPass"].on', n => n.textContent)) === 'FARTHEST OPEN', 'FARTHEST OPEN picked, and saved: ' + JSON.stringify(d.pinstr.gk));
-// they go with the position: the striker and the left winger swap places, and the false nine is still a false nine
-await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
-const st0 = lu.atk[5], w0 = lu.atk[4];
-await drag(`#bpBody .tpitch .ptk[data-ri="${st0}"]`, `#bpBody .tpitch .ptk[data-ri="${w0}"]`);
-d = await save(); lu = d.lineup;
-await tap(lu.atk[5]); pn = await panel();
-ok(lu.atk[5] === w0 && lu.atk[4] === st0 && pn.on.includes('stRuns=false9') && d.pinstr.atk['2-2-3'][5].stRuns === 'false9', 'after a swap the spot keeps its instructions: the new man there is the false nine');
+const tiKeep = d.ti;
+ok(tiKeep.eng === 'mid' && tiKeep.dline === 'trap' && tiKeep.dtk === 'front' && tiKeep.mtk === 'tackle' && tiKeep.aline === 'press' && tiKeep.build === 'long' && tiKeep.aruns === 'run' && tiKeep.wide === 'feet',
+  'kept with the career: ' + JSON.stringify(tiKeep));
 const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
 await page.click('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(60);
+await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);   // (back to the shape with the ball)
 
 // a drag's fits and swaps
 const a0 = lu.atk[1], b0 = lu.atk[2], def0 = d.lineup.def.slice();
@@ -234,9 +228,8 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
   const count = (ps, k) => { const o = {}; for(const p of ps){ const r = p[k].role; o[r] = (o[r] || 0) + 1; } return o; };
   const by = id => G.find(p => p.lookKey === id);
   const posOK = G.every(p => p.slotAtk.pos === T.POS_OF[f[0]][p.slotAtk.si] && p.slotDef.pos === T.POS_OF[f[1]][p.slotDef.si]);
-  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, gk: (T.PI().G.gk || {}).gkPass, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
-    st: [T.ins(by(ids.st), 'stRuns'), T.ins(by(ids.st), 'stWidth')], cb: T.ins(by(ids.cb), 'cbAggr'), cm: [T.ins(by(ids.cm), 'cmCover'), T.ins(by(ids.cm), 'cmDef')],
-    other: G.filter(p => p.lookKey !== ids.st).map(p => T.ins(p, 'stRuns')), stars: G.map(p => p.stars),
+  return { f, gAtk: count(G, 'slotAtk'), gDef: count(G, 'slotDef'), rDef: count(R, 'slotDef'), posOK, sty: [T.TAC.G.style, T.TAC.G.def, T.TAC.R.style, T.TAC.R.def, T.postureOf(T.TAC.R.style)],
+    ti: T.TI().G, tiR: T.TI().R, tiR0: T.tiDefault(T.TAC.R.style), stars: G.map(p => p.stars),
     legs: [by(ids.st).staminaCap, Math.min(...G.filter(p => p.lookKey !== ids.st).map(p => p.staminaCap))],
     want: G.map(p => { const S = window.__S, r = S.d.roster.find(q => q.id === p.lookKey); return r ? S.careerStars(r) : null; }) }; }, ids);
 ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
@@ -244,10 +237,9 @@ ok(Math.abs(m.legs[0] - 0.6) < 0.03 && m.legs[1] > 0.97, 'a man 60% fit starts t
 ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
 ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
-ok(m.gk === 'farthest', 'the keeper\'s PASS in the match: ' + m.gk);
-ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match; they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
-ok(m.st.join() === 'false9,wide' && m.cb === 'step' && m.cm.join() === 'wing,int', 'in the match the men in those spots follow them: ' + JSON.stringify([m.st, m.cb, m.cm]));
-ok(m.other.every(v => v === 'bal'), 'nobody else is a false nine');
+ok(JSON.stringify(m.ti) === JSON.stringify(tiKeep), 'your team instructions in the match, as you left them: ' + JSON.stringify(m.ti));
+ok(JSON.stringify(m.tiR) === JSON.stringify(m.tiR0), 'theirs: their style\'s own (' + m.sty[2] + ')');
+ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match (its forwards pressing up, the line of engagement high); they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
 ok(m.stars.every(s => s >= 1 && s <= 5) && m.stars.join() === m.want.join(), 'every man in the match has his own skill stars (one to five, for his age): ' + m.stars.join(''));
 // IN THE MATCH: a man's spots cost him -- with the ball his Off IQ, without it his Def IQ -- as they fit his position
 const iq = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && T.natPos({ role: q.natRole, subRole: q.subRole, style: q.style }) === 'CB') || T.players().find(q => q.team === 'G');
@@ -285,17 +277,11 @@ const sub3 = await page.evaluate(() => ({ used: window.__T.SUBS().G.used, head: 
 ok(sub3.used === 3 && /SUBS LEFT 0/.test(sub3.head) && sub3.bench === 2, 'a second sub and a third, and no fourth: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
 await page.click('#mtacOv [data-mt="back"]'); await page.waitForTimeout(80); await page.click('#pauseMenu [data-pause="back"]');
 
-// what each position can be told, with the ball and without it
-const keys = await page.evaluate(() => { const T = window.__T, o = {}; for(const pos of ['CB','FB','CM','WM','W','ST']) for(const ph of ['atk','def']) o[pos + ph] = T.instrKeysFor(pos, ph).join(','); return o; });
-ok(keys.CBatk === 'cbWidth,cbSupport' && keys.CBdef === 'cbAggr' && keys.FBatk === 'fbRuns' && keys.FBdef === 'fbAggr', 'defenders: ' + [keys.CBatk, keys.CBdef, keys.FBatk, keys.FBdef].join(' | '));
-ok(keys.CMatk === 'cmSupport,cmCross' && keys.CMdef === 'cmCover,cmDef' && keys.WMatk === 'wmSupport,wmWidth' && keys.WMdef === 'wmDef', 'midfielders: ' + [keys.CMatk, keys.CMdef, keys.WMatk, keys.WMdef].join(' | '));
-ok(keys.Watk === 'wSupport,wWidth' && keys.Wdef === 'wDef' && keys.STatk === 'stWidth,stRuns' && keys.STdef === 'stDef', 'forwards: ' + [keys.Watk, keys.Wdef, keys.STatk, keys.STdef].join(' | '));
-// a midfielder told to RUN IN BEHIND is never the one holding
-const hk = await page.evaluate(() => { const T = window.__T, f = T.forms()[0], h0 = T.holderOf('G'); if(!h0) return {};
-  T.piSet(T.PI().G, 'atk', f, h0.slotAtk.si, 'cmSupport', 'run'); const h1 = T.holderOf('G');
-  T.piSet(T.PI().G, 'atk', f, h0.slotAtk.si, 'cmSupport', 'bal'); T.holderOf('G');
+// the holder: told to GET FORWARD the other midfielders go, and one still holds
+const hk = await page.evaluate(() => { const T = window.__T, h0 = T.holderOf('G'); if(!h0) return {}; const keep = T.TI().G.mruns;
+  T.TI().G.mruns = 'fwd'; const h1 = T.holderOf('G'); T.TI().G.mruns = keep; T.holderOf('G');
   return { h0: h0.lookKey, h1: h1 && h1.lookKey }; });
-ok(hk.h0 && hk.h1 !== hk.h0, 'told to RUN IN BEHIND, the holder hands it on (' + (hk.h1 ? 'to his partner' : 'to nobody') + ')');
+ok(hk.h0 && hk.h1 === hk.h0, 'told to GET FORWARD, the midfield keeps its holder (one holds, the others go)');
 
 process.exitCode = rep.finish();
 await browser.close();

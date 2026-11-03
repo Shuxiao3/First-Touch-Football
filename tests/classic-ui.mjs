@@ -292,16 +292,17 @@ for(const [w, h] of SIZES){
       wm: all.filter(p => p.subRole === 'WM' && p.role === 'MID').length }; });
   ok(own.toks.length === 13 && own.toks.every(([a, b]) => a && a === b), 'every man shows his own position beside his rating, the eight and the bench\'s five (' + own.toks.map(x => x[0]).join(' ') + ')');
   ok(!own.midStyles.some(x => /WNG|Winger/.test(x)) && !own.wngNotAtt && own.wm > 0, 'a winger is an attacker: no midfielder is a winger; wide midfielders are WM (' + own.wm + ' in the world; midfield styles ' + own.midStyles.join(', ') + ')');
-  // THE CARD HAS TWO SIDES: his ratings (a category opens under the six) and his spot's instructions (no ratings), turned
-  // over with one small button under his rating; his figure, name, rating and stars on top of both
+  // THE RIGHT COLUMN HAS TWO SIDES: his card (his figure, name, rating and stars, and his ratings: a category opens under the
+  // six) and, turned over with one small button under his rating, the TEAM's instructions (v112: no man's own) -- no
+  // ratings, a row a setting and the one note for the row last touched -- with a button back to him
   const side = () => page.evaluate(() => { const flips = [...document.querySelectorAll('#cTacRight button[data-cside]')], f = flips[0], fr = f && f.getBoundingClientRect(), o = document.querySelector('#cTacRight .mgCardOvr');
     return { six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixOpen .statRow').length,
-      instr: document.querySelectorAll('#cTacRight .instrGrp').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
+      instr: document.querySelectorAll('#cTacRight .tiRow').length, head: (document.querySelector('#cTacRight .tiHead') || {}).textContent || '', notes: document.querySelectorAll('#cTacRight .tiNote').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
       stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
       flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
       seen: [...document.querySelectorAll('#cTacRight .sixOpen .statRow')].every(e => e.getClientRects().length),
       bars: [...document.querySelectorAll('#cTacRight .sixOpen .statBar')].filter(e => e.getClientRects().length && e.getBoundingClientRect().width > 10).length, hd: (document.querySelector('#cTacRight .sixOpen .sixHd') || {}).textContent || '',
-      desc: document.querySelectorAll('#cTacRight .instrDesc, #cTacRight .instrNote, #cTacRight .instrHead').length,
+      desc: document.querySelectorAll('#cTacRight .instrDesc, #cTacRight .instrNote, #cTacRight .instrHead').length,   /* (the old per-spot panel's) */
       paged: !!document.querySelector('#cTacRight .fitPager'), fits: (b => b.scrollHeight <= b.clientHeight + 1)(document.getElementById('cTacRight')),
       top: [...document.querySelectorAll('#cTacRight .mgCardHead, #cTacRight .mgCardHead > *')].map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join(' ') }; });
   await page.tap('#bpBody .tpitch .ptk[data-tac="field"] >> nth=6'); await page.waitForTimeout(150);
@@ -313,10 +314,9 @@ for(const [w, h] of SIZES){
   ok(s1.flips === 1 && s1.small && s1.under && /INSTRUCTIONS/.test(s1.flip) && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
     'his card: his figure, rating and stars, the six, and one small button under his rating (' + s1.flip + ')');
   ok(s2.six === 6 && s2.det === 4 && s2.seen && s2.bars === 4 && /DEFENDING/.test(s2.hd) && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, its name and a coloured bar for each rating, all of it on the card, no pages (DEF: ' + s2.det + ' ratings, ' + s2.bars + ' bars)');
-  ok(s3.flips === 1 && /RATINGS/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr >= 1 && s3.body && s3.ovr && s3.stars && s3.name === s1.name,
-    'turned over: his spot\'s instructions (' + s3.instr + '), no ratings, his figure, name, rating and stars still on top, the button back to RATINGS');
-  ok(s3.top === s1.top, 'the top of his card is the same on both sides, figure and all (' + s1.top + ')');
-  ok(!s1.paged && !s3.paged && s1.fits && s3.fits && !s3.desc, 'his card never goes over pages, and its instructions are just the buttons: no heading, note or descriptions');
+  ok(s3.flips === 1 && /PLAYER/.test(s3.flip) && s3.six === 0 && !s3.det && s3.instr === 5 && /^TEAM/.test(s3.head) && s3.notes === 1,
+    'turned over: the team\'s instructions (' + s3.head + ': ' + s3.instr + ' rows and one note), no ratings, the button back to him (' + s3.flip + ')');
+  ok(!s1.paged && !s3.paged && s1.fits && s3.fits && !s3.desc, 'neither side goes over pages: all of it on the screen');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off
   // the font, against the token's 2 px rim -- on the tactics pitch, the bench and the squad's little pitch
@@ -372,6 +372,10 @@ for(const [w, h] of SIZES){
       const fl = await page.$(sel + ' button[data-cside="instr"]'); if(fl){ await fl.tap(); await page.waitForTimeout(60); views++; if(!await fits(sel)) bad.push(i + ' instr'); await page.tap(sel + ' button[data-cside="rate"]'); await page.waitForTimeout(40); } }
     return { n, views, bad }; };
   const wo = await walk('#cTacRight', '#bpBody .tpitch .ptk[data-tac]');
+  // (and the team's instructions without the ball: the lines' pitch above the rows -- the tallest of them)
+  await page.tap('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(100); await page.tap('#cTacRight [data-cside="instr"]'); await page.waitForTimeout(150);
+  if(!await fits('#cTacRight') || !(await page.$('#cTacRight .tiPitch'))) wo.bad.push('team without the ball'); else wo.views++;
+  await page.tap('#cTacRight [data-cside="rate"]'); await page.waitForTimeout(80); await page.tap('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(100);
   await page.tap('.bpTopBack'); await page.waitForTimeout(100);
   for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)
   await page.tap('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
