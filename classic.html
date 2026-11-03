@@ -3141,7 +3141,7 @@
   // first: a first-time pass -- he waits his reaction (q.reactUntil) before he moves, and the stick you aimed it with,
   // held that way, isn't his until you let it go or push it somewhere else
   function passSwitch(q,first){
-    if(!canSwitch()||!q||q.team!=='G') return;
+    if(!canSwitch()||!q||q.team!=='G'||q.isGK) return;   // (your keeper: you're on him when it's at his feet -- gkToFeet)
     const hold=first&&(curIx||curIy)?{x:curIx,y:curIy}:null;
     setControlled(q); recvAuto={q,until:simNow+3,wait:first?q.reactUntil:simNow+offReact(q),hold};   // (a beat to read it: Off IQ)
   }
@@ -3169,12 +3169,13 @@
               dribbler:null,dribbleGrace:0};
   function mkKeeper(side,team){
     return {x:side<0?26:FW-26,homeX:side<0?26:FW-26,y:YC,side,team,r:12,
-            mode:'line',holdT:0,claimCd:0,
+            mode:'line',holdT:0,claimCd:0, state:'normal',stateT:0,vx:0,vy:0,facing:{x:-side,y:0},carryAngle:0,noTouchT:0,tackleCd:0,sprint:false,stamina:1,staminaCap:1,isGK:true,
             diveT:0,diveDir:1,diveY:YC,groundT:0,reactT:0,threatActive:false,spreadT:0,spreadDn:0};   // dive + grounded-recovery + reaction state
   }
   const keepers=[mkKeeper(-1,'G'),mkKeeper(1,'R')];
   applyKeeperStats();
   let gkHold=null,controllingKeeper=null;
+  let HI={ix:0,iy:0};                        // (this frame's stick: humanIntent -- your keeper at his feet moves by it too)
   let DBG=false; const dbgEl=document.getElementById('dbg');
   const dbgTextEl=document.getElementById('dbgText'), dbgCopyEl=document.getElementById('dbgCopy');
   dbgCopyEl.onclick=()=>{
@@ -6135,11 +6136,46 @@
     const cs=Math.cos(spread), sn=Math.sin(spread);
     const ax=dx*cs-dy*sn, ay=dx*sn+dy*cs;
     ball.vx=ax*power; ball.vy=ay*power; ball.vz=vz;
-    ball.z=Math.max(ball.z,6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;
+    ball.z=Math.max(ball.z,kp.goalKick?0:6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;   // (a goal kick: off the ground)
     recordPassTeam(kp.team, null);
   }
   function keeperThrowTo(kp,mate){
     gkLaunch(kp, mate.x+mate.vx*0.3, mate.y+mate.vy*0.3);          // lead the run a touch
+  }
+  // THE RULES (v113): a keeper's hands only in his own penalty area -- and never to a ball a team-mate has kicked to him
+  // on purpose (a pass, a cross, a clearance: recordPassTeam), unless someone else has touched it since (a header, a
+  // deflection, one of theirs). Otherwise he plays it with his feet, as anyone would (gkToFeet).
+  function gkInBox(kp,x,y){ const gl=kp.side<0?0:FW; return Math.abs(x-gl)<PA_D && Math.abs(y-YC)<PA_HW; }
+  function gkBackPass(kp){ return ball.kickBy===kp.team && !!ball.kickP && ball.kickP!==kp && ball.lastTouchP===ball.kickP; }
+  function gkMayHandle(kp){ return gkInBox(kp,ball.x,ball.y) && !gkBackPass(kp); }
+  // HIS FEET: the ball's his as it would be anyone's -- at his feet, carried, pressed, tackled. Yours, and you're on him
+  // (you move him; PASS, CLEAR and SHOOT do what they do for anyone); the computer's -- or yours with you on another man
+  // -- plays it himself (gkFeetAI). When it's gone from him, so are you: on to the man it's for, or the nearest of ours.
+  function gkToFeet(kp){
+    kp.gkRoaming=false; kp.charging=false; kp.mode='feet'; kp.feetT=0; kp.state='normal'; kp.noTouchT=0;
+    ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.z=0; ball.vz=0;
+    own(kp,kp.r+ball.r+2);
+    if(kp.team==='G' && keeperWaits(kp) && canSwitch() && !window.__aiAll) switchTo(kp);
+  }
+  function gkHandBack(kp){ if(controlled!==kp) return;
+    const r=ball.intendedRcv; let q=r&&r.team===kp.team&&players.includes(r)?r:null;
+    if(!q){ let bd=1e9; for(const m of players){ if(m.team!==kp.team) continue; const d=dist(m,ball); if(d<bd){ bd=d; q=m; } } }
+    if(q) switchTo(q); }
+  // the computer's keeper with it at his feet: a touch to settle it, then -- one of theirs closing in (7 m), or told to
+  // go LONG -- up the pitch, kicked (gkLong); else to the best of ours free near him, along the ground (passTo); with
+  // nobody, a moment, then long
+  function gkFeetMate(kp){ let best=null, bs=-1e9;
+    for(const q of teamOf(kp.team)){ if(inOffsidePos(q)||q.state!=='normal') continue; const d=dist(kp,q); if(d<5*MK||d>32*MK||laneBlocked(kp,q)) continue;
+      const spare=oppTimeTo(kp.team,q.x,q.y)-d/600; if(spare<0.5) continue;
+      const sc=Math.min(spare,2.5)*180+(q.role==='DEF'?120:q.role==='MID'?100:0)-Math.abs(d-16*MK)*0.2; if(sc>bs){ bs=sc; best=q; } }
+    return best; }
+  function gkFeetAI(kp,dt){
+    kp.vx*=Math.pow(0.02,dt); kp.vy*=Math.pow(0.02,dt);   // (he stands on it)
+    let near=1e9; for(const q of players) if(q.team!==kp.team&&q.state==='normal') near=Math.min(near,dist(q,kp));
+    if(kp.feetT<0.45 && near>4*MK) return;                 // (a touch to settle it)
+    if(near<7*MK || ti(kp.team,'build')==='long'){ gkLong(kp,true); return; }
+    const q=gkFeetMate(kp); if(q){ passTo(kp,q); return; }
+    if(kp.feetT>2.2) gkLong(kp,true);
   }
   // YOUR KEEPER WAITS FOR YOU: in a match, with the ball in his hands he plays it out when you press PASS (callPass), or by
   // himself once he's had it GK_WAIT -- the last GK_WARN of that with a red stopwatch flashing over his head -- and either
@@ -6224,6 +6260,7 @@
     return best;
   }
   function recordPassTeam(team,exclude){
+    ball.kickBy=team; ball.kickP=exclude||null;   // (who kicked it on purpose, for the keeper's hands: gkBackPass)
     ball.passT=simNow;                     // (when it was struck: a man it's for reads it from then -- offReading)
     // snapshot teammates who are in an offside position at the moment of the pass
     offsidePass={team, passer:exclude,
@@ -6610,10 +6647,11 @@
     const power=620;
     const intendedDist=clamp(180+charge*720,180,950);
 
-    // score teammates: must be roughly in the aimed direction
+    // score teammates: must be roughly in the aimed direction -- your keeper too (a ball back to him is at his feet:
+    // THE RULES)
     let best=null,bs=-1e9;
-    for(const q of players){
-      if(q.team!==p.team||q===p)continue;
+    for(const q of players.concat(keepers)){
+      if(q.team!==p.team||q===p||q.benched)continue;
       let dx=q.x-p.x,dy=q.y-p.y;
       const d=Math.hypot(dx,dy)||1;
       const dirDot=(dx/d)*aimx+(dy/d)*aimy;        // 1 = dead on aim
@@ -6626,7 +6664,7 @@
     }
 
     if(o.target&&o.target.team===p.team&&o.target!==p) best=o.target;   // a touch pass: him, whoever the stick would pick
-    if(best&&o.thru){ thruBall(p,best,o.thru,false); labOnPass('THROUGH BALL',best,ball.thru); return; }   // (along the grass, double-tap or not: no lofted through ball, v81)
+    if(best&&o.thru&&!best.isGK){ thruBall(p,best,o.thru,false); labOnPass('THROUGH BALL',best,ball.thru); return; }   // (along the grass, double-tap or not: no lofted through ball, v81; to your keeper it's a pass to him)
     if(best){
       // lead the target slightly along their motion + a touch ahead
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
@@ -6981,7 +7019,7 @@
     ball.vx=ax*speed; ball.vy=ay*speed; ball.vz=30;                     // (headers go down)
     ball.cushBy=null; ball.ownedBy=null; ball.lastTouch=p.team; ball.crossT=0;
     ball.shotBy=p.team; ball.shotT=1.0; ball.curveSpin=0; ball.curveSpinT=0;
-    recordPassTeam(p.team,p);
+    recordPassTeam(p.team,p); ball.kickP=null;   // (a header: never a back-pass -- see gkBackPass)
     lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;
   }
   // A HEADER CLEAR: up and away from his own goal, out to the side it came from -- or, the better he reads the game (Def
@@ -6996,7 +7034,7 @@
     const err=(0.04+0.12*(1-iq))*(1+cq)*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
     ball.vx=(dx*ca-dy*sa)*sp; ball.vy=(dx*sa+dy*ca)*sp; ball.vz=200;
     ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=p.team; ball.crossT=0; ball.crossBy=null; ball.shotBy=null; ball.shotT=0;
-    endCurve(); recordPassTeam(p.team,p);
+    endCurve(); recordPassTeam(p.team,p); ball.kickP=null;   // (a header)
     lastGrade='HEADED CLEAR'; gradeColor='#ffb43c'; gradeFade=1.0;
   }
   // Who of theirs goes up for this ball with him: anyone off the ground at it, or one of the computer's men going for
@@ -7062,7 +7100,7 @@
         if(!isFinite(al)||al<0.001){ ax=(atkOf(contester.team)); ay=0; al=1; }
         ball.vx=ax/al*200; ball.vy=ay/al*200; ball.vz=120;
         ball.ownedBy=null; ball.lastTouch=contester.team; ball.cushBy=null;
-        endCurve(); recordPassTeam(contester.team,contester);
+        endCurve(); recordPassTeam(contester.team,contester); ball.kickP=null;   // (a header)
         lastGrade='BEATEN';gradeColor='#ff5a4d';gradeFade=1.0; return;
       }
       // aim at the NEAREST teammate outside our defending third; if none, the centre of the pitch.
@@ -7082,7 +7120,7 @@
       ball.vz=180;                             // headed up & away
       ball.cushBy=null;ball.ownedBy=null;ball.lastTouch=p.team;ball.crossT=0;
       ball.curveSpin=0;ball.curveSpinT=0;curveArmed=false;curveT=0;
-      recordPassTeam(p.team,p);
+      recordPassTeam(p.team,p); ball.kickP=null;   // (a header)
       lastGrade='CLEARED!';gradeColor='#9dff3c';gradeFade=1.2;
     }
   }
@@ -7729,6 +7767,7 @@
     if(type==='goalkick'){
       const kp=keeperOf(team);
       kp.x=kp.homeX;kp.y=YC;kp.mode='hold';kp.holdT=1.0;kp.heldT=0;
+      kp.goalKick=true;                        // (THE RULES, v113: placed on the ground and kicked -- never thrown)
       gkHold=kp;
       return;
     }
@@ -11571,13 +11610,25 @@
         kp.spreadT=SPREAD_T; kp.spreadAt=simNow+Math.random()*SPREAD_LATE*(1.3-reflexOf(kp)); kp.spreadN={x:-ball.vx/sp, y:-ball.vy/sp}; kp.closeT=-9;
         kp.mode='line'; kp.gkRoaming=false; kp.charging=false; return; } }
 
+    // AT HIS FEET (gkToFeet): yours you move; the computer's plays it himself. (The carry and the tackles are the frame's,
+    // as for anyone on the ball.) Gone from him -- played, or lost -- and he goes back to his line.
+    if(kp.mode==='feet'){
+      if(!ball.ownedBy && ball.dribbler===kp && dist(kp,ball)<kp.r+ball.r+14) own(kp,dist(kp,ball),true);   // (his own touch: his again)
+      if(ball.ownedBy!==kp && ball.dribbler!==kp){ kp.mode='return'; kp.claimCd=0.8; kp.state='normal'; gkHandBack(kp); return; }
+      kp.feetT=(kp.feetT||0)+dt;
+      if(kp===controlled && !window.__aiAll) stepOutfield(kp,HI.ix,HI.iy,dt);
+      else { gkFeetAI(kp,dt); if(ball.ownedBy===kp){ kp.x=clamp(kp.x+kp.vx*dt,kp.r,FW-kp.r); kp.y=clamp(kp.y+kp.vy*dt,kp.r,FH-kp.r); } }
+      return;
+    }
+    if(controlled===kp){ kp.state='normal'; gkHandBack(kp); }    // (not at his feet any more: back on to one of ours)
+    if(kp.mode!=='hold') kp.goalKick=false;
     if(kp.mode==='hold'){
       gkHold=kp;
       kp.holdT-=dt;
       kp.x+=clamp(kp.homeX-kp.x,-spd*0.5*dt,spd*0.5*dt);
       kp.y+=clamp(YC-kp.y,-spd*0.4*dt,spd*0.4*dt);
-      ball.x=kp.x-kp.side*18;ball.y=kp.y;
-      ball.vx=ball.vy=0;ball.z=6;ball.vz=0;
+      ball.x=kp.x-kp.side*(kp.goalKick?26:18);ball.y=kp.y;
+      ball.vx=ball.vy=0;ball.z=kp.goalKick?0:6;ball.vz=0;   // (a goal kick: on the ground in front of him)
       kp.heldT=(kp.heldT||0)+dt;
       if(keeperWaits(kp)){ if(kp.heldT>=GK_WAIT) keeperPlay(kp); return; }   // yours: until you press PASS, or his time's up
       if(kp.holdT<=0 && !(kp.heldT<2.4 && gkSetting(kp)) && distribute(kp, kp.heldT>3.2)){   // (he waits, up to a few seconds, for a safe short ball -- and a moment for his side to set: gkSetting)
@@ -11616,18 +11667,12 @@
         kp.x=kp.side<0?clamp(kp.x,gl,gl+PA_D):clamp(kp.x,gl-PA_D,gl);
         kp.y=clamp(kp.y,YC-(PA_HW-kp.r),YC+(PA_HW-kp.r));
       }
-      if(air&&ball.z>=34&&ball.shotT<=0&&Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW&&gkTakeCross(kp,spd)) return;   // (up at his hands, in his box)
+      if(air&&ball.z>=34&&ball.shotT<=0&&Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW&&gkInBox(kp,ball.x,ball.y)&&!gkBackPass(kp)&&gkTakeCross(kp,spd)) return;   // (up at his hands, in his box -- not a team-mate's ball to him)
       if(dist(kp,ball)<kp.r+ball.r+6&&ball.z<34){
         const inBox=Math.abs(kp.x-gl)<PA_D&&Math.abs(kp.y-YC)<PA_HW;      // hands: anywhere in his penalty area
         if(ball.shotT>0&&ball.shotBy!==kp.team&&inBox&&!(kp.beatT>0)){ kp.gkRoaming=false; kp.mode='line'; keeperSave(kp,ball.x-kp.x,ball.y-kp.y,Math.hypot(ball.vx,ball.vy)); return; }   // (a shot: the save, as on his line)
-        if(kp.gkRoaming&&!inBox){
-          // Outside the box: boot it upfield rather than hold and distribute
-          ball.vx=-kp.side*720; ball.vy=(kp.y-YC)*0.3+(Math.random()-0.5)*180;
-          ball.z=8;ball.vz=180;ball.ownedBy=null;ball.cushBy=null;
-          ball.lastTouch=kp.team;ball.shotT=0;
-          kp.gkRoaming=false;kp.mode='return';kp.claimCd=1.0;
-          lastGrade='KEEPER CLEAR!';gradeColor='#ffb43c';gradeFade=1.5;
-        } else {
+        if(!gkMayHandle(kp)){ gkToFeet(kp); return; }   // outside his box, or a team-mate's ball to him: his feet (THE RULES)
+        else {
           kp.gkRoaming=false;
           kp.mode='hold';kp.holdT=1.15+Math.random()*0.45;kp.heldT=0;
           gkHold=kp;ball.cushBy=null;offsidePass=null;
@@ -11713,8 +11758,9 @@
       { const v=spd*(charge?1.35:1.15), mx=tx-kp.x, my=shadeY-kp.y, ml=Math.hypot(mx,my)||1, st=Math.min(ml,v*dt);
         kp.x+=mx/ml*st; kp.y+=my/ml*st; }
       kp.charging=charge;
-      // at his feet -> the keeper takes it off him
+      // at his feet -> the keeper takes it off him (in his box with his hands; outside it, with his feet: THE RULES)
       if(dist(kp,ball)<reachOf(kp)+ball.r+6+divingOf(kp)*0.1&&ball.z<34){
+        if(!gkInBox(kp,ball.x,ball.y)){ const c0=ball.ownedBy; if(c0){ ball.ownedBy=null; c0.noTouchT=0.4; } kp.charging=false; gkToFeet(kp); lastGrade='KEEPER OUT!';gradeColor='#ffb43c';gradeFade=1.3; return; }
         kp.mode='hold';kp.holdT=1.1;kp.heldT=0;gkHold=kp;
         ball.cushBy=null;offsidePass=null;ball.ownedBy=null;ball.lastTouch=kp.team;
         lastGrade='KEEPER OUT!';gradeColor='#ffb43c';gradeFade=1.3;
@@ -11742,7 +11788,8 @@
     }
     cageKeeper(kp);
 
-    // BACK-PASS: a teammate played it back to us -> the keeper always takes it, regardless of pace.
+    // BACK-PASS: a team-mate played it back to us -> the keeper comes for it, whatever its pace -- and has it with his
+    // feet if it was kicked to him on purpose, or he's out of his box (THE RULES: gkMayHandle)
     if(!ball.ownedBy&&!gkHold&&ball.shotT<=0&&ball.lastTouch===kp.team&&kp.claimCd<=0
        &&scoredT<=0&&offsideT<=0&&restartT<=0&&ball.z<60){
       const towardKeeper = ball.vx*kp.side >= -25;                       // coming back toward our goal (not our own distribution going out)
@@ -11973,10 +12020,11 @@
   // it, or here)
   function gkShort(kp,tx,ty,vh,vz){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    if(vz==null){ vz=clamp(40+d*0.18,55,240)*gkLoftOf(kp,d)*0.75; vh=gkSolvePower(d*1.12,vz); }
+    if(kp.goalKick){ const sol=passSolve(d); vh=sol.vh; vz=sol.vz; }   // (a goal kick: played along the ground, never thrown)
+    else if(vz==null){ vz=clamp(40+d*0.18,55,240)*gkLoftOf(kp,d)*0.75; vh=gkSolvePower(d*1.12,vz); }
     const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
     ball.vx=(dx*cs-dy*sn)*vh; ball.vy=(dx*sn+dy*cs)*vh; ball.vz=vz;
-    ball.z=Math.max(ball.z,6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;
+    ball.z=Math.max(ball.z,kp.goalKick?0:6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;   // (a goal kick: off the ground)
     recordPassTeam(kp.team, null); }
   // HIS SIDE SETTING ITSELF for the keeper's ball: the computer's keeper gives it a moment (up to 2.4 s held) while more
   // than one of his men is still on his way to his spot in the shape, so it goes out with the side spread rather than
@@ -12121,7 +12169,7 @@
     if(clearHeld&&(clearFeet||clearArm>0)) clearCharge=clamp(clearCharge+dt/CLEAR_FILL,0,1);
 
     if(LAB.on) labStep(dt,rdt);
-    let hi=humanIntent();
+    let hi=humanIntent(); HI=hi;
     { const ad=autoDefIntent(dt); if(ad) hi=ad; }                       // (SWITCH held, defending: AUTO DEFEND)
     if(!(offsideT>0||restartT>0||scoredT>0||breakT>0||kickT>0||matchOver)) assistHeader();   // (DIFFICULTY's assist: their cross, at your man's head)
     updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
@@ -13639,7 +13687,7 @@
       return cfg.gk.looks[key]||(cfg.gk.looks[key]=bake(Object.assign({shirt:rampOf(top,KIT_FLOOR), shorts:GK_DARK, trim:GK_DARK},sw),
         0,0,0,0,cfg.gk.img,GK_DRAWN));
     }
-    const holding=kp=>gkHold===kp && !(kp.diveT>0) && !(kp.groundT>0);
+    const holding=kp=>gkHold===kp && !kp.goalKick && !(kp.diveT>0) && !(kp.groundT>0);   // (a goal kick's on the ground, not in his gloves)
     function pickKeeper(kp){                               // -> [row, frame]
       const facingE=kp.side<0;                             // he faces up the pitch, away from his goal
       if((kp.spreadT>0||kp.spreadDn>0)&&GKR.spread!=null)  // down big (see spreadBlock): going down, spread, and getting up
@@ -13648,9 +13696,13 @@
         return [GKR.dive+((kp.diveDir||1)<0?0:1)+(facingE?0:2), kp.diveT>0?0:1];
       if(kp.punchT>0) return [GKR.dive+((kp.punchDir||1)<0?0:1)+(facingE?0:2), 0];   // a punch: up at it, at a stretch
       const now=performance.now();
-      if(kp._held && !holding(kp) && gkHold!==kp){         // he's just let it go: the kick out, toward where it went
+      if(kp._had && gkHold!==kp){                         // he's just let it go: the kick out, toward where it went
         kp._kickUntil=now+380; const sp=Math.hypot(ball.vx,ball.vy);
         kp._kickDir=sp>40?[ball.vx,ball.vy]:[facingE?1:-1,0]; }
+      kp._had=gkHold===kp && !(kp.diveT>0) && !(kp.groundT>0);   // (in his hands, or a goal kick at his feet)
+      { const atFeet=kp.mode==='feet' && ball.ownedBy===kp, sp=Math.hypot(ball.vx,ball.vy);   // (the ball at his feet, played on: the kick too)
+        if(kp._atFeet && !atFeet && ball.lastTouchP===kp && sp>200){ kp._kickUntil=now+380; kp._kickDir=[ball.vx,ball.vy]; }
+        kp._atFeet=atFeet; }
       kp._held=holding(kp);
       if(kp._held) return [GKR.hold+(facingE?0:4), 0];
       if(kp._kickUntil>now) return [GKR.kick+snap8(kp._kickDir[0],kp._kickDir[1]), 0];

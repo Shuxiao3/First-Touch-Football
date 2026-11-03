@@ -687,6 +687,23 @@ The same game played like any other football game. It's a copy of `index.html` w
     out on his own after about a second. The computer's keeper still does -- by its side's BUILD-UP: LONG kicks it up
     to a man who can win it (with nobody, after a moment, up the emptier side anyway), SHORT and MIXED find a man near
     him when one's free (SHORT, made to play it, takes a closer call before going long).
+  - **The keeper and the rules (v113).** His hands only in his own penalty area -- and never to a ball a team-mate
+    has kicked to him on purpose (a pass, a cross, a clearance), unless someone else has touched it since (one of
+    theirs, a deflection) or it came off a team-mate's head (a header isn't a kick). Anywhere else he plays it with
+    his feet, like anyone: a pass back to him, a loose ball he comes out of his box for (it used to be booted
+    upfield, KEEPER CLEAR), a man on the ball he comes out at beyond his box (KEEPER OUT!: off his feet, not into
+    his gloves). He used to handle everything.
+    - **Yours at his feet**: you're on him -- the stick moves him with it, PASS, CLEAR and SHOOT do what they do for
+      anyone, by his own stats (a keeper's passing is a keeper's), and one of theirs can take it off him. Played
+      on, you go with it, on to the man it's for; lost, you're on the nearest of ours. You can pass it back to him
+      yourself (he's one of the men your pass can pick out), and he comes for it -- your pass doesn't put you on
+      him until it's at his feet.
+    - **The computer's at his feet**: a touch to settle it, then a short ball to a man of his who's free -- or, one
+      of yours closing in (7 m), or its BUILD-UP LONG, kicked up the pitch; with nobody free, a moment, then long.
+      He never sits on it: one of yours stood off him gets it played past him (and see **nobody sits on it for
+      free** under the line of engagement).
+    - **A goal kick** sits on the ground in front of him and is kicked, short or long -- never thrown, never in his
+      gloves.
   - **Winning the ball back counts.** All a side does on winning it -- a counter's break, the men going up the pitch
     at a sprint, the counter-press, a deep block noting that it lost the ball high -- starts when the ball changes
     hands. That was read from the last touch alone, and a tackle, a block or a first touch makes the ball the
@@ -1729,7 +1746,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | Key | Action |
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross · your keeper holding it: he plays it out (Football Classic: see **Your keeper waits for you**) |
+| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross · your keeper holding it: he plays it out (Football Classic: see **Your keeper waits for you**); with it at his feet, you're on him and it's a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
@@ -1959,6 +1976,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The keeper and the rules (v113).** He used to handle everything. Now his hands are only for his own penalty
+  area, and never for a ball a team-mate kicked to him on purpose (a header back is fine); anything else is at his
+  feet, and he plays it like anyone -- yours with you on him (the stick, PASS, CLEAR, SHOOT; one of theirs can take
+  it off him), the computer's settling it and passing it short, or kicking it long when he's pressed. You can pass
+  it back to him. A goal kick is on the ground and kicked, never thrown. See **The keeper and the rules**.
 - **Team instructions (v112).** Every man's -- every spot's -- instructions are gone; the side has one set, by its
   lines. Without the ball: the defensive line and the line of engagement, dragged on a little pitch of their own (never
   closer than 14 m), which line stands on the line of engagement (the forwards or the midfield), what the back line does
@@ -2400,8 +2422,9 @@ test, and like the Trap Lab the values are the game's settings.
   can get there first. A good dribbler facing a lone defender with nobody covering takes him on: he
   runs at him to make him commit, then cuts sharply past him (see *Beating a tight press*).
 - **The keeper's area** — he works his whole penalty area: he comes for a loose ball or a cross anywhere
-  in it, uses his hands anywhere in it, closes down a man on the ball in it, and sweeps outside it for a
-  free ball he'll win. Guarding his goal, he stays between the posts.
+  in it, uses his hands anywhere in it (never to a team-mate's ball kicked to him: v113), closes down a man
+  on the ball in it, and sweeps outside it for a free ball he'll win -- at his feet (v113). Guarding his goal,
+  he stays between the posts.
 - **The keeper's angles** — facing a man on the ball he stands about halfway between the line that
   splits the angle between his posts and his near post: not hugging the post (that leaves the far
   corner to anyone wide of him), and closer in, he comes off his line toward the man. From a tight
