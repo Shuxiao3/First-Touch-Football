@@ -56,7 +56,7 @@ r = await K(`(()=>{ const d=CAREER.data, C=mgAiClubs(d), a=C[0], b=C[1];
   const g=man(19,85); a.players.push(g); const s0=a.sc; a.sc=0; out.gem0=mgAsk(d,g,a); mgBidSeen(g,out.gem0*1.1,out.gem0); out.gem1=mgAsk(d,g,a);
   mgBidSeen(g,out.gem0*1.3,out.gem0); out.gem2=mgAsk(d,g,a); out.mk=g.mk; a.players.pop(); a.sc=s0;
   out.eyes=C.map(c=>mgClubEye(c).sc); out.temps=C.map(c=>c.gr);
-  const as=(role,sub)=>{ const p=mgNewPlayer(d,role,66,25,{sub,pot:66,until:d.season+2}); p.ovr=66; p.pot=66; return p; }, ps=[['ATT','ST'],['MID','CM'],['DEF','CB'],['GK','GK']].map(x=>as(...x));
+  const as=(role,sub)=>{ const p=mgNewPlayer(d,role,66,25,{sub,pot:66,until:d.season+2}); p.ovr=66; p.pot=66; return p; }, ps=[['ATT','STK'],['ATT','WNG'],['MID','CM'],['DEF','CB'],['GK','GK']].map(x=>as(...x));
   out.pos=ps.map(p=>at(a,0.5,1,p)); out.posVal=ps.map(p=>mgValue(d,p));
   return out; })()`);
 info('asks: ' + JSON.stringify(r));
@@ -65,8 +65,9 @@ ok(r.poorScouts[0] === r.poorScouts[1], 'a club with poor scouts prices a 19-yea
 ok(r.goodScouts[1] > r.goodScouts[0] * 1.8, 'one with good scouts on what he could be: ' + r.goodScouts.join(' -> '));
 ok(r.form[1] > r.form[0], 'a man in fine form gets noticed, even by poor scouts: ' + r.form.join(' -> '));
 ok(r.temper[0] !== r.temper[1] && new Set(r.temps).size > 1 && new Set(r.eyes).size > 1, 'no two clubs quite alike: the same man ' + r.temper.join(' or ') + ' (temperaments ' + r.temps.slice(0, 5).join(', ') + '...; scouts ' + r.eyes.slice(0, 5).join(', ') + '...)');
-ok(r.pos[0] > r.pos[1] && r.pos[1] > r.pos[2] && r.pos[2] > r.pos[3] && r.posVal[0] > r.posVal[1] && r.posVal[1] > r.posVal[2] && r.posVal[2] > r.posVal[3] && r.pos[0] >= r.pos[1] * 1.25 && r.pos[3] <= r.pos[1] * 0.7,
-  'by position, as the real market has it: the same man, rated 66 at 25, asked ' + r.pos.join(', ') + ' as a striker, a midfielder, a centre-back and a keeper (worth to you ' + r.posVal.join(', ') + ')');
+const dn = a => a.every((v, i) => !i || a[i - 1] > v);
+ok(dn(r.pos) && dn(r.posVal) && r.pos[0] >= r.pos[2] * 1.7 && r.pos[1] >= r.pos[2] * 1.5 && r.pos[3] <= r.pos[2] * 0.8 && r.pos[4] <= r.pos[2] * 0.55,
+  'by position, as the real market has it (v119: more so): the same man, rated 66 at 25, asked ' + r.pos.join(', ') + ' as a striker, a winger, a midfielder, a centre-back and a keeper (worth to you ' + r.posVal.join(', ') + ')');
 ok(r.gem1 === r.gem0 && r.mk.n === 2 && r.gem2 >= r.gem0 * 1.3 * 1.08 - 10, 'one bid over their price changes nothing (' + r.gem1 + '); a second, and they know they have a gem: ' + r.gem2 + ', over the best bid');
 
 // --- YOUR BIDS ------------------------------------------------------------------------------------------------------------

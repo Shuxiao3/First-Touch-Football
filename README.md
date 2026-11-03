@@ -1468,10 +1468,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     SHUT; and the season's count, how many signed and what they cost. (Until v108 your live bids sat at the top of
     the Offers tab and went from sight once they were over.)
   - **What a club asks (v83)**: each club prices its own men, no two quite alike.
-    - **His position (v116)**, as the real market has it: goals cost the most. An attacker (a striker or a winger)
-      asks 30% more than a midfielder of the same rating and age, a defender a fifth less, a keeper a third less --
-      a 25-year-old rated 66 in League 2 about $57,000 as a striker, $44,000 in midfield, $35,000 at centre-back,
-      $29,000 in goal. What he's worth to you (his VALUE) goes the same way.
+    - **His position (v116; v119 more so)**, as the real market has it: goals cost the most. A striker asks 80% more
+      than a midfielder of the same rating and age, a winger 60% more, a defender a quarter less, a keeper half -- a
+      25-year-old rated 66 in League 2 about $79,000 as a striker, $70,000 on the wing, $44,000 in midfield, $33,000 at
+      centre-back, $22,000 in goal. What he's worth to you (his VALUE) goes the same way. (v116's was an attacker 30%
+      over a midfielder, a defender a fifth under and a keeper a third: about one rating point's worth -- a point is a
+      third on a man's price -- so a striker a point below a midfielder, or at a club pricing him a little low, cost the
+      same or less, and strikers looked cheap. Now the cheapest strikers in the world, for their rating and age, ask
+      more than the dearest midfielders.)
     - **His rating and his age**: the younger the dearer. A man rated 60 asks about 2.4 times as much at 19 as at 29,
       four times as much as at 33.
     - **His potential, as far as the club's scouts can see it.** Each club has its own scouts, better as a rule the
@@ -2017,6 +2021,10 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v119: attackers are dearer.** A striker asks 80% more than a midfielder of his rating and age (it was 30%), a
+  winger 60% more, a defender a quarter less (a fifth), a keeper half (a third under). v116's premium was about one
+  rating point's worth, lost among the rest of what goes into a price -- a club's temperament, whether he's one of its
+  first eight, what its scouts see in him -- so strikers looked cheap.
 - **v118: archetypes say where a man plays, and there are more of them.** 31 archetypes, keepers' too (none before):
   five centre-backs (Stopper, Cover CB, Ball-playing CB, and new: Wide CB, Libero), four full-backs (Full-back,
   Wing-back, and new: Defensive full-back, Inverted full-back), seven central midfielders (Box-to-box, Anchor,

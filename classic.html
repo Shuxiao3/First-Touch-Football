@@ -15539,11 +15539,14 @@
   function mgWage(ovr){ return Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10); }
   // seasons left on his deal, this one included (0: out of contract)
   function mgLeft(d,p){ return Math.max(0,(p.until||0)-d.season+1); }
-  // WHAT A POSITION FETCHES (v116), as the real market has it: goals cost the most -- an attacker 30% over a midfielder
-  // of his rating and age, a defender a fifth under, a keeper a third under. On what a man's worth to you (mgValue) and
-  // to the club that has him (mgWorth) alike
-  const POS_PRICE={ATT:1.3, MID:1, DEF:0.8, GK:0.65};
-  const posPriceF=p=>POS_PRICE[p&&p.role]||1;
+  // WHAT A POSITION FETCHES (v116; v119 more so), as the real market has it: goals cost the most -- a striker 80% over a
+  // midfielder of his rating and age, a winger 60% over, a defender a quarter under, a keeper half. On what a man's worth
+  // to you (mgValue) and to the club that has him (mgWorth) alike. (v116's was an attacker 30% over, a defender a fifth
+  // under, a keeper a third: about a rating point's worth -- one point is a third on his price -- and lost in the rest
+  // of what goes into one: a club's temperament, whether he's one of its first eight, what its scouts see in him.) By
+  // his own position, else his line
+  const POS_PRICE={STK:1.8, WNG:1.6, CM:1, WM:1, CB:0.75, FB:0.75, GK:0.5, ATT:1.7, MID:1, DEF:0.75};
+  const posPriceF=p=>p?(POS_PRICE[natPos(p)]||POS_PRICE[p.role]||1):1;
   function mgValue(d,p){ const age=p.age||25;
     const ageF=age<=21?1.35:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.4:0.25;
     const potF=1+Math.max(0,(p.pot||p.ovr)-p.ovr)*(age<=24?0.03:0.01);
