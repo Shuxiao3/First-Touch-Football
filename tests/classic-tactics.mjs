@@ -235,7 +235,7 @@ ok(marks.rate[1] === marks.rate[0] && marks.rate[2] < marks.rate[0] && marks.rat
 const cl = marks.clubs, all = cl.main + cl.second + cl.out;
 ok(cl.main / all >= 0.5 && cl.out / all <= 0.05, 'the computer\'s clubs pick each spot\'s man by position: ' + Math.round(cl.main / all * 100) + '% in their own, ' + Math.round(cl.second / all * 100) + '% in a second, ' + Math.round(cl.out / all * 100) + '% out of position');
 const cd = marks.clubsDef, allD = cd.main + cd.second + cd.out;
-ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.08,   // (v118: archetypes are choosier than positions were -- about 6% now, 4% before)
+ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.10,   // (v118: archetypes are choosier than positions were -- about 6% now, 4% before; over 120 new worlds 3.6% to 8.8%, so 10%: 8% failed one world in fourteen)
    'who defends where: his own position before another (a 2-3-2 defending in a 3-3-1: the anchor drops into the back three, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
 
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------

@@ -1290,8 +1290,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **The derby**: a club in your league is your rival, the club down the road (picked when a career starts, and
       again in a season they're not in your league). The week you play them the papers build it up (where they are,
       their form, your record against them); the result counts 1.6 times as much in the dressing room and with the
-      fans, win or lose, and a home derby fills the ground (a quarter more at the gate). The press conference after
-      it has its own question.
+      fans, win or lose, and a home derby brings every fan the club has, as many as the ground holds (v120; it was a
+      quarter more at the gate: see **The turnout**). The press conference after it has its own question.
     - **The cups' draws**: your first round (or a bye, or the Champions League group), and after each round you're
       through, the next draw -- who, home or away, the Wednesday it's on and what winning it pays; or that you're out.
     - **Loans**, in the transfer window: a club wants one of your fringe men (out of your eight, 24 or under or
@@ -1489,7 +1489,11 @@ The same game played like any other football game. It's a copy of `index.html` w
       Two bids or more over its price for him -- yours, or another club's -- and it knows it has a gem: it sees all
       of his potential, and asks more than the best of them. What it's heard is forgotten when the window shuts.
   - **Wages (v83)** are set by how good a man is when he signs (the wage a man of his rating earns), not haggled
-    over, and they stay put. A man who's come on a lot -- worth 30% more than he's paid, with more than this season
+    over, and they stay put. They climb with his rating faster from v120 -- a 52 (League 2's run of the mill) earns
+    $110 a week (it was $90), a 60 $280 ($190), a 68 $770 ($420), a 79 $3,020 ($1,200): about a fifth more for League
+    2's men, half again for League 1's, twice for the Championship's, two and a half times for the Premium League's,
+    as ticket money grows far faster up the leagues than the old wages did. A save from before v120 puts every man's
+    wage up the same way, in the world as well as your squad. A man who's come on a lot -- worth 30% more than he's paid, with more than this season
     left on his deal -- asks for a new one: WANTS A NEW DEAL on the squad list, HE WANTS A NEW DEAL on his card, and
     the news says so. GIVE IT HIM (his new wage from now, the deal no shorter than the one he's on), or NOT NOW: that
     stings, a point off his mood, and he asks again in eight weeks. Leave him waiting, and every three weeks it costs
@@ -1631,7 +1635,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       bleachers, 150 covered, 300 with four stands, 600 in the grand stadium) at four times the going rate, executive
       boxes (twelve of ten seats with four stands, thirty in the grand stadium) at fourteen times, and the members'
       club (800 seats, the grand stadium) at seven. The fans who'd come at the going rate share out over the stands by
-      their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to its seats); the
+      their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to its seats -- and
+      never past its share of the fans: see **The turnout**); the
       premium seats sell to the money in the town -- about a fifth of them in League 2, all of them in the Premium
       League -- and mind the price more. The fans see the prices too: dearer than the going rate, their loyalty slips
       (more after a defeat); cheaper, it grows. A price you've never touched goes up with the going rate when you're
@@ -1639,7 +1644,18 @@ The same game played like any other football game. It's a copy of `index.html` w
       +, how full it'll be, how many and what it takes; and BACK TO THE GOING RATE. (There's no longer a rule that the
       price can only go up while the ground's 85% full.) A save from before v108 left at the old going rate moves to
       the new one. In money: a first season in League 2 now ends with $140,000 to $172,000 in the bank, against
-      $84,000 to $87,000 on v107 (three simulated seasons each).
+      $84,000 to $87,000 on v107 (three simulated seasons each). (v120's turnout and wages: see below.)
+    - **The turnout (v120).** The club's fans are everyone who'd ever come: the most a game can bring, not who
+      comes. A league game at the going rate brings about seven in ten of them -- up to a tenth more top of the league,
+      a tenth fewer bottom (the table counts in full five games in; before a ball's kicked it doesn't) -- and a big
+      game more: a cup tie 8% more, a playoff 15%, a side better than yours up to 15% (one rated ten points over you).
+      A derby brings every one. Your stars' draw comes on top (see **Popularity**), and cheap tickets fill a stand
+      only up to its share of the fans. The Money tab's projected attendance says how full the ground will be and
+      what share of the fans a league game brings. (Before v120 every fan came to every game, and a popular side or
+      cheap seats brought more people than the club had fans: a new career's 1,000 fans filled 1,150 to 1,300 seats.)
+      Two simulated seasons from a new career in League 2 (four careers, doing nothing in the market): the first ends
+      with $83,000 to $107,000 in the bank (v119: $125,000 to $169,000; v120's wages count in this too), and the second
+      adds $82,000 to $95,000 (v119: $114,000 to $148,000).
     - **The money** (v106), back at the club after a match you played, after the press conference: a line at a time,
       each figure counting up -- where the bank stood before the game, what the game brought in (the gate or your
       share of it, the TV, the week's partners, sponsors and boards; a cup's prize), the wages out, and where it
@@ -2021,6 +2037,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v120: a crowd is a share of the fans, and wages are up.** The fans are the most a game can bring: a league
+  game at the going rate brings about seven in ten of them (more high in the table, fewer low; more for a cup tie, a
+  playoff or a better side; every one for a derby), and cheap tickets fill a stand only up to its share of them.
+  Before, every fan came to every game, and a popular side or cheap seats brought more people than the club had
+  fans. Wages climb faster with a man's rating: about a fifth more for League 2's men, half again for League 1's,
+  twice for the Championship's, two and a half times for the Premium League's; saves get the new wages. A first
+  season in League 2, doing nothing in the market, ends with $83,000 to $107,000 in the bank (v119: $125,000 to
+  $169,000). Also: in contract talks, a man's halfway figure no longer rounds up to his full ask when the least he'd
+  take is one step under it (he comes back at the least he'd take). See **The turnout** and **Wages**.
 - **v119: attackers are dearer.** A striker asks 80% more than a midfielder of his rating and age (it was 30%), a
   winger 60% more, a defender a quarter less (a fifth), a keeper half (a third under). v116's premium was about one
   rating point's worth, lost among the rest of what goes into a price -- a club's temperament, whether he's one of its

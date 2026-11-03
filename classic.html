@@ -15536,7 +15536,11 @@
   // a week's training: a knock now and then
   function injTraining(d){ for(const p of d.roster) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,null)) injHurt(d,p,injKind(p,Math.random(),true,injDu(d,p,null)),null,'in training');
     for(const c of mgAiClubs(d)) for(const p of c.players) if(!p.inj&&Math.random()<injRisk(d,p,INJ_TRAIN/INJ_GAME,c)) injHurt(d,p,injKind(p,Math.random(),true,injDu(d,p,c)),c); }
-  function mgWage(ovr){ return Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10); }
+  // A MAN'S WAGE by his rating (v120: steeper -- about a fifth more for League 2's men, half again for League 1's, twice
+  // for the Championship's, two and a half times for the Premium League's: ticket money grows far faster up the leagues
+  // than v119's wages did, and money came too easily). (v119's: 60 x 10^(0.042 x (rating - 48)): WAGE_OLD)
+  function mgWage(ovr){ return Math.max(30, Math.round(64*Math.pow(10,0.054*(ovr-48))/10)*10); }
+  const WAGE_OLD=ovr=>Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10);
   // seasons left on his deal, this one included (0: out of contract)
   function mgLeft(d,p){ return Math.max(0,(p.until||0)-d.season+1); }
   // WHAT A POSITION FETCHES (v116; v119 more so), as the real market has it: goals cost the most -- a striker 80% over a
@@ -15964,7 +15968,7 @@
     mgNews(d,d.clubName+' '+c.yes+'.'); return null; }
   // THE DERBY: a club in your league is your rival (d.rival: picked when a career starts, and again in a season they're
   // not in it) -- the club down the road. The week you play them the papers build it up; the result counts more in the
-  // dressing room and with the fans (DERBY_X), and a home derby fills the ground (a quarter more at the gate).
+  // dressing room and with the fans (DERBY_X), and a home derby brings every fan (THE TURNOUT, v120: it was a quarter more at the gate).
   const DERBY_X=1.6;
   function mgRivalPick(d){ const L=((d.div&&d.div[d.tier])||[]).filter(id=>id!==d.clubId); if(!L.length) return;
     if(d.rival==null||!L.includes(d.rival)){ const was=d.rival; d.rival=mgPick(L); d.derbyRec=was==null?(d.derbyRec||{w:0,d:0,l:0}):{w:0,d:0,l:0};
@@ -16475,7 +16479,7 @@
         next(); return [K.name+', '+K.rounds[x.r].toLowerCase()+': '+(x.home?'at home to ':'away at ')+mgEsc(mgNameOf(d,x.opp)),L,B]; }
       case 'derby': { const c=d.world.clubs[x.opp]; if(!c){ next(); return ['Derby week',L,B]; } const R=d.derbyRec||{w:0,d:0,l:0};
         const row=d.lg&&d.lg[c.tier]?mgTable(d,c.tier).findIndex(r=>r.id===c.id):-1, fm=mgFormOf(d,c.id);
-        L.push('The town’s talking about nothing else. '+mgEsc(x.label)+', '+(x.home?'at home: a full house':'away'));
+        L.push('The town’s talking about nothing else. '+mgEsc(x.label)+', '+(x.home?'at home: every last fan will be there':'away'));
         if(row>=0&&d.md>0) L.push('They’re '+ordinal(row+1)+(fm?' · form '+fm.split('').join(' '):''));
         if(R.w+R.d+R.l) L.push('Your derbies with them: won '+R.w+', drawn '+R.d+', lost '+R.l+'.');
         L.push('<span class="dim">A derby counts for more, in the dressing room and with the fans, win or lose.</span>');
@@ -16684,7 +16688,7 @@
     return 'IN THE '+K.rounds[(C.r[0].byes||[]).includes(you)?1:0].toUpperCase(); }
   // a cup game's money: the gate (or the away share) and the television's bump -- no week's wages or partners (those
   // are the league week's) -- and the prize, if he won a round
-  function applyCupGame(d,mine){ const f=computeFinance(d), gate=mine?Math.round((mine.home?f.homeGate:f.awayGate)*(mine.derby&&mine.home?1.25:1)):0, tv=mine?broadcastGameBump(d,mine):0, prize=(mine&&mine.prize)||0, income=gate+tv;
+  function applyCupGame(d,mine){ const f=computeFinance(d), gate=mine?(mine.home?computeFinance(d,Object.assign({competition:'cup'},mine)).homeGate:f.awayGate):0, tv=mine?broadcastGameBump(d,mine):0, prize=(mine&&mine.prize)||0, income=gate+tv;
     d.budget=(d.budget||0)+income; d.ledger=d.ledger||[];
     d.ledger.unshift({week:d.week,season:d.season,income:income+prize,gate,tv,wages:0,net:income+prize,budget:Math.round(d.budget),cup:mine?CUP[mine.cup].short+' '+CUP[mine.cup].rs[mine.round]:'CUP'});
     if(d.ledger.length>12) d.ledger.length=12; d.inRed=d.budget<0;
@@ -17046,7 +17050,8 @@
     const ban=cTalkBan(d,p); if(ban) return {msg:p.name+' won’t talk terms for '+ban+' more week'+(ban>1?'s':'')+'.'};
     const ask=mgRenewWage(d,p), y=years||2, fl=cFloor(d,p,y), T=cTalkOf(d,p); w=mgRound(Math.min(w,ask));
     if(w>=fl){ mgRenew(d,d.roster.indexOf(p),y,w); return {ok:true, wage:p.wage}; }
-    if(!T&&fl-w<=ask*0.08){ p.cTalk={cnt:Math.min(ask,Math.max(fl,mgRound(fl+(ask-fl)*0.5))), y, wk:d.weeks||0}; return {counter:p.cTalk.cnt}; }
+    if(!T&&fl-w<=ask*0.08){ let c=Math.max(fl,mgRound(fl+(ask-fl)*0.5)); if(c>=ask&&fl<ask) c=fl;   // (halfway to his ask -- the least he'd take, when halfway rounds up to the ask itself)
+      p.cTalk={cnt:Math.min(ask,c), y, wk:d.weeks||0}; return {counter:p.cTalk.cnt}; }
     delete p.cTalk; p.mor=clamp((p.mor??MOR0)-1,1,10); p.cTalkNo=(d.weeks||0)+4; if(p.cAsk){ delete p.cAsk; p.cNot=(d.weeks||0)+8; }
     const say=p.name+(T?' has had enough of haggling':' took that as an insult')+': no talk of terms for four weeks.'; mgNews(d,say); return {sulk:true, say}; }
   function mgMeetC(d,pid){ const p=d.roster.find(x=>x.id===pid), T=p&&cTalkOf(d,p); if(!T) return 'He isn’t waiting on an answer.'; return mgRenew(d,d.roster.indexOf(p),T.y,T.cnt); }
@@ -17194,9 +17199,23 @@
   const goingRate=d=>(FIN_TIER[d.tier]||FIN_TIER[1]).price;
   function seatFair(d,id,lv){ const g=goingRate(d); return SEAT_PREM[id]?g*SEAT_PREM[id].x:g*((id==='E'||id==='W')&&lv===3?0.75:(SEAT_RATE[id]||1)); }
   function seatPrice(d,id,lv){ const own=id==='B'?d.ticketPrice:(d.seats||{})[id]; return own!=null?own:Math.max(1,Math.round(seatFair(d,id,lv))); }
-  function seatPlan(d){ const lv=d.stadium?stadOf(d).lvl:1, cap=STAD_LEVELS[lv].cap, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[d.tier||1]||1000), W=L*popDraw(d), out=[];
+  // THE TURNOUT (v120): the club's fans are everyone who'd ever come -- the most a game can bring -- and a game brings
+  // some of them. A league game at the going rate about seven in ten (TURN_BASE); a tenth more top of the league, a
+  // tenth fewer bottom (in full five games in); more for a big game -- a cup tie, a playoff, a side better than yours
+  // (up to 15% more for one ten points better) -- and every last one for a derby. Then the side's popular men draw more (popDraw), and each
+  // stand thins the dearer it is and fills the cheaper -- but never to more than its share of the fans. (Before v120
+  // every fan came at the going rate, and more than there were with a popular side or cheap tickets.) m: the game
+  // (none: a league game, as the stadium projects one)
+  const TURN_BASE=0.7;
+  function turnout(d,m){ if(m&&m.derby) return 1;
+    let t=TURN_BASE; const T=d.lg&&d.lg[d.tier]?mgTable(d,d.tier):[], i=T.findIndex(r=>r.id===d.clubId);
+    if(i>=0&&T[i].p>0) t+=(MG_CLUBS-1-2*i)/(MG_CLUBS-1)*0.1*Math.min(1,T[i].p/5);   // (where you stand -- once there's a table to speak of: before a ball's kicked it's only the clubs in a row)
+    if(m){ const comp=m.competition||'league', own=mgStrength(d,d.clubId);
+      t+=(comp==='cup'?0.08:/^playoff/.test(comp)||d.phase==='playoffs'?0.15:0)+0.15*clamp(((m.oppOvr||own)-own)/10,0,1); }
+    return clamp(t,0.3,1); }
+  function seatPlan(d,m){ const lv=d.stadium?stadOf(d).lvl:1, cap=STAD_LEVELS[lv].cap, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[d.tier||1]||1000), W=L*turnout(d,m)*popDraw(d), out=[];
     const prem=Object.keys(SEAT_PREM).filter(k=>SEAT_PREM[k].cap[lv]), pcap=prem.reduce((a,k)=>a+SEAT_PREM[k].cap[lv],0), sh=SEAT_SHARE[lv];
-    for(const id in sh){ const c=Math.round(cap*sh[id])-(id==='N'?pcap:0), fair=seatFair(d,id,lv), price=seatPrice(d,id,lv), want=W*sh[id]*Math.pow(fair/Math.max(1,price),1.1);
+    for(const id in sh){ const c=Math.round(cap*sh[id])-(id==='N'?pcap:0), fair=seatFair(d,id,lv), price=seatPrice(d,id,lv), want=Math.min(L*sh[id], W*sh[id]*Math.pow(fair/Math.max(1,price),1.1));   // (never more than its share of the fans)
       out.push({id, n:id==='B'?'The bleachers':(d.stadium?standName(d,id):id), cap:c, price, fair, want, att:Math.min(c,Math.round(want)), prem:false}); }
     const app=clamp(0.2+0.2*((d.tier||1)-1)+0.25*clamp(L/cap,0,1.5),0.15,1.1);       // (how much of the premium the town will take at the going rate)
     for(const k of prem){ const c=SEAT_PREM[k].cap[lv], fair=seatFair(d,k,lv), price=seatPrice(d,k,lv), want=c*app*Math.pow(fair/Math.max(1,price),1.4);
@@ -17216,14 +17235,14 @@
     h+='</div><div class="stadWhat">'+(lv===1?'One price for the bleachers: the going rate in '+MG_LEAGUE[d.tier]+' is $'+goingRate(d)+'. ':'Each stand priced on its own: the dearer against its rate, the emptier it is. ')
       +seatNext(lv)+'</div><button class="stadBtn" data-stad="seatrate">BACK TO THE GOING RATE</button>';
     return h; }
-  function computeFinance(d){
+  function computeFinance(d,m){   // (m: a home game being played -- its turnout; none, a league game as projected)
     const tier=d.tier||1, ft=FIN_TIER[tier]||FIN_TIER[1];
     const wageWk=(d.roster?d.roster.reduce((a,p)=>a+(p.wage||0),0):(d.wageWk||0))+(d.staff||[]).reduce((a,c)=>a+(c.wage||0),0);   // (and the coaches')
     const sponsorWk=d.sponsorWk!=null?d.sponsorWk:ft.sponsor;   // (the club's partners: local firms, by the league)
     const broadcastWk=broadcastFor(d);
     const capacity=d.stadium?STAD_LEVELS[d.stadium.lvl].cap:(d.capacity!=null?d.capacity:ft.capacity);
     const L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[tier]||1000);
-    const draw=popDraw(d), seats=seatPlan(d);   // (v105: your most popular men bring more through the gate; v108: stand by stand -- see TICKETS)
+    const draw=popDraw(d), seats=seatPlan(d,m), turn=turnout(d,m);   // (v105: your most popular men bring more through the gate; v108: stand by stand -- see TICKETS; v120: a share of the fans -- see THE TURNOUT)
     const stands=seats.filter(x=>!x.prem), price=stands[0].price;
     const attendance=seats.reduce((a,x)=>a+x.att,0), standCap=stands.reduce((a,x)=>a+x.cap,0);
     const rawDemand=standCap?stands.reduce((a,x)=>a+x.want,0)/standCap:0;
@@ -17242,13 +17261,13 @@
     const incomeAvg=poolWk+Math.round((homeGate+awayGate)/2);   // ~half home, half away -> typical weekly income
     const netAvg=incomeAvg-wageWk;
     return { wageWk, sponsorWk, broadcastWk, boardsWk, dealsWk, commercialWk, shirtWk, poolWk, capacity, price, loyalty:L, loyMult, demand:pct, rawDemand, attendance,
-             homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, canPrice:true, soldOut:rawDemand>=1, seats, ticketGate:Math.round(ticketGate) };
+             homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, turn, canPrice:true, soldOut:rawDemand>=1, seats, ticketGate:Math.round(ticketGate) };
   }
   // a week of the season: the pool, the gate (home or away) and any TV bump in, the wages out. -> what it came to
   function applyWeek(d, mine){
-    const f=computeFinance(d);
-    const gate = mine ? Math.round((mine.home ? f.homeGate : f.awayGate)*(mine.derby&&mine.home?1.25:1)) : 0;   // (a home derby: the ground full)
-    if(mine&&mine.home&&f.capacity){ d.crowd=d.crowd||{n:0,sum:0}; d.crowd.n++; d.crowd.sum+=f.attendance/f.capacity; }   // (the season's home crowds: see A SPONSOR'S BONUS)
+    const f=computeFinance(d), fh=mine&&mine.home?computeFinance(d,mine):null;   // (a home game: its own crowd -- a derby every fan, a big game more: THE TURNOUT)
+    const gate = mine ? (fh ? fh.homeGate : f.awayGate) : 0;
+    if(fh&&fh.capacity){ d.crowd=d.crowd||{n:0,sum:0}; d.crowd.n++; d.crowd.sum+=fh.attendance/fh.capacity; }   // (the season's home crowds: see A SPONSOR'S BONUS)
     const tv = mine ? broadcastGameBump(d,mine) : 0;
     const income = f.poolWk - f.shirtWk + tv + gate;   // (the shirts are Monday's: see shirtWeek)
     d.budget=(d.budget||0)+income-f.wageWk; d.week=(d.week||0)+1;
@@ -17770,7 +17789,8 @@
       // Money: the gate and the ticket price, then the club's books
       h+=finRow('Club loyalty', Math.round(f.loyalty).toLocaleString()+' fans', true, 'var(--warn)');
       h+=finRow('Capacity', f.capacity.toLocaleString()+' · '+L.n.toLowerCase());
-      h+=finRow('Projected attendance', f.attendance.toLocaleString()+' · '+Math.round(f.demand*100)+'%'+(f.soldOut?'  SOLD OUT':''));
+      h+=finRow('Projected attendance', f.attendance.toLocaleString()+' · '+Math.round(f.demand*100)+'% full'+(f.soldOut?'  SOLD OUT':''));
+      h+='<div class="stadWhat">Not every fan comes to every game: a league game brings about '+Math.round(f.turn*100)+'% of them at the going rate, more when you’re high in the table or the game’s big, every one for a derby.</div>';
       h+=finRow('Home gate / home game', money(f.homeGate));
       h+=seatTable(d,f);
       h+='<div class="bpSect">THE BOOKS</div>'+mgFinanceTab(d);
@@ -18692,6 +18712,9 @@
     if(d.concOwned){ const cap=d.capacity!=null?d.capacity:(FIN_TIER[d.tier]||FIN_TIER[1]).capacity, back=Object.keys(d.concOwned).filter(k=>d.concOwned[k]&&CONC_GONE[k]).reduce((a,k)=>a+Math.round(cap*CONC_GONE[k]),0);
       if(back){ d.budget=(d.budget||0)+back; mgNews(d,'The stalls, the megastore and the jersey stand are gone from the ground: what they cost, '+money(back)+', is back in the budget.'); }
       delete d.concOwned; }   // (v116: no concessions)
+    if(!d.w120){ const W=d.world||{}, up=(w,o)=>mgRound(w*mgWage(o)/WAGE_OLD(o));
+      for(const p of [...(d.roster||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.wage>0){ p.wage=up(p.wage,p.ovr); if(p.loan&&p.loan.wage>0) p.loan.wage=up(p.loan.wage,p.ovr); }   // (a man here on loan: his own wage too, for when he goes back)
+      d.w120=true; }   // (v120: every man's wage up as wages went up -- his deal's terms against the going rate kept)
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
@@ -18966,7 +18989,7 @@
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0} };
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true };   // (w120: on v120's wages from the start)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);

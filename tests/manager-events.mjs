@@ -36,8 +36,10 @@ r = await K(`(()=>{ const d=CAREER.data; return { rival:d.rival, inLeague:d.div[
 ok(r.rival != null && r.inLeague, 'a new career has a rival in its league, the club down the road (' + r.name + ')');
 r = await K(`(()=>{ const d=CAREER.data, mine={win:true, oppOvr:mgStrength(d,d.clubId)}, run=dby=>{ d.tm=6.5; morAfterGame(d,Object.assign({derby:dby},mine)); return d.tm-6.5; };
   const a=run(false), b=run(true); d.tm=6.5; const g0=applyWeek(d,{home:true}).gate, g1=applyWeek(d,{home:true,derby:true}).gate, ga=applyWeek(d,{home:false,derby:true}).gate, gaw=applyWeek(d,{home:false}).gate;
-  return { a:+a.toFixed(3), b:+b.toFixed(3), g0, g1, ga, gaw }; })()`);
-ok(Math.abs(r.b - r.a * 1.6) < 0.02 && r.g1 === Math.round(r.g0 * 1.25) && r.ga === r.gaw, 'a derby win lifts the dressing room more (' + r.b + ' against ' + r.a + '), and a home derby fills the ground: the gate a quarter up (' + r.g0 + ' -> ' + r.g1 + '; away, as ever)');
+  const fd=computeFinance(d,{home:true,derby:true}), fl=computeFinance(d,{home:true}), all=Math.min(fd.capacity,Math.round(fd.loyalty));   // (v120: a derby brings every fan -- THE TURNOUT)
+  return { a:+a.toFixed(3), b:+b.toFixed(3), g0, g1, ga, gaw, turn:fd.turn, lturn:+fl.turn.toFixed(2), att:fd.attendance, latt:fl.attendance, all, fans:Math.round(fd.loyalty) }; })()`);
+ok(Math.abs(r.b - r.a * 1.6) < 0.02 && r.turn === 1 && r.lturn < 1 && Math.abs(r.att - r.all) <= 2 && r.latt < r.att && r.g1 > r.g0 && r.ga === r.gaw,
+  'a derby win lifts the dressing room more (' + r.b + ' against ' + r.a + '), and a home derby brings every fan: ' + r.att + ' of ' + r.fans + ' (a league game ' + r.latt + ', ' + Math.round(r.lturn * 100) + '% of them), the gate ' + r.g0 + ' -> ' + r.g1 + ' (away, as ever)');
 
 // --- THE PRESS CONFERENCE: after the derby, before the papers ---------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; for(let i=0;i<3;i++) mgForward(d); d.rival=mgNextGame(d).opp; d.derbyRec={w:0,d:0,l:0}; pileBuild(d,{dev:null}); d.pile.opened=true; mgSave(d); renderHub(); return 1; })()`);
@@ -93,7 +95,9 @@ ok(r.L.length >= 1 && r.L.every(t => /^Coco Cup, (round of \d+|quarter-final|sem
 // --- LOANS ----------------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data; d.phase='summer'; d.day=1; d.wday='mon'; d.budget=200000;
   const ok=x=>x.role!=='GK'&&(x.until||0)>d.season&&x.age<33;   // (a man with a deal past this season, and years in him: he's still about when the loans end)
-  const c=mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2&&c.players.some(x=>ok(x)&&!mgEight(c.players).includes(x)))||mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2), e8=mgEight(c.players);
+  // (a club in the league with a man to spare: a new world's have fourteen each, and only the market's moves make one more -- none yet, and one's given a man)
+  const c=mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2&&c.players.some(x=>ok(x)&&!mgEight(c.players).includes(x)))||mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2)
+    ||(()=>{ const x=mgAiClubs(d).find(c=>c.tier===d.tier); x.players.push(mgNewPlayer(d,'MID',40,30)); return x; })(), e8=mgEight(c.players);
   let p=c.players.find(x=>!e8.includes(x)&&ok(x)); if(!p){ p=c.players.find(x=>!e8.includes(x)&&x.role!=='GK'); p.until=d.season+2; p.age=Math.min(p.age,30); }
   const w0=p.wage, wk0=computeFinance(d).wageWk, sh=mgLoanShare(d,p,c), err=mgLoanIn(d,p.id), i=d.roster.indexOf(p);
   window.__lin={id:p.id, cid:c.id, w0};

@@ -37,8 +37,8 @@ await page.fill('#mgName', 'Ade Moss'); await page.fill('#mgClubIn', 'Contract T
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); await page.waitForTimeout(150);
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); pileHide();
   window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); };
-  // a man made plain for a test: rated 70 (worth hundreds a week), no traits, settled, no season to speak of, two seasons left
-  window.PLAIN=(p,o)=>Object.assign(p,{ovr:70, mor:6, hv:HV({}), rn:10, rs:62, goals:0, as:0, cs:0, hist:[], evs:[], since:d.season-1, until:d.season+1, wage:100, age:27},o||{});
+  // a man made plain for a test: rated 65 (worth hundreds a week -- v120's wages: a 70 is near a thousand), no traits, settled, no season to speak of, two seasons left
+  window.PLAIN=(p,o)=>Object.assign(p,{ovr:65, mor:6, hv:HV({}), rn:10, rs:62, goals:0, as:0, cs:0, hist:[], evs:[], since:d.season-1, until:d.season+1, wage:100, age:27},o||{});
   for(const p of d.roster){ delete p.cAsk; delete p.cTalk; delete p.cTalkNo; delete p.cNot; delete p.wantsOut; }
   return 1; })()`);
 
