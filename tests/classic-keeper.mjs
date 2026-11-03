@@ -1,7 +1,6 @@
-// FOOTBALL CLASSIC, YOUR KEEPER: with the ball in his hands he waits for you -- he plays it out when you press PASS, or by
-// himself once he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head -- and either way to
-// whoever the side's BUILD-UP says (v112, team instructions): SHORT the nearest of ours who's free, MIXED the man you're
-// playing as, LONG hoofed up to the forwards. The
+// FOOTBALL CLASSIC, YOUR KEEPER: with the ball in his hands you're on him (v114) -- the stick walks him round his box,
+// PASS throws it to the man you aim at (twice: overarm), CLEAR or SHOOT boots it downfield -- and if you do nothing, once
+// he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head, it goes to the man you have lit. The
 // computer's keeper plays it out himself, as before. IN THE AIR no man gets to a ball higher than a keeper: a header
 // tops out at 61 px (Heading 10, at the top of his leap), the keeper's hands at 82; and a keeper coming for a cross
 // catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. HIS WAY TO IT
@@ -31,49 +30,63 @@ const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(1500);
 
-// THE SCENE: their men parked on their own goal line out of the way, ours set at known distances up the pitch from our
-// keeper (held there), and the keeper given the ball. Watch it for `secs` (or until he lets it go): when he does, who
-// it's for and how far from him it comes down; and how many frames the stopwatch showed in the first 3 s and the 2 s after.
-const scene = (how, secs, pressAt) => page.evaluate(({ how, secs, pressAt }) => new Promise(res => {
+// YOUR KEEPER, THE BALL IN HIS HANDS (v114): you're on him. THE SCENE: theirs parked out of the way in the far corner,
+// ours set at known spots up the pitch from him (held there), the keeper given the ball; then, 0.5 s in, what you do --
+// the stick held one way (walk), PASS tapped with the stick one way (pass), PASS twice (loft), CLEAR, SHOOT -- or
+// nothing, his time running out. When it's gone: who it was for, who you're on, how high it went up and where it first
+// came down; and how many frames the stopwatch showed in his first 3 s and after.
+const yours = (act, dir) => page.evaluate(({ act, dir }) => new Promise(res => {
   const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
-  T.freeze(); T.TI().G.build = how;
+  T.freeze(); T.TI().G.build = 'short';
   const gx = atk > 0 ? 0 : T.FW, spots = G.map((q, i) => ({ q, x: gx + atk * (300 + i * 150), y: T.YC + (i % 2 ? 1 : -1) * (120 + 40 * i) }));
   const place = () => { for(const s of spots){ s.q.x = s.x; s.q.y = s.y; s.q.vx = s.q.vy = 0; }
-    // (theirs out of the way, in the far corner on the near side: the man furthest up is on the far side, and on a short
-    // pitch he'd be in their reach from the far end, and not open)
     for(const [i, o] of R.entries()){ o.x = atk > 0 ? T.FW - 40 : 40; o.y = T.FH - 60 - i * 40; o.vx = o.vy = 0; } };
+  const key = (type, code) => window.dispatchEvent(new KeyboardEvent(type, { code, key: code.slice(-1).toLowerCase() }));
+  const stick = { up: 'KeyW', down: 'KeyS', fwd: atk > 0 ? 'KeyD' : 'KeyA' }[dir];
   place(); T.hold(kp); window.__sw = 0;
-  const t0 = T.simNow(); let sw3 = 0, swEnd = 0, frames3 = 0, framesEnd = 0, out = null, want = null, pressed = false;
+  const t0 = T.simNow(), x0 = kp.x, y0 = kp.y; let sw3 = 0, swEnd = 0, frames3 = 0, framesEnd = 0, on = false, out = null, step = 0, inBox = true;
   (function tick(){
-    const t = T.simNow() - t0;
-    if(T.gkHold() === kp){ place(); want = T.gkTarget(kp, T.gkHowOf('G'));
+    const t = T.simNow() - t0, b = T.ball();
+    if(T.gkHold() === kp){ place(); if(T.controlled() === kp) on = true;
+      if(Math.abs(kp.x - gx) > 16.5 * 22.5 || Math.abs(kp.y - T.YC) > 900) inBox = false;
       const n = window.__sw; window.__sw = 0; if(t < 3){ sw3 += n; frames3++; } else { swEnd += n; framesEnd++; } }
-    else if(!out){ const b = T.ball(); out = { t, rcv: b.intendedRcv ? G.indexOf(b.intendedRcv) : -1, you: b.intendedRcv === T.controlled(), want: want ? G.indexOf(want) : -1,
-      x0: b.x, y0: b.y, land: null, dists: G.map(q => Math.hypot(q.x - kp.x, q.y - kp.y)) }; }
-    else if(out.land == null){ const b = T.ball(); place();   // (where it comes down: the first bounce, or where it's taken)
-      if((t - out.t > 0.25 && b.z <= 0.5) || b.ownedBy || t - out.t > 4) out.land = Math.hypot(b.x - out.x0, b.y - out.y0) / 22.5; }
-    if(pressAt != null && !pressed && t >= pressAt){ pressed = true; window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyJ', key: 'j' })); window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyJ', key: 'j' })); }
-    if((out && out.land != null) || t > secs + 4) return res({ how, out, sw3, swEnd, frames3, framesEnd });
-    requestAnimationFrame(tick); })(); }), { how, secs, pressAt });
+    else if(!out){ out = { t: +t.toFixed(2), rcv: b.intendedRcv ? G.indexOf(b.intendedRcv) : -1, side: b.intendedRcv ? Math.sign(b.intendedRcv.y - kp.y) : 0, you: T.controlled() === kp ? 'keeper' : G.indexOf(T.controlled()),
+        vz: Math.round(b.vz), bx: b.x, by: b.y, land: null }; if(stick) key('keyup', stick); }
+    else if(out.land == null){ place();   // (where it first comes down, or where it's taken)
+      if((t - out.t > 0.25 && b.z <= 0.5) || b.ownedBy || t - out.t > 4) out.land = +(Math.hypot(b.x - out.bx, b.y - out.by) / 22.5).toFixed(1); }
+    if(act !== 'none' && step === 0 && t >= 0.5){ step = 1; if(stick) key('keydown', stick); }
+    if(step === 1 && t >= 0.7){ step = 2;
+      if(act === 'pass') { key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); }
+      if(act === 'loft') { key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); }
+      if(act === 'clear'){ key('keydown', 'KeyL'); key('keyup', 'KeyL'); }
+      if(act === 'shoot'){ key('keydown', 'KeyK'); key('keyup', 'KeyK'); } }
+    if(act === 'walk' && t >= 1.7){ key('keyup', stick); return res({ on, held: T.gkHold() === kp, inBox, moved: +(Math.hypot(kp.x - x0, kp.y - y0) / 22.5).toFixed(1), dy: Math.sign(kp.y - y0) }); }
+    if((out && out.land != null) || t > 9) return res({ act, dir, on, out, sw3, swEnd, frames3, framesEnd });
+    requestAnimationFrame(tick); })(); }), { act, dir });
 
-// THE TIMER, with the BUILD-UP SHORT
-const c = await scene('short', 7, null);
-info('closest: ' + JSON.stringify(c));
-ok(c.out && c.out.t >= 4.9 && c.out.t <= 5.4, 'your keeper holds it until his time\'s up, then plays it out by himself (' + (c.out ? c.out.t.toFixed(2) : '-') + ' s)');
+// THE MOMENT HE HAS IT: you're on him; the stick walks him round his box with it in his hands
+const w = await yours('walk', 'down');
+info('the stick held down for a second: ' + JSON.stringify(w));
+ok(w.on && w.held && w.moved >= 2 && w.dy > 0 && w.inBox, 'your keeper takes it in his hands and you\'re on him: the stick walks him round his box with it (' + w.moved + ' m in a second, still in his hands, still in his box)');
+// HIS TIME: nothing pressed -- the stopwatch for his last 2 s, then it goes to the man you've got lit (the way he faces: up the pitch)
+const c = await yours('none');
+info('nothing pressed: ' + JSON.stringify(c));
+ok(c.on && c.out && c.out.t >= 4.9 && c.out.t <= 5.4 && c.out.rcv >= 0, 'his time\'s up at 5 s and it goes to the man you had lit (' + (c.out ? c.out.t.toFixed(2) : '-') + ' s, man ' + (c.out && c.out.rcv) + ')');
 ok(c.sw3 === 0 && c.swEnd > 0 && c.swEnd < c.framesEnd, 'no stopwatch for his first 3 s; in the last 2 s it flashes over his head (' + c.swEnd + ' of ' + c.framesEnd + ' frames)');
-const near = c.out ? c.out.dists.indexOf(Math.min(...c.out.dists)) : -2;
-ok(c.out && c.out.rcv === near, 'SHORT: to the nearest of ours, with nobody near (man ' + (c.out && c.out.rcv) + ', the nearest ' + near + ')');
-// MIXED: the man you're playing as
-const p = await scene('mixed', 7, null);
-ok(p.out && p.out.you, 'MIXED: to the man you\'re playing as');
-// LONG: hoofed, up towards the forwards
-const h = await scene('long', 7, null);
-const hm = h.out && h.out.rcv >= 0 ? h.out.dists[h.out.rcv] / 22.5 : 0;
-ok(hm >= 45 && h.out.land > c.out.land + 20, 'LONG: kicked as far up as it goes, to a man ' + Math.round(hm) + ' m up the pitch, first bouncing ' + (h.out ? Math.round(h.out.land) : '-') + ' m out (SHORT: thrown ' + (c.out ? Math.round(c.out.land) : '-') + ' m)');
-// PASS pressed before his time's up: at once, to his instruction's man
-const j = await scene('short', 7, 1.5);
-ok(j.out && j.out.t < 1.7 && j.out.rcv === near, 'press PASS and he plays it at once (' + (j.out ? j.out.t.toFixed(2) : '-') + ' s), to the man his instruction says');
-
+// PASS: thrown to the man you aim at -- the stick up, one of ours up that way; down, down that way -- and you go with it
+const pu = await yours('pass', 'up'), pd = await yours('pass', 'down');
+info('PASS with the stick up: ' + JSON.stringify(pu.out) + '; down: ' + JSON.stringify(pd.out));
+ok(pu.out && pd.out && pu.out.t < 1.2 && pu.out.rcv >= 0 && pd.out.rcv >= 0 && pu.out.side < 0 && pd.out.side > 0 && pu.out.you === pu.out.rcv && pd.out.you === pd.out.rcv,
+  'PASS throws it at once to the man you aim at -- the stick up, a man up that way (' + pu.out.rcv + '); down, down that way (' + pd.out.rcv + ') -- and you go with it, on to him');
+// two taps: overarm, up in the air -- a tap's along the grass
+const lf = await yours('loft', 'fwd'), gr = await yours('pass', 'fwd');
+info('two taps: ' + JSON.stringify(lf.out) + '; one: ' + JSON.stringify(gr.out));
+ok(lf.out && gr.out && lf.out.rcv >= 0 && lf.out.vz > gr.out.vz + 30, 'two taps of PASS: thrown overarm, up in the air (' + lf.out.vz + ' up), a tap along the grass (' + gr.out.vz + ')');
+// CLEAR, and SHOOT: booted downfield
+const cl = await yours('clear', null), sh = await yours('shoot', null);
+info('CLEAR: ' + JSON.stringify(cl.out) + '; SHOOT: ' + JSON.stringify(sh.out));
+ok(cl.out && sh.out && cl.out.t < 1.2 && cl.out.land >= 38 && sh.out.land >= 38 && cl.out.land > gr.out.land + 15,
+  'CLEAR -- or SHOOT -- boots it downfield: first down ' + (cl.out ? cl.out.land : '-') + ' m and ' + (sh.out ? sh.out.land : '-') + ' m out (a throw along the grass: ' + (gr.out ? gr.out.land : '-') + ' m)');
 // THE COMPUTER'S KEEPER plays it out by himself, as before
 const ai = await page.evaluate(() => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'R'); T.freeze(); T.hold(kp);
   const t0 = T.simNow(); (function tick(){ const t = T.simNow() - t0; if(T.gkHold() !== kp || t > 6) return res({ t, held: T.gkHold() === kp }); requestAnimationFrame(tick); })(); }));

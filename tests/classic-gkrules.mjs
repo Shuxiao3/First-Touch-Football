@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, now:()=>simNow, atkOf, FW, YC, MK, PA_D, controlled:()=>controlled, gkHold:()=>gkHold, passTo, own, setControlled, setTI:(t,o)=>setTI(t,Object.assign(tiDefault(TAC[t].style),o)),\n'
-  + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; }, grade:()=>lastGrade,\n'
+  + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; matchClock=0; half=1; matchOver=false; breakT=0; advOn=false; kickT=0; }, grade:()=>lastGrade,\n'
   + '    goalKick:t=>{ restartInfo={type:"goalkick",team:t,x:0,y:YC}; executeRestart(); }};\n  const LAB_TITLE=');
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');
 patch('  function gkLaunch(kp, tx, ty){', '  function gkLaunch(kp, tx, ty){ if(window.__K){ window.__K.kick++; window.__K.from=ball.z; }');
@@ -80,8 +80,9 @@ ok(rOut.seen && rOut.seen.how === 'feet' && !rOut.seen.inBox && !rOut.handsEver 
 
 // PASS, held a quarter of a second -- past a tap, so it goes as you let go (a tap waits a moment of real time in case
 // it's a double-tap) -- with the game's clock held meanwhile
-const pressPass = async () => { await page.evaluate(() => { window.__vpause = true; dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyJ' })); });
-  await page.waitForTimeout(260); await page.evaluate(() => { dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyJ' })); window.__vpause = false; }); };
+const pressKey = async code => { await page.evaluate(code => { window.__vpause = true; dispatchEvent(new KeyboardEvent('keydown', { code })); }, code);
+  await page.waitForTimeout(260); await page.evaluate(code => { dispatchEvent(new KeyboardEvent('keyup', { code })); window.__vpause = false; }, code); };
+const pressPass = () => pressKey('KeyJ');
 // --- YOUR KEEPER ON THE BALL: the stick moves him, PASS plays it on (and you go with it), and one of theirs can take it --
 const yours = async what => { await scene('G', 'back');
   if(what === 'pass'){ await page.evaluate(() => { const T = window.__T, M = T.MK, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G');
@@ -121,6 +122,14 @@ const back = await page.evaluate(() => new Promise(res => { const T = window.__T
 info('your pass back to your keeper: ' + JSON.stringify(back));
 ok(back.how === 'feet' && back.you, 'you pass it back to your keeper (facing him, PASS): he has it at his feet, not his hands, and you\'re on him');
 const st = await yours('stick'), ps = await yours('pass'), tk = await yours('tackle');
+// CLEAR with it at his feet: booted downfield (v114)
+await scene('G', 'back'); await page.evaluate(() => { window.__b0 = { x: window.__T.ball().x, y: window.__T.ball().y }; window.__t0 = window.__T.now(); }); await pressKey('KeyL');
+const ft = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(), kp = T.keepers().find(k => k.team === 'G'), b0 = window.__b0; let gone = null;
+  (function tick(){ const t = T.now() - window.__t0; if(gone === null && b.ownedBy !== kp) gone = t;
+    if(gone !== null && ((t - gone > 0.25 && b.z <= 0.5) || b.ownedBy || t - gone > 4)) return res({ land: +(Math.hypot(b.x - b0.x, b.y - b0.y) / T.MK).toFixed(1), grade: T.grade() });
+    if(t > 6) return res({ land: null }); requestAnimationFrame(tick); })(); }));
+info('CLEAR with it at his feet: ' + JSON.stringify(ft));
+ok(ft.land >= 35, 'CLEAR with it at his feet: he boots it downfield (first down ' + ft.land + ' m out), not an outfielder\'s clearance');
 info('your keeper on the ball -- the stick: ' + JSON.stringify(st) + '; PASS: ' + JSON.stringify(ps) + '; one of theirs at him: ' + JSON.stringify(tk));
 ok(st.ran > 1.5 && st.still && st.you, 'your keeper with it at his feet: the stick takes him on with it (' + st.ran + ' m in 0.8 s, the ball still his)');
 ok(ps.out && ps.out.to && ps.you === 'the man it\'s for' && !ps.hands, 'PASS plays it up the pitch to one of ours (' + (ps.out && ps.out.off) + '° off him: a keeper\'s passing), and you go with it, on to him');
@@ -162,6 +171,26 @@ const gkS = await gk('short'), gkL = await gk('long');
 info('a goal kick, told SHORT: ' + JSON.stringify(gkS) + '; told LONG: ' + JSON.stringify(gkL));
 ok(gkS.onGround && gkS.short === 1 && gkS.from === 0 && gkL.onGround && gkL.kick === 1 && gkL.from === 0,
   'a goal kick sits on the ground in front of him, not in his gloves, and is struck off the ground -- SHORT to a man near him, LONG up the pitch -- never thrown');
+// YOUR GOAL KICK: you're on him; the stick turns him (he stays at the ball); PASS, a pass kicked along the grass to the
+// man that way, off the ground -- and you go with it
+const yg1 = await page.evaluate(() => new Promise(res => { const T = window.__T, M = T.MK, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), gl = atk > 0 ? 0 : T.FW;
+  const G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R'), key = (type, code) => dispatchEvent(new KeyboardEvent(type, { code }));
+  T.freeze(); T.setTI('G', {}); for(const k of T.keepers()) Object.assign(k, { mode: 'line', holdT: 0, heldT: 0, gkRoaming: false, charging: false });
+  R.forEach((q, i) => Object.assign(q, { x: (atk > 0 ? T.FW - 8 * M : 8 * M), y: 200 + i * 150, vx: 0, vy: 0 }));
+  G.forEach((q, i) => Object.assign(q, { x: gl + atk * (14 + i * 6) * M, y: T.YC + (i % 2 ? 1 : -1) * (8 + i * 2) * M, vx: 0, vy: 0 }));
+  window.__K = { kick: 0, short: 0, from: null }; T.goalKick('G'); const t0 = T.now(); let x0 = null, y0 = null, t1 = null, st = 0;
+  (function tick(){ const t = T.now();
+    if(st === 0 && T.controlled() === kp){ st = 1; x0 = kp.x; y0 = kp.y; t1 = t; key('keydown', 'KeyS'); }
+    if(st === 1 && t - t1 > 0.5){ key('keyup', 'KeyS'); st = 2; t1 = t; }
+    if(st === 2 && t - t1 > 0.05){ window.__vpause = true; return res({ on: true, moved: +(Math.hypot(kp.x - x0, kp.y - y0) / M).toFixed(2), fy: +kp.facing.y.toFixed(2), held: T.gkHold() === kp }); }
+    if(t - t0 > 30) return res({ on: false }); requestAnimationFrame(tick); })(); }));
+await page.evaluate(() => dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyJ' }))); await page.waitForTimeout(260);
+await page.evaluate(() => { dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyJ' })); window.__vpause = false; });
+const yg2 = await page.evaluate(() => { const T = window.__T, b = T.ball(), kp = T.keepers().find(k => k.team === 'G'), c = T.controlled();
+  return { gone: T.gkHold() !== kp, short: window.__K.short, from: window.__K.from, you: c !== kp && c.team === 'G', down: c.y > kp.y, toHim: (b.vx * (c.x - b.x) + b.vy * (c.y - b.y)) > 0 }; });
+info('your goal kick -- the stick down a moment: ' + JSON.stringify(yg1) + '; PASS: ' + JSON.stringify(yg2));
+ok(yg1.on && yg1.held && yg1.moved < 0.3 && yg1.fy > 0.5 && yg2.gone && yg2.short === 1 && yg2.from === 0 && yg2.you && yg2.down && yg2.toHim,
+  'your goal kick: you\'re on him -- the stick turns him, he stays at the ball -- and PASS kicks it along the grass, off the ground, to the man that way, and you go with it');
 ok(frameErr.length === 0, 'no frame errors' + (frameErr.length ? ': ' + frameErr[0] : ''));
 
 process.exitCode = rep.finish();
