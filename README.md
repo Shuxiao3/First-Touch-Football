@@ -717,7 +717,10 @@ The same game played like any other football game. It's a copy of `index.html` w
       the man nearest waits on his line, in the lane between his place in it and the man on the ball, and the block
       waits with him; the ball coming over it springs the block, all of it at once (it used to be the middle third,
       for every side). Only forwards told to PRESS UP go beyond it. A man a long way upfield of his place in the block
-      (15 m; a forward told to DEFEND THE LINE 18 m) gets back at a sprint, so a deep block forms quickly.
+      (15 m; a forward told to DEFEND THE LINE 18 m) gets back at a sprint, so a deep block forms quickly. But nobody
+      sits on it for free: a man who keeps the ball within 5 m of where he had it for 3 s gets the nearest of theirs
+      out to him wherever their line is (about 1 to 8 s more, by how deep they sit) -- without it, a man stood still
+      on the ball in his own half kept it all day.
     - **With the ball**: BUILD-UP (SHORT, MIXED, LONG: your keeper's ball -- see **Your keeper waits for you** -- and the
       computer's, and how the back line moves it on: SHORT plays it safe and short from the back, LONG looks long);
       DEFENDERS (STAY BACK, SUPPORT, PUSH UP: the full-backs staying in the back line, joining the midfield in their third
@@ -1963,8 +1966,8 @@ test, and like the Trap Lab the values are the game's settings.
   FRONT, BALANCED, TACKLE), and what the forwards do (CONSERVE, DEFEND THE LINE, PRESS UP). With it: the BUILD-UP
   (SHORT, MIXED, LONG -- your keeper's ball as well, in place of his PASS), how far the defenders, the midfield and the
   forwards go forward, and what the wide men look for (TO FEET, IN BEHIND). A style picked sets its own; the computer's
-  clubs play their style's. Beyond the line of engagement nobody goes and gets it; the ball coming over it springs the
-  block. See **Team instructions**.
+  clubs play their style's. Beyond the line of engagement nobody goes and gets it -- unless a man sits on it (3 s
+  within 5 m) -- and the ball coming over it springs the block. See **Team instructions**.
 - **The computer goes forward (v111).** It kept giving the ball back: forward a little, then back, and back again
   whenever it was pressed. A ball back now costs more than the ground it gives up -- more in the other half, more with
   a man on him there, more straight after a ball forward -- and ground counts for more. Its balls back are down from

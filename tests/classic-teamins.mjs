@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, gkHold:()=>gkHold, ball:()=>ball, now:()=>simNow, atkOf, heldBy, FW, MK, over:()=>matchOver, setStyle, TI:()=>TI, TAC, tiDefault, tiLines, tiSet, tiPosture,\n'
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, gkHold:()=>gkHold, ball:()=>ball, now:()=>simNow, atkOf, heldBy, FW, MK, YC, over:()=>matchOver, setStyle, TI:()=>TI, TAC, tiDefault, tiLines, tiSet, tiPosture, own, setControlled, SIT:()=>SIT,\n'
   + '    setTI:(t,o)=>{ setTI(t,Object.assign(tiDefault(TAC[t].style),o)); }, block:t=>{ blockCache[t]=null; return defBlock(t); }, seen:(t,x,y)=>{ const e=seenBall(t); e.x=x; e.y=y; },\n'
   + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; },\n'
   + '    hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
@@ -25,7 +25,7 @@ patch('carry(p,dt,p===controlled?(hi.ix||hi.iy):true)', 'carry(p,dt,(p===control
 patch('  function slideAt(p, carrier){\n', '  function slideAt(p, carrier){\n    if(window.__M) window.__M.tk[p.team]++;\n');
 patch('  function gkLaunch(kp, tx, ty){', '  function gkLaunch(kp, tx, ty){ if(window.__K) window.__K.kick++;');
 patch('  function gkShort(kp,tx,ty,vh,vz){\n', '  function gkShort(kp,tx,ty,vh,vz){\n    if(window.__K) window.__K.throw++;\n');
-patch('          S.runs.push({p:q, x:best.L.x,', '          if(window.__M) window.__M.runs[team]++; S.runs.push({p:q, x:best.L.x,');
+patch('          S.runs.push({p:q, x:best.L.x,', '          if(window.__M){ window.__M.runs[team]++; const pw=posOf(q,"atk"); if(pw==="W"||pw==="WM") window.__M.wruns[team]++; } S.runs.push({p:q, x:best.L.x,');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ti-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -61,10 +61,29 @@ ok(near(R.block.fwd[0], 30) && near(R.block.fwd[2], 56) && near(R.block.fwd[1], 
   'the block, the ball far off: the back line on its line, the forwards on the line of engagement and the midfield halfway (' + R.block.fwd + '); the midfield on it, the forwards a few yards ahead (' + R.block.mid + '), further told to PRESS UP (' + R.block.midPress + ')');
 ok(R.posture.join() === 'neutral,press,lowblock', 'and the old code\'s posture follows them: ' + R.posture.join(', '));
 
+// --- A MAN SITTING ON IT beyond their line: yours, 12 m out from our goal, stood still on the ball -- they wait at their line
+// of engagement (54 m from theirs), then after 3 s the nearest of theirs goes out and gets it --------------------------------
+const sit = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(), MK = T.MK; window.__aiAll = false; window.__noDraw = true;
+  T.freeze(); T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); T.setTI('G', {}); T.setTI('R', {});
+  const aG = T.atkOf('G'), xG = u => aG > 0 ? u : T.FW - u, xR = u => aG > 0 ? T.FW - u : u;   // (u: metres-in-px from one's own goal)
+  const G = T.players().filter(q => q.team === 'G'), man = G.find(q => q.role === 'DEF') || G[0];
+  Object.assign(man, { x: xG(12 * MK), y: T.YC + 150, vx: 0, vy: 0, state: 'normal', facing: { x: aG, y: 0 } });
+  const B = T.block('R'); for(const q of T.players()) if(q.team === 'R'){ const r = q.slotDef ? q.slotDef.role : q.role;
+    q.x = xR(r === 'DEF' ? B.uD : r === 'MID' ? B.uM : B.uF); q.vx = q.vy = 0; q.state = 'normal'; }
+  T.setControlled(man); Object.assign(b, { z: 0, vx: 0, vy: 0, vz: 0 }); T.own(man); const t0 = T.now(); let at25 = null, won = null;
+  const nearR = () => Math.min(...T.players().filter(q => q.team === 'R').map(q => Math.hypot(q.x - man.x, q.y - man.y))) / MK;
+  (function tick(){ const t = T.now() - t0;
+    if(at25 === null && t >= 2.5) at25 = +nearR().toFixed(1);
+    if(won === null && (b.lastTouch === 'R' || (b.ownedBy && b.ownedBy.team === 'R'))) won = +t.toFixed(1);
+    if(won !== null || t > 16) return res({ at25, won, sat: +T.SIT().t.toFixed(1) });
+    requestAnimationFrame(tick); })(); }));
+info('a man sitting on it: ' + JSON.stringify(sit));
+ok(sit.at25 > 15 && sit.won !== null && sit.won > 3 && sit.won < 14, 'a man stood still on the ball 12 m out from his goal: they wait at their line (the nearest ' + sit.at25 + ' m off after 2.5 s), then after 3 s their nearest goes out and wins it (' + sit.won + ' s)');
+
 // --- AND WHAT IT DOES: computer v computer, side G told one thing, then another --------------------------------------------
 const play = (ti, n) => page.evaluate(async ({ ti }) => { const T = window.__T; window.__noDraw = true; window.__aiAll = true;
   T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); T.setTI('G', ti); T.setTI('R', {});
-  window.__M = { tk: { G: 0, R: 0 }, long: { G: 0, R: 0 }, short: { G: 0, R: 0 }, runs: { G: 0, R: 0 } };
+  window.__M = { tk: { G: 0, R: 0 }, long: { G: 0, R: 0 }, short: { G: 0, R: 0 }, runs: { G: 0, R: 0 }, wruns: { G: 0, R: 0 } };
   let dSum = 0, dN = 0, ownT = 0, last = null;
   await new Promise(res => { (function tick(){ if(T.over() || T.now() > 60 * 30) return res();
     const c = T.heldBy(), aG = T.atkOf('G'), U = x => (aG > 0 ? x : T.FW - x) / T.MK, b = T.ball();
@@ -93,9 +112,9 @@ const bu = await page.evaluate(async () => { const T = window.__T, kp = T.keeper
   return out; });
 info('the computer\'s keeper, three balls each way (kicked, thrown): told LONG ' + bu.long + ', told SHORT ' + bu.short);
 ok(bu.long.join() === '3,0' && bu.short.join() === '0,3', 'BUILD-UP: told LONG the keeper kicks it long every time (' + bu.long + '), told SHORT he plays it short every time (' + bu.short + ')');
-const wf = await runs({ wide: 'feet' }, 1), wr = await runs({ wide: 'run' }, 1);
-info('runs in behind a match: wide men TO FEET ' + wf[0].M.runs.G + ', IN BEHIND ' + wr[0].M.runs.G);
-ok(wr[0].M.runs.G > 1.5 * wf[0].M.runs.G, 'the wide men told IN BEHIND make far more runs in behind than told TO FEET (' + wr[0].M.runs.G + ' against ' + wf[0].M.runs.G + ')');
+const wf = await runs({ wide: 'feet' }, 2), wr = await runs({ wide: 'run' }, 2);   // (two matches each: one alone is noisy)
+info('runs in behind a match, the wide men\'s (all of the side\'s): TO FEET ' + mean(wf, r => r.M.wruns.G) + ' (' + mean(wf, r => r.M.runs.G) + '), IN BEHIND ' + mean(wr, r => r.M.wruns.G) + ' (' + mean(wr, r => r.M.runs.G) + ')');
+ok(mean(wr, r => r.M.wruns.G) > 1.5 * mean(wf, r => r.M.wruns.G), 'the wide men told IN BEHIND make far more runs in behind than told TO FEET (' + mean(wr, r => r.M.wruns.G) + ' a match against ' + mean(wf, r => r.M.wruns.G) + ')');
 
 // --- THE PANEL, WITHOUT THE BALL, ON THE SMALLEST PHONES: the lines' pitch and every row on the screen, in a match ----------
 for(const [w, h] of [[640, 360], [844, 340]]){

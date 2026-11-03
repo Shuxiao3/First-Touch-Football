@@ -7875,7 +7875,12 @@
   function teamInAttackPhase(team){ return possConfTeam===team; }
   // update confident possession once per frame: the OTHER team must HOLD the ball for POSS_FLIP_TIME
   // before we accept possession has changed. A loose ball gives that progress back (must be sustained).
+  // A MAN SITTING ON IT: how long the man on the ball has kept it within 5 m of where he had it (a nudge in a challenge
+  // doesn't count as going anywhere) -- past SIT_T, one of theirs goes out to him whatever their line of engagement (see
+  // the man on the ball: waitLine). Nobody holds it at the back for free
+  const SIT={p:null,x:0,y:0,t:0}, SIT_T=3;
   function updatePossConf(dt){
+    { const ob=ball.ownedBy; if(ob && SIT.p===ob && Math.hypot(ball.x-SIT.x,ball.y-SIT.y)<5*MK) SIT.t+=dt; else { SIT.p=ob||null; SIT.x=ball.x; SIT.y=ball.y; SIT.t=0; } }
     transitionT.G=Math.max(0,transitionT.G-dt); transitionT.R=Math.max(0,transitionT.R-dt);   // the counter window DECAYS (it never did before)
     const hb=heldBy(), ownT = hb ? hb.team : (gkHold ? gkHold.team : null);   // (a knock-on or a pass to a team-mate is still his side's ball)
     // A COUNTER-ATTACKING SIDE'S BREAK goes on while the ball keeps going forward (each 4 m more up the pitch than it's
@@ -10171,8 +10176,8 @@
         else if(cSpeed<45) mode='step';       // stopped/slow -> tighten to the body
         else mode='shadow';                   // shielding/moving away -> contain
         // BEYOND THE LINE OF ENGAGEMENT nobody goes and gets it: he holds off and waits for it to come (unless the block's
-        // sprung, or he's a forward told to PRESS UP)
-        const waitLine=(atk>0?ball.x:FW-ball.x)>engLineU(p.team) && mode!=='commit' && !pressing(p.team) && !(roleIn(p,'def')==='ATT'&&ti(p.team,'aline')==='press');
+        // sprung, he's a forward told to PRESS UP, or the man's been sitting on it: SIT)
+        const waitLine=(atk>0?ball.x:FW-ball.x)>engLineU(p.team) && mode!=='commit' && !pressing(p.team) && !(roleIn(p,'def')==='ATT'&&ti(p.team,'aline')==='press') && !(SIT.p===c && SIT.t>SIT_T);
         if(waitLine) mode='shadow';
         // STAY IN FRONT: in only when the ball's there to win -- not at a man running at him (he backs off) nor tight on a
         // still one; TACKLE: tight on a man who isn't going anywhere
