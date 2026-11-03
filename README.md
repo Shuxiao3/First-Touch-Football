@@ -682,8 +682,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     PASS throws it to the man you're aiming at (as your pass picks him: that way, the free one -- an amber ring marks
     him), along the grass as a pass would go, and you go with it, on to him; `J` `J` throws it overarm, up and over;
     a tap on a team-mate throws it to him, a drag off PASS throws it that way, and with nobody that way it's thrown
-    into the space. CLEAR -- or SHOOT -- boots it downfield: as far up as it goes, to the one of ours furthest up
-    (the stick's way, if you're pushing it), else long up the emptier side. A goal kick is the same, kicked -- the
+    into the space. CLEAR -- or SHOOT -- is his long ball (v115): not a defender's clearance but a long pass, pinged to
+    the man you're aiming at (picked as a pass picks him, the further on the better, 10 m to 60 m out) on a lofted
+    pass's flight, and you go with it; with nobody that way, long into the space that way. (In v114 it was booted as
+    far up as it would go, a clearance.) A goal kick is the same, kicked -- the
     ball's on the ground, so the stick turns him but he stays at it. He still has 5 s: for the last 2 s a red
     stopwatch flashes over his head, and when it's up it goes to the man you've got lit (with nobody lit, where the
     side's BUILD-UP says). Before v114 you were left on an outfielder and PASS played it out by the BUILD-UP --
@@ -697,8 +699,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     upfield, KEEPER CLEAR), a man on the ball he comes out at beyond his box (KEEPER OUT!: off his feet, not into
     his gloves). He used to handle everything.
     - **Yours at his feet**: you're on him -- the stick moves him with it, PASS and SHOOT do what they do for anyone,
-      by his own stats (a keeper's passing is a keeper's), CLEAR boots it downfield (v114), and one of theirs can
-      take it off him. Played
+      by his own stats (a keeper's passing is a keeper's), CLEAR is his long ball (a long pass to the man you aim
+      at: v115), and one of theirs can take it off him. Played
       on, you go with it, on to the man it's for; lost, you're on the nearest of ours. You can pass it back to him
       yourself (he's one of the men your pass can pick out), and he comes for it -- your pass doesn't put you on
       him until it's at his feet.
@@ -1752,10 +1754,10 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `WASD` | Move (double-tap a direction to sprint) |
 | `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
-| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle · your keeper with it in his hands: booted downfield |
+| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
-| `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is a boot downfield (v114) |
+| `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is his long ball, a long pass pinged to the man you aim at (the button reads LONG; v115) |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
 
@@ -1980,9 +1982,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **The keeper's long ball (v115).** His CLEAR isn't a defender's clearance any more: it's a long pass, pinged to the
+  man you're aiming at -- the stick picks him as it would a pass, the further on the better, out to 60 m -- on a
+  lofted pass's flight, and you go with it. On a touch screen the button reads LONG when you're on him with it.
 - **Your keeper with it in his hands (v114).** You're on him the moment he has it -- not left on an outfielder with
   PASS playing it out for you. The stick walks him round his box and aims; PASS throws it to the man you're aiming at
-  (`J` `J`: overarm), and you go with it; CLEAR or SHOOT boots it downfield -- and his CLEAR at his feet does too. A
+  (`J` `J`: overarm), and you go with it; CLEAR or SHOOT boots it downfield (a long pass to the man you aim at since
+  v115) -- and his CLEAR at his feet does too. A
   goal kick the same, kicked. See **Your keeper with it in his hands**.
 - **The keeper and the rules (v113).** He used to handle everything. Now his hands are only for his own penalty
   area, and never for a ball a team-mate kicked to him on purpose (a header back is fine); anything else is at his

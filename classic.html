@@ -3271,7 +3271,7 @@
       }
       if(e.code==='KeyK'){ if(practice==='keeper'){ practiceT=0; } else pressK(); }
       if(e.code==='KeyL'){
-        if(keeperInHand()) keeperBoot(controlled);   // your keeper, the ball in his hands: booted downfield (v114)
+        if(keeperInHand()) keeperLong(controlled);   // your keeper, the ball in his hands: a long pass, pinged (v115)
         else if(clearMode()&&pressClear()){/* own half: CLEAR it (now if it's yours, first time if it's loose) */}
         else if(myBall())crossPressBall();                                // you have it -> charge your own cross (double-tap: low)
         else if(performance.now()-crossGoneAt<450){/* a double-tap's second press just after your cross went: nothing (not a slide) */}
@@ -3373,7 +3373,7 @@
         continue;
       }
       if(t.target===btns.cross){
-        if(keeperInHand()) keeperBoot(controlled);                                 // your keeper, the ball in his hands: booted downfield (v114)
+        if(keeperInHand()) keeperLong(controlled);                                 // your keeper, the ball in his hands: a long pass, pinged (v115)
         else if(clearMode()){ if(pressClear()) clearTouchId=t.identifier; }      // own half: CLEAR (nothing to clear -> inert)
         else if(myBall()){crossPressBall();crossTouchId=t.identifier;}
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G'))requestCross();   // teammate has it -> DEMAND the cross
@@ -6229,7 +6229,7 @@
   // turns him and walks him round his box; PASS plays it to the man you're aiming at as a pass would pick him (that way,
   // the free one; a tap on a man, him) -- thrown: along the grass, or double-tapped, overarm -- and you go with it; with
   // nobody that way, thrown into the space that way. A goal kick the same, kicked (it's on the ground). CLEAR -- or SHOOT,
-  // from his hands -- boots it downfield (keeperBoot). His time up (GK_WAIT), it goes to the man you've got lit -- or,
+  // from his hands -- pings a long pass (keeperLong). His time up (GK_WAIT), it goes to the man you've got lit -- or,
   // nobody, where the side's BUILD-UP says (distribute)
   const GK_THROW=GK_SHORT, GK_KICKPASS=1125;   // (how far he throws it, 34 m; a goal kick's pass, kicked, 50 m)
   function keeperInHand(){ return !!gkHold && gkHold===controlled && gkHold.team==='G'; }
@@ -6261,21 +6261,28 @@
     kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0;
     if(q) passSwitch(q);
   }
-  // THE KEEPER'S BOOT (v114): CLEAR -- from his hands or at his feet -- or SHOOT from his hands, and he boots it
-  // downfield: as far up as it goes, to the one of ours furthest up the pitch (the stick's way, if you're pushing it),
-  // else long up the emptier side (gkLong)
-  function keeperBoot(kp){
+  // THE KEEPER'S LONG BALL (v115): CLEAR -- from his hands or at his feet -- or SHOOT from his hands. Not a defender's
+  // clearance: a long pass, pinged to the man you're aiming at (the stick, else the way he faces), picked as a pass picks
+  // him but further on (the longer the better, 10 m to 60 m out), on a lofted pass's flight to his feet, struck by the
+  // keeper's distribution; you go with it. Nobody that way: long into the space that way
+  const GK_LONGPASS=1350;
+  function keeperLongTarget(kp,ax,ay){ let best=null, bs=-1e9;
+    for(const q of players){ if(q.team!==kp.team) continue;
+      const dx=q.x-ball.x, dy=q.y-ball.y, d=Math.hypot(dx,dy)||1, dot=(dx*ax+dy*ay)/d;
+      if(dot<0.3||d<10*MK||d>GK_LONGPASS) continue;                         // (that way, as a pass's cone: doPass)
+      const opp=nearestOppTo(kp,q), open=opp?clamp(dist(opp,q)/160,0,1):1;
+      const sc=dot*2.4+open*0.7+clamp(d/GK_LONGPASS,0,1)*0.9; if(sc>bs){ bs=sc; best=q; } }
+    return best; }
+  function keeperLong(kp){
     if(!kp||!kp.isGK) return;
-    const atk=atkOf(kp.team), sx=curIx, sy=curIy, sl=Math.hypot(sx,sy), held=gkHold===kp; let tgt=null, best=-1e9;
-    for(const q of teamOf(kp.team)){ if(q.role==='DEF'||inOffsidePos(q)) continue;
-      const d=dist(kp,q), up=atk*(q.x-kp.x); if(d<600||d>1250) continue;
-      let sc=up; if(sl>0.2){ const dot=((q.x-kp.x)*sx+(q.y-kp.y)*sy)/(d*sl); if(dot<0.2) continue; sc+=dot*400; }
-      if(sc>best){ best=sc; tgt=q; } }
-    if(tgt){ gkLaunch(kp, clamp(tgt.x+atk*40,80,FW-80), tgt.y); ball.intendedRcv=tgt; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null; }
-    else { ball.intendedRcv=null; gkLong(kp,true); }
+    const a=keeperAim(kp), held=gkHold===kp, q=keeperLongTarget(kp,a.x,a.y);
+    const tx=q?q.x+q.vx*0.5:clamp(ball.x+a.x*1050,40,FW-40), ty=q?q.y+q.vy*0.5:clamp(ball.y+a.y*1050,40,FH-40);
+    const d=Math.hypot(tx-ball.x,ty-ball.y), T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, f=Math.hypot(tx-kp.x,ty-kp.y)||1;
+    kp.facing={x:(tx-kp.x)/f,y:(ty-kp.y)/f};
+    gkShort(kp,tx,ty,loftVh(d,T),260*T,true);                 // (pinged, as your lofted pass flies -- a goal kick's too)
+    ball.intendedRcv=q||null; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=kp;
     if(held){ kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0; }
-    lastGrade='BOOTED UPFIELD'; gradeColor='#ffb43c'; gradeFade=1.0;
-    if(tgt&&kp.team==='G') passSwitch(tgt);
+    if(q&&kp.team==='G') passSwitch(q);
   }
 
   // ===== offside =====
@@ -6519,7 +6526,7 @@
     clearBall(p,true,clearHeld?1:clearCharge);                           // (still holding: the whole way; let go: as far as it was charged)
   }
   function clearBall(p,firstTime,charge){
-    if(p&&p.isGK){ keeperBoot(p); return; }   // (the keeper's clearance: booted downfield -- v114)
+    if(p&&p.isGK){ keeperLong(p); return; }   // (the keeper's clearance: a long pass, pinged -- v115)
     const atk=atkOf(p.team), c=charge==null?1:clamp(charge,0,1), k=CLEAR_MIN+(1-CLEAR_MIN)*c, T=0.75+0.55*c;   // (a tap: short and low; full: high and long)
     // aim: the stick, unless it points back at your own goal; otherwise up and out toward your touchline
     let dx=curIx, dy=curIy; const il=Math.hypot(dx,dy), stick=il>0.3 && atk*dx/il>-0.2;
@@ -6847,7 +6854,7 @@
     return best;
   }
   function pressK(){
-    if(keeperInHand()){ keeperBoot(controlled); return; }   // your keeper, the ball in his hands: booted downfield (v114)
+    if(keeperInHand()){ keeperLong(controlled); return; }   // your keeper, the ball in his hands: a long pass, pinged (v115)
     if(myBall()){ pressShoot(); return; }                    // you have it (or it's a touch away) -> shoot
     if(headerReady()){ pressShoot(); return; }               // ball crossed & in the air near you -> jump & head it
     // FIRST-TOUCH SHOT: a strikeable loose ball near you -> volley it (pressShoot handles it)
@@ -12083,9 +12090,9 @@
   }
   // a keeper's ball out to a man near him, thrown or rolled: arriving with a little pace on it (vh, vz: as worked out for
   // it, or here)
-  function gkShort(kp,tx,ty,vh,vz){
+  function gkShort(kp,tx,ty,vh,vz,asIs){
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    if(kp.goalKick){ const sol=passSolve(d); vh=sol.vh; vz=sol.vz; }   // (a goal kick: played along the ground, never thrown)
+    if(kp.goalKick&&!asIs){ const sol=passSolve(d); vh=sol.vh; vz=sol.vz; }   // (a goal kick: played along the ground, never thrown)
     else if(vz==null){ vz=clamp(40+d*0.18,55,240)*gkLoftOf(kp,d)*0.75; vh=gkSolvePower(d*1.12,vz); }
     const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
     ball.vx=(dx*cs-dy*sn)*vh; ball.vy=(dx*sn+dy*cs)*vh; ball.vz=vz;
@@ -12518,13 +12525,14 @@
           btns.kick.classList.toggle('mTrap', (!mine && !oursHave) || lockT);
         }
         if(btns.shoot){ const slide=!mine&&!oursHave&&!strikeable;
-          btns.shoot.textContent = mine?'SHOOT':(oursHave?'SHOOT!':(strikeable?'SHOOT':'SLIDE'));
+          btns.shoot.textContent = keeperInHand()?'LONG':mine?'SHOOT':(oursHave?'SHOOT!':(strikeable?'SHOOT':'SLIDE'));
           btns.shoot.classList.toggle('mSlide',slide);
-          btns.shoot.classList.toggle('mCmd',!mine&&oursHave); }
-        if(btns.cross){ const clr=clearMode(), on=clr?clearableBall():(mine||oursHave)&&crossOut('G',ball.x)<=CROSS_MAX;   // own half: CLEAR; more than 24 m out: no cross (dimmed)
-          btns.cross.textContent = clr?'CLEAR':(mine?'CROSS':(oursHave?'CROSS!':'CROSS'));
+          btns.shoot.classList.toggle('mCmd',!mine&&oursHave&&!keeperInHand()); }
+        if(btns.cross){ const gkL=keeperInHand()||(!!controlled&&controlled.isGK&&ball.ownedBy===controlled);   // your keeper with it: his long ball (keeperLong)
+          const clr=!gkL&&clearMode(), on=gkL||(clr?clearableBall():(mine||oursHave)&&crossOut('G',ball.x)<=CROSS_MAX);   // own half: CLEAR; more than 24 m out: no cross (dimmed)
+          btns.cross.textContent = gkL?'LONG':clr?'CLEAR':(mine?'CROSS':(oursHave?'CROSS!':'CROSS'));
           btns.cross.classList.toggle('dimBtn',!on);
-          btns.cross.classList.toggle('mClear',clr);
+          btns.cross.classList.toggle('mClear',clr||gkL);
           btns.cross.classList.toggle('armed',clr&&clearArm>0);
           btns.cross.classList.toggle('mCmd',!clr&&!mine&&oursHave); }
       }

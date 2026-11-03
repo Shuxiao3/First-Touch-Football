@@ -19,7 +19,7 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
   + '    goalKick:t=>{ restartInfo={type:"goalkick",team:t,x:0,y:YC}; executeRestart(); }};\n  const LAB_TITLE=');
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');
 patch('  function gkLaunch(kp, tx, ty){', '  function gkLaunch(kp, tx, ty){ if(window.__K){ window.__K.kick++; window.__K.from=ball.z; }');
-patch('  function gkShort(kp,tx,ty,vh,vz){\n', '  function gkShort(kp,tx,ty,vh,vz){\n    if(window.__K){ window.__K.short++; window.__K.from=ball.z; }\n');
+patch('  function gkShort(kp,tx,ty,vh,vz,asIs){\n', '  function gkShort(kp,tx,ty,vh,vz,asIs){\n    if(window.__K){ window.__K.short++; window.__K.from=ball.z; }\n');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-gkr-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -122,14 +122,14 @@ const back = await page.evaluate(() => new Promise(res => { const T = window.__T
 info('your pass back to your keeper: ' + JSON.stringify(back));
 ok(back.how === 'feet' && back.you, 'you pass it back to your keeper (facing him, PASS): he has it at his feet, not his hands, and you\'re on him');
 const st = await yours('stick'), ps = await yours('pass'), tk = await yours('tackle');
-// CLEAR with it at his feet: booted downfield (v114)
+// CLEAR with it at his feet: his long ball, pinged (v115)
 await scene('G', 'back'); await page.evaluate(() => { window.__b0 = { x: window.__T.ball().x, y: window.__T.ball().y }; window.__t0 = window.__T.now(); }); await pressKey('KeyL');
 const ft = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(), kp = T.keepers().find(k => k.team === 'G'), b0 = window.__b0; let gone = null;
   (function tick(){ const t = T.now() - window.__t0; if(gone === null && b.ownedBy !== kp) gone = t;
     if(gone !== null && ((t - gone > 0.25 && b.z <= 0.5) || b.ownedBy || t - gone > 4)) return res({ land: +(Math.hypot(b.x - b0.x, b.y - b0.y) / T.MK).toFixed(1), grade: T.grade() });
     if(t > 6) return res({ land: null }); requestAnimationFrame(tick); })(); }));
 info('CLEAR with it at his feet: ' + JSON.stringify(ft));
-ok(ft.land >= 35, 'CLEAR with it at his feet: he boots it downfield (first down ' + ft.land + ' m out), not an outfielder\'s clearance');
+ok(ft.land >= 25, 'CLEAR with it at his feet: his long ball, pinged (first down ' + ft.land + ' m out), not an outfielder\'s clearance');
 info('your keeper on the ball -- the stick: ' + JSON.stringify(st) + '; PASS: ' + JSON.stringify(ps) + '; one of theirs at him: ' + JSON.stringify(tk));
 ok(st.ran > 1.5 && st.still && st.you, 'your keeper with it at his feet: the stick takes him on with it (' + st.ran + ' m in 0.8 s, the ball still his)');
 ok(ps.out && ps.out.to && ps.you === 'the man it\'s for' && !ps.hands, 'PASS plays it up the pitch to one of ours (' + (ps.out && ps.out.off) + '° off him: a keeper\'s passing), and you go with it, on to him');

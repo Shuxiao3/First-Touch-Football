@@ -24,7 +24,7 @@ patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy
 patch('carry(p,dt,p===controlled?(hi.ix||hi.iy):true)', 'carry(p,dt,(p===controlled&&!window.__aiAll)?(hi.ix||hi.iy):true)');
 patch('  function slideAt(p, carrier){\n', '  function slideAt(p, carrier){\n    if(window.__M) window.__M.tk[p.team]++;\n');
 patch('  function gkLaunch(kp, tx, ty){', '  function gkLaunch(kp, tx, ty){ if(window.__K) window.__K.kick++;');
-patch('  function gkShort(kp,tx,ty,vh,vz){\n', '  function gkShort(kp,tx,ty,vh,vz){\n    if(window.__K) window.__K.throw++;\n');
+patch('  function gkShort(kp,tx,ty,vh,vz,asIs){\n', '  function gkShort(kp,tx,ty,vh,vz,asIs){\n    if(window.__K) window.__K.throw++;\n');
 patch('          S.runs.push({p:q, x:best.L.x,', '          if(window.__M){ window.__M.runs[team]++; const pw=posOf(q,"atk"); if(pw==="W"||pw==="WM") window.__M.wruns[team]++; } S.runs.push({p:q, x:best.L.x,');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ti-')), 'classic.html');
 writeFileSync(copy, src);

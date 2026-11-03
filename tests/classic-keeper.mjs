@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, YOUR KEEPER: with the ball in his hands you're on him (v114) -- the stick walks him round his box,
 // PASS throws it to the man you aim at (twice: overarm), CLEAR or SHOOT boots it downfield -- and if you do nothing, once
-// he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head, it goes to the man you have lit. The
+// he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head, it goes to the man you have lit (v115:
+// CLEAR is his long ball -- a long pass pinged to the man you aim at, not a defender's clearance). The
 // computer's keeper plays it out himself, as before. IN THE AIR no man gets to a ball higher than a keeper: a header
 // tops out at 61 px (Heading 10, at the top of his leap), the keeper's hands at 82; and a keeper coming for a cross
 // catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. HIS WAY TO IT
@@ -32,7 +33,8 @@ await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector
 
 // YOUR KEEPER, THE BALL IN HIS HANDS (v114): you're on him. THE SCENE: theirs parked out of the way in the far corner,
 // ours set at known spots up the pitch from him (held there), the keeper given the ball; then, 0.5 s in, what you do --
-// the stick held one way (walk), PASS tapped with the stick one way (pass), PASS twice (loft), CLEAR, SHOOT -- or
+// the stick held one way (walk), PASS tapped with the stick one way (pass), PASS twice (loft), CLEAR (the stick held or
+// not), SHOOT -- or
 // nothing, his time running out. When it's gone: who it was for, who you're on, how high it went up and where it first
 // came down; and how many frames the stopwatch showed in his first 3 s and after.
 const yours = (act, dir) => page.evaluate(({ act, dir }) => new Promise(res => {
@@ -82,11 +84,12 @@ ok(pu.out && pd.out && pu.out.t < 1.2 && pu.out.rcv >= 0 && pd.out.rcv >= 0 && p
 const lf = await yours('loft', 'fwd'), gr = await yours('pass', 'fwd');
 info('two taps: ' + JSON.stringify(lf.out) + '; one: ' + JSON.stringify(gr.out));
 ok(lf.out && gr.out && lf.out.rcv >= 0 && lf.out.vz > gr.out.vz + 30, 'two taps of PASS: thrown overarm, up in the air (' + lf.out.vz + ' up), a tap along the grass (' + gr.out.vz + ')');
-// CLEAR, and SHOOT: booted downfield
-const cl = await yours('clear', null), sh = await yours('shoot', null);
-info('CLEAR: ' + JSON.stringify(cl.out) + '; SHOOT: ' + JSON.stringify(sh.out));
-ok(cl.out && sh.out && cl.out.t < 1.2 && cl.out.land >= 38 && sh.out.land >= 38 && cl.out.land > gr.out.land + 15,
-  'CLEAR -- or SHOOT -- boots it downfield: first down ' + (cl.out ? cl.out.land : '-') + ' m and ' + (sh.out ? sh.out.land : '-') + ' m out (a throw along the grass: ' + (gr.out ? gr.out.land : '-') + ' m)');
+// CLEAR, and SHOOT: a long pass, pinged to the man you aim at -- further on than a throw -- and you go with it (v115)
+const cl = await yours('clear', null), sh = await yours('shoot', null), cu = await yours('clear', 'up');
+info('CLEAR: ' + JSON.stringify(cl.out) + '; SHOOT: ' + JSON.stringify(sh.out) + '; CLEAR, the stick up: ' + JSON.stringify(cu.out));
+ok(cl.out && sh.out && cl.out.t < 1.2 && cl.out.rcv >= 0 && cl.out.you === cl.out.rcv && sh.out.rcv >= 0 && cl.out.land >= 30 && cl.out.land > gr.out.land + 10,
+  'CLEAR -- or SHOOT -- pings a long pass to one of ours up the pitch (man ' + (cl.out && cl.out.rcv) + ', first down ' + (cl.out ? cl.out.land : '-') + ' m out; a throw along the grass ' + (gr.out ? gr.out.land : '-') + ' m), and you go with it');
+ok(cu.out && cu.out.rcv >= 0 && cu.out.side < 0 && cu.out.you === cu.out.rcv, 'and it\'s aimed like a pass: the stick up, it\'s to a man up that way (' + (cu.out && cu.out.rcv) + ')');
 // THE COMPUTER'S KEEPER plays it out by himself, as before
 const ai = await page.evaluate(() => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'R'); T.freeze(); T.hold(kp);
   const t0 = T.simNow(); (function tick(){ const t = T.simNow() - t0; if(T.gkHold() !== kp || t > 6) return res({ t, held: T.gkHold() === kp }); requestAnimationFrame(tick); })(); }));
