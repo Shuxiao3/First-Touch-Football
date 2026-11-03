@@ -32,6 +32,11 @@ const { ok, info } = rep;
 await page.evaluate(() => { const T = window.__T; T.EXH.you = 'LIV'; T.EXH.opp = 'MCI'; localStorage.removeItem('ft_clubsq'); });
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(1500);
 await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); });
+// (v118: an archetype has habits of its own -- a target man hardly runs, a false nine always drops in: the scenes below are
+// the side's runs as such, so Liverpool's men are given archetypes with none to speak of -- wingers, a complete forward,
+// playmakers, ball-playing centre-backs)
+await page.evaluate(() => { const T = window.__T, A = { W: 'winger', ST: 'complete', CM: 'playmaker', CB: 'ballplayer', FB: 'fullback', WM: 'widemid' };
+  for(const q of T.players()) if(q.team === 'G' && A[T.posOf(q, 'atk')]) q.style = A[T.posOf(q, 'atk')]; });
 await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
   // a man at (u m from his own goal, w m across: + toward y=FH)
   window.__at = (q, u, w) => { const a = T.atkOf(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; q.facing = { x: a, y: 0 }; };

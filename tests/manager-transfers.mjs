@@ -72,7 +72,7 @@ ok(r.gem1 === r.gem0 && r.mk.n === 2 && r.gem2 >= r.gem0 * 1.3 * 1.08 - 10, 'one
 // --- YOUR BIDS ------------------------------------------------------------------------------------------------------------
 // a man at a club with room to sell; bids at fractions of their price, the dice fixed where it matters
 r = await K(`(()=>{ const d=CAREER.data, out={}, rnd=Math.random;
-  const pick=()=>{ for(const c of mgAiClubs(d)){ if(c.players.length<14||Math.abs(c.tier-d.tier)>0) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!(d.bids||[]).some(b=>b.pid===x.id)); if(p) return {p,c}; } };
+  const pick=()=>{ for(const c of mgAiClubs(d)){ if(c.players.length<14||Math.abs(c.tier-d.tier)>0) continue; const p=c.players.find(x=>x.role!=='GK'&&!mgWontCome(d,x)&&!(d.bids||[]).some(b=>b.pid===x.id)&&mgAsk(d,x,c)>=500); if(p) return {p,c}; } };   /* (a man with a price: one asking next to nothing rounds a 90% bid up to it) */
   const go=(k,fee,dice)=>{ const {p,c}=pick(), ask=mgAsk(d,p,c); Math.random=()=>dice; const res=mgBid(d,p.id,mgRound(ask*fee)); Math.random=rnd; return {p,c,ask,res,B:mgBidOf(d,p.id)}; };
   let t=go('low',0.7,0.5); out.low={res:t.res, B:!!t.B};
   t=go('high',1.3,0.99); out.high={res:t.res, st:t.B&&t.B.st};
@@ -185,9 +185,10 @@ const rows = () => page.evaluate(() => [...document.querySelectorAll('#bpBody .m
 const pick = async (k, v) => { await page.click(`#bpBody [data-mg="mdrop"][data-k="${k}"]`); await page.waitForTimeout(60); const opts = await page.$$eval('#bpBody .mkMenu [data-mg="filt"]', ns => ns.map(n => n.textContent));
   await page.click(`#bpBody .mkMenu [data-mg="filt"][data-k="${k}"][data-v="${v}"]`); await page.waitForTimeout(80); return opts; };
 const all0 = await rows();
-const posOpts = await pick('mpos', 'DM'); const dm = await rows();
+const posOpts = await pick('mpos', 'CM'); const dm = await rows();
 const typeOpts = await pick('arch', 'deepcreator'); const dc = await rows(), dcStyles = await K(`(()=>{ const d=CAREER.data; return ${JSON.stringify((await rows()).map(r => r.id))}.map(id=>mgFind(d,id).p.style); })()`);
 const posAfter = await K('MGUI.mpos');
+await pick('arch', 'ALL'); await pick('mpos', 'GK'); const gkTypes = await pick('arch', 'shotstopper'), gkRows = await rows(), gkStyles = await K(`(()=>{ const d=CAREER.data; return ${JSON.stringify((await rows()).map(r => r.id))}.map(id=>mgFind(d,id).p.style); })()`);
 await pick('arch', 'ALL'); await pick('mpos', 'ALL');
 await pick('sort', 'cheap'); const cheap = await rows();
 await pick('sort', 'dear'); const dear = await rows();
@@ -196,13 +197,16 @@ const sortOpts = await pick('sort', 'age'); const ages = await agesNow();
 await pick('sort', 'old'); const olds = await agesNow();
 await K(`(()=>{ const d=CAREER.data, L=mgAiClubs(d).filter(c=>c.tier===(MGUI.tier||d.tier)).flatMap(c=>c.players); for(const p of L.slice(0,4)){ d.kn=d.kn||{}; d.kn[p.id]=2; } return 1; })()`);
 await pick('sort', 'pot'); const pot = await rows(), potKnown = await K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgPotSort(d,mgFind(d,+r.dataset.pid).p)); })()`);
-await pick('sort', 'ovr'); await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(80); const inBud = await rows(), budNow = await K('CAREER.data.budget');
-await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(60);
+await pick('sort', 'ovr'); await K(`(()=>{ CAREER.data.budget=${cheap[Math.floor(cheap.length / 2)].amt}; mgRerender(); return 1; })()`);   // (a budget some of them are over: the middle of their prices)
+await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(80); const inBud = await rows(), budNow = await K('CAREER.data.budget');
+await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(60); await K('(()=>{ CAREER.data.budget=20000; mgRerender(); return 1; })()');
 const asc = a => a.every((v, i) => !i || a[i - 1] <= v), desc = a => a.every((v, i) => !i || a[i - 1] >= v);
 info('the Search\'s filters: ' + JSON.stringify({ all: all0.length, dm: dm.length, dc: dc.length, posOpts, typeOpts, posAfter, cheap: cheap.slice(0, 4).map(r => r.amt), dear: dear.slice(0, 4).map(r => r.amt), ages: ages.slice(0, 6), pot: pot.slice(0, 5).map(r => r.ovr), inBud: inBud.length }));
-ok(posOpts.join() === 'ALL,GK,CB,FB,DM,CM,AM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'DM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + '); DM, and only DMs (' + dm.length + ' of ' + all0.length + ')');
-ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
-  'TYPE: a DM\'s are the Anchor and the Deep creator (v116); Deep creator, and only they (' + dc.length + ')');
+ok(posOpts.join() === 'ALL,GK,CB,FB,CM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'CM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + ': v118, a holding and an attacking midfielder are CMs); CM, and only CMs (' + dm.length + ' of ' + all0.length + ')');
+ok(String(typeOpts) === 'ALL,CMBox-to-box,CMAnchor,CMPlaymaker,CMBall-winner,CMDeep creator,CMShadow striker,CMTrequartista' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'CM',
+  'TYPE: a CM\'s seven archetypes, the commonest first (v118); Deep creator, and only they (' + dc.length + ')');
+ok(String(gkTypes) === 'ALL,GKShot-stopper,GKAll-rounder,GKSweeper keeper,GKOne-on-one keeper' && gkRows.length > 0 && gkStyles.every(x => x === 'shotstopper'),
+  'a keeper\'s four types (v118): Shot-stopper, and only they (' + gkRows.length + ')');
 ok(String(sortOpts) === 'RATING,POTENTIAL,PRICE ▲,PRICE ▼,AGE ▲,AGE ▼' && asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && desc(olds) && ages[0] < olds[0] && cheap.length === all0.length,
   'SORT: the price cheapest first and dearest first, and age youngest first and oldest first (v117: ' + ages[0] + ' to ' + olds[0] + ')');
 // ...and the Free agents tab has them too (v117), its price the wage he'd ask -- sharing what's picked with the Search
@@ -213,7 +217,7 @@ await pick('sort', 'cheap'); const fa3 = (await rows()).map(r => r.amt); await p
 const faPosOpts = await pick('mpos', 'CB'); const fa5 = await rows(); await pick('mpos', 'ALL'); await pick('sort', 'ovr');
 const faAll = await K('CAREER.data.world.free.length');
 info('free agents, sorted: ' + JSON.stringify({ n: faAll, young: fa1.slice(0, 4), old: fa2.slice(0, 4), wageUp: fa3.slice(0, 3), wageDown: fa4.slice(0, 3), cb: fa5.length }));
-ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 10 && fa5.every(r => r.pos === 'CB'),
+ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 8 && fa5.every(r => r.pos === 'CB'),
   'free agents: POSITION, TYPE and SORT too -- age youngest or oldest first (' + fa1[0] + ' / ' + fa2[0] + '), the wage he asks either way, CBs only (' + fa5.length + ' of ' + faAll + ')');
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^POT/.test(pot[0].ovr), 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list (' + pot[0].ovr + '); the rest after');

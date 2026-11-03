@@ -73,7 +73,7 @@ info('City building from the back (' + bu.c + ' on it): ' + bu.jobs.map(j => `${
 const buCB = bu.jobs.filter(j => j.pos === 'CB'), farCB = buCB.sort((a, b) => Math.sign(bu.wc) * (a.w - b.w))[0];
 ok(farCB && Math.sign(bu.wc) * farCB.w <= -15, `the far centre-back splits wide, ${farCB && farCB.w} m across (the man on it at ${bu.wc}; it was ~-10)`);
 const buW = bu.jobs.filter(j => j.pos === 'W');
-ok(buW.length === 2 && buW.every(j => j.u >= 30) && buW.some(j => j.job === 'WIDTH' && j.u >= 43),
+ok(buW.length === 2 && buW.every(j => j.u >= 30) && buW.some(j => (j.job === 'WIDTH' || j.job === 'INSIDE') && j.u >= 43),   // (v118: an inside forward or inverted winger holds there in the channel, INSIDE)
   `neither winger comes back into our third, one holding near halfway (${buW.map(j => j.job + ' ' + j.u).join(', ')} m out)`);
 
 // --- SUPPORT: room around him -- City's midfielder on it in midfield, a man on him ---------------------------------
@@ -119,19 +119,23 @@ ok(bl3t && Math.max(...bl3u) - Math.min(...bl3u) <= 2.3, `the midfield stays a l
 // --- HOLDING THE LINE: City's forward going in behind at 8 m/s, 4 m in front of Liverpool's back line, in a centre-back's
 // zone, the centre-back holding his place in it: he holds his line a beat (a tenth of a second) before he turns and goes
 // with him. (One already pressing or shadowing the man goes with him at once: see classic-shots.mjs's runner into space.)
-const hold = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');
+// (v118: a ball-playing CB -- a cover CB, told to hold the line, picks up the runner at once: FOLLOW RUNNERS is his habit)
+const holdFor = sty => page.evaluate(sty => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');
   const R = window.__men('R'), c = R.find(q => window.__pos(q, 'atk') === 'CM'), st = R.find(q => window.__pos(q, 'atk') === 'ST');
-  const cb = window.__men('G').find(q => q.slotDef && q.slotDef.role === 'DEF');
+  const cb = window.__men('G').find(q => q.slotDef && q.slotDef.role === 'DEF'); cb.style = sty;
   window.__give(c, 42, 16);
   const s0 = T.blockSpot(cb), [u0, w0] = window.__uw('R', s0.x, s0.y);
   window.__at(st, u0 - 4, w0); const a = T.atkOf('R'); st.vx = a * 8 * T.MK; st.seenVx = st.vx; st.vy = st.seenVy = 0;
   cb.blockAt = T.simNow();   // (holding his place in the line when the run comes: see aiBrain)
   const at = () => { const s = T.blockSpot(cb), [u] = window.__uw('R', s.x, s.y); return { u: +u.toFixed(2), tr: !!s.track }; };
   T.adv(0.01); const h0 = at(); T.adv(0.06); const h1 = at(); T.adv(0.06); const h2 = at();
-  return { line: +u0.toFixed(2), h0, h1, h2 }; });
+  return { line: +u0.toFixed(2), h0, h1, h2 }; }, sty);
+const hold = await holdFor('ballplayer'), holdC = await holdFor('cover');
 info('holding the line (his spot, in City\'s metres; on the runner?): at the line ' + hold.line + ' | picked up ' + JSON.stringify(hold.h0) + ' | 0.06 s on ' + JSON.stringify(hold.h1) + ' | 0.12 s on ' + JSON.stringify(hold.h2));
 ok(!hold.h0.tr && !hold.h1.tr && Math.abs(hold.h1.u - hold.line) < 0.3, 'a centre-back who picks up a runner going in behind holds his line a beat: not yet with him 0.06 s on');
 ok(hold.h2.tr && hold.h2.u > hold.line + 1, `...then turns and goes with him (by 0.12 s on, his spot ${(hold.h2.u - hold.line).toFixed(1)} m back toward his goal)`);
+info('...a cover CB in his place: ' + JSON.stringify(holdC));
+ok(holdC.h1.tr, 'a cover CB (v118) picks up the runner at once, his line told to hold it: with him 0.06 s on');
 
 // --- OUT WIDE IN THEIR THIRD: Liverpool's forward on it 74 m out, 19 m across; the winger behind him on that flank ---
 const ov = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', 30); window.__homeDef('R');

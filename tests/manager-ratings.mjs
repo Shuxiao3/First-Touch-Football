@@ -65,7 +65,7 @@ r = await K(`(()=>{ const d=CAREER.data; for(let i=0;i<8;i++){ if(d.wday==='mon'
 ok(r.n >= 8 && r.avg > 5.4 && r.avg < 7 && r.fm && r.as > 0.5 * r.gl && r.as < r.gl, 'the computer\'s men rated every game too (' + r.n + ' of one club, ' + r.avg + ' on average), and most goals have an assist (' + r.as + ' of ' + r.gl + ')');
 
 // --- form and development ---------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, mk=(age,ovr,pot)=>{ const p=mgNewPlayer(d,'MID',ovr,age,{pot,sub:'CM'}); p.hv='jjjjjjjjj'; p.seed=777; p.mo=0; return p; };
+r = await K(`(()=>{ const d=CAREER.data, mk=(age,ovr,pot)=>{ const p=mgNewPlayer(d,'MID',ovr,age,{pot,sub:'CM'}); if(p.style!=='boxtobox'){ p.style='boxtobox'; delete p.at; devInit(p); p.pot=Math.max(p.ovr,pot); } p.hv='jjjjjjjjj'; p.seed=777; p.mo=0; return p; };   /* (v118: a box-to-box man -- seven kinds of CM now, an anchor's finishing ceiling low) */
   const prog=(p,f)=>{ const st=devUnpack(p.at), pg=devUnpackPg(p.pg); return DEV_KEYS.filter(f||(()=>true)).reduce((s,k)=>s+st[k]*2+pg[DEV_KEYS.indexOf(k)],0); };
   const tick=(p,n,fm,wg)=>{ for(let i=0;i<n;i++){ d.weeks=300+3*i; p.mw=4; p.fm=fm; if(wg!=null) p.wg=wg; devTick(d,p,{T:0.75,gw:4}); } };
   const a=mk(19,58,70), b=JSON.parse(JSON.stringify(a)), a0=prog(a); tick(a,8,8.0); tick(b,8,5.2); const ga=prog(a)-a0, gb=prog(b)-a0;

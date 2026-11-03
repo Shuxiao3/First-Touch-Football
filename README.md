@@ -232,8 +232,9 @@ The same game played like any other football game. It's a copy of `index.html` w
     it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
     has no long text on it: his figure, name, own position, style, age, stars, rating and potential (as you know it:
     see **His story**) on top, then the spots he plays (v116): PLAYS and the ones that are his own, lit green, ALSO and
-    the ones he can play well enough (a second position: a little off his reading of the game), outlined -- e.g. a
-    full-back PLAYS FB ALSO WM CB -- and his popularity under his potential. Along the card's foot, a tab for each side
+    the ones he can play well enough (a second position: a little off his reading of the game), outlined -- his
+    archetype's since v118, e.g. a wing-back PLAYS FB WM ALSO W, a stopper PLAYS CB and nothing else -- and his
+    popularity under his potential. Along the card's foot, a tab for each side
     -- RATINGS, DEAL, CAREER, PERSONALITY (v116: in the Squad tab ◀ TEAM first, back to the little pitch) -- the one
     showing lit; the side you're on stays as you go from man to man. (Before v116 one small button under his rating,
     DEAL ▶ and so on, turned it a side at a time.) His trait tags show on his ratings side, and while one of the six is
@@ -263,7 +264,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     turn to the next, so the pitch never loses height. (The rest of the squad used to sit after the bench, in
     reserve, dimmed: with squads of twenty that crammed the pitch's screen.) On the right, from under that
     row to the foot of the screen, the card of the man you tapped. Every man on the pitch shows his face (his own
-    look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, DM, CM, WM, AM, WNG, STK)
+    look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, CM, WM, WNG, STK)
     on top, his name and shirt number under them. The bench has the same two lines without the face, in a shorter box,
     so the pitch gets the height. The lines sit inside each token with room round them, clear of its edges.
   - **Selection** (in a career, on the training pitch): who you take, and your quick subs. The whole squad as one
@@ -810,19 +811,12 @@ The same game played like any other football game. It's a copy of `index.html` w
     then takes his spots in both shapes). BEST 8 puts a keeper in goal and the best seven by their ratings in the
     spots they're in, a man in his own position ahead of an equal one out of it.
   - **Positions: his own, his second ones, and the rest.** A spot in a shape is a CB, FB, CM, WM, W (a winger's) or
-    ST. A man's own position is his main one, and a holding or attacking midfielder's is CM's too. Most have second
-    positions they can play well enough:
-
-    | His position | Also plays |
-    | --- | --- |
-    | CB | FB |
-    | FB | WM, CB |
-    | CM | WM |
-    | DM | CB |
-    | AM | WM, W, ST |
-    | WM | FB, W |
-    | WNG | WM, ST |
-    | STK | W |
+    ST. Since v118 it's a man's ARCHETYPE that says where he can play, not his position: the spots it plays are his own,
+    and the ones it covers his second positions -- a stopper is a centre-back and nothing else, a cover CB can go out to
+    full-back, a libero is a centre-back and a midfielder both, a false nine a striker who can drop into midfield. Every
+    archetype's are in the table under [Playing styles](#playing-styles). (A man without one -- none in a career now --
+    goes by his position, as every man did before v118: a CB also FB; a FB also WM and CB; a CM also WM; a WM also FB
+    and W; a WNG also WM and ST; a STK also W.)
 
     Anywhere else he's out of position. What it costs him is his reading of the game. In a second position he loses
     0.6 of his Def IQ out of possession and 1.2 of his Off IQ on the ball; out of position, 3 of each. In a match it's
@@ -832,12 +826,14 @@ The same game played like any other football game. It's a copy of `index.html` w
     IQ he loses there (2); out of position, his rating for that line less 6 (what his attributes make him there, if
     it's not his own line). On the tactics pitch a man's rating is lime in a second position of his and amber out of
     position, and in Training his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
-    spot's man by position: in a new career about 72% of them play in their own, 27% in a second one and under 1% out
-    of position. Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
+    spot's man by position: in a new career about 84% of them play in their own, 14% in a second one and 2% out of
+    position (v118: archetypes are choosier than positions were -- 72%, 27% and under 1% before -- so a computer squad's
+    positions are dealt to fit its shapes: see [Playing styles](#playing-styles)). Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
     change one), is still each man to the spot nearest his, but now in a position of his own before another: a second
     position counts as a little further off, one he'd be out of position in as about a spot further on. So a 2-3-2
     that defends in a 3-3-1 drops its holding midfielder into the back three rather than the central midfielder next
-    to him. The computer's clubs had about 7% of their men out of position without the ball, and now about 4%, none of
+    to him (since v118: its anchor -- an anchor covers centre-back -- rather than its playmaker). The computer's clubs had
+    about 7% of their men out of position without the ball, then about 4% (about 6% with archetypes, v118), none of
     them further from their spots; what's left is the shape's doing (a back three from a side with two defenders in
     it). Before, nothing was lost in a match, and a man was only rated afresh for a spot in another line (a winger at
     wide midfield was rated as a midfielder: 90 down to 78; now 88).
@@ -1426,9 +1422,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
     Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
   - **Finding a man (v116).** The market's Search tab lists a league's men (◀ ▶ for another league), filtered and
-    sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, DM,
-    CM, AM, WM, WNG, STK), TYPE (his archetype -- a position's own once one's picked, and picking one picks its
-    position), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
+    sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, CM,
+    WM, WNG, STK -- v118: no DM or AM, a CM's both), TYPE (his archetype -- a position's own once one's picked, the
+    commonest first, and picking one picks its position; with every position, all 31 of them, open across the whole
+    screen), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
     closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE ▲ youngest first, AGE ▼ oldest first:
     v117), and IN BUDGET, only the men you could pay for. The Free agents tab has POSITION, TYPE and SORT too (v117),
     its price the wage he'd ask (WAGE ▲, WAGE ▼); the two tabs share what you've picked. (Before v116: the league and
@@ -2020,6 +2017,21 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v118: archetypes say where a man plays, and there are more of them.** 31 archetypes, keepers' too (none before):
+  five centre-backs (Stopper, Cover CB, Ball-playing CB, and new: Wide CB, Libero), four full-backs (Full-back,
+  Wing-back, and new: Defensive full-back, Inverted full-back), seven central midfielders (Box-to-box, Anchor,
+  Playmaker, Deep creator, and new: Ball-winner, Shadow striker, Trequartista -- the Creator's now a Trequartista),
+  three wide midfielders (Wide midfielder, Wide runner, and new: Wide playmaker), four wingers (Winger -- the crosser
+  now -- Inside forward, and new: Trickster, Inverted winger), six strikers (Poacher, Speedster, Complete forward,
+  Target man, and new: Pressing forward, False nine) and four keepers (Shot-stopper, All-rounder, Sweeper keeper,
+  One-on-one keeper). Each has the spots it plays and the ones it covers (PLAYS, ALSO on his card) -- the archetype
+  says where he can play, not his position -- how common it is in its position, and its habits on the pitch (see
+  [Playing styles](#playing-styles)). A holding and an attacking midfielder are one position now, CM (three of a
+  squad's four midfielders: more CMs than any other position); the market's POSITION has no DM or AM. A computer
+  club's positions are dealt to fit its shapes, as archetypes are choosier than positions were. A trickster has the
+  most skill stars of anyone. The exhibition clubs' squads have the new archetypes too. A save from before: a DM or
+  AM is a CM, a Creator a Trequartista, and a keeper gets the archetype his keeping leans toward -- labels only, his
+  stats as they were.
 - **v117: sort by age either way, and the free agents too.** The Search's SORT has AGE ▲ (youngest first) and AGE ▼
   (oldest first); the Free agents tab has the Search's POSITION, TYPE and SORT, its price the wage he'd ask.
 - **v116: a career batch, and two fixes.**
@@ -2573,46 +2585,95 @@ test, and like the Trap Lab the values are the game's settings.
 
 ## Playing styles
 
-Every outfield player has a style within his position, and his stats are built around it: the
-position's averages shifted by the style. Pace most of all — centre-backs and holding midfielders
-are the slowest men on the pitch, wingers and speedsters the quickest, and a forward's pace goes
-with his build. Ratings come out about the same across styles; what changes is the kind of player.
+Every player has an archetype within his position -- keepers too, since v118 -- and his stats are built around it:
+the position's averages shifted by the archetype. Pace most of all: centre-backs and holding midfielders are the
+slowest men on the pitch, wingers and speedsters the quickest, and a forward's pace goes with his build. Ratings come
+out about the same across archetypes; what changes is the kind of player.
 
-| Position | Style | Pace (typical speed stat, 1–10) | Strengths |
-|---|---|---|---|
-| Centre-back | Stopper | 4 | strength, heading, tackling |
-| | Ball-playing CB | 4.5 | passing, composure, control |
-| | Cover CB | 5.5 | reading the game, interceptions |
-| Full-back | Full-back | 6.5 | stamina, crossing |
-| | Wing-back | 7.5 | crossing, dribbling, engine (defends less) |
-| Midfield | Anchor (DM) | 4.5 | tackling, interceptions, strength |
-| | Deep creator (DM, v116) | 5 | long passing, composure, reading the game |
-| | Playmaker (CM) | 4.5 | passing, vision, bend |
-| | Box-to-box (CM) | 5.5 | stamina, tackling, shooting |
-| | Creator (AM) | 5.5 | dribbling, the killer ball, shooting |
-| | Wide midfielder (WM) | 6.5 | stamina, crossing |
-| | Wide runner (WM) | 8 | pace, dribbling, crossing |
-| Forward | Target man | 5.5 | strength, heading, holding it up |
-| | Poacher | 6.5 | finishing, composure, movement |
-| | Complete forward | 6.5 | link play, passing, shooting |
-| | Inside forward | 8 | cutting in, bend, shooting |
-| | Winger | 8 | dribbling, crossing |
-| | Speedster | 8.5 | pace, runs in behind |
+Since v118 the archetype, not the position, says **where a man can play**: PLAYS, the spots that are his own, and
+ALSO, the ones he can cover (a second position: a little off his reading of the game -- see **Positions** in the
+tactics). Anywhere else he's out of position. It also gives him **habits on the pitch**, on top of what his side's
+told (the team instructions). "How common" is its share of the men in its position.
 
-A DM in a career is an Anchor two times in three and a Deep creator the third (v116; an exhibition's squads have
-none yet: theirs are as they were). The style also shapes how a player is used: an Anchor or a Deep creator is the
-one who holds in midfield, speedsters,
-wingers and wide runners make runs in behind sooner and from further out, and a target man stays on the line.
-On the ball it tilts his choices: wingers, wide runners and inside forwards fancy taking their man on (an inside
-forward a shot too), a speedster running with it, a playmaker or creator the ball through, a deep creator the
-long ball forward from deep (never a dribble), a poacher a shot; a target man holds it up, and a stopper or an
-anchor keeps it simple. The side's way of playing
-tilts them too: tiki-taka keeps the ball and passes quickly, direct looks forward first and further, a
-wing side crosses more, and a counter goes quickly while the break is on.
-In a career, each sub-role (CB, FB, DM, CM, WM, AM, STK, WNG) has its styles; players signed before
-styles existed are labelled with the style their stats already fit, and keep their stats. A winger (WNG)
-is a forward and a wide midfielder (WM) a midfielder: no midfielder is a winger. A wide midfielder an older
-save filed as a CM is moved to WM when it loads.
+| Position | Archetype | Plays | Also | How common | Pace | Good at | On the pitch |
+|---|---|---|---|---|---|---|---|
+| Centre-back | Stopper | CB | -- | 30% | 3.5 | strength, heading, tackling | attacks the ball: tighter on a man, and out to one in front of him where the line holds; clears it rather than plays it |
+| | Cover CB | CB | FB | 30% | 5 | reading the game, interceptions | sweeps behind: a few yards deeper with the ball, picks up a runner where the line holds, reads it rather than wins it |
+| | Ball-playing CB | CB | CM | 20% | 4 | passing, composure, control | plays it out from the back, the longer pass forward |
+| | Wide CB *(v118)* | CB | FB | 13% | 5.5 | stamina, tackling, crossing | the outside man of a back three: splits wider, up behind the play on the ball's side, carries it forward |
+| | Libero *(v118)* | CB, CM | -- | 7% | 5.5 | passing, dribbling, reading the game | up close to the play with the ball, and carries it out of defence into midfield |
+| Full-back | Full-back | FB | WM | 40% | 6 | pace, stamina, crossing | overlaps when the side's told to, then gets back |
+| | Wing-back | FB, WM | W | 25% | 7.5 | pace, crossing, dribbling, engine | a step further up than the full-backs are told to go; down the line, and the cross |
+| | Defensive full-back *(v118)* | FB | CB | 25% | 5 | tackling, strength, heading | a step further back: overlaps rarely, tucks in as a third centre-back, keeps it simple |
+| | Inverted full-back *(v118)* | FB | CM, WM | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
+| Central midfield | Box-to-box | CM | WM | 20% | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
+| | Anchor | CM | CB | 17% | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
+| | Playmaker | CM | -- | 17% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
+| | Ball-winner *(v118)* | CM | -- | 14% | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
+| | Deep creator *(v116)* | CM | -- | 14% | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
+| | Shadow striker *(v118)* | CM | ST | 11% | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
+| | Trequartista *(v118: was the Creator)* | CM | W, ST | 7% | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
+| Wide midfield | Wide midfielder | WM | CM, FB | 45% | 6 | stamina, crossing, tackling | up and down the flank all game; crosses, tracks back |
+| | Wide runner | WM | FB, W | 30% | 8 | pace, dribbling, crossing | flies down the line with it and takes his man on |
+| | Wide playmaker *(v118)* | WM | W | 25% | 5 | passing, vision, control | inside off the flank, to the ball, to make the play |
+| Winger | Trickster *(v118)* | W | WM | 30% | 7 | dribbling, agility, skill moves | runs at his man with tricks, any way at all; the most skill stars of anyone |
+| | Winger | W | WM | 30% | 7.5 | pace, crossing, dribbling | takes it down the line to the byline and crosses |
+| | Inverted winger *(v118)* | W | WM | 22% | 7.5 | dribbling, bend, passing | narrower; cuts inside to curl it in or slide the pass through |
+| | Inside forward | W | ST | 18% | 7.5 | pace, finishing, runs | in the channel between full-back and centre-back; runs in behind, cuts in, shoots |
+| Striker | Poacher | ST | -- | 22% | 6 | finishing, composure, movement | on the last man's shoulder: pins their line |
+| | Speedster | ST | W | 20% | 8 | pace, acceleration | runs in behind all day |
+| | Complete forward | ST | W | 20% | 6 | link play, passing, shooting | drops in to link, then gets in the box |
+| | Target man | ST | -- | 18% | 5 | strength, heading, holding it up | back to goal, up and central: holds it up; hardly ever runs |
+| | Pressing forward *(v118)* | ST | W | 10% | 7 | stamina, tackling, acceleration | presses up whatever the forwards are told, tight on the man |
+| | False nine *(v118)* | ST | CM | 10% | 6.5 | passing, dribbling, vision | drops into midfield to make the play, always |
+| Keeper *(v118)* | Shot-stopper | GK | -- | 35% | 5 | reflexes, diving, handling | stays home: less far off his line at a man, sweeps less, comes for fewer crosses |
+| | All-rounder | GK | -- | 30% | 6.5 | a bit of everything | as every keeper was before v118 |
+| | Sweeper keeper | GK | -- | 20% | 7.5 | speed off his line, kicking, composure | stands higher (up to 4 m off his line with the ball far up the pitch), sweeps further out and sooner |
+| | One-on-one keeper | GK | -- | 15% | 7.5 | speed off his line, diving | at the man through on goal further off his line, straight at him from further, and down bigger and sooner |
+
+(Pace: the middle of a new career's men's speed stat, 1--10 -- a keeper's, his keeper speed.)
+
+**The habits.** Most lean the setting his line has a step one way or the other: a wing-back goes a step further up
+than the full-backs are told (SUPPORT is PUSH UP to him), a defensive full-back a step back, a libero a step closer
+to the play, a cover CB a step deeper, a box-to-box midfielder a step further forward (and into the box for a cross),
+an anchor and a deep creator a step back (they hold with the pivot), a poacher and a speedster a step nearer their
+line. Some have a setting of their own: a target man always
+holds it up, a false nine always drops in, a shadow striker always goes in behind; an inside forward plays in the
+channel, an inverted winger and a wide playmaker narrower, and a wide playmaker comes short for it. (A winger and a
+wide runner play wide as their line's told, and go in at the back post with the ball near their box like anyone.) Without the ball: a stopper, a ball-winner and a pressing
+forward go in tighter (a step toward TACKLE), a cover CB and a deep creator a step off; where the line holds, a cover
+CB picks up a runner (FOLLOW RUNNERS) and a stopper steps out to a man in front of him (PRESS UP); a pressing forward
+presses up whatever the forwards are told; a ball-winner goes and gets it further up than the line of engagement. On
+the ball his choices tilt: a winger, a wide runner and a wing-back fancy going down the line, an inverted winger, an
+inside forward and a wide playmaker cutting in off it; a trickster takes his man on most of all, and does a skill
+move keenest; a trequartista takes men on and plays the killer ball, a playmaker and a deep creator the ball
+through (the deep creator long, from deep), a libero and a wide CB run with it, an inverted full-back passes and
+doesn't cross, a poacher and a shadow striker shoot, a false nine makes it rather than finishes it; a stopper, an
+anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster, an
+inside forward and a shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
+a wide playmaker less, a false nine and a target man hardly ever. The holder is an anchor or a deep
+creator if there's one, a ball-winner next, never a shadow striker or a trequartista if anyone else will do.
+
+**Keepers.** A keeper's archetype has his stats (a shot-stopper's reflexes, diving and handling; a sweeper keeper's
+speed off his line, kicking and composure; a one-on-one keeper's speed and diving) and his habits in goal, measured
+in a computer match: a sweeper keeper stood about 5 m off his line with the ball far up the pitch, the others about a
+metre. An exhibition club's keepers have none: they keep as an All-rounder.
+
+**Where they come from.** In a career a man's archetype is drawn for his position by how common each is. A squad's
+positions are dealt so it can always field a side -- two or three centre-backs and a full-back or two, three central
+midfielders and a wide one, two or three strikers and a winger or two -- and so a computer club's shapes (with the
+ball and without it) have the men they need: archetypes are choosier than positions were, and a squad drawn man by
+man could be a position short and play a man out of it every week. A club topping its squad up signs the position
+it's shortest of, and one buying a man buys one who can play where the man he's replacing did. The exhibition clubs'
+squads have the new archetypes too, dealt by the spot each man plays in their shape. A holding and an attacking
+midfielder are one position, CM, since v118 (in a squad, three of its four midfielders: more CMs than any other
+position). Skill stars: a trickster's ceiling is drawn from odds of its own, the best of anyone's (at the top level
+one in seven has five), and a trequartista's and a shadow striker's from an attacking midfielder's; the other
+wingers' are a little lower than before, so the world has about as many five-star men. A save from before v118: a
+DM or AM is a CM, a Creator a Trequartista, and a keeper gets the archetype his keeping leans toward (about as often
+as they come now) -- labels only: his stats are as they were. Players signed before styles existed are labelled with
+the style their stats already fit, and keep their stats. A winger (WNG) is a forward and a wide midfielder (WM) a
+midfielder: no midfielder is a winger.
 
 ## Layout
 

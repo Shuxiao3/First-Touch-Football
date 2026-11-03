@@ -52,6 +52,7 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
   const att = R.filter(q => q.role === 'ATT'), mid = R.filter(q => q.role === 'MID'), defs = G.filter(q => q.role === 'DEF');
   const pas = R.find(q => q !== att[0] && q !== mid[0] && q.role !== 'G') || R[1], rcv = scene === 'cross' ? att[0] : mid[0], opp = defs[0], keep = new Map();
   for(const q of [pas, rcv, opp]) keep.set(q, q.stats);
+  const sty0 = rcv.style, styO = opp && opp.style; rcv.style = null; if(opp) opp.style = null;   // (v118: an archetype tilts what a man does -- the receiver and his marker here have none: his Off IQ alone)
   pas.stats = Object.assign({}, pas.stats, { crossing: 10, passAcc: 10, curve: 5.5, offIQ: 7 });
   rcv.stats = Object.assign({}, rcv.stats, { offIQ: iq, heading: 6.5, speed: 7, acceleration: 7, shotAcc: 7, composure: 7, ballControl: 7 });
   opp.stats = Object.assign({}, opp.stats, { heading: 6.5, speed: 6.5, acceleration: 6.5, defIQ: 6.5, interceptions: 6.5, tackle: 6.5 });
@@ -81,7 +82,7 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
         else if(e.k === 'own' && e.team === 'R' && e.num === rcv.num && got === null){ got = e.t; out.got = +(e.t - t0).toFixed(2); if(scene === 'midfield') out.k = 'his'; }
         else if(e.k === 'xg' && e.team === 'R' && got !== null) out.xg = e.P;
         else if(e.k === 'shot' && e.team === 'R' && got !== null){ out.k = 'shot'; out.after = +(e.t - got).toFixed(2); } } }
-    if(out.k || t > (scene === 'cross' ? 2.6 : 3)){ for(const [q, s] of keep) q.stats = s; if(!out.k) out.k = 'nothing';
+    if(out.k || t > (scene === 'cross' ? 2.6 : 3)){ for(const [q, s] of keep) q.stats = s; rcv.style = sty0; if(opp) opp.style = styO; if(!out.k) out.k = 'nothing';
       const g = window.__RT.get(rcv); if(g){ const l = Math.hypot(g.bx - g.px, g.by - g.py) || 1; out.toward = Math.round(((g.x - g.px) * (g.bx - g.px) + (g.y - g.py) * (g.by - g.py)) / l); }
       b.ownedBy = null; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0; b.crossT = 0; b.crossBy = null; return res(out); }
     requestAnimationFrame(tick); })(); }), { scene, iq, i });

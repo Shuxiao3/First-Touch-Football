@@ -551,7 +551,7 @@ await games(2); const s4 = await story(); await games(1); const s5 = await story
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);
 const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();
 const kid = await page.evaluate(() => { const d = __MG.d, p = d.roster.find(x => x.id === d.story.kidId); return p && { age: p.age, ovr: p.ovr, pot: p.pot, role: p.role, sub: p.subRole, style: p.style, story: d.story.kid }; });
-ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Starts wide, cuts in/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
+ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Gets inside, runs the channel/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
    && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'insidefwd' && kid.story === 2,
   'after the 5th, a wonderkid asks to join; WNG and INSIDE FORWARD picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
 

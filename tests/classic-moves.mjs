@@ -262,7 +262,8 @@ const odds = await cp.evaluate(() => { const T = window.__T, O = T.STAR_ODDS, o 
   o.cb = O.CB.every(r => r[3] === 0 && r[4] === 0) && pl('CB')[0] + pl('CB')[1] >= 90;
   o.lowDef = ['CB', 'FB'].every(k => low(k).every(r => r[0] + r[1] >= 95));
   o.lowFive = Object.values(O).every(rows => rows[0][4] === 0 && rows[1][4] === 0 && rows[2][4] <= 0.5);
-  o.wing = pl('WNG')[2] + pl('WNG')[3] >= 75 && Object.keys(O).every(k => k === 'WNG' || pl(k)[4] < pl('WNG')[4]);
+  o.wing = pl('WNG')[2] + pl('WNG')[3] >= 75 && Object.keys(O).every(k => k === 'WNG' || k === 'TRK' || pl(k)[4] < pl('WNG')[4]);
+  o.trk = pl('TRK')[4] > 2 * pl('WNG')[4] && pl('TRK')[3] + pl('TRK')[4] > pl('WNG')[3] + pl('WNG')[4];   // (v118: a trickster, the most of anyone)
   o.stk = pl('STK')[2] > 45 && pl('STK')[3] > pl('STK')[4] * 4 && pl('STK')[4] <= 3;
   o.mid = pl('DM')[4] <= 0.5 && pl('CM')[4] <= 0.5 && pl('AM')[4] <= 1 && pl('WM')[4] > pl('AM')[4] && pl('WM')[4] < pl('STK')[4];
   o.fb = pl('FB')[4] <= 1;
@@ -271,10 +272,10 @@ const odds = await cp.evaluate(() => { const T = window.__T, O = T.STAR_ODDS, o 
   o.drawn = n.map(x => x / 100); o.leagues = [T.starLeague(58), T.starLeague(59), T.starLeague(67), T.starLeague(75)].join('');
   return o; });
 info('a top-league winger\'s ceiling 1..5, drawn: ' + odds.drawn.join('% ') + '%');
-ok(odds.sums && odds.leagues === '1234' && odds.drawn.join() === '0,11,42,40,7', 'each position\'s odds in each league add up, and a draw gives each ceiling its share');
+ok(odds.sums && odds.leagues === '1234' && odds.drawn.join() === '0,13,45,38,4', 'each position\'s odds in each league add up, and a draw gives each ceiling its share');
 ok(odds.cb && odds.lowDef, 'a centre-back three stars at most (the top league\'s 9 in 10 one or two); the lower two leagues\' defenders one or two, 95 in 100 or more');
 ok(odds.lowFive, 'no five-stars in the lower two leagues, hardly any in the one below the top');
-ok(odds.wing && odds.stk && odds.mid && odds.fb, 'in the top league: wingers mostly three or four stars and the most five-stars; strikers mostly three, some four, five rare; a five-star midfielder very rare (the wide one a little less); a full-back hardly ever');
+ok(odds.wing && odds.trk && odds.stk && odds.mid && odds.fb, 'in the top league: wingers mostly three or four stars and the most five-stars -- a trickster most of all (v118); strikers mostly three, some four, five rare; a five-star midfielder very rare (the wide one a little less); a full-back hardly ever');
 
 // --- grown into, and perhaps one lost: his stars at each age -------------------------------------------------------
 const ages = await cp.evaluate(() => { const T = window.__T, o = { mono: true, young: true, prime: true, lose: 0, peaks: {}, n: 2000 };
