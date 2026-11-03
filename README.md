@@ -1429,8 +1429,10 @@ The same game played like any other football game. It's a copy of `index.html` w
     sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, DM,
     CM, AM, WM, WNG, STK), TYPE (his archetype -- a position's own once one's picked, and picking one picks its
     position), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
-    closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE youngest first), and IN BUDGET, only
-    the men you could pay for. (Before v116: the league and ALL, GK, DEF, MID or ATT, by rating.)
+    closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE ▲ youngest first, AGE ▼ oldest first:
+    v117), and IN BUDGET, only the men you could pay for. The Free agents tab has POSITION, TYPE and SORT too (v117),
+    its price the wage he'd ask (WAGE ▲, WAGE ▼); the two tabs share what you've picked. (Before v116: the league and
+    ALL, GK, DEF, MID or ATT, by rating -- and Free agents just ALL, GK, DEF, MID or ATT until v117.)
   - **The transfer window** is open from the first week of pre-season to the end of the winter break -- the first
     half of the season with it -- and shut for the second half. While it's open you can bid for anyone at another
     club (see **Bids** and **What a club asks**). Once a fee's agreed you agree his contract: 1 to 4 seasons at the
@@ -2018,6 +2020,8 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v117: sort by age either way, and the free agents too.** The Search's SORT has AGE ▲ (youngest first) and AGE ▼
+  (oldest first); the Free agents tab has the Search's POSITION, TYPE and SORT, its price the wage he'd ask.
 - **v116: a career batch, and two fixes.**
   - **Hurt men come off.** One of your eight hurt between games is out of the side there and then, the best fit off
     the bench in his place (the news says who); hurt in a live match, he comes off at once for your planned quick sub

@@ -191,7 +191,9 @@ const posAfter = await K('MGUI.mpos');
 await pick('arch', 'ALL'); await pick('mpos', 'ALL');
 await pick('sort', 'cheap'); const cheap = await rows();
 await pick('sort', 'dear'); const dear = await rows();
-await pick('sort', 'age'); const ages = await K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgFind(d,+r.dataset.pid).p.age); })()`);
+const agesNow = () => K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgFind(d,+r.dataset.pid).p.age); })()`);
+const sortOpts = await pick('sort', 'age'); const ages = await agesNow();
+await pick('sort', 'old'); const olds = await agesNow();
 await K(`(()=>{ const d=CAREER.data, L=mgAiClubs(d).filter(c=>c.tier===(MGUI.tier||d.tier)).flatMap(c=>c.players); for(const p of L.slice(0,4)){ d.kn=d.kn||{}; d.kn[p.id]=2; } return 1; })()`);
 await pick('sort', 'pot'); const pot = await rows(), potKnown = await K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgPotSort(d,mgFind(d,+r.dataset.pid).p)); })()`);
 await pick('sort', 'ovr'); await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(80); const inBud = await rows(), budNow = await K('CAREER.data.budget');
@@ -201,7 +203,19 @@ info('the Search\'s filters: ' + JSON.stringify({ all: all0.length, dm: dm.lengt
 ok(posOpts.join() === 'ALL,GK,CB,FB,DM,CM,AM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'DM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + '); DM, and only DMs (' + dm.length + ' of ' + all0.length + ')');
 ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
   'TYPE: a DM\'s are the Anchor and the Deep creator (v116); Deep creator, and only they (' + dc.length + ')');
-ok(asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && cheap.length === all0.length, 'SORT: the price cheapest first and dearest first, and age youngest first');
+ok(String(sortOpts) === 'RATING,POTENTIAL,PRICE ▲,PRICE ▼,AGE ▲,AGE ▼' && asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && desc(olds) && ages[0] < olds[0] && cheap.length === all0.length,
+  'SORT: the price cheapest first and dearest first, and age youngest first and oldest first (v117: ' + ages[0] + ' to ' + olds[0] + ')');
+// ...and the Free agents tab has them too (v117), its price the wage he'd ask -- sharing what's picked with the Search
+await page.click('#bldgPanel .bpTab:text-is("Free agents")'); await page.waitForTimeout(80);
+const faAges = async () => K(`(()=>{ const d=CAREER.data; return [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r=>mgFind(d,+r.dataset.pid).p.age); })()`);
+const faSort = await pick('sort', 'age'); const fa1 = await faAges(); await pick('sort', 'old'); const fa2 = await faAges();
+await pick('sort', 'cheap'); const fa3 = (await rows()).map(r => r.amt); await pick('sort', 'dear'); const fa4 = (await rows()).map(r => r.amt);
+const faPosOpts = await pick('mpos', 'CB'); const fa5 = await rows(); await pick('mpos', 'ALL'); await pick('sort', 'ovr');
+const faAll = await K('CAREER.data.world.free.length');
+info('free agents, sorted: ' + JSON.stringify({ n: faAll, young: fa1.slice(0, 4), old: fa2.slice(0, 4), wageUp: fa3.slice(0, 3), wageDown: fa4.slice(0, 3), cb: fa5.length }));
+ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 10 && fa5.every(r => r.pos === 'CB'),
+  'free agents: POSITION, TYPE and SORT too -- age youngest or oldest first (' + fa1[0] + ' / ' + fa2[0] + '), the wage he asks either way, CBs only (' + fa5.length + ' of ' + faAll + ')');
+await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^POT/.test(pot[0].ovr), 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list (' + pot[0].ovr + '); the rest after');
 ok(inBud.length > 0 && inBud.length < all0.length && inBud.every(r => r.amt <= budNow), 'IN BUDGET: only the men you could pay for (' + inBud.length + ', all at or under ' + budNow + ')');
 // the Bids tab's history (v108): the one you signed, and the one you walked away from -- and the season's count
