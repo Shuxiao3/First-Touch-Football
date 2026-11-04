@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, P, FW, FH, YC, MK, GOAL_W, ARCH, OVR_W, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, P, FW, FH, YC, MK, GOAL_W, ARCH, OVR_W, OVR_W_V121, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
   + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, checkOutOfPlay, rs:()=>restartInfo, switchEnds, setControlled, shootAt, '
   + 'overallOf, gkHandlingFor, sixHtml, genStyledStats, rng32, divingOf, reflexOf, spreadWidth, spreadBlock, spreadHalf:k=>spreadHalf(k), spreadGrow:k=>spreadGrow(k), '
   + 'SP:()=>({H:SPREAD_H, R:SPREAD_RANGE, DIVE:SPREAD_DIVE, LATE:SPREAD_LATE, T:SPREAD_T, DOWN:SPREAD_DOWN}), pal:()=>KEEPER_SHEET_PAL, PX_M, '
@@ -194,12 +194,12 @@ r = await page.evaluate(() => { const T = window.__T, R = T.rng32(7), hs = [];
   for(let i = 0; i < 60; i++){ const st = T.genStyledStats('GK', undefined, R, 0); hs.push(st.gkHandling); }
   const st = { keeperSpd: 6, gkReflex: 8, gkReach: 7.5, gkDiveRange: 6.5, gkDistribution: 5, composure: 6, ballControl: 5 }, w0 = { gkReflex: 3, gkReach: 3, gkDiveRange: 2, keeperSpd: 1, gkDistribution: 2 };
   let s = 0, t = 0; for(const k in w0){ s += st[k] * w0[k]; t += w0[k]; } const before = Math.round(s / t * 10);
-  const filled = Object.assign({ gkHandling: T.gkHandlingFor(st) }, st), after = T.overallOf({ role: 'GK', stats: filled });
+  const filled = Object.assign({ gkHandling: T.gkHandlingFor(st) }, st), wv = T.OVR_W_V121.GK; let s2 = 0, t2 = 0; for(const k in wv){ s2 += filled[k] * wv[k]; t2 += wv[k]; } const after = Math.round(s2 / t2 * 10);   // (rated as then: v121's weights)
   const six = T.sixHtml(filled, 'GK');
-  return { arch: T.ARCH.GK.gkHandling, w: T.OVR_W.GK.gkHandling, mean: +(hs.reduce((a, b) => a + b, 0) / hs.length).toFixed(2), halves: hs.every(v => v * 2 === Math.round(v * 2) && v >= 1 && v <= 10),
+  return { arch: T.ARCH.GK.gkHandling, w: T.OVR_W.GK.gkHandling, wDive: T.OVR_W.GK.gkDiveRange, mean: +(hs.reduce((a, b) => a + b, 0) / hs.length).toFixed(2), halves: hs.every(v => v * 2 === Math.round(v * 2) && v >= 1 && v <= 10),
     before, after, fill: filled.gkHandling, han: /data-six="HAN"/.test(six), cmp: /data-six="CMP"/.test(six), kicks: /data-six="KIC"/.test(six), dial: T.P.gkHandling.val }; });
 info('handling: ' + JSON.stringify(r));
-ok(r.arch === 7 && r.w === 2 && r.dial === 5.5 && Math.abs(r.mean - 7) < 0.6 && r.halves, 'Handling is a keeper\'s stat: 7 for an average side\'s, in half points (60 drawn: ' + r.mean + ' on average), weighed in his rating as Diving is');
+ok(r.arch === 7 && r.w === r.wDive && r.dial === 5.5 && Math.abs(r.mean - 7) < 0.6 && r.halves, 'Handling is a keeper\'s stat: 7 for an average side\'s, in half points (60 drawn: ' + r.mean + ' on average), weighed in his rating as Diving is');
 ok(r.before === r.after && r.han && r.kicks && !r.cmp, 'a keeper made before it gets his from the rest of his keeping (' + r.fill + '), his rating unchanged (' + r.after + '); his six: DIV REF REA SPD KIC HAN');
 
 // --- THE END LINES: a goal kick for the side whose goal it is, either half -- no corners ----------------------------------

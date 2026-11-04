@@ -86,8 +86,9 @@ r = await K(`(()=>{ const d=CAREER.data, out={}, rnd=Math.random;
   // and sign him: at the wage a man as good as he is earns, for the agreed fee
   const b0=d.budget, n0=d.roster.length, fee=mgBidOf(d,t.p.id).fee, err=mgSignDeal(d,t.p.id,fee,2), him=d.roster.find(x=>x.id===t.p.id);
   out.sign={err, mine:!!him, wage:him&&him.wage, demand:him&&mgDemand(d,him,true), paid:b0-d.budget, fee, n:d.roster.length-n0, left:!!mgBidOf(d,t.p.id)};
-  // ANOTHER CLUB IN: 95% of it on Monday, a rival bidding more (the dice low) -- they want more; left a week, he goes there
-  t=go('rival',0.95,0.99); Math.random=()=>0.01; d.weeks++; mgBidReplies(d); Math.random=rnd;
+  // ANOTHER CLUB IN: 90% of it on Monday, a rival bidding more (the dice low) -- they want more; left a week, he goes there
+  // (90%, not 95%: at an ask of about $3,000 95% and the rival's 98% round to the same $2,900, and yours is as good as his)
+  t=go('rival',0.9,0.99); Math.random=()=>0.01; d.weeks++; mgBidReplies(d); Math.random=rnd;
   out.rival={st:t.B.st, ask:t.B.ask, rf:t.B.rf, rivalClub:t.B.rival, fee:t.B.fee};
   d.weeks++; mgBidReplies(d); const where=mgFind(d,t.p.id);
   out.rivalAfter={gone:!mgBidOf(d,t.p.id), club:where&&where.club&&where.club.id, from:t.c.id};

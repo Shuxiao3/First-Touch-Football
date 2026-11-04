@@ -2410,12 +2410,36 @@
     MID:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:6.5,stamina:7.5,strength:5.5,ballControl:7,dribbling:6.5,passAcc:7.5,composure:6.5,crossing:6,heading:5,slideTackle:5,tackle:5.5,interceptions:6,offIQ:7,defIQ:6,shotPower:6,curve:6,longShots:6,shotAcc:6},
     ATT:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:7.5,acceleration:7.5,agility:7.5,stamina:6,strength:5.5,ballControl:7,dribbling:7.5,passAcc:6,composure:7,crossing:6,heading:6.5,slideTackle:3,tackle:3.5,interceptions:4,offIQ:7,defIQ:4.5,shotPower:7,curve:6,longShots:6.5,shotAcc:7.5}
   };
+  // A MAN'S RATING (v122): a weighted average of his stats, the weights out of 5 -- what his line's game is made of 5,
+  // then 4 and 2, and everything else 1, so every stat counts for something (before v122 they were 1 to 3, and a good
+  // many counted for nothing: a defender's shooting, anyone's crossing or curve). A keeper's: his keeping, and a little
+  // his feet (composure, passing, ball control). By his line, not his exact position. Set (OVR_REF, OVR_K) so that a man
+  // of his line's usual make (ARCH) rates what he did under v121's weights (OVR_W_V121), at any level: what moves a man
+  // is how his lesser stats compare with a usual one's -- a defender who can shoot rates a little higher.
   const OVR_W={
+    GK:{gkReflex:5,gkReach:5,gkDiveRange:4,gkHandling:4,gkDistribution:4,keeperSpd:2,composure:1,passAcc:1,ballControl:1},
+    DEF:{defIQ:5,tackle:5,interceptions:5,slideTackle:4,strength:4,heading:4,speed:4,composure:2,passAcc:2,stamina:2,agility:2,acceleration:2,
+         ballControl:1,dribbling:1,crossing:1,offIQ:1,shotPower:1,curve:1,longShots:1,shotAcc:1},
+    MID:{passAcc:5,offIQ:5,stamina:4,ballControl:4,dribbling:4,agility:4,composure:4,defIQ:2,interceptions:2,shotAcc:2,speed:2,longShots:2,
+         acceleration:1,strength:1,crossing:1,heading:1,slideTackle:1,tackle:1,shotPower:1,curve:1},
+    ATT:{shotAcc:5,dribbling:5,shotPower:4,speed:4,acceleration:4,agility:4,composure:4,offIQ:4,ballControl:4,longShots:2,heading:2,
+         stamina:1,strength:1,passAcc:1,crossing:1,slideTackle:1,tackle:1,interceptions:1,defIQ:1,curve:1}
+  };
+  const OVR_W_V121={
     GK:{gkReflex:3,gkReach:3,gkDiveRange:2,gkHandling:2,keeperSpd:1,gkDistribution:2},
     DEF:{defIQ:3,tackle:3,interceptions:3,slideTackle:2,strength:2,heading:2,speed:2,composure:1,passAcc:1,stamina:1,agility:1,acceleration:1},
     MID:{passAcc:3,offIQ:3,stamina:2,ballControl:2,dribbling:2,agility:2,composure:2,defIQ:1,interceptions:1,shotAcc:1,speed:1,longShots:1},
     ATT:{shotAcc:3,dribbling:3,shotPower:2,speed:2,acceleration:2,agility:2,composure:2,offIQ:2,ballControl:2,longShots:1,heading:1}
   };
+  // the stats that make his game (2 and up): what's moved to make a man to his rating, and what he grows most in
+  const ovrMain=role=>{ const w=OVR_W[role]||OVR_W.MID; return Object.keys(w).filter(k=>w[k]>=2); };
+  const ovrMean=(st,w)=>{ let s=0,t=0; for(const k in w){ s+=(st[k]||5.5)*w[k]; t+=w[k]; } return s/t; };
+  // OVR_REF: the usual make's average under v121's weights and under these. OVR_K: the lesser stats (1) move about half
+  // as far as the rest with a man's level (see cwStatsForOVR), so the average is stretched a little to keep a usual man at
+  // any level where he was -- a League 2 man's rating as it was, a Premium League man's too
+  const OVR_REF={}, OVR_K={};
+  for(const r in OVR_W){ const w=OVR_W[r], tot=Object.values(w).reduce((a,v)=>a+v,0), ones=Object.values(w).filter(v=>v===1).length;
+    OVR_REF[r]=[ovrMean(ARCH[r],OVR_W_V121[r]), ovrMean(ARCH[r],w)]; OVR_K[r]=1/(1-0.45*ones/tot); }
   // ============ PLAYING STYLES: ARCHETYPES ============
   // Every player has an archetype within his position (keepers too: v118), and his stats are built around it: the role's
   // averages (ARCH) shifted by the archetype's offsets. Pace above all -- centre-backs and holding midfielders are the
@@ -2792,10 +2816,10 @@
   const PERS3=['passive','default','aggressive'];
   // HANDLING FOR A MAN MADE BEFORE IT (a side kept, a career's man): the rest of his keeping as it weighs in his rating, so
   // the rating doesn't move
-  function gkHandlingFor(st){ const w=OVR_W.GK; let s=0,t=0; for(const k in w) if(k!=='gkHandling'){ s+=(+st[k]||5.5)*w[k]; t+=w[k]; }
+  function gkHandlingFor(st){ const w=OVR_W_V121.GK; let s=0,t=0; for(const k in w) if(k!=='gkHandling'){ s+=(+st[k]||5.5)*w[k]; t+=w[k]; }   // (v121's weights: a save from before Handling reads as it always did)
     return clamp(Math.round(s/t*2)/2,1,10); }
   function gkHandlingFill(st){ if(st&&st.gkHandling==null) st.gkHandling=gkHandlingFor(st); return st; }
-  function overallOf(entry){ const w=OVR_W[entry.role]||OVR_W.MID; let sum=0,wt=0; for(const k in w){ sum+=(entry.stats[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(sum/wt*10))); }
+  function overallOf(entry){ return cwOverall(entry.role,entry.stats); }
   const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
   // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in
   function rolesFor(form){ const L=FORMS[form]||FORMS['2-3-2'], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=['GK'];
@@ -15013,17 +15037,17 @@
   // a generated player's style: its offsets on top of his stats, then the whole block nudged back to the rating he
   // was made for (so a stopper's lost pace comes back as strength and heading, not as a lower rating)
   function cwStyleStats(role,s,style,T){
-    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role];
+    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role], main=ovrMain(role);
     for(const k in d) s[k]=clamp(Math.round((s[k]+d[k])*2)/2,1,10);
-    if(w) for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k in w){ s[k]=clamp(s[k]+step,1,10); } }
+    if(w) for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwMul(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
-  function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID; let s=0,wt=0; for(const k in w){ s+=(st[k]||5.5)*w[k]; wt+=w[k]; } return Math.max(1,Math.min(99,Math.round(s/wt*10))); }
+  function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return Math.max(1,Math.min(99,Math.round((R[0]+(ovrMean(st,w)-R[1])*K)*10))); }   // (A MAN'S RATING)
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
-  function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=cwWmean(base,w),delta=T/10-B,s={};
-    for(const k of ALL_STAT_KEYS){ const onW=(k in w); let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
-    for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k in w){ s[k]=clamp(s[k]+step,1,10); } }
+  function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMain(role);   // (B: the usual make's rating, in stat points)
+    for(const k of ALL_STAT_KEYS){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
+    for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwStyleFor(tier,rng){
     const r=rng();
@@ -15081,7 +15105,7 @@
   function mgDeriveStats(p){
     const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1));
     if(p.style) cwStyleStats(p.role,s,p.style,p.ovr);   // (a keeper's too: v118)
-    const w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((a,b)=>w[a]-w[b]);   // the lightest stats first: small steps
+    const w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[a]-w[b]);   // the lightest of the stats that make his game first: small steps
     for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }
     return s; }
   // his stats: his own attributes (p.at), read once per string
@@ -15128,7 +15152,8 @@
   const devLate=p=>cwHash((p.seed>>>0)||1,'late')%16===0;
   // how much an attribute matters to him: by his role's rating weights, more for what his style is about
   function devRel(p){ const w=OVR_W[p.role]||OVR_W.MID, mx=Math.max(...Object.values(w)), sd=(STYLES[p.style]&&STYLES[p.style].d)||{}, o={};
-    for(const k of DEV_KEYS){ let r=k in w?0.35+0.65*w[k]/mx:0.15; if(sd[k]>0) r=Math.min(1,r+0.25); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }
+    for(const k of DEV_KEYS){ let r=(w[k]||0)>=2?0.35+0.65*w[k]/mx:0.15;   // (a lesser stat, 1: as one that counted for nothing grew, before v122)
+      if(sd[k]>0) r=Math.min(1,r+0.25); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }
   // his ceilings: his attributes as he's made, lifted (most where it matters to him) till they rate his potential;
   // reading the game a point more besides (it grows with the years)
   function devCeil(p,st){ const rel=devRel(p), T=Math.max(p.pot||p.ovr,p.ovr);
@@ -15140,7 +15165,7 @@
     p.at=devPack(st); p.cl=devPack(devCeil(p,st)); p.bs=p.at; p.pg=''; p.mo=0; hvOf(p);
     p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
   // his rating set by hand (the board's signings, a test): every attribute that counts moved till it rates that
-  function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),30,95);
+  function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),30,95);
     for(let it=0; it<400; it++){ const cur=cwOverall(p.role,st); if(cur===v) break; const up=cur<v, k=ks[it%ks.length]; st[k]=clamp(st[k]+(up?0.5:-0.5),1,10); }
     const cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at); for(const k of DEV_KEYS){ cl[k]=Math.max(cl[k],st[k]); bs[k]=Math.max(bs[k],st[k]); }
     p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
@@ -16197,7 +16222,7 @@
   function mgSignKid(d,sub,style){ const S=d.story, A=S&&S.kidAsk; if(!A||S.kid!==1) return 'He has gone.';
     const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
     p.name=A.name; if(STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style: a keeper's too, v118)
-    if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=Object.keys(w).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
+    if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
       for(let i=0;i<300&&cwOverall(p.role,cl)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
       p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
     p.wage=mgRound(mgWage(p.ovr)*0.5); p.fame=8; mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;   // (the town's heard about him)
@@ -18221,7 +18246,7 @@
   function mgStep(act,label){ return '<div class="mgStep"><button class="mgAdj" data-mg="'+act+'" data-dir="-1">−</button><b>'+label+'</b><button class="mgAdj" data-mg="'+act+'" data-dir="1">+</button></div>'; }
   function mgYears(){ const y=MGUI.years||2; return mgStep('yrs',y+' season'+(y>1?'s':'')); }
   function mgBars(p){ const st=mgStats(p); let h='<div class="mgBars">';
-    for(const k of Object.keys(OVR_W[p.role]||OVR_W.MID)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
+    for(const k of ovrMain(p.role)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
   // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
   // (how he moves; his body and the air -- Heading's a duel at both ends; on the ball -- Curve bends his shots, crosses and
@@ -18738,6 +18763,10 @@
     if(!d.w120){ const W=d.world||{}, up=(w,o)=>mgRound(w*mgWage(o)/WAGE_OLD(o));
       for(const p of [...(d.roster||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.wage>0){ p.wage=up(p.wage,p.ovr); if(p.loan&&p.loan.wage>0) p.loan.wage=up(p.loan.wage,p.ovr); }   // (a man here on loan: his own wage too, for when he goes back)
       d.w120=true; }   // (v120: every man's wage up as wages went up -- his deal's terms against the going rate kept)
+    if(!d.w122){ const W=d.world||{};   // (v122: every man rated again on the new weights -- A MAN'S RATING -- his potential too)
+      for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+      d.w122=true; }
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
@@ -19012,7 +19041,7 @@
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true };   // (w120: on v120's wages from the start)
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);

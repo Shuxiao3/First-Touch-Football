@@ -927,7 +927,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     as any through ball is, a touch harder for the longer way round; everyone reading the ball reads the bend, and
     a touch on the way ends it. Yours go where you drag them, as before.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
-  shows: a man's rating comes from weights for each position, as before.
+  shows: a man's rating comes from weights for his line (see **Ratings**).
 
   | | Attributes |
   | --- | --- |
@@ -942,6 +942,43 @@ The same game played like any other football game. It's a copy of `index.html` w
   at both ends) and Curve from Shooting to Technique (it bends his crosses and passes as well as his shots).
   A keeper's six: DIV Diving, REF Reflexes, REA Reach, SPD Speed, KIC Kicking (distribution, ball control,
   composure) and HAN Handling (v77; composure and ball control were a CMP of their own).
+- **Ratings (v122).** A man's rating is a weighted average of his stats (times ten), the weights out of 5 and set by
+  his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. What his line's game
+  is made of counts 5, then 4 and 2, and every other outfield stat 1, so even a defender's shooting counts a little:
+  a League 2 centre-back goes from 49 to 55 with his three shooting stats taken from all 1s to all 10s (his tackling
+  the same way: 37 to 65). Before v122 the weights were 1 to 3 and a good many stats counted for nothing -- crossing
+  and curve for anyone. A keeper's rating is his keeping, and a little his feet.
+
+  | Stat | Defender | Midfielder | Attacker |
+  | --- | --- | --- | --- |
+  | Def IQ | 5 | 2 | 1 |
+  | Tackle | 5 | 1 | 1 |
+  | Interceptions | 5 | 2 | 1 |
+  | Slide tackle | 4 | 1 | 1 |
+  | Strength | 4 | 1 | 1 |
+  | Heading | 4 | 1 | 2 |
+  | Speed | 4 | 2 | 4 |
+  | Acceleration | 2 | 1 | 4 |
+  | Agility | 2 | 4 | 4 |
+  | Stamina | 2 | 4 | 1 |
+  | Composure | 2 | 4 | 4 |
+  | Passing | 2 | 5 | 1 |
+  | Off IQ | 1 | 5 | 4 |
+  | Ball control | 1 | 4 | 4 |
+  | Dribbling | 1 | 4 | 5 |
+  | Crossing | 1 | 1 | 1 |
+  | Curve | 1 | 1 | 1 |
+  | Shot accuracy | 1 | 2 | 5 |
+  | Shot power | 1 | 1 | 4 |
+  | Long shots | 1 | 2 | 2 |
+
+  Keepers: Reflexes 5, Reach 5, Diving 4, Handling 4, Distribution 4, Keeper speed 2; Composure, Passing and Ball
+  control 1 each. The scale is kept where it was: a man of his line's usual make rates what he did before at any
+  level, so a League 2 man is still rated as one and prices and wages don't move with the change; what moves a man is
+  how his lesser stats compare with a usual one's. A career from before v122 has every man rated again on these, once
+  (a new world made on v121 and read on v122: about half the men the same, most of the rest a point either way, a
+  few two, the leagues' averages where they were). Played somewhere else, a man's rating is his own in his own positions, two less in a
+  second one, six less out of position -- and out in another line he's rated on that line's weights, then six less.
 - **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
   yours when you've passed to him and left the stick alone.
   - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
@@ -2037,6 +2074,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v122: every stat counts in a rating.** The rating's weights go out of 5, and every outfield stat counts at least 1
+  for every outfield line (they were 1 to 3, and crossing, curve, a defender's shooting, an attacker's defending and
+  more counted for nothing): what his line's game is made of 5, then 4 and 2, the rest 1; a keeper's keeping, and a
+  little his feet. The scale stays where it was -- a usual man of each line rates as before at every level, so prices,
+  wages and the leagues' levels hold -- and a man moves by how his lesser stats compare: a defender who can shoot a
+  little up. Saves are rated again once (most men the same or a point either way). See **Ratings**.
 - **v121: stamina.** A side was winded by half-time -- the ceiling under the bar about 0.67 on average, fast
   forwards 0.45 -- and 30% slower by full time. Now a sprint costs by the ground it covers: the quickest man pays
   what he did, a slower one less a second (Speed 2 about a third less than Speed 10), so pace has a price; the
