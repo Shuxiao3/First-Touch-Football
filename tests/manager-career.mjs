@@ -378,8 +378,8 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, me = { team: 'G' }, the
   M.fix = { physio: 4 }; out.l4 = [M.physioBack(me), +M.physioWear(me).toFixed(2)]; M.fix = null;
   const L = d.lv.physio; d.lv.physio = 0; const s0 = M.mgSimStr(d, d.clubId) - M.mgStrength(d, d.clubId); d.lv.physio = 4; out.sim = [s0, +(M.mgSimStr(d, d.clubId) - M.mgStrength(d, d.clubId)).toFixed(2)]; d.lv.physio = L;
   return out; });
-ok(String(r.none) === '0.25,1' && String(r.l1) === '0.35,0.92,0.25,1' && String(r.l4) === '0.65,0.68' && String(r.sim) === '0,1.6',
-  'the physio: a quarter of the legs back at half-time without one, 35% at level 1 up to 65% at 4; tiring 8% slower a level (yours, not theirs); +' + r.sim[1] + ' in a simulated game at level 4');
+ok(String(r.none) === '0.5,1' && String(r.l1) === '0.6,0.92,0.5,1' && String(r.l4) === '0.85,0.68' && String(r.sim) === '0,1.6',
+  'the physio: half the legs back at half-time without one (v121; a quarter before), 60% at level 1 up to 85% at 4; tiring 8% slower a level (yours, not theirs); +' + r.sim[1] + ' in a simulated game at level 4');
 
 // --- DECORATIONS: bought from DECORATE and put down where you like (somewhere free), moved, put away, put out again ------
 await page.click('#careerHub .cpDeco'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);

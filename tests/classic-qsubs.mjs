@@ -71,6 +71,9 @@ ok(!S.open && /ON .* OFF/.test(S.msg), `it goes back up and says who's on and wh
 // ON THE BALL: the rest worn down, the first it suggests made your man, the ball at his feet (and you not touching
 // anything, he keeps it) -- tapped, he stays on until he's played it
 await K(`players.filter(q=>q.team==='G'&&q.squadIdx!==${sug[0].inn}).forEach((q,i)=>{ q.staminaCap=0.45+i*0.01; q.stamina=0.4; })`);
+// (in open play: in a restart, a goal and its kick-off, or with the keeper's ball in his hands, the ball goes to whoever
+// takes it -- and the man off at once)
+await page.waitForFunction(() => window.__K.ev('!(restartT>0||scoredT>0||offsideT>0||breakT>0||celeb||kickT>0||gkHold)'), null, { timeout: 30000 });
 const w2 = await K(`(()=>{ const s=qsSuggest()[0]; if(!s) return null; const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out); setControlled(p); own(p,p.r+ball.r+4); return {si:s.out, row:s.out+':'+s.inn}; })()`);
 await page.click('#qsBtn'); await page.waitForTimeout(150);
 await page.click(`#qsDrop .qsRow[data-qs="${w2 && w2.row}"]`); await page.waitForTimeout(120);

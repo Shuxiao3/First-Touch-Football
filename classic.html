@@ -6137,7 +6137,18 @@
   function agilityStatOf(p){ return statLerp(statOf(p,'agility',       P.agility.val),0.2, 0.5); }
   // the physio, for your side in a career match: how much slower the legs go, and how much of them comes back at half-time
   function physioWear(p){ return p.team==='G'&&careerFix&&careerFix.physio?1-PHYSIO_WEAR[careerFix.physio]/100:1; }
-  function physioBack(p){ return p.team==='G'&&careerFix&&careerFix.physio?PHYSIO_HT[careerFix.physio]/100:0.25; }
+  function physioBack(p){ return PHYSIO_HT[p.team==='G'&&careerFix&&careerFix.physio||0]/100; }   // (half of what the half took, without one: v121; it was a quarter)
+  // A SPRINT'S COST (v121): what tires a man is the ground he covers flat out, not the seconds. The fastest man pays
+  // what he always did for a second at his top speed (SPRINT_TOP, Speed 10's); a slower one less a second, in step
+  // with how fast he's going -- the same metre costs the same -- so a quick man pays for his pace. The ceiling it
+  // wears goes the same way, and slower than it did (CAP_WEAR: it was 0.007 a second, at any speed). His Stamina sets
+  // what a metre costs, as before. (sprintPace: no less than a quarter, a sprint from standing still)
+  const SPRINT_TOP=228, CAP_WEAR=0.0045;
+  const sprintPace=p=>clamp(Math.hypot(p.vx||0,p.vy||0)/SPRINT_TOP,0.25,1);
+  // PACING (v121): a computer player whose legs have begun to go -- his ceiling worn under CAP_SAVE -- saves his
+  // sprints for what matters (see the AI's sprint call). (At 0.8 the computer spent what v121 saved it, sprinting a
+  // quarter more of the time; at 0.9 about what it did before, its legs kept)
+  const CAP_SAVE=0.9;
   // STAMINA stat -> the five stamina rates. Higher stat = less drain, faster recovery.
   function drainCarryOf(p){     return statLerp(statOf(p,'stamina',P.stamina.val),0.04,0.025); }  // jogging with the ball (a little)
   function drainSprintOf(p){    return statLerp(statOf(p,'stamina',P.stamina.val),0.18,0.08); }   // sprint, no ball
@@ -7884,7 +7895,13 @@
   // SLIDE TACKLE stat -> lunge length/speed & contact reach (endpoints: 1 => 0.5/0.7, 10 => 1.1/1.3)
   function slideLenOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.5, 1.1); }
   function slideHitOf(p){ return statLerp(statOf(p,'slideTackle',P.slideTackle.val), 0.7, 1.3); }
+  // THE LAST OF HIS LEGS (v121): a man with nothing left in the bar can't go to ground. With a little -- the end of a
+  // sprint -- he can, once: the slide takes the last of it, and he can't slide again till a quarter of the bar is back
+  // (SLIDE_BACK). The same for the computer's men. (Before v121 a slide was there to be had on an empty bar.)
+  const SLIDE_COST=0.16, SLIDE_EMPTY=0.02, SLIDE_BACK=0.25;
+  function canSlide(p){ if(p.gassed&&p.stamina>=SLIDE_BACK) p.gassed=false; return !p.gassed&&p.stamina>SLIDE_EMPTY; }
   function slideAt(p, carrier){
+    if(!canSlide(p)) return;                                 // (nothing left to go to ground with)
     const sl=slideLenOf(p);
     // Reproduce the slide physics to find where the player's CENTRE actually ends up.
     // startSlide: v0 = 470*sl*staFac, duration T = 0.45*sl*staFac, velocity decays by 0.03^dt each frame.
@@ -7912,12 +7929,13 @@
   function startSlide(p){
     if(p.tackleCd>0||p.state!=='normal')return;
     if(ball.ownedBy===p||gkHold)return;
+    if(!canSlide(p)){ if(p===controlled){ lastGrade='TOO TIRED TO SLIDE'; gradeColor='#ffb43c'; gradeFade=1.0; } return; }   // (THE LAST OF HIS LEGS)
     const staFac=0.7+0.3*clamp(p.stamina,0,1);            // a tired slide lunges shorter
     p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;p.tackleCd=1.2;p.slideTried=false;
     p.slideDx=p.facing.x;p.slideDy=p.facing.y;
     const sShort=(p.slideShort||0); p.slideShort=0;
     p.vx=p.facing.x*470*slideLenOf(p)*staFac*(1-sShort);p.vy=p.facing.y*470*slideLenOf(p)*staFac*(1-sShort);
-    p.stamina=clamp(p.stamina-0.16,0,p.staminaCap);       // a slide burns a burst of stamina
+    const left=p.stamina-SLIDE_COST; p.stamina=clamp(left,0,p.staminaCap); if(left<=SLIDE_EMPTY) p.gassed=true;   // a slide burns a burst of stamina -- the last of it, once (THE LAST OF HIS LEGS)
   }
   function slideContact(p){
     if(gkHold||restartT>0)return;
@@ -11072,6 +11090,7 @@
     const hurt = p.squadIdx!=null && HURT[p.team] && HURT[p.team].has(p.squadIdx);   // (hurt: no sprinting -- see INJURIES)
     const wantSprint = p.sprint && moving && p.stamina>0.02 && !offFront && !held && !hurt;
     const empty = p.stamina<=0.02;                  // gassed
+    if(empty) p.gassed=true; else if(p.gassed&&p.stamina>=SLIDE_BACK) p.gassed=false;   // (no slide till a quarter of the bar's back: THE LAST OF HIS LEGS)
     if(p.staminaCap===undefined)p.staminaCap=1;
     // CUMULATIVE FATIGUE: a lower recoverable CEILING (staminaCap) means the player has been
     // worked hard over the match and is permanently a bit slower & less agile. cap 1.0 -> 1,
@@ -11090,9 +11109,9 @@
 
     if(wantSprint && !empty){
       accelMul=1.25;
-      const drain = hasBall ? drainSprintBallOf(p) : drainSprintOf(p);   // sprint stamina drain
+      const pace=sprintPace(p), drain=(hasBall ? drainSprintBallOf(p) : drainSprintOf(p))*pace;   // sprint stamina drain, by the ground covered (A SPRINT'S COST, v121)
       p.stamina=clamp(p.stamina - dt*drain, 0, 1);
-      p.staminaCap=clamp(p.staminaCap - dt*0.007*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
+      p.staminaCap=clamp(p.staminaCap - dt*CAP_WEAR*pace*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
     } else if(p.sprint && moving && empty){
       // trying to sprint with NOTHING left -> burns into the max (cap) itself
       p.staminaCap=clamp(p.staminaCap - dt*0.035*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
@@ -12530,12 +12549,16 @@
                            atkP*(carrier.x-p.x)>260 && atkP*(carrier.x-FW/2)>0 && atkP*ai.ix>0.5;
         const opportunistic = onCounter || pressClose || driving || longRun || supporting || !!p.coverRun;   // (a long way off the cover spot: see aiBrain)
 
+        // PACING (v121): legs going -- his ceiling under CAP_SAVE -- and he saves them for what matters: nothing
+        // opportunistic, not the plan's runs either; the critical moments still, with a little more in the bar once
+        // the ceiling's low
+        const fresh=(p.staminaCap??1)>=CAP_SAVE, critMin=(p.staminaCap??1)<0.6?0.15:0.06;
         let doSprint=false;
-        if(critical && sta>0.06) doSprint=true;            // push hard for the important stuff
-        else if(opportunistic && sta>0.55) doSprint=true;  // only with plenty in the tank
+        if(critical && sta>critMin) doSprint=true;            // push hard for the important stuff
+        else if(opportunistic && sta>0.55 && fresh) doSprint=true;  // only with plenty in the tank, and the legs for it
         if(!critical && sta<0.40) doSprint=false;          // conserve when not critical
 
-        if(p.planned) doSprint = (critical && sta>0.06) || (p.planSprint && sta>0.25);   // on the plan: only its runs (see teamPlan)
+        if(p.planned) doSprint = (critical && sta>critMin) || (p.planSprint && sta>0.25 && fresh);   // on the plan: only its runs (see teamPlan)
         p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));
         if(!reacting) p.preTouchAi=ai;
         stepOutfield(p,ai.ix,ai.iy,dt);
@@ -13120,11 +13143,11 @@
     if(half===1){
       half=2; matchClock=0; breakT=2.2;
       // half-time breather: refill the live stamina bar, but the eroded max-stamina
-      // CEILING only recovers 25% of what's been lost over the half.
+      // CEILING only recovers half of what's been lost over the half (v121; it was a quarter -- more with a physio).
       for(const q of players){
         if(q.squadIdx!=null&&HURT[q.team]&&HURT[q.team].has(q.squadIdx)) continue;   // (hurt: no better after the break)
         const cap=(q.staminaCap||1), top=q.cond0||1;
-        q.staminaCap=Math.min(top, cap + physioBack(q)*Math.max(0,top-cap));   // claw back a quarter of the loss (more with a physio), as far as he came in with
+        q.staminaCap=Math.min(top, cap + physioBack(q)*Math.max(0,top-cap));   // claw back half the loss (more with a physio), as far as he came in with
         q.stamina=q.staminaCap;                          // top the bar up to the new ceiling
       }
       resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
@@ -18135,7 +18158,7 @@
   // ---- the physio ----
   // THE PHYSIO: stamina on match day (tiring more slowly through a game, more of their legs back at half-time, fitter again
   // between games) and injuries (fewer and lighter, back from one sooner and fitter: see INJURIES)
-  const PHYSIO_HT=[25,35,45,55,65], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];
+  const PHYSIO_HT=[50,60,70,78,85], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];   // (PHYSIO_HT: v121, with half back at half-time for anyone; it was 25 to 65)
   const physFewer=L=>Math.round((1-(1.6-0.12*Math.min(10,5.5+PHYSIO_DU*L))/(1.6-0.12*5.5))*100);   // (an ordinary man's injuries, fewer by)
   function mgPhysioBody(d){ const L=lvOf(d,'physio');
     return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.bld.physio,'b:physio')+'<div class="bpBuildTxt"><div class="bpSect">THE PHYSIO · LEVEL '+L+' OF 4</div>'

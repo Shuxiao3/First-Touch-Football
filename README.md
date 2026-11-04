@@ -1758,8 +1758,8 @@ The same game played like any other football game. It's a copy of `index.html` w
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
         day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
-        (32% at 4); at half-time they get back a quarter of the legs they've lost without one, 35% at level 1 up to
-        65% at 4; between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
+        (32% at 4); at half-time they get back half of the legs they've lost without one, 60% at level 1, 70% at 2,
+        78% at 3 and 85% at 4 (v121; it was a quarter, up to 65%); between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
         up to 7.5% at 4; in a simulated game it's worth 0.4 a level on your side's rating. Injuries: each level is a
         point more durability for every man (fewer and lighter: half as many with the best), 10% sooner back, and 4%
         fitter on his return (see **Injuries**). Its screen says all of it, level by level.
@@ -2037,6 +2037,14 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v121: stamina.** A side was winded by half-time -- the ceiling under the bar about 0.67 on average, fast
+  forwards 0.45 -- and 30% slower by full time. Now a sprint costs by the ground it covers: the quickest man pays
+  what he did, a slower one less a second (Speed 2 about a third less than Speed 10), so pace has a price; the
+  ceiling wears more slowly, and half-time gives back half of what the half took (it was a quarter; more with a
+  physio, up to 85%). The computer paces itself: once a man's ceiling dips under 0.9 he makes only the sprints that
+  matter, so it sprints about as much as before rather than spending the legs it's saved. A half on the computer now
+  leaves the ceiling about 0.85, the lowest about 0.7. And no slide tackle on an empty bar: one last-ditch slide off
+  a sprint, on what's left, then none till a quarter of the bar is back (the computer's men too). See **Stamina**.
 - **v120: a crowd is a share of the fans, and wages are up.** The fans are the most a game can bring: a league
   game at the going rate brings about seven in ten of them (more high in the table, fewer low; more for a cup tie, a
   playoff or a better side; every one for a derby), and cheap tickets fill a stand only up to its share of them.
@@ -2309,6 +2317,25 @@ test, and like the Trap Lab the values are the game's settings.
   it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
   him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
+- **Stamina (v121)** — two things: the bar, which a sprint drains and a jog or a stand fills again, and the
+  ceiling under it, which every sprint wears down for the rest of the half. A tired man is slower: at 70% of both,
+  about a seventh.
+  - **A sprint costs by the ground it covers, not the seconds.** The quickest man pays what a second at his top
+    speed always cost; a slower one less a second, in step with how fast he's going, so a metre flat out costs the
+    same whoever runs it and pace has a price. A Speed 2 man spends about a third less a second sprinting than a
+    Speed 10 one. His Stamina sets what a metre costs, as before. The ceiling wears the same way, and slower than
+    it did (0.0045 a second at full tilt, against 0.007 at any speed).
+  - **Half-time gives back half** of what the half took from the ceiling (a quarter before), more with a physio.
+  - **The computer paces itself.** A man whose ceiling has begun to go (under 0.9) saves his sprints for what
+    matters (see **When the computer sprints**): none of the opportunistic ones -- up in support, on a counter,
+    driving on with it -- though the critical ones still.
+  - In matches played on the computer (v121, against v120): after a half, the ceiling about 0.85 on average, the
+    lowest about 0.7 (it was 0.67 and 0.43); at full time about 0.8 (it was 0.47). In League 2 the men sprint about
+    a fifth of the time, as before (21% against 19%). Before, a side was winded by half-time, fast forwards most of
+    all: a man 16% slower by the break and up to 30% by the end.
+  - **No slide on an empty bar.** With a little left -- the end of a sprint -- you can make one last-ditch slide:
+    it takes the last of the bar, and then there's none till a quarter of it is back (TOO TIRED TO SLIDE). The
+    same once the bar runs dry sprinting. The computer's men are held to it too. A slide costs 0.16 of the bar.
 - **The computer's man on the ball** — he weighs everything he could do and picks whatever scores
   best, rather than going down a list of rules where the first that fits wins: a pass to each
   team-mate (to his feet, or into the path of a man making a run, weighted to arrive with him), a carry
@@ -2385,8 +2412,9 @@ test, and like the Trap Lab the values are the game's settings.
   one of yours is through on goal; closing down the man on the ball; covering a break; staying with a
   runner who's sprinting in behind; going for a cross or a through ball; a run in behind; getting back
   when caught upfield. Forwards jog back: a sprint all the way back would leave them nothing for the
-  next attack. By full time a side has used a good part of its legs (the ceiling on its stamina is
-  around 0.6–0.75), not all of them.
+  next attack. A man whose ceiling has begun to go (under 0.9) keeps his sprints for these alone (v121: see
+  **Stamina**). By full time a side has used some of its legs (the ceiling on its stamina is around 0.8, the
+  hardest runners' 0.6 or so; before v121, 0.6–0.75 and less), not all of them.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
   knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
   his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a
