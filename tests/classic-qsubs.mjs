@@ -74,7 +74,10 @@ await K(`players.filter(q=>q.team==='G'&&q.squadIdx!==${sug[0].inn}).forEach((q,
 // (in open play: in a restart, a goal and its kick-off, or with the keeper's ball in his hands, the ball goes to whoever
 // takes it -- and the man off at once)
 await page.waitForFunction(() => window.__K.ev('!(restartT>0||scoredT>0||offsideT>0||breakT>0||celeb||kickT>0||gkHold)'), null, { timeout: 30000 });
-const w2 = await K(`(()=>{ const s=qsSuggest()[0]; if(!s) return null; const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out); setControlled(p); own(p,p.r+ball.r+4); return {si:s.out, row:s.out+':'+s.inn}; })()`);
+// (and nobody of theirs near enough to take it off him while the tap goes in: on a slow machine more of the match goes by)
+const w2 = await K(`(()=>{ const s=qsSuggest()[0]; if(!s) return null; const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out); setControlled(p); own(p,p.r+ball.r+4);
+  for(const q of players){ if(q.team!=='R') continue; const dx=q.x-p.x, dy=q.y-p.y, dd=Math.hypot(dx,dy)||1; if(dd<320){ q.x=clamp(p.x+dx/dd*320,q.r,FW-q.r); q.y=clamp(p.y+dy/dd*320,q.r,FH-q.r); q.vx=q.vy=0; } }
+  return {si:s.out, row:s.out+':'+s.inn}; })()`);
 await page.click('#qsBtn'); await page.waitForTimeout(150);
 await page.click(`#qsDrop .qsRow[data-qs="${w2 && w2.row}"]`); await page.waitForTimeout(120);
 const held = await K(`({ stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${w2 && w2.si}), pend:!!QS.pend, used:SUBS.G.used })`); S = await state();

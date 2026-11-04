@@ -1,7 +1,8 @@
-// FOOTBALL CLASSIC, STAMINA (v121). A SPRINT'S COST: what tires a man is the ground he covers flat out, not the seconds
-// -- the fastest man pays what he always did for a second at his top speed, a slow one less a second, the same a metre
-// -- and the ceiling under his bar wears the same way, slower than it did. HALF TIME gives back half of what the half
-// took from the ceiling (it was a quarter). So after a half on the computer nobody's winded. PACING: a computer player
+// FOOTBALL CLASSIC, STAMINA (v121, v123). A SPRINT'S COST: what tires a man is the ground he covers flat out, not the
+// seconds -- the same metre costs the same whoever runs it: a Speed 6.5 man pays what a second flat out cost anyone
+// before v121, the quickest a fifth more, a slow one about a quarter less -- and the ceiling under his bar wears the
+// same way. HALF TIME gives back half of what the half took from the ceiling (it was a quarter). So after a half on the
+// computer the sides are tired but not spent. PACING: a computer player
 // whose ceiling has begun to go (under CAP_SAVE) saves his sprints for what matters -- none of the opportunistic ones,
 // the critical ones still. THE LAST OF HIS LEGS: no slide tackle on an empty bar; one off the end of a sprint, on what's
 // left -- it takes the last of it -- and then none till a quarter of the bar is back; the computer's men the same.
@@ -47,15 +48,17 @@ const A = await page.evaluate(() => {
     for(let i = 0; i < 60; i++){ p.sprint = true; T.stepOutfield(p, 1, 0, dt); }
     const m = (p.x - x0) / T.MK, bar = 1 - p.stamina, cap = 1 - p.staminaCap;
     return { m: +m.toFixed(2), bar: +bar.toFixed(4), cap: +cap.toFixed(5), perM: +(bar / m).toFixed(5), top: T.sprintSpeedOf(p), was: +T.drainSprintOf(p).toFixed(4), wasCap: +(0.007 * T.staminaCapDrainOf(p)).toFixed(5), nowCap: +(T.CAP_WEAR * T.staminaCapDrainOf(p)).toFixed(5) }; };
-  const fast = run(10), slow = run(2);
+  const fast = run(10), mid = run(6.5), slow = run(2);
   p.stats = keep.stats; p.x = keep.x; p.y = keep.y; p.vx = p.vy = 0; p.sprint = false; p.stamina = p.staminaCap = 1;
-  return { fast, slow };
+  return { fast, mid, slow };
 });
 info('a second flat out: ' + JSON.stringify(A));
-ok(Math.abs(A.fast.bar / A.fast.was - 1) < 0.08 && A.fast.cap < A.fast.wasCap * 0.72 && Math.abs(A.fast.cap / A.fast.nowCap - 1) < 0.08,
-  'the quickest man (Speed 10, ' + A.fast.m + ' m in the second) pays what a second always cost him (' + A.fast.bar + ' of his bar, against ' + A.fast.was + '), and his ceiling wears slower than it did (' + A.fast.cap + ' a second, against ' + A.fast.wasCap + ')');
-ok(A.slow.bar < A.fast.bar * 0.75 && A.slow.bar > A.fast.bar * 0.5 && Math.abs(A.slow.perM / A.fast.perM - 1) < 0.1 && A.slow.cap < A.fast.cap * 0.75,
-  'a slow man (Speed 2, ' + A.slow.m + ' m) spends less a second (' + A.slow.bar + ' against ' + A.fast.bar + ') -- the same a metre (' + A.slow.perM + ' against ' + A.fast.perM + ') -- and wears his ceiling less (' + A.slow.cap + ')');
+ok(Math.abs(A.mid.bar / A.mid.was - 1) < 0.08 && Math.abs(A.mid.cap / A.mid.nowCap - 1) < 0.08,
+  'a Speed 6.5 man (' + A.mid.m + ' m in the second flat out) pays what a second cost anyone before v121 (' + A.mid.bar + ' of his bar, against ' + A.mid.was + '), his ceiling ' + A.mid.cap + ' a second');
+ok(A.fast.bar / A.fast.was >= 1.1 && A.fast.bar / A.fast.was <= 1.25 && A.slow.bar / A.slow.was >= 0.65 && A.slow.bar / A.slow.was <= 0.85,
+  'the quickest (Speed 10, ' + A.fast.m + ' m) pays about a fifth more a second (' + A.fast.bar + '), a slow man (Speed 2, ' + A.slow.m + ' m) about a quarter less (' + A.slow.bar + ')');
+ok([A.fast, A.slow].every(x => Math.abs(x.perM / A.mid.perM - 1) < 0.05) && A.slow.cap < A.mid.cap && A.mid.cap < A.fast.cap,
+  'a metre flat out costs the same whoever runs it (' + [A.fast.perM, A.mid.perM, A.slow.perM].join(', ') + ' of the bar), and the ceiling wears in step (' + [A.fast.cap, A.mid.cap, A.slow.cap].join(', ') + ' a second)');
 
 // --- THE LAST OF HIS LEGS: one of theirs on the ball 30 px in front of your man, the game paused -----------------------
 const L = await page.evaluate(() => {
@@ -103,8 +106,8 @@ const H = await page.evaluate(() => ({ HT: window.__HT, PC: window.__PC, secs: M
 const b = H.HT.before || [], a = H.HT.after || [], mean = x => x.reduce((s, y) => s + y, 0) / (x.length || 1);
 const back = b.map((x, i) => a[i] - x - 0.5 * (1 - x));
 info('half time: ceilings as the half ended ' + b.map(x => x.toFixed(2)).join(' ') + ' -> after the break ' + a.map(x => x.toFixed(2)).join(' '));
-ok(b.length >= 12 && mean(b) >= 0.75 && Math.min(...b) >= 0.55,
-  'after a half on the computer nobody\'s winded: the ceiling ' + mean(b).toFixed(2) + ' on average, ' + Math.min(...b).toFixed(2) + ' at the lowest (v120: about 0.66 and 0.44)');
+ok(b.length >= 12 && mean(b) >= 0.68 && mean(b) <= 0.8 && Math.min(...b) >= 0.33,
+  'after a half on the computer, tired but not spent: the ceiling ' + mean(b).toFixed(2) + ' on average, ' + Math.min(...b).toFixed(2) + ' at the lowest -- the quick forwards who sprint most (v120: about 0.66 and 0.44; v121: 0.84 and 0.7)');
 ok(b.length === a.length && back.every(x => Math.abs(x) < 0.005), 'half-time gives back half of what the half took from each man\'s ceiling (it was a quarter)');
 const P1 = H.PC, share1 = (P1.fresh.crit + P1.fresh.opp + P1.tired.crit + P1.tired.opp) / Math.max(1, P1.fresh.n + P1.tired.n);
 info('the first half\'s sprint calls: ' + JSON.stringify(P1) + ' -- sprinting ' + (share1 * 100).toFixed(1) + '% of the computer\'s moves');

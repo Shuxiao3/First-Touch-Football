@@ -2074,6 +2074,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v123: players tire again -- halfway.** v121 left the sides almost as fresh at half-time as at the kick-off (the
+  ceiling under the bar 0.85 on average, 0.82 at full time). A metre flat out now costs a fifth more -- still the same
+  whoever runs it, so a Speed 6 man pays what anyone did before v121, the quickest a fifth more, a slow man about a
+  quarter less -- and the ceiling wears at 0.0075 a second at that pace (it was 0.0045). League 2 on the computer:
+  0.75 at half-time, 0.67 at full time, the bar about 0.78 through a match; v120's were 0.67, 0.47 and 0.65. Half-time
+  still gives back half. See **Stamina**.
 - **v122: every stat counts in a rating.** The rating's weights go out of 5, and every outfield stat counts at least 1
   for every outfield line (they were 1 to 3, and crossing, curve, a defender's shooting, an attacker's defending and
   more counted for nothing): what his line's game is made of 5, then 4 and 2, the rest 1; a keeper's keeping, and a
@@ -2363,19 +2369,22 @@ test, and like the Trap Lab the values are the game's settings.
 - **Stamina (v121)** — two things: the bar, which a sprint drains and a jog or a stand fills again, and the
   ceiling under it, which every sprint wears down for the rest of the half. A tired man is slower: at 70% of both,
   about a seventh.
-  - **A sprint costs by the ground it covers, not the seconds.** The quickest man pays what a second at his top
-    speed always cost; a slower one less a second, in step with how fast he's going, so a metre flat out costs the
-    same whoever runs it and pace has a price. A Speed 2 man spends about a third less a second sprinting than a
-    Speed 10 one. His Stamina sets what a metre costs, as before. The ceiling wears the same way, and slower than
-    it did (0.0045 a second at full tilt, against 0.007 at any speed).
+  - **A sprint costs by the ground it covers, not the seconds.** A metre flat out costs the same whoever runs it, so
+    pace has a price: a Speed 6 or 7 man pays a second what a second flat out cost anyone before v121, the quickest
+    (Speed 10) a fifth more, a Speed 2 man about a quarter less. His Stamina sets what a metre costs, as before. The
+    ceiling wears the same way: 0.0075 a second at a Speed 6 man's pace (before v121 0.007 a second at any speed).
+    (v123: v121 had the quickest man pay what he always had and the ceiling wear at 0.0045, and the sides came to
+    half-time almost as fresh as they started; a metre went a fifth dearer and the ceiling a good deal faster.)
   - **Half-time gives back half** of what the half took from the ceiling (a quarter before), more with a physio.
   - **The computer paces itself.** A man whose ceiling has begun to go (under 0.9) saves his sprints for what
     matters (see **When the computer sprints**): none of the opportunistic ones -- up in support, on a counter,
     driving on with it -- though the critical ones still.
-  - In matches played on the computer (v121, against v120): after a half, the ceiling about 0.85 on average, the
-    lowest about 0.7 (it was 0.67 and 0.43); at full time about 0.8 (it was 0.47). In League 2 the men sprint about
-    a fifth of the time, as before (21% against 19%). Before, a side was winded by half-time, fast forwards most of
-    all: a man 16% slower by the break and up to 30% by the end.
+  - In League 2 matches played on the computer (v123): after a half, the ceiling about 0.75 on average, the lowest
+    about 0.6; at full time about 0.67, the lowest about 0.45; the bar about 0.78 through a match -- halfway between
+    v120, when a side was winded by half-time (0.67 and 0.43 at the break, 0.47 at full time, the bar 0.65), and
+    v121, when it hardly tired at all (0.85, 0.82, the bar 0.87). The men sprint about a fifth of the time, as
+    before. The quick forwards who sprint most tire most -- in a top club's side down to 0.45 or so by half-time --
+    so they're the ones you'll want to take off on the hour.
   - **No slide on an empty bar.** With a little left -- the end of a sprint -- you can make one last-ditch slide:
     it takes the last of the bar, and then there's none till a quarter of it is back (TOO TIRED TO SLIDE). The
     same once the bar runs dry sprinting. The computer's men are held to it too. A slide costs 0.16 of the bar.
@@ -2456,8 +2465,8 @@ test, and like the Trap Lab the values are the game's settings.
   runner who's sprinting in behind; going for a cross or a through ball; a run in behind; getting back
   when caught upfield. Forwards jog back: a sprint all the way back would leave them nothing for the
   next attack. A man whose ceiling has begun to go (under 0.9) keeps his sprints for these alone (v121: see
-  **Stamina**). By full time a side has used some of its legs (the ceiling on its stamina is around 0.8, the
-  hardest runners' 0.6 or so; before v121, 0.6–0.75 and less), not all of them.
+  **Stamina**). By full time a side has used a good part of its legs (the ceiling on its stamina is around 0.67,
+  the hardest runners' 0.45 or so), not all of them.
 - **Whose ball it is** — both sides read possession the way a player would. A man running with the ball
   knocks it a stride ahead every few steps, and a pass takes a moment to arrive; through both it's still
   his side's ball: his teammates keep their runs and their shape, and the other side keeps defending as a
