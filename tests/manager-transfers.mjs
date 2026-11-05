@@ -187,7 +187,7 @@ const rows = () => page.evaluate(() => [...document.querySelectorAll('#bpBody .m
 const pick = async (k, v) => { await page.click(`#bpBody [data-mg="mdrop"][data-k="${k}"]`); await page.waitForTimeout(60); const opts = await page.$$eval('#bpBody .mkMenu [data-mg="filt"]', ns => ns.map(n => n.textContent));
   await page.click(`#bpBody .mkMenu [data-mg="filt"][data-k="${k}"][data-v="${v}"]`); await page.waitForTimeout(80); return opts; };
 const all0 = await rows();
-const posOpts = await pick('mpos', 'CM'); const dm = await rows();
+const posOpts = await pick('mpos', 'DM'); const dm = await rows();   // (v127: a holding midfielder's a position again)
 const typeOpts = await pick('arch', 'deepcreator'); const dc = await rows(), dcStyles = await K(`(()=>{ const d=CAREER.data; return ${JSON.stringify((await rows()).map(r => r.id))}.map(id=>mgFind(d,id).p.style); })()`);
 const posAfter = await K('MGUI.mpos');
 await pick('arch', 'ALL'); await pick('mpos', 'GK'); const gkTypes = await pick('arch', 'shotstopper'), gkRows = await rows(), gkStyles = await K(`(()=>{ const d=CAREER.data; return ${JSON.stringify((await rows()).map(r => r.id))}.map(id=>mgFind(d,id).p.style); })()`);
@@ -204,9 +204,9 @@ await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(80); co
 await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(60); await K('(()=>{ CAREER.data.budget=20000; mgRerender(); return 1; })()');
 const asc = a => a.every((v, i) => !i || a[i - 1] <= v), desc = a => a.every((v, i) => !i || a[i - 1] >= v);
 info('the Search\'s filters: ' + JSON.stringify({ all: all0.length, dm: dm.length, dc: dc.length, posOpts, typeOpts, posAfter, cheap: cheap.slice(0, 4).map(r => r.amt), dear: dear.slice(0, 4).map(r => r.amt), ages: ages.slice(0, 6), pot: pot.slice(0, 5).map(r => r.ovr), inBud: inBud.length }));
-ok(posOpts.join() === 'ALL,GK,CB,FB,CM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'CM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + ': v118, a holding and an attacking midfielder are CMs); CM, and only CMs (' + dm.length + ' of ' + all0.length + ')');
-ok(String(typeOpts) === 'ALL,CMBox-to-box,CMAnchor,CMPlaymaker,CMBall-winner,CMDeep creator,CMShadow striker,CMTrequartista' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'CM',
-  'TYPE: a CM\'s seven archetypes, the commonest first (v118); Deep creator, and only they (' + dc.length + ')');
+ok(posOpts.join() === 'ALL,GK,CB,FB,DM,CM,AM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'DM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + ': v127, a holding and an attacking midfielder positions again); DM, and only DMs (' + dm.length + ' of ' + all0.length + ')');
+ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
+  'TYPE: a DM\'s two archetypes, the commonest first (v127); Deep creator, and only they (' + dc.length + ')');
 ok(String(gkTypes) === 'ALL,GKShot-stopper,GKAll-rounder,GKSweeper keeper,GKOne-on-one keeper' && gkRows.length > 0 && gkStyles.every(x => x === 'shotstopper'),
   'a keeper\'s four types (v118): Shot-stopper, and only they (' + gkRows.length + ')');
 ok(String(sortOpts) === 'RATING,POTENTIAL,PRICE ▲,PRICE ▼,AGE ▲,AGE ▼' && asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && desc(olds) && ages[0] < olds[0] && cheap.length === all0.length,
@@ -219,7 +219,7 @@ await pick('sort', 'cheap'); const fa3 = (await rows()).map(r => r.amt); await p
 const faPosOpts = await pick('mpos', 'CB'); const fa5 = await rows(); await pick('mpos', 'ALL'); await pick('sort', 'ovr');
 const faAll = await K('CAREER.data.world.free.length');
 info('free agents, sorted: ' + JSON.stringify({ n: faAll, young: fa1.slice(0, 4), old: fa2.slice(0, 4), wageUp: fa3.slice(0, 3), wageDown: fa4.slice(0, 3), cb: fa5.length }));
-ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 8 && fa5.every(r => r.pos === 'CB'),
+ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 10 && fa5.every(r => r.pos === 'CB'),
   'free agents: POSITION, TYPE and SORT too -- age youngest or oldest first (' + fa1[0] + ' / ' + fa2[0] + '), the wage he asks either way, CBs only (' + fa5.length + ' of ' + faAll + ')');
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^POT/.test(pot[0].ovr), 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list (' + pot[0].ovr + '); the rest after');

@@ -314,13 +314,13 @@ const locks = async () => { const o = {};
   if(await page.$('#bpBody .tbTop .tbIns[data-cside="instr"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (INSTRUCTIONS, up in the top row: v116)
   o.instr = await page.$$eval('#cTacRight .tiRow', ns => ns.map(n => (n.querySelector('.locked, [disabled]') ? 'locked ' : '') + n.querySelector('.tiLbl').textContent).join(', '));   // (v112: the team's instructions)
   return o; };
-const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '2-3-3'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });
+const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '3-1-3-1'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });   // (v127: 3-1-3-1 one of level 4's shapes, as 2-3-3 was)
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 4; __MG.mgSave(d); }); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const l4 = await locks();
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 info('training locks: ' + JSON.stringify({ l1, lt1, l4 }));
-ok(l1.forms.length === 5 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRECT/.test(l1.free) && String(lt1) === '4,4,0,0' && !/locked/.test(l1.instr) && l1.instr.length > 0,
-  'training pitch level 1: three shapes (the other five locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), and every team instruction open from the start (v106, the team\'s from v112: ' + l1.instr + ')');
+ok(l1.forms.length === 8 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRECT/.test(l1.free) && String(lt1) === '4,4,0,0' && !/locked/.test(l1.instr) && l1.instr.length > 0,
+  'training pitch level 1: three shapes (the other eight locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), and every team instruction open from the start (v106, the team\'s from v112: ' + l1.instr + ')');
 ok(!l4.forms.length && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: every shape, style and instruction');
 
 // --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty-one at most) as one list, wrapped in three columns:

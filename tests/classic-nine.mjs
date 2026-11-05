@@ -1,8 +1,8 @@
-// FOOTBALL CLASSIC, NINE A SIDE (v124): eight outfielders and a keeper. Eight shapes, each a seven-outfielder one with a man
-// more at the back (2-3-2 is 3-3-2 now) -- or, for the two that defended with four at the back, a man more in midfield
-// (4-2-1 is 4-3-1) -- their spots eight long, two for attacking only (two at the back) and none for defending only (v126:
-// the two with five at the back are gone, read as their nearest); an old shape's name read as its new one (a seven- or
-// six-outfielder one). Every exhibition club nine and a bench of five: its eight from before, named as they were, and a
+// FOOTBALL CLASSIC, NINE A SIDE (v124): eight outfielders and a keeper. Eleven shapes (v127), their lines adding up to eight
+// and their spots eight long, every one for attacking and defending alike; a seven-outfielder shape grows into one with a
+// man more at the back (2-3-2 is 3-3-2 now) -- or, for the two that defended with four at the back, a man more in midfield
+// (4-2-1 is 4-3-1) -- and a shape gone since is read as its nearest (v126: five at the back, 5-2-1 as 4-3-1; v127: two at
+// the back, 2-4-2 as 3-4-1 and 2-3-3 as 3-2-3); an old shape's name read as its new one (a seven- or six-outfielder one). Every exhibition club nine and a bench of five: its eight from before, named as they were, and a
 // ninth -- a centre-back of its own -- in the middle of its back line, the outside men of a back four full-backs; nobody
 // shares a name. A match nine a side. What's kept from eight a side gets its eighth outfielder, everyone else in his spot:
 // a career (its shapes too), a club's side kept from the exhibition, the quick match's squads. On a copy of the game that
@@ -29,15 +29,16 @@ const sh = await page.evaluate(() => { const N = window.__N, out = { bad: [] };
   for(const [f, L] of Object.entries(N.FORMS)){ if(L.reduce((a, b) => a + b, 0) !== 8 || f !== L.join('-')) out.bad.push(f + ' lines'); if((N.POS_OF[f] || []).length !== 8) out.bad.push(f + ' spots'); }
   out.from7 = Object.entries(N.FORM_FROM_7).filter(([o, n]) => { const a = o.split('-').map(Number), b = n.split('-').map(Number);
     const back = b[0] === a[0] + 1 && b[1] === a[1] && b[2] === a[2], mid = a[0] === 4 && b[0] === 4 && b[1] === a[1] + 1 && b[2] === a[2];   // (a back four already: a man more in midfield)
-    return !((back || mid) && N.FORMS[n]); }).map(x => x.join('>'));
-  out.read = [N.formOK('2-3-2', null), N.formOK('1-3-3', null), N.formOK('4-2-1', null), N.formOK('4-1-2', null), N.formOK('5-2-1', null), N.formOK('5-1-2', null), N.formOK('2-3-1', null), N.formOK('3-3-2', null), N.formOK('9-9-9', 'x')].join(' ');
+    return !((back || mid) && (N.FORMS[n] || N.FORM_GONE[n])); }).map(x => x.join('>'));   // (v127: 1-4-2's 2-4-2 and 1-3-3's 2-3-3 are gone, read on as their nearest)
+  out.read = [N.formOK('2-3-2', null), N.formOK('1-3-3', null), N.formOK('4-2-1', null), N.formOK('4-1-2', null), N.formOK('5-2-1', null), N.formOK('5-1-2', null), N.formOK('2-3-1', null), N.formOK('3-3-2', null),
+    N.formOK('2-4-2', null), N.formOK('2-3-3', null), N.formOK('9-9-9', 'x')].join(' ');
   out.only = [N.ATK_ONLY.join(' '), N.DEF_ONLY.join(' ')];
   out.fb = Object.entries(N.POS_OF).filter(([f, P]) => { const n = N.FORMS[f][0], back = P.slice(0, n); return n >= 4 ? !(back[0] === 'FB' && back[n - 1] === 'FB' && back.slice(1, -1).every(p => p === 'CB')) : !back.every(p => p === 'CB'); }).map(x => x[0]);
   return out; });
 info('the shapes: ' + sh.names + '; read from old saves: ' + sh.read);
-ok(!sh.bad.length && sh.names.split(' ').length === 8 && !/5-/.test(sh.names), 'eight shapes, none with five at the back, every one\'s lines adding up to eight and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
-ok(!sh.from7.length && sh.read === '3-3-2 2-3-3 4-3-1 4-2-2 4-3-1 4-2-2 3-3-2 3-3-2 x', 'each seven-outfielder shape grows into one with a man more at the back (2-3-2 3-3-2, 1-3-3 2-3-3), one with four at the back already a man more in midfield (4-2-1 4-3-1, 4-1-2 4-2-2), a six-outfielder one through them (2-3-1 3-3-2), and the five-at-the-back ones gone read as their nearest (5-2-1 4-3-1, 5-1-2 4-2-2)' + (sh.from7.length ? ': ' + sh.from7.join(', ') : ''));
-ok(sh.only[0] === '2-3-3 2-4-2' && sh.only[1] === '', 'two at the back for attacking only (' + sh.only[0] + '), and nothing for defending only (v126)');
+ok(!sh.bad.length && sh.names.split(' ').length === 11 && !/(^| )[25]-/.test(sh.names), 'eleven shapes (v127), none with five or two at the back, every one\'s lines adding up to eight and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
+ok(!sh.from7.length && sh.read === '3-3-2 3-2-3 4-3-1 4-2-2 4-3-1 4-2-2 3-3-2 3-3-2 3-4-1 3-2-3 x', 'each seven-outfielder shape grows into one with a man more at the back (2-3-2 3-3-2, 1-3-3 2-3-3 and on to 3-2-3), one with four at the back already a man more in midfield (4-2-1 4-3-1, 4-1-2 4-2-2), a six-outfielder one through them (2-3-1 3-3-2), and the ones gone read as their nearest (5-2-1 4-3-1, 5-1-2 4-2-2, 2-4-2 3-4-1, 2-3-3 3-2-3)' + (sh.from7.length ? ': ' + sh.from7.join(', ') : ''));
+ok(sh.only[0] === '' && sh.only[1] === '', 'every shape for attacking and defending alike (v127: two at the back, for attacking only, gone; v126: five at the back, for defending only)');
 ok(!sh.fb.length, 'a back three is centre-backs, a back four has a full-back at each end' + (sh.fb.length ? ': ' + sh.fb.join(', ') : ''));
 
 // --- THE CLUBS: nine and a bench of five, the eight from before as they were and a centre-back of their own ---------------

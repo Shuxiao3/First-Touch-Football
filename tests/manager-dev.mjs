@@ -23,7 +23,9 @@ const K = s => page.evaluate(s => window.__K.ev(s), s);
 let r;
 await K(`(()=>{ window.D=mgNewCareer({slot:'1',manager:'T',clubName:'Dev Town',colors:['#c00','#fff'],code:'DEV',crest:{s:0,c:['#c00','#fff','#000']}}); D.story={vet:2,kid:2,phone:2};
   // a man of a given age and rating, his ceiling given, made as the world makes them
-  window.XMK=(age,ovr,pot,role)=>{ const p=mgNewPlayer(D,role||'MID',ovr,age,{pot:pot??ovr,sub:role==='DEF'?'CB':role==='ATT'?'STK':role==='GK'?'GK':'CM'}); p.hv='jjjjjjjjj'; p.seed=424242; p.mo=0; return p; };   // (an ordinary man in every hidden way, the same dice each run)
+  window.XMK=(age,ovr,pot,role)=>{ const sub=role==='DEF'?'CB':role==='ATT'?'STK':role==='GK'?'GK':'CM', want=SUB_STYLES[sub]&&SUB_STYLES[sub][0];
+    let p; for(let i=0;i<60;i++){ p=mgNewPlayer(D,role||'MID',ovr,age,{pot:pot??ovr,sub}); if(!want||p.style===want) break; }   // (v127: his position's commonest archetype every run -- a box-to-box midfielder -- so his dice are the same too)
+    p.hv='jjjjjjjjj'; p.seed=424242; p.mo=0; return p; };   // (an ordinary man in every hidden way, the same dice each run)
   window.XCLONE=p=>Object.assign(JSON.parse(JSON.stringify(p)),{id:p.id+100000});
   window.XTICKS=(p,n,x)=>{ for(let i=0;i<n;i++){ D.weeks=(D.weeks||0)+3; if(x.gw) p.mw=x.gw*(x.share??1); devTick(D,p,x); } return p; };
   return 1; })()`);

@@ -1,10 +1,10 @@
-// FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (2-3-3 and 2-4-2 attacking only -- the computer
-// never defends in them -- and none for defending only; v124: nine a side, every shape a man more at the back; v126: the two with five at the back gone), width as COMPACT / BALANCED / WIDE, seven styles each
+// FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (v127: eleven, every one for either -- 2-3-3 and
+// 2-4-2, attacking only, gone; v124: nine a side; v126: the two with five at the back gone), width as COMPACT / BALANCED / WIDE, seven styles each
 // with its own block without the ball (no posture to set), anyone in any position (the keeper too), the team's instructions
 // (v112: no man's or spot's own -- the lines to drag, a style's own set, kept with the career, the same in the match), skill stars in
-// the match (each man's own, one to five: which moves each allows is classic-moves.mjs), and POSITIONS: a man's own (a
-// holding or attacking midfielder's CM's too), his second ones (CB: FB; FB: WM, CB; CM: WM; DM: CB; AM: WM, W, ST; WM:
-// FB, W; W: WM, ST; ST: W) and the rest -- what each costs his Off IQ and Def IQ in a match (the spot with the ball his
+// the match (each man's own, one to five: which moves each allows is classic-moves.mjs), and POSITIONS: a man's own, his
+// second ones (CB: FB; FB: WM, CB; DM: CM, CB; CM: DM, AM, WM; AM: CM, W, ST; WM: FB, W; W: WM, ST; ST: W -- v127, DM and
+// AM positions of their own again) and the rest -- what each costs his Off IQ and Def IQ in a match (the spot with the ball his
 // Off IQ, the one without it his Def IQ), his rating there, the marks on the tactics pitch, the computer's clubs picking
 // their men by them. On a copy of the game that lets the test reach the match.
 import { open } from './_harness.mjs';
@@ -17,7 +17,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={statOf, posPenOf, natPos, posFit, fitPos, fitOfP, POS_MAIN, POS_SECOND, STYLES, FIT_PEN, rateAt, players:()=>players, SUBS:()=>SUBS, controlled:()=>controlled, forms:()=>[myForm,myFormDef,rForm,rFormDef], LINEUP:()=>LINEUP, SQUAD:()=>SQUAD, TAC, CLUBS, defFormFor, cwFormFor, postureOf, styleKey, setStyle, ATK_ONLY, DEF_ONLY, POS_OF, TI:()=>TI, tiDefault, holderOf:t=>{ holderCache[t]=null; return holderOf(t); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
-patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, mgSave, careerStars, natPos, posFit, fitPos, ovrAt, careerSquad, careerSlots, cwFormFor, mgAiClubs, careerMapDef, defFormFor, postureOf};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__S={get d(){ return CAREER&&CAREER.data; }, mgSave, careerStars, natPos, posFit, fitPos, spotFit, ovrAt, careerSquad, careerSlots, cwFormFor, mgAiClubs, careerMapDef, defFormFor, postureOf};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-tac-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -25,14 +25,14 @@ const { browser, page, rep } = await open({ url: 'file://' + copy, papers: 'asid
 const { ok, info } = rep;
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 
-// --- the computer never defends in an attack-only shape ------------------------------------------------
+// --- the computer defends in a shape there is (none for attacking only now: v127) ------------------------------------
 const STYLES = ['neutral','gegen','control','wing','direct','fluid','dcounter'];
 const bad = await page.evaluate(STYLES => { const T = window.__T, out = [];
-  for(const c of T.CLUBS) for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(c.form, po); if(T.ATK_ONLY.includes(f)) out.push(c.id + ' ' + po + ' ' + f); }
+  for(const c of T.CLUBS) for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(c.form, po); if(T.ATK_ONLY.includes(f) || !T.POS_OF[f]) out.push(c.id + ' ' + po + ' ' + f); }
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const club = { name: 'Club ' + i, style: st };   // (each style without the ball in its own block)
-    const f = T.defFormFor(T.cwFormFor(club), T.postureOf(st)); if(T.ATK_ONLY.includes(f)) out.push(st + ' ' + f); }
+    const f = T.defFormFor(T.cwFormFor(club), T.postureOf(st)); if(T.ATK_ONLY.includes(f) || !T.POS_OF[f]) out.push(st + ' ' + f); }
   return out; }, STYLES);
-ok(bad.length === 0, 'no computer side defends in 2-3-3 or 2-4-2' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
+ok(bad.length === 0 && !(await page.evaluate(() => window.__T.ATK_ONLY.length)), 'every computer side defends in one of the shapes, none of them for attacking only (v127: 2-3-3 and 2-4-2 gone)' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
 const badA = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) if(T.DEF_ONLY.includes(c.form)) out.push(c.id);
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
@@ -55,13 +55,13 @@ const shut = async () => { if(await page.$('#bpBody .tbDrop.on')){ await page.cl
 const pick = async (k, sel) => { await menu(k); await page.click('#bpBody ' + sel); await page.waitForTimeout(80); };
 ok(await page.isVisible('#bpBody [data-ctphase="atk"]') && await page.isVisible('#bpBody [data-ctphase="def"]'), 'WITH THE BALL / WITHOUT THE BALL');
 await menu('form');
-ok(!(await page.isDisabled('#bpBody [data-cform="2-3-3"]')), 'with the ball, 2-3-3 can be picked');
-ok((await page.$$('#bpBody [data-cform]')).length === 8 && !(await page.$('#bpBody [data-cform="5-2-1"]')) && !(await page.$('#bpBody [data-cform="5-1-2"]')), 'eight shapes, none with five at the back (v126: 5-2-1 and 5-1-2 gone)');
+ok(!(await page.isDisabled('#bpBody [data-cform="3-1-3-1"]')), 'with the ball, 3-1-3-1 can be picked');
+ok((await page.$$('#bpBody [data-cform]')).length === 11 && !(await page.$('#bpBody [data-cform="5-2-1"]')) && !(await page.$('#bpBody [data-cform="2-3-3"]')), 'eleven shapes, none with five or two at the back (v126: 5-2-1 and 5-1-2 gone; v127: 2-3-3 and 2-4-2)');
 await page.click('#bpBody [data-cform="3-2-3"]'); await page.waitForTimeout(80);
 await pick('width', '[data-cwidth="1.18"]');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(80);
 await menu('form');
-ok(await page.isDisabled('#bpBody [data-cform="2-3-3"]') && await page.isDisabled('#bpBody [data-cform="2-4-2"]'), 'without it, 2-3-3 and 2-4-2 are off');
+ok((await page.$$('#bpBody [data-cform]:not([disabled])')).length === 11, 'without it, every one of them can be picked too (v127: none for attacking only)');
 await page.click('#bpBody [data-cform="4-2-2"]'); await page.waitForTimeout(80);
 ok((await save()).formDef === '4-2-2', 'without it, a back four: 4-2-2');
 await pick('form', '[data-cform="4-3-1"]');
@@ -189,24 +189,24 @@ d = await save(); lu = d.lineup;
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60); await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 
 // --- POSITIONS: his own, his second ones, the rest ------------------------------------------------------------------
-const fit = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','CM','WM','W','ST'], o = {};
+const fit = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','DM','CM','AM','WM','W','ST'], o = {};
   for(const nat of ['CB','FB','DM','CM','AM','WM','WNG','STK']) o[nat] = spots.map(sp => ({ main: 'M', second: 's', out: '.' })[S.posFit(nat, sp)]).join('');
   o.pen = T.FIT_PEN; return o; });
-info('fits (CB FB CM WM W ST; M his own, s a second, . out of it): ' + Object.entries(fit).filter(([k]) => k !== 'pen').map(([k, v]) => k + ' ' + v).join(' | '));
-ok(fit.CB === 'Ms....' && fit.FB === 'sM.s..' && fit.CM === '..Ms..' && fit.DM === 's.M...' && fit.AM === '..Msss' && fit.WM === '.s.Ms.' && fit.WNG === '...sMs' && fit.STK === '....sM',
-  'a man without an archetype: his own position and his second ones, as given -- a holding or attacking midfielder\'s own CM\'s too');
+info('fits (CB FB DM CM AM WM W ST; M his own, s a second, . out of it): ' + Object.entries(fit).filter(([k]) => k !== 'pen').map(([k, v]) => k + ' ' + v).join(' | '));
+ok(fit.CB === 'Ms......' && fit.FB === 'sM...s..' && fit.DM === 's.Ms....' && fit.CM === '..sMss..' && fit.AM === '...sM.ss' && fit.WM === '.s...Ms.' && fit.WNG === '.....sMs' && fit.STK === '......sM',
+  'a man without an archetype: his own position and his second ones, as given -- a holding, a central and an attacking midfielder each his own (v127), covering the next one along');
 // v118: an ARCHETYPE says where he plays -- its own spots, and the ones it covers -- not his position
-const tf = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','CM','WM','W','ST'], o = {};
+const tf = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','DM','CM','AM','WM','W','ST'], o = {};
   for(const k in T.STYLES) if(T.STYLES[k].role !== 'GK') o[k] = spots.map(sp => ({ main: 'M', second: 's', out: '.' })[S.posFit(k, sp)]).join('');
   o.gk = ['shotstopper','allround','sweeperkeeper','onevone'].map(k => S.posFit(k, 'GK') + '/' + S.posFit(k, 'CB')).join(' ');
   o.fpCover = S.fitPos({ role: 'DEF', subRole: 'CB', style: 'cover' }); o.fpNone = S.fitPos({ role: 'DEF', subRole: 'CB' }); o.fpWas = S.fitPos({ role: 'MID', subRole: 'AM', style: 'creator' });
   return o; });
-info('archetypes\' fits (CB FB CM WM W ST): ' + Object.entries(tf).filter(([k]) => !['gk','fpCover','fpNone','fpWas'].includes(k)).map(([k, v]) => k + ' ' + v).join(' | '));
-const WANT = { stopper: 'M.....', cover: 'Ms....', ballplayer: 'M.s...', widecb: 'Ms....', libero: 'M.M...', fullback: '.M.s..', wingback: '.M.Ms.', deffb: 'sM....', invfb: '.Mss..',
-  boxtobox: '..Ms..', anchor: 's.M...', playmaker: '..M...', ballwinner: '..M...', deepcreator: '..M...', shadow: '..M..s', trequartista: '..M.ss', widemid: '.ssM..', mwinger: '.s.Ms.', wideplaymaker: '...Ms.',
-  trickster: '...sM.', winger: '...sM.', invwinger: '...sM.', insidefwd: '....Ms', poacher: '.....M', speedster: '....sM', complete: '....sM', target: '.....M', pressfwd: '....sM', falsenine: '..s..M' };
+info('archetypes\' fits (CB FB DM CM AM WM W ST): ' + Object.entries(tf).filter(([k]) => !['gk','fpCover','fpNone','fpWas'].includes(k)).map(([k, v]) => k + ' ' + v).join(' | '));
+const WANT = { stopper: 'M.......', cover: 'Ms......', ballplayer: 'M.s.....', widecb: 'Ms......', libero: 'M.Ms....', fullback: '.M...s..', wingback: '.M...Ms.', deffb: 'sM......', invfb: '.Ms..s..',
+  anchor: 's.Ms....', deepcreator: '..Ms....', boxtobox: '..sMss..', playmaker: '...Ms...', ballwinner: '..sM....', shadow: '...sM..s', trequartista: '...sM.ss', widemid: '.s.s.M..', mwinger: '.s...Ms.', wideplaymaker: '.....Ms.',
+  trickster: '.....sM.', winger: '.....sM.', invwinger: '.....sM.', insidefwd: '......Ms', poacher: '.......M', speedster: '......sM', complete: '......sM', target: '.......M', pressfwd: '......sM', falsenine: '....s..M' };   // (v127: DM and AM spots, and the central midfielders sorted among them)
 const tfBad = Object.keys(WANT).filter(k => tf[k] !== WANT[k]);
-ok(!tfBad.length && Object.keys(tf).length === 3 + 1 + Object.keys(WANT).length, 'every archetype\'s own spots and second ones, as agreed: a stopper only a centre-back, a libero a centre-back and a midfielder, a wing-back a full-back and a wide midfielder (and a winger at a push), a false nine a striker who can drop into midfield' + (tfBad.length ? ' -- wrong: ' + tfBad.map(k => k + ' ' + tf[k]).join(', ') : ''));
+ok(!tfBad.length && Object.keys(tf).length === 3 + 1 + Object.keys(WANT).length, 'every archetype\'s own spots and second ones, as agreed: a stopper only a centre-back, a libero a centre-back and a holding midfielder, a wing-back a full-back and a wide midfielder (and a winger at a push), an anchor a holding midfielder who covers centre-back, a false nine a striker who can drop into the hole' + (tfBad.length ? ' -- wrong: ' + tfBad.map(k => k + ' ' + tf[k]).join(', ') : ''));
 ok(tf.gk === 'main/out main/out main/out main/out' && tf.fpCover === 'cover' && tf.fpNone === 'CB' && tf.fpWas === 'trequartista', 'a keeper\'s four types: in goal and nowhere else; a man goes by his archetype, one without by his position, and a Creator kept from before is a Trequartista (' + tf.gk + ')');
 ok(fit.pen.second.offIQ > fit.pen.second.defIQ && fit.pen.second.defIQ > 0 && fit.pen.out.offIQ >= 2 * fit.pen.second.offIQ && fit.pen.out.defIQ >= 2 * fit.pen.second.offIQ,
   'in a second position a little off his Def IQ out of possession (' + fit.pen.second.defIQ + ') and a little more off his Off IQ on the ball (' + fit.pen.second.offIQ + '); out of position a good deal of both (' + fit.pen.out.offIQ + ', ' + fit.pen.out.defIQ + ')');
@@ -218,15 +218,15 @@ const marks = await page.evaluate(() => { const S = window.__S, d = S.d, out = {
   out.rate = [p.ovr, S.ovrAt(p, 'DEF', 'CB'), S.ovrAt(p, 'DEF', 'FB'), S.ovrAt(p, 'MID', 'WM'), S.natPos(p)]; p.style = st0;
   // the computer's clubs: how their men fit the spots they're picked for
   const n = { main: 0, second: 0, out: 0 }, nd = { main: 0, second: 0, out: 0 }; for(const c of S.mgAiClubs(d)){ const f = S.cwFormFor(c), sq = S.careerSquad(c, f), sp = S.careerSlots(f, 'atk');
-    sq.slice(1).forEach((e, i) => n[S.posFit(S.fitPos(e), sp[i].pos)]++);
+    sq.slice(1).forEach((e, i) => n[S.posFit(S.fitPos(e), S.spotFit(sp[i]))]++);
     // ...and without the ball, in their defending shape
     const fd = S.defFormFor(f, S.postureOf(c.style)), dp = S.careerSlots(fd, 'def'), roster = sq.slice(1);
-    S.careerMapDef({ lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, formation: f, formDef: fd, roster }).forEach((ri, k) => nd[S.posFit(S.fitPos(roster[ri]), dp[k].pos)]++); }
+    S.careerMapDef({ lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, formation: f, formDef: fd, roster }).forEach((ri, k) => nd[S.posFit(S.fitPos(roster[ri]), S.spotFit(dp[k]))]++); }
   out.clubs = n; out.clubsDef = nd;
-  // who defends where: a 2-4-2 in a 3-4-1 needs a third centre-back from midfield -- the anchor (centre-back's one of his
-  // second positions), out on the left of it, rather than the playmaker nearer (out of position there)
-  const hold = { formation: '2-4-2', formDef: '3-4-1', lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, roster: [['CB','stopper'], ['CB','cover'], ['CM','anchor'], ['CM','playmaker'], ['CM','boxtobox'], ['WM','widemid'], ['STK','poacher'], ['STK','target']].map(([sub, style]) => ({ role: sub === 'CB' ? 'DEF' : sub === 'STK' ? 'ATT' : 'MID', subRole: sub, style })) };
-  const hp = S.careerSlots('3-4-1', 'def'), hm = S.careerMapDef(hold); out.hold = [hp[hm.indexOf(2)].pos, hp[hm.indexOf(3)].pos];
+  // who defends where: a 3-2-3 in a 4-3-1 needs a fourth defender from midfield -- the anchor (centre-back's one of his
+  // second positions) rather than the playmaker beside him (out of position there). (v127: it was a 2-4-2 in a 3-4-1)
+  const hold = { formation: '3-2-3', formDef: '4-3-1', lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, roster: [['CB','cover'], ['CB','stopper'], ['CB','widecb'], ['DM','anchor'], ['CM','playmaker'], ['WNG','winger'], ['STK','poacher'], ['WNG','trickster']].map(([sub, style]) => ({ role: sub === 'CB' ? 'DEF' : sub === 'STK' || sub === 'WNG' ? 'ATT' : 'MID', subRole: sub, style })) };
+  const hp = S.careerSlots('4-3-1', 'def'), hm = S.careerMapDef(hold); out.hold = [hp[hm.indexOf(3)].pos, hp[hm.indexOf(4)].pos];
   return out; });
 info('your tactics pitch: ' + marks.n + ' tokens' + (marks.bad.length ? ', wrong: ' + marks.bad.join(' ') : '') + '; a ' + marks.rate[4] + ' rated ' + marks.rate[0] + ': ' + marks.rate.slice(1, 4).join(' / ') + ' at CB / FB / WM; the computer\'s clubs\' men in their spots: ' + JSON.stringify(marks.clubs));
 ok(marks.n >= 8 && !marks.bad.length, 'on the tactics pitch a man in a second position of his has his rating in lime, one out of position in amber, one in his own as it was');
@@ -236,7 +236,7 @@ const cl = marks.clubs, all = cl.main + cl.second + cl.out;
 ok(cl.main / all >= 0.5 && cl.out / all <= 0.05, 'the computer\'s clubs pick each spot\'s man by position: ' + Math.round(cl.main / all * 100) + '% in their own, ' + Math.round(cl.second / all * 100) + '% in a second, ' + Math.round(cl.out / all * 100) + '% out of position');
 const cd = marks.clubsDef, allD = cd.main + cd.second + cd.out;
 ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.10,   // (v118: archetypes are choosier than positions were -- about 6% now, 4% before; over 120 new worlds 3.6% to 8.8%, so 10%: 8% failed one world in fourteen)
-   'who defends where: his own position before another (a 2-4-2 defending in a 3-4-1: the anchor drops into the back three, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
+   'who defends where: his own position before another (a 3-2-3 defending in a 4-3-1: the anchor drops into the back four, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
 
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------
 await page.click('#bldgPanel .bpTopBack');
@@ -256,14 +256,14 @@ ok(m.f[0] === '3-2-3' && m.f[1] === '4-3-1', 'your shapes in the match: ' + m.f[
 ok(Math.abs(m.legs[0] - 0.6) < 0.03 && m.legs[1] > 0.97, 'a man 60% fit starts the match with his legs\' ceiling at ' + Math.round(m.legs[0] * 100) + '% (the fresh ones at ' + Math.round(m.legs[1] * 100) + '%)');
 ok(m.gAtk.DEF === 3 && m.gAtk.ATT === 3 && m.gDef.DEF === 4 && m.gDef.ATT === 1, 'with the ball 3-2-3, without it 4-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
 ok(!m.f[3] || !['2-3-3','2-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
-ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
+ok(m.posOK, 'every spot in the match knows what it is (CB, FB, DM, CM, AM, WM, W, ST)');
 ok(JSON.stringify(m.ti) === JSON.stringify(tiKeep), 'your team instructions in the match, as you left them: ' + JSON.stringify(m.ti));
 ok(JSON.stringify(m.tiR) === JSON.stringify(m.tiR0), 'theirs: their style\'s own (' + m.sty[2] + ')');
 ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your GEGENPRESS presses in the match (its forwards pressing up, the line of engagement high); they (' + m.sty[2] + ') defend in their style\'s block: ' + m.sty.join(' / '));
 ok(m.stars.every(s => s >= 1 && s <= 5) && m.stars.join() === m.want.join(), 'every man in the match has his own skill stars (one to five, for his age): ' + m.stars.join(''));
 // IN THE MATCH: a man's spots cost him -- with the ball his Off IQ, without it his Def IQ -- as they fit his position
 const iq = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && (T.POS_SECOND[T.fitOfP(q)] || []).length) || T.players().find(q => q.team === 'G');   // (a man with a second position: his archetype's, v118)
-  const nat = T.fitOfP(p), keep = [p.slotAtk, p.slotDef], base = [p.stats.offIQ, p.stats.defIQ], spot = pos => Object.assign({}, p.slotAtk, { pos });
+  const nat = T.fitOfP(p), keep = [p.slotAtk, p.slotDef], base = [p.stats.offIQ, p.stats.defIQ], spot = pos => Object.assign({}, p.slotAtk, { pos, fit: pos });   // (its fit its own: v127, a back three's outside spot's is CB/FB)
   const at = (a, d) => { p.slotAtk = spot(a); p.slotDef = spot(d); return [+T.statOf(p, 'offIQ', 0).toFixed(2), +T.statOf(p, 'defIQ', 0).toFixed(2)]; };
   const own = (T.POS_MAIN[nat] || ['CB'])[0], sec = (T.POS_SECOND[nat] || ['FB'])[0], away = ['ST', 'CB', 'FB', 'W'].find(s => T.posFit(nat, s) === 'out');
   const r = { nat, base, own: at(own, own), secAtk: at(sec, own), secDef: at(own, sec), out: at(away, away) };

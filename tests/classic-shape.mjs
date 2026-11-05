@@ -24,7 +24,7 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
   + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
-  + 'setGk:k=>{ gkHold=k; ball.ownedBy=null; ball.x=k.x; ball.y=k.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
+  + 'setGk:k=>{ gkHold=k; ball.ownedBy=null; ball.x=k.x; ball.y=k.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }, setCtl:q=>{ controlled=q; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-shape-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -63,6 +63,7 @@ ok(kpFB.length === 2 && kpFB.every(j => Math.abs(j.w) >= 25 && j.u >= 23) && kpF
 ok(kpPiv && kpPiv.u >= 29, `the pivot stands off them, ${kpPiv && kpPiv.u} m out (it was 28)`);
 ok(kpW.length === 2 && kpW.every(j => j.u >= 43), `both wingers up near halfway (${kpW.map(j => j.u).join(', ')} m out; they were ~32)`);
 const kpL = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', -20); window.__homeDef('R');
+  T.setCtl(window.__men('G').find(q => T.posOf(q, 'atk') === 'ST'));   // (you on their striker: the man you're on has no job in the plan -- v127, Liverpool's squad made afresh)
   const k = T.keepers().find(q => q.team === 'G'); window.__at(k, 2, 0); T.setGk(k); return window.__plan('G'); });
 const kpIn = kpL.filter(j => j.pos === 'CM' && j.job === 'INSIDE');
 ok(kpIn.length === 1 && kpIn[0].u >= 38, `Liverpool on theirs: the other central midfielder up between their lines, ${kpIn[0] && kpIn[0].u} m out (it was ~35)`);

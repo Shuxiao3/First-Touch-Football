@@ -629,18 +629,27 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
   again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the training pitch's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
-  - **Formations.** There are eight shapes for eight outfielders (v124; before, ten for seven, and each of these is
-    one of those with a man more at the back): 4-2-2, 3-3-2, 3-2-3, 3-4-1, 4-3-1, 2-4-2, 4-1-3 and 2-3-3. 2-3-3 and
-    2-4-2 (two at the back) are attacking shapes only, greyed out without the ball, and the computer keeps to the same
-    rule; every other shape is for either phase. (There were two for defending only, 5-2-1 and 5-1-2, five at the back:
-    gone in v126.) The same eight men play in both shapes. A back three is three centre-backs; a back four has a
-    full-back at each end, who goes up his flank with the ball as the side's instructions tell him. Each man's defending
-    spot starts as the one nearest his attacking spot, and you can rearrange either shape. A computer side defends in
-    the shape it attacks in, with some exceptions. A front three drops a man into midfield unless the side gegenpresses,
-    so 3-2-3 defends as 3-4-1 and 4-1-3 as 4-3-1. 2-3-3 defends as 3-3-2 and 2-4-2 as 3-4-1. A direct counter sits deep
-    and makes a back four of some: 3-2-3, 4-2-2 and 2-3-3 defend as 4-3-1, and 2-4-2 as 4-2-2. A shape saved before v124
-    is read as its new one (2-3-2 as 3-3-2; 4-2-1, which defended with four at the back, as 4-3-1), and 5-2-1 and 5-1-2
-    as 4-3-1 and 4-2-2.
+  - **Formations.** There are eleven shapes for eight outfielders (v127): 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2,
+    3-1-2-2, 3-2-2-1, 4-2-2, 4-3-1, 4-1-3 and 4-1-2-1, in that order on the menus. Five are in four lines, with a
+    holding midfielder's spot (DM) and an attacking midfielder's (AM) where they have them: 3-1-3-1 is a DM, two wide
+    midfielders either side of an AM, and a striker; 3-2-1-2 two central midfielders, an AM and two strikers; 3-1-2-2 a
+    central midfielder, two wide midfielders and two strikers; 3-2-2-1 two DMs, two wide midfielders and a striker;
+    4-1-2-1 a DM, two wide midfielders and a striker. 4-1-3's one in the middle is a central midfielder. Every shape is
+    for either phase. (v124 had eight, each one of the seven-outfielder shapes with a man more at the back; 2-4-2 and
+    2-3-3, two at the back and for attacking only, went in v127, and 5-2-1 and 5-1-2, five at the back and for defending
+    only, in v126.) The same eight men play in both shapes. A back three's middle man is a centre-back and its outside
+    men centre-backs or full-backs, either in his own position there (v127); a back four has a full-back at each end,
+    who goes up his flank with the ball as the side's instructions tell him. In a four-line shape the two midfield lines
+    are a step apart. With the ball the DM holds in front of the back line as the pivot (a second DM holds beside him),
+    the AM plays in the hole, between their lines behind the forwards (and the central midfielders a step behind him),
+    and two wide midfielders on their own in a line hold the touchlines. Without it the deeper line screens, halfway
+    between the back line and the midfield, and a lone AM stands halfway between the midfield and the forwards. Each
+    man's defending spot starts as the one nearest his attacking spot, and you can rearrange either shape. A computer
+    side defends in the shape it attacks in, with some exceptions. A front three drops a man into midfield unless the side
+    gegenpresses, so 3-2-3 defends as 3-4-1 and 4-1-3 as 4-3-1. A direct counter sits deep and makes a back four of some:
+    3-2-3 and 4-2-2 defend as 4-3-1. A shape saved before v124 is read as its new one (2-3-2 as 3-3-2; 4-2-1, which
+    defended with four at the back, as 4-3-1); 5-2-1 and 5-1-2 as 4-3-1 and 4-2-2; and 2-4-2 and 2-3-3 as 3-4-1 (the
+    shape it defended in) and 3-2-3 (its front three kept), each man in the spot of it nearest his old one.
   - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
     out the wide men go, by ×0.84, ×1 or ×1.18.
   - **Seven styles, and the style is the whole game.** Each says how a side plays with the ball and how it defends
@@ -815,13 +824,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Anyone can play anywhere**, the keeper included. Swap any two men, or put an outfielder in goal (the keeper
     then takes his spots in both shapes). BEST 9 puts a keeper in goal and the best eight by their ratings in the
     spots they're in, a man in his own position ahead of an equal one out of it.
-  - **Positions: his own, his second ones, and the rest.** A spot in a shape is a CB, FB, CM, WM, W (a winger's) or
-    ST. Since v118 it's a man's ARCHETYPE that says where he can play, not his position: the spots it plays are his own,
-    and the ones it covers his second positions -- a stopper is a centre-back and nothing else, a cover CB can go out to
-    full-back, a libero is a centre-back and a midfielder both, a false nine a striker who can drop into midfield. Every
-    archetype's are in the table under [Playing styles](#playing-styles). (A man without one -- none in a career now --
-    goes by his position, as every man did before v118: a CB also FB; a FB also WM and CB; a CM also WM; a WM also FB
-    and W; a WNG also WM and ST; a STK also W.)
+  - **Positions: his own, his second ones, and the rest.** A spot in a shape is a CB, FB, DM (a holding midfielder's:
+    v127), CM, AM (an attacking midfielder's: v127), WM, W (a winger's) or ST. Since v118 it's a man's ARCHETYPE that
+    says where he can play, not his position: the spots it plays are his own, and the ones it covers his second
+    positions -- a stopper is a centre-back and nothing else, a cover CB can go out to full-back, a libero is a
+    centre-back and a holding midfielder both, a false nine a striker who can drop into the hole (an AM's spot). Every
+    archetype's are in the table under [Playing styles](#playing-styles). The outside spots of a back three are a
+    centre-back's and a full-back's alike (v127): a full-back there is in his own position, nothing off him, as a
+    centre-back is. (A man without an archetype -- none in a career now -- goes by his position, as every man did
+    before v118: a CB also FB; a FB also WM and CB; a DM also CM and CB; a CM also DM, AM and WM; an AM also CM, W and
+    ST; a WM also FB and W; a WNG also WM and ST; a STK also W.)
 
     Anywhere else he's out of position. What it costs him is his reading of the game. In a second position he loses
     0.6 of his Def IQ out of possession and 1.2 of his Off IQ on the ball; out of position, 3 of each. In a match it's
@@ -831,13 +843,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     IQ he loses there (2); out of position, his rating for that line less 6 (what his attributes make him there, if
     it's not his own line). On the tactics pitch a man's rating is lime in a second position of his and amber out of
     position, and in Training his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
-    spot's man by position: in a new career about 84% of them play in their own, 14% in a second one and 2% out of
-    position (v118: archetypes are choosier than positions were -- 72%, 27% and under 1% before -- so a computer squad's
-    positions are dealt to fit its shapes: see [Playing styles](#playing-styles)). Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
+    spot's man by position: in a new career about 83% of them play in their own, 15% in a second one and 2% out of
+    position (v127: 85%, 12% and 3% before -- a holding or an attacking midfielder in a central one's spot is in a
+    second position; v118: archetypes are choosier than positions were -- 72%, 27% and under 1% before -- so a computer
+    squad's positions are dealt to fit its shapes: see [Playing styles](#playing-styles)). Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
     change one), is still each man to the spot nearest his, but now in a position of his own before another: a second
-    position counts as a little further off, one he'd be out of position in as about a spot further on. So a 2-4-2
-    that defends in a 3-4-1 drops its holding midfielder into the back three rather than the central midfielder next
-    to him (since v118: its anchor -- an anchor covers centre-back -- rather than its playmaker). The computer's clubs had
+    position counts as a little further off, one he'd be out of position in as about a spot further on. So a side
+    that drops a midfielder into its back line without the ball drops one who covers there -- an anchor, who covers
+    centre-back -- rather than a playmaker beside him (v118). The computer's clubs had
     about 7% of their men out of position without the ball, then about 4% (about 6% with archetypes, v118), none of
     them further from their spots; what's left is the shape's doing (a back three from a side with two defenders in
     it). Before, nothing was lost in a match, and a man was only rated afresh for a spot in another line (a winger at
@@ -1465,8 +1478,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
     Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
   - **Finding a man (v116).** The market's Search tab lists a league's men (◀ ▶ for another league), filtered and
-    sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, CM,
-    WM, WNG, STK -- v118: no DM or AM, a CM's both), TYPE (his archetype -- a position's own once one's picked, the
+    sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, DM, CM,
+    AM, WM, WNG, STK -- v127: DM and AM again; from v118 to v126 a CM was both), TYPE (his archetype -- a position's own once one's picked, the
     commonest first, and picking one picks its position; with every position, all 31 of them, open across the whole
     screen), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
     closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE ▲ youngest first, AGE ▼ oldest first:
@@ -1794,8 +1807,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
         taken: its Tactics and Selection tabs), and its
         level is what shapes and styles your side can have: at 1 the 3-3-2, 4-2-2 and 3-2-3 and the balanced and direct
-        styles; 2 adds the 3-4-1 and 4-3-1, wing play and fluid counter; 3 the 4-1-3 and 2-4-2, control
-        possession and direct counter; 4 the 2-3-3 and gegenpress. The rest are on the menus, locked, each with the
+        styles; 2 adds the 3-4-1, 4-3-1 and 3-1-2-2, wing play and fluid counter; 3 the 4-1-3, 4-1-2-1 and 3-2-1-2,
+        control possession and direct counter; 4 the 3-1-3-1, 3-2-2-1 and gegenpress (v127: the four-line shapes from
+        level 2, those with a DM's or an AM's spot from 3). The rest are on the menus, locked, each with the
         level it needs -- in a match's tactics too. Width is always yours, and so are the team instructions (v112), from
         the first day (before them every player instruction was, from v106; before that they came with the levels).
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
@@ -1938,18 +1952,22 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
   | Shape | Clubs |
   |---|---|
-  | 3-2-3 | Arsenal, Leeds United, Liverpool |
   | 3-3-2 | Bournemouth, Coventry City, Everton, Newcastle United |
-  | 3-4-1 | Aston Villa, Brighton, Chelsea, Fulham |
-  | 4-3-1 | Crystal Palace, Ipswich Town, Manchester United, Sunderland |
+  | 3-2-3 | Arsenal, Leeds United, Liverpool |
+  | 3-4-1 | Aston Villa, Fulham |
+  | 3-1-3-1 | Tottenham Hotspur *(v127; 2-3-3 before)* |
+  | 3-2-1-2 | Brighton *(v127; 3-4-1 before)* |
+  | 3-1-2-2 | Hull City *(v127; 2-4-2 before)* |
+  | 3-2-2-1 | Chelsea *(v127; 3-4-1 before)* |
   | 4-2-2 | Brentford, Nottingham Forest |
+  | 4-3-1 | Crystal Palace, Ipswich Town, Manchester United |
   | 4-1-3 | Manchester City |
-  | 2-4-2 | Hull City |
-  | 2-3-3 | Tottenham Hotspur |
+  | 4-1-2-1 | Sunderland *(v127; 4-3-1 before)* |
 
   Both sides kick off in their club's shape, and a club's squad is made for it: wingers on the flanks
-  of a front three, wide midfielders in a midfield of three or four, full-backs at the ends of a back
-  four (wing-backs with nobody wide ahead of them), who go up the flanks with the ball. Change a shape
+  of a front three, wide midfielders where its shape has them, a holding or an attacking midfielder in
+  a DM's or an AM's spot (v127), full-backs at the ends of a back four (wing-backs with nobody wide
+  ahead of them), who go up the flanks with the ball. Change a shape
   in the match and the club keeps it. A club whose line-up you'd saved before clubs had shapes stays in
   the 3-3-2 its 2-3-2 grew into.
 - **Nine a side (v124).** Every club's eight from before are the same men, and a ninth joins them: a
@@ -2088,6 +2106,56 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v127: eleven shapes, and a holding and an attacking midfielder again.**
+  - **The shapes** are 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2, 3-1-2-2, 3-2-2-1, 4-2-2, 4-3-1, 4-1-3 and 4-1-2-1. Five
+    are in four lines: 3-1-3-1 (a DM, two wide midfielders either side of an AM, a striker), 3-2-1-2 (two central
+    midfielders, an AM, two strikers), 3-1-2-2 (a central midfielder, two wide midfielders, two strikers), 3-2-2-1 (two
+    DMs, two wide midfielders, a striker) and 4-1-2-1 (a DM, two wide midfielders, a striker). 4-1-3's one in the middle
+    stays a central midfielder. 2-4-2 and 2-3-3, two at the back and for attacking only, are gone, so every shape is for
+    either phase; a side or career kept in one plays 3-4-1 or 3-2-3, each man in the spot nearest his old one. The
+    training pitch: 3-1-2-2 at level 2, 4-1-2-1 and 3-2-1-2 at 3, 3-1-3-1 and 3-2-2-1 at 4.
+  - **DM and AM** are positions of their own again (from v118 to v126 both were CMs), and the seven central archetypes
+    are sorted among the three: the anchor and the deep creator are DMs; the box-to-box, the playmaker and the
+    ball-winner CMs; the shadow striker and the trequartista AMs. Each covers the next one along as a second position --
+    an anchor CM (and CB), a deep creator CM, a ball-winner DM, a playmaker AM, a box-to-box DM and AM (and WM), a
+    shadow striker CM (and ST), a trequartista CM (and W, ST) -- and none the far end. A ball-playing CB and an inverted
+    full-back cover DM now, a libero plays DM (covering CM), and a false nine covers AM. The market's and the
+    wonderkid's POSITION have DM and AM.
+  - **Two to one to one.** A holding and an attacking midfielder are each half as common as a central one. A man drawn
+    on his own is a wide midfielder a quarter of the time and otherwise two CMs to each DM and each AM; a computer club's
+    middle three are dealt first for the DM, AM and CM spots its shapes have, then drawn so the world comes out the
+    same. Six new careers' worlds: 0.52 DMs and 0.51 AMs to each CM, every club with a man of his own for each such spot
+    of its shapes. Your own squad is dealt for the 3-3-2 you start in. A career saved before: an anchor or a deep
+    creator is a DM, a shadow striker or a trequartista an AM (labels only).
+  - **A back three's outside men** can be centre-backs or full-backs alike: a full-back there is in his own position,
+    nothing off his rating or his reading of the game (a full-back rated 70: 70 there, 64 in its middle).
+  - **Four lines on the pitch.** With the ball the DM is the pivot (a second DM holds beside him), the AM plays in the
+    hole between their lines with the central midfielders a step behind him, and two wide midfielders on their own in a
+    line hold the touchlines; without it the deeper midfield line screens halfway between the back line and the
+    midfield, and a lone AM stands halfway between the midfield and the forwards. In computer matches: 3-1-3-1's DM
+    about 41 m from his own goal with the ball, its AM 60; 3-2-1-2's central midfielders 47, its AM 51.5, its strikers
+    64. An AM supporting the man on the ball offers himself level with it or ahead, seldom behind. Both tactics pitches
+    draw a four-line shape in four lines.
+  - **The clubs.** Tottenham play 3-1-3-1 (2-3-3 before), Brighton 3-2-1-2 and Chelsea 3-2-2-1 (both 3-4-1 before), Hull
+    3-1-2-2 (2-4-2) and Sunderland 4-1-2-1 (4-3-1), their squads made for their spots. The career's computer clubs have
+    the four-line shapes too: a passing side an AM, a wing side two wide midfielders either side of one, a direct side
+    two up front ahead of a CM, a fluid counter two DMs, a direct counter a DM in front of a back four. Of the men a
+    computer club picks, 83% are in their own position, 15% in a second and 2% out of it (85%, 12% and 3% before: a DM
+    or an AM in a CM's spot is in a second position).
+  - Computer v computer, 220 exhibition matches each (STAR, three-minute halves):
+
+    | | v126 | v127 |
+    | --- | --- | --- |
+    | Goals a match | 1.16 | 1.34 |
+    | Shots a match | 5.5 | 5.8 |
+    | Shots scored | 21% | 23% |
+    | Shots from 20 m or more | 49% | 47% |
+    | Men within 10 m of the man on the ball | 2.67 | 2.63 |
+    | A man's nearest neighbour | 6.5 m | 6.6 m |
+
+    Scoring's a little up -- 1.34 a match against 1.16, about one and a half standard errors apart, so likely but not
+    sure -- and not from the four-line shapes: the 110 matches with one of them in it scored 1.29 a match, the 110
+    without 1.38.
 - **v126: the old length back, and no five at the back.** v125's full length is taken back: the pitch is 99.75 m
   long again, keeping v125's width (71.4 m). The two shapes with five at the back (5-2-1 and 5-1-2, for defending only)
   are gone: a side sitting deep defends in a back four instead (3-2-3, 4-2-2 and 2-3-3 as 4-3-1, 2-4-2 as 4-2-2), so
@@ -2783,26 +2851,29 @@ out about the same across archetypes; what changes is the kind of player.
 Since v118 the archetype, not the position, says **where a man can play**: PLAYS, the spots that are his own, and
 ALSO, the ones he can cover (a second position: a little off his reading of the game -- see **Positions** in the
 tactics). Anywhere else he's out of position. It also gives him **habits on the pitch**, on top of what his side's
-told (the team instructions). "How common" is its share of the men in its position.
+told (the team instructions). "How common" is its share of the men in its position. (v127: the central midfielders
+are three positions again -- holding, central and attacking -- and their seven archetypes are sorted among them, each
+covering the next one along as a second position. A holding and an attacking midfielder are each half as common as a
+central one: see **Positions, two to one to one** in the career.)
 
 | Position | Archetype | Plays | Also | How common | Pace | Good at | On the pitch |
 |---|---|---|---|---|---|---|---|
 | Centre-back | Stopper | CB | -- | 30% | 3.5 | strength, heading, tackling | attacks the ball: tighter on a man, and out to one in front of him where the line holds; clears it rather than plays it |
 | | Cover CB | CB | FB | 30% | 5 | reading the game, interceptions | sweeps behind: a few yards deeper with the ball, picks up a runner where the line holds, reads it rather than wins it |
-| | Ball-playing CB | CB | CM | 20% | 4 | passing, composure, control | plays it out from the back, the longer pass forward |
+| | Ball-playing CB | CB | DM *(v127; CM before)* | 20% | 4 | passing, composure, control | plays it out from the back, the longer pass forward |
 | | Wide CB *(v118)* | CB | FB | 13% | 5.5 | stamina, tackling, crossing | the outside man of a back three: splits wider, up behind the play on the ball's side, carries it forward |
-| | Libero *(v118)* | CB, CM | -- | 7% | 5.5 | passing, dribbling, reading the game | up close to the play with the ball, and carries it out of defence into midfield |
+| | Libero *(v118)* | CB, DM *(v127; CB, CM before)* | CM | 7% | 5.5 | passing, dribbling, reading the game | up close to the play with the ball, and carries it out of defence into midfield |
 | Full-back | Full-back | FB | WM | 40% | 6 | pace, stamina, crossing | overlaps when the side's told to, then gets back |
 | | Wing-back | FB, WM | W | 25% | 7.5 | pace, crossing, dribbling, engine | a step further up than the full-backs are told to go; down the line, and the cross |
 | | Defensive full-back *(v118)* | FB | CB | 25% | 5 | tackling, strength, heading | a step further back: overlaps rarely, tucks in as a third centre-back, keeps it simple |
-| | Inverted full-back *(v118)* | FB | CM, WM | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
-| Central midfield | Box-to-box | CM | WM | 20% | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
-| | Anchor | CM | CB | 17% | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
-| | Playmaker | CM | -- | 17% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
-| | Ball-winner *(v118)* | CM | -- | 14% | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
-| | Deep creator *(v116)* | CM | -- | 14% | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
-| | Shadow striker *(v118)* | CM | ST | 11% | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
-| | Trequartista *(v118: was the Creator)* | CM | W, ST | 7% | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
+| | Inverted full-back *(v118)* | FB | DM, WM *(v127; CM, WM before)* | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
+| Holding midfield *(v127)* | Anchor | DM | CB, CM | 55% | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
+| | Deep creator *(v116)* | DM | CM | 45% | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
+| Central midfield | Box-to-box | CM | DM, AM, WM | 40% | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
+| | Playmaker | CM | AM | 33% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
+| | Ball-winner *(v118)* | CM | DM | 27% | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
+| Attacking midfield *(v127)* | Shadow striker *(v118)* | AM | CM, ST | 60% | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
+| | Trequartista *(v118: was the Creator)* | AM | CM, W, ST | 40% | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
 | Wide midfield | Wide midfielder | WM | CM, FB | 45% | 6 | stamina, crossing, tackling | up and down the flank all game; crosses, tracks back |
 | | Wide runner | WM | FB, W | 30% | 8 | pace, dribbling, crossing | flies down the line with it and takes his man on |
 | | Wide playmaker *(v118)* | WM | W | 25% | 5 | passing, vision, control | inside off the flank, to the ball, to make the play |
@@ -2815,7 +2886,7 @@ told (the team instructions). "How common" is its share of the men in its positi
 | | Complete forward | ST | W | 20% | 6 | link play, passing, shooting | drops in to link, then gets in the box |
 | | Target man | ST | -- | 18% | 5 | strength, heading, holding it up | back to goal, up and central: holds it up; hardly ever runs |
 | | Pressing forward *(v118)* | ST | W | 10% | 7 | stamina, tackling, acceleration | presses up whatever the forwards are told, tight on the man |
-| | False nine *(v118)* | ST | CM | 10% | 6.5 | passing, dribbling, vision | drops into midfield to make the play, always |
+| | False nine *(v118)* | ST | AM *(v127; CM before)* | 10% | 6.5 | passing, dribbling, vision | drops into midfield to make the play, always |
 | Keeper *(v118)* | Shot-stopper | GK | -- | 35% | 5 | reflexes, diving, handling | stays home: less far off his line at a man, sweeps less, comes for fewer crosses |
 | | All-rounder | GK | -- | 30% | 6.5 | a bit of everything | as every keeper was before v118 |
 | | Sweeper keeper | GK | -- | 20% | 7.5 | speed off his line, kicking, composure | stands higher (up to 4 m off his line with the ball far up the pitch), sweeps further out and sooner |
@@ -2850,14 +2921,23 @@ in a computer match: a sweeper keeper stood about 5 m off his line with the ball
 metre. An exhibition club's keepers have none: they keep as an All-rounder.
 
 **Where they come from.** In a career a man's archetype is drawn for his position by how common each is. A squad's
-positions are dealt so it can always field a side -- two or three centre-backs and a full-back or two, three central
-midfielders and a wide one, two or three strikers and a winger or two -- and so a computer club's shapes (with the
-ball and without it) have the men they need: archetypes are choosier than positions were, and a squad drawn man by
+positions are dealt so it can always field a side -- two or three centre-backs and a full-back or two, three in the
+middle of midfield and a wide one, two or three strikers and a winger or two -- and so a computer club's shapes (with
+the ball and without it) have the men they need: archetypes are choosier than positions were, and a squad drawn man by
 man could be a position short and play a man out of it every week. A club topping its squad up signs the position
 it's shortest of, and one buying a man buys one who can play where the man he's replacing did. The exhibition clubs'
-squads have the new archetypes too, dealt by the spot each man plays in their shape. A holding and an attacking
-midfielder are one position, CM, since v118 (in a squad, three of its four midfielders: more CMs than any other
-position). Skill stars: a trickster's ceiling is drawn from odds of its own, the best of anyone's (at the top level
+squads have the new archetypes too, dealt by the spot each man plays in their shape.
+
+**Positions, two to one to one (v127).** The middle of midfield is three positions again: a holding midfielder (DM), a
+central one (CM) and an attacking one (AM) -- from v118 to v126 they were one, CM. A holding and an attacking
+midfielder are each half as common as a central one. A man drawn on his own (a youngster, a free agent) is a wide
+midfielder a quarter of the time and in the middle the rest, two CMs to each DM and each AM. A squad's middle three
+are first a man for each DM, AM and CM spot its shapes have, then drawn so that across the world it comes out the same
+-- most shapes have a CM's spot or two and few a DM's or an AM's, so what's left to draw is mostly DMs and AMs. In six
+new careers' worlds the computer clubs had 0.52 DMs and 0.51 AMs to each CM, and every one of them had a man of his
+own for each DM, AM and CM spot of its shapes. Your own squad is dealt for the 3-3-2 you start in. A career saved
+before: a central midfielder's position is his archetype's -- an anchor or a deep creator is a DM, a shadow striker or
+a trequartista an AM, the rest CMs (labels only: his stats are as they were). Skill stars: a trickster's ceiling is drawn from odds of its own, the best of anyone's (at the top level
 one in seven has five), and a trequartista's and a shadow striker's from an attacking midfielder's; the other
 wingers' are a little lower than before, so the world has about as many five-star men. A save from before v118: a
 DM or AM is a CM, a Creator a Trequartista, and a keeper gets the archetype his keeping leans toward (about as often

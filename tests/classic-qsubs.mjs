@@ -52,7 +52,7 @@ await simFor(1.5); S = await state();
 ok(!S.open && S.hot, 'one of yours worn down to half his ceiling: it doesn\'t drop down by itself, the chip just lights up');
 await page.click('#qsBtn'); await page.waitForTimeout(150); S = await state();
 const sug = await K(`qsSuggest().map(s=>({out:s.out,inn:s.inn,rIn:s.rIn,rOut:s.rOut,cap:s.cap}))`);
-const best = await K(`(()=>{ const s=qsSuggest()[0], sl=qsSlot(s.out); return Math.max(...mtBench('G').filter(si=>SQUAD.G[si].role!=='GK').map(si=>mtRating(SQUAD.G[si],sl.role,sl.pos))); })()`);
+const best = await K(`(()=>{ const s=qsSuggest()[0], sl=qsSlot(s.out); return Math.max(...mtBench('G').filter(si=>SQUAD.G[si].role!=='GK').map(si=>mtRating(SQUAD.G[si],sl.role,spotFit(sl)))); })()`);   // (his spot's fit: v127, a back three's outside spot takes a full-back too)
 info('worn out (' + worn.name + '): ' + JSON.stringify(S.rows));
 ok(S.rows.length >= 1 && S.rows[0].text.includes(worn.name.split(' ').slice(-1)[0]) && sug[0].out === worn.si && sug[0].rIn === best && sug[0].rIn > sug[0].rOut * (0.74 + 0.26 * sug[0].cap),
   `pressed, he's first, with the bench's best at his spot (${sug[0] && sug[0].rIn}, against his ${sug[0] && sug[0].rOut} on tired legs)`);
