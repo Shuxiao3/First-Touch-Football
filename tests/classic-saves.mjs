@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, P, FW, FH, YC, MK, GOAL_W, ARCH, OVR_W, OVR_W_V121, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
-  + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, checkOutOfPlay, rs:()=>restartInfo, switchEnds, setControlled, shootAt, '
+  + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, CR:()=>CPU_RUN, checkOutOfPlay, rs:()=>restartInfo, switchEnds, setControlled, shootAt, '
   + 'overallOf, gkHandlingFor, sixHtml, genStyledStats, rng32, divingOf, reflexOf, spreadWidth, spreadBlock, spreadHalf:k=>spreadHalf(k), spreadGrow:k=>spreadGrow(k), '
   + 'SP:()=>({H:SPREAD_H, R:SPREAD_RANGE, DIVE:SPREAD_DIVE, LATE:SPREAD_LATE, T:SPREAD_T, DOWN:SPREAD_DOWN}), pal:()=>KEEPER_SHEET_PAL, PX_M, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
@@ -176,17 +176,20 @@ r = await page.evaluate(async () => { const T = window.__T, atk = T.atkOf('G'), 
 info('following in: ' + JSON.stringify(r));
 ok(r.tag === 'FOLLOW-IN' && r.in > 1, 'a team-mate shoots from 20 m: our forward 14 m out goes in after it (' + r.in + ' m nearer in the first 0.4 s)');
 
-// --- READS: a man's run read 95% of the way on the ball, 90% off it, at Def IQ 10 -- less again tired --------------------
-r = await page.evaluate(() => { const T = window.__T, d = T.players().find(q => q.team === 'R' && q.role === 'DEF'), c = T.players().find(q => q.team === 'G');
+// --- READS: a man's run read 95% of the way on the ball, 90% off it, at Def IQ 10 -- less again tired. One of your men
+// reading one of theirs (v128: the computer's men read a runner off the ball less far -- CPU_RUN.read, below) --------------
+r = await page.evaluate(() => { const T = window.__T, d = T.players().find(q => q.team === 'G' && q.role === 'DEF'), c = T.players().find(q => q.team === 'R');
   const keep = { d: d.stats, x: d.x, y: d.y, cx: c.x, cy: c.y, cvx: c.vx, cvy: c.vy, st: d.stamina, cap: d.staminaCap };
   d.stats = Object.assign({}, d.stats, { defIQ: 10 }); d.slotAtk = null; d.x = T.FW / 2; d.y = T.YC - 200; c.x = T.FW / 2 - 300; c.y = T.YC; c.vx = 200; c.vy = 0;
   const share = off => { const t = T.runLeadT(d, c), r = T.readRun(d, c, c, off); return +((r.x - c.x) / (c.vx * t)).toFixed(3); };
   d.stamina = 1; d.staminaCap = 1; const on = share(false), off = share(true);
+  d.team = 'R'; const cpuOn = share(false), cpuOff = share(true); d.team = 'G';   // (the same man, the computer's)
   d.stamina = 0.55; d.staminaCap = 0.6; const legs = +T.legsOf(d).toFixed(3), tOn = share(false), tOff = share(true);
   d.stats = keep.d; d.x = keep.x; d.y = keep.y; c.x = keep.cx; c.y = keep.cy; c.vx = keep.cvx; c.vy = keep.cvy; d.stamina = keep.st; d.staminaCap = keep.cap;
-  return { on, off, legs, tOn, tOff, RR: T.RR() }; });
+  return { on, off, legs, tOn, tOff, cpuOn, cpuOff, RR: T.RR(), CR: T.CR() }; });
 info('reads: ' + JSON.stringify(r));
 ok(r.on === 0.95 && r.off === 0.9, 'Def IQ 10, fresh: he reads 95% of the way along a man\'s run with the ball, 90% of a runner\'s without it');
+ok(r.cpuOn === 0.95 && Math.abs(r.cpuOff - 0.9 * r.CR.read) < 0.002, 'the computer\'s man the same on the ball, and ' + r.CR.read + ' as far off it: ' + r.cpuOff + ' of a runner\'s way (v128)');
 ok(Math.abs(r.tOn - 0.95 * (1 - 2 * (1 - r.legs))) < 0.002 && r.tOn < 0.62 && r.tOff < r.tOn, 'tired (his legs at ' + r.legs + ' of his top speed) he reads twice as much less: ' + r.tOn + ' on the ball, ' + r.tOff + ' off it');
 
 // --- HANDLING, THE STAT ---------------------------------------------------------------------------------------------------

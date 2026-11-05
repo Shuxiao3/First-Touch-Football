@@ -107,13 +107,14 @@ info('a season: ' + JSON.stringify(r));
 ok(r.n >= 150 && r.n <= 500 && r.news === r.mine, 'a season: ' + r.n + ' injuries across the four leagues (about ' + (r.n / 56).toFixed(1) + ' a club), ' + r.mine + ' of yours, each in the news');
 
 // --- a live match: hurt in it -- v116: yours comes off there and then for your planned man for him, else the bench's
-// best at his spot; with no subs left he plays on, slowed ---------------------------------------------------------------------
+// best at his spot (rated by the spot's fit: v127, a back three's outside spot takes a full-back too); with no subs left he
+// plays on, slowed ------------------------------------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2,phone:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } d.qsubs=[]; INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(1500);
 const hurtMan = (pick, plan) => K(`(()=>{ const d=CAREER.data, rid=si=>d.roster[SQUAD.G[si].ri].id;
   const p=players.filter(q=>q.team==='G'&&!HURT.G.has(q.squadIdx)&&qsSlot(q.squadIdx))[${pick}], si=p.squadIdx, sl=qsSlot(si);
-  const val=b=>{ const e=SQUAD.G[b]; return mtRating(e,sl.role,sl.pos)*qsLegs(e.cond??1); }, bench=mtBench('G').filter(b=>SQUAD.G[b].role!=='GK'&&!HURT.G.has(b)).sort((a,b)=>val(a)-val(b));
+  const val=b=>{ const e=SQUAD.G[b]; return mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); }, bench=mtBench('G').filter(b=>SQUAD.G[b].role!=='GK'&&!HURT.G.has(b)).sort((a,b)=>val(a)-val(b));
   const worst=bench[0], best=bench[bench.length-1]; if(${plan}) d.qsubs=[{off:rid(si), on:rid(worst)}];
   if(ball.ownedBy===p||ball.dribbler===p){ ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; }
   const name=SQUAD.G[si].name; hurtInMatch(p); const q=players.find(x=>x.team==='G'&&x.squadIdx===si);
