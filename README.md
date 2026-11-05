@@ -255,8 +255,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     In the Squad tab his card has the right side to
     itself (◀ TEAM in its tabs, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
     a man up to drop on it.
-  - **Tactics** (in a career, on the training pitch: its level decides which shapes and styles your side can have; see
-    **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
+  - **Tactics** (in a career, on the training pitch: every shape and style from the start -- v130: its level decided
+    which your side could have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
     seven two to a line -- and, at its end, INSTRUCTIONS and BEST 9 (v116: INSTRUCTIONS was a button on his card). Under the pitch, on one line, the bench: five men, the subs you'll have in a
     match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
@@ -1745,11 +1745,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       free, the likelier -- a new club's first call usually comes in its first few weeks), two at most in a week,
       each offer standing two weeks. Who calls is the club's size -- its league most of all, then its fans against
       what its league's clubs have, its ground and where it stands in the table: first the businesses round the
-      corner (a coffee shop, the tyre place, the bakery, the barber's: $15 to $40 a week for a board, to the end of
+      corner (a coffee shop, the tyre place, the bakery, the barber's: $45 to $120 a week for a board, to the end of
       the season), then the town's firms (car dealers, builders, solicitors) a league up, regional companies, national
-      companies, and global brands at the top with a grand stadium -- each size paying more (a board $40 to $110
-      a week from a town firm, up to $950 to $2,600 from a global brand; the shirt $60 to $160 from a local business,
-      $8,000 to $20,000 from a global brand), now and then a bigger firm taking a punt or a smaller one calling.
+      companies, and global brands at the top with a grand stadium -- each size paying more (a board $90 to $240
+      a week from a town firm, up to $1,100 to $3,000 from a global brand; the shirt $180 to $480 from a local business,
+      $9,200 to $23,000 from a global brand; v130: a local business pays three times what it did, a town firm 2.2
+      times, a regional company 1.3, the biggest 1.15), now and then a bigger firm taking a punt or a smaller one calling.
       Where they can go: boards, as many as the ground's level has (1, 3, 6, 10, 16), never bought, bare till
       someone takes them (YOUR AD HERE on the far stand); the shirt once you've moved into the cabin (clubhouse 2;
       v108 -- it was from your second season); the stands' names once there are covered stands (level 3: the North and South
@@ -1805,13 +1806,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       | Youth academy | $25,000 | $25,000 | $120,000 | |
 
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
-        taken: its Tactics and Selection tabs), and its
-        level is what shapes and styles your side can have: at 1 the 3-3-2, 4-2-2 and 3-2-3 and the balanced and direct
-        styles; 2 adds the 3-4-1, 4-3-1 and 3-1-2-2, wing play and fluid counter; 3 the 4-1-3, 4-1-2-1 and 3-2-1-2,
-        control possession and direct counter; 4 the 3-1-3-1, 3-2-2-1 and gegenpress (v127: the four-line shapes from
-        level 2, those with a DM's or an AM's spot from 3). The rest are on the menus, locked, each with the
-        level it needs -- in a match's tactics too. Width is always yours, and so are the team instructions (v112), from
-        the first day (before them every player instruction was, from v106; before that they came with the levels).
+        taken: its Tactics and Selection tabs), and its level is how well your men train (see **What they do**).
+        Every shape, every style, the width and every team instruction are yours from the first day, in a match's
+        tactics too (v130: the shapes and styles came with its levels -- at 1 the 3-3-2, 4-2-2 and 3-2-3 and the
+        balanced and direct styles, the rest locked on the menus till 2, 3 or 4; the team instructions have been
+        open from the start since v112, every player instruction since v106). Its Pitch tab says so, and what each
+        level trains.
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
         day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
@@ -2106,6 +2106,23 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v130: nothing locked, and sponsors worth having.** The training pitch's levels locked shapes and styles (at 1 three
+  shapes and two styles, the rest a level at a time). It was no fun, so every shape and every style is yours from the
+  first day, as the width and the team instructions were; a level of the pitch trains your men better, no more. And
+  the sponsors were weak against the wages: a League 2 side's ad board and shirt came to about a twentieth of its
+  wage bill. A local business pays three times what it did, a town firm 2.2 times, a regional company 1.3, a
+  national company or a global brand 1.15 (each size's fee for each place, the middle of its range, a week):
+
+  | | the league | v129 | v130 | its clubs' wages (median) |
+  | --- | --- | --- | --- | --- |
+  | a board, a local business | League 2 | $28 | $83 | $1,760 |
+  | the shirt, a local business | League 2 | $110 | $330 | $1,760 |
+  | the shirt, a town firm | League 1 | $350 | $775 | $4,780 |
+  | the shirt, a regional company | Championship | $1,250 | $1,640 | $13,710 |
+  | the shirt, a national company | Premium League | $4,500 | $5,150 | $49,500 |
+
+  A whole set of deals is about a quarter of a League 2 or League 1 side's wages, a third of a Championship side's,
+  half a Premium League side's. Deals already signed keep their fees.
 - **v129: after the break, each man where the tactics screen shows him.** A change on the tactics screen in the second
   half -- a shape, the width, two men swapped -- dealt that side's spots out for the first half's ends, so once the ends
   had changed a left-back went to right-back, a left winger to the right wing, and each man's spot was in the other

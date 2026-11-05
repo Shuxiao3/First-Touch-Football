@@ -30,8 +30,8 @@ const anchor = '  // ===== END MANAGER CAREER';
 if(src.split(anchor).length !== 2) throw new Error('instrumenting: anchor not found once: ' + anchor);
 src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }, mgForward, mgPlayGame, mgPos, mgWindowOpen, mgNextGame, mgSave, renderHub, mgStarters, '
   + 'mgMarketOpen, stadOf, stadUpgrade, boardBuy, spOfferFor, spSign, spOpen, spMake, dealsExpire, computeFinance, groundOfYours, groundOfClub, mgSetTeams, mgNewSeason, STAD_LEVELS, '
-  + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, tacNeed, '
-  + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, set lock(v){ TAC_LOCK=v; }, '
+  + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, get FORMS(){ return FORMS; }, '
+  + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
   + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
@@ -303,25 +303,29 @@ ok(r.club4[1] === 450000 && /as good as it gets/.test(r.club5) && r.full === '{"
 ok(r.pre === '{"club":4,"train":4,"physio":0,"market":1,"scouting":2,"academy":3}' && r.v49[0] === '{"club":1,"train":1,"physio":0,"market":1,"scouting":1,"academy":0}' && r.v49[1] === 2400,
   'careers from before: one built up keeps it all (the hall, its scouting and academy as they were); one that had only begun starts in the shed, its plants\' money back ($2,400)');
 
-// --- THE TRAINING PITCH: its level locks shapes and styles (your side's, in a career); the instructions are all open (v106) --
+// --- THE TRAINING PITCH: nothing locked at any level (v130: its level locked shapes and styles before); the instructions
+// all open (v106) -- and its Pitch tab says so ---------------------------------------------------------------------------
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); });
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const locks = async () => { const o = {};
-  await page.click('#bpBody [data-tdrop="form"]'); await page.waitForTimeout(60); o.forms = await page.$$eval('#bpBody .formBtn.locked', ns => ns.map(n => n.dataset.cform + ' (' + n.querySelector('.lk').textContent + ')'));
-  await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60); o.styles = await page.$$eval('#bpBody .tbOpt.locked', ns => ns.length);
+  await page.click('#bpBody [data-tdrop="form"]'); await page.waitForTimeout(60); o.forms = await page.$$eval('#bpBody .formBtn.locked, #bpBody .formBtn[disabled]', ns => ns.map(n => n.dataset.cform)); o.open = await page.$$eval('#bpBody .formBtn:not([disabled])', ns => ns.length);
+  await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60); o.styles = await page.$$eval('#bpBody .tbOpt.locked, #bpBody .tbOpt[disabled]', ns => ns.length);
   o.free = await page.$$eval('#bpBody .tbOpt:not(.locked)', ns => ns.map(n => n.textContent).join()); await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60);
   await page.click('#bpBody .tpitch .ptk[data-tac="field"] >> nth=2'); await page.waitForTimeout(60);
   if(await page.$('#bpBody .tbTop .tbIns[data-cside="instr"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (INSTRUCTIONS, up in the top row: v116)
   o.instr = await page.$$eval('#cTacRight .tiRow', ns => ns.map(n => (n.querySelector('.locked, [disabled]') ? 'locked ' : '') + n.querySelector('.tiLbl').textContent).join(', '));   // (v112: the team's instructions)
   return o; };
-const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '3-1-3-1'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });   // (v127: 3-1-3-1 one of level 4's shapes, as 2-3-3 was)
+const l1 = await locks(), nForms = await page.evaluate(() => Object.keys(__MG.FORMS).length);
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 4; __MG.mgSave(d); }); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const l4 = await locks();
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
-info('training locks: ' + JSON.stringify({ l1, lt1, l4 }));
-ok(l1.forms.length === 8 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRECT/.test(l1.free) && String(lt1) === '4,4,0,0' && !/locked/.test(l1.instr) && l1.instr.length > 0,
-  'training pitch level 1: three shapes (the other eight locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), and every team instruction open from the start (v106, the team\'s from v112: ' + l1.instr + ')');
-ok(!l4.forms.length && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: every shape, style and instruction');
+info('training locks: ' + JSON.stringify({ l1, l4, nForms }));
+ok(!l1.forms.length && l1.open === nForms && nForms === 11 && !l1.styles && /GEGENPRESS/.test(l1.free) && /CONTROL POSSESSION/.test(l1.free) && !/locked/.test(l1.instr) && l1.instr.length > 0,
+  'training pitch level 1: all ' + l1.open + ' shapes and every style open from the start (v130: they were locked by its level), and every team instruction (v106, the team\'s from v112: ' + l1.instr + ')');
+ok(!l4.forms.length && l4.open === nForms && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: the same');
+await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); }); await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.waitForTimeout(80);
+const pitchTxt = await page.textContent('#bpBody'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
+ok(/Every shape, style and team instruction is yours from the start/.test(pitchTxt) && /training ×0\.65/.test(pitchTxt) && !/opens more shapes/.test(pitchTxt), 'the training pitch says so, and what each level trains (×0.65 at 1)');
 
 // --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty-one at most) as one list, wrapped in three columns:
 // the keeper and the eight on the pitch, the bench's five, the rest not taken. A bar dragged onto the pitch's part (or one

@@ -2761,14 +2761,8 @@
     if(typeof n==='string') return n;
     const S=INS_SCALE[k], i=S?S.indexOf(v):-1; return i<0?v:S[clamp(i+n,0,S.length-1)]; }
   // (gone: per-spot instructions, PI and its settings -- a saved career's or club's are dropped on load)
-  // THE TRAINING PITCH'S LEVELS: the shapes and styles your side in a career can have. One past the pitch's level is
-  // shown locked, with the level it needs (TAC_LOCK: the pitch's level while your career side's tactics are on screen;
-  // 0, nothing's locked: an exhibition, the labs, the other side). The team instructions are yours from the start.
-  const TRAIN_FORM={'3-3-2':1,'4-2-2':1,'3-2-3':1,'3-4-1':2,'4-3-1':2,'3-1-2-2':2,'4-1-3':3,'4-1-2-1':3,'3-2-1-2':3,'3-1-3-1':4,'3-2-2-1':4};   // (v127: the four-line ones from level 2 -- a holding or an attacking midfielder's spot from 3)
-  const TRAIN_STYLE={neutral:1,direct:1,wing:2,fluid:2,control:3,dcounter:3,gegen:4};
-  let TAC_LOCK=0;
-  function tacNeed(kind,k){ if(!TAC_LOCK||(kind!=='form'&&kind!=='style')) return 0; const n=(kind==='form'?TRAIN_FORM:TRAIN_STYLE)[k]||1; return n>TAC_LOCK?n:0; }
-  const lockChip=n=>'<i class="lk">'+LOCK_SVG+n+'</i>';
+  // (v130: the training pitch's levels no longer lock shapes and styles -- every one is yours from the start, as the team
+  // instructions have been since v106; the pitch's level trains your men: devTrainYours)
   const POS_NAME={GK:'GOALKEEPER', CB:'CENTRE-BACK', FB:'FULL-BACK', DM:'HOLDING MIDFIELD', CM:'CENTRAL MIDFIELD', AM:'ATTACKING MIDFIELD', WM:'WIDE MIDFIELD', W:'WINGER', ST:'STRIKER'};
   // a spot's name, on its side of the pitch (left: on the side's left)
   function posName(pos,left){ return pos==='FB'?(left?'LEFT-BACK':'RIGHT-BACK') : pos==='WM'?(left?'LEFT MIDFIELD':'RIGHT MIDFIELD') : pos==='W'?(left?'LEFT WING':'RIGHT WING') : (POS_NAME[pos]||pos||''); }
@@ -14593,7 +14587,7 @@
     if(CAREER&&CAREER.data&&matchReturn==='hub'){ if(team==='G') careerFromMatch(); return; }
     saveSquads();
   }
-  function renderPhase(phase){ TAC_LOCK=0;
+  function renderPhase(phase){
     const t=menuState.team;
     const form=formFor(t,phase), slots=slotsFor(t,form,phase), forms=Object.keys(FORMS);
     const perm=LINEUP[t][phase]||LINEUP[t].atk;
@@ -14717,13 +14711,13 @@
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div></div></div>';
     return h+sixHtml(e.stats,e.role)+'</div>'; }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'?' r':'')+'">';
-    if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm), lk=tacNeed('form',fm);
-        return '<button class="formBtn'+(fm===form?' on':'')+(lk?' locked':'')+'" data-mtform="'+fm+'"'+(off||lk?' disabled':'')+'>'+fm+(lk?lockChip(lk):'')+'</button>'; }).join('')+'</div>'; }
+    if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
+        return '<button class="formBtn'+(fm===form?' on':'')+'" data-mtform="'+fm+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
     else if(MT.drop==='width'){ const w=widthSnap(widthOf(t,phase)); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-mtwidth="'+x[2]+'"><b>'+x[1]+'</b></button>').join(''); }
-    else if(MT.drop==='style'){ h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(s=>{ const lk=tacNeed('style',s[0]);
-        return '<button class="tbOpt'+(s[0]===TAC[t].style?' on':'')+(lk?' locked':'')+'" data-mtstyle="'+s[0]+'"'+(lk?' disabled':'')+'><b>'+s[1]+'</b>'+(lk?lockChip(lk):'')+'</button>'; }).join('')+'</div>'; }
+    else if(MT.drop==='style'){ h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(s=>
+        '<button class="tbOpt'+(s[0]===TAC[t].style?' on':'')+'" data-mtstyle="'+s[0]+'"><b>'+s[1]+'</b></button>').join('')+'</div>'; }
     return h+'</div>'; }
-  function renderMatchTac(){ const t=MT.team, phase=MT.phase, li=LINEUP[t]; if(!li||!SQUAD[t]) return; TAC_LOCK=(t==='G'&&careerFix&&careerFix.train)||0;
+  function renderMatchTac(){ const t=MT.team, phase=MT.phase, li=LINEUP[t]; if(!li||!SQUAD[t]) return;
     const mine=t==='G', form=formFor(t,phase), slots=slotsFor(t,form,phase), order=li[phase]||li.atk, bench=mtBench(t);
     if(MT.sel==null||!SQUAD[t][MT.sel]) MT.sel=(controlled&&controlled.team===t)?controlled.squadIdx:order[0];
     const lbl=x=>(x||'').toUpperCase(), w=widthSnap(widthOf(t,phase)), wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
@@ -17489,25 +17483,29 @@
     ['#5a2d82','#f4f4f4'],['#161616','#f2d23c'],['#f4f4f4','#d4202a'],['#23a4a4','#f4f4f4'],['#ff6fae','#161616'],['#6cabdd','#132257']];
   const GROUND_SUFFIX=['Park','Arena','Stadium','Ground','Field'];
   // the firms, smallest first: who they are (a name, a trade: the first is what goes on a board), what they'd pay a week
-  // for each kind of place (a range), how many seasons they sign for
+  // for each kind of place (a range), how many seasons they sign for (v130: the sponsors were weak against the wages -- a
+  // League 2 side's ad board and shirt came to about a twentieth of its wage bill -- so a local business pays three
+  // times what it did, a town firm 2.2 times, a regional company 1.3, a national company or a global brand 1.15: a whole
+  // set of deals about a quarter of a League 2 or League 1 side's wages, a third of a Championship side's, half a
+  // Premium League side's)
   const SP_SIZES=[
     {n:'local', what:'a local business', many:'local businesses',
      a:['Mario’s','Bev’s','Hilltop','Station Road','Corner','Village','Old Mill','Market St','Kev’s','Sunny’s','Bridge','High Street','Park Lane','Sandra’s','Golden','Green Lane','Abbey','Church St','Mill Lane','Tony’s','Rosie’s','Harbour','Kingsway','Dot’s'],
      b:['Coffee','Tyres','Bakery','Barbers','Butchers','Fish & Chips','Garage','Florist','Hardware','Pizza','Launderette','Driving School','Plumbing','Bike Shop','Pet Shop','Car Wash','Kebabs','Dry Cleaners','Opticians','Taxis','Cafe','Newsagents','Hair Salon','Ironmongers'],
-     fee:{board:[15,40], kit:[60,160], stand:[30,70], ground:[60,150]}, yrs:[1,1]},
+     fee:{board:[45,120], kit:[180,480], stand:[90,210], ground:[180,450]}, yrs:[1,1]},
     {n:'town', what:'a firm from the town', many:'the town’s firms',
      a:['Northgate','Copperfield','Westfield','Oakridge','Meadowvale','Stonegate','Kingsgate','Ashford','Lakeside','Fairway','Hillcrest','Brookside'],
      b:['Motors','Builders','Estate Agents','Solicitors','Hotel','Garden Centre','Carpets','Kitchens','Removals','Accountants','Car Sales','Windows','Roofing','Furniture','Vets','Dental Care'],
-     fee:{board:[40,110], kit:[180,520], stand:[60,160], ground:[150,450]}, yrs:[1,2]},
+     fee:{board:[90,240], kit:[400,1150], stand:[130,350], ground:[330,990]}, yrs:[1,2]},
     {n:'region', what:'a regional company', many:'regional companies', a:SP_FIRST,
      b:['Brewery','Dairy','Buses','Building Society','Radio','Homes','Logistics','Foods','Water','Cider','Hotels','Construction'],
-     fee:{board:[110,320], kit:[600,1900], stand:[160,520], ground:[450,1500]}, yrs:[1,3]},
+     fee:{board:[140,420], kit:[780,2500], stand:[210,680], ground:[590,1950]}, yrs:[1,3]},
     {n:'nation', what:'a national company', many:'national companies', a:SP_FIRST,
      b:['Bank','Insurance','Energy','Mobile','Air','Motors','Telecom','Supermarkets','Rail','Paints'],
-     fee:{board:[320,950], kit:[2000,7000], stand:[520,1600], ground:[1500,5200]}, yrs:[2,3]},
+     fee:{board:[370,1100], kit:[2300,8000], stand:[600,1850], ground:[1700,6000]}, yrs:[2,3]},
     {n:'world', what:'a global brand', many:'global brands', a:SP_FIRST,
      b:['Airways','Electronics','Cola','Sportswear','Motors','Bank','Software','Energy','Telecom','Mobile'],
-     fee:{board:[950,2600], kit:[8000,20000], stand:[1600,4500], ground:[5200,15000]}, yrs:[2,3]}];
+     fee:{board:[1100,3000], kit:[9200,23000], stand:[1850,5200], ground:[6000,17000]}, yrs:[2,3]}];
   const SP_PLACE={board:'an ad board', kit:'the shirt', ground:'the ground’s name', N:'the North Stand', S:'the South Stand', E:'the East End', W:'the West End'};
   const SP_KINDS=['board','kit','N','S','E','W','ground'];
   const AD_EMPTY={short:'YOUR AD HERE', col:['#f8f8f8','#313852']};   // (a board nobody's taken, as it's drawn)
@@ -17812,7 +17810,7 @@
   function tiSideHtml(o,phase,attr,ro){ return '<div class="tbCard tiCard">'+tiPanelHtml(o,phase,attr,ro,null,'')+'</div>'; }
   // a man tapped while the instructions are up: his card, and INSTRUCTIONS unlit (root: the screen it's on)
   function cardToRate(root){ if(cardSide==='rate') return; cardSide='rate'; const b=root&&root.querySelector('.tbIns'); if(b){ b.classList.remove('go'); b.dataset.cside='instr'; } }
-  function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; TAC_LOCK=lvOf(d,'train'); rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
+  function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
   // THE MAN YOU TAPPED: his rating where he's playing and his six -- or, turned over, the team's instructions
   function tbCard(d, ri, phase){ if(cardSide==='instr') return tiSideHtml(d.ti||(d.ti=tiDefault(d.style)),phase,'cti',false);
     const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
@@ -17863,13 +17861,13 @@
   function ghostTok(L,T,num,name,k,n){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k,n)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
-      h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm), lk=tacNeed('form',fm);
-        return '<button class="formBtn'+(fm===form?' on':'')+(lk?' locked':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'"'+(off||lk?' disabled':'')+'>'+fm+(lk?lockChip(lk):'')+'</button>'; }).join('')+'</div>'; }
+      h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
+        return '<button class="formBtn'+(fm===form?' on':'')+'" data-cform="'+fm+'" data-cphase="'+phase+'"'+(off?' disabled':'')+'>'+fm+'</button>'; }).join('')+'</div>'; }
     else if(tacDrop==='width'){ const w=widthSnap(d.width[phase]); h+=WIDTHS.map(x=>'<button class="tbOpt'+(w===x[2]?' on':'')+'" data-cwidth="'+x[2]+'" data-cphase="'+phase+'"><b>'+x[1]+'</b></button>').join(''); }
-    else if(tacDrop==='style'){ const cur=styleKey(d.style); h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(t=>{ const lk=tacNeed('style',t[0]);
-        return '<button class="tbOpt'+(t[0]===cur?' on':'')+(lk?' locked':'')+'" data-cstyle="'+t[0]+'"'+(lk?' disabled':'')+'><b>'+t[1]+'</b>'+(lk?lockChip(lk):'')+'</button>'; }).join('')+'</div>'; }
+    else if(tacDrop==='style'){ const cur=styleKey(d.style); h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(t=>
+        '<button class="tbOpt'+(t[0]===cur?' on':'')+'" data-cstyle="'+t[0]+'"><b>'+t[1]+'</b></button>').join('')+'</div>'; }
     return h+'</div>'; }
-  function renderTactics(d, phase){ ensureForms(d); const lu=ensureLineup(d); TAC_LOCK=lvOf(d,'train');
+  function renderTactics(d, phase){ ensureForms(d); const lu=ensureLineup(d);
     if(statViewRi==null||!d.roster[statViewRi]) statViewRi=lu.atk[0];
     tacPhase=phase;
     const form=phase==='def'?d.formDef:d.formation, w=widthSnap(d.width[phase]), slots=careerSlots(form,phase,w), order=lu[phase];
@@ -18340,10 +18338,10 @@
     return h; }
   // ---- the training pitch's level: what each brings ----
   const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
-  function trainAdds(lv){ const f=Object.keys(TRAIN_FORM).filter(k=>TRAIN_FORM[k]===lv), s=STYLE_LIST.filter(x=>TRAIN_STYLE[x[0]]===lv).map(x=>x[1].toLowerCase());
-    return [f.join(', '), andList(s), lv===1?'every team instruction':''].filter(Boolean).join(' · '); }   // (v106: the instructions all from the start -- the team's, v112)
+  // (v130: every shape, style and team instruction from the start -- a level trains everyone a little better, no more)
+  function trainAdds(lv){ return (lv===1?'every shape, style and team instruction · ':'')+'training ×'+(0.58+0.07*lv).toFixed(2); }
   function mgTrainTab(d){ return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.train[lvOf(d,'train')],'train'+lvOf(d,'train'))
-      +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level opens more shapes and styles, and trains everyone a little better. The team instructions are yours from the start.</div></div></div>'
+      +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level trains everyone a little better. Every shape, style and team instruction is yours from the start.</div></div></div>'
       +lvlRows(d,'train',4,trainAdds)+lvlNext(d,'train','BUILD IT UP'); }   // (the levels and the price over pages, if they must)
   // ---- the physio ----
   // THE PHYSIO: stamina on match day (tiring more slowly through a game, more of their legs back at half-time, fitter again
