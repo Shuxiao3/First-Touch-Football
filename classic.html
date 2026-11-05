@@ -2430,6 +2430,13 @@
     const k=2*Math.max(...D.map(q=>Math.abs(q.homeY-YC)))/FH;   // (the old shape's width as wide as the new one's)
     const pick=bestAssign(n,(i,j)=>{ const dx=A[i].x-D[j].lineFrac, dy=A[i].y*k-(D[j].homeY-YC)/FH; return 1.6*dx*dx+dy*dy+FIT_FAR[posFit(nat[i],spotFit(D[j]))]; });
     const out=order.slice(0,n); for(let i=0;i<n;i++) out[pick[i]]=order[i]; return out; }
+  // THE SPOTS AS THEY STAND NOW: slotsFor lays a shape out for the first half's ends (Green attacking the right-hand goal).
+  // At half-time switchEnds mirrors every man's spots, so spots dealt out afresh after it -- a shape, the width or two men
+  // swapped on the tactics screen -- are mirrored too (v129: they weren't, and a change after the break put men on the
+  // other flank to the one the tactics screen showed, their spots in the wrong half). The tactics screen draws slotsFor's.
+  function slotsNow(team,formName,phase){ const S=slotsFor(team,formName,phase);
+    if(gDir<0) for(const s of S){ s.homeX=FW-s.homeX; s.homeY=2*YC-s.homeY; s.wide=-s.wide; }
+    return S; }
   // apply one slot's fields onto a player (used to switch phase shape)
   function applySlot(p,s){
     p.role=s.role;p.lineFrac=s.lineFrac;p.homeX=s.homeX;p.homeY=s.homeY;
@@ -3241,8 +3248,8 @@
     LINEUP[t].atk=mapShapeOrder(goneForm[t],formFor(t,'atk'),LINEUP[t].atk,LINEUP[t].atk.map(i=>fitPos(SQUAD[t][i]))); LINEUP[t].def=mapDefOrder(t,LINEUP[t].atk); goneForm[t]=null; saveSquads(); }
   function layoutTeam(team){
     const li=LINEUP[team]||defaultLineup();
-    const atkSlots=slotsFor(team,formFor(team,'atk'),'atk');
-    const defSlots=slotsFor(team,formFor(team,'def'),'def');
+    const atkSlots=slotsNow(team,formFor(team,'atk'),'atk');
+    const defSlots=slotsNow(team,formFor(team,'def'),'def');
     const out=[];
     for(const sidx of li.atk){                 // one player per outfield squad index in the lineup
       const p=mkP(team);
@@ -14505,7 +14512,7 @@
   function swapPhasePos(team,phase,i,j){
     const arr=LINEUP[team][phase]; if(!arr)return;
     const a=arr[i], b=arr[j]; arr[i]=b; arr[j]=a;                 // swap who plays each position THIS phase
-    const slots=slotsFor(team, formFor(team,phase), phase);
+    const slots=slotsNow(team, formFor(team,phase), phase);       // (as the ends stand now: v129)
     const pa=players.find(q=>q.team===team&&q.squadIdx===a);      // a now occupies position j
     const pb=players.find(q=>q.team===team&&q.squadIdx===b);      // b now occupies position i
     if(phase==='atk'){ if(pa)pa.slotAtk=slots[j]; if(pb)pb.slotAtk=slots[i]; }
@@ -14549,7 +14556,7 @@
     else if(EXH.on&&EXH.play) saveClubSides(); }
   // the players' spots, from the shapes and the lineup, without stopping play (a change of shape or width mid-match)
   function applyWidthLive(team){
-    const aS=slotsFor(team,formFor(team,'atk'),'atk'), dS=slotsFor(team,formFor(team,'def'),'def'), li=LINEUP[team];
+    const aS=slotsNow(team,formFor(team,'atk'),'atk'), dS=slotsNow(team,formFor(team,'def'),'def'), li=LINEUP[team];   // (as the ends stand now: v129)
     for(const p of players){ if(p.team!==team||p.squadIdx==null)continue;
       const ai=li.atk.indexOf(p.squadIdx), di=li.def.indexOf(p.squadIdx);
       if(ai>=0&&aS[ai])p.slotAtk=aS[ai]; if(di>=0&&dS[di])p.slotDef=dS[di]; }
@@ -14757,7 +14764,7 @@
   function mtMsg(m,col){ const el=document.getElementById('mtMsg'); el.textContent=m; el.style.color=col||'var(--warn)'; el.classList.add('on'); clearTimeout(_mtMsgT); _mtMsgT=setTimeout(()=>el.classList.remove('on'),3500); }
   // two of your men swap spots in one shape, live (and a career or a club keeps it)
   function mtSwapPos(t,phase,i,j){ const arr=LINEUP[t][phase]; if(!arr) return; const a=arr[i], b=arr[j]; arr[i]=b; arr[j]=a;
-    const slots=slotsFor(t,formFor(t,phase),phase), pa=players.find(q=>q.team===t&&q.squadIdx===a), pb=players.find(q=>q.team===t&&q.squadIdx===b);
+    const slots=slotsNow(t,formFor(t,phase),phase), pa=players.find(q=>q.team===t&&q.squadIdx===a), pb=players.find(q=>q.team===t&&q.squadIdx===b);   // (as the ends stand now: v129)
     if(phase==='atk'){ if(pa)pa.slotAtk=slots[j]; if(pb)pb.slotAtk=slots[i]; } else { if(pa)pa.slotDef=slots[j]; if(pb)pb.slotDef=slots[i]; }
     saveTeamSide(t); }
   // A SUB: the man off the bench takes the other's place (his spots in both shapes, his instructions), on fresh legs

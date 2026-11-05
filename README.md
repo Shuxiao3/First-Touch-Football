@@ -2106,6 +2106,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v129: after the break, each man where the tactics screen shows him.** A change on the tactics screen in the second
+  half -- a shape, the width, two men swapped -- dealt that side's spots out for the first half's ends, so once the ends
+  had changed a left-back went to right-back, a left winger to the right wing, and each man's spot was in the other
+  half. Spots dealt out after the break are mirrored with the ends now, as the ones the men already had were. (In a
+  test, two men swapped and the width changed after the break: all eight in their spots; before, all eight on the
+  wrong flank and in the wrong half.)
 - **v128: the computer picks up your runners later.** It was too good at it: a man of yours going in behind was
   picked up a tenth of a second after he went, the defender reading where he was going and getting goal-side of him.
   Now the computer's men, at every level, hold their line 0.7 s before they go with a runner off the ball (a cover CB

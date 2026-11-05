@@ -2,7 +2,8 @@
 // his own half (a metre short of halfway at least) and the side not kicking off is outside the centre circle; the
 // kicking side's most advanced man in the middle is on the ball at the spot. Play holds a moment -- nobody moves, the
 // clock doesn't run -- and then he rolls it back to a team-mate behind him, and it's on (yours: you're put on the man
-// it's going to). For eight club pairings, each side kicking off; then after a goal; then the second half's.
+// it's going to). For eight club pairings, each side kicking off; then after a goal; then the second half's -- and after
+// the break, two men swapped and the width changed on the tactics screen, each man's spot still the one it shows (v129).
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -13,7 +14,8 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, resetKickoff, FW, FH, YC, MK, CIRCLE_R, KICK_HOLD, atkOf, EXH, CLUBS, '
   + 'controlled:()=>controlled, kick:()=>({t:kickT, by:kickBy, to:kickTo}), simNow:()=>simNow, clock:()=>matchClock, half:()=>half, score:()=>scoreG+scoreR, '
-  + 'goal:side=>goal(side), scored:()=>scoredT, breakT:()=>breakT, runout:()=>{ matchClock=halfLenSec()-0.05; }, pass:(p,q)=>passTo(p,q)};\n  const LAB_TITLE=');
+  + 'goal:side=>goal(side), scored:()=>scoredT, breakT:()=>breakT, runout:()=>{ matchClock=halfLenSec()-0.05; }, pass:(p,q)=>passTo(p,q), '
+  + 'slotsFor, formFor, mtSwapPos, setMenuWidth, LINEUP:()=>LINEUP, gDir:()=>gDir};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-kick-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -78,6 +80,19 @@ const [h, hw, hs] = await page.evaluate(() => new Promise(res => { const T = win
 info('the second half: ' + JSON.stringify({ h, hw, played: hs.played }));
 ok(h.half === 2 && h.team === 'R' && h.hold > 0 && hw.over === 0 && hw.circle === 0 && hs.played && hs.played.back && hs.played.rcv,
   'the second half: after the break Red kick off, the same way (held, rolled back)');
+
+// AFTER THE BREAK, A CHANGE ON THE TACTICS SCREEN (v129): two of yours swapped and the width changed -- every man's spot the
+// one the tactics screen shows him in, mirrored with the ends (it used to be dealt out for the first half's: a left-back
+// sent to right-back, and into the other half)
+const ht = await page.evaluate(() => { const T = window.__T, li = T.LINEUP().G, bad = [];
+  T.mtSwapPos('G', 'atk', 0, 1); T.setMenuWidth('G', 'atk', 1.18);
+  for(const ph of ['atk', 'def']){ const can = T.slotsFor('G', T.formFor('G', ph), ph);   // (as the tactics screen lays them out)
+    for(const p of T.players().filter(q => q.team === 'G')){ const s = ph === 'atk' ? p.slotAtk : p.slotDef, c = can[li[ph].indexOf(p.squadIdx)];
+      if(!c || Math.abs((s.homeY - T.YC) + (c.homeY - T.YC)) > 1 || Math.abs(s.homeX - (T.FW - c.homeX)) > 1 || s.wide !== -c.wide) bad.push(ph + ' ' + p.pname + ' ' + s.pos); } }
+  T.mtSwapPos('G', 'atk', 0, 1); T.setMenuWidth('G', 'atk', 1);
+  return { gDir: T.gDir(), bad }; });
+info('after the break, two swapped and the width changed: ' + JSON.stringify(ht));
+ok(ht.gDir === -1 && !ht.bad.length, 'after the break, a change on the tactics screen: every man in the spot it shows him in, on his own side\'s flank and in his own half (v129)' + (ht.bad.length ? ': wrong ' + ht.bad.slice(0, 4).join(', ') : ''));
 
 process.exitCode = rep.finish();
 await browser.close();
