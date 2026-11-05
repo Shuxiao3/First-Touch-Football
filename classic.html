@@ -11108,16 +11108,17 @@
       // a man of the back line holding it: a beat (RUN_HOLD_T) before he goes with a runner he's just picked up -- if
       // he was holding his place in it (blockAt, from aiBrain), not already pressing, shadowing or tracking a man, and
       // not one in front of him he's been told to step out to
-      if(best&&role==='DEF'&&!follow&&!(step&&bu>u-20)){ const rs=p.runSeen;   // (FOLLOW RUNNERS: no beat -- with him at once)
-        if(!rs||simNow-rs.last>0.4) p.runSeen={t0:(p.blockAt??-9)>=simNow-0.1?simNow:-9, last:simNow}; else rs.last=simNow;
-        if(simNow-p.runSeen.t0<RUN_HOLD_T) best=null; }
+      const cpuM=isCpu(p);   // (v128: the computer's men hold it longer -- FOLLOW RUNNERS too: CPU_RUN)
+      if(best&&role==='DEF'&&(!follow||cpuM)&&!(step&&bu>u-20)){ const rs=p.runSeen;   // (FOLLOW RUNNERS: no beat -- with him at once -- but for the computer's)
+        if(!rs||simNow-rs.last>0.4) p.runSeen={t0:(p.blockAt??-9)>=simNow-0.1||(cpuM&&follow)?simNow:-9, last:simNow}; else rs.last=simNow;
+        if(simNow-p.runSeen.t0<(cpuM?CPU_RUN.hold:RUN_HOLD_T)) best=null; }
       if(best){ const vu=B.atk>0?best.seenVx||0:-(best.seenVx||0);
         // where I go with him: off where his run takes him by the time I'm there, as my Def IQ reads it (see readRun) --
         // into the space he's running into at 10; off where he is at 1, left behind a man sprinting past
         const rb=readRun(p,best,best,true), ru=B.U(rb.x);
         track=best;
         if(step && bu>u-20){ u=ru-28; y=y+(rb.y-y)*0.85; }                                     // stepped up: tight on him
-        else if(role==='DEF'){ u=Math.min(u, ru-25-clamp(-vu*0.3,0,60)); y=y+(rb.y-y)*(follow?0.95:0.75); }   // (FOLLOW RUNNERS: right with him across the pitch too)
+        else if(role==='DEF'){ const gs=cpuM?CPU_RUN.side:1; u=Math.min(u, ru-(25+clamp(-vu*0.3,0,60))*gs); y=y+(rb.y-y)*(follow?0.95:0.75); }   // (FOLLOW RUNNERS: right with him across the pitch too; the computer's men less far goal-side of him: CPU_RUN.side -- v128)
         else { const u2=Math.max(Math.min(u,ru-20),u-45), t=B.uB>ru+1?clamp((B.uB-u2)/(B.uB-ru),0,1):1;   // (where the pass from the ball to him crosses my line)
           u=u2; y=y+clamp((B.by+(rb.y-B.by)*t-y)*0.6,-140,140); } }
     }
@@ -11149,6 +11150,13 @@
   // holds it a beat before he turns and goes with him (blockSpot) -- a tenth of a second, about a twentieth of a run in
   // behind; one already pressing, shadowing or tracking a man goes with him at once
   const RUN_HOLD_T=0.1;
+  // THE COMPUTER'S RUNNERS PICKED UP LATER, AND READ LESS FAR (v128: it was too good at it). Its men -- the other side to
+  // yours, in a match, at every level -- hold their line a beat longer before they go with a runner off the ball (hold, in
+  // s: a cover CB, who follows runners, holds it too), read where he's going less far (read: times their read, on top of
+  // their DIFFICULTY's), and go with him less far goal-side of him (side: times the yard or two they'd keep). Your own men
+  // pick up the computer's runners as they always have.
+  const CPU_RUN={hold:0.7, read:0.4, side:0.4};
+  const isCpu=p=>!!p&&p.team==='R'&&!LAB.on&&!practice;   // (the computer's side, as cpuT has it)
   function runLeadT(p,c){
     const s=sprintSpeedOf(p), rx=c.x-p.x, ry=c.y-p.y, a=c.vx*c.vx+c.vy*c.vy-s*s, b=2*(rx*c.vx+ry*c.vy), cc=rx*rx+ry*ry;
     let t=RUN_READ_T;                                                  // (he's quicker than me and going away: as far on as it goes)
@@ -11160,7 +11168,7 @@
   // fifth off his read; never under 40% of it
   function readLegs(p){ return clamp(1-2*(1-legsOf(p)),0.4,1); }
   function readRun(p,c,base,off){   // (off: a runner without the ball)
-    const iq=Math.min(0.98,clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p)*cpu(p).read), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;   // (cpu: DIFFICULTY)
+    const iq=Math.min(0.98,clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p)*cpu(p).read*(off&&isCpu(p)?CPU_RUN.read:1)), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;   // (cpu: DIFFICULTY; CPU_RUN: a runner off the ball, the computer's read of him -- v128)
     return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.

@@ -8,7 +8,7 @@
 // with nobody out there it tucks in; out wide in their third the wide man on the ball's flank goes past the man on it
 // on the outside, not at him, and with the box short of men one central midfielder -- not both -- gets in it; a man of
 // theirs between the lines, the midfield keeps its line and stands in the pass into him; a centre-back who picks up a
-// runner going in behind holds his line a beat before he goes with him. The
+// runner going in behind holds his line a beat before he goes with him -- the computer's a good deal longer (v128). The
 // plan's and the block's spots read straight off a scene set up in a match. On a copy of the game that lets the test
 // set the scene.
 import { open } from './_harness.mjs';
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, holderOf, teamPlan, PLAN:()=>PLAN, mkPlanState, '
-  + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, setStyle, '
+  + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, setStyle, get CPU_RUN(){ return CPU_RUN; }, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
   + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
@@ -142,6 +142,26 @@ ok(!hold.h0.tr && !hold.h1.tr && Math.abs(hold.h1.u - hold.line) < 0.3, 'a centr
 ok(hold.h2.tr && hold.h2.u > hold.line + 1, `...then turns and goes with him (by 0.12 s on, his spot ${(hold.h2.u - hold.line).toFixed(1)} m back toward his goal)`);
 info('...a cover CB in his place: ' + JSON.stringify(holdC));
 ok(holdC.h1.tr, 'a cover CB (v118) picks up the runner at once, his line told to hold it: with him 0.06 s on');
+// ...THE COMPUTER'S (v128: it picked up runs too well): City's centre-back, Liverpool's forward going in behind him the
+// same way -- he holds his line CPU_RUN.hold before he goes with him, four times as long as yours, and a cover CB of
+// theirs holds it too
+const holdCpu = sty => page.evaluate(sty => { const T = window.__T; T.reset(); window.__home('G', 15); window.__homeDef('R');
+  const G = window.__men('G'), c = G.find(q => window.__pos(q, 'atk') === 'CM'), st = G.find(q => window.__pos(q, 'atk') === 'ST');
+  const cb = window.__men('R').find(q => q.slotDef && q.slotDef.pos === 'CB'); cb.style = sty;
+  window.__give(c, 42, 16);
+  const s0 = T.blockSpot(cb), [u0, w0] = window.__uw('G', s0.x, s0.y);
+  window.__at(st, u0 - 4, w0); const a = T.atkOf('G'); st.vx = a * 8 * T.MK; st.seenVx = st.vx; st.vy = st.seenVy = 0;
+  cb.blockAt = T.simNow();   // (holding his place in the line when the run comes)
+  const at = () => { const s = T.blockSpot(cb), [u] = window.__uw('G', s.x, s.y); return { u: +u.toFixed(2), tr: !!s.track }; };
+  // (looked at every tenth of a second, as a match does every frame: a runner out of his sight for 0.4 s is a new one)
+  const H = T.CPU_RUN.hold; T.adv(0.01); const h0 = at(); let early = false;
+  for(let t = 0.1; t < H - 0.05; t += 0.1){ T.adv(0.1); if(at().tr) early = true; }
+  const h1 = at(); T.adv(0.12); const h2 = at();
+  return { hold: H, line: +u0.toFixed(2), early, h0, h1, h2 }; }, sty);
+const hc = await holdCpu('ballplayer'), hcC = await holdCpu('cover');
+info('the computer\'s centre-back holding the line (in Liverpool\'s metres): ' + JSON.stringify(hc) + ' | a cover CB of theirs: ' + JSON.stringify(hcC));
+ok(hc.hold >= 0.5 && !hc.h0.tr && !hc.early && !hc.h1.tr && hc.h2.tr && hc.h2.u > hc.line && !hcC.early && !hcC.h1.tr && hcC.h2.tr,
+  `the computer's centre-back holds his line ${hc.hold} s before he goes with your runner (yours a tenth), and a cover CB of theirs too, then drops with him -- less far goal-side of him than yours would (${(hc.h2.u - hc.line).toFixed(1)} m back) (v128)`);
 
 // --- OUT WIDE IN THEIR THIRD: Liverpool's forward on it 74 m out, 19 m across; the winger behind him on that flank ---
 const ov = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', 30); window.__homeDef('R');

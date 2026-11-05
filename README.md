@@ -2106,6 +2106,23 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v128: the computer picks up your runners later.** It was too good at it: a man of yours going in behind was
+  picked up a tenth of a second after he went, the defender reading where he was going and getting goal-side of him.
+  Now the computer's men, at every level, hold their line 0.7 s before they go with a runner off the ball (a cover CB
+  too, who used to go at once), read his run 0.4 as far as they would, and keep 0.4 as far goal-side of him. Your own
+  men pick up the computer's runners as before. Computer v computer, 32 exhibition matches each (STAR, three-minute
+  halves), your side's runs in behind against the computer's back line:
+
+  | | v127 | v128 |
+  | --- | --- | --- |
+  | Your runs picked up by one of theirs within 1 s | 64% | 58% |
+  | ...the man on him goal-side of him | 45% | 35% |
+  | Your runner past every one of theirs 1 s in | 17% | 21% |
+  | Passes into your runners that reach him, a match | 6.0 | 6.6 |
+
+  The computer's runs against your back line, alongside: the man on him goal-side 43% and 41%, its runner past
+  everyone 20% and 21% -- no change. (Half a second and half the read was tried first: goal-side 38%, past everyone
+  19%, passes reaching him 6.25.)
 - **v127: eleven shapes, and a holding and an attacking midfielder again.**
   - **The shapes** are 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2, 3-1-2-2, 3-2-2-1, 4-2-2, 4-3-1, 4-1-3 and 4-1-2-1. Five
     are in four lines: 3-1-3-1 (a DM, two wide midfielders either side of an AM, a striker), 3-2-1-2 (two central
@@ -2391,7 +2408,9 @@ test, and like the Trap Lab the values are the game's settings.
     0.72 / 0.84 / 0.93 / 1 / 1.06);
   - how noisy their choices on the ball are (× 4 / 2.5 / 1.5 / 1 / 0.7) and how long they look before playing it
     (× 1.5 / 1.25 / 1.1 / 1 / 0.9);
-  - how far they stretch to cut out your pass (× 0.8 / 0.88 / 0.95 / 1 / 1.05).
+  - how far they stretch to cut out your pass (× 0.8 / 0.88 / 0.95 / 1 / 1.05);
+  - and, at every level (v128), a runner of yours off the ball: their back line holds its line 0.7 s before it goes
+    with him (your own men a tenth), reads his run 0.4 as far as it would, and keeps 0.4 as far goal-side of him.
 
   On RELAXED and NORMAL there's a hand on their crosses too: your man heads one clear himself if you don't (as the
   computer's marker would, when he's under it and their man doesn't beat him to it), and with the stick left alone he
@@ -2624,7 +2643,8 @@ test, and like the Trap Lab the values are the game's settings.
   1. When he picks the runner up holding his place in the line, he holds it a beat, a tenth of a second,
   before he turns and goes with him (about a twentieth of a run in behind: half a stride on him for the
   runner); one already pressing, shadowing or tracking a man goes with him at once, and so does one going
-  to a man in front of him he's been told to STEP UP to. (In v62 the beat caught a man already shadowing
+  to a man in front of him he's been told to STEP UP to. The computer's men are slower to it (v128): they hold
+  it 0.7 s -- a cover CB too, who'd go at once -- read the run 0.4 as far, and keep less far goal-side of him. (In v62 the beat caught a man already shadowing
   the runner too, stopping him mid-run: about a metre and a half more than meant. v63 put that right.) A pressing side's man on his man in their build-up
   reads him the same way, without the beat. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. The midfield stays a

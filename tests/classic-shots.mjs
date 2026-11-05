@@ -120,7 +120,9 @@ const offBall = iq => page.evaluate(iq => {
 const off10 = await offBall(10), off1 = await offBall(1);
 info('a runner into space: ' + JSON.stringify({ off10, off1 }));
 ok(/TRACK|PAIR/.test(off10.tags) && /TRACK|PAIR/.test(off1.tags), 'he picks up the runner in his zone (' + off10.tags + ' / ' + off1.tags + ')');
-ok(off10.ahead - off1.ahead >= 30 && off10.goalSide - off1.goalSide >= 30 && off10.goalSide > 0, 'at Def IQ 10 he goes with you off where the run takes you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average (at Def IQ 1, off where you are: ' + off1.ahead + ' px, ' + off1.goalSide + ' px)');
+// (v128: the computer's men are slower to pick up a run, read it 0.4 as far and keep 0.4 as far goal-side of you --
+// CPU_RUN -- so his Def IQ moves him less: at 10 he was 75 px ahead of you and 97 goal-side, at 1 22 and 39)
+ok(off10.ahead > off1.ahead && off10.goalSide > off1.goalSide && off10.goalSide > 0 && off10.goalSide < 70, 'at Def IQ 10 he goes with you off where the run takes you, a little more than at 1, and since v128 only a yard or so goal-side of you: ' + off10.ahead + ' px ahead of you along it and ' + off10.goalSide + ' px goal-side, on average (at Def IQ 1: ' + off1.ahead + ' px, ' + off1.goalSide + ' px; v127: 97 px goal-side at 10)');
 
 // THEIR CROSS: the moment one of theirs crosses it into your box, you're put on the man of yours marking the one it's
 // for -- or the one nearest where it comes through head height

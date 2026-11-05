@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, setControlled, aiCross, passSpray, crossSpray, readRun, cpu, PREFS, DIFFS, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, setControlled, aiCross, passSpray, crossSpray, readRun, cpu, PREFS, DIFFS, get CPU_RUN(){ return CPU_RUN; }, '
   + 'FW, FH, YC, MK, atkOf, simNow:()=>simNow, score:()=>[scoreG,scoreR], goals:()=>goalLog, drop:()=>{ gkHold=null; }, stopped:()=>restartT>0||scoredT>0, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; matchClock=0; switchLock=null; }};\n  const LAB_TITLE=');
 patch('  function headClear(p){\n', '  function headClear(p){\n    if(p===controlled) window.__hcMine=(window.__hcMine||0)+1;\n');   // (your man's own headers clear)
@@ -68,6 +68,16 @@ ok(down(col('passR')) && down(col('crossR')) && up(col('readR')) && up(col('reac
   'from RELAXED to CHAMPION the computer\'s passes and crosses go truer (a long pass ' + col('passR').join(' / ') + ' rad), it reads your run further on (' + col('readR').join(' / ') + ' px), reaches, tackles and finishes better');
 ok(flat(col('passG')) && flat(col('crossG')) && flat(col('readG')), 'your own men are the same at every level (' + levels.star.passG + ' rad, ' + levels.star.readG + ' px)');
 ok(levels.star.all1 && !levels.normal.all1, 'at STAR every one of its levers is at 1: the computer at full strength, as it always played');
+// OFF THE BALL (v128): the computer reads a runner's run less far than your men do -- the same man, on its side or yours
+// -- at every level, on top of its own read (CPU_RUN.read); a man on the ball the same as ever
+const offRead = await page.evaluate(() => { const T = window.__T, d = T.players().find(q => q.team === 'G' && q.role === 'DEF'), runner = { x: T.FW / 2, y: T.YC, vx: 200, vy: 0 };
+  const read = off => +(T.readRun(d, runner, runner, off).x - runner.x).toFixed(1), out = { k: T.CPU_RUN.read };
+  for(const lv of ['star', 'normal']){ T.PREFS.diff = lv; const g = [read(true), read(false)]; d.team = 'R'; const r = [read(true), read(false)]; d.team = 'G'; out[lv] = { g, r }; }
+  T.PREFS.diff = 'relaxed'; return out; });
+info('a runner off the ball and a man on it, as read (px on along his run): ' + JSON.stringify(offRead));
+ok(offRead.k < 1 && ['star', 'normal'].every(lv => Math.abs(offRead[lv].r[0] - offRead.star.g[0] * offRead.k * (lv === 'star' ? 1 : 0.65)) < 0.6 && offRead[lv].g[0] === offRead.star.g[0]),
+  'off the ball the computer reads your runner ' + offRead.k + ' as far as your men read its own (' + offRead.star.r[0] + ' px against ' + offRead.star.g[0] + ' at STAR), on top of its level\'s read (' + offRead.normal.r[0] + ' at NORMAL) -- v128');
+ok(offRead.star.r[1] === offRead.star.g[1], 'a man on the ball, the same as ever at STAR (' + offRead.star.r[1] + ' px)');
 
 // THE ASSIST: their cross from the byline toward 9 m out, one of theirs attacking it and our marker (yours) left alone
 // -- NORMAL: he heads some clear himself; STAR: none
