@@ -293,7 +293,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
     the keeper and the three lines close up, a man's width each, rather than overlap -- in a match's tactics and the
-    Squad tab's little pitch too (a five across the back as well, v124). It used to look the same whatever the width, and a four across the middle overlapped.
+    Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
   - **The right-hand side has two sides**: INSTRUCTIONS, up in the top row left of BEST 9 (lit while they're up;
     a tap on it again, or on a man, and it's his card), turns it over (v116: it was a small button on his card,
     INSTRUCTIONS ▶, then ◀ PLAYER). One is his card: all of him, head to toe (a keeper in a keeper's top), his name, his
@@ -629,17 +629,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
   again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the training pitch's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
-  - **Formations.** There are ten shapes for eight outfielders (v124; before, ten for seven, and each of these is one of
-    those with a man more at the back): 4-2-2, 3-3-2, 3-2-3, 3-4-1, 4-3-1, 2-4-2, 4-1-3, 2-3-3, 5-2-1 and 5-1-2.
-    2-3-3 and 2-4-2 (two at the back) are attacking shapes only, and 5-2-1 and 5-1-2 (five at the back) are defending
-    shapes only. Each pair is greyed out in the other phase, and the computer keeps to the same rule. The same eight men
-    play in both shapes. A back three is three centre-backs; a back four or five has a full-back at each end, who goes
-    up his flank with the ball as the side's instructions tell him. Each man's defending spot starts as the one nearest
-    his attacking spot, and you can rearrange either shape. A computer side defends in the shape it attacks in, with
-    some exceptions. A front three drops a man into midfield unless the side gegenpresses, so 3-2-3 defends as 3-4-1
-    and 4-1-3 as 4-3-1. 2-3-3 defends as 3-3-2 and 2-4-2 as 3-4-1. A direct counter sits deep and makes a back five of
-    some: 3-2-3 and 4-2-2 defend as 5-2-1 and 2-4-2 as 5-1-2 (2-3-3 as 4-3-1). A shape saved before v124 is read as its
-    new one (2-3-2 as 3-3-2).
+  - **Formations.** There are eight shapes for eight outfielders (v124; before, ten for seven, and each of these is
+    one of those with a man more at the back): 4-2-2, 3-3-2, 3-2-3, 3-4-1, 4-3-1, 2-4-2, 4-1-3 and 2-3-3. 2-3-3 and
+    2-4-2 (two at the back) are attacking shapes only, greyed out without the ball, and the computer keeps to the same
+    rule; every other shape is for either phase. (There were two for defending only, 5-2-1 and 5-1-2, five at the back:
+    gone in v126.) The same eight men play in both shapes. A back three is three centre-backs; a back four has a
+    full-back at each end, who goes up his flank with the ball as the side's instructions tell him. Each man's defending
+    spot starts as the one nearest his attacking spot, and you can rearrange either shape. A computer side defends in
+    the shape it attacks in, with some exceptions. A front three drops a man into midfield unless the side gegenpresses,
+    so 3-2-3 defends as 3-4-1 and 4-1-3 as 4-3-1. 2-3-3 defends as 3-3-2 and 2-4-2 as 3-4-1. A direct counter sits deep
+    and makes a back four of some: 3-2-3, 4-2-2 and 2-3-3 defend as 4-3-1, and 2-4-2 as 4-2-2. A shape saved before v124
+    is read as its new one (2-3-2 as 3-3-2; 4-2-1, which defended with four at the back, as 4-3-1), and 5-2-1 and 5-1-2
+    as 4-3-1 and 4-2-2.
   - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
     out the wide men go, by ×0.84, ×1 or ×1.18.
   - **Seven styles, and the style is the whole game.** Each says how a side plays with the ball and how it defends
@@ -1793,7 +1794,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
         taken: its Tactics and Selection tabs), and its
         level is what shapes and styles your side can have: at 1 the 3-3-2, 4-2-2 and 3-2-3 and the balanced and direct
-        styles; 2 adds the 3-4-1, 4-3-1 and 5-2-1, wing play and fluid counter; 3 the 4-1-3, 2-4-2 and 5-1-2, control
+        styles; 2 adds the 3-4-1 and 4-3-1, wing play and fluid counter; 3 the 4-1-3 and 2-4-2, control
         possession and direct counter; 4 the 2-3-3 and gegenpress. The rest are on the menus, locked, each with the
         level it needs -- in a match's tactics too. Width is always yours, and so are the team instructions (v112), from
         the first day (before them every player instruction was, from v106; before that they came with the levels).
@@ -2068,9 +2069,10 @@ test, and like the Trap Lab the values are the game's settings.
 - **9v9 match sim** (eight outfielders and a keeper a side, since v124: it was 8v8) with 3D ball physics (loft, curve/spin, bounce), offside, restarts, and possession-aware team
   phases, on a pitch marked like a real one -- penalty areas, six-yard boxes, penalty spots and arcs, the centre
   circle and the corners -- at nine-tenths of the men's size: they're 25 px to the metre, the pitch 22.5. It's
-  105 m by 71.4 (2362.5 × 1606.5), full length and a twentieth wider than a usual one (v125: nine a side was cramped on
-  the 99.75 by 68 before it): it was 2625 × 1700 at 25 px to the metre, then a tenth smaller every way (2362.5 ×
-  1530), then a twentieth shorter goal to goal (2244.375 × 1530), then full length again and a twentieth wider. What goes by the
+  99.75 m by 71.4 (2244.375 × 1606.5), a twentieth shorter than a full-length one and a twentieth wider than a usual
+  one (v125: nine a side was cramped on the 99.75 by 68 before it): it was 2625 × 1700 at 25 px to the metre, then a
+  tenth smaller every way (2362.5 × 1530), then a twentieth shorter goal to goal (2244.375 × 1530), then a twentieth
+  wider (v125 made it full length too, 105 m, and v126 took that back: it spread the play out). What goes by the
   pitch shrinks with it: its markings, where the men wait in the box for a cross, where the keeper starts coming
   off his line (5 m outside his box) and how far out a cross can be struck from (24 m). What goes by the men
   doesn't: their size and pace, how far they'll shoot and pass from, and the goals, the men's size, so a little
@@ -2086,6 +2088,25 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v126: the old length back, and no five at the back.** v125's full length is taken back: the pitch is 99.75 m
+  long again, keeping v125's width (71.4 m). The two shapes with five at the back (5-2-1 and 5-1-2, for defending only)
+  are gone: a side sitting deep defends in a back four instead (3-2-3, 4-2-2 and 2-3-3 as 4-3-1, 2-4-2 as 4-2-2), so
+  there are eight shapes, none for defending only. A side or career saved defending in one reads it as 4-3-1 or 4-2-2
+  (a career's men's defending spots shared out again, each to the nearest), and one from eight a side that defended
+  with four at the back (4-2-1, 4-1-2) gets its eighth man in midfield (4-3-1, 4-2-2). The training pitch's levels: 2
+  adds the 3-4-1 and 4-3-1, 3 the 4-1-3 and 2-4-2. Scoring isn't back -- computer v computer, 220 exhibition matches
+  each (STAR, three-minute halves):
+
+  | | v124 (99.75 by 68) | v125 (105 by 71.4) | v126 (99.75 by 71.4, no five at the back) |
+  | --- | --- | --- | --- |
+  | Goals a match | 1.17 | 1.10 | 1.16 |
+  | Shots a match | 5.5 | 4.4 | 5.5 |
+  | Shots scored | 21% | 25% | 21% |
+  | Men within 10 m of the man on the ball | 2.76 | 2.57 | 2.67 |
+  | A man's nearest neighbour | 6.4 m | 6.7 m | 6.5 m |
+
+  It's nine a side itself: eight a side scored 1.71 a match, from 7.0 shots. A back three's outside centre-backs going
+  up with the ball like full-backs was tried too: 1.23 goals a match (120 matches), no clear change, not kept.
 - **v125: a bigger pitch for nine a side.** It was a little cramped. The pitch is full length again, 105 m (it was
   99.75, so a twentieth longer), and a twentieth wider than a usual one, 71.4 m (it was 68), which gives nine a side
   the room eight a side had. The camera's as it was: the men as big as ever, the near touchline about nineteen-twentieths

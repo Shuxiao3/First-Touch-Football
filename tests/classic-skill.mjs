@@ -87,8 +87,9 @@ ok(['rainbow', 'elastico', 'heel'].every(k => picks[5][k] > 0) && !picks[5].somb
 // (shielding it), looked at 400 times: five stars, four; the man in front of him instead; in his own half; another of
 // ours back there
 const somb = await page.evaluate(() => { const T = window.__T, R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
-  const p = R[2], d = G[2], e = G[3], atk = T.atkOf('R'), b = T.ball(), keep = { s: p.stats, st: p.stars }, out = {};
+  const p = R[2], d = G[2], e = G[3], atk = T.atkOf('R'), b = T.ball(), keep = { s: p.stats, st: p.stars, d: d.stats }, out = {};
   T.freeze(); p.stats = Object.assign({}, keep.s, { dribbling: 9, ballControl: 9, agility: 9 });
+  d.stats = Object.assign({}, keep.d, { tackle: 5, defIQ: 5, agility: 5 });   // (the man behind him a plain 5, as in the scenes above -- v124: the ninth man's here now, a libero who reads it better)
   for(const q of T.players()) if(q !== p && q !== d && q !== e){ q.x = atk > 0 ? 60 : T.FW - 60; q.y = q.team === 'R' ? 60 : T.FH - 60; q.vx = q.vy = 0; }   // (everyone else out of it: v124, nine a side, had another of ours near enough to stop it)
   const go = (st, o) => { let n = 0, kinds = new Set();
     for(let i = 0; i < 400; i++){ const u = o.own ? T.FW * 0.3 : T.FW * 0.7; p.x = atk > 0 ? u : T.FW - u; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal';
@@ -100,7 +101,7 @@ const somb = await page.evaluate(() => { const T = window.__T, R = T.players().f
       p.skill = null; }
     return { n, kinds: [...kinds] }; };
   out.five = go(5, {}); out.four = go(4, {}); out.front = go(5, { front: true }); out.own = go(5, { own: true }); out.cover = go(5, { cover: true });
-  p.stats = keep.s; p.stars = keep.st; T.freeze(); return out; });
+  p.stats = keep.s; p.stars = keep.st; d.stats = keep.d; T.freeze(); return out; });
 info('the computer\'s sombrero, his back to a man: ' + JSON.stringify(somb));
 ok(somb.five.n >= 20 && somb.five.kinds.join() === 'sombrero' && !somb.four.n && !somb.front.n && !somb.own.n && !somb.cover.n,
   'a five-star man shielding it in their half, his back to a man 1.5 m behind him, flicks it over them both now and then (' + somb.five.n + ' times in 400 looks) -- with four stars never, nor with the man in front of him, in his own half, or another of ours back there');

@@ -1,5 +1,5 @@
 // FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (2-3-3 and 2-4-2 attacking only -- the computer
-// never defends in them -- and 5-2-1 and 5-1-2 defending only; v124: nine a side, every shape a man more at the back), width as COMPACT / BALANCED / WIDE, seven styles each
+// never defends in them -- and none for defending only; v124: nine a side, every shape a man more at the back; v126: the two with five at the back gone), width as COMPACT / BALANCED / WIDE, seven styles each
 // with its own block without the ball (no posture to set), anyone in any position (the keeper too), the team's instructions
 // (v112: no man's or spot's own -- the lines to drag, a style's own set, kept with the career, the same in the match), skill stars in
 // the match (each man's own, one to five: which moves each allows is classic-moves.mjs), and POSITIONS: a man's own (a
@@ -37,7 +37,7 @@ const badA = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) if(T.DEF_ONLY.includes(c.form)) out.push(c.id);
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
   return out; }, STYLES);
-ok(badA.length === 0, 'no computer side attacks in 5-2-1 or 5-1-2');
+ok(badA.length === 0, 'no computer side attacks in a shape for defending only (there are none now)');
 
 // --- a career: the tactics screen ------------------------------------------------------------------
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
@@ -56,14 +56,14 @@ const pick = async (k, sel) => { await menu(k); await page.click('#bpBody ' + se
 ok(await page.isVisible('#bpBody [data-ctphase="atk"]') && await page.isVisible('#bpBody [data-ctphase="def"]'), 'WITH THE BALL / WITHOUT THE BALL');
 await menu('form');
 ok(!(await page.isDisabled('#bpBody [data-cform="2-3-3"]')), 'with the ball, 2-3-3 can be picked');
-ok(await page.isDisabled('#bpBody [data-cform="5-2-1"]') && await page.isDisabled('#bpBody [data-cform="5-1-2"]'), 'with the ball, 5-2-1 and 5-1-2 are off');
+ok((await page.$$('#bpBody [data-cform]')).length === 8 && !(await page.$('#bpBody [data-cform="5-2-1"]')) && !(await page.$('#bpBody [data-cform="5-1-2"]')), 'eight shapes, none with five at the back (v126: 5-2-1 and 5-1-2 gone)');
 await page.click('#bpBody [data-cform="3-2-3"]'); await page.waitForTimeout(80);
 await pick('width', '[data-cwidth="1.18"]');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(80);
 await menu('form');
 ok(await page.isDisabled('#bpBody [data-cform="2-3-3"]') && await page.isDisabled('#bpBody [data-cform="2-4-2"]'), 'without it, 2-3-3 and 2-4-2 are off');
-await page.click('#bpBody [data-cform="5-2-1"]'); await page.waitForTimeout(80);
-ok((await save()).formDef === '5-2-1', 'without it, a back five: 5-2-1');
+await page.click('#bpBody [data-cform="4-2-2"]'); await page.waitForTimeout(80);
+ok((await save()).formDef === '4-2-2', 'without it, a back four: 4-2-2');
 await pick('form', '[data-cform="4-3-1"]');
 await pick('width', '[data-cwidth="0.84"]');
 let d = await save();
@@ -146,7 +146,7 @@ ok(String(pn.tags) === 'DEF 46 m,ENGAGE 68 m' && pn.on.includes('dtk=tackle') &&
 // the lines dragged: the line of engagement up to 74 m; the back line up into it stops at 50 m (as high as it goes); the line
 // of engagement back down into it stops 14 m in front of it
 const dragLine = async (fromM, toM) => { const b = await page.$eval('#cTacRight .tiPitch', e => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
-  const X = m => b.x + b.w * m / 105; await page.mouse.move(X(fromM), b.y + b.h / 2); await page.mouse.down(); await page.mouse.move(X(toM), b.y + b.h / 2, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(80); };   // (v125: the pitch 105 m long)
+  const X = m => b.x + b.w * m / 99.75; await page.mouse.move(X(fromM), b.y + b.h / 2); await page.mouse.down(); await page.mouse.move(X(toM), b.y + b.h / 2, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(80); };
 await dragLine(68, 74); d = await save(); const l1 = [d.ti.dl, d.ti.loe];
 await dragLine(46, 72); d = await save(); const l2 = [d.ti.dl, d.ti.loe];
 await dragLine(74, 40); d = await save(); const l3 = [d.ti.dl, d.ti.loe];

@@ -1964,41 +1964,45 @@
   };
   // NINE A SIDE (v124): eight outfielders and a keeper -- every formation's lines add up to 8. Each shape is one of the
   // seven-outfielder ones with a man more at the back (2-3-2 is 3-3-2 now, 3-1-3 is 4-1-3), in the same order on the menus.
-  const FORMS={'4-2-2':[4,2,2],'3-3-2':[3,3,2],'3-2-3':[3,2,3],'3-4-1':[3,4,1],'4-3-1':[4,3,1],'2-4-2':[2,4,2],'4-1-3':[4,1,3],'2-3-3':[2,3,3],'5-2-1':[5,2,1],'5-1-2':[5,1,2]};
+  // (v126: the two with five at the back, 5-2-1 and 5-1-2, are gone -- the two seven-outfielder ones they grew from, with
+  // four at the back, have a man more in midfield instead: 4-2-1 is 4-3-1, 4-1-2 is 4-2-2)
+  const FORMS={'4-2-2':[4,2,2],'3-3-2':[3,3,2],'3-2-3':[3,2,3],'3-4-1':[3,4,1],'4-3-1':[4,3,1],'2-4-2':[2,4,2],'4-1-3':[4,1,3],'2-3-3':[2,3,3]};
   // WHAT EACH SPOT IS, line by line from the back, each line from the side's left: a centre-back (CB), a full-back (FB:
-  // the outside men of a back four or five), a central midfielder (CM), a wide midfielder (WM: the outside men of a
-  // midfield three or four), a winger (W: the outside men of a front three) or a striker (ST). The instructions go with
-  // the spot (see INSTR).
+  // the outside men of a back four), a central midfielder (CM), a wide midfielder (WM: the outside men of a midfield
+  // three or four), a winger (W: the outside men of a front three) or a striker (ST). The instructions go with the spot
+  // (see INSTR).
   const POS_OF={
     '4-2-2':['FB','CB','CB','FB','CM','CM','ST','ST'], '3-3-2':['CB','CB','CB','WM','CM','WM','ST','ST'], '3-2-3':['CB','CB','CB','CM','CM','W','ST','W'],
     '3-4-1':['CB','CB','CB','WM','CM','CM','WM','ST'], '4-3-1':['FB','CB','CB','FB','WM','CM','WM','ST'], '2-4-2':['CB','CB','WM','CM','CM','WM','ST','ST'],
-    '4-1-3':['FB','CB','CB','FB','CM','W','ST','W'],   '2-3-3':['CB','CB','WM','CM','WM','W','ST','W'],   '5-2-1':['FB','CB','CB','CB','FB','CM','CM','ST'],
-    '5-1-2':['FB','CB','CB','CB','FB','CM','ST','ST'] };
+    '4-1-3':['FB','CB','CB','FB','CM','W','ST','W'],   '2-3-3':['CB','CB','WM','CM','WM','W','ST','W'] };
   const OUTFIELD=8;
   // saved settings / careers from the six- and seven-outfielder days: each old shape grows into its closest -- a six-a-side
-  // one into a seven-a-side one (FORM_FROM_6), and that into this one with a man more at the back (FORM_FROM_7)
+  // one into a seven-a-side one (FORM_FROM_6), and that into this one with a man more at the back (FORM_FROM_7; a back four
+  // with a man more in midfield) -- and a shape gone since (FORM_GONE: v126, five at the back) is read as its nearest
   const FORM_FROM_6={'2-3-1':'2-3-2','3-2-1':'3-2-2','2-2-2':'2-3-2','3-1-2':'3-1-3','1-3-2':'1-4-2','2-1-3':'2-2-3','1-4-1':'2-4-1','1-2-3':'1-3-3'};
-  const FORM_FROM_7={'3-2-2':'4-2-2','2-3-2':'3-3-2','2-2-3':'3-2-3','2-4-1':'3-4-1','3-3-1':'4-3-1','1-4-2':'2-4-2','3-1-3':'4-1-3','1-3-3':'2-3-3','4-2-1':'5-2-1','4-1-2':'5-1-2'};
-  function formOK(f,dflt){ f=FORM_FROM_6[f]||f; f=FORM_FROM_7[f]||f; return FORMS[f]?f:dflt; }
+  const FORM_FROM_7={'3-2-2':'4-2-2','2-3-2':'3-3-2','2-2-3':'3-2-3','2-4-1':'3-4-1','3-3-1':'4-3-1','1-4-2':'2-4-2','3-1-3':'4-1-3','1-3-3':'2-3-3','4-2-1':'4-3-1','4-1-2':'4-2-2'};
+  const FORM_GONE={'5-2-1':'4-3-1','5-1-2':'4-2-2'};
+  function formOK(f,dflt){ f=FORM_FROM_6[f]||f; f=FORM_FROM_7[f]||f; f=FORM_GONE[f]||f; return FORMS[f]?f:dflt; }
   // each team has an ATTACK shape and a DEFENSE shape; players adopt the right one by phase. Two shapes are for attacking
-  // only -- a side never defends with two men at the back -- and two, with five at the back, for defending only
+  // only -- a side never defends with two men at the back -- and every other one is for either (v126: the two for
+  // defending only, with five at the back, are gone)
   let myForm='3-3-2', myFormDef='3-3-2';
   let rForm='3-3-2', rFormDef='3-3-2';
-  const ATK_ONLY=['2-3-3','2-4-2'], DEF_ONLY=['5-2-1','5-1-2'];
+  const ATK_ONLY=['2-3-3','2-4-2'], DEF_ONLY=[];
   function formFor(team,phase){ return phase==='def' ? (team==='G'?myFormDef:rFormDef) : (team==='G'?myForm:rForm); }
   function formOKDef(f,dflt){ f=formOK(f,dflt); return ATK_ONLY.includes(f)?dflt:f; }
   function formOKAtk(f,dflt){ f=formOK(f,dflt); return DEF_ONLY.includes(f)?dflt:f; }
   // the defending shape that goes with an attacking one, when nobody has picked one: the same shape, except that a front
   // three drops a man into midfield (unless the side presses), an attack-only shape fills its back line, and a side that
-  // sits deep makes some shapes a back five
+  // sits deep makes some shapes a back four (v126: they were a back five)
   function defFormFor(atkForm,posture){
     const press=posture==='press', sit=posture==='lowblock';
     switch(atkForm){
-      case '3-2-3': return press?'3-2-3':sit?'5-2-1':'3-4-1';
+      case '3-2-3': return press?'3-2-3':sit?'4-3-1':'3-4-1';
       case '4-1-3': return press?'4-1-3':'4-3-1';
-      case '4-2-2': return sit?'5-2-1':'4-2-2';
+      case '4-2-2': return sit?'4-3-1':'4-2-2';
       case '2-3-3': return sit?'4-3-1':'3-3-2';
-      case '2-4-2': return sit?'5-1-2':'3-4-1';
+      case '2-4-2': return sit?'4-2-2':'3-4-1';
       default: return formOKDef(atkForm,'3-3-2');
     }
   }
@@ -2327,13 +2331,14 @@
   });
 
   // ===== pitch: a real pitch's markings at nine-tenths of the men's size -- the men are 25 px to the metre, the pitch
-  // 22.5 -- on one 105 m by 71.4: full length, and a twentieth wider than a usual one (v125: nine a side was cramped on
-  // 99.75 by 68). It was 105 x 68 at 25 px to the metre, then a tenth smaller every way, then a twentieth shorter goal
-  // to goal, then a twentieth longer and wider again. (Smaller still was tried -- a tenth smaller every way again, and
-  // then a fifth shorter and a tenth narrower than that -- and taken back.) The whole width stays in view =====
+  // 22.5 -- on one 99.75 m by 71.4: a twentieth shorter than a full-length one, and a twentieth wider than a usual one
+  // (v125: nine a side was cramped on 99.75 by 68). It was 105 x 68 at 25 px to the metre, then a tenth smaller every
+  // way, then a twentieth shorter goal to goal, then a twentieth wider. (Smaller still was tried -- a tenth smaller every
+  // way again, and then a fifth shorter and a tenth narrower than that -- and taken back; and full length again, v125,
+  // which spread the play too far: v126.) The whole width stays in view =====
   const PX_M=25, PITCH_K=0.9, MK=PX_M*PITCH_K;          // the men's metre, and the pitch's
-  const PITCH_LEN=105, PITCH_WIDE=71.4;                  // its length and width in its own metres (v125: they were 99.75 and 68)
-  const FW=PITCH_LEN*MK, FH=Math.round(PITCH_WIDE*MK*2)/2;   // (2362.5 x 1606.5; it was 2244.375 x 1530, 2362.5 x 1530 before that, and 2625 x 1700 first)
+  const PITCH_LEN=99.75, PITCH_WIDE=71.4;                // its length and width in its own metres (v125-v126: they were 99.75 and 68)
+  const FW=PITCH_LEN*MK, FH=Math.round(PITCH_WIDE*MK*2)/2;   // (2244.375 x 1606.5; it was 2244.375 x 1530, 2362.5 x 1530 before that, and 2625 x 1700 first)
   const GOAL_W=227, GOAL_H=69, NET_D=40, YC=FH/2;   // (NET_D: how deep the net runs behind the line)
   // the markings, a real pitch's at the pitch's metre: penalty area 16.5 x 40.32, goal area 5.5 x 18.32, the penalty
   // spot 11 out, the arc and the centre circle 9.15. (The goal is the men's size, so a little wider than a real one.)
@@ -2717,7 +2722,7 @@
   // THE TRAINING PITCH'S LEVELS: the shapes and styles your side in a career can have. One past the pitch's level is
   // shown locked, with the level it needs (TAC_LOCK: the pitch's level while your career side's tactics are on screen;
   // 0, nothing's locked: an exhibition, the labs, the other side). The team instructions are yours from the start.
-  const TRAIN_FORM={'3-3-2':1,'4-2-2':1,'3-2-3':1,'3-4-1':2,'4-3-1':2,'5-2-1':2,'4-1-3':3,'2-4-2':3,'5-1-2':3,'2-3-3':4};
+  const TRAIN_FORM={'3-3-2':1,'4-2-2':1,'3-2-3':1,'3-4-1':2,'4-3-1':2,'4-1-3':3,'2-4-2':3,'2-3-3':4};
   const TRAIN_STYLE={neutral:1,direct:1,wing:2,fluid:2,control:3,dcounter:3,gegen:4};
   let TAC_LOCK=0;
   function tacNeed(kind,k){ if(!TAC_LOCK||(kind!=='form'&&kind!=='style')) return 0; const n=(kind==='form'?TRAIN_FORM:TRAIN_STYLE)[k]||1; return n>TAC_LOCK?n:0; }
@@ -17592,6 +17597,10 @@
   const TAC_GK=[50,92];
   const CAREER_STEP={1:0,2:52,3:23,4:17};
   function ensureForms(d){ careerTo7(d); careerTo8(d);
+    // (v126: a shape that's gone -- five at the back -- is its nearest, and the men's defending spots are shared out again)
+    if(FORM_GONE[d.formation]) d.formation=FORM_GONE[d.formation];
+    if(FORM_GONE[d.formDef]){ d.formDef=FORM_GONE[d.formDef]; const lu=d.lineup, R=d.roster||[];
+      if(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD&&lu.atk.every(i=>R[i])) lu.def=careerMapDef(d); }
     if(!d.formation||!FORMS[d.formation]||DEF_ONLY.includes(d.formation)) d.formation=formOKAtk(d.formation,formOKAtk(d.formAtk,'3-3-2'));
     if(!d.formDef||!FORMS[d.formDef]||ATK_ONLY.includes(d.formDef)) d.formDef=defFormFor(d.formation,postureOf(d.style));
     d.width=widthObj(d.width); d.ti=tiClean(d.ti,d.style); delete d.pinstr; delete d.instr; return d; }   // (v112: the side's team instructions -- the old per-spot ones dropped)
@@ -17649,10 +17658,12 @@
   // NINE A SIDE (v124): a career saved with seven outfielders. Both its shapes grow into their nine-a-side ones, each a
   // man more at the back (FORM_FROM_7: 2-3-2 is 3-3-2), and he comes off the bench -- the first fit defender there, else
   // the first fit outfielder -- into the middle of the back line, with the ball and without it, so everyone else keeps
-  // the spot he had (the two ends of a back three are the full-backs of a back four).
+  // the spot he had (the two ends of a back three are the full-backs of a back four). (v126: a defending shape with four
+  // at the back already grows in midfield instead -- 4-2-1 is 4-3-1 -- and its spots are shared out again, each man to the
+  // nearest: careerMapDef.)
   function careerTo8(d){
     if(d.eight) return; d.eight=true;
-    const f=d.formation||d.formAtk; if(FORM_FROM_7[f]) d.formation=FORM_FROM_7[f];
+    const f=d.formation||d.formAtk, fd0=d.formDef; if(FORM_FROM_7[f]) d.formation=FORM_FROM_7[f];
     if(FORM_FROM_7[d.formDef]) d.formDef=FORM_FROM_7[d.formDef];
     const lu=d.lineup, R=d.roster||[];
     if(!(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD-1&&Array.isArray(lu.bench)&&lu.bench.length)) return;
@@ -17661,7 +17672,8 @@
     const ri=lu.bench.splice(bi,1)[0], mid=form=>Math.floor((FORMS[form]||FORMS['3-3-2'])[0]/2);   // (the middle of its back line)
     const def=Array.isArray(lu.def)&&lu.def.length===lu.atk.length&&lu.def.every(i=>lu.atk.includes(i))?lu.def.slice():null;
     lu.atk.splice(mid(d.formation),0,ri);
-    if(def){ def.splice(mid(d.formDef),0,ri); lu.def=def; } else lu.def=lu.atk.slice();
+    const backGrew=FORMS[d.formDef]&&FORMS[d.formDef][0]>(+String(fd0||'').split('-')[0]||0);
+    if(def&&backGrew){ def.splice(mid(d.formDef),0,ri); lu.def=def; } else if(FORMS[d.formDef]&&FORMS[d.formation]) lu.def=careerMapDef(d); else lu.def=lu.atk.slice();
   }
   // a man off the bench for one on the pitch: he takes the other's place with the ball and without it
   function subIn(d, inRi, outRi){ const lu=d.lineup;
@@ -17743,13 +17755,13 @@
   // and on the pitch his face beside them (the bench has none)
   // (his spot, never so near an edge that he hangs off it -- and the keeper and each line a man's width from the next, so on a narrow pitch they close up rather than overlap)
   const PTK_COL={DEF:1,MID:2,ATT:3};
-  // (n: how many in his line -- v124: a line of five on a short pitch goes right to its edges, the rims on its lines)
-  const ptkAt=(L,T,role,k,n)=>{ const c=PTK_COL[role]||0, e=n>=5?'calc(var(--hh) - 2px)':'var(--hh)';
-    return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(7-2*c)+'));top:clamp('+e+','+ptkTop(T,k,n)+',calc(100% - '+e+'))"'; };
+  // (n: how many in his line)
+  const ptkAt=(L,T,role,k,n)=>{ const c=PTK_COL[role]||0;
+    return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(7-2*c)+'));top:clamp(var(--hh),'+ptkTop(T,k,n)+',calc(100% - var(--hh)))"'; };
   // how far down: his line's middle, then k men along it (T is where its step puts him) -- the step never less than a man's height, so on a short
-  // pitch a line spreads rather than its men overlap; and never more than the pitch has room for, n men in his line (v124: five across the back)
+  // pitch a line spreads rather than its men overlap; and never more than the pitch has room for, n men in his line (v124)
   const ptkTop=(T,k,n)=>{ if(!k) return T.toFixed(1)+'%'; const st='max('+((T-50)/k).toFixed(2)+'%, var(--rowH))';
-    return 'calc(50% + '+k+' * '+(n>=2?'min('+st+', calc((100% - 2 * var(--hh, 20px) + '+(n>=5?4:0)+'px) / '+(n-1)+'))':st)+')'; };
+    return 'calc(50% + '+k+' * '+(n>=2?'min('+st+', calc((100% - 2 * var(--hh, 20px)) / '+(n-1)+'))':st)+')'; };
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
   function tbTok(d, ri, L, T, kind, phase, slotRole, k, pos, n){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;

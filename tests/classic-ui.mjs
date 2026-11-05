@@ -169,7 +169,6 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (3-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
-    // -- and five across the back without the ball (5-2-1, v124), COMPACT and WIDE
     await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
     const d0 = await page.evaluate(() => [window.__MG.d.formation, window.__MG.d.width.atk]);
@@ -180,14 +179,7 @@ for(const [w, h] of SIZES){
     await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(120); const sq = await apart(page, '#bpBody .sqPitch');
     await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
     await set('3-4-1', '1.18'); const wde = await apart(page, '#bpBody .tpitch');
-    await set(d0[0], String(d0[1]));
-    const dd = await page.evaluate(() => [window.__MG.d.formDef, window.__MG.d.width.def]);
-    await page.tap('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(100);
-    await set('5-2-1', '0.84'); const f5c = await apart(page, '#bpBody .tpitch'); await set('5-2-1', '1.18'); const f5w = await apart(page, '#bpBody .tpitch');
-    await set(dd[0], String(dd[1])); await page.tap('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(80); await page.tap('.bpTopBack'); await page.waitForTimeout(80);
-    ok(f5c.n === 9 && f5w.n === 9 && !f5c.over && !f5c.out && !f5w.over && !f5w.out,
-      w + 'x' + h + ': five across the back without the ball (5-2-1), COMPACT and WIDE: nobody overlaps or hangs off the pitch'
-      + (f5c.over + f5w.over ? ' -- overlaps: ' + [f5c.over, f5w.over].join('/') : '') + (f5c.out + f5w.out ? ' -- off the pitch by ' + Math.max(f5c.out, f5w.out) + ' px' : ''));
+    await set(d0[0], String(d0[1])); await page.tap('.bpTopBack'); await page.waitForTimeout(80);
     ok(cpt.n === 9 && sq.n === 9 && !cpt.over && !cpt.out && !sq.over && !sq.out && !wde.over && !wde.out && wde.span > cpt.span + 20,
       w + 'x' + h + ': a four across the middle -- COMPACT, nobody overlaps or hangs off the pitch (the training pitch\'s and the Squad\'s); WIDE, the four spread ' + cpt.span + ' -> ' + wde.span + ' px'
       + (cpt.over + sq.over + wde.over ? ' -- overlaps: ' + [cpt.over, sq.over, wde.over].join('/') : '') + (cpt.out + sq.out + wde.out ? ' -- off the pitch by ' + Math.max(cpt.out, sq.out, wde.out) + ' px' : '')); }

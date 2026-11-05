@@ -1,10 +1,12 @@
-// FOOTBALL CLASSIC, NINE A SIDE (v124): eight outfielders and a keeper. Ten shapes, each a seven-outfielder one with a man
-// more at the back (2-3-2 is 3-3-2 now), their spots eight long, two for attacking only (two at the back) and two for
-// defending only (five at the back); an old shape's name read as its new one (a seven- or six-outfielder one). Every
-// exhibition club nine and a bench of five: its eight from before, named as they were, and a ninth -- a centre-back of its
-// own in the middle of its back line -- the outside men of a back four full-backs; nobody shares a name. A match nine a side.
-// What's kept from eight a side gets its eighth outfielder at the back, everyone else in his spot: a career (its shapes
-// too), a club's side kept from the exhibition, the quick match's squads. On a copy of the game that lets the test reach it.
+// FOOTBALL CLASSIC, NINE A SIDE (v124): eight outfielders and a keeper. Eight shapes, each a seven-outfielder one with a man
+// more at the back (2-3-2 is 3-3-2 now) -- or, for the two that defended with four at the back, a man more in midfield
+// (4-2-1 is 4-3-1) -- their spots eight long, two for attacking only (two at the back) and none for defending only (v126:
+// the two with five at the back are gone, read as their nearest); an old shape's name read as its new one (a seven- or
+// six-outfielder one). Every exhibition club nine and a bench of five: its eight from before, named as they were, and a
+// ninth -- a centre-back of its own -- in the middle of its back line, the outside men of a back four full-backs; nobody
+// shares a name. A match nine a side. What's kept from eight a side gets its eighth outfielder, everyone else in his spot:
+// a career (its shapes too), a club's side kept from the exhibition, the quick match's squads. On a copy of the game that
+// lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -13,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  // ===== END MANAGER CAREER', '  window.__N={FORMS, POS_OF, OUTFIELD, ATK_ONLY, DEF_ONLY, FORM_FROM_7, formOK, defFormFor, CLUBS, CLUB_NAME_DEAL, clubSquadGen, clubSide, clubCB9At, SQ_CB, '
+patch('  // ===== END MANAGER CAREER', '  window.__N={FORMS, POS_OF, OUTFIELD, ATK_ONLY, DEF_ONLY, FORM_FROM_7, FORM_GONE, formOK, ensureForms, defFormFor, CLUBS, CLUB_NAME_DEAL, clubSquadGen, clubSide, clubCB9At, SQ_CB, '
   + 'players:()=>players, keepers:()=>keepers, SQUAD:()=>SQUAD, LINEUP:()=>LINEUP, forms:()=>[myForm,myFormDef,rForm,rFormDef], mgMigrate, ensureLineup, careerSlots, get d(){ return CAREER&&CAREER.data; }};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-nine-')), 'classic.html');
 writeFileSync(copy, src);
@@ -25,16 +27,18 @@ const { ok, info } = rep;
 const sh = await page.evaluate(() => { const N = window.__N, out = { bad: [] };
   out.names = Object.keys(N.FORMS).join(' ');
   for(const [f, L] of Object.entries(N.FORMS)){ if(L.reduce((a, b) => a + b, 0) !== 8 || f !== L.join('-')) out.bad.push(f + ' lines'); if((N.POS_OF[f] || []).length !== 8) out.bad.push(f + ' spots'); }
-  out.from7 = Object.entries(N.FORM_FROM_7).filter(([o, n]) => { const a = o.split('-').map(Number), b = n.split('-').map(Number); return !(b[0] === a[0] + 1 && b[1] === a[1] && b[2] === a[2] && N.FORMS[n]); }).map(x => x.join('>'));
-  out.read = [N.formOK('2-3-2', null), N.formOK('1-3-3', null), N.formOK('4-2-1', null), N.formOK('2-3-1', null), N.formOK('3-3-2', null), N.formOK('9-9-9', 'x')].join(' ');
+  out.from7 = Object.entries(N.FORM_FROM_7).filter(([o, n]) => { const a = o.split('-').map(Number), b = n.split('-').map(Number);
+    const back = b[0] === a[0] + 1 && b[1] === a[1] && b[2] === a[2], mid = a[0] === 4 && b[0] === 4 && b[1] === a[1] + 1 && b[2] === a[2];   // (a back four already: a man more in midfield)
+    return !((back || mid) && N.FORMS[n]); }).map(x => x.join('>'));
+  out.read = [N.formOK('2-3-2', null), N.formOK('1-3-3', null), N.formOK('4-2-1', null), N.formOK('4-1-2', null), N.formOK('5-2-1', null), N.formOK('5-1-2', null), N.formOK('2-3-1', null), N.formOK('3-3-2', null), N.formOK('9-9-9', 'x')].join(' ');
   out.only = [N.ATK_ONLY.join(' '), N.DEF_ONLY.join(' ')];
   out.fb = Object.entries(N.POS_OF).filter(([f, P]) => { const n = N.FORMS[f][0], back = P.slice(0, n); return n >= 4 ? !(back[0] === 'FB' && back[n - 1] === 'FB' && back.slice(1, -1).every(p => p === 'CB')) : !back.every(p => p === 'CB'); }).map(x => x[0]);
   return out; });
 info('the shapes: ' + sh.names + '; read from old saves: ' + sh.read);
-ok(!sh.bad.length && sh.names.split(' ').length === 10, 'ten shapes, every one\'s lines adding up to eight and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
-ok(!sh.from7.length && sh.read === '3-3-2 2-3-3 5-2-1 3-3-2 3-3-2 x', 'each seven-outfielder shape grows into one with a man more at the back (2-3-2 3-3-2, 1-3-3 2-3-3, 4-2-1 5-2-1), a six-outfielder one through it (2-3-1 3-3-2)' + (sh.from7.length ? ': ' + sh.from7.join(', ') : ''));
-ok(sh.only[0] === '2-3-3 2-4-2' && sh.only[1] === '5-2-1 5-1-2', 'two at the back for attacking only (' + sh.only[0] + '), five for defending only (' + sh.only[1] + ')');
-ok(!sh.fb.length, 'a back three is centre-backs, a back four or five has a full-back at each end' + (sh.fb.length ? ': ' + sh.fb.join(', ') : ''));
+ok(!sh.bad.length && sh.names.split(' ').length === 8 && !/5-/.test(sh.names), 'eight shapes, none with five at the back, every one\'s lines adding up to eight and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
+ok(!sh.from7.length && sh.read === '3-3-2 2-3-3 4-3-1 4-2-2 4-3-1 4-2-2 3-3-2 3-3-2 x', 'each seven-outfielder shape grows into one with a man more at the back (2-3-2 3-3-2, 1-3-3 2-3-3), one with four at the back already a man more in midfield (4-2-1 4-3-1, 4-1-2 4-2-2), a six-outfielder one through them (2-3-1 3-3-2), and the five-at-the-back ones gone read as their nearest (5-2-1 4-3-1, 5-1-2 4-2-2)' + (sh.from7.length ? ': ' + sh.from7.join(', ') : ''));
+ok(sh.only[0] === '2-3-3 2-4-2' && sh.only[1] === '', 'two at the back for attacking only (' + sh.only[0] + '), and nothing for defending only (v126)');
+ok(!sh.fb.length, 'a back three is centre-backs, a back four has a full-back at each end' + (sh.fb.length ? ': ' + sh.fb.join(', ') : ''));
 
 // --- THE CLUBS: nine and a bench of five, the eight from before as they were and a centre-back of their own ---------------
 const cl = await page.evaluate(() => { const N = window.__N, out = { bad: [], names: [], n: 0 }, K = N.CLUBS.length, D = N.CLUB_NAME_DEAL;
@@ -94,11 +98,19 @@ const cr = await page.evaluate(() => { const N = window.__N, d0 = N.d, R = d0.ro
   d.lineup = { gk, atk, def: dfn, bench: R.map((p, i) => i).filter(i => i !== gk && !atk.includes(i)) };
   const firstDef = d.lineup.bench.find(i => R[i].role === 'DEF'), was = { atk: atk.slice(), dfn: dfn.slice() };
   N.mgMigrate(d);
-  return { fresh, form: d.formation, formDef: d.formDef, atk: d.lineup.atk, def: d.lineup.def, was, firstDef, eight: d.eight, benchN: d.lineup.bench.length }; });
+  // ...one from eight a side that defended in 4-2-1 (a back four already): 4-3-1, the eighth in, everyone's defending spot shared out again
+  const d4 = JSON.parse(JSON.stringify(d)); delete d4.eight; d4.formation = '2-3-2'; d4.formDef = '4-2-1'; d4.lineup = JSON.parse(JSON.stringify({ gk, atk: was.atk, def: was.dfn, bench: R.map((p, i) => i).filter(i => i !== gk && !was.atk.includes(i)) }));
+  N.mgMigrate(d4); const four = { formDef: d4.formDef, atk: d4.lineup.atk.length, same: [...d4.lineup.def].sort().join() === [...d4.lineup.atk].sort().join() };
+  // ...and one saved on v124-v125, defending in 5-2-1: read as 4-3-1, its men's defending spots shared out again
+  const d5 = JSON.parse(JSON.stringify(d0)); d5.formDef = '5-2-1'; N.ensureForms(d5);
+  const five = { formDef: d5.formDef, same: [...d5.lineup.def].sort().join() === [...d5.lineup.atk].sort().join() && d5.lineup.def.length === 8 };
+  return { fresh, form: d.formation, formDef: d.formDef, atk: d.lineup.atk, def: d.lineup.def, was, firstDef, eight: d.eight, benchN: d.lineup.bench.length, five, four }; });
 info('a career from seven outfielders: ' + JSON.stringify(cr));
 const ins = (a, k, x) => { const b = a.slice(); b.splice(k, 0, x); return b.join(); };
 ok(cr.fresh.roster === 15 && cr.fresh.atk === 8 && cr.fresh.form === '3-3-2' && cr.fresh.eight, 'a new career: fifteen men, eight outfielders on the pitch, in a 3-3-2');
 ok(cr.form === '3-3-2' && cr.formDef === '4-3-1' && cr.eight, 'a career saved with seven outfielders: 2-3-2 with the ball reads as 3-3-2, 3-3-1 without it as 4-3-1');
+ok(cr.four.formDef === '4-3-1' && cr.four.atk === 8 && cr.four.same, 'a career from eight a side that defended in 4-2-1, four at the back already: it defends in 4-3-1, the same eight in its spots');
+ok(cr.five.formDef === '4-3-1' && cr.five.same, 'a career saved defending in 5-2-1 (v124-v125): it defends in 4-3-1, the same eight in its spots');
 ok(cr.atk.join() === ins(cr.was.atk, 1, cr.firstDef) && cr.def.join() === ins(cr.was.dfn, 2, cr.firstDef),
   '...and the first defender off the bench is its eighth, in the middle of the back line with the ball and without it, everyone else in his spot (' + cr.atk.join() + ' / ' + cr.def.join() + ')');
 
