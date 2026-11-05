@@ -84,7 +84,7 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(cr.s === 1 && cr.p === 3 && cr.e === 2 && String(cr.c) === '#1d4fa3,#f2d23c,#ffb43c' && cr.l === 'F', 'your crest as you made it: ' + JSON.stringify(cr));
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
-ok(d.roster.length === 14 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 14), 'a 14-man squad (every club\'s 14), $20,000, the first Monday of pre-season');
+ok(d.roster.length === 15 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 15), 'a 15-man squad (every club\'s 15: v124, nine a side), $20,000, the first Monday of pre-season');
 ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{26}$/.test(p.at) && /^[a-s]{26}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
@@ -128,9 +128,9 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   if(await page.$('#bpBody [data-mg="sign"]')){ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(60); signed = /Signed/.test(await msg()); }
 }
 d = await save();
-ok(signed && d.roster.length === 15 && d.budget < 20000, 'signed a man for a quarter over the asking price: squad 15, budget ' + d.budget);
-const newMan = d.roster[14];
-ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(14) >= 5, 'he has a contract, and isn\'t taken till you pick him (the bench is five)');
+ok(signed && d.roster.length === 16 && d.budget < 20000, 'signed a man for a quarter over the asking price: squad 16, budget ' + d.budget);
+const newMan = d.roster[15];
+ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(15) >= 5, 'he has a contract, and isn\'t taken till you pick him (the bench is five)');
 
 // --- selling: put the worst man on the list ------------------------------------------------
 await page.click('#bldgPanel .bpTab:text-is("Selling")'); await page.waitForTimeout(60);
@@ -177,7 +177,7 @@ await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(
 d = await save();
 ok(d.season === 2 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14), 'season 2: pre-season\'s first Monday, four leagues of 14');
 ok(d.manager.history.length === 1 && d.roster.every(p => p.apps === 0), 'season 1 is in your history, the season numbers start again');
-ok(d.roster.length >= 12 && d.roster.some(p => p.role === 'GK'), 'never short: ' + d.roster.length + ' men, a keeper among them');
+ok(d.roster.length >= 13 && d.roster.some(p => p.role === 'GK'), 'never short: ' + d.roster.length + ' men, a keeper among them');
 
 // --- promotion: a squad of 75s ---------------------------------------------------------------
 await create('Strong Town');
@@ -219,7 +219,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d; while(d.phase === 'summ
   const rep = M.mgPlayGame(d, [3, 1], logs); M.mgSave(d);
   return { a: d.roster[a].goals, b: d.roster[b].goals, apps: st.map(p => p.apps), you: rep.mine.you, md: d.md }; });
 ok(r.a === 2 && r.b === 1 && r.you === 3 && r.md === 1, 'goals credited from the goal log: 2 and 1');
-ok(r.apps.every(n => n === 1), 'an appearance each for the eight who started');
+ok(r.apps.length === 9 && r.apps.every(n => n === 1), 'an appearance each for the nine who started');
 
 // --- THE GROUND: built up a level at a time, its boards with it, sponsors for a board, the shirt and the names ---------
 await create('Ground Town');
@@ -314,7 +314,7 @@ const locks = async () => { const o = {};
   if(await page.$('#bpBody .tbTop .tbIns[data-cside="instr"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (INSTRUCTIONS, up in the top row: v116)
   o.instr = await page.$$eval('#cTacRight .tiRow', ns => ns.map(n => (n.querySelector('.locked, [disabled]') ? 'locked ' : '') + n.querySelector('.tiLbl').textContent).join(', '));   // (v112: the team's instructions)
   return o; };
-const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '1-3-3'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });
+const l1 = await locks(), lt1 = await page.evaluate(() => { const M = __MG; M.lock = 1; return [M.tacNeed('form', '2-3-3'), M.tacNeed('style', 'gegen'), M.tacNeed('instr', 'cbAggr'), M.tacNeed('instr', 'gkPass')]; });
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 4; __MG.mgSave(d); }); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const l4 = await locks();
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
@@ -323,13 +323,13 @@ ok(l1.forms.length === 7 && l1.styles === 5 && /BALANCED/.test(l1.free) && /DIRE
   'training pitch level 1: three shapes (the other seven locked, each with its level: ' + l1.forms.slice(0, 3).join(' ') + '...), two styles (balanced, direct), and every team instruction open from the start (v106, the team\'s from v112: ' + l1.instr + ')');
 ok(!l4.forms.length && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: every shape, style and instruction');
 
-// --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty at most) as one list, wrapped in three columns:
-// the keeper and the seven on the pitch, the bench's five, the rest not taken. A bar dragged onto the pitch's part (or one
+// --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty-one at most) as one list, wrapped in three columns:
+// the keeper and the eight on the pitch, the bench's five, the rest not taken. A bar dragged onto the pitch's part (or one
 // from it dragged anywhere) and the two change places, spots and all; on the bench or in the rest it goes in where it's
-// put and the others move along. The tactics pitch shows the eight and the five, and a match takes the thirteen ----------
+// put and the others move along. The tactics pitch shows the nine and the five, and a match takes the fourteen ----------
 r = await page.evaluate(() => { const M = __MG, d = M.d; window.__keepSel = JSON.stringify({ roster: d.roster, lineup: d.lineup }); let id = 880000;
   while(d.roster.length < M.MG_MAX){ const p = JSON.parse(JSON.stringify(d.roster[d.roster.length % 12])); p.id = ++id; p.num = 60 + d.roster.length; p.name = 'Test Extra' + d.roster.length; d.roster.push(p); }
-  d.lineup = null; const lu = M.ensureLineup(d); M.mgSave(d); M.renderHub();   // (picked afresh, as BEST 8 picks them)
+  d.lineup = null; const lu = M.ensureLineup(d); M.mgSave(d); M.renderHub();   // (picked afresh, as BEST 9 picks them)
   return { n: d.roster.length, max: M.MG_MAX, firstSub: d.roster[lu.bench[0]].role, keepers: d.roster.filter(p => p.role === 'GK').length }; });
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Selection")'); await page.waitForTimeout(80);
 const selLu = () => page.evaluate(() => { const d = __MG.d, l = __MG.ensureLineup(d), id = i => d.roster[i].id; return { gk: id(l.gk), atk: l.atk.map(id), def: l.def.map(id), bench: l.bench.map(id) }; });
@@ -340,11 +340,11 @@ const selDrag = async (a, b, below) => { const box = k => page.$eval(`#bpBody .s
   await page.mouse.up(); await page.waitForTimeout(80); return mark; };
 const lay = await page.evaluate(() => ({ cols: [...document.querySelectorAll('#bpBody .selCol:not(.qpCol)')].map(c => c.dataset.grp + ' ' + [...c.querySelectorAll('.selRow')].map(x => x.dataset.k).join(' ')),
   imgs: document.querySelectorAll('#bpBody .selB img').length, top: document.querySelector('#bpBody .selRow[data-k="0"] .slPos').textContent }));
-const S0 = await selLu(), m1 = await selDrag(15, 2), S1 = await selLu();             // one not taken onto the pitch: they change places
-const m2 = await selDrag(11, 8), S2 = await selLu();                                 // the bench's fourth to its first: the others along one
-const m3 = await selDrag(13, 9), S3 = await selLu();                                 // the rest's first to the bench's second: the bench's fifth drops out
-const m4 = await selDrag(4, 10), S4 = await selLu();                                 // one on the pitch onto the bench: they change places
-const m5 = await selDrag(8, 19, true), S5 = await selLu();                           // the bench's first below the last of the rest: the end of the list
+const S0 = await selLu(), m1 = await selDrag(16, 2), S1 = await selLu();             // one not taken onto the pitch: they change places
+const m2 = await selDrag(12, 9), S2 = await selLu();                                 // the bench's fourth to its first: the others along one
+const m3 = await selDrag(14, 10), S3 = await selLu();                                // the rest's first to the bench's second: the bench's fifth drops out
+const m4 = await selDrag(4, 11), S4 = await selLu();                                 // one on the pitch onto the bench: they change places
+const m5 = await selDrag(9, 20, true), S5 = await selLu();                           // the bench's first below the last of the rest: the end of the list
 const shown = await page.evaluate(() => [...document.querySelectorAll('#bpBody .selRow')].map(x => x.querySelector('.slNm').textContent));
 await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
 const tac = await page.evaluate(() => { const d = __MG.d, l = __MG.ensureLineup(d); return { bench: [...document.querySelectorAll('#bpBody .tbBench .ptk')].map(t => +t.dataset.ri).join(), five: l.bench.slice(0, 5).join(),
@@ -355,20 +355,20 @@ const sqSum = await page.textContent('#bpBody .mgSum'); await page.click('#bldgP
 await page.evaluate(() => { const d = __MG.d, k = JSON.parse(window.__keepSel); d.roster = k.roster; d.lineup = k.lineup; __MG.mgSave(d); __MG.renderHub(); });
 info('selection: ' + JSON.stringify({ r, lay, m: [m1, m2, m3, m4, m5], tac, sqSum }));
 const sw = (A, B, x, y) => A.atk[A.atk.indexOf(x)] === x && B.atk[A.atk.indexOf(x)] === y && B.def[A.def.indexOf(x)] === y && B.bench[A.bench.indexOf(y)] === x;
-ok(r.n === 20 && r.max === 20 && /20 players \(most 20/.test(sqSum) && r.firstSub === 'GK',
-  'a squad is twenty at most (the clubhouse says so: "' + sqSum.split(' · ')[0] + '"); picked afresh, the next keeper is first on the bench');
-ok(String(lay.cols) === 'xi 0 1 2 3 4 5 6 7,bench 8 9 10 11 12,rest 13 14 15 16 17 18 19' && !lay.imgs && lay.top === 'GK',
-  'the Selection tab: the twenty in one list, top to bottom -- the keeper on top, the seven, the bench\'s five, the seven not taken -- in three columns, no faces');
+ok(r.n === 21 && r.max === 21 && /21 players \(most 21/.test(sqSum) && r.firstSub === 'GK',
+  'a squad is twenty-one at most (the clubhouse says so: "' + sqSum.split(' · ')[0] + '"); picked afresh, the next keeper is first on the bench');
+ok(String(lay.cols) === 'xi 0 1 2 3 4 5 6 7 8,bench 9 10 11 12 13,rest 14 15 16 17 18 19 20' && !lay.imgs && lay.top === 'GK',
+  'the Selection tab: the twenty-one in one list, top to bottom -- the keeper on top, the eight, the bench\'s five, the seven not taken -- in three columns, no faces');
 ok(m1 === '2 swap' && sw(S0, S1, S0.atk[1], S0.bench[7]),
   'one not taken dragged onto a man on the pitch: they change places, his spot with the ball and without it his');
-ok(m2 === '8 above' && S2.bench.slice(0, 5).join() === [S1.bench[3], ...S1.bench.slice(0, 3), S1.bench[4]].join() && S2.bench.slice(5).join() === S1.bench.slice(5).join(),
+ok(m2 === '9 above' && S2.bench.slice(0, 5).join() === [S1.bench[3], ...S1.bench.slice(0, 3), S1.bench[4]].join() && S2.bench.slice(5).join() === S1.bench.slice(5).join(),
   'the bench\'s fourth dragged up to its first: he goes in there, the three he passed move down one');
-ok(m3 === '9 above' && S3.bench[1] === S2.bench[5] && S3.bench[5] === S2.bench[4] && S3.bench.length === S2.bench.length,
+ok(m3 === '10 above' && S3.bench[1] === S2.bench[5] && S3.bench[5] === S2.bench[4] && S3.bench.length === S2.bench.length,
   'the first not taken dragged onto the bench\'s second: he\'s on the bench, and its fifth drops out to the top of the rest');
-ok(m4 === '10 swap' && sw(S3, S4, S3.atk[3], S3.bench[2]), 'one on the pitch dragged onto the bench: they change places');
-ok(m5 === '19 below' && S5.bench[S5.bench.length - 1] === S4.bench[0] && S5.bench.slice(0, -1).join() === S4.bench.slice(1).join() && shown.length === 20,
+ok(m4 === '11 swap' && sw(S3, S4, S3.atk[3], S3.bench[2]), 'one on the pitch dragged onto the bench: they change places');
+ok(m5 === '20 below' && S5.bench[S5.bench.length - 1] === S4.bench[0] && S5.bench.slice(0, -1).join() === S4.bench.slice(1).join() && shown.length === 21,
   'the bench\'s first dragged below the last bar: he\'s last of all, everyone after him up one (the rest\'s first onto the bench)');
-ok(tac.bench === tac.five && tac.pitch === 8 && tac.match === 13, 'the tactics pitch shows the eight and the bench\'s five, no one else; a match takes the thirteen');
+ok(tac.bench === tac.five && tac.pitch === 9 && tac.match === 14, 'the tactics pitch shows the nine and the bench\'s five, no one else; a match takes the fourteen');
 
 // --- THE PHYSIO: in a career match your side tires more slowly and gets more back at half-time; a little in a simulated
 // game too -------------------------------------------------------------------------------------------------------------

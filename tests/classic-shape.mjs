@@ -1,5 +1,6 @@
 // FOOTBALL CLASSIC, THE SHAPE (as coached from the coaching page): on the keeper's ball the back line splits to the corners
-// of the box, the pivot stands off it and the midfielders and wide men are up the pitch (not all inside our third), and
+// of the box (v124: a back four's centre-backs, its full-backs up toward the touchlines), the pivot stands off it and the
+// midfielders and wide men are up the pitch (not all inside our third), and
 // the computer's keeper gives them a moment to get there before he plays it;
 // building from the back the centre-backs split wide and the wingers stay up near halfway (not down in our third to
 // offer themselves); a man supporting the man on the ball is never on top of him; the defending midfield's far wide man
@@ -29,7 +30,7 @@ writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
-// Liverpool (2-2-3 with the ball, 2-4-1 without) v Manchester City (3-1-3 / 3-3-1), both BALANCED (not their clubs' own
+// Liverpool (3-2-3 with the ball, 3-4-1 without) v Manchester City (4-1-3 / 4-3-1), both BALANCED (not their clubs' own
 // ways, GEGENPRESS and CONTROL POSSESSION: the shape as coached is the balanced one), nothing else changed
 await page.evaluate(() => { const T = window.__T; T.EXH.you = 'LIV'; T.EXH.opp = 'MCI'; localStorage.removeItem('ft_clubsq'); });
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(1500);
@@ -49,13 +50,16 @@ await page.evaluate(() => { const T = window.__T, M = T.MK;
   window.__home = (team, uShift) => { for(const q of window.__men(team)){ const s = q.slotAtk || q, [u, w] = window.__uw(team, s.homeX, s.homeY); window.__at(q, Math.max(4, u + uShift), w); } };
   window.__homeDef = team => { for(const q of window.__men(team)){ const s = q.slotDef || q, [u, w] = window.__uw(team, s.homeX, s.homeY); window.__at(q, u, w); } }; });
 
-// --- THE KEEPER'S BALL (City's): the back three at the corners of the box, the pivot well off it, the wingers up ---
+// --- THE KEEPER'S BALL (City's): the back four's centre-backs at the corners of the box and its full-backs up and wide,
+// the pivot well off them, the wingers up ---
 const kp = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', -20); window.__homeDef('G');
   const k = T.keepers().find(q => q.team === 'R'); window.__at(k, 2, 0); T.setGk(k); return window.__plan('R'); });
 info('City on its keeper\'s ball: ' + kp.map(j => `${j.q} ${j.pos} ${j.job} ${j.u},${j.w}`).join(' | '));
-const kpCB = kp.filter(j => j.pos === 'CB'), kpW = kp.filter(j => j.pos === 'W'), kpPiv = kp.find(j => j.pos === 'CM');
-ok(kpCB.length === 3 && Math.max(...kpCB.map(j => Math.abs(j.w))) >= 19 && Math.min(...kpCB.map(j => j.w)) <= -19 && kpCB.every(j => j.u < 20.5),
-  `the back three split to the corners of the box (${kpCB.map(j => j.w).join(', ')} m across, ${kpCB.map(j => j.u).join(', ')} m out)`);
+const kpCB = kp.filter(j => j.pos === 'CB'), kpFB = kp.filter(j => j.pos === 'FB'), kpW = kp.filter(j => j.pos === 'W'), kpPiv = kp.find(j => j.pos === 'CM');
+ok(kpCB.length === 2 && kpCB.every(j => Math.abs(j.w) >= 19 && j.u < 20.5) && kpCB[0].w * kpCB[1].w < 0,
+  `the centre-backs split to the corners of the box (${kpCB.map(j => j.w).join(', ')} m across, ${kpCB.map(j => j.u).join(', ')} m out)`);
+ok(kpFB.length === 2 && kpFB.every(j => Math.abs(j.w) >= 25 && j.u >= 23) && kpFB[0].w * kpFB[1].w < 0,
+  `the full-backs up and out toward the touchlines (${kpFB.map(j => j.w).join(', ')} m across, ${kpFB.map(j => j.u).join(', ')} m out)`);
 ok(kpPiv && kpPiv.u >= 29, `the pivot stands off them, ${kpPiv && kpPiv.u} m out (it was 28)`);
 ok(kpW.length === 2 && kpW.every(j => j.u >= 43), `both wingers up near halfway (${kpW.map(j => j.u).join(', ')} m out; they were ~32)`);
 const kpL = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', -20); window.__homeDef('R');

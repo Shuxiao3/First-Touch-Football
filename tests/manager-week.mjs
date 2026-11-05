@@ -3,8 +3,8 @@
 // morning (PLAY or SIMULATE), and after the game you're on the next Monday. A week with a cup game has it on the
 // Wednesday: from it to Saturday morning, then Monday -- never in the league's first three weeks. A week's winter break
 // after week 13; the transfer window open from pre-season to the end of it (a bid standing two weeks); the computer
-// clubs' choice of eight (the tired rested, the young now and then, a lesser cup's side of them, the best in a big game,
-// three of them once the league's settled for the club); the eight you face live are the eight they picked. And a
+// clubs' choice of nine (the tired rested, the young now and then, a lesser cup's side of them, the best in a big game,
+// three of them once the league's settled for the club); the nine you face live are the nine they picked. And a
 // career saved before the week is cleared, LOAD GAME saying so. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -98,11 +98,11 @@ ok(/FORWARD TO MATCHDAY/.test(m4[0]) && /next: Champions League · Group game 1/
    && sat[2] === 'sat' && /SIMULATE/.test(sat[0]) && /^Saturday · Matchday 4\/26/.test(sat[1]) && d.wday === 'mon' && d.md === 4,
   'week 4 on the hub: Monday (' + m4[1].replace(/^Season \d+ · /, '') + '), Wednesday morning (' + wed[1] + '), Saturday morning (' + sat[1] + '), then Monday');
 
-// --- the computer clubs' eight (everyone fresh, chance taken out: no youngster drawn for an ordinary league game) ---
+// --- the computer clubs' nine (everyone fresh, chance taken out: no youngster drawn for an ordinary league game) ---
 r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; mgFreshen(d); for(const c of mgAiClubs(d)) for(const p of c.players) delete p.inj;   // (everyone fit too)
   const pl=d.div[4].map(id=>d.world.clubs[id]).filter(c=>c&&c.id!==d.clubId), c=pl[0];
   const diff=(k,ctx)=>{ const base=mgPickEight(k.players), x=mgPickEight(k.players,ctx,d,k); return { n:x.filter(p=>!base.includes(p)).length, base, x }; };
-  // the tired: his best eight at 80% -- some rest for fresh men not much worse, three at most; in a big game (78%) they play
+  // the tired: his best nine at 80% -- some rest for fresh men not much worse, three at most; in a big game (78%) they play
   const b8=mgPickEight(c.players); for(const p of b8) p.cond=0.8;
   const lg=diff(c,{kind:'league'}), big=diff(c,{kind:'cup',key:'cl',r:2});
   const tired={ league:lg.n, big:big.n, fresh:lg.x.filter(p=>!lg.base.includes(p)).every(p=>condOf(p)>=AI_REST) };
@@ -112,8 +112,8 @@ r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; 
   const sum=(L,ctx)=>L.reduce((a,k)=>a+diff(k,ctx).n,0), l1=d.div[2].map(id=>d.world.clubs[id]).filter(Boolean);
   const out={ tired, coco, l1chg:sum(l1,{kind:'cup',key:'coco',r:0}), final:sum(pl,{kind:'cup',key:'coco',r:5}), cl:sum(pl,{kind:'cup',key:'cl',r:0}), league:sum(pl,{kind:'league'}) };
   Math.random=rnd; return out; })()`);
-info('their eight: ' + JSON.stringify(r));
-ok(r.tired.league >= 1 && r.tired.league <= 4 && r.tired.fresh && r.tired.big === 0, 'his best eight at 80% for a league game: ' + r.tired.league + ' rested for fresh men (three outfielders at most, and the keeper if there\'s another); in a big game they play');
+info('their nine: ' + JSON.stringify(r));
+ok(r.tired.league >= 1 && r.tired.league <= 4 && r.tired.fresh && r.tired.big === 0, 'his best nine at 80% for a league game: ' + r.tired.league + ' rested for fresh men (three outfielders at most, and the keeper if there\'s another); in a big game they play');
 ok(r.coco.every(n => n >= 4) && r.l1chg === 0 && r.final === 0 && r.cl === 0 && r.league === 0,
   'the Premium League in the Coco Cup: four of the seven youngsters or reserves (' + r.coco.join(',') + '); League 1 in it, the final, the Champions League, an ordinary league game when fresh: the best');
 
@@ -133,11 +133,11 @@ info('a settled league: ' + JSON.stringify(r));
 ok(r.top && r.mid && !r.race, 'with three games left, promotion sure for the top (' + r.pts[0] + ' pts) and nothing to play for mid-table (' + r.pts[2] + '); the clubs still in the race aren\'t settled');
 ok(r.young >= Math.min(3, r.kids) - 0.01, 'a settled club starts its young: ' + r.young.toFixed(1) + ' a game (' + r.kids + ' 21 and under in the squad)');
 
-// --- the eight you face live are the eight they picked ---------------------------------------------------------------
+// --- the nine you face live are the nine they picked ---------------------------------------------------------------
 await K("(()=>{ const d=CAREER.data; d.wday='sat'; mgSave(d); renderHub(); })()");
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(1200);
 r = await K(`(()=>({ live:MG_LIVE_XI&&MG_LIVE_XI.ids.slice().sort().join(), squad:SQUAD.R.map(e=>e.lookKey).sort().join(), n:SQUAD.R.length }))()`);
-ok(r.live && r.live === r.squad && r.n === 8, 'live, they field the eight they picked (' + r.n + ')');
+ok(r.live && r.live === r.squad && r.n === 9, 'live, they field the nine they picked (' + r.n + ')');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

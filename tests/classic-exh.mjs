@@ -51,9 +51,9 @@ ok(pre.on && pre.back === '◀ CLUBS' && pre.head === 'BEFORE KICK-OFF' && pre.k
 ok(pre.bench === 5 && pre.dim === 0, 'the bench, all five to be had');
 // style and shape
 await page.click('#mtacBody [data-mtdrop="style"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtstyle="wing"]'); await page.waitForTimeout(80);
-await page.click('#mtacBody [data-mtdrop="form"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtform="2-3-2"]'); await page.waitForTimeout(120);
+await page.click('#mtacBody [data-mtdrop="form"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtform="3-3-2"]'); await page.waitForTimeout(120);
 const s1 = await K(`({ style:TAC.G.style, form:myForm })`);
-ok(s1.style === 'wing' && s1.form === '2-3-2', `your style and shape picked before kick-off (${s1.style}, ${s1.form})`);
+ok(s1.style === 'wing' && s1.form === '3-3-2', `your style and shape picked before kick-off (${s1.style}, ${s1.form})`);
 // a man off the bench for one in the team: a change of team, not a sub
 const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
 async function drag(a, b){ const p = await centre(a), q = await centre(b); await page.mouse.move(p.x, p.y); await page.mouse.down();
@@ -72,12 +72,12 @@ const k0 = await K(`(()=>{ mtKickOff(); const G=players.filter(p=>p.team==='G'),
   return { menu:menuOpen, ov:document.getElementById('mtacOv').classList.contains('on'), worst:Math.round(Math.max(...off)), t:simNow, lines:lines.join('-') }; })()`);
 await page.waitForTimeout(700); const k1 = await K('({ t:simNow, style:TAC.G.style, R:TAC.R.style })');
 ok(!k0.menu && !k0.ov && k1.t > k0.t && k1.style === 'wing' && k1.R === 'control', 'KICK OFF ▶: the match goes, in your style, City in theirs');
-ok(k0.worst === 0 && k0.lines === '2-3-2', `...kicking off with everyone in his spot (his own half), the side in the shape you picked (${k0.lines} with the ball)`);
+ok(k0.worst === 0 && k0.lines === '3-3-2', `...kicking off with everyone in his spot (his own half), the side in the shape you picked (${k0.lines} with the ball)`);
 // kept with the club: the setup screen says so, the opponent's as it was
 await K('pauseFromMatch()'); await page.waitForTimeout(150);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');
 const g2 = await card('G'), r2 = await card('R'), kept = await page.evaluate(() => { const o = JSON.parse(localStorage.getItem('ft_clubsq') || '{}'); return { liv: o.LIV && o.LIV.style, mci: o.MCI ? (o.MCI.style || null) : 'none', livIn: o.LIV && o.LIV.lineup.atk.length }; });
-ok(g2.style === 'WING PLAY' && /2-3-2/.test(g2.meta) && kept.liv === 'wing' && r2.style === 'CONTROL POSSESSION' && kept.mci === null,
+ok(g2.style === 'WING PLAY' && /3-3-2/.test(g2.meta) && kept.liv === 'wing' && r2.style === 'CONTROL POSSESSION' && kept.mci === null,
   `kept with your club: ${g2.name} ${g2.style} ${g2.meta.split(' · ')[2]}; City still ${r2.style} (nothing stored for it)`);
 // ◀ CLUBS: back to the setup screen, no match
 await page.click('#exhTac'); await page.waitForTimeout(300);

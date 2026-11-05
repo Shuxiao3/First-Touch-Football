@@ -3,7 +3,7 @@
 // durability for everyone a level). A knock, a strain, a torn muscle, now and then something serious, worse the older
 // and the less durable, lighter and shorter with a better physio, and back fitter; from
 // 28 a tear or worse takes something off his legs for good, and their decline comes sooner. He heals by the day and
-// comes back short of fitness. The computer never picks a man who's hurt; yours, if he's in your eight at kick-off, is
+// comes back short of fitness. The computer never picks a man who's hurt; yours, if he's in your nine at kick-off, is
 // replaced by the best fit off the bench, and the injured aren't among the subs. A season of them, the news saying who.
 // In a live match he slows (no sprinting, his legs' ceiling down to 40%, not back at half-time), tops the quick subs
 // (the chip lights, it doesn't drop down) and the report lists him. And everywhere he's marked: the squad, Training's
@@ -82,10 +82,10 @@ r = await K(`(()=>{ const d=CAREER.data, p=d.roster[3]; injHurt(d,p,'strain',nul
   mgDays(d,days-1); const still=!!p.inj; mgDays(d,1); const healed=!p.inj, back=p.injB, cond=condOf(p); mgDays(d,INJ_BACK); return { days, news, still, healed, back, cond, clear:!p.injB }; })()`);
 ok(r.still && r.healed && r.back === 21 && r.cond <= 0.8 && r.clear && /is out for \d+ weeks? \(a strain, in training\)/.test(r.news),
   'hurt (the news: "' + r.news + '"), he heals by the day: out ' + r.days + ' days, back a short of fitness (' + Math.round(r.cond * 100) + '%), three risky weeks after it');
-// (v116) one of your eight hurt between games: out of the side there and then
+// (v116) one of your nine hurt between games: out of the side there and then
 r = await K(`(()=>{ const d=CAREER.data, lu=ensureLineup(d), ri=lu.atk[2], p=d.roster[ri]; d.news=[]; injHurt(d,p,'knock',null,'in training');
   const l2=ensureLineup(d), rep=(d.news.map(n=>n.t).find(t=>/takes his place in the side/.test(t)))||''; const out={ out8:!l2.atk.includes(ri)&&l2.gk!==ri, inn:l2.atk[2]!==ri&&!d.roster[l2.atk[2]].inj, rep }; delete p.inj; delete p.injB; return out; })()`);
-ok(r.out8 && r.inn && /takes his place in the side/.test(r.rep), 'one of your eight hurt: out of it there and then, the best fit off the bench in his place, and the news says so ("' + r.rep + '")');
+ok(r.out8 && r.inn && /takes his place in the side/.test(r.rep), 'one of your nine hurt: out of it there and then, the best fit off the bench in his place, and the news says so ("' + r.rep + '")');
 
 // --- who plays: never a hurt man for the computer; yours replaced at kick-off, none on the bench -------------------------------
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d)[0], best=mgEight(c.players), hurt=best[3]; hurt.inj={k:'strain',d:14};
@@ -96,8 +96,8 @@ r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d)[0], best=mgEight(c.playe
   const k=lu.atk.indexOf(ri)>=0?-1:0, slot=sw.length?lu.atk.indexOf(sw[0][1]&&R.indexOf(sw[0][1])):-1, now=slot>=0?lu.atk[slot]:ri, inn=R[now];
   const out={ ai:!pick.includes(hurt), swapped:sw.length===1&&sw[0][0]===man&&!lu.atk.includes(ri), sameRole:inn.role===role, notInj:!inn.inj, benchOk:!squad.some(e=>R[e.ri]&&R[e.ri].inj), def:lu.def.includes(now)&&!lu.def.includes(ri) };
   delete man.inj; delete R[bri].inj; return out; })()`);
-ok(r.ai, 'the computer leaves a man who\'s hurt out of its eight');
-ok(r.swapped && r.sameRole && r.notInj && r.def && r.benchOk, 'one of your eight hurt at kick-off: the best fit off the bench (his line\'s) takes his place, with the ball and without it; nobody hurt among the subs');
+ok(r.ai, 'the computer leaves a man who\'s hurt out of its nine');
+ok(r.swapped && r.sameRole && r.notInj && r.def && r.benchOk, 'one of your nine hurt at kick-off: the best fit off the bench (his line\'s) takes his place, with the ball and without it; nobody hurt among the subs');
 
 // --- a season of them -----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data; d.news.length=0; let n=0, mine=0; const orig=injHurt; injHurt=function(a,p,k,c,h){ orig(a,p,k,c,h); n++; if(!c) mine++; };
@@ -149,7 +149,7 @@ const row = await page.$$eval('#bpBody .mgRow .mgInj', ns => ns.map(n => n.textC
 const hn = await K('HURTNAME'); await page.click(`#bpBody .mgRow:has-text("${hn}")`); await page.waitForTimeout(120);
 const card = await page.innerText('#bpBody .mgCard').catch(() => '');
 info('marked: ' + JSON.stringify({ warn, tok, sel, row, card: card.split('\n').find(l => /INJURED/.test(l)) }));
-ok(/✚/.test(warn) && /in your eight/.test(warn) && tok >= 1 && sel === 1 && row.length === 1 && /2w/.test(row[0]) && /INJURED · a strain · 2 weeks/.test(card),
+ok(/✚/.test(warn) && /in your nine/.test(warn) && tok >= 1 && sel === 1 && row.length === 1 && /2w/.test(row[0]) && /INJURED · a strain · 2 weeks/.test(card),
   'marked everywhere: the hub ("' + warn.split('·').find(x => /✚/.test(x)).trim() + '"), the tactics pitch, the Selection list, the squad (' + row[0] + '), his card');
 
 process.exitCode = rep.finish() ? 1 : 0;

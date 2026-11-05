@@ -1,5 +1,5 @@
-// FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (1-3-3 and 1-4-2 attacking only -- the computer
-// never defends in them -- and 4-2-1 and 4-1-2 defending only), width as COMPACT / BALANCED / WIDE, seven styles each
+// FOOTBALL CLASSIC, TACTICS: a shape with the ball and one without it (2-3-3 and 2-4-2 attacking only -- the computer
+// never defends in them -- and 5-2-1 and 5-1-2 defending only; v124: nine a side, every shape a man more at the back), width as COMPACT / BALANCED / WIDE, seven styles each
 // with its own block without the ball (no posture to set), anyone in any position (the keeper too), the team's instructions
 // (v112: no man's or spot's own -- the lines to drag, a style's own set, kept with the career, the same in the match), skill stars in
 // the match (each man's own, one to five: which moves each allows is classic-moves.mjs), and POSITIONS: a man's own (a
@@ -32,12 +32,12 @@ const bad = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const club = { name: 'Club ' + i, style: st };   // (each style without the ball in its own block)
     const f = T.defFormFor(T.cwFormFor(club), T.postureOf(st)); if(T.ATK_ONLY.includes(f)) out.push(st + ' ' + f); }
   return out; }, STYLES);
-ok(bad.length === 0, 'no computer side defends in 1-3-3 or 1-4-2' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
+ok(bad.length === 0, 'no computer side defends in 2-3-3 or 2-4-2' + (bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''));
 const badA = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) if(T.DEF_ONLY.includes(c.form)) out.push(c.id);
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const f = T.cwFormFor({ name: 'Club ' + i, style: st }); if(T.DEF_ONLY.includes(f)) out.push(st + ' ' + f); }
   return out; }, STYLES);
-ok(badA.length === 0, 'no computer side attacks in 4-2-1 or 4-1-2');
+ok(badA.length === 0, 'no computer side attacks in 5-2-1 or 5-1-2');
 
 // --- a career: the tactics screen ------------------------------------------------------------------
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
@@ -55,21 +55,21 @@ const shut = async () => { if(await page.$('#bpBody .tbDrop.on')){ await page.cl
 const pick = async (k, sel) => { await menu(k); await page.click('#bpBody ' + sel); await page.waitForTimeout(80); };
 ok(await page.isVisible('#bpBody [data-ctphase="atk"]') && await page.isVisible('#bpBody [data-ctphase="def"]'), 'WITH THE BALL / WITHOUT THE BALL');
 await menu('form');
-ok(!(await page.isDisabled('#bpBody [data-cform="1-3-3"]')), 'with the ball, 1-3-3 can be picked');
-ok(await page.isDisabled('#bpBody [data-cform="4-2-1"]') && await page.isDisabled('#bpBody [data-cform="4-1-2"]'), 'with the ball, 4-2-1 and 4-1-2 are off');
-await page.click('#bpBody [data-cform="2-2-3"]'); await page.waitForTimeout(80);
+ok(!(await page.isDisabled('#bpBody [data-cform="2-3-3"]')), 'with the ball, 2-3-3 can be picked');
+ok(await page.isDisabled('#bpBody [data-cform="5-2-1"]') && await page.isDisabled('#bpBody [data-cform="5-1-2"]'), 'with the ball, 5-2-1 and 5-1-2 are off');
+await page.click('#bpBody [data-cform="3-2-3"]'); await page.waitForTimeout(80);
 await pick('width', '[data-cwidth="1.18"]');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(80);
 await menu('form');
-ok(await page.isDisabled('#bpBody [data-cform="1-3-3"]') && await page.isDisabled('#bpBody [data-cform="1-4-2"]'), 'without it, 1-3-3 and 1-4-2 are off');
-await page.click('#bpBody [data-cform="4-2-1"]'); await page.waitForTimeout(80);
-ok((await save()).formDef === '4-2-1', 'without it, a back four: 4-2-1');
-await pick('form', '[data-cform="3-3-1"]');
+ok(await page.isDisabled('#bpBody [data-cform="2-3-3"]') && await page.isDisabled('#bpBody [data-cform="2-4-2"]'), 'without it, 2-3-3 and 2-4-2 are off');
+await page.click('#bpBody [data-cform="5-2-1"]'); await page.waitForTimeout(80);
+ok((await save()).formDef === '5-2-1', 'without it, a back five: 5-2-1');
+await pick('form', '[data-cform="4-3-1"]');
 await pick('width', '[data-cwidth="0.84"]');
 let d = await save();
-ok(d.formation === '2-2-3' && d.formDef === '3-3-1', 'saved: 2-2-3 with the ball, 3-3-1 without');
+ok(d.formation === '3-2-3' && d.formDef === '4-3-1', 'saved: 3-2-3 with the ball, 4-3-1 without');
 ok(d.width.atk === 1.18 && d.width.def === 0.84, 'saved: wide with the ball, compact without');
-ok(d.lineup.def.length === 7 && [...d.lineup.def].sort().join() === [...d.lineup.atk].sort().join(), 'the same seven defend, in the defending spots');
+ok(d.lineup.def.length === 8 && [...d.lineup.def].sort().join() === [...d.lineup.atk].sort().join(), 'the same eight defend, in the defending spots');
 await menu('width');
 const widths = await page.$$eval('#bpBody [data-cwidth]', ns => ns.map(n => n.textContent));
 ok(String(widths) === 'COMPACT,BALANCED,WIDE', 'width: ' + widths.join(' / '));
@@ -113,9 +113,9 @@ const tok = await page.$eval(`#bpBody .tpitch .ptk[data-ri="${field}"]`, e => ({
 ok(tok.oop && tok.ovr < d.roster[field].ovr, 'out of position he plays below his rating: ' + tok.ovr + ' in goal, ' + d.roster[field].ovr + ' as a ' + d.roster[field].role);
 await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
-ok(d.roster[d.lineup.gk].role === 'GK', 'PICK MY BEST EIGHT puts a keeper back in goal');
+ok(d.roster[d.lineup.gk].role === 'GK', 'BEST 9 puts a keeper back in goal');
 
-// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): INSTRUCTIONS, up in the top row left of BEST 8 (v116), puts
+// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): INSTRUCTIONS, up in the top row left of BEST 9 (v116), puts
 // the team's for the phase where his card was, and lights up -- with the ball DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN
 // (no BUILD-UP since v116: it comes with the style); without it the lines' own pitch (the defensive line and the line of
 // engagement, to drag: in range, never closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF TACKLES, MID TACKLES and
@@ -133,7 +133,7 @@ const insB = () => page.evaluate(() => { const top = document.querySelector('#bp
 await tap(lu.atk[5]); const ib0 = await insB(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60);
 let pn = await panel(); const ib1 = await insB();
 ok(!ib0.lit && ib0.left && !ib0.flips && ib0.card && ib1.lit && pn && String(pn.rows) === 'DEFENDERS,MIDFIELD,FORWARDS,WIDE MEN' && /WITH THE BALL/.test(pn.head) && !pn.pitch,
-  'INSTRUCTIONS, in the top row just left of BEST 8 (nothing on his card turns it over): lit, the team\'s instructions with the ball where his card was, no BUILD-UP -- ' + (pn && pn.rows.join(', ')));
+  'INSTRUCTIONS, in the top row just left of BEST 9 (nothing on his card turns it over): lit, the team\'s instructions with the ball where his card was, no BUILD-UP -- ' + (pn && pn.rows.join(', ')));
 await cti('aruns', 'run'); await cti('wide', 'feet');
 pn = await panel();
 ok(/^WIDE MEN: /.test(pn.note), 'the note under them is the last one touched: ' + pn.note);
@@ -221,12 +221,12 @@ const marks = await page.evaluate(() => { const S = window.__S, d = S.d, out = {
     sq.slice(1).forEach((e, i) => n[S.posFit(S.fitPos(e), sp[i].pos)]++);
     // ...and without the ball, in their defending shape
     const fd = S.defFormFor(f, S.postureOf(c.style)), dp = S.careerSlots(fd, 'def'), roster = sq.slice(1);
-    S.careerMapDef({ lineup: { atk: [0, 1, 2, 3, 4, 5, 6] }, formation: f, formDef: fd, roster }).forEach((ri, k) => nd[S.posFit(S.fitPos(roster[ri]), dp[k].pos)]++); }
+    S.careerMapDef({ lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, formation: f, formDef: fd, roster }).forEach((ri, k) => nd[S.posFit(S.fitPos(roster[ri]), dp[k].pos)]++); }
   out.clubs = n; out.clubsDef = nd;
-  // who defends where: a 2-3-2 in a 3-3-1 needs a third centre-back from midfield -- the anchor (centre-back's one of his
+  // who defends where: a 2-4-2 in a 3-4-1 needs a third centre-back from midfield -- the anchor (centre-back's one of his
   // second positions), out on the left of it, rather than the playmaker nearer (out of position there)
-  const hold = { formation: '2-3-2', formDef: '3-3-1', lineup: { atk: [0, 1, 2, 3, 4, 5, 6] }, roster: [['CB','stopper'], ['CB','cover'], ['CM','anchor'], ['CM','playmaker'], ['WM','widemid'], ['STK','poacher'], ['STK','target']].map(([sub, style]) => ({ role: sub === 'CB' ? 'DEF' : sub === 'STK' ? 'ATT' : 'MID', subRole: sub, style })) };
-  const hp = S.careerSlots('3-3-1', 'def'), hm = S.careerMapDef(hold); out.hold = [hp[hm.indexOf(2)].pos, hp[hm.indexOf(3)].pos];
+  const hold = { formation: '2-4-2', formDef: '3-4-1', lineup: { atk: [0, 1, 2, 3, 4, 5, 6, 7] }, roster: [['CB','stopper'], ['CB','cover'], ['CM','anchor'], ['CM','playmaker'], ['CM','boxtobox'], ['WM','widemid'], ['STK','poacher'], ['STK','target']].map(([sub, style]) => ({ role: sub === 'CB' ? 'DEF' : sub === 'STK' ? 'ATT' : 'MID', subRole: sub, style })) };
+  const hp = S.careerSlots('3-4-1', 'def'), hm = S.careerMapDef(hold); out.hold = [hp[hm.indexOf(2)].pos, hp[hm.indexOf(3)].pos];
   return out; });
 info('your tactics pitch: ' + marks.n + ' tokens' + (marks.bad.length ? ', wrong: ' + marks.bad.join(' ') : '') + '; a ' + marks.rate[4] + ' rated ' + marks.rate[0] + ': ' + marks.rate.slice(1, 4).join(' / ') + ' at CB / FB / WM; the computer\'s clubs\' men in their spots: ' + JSON.stringify(marks.clubs));
 ok(marks.n >= 8 && !marks.bad.length, 'on the tactics pitch a man in a second position of his has his rating in lime, one out of position in amber, one in his own as it was');
@@ -236,7 +236,7 @@ const cl = marks.clubs, all = cl.main + cl.second + cl.out;
 ok(cl.main / all >= 0.5 && cl.out / all <= 0.05, 'the computer\'s clubs pick each spot\'s man by position: ' + Math.round(cl.main / all * 100) + '% in their own, ' + Math.round(cl.second / all * 100) + '% in a second, ' + Math.round(cl.out / all * 100) + '% out of position');
 const cd = marks.clubsDef, allD = cd.main + cd.second + cd.out;
 ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.10,   // (v118: archetypes are choosier than positions were -- about 6% now, 4% before; over 120 new worlds 3.6% to 8.8%, so 10%: 8% failed one world in fourteen)
-   'who defends where: his own position before another (a 2-3-2 defending in a 3-3-1: the anchor drops into the back three, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
+   'who defends where: his own position before another (a 2-4-2 defending in a 3-4-1: the anchor drops into the back three, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
 
 // --- the match: the shapes, the instructions and the stars reach the pitch ----------------------------
 await page.click('#bldgPanel .bpTopBack');
@@ -252,10 +252,10 @@ const m = await page.evaluate(ids => { const T = window.__T, f = T.forms(), G = 
     ti: T.TI().G, tiR: T.TI().R, tiR0: T.tiDefault(T.TAC.R.style), stars: G.map(p => p.stars),
     legs: [by(ids.st).staminaCap, Math.min(...G.filter(p => p.lookKey !== ids.st).map(p => p.staminaCap))],
     want: G.map(p => { const S = window.__S, r = S.d.roster.find(q => q.id === p.lookKey); return r ? S.careerStars(r) : null; }) }; }, ids);
-ok(m.f[0] === '2-2-3' && m.f[1] === '3-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
+ok(m.f[0] === '3-2-3' && m.f[1] === '4-3-1', 'your shapes in the match: ' + m.f[0] + ' / ' + m.f[1]);
 ok(Math.abs(m.legs[0] - 0.6) < 0.03 && m.legs[1] > 0.97, 'a man 60% fit starts the match with his legs\' ceiling at ' + Math.round(m.legs[0] * 100) + '% (the fresh ones at ' + Math.round(m.legs[1] * 100) + '%)');
-ok(m.gAtk.DEF === 2 && m.gAtk.ATT === 3 && m.gDef.DEF === 3 && m.gDef.ATT === 1, 'with the ball 2-2-3, without it 3-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
-ok(!m.f[3] || !['1-3-3','1-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
+ok(m.gAtk.DEF === 3 && m.gAtk.ATT === 3 && m.gDef.DEF === 4 && m.gDef.ATT === 1, 'with the ball 3-2-3, without it 4-3-1: ' + JSON.stringify(m.gAtk) + ' ' + JSON.stringify(m.gDef));
+ok(!m.f[3] || !['2-3-3','2-4-2'].includes(m.f[3]), 'the opposition defends in ' + m.f[3]);
 ok(m.posOK, 'every spot in the match knows what it is (CB, FB, CM, WM, W, ST)');
 ok(JSON.stringify(m.ti) === JSON.stringify(tiKeep), 'your team instructions in the match, as you left them: ' + JSON.stringify(m.ti));
 ok(JSON.stringify(m.tiR) === JSON.stringify(m.tiR0), 'theirs: their style\'s own (' + m.sty[2] + ')');
@@ -281,7 +281,7 @@ await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout
 const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .tpitch .ptk img.ptkFace').length,
   men: document.querySelectorAll('#mtacBody .tpitch .ptk').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk img').length,
   card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
-ok(mt.ghosts === 7 && mt.faces === mt.men && mt.men === 8 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
+ok(mt.ghosts === 8 && mt.faces === mt.men && mt.men === 9 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
 const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent }));
 ok(pre.bench === 5 && /SUBS LEFT 3/.test(pre.head), 'the bench is five, and three subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);

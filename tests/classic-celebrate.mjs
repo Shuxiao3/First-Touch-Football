@@ -52,7 +52,7 @@ ok(sm.tier === 'small' && sm.men === 3 && sm.run <= 8.05 && sm.held === 2.8 && s
   'an early one of yours (small): the scorer ' + sm.run + ' m toward the corner, the two nearest to him (' + sm.arrived + ' of 3 got there), a hop; held ' + sm.held + ' s');
 const bg = await goal({ half: 2, clock: L / 2, g: 1, r: 2 });
 info('big: ' + JSON.stringify(bg));
-ok(bg.tier === 'big' && bg.men === 7 && bg.run <= 16.05 && bg.held === 4.6 && bg.heroGap < 3 && bg.arrived >= 4 && bg.conf > 0 && bg.flashes > 0 && !sm.flashes && !bg.keeper,
+ok(bg.tier === 'big' && bg.men === 8 && bg.run <= 16.05 && bg.held === 4.6 && bg.heroGap < 3 && bg.arrived >= 4 && bg.conf > 0 && bg.flashes > 0 && !sm.flashes && !bg.keeper,
   'an equaliser in the second half (big): off toward the flag (' + bg.run + ' m), all ' + (bg.men - 1) + ' team-mates after him (' + bg.arrived + ' of ' + bg.men + ' there by the end), confetti, the cameras in the stand (none for the small one); held ' + bg.held + ' s');
 const ep = await goal({ half: 2, clock: L - 4, g: 2, r: 2 });
 info('epic: ' + JSON.stringify(ep));

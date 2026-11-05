@@ -165,7 +165,7 @@ const squareUp = iq => page.evaluate(iq => new Promise(res => {
   (function tick(){
     const got = b.ownedBy === p || b.dribbler === p, lost = b.intendedRcv !== p && !got;
     if(got || lost || performance.now() - t0 > 2500){ p.stats = keep; return res({ cos: +cos.toFixed(2), got }); }
-    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy); if(d > 1 && !near) cos = (p.facing.x * dx + p.facing.y * dy) / d;
+    const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy); if(d > 1 && !near) cos = -p.facing.x * atk;   // (how far round he is to where it's coming from -- back down its line: v124, a man drifting toward his spot can have it go by him a stride off)
     near = near || d < 34;
     requestAnimationFrame(tick);
   })(); }), iq);

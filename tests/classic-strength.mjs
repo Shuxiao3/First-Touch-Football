@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, TAC, atkOf, strengthOf, simNow:()=>simNow, '
-  + 'separateBodies, shieldCushion, contactTackles, obMods, pause:v=>{ pauseOpen=v; }, setControlled, stick:(x,y)=>{ window.__stick={x,y}; }, '
+  + 'separateBodies, shieldCushion, contactTackles, obMods, pause:v=>{ pauseOpen=v; }, setControlled, setTeamForm, stick:(x,y)=>{ window.__stick={x,y}; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
@@ -100,7 +100,10 @@ ok(!M[2].off && !M[3].off, '...and a level or weaker man never does');
 
 // FROM BEHIND, IN PLAY: you run upfield with it (no sprint) and one of theirs, pressing, starts 2 m behind you --
 // straight behind or off your shoulder -- and goes after it for 4 s. Your man and theirs: 8 against 4, and 4 against 8.
-// Then the same with you standing still: whoever takes it has come round in front of you.
+// Then the same with you standing still: whoever takes it has come round in front of you. (v124: City defends in a back
+// three here, the shape these were set in -- its own 4-3-1's centre-back comes round the man on the ball twice as often,
+// 26 of 64 against 10, which is the back four's game, not Strength's)
+await page.evaluate(() => window.__T.setTeamForm('R', 'def', '3-3-2'));
 const scene = (cs, os, ang, i, run) => page.evaluate(({ cs, os, ang, i, run }) => new Promise(res => {
   const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team); T.freeze(); T.TAC.R.def = 'press'; window.__TK = [];
   const o = T.players().filter(q => q.team !== c.team && q.role !== 'G')[1], keepC = c.stats, keepO = o.stats;

@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, teamPlan, PLAN:()=>PLAN, mkPlanState, TI:()=>TI, tiDefault, '
-  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, watchBall, onAhead, inStride, controlled:()=>controlled, setControlled, EXH, simNow:()=>simNow, setStyle, '
+  + 'runGap, backlineGap, offsideLineX, heldBy, holderOf, thruDir, thruBall, screenDirToPitch, watchBall, onAhead, inStride, controlled:()=>controlled, setControlled, EXH, simNow:()=>simNow, setStyle, setTeamForm, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } '
   + 'for(const q of players){ q.runSeen=null; q.runCd=0; q.gapRun=0; } ball.thru=null; ball.intendedRcv=null; ball.passerRef=null; simNow+=0.5; }, '
@@ -28,10 +28,11 @@ writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
-// Liverpool (2-2-3 with the ball) v Manchester City (3-3-1 without it), both BALANCED
+// Liverpool (3-2-3 with the ball) v Manchester City (3-3-2 without it: v124, nine a side -- its own 4-3-1 has a back four,
+// and the scenes are a back three's), both BALANCED
 await page.evaluate(() => { const T = window.__T; T.EXH.you = 'LIV'; T.EXH.opp = 'MCI'; localStorage.removeItem('ft_clubsq'); });
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(1500);
-await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); });
+await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.setStyle('R', 'neutral'); T.setTeamForm('R', 'def', '3-3-2'); });
 // (v118: an archetype has habits of its own -- a target man hardly runs, a false nine always drops in: the scenes below are
 // the side's runs as such, so Liverpool's men are given archetypes with none to speak of -- wingers, a complete forward,
 // playmakers, ball-playing centre-backs)
@@ -46,10 +47,10 @@ await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
   // (v112: instructions are the team's -- its lines' -- not a man's: TEAM.G.<key> = setting; cleared, the side's style's own)
   window.__ti = (k, v) => { T.TI().G[k] = v; };
   window.__clearIns = () => { for(const t of ['G', 'R']){ const d = T.tiDefault('neutral'); for(const k in d) T.TI()[t][k] = d[k]; } };
-  // City's block: three across their line (u from their goal), three in front of it, the forward up; their keeper on his line
+  // City's block: three across their line (u from their goal), three in front of it, the forwards up; their keeper on his line
   window.__city = (uLine, ws, uMid) => { const R = window.__men('R'), back = R.filter(q => T.posOf(q, 'def') === 'CB'), rest = R.filter(q => !back.includes(q));
     back.forEach((q, i) => window.__at(q, uLine, ws[i]));
-    rest.forEach((q, i) => i < 3 ? window.__at(q, uMid, [-22, 0, 22][i]) : window.__at(q, 62, 0));
+    rest.forEach((q, i) => i < 3 ? window.__at(q, uMid, [-22, 0, 22][i]) : window.__at(q, 62, i === 3 ? 0 : -16));   // (a second forward out of the scenes' way)
     const k = T.keepers().find(q => q.team === 'R'); window.__at(k, 1, 0); };
   // Liverpool deep, out of it (their back two, the men not in the scene)
   window.__liv = () => { window.__men('G').forEach((q, i) => window.__at(q, 22, -20 + i * 7)); };

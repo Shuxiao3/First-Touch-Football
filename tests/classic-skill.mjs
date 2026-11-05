@@ -43,10 +43,11 @@ const keen = await page.evaluate(() => { const T = window.__T, R = T.players().f
   sk(8, 5); at(T.FW * 0.4, T.YC + T.FH * 0.4); out.wingOwnHalf = T.aiSkillKeen(p, d, C);
   at(T.FW * 0.75, T.YC + T.FH * 0.1); as('CM', 'MID', 0); out.cm = T.aiSkillKeen(p, d, C);
   as('CB', 'DEF', 0); out.cb = T.aiSkillKeen(p, d, C);
+  const st0 = p.style; p.style = 'fullback';   // (a plain full-back: a wing-back's habit is to push on -- v124: City's first man is one now)
   as('FB', 'DEF', 1); at(T.FW * 0.6, T.YC + T.FH * 0.4); out.fbHolding = T.aiSkillKeen(p, d, C);
   at(T.FW * 0.75, T.YC + T.FH * 0.4); out.fbOn = T.aiSkillKeen(p, d, C);
   sk(6, 5); out.fbOnSmallEdge = T.aiSkillKeen(p, d, C);
-  p.stats = keep.s; d.stats = keep.d; p.slotAtk = keep.a; T.applySlot(p, keep.a);
+  p.stats = keep.s; d.stats = keep.d; p.slotAtk = keep.a; T.applySlot(p, keep.a); p.style = st0;
   for(const k in out) out[k] = +out[k].toFixed(2); return out; });
 info('how keen: ' + JSON.stringify(keen));
 ok(keen.wingTouchline > 0.8 && keen.wingTouchline > keen.wingInside, 'a winger 3 better than the man in front of him on the touchline in their third is keenest (' + keen.wingTouchline + ', ' + keen.wingInside + ' infield)');
@@ -88,6 +89,7 @@ ok(['rainbow', 'elastico', 'heel'].every(k => picks[5][k] > 0) && !picks[5].somb
 const somb = await page.evaluate(() => { const T = window.__T, R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
   const p = R[2], d = G[2], e = G[3], atk = T.atkOf('R'), b = T.ball(), keep = { s: p.stats, st: p.stars }, out = {};
   T.freeze(); p.stats = Object.assign({}, keep.s, { dribbling: 9, ballControl: 9, agility: 9 });
+  for(const q of T.players()) if(q !== p && q !== d && q !== e){ q.x = atk > 0 ? 60 : T.FW - 60; q.y = q.team === 'R' ? 60 : T.FH - 60; q.vx = q.vy = 0; }   // (everyone else out of it: v124, nine a side, had another of ours near enough to stop it)
   const go = (st, o) => { let n = 0, kinds = new Set();
     for(let i = 0; i < 400; i++){ const u = o.own ? T.FW * 0.3 : T.FW * 0.7; p.x = atk > 0 ? u : T.FW - u; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal';
       p.stars = st; p.skill = null; p.skillCd = 0; p.sombNext = 0; b.z = 0; b.vz = 0; T.own(p, p.r + b.r + 5);

@@ -13,7 +13,8 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 
 ## Football Classic (`classic.html`)
 
-The same game played like any other football game. It's a copy of `index.html` with two changes:
+The same game played like any other football game, and nine a side since v124: eight outfielders and a keeper (`index.html`
+is still seven and a keeper). It's a copy of `index.html` with two changes:
 
 - **The first touch is the player's own.** There's nothing to time, for you or the computer. As the ball reaches a
   man, his touch is judged from his Ball control and Composure, and how much they matter depends on the moment.
@@ -257,24 +258,24 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **Tactics** (in a career, on the training pitch: its level decides which shapes and styles your side can have; see
     **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
-    seven two to a line -- and, at its end, INSTRUCTIONS and BEST 8 (v116: INSTRUCTIONS was a button on his card). Under the pitch, on one line, the bench: five men, the subs you'll have in a
+    seven two to a line -- and, at its end, INSTRUCTIONS and BEST 9 (v116: INSTRUCTIONS was a button on his card). Under the pitch, on one line, the bench: five men, the subs you'll have in a
     match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
-    on the bench, to swap them. BEST 8 puts the next keeper first on the bench and the best four of the rest after
+    on the bench, to swap them. BEST 9 puts the next keeper first on the bench and the best four of the rest after
     him. The tokens narrow to fit; if they still don't, they show a page at a time, with a small 1/2 ▶ button to
     turn to the next, so the pitch never loses height. (The rest of the squad used to sit after the bench, in
-    reserve, dimmed: with squads of twenty that crammed the pitch's screen.) On the right, from under that
+    reserve, dimmed: with squads of twenty-one that crammed the pitch's screen.) On the right, from under that
     row to the foot of the screen, the card of the man you tapped. Every man on the pitch shows his face (his own
     look, in the club's kit) beside two lines: his rating and his own position (GK, CB, FB, CM, WM, WNG, STK)
     on top, his name and shirt number under them. The bench has the same two lines without the face, in a shorter box,
     so the pitch gets the height. The lines sit inside each token with room round them, clear of its edges.
   - **Selection** (in a career, on the training pitch): who you take, and your quick subs. The whole squad as one
-    list, top to bottom: the keeper, then the seven on the pitch (each beside the spot he's in, with the ball), the
+    list, top to bottom: the keeper, then the eight on the pitch (each beside the spot he's in, with the ball), the
     five on the bench, then the rest, who aren't taken. It's wrapped into three columns where its parts meet -- ON THE
-    PITCH, THE BENCH, NOT TAKEN -- so a squad of twenty fits a phone held sideways without scrolling; the fourth is
+    PITCH, THE BENCH, NOT TAKEN -- so a squad of twenty-one fits a phone held sideways without scrolling; the fourth is
     QUICK SUBS (below). No faces: a bar a man,
     with his place in the list, his name, his position (on the pitch, the spot he plays) and his rating (there:
     lime in a second position of his, amber out of position). Drag a bar up or down (or across) and put it down:
-    - **On the pitch's part** (the keeper or one of the seven), or anywhere if he came from there, the two change
+    - **On the pitch's part** (the keeper or one of the eight), or anywhere if he came from there, the two change
       places: he takes the other's spots, with the ball and without it, and the other takes his place in the list.
       So a man dragged from NOT TAKEN onto your right back plays there, and the right back is not taken.
     - **On the bench or in the rest**, coming from there, he goes in where you put him and the men in between
@@ -292,8 +293,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     running down the pitch's height (a WIDE line's end men reach its edges). No man is drawn over another or off the
     pitch, at any phone size: on a short screen a line's men stay at least a man's height apart, and on a narrow one
     the keeper and the three lines close up, a man's width each, rather than overlap -- in a match's tactics and the
-    Squad tab's little pitch too. It used to look the same whatever the width, and a four across the middle overlapped.
-  - **The right-hand side has two sides**: INSTRUCTIONS, up in the top row left of BEST 8 (lit while they're up;
+    Squad tab's little pitch too (a five across the back as well, v124). It used to look the same whatever the width, and a four across the middle overlapped.
+  - **The right-hand side has two sides**: INSTRUCTIONS, up in the top row left of BEST 9 (lit while they're up;
     a tap on it again, or on a man, and it's his card), turns it over (v116: it was a small button on his card,
     INSTRUCTIONS ▶, then ◀ PLAYER). One is his card: all of him, head to toe (a keeper in a keeper's top), his name, his
     own position, style, age, skill stars, the spots he plays (PLAYS, ALSO: as on a building's card) and rating (lime in a second position of his, amber out of position: no line of text says
@@ -628,14 +629,17 @@ The same game played like any other football game. It's a copy of `index.html` w
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
   again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the training pitch's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
-  - **Formations.** There are ten seven-a-side shapes: 3-2-2, 2-3-2, 2-2-3, 2-4-1, 3-3-1, 3-1-3, 1-3-3, 1-4-2, 4-2-1
-    and 4-1-2. 1-3-3 and 1-4-2 are attacking shapes only, and 4-2-1 and 4-1-2 (four at the back) are defending shapes
-    only. Each pair is greyed out in the other phase, and the computer keeps to the same rule. The same seven men play
-    in both shapes. Each man's defending spot starts as the one nearest his attacking spot, and you can rearrange
-    either shape. A computer side defends in the shape it attacks in, with some exceptions. A front three drops a man
-    into midfield unless the side gegenpresses, so 2-2-3 defends as 2-4-1 and 3-1-3 as 3-3-1. 1-3-3 defends as 2-3-2
-    and 1-4-2 as 2-4-1. A direct counter sits deep and makes a back four of some: 2-2-3 and 3-2-2 defend as 4-2-1 and 1-4-2 as
-    4-1-2 (1-3-3 as 3-3-1).
+  - **Formations.** There are ten shapes for eight outfielders (v124; before, ten for seven, and each of these is one of
+    those with a man more at the back): 4-2-2, 3-3-2, 3-2-3, 3-4-1, 4-3-1, 2-4-2, 4-1-3, 2-3-3, 5-2-1 and 5-1-2.
+    2-3-3 and 2-4-2 (two at the back) are attacking shapes only, and 5-2-1 and 5-1-2 (five at the back) are defending
+    shapes only. Each pair is greyed out in the other phase, and the computer keeps to the same rule. The same eight men
+    play in both shapes. A back three is three centre-backs; a back four or five has a full-back at each end, who goes
+    up his flank with the ball as the side's instructions tell him. Each man's defending spot starts as the one nearest
+    his attacking spot, and you can rearrange either shape. A computer side defends in the shape it attacks in, with
+    some exceptions. A front three drops a man into midfield unless the side gegenpresses, so 3-2-3 defends as 3-4-1
+    and 4-1-3 as 4-3-1. 2-3-3 defends as 3-3-2 and 2-4-2 as 3-4-1. A direct counter sits deep and makes a back five of
+    some: 3-2-3 and 4-2-2 defend as 5-2-1 and 2-4-2 as 5-1-2 (2-3-3 as 4-3-1). A shape saved before v124 is read as its
+    new one (2-3-2 as 3-3-2).
   - **Width.** COMPACT, BALANCED or WIDE, set separately with and without the ball. It spreads each line, and how far
     out the wide men go, by ×0.84, ×1 or ×1.18.
   - **Seven styles, and the style is the whole game.** Each says how a side plays with the ball and how it defends
@@ -808,7 +812,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       - A central midfielder told to INTERCEPT is in a passing lane 10% of the time. One told to COVER WING is
         2.7 m nearer a ball that's been out wide for 1.5 s.
   - **Anyone can play anywhere**, the keeper included. Swap any two men, or put an outfielder in goal (the keeper
-    then takes his spots in both shapes). BEST 8 puts a keeper in goal and the best seven by their ratings in the
+    then takes his spots in both shapes). BEST 9 puts a keeper in goal and the best eight by their ratings in the
     spots they're in, a man in his own position ahead of an equal one out of it.
   - **Positions: his own, his second ones, and the rest.** A spot in a shape is a CB, FB, CM, WM, W (a winger's) or
     ST. Since v118 it's a man's ARCHETYPE that says where he can play, not his position: the spots it plays are his own,
@@ -830,8 +834,8 @@ The same game played like any other football game. It's a copy of `index.html` w
     position (v118: archetypes are choosier than positions were -- 72%, 27% and under 1% before -- so a computer squad's
     positions are dealt to fit its shapes: see [Playing styles](#playing-styles)). Who defends where, when a side's shape without the ball isn't its shape with it (yours too, when you
     change one), is still each man to the spot nearest his, but now in a position of his own before another: a second
-    position counts as a little further off, one he'd be out of position in as about a spot further on. So a 2-3-2
-    that defends in a 3-3-1 drops its holding midfielder into the back three rather than the central midfielder next
+    position counts as a little further off, one he'd be out of position in as about a spot further on. So a 2-4-2
+    that defends in a 3-4-1 drops its holding midfielder into the back three rather than the central midfielder next
     to him (since v118: its anchor -- an anchor covers centre-back -- rather than its playmaker). The computer's clubs had
     about 7% of their men out of position without the ball, then about 4% (about 6% with archetypes, v118), none of
     them further from their spots; what's left is the shape's doing (a back three from a side with two defenders in
@@ -1165,9 +1169,10 @@ The same game played like any other football game. It's a copy of `index.html` w
   you name yourself and your club and give it a three-letter short name (it suggests one from the club's name,
   shown on a scoreboard as you type); KIT, its colours; and CREST, its badge. START works from any of them. You
   start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
-  Premium League), with a weak squad of 14 and $20,000. A squad is twenty at most (every club's), twelve at
-  least; eight start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
-  **Selection**). It was fifteen at most, with a bench of four. The game is buying and selling players:
+  Premium League), with a weak squad of 15 and $20,000. A squad is twenty-one at most (every club's), thirteen at
+  least; nine start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
+  **Selection**). It was fifteen at most, with a bench of four, then twenty with eight starting (v124: a man more
+  each for nine a side, a fifth defender among a new squad's fifteen). The game is buying and selling players:
   nobody's stats are built up by hand.
   - **The season runs a week at a time.** Three weeks of pre-season (no games), then 26 league weeks with a league
     game every Saturday, home and away -- in some weeks a cup game on the Wednesday before it, never in the league's
@@ -1190,7 +1195,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     ceiling: a man 60% fit can't get past 60% of his legs all game (and comes back at half-time only as far as
     that), so he's slower from the kick-off. In a simulated game he counts 15 points under his rating for all he's
     short of fresh (at 80%, 3 under). Who plays for you is yours (Training's Selection tab shows each man's fitness as a bar along his name, the
-    tactics pitch along his token, his card as FITNESS; the hub warns when some of your eight are under 70%).
+    tactics pitch along his token, his card as FITNESS; the hub warns when some of your nine are under 70%).
     - **A game a week, and they're fresh for it**, whatever the physio: a week's rest is more than a game costs. What a
       man's fitness reads between games is what he'll start the next one with.
     - **Two games a week, and only a good physio keeps up**: four days from Saturday to the Wednesday game, three to
@@ -1213,7 +1218,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       older and the less durable; in training mostly knocks. He heals by the day, and comes back short of fitness
       (see the physio, above). From 28, a torn muscle or worse takes half a point off his legs for
       good, and their decline comes on sooner and steeper; younger, it heals clean.
-    - **Who plays**: the computer never picks a man who's hurt. Yours, if he's in your eight at kick-off (PLAY or
+    - **Who plays**: the computer never picks a man who's hurt. Yours, if he's in your nine at kick-off (PLAY or
       SIMULATE), gives his place to the best fit off the bench -- a man of his line, the fittest -- and the hub says so;
       nobody hurt is among the subs.
     - **In a match you play**, a man can get hurt in it: he slows (his legs' ceiling down to 40%), can't sprint, and
@@ -1222,7 +1227,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       report lists him. In a simulated game it's a roll for each man at his share of it.
     - **Where you see it**: ✚ and the weeks out by his name in the squad lists and Training's Selection list, his
       token on the tactics pitch faded, ✚ INJURED · a strain · 2 weeks on his card, the hub (✚ and who, and whether
-      he's in your eight), and the news.
+      he's in your nine), and the news.
   - **Match ratings and form.** Every man who plays gets a rating for the game, 3 to 10 (6 an ordinary one).
     - **In a game you play** it comes from what he did in it, counted as it happens: passes tried and found, shots
       and on target, goals, assists, tackles won, interceptions, the ball lost, a keeper's saves. His role's work
@@ -1323,7 +1328,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       primary school, a charity match for the hospital, a visit to the children's ward, a youth club's kits, an open
       training day, a collection for the food bank. YES and the fans think more of the club (1.5% to 3% more of the
       league's usual following), sometimes the dressing room too; some cost money (by the league), some a little of
-      your eight's legs. NOT THIS TIME, and nothing happens.
+      your nine's legs. NOT THIS TIME, and nothing happens.
     - **The derby**: a club in your league is your rival, the club down the road (picked when a career starts, and
       again in a season they're not in your league). The week you play them the papers build it up (where they are,
       their form, your record against them); the result counts 1.6 times as much in the dressing room and with the
@@ -1331,11 +1336,11 @@ The same game played like any other football game. It's a copy of `index.html` w
       quarter more at the gate: see **The turnout**). The press conference after it has its own question.
     - **The cups' draws**: your first round (or a bye, or the Champions League group), and after each round you're
       through, the next draw -- who, home or away, the Wednesday it's on and what winning it pays; or that you're out.
-    - **Loans**, in the transfer window: a club wants one of your fringe men (out of your eight, 24 or under or
+    - **Loans**, in the transfer window: a club wants one of your fringe men (out of your nine, 24 or under or
       not happy) to the end of the season and pays his wages -- LET HIM GO and he plays there and comes back when the
-      season's over; or lends you one of theirs out of their eight for a share of his wage (30% to all of it, the
+      season's over; or lends you one of theirs out of their nine for a share of his wage (30% to all of it, the
       better he is to them the more) -- TAKE HIM. LOAN HIM on another club's man in the market asks for one yourself
-      (a man out of their eight, the window open, room in your squad). A man on loan isn't his club's to sell,
+      (a man out of their nine, the window open, room in your squad). A man on loan isn't his club's to sell,
       release, renew or lend again till he's back, and nobody bids for him (the transfer list says who of yours is
       out on loan, and doesn't list the man you have on loan; his card says ON LOAN). Everyone goes back at the
       season's end: in the review, and the Monday papers say how yours did.
@@ -1353,7 +1358,7 @@ The same game played like any other football game. It's a copy of `index.html` w
     - **A youngster on a buyback clause** (v105): now and then in a window (about one week in five of pre-season
       and the winter break, one in sixteen of the league's first half) a bigger club -- a league or more above yours;
       in the Premium League, one of its top five -- offers you a youngster it has no use for yet: 21 or under, out of
-      its eight, too raw for its first team or not doing it there, no worse than your weakest in his part of the side
+      its nine, too raw for its first team or not doing it there, no worse than your weakest in his part of the side
       less two, with more to come, at a fee you can find. A fifth under their price, on a buyback clause: at the start
       of either window, to the end of next season, they can have him back for twice what you paid -- and they will if
       he's come on (four points or more, and within five of their league's level): he goes, the money comes in, and
@@ -1520,7 +1525,7 @@ The same game played like any other football game. It's a copy of `index.html` w
       might become; one with good scouts prices what he could be too. A 19-year-old rated 60 with a ceiling of 85
       asks about the same as one with a ceiling of 60 at a club with no eye for it, and over twice as much at one
       with the best.
-    - **Its temperament**: 0.85 to 1.25 times the rest, its own. More for one of its first eight, less in the last
+    - **Its temperament**: 0.85 to 1.25 times the rest, its own. More for one of its first nine, less in the last
       season of his deal.
     - **A small club is nobody's fool.** A man in fine form (7.2 and up) gets noticed, as a good scout would see him.
       Two bids or more over its price for him -- yours, or another club's -- and it knows it has a gem: it sees all
@@ -1639,15 +1644,15 @@ The same game played like any other football game. It's a copy of `index.html` w
   - **The computer clubs** buy from each other and from the free agents while the window's open (most of it in
     pre-season and the winter break, a little in the weeks between), bid for your players, and fill their squads up
     every summer.
-    - **Who they pick.** Their best keeper and seven best outfielders on the day, but not always. Up to three men too
+    - **Who they pick.** Their best keeper and eight best outfielders on the day, but not always. Up to three men too
       tired for a game (under 90% fit; under 78% in a big one: the Champions League, a cup's last two rounds, the
       playoffs) sit it out for a fresh man not much worse. Their young men (21 and under) get a start now and then in
       the league, and three of them once the league's settled for the club (promotion sure -- in the Premium League a
       Champions League place -- or the top six out of reach with relegation out of reach too: by the last few weeks a
       good few clubs have nothing left to play for). In a cup below its level a club rests its regulars: two leagues
-      above the cup's lowest (the Premium League in the Coco Cup), four of its seven are youngsters (or the reserves),
+      above the cup's lowest (the Premium League in the Coco Cup), four of its eight are youngsters (or the reserves),
       a league above, one or two. The Champions League, a cup's last two rounds and the playoffs get their best.
-      When you play them live, the eight they picked are the eight you face. Each has its own style, with shapes and widths to suit it: a wing side
+      When you play them live, the nine they picked are the nine you face. Each has its own style, with shapes and widths to suit it: a wing side
     plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
     The better leagues have more control and gegenpressing sides, the lower ones more direct play and deep counters.
   - **Crests.** Yours is 16 by 18 pixels: a shape (shield, round, classic, block, oval), a pattern in two colours
@@ -1787,9 +1792,9 @@ The same game played like any other football game. It's a copy of `index.html` w
 
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
         taken: its Tactics and Selection tabs), and its
-        level is what shapes and styles your side can have: at 1 the 2-3-2, 3-2-2 and 2-2-3 and the balanced and direct
-        styles; 2 adds the 2-4-1, 3-3-1 and 4-2-1, wing play and fluid counter; 3 the 3-1-3, 1-4-2 and 4-1-2, control
-        possession and direct counter; 4 the 1-3-3 and gegenpress. The rest are on the menus, locked, each with the
+        level is what shapes and styles your side can have: at 1 the 3-3-2, 4-2-2 and 3-2-3 and the balanced and direct
+        styles; 2 adds the 3-4-1, 4-3-1 and 5-2-1, wing play and fluid counter; 3 the 4-1-3, 2-4-2 and 5-1-2, control
+        possession and direct counter; 4 the 2-3-3 and gegenpress. The rest are on the menus, locked, each with the
         level it needs -- in a match's tactics too. Width is always yours, and so are the team instructions (v112), from
         the first day (before them every player instruction was, from v106; before that they came with the levels).
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
@@ -1919,7 +1924,7 @@ doesn't shoot.
 
 **EXHIBITION** opens a match setup before kick-off. Pick **your team** and the **opponent** from the
 2026/27 Premier League (◀ ▶ step through the clubs; tap a club for the full list), then pick the
-player **you control** from your team's seven outfielders (a striker by default; switching clubs keeps you
+player **you control** from your team's eight outfielders (a striker by default; switching clubs keeps you
 in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
@@ -1927,24 +1932,29 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   tell apart at a glance (brightness counts most, so colour-blind players can tell them apart);
   then it's their change kit, or a plain white or black one if that's no better. The keepers pick a
   top unlike either team's shirts and the grass.
-- **Every club has its own shape**, loosely after how it lines up (a back four is two here, a front
+- **Every club has its own shape**, loosely after how it lines up (a back four is three here, a front
   three three), and the setup shows it under the club's name:
 
   | Shape | Clubs |
   |---|---|
-  | 2-2-3 | Arsenal, Leeds United, Liverpool |
-  | 2-3-2 | Bournemouth, Coventry City, Everton, Newcastle United |
-  | 2-4-1 | Aston Villa, Brighton, Chelsea, Fulham |
-  | 3-3-1 | Crystal Palace, Ipswich Town, Manchester United, Sunderland |
-  | 3-2-2 | Brentford, Nottingham Forest |
-  | 3-1-3 | Manchester City |
-  | 1-4-2 | Hull City |
-  | 1-3-3 | Tottenham Hotspur |
+  | 3-2-3 | Arsenal, Leeds United, Liverpool |
+  | 3-3-2 | Bournemouth, Coventry City, Everton, Newcastle United |
+  | 3-4-1 | Aston Villa, Brighton, Chelsea, Fulham |
+  | 4-3-1 | Crystal Palace, Ipswich Town, Manchester United, Sunderland |
+  | 4-2-2 | Brentford, Nottingham Forest |
+  | 4-1-3 | Manchester City |
+  | 2-4-2 | Hull City |
+  | 2-3-3 | Tottenham Hotspur |
 
   Both sides kick off in their club's shape, and a club's squad is made for it: wingers on the flanks
-  of a front three, wide midfielders in a midfield of three or four, wing-backs in a back three with
-  nobody wide ahead of it (who go up the flanks with the ball). Change a shape in the match and the
-  club keeps it. A club whose line-up you'd saved before clubs had shapes stays in its 2-3-2.
+  of a front three, wide midfielders in a midfield of three or four, full-backs at the ends of a back
+  four (wing-backs with nobody wide ahead of them), who go up the flanks with the ball. Change a shape
+  in the match and the club keeps it. A club whose line-up you'd saved before clubs had shapes stays in
+  the 3-3-2 its 2-3-2 grew into.
+- **Nine a side (v124).** Every club's eight from before are the same men, and a ninth joins them: a
+  centre-back of its own, in the middle of its back line (the outside centre-backs of a back three that's
+  a back four now are full-backs). A side you'd kept from before gets him too, and everyone else keeps his
+  spot.
 - **Every club has its own way of playing** too -- its style, loosely after how it plays -- shown on the setup
   screen under its shape, and each side plays its own (they all used to play whatever you'd last picked, BALANCED
   unless you'd changed it):
@@ -2055,7 +2065,7 @@ test, and like the Trap Lab the values are the game's settings.
 
 ## What's in the engine
 
-- **7v7 match sim** with 3D ball physics (loft, curve/spin, bounce), offside, restarts, and possession-aware team
+- **9v9 match sim** (eight outfielders and a keeper a side, since v124: it was 8v8) with 3D ball physics (loft, curve/spin, bounce), offside, restarts, and possession-aware team
   phases, on a pitch marked like a real one -- penalty areas, six-yard boxes, penalty spots and arcs, the centre
   circle and the corners -- at nine-tenths of the men's size: they're 25 px to the metre, the pitch 22.5. It's
   99.75 m by 68 (2244.375 × 1530), a twentieth shorter than a full-length one: it was 2625 × 1700 at 25 px to the
@@ -2074,6 +2084,33 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
     show in 80 matches).
+- **v124: nine a side.** Eight outfielders and a keeper a side (it was seven and a keeper). Every shape is one of the
+  old ones with a man more at the back -- 3-3-2 (it was 2-3-2), 4-2-2, 3-2-3, 3-4-1, 4-3-1 and 4-1-3, two for attacking
+  only (2-3-3 and 2-4-2: two at the back) and two for defending only (5-2-1 and 5-1-2: five) -- and a shape saved before
+  is read as its new one. A back three is three centre-backs; a back four or five has a full-back at each end, who goes
+  up his flank with the ball as the side's instructions say. Building from the back a back four's centre-backs split as
+  a back three's outside men do and its full-backs go higher and wider still; on the keeper's ball the centre-backs are
+  at the corners of the box and the full-backs up toward the touchlines (with seven outfielders a back four only ever
+  defended). Every exhibition club keeps its eight men and gets a ninth, a centre-back of its own in the middle of its
+  back line; the outside centre-backs of a back three that's a back four now are full-backs (City's, Palace's,
+  Ipswich's, United's and Sunderland's two). A career squad is fifteen to start (a fifth defender), twenty-one at most
+  and thirteen at least, and BEST 9 picks the side. A career, a club's side or the quick match's squads kept from before
+  get their eighth outfielder off the bench (the first fit defender there) in the middle of the back line, everyone else
+  in his spot. On a phone a five across the back fits the tactics pitch (on the shortest, right to its edges).
+  Computer v computer, 120 exhibition matches each (STAR, three-minute halves):
+
+  | | v123 (eight a side) | v124 (nine a side) |
+  | --- | --- | --- |
+  | Goals a match | 1.70 | 1.19 |
+  | Shots a match | 7.0 | 5.8 |
+  | Shots scored | 24% | 20% |
+  | Goalless matches | 19% | 29% |
+  | Passes a match | 139 | 152 |
+  | Stamina's ceiling at half-time / full time (20 matches) | 0.74 / 0.65 | 0.76 / 0.67 |
+
+  A new career's wages are up with its fifteenth man: $948 a week to $1,069 for yours, $1,620 to $1,800 for a League 2
+  club's (the median; twelve new careers each). Figures from before v124 elsewhere in this README were measured with
+  seven outfielders.
 - **v123: players tire again -- halfway.** v121 left the sides almost as fresh at half-time as at the kick-off (the
   ceiling under the bar 0.85 on average, 0.82 at full time). A metre flat out now costs a fifth more -- still the same
   whoever runs it, so a Speed 6 man pays what anyone did before v121, the quickest a fifth more, a slow man about a
@@ -2553,10 +2590,12 @@ test, and like the Trap Lab the values are the game's settings.
   lane (he cuts in, or holds it, rather than carrying it into the run; pushed out to the line anyway, the
   runner goes round the back of him to the inside). Out there with fewer than two men going into the box,
   the furthest-up central midfielder (on BALANCED crosses) gets in it too, through the gap between their
-  centre-backs -- one of them, not both. A back three with nobody
-  wide ahead of it (3-2-2) sends its outside men up the flanks as wing-backs once the ball's out of its
-  third, the middle one and the holder staying back (the far wing-back too while they've two or more
-  men left up). One forward pins their last
+  centre-backs -- one of them, not both. A back four (4-2-2, 4-3-1, 4-1-3) sends its
+  full-backs up the flanks as the side's instructions tell them (SUPPORT once the ball's in their third,
+  ATTACKING from the build-up), the centre-backs and the holder staying back. Building from the back, a
+  back four's centre-backs split as a back three's outside men do and its full-backs go higher and wider
+  still; on the keeper's ball the centre-backs are at the corners of the box and the full-backs up toward
+  the touchlines (v124). One forward pins their last
   line, in a gap in it, and the other drops between their lines (whoever is pinning stays on it unless the
   other gets clearly higher: one comes short, the other goes); out wide in their third they go to the
   near and far posts. Around the man on the ball, two team-mates take up spots at clearly different

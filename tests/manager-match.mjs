@@ -41,7 +41,7 @@ const d = await page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot
 ok(d.md === 1 && [1, 2, 3, 4].every(t => d.lg[t].fx[0].every(m => m[2] != null)), 'matchday 1 recorded in every league');
 const m = d.lg[1].fx[0].find(x => x[0] === d.clubId || x[1] === d.clubId);
 info('your game: ' + JSON.stringify(m));
-ok(d.roster.filter(p => p.apps === 1).length === 8, 'the eight who started have a game each');
+ok(d.roster.filter(p => p.apps === 1).length === 9, 'the nine who started have a game each');
 ok(d.week === 1 && d.ledger.length === 1, 'the week was paid');
 await page.click('#mrContinueBtn'); await page.waitForTimeout(250);
 await page.evaluate(() => { const b = document.querySelector('#pressModal.on [data-pr="skip"]'); if(b) b.click(); }); await page.waitForTimeout(250);   // (the press first)

@@ -137,8 +137,8 @@ const tab = () => pc.evaluate(() => ({ plan: JSON.stringify(__MG.d.qsubs || []),
 const id = (side, k) => pc.$$eval(`#bpBody .selRow[data-side="${side}"]`, (ns, k) => +ns[k].dataset.qid, k);
 const tapRow = async (side, k) => { await pc.click(`#bpBody .selRow[data-side="${side}"] >> nth=${k}`); await pc.waitForTimeout(80); };
 let T0 = await tab();
-ok(noSubs && T0.xi === 7 && T0.benchAll === 5 && T0.bench === 4 && T0.gkOff === 1 && T0.head.join('|') === 'ON THE PITCH|THE BENCH|NOT TAKEN|QUICK SUBS · 0 OF 3' && T0.pairs.length === 0,
-  'no Subs tab: the Selection tab\'s seven on the pitch and the bench\'s five (its keeper not to be had) to tap, and QUICK SUBS · 0 OF 3 down its fourth column');
+ok(noSubs && T0.xi === 8 && T0.benchAll === 5 && T0.bench === 4 && T0.gkOff === 1 && T0.head.join('|') === 'ON THE PITCH|THE BENCH|NOT TAKEN|QUICK SUBS · 0 OF 3' && T0.pairs.length === 0,
+  'no Subs tab: the Selection tab\'s eight on the pitch and the bench\'s five (its keeper not to be had) to tap, and QUICK SUBS · 0 OF 3 down its fourth column');
 const x1 = await id('xi', 1), b1 = await id('bench', 1), b2 = await id('bench', 2), x4 = await id('xi', 4), b3i = await id('bench', 3);
 await tapRow('xi', 1); const Tl = await tab(); await tapRow('bench', 1); let T1 = await tab();
 await tapRow('xi', 1); await tapRow('bench', 2); let T2 = await tab();
@@ -164,8 +164,10 @@ const M = await pc.evaluate(() => [...document.querySelectorAll('#qsDrop .qsRow'
 info('the career match, pressed: ' + JSON.stringify({ want, rows: M, tired }));
 ok(M.length >= 2 && M[0].plan && M[1].plan && M[0].qs === want[0] && M[1].qs === want[1] && !tired, 'in the match, pressed with nobody tired: your two planned subs first on the list, lit as yours');
 await pc.click('#qsDrop .qsRow >> nth=0'); await pc.waitForTimeout(250);
-const done = await KC(`(()=>{ const [o,i]=${JSON.stringify(want[0])}.split(':').map(Number); return { on:players.some(q=>q.team==='G'&&q.squadIdx===i), off:players.some(q=>q.team==='G'&&q.squadIdx===o), used:SUBS.G.used }; })()`);
-ok(done.on && !done.off && done.used === 1, 'a tap on the first: that sub, there and then');
+const subbed = () => KC(`(()=>{ const [o,i]=${JSON.stringify(want[0])}.split(':').map(Number); return { on:players.some(q=>q.team==='G'&&q.squadIdx===i), off:players.some(q=>q.team==='G'&&q.squadIdx===o), used:SUBS.G.used, wait:!!QS.pend }; })()`);
+let done = await subbed(); const waited = done.wait;   // (the man coming off on the ball -- the kick-off's, say -- goes once he's played it)
+for(let i = 0; i < 40 && done.wait; i++){ await pc.waitForTimeout(100); done = await subbed(); }
+ok(done.on && !done.off && done.used === 1, 'a tap on the first: that sub, there and then' + (waited ? ' (once the man coming off had played the ball)' : ''));
 await b4.close();
 
 process.exit(rep.finish() ? 1 : 0);

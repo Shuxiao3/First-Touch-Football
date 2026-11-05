@@ -1183,7 +1183,7 @@
   .tbDrop i{ font:9px 'FTC Dot',monospace; font-style:normal; color:inherit; opacity:.8; letter-spacing:1px; }
   .tbDrop.on{ background:var(--fillAcc); color:var(--accInk); text-shadow:1px 1px 0 var(--accSh); }
   .tbBest, .tbIns{ margin-left:auto; flex:none !important; padding:0 12px !important; font-size:12px; }
-  .tbIns + .tbBest{ margin-left:0; }   /* (INSTRUCTIONS left of BEST 8, the two at the row's end) */
+  .tbIns + .tbBest{ margin-left:0; }   /* (INSTRUCTIONS left of BEST 9, the two at the row's end) */
   .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin);
     padding:10px; display:flex; flex-direction:column; gap:6px; }
   .tbMenuGrid{ display:grid; grid-template-columns:repeat(5,auto); gap:6px; }
@@ -1244,7 +1244,7 @@
   .sqPitch .ptk .ptkName{ font-size:8px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
   .sqList .mgRow{ -webkit-touch-callout:none; touch-action:none; }   /* (a finger that moves on him carries him: see pxDrag) */
-  /* WHO YOU TAKE: the squad as one list wrapped into three columns -- the eight, the bench, the rest -- a bar a man */
+  /* WHO YOU TAKE: the squad as one list wrapped into three columns -- the nine, the bench, the rest -- a bar a man */
   .selB{ display:flex; flex-direction:column; height:100%; min-height:0; padding:8px 12px 10px; }
   .selCols{ flex:1 1 auto; min-height:0; display:flex; gap:10px; }
   .selCol{ flex:1 1 0; min-width:0; min-height:0; display:grid; grid-template-rows:auto repeat(var(--rows,8),minmax(18px,32px)); row-gap:3px; align-content:start; }   /* (as many rows in each: the same height in all three) */
@@ -1434,7 +1434,7 @@
   <div id="startMenu">
     <div class="smCenter">
       <div class="smTitle">FOOTBALL<span class="dot">.</span> CLASSIC</div>
-      <div class="smSub">seven a side</div>
+      <div class="smSub">nine a side</div>
       <div class="smItems" id="smItems">
         <button class="smBtn" data-act="resume" id="smResume" style="display:none"><span class="mk">▶</span>RESUME MATCH</button>
         <button class="smBtn" data-act="new"><span class="mk">▶</span>NEW GAME</button>
@@ -1962,41 +1962,44 @@
     balanced:{friction:0.55,ballControl:6,knockOn:480,knockVar:0.35,speed:7,accel:3,agility:5,aiThink:0.45,mateThink:0.45,pressTight:0.45,shotPower:4, passAcc:6,curve:7,shotAcc:8, longShots:7,keeperSpd:4,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.6,stamina:5.5,dribbling:5.5,composure:5.5,tackle:5.5,interceptions:5.5,crossing:5.5,heading:5.5,offIQ:5.5,defIQ:5.5},
     sim:     {friction:0.32,ballControl:4,knockOn:600,knockVar:0.5, speed:5.5,accel:2,agility:2,aiThink:0.8, mateThink:0.8, pressTight:0.6, shotPower:6,passAcc:5,curve:7,shotAcc:5.5, longShots:5,keeperSpd:8,strengthG:6,strengthR:6,firstTouchAcc:0.5,stamina:4,dribbling:4,composure:6,tackle:6,interceptions:6,crossing:6,heading:6,offIQ:5,defIQ:6},
   };
-  // seven outfielders a side: every formation's lines add up to 7
-  const FORMS={'3-2-2':[3,2,2],'2-3-2':[2,3,2],'2-2-3':[2,2,3],'2-4-1':[2,4,1],'3-3-1':[3,3,1],'1-4-2':[1,4,2],'3-1-3':[3,1,3],'1-3-3':[1,3,3],'4-2-1':[4,2,1],'4-1-2':[4,1,2]};
+  // NINE A SIDE (v124): eight outfielders and a keeper -- every formation's lines add up to 8. Each shape is one of the
+  // seven-outfielder ones with a man more at the back (2-3-2 is 3-3-2 now, 3-1-3 is 4-1-3), in the same order on the menus.
+  const FORMS={'4-2-2':[4,2,2],'3-3-2':[3,3,2],'3-2-3':[3,2,3],'3-4-1':[3,4,1],'4-3-1':[4,3,1],'2-4-2':[2,4,2],'4-1-3':[4,1,3],'2-3-3':[2,3,3],'5-2-1':[5,2,1],'5-1-2':[5,1,2]};
   // WHAT EACH SPOT IS, line by line from the back, each line from the side's left: a centre-back (CB), a full-back (FB:
-  // the outside men of a back four, and of a 3-2-2's three), a central midfielder (CM), a wide midfielder (WM: the outside
-  // men of a midfield three or four), a winger (W: the outside men of a front three) or a striker (ST). The instructions
-  // go with the spot (see INSTR).
+  // the outside men of a back four or five), a central midfielder (CM), a wide midfielder (WM: the outside men of a
+  // midfield three or four), a winger (W: the outside men of a front three) or a striker (ST). The instructions go with
+  // the spot (see INSTR).
   const POS_OF={
-    '3-2-2':['FB','CB','FB','CM','CM','ST','ST'], '2-3-2':['CB','CB','WM','CM','WM','ST','ST'], '2-2-3':['CB','CB','CM','CM','W','ST','W'],
-    '2-4-1':['CB','CB','WM','CM','CM','WM','ST'], '3-3-1':['CB','CB','CB','WM','CM','WM','ST'], '1-4-2':['CB','WM','CM','CM','WM','ST','ST'],
-    '3-1-3':['CB','CB','CB','CM','W','ST','W'],   '1-3-3':['CB','WM','CM','WM','W','ST','W'],   '4-2-1':['FB','CB','CB','FB','CM','CM','ST'],
-    '4-1-2':['FB','CB','CB','FB','CM','ST','ST'] };
-  const OUTFIELD=7;
-  // saved settings / careers from the six-outfielder days: each six-a-side formation grows into its closest
+    '4-2-2':['FB','CB','CB','FB','CM','CM','ST','ST'], '3-3-2':['CB','CB','CB','WM','CM','WM','ST','ST'], '3-2-3':['CB','CB','CB','CM','CM','W','ST','W'],
+    '3-4-1':['CB','CB','CB','WM','CM','CM','WM','ST'], '4-3-1':['FB','CB','CB','FB','WM','CM','WM','ST'], '2-4-2':['CB','CB','WM','CM','CM','WM','ST','ST'],
+    '4-1-3':['FB','CB','CB','FB','CM','W','ST','W'],   '2-3-3':['CB','CB','WM','CM','WM','W','ST','W'],   '5-2-1':['FB','CB','CB','CB','FB','CM','CM','ST'],
+    '5-1-2':['FB','CB','CB','CB','FB','CM','ST','ST'] };
+  const OUTFIELD=8;
+  // saved settings / careers from the six- and seven-outfielder days: each old shape grows into its closest -- a six-a-side
+  // one into a seven-a-side one (FORM_FROM_6), and that into this one with a man more at the back (FORM_FROM_7)
   const FORM_FROM_6={'2-3-1':'2-3-2','3-2-1':'3-2-2','2-2-2':'2-3-2','3-1-2':'3-1-3','1-3-2':'1-4-2','2-1-3':'2-2-3','1-4-1':'2-4-1','1-2-3':'1-3-3'};
-  function formOK(f,dflt){ f=FORM_FROM_6[f]||f; return FORMS[f]?f:dflt; }
+  const FORM_FROM_7={'3-2-2':'4-2-2','2-3-2':'3-3-2','2-2-3':'3-2-3','2-4-1':'3-4-1','3-3-1':'4-3-1','1-4-2':'2-4-2','3-1-3':'4-1-3','1-3-3':'2-3-3','4-2-1':'5-2-1','4-1-2':'5-1-2'};
+  function formOK(f,dflt){ f=FORM_FROM_6[f]||f; f=FORM_FROM_7[f]||f; return FORMS[f]?f:dflt; }
   // each team has an ATTACK shape and a DEFENSE shape; players adopt the right one by phase. Two shapes are for attacking
-  // only -- a side never defends with one man at the back -- and two, with four at the back, for defending only
-  let myForm='2-3-2', myFormDef='2-3-2';
-  let rForm='2-3-2', rFormDef='2-3-2';
-  const ATK_ONLY=['1-3-3','1-4-2'], DEF_ONLY=['4-2-1','4-1-2'];
+  // only -- a side never defends with two men at the back -- and two, with five at the back, for defending only
+  let myForm='3-3-2', myFormDef='3-3-2';
+  let rForm='3-3-2', rFormDef='3-3-2';
+  const ATK_ONLY=['2-3-3','2-4-2'], DEF_ONLY=['5-2-1','5-1-2'];
   function formFor(team,phase){ return phase==='def' ? (team==='G'?myFormDef:rFormDef) : (team==='G'?myForm:rForm); }
   function formOKDef(f,dflt){ f=formOK(f,dflt); return ATK_ONLY.includes(f)?dflt:f; }
   function formOKAtk(f,dflt){ f=formOK(f,dflt); return DEF_ONLY.includes(f)?dflt:f; }
   // the defending shape that goes with an attacking one, when nobody has picked one: the same shape, except that a front
   // three drops a man into midfield (unless the side presses), an attack-only shape fills its back line, and a side that
-  // sits deep makes some shapes a back four
+  // sits deep makes some shapes a back five
   function defFormFor(atkForm,posture){
     const press=posture==='press', sit=posture==='lowblock';
     switch(atkForm){
-      case '2-2-3': return press?'2-2-3':sit?'4-2-1':'2-4-1';
-      case '3-1-3': return press?'3-1-3':'3-3-1';
-      case '3-2-2': return sit?'4-2-1':'3-2-2';
-      case '1-3-3': return sit?'3-3-1':'2-3-2';
-      case '1-4-2': return sit?'4-1-2':'2-4-1';
-      default: return formOKDef(atkForm,'2-3-2');
+      case '3-2-3': return press?'3-2-3':sit?'5-2-1':'3-4-1';
+      case '4-1-3': return press?'4-1-3':'4-3-1';
+      case '4-2-2': return sit?'5-2-1':'4-2-2';
+      case '2-3-3': return sit?'4-3-1':'3-3-2';
+      case '2-4-2': return sit?'5-1-2':'3-4-1';
+      default: return formOKDef(atkForm,'3-3-2');
     }
   }
   // WIDTH, for each phase: COMPACT, BALANCED or WIDE -- how far apart each line's men stand, and how far out the wide
@@ -2714,7 +2717,7 @@
   // THE TRAINING PITCH'S LEVELS: the shapes and styles your side in a career can have. One past the pitch's level is
   // shown locked, with the level it needs (TAC_LOCK: the pitch's level while your career side's tactics are on screen;
   // 0, nothing's locked: an exhibition, the labs, the other side). The team instructions are yours from the start.
-  const TRAIN_FORM={'2-3-2':1,'3-2-2':1,'2-2-3':1,'2-4-1':2,'3-3-1':2,'4-2-1':2,'3-1-3':3,'1-4-2':3,'4-1-2':3,'1-3-3':4};
+  const TRAIN_FORM={'3-3-2':1,'4-2-2':1,'3-2-3':1,'3-4-1':2,'4-3-1':2,'5-2-1':2,'4-1-3':3,'2-4-2':3,'5-1-2':3,'2-3-3':4};
   const TRAIN_STYLE={neutral:1,direct:1,wing:2,fluid:2,control:3,dcounter:3,gegen:4};
   let TAC_LOCK=0;
   function tacNeed(kind,k){ if(!TAC_LOCK||(kind!=='form'&&kind!=='style')) return 0; const n=(kind==='form'?TRAIN_FORM:TRAIN_STYLE)[k]||1; return n>TAC_LOCK?n:0; }
@@ -2773,14 +2776,17 @@
     st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+(hj*2-1)*1.5)*2)/2));
     return st;
   }
-  // the styles a lineup slot calls for (index into SQUAD_ROLES; the default 2-3-2 puts squad men 3 and 5 out
-  // wide in midfield, 4 in the middle), and a pick from them -- a second centre-back or forward unlike the first
+  // the styles a lineup slot calls for (index into SQUAD_ROLES; the default 3-3-2 puts squad men 4 and 6 out
+  // wide in midfield, 5 in the middle), and a pick from them -- a second centre-back or forward unlike the first
   // (v118: the new archetypes among them, about as often as a career's -- STYLES' w -- has them)
   const SQ_CB=['stopper','stopper','stopper','cover','cover','cover','ballplayer','ballplayer','widecb','libero'],
         SQ_WM=['mwinger','mwinger','widemid','widemid','wideplaymaker'], SQ_CM1=['anchor','anchor','deepcreator','ballwinner','boxtobox','playmaker','trequartista'],
         SQ_CM=['boxtobox','boxtobox','playmaker','ballwinner','shadow','trequartista'], SQ_W=['trickster','trickster','winger','winger','invwinger','insidefwd'],
         SQ_ST=['poacher','poacher','speedster','speedster','complete','complete','target','target','pressfwd','falsenine'];
-  const SQUAD_STYLES=[null,SQ_CB,SQ_CB,SQ_WM,SQ_CM1,SQ_WM,SQ_ST,[...SQ_ST,'insidefwd']];
+  // the outside men of a back line: wing-backs with nobody wide ahead of them; with men wide ahead, a back three's are
+  // centre-backs (wide CBs most), a back four's or five's full-backs (v124)
+  const SQ_WB=['wingback','wingback','fullback'], SQ_CBW=['widecb','widecb','cover','stopper','ballplayer'], SQ_FB=['fullback','fullback','deffb','deffb','invfb','wingback'];
+  const SQUAD_STYLES=[null,SQ_CB,SQ_CB,SQ_CB,SQ_WM,SQ_CM1,SQ_WM,SQ_ST,[...SQ_ST,'insidefwd']];
   function pickSquadStyle(i,R,taken,list){
     const L=list||SQUAD_STYLES, opts=L[i]; if(!opts) return undefined;
     const prev=L[i-1], again=!!prev&&prev[0]===opts[0]&&opts[0]!=='mwinger';   // a second centre-back or striker unlike the first
@@ -2820,25 +2826,25 @@
     return clamp(Math.round(s/t*2)/2,1,10); }
   function gkHandlingFill(st){ if(st&&st.gkHandling==null) st.gkHandling=gkHandlingFor(st); return st; }
   function overallOf(entry){ return cwOverall(entry.role,entry.stats); }
-  const SQUAD_ROLES=['GK','DEF','DEF','MID','MID','MID','ATT','ATT'];
-  // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in
-  function rolesFor(form){ const L=FORMS[form]||FORMS['2-3-2'], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=['GK'];
+  const SQUAD_ROLES=['GK','DEF','DEF','DEF','MID','MID','MID','ATT','ATT'];
+  // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in (form: a
+  // shape's name, or its lines)
+  function rolesFor(form){ const L=Array.isArray(form)?form:(FORMS[form]||FORMS['3-3-2']), R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=['GK'];
     L.forEach((n,i)=>{ for(let k=0;k<n;k++) out.push(R[i]); }); return out; }
-  // the styles each place in a shape calls for (as SQUAD_STYLES does for 2-3-2): out wide in a line of three or more, a
-  // winger's (a back three with nobody wide ahead of it: wing-backs); the middle of midfield, the holder's first; the
-  // middle up front, a striker's
+  // the styles each place in a shape calls for (as SQUAD_STYLES does for 3-3-2): out wide in a line of three or more, a
+  // winger's (at the back, see SQ_WB); the middle of midfield, the holder's first; the middle up front, a striker's
+  // (form: a shape's name, or its lines)
   function slotStylesFor(form){
-    const L=FORMS[form]||FORMS['2-3-2'], R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=[null];
+    const L=Array.isArray(form)?form:(FORMS[form]||FORMS['3-3-2']), R=L.length===2?['DEF','ATT']:['DEF','MID','ATT'], out=[null];
     const wideAhead=L.some((n,i)=>R[i]!=='DEF'&&n>=3);
-    const WB=['wingback','wingback','fullback'], CBW=['widecb','widecb','cover','stopper','ballplayer'];   // (the outside men of a back three with men wide ahead of them: centre-backs, wide CBs most)
     L.forEach((n,li)=>{ const role=R[li]; let cen=0;
       for(let k=0;k<n;k++){ const wide=n>=3&&(k===0||k===n-1);
-        if(role==='DEF') out.push(wide&&!wideAhead?WB:wide?CBW:SQ_CB);
+        if(role==='DEF') out.push(!wide?SQ_CB : !wideAhead?SQ_WB : n>=4?SQ_FB : SQ_CBW);
         else if(role==='MID') out.push(wide?SQ_WM:(cen++===0?SQ_CM1:SQ_CM));
         else out.push(wide?SQ_W:(cen++===0?SQ_ST:[...SQ_ST,'insidefwd'])); } });
     return out; }
   function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
-  // new squads, and those saved in the six-a-side days (a keeper and six): fill up to a keeper and seven
+  // new squads, and those saved in the six- or seven-a-side days: fill up to a keeper and eight
   function topUpSquad(sq){
     const used=new Set(sq.map(e=>e.name)), pool=NAMES.filter(n=>!used.has(n));
     const pick=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0]||'Player';
@@ -2848,32 +2854,32 @@
   // ============ CLUBS (exhibition): the 2026/27 Premier League ============
   // A kit is [shirt, trim, shorts]: the club's colours, plus a change kit worn when the shirts clash. str nudges
   // a generated squad's stats (roughly last season's finish). form: the club's shape, loosely after how it lines up
-  // (a back four is two here, a front three three) -- its squad is made for it. The players are made up: the same
-  // eight each time.
+  // (a back four is three here, a front three three) -- its squad is made for it. The players are made up: the same
+  // nine each time.
   const CLUB_LEAGUE='PREMIER LEAGUE · 2026/27';
   // each club in its own shape and its own way of playing (style: see STYLE_TAC) -- yours too, until you change it
   // (then it's kept with the club: clubSide, saveClubSides)
   const CLUBS=[
-    {id:'ARS',name:'Arsenal',           form:'2-2-3', style:'control', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
-    {id:'AVL',name:'Aston Villa',       form:'2-4-1', style:'fluid', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
-    {id:'BOU',name:'Bournemouth',       form:'2-3-2', style:'gegen', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
-    {id:'BRE',name:'Brentford',         form:'3-2-2', style:'direct', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
-    {id:'BHA',name:'Brighton',          form:'2-4-1', style:'control', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
-    {id:'CHE',name:'Chelsea',           form:'2-4-1', style:'wing', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
-    {id:'COV',name:'Coventry City',     form:'2-3-2', style:'neutral', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
-    {id:'CRY',name:'Crystal Palace',    form:'3-3-1', style:'dcounter', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
-    {id:'EVE',name:'Everton',           form:'2-3-2', style:'direct', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
-    {id:'FUL',name:'Fulham',            form:'2-4-1', style:'neutral', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
-    {id:'HUL',name:'Hull City',         form:'1-4-2', style:'neutral', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
-    {id:'IPS',name:'Ipswich Town',      form:'3-3-1', style:'control', str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
-    {id:'LEE',name:'Leeds United',      form:'2-2-3', style:'wing', str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
-    {id:'LIV',name:'Liverpool',         form:'2-2-3', style:'gegen', str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
-    {id:'MCI',name:'Manchester City',   form:'3-1-3', style:'control', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
-    {id:'MUN',name:'Manchester United', form:'3-3-1', style:'wing', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
-    {id:'NEW',name:'Newcastle United',  form:'2-3-2', style:'gegen', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
-    {id:'NFO',name:'Nottingham Forest', form:'3-2-2', style:'dcounter', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
-    {id:'SUN',name:'Sunderland',        form:'3-3-1', style:'fluid', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
-    {id:'TOT',name:'Tottenham Hotspur', form:'1-3-3', style:'wing', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
+    {id:'ARS',name:'Arsenal',           form:'3-2-3', style:'control', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
+    {id:'AVL',name:'Aston Villa',       form:'3-4-1', style:'fluid', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
+    {id:'BOU',name:'Bournemouth',       form:'3-3-2', style:'gegen', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
+    {id:'BRE',name:'Brentford',         form:'4-2-2', style:'direct', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
+    {id:'BHA',name:'Brighton',          form:'3-4-1', style:'control', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
+    {id:'CHE',name:'Chelsea',           form:'3-4-1', style:'wing', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
+    {id:'COV',name:'Coventry City',     form:'3-3-2', style:'neutral', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
+    {id:'CRY',name:'Crystal Palace',    form:'4-3-1', style:'dcounter', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
+    {id:'EVE',name:'Everton',           form:'3-3-2', style:'direct', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
+    {id:'FUL',name:'Fulham',            form:'3-4-1', style:'neutral', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
+    {id:'HUL',name:'Hull City',         form:'2-4-2', style:'neutral', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
+    {id:'IPS',name:'Ipswich Town',      form:'4-3-1', style:'control', str:-0.1,home:['#1f4fa3','#ffffff','#ffffff'], away:['#e8572a','#141414','#141414']},
+    {id:'LEE',name:'Leeds United',      form:'3-2-3', style:'wing', str:0.1, home:['#ffffff','#1d428a','#ffffff'], away:['#1d428a','#ffcd00','#1d428a']},
+    {id:'LIV',name:'Liverpool',         form:'3-2-3', style:'gegen', str:0.8, home:['#c8102e','#ffffff','#c8102e'], away:['#0e3b2e','#f6eb61','#0e3b2e']},
+    {id:'MCI',name:'Manchester City',   form:'4-1-3', style:'control', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
+    {id:'MUN',name:'Manchester United', form:'4-3-1', style:'wing', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
+    {id:'NEW',name:'Newcastle United',  form:'3-3-2', style:'gegen', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
+    {id:'NFO',name:'Nottingham Forest', form:'4-2-2', style:'dcounter', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
+    {id:'SUN',name:'Sunderland',        form:'4-3-1', style:'fluid', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
+    {id:'TOT',name:'Tottenham Hotspur', form:'2-3-3', style:'wing', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
   ];
   const clubById=id=>CLUBS.find(c=>c.id===id)||null;
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
@@ -2890,12 +2896,19 @@
     'Udeh','Upton','Vance','Varga','Voss','Wade','Ward','Weller','Wilde','Winter','Wolfe','Yates','Yilmaz','Zamora','Zeller'];
   function rng32(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
   function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
-  // one fixed shuffle of the surnames, dealt out seven to a club and then one more each: nobody shares a name
+  // one fixed shuffle of the surnames, dealt out seven to a club and then one more each, and one more again (v124: the
+  // ninth man): nobody shares a name
   const CLUB_NAME_DEAL=(()=>{ const R=rng32(hashStr('ft-club-names')), a=CLUB_SURNAMES.slice();
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; })();
+  // A CLUB'S SQUAD (v124: nine a side). Its keeper and seven from before, the men they were -- made for the shape its own
+  // grew from, a man fewer at the back (FORM_FROM_7), drawn as they always were -- and a ninth, a centre-back of his own
+  // (clubCB9), in the middle of its back line. A wide centre-back of a back three that's the end of a back four now is a
+  // full-back (drawn from a full-back's styles: the rest of the side's draws as they were).
   function clubSquadGen(club){
     const R=rng32(hashStr('ft-club-'+club.id)), RS=rng32(hashStr('ft-style-'+club.id)), ci=CLUBS.indexOf(club);
-    const roles=rolesFor(club.form), slotSt=slotStylesFor(club.form), styles=[];
+    const L=FORMS[club.form]||FORMS['3-3-2'], L7=[L[0]-1,...L.slice(1)], at=1+Math.floor(L[0]/2), pos=POS_OF[club.form]||[];   // (at: the ninth man's place, after the keeper)
+    const st7=slotStylesFor(L7), st9=slotStylesFor(L), fb=o=>o===SQ_WB||o===SQ_FB;
+    const roles=rolesFor(L7), slotSt=st7.map((o,i)=>{ const j=i<at?i:i+1; return i&&pos[j-1]==='FB'&&!fb(o)?st9[j]:o; }), styles=[];
     const NUMS={GK:[1],DEF:[2,3,4,5,6,12,15],MID:[8,10,14,16,17,18,20,23],ATT:[7,9,11,19,21]};
     const take=r=>{ const l=NUMS[r]; return l.splice(Math.floor(R()*l.length),1)[0]; };
     const xi=roles.map((r,i)=>{
@@ -2904,11 +2917,21 @@
       const e={name:CLUB_NAME_DEAL[(i<7?ci*7+i:CLUBS.length*7+ci)%CLUB_NAME_DEAL.length], num:take(r), role:r, style, defPers:PERS3[Math.floor(R()*3)], stats:st};
       e.ovr=overallOf(e); return e;
     });
+    xi.splice(at,0,clubCB9(club,xi));
     return xi.concat(clubBenchGen(club,xi));
   }
+  // THE NINTH MAN (v124): a centre-back, unlike the ones the club has, drawn from a source of his own -- so the eight
+  // from before are the men they were -- in a number of his own (a back four's or five's, 2 to 6, if one's free)
+  function clubCB9(club,xi){
+    const R=rng32(hashStr('ft-club9-'+club.id)), ci=CLUBS.indexOf(club), taken=xi.map(e=>e.style), used=new Set(xi.map(e=>e.num));
+    const fresh=SQ_CB.filter(x=>!taken.includes(x)), L=fresh.length?fresh:SQ_CB, style=L[Math.floor(R()*L.length)];
+    const nums=[2,3,4,5,6].filter(n=>!used.has(n)), free=nums.length?nums:[12,15,22,24,26].filter(n=>!used.has(n));
+    const e={name:CLUB_NAME_DEAL[(CLUBS.length*8+ci)%CLUB_NAME_DEAL.length], num:free[Math.floor(R()*free.length)]||30, role:'DEF', style, defPers:PERS3[Math.floor(R()*3)], stats:genStyledStats('DEF',style,R,club.str)};
+    e.ovr=overallOf(e); return e; }
+  const clubCB9At=club=>1+Math.floor((FORMS[club.form]||FORMS['3-3-2'])[0]/2);   // (his place in the squad clubSquadGen makes)
   // THE BENCH: five more for every club -- a keeper, then a man for each line, then another defender -- a little short of
   // the starters, named from a pool of their own (dealt like the starters' names, so no two benches share one). A career
-  // club's bench is five too: the five after the eight in its selection list (see mgSelectTab), the rest not taken.
+  // club's bench is five too: the five after the nine in its selection list (see mgSelectTab), the rest not taken.
   const BENCH_N=5;
   const BENCH_SURNAMES=['Abara','Adebayo','Aguilar','Ahlberg','Almeida','Amrani','Andersen','Arslan','Asante','Bakker','Barros','Bellamy','Benali','Bergman','Bianchi','Bjork','Boateng','Bondarenko','Brennan','Calloway','Carvalho','Castro','Celik','Chandler','Cisse','Coleman','Conti','Cruz','Dahl','Delgado','Demir','Diallo','Dorsey','Doyle','Dubois','Duarte','Eklund','Esposito','Falk','Ferreira','Fischer','Fofana','Gallo','Garrido','Giraud','Guerra','Halloran','Hansen','Haddad','Ibarra','Ivanov','Jensen','Jovic','Kaya','Keller','Kimura','Koroma','Kowalski','Kruger','Laine','Larsen','Lopes','Maddox','Marin','Medina','Moreno','Murray','Nakamura','Navarro','Nielsen','Nwosu','Okoro','Ortega','Osei','Pajic','Pereira','Petrov','Pires','Quinn','Rahimi','Ramos','Reyes','Rocha','Romero','Sadiq','Salazar','Santos','Schmidt','Serra','Sorensen','Sousa','Stone','Suzuki','Teixeira','Toure','Tran','Ulloa','Valdez','Vargas','Vidal','Vogel','Walsh','Weber','Yamada','Yusuf','Zielinski','Acheampong','Barrow','Cardoso','Danso','Ekberg','Farrell','Gomes','Holm','Ilic','Juarez','Kagawa','Lacroix','Mahrez','Nunes','Obi','Pacheco','Quaresma','Rask','Sala','Tiago','Ueda','Valente','Wiggins','Xavier','Yeboah','Zubiri',
     'Ashby','Brook','Carver','Dunne','Ellery','Foley','Grady','Hollis','Irwin','Jarvis','Kerr','Lowe','Mercer','Nash','Oakes','Price','Reid','Sutton','Tate','Vaughan','Whitby','Yardley','Bramble','Colby','Penrose'];
@@ -2926,23 +2949,25 @@
   }
   function clubOvr(sq,li){ const xi=li?[li.gk,...(li.atk||[])].map(i=>sq[i]).filter(Boolean):sq;   // the starters (the bench doesn't count)
     return Math.round(xi.reduce((s,e)=>s+(e.ovr||0),0)/Math.max(1,xi.length)); }
-  // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-7) ----
+  // ---- the exhibition setup: your club (internal team G), theirs (R), the player you control (squad index 1-8) ----
   const EXH={on:false, you:'ARS', opp:'MCI', play:null};   // play: the clubs actually out there (set at kick-off)
   try{ const o=JSON.parse(localStorage.getItem('ft_exh')||'null');
        if(o&&clubById(o.you)&&clubById(o.opp)&&o.you!==o.opp){ EXH.you=o.you; EXH.opp=o.opp; } }catch(e){}
   function saveExh(){ try{ localStorage.setItem('ft_exh',JSON.stringify({you:EXH.you,opp:EXH.opp})); }catch(e){} }
   // a club's squad, lineup and shape: as you last left them (a side kept from before clubs had shapes stays in the
-  // 2-3-2 it was made for), else as generated, in the club's own shape
+  // 3-3-2 its 2-3-2 grew into), else as generated, in the club's own shape
   function clubSide(id){
     let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
     if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
-      const gen=clubSquadGen(clubById(id));
+      const club=clubById(id), gen=clubSquadGen(club);
+      if(o.lineup.atk&&o.lineup.atk.length===OUTFIELD-1&&o.squad.length>OUTFIELD){ const fa=formOKAtk(o.form,club.form), cb=gen[clubCB9At(club)];   // (v124: kept with seven outfielders: the club's ninth man, at the back)
+        squadAddCB(o.squad,o.lineup,fa,o.dform?formOKDef(o.dform,defFormFor(fa)):defFormFor(fa,postureOf(o.style||club.style)),o.squad.some(e=>e&&e.name===cb.name)?null:JSON.parse(JSON.stringify(cb))); }
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeNow(e.style);   // (an archetype kept under an older name: TYPE_WAS)
         if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
       for(const e of o.squad) if(e&&e.stats) gkHandlingFill(e.stats);                                                            // (and before Handling)
-      const f=formOKAtk(o.form,'2-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, ti:o.ti&&typeof o.ti==='object'?o.ti:null,
+      const f=formOKAtk(o.form,'3-3-2'); return {squad:o.squad, lineup:o.lineup, form:f, dform:o.dform?formOKDef(o.dform,defFormFor(f)):null, ti:o.ti&&typeof o.ti==='object'?o.ti:null,
         style:STYLE_TAC[o.style]?o.style:null, width:o.width||null};   // (its team instructions, if you've changed its style's: setTI cleans them)
     }
     return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form, dform:null, ti:null, style:null, width:null};
@@ -3118,8 +3143,8 @@
     document.querySelectorAll('.mteam').forEach(b=>{ b.textContent=b.dataset.mteam==='G'?'your team ('+TEAM.G.code+')':'opponent ('+TEAM.R.code+')'; });
   }
   let SQUAD={G:null,R:null}, LINEUP={G:null,R:null};
-  function defaultLineup(){ return {gk:0, atk:[1,2,3,4,5,6,7], def:[1,2,3,4,5,6,7]}; }
-  // a lineup's starters, trimmed or topped up to seven: the attack order picks who starts, the
+  function defaultLineup(){ const o=[...Array(OUTFIELD).keys()].map(i=>i+1); return {gk:0, atk:o, def:o.slice()}; }
+  // a lineup's starters, trimmed or topped up to eight: the attack order picks who starts, the
   // defence order keeps its own arrangement of those same players
   function fitLineup(li,n){
     const pool=[...Array(n).keys()].filter(i=>i!==li.gk);
@@ -3143,11 +3168,21 @@
   }
   function loadSquads(){
     try{ const raw=localStorage.getItem('ft7_squads'); if(raw){ const o=JSON.parse(raw); if(o.__v===SQUAD_V&&o.SQUAD&&o.LINEUP){ SQUAD=o.SQUAD; LINEUP=o.LINEUP;
+      for(const t of ['G','R']) if(SQUAD[t]&&SQUAD[t].length===OUTFIELD&&LINEUP[t]) squadAddCB(SQUAD[t],LINEUP[t],formFor(t,'atk'),formFor(t,'def'),null);   // (v124: one kept with seven outfielders: an eighth, at the back)
       const grew=['G','R'].some(t=>SQUAD[t]&&SQUAD[t].length<SQUAD_ROLES.length); normalizeSquads();
       if(grew) localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP}));   // keep the man who came back
       return; } } }catch(e){}
     SQUAD={G:genSquad(),R:genSquad()}; LINEUP={G:defaultLineup(),R:defaultLineup()}; saveSquads();
   }
+  // NINE A SIDE (v124): a side kept with seven outfielders gets an eighth, a centre-back (e, else one made for it), at the end
+  // of its squad and in the middle of its back line, with the ball and without it -- everyone else keeps his spot
+  function squadAddCB(sq,li,fa,fd,e){
+    if(!e){ const used=new Set(sq.map(x=>x.name)), pool=NAMES.filter(n=>!used.has(n)), taken=sq.map(x=>x.style), fresh=SQ_CB.filter(x=>!taken.includes(x)), L=fresh.length?fresh:SQ_CB, style=L[Math.floor(Math.random()*L.length)];
+      e={name:pool[Math.floor(Math.random()*pool.length)]||'Player', num:Math.max(0,...sq.map(x=>+x.num||0))+1, role:'DEF', style, defPers:PERS3[Math.floor(Math.random()*3)], stats:genStyledStats('DEF',style,Math.random,0)}; e.ovr=overallOf(e); }
+    const k=sq.length, mid=f=>Math.floor((FORMS[f]||FORMS['3-3-2'])[0]/2);
+    sq.push(e); if(!li) return;
+    if(Array.isArray(li.atk)&&li.atk.length===OUTFIELD-1) li.atk.splice(mid(fa),0,k);
+    if(Array.isArray(li.def)&&li.def.length===OUTFIELD-1) li.def.splice(mid(fd),0,k); }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
     if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
@@ -9518,7 +9553,7 @@
     let defs=mates.filter(q=>q.role==='DEF').sort((a,b)=>a.homeY-b.homeY);
     const h=holderOf(team), pivot=(h&&h.role==='MID')?h:null;
     const wides=mates.filter(q=>q!==pivot&&isWideMan(q));
-    // FULL-BACKS (the outside men of a back line with nobody wide in front of them: see POS_OF) go up their flank as
+    // FULL-BACKS (the outside men of a back four or five: see POS_OF) go up their flank as
     // they're told: SUPPORT joins the midfield once we're in their third (on a wing side, the ball's side from halfway, and
     // overlapping), ATTACKING is up in midfield from the build-up and overlaps nearer their goal, STAY BACK stays. One man
     // always stays back.
@@ -9545,10 +9580,15 @@
     // splits wide and the pivot stands off it while we build from the back, closing up to the settled shape as we go up)
     let uCB, uPk=0;
     const bt=kpPhase?0:clamp((uB-FW*0.25)/(FW*0.30),0,1);
+    // A BACK FOUR WITH THE BALL (v124: nine a side has them in possession): its centre-backs split as a back three's outside
+    // men do and its full-backs go higher and wider still -- on the keeper's ball the centre-backs at the corners of the
+    // box and the full-backs up toward the touchlines (b4: the back line is two centre-backs between two full-backs)
+    const b4=defs.length===4&&posOf(defs[0],'atk')==='FB'&&posOf(defs[3],'atk')==='FB';
     if(kpPhase){
       const n=defs.length;
       defs.forEach((q,i)=>{ const mid=n%2===1&&i===(n-1)/2, f=n===1?(q.homeY<YC?-0.8:0.8):(i/(n-1))*2-1;
-        set(q, mid?440:330, YC+(mid?0:f*(PA_HW+15)*wf), 'BUILD'); });
+        if(b4&&(i===0||i===3)){ set(q, 640, YC+Math.sign(f)*FH*0.41*wf, 'BUILD'); return; }
+        set(q, mid?440:330, YC+(mid?0:(b4?Math.sign(f):f)*(PA_HW+15)*wf), 'BUILD'); });
       uCB=330; uPk=700;
       if(pivot) set(pivot, uPk, YC+(pivot.homeY-YC)*0.3, 'BUILD');
     } else {
@@ -9564,6 +9604,7 @@
       // away from the ball, splits wider from his partner
       defs.forEach((q,i)=>{ const f=n===1?0:(i/(n-1))*2-1, mid=n%2===1&&i===(n-1)/2, sup=insOf(q,'cbSupport');
         let u=uCB-(mid&&n>=3?40:0), y=cy+f*hs;
+        if(b4&&n===4){ const fb=i===0||i===3; y=cy+Math.sign(f)*(fb?680-380*bt:440-310*bt)*wf; if(fb) u+=150*(1-bt); }   // (a back four: see b4 -- 27 and 18 m out from the middle building from the back, 12 and 5 settled)
         if(sup==='back' && uB>FW/3) u=Math.max(200,u-130);                   // (beyond our third: the counter's what he's there for)
         else if(sup==='up' && uB>FW*0.34) u=Math.max(u, Math.min(uB-(uB-u)*0.45, uB>FW*0.72?FW*0.64:FW*0.5));
         if(f!==0 && Math.sign(f)!==bsd && insOf(q,'cbWidth')==='wide') y+=Math.sign(f)*FH*0.09;
@@ -14444,7 +14485,7 @@
       const ai=li.atk.indexOf(p.squadIdx), di=li.def.indexOf(p.squadIdx);
       if(ai>=0&&aS[ai])p.slotAtk=aS[ai]; if(di>=0&&dS[di])p.slotDef=dS[di]; }
   }
-  // the cheapest way to pair n things with n others (cost(i,j)); -> j for each i. (Seven a side: every pairing is tried.)
+  // the cheapest way to pair n things with n others (cost(i,j)); -> j for each i. (Eight outfielders: every pairing is tried.)
   function bestAssign(n,cost){
     let best=null, bc=1e9; const used=new Array(n).fill(false), cur=new Array(n);
     const rec=(i,acc)=>{ if(acc>=bc) return; if(i===n){ bc=acc; best=cur.slice(); return; }
@@ -14452,7 +14493,7 @@
     rec(0,0); return best||[...Array(n).keys()];
   }
   // WHO DEFENDS WHERE when the shapes change: each man takes the defending spot nearest his attacking one (the best fit
-  // of the seven, depth counting for more than width -- a defender stays a defender), in a position of his own before
+  // of the eight, depth counting for more than width -- a defender stays a defender), in a position of his own before
   // another (FIT_FAR): a holding midfielder drops into a back three before a central one
   function mapDefOrder(team,atkOrder){
     const A=slotsFor(team,formFor(team,'atk'),'atk'), D=slotsFor(team,formFor(team,'def'),'def'), n=Math.min(atkOrder.length,A.length,D.length);
@@ -14582,13 +14623,13 @@
   // how far a line's men spread down the tactics pitch: a WIDE line's end men reach its edges, so a COMPACT four still has room between its men
   const TOK_SPREAD=1.13;
   function mtPos(t,s){ const g=t==='G', u=g?s.homeX/FW:1-s.homeX/FW;   // their own goal on the left, the lines spread as the Office draws them
-    return {L:30+(u-0.16)/0.40*52, T:50+(g?s.homeY/FH-0.5:0.5-s.homeY/FH)*100*TOK_SPREAD, k:(g?1:-1)*(s.lineIdx-(s.lineSize-1)/2)}; }
+    return {L:30+(u-0.16)/0.40*52, T:50+(g?s.homeY/FH-0.5:0.5-s.homeY/FH)*100*TOK_SPREAD, k:(g?1:-1)*(s.lineIdx-(s.lineSize-1)/2), n:s.lineSize}; }
   const mtKeeperKit=t=>keeperKit(teamKit(t),TEAM[t]&&TEAM[t].gk);   // his keeper's top in this match
   // the man as the match has him (his look), or as his squad entry has him if he isn't on
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
-  function mtTok(t,si,L,T,kind,role,k,pos){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);
-    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k))
+  function mtTok(t,si,L,T,kind,role,k,pos,n){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);
+    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false);   // (theirs are theirs: their men show their ratings)
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
@@ -14617,9 +14658,9 @@
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
-      h+=ghostTok(q.L,q.T,e.num,surname(e.name),q.k); }
+      h+=ghostTok(q.L,q.T,e.num,surname(e.name),q.k,q.n); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK',0,'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k,slots[i].pos); }
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k,slots[i].pos,q.n); }
     h+='</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
@@ -15059,7 +15100,7 @@
           :            [['direct',.3],['neutral',.22],['dcounter',.18],['wing',.14],['fluid',.08],['gegen',.08]];
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
-  const MG_CLUBS=14, MG_SQUAD=14, MG_MAX=20, MG_MIN=12, MG_MD=26, MG_HALF=13;   // a squad: fourteen to start, twenty at most
+  const MG_CLUBS=14, MG_SQUAD=15, MG_MAX=21, MG_MIN=13, MG_MD=26, MG_HALF=13;   // a squad: fifteen to start, twenty-one at most (v124: a man more each, for nine a side)
   // THE WEEK. A season runs a week at a time: three weeks of pre-season (no games), then a league game every Saturday --
   // in some weeks a cup game on the Wednesday before it, never in the league's first three weeks -- with a week's winter
   // break after week 13, the playoffs after week 26 for those in them, and the review. Each week starts on a Monday:
@@ -15074,16 +15115,16 @@
   const MG_AI_BUDGET={1:25000,2:120000,3:600000,4:6000000};
   const MG_SCOUT_COST={1:200,2:600,3:1800,4:6000};       // to scout one man, by the league he plays in
   const MG_SCOUT_W={1:4,2:3,3:1};                        // how far an unscouted rating can be off, by your scouting network
-  const MG_ROLES=['GK','GK','DEF','DEF','DEF','DEF','MID','MID','MID','MID','ATT','ATT','ATT','ATT'];   // (MG_SQUAD of them)
-  // A SQUAD'S POSITIONS, in MG_ROLES' order (v118): dealt so it can always field a side -- two or three centre-backs and a
+  const MG_ROLES=['GK','GK','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','ATT','ATT','ATT','ATT'];   // (MG_SQUAD of them)
+  // A SQUAD'S POSITIONS, in MG_ROLES' order (v118): dealt so it can always field a side -- three or four centre-backs and a
   // full-back or two, three central midfielders and a wide one, two or three strikers and a winger or two -- in about the
   // shares a single man's are drawn in (cwSubRole), and the club's shapes (with the ball and without it: c) have the men
-  // they need: three centre-backs for a back three with men wide ahead of it, two full-backs for one without, two
-  // wingers for a front three. Archetypes say where a man can play, and they're choosy: a squad drawn man by man could be
+  // they need: two full-backs for a back four or five (and three centre-backs beside them), four centre-backs for a back
+  // three, two wingers for a front three. Archetypes say where a man can play, and they're choosy: a squad drawn man by man could be
   // a side short of a position, and play a man out of it every week.
   function mgSquadSubs(c){ const need={}; if(c){ const f=cwFormFor(c); for(const F of [f, defFormFor(f,postureOf(c.style))]){ const n={}; for(const s of POS_OF[F]||[]) n[s]=(n[s]||0)+1; for(const s in n) need[s]=Math.max(need[s]||0,n[s]); } }
-    const r=Math.random(), def=(need.CB||0)>=3?false:(need.FB||0)>=2?true:r<0.6, att=(need.W||0)>=2?true:!(need.W)?Math.random()<0.5:Math.random()<0.8;
-    return ['GK','GK', ...(def?['CB','CB','FB','FB']:['CB','CB','CB','FB']), 'CM','CM','CM','WM', ...(att?['STK','STK','WNG','WNG']:['STK','STK','STK','WNG'])]; }
+    const r=Math.random(), def=(need.FB||0)>=2?true:(need.CB||0)>=3?false:r<0.6, att=(need.W||0)>=2?true:!(need.W)?Math.random()<0.5:Math.random()<0.8;
+    return ['GK','GK', ...(def?['CB','CB','CB','FB','FB']:['CB','CB','CB','CB','FB']), 'CM','CM','CM','WM', ...(att?['STK','STK','WNG','WNG']:['STK','STK','STK','WNG'])]; }
   // a squad's men made at a level: MG_ROLES, their positions dealt (mgSquadSubs)
   function mgFillSquad(d,c,lvl){ const subs=mgSquadSubs(c); MG_ROLES.forEach((role,i)=>{ const age=mgAge(); c.players.push(mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age,{sub:subs[i]})); }); }
   const MG_FIRST=['Leo','Marco','Tariq','Samuel','Dani','Iker','Bruno','Kemar','Yuki','Lars','Pavel','Andre','Felix','Oskar','Diego','Sven',
@@ -15573,7 +15614,7 @@
       for(const k of legs.slice(0,kind==='serious'?3:1)){ st[k]=Math.max(1,st[k]-0.5); bs[k]=Math.min(bs[k],st[k]); }
       p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
     if(!c){ mgNews(d,p.name+' is out for '+injWeeks(days)+' ('+INJ_NAME[kind]+(how?', '+how:'')+').'); INJ_NOW.push({name:p.name,num:p.num,k:kind,d:days}); if(d.roster.includes(p)) wkLog(d).hurt.push({pid:p.id,k:kind,d:days,how:how||''});
-      // OUT OF THE SIDE (v116): one of your eight hurt is switched out there and then -- the fittest best fit off the bench
+      // OUT OF THE SIDE (v116): one of your nine hurt is switched out there and then -- the fittest best fit off the bench
       // in his place (mgFitXI), so the Selection tab's never left with him in it
       if(d.roster.includes(p)&&d.lineup){ for(const [o,i] of mgFitXI(d)) if(o===p) mgNews(d,surname(i.name)+' takes his place in the side.'); } } }
   // the days go by: the injured heal, the fit come out of their risky weeks
@@ -15597,7 +15638,7 @@
   // midfielder of his rating and age, a winger 60% over, a defender a quarter under, a keeper half. On what a man's worth
   // to you (mgValue) and to the club that has him (mgWorth) alike. (v116's was an attacker 30% over, a defender a fifth
   // under, a keeper a third: about a rating point's worth -- one point is a third on his price -- and lost in the rest
-  // of what goes into one: a club's temperament, whether he's one of its first eight, what its scouts see in him.) By
+  // of what goes into one: a club's temperament, whether he's one of its first nine, what its scouts see in him.) By
   // his own position, else his line
   const POS_PRICE={STK:1.8, WNG:1.6, CM:1, WM:1, CB:0.75, FB:0.75, GK:0.5, ATT:1.7, MID:1, DEF:0.75};
   const posPriceF=p=>p?(POS_PRICE[natPos(p)]||POS_PRICE[p.role]||1):1;
@@ -15727,13 +15768,13 @@
     const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
     for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
   function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
-  // A COMPUTER CLUB'S EIGHT FOR A GAME: its best keeper and seven best outfielders on the day -- but not always. Up to
+  // A COMPUTER CLUB'S NINE FOR A GAME: its best keeper and eight best outfielders on the day -- but not always. Up to
   // AI_ROT men too tired for it (fitness under AI_REST; AI_REST_BIG in a big game: the Champions League, a cup's last two
   // rounds, the playoffs), the most tired first, sit it out for a fresh man not much worse (AI_ROT_GAP); and some of it
   // goes to the young (AI_YOUNG and under, the best not already in it): one now and then in the league, three once the
-  // league is settled for the club (mgSettled), a side of them in a cup below its level -- four of the seven two leagues
+  // league is settled for the club (mgSettled), a side of them in a cup below its level -- four of the eight two leagues
   // above the cup's lowest (the reserves, if it's short of youngsters), one or two a league above -- and none in a big
-  // game. ctx: {kind:'league'|'cup'|'playoff', key, r}; without it, the best eight (the side on paper)
+  // game. ctx: {kind:'league'|'cup'|'playoff', key, r}; without it, the best nine (the side on paper)
   const AI_REST=0.9, AI_REST_BIG=0.78, AI_ROT=3, AI_ROT_GAP=8, AI_YOUNG=21;
   function mgBigGame(ctx){ return !!ctx&&(ctx.kind==='playoff'||(ctx.kind==='cup'&&(ctx.key==='cl'||ctx.r>=CUP[ctx.key].rounds.length-2))); }
   function mgYoungStarts(d,club,ctx){ if(!ctx||!club||mgBigGame(ctx)) return 0;
@@ -15759,8 +15800,8 @@
     const max=r=>r.pts+3*(MG_MD-r.p), rest=T.filter(r=>r.id!==id);
     if(rest.filter(r=>max(r)>=me.pts).length<(c.tier===4?6:2)) return true;
     return rest.filter(r=>r.pts>max(me)).length>=6&&(c.tier===1||rest.filter(r=>max(r)<me.pts).length>=3); }
-  // who plays for a side: yours, the eight you picked; the computer's, its eight for the game -- in the game you play
-  // against it, the eight that played (MG_LIVE_XI, set as it kicks off)
+  // who plays for a side: yours, the nine you picked; the computer's, its nine for the game -- in the game you play
+  // against it, the nine that played (MG_LIVE_XI, set as it kicks off)
   let MG_LIVE_XI=null;
   function mgSideOf(d,id,ctx){ if(id===d.clubId) return mgStarters(d);
     const L=mgPlayersOf(d,id);
@@ -15768,14 +15809,14 @@
     return mgPickEight(L,ctx,d,d.world.clubs[id]); }
   const mgCtxOf=g=>g.kind==='cup'?{kind:'cup',key:g.key,r:g.r}:{kind:g.kind};
   // a game over: the men who played it pay for it. Yours after a live one by what they played (a man taken off 0.6 of
-  // it, one brought on 0.4), the side you played by its eight on the pitch
+  // it, one brought on 0.4), the side you played by its nine on the pitch
   // a game's cost to the men who played it -- and its minutes, for their development (each man his share of the game,
   // the side a game more; in a simulated game a couple of the computer's subs a third of one: see devSimSubs)
   function mgTireGame(d,id,xi,live){ devGame(d,id); if(id===d.clubId) d.mgw=(d.mgw||0)+1;
     if(live&&SQUAD.G&&SQUAD.R){ const t=id===d.clubId?'G':'R', L=LINEUP[t], on=new Set([L.gk,...L.atk]), S=SUBS[t]||{on:[],off:[]}, P=mgPlayersOf(d,id);
       SQUAD[t].forEach((e,si)=>{ const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return;
         const sh=S.on.includes(si)?0.4:S.off.includes(si)?0.6:on.has(si)?1:0; condTire(p,sh); if(sh) p.mw=(p.mw||0)+sh; if(sh&&t==='G') p.wmw=(p.wmw||0)+sh;
-        if(HURT[t].has(si)&&!p.inj){ const c=id===d.clubId?null:d.world.clubs[id]; injHurt(d,p,injKind(p,Math.random(),false,injDu(d,p,c)),c,'in the game'); } }); return; }   // (LINEUP is the eight at the end: a sub's in it)
+        if(HURT[t].has(si)&&!p.inj){ const c=id===d.clubId?null:d.world.clubs[id]; injHurt(d,p,injKind(p,Math.random(),false,injDu(d,p,c)),c,'in the game'); } }); return; }   // (LINEUP is the nine at the end: a sub's in it)
     for(const p of xi){ condTire(p,1); p.mw=(p.mw||0)+1; if(id===d.clubId) p.wmw=(p.wmw||0)+1; }
     const subs=devSimSubs(d,id,xi); injAfterGame(d,id,[...xi.map(p=>[p,1]),...subs.map(p=>[p,0.35])]); }
 
@@ -15800,14 +15841,14 @@
     for(const day of d.lg[d.tier].fx) for(const m of day){ if(m[2]==null||(m[0]!==d.clubId&&m[1]!==d.clubId)) continue;
       const you=m[0]===d.clubId?m[2]:m[3], them=m[0]===d.clubId?m[3]:m[2]; out.push(you>them?'W':you<them?'L':'D'); }
     return out.slice(-(n||5)); }
-  // a side's best eight: the best keeper and the seven best outfielders
+  // a side's best nine: the best keeper and the eight best outfielders
   function mgEight(L){ const g=L.filter(p=>p.role==='GK').sort((a,b)=>b.ovr-a.ovr), o=L.filter(p=>p.role!=='GK').sort((a,b)=>b.ovr-a.ovr);
     const xi=[]; if(g[0]) xi.push(g[0]); xi.push(...o.slice(0,1+OUTFIELD-xi.length)); return xi; }
   function mgStarters(d){ const lu=ensureLineup(d); return [lu.gk,...lu.atk].map(i=>d.roster[i]).filter(Boolean); }
-  // how good a side is on the day: the computer's clubs field their best eight; you field the eight you picked, each
+  // how good a side is on the day: the computer's clubs field their best nine; you field the nine you picked, each
   // as good as he is in his spots (with the ball and without it: a man out of position plays below his rating), and
   // each as fresh as he is (see FITNESS)
-  // a side's strength in a simulated game: yours as on paper, with your physio's help on top; the computer's, the eight
+  // a side's strength in a simulated game: yours as on paper, with your physio's help on top; the computer's, the nine
   // it picked for the game (xi), as fresh as they are
   function mgSimStr(d,id,xi){ if(id!==d.clubId&&xi) return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40;
     return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
@@ -15864,7 +15905,7 @@
     if(d.wday==='mon'&&(d.phase==='league'||d.phase==='playoffs')) mgForward(d);   // (from the week's start: on to its first matchday)
     const g=mgNextGame(d); if(!g) return null;
     if(d.pile&&(d.pile.day||'mon')!=='mon') d.pile=null;   // (the matchday's paper: the game's on now)
-    if(!score) mgFitXI(d);   // (a simulated game: nobody hurt in your eight -- a live one's was made fit at kick-off)
+    if(!score) mgFitXI(d);   // (a simulated game: nobody hurt in your nine -- a live one's was made fit at kick-off)
     const posBefore=mgPos(d), loyBefore=Math.round(d.loyalty||0), budBefore=d.budget, yours=score?{score,logs}:null; INJ_NOW.length=0; RAT_NOW.length=0;
     const mine=g.kind==='league'?mgMatchday(d,yours):g.kind==='cup'?mgMidweek(d,yours):mgPlayoffRound(d,yours);
     if(mine){ mine.derby=isDerby(d,mine.opp); const L0=d.loyalty??0; applyLoyalty(d,mine); morAfterGame(d,mine);
@@ -16001,7 +16042,7 @@
     const txt=w[0].replace('{club}',d.clubName).replace('{amt}',money(amt)); d.budget+=amt; mgNews(d,txt); return {title:w[1], txt, amt}; }
   // THE COMMUNITY (about one Monday in six): the town asks something of the club. Say yes and the fans think more of it
   // (a share of the league's usual following: fans, %), sometimes the dressing room too (tm); some cost money (by the
-  // league), some a little of the men's legs (tire: off your eight's fitness). Say no and nothing happens.
+  // league), some a little of the men's legs (tire: off your nine's fitness). Say no and nothing happens.
   const COMMUNITY=[
     {k:'school', t:'The primary school asks for a coaching day with the players.', yes:'run a coaching day at the primary school', fans:2, tm:0.1, tire:0.05},
     {k:'charity', t:'The hospital asks for a charity match against the town’s old boys.', yes:'play a charity match for the hospital', fans:3, tm:0.2, tire:0.1},
@@ -16027,7 +16068,7 @@
   // THE CUPS' DRAWS, for the papers: the Wednesday a cup's round is played (league week g+2), and what winning it pays
   function cupWeek(key,r){ for(const g in CUP_CAL) if(CUP_CAL[g][0]===key&&CUP_CAL[g][1]===r) return +g+2; return null; }
   // LOANS (in a window): a club takes one of your men to the end of the season and pays his wages -- he plays (and
-  // develops) there and comes back when it's over; or lends you a man out of its eight for a share of his wage (the
+  // develops) there and comes back when it's over; or lends you a man out of its nine for a share of his wage (the
   // better he is to them, the more: mgLoanShare). Offers come in the Monday papers both ways; LOAN HIM on another club's
   // man in the market asks for one. A man on loan isn't his club's to sell, release, renew or lend again till he's back,
   // and nobody bids for him; everyone goes back at the season's end (mgLoansHome).
@@ -16055,8 +16096,8 @@
       const since=p.since; mgRosterAdd(d,p); p.since=since??d.season;
       R.loans.push({name:p.name, back:true, club:c.name, apps:p.apps||0, goals:p.goals||0}); wkLog(d).loanback.push({pid:p.id, club:c.name, apps:p.apps||0, goals:p.goals||0});
       mgNews(d,p.name+' is back from his loan at '+c.name+' ('+(p.apps||0)+' games, '+(p.goals||0)+' goals).'); } }
-  // a window Monday's loan calls, now and then: a club wants one of your fringe men (out of your eight, 24 or under or
-  // not happy) and pays his wages; or offers one of theirs (out of their eight, a step up on your weakest in his part
+  // a window Monday's loan calls, now and then: a club wants one of your fringe men (out of your nine, 24 or under or
+  // not happy) and pays his wages; or offers one of theirs (out of their nine, a step up on your weakest in his part
   // of the side) for a share of his wage
   function wkLoans(d){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return []; const out=[], k=d.phase==='league'?0.12:0.3, xi=new Set(mgStarters(d));
     if(Math.random()<k){ const fr=d.roster.filter((p,i)=>!xi.has(p)&&!p.loan&&(p.age<=24||(p.mor??MOR0)<5)&&!mgCanLose(d,i));
@@ -16085,7 +16126,7 @@
     return out; }
   // ===== A YOUNGSTER ON A BUYBACK CLAUSE (v105) ======================================================================
   // Now and then in a window a bigger club (a league or more above yours; in the top league, one of its top five) offers
-  // you a youngster it has no use for yet: 21 or under, out of its eight, too raw for its first team (three under its
+  // you a youngster it has no use for yet: 21 or under, out of its nine, too raw for its first team (three under its
   // league's level or more) or not doing it there (his form under 6.2) -- no worse than your weakest in his part of the
   // side less two, with more to come (his ceiling five over him or more), at a fee you can find. A fifth under their
   // price (BB_OFF), on a buyback clause: at the start of either window, to the end of next season, they can have him
@@ -16518,7 +16559,7 @@
       case 'windfall': L.push(mgEsc(x.txt)); L.push('In the bank: <b>'+money(d.budget)+'</b>'); next(); return [mgEsc(x.title)+': +'+money(x.amt),L,B];
       case 'comm': { const c=COMMUNITY.find(y=>y.k===x.ck); if(!c){ next(); return ['The community',L,B]; }
         L.push('Say yes and the fans think more of the club: about <span class="up">+'+commFans(d,c)+' fans</span>'+(c.tm?', and the dressing room enjoys it':'')+'.');
-        if(x.cost) L.push('It costs <b>'+money(x.cost)+'</b>.'); if(c.tire) L.push('<span class="dim">It takes a little out of your eight’s legs.</span>');
+        if(x.cost) L.push('It costs <b>'+money(x.cost)+'</b>.'); if(c.tire) L.push('<span class="dim">It takes a little out of your nine’s legs.</span>');
         B.push(['YES','commyes'],['NOT THIS TIME','next']); return [mgEsc(c.t),L,B]; }
       case 'cup': { const K=CUP[x.key];
         if(x.out){ next(); return ['Out of the '+K.name+' in the '+K.rounds[x.r].toLowerCase(),L,B]; }
@@ -16784,14 +16825,14 @@
       else { c.players.splice(c.players.indexOf(p),1); mgToFree(d,p,c); } }
     d.youth=(d.youth||[]).filter(p=>{ if(p.age>=19){ R.youthOut.push(p.name); return false; } return true; });   // 19: promoted by now, or gone
     for(const L of [d.roster,d.world.free,...mgAiClubs(d).map(c=>c.players)]) for(const p of L){ p.apps=0; p.goals=0; p.as=0; p.cs=0; p.rs=0; p.rn=0; } }
-  // the role a squad is shortest of, against two keepers and four each of defenders, midfielders and forwards
-  function mgNeedRole(L){ const want={GK:2,DEF:4,MID:4,ATT:4}, n={GK:0,DEF:0,MID:0,ATT:0}; for(const p of L) n[p.role]++;
+  // the role a squad is shortest of, against two keepers, five defenders and four each of midfielders and forwards
+  function mgNeedRole(L){ const want={GK:2,DEF:5,MID:4,ATT:4}, n={GK:0,DEF:0,MID:0,ATT:0}; for(const p of L) n[p.role]++;
     return Object.keys(want).sort((a,b)=>(want[b]-n[b])-(want[a]-n[a]))[0]; }
   // ...and the position in a line it's shortest of, against a squad's shares of them (mgSquadSubs: v118)
-  const MG_SUB_WANT={DEF:{CB:2.4,FB:1.6}, MID:{CM:3,WM:1}, ATT:{STK:2.2,WNG:1.8}};
+  const MG_SUB_WANT={DEF:{CB:3,FB:2}, MID:{CM:3,WM:1}, ATT:{STK:2.2,WNG:1.8}};
   function mgNeedSub(L,role){ const W=MG_SUB_WANT[role]; if(!W) return role; const n={}; for(const p of L) if(p.role===role){ const s=natPos(p); n[s]=(n[s]||0)+1; }
     return Object.keys(W).sort((a,b)=>(W[b]-(n[b]||0))-(W[a]-(n[a]||0)))[0]; }
-  // a computer club made up to fourteen men (two of them keepers): free agents at its level, else a youngster of its own --
+  // a computer club made up to fifteen men (two of them keepers): free agents at its level, else a youngster of its own --
   // in the position it's shortest of (v118)
   function mgRefill(d,c){ const lvl=MG_LEVEL[c.tier];
     while(c.players.length<MG_SQUAD||c.players.filter(p=>p.role==='GK').length<2){
@@ -16799,7 +16840,7 @@
       const fa=d.world.free.filter(p=>p.role===role&&(role==='GK'||natPos(p)===sub)&&Math.abs(mgLevelTier(p.ovr)-c.tier)<=1&&p.ovr>=lvl-10).sort((a,b)=>b.ovr-a.ovr)[0];
       let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=17+Math.floor(Math.random()*5); p=mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age,{sub}); }   // (a youngster with the league's prime in him, give or take: as the world began)
       p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); } }
-  // never short: under twelve men (or with no keeper) the board signs free agents on one-year deals
+  // never short: under thirteen men (or with no keeper) the board signs free agents on one-year deals
   function mgTopUpYours(d){ const lvl=MG_LEVEL[d.tier];
     while(d.roster.length<MG_MIN||!d.roster.some(p=>p.role==='GK')){
       const role=d.roster.some(p=>p.role==='GK')?mgNeedRole(d.roster):'GK';
@@ -16835,7 +16876,7 @@
 
   // ---- your squad: men in and out (the lineup keeps pointing at the right men) ----
   function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; p.since=d.season; p.mor=Math.min(10,(p.mor??MOR0)+0.5); p.kt=0; p.kw=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); popNew(d,p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
-  // takes roster[idx] out: his place in the eight goes to the first sub who plays there (else the first sub)
+  // takes roster[idx] out: his place in the nine goes to the first sub who plays there (else the first sub)
   function mgRosterRemove(d,idx){ const lu=ensureLineup(d), R=d.roster, gone=R[idx]; if(!gone) return null;
     const sub=role=>{ let k=lu.bench.findIndex(i=>R[i]&&R[i].role===role); if(k<0&&role!=='GK') k=lu.bench.findIndex(i=>R[i]&&R[i].role!=='GK'); if(k<0&&lu.bench.length) k=0; return k<0?null:lu.bench.splice(k,1)[0]; };
     if(lu.gk===idx){ const s=sub('GK'); if(s!=null) lu.gk=s; }
@@ -16847,7 +16888,7 @@
     if(d.listed) delete d.listed[gone.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==gone.id); knUp(d,gone,2,2);   // (you know him: he played for you)
     if(statViewRi!=null) statViewRi=null;
     return gone; }
-  // the best eight for your shapes: the best keeper, then the spots with the ball filled best first -- whoever's best in a
+  // the best nine for your shapes: the best keeper, then the spots with the ball filled best first -- whoever's best in a
   // spot (his rating there, a little extra in his own position) -- then who defends where; and the bench, the next keeper
   // and the best four after him
   function mgAutoLineup(d){ ensureForms(d); const R=d.roster, used=new Set();
@@ -16862,7 +16903,7 @@
     d.lineup={gk, atk:atk.filter(i=>i>=0), def:[], bench};
     d.lineup.def=careerMapDef(d); }
   function mgGkCount(d){ return d.roster.filter(p=>p.role==='GK').length; }
-  // can roster[idx] leave? (twelve men at least, and one keeper)
+  // can roster[idx] leave? (thirteen men at least, and one keeper)
   function mgCanLose(d,idx){ const p=d.roster[idx]; if(!p) return 'He is not in your squad.';
     if(p.loan) return p.name+' is on loan from '+mgNameOf(d,p.loan.from)+': he goes back at the season’s end.';
     if(d.roster.length<=MG_MIN) return 'You need at least '+MG_MIN+' players.';
@@ -16875,7 +16916,7 @@
   // dearer -- and his potential as far as its scouts can see it (c.sc, 0 to 1: a better league's clubs
   // scout better, as a rule, with plenty either way). A club with poor scouts prices him on what he is now, whatever he
   // might become; one with good scouts on what he could be too. Its temperament on top (c.gr, 0.85 to 1.25), more for
-  // one of its first eight, less in the last season of his deal. And a small club is nobody's fool: a man in fine form
+  // one of its first nine, less in the last season of his deal. And a small club is nobody's fool: a man in fine form
   // gets noticed (it sees his potential as a good scout would), and once two bids or more over its price have come in for
   // him (p.mk: how many, the best of them) it knows it has a gem -- all of his potential, and more than the best bid.
   function mgClubEye(c){ if(c.sc==null){ c.sc=Math.round(clamp(0.1+0.15*(c.tier||1)+(Math.random()-0.5)*0.5,0.05,0.95)*100)/100; c.gr=Math.round((0.85+Math.random()*0.4)*100)/100; } return c; }
@@ -17513,9 +17554,9 @@
     return Math.round(base*(oppFac*compFac-1)); }
   function ordinal(n){ const s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
   // ===== YOUR LINEUP & TACTICS (career) ======================================================
-  // a club's eight for a match: in a shape, its keeper, then in each spot the man who's best there -- in his own position
+  // a club's nine for a match: in a shape, its keeper, then in each spot the man who's best there -- in his own position
   // if it has one of its men for it, else in one of his second ones (see POSITIONS); short of a position, the best man
-  // left. (No shape: the first eight.)
+  // left. (No shape: the first nine.)
   function careerSquad(club,form,pool){   // (pool: the men it picked for the game, else its whole squad)
     const d=CAREER&&CAREER.data, ps=pool||club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p), risk:d&&p.role!=='GK'?injRisk(d,p,1,club):0 });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
@@ -17533,9 +17574,9 @@
   }
   // A CLUB'S SHAPE: from how it plays -- a passing side keeps men in midfield, a wing side has wingers, a direct one two
   // up front, a counter-attacking one a back three -- and which of those its name draws (the same every season)
-  const CW_STYLE_FORMS={control:['2-4-1','2-3-2','1-4-2'], gegen:['2-3-2','2-2-3','3-1-3'], wing:['2-2-3','3-1-3','1-3-3'], direct:['3-2-2','2-3-2','1-4-2'],
-    fluid:['3-2-2','2-3-2','3-3-1'], dcounter:['3-3-1','3-2-2','2-4-1'], neutral:['2-3-2','2-2-3','2-4-1','3-3-1']};
-  function cwFormFor(club){ if(!club) return '2-3-2'; const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
+  const CW_STYLE_FORMS={control:['3-4-1','3-3-2','2-4-2'], gegen:['3-3-2','3-2-3','4-1-3'], wing:['3-2-3','4-1-3','2-3-3'], direct:['4-2-2','3-3-2','2-4-2'],
+    fluid:['4-2-2','3-3-2','4-3-1'], dcounter:['4-3-1','4-2-2','3-4-1'], neutral:['3-3-2','3-2-3','3-4-1','4-3-1']};
+  function cwFormFor(club){ if(!club) return '3-3-2'; const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
   // ...and its width: a wing side wide with the ball, a counter-attacking side compact; a deep block compact without it
   function cwWidthFor(club){ const st=styleKey(club&&club.style);
     return {atk:st==='wing'?1.18:(st==='fluid'||st==='dcounter')?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
@@ -17544,21 +17585,21 @@
     if(!p.style) p.style=inferStyle(p.role,p.subRole,p.at?mgStats(p):(p.stats||{})); return p.style; }
   // ---- career lineup / tactics ----
   // Two shapes, one for each phase -- with the ball and without it -- each with its width. lineup.atk is who plays in
-  // each attacking spot, lineup.def who plays in each defending one (the same seven), lineup.gk the keeper. Anyone can
+  // each attacking spot, lineup.def who plays in each defending one (the same eight), lineup.gk the keeper. Anyone can
   // play anywhere: out of position a man is as good as his stats make him there (ovrAt).
   let tacNote='', statViewRi=null, tacPhase='atk';
   const TAC_GK=[50,92];
   const CAREER_STEP={1:0,2:52,3:23,4:17};
-  function ensureForms(d){ careerTo7(d);
-    if(!d.formation||!FORMS[d.formation]||DEF_ONLY.includes(d.formation)) d.formation=formOKAtk(d.formation,formOKAtk(d.formAtk,'2-3-2'));
+  function ensureForms(d){ careerTo7(d); careerTo8(d);
+    if(!d.formation||!FORMS[d.formation]||DEF_ONLY.includes(d.formation)) d.formation=formOKAtk(d.formation,formOKAtk(d.formAtk,'3-3-2'));
     if(!d.formDef||!FORMS[d.formDef]||ATK_ONLY.includes(d.formDef)) d.formDef=defFormFor(d.formation,postureOf(d.style));
     d.width=widthObj(d.width); d.ti=tiClean(d.ti,d.style); delete d.pinstr; delete d.instr; return d; }   // (v112: the side's team instructions -- the old per-spot ones dropped)
   function formForCareer(d,phase){ ensureForms(d); return phase==='def'?d.formDef:d.formation; }
   // a man's rating in a position: his own, or what his stats make him there
   function ovrAt(p,role,pos){ return !p?0:rateAt(p.role,p.ovr,mgStats(p),fitPos(p),role,pos); }
-  // formation -> 7 slot positions on the portrait tactics pitch (x across, y down from their goal), with role/line metadata
+  // formation -> 8 slot positions on the portrait tactics pitch (x across, y down from their goal), with role/line metadata
   function careerSlots(form, phase, wMul){ wMul=clamp(wMul||1,0.8,1.2);
-    const lines=FORMS[form]||FORMS['2-3-2']; const roles=lines.length===2?['DEF','ATT']:['DEF','MID','ATT'];
+    const lines=FORMS[form]||FORMS['3-3-2']; const roles=lines.length===2?['DEF','ATT']:['DEF','MID','ATT'];
     const Y = {DEF:70,MID:45,ATT:18};
     const out=[];
     const maxCnt=Math.max(...lines);
@@ -17590,13 +17631,13 @@
     return lu; }
   // A career saved with six outfielders: its formation grows into the nearest seven-a-side one, and the line
   // that grows takes a man off the bench (the first one there who plays in that line, else the front of the
-  // bench), so everyone else keeps the position they had.
+  // bench), so everyone else keeps the position they had. (v124: then it grows again, to nine a side: careerTo8.)
   function careerTo7(d){
     if(d.seven) return; d.seven=true;
-    const lu=d.lineup, oldF=d.formation||d.formAtk;
-    if(oldF&&!FORMS[oldF]) d.formation=formOK(oldF,'2-3-2');
-    if(!(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD-1&&Array.isArray(lu.bench)&&lu.bench.length)) return;
-    const oldL=String(oldF||'').split('-').map(Number), newL=FORMS[d.formation]||FORMS['2-3-2'];
+    const lu=d.lineup, oldF=d.formation||d.formAtk, f7=FORM_FROM_6[oldF]||(FORM_FROM_7[oldF]?oldF:'2-3-2');
+    if(oldF!==f7) d.formation=f7;
+    if(!(lu&&Array.isArray(lu.atk)&&lu.atk.length===6&&Array.isArray(lu.bench)&&lu.bench.length)) return;
+    const oldL=String(oldF||'').split('-').map(Number), newL=f7.split('-').map(Number);
     let li=oldL.length===3 ? newL.findIndex((n,k)=>n>oldL[k]) : -1;
     if(li<0) li=2;
     const R=d.roster||[], role=['DEF','MID','ATT'][li];
@@ -17604,11 +17645,28 @@
     const ri=lu.bench.splice(bi,1)[0], at=newL.slice(0,li+1).reduce((a,b)=>a+b,0)-1;   // the end of that line
     lu.atk.splice(Math.min(at,lu.atk.length),0,ri); lu.def=lu.atk.slice();
   }
+  // NINE A SIDE (v124): a career saved with seven outfielders. Both its shapes grow into their nine-a-side ones, each a
+  // man more at the back (FORM_FROM_7: 2-3-2 is 3-3-2), and he comes off the bench -- the first fit defender there, else
+  // the first fit outfielder -- into the middle of the back line, with the ball and without it, so everyone else keeps
+  // the spot he had (the two ends of a back three are the full-backs of a back four).
+  function careerTo8(d){
+    if(d.eight) return; d.eight=true;
+    const f=d.formation||d.formAtk; if(FORM_FROM_7[f]) d.formation=FORM_FROM_7[f];
+    if(FORM_FROM_7[d.formDef]) d.formDef=FORM_FROM_7[d.formDef];
+    const lu=d.lineup, R=d.roster||[];
+    if(!(lu&&Array.isArray(lu.atk)&&lu.atk.length===OUTFIELD-1&&Array.isArray(lu.bench)&&lu.bench.length)) return;
+    const fit=(ri,role)=>R[ri]&&!R[ri].inj&&(role?R[ri].role===role:R[ri].role!=='GK');
+    let bi=lu.bench.findIndex(ri=>fit(ri,'DEF')); if(bi<0) bi=lu.bench.findIndex(ri=>fit(ri)); if(bi<0) bi=lu.bench.findIndex(ri=>R[ri]&&R[ri].role!=='GK'); if(bi<0) return;
+    const ri=lu.bench.splice(bi,1)[0], mid=form=>Math.floor((FORMS[form]||FORMS['3-3-2'])[0]/2);   // (the middle of its back line)
+    const def=Array.isArray(lu.def)&&lu.def.length===lu.atk.length&&lu.def.every(i=>lu.atk.includes(i))?lu.def.slice():null;
+    lu.atk.splice(mid(d.formation),0,ri);
+    if(def){ def.splice(mid(d.formDef),0,ri); lu.def=def; } else lu.def=lu.atk.slice();
+  }
   // a man off the bench for one on the pitch: he takes the other's place with the ball and without it
   function subIn(d, inRi, outRi){ const lu=d.lineup;
     for(const ph of ['atk','def']){ const k=lu[ph].indexOf(outRi); if(k>=0) lu[ph][k]=inRi; }
     const bk=lu.bench.indexOf(inRi); if(bk>=0) lu.bench[bk]=outRi; }
-  // your eight with nobody injured in it: an injured man's place goes to the fittest best fit for it off the bench (a
+  // your nine with nobody injured in it: an injured man's place goes to the fittest best fit for it off the bench (a
   // keeper's to a keeper) -> [[out, in]...]
   function mgFitXI(d){ const lu=ensureLineup(d), R=d.roster, swaps=[];
     const sub=(ri,slot)=>{ const B=lu.bench.filter(i=>R[i]&&!R[i].inj), gk=R[ri].role==='GK'||slot==='GK', same=B.filter(i=>(R[i].role==='GK')===gk);
@@ -17645,7 +17703,7 @@
   }
   // the card's other side: his spot's instructions for this phase (he's moved by dragging him)
   // THE RIGHT COLUMN HAS TWO SIDES: the man you tapped (his ratings: the six, each opening on what it's made of) and the
-  // team's instructions for this phase (tiPanelHtml) -- INSTRUCTIONS, up in the top row left of BEST 8, lit while they're
+  // team's instructions for this phase (tiPanelHtml) -- INSTRUCTIONS, up in the top row left of BEST 9, lit while they're
   // up: a tap on it again, or on a man, and it's his card (v116: before, a button on his card turned it over)
   let cardSide='rate';
   const insBtn=()=>'<button class="mgBtn tbIns'+(cardSide==='instr'?' go':'')+'" data-cside="'+(cardSide==='instr'?'rate':'instr')+'">INSTRUCTIONS</button>';
@@ -17669,7 +17727,7 @@
   // (or onto a sub to bring the sub on): while he's up, every spot shows what he'd be worth there. MOVE / SWAP on his card
   // does the same with two taps.
   let tacDrop=null;   // the menu open on the top row: 'form' | 'width' | 'style'
-  function tbPos(x,y,s){ return {L:100-y, T:50+(clamp(x,6,94)-50)*TOK_SPREAD, k:s?s.idx-(s.count-1)/2:0}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
+  function tbPos(x,y,s){ return {L:100-y, T:50+(clamp(x,6,94)-50)*TOK_SPREAD, k:s?s.idx-(s.count-1)/2:0, n:s?s.count:1}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
   // a man's face for the menus, in his club's kit (SPRITE.face): an <img>, or nothing while the art loads
   function faceImg(who,kit,cls){ const u=SPRITE.face(who,kit); return u?'<img class="'+(cls||'ptkFace')+'" src="'+u+'" alt="" draggable="false">':''; }
   function bodyImg(who,kit){ const u=SPRITE.body(who,kit); return u?'<img class="cardBody" src="'+u+'" alt="" draggable="false">':''; }   // all of him, for his card
@@ -17684,20 +17742,22 @@
   // and on the pitch his face beside them (the bench has none)
   // (his spot, never so near an edge that he hangs off it -- and the keeper and each line a man's width from the next, so on a narrow pitch they close up rather than overlap)
   const PTK_COL={DEF:1,MID:2,ATT:3};
-  const ptkAt=(L,T,role,k)=>{ const c=PTK_COL[role]||0;
-    return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(7-2*c)+'));top:clamp(var(--hh),'+ptkTop(T,k)+',calc(100% - var(--hh)))"'; };
+  // (n: how many in his line -- v124: a line of five on a short pitch goes right to its edges, the rims on its lines)
+  const ptkAt=(L,T,role,k,n)=>{ const c=PTK_COL[role]||0, e=n>=5?'calc(var(--hh) - 2px)':'var(--hh)';
+    return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(7-2*c)+'));top:clamp('+e+','+ptkTop(T,k,n)+',calc(100% - '+e+'))"'; };
   // how far down: his line's middle, then k men along it (T is where its step puts him) -- the step never less than a man's height, so on a short
-  // pitch a line spreads rather than its men overlap
-  const ptkTop=(T,k)=>k?'calc(50% + '+k+' * max('+((T-50)/k).toFixed(2)+'%, var(--rowH)))':T.toFixed(1)+'%';
+  // pitch a line spreads rather than its men overlap; and never more than the pitch has room for, n men in his line (v124: five across the back)
+  const ptkTop=(T,k,n)=>{ if(!k) return T.toFixed(1)+'%'; const st='max('+((T-50)/k).toFixed(2)+'%, var(--rowH))';
+    return 'calc(50% + '+k+' * '+(n>=2?'min('+st+', calc((100% - 2 * var(--hh, 20px) + '+(n>=5?4:0)+'px) / '+(n-1)+'))':st)+')'; };
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
-  function tbTok(d, ri, L, T, kind, phase, slotRole, k, pos){ const p=d.roster[ri]; if(!p) return '';
+  function tbTok(d, ri, L, T, kind, phase, slotRole, k, pos, n){ const p=d.roster[ri]; if(!p) return '';
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
     return '<button class="ptk'+fitCls(fitPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+(p.inj?' inj':'')+'"'
-      +(kind==='bench'?'':ptkAt(L,T,slotRole,k))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
+      +(kind==='bench'?'':ptkAt(L,T,slotRole,k,n))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
       +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
   // a small lit box off the bottom-right corner of the spot
-  function ghostTok(L,T,num,name,k){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
+  function ghostTok(L,T,num,name,k,n){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k,n)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm), lk=tacNeed('form',fm);
@@ -17715,13 +17775,13 @@
     const sl=(STYLE_LIST.find(t=>t[0]===styleKey(d.style))||STYLE_LIST[0])[1];   // (one style, with the ball and without it)
     let h='<div class="tacB1"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
       +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop('style',sl)+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 8</button></div>';
+      +drop('form',form)+drop('width',wl)+drop('style',sl)+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 9</button></div>';
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
     for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y,oslots[i]);
-      h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k); }
+      h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k,q.n); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', 0, 'GK');
-    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, q.k, slots[i].pos); }
+    for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, q.k, slots[i].pos, q.n); }
     h+='</div><div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch, its five: who's taken at all is the Selection tab's)
     h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
     return h+'</div>'; }
@@ -17750,7 +17810,7 @@
     } else if(kinds==='bench+field'){                                     // a sub on, for both phases
       subIn(d, a.kind==='bench'?a.ri:b.ri, a.kind==='field'?a.ri:b.ri);
     } else { const ia=lu.bench.indexOf(a.ri), ib=lu.bench.indexOf(b.ri); if(ia>=0&&ib>=0){ lu.bench[ia]=b.ri; lu.bench[ib]=a.ri; } } }
-  // ---- WHO YOU TAKE (the training pitch's Selection tab): the squad as one list, top to bottom -- the keeper, the seven on
+  // ---- WHO YOU TAKE (the training pitch's Selection tab): the squad as one list, top to bottom -- the keeper, the eight on
   // the pitch (in their spots, with the ball), the five on the bench, then the rest, not taken -- wrapped into three columns
   // where its parts meet. No faces: a bar a man, his place in the list, his name, his position (on the pitch, the spot
   // he's in) and his rating (there). Drag a bar up or down (see selMove, and the drag below).
@@ -17871,14 +17931,14 @@
     teamLabels(); try{ SPRITE.flush(); }catch(e){} }
   function mgPlay(d){ if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return;
     const sw=mgFitXI(d); if(sw.length) showNote(sw.map(([o,i])=>surname(o.name)+' is injured: '+surname(i.name)+' plays').join(' · '),'var(--warn)');
-    if(d.roster.length<1+OUTFIELD){ showNote('You need eight players to play.','var(--bad)'); return; }
+    if(d.roster.length<1+OUTFIELD){ showNote('You need nine players to play.','var(--bad)'); return; }
     const opp=d.world.clubs[g.opp];
     EXH.on=false; mgSetTeams(d,g);
     ensureForms(d); TAC.G.width=widthObj(d.width); TAC.R.width=widthObj(cwWidthFor(opp));
     setStyle('G',d.style); setStyle('R',opp.style);
     const me=careerLineupYours(d); SQUAD.G=me.squad; LINEUP.G=me.lineup; myForm=d.formation; myFormDef=d.formDef; setTI('G',d.ti); setTI('R',null);   // (theirs: their style's)
     rForm=cwFormFor(opp); rFormDef=defFormFor(rForm,postureOf(opp.style));             // they line up in their own shapes
-    const oxi=mgPickEight(opp.players||[],mgCtxOf(g),d,opp); MG_LIVE_XI={id:opp.id,ids:oxi.map(p=>p.id)};   // (their eight for it: the same choice as a simulated game's)
+    const oxi=mgPickEight(opp.players||[],mgCtxOf(g),d,opp); MG_LIVE_XI={id:opp.id,ids:oxi.map(p=>p.id)};   // (their nine for it: the same choice as a simulated game's)
     SQUAD.R=careerSquad(opp,rForm,oxi); LINEUP.R=defaultLineup(); LINEUP.R.def=mapDefOrder('R',LINEUP.R.atk);
     careerFix={opp:g.opp, home:g.home, kind:g.kind, recorded:false, train:lvOf(d,'train'), physio:lvOf(d,'physio')};
     matchReturn='hub'; resumable=false;
@@ -17925,7 +17985,7 @@
     } else { const P=d.po&&d.po[d.review?d.review.tier:d.tier]; after.push(m.through?(P&&P.winner===d.clubId?'<b style="color:var(--good)">PROMOTED through the playoffs!</b>':'Through to the playoff final.'):'Out of the playoffs.'); }
     h+='<div class="mrAfter">'+after.map(t=>'<div>'+t+'</div>').join('')+'</div>';
     h+='<div class="mrFoot"><button class="mrContinue mrNext" id="mrNextBtn">NEXT ▶</button></div></div>';
-    // YOUR PLAYERS: who played (the eight at the end and anyone who came on or off), what each did
+    // YOUR PLAYERS: who played (the nine at the end and anyone who came on or off), what each did
     const S=SUBS.G||{on:[],off:[]}, lu=LINEUP.G||{gk:-1,atk:[]}, on=new Set([lu.gk,...lu.atk]), rows=[];
     (SQUAD.G||[]).forEach((e,si)=>{ if(!(on.has(si)||S.on.includes(si)||S.off.includes(si))) return; const p=e.ri!=null?d.roster[e.ri]:null, o=MSTAT.G[si]||{};
       const rt=(rep.rat||[]).find(x=>p&&x.name===p.name); rows.push({name:p?p.name:e.name, num:p?p.num:e.num, pos:p?natPos(p):e.role, gk:(p?p.role:e.role)==='GK', r:rt?rt.r:null, o, sub:S.on.includes(si)}); });
@@ -18373,7 +18433,7 @@
   function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
     let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', 0, 'GK');
-    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, q.k, slots[i].pos); }
+    for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, q.k, slots[i].pos, q.n); }
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
     h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
@@ -18602,10 +18662,10 @@
     if(!gk||gk.role!=='GK') w.push(bad('No goalkeeper in goal — pick one in Training'));
     if((d.phase==='league'&&d.md>=MG_MD-6)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
     if(mgWindowOpen(d)&&(d.offers||[]).length) w.push(info(d.offers.length+' offer'+(d.offers.length>1?'s':'')+' for your players — see Transfers'));
-    { const tired=mgStarters(d).filter(p=>condOf(p)<0.7).length; if(tired&&(d.phase==='league'||d.phase==='playoffs')) w.push(info(tired+' of your eight '+(tired>1?'are':'is')+' tired — rest '+(tired>1?'them':'him')+' in Training')); }
+    { const tired=mgStarters(d).filter(p=>condOf(p)<0.7).length; if(tired&&(d.phase==='league'||d.phase==='playoffs')) w.push(info(tired+' of your nine '+(tired>1?'are':'is')+' tired — rest '+(tired>1?'them':'him')+' in Training')); }
     { const tm=d.tm??MOR0; if(tm<4.5||tm>=8) w.push((tm<4.5?bad:info)('The dressing room is '+tmWord(tm))); }
     { const out=d.roster.filter(p=>p.wantsOut); if(out.length) w.push(info(out.map(p=>surname(p.name)).join(', ')+(out.length>1?' want':' wants')+' to leave')); }
-    { const hurt=d.roster.filter(p=>p.inj); if(hurt.length) w.push(bad('✚ '+hurt.map(p=>surname(p.name)+' '+injShort(p.inj.d)).join(', ')+(mgStarters(d).some(p=>p.inj)?' — in your eight':''))); }
+    { const hurt=d.roster.filter(p=>p.inj); if(hurt.length) w.push(bad('✚ '+hurt.map(p=>surname(p.name)+' '+injShort(p.inj.d)).join(', ')+(mgStarters(d).some(p=>p.inj)?' — in your nine':''))); }
     const wEl=document.getElementById('chWarn'); wEl.style.display=w.length?'block':'none'; wEl.innerHTML=w.join('  ·  ');
     const badge=(id,n)=>{ const el=document.querySelector('#chCampus [data-bldg="'+id+'"] .bBadge'); if(el){ el.textContent=n||''; el.style.display=n?'block':'none'; } };
     badge('market',mgWindowOpen(d)&&lvOf(d,'market')?(d.offers||[]).length:0); badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
@@ -18731,7 +18791,8 @@
   function showHubScreen(){ SCREEN='hub'; document.getElementById('stageWrap').classList.add('menuMode'); document.getElementById('careerHub').classList.add('show'); renderHub(); cpFit(); }
   function openHub(key){ const d=readSave(key); if(!d||d.kind!=='manager') return; mgMigrate(d); CAREER={key,data:d}; MGUI.money=null;
     resumable=false; hideStartMenu(); hideBldg(); showHubScreen(); }
-  function mgMigrate(d){ d.listed=d.listed||{}; d.offers=d.offers||[]; d.kn=d.kn||{}; for(const id in d.scouted||{}) d.kn[id]=Math.max(d.kn[id]||0,1); delete d.scouted; d.rec=d.rec||{};
+  function mgMigrate(d){ careerTo7(d); careerTo8(d);   // (v124: a career saved with seven outfielders gets its eighth before anything reads its side)
+    d.listed=d.listed||{}; d.offers=d.offers||[]; d.kn=d.kn||{}; for(const id in d.scouted||{}) d.kn[id]=Math.max(d.kn[id]||0,1); delete d.scouted; d.rec=d.rec||{};
     for(const c of d.staff||[]){ if(c.k==='tac') c.k='def'; coachSpec(c); }   // (the coaches as they are now: see THE STAFF)
     if(d.cand&&d.cand.list.some(c=>!COACH_AREA[c.k]||!c.up)) d.cand=null;   // (the first team's men to hire: no youth coach among them)
     d.story=d.story||{vet:2,kid:2}; if(lvOf(d,'market')) d.story.phone=2;   // (on the phone already: no call to come)
@@ -18880,7 +18941,7 @@
       case 'goclub': openBuilding('club'); return;
       case 'dbuy': case 'dout': { const err=placeStart(d,ds.id,a==='dbuy'); if(err) say(err,'var(--bad)'); else return; break; }
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'var(--bad)':'var(--good)'); break; }
-      case 'best8': mgAutoLineup(d); statViewRi=null; say('Your best eight are picked.','var(--good)'); break;
+      case 'best8': mgAutoLineup(d); statViewRi=null; say('Your best nine are picked.','var(--good)'); break;
       case 'qpick': { const side=ds.side, id=+ds.qid, sel=MGUI.qpSel;            // (the Selection tab's quick subs: see mgSelectTab)
         if(!sel||sel.side===side){ MGUI.qpSel=sel&&sel.id===id?null:{side,id}; break; }
         const err=qpPair(d,side==='xi'?id:sel.id,side==='bench'?id:sel.id); MGUI.qpSel=null; if(err) say(err); break; }
@@ -19041,7 +19102,7 @@
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
       budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
-      formation:'2-3-2', width:{atk:1,def:1}, style:'neutral', seven:true,
+      formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
