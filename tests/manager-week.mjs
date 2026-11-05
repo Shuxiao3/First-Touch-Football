@@ -28,7 +28,8 @@ const mid = () => page.getAttribute('#chPhase', 'data-mid');
 await page.emulateMedia({ reducedMotion: 'reduce' });   // (the day's end: manager-career.mjs's)
 
 // --- a career saved before the week is cleared, and LOAD GAME says so -----------------------------------------------
-await page.evaluate(() => { localStorage.setItem('ft_mgr_slot2', JSON.stringify({ v: 3, kind: 'manager', clubName: 'Old Town', tier: 1, season: 4, manager: { name: 'Old Hand' }, phase: 'summer', day: 2 })); });
+// (stored as the page loads, before the game reads it: a write just before a reload isn't always there after it -- v125)
+await page.addInitScript(() => { try{ if(!sessionStorage.getItem('oldSave')){ sessionStorage.setItem('oldSave', '1'); localStorage.setItem('ft_mgr_slot2', JSON.stringify({ v: 3, kind: 'manager', clubName: 'Old Town', tier: 1, season: 4, manager: { name: 'Old Hand' }, phase: 'summer', day: 2 })); } }catch(e){} });
 await page.reload(); await page.waitForTimeout(700); await page.emulateMedia({ reducedMotion: 'reduce' });
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 const slots = await page.innerText('#newSlotList');

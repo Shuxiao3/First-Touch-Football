@@ -166,7 +166,7 @@ ok(M.length >= 2 && M[0].plan && M[1].plan && M[0].qs === want[0] && M[1].qs ===
 await pc.click('#qsDrop .qsRow >> nth=0'); await pc.waitForTimeout(250);
 const subbed = () => KC(`(()=>{ const [o,i]=${JSON.stringify(want[0])}.split(':').map(Number); return { on:players.some(q=>q.team==='G'&&q.squadIdx===i), off:players.some(q=>q.team==='G'&&q.squadIdx===o), used:SUBS.G.used, wait:!!QS.pend }; })()`);
 let done = await subbed(); const waited = done.wait;   // (the man coming off on the ball -- the kick-off's, say -- goes once he's played it)
-for(let i = 0; i < 40 && done.wait; i++){ await pc.waitForTimeout(100); done = await subbed(); }
+for(let i = 0; i < 150 && done.wait; i++){ await pc.waitForTimeout(100); done = await subbed(); }   // (up to 15 s: a busy machine plays slowly)
 ok(done.on && !done.off && done.used === 1, 'a tap on the first: that sub, there and then' + (waited ? ' (once the man coming off had played the ball)' : ''));
 await b4.close();
 

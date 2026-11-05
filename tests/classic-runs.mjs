@@ -39,9 +39,11 @@ await page.evaluate(() => { const T = window.__T; T.setStyle('G', 'neutral'); T.
 await page.evaluate(() => { const T = window.__T, A = { W: 'winger', ST: 'complete', CM: 'playmaker', CB: 'ballplayer', FB: 'fullback', WM: 'widemid' };
   for(const q of T.players()) if(q.team === 'G' && A[T.posOf(q, 'atk')]) q.style = A[T.posOf(q, 'atk')]; });
 await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
-  // a man at (u m from his own goal, w m across: + toward y=FH)
-  window.__at = (q, u, w) => { const a = T.atkOf(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; q.facing = { x: a, y: 0 }; };
-  window.__uw = (team, x, y) => { const a = T.atkOf(team); return [+((a > 0 ? x : T.FW - x) / M).toFixed(1), +((y - T.YC) / M).toFixed(1)]; };
+  // a man at (u m from his own goal, w m across: + toward y=FH) -- Liverpool's, who attack in these scenes, as far from
+  // City's goal as on the 99.75 m pitch the scenes were set on (v125: it's 105 m long)
+  const sh = t => t === 'G' ? L - 99.75 : 0;
+  window.__at = (q, u, w) => { const a = T.atkOf(q.team); u += sh(q.team); q.x = a > 0 ? u * M : T.FW - u * M; q.y = T.YC + w * M; q.vx = q.vy = 0; q.state = 'normal'; q.runTarget = null; q.runCd = 0; q.gapRun = 0; q.facing = { x: a, y: 0 }; };
+  window.__uw = (team, x, y) => { const a = T.atkOf(team); return [+((a > 0 ? x : T.FW - x) / M - sh(team)).toFixed(1), +((y - T.YC) / M).toFixed(1)]; };
   window.__men = team => T.players().filter(q => q.team === team && !q.benched);
   window.__by = (team, pos, ph, i) => window.__men(team).filter(q => T.posOf(q, ph || 'atk') === pos).sort((a, b) => a.homeY - b.homeY)[i || 0];
   // (v112: instructions are the team's -- its lines' -- not a man's: TEAM.G.<key> = setting; cleared, the side's style's own)
@@ -144,7 +146,7 @@ ok(!r.bal.runs.some(R => R.third), `the midfield BALANCED, he doesn't: he gives 
 r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(24, [-8, 2, 12], 34);
   const cm = window.__by('G', 'CM', 'atk', 1), st = window.__by('G', 'ST'), wl = window.__by('G', 'W', 'atk', 0), wr = window.__by('G', 'W', 'atk', 1);
   window.__at(cm, 64, 4); window.__at(st, 72, -2); window.__at(wl, 62, -28); window.__at(wr, 62, 28);
-  const a = T.atkOf('G'), tx = a > 0 ? (99.75 - 19) * T.MK : T.FW - (99.75 - 19) * T.MK;
+  const a = T.atkOf('G'), tx = a > 0 ? T.FW - 19 * T.MK : 19 * T.MK;   // (19 m out from their goal)
   window.__pass(cm, st, { x: tx, y: T.YC - 2 * T.MK }); const p = window.__plan();
   return { w: p.jobs.filter(j => j.pos === 'W'), p }; });
 info('a ball through to the striker, 19 m out in the middle: ' + show(r.p));
@@ -156,7 +158,7 @@ r = await page.evaluate(() => { const T = window.__T, deg = (a, b) => Math.round
   const cm = window.__by('G', 'CM', 'atk', 1), w = window.__by('G', 'W', 'atk', 1), a = T.atkOf('G');
   window.__at(cm, 52, 0); window.__at(w, 60, 20);
   // him on a run: in behind, on a diagonal in towards goal (his landing past their line, 12 m across)
-  const L = { x: a > 0 ? 82 * T.MK : T.FW - 82 * T.MK, y: T.YC + 12 * T.MK }, gl = Math.hypot(L.x - w.x, L.y - w.y), g = { x: (L.x - w.x) / gl, y: (L.y - w.y) / gl };
+  const u82 = 82 + T.FW / T.MK - 99.75, L = { x: a > 0 ? u82 * T.MK : T.FW - u82 * T.MK, y: T.YC + 12 * T.MK }, gl = Math.hypot(L.x - w.x, L.y - w.y), g = { x: (L.x - w.x) / gl, y: (L.y - w.y) / gl };   // (82 m on the 99.75 m pitch)
   w.runTarget = { x: L.x, y: L.y, lx: L.x, ly: L.y }; w.vx = g.x * 200; w.vy = g.y * 200;
   const flick = ang => { const c = Math.cos(ang), s = Math.sin(ang); return { x: g.x * c - g.y * s, y: g.x * s + g.y * c }; };   // (a drag, on the pitch, that far off his line)
   const out = {};

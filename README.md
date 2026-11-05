@@ -2068,13 +2068,15 @@ test, and like the Trap Lab the values are the game's settings.
 - **9v9 match sim** (eight outfielders and a keeper a side, since v124: it was 8v8) with 3D ball physics (loft, curve/spin, bounce), offside, restarts, and possession-aware team
   phases, on a pitch marked like a real one -- penalty areas, six-yard boxes, penalty spots and arcs, the centre
   circle and the corners -- at nine-tenths of the men's size: they're 25 px to the metre, the pitch 22.5. It's
-  99.75 m by 68 (2244.375 × 1530), a twentieth shorter than a full-length one: it was 2625 × 1700 at 25 px to the
-  metre, then a tenth smaller every way (2362.5 × 1530), then a twentieth shorter goal to goal. What goes by the
+  105 m by 71.4 (2362.5 × 1606.5), full length and a twentieth wider than a usual one (v125: nine a side was cramped on
+  the 99.75 by 68 before it): it was 2625 × 1700 at 25 px to the metre, then a tenth smaller every way (2362.5 ×
+  1530), then a twentieth shorter goal to goal (2244.375 × 1530), then full length again and a twentieth wider. What goes by the
   pitch shrinks with it: its markings, where the men wait in the box for a cross, where the keeper starts coming
   off his line (5 m outside his box) and how far out a cross can be struck from (24 m). What goes by the men
   doesn't: their size and pace, how far they'll shoot and pass from, and the goals, the men's size, so a little
   wider than real ones. The camera is as it was: it always shows the full width, the far touchline under the stand
-  and the near one nine-tenths of the way down the screen (the lawn past it below), the men, the ball and the
+  and the near one about nineteen-twentieths of the way down the screen (nine-tenths on the narrower pitch; the lawn
+  past it below), the men, the ball and the
   goals as big as ever, and it follows play along the length. The far stand's middle -- its name, its boards -- is
   over the halfway line (it was drawn for the first pitch, and sat a little right of halfway).
   - **Smaller still was tried, and taken back.** A tenth smaller again every way (2126.25 × 1377 at 20.25 px to
@@ -2082,8 +2084,23 @@ test, and like the Trap Lab the values are the game's settings.
     goals 2.56 a match → 3.02, shots 7.3 → 10.0, +0.46 goals a match pairing by pairing (95%: +0.01 to +0.99).
     Then a fifth shorter and a tenth narrower than that (93 1/3 m by 68 at 18.225, v56): 3.66 goals a match, but
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
-    (v57). What's kept is this one: v54's pitch with a twentieth off its length (not measured: too small a step to
-    show in 80 matches).
+    (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
+    80 matches), until nine a side made it bigger again (v125).
+- **v125: a bigger pitch for nine a side.** It was a little cramped. The pitch is full length again, 105 m (it was
+  99.75, so a twentieth longer), and a twentieth wider than a usual one, 71.4 m (it was 68), which gives nine a side
+  the room eight a side had. The camera's as it was: the men as big as ever, the near touchline about nineteen-twentieths
+  of the way down the screen (nine-tenths before). Back to the first pitch's width (75.6 m, 1700 px) was tried and
+  not kept: 0.98 goals and 3.7 shots a match (60 matches). Computer v computer, 220 exhibition matches each (STAR,
+  three-minute halves; the spacing from 40 to 160 of them):
+
+  | | v123 (eight a side, 99.75 by 68) | v124 (nine a side, 99.75 by 68) | v125 (nine a side, 105 by 71.4) |
+  | --- | --- | --- | --- |
+  | Men within 10 m of the man on the ball | 2.55 | 2.76 | 2.57 |
+  | A man's nearest neighbour | 6.6 m | 6.4 m | 6.7 m |
+  | Goals a match | 1.71 | 1.17 | 1.10 |
+  | Shots a match | 7.0 | 5.5 | 4.4 |
+  | Shots scored | 24% | 21% | 25% |
+  | Passes a match | 140 | 153 | 152 |
 - **v124: nine a side.** Eight outfielders and a keeper a side (it was seven and a keeper). Every shape is one of the
   old ones with a man more at the back -- 3-3-2 (it was 2-3-2), 4-2-2, 3-2-3, 3-4-1, 4-3-1 and 4-1-3, two for attacking
   only (2-3-3 and 2-4-2: two at the back) and two for defending only (5-2-1 and 5-1-2: five) -- and a shape saved before

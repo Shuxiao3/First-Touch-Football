@@ -83,7 +83,7 @@ ok(buW.length === 2 && buW.every(j => j.u >= 30) && buW.some(j => (j.job === 'WI
 // --- SUPPORT: room around him -- City's midfielder on it in midfield, a man on him ---------------------------------
 const su = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');
   const c = window.__men('R').find(q => window.__pos(q, 'atk') === 'CM'); window.__give(c, 45, 5);
-  const d = window.__men('G').filter(q => window.__pos(q, 'def') === 'CM')[0]; window.__at(d, 99.75 - 49, 5);   // (one of theirs 4 m off him)
+  const d = window.__men('G').filter(q => window.__pos(q, 'def') === 'CM')[0]; window.__at(d, T.FW / T.MK - 49, 5);   // (one of theirs 4 m off him)
   T.PLAN().R.t = -1; const jobs = window.__plan('R'), cx = c.x, cy = c.y;
   return jobs.filter(j => j.job === 'SUPPORT').map(j => { const a = T.atkOf('R'), x = a > 0 ? j.u * T.MK : T.FW - j.u * T.MK, y = T.YC + j.w * T.MK; return +(Math.hypot(x - cx, y - cy) / T.MK).toFixed(1); }); });
 ok(su.length >= 2 && su.every(r => r >= 10.5), `the men supporting him give him room: 11 m off him or more (${su.join(', ')} m)`);
@@ -107,7 +107,8 @@ const bl2 = await page.evaluate(() => { const T = window.__T; T.reset(); window.
   R.filter(q => q !== c).forEach((q, i) => { if(window.__uw('R', q.x, q.y)[1] < 4) window.__at(q, window.__uw('R', q.x, q.y)[0], 4 + (i % 4) * 2); });   // (nobody of theirs out on the far side)
   const mids = window.__men('G').filter(q => q.slotDef && q.slotDef.role === 'MID');
   return Math.min(...mids.map(q => { const s = T.blockSpot(q); return window.__uw('R', s.x, s.y)[1]; })); });
-ok(bl2 >= -15.5, `with nobody of theirs out on the far side, the far wide man tucks in (${bl2.toFixed(1)} m across; it was ~-20)`);
+const wk = await page.evaluate(() => window.__T.FH / (68 * window.__T.MK));   // (v125: the pitch a twentieth wider, the block's spots with it)
+ok(bl2 >= -15.5 * wk, `with nobody of theirs out on the far side, the far wide man tucks in (${bl2.toFixed(1)} m across, ${(15.5 * wk).toFixed(1)} at most; it was ~-20)`);
 // their forward standing just in front of our back line, between the lines: the midfielder nearest him stays in the line
 // (a couple of yards' drop at most) and stands in the pass from the ball into him, not in front of him
 const bl3 = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');

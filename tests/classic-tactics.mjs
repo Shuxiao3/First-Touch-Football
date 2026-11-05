@@ -146,7 +146,7 @@ ok(String(pn.tags) === 'DEF 46 m,ENGAGE 68 m' && pn.on.includes('dtk=tackle') &&
 // the lines dragged: the line of engagement up to 74 m; the back line up into it stops at 50 m (as high as it goes); the line
 // of engagement back down into it stops 14 m in front of it
 const dragLine = async (fromM, toM) => { const b = await page.$eval('#cTacRight .tiPitch', e => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
-  const X = m => b.x + b.w * m / 99.75; await page.mouse.move(X(fromM), b.y + b.h / 2); await page.mouse.down(); await page.mouse.move(X(toM), b.y + b.h / 2, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(80); };
+  const X = m => b.x + b.w * m / 105; await page.mouse.move(X(fromM), b.y + b.h / 2); await page.mouse.down(); await page.mouse.move(X(toM), b.y + b.h / 2, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(80); };   // (v125: the pitch 105 m long)
 await dragLine(68, 74); d = await save(); const l1 = [d.ti.dl, d.ti.loe];
 await dragLine(46, 72); d = await save(); const l2 = [d.ti.dl, d.ti.loe];
 await dragLine(74, 40); d = await save(); const l3 = [d.ti.dl, d.ti.loe];

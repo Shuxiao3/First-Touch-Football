@@ -68,10 +68,11 @@ info('a side kept from eight a side: ' + JSON.stringify(side));
 ok(side.n === 14 && side.last === side.cb && side.atk === '7,6,13,5,4,3,2,1' && side.form === '4-1-3' && side.dform === '4-3-1',
   'a club\'s side kept from eight a side: its ninth man joins it, in the middle of its back line (with the ball: ' + side.atk + '), everyone else in his spot; its shapes 3-1-3 / 3-3-1 read as ' + side.form + ' / ' + side.dform);
 // the quick match's squads, kept at eight a side (a keeper and seven): a centre-back joins each, in the middle of the back line
-await page.evaluate(() => { const N = window.__N; localStorage.removeItem('ft_clubsq');
-  const S = N.SQUAD(), L = N.LINEUP(), cut = t => ({ sq: S[t].slice(0, 8).map((e, i) => Object.assign({}, e, { role: ['GK', 'DEF', 'DEF', 'MID', 'MID', 'MID', 'ATT', 'ATT'][i] })) });
-  const o = { __v: 1, SQUAD: { G: cut('G').sq, R: cut('R').sq }, LINEUP: { G: { gk: 0, atk: [1, 2, 3, 4, 5, 6, 7], def: [2, 1, 3, 4, 5, 6, 7] }, R: { gk: 0, atk: [1, 2, 3, 4, 5, 6, 7], def: [1, 2, 3, 4, 5, 6, 7] } } };
-  localStorage.setItem('ft7_squads', JSON.stringify(o)); localStorage.setItem('ft_exh', JSON.stringify({ you: 'ARS', opp: 'MCI' })); });
+const kept = await page.evaluate(() => { const N = window.__N; localStorage.removeItem('ft_clubsq');
+  const S = N.SQUAD(), cut = t => S[t].slice(0, 8).map((e, i) => Object.assign({}, e, { role: ['GK', 'DEF', 'DEF', 'MID', 'MID', 'MID', 'ATT', 'ATT'][i] }));
+  return JSON.stringify({ __v: 1, SQUAD: { G: cut('G'), R: cut('R') }, LINEUP: { G: { gk: 0, atk: [1, 2, 3, 4, 5, 6, 7], def: [2, 1, 3, 4, 5, 6, 7] }, R: { gk: 0, atk: [1, 2, 3, 4, 5, 6, 7], def: [1, 2, 3, 4, 5, 6, 7] } } }); });
+// (stored as the page loads, before the game reads it: a write just before a reload isn't always there after it)
+await page.addInitScript(kept => { try{ if(!sessionStorage.getItem('qm8')){ sessionStorage.setItem('qm8', '1'); localStorage.setItem('ft7_squads', kept); } }catch(e){} }, kept);
 await page.reload(); await page.waitForTimeout(700);
 const qm = await page.evaluate(() => { const N = window.__N, S = N.SQUAD(), L = N.LINEUP(), f = N.forms(); return { n: [S.G.length, S.R.length], role: S.G[8] && S.G[8].role, atk: L.G.atk.join(), def: L.G.def.join(), f: f.slice(0, 2) }; });
 info('the quick match\'s squads kept at eight a side: ' + JSON.stringify(qm));

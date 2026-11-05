@@ -16,9 +16,9 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, TAC, atkOf, strengthOf, simNow:()=>simNow, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, MK, TAC, atkOf, strengthOf, simNow:()=>simNow, '
   + 'separateBodies, shieldCushion, contactTackles, obMods, pause:v=>{ pauseOpen=v; }, setControlled, setTeamForm, stick:(x,y)=>{ window.__stick={x,y}; }, '
-  + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
+  + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,lastU:null}); transitionT[t]=0; } }};\n  const LAB_TITLE=');   // (v125: and the press, scene to scene -- one left on went straight at the next man)
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // your man on the computer too
@@ -110,7 +110,7 @@ const scene = (cs, os, ang, i, run) => page.evaluate(({ cs, os, ang, i, run }) =
   c.stats = Object.assign({}, keepC, { strength: cs, speed: 6, acceleration: 6, dribbling: 5, ballControl: 6, agility: 6 });
   o.stats = Object.assign({}, keepO, { strength: os, speed: 7, acceleration: 7, tackle: 6, defIQ: 6, agility: 6 });
   for(const p of [c, o]){ p.state = 'normal'; p.noTouchT = 0; p.tackleCd = 0; p.stamina = 1; p.staminaCap = 1; p.sprintMoT = 0; p.sprint = false; p.lean = 0; }
-  c.x = T.FW * 0.3; c.y = T.YC + (i % 3 - 1) * 120; c.vx = run ? atk * 140 : 0; c.vy = 0; c.facing = { x: atk, y: 0 }; c.carryAngle = atk > 0 ? 0 : Math.PI;
+  c.x = atk > 0 ? T.FW - 0.7 * 99.75 * T.MK : 0.7 * 99.75 * T.MK; c.y = T.YC + (i % 3 - 1) * 120;   // (as far from their goal as on the 99.75 m pitch, whichever end it is after half-time -- v125: further, he ran over their line of engagement and their block went at him) c.vx = run ? atk * 140 : 0; c.vy = 0; c.facing = { x: atk, y: 0 }; c.carryAngle = atk > 0 ? 0 : Math.PI;
   const r = (180 - ang) / 57.3, side = i % 2 ? 1 : -1;
   o.x = c.x + atk * Math.cos(r) * 50; o.y = c.y + side * Math.sin(r) * 50; o.vx = c.vx; o.vy = 0; o.facing = { x: atk, y: 0 };
   const bl = T.ball(); bl.ownedBy = c; bl.dribbler = null; bl.x = c.x + atk * 25; bl.y = c.y; bl.z = 0; bl.vx = c.vx; bl.vy = 0; bl.vz = 0; bl.lastTouch = c.team;
@@ -124,9 +124,10 @@ const scene = (cs, os, ang, i, run) => page.evaluate(({ cs, os, ang, i, run }) =
 const runs = {};
 for(const [cs, os] of [[8, 4], [4, 8]]){ const R = [];
   for(const ang of [0, 45]) for(let i = 0; i < 8; i++) R.push(await scene(cs, os, ang, i, true));
-  runs[cs + 'v' + os] = R.filter(r => r.won).length; }
-info(`running with it, one of theirs from behind: robbed ${runs['8v4']} of 16 at 8 against 4, ${runs['4v8']} of 16 at 4 against 8`);
-ok(runs['8v4'] <= 2, 'a strong man running with it isn\'t robbed from behind by a weak one (' + runs['8v4'] + ' of 16)');
+  runs[cs + 'v' + os] = R.filter(r => r.won).length;
+  runs[cs + 'v' + os + 'behind'] = R.filter(r => r.won && !(r.ang != null && r.ang < 90)).length; }   // (v125: taken from behind him -- not by a man who's come round his side, as Strength leaves to him: on the wider pitch the weak man's round within the 4 s more often)
+info(`running with it, one of theirs from behind: robbed ${runs['8v4']} of 16 at 8 against 4 (${runs['8v4behind']} from behind him, the rest from his side), ${runs['4v8']} of 16 at 4 against 8`);
+ok(runs['8v4behind'] <= 2, 'a strong man running with it isn\'t robbed from behind by a weak one (' + runs['8v4behind'] + ' of 16 from behind him; ' + (runs['8v4'] - runs['8v4behind']) + ' by a man come round his side)');
 ok(runs['4v8'] >= 13, '...a weak one is, by a strong one (' + runs['4v8'] + ' of 16)');
 const stand = [];
 for(let i = 0; i < 8; i++) stand.push(await scene(8, 4, i % 2 ? 0 : 45, i, false));

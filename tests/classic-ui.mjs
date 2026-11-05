@@ -23,7 +23,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
 patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
@@ -493,8 +493,10 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   for(let k = 0; k < 3 && !(grass && n1 === n0); k++){
     grass = await page.evaluate(() => { const T = window.__T; T.theirBall(); for(let y = 70; y <= 200; y += 10) for(let x = 470; x <= 760; x += 10) if(!T.mateAt(x, y) && !document.elementFromPoint(x, y).closest('.actBtn,#menuBtn,.chip')) return { x, y }; return null; });
     if(!grass) break; n0 = await who(); await touch('touchStart', grass.x, grass.y); n1 = await who(); await touch('touchEnd', grass.x, grass.y); }
+  const settle = async () => { let x = null; for(let i = 0; i < 40; i++){ await page.waitForTimeout(100); const x2 = await page.evaluate(() => window.__T.camX()); if(x !== null && Math.abs(x2 - x) < 1) return; x = x2; } };   // (the camera gone over to the ball, and still: v125, a longer way on the longer pitch)
   for(let k = 0; k < 3 && !(mate && n2 === mate.num); k++){
-    mate = await page.evaluate(() => { const T = window.__T; T.theirBall(); const c = T.controlled(); for(const q of T.players()){ if(q.team !== c.team || q === c || q.role === 'G') continue; const s = T.scr(q); if(s.x > 20 && s.x < 440 && s.y > 60 && s.y < 330 && T.mateAt(s.x, s.y) === q) return { num: q.num, x: s.x, y: s.y }; } return null; });
+    await page.evaluate(() => window.__T.theirBall()); await settle();
+    mate = await page.evaluate(() => { const T = window.__T; const c = T.controlled(); for(const q of T.players()){ if(q.team !== c.team || q === c || q.role === 'G') continue; const s = T.scr(q); if(s.x > 20 && s.x < 440 && s.y > 60 && s.y < 330 && T.mateAt(s.x, s.y) === q) return { num: q.num, x: s.x, y: s.y }; } return null; });
     if(!mate) break; await touch('touchStart', mate.x, mate.y); n2 = await who(); await touch('touchEnd', mate.x, mate.y); }
   ok(grass && n1 === n0 && mate && n2 === mate.num, 'a tap on the grass doesn\'t switch you (#' + n0 + ' still); a tap on one of your men does (#' + n2 + ')');
   await ctx.close(); }
