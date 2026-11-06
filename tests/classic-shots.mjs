@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, MK, GOAL_W, GOAL_H, atkOf, simNow:()=>simNow, '
-  + 'gkHold:()=>gkHold, setControlled, blockReachOf, swipeAcross, shootAt, proj, blockSpot, aiCross, draw:()=>draw(), cam:v=>{ camX=v; }, stick:(x,y)=>{ window.__stick={x,y}; }, '
+  + 'gkHold:()=>gkHold, get LINE_LOOSE(){ return LINE_LOOSE; }, setControlled, blockReachOf, swipeAcross, shootAt, proj, blockSpot, aiCross, draw:()=>draw(), cam:v=>{ camX=v; }, stick:(x,y)=>{ window.__stick={x,y}; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}',
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
@@ -99,6 +99,9 @@ const offBall = iq => page.evaluate(iq => {
   const o = G[1], c = G[0], m = R.find(q => q.role !== 'DEF') || R[0], d = R.find(q => q.role === 'DEF' && q !== m);
   T.setControlled(o); T.freeze();
   for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; k.vx = k.vy = 0; k.mode = 'line'; k.diveT = 0; k.groundT = 0; k.heldT = 0; k.claimCd = 2; }
+  // (v131: the line's looseness at a low Def IQ held out of it -- his place holding the line wanders, mostly deeper, which
+  // could leave him goal-side of you by chance: this is his read of the run)
+  const LL = T.LINE_LOOSE, LL0 = Object.assign({}, LL); Object.assign(LL, { wander: 0, up: 1e-6, down: 1e-6 });
   const keep = { o: o.stats, d: d.stats }; o.stats = Object.assign({}, keep.o, { speed: 7, acceleration: 7 }); d.stats = Object.assign({}, keep.d, { defIQ: iq, speed: 9, acceleration: 7 });
   const b = T.ball(), hold = () => { window.__park([c, o, m, d]);
     c.x = T.FW / 2 - atk * 150; c.y = T.YC - 330; c.vx = c.vy = 0; c.state = 'normal';
@@ -113,7 +116,7 @@ const offBall = iq => page.evaluate(iq => {
   return window.__until(1.4, () => undefined, () => { hold(); o.sprint = true; d.tackleCd = 99; d.noTouchT = 0.2;
     const t = T.simNow() - t0, v = Math.hypot(o.vx, o.vy) || 1;
     path.push({ t, ahead: Math.round(((d.x - o.x) * o.vx + (d.y - o.y) * o.vy) / v), goalSide: Math.round((d.x - o.x) * atk), tag: d.dbgTag }); })
-    .then(() => { T.stick(0, 0); o.stats = keep.o; d.stats = keep.d;
+    .then(() => { T.stick(0, 0); o.stats = keep.o; d.stats = keep.d; Object.assign(LL, LL0);
       const late = path.filter(s => s.t >= 0.5), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
       return { ahead: mean('ahead'), goalSide: mean('goalSide'), tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
 }, iq);

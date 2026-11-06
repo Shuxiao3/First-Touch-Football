@@ -2106,6 +2106,22 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v131: the computer's back line as straight as its Def IQ.** It held one as straight at Def IQ 1 as at 10. Now each
+  of its men wanders off the line's height, slowly and his own way, mostly deeper (at Def IQ 1 up to 9 m deeper, or
+  3.6 m higher), and steps up with it late: half a second after the ball's played back out, a line at Def IQ 1 has
+  come up 4 m of the 19 a line at 10 has (5.5: 10 m). Each point under 10 is a ninth of it; at 10 nothing's changed,
+  and your own line is as it was. It's his place holding the line: who he picks up going in behind, and where he goes
+  with him, are as they were. Computer v computer, 8 exhibition matches at each Def IQ (STAR, three-minute
+  halves), its back line with your side on the ball:
+
+  | its men's Def IQ | front to back (median) | its deepest man behind the rest (median) | over 2 m behind |
+  | --- | --- | --- | --- |
+  | 1 | 4.1 m → 6.8 | 1.4 m → 3.1 | 41% → 67% |
+  | 5.5 | 4.6 m → 5.4 | 1.6 m → 2.3 | 44% → 55% |
+  | 10 | 4.4 m (as it was) | 1.5 m | 44% |
+
+  (Tests: classic-midfield started the wrong clubs now and then, its pick set just before a reload, and classic-shape
+  could find a side pressing that wasn't, its reset leaving the press's memory of the ball; both put right.)
 - **v130: nothing locked, and sponsors worth having.** The training pitch's levels locked shapes and styles (at 1 three
   shapes and two styles, the rest a level at a time). It was no fun, so every shape and every style is yours from the
   first day, as the width and the team instructions were; a level of the pitch trains your men better, no more. And
@@ -2667,7 +2683,12 @@ test, and like the Trap Lab the values are the game's settings.
   before he turns and goes with him (about a twentieth of a run in behind: half a stride on him for the
   runner); one already pressing, shadowing or tracking a man goes with him at once, and so does one going
   to a man in front of him he's been told to STEP UP to. The computer's men are slower to it (v128): they hold
-  it 0.7 s -- a cover CB too, who'd go at once -- read the run 0.4 as far, and keep less far goal-side of him. (In v62 the beat caught a man already shadowing
+  it 0.7 s -- a cover CB too, who'd go at once -- read the run 0.4 as far, and keep less far goal-side of him. And the
+  computer's back line is only as straight as its men's Def IQ (v131): each man wanders off the line's height, slowly
+  and his own way, mostly deeper -- at Def IQ 1 up to 9 m deeper, the man who plays your runners on, or 3.6 m higher --
+  and steps up with it late (a time constant of 1.5 s at 1) and drops with it a beat behind (0.4 s); each point of Def
+  IQ under 10 a ninth of that, none at 10 -- his place holding the line, not where he goes with a runner. Your own line
+  is as it was. (In v62 the beat caught a man already shadowing
   the runner too, stopping him mid-run: about a metre and a half more than meant. v63 put that right.) A pressing side's man on his man in their build-up
   reads him the same way, without the beat. The midfield sits a gap in
   front and the forwards in front of that, every line sliding across toward the ball. The midfield stays a

@@ -22,7 +22,7 @@ const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_HW, atkOf, posOf, own, holderOf, teamPlan, PLAN:()=>PLAN, mkPlanState, '
   + 'blockSpot, playEye:()=>playEye, ballEye:()=>ballEye, EXH, simNow:()=>simNow, gkHold:()=>gkHold, setStyle, get CPU_RUN(){ return CPU_RUN; }, '
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
-  + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
+  + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9,lastU:null}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
   + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
   + 'setGk:k=>{ gkHold=k; ball.ownedBy=null; ball.x=k.x; ball.y=k.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }, setCtl:q=>{ controlled=q; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-shape-')), 'classic.html');
@@ -162,6 +162,27 @@ const hc = await holdCpu('ballplayer'), hcC = await holdCpu('cover');
 info('the computer\'s centre-back holding the line (in Liverpool\'s metres): ' + JSON.stringify(hc) + ' | a cover CB of theirs: ' + JSON.stringify(hcC));
 ok(hc.hold >= 0.5 && !hc.h0.tr && !hc.early && !hc.h1.tr && hc.h2.tr && hc.h2.u > hc.line && !hcC.early && !hcC.h1.tr && hcC.h2.tr,
   `the computer's centre-back holds his line ${hc.hold} s before he goes with your runner (yours a tenth), and a cover CB of theirs too, then drops with him -- less far goal-side of him than yours would (${(hc.h2.u - hc.line).toFixed(1)} m back) (v128)`);
+// ...AND ITS LINE AS STRAIGHT AS ITS DEF IQ (v131: it held one as straight at 1 as at 10). City's back four, Liverpool on
+// the ball in midfield, their spots looked at every tenth of a second for 12 s: at Def IQ 10 every man on the line's
+// depth; at 1 they wander off it, mostly deeper. Then Liverpool get it near City's box, and play it back out to their
+// centre-back: the line steps up, and half a second on the men at 1 are a good way short of where those at 10 are
+const looseCpu = iq => page.evaluate(iq => { const T = window.__T; T.reset(); window.__home('G', 15); window.__homeDef('R');
+  const G = window.__men('G'), c = G.find(q => window.__pos(q, 'atk') === 'CM'), cb = G.find(q => window.__pos(q, 'atk') === 'CB');
+  const D = window.__men('R').filter(q => q.slotDef && q.slotDef.role === 'DEF');
+  for(const q of D){ q.stats = Object.assign({}, q.stats, { defIQ: iq }); q.lineL = null; }
+  const us = () => D.map(q => window.__uw('R', T.blockSpot(q).x, 0)[0]);   // (each man's spot, m from City's goal)
+  const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  window.__give(c, 50, 0); let spread = 0, deep = 0, n = 0, lo = 0;
+  for(let i = 0; i < 120; i++){ T.adv(0.1); const u = us().sort((x, y) => x - y); spread += u[u.length - 1] - u[0]; deep += u[u.length >> 1] - u[0]; lo = Math.max(lo, u[u.length >> 1] - u[0]); n++; }
+  window.__give(c, 80, 0); for(let i = 0; i < 30; i++){ T.adv(0.1); us(); }   // (looked at every tenth, as a match does every frame)
+  const before = mean(us()); window.__give(cb, 45, 0);
+  for(let i = 0; i < 5; i++){ T.adv(0.1); us(); } const after = mean(us());
+  return { n: D.length, spread: +(spread / n).toFixed(2), deep: +(deep / n).toFixed(2), deepMax: +lo.toFixed(1), up: +(after - before).toFixed(1) }; }, iq);
+const lc10 = await looseCpu(10), lc1 = await looseCpu(1), lc5 = await looseCpu(5.5);
+info('the computer\'s back line, its spots (m: the spread back to front, how far its deepest man behind the rest, how far it stepped up in 0.5 s): Def IQ 10 ' + JSON.stringify(lc10) + ' | 5.5 ' + JSON.stringify(lc5) + ' | 1 ' + JSON.stringify(lc1));
+ok(lc10.n === 4 && lc10.spread < 0.05 && lc1.spread > 3 && lc1.deep > 1.5 && lc5.spread > 1 && lc5.spread < lc1.spread,
+  `the computer's back line as straight as its men's Def IQ: every man on it at 10, ${lc5.spread} m from front to back at 5.5 and ${lc1.spread} at 1, its deepest man ${lc1.deep} m behind the rest there (v131: as straight at 1 as at 10)`);
+ok(lc10.up > 3 && lc1.up < lc10.up * 0.6, `...and stepping up, the men at 1 late: ${lc1.up} m up half a second on, ${lc10.up} at 10`);
 
 // --- OUT WIDE IN THEIR THIRD: Liverpool's forward on it 74 m out, 19 m across; the winger behind him on that flank ---
 const ov = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('G', 30); window.__homeDef('R');

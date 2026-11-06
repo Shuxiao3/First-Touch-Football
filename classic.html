@@ -11064,6 +11064,7 @@
     // or halfway up to the forwards, behind them. Two wide midfielders on their own in a line spread as a four would
     const mz=role==='MID'?(s.mz||0):0, nW=n===2&&s.pos==='WM'?4:n;
     if(mz<0) u=B.uD+(B.uM-B.uD)*0.5; else if(mz>0) u=B.uM+(B.uF-B.uM)*0.5;
+    const uLoose=role==='DEF'&&isCpu(p)?looseLine(p,u):null;          // (v131: the computer's back line as straight as its Def IQ -- his spot holding it)
     if(role==='ATT'){
       const tr=trackOf(p);                                              // (CONSERVE: 'up')
       // THE OUTLET: one forward stays up -- the highest, while the ball's deep in our third; always, for a side that
@@ -11123,6 +11124,7 @@
         else { const u2=Math.max(Math.min(u,ru-20),u-45), t=B.uB>ru+1?clamp((B.uB-u2)/(B.uB-ru),0,1):1;   // (where the pass from the ball to him crosses my line)
           u=u2; y=y+clamp((B.by+(rb.y-B.by)*t-y)*0.6,-140,140); } }
     }
+    if(uLoose!=null && !track) u=uLoose;                               // (holding the line, not gone with a runner: who he picks up, and where he goes with him, are as they were)
     u=Math.max(u,30);
     return {x:B.atk>0?u:FW-u, y:clamp(y,40,FH-40), track};
   }
@@ -11158,6 +11160,19 @@
   // pick up the computer's runners as they always have.
   const CPU_RUN={hold:0.7, read:0.4, side:0.4};
   const isCpu=p=>!!p&&p.team==='R'&&!LAB.on&&!practice;   // (the computer's side, as cpuT has it)
+  // THE COMPUTER'S BACK LINE, AS STRAIGHT AS ITS MEN'S DEF IQ (v131: it held one as straight at Def IQ 1 as at 10). Each
+  // man of it wanders off the line's depth, slowly and his own way -- mostly deeper, the man who plays them on: at Def
+  // IQ 1 up to 9 m deeper (3.6 m higher at most) -- and steps up with it late, a second and a half behind (up, in s: a
+  // time constant), dropping with it a beat behind (down). Each point of Def IQ under 10 a ninth of it, none at 10.
+  // Your own men's line is as it was.
+  const LINE_LOOSE={wander:9*MK, up:1.5, down:0.4};
+  function looseLine(p,u){ const k=clamp((10-defIQof(p))/9,0,1); if(k<=0) return u;
+    const L=p.lineL; let v=u;
+    if(L&&simNow-L.t<0.5){ const tau=(u>L.u?LINE_LOOSE.up:LINE_LOOSE.down)*k; v=L.u+(u-L.u)*(1-Math.exp(-(simNow-L.t)/tau)); }   // (late with it)
+    p.lineL={u:v, t:simNow};
+    if(p.lineSeed==null) p.lineSeed=Math.random()*100;
+    const g=0.5*(Math.sin(simNow*0.83+p.lineSeed)+Math.sin(simNow*0.47+p.lineSeed*1.7));   // (-1 to 1, his own way, slowly)
+    return Math.max(v-LINE_LOOSE.wander*k*(0.3+0.7*g), Math.min(u, GA_D+15)); }   // (never into his six-yard box for it)
   function runLeadT(p,c){
     const s=sprintSpeedOf(p), rx=c.x-p.x, ry=c.y-p.y, a=c.vx*c.vx+c.vy*c.vy-s*s, b=2*(rx*c.vx+ry*c.vy), cc=rx*rx+ry*ry;
     let t=RUN_READ_T;                                                  // (he's quicker than me and going away: as far on as it goes)
