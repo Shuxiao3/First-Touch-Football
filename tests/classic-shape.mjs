@@ -80,6 +80,10 @@ ok(farCB && Math.sign(bu.wc) * farCB.w <= -15, `the far centre-back splits wide,
 const buW = bu.jobs.filter(j => j.pos === 'W');
 ok(buW.length === 2 && buW.every(j => j.u >= 30) && buW.some(j => (j.job === 'WIDTH' || j.job === 'INSIDE') && j.u >= 43),   // (v118: an inside forward or inverted winger holds there in the channel, INSIDE)
   `neither winger comes back into our third, one holding near halfway (${buW.map(j => j.job + ' ' + j.u).join(', ')} m out)`);
+// (v132: the midfield off the back line building up -- it sat on top of it) the central midfielder offers himself well
+// ahead of the man on it, 6 m at least: not level with him across the pitch, crowding the back line
+const buCM = bu.jobs.filter(j => j.pos === 'CM' || j.pos === 'DM');
+ok(buCM.length >= 1 && buCM.every(j => j.u >= 11 + 6), `...and the central midfielder offers himself well ahead of the man on it, not level with the back line (${buCM.map(j => j.job + ' ' + j.u).join(', ')} m out, the ball 11 m; it was in support 14 m out) (v132)`);
 
 // --- SUPPORT: room around him -- City's midfielder on it in midfield, a man on him ---------------------------------
 const su = await page.evaluate(() => { const T = window.__T; T.reset(); window.__home('R', 15); window.__homeDef('G');

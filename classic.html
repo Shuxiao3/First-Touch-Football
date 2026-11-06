@@ -9590,6 +9590,9 @@
   // a side's settings now: a counter-attacking side that's just won it goes for it
   function stylePlan(team){ const off=TAC[team]?TAC[team].off:'neutral', S=STYLE_PLAN[off]||STYLE_PLAN.neutral;
     return (off==='counter'&&transitionT[team]>0) ? Object.assign({},S,{runK:TAC[team].brk==='fluid'?2.2:2.6, restMid:false, wideAdv:440, sup:TAC[team].brk==='fluid'?2:1, brk:true}) : S; }   // (FLUID keeps a man near him for the short one)
+  const PIVOT_GAP=[320,80];   // (v132: the pivot off the back line, px: settled, and more building from the back -- see teamPlan)
+  const SUP_MID=0.8;          // (v132: what a support spot 6 to 11 m ahead of the ball costs a central midfielder in the build-up: see planSupport)
+  const MID_UP=10*MK;         // (v132: how far short of his spot a midfielder sprints to it, building up: see teamPlan)
   function teamPlan(team,dt){
     const S=PLAN[team]; if(S.t===simNow) return S;
     S.t=simNow; S.jobs=new Map();
@@ -9666,16 +9669,18 @@
         set(q, u, y, 'REST'); });
     }
     // THE PIVOT, and anyone holding with him (beside him, a touch deeper)
-    let uP=uPk||uCB+240+60*(1-bt);
+    // (v132: the pivot stands 14 m off the back line once we're settled, 18 m building from the back -- it was 11 and 13,
+    // and with the men supporting the ball as close, the midfield sat on top of the back line: PIVOT_GAP)
+    let uP=uPk||uCB+PIVOT_GAP[0]+PIVOT_GAP[1]*(1-bt);
     const sc=Math.sign(c.y-YC)||1, boxPhase=!kpPhase && U(c.x)>FW*SP.box && Math.abs(c.y-YC)>FH*0.22;
     const upN=S.upKs===undefined?upK:S.upKs;
     if(pivot && !kpPhase){ const pcr=insOf(pivot,'cmCross');
       if(boxPhase && pcr==='box') set(pivot, Math.min(FW-260,uOn), YC+sc*FH*0.04, 'LATE');                        // told to get in the box for the cross
       else if(boxPhase && pcr==='edge') set(pivot, Math.min(FW-470,uOn), YC+sc*FH*0.06, 'CUTBACK');            // ... or to wait at the edge of it
       else if(boxPhase && upN<=1.3 && U(c.x)>FW*0.70) set(pivot, Math.min(FW-340,uOn), YC+sc*FH*0.05, 'CUTBACK');     // arriving late, for the pull-back (never from further out: he's the way back)
-      else { uP=clamp(Math.max(uCB+240+60*(1-bt), uB-(upN<=1.3?200:280)*SP.pivotK), 380, FW-470); set(pivot, Math.min(uP,uOn), YC+(B.y-YC)*0.35, 'PIVOT'); } }
+      else { uP=clamp(Math.max(uCB+PIVOT_GAP[0]+PIVOT_GAP[1]*(1-bt), uB-(upN<=1.3?200:280)*SP.pivotK), 380, FW-470); set(pivot, Math.min(uP,uOn), YC+(B.y-YC)*0.35, 'PIVOT'); } }
     if(!kpPhase) holds.forEach((q,i)=>{ const side=Math.sign(q.homeY-YC)||(i%2?1:-1);
-      set(q, clamp(Math.min(uP,uOn)-40, uCB+160, uOn), YC+(B.y-YC)*0.3+side*FH*0.16*wf, 'PIVOT'); });
+      set(q, clamp(Math.min(uP,uOn)-30, uCB+220, uOn), YC+(B.y-YC)*0.3+side*FH*0.16*wf, 'PIVOT'); });   // (v132: a touch nearer him, and further off the back line: it was 40 behind him, 160 at least off it)
     // (the inverted full-back, in off his flank: beside the pivot on his own side, a touch behind him -- the extra man in
     // the middle, and still the first man back)
     invs.forEach(q=>{ const side=Math.sign(q.homeY-YC)||1; set(q, clamp(Math.min(uP,uOn)-60, uCB+140, uOn), YC+(B.y-YC)*0.2+side*FH*0.12*wf, 'INVERT'); });
@@ -9763,6 +9768,11 @@
     }
     // on winning it back, the men going up the pitch get up there at a sprint
     if(transitionT[team]>0) for(const [q,a] of S.jobs) if(a.job!=='REST' && a.job!=='PIVOT' && atk*(a.x-q.x)>(SP.brk?150:350)) a.sprint=true;
+    // (v132) GETTING UP OFF THE BACK LINE: building up and on through midfield, our man with it at his feet (or the keeper
+    // in his hands: not a pass on its way, the man it's for the one that matters then), a midfielder a long way short of
+    // his spot -- MID_UP or more -- gets there at a sprint, and jogs the rest. He jogged all of it, and the play left him
+    // on top of the back line (in the build-up the pivot stood 7 m short of his spot, the man inside 12 m)
+    if(uB<FW*0.66 && (ball.ownedBy===c || c===gkHold)) for(const [q,a] of S.jobs) if(q.role==='MID' && a.job!=='RUN' && atk*(a.x-q.x)>MID_UP){ a.sprint=true; a.up=true; }   // (a.up: his legs going or not -- see the AI's sprint call)
     // SPACING: nobody's spot within ~7 m of another's (the lesser job gives way), nor on top of the man on the ball (or you)
     const arr=[...S.jobs.entries()].map(([q,a])=>({a,pri:JOB_PRI[a.job]||1,box:BOX_SPOT.has(a.job)}));
     arr.push({a:{x:c.x,y:c.y},pri:9}); if(controlled && controlled.team===team && controlled!==c) arr.push({a:{x:controlled.x,y:controlled.y},pri:9});
@@ -9818,6 +9828,11 @@
         const lo=pa==='W'?FW*0.30:FW*0.22; if(u<lo) return 99; if(u<lo+FW*0.06) pen+=1.2; }
       if(q.role==='ATT' && !isWideMan(q) && u<uF-60) pen+=0.8;                 // forwards don't come back behind the ball
       if(pa==='AM' && u<uF-60) pen+=0.6;                                        // (v127: nor, much, the attacking midfielder: he's for the pass forward, into the hole)
+      // (v132) A CENTRAL MIDFIELDER IN THE BUILD-UP -- the ball in our third, or with one of the back line short of their
+      // third -- offers himself well ahead of it, not level with the back line or behind it: never less than 6 m ahead of
+      // it, and less than 11 m only at a price (SUP_MID). The back line and the keeper are the ways across and back there,
+      // and he only crowded them
+      if(q.role==='MID' && !isWideMan(q) && (uF<FW/3 || (c.role==='DEF' && uF<FW*0.55))){ if(u<uF+130) return 99; if(u<uF+250) pen+=SUP_MID; }
       if(j && S.box && BOX_SPOT.has(j.job)) return 99;                         // waiting in the box for the cross: he stays there
       if(j && S.nearBox && j.job==='BACKPOST') return 99;                       // (in at the back post with the ball through near the box: the same)
       if(j && (j.job==='BACKPOST'||j.job==='CUTBACK')) pen+=1.2;
@@ -9995,7 +10010,7 @@
   // a man following the plan: his job, his spot -- eased toward it (~0.25 s), so a spot that flickers for a moment doesn't
   // turn him round -- or, on a run, straight there (the man on the ball looks for the runner: see ON THE BALL)
   function followPlan(p,a,dt){
-    p.dbgTag=a.job; p.planned=true; p.planSprint=!!a.sprint;
+    p.dbgTag=a.job; p.planned=true; p.planSprint=!!a.sprint; p.planUp=!!a.up;
     p.runTarget = a.job==='RUN' ? {x:a.x,y:a.y,lx:a.lx,ly:a.ly} : null;
     if(a.job==='RUN' || !(p.ptT>simNow-0.25)){ p.ptx=a.x; p.pty=a.y; }
     else { const k=1-Math.exp(-(dt||1/60)/0.25); p.ptx+=(a.x-p.ptx)*k; p.pty+=(a.y-p.pty)*k; }
@@ -10004,7 +10019,7 @@
   }
 
   function aiBrain(p,dt){
-    p.planned=false; p.planSprint=false;
+    p.planned=false; p.planSprint=false; p.planUp=false;
     p.runT-=dt;
     if(p.runCd>0)p.runCd-=dt;                                                    // (a man who's just made a run waits before the next)
     p.intercepting=false;
@@ -12710,7 +12725,7 @@
         else if(opportunistic && sta>0.55 && fresh) doSprint=true;  // only with plenty in the tank, and the legs for it
         if(!critical && sta<0.40) doSprint=false;          // conserve when not critical
 
-        if(p.planned) doSprint = (critical && sta>critMin) || (p.planSprint && sta>0.25 && fresh);   // on the plan: only its runs (see teamPlan)
+        if(p.planned) doSprint = (critical && sta>critMin) || (p.planSprint && sta>0.25 && (fresh || (p.planUp && sta>0.45)));   // on the plan: only its runs (see teamPlan) -- and a midfielder a long way short of his spot building up, his legs going or not, while he has some left (v132)
         p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));
         if(!reacting) p.preTouchAi=ai;
         stepOutfield(p,ai.ix,ai.iy,dt);

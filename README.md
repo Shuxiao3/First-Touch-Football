@@ -2106,6 +2106,30 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v132: the midfield off the back line.** With the ball, building up and on through midfield, the central
+  midfielders sat on top of the back line: about 10 m off it, and within 8 m of one of it a quarter of the time.
+  Their spots were higher than that; they jogged to them and the play left them behind, and the men offering
+  themselves to a centre-back on the ball came across level with him, or behind him. Now the pivot stands
+  further off the back line (14 m settled, 18 m building from the back: it was 11 and 13) and a second holding
+  man beside him; a midfielder a long way short of his spot building up (10 m or more, our man with it at his
+  feet) gets there at a sprint, even with his legs going while he has 45% left; and a central midfielder
+  offering himself in the build-up does it at least 6 m ahead of the ball, the back line and the keeper the
+  ways across and back. Computer v computer, 16 exhibition matches each (STAR, three-minute halves), the
+  central midfielders with the ball:
+
+  | | v130 | v132 |
+  | --- | --- | --- |
+  | the build-up (the ball in our third): off the back line | 9.6 m | 12.0 m |
+  | ...within 8 m of one of it | 24% | 18% |
+  | ...the pivot | 10.4 m | 12.6 m |
+  | ...a man offering himself to the man on it | 7.0 m | 11.0 m |
+  | the middle third: off the back line | 12.8 m | 15.0 m |
+  | ...within 8 m of one of it | 13% | 10% |
+  | the ball lost in its own third, a side a match | 2.3 (2.3 to 3.3 over three runs) | 3.0 |
+  | the midfielders' stamina at the end (its ceiling) | 0.60 (0.62) | 0.54 (0.56) |
+
+  The wide midfielders are where they were (12.9 → 14.0 m in the build-up). The cost is the running: a midfielder
+  ends a match about a tenth more tired.
 - **v131: the computer's back line as straight as its Def IQ.** It held one as straight at Def IQ 1 as at 10. Now each
   of its men wanders off the line's height, slowly and his own way, mostly deeper (at Def IQ 1 up to 9 m deeper, or
   3.6 m higher), and steps up with it late: half a second after the ball's played back out, a line at Def IQ 1 has
@@ -2748,8 +2772,15 @@ test, and like the Trap Lab the values are the game's settings.
   always goal-side of their highest man. Building from the back they split: a pair 17 m either side of the
   middle, the outside men of a three 20 m (it was 13 and 15), leaning only a little toward the ball, and
   closing up to the settled width as the ball goes past halfway. The holding midfielder is the pivot in
-  front of them, a little further off them while we build up (with the ball out wide in their third, he
-  arrives late for the pull-back). The wide men hold the touchlines, about level with the ball -- but while
+  front of them, 14 m off them once we're settled and 18 m while we build up (v132: it was 11 and 13; with
+  the ball out wide in their third, he arrives late for the pull-back); a second holding man beside him a
+  touch nearer him. Building up -- the ball in our third, or with one of the back line short of their third --
+  a central midfielder offering himself to the man on it does it well ahead of him: never less than 6 m
+  ahead, and less than 11 m only when there's nothing better (v132: he came across level with the back
+  line, or behind it, and crowded it; the back line and the keeper are the ways across and back). And a
+  midfielder 10 m or more short of his spot while we build up (the ball at our man's feet, or in our
+  keeper's hands) gets up there at a sprint, his legs going or not while he's more than 45% left, and jogs
+  the rest (v132: he jogged all of it, and the play left him behind). The wide men hold the touchlines, about level with the ball -- but while
   we build up they don't come down to it: a winger holds on halfway (46 m out) and a wide midfielder just
   short of it (38 m), and neither comes back into our third to offer himself (a man told to COME SHORT
   excepted), so the build-up has depth and the forward isn't on his own up there. The other central
