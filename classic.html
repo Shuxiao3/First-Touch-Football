@@ -11836,6 +11836,7 @@
     startGuard(p);                                                        // (just won it off one of theirs: AFTER A TACKLE)
   }
 
+  const BODY_LEAD=35*Math.PI/180, BALL_ROLL=2.5;   // (v133: how far to one side of his run the computer's man can have the ball, and how fast he can take it round himself on top of his body's turn, rad/s: see carry)
   function carry(p,dt,moving){
     // PLANT TO SHOOT: while charging a shot, hold the ball in front toward goal so a trailing
     // defender can't poke the wind-up from behind, and the shot launches from in front of you.
@@ -11855,7 +11856,18 @@
     }
     const faceAng=Math.atan2(p.facing.y,p.facing.x);
     if(!isFinite(p.carryAngle)) p.carryAngle=isFinite(faceAng)?faceAng:0;
-    let d=faceAng-p.carryAngle;
+    // THE COMPUTER'S MAN TURNS WITH THE BALL (v133). On the move it's in front of him: no more than BODY_LEAD off his run,
+    // going round him with his body as his run turns, and BALL_ROLL a second at most on top of that. One well off his run
+    // -- taken back beside him or behind him, his own knock-on or a pass -- is touched straight across to the front of him,
+    // not swung round him. It went round him at the carry's rate (9.5 rad/s) to wherever he meant to go next, while he
+    // ran on straight. Stood still (drawn the way he faces) he turns with it as before; yours goes the way you push.
+    let tgt=faceAng, roll=null;
+    if(p!==controlled){ const sp=Math.hypot(p.vx,p.vy);
+      if(sp>12){ const va=Math.atan2(p.vy,p.vx); let off=faceAng-va; off=Math.atan2(Math.sin(off),Math.cos(off)); tgt=va+clamp(off,-BODY_LEAD,BODY_LEAD);
+        if(p.carryVa!=null && simNow-p.carryVaT<0.1){ let dv=va-p.carryVa; dv=Math.atan2(Math.sin(dv),Math.cos(dv)); p.carryAngle+=dv; }   // (his body turns: the ball with it)
+        p.carryVa=va; p.carryVaT=simNow; roll=BALL_ROLL; }
+      else p.carryVa=null; }
+    let d=tgt-p.carryAngle;
     if(!isFinite(d)) d=0;
     while(d>Math.PI)d-=Math.PI*2;
     while(d<-Math.PI)d+=Math.PI*2;
@@ -11880,6 +11892,8 @@
         }
       }
     }
+    if(roll!=null){ turnCap=Math.min(turnCap,roll);                   // (v133: round him at BALL_ROLL at most -- and one well off his run straight across to the front: the carry's spring takes it there along the line, not round him)
+      if(Math.abs(d)>BODY_LEAD){ p.carryAngle+=d-Math.sign(d)*BODY_LEAD; d=Math.sign(d)*BODY_LEAD; } }
     p.carryAngle+=clamp(d,-turnCap*dt,turnCap*dt);
     if(!isFinite(p.carryAngle)) p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x)||0;
     const turning=Math.min(Math.abs(d),1.2);

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={P, players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, simNow:()=>simNow, FW, FH, YC, MK, atkOf, applySlot, own, '
-  + 'aiSkillKeen, aiSkillMove, aiSombrero, mkSkill, skillPaceOf, skillReachOf, ROULETTE_TURN, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
+  + 'aiSkillKeen, aiSkillMove, aiSombrero, mkSkill, skillPaceOf, skillReachOf, ROULETTE_TURN, carry, get BODY_LEAD(){ return BODY_LEAD; }, setCtl:q=>{ controlled=q; }, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // (your man on the computer too)
 patch("    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    return kind;",
   "    lastGrade=SKILL_NAME[kind]; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=0.8;\n    if(window.__SK) window.__SK.push({team:p.team, num:p.num, kind});\n    return kind;");   // (every move the computer makes)
@@ -134,6 +134,28 @@ info(`a winger, 9 against a 4: ${moves(W).length} of 8 took him on with a move (
 ok(moves(W).length >= 4 && new Set(moves(W)).size >= 2, 'a winger with the moves takes his man on with them, on the touchline in their third (' + moves(W).length + ' of 8, ' + [...new Set(moves(W))].join(', ') + ')');
 ok(moves(Wlevel).length < moves(W).length, '...far less against a man better than him (' + moves(Wlevel).length + ')');
 ok(moves(CB).length === 0, 'a centre-back never does one');
+
+// --- THE COMPUTER'S MAN TURNS WITH THE BALL (v133): running straight on and facing square across (where he means to go
+// next), the ball stays in front of him -- within BODY_LEAD of his run -- instead of swinging round him to the side at the
+// carry's rate; stood still, it comes round to the way he faces; and yours goes the way you push, as it always has.
+// 0.3 s of the carry on its own, the ball moved as the pitch would move it
+await page.evaluate(() => { window.__aiAll = false; });
+const orb = await page.evaluate(() => { const T = window.__T; T.freeze(); const b = T.ball(), dt = 1 / 60;
+  const ang = (x, y, X, Y) => Math.round(Math.abs(Math.atan2(x * Y - y * X, x * X + y * Y)) * 180 / Math.PI);
+  const run = (q, vx, vy, fx, fy) => { q.x = T.FW / 2; q.y = T.YC; q.vx = vx; q.vy = vy; q.state = 'normal'; q.stepPhase = 0;
+    const l = Math.hypot(vx, vy), ux = l ? vx / l : 1, uy = l ? vy / l : 0;
+    b.x = q.x + ux * 14; b.y = q.y + uy * 14; b.z = 0; b.vx = vx; b.vy = vy; b.vz = 0; T.own(q, 14, true);
+    q.carryAngle = Math.atan2(uy, ux); q.facing = { x: fx, y: fy };
+    for(let s = 0; s < 18; s++){ q.x += q.vx * dt; q.y += q.vy * dt; T.carry(q, dt, true); b.x += b.vx * dt; b.y += b.vy * dt; }
+    return { carry: ang(Math.cos(q.carryAngle), Math.sin(q.carryAngle), ux, uy), ball: ang(b.x - q.x, b.y - q.y, ux, uy), held: b.ownedBy === q }; };
+  const R = T.players().find(q => q.team === 'R' && q.role !== 'DEF'), G = T.players().find(q => q.team === 'G' && q.role !== 'DEF'), was = T.controlled();
+  const a = T.atkOf('R'), moving = run(R, a * 150, 0, 0, 1), still = run(R, 0, 0, 0, 1);
+  T.setCtl(G); const yours = run(G, T.atkOf('G') * 150, 0, 0, 1); T.setCtl(was);
+  return { lead: Math.round(T.BODY_LEAD * 180 / Math.PI), moving, still, yours }; });
+info('0.3 s with it, facing square across (degrees off his run -- the carry and the ball): ' + JSON.stringify(orb));
+ok(orb.moving.held && orb.moving.carry <= orb.lead + 1 && orb.moving.ball <= 60,
+  `the computer's man running straight on keeps the ball in front of him, facing square across: his carry ${orb.moving.carry} degrees off his run (${orb.lead} at most), the ball ${orb.moving.ball} (trailing it a touch as he runs) -- it doesn't swing round him (v133: it went round to 90, the ball 112)`);
+ok(orb.still.carry >= 80 && orb.yours.carry >= 80, `...stood still it comes round to the way he faces (${orb.still.carry}), and yours goes the way you push (${orb.yours.carry})`);
 
 process.exitCode = rep.finish();
 await browser.close();

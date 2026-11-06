@@ -2106,6 +2106,21 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v133: the computer's man turns with the ball.** On the move, the ball went round him to wherever he meant to go
+  next, at 9.5 radians a second, while he ran on straight: each time he took his own knock-on, or a pass, beside him
+  or behind him it swung round to his front. Now it's in front of him on the move -- no more than 35° off his run,
+  going round him with his body as he turns and at most 2.5 radians a second more on top of that -- and one well off
+  his run is touched straight across to the front of him rather than swung round him. Stood still he turns with it
+  as before (he's drawn the way it goes), and yours goes the way you push, as it always has. (v116 stopped his
+  shield spinning it round him; this is the rest of it.) Computer v computer, 6 exhibition matches each (STAR,
+  three-minute halves), the computer's men with it at their feet:
+
+  | | v132 | v133 |
+  | --- | --- | --- |
+  | the ball more than 67.5° off the way he's drawn (beside him or behind him), of the time he has it | 9.7% | 4.4% |
+  | the ball 90° round him or more in 0.3 s, at his feet's distance, his run turning less than 30°, a match | 3.8 | 2.7 |
+
+  (Some of the second are now a touch across him, which turns the ball's angle as fast without going round him.)
 - **v132: the midfield off the back line.** With the ball, building up and on through midfield, the central
   midfielders sat on top of the back line: about 10 m off it, and within 8 m of one of it a quarter of the time.
   Their spots were higher than that; they jogged to them and the play left them behind, and the men offering
@@ -2626,6 +2641,11 @@ test, and like the Trap Lab the values are the game's settings.
   - Over a man in the way, a long ball is chipped just high enough to be over his head where he is
     (about 2.5 m) and comes down a little short of the receiver, skipping on to him. A ball still
     bouncing up off his first touch, he lets drop before he plays it unless there's a man on him.
+  - With it at his feet on the move he turns with the ball (v133): it's in front of him, no more than 35° off his
+    run, going round him with his body as he turns and at most 2.5 radians a second more on top of that; one
+    he takes back beside him or behind him (his own knock-on, a pass) is touched straight across to the front of
+    him. It used to go round him at 9.5 radians a second to wherever he meant to go next while he ran on
+    straight. Stood still he turns with it on the spot, drawn the way it goes; yours goes the way you push.
   - A carry is worth where he gets to before anyone can reach him. With room in front of him (nobody
     within about 6 m in the 120° ahead), a run forward is worth more than the ground it gains: it draws a
     man out to meet him and opens a ball for someone else. So he attacks the space rather than turning
