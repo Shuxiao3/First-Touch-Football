@@ -13385,9 +13385,14 @@
     if(kickTeam){
       const a=atkOf(kickTeam), mine=players.filter(p=>p.team===kickTeam);
       const mid=mine.filter(p=>Math.abs(p.y-YC)<FH*0.22), taker=(mid.length?mid:mine).sort((p,q)=>a*(q.x-p.x)||Math.abs(p.y-YC)-Math.abs(q.y-YC))[0];
-      if(taker){ taker.x=FW/2-a*12; taker.y=YC; taker.vx=taker.vy=0; own(taker,taker.r+ball.r+5); ball.lastTouch=kickTeam;
-        const bx=FW/2-a*10*MK, behind=mine.filter(p=>p!==taker&&a*(p.x-FW/2)<-3*MK);
+      if(taker){ const bx=FW/2-a*10*MK, behind=mine.filter(p=>p!==taker&&a*(p.x-FW/2)<-3*MK);
         kickTo=(behind.length?behind:mine.filter(p=>p!==taker)).sort((p,q)=>Math.hypot(p.x-bx,p.y-YC)-Math.hypot(q.x-bx,q.y-YC))[0]||null;
+        // (v137) FACING HIS OWN SIDE: he stands at the ball facing the man he'll roll it back to, the ball at his feet on the
+        // spot between them (the taker's the one man who may be in the other half). He stood behind it facing them and
+        // then knocked it back past himself
+        const to=kickTo||{x:bx,y:YC}, dx=to.x-FW/2, dy=to.y-YC, dl=Math.hypot(dx,dy)||1, cd=taker.r+ball.r+5;
+        taker.x=FW/2-dx/dl*cd; taker.y=YC-dy/dl*cd; taker.vx=taker.vy=0; taker.facing={x:dx/dl,y:dy/dl};
+        own(taker,cd,true); ball.lastTouch=kickTeam;   // (the ball stays on the spot)
         kickBy=taker; kickT=KICK_HOLD; }
       possConfTeam=kickTeam; possFlipT=0;
     }

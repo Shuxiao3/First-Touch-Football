@@ -28,7 +28,10 @@ const start = async (a, b) => { await page.goto('file://' + copy); await page.wa
   await page.evaluate(HELPERS); };
 // where everyone is at a kick-off, and what the man on the spot is: -> wrong-half, in-circle, taker
 const HELPERS = `window.__where = k => { const T = window.__T, tk = T.ball().ownedBy;
-  return { over: T.players().filter(p => p !== tk && T.atkOf(p.team) * (p.x - T.FW / 2) > -0.99 * T.MK).length + (tk && T.atkOf(tk.team) * (tk.x - T.FW / 2) > 0 ? 1 : 0),   // (the man on the ball: at it, his own side of it)
+  const to = T.kick().to, b = T.ball(), f = tk && tk.facing, u = (x, y) => { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; };
+  const [tx, ty] = tk && to ? u(to.x - tk.x, to.y - tk.y) : [0, 0], [bx, by] = tk ? u(b.x - tk.x, b.y - tk.y) : [0, 0];
+  return { over: T.players().filter(p => p !== tk && T.atkOf(p.team) * (p.x - T.FW / 2) > -0.99 * T.MK).length,   // (the man on the ball at it: the one man who may be over halfway -- v137)
+    face: tk && to ? +(f.x * tx + f.y * ty).toFixed(2) : -9, ballAt: tk ? +(f.x * bx + f.y * by).toFixed(2) : -9, spot: +(Math.hypot(b.x - T.FW / 2, b.y - T.YC) / T.MK).toFixed(2),
     circle: T.players().filter(p => p.team !== k && Math.hypot(p.x - T.FW / 2, p.y - T.YC) < T.CIRCLE_R + 0.99 * T.MK).length,
     taker: tk && tk.team === k && Math.hypot(tk.x - T.FW / 2, tk.y - T.YC) < 2 * T.MK ? (tk.slotAtk && tk.slotAtk.pos) || tk.role : null,
     adv: tk ? T.players().filter(p => p.team === k && Math.abs(p.y - T.YC) < T.FH * 0.22 && p !== tk && T.atkOf(k) * (p.homeX - tk.homeX) > 1).length : -1 }; };
@@ -51,6 +54,7 @@ info('kick-offs: ' + rows.map(r => r.pair + ' ' + r.k + ': ' + JSON.stringify({ 
 ok(rows.every(r => r.over === 0), 'everyone in his own half, a metre short of halfway at least, the man on the ball at it on his own side (' + rows.length + ' kick-offs, eight club pairings, each side)');
 ok(rows.every(r => r.circle === 0), 'the side not kicking off outside the centre circle');
 ok(rows.every(r => r.taker && r.adv === 0), 'on the spot with the ball: the kicking side\'s most advanced man in the middle (' + [...new Set(rows.map(r => r.taker))].join(', ') + ')');
+ok(rows.every(r => r.face > 0.95 && r.ballAt > 0.95 && r.spot < 0.05), 'he faces his own side -- the man he\'ll roll it back to -- with the ball at his feet on the spot between them (v137: he faced the other side and knocked it back past himself; facing ' + Math.min(...rows.map(r => r.face)) + ' at worst)');
 ok(rows.every(r => r.moved === 0 && r.clockHold === 0), 'it holds a moment: nobody moves and the clock doesn\'t run');
 ok(rows.every(r => r.played && r.played.back && r.played.rcv && r.played.mate && r.played.behind && Math.abs(r.played.at - r.hold) < 0.15),
   'then he rolls it back to a team-mate behind him (' + rows.map(r => r.played && r.played.at).slice(0, 4).join(', ') + ' s in)');
@@ -69,7 +73,7 @@ const [g, gw, gs] = await page.evaluate(() => new Promise(res => { const T = win
   (function tick(){ if(T.scored() > 0 || !T.kick().by) return requestAnimationFrame(tick); const k = T.kick(), g = { goals: T.score() - s0, team: k.by.team, hold: k.t };
     const w = window.__where(g.team); window.__watch().then(s => res([g, w, s])); })(); }));
 info('after a goal: ' + JSON.stringify({ g, gw, played: gs.played }));
-ok(g.goals === 1 && g.team && gw.over === 0 && gw.circle === 0 && gw.taker && gs.moved === 0 && gs.played && gs.played.back && gs.played.rcv,
+ok(g.goals === 1 && g.team && gw.over === 0 && gw.circle === 0 && gw.taker && gw.face > 0.95 && gs.moved === 0 && gs.played && gs.played.back && gs.played.rcv,
   'after a goal: the side that conceded (' + g.team + ') kicks off, everyone in his own half, it held, rolled back');
 
 // THE SECOND HALF: after the break, Red kick off, the same way
@@ -78,7 +82,7 @@ const [h, hw, hs] = await page.evaluate(() => new Promise(res => { const T = win
     (function wait(){ if(T.breakT() > 0) return requestAnimationFrame(wait); const k = T.kick(), h = { half: T.half(), team: k.by && k.by.team, hold: k.t };
       const w = window.__where('R'); window.__watch().then(s => res([h, w, s])); })(); })(); }));
 info('the second half: ' + JSON.stringify({ h, hw, played: hs.played }));
-ok(h.half === 2 && h.team === 'R' && h.hold > 0 && hw.over === 0 && hw.circle === 0 && hs.played && hs.played.back && hs.played.rcv,
+ok(h.half === 2 && h.team === 'R' && h.hold > 0 && hw.over === 0 && hw.circle === 0 && hw.face > 0.95 && hs.played && hs.played.back && hs.played.rcv,
   'the second half: after the break Red kick off, the same way (held, rolled back)');
 
 // AFTER THE BREAK, A CHANGE ON THE TACTICS SCREEN (v129): two of yours swapped and the width changed -- every man's spot the

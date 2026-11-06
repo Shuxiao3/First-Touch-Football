@@ -2117,6 +2117,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v137: the kick-off taker faces his own side.** At every kick-off -- the start, after a goal, the second half -- the man
+  on the ball stood behind it facing the other side, and then rolled it back past himself to a team-mate. Now he stands
+  over the spot facing the man he'll roll it back to, the ball at his feet between them, so it goes the way he faces.
+  (He's a metre over halfway to do it: the Laws let the taker be in the other half.) Yours, a tap on PASS with the stick
+  left alone plays it back to him too.
 - **v136: four minutes a half.** A match is two 4-minute halves unless you pick 3 or 5 in Settings (it was 3; settings
   kept from before kept the old 3 with everything else, picked or not, so a kept 3 is the new 4 -- pick 3 again and it
   stays). And the legs go over a match as they did at 3 minutes: the ceiling under a man's stamina wears by the match,
@@ -2623,7 +2628,9 @@ test, and like the Trap Lab the values are the game's settings.
     35 → 18 of them; of those he let in 23 → 0, and had (caught or punched) 5 → 14 -- the rest we cleared.
 - **The kick-off (v84)** -- at the start, after a goal (the side that conceded) and to start the second half (Red):
   everyone is in his own half, a metre short of halfway at least, and the side not kicking off is outside the
-  centre circle. The kicking side's most advanced man in the middle stands over the ball on the spot. Play holds
+  centre circle. The kicking side's most advanced man in the middle stands over the ball on the spot, facing his own
+  side -- the man he'll roll it back to, the ball at his feet between them (v137: he faced the other side, then knocked
+  it back past himself; the taker's the one man the Laws let stand in the other half). Play holds
   0.8 s (nobody moves, and the clock doesn't run), then he rolls it back to a team-mate -- the one nearest a spot ten
   metres behind the ball, in the middle -- and it's on. Yours, you're put on the man it's going to. (Before, the
   forwards stood where their shape without the ball put them, up to 6 m into the other half and inside the circle,
