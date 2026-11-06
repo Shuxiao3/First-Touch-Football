@@ -223,7 +223,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
-  - **Settings** are a player's: match length, how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
+  - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
+    how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
     graphics, the colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
     plus the button layout on a touch screen. Settings also credits the campus's tilesets and the font. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
@@ -2116,6 +2117,21 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v136: four minutes a half.** A match is two 4-minute halves unless you pick 3 or 5 in Settings (it was 3; settings
+  kept from before kept the old 3 with everything else, picked or not, so a kept 3 is the new 4 -- pick 3 again and it
+  stays). And the legs go over a match as they did at 3 minutes: the ceiling under a man's stamina wears by the match,
+  not the minute -- three quarters as fast a second at 4 minutes, three fifths at 5. Computer v computer, 16
+  exhibition matches each (STAR), each man's ceiling through a match:
+
+  | | at half-time | at full time |
+  | --- | --- | --- |
+  | 3-minute halves (v135) | DEF 0.86, MID 0.71, ATT 0.70 | DEF 0.80, MID 0.60, ATT 0.61 |
+  | 4-minute halves, the ceiling as it wore (v135) | 0.82, 0.63, 0.63 | 0.76, 0.51, 0.51 |
+  | 4-minute halves (v136) | 0.86, 0.71, 0.72 | 0.80, 0.60, 0.60 |
+
+  The men sprint as much of the time at either length (midfielders about a quarter, forwards a fifth). (Tests:
+  classic-teamins could find a side pressing that wasn't -- its freeze left the press's memory of the ball, as
+  classic-shape's reset did till v131; put right.)
 - **v135: a header on goal is a shot.** It was never counted as one: a header at goal went into the stats only if it
   was saved or went in (on target), so a man could have more on target than shots, and the shots a match came up short.
   Computer v computer (120 exhibition matches, STAR, three-minute halves) there are about one and a half headers on goal
@@ -2649,10 +2665,14 @@ test, and like the Trap Lab the values are the game's settings.
 - **Stamina (v121)** — two things: the bar, which a sprint drains and a jog or a stand fills again, and the
   ceiling under it, which every sprint wears down for the rest of the half. A tired man is slower: at 70% of both,
   about a seventh.
+  - **The ceiling goes by the match, not the minute** (v136). It wears as a 3-minute half wears it, whatever the
+    half's length: a second of it three quarters as fast at 4 minutes, three fifths at 5, so the legs go over a match
+    as they did at 3 minutes. The bar, back within a few seconds of a sprint, goes by the second as it always has.
   - **A sprint costs by the ground it covers, not the seconds.** A metre flat out costs the same whoever runs it, so
     pace has a price: a Speed 6 or 7 man pays a second what a second flat out cost anyone before v121, the quickest
     (Speed 10) a fifth more, a Speed 2 man about a quarter less. His Stamina sets what a metre costs, as before. The
-    ceiling wears the same way: 0.0075 a second at a Speed 6 man's pace (before v121 0.007 a second at any speed).
+    ceiling wears the same way: 0.0075 a second at a Speed 6 man's pace in a 3-minute half (before v121 0.007 a second
+    at any speed; v136: less a second in a longer half, see above).
     (v123: v121 had the quickest man pay what he always had and the ceiling wear at 0.0045, and the sides came to
     half-time almost as fresh as they started; a metre went a fifth dearer and the ceiling a good deal faster.)
   - **Half-time gives back half** of what the half took from the ceiling (a quarter before), more with a physio.

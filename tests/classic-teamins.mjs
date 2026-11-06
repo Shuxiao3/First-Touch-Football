@@ -17,7 +17,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, gkHold:()=>gkHold, ball:()=>ball, now:()=>simNow, atkOf, heldBy, FW, MK, YC, over:()=>matchOver, setStyle, buildOfStyle, TI:()=>TI, TAC, tiDefault, tiLines, tiSet, tiPosture, own, setControlled, SIT:()=>SIT,\n'
   + '    setTI:(t,o)=>{ setTI(t,Object.assign(tiDefault(TAC[t].style),o)); }, block:t=>{ blockCache[t]=null; return defBlock(t); }, seen:(t,x,y)=>{ const e=seenBall(t); e.x=x; e.y=y; },\n'
-  + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; },\n'
+  + '    freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; restartInfo=null; for(const t of ["G","R"]) Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9,lastU:null}); },\n'   // (v136: the press\'s memory of the ball cleared too -- a side could be pressing by chance)
   + '    hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');

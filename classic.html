@@ -1874,7 +1874,7 @@
     mateThink: {val:0.45,min:0,   max:1.4, step:0.02,label:'Teammate decision time',hint:'Seconds YOUR AI teammates settle on the ball before passing/shooting. Lower = they play quicker.'},
     pressTight:{val:0.45,   min:0,max:1,step:0.02,label:'Press tightness',hint:'How aggressively defenders close you down. Low = they sag off and lanes stay open; high = they get tight fast.'},
     offIQ:{val:5.5,min:1,max:10,step:0.1,label:'Off IQ (stat 1–10)',hint:'Attacking decision speed. 1 = slow to re-read play and commit; 10 = decisive, near one-touch. (decision clock x0.5 at 1 to x2.0 at 10.)'},
-    halfMin:{val:3,min:3,max:5,step:1,label:'Half length (min)',hint:'Real minutes per half (3, 4, or 5). The on-screen clock is scaled to read 1–45 in the first half and 45–90 in the second, whatever you pick here.'},
+    halfMin:{val:4,min:3,max:5,step:1,label:'Half length (min)',hint:'Real minutes per half (3, 4, or 5; 4 unless you pick another). The on-screen clock is scaled to read 1–45 in the first half and 45–90 in the second, whatever you pick here.'},
     mateSpace:{val:170,min:0,max:260,step:10,label:'Off-ball spacing from carrier',hint:'Teammates positioning off the ball keep at least this distance from their own carrier (anchor-based positioning only; committed runs, the intended receiver, and ball contests are exempt). 0 disables.'},
     switchLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Switch: keep his run (s)',hint:'For this long after you switch, the man you switch to carries on the way he was running, before the stick takes him over, so the direction you were holding for the last man doesn\'t snap him round. 0 = off.'},
     passLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Touch: pass lockout after receiving',hint:'TOUCH ONLY — for this many seconds after a ball reaches you (a pass you receive, or your own trap), the big button still reads as TRAP and cannot fire a pass, so a trap-intent tap landing just after it arrives never becomes an accidental pass. Running with the ball never sets it off. 0 disables. Keyboard passing (J) is never locked.'},
@@ -2077,9 +2077,11 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:3, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal'};
+  const PREFS={halfMin:4, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', pv:1};
   const THEMES=['blue','ruby','silver','mint'];
-  try{ Object.assign(PREFS, JSON.parse(localStorage.getItem('ftc_prefs')||'{}')); }catch(e){}
+  // (v136: 4 minutes a half unless you pick another -- it was 3. Settings kept from before kept the old 3 along with
+  // everything else, picked or not, so a kept 3 from then is the new 4; pv marks settings kept since)
+  try{ const sp=JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}; if(!sp.pv&&+sp.halfMin===3) delete sp.halfMin; Object.assign(PREFS, sp, {pv:1}); }catch(e){}
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
   // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
@@ -2107,7 +2109,7 @@
   const diffOf=()=>DIFFS[PREFS.diff]||DIFFS.normal;
   const cpuT=t=>(t==='R'&&!LAB.on&&!practice)?diffOf():DIFFS.star;      // (the computer's side, in a match)
   const cpu=p=>cpuT(p&&p.team);
-  function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||3),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
+  function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||4),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
     try{ SPRITE.enable(PREFS.art!==false); PITCH.enable(PREFS.art!==false); }catch(e){}
     applyTheme(); try{ document.getElementById('careerHub').classList.toggle('cpRight',PREFS.side==='right'); }catch(e){} }
   // the colour scheme: data-theme on <html> swaps the PIXEL THEME's variables; the canvas reads its few colours from them (TC)
@@ -3461,7 +3463,7 @@
   const KICK_HOLD=0.8; let kickT=0, kickBy=null, kickTo=null;
   let goalLog=[];
   let kdShots=0,kdSaves=0,kdGoals=0,kdGoalLock=false;        // keeper-drill running tally (+ re-trigger lock)
-  const halfLenSec=()=>Math.max(60,(P.halfMin?P.halfMin.val:3)*60);   // real seconds per half, from the Half length setting
+  const halfLenSec=()=>Math.max(60,(P.halfMin?P.halfMin.val:4)*60);   // real seconds per half, from the Half length setting
   let matchClock=0, half=1, matchOver=false, breakT=0;  // breakT freezes play at half/full time
   // THE END-OF-HALF ADVANTAGE: once the clock's run out, at half time as at full time, play goes on while there's an
   // attack on, and the half ends when it's dead (see advOver). ADV: since when (t0), whose attack it is (side), the
@@ -6258,6 +6260,11 @@
   // what he always had, SPRINT_TOP 228 -- and the ceiling worn faster, 0.0045 then: half-time found the sides fresh as
   // the kick-off.) (sprintPace: from a quarter, a sprint from standing still, to Speed 10's and a burst over it)
   const SPRINT_TOP=190, CAP_WEAR=0.0075;
+  // THE CEILING BY THE MATCH, NOT THE MINUTE (v136): it wears as a 3-minute half wears it, whatever the half's length --
+  // CAP_WEAR is a 3-minute half's, and a longer half wears it slower (capRate: three quarters as fast a second at 4
+  // minutes, three fifths at 5), so the legs go as they did at 3 minutes over the match. (A man's stamina between sprints,
+  // back in a few seconds, goes by the second as it always has.)
+  const capRate=()=>180/halfLenSec();
   const sprintPace=p=>clamp(Math.hypot(p.vx||0,p.vy||0)/SPRINT_TOP,0.25,1.25);
   // PACING (v121): a computer player whose legs have begun to go -- his ceiling worn under CAP_SAVE -- saves his
   // sprints for what matters (see the AI's sprint call). (At 0.8 the computer spent what v121 saved it, sprinting a
@@ -11292,10 +11299,10 @@
       accelMul=1.25;
       const pace=sprintPace(p), drain=(hasBall ? drainSprintBallOf(p) : drainSprintOf(p))*pace;   // sprint stamina drain, by the ground covered (A SPRINT'S COST, v121)
       p.stamina=clamp(p.stamina - dt*drain, 0, 1);
-      p.staminaCap=clamp(p.staminaCap - dt*CAP_WEAR*pace*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
+      p.staminaCap=clamp(p.staminaCap - dt*CAP_WEAR*capRate()*pace*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);   // (capRate: v136)
     } else if(p.sprint && moving && empty){
       // trying to sprint with NOTHING left -> burns into the max (cap) itself
-      p.staminaCap=clamp(p.staminaCap - dt*0.035*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
+      p.staminaCap=clamp(p.staminaCap - dt*0.035*capRate()*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
       p.stamina=0;
     } else if(hasBall && moving){
       // running WITH the ball (not sprinting) tires him a little -- or a quick man could sprint, ease off, and sprint

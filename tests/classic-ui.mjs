@@ -100,6 +100,14 @@ for(const [w, h] of SIZES){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
     ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
+    // new 4, where a 3 picked from now on stays 3
+    const mlOn = pg => pg.evaluate(() => { const r = [...document.querySelectorAll('#setRows .setRow')].find(x => /MATCH LENGTH/.test(x.textContent)), on = r && r.querySelector('.setOpt.on'); return on ? on.textContent : null; });
+    const fresh = await mlOn(page);
+    const keptAs = async o => { const c = await browser.newContext({ viewport: { width: 1100, height: 800 } }); await c.addInitScript(o => { try{ localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} }, o);
+      const pg = await c.newPage(); await pg.goto('file://' + copy); await pg.waitForTimeout(500); await pg.click('#smItems [data-act="settings"]'); await pg.waitForTimeout(150); const v = await mlOn(pg); await c.close(); return v; };
+    const old3 = await keptAs({ halfMin: 3, diff: 'star' }), new3 = await keptAs({ halfMin: 3, diff: 'star', pv: 1 }), old5 = await keptAs({ halfMin: 5, diff: 'star' });
+    ok(fresh === '4 MIN' && old3 === '4 MIN' && new3 === '3 MIN' && old5 === '5 MIN', `MATCH LENGTH: 4 minutes unless you pick another (${fresh}); a 3 kept from before is the new 4 (${old3}), one picked since stays (${new3}), a 5 kept as it was (${old5}) (v136)`);
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
     const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));

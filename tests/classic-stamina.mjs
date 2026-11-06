@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, ball:()=>ball, P, MK, FW, FH, YC, stepOutfield, statOf, drainSprintOf, staminaCapDrainOf, sprintSpeedOf, '
-  + 'startSlide, slideAt, canSlide, resetKickoff, get SPRINT_TOP(){ return SPRINT_TOP; }, get CAP_WEAR(){ return CAP_WEAR; }, get CAP_SAVE(){ return CAP_SAVE; }, get SLIDE_BACK(){ return SLIDE_BACK; }, grade:()=>lastGrade, half:()=>half, clock:()=>matchClock, pause:v=>{ pauseOpen=v; }, setControlled, '
+  + 'startSlide, slideAt, canSlide, resetKickoff, get SPRINT_TOP(){ return SPRINT_TOP; }, get CAP_WEAR(){ return CAP_WEAR; }, capRate:()=>capRate(), halfLenSec:()=>halfLenSec(), PREFS, get CAP_SAVE(){ return CAP_SAVE; }, get SLIDE_BACK(){ return SLIDE_BACK; }, grade:()=>lastGrade, half:()=>half, clock:()=>matchClock, pause:v=>{ pauseOpen=v; }, setControlled, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // your man on the computer too
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');   // (nothing drawn: quicker)
@@ -47,12 +47,20 @@ const A = await page.evaluate(() => {
     p.stamina = p.staminaCap = 1; const x0 = p.x;
     for(let i = 0; i < 60; i++){ p.sprint = true; T.stepOutfield(p, 1, 0, dt); }
     const m = (p.x - x0) / T.MK, bar = 1 - p.stamina, cap = 1 - p.staminaCap;
-    return { m: +m.toFixed(2), bar: +bar.toFixed(4), cap: +cap.toFixed(5), perM: +(bar / m).toFixed(5), top: T.sprintSpeedOf(p), was: +T.drainSprintOf(p).toFixed(4), wasCap: +(0.007 * T.staminaCapDrainOf(p)).toFixed(5), nowCap: +(T.CAP_WEAR * T.staminaCapDrainOf(p)).toFixed(5) }; };
+    return { m: +m.toFixed(2), bar: +bar.toFixed(4), cap: +cap.toFixed(5), perM: +(bar / m).toFixed(5), top: T.sprintSpeedOf(p), was: +T.drainSprintOf(p).toFixed(4), wasCap: +(0.007 * T.staminaCapDrainOf(p)).toFixed(5), nowCap: +(T.CAP_WEAR * T.capRate() * T.staminaCapDrainOf(p)).toFixed(5) }; };
   const fast = run(10), mid = run(6.5), slow = run(2);
   p.stats = keep.stats; p.x = keep.x; p.y = keep.y; p.vx = p.vy = 0; p.sprint = false; p.stamina = p.staminaCap = 1;
   return { fast, mid, slow };
 });
 info('a second flat out: ' + JSON.stringify(A));
+// (v136) THE HALF'S LENGTH: 4 minutes unless you pick another, and the ceiling worn as a 3-minute half wears it over the
+// match -- a second of it three quarters as fast at 4 minutes, three fifths at 5, CAP_WEAR at 3
+const HL = await page.evaluate(() => { const T = window.__T, was = T.P.halfMin.val, r = {};
+  r.def = T.P.halfMin.val; r.secs = T.halfLenSec();
+  for(const m of [3, 4, 5]){ T.P.halfMin.val = m; r['k' + m] = +T.capRate().toFixed(3); }
+  T.P.halfMin.val = was; return r; });
+info('the half: ' + JSON.stringify(HL));
+ok(HL.def === 4 && HL.secs === 240 && HL.k3 === 1 && HL.k4 === 0.75 && HL.k5 === 0.6, 'a half is 4 minutes unless you pick another (it was 3), and its ceiling wears as a 3-minute half\'s over the match: ' + HL.k4 + ' as fast a second at 4, ' + HL.k5 + ' at 5 (v136)');
 ok(Math.abs(A.mid.bar / A.mid.was - 1) < 0.08 && Math.abs(A.mid.cap / A.mid.nowCap - 1) < 0.08,
   'a Speed 6.5 man (' + A.mid.m + ' m in the second flat out) pays what a second cost anyone before v121 (' + A.mid.bar + ' of his bar, against ' + A.mid.was + '), his ceiling ' + A.mid.cap + ' a second');
 ok(A.fast.bar / A.fast.was >= 1.1 && A.fast.bar / A.fast.was <= 1.25 && A.slow.bar / A.slow.was >= 0.65 && A.slow.bar / A.slow.was <= 0.85,
