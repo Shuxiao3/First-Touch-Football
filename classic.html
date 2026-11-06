@@ -6963,6 +6963,33 @@
   function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
   function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); }   // (every frame)
 
+  // WHO YOUR PASS IS FOR (v134): the man the way you aim it -- the stick, or the way he faces -- at the range you held
+  // PASS for (passRange: a tap about 12 m, held half its fill 24 m, all of it 42 m). The way you aim counts most: within
+  // PASS_CONE of it, the nearer the line the better (PASS_AIM: off it by that, as much as his range off by PASS_RNG, a
+  // factor of about 1.7); then the range; how free he is a little (PASS_FREE). It was the way you aimed and how free he
+  // was, from 72 degrees either side, and the range no part of it: a free man well off your line beat the one you aimed
+  // at, and the near one of two the same way got it however long you held it. YOUR KEEPER only when he's plainly the
+  // one (PASS_GK): aimed within 15 degrees of him, no more than 35 m off, no man of yours within 25 degrees of the way
+  // you aimed it, and him the better pick. A tap back toward him from up the pitch went to him, from 40 m and more, and
+  // past him.
+  const PASS_CONE=55*Math.PI/180, PASS_AIM=0.38, PASS_RNG=0.55, PASS_FREE=0.35, PASS_GK={ang:15*Math.PI/180, d:35*MK, clear:25*Math.PI/180};
+  function passRange(charge){ return clamp(180+charge*720,180,950); }
+  function passScore(p,q,a,d,dI){ const opp=nearestOppTo(p,q), open=opp?clamp(dist(opp,q)/120,0,1):1;
+    const ea=a/PASS_AIM, er=Math.log(d/dI)/PASS_RNG; return PASS_FREE*open-ea*ea-er*er; }
+  function passPick(p,ax,ay,charge){
+    const dI=passRange(charge); let best=null, bs=-1e9, gk=null, gkA=9, gkD=0, near=9;
+    for(const q of players.concat(keepers)){
+      if(q.team!==p.team||q===p||q.benched) continue;
+      const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy)||1, a=Math.acos(clamp((dx*ax+dy*ay)/d,-1,1));
+      if(q.isGK){ gk=q; gkA=a; gkD=d; continue; }
+      if(a<PASS_GK.clear) near=Math.min(near,a);
+      if(a>PASS_CONE) continue;
+      const sc=passScore(p,q,a,d,dI);
+      if(sc>bs){ bs=sc; best=q; }
+    }
+    if(gk && gkA<=PASS_GK.ang && gkD<=PASS_GK.d && near>=PASS_GK.clear && passScore(p,gk,gkA,gkD,dI)>bs) return gk;
+    return best;
+  }
   // The pass itself. o.loft: in the air, over them; o.thru: {dx,dy} a screen direction to play it through.
   function doPass(charge,o){
     o=o||{};
@@ -6976,25 +7003,8 @@
     if(!aimx&&!aimy){aimx=p.facing.x;aimy=p.facing.y;}
     const al=Math.hypot(aimx,aimy)||1;aimx/=al;aimy/=al;
 
-    // power -> intended pass distance
-    const power=620;
-    const intendedDist=clamp(180+charge*720,180,950);
-
-    // score teammates: must be roughly in the aimed direction -- your keeper too (a ball back to him is at his feet:
-    // THE RULES)
-    let best=null,bs=-1e9;
-    for(const q of players.concat(keepers)){
-      if(q.team!==p.team||q===p||q.benched)continue;
-      let dx=q.x-p.x,dy=q.y-p.y;
-      const d=Math.hypot(dx,dy)||1;
-      const dirDot=(dx/d)*aimx+(dy/d)*aimy;        // 1 = dead on aim
-      if(dirDot<0.30)continue;                      // not in the aimed cone
-      const distErr=Math.abs(d-intendedDist)/300;   // how well power matches range
-      const opp=nearestOppTo(p,q);
-      const open=opp?clamp(dist(opp,q)/120,0,1):1;   // prefer open men
-      const score=dirDot*2.4 + open*0.7 - clamp(d/1400,0,1)*0.4;
-      if(score>bs){bs=score;best=q;}
-    }
+    // who it's for: the man the way you aimed it, at the range you held PASS for (passPick)
+    let best=passPick(p,aimx,aimy,charge);
 
     if(o.target&&o.target.team===p.team&&o.target!==p) best=o.target;   // a touch pass: him, whoever the stick would pick
     if(best&&o.thru&&!best.isGK){ thruBall(p,best,o.thru,false); labOnPass('THROUGH BALL',best,ball.thru); return; }   // (along the grass, double-tap or not: no lofted through ball, v81; to your keeper it's a pass to him)
@@ -7025,12 +7035,15 @@
       labOnPass(o.loft?'LOFTED PASS':'PASS',best,lead);
       passSwitch(best);
     } else {
-      // no good target: raw directional kick where aimed -- or into space the way you dragged
+      // no good target: raw directional kick where aimed -- or into space the way you dragged. Along the grass it dies
+      // about as far off as you held PASS for (v134: it went at one pace, a tap as far as a held one -- a tap back toward
+      // your own goal rolled on toward it); in the air, as it did
       if(o.thru){ const u=screenDirToPitch(o.thru.dx,o.thru.dy,p.y); aimx=u.x; aimy=u.y; }
       { const te=turnSpray(p,aimx,aimy), c=Math.cos(te), sn=Math.sin(te); const ax=aimx*c-aimy*sn; aimy=aimx*sn+aimy*c; aimx=ax; }
+      const dR=passRange(charge), vz0=o.loft?320:clamp(dR*0.22,0,520)*P.passLoft.val, power=o.loft?620:gkSolvePower(dR,vz0);   // (gkSolvePower: the pace that has it come to rest there)
       ball.vx=aimx*power+p.vx*0.3;
       ball.vy=aimy*power+p.vy*0.3;
-      ball.vz=o.loft?320:200;
+      ball.vz=vz0;
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       recordPassTeam(p.team,p); passPose(p);
       labOnPass(o.thru?'KICK INTO SPACE':o.loft?'LOFTED KICK':'KICK (nobody that way)',null,null);

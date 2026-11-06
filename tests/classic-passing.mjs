@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, turnWorst, trackFacing, oneTouchMax, passSolve, firstTouchPass, touchPass, oneTouch:()=>oneTouch, lastGrade:()=>lastGrade, obThruBall, obThruV0, '
+patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, controlled:()=>controlled, ball:()=>ball, P, FW, FH, YC, MK, passPick, passRange, gkSolvePower, turnWorst, trackFacing, oneTouchMax, passSolve, firstTouchPass, touchPass, oneTouch:()=>oneTouch, lastGrade:()=>lastGrade, obThruBall, obThruV0, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; recvAuto=null; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pass-')), 'classic.html');
 writeFileSync(copy, src);
@@ -86,6 +86,36 @@ info('the computer\'s through ball: ' + JSON.stringify(tb));
 ok(tb.cap === 900 && Math.abs(tb.long.sp - 900) < 1 && tb.long.vz === 0, 'a long through ball that would need ' + tb.need + ' px/s to get there in time is struck at ' + Math.round(tb.long.sp) + ', along the grass');
 ok(Math.abs(tb.short.sp - tb.shortNeed) < 1, '...a short one at what it needs (' + Math.round(tb.short.sp) + ' px/s)');
 ok(tb.sd1 > 2 * tb.sd10 && tb.sd10 > 0.02, 'its weight errs with Passing: ' + Math.round(tb.sd1 * 100) + '% at 1, ' + Math.round(tb.sd10 * 100) + '% at 10');
+
+// --- WHO YOUR PASS IS FOR (v134): the way you aim it, at the range you held PASS for -- your keeper only when it's
+// plainly him. (It was the way you aimed and how free a man was, from 72 degrees either side, the range no part of it.)
+const pk = await page.evaluate(() => { const T = window.__T, c = T.controlled(), atk = c.team === 'G' ? 1 : -1, M = T.MK; T.freeze();
+  const mates = T.players().filter(q => q.team === c.team && q !== c), opp = T.players().filter(q => q.team !== c.team);
+  const put = (q, u, w) => { q.x = c.x + atk * u * M; q.y = c.y + w * M; q.vx = q.vy = 0; };
+  const clear = () => [...mates, ...opp].forEach((q, i) => { q.x = c.x + (i % 4 - 1.5) * M; q.y = i % 2 ? 40 : T.FH - 40; q.vx = q.vy = 0; });   // (out on the touchlines, square of him)
+  const name = q => q ? (q.isGK ? 'GK' : mates.indexOf(q)) : 'nobody', out = {};
+  c.x = T.FW * 0.5; c.y = T.YC;
+  // two of yours the same way, 10 m and 30 m on: a tap to the near one, held all the way to the far one
+  clear(); put(mates[0], 10, 0); put(mates[1], 30, 1);
+  out.tapNear = name(T.passPick(c, atk, 0, 0.15)); out.heldFar = name(T.passPick(c, atk, 0, 1));
+  // one dead ahead with a man of theirs 2 m off him, one free 30 degrees off: the one you aimed at
+  clear(); put(mates[0], 18, 0); put(mates[1], 14, 8); opp[0].x = mates[0].x; opp[0].y = mates[0].y + 2 * M;
+  out.aimed = name(T.passPick(c, atk, 0, (18 * M - 180) / 720));
+  // the keeper: you 50 m out tapping it straight back toward him (one of yours back there too, out wide) -- not him;
+  // 15 m out, aiming at him -- him; and 15 m out with one of yours 18 degrees off the line to him -- that man
+  const kp = T.keepers().find(k => k.team === c.team), gx = atk > 0 ? 0 : T.FW;
+  kp.x = gx + atk * 1 * M; kp.y = T.YC; kp.vx = kp.vy = 0;
+  clear(); c.x = gx + atk * 50 * M; put(mates[0], -20, 18); out.tapBack50 = name(T.passPick(c, -atk, 0, 0.1));
+  clear(); c.x = gx + atk * 15 * M; out.back15 = name(T.passPick(c, -atk, 0, 0.1));
+  put(mates[0], -12, 4); out.back15mate = name(T.passPick(c, -atk, 0, 0.1));
+  const kick = ch => { const d = T.passRange(ch), vz = Math.min(520, d * 0.22) * T.P.passLoft.val; return { d: Math.round(d / M), v: Math.round(T.gkSolvePower(d, vz)) }; };   // (as doPass strikes one to nobody)
+  out.tap = kick(0.1); out.full = kick(1);
+  return out; });
+info('who the pass is for: ' + JSON.stringify(pk));
+ok(pk.tapNear === 0 && pk.heldFar === 1, 'two of yours the same way, 10 m and 30 m on: a tap finds the near one, PASS held all the way the far one (it was the near one, held or not)');
+ok(pk.aimed === 0, 'the man you aimed at, marked, not a free one 30 degrees off your line (it was the free one)');
+ok(pk.tapBack50 !== 'GK' && pk.back15 === 'GK' && pk.back15mate === 0, `your keeper only when it's plainly him: tapped back toward him from 50 m, not him (${pk.tapBack50}); 15 m out aimed at him, him; one of yours 18 degrees off the line to him, that man`);
+ok(pk.tap.d <= 13 && pk.full.d >= 40 && pk.tap.v < 620 && pk.tap.v < pk.full.v, `a kick to nobody dies about where you held it for: off a tap ${pk.tap.d} m away (struck at ${pk.tap.v} px/s), held all the way ${pk.full.d} m (${pk.full.v}) -- it was 620 px/s and in the air either way`);
 
 process.exitCode = rep.finish();
 await browser.close();

@@ -379,6 +379,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   theirs crosses it, you're put straight on the man of yours marking the one it's for (within 3 m of him) -- unless
   another of yours is clearly nearer where it comes through head height in or by your box (or where it comes down, if
   it never does) -- and for a cross to nobody in particular, on whoever's nearest there.
+- **Who your pass is for** (v134). PASS goes to the man the way you aim it -- the stick, or the way you face -- at the
+  range you held it for: a tap finds a man about 12 m off, held half its fill about 24 m, all of it 40 m and more (its
+  meter fills in 0.5 to 0.72 s, quicker the better your Passing). The way you aim counts most: anyone within 55° of
+  it, the nearer your line the better; then the range; how free he is a little. Your keeper only when it's plainly
+  him: aimed within 15° of him, no more than 35 m off, and nobody of yours within 25° of the way you aimed it. With
+  nobody that way, it's kicked that way, dying about where you held it for. (It was the way you aimed and how free a
+  man was, from 72° either side, and how long you held it no part of it: a free man well off your line got it ahead
+  of the one you aimed at, the near one of two the same way got it however long you held it, a tap back toward your
+  keeper from up the pitch went to him from 40 m and more, and a kick to nobody went 31 m whatever you did.)
 - **One-touch passing.** With a ball on its way to you, press PASS (`J`, or the PASS button, which reads 1-TOUCH),
   or tap/click a team-mate. It's played first time the moment it arrives, to the man you tapped or whoever is that
   way, and you're on the receiver. "That way" is the stick's direction as the ball reaches you. On a phone, swiping
@@ -1864,7 +1873,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | Key | Action |
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass (hold for a longer ball) · head-clear an incoming cross · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
+| `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
@@ -2106,6 +2115,27 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v134: your pass goes to the man you meant.** Who a pass was for was the way you aimed it and how free a man was,
+  from 72° either side of your aim, and how long you held PASS no part of it -- its range was worked out and never
+  used: a free man well off your line got it ahead of the one you aimed at, the near one of two the same way got it
+  however long you held it, and your keeper was in it like anyone (a tap back toward him from up the pitch went to
+  him from 40 m and more, and past him). Now it's the way you aim (within 55°, the nearer your line the better),
+  then the range you held it for (a tap about 12 m, all of it 40 m and more), then how free he is; the keeper only
+  when it's plainly him (aimed within 15° of him, 35 m off at most, nobody of yours within 25° of the way you aimed
+  it); and a kick to nobody dies about where you held it for (it went 31 m whatever you did: now 11 m off a tap, 40
+  m held). From real match moments (computer v computer, 6 exhibition matches, every 0.5 s a man on the ball, each
+  team-mate 5 to 45 m from him in turn the man you mean, aimed at and held for his range, give or take a tenth):
+
+  | | v133 | v134 |
+  | --- | --- | --- |
+  | the man you meant gets it: on keys (the nearest of eight directions) | 60% | 84% |
+  | ...on a stick (8° out either way) | 68% | 94% |
+  | the keeper instead, when you meant an outfielder | 0.3 to 0.6% | 0% |
+  | a forward in their half tapping it straight back: to the keeper | 4.5% | 0% |
+  | always a tap, on keys: the man you meant, under 25 m off | 72% | 84% |
+  | ...25 m and more off | 45% | 27% |
+
+  The last line is the price: a tap is a short ball now, so a long one needs PASS held.
 - **v133: the computer's man turns with the ball.** On the move, the ball went round him to wherever he meant to go
   next, at 9.5 radians a second, while he ran on straight: each time he took his own knock-on, or a pass, beside him
   or behind him it swung round to his front. Now it's in front of him on the move -- no more than 35° off his run,
