@@ -49,6 +49,9 @@ for(let i = 0; i < 37; i++){ const n = await K(`Object.values(MSTAT.G).concat(Ob
   await page.waitForTimeout(1000); }
 r = await K(`(()=>{ const G=MSTAT.G, R=MSTAT.R, sum=(S,k)=>Object.values(S).reduce((a,o)=>a+(o[k]||0),0); return { men:Object.keys(G).length+Object.keys(R).length, pa:sum(G,'pa')+sum(R,'pa'), pc:sum(G,'pc')+sum(R,'pc') }; })()`);
 ok(r.men >= 2 && r.pa >= 2 && r.pc >= 1 && r.pc <= r.pa, 'live, what each man does is counted: ' + r.men + ' men on the ball, ' + r.pa + ' passes, ' + r.pc + ' found');
+r = await K(`(()=>{ const t=players.find(q=>q.team==='G'&&q.squadIdx!=null), sh=()=>((MSTAT.G[t.squadIdx]||{}).sh||0), b=sh(); headOnGoal(t); const a=sh();
+  ball.vx=ball.vy=ball.vz=0; ball.shotT=0; ball.shotBy=null; return { b, a }; })()`);
+ok(r.a === r.b + 1, 'a header on goal is a shot in his numbers (v135: it never was -- about one and a half a match went uncounted)');
 await K(`(()=>{ const t=players.find(q=>q.team==='G'&&q.squadIdx===LINEUP.G.atk[0]); for(let i=0;i<3;i++) mStat(t,'tk'); finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);
 await page.click('#mrNextBtn').catch(() => {}); await page.waitForTimeout(120);   // (v106: YOUR PLAYERS, the report's second screen)
 r = await K(`(()=>{ const d=CAREER.data, rated=d.roster.filter(p=>p.rn===1), rep=document.getElementById('matchReport').innerText; return { n:rated.length, fm:rated.every(p=>p.fm===p.rs), rep:/RATING/.test(rep)&&/★/.test(rep) }; })()`);

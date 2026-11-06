@@ -337,7 +337,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     the two clubs with their crests, each side's goals -- the minute, the scorer, who made it -- anyone hurt, and
     where it leaves you (the league position and how it moved; through or out of a cup; the playoffs); NEXT. YOUR
     PLAYERS: a row for every one of yours who played -- his rating, goals, assists, passes found of those tried and the
-    share, shots on target of his shots, tackles won, interceptions, a keeper's saves -- your best on the day starred;
+    share, shots on target of his shots (headers on goal among them, v135), tackles won, interceptions, a keeper's
+    saves -- your best on the day starred;
     CONTINUE. Back at the club, after the press conference: THE MONEY (see the manager career).
   - **The goal, celebrated** (v106). A goal of theirs: GOAL, big in the middle of the screen with the score under it,
     and play held a moment as before. One of yours: GOAL! grander -- gold, bigger, the scorer's name under it -- and
@@ -2115,6 +2116,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v135: a header on goal is a shot.** It was never counted as one: a header at goal went into the stats only if it
+  was saved or went in (on target), so a man could have more on target than shots, and the shots a match came up short.
+  Computer v computer (120 exhibition matches, STAR, three-minute halves) there are about one and a half headers on goal
+  a match, so with them about 7 shots a match rather than 5.7. Nothing about how the game plays has changed. (Looked at
+  for more chances in open play, and not kept, as none of them made more: the wide men and the inside midfielder higher
+  in their half, the men going into the box sprinting to it, a knock-on easier to keep, passes harder to cut out, and the
+  computer's odds for its crosses and through balls put right -- possessions getting within 20 m of goal stayed at about
+  4 a match. With the ball in their half there are about 3 of the attacking side ahead of it against about 5 of theirs
+  goal-side, and that's where the chances are set.)
 - **v134: your pass goes to the man you meant.** Who a pass was for was the way you aimed it and how free a man was,
   from 72° either side of your aim, and how long you held PASS no part of it -- its range was worked out and never
   used: a free man well off your line got it ahead of the one you aimed at, the near one of two the same way got it

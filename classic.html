@@ -7367,6 +7367,7 @@
     ball.cushBy=null; ball.ownedBy=null; ball.lastTouch=p.team; ball.crossT=0;
     ball.shotBy=p.team; ball.shotT=1.0; ball.curveSpin=0; ball.curveSpinT=0;
     recordPassTeam(p.team,p); ball.kickP=null;   // (a header: never a back-pass -- see gkBackPass)
+    mStat(p,'sh'); if(meIs(p)) meBump('shots');   // (v135: a shot in the stats too -- a header on goal never was, about one and a half a match, though its goal or its save counted it on target)
     lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;
   }
   // A HEADER CLEAR: up and away from his own goal, out to the side it came from -- or, the better he reads the game (Def
