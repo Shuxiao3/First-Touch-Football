@@ -1068,8 +1068,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   | Slide tackle | 4 | 1 | 1 |
   | Strength | 4 | 1 | 1 |
   | Heading | 4 | 1 | 2 |
-  | Speed | 4 | 2 | 4 |
-  | Acceleration | 2 | 1 | 4 |
+  | Speed | **6** *(v144; 4 before)* | **6** *(v144; 2)* | **6** *(v144; 4)* |
+  | Acceleration | **5** *(v144; 2)* | **5** *(v144; 1)* | **5** *(v144; 4)* |
   | Agility | 2 | 4 | 4 |
   | Stamina | 2 | 4 | 1 |
   | Composure | 2 | 4 | 4 |
@@ -1090,6 +1090,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   (a new world made on v121 and read on v122: about half the men the same, most of the rest a point either way, a
   few two, the leagues' averages where they were). Played somewhere else, a man's rating is his own in his own positions, two less in a
   second one, six less out of position -- and out in another line he's rated on that line's weights, then six less.
+  - **Pace, the dearest of all (v144).** Speed weighs the most in every outfielder's rating, 6 -- above every other
+    stat -- and acceleration 5 (they were 4 and 2 for a defender, 2 and 1 for a midfielder, 4 and 4 for a forward). A
+    usual man of each line still rates what he did (69, 67, 72 at the averages), but three points more pace on him is
+    now worth 6 points of rating to a defender, 7 to a midfielder and 7 to a forward (it was 4, 2 and 5). A man is made
+    to a rating, and his pace is left as it comes while the rest of his game is moved to make it -- so a quick man pays
+    for it in the rest of his game: of men made at 70, the quickest quarter have 0.91 of a point less of the rest of
+    their game than the slowest quarter for a defender, 0.52 for a midfielder and 0.87 for a forward (it was 0.70, nothing
+    at all and 0.38). One who's quick and good at the rest as well rates among the best there are. Keepers are as they
+    were. A man's development still reckons what matters to him on the weights from before (or most of every man's
+    growth would go to his pace: pace mostly comes with the man). A career from before v144 has every man rated again
+    on these, once, his potential too: on average no change (-0.1), the quick types up -- a wide runner +3.8, a
+    wing-back +1.5, a speedster +0.9 -- and the slow ones down: an anchor -2.1, a stopper -1.9, a target man -1.5, a deep
+    creator -1.4. Exhibition matches computer v computer score as they did (40 a version: 1.73 goals and 9.7 shots a
+    match, against 1.63 and 9.7).
 - **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
   yours when you've passed to him and left the stick alone.
   - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
@@ -2216,6 +2230,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v144: pace the dearest; the types again.** Speed weighs the most in every outfielder's rating (6) and acceleration 5,
+  so a quick man pays for it in the rest of his game at the same rating -- at 70, the quickest quarter have up to 0.9 of
+  a point less of the rest than the slowest -- and one who's quick and good at the rest rates among the best. A
+  holding midfielder is a Ball-winner, a Deep creator or an Anchor; a central one the new Complete midfielder, a
+  Box-to-box, a Cover midfielder or a Mezzala; an attacking one a Playmaker, a Trequartista or a Shadow striker. The
+  new Pacey winger joins the wingers; the One-on-one keeper's gone and no Pressing forward is made. A career is rated
+  again once. See **Pace, the dearest of all** and **The types in each position, again (v144)**.
 - **v143: three types in each middle; the Inside forward gone.** A holding midfielder is an Anchor, a Deep creator or
   the new Cover midfielder (the quicker holder, who reads it); a central one a Box-to-box, a Ball-winner or the new
   Mezzala (a dribbler who arrives to finish); an attacking one a Playmaker (a central midfielder's type before), a
@@ -3191,42 +3212,43 @@ are Inverted wingers. See **The types in each position (v143)** below.)
 
 | Position | Archetype | Plays | Also | How common | Pace | Good at | On the pitch |
 |---|---|---|---|---|---|---|---|
-| Centre-back | Stopper | CB | -- | 30% | 3.5 | strength, heading, tackling | attacks the ball: tighter on a man, and out to one in front of him where the line holds; clears it rather than plays it |
-| | Cover CB | CB | FB | 30% | 5 | reading the game, interceptions | sweeps behind: a few yards deeper with the ball, picks up a runner where the line holds, reads it rather than wins it |
+| Centre-back | Stopper | CB | -- | 30% | 4 | strength, heading, tackling | attacks the ball: tighter on a man, and out to one in front of him where the line holds; clears it rather than plays it |
+| | Cover CB | CB | FB | 30% | 5.5 | reading the game, interceptions | sweeps behind: a few yards deeper with the ball, picks up a runner where the line holds, reads it rather than wins it |
 | | Ball-playing CB | CB | DM *(v127; CM before)* | 20% | 4 | passing, composure, control | plays it out from the back, the longer pass forward |
 | | Wide CB *(v118)* | CB | FB | 13% | 5.5 | stamina, tackling, crossing | the outside man of a back three: splits wider, up behind the play on the ball's side, carries it forward |
-| | Libero *(v118)* | CB, DM *(v127; CB, CM before)* | CM | 7% | 5.5 | passing, dribbling, reading the game | up close to the play with the ball, and carries it out of defence into midfield |
-| Full-back | Full-back | FB | WM | 40% | 6 | pace, stamina, crossing | overlaps when the side's told to, then gets back |
-| | Wing-back | FB, WM | W | 25% | 7.5 | pace, crossing, dribbling, engine | a step further up than the full-backs are told to go; down the line, and the cross |
+| | Libero *(v118)* | CB, DM *(v127; CB, CM before)* | CM | 7% | 5 | passing, dribbling, reading the game | up close to the play with the ball, and carries it out of defence into midfield |
+| Full-back | Full-back | FB | WM | 40% | 6.5 | pace, stamina, crossing | overlaps when the side's told to, then gets back |
+| | Wing-back | FB, WM | W | 25% | 7 | pace, crossing, dribbling, engine | a step further up than the full-backs are told to go; down the line, and the cross |
 | | Defensive full-back *(v118)* | FB | CB | 25% | 5 | tackling, strength, heading | a step further back: overlaps rarely, tucks in as a third centre-back, keeps it simple |
-| | Inverted full-back *(v118)* | FB | DM, WM *(v127; CM, WM before)* | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
-| Holding midfield *(v127)* | Anchor | DM | CB, CM | 40% *(v143; 55% before)* | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
-| | Deep creator *(v116)* | DM | CM | 35% *(v143; 45%)* | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
-| | Cover midfielder *(v143)* | DM | CB, CM | 25% | 5.5 | reading the game, interceptions, stamina | the quicker holder; for now he plays as the anchor does -- holds with the pivot, reads it rather than wins it, keeps it simple -- till his own habits come: dropping into the gap a full-back or a centre-back leaves |
-| Central midfield | Box-to-box | CM | DM, AM, WM | 45% *(v143; 40%)* | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
-| | Ball-winner *(v118)* | CM | DM | 30% *(v143; 27%)* | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
-| | Mezzala *(v143)* | CM | AM, WM | 25% | 5.5 | dribbling, runs, finishing | for now he plays as the box-to-box does -- a step further forward, into the box for a cross -- runs with it and takes his man on, till his own habits come: out of the middle into the half-space, and the channel beyond the wide man |
-| Attacking midfield *(v127)* | Playmaker *(v143: a central midfielder before, 33% of them)* | AM | CM | 40% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
-| | Shadow striker *(v118)* | AM | CM, ST | 35% *(v143; 60%)* | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
-| | Trequartista *(v118: was the Creator)* | AM | CM, W, ST | 25% *(v143; 40%)* | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
-| Wide midfield | Wide midfielder | WM | CM, FB | 45% | 6 | stamina, crossing, tackling | up and down the flank all game; crosses, tracks back |
-| | Wide runner | WM | FB, W | 30% | 8 | pace, dribbling, crossing | flies down the line with it and takes his man on |
-| | Wide playmaker *(v118)* | WM | W | 25% | 5 | passing, vision, control | inside off the flank, to the ball, to make the play |
-| Winger | Trickster *(v118)* | W | WM | 37% *(v143; 30%)* | 7 | dribbling, agility, skill moves | runs at his man with tricks, any way at all; the most skill stars of anyone |
-| | Winger | W | WM | 37% *(v143; 30%)* | 7.5 | pace, crossing, dribbling | takes it down the line to the byline and crosses |
-| | Inverted winger *(v118)* | W | WM | 26% *(v143; 22%)* | 7.5 | dribbling, bend, passing | narrower; cuts inside to curl it in or slide the pass through |
-| Striker | Poacher | ST | -- | 22% | 6 | finishing, composure, movement | on the last man's shoulder: pins their line |
-| | Speedster | ST | W | 20% | 8 | pace, acceleration | runs in behind all day |
-| | Complete forward | ST | W | 20% | 6 | link play, passing, shooting | drops in to link, then gets in the box |
-| | Target man | ST | -- | 18% | 5 | strength, heading, holding it up | back to goal, up and central: holds it up; hardly ever runs |
-| | Pressing forward *(v118)* | ST | W | 10% | 7 | stamina, tackling, acceleration | presses up whatever the forwards are told, tight on the man |
+| | Inverted full-back *(v118)* | FB | DM, CM, WM *(v144; DM, WM in v127--v143)* | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
+| Holding midfield *(v127)* | Ball-winner *(v118; a holding midfielder since v144)* | DM | CM | 40% *(v144; a CM before, 30% of them)* | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
+| | Deep creator *(v116)* | DM | CM | 35% | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
+| | Anchor | DM | CB, CM | 25% *(v144; 40% in v143, 55% before)* | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
+| Central midfield | Complete midfielder *(v144)* | CM | DM, AM | 40% | 5.5 | a bit of everything, no weak spot | for now he plays as his line's told, with nothing of his own -- till his own habits come |
+| | Box-to-box | CM | DM, AM, WM | 25% *(v144; 45% in v143, 40% before)* | 5.5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours -- his engine above all (v144: stamina 2.5 over the line's, it was 1.5) |
+| | Cover midfielder *(v143; a central midfielder since v144)* | CM | DM | 20% *(v144; a DM in v143, 25% of them)* | 5.5 | reading the game, interceptions, stamina | reads it from the middle; for now he plays as the anchor does -- holds with the pivot, reads it rather than wins it, keeps it simple -- till his own habits come: covering the space the others leave |
+| | Mezzala *(v143)* | CM | AM, WM | 15% *(v144; 25%)* | 6 | dribbling, runs, finishing | for now he plays as the box-to-box does -- a step further forward, into the box for a cross -- runs with it and takes his man on, till his own habits come: out of the middle into the half-space, and the channel beyond the wide man |
+| Attacking midfield *(v127)* | Playmaker *(v143: a central midfielder before, 33% of them)* | AM | CM | 50% *(v144; 40% in v143)* | 4.5 | passing, vision, bend | plays it through, keeps the ball |
+| | Trequartista *(v118: was the Creator)* | AM | CM, W, ST | 35% *(v144; 25% in v143, 40% before)* | 6.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
+| | Shadow striker *(v118)* | AM | CM, ST | 15% *(v144; 35% in v143, 60% before)* | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
+| Wide midfield | Wide midfielder | WM | CM, FB | 45% | 6.5 | stamina, crossing, tackling | up and down the flank all game; crosses, tracks back |
+| | Wide runner | WM | FB, W | 30% | 7.5 | pace, dribbling, crossing | flies down the line with it and takes his man on |
+| | Wide playmaker *(v118)* | WM | W, AM *(v144; W before)* | 25% | 5.5 | passing, vision, control | inside off the flank, to the ball, to make the play |
+| Winger | Winger | W | WM | 40% *(v144; 37% in v143, 30% before)* | 8 | pace, crossing, dribbling | takes it down the line to the byline and crosses |
+| | Trickster *(v118)* | W | WM | 25% *(v144; 37% in v143, 30% before)* | 7 | dribbling, agility, skill moves | runs at his man with tricks, any way at all; the most skill stars of anyone |
+| | Pacey winger *(v144)* | W | WM, ST | 20% | 9 | pace, acceleration | on their last man out wide and in behind them, past his man on the run; for now: in behind whatever the wide men are told, the keenest runner of the wingers |
+| | Inverted winger *(v118)* | W | WM | 15% *(v144; 26% in v143, 22% before)* | 7.5 | dribbling, bend, passing | narrower; cuts inside to curl it in or slide the pass through |
+| Striker | Complete forward | ST | W | 25% *(v144; 20%)* | 6.5 | link play, passing, shooting | drops in to link, then gets in the box |
+| | Poacher | ST | -- | 25% *(v144; 22%)* | 6.5 | finishing, composure, movement | on the last man's shoulder: pins their line |
+| | Speedster | ST | W | 20% | 8.5 | pace, acceleration | runs in behind all day |
+| | Target man | ST | -- | 20% *(v144; 18%)* | 4.5 | strength, heading, holding it up | back to goal, up and central: holds it up; hardly ever runs |
 | | False nine *(v118)* | ST | AM *(v127; CM before)* | 10% | 6.5 | passing, dribbling, vision | drops into midfield to make the play, always |
-| Keeper *(v118)* | Shot-stopper | GK | -- | 35% | 5 | reflexes, diving, handling | stays home: less far off his line at a man, sweeps less, comes for fewer crosses |
-| | All-rounder | GK | -- | 30% | 6.5 | a bit of everything | as every keeper was before v118 |
-| | Sweeper keeper | GK | -- | 20% | 7.5 | speed off his line, kicking, composure | stands higher (up to 4 m off his line with the ball far up the pitch), sweeps further out and sooner |
-| | One-on-one keeper | GK | -- | 15% | 7.5 | speed off his line, diving | at the man through on goal further off his line, straight at him from further, and down bigger and sooner |
+| | Pressing forward *(v118)* | ST | W | 0 *(v144: none made; 10% before -- those there are stay)* | 7 | stamina, tackling, acceleration | presses up whatever the forwards are told, tight on the man |
+| Keeper *(v118)* | All-rounder | GK | -- | 40% *(v144; 30%)* | 6.5 | a bit of everything | as every keeper was before v118 |
+| | Shot-stopper | GK | -- | 35% | 5 | reflexes, diving, handling | stays home: less far off his line at a man, sweeps less, comes for fewer crosses |
+| | Sweeper keeper | GK | -- | 25% *(v144; 20%)* | 7 | speed off his line, kicking, composure | stands higher (up to 4 m off his line with the ball far up the pitch), sweeps further out and sooner |
 
-(Pace: the middle of a new career's men's speed stat, 1--10 -- a keeper's, his keeper speed.)
+(Pace: the middle of a new career's men's speed stat, 1--10 -- a keeper's, his keeper speed. v144: measured again, as men are made now -- see **Pace, the dearest of all**. The One-on-one keeper's gone: a keeper who was one is re-labelled as the keeper his keeping fits best, most of them sweeper keepers.)
 
 **The habits.** Most lean the setting his line has a step one way or the other: a wing-back goes a step further up
 than the full-backs are told (SUPPORT is PUSH UP to him), a defensive full-back a step back, a libero a step closer
@@ -3244,8 +3266,8 @@ and a wide playmaker cutting in off it; a trickster takes his man on most of all
 move keenest; a trequartista takes men on and plays the killer ball, a playmaker and a deep creator the ball
 through (the deep creator long, from deep), a libero and a wide CB run with it, an inverted full-back passes and
 doesn't cross, a poacher and a shadow striker shoot, a false nine makes it rather than finishes it; a stopper, an
-anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster and a
-shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
+anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster, a
+pacey winger (v144) and a shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
 a wide playmaker less, a false nine and a target man hardly ever. The holder is an anchor or a deep
 creator if there's one, a ball-winner next, never a shadow striker or a trequartista if anyone else will do.
 
@@ -3264,8 +3286,22 @@ who reads it, the mezzala a dribbler who arrives to finish -- and, for now, the 
 cover midfielder the anchor's, the mezzala the box-to-box's. Their own (the gap he drops into; the half-space and the
 channel) come when each type's play is gone through, one by one.
 
+**The types in each position, again (v144).** A holding midfielder is a Ball-winner (40 -- a central midfielder's type
+in v143), a Deep creator (35) or an Anchor (25); a central one the new Complete midfielder (40: a bit of everything,
+no weak spot), a Box-to-box (25, his engine above all), a Cover midfielder (20 -- a holding midfielder's type in v143)
+or a Mezzala (15); an attacking one a Playmaker (50), a Trequartista (35) or a Shadow striker (15). An inverted
+full-back can go to central midfield now, and a wide playmaker to attacking midfield. The wingers are the Winger (40),
+the Trickster (25), the new Pacey winger (20: all pace -- the quickest of them at 9, paid for in the rest) and the
+Inverted winger (15). The strikers: the Complete forward 25, the Poacher 25, the Speedster 20, the Target man 20, the
+False nine 10; no Pressing forward is made now (those there are stay as they are). The keepers: the All-rounder 40,
+the Shot-stopper 35, the Sweeper keeper 25 -- the One-on-one keeper's gone, a keeper who was one re-labelled as the
+keeper his keeping fits best (of 300 made as v143 made them, 251 come out sweeper keepers, 45 shot-stoppers, 4
+all-rounders), his rating as it was. A career's ball-winners are holding midfielders now and its cover midfielders
+central ones. The new types play, for now, as the nearest type does -- the pacey winger in behind whatever the wide
+men are told, the complete midfielder as his line's told -- till each type's play is gone through.
+
 **Keepers.** A keeper's archetype has his stats (a shot-stopper's reflexes, diving and handling; a sweeper keeper's
-speed off his line, kicking and composure; a one-on-one keeper's speed and diving) and his habits in goal, measured
+speed off his line, kicking and composure; v144: the one-on-one keeper, quick and a diver, is gone) and his habits in goal, measured
 in a computer match: a sweeper keeper stood about 5 m off his line with the ball far up the pitch, the others about a
 metre. An exhibition club's keepers have none: they keep as an All-rounder.
 

@@ -46,7 +46,7 @@ ok(r.plays, 'what\'s stored is what plays: an attribute changed, his card and hi
 
 // --- A MAN'S RATING (v122): weights out of 5, every stat counting for something --------------------------------------------
 r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
-  o.every=lines.every(l=>OUTF.every(k=>OVR_W[l][k]>=1&&OVR_W[l][k]<=5)&&Object.values(OVR_W[l]).some(v=>v===5));
+  o.every=lines.every(l=>OUTF.every(k=>OVR_W[l][k]>=1&&OVR_W[l][k]<=6)&&Object.values(OVR_W[l]).some(v=>v===5)&&OVR_W[l].speed===6&&OUTF.every(k=>k==='speed'||OVR_W[l][k]<6)&&OVR_W[l].acceleration===5);   // (v144: pace the dearest -- speed 6, above every other, acceleration 5)
   o.gk=Object.entries(OVR_W.GK).map(([k,v])=>k+' '+v).join(', ');
   o.gkOk=GK_KEYS.every(k=>OVR_W.GK[k]>=2)&&['composure','passAcc','ballControl'].every(k=>OVR_W.GK[k]===1)&&Object.keys(OVR_W.GK).length===9;
   o.usual=['GK','DEF','MID','ATT'].map(r=>cwOverall(r,ARCH[r])+'/'+Math.round(OVR_REF[r][0]*10));
@@ -63,11 +63,11 @@ r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
   all.forEach((q,i)=>{ q.ovr=keep[i][0]; q.pot=keep[i][1]; });
   return o; })()`);
 info('ratings out of 5: ' + JSON.stringify(r));
-ok(r.every && r.gkOk, 'every outfield stat counts for every outfield line, 1 to 5 (the line\'s game 5); a keeper\'s: his keeping, his feet a little (' + r.gk + ')');
+ok(r.every && r.gkOk, 'every outfield stat counts for every outfield line, 1 to 5 (the line\'s game 5) -- and his pace above all since v144, speed 6 and acceleration 5; a keeper\'s: his keeping, his feet a little (' + r.gk + ')');
 ok(r.usual.every(x => x.split('/')[0] === x.split('/')[1]), 'a man of each line\'s usual make rates what he did on v121\'s weights (' + r.usual.join(', ') + ')');
 ok(r.shoot[1] > r.shoot[0] && r.shoot[1] - r.shoot[0] >= 3 && r.shoot[1] - r.shoot[0] <= 8 && r.tackle[1] - r.tackle[0] > 2 * (r.shoot[1] - r.shoot[0]),
   'a defender\'s shooting counts a little now: ' + r.shoot.join(' -> ') + ' from all 1s to all 10s (his tackling the same way: ' + r.tackle.join(' -> ') + ')');
-ok(r.mig.flag && r.mig.rated && Math.abs(r.mig.mean) <= 0.5 && r.mig.most <= 3 && r.mig.tiers.every(v => Math.abs(v) <= 0.5),
+ok(r.mig.flag && r.mig.rated && Math.abs(r.mig.mean) <= 0.5 && r.mig.most <= 8 && r.mig.tiers.every(v => Math.abs(v) <= 0.5),   // (v144: a quick man or a slow one moves further, his pace dearer -- up to 6 here; it was 3 at most on v122's weights)
   'a career rated on v121\'s weights, read: every man rated again on these (' + Math.round(r.mig.same * 100) + '% the same, ' + (r.mig.mean >= 0 ? '+' : '') + r.mig.mean + ' on average, none by more than ' + r.mig.most + '), each league\'s average where it was (' + r.mig.tiers.join(', ') + ')');
 
 // --- a career from before Handling (v77): 25 letters a man -- his Handling from the rest of his keeping, his rating as it was
@@ -99,7 +99,8 @@ r = await K(`(()=>{ const a=XMK(18,58,72), b=XCLONE(a), c=XCLONE(a); hvOf(a);
   XTICKS(a,10,{T:0.95,gw:4,share:1}); XTICKS(b,10,{T:0.55,gw:4,share:0}); XTICKS(c,10,{T:0.75,gw:4,share:0.5});
   const prog=p=>{ const st=devUnpack(p.at), pg=devUnpackPg(p.pg); return +DEV_KEYS.reduce((s,k,i)=>s+st[k]*2+pg[i],0).toFixed(2); };   // (in half points, the meters too)
   return { start:58, starter:a.ovr, bench:b.ovr, half:c.ovr, pot:a.pot, prog:[prog(a),prog(c),prog(b)] }; })()`);
-ok(r.prog[0] > r.prog[1] && r.prog[1] > r.prog[2] && r.starter - r.bench >= 2 && r.bench >= r.start, 'twins at 18 (58, a ceiling of ' + r.pot + '), a season on: a regular with good training ' + r.starter + ', half the games ' + r.half + ', on the bench with poor training ' + r.bench + ' (all he\'s grown, in half points: ' + r.prog.join(', ') + ')');
+ok(r.prog[0] > r.prog[1] && r.prog[1] > r.prog[2] && r.starter - r.bench >= 2 && r.bench >= r.start - 1,   // (v144: on the bench with poor training a point down at most -- bad weeks take a little of his legs, and his pace counts the most now; it was never down)
+  'twins at 18 (58, a ceiling of ' + r.pot + '), a season on: a regular with good training ' + r.starter + ', half the games ' + r.half + ', on the bench with poor training ' + r.bench + ' (all he\'s grown, in half points: ' + r.prog.join(', ') + ')');
 
 // --- the ceiling: reached, never passed ------------------------------------------------------------------------------
 r = await K(`(()=>{ const p=XMK(19,60,70); for(let i=0;i<80;i++){ XTICKS(p,1,{T:1,gw:3,share:1}); p.age=19+Math.floor(i/10)>23?23:19+Math.floor(i/10); }

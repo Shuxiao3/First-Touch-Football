@@ -2479,15 +2479,22 @@
   // his feet (composure, passing, ball control). By his line, not his exact position. Set (OVR_REF, OVR_K) so that a man
   // of his line's usual make (ARCH) rates what he did under v121's weights (OVR_W_V121), at any level: what moves a man
   // is how his lesser stats compare with a usual one's -- a defender who can shoot rates a little higher.
+  // PACE, THE DEAREST OF ALL (v144): speed weighs the most in every outfielder's rating, 6, and acceleration 5 -- they
+  // were 4 and 2 for a defender, 2 and 1 for a midfielder, 4 and 4 for a forward. So a quick man is paid for in the rest
+  // of his game at the same rating (a man is made to a rating: see cwStatsForOVR), and a quick one who's good at the rest
+  // as well rates among the best there are. A keeper's as it was. (His development goes by the weights from before --
+  // OVR_W_DEV -- or the most of every man's growth would go to his pace.)
   const OVR_W={
     GK:{gkReflex:5,gkReach:5,gkDiveRange:4,gkHandling:4,gkDistribution:4,keeperSpd:2,composure:1,passAcc:1,ballControl:1},
-    DEF:{defIQ:5,tackle:5,interceptions:5,slideTackle:4,strength:4,heading:4,speed:4,composure:2,passAcc:2,stamina:2,agility:2,acceleration:2,
+    DEF:{speed:6,defIQ:5,tackle:5,interceptions:5,acceleration:5,slideTackle:4,strength:4,heading:4,composure:2,passAcc:2,stamina:2,agility:2,
          ballControl:1,dribbling:1,crossing:1,offIQ:1,shotPower:1,curve:1,longShots:1,shotAcc:1},
-    MID:{passAcc:5,offIQ:5,stamina:4,ballControl:4,dribbling:4,agility:4,composure:4,defIQ:2,interceptions:2,shotAcc:2,speed:2,longShots:2,
-         acceleration:1,strength:1,crossing:1,heading:1,slideTackle:1,tackle:1,shotPower:1,curve:1},
-    ATT:{shotAcc:5,dribbling:5,shotPower:4,speed:4,acceleration:4,agility:4,composure:4,offIQ:4,ballControl:4,longShots:2,heading:2,
+    MID:{speed:6,passAcc:5,offIQ:5,acceleration:5,stamina:4,ballControl:4,dribbling:4,agility:4,composure:4,defIQ:2,interceptions:2,shotAcc:2,longShots:2,
+         strength:1,crossing:1,heading:1,slideTackle:1,tackle:1,shotPower:1,curve:1},
+    ATT:{speed:6,shotAcc:5,dribbling:5,acceleration:5,shotPower:4,agility:4,composure:4,offIQ:4,ballControl:4,longShots:2,heading:2,
          stamina:1,strength:1,passAcc:1,crossing:1,slideTackle:1,tackle:1,interceptions:1,defIQ:1,curve:1}
   };
+  // what a man's development reckons matters to him (devRel): the weights as they were before v144
+  const OVR_W_DEV={GK:OVR_W.GK, DEF:Object.assign({},OVR_W.DEF,{speed:4,acceleration:2}), MID:Object.assign({},OVR_W.MID,{speed:2,acceleration:1}), ATT:Object.assign({},OVR_W.ATT,{speed:4,acceleration:4})};
   const OVR_W_V121={
     GK:{gkReflex:3,gkReach:3,gkDiveRange:2,gkHandling:2,keeperSpd:1,gkDistribution:2},
     DEF:{defIQ:3,tackle:3,interceptions:3,slideTackle:2,strength:2,heading:2,speed:2,composure:1,passAcc:1,stamina:1,agility:1,acceleration:1},
@@ -2496,6 +2503,7 @@
   };
   // the stats that make his game (2 and up): what's moved to make a man to his rating, and what he grows most in
   const ovrMain=role=>{ const w=OVR_W[role]||OVR_W.MID; return Object.keys(w).filter(k=>w[k]>=2); };
+  const ovrMainBut=role=>ovrMain(role).filter(k=>role==='GK'||!STYLE_PACE_KEYS.includes(k));   // (v144: the stats moved to make a man's rating when he's made -- not an outfielder's pace)
   const ovrMean=(st,w)=>{ let s=0,t=0; for(const k in w){ s+=(st[k]||5.5)*w[k]; t+=w[k]; } return s/t; };
   // OVR_REF: the usual make's average under v121's weights and under these. OVR_K: the lesser stats (1) move about half
   // as far as the rest with a man's level (see cwStatsForOVR), so the average is stretched a little to keep a usual man at
@@ -2516,7 +2524,9 @@
   // Trequartista -- each covering the next one along as a second position. v118 had made them all CMs.) (v143: three
   // of each -- DM the Anchor, the Deep creator and the Cover midfielder; CM the Box-to-box, the Ball-winner and the
   // Mezzala; AM the Playmaker, the Shadow striker and the Trequartista: the Playmaker's an attacking midfielder now, the
-  // Cover midfielder and the Mezzala new. And the Inside forward's gone from the wingers: TYPE_GONE.)
+  // Cover midfielder and the Mezzala new. And the Inside forward's gone from the wingers: TYPE_GONE.) (v144: DM the
+  // Ball-winner, the Deep creator and the Anchor; CM the new Complete midfielder, the Box-to-box, the Cover midfielder
+  // and the Mezzala; the new Pacey winger among the wingers; the One-on-one keeper gone; the Pressing forward none made.)
   const STYLES={
     stopper:   {role:'DEF',sub:'CB', w:30, plays:['CB'], also:[], name:'Stopper',        blurb:'Big, slow centre-back: attacks the ball, and clears it rather than plays it.',
                 d:{speed:-2,acceleration:-1.5,agility:-1,strength:1.5,heading:1.5,tackle:0.5,slideTackle:0.5,passAcc:-0.5,dribbling:-0.5}},
@@ -2534,67 +2544,69 @@
                 d:{speed:1.5,acceleration:1.5,agility:1,stamina:2,crossing:2.5,dribbling:1.5,offIQ:1,strength:-1.5,heading:-1.5,tackle:-1,slideTackle:-1,defIQ:-0.5}},
     deffb:     {role:'DEF',sub:'FB', w:25, plays:['FB'], also:['CB'], name:'Defensive full-back', blurb:'Stays back, overlaps rarely, and tucks in as a third centre-back.',
                 d:{speed:-0.5,tackle:1,defIQ:1,strength:0.5,heading:0.5,interceptions:0.5,crossing:-1,dribbling:-1}},
-    invfb:     {role:'DEF',sub:'FB', w:10, plays:['FB'], also:['DM','WM'], name:'Inverted full-back', blurb:'Steps inside into midfield when his side has the ball: passing, composure, control.',
+    invfb:     {role:'DEF',sub:'FB', w:10, plays:['FB'], also:['DM','CM','WM'], name:'Inverted full-back', blurb:'Steps inside into midfield when his side has the ball: passing, composure, control.',
                 d:{speed:-0.5,passAcc:1.5,composure:1,ballControl:1,offIQ:0.5,crossing:-0.5,heading:-0.5}},
-    anchor:    {role:'MID',sub:'DM', w:40, plays:['DM'], also:['CB','CM'], name:'Anchor',       blurb:'Sits in front of the back line and screens it: tackles, and keeps it simple; slow.',   // (v143: 40 of a hundred holding midfielders -- 55 before)
-                d:{speed:-1.5,acceleration:-1,strength:2,tackle:2,interceptions:2,defIQ:1.5,slideTackle:1.5,heading:1,dribbling:-1,shotAcc:-1,offIQ:-0.5}},
-    deepcreator:{role:'MID',sub:'DM', w:35, plays:['DM'], also:['CM'], name:'Deep creator',    blurb:'Holds in front of the back line and runs the game from there: the long ball forward, calm on the ball.',   // (v116; v143: 35 -- 45 before)
-                d:{speed:-1,acceleration:-0.5,passAcc:2,offIQ:1.5,composure:1.5,ballControl:1,curve:1,longShots:0.5,interceptions:1,defIQ:0.5,tackle:-0.5,slideTackle:-0.5,strength:-0.5,dribbling:-0.5}},
-    covermid:  {role:'MID',sub:'DM', w:25, plays:['DM'], also:['CB','CM'], name:'Cover midfielder', blurb:'The quicker holder: reads the game, cuts it out, and drops into the gap a full-back or a centre-back leaves.',   // (v143)
-                d:{speed:-0.5,acceleration:0.5,stamina:1,defIQ:1.5,interceptions:2,tackle:0.5,passAcc:0.5,composure:0.5,strength:-0.5,heading:-0.5,dribbling:-1,shotAcc:-1,longShots:-0.5,shotPower:-0.5}},
-    boxtobox:  {role:'MID',sub:'CM', w:45, plays:['CM'], also:['DM','AM','WM'], name:'Box-to-box',   blurb:'Covers both boxes: arrives late in theirs, gets back to ours.',   // (v143: 45 -- 40 before)
-                d:{speed:-0.5,stamina:1.5,strength:1,tackle:1,shotPower:0.5,longShots:0.5,defIQ:0.5}},
-    ballwinner:{role:'MID',sub:'CM', w:30, plays:['CM'], also:['DM'], name:'Ball-winner',      blurb:'Hunts the ball: goes into the man on it sooner and higher, then keeps it simple.',   // (v143: 30 -- 27 before)
+    ballwinner:{role:'MID',sub:'DM', w:40, plays:['DM'], also:['CM'], name:'Ball-winner',      blurb:'Hunts the ball in front of the back line: goes into the man on it sooner and higher, then keeps it simple.',   // (v144: a holding midfielder, 40 of a hundred -- a central one before)
                 d:{acceleration:0.5,stamina:1.5,tackle:2,slideTackle:1.5,strength:0.5,interceptions:0.5,passAcc:-1,offIQ:-1,ballControl:-0.5,shotAcc:-0.5}},
-    mezzala:   {role:'MID',sub:'CM', w:25, plays:['CM'], also:['AM','WM'], name:'Mezzala',     blurb:'Drifts out of the middle into the half-space and runs the channel beyond the wide man: dribbles, and arrives to finish.',   // (v143)
+    deepcreator:{role:'MID',sub:'DM', w:35, plays:['DM'], also:['CM'], name:'Deep creator',    blurb:'Holds in front of the back line and runs the game from there: the long ball forward, calm on the ball.',   // (v116; v143: 35)
+                d:{speed:-1,acceleration:-0.5,passAcc:2,offIQ:1.5,composure:1.5,ballControl:1,curve:1,longShots:0.5,interceptions:1,defIQ:0.5,tackle:-0.5,slideTackle:-0.5,strength:-0.5,dribbling:-0.5}},
+    anchor:    {role:'MID',sub:'DM', w:25, plays:['DM'], also:['CB','CM'], name:'Anchor',       blurb:'Sits in front of the back line and screens it: tackles, and keeps it simple; slow.',   // (v144: 25 -- 40 in v143, 55 before)
+                d:{speed:-1.5,acceleration:-1,strength:2,tackle:2,interceptions:2,defIQ:1.5,slideTackle:1.5,heading:1,dribbling:-1,shotAcc:-1,offIQ:-0.5}},
+    completemid:{role:'MID',sub:'CM', w:40, plays:['CM'], also:['DM','AM'], name:'Complete midfielder', blurb:'Good at everything and no weak spot: passes it, wins it, gets about the pitch, scores now and then.',   // (v144)
+                d:{tackle:1,interceptions:0.5,defIQ:0.5,passAcc:0.5,offIQ:0.5,shotAcc:0.5,longShots:0.5,strength:0.5,heading:0.5,speed:-0.5}},
+    boxtobox:  {role:'MID',sub:'CM', w:25, plays:['CM'], also:['DM','AM','WM'], name:'Box-to-box',   blurb:'Runs all day: covers both boxes, arrives late in theirs and gets back to ours.',   // (v144: 25, and his engine above all -- stamina 2.5, it was 1.5)
+                d:{speed:-0.5,stamina:2.5,strength:0.5,tackle:0.5,shotPower:0.5,longShots:0.5,defIQ:0.5}},
+    covermid:  {role:'MID',sub:'CM', w:20, plays:['CM'], also:['DM'], name:'Cover midfielder', blurb:'Reads the game from the middle: covers the space the others leave, and cuts it out.',   // (v144: a central midfielder, 20 -- a holding one in v143)
+                d:{speed:-0.5,acceleration:0.5,stamina:1,defIQ:1.5,interceptions:2,tackle:0.5,passAcc:0.5,composure:0.5,strength:-0.5,heading:-0.5,dribbling:-1,shotAcc:-1,longShots:-0.5,shotPower:-0.5}},
+    mezzala:   {role:'MID',sub:'CM', w:15, plays:['CM'], also:['AM','WM'], name:'Mezzala',     blurb:'Drifts out of the middle into the half-space and runs the channel beyond the wide man: dribbles, and arrives to finish.',   // (v143; v144: 15)
                 d:{acceleration:0.5,stamina:1,dribbling:1.5,ballControl:0.5,offIQ:1,shotAcc:0.5,crossing:0.5,tackle:-1,defIQ:-0.5,interceptions:-0.5,heading:-0.5,strength:-0.5}},
-    playmaker: {role:'MID',sub:'AM', w:40, plays:['AM'], also:['CM'], name:'Playmaker',        blurb:'In the pocket between their lines: passing and vision, plays it through, keeps the ball; not quick.',   // (v143: an attacking midfielder, 40 of a hundred -- a central one before, 33 of theirs)
+    playmaker: {role:'MID',sub:'AM', w:50, plays:['AM'], also:['CM'], name:'Playmaker',        blurb:'In the pocket between their lines: passing and vision, plays it through, keeps the ball; not quick.',   // (v143: an attacking midfielder -- a central one before; v144: 50)
                 d:{speed:-1,acceleration:-0.5,passAcc:1.5,offIQ:1.5,composure:1,ballControl:1,curve:1,longShots:0.5,strength:-1,tackle:-1,stamina:-0.5}},
-    shadow:    {role:'MID',sub:'AM', w:35, plays:['AM'], also:['CM','ST'], name:'Shadow striker', blurb:'A second forward from midfield: runs beyond the striker into the box, and finishes.',   // (v143: 35 -- 60 before)
-                d:{acceleration:0.5,shotAcc:1.5,composure:1,offIQ:1,shotPower:0.5,passAcc:-0.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
-    trequartista:{role:'MID',sub:'AM', w:25, plays:['AM'], also:['CM','W','ST'], name:'Trequartista', blurb:'A free role behind the front: drifts to find it, takes men on, plays the killer ball.',   // (the Creator, before v118; v143: 25 -- 40 before)
+    trequartista:{role:'MID',sub:'AM', w:35, plays:['AM'], also:['CM','W','ST'], name:'Trequartista', blurb:'A free role behind the front: drifts to find it, takes men on, plays the killer ball.',   // (the Creator, before v118; v144: 35)
                 d:{acceleration:0.5,agility:1,dribbling:1.5,ballControl:1,passAcc:0.5,offIQ:1,shotAcc:1,longShots:1,curve:0.5,strength:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
+    shadow:    {role:'MID',sub:'AM', w:15, plays:['AM'], also:['CM','ST'], name:'Shadow striker', blurb:'A second forward from midfield: runs beyond the striker into the box, and finishes.',   // (v144: 15)
+                d:{acceleration:0.5,shotAcc:1.5,composure:1,offIQ:1,shotPower:0.5,passAcc:-0.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
     widemid:   {role:'MID',sub:'WM', w:45, plays:['WM'], also:['CM','FB'], name:'Wide midfielder', blurb:'Up and down the flank all game: crosses, and tracks back.',
                 d:{speed:0.5,acceleration:0.5,stamina:1.5,crossing:1.5,tackle:0.5,defIQ:0.5}},
     mwinger:   {role:'MID',sub:'WM', w:30, plays:['WM'], also:['FB','W'], name:'Wide runner', blurb:'Flies down the flank and takes his man on: pace, tricks and crosses; defends less.',   // (a winger is an attacker)
                 d:{speed:2,acceleration:2,agility:1.5,dribbling:1.5,crossing:2,stamina:0.5,strength:-2,heading:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1,passAcc:-0.5}},
-    wideplaymaker:{role:'MID',sub:'WM', w:25, plays:['WM'], also:['W'], name:'Wide playmaker', blurb:'Drifts inside from the flank to make the play: passing, vision, control.',
+    wideplaymaker:{role:'MID',sub:'WM', w:25, plays:['WM'], also:['W','AM'], name:'Wide playmaker', blurb:'Drifts inside from the flank to make the play: passing, vision, control.',   // (v144: an attacking midfielder's spot a second one of his)
                 d:{speed:-0.5,passAcc:1.5,offIQ:1,ballControl:1,curve:1,crossing:0.5,stamina:-0.5,tackle:-1}},
-    trickster: {role:'ATT',sub:'WNG',w:37, plays:['W'], also:['WM'], name:'Trickster',     blurb:'Runs at his man and beats him with tricks, any way he likes: the most skill stars of anyone.',   // (v143: 37 of a hundred wingers -- 30 before; the Inside forward's 18 shared out)
-                d:{speed:0.5,acceleration:1,agility:1.5,dribbling:2,ballControl:1,crossing:-0.5,shotAcc:-0.5,strength:-2,heading:-2,tackle:-1}},
-    winger:    {role:'ATT',sub:'WNG',w:37, plays:['W'], also:['WM'], name:'Winger',        blurb:'Pace out wide: takes it to the byline and crosses.',   // (v143: 37 -- 30 before)
+    winger:    {role:'ATT',sub:'WNG',w:40, plays:['W'], also:['WM'], name:'Winger',        blurb:'Out wide: takes his man on to the byline and crosses.',   // (v144: 40, the commonest -- 37 in v143, 30 before)
                 d:{speed:1,acceleration:1,agility:1,dribbling:1,crossing:2,curve:0.5,strength:-2,heading:-2,shotAcc:-0.5}},
-    invwinger: {role:'ATT',sub:'WNG',w:26, plays:['W'], also:['WM'], name:'Inverted winger', blurb:'Cuts inside from the flank to curl it in, or slide the pass through.',   // (v143: 26 -- 22 before)
+    trickster: {role:'ATT',sub:'WNG',w:25, plays:['W'], also:['WM'], name:'Trickster',     blurb:'Runs at his man and beats him with tricks, any way he likes: the most skill stars of anyone.',   // (v144: 25)
+                d:{speed:0.5,acceleration:1,agility:1.5,dribbling:2,ballControl:1,crossing:-0.5,shotAcc:-0.5,strength:-2,heading:-2,tackle:-1}},
+    paceywinger:{role:'ATT',sub:'WNG',w:20, plays:['W'], also:['WM','ST'], name:'Pacey winger', blurb:'All pace: on their last man out wide and away in behind them, past his man on the run rather than with tricks.',   // (v144)
+                d:{speed:2,acceleration:2,agility:0.5,dribbling:0.5,crossing:0.5,stamina:0.5,ballControl:-0.5,passAcc:-0.5,composure:-0.5,curve:-0.5,strength:-1.5,heading:-1.5}},
+    invwinger: {role:'ATT',sub:'WNG',w:15, plays:['W'], also:['WM'], name:'Inverted winger', blurb:'Cuts inside from the flank to curl it in, or slide the pass through.',   // (v144: 15)
                 d:{speed:0.5,dribbling:1,curve:1.5,passAcc:1,offIQ:0.5,crossing:-0.5,strength:-1.5,heading:-1.5}},
-    poacher:   {role:'ATT',sub:'STK',w:22, plays:['ST'], also:[], name:'Poacher',          blurb:'Lives in the box on the last man’s shoulder: movement and finishing.',
+    complete:  {role:'ATT',sub:'STK',w:25, plays:['ST'], also:['W'], name:'Complete forward', blurb:'A bit of everything: drops in to link play, then gets in the box to finish.',   // (v144: 25)
+                d:{speed:-0.5,passAcc:1.5,offIQ:1,ballControl:1,dribbling:0.5,longShots:1,shotPower:0.5,strength:0.5}},
+    poacher:   {role:'ATT',sub:'STK',w:25, plays:['ST'], also:[], name:'Poacher',          blurb:'Lives in the box on the last man’s shoulder: movement and finishing.',   // (v144: 25)
                 d:{speed:-0.5,shotAcc:1.5,composure:1.5,offIQ:1.5,heading:0.5,passAcc:-1,dribbling:-1,stamina:-0.5,longShots:-1}},
     speedster: {role:'ATT',sub:'STK',w:20, plays:['ST'], also:['W'], name:'Speedster',     blurb:'Small and rapid: runs in behind all day.',
                 d:{speed:1.5,acceleration:1.5,agility:0.5,strength:-1.5,heading:-1.5,composure:-0.5,ballControl:-0.5,shotAcc:-0.5,offIQ:0.5}},
-    complete:  {role:'ATT',sub:'STK',w:20, plays:['ST'], also:['W'], name:'Complete forward', blurb:'A bit of everything: drops in to link play, then gets in the box to finish.',
-                d:{speed:-0.5,passAcc:1.5,offIQ:1,ballControl:1,dribbling:0.5,longShots:1,shotPower:0.5,strength:0.5}},
-    target:    {role:'ATT',sub:'STK',w:18, plays:['ST'], also:[], name:'Target man',       blurb:'Back to goal: wins headers, holds it up and brings others in; slow.',
+    target:    {role:'ATT',sub:'STK',w:20, plays:['ST'], also:[], name:'Target man',       blurb:'Back to goal: wins headers, holds it up and brings others in; slow.',   // (v144: 20)
                 d:{speed:-2.5,acceleration:-2,agility:-2,strength:3,heading:2.5,ballControl:0.5,shotPower:1,composure:0.5,dribbling:-1.5}},
-    pressfwd:  {role:'ATT',sub:'STK',w:10, plays:['ST'], also:['W'], name:'Pressing forward', blurb:'Leads the press: harries their centre-backs and keeper, and wins it high.',
-                d:{acceleration:1,stamina:2,tackle:1,strength:0.5,defIQ:0.5,interceptions:0.5,shotAcc:-0.5,composure:-0.5,ballControl:-0.5}},
     falsenine: {role:'ATT',sub:'STK',w:10, plays:['ST'], also:['AM'], name:'False nine',   blurb:'Drops deep into midfield to make the play, and pulls their centre-backs out.',
                 d:{passAcc:1.5,dribbling:1,ballControl:1,offIQ:1,composure:0.5,shotAcc:-0.5,strength:-1,heading:-1.5}},
+    pressfwd:  {role:'ATT',sub:'STK',w:0,  plays:['ST'], also:['W'], name:'Pressing forward', blurb:'Leads the press: harries their centre-backs and keeper, and wins it high.',   // (v144: none made -- those there are stay as they are)
+                d:{acceleration:1,stamina:2,tackle:1,strength:0.5,defIQ:0.5,interceptions:0.5,shotAcc:-0.5,composure:-0.5,ballControl:-0.5}},
+    allround:  {role:'GK',sub:'GK', w:40, plays:['GK'], also:[], name:'All-rounder',      blurb:'A bit of everything and no weak spot: a safe, steady keeper.',   // (v144: 40, the commonest -- 30 before)
+                d:{}},
     shotstopper:{role:'GK',sub:'GK', w:35, plays:['GK'], also:[], name:'Shot-stopper',     blurb:'Reflexes, diving, handling: stays on his line, and comes for fewer crosses.',
                 d:{gkReflex:1,gkDiveRange:1,gkHandling:0.5,keeperSpd:-1,gkDistribution:-0.5,passAcc:-0.5}},
-    allround:  {role:'GK',sub:'GK', w:30, plays:['GK'], also:[], name:'All-rounder',      blurb:'A bit of everything and no weak spot: a safe, steady keeper.',
-                d:{}},
-    sweeperkeeper:{role:'GK',sub:'GK', w:20, plays:['GK'], also:[], name:'Sweeper keeper', blurb:'Stands higher, comes out sooner and further for the ball through, and plays it out well.',
-                d:{keeperSpd:1.5,gkDistribution:1,passAcc:1,composure:1,ballControl:0.5,gkReflex:-0.5,gkReach:-0.5}},
-    onevone:   {role:'GK',sub:'GK', w:15, plays:['GK'], also:[], name:'One-on-one keeper', blurb:'Rushes a man through on goal, and smothers it at his feet; weaker at long shots.',
-                d:{keeperSpd:1,gkDiveRange:1,composure:0.5,gkReach:-0.5,gkHandling:-0.5,gkReflex:-0.5}}
+    sweeperkeeper:{role:'GK',sub:'GK', w:25, plays:['GK'], also:[], name:'Sweeper keeper', blurb:'Stands higher, comes out sooner and further for the ball through, and plays it out well.',   // (v144: 25 -- 20 before; the One-on-one keeper's gone)
+                d:{keeperSpd:1.5,gkDistribution:1,passAcc:1,composure:1,ballControl:0.5,gkReflex:-0.5,gkReach:-0.5}}
   };
   // an archetype kept under an older name (a save's, a kept side's): what it is now
-  const TYPE_WAS={creator:'trequartista', insidefwd:'invwinger'};   // (v143: an Inside forward read anywhere before he's re-labelled: typeKept)
+  const TYPE_WAS={creator:'trequartista', insidefwd:'invwinger', onevone:'allround'};   // (v143: an Inside forward read anywhere before he's re-labelled: typeKept; v144: a One-on-one keeper)
   const typeNow=s=>TYPE_WAS[s]||s;
   // A TYPE THAT'S GONE (v143: the Inside forward, from the wingers): a man who was one -- yours, the other clubs', a free
   // agent, a youth, an exhibition side kept -- is whichever of his position's types his stats fit best, as a man from
   // before the archetypes was: labelled, not changed (inferStyle), so his rating doesn't move. Most come out Inverted
   // wingers, the nearest of them.
-  const TYPE_GONE={insidefwd:'WNG'};
+  const TYPE_GONE={insidefwd:'WNG', onevone:'GK'};   // (v144: the One-on-one keeper too -- whichever keeper his keeping fits best: gkInferType)
   function typeKept(style,role,stats){ const sub=TYPE_GONE[style]; return sub&&stats&&ARCH[role]?inferStyle(role,sub,stats)||typeNow(style):typeNow(style); }
   const STYLE_PACE_KEYS=['speed','acceleration'];   // a style's pace is its identity: these get less random spread
   function styleOf(e){ return (e&&STYLES[e.style])||null; }
@@ -2780,6 +2792,7 @@
     libero:{cbSupport:1}, cover:{cbSupport:-1}, widecb:{cbWidth:'wide'},
     boxtobox:{cmSupport:1, cmCross:1}, shadow:{cmSupport:2, cmCross:2}, anchor:{cmSupport:-1}, deepcreator:{cmSupport:-1},   // (a holder stays the way back: not off to the edge of their box)
     covermid:{cmSupport:-1}, mezzala:{cmSupport:1, cmCross:1},   // (v143: new -- as the Anchor and the Box-to-box, till their own habits come)
+    paceywinger:{wSupport:1},   // (v144: on their last man and in behind, whatever the wide men are told -- for now)
     wideplaymaker:{wmWidth:'narrow', wmSupport:-1},
     invwinger:{wWidth:'narrow'},   // (a winger and a wide runner: their line's -- out wide, and in at the back post with the ball near their box; v143: the Inside forward, in the channel, gone)
     poacher:{stRuns:1}, speedster:{stRuns:1}, target:{stRuns:'target'}, falsenine:{stRuns:'false9'}
@@ -2854,12 +2867,14 @@
   // (v118: the new archetypes among them, about as often as a career's -- STYLES' w -- has them. v127: a central
   // midfielder's spot a central midfielder's -- a ball-winner or a playmaker first in the middle -- and a holding or an
   // attacking midfielder's spot one of theirs: SQ_DM, SQ_AM. v143: a ball-winner or a box-to-box first in the middle,
-  // the playmaker an attacking midfielder's; the Cover midfielder and the Mezzala among them; no Inside forward)
+  // the playmaker an attacking midfielder's; the Cover midfielder and the Mezzala among them; no Inside forward. v144: a
+  // holding midfielder's spot a ball-winner's or a deep creator's first, the middle a complete midfielder's or a cover
+  // midfielder's first, the Pacey winger among the wingers, no Pressing forward)
   const SQ_CB=['stopper','stopper','stopper','cover','cover','cover','ballplayer','ballplayer','widecb','libero'],
-        SQ_WM=['mwinger','mwinger','widemid','widemid','wideplaymaker'], SQ_CM1=['ballwinner','ballwinner','boxtobox','boxtobox','mezzala'],
-        SQ_CM=['boxtobox','boxtobox','mezzala','ballwinner'], SQ_W=['trickster','trickster','winger','winger','invwinger'],
-        SQ_ST=['poacher','poacher','speedster','speedster','complete','complete','target','target','pressfwd','falsenine'],
-        SQ_DM=['anchor','anchor','deepcreator','deepcreator','covermid'], SQ_AM=['playmaker','playmaker','shadow','shadow','trequartista'];
+        SQ_WM=['mwinger','mwinger','widemid','widemid','wideplaymaker'], SQ_CM1=['completemid','completemid','covermid','covermid','boxtobox'],
+        SQ_CM=['completemid','boxtobox','boxtobox','mezzala'], SQ_W=['winger','winger','trickster','paceywinger','invwinger'],
+        SQ_ST=['complete','complete','poacher','poacher','speedster','speedster','target','target','falsenine'],
+        SQ_DM=['ballwinner','ballwinner','deepcreator','deepcreator','anchor'], SQ_AM=['playmaker','playmaker','trequartista','trequartista','shadow'];
   // the outside men of a back line: wing-backs with nobody wide ahead of them; with men wide ahead, a back three's are
   // centre-backs (wide CBs most), a back four's or five's full-backs (v124)
   const SQ_WB=['wingback','wingback','fullback'], SQ_CBW=['widecb','widecb','cover','stopper','ballplayer'], SQ_FB=['fullback','fullback','deffb','deffb','invfb','wingback'];
@@ -2889,7 +2904,7 @@
   // A KEEPER FROM BEFORE v118 (made without an archetype: his stats about a keeper's averages): the one his keeping leans
   // toward most -- how far it leans its way, from the averages, with a nudge each (GK_LEAN: so they come out about as
   // often as they would now) -- or, leaning no way much, an all-rounder
-  const GK_LEAN={shotstopper:0.3, sweeperkeeper:-0.15, onevone:0};
+  const GK_LEAN={shotstopper:0.3, sweeperkeeper:-0.15};   // (v144: no One-on-one keeper)
   function gkInferType(st){ let best='allround', bs=0.1;
     for(const k in GK_LEAN){ const d=STYLES[k].d; let s=0, L=0; for(const x in d){ const b=ARCH.GK[x]; s+=((st[x]??b)-b)*d[x]; L+=d[x]*d[x]; }
       s=s/Math.sqrt(L)+GK_LEAN[k]; if(s>bs){ bs=s; best=k; } }
@@ -8802,7 +8817,7 @@
   // the most central of the midfield (the deeper of two central ones; an Anchor if he's anywhere near the middle).
   // Null without a midfield.
   // how keen a man is on a run in behind, by archetype (see the runs): a speedster's always going, a target man hardly ever
-  const RUN_MUL={speedster:1.35, shadow:1.3, winger:1.2, mwinger:1.2, wingback:1.2, poacher:1.15, pressfwd:1.1,
+  const RUN_MUL={speedster:1.35, paceywinger:1.35, shadow:1.3, winger:1.2, mwinger:1.2, wingback:1.2, poacher:1.15, pressfwd:1.1,
     wideplaymaker:0.9, falsenine:0.5, target:0.35};
   const holderCache={G:null,R:null};
   const HOLD_PREF={anchor:-150, deepcreator:-150, covermid:-150, ballwinner:-60, playmaker:-20, boxtobox:40, mezzala:60, shadow:120, trequartista:120};   // (by archetype: v118; v143: a cover midfielder a holder first, a mezzala hardly)
@@ -9511,6 +9526,7 @@
     trickster:{takeOn:1.5, carry:1.2, cross:0.95},                      // (at his man, every time: see aiSkillKeen)
     winger:{takeOn:1.2, carry:1.2, cross:1.35},                         // (to the byline, and the cross)
     invwinger:{takeOn:1.2, carry:1.1, cross:0.75, shoot:1.08, longShot:1.15, range:1.05},   // (in off the line: the curler, or the pass through)
+    paceywinger:{carry:1.25, takeOn:1.1, cross:1.1},                    // (v144: runs with it, past his man on the run)
     poacher:{shoot:1.15, carry:0.85},
     speedster:{carry:1.2, takeOn:1.1},
     complete:{range:1.05, hold:1.1},
@@ -9520,7 +9536,7 @@
   };
   // ...and which way he takes it out wide: a winger, a wide runner and a wing-back down the line, to the byline; an
   // inverted winger and a wide playmaker in off it, toward goal (a trickster any way at all) (v143: an inside forward in off it too, before)
-  const CARRY_WAY={winger:'line', mwinger:'line', wingback:'line', invwinger:'in', wideplaymaker:'in'};
+  const CARRY_WAY={winger:'line', mwinger:'line', wingback:'line', paceywinger:'line', invwinger:'in', wideplaymaker:'in'};   // (v144: a pacey winger down the line)
   // what the man on the ball can see: who's on him, what the ball's worth where he is
   function obCtx(p,atk,goalX){
     const opp=p.team==='G'?'R':'G', opps=players.filter(o=>o.team!==p.team), kp=keeperOf(opp), M=obMods(p);
@@ -9717,7 +9733,7 @@
   // much better he is on the ball (Dribbling twice, Ball control, Agility) than that man is at stopping him (Tackle
   // twice, Def IQ, Agility) -- not how good either is overall -- and where: out on the touchline keenest, in their
   // third keener, never in his own half.
-  const SKILL_KEEN={trickster:1.6, trequartista:1.5, mwinger:1.1, winger:0.9, wingback:0.9, target:0.6, anchor:0.6, ballwinner:0.6, stopper:0.5, deffb:0.6};
+  const SKILL_KEEN={trickster:1.6, trequartista:1.5, mwinger:1.1, winger:0.9, paceywinger:0.8, wingback:0.9, target:0.6, anchor:0.6, ballwinner:0.6, stopper:0.5, deffb:0.6};
   function aiSkillKeen(p,d,C){
     if(!d) return 0;
     const pa=posOf(p,'atk'), u=C.atk>0?p.x:FW-p.x;
@@ -12447,7 +12463,7 @@
   // every keeper was before.
   const GK_TYPE={shotstopper:{zone:0.85,brave:0.5,reach:1,adv:0.75,charge:0.85,claim:0.85,high:0},
     sweeperkeeper:{zone:1.2,brave:1.8,reach:1.6,adv:1.1,charge:1,claim:1,high:1},
-    onevone:{zone:1,brave:1.2,reach:1.2,adv:1.3,charge:1.35,claim:0.95,high:0}};
+    };   // (v144: the One-on-one keeper gone -- he rushed the man through on goal, and went down bigger and sooner)
   const GK_ALL={zone:1,brave:1,reach:1,adv:1,charge:1,claim:1,high:0}, gkType=kp=>GK_TYPE[kp&&kp.style]||GK_ALL;
   // how far off his line a sweeper keeper stands: not at all with the ball within 40 m of his goal, up to 4 m off it
   // with the ball 65 m away
@@ -12536,7 +12552,7 @@
        && kp.diveT<=0 && kp.groundT<=0 && simNow-(kp.closeT??-9)<0.25 && scoredT<=0){
       const sh=ball.lastTouchP&&ball.lastTouchP.team!==kp.team?ball.lastTouchP:null, sp=Math.hypot(ball.vx,ball.vy);
       if(sh && sp>120 && Math.hypot(sh.x-kp.x,sh.y-kp.y)<SPREAD_RANGE && (ball.vx*(kp.x-ball.x)+ball.vy*(kp.y-ball.y))>0){
-        kp.spreadT=SPREAD_T; kp.spreadAt=simNow+Math.random()*SPREAD_LATE*(1.3-reflexOf(kp))*(kp.style==='onevone'?0.6:1); kp.spreadN={x:-ball.vx/sp, y:-ball.vy/sp}; kp.closeT=-9;   // (a one-on-one keeper reads the strike sooner)
+        kp.spreadT=SPREAD_T; kp.spreadAt=simNow+Math.random()*SPREAD_LATE*(1.3-reflexOf(kp)); kp.spreadN={x:-ball.vx/sp, y:-ball.vy/sp}; kp.closeT=-9;   // (v144: a one-on-one keeper read the strike sooner -- gone)
         kp.mode='line'; kp.gkRoaming=false; kp.charging=false; return; } }
 
     // AT HIS FEET (gkToFeet): yours you move; the computer's plays it himself. (The carry and the tackles are the frame's,
@@ -12824,7 +12840,7 @@
   // slower, up off the turf, and off to one side -- out wide the likelier the better his Handling (GK_WIDE, as a save
   // he can't hold). One past the end of him goes on, or over him; and down there he's done till he's up.
   const SPREAD_RANGE=10*MK, SPREAD_T=0.7, SPREAD_DOWN=0.45, SPREAD_H=PLAYER_H, SPREAD_DIVE=0.25, SPREAD_LATE=0.14;
-  const spreadHalf=kp=>(reachOf(kp)+SPREAD_DIVE*divingOf(kp))*(kp.style==='onevone'?1.15:1);   // (a one-on-one keeper, bigger: v118)
+  const spreadHalf=kp=>reachOf(kp)+SPREAD_DIVE*divingOf(kp);   // (v144: a One-on-one keeper went down bigger -- gone)
   const spreadGrow=kp=>0.24-0.2*reflexOf(kp);
   function spreadWidth(kp){ const g=clamp((simNow-(kp.spreadAt??-9))/spreadGrow(kp),0,1); return kp.r+(spreadHalf(kp)-kp.r)*g; }
   function spreadBlock(x0,y0){
@@ -15717,7 +15733,7 @@
   // a generated player's style: its offsets on top of his stats, then the whole block nudged back to the rating he
   // was made for (so a stopper's lost pace comes back as strength and heading, not as a lower rating)
   function cwStyleStats(role,s,style,T){
-    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role], main=ovrMain(role);
+    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role], main=ovrMainBut(role);   // (v144: his pace isn't what's moved to make his rating: the rest of his game pays for it -- PACE, THE DEAREST)
     for(const k in d) s[k]=clamp(Math.round((s[k]+d[k])*2)/2,1,10);
     if(w) for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
@@ -15725,7 +15741,7 @@
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
   function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return Math.max(1,Math.min(99,Math.round((R[0]+(ovrMean(st,w)-R[1])*K)*10))); }   // (A MAN'S RATING)
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
-  function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMain(role);   // (B: the usual make's rating, in stat points)
+  function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMainBut(role);   // (B: the usual make's rating, in stat points; v144: his pace not moved to make it)
     for(const k of ALL_STAT_KEYS){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
     for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
@@ -15794,7 +15810,7 @@
   function mgDeriveStats(p){
     const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1));
     if(p.style) cwStyleStats(p.role,s,p.style,p.ovr);   // (a keeper's too: v118)
-    const w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[a]-w[b]);   // the lightest of the stats that make his game first: small steps
+    const w=OVR_W[p.role]||OVR_W.MID, ks=ovrMainBut(p.role).sort((a,b)=>w[a]-w[b]);   // the lightest of the stats that make his game first: small steps (v144: never his pace)
     for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }
     return s; }
   // his stats: his own attributes (p.at), read once per string
@@ -15840,7 +15856,8 @@
   // one in sixteen grows late: his touch and his legs keep coming three years longer
   const devLate=p=>cwHash((p.seed>>>0)||1,'late')%16===0;
   // how much an attribute matters to him: by his role's rating weights, more for what his style is about
-  function devRel(p){ const w=OVR_W[p.role]||OVR_W.MID, mx=Math.max(...Object.values(w)), sd=(STYLES[p.style]&&STYLES[p.style].d)||{}, o={};
+  function devRel(p){ const w=OVR_W_DEV[p.role]||OVR_W_DEV.MID, mx=Math.max(...Object.values(w)),   // (v144: the weights before pace was dearest -- OVR_W_DEV)
+     sd=(STYLES[p.style]&&STYLES[p.style].d)||{}, o={};
     for(const k of DEV_KEYS){ let r=(w[k]||0)>=2?0.35+0.65*w[k]/mx:0.15;   // (a lesser stat, 1: as one that counted for nothing grew, before v122)
       if(sd[k]>0) r=Math.min(1,r+0.25); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }
   // his ceilings: his attributes as he's made, lifted (most where it matters to him) till they rate his potential;
@@ -19496,6 +19513,10 @@
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
         p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
       d.w122=true; }
+    if(!d.w144){ const W=d.world||{};   // (v144: rated again with pace the dearest -- PACE, THE DEAREST OF ALL -- his potential too)
+      for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+      d.w144=true; }
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;

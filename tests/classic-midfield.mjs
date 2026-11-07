@@ -46,12 +46,12 @@ const po = await page.evaluate(() => { const M = window.__M, S = M.SUB_STYLES, w
   out.lists = ['DM', 'CM', 'AM'].map(k => k + ' ' + S[k].join(',') + ' (' + w(k) + ')');
   out.nat = [M.natPos({ role: 'MID', subRole: 'DM' }), M.natPos({ role: 'MID', subRole: 'AM' }), M.natPos({ role: 'MID', style: 'anchor' }), M.natPos({ role: 'MID', style: 'shadow' }), M.natPos({ role: 'MID', style: 'playmaker' })].join(' ');
   const fit = k => ['DM', 'CM', 'AM'].map(s => M.posFit(k, s)[0]).join('');   // (m: his own, s: a second one, o: out of position)
-  out.fit = ['anchor', 'deepcreator', 'covermid', 'ballwinner', 'boxtobox', 'mezzala', 'playmaker', 'shadow', 'trequartista'].map(k => k + ' ' + fit(k)).join(', ');
+  out.fit = ['ballwinner', 'deepcreator', 'anchor', 'completemid', 'boxtobox', 'covermid', 'mezzala', 'playmaker', 'trequartista', 'shadow'].map(k => k + ' ' + fit(k)).join(', ');
   return out; });
 info('archetypes: ' + po.lists.join(' | ') + ' -- at DM, CM, AM: ' + po.fit);
-ok(po.lists.join(' | ') === 'DM anchor,deepcreator,covermid (100) | CM boxtobox,ballwinner,mezzala (100) | AM playmaker,shadow,trequartista (100)', 'the central midfield archetypes, three of each (v143): DM the anchor, the deep creator and the cover midfielder, CM the box-to-box, the ball-winner and the mezzala, AM the playmaker, the shadow striker and the trequartista');
+ok(po.lists.join(' | ') === 'DM ballwinner,deepcreator,anchor (100) | CM completemid,boxtobox,covermid,mezzala (100) | AM playmaker,trequartista,shadow (100)', 'the central midfield archetypes (v144): DM the ball-winner, the deep creator and the anchor, CM the complete midfielder, the box-to-box, the cover midfielder and the mezzala, AM the playmaker, the trequartista and the shadow striker');
 ok(po.nat === 'DM AM DM AM AM', 'a holding and an attacking midfielder are positions of their own again, and an archetype\'s is his -- the playmaker\'s an AM (v143: ' + po.nat + ')');
-ok(po.fit === 'anchor mso, deepcreator mso, covermid mso, ballwinner smo, boxtobox sms, mezzala oms, playmaker osm, shadow osm, trequartista osm', 'each covers the next one along as a second position, and none the far end (' + po.fit + ')');
+ok(po.fit === 'ballwinner mso, deepcreator mso, anchor mso, completemid sms, boxtobox sms, covermid smo, mezzala oms, playmaker osm, trequartista osm, shadow osm', 'each covers the next one along as a second position, and none the far end (' + po.fit + ')');
 
 // --- A HOLDING AND AN ATTACKING MIDFIELDER HALF AS COMMON AS A CENTRAL ONE ----------------------------------------------------
 const one = await page.evaluate(() => { const M = window.__M, n = { CM: 0, DM: 0, AM: 0, WM: 0 }; let s = 12345;
