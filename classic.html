@@ -8209,11 +8209,13 @@
   // the ball comes back off them, as it did in a match before. A ball over a touchline was a kick-in once, and a goal
   // kick from an end line, but nothing called it: the walls kept it in.)
   const RS_WALK=3.0, RS_SET={throw:[0.9,1.5], corner:[1.0,1.6]}, RS_LATE={throw:2.8, corner:3.5}, RS_YOURS=5, RS_OFF={throw:2*MK, corner:9.15*MK};
-  const THROW_D=[3*MK,25*MK], THROW_Z=PLAYER_H+6;   // (how far a throw goes; how high he holds it)
-  // THE THROW-IN, DRAWN (v140): he holds it over his head with both arms up (SPRITE.draw, throwPoseOf); to throw it he takes
-  // it back over his head for THROW_WIND -- it goes up THROW_LIFT -- and lets it go, his arms coming down in front of him for
-  // THROW_FOLLOW. (The ball hung over his head and went)
-  const THROW_WIND=0.25, THROW_LIFT=5, THROW_FOLLOW=0.3;
+  const THROW_D=[3*MK,25*MK], THROW_Z=15;   // (how far a throw goes; how high he holds it: in front of his face -- v141, it was over his head, PLAYER_H+6)
+  // THE THROW-IN, DRAWN (v140): he holds it in front of his face in both hands, his arms as short as they always are (SPRITE.draw,
+  // throwPoseOf; v141 -- in v140 they reached up over his head to it, twice as long as his body); to throw it he takes it
+  // back for THROW_WIND -- it goes up THROW_LIFT -- and lets it go, his hands coming down to his chest for THROW_FOLLOW. (The
+  // ball hung over his head and went)
+  const THROW_WIND=0.25, THROW_LIFT=2, THROW_FOLLOW=0.3;
+  function throwBallY(p,Rs){ return p.y+(Rs.y<YC?0.5:-0.5); }   // (v141: in front of him -- toward you from the far touchline, away from you, behind his head, from the near)
   function throwPoseOf(p){ const Rs=restartInfo;
     if(Rs&&restartT>0&&Rs.set&&Rs.type==='throw'&&Rs.taker===p) return Rs.windT>0?'wind':'hold';
     return p.throwFollowT>0?'follow':null; }
@@ -8305,7 +8307,7 @@
     p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false; p.state='normal'; p.stateT=0; p.noTouchT=0; p.skill=null;
     Rs.set=true; Rs.heldT=0; const w=RS_SET[Rs.type]; Rs.wait=w[0]+Math.random()*(w[1]-w[0]);
     ball.vx=ball.vy=ball.vz=0; ball.lastTouch=p.team; possTeam=p.team;
-    if(Rs.type==='throw'){ p.facing={x:0,y:Rs.y<YC?1:-1}; ball.x=p.x; ball.y=p.y+0.5; ball.z=THROW_Z; }
+    if(Rs.type==='throw'){ p.facing={x:0,y:Rs.y<YC?1:-1}; ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z; }
     else { const a=restartAimPt(Rs), dx=a.x-Rs.x, dy=a.y-Rs.y, l=Math.hypot(dx,dy)||1; p.facing={x:dx/l,y:dy/l};
       ball.x=Rs.x; ball.y=Rs.y; ball.z=0; ball.ownedBy=p; ball.dribbler=null; ball.dribbleGrace=0; ball.passerRef=null; }
     for(const t of ['G','R']) if(PLAN[t]) PLAN[t].last=null;   // (the plan from before it went out: gone stale -- a corner goes to the men where they are)
@@ -8455,7 +8457,7 @@
     p.intercepting=false; p.goingForBall=false; p.dash=false; p.planned=false; p.engageCap=1; p.runTarget=null; p.gapRun=0; p.recover=false; p.pressRun=false;
     if(p===Rs.taker){
       if(Rs.set){ const st=restartStand(Rs,p); p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false;
-        if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=p.y+0.5; ball.z=THROW_Z+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
+        if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
         else { ball.x=Rs.x; ball.y=Rs.y; ball.z=0; }
         ball.vx=ball.vy=ball.vz=0; return true; }
       const w=restartWalkTo(Rs,p), d=Math.hypot(w.x-p.x,w.y-p.y), ai=steer(p,w.x,w.y,1);
@@ -14515,17 +14517,16 @@
       return ['run', Math.floor((p.animPhase||0)/56*4)%4, dx, dy];   // feet sync to speed
     }
     // THE THROW-IN (v140): his frame facing the pitch -- S from the far touchline, N from the near -- with his hanging hands
-    // left out (rows 24-25 beside his shorts), and his arms drawn up beside his head to the ball over it, a hand either
-    // side of it, in his own kit's and skin's pixels copied from his frame (THROW_SRC: where each is in it); winding up,
-    // higher with it; thrown, coming down in front of him
+    // left out (rows 24-25 beside his shorts), and his arms drawn bent up from his shoulders, as short as they always are, to
+    // the ball in front of his face, a hand either side of it (v141: they reached up over his head to it), in his own kit's
+    // and skin's pixels copied from his frame (THROW_SRC: where each is in it); winding up, a pixel higher with it; thrown,
+    // his hands down at his chest
     const THROW_SRC={S:{row:2,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[20,24],SKD:[10,24]}, N:{row:6,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[10,24],SKD:[11,24]}};
-    function throwArm(top){                                // his left arm, his hand at row `top`: [x, y, material]
-      const px=[[8,top-1,'O'],[9,top-1,'O'],[10,top-1,'O']], el=Math.round((top+21)/2);   // (his elbow out wide, halfway up)
+    function throwArm(top,x){                              // his left arm, short as ever: his hand at row `top`, its outer edge at column x
+      const px=[[x,top-1,'O'],[x+1,top-1,'O']];            // (the top of his hand)
       for(let y=top;y<=21;y++){
-        if(y<=top+1){ px.push([7,y,'O'],[8,y,'SKN'],[9,y,'SKN'],[10,y,'SKN'],[11,y,'O']); continue; }   // the hand
-        const c=y>=el?Math.round(8-2*(21-y)/Math.max(1,21-el)):Math.round(6+2*(el-y)/Math.max(1,el-top-1));   // out to the elbow, in to the hand
-        const m=y>=20?['SLV','SLV']:y>=18?['TRM','TRM']:['SKD','SKN'];             // the sleeve into his shoulder, its hem, the arm bare
-        px.push([c-1,y,'O'],[c,y,m[0]],[c+1,y,m[1]],[c+2,y,'O']);
+        const m=y<=top+1?['SKD','SKN']:y===21?['SLV','SLV']:y===20?['TRM','TRM']:['SKD','SKN'];   // his hand; his forearm; the sleeve's hem; the sleeve into his shoulder
+        px.push([x-1,y,'O'],[x,y,m[0]],[x+1,y,m[1]],[x+2,y,'O']);
       }
       return px;
     }
@@ -14533,12 +14534,12 @@
       const V=THROW_SRC[p.facing&&p.facing.y<0?'N':'S'], sz=lookOf(p).size, sc=base.scale*cfg.scale*sz, sheet=sheetFor(p), oy=V.row*CELL;
       const x0=Math.round(base.x-AX*sc), y0=Math.round(base.y-AY*sc), P=v=>Math.round(v*sc);
       const blit=(sx,sy,w,h,dx,dy)=>ctx.drawImage(sheet,sx,oy+sy,w,h,x0+P(dx),y0+P(dy),P(dx+w)-P(dx),P(dy+h)-P(dy));
-      const top=pose==='follow'?14:clamp(Math.round(AY-(ball.z||0)/(cfg.scale*sz)-5.5),-4,14);   // (his hands at the ball's middle: its bottom sits ball.z up)
+      const top=pose==='follow'?20:clamp(Math.round(AY-(ball.z||0)/(cfg.scale*sz)-2.7),14,20), ax=pose==='follow'?10:9;   // (his hands at the ball's lower half -- its bottom sits ball.z up -- and either side of it; thrown, at his chest)
       ctx.save(); ctx.imageSmoothingEnabled=false;
       blit(0,0,CELL,24,0,0); blit(12,24,8,2,12,24); blit(0,26,CELL,CELL-26,0,26);   // his frame, the hanging hands left out
       const dot=(m,x,y)=>{ const q=V[m]; blit(q[0],q[1],1,1,x,y); };
       for(const y of [24,25]){ dot('O',11,y); dot('O',20,y); }                   // (his sides there, closed)
-      for(const [x,y,m] of throwArm(top)){ dot(m,x,y); dot(m,31-x,y); }           // both arms: the right the left's mirror
+      for(const [x,y,m] of throwArm(top,ax)){ dot(m,x,y); dot(m,31-x,y); }        // both arms: the right the left's mirror
       ctx.restore(); return true;
     }
     function draw(p,base){

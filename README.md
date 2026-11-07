@@ -224,11 +224,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     that way at about the range you held PASS for -- a tap 5 m, the whole bar 25 m -- picked as your pass picks him (a
     tap on a man: him); nobody that way, into the space that way. You go with it. Left alone, it goes after 5 s (the
     stopwatch over his head for the last two). On a phone the big button reads THROW.
-    - **Drawn as a throw-in** (v140): he holds it up over his head in both hands, elbows out, the ball between his
-      hands -- his frame's hanging hands left out and his arms drawn up beside his head in his own kit's and skin's
-      pixels. To throw it he takes it back over his head for a quarter of a second (it goes up 5 px) and lets it go, and
-      his arms come down in front of him; he stays where he is for those 0.3 s, then he's off. (The ball hung over his
-      head and went.)
+    - **Drawn as a throw-in** (v140): he holds it in front of his face in both hands, a hand either side of it, his arms
+      as short as they always are, bent up from his shoulders (v141: in v140 they reached up over his head to the ball,
+      twice the length of his body) -- his frame's hanging hands left out and his arms drawn in his own kit's and skin's
+      pixels. From the near touchline it's in front of him, behind his head. To throw it he takes it back for a quarter
+      of a second (it goes up 2 px) and lets it go, and his hands come down to his chest; he stays where he is for those
+      0.3 s, then he's off. (The ball hung over his head and went.)
   - **A corner**: the nearest of the side who isn't a forward or a centre-back (they're wanted in the box), the better
     crosser first, takes it from the quadrant. Four of his best in the air go into the box -- the near post, the far
     post, the spot and the back post -- a forward or a centre-back first, the nearer the box the likelier; one goes to
@@ -2187,6 +2188,9 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v141: the throw-in, held in front of his face.** The man taking a throw-in holds the ball in front of his face, a hand
+  either side of it, his arms the length they always are -- in v140 they reached up over his head to it, twice the length
+  of his body. Winding up it rises 2 px; thrown, his hands come down to his chest.
 - **v140: the ball runs off; the throw-in drawn; SHOOT a slide in your own half.** A ball that goes out runs on off the
   pitch, and a new one fades in where the restart's taken as the old one fades out -- it jumped there. A goal kick's
   keeper walks to the ball. The man taking a throw-in holds it up over his head in both hands, takes it back to throw it
