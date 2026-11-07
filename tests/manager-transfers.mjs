@@ -205,8 +205,8 @@ await page.click('#bpBody [data-mg="cheap"]'); await page.waitForTimeout(60); aw
 const asc = a => a.every((v, i) => !i || a[i - 1] <= v), desc = a => a.every((v, i) => !i || a[i - 1] >= v);
 info('the Search\'s filters: ' + JSON.stringify({ all: all0.length, dm: dm.length, dc: dc.length, posOpts, typeOpts, posAfter, cheap: cheap.slice(0, 4).map(r => r.amt), dear: dear.slice(0, 4).map(r => r.amt), ages: ages.slice(0, 6), pot: pot.slice(0, 5).map(r => r.ovr), inBud: inBud.length }));
 ok(posOpts.join() === 'ALL,GK,CB,FB,DM,CM,AM,WM,WNG,STK' && dm.length > 0 && dm.length < all0.length && dm.every(r => r.pos === 'DM'), 'POSITION: a man\'s own (' + posOpts.join(' ') + ': v127, a holding and an attacking midfielder positions again); DM, and only DMs (' + dm.length + ' of ' + all0.length + ')');
-ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
-  'TYPE: a DM\'s two archetypes, the commonest first (v127); Deep creator, and only they (' + dc.length + ')');
+ok(String(typeOpts) === 'ALL,DMAnchor,DMDeep creator,DMCover midfielder' && dcStyles.every(x => x === 'deepcreator') && dc.length <= dm.length && posAfter === 'DM',
+  'TYPE: a DM\'s three archetypes, the commonest first (v127; v143: the cover midfielder the third); Deep creator, and only they (' + dc.length + ')');
 ok(String(gkTypes) === 'ALL,GKShot-stopper,GKAll-rounder,GKSweeper keeper,GKOne-on-one keeper' && gkRows.length > 0 && gkStyles.every(x => x === 'shotstopper'),
   'a keeper\'s four types (v118): Shot-stopper, and only they (' + gkRows.length + ')');
 ok(String(sortOpts) === 'RATING,POTENTIAL,PRICE ▲,PRICE ▼,AGE ▲,AGE ▼' && asc(cheap.map(r => r.amt)) && desc(dear.map(r => r.amt)) && asc(ages) && desc(olds) && ages[0] < olds[0] && cheap.length === all0.length,
