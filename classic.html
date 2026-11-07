@@ -11927,7 +11927,7 @@
     let D=1-(1-touchPressure(p))*(1-0.6*finalThirdOf(p));
     D+=clamp((Math.hypot(ball.vx,ball.vy)-450)/1250,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
     if(intercept) D=Math.max(D,ICP_D)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch (v146: from 0.55)
-    else D+=offSquare(p)*P.turnTouch.val+passLenD(p);                          // he didn't get his body round to it in time; a long one, or one played back to him
+    else D+=offSquare(p)*P.turnTouch.val+passLenD(p);                          // he didn't get his body round to it in time (v146: a long one, or one played back to him: passLenD)
     return clamp(D,0,1);
   }
   // A LONG PASS, AND ONE PLAYED BACK (v146): a pass of ours is harder to take the further it's come -- nothing up to 15 m,
