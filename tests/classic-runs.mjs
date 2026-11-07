@@ -207,7 +207,7 @@ r = await page.evaluate(() => new Promise(res => { const T = window.__T; T.reset
     if(got || t > 3.5) return res({ got, t: +t.toFixed(2), back, n, minV: Math.round(minV), ran: Math.round(a * (w.x - x0) / T.MK) });
     requestAnimationFrame(tick); })(); }));
 info('a ball lofted over his head, him sprinting on: ' + JSON.stringify(r));
-ok(r.got && r.n > 10 && r.back === 0 && r.minV > 120,   // (v146: 120 -- a pass a little long now and then and he eases to 136-143 px/s, still running: one run in six or so on v143 and on v146 alike; it was 150) `played over his head from 16 m behind him as he sprints on: he never turns round while it's in the air (${r.back} of ${r.n} frames facing back), keeps going (never under ${r.minV} px/s forward), and has it at ${r.t} s, ${r.ran} m on`);
+ok(r.got && r.n > 10 && r.back === 0 && r.minV > 120, `played over his head from 16 m behind him as he sprints on: he never turns round while it's in the air (${r.back} of ${r.n} frames facing back), keeps going (never under ${r.minV} px/s forward), and has it at ${r.t} s, ${r.ran} m on`);   // (v146: 120 -- a pass a little long now and then and he eases to 136-143 px/s, still running: one run in six or so on v143 and on v146 alike; it was 150)
 
 process.exitCode = rep.finish();
 await browser.close();
