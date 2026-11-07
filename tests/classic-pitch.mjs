@@ -3,7 +3,7 @@
 // so the stand shows. The specks are fixed to the pitch: pan the camera and the ground moves with it, pixel for pixel.
 // PITCH.enable(false) puts the vector pitch back. THE NET: a shot in goes all the way over the line into the net, which
 // gives where it's hit and holds it (never through it or out of the back), and it's a goal; wide of the post or over the
-// bar it comes back off the line. THE STANDS: each level's name panel is inside its strip and as tall as the letters
+// bar it's out, no goal (v138: a goal kick or a corner -- it came back off the line before). THE STANDS: each level's name panel is inside its strip and as tall as the letters
 // (five rows), and the Stadium's Stands tab gets a picture of each. On a copy of the game that lets the test move the
 // camera, redraw and set a shot up.
 import { open } from './_harness.mjs';
@@ -16,7 +16,8 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={cam:v=>{ if(v!=null) camX=v; return camX; }, draw:()=>draw(), HORIZON, FAR_SCALE, NEAR_SCALE, NEAR_Y, FH, proj, PA_D, PA_HW, GA_D, GA_HW, PEN_SPOT, CIRCLE_R, '
   + 'ball:()=>ball, net:()=>NET, scored:()=>scoredT, score:()=>scoreG+scoreR, simNow:()=>simNow, players:()=>players, keepers:()=>keepers, '
-  + 'FW, YC, GOAL_W, GOAL_H, NET_D, freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; }, over:()=>matchOver, '
+  + 'FW, YC, GOAL_W, GOAL_H, NET_D, freeze:()=>{ restartT=0; restartInfo=null; offsideT=0; scoredT=0; gkHold=null; for(const k of keepers){ k.mode="line"; k.holdT=0; k.goalKick=false; } }, over:()=>matchOver, '
+  + 'last:()=>lastRestart, '
   + 'endgame:()=>{ half=2; matchClock=halfLenSec()+1; advStart(); }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-pitch-')), 'classic.html');
 writeFileSync(copy, src);
@@ -101,11 +102,13 @@ ok(!!low.rest && low.rest.x > dims.r && low.rest.x <= dims.NET_D && Math.abs(low
 const side = await shot(50, 50, 0, 500, 320, 0, 1.3);
 info('into the side netting: ' + JSON.stringify(side));
 ok(side.goals === 1 && !!side.rest && Math.abs(side.rest.y) < dims.GOAL_W / 2 && side.rest.x <= dims.NET_D + 1, 'across the goal into the side netting: held in, and a goal (' + JSON.stringify(side.rest) + ')');
-const wide = await shot(180, dims.GOAL_W / 2 + 40, 0, 950, 0, 0, 0.6), high = await shot(180, 0, dims.GOAL_H + 30, 950, 0, 0, 0.6);
-ok(!wide.goals && !wide.inNet && wide.far <= 0.5 && !high.goals && !high.inNet && high.far <= 0.5, 'wide of the post, or over the bar, it comes back off the line: no goal (' + wide.far + ', ' + high.far + ')');
+const outNow = () => page.evaluate(() => { const L = window.__T.last(); return L && window.__T.simNow() - L.at < 1 ? L.type : 'none'; });
+const wide = await shot(180, dims.GOAL_W / 2 + 40, 0, 950, 0, 0, 0.6), wideOut = await outNow(), high = await shot(180, 0, dims.GOAL_H + 30, 950, 0, 0, 0.6), highOut = await outNow();
+ok(!wide.goals && !wide.inNet && /goalkick|corner/.test(wideOut) && !high.goals && !high.inNet && /goalkick|corner/.test(highOut),
+  'wide of the post, or over the bar, it\'s out: no goal, a ' + wideOut + ' and a ' + highOut + ' (v138: it came back off the line before)');
 // a ball that was in the mouth, back out in front (a parry) and going over the line just past the post: not a goal
-const past = await shot(4, dims.GOAL_W / 2 + 10, 0, 30, 0, 0, 0.6, 1);
-ok(!past.goals && past.far <= 0.5, 'a ball back out of the mouth and over the line past the post comes back off it: no goal (' + past.far + ')');
+const past = await shot(4, dims.GOAL_W / 2 + 10, 0, 30, 0, 0, 0.6, 1), pastOut = await outNow();
+ok(!past.goals && (past.far <= dims.r || /goalkick|corner/.test(pastOut)), 'a ball back out of the mouth and over the line past the post: no goal -- out once all of it\'s over (' + pastOut + ', ' + past.far + ' px past, the ball ' + dims.r + ')');
 // A GOAL IN THE LAST PLAY: the clock run out, the full-time advantage on, a shot struck into the net -- it counts once,
 // the match ends with the ball still in the net, and nothing more is counted however long the full-time screen stays
 // up. (It used to count again every time the celebration ran out: a phantom goal or two in a career's result.)

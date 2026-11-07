@@ -95,7 +95,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     ball's pace on the way, eases it back off and lets it drop to the floor of the goal.
   - **Nothing goes through it** or out of the back.
   - The netting is drawn pushed in where it was hit, and it wobbles back after.
-  - Wide of a post or over the bar, the ball still comes back off the line.
+  - Off a post or the bar it comes back into play; wide of a post or over the bar it's out -- a goal kick or a corner
+    (v138: before, it came back off the line there too).
   - **The near post and side netting are in front.** A ball in the goal, or a keeper on his line, is drawn behind
     the near post and seen through the near side netting. Before, they were drawn over them. Once the ball is in,
     every part of the goal nearer the camera than the ball is in front of it.
@@ -165,7 +166,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   slow one at that; a curling shot is harder to hold. At the edge of the window it's even money. A slow one -- a
   header, a scuff -- he goes to, as before, and has it if he gets there.
   - **What he can't hold he pushes away**: wide of his near post the better his Handling (15% of them at 1, half at
-    5.5, 90% at 10) -- off the line beside the goal and back out wide, away from the danger -- and out in front of
+    5.5, 90% at 10) -- round his post and out for a corner, away from the danger (v138: off the line beside the goal
+    and back out wide, before) -- and out in front of
     him the worse, for whoever's first to it. Either way the shot's over: it's anyone's ball, the shooter's
     team-mates' too, and he can't claim it back for a moment (getting up, or set again). Before, a shot he got to
     came off him anywhere at random -- or, if it came within a stride of him, he simply held it, however hard it was.
@@ -201,9 +203,42 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   v77, 3% now (90 shots); from 16-20 m 46% → 38%; from 12-16 m 54% → 51%. Goalless draws 14% → 19%, five goals or
   more 12% → 11%. The keeper goes down big about once a match and stops about one in four of those with his wall;
   two in five go in anyway (the computer's forwards go for the corners).
-- **No corners, no goal kicks.** Wide of a post or over the bar the ball still comes back off the line (see the net,
-  above). Should one ever get past it, it's a goal kick for the side whose goal it is -- in either half: the old rule
-  had the ends the wrong way round after half-time.
+- **The ball goes out (v138).** All of it over a touchline, it's a throw-in to the side that didn't touch it last, from
+  where it went out; all of it over an end line, not in the goal, a goal kick -- or a corner, off a man of the side
+  whose goal it is (a save pushed round the post, a block, a clearance behind). Off a post or the bar it comes back.
+  Play stops, the man taking it goes to the ball while both sides take up their places, and then he takes it. Nobody's
+  offside from a throw-in, a corner or a goal kick. (The labs, the drills and FREE PLAY keep the walls round the pitch:
+  there the ball still comes back off them. Before v138 it did in a match too -- no throw-ins and no corners, and a
+  goal kick only if a ball ever got past the line, which it never did.)
+  - **A throw-in**: the nearest of the side -- a full-back or a wide man before a man from the middle -- takes it on the
+    touchline, the ball over his head in both hands, facing the pitch. Two or three of his men come to offer for it --
+    down the line, infield, and back toward his own goal -- each with one of theirs goal-side of him; the rest hold
+    their shape, and theirs stay 2 m off him. It's thrown, in the air all the way, to a man's feet or into the space
+    ahead of him, 3 to 25 m, a touch less true the worse his passing. The computer's goes once his side's had a moment
+    (about a second) and a man's free enough -- after 2.8 s, to the best there is; with nobody in reach, down the line.
+    Yours: you're put on him. The stick aims (onto the pitch: he won't throw it off it) and PASS throws it to the man
+    that way at about the range you held PASS for -- a tap 5 m, the whole bar 25 m -- picked as your pass picks him (a
+    tap on a man: him); nobody that way, into the space that way. You go with it. Left alone, it goes after 5 s (the
+    stopwatch over his head for the last two). On a phone the big button reads THROW.
+  - **A corner**: the nearest of the side who isn't a forward or a centre-back (they're wanted in the box), the better
+    crosser first, takes it from the quadrant. Four of his best in the air go into the box -- the near post, the far
+    post, the spot and the back post -- a forward or a centre-back first, the nearer the box the likelier; one goes to
+    the edge of the box and two stay back for the break. Theirs leave one man up, put a man goal-side of each man in the
+    box, one on the near post and one on the six-yard line, and stand 9.15 m off the ball. The computer's taker waits
+    for his men to be on their spots (up to 3.5 s once he's over it) and crosses it to the best placed of them; with it
+    on its way, anyone of his in the box goes for it, a centre-back too. Yours: you're put on him, over the ball -- the
+    stick doesn't walk him off it -- and CROSS crosses it in (held longer, to a man further across, as any cross of
+    yours), PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you after 5 s.
+  - **A goal kick** is the keeper's, from his six-yard box, as it was (yours: you're on him -- see **Your keeper with it
+    in his hands**). The other side go out of his penalty area, and none of them can come back into it till it's taken.
+  - **At the end of a half** the side taking a restart has the ball: in the other half (a corner, a throw-in up the
+    pitch) it's taken and played out; in its own half -- or the other side's, while one side's attack is being played
+    out -- the whistle goes (see **The advantage at the end of each half**).
+  - **Measured** (computer v computer, 40 exhibition matches, STAR, 4-minute halves): 3.2 throw-ins, 1.4 corners and 1.7
+    goal kicks a match. From going out to taken, a throw-in takes about 2 s, a corner about 5.7 s and a goal kick 3.7 s:
+    the ball's dead for restarts about 4% of a match. The side throwing it keeps it about four times in five. As a
+    corner's taken, 3.8 of the attackers and 6.7 of the defenders are in the box on average; three in five lead to a
+    shot or a header within 4 s, and 2 of the 57 went in. Nobody was flagged offside off a restart.
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
@@ -1875,7 +1910,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | Key | Action |
 | --- | --- |
 | `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
+| `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · a throw-in of yours: thrown to the man you aim at, about as far as you held it (Football Classic, v138: see **The ball goes out**) · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
 | `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
@@ -1890,7 +1925,7 @@ Drag on the left half to move. **Push the stick out past its ring to sprint** (t
 orange) and ease back inside it to stop, without ever lifting your thumb; push on out and the
 stick follows your thumb, so you can't run off its edge. A double-tap on the left half still
 sprints too. The big right-hand button is
-context-sensitive — TRAP / CALL / PASS depending on the moment. Separate SHOOT / SLIDE
+context-sensitive — TRAP / CALL / PASS depending on the moment (THROW at a throw-in of yours, v138). Separate SHOOT / SLIDE
 and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
 for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too (Football Classic, in a match: nothing, unless it's a tap on one of your men, which switches to him).
 
@@ -2117,6 +2152,19 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v138: the ball goes out.** Over a touchline it's a throw-in, thrown by hand from the line, over his head; over an end
+  line a goal kick, or a corner off one of the side whose goal it is, with both sides set up in the box first; off a post
+  or the bar it still comes back. Nobody's offside from any of them. Yours you take: PASS throws a throw-in the way you
+  aim it, CROSS crosses a corner in, your keeper's goal kick as before. The men take their places while the ball's dead
+  (it used to freeze them). Before, walls round the pitch sent the ball back off every line; the labs, the drills and
+  free play keep them. Computer v computer, 40 exhibition matches each (STAR, 4-minute halves):
+
+  | | goals | shots | throw-ins | corners | goal kicks | ball dead for restarts |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | v137 (walls) | 1.77 | 9.8 | 0 | 0 | 0 | 0% |
+  | v138 | 1.60 | 10.1 | 3.2 | 1.4 | 1.7 | 4% |
+
+  Goals are within the noise (give or take 0.25 a match). See **The ball goes out**.
 - **v137: the kick-off taker faces his own side.** At every kick-off -- the start, after a goal, the second half -- the man
   on the ball stood behind it facing the other side, and then rolled it back past himself to a team-mate. Now he stands
   over the spot facing the man he'll roll it back to, the ball at his feet between them, so it goes the way he faces.

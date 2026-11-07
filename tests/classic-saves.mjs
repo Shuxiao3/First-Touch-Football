@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, P, FW, FH, YC, MK, GOAL_W, ARCH, OVR_W, OVR_W_V121, atkOf, simNow:()=>simNow, gkHold:()=>gkHold, '
-  + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, CR:()=>CPU_RUN, checkOutOfPlay, rs:()=>restartInfo, switchEnds, setControlled, shootAt, '
+  + 'keeperSave, holdOdds, beatOdds, handlingOf, saveStretch, reachOf, readRun, runLeadT, legsOf, readLegs, RR:()=>RUN_READ, CR:()=>CPU_RUN, checkOutOfPlay, rs:()=>lastRestart, switchEnds, setControlled, shootAt, '
   + 'overallOf, gkHandlingFor, sixHtml, genStyledStats, rng32, divingOf, reflexOf, spreadWidth, spreadBlock, spreadHalf:k=>spreadHalf(k), spreadGrow:k=>spreadGrow(k), '
   + 'SP:()=>({H:SPREAD_H, R:SPREAD_RANGE, DIVE:SPREAD_DIVE, LATE:SPREAD_LATE, T:SPREAD_T, DOWN:SPREAD_DOWN}), pal:()=>KEEPER_SHEET_PAL, PX_M, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
@@ -205,12 +205,12 @@ info('handling: ' + JSON.stringify(r));
 ok(r.arch === 7 && r.w === r.wDive && r.dial === 5.5 && Math.abs(r.mean - 7) < 0.6 && r.halves, 'Handling is a keeper\'s stat: 7 for an average side\'s, in half points (60 drawn: ' + r.mean + ' on average), weighed in his rating as Diving is');
 ok(r.before === r.after && r.han && r.kicks && !r.cmp, 'a keeper made before it gets his from the rest of his keeping (' + r.fill + '), his rating unchanged (' + r.after + '); his six: DIV REF REA SPD KIC HAN');
 
-// --- THE END LINES: a goal kick for the side whose goal it is, either half -- no corners ----------------------------------
+// --- THE END LINES: a goal kick for the side whose goal it is -- or, off one of that side, a corner to the other (v138) --
 r = await page.evaluate(() => { const T = window.__T, b = T.ball(), res = [];
-  const out = (x, last) => { T.freeze(); b.ownedBy = null; b.x = x; b.y = T.YC + 200; b.vx = b.vy = 0; b.z = 0; b.lastTouch = last; T.checkOutOfPlay(); const s = T.rs(); return s ? s.type + ':' + s.team : 'none'; };
+  const out = (x, last) => { T.freeze(); b.ownedBy = null; b.x = x; b.y = T.YC + 200; b.vx = b.vy = 0; b.z = 0; b.lastTouch = last; T.checkOutOfPlay(); const s = T.rs(); return s ? s.type + ':' + s.team : 'none'; };   // (rs: the last restart given -- v138)
   res.push(out(-10, 'G'), out(-10, 'R'), out(T.FW + 10, 'R'), out(T.FW + 10, 'G')); T.switchEnds(); res.push(out(-10, 'G'), out(T.FW + 10, 'R')); T.switchEnds(); T.freeze(); return res; });
 info('end lines: ' + JSON.stringify(r));
-ok(r.join(' ') === 'goalkick:G goalkick:G goalkick:R goalkick:R goalkick:R goalkick:G', 'over an end line, whoever touched it last: a goal kick for the side whose goal it is -- and after half-time the other side\'s (' + r.join(' ') + ')');
+ok(r.join(' ') === 'corner:R goalkick:G corner:G goalkick:R goalkick:R goalkick:G', 'over an end line: a goal kick for the side whose goal it is, a corner to the others off one of them -- and after half-time the other way (' + r.join(' ') + ')');
 
 process.exitCode = rep.finish();
 await browser.close();
