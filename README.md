@@ -44,6 +44,23 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - A flicked first touch (a flick on SKILL as the ball comes) strays and runs on as the touch does. Above the waist
     it goes from where you met it, off your chest or thigh, not from your feet.
   - A rocket you get in the way of (their shot, or a pass over 700 px/s) is still a block that runs loose.
+  - **Cutting one out, and a ball played back (v146).** A man cutting out their pass is reacting to it, at a stretch:
+    the touch is harder (from 0.55, it was 0.45) and the worse for it -- 0.08 off at Composure 10 to 0.24 at 1, his
+    composure counting for more than his Ball control -- and less sure. A pass of ours is harder to take the further it
+    has come: nothing up to 15 m, up to 0.3 more at 40 m and on, a little more again played back to him from further
+    up the pitch (his own goal behind him); and a hard ball counts from 20 m/s (it was 29). Knocked about at the back,
+    short, it's as clean as ever. Measured over 8 computer v computer matches:
+
+    | A defender's touch | PERFECT | CLEAN | LOOSE | HEAVY |
+    | --- | --- | --- | --- | --- |
+    | Cutting their pass out, before → now | 27% → 11% | 61% → 47% | 13% → 38% | 0% → 4% |
+    | ...at Composure 7 and up, now | 17% | 54% | 28% | 1% |
+    | ...at Composure 5 to 6.5, now (it was 21% PERFECT) | 0% | 40% | 55% | 5% |
+    | A back pass from a midfielder or a forward | 85% → 75% | 15% → 25% | 0% | 0% |
+    | ...from 30 m and more | 75% → 61% | 25% → 39% | 0% | 0% |
+    | Across the back, and from the keeper | 66% → 62% | 31% → 37% | 3% → 1% | 0% |
+
+    The matches score as they did: 1.57 goals and 10.5 shots a match over 40 (1.63 and 10.3 before).
 
   The reach, where you first meet the ball, is smaller: 18 at Ball control 1 up to 32 at 10 (it was 25 to 45). How
   far a touch can fall from the likely one is a dial: First-touch spread ×, default 1.
@@ -2230,6 +2247,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v146: cut-outs and back passes less perfect.** A defender cutting out their pass -- a ball over the top for a
+  forward's run, cut out -- now takes it PERFECT about one time in nine (it was one in four) and loose two in five,
+  the less composed the worse. A long pass of ours is harder to take the further it's come, and a back pass a touch
+  harder again; knocked about at the back, short, it's as clean as ever. See **Cutting one out, and a ball played
+  back (v146)**.
 - **v145: the Pressing forward gone.** As the One-on-one keeper went in v144: a man who was one -- yours, the other
   clubs', a free agent, a youth, an exhibition side kept -- is re-labelled as the striker his stats fit best, his stats
   and rating as they were (most come out Complete forwards, then Speedsters), and his habits are gone with him: pressing

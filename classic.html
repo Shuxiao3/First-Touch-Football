@@ -6649,6 +6649,7 @@
     touchedBy(exclude);
     ball.kickBy=team; ball.kickP=exclude||null;   // (who kicked it on purpose, for the keeper's hands: gkBackPass)
     ball.passT=simNow;                     // (when it was struck: a man it's for reads it from then -- offReading)
+    ball.passFrom={x:ball.x, y:ball.y, team, by:exclude||null};   // (v146: where it was struck from -- a long one's harder to take: passLenD)
     // snapshot teammates who are in an offside position at the moment of the pass
     offsidePass={team, passer:exclude,
       flagged:players.filter(q=>q.team===team&&q!==exclude&&inOffsidePos(q))};
@@ -11920,13 +11921,26 @@
   // how far into the final third he is, going his own side's way: 0 short of it, 1 well into it
   function finalThirdOf(p){ const u=atkOf(p.team)>0?p.x:FW-p.x; return clamp((u/FW-0.62)/0.12,0,1); }
   // how hard this touch is: 0 = nobody near and it's at the back .. 1 = as hard as a first touch gets
+  // (v146: a hard ball from 20 m/s -- it was 29; a cut-out a stretch from 0.55 -- it was 0.45; a pass of ours the
+  // harder the longer it's come and if it's come back to him: passLenD)
   function touchDifficulty(p,intercept){
     let D=1-(1-touchPressure(p))*(1-0.6*finalThirdOf(p));
-    D+=clamp((Math.hypot(ball.vx,ball.vy)-650)/1500,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
-    if(intercept) D=Math.max(D,0.45)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch
-    else D+=offSquare(p)*P.turnTouch.val;                                      // he didn't get his body round to it in time
+    D+=clamp((Math.hypot(ball.vx,ball.vy)-450)/1250,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
+    if(intercept) D=Math.max(D,ICP_D)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch (v146: from 0.55)
+    else D+=offSquare(p)*P.turnTouch.val+passLenD(p);                          // he didn't get his body round to it in time; a long one, or one played back to him
     return clamp(D,0,1);
   }
+  // A LONG PASS, AND ONE PLAYED BACK (v146): a pass of ours is harder to take the further it's come -- nothing up to 15 m,
+  // PASS_LEN_D more at 40 m and on -- and a touch harder (BACK_D) played back to him from further up the pitch, his own
+  // goal behind him. Knocked about at the back, short, it's as clean as ever.
+  const ICP_D=0.55, PASS_LEN_D=0.3, BACK_D=0.12;
+  // CUTTING ONE OUT (v146): a man taking their pass is reacting to it, at a stretch -- his touch is the worse for it,
+  // 0.08 off at Composure 10 to 0.24 at 1, and less sure (ICP_SD the spread): a composed man still takes it clean more
+  // often than not, a nervy one loose. It was rarely loose and never heavy.
+  const ICP_DROP=[0.08,0.16], ICP_SD=1.3;
+  function passLenD(p){ const f=ball.passFrom; if(!f||f.team!==p.team||f.by===p||ball.lastTouch!==p.team) return 0;
+    const len=Math.hypot(p.x-f.x,p.y-f.y)/MK, back=atkOf(p.team)*(f.x-p.x)>3*MK;
+    return PASS_LEN_D*clamp((len-15)/25,0,1)+(back?BACK_D:0); }
   // ABOVE THE WAIST: a ball met at chest or high-thigh height is never a PERFECT touch, dead at his feet -- it comes off
   // his body, a little way with good Ball control and a long way with poor, a little further the higher it is (the
   // Above the waist dials). Below the waist (a ball at his shins or knees) it's the touch as on the grass.
@@ -12022,9 +12036,10 @@
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
   function touchQuality(p,intercept){
     const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(statOf(p,'composure',P.composure.val)-1)/9;
-    const D=touchDifficulty(p,intercept), k=0.45*bc+0.55*cp;
-    const m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
-    const sd=((0.085-0.035*bc)*(1-D)+(0.16-0.07*k)*D)*P.aiTouch.val;
+    const D=touchDifficulty(p,intercept), k=intercept?0.3*bc+0.7*cp:0.45*bc+0.55*cp;   // (v146: cutting one out, his composure most of all)
+    let m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
+    let sd=((0.085-0.035*bc)*(1-D)+(0.16-0.07*k)*D)*P.aiTouch.val;
+    if(intercept){ m-=ICP_DROP[0]+ICP_DROP[1]*(1-cp); sd*=ICP_SD; }   // (v146: cutting their pass out, a touch the worse -- the less composed, the worse again: CUT_OUT)
     const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
     return clamp(m+g*sd,0,1);
   }
