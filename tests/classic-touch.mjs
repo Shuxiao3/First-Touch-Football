@@ -47,6 +47,7 @@ const odds = (u, man, bc, cp, n = 800, back = false) => page.evaluate(({ u, man,
   const o = T.players().find(q => q.team !== 'G');
   if(man) { o.x = p.x - atk * man; o.y = p.y; }
   const b = T.ball(); b.ownedBy = null; b.x = p.x - atk * 60; b.y = p.y; b.z = 0; b.vx = atk * 400; b.vy = 0;
+  b.passFrom = null;   // (v147: no pass of ours behind it -- the kick-off's, left over, made it a back pass from 20 m when we kicked off: classic-cutout's)
   p.facing = { x: back ? atk : -atk, y: 0 };
   const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp });
   const c = { PERFECT: 0, CLEAN: 0, LOOSE: 0, HEAVY: 0 }; let sum = 0;

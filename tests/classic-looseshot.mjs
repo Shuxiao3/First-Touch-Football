@@ -16,7 +16,7 @@ const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, atkOf, simNow:()=>simNow, controlled:()=>controlled, setCtl:q=>setControlled(q), ballAt, '
   + 'startSlideShot, slideShotLenOf, pressK, releaseShoot, shotQ:()=>shotQ, curve:()=>curveArmed, label:()=>{ const b=document.getElementById("shootBtn"); return b?b.textContent:""; }, '
   + 'freeze:()=>{ restartT=0; restartInfo=null; offsideT=0; offsidePass=null; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; skill=null; matchClock=0; advOn=false; endCurve(); recvAuto=null; oneTouch=null; ftAim=null; shotQ=null; }};\n  const LAB_TITLE=');
-patch("    mStat(p,'sh'); if(meIs(p)) meBump('shots');\n", "    mStat(p,'sh'); if(meIs(p)) meBump('shots'); if(window.__shot) window.__shot(p, p.state==='slide'?'sliding finish':ball.ownedBy===p?'after his touch':'first time');\n");
+patch("    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots');\n", "    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots'); if(window.__shot) window.__shot(p, p.state==='slide'?'sliding finish':ball.ownedBy===p?'after his touch':'first time');\n");
 patch("    lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;\n  }", "    lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;\n    if(window.__shot) window.__shot(p,'header');\n  }");
 patch("    p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;", "    if(window.__slide) window.__slide(p); p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;");
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-loose-')), 'classic.html');

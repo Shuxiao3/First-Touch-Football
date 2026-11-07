@@ -56,8 +56,8 @@ await page.click('#mrNextBtn'); await page.waitForTimeout(120);
 const rows = await page.$$eval('#matchReport .mrStats tbody tr', ns => ns.map(n => ({ t: [...n.children].map(c => c.textContent.trim()), motm: n.classList.contains('motm') })));
 r = await K(`(()=>{ const S=SUBS.G, lu=LINEUP.G, on=new Set([lu.gk,...lu.atk]); let n=0; SQUAD.G.forEach((e,si)=>{ if(on.has(si)||S.on.includes(si)||S.off.includes(si)) n++; }); return { n, best:Math.max(...RAT_NOW.map(x=>x.r)) }; })()`);
 const motm = rows.filter(x => x.motm);
-ok(rows.length === r.n && rows.every(x => x.t.length === 11) && motm.length === 1 && +motm[0].t[2] === r.best && /★/.test(motm[0].t[0]),
-  'YOUR PLAYERS: a row for each of the ' + r.n + ' who played -- rating, goals, assists, passes, shots, tackles, interceptions, saves -- and your best on the day starred (' + motm[0].t[0] + ', ' + motm[0].t[2] + ')');
+ok(rows.length === r.n && rows.every(x => x.t.length === 12) && motm.length === 1 && +motm[0].t[2] === r.best && /★/.test(motm[0].t[0]),
+  'YOUR PLAYERS: a row for each of the ' + r.n + ' who played -- rating, goals, assists, passes, the share found, shots, on target (v147: its own column), tackles, interceptions, saves -- and your best on the day starred (' + motm[0].t[0] + ', ' + motm[0].t[2] + ')');
 
 // --- the press conference, in its room -----------------------------------------------------------------------------------------
 await page.click('#mrContinueBtn'); await page.waitForTimeout(250);

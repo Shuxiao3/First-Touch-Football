@@ -38,7 +38,7 @@ r = await K(`(()=>{ const R=(role,o,res,gc)=>mRate(role,o,res??0,gc??1);
 info('ratings: ' + JSON.stringify(r));
 ok(r.plain >= 6 && r.plain <= 7 && r.win - r.loss >= 0.6, 'an ordinary game, a midfielder finding his passes: ' + r.plain + ' (won ' + r.win + ', lost ' + r.loss + ')');
 ok(r.one > r.plain && r.two > r.one && r.three > r.two && (r.three - r.two) < (r.two - r.one), 'a forward\'s goals: one ' + r.one + ', two ' + r.two + ', three ' + r.three + ' -- each worth less than the one before');
-ok(r.def >= 7.5 && r.defBad < 5 && r.gk >= 8 && r.og < 6 && r.worst === 3 && r.best === 10, 'a defender\'s tackles and interceptions and a clean sheet ' + r.def + ' (beaten, losing the ball ' + r.defBad + '); a keeper\'s five saves ' + r.gk + '; an own goal ' + r.og + '; from 3 to 10');
+ok(r.def >= 7.5 && r.defBad < 5 && r.gk >= 7.5 && r.og < 6 && r.worst === 3 && r.best === 10, 'a defender\'s tackles and interceptions and a clean sheet ' + r.def + ' (beaten, losing the ball ' + r.defBad + '); a keeper\'s five saves and a clean sheet in a win ' + r.gk + ' (v147: saves count less each -- manager-stats.mjs); an own goal ' + r.og + '; from 3 to 10');
 
 // --- a game you play: what each man did is counted, and rated -------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);

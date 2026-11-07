@@ -1384,13 +1384,38 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       he's in your nine), and the news.
   - **Match ratings and form.** Every man who plays gets a rating for the game, 3 to 10 (6 an ordinary one).
     - **In a game you play** it comes from what he did in it, counted as it happens: passes tried and found, shots
-      and on target, goals, assists, tackles won, interceptions, the ball lost, a keeper's saves. His role's work
-      counts most -- a forward's shots and goals, a midfielder's passes found, a defender's tackles and
-      interceptions, a keeper's saves -- and each goal counts less than the one before (one 7.2, two 7.9, three 8.4
-      for a forward); the result counts (a win about seven tenths above a loss), and for the back and the keeper
-      the goals let in (a clean sheet half a point). An own goal costs a point.
-    - **In a simulated game** it's guessed: how good he is beside his side, the result, his goals and the luck of
-      the day. Most goals have an assist (three in four).
+      and on target, goals, assists, tackles won, interceptions, clearances and blocks (v147), the ball lost, a
+      keeper's saves. His role's work counts most -- a forward's shots and goals, a midfielder's passes found, a
+      defender's tackles, interceptions, blocks and clearances (a clearance half), a keeper's saves -- and each goal
+      counts less than the one before (one 7.2, two 7.9, three 8.4 for a forward); the result counts (a win about
+      seven tenths above a loss), and for the back and the keeper the goals let in (a clean sheet half a point). An
+      own goal costs a point.
+    - **Not how busy he was (v147).** A keeper's saves count less each, as goals do: the first 0.45, the lot never
+      more than 1.1 (none to 1, 2, 4, 8 and 12 saves: 5.7, 6.2, 6.4, 6.7, 6.8, 6.8 in a draw). They were 0.3 apiece up
+      to eight, 2.4 in all, and his passes counted found and never missed, so the keeper on the side that lost -- the
+      one with the most to save -- was nearly always its best. Every goal past him counts now, up to six (four
+      before); his passes, every ball he plays out, count a little. A defender's side giving them few of the shots
+      while he's on counts for him (up to a third of a point), never against him. And every man's rating starts from
+      how good he is beside the 18 on the pitch: a fortieth of a point for each point of rating, a third of a point at
+      most.
+
+      | Beaten 0-4 (the playthrough that found it) | v146 | v147 |
+      |---|---|---|
+      | The keeper, rated 47: eight saves, 22 of 26 balls out found | 7.6 | 5.6 |
+      | A centre-back rated 70 who played well (3 tackles, 3 interceptions, 3 clearances, a block) | 6.0 | 6.8 |
+      | A centre-back rated 59 who did little (a tackle, 2 interceptions, a clearance) | 5.3 | 5.6 |
+      | A keeper's five saves, a clean sheet and a win | 8.4 | 7.9 |
+
+    - **The numbers in the report (v147).** PASSES is the passes he tried, % the share that found one of ours,
+      SHOTS every shot he took (blocked and off target too) and ON TGT the ones on target, each its own column with
+      its word on what it is under the pointer; under them both sides' totals, theirs from the whole match. They were
+      found/tried and on target/all, easy to read the wrong way round. On a short screen the table turns pages as the
+      game's other boxes do (it ran off the foot of its box). Every ball a keeper plays out -- kicked,
+      thrown, rolled, a goal kick -- is a pass of his: tried, and found when one of ours has it next.
+    - **In a simulated game** it's guessed: how good he is beside both sides (v147: his own side before), the
+      result, his goals and the luck of the day. Most goals have an assist (three in four). Over a season a better
+      man rates higher: in his own league the correlation is 0.62 to 0.66 (0.51 to 0.55 before), across all four
+      about 0.2 (each league's ratings are its own, as its results are).
     - **His form** is the drift of his last few ratings; it fades back to ordinary without games to keep it. It
       counts in his development: in good form he grows faster (twins at 19, a season: 13.8 half points against 7.9);
       in poor form his touch, his reading of the game and his composure slip (not his legs).
@@ -2247,6 +2272,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v147: a match's numbers and its ratings.** Every ball your keeper plays out is a pass of his in the report, tried
+  and (when one of ours takes it) found: before, only the ones you played from his hands counted, as found and never
+  tried, so he read 10/0, 15/0 -- and every one had reached one of ours (30 of 30, measured). The report's columns are
+  one thing each -- PASSES tried, %, SHOTS, ON TGT -- with both sides' totals under them; shots were always counted,
+  but on target/all read as none taken. A keeper's saves count less each and every goal past him counts, to six: beaten
+  0-4 with eight saves he's 5.6 (7.6 before), under a centre-back who played well (6.8). See **Match ratings and form**.
 - **v146: cut-outs and back passes less perfect.** A defender cutting out their pass -- a ball over the top for a
   forward's run, cut out -- now takes it PERFECT about one time in nine (it was one in four) and loose two in five,
   the less composed the worse. A long pass of ours is harder to take the further it's come, and a back pass a touch

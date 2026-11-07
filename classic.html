@@ -630,6 +630,7 @@
   .mrStats td{ padding:2px 4px; text-align:center; color:var(--ink2); border-top:1px solid var(--well); font-family:'FTC Dot',monospace; white-space:nowrap; } .mrStats .l{ text-align:left; }
   .mrStats td.l{ color:var(--ink); } .mrStats td i{ font-style:normal; color:var(--dim); } .mrStats .sub{ font-size:9px; color:var(--warn); } .mrStats .st{ color:#ffcf3f; font-weight:400; }
   .mrStats tr.motm td{ background:rgb(255 207 63 / .08); }
+  .mrStats tfoot td{ color:var(--dim); } .mrStats tfoot tr:first-child td{ border-top:2px solid var(--well); }   /* (v147: both sides' totals) */
   @media (max-height:400px){ .mrStats{ font-size:11px; } .mrStats td{ padding:1px 4px; } #matchReport .mrBoard .mrScore{ font-size:34px; } }
   .mnCard{ max-width:380px; gap:6px; } .mnTitle{ font:16px 'FTC Dot',monospace; letter-spacing:2px; color:var(--acc); text-align:center; } .mnSub{ font-size:11px; color:var(--dim); text-align:center; margin-bottom:4px; }
   .mnRow{ display:flex; justify-content:space-between; align-items:baseline; padding:4px 2px; font-size:13px; color:var(--ink2); opacity:0; transform:translateY(6px); transition:opacity .25s, transform .25s; }
@@ -6458,8 +6459,12 @@
     const ax=dx*cs-dy*sn, ay=dx*sn+dy*cs;
     ball.vx=ax*power; ball.vy=ay*power; ball.vz=vz;
     ball.z=Math.max(ball.z,kp.goalKick?0:6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;   // (a goal kick: off the ground)
-    recordPassTeam(kp.team, null); touchedBy(kp);
+    recordPassTeam(kp.team, null); touchedBy(kp); gkPassMade(kp);
   }
+  // (v147: every ball a keeper plays out -- kicked, thrown, rolled, a goal kick -- is a pass of his in the numbers, tried,
+  // and found when one of ours takes it. Only the ones you played from his hands counted as found before, and none as
+  // tried: the report had him at 10 found of 0, 15 of 0)
+  function gkPassMade(kp){ mStat(kp,'pa'); ball.passerRef=kp; }
   function keeperThrowTo(kp,mate){
     gkLaunch(kp, mate.x+mate.vx*0.3, mate.y+mate.vy*0.3);          // lead the run a touch
   }
@@ -6532,7 +6537,7 @@
       kp.facing={x:f.x/fl,y:f.y/fl};
       if(q===controlled||Math.hypot(tx-ball.x,ty-ball.y)>GK_SHORT) gkLaunch(kp,tx,ty);   // (to your run, or a long one: his kick)
       else gkShort(kp,tx,ty);                                                           // (to a man near: thrown or rolled out)
-      ball.intendedRcv=q; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null; }
+      ball.intendedRcv=q; ball.rcvRunner=false; ball.thru=null; ball.lob=null; }
     else if(how==='hoof') gkHoof(kp);                                                     // HOOF IT
     else gkLong(kp,true);                                                                 // (nobody open: long, to whoever it can find)
     kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0; controllingKeeper=null; }
@@ -6542,7 +6547,7 @@
     for(const q of teamOf(kp.team)){ if(q.role==='DEF'||inOffsidePos(q)) continue;
       const d=dist(kp,q), up=atk*(q.x-kp.x); if(d<600||d>1250) continue; if(up>best){ best=up; tgt=q; } }
     if(!tgt){ gkLong(kp,true); return; }
-    gkLaunch(kp, clamp(tgt.x+atk*40,80,FW-80), tgt.y); ball.intendedRcv=tgt; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null; }
+    gkLaunch(kp, clamp(tgt.x+atk*40,80,FW-80), tgt.y); ball.intendedRcv=tgt; ball.rcvRunner=false; ball.thru=null; ball.lob=null; }
 
   // YOUR KEEPER WITH IT IN HIS HANDS (v114): you're on him the moment he has it -- not left on whoever you were. The stick
   // turns him and walks him round his box; PASS plays it to the man you're aiming at as a pass would pick him (that way,
@@ -6906,7 +6911,7 @@
     p.noTouchT=0.35; ball.lastTouch=p.team;
     endCurve(); recordPassTeam(p.team,p); passPose(p);
     clearArm=0; clearHeld=false; clearCharge=0; clearFeet=false; trapping=0; crossHeld=false; crossCharge=0; crossPend=null; crossLow=false;
-    lastGrade='CLEARED!'; gradeColor='#9dff3c'; gradeFade=1.0;
+    lastGrade='CLEARED!'; gradeColor='#9dff3c'; gradeFade=1.0; mStat(p,'clr');   // (v147: a clearance in his numbers, as a block is)
   }
   // A CLEARANCE AND DEF IQ: the better a man reads the game, the further his clearance can go (x0.85 at Def IQ 1, x1.3 at
   // 10, on what his Shot power gives it) and the more surely and truly it finds a team-mate upfield -- one within reach,
@@ -7540,7 +7545,7 @@
     ball.cushBy=null; ball.ownedBy=null; ball.lastTouch=p.team; ball.crossT=0; p.noTouchT=Math.max(p.noTouchT||0,0.3);   // (v142: and away -- not chested down by him again as it leaves his head)
     ball.shotBy=p.team; ball.shotT=1.0; ball.curveSpin=0; ball.curveSpinT=0;
     recordPassTeam(p.team,p); ball.kickP=null;   // (a header: never a back-pass -- see gkBackPass)
-    mStat(p,'sh'); if(meIs(p)) meBump('shots');   // (v135: a shot in the stats too -- a header on goal never was, about one and a half a match, though its goal or its save counted it on target)
+    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots');   // (v135: a shot in the stats too -- a header on goal never was, about one and a half a match, though its goal or its save counted it on target)
     lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;
   }
   // A HEADER CLEAR: up and away from his own goal, out to the side it came from -- or, the better he reads the game (Def
@@ -7555,7 +7560,7 @@
     const err=(0.04+0.12*(1-iq))*(1+cq)*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
     ball.vx=(dx*ca-dy*sa)*sp; ball.vy=(dx*sa+dy*ca)*sp; ball.vz=200;
     ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=p.team; ball.crossT=0; ball.crossBy=null; ball.shotBy=null; ball.shotT=0;
-    endCurve(); recordPassTeam(p.team,p); ball.kickP=null;   // (a header)
+    endCurve(); recordPassTeam(p.team,p); ball.kickP=null; mStat(p,'clr');   // (a header)
     lastGrade='HEADED CLEAR'; gradeColor='#ffb43c'; gradeFade=1.0;
   }
   // Who of theirs goes up for this ball with him: anyone off the ground at it, or one of the computer's men going for
@@ -7728,7 +7733,7 @@
   }
   function shootAt(p,atkSide,aim,charge,aiCurl,accMul,spin,across){
     if(LAB.on&&LAB.kind==='cross') crossLabOnShot(p);
-    mStat(p,'sh'); if(meIs(p)) meBump('shots');
+    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots');
     const gx=atkSide>0?FW:0;
     let ty=YC+aim*(GOAL_W/2-14);
     const manual=(p===controlled), aimed=Math.abs(aim)>0.25;   // player picked a corner -> honor it
@@ -9884,7 +9889,7 @@
     ball.vx=cx*D/T; ball.vy=cy*D/T; ball.vz=520*T/2; ball.z=Math.max(ball.z,1);
     ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.cushBy=null; ball.intendedRcv=C.q; ball.rcvRunner=false;
     ball.crossBy=null; ball.crossT=0; ball.shotBy=null; ball.shotT=0;
-    p.noTouchT=0.35; ball.lastTouch=p.team;
+    p.noTouchT=0.35; ball.lastTouch=p.team; mStat(p,'clr');
     endCurve(); recordPassTeam(p.team,p); passPose(p);
   }
   // running at the man (approach), the sharp cut past him (cut), and away (go)
@@ -12009,7 +12014,7 @@
     if(!hit) return;
     ball.x=x0+sx*ht; ball.y=y0+sy*ht;
     deflectOff(hit,0.3,0.6);
-    ball.shotT=0; ball.shotBy=null; hit.noTouchT=0.3;
+    ball.shotT=0; ball.shotBy=null; hit.noTouchT=0.3; mStat(hit,'blk');   // (v147: a block in his numbers -- his rating counts it)
     lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
     if(LAB.on&&LAB.kind==='shoot') labOnSave('blocked');
   }
@@ -12028,7 +12033,7 @@
     if(!hit) return;
     ball.x=x0+sx*ht; ball.y=y0+sy*ht;
     deflectOff(hit,0.3,0.6);
-    ball.crossT=0; ball.crossBy=null; hit.noTouchT=0.3;
+    ball.crossT=0; ball.crossBy=null; hit.noTouchT=0.3; mStat(hit,'blk');
     lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
     if(LAB.on&&LAB.kind==='cross'&&LAB.rep&&LAB.rep.cross) crossLabFinish('blocked');
   }
@@ -12990,7 +12995,7 @@
     const spread=(1-gkAccOf(kp))*0.08*(Math.random()*2-1), cs=Math.cos(spread), sn=Math.sin(spread);
     ball.vx=(dx*cs-dy*sn)*vh; ball.vy=(dx*sn+dy*cs)*vh; ball.vz=vz;
     ball.z=Math.max(ball.z,kp.goalKick?0:6); ball.ownedBy=null; ball.cushBy=null; ball.dribbler=null; ball.lastTouch=kp.team;   // (a goal kick: off the ground)
-    recordPassTeam(kp.team, null); touchedBy(kp); }
+    recordPassTeam(kp.team, null); touchedBy(kp); gkPassMade(kp); }
   // HIS SIDE SETTING ITSELF for the keeper's ball: the computer's keeper gives it a moment (up to 2.4 s held) while more
   // than one of his men is still on his way to his spot in the shape, so it goes out with the side spread rather than
   // bunched in front of him -- unless one of theirs is coming at him
@@ -13019,7 +13024,7 @@
     }
     if(best){
       gkShort(kp,bt.x,bt.y,bt.vh,bt.vz);
-      ball.intendedRcv=best; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=null;
+      ball.intendedRcv=best; ball.rcvRunner=false; ball.thru=null; ball.lob=null;
     } else if(!force){
       return false;
     } else {
@@ -15374,6 +15379,9 @@
   // keeper's saves (sav) -- read at the end for his rating (see MATCH RATINGS)
   const MSTAT={G:{},R:{}};
   function mStat(p,k){ if(!careerFix||!p||p.squadIdx==null||!MSTAT[p.team]) return; const o=MSTAT[p.team][p.squadIdx]||(MSTAT[p.team][p.squadIdx]={}); o[k]=(o[k]||0)+1; }
+  // (v147: a shot, seen by every man on: his side's shots while he was on (shm), and theirs (shf) -- a defender's rating
+  // has his side's share of them, the fewer they had the better)
+  function shotSeen(p){ if(!careerFix||!p) return; for(const q of players) if(!q.benched) mStat(q,q.team===p.team?'shm':'shf'); }
   // a man hurt in a career match (his squad index, by side): slowed, no sprinting, the injury his after it
   const HURT={G:new Set(),R:new Set()};
   function hurtInMatch(p){ HURT[p.team].add(p.squadIdx); p.staminaCap=Math.min(p.staminaCap??1,0.4); p.stamina=Math.min(p.stamina??1,p.staminaCap); p.sprint=false;
@@ -15964,17 +15972,28 @@
   // less), big games a little more composure. His season's games, goals, assists, clean sheets and average rating go on
   // his card; the report has your men's ratings.
   const FORM_BASE=6.6;
-  function mRate(role,o,res,gc){ const n=k=>o[k]||0, dim=(x,a)=>a*(1-Math.pow(0.6,x))/0.4;   // (diminishing: 1, 1.6, 1.96...)
+  // THE RATING AND HOW MUCH OF IT IS VOLUME (v147): a keeper's saves count less each, as goals do -- the first 0.45, the
+  // lot never more than 1.1 (they were 0.3 apiece up to eight: 2.4, so the busiest keeper, on the side that lost, was
+  // nearly always the best on it) -- and every goal past him counts against him, to six (four before); his passes, now
+  // every ball he plays out, count a little. A defender's work counts clearances and blocks with his tackles and
+  // interceptions (a clearance half), and his side giving them little to shoot at -- their share of the match's shots
+  // while he was on -- a little more. And every man's rating starts from how good he is beside the 18 on the pitch (a
+  // fortieth of a point for each point of rating, at most a third of a point either way). x: {ovr, avg}
+  function mRate(role,o,res,gc,x){ x=x||{}; const n=k=>o[k]||0, dim=(v,a)=>a*(1-Math.pow(0.6,v))/0.4;   // (diminishing: 1, 1.6, 1.96...)
     let r=6+res*0.35+dim(n('g'),role==='ATT'?0.9:1.1)+dim(n('a'),0.6)+Math.min(n('son'),4)*0.12+Math.min(n('sh'),6)*0.03;
-    r+=Math.min(n('pc'),25)*(role==='MID'?0.04:0.025)-Math.max(0,n('pa')-n('pc'))*0.03;
-    r+=Math.min(n('tk')+n('int'),8)*(role==='DEF'?0.18:0.1)-Math.min(n('lost'),8)*0.06;
-    if(role==='GK') r+=Math.min(n('sav'),8)*0.3;
-    if(role==='GK'||role==='DEF') r+=gc===0?0.5:-0.25*Math.min(gc,4);
+    r+=Math.min(n('pc'),25)*(role==='MID'?0.04:role==='GK'?0.01:0.025)-Math.max(0,n('pa')-n('pc'))*(role==='GK'?0.015:0.03);
+    r+=Math.min(n('tk')+n('int')+n('blk')+0.5*n('clr'),10)*(role==='DEF'?0.18:0.1)-Math.min(n('lost'),8)*0.06;
+    if(role==='GK') r+=dim(n('sav'),0.45)+(gc===0?0.5:-0.3*Math.min(gc,6));
+    else if(role==='DEF'){ r+=gc===0?0.5:-0.25*Math.min(gc,4); const f=n('shf'), m=n('shm'); if(f+m>=3) r+=clamp((0.5-f/(f+m))*0.8,0,0.35); }
+    if(x.ovr!=null&&x.avg!=null) r+=clamp((x.ovr-x.avg)*0.025,-0.35,0.35);
     return clamp(Math.round((r-n('og'))*10)/10,3,10); }
   function mSimRate(p,avg,res,g,gc){ let r=6.1+res*0.35+(p.ovr-avg)*0.04+(Math.random()+Math.random()+Math.random()-1.5)*0.7+g*0.8;
     if(p.role==='GK'||p.role==='DEF') r+=gc===0?0.5:-0.2*Math.min(gc,4);
     return clamp(Math.round(r*10)/10,3,10); }
   const RAT_NOW=[];   // (your men's ratings in the game being played: for its report)
+  // (v147) the average rating of the men who started the game being played, both sides: what mRate measures a man against
+  function liveAvgOvr(){ const L=[]; for(const t of ['G','R']){ const lu=LINEUP[t], sq=SQUAD[t]; if(!lu||!sq) continue; for(const si of [lu.gk,...lu.atk]){ const e=sq[si]; if(e&&e.ovr!=null) L.push(e.ovr); } }
+    return L.length?L.reduce((a,v)=>a+v,0)/L.length:null; }
   function mgRated(d,p,r,g,big,gc,yours){ const a=yours&&hasTrait(p,d,'incon')?0.45:0.3;   // (the inconsistent: his form swings more)
     p.fm=p.fm==null?r:Math.round(((1-a)*p.fm+a*r)*100)/100; p.rs=Math.round(((p.rs||0)+r)*10)/10; p.rn=(p.rn||0)+1;
     if(g) p.wg=(p.wg||0)+g; if(big) p.wb=(p.wb||0)+1; if(gc===0&&(p.role==='GK'||p.role==='DEF')) p.cs=(p.cs||0)+1;
@@ -15982,11 +16001,11 @@
   // a game's ratings, both sides (m: [home, away, their goals, ...]; live: the one you played)
   function mgRateGame(d,m,xh,xa,live,big){
     const side=(id,xi,gf,gc)=>{ const res=gf>gc?1:gf<gc?-1:0, yours=id===d.clubId, vs=!yours&&(m[0]===d.clubId||m[1]===d.clubId);   // (vs: against you -- you learn about him)
-      if(live&&SQUAD.G&&SQUAD.R){ const t=yours?'G':'R', P=mgPlayersOf(d,id), S=SUBS[t]||{on:[],off:[]}, on=new Set([LINEUP[t].gk,...LINEUP[t].atk]);
+      if(live&&SQUAD.G&&SQUAD.R){ const t=yours?'G':'R', P=mgPlayersOf(d,id), S=SUBS[t]||{on:[],off:[]}, on=new Set([LINEUP[t].gk,...LINEUP[t].atk]), avg=liveAvgOvr();
         SQUAD[t].forEach((e,si)=>{ if(!(on.has(si)||S.on.includes(si)||S.off.includes(si))) return;
           const p=t==='G'?d.roster[e.ri]:P.find(x=>x.id===e.lookKey); if(!p) return; const o=MSTAT[t][si]||{};
-          mgRated(d,p,mRate(p.role,o,res,gc),o.g||0,big,gc,yours); if(o.a) p.as=(p.as||0)+o.a; if(vs) knUp(d,p,knOf(d,p)+0.5,2); }); return; }
-      const avg=xi.reduce((s,p)=>s+p.ovr,0)/Math.max(1,xi.length);
+          mgRated(d,p,mRate(p.role,o,res,gc,{ovr:p.ovr,avg}),o.g||0,big,gc,yours); if(o.a) p.as=(p.as||0)+o.a; if(vs) knUp(d,p,knOf(d,p)+0.5,2); }); return; }
+      const both=[...(xh||[]),...(xa||[])], avg=both.reduce((s,p)=>s+p.ovr,0)/Math.max(1,both.length);   // (v147: beside both sides, as a game you play has it -- it was beside his own)
       for(const p of xi){ const g=p._g||0; delete p._g; mgRated(d,p,mSimRate(p,avg,res,g,gc),g,big,gc,yours); if(vs) knUp(d,p,knOf(d,p)+0.5,2); } };
     side(m[0],xh,m[2],m[3]); side(m[1],xa,m[3],m[2]);
     if(m[0]===d.clubId) recWin(d,m[2],m[3],m[1]); else if(m[1]===d.clubId) recWin(d,m[3],m[2],m[0]); }
@@ -18686,15 +18705,21 @@
       const rt=(rep.rat||[]).find(x=>p&&x.name===p.name); rows.push({name:p?p.name:e.name, num:p?p.num:e.num, pos:p?natPos(p):e.role, gk:(p?p.role:e.role)==='GK', r:rt?rt.r:null, o, sub:S.on.includes(si)}); });
     const ord=r=>r.gk?0:r.sub?2:1; rows.sort((a,b)=>ord(a)-ord(b)||(b.r||0)-(a.r||0));
     const best=rows.reduce((a,r)=>r.r!=null&&(!a||r.r>a.r)?r:a,null), n=(o,k)=>o[k]||0, pct=o=>n(o,'pa')?Math.round(n(o,'pc')/n(o,'pa')*100)+'%':'—';
+    // (v147: passes tried, the share found, shots, on target -- each its own column. It was found/tried and on target/all,
+    // read the other way round as often as not: a keeper's 10/0 looked like ten tried and none found. Under them both
+    // sides' totals -- theirs from the whole match, not just the men listed)
+    const tot=S0=>{ const o={}; for(const x of Object.values(S0||{})) for(const k in x) o[k]=(o[k]||0)+x[k]; return o; }, totG=tot(MSTAT.G), totR=tot(MSTAT.R);
+    const totRow=(lbl,o,sv)=>'<tr class="tot"><td class="l">'+lbl+'</td><td></td><td></td><td>'+(n(o,'g')||'·')+'</td><td>'+(n(o,'a')||'·')+'</td><td>'+n(o,'pa')+'</td><td>'+pct(o)+'</td><td>'+n(o,'sh')+'</td><td>'+n(o,'son')+'</td><td>'+(n(o,'tk')||'·')+'</td><td>'+(n(o,'int')||'·')+'</td><td>'+sv+'</td></tr>';
+    const kpOf=t=>{ const lu=LINEUP[t]; return lu?((MSTAT[t]||{})[lu.gk]||{}):{}; };
     h+='<div class="mrPage" data-mrp="1" style="display:none"><div class="mrHead"><div class="mrLabel">YOUR PLAYERS · '+mgEsc(d.clubName)+' '+m.you+'–'+m.them+' '+mgEsc(opp)+'</div>'
       +(best?'<div class="mrMotm">★ YOUR BEST · '+(best.num?'#'+best.num+' ':'')+mgEsc(best.name)+' · '+best.r.toFixed(1)+'</div>':'')+'</div>'
-      +'<div class="mrStatsBox"><table class="mrStats"><thead><tr><th class="l">PLAYER</th><th>POS</th><th>RATING</th><th>G</th><th>A</th><th>PASSES</th><th>%</th><th>SHOTS</th><th>TACKLES</th><th>INT</th><th>SAVES</th></tr></thead><tbody>'
+      +'<div class="mrStatsBox" data-pages="mrStats"><table class="mrStats"><thead><tr><th class="l">PLAYER</th><th>POS</th><th>RATING</th><th title="Goals">G</th><th title="Assists">A</th><th title="Passes he tried">PASSES</th><th title="The share of them that found one of ours">%</th><th title="Shots he took, blocked and off target included">SHOTS</th><th title="Of his shots, the ones on target">ON TGT</th><th>TACKLES</th><th title="Interceptions">INT</th><th>SAVES</th></tr></thead><tbody>'
       +rows.map(r=>'<tr'+(r===best?' class="motm"':'')+'><td class="l">'+(r.num?'<i>#'+r.num+'</i> ':'')+mgEsc(surname(r.name))+(r===best?' <b class="st">★</b>':'')+(r.sub?' <i class="sub">SUB</i>':'')+'</td><td>'+mgEsc(r.pos)+'</td>'
         +'<td class="rt" style="color:'+(r.r==null?'var(--dim)':r.r>=7.5?'var(--good)':r.r<6?'var(--bad)':'var(--ink)')+'">'+(r.r!=null?r.r.toFixed(1):'—')+'</td><td>'+(n(r.o,'g')||'·')+'</td><td>'+(n(r.o,'a')||'·')+'</td>'
-        +'<td>'+n(r.o,'pc')+'/'+n(r.o,'pa')+'</td><td>'+pct(r.o)+'</td><td>'+n(r.o,'son')+'/'+n(r.o,'sh')+'</td><td>'+(n(r.o,'tk')||'·')+'</td><td>'+(n(r.o,'int')||'·')+'</td><td>'+(r.gk?n(r.o,'sav'):'·')+'</td></tr>').join('')
-      +'</tbody></table></div><div class="mrFoot"><button class="mrContinue" id="mrContinueBtn">CONTINUE ▶</button></div></div></div>';
+        +'<td>'+n(r.o,'pa')+'</td><td>'+pct(r.o)+'</td><td>'+n(r.o,'sh')+'</td><td>'+n(r.o,'son')+'</td><td>'+(n(r.o,'tk')||'·')+'</td><td>'+(n(r.o,'int')||'·')+'</td><td>'+(r.gk?n(r.o,'sav'):'·')+'</td></tr>').join('')
+      +'</tbody><tfoot>'+totRow(mgEsc(d.clubName.toUpperCase()),totG,n(kpOf('G'),'sav'))+totRow(mgEsc(opp.toUpperCase()),totR,n(kpOf('R'),'sav'))+'</tfoot></table></div><div class="mrFoot"><button class="mrContinue" id="mrContinueBtn">CONTINUE ▶</button></div></div></div>';
     el.innerHTML=h; el.style.display='block'; el.scrollTop=0;
-    const pg=k=>el.querySelectorAll('.mrPage').forEach(x=>{ x.style.display=x.dataset.mrp===String(k)?'':'none'; });
+    const pg=k=>{ el.querySelectorAll('.mrPage').forEach(x=>{ x.style.display=x.dataset.mrp===String(k)?'':'none'; }); fitNow(); };   // (v147: measured as it shows -- a page shown by its style wasn't, and on a short screen the table ran off its foot)
     document.getElementById('mrNextBtn').onclick=()=>pg(1);
     document.getElementById('mrContinueBtn').onclick=()=>{ el.style.display='none'; renderHub(); }; }
   // THE MONEY, back at the club after a match you played (v106): where the bank stood before it, then -- a line at a time,
