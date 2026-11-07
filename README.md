@@ -238,7 +238,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     for his men to be on their spots (up to 3.5 s once he's over it) and crosses it to the best placed of them; with it
     on its way, anyone of his in the box goes for it, a centre-back too. Yours: you're put on him, over the ball -- the
     stick doesn't walk him off it -- and CROSS crosses it in (held longer, to a man further across, as any cross of
-    yours), PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you after 5 s.
+    yours), PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you after 8 s
+    (v142: 5 s), the stopwatch over him for the last two. Crossed, by you or for you, you're on the man it's for
+    (v142: see **You're on the man it's for**).
+    - **Your corner's set-up** (v142): while a corner of yours is being taken -- your man walking to it, and over it --
+      a panel at the top of the screen says how many of your men are IN THE BOX, how many are BACK for the break, in
+      your own half, and how many are in MIDFIELD: the rest. `Q` and `E` are one fewer and one more in the box, `Z`
+      and `C` one fewer and one more back (on a phone, tap the panel's − and +); at most six in the box and five
+      back, and one more of either only if there's a man in midfield for it. Your men go at once. Back, a defender
+      before a midfielder before a forward, the weaker in the air before the better; in the box, the best in the air
+      of the rest, a forward or a centre-back first, the nearer the box the likelier; midfield, the edge of the box
+      first, then further out. It starts at four in the box and two back, as the computer's, and it's kept for your
+      corners after (on the device, with your settings). The computer's own corners are as they were.
   - **A goal kick** is the keeper's, from his six-yard box, as it was (yours: you're on him -- see **Your keeper with it
     in his hands**). The other side go out of his penalty area, and none of them can come back into it till it's taken.
     He walks to it (v140), up off the turf first if he's down -- 7 m takes him about a second and a quarter; he was put
@@ -1182,6 +1193,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       against 4-5 m for a lofted cross.
     - A single tap waits the double-tap window (the pass's, 150 ms) in case a second tap is coming; a held press goes
       as you let go. A second press just after your cross has gone doesn't turn into a slide.
+    - **You're on the man it's for** (v142), as it's struck: the one of ours who'll get to it first where it comes
+      through head height in or by their box -- the man it was aimed at, unless another of ours is there a clear
+      0.2 s sooner (a cross gone over him to the far post: the man at the far post). With the stick left alone he
+      sprints to the first point of it he can get to, read as the computer's man reads it (his Off IQ), and waits
+      there. Press SHOOT (`K`) any time from the moment it's struck and he goes up for it -- one of theirs at it has a
+      duel on his hands, Heading against Heading -- and heads it on goal as it gets to his head, as the computer's
+      man would: not a jump at it while it's still over him, nor a slide under it. No SHOOT, no header: he takes it
+      down if he can. Steer him and he's yours. A low one: you're on him and he meets it as he would a pass (SHOOT:
+      first time). A corner of yours is the same, crossed by you or for you. (You stayed on the crosser, and the man
+      it was for headed it himself.) Measured over 150 crosses from the byline (the same set-ups each time: two of
+      ours in their box, three of theirs and their keeper), with SHOOT pressed as it's struck: 36% headed on goal and
+      9% in, against 23% and 3% for the computer's man in v141 (210) -- yours sprints straight there where his times
+      his run. With no SHOOT he never heads it (0 of 30; the other man of ours did, 4 times). Low ones (30): with
+      SHOOT, 25 shots and 6 goals; in v141 the computer's man got to 3 of them and shot at none.
+    - **A header's away off his head** (v142): the man who heads it can't touch it again for 0.3 s. Yours used to be
+      chested down by you as it left your head, often enough to cost two headers in five.
   - **The predicted flight** of a ball that's just been lofted now allows for the grass dragging at it till it's off
     the ground. It used to run every cross on 8% too far in its first moments.
   - **Over whole matches** (computer against computer, 12 six-minute games each, per 6 minutes, before → now):
@@ -1948,10 +1975,11 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `WASD` | Move (double-tap a direction to sprint) |
 | `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · a throw-in of yours: thrown to the man you aim at, about as far as you held it (Football Classic, v138: see **The ball goes out**) · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
-| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · the ball nobody's: a shot, struck first time as it gets to you, or a sliding finish (Football Classic, v139: see **A shot at a ball that's nobody's**) · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
+| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · the ball nobody's: a shot, struck first time as it gets to you, or a sliding finish (Football Classic, v139: see **A shot at a ball that's nobody's**) · your cross on its way (you're on the man it's for): he goes up for it and heads it as it gets to him (Football Classic, v142: see **You're on the man it's for**) · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
 | `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is his long ball, a long pass pinged to the man you aim at (the button reads LONG; v115) |
+| `Q` `E` · `Z` `C` | A corner of yours being taken (Football Classic, v142): one fewer · one more of your men in the box; one fewer · one more back for the break -- the rest in midfield (the panel at the top; on a phone, tap its − and +). See **Your corner's set-up** |
 | `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
 | `V` | Toggle the pixel-art players / plain vector players |
 
@@ -2188,6 +2216,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v142: your cross puts you on the man it's for; your corner's set-up.** As your cross is struck -- or your corner,
+  crossed by you or for you -- you're on the man of ours who'll get to it first (it was the crosser you stayed on).
+  He sprints to it; SHOOT any time and he goes up for it and heads it as the computer's man would, a duel for their
+  man at it; no SHOOT, no header. At a corner of yours a panel picks how many go in the box (`Q` `E`) and how many
+  stay back for the break (`Z` `C`), the rest in midfield -- back, defenders first, then midfielders -- kept for your
+  corners after; you've 8 s to set it up (5 before). A header's away off the man's head: yours were chested down
+  again as they left it.
 - **v141: the throw-in, held in front of his face.** The man taking a throw-in holds the ball in front of his face, a hand
   either side of it, his arms the length they always are -- in v140 they reached up over his head to it, twice the length
   of his body. Winding up it rises 2 px; thrown, his hands come down to his chest.
