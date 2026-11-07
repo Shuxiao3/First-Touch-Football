@@ -137,6 +137,7 @@ const scene = (kind, o) => page.evaluate(({ kind, o }) => new Promise(res => { c
   for(const k of T.keepers()) k.y = 30;
   const DX = o.back ? -34 : 70;
   p.x = T.FW / 2; p.y = T.YC; p.vx = o.back ? 0 : atk * 150; p.vy = 0; p.facing = { x: atk, y: 0 }; p.stars = 5; p.state = 'normal'; p.noTouchT = 0; p.skill = null; p.stamina = 1;
+  Object.assign(p.stats, { speed: 7, acceleration: 8, agility: 8.5, ballControl: 9, dribbling: 6.5, offIQ: 9.5 });   // (v144: the man the moves were measured on -- a box-to-box midfielder of the exhibition side's, whoever's in his place now: the side's men change with the types)
   d.x = p.x + atk * DX; d.y = p.y + 6; d.vx = d.vy = 0; d.state = 'normal'; d.noTouchT = 99; d.tackleCd = 99;   // (nor slides in)
   b.ownedBy = p; b.x = p.x + atk * 14; b.y = p.y; b.z = 0; b.vx = p.vx; b.vy = 0; b.vz = 0; b.lob = null; b.thru = null; b.dribbler = null; b.dribbleGrace = 0; b.intendedRcv = null; b.curveSpinT = 0;
   const m = { kind }; if(o.d) m.d = { x: o.d[0] * atk, y: o.d[1] * atk }; if(o.sense) m.sense = o.sense; if(o.side) m.side = o.side;
