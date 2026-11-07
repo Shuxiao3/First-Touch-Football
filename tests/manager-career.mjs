@@ -552,12 +552,12 @@ await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); c
 ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.role !== 'GK' && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
   'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', ' + vet.role + ' (never a keeper), on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
 await games(2); const s4 = await story(); await games(1); const s5 = await story();
-await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="insidefwd"]'); await page.waitForTimeout(40);
+await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="invwinger"]'); await page.waitForTimeout(40);
 const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();
 const kid = await page.evaluate(() => { const d = __MG.d, p = d.roster.find(x => x.id === d.story.kidId); return p && { age: p.age, ovr: p.ovr, pot: p.pot, role: p.role, sub: p.subRole, style: p.style, story: d.story.kid }; });
-ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Gets inside, runs the channel/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
-   && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'insidefwd' && kid.story === 2,
-  'after the 5th, a wonderkid asks to join; WNG and INSIDE FORWARD picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
+ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 90
+   && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'invwinger' && kid.story === 2,   // (v143: an inverted winger -- the inside forward's gone)
+  'after the 5th, a wonderkid asks to join; WNG and INVERTED WINGER picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
 
 // --- FITNESS AND THE CUPS: a man's fitness carries from one game to the next -- a game costs him a quarter of it or so,
 // a day's rest gives some back (more with a better physio) -- and a live match starts with it as his legs' ceiling.

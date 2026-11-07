@@ -2216,6 +2216,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v143: three types in each middle; the Inside forward gone.** A holding midfielder is an Anchor, a Deep creator or
+  the new Cover midfielder (the quicker holder, who reads it); a central one a Box-to-box, a Ball-winner or the new
+  Mezzala (a dribbler who arrives to finish); an attacking one a Playmaker (a central midfielder's type before), a
+  Shadow striker or a Trequartista. The Inside forward's gone from the wingers, his share to the rest; a man who was one
+  is the winger his stats fit best, his rating as it was, and a career's playmakers are attacking midfielders. The new
+  two play as the anchor and the box-to-box for now, till their own play is gone through. See **The types in each
+  position (v143)**.
 - **v142: your cross puts you on the man it's for; your corner's set-up.** As your cross is struck -- or your corner,
   crossed by you or for you -- you're on the man of ours who'll get to it first (it was the crosser you stayed on).
   He sprints to it; SHOOT any time and he goes up for it and heads it as the computer's man would, a duel for their
@@ -3177,7 +3184,10 @@ tactics). Anywhere else he's out of position. It also gives him **habits on the 
 told (the team instructions). "How common" is its share of the men in its position. (v127: the central midfielders
 are three positions again -- holding, central and attacking -- and their seven archetypes are sorted among them, each
 covering the next one along as a second position. A holding and an attacking midfielder are each half as common as a
-central one: see **Positions, two to one to one** in the career.)
+central one: see **Positions, two to one to one** in the career.) (v143: nine of them, three to each position -- the
+Playmaker an attacking midfielder now, the Cover midfielder and the Mezzala new -- and the Inside forward gone from the
+wingers: a man who was one is re-labelled as the winger his stats fit best, his stats and rating as they were -- most
+are Inverted wingers. See **The types in each position (v143)** below.)
 
 | Position | Archetype | Plays | Also | How common | Pace | Good at | On the pitch |
 |---|---|---|---|---|---|---|---|
@@ -3190,20 +3200,21 @@ central one: see **Positions, two to one to one** in the career.)
 | | Wing-back | FB, WM | W | 25% | 7.5 | pace, crossing, dribbling, engine | a step further up than the full-backs are told to go; down the line, and the cross |
 | | Defensive full-back *(v118)* | FB | CB | 25% | 5 | tackling, strength, heading | a step further back: overlaps rarely, tucks in as a third centre-back, keeps it simple |
 | | Inverted full-back *(v118)* | FB | DM, WM *(v127; CM, WM before)* | 10% | 5.5 | passing, composure, control | with the ball (out of our first quarter) steps in off his flank, into midfield beside the pivot; passes, doesn't cross |
-| Holding midfield *(v127)* | Anchor | DM | CB, CM | 55% | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
-| | Deep creator *(v116)* | DM | CM | 45% | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
-| Central midfield | Box-to-box | CM | DM, AM, WM | 40% | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
-| | Playmaker | CM | AM | 33% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
-| | Ball-winner *(v118)* | CM | DM | 27% | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
-| Attacking midfield *(v127)* | Shadow striker *(v118)* | AM | CM, ST | 60% | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
-| | Trequartista *(v118: was the Creator)* | AM | CM, W, ST | 40% | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
+| Holding midfield *(v127)* | Anchor | DM | CB, CM | 40% *(v143; 55% before)* | 4.5 | tackling, interceptions, strength | the holder first; a step back: screens the back line, keeps it simple |
+| | Deep creator *(v116)* | DM | CM | 35% *(v143; 45%)* | 4.5 | long passing, composure, reading the game | holds with the pivot and runs the game from deep: the long ball forward, never the dribble |
+| | Cover midfielder *(v143)* | DM | CB, CM | 25% | 5.5 | reading the game, interceptions, stamina | the quicker holder; for now he plays as the anchor does -- holds with the pivot, reads it rather than wins it, keeps it simple -- till his own habits come: dropping into the gap a full-back or a centre-back leaves |
+| Central midfield | Box-to-box | CM | DM, AM, WM | 45% *(v143; 40%)* | 5 | stamina, strength, tackling, shooting | a step further forward: arrives late in their box, gets back to ours |
+| | Ball-winner *(v118)* | CM | DM | 30% *(v143; 27%)* | 6 | tackling, stamina, slide tackles | goes into the man on it tighter, and out to him higher up the pitch; won, he keeps it simple |
+| | Mezzala *(v143)* | CM | AM, WM | 25% | 5.5 | dribbling, runs, finishing | for now he plays as the box-to-box does -- a step further forward, into the box for a cross -- runs with it and takes his man on, till his own habits come: out of the middle into the half-space, and the channel beyond the wide man |
+| Attacking midfield *(v127)* | Playmaker *(v143: a central midfielder before, 33% of them)* | AM | CM | 40% | 4.5 | passing, vision, bend | plays it through, keeps the ball |
+| | Shadow striker *(v118)* | AM | CM, ST | 35% *(v143; 60%)* | 5.5 | finishing, composure, runs | runs beyond the striker into the box, always: a second forward from midfield |
+| | Trequartista *(v118: was the Creator)* | AM | CM, W, ST | 25% *(v143; 40%)* | 5.5 | dribbling, flair, control | a free role between their lines, drifting over to where the ball is; takes men on, the killer ball |
 | Wide midfield | Wide midfielder | WM | CM, FB | 45% | 6 | stamina, crossing, tackling | up and down the flank all game; crosses, tracks back |
 | | Wide runner | WM | FB, W | 30% | 8 | pace, dribbling, crossing | flies down the line with it and takes his man on |
 | | Wide playmaker *(v118)* | WM | W | 25% | 5 | passing, vision, control | inside off the flank, to the ball, to make the play |
-| Winger | Trickster *(v118)* | W | WM | 30% | 7 | dribbling, agility, skill moves | runs at his man with tricks, any way at all; the most skill stars of anyone |
-| | Winger | W | WM | 30% | 7.5 | pace, crossing, dribbling | takes it down the line to the byline and crosses |
-| | Inverted winger *(v118)* | W | WM | 22% | 7.5 | dribbling, bend, passing | narrower; cuts inside to curl it in or slide the pass through |
-| | Inside forward | W | ST | 18% | 7.5 | pace, finishing, runs | in the channel between full-back and centre-back; runs in behind, cuts in, shoots |
+| Winger | Trickster *(v118)* | W | WM | 37% *(v143; 30%)* | 7 | dribbling, agility, skill moves | runs at his man with tricks, any way at all; the most skill stars of anyone |
+| | Winger | W | WM | 37% *(v143; 30%)* | 7.5 | pace, crossing, dribbling | takes it down the line to the byline and crosses |
+| | Inverted winger *(v118)* | W | WM | 26% *(v143; 22%)* | 7.5 | dribbling, bend, passing | narrower; cuts inside to curl it in or slide the pass through |
 | Striker | Poacher | ST | -- | 22% | 6 | finishing, composure, movement | on the last man's shoulder: pins their line |
 | | Speedster | ST | W | 20% | 8 | pace, acceleration | runs in behind all day |
 | | Complete forward | ST | W | 20% | 6 | link play, passing, shooting | drops in to link, then gets in the box |
@@ -3222,21 +3233,36 @@ than the full-backs are told (SUPPORT is PUSH UP to him), a defensive full-back 
 to the play, a cover CB a step deeper, a box-to-box midfielder a step further forward (and into the box for a cross),
 an anchor and a deep creator a step back (they hold with the pivot), a poacher and a speedster a step nearer their
 line. Some have a setting of their own: a target man always
-holds it up, a false nine always drops in, a shadow striker always goes in behind; an inside forward plays in the
-channel, an inverted winger and a wide playmaker narrower, and a wide playmaker comes short for it. (A winger and a
+holds it up, a false nine always drops in, a shadow striker always goes in behind; an inverted winger and a wide
+playmaker narrower, and a wide playmaker comes short for it. (A winger and a
 wide runner play wide as their line's told, and go in at the back post with the ball near their box like anyone.) Without the ball: a stopper, a ball-winner and a pressing
 forward go in tighter (a step toward TACKLE), a cover CB and a deep creator a step off; where the line holds, a cover
 CB picks up a runner (FOLLOW RUNNERS) and a stopper steps out to a man in front of him (PRESS UP); a pressing forward
 presses up whatever the forwards are told; a ball-winner goes and gets it further up than the line of engagement. On
-the ball his choices tilt: a winger, a wide runner and a wing-back fancy going down the line, an inverted winger, an
-inside forward and a wide playmaker cutting in off it; a trickster takes his man on most of all, and does a skill
+the ball his choices tilt: a winger, a wide runner and a wing-back fancy going down the line, an inverted winger
+and a wide playmaker cutting in off it; a trickster takes his man on most of all, and does a skill
 move keenest; a trequartista takes men on and plays the killer ball, a playmaker and a deep creator the ball
 through (the deep creator long, from deep), a libero and a wide CB run with it, an inverted full-back passes and
 doesn't cross, a poacher and a shadow striker shoot, a false nine makes it rather than finishes it; a stopper, an
-anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster, an
-inside forward and a shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
+anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster and a
+shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
 a wide playmaker less, a false nine and a target man hardly ever. The holder is an anchor or a deep
 creator if there's one, a ball-winner next, never a shadow striker or a trequartista if anyone else will do.
+
+**The types in each position (v143).** Three in each of the three middles: a holding midfielder the Anchor (40 of a
+hundred, 55 before), the Deep creator (35, 45 before) and the new Cover midfielder (25); a central one the Box-to-box
+(45, 40 before), the Ball-winner (30, 27 before) and the new Mezzala (25); an attacking one the Playmaker (40 -- he was a
+central midfielder, 33 of them), the Shadow striker (35, 60 before) and the Trequartista (25, 40 before). The wingers
+lose the Inside forward: the Trickster and the Winger are 37 each (30 before), the Inverted winger 26 (22). A career, a
+kept exhibition side and the match squads re-label an Inside forward as the winger his stats fit best -- labelled, not
+changed, so his rating doesn't move; over 300 made as v142 made them, 213 come out Inverted wingers, 81 Tricksters and
+6 Wingers -- and a career's playmakers are attacking midfielders (at a central midfielder's spot, in a second
+position). The exhibition clubs' men come from the same lists: a ball-winner or a box-to-box first in the middle, the
+playmaker an attacking midfielder's, the cover midfielder and the mezzala among them, no Inside forward. The two new
+types have their stats -- the cover midfielder the quicker holder (5.5 against the anchor's and the deep creator's 4.5)
+who reads it, the mezzala a dribbler who arrives to finish -- and, for now, the habits of the type nearest them: the
+cover midfielder the anchor's, the mezzala the box-to-box's. Their own (the gap he drops into; the half-space and the
+channel) come when each type's play is gone through, one by one.
 
 **Keepers.** A keeper's archetype has his stats (a shot-stopper's reflexes, diving and handling; a sweeper keeper's
 speed off his line, kicking and composure; a one-on-one keeper's speed and diving) and his habits in goal, measured

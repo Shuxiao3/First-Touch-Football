@@ -2513,7 +2513,10 @@
   // the rest). w: how common it is in its position, out of 100. The Creator is the Trequartista (TYPE_WAS). (v127: the
   // central midfielders are three positions again -- a holding midfielder, DM: the Anchor and the Deep creator; a
   // central one, CM: the Box-to-box, the Playmaker and the Ball-winner; an attacking one, AM: the Shadow striker and the
-  // Trequartista -- each covering the next one along as a second position. v118 had made them all CMs.)
+  // Trequartista -- each covering the next one along as a second position. v118 had made them all CMs.) (v143: three
+  // of each -- DM the Anchor, the Deep creator and the Cover midfielder; CM the Box-to-box, the Ball-winner and the
+  // Mezzala; AM the Playmaker, the Shadow striker and the Trequartista: the Playmaker's an attacking midfielder now, the
+  // Cover midfielder and the Mezzala new. And the Inside forward's gone from the wingers: TYPE_GONE.)
   const STYLES={
     stopper:   {role:'DEF',sub:'CB', w:30, plays:['CB'], also:[], name:'Stopper',        blurb:'Big, slow centre-back: attacks the ball, and clears it rather than plays it.',
                 d:{speed:-2,acceleration:-1.5,agility:-1,strength:1.5,heading:1.5,tackle:0.5,slideTackle:0.5,passAcc:-0.5,dribbling:-0.5}},
@@ -2533,19 +2536,23 @@
                 d:{speed:-0.5,tackle:1,defIQ:1,strength:0.5,heading:0.5,interceptions:0.5,crossing:-1,dribbling:-1}},
     invfb:     {role:'DEF',sub:'FB', w:10, plays:['FB'], also:['DM','WM'], name:'Inverted full-back', blurb:'Steps inside into midfield when his side has the ball: passing, composure, control.',
                 d:{speed:-0.5,passAcc:1.5,composure:1,ballControl:1,offIQ:0.5,crossing:-0.5,heading:-0.5}},
-    boxtobox:  {role:'MID',sub:'CM', w:40, plays:['CM'], also:['DM','AM','WM'], name:'Box-to-box',   blurb:'Covers both boxes: arrives late in theirs, gets back to ours.',
-                d:{speed:-0.5,stamina:1.5,strength:1,tackle:1,shotPower:0.5,longShots:0.5,defIQ:0.5}},
-    anchor:    {role:'MID',sub:'DM', w:55, plays:['DM'], also:['CB','CM'], name:'Anchor',       blurb:'Sits in front of the back line and screens it: tackles, and keeps it simple; slow.',
+    anchor:    {role:'MID',sub:'DM', w:40, plays:['DM'], also:['CB','CM'], name:'Anchor',       blurb:'Sits in front of the back line and screens it: tackles, and keeps it simple; slow.',   // (v143: 40 of a hundred holding midfielders -- 55 before)
                 d:{speed:-1.5,acceleration:-1,strength:2,tackle:2,interceptions:2,defIQ:1.5,slideTackle:1.5,heading:1,dribbling:-1,shotAcc:-1,offIQ:-0.5}},
-    playmaker: {role:'MID',sub:'CM', w:33, plays:['CM'], also:['AM'], name:'Playmaker',        blurb:'Dictates from the middle: passing and vision, plays it through, keeps the ball; not quick.',
-                d:{speed:-1,acceleration:-0.5,passAcc:1.5,offIQ:1.5,composure:1,ballControl:1,curve:1,longShots:0.5,strength:-1,tackle:-1,stamina:-0.5}},
-    ballwinner:{role:'MID',sub:'CM', w:27, plays:['CM'], also:['DM'], name:'Ball-winner',      blurb:'Hunts the ball: goes into the man on it sooner and higher, then keeps it simple.',
-                d:{acceleration:0.5,stamina:1.5,tackle:2,slideTackle:1.5,strength:0.5,interceptions:0.5,passAcc:-1,offIQ:-1,ballControl:-0.5,shotAcc:-0.5}},
-    deepcreator:{role:'MID',sub:'DM', w:45, plays:['DM'], also:['CM'], name:'Deep creator',    blurb:'Holds in front of the back line and runs the game from there: the long ball forward, calm on the ball.',   // (v116)
+    deepcreator:{role:'MID',sub:'DM', w:35, plays:['DM'], also:['CM'], name:'Deep creator',    blurb:'Holds in front of the back line and runs the game from there: the long ball forward, calm on the ball.',   // (v116; v143: 35 -- 45 before)
                 d:{speed:-1,acceleration:-0.5,passAcc:2,offIQ:1.5,composure:1.5,ballControl:1,curve:1,longShots:0.5,interceptions:1,defIQ:0.5,tackle:-0.5,slideTackle:-0.5,strength:-0.5,dribbling:-0.5}},
-    shadow:    {role:'MID',sub:'AM', w:60, plays:['AM'], also:['CM','ST'], name:'Shadow striker', blurb:'A second forward from midfield: runs beyond the striker into the box, and finishes.',
+    covermid:  {role:'MID',sub:'DM', w:25, plays:['DM'], also:['CB','CM'], name:'Cover midfielder', blurb:'The quicker holder: reads the game, cuts it out, and drops into the gap a full-back or a centre-back leaves.',   // (v143)
+                d:{speed:-0.5,acceleration:0.5,stamina:1,defIQ:1.5,interceptions:2,tackle:0.5,passAcc:0.5,composure:0.5,strength:-0.5,heading:-0.5,dribbling:-1,shotAcc:-1,longShots:-0.5,shotPower:-0.5}},
+    boxtobox:  {role:'MID',sub:'CM', w:45, plays:['CM'], also:['DM','AM','WM'], name:'Box-to-box',   blurb:'Covers both boxes: arrives late in theirs, gets back to ours.',   // (v143: 45 -- 40 before)
+                d:{speed:-0.5,stamina:1.5,strength:1,tackle:1,shotPower:0.5,longShots:0.5,defIQ:0.5}},
+    ballwinner:{role:'MID',sub:'CM', w:30, plays:['CM'], also:['DM'], name:'Ball-winner',      blurb:'Hunts the ball: goes into the man on it sooner and higher, then keeps it simple.',   // (v143: 30 -- 27 before)
+                d:{acceleration:0.5,stamina:1.5,tackle:2,slideTackle:1.5,strength:0.5,interceptions:0.5,passAcc:-1,offIQ:-1,ballControl:-0.5,shotAcc:-0.5}},
+    mezzala:   {role:'MID',sub:'CM', w:25, plays:['CM'], also:['AM','WM'], name:'Mezzala',     blurb:'Drifts out of the middle into the half-space and runs the channel beyond the wide man: dribbles, and arrives to finish.',   // (v143)
+                d:{acceleration:0.5,stamina:1,dribbling:1.5,ballControl:0.5,offIQ:1,shotAcc:0.5,crossing:0.5,tackle:-1,defIQ:-0.5,interceptions:-0.5,heading:-0.5,strength:-0.5}},
+    playmaker: {role:'MID',sub:'AM', w:40, plays:['AM'], also:['CM'], name:'Playmaker',        blurb:'In the pocket between their lines: passing and vision, plays it through, keeps the ball; not quick.',   // (v143: an attacking midfielder, 40 of a hundred -- a central one before, 33 of theirs)
+                d:{speed:-1,acceleration:-0.5,passAcc:1.5,offIQ:1.5,composure:1,ballControl:1,curve:1,longShots:0.5,strength:-1,tackle:-1,stamina:-0.5}},
+    shadow:    {role:'MID',sub:'AM', w:35, plays:['AM'], also:['CM','ST'], name:'Shadow striker', blurb:'A second forward from midfield: runs beyond the striker into the box, and finishes.',   // (v143: 35 -- 60 before)
                 d:{acceleration:0.5,shotAcc:1.5,composure:1,offIQ:1,shotPower:0.5,passAcc:-0.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
-    trequartista:{role:'MID',sub:'AM', w:40, plays:['AM'], also:['CM','W','ST'], name:'Trequartista', blurb:'A free role behind the front: drifts to find it, takes men on, plays the killer ball.',   // (the Creator, before v118)
+    trequartista:{role:'MID',sub:'AM', w:25, plays:['AM'], also:['CM','W','ST'], name:'Trequartista', blurb:'A free role behind the front: drifts to find it, takes men on, plays the killer ball.',   // (the Creator, before v118; v143: 25 -- 40 before)
                 d:{acceleration:0.5,agility:1,dribbling:1.5,ballControl:1,passAcc:0.5,offIQ:1,shotAcc:1,longShots:1,curve:0.5,strength:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1}},
     widemid:   {role:'MID',sub:'WM', w:45, plays:['WM'], also:['CM','FB'], name:'Wide midfielder', blurb:'Up and down the flank all game: crosses, and tracks back.',
                 d:{speed:0.5,acceleration:0.5,stamina:1.5,crossing:1.5,tackle:0.5,defIQ:0.5}},
@@ -2553,14 +2560,12 @@
                 d:{speed:2,acceleration:2,agility:1.5,dribbling:1.5,crossing:2,stamina:0.5,strength:-2,heading:-1.5,tackle:-1.5,defIQ:-1,interceptions:-1,passAcc:-0.5}},
     wideplaymaker:{role:'MID',sub:'WM', w:25, plays:['WM'], also:['W'], name:'Wide playmaker', blurb:'Drifts inside from the flank to make the play: passing, vision, control.',
                 d:{speed:-0.5,passAcc:1.5,offIQ:1,ballControl:1,curve:1,crossing:0.5,stamina:-0.5,tackle:-1}},
-    trickster: {role:'ATT',sub:'WNG',w:30, plays:['W'], also:['WM'], name:'Trickster',     blurb:'Runs at his man and beats him with tricks, any way he likes: the most skill stars of anyone.',
+    trickster: {role:'ATT',sub:'WNG',w:37, plays:['W'], also:['WM'], name:'Trickster',     blurb:'Runs at his man and beats him with tricks, any way he likes: the most skill stars of anyone.',   // (v143: 37 of a hundred wingers -- 30 before; the Inside forward's 18 shared out)
                 d:{speed:0.5,acceleration:1,agility:1.5,dribbling:2,ballControl:1,crossing:-0.5,shotAcc:-0.5,strength:-2,heading:-2,tackle:-1}},
-    winger:    {role:'ATT',sub:'WNG',w:30, plays:['W'], also:['WM'], name:'Winger',        blurb:'Pace out wide: takes it to the byline and crosses.',
+    winger:    {role:'ATT',sub:'WNG',w:37, plays:['W'], also:['WM'], name:'Winger',        blurb:'Pace out wide: takes it to the byline and crosses.',   // (v143: 37 -- 30 before)
                 d:{speed:1,acceleration:1,agility:1,dribbling:1,crossing:2,curve:0.5,strength:-2,heading:-2,shotAcc:-0.5}},
-    invwinger: {role:'ATT',sub:'WNG',w:22, plays:['W'], also:['WM'], name:'Inverted winger', blurb:'Cuts inside from the flank to curl it in, or slide the pass through.',
+    invwinger: {role:'ATT',sub:'WNG',w:26, plays:['W'], also:['WM'], name:'Inverted winger', blurb:'Cuts inside from the flank to curl it in, or slide the pass through.',   // (v143: 26 -- 22 before)
                 d:{speed:0.5,dribbling:1,curve:1.5,passAcc:1,offIQ:0.5,crossing:-0.5,strength:-1.5,heading:-1.5}},
-    insidefwd: {role:'ATT',sub:'WNG',w:18, plays:['W'], also:['ST'], name:'Inside forward', blurb:'Gets inside, runs the channel between full-back and centre-back, and shoots.',
-                d:{speed:1,acceleration:1,dribbling:0.5,shotAcc:1,offIQ:1,composure:0.5,strength:-1.5,crossing:-1,curve:-0.5,heading:-0.5}},
     poacher:   {role:'ATT',sub:'STK',w:22, plays:['ST'], also:[], name:'Poacher',          blurb:'Lives in the box on the last man’s shoulder: movement and finishing.',
                 d:{speed:-0.5,shotAcc:1.5,composure:1.5,offIQ:1.5,heading:0.5,passAcc:-1,dribbling:-1,stamina:-0.5,longShots:-1}},
     speedster: {role:'ATT',sub:'STK',w:20, plays:['ST'], also:['W'], name:'Speedster',     blurb:'Small and rapid: runs in behind all day.',
@@ -2583,8 +2588,14 @@
                 d:{keeperSpd:1,gkDiveRange:1,composure:0.5,gkReach:-0.5,gkHandling:-0.5,gkReflex:-0.5}}
   };
   // an archetype kept under an older name (a save's, a kept side's): what it is now
-  const TYPE_WAS={creator:'trequartista'};
+  const TYPE_WAS={creator:'trequartista', insidefwd:'invwinger'};   // (v143: an Inside forward read anywhere before he's re-labelled: typeKept)
   const typeNow=s=>TYPE_WAS[s]||s;
+  // A TYPE THAT'S GONE (v143: the Inside forward, from the wingers): a man who was one -- yours, the other clubs', a free
+  // agent, a youth, an exhibition side kept -- is whichever of his position's types his stats fit best, as a man from
+  // before the archetypes was: labelled, not changed (inferStyle), so his rating doesn't move. Most come out Inverted
+  // wingers, the nearest of them.
+  const TYPE_GONE={insidefwd:'WNG'};
+  function typeKept(style,role,stats){ const sub=TYPE_GONE[style]; return sub&&stats&&ARCH[role]?inferStyle(role,sub,stats)||typeNow(style):typeNow(style); }
   const STYLE_PACE_KEYS=['speed','acceleration'];   // a style's pace is its identity: these get less random spread
   function styleOf(e){ return (e&&STYLES[e.style])||null; }
   const nbsp=s=>String(s).replace(/ /g,'\u00a0');   // (a name kept on one line: a card's line breaks between its parts, not inside "Defensive full-back")
@@ -2654,7 +2665,7 @@
   // the odds a man's drawn from: his position's -- a trequartista's and a shadow striker's an attacking midfielder's (as
   // they were while they were CMs: v118 to v126), a central midfielder's a holding one's -- and a trickster's the most of
   // anyone's
-  const starPos=e=>{ const k=typeNow(e&&e.style); return k==='trequartista'||k==='shadow'?'AM':k==='trickster'?'TRK':natPos(e); };
+  const starPos=e=>{ const k=typeNow(e&&e.style); return k==='trequartista'||k==='shadow'||k==='playmaker'?'AM':k==='trickster'?'TRK':natPos(e); };   // (v143: a playmaker's an attacking midfielder's)
   // the league a rating belongs in (as mgLevelTier has it: this runs before the career's levels exist)
   function starLeague(r){ return r>=75?4:r>=67?3:r>=59?2:1; }
   // his ceiling: u (0..1, drawn for him) against his position's odds in the league his potential rating belongs in
@@ -2760,15 +2771,17 @@
   // covering and intercepting midfielder have no line setting: the old default) -- then HIS ARCHETYPE'S HABIT (v118,
   // INS_LEAN): a step one way or the other along the setting's scale from his line's (a wing-back a step further up
   // than the full-backs are told to go; a defensive full-back a step back), or a setting of its own (a target man
-  // always holds it up, a false nine always drops in; an inverted winger narrower, an inside forward in the channel)
+  // always holds it up, a false nine always drops in; an inverted winger narrower. v143: the Cover midfielder and the
+  // Mezzala as the Anchor and the Box-to-box, for now)
   const INS_SCALE={fbRuns:['back','support','attack'], cbSupport:['back','normal','up'], cmSupport:['back','bal','run'], cmCross:['edge','bal','box'],
     wSupport:['short','bal','run'], wmSupport:['short','bal','fwd'], stRuns:['short','bal','run']};
   const INS_LEAN={
     wingback:{fbRuns:1}, deffb:{fbRuns:-1},
     libero:{cbSupport:1}, cover:{cbSupport:-1}, widecb:{cbWidth:'wide'},
     boxtobox:{cmSupport:1, cmCross:1}, shadow:{cmSupport:2, cmCross:2}, anchor:{cmSupport:-1}, deepcreator:{cmSupport:-1},   // (a holder stays the way back: not off to the edge of their box)
+    covermid:{cmSupport:-1}, mezzala:{cmSupport:1, cmCross:1},   // (v143: new -- as the Anchor and the Box-to-box, till their own habits come)
     wideplaymaker:{wmWidth:'narrow', wmSupport:-1},
-    invwinger:{wWidth:'narrow'}, insidefwd:{wWidth:'inside', wSupport:1},   // (a winger and a wide runner: their line's -- out wide, and in at the back post with the ball near their box)
+    invwinger:{wWidth:'narrow'},   // (a winger and a wide runner: their line's -- out wide, and in at the back post with the ball near their box; v143: the Inside forward, in the channel, gone)
     poacher:{stRuns:1}, speedster:{stRuns:1}, target:{stRuns:'target'}, falsenine:{stRuns:'false9'}
   };
   function insOf(q,k){ const t=q&&q.team; let v;
@@ -2840,16 +2853,17 @@
   // wide in midfield, 5 in the middle), and a pick from them -- a second centre-back or forward unlike the first
   // (v118: the new archetypes among them, about as often as a career's -- STYLES' w -- has them. v127: a central
   // midfielder's spot a central midfielder's -- a ball-winner or a playmaker first in the middle -- and a holding or an
-  // attacking midfielder's spot one of theirs: SQ_DM, SQ_AM)
+  // attacking midfielder's spot one of theirs: SQ_DM, SQ_AM. v143: a ball-winner or a box-to-box first in the middle,
+  // the playmaker an attacking midfielder's; the Cover midfielder and the Mezzala among them; no Inside forward)
   const SQ_CB=['stopper','stopper','stopper','cover','cover','cover','ballplayer','ballplayer','widecb','libero'],
-        SQ_WM=['mwinger','mwinger','widemid','widemid','wideplaymaker'], SQ_CM1=['ballwinner','ballwinner','playmaker','playmaker','boxtobox'],
-        SQ_CM=['boxtobox','boxtobox','playmaker','ballwinner'], SQ_W=['trickster','trickster','winger','winger','invwinger','insidefwd'],
+        SQ_WM=['mwinger','mwinger','widemid','widemid','wideplaymaker'], SQ_CM1=['ballwinner','ballwinner','boxtobox','boxtobox','mezzala'],
+        SQ_CM=['boxtobox','boxtobox','mezzala','ballwinner'], SQ_W=['trickster','trickster','winger','winger','invwinger'],
         SQ_ST=['poacher','poacher','speedster','speedster','complete','complete','target','target','pressfwd','falsenine'],
-        SQ_DM=['anchor','anchor','deepcreator'], SQ_AM=['shadow','shadow','trequartista'];
+        SQ_DM=['anchor','anchor','deepcreator','deepcreator','covermid'], SQ_AM=['playmaker','playmaker','shadow','shadow','trequartista'];
   // the outside men of a back line: wing-backs with nobody wide ahead of them; with men wide ahead, a back three's are
   // centre-backs (wide CBs most), a back four's or five's full-backs (v124)
   const SQ_WB=['wingback','wingback','fullback'], SQ_CBW=['widecb','widecb','cover','stopper','ballplayer'], SQ_FB=['fullback','fullback','deffb','deffb','invfb','wingback'];
-  const SQUAD_STYLES=[null,SQ_CB,SQ_CB,SQ_CB,SQ_WM,SQ_CM1,SQ_WM,SQ_ST,[...SQ_ST,'insidefwd']];
+  const SQUAD_STYLES=[null,SQ_CB,SQ_CB,SQ_CB,SQ_WM,SQ_CM1,SQ_WM,SQ_ST,SQ_ST];   // (v143: the second striker one of the strikers -- an Inside forward too, before)
   function pickSquadStyle(i,R,taken,list){
     const L=list||SQUAD_STYLES, opts=L[i]; if(!opts) return undefined;
     const prev=L[i-1], again=!!prev&&prev[0]===opts[0]&&opts[0]!=='mwinger';   // a second centre-back or striker unlike the first
@@ -2905,7 +2919,7 @@
       for(let k=0;k<n;k++){ const wide=n>=3&&(k===0||k===n-1), sp=P[at++];
         if(role==='DEF') out.push(!wide?SQ_CB : !wideAhead?SQ_WB : n>=4?SQ_FB : SQ_CBW);
         else if(role==='MID') out.push(sp==='DM'?SQ_DM : sp==='AM'?SQ_AM : (sp?sp==='WM':wide)?SQ_WM : (cen++===0?SQ_CM1:SQ_CM));
-        else out.push(wide?SQ_W:(cen++===0?SQ_ST:[...SQ_ST,'insidefwd'])); } });
+        else out.push(wide?SQ_W:SQ_ST); } });   // (v143: the second in the middle up front a striker too -- or an Inside forward, before)
     return out; }
   function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
   // new squads, and those saved in the six- or seven-a-side days: fill up to a keeper and eight
@@ -3028,7 +3042,7 @@
         squadAddCB(o.squad,o.lineup,fa,o.dform?formOKDef(o.dform,defFormFor(fa)):defFormFor(fa,postureOf(o.style||club.style)),o.squad.some(e=>e&&e.name===cb.name)?null:JSON.parse(JSON.stringify(cb))); }
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
-      o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeNow(e.style);   // (an archetype kept under an older name: TYPE_WAS)
+      o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeKept(e.style,e.role,e.stats);   // (an archetype kept under an older name: TYPE_WAS -- v143: or gone, TYPE_GONE)
         if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
       for(const e of o.squad) if(e&&e.stats) gkHandlingFill(e.stats);                                                            // (and before Handling)
       const f=formOKAtk(o.form,'3-3-2'), df=o.dform?formOKDef(o.dform,defFormFor(f)):null, li=o.lineup, nat=i=>fitPos(o.squad[i]);
@@ -3227,7 +3241,7 @@
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
       topUpSquad(SQUAD[t]);
       SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; gkHandlingFill(e.stats);
-        if(e.style) e.style=typeNow(e.style); if(!e.style && !e.me && e.role!=='GK' && ARCH[e.role]) e.style=inferStyle(e.role,e.subRole,e.stats); for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
+        if(e.style) e.style=typeKept(e.style,e.role,e.stats); if(!e.style && !e.me && e.role!=='GK' && ARCH[e.role]) e.style=inferStyle(e.role,e.subRole,e.stats); for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
       const li=LINEUP[t];
       if(li){ if(li.out&&!li.atk){ li.atk=li.out.slice(); li.def=li.out.slice(); delete li.out; }
               if(!li.atk)li.atk=defaultLineup().atk; if(!li.def)li.def=li.atk.slice(); if(li.gk==null)li.gk=0;
@@ -8788,10 +8802,10 @@
   // the most central of the midfield (the deeper of two central ones; an Anchor if he's anywhere near the middle).
   // Null without a midfield.
   // how keen a man is on a run in behind, by archetype (see the runs): a speedster's always going, a target man hardly ever
-  const RUN_MUL={speedster:1.35, insidefwd:1.3, shadow:1.3, winger:1.2, mwinger:1.2, wingback:1.2, poacher:1.15, pressfwd:1.1,
+  const RUN_MUL={speedster:1.35, shadow:1.3, winger:1.2, mwinger:1.2, wingback:1.2, poacher:1.15, pressfwd:1.1,
     wideplaymaker:0.9, falsenine:0.5, target:0.35};
   const holderCache={G:null,R:null};
-  const HOLD_PREF={anchor:-150, deepcreator:-150, ballwinner:-60, playmaker:-20, boxtobox:40, shadow:120, trequartista:120};   // (by archetype: v118)
+  const HOLD_PREF={anchor:-150, deepcreator:-150, covermid:-150, ballwinner:-60, playmaker:-20, boxtobox:40, mezzala:60, shadow:120, trequartista:120};   // (by archetype: v118; v143: a cover midfielder a holder first, a mezzala hardly)
   function holderOf(team){
     const hc=holderCache[team]; if(hc&&hc.t===simNow) return hc.p;
     // the most central midfielder (an anchor first), never a wide man -- one always holds (GET FORWARD sends the others)
@@ -9487,6 +9501,8 @@
     playmaker:{risk:0.85, range:1.1, fwd:1.08},
     ballwinner:{risk:1.1, carry:0.85, takeOn:0.6, range:0.9},           // (won it: gives it simply)
     deepcreator:{risk:0.85, range:1.25, fwd:1.12, carry:0.85, takeOn:0.6},   // (from deep: the long ball forward, not the dribble)
+    covermid:{risk:1.1, carry:0.85, takeOn:0.6},                        // (v143: won it, he gives it simply)
+    mezzala:{carry:1.15, takeOn:1.15, shoot:1.05},                      // (v143: runs with it, takes his man on)
     shadow:{shoot:1.15, carry:1.05, risk:0.95},
     trequartista:{risk:0.85, range:1.1, fwd:1.08, takeOn:1.25, carry:1.1, longShot:1.1},   // (the Creator's, and he takes men on)
     widemid:{cross:1.1},
@@ -9495,7 +9511,6 @@
     trickster:{takeOn:1.5, carry:1.2, cross:0.95},                      // (at his man, every time: see aiSkillKeen)
     winger:{takeOn:1.2, carry:1.2, cross:1.35},                         // (to the byline, and the cross)
     invwinger:{takeOn:1.2, carry:1.1, cross:0.75, shoot:1.08, longShot:1.15, range:1.05},   // (in off the line: the curler, or the pass through)
-    insidefwd:{takeOn:1.2, carry:1.15, shoot:1.15, cross:0.85},
     poacher:{shoot:1.15, carry:0.85},
     speedster:{carry:1.2, takeOn:1.1},
     complete:{range:1.05, hold:1.1},
@@ -9504,8 +9519,8 @@
     falsenine:{risk:0.85, range:1.1, fwd:1.05, takeOn:1.1, shoot:0.92}   // (deep, making it for the others)
   };
   // ...and which way he takes it out wide: a winger, a wide runner and a wing-back down the line, to the byline; an
-  // inverted winger, an inside forward and a wide playmaker in off it, toward goal (a trickster any way at all)
-  const CARRY_WAY={winger:'line', mwinger:'line', wingback:'line', invwinger:'in', insidefwd:'in', wideplaymaker:'in'};
+  // inverted winger and a wide playmaker in off it, toward goal (a trickster any way at all) (v143: an inside forward in off it too, before)
+  const CARRY_WAY={winger:'line', mwinger:'line', wingback:'line', invwinger:'in', wideplaymaker:'in'};
   // what the man on the ball can see: who's on him, what the ball's worth where he is
   function obCtx(p,atk,goalX){
     const opp=p.team==='G'?'R':'G', opps=players.filter(o=>o.team!==p.team), kp=keeperOf(opp), M=obMods(p);
@@ -11421,7 +11436,7 @@
     return n?TK_SCALE[clamp(TK_SCALE.indexOf(v)+n,0,2)]:v; }
   // ...and his archetype's lean on it (v118): a stopper, a ball-winner and a pressing forward a step tighter; a cover CB
   // and a deep creator, who read it rather than win it, a step further off
-  const TK_SCALE=['front','bal','tackle'], TK_LEAN={stopper:1, ballwinner:1, pressfwd:1, cover:-1, deepcreator:-1};
+  const TK_SCALE=['front','bal','tackle'], TK_LEAN={stopper:1, ballwinner:1, pressfwd:1, cover:-1, deepcreator:-1, covermid:-1};   // (v143: a cover midfielder reads it too)
   const TK_MUL={front:0.5, bal:1, tackle:1.5};                            // (his chance of going in, against BALANCED)
   // THE OFFSIDE TRAP (DEFENDERS: OFFSIDE TRAP): the man on the ball in front of our back line, facing it, free to pick a
   // pass, with one of theirs on our line -- the line steps up together, TRAP_STEP, and holds it a moment: a man left on
@@ -18219,7 +18234,7 @@
   function cwWidthFor(club){ const st=styleKey(club&&club.style);
     return {atk:st==='wing'?1.18:(st==='fluid'||st==='dcounter')?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
   // a career player's style: as made, or for one signed before styles, the one his stats fit (your own pro has none)
-  function careerStyle(p){ if(!p||p.me||!ARCH[p.role]) return p&&p.style; if(p.style&&TYPE_WAS[p.style]) p.style=TYPE_WAS[p.style];
+  function careerStyle(p){ if(!p||p.me||!ARCH[p.role]) return p&&p.style; if(p.style&&(TYPE_WAS[p.style]||TYPE_GONE[p.style])) p.style=typeKept(p.style,p.role,p.at?mgStats(p):(p.stats||{}));   // (v143: a type that's gone, too)
     if(!p.style) p.style=inferStyle(p.role,p.subRole,p.at?mgStats(p):(p.stats||{})); return p.style; }
   // ---- career lineup / tactics ----
   // Two shapes, one for each phase -- with the ball and without it -- each with its width. lineup.atk is who plays in
@@ -19455,7 +19470,7 @@
     { const v=d.story&&d.story.vetId!=null&&(d.roster||[]).find(p=>p.id===d.story.vetId); if(v&&!v.hometown){ v.hometown=true; delete v.cAsk; } }   // (v109: the hometown hero, from before)
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
-    for(const p of all) if(p){ if(TYPE_WAS[p.style]) p.style=TYPE_WAS[p.style];   // (v118: the Creator's a Trequartista)
+    for(const p of all) if(p){ if(TYPE_WAS[p.style]||TYPE_GONE[p.style]) p.style=typeKept(p.style,p.role,mgStats(p));   // (v118: the Creator's a Trequartista; v143: an Inside forward's the winger his stats fit best)
       const S=STYLES[p.style]; if(p.role==='MID'&&cenMid(p.subRole)&&S&&S.role==='MID'&&cenMid(S.sub)) p.subRole=S.sub;   // (v127: a central midfielder's position is his archetype's -- an anchor's a DM, a shadow striker's an AM)
       if(p.role==='GK'&&!p.style) p.style=inferStyle('GK','GK',mgStats(p)); }                                                         // (...and a keeper has an archetype: the one his keeping fits best)
     for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)

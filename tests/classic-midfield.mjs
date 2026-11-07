@@ -46,12 +46,12 @@ const po = await page.evaluate(() => { const M = window.__M, S = M.SUB_STYLES, w
   out.lists = ['DM', 'CM', 'AM'].map(k => k + ' ' + S[k].join(',') + ' (' + w(k) + ')');
   out.nat = [M.natPos({ role: 'MID', subRole: 'DM' }), M.natPos({ role: 'MID', subRole: 'AM' }), M.natPos({ role: 'MID', style: 'anchor' }), M.natPos({ role: 'MID', style: 'shadow' }), M.natPos({ role: 'MID', style: 'playmaker' })].join(' ');
   const fit = k => ['DM', 'CM', 'AM'].map(s => M.posFit(k, s)[0]).join('');   // (m: his own, s: a second one, o: out of position)
-  out.fit = ['anchor', 'deepcreator', 'ballwinner', 'boxtobox', 'playmaker', 'shadow', 'trequartista'].map(k => k + ' ' + fit(k)).join(', ');
+  out.fit = ['anchor', 'deepcreator', 'covermid', 'ballwinner', 'boxtobox', 'mezzala', 'playmaker', 'shadow', 'trequartista'].map(k => k + ' ' + fit(k)).join(', ');
   return out; });
 info('archetypes: ' + po.lists.join(' | ') + ' -- at DM, CM, AM: ' + po.fit);
-ok(po.lists.join(' | ') === 'DM anchor,deepcreator (100) | CM boxtobox,playmaker,ballwinner (100) | AM shadow,trequartista (100)', 'the central midfield archetypes sorted among the three: DM the anchor and the deep creator, CM the box-to-box, the playmaker and the ball-winner, AM the shadow striker and the trequartista');
-ok(po.nat === 'DM AM DM AM CM', 'a holding and an attacking midfielder are positions of their own again, and an archetype\'s is his (' + po.nat + ')');
-ok(po.fit === 'anchor mso, deepcreator mso, ballwinner smo, boxtobox sms, playmaker oms, shadow osm, trequartista osm', 'each covers the next one along as a second position, and none the far end (' + po.fit + ')');
+ok(po.lists.join(' | ') === 'DM anchor,deepcreator,covermid (100) | CM boxtobox,ballwinner,mezzala (100) | AM playmaker,shadow,trequartista (100)', 'the central midfield archetypes, three of each (v143): DM the anchor, the deep creator and the cover midfielder, CM the box-to-box, the ball-winner and the mezzala, AM the playmaker, the shadow striker and the trequartista');
+ok(po.nat === 'DM AM DM AM AM', 'a holding and an attacking midfielder are positions of their own again, and an archetype\'s is his -- the playmaker\'s an AM (v143: ' + po.nat + ')');
+ok(po.fit === 'anchor mso, deepcreator mso, covermid mso, ballwinner smo, boxtobox sms, mezzala oms, playmaker osm, shadow osm, trequartista osm', 'each covers the next one along as a second position, and none the far end (' + po.fit + ')');
 
 // --- A HOLDING AND AN ATTACKING MIDFIELDER HALF AS COMMON AS A CENTRAL ONE ----------------------------------------------------
 const one = await page.evaluate(() => { const M = window.__M, n = { CM: 0, DM: 0, AM: 0, WM: 0 }; let s = 12345;
@@ -164,7 +164,7 @@ const kept = await page.evaluate(() => { const M = window.__M, d0 = M.d, R = d0.
   const moved = atk.map((ri, i) => was[i] + '>' + sp[e.lineup.atk.indexOf(ri)]);
   return { pos, form: e.formation, moved: moved.join(' '), same: [...e.lineup.def].sort().join() === [...e.lineup.atk].sort().join() }; });
 info('a career saved before: ' + kept.pos + '; in 2-4-2: read as ' + kept.form + ', its men ' + kept.moved);
-ok(kept.pos === 'anchor DM, shadow AM, playmaker CM', 'a career saved before: a central midfielder\'s position is his archetype\'s (' + kept.pos + ')');
+ok(kept.pos === 'anchor DM, shadow AM, playmaker AM', 'a career saved before: a central midfielder\'s position is his archetype\'s -- a playmaker\'s an AM since v143 (' + kept.pos + ')');
 const LN = { CB: 0, FB: 0, DM: 1, CM: 1, AM: 1, WM: 1, W: 2, ST: 2 }, far = kept.moved.split(' ').filter(m => { const [a, b] = m.split('>'); return Math.abs(LN[a] - LN[b]) > 1; });
 ok(kept.form === '3-4-1' && /^CB>CB CB>CB /.test(kept.moved) && /ST>ST/.test(kept.moved) && !far.length && kept.same,
   'a career kept in 2-4-2: it plays 3-4-1, its centre-backs and a striker where they were, nobody more than a line from his old spot, the same eight without the ball (' + kept.moved + ')');
