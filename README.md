@@ -442,6 +442,28 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it isn't played first time: the screen says TOO FAR TO PLAY FIRST TIME, and you take it as normal. With nobody
     near enough the way you've aimed, it's a short ball (14 m) into the space there. The computer's first-time
     passes, played while it's still looking up, are short too: a longer ball waits for a touch.
+- **A shot at a ball that's nobody's (v139).** With the ball not at anyone's feet and not in a keeper's hands -- bouncing
+  loose in the box, a pass on its way to you, one of theirs gone astray -- SHOOT is a shot. In your reach that moment it's
+  struck first time (or headed, at your head in their box); otherwise it's asked for (SHOT … on the screen) and your
+  man goes to meet it, the stick left alone (steer him and he's yours), and strikes it first time the moment it's in
+  his reach -- heads it if it gets to his head in their box -- or, if his first touch takes it, hits it at once. It
+  waits 1.6 s. Not a team-mate's ball (his knock-on, our pass on its way to him): SHOOT tells him to shoot, as before.
+  Only a ball of theirs -- at a man's feet, in his stride, in their keeper's hands -- is a slide on the phone's SHOOT
+  button, which reads SLIDE then and SHOOT otherwise.
+  - **The sliding finish.** Should he not get there on his feet before it's away -- running from him, or one of theirs
+    or their keeper there first -- and his slide can get to it as it comes past, he slides in and strikes it at goal: at
+    0.4 of full power and a little less true than a first-time shot standing. It's a shot, never a tackle -- slid into
+    the man on the ball, he keeps it. How far the slide goes is his Shot accuracy -- his finishing -- not his Slide
+    tackle: about 1.4 m at 1 to 3 m at 10 (a slide tackle's 1.6 m to 5.2 m), with his foot at the end of it. It costs
+    half a slide tackle's stamina.
+  - **After your shot's saved** (or blocked), SHOOT is a shot again -- it used to bend the old one for the rest of its
+    1.1 s, so a rebound in that time got nothing.
+  - (Before, on a phone, SHOOT was a slide tackle at any loose ball not in your reach that moment -- a pass a fraction
+    of a second from you included -- and on the keyboard it told a team-mate near it to shoot, or did nothing. Measured,
+    your striker 12 m out and SHOOT tapped 0.1 to 0.6 s before the ball got to him, 12 times each: a pass along the
+    grass 12 slide tackles before, 12 first-time shots now; a pass in the air 3 slide tackles, 7 nothing and 2 headers
+    before, 6 first-time shots and 6 headers now; a ball rolling across him 12 slide tackles before, 12 first-time
+    shots now.)
 - **Turning and passing costs accuracy.** A pass played the moment you've turned to face it goes less true than one
   you've been lined up for. The game reads your facing over the last ~0.3 s against the way the ball goes.
   - **The angle.** Up to 20° costs nothing. At Off IQ 1 the worst spray is 6.1° turned square and 14° right round
@@ -1912,7 +1934,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 | `WASD` | Move (double-tap a direction to sprint) |
 | `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · a throw-in of yours: thrown to the man you aim at, about as far as you held it (Football Classic, v138: see **The ball goes out**) · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
 | `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
-| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
+| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · the ball nobody's: a shot, struck first time as it gets to you, or a sliding finish (Football Classic, v139: see **A shot at a ball that's nobody's**) · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
 | `K` + `↑`/`↓` (hold) | Curl the shot |
 | `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
 | `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is his long ball, a long pass pinged to the man you aim at (the button reads LONG; v115) |
@@ -1926,7 +1948,7 @@ orange) and ease back inside it to stop, without ever lifting your thumb; push o
 stick follows your thumb, so you can't run off its edge. A double-tap on the left half still
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment (THROW at a throw-in of yours, v138). Separate SHOOT / SLIDE
-and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
+(SLIDE only with one of theirs on the ball: with it nobody's, SHOOT shoots -- v139) and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
 for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too (Football Classic, in a match: nothing, unless it's a tap on one of your men, which switches to him).
 
 **Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
@@ -2152,6 +2174,20 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v139: SHOOT shoots at a ball that's nobody's.** With the ball loose -- a pass on its way to your striker, one
+  bouncing about in the box -- SHOOT is a shot: struck first time the moment it's in his reach (or headed), and asked
+  for till then, your man going to meet it. If he can't get there on his feet in time, he slides in and strikes it: a
+  sliding finish, as far as his Shot accuracy takes it (about 1.4 m at 1, 3 m at 10), not his Slide tackle, and never a
+  tackle. On a phone SHOOT was a slide tackle at any loose ball not already in reach; only a ball of theirs is now. Your
+  striker 12 m out, SHOOT tapped 0.1 to 0.6 s before the ball got to him, 12 times each:
+
+  | the ball | v138 | v139 |
+  | --- | --- | --- |
+  | a pass along the grass | 12 slide tackles | 12 first-time shots |
+  | a pass in the air | 3 slide tackles, 7 nothing, 2 headers | 6 first-time shots, 6 headers |
+  | rolling across him, 2.6 m out | 12 slide tackles | 12 first-time shots |
+
+  See **A shot at a ball that's nobody's**.
 - **v138: the ball goes out.** Over a touchline it's a throw-in, thrown by hand from the line, over his head; over an end
   line a goal kick, or a corner off one of the side whose goal it is, with both sides set up in the box first; off a post
   or the bar it still comes back. Nobody's offside from any of them. Yours you take: PASS throws a throw-in the way you

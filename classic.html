@@ -3616,8 +3616,8 @@
       if(t.target===btns.shoot){
         const oursHave=(ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G');
         const strikeable=controlled&&(headerReady()||firstTouchBall(controlled));
-        if(myBall() || strikeable || oursHave){ pressK(); shootTouchId=t.identifier; }   // shoot / volley-header / DEMAND the shot
-        else startSlide(controlled);                                       // defending or dead loose ball -> SLIDE
+        if(myBall() || strikeable || oursHave || shotQOK()){ pressK(); shootTouchId=t.identifier; }   // shoot / volley-header / DEMAND the shot / (v139) the ball nobody's: a shot asked for
+        else startSlide(controlled);                                       // theirs -> SLIDE
         continue;
       }
       if(t.target===btns.skill){
@@ -6005,6 +6005,8 @@
         m={x:m0.x+mr.x, y:m0.y+mr.y}, dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // (where he reads it going: Off IQ)
       if(d>8){ if(d>140&&!c.sprint&&!recvAuto.run) c.sprint=true; return {ix:dx/d, iy:dy/d}; } return {ix:0,iy:0}; }
     if(recvAuto&&(ix||iy)) recvAuto=null;                      // you've taken him over
+    if(shotQ&&shotQ.p===controlled&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // (v139: a shot asked for, the stick left alone: he goes to meet it)
+      return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);   // a touch asked for, the stick left alone: he meets it
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
     const gd=guardIntent(controlled,ix,iy); if(gd) return gd;           // (just won it: not back into the man he took it from -- AFTER A TACKLE)
@@ -6969,7 +6971,7 @@
     else passPend={charge,at:performance.now()+P.passDtap.val};
   }
   function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
-  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); }   // (every frame)
+  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); shotStep(); }   // (every frame; v139: shotStep)
 
   // WHO YOUR PASS IS FOR (v134): the man the way you aim it -- the stick, or the way he faces -- at the range you held
   // PASS for (passRange: a tap about 12 m, held half its fill 24 m, all of it 42 m). The way you aim counts most: within
@@ -7133,26 +7135,95 @@
     if(ball.ownedBy&&ball.ownedBy.team==='G'&&ball.ownedBy!==controlled)return ball.ownedBy;
     return null;
   }
-  function teammateNearLooseBall(){
-    // a green teammate about to reach a loose ball
-    if(ball.ownedBy||gkHold)return null;
-    let best=null,bd=120;
-    for(const q of players)if(q.team==='G'&&q!==controlled){
-      const d=dist(q,ball);
-      if(d<bd){bd=d;best=q;}
-    }
-    return best;
-  }
   function pressK(){
     if(keeperInHand()){ keeperLong(controlled); return; }   // your keeper, the ball in his hands: a long pass, pinged (v115)
     if(restartOn()&&!myBall()) return;                       // (v138: a throw-in, or theirs being taken: nothing)
     if(myBall()){ pressShoot(); return; }                    // you have it (or it's a touch away) -> shoot
-    if(headerReady()){ pressShoot(); return; }               // ball crossed & in the air near you -> jump & head it
+    if(headerReady()&&(dist(controlled,ball)<PLAYER_H*1.3||!shotQOK())){ pressShoot(); return; }   // ball crossed & in the air at you -> jump & head it (v139: still on its way, asked for -- shotStep -- not a jump at it from 9 m)
     // FIRST-TOUCH SHOT: a strikeable loose ball near you -> volley it (pressShoot handles it)
     if(firstTouchBall(controlled)){ pressShoot(); return; }
-    const mate=teammateOnBall()||teammateNearLooseBall();
+    const mate=teammateOnBall()||matesBall();
     if(mate){ commandShoot(mate); return; }                  // tell a teammate to shoot/head
+    if(curveArmed) return;                                   // (your shot, still on its way untouched: K bends it)
+    if(shotQOK()) queueShot();                               // (v139) the ball nobody's: he goes to it and hits it -- or slides in for it
     // (slide tackle moved to L when you don't have the ball)
+  }
+  // A TEAM-MATE'S BALL that isn't at his feet: his knock-on running ahead of him, or our pass on its way to him -- SHOOT
+  // tells him to hit it (v139: it was any loose ball within 5 m of one of ours, however it was nobody's)
+  function matesBall(){
+    const c=controlled; if(!c||ball.ownedBy||gkHold) return null;
+    if(ball.dribbler&&ball.dribbleGrace>0&&ball.dribbler!==c) return ball.dribbler.team===c.team?ball.dribbler:null;
+    const h=heldBy(); return h&&h.team===c.team&&h!==c?h:null;
+  }
+  // THE BALL NOBODY'S, AND SHOOT (v139): not at anyone's feet or in a keeper's hands, not in a man's stride, not our pass
+  // to another of ours -- bouncing loose in the box, a pass on its way to you, one of theirs gone astray -- and SHOOT is a
+  // shot: struck now if it's in your reach (first time, or headed), else asked for. Your man goes to meet it (the stick
+  // left alone; steer him and he's yours) and strikes it first time the moment it's in his reach -- heads it if it's at
+  // his head in their box; if his first touch takes it, he hits it at once. Should he not get there on his feet before
+  // it's away -- running from him, or one of theirs or their keeper there first -- and it's low and within his sliding
+  // reach, he slides in and strikes it (the sliding finish, slideShotFor). Asked for, it waits SHOTQ_T. (It was a slide
+  // tackle on a phone, whatever the ball, unless it was at your feet or in your reach that moment -- and on the keyboard
+  // nothing at all: SHOOT told a team-mate near it to shoot.) Only a ball of theirs is a slide on SHOOT now
+  const SHOTQ_T=1.6;
+  let shotQ=null;
+  function shotQOK(){ const c=controlled;
+    if(!c||LAB.on||practice||ball.ownedBy||gkHold||restartOn()||scoredT>0||offsideT>0||kickT>0||breakT>0||matchOver) return false;
+    return !matesBall()&&!(ball.dribbler&&ball.dribbleGrace>0&&ball.dribbler!==c); }
+  function queueShot(){ shotQ={p:controlled, until:simNow+SHOTQ_T}; oneTouch=null; ftAim=null;
+    lastGrade='SHOT …'; gradeColor='#9dff3c'; gradeFade=0.9; }
+  // every frame, before the ball's taken (attemptCaptures): struck if it's his to strike now
+  function shotStep(){
+    const q=shotQ; if(!q) return;
+    const p=controlled;
+    if(q.p!==p||simNow>q.until||gkHold||restartOn()||scoredT>0||offsideT>0||breakT>0||kickT>0||matchOver){ shotQ=null; return; }
+    if(p.state==='slide') return;                                         // (sliding in for it: slideContact strikes it)
+    if(ball.ownedBy){ shotQ=null; if(ball.ownedBy===p&&p.state==='normal'&&!curveArmed){ shootCharge=Math.max(shootCharge,0.45); releaseShoot(); } return; }   // his first touch took it: hit at once; anyone else's, it's off
+    if(ball.dribbler&&ball.dribbleGrace>0&&ball.dribbler!==p){ shotQ=null; return; }
+    if(p.state!=='normal'||curveArmed) return;
+    if(ball.z>26&&headerReady()&&dist(p,ball)<PLAYER_H*1.3){ shotQ=null; pressShoot(); return; }   // at his head in their box: up for it
+    if(firstTouchBall(p)){ shotQ=null; firstTimeShot(); return; }        // in his reach: first time
+    const S=slideShotFor(p); if(S){ shotQ=null; startSlideShot(p,S.x,S.y); }
+  }
+  // THE SLIDING FINISH (v139): how far his slide in for a shot goes is his Shot accuracy -- his finishing -- not his Slide
+  // tackle: 0.45 of a full slide's lunge at 1 to 0.75 at 10, about 1.4 m to 3.1 m, so with his foot at the end of it the
+  // ball's his from about 2.6 m to 4.4 m (a first-time shot's reach is 1.3 m to 2 m). A shot as he gets there -- struck
+  // at 0.4 of full power and a touch less true than a first-time one standing (SLIDE_SHOT_ACC of it) -- never a tackle.
+  // Half a slide tackle's stamina
+  const SLIDE_SHOT_ACC=0.85;
+  function slideShotLenOf(p){ return statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.45,0.75); }
+  // when a man reaches it on his feet (his reach from it, his pace, a beat to get going): the first point of its path, low
+  // enough to strike, he can be at as it is -- Infinity if none in 1.2 s
+  function meetTimeOf(q,reach,sp,go){ for(let i=0;i<=24;i++){ const t=i*0.05, B=ballAt(t); if(B.z>26) continue; if(Math.hypot(B.x-q.x,B.y-q.y)-reach<=sp*Math.max(0,t-go)) return t; } return Infinity; }
+  // where he slides to for it: the first point of its path his slide gets to as it does (his slide's length, as
+  // startSlideShot strikes it out, and his foot at the end of it) -- null if it can't, or if he'll be there on his feet
+  // first (it's not running from him and none of theirs will beat him to it), or if it's away from their goal
+  function slideShotFor(p){
+    if(p.tackleCd>0||!canSlide(p)) return null;
+    const L=slideShotLenOf(p), staFac=0.7+0.3*clamp(p.stamina,0,1), v0=470*L*staFac, T=0.45*L*staFac, k=3.507, contact=p.r+ball.r+12;
+    let hit=null;
+    for(let t=0.02;t<=T+0.001&&!hit;t+=0.02){ const B=ballAt(t); if(B.z>30) continue; if(Math.hypot(B.x-p.x,B.y-p.y)<=v0*(1-Math.exp(-k*t))/k+contact) hit={x:B.x,y:B.y,t}; }
+    if(!hit) return null;
+    const atk=atkOf(p.team), gx=atk>0?FW:0, hx=hit.x-p.x, hy=hit.y-p.y, hl=Math.hypot(hx,hy)||1, gl=Math.hypot(gx-p.x,YC-p.y)||1;
+    if((hx*(gx-p.x)+hy*(YC-p.y))/(hl*gl)<-0.35) return null;              // (not sliding away from their goal to shoot at it)
+    const tMe=meetTimeOf(p,controlROf(p)+ball.r+4,sprintSpeedOf(p)*0.9,0.15);
+    let tThem=Infinity;
+    for(const o of players) if(o.team!==p.team&&o.state==='normal') tThem=Math.min(tThem,meetTimeOf(o,controlROf(o)+ball.r,sprintSpeedOf(o),0.1));
+    const kp=keeperOf(p.team==='G'?'R':'G'); if(kp&&!kp.benched) tThem=Math.min(tThem,meetTimeOf(kp,reachOf(kp)*2.5,keeperSpdOf(kp)*1.4,0.1));
+    if(tMe<Infinity&&tMe<tThem-0.05&&tMe<=hit.t+0.35) return null;       // he'll be there on his feet, and first: he runs on to it
+    return hit;
+  }
+  function startSlideShot(p,tx,ty){
+    const dx=tx-p.x, dy=ty-p.y, l=Math.hypot(dx,dy)||1, L=slideShotLenOf(p), staFac=0.7+0.3*clamp(p.stamina,0,1);
+    p.facing={x:dx/l,y:dy/l}; p.slideDx=dx/l; p.slideDy=dy/l; p.slideShort=0;
+    p.state='slide'; p.stateT=0.45*L*staFac; p.tackleCd=1.2; p.slideTried=false; p.slideShot=true;
+    p.vx=p.slideDx*470*L*staFac; p.vy=p.slideDy*470*L*staFac;
+    const left=p.stamina-SLIDE_COST*0.5; p.stamina=clamp(left,0,p.staminaCap); if(left<=SLIDE_EMPTY) p.gassed=true;
+    lastGrade='SLIDING IN'; gradeColor='#9dff3c'; gradeFade=0.8;
+  }
+  function slideShotStrike(p){
+    const atk=atkOf(p.team), aim=p===controlled?Math.max(-1,Math.min(1,curIy)):0;
+    shootAt(p,atk,aim,0.4,0,P.firstTouchAcc.val*SLIDE_SHOT_ACC);
+    lastGrade='SLIDING FINISH!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.2;
   }
   function commandShoot(mate){
     mate.cmdShoot=1.4;                       // honored for a short window
@@ -7313,7 +7384,7 @@
     return incomingToMe();
   }
   function queueOneTouch(target){
-    oneTouch={p:controlled,target:target||null,until:simNow+2}; ftAim=null;
+    oneTouch={p:controlled,target:target||null,until:simNow+2}; ftAim=null; shotQ=null;
     lastGrade='ONE-TOUCH …'; gradeColor='#9dff3c'; gradeFade=0.9;
   }
   function playOneTouch(p){ const o=oneTouch; oneTouch=null; firstTouchPass({target:o.target,dir:o.dir}); }
@@ -7336,6 +7407,14 @@
     const relSpd=Math.hypot(ball.vx-p.vx,ball.vy-p.vy);
     return relSpd < cleanSpdOf(p);                             // within clean-touch speed
   }
+  function firstTimeShot(){
+    const atk=atkOf(controlled.team);
+    const aim=Math.max(-1,Math.min(1,curIy));
+    // a quick-charge based on how long K is held would need a frame; first-time is a snap strike
+    shootAt(controlled,atk,aim,0.55,aiCurlFor(controlled,atk),P.firstTouchAcc.val);
+    curveArmed=true;curveT=1.0;            // can still bend the live first-time shot briefly
+    lastGrade='FIRST-TIME!';gradeColor=controlled.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
+  }
   function pressShoot(){
     if(curveArmed){return;}                 // re-holding K bends the live shot
     if(headerT>0 || controlled.z>1){ return; }   // already leaping / mid-header -> ignore repeats (no double jump)
@@ -7347,15 +7426,7 @@
     if(myLooseBall()) gatherForAction();     // your own ball a touch away: still yours to wind up and shoot
     // FIRST-TOUCH SHOT: you don't have the ball yet, but it's strikeable -> volley it now,
     // at reduced accuracy (set by the first-touch accuracy dial).
-    if(ball.ownedBy!==controlled && !myLooseBall() && firstTouchBall(controlled)){
-      const atk=atkOf(controlled.team);
-      const aim=Math.max(-1,Math.min(1,curIy));
-      // a quick-charge based on how long K is held would need a frame; first-time is a snap strike
-      shootAt(controlled,atk,aim,0.55,aiCurlFor(controlled,atk),P.firstTouchAcc.val);
-      curveArmed=true;curveT=1.0;            // can still bend the live first-time shot briefly
-      lastGrade='FIRST-TIME!';gradeColor=controlled.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
-      return;
-    }
+    if(ball.ownedBy!==controlled && !myLooseBall() && firstTouchBall(controlled)){ firstTimeShot(); return; }
     shootHeld=true;
     const atk=atkOf(controlled.team);
     windUp={t:simNow, ahead:new Set(players.filter(q=>q.team!==controlled.team&&(q.x-controlled.x)*atk>0))};
@@ -7500,7 +7571,7 @@
     curveActive=0;
     if(!curveArmed){return;}
     curveT-=dt;
-    if(curveT<=0||ball.ownedBy||gkHold){curveArmed=false;return;}
+    if(curveT<=0||ball.ownedBy||gkHold||ball.lastTouchP!==controlled){curveArmed=false;return;}   // (v139: someone else has touched it -- a save, a block: it's not your shot to bend any more)
     // hold K + UP(W) to curve LEFT, K + DOWN(S) to curve RIGHT (relative to travel)
     const up = keys['KeyW']||keys['ArrowUp'];
     const down = keys['KeyS']||keys['ArrowDown'];
@@ -8070,7 +8141,7 @@
     if(ball.ownedBy===p||gkHold)return;
     if(!canSlide(p)){ if(p===controlled){ lastGrade='TOO TIRED TO SLIDE'; gradeColor='#ffb43c'; gradeFade=1.0; } return; }   // (THE LAST OF HIS LEGS)
     const staFac=0.7+0.3*clamp(p.stamina,0,1);            // a tired slide lunges shorter
-    p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;p.tackleCd=1.2;p.slideTried=false;
+    p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;p.tackleCd=1.2;p.slideTried=false;p.slideShot=false;
     p.slideDx=p.facing.x;p.slideDy=p.facing.y;
     const sShort=(p.slideShort||0); p.slideShort=0;
     p.vx=p.facing.x*470*slideLenOf(p)*staFac*(1-sShort);p.vy=p.facing.y*470*slideLenOf(p)*staFac*(1-sShort);
@@ -8078,6 +8149,9 @@
   }
   function slideContact(p){
     if(gkHold||restartT>0)return;
+    if(p.slideShot){                                       // (v139: a sliding finish -- the ball struck at goal as he gets there; never a tackle)
+      if(!p.slideTried&&!ball.ownedBy&&ball.z<=30&&dist(p,ball)<=p.r+ball.r+12){ p.slideTried=true; if(!checkOffsideTouch(p)) slideShotStrike(p); }
+      return; }
     if(dist(p,ball)>p.r+ball.r+10*slideHitOf(p)||ball.z>26)return;
     const carrier=ball.ownedBy;
     if(carrier&&carrier!==p&&carrier.team!==p.team&&!p.slideTried){
@@ -8148,7 +8222,7 @@
     ball.intendedRcv=null; ball.thru=null; ball.lob=null; ball.selfLob=null; ball.rcvRunner=false; ball.inNet=0;
     ball.shotT=0; ball.shotBy=null; ball.crossT=0; ball.crossBy=null; endCurve();
     offsidePass=null; headerT=0; defHeaderT=0; possTeam=team;
-    skill=null; holdMode=null; actQ=null; oneTouch=null; ftAim=null; recvAuto=null; swipeShot=null; passPend=null; crossPend=null;
+    skill=null; holdMode=null; actQ=null; oneTouch=null; ftAim=null; recvAuto=null; swipeShot=null; passPend=null; crossPend=null; shotQ=null;
     for(const q of players){ q.skill=null; if(q.state==='slide') { q.state='getup'; q.stateT=0.3; } }
     if(type==='goalkick'){ restartInfo={type,team,x,y}; executeRestart(); return; }
     const Rs={type,team,x,y,set:false,walkT:0,heldT:0,wait:0};
@@ -11485,7 +11559,7 @@
       p.x=clamp(p.x+p.vx*dt,p.r,FW-p.r);
       p.y=clamp(p.y+p.vy*dt,p.r,FH-p.r);
       slideContact(p);
-      if(p.stateT<=0){p.state='getup';p.stateT=0.55;}
+      if(p.stateT<=0){p.state='getup';p.stateT=0.55;p.slideShot=false;}
       return;
     }
     if(p.state==='stumble'||p.state==='getup'){
@@ -13197,8 +13271,8 @@
           btns.kick.classList.toggle('mCall', !mine && !thr && !gkYours && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !thr && !oursHave) || lockT);
         }
-        if(btns.shoot){ const slide=!mine&&!oursHave&&!strikeable;
-          btns.shoot.textContent = keeperInHand()?'LONG':mine?'SHOOT':(oursHave?'SHOOT!':(strikeable?'SHOOT':'SLIDE'));
+        if(btns.shoot){ const loose=!mine&&!oursHave&&!strikeable&&shotQOK(), slide=!mine&&!oursHave&&!strikeable&&!loose;   // (v139: the ball nobody's -- SHOOT)
+          btns.shoot.textContent = keeperInHand()?'LONG':mine?'SHOOT':(oursHave?'SHOOT!':(strikeable||loose?'SHOOT':'SLIDE'));
           btns.shoot.classList.toggle('mSlide',slide);
           btns.shoot.classList.toggle('mCmd',!mine&&oursHave&&!keeperInHand()); }
         if(btns.cross){ const gkL=keeperInHand()||(!!controlled&&controlled.isGK&&ball.ownedBy===controlled);   // your keeper with it: his long ball (keeperLong)
