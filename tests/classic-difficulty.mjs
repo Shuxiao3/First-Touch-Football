@@ -9,6 +9,7 @@ import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
@@ -18,11 +19,17 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
 patch('  function headClear(p){\n', '  function headClear(p){\n    if(p===controlled) window.__hcMine=(window.__hcMine||0)+1;\n');   // (your man's own headers clear)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-diff-')), 'classic.html');
 writeFileSync(copy, src);
+// (v142: served from a page of its own, http://127.0.0.1 -- a file:// page's saved settings weren't reliably there after a
+// reload in a headless browser, its own game's or not: v141's came back as they were before the pick 3 times in 4, and a
+// second tab never saw them. Over http they're the site's, as on the real page.)
+const srv = http.createServer((req, res) => { if(req.url.split('?')[0] === '/classic.html'){ res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(src); } else { res.writeHead(404); res.end(); } });
+await new Promise(r => srv.listen(0, '127.0.0.1', r));
+const URL_ = 'http://127.0.0.1:' + srv.address().port + '/classic.html';
 
 // a fresh browser, nothing kept: it's NORMAL (a page of its own: the harness starts its pages at STAR)
-const { browser, page, rep } = await open({ url: 'file://' + copy });
+const { browser, page, rep } = await open({ url: URL_ });
 const { ok, info } = rep;
-{ const fp = await browser.newPage(); await fp.goto('file://' + copy); await fp.waitForTimeout(500);
+{ const fp = await browser.newPage(); await fp.goto(URL_); await fp.waitForTimeout(500);
   const fresh = await fp.evaluate(() => window.__T.PREFS.diff); await fp.close();
   ok(fresh === 'normal', 'a fresh browser starts at NORMAL (' + fresh + ')'); }
 
@@ -108,4 +115,4 @@ ok(star.goal >= 3 && star.theirs === star.goal && star.assist === star.goal, 'a 
 ok(nrm.cleared >= 4 && star.cleared === 0 && nrm.goal < star.goal, 'on NORMAL your man heads their cross clear himself if you don\'t (' + nrm.cleared + ' of 16, ' + nrm.goal + ' in); at STAR he doesn\'t (' + star.cleared + ', ' + star.goal + ' in)');
 
 process.exitCode = rep.finish();
-await browser.close();
+await browser.close(); srv.close();
