@@ -210,6 +210,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   offside from a throw-in, a corner or a goal kick. (The labs, the drills and FREE PLAY keep the walls round the pitch:
   there the ball still comes back off them. Before v138 it did in a match too -- no throw-ins and no corners, and a
   goal kick only if a ball ever got past the line, which it never did.)
+  - **The ball that went out runs on** (v140) off the pitch -- over the far touchline up toward the boards and into the
+    stand -- and a new one comes in where it's taken from: faded in from 0.8 s to 1.3 s after it went out, the old one
+    fading as it does, and all of it there as soon as the man taking it is over it. (It jumped to the spot the moment
+    it went out.)
   - **A throw-in**: the nearest of the side -- a full-back or a wide man before a man from the middle -- takes it on the
     touchline, the ball over his head in both hands, facing the pitch. Two or three of his men come to offer for it --
     down the line, infield, and back toward his own goal -- each with one of theirs goal-side of him; the rest hold
@@ -220,6 +224,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     that way at about the range you held PASS for -- a tap 5 m, the whole bar 25 m -- picked as your pass picks him (a
     tap on a man: him); nobody that way, into the space that way. You go with it. Left alone, it goes after 5 s (the
     stopwatch over his head for the last two). On a phone the big button reads THROW.
+    - **Drawn as a throw-in** (v140): he holds it up over his head in both hands, elbows out, the ball between his
+      hands -- his frame's hanging hands left out and his arms drawn up beside his head in his own kit's and skin's
+      pixels. To throw it he takes it back over his head for a quarter of a second (it goes up 5 px) and lets it go, and
+      his arms come down in front of him; he stays where he is for those 0.3 s, then he's off. (The ball hung over his
+      head and went.)
   - **A corner**: the nearest of the side who isn't a forward or a centre-back (they're wanted in the box), the better
     crosser first, takes it from the quadrant. Four of his best in the air go into the box -- the near post, the far
     post, the spot and the back post -- a forward or a centre-back first, the nearer the box the likelier; one goes to
@@ -231,6 +240,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     yours), PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you after 5 s.
   - **A goal kick** is the keeper's, from his six-yard box, as it was (yours: you're on him -- see **Your keeper with it
     in his hands**). The other side go out of his penalty area, and none of them can come back into it till it's taken.
+    He walks to it (v140), up off the turf first if he's down -- 7 m takes him about a second and a quarter; he was put
+    there.
   - **At the end of a half** the side taking a restart has the ball: in the other half (a corner, a throw-in up the
     pitch) it's taken and played out; in its own half -- or the other side's, while one side's attack is being played
     out -- the whistle goes (see **The advantage at the end of each half**).
@@ -449,7 +460,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his reach -- heads it if it gets to his head in their box -- or, if his first touch takes it, hits it at once. It
   waits 1.6 s. Not a team-mate's ball (his knock-on, our pass on its way to him): SHOOT tells him to shoot, as before.
   Only a ball of theirs -- at a man's feet, in his stride, in their keeper's hands -- is a slide on the phone's SHOOT
-  button, which reads SLIDE then and SHOOT otherwise.
+  button, which reads SLIDE then and SHOOT otherwise. **In your own half** (your man in it) SHOOT is a slide as it was,
+  whatever the ball, unless it's in his reach to strike there and then (v140): there's no shooting from there, and on
+  the keyboard K asks for no shot.
   - **The sliding finish.** Should he not get there on his feet before it's away -- running from him, or one of theirs
     or their keeper there first -- and his slide can get to it as it comes past, he slides in and strikes it at goal: at
     0.4 of full power and a little less true than a first-time shot standing. It's a shot, never a tackle -- slid into
@@ -2174,6 +2187,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v140: the ball runs off; the throw-in drawn; SHOOT a slide in your own half.** A ball that goes out runs on off the
+  pitch, and a new one fades in where the restart's taken as the old one fades out -- it jumped there. A goal kick's
+  keeper walks to the ball. The man taking a throw-in holds it up over his head in both hands, takes it back to throw it
+  and his arms come down after (it hung over his head and went). And in your own half SHOOT is a slide again at any ball
+  not in your man's reach: a shot asked for is in their half only.
 - **v139: SHOOT shoots at a ball that's nobody's.** With the ball loose -- a pass on its way to your striker, one
   bouncing about in the box -- SHOOT is a shot: struck first time the moment it's in his reach (or headed), and asked
   for till then, your man going to meet it. If he can't get there on his feet in time, he slides in and strikes it: a

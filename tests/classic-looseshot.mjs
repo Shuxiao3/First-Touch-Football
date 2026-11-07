@@ -91,6 +91,16 @@ ok(all.every(r => !r.slide) && all.every(r => r.lbl === 'SHOOT'), 'the button re
   info('theirs: ' + r + ' -> ' + JSON.stringify(ev));
   ok(r === 'SLIDE' && ev.slide === 'tackle' && !ev.shot, 'one of theirs on the ball: the button reads SLIDE, and a tap slides in');
 }
+// ...and in your own half, a ball nobody's: SLIDE, as it was (v140) -- no shot from there
+{
+  const r = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(); window.__scene('ground', 1); const st = window.__st, atk = T.atkOf('G');
+    st.x = T.FW / 2 - atk * 20 * T.MK; st.y = T.YC; b.vx = b.vy = 0; b.intendedRcv = null; b.lastTouch = 'R'; b.x = st.x + atk * 5 * T.MK; b.y = st.y + 2 * T.MK;
+    let n = 0; (function tick(){ if(++n > 4) return res(T.label()); requestAnimationFrame(tick); })(); }));
+  await tapShoot();
+  const ev = await page.evaluate(() => new Promise(res => { const T = window.__T, t0 = T.simNow(); (function tick(){ if(window.__ev.slide || window.__ev.shot || T.simNow() - t0 > 0.5) return res(Object.assign({ asked: !!T.shotQ() }, window.__ev)); requestAnimationFrame(tick); })(); }));
+  info('your own half: ' + r + ' -> ' + JSON.stringify(ev));
+  ok(r === 'SLIDE' && ev.slide === 'tackle' && !ev.shot && !ev.asked, 'in your own half, a ball nobody\'s: the button reads SLIDE and slides, as it did -- no shot from there');
+}
 await page.evaluate(() => window.__T.freeze());
 await ctx.close();
 
@@ -138,6 +148,9 @@ let r = await pg.evaluate(() => new Promise(res => { const T = window.__T, b = T
       T.startSlideShot(p, b.x, b.y);
       await new Promise(r2 => { const t0 = T.simNow(); (function tick(){ if(window.__ev.shot || T.simNow() - t0 > 0.6) return r2(); requestAnimationFrame(tick); })(); });
       out.slideShot = window.__ev.shot; out.toGoal = Math.sign(b.vx) === atk && b.shotT > 0 && b.shotBy === 'G'; }
+    // in your own half, K at a ball nobody's asks for nothing (v140)
+    window.__scene('ground', 2); { const p = window.__st, atk = T.atkOf('G'); p.x = T.FW / 2 - atk * 20 * T.MK; p.y = T.YC; b.vx = b.vy = 0; b.intendedRcv = null; b.lastTouch = 'R'; b.x = p.x + atk * 5 * T.MK; b.y = p.y;
+      T.pressK(); out.ownHalfAsked = !!T.shotQ(); }
     // your shot, saved and parried: K is a shot again (asked for), not a bend on the old one
     window.__scene('ground', 0); { const p = window.__st, atk = T.atkOf('G'); b.vx = b.vy = 0; b.intendedRcv = null; b.x = p.x + atk * (p.r + b.r + 4); b.y = p.y; b.ownedBy = p;
       T.pressK(); T.releaseShoot(); out.armed = T.curve(); const kp = T.keepers().find(k => k.team === 'R');
@@ -150,6 +163,7 @@ ok(r.acc1 >= 1.1 && r.acc1 <= 1.6 && r.acc10 >= 2.7 && r.acc10 <= 3.3 && r.len1 
 ok(!r.tackled && r.noShot, 'slid into the man on the ball, it\'s no tackle: he keeps it');
 ok(r.slideShot === 'sliding finish' && r.toGoal, 'slid into a ball nobody\'s, it\'s a shot at goal');
 ok(r.armed && !r.armedAfter && r.asked, 'your shot saved and parried: K is a shot again, asked for -- not a bend on the old one');
+ok(r.ownHalfAsked === false, 'in your own half, K at a ball nobody\'s asks for no shot (v140)');
 
 process.exitCode = rep.finish();
 await browser.close();

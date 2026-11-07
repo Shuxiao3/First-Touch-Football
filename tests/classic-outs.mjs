@@ -14,7 +14,8 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_D, PA_HW, GOAL_W, atkOf, keeperOf, inOffsidePos, passTo, doPass, '
-  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, THROW_D}; }, rs:()=>restartInfo, rt:()=>restartT, last:()=>lastRestart, check:()=>checkOutOfPlay(), '
+  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, THROW_D, WIND:THROW_WIND, LIFT:THROW_LIFT, FOLLOW:THROW_FOLLOW, RUN:OUTBALL_RUN, FADE:OUTBALL_FADE}; }, '
+  + 'outBall:()=>outBall, newAlpha:()=>newBallAlpha(), pose:p=>throwPoseOf(p), keepers:()=>keepers, rs:()=>restartInfo, rt:()=>restartT, last:()=>lastRestart, check:()=>checkOutOfPlay(), '
   + 'give:(t,tm,x,y)=>doRestart(t,tm,x,y), controlled:()=>controlled, gk:()=>gkHold, offsideT:()=>offsideT, offsidePass:()=>offsidePass, simNow:()=>simNow, '
   + 'setFree:v=>{ freePlay=v; }, grade:()=>lastGrade, ballAt, '
   + 'freeze:()=>{ restartT=0; restartInfo=null; offsideT=0; offsidePass=null; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; skill=null; matchClock=0; advOn=false; }};\n  const LAB_TITLE=');
@@ -96,7 +97,7 @@ r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = 
   await window.__run(4, () => T.rs() && T.rs().set); res.yours = T.controlled() === T.rs().taker;
   res.after = await window.__run(T.RS.YOURS + 1, () => !T.rs()); res.thrown = !T.rs(); T.freeze(); return res; });
 info('left: ' + JSON.stringify(r));
-ok(r.yours && r.thrown && Math.abs(r.after - 5) < 0.2, 'left alone, it\'s thrown for you after ' + r.after + ' s');
+ok(r.yours && r.thrown && Math.abs(r.after - 5.25) < 0.2, 'left alone, it\'s thrown for you after ' + r.after + ' s (5 s, and the wind-up)');
 
 // --- NO OFFSIDE FROM A THROW-IN: a man of ours past their last man, a throw to him -- nobody's flagged; a pass, he is -----
 r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = { trials: [] };
@@ -108,7 +109,7 @@ r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = 
     q.x = defs[1] + atk * 3 * T.MK; q.y = 8 * T.MK; q.vx = q.vy = 0;                           // (three metres past their second-last man)
     const off = T.inOffsidePos(q);
     T.doPass(0.3, { target: q });                                                             // (thrown to him: yours, a tap on him)
-    const snap = T.offsidePass(), thrown = !T.rs();
+    await window.__run(1, () => !T.rs()); const snap = T.offsidePass(), thrown = !T.rs();     // (wound up, and gone: nobody flagged as it goes)
     await window.__run(2.5, () => b.ownedBy || T.offsideT() > 0);
     // the same man, the same spot, a pass instead: he's flagged
     T.freeze(); b.ownedBy = null; b.x = tk.x; b.y = 2 * T.MK; b.z = 0; b.vx = b.vy = 0;
@@ -164,7 +165,12 @@ ok(c2.taken && c2.cross, 'CROSS crosses it in');
 
 // --- A GOAL KICK: theirs; ours can't go into their box till it's taken; nobody's offside from it -------------------------
 r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = {};
-  T.freeze(); const atkR = T.atkOf('R'), gl = atkR > 0 ? 0 : T.FW; b.ownedBy = null; b.x = gl - atkR * 12; b.y = T.YC + 12 * T.MK; b.vx = b.vy = 0; b.z = 0; b.lastTouch = 'G'; T.check();
+  T.freeze(); const atkR = T.atkOf('R'), gl = atkR > 0 ? 0 : T.FW; b.ownedBy = null; b.x = gl - atkR * 12; b.y = T.YC + 12 * T.MK; b.vx = b.vy = 0; b.z = 0; b.lastTouch = 'G';
+  { const k = T.keepers().find(k => k.team === 'R'); k.x = k.homeX - k.side * 6 * T.MK; k.y = T.YC + 4 * T.MK; k.mode = 'line'; }   // (off his line, out to the ball that went past him)
+  T.check();
+  const k0 = T.keepers().find(k => k.team === 'R'); let jump = 0, px = k0.x, py = k0.y; const d0 = Math.hypot(k0.x - k0.homeX, k0.y - T.YC);
+  res.walk = await window.__run(3.5, () => { jump = Math.max(jump, Math.hypot(k0.x - px, k0.y - py)); px = k0.x; py = k0.y; return T.gk(); });   // (he walks to it)
+  res.jump = +(jump / T.MK).toFixed(2); res.d0 = +(d0 / T.MK).toFixed(1);
   const kp = T.gk(); res.gk = !!kp && kp.team === 'R' && !!kp.goalKick;
   const inB = q => Math.abs(q.x - gl) < T.PA_D && Math.abs(q.y - T.YC) < T.PA_HW, was = new Set(T.players().filter(q => q.team === 'G' && inB(q)));
   let came = 0; const snap = { off: null };
@@ -173,7 +179,36 @@ r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = 
   res.came = came; res.kicked = !T.gk(); res.off = snap.off; T.freeze(); return res; });
 info('goal kick: ' + JSON.stringify(r));
 ok(r.gk && r.kicked && r.came === 0, 'a goal kick to them: their keeper\'s, and none of ours goes into their box till it\'s taken');
+ok(r.jump < 0.4 && r.walk > 0, 'their keeper walks to the ball in his six-yard box (' + r.d0 + ' m in ' + r.walk + ' s, never more than ' + r.jump + ' m a frame) -- he isn\'t put there');
 ok(r.off === 'none', 'nobody\'s offside from it (nobody flagged as it\'s kicked)');
+
+// --- THE BALL GONE OUT runs on, and a new one comes in where it's taken: the old fading as the new one does -----------
+r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = { old: [], nw: [] };
+  T.freeze(); b.ownedBy = null; b.dribbler = null; b.x = T.FW * 0.45; b.y = 40; b.vx = 100; b.vy = -450; b.z = 0; b.vz = 0; b.lastTouch = 'G'; b.shotT = 0;
+  for(const q of T.players()) if(Math.hypot(q.x - b.x, q.y - b.y) < 15 * T.MK) q.y = T.YC;
+  await window.__run(0.5, () => T.outBall()); const o0 = T.outBall(); res.started = !!o0; const y0 = o0 ? o0.y : 0;
+  for(const at of [0.4, 0.7, 1.0, 1.15, 1.45]){ await window.__run(9, () => !T.outBall() || T.outBall().t >= at); const o = T.outBall();
+    res.old.push(o ? [+(o.y / T.MK).toFixed(1), +(1 - Math.min(1, Math.max(0, (o.t - T.RS.RUN) / T.RS.FADE))).toFixed(2)] : null); res.nw.push(+T.newAlpha().toFixed(2)); }
+  res.spot = [Math.round(b.y), b.vx === 0 && b.vy === 0]; T.freeze(); return res; });
+info('the ball gone out: ' + JSON.stringify(r));
+ok(r.started && r.old[0] && r.old[1] && r.old[1][0] < r.old[0][0] && r.old[0][0] < -1 && r.old[0][1] === 1 && r.old[1][1] === 1,
+  'over the touchline, the ball runs on off the pitch (' + (r.old[0] && r.old[0][0]) + ' m, then ' + (r.old[1] && r.old[1][0]) + ' m past the line), as it was');
+ok(r.nw[0] === 0 && r.nw[1] === 0 && r.nw[2] > 0 && r.nw[2] < 1 && r.nw[3] > r.nw[2] && r.nw[4] === 1 && r.old[2][1] < 1 && r.old[3][1] < r.old[2][1] && r.old[4] === null,
+  'and a new one comes in on the line where it went out, faded in from 0.8 s to 1.3 s as the old one fades out (new ' + r.nw.join(' ') + '; old ' + r.old.map(x => x ? x[1] : '-').join(' ') + ')');
+
+// --- THE THROW, DRAWN: held up over his head; wound up, higher; gone, his arms coming down, him where he is ------------
+r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = {};
+  T.freeze(); b.ownedBy = null; b.x = T.FW * 0.6; b.y = -12; b.vx = b.vy = 0; b.z = 0; b.lastTouch = 'G'; T.check();
+  await window.__run(4, () => T.rs() && T.rs().set); const tk = T.rs().taker; res.hold = T.pose(tk); res.z0 = Math.round(b.z);
+  await window.__run(4, () => !T.rs() || T.rs().windT > 0); res.wind = T.pose(tk); const tw = T.simNow();
+  let top = 0; await window.__run(1, () => { if(T.rs()) top = Math.max(top, b.z); return !T.rs(); }); res.windFor = +(T.simNow() - tw).toFixed(2); res.lift = Math.round(top - res.z0);
+  res.follow = T.pose(tk); const fx = tk.x, fy = tk.y;
+  await window.__run(T.RS.FOLLOW - 0.06); res.still = Math.hypot(tk.x - fx, tk.y - fy) < 1; res.during = T.pose(tk);
+  await window.__run(0.15); res.after = T.pose(tk); T.freeze(); return res; });
+info('the throw, drawn: ' + JSON.stringify(r));
+ok(r.hold === 'hold' && r.z0 === 40, 'he holds it up over his head with both arms (his frame\'s hanging hands left out, his arms drawn up to it)');
+ok(r.wind === 'wind' && Math.abs(r.windFor - 0.25) <= 0.07 && r.lift >= 4, 'to throw it he takes it back over his head -- ' + r.lift + ' px up over ' + r.windFor + ' s -- and lets it go');
+ok(r.follow === 'follow' && r.during === 'follow' && r.still && r.after === null, 'gone, his arms come down in front of him, him where he is for a moment, then he\'s off');
 
 // --- FREE PLAY keeps its walls --------------------------------------------------------------------------------------
 r = await page.evaluate(async () => { const T = window.__T, b = T.ball();

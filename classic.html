@@ -7163,11 +7163,13 @@
   // it's away -- running from him, or one of theirs or their keeper there first -- and it's low and within his sliding
   // reach, he slides in and strikes it (the sliding finish, slideShotFor). Asked for, it waits SHOTQ_T. (It was a slide
   // tackle on a phone, whatever the ball, unless it was at your feet or in your reach that moment -- and on the keyboard
-  // nothing at all: SHOOT told a team-mate near it to shoot.) Only a ball of theirs is a slide on SHOOT now
+  // nothing at all: SHOOT told a team-mate near it to shoot.) Only a ball of theirs is a slide on SHOOT now -- and, your man
+  // in his own half, any ball not in his reach (v140): no shot from there
   const SHOTQ_T=1.6;
   let shotQ=null;
   function shotQOK(){ const c=controlled;
     if(!c||LAB.on||practice||ball.ownedBy||gkHold||restartOn()||scoredT>0||offsideT>0||kickT>0||breakT>0||matchOver) return false;
+    if(inOwnHalf(c)) return false;                           // (v140: in your own half SHOOT is a slide, as it was -- no shot from there)
     return !matesBall()&&!(ball.dribbler&&ball.dribbleGrace>0&&ball.dribbler!==c); }
   function queueShot(){ shotQ={p:controlled, until:simNow+SHOTQ_T}; oneTouch=null; ftAim=null;
     lastGrade='SHOT …'; gradeColor='#9dff3c'; gradeFade=0.9; }
@@ -8208,13 +8210,42 @@
   // kick from an end line, but nothing called it: the walls kept it in.)
   const RS_WALK=3.0, RS_SET={throw:[0.9,1.5], corner:[1.0,1.6]}, RS_LATE={throw:2.8, corner:3.5}, RS_YOURS=5, RS_OFF={throw:2*MK, corner:9.15*MK};
   const THROW_D=[3*MK,25*MK], THROW_Z=PLAYER_H+6;   // (how far a throw goes; how high he holds it)
+  // THE THROW-IN, DRAWN (v140): he holds it over his head with both arms up (SPRITE.draw, throwPoseOf); to throw it he takes
+  // it back over his head for THROW_WIND -- it goes up THROW_LIFT -- and lets it go, his arms coming down in front of him for
+  // THROW_FOLLOW. (The ball hung over his head and went)
+  const THROW_WIND=0.25, THROW_LIFT=5, THROW_FOLLOW=0.3;
+  function throwPoseOf(p){ const Rs=restartInfo;
+    if(Rs&&restartT>0&&Rs.set&&Rs.type==='throw'&&Rs.taker===p) return Rs.windT>0?'wind':'hold';
+    return p.throwFollowT>0?'follow':null; }
+  // the throw decided -- the man it's for (or none) and where -- he winds up, and it goes as he lets go (throwRelease)
+  function throwWind(Rs,q,tx,ty){ Rs.windT=THROW_WIND; Rs.wind={q,tx,ty}; }
+  function throwRelease(Rs){ const p=Rs.taker, w=Rs.wind||{}; let tx=w.tx, ty=w.ty;
+    if(w.q&&players.includes(w.q)){ const T=throwT(dist(p,w.q)); tx=w.q.x+w.q.vx*T*0.6; ty=w.q.y+w.q.vy*T*0.6; }   // (where he is now)
+    throwTo(p,tx,ty,w.q&&players.includes(w.q)?w.q:null); restartDone(); p.throwFollowT=THROW_FOLLOW;
+    if(w.q&&w.q.team==='G'&&p.team==='G') passSwitch(w.q); }
   function outsOn(){ return !LAB.on && !practice && !freePlay; }
   function restartOn(){ return !!restartInfo && restartT>0; }                                    // a throw-in or a corner being taken
   function restartHolder(){ const R=restartInfo; return R&&restartT>0&&R.set&&R.type==='throw'?R.taker:null; }   // the man with a throw-in in his hands
   function restartHeld(p){ const R=restartInfo; return !!R&&restartT>0&&R.set&&R.taker===p; }   // the man over it, about to take it
   function myThrow(){ const h=restartHolder(); return !!h&&h===controlled&&h.team==='G'; }       // yours: PASS throws it
   function restartYours(R){ return !!R&&R.set&&R.taker===controlled&&R.team==='G'&&canSwitch()&&!window.__aiAll; }
+  // THE BALL GONE OUT (v140): the ball that went out runs on off the pitch (outBall) while a new one comes in where it's
+  // taken from -- faded in from OUTBALL_RUN to OUTBALL_RUN+OUTBALL_FADE, the old one fading out as it does; all of it
+  // there as soon as he's over it or it's played. (It jumped to the spot.)
+  const OUTBALL_RUN=0.8, OUTBALL_FADE=0.5;
+  let outBall=null;
+  function outBallStep(dt){ const o=outBall; if(!o) return; o.t+=dt; if(o.t>=OUTBALL_RUN+OUTBALL_FADE){ outBall=null; return; }
+    if(o.z>0||o.vz!==0){ o.vz-=520*dt; o.z+=o.vz*dt; if(o.z<=0){ o.z=0; o.vz=o.vz<-40?-o.vz*0.45:0; } }
+    o.x+=o.vx*dt; o.y+=o.vy*dt; if(o.z<12){ const fr=Math.pow(1-P.friction.val,dt*3.2); o.vx*=fr; o.vy*=fr; }
+    o.roll+=Math.hypot(o.vx,o.vy)*dt*0.02; }
+  function outBallFade(){ const o=outBall; return o?clamp((o.t-OUTBALL_RUN)/OUTBALL_FADE,0,1):1; }
+  function newBallAlpha(){ if(!outBall) return 1; const Rs=restartInfo;
+    if(!(Rs&&restartT>0)&&!(gkHold&&gkHold.goalKick)) return 1;           // (played: it's there)
+    if(Rs&&restartT>0&&Rs.set) return 1;                                 // (he's over it)
+    if(gkHold&&gkHold.goalKick) return 1;
+    return outBallFade(); }
   function doRestart(type,team,x,y){
+    outBall=outsOn()?{x:ball.x,y:ball.y,z:ball.z,vx:ball.vx,vy:ball.vy,vz:ball.vz,roll:ball.roll||0,t:0}:null;   // (v140: on it goes)
     restartLabel=type==='throw'?'THROW-IN':type==='corner'?'CORNER':'GOAL KICK'; restartLblT=1.4;
     lastGrade=restartLabel; gradeColor='#ffb43c'; gradeFade=1.4;
     lastRestart={type,team,x,y,at:simNow};
@@ -8224,8 +8255,10 @@
     offsidePass=null; headerT=0; defHeaderT=0; possTeam=team;
     skill=null; holdMode=null; actQ=null; oneTouch=null; ftAim=null; recvAuto=null; swipeShot=null; passPend=null; crossPend=null; shotQ=null;
     for(const q of players){ q.skill=null; if(q.state==='slide') { q.state='getup'; q.stateT=0.3; } }
-    if(type==='goalkick'){ restartInfo={type,team,x,y}; executeRestart(); return; }
     const Rs={type,team,x,y,set:false,walkT:0,heldT:0,wait:0};
+    if(type==='goalkick'){ const kp=keeperOf(team);                      // (v140: he walks to it in his six-yard box -- he was put there)
+      Rs.taker=kp; kp.mode='toGK'; kp.holdT=0; kp.goalKick=false; kp.diveT=0; kp.spreadT=0;
+      ball.x=kp.homeX-kp.side*26; ball.y=YC; restartInfo=Rs; restartT=1; restartPlan(Rs); return; }
     ball.x=x; ball.y=y;
     Rs.taker=restartTaker(Rs);
     restartInfo=Rs; restartT=1;
@@ -8237,7 +8270,7 @@
     if(Rs.type==='goalkick'){
       restartInfo=null; restartT=0; possTeam=Rs.team;
       const kp=keeperOf(Rs.team);
-      kp.x=kp.homeX;kp.y=YC;kp.mode='hold';kp.holdT=1.0;kp.heldT=0;
+      kp.x=kp.homeX;kp.y=YC;kp.mode='hold';kp.holdT=1.0;kp.heldT=0;kp.vx=kp.vy=0;
       kp.goalKick=true;                        // (THE RULES, v113: placed on the ground and kicked -- never thrown)
       gkHold=kp;
       ball.x=kp.x-kp.side*26; ball.y=YC; ball.z=0; ball.vx=ball.vy=ball.vz=0;
@@ -8284,11 +8317,14 @@
   function restartStep(dt){
     if(restartLblT>0) restartLblT-=dt;
     const Rs=restartInfo; if(!Rs||restartT<=0||matchOver||breakT>0) return;
+    if(Rs.type==='goalkick'){ const kp=Rs.taker; Rs.walkT+=dt;           // (v140: the keeper to the ball -- keeperUpdate walks him)
+      if(!kp||Math.hypot(kp.x-kp.homeX,kp.y-YC)<8||Rs.walkT>=2.5) executeRestart(); return; }
     let p=Rs.taker;
     if(!p||!players.includes(p)||p.benched){ p=Rs.taker=restartTaker(Rs); Rs.set=false; ball.ownedBy=null; ball.x=Rs.x; ball.y=Rs.y; ball.z=0;   // (gone off: another man)
       if(!p){ restartDone(); return; } }
     if(!Rs.set){ Rs.walkT+=dt; const w=restartWalkTo(Rs,p); if(Math.hypot(p.x-w.x,p.y-w.y)<14||Rs.walkT>=RS_WALK) restartSet(Rs); return; }
     if(Rs.type==='corner'&&ball.ownedBy!==p){ restartDone(); return; }     // (taken -- yours, pressed between frames)
+    if(Rs.windT>0){ Rs.windT-=dt; if(Rs.windT<=0) throwRelease(Rs); return; }   // (v140: winding up the throw)
     Rs.heldT+=dt;
     if(restartYours(Rs)){ if(Rs.heldT>=RS_YOURS) restartTake(Rs,true); return; }
     const late=Rs.heldT>=RS_LATE[Rs.type];
@@ -8305,8 +8341,8 @@
     const p=Rs.taker;
     if(Rs.type==='throw'){
       const q=throwPick(p,late);
-      if(q){ const T=throwT(dist(p,q)); throwTo(p,q.x+q.vx*T*0.6,q.y+q.vy*T*0.6,q); restartDone(); if(q.team==='G'&&p.team==='G') passSwitch(q); return; }
-      if(late){ const atk=atkOf(p.team), inw=Rs.y<YC?1:-1; throwTo(p,clamp(p.x+atk*12*MK,MK,FW-MK),Rs.y+inw*4*MK,null); restartDone(); }   // (nobody to throw it to: down the line)
+      if(q){ throwWind(Rs,q,q.x,q.y); return; }
+      if(late){ const atk=atkOf(p.team), inw=Rs.y<YC?1:-1; throwWind(Rs,null,clamp(p.x+atk*12*MK,MK,FW-MK),Rs.y+inw*4*MK); }   // (nobody to throw it to: down the line)
       return;
     }
     ball.cornerAt=simNow; aiCross(p,crossSpot(p)); restartDone();           // a corner: into the box, to the best of ours there (crossSpot)
@@ -8349,7 +8385,7 @@
     if(!ax&&!ay){ ax=p.facing?p.facing.x:0; ay=p.facing?p.facing.y:inw; }
     if(ay*inw<0.2) ay=inw*0.2; const l=Math.hypot(ax,ay)||1; return {x:ax/l,y:ay/l}; }
   function throwYours(charge,o){
-    if(!myThrow()) return;
+    if(!myThrow()||restartInfo.windT>0) return;                          // (v140: winding up already)
     const Rs=restartInfo, p=controlled; o=o||{};
     const a=restartAim(p,Rs), dI=clamp(5*MK+clamp(charge||0,0,1)*20*MK,THROW_D[0],THROW_D[1]);
     let q=o.target&&o.target.team===p.team&&o.target!==p&&players.includes(o.target)?o.target:null;
@@ -8357,14 +8393,12 @@
       const dx=m.x-p.x, dy=m.y-p.y, d=Math.hypot(dx,dy)||1; if(d>THROW_D[1]*1.15) continue;
       const an=Math.acos(clamp((dx*a.x+dy*a.y)/d,-1,1)); if(an>PASS_CONE) continue;
       const sc=passScore(p,m,an,d,dI); if(sc>bs){ bs=sc; q=m; } } }
-    let tx, ty;
-    if(q){ const T=throwT(dist(p,q)); tx=q.x+q.vx*T*0.6; ty=q.y+q.vy*T*0.6; }
-    else { tx=clamp(p.x+a.x*dI,MK,FW-MK); ty=clamp(p.y+a.y*dI,MK,FH-MK); }
-    throwTo(p,tx,ty,q); restartDone(); if(q) passSwitch(q);
+    throwWind(Rs,q,q?q.x:clamp(p.x+a.x*dI,MK,FW-MK),q?q.y:clamp(p.y+a.y*dI,MK,FH-MK));   // (v140: wound up first; it goes to where he is then -- throwRelease)
   }
   // THE PLACES, for everyone but him (restartTarget gives each man's, every frame)
   function restartPlan(Rs){
     const T=Rs.team, atk=atkOf(T), plan=new Map(); Rs.plan=plan;
+    if(Rs.type==='goalkick') return;                                     // (v140: the keeper walking to it -- see restartTarget)
     const mine=players.filter(q=>q.team===T&&q!==Rs.taker&&!q.benched), theirs=players.filter(q=>q.team!==T&&!q.benched);
     const nearest=(men,pt,far)=>{ let b=null, bd=far||1e9; for(const q of men){ if(plan.has(q)) continue; const d=Math.hypot(q.x-pt.x,q.y-pt.y); if(d<bd){ bd=d; b=q; } } return b; };
     if(Rs.type==='throw'){
@@ -8399,6 +8433,7 @@
   // a man's place: his spot; goal-side of the man he's on (and a little toward the ball); or, nothing for him, his
   // place in the shape
   function restartTarget(Rs,p){
+    if(Rs.type==='goalkick'){ const a=anchorOf(p); return p.team!==Rs.team?boxOut(a.x,a.y,Rs.taker,true):a; }   // (v140: the keeper on his way to it)
     const s=Rs.plan&&Rs.plan.get(p);
     if(s&&s.m&&players.includes(s.m)){ const m=s.m, gx=atkOf(p.team)>0?0:FW, dx=gx-m.x, dy=YC-m.y, l=Math.hypot(dx,dy)||1, bx=ball.x-m.x, by=ball.y-m.y, bl=Math.hypot(bx,by)||1;
       return {x:m.x+dx/l*1.1*MK+bx/bl*0.5*MK, y:m.y+dy/l*1.1*MK+by/bl*0.5*MK}; }
@@ -8407,7 +8442,7 @@
   }
   // the other side stand off it: 2 m from the thrower, 9.15 m from the ball at a corner
   function restartKeepOff(Rs,p){
-    if(p.team===Rs.team) return;
+    if(p.team===Rs.team||Rs.type==='goalkick') return;
     const c=Rs.type==='throw'&&Rs.set?Rs.taker:Rs, r=RS_OFF[Rs.type]; let dx=p.x-c.x, dy=p.y-c.y; const d=Math.hypot(dx,dy);
     if(d>=r) return;
     if(d<1){ dx=0; dy=Rs.y<YC?1:-1; } else { dx/=d; dy/=d; }
@@ -8420,7 +8455,7 @@
     p.intercepting=false; p.goingForBall=false; p.dash=false; p.planned=false; p.engageCap=1; p.runTarget=null; p.gapRun=0; p.recover=false; p.pressRun=false;
     if(p===Rs.taker){
       if(Rs.set){ const st=restartStand(Rs,p); p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false;
-        if(Rs.type==='throw'){ if(restartYours(Rs)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=p.y+0.5; ball.z=THROW_Z; }
+        if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=p.y+0.5; ball.z=THROW_Z+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
         else { ball.x=Rs.x; ball.y=Rs.y; ball.z=0; }
         ball.vx=ball.vy=ball.vz=0; return true; }
       const w=restartWalkTo(Rs,p), d=Math.hypot(w.x-p.x,w.y-p.y), ai=steer(p,w.x,w.y,1);
@@ -8432,8 +8467,8 @@
   }
   // A GOAL KICK: the other side out of the penalty area till it's taken -- where they go is outside it (boxOut), and a man
   // out of it can't come back in (keepOutOfBox); one in it when it's given walks out
-  function boxOut(x,y,kp){
-    if(!kp||!kp.goalKick) return {x,y};
+  function boxOut(x,y,kp,force){
+    if(!kp||!(kp.goalKick||force)) return {x,y};
     const gl=kp.side<0?0:FW, dx=Math.abs(x-gl), dy=Math.abs(y-YC), m=MK;
     if(dx>=PA_D+m||dy>=PA_HW+m) return {x,y};
     if(PA_D+m-dx<PA_HW+m-dy) return {x:gl+(kp.side<0?1:-1)*(PA_D+m), y};
@@ -8699,7 +8734,7 @@
     // whatever the hysteresis says (a loose ball freezes possConf progress, so the stale phase can
     // hold forever) -- that team drops into its defensive shape and the opponent pushes up.
     { const c0=heldBy();
-      if(!c0){ if(atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66) weAttack=false;
+      if(!c0&&!restartOn()){ if(atk>0 ? ball.x<FW*0.34 : ball.x>FW*0.66) weAttack=false;   // (v140: a restart, the side taking it has it)
                else if(atk>0 ? ball.x>FW*0.66 : ball.x<FW*0.34) weAttack=true; } }
     // ADOPT THE RIGHT FORMATION SHAPE for the phase (attack vs defense).
     if(p.slotAtk&&p.slotDef) applySlot(p, weAttack?p.slotAtk:p.slotDef);
@@ -12396,6 +12431,12 @@
     if(kp.diveT>0){ kp.diveT-=dt; if(kp.diveT<=0 && kp.groundT<=0) kp.groundT=0.5; }   // after the dive, lie down ~0.5s
     else if(kp.groundT>0){ kp.groundT-=dt; }
     const spd=keeperSpdOf(kp);
+    // TO THE BALL FOR A GOAL KICK (v140): up off the turf if he's down, then he walks to it in his six-yard box -- the
+    // restart (restartStep) has it his once he's there
+    if(kp.mode==='toGK'){ if(kp.diveT>0||kp.groundT>0) return;
+      const dx=kp.homeX-kp.x, dy=YC-kp.y, d=Math.hypot(dx,dy), v=Math.min(d,spd*1.1*dt);
+      if(d>0.5){ kp.x+=dx/d*v; kp.y+=dy/d*v; kp.facing={x:dx/d,y:dy/d}; }
+      return; }
     // GOING DOWN BIG (see spreadBlock): a shot from close by the man he's out at puts him down, across the way it's going,
     // and down he stays till he's up again
     if(kp.spreadT>0){ kp.spreadT-=dt; if(kp.spreadT<=0){ kp.spreadT=0; kp.groundT=SPREAD_DOWN; kp.spreadDn=SPREAD_DOWN; } return; }
@@ -12949,7 +12990,7 @@
     const seeK=1-Math.exp(-dt/0.35);
     for(const p of players){ p.seenVx=(p.seenVx||0)+(p.vx-(p.seenVx||0))*seeK; p.seenVy=(p.seenVy||0)+(p.vy-(p.seenVy||0))*seeK; }   // how others read a man's running: a beat late (see blockSpot)
     for(const p of players) trackFacing(p,dt);
-    for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.skillCd>0)p.skillCd-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
+    for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.throwFollowT>0)p.throwFollowT-=dt;if(p.skillCd>0)p.skillCd-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
       if(!p.facing||!isFinite(p.facing.x)||!isFinite(p.facing.y)) p.facing={x:atkOf(p.team),y:0};}
     for(const kp of keepers){ if(!kp.facing||!isFinite(kp.facing.x)||!isFinite(kp.facing.y)) kp.facing={x:atkOf(kp.team),y:0}; }
     updatePossConf(dt);
@@ -12977,12 +13018,14 @@
     if(!(offsideT>0||restartT>0||scoredT>0||breakT>0||kickT>0||matchOver)) assistHeader();   // (DIFFICULTY's assist: their cross, at your man's head)
     updateHold(!!(hi.ix||hi.iy));                                     // (SKILL held: strafing or shielding)
     restartStep(dt);                                                  // (v138: a throw-in or a corner being taken -- see doRestart)
+    outBallStep(dt);                                                  // (v140: the ball gone out, running on)
     // (v138: a restart no longer stops the men -- they take their places, restartMove -- only the ball)
     const frozen = offsideT>0 || (restartT>0&&!restartInfo) || scoredT>0 || breakT>0 || kickT>0 || matchOver;
     const gkBox=gkHold&&gkHold.goalKick?gkHold:null;                  // (v138: a goal kick -- the other side out of the box: keepOutOfBox)
     if(gkBox) for(const p of players){ if(p.team!==gkBox.team){ p._bx=p.x; p._by=p.y; } }
     if(!frozen) for(const p of players){
       if(restartInfo&&restartMove(p,dt,hi)) continue;
+      if(p.throwFollowT>0){ p.vx=p.vy=0; continue; }                  // (v140: just thrown it, his arms coming down: a moment where he is)
       if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }
       else if(practice && !p.labAI && practiceStep(p,dt)){ /* scripted helper handled */ }
       else if(practice && !p.labAI){ p.vx=p.vy=0; p.z=0; p.vz=0; }   // everyone else parked during practice (the Crossing Lab's men play on)
@@ -13685,7 +13728,7 @@
   function resetKickoff(kickTeam){
     ball.x=FW/2;ball.y=FH/2;ball.vx=ball.vy=0;ball.z=0;ball.vz=0;
     ball.ownedBy=null;ball.cushBy=null;ball.lastTouch=null; possTeam=null;
-    offsidePass=null;gkHold=null;controllingKeeper=null;restartT=0;restartInfo=null;headerT=0;
+    offsidePass=null;gkHold=null;controllingKeeper=null;restartT=0;restartInfo=null;headerT=0;outBall=null;
     kickT=0; kickBy=null; kickTo=null;
     for(const p of players){
       if(p.slotDef) applySlot(p,p.slotDef);              // compact defensive shape -> both teams in their own halves
@@ -14158,6 +14201,7 @@
     actors.push({y:ball.y,fn:drawBall});
     for(const sd of [-1,1]) actors.push({y:goalSplit(sd)+0.01,fn:()=>{ if(!PITCH.front(sd)) drawGoal(sd,true); }});   // the goals' fronts
     if(pball.on)actors.push({y:pball.y,fn:drawGhostBall});
+    if(outBall) actors.push({y:outBall.y,fn:drawOutBall});            // (v140: the ball gone out)
     for(const kp of keepers) if(!kp.benched) actors.push({y:kp.y,fn:()=>drawKeeper(kp)});
     actors.sort((a,b)=>a.y-b.y);
     for(const a of actors)a.fn();
@@ -14470,8 +14514,36 @@
       if(sp<14) return ['idle',0,dx,dy];
       return ['run', Math.floor((p.animPhase||0)/56*4)%4, dx, dy];   // feet sync to speed
     }
+    // THE THROW-IN (v140): his frame facing the pitch -- S from the far touchline, N from the near -- with his hanging hands
+    // left out (rows 24-25 beside his shorts), and his arms drawn up beside his head to the ball over it, a hand either
+    // side of it, in his own kit's and skin's pixels copied from his frame (THROW_SRC: where each is in it); winding up,
+    // higher with it; thrown, coming down in front of him
+    const THROW_SRC={S:{row:2,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[20,24],SKD:[10,24]}, N:{row:6,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[10,24],SKD:[11,24]}};
+    function throwArm(top){                                // his left arm, his hand at row `top`: [x, y, material]
+      const px=[[8,top-1,'O'],[9,top-1,'O'],[10,top-1,'O']], el=Math.round((top+21)/2);   // (his elbow out wide, halfway up)
+      for(let y=top;y<=21;y++){
+        if(y<=top+1){ px.push([7,y,'O'],[8,y,'SKN'],[9,y,'SKN'],[10,y,'SKN'],[11,y,'O']); continue; }   // the hand
+        const c=y>=el?Math.round(8-2*(21-y)/Math.max(1,21-el)):Math.round(6+2*(el-y)/Math.max(1,el-top-1));   // out to the elbow, in to the hand
+        const m=y>=20?['SLV','SLV']:y>=18?['TRM','TRM']:['SKD','SKN'];             // the sleeve into his shoulder, its hem, the arm bare
+        px.push([c-1,y,'O'],[c,y,m[0]],[c+1,y,m[1]],[c+2,y,'O']);
+      }
+      return px;
+    }
+    function drawThrow(p,base,pose){
+      const V=THROW_SRC[p.facing&&p.facing.y<0?'N':'S'], sz=lookOf(p).size, sc=base.scale*cfg.scale*sz, sheet=sheetFor(p), oy=V.row*CELL;
+      const x0=Math.round(base.x-AX*sc), y0=Math.round(base.y-AY*sc), P=v=>Math.round(v*sc);
+      const blit=(sx,sy,w,h,dx,dy)=>ctx.drawImage(sheet,sx,oy+sy,w,h,x0+P(dx),y0+P(dy),P(dx+w)-P(dx),P(dy+h)-P(dy));
+      const top=pose==='follow'?14:clamp(Math.round(AY-(ball.z||0)/(cfg.scale*sz)-5.5),-4,14);   // (his hands at the ball's middle: its bottom sits ball.z up)
+      ctx.save(); ctx.imageSmoothingEnabled=false;
+      blit(0,0,CELL,24,0,0); blit(12,24,8,2,12,24); blit(0,26,CELL,CELL-26,0,26);   // his frame, the hanging hands left out
+      const dot=(m,x,y)=>{ const q=V[m]; blit(q[0],q[1],1,1,x,y); };
+      for(const y of [24,25]){ dot('O',11,y); dot('O',20,y); }                   // (his sides there, closed)
+      for(const [x,y,m] of throwArm(top)){ dot(m,x,y); dot(m,31-x,y); }           // both arms: the right the left's mirror
+      ctx.restore(); return true;
+    }
     function draw(p,base){
       if(!(cfg.enabled&&cfg.ready)) return false;
+      { const tp=throwPoseOf(p); if(tp) return drawThrow(p,base,tp); }          // (v140: a throw-in)
       const [name,f,dx,dy]=pick(p), A=ANIM[name];
       const sc=base.scale*cfg.scale*lookOf(p).size, row=A.row+snap8(dx,dy);
       const sz=Math.round(CELL*sc), x=Math.round(base.x-AX*sc), y=Math.round(base.y-AY*sc);   // whole pixels: no shimmer
@@ -14794,7 +14866,18 @@
       c2.save(); c2.imageSmoothingEnabled=false; c2.drawImage(SH,Math.round(x-w/2),Math.round(y-h/2),w,h); c2.restore(); }
     return {on, shadow, draw, drawTo, shadowTo, frames:F};
   })();
-  function drawBall(){
+  // (v140) the ball gone out, on its way off the pitch -- fading as the new one comes in
+  function drawOutBall(){ const o=outBall; if(!o) return; const a=1-outBallFade(); if(a<=0.01) return;
+    ctx.save(); ctx.globalAlpha=a;
+    // (past the far touchline proj holds everything on the line: this one goes on up toward the boards, a little smaller)
+    const s=o.y<0?(()=>{ const q=proj(o.x,0,o.z), k=1+o.y/VIEW_D, sc=q.scale*k; return {x:W/2+(o.x-camX)*sc, y:HORIZON+(NEAR_Y-HORIZON)*o.y/VIEW_D-o.z*sc, scale:sc}; })():proj(o.x,o.y,o.z);
+    const sq=o.z>4?clamp(1-o.z/300,0.45,1):1;
+    if(BALL_ART.on()){ if(o.y>=0) BALL_ART.shadow(o.x,o.y,sq); BALL_ART.draw(s,false,o.roll); }
+    else { if(o.y>=0) drawShadow(o.x,o.y,ball.r,sq); const rr=ball.r*s.scale; ctx.beginPath(); ctx.arc(s.x,s.y,rr,0,Math.PI*2); ctx.fillStyle='#f4f7ee'; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#10130f'; ctx.stroke(); }
+    ctx.restore(); }
+  function drawBall(){ const a=newBallAlpha(); if(a<=0.01) return;     // (v140: the new ball fading in where it's taken)
+    if(a<1){ ctx.save(); ctx.globalAlpha=a; drawBallNow(); ctx.restore(); } else drawBallNow(); }
+  function drawBallNow(){
     if(gkHold && SPRITE.keeperShowsBall(gkHold)) return;      // held: it's in his gloves on his sprite
     const px=BALL_ART.on(), sq=ball.z>4?clamp(1-ball.z/300,0.45,1):1;
     if(px) BALL_ART.shadow(ball.x,ball.y,sq); else drawShadow(ball.x,ball.y,ball.r,sq);
