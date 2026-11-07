@@ -2230,6 +2230,10 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v145: the Pressing forward gone.** As the One-on-one keeper went in v144: a man who was one -- yours, the other
+  clubs', a free agent, a youth, an exhibition side kept -- is re-labelled as the striker his stats fit best, his stats
+  and rating as they were (most come out Complete forwards, then Speedsters), and his habits are gone with him: pressing
+  up whatever the forwards are told, and going in a step tighter.
 - **v144: pace the dearest; the types again.** Speed weighs the most in every outfielder's rating (6) and acceleration 5,
   so a quick man pays for it in the rest of his game at the same rating -- at 70, the quickest quarter have up to 0.9 of
   a point less of the rest than the slowest -- and one who's quick and good at the rest rates among the best. A
@@ -3243,12 +3247,11 @@ are Inverted wingers. See **The types in each position (v143)** below.)
 | | Speedster | ST | W | 20% | 8.5 | pace, acceleration | runs in behind all day |
 | | Target man | ST | -- | 20% *(v144; 18%)* | 4.5 | strength, heading, holding it up | back to goal, up and central: holds it up; hardly ever runs |
 | | False nine *(v118)* | ST | AM *(v127; CM before)* | 10% | 6.5 | passing, dribbling, vision | drops into midfield to make the play, always |
-| | Pressing forward *(v118)* | ST | W | 0 *(v144: none made; 10% before -- those there are stay)* | 7 | stamina, tackling, acceleration | presses up whatever the forwards are told, tight on the man |
 | Keeper *(v118)* | All-rounder | GK | -- | 40% *(v144; 30%)* | 6.5 | a bit of everything | as every keeper was before v118 |
 | | Shot-stopper | GK | -- | 35% | 5 | reflexes, diving, handling | stays home: less far off his line at a man, sweeps less, comes for fewer crosses |
 | | Sweeper keeper | GK | -- | 25% *(v144; 20%)* | 7 | speed off his line, kicking, composure | stands higher (up to 4 m off his line with the ball far up the pitch), sweeps further out and sooner |
 
-(Pace: the middle of a new career's men's speed stat, 1--10 -- a keeper's, his keeper speed. v144: measured again, as men are made now -- see **Pace, the dearest of all**. The One-on-one keeper's gone: a keeper who was one is re-labelled as the keeper his keeping fits best, most of them sweeper keepers.)
+(Pace: the middle of a new career's men's speed stat, 1--10 -- a keeper's, his keeper speed. v144: measured again, as men are made now -- see **Pace, the dearest of all**. The One-on-one keeper's gone: a keeper who was one is re-labelled as the keeper his keeping fits best, most of them sweeper keepers. v145: the Pressing forward too -- the striker his stats fit best, most of them complete forwards.)
 
 **The habits.** Most lean the setting his line has a step one way or the other: a wing-back goes a step further up
 than the full-backs are told (SUPPORT is PUSH UP to him), a defensive full-back a step back, a libero a step closer
@@ -3257,17 +3260,16 @@ an anchor and a deep creator a step back (they hold with the pivot), a poacher a
 line. Some have a setting of their own: a target man always
 holds it up, a false nine always drops in, a shadow striker always goes in behind; an inverted winger and a wide
 playmaker narrower, and a wide playmaker comes short for it. (A winger and a
-wide runner play wide as their line's told, and go in at the back post with the ball near their box like anyone.) Without the ball: a stopper, a ball-winner and a pressing
-forward go in tighter (a step toward TACKLE), a cover CB and a deep creator a step off; where the line holds, a cover
-CB picks up a runner (FOLLOW RUNNERS) and a stopper steps out to a man in front of him (PRESS UP); a pressing forward
-presses up whatever the forwards are told; a ball-winner goes and gets it further up than the line of engagement. On
+wide runner play wide as their line's told, and go in at the back post with the ball near their box like anyone.) Without the ball: a stopper and a ball-winner go in
+tighter (a step toward TACKLE), a cover CB and a deep creator a step off; where the line holds, a cover
+CB picks up a runner (FOLLOW RUNNERS) and a stopper steps out to a man in front of him (PRESS UP); a ball-winner goes and gets it further up than the line of engagement. On
 the ball his choices tilt: a winger, a wide runner and a wing-back fancy going down the line, an inverted winger
 and a wide playmaker cutting in off it; a trickster takes his man on most of all, and does a skill
 move keenest; a trequartista takes men on and plays the killer ball, a playmaker and a deep creator the ball
 through (the deep creator long, from deep), a libero and a wide CB run with it, an inverted full-back passes and
 doesn't cross, a poacher and a shadow striker shoot, a false nine makes it rather than finishes it; a stopper, an
 anchor, a ball-winner and a defensive full-back keep it simple. Runs in behind come keenest from a speedster, a
-pacey winger (v144) and a shadow striker, then a winger, a wide runner and a wing-back, a poacher and a pressing forward;
+pacey winger (v144) and a shadow striker, then a winger, a wide runner and a wing-back, and a poacher;
 a wide playmaker less, a false nine and a target man hardly ever. The holder is an anchor or a deep
 creator if there's one, a ball-winner next, never a shadow striker or a trequartista if anyone else will do.
 
@@ -3293,7 +3295,7 @@ or a Mezzala (15); an attacking one a Playmaker (50), a Trequartista (35) or a S
 full-back can go to central midfield now, and a wide playmaker to attacking midfield. The wingers are the Winger (40),
 the Trickster (25), the new Pacey winger (20: all pace -- the quickest of them at 9, paid for in the rest) and the
 Inverted winger (15). The strikers: the Complete forward 25, the Poacher 25, the Speedster 20, the Target man 20, the
-False nine 10; no Pressing forward is made now (those there are stay as they are). The keepers: the All-rounder 40,
+False nine 10; no Pressing forward is made now (v145: and he's gone -- one who was is the striker his stats fit best: of 300 made as v144 made them, 174 come out complete forwards, 120 speedsters, 4 poachers and 2 false nines, his rating as it was; his habits went with him: pressing up whatever the forwards were told, going in a step tighter). The keepers: the All-rounder 40,
 the Shot-stopper 35, the Sweeper keeper 25 -- the One-on-one keeper's gone, a keeper who was one re-labelled as the
 keeper his keeping fits best (of 300 made as v143 made them, 251 come out sweeper keepers, 45 shot-stoppers, 4
 all-rounders), his rating as it was. A career's ball-winners are holding midfielders now and its cover midfielders
