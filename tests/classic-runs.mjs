@@ -199,7 +199,7 @@ ok(r.stride.inStride && !r.stride.watch, 'one through along the grass catching h
 r = await page.evaluate(() => new Promise(res => { const T = window.__T; T.reset(); window.__clearIns(); window.__liv(); window.__city(10, [-14, 0, 14], 22);
   const cm = window.__by('G', 'CM', 'atk', 1), w = window.__by('G', 'W', 'atk', 1), a = T.atkOf('G'), b = T.ball(), t0 = T.simNow();
   window.__at(cm, 36, 8); window.__at(w, 52, 8); const x0 = w.x; w.vx = a * 220; w.vy = 0; w.facing = { x: a, y: 0 }; w.runTarget = { x: w.x + a * 400, y: w.y, lx: w.x + a * 400, ly: w.y };
-  Object.assign(cm.stats, { passAcc: 6.5, curve: 8, offIQ: 8.5 }); Object.assign(w.stats, { speed: 9.5, acceleration: 9.5, agility: 9.5, offIQ: 6.5, ballControl: 8, stamina: 5.5 });   // (v146: the two the scene was set on -- Liverpool's men in these spots change with the types)
+  Object.assign(cm.stats, { passAcc: 6.5, longPass: 6.5, curve: 8, offIQ: 8.5 }); Object.assign(w.stats, { speed: 9.5, acceleration: 9.5, agility: 9.5, offIQ: 6.5, ballControl: 8, stamina: 5.5 });   // (v146: the two the scene was set on -- Liverpool's men in these spots change with the types)
   window.__give(cm); T.setControlled(window.__by('G', 'CB', 'atk', 0));       // (the computer runs him, not you: you're on a centre-back out of it)
   T.thruBall(cm, w, { dx: a * 60, dy: 0 }, true);                              // (lofted, over his head: the computer can still play one)
   let back = 0, minV = 1e9, n = 0;

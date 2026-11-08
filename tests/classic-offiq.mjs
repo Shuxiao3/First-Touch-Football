@@ -53,8 +53,8 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
   const pas = R.find(q => q !== att[0] && q !== mid[0] && q.role !== 'G') || R[1], rcv = scene === 'cross' ? att[0] : mid[0], opp = defs[0], keep = new Map();
   for(const q of [pas, rcv, opp]) keep.set(q, q.stats);
   const sty0 = rcv.style, styO = opp && opp.style; rcv.style = null; if(opp) opp.style = null;   // (v118: an archetype tilts what a man does -- the receiver and his marker here have none: his Off IQ alone)
-  pas.stats = Object.assign({}, pas.stats, { crossing: 10, passAcc: 10, curve: 5.5, offIQ: 7 });
-  rcv.stats = Object.assign({}, rcv.stats, { offIQ: iq, heading: 6.5, speed: 7, acceleration: 7, shotAcc: 7, composure: 7, ballControl: 7 });
+  pas.stats = Object.assign({}, pas.stats, { crossing: 10, passAcc: 10, longPass: 10, curve: 5.5, offIQ: 7 });
+  rcv.stats = Object.assign({}, rcv.stats, { offIQ: iq, heading: 6.5, speed: 7, acceleration: 7, shotAcc: 7, composure: 7, compFinal: 7, ballControl: 7 });
   opp.stats = Object.assign({}, opp.stats, { heading: 6.5, speed: 6.5, acceleration: 6.5, defIQ: 6.5, interceptions: 6.5, tackle: 6.5 });
   const cast = /cutback|square/.test(scene) ? [pas, rcv] : [pas, rcv, opp], jy = (i % 3 - 1) * 30, jx = (i % 2) * 20, out = {};
   const park = () => { for(const q of T.players()) if(!cast.includes(q)){ q.x = T.FW / 2 - atk * 700 + (q.team === 'R' ? 0 : 60); q.y = q.team === 'R' ? 50 : T.FH - 50; q.vx = q.vy = 0; } };

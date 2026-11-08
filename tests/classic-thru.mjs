@@ -33,7 +33,7 @@ await page.evaluate(() => { window.__noOffside = true;
     const p = R[0], q = R[1], A = G[0], B = G[1];
     for(const o of T.players()) if(o !== p && o !== q && o !== A && o !== B){ o.x = X(-30); o.y = Y(-30); o.vx = o.vy = 0; o.noTouchT = 99; }
     for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; }
-    p.stats = Object.assign({}, p.stats, { curve: cv, passAcc: 10, offIQ: 10 }); p.x = X(18); p.y = Y(0); p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
+    p.stats = Object.assign({}, p.stats, { curve: cv, passAcc: 10, longPass: 10, offIQ: 10 }); p.x = X(18); p.y = Y(0); p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
     A.x = X(27); A.y = Y(wA); B.x = X(27); B.y = Y(wB);
     for(const o of [A, B]){ o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 99; }
     if(run){ q.x = X(run.u); q.y = Y(run.w); q.vx = atk * run.v * M; q.vy = (run.vw || 0) * M; q.state = 'normal'; }

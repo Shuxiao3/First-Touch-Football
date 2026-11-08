@@ -49,7 +49,7 @@ const odds = (u, man, bc, cp, n = 800, back = false) => page.evaluate(({ u, man,
   const b = T.ball(); b.ownedBy = null; b.x = p.x - atk * 60; b.y = p.y; b.z = 0; b.vx = atk * 400; b.vy = 0;
   b.passFrom = null;   // (v147: no pass of ours behind it -- the kick-off's, left over, made it a back pass from 20 m when we kicked off: classic-cutout's)
   p.facing = { x: back ? atk : -atk, y: 0 };
-  const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp });
+  const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp, compFinal: cp });
   const c = { PERFECT: 0, CLEAN: 0, LOOSE: 0, HEAVY: 0 }; let sum = 0;
   for(let i = 0; i < n; i++){ const s = T.touchQuality(p, false); sum += s; c[s > 0.8 ? 'PERFECT' : s > 0.55 ? 'CLEAN' : s > 0.3 ? 'LOOSE' : 'HEAVY']++; }
   const out = { pressure: +T.touchPressure(p).toFixed(2), third: +T.finalThirdOf(p).toFixed(2), perfect: c.PERFECT / n, clean: (c.PERFECT + c.CLEAN) / n, heavy: c.HEAVY / n, mean: +(sum / n).toFixed(3) };
@@ -84,7 +84,7 @@ const receive = (who, u, man, bc, cp) => page.evaluate(({ who, u, man, bc, cp })
   const p = who === 'you' ? c : T.players().find(q => q !== c && q.team === c.team);
   for(const q of T.players()) if(q !== p){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = q.team === c.team ? 90 : T.FH - 90; q.vx = q.vy = 0; q.state = 'normal'; }
   p.x = atk > 0 ? T.FW * u : T.FW * (1 - u); p.y = T.YC - 150; p.vx = p.vy = 0; p.noTouchT = 0; p.state = 'normal';
-  const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp });
+  const keep = p.stats; p.stats = Object.assign({}, keep, { ballControl: bc, composure: cp, compFinal: cp });
   const o = T.players().find(q => q.team !== c.team), ox = p.x + atk * man, oy = p.y;
   const b = T.ball(); b.ownedBy = null; b.dribbler = null; b.lastTouch = c.team; b.x = p.x - atk * 150; b.y = p.y; b.z = 0; b.vz = 0; b.vx = atk * 380; b.vy = 0;
   const g0 = T.lastGrade(), t0 = performance.now();
@@ -271,7 +271,7 @@ ok(starPx.none === 0 && starPx.on === 0, 'no skill stars over the man on the bal
 // little way at Ball control 10 and a long way at 1. At knee height (below the waist) a good touch still kills it.
 const airTouch = (bc, z, n) => page.evaluate(({ bc, z, n }) => new Promise(res => {
   const T = window.__T, atk = T.atkOf('G'), m = T.players().find(q => q.team === 'G'), keep = m.stats, out = [];
-  T.setControlled(m); m.stats = Object.assign({}, keep, { ballControl: bc, composure: bc });
+  T.setControlled(m); m.stats = Object.assign({}, keep, { ballControl: bc, composure: bc, compFinal: bc });
   for(const q of T.players()) if(q !== m){ q.x = atk > 0 ? 80 : T.FW - 80; q.y = 90; q.vx = q.vy = 0; }
   const serve = () => { T.freeze();
     m.x = atk > 0 ? T.FW * 0.3 : T.FW * 0.7; m.y = T.YC; m.vx = m.vy = 0; m.state = 'normal'; m.noTouchT = 0; m.reactUntil = 0; m.facing = { x: -atk, y: 0 };

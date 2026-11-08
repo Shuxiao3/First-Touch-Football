@@ -27,7 +27,7 @@ const r = await page.evaluate(() => { const T = window.__T, b = T.ball(), atk = 
   p.x = own + atk * 22 * T.MK; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 }; p.state = 'normal';
   const stats0 = Object.assign({}, p.stats);
   // the ball coming to him along the grass from (dx m up the pitch, dy m across), struck by (who) of (team), at (v) px/s
-  const draw = (dx, dy, team, by, v, comp, icp) => { Object.assign(p.stats, stats0, { ballControl: 6, composure: comp });
+  const draw = (dx, dy, team, by, v, comp, icp) => { Object.assign(p.stats, stats0, { ballControl: 6, composure: comp, compFinal: comp });
     const fx = p.x + atk * dx * T.MK, fy = p.y + dy * T.MK, l = Math.hypot(p.x - fx, p.y - fy) || 1;
     const out = { P: 0, C: 0, L: 0, H: 0 }, N = 2000;   // (v147: 2000 draws, to a tenth of a per cent: with 400, a ball played back from 12 m and one knocked across could round to the same)
     for(let i = 0; i < N; i++){ b.ownedBy = null; b.z = 0; b.vz = 0; b.x = p.x - (p.x - fx) / l * 30; b.y = p.y - (p.y - fy) / l * 30; b.vx = (p.x - fx) / l * v; b.vy = (p.y - fy) / l * v;

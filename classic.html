@@ -1950,7 +1950,8 @@
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. Baseline for all players.'},
-    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure (stat 1–10)',hint:'How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
+    compFinal:{val:5.5,min:1,  max:10,  step:0.1, label:'Final third composure (stat 1–10)',hint:'Composure in the final third: from 62% of the way up the pitch it takes over from Composure in traffic, all of it by 74% -- pressure on a pass, a shot or a touch there, and the touch in the final third. It weighs too in how keen a man is to shoot.'},
+    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure in traffic (stat 1–10)',hint:'(v163: in his own half and the middle -- Final third composure takes over going into theirs.) How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
     knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch',hint:'Forward nudge per dribble stride. Bigger = the ball rolls much further out ahead.'},
     knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'Random spread on each touch. Higher = looser, less predictable dribbling.'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
@@ -1973,7 +1974,8 @@
     pressTrigger:{val:1.0, min:0,max:2,step:0.05,label:'Press trigger (temperament)',hint:'Eagerness of the engaging defender to step out and press. Scaled per-player by temperament: passive x0.5 / default x1 / aggressive x1.5.'},
     tackleTiming:{val:1.0, min:0,max:2,step:0.05,label:'Tackle timing (temperament)',hint:'How readily a defender commits a tackle when the ball is exposed. Scaled per-player by temperament: passive x0.5 / default x1 / aggressive x1.5.'},
     interceptions:{val:5.5,min:1,max:10,step:0.1,label:'Interceptions (stat 1–10)',hint:'Reading & cutting out passes as a 1–10 stat, driving both reach and how dead the ball is cushioned. 1 = reach 0.1 / damping 0.1 (short reach, the ball ricochets off); 10 = reach 1.0 / damping 0.8 (long reach, cushions the cut-out pass nearly dead at the feet). Only affects cutting out the OPPONENT\'s passes.'},
-    passAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Passing (stat 1–10)',hint:'Passing precision as a 1–10 stat. 1 = short accuracy 0.92 + long accuracy 0.20 (long balls spray badly); 10 = short 0.97 + long 0.90 (pinpoint at any range). Baseline for all players.'},
+    passAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Short passing (stat 1–10)',hint:'Short passing as a 1–10 stat: every pass up to 12 m goes by it, and less of each one the longer it is, none from 32 m (Long passing takes over). 1 = short accuracy 0.92 + long accuracy 0.20; 10 = short 0.97 + long 0.90. Baseline for all players.'},
+    longPass:  {val:5.5, min:1,   max:10,  step:0.1, label:'Long passing (stat 1–10)',hint:'Long passing as a 1–10 stat: a pass of 32 m or more goes by it alone, a shorter one by a share of it from 12 m (a quarter at 17 m, half at 22 m). It also sets how far a man can hit it well (281 to 713 px) and how quickly a pass winds up. Baseline for all players.'},
     crossing:{val:5.5,min:1,max:10,step:0.1,label:'Crossing (stat 1–10)',hint:'Accuracy of balls whipped into the box (pace auto-set to reach the target; loft is fixed at 1.6). 1 = sprays wide (~0.2 accuracy); 10 = tight and true (~0.9).'},
     curve:     {val:5.5, min:1,   max:10,  step:0.1, label:'Curve (stat 1–10)',hint:'How much a ball bends, as a 1–10 stat: a shot (1 = 0.05, 10 = 0.3; the swipe bent to curl it), a cross, a through ball or a long pass.'},
     shotPower: {val:5.5, min:1,   max:10,  step:0.1, label:'Shot power (stat 1–10)',hint:'Shot pace as a 1–10 stat. 1 = 600, 10 = 900, on a full-charge strike at goal.'},
@@ -2047,9 +2049,9 @@
   };
   const DIAL_DEFAULT={}; for(const k in P) DIAL_DEFAULT[k]=P[k].val;   // factory values (before saved settings load)
   const PRESETS={
-    arcade:  {friction:0.78,ballControl:9,knockOn:340,knockVar:0.25,speed:10,accel:6.8,agility:7,aiThink:0.35,mateThink:0.35,pressTight:0.35,shotPower:3, passAcc:7,curve:8,shotAcc:10, longShots:9, keeperSpd:3,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.7,stamina:8,dribbling:8,composure:8,tackle:6,interceptions:6,crossing:7,heading:7,offIQ:8,defIQ:7},
-    balanced:{friction:0.55,ballControl:6,knockOn:480,knockVar:0.35,speed:7,accel:3,agility:5,aiThink:0.45,mateThink:0.45,pressTight:0.45,shotPower:4, passAcc:6,curve:7,shotAcc:8, longShots:7,keeperSpd:4,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.6,stamina:5.5,dribbling:5.5,composure:5.5,tackle:5.5,interceptions:5.5,crossing:5.5,heading:5.5,offIQ:5.5,defIQ:5.5},
-    sim:     {friction:0.32,ballControl:4,knockOn:600,knockVar:0.5, speed:5.5,accel:2,agility:2,aiThink:0.8, mateThink:0.8, pressTight:0.6, shotPower:6,passAcc:5,curve:7,shotAcc:5.5, longShots:5,keeperSpd:8,strengthG:6,strengthR:6,firstTouchAcc:0.5,stamina:4,dribbling:4,composure:6,tackle:6,interceptions:6,crossing:6,heading:6,offIQ:5,defIQ:6},
+    arcade:  {friction:0.78,ballControl:9,knockOn:340,knockVar:0.25,speed:10,accel:6.8,agility:7,aiThink:0.35,mateThink:0.35,pressTight:0.35,shotPower:3, passAcc:7,longPass:7,curve:8,shotAcc:10, longShots:9, keeperSpd:3,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.7,stamina:8,dribbling:8,composure:8,compFinal:8,tackle:6,interceptions:6,crossing:7,heading:7,offIQ:8,defIQ:7},
+    balanced:{friction:0.55,ballControl:6,knockOn:480,knockVar:0.35,speed:7,accel:3,agility:5,aiThink:0.45,mateThink:0.45,pressTight:0.45,shotPower:4, passAcc:6,longPass:6,curve:7,shotAcc:8, longShots:7,keeperSpd:4,strengthG:5.5,strengthR:5.5,firstTouchAcc:0.6,stamina:5.5,dribbling:5.5,composure:5.5,compFinal:5.5,tackle:5.5,interceptions:5.5,crossing:5.5,heading:5.5,offIQ:5.5,defIQ:5.5},
+    sim:     {friction:0.32,ballControl:4,knockOn:600,knockVar:0.5, speed:5.5,accel:2,agility:2,aiThink:0.8, mateThink:0.8, pressTight:0.6, shotPower:6,passAcc:5,longPass:5,curve:7,shotAcc:5.5, longShots:5,keeperSpd:8,strengthG:6,strengthR:6,firstTouchAcc:0.5,stamina:4,dribbling:4,composure:6,compFinal:6,tackle:6,interceptions:6,crossing:6,heading:6,offIQ:5,defIQ:6},
   };
   // NINE A SIDE (v124): eight outfielders and a keeper -- every formation's lines add up to 8. Each shape was one of the
   // seven-outfielder ones with a man more at the back (2-3-2 is 3-3-2 now, 3-1-3 is 4-1-3).
@@ -2382,7 +2384,7 @@
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','aiTouch','aiReact','firstTouchAcc'],
     traplab:  ['bodyTurn','pedalSide','pedalBack','turnTouch','awayAngle','airKeepGood','airKeepBad','ballControl','trapSweet','trapWin','trapLate','trapKeepGood','trapKeepBad','trapPop','trapLock','gatherR','ftPush','ftErr','ftTurn','ftWin','ftDrag','aiTouch','aiReact'],
-    passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
+    passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','longPass','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange','gkHandling'],
     crosslab: ['crossing','curve','heading','offIQ','defIQ','gkReach','keeperSpd']
@@ -2474,7 +2476,7 @@
       // PER-PLAYER STATS (1..10). undefined => fall back to the matching global stat dial.
       // Speed -> run & sprint top speed; Acceleration -> how fast they reach top speed;
       // Dribbling -> reduces the ball-carry penalties. (More wired as we define them.)
-      stats:{speed:undefined, acceleration:undefined, agility:undefined, stamina:undefined, ballControl:undefined, dribbling:undefined, strength:undefined, passAcc:undefined, composure:undefined, slideTackle:undefined, tackle:undefined, interceptions:undefined, crossing:undefined, heading:undefined, offIQ:undefined, defIQ:undefined, shotPower:undefined, curve:undefined, longShots:undefined, shotAcc:undefined, keeperSpd:undefined, gkReflex:undefined, gkReach:undefined, gkDiveRange:undefined, gkDistribution:undefined},
+      stats:{speed:undefined, acceleration:undefined, agility:undefined, stamina:undefined, ballControl:undefined, dribbling:undefined, strength:undefined, passAcc:undefined, longPass:undefined, composure:undefined, compFinal:undefined, slideTackle:undefined, tackle:undefined, interceptions:undefined, crossing:undefined, heading:undefined, offIQ:undefined, defIQ:undefined, shotPower:undefined, curve:undefined, longShots:undefined, shotAcc:undefined, keeperSpd:undefined, gkReflex:undefined, gkReach:undefined, gkDiveRange:undefined, gkDistribution:undefined},
       defPers:(['passive','default','default','aggressive'][Math.floor(Math.random()*4)]),  // baked-in defending temperament
       dblT:0,dblDirX:0,dblDirY:0};                     // double-tap sprint detection (human)
   }
@@ -2537,16 +2539,25 @@
   // ============ SQUADS: unique per-player stat blocks ============
   const SQUAD_V=1;
   let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false, ctlOpen=false, htOpen=false;   // (v148: the controls card, half-time)
-  const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
+  // (v163) TWO STATS SPLIT IN TWO: Passing is SHORT PASSING now (passAcc, as it was kept) beside LONG PASSING (longPass),
+  // and Composure is COMPOSURE IN TRAFFIC (composure) beside FINAL THIRD COMPOSURE (compFinal) -- see THE PASS'S STAT and
+  // COMPOSURE, WHERE HE IS. Each new one sits after the one it came from; the random draws that make a man still go by
+  // the old list (STAT_KEYS_V162), so every club's men keep the stats they had, and the new two come after (newStatsFill)
+  const NEW_STAT_KEYS=['longPass','compFinal'];
+  const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','longPass','composure','compFinal','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
   const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const ALL_STAT_KEYS=[...OUT_KEYS,...GK_KEYS];
-  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Passing',composure:'Composure',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution',gkHandling:'GK handling'};
+  const STAT_KEYS_V162=ALL_STAT_KEYS.filter(k=>!NEW_STAT_KEYS.includes(k));   // (the draws' order, and Handling's hash)
+  const STAT_LABEL={speed:'Speed',acceleration:'Accel',agility:'Agility',stamina:'Stamina',strength:'Strength',ballControl:'Ball ctrl',dribbling:'Dribbling',passAcc:'Short pass',longPass:'Long pass',composure:'Traffic comp.',compFinal:'Final 3rd comp.',crossing:'Crossing',heading:'Heading',slideTackle:'Slide tackle',tackle:'Tackle',interceptions:'Interceptions',offIQ:'Off IQ',defIQ:'Def IQ',shotPower:'Shot power',curve:'Curve',longShots:'Long shots',shotAcc:'Shot acc',keeperSpd:'GK speed',gkReflex:'GK reflexes',gkReach:'GK reach',gkDiveRange:'GK diving',gkDistribution:'GK distribution',gkHandling:'GK handling'};
   const ARCH={
-    GK:{keeperSpd:6.5,gkReflex:7,gkReach:7,gkDiveRange:7,gkDistribution:6.5,gkHandling:7,speed:5,acceleration:5,agility:5.5,stamina:6,strength:6,ballControl:5,dribbling:3.5,passAcc:5.5,composure:6.5,crossing:3,heading:5,slideTackle:3,tackle:4,interceptions:5,offIQ:5,defIQ:5.5,shotPower:4,curve:3,longShots:3,shotAcc:3},
-    DEF:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:5.5,stamina:6.5,strength:7,ballControl:5.5,dribbling:4.5,passAcc:6,composure:6,crossing:4.5,heading:7,slideTackle:7,tackle:7.5,interceptions:7.5,offIQ:5,defIQ:7.5,shotPower:4.5,curve:4,longShots:4,shotAcc:4.5},
-    MID:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:6.5,stamina:7.5,strength:5.5,ballControl:7,dribbling:6.5,passAcc:7.5,composure:6.5,crossing:6,heading:5,slideTackle:5,tackle:5.5,interceptions:6,offIQ:7,defIQ:6,shotPower:6,curve:6,longShots:6,shotAcc:6},
-    ATT:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:7.5,acceleration:7.5,agility:7.5,stamina:6,strength:5.5,ballControl:7,dribbling:7.5,passAcc:6,composure:7,crossing:6,heading:6.5,slideTackle:3,tackle:3.5,interceptions:4,offIQ:7,defIQ:4.5,shotPower:7,curve:6,longShots:6.5,shotAcc:7.5}
+    GK:{keeperSpd:6.5,gkReflex:7,gkReach:7,gkDiveRange:7,gkDistribution:6.5,gkHandling:7,speed:5,acceleration:5,agility:5.5,stamina:6,strength:6,ballControl:5,dribbling:3.5,passAcc:5.5,composure:6.5,crossing:3,heading:5,slideTackle:3,tackle:4,interceptions:5,offIQ:5,defIQ:5.5,shotPower:4,curve:3,longShots:3,shotAcc:3,longPass:5,compFinal:3},
+    DEF:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:5.5,stamina:6.5,strength:7,ballControl:5.5,dribbling:4.5,passAcc:6,composure:6,crossing:4.5,heading:7,slideTackle:7,tackle:7.5,interceptions:7.5,offIQ:5,defIQ:7.5,shotPower:4.5,curve:4,longShots:4,shotAcc:4.5,longPass:5.5,compFinal:4.5},
+    MID:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:6,acceleration:6,agility:6.5,stamina:7.5,strength:5.5,ballControl:7,dribbling:6.5,passAcc:7.5,composure:6.5,crossing:6,heading:5,slideTackle:5,tackle:5.5,interceptions:6,offIQ:7,defIQ:6,shotPower:6,curve:6,longShots:6,shotAcc:6,longPass:6.5,compFinal:6},
+    ATT:{keeperSpd:2,gkReflex:2,gkReach:2,gkDiveRange:2,gkDistribution:3,gkHandling:2,speed:7.5,acceleration:7.5,agility:7.5,stamina:6,strength:5.5,ballControl:7,dribbling:7.5,passAcc:6,composure:7,crossing:6,heading:6.5,slideTackle:3,tackle:3.5,interceptions:4,offIQ:7,defIQ:4.5,shotPower:7,curve:6,longShots:6.5,shotAcc:7.5,longPass:5,compFinal:7}
   };
+  // (v163: Short and Long passing share what Passing weighed -- a defender's 1 and 1, a midfielder's 3 and 2, a forward's 1
+  // and 1 -- and Composure in traffic and in the final third what Composure did: a defender's 2 and 1, a midfielder's 3 and
+  // 1, a forward's 2 and 2. A keeper's as they were.)
   // A MAN'S RATING (v122): a weighted average of his stats, the weights out of 5 -- what his line's game is made of 5,
   // then 4 and 2, and everything else 1, so every stat counts for something (before v122 they were 1 to 3, and a good
   // many counted for nothing: a defender's shooting, anyone's crossing or curve). A keeper's: his keeping, and a little
@@ -2560,12 +2571,12 @@
   // OVR_W_DEV -- or the most of every man's growth would go to his pace.)
   const OVR_W={
     GK:{gkReflex:5,gkReach:5,gkDiveRange:4,gkHandling:4,gkDistribution:4,keeperSpd:2,composure:1,passAcc:1,ballControl:1},
-    DEF:{speed:6,defIQ:5,tackle:5,interceptions:5,acceleration:5,slideTackle:4,strength:4,heading:4,composure:2,passAcc:2,stamina:2,agility:2,
-         ballControl:1,dribbling:1,crossing:1,offIQ:1,shotPower:1,curve:1,longShots:1,shotAcc:1},
-    MID:{speed:6,passAcc:5,offIQ:5,acceleration:5,stamina:4,ballControl:4,dribbling:4,agility:4,composure:4,defIQ:2,interceptions:2,shotAcc:2,longShots:2,
+    DEF:{speed:6,defIQ:5,tackle:5,interceptions:5,acceleration:5,slideTackle:4,strength:4,heading:4,composure:2,passAcc:1,longPass:1,stamina:2,agility:2,
+         ballControl:1,dribbling:1,crossing:1,offIQ:1,shotPower:1,curve:1,longShots:1,shotAcc:1,compFinal:1},
+    MID:{speed:6,passAcc:3,longPass:2,offIQ:5,acceleration:5,stamina:4,ballControl:4,dribbling:4,agility:4,composure:3,compFinal:1,defIQ:2,interceptions:2,shotAcc:2,longShots:2,
          strength:1,crossing:1,heading:1,slideTackle:1,tackle:1,shotPower:1,curve:1},
-    ATT:{speed:6,shotAcc:5,dribbling:5,acceleration:5,shotPower:4,agility:4,composure:4,offIQ:4,ballControl:4,longShots:2,heading:2,
-         stamina:1,strength:1,passAcc:1,crossing:1,slideTackle:1,tackle:1,interceptions:1,defIQ:1,curve:1}
+    ATT:{speed:6,shotAcc:5,dribbling:5,acceleration:5,shotPower:4,agility:4,composure:2,compFinal:2,offIQ:4,ballControl:4,longShots:2,heading:2,
+         stamina:1,strength:1,passAcc:1,longPass:1,crossing:1,slideTackle:1,tackle:1,interceptions:1,defIQ:1,curve:1}
   };
   // what a man's development reckons matters to him (devRel): the weights as they were before v144
   const OVR_W_DEV={GK:OVR_W.GK, DEF:Object.assign({},OVR_W.DEF,{speed:4,acceleration:2}), MID:Object.assign({},OVR_W.MID,{speed:2,acceleration:1}), ATT:Object.assign({},OVR_W.ATT,{speed:4,acceleration:4})};
@@ -2672,6 +2683,28 @@
     sweeperkeeper:{role:'GK',sub:'GK', w:25, plays:['GK'], also:[], name:'Sweeper keeper', blurb:'Stands higher, comes out sooner and further for the ball through, and plays it out well.',   // (v144: 25 -- 20 before; the One-on-one keeper's gone)
                 d:{keeperSpd:1.5,gkDistribution:1,passAcc:1,composure:1,ballControl:0.5,gkReflex:-0.5,gkReach:-0.5}}
   };
+  // (v163) EACH ARCHETYPE'S NEW TWO: what it has in Long passing and Final third composure over its role's -- a deep
+  // creator, a ball-playing centre-back or a playmaker pings it long; a poacher, a shadow striker or a mezzala keeps his
+  // head in front of goal; a ball-winner or a stopper neither
+  const STYLE_NEW_D={stopper:{longPass:-0.5,compFinal:-0.5}, cover:{}, ballplayer:{longPass:1.5}, widecb:{longPass:0.5}, libero:{longPass:1,compFinal:0.5},
+    fullback:{}, wingback:{compFinal:0.5}, deffb:{longPass:-0.5,compFinal:-0.5}, invfb:{longPass:1},
+    ballwinner:{longPass:-1,compFinal:-0.5}, deepcreator:{longPass:2.5}, anchor:{compFinal:-0.5}, completemid:{longPass:0.5,compFinal:0.5}, boxtobox:{compFinal:0.5},
+    covermid:{longPass:0.5,compFinal:-0.5}, mezzala:{compFinal:1}, playmaker:{longPass:1.5,compFinal:0.5}, trequartista:{compFinal:1}, shadow:{longPass:-1,compFinal:1.5},
+    widemid:{longPass:0.5}, mwinger:{longPass:-0.5}, wideplaymaker:{longPass:1.5,compFinal:0.5},
+    winger:{}, trickster:{longPass:-0.5,compFinal:0.5}, paceywinger:{longPass:-0.5,compFinal:-0.5}, invwinger:{longPass:0.5,compFinal:1},
+    complete:{longPass:1,compFinal:1}, poacher:{longPass:-1.5,compFinal:2}, speedster:{longPass:-0.5}, target:{compFinal:0.5}, falsenine:{longPass:1,compFinal:0.5},
+    allround:{}, shotstopper:{longPass:-0.5}, sweeperkeeper:{longPass:1}};
+  for(const k in STYLE_NEW_D) if(STYLES[k]) Object.assign(STYLES[k].d||(STYLES[k].d={}), STYLE_NEW_D[k]);
+  // a man's new two from his old ones (newStatsFill): his Short passing and Composure, moved by how his role's and
+  // archetype's Long passing and Final third composure differ from them -- and (made, not carried over) a little of his own
+  // either way, from a hash of the rest, so his long game isn't simply his short one
+  function newStatsFor(st,role,style,own){ const A=ARCH[role]||ARCH.MID, d=(STYLES[style]&&STYLES[style].d)||{}, o={};
+    const h=k=>own?((hashStr(STAT_KEYS_V162.map(x=>st[x]).join(',')+'|'+k)/4294967296)*2-1)*0.8:0;
+    o.longPass=clamp(Math.round(((+st.passAcc||5.5)+(A.longPass+(d.longPass||0))-(A.passAcc+(d.passAcc||0))+h('lp'))*2)/2,1,10);
+    o.compFinal=clamp(Math.round(((+st.composure||5.5)+(A.compFinal+(d.compFinal||0))-(A.composure+(d.composure||0))+h('cf'))*2)/2,1,10);
+    return o; }
+  function newStatsFill(e){ const st=e&&e.stats; if(!st||(st.longPass!=null&&st.compFinal!=null)) return e; const o=newStatsFor(st,e.role,e.style,false);
+    if(st.longPass==null) st.longPass=o.longPass; if(st.compFinal==null) st.compFinal=o.compFinal; return e; }
   // an archetype kept under an older name (a save's, a kept side's): what it is now
   const TYPE_WAS={creator:'trequartista', insidefwd:'invwinger', onevone:'allround', pressfwd:'complete'};   // (v143: an Inside forward read anywhere before he's re-labelled: typeKept; v144: a One-on-one keeper)
   const typeNow=s=>TYPE_WAS[s]||s;
@@ -2949,13 +2982,14 @@
   // as much on pace). R: a 0..1 random source; shift: added to everything (a club's strength).
   function genStyledStats(role,style,R,shift){
     const st={}, d=(STYLES[style]&&STYLES[style].d)||{};
-    for(const k of ALL_STAT_KEYS){ if(k==='gkHandling') continue; const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
+    for(const k of STAT_KEYS_V162){ if(k==='gkHandling') continue; const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
       const m=ARCH[role][k]+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);
       st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*sp)*2)/2)); }
     // (Handling came later than the rest: its spread from a hash of his other stats, not from R -- so every club's men
     // keep the stats they had)
-    const hj=hashStr(ALL_STAT_KEYS.map(k=>st[k]).join(','))/4294967296;
+    const hj=hashStr(STAT_KEYS_V162.map(k=>st[k]).join(','))/4294967296;
     st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+(hj*2-1)*1.5)*2)/2));
+    Object.assign(st,newStatsFor(st,role,style,true));   // (v163: Long passing and Final third composure, after: nobody's old stats move)
     return st;
   }
   // the styles a lineup slot calls for (index into SQUAD_ROLES; the default 3-3-2 puts squad men 4 and 6 out
@@ -3351,7 +3385,7 @@
   function normalizeSquads(){
     for(const t of ['G','R']){ if(!SQUAD[t])continue;
       topUpSquad(SQUAD[t]);
-      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; gkHandlingFill(e.stats);
+      SQUAD[t].forEach((e,i)=>{ if(e.num==null)e.num=i+1; if(e.stats.defIQ==null&&ARCH[e.role])e.stats.defIQ=ARCH[e.role].defIQ; gkHandlingFill(e.stats); newStatsFill(e);
         if(e.style) e.style=typeKept(e.style,e.role,e.stats); if(!e.style && !e.me && e.role!=='GK' && ARCH[e.role]) e.style=inferStyle(e.role,e.subRole,e.stats); for(const k in e.stats) e.stats[k]=Math.max(1,Math.min(10,Math.round(e.stats[k]*2)/2)); e.ovr=overallOf(e); });
       const li=LINEUP[t];
       if(li){ if(li.out&&!li.atk){ li.atk=li.out.slice(); li.def=li.out.slice(); delete li.out; }
@@ -4632,8 +4666,8 @@
   function trapLabSetup(){
     const mates=grnList().filter(q=>q!==controlled), S=mates[0], A=mates[1];
     // both receivers read the Ball control dial, so the lab can try any skill level
-    controlled.stats=Object.assign({},controlled.stats,{ballControl:undefined,composure:undefined});
-    if(A){ A.pRole='labRecv'; A.stats=Object.assign({},A.stats,{ballControl:undefined,composure:undefined}); }
+    controlled.stats=Object.assign({},controlled.stats,{ballControl:undefined,composure:undefined,compFinal:undefined});
+    if(A){ A.pRole='labRecv'; A.stats=Object.assign({},A.stats,{ballControl:undefined,composure:undefined,compFinal:undefined}); }
     if(S){ S.pRole='labServer'; S.x=LAB.spot.x-LAB.dist; S.y=LAB.spot.y; S.facing={x:1,y:0}; }
     let n=0; for(const q of mates){ if(q!==S&&q!==A){ q.x=70; q.y=70+(n++)*36; } }   // everyone else well out of shot
     redList().forEach((q,i)=>{ q.x=FW-70; q.y=70+i*36; });
@@ -4955,7 +4989,7 @@
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
     trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'First-touch spread',aiReact:'AI reaction',
     ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
-    passAcc:'Passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
+    passAcc:'Short passing',longPass:'Long passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',gkHandling:'Keeper handling',
     skCutPop:'Knock-on · push',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
@@ -4978,7 +5012,8 @@
     gatherR:'Same for everyone: a trap comes off you at this ring (the inner one). Your reach (the outer one) is where you first meet the ball, and where you take it back.',
     aiTouch:'How far a first touch can fall from the likely one, for everyone. 0 = always the likely touch, 2+ = scrappy.',
     aiReact:'How long the AI takes to react to where its own touch went. Until then it eases off what it was doing. 0 = instant.',
-    passAcc:'Your passing (1 to 10): how true it goes, and how far you can hit it well.',
+    passAcc:'Your short passing (1 to 10): how true a pass goes up to 12 m -- and less of it the longer it is, none from 32 m.',
+    longPass:'Your long passing (1 to 10): how true a ball of 32 m or more goes (a share of a shorter one from 12 m), and how far you can hit it well.',
     passLoft:'How high a normal pass is struck. The default stays low over short range and clears a man halfway along a medium pass; double-tap for a lofted one.',
     passPace:'How firmly a normal pass is struck. Higher = there sooner, but harder to control when it arrives.',
     passDtap:'How quickly the second tap of a double-tap has to come. A single tap waits this long.',
@@ -5018,7 +5053,7 @@
     if(k==='lobCheck') return Math.round(v*100)+'%';
     if(k==='swipePow') return v.toFixed(1)+' /s';
     if(k==='swipeBow') return Math.round(v*100)+'% of its length';
-    if(['passAcc','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange','gkHandling'].includes(k)) return v.toFixed(1);
+    if(['passAcc','longPass','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange','gkHandling'].includes(k)) return v.toFixed(1);
     if(k==='gatherR') return v+' (reach '+Math.round(controlROf({stats:{}}))+')';
     if(k==='ftPush') return v+' (≈'+(v/controlROf({stats:{}})).toFixed(1)+' rings)';
     if(k==='ftErr') return v+'°';
@@ -5131,8 +5166,8 @@
   function plDef(){ return players.find(q=>q.pRole==='labPassDef'); }
   function passLabSetup(){
     const mates=grnList().filter(q=>q!==controlled), R=mates[0], reds=redList(), D=reds[0];
-    controlled.stats=Object.assign({},controlled.stats,{passAcc:undefined});                // you pass off the Passing dial...
-    if(R){ R.pRole='labPassRcv'; R.stats=Object.assign({},R.stats,{ballControl:undefined,composure:undefined}); }   // ...he traps off Ball control
+    controlled.stats=Object.assign({},controlled.stats,{passAcc:undefined,longPass:undefined});                // you pass off the passing dials...
+    if(R){ R.pRole='labPassRcv'; R.stats=Object.assign({},R.stats,{ballControl:undefined,composure:undefined,compFinal:undefined}); }   // ...he traps off Ball control
     if(D) D.pRole='labPassDef';
     let n=0; for(const q of mates){ if(q!==R){ q.x=60; q.y=60+(n++)*36; } }                  // everyone else well out of it
     reds.forEach((q,i)=>{ if(q!==D){ q.x=FW-60; q.y=FH-60-i*36; } });
@@ -5315,7 +5350,7 @@
   function slKeeper(){ return keepers.find(k=>k.team!==controlled.team); }
   function shootLabSetup(){
     // you shoot off the shot dials, their keeper saves off the keeper dials
-    controlled.stats=Object.assign({},controlled.stats,{shotPower:undefined,shotAcc:undefined,curve:undefined,longShots:undefined,composure:undefined});
+    controlled.stats=Object.assign({},controlled.stats,{shotPower:undefined,shotAcc:undefined,curve:undefined,longShots:undefined,composure:undefined,compFinal:undefined});
     const kp=slKeeper(); if(kp) kp.stats=Object.assign({},kp.stats,{gkReflex:undefined,gkReach:undefined,gkDiveRange:undefined,gkHandling:undefined});
     let n=0; for(const q of players){ if(q===controlled) continue; q.x=q.team==='G'?60:260; q.y=60+(n++)*36; }   // everyone well out of it
     shootLabServe();
@@ -6195,14 +6230,21 @@
     const il=Math.hypot(ix,iy); return {ix:mx/ml*il, iy:my/ml*il};
   }
 
-  // PASS ACCURACY stat (1..10) -> short-pass accuracy (0.92=>1, 0.97=>10) and long-pass accuracy
-  // (0.20=>1, 0.90=>10). per-player stats.passAcc overrides the global baseline dial.
-  function kickAccOf(p){ return statLerp(statOf(p,'passAcc',P.passAcc.val),0.92,0.97); }
-  function longAccOf(p){ return statLerp(statOf(p,'passAcc',P.passAcc.val),0.20,0.90); }
-  // Comfortable passing RANGE (px) from the Passing stat: how far this player can hit a ball
-  // reliably. Weak passers (low stat) keep it short; only elite passers ping it long. The AI uses
-  // this to STOP attempting balls beyond its range (which passSpray would just spray anyway).
-  function passRangeOf(p){ return statLerp(statOf(p,'passAcc',P.passAcc.val), 281, 713); }
+  // THE PASS'S STAT (v163): Short passing up to 12 m (PASS_SHORT_M), Long passing from 32 m (PASS_LONG_M), and between
+  // them a blend of the two along the way -- at 17 m a quarter of it Long passing, at 22 m half, at 27 m three-quarters.
+  // Before, one Passing stat did for every length. (Composure and Curve come in as they always did: pressure widens it,
+  // and a bent ball is a bent ball.)
+  const PASS_SHORT_M=12, PASS_LONG_M=32;
+  const passLongT=d=>clamp(((d||0)/MK-PASS_SHORT_M)/(PASS_LONG_M-PASS_SHORT_M),0,1);
+  function passStatAt(p,d){ const t=passLongT(d), sh=statOf(p,'passAcc',P.passAcc.val); return t<=0?sh:t>=1?statOf(p,'longPass',P.longPass.val):sh+(statOf(p,'longPass',P.longPass.val)-sh)*t; }
+  // PASS ACCURACY (the pass's stat, 1..10, d its length: none, short) -> short-pass accuracy (0.92=>1, 0.97=>10) and long-pass
+  // accuracy (0.20=>1, 0.90=>10). per-player stats override the global baseline dials.
+  function kickAccOf(p,d){ return statLerp(passStatAt(p,d),0.92,0.97); }
+  function longAccOf(p,d){ return statLerp(passStatAt(p,d),0.20,0.90); }
+  // Comfortable passing RANGE (px): how far this player can hit a ball reliably -- his Long passing (v163; it was Passing).
+  // Weak passers keep it short; only elite ones ping it long. The AI uses this to STOP attempting balls beyond its range
+  // (which passSpray would just spray anyway).
+  function passRangeOf(p){ return statLerp(statOf(p,'longPass',P.longPass.val), 281, 713); }
   // Aerial loft vs charge (0..1). Both endpoints come from the PASS POWER stat: the low-charge end
   // flattens as power rises (1.6 at 1 -> 1.2 at 10), the high-charge end stays at 2.5 either way.
   function aerialAt(charge){ return 1.0; }   // (legacy; loft is now distance-based in passLoftD)
@@ -6275,8 +6317,8 @@
   // PLUS a distance term that grows sharply as their long-pass accuracy drops. shortOverride lets a
   // caller (AI context risk, first-time) substitute an already-adjusted short accuracy.
   function passSpray(d, p, shortOverride){
-    const sa = (shortOverride!=null) ? clamp(shortOverride,0,1) : kickAccOf(p);
-    const la = longAccOf(p);
+    const sa = (shortOverride!=null) ? clamp(shortOverride,0,1) : kickAccOf(p,d);
+    const la = longAccOf(p,d);
     const base   = (1-sa)*0.06;
     const longErr= (1-la)*clamp((d-250)/650,0,1)*0.45;   // big spread: up to ~25° at the worst
     return (base+longErr)*(1+poiseLoss(p)*0.9)*cpu(p).spray*(Math.random()*2-1);   // composure: pressure widens the spray (and DIFFICULTY, the computer's)
@@ -6370,7 +6412,9 @@
   // A stat is 1..10. statLerp maps it linearly onto a [lo(=stat 1) .. hi(=stat 10)] value range.
   function statLerp(s,lo,hi){ s=clamp(isFinite(s)?s:5.5,1,10); return lo+(s-1)/9*(hi-lo); }
   // read a player's stat; undefined per-player => use the global stat dial as the baseline.
-  function statOf(p,key,dialVal){ const s=p&&p.stats&&p.stats[key]; if(!isFinite(s)) return dialVal;
+  function statOf(p,key,dialVal){ let s=p&&p.stats&&p.stats[key];
+    if(!isFinite(s)&&(key==='longPass'||key==='compFinal')) s=p&&p.stats&&p.stats[key==='longPass'?'passAcc':'composure'];   // (v163: a new one missing -- the one it came from; neither -- its own dial)
+    if(!isFinite(s)) return dialVal;
     return (key==='offIQ'||key==='defIQ')&&p.slotAtk?Math.max(1,s-posPenOf(p)[key]):s; }   // (his IQ, less what his spots cost him)
   // what his spots cost him in the match: his Off IQ for the one he takes with the ball, his Def IQ for the one without it
   function posPenOf(p){ const c=p.posPen; if(c&&c.a===p.slotAtk&&c.d===p.slotDef&&c.e===p.squadIdx&&c.s===p.style) return c;
@@ -8075,7 +8119,7 @@
     const lane=laneClearance(p,mate);                         // 1 clear .. 0 tight
     const fwd=clamp(atk*(mate.x-p.x)/500,0,1);                // 0 backward/square .. 1 well forward
     const lenRisk=clamp((d-260)/600,0,1);
-    let acc=kickAccOf(p);
+    let acc=kickAccOf(p,d);
     acc += (1-acc)*(1-fwd)*lane*0.9;                          // safe square clear -> near perfect
     acc -= (0.10*fwd + 0.10*lenRisk + 0.16*(1-lane));         // forward/long/threaded -> worse
     acc=clamp(acc,0.6,1);
@@ -8733,8 +8777,12 @@
     const o=nearestOppTo(p,p); if(!o) return 0;
     return clamp(1-(dist(o,p)-40)/180, 0, 1);
   }
+  // COMPOSURE, WHERE HE IS (v163): his Composure in traffic in his own half and the middle, his Final third composure
+  // into theirs, and a blend of the two on the way in (as finalThirdOf goes, from 62% of the way up the pitch to 74%).
+  // Every place composure counted -- pressure on a pass, a shot or a touch, a touch in the final third -- reads this.
+  function composureAt(p){ const t=p&&p.team?finalThirdOf(p):0, c=statOf(p,'composure',P.composure.val); return t<=0?c:c+(statOf(p,'compFinal',P.compFinal.val)-c)*t; }
   // composureOf: the FRACTION of pressure a player shrugs off. stat 1 => 0.0 (full penalty), stat 10 => 0.9.
-  function composureOf(p){ return statLerp(statOf(p,'composure',P.composure.val), 0.0, 0.9); }
+  function composureOf(p){ return statLerp(composureAt(p), 0.0, 0.9); }
   // poiseLoss: net wobble under pressure, 0 (unaffected / in space / ice-cold) .. 1 (max). drives touch/pass/shot.
   function poiseLoss(p){ return pressFactor(p)*(1-composureOf(p)); }
   // WHOSE BALL IT IS, for everyone off it: the man on it; else a dribbler whose touch is running on ahead of him (his
@@ -9551,10 +9599,10 @@
     tx=q.x+(tx-q.x)*(1+le); ty=q.y+(ty-q.y)*(1+le);
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const lane=laneClearance(p,q), fwd=clamp(atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
-    let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
+    let acc=kickAccOf(p,d); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
     const R=arc?d/(2*Math.sin(arc.th/2)):0, Lp=arc?R*arc.th:d;
-    const v0=obThruV0(Lp,tA).v0*(1+obGauss()*statLerp(statOf(p,'passAcc',P.passAcc.val),0.14,0.05));   // (over- or under-hit: 14% at Passing 1, 5% at 10)
+    const v0=obThruV0(Lp,tA).v0*(1+obGauss()*statLerp(passStatAt(p,Lp),0.14,0.05));   // (over- or under-hit: 14% at the pass's stat 1, 5% at 10 -- v163: Short and Long passing by its length)
     if(arc){ const h=Math.atan2(dy,dx)+arc.side*arc.th/2+aerr;
       ball.vx=Math.cos(h)*v0; ball.vy=Math.sin(h)*v0;
       ball.curveSpin=arc.side; ball.curveSpinT=9; ball.curveK=0; ball.arcK=1/R; ball.arcLeft=Lp; ball.arcHd=h; ball.arcSp=v0; }
@@ -9633,11 +9681,11 @@
     const opp=p.team==='G'?'R':'G', opps=players.filter(o=>o.team!==p.team), kp=keeperOf(opp), M=obMods(p);
     let presser=null, prD=1e9; for(const o of opps){ const d=dist(o,p); if(d<prD){ prD=d; presser=o; } }
     const C={atk, gx:goalX, opp, opps, kp, M, presser, prD, vHere:obVal(p.team,p.x,p.y)*obRoom(obNearAt(opps,p.x,p.y,0.5,atk)), lossHere:obVal(opp,p.x,p.y)*M.risk,
-             range:passRangeOf(p)*M.range, lobD:statLerp(statOf(p,'passAcc',P.passAcc.val),35,55)*OBM*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
+             range:passRangeOf(p)*M.range, lobD:statLerp(statOf(p,'longPass',P.longPass.val),35,55)*OBM*M.range, own3:atk*(p.x-(atk>0?0:FW))<FW/3, u:atk>0?p.x:FW-p.x};
     C.urge=obUrge(p,C);
     // his finishing against the table's average man (and from range, his long shots); his crossing, and who of ours
     // would be first to a cross
-    C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'composure',P.composure.val),0.94,1.06)*M.shoot;
+    C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'compFinal',P.compFinal.val),0.94,1.06)*M.shoot;   // (v163: his Final third composure)
     C.finLong=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4)*M.longShot;
     C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1); C.cAcc=crossAccOf(p);
     C.cs=C.u>FW*0.45?crossSpot(p):null;
@@ -9720,8 +9768,8 @@
     const {safe, cx, cy}=rc;
     // struck as passTo will strike it: how far off line it may go, against how far the receiver can reach for it
     const lane=laneClearance(p,q), fwd=clamp(C.atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
-    let acc=kickAccOf(p); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
-    let amp=((1-acc)*0.06+(1-longAccOf(p))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
+    let acc=kickAccOf(p,d); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
+    let amp=((1-acc)*0.06+(1-longAccOf(p,d))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
     if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
     amp+=0.5*turnWorst(p,dx/(d||1),dy/(d||1));                         // (a ball he'd have to turn and play at once)
     const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30)+(lob?runSpeedOf(q)*Math.max(0,tEnd-0.4)*0.8:0);   // (a long ball up: he has time to get under it)
@@ -12127,7 +12175,7 @@
   // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
   function touchQuality(p,intercept){
-    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(statOf(p,'composure',P.composure.val)-1)/9;
+    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(composureAt(p)-1)/9;   // (v163: his composure where he is)
     const D=touchDifficulty(p,intercept), k=intercept?0.3*bc+0.7*cp:0.45*bc+0.55*cp;   // (v146: cutting one out, his composure most of all)
     let m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
     let sd=((0.085-0.035*bc)*(1-D)+(0.16-0.07*k)*D)*P.aiTouch.val;
@@ -13241,8 +13289,8 @@
     if(ball.crossT>0){ball.crossT-=dt;const _cl=Math.hypot(ball.vx,ball.vy);if(_cl>1)ball.crossDir={x:ball.vx/_cl,y:ball.vy/_cl};if(ball.crossT<=0)ball.crossBy=null;}
     if(ball.dribbleGrace>0){ball.dribbleGrace-=dt;if(ball.dribbleGrace<=0)ball.dribbler=null;}
     if(kickHeld&&(myBall()||keeperInHand()||myThrow())){
-      // Passing stat sets the wind-up: 1 fills a touch slower (0.72s), 10 a touch quicker (0.50s)
-      const fillT = statLerp(statOf(controlled,'passAcc',P.passAcc.val), 0.72, 0.50);
+      // Long passing sets the wind-up (v163; it was Passing): 1 fills a touch slower (0.72s), 10 a touch quicker (0.50s)
+      const fillT = statLerp(statOf(controlled,'longPass',P.longPass.val), 0.72, 0.50);
       kickCharge=clamp(kickCharge+dt/fillT,0,1);
     }
     if(shootHeld&&myBall())shootCharge=clamp(shootCharge+dt/0.57,0,1);
@@ -15954,7 +16002,8 @@
   function cwOverallX(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }   // (v155: his rating unrounded -- what the side's mood is worth to him)
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
   function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMainBut(role);   // (B: the usual make's rating, in stat points; v144: his pace not moved to make it)
-    for(const k of ALL_STAT_KEYS){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
+    for(const k of STAT_KEYS_V162){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
+    for(const k of NEW_STAT_KEYS){ const onW=(w[k]||0)>=2, par=k==='longPass'?'passAcc':'composure'; let v=base[k]+(onW?delta:delta*0.55)+0.6*(s[par]-base[par]-((w[par]||0)>=2?delta:delta*0.55))+(rng()*2-1)*0.5; s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
     for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwStyleFor(tier,rng){
@@ -16045,16 +16094,17 @@
   // it's ever been (p.bs) it fills a good deal faster: a man gets back to a level he's been at (not his legs, past 29).
   // The dice are his own, the season's and the week's: a reload gives the same.
   const DEV_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle',
-    'interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];   // (this order, in the strings: Handling
-    // last, as it came last -- a string from before has 25, and devUnpack gives it his Handling from the rest of his keeping)
-  const DEV_GROUP={speed:'phy',acceleration:'phy',agility:'phy',stamina:'phy',strength:'phy',keeperSpd:'phy',offIQ:'men',defIQ:'men',composure:'men',interceptions:'men',
+    'interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling','longPass','compFinal'];   // (this order, in the strings: Handling
+    // after the rest, as it came after -- a string from before has 25, and devUnpack gives it his Handling from the rest of his keeping; v163: Long
+    // passing and Final third composure after that -- a string of 26 gets his Short passing and Composure for them, till mgMigrate works them out)
+  const DEV_GROUP={speed:'phy',acceleration:'phy',agility:'phy',stamina:'phy',strength:'phy',keeperSpd:'phy',offIQ:'men',defIQ:'men',composure:'men',compFinal:'men',interceptions:'men',
     gkReflex:'gk',gkReach:'gk',gkDiveRange:'gk',gkDistribution:'gk',gkHandling:'gk'};   // (the rest: 'tec', his touch)
   const devGroup=k=>DEV_GROUP[k]||'tec';
-  const DEV_EVERY=3, DEV_RATE=0.045, DEV_BACK=2.5, DEV_MEN_EXTRA={offIQ:1,defIQ:1,composure:1,interceptions:0.5};
+  const DEV_EVERY=3, DEV_RATE=0.045, DEV_BACK=2.5, DEV_MEN_EXTRA={offIQ:1,defIQ:1,composure:1,compFinal:1,interceptions:0.5};
   // the strings: a half point a letter ('a' is 1, 's' is 10); the meters two base-36 digits each
   const devEnc=v=>String.fromCharCode(97+Math.round((clamp(v,1,10)-1)*2)), devDec=c=>1+(c.charCodeAt(0)-97)/2;
   function devPack(st){ let s=''; for(const k of DEV_KEYS) s+=devEnc(st[k]??5.5); return s; }
-  function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); if(s.length<DEV_KEYS.length) o.gkHandling=gkHandlingFor(o); return o; }
+  function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); if(s.length<26) o.gkHandling=gkHandlingFor(o); if(s.length<27) o.longPass=o.passAcc; if(s.length<28) o.compFinal=o.composure; return o; }
   function devPackPg(a){ return a.map(v=>Math.round((clamp(v,-1,1)+1)*600).toString(36).padStart(2,'0')).join(''); }
   function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>{ const v=s?parseInt(s.substr(i*2,2),36):NaN; return isFinite(v)?v/600-1:0; }); }
   // (v152) his rating to the hundredth: his attributes with the way each has come on towards its next half point (the
@@ -16125,7 +16175,7 @@
         gain=DEV_RATE*(room+1)*ag*(W/0.69*amb)*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1)*(fo?(areaOf(k)===fo?1.25:0.9):1)*settle; }   // (his focus: more in that coach's field, a little less elsewhere)
       if(p.inj&&(g==='phy'||g==='tec')) gain*=0.3;   // (injured: rehab, not training)
       if(room>0&&k==='shotAcc'&&p.wg) gain+=0.05*Math.sqrt(p.wg);            // (his goals: a little more finishing, each worth less)
-      if(room>0&&k==='composure'&&p.wb) gain+=0.04*Math.min(p.wb,4);         // (big games: a little more composure)
+      if(room>0&&(k==='composure'||k==='compFinal')&&p.wb) gain+=0.04*Math.min(p.wb,4);         // (big games: a little more composure, both kinds)
       let drain=devAgeDrop(g,p.age)+(g==='phy'?(p.decl||0):0);   // (p.decl: a bad injury past 28 -- his legs go sooner)
       if(!p.inj&&W<0.48&&(g==='phy'||g==='tec')) drain+=(0.48-W)*1.2;    // (bad weeks' training: his sharpness and his legs go)
       if(fm<5.8&&(g==='tec'||g==='men')) drain+=(5.8-fm)*0.06;              // (poor form: his touch, his reading of the game, his composure)
@@ -16394,8 +16444,8 @@
   // trains as it always did, and a coach never makes it worse. New men to hire, two for each post (and a youth coach),
   // come round every four weeks. A man's FOCUS (his card) puts his training on one coach's field: a quarter more there,
   // a tenth less elsewhere.
-  const COACH_AREA={fit:['speed','acceleration','agility','stamina','strength'],tec:['ballControl','dribbling','passAcc','crossing','curve'],
-    fin:['shotAcc','shotPower','longShots','heading','offIQ','composure'],def:['tackle','slideTackle','interceptions','defIQ'],gk:['gkReflex','gkReach','gkDiveRange','gkHandling','gkDistribution','keeperSpd']};
+  const COACH_AREA={fit:['speed','acceleration','agility','stamina','strength'],tec:['ballControl','dribbling','passAcc','longPass','crossing','curve','composure'],
+    fin:['shotAcc','shotPower','longShots','heading','offIQ','compFinal'],def:['tackle','slideTackle','interceptions','defIQ'],gk:['gkReflex','gkReach','gkDiveRange','gkHandling','gkDistribution','keeperSpd']};
   const STAFF_ORDER=['fit','tec','fin','def','gk'], areaOf=k=>STAFF_ORDER.find(a=>COACH_AREA[a].includes(k))||'tec';
   const DEV_FOCUS={fit:'FITNESS',tec:'TECHNICAL',fin:'FINISHING',def:'DEFENDING',gk:'KEEPING'};
   const STAFF_KIND={fit:{n:'fitness'},tec:{n:'technical'},fin:{n:'finishing'},def:{n:'defending'},gk:{n:'goalkeeping'},youth:{n:'youth'}};
@@ -16473,8 +16523,8 @@
   // +0.83 at 9); down, those and his reading of the game both ways, -0.5 at 3.5 and -1.5 at 1.5 and under (-0.25 at 5,
   // -0.42 at 4). Before, nothing at all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once
   function morDeltas(m){ m=m??MOR0; if(Math.abs(m-6.5)<0.005) return null;
-    if(m>6.5){ const v=m>=9.5?1:m>=8?0.5+0.5*(m-8)/1.5:0.5*(m-6.5)/1.5; return {stamina:v,composure:v}; }
-    const v=m<=1.5?-1.5:m<=3.5?-0.5-(3.5-m)*0.5:-0.5*(6.5-m)/3; return {stamina:v,composure:v,offIQ:v,defIQ:v}; }
+    if(m>6.5){ const v=m>=9.5?1:m>=8?0.5+0.5*(m-8)/1.5:0.5*(m-6.5)/1.5; return {stamina:v,composure:v,compFinal:v}; }
+    const v=m<=1.5?-1.5:m<=3.5?-0.5-(3.5-m)*0.5:-0.5*(6.5-m)/3; return {stamina:v,composure:v,compFinal:v,offIQ:v,defIQ:v}; }
   // THE DRESSING ROOM ON THE PITCH (v155): the side's mood (d.tm) is a little more of every man's stamina, composure
   // and reading of the game on match day, on top of his own -- along a line, a quarter of a point at 10, as much off
   // at 3 and under -- about half a point of a man's rating either way at its ends, a fifth at 8 (buoyant). It touched
@@ -16483,7 +16533,7 @@
   const tmV=tm=>tm==null?0:clamp(((tm??MOR0)-MOR0)/3.5,-1,1)*0.25;
   function morStats(p,st,tm){ const dl=morDeltas(p.mor), v=tmV(tm); if(!dl&&!v) return Object.assign({},st); const o=Object.assign({},st);
     if(dl) for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10);
-    if(v) for(const k of ['stamina','composure','offIQ','defIQ']) o[k]=clamp(o[k]+v,1,10);
+    if(v) for(const k of ['stamina','composure','compFinal','offIQ','defIQ']) o[k]=clamp(o[k]+v,1,10);
     return o; }
   const morOvr=(p,tm)=>{ if(!morDeltas(p.mor)&&!tmV(tm)) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st,tm))-cwOverall(p.role,st); };
   // what the side's mood is worth to a man today, on average over your nine: a rating's worth, to the tenth
@@ -19584,8 +19634,8 @@
   // (how he moves; his body and the air -- Heading's a duel at both ends; on the ball -- Curve bends his shots, crosses and
   // passes alike; delivery and vision; finishing; winning it back)
   const SIX=[['PAC','Pace',['speed','acceleration','agility']],['PHY','Physical',['strength','stamina','heading']],['TEC','Technique',['ballControl','dribbling','composure','curve']],
-    ['PAS','Passing',['passAcc','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ']]];
-  const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution','ballControl','composure']],['HAN','Handling',['gkHandling']]];
+    ['PAS','Passing',['passAcc','longPass','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','compFinal']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ']]];
+  const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution','longPass','ballControl','composure']],['HAN','Handling',['gkHandling']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
   function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }
   function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
@@ -20128,6 +20178,12 @@
     d.story=d.story||{vet:2,kid:2}; if(lvOf(d,'market')) d.story.phone=2;   // (on the phone already: no call to come)
     for(const p of d.roster||[]){ if(p.fo==='phy') p.fo='fit'; else if(p.fo==='men') p.fo=null; } d.youth=d.youth||[]; d.news=d.news||[]; d.tx=d.tx||[]; d.ledger=d.ledger||[];
     if(!MG_DAY[d.wday]) d.wday='mon'; d.wkN=d.wkN||0; d.weeks=d.weeks||0; d.tm=d.tm??MOR0; mgCaptains(d);
+    if(!d.st163&&d.world){   // (v163, once, before anything else reads the strings: every man's Long passing and Final third composure, from his own Short passing and Composure and what his role and archetype make of them -- his best and his ceiling the same way -- and his rating and potential on the new weights)
+      for(const p of [...(d.roster||[]),...(d.world.free||[]),...(d.youth||[]),...Object.values(d.world.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at||p.at.length>=28) continue;
+        const up=str=>{ const o=devUnpack(str); Object.assign(o,newStatsFor(o,p.role,p.style,false)); return o; }, at=up(p.at), cl=up(p.cl||p.at), bs=up(p.bs||p.at);
+        for(const k of NEW_STAT_KEYS){ cl[k]=Math.max(cl[k],at[k]); bs[k]=Math.max(bs[k],at[k]); }
+        p.at=devPack(at); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,at),30,99); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
+      d.st163=true; }
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
@@ -20459,7 +20515,7 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
+      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)

@@ -92,7 +92,7 @@ ok(cl[0] && !cl[1], 'a curling cross is a little harder for the keeper to claim:
 const thru = (cv, run, lane, lob) => page.evaluate(({ cv, run, lane, lob }) => new Promise(res => {
   const T = window.__T, R = T.players().filter(q => q.team === 'R' && q.role !== 'G'), G = T.players().filter(q => q.team === 'G' && q.role !== 'G'); T.freeze();
   const p = R[0], q = R[1], o = G[1], atk = T.atkOf('R'), keep = p.stats;
-  p.stats = Object.assign({}, keep, { curve: cv, passAcc: 10, offIQ: 10 });
+  p.stats = Object.assign({}, keep, { curve: cv, passAcc: 10, longPass: 10, offIQ: 10 });
   const D = lob ? 800 : 280, ang = run === 'across' ? 60 / 57.3 : 0, rv = 170, b = T.ball();
   const park = () => { for(const x of T.players()) if(x !== p && x !== q && x !== o){ x.x = T.FW / 2; x.y = 40; x.vx = x.vy = 0; } for(const k of T.keepers()) k.y = 30; };
   park(); p.x = T.FW / 2 - atk * 300; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };

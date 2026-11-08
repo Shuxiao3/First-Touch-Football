@@ -32,7 +32,7 @@ await K(`(()=>{ window.D=mgNewCareer({slot:'1',manager:'T',clubName:'Dev Town',c
 
 // --- stored attributes -----------------------------------------------------------------------------------------
 r = await K(`(()=>{ const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free];
-  const okAt=all.every(p=>/^[a-s]{26}$/.test(p.at)&&/^[a-s]{26}$/.test(p.cl)&&/^[a-s]{26}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));
+  const okAt=all.every(p=>/^[a-s]{28}$/.test(p.at)&&/^[a-s]{28}$/.test(p.cl)&&/^[a-s]{28}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));   // (v163: 28, Long passing and Final third composure last)
   const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at)),30,95)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)));
   const under=all.every(p=>{ const a=devUnpack(p.at), c=devUnpack(p.cl); return DEV_KEYS.every(k=>c[k]>=a[k]); });
   const hv=all.flatMap(p=>Object.values(hvOf(p))), hvMean=hv.reduce((a,b)=>a+b,0)/hv.length;
@@ -76,12 +76,12 @@ r = await K(`(()=>{ const ps=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players)]
   const v121=st=>{ const w=OVR_W_V121.GK; let s=0,n=0; for(const k in w){ s+=st[k]*w[k]; n+=w[k]; } return Math.round(s/n*10); };
   const was=ps.map(p=>({ ovr:p.ovr, at:p.at, pg:p.pg })); for(const p of ps){ p.ovr=old(devUnpack(p.at)); p.at=cut(p.at); p.cl=cut(p.cl); p.bs=cut(p.bs); if(p.pg) p.pg=p.pg.slice(0,50); }
   const read=ps.map(p=>{ const a=devUnpack(p.at); return a.gkHandling===gkHandlingFor(a)&&Math.abs(v121(a)-p.ovr)<=1; });
-  delete D.w122; mgMigrate(D);   // (a save that old was rated on v121's weights: read, it's rated again on v122's)
-  const len=ps.every(p=>p.at.length===26&&p.cl.length===26&&p.bs.length===26&&(!p.pg||p.pg.length===52)), same=ps.every((p,i)=>p.at.slice(0,25)===was[i].at.slice(0,25));
+  delete D.w122; delete D.st163; mgMigrate(D);   // (a save that old was rated on v121's weights: read, it's rated again on v122's -- and from before v163 too)
+  const len=ps.every(p=>p.at.length===28&&p.cl.length===28&&p.bs.length===28&&(!p.pg||p.pg.length===56)), same=ps.every((p,i)=>p.at.slice(0,25)===was[i].at.slice(0,25));
   const rate=ps.every(p=>Math.abs(cwOverall(p.role,devUnpack(p.at))-p.ovr)<=1), meters=ps.every(p=>devUnpackPg(p.pg).every(v=>isFinite(v)));
   return { n:ps.length, read:read.every(Boolean), len, same, rate, meters, h:ps.map(p=>devUnpack(p.at).gkHandling) }; })()`);
 info('from before Handling: ' + JSON.stringify(r));
-ok(r.n >= 6 && r.read && r.len && r.same && r.rate && r.meters, 'a career saved before Handling: each man\'s from the rest of his keeping (keepers ' + r.h.join(', ') + '), his rating as it was; stored as 26 again, the rest untouched');
+ok(r.n >= 6 && r.read && r.len && r.same && r.rate && r.meters, 'a career saved before Handling: each man\'s from the rest of his keeping (keepers ' + r.h.join(', ') + '), his rating as it was; stored as 28 now (v163: Long passing and Final third composure after it), the rest untouched');
 
 // --- every third week; the same dice on a reload ------------------------------------------------------------------
 r = await K(`(()=>{ const d=D, seen=[]; d.lv.market=0;

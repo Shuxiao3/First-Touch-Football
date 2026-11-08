@@ -1081,15 +1081,41 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   | --- | --- |
   | PAC Pace | Speed, Accel, Agility |
   | PHY Physical | Strength, Stamina, Heading |
-  | TEC Technique | Ball ctrl, Dribbling, Composure, Curve |
-  | PAS Passing | Passing, Crossing, Off IQ |
-  | SHO Shooting | Shot acc, Shot power, Long shots |
+  | TEC Technique | Ball ctrl, Dribbling, Composure in traffic, Curve |
+  | PAS Passing | Short passing, Long passing *(v163)*, Crossing, Off IQ |
+  | SHO Shooting | Shot acc, Shot power, Long shots, Final third composure *(v163)* |
   | DEF Defending | Tackle, Slide tackle, Interceptions, Def IQ |
 
   Agility went from Physical to Pace (it's how he turns on the run), Heading from Defending to Physical (it's a duel
   at both ends) and Curve from Shooting to Technique (it bends his crosses and passes as well as his shots).
-  A keeper's six: DIV Diving, REF Reflexes, REA Reach, SPD Speed, KIC Kicking (distribution, ball control,
+  A keeper's six: DIV Diving, REF Reflexes, REA Reach, SPD Speed, KIC Kicking (distribution, long passing, ball control,
   composure) and HAN Handling (v77; composure and ball control were a CMP of their own).
+- **Passing and composure in two (v163).** Passing is **Short passing** and **Long passing**, and Composure is
+  **Composure in traffic** and **Final third composure** (on the cards: Short pass, Long pass, Traffic comp., Final 3rd
+  comp.).
+  - **The pass's stat, by its length.** A pass up to 12 m goes by Short passing alone, one of 32 m or more by Long
+    passing alone, and between them by a blend that moves along the way: a quarter Long passing at 17 m, half at
+    22 m, three-quarters at 27 m. Everything that went by Passing goes by that: how true it goes (the short drift and
+    the long ball's spread), a through ball's weight, the computer's own reckoning of a pass. How far a man can hit it
+    well (281 to 713 px), the computer's lofted balls and how quickly your pass winds up go by Long passing; a
+    one-touch pass and a throw-in by Short. Composure and Curve come in as they always did. Measured on the pitch, nobody
+    near: a man of Short 10 and Long 1 is 0.05° off on average at 8 m and 10.6° at 40 m; one of Short 1 and Long 10,
+    0.14° and 1.35°.
+  - **Composure, where he is.** The composure a man plays with is his Composure in traffic in his own half and the
+    middle, his Final third composure going into theirs -- from 62% of the way up the pitch, all of it at 74% -- in
+    everything composure did: pressure on a pass, a shot or a touch, and the touch in the final third. The computer
+    weighs a man's Final third composure in how keen he is to shoot. A mood high or low, the dressing room and the
+    big games move both.
+  - **Every man has both.** A role's usual make: a keeper's Long passing 5 (Short 5.5), a defender's 5.5 (6), a
+    midfielder's 6.5 (7.5), a forward's 5 (6); Final third composure 3, 4.5, 6 and 7 (Composure in traffic 6.5, 6, 6.5,
+    7). Each archetype has its own on top: a deep creator 2.5 more Long passing, a ball-playing centre-back, a playmaker
+    and a wide playmaker 1.5; a poacher 2 more Final third composure, a shadow striker 1.5, a mezzala, a trequartista,
+    an inverted winger and a complete forward 1. An exhibition side's men keep every stat they had (the new two are
+    made after the old ones are drawn, as Handling was); a career's men are made with them. A career from before gets
+    them once, as it's loaded: each man's from his own Short passing and Composure, moved as his role and archetype
+    move them -- his best and his ceiling the same way. They develop like the rest: Long passing with the technical
+    coach, as Short passing and Composure in traffic now do; Final third composure with the finishing coach, and with
+    a man's reading of the game it keeps growing into his thirties.
 - **Ratings (v122).** A man's rating is a weighted average of his stats (times ten), the weights out of 5 and set by
   his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. What his line's game
   is made of counts 5, then 4 and 2, and every other outfield stat 1, so even a defender's shooting counts a little:
@@ -1109,8 +1135,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   | Acceleration | **5** *(v144; 2)* | **5** *(v144; 1)* | **5** *(v144; 4)* |
   | Agility | 2 | 4 | 4 |
   | Stamina | 2 | 4 | 1 |
-  | Composure | 2 | 4 | 4 |
-  | Passing | 2 | 5 | 1 |
+  | Composure in traffic | 2 | 3 | 2 |
+  | Final third composure *(v163)* | 1 | 1 | 2 |
+  | Short passing | 1 | 3 | 1 |
+  | Long passing *(v163)* | 1 | 2 | 1 |
   | Off IQ | 1 | 5 | 4 |
   | Ball control | 1 | 4 | 4 |
   | Dribbling | 1 | 4 | 5 |
@@ -1120,8 +1148,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   | Shot power | 1 | 1 | 4 |
   | Long shots | 1 | 2 | 2 |
 
+  (v163: Short and Long passing share what Passing weighed -- 2, 5 and 1 -- and the two composures what Composure did,
+  2, 4 and 4, a defender's and an attacker's with 1 more for the stat that's new to them; a man whose two match rates
+  as he did. A career's 990 men, measured: four in five rated the same after, the rest a point either way.)
   Keepers: Reflexes 5, Reach 5, Diving 4, Handling 4, Distribution 4, Keeper speed 2; Composure, Passing and Ball
-  control 1 each. The scale is kept where it was: a man of his line's usual make rates what he did before at any
+  control 1 each (Short passing and Composure in traffic: a keeper's as they were). The scale is kept where it was: a man of his line's usual make rates what he did before at any
   level, so a League 2 man is still rated as one and prices and wages don't move with the change; what moves a man is
   how his lesser stats compare with a usual one's. A career from before v122 has every man rated again on these, once
   (a new world made on v121 and read on v122: about half the men the same, most of the rest a point either way, a
@@ -1655,8 +1686,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **The staff and training focus.**
     - **Five coaches, a post for each from the start**, so it's never a choice of which -- only who's the best you
       can get for each. Each develops one field: **fitness** (speed, acceleration, agility, stamina, strength),
-      **technical** (ball control, dribbling, passing, crossing, curve), **finishing** (shot accuracy and power, long
-      shots, heading, Off IQ, composure), **defending** (tackling, sliding, interceptions, Def IQ) and
+      **technical** (ball control, dribbling, short and long passing, crossing, curve, composure in traffic -- v163),
+      **finishing** (shot accuracy and power, long shots, heading, Off IQ, final third composure), **defending** (tackling, sliding, interceptions, Def IQ) and
       **goalkeeping** (reflexes, reach, diving, handling, distribution, a keeper's speed). The Training building's **Staff**
       tab has a line for each post (vacant till filled) and two men to hire for each, new ones every four weeks.
     - **The academy's youth coach** is the academy's, never the first team's: its **Coach** tab, a post of his own,
@@ -2531,6 +2562,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v163: passing and composure in two.** Passing is Short passing and Long passing: a pass goes by Short passing up
+  to 12 m, by Long passing from 32 m, a blend that moves between (half and half at 22 m). Composure is Composure in
+  traffic and Final third composure: the one a man plays with goes from the first to the second as he goes into the
+  final third. Every man has all four, by his role and archetype; a career from before gets the new two once, from
+  each man's own; an exhibition side's men keep every stat they had. See **Passing and composure in two (v163)**.
 - **v162: no YOUR NINE on a transfer.** A man to buy or sign no longer shows what he'd do for your nine (its average
   now and with him in it): it told you which men were better without a rating to go on. Scout a man to know him. See
   **What he'd do for your nine (v156; gone in v162)**.

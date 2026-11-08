@@ -36,8 +36,8 @@ info('mood -> composure (and the rest): ' + JSON.stringify(r));
 const [m1, m15, m25, m35, m4, m5, m6, m65, m7, m8, m9, m95, m10] = r.v;
 ok(m1 === -1.5 && m15 === -1.5 && m35 === -0.5 && m8 === 0.5 && m95 === 1 && m10 === 1 && m65 === 0,
   'at the old steps what it always came to: -1.5 at 1.5 and under, -0.5 at 3.5, +0.5 at 8, +1 at 9.5 and over; nothing at 6.5');
-ok(m4 < 0 && m5 < 0 && m6 < 0 && m7 > 0 && m9 > 0 && m4 < m5 && m5 < m6 && m7 < m8 && m8 < m9 && m25 < m35 && r.n[0] === 4 && r.n[1] === 2 && r.o.m4 < 0 && r.o.m9 > 0 && r.o.m65 === 0,
-  'and every point between counts -- no dead zone: ' + [4, 5, 6, 7, 9].map((m, i) => m + ': ' + [m4, m5, m6, m7, m9][i]).join(', ') + '; a midfielder at 4 rates ' + r.o.m4 + ', at 9 +' + r.o.m9 + ' (low: his stamina, composure and both IQs; high: stamina and composure)');
+ok(m4 < 0 && m5 < 0 && m6 < 0 && m7 > 0 && m9 > 0 && m4 < m5 && m5 < m6 && m7 < m8 && m8 < m9 && m25 < m35 && r.n[0] === 5 && r.n[1] === 3 && r.o.m4 < 0 && r.o.m9 > 0 && r.o.m65 === 0,
+  'and every point between counts -- no dead zone: ' + [4, 5, 6, 7, 9].map((m, i) => m + ': ' + [m4, m5, m6, m7, m9][i]).join(', ') + '; a midfielder at 4 rates ' + r.o.m4 + ', at 9 +' + r.o.m9 + ' (low: his stamina, both composures -- v163: in traffic and in the final third -- and both IQs; high: stamina and both composures)');
 
 // --- A WORD WITH HIM: once a week --------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2]; p.mor=3; const a=mgTalk(d,p), m1=p.mor, b=mgTalk(d,p), m2=p.mor; d.weeks=(d.weeks||0)+1; const c=mgTalk(d,p), m3=p.mor; return { a:a[0], b, m:[3,m1,m2,m3], c:c[0] }; })()`);
