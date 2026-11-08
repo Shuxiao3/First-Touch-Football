@@ -102,7 +102,7 @@ info('struck on it: ' + JSON.stringify(F) + '; struck straight there: ' + JSON.s
 ok(F.bent && F.off < 0.25, 'struck on the arc it was chosen on, still bending half a second in: never more than ' + F.off + ' m off it');
 ok(F.nearDoor < 0.35, 'through the middle of the gap (' + F.nearDoor + ' m off it)');
 ok(F.nearEnd < 0.5 && Math.abs(F.spEnd - S0.spEnd) < 0.6, '...and onto the spot, weighted as the straight ball is (' + F.nearEnd + ' m off it, going ' + F.spEnd + ' m/s; straight ' + S0.spEnd + ')');
-ok(F.read !== null && S0.read !== null && F.read < S0.read + 0.1, 'a read of its path reads the bend: half a second on, ' + F.read + ' m out (a straight ball\'s, ' + S0.read + ')');
+ok(F.read !== null && S0.read !== null && F.read < 0.25 && S0.read < 0.25, 'a read of its path reads the bend: half a second on, ' + F.read + ' m out (a straight ball\'s, ' + S0.read + '; v165: against a quarter of a metre, as the straight ball may carry a little bend of its own now)');
 const D = await flight('knocked');
 info('touched on the way: ' + JSON.stringify(D));
 ok(D.kill === 0 && D.turnAfter !== null && D.turnAfter < 0.5, 'knocked off its line on the way, it stops bending (turned ' + D.turnAfter + '° after)');
