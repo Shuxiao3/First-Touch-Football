@@ -1737,7 +1737,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       after it only MEET IT or WALK AWAY. A counter no higher than you bid before moves nothing. (Before v116 you met
       their figure or walked away; a lower bid meant waiting for Monday again.)
   - **A bid in a tap (v151).** Under OFFER: HALF, 3/4, THEIR PRICE, +10% -- or any figure typed into the field
-    beside them and Enter ("2.5m", "750k", "$1,200,000"; never under half their price). It was − and + alone, 5% a
+    beside them (on the iPhone's number pad the figure in full, 2500000, bid as you tap off the field; "2.5m" and
+    "750k" are read too; never under half their price). It was − and + alone, 5% a
     step: a bid at their price from half of it was ten taps. A price to list a man at the same way: HIS WORTH, +25%,
     +50%, TWICE, or typed (with no bids in the way: the card never pages). Once a man's scouted, his card has what
     he's WORTH beside what they're ASKING -- in red when they want more than a third over it, green when it's a
@@ -2245,7 +2246,7 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 
 ## Controls
 
-**How to play, in the game (v148).** HOW TO PLAY -- these, on a card, the keys or on a touch screen the buttons -- comes
+**How to play, in the game (v148).** HOW TO PLAY -- the screen's buttons, on a card -- comes
 up before your first career match (KICK OFF from it), and again from **?** over the pitch (right of the menu) and
 CONTROLS in the pause menu, the match waiting while it's up. And the first time each thing comes up in a match you play,
 a word on it over the pitch for a few seconds: shooting (the ball yours within 24 m of their goal), crossing (out wide
@@ -2253,22 +2254,14 @@ in their half), clearing (deep in your own), passing (the ball yours anywhere el
 once, one at a time, at least 8 s apart; TIPS in the settings turns them off, and on again starts them again. Before,
 a career had no word on the controls anywhere: the only teaching was in the labs.
 
-**Desktop**
+**An iPhone's controls, whatever it's opened on (v159).** Football Classic ships as an iPhone app, so every word the
+game says on how to play is about the screen's buttons and a finger: the card (the left of the screen to steer, PASS,
+SHOOT, CROSS, SKILL, defending, your corner's − and +, ☰), the tips over the pitch, each lab's first line and its tally
+("tap ▶ NEW BALL to reset"), the TUNE drawer's notes, the skill moves page. The labs' chips and your corner's panel
+carry no key hints. Before, opened on a computer, the same places spoke of WASD, J, K, L, SPACE and the mouse. The keys
+still play it (see **Keys**, below the iPhone's), but nothing in the game mentions them.
 
-| Key | Action |
-| --- | --- |
-| `WASD` | Move (double-tap a direction to sprint) |
-| `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · a throw-in of yours: thrown to the man you aim at, about as far as you held it (Football Classic, v138: see **The ball goes out**) · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
-| `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
-| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · the ball nobody's: a shot, struck first time as it gets to you, or a sliding finish (Football Classic, v139: see **A shot at a ball that's nobody's**) · your cross on its way (you're on the man it's for): he goes up for it and heads it as it gets to him (Football Classic, v142: see **You're on the man it's for**) · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
-| `K` + `↑`/`↓` (hold) | Curl the shot |
-| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
-| `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is his long ball, a long pass pinged to the man you aim at (the button reads LONG; v115) |
-| `Q` `E` · `Z` `C` | A corner of yours being taken (Football Classic, v142): one fewer · one more of your men in the box; one fewer · one more back for the break -- the rest in midfield (the panel at the top; on a phone, tap its − and +). See **Your corner's set-up** |
-| `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
-| `V` | Toggle the pixel-art players / plain vector players |
-
-**Touch**
+**On the iPhone** -- the controls Football Classic tells you about, and the only ones (v159).
 
 Drag on the left half to move. **Push the stick out past its ring to sprint** (the ring lights up
 orange) and ease back inside it to stop, without ever lifting your thumb; push on out and the
@@ -2276,7 +2269,7 @@ stick follows your thumb, so you can't run off its edge. A double-tap on the lef
 sprints too. The big right-hand button is
 context-sensitive — TRAP / CALL / PASS depending on the moment (THROW at a throw-in of yours, v138). Separate SHOOT / SLIDE
 (SLIDE only with one of theirs on the ball: with it nobody's, SHOOT shoots -- v139) and hold-to-CROSS buttons sit alongside it (Football Classic: hold CROSS longer for a man further across, double-tap it
-for a low driven cross); in your own half CROSS reads **CLEAR** and works like `L` there, and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too (Football Classic, in a match: nothing, unless it's a tap on one of your men, which switches to him).
+for a low driven cross); in your own half CROSS reads **CLEAR** and clears it (hold it to charge, as `L` in the keys below), and in theirs it's dimmed while the ball's more than 24 m from their byline (too far out to cross). Anywhere else on the right half, off the buttons, is TRAP too (Football Classic, in a match: nothing, unless it's a tap on one of your men, which switches to him).
 
 **Directional first touch** — press TRAP (the button, or anywhere off the buttons on the right half)
 and **drag** the way you want the ball to go. The trap is timed from the moment your finger lands,
@@ -2324,11 +2317,27 @@ his accuracy, and it grows evenly in between: the Swipe shot: off his line dials
 With the ball, swipe toward goal on the right half of the screen (off the
 buttons). The swipe's line, cast from your player, picks the spot on the goal line (point past a
 post and it goes for that corner; straight at the middle lets your player pick the better corner,
-as an unaimed `K` shot does). How fast you flick it sets the power. **Bend the swipe to curl the
+as a shot off the SHOOT button does). How fast you flick it sets the power. **Bend the swipe to curl the
 shot**: the ball bows out the same way your swipe did and bends back onto the spot, so a curled
 shot still finds its target while starting out away from the keeper. The bigger the bow, the more
 spin, and your Curve stat sets how hard it bends. A tap, or a swipe back toward your own goal,
 doesn't shoot.
+
+**Keys** -- First Touch's, and Football Classic's in a browser while it's built and tested. Football Classic never
+mentions them (v159: it ships as an iPhone app); the tests drive it with them.
+
+| Key | Action |
+| --- | --- |
+| `WASD` | Move (double-tap a direction to sprint) |
+| `J` | Call for the ball / pass (the way you aim; hold for a longer ball: see **Who your pass is for**) · head-clear an incoming cross · a throw-in of yours: thrown to the man you aim at, about as far as you held it (Football Classic, v138: see **The ball goes out**) · your keeper with it in his hands: you're on him, and it's thrown to the man you aim at (`J` `J`: overarm) -- a goal kick, kicked (Football Classic: see **Your keeper with it in his hands**); with it at his feet, a pass like anyone's (**The keeper and the rules**) |
+| `J` `J` (double-tap) | **Lofted pass**: up over everyone and down at the receiver's feet, checking up where it lands |
+| `K` | Shoot (hold to wind up: while you do, a defender who was behind you can't take it off you) / header / command a teammate to shoot · the ball nobody's: a shot, struck first time as it gets to you, or a sliding finish (Football Classic, v139: see **A shot at a ball that's nobody's**) · your cross on its way (you're on the man it's for): he goes up for it and heads it as it gets to him (Football Classic, v142: see **You're on the man it's for**) · standing tackle · your keeper with it in his hands: his long ball, as `L` (v115) |
+| `K` + `↑`/`↓` (hold) | Curl the shot |
+| `L` (hold) | Cross — or, without the ball, request a cross from a wide teammate, or slide in when they have it. (Football Classic: the longer you hold it, the further the man it's for, nearest first; `L` `L` double-tap: a low driven cross. See **Your cross picks its man**. Only from 24 m out from their byline or nearer: further out it does nothing, yours or a team-mate's. See **Crosses come from 24 m out at most**.) |
+| `L` in your own half | **Clear** it instead: with the ball, hold it to charge (the blue meter round your man fills in 0.6 s) and it goes as you let go -- a tap a short way and low, held full high and long; a loose ball is struck first time the moment it reaches your reach ring, no trap needed (press as it comes, or hold it for up to two seconds); one dropping over your head, you jump and head it away. The stick picks the direction if it points upfield, otherwise it goes up and out toward your touchline. Your keeper's -- in his hands or at his feet -- is his long ball, a long pass pinged to the man you aim at (the button reads LONG; v115) |
+| `Q` `E` · `Z` `C` | A corner of yours being taken (Football Classic, v142): one fewer · one more of your men in the box; one fewer · one more back for the break -- the rest in midfield (the panel at the top; on a phone, tap its − and +). See **Your corner's set-up** |
+| `SPACE` | Trap: press a hair before the ball reaches your reach ring (leave it and it runs past) |
+| `V` | Toggle the pixel-art players / plain vector players |
 
 ## Exhibition
 
@@ -2501,6 +2510,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v159: an iPhone's controls, whatever it's opened on.** Every word the game says on how to play is about the
+  screen's buttons and a finger, on a computer too: HOW TO PLAY (with your corner's − and + and where the skill moves
+  are), the tips, each lab's first line and tally, the TUNE drawer's notes, the skill moves page, a drill's "tap the
+  pitch to play again". No key hints on the labs' chips or your corner's panel. The keys still play it, for the tests.
+  See **An iPhone's controls, whatever it's opened on (v159)**.
 - **v158: touch first.** Everything a drag does, a tap does too: on Training's Selection your keeper or a man not
   taken, tapped, then anyone -- they swap; on Training's pitch and in a match's ALL SUBS, a man tapped, SWAP on his
   card, then the other man (in a match, off the bench that's a sub). A career's whole round -- a new career, your

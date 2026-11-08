@@ -107,8 +107,6 @@
   #cornerSet .csBtn,#cornerSet .csGap{width:22px;height:20px;}
   #cornerSet .csBtn{font:14px 'FTC Dot',monospace;line-height:1;color:var(--ink);background:rgba(223,230,212,.08);border:1px solid var(--edge);border-radius:4px;cursor:pointer;padding:0;}
   #cornerSet b{width:16px;text-align:center;color:var(--good);}
-  #cornerSet kbd{font:10px 'FTC Dot',monospace;color:var(--ink2);width:28px;text-align:right;}
-  body.touch #cornerSet kbd{display:none;}
   #crossBtn.mClear{background:rgba(223,230,212,.12);border-color:var(--ink);color:var(--ink);}
   #crossBtn.armed{box-shadow:0 0 14px 3px rgba(223,230,212,.5);filter:brightness(1.3);}
   #shootBtn.mSlide{background:rgb(var(--warnRGB) / .16);border-color:var(--amber);color:var(--amber);}
@@ -121,8 +119,6 @@
     pointer-events:none;z-index:5;display:none;transform:scale(.4);opacity:0;}
   #tapRing.go{display:block;animation:tapring .28s ease-out;}
   @keyframes tapring{0%{transform:scale(.4);opacity:.9;}100%{transform:scale(1.15);opacity:0;}}
-  .desktop-only{display:inline;} .touch-only{display:none;}
-  body.touch .desktop-only{display:none;} body.touch .touch-only{display:inline;}
 
   .menuChip{cursor:pointer;font-family:'FTC Dot',monospace;font-weight:700;color:var(--phosphor);pointer-events:auto;margin-left:auto;
     border-color:var(--phosphor-dim);letter-spacing:.5px;}
@@ -1001,8 +997,6 @@
     border:1px solid var(--edge);border-radius:6px;padding:4px 7px;cursor:pointer;display:inline-flex;align-items:baseline;gap:5px;line-height:1.2;}
   .labChip i{font-style:normal;font-size:8.5px;letter-spacing:.8px;}
   .labChip b{color:var(--phosphor);font-weight:600;}
-  .labChip kbd{font-family:inherit;font-size:8px;color:var(--dim2);border:1px solid var(--well);border-radius:3px;padding:0 3px;}
-  body.touch .labChip kbd{display:none;}
   .labChip:hover,.labChip.on{border-color:var(--phosphor);background:rgb(var(--accRGB) / .12);}
   .labGo{border-color:var(--phosphor-dim);}
   .labGo.wait{animation:cmdPulse 1s ease-in-out infinite;border-color:var(--phosphor);}
@@ -1513,8 +1507,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span class="desktop-only">WASD move (double-tap = sprint) · J call/pass (double-tap: lofted) / head-clear a cross · L cross (hold it longer for a man further across; double-tap: a low driven cross), CLEAR in your own half (or SLIDE when they have the ball) · J / SPACE switch player (towards the way you're pushing), or click a team-mate · with the ball (or with it on its way to you: first time), click a team-mate to pass to him · J with it on its way: one-touch pass · hold the mouse and draw for a skill move, read against the way he's going (a flick ahead = flick, back = drag-back, L = croqueta, circle = roulette, hook = Cruyff turn, back then ahead = rainbow, ahead then back = sombrero, out and back = elastico, loop then a line = heel flick; a player's stars say which he can do) · K shoot (hold K+Up/Down to curl) / header</span>
-    <span class="touch-only">left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball into his run, leaned that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
+    <span>left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball into his run, leaned that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
 
@@ -1636,30 +1629,30 @@
   </div>
   <div id="labHud" class="labUI">
     <div id="labBar">
-      <button class="labChip" data-kinds="trap" data-lab="serve"><i>SERVE</i><b id="labServeV">ROLLED</b><kbd>1-5</kbd></button>
-      <button class="labChip" data-kinds="trap" data-lab="pace"><i>PACE</i><b id="labPaceV">450</b><kbd>[ ]</kbd></button>
-      <button class="labChip" data-kinds="trap" data-lab="line"><i>LINE</i><b id="labLineV">AT YOU</b><kbd>, .</kbd></button>
-      <button class="labChip" data-kinds="pass" data-lab="pdist"><i>DISTANCE</i><b id="labPDistV">MEDIUM</b><kbd>1-4</kbd></button>
-      <button class="labChip" data-kinds="pass" data-lab="pang"><i>WHERE</i><b id="labPAngV">AHEAD</b><kbd>, .</kbd></button>
-      <button class="labChip" data-kinds="pass" data-lab="prun"><i>RECEIVER</i><b id="labPRunV">STANDS</b><kbd>C</kbd></button>
-      <button class="labChip" data-kinds="pass" data-lab="pdef"><i>DEFENDER</i><b id="labPDefV">NONE</b><kbd>B</kbd></button>
-      <button class="labChip" data-kinds="shoot" data-lab="sdist"><i>FROM</i><b id="labSDistV">EDGE OF BOX</b><kbd>1-4</kbd></button>
-      <button class="labChip" data-kinds="shoot" data-lab="sang"><i>ANGLE</i><b id="labSAngV">CENTRE</b><kbd>, .</kbd></button>
-      <button class="labChip" data-kinds="shoot" data-lab="skeep"><i>KEEPER</i><b id="labSKeepV">ON</b><kbd>B</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="ddef"><i>DEFENDER</i><b id="labDDefV">CLOSES</b><kbd>B</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="ddist"><i>FROM</i><b id="labDDistV">10 M</b><kbd>1-3</kbd></button>
-      <button class="labChip" data-kinds="dribble" data-lab="dslide"><i>SLIDES</i><b id="labDSlideV">OFF</b><kbd>C</kbd></button>
-      <button class="labChip" data-kinds="cross" data-lab="cwho"><i>CROSSER</i><b id="labCWhoV">COMPUTER</b><kbd>C</kbd></button>
-      <button class="labChip" data-kinds="cross" data-lab="cfrom"><i>FROM</i><b id="labCFromV">8 M OUT</b><kbd>1-4</kbd></button>
-      <button class="labChip" data-kinds="cross" data-lab="catk"><i>OURS</i><b id="labCAtkV">2</b><kbd>, .</kbd></button>
-      <button class="labChip" data-kinds="cross" data-lab="cdef"><i>THEIRS</i><b id="labCDefV">2</b><kbd>[ ]</kbd></button>
-      <button class="labChip" data-kinds="cross" data-lab="ckeep"><i>KEEPER</i><b id="labCKeepV">ON</b><kbd>B</kbd></button>
-      <button class="labChip" data-lab="auto"><i>NEXT</i><b id="labAutoV">AUTO</b><kbd>Q</kbd></button>
-      <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b><kbd>Z</kbd></button>
-      <button class="labChip" data-kinds="trap" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b><kbd>C</kbd></button>
-      <button class="labChip" data-kinds="trap" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b><kbd>G</kbd></button>
-      <button class="labChip labGo" data-lab="go" id="labGoChip"><b id="labGoV">▶ SERVE</b><kbd>R</kbd></button>
-      <button class="labChip" data-lab="tune" id="labTuneChip"><b>⚙ TUNE</b><kbd>T</kbd></button>
+      <button class="labChip" data-kinds="trap" data-lab="serve"><i>SERVE</i><b id="labServeV">ROLLED</b></button>
+      <button class="labChip" data-kinds="trap" data-lab="pace"><i>PACE</i><b id="labPaceV">450</b></button>
+      <button class="labChip" data-kinds="trap" data-lab="line"><i>LINE</i><b id="labLineV">AT YOU</b></button>
+      <button class="labChip" data-kinds="pass" data-lab="pdist"><i>DISTANCE</i><b id="labPDistV">MEDIUM</b></button>
+      <button class="labChip" data-kinds="pass" data-lab="pang"><i>WHERE</i><b id="labPAngV">AHEAD</b></button>
+      <button class="labChip" data-kinds="pass" data-lab="prun"><i>RECEIVER</i><b id="labPRunV">STANDS</b></button>
+      <button class="labChip" data-kinds="pass" data-lab="pdef"><i>DEFENDER</i><b id="labPDefV">NONE</b></button>
+      <button class="labChip" data-kinds="shoot" data-lab="sdist"><i>FROM</i><b id="labSDistV">EDGE OF BOX</b></button>
+      <button class="labChip" data-kinds="shoot" data-lab="sang"><i>ANGLE</i><b id="labSAngV">CENTRE</b></button>
+      <button class="labChip" data-kinds="shoot" data-lab="skeep"><i>KEEPER</i><b id="labSKeepV">ON</b></button>
+      <button class="labChip" data-kinds="dribble" data-lab="ddef"><i>DEFENDER</i><b id="labDDefV">CLOSES</b></button>
+      <button class="labChip" data-kinds="dribble" data-lab="ddist"><i>FROM</i><b id="labDDistV">10 M</b></button>
+      <button class="labChip" data-kinds="dribble" data-lab="dslide"><i>SLIDES</i><b id="labDSlideV">OFF</b></button>
+      <button class="labChip" data-kinds="cross" data-lab="cwho"><i>CROSSER</i><b id="labCWhoV">COMPUTER</b></button>
+      <button class="labChip" data-kinds="cross" data-lab="cfrom"><i>FROM</i><b id="labCFromV">8 M OUT</b></button>
+      <button class="labChip" data-kinds="cross" data-lab="catk"><i>OURS</i><b id="labCAtkV">2</b></button>
+      <button class="labChip" data-kinds="cross" data-lab="cdef"><i>THEIRS</i><b id="labCDefV">2</b></button>
+      <button class="labChip" data-kinds="cross" data-lab="ckeep"><i>KEEPER</i><b id="labCKeepV">ON</b></button>
+      <button class="labChip" data-lab="auto"><i>NEXT</i><b id="labAutoV">AUTO</b></button>
+      <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b></button>
+      <button class="labChip" data-kinds="trap" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b></button>
+      <button class="labChip" data-kinds="trap" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b></button>
+      <button class="labChip labGo" data-lab="go" id="labGoChip"><b id="labGoV">▶ SERVE</b></button>
+      <button class="labChip" data-lab="tune" id="labTuneChip"><b>⚙ TUNE</b></button>
     </div>
     <div id="labMeter" data-kinds="trap">
       <div class="lmTrack"><div id="labZonesEl"></div><div id="labTicks"></div><div class="lmCursor" id="labCursor"></div></div>
@@ -1667,7 +1660,7 @@
       <div class="lmScale"><span>◂ EARLY</span><span id="labWinTxt"></span><span>LATE ▸</span></div>
     </div>
     <div id="labResult"></div>
-    <div class="labTallyRow"><span id="labTally"></span><button class="labClear" data-lab="clear" title="Clear the tally (X)">clear</button></div>
+    <div class="labTallyRow"><span id="labTally"></span><button class="labClear" data-lab="clear" title="Clear the tally">clear</button></div>
   </div>
   <div id="labLow" class="labUI">
     <div id="labGoal">
@@ -1684,9 +1677,9 @@
   <div id="pad"><div class="base"></div><div class="stick" id="stick"></div></div>
   <div id="tapRing"></div>
   <div id="cornerSet" class="csUI"><div class="csTitle">YOUR CORNER</div>
-    <div class="csRow"><span class="csLbl">IN THE BOX</span><button class="csBtn" data-cs="box" data-d="-1">−</button><b id="csBox">4</b><button class="csBtn" data-cs="box" data-d="1">+</button><kbd>Q E</kbd></div>
-    <div class="csRow"><span class="csLbl">BACK</span><button class="csBtn" data-cs="back" data-d="-1">−</button><b id="csBack">2</b><button class="csBtn" data-cs="back" data-d="1">+</button><kbd>Z C</kbd></div>
-    <div class="csRow"><span class="csLbl">MIDFIELD</span><span class="csGap"></span><b id="csMid">1</b><span class="csGap"></span><kbd class="csNo"></kbd></div></div>
+    <div class="csRow"><span class="csLbl">IN THE BOX</span><button class="csBtn" data-cs="box" data-d="-1">−</button><b id="csBox">4</b><button class="csBtn" data-cs="box" data-d="1">+</button></div>
+    <div class="csRow"><span class="csLbl">BACK</span><button class="csBtn" data-cs="back" data-d="-1">−</button><b id="csBack">2</b><button class="csBtn" data-cs="back" data-d="1">+</button></div>
+    <div class="csRow"><span class="csLbl">MIDFIELD</span><span class="csGap"></span><b id="csMid">1</b><span class="csGap"></span></div></div>
   <div id="kickBtn" class="actBtn">PASS</div>
   <div id="shootBtn" class="actBtn">SHOOT</div>
   <div id="crossBtn" class="actBtn">CROSS</div>
@@ -1843,11 +1836,9 @@
   </div>
   <p class="legend" style="margin-top:14px">
     <b>Offside is on</b> — forwards play on the shoulder of the last defender and slot into the gaps between markers,
-    waiting to spring onto a through ball; stray beyond the line when the pass is played and it\u2019s a free kick the
-    other way. <b>Tactics</b> for both teams (press / neutral / low block · neutral / wing / counter). <b>L</b> crosses
-    when you have the ball, or <b>requests a cross</b> when you don\u2019t (a wide teammate whips it toward you); in
-    your own half it <b>clears</b> instead (first time, no control needed) ·
-    <b>J</b> call/pass (double-tap for a lofted pass) · <b>K</b> shoot/header/command/tackle · J or SPACE switches player (towards the way you're pushing), or click one; hold J while they have it and your man jockeys the man on the ball by himself (AUTO DEFEND). <b>FREE PLAY</b> for shooting practice.
+    waiting to spring onto a through ball; stray beyond the line when the pass is played and it’s a free kick the
+    other way. <b>Tactics</b> for both teams (press / neutral / low block · neutral / wing / counter). The controls: HOW TO PLAY,
+    on ? over the pitch. <b>FREE PLAY</b> for shooting practice.
   </p>
 </div>
 
@@ -1979,7 +1970,7 @@
     halfMin:{val:4,min:3,max:5,step:1,label:'Half length (min)',hint:'Real minutes per half (3, 4, or 5; 4 unless you pick another). The on-screen clock is scaled to read 1–45 in the first half and 45–90 in the second, whatever you pick here.'},
     mateSpace:{val:170,min:0,max:260,step:10,label:'Off-ball spacing from carrier',hint:'Teammates positioning off the ball keep at least this distance from their own carrier (anchor-based positioning only; committed runs, the intended receiver, and ball contests are exempt). 0 disables.'},
     switchLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Switch: keep his run (s)',hint:'For this long after you switch, the man you switch to carries on the way he was running, before the stick takes him over, so the direction you were holding for the last man doesn\'t snap him round. 0 = off.'},
-    passLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Touch: pass lockout after receiving',hint:'TOUCH ONLY — for this many seconds after a ball reaches you (a pass you receive, or your own trap), the big button still reads as TRAP and cannot fire a pass, so a trap-intent tap landing just after it arrives never becomes an accidental pass. Running with the ball never sets it off. 0 disables. Keyboard passing (J) is never locked.'},
+    passLock:{val:0.25,min:0,max:0.6,step:0.05,label:'Touch: pass lockout after receiving',hint:'For this many seconds after a ball reaches you (a pass you receive, or your own trap), the big button still reads as TRAP and cannot fire a pass, so a trap-intent tap landing just after it arrives never becomes an accidental pass. Running with the ball never sets it off. 0 disables.'},
     oppShift:{val:0,min:-3,max:3,step:0.5,label:'Exhibition: opponent stat shift',hint:'EXHIBITION ONLY — shifts every stat of every opponent (red) player by this amount, clamped 1–10. -3 = pub team, 0 = as generated, +3 = world beaters. Career matches ignore this; league opponents come from the career world.'},
     defIQ:{val:5.5,min:1,max:10,step:0.1,label:'Def IQ (stat 1–10)',hint:'Defensive read on three traits: slide-tackle TIMING (1 = mistimed/short, 10 = perfect lead), an INTERCEPTION speed burst, and TACKLING (lower ball-exposure needed to nick it).'},
     defIQtime:{val:0.6,min:0,max:1.5,step:0.05,label:'Def IQ: low-IQ aim lag (s)',hint:'A Def IQ 1 slide aims for where the ball WAS, not where it is going. This is how far into the PAST it aims (random, up to this many seconds), so it lands behind a moving carrier. Def IQ 10 always aims where the ball is going.'},
@@ -1988,7 +1979,7 @@
     interceptions:{val:5.5,min:1,max:10,step:0.1,label:'Interceptions (stat 1–10)',hint:'Reading & cutting out passes as a 1–10 stat, driving both reach and how dead the ball is cushioned. 1 = reach 0.1 / damping 0.1 (short reach, the ball ricochets off); 10 = reach 1.0 / damping 0.8 (long reach, cushions the cut-out pass nearly dead at the feet). Only affects cutting out the OPPONENT\'s passes.'},
     passAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Passing (stat 1–10)',hint:'Passing precision as a 1–10 stat. 1 = short accuracy 0.92 + long accuracy 0.20 (long balls spray badly); 10 = short 0.97 + long 0.90 (pinpoint at any range). Baseline for all players.'},
     crossing:{val:5.5,min:1,max:10,step:0.1,label:'Crossing (stat 1–10)',hint:'Accuracy of balls whipped into the box (pace auto-set to reach the target; loft is fixed at 1.6). 1 = sprays wide (~0.2 accuracy); 10 = tight and true (~0.9).'},
-    curve:     {val:5.5, min:1,   max:10,  step:0.1, label:'Curve (stat 1–10)',hint:'How much a ball bends, as a 1–10 stat: a shot (1 = 0.05, 10 = 0.3; hold K + Up (left) or K + Down (right) after striking), a cross, a through ball or a long pass.'},
+    curve:     {val:5.5, min:1,   max:10,  step:0.1, label:'Curve (stat 1–10)',hint:'How much a ball bends, as a 1–10 stat: a shot (1 = 0.05, 10 = 0.3; the swipe bent to curl it), a cross, a through ball or a long pass.'},
     shotPower: {val:5.5, min:1,   max:10,  step:0.1, label:'Shot power (stat 1–10)',hint:'Shot pace as a 1–10 stat. 1 = 600, 10 = 900, on a full-charge strike at goal.'},
     shotAcc:   {val:5.5, min:1,   max:10,  step:0.1, label:'Shot accuracy (stat 1–10)',hint:'How true a shot flies, as a 1–10 stat. 1 = 0.1, 10 = 0.9. High = on target; low = sprays, especially at power.'},
     longShots: {val:5.5, min:1,   max:10,  step:0.1, label:'Long shots (stat 1–10)',hint:'How well shots hold up from distance, as a 1–10 stat. 1 = 0.1, 10 = 0.6. Low = long shots lose pace and spray; high = they hold up. Scales with true distance to the goal centre, so wide shots are penalised more. No effect inside the box.'},
@@ -2053,7 +2044,7 @@
     loftHang: {val:1,min:0.6,max:1.6,step:0.05,label:'Lofted pass: hang time ×',hint:'How long a lofted pass stays up (0.65 to 1.45 s at 1x, longer for longer passes). Higher = a higher, slower ball that drops more steeply.'},
     lobCheck: {val:0.5,min:0.1,max:1,step:0.05,label:'Lofted pass: pace kept on landing',hint:'A lofted pass checks up where it lands (backspin): this is the share of its pace it keeps through that first bounce. 1 = no check-up at all.'},
     // swipe shots (tune them live in the Shooting Lab)
-    swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball, against holding K+Up/Down for the whole flight (1x). The Curve stat scales it again.'},
+    swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball. The Curve stat scales it again.'},
     swipePow: {val:3.2,min:1.4,max:6,step:0.1,label:'Swipe shot: flick for full power',hint:'How fast a flick (in screen widths per second, over its quickest 70 ms) gives a full-power shot. Lower = full power comes easier.'},
     swipeBow: {val:0.30,min:0.12,max:0.6,step:0.01,label:'Swipe shot: bend for full spin',hint:'How far a swipe has to bow off its straight line (as a share of its length) for full spin. A bow under about a quarter of this is read as straight, so a thumb\'s natural arc does not curl it.'},
     gatherR:  {val:20,min:14,max:60,step:1,label:'Trap: gather radius',hint:'The same for every player. A trap comes off you at this radius, measured from your middle. Your trap reach (Ball control) is where you can first meet the ball and where you take it back afterwards, but a big reach never sends a touch further away.'},
@@ -4903,7 +4894,7 @@
     const shown=r&&(r.touch||r.done)?r:LAB.last;            // a touch reads out at once; the settle is added when known
     labEl.labResult.innerHTML=shown?labRepText(shown)
       :(LAB.recv==='ai'?'Watch the AI receiver. Its timing error comes from Ball control and the AI first-touch error dial.'
-        :(isTouch?'Tap <b>TRAP</b> (or the right side)':'Press <b>SPACE</b>')+' a hair before the ball reaches your ring'+(isTouch?'; drag it a way to take the touch that way':'')+'. Leave it and it runs past.');
+        :'Tap <b>TRAP</b> (or the right side) a hair before the ball reaches your ring; drag it a way to take the touch that way. Leave it and it runs past.');   // (v159: the screen's buttons, on any device)
     labEl.labTally.textContent=labTallyText();
   }
   function labRepText(r){
@@ -4927,9 +4918,9 @@
       let why;
       if(r.ai) why=r.aiMiss!=null?`the AI mistimed it, ${labMs(r.aiMiss)}`:'the AI left it';
       else { const pr=labLastPress(r);
-        if(r.latePress!=null) why=`you pressed ${Math.round(r.latePress*1000)} ms late, after it had gone`;
-        else if(!pr) why=r.presses.length?'locked out: that press came during the lockout':'no press';
-        else why=`you pressed ${labMs(labPressE(r,pr))}: the window shut before it arrived`; }
+        if(r.latePress!=null) why=`you tapped ${Math.round(r.latePress*1000)} ms late, after it had gone`;
+        else if(!pr) why=r.presses.length?'locked out: that tap came during the lockout':'no tap';
+        else why=`you tapped ${labMs(labPressE(r,pr))}: the window shut before it arrived`; }
       return `${head} <b style="color:${LAB_COL.PAST}">RAN PAST</b> ${why}`;
     }
     if(r.result==='unreached') return `${head} <b style="color:${LAB_COL.PAST}">OUT OF REACH</b> `
@@ -4939,8 +4930,8 @@
   }
   function labTallyText(){
     const T=labTally();
-    if(!T.reps) return LAB.auto?'no balls yet · the machine serves on its own'+(isTouch?'':' (Q for on cue)')
-                               :'no balls yet · '+(isTouch?'tap':'press R or')+' ▶ SERVE for a ball';
+    if(!T.reps) return LAB.auto?'no balls yet · the machine serves on its own'
+                               :'no balls yet · tap ▶ SERVE for a ball';
     const parts=[T.reps+(T.reps===1?' ball':' balls')];
     for(const k of ['perfect','clean','loose','heavy']) if(T[k]) parts.push(T[k]+' '+k);
     if(T.past) parts.push(T.past+' ran past');
@@ -4969,7 +4960,7 @@
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
-    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). A flick on SKILL as the ball comes (Trap Lab: press TRAP and drag).',
+    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). A flick on SKILL as the ball comes (Trap Lab: tap TRAP and drag).',
     ftErr:'How far off your aim a directional touch strays at the worst timing.',
     ftTurn:'How much turning the ball narrows the window. 0 = every direction is as easy.',
     ftWin:'How long after your finger lands a drag still aims the touch (before the ball gets to you, or just after).',
@@ -4987,9 +4978,9 @@
     lobCheck:'Pace a lofted pass keeps when it lands (it checks up). 100% = no check-up.',
     shotPower:'Your shot power (1 to 10): pace and how far it carries.',
     shotAcc:'Your shot accuracy (1 to 10): how close to the aim it flies. Corners are only a few px inside the posts.',
-    curve:'Your curve (1 to 10): how hard a curled shot bends, held K+Up/Down or swiped.',
+    curve:'Your curve (1 to 10): how hard a shot bends when you bend the swipe.',
     longShots:'Your long shots (1 to 10): how well shots from distance hold their pace and line.',
-    swipeCurl:'How hard a fully bent swipe curls it, against holding K+Up/Down all the way (1×).',
+    swipeCurl:'How hard a fully bent swipe curls it. Your curve scales it again.',
     swipePow:'How fast a flick has to be for full power, in screen widths per second. Lower = easier.',
     swipeBow:'How far a swipe has to bow for full spin. A quarter of this reads as straight.',
     gkReflex:'Their keeper\'s reflexes (1 to 10): how soon they react to the strike.',
@@ -5254,11 +5245,7 @@
     labEl.labResult.innerHTML=shown&&(shown.pass||shown.done)?passLabText(shown):passLabHint();
     labEl.labTally.textContent=passLabTallyText();
   }
-  function passLabHint(){
-    return isTouch
-      ? 'Tap <b>PASS</b> · <b>double-tap</b> to loft it · <b>drag off PASS</b> for a through ball'
-      : 'Pass to your teammate: <b>J</b> (hold for a longer ball) · <b>J J</b> double-tap for a lofted pass. Aim with WASD. (Through balls are the touch drag off PASS.)';
-  }
+  function passLabHint(){ return 'Tap <b>PASS</b> · <b>double-tap</b> to loft it · <b>drag off PASS</b> for a through ball'; }   // (v159: the screen's buttons, on any device)
   function passLabText(r){
     const head=`<span class="lsv">${plName(PL_DISTS,r.dSet)} ${r.d} px · ${r.run?'running':'standing'}${r.def!=='none'?' · defender '+(r.def==='lane'?'in the lane':'marking'):''}</span>`;
     if(!r.pass) return `${head} <b style="color:${PL_COL.lost}">LOST IT</b> before you passed`;
@@ -5277,8 +5264,8 @@
   }
   function passLabTallyText(){
     const T=passLabTally();
-    if(!T.n) return LAB.auto?'no passes yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
-                             :'no passes yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no passes yet · a new ball comes after each one'
+                             :'no passes yet · tap ▶ NEW BALL to reset';
     const parts=[T.n+(T.n===1?' pass':' passes'), T.ok+' received ('+Math.round(T.ok/T.n*100)+'%)'];
     if(T.cut) parts.push(T.cut+' cut out');
     for(const k of Object.keys(T.by)) parts.push(k.toLowerCase()+' '+T.by[k].ok+'/'+T.by[k].n);
@@ -5442,11 +5429,7 @@
     labEl.labResult.innerHTML=shown&&(shown.shot||shown.done)?shootLabText(shown):shootLabHint();
     labEl.labTally.textContent=shootLabTallyText();
   }
-  function shootLabHint(){
-    return isTouch
-      ? '<b>Swipe</b> at the goal on the right side (<b>bend it to curl</b>) or hold <b>SHOOT</b>'
-      : 'Shoot: hold <b>K</b> to wind up and let go · hold <b>W</b> / <b>S</b> as you shoot to pick the corner · hold <b>K</b> + <b>W</b>/<b>S</b> while it flies to curl it.';
-  }
+  function shootLabHint(){ return '<b>Swipe</b> at the goal on the right side (<b>bend it to curl</b>) or hold <b>SHOOT</b>'; }
   function shootLabText(r){
     const head=`<span class="lsv">${plName(SL_DISTS,r.dSet)} · ${r.ang===0?'centre':r.ang<0?'left':'right'}${r.keeper?'':' · no keeper'}</span>`;
     if(!r.shot) return `${head} <b style="color:${SL_COL[r.result]||'#8a9580'}">${r.result==='keeper'?'THE KEEPER TOOK IT':'LOST IT'}</b> before you shot`;
@@ -5464,8 +5447,8 @@
   }
   function shootLabTallyText(){
     const T=shootLabTally();
-    if(!T.n) return LAB.auto?'no shots yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
-                             :'no shots yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no shots yet · a new ball comes after each one'
+                             :'no shots yet · tap ▶ NEW BALL to reset';
     const on=T.goal+T.saved, parts=[T.n+(T.n===1?' shot':' shots'), T.goal+' scored', T.saved+' saved'];
     if(T.post) parts.push(T.post+' off the post');
     if(T.wide+T.over) parts.push((T.wide+T.over)+' off target ('+[T.wide?T.wide+' wide':'',T.over?T.over+' over':''].filter(Boolean).join(', ')+')');
@@ -5620,8 +5603,7 @@
     labEl.labTally.textContent=dribLabTallyText();
   }
   function dribLabHint(){
-    return (isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')
-      +' a move, ahead being the way he\'s going. Get past him with the ball.';
+    return 'Start on <b>SKILL</b> and draw a move, ahead being the way he\'s going. Get past him with the ball.';
   }
   function dribLabText(r){
     const head=`<span class="lsv">${plName(DL_DEFS,r.def)} · ${plName(DL_DISTS,r.d).toLowerCase()} off${r.slide?' · slides':''}</span>`;
@@ -5637,8 +5619,8 @@
   }
   function dribLabTallyText(){
     const T=dribLabTally();
-    if(!T.n) return LAB.auto?'no runs yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
-                             :'no runs yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no runs yet · a new ball comes after each one'
+                             :'no runs yet · tap ▶ NEW BALL to reset';
     const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
     if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
     for(const k of SKILL_KINDS){ const m=T.mv[k]; if(m&&m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
@@ -5819,8 +5801,7 @@
   }
   function crossLabHint(){
     if(LAB.cWho==='ai') return 'The computer crosses once his men are in their spots. Watch who he picks, how true it goes, and who gets on the end of it.';
-    return isTouch ? 'Hold <b>CROSS</b> and let go: the longer, the further the man it\'s for (his amber ring). Double-tap it for a low driven cross.'
-                   : 'Hold <b>L</b> and let go: the longer, the further the man it\'s for (his amber ring). Double-tap L for a low driven cross.';
+    return 'Hold <b>CROSS</b> and let go: the longer, the further the man it\'s for (his amber ring). Double-tap it for a low driven cross.';
   }
   function crossLabText(r){
     const head=`<span class="lsv">${plName(CL_FROMS,r.from).toLowerCase()} · ${r.nA} of ours, ${r.nD} of theirs${r.keeper?'':' · no keeper'}</span>`;
@@ -5836,8 +5817,8 @@
   }
   function crossLabTallyText(){
     const T=crossLabTally();
-    if(!T.n) return LAB.auto?'no crosses yet · a new ball comes after each one'+(isTouch?'':' (Q for on cue)')
-                             :'no crosses yet · '+(isTouch?'tap':'press R or')+' ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no crosses yet · a new ball comes after each one'
+                             :'no crosses yet · tap ▶ NEW BALL to reset';
     const parts=[T.n+(T.n===1?' cross':' crosses'), T.found+' to ours ('+Math.round(T.found/T.n*100)+'%)'];
     if(T.head) parts.push(T.head+' headed');
     if(T.found>T.head) parts.push((T.found-T.head)+' to his feet');
@@ -14529,7 +14510,7 @@
       ctx.shadowBlur=0;ctx.font="30px 'FTC Dot',monospace";ctx.fillStyle='#e9f5ec';
       ctx.fillText(TEAM.G.code+' '+scoreG+' : '+scoreR+' '+TEAM.R.code,W/2,H/2+24);
       if(matchOver){ctx.font="16px 'FTC Dot',monospace";ctx.fillStyle='#8a9580';
-        ctx.fillText('click the pitch to play again',W/2,H/2+56);}
+        ctx.fillText('tap the pitch to play again',W/2,H/2+56);}
       ctx.restore();
     }
     if(practice==='keeper'){
@@ -15621,30 +15602,24 @@
     drop(a,b){ mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si:+b.dataset.si,kind:b.dataset.mtk}); renderMatchTac(); },
     cancel(){ renderMatchTac(); } });
   // ===== HOW TO PLAY (v148): the controls on a card -- before your first career match, from CONTROLS in the pause menu
-  // and from ? on the scoreboard (a match waits while it's up): the keys, or on a touch screen the buttons. And the
-  // first time each thing comes up in a match you play, a word on it over the pitch for a few seconds -- one at a time,
-  // each once (TIPS in the settings: off; on again, and they start again). Before, a career had no word on the controls
-  // anywhere -- the only teaching was in the labs -- so a first match was played blind. =====
+  // and from ? on the scoreboard (a match waits while it's up). And the first time each thing comes up in a match you
+  // play, a word on it over the pitch for a few seconds -- one at a time, each once (TIPS in the settings: off; on again,
+  // and they start again). Before, a career had no word on the controls anywhere -- the only teaching was in the labs --
+  // so a first match was played blind. (v159: the game ships as an iPhone app, so the card, the tips, the labs and the
+  // skill moves page speak of the screen's buttons and a finger only, whatever it's opened on. The keys still play, for
+  // the tests, but nothing in the game tells a player about them.) =====
   let ctlThen=null;
-  const CTL_KEYS=[
-    ['WASD','Steer the man on the ball: he runs with it by himself. Tap a direction twice to sprint.'],
-    ['J','Pass, the way you’re steering: hold it for a longer one, tap it twice to loft it. As a ball comes to you, J plays it first time. Click a team-mate to pass to him.'],
-    ['K','Shoot: hold it to wind up, let go to strike, with W or S as you let go for the corner. At a cross, K heads it at goal.'],
-    ['L','Cross from out wide: hold it longer for a man further across, tap it twice for a low, driven one. In your own half, L clears it.'],
-    ['MOUSE','Hold the button and draw for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do; SKILL MOVES in the menu has them all.'],
-    ['DEFENDING','J or SPACE switches you to a team-mate, the way you’re steering, or click one. Hold J and your man closes the man on the ball down by himself. L slides in.'],
-    ['CORNERS','Q and E: one fewer or one more of yours in their box; Z and C: back.'],
-    ['ESC','Pause: tactics, subs, settings, these controls.']];
-  const CTL_TOUCH=[
+  const CTL=[
     ['LEFT','Drag anywhere on the left to steer the man on the ball: he runs with it by himself. Double-tap to sprint.'],
     ['PASS','The big button: pass, the way you’re steering. Tap it twice to loft it; drag off it for a through ball into a run. Tap a team-mate to pass to him.'],
     ['SHOOT','Hold it to wind up, let go to strike -- or swipe the right of the screen, bending the swipe to curl it. At a cross it heads it at goal.'],
     ['CROSS','From out wide: hold it longer for a man further across, tap it twice for a low, driven one. In your own half it clears it.'],
-    ['SKILL','Hold it and draw from it for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do.'],
+    ['SKILL','Hold it and draw from it for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do; SKILL MOVES in the menu has them all.'],
     ['DEFENDING','Tap a team-mate to switch to him, anywhere else to switch the way you’re steering. Hold the big button and your man closes the man on the ball down by himself. SLIDE slides in.'],
+    ['CORNERS','Your corner: − and + on the panel over the pitch, how many go into their box and how many stay back; the rest wait in midfield.'],
     ['☰','Pause: tactics, subs, settings, these controls.']];
   function ctlShow(how){ how=how||{}; ctlThen=how.then||null; ctlOpen=true;
-    const T=isTouch?CTL_TOUCH:CTL_KEYS, card=document.querySelector('#ctlModal .ctlCard');
+    const T=CTL, card=document.querySelector('#ctlModal .ctlCard');
     card.innerHTML='<div class="pauseTitle">HOW TO PLAY</div><div class="ctlRows">'+T.map(([k,t])=>'<b>'+k+'</b><span>'+t+'</span>').join('')+'</div>'
       +(how.first?'<div class="ctlNote">They’re always on ? over the pitch, and CONTROLS in the menu.</div>':'')
       +'<div class="cfBtns"><button class="pauseBtn" data-ctl="go">'+(how.first?'KICK OFF ▶':how.then?'◀ BACK':'◀ BACK TO THE GAME')+'</button></div>';
@@ -15655,18 +15630,18 @@
   // the tips: the first of these that's so and not yet seen, the more particular first
   const tipGoalD=c=>Math.hypot((atkOf(c.team)>0?FW:0)-c.x,YC-c.y), tipUp=c=>atkOf(c.team)*(c.x-FW/2);
   const TIPS=[
-    {k:'s', when:c=>myBall()&&tipGoalD(c)<24*MK, key:'Hold <b>K</b> to wind up a shot, let go to strike · <b>W</b> or <b>S</b> as you let go picks the corner', touch:'Hold <b>SHOOT</b>, let go to strike · or swipe the right of the screen, bending it to curl'},
-    {k:'c', when:c=>myBall()&&tipUp(c)>FW*0.2&&Math.abs(c.y-YC)>FH*0.27, key:'<b>L</b> crosses it · hold it longer for a man further across', touch:'<b>CROSS</b> · hold it longer for a man further across'},
-    {k:'k', when:c=>myBall()&&tipUp(c)<-FW*0.2, key:'In your own half <b>L</b> clears it', touch:'In your own half <b>CROSS</b> clears it'},
-    {k:'p', when:c=>myBall(), key:'<b>J</b> passes, the way you’re steering · hold it for a longer one, tap it twice to loft it', touch:'<b>PASS</b>, the way you’re steering · tap it twice to loft it, drag off it for a through ball'},
-    {k:'d', when:c=>!!ball.ownedBy&&ball.ownedBy.team!==c.team, key:'They have it: <b>J</b> or <b>SPACE</b> switches you · hold <b>J</b> and your man closes them down · <b>L</b> slides in', touch:'They have it: tap a team-mate to switch to him · hold the big button and your man closes them down · <b>SLIDE</b> slides in'}];
+    {k:'s', when:c=>myBall()&&tipGoalD(c)<24*MK, txt:'Hold <b>SHOOT</b>, let go to strike · or swipe the right of the screen, bending it to curl'},
+    {k:'c', when:c=>myBall()&&tipUp(c)>FW*0.2&&Math.abs(c.y-YC)>FH*0.27, txt:'<b>CROSS</b> · hold it longer for a man further across'},
+    {k:'k', when:c=>myBall()&&tipUp(c)<-FW*0.2, txt:'In your own half <b>CROSS</b> clears it'},
+    {k:'p', when:c=>myBall(), txt:'<b>PASS</b>, the way you’re steering · tap it twice to loft it, drag off it for a through ball'},
+    {k:'d', when:c=>!!ball.ownedBy&&ball.ownedBy.team!==c.team, txt:'They have it: tap a team-mate to switch to him · hold the big button and your man closes them down · <b>SLIDE</b> slides in'}];
   const TIP={t:0, gap:0};
   function tipTick(dt){ const el=document.getElementById('tipBar'); if(!el) return;
     if(TIP.t>0){ TIP.t-=dt; if(TIP.t<=0) el.classList.remove('on'); return; }
     if(TIP.gap>0){ TIP.gap-=dt; return; }
     const c=controlled; if(!PREFS.tips||LAB.on||practice||window.__aiAll||matchOver||breakT>0||restartOn()||!c||c.team!=='G'||c.isGK) return;
     const seen=PREFS.tipsSeen||'', T=TIPS.find(x=>!seen.includes(x.k)&&x.when(c)); if(!T) return;
-    PREFS.tipsSeen=seen+T.k; savePrefs(); el.innerHTML=isTouch?T.touch:T.key; el.classList.add('on'); TIP.t=4.5; TIP.gap=8; }
+    PREFS.tipsSeen=seen+T.k; savePrefs(); el.innerHTML=T.txt; el.classList.add('on'); TIP.t=4.5; TIP.gap=8; }
   function tipOff(){ TIP.t=0; TIP.gap=2; const el=document.getElementById('tipBar'); if(el) el.classList.remove('on'); }
   // ===== HALF TIME (v148): the whistle stops the match on a card -- the score, the goals so far and, in a career match,
   // both sides' numbers so far (shots, on target, passes and the share found, tackles, saves) -- with SUBS and TACTICS (the
@@ -15733,8 +15708,8 @@
   function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
   document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')) closeSkills(); };
   function renderSkills(){
-    document.getElementById('skHint').innerHTML=(isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')+'; ahead is the way he\'s going, <b>→</b> here.<br>'
-      +(isTouch?'Hold <b>SKILL</b>':'Hold it')+' without drawing to shield the ball, or with the '+(isTouch?'stick':'keys')+' to strafe';
+    document.getElementById('skHint').innerHTML='Start on <b>SKILL</b> and draw; ahead is the way he\'s going, <b>→</b> here.<br>'
+      +'Hold <b>SKILL</b> without drawing to shield the ball, or with the stick to strafe';   // (v159: the screen's buttons, on any device)
     document.getElementById('skGrid').innerHTML=SKILL_KINDS.map(k=>'<div class="skCard fitWhole" data-sk="'+k+'"><canvas class="skDraw"></canvas><canvas class="skClip"></canvas>'
       +'<div class="skTxt"><span class="skName">'+SKILL_NAME[k]+'</span>'+starsHtml(SKILL_STARS[k],true)+'</div></div>').join(''); }
   // a canvas at its size on the screen, in device pixels: true when it's (re)sized, and so wants drawing afresh
