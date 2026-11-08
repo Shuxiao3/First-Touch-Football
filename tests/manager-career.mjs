@@ -100,8 +100,10 @@ for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'aca
     ok(!tabs.length && sect === 'YOUR PHONE' && /hasn’t rung yet: it will when the transfer window opens/.test(body) && !(await page.$('#bpFoot [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
       'market: your phone, not for sale -- it hasn\'t rung yet (locked in the menu)'); }
   else if(['physio', 'scouting', 'academy'].includes(b)){ const sect = await page.textContent('#bpBody .bpSect');
-    ok(!tabs.length && /COMES WITH CLUBHOUSE [23]/.test(sect) && await page.$('#bpFoot [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
-      b + ': ' + sect.toLowerCase() + ' (' + chip + ' in the menu), and a way to the clubhouse'); }
+    const sub = await page.$eval(`#chCampus [data-bldg="${b}"] .bn`, e => e.dataset.sub || ''), path = await page.$$eval('#bpBody .pathR', ns => ns.map(n => n.className.replace('pathR ', '')));   // (v153: what it waits for, and THE WAY TO IT)
+    ok(!tabs.length && /^NEEDS THE (CABIN|CLUBHOUSE) · CLUBHOUSE [23]$/.test(sect) && /^needs clubhouse [23]$/.test(sub) && path[0] === 'done' && path[1] === 'next' && path[path.length - 1] !== 'done'
+       && await page.$('#bpFoot [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
+      b + ': ' + sect.toLowerCase() + ' ("' + sub + '" in the menu), the way to it (' + path.join(', ') + '), and a way to the clubhouse'); }
   else { for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
     ok(tabs.length >= 2, b + ': ' + (await page.textContent('#bpTitle')) + ' -- ' + tabs.join(', ')); }
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(50);

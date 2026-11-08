@@ -2140,6 +2140,25 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
       it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
+    - **A path, not a loop (v153).** A building not open yet says under its name in the list what it waits for --
+      "needs clubhouse 2" (it was a lock and "2", which read as a building already at level 2) -- and the clubhouse
+      what the next one costs, "next $400K", with a bar under it of your money against that. Tapped, a building
+      waiting for its clubhouse (or a level of one) has THE WAY TO IT: each clubhouse on the way, in order, then it --
+      ✓ the ones you have, ▸ the next to buy with your money against its price and a bar, · the rest with theirs.
+      The clubhouse says what the next one UNLOCKS, and its list has each clubhouse ticked as it's done, the next lit,
+      each one's price. It said the next "puts up the physio's clinic... builds up the training pitch to 2", and beside
+      a level's "clubhouse 2" that read as what the clubhouse needed: a loop, the playthrough said. From the campus
+      now: the cabin first, $400,000; it opens the physio and the scouts.
+    - **What's waiting on you (v153)**, a number on its building in the list (hold a finger on it for what it is):
+      the clubhouse -- deals that end this season (not the men you've let go) and men asking for a new deal; training
+      -- no keeper in goal, men in your nine hurt or tired; the stadium -- sponsors' offers; transfers -- clubs' bids
+      for your men and their answers to yours (only the academy's and the bids' were counted). And over the campus,
+      what has a deadline inside two weeks, and when: a bid for one of yours lapsing this week (they stand two weeks),
+      a club's yes to sign before the window shuts, a club wanting more to answer this week, a sponsor's offer and
+      its two weeks, the window shutting in two weeks or this one, a man asking for a new deal, and the deals that
+      end with the season from its last eight weeks (it was six); four at most, the first three and +N MORE (LESS
+      takes it back). The deals running out are in the season's first Monday's papers too, as well as the winter
+      break's, the last four weeks' and the playoffs': a deal can't run out unsaid.
     - **The day's end.** When the week moves on (FORWARD TO MATCHDAY, NEXT WEEK) the sun goes down behind your
       stadium as it stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new
       day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
@@ -2416,6 +2435,14 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v153: the campus says what's waiting and what's next.** A building not open yet says what it waits for
+  ("needs clubhouse 2", not a lock and "2"), the clubhouse what the next one costs, with a bar of your money against
+  it; a building or a level waiting for its clubhouse has THE WAY TO IT, each clubhouse on the way in order, ticked as
+  done, the next lit with your money against its price; the clubhouse says what each one UNLOCKS. What's waiting on
+  you counted on its building (deals ending and men asking, your nine's keeper, hurt and tired, sponsors' offers, bids
+  and answers), and what has a deadline inside two weeks said over the campus with when -- four at most, the rest a
+  tap away. A deal running out is in the season's first Monday's papers too. See **A path, not a loop (v153)** and
+  **What's waiting on you (v153)**.
 - **v152: every number explained.** Which way a man's going: a green ▲ by his rating when it's rising, a red ▼
   when it's falling, read from his rating to the hundredth every third week -- of the men who come on over a season,
   three in four show ▲ three weeks in (every one who comes on two points or more), and one in a hundred with ▲ then

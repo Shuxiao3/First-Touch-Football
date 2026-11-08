@@ -137,7 +137,7 @@ ok(/He’ll sign for \$[\d,]+ a week/.test(p2) && btns2[0] === 'MEET IT' && !r.a
   'OFFER a step under: "He’ll sign for $..." and MEET IT in place of GIVE IT HIM; met, he\'s signed ($' + r.wage + ' of $' + r.ask + ') and the paper\'s done');
 
 // --- DEALS RUNNING OUT ----------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, due={}; for(const [ph,md] of [['summer',0],['league',10],['winter',13],['league',21],['league',22],['playoffs',26]]){ d.phase=ph; d.md=md; due[ph+md]=pileEndingDue(d); }
+r = await K(`(()=>{ const d=CAREER.data, due={}; const wk0=d.wkN; for(const [ph,md,wk] of [['summer',0,1],['summer',0,2],['league',10],['winter',13],['league',21],['league',22],['playoffs',26]]){ d.phase=ph; d.md=md; if(wk) d.wkN=wk; due[ph+md+(wk?'w'+wk:'')]=pileEndingDue(d); } d.wkN=wk0;   // (v153: the season's first Monday too)
   for(const p of d.roster){ p.until=d.season+1; delete p.cGo; delete p.cAsk; delete p.cTalk; delete p.cTalkNo; delete p.wantsOut; }
   const E=d.roster.filter(p=>!p.loan).slice(0,3); for(const p of E){ p.until=d.season; p.hv=HV({}); } window.ENDS=E.map(p=>p.id);
   d.offers=[]; d.spOff=[]; d.bids=[]; d.phase='league'; d.md=22; d.wday='mon'; MGUI.years=2; pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true);
@@ -148,8 +148,8 @@ const e0 = await top();
 const rows0 = await page.$$eval('#pileModal .plRow', ns => ns.length), eb = await page.$$eval('#pileModal .plBtns button', ns => ns.map(n => n.textContent.trim()));
 const ends = await K('ENDS');
 info('deals running out: ' + JSON.stringify({ due: r.due, n: r.n, onEnd, e0: e0.split('\n').slice(0, 5), rows0 }));
-ok(r.due.winter13 && r.due.league22 && r.due.playoffs26 && !r.due.summer0 && !r.due.league10 && !r.due.league21 && onEnd && /3 deals end with this season/.test(e0) && rows0 === 3 && eb.includes('TALK TERMS'),
-  'DEALS RUNNING OUT: at the winter break, in the league\'s last four weeks and the playoffs (not before) -- "3 deals end with this season", a row each with RENEW and LET GO, and TALK TERMS');
+ok(r.due.summer0w1 && !r.due.summer0w2 && r.due.winter13 && r.due.league22 && r.due.playoffs26 && !r.due.league10 && !r.due.league21 && onEnd && /3 deals end with this season/.test(e0) && rows0 === 3 && eb.includes('TALK TERMS'),
+  'DEALS RUNNING OUT: on the season\'s first Monday (v153), at the winter break, in the league\'s last four weeks and the playoffs (not between) -- "3 deals end with this season", a row each with RENEW and LET GO, and TALK TERMS');
 await click(`#pileModal [data-pile="erenew"][data-pid="${ends[0]}"]`);
 await click(`#pileModal [data-pile="ego"][data-pid="${ends[1]}"]`);
 const e1 = await top(), rows1 = await page.$$eval('#pileModal .plRow', ns => ns.length);

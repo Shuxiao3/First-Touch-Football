@@ -546,6 +546,17 @@
   .decoOwn{ flex:none; font-size:10px; letter-spacing:.5px; color:var(--good); }
   .cpBldgs .bldg.locked{ background:var(--row); color:var(--dim); text-shadow:none; box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); opacity:.8; }
   .cpBldgs .bldg.locked .bPrice{ display:flex; color:var(--dim); }
+  .cpBldgs .bldg .bn[data-sub]:not([data-sub=""])::after{ content:attr(data-sub); display:block; margin-top:1px; font-size:8px; line-height:1.1; letter-spacing:.3px; opacity:.85; overflow:hidden; text-overflow:ellipsis; }   /* (v153: what it waits for, or the next clubhouse) */
+  .cpBldgs .bldg .bn[data-sub]:not([data-sub=""]){ overflow:hidden; }
+  .bProg{ position:absolute; left:9px; right:7px; bottom:3px; height:2px; background:rgba(0,0,0,.35); border-radius:1px; overflow:hidden; pointer-events:none; }
+  .bProg i{ display:block; height:100%; background:var(--good); }
+  .pBar{ display:inline-block; vertical-align:middle; width:60px; height:5px; margin-left:6px; background:var(--well); border-radius:2px; overflow:hidden; }
+  .pBar i{ display:block; height:100%; background:var(--good); }
+  .pathL{ margin:6px 0 2px; font-size:11px; } .pathH{ font-size:10px; letter-spacing:1px; color:var(--dim); margin-bottom:2px; }
+  .pathR{ display:flex; align-items:center; gap:6px; padding:1px 0; color:var(--dim); } .pathR b{ width:10px; flex:none; font-weight:400; }
+  .pathR span{ flex:1 1 auto; min-width:0; } .pathR em{ font-style:normal; white-space:nowrap; }
+  .pathR.done{ color:var(--good); } .pathR.next{ color:var(--ink); } .pathR.next b{ color:var(--acc); }
+  .bpLvl b.done, .bpLvl span.done{ color:var(--good); }
   .bPrice{ align-items:center; gap:2px; }
   .lkI{ width:7px; height:9px; flex:none; fill:none; stroke:currentColor; stroke-width:1.4; }
   .lkI rect{ fill:currentColor; stroke:none; }
@@ -613,6 +624,7 @@
   .cpClub img{ width:16px; height:18px; image-rendering:pixelated; }
   .cpClub img:not([src]){ display:none; }
   .cpNotes{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .chMore{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--acc); background:none; border:0; padding:0 2px; cursor:pointer; pointer-events:auto; }   /* (v153) */
   .cpNotes .chWarn{ margin:0; max-width:100%; padding:5px 10px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; line-height:1.4; white-space:normal; text-align:center; }
   .cpFoot{ position:absolute; left:10px; right:10px; bottom:8px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:8px; pointer-events:none; }
   .cpStats{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:14px; height:30px; padding:0 10px; overflow:hidden; white-space:nowrap; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); pointer-events:auto; }
@@ -18093,7 +18105,7 @@
   // DEALS RUNNING OUT (v110): your men whose deals end with this season, not let go -- a paper of them at the winter
   // break, in the league's last four weeks and through the playoffs: RENEW (what he asks), LET GO, or talk terms
   const mgEnding=d=>d.roster.filter(p=>(p.until||0)<=d.season&&!p.loan&&p.cGo!==d.season);
-  const pileEndingDue=d=>d.phase==='winter'||(d.phase==='league'&&d.md>=MG_MD-4)||d.phase==='playoffs';
+  const pileEndingDue=d=>(d.phase==='summer'&&(d.wkN||0)<=1)||d.phase==='winter'||(d.phase==='league'&&d.md>=MG_MD-4)||d.phase==='playoffs';   // (v153: and the season's first Monday -- a deal into its last season, said at its start)
   function mgLetGo(d,p){ p.cGo=d.season; mgNews(d,p.name+' will leave when his deal ends.'); }
 
   // ---- scouting: what you know of a man at another club (d.kn, 0 to 3) ----
@@ -19235,6 +19247,27 @@
     for(const m of more){ let k=m[1]; while(BLD_LV[m[0]][k+1]&&BLD_LV[m[0]][k+1].cl===lv) k++; m[1]=k; }
     const st=STAD_LEVELS.map((x,k)=>k>1&&STAD_CL[k]===lv?k:0).filter(Boolean);
     return {put, more:more.map(([id,k])=>BLD_NAME[id].replace(/^the /,'')+' to '+k), stad:st, decor:DECOR_CL===lv}; }
+  // A PATH, NOT A LOOP (v153). What a clubhouse UNLOCKS, in a list of what it lets you build (clubUnlocks) -- it said
+  // "put up the physio's clinic; build up the training pitch to 2", and beside a level's "clubhouse 2" that read as what
+  // the clubhouse needed: a loop. A clubhouse by its own short name for the campus's rail ("CABIN": the clubhouse a
+  // building waits for -- it was the number, "PHYSIO 2", which read as a building already at level 2). And THE WAY TO
+  // IT (pathHtml): what stands before a building or its next level, in order -- each clubhouse on the way, then it --
+  // ticked as it's done (✓), the next to buy lit with your money against its price (▸), the rest after it (·)
+  const clubShort=lv=>CLUB_LV[lv].n.replace(/^the /i,'').toUpperCase();
+  const pBar=(have,cost)=>'<span class="pBar"><i style="width:'+Math.round(100*clamp((have||0)/Math.max(1,cost),0,1))+'%"></i></span>';
+  const capFirst=t=>String(t).replace(/^./,c=>c.toUpperCase());
+  function clubUnlocks(lv){ const B=clubBrings(lv), L=B.put.slice();
+    for(const m of B.more) L.push('the '+m.replace(/ to (\d)$/,' to level $1'));
+    for(const k of B.stad) L.push('the stadium to level '+k);
+    if(B.decor) L.push('decorations'); if(lv===2) L.push('the shirt for sponsors');
+    return L; }
+  function pathHtml(d,id,lv,label){ const need=clubNeed(id,lv), cl=lvOf(d,'club'), b=Math.round(d.budget||0), R=[]; let lit=false;
+    const row=(st,name,cost)=>'<div class="pathR '+st+'"><b>'+(st==='done'?'✓':st==='next'?'▸':'·')+'</b><span>'+name+'</span>'
+      +(cost==null||st==='done'?'':'<em>'+(st==='next'?money(Math.max(0,b))+' of '+money(cost)+pBar(b,cost):money(cost))+'</em>')+'</div>';
+    R.push(row('done',CLUB_LV[cl].n+' · clubhouse '+cl));
+    for(let k=cl+1;k<=need;k++){ R.push(row(lit?'later':'next',CLUB_LV[k].n+' · clubhouse '+k,CLUB_LV[k].cost)); lit=true; }
+    R.push(row(lit?'later':'next',label,bldCost(id,lv)));
+    return '<div class="pathL"><div class="pathH">THE WAY TO IT</div>'+R.join('')+'</div>'; }
   function clubBringsTxt(lv){ const B=clubBrings(lv), L=[];
     if(B.put.length) L.push('put up '+B.put.join(', '));
     if(B.more.length) L.push('build up the '+B.more.join(', the '));
@@ -19250,9 +19283,9 @@
   function mgBuildBody(d,id){ if(id==='market') return '<div class="bpBuild fitWhole"><div class="bpPhone">'+PHONE_SVG+'</div><div class="bpBuildTxt"><div class="bpSect">YOUR PHONE</div>'
       +'<div class="stadWhat">'+BLD_WHAT.market+'</div><div class="stadWhat">'+(d.story&&d.story.phone===1?'It’s ringing: answer it.':'It hasn’t rung yet: it will when the transfer window opens.')+'</div></div></div>';
     const need=clubNeed(id,1), lock=lvOf(d,'club')<need, c=bldCost(id,1), ok=(d.budget||0)>=c;
-    let h='<div class="bpBuild fitWhole">'+(id==='market'?'<div class="bpPhone">'+PHONE_SVG+'</div>':bldPic(d,CAMPUS_META.bld[id],'b:'+id))+'<div class="bpBuildTxt"><div class="bpSect">'+(lock?'COMES WITH CLUBHOUSE '+need:'NOT BUILT YET')+'</div>'
+    let h='<div class="bpBuild fitWhole">'+(id==='market'?'<div class="bpPhone">'+PHONE_SVG+'</div>':bldPic(d,CAMPUS_META.bld[id],'b:'+id))+'<div class="bpBuildTxt"><div class="bpSect">'+(lock?'NEEDS '+CLUB_LV[need].n.toUpperCase()+' · CLUBHOUSE '+need:'NOT BUILT YET')+'</div>'
       +'<div class="stadWhat">'+BLD_WHAT[id]+'</div>';
-    h+=lock?'<div class="stadWhat">It comes with '+CLUB_LV[need].n.toLowerCase()+' (clubhouse '+need+'), and costs '+money(c)+'.</div>'
+    h+=lock?pathHtml(d,id,1,capFirst(BLD_NAME[id]))   // (v153: THE WAY TO IT)
       :finRow('It costs',money(c),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,ok?'var(--good)':'var(--bad)');
     h+='</div></div>';
     return h+(lock?'<button class="mgBtn bpPin" data-mg="goclub">◀ THE CLUBHOUSE</button>'
@@ -19266,19 +19299,20 @@
   function lvlNext(d,id,verb){ const L=lvOf(d,id); if(L>=bldMax(id)) return '<div class="stadWhat">It’s as good as it gets.</div>';
     const c=bldCost(id,L+1), why=bldBlock(d,id);
     return finRow('Level '+(L+1)+' costs',money(c),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,(d.budget||0)>=c?'var(--good)':'var(--bad)')
-      +(why&&!/budget/.test(why)?'<div class="stadWhat">'+why+'</div>':'')
+      +(why&&/clubhouse/.test(why)?pathHtml(d,id,L+1,'Level '+(L+1)):why&&!/budget/.test(why)?'<div class="stadWhat">'+why+'</div>':'')   // (v153: THE WAY TO IT)
       +'<button class="mgBtn go bpPin" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'>'+verb+' — '+money(c)+'</button>'; }
   // ---- the clubhouse: what it is, what the next one brings, and your career ----
   function mgClubTab(d){ const L=lvOf(d,'club'), C=CLUB_LV[L], N=CLUB_LV[L+1];
     let h='<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.club[L],'club'+L)+'<div class="bpBuildTxt"><div class="bpSect">'+C.n.toUpperCase()+' · CLUBHOUSE '+L+' OF 4</div>';
     if(N){ const why=bldBlock(d,'club');
-      h+='<div class="stadWhat">Next, '+N.n.toLowerCase()+': '+clubBringsTxt(L+1)+'.</div>'
-        +finRow('It costs',money(N.cost),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,(d.budget||0)>=N.cost?'var(--good)':'var(--bad)')
+      h+='<div class="stadWhat">Next, '+N.n.toLowerCase()+'. It unlocks '+andList(clubUnlocks(L+1))+'.</div>'
+        +finRow('It costs',money(N.cost),true,'var(--ink)')+finRow('Your budget',money(d.budget)+pBar(d.budget,N.cost),false,(d.budget||0)>=N.cost?'var(--good)':'var(--bad)')
         +(why&&!/budget/.test(why)?'<div class="stadWhat" style="color:var(--warn)">'+why+'</div>':'')+'</div></div>'
         +'<button class="mgBtn go bpPin" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN — '+money(N.cost)+'</button>'; }
     else h+='<div class="stadWhat">It’s the best there is: everything’s open to you.</div></div></div>';
-    h+='<div class="bpSect">EACH CLUBHOUSE</div><div class="bpLvl">';
-    for(let k=1;k<CLUB_LV.length;k++) h+='<b class="'+(k===L?'now':'')+'">'+(k===L?'▶ ':'')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+(k===L?'now':'')+'">'+(k===1?'the training pitch, the stadium to '+STAD_CL.lastIndexOf(1):clubBringsTxt(k))+'</span>';
+    h+='<div class="bpSect">EACH CLUBHOUSE, AND WHAT IT UNLOCKS</div><div class="bpLvl">';   // (v153: ticked as they're done, the next lit, each one's price)
+    for(let k=1;k<CLUB_LV.length;k++){ const c=k<=L?'done':k===L+1?'now':'';
+      h+='<b class="'+c+'">'+(k<=L?'✓ ':k===L+1?'▸ ':'· ')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+c+'">'+(k===1?'the training pitch, the stadium to level '+STAD_CL.lastIndexOf(1):andList(clubUnlocks(k)))+(k>L?' · '+money(CLUB_LV[k].cost):'')+'</span>'; }
     h+='</div><div class="bpSect">YOUR CAREER</div>'+mgProfileTab(d)+mgHistoryTab(d)+mgRecordsHtml(d);
     return h; }
   // ---- the training pitch's level: what each brings ----
@@ -19722,20 +19756,40 @@
     else if(d.budget<0) w.push(bad('IN THE RED — sell before you can buy'));
     if(isDeadline(d)&&lvOf(d,'market')) w.push(info('DEADLINE DAY — the transfer window shuts tonight'));
     if(!gk||gk.role!=='GK') w.push(bad('No goalkeeper in goal — pick one in Training'));
-    if((d.phase==='league'&&d.md>=MG_MD-6)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
-    if(mgWindowOpen(d)&&(d.offers||[]).length) w.push(info(d.offers.length+' offer'+(d.offers.length>1?'s':'')+' for your players — see Transfers'));
+    // (v153) WHAT HAS A DEADLINE: when a bid for one of yours lapses, a club's answer to yours stands, a sponsor's offer
+    // lapses, the window shuts (two weeks or less), and the deals that end with the season (its last eight weeks; it was six)
+    if((d.phase==='league'&&d.md>=MG_MD-8)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season&&p.cGo!==d.season&&!p.loan).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
+    const lapse=(n,last)=>last?' — '+(n===1?'it lapses':last===n?'they lapse':last>1?last+' lapse':'one lapses')+' this week':' — two weeks to answer';
+    if(mgWindowOpen(d)&&lvOf(d,'market')&&(d.offers||[]).length){ const O=d.offers, last=O.filter(o=>(d.wkN||0)-(o.wk??(d.wkN||0))>=1).length;
+      w.push(info(O.length+' bid'+(O.length>1?'s':'')+' for your players'+lapse(O.length,last)+' · Transfers')); }
+    for(const B of (d.bids||[]).filter(B=>B.st==='yes'||B.st==='more')){ const f=mgFind(d,B.pid); if(!f||!f.club) continue;
+      w.push(info(B.st==='yes'?mgEsc(f.club.name)+' say yes for '+mgEsc(surname(f.p.name))+' — sign him before the window shuts · Transfers':mgEsc(f.club.name)+' want more for '+mgEsc(surname(f.p.name))+' — answer this week or they give up · Transfers')); }
+    { const S=(d.spOff||[]); if(S.length){ const last=S.filter(o=>(d.weeks||0)-(o.at??(d.weeks||0))>=1).length;
+      w.push(info(S.length+' sponsor'+(S.length>1?'s’ offers':'’s offer')+lapse(S.length,last)+' · Stadium')); } }
+    if(mgWindowOpen(d)&&lvOf(d,'market')&&!isDeadline(d)){ const wl=mgWindowWeeks(d); if(wl<=2) w.push(info('The transfer window shuts '+(wl<=1?'this week':'in two weeks'))); }
+    { const A=d.roster.filter(p=>p.cAsk); if(A.length) w.push(info(A.map(p=>mgEsc(surname(p.name))).join(', ')+(A.length>1?' want':' wants')+' a new deal · Clubhouse')); }
     { const tired=mgStarters(d).filter(p=>condOf(p)<0.7).length; if(tired&&(d.phase==='league'||d.phase==='playoffs')) w.push(info(tired+' of your nine '+(tired>1?'are':'is')+' tired — rest '+(tired>1?'them':'him')+' in Training')); }
     { const tm=d.tm??MOR0; if(tm<4.5||tm>=8) w.push((tm<4.5?bad:info)('The dressing room is '+tmWord(tm))); }
     { const out=d.roster.filter(p=>p.wantsOut); if(out.length) w.push(info(out.map(p=>surname(p.name)).join(', ')+(out.length>1?' want':' wants')+' to leave')); }
     { const hurt=d.roster.filter(p=>p.inj); if(hurt.length) w.push(bad('✚ '+hurt.map(p=>surname(p.name)+' '+injShort(p.inj.d)).join(', ')+(mgStarters(d).some(p=>p.inj)?' — in your nine':''))); }
-    const wEl=document.getElementById('chWarn'); wEl.style.display=w.length?'block':'none'; wEl.innerHTML=w.join('  ·  ');
-    const badge=(id,n)=>{ const el=document.querySelector('#chCampus [data-bldg="'+id+'"] .bBadge'); if(el){ el.textContent=n||''; el.style.display=n?'block':'none'; } };
-    badge('market',mgWindowOpen(d)&&lvOf(d,'market')?(d.offers||[]).length:0); badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
+    { const pri=t=>/var\(--bad\)/.test(t)?2:/this week|tonight/.test(t)?1:0; w.sort((a,b)=>pri(b)-pri(a)); }   // (v153: the worst first, then what's due this week)
+    const wEl=document.getElementById('chWarn'), many=w.length>4&&!MGUI.warnAll;   // (v153: four at most, the rest a tap away)
+    wEl.style.display=w.length?'block':'none'; wEl.innerHTML=(many?w.slice(0,3):w).join('  ·  ')+(w.length>4?'  <button class="chMore" data-hub="warnall">'+(many?'+'+(w.length-3)+' MORE':'LESS')+'</button>':'');
+    const badge=(id,n,t)=>{ const el=document.querySelector('#chCampus [data-bldg="'+id+'"] .bBadge'); if(el){ el.textContent=n||''; el.style.display=n?'block':'none'; el.title=t||''; } };
+    { const H=hubWaiting(d); badge('club',H.club.n,H.club.t); badge('train',H.train.n,H.train.t); badge('stadium',H.stad.n,H.stad.t); badge('market',H.market.n,H.market.t); }   // (v153: WHAT'S WAITING ON YOU)
+    badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
     for(const id of ['market','physio','scouting','academy']){ const el=document.querySelector('#chCampus [data-bldg="'+id+'"]'); if(!el) continue;   // (a plot: its price; not yet: the clubhouse it needs)
       const L=lvOf(d,id), need=clubNeed(id,1), lock=!L&&lvOf(d,'club')<need, pc=el.querySelector('.bPrice');
       if(id==='market'){ el.classList.toggle('unbuilt',false); el.classList.toggle('locked',!L); if(pc) pc.innerHTML=L?'':LOCK_SVG; continue; }   // (the phone: locked till it rings)
-      el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=lock?LOCK_SVG+need:!L?kPrice(bldCost(id,1)):''; }
-    { const el=document.querySelector('#careerHub .cpDeco'), lock=lvOf(d,'club')<DECOR_CL; if(el){ el.classList.toggle('locked',lock); el.querySelector('.bPrice').innerHTML=lock?LOCK_SVG+DECOR_CL:''; }
+      el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=lock?LOCK_SVG:!L?kPrice(bldCost(id,1)):'';
+      { const bn=el.querySelector('.bn'); if(bn) bn.dataset.sub=lock?'needs clubhouse '+need:''; }   // (v153: under its name, what it waits for -- the lock and a number, "2", read as a building at level 2)
+      el.setAttribute('aria-label',BLD_NAME[id]+(lock?': needs '+CLUB_LV[need].n.toLowerCase()+' (clubhouse '+need+')':!L?': '+money(bldCost(id,1))+' to build':'')); }
+    { const el=document.querySelector('#chCampus [data-bldg="club"]'), L=lvOf(d,'club'), N=CLUB_LV[L+1];   // (v153: THE NEXT CLUBHOUSE, your money against it)
+      if(el){ let pg=el.querySelector('.bProg'); if(!pg){ pg=document.createElement('i'); pg.className='bProg'; pg.innerHTML='<i></i>'; el.appendChild(pg); }
+        el.classList.toggle('nextUp',!!N); const bn=el.querySelector('.bn'); if(bn) bn.dataset.sub=N?'next '+kPrice(N.cost):''; pg.style.display=N?'':'none';
+        if(N) pg.firstChild.style.width=Math.round(100*clamp((d.budget||0)/N.cost,0,1))+'%';
+        el.setAttribute('aria-label','the clubhouse'+(N?': next, '+N.n.toLowerCase()+' (clubhouse '+(L+1)+'), '+money(N.cost)+' -- you have '+money(Math.round(d.budget||0)):'')); } }
+    { const el=document.querySelector('#careerHub .cpDeco'), lock=lvOf(d,'club')<DECOR_CL; if(el){ el.classList.toggle('locked',lock); el.querySelector('.bPrice').innerHTML=lock?LOCK_SVG+clubShort(DECOR_CL):''; }
       const mv=document.querySelector('#careerHub .cpMove'); if(mv) mv.style.display=(d.deco||[]).length?'':'none'; }
     // the week's button: on a Monday, on to the matchday (or the next week); on a matchday's morning, play it or simulate it
     let b=''; const g=mgNextGame(d), opp=g&&mgClub(d,g.opp), mon=d.wday!=='wed'&&d.wday!=='sat';
@@ -19755,6 +19809,18 @@
   // THE PAPERS' BUTTON (v106): off to the side, on the campus's top bar, with how many there are in an orange box -- it
   // pops in when they come, and the button glows till you've opened them. A Monday's pile waits there for you; only a
   // matchday's table opens by itself.
+  // WHAT'S WAITING ON YOU (v153), counted on the campus's rail: the clubhouse -- deals ending this season (not the men
+  // you've let go) and men asking for a new deal; training -- your nine's keeper missing, men in it hurt or tired; the
+  // stadium -- sponsors' offers; transfers -- clubs' bids for your men and their answers to yours (yes, or more). Each
+  // a number on its building, and what it is when you hold a finger on it (its title). Only the academy's was there,
+  // and the market's bids
+  function hubWaiting(d){ const S=d.season, R=d.roster, lu=ensureLineup(d), xi=mgStarters(d), gk=d.roster[lu.gk], live=d.phase==='league'||d.phase==='playoffs';
+    const end=R.filter(p=>(p.until||0)<=S&&p.cGo!==S&&!p.loan), ask=R.filter(p=>p.cAsk), hurt=xi.filter(p=>p.inj), tired=live?xi.filter(p=>!p.inj&&condOf(p)<0.7):[];
+    const off=mgWindowOpen(d)&&lvOf(d,'market')?(d.offers||[]):[], ans=(d.bids||[]).filter(B=>B.st==='yes'||B.st==='more'), sp=d.spOff||[], plural=(n,a,b)=>n+' '+(n===1?a:b);
+    return { club:{n:end.length+ask.length, t:[end.length?plural(end.length,'deal ends','deals end')+' this season':'', ask.length?plural(ask.length,'man wants','men want')+' a new deal':''].filter(Boolean).join(' · ')},
+      train:{n:(gk&&gk.role==='GK'?0:1)+hurt.length+tired.length, t:[gk&&gk.role==='GK'?'':'no keeper in goal', hurt.length?plural(hurt.length,'man','men')+' in your nine hurt':'', tired.length?plural(tired.length,'man','men')+' in your nine tired':''].filter(Boolean).join(' · ')},
+      stad:{n:sp.length, t:sp.length?plural(sp.length,'sponsor’s offer','sponsors’ offers')+' waiting':''},
+      market:{n:off.length+ans.length, t:[off.length?plural(off.length,'bid','bids')+' for your men':'', ans.length?plural(ans.length,'answer','answers')+' to your bids':''].filter(Boolean).join(' · ')} }; }
   function pilesBtn(d){ const b=document.querySelector('#careerHub .cpPapers'), nEl=document.getElementById('cpPapersN'); if(!b||!nEl) return;
     const n=pileLeft(d).length, key=d.pile?(d.pile.w+'.'+(d.pile.day||'mon')):'';
     b.style.display=n?'':'none'; b.classList.toggle('fresh',!!n&&!!d.pile&&!d.pile.opened);
@@ -20079,6 +20145,7 @@
     const h=e.target.closest('[data-hub]'); if(!h) return;
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg(); else if(h.dataset.hub==='decor') openBuilding('decor');
     else if(h.dataset.hub==='papers'){ const d=CAREER&&CAREER.data; if(d){ pileShow(d,true); pilesBtn(d); } }
+    else if(h.dataset.hub==='warnall'){ MGUI.warnAll=!MGUI.warnAll; renderHub(); }   // (v153: every warning, or the first three)
     else if(h.dataset.hub==='ledger'){ const d=CAREER&&CAREER.data; if(d&&!mgUpElse('ldgModal')) ldgShow(d); }
     else if(h.dataset.hub==='move'){ Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
   });
