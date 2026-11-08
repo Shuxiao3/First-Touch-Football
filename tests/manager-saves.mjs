@@ -52,7 +52,7 @@ info('exported: ' + text.slice(0, 40) + '... ' + text.length + ' characters (the
 ok(/^FTC1:[A-Za-z0-9+/=]+$/.test(text) && text.length < raw1 / 2.5, 'EXPORT: a line of text, the career gzipped -- ' + text.length.toLocaleString() + ' characters for a ' + raw1.toLocaleString() + '-character save');
 const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#ioModal [data-io="file"]')]);
 const fileText = readFileSync(await dl.path(), 'utf8');
-ok(fileText === text && /\.ftc$/.test(dl.suggestedFilename()), 'or a file to keep: ' + dl.suggestedFilename() + ', the same text');
+ok(fileText === text && /\.txt$/.test(dl.suggestedFilename()), 'or a file to keep: ' + dl.suggestedFilename() + ', the same text');
 await page.click('#ioModal [data-io="close"]'); await page.waitForTimeout(100);
 // in again: into slot 3 (empty), pasted
 await page.click('#slotList .slotImp'); await page.waitForSelector('#ioModal.on', { timeout: 4000 }); await page.waitForTimeout(100);
@@ -66,7 +66,7 @@ r = await K(`(()=>{ const a=readSave(SAVE_KEYS['1']), b=readSave(SAVE_KEYS['3'])
 ok(/Imported into SLOT 3/.test(msg) && r && r.same && r.slot === 'SLOT 3', 'IMPORT A CAREER: pasted into slot 3 -- ' + (r && r.club) + ', the same career (its men and their ratings, its money, its week)');
 // from the file, into a slot with a career in it: asked first
 await page.click('#ioModal [data-io="slot"][data-l="2"]'); await page.waitForTimeout(80);
-await page.setInputFiles('#ioModal .ioFile', { name: 'kept.ftc', mimeType: 'text/plain', buffer: Buffer.from(text) }); await page.waitForTimeout(200);
+await page.setInputFiles('#ioModal .ioFile', { name: 'kept.txt', mimeType: 'text/plain', buffer: Buffer.from(text) }); await page.waitForTimeout(200);
 await page.click('#ioModal [data-io="in"]'); await page.waitForTimeout(200);
 const asked = await page.evaluate(() => document.getElementById('confirmModal').classList.contains('on') ? document.querySelector('#confirmModal .cfMsg').textContent : '');
 await page.click('#confirmModal [data-cf="yes"]'); await page.waitForTimeout(300);

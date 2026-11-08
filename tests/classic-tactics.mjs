@@ -263,7 +263,7 @@ ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your 
 ok(m.stars.every(s => s >= 1 && s <= 5) && m.stars.join() === m.want.join(), 'every man in the match has his own skill stars (one to five, for his age): ' + m.stars.join(''));
 // IN THE MATCH: a man's spots cost him -- with the ball his Off IQ, without it his Def IQ -- as they fit his position
 const iq = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && (T.POS_SECOND[T.fitOfP(q)] || []).length) || T.players().find(q => q.team === 'G');   // (a man with a second position: his archetype's, v118)
-  const nat = T.fitOfP(p), keep = [p.slotAtk, p.slotDef], base = [p.stats.offIQ, p.stats.defIQ], spot = pos => Object.assign({}, p.slotAtk, { pos, fit: pos });   // (its fit its own: v127, a back three's outside spot's is CB/FB)
+  const nat = T.fitOfP(p), keep = [p.slotAtk, p.slotDef], base = [+p.stats.offIQ.toFixed(2), +p.stats.defIQ.toFixed(2)], spot = pos => Object.assign({}, p.slotAtk, { pos, fit: pos });   // (its fit its own: v127, a back three's outside spot's is CB/FB)
   const at = (a, d) => { p.slotAtk = spot(a); p.slotDef = spot(d); return [+T.statOf(p, 'offIQ', 0).toFixed(2), +T.statOf(p, 'defIQ', 0).toFixed(2)]; };
   const own = (T.POS_MAIN[nat] || ['CB'])[0], sec = (T.POS_SECOND[nat] || ['FB'])[0], away = ['ST', 'CB', 'FB', 'W'].find(s => T.posFit(nat, s) === 'out');
   const r = { nat, base, own: at(own, own), secAtk: at(sec, own), secDef: at(own, sec), out: at(away, away) };

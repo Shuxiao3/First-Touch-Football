@@ -1461,7 +1461,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       composure (+0.5 at 8, +1 at 9.5 and over); low, less of those and of his reading of the game (-0.5 at 3.5, -1.5
       at 1.5 and under). Since v150 every point either side of 6.5 counts, along lines through those: +0.17 at 7, +0.83
       at 9, -0.25 at 5, -0.42 at 4 (a midfielder at 4 rates two points under himself, at 9 one over). Before, nothing at
-      all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once. In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
+      all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once. **The dressing room on the
+      pitch (v155)**: the side's mood is a little more of every man's stamina, composure and reading of the game on top
+      of his own, along a line -- a quarter of a point at 10, as much off at 3 and under: half a point of each man's
+      rating at its ends, +0.2 at 8 (buoyant), -0.3 at 4.5 (uneasy) -- played or simulated alike, and the matchday's
+      paper says what it's worth today ("The dressing room: buoyant (8.6) · +0.3 on each man's rating today"). It
+      touched nothing on the pitch before: the side's spirit was only the shirts. In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
       unhappy, ambitious man asks to leave: the news says so, clubs bid for him as if he were listed, and he won't
       renew till he's settled. So does an ambitious man (Ambition 7 or more) turned down twice for a new deal -- NOT
       NOW, or left waiting till he stops asking (v150); one who isn't sulks a point each time, and a new deal forgets
@@ -1596,6 +1601,21 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       it, the same every time you look -- 12 points wide with no coaches, down to 4 with a coach rated 10 (your best;
       the academy's lads by its youth coach) -- and another club's man's by how well he's scouted (?, the league he
       could reach, 10 wide, 6 wide). The wonderkid's ceiling comes as a range too.
+    - **An honest potential (v155).** The range holds his potential somewhere in it, and its top was as much as
+      twelve over it -- which past 22 nobody reaches: a 23-year-old rated 49 read "49–61". Measured over four
+      seasons, every computer club's man in a new career: from 23, nine in ten of those with room came on no more
+      than 5 points at 23, 4 at 24, 3 at 25 and 26, 2 at 27 and 28, 1 after. So from 23 the top's no higher than
+      that over his rating (or his potential, if it's higher: the range always holds it), a late developer counted
+      three years younger. The top was on average 7.9 over a man's rating from 23 (no coaches); now 3.1. Of men
+      23 to 25, the top's reached within a point by 38% in four seasons (it was 12%), 26 to 28 by 50% (10%); the
+      ones short of it are mostly men who don't play or train well. 22 and under, as it was.
+    - **His character, explained (v155).** Each word on his PERSONALITY side says what it does when tapped --
+      TEMPER how far his mood swings, WORK how well he trains week to week, LEARNS how fast he comes on, DRIVE how
+      many games he expects (and whether he'll ask to leave), LOYALTY the Loyal Servant he becomes, VOICE the
+      dressing room from the armband, GRIT how fast his mood comes back, BODY how often he's hurt, SETTLES how fast he
+      comes on at a new club. **Settling in** is new: a man's first twelve weeks at a club -- bought, loaned, signed
+      free or back from a loan -- he comes on at 0.92 (settles badly) to 1.1 (anywhere) of his rate. Adaptability
+      was the one hidden value nothing read.
     - **His career** is his card's third side: his seasons, the latest first (this one so far, then the last three on
       record: season and league, club, games, goals, assists, average rating), his last two moments, and for your own
       man his games and goals for you. A season goes on record for every man who's played for you, and for anyone
@@ -2118,7 +2138,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
         (32% at 4); at half-time they get back half of the legs they've lost without one, 60% at level 1, 70% at 2,
         78% at 3 and 85% at 4 (v121; it was a quarter, up to 65%); between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
-        up to 7.5% at 4; in a simulated game it's worth 0.4 a level on your side's rating. Injuries: each level is a
+        up to 7.5% at 4; in a simulated game nothing more (v155: it was 0.4 a level on your side's rating, hidden, and no
+        computer club's physio did the same -- its help is in the fitness and the injuries, as theirs is). Injuries: each level is a
         point more durability for every man (fewer and lighter: half as many with the best), 10% sooner back, and 4%
         fitter on his return (see **Injuries**). Its screen says all of it, level by level.
       - **The scouts' house** is scouting (see **Scouting**): its level is the network's.
@@ -2181,7 +2202,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       from an older build: SLOT 2", or that one couldn't be.
     - **A career to take with you (v154).** ⇩ by a saved career in LOAD GAME exports it: a line of text (the save
       gzipped, in base64, `FTC1:` in front; `FTC0:` unzipped, where a browser can't zip) to COPY, or SAVE AS A FILE
-      (`football-classic-<club>-s<season>.ftc`). IMPORT A CAREER, under the slots, takes one back -- pasted, or
+      (`football-classic-<club>-s<season>.txt`; v155: in the published page the viewer saves it, asking first -- a
+      plain download does nothing there, and its list of file types has no `.ftc`, the name it had in v154). IMPORT A CAREER, under the slots, takes one back -- pasted, or
       CHOOSE A FILE -- into the slot you pick (a slot with a career in it asks first), brought up to date and tried
       as an old career is, and written only if it goes; anything that isn't a career is turned away. A career is
       about 360,000 characters new, levelling off near 510,000 by its sixth season (the other clubs' 990 men are
@@ -2449,6 +2471,14 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v155: honest numbers.** A man's potential range topped from 23 at what his age actually reaches (it ran up to
+  twelve over his potential: on average 7.9 over his rating, now 3.1); a simulated game the same for everyone (your
+  physio's hidden +0.4 a level is gone: its help is in the fitness and injuries); a veteran's wage asked once for his
+  age (the extra 0.85 from 31 gone); the dressing room's mood half a point of each man's rating at its ends, on match
+  day, played or simulated, said on the matchday's paper; a man settling in at a new club coming on as well as he
+  settles (adaptability, the one hidden value nothing read); every word of his character saying, tapped, what it
+  does. An exported career's file saves in the published page, through the viewer (as a .txt). See **An honest
+  potential (v155)**, **The dressing room on the pitch (v155)** and **His character, explained (v155)**.
 - **v154: a career kept.** A career saved before the season ran in weeks is brought up to date on opening LOAD
   GAME, not cleared -- tried on a copy, kept if it goes, cleared only if it won't, and LOAD GAME says which. ⇩ by a
   saved career exports it, a line of text (gzipped: about a quarter of the save) to copy or a file to keep; IMPORT A

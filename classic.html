@@ -15940,6 +15940,7 @@
   function cwMul(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
   function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return Math.max(1,Math.min(99,Math.round((R[0]+(ovrMean(st,w)-R[1])*K)*10))); }   // (A MAN'S RATING)
+  function cwOverallX(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }   // (v155: his rating unrounded -- what the side's mood is worth to him)
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
   function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMainBut(role);   // (B: the usual make's rating, in stat points; v144: his pace not moved to make it)
     for(const k of ALL_STAT_KEYS){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
@@ -16092,7 +16093,13 @@
   const devMinutes=share=>1-Math.pow(1-clamp(share,0,1),2);
   // ONE TICK for one man. x: {T: his training (0 to 1), gw: his side's games these weeks, M: minutes' worth when he has
   // no side's games to count (pre-season, the academy, no club)} -> his rating's change
-  function devTick(d,p,x){ devInit(p); const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p), x0=devX(p.role,st,pg);   // (x0: v152, which way he's going)
+  function devTick(d,p,x){ devInit(p);
+    // (v155) A MAN SETTLING IN: his first twelve weeks at a club (bought, loaned, signed free, or back from a loan) he
+    // comes on as well as he settles -- SETTLES (adaptability, h.ad) 1 to 10: 0.92 to 1.1 of it, 5.5 as he was. It was
+    // the one of his nine hidden values nothing read
+    if(x.cid!=null){ if(p.dc===undefined) p.dc=x.cid; else if(p.dc!==x.cid){ p.dc=x.cid; p.mvw=d.weeks||0; } }
+    const settle=p.mvw!=null&&(d.weeks||0)-p.mvw<12?0.9+0.02*hvOf(p).ad:1;
+    const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p), x0=devX(p.role,st,pg);   // (x0: v152, which way he's going)
     const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
     p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
     const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
@@ -16104,7 +16111,7 @@
     for(let i=0;i<DEV_KEYS.length;i++){ const k=DEV_KEYS[i], g=devGroup(k), room=(cl[k]-st[k])*2, W=Wk(k);
       let gain=0;
       if(room>0){ const back=st[k]<bs[k], ag=back?Math.max(devAgeGrow(g,g==='men'?p.age:ageE),0.6):devAgeGrow(g,g==='men'?p.age:ageE);
-        gain=DEV_RATE*(room+1)*ag*(W/0.69*amb)*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1)*(fo?(areaOf(k)===fo?1.25:0.9):1); }   // (his focus: more in that coach's field, a little less elsewhere)
+        gain=DEV_RATE*(room+1)*ag*(W/0.69*amb)*lrF*momF*rel[k]*(0.8+0.4*r())*(back?DEV_BACK:1)*(fo?(areaOf(k)===fo?1.25:0.9):1)*settle; }   // (his focus: more in that coach's field, a little less elsewhere)
       if(p.inj&&(g==='phy'||g==='tec')) gain*=0.3;   // (injured: rehab, not training)
       if(room>0&&k==='shotAcc'&&p.wg) gain+=0.05*Math.sqrt(p.wg);            // (his goals: a little more finishing, each worth less)
       if(room>0&&k==='composure'&&p.wb) gain+=0.04*Math.min(p.wb,4);         // (big games: a little more composure)
@@ -16140,11 +16147,11 @@
   // EVERY THIRD WEEK, everyone: your squad, your academy (no games: its level's worth), the computer clubs', the free
   // agents (no club: little training, no games). Your squad's movers make the news (one line).
   function mgDevelop(d){ const up=[], down=[];
-    const TY=devTrainYours(d); for(const p of d.roster){ const dl=devTick(d,p,{Tk:TY,gw:d.gw||0}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
+    const TY=devTrainYours(d); for(const p of d.roster){ const dl=devTick(d,p,{Tk:TY,gw:d.gw||0,cid:d.clubId}); if(dl>0) up.push([p,dl]); else if(dl<0) down.push([p,dl]); }
     d.gw=0; const al=lvOf(d,'academy');
-    const YT=youthTrain(d); for(const p of d.youth||[]) devTick(d,p,{Tk:YT,M:0.45+0.08*al});   // (the academy's training: see youthTrain)
-    for(const c of mgAiClubs(d)){ const T=devTrainAi(c); for(const p of c.players) devTick(d,p,{T,gw:c.gw||0}); c.gw=0; }
-    for(const p of d.world.free) devTick(d,p,{T:0.35,M:0.15});
+    const YT=youthTrain(d); for(const p of d.youth||[]) devTick(d,p,{Tk:YT,M:0.45+0.08*al,cid:d.clubId});   // (the academy's training: see youthTrain)
+    for(const c of mgAiClubs(d)){ const T=devTrainAi(c); for(const p of c.players) devTick(d,p,{T,gw:c.gw||0,cid:c.id}); c.gw=0; }
+    for(const p of d.world.free) devTick(d,p,{T:0.35,M:0.15,cid:'free'});
     if(up.length||down.length){ up.sort((a,b)=>b[1]-a[1]); down.sort((a,b)=>a[1]-b[1]);
       const say=([p,dl])=>p.name+' ('+(dl>0?'+':'')+dl+', '+p.ovr+')';
       mgNews(d,'Three weeks on: '+[up.length?up.slice(0,3).map(say).join(', ')+(up.length>3?' and '+(up.length-3)+' more':'')+' up':'', down.length?down.slice(0,2).map(say).join(', ')+' down':''].filter(Boolean).join('; ')+'.'); }
@@ -16211,8 +16218,18 @@
   // scouted twice, 5; three times, 3. Scouted once, the league it could take him to; not at all, '?'.
   const POT_BAND=[[86,'a Premium League star'],[79,'a Premium League player'],[71,'a Championship player'],[63,'a League 1 player'],[0,'a League 2 player']];
   const potBand=p=>POT_BAND.find(b=>(p.pot||p.ovr)>=b[0])[1];
+  // AN HONEST POTENTIAL (v155). The range shown is his potential somewhere in a window as wide as what you know of him
+  // -- and its top was as much as twelve over his potential, which past 22 nobody reaches: a 23-year-old rated 49 read
+  // "49–61". Measured, four seasons on (every computer club's man, a new career simulated): from 23, nine in ten of
+  // those with room came on no more than 5 points at 23, 4 at 24, 3 at 25 and 26, 2 at 27 and 28, 1 after. So from 23
+  // the top's no higher than that over his rating (his potential if it's higher: the window always holds it); a late
+  // developer counts three years younger
+  const POT_REACH={23:5,24:4,25:3,26:3,27:2,28:2};
+  const potReach=p=>{ if(p.age==null) return null; const a=p.age-(devLate(p)?3:0); return a<23?null:a>=29?1:POT_REACH[a]; };
   function potRange(p,w){ const pot=p.pot||p.ovr, off=(Math.imul(((p.id>>>0)||1)+977,2654435761)>>>0)%(2*w+1); let lo=pot-off, hi=lo+2*w;
-    if(hi>99){ lo-=hi-99; hi=99; } lo=Math.max(lo,Math.min(p.ovr,pot)); return [lo,Math.max(hi,lo+2)]; }
+    if(hi>99){ lo-=hi-99; hi=99; } lo=Math.max(lo,Math.min(p.ovr,pot));
+    const R=potReach(p); if(R!=null) hi=Math.min(hi,Math.max(pot,p.ovr+R));   // (v155: AN HONEST POTENTIAL)
+    return [lo,Math.max(hi,lo+2)]; }
   function potWYours(d,youth){ const best=(d.staff||[]).filter(c=>youth?c.k==='youth':c.k!=='youth').reduce((a,c)=>Math.max(a,c.r),0); return clamp(Math.round(6-0.4*best),2,6); }
   // as text: a range, the league (not short), or '?'. f: what mgFind says of him (mine, youth...); short: a list's
   function potTxt(d,p,f,short){ f=f||{}; const k=f.mine||f.youth?9:knOf(d,p);
@@ -16248,6 +16265,17 @@
     ad:['SETTLES',['badly','slowly','in time','quickly','anywhere']]};
   const hvLvl=v=>v<3?0:v<4.5?1:v<6.5?2:v<8?3:4, HV_COL=['var(--bad)','var(--warn)','var(--ink)','var(--good2)','var(--good)'];
   const HV_PLAIN={am:1,ch:1};   // (no better or worse: drive and a voice cut both ways)
+  // WHAT HIS CHARACTER DOES (v155), a tap on each word on his PERSONALITY side: every one of the nine is read somewhere
+  // (adaptability since v155: see A MAN SETTLING IN). The traits say theirs already (good side · cost)
+  const HV_DOES={te:'TEMPER: how far his mood swings, up and down -- the calm least, the hot-headed most.',
+    pro:'WORK: how well he trains week to week -- a hard worker comes on faster, and steadily.',
+    lr:'LEARNS: how fast he comes on -- the quickest half as fast again as the slowest.',
+    am:'DRIVE: how many games he expects -- the driven come on fastest playing, and ask to leave when unhappy or turned down.',
+    lo:'LOYALTY: three seasons at the club and a loyal man becomes a Loyal Servant -- he renews for less and won’t want to go.',
+    ch:'VOICE: a leader steadies the side’s mood from the armband, and the captain picked is the strongest voice.',
+    rs:'GRIT: how fast his mood comes back to settled after a knock.',
+    du:'BODY: how often he’s hurt, and how badly.',
+    ad:'SETTLES: how fast he comes on in his first twelve weeks at a new club, or on loan.'};
   function mgMindSide(d,p,f){ const own=f.mine||f.youth;
     if(!own){ const k=knOf(d,p), L=lvOf(d,'scouting'), S=k>=2?hvSay(p,k>=3?4:2):[];
       let h='<div class="mgFacts">'+(k<2?mgFact('CHARACTER','not known','var(--dim)',true):S.length?S.map(x=>mgFact(x[0],x[1])).join(''):mgFact('CHARACTER','nothing stands out','',true))+'</div>';
@@ -16264,7 +16292,7 @@
         +(talkedThisWeek(d,p)?'<span class="mgActC mindDone">SPOKEN THIS WEEK</span>':'<span class="mgActC"><button class="mgBtn" data-mg="talkcard" data-pid="'+p.id+'">TALK TO HIM</button></span>')+'</div>'
         +(said?'<div class="mindSaid">'+said.map(mgEsc).join(' · ')+'</div>':''); }
     h+='<div class="mgFacts">'
-      +Object.keys(HV_WORDS).map(k=>{ const l=hvLvl(hv[k]); return mgFact(HV_WORDS[k][0],HV_WORDS[k][1][l],HV_PLAIN[k]?'var(--ink)':HV_COL[l]); }).join('')+'</div>';
+      +Object.keys(HV_WORDS).map(k=>{ const l=hvLvl(hv[k]); return mgFact(HV_WORDS[k][0],HV_WORDS[k][1][l],HV_PLAIN[k]?'var(--ink)':HV_COL[l]).replace('<div class="mgFact','<div data-xpl="'+mgEsc(HV_DOES[k])+'" class="mgFact'); }).join('')+'</div>';   // (v155: a tap says what it does)
     const tr=f.mine?traitsOf(p,d).slice(0,p.kt||0):[];
     h+=tr.length?'<div class="mindTr">'+tr.slice(0,3).map(t=>'<div class="mindT"><b>'+t.n+'</b><span>'+t.up+' · '+t.down+'</span></div>').join('')+'</div>'
       :'<div class="cvEv">'+(f.mine?'No traits have come out yet':'Traits come out in the squad')+'</div>';
@@ -16434,8 +16462,19 @@
   function morDeltas(m){ m=m??MOR0; if(Math.abs(m-6.5)<0.005) return null;
     if(m>6.5){ const v=m>=9.5?1:m>=8?0.5+0.5*(m-8)/1.5:0.5*(m-6.5)/1.5; return {stamina:v,composure:v}; }
     const v=m<=1.5?-1.5:m<=3.5?-0.5-(3.5-m)*0.5:-0.5*(6.5-m)/3; return {stamina:v,composure:v,offIQ:v,defIQ:v}; }
-  function morStats(p,st){ const dl=morDeltas(p.mor); if(!dl) return Object.assign({},st); const o=Object.assign({},st); for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10); return o; }
-  const morOvr=p=>{ const dl=morDeltas(p.mor); if(!dl) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st))-cwOverall(p.role,st); };
+  // THE DRESSING ROOM ON THE PITCH (v155): the side's mood (d.tm) is a little more of every man's stamina, composure
+  // and reading of the game on match day, on top of his own -- along a line, a quarter of a point at 10, as much off
+  // at 3 and under -- about half a point of a man's rating either way at its ends, a fifth at 8 (buoyant). It touched
+  // nothing on the pitch: the side's spirit was only the shirts. In a game you play and one simulated alike; the
+  // matchday's paper says what it's worth today
+  const tmV=tm=>tm==null?0:clamp(((tm??MOR0)-MOR0)/3.5,-1,1)*0.25;
+  function morStats(p,st,tm){ const dl=morDeltas(p.mor), v=tmV(tm); if(!dl&&!v) return Object.assign({},st); const o=Object.assign({},st);
+    if(dl) for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10);
+    if(v) for(const k of ['stamina','composure','offIQ','defIQ']) o[k]=clamp(o[k]+v,1,10);
+    return o; }
+  const morOvr=(p,tm)=>{ if(!morDeltas(p.mor)&&!tmV(tm)) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st,tm))-cwOverall(p.role,st); };
+  // what the side's mood is worth to a man today, on average over your nine: a rating's worth, to the tenth
+  function tmOvr(d){ const xi=mgStarters(d); if(!xi.length) return 0; return Math.round(xi.reduce((a,p)=>{ const st=morStats(p,mgStats(p)); return a+cwOverallX(p.role,morStats(p,mgStats(p),d.tm))-cwOverallX(p.role,st); },0)/xi.length*10)/10; }
   // how far a man's mood moves: his temperament (the calm least, the hot-headed most)
   function morSwing(p,d){ const h=hvOf(p); let s=1.3-0.08*h.te; if(hasTrait(p,d,'calm')) s*=0.6; if(hasTrait(p,d,'hot')) s*=1.5; return clamp(s,0.4,2.2); }
   // ...and the side's: its men's temperament, softened by its leaders -- the captain's character most, the vice's half
@@ -16778,8 +16817,10 @@
   // each as fresh as he is (see FITNESS)
   // a side's strength in a simulated game: yours as on paper, with your physio's help on top; the computer's, the nine
   // it picked for the game (xi), as fresh as they are
+  // (v155) THE SAME FOR EVERYONE: your physio added up to 1.6 to your side in a simulated game, and no computer club's
+  // did -- hidden, and yours alone. The physio's help is in your men's fitness and injuries now, as theirs is
   function mgSimStr(d,id,xi){ if(id!==d.clubId&&xi) return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40;
-    return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
+    return mgStrength(d,id); }
   const mgXiStr=(d,id,xi)=>id===d.clubId?mgStrength(d,id):mgSimStr(d,id,xi);   // (on the day, without the physio)
   // A CLUB'S RATING, as shown (v152): its best keeper and eight others, fit to play, their ratings as they are -- not as
   // fresh as they are today (that's its strength on the day, mgStrength) -- so it's the same on every screen all week.
@@ -16789,8 +16830,8 @@
     return L.length?Math.round(L.reduce((a,p)=>a+p.ovr,0)/L.length):40; }
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
-      let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK'))+morOvr(R[lu.gk]):30;
-      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?condOvr(p,0.5*(ovrAt(p,A[i]&&A[i].role,spotFit(A[i]))+ovrAt(p,D[j]&&D[j].role,spotFit(D[j]))))+morOvr(p):30; });
+      let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK'))+morOvr(R[lu.gk],d.tm):30;   // (v155: and the side's mood)
+      lu.atk.forEach((ri,i)=>{ const p=R[ri], j=lu.def.indexOf(ri); s+=p?condOvr(p,0.5*(ovrAt(p,A[i]&&A[i].role,spotFit(A[i]))+ovrAt(p,D[j]&&D[j].role,spotFit(D[j]))))+morOvr(p,d.tm):30; });
       return s/(1+OUTFIELD); }
     const xi=mgPickEight(mgPlayersOf(d,id)); return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40; }
   function mgPois(l){ let L=Math.exp(-l),k=0,p=1; do{ k++; p*=Math.random(); }while(p>L); return Math.min(8,k-1); }
@@ -17426,6 +17467,7 @@
         next(); return ['The club shop: +'+money(x.wk)+' in shirts this week',L,B]; }
       case 'table': { const me=x.rows.findIndex(r=>r.id===d.clubId), opp=d.world.clubs[x.opp], oi=x.rows.findIndex(r=>r.id===x.opp), mv=me>=0?x.rows[me].mv:0;
         L.push('Today: '+mgEsc(x.label)+' · '+(x.home?'at home to ':'away at ')+'<b>'+mgEsc(opp?opp.name:'?')+'</b>'+(oi>=0&&x.rows[oi].p?' ('+ordinal(oi+1)+')':'')+(isDerby(d,x.opp)?' <span class="dn">· the derby</span>':''));
+        { const tv=tmOvr(d), tm=d.tm??MOR0; L.push('The dressing room: '+tmWord(tm)+' ('+tm.toFixed(1)+')'+(Math.abs(tv)>=0.05?' · <span class="'+(tv>0?'up':'dn')+'">'+(tv>0?'+':'')+tv.toFixed(1)+'</span> on each man’s rating today':' · no more or less on the day')); }   // (v155: THE DRESSING ROOM ON THE PITCH)
         L.push(pileTable(d,x)); const gp=pileGaps(d,x); if(gp) L.push(gp+(mv?' · '+(mv>0?'<span class="up">up '+mv:'<span class="dn">down '+(-mv))+'</span> since the last round':'')+'.');
         if(x.rows.every(r=>!r.p)){ next(); return ['The season starts today: everyone on nothing',L,B]; }
         next(); return [(me>=0?ordinal(me+1)+' in '+MG_LEAGUE[x.tier]:MG_LEAGUE[x.tier])+(me>=0&&x.rows[me].p?', '+x.rows[me].pts+' point'+(x.rows[me].pts===1?'':'s'):''),L,B]; }
@@ -17893,7 +17935,7 @@
   // a bid for him over his club's price, heard (yours or another club's): see mgAsk
   function mgBidSeen(p,fee,ask){ if(fee<ask) return; const m=p.mk||(p.mk={n:0,hi:0}); m.n++; m.hi=Math.max(m.hi,fee); }
   // his wage to sign (moving clubs is worth a rise to him; a man a league or more above you wants more again)
-  function mgDemand(d,p,moving){ return mgRound(mgWage(p.ovr)*(moving?1.1:1)*(p.age>=31?0.85:1)*(1+0.15*Math.max(0,mgLevelTier(p.ovr)-d.tier))); }
+  function mgDemand(d,p,moving){ return mgRound(mgWage(p.ovr)*(moving?1.1:1)*(1+0.15*Math.max(0,mgLevelTier(p.ovr)-d.tier))); }   // (v155: no 0.85 from 31 -- his age is in what he's worth already; a veteran asked less to move than to stay)
   // A FREE AGENT'S PRICE: from 29 he asks his wage, as from anyone; younger, he reckons he's worth more than the club
   // that let him go did, and asks it -- up to two and a half times his wage at 21 and under, sliding to his wage at 29
   // -- and a fee to sign of up to twelve weeks of that, the younger he is the more. -> {wage, fee}
@@ -18728,7 +18770,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.filter(ri=>R[ri]&&!R[ri].inj).slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, five fit ones)
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:morStats(p,mgStats(p)),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null)}; });   // (his mood's in his legs and his head today: see MORALE)
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),defPers:p.defPers||'default',stats:morStats(p,mgStats(p),d.tm),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null)}; });   // (his mood's in his legs and his head today: see MORALE)
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   // your side's shapes and spots changed in a match (the pause menu): the career keeps them
@@ -18766,8 +18808,8 @@
     const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, pos=ri===lu.gk?'GK':sl?spotFit(sl):null, at=role?ovrAt(p,role,pos):p.ovr, fc=fitCls(fitPos(p),role,pos), sty=styleOf(p), st=mgStats(p);
-    const c=condOf(p), mo=morOvr(p), today=Math.round(condOvr(p,at)+mo), why=[];   // (v152: on the day -- see WHY HIS NUMBER ISN'T HIS RATING)
-    if((1-c)*COND_PEN>=0.5) why.push(c<0.85?'tired':'not quite fresh'); if(mo) why.push(morWord(p.mor??MOR0).toLowerCase());
+    const c=condOf(p), mo=morOvr(p,d.tm), mine=morOvr(p), today=Math.round(condOvr(p,at)+mo), why=[];   // (v152: on the day -- see WHY HIS NUMBER ISN'T HIS RATING; v155: the side's mood too)
+    if((1-c)*COND_PEN>=0.5) why.push(c<0.85?'tired':'not quite fresh'); if(Math.abs(mine)>=0.5) why.push(morWord(p.mor??MOR0).toLowerCase()); if(Math.abs(mo-mine)>=0.3) why.push('the dressing room '+tmWord(d.tm??MOR0));
     const legs='<div class="mtLegs" data-xpl="fit"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
@@ -19141,12 +19183,16 @@
     const d=JSON.parse(raw); if(!d||d.kind!=='manager') throw new Error('That isn’t a career.');
     const c=JSON.parse(JSON.stringify(d)); if((c.v||0)<MG_SAVE_V) mgOldShape(c); mgMigrate(c); mgCheck(c); c.v=MG_SAVE_V; return c; }
   const IO={};   // (the export or import being shown)
+  // (v155) the file, in the published page: the viewer saves it through its downloads capability -- asking first --
+  // and a plain download link does nothing there; opened as a file of its own, the plain link. A .txt: the viewer's
+  // list of file types has no .ftc
+  let DLS=null; try{ if(window.claude&&window.claude.use) window.claude.use('downloads').then(n=>{ DLS=n; },()=>{}); }catch(e){}
   function ioPaint(){ const m=document.getElementById('ioModal'), card=m&&m.querySelector('.ioCard'); if(!card) return; let h;
     if(IO.mode==='out') h='<div class="ioTitle">EXPORT · SLOT '+IO.label+'</div><div class="ioSub">'+mgEsc(IO.what)+'</div>'
       +'<textarea class="ioText" readonly spellcheck="false">'+IO.text+'</textarea><div class="ioSub">'+IO.text.length.toLocaleString()+' characters. Paste it into IMPORT A CAREER (LOAD GAME) on another device, or keep the file.</div>'
       +'<div class="ioBtns"><button class="pauseBtn pauseBack" data-io="close">Close</button><button class="pauseBtn" data-io="file">Save as a file</button><button class="pauseBtn" data-io="copy">Copy</button></div>';
     else h='<div class="ioTitle">IMPORT A CAREER</div><div class="ioSub">Paste an exported career, or choose its file.</div>'
-      +'<textarea class="ioText" spellcheck="false" placeholder="FTC1:..."></textarea><input type="file" class="ioFile" accept=".ftc,.txt,.json,text/plain" hidden>'
+      +'<textarea class="ioText" spellcheck="false" placeholder="FTC1:..."></textarea><input type="file" class="ioFile" accept=".txt,.ftc,.json,text/plain" hidden>'
       +'<div class="ioSlots">INTO '+Object.keys(SAVE_KEYS).map(l=>{ const d=readSave(SAVE_KEYS[l]), ok=d&&d.kind==='manager';
         return '<button class="ioSlot'+(IO.slot===l?' on':'')+'" data-io="slot" data-l="'+l+'">SLOT '+l+'<i>'+(ok?mgEsc(d.clubName)+' · S'+d.season:'empty')+'</i></button>'; }).join('')+'</div>'
       +'<div class="ioMsg" style="color:'+(IO.err?'var(--bad)':'var(--good)')+'">'+mgEsc(IO.msg||'')+'</div>'
@@ -19154,7 +19200,7 @@
     card.innerHTML=h; }
   async function mgExport(label){ const k=SAVE_KEYS[label], raw=localStorage.getItem(k); if(!raw) return; const d=JSON.parse(raw);
     Object.assign(IO,{mode:'out', label, what:d.clubName+' · '+MG_LEAGUE[d.tier]+' · season '+d.season+' · '+((d.manager||{}).name||''), text:await saveToText(raw),
-      file:'football-classic-'+String(d.clubName||'career').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-s'+d.season+'.ftc'});
+      file:'football-classic-'+String(d.clubName||'career').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-s'+d.season+'.txt'});
     ioPaint(); document.getElementById('ioModal').classList.add('on'); }
   function mgImportOpen(){ const empty=Object.keys(SAVE_KEYS).find(l=>!readSave(SAVE_KEYS[l]));
     Object.assign(IO,{mode:'in', slot:empty||'1', msg:'', err:false}); ioPaint(); document.getElementById('ioModal').classList.add('on'); }
@@ -19167,7 +19213,9 @@
     if(a==='close'){ m.classList.remove('on'); return; }
     if(a==='copy'){ const ta=card.querySelector('.ioText'); let done=false; try{ await navigator.clipboard.writeText(IO.text); done=true; }catch(err){ try{ ta.select(); done=document.execCommand('copy'); }catch(err2){} }
       b.textContent=done?'Copied':'Select it and copy'; return; }
-    if(a==='file'){ const u=URL.createObjectURL(new Blob([IO.text],{type:'text/plain'})), x=document.createElement('a'); x.href=u; x.download=IO.file; document.body.appendChild(x); x.click(); x.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); return; }
+    if(a==='file'){ if(DLS){ try{ await DLS.save({filename:IO.file, data:IO.text}); b.textContent='Saved'; }catch(err){ b.textContent=err&&err.code==='declined'?'Not saved':'Can’t save here: copy it'; } return; }   // (v155: in the published page, through the viewer)
+      if(window.claude){ b.textContent='Can’t save here: copy it'; return; }
+      const u=URL.createObjectURL(new Blob([IO.text],{type:'text/plain'})), x=document.createElement('a'); x.href=u; x.download=IO.file; document.body.appendChild(x); x.click(); x.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); return; }
     if(a==='slot'){ const t=card.querySelector('.ioText').value; IO.slot=b.dataset.l; ioPaint(); card.querySelector('.ioText').value=t; return; }
     if(a==='pick'){ card.querySelector('.ioFile').click(); return; }
     if(a==='in'){ ioImport(); return; } });

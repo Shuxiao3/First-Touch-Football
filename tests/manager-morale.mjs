@@ -63,8 +63,8 @@ info('his week: ' + JSON.stringify(r));
 ok(r.benchedAmbitious < -0.2 && r.benchedFrust < r.benchedAmbitious && r.playing >= -0.05 && r.benchedTeam > r.benchedAmbitious, 'a week on the bench: an ambitious man down ' + r.benchedAmbitious + ', the easily frustrated more (' + r.benchedFrust + '), a team player hardly (' + r.benchedTeam + '); playing every game, he\'s fine (' + r.playing + ')');
 
 // --- match day ------------------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, lu=ensureLineup(d), p=d.roster[lu.atk[1]], st=mgStats(p), entry=()=>careerLineupYours(d).squad.find(e=>e.ri===lu.atk[1]).stats;
-  p.mor=9.6; const hi=entry(); p.mor=1; const lo=entry(); p.mor=6.5; const mid=entry(); const s0=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=1; const sLow=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=9.6; const sHigh=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=6.5;
+r = await K(`(()=>{ const d=CAREER.data, tm0=d.tm, lu=ensureLineup(d), p=d.roster[lu.atk[1]], st=mgStats(p), entry=()=>careerLineupYours(d).squad.find(e=>e.ri===lu.atk[1]).stats; d.tm=MOR0;   // (the side settled: his own mood alone -- v155, the side's is on top)
+  p.mor=9.6; const hi=entry(); p.mor=1; const lo=entry(); p.mor=6.5; const mid=entry(); const s0=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=1; const sLow=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=9.6; const sHigh=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=6.5; d.tm=tm0;
   return { hi:[hi.stamina-st.stamina,hi.composure-st.composure,hi.offIQ-st.offIQ], lo:[lo.stamina-st.stamina,lo.composure-st.composure,lo.offIQ-st.offIQ,lo.defIQ-st.defIQ], mid:mid.stamina===st.stamina&&mid.offIQ===st.offIQ, s:[+(sLow-s0).toFixed(1),+(sHigh-s0).toFixed(1)] }; })()`);
 info('match day: ' + JSON.stringify(r));
 ok(r.hi.join() === '1,1,0' && r.lo.every((v, i) => v < 0 && v >= -1.5) && r.mid, 'match day: on top of the world, +1 stamina and composure (his reading of the game as it is); at rock bottom, down to -1.5 on stamina, composure, Off IQ and Def IQ; settled, as he is');
