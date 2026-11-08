@@ -1872,17 +1872,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
       | In his prime | 55 | 65 | 75 | 79 | 85 | 90 | most |
       | --- | --- | --- | --- | --- | --- | --- | --- |
-      | Striker, winger, wide midfielder (x1.10) | $170k | $1.2M | $8.7M | $19M | $63M | $169M | $200M |
-      | Attacking midfielder (x1.05) | $160k | $1.1M | $8.3M | $18M | $60M | $161M | $190M |
+      | Striker, winger, wide midfielder (x1.10) | $165k | $1.2M | $8.7M | $19M | $63M | $169M | $200M |
+      | Attacking midfielder (x1.05) | $158k | $1.1M | $8.3M | $18M | $60M | $161M | $190M |
       | Central midfielder | $150k | $1.1M | $7.9M | $17M | $57M | $154M | $180M |
-      | Holding midfielder (x0.68) | $100k | $740k | $5.4M | $12M | $39M | $104M | $120M |
-      | Centre-back (x0.55) | $83k | $600k | $4.3M | $9.6M | $31M | $84M | $100M |
-      | Full-back (x0.45) | $68k | $490k | $3.5M | $7.8M | $26M | $69M | $80M |
-      | Keeper (x0.38) | $57k | $410k | $3.0M | $6.6M | $22M | $58M | $70M |
+      | Holding midfielder (x0.68) | $102k | $739k | $5.4M | $12M | $39M | $104M | $120M |
+      | Centre-back (x0.55) | $82.5k | $598k | $4.3M | $9.6M | $31M | $84M | $100M |
+      | Full-back (x0.45) | $67.5k | $489k | $3.5M | $7.8M | $26M | $69M | $80M |
+      | Keeper (x0.38) | $57k | $413k | $3.0M | $6.6M | $22M | $58M | $70M |
 
       It was $2,000 at 55 and each point a third more (a striker of 79 $2.7M, of 90 $34M; by position a striker 80%
       over, a winger 60%, a defender a quarter under, a keeper half). A club's asking price is made as before but never
-      more than a quarter over the most for his position. **A wage**: $2,000 a week at 55, each point 16% more -- $1,110
+      more than a quarter over the most for his position. Money is rounded a notch finer from $10,000 to $1M than it
+      was (to the $100 under $100,000, the $1,000 under $1M), now wages and most fees live there: an $11,000 ask was
+      rounded to the $1,000, a negotiation in 9% steps. **A wage**: $2,000 a week at 55, each point 16% more -- $1,110
       at 51, $8,730 at 65, $38,110 at 75, $68,710 at 79, $166,350 at 85, $347,560 at 90, $626,660 at 94 (it was $150 at
       55 and $3,020 at 79): a new club's 15 on about $10,000 to $17,000 a week, a great side's 21 on $3.5M. A coach
       twenty times what he was ($1,000 to $20,000 a week). **Round it**: the TV ($45,000 a week in League 2, $250,000,
