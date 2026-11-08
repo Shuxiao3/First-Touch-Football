@@ -9,6 +9,62 @@
 <meta name="apple-mobile-web-app-title" content="Football Classic">
 <meta name="theme-color" content="#0a120b">
 <title>Football Classic</title>
+<script>/* ON A COMPUTER, AN IPHONE HELD SIDEWAYS (v166). The game is an iPhone app played sideways, and that's how a computer
+   shows it: in a phone's screen, 852 x 393 (an iPhone 15 or 16 held sideways), as big as the window takes, with the
+   mouse a finger on it. The page puts the phone up and runs the game in it, laid out and played as on the phone. A
+   phone or a tablet runs it as it is, and so does a browser a test drives (navigator.webdriver). */
+(function(){
+  var PW=852, PH=393, B=12, touch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+  if(window.name==='ftc-phone'){                                   // IN THE PHONE: the game, as on one
+    window.__FTC_PHONE=true; try{ parent.__ftcPhoneUp=true; }catch(e){}
+    try{ if(!('claude' in window)) Object.defineProperty(window,'claude',{configurable:true,get:function(){ try{ return parent.claude; }catch(e){ return undefined; } }}); }catch(e){}   // (the page's own: saving a file)
+    if(!touch) mouseFinger();
+    return; }
+  if(touch||navigator.webdriver) return;
+  try{ if(sessionStorage.getItem('ftc_noframe')) return; }catch(e){}   // (the phone wouldn't start here: the game on the page, this tab)
+  window.__FTC_FRAME=true;                                         // A COMPUTER: the phone, and the game in it, not here
+  document.addEventListener('DOMContentLoaded',function(){
+    var doc=document.documentElement.cloneNode(true), css=document.createElement('style');   // (the page as written: only its own scripts, none the host may have added)
+    [].forEach.call(doc.querySelectorAll('script'),function(x){ if(x.src||!/ftc/i.test(x.textContent)) x.parentNode.removeChild(x); });
+    var html='<!DOCTYPE html>\n'+doc.outerHTML;
+    css.textContent='html,body{margin:0!important;padding:0!important;width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;display:block!important;background:#030504!important;}'
+      +'#ftcPhone{position:fixed;left:50%;top:50%;width:'+(PW+2*B)+'px;height:'+(PH+2*B)+'px;padding:'+B+'px;box-sizing:border-box;border-radius:'+(22+B)+'px;background:#101311;box-shadow:0 0 0 1px #2c322e,inset 0 0 0 1px #1d221f,0 24px 70px rgba(0,0,0,.7);}'
+      +'#ftcPhone iframe{display:block;width:'+PW+'px;height:'+PH+'px;border:0;border-radius:22px;background:#000;}';   // (corners a little rounder than square: a computer can't give the game the phone's safe margins, and its corner buttons sit right in them)
+    document.head.appendChild(css);
+    while(document.body.firstChild) document.body.removeChild(document.body.firstChild);
+    document.body.className=''; document.body.removeAttribute('style');
+    var ph=document.createElement('div'), f=document.createElement('iframe');
+    ph.id='ftcPhone'; f.name='ftc-phone'; f.title='Football Classic'; f.setAttribute('allow','fullscreen; autoplay'); f.srcdoc=html;
+    ph.appendChild(f); document.body.appendChild(ph);
+    function fit(){ var k=Math.min((innerWidth-24)/(PW+2*B),(innerHeight-24)/(PH+2*B)); ph.style.transform='translate(-50%,-50%) scale('+(k>0?k:1)+')'; }
+    addEventListener('resize',fit); fit();
+    function focusIn(){ try{ f.contentWindow.focus(); }catch(e){} }   // (the keys go to the game)
+    f.addEventListener('load',focusIn); addEventListener('mousedown',function(e){ if(e.target!==f) focusIn(); });
+    setTimeout(function(){ if(window.__ftcPhoneUp) return;           // (a host that won't start the phone: once, the game on the page)
+      try{ sessionStorage.setItem('ftc_noframe','1'); if(sessionStorage.getItem('ftc_noframe')) location.reload(); }catch(e){} },10000);
+  });
+  // THE MOUSE A FINGER: a press, a drag and a let-go of the left button are a touch where it went down (the touch events
+  // the game's controls read), one finger. A touch the game takes for itself (it cancels it) takes the click that would
+  // follow, as a tap on a phone does; and a press has no menu or dragging off to it. A drag off the screen lets go.
+  function mouseFinger(){
+    var tgt=null, last=null, eat=false;
+    function send(type,e){ if(!tgt) return false;
+      var t={identifier:1,target:tgt,clientX:e.clientX,clientY:e.clientY,pageX:e.pageX,pageY:e.pageY,screenX:e.screenX,screenY:e.screenY,radiusX:11,radiusY:11,rotationAngle:0,force:1},
+        on=type==='touchend'||type==='touchcancel'?[]:[t], ev;
+      try{ ev=new Event(type,{bubbles:true,cancelable:true,composed:true}); }catch(x){ ev=document.createEvent('Event'); ev.initEvent(type,true,true); }
+      Object.defineProperty(ev,'changedTouches',{value:[t]}); Object.defineProperty(ev,'touches',{value:on}); Object.defineProperty(ev,'targetTouches',{value:on});
+      tgt.dispatchEvent(ev); return ev.defaultPrevented; }
+    addEventListener('mousedown',function(e){ if(e.button!==0) return; tgt=e.target; last=e; eat=send('touchstart',e); },true);
+    addEventListener('mousemove',function(e){ if(!tgt) return; last=e; if(send('touchmove',e)) e.preventDefault(); },true);
+    addEventListener('mouseup',function(e){ if(e.button!==0||!tgt) return; if(send('touchend',e)) eat=true; tgt=null; },true);
+    function lost(){ if(!tgt) return; send('touchcancel',last); tgt=null; }
+    addEventListener('blur',lost); document.documentElement.addEventListener('mouseleave',lost);
+    addEventListener('click',function(e){ if(eat){ eat=false; e.stopPropagation(); e.preventDefault(); } },true);
+    addEventListener('contextmenu',function(e){ e.preventDefault(); },true);
+    addEventListener('dragstart',function(e){ e.preventDefault(); },true);
+  }
+})();
+</script>
 <script>try{ const t=(JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}).theme; if(t&&t!=='blue') document.documentElement.dataset.theme=t; }catch(e){}</script>
 <style>/* the one font: DotGothic16 by Fontworks, SIL Open Font License 1.1 (assets/fonts/OFL-DotGothic16.txt), cut to the game's characters with a few symbols drawn in (tools/fonts/make_ui_font.py) */@font-face{font-family:'FTC Dot';font-style:normal;font-weight:400;font-display:block;src:url(data:font/woff2;base64,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) format('woff2');}</style>
 <style>
@@ -1845,6 +1901,7 @@
 
 <script>
 (() => {
+  if(window.__FTC_FRAME) return;   // (v166: a computer -- the game runs in the phone the page puts up, not here)
   let W=920; const H=540;   // the game's screen: H is fixed, W follows the shape of yours (fitStage)
   const cv=document.getElementById('c');
   const ctx=cv.getContext('2d');
@@ -1947,7 +2004,7 @@
   const fitNow=()=>{ fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } };
   addEventListener('resize',fitNow);
   fitWatch(); if(document.fonts) document.fonts.ready.then(fitNow);   // (from the start, and again once the font is in: it sets how tall a line is)
-  const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+  const isTouch=!!window.__FTC_PHONE||('ontouchstart' in window)||navigator.maxTouchPoints>0;   // (v166: in the phone on a computer, a phone's)
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
@@ -4393,12 +4450,12 @@
     ctx.stroke(); ctx.restore();
   }
   // a computer: hold the left mouse button anywhere on the pitch and draw
-  wrapEl.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||e.button!==0||!touchLive()||onLabUI(e)) return;
+  wrapEl.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||window.__FTC_PHONE||e.button!==0||!touchLive()||onLabUI(e)) return;   // (v166: in the phone, the mouse is a finger)
     if(e.target.closest&&e.target.closest('.actBtn,#menuBtn')) return;
     if(tapSwitch(e.clientX,e.clientY)) return;               // a click on one of your men: him
     skillGStart(e.clientX,e.clientY); });
-  addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'&&skillG&&skillG.mouse!==false) skillGMove(e.clientX,e.clientY); });
-  addEventListener('pointerup',e=>{ if(e.pointerType==='mouse'&&skillG) skillGEnd(!touchLive()); });
+  addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'&&!window.__FTC_PHONE&&skillG&&skillG.mouse!==false) skillGMove(e.clientX,e.clientY); });
+  addEventListener('pointerup',e=>{ if(e.pointerType==='mouse'&&!window.__FTC_PHONE&&skillG) skillGEnd(!touchLive()); });
 
   if(isTouch)for(const k in btns)btns[k].style.display='flex';
   document.getElementById('feedBtn').onclick=feed;
@@ -20508,7 +20565,7 @@
       g.classList.add('pxGhost'); g.removeAttribute('id'); g.style.cssText='left:'+(x-st.dx)+'px;top:'+(y-st.dy)+'px;width:'+w+'px;height:'+h+'px';
       document.body.appendChild(g); st.ghost=g; st.live=true; st.el.classList.add('lifted'); if(o.lift) o.lift(st.el); }
     root.addEventListener('pointerdown',e=>{ const el=e.target.closest(sel); if(!el||!root.contains(el)||e.button>0||(o.can&&!o.can(el))) return;
-      st={el, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', over:null}; });
+      st={el, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse'&&!window.__FTC_PHONE, over:null}; });
     root.addEventListener('contextmenu',e=>{ if(e.target.closest(sel)) e.preventDefault(); });
     root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // no scrolling under a man you're carrying
     addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return; const dx=e.clientX-st.x0, dy=e.clientY-st.y0;
@@ -20569,7 +20626,7 @@
         if(last&&k>=n8&&k!==from) return {k,swap:false,el:last,cls:k>from?'insB':'insA'}; }
       return null; }
     root.addEventListener('pointerdown',e=>{ const el=e.target.closest('#bpBody .selRow'); if(!el||e.button>0) return;
-      st={el, k:+el.dataset.k, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse', aim:null}; });
+      st={el, k:+el.dataset.k, id:e.pointerId, x0:e.clientX, y0:e.clientY, live:false, mouse:e.pointerType==='mouse'&&!window.__FTC_PHONE, aim:null}; });
     root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // (nothing scrolls under a bar you're carrying)
     addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return;
       if(!st.live){ if(Math.hypot(e.clientX-st.x0,e.clientY-st.y0)<(st.mouse?6:8)) return;

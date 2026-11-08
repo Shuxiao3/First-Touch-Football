@@ -2352,6 +2352,20 @@ SHOOT, CROSS, SKILL, defending, your corner's − and +, ☰), the tips over the
 carry no key hints. Before, opened on a computer, the same places spoke of WASD, J, K, L, SPACE and the mouse. The keys
 still play it (see **Keys**, below the iPhone's), but nothing in the game mentions them.
 
+**On a computer, an iPhone held sideways (v166).** Opened on a computer, Football Classic puts up a phone held
+sideways -- a screen 852 x 393, an iPhone 15 or 16's -- as big as the window takes and in the middle of it, and runs
+the game in it as on the phone: the game's screen is the phone's (it lays itself out for 852 x 393, a touch screen),
+the screen's buttons are on it, and the mouse is a finger. Press, drag and let go of the left button are a finger's
+touch where it went down: the menus are tapped with it, the left of the pitch is the stick, PASS, SHOOT and the rest
+are pressed and let go of. A touch the game takes for itself (in a match) takes the click after it, as a tap on a
+phone makes none; a drag off the screen lets go. The keys still play it when the window has the phone. A bigger or
+smaller window, a bigger or smaller phone (the game's screen the same). Its corners are rounded less than a real
+phone's: a computer can't give the game the margins an iPhone keeps clear of its corners, and the game's corner
+buttons sit right in them. If the phone never starts (a host that won't run the game inside it), 10 s on the page
+puts the game on itself instead, as before, for as long as that tab's open. A phone or a tablet runs it as it is, as does a browser a test drives (the tests read the
+game on the page, as before: classic-phone.mjs puts the phone up). Before, a computer showed it its own way: as wide as
+the window (up to 1280), the screen's buttons hidden, mouse and keys.
+
 **On the iPhone** -- the controls Football Classic tells you about, and the only ones (v159).
 
 Drag on the left half to move. **Push the stick out past its ring to sprint** (the ring lights up
@@ -2601,6 +2615,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v166: on a computer, an iPhone held sideways.** Opened on a computer, the page puts up a phone held sideways (an
+  iPhone 15 or 16's screen, 852 x 393) as big as the window takes, and runs the game in it as on the phone: laid out
+  for it, the screen's buttons on it, the mouse a finger (a touch where it's pressed; the click after a touch the game
+  takes for itself goes nowhere, as on a phone). A phone or a tablet, as it is. See **On a computer, an iPhone held
+  sideways (v166)**.
 - **v165: Curve in through balls.** Your man, run onto your through ball, reads its bend: he ran to where it would
   come down if it went straight, a long way wrong for a bent one, so Curve cost you through balls (68 in 100 ended up
   yours at Curve 1, 63 at 10); now about the same at either. A through ball bends up to 29° at Curve 10 (16°), the
