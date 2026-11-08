@@ -36,7 +36,18 @@ export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_
 // they're in the way of a click: the manager tests by default, others
 // with papers: 'aside' (or pileAside on a page of their own); papers: true leaves them be (a test of the pile itself).
 // Tests that never reach a career have no handler at all: nothing between a click and a match.
+// HE'S YOURS (v164): the overview of a man just signed (or on a new deal) -- a career test that isn't about it closes it
+// (DONE, one after another) whenever it's in the way of a click, the papers aside or not; signs: true leaves it be (a test
+// of it: manager-signed.mjs). A page gets it once.
+const SIGNED_ASIDE = new WeakSet();
+export async function signAside(page){
+  if(SIGNED_ASIDE.has(page)) return; SIGNED_ASIDE.add(page);
+  await page.addLocatorHandler(page.locator('#signModal.on'), async () => {
+    await page.evaluate(() => { for(let i = 0; i < 9; i++){ const m = document.getElementById('signModal'); if(!m || !m.classList.contains('on')) break; const b = m.querySelector('[data-sg="done"]'); if(b) b.click(); else m.classList.remove('on'); } });
+  });
+}
 export async function pileAside(page){
+  await signAside(page);
   await page.addLocatorHandler(page.locator('#pileModal.on'), async () => {
     await page.evaluate(() => { const x = document.querySelector('#pileModal.on [data-pile="close"]'); if(x) x.click(); else { const m = document.getElementById('pileModal'); if(m) m.classList.remove('on'); } });
   });
@@ -50,12 +61,13 @@ export async function pileAside(page){
   });
 }
 
-export async function open({ fastFrames = false, url = GAME, papers } = {}){
+export async function open({ fastFrames = false, url = GAME, papers, signs } = {}){
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
   await page.addInitScript(STAR);
   const career = /(^|[\/\\])manager-[^\/\\]*$/.test(process.argv[1] || '');
   if(papers === 'aside' || (papers === undefined && career)) await pileAside(page);
+  if(career && signs !== true) await signAside(page);   // (v164: the papers left be or not)
   const rep = reporter();
   page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if(m.type() === 'error') rep.errs.push('CONSOLE: ' + m.text()); });

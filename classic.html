@@ -1448,6 +1448,10 @@
   .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
   .mgQuick{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:flex-end; margin:2px 0 4px; } .mgQuick .mgMini{ margin:0; padding:3px 6px; }   /* (v151) */
   .mgAmtIn{ flex:1 1 72px; min-width:64px; max-width:118px; width:auto; font:11px 'FTC Dot',monospace; padding:3px 6px; background:var(--well); color:var(--ink); border:1px solid var(--btnHi); border-radius:4px; }
+  #signModal{ z-index:240; }   /* (v164: HE'S YOURS -- over the papers, under a confirm) */
+  .signCard{ max-width:560px; gap:5px; } .signCard .mgCardHead{ margin:0; } .signCard .signWhere{ color:var(--acc); }
+  .signFacts{ display:grid; grid-template-columns:1fr 1fr; gap:0 16px; } .signFacts .mgFact.wide{ grid-column:1 / -1; }
+  .signCard .six{ margin:2px 0 0; } .signCard .cfBtns{ flex:none; margin-top:4px; }
   .ldgCard{ max-width:520px; gap:6px; } .ldgCard .cfBtns{ flex:none; margin-top:4px; }   /* (v160: its middle pages, .ldgMid; BACK always on the screen) */ .ldgSect{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); margin-top:6px; }
   .ldgRow{ display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--ink2); padding:1px 0; } .ldgRow b{ font-weight:400; color:var(--ink); } .ldgRow.tot{ border-top:1px solid var(--well); padding-top:3px; } .ldgNote{ font-size:11px; color:var(--dim); }
   #chNetBtn{ cursor:pointer; } #chNetBtn i{ text-decoration:underline dotted; }
@@ -1752,6 +1756,7 @@
 <div id="pressModal" class="pauseOv"><div class="pauseCard prCard"></div></div>
 <div id="moneyModal" class="pauseOv"><div class="pauseCard mnCard"></div></div>
 <div id="ldgModal" class="pauseOv"><div class="pauseCard ldgCard"></div></div>
+<div id="signModal" class="pauseOv"><div class="pauseCard signCard"></div></div>
 <div id="ctlModal" class="pauseOv"><div class="pauseCard ctlCard"></div></div>
 <div id="htModal" class="pauseOv"><div class="pauseCard htCard"></div></div>
 <div id="menu" class="menuOverlay" style="display:none">
@@ -17676,20 +17681,20 @@
       case 'later': d.pile.list.splice(d.pile.list.indexOf(x),1); d.pile.list.push(x); break;
       case 'accept': err=mgAcceptOffer(d,x.oid); x.done=true; if(!err) showNote('Sold.','var(--good)'); break;
       case 'reject': { const msg=mgRejectOffer(d,x.oid); x.done=true; if(msg) showNote(msg,'var(--warn)'); break; }   // (v156: HE HEARS OF IT)
-      case 'sign': { const Bd=mgBidOf(d,x.pid); err=Bd?mgSignDeal(d,x.pid,Bd.fee,MGUI.years||2):'That deal has gone.'; if(!err){ x.done=true; showNote('Signed! He joins your squad.','var(--good)'); } break; }
+      case 'sign': { const Bd=mgBidOf(d,x.pid), pre=signPre(d,x.pid); err=Bd?mgSignDeal(d,x.pid,Bd.fee,MGUI.years||2):'That deal has gone.'; if(!err){ x.done=true; showNote('Signed! He joins your squad.','var(--good)'); signShow(d,pre,'buy',{fee:Bd.fee}); } break; }
       case 'walk': { const Bw=mgBidOf(d,x.pid); if(Bw) bidLog(d,Bw,'walked'); d.bids=(d.bids||[]).filter(y=>y.pid!==x.pid); x.done=true; break; }
       case 'meet': { const Bd=mgBidOf(d,x.pid); if(!Bd){ x.done=true; break; } const r=mgBid(d,x.pid,Bd.ask); if(!r.ok&&!r.wait&&!r.more) err=r.msg; else MGUI.years=2; break; }
       case 'counter': { const Bd=mgBidOf(d,x.pid); if(!Bd){ x.done=true; break; } const r=mgCounter(d,x.pid,mgCounterFee(d,Bd)); MGUI.bid=null;
         if(r.ok){ MGUI.years=2; showNote('They accept: now his contract.','var(--good)'); } else if(r.more) showNote(r.msg,'var(--warn)'); else err=r.msg; break; }
       case 'spsign': err=spSign(d,x.oid); x.done=true; if(!err) showNote('Signed.','var(--good)'); break;
       case 'spno': spDecline(d,x.oid); x.done=true; break;
-      case 'renew': if(P){ err=mgRenew(d,d.roster.indexOf(P),MGUI.years||2); if(!err){ x.done=true; showNote(P.name+' has signed a new deal.','var(--good)'); } } break;
+      case 'renew': if(P){ const pre=signPre(d,P.id); err=mgRenew(d,d.roster.indexOf(P),MGUI.years||2); if(!err){ x.done=true; showNote(P.name+' has signed a new deal.','var(--good)'); signShow(d,pre,'renew'); } } break;
       case 'cnot': err=mgContractNo(d,x.pid); x.done=true; break;
-      case 'offer': if(P){ const r=mgOffer(d,P.id,cOfferOf(d,P),MGUI.years||2); if(r.msg) err=r.msg;
-          else if(r.ok){ x.done=true; MGUI.offer=null; showNote(P.name+' signs for '+money(r.wage)+' a week.','var(--good)'); }
+      case 'offer': if(P){ const pre=signPre(d,P.id), r=mgOffer(d,P.id,cOfferOf(d,P),MGUI.years||2); if(r.msg) err=r.msg;
+          else if(r.ok){ x.done=true; MGUI.offer=null; showNote(P.name+' signs for '+money(r.wage)+' a week.','var(--good)'); signShow(d,pre,'renew'); }
           else if(r.sulk){ x.done=true; showNote(r.say,'var(--bad)'); } } break;   // (a counter: the paper's MEET IT)
-      case 'meetc': if(P){ err=mgMeetC(d,P.id); if(!err){ x.done=true; MGUI.offer=null; showNote(P.name+' has signed a new deal.','var(--good)'); } } break;
-      case 'erenew': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q){ err=mgRenew(d,d.roster.indexOf(q),MGUI.years||2); if(!err) showNote(q.name+' has signed a new deal.','var(--good)'); } if(!pileLive(d,x)) x.done=true; break; }
+      case 'meetc': if(P){ const pre=signPre(d,P.id); err=mgMeetC(d,P.id); if(!err){ x.done=true; MGUI.offer=null; showNote(P.name+' has signed a new deal.','var(--good)'); signShow(d,pre,'renew'); } } break;
+      case 'erenew': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q){ const pre=signPre(d,q.id); err=mgRenew(d,d.roster.indexOf(q),MGUI.years||2); if(!err){ showNote(q.name+' has signed a new deal.','var(--good)'); signShow(d,pre,'renew'); } } if(!pileLive(d,x)) x.done=true; break; }
       case 'ego': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q) mgLetGo(d,q); if(!pileLive(d,x)) x.done=true; break; }
       case 'eterms': { const q=mgEnding(d).find(y=>(x.pids||[]).includes(y.id)); pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=q?q.id:null; mgSide='deal'; paintBuilding(); return; }   // (to his card, its deal side)
       case 'list': if(P&&lvOf(d,'market')&&!P.hometown){ d.listed[P.id]=mgValue(d,P); P.mor=clamp((P.mor??MOR0)+0.5,1,10); mgNews(d,P.name+' is on the transfer list, as he wanted.'); } x.done=true; break;   // (what he asked for: it lifts him a little)
@@ -17699,8 +17704,8 @@
       case 'talk': if(P) x.res=mgTalk(d,P); else x.done=true; break;
       case 'commyes': err=commDo(d,x); if(!err){ x.done=true; showNote('Done: the town will remember it.','var(--good)'); } break;
       case 'loanout': err=mgLoanOut(d,x.pid,x.cid); x.done=true; if(!err) showNote('He’s gone on loan.','var(--good)'); break;
-      case 'loanin': err=mgLoanIn(d,x.pid,x.share); x.done=true; if(!err) showNote('He joins on loan.','var(--good)'); break;
-      case 'bbsign': err=mgSignBB(d,x,MGUI.years||2); if(!err){ x.done=true; MGUI.years=2; showNote('Signed! He joins your squad, on a buyback clause.','var(--good)'); } break;
+      case 'loanin': { const pre=signPre(d,x.pid), lf=pre?mgLoanFee(d,mgFind(d,x.pid).p):0; err=mgLoanIn(d,x.pid,x.share); x.done=true; if(!err){ showNote('He joins on loan.','var(--good)'); signShow(d,pre,'loan',{fee:lf}); } break; }
+      case 'bbsign': { const pre=signPre(d,x.pid); err=mgSignBB(d,x,MGUI.years||2); if(!err){ x.done=true; MGUI.years=2; showNote('Signed! He joins your squad, on a buyback clause.','var(--good)'); signShow(d,pre,'bb',{fee:x.fee}); } break; }
     }
     if(err) showNote(err,'var(--bad)');
     mgSave(d); renderHub(); pilePaint(d); });
@@ -17939,7 +17944,8 @@
     mgWeekStart(d); }
 
   // ---- your squad: men in and out (the lineup keeps pointing at the right men) ----
-  function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; p.since=d.season; p.mor=Math.min(10,(p.mor??MOR0)+0.5); p.kt=0; p.kw=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0; d.roster.push(p); popNew(d,p); const lu=ensureLineup(d); lu.bench.push(d.roster.length-1); }
+  function mgRosterAdd(d,p){ p.num=0; p.s0=p.ovr; p.since=d.season; p.mor=Math.min(10,(p.mor??MOR0)+0.5); p.kt=0; p.kw=0; mgNumber(d.roster,p); p.apps=p.apps||0; p.goals=p.goals||0;
+    const lu=ensureLineup(d); d.roster.push(p); popNew(d,p); lu.bench.push(d.roster.length-1); }   // (v164: your lineup read before he's in the squad -- read after, a squad a man longer than its lineup looked wrong, the whole nine was picked again for you, and he was in it twice; now it stays as you set it, and he goes to the end of the bench)
   // takes roster[idx] out: his place in the nine goes to the first sub who plays there (else the first sub)
   function mgRosterRemove(d,idx){ const lu=ensureLineup(d), R=d.roster, gone=R[idx]; if(!gone) return null;
     const sub=role=>{ let k=lu.bench.findIndex(i=>R[i]&&R[i].role===role); if(k<0&&role!=='GK') k=lu.bench.findIndex(i=>R[i]&&R[i].role!=='GK'); if(k<0&&lu.bench.length) k=0; return k<0?null:lu.bench.splice(k,1)[0]; };
@@ -18472,6 +18478,40 @@
     return { wageWk, sponsorWk, broadcastWk, boardsWk, dealsWk, commercialWk, shirtWk, poolWk, capacity, price, loyalty:L, loyMult, demand:pct, rawDemand, attendance,
              homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, turn, canPrice:true, soldOut:rawDemand>=1, seats, ticketGate:Math.round(ticketGate) };
   }
+  // HE'S YOURS (v164): a man signed by a tap -- bought, a free agent, on loan, on a buyback clause -- or one of yours on
+  // a new deal, from the market, his card or the papers: an overview of him there and then. His figure, his number and
+  // name, his position, archetype and age, his rating, stars and potential; where he came from and what he cost (a new
+  // deal: his old wage and his new); his wage and his contract; where he is now in your squad -- in your nine, on the
+  // bench, or neither yet (Training's Selection picks him) -- and his six, to look at (his card has the rest). SEE HIM IN THE SQUAD
+  // takes you to his card in the clubhouse; DONE (or a tap outside) closes it; two at once, one after the other. Before,
+  // a signing was a line along the foot of the screen for a moment, and the man was gone from the list: you couldn't
+  // always tell he was yours.
+  const SIGN_TITLE={buy:'SIGNED',free:'SIGNED',bb:'SIGNED',loan:'ON LOAN',renew:'A NEW DEAL'};
+  function signPre(d,pid){ const f=mgFind(d,pid); if(!f) return null; const p=f.p;   // (what he was, before it's done)
+    return {pid, from:f.club&&!f.mine?f.club.name+' ('+MG_LEAGUE[f.club.tier]+')':f.free?'a free agent':'', wage0:p.wage, until0:p.until}; }
+  function signShow(d,pre,k,more){ if(!pre||!(d.roster||[]).some(p=>p.id===pre.pid)) return;
+    MGUI.signQ=MGUI.signQ||[]; MGUI.signQ.push(Object.assign({},pre,{k},more||{})); signPaint(d); }   // (the first still showing, the count on its button)
+  function signPaint(d){ const m=document.getElementById('signModal'), Q=MGUI.signQ||[], e=Q[0], p=e&&d.roster.find(x=>x.id===e.pid);
+    if(!p){ MGUI.signQ=[]; m.classList.remove('on'); return; }
+    const sty=styleOf(p), kit=careerKit(d), lu=ensureLineup(d), bi=lu.bench.indexOf(d.roster.indexOf(p)), xi=mgStarters(d).includes(p);
+    const where=xi?'In your nine':bi>=0&&bi<BENCH_N?'On your bench':'In your squad: not in your nine or on the bench yet (Training’s Selection)';
+    let h='<div class="pauseTitle">'+SIGN_TITLE[e.k]+'</div><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+      +'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div><div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p),true):'')+'</div>'
+      +'<div class="mgCardSub signWhere">'+where+'</div></div>'
+      +'<div class="cardEnd"><div class="mgCardOvr">'+p.ovr+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,mgFind(d,p.id))+'</div></div></div>';
+    const F=[], wk=w=>money(w)+'/wk';
+    if(e.k==='renew') F.push(mgFact('WAS',wk(e.wage0)+', to season '+(e.until0||d.season)), mgFact('NOW',wk(p.wage)+', to season '+p.until,'var(--good)'));
+    else if(e.k==='loan') F.push(mgFact('ON LOAN FROM',mgEsc((e.from||'').replace(/ \(.*\)$/,''))), mgFact('LOAN FEE',money(e.fee||0),'var(--warn)'), mgFact('HIS WAGE',wk(p.wage)+(p.loan?' ('+Math.round(p.loan.share*100)+'% of it)':'')), mgFact('UNTIL','the end of the season'));
+    else { F.push(mgFact('FROM',mgEsc(e.from||'')), mgFact(e.k==='free'?'TO SIGN':'FEE',e.fee?money(e.fee):'nothing',e.fee?'var(--warn)':''), mgFact('WAGE',wk(p.wage)), mgFact('CONTRACT','to season '+p.until));
+      if(e.k==='bb'&&p.bb) F.push(mgFact('BUYBACK',money(p.bb.fee)+', to season '+p.bb.until,'var(--warn)',true)); }
+    const so=sixOpen; sixOpen=null; const six=sixHtml(mgStats(p),p.role).replace(/<button class="sixC([^"]*)" data-six="[A-Z]+">/g,'<div class="sixC$1">').replace(/<\/button>/g,'</div>'); sixOpen=so;   // (to look at: his card in the squad has the rest)
+    h+='<div class="signFacts">'+F.join('')+'</div>'+six
+      +'<div class="cfBtns"><button class="pauseBtn" data-sg="see">SEE HIM IN THE SQUAD</button><button class="pauseBtn" data-sg="done">'+(Q.length>1?'NEXT (1 OF '+Q.length+') ▸':'DONE')+'</button></div>';
+    m.querySelector('.signCard').innerHTML=h; m.classList.add('on'); }
+  document.getElementById('signModal').addEventListener('click',ev=>{ const d=CAREER&&CAREER.data, m=document.getElementById('signModal'); if(!d){ m.classList.remove('on'); return; }
+    const b=ev.target.closest('[data-sg]');
+    if(b&&b.dataset.sg==='see'){ const e0=(MGUI.signQ||[])[0]; MGUI.signQ=[]; m.classList.remove('on'); if(e0){ pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=e0.pid; mgSide='rate'; paintBuilding(); } return; }
+    if(ev.target===ev.currentTarget||(b&&b.dataset.sg==='done')){ (MGUI.signQ||[]).shift(); if((MGUI.signQ||[]).length) signPaint(d); else m.classList.remove('on'); } });
   // THE WEEK'S MONEY (v151): every dollar in and out of the bank this week, by what it was -- the gate, the TV, the
   // partners, the sponsors, the shirts, prizes, transfers and loans, wages, building, scouting, the week's events -- and
   // anything else in a line of its own, so the week's lines take the bank from what it was on Monday to what it is now,
@@ -20301,9 +20341,9 @@
       case 'bidgo': { const f=mgFind(d,pid); curTab.market='Search'; openBuilding('market'); MGUI.sel=pid; if(f&&f.club) MGUI.tier=f.club.tier; paintBuilding(); return; }
       case 'walk': { const Bw=mgBidOf(d,pid); if(Bw) bidLog(d,Bw,'walked'); d.bids=(d.bids||[]).filter(b=>b.pid!==pid); MGUI.bid=null; say('You walk away.',''); break; }
       case 'yrs': MGUI.years=clamp((MGUI.years||2)+(+ds.dir),1,4); break;
-      case 'sign': { const B=mgBidOf(d,pid); if(!B||B.st!=='yes') break; const err=mgSignDeal(d,pid,B.fee,MGUI.years||2); MGUI.bid=null;
-        say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
-      case 'signfree': { const err=mgSignFree(d,pid,MGUI.years||2); say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
+      case 'sign': { const B=mgBidOf(d,pid); if(!B||B.st!=='yes') break; const pre=signPre(d,pid), err=mgSignDeal(d,pid,B.fee,MGUI.years||2); MGUI.bid=null;
+        say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err){ MGUI.sel=null; signShow(d,pre,'buy',{fee:B.fee}); } break; }   // (v164: HE'S YOURS)
+      case 'signfree': { const f0=mgFind(d,pid), pre=signPre(d,pid), fee=f0&&f0.free?mgFreeAsk(d,f0.p).fee:0, err=mgSignFree(d,pid,MGUI.years||2); say(err||'Signed! He joins your squad.',err?'var(--bad)':'var(--good)'); if(!err){ MGUI.sel=null; signShow(d,pre,'free',{fee}); } break; }
       case 'scout': { const err=mgScout(d,pid), f=mgFind(d,pid), k=f?Math.floor(knOf(d,f.p)):0;
         say(err||['Scouted.','Scouted: his rating, and the league he could reach.','A closer look: his potential, roughly, and his character.','A full report: his potential within six, and more of him.'][k]||'Scouted.',err?'var(--bad)':'var(--good)'); break; }
       case 'csel': MGUI.csel=MGUI.csel===+ds.cid?null:+ds.cid; break;
@@ -20311,13 +20351,13 @@
       case 'cfire': { const err=mgReleaseCoach(d,+ds.cid); say(err||'He has gone.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.csel=null; break; }
       case 'focus': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const order=p.role==='GK'?[null,'fit','gk']:[null,'fit','tec','fin','def'], i=order.indexOf(p.fo??null); p.fo=order[(i+1)%order.length]; break; }
       case 'cap': case 'vice': { const err=mgSetCaptain(d,pid,a==='vice'); say(err||'Done.',err?'var(--bad)':'var(--good)'); break; }
-      case 'renew': { const err=mgRenew(d,d.roster.findIndex(p=>p.id===pid),MGUI.years||2); say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
+      case 'renew': { const pre=signPre(d,pid), err=mgRenew(d,d.roster.findIndex(p=>p.id===pid),MGUI.years||2); say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); if(!err) signShow(d,pre,'renew'); break; }
       case 'cnot': { const err=mgContractNo(d,pid); say(err||'He’ll have to wait. He isn’t pleased.',err?'var(--bad)':'var(--warn)'); break; }
       case 'ofr': { const p=d.roster.find(x=>x.id===pid); if(p) cOfferStep(d,p,+ds.dir); break; }
-      case 'offer': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const r=mgOffer(d,pid,cOfferOf(d,p),MGUI.years||2);
-        if(r.msg) say(r.msg,'var(--bad)'); else if(r.ok){ MGUI.offer=null; say(p.name+' signs for '+money(r.wage)+' a week.','var(--good)'); }
+      case 'offer': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const pre=signPre(d,pid), r=mgOffer(d,pid,cOfferOf(d,p),MGUI.years||2);
+        if(r.msg) say(r.msg,'var(--bad)'); else if(r.ok){ MGUI.offer=null; say(p.name+' signs for '+money(r.wage)+' a week.','var(--good)'); signShow(d,pre,'renew'); }
         else if(r.counter) say(p.name+' comes back: he’ll sign for '+money(r.counter)+' a week.','var(--warn)'); else say(r.say,'var(--bad)'); break; }
-      case 'meetc': { const err=mgMeetC(d,pid); if(!err) MGUI.offer=null; say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
+      case 'meetc': { const pre=signPre(d,pid), err=mgMeetC(d,pid); if(!err){ MGUI.offer=null; signShow(d,pre,'renew'); } say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
       case 'listset': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), want=ds.v!=null?+ds.v:mgRound(v*(+ds.k)); if(!(want>0)) break;   // (v151: a quick figure, or one typed)
         MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRoundF(want))}; break; }
       case 'liststep': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), cur=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:v;
@@ -20328,7 +20368,7 @@
         showConfirm('Release '+p.name+'? Paying off his contract costs '+money(mgReleaseCost(d,p))+'.',()=>{ const err=mgRelease(d,d.roster.findIndex(x=>x.id===pid)); if(!err) MGUI.sel=null; say(err||p.name+' has been released.',err?'var(--bad)':'var(--good)'); mgRerender(); },{yes:'Release',danger:true});
         return; }
       case 'accept': { const err=mgAcceptOffer(d,+ds.oid); say(err||'Sold.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
-      case 'loanask': { const err=mgLoanIn(d,pid); say(err||'He joins on loan, to the end of the season.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
+      case 'loanask': { const f0=mgFind(d,pid), pre=signPre(d,pid), lf=f0?mgLoanFee(d,f0.p):0, err=mgLoanIn(d,pid); say(err||'He joins on loan, to the end of the season.',err?'var(--bad)':'var(--good)'); if(!err){ MGUI.sel=null; signShow(d,pre,'loan',{fee:lf}); } break; }
       case 'reject': { const msg=mgRejectOffer(d,+ds.oid); if(msg) say(msg); break; }   // (v156: HE HEARS OF IT)
       case 'promote': { const err=mgPromoteYouth(d,pid); say(err||'Promoted to the first team.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'ryouth': mgReleaseYouth(d,pid); MGUI.sel=null; break;

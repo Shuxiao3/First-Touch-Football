@@ -2047,6 +2047,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       deal side: your starting nine's average rating now and with him in it, to the tenth, or "no change". It gave the
       game away -- which men were the better ones, without a rating to go on, an unscouted man's too -- so it's gone:
       what a man's like is his range till he's scouted, and his rating once he is.
+    - **He's yours (v164).** A man signed by a tap -- bought, a free agent, on loan, on a buyback clause -- or one of
+      yours on a new deal, from the market, his card or the papers: an overview of him there and then. SIGNED (ON LOAN,
+      A NEW DEAL), his figure, number and name, position, archetype and age, rating, stars and potential; where he came
+      from and what he cost (a new deal: his wage before and after), his wage and his contract (a loan: the fee up
+      front, his wage and your share of it, to the end of the season; a buyback clause: its fee and how long it runs);
+      where he is in your squad -- in your nine, on your bench, or neither yet (Training's Selection picks him) -- and
+      his six. SEE HIM IN THE SQUAD takes you to his card in the clubhouse; DONE, or a tap outside, closes it; two at
+      once, one after the other ("NEXT (1 OF 2)"); over the papers, they're still there after. All of it fits the
+      smallest iPhone held sideways. Before, a signing was a line along the foot of the screen for a moment and the man
+      was gone from the list, so you couldn't always tell he was yours.
+    - **A signing leaves your lineup be (v164).** A man who joins goes to the end of your bench, outside your nine and
+      your matchday five, till you pick him. Before, every man added -- signed, on loan, promoted from the academy --
+      had your whole nine picked again for you (the best of them by rating, him in it if he was good enough) and was
+      listed twice, so a lineup you'd set was gone after a signing.
     - **His agent's cut (v156).** A man from your academy sold -- a bid accepted, or the board's sale -- his agent takes a
       tenth of the fee; the bid says so ("academy: $450,000 after his agent"). Measured (League 2, an academy at level 3
       from the start, three seasons with nobody sold): the club's surplus about $1.66M a season; an academy striker or
@@ -2562,6 +2576,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v164: he's yours.** After a signing or a new deal -- from the market, his card or the papers -- an overview of the
+  man: his figure, number, position, archetype, age, rating and potential, where he came from and what he cost (or
+  his old wage and his new), his wage and contract, where he is in your squad, his six; SEE HIM IN THE SQUAD or DONE.
+  And a signing leaves your lineup be: he goes to the end of the bench (it picked your whole nine again, and listed
+  him twice). See **He's yours (v164)** and **A signing leaves your lineup be (v164)**.
 - **v163: passing and composure in two.** Passing is Short passing and Long passing: a pass goes by Short passing up
   to 12 m, by Long passing from 32 m, a blend that moves between (half and half at 22 m). Composure is Composure in
   traffic and Final third composure: the one a man plays with goes from the first to the second as he goes into the
