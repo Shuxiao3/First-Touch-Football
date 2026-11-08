@@ -99,7 +99,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU,HALF-TIME,TIPS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU,HALF-TIME,TIPS,TEXT SIZE' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
     // new 4, where a 3 picked from now on stays 3
     const mlOn = pg => pg.evaluate(() => { const r = [...document.querySelectorAll('#setRows .setRow')].find(x => /MATCH LENGTH/.test(x.textContent)), on = r && r.querySelector('.setOpt.on'); return on ? on.textContent : null; });

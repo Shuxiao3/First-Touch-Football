@@ -2176,6 +2176,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
       it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
+    - **Touch first (v158).** A drag was the only way to move a man in three places; now each has a tap. Training's
+      Selection: your keeper or a man not taken, tapped, is lit; then any man, and they swap (him again: let go) --
+      taps on your nine and the bench still plan your quick subs. Training's pitch, and a match's ALL SUBS: a man
+      tapped shows his card, SWAP on it lights him, and the next man tapped changes places with him (in a match, from
+      the bench that's a sub). A ✕ (YOUR FIRST WEEK's, the papers') and +N MORE take a tap from 9 px round them as
+      well as on them, as they look, and a bid's quick figures are a size up. Measured at 844 by 390, the smallest
+      were a ✕ at 10 by 16 px, a chip (C, VC, FOCUS) at 17 by 18, a − at 22 by 22; nearly everything else 28 px and up,
+      as big as nine men, a bench and a card allow on a phone held sideways. A wider place round a chip or a − ran past
+      the foot of a box that pages, so those stay under 44 px; **TEXT SIZE** in Settings: LARGE puts a building's
+      screens a size up (by 15%), them and their buttons with them; its pages hold less and turn more.
     - **Your first week (v157).** A new career opens with YOUR FIRST WEEK over the campus's left: pick your nine
       (Training), meet the squad (the clubhouse's Squad), answer the phone (Transfers: it rings in pre-season), play
       your first match -- each ticked as it's done and a tap to where it's done (the match: the week's button, lit);
@@ -2491,6 +2501,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v158: touch first.** Everything a drag does, a tap does too: on Training's Selection your keeper or a man not
+  taken, tapped, then anyone -- they swap; on Training's pitch and in a match's ALL SUBS, a man tapped, SWAP on his
+  card, then the other man (in a match, off the bench that's a sub). A career's whole round -- a new career, your
+  nine, a bid, a match, a sub -- by taps on a phone held sideways, measured. A ✕ takes a tap from round it, and a
+  bid's quick figures are a size up. TEXT SIZE in Settings: LARGE puts a building's screens a size up, their buttons
+  with them. See **Touch first (v158)**.
 - **v157: a new career's first week, empty screens and the match's buttons.** The menu says NEW CAREER (it said NEW
   GAME). A new career's campus has YOUR FIRST WEEK: pick your nine, meet the squad, answer the phone, play your first
   match -- ticked as each is done, a tap to where it's done, ✕ to put it away, gone by itself when all four are. An

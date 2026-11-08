@@ -634,12 +634,21 @@
   .cpClub img{ width:16px; height:18px; image-rendering:pixelated; }
   .cpClub img:not([src]){ display:none; }
   .cpNotes{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  :root[data-text="large"] #bpBody, :root[data-text="large"] #bpFoot{ zoom:1.15; }   /* (v158: TEXT SIZE, LARGE -- a building's screens a size up, and their buttons with them; the pages fit what's left) */
+  .ptk.armed{ outline:2px dashed var(--acc); outline-offset:3px; }   /* (v158: A TAP TO SWAP) */
+  .tSwap{ display:block; margin:6px 0 0 auto; padding:3px 8px; } .mgCardOvr + .tSwap{ margin-top:4px; }
   .cpFirst{ position:absolute; left:10px; top:54px; z-index:5; width:min(200px,42%); padding:6px 8px 7px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; }   /* (v157: YOUR FIRST WEEK) */
   .fwHead{ display:flex; align-items:center; justify-content:space-between; font-size:10px; letter-spacing:1px; color:var(--acc); margin-bottom:3px; }
   .fwX{ font:11px 'FTC Dot',monospace; color:var(--dim); background:none; border:0; padding:0 2px; cursor:pointer; }
   .fwRow{ display:flex; gap:6px; width:100%; text-align:left; font:11px 'FTC Dot',monospace; color:var(--ink); background:none; border:0; padding:2px 0; cursor:pointer; }
   .fwRow b{ width:9px; font-weight:400; color:var(--acc); } .fwRow.done{ color:var(--good); } .fwRow.done b{ color:var(--good); }
   .chPlay.flash{ outline:2px solid var(--acc); outline-offset:2px; }
+  /* (v158) BIGGER PLACES TO TAP: a ✕ (YOUR FIRST WEEK's, the papers') and +N MORE take a tap from round them too, as
+     they look -- only outside a box that pages: there a wider place runs past its foot -- and a bid's quick figures
+     are a size up */
+  .fwX, .plX, .chMore{ position:relative; }
+  .fwX::after, .plX::after{ content:''; position:absolute; inset:-9px; } .chMore::after{ content:''; position:absolute; inset:-6px -4px; }
+  .mgQuick .mgMini{ padding:5px 8px; }
   .chMore{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--acc); background:none; border:0; padding:0 2px; cursor:pointer; pointer-events:auto; }   /* (v153) */
   .cpNotes .chWarn{ margin:0; max-width:100%; padding:5px 10px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; line-height:1.4; white-space:normal; text-align:center; }
   .cpFoot{ position:absolute; left:10px; right:10px; bottom:8px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:8px; pointer-events:none; }
@@ -2204,7 +2213,8 @@
   const cpu=p=>cpuT(p&&p.team);
   function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||4),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
     try{ SPRITE.enable(PREFS.art!==false); PITCH.enable(PREFS.art!==false); }catch(e){}
-    applyTheme(); try{ document.getElementById('careerHub').classList.toggle('cpRight',PREFS.side==='right'); }catch(e){} }
+    applyTheme(); try{ document.getElementById('careerHub').classList.toggle('cpRight',PREFS.side==='right'); }catch(e){}
+    try{ if(PREFS.text==='l') document.documentElement.dataset.text='large'; else delete document.documentElement.dataset.text; }catch(e){} }   // (v158: TEXT SIZE)
   // the colour scheme: data-theme on <html> swaps the PIXEL THEME's variables; the canvas reads its few colours from them (TC)
   const TC={acc:'#ff9c40', ink:'#f4f7ff', bg:'#121a33'};
   function applyTheme(){ const t=THEMES.includes(PREFS.theme)?PREFS.theme:'blue', root=document.documentElement;
@@ -15409,7 +15419,7 @@
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,L,T,kind,role,k,pos,n,cc){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);   // (pos: the spot's fit -- spotFit)
-    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
+    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false);   // (theirs are theirs: their men show their ratings)
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
@@ -15418,7 +15428,8 @@
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs" data-xpl="stam"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
       +posRowHtml(e)+legs+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+ratingWhy(e.ovr,at,fc)+'</div></div>';   // (v152: the number named)
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+ratingWhy(e.ovr,at,fc)
+      +(t==='G'&&!SUBS.G.off.includes(si)?'<button class="mgMini tSwap" data-mtarm="'+si+'">'+(MT.arm===si?'NOW THE OTHER MAN':'SWAP')+'</button>':'')+'</div></div>';   // (v152: the number named; v158: A TAP TO SWAP)
     return h+sixHtml(e.stats,e.role)+'</div>'; }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'?' r':'')+'">';
     if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -15448,7 +15459,7 @@
     document.getElementById('mtSubs').textContent=MT.pre?'BEFORE KICK-OFF':mtBench('G').length||SUBS.G.used?'SUBS LEFT '+(SUB_MAX-SUBS.G.used):''; }
   // pre: before an exhibition's kick-off (kickOffExhibition) -- ◀ CLUBS back to the setup screen, KICK OFF ▶ to play, and a
   // man off the bench for one in the team a change of team, not a sub (mtLineup)
-  function openMatchTac(pre){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.pre=!!pre; menuOpen=true;
+  function openMatchTac(pre){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.arm=null; MT.pre=!!pre; menuOpen=true;
     const ov=document.getElementById('mtacOv'); ov.classList.add('on'); ov.classList.toggle('pre',MT.pre);
     ov.querySelector('.bpTopBack').textContent=MT.pre?'◀ CLUBS':'◀ BACK'; renderMatchTac(); }
   function closeMatchTac(){ if(MT.pre){ mtBackToClubs(); return; }
@@ -15598,7 +15609,10 @@
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
     const mi=e.target.closest('[data-mti]'); if(mi){ if(mi.disabled||t!=='G') return; tiNoteK=mi.dataset.mti; setMatchTI(t,mi.dataset.mti,mi.dataset.v); renderMatchTac(); return; }
     const tr=e.target.closest('[data-tirow]'); if(tr){ tiNoteK=tr.dataset.tirow; renderMatchTac(); return; }
-    const tk=e.target.closest('[data-mtk]'); if(tk){ MT.sel=+tk.dataset.si; cardSide='rate'; renderMatchTac(); return; } });   // (a man tapped: his card)
+    const am=e.target.closest('[data-mtarm]'); if(am){ const si=+am.dataset.mtarm; MT.arm=MT.arm===si?null:si; renderMatchTac(); return; }   // (v158: A TAP TO SWAP -- SWAP on his card, then the other man)
+    const tk=e.target.closest('[data-mtk]'); if(tk){ const si=+tk.dataset.si;
+      if(MT.arm!=null&&MT.arm!==si&&t==='G'){ const a=document.querySelector('#mtacOv .tacB1:not(.ro) .ptk[data-si="'+MT.arm+'"]'); MT.arm=null; if(a) mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si,kind:tk.dataset.mtk}); renderMatchTac(); return; }
+      MT.arm=null; MT.sel=si; cardSide='rate'; renderMatchTac(); return; } });   // (a man tapped: his card)
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
     can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtBenchOK(MT.team)); },
     lift(el){ const e=SQUAD[MT.team][+el.dataset.si]; if(!e) return;
@@ -15693,11 +15707,12 @@
     ['theme','COLOURS',[['blue','BLUE'],['ruby','RUBY'],['silver','SILVER'],['mint','MINT']],'the menus'],
     ['side','CAMPUS MENU',[['left','LEFT'],['right','RIGHT']],'the side of the career’s campus its buildings are listed down'],
     ['ht','HALF-TIME',[['wait','A BREAK'],['on','PLAY ON']],'a break with the score and the numbers so far, for subs and tactics -- or straight on'],
-    ['tips','TIPS',[[1,'ON'],[0,'OFF']],'a word on the controls the first time each comes up in a match (on again: from the start)']];
+    ['tips','TIPS',[[1,'ON'],[0,'OFF']],'a word on the controls the first time each comes up in a match (on again: from the start)'],
+    ['text','TEXT SIZE',[['n','NORMAL'],['l','LARGE']],'the career’s screens: larger text, and larger buttons with it (v158)']];
   function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
     el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
       +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
-  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side'||k==='diff'||k==='ht')?raw:+raw; if(k==='tips'&&PREFS.tips) PREFS.tipsSeen=''; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
+  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side'||k==='diff'||k==='ht'||k==='text')?raw:+raw; if(k==='tips'&&PREFS.tips) PREFS.tipsSeen=''; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
   function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
     if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
     else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
@@ -18828,7 +18843,7 @@
   // THE RIGHT COLUMN HAS TWO SIDES: the man you tapped (his ratings: the six, each opening on what it's made of) and the
   // team's instructions for this phase (tiPanelHtml) -- INSTRUCTIONS, up in the top row left of BEST 9, lit while they're
   // up: a tap on it again, or on a man, and it's his card (v116: before, a button on his card turned it over)
-  let cardSide='rate';
+  let cardSide='rate', TARM=null;   // (TARM, v158: the man whose SWAP was tapped -- the next man tapped changes places with him)
   const insBtn=()=>'<button class="mgBtn tbIns'+(cardSide==='instr'?' go':'')+'" data-cside="'+(cardSide==='instr'?'rate':'instr')+'">INSTRUCTIONS</button>';
   function tiSideHtml(o,phase,attr,ro){ return '<div class="tbCard tiCard">'+tiPanelHtml(o,phase,attr,ro,null,'')+'</div>'; }
   // a man tapped while the instructions are up: his card, and INSTRUCTIONS unlit (root: the screen it's on)
@@ -18845,7 +18860,7 @@
     return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)+legs+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+trendHtml(p)+'</div>'+ratingWhy(p.ovr,at,fc,today,why.join(', '))+'</div></div>'
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+trendHtml(p)+'</div>'+ratingWhy(p.ovr,at,fc,today,why.join(', '))+'<button class="mgMini tSwap" data-tarm="'+ri+'">'+(TARM===ri?'NOW THE OTHER MAN':'SWAP')+'</button></div></div>'
       +sixHtml(st,p.role)+'</div>'; }
   // TACTICS: the pitch first, on its side as in a match (your goal on the left) -- the shape, width and style in one row of
   // menus above it, the bench under it, the man you tapped on the right. Hold a man and drag him onto another to swap them
@@ -18878,7 +18893,7 @@
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
   function tbTok(d, ri, L, T, kind, phase, slotRole, k, pos, n, cc){ const p=d.roster[ri]; if(!p) return '';   // (pos: the spot's fit -- spotFit)
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
-    return '<button class="ptk'+fitCls(fitPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+(p.inj?' inj':'')+'"'
+    return '<button class="ptk'+fitCls(fitPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+(TARM===ri?' armed':'')+(p.inj?' inj':'')+'"'
       +(kind==='bench'?'':ptkAt(L,T,slotRole,k,n,cc))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
       +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
   // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
@@ -18956,7 +18971,7 @@
     const plans=qpPlans(d), sel=MGUI.qpSel, byId=id=>R.find(p=>p.id===id), tag=id=>{ const p=byId(id); return p?'#'+(p.num||'')+' '+mgEsc(surname(p.name||'')):''; };
     const row=k=>{ const p=R[L[k]]; if(!p) return ''; const sl=k===0?{role:'GK',pos:'GK'}:k<n8?A[k-1]:null;
       const side=k>0&&k<n8?'xi':k>=n8&&k<nb&&p.role!=='GK'?'bench':null, pair=side==='xi'?plans.find(q=>q.off===p.id):side==='bench'?plans.find(q=>q.on===p.id):null;
-      const on=!!(side&&sel&&sel.side===side&&sel.id===p.id);
+      const on=!!(side&&sel&&sel.side===side&&sel.id===p.id)||MGUI.selPick===k;   // (v158: or picked to move, A TAP TO MOVE A MAN)
       return '<div class="selRow'+(sl?' slot'+fitCls(fitPos(p),sl.role,spotFit(sl)):'')+(p.inj?' inj':'')+(on?' qpOn':'')+(pair?' paired':'')+'" data-k="'+k+'"'
         +(side?' data-mg="qpick" data-side="'+side+'" data-qid="'+p.id+'"':'')+'><span class="slK">'+(k+1)+'</span><span class="slNm">'+(p.inj?'<b class="injX">✚</b>':'')+mgEsc(initName(p.name))+'</span>'
         +(pair?'<span class="qpTo">'+(side==='xi'?'▸ '+tag(pair.on).split(' ')[0]:'◂ '+tag(pair.off).split(' ')[0])+'</span>':'')
@@ -18965,7 +18980,7 @@
     let plan=''; for(let k=0;k<SUB_MAX;k++){ const q=plans[k];
       plan+=q?'<div class="qpRow qpPair"><span class="slK">'+(k+1)+'</span><span class="slNm">'+tag(q.off)+' ▸ '+tag(q.on)+'</span><button class="qpX" data-mg="qpdel" data-k="'+k+'" aria-label="take this sub off the plan">✕</button></div>'
         :'<div class="qpRow qpPair empty"><span class="slK">'+(k+1)+'</span><span class="slNm">—</span></div>'; }
-    plan+='<div class="qpHint">'+(sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.':'Tap a man on the pitch, then one on the bench: in the match they\'re first on your quick subs.')+'</div>';
+    plan+='<div class="qpHint">'+(MGUI.selPick!=null?'Now the man to swap him with (him again: let go).':sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.':'Tap a man on the pitch, then one on the bench: in the match they\'re first on your quick subs. Your keeper or a man not taken, tapped, then anyone: they swap.')+'</div>';
     return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb,SUB_MAX+2)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)
       +'<div class="selCol qpCol" data-grp="qs"><div class="selHd">QUICK SUBS · '+plans.length+' OF '+SUB_MAX+'</div>'+plan+'</div></div></div>'; }
   // a man of the pitch and one of the bench, tapped in turn: paired (taking the place of either's last pair)
@@ -18982,6 +18997,12 @@
     if(swap){ const f=x=>x===a?b:x===b?a:x; lu.gk=f(lu.gk); lu.atk=lu.atk.map(f); lu.def=lu.def.map(f); lu.bench=lu.bench.map(f); return true; }
     if(from<n8||to<n8) return false;
     const B=lu.bench, m=B.splice(from-n8,1)[0]; B.splice(to-n8,0,m); return true; }
+  // A TAP TO MOVE A MAN (v158), as a drag does, on Training's Selection: your keeper or a man not taken, tapped, is
+  // picked (lit); then any man -- the two change places (a tap on him again lets him go). Taps on your nine and the bench
+  // still plan your quick subs, unless a man's picked. On a phone without dragging, he could be moved only by dragging
+  function selTap(d,k){ if(MGUI.selPick==null){ MGUI.selPick=k; MGUI.qpSel=null; rerenderOffice(); return; }
+    if(MGUI.selPick===k){ MGUI.selPick=null; rerenderOffice(); return; }
+    const from=MGUI.selPick; MGUI.selPick=null; if(selMove(d,from,k,true)) mgSave(d); rerenderOffice(); }
   function rerenderOffice(){ if(curBldg==='train'||curBldg==='club') paintBuilding(); }
   function showNote(msg,color){ const el=document.getElementById('chNote'); if(!el)return; el.textContent=msg; el.style.color=color||'var(--warn)'; el.style.display='block'; clearTimeout(showNote._t); showNote._t=setTimeout(()=>{ el.style.display='none'; },6000); }
   // ---- Stadium screen ----
@@ -20135,7 +20156,7 @@
     if(!d.w149){ econV149(d); d.w149=true; }   // (v149: the real game's money -- econV149)
     return d; }
   let curBldg=null; const curTab={};
-  function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
+  function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null; MGUI.selPick=null; TARM=null;
     { const D=CAREER&&CAREER.data; if(D&&D.fw&&id==='train') D.fw.nine=1; }   // (v157: YOUR FIRST WEEK)
     Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',tier:null,ntier:null,role:'ALL',noPile:false,drop:null});   // (the Search's filters stay as you left them; none of its drop-downs open)
     document.getElementById('bpTitle').innerHTML=b.title;
@@ -20253,7 +20274,8 @@
       case 'dbuy': case 'dout': { const err=placeStart(d,ds.id,a==='dbuy'); if(err) say(err,'var(--bad)'); else return; break; }
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'var(--bad)':'var(--good)'); break; }
       case 'best8': mgAutoLineup(d); statViewRi=null; say('Your best nine are picked.','var(--good)'); break;
-      case 'qpick': { const side=ds.side, id=+ds.qid, sel=MGUI.qpSel;            // (the Selection tab's quick subs: see mgSelectTab)
+      case 'qpick': { if(MGUI.selPick!=null){ const k=+ds.k; if(MGUI.selPick===k) MGUI.selPick=null; else { const from=MGUI.selPick; MGUI.selPick=null; if(selMove(d,from,k,true)) mgSave(d); } break; }   // (v158: a man picked to move: this is where he goes)
+        const side=ds.side, id=+ds.qid, sel=MGUI.qpSel;            // (the Selection tab's quick subs: see mgSelectTab)
         if(!sel||sel.side===side){ MGUI.qpSel=sel&&sel.id===id?null:{side,id}; break; }
         const err=qpPair(d,side==='xi'?id:sel.id,side==='bench'?id:sel.id); MGUI.qpSel=null; if(err) say(err); break; }
       case 'qpdel': { const plans=qpPlans(d); plans.splice(+ds.k,1); d.qsubs=plans; MGUI.qpSel=null; break; }
@@ -20308,7 +20330,11 @@
     const ci=e.target.closest('[data-cti]'); if(ci){ const d=CAREER&&CAREER.data; tiNoteK=ci.dataset.cti; if(d&&!ci.disabled){ ensureForms(d); if(tiSet(d.ti,ci.dataset.cti,ci.dataset.v)) mgSave(d); } paintCareerRight(d); return; }   // a team instruction
     const cr=e.target.closest('[data-tirow]'); if(cr){ const d=CAREER&&CAREER.data; tiNoteK=cr.dataset.tirow; if(d) paintCareerRight(d); return; }       // (its note)
     const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cs.disabled){ d.style=setStyle('G',cs.dataset.cstyle); d.ti=tiDefault(d.style); mgSave(d); mgRerender(); } return; }   // (a style sets its instructions too)
-    const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; } tacticTap(tc); return; }
+    const ta=e.target.closest('[data-tarm]'); if(ta){ const ri=+ta.dataset.tarm; TARM=TARM===ri?null:ri; const d=CAREER&&CAREER.data; if(d) paintBuilding(); return; }   // (v158: A TAP TO SWAP)
+    const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; }
+      if(TARM!=null&&+tc.dataset.ri!==TARM){ const d=CAREER&&CAREER.data, a=document.querySelector('#bpBody .ptk[data-tac][data-ri="'+TARM+'"]'); TARM=null;
+        if(d&&a){ careerSwap(d,{ri:+a.dataset.ri,kind:a.dataset.tac},{ri:+tc.dataset.ri,kind:tc.dataset.tac},tacPhase); statViewRi=+a.dataset.ri; mgSave(d); } rerenderOffice(); return; }
+      TARM=null; tacticTap(tc); return; }
     const sd=e.target.closest('[data-stad]'); if(sd){ applyStadium(sd.dataset.stad, sd.dataset); return; }
     const mg=e.target.closest('[data-mg]'); if(mg){ if(!mg.disabled) mgAct(mg.dataset.mg, mg.dataset); return; }
     const cp=e.target.closest('[data-cp]'); if(cp){ if(!cp.disabled) placeAct(cp.dataset.cp); return; }
@@ -20407,7 +20433,8 @@
       e.preventDefault(); st.ghost.style.left=(e.clientX-st.dx)+'px'; st.ghost.style.top=(e.clientY-st.dy)+'px';
       const a=aim(e.clientX,e.clientY);
       if((!a)!==(!st.aim)||(a&&(a.el!==st.aim.el||a.cls!==st.aim.cls))){ unmark(); st.aim=a; if(a) a.el.classList.add(a.cls); } },{passive:false});
-    const end=e=>{ if(!st||e.pointerId!==st.id) return; const s=st; st=null; if(!s.live) return;
+    const end=e=>{ if(!st||e.pointerId!==st.id) return; const s=st; st=null;
+      if(!s.live){ if(e.type==='pointerup'&&!s.el.dataset.mg){ const d=CAREER&&CAREER.data; if(d) selTap(d,s.k); } return; }   // (v158: A TAP TO MOVE A MAN)
       s.ghost.remove(); s.el.classList.remove('lifted'); unmark(); quiet();
       const d=CAREER&&CAREER.data; if(d&&s.aim&&e.type==='pointerup'&&selMove(d,s.k,s.aim.k,s.aim.swap)){ mgSave(d); rerenderOffice(); } };
     addEventListener('pointerup',end); addEventListener('pointercancel',end); })();
