@@ -1066,14 +1066,39 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     goes through a gap in it -- between two of their back line 3 m or more apart, or, the run being out past their
     outside man, between him and the touchline -- and bends on round onto the runner along a steady arc (the same
     turn every metre, however it slows), as much as that takes and as much as the passer's Curve gives him: 6° of
-    turn over its flight at Curve 1, 34° at 10 (over 15 m, from a few centimetres off the straight line to about a
-    metre). He chooses it on that path, not on a straight line through a man, so a passer who can bend it finds
+    turn over its flight at Curve 1, 43° at 10 (34° before v165; over 15 m, from a few centimetres off the straight
+    line to a metre and a quarter). He chooses it on that path, not on a straight line through a man, so a passer who can bend it finds
     balls in behind that one who can't misses: where the straight ball goes a couple of metres from one of theirs, a
     Curve 10 passer bends it away from him and its chance of getting there goes from about 0.23 to 0.30; out wide,
     with the runner outside their full-back, from 0.36 to 0.60. One he'd have to bend more than he can, he bends as
     far as he can (or half that, if the full bend takes it onto the next man), or plays it straight. It's weighted
     as any through ball is, a touch harder for the longer way round; everyone reading the ball reads the bend, and
     a touch on the way ends it. Yours go where you drag them, as before.
+  - **Curve in through balls (v165).** Curve counted for nothing in your through balls, and worse than nothing at
+    10. Measured on 1000 varied scenes a Curve (a man breaking past a back line of two at an angle, their keeper in
+    goal, everyone fresh and free to go for the ball), 68 in 100 of your through balls ended up yours at Curve 1 and
+    63 at 10. The reasons, and what's changed:
+    - **Your man reads the bend.** Once a through ball's played he's yours, run onto it while you leave the stick
+      alone, and he ran to where it would come down if it went straight: for a bent one, a long way wrong (10 m off
+      in the test's scene). He now runs to the spot it was played to, then after the ball once it's past, as your
+      team-mates always have. A straight one he reads as before.
+    - **No bending round a man it's flying over.** Your through ball is lifted as any pass is (over 10 m or so it's
+      over a man's head for most of the way), but it bent round a man on its line wherever he was: in more than half
+      the scenes, round a man who couldn't have touched it. Now only a man it'll be low enough for counts.
+    - **Bent away from the man closing on it.** With nobody in its way and one of theirs closing on where it's going
+      -- the one of theirs who'd be there soonest, if he'd be there by the time it is (none of it half a second
+      behind it) -- it's bent away from him, so it comes in from his far side. Otherwise into the runner's path, from
+      3° off his line (a long pass, 7°).
+    - **More bend.** A through ball turns up to 29° over its flight at Curve 10, 16° at 5.5, 2° at 1 (a long pass,
+      still 16° at most). The computer's round their line, up to 43° (34°).
+    - **Harder to deal with.** As a curling cross is, by the bend it was struck with, till anyone gets a touch on it:
+      a man of theirs has up to a fifth less reach for it at Curve 10 (a ball 0.9 of his reach off him he gets to
+      straight, and not curling), and a worse touch on it (on the game's 0 to 1 scale, about a quarter lower); the
+      man it's for takes it a little the cleaner. The computer's men read it so, cutting it out and choosing it.
+    - **What it comes to.** Your through balls on the same 1000 scenes a Curve: 69 in 100 yours at Curve 1, 68 at
+      5.5, 70 at 10 -- Curve no longer costs you. The computer's (a team-mate's, or theirs, chosen as the computer
+      chooses, along the grass: 419 a Curve where it chose one), 70 in 100 getting to their man at Curve 1 and 75 at
+      10, where it was 68 and 71.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for his line (see **Ratings**).
 
@@ -2576,6 +2601,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v165: Curve in through balls.** Your man, run onto your through ball, reads its bend: he ran to where it would
+  come down if it went straight, a long way wrong for a bent one, so Curve cost you through balls (68 in 100 ended up
+  yours at Curve 1, 63 at 10); now about the same at either. A through ball bends up to 29° at Curve 10 (16°), the
+  computer's round their line up to 43° (34°); it bends away from a man of theirs closing on where it's going, not
+  round a man it's flying over; and a curling one is harder for them to deal with, as a curling cross is. See
+  **Curve in through balls (v165)**.
 - **v164: he's yours.** After a signing or a new deal -- from the market, his card or the papers -- an overview of the
   man: his figure, number, position, archetype, age, rating and potential, where he came from and what he cost (or
   his old wage and his new), his wage and contract, where he is in your squad, his six; SEE HIM IN THE SQUAD or DONE.

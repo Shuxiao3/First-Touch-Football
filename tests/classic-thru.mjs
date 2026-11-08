@@ -1,7 +1,7 @@
 // FOOTBALL CLASSIC, THROUGH BALLS ROUND THEIR LINE: the computer's through ball to a man running in behind their back
 // line goes through a gap in it -- between two of them, or between the outside one and the touchline when the run's out
 // there -- and bends on round onto the runner along a steady arc (the same turn every metre, however it slows), as much
-// as that takes and as much as the passer's Curve gives him (6 degrees of turn at Curve 1, 34 at 10). The pass is chosen
+// as that takes and as much as the passer's Curve gives him (6 degrees of turn at Curve 1, 43 at 10 -- v165: 34 before). The pass is chosen
 // on that path, not on a straight line through a man. The ball goes the way it was chosen for, a read of its path reads
 // the bend, and a touch on the way ends it.
 // On a copy of the game that lets the test set the scene and reach the passes.
@@ -63,7 +63,7 @@ const arcs = await page.evaluate(() => { const out = {};
     out['max' + cv] = +(T.thruArcOf(S.p) * 57.3).toFixed(1); }
   return out; });
 info('the bend: Curve 10 (' + arcs.max10 + '° at most): ' + JSON.stringify(arcs[10]) + '; Curve 1 (' + arcs.max1 + '°): ' + JSON.stringify(arcs[1]));
-ok(Math.abs(arcs.max10 - 34.4) < 0.2 && Math.abs(arcs.max1 - 5.7) < 0.2, 'as much bend as his Curve gives him: 6 degrees of turn at Curve 1, 34 at 10');
+ok(Math.abs(arcs.max10 - 43) < 0.2 && Math.abs(arcs.max1 - 5.7) < 0.2, 'as much bend as his Curve gives him: 6 degrees of turn at Curve 1, 43 at 10 (v165: 34 before)');
 ok(arcs[10].length && arcs[10][0].near < 0.15 && arcs[10][0].deg > 20 && arcs[10][0].deg < 30 && arcs[10][0].end < 0.01, 'Curve 10: bent through the middle of the gap (' + (arcs[10][0] && arcs[10][0].near) + ' m off it, ' + (arcs[10][0] && arcs[10][0].deg) + '° of turn) and on to the spot');
 ok(arcs[1].length && arcs[1][0].deg === arcs.max1 && arcs[1][0].near > 0.4 && arcs[1][0].end < 0.01, 'Curve 1: as far that way as he can bend it (' + (arcs[1][0] && arcs[1][0].deg) + '°), ' + (arcs[1][0] && arcs[1][0].near) + ' m short of the middle of the gap');
 
