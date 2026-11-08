@@ -321,6 +321,29 @@
   .pauseExit{ color:#ff8a7d; border-color:rgb(var(--badRGB) / .35); }
   .pauseExit:hover{ background:rgb(var(--badRGB) / .12); border-color:var(--bad); }
   .pauseBack{ color:var(--dim); }
+  /* (v148) after a game you played, where a window is in the run: 2 OF 5 */
+  .seqTag{ color:var(--dim); font-size:10px; letter-spacing:1px; white-space:nowrap; font-weight:400; }
+  /* (v148) HOW TO PLAY: the controls, a row each */
+  .ctlCard{ max-width:660px; gap:8px; }
+  .ctlRows{ display:grid; grid-template-columns:max-content 1fr; gap:5px 12px; align-items:baseline; min-height:0; overflow:hidden; }
+  .ctlRows b{ font:12px 'FTC Dot',monospace; font-weight:400; color:var(--acc); letter-spacing:1px; white-space:nowrap; text-align:right; }
+  .ctlRows span{ font-size:12px; line-height:1.35; color:var(--ink2); }
+  .ctlNote{ font-size:11px; color:var(--dim); text-align:center; }
+  @media (max-height:430px){ .ctlCard{ gap:4px; } .ctlRows{ gap:1px 10px; } .ctlRows span{ font-size:10.5px; line-height:1.22; } .ctlRows b{ font-size:10.5px; } .ctlNote{ display:none; } }
+  /* (v148) HALF TIME: the score, the goals, the numbers so far; subs, tactics, on */
+  .htCard{ max-width:460px; gap:8px; }
+  .htNames{ display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; font-size:12px; color:var(--ink2); } .htNames span:last-child{ text-align:right; }
+  .htScore{ font:30px 'FTC Dot',monospace; color:var(--ink); letter-spacing:2px; }
+  .htGoals{ font-size:11px; color:var(--dim); text-align:center; line-height:1.4; }
+  .htStats{ display:grid; grid-template-columns:1fr auto 1fr; gap:1px 12px; font:12px 'FTC Dot',monospace; color:var(--ink2); }
+  .htStats i{ font-style:normal; color:var(--dim); font-size:10px; letter-spacing:1px; text-align:center; } .htStats span:nth-child(3n){ text-align:right; }
+  .htBtns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; } .htBtns .htGo{ grid-column:1/-1; }
+  @media (max-height:430px){ .htScore{ font-size:22px; } .htCard{ gap:4px; } .htStats{ font-size:11px; } }
+  /* (v148) a word on the controls, the first time each comes up in a match */
+  #tipBar{ position:absolute; left:50%; top:48px; transform:translateX(-50%); width:max-content; max-width:min(580px,92%); padding:7px 12px; border-radius:8px; background:rgb(0 0 0 / .74);
+    color:var(--ink); font:12px 'FTC Dot',monospace; letter-spacing:.5px; line-height:1.4; text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; z-index:30; }
+  #tipBar.on{ opacity:1; } #tipBar b{ color:var(--acc); font-weight:400; }
+  #ctlBtn{ margin-left:0; } #stageWrap.labMode #ctlBtn{ display:none; }   /* (right of the menu: your man's window stays beside it) */
   .menuOverlay{position:fixed;inset:0;z-index:50;background:rgba(4,8,5,.86);
     display:flex;align-items:flex-start;justify-content:center;overflow:hidden;backdrop-filter:blur(2px);
     padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));}
@@ -1444,6 +1467,7 @@
 
 <div id="stageWrap">
   <canvas id="c" width="920" height="540"></canvas>
+  <div id="tipBar" aria-live="polite"></div>
   <div id="startMenu">
     <div class="smCenter">
       <div class="smTitle">FOOTBALL<span class="dot">.</span> CLASSIC</div>
@@ -1554,6 +1578,7 @@
     <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop">SUBS <b id="qsLeft"></b><i>▾</i></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
     <div class="chip" id="rPlayer"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
     <button id="menuBtn" class="chip menuChip">☰</button>
+    <button id="ctlBtn" class="chip menuChip ctlChip" aria-label="how to play: the controls" title="How to play">?</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
   </div>
   <div id="labHud" class="labUI">
@@ -1621,10 +1646,11 @@
     <div class="pauseGrid" id="pauseGrid">
       <button class="pauseBtn" data-pause="tactics">TACTICS</button>
       <button class="pauseBtn" data-pause="skills">SKILL MOVES</button>
+      <button class="pauseBtn" data-pause="controls">CONTROLS</button>
       <button class="pauseBtn" data-pause="settings">SETTINGS</button>
       <button class="pauseBtn pauseExit" data-pause="exit">EXIT GAME</button>
       <button class="pauseBtn pauseSim" data-pause="simrest">SIM THE REST ⏭</button>
-      <button class="pauseBtn pauseBack" data-pause="back">◀ BACK TO GAME</button>
+      <button class="pauseBtn pauseBack" data-pause="back" style="grid-column:1/-1">◀ BACK TO GAME</button>
       <button class="pauseBtn devOnly" data-pause="oldtac" style="grid-column:1/-1">DEV · OLD TACTICS MENU</button>
     </div>
   </div>
@@ -1680,6 +1706,8 @@
 <div id="pileModal" class="pauseOv"><div class="pauseCard pileCard"></div></div>
 <div id="pressModal" class="pauseOv"><div class="pauseCard prCard"></div></div>
 <div id="moneyModal" class="pauseOv"><div class="pauseCard mnCard"></div></div>
+<div id="ctlModal" class="pauseOv"><div class="pauseCard ctlCard"></div></div>
+<div id="htModal" class="pauseOv"><div class="pauseCard htCard"></div></div>
 <div id="menu" class="menuOverlay" style="display:none">
   <div class="menuCard">
     <div class="menuTop">
@@ -2094,7 +2122,7 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:4, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', pv:1, cornerBox:4, cornerBack:2};   // (v142: cornerBox, cornerBack -- your corners' set-up)
+  const PREFS={halfMin:4, oppShift:0, art:true, theme:'blue', side:'left', diff:'normal', pv:1, cornerBox:4, cornerBack:2, ht:'wait', tips:1, tipsSeen:'', seenCtl:0};   // (v142: cornerBox, cornerBack -- your corners' set-up; v148: ht -- a break at half-time or PLAY ON; tips, tipsSeen -- a word on the controls the first time each comes up; seenCtl -- the controls card seen before a first career match)
   const THEMES=['blue','ruby','silver','mint'];
   // (v136: 4 minutes a half unless you pick another -- it was 3. Settings kept from before kept the old 3 along with
   // everything else, picked or not, so a kept 3 from then is the new 4; pv marks settings kept since)
@@ -2463,7 +2491,7 @@
   }
   // ============ SQUADS: unique per-player stat blocks ============
   const SQUAD_V=1;
-  let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false;
+  let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false, ctlOpen=false, htOpen=false;   // (v148: the controls card, half-time)
   const OUT_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','composure','crossing','heading','slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc'];
   const GK_KEYS=['keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const ALL_STAT_KEYS=[...OUT_KEYS,...GK_KEYS];
@@ -3546,7 +3574,8 @@
   let lastMoveKey='', lastMoveT=0, lastPadTapT=0;
   addEventListener('keydown',e=>{
     if(teOpen) return;
-    if(SCREEN!=='match'){ startMenuKey(e); return; }
+    if(SCREEN!=='match'){ if(!ctlOpen) startMenuKey(e); return; }
+    if(ctlOpen||htOpen){ if(htOpen&&!menuOpen&&e.code==='Enter') htGo(); return; }   // (v148: the controls card, half-time: the match waits)
     if(e.target&&e.target.tagName==='INPUT'&&e.target.closest('.labUI')) return;   // a focused lab slider keeps its arrow keys
     if(LAB.on&&!e.repeat&&!pauseOpen&&!settingsOpen&&!skillsOpen&&!menuOpen&&labKey(e.code)){ e.preventDefault(); return; }
     if(!e.repeat){
@@ -3638,7 +3667,7 @@
     moveStick();
   }
   const wrapEl=document.getElementById('stageWrap');
-  const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !skillsOpen && !matchOver;
+  const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !skillsOpen && !ctlOpen && !htOpen && !matchOver;
   const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip,.qsUI,.csUI'));   // on-screen buttons (☰, Trap Lab, quick subs; v142: your corner's set-up) take taps as clicks
   let swTouch=null;          // a finger on SWITCH: where it landed
   const tapStart={};        // finger id -> where and when it landed, and the team-mate under it (for a touch pass)
@@ -13087,7 +13116,7 @@
     try{
     const rdt=Math.min(0.033,(t-last)/1000||0.016);last=t;
     const dt=LAB.on?rdt*LAB.slow:rdt;                  // the Trap Lab can run the game in slow motion
-    if(menuOpen || pauseOpen || settingsOpen || skillsOpen || SCREEN!=='match'){ requestAnimationFrame(frame); return; }
+    if(menuOpen || pauseOpen || settingsOpen || skillsOpen || ctlOpen || htOpen || SCREEN!=='match'){ requestAnimationFrame(frame); return; }
     if(matchOver && careerFix && !careerFix.recorded){ careerFix.recorded=true; const cf=careerFix; setTimeout(()=>finishCareerMatch(cf),1600); }
     nanChk('FRAME-START');
     // GLOBAL ENTITY SANITIZE: scrub any non-finite position/velocity/facing on every player &
@@ -13456,7 +13485,7 @@
     }
     { const d=document.getElementById('rDir');
       if(d) d.textContent = atkOf('G')>0 ? '▶' : '◀'; }
-    playerHud(); qsTick(dt);
+    playerHud(); qsTick(dt); tipTick(dt);
     if(LAB.on) labHud();
     if(gradeFade>0) gradeFade-=dt;
     if(venueT>0) venueT-=dt;   // a touch's grade is kept (lastGrade) but no longer shown
@@ -13841,6 +13870,7 @@
       resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
       switchEnds();                 // swap which goal each team attacks
       resetKickoff('R');            // the team that didn't start (Red) kicks off the second half
+      if(htWants()) htShow();       // (v148: the break -- the score, the numbers so far, subs and tactics)
       return;
     }
     matchOver=true; breakT=1e9;
@@ -15284,7 +15314,7 @@
   // The other side: look, don't touch. =====
   const SUB_MAX=3;
   let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
-  const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false};
+  const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false, fromHT:false};   // (v148: fromHT -- opened from half-time, and back to it)
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
   const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
   function mtRating(e,role,pos){ return !e?0:rateAt(e.role,e.ovr,e.stats,fitPos(e),role,pos); }
@@ -15340,7 +15370,9 @@
     const ov=document.getElementById('mtacOv'); ov.classList.add('on'); ov.classList.toggle('pre',MT.pre);
     ov.querySelector('.bpTopBack').textContent=MT.pre?'◀ CLUBS':'◀ BACK'; renderMatchTac(); }
   function closeMatchTac(){ if(MT.pre){ mtBackToClubs(); return; }
-    menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on'); if(SCREEN==='match') openPause(); }
+    menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on');
+    if(MT.fromHT){ MT.fromHT=false; htShow(); return; }   // (v148: from half-time, back to it)
+    if(SCREEN==='match') openPause(); }
   function mtShut(){ MT.pre=false; MT.drop=null; menuOpen=false; document.getElementById('mtacOv').classList.remove('on','pre'); }
   function mtKickOff(){ mtShut(); resetKickoff('G'); }                // (everyone in his spot in the shape you've picked)
   function mtBackToClubs(){ mtShut(); showStartMenu(); startExhibition(); }
@@ -15444,7 +15476,7 @@
         +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">'+(wait?'…':'▸')+'</span>'
         +'<span class="qsIn"><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span></span></button>'; };
     const h=(QS.pend?row(QS.pend,true):'')+sug.map(s=>row(s,false)).join('');
-    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }
+    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet: any change, any time, from ALL SUBS</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }   // (v148: the tired ones are a suggestion; anyone can come off)
   // every frame of a match (from the HUD): show it or not, the man coming off once he's played it, and drawn again only
   // when something on it has changed
   function qsTick(dt){
@@ -15492,6 +15524,76 @@
         if(role){ const fc=fitCls(fitPos(e),role,pos); t.dataset.fit=mtRating(e,role,pos); t.classList.toggle('fitOop',fc===' oop'); t.classList.toggle('fitSec',fc===' sec'); } } },
     drop(a,b){ mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si:+b.dataset.si,kind:b.dataset.mtk}); renderMatchTac(); },
     cancel(){ renderMatchTac(); } });
+  // ===== HOW TO PLAY (v148): the controls on a card -- before your first career match, from CONTROLS in the pause menu
+  // and from ? on the scoreboard (a match waits while it's up): the keys, or on a touch screen the buttons. And the
+  // first time each thing comes up in a match you play, a word on it over the pitch for a few seconds -- one at a time,
+  // each once (TIPS in the settings: off; on again, and they start again). Before, a career had no word on the controls
+  // anywhere -- the only teaching was in the labs -- so a first match was played blind. =====
+  let ctlThen=null;
+  const CTL_KEYS=[
+    ['WASD','Steer the man on the ball: he runs with it by himself. Tap a direction twice to sprint.'],
+    ['J','Pass, the way you’re steering: hold it for a longer one, tap it twice to loft it. As a ball comes to you, J plays it first time. Click a team-mate to pass to him.'],
+    ['K','Shoot: hold it to wind up, let go to strike, with W or S as you let go for the corner. At a cross, K heads it at goal.'],
+    ['L','Cross from out wide: hold it longer for a man further across, tap it twice for a low, driven one. In your own half, L clears it.'],
+    ['MOUSE','Hold the button and draw for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do; SKILL MOVES in the menu has them all.'],
+    ['DEFENDING','J or SPACE switches you to a team-mate, the way you’re steering, or click one. Hold J and your man closes the man on the ball down by himself. L slides in.'],
+    ['CORNERS','Q and E: one fewer or one more of yours in their box; Z and C: back.'],
+    ['ESC','Pause: tactics, subs, settings, these controls.']];
+  const CTL_TOUCH=[
+    ['LEFT','Drag anywhere on the left to steer the man on the ball: he runs with it by himself. Double-tap to sprint.'],
+    ['PASS','The big button: pass, the way you’re steering. Tap it twice to loft it; drag off it for a through ball into a run. Tap a team-mate to pass to him.'],
+    ['SHOOT','Hold it to wind up, let go to strike -- or swipe the right of the screen, bending the swipe to curl it. At a cross it heads it at goal.'],
+    ['CROSS','From out wide: hold it longer for a man further across, tap it twice for a low, driven one. In your own half it clears it.'],
+    ['SKILL','Hold it and draw from it for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do.'],
+    ['DEFENDING','Tap a team-mate to switch to him, anywhere else to switch the way you’re steering. Hold the big button and your man closes the man on the ball down by himself. SLIDE slides in.'],
+    ['☰','Pause: tactics, subs, settings, these controls.']];
+  function ctlShow(how){ how=how||{}; ctlThen=how.then||null; ctlOpen=true;
+    const T=isTouch?CTL_TOUCH:CTL_KEYS, card=document.querySelector('#ctlModal .ctlCard');
+    card.innerHTML='<div class="pauseTitle">HOW TO PLAY</div><div class="ctlRows">'+T.map(([k,t])=>'<b>'+k+'</b><span>'+t+'</span>').join('')+'</div>'
+      +(how.first?'<div class="ctlNote">They’re always on ? over the pitch, and CONTROLS in the menu.</div>':'')
+      +'<div class="cfBtns"><button class="pauseBtn" data-ctl="go">'+(how.first?'KICK OFF ▶':how.then?'◀ BACK':'◀ BACK TO THE GAME')+'</button></div>';
+    document.getElementById('ctlModal').classList.add('on'); }
+  function ctlHide(){ ctlOpen=false; document.getElementById('ctlModal').classList.remove('on'); const f=ctlThen; ctlThen=null; if(f) f(); }
+  document.getElementById('ctlModal').addEventListener('click',e=>{ if(e.target.closest('[data-ctl="go"]')) ctlHide(); });
+  document.getElementById('ctlBtn').addEventListener('click',e=>{ e.stopPropagation(); if(SCREEN==='match'&&!ctlOpen&&!pauseOpen&&!menuOpen&&!htOpen) ctlShow(); });
+  // the tips: the first of these that's so and not yet seen, the more particular first
+  const tipGoalD=c=>Math.hypot((atkOf(c.team)>0?FW:0)-c.x,YC-c.y), tipUp=c=>atkOf(c.team)*(c.x-FW/2);
+  const TIPS=[
+    {k:'s', when:c=>myBall()&&tipGoalD(c)<24*MK, key:'Hold <b>K</b> to wind up a shot, let go to strike · <b>W</b> or <b>S</b> as you let go picks the corner', touch:'Hold <b>SHOOT</b>, let go to strike · or swipe the right of the screen, bending it to curl'},
+    {k:'c', when:c=>myBall()&&tipUp(c)>FW*0.2&&Math.abs(c.y-YC)>FH*0.27, key:'<b>L</b> crosses it · hold it longer for a man further across', touch:'<b>CROSS</b> · hold it longer for a man further across'},
+    {k:'k', when:c=>myBall()&&tipUp(c)<-FW*0.2, key:'In your own half <b>L</b> clears it', touch:'In your own half <b>CROSS</b> clears it'},
+    {k:'p', when:c=>myBall(), key:'<b>J</b> passes, the way you’re steering · hold it for a longer one, tap it twice to loft it', touch:'<b>PASS</b>, the way you’re steering · tap it twice to loft it, drag off it for a through ball'},
+    {k:'d', when:c=>!!ball.ownedBy&&ball.ownedBy.team!==c.team, key:'They have it: <b>J</b> or <b>SPACE</b> switches you · hold <b>J</b> and your man closes them down · <b>L</b> slides in', touch:'They have it: tap a team-mate to switch to him · hold the big button and your man closes them down · <b>SLIDE</b> slides in'}];
+  const TIP={t:0, gap:0};
+  function tipTick(dt){ const el=document.getElementById('tipBar'); if(!el) return;
+    if(TIP.t>0){ TIP.t-=dt; if(TIP.t<=0) el.classList.remove('on'); return; }
+    if(TIP.gap>0){ TIP.gap-=dt; return; }
+    const c=controlled; if(!PREFS.tips||LAB.on||practice||window.__aiAll||matchOver||breakT>0||restartOn()||!c||c.team!=='G'||c.isGK) return;
+    const seen=PREFS.tipsSeen||'', T=TIPS.find(x=>!seen.includes(x.k)&&x.when(c)); if(!T) return;
+    PREFS.tipsSeen=seen+T.k; savePrefs(); el.innerHTML=isTouch?T.touch:T.key; el.classList.add('on'); TIP.t=4.5; TIP.gap=8; }
+  function tipOff(){ TIP.t=0; TIP.gap=2; const el=document.getElementById('tipBar'); if(el) el.classList.remove('on'); }
+  // ===== HALF TIME (v148): the whistle stops the match on a card -- the score, the goals so far and, in a career match,
+  // both sides' numbers so far (shots, on target, passes and the share found, tackles, saves) -- with SUBS and TACTICS (the
+  // match's board; back from it to here) and SECOND HALF. HALF-TIME in the settings: A BREAK, or PLAY ON as it was (the
+  // whistle, two seconds, and on). Never with the computer on both sides. Before, the clock ran from 45 to 90 with only
+  // the whistle between: no moment for a change but a pause =====
+  function htWants(){ return SCREEN==='match'&&!practice&&!LAB.on&&!window.__aiAll&&PREFS.ht!=='on'&&!matchOver; }
+  function htShow(){ htOpen=true; tipOff(); const card=document.querySelector('#htModal .htCard'), L=halfLenSec();
+    const nm=t=>mgEsc((document.getElementById(t==='G'?'tnG':'tnR')||{}).textContent||t);
+    const minute=x=>x.half!=null?Math.max(1,Math.min(45,Math.round(((x.time||0))/(2*L)*90))):null;
+    const gl=t=>goalLog.filter(x=>x.team===t).map(x=>(minute(x)!=null?minute(x)+'’ ':'')+mgEsc(surname(x.scorerName||''))+(x.ownGoal?' (OG)':'')).join(', ');
+    let h='<div class="pauseTitle">HALF TIME</div><div class="htNames"><span>'+nm('G')+'</span><b class="htScore">'+scoreG+' – '+scoreR+'</b><span>'+nm('R')+'</span></div>';
+    const gG=gl('G'), gR=gl('R'); if(gG||gR) h+='<div class="htGoals">'+(gG||'—')+' · '+(gR||'—')+'</div>';
+    if(careerFix){ const tot=t=>{ const o={}; for(const x of Object.values(MSTAT[t]||{})) for(const k in x) o[k]=(o[k]||0)+x[k]; return o; }, A=tot('G'), B=tot('R'), n=(o,k)=>o[k]||0;
+      const pc=o=>n(o,'pa')?Math.round(n(o,'pc')/n(o,'pa')*100)+'%':'—', row=(lbl,a,b)=>'<span>'+a+'</span><i>'+lbl+'</i><span>'+b+'</span>';
+      h+='<div class="htStats">'+row('SHOTS',n(A,'sh'),n(B,'sh'))+row('ON TARGET',n(A,'son'),n(B,'son'))+row('PASSES',n(A,'pa'),n(B,'pa'))+row('FOUND',pc(A),pc(B))+row('TACKLES',n(A,'tk'),n(B,'tk'))+row('SAVES',n(A,'sav'),n(B,'sav'))+'</div>'; }
+    const left=SUB_MAX-SUBS.G.used;
+    h+='<div class="htBtns"><button class="pauseBtn" data-ht="tac">SUBS ('+left+' LEFT)</button><button class="pauseBtn" data-ht="tac">TACTICS</button><button class="pauseBtn htGo" data-ht="go">SECOND HALF ▶</button></div>';
+    card.innerHTML=h; document.getElementById('htModal').classList.add('on'); }
+  function htGo(){ htOpen=false; document.getElementById('htModal').classList.remove('on'); }
+  document.getElementById('htModal').addEventListener('click',e=>{ const b=e.target.closest('[data-ht]'); if(!b) return;
+    if(b.dataset.ht==='go'){ htGo(); return; }
+    document.getElementById('htModal').classList.remove('on'); MT.fromHT=true; openMatchTac(); });   // (the board: back from it to here -- closeMatchTac)
   // ===== IN-GAME PAUSE MENU (Tactics / Settings / Exit / Back) =====
   function openPause(){ if(SCREEN!=='match') return; pauseOpen=true; document.getElementById('pauseMenu').classList.add('on'); }
   function closePause(){ pauseOpen=false; document.getElementById('pauseMenu').classList.remove('on'); }
@@ -15503,11 +15605,13 @@
     ['oppShift','EXHIBITION OPPONENTS',[[-3,'PUB'],[-1.5,'EASY'],[0,'NORMAL'],[1.5,'HARD'],[3,'ELITE']],'their stats, against the clubs as they are (career matches are as they are)'],
     ['art','GRAPHICS',[[true,'PIXEL ART'],[false,'SIMPLE']],'pixel players, pitch and ball, or plain shapes'],
     ['theme','COLOURS',[['blue','BLUE'],['ruby','RUBY'],['silver','SILVER'],['mint','MINT']],'the menus'],
-    ['side','CAMPUS MENU',[['left','LEFT'],['right','RIGHT']],'the side of the career’s campus its buildings are listed down']];
+    ['side','CAMPUS MENU',[['left','LEFT'],['right','RIGHT']],'the side of the career’s campus its buildings are listed down'],
+    ['ht','HALF-TIME',[['wait','A BREAK'],['on','PLAY ON']],'a break with the score and the numbers so far, for subs and tactics -- or straight on'],
+    ['tips','TIPS',[[1,'ON'],[0,'OFF']],'a word on the controls the first time each comes up in a match (on again: from the start)']];
   function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
     el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
       +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
-  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side'||k==='diff')?raw:+raw; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
+  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='theme'||k==='side'||k==='diff'||k==='ht')?raw:+raw; if(k==='tips'&&PREFS.tips) PREFS.tipsSeen=''; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
   function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
     if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
     else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
@@ -15596,6 +15700,7 @@
   function closeSettings(){ showDevDials(false); settingsOpen=false; document.getElementById('settingsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
   document.getElementById('pauseMenu').onclick=(e)=>{ const b=e.target.closest('[data-pause]'); if(!b)return; const a=b.dataset.pause;
     if(a==='tactics'){ closePause(); openMatchTac(); }
+    else if(a==='controls'){ closePause(); ctlShow({then:openPause}); }   // (v148: back to the menu after)
     else if(a==='oldtac'){ closePause(); openMenu(); }
     else if(a==='settings'){ closePause(); openSettings(); }
     else if(a==='skills'){ closePause(); openSkills(); }
@@ -15709,10 +15814,12 @@
   document.getElementById('editToggle').onclick=function(){ menuState.edit=!menuState.edit; this.textContent='EDIT STATS: '+(menuState.edit?'ON':'OFF'); if(menuState.tab==='squad')renderSquad(); };
   window.addEventListener('keydown',e=>{ if(teOpen) return; if(e.key==='Escape'){
     if(layoutOpen){ layoutDone(); }           // button layout -> back to settings (what you've moved is kept)
+    else if(ctlOpen){ ctlHide(); }            // (v148) the controls card -> where it came from
     else if(menuOpen){ if(document.getElementById('mtacOv').classList.contains('on')) closeMatchTac(); else closeMenu(); }   // tactics -> back to menu list
     else if(skillsOpen){ closeSkills(); }     // skill moves -> back to menu list
     else if(settingsOpen){ closeSettings(); } // settings -> back to menu list
     else if(pauseOpen){ closePause(); }       // menu list -> resume
+    else if(htOpen){ htGo(); }                // (v148) half-time -> the second half
     else if(SCREEN==='match'){ openPause(); }  // match -> open menu list
   } });
 
@@ -16973,6 +17080,7 @@
     const want=S&&S.phone===1?'phone':S&&S.vet===1?'vet':S&&S.kid===1?'kid':'';
     if(!want){ m.classList.remove('on'); return; }
     if(m.classList.contains('on')&&m.dataset.k===want) return;
+    if(mgUpElse('storyModal')) return;   // (v148: one at a time)
     m.dataset.k=want; mgStoryPaint(d); m.classList.add('on'); }
   function mgStoryPaint(d){ const S=d.story, card=document.querySelector('#storyModal .stCard'); let h='';
     if(S.phone===1) h=MGUI.phoneStep?'<div class="stTitle">THE CHAIRMAN</div><div class="stPhone">'+PHONE_SVG+'</div>'
@@ -17007,9 +17115,19 @@
   // question at a time, three answers, then what came of it ----
   function pressShow(d){ const m=document.getElementById('pressModal'); if(!m) return; const P=d.press;
     if(!P||!P.qs||(P.i>=P.qs.length&&!P.last)){ if(P) d.press=null; m.classList.remove('on'); return; }
-    const mr=document.getElementById('matchReport'); if(mr&&getComputedStyle(mr).display!=='none') return;   // (the report first)
-    if(document.getElementById('storyModal').classList.contains('on')) return;
+    if(mgUpElse('pressModal')) return;   // (the report first, a story first: one at a time -- v148)
     pressPaint(d); m.classList.add('on'); }
+  // ONE AT A TIME (v148): what comes up over the club -- a story (the phone, the hometown hero, the wonderkid), THE
+  // RESULT and YOUR PLAYERS after a game you played, the press conference, THE MONEY, the papers -- comes one at a time,
+  // in that order, and none opens under another. Before, the club drew itself as a game ended, before the report was up,
+  // and the press conference opened then (or THE MONEY, with no press to wait for), under the report: out of sight, its
+  // buttons dead until the report went; and the papers never waited for the money.
+  function mgUpOn(id){ const el=document.getElementById(id); return !!el&&(id==='matchReport'?getComputedStyle(el).display!=='none':el.classList.contains('on')); }
+  function mgUpElse(id){ return ['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(k=>k!==id&&mgUpOn(k)); }
+  // ...and after a game you played each says where it is in the run (MGUI.seq: what's coming, set at full time)
+  function mgSeqTag(k){ const S=MGUI.seq, i=S?S.indexOf(k):-1; return i<0?'':'<span class="seqTag"> · '+(i+1)+' OF '+S.length+'</span>'; }
+  // would the papers open by themselves after this game (a matchday's pile, not yet opened)?
+  function mgPileDue(d){ return !!(d.pile&&(d.pile.day||'mon')!=='mon'&&!d.pile.opened&&pileLeft(d).length); }
   // THE PRESS ROOM (v106): a little scene beside the questions, as big as the club's league. League 2's a back room --
   // a painted wall with a damp patch, a small window, a calendar, a folding table, one microphone, a plastic cup, a
   // reporter or two. League 1: a banner in the club's colours, a cloth on the table, two microphones, four of them,
@@ -17081,7 +17199,7 @@
       prDraw(c,S); me.raf=requestAnimationFrame(tick); };
     prDraw(c,S); me.raf=requestAnimationFrame(tick); }
   function pressPaint(d){ const P=d.press, card=document.querySelector('#pressModal .prCard'); if(!P||!card) return;
-    let h='<div class="prHead"><span>THE PRESS CONFERENCE</span><span>'+mgEsc(P.label.toUpperCase())+' <b class="prScore '+P.res+'">'+P.score+'</b></span></div><div class="prBody"><canvas class="prScene" width="'+PR_W+'" height="'+PR_H+'" aria-hidden="true"></canvas><div class="prQA">';
+    let h='<div class="prHead"><span>THE PRESS CONFERENCE'+mgSeqTag('press')+'</span><span>'+mgEsc(P.label.toUpperCase())+' <b class="prScore '+P.res+'">'+P.score+'</b></span></div><div class="prBody"><canvas class="prScene" width="'+PR_W+'" height="'+PR_H+'" aria-hidden="true"></canvas><div class="prQA">';
     if(P.last) h+='<div class="prQ"><i>THEY ASKED</i>“'+mgEsc(P.last.q)+'”</div><div class="prSaid">You said <b>“'+mgEsc(P.last.a)+'”</b> — '+P.last.said.map(mgEsc).join(' ')+'</div>'
       +'<div class="plBtns"><button class="pauseBtn" data-pr="next">'+(P.i<P.qs.length?'NEXT QUESTION ▶':'THAT’S ALL ▶')+'</button></div>';
     else { const q=P.qs[P.i]; h+='<div class="prQ"><i>QUESTION '+(P.i+1)+' OF '+P.qs.length+(P.derby?' · THE DERBY':'')+'</i>“'+mgEsc(q.q)+'”</div>'
@@ -17120,9 +17238,10 @@
   function pileShow(d,force){ const m=document.getElementById('pileModal'); if(!m) return; const left=pileLeft(d);
     if(!left.length){ m.classList.remove('on'); return; }
     if(m.classList.contains('on')){ d.pile.opened=true; pilePaint(d); return; }   // (a new pile under one already open: seen)
+    if(mgUpElse('pileModal')||(!force&&MGUI.money)) return;   // (v148: one at a time -- after THE MONEY too)
     if(!force&&((d.pile.day||'mon')==='mon'||d.pile.opened||MGUI.noPile||document.getElementById('storyModal').classList.contains('on')||(d.press&&d.press.qs.length))) return;   // (a Monday's waits for you -- PAPERS, off to the side; a matchday's after the press)
     d.pile.opened=true; MGUI.years=2; pilePaint(d); m.classList.add('on'); }
-  function pileHide(){ const m=document.getElementById('pileModal'); if(m) m.classList.remove('on'); }
+  function pileHide(){ const m=document.getElementById('pileModal'); if(m) m.classList.remove('on'); MGUI.seq=null; }   // (v148: the papers are the run's last)
   const pileNm=(d,pid)=>{ const p=d.roster.find(q=>q.id===pid); return p?mgEsc(p.name):'—'; };
   const pileDelta=v=>(v>0?'<span class="up">+':'<span class="dn">')+v.toFixed(1)+'</span>';
   const pileOffer=(d,p)=>'<div class="plYrs">OR OFFER <button data-pile="ofr" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(cOfferOf(d,p))+' A WEEK</b><button data-pile="ofr" data-dir="1" data-pid="'+p.id+'">+</button></div>';
@@ -17290,7 +17409,7 @@
     if(!left.length){ pileHide(); return; }
     const x=left[0], tm=d.tm??MOR0, dt=Math.round((tm-(d.pileTm0??tm))*10)/10, [title,L,B]=pileBody(d,x);
     const fresh=(x.k==='offer'||x.k==='sponsor')?(x.fresh?'<span class="new">NEW</span>':'<i>STILL WAITING</i>'):'';
-    card.innerHTML='<div class="plHead"><span>'+mgEsc(mgPhaseLabel(d).toUpperCase())+'</span><span>MORALE <b>'+tm.toFixed(1)+'</b>'+(dt?' <span class="'+(dt>0?'plUp">▲':'plDn">▼')+Math.abs(dt).toFixed(1)+'</span>':'')+'</span>'
+    card.innerHTML='<div class="plHead"><span>'+mgEsc(mgPhaseLabel(d).toUpperCase())+mgSeqTag('pile')+'</span><span>MORALE <b>'+tm.toFixed(1)+'</b>'+(dt?' <span class="'+(dt>0?'plUp">▲':'plDn">▼')+Math.abs(dt).toFixed(1)+'</span>':'')+'</span>'
       +'<span>'+left.length+' TO GO</span><button class="plX" data-pile="close" aria-label="Close">✕</button></div>'
       +'<div class="plPaper'+(left.length>2?' many':left.length>1?' more':'')+'"><div class="plStamp"><span>'+pileStamp(d,x)+'</span>'+fresh+'</div>'
       +'<div class="plTitle">'+title+'</div>'+L.map(t=>/^<div/.test(t)?t:'<div class="plLine">'+t+'</div>').join('')+'</div>'
@@ -18643,7 +18762,8 @@
     TEAM.R={code:op.code,name:op.name,col:opKit[0],kit:withLogo(opKit,kitSponsorOf(op)),gk:gk.R,crest:crestFor(op)};
     const gr=g.home?groundOfYours(d):groundOfClub(op); setMatchGround(gr,gr.name);
     teamLabels(); try{ SPRITE.flush(); }catch(e){} }
-  function mgPlay(d){ if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return;
+  function mgPlay(d){ if(!PREFS.seenCtl&&mgNextGame(d)){ PREFS.seenCtl=1; savePrefs(); ctlShow({first:true, then:()=>mgPlay(d)}); return; }   // (v148: your first career match: the controls first)
+    if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return;
     const sw=mgFitXI(d); if(sw.length) showNote(sw.map(([o,i])=>surname(o.name)+' is injured: '+surname(i.name)+' plays').join(' · '),'var(--warn)');
     if(d.roster.length<1+OUTFIELD){ showNote('You need nine players to play.','var(--bad)'); return; }
     const opp=d.world.clubs[g.opp];
@@ -18663,8 +18783,10 @@
       MGUI.money={label:rep.g.label+' · '+(rep.mine.home?'vs ':'@ ')+mgNameOf(d,rep.mine.opp), home:rep.mine.home, from:Math.round(rep.budBefore), inc:Math.round(wk.income+(wk.prize||0)),
         gate:wk.gate, tv:wk.tv, pool:Math.max(0,pool), prize:wk.prize||0, wages:Math.round(wk.wages||0), to:Math.round(rep.budAfter), fans:rep.loyDelta, fansNow:d.loyalty||0}; }
     mgSave(d);
-    document.getElementById('stageWrap').classList.add('menuMode'); showHubScreen();
-    if(rep&&rep.mine) mgShowReport(d,rep,logs); }
+    document.getElementById('stageWrap').classList.add('menuMode');
+    if(rep&&rep.mine){ MGUI.seq=['result','players'].concat(d.press&&d.press.qs&&d.press.qs.length?['press']:[],MGUI.money?['money']:[],mgPileDue(d)?['pile']:[]);
+      mgShowReport(d,rep,logs); }   // (v148: the report up before the club draws itself, so nothing opens under it -- mgUpElse)
+    showHubScreen(); }
   function mgResultWord(m){ return m.pens?(m.through?'WON ON PENALTIES':'LOST ON PENALTIES'):m.win?'WON':m.draw?'DREW':'LOST'; }
   function mgResultCol(m){ return m.win?'var(--good)':(m.draw&&!m.pens)?'var(--warn)':'var(--bad)'; }
   function mgSim(d){ MG_LIVE_XI=null; if(d.wday==='mon') mgForward(d); const g=mgNextGame(d); if(!g) return; mgFitXI(d);
@@ -18686,7 +18808,7 @@
       +(x.ownGoal?' <i class="og">(OG)</i>':'')+'</span>'+(x.assistName?'<span class="mrAst">assist '+(x.assistNum?'#'+x.assistNum+' ':'')+mgEsc(x.assistName)+'</span>':'')+'</div>';
     const gG=logs.filter(x=>x.team==='G'), gR=logs.filter(x=>x.team==='R'), none='<div class="mrNone">— none</div>';
     const H=m.home, nmL=H?d.clubName:opp, nmR=H?opp:d.clubName, idL=H?d.clubId:m.opp, idR=H?m.opp:d.clubId, sL=H?m.you:m.them, sR=H?m.them:m.you, glL=H?gG:gR, glR=H?gR:gG;
-    let h='<div class="mrWrap"><div class="mrPage" data-mrp="0"><div class="mrHead"><div class="mrLabel">'+mgEsc(g.label)+' · '+(m.home?'HOME':'AWAY')+(m.derby?' · THE DERBY':'')+'</div>'
+    let h='<div class="mrWrap"><div class="mrPage" data-mrp="0"><div class="mrHead"><div class="mrLabel">'+mgEsc(g.label)+' · '+(m.home?'HOME':'AWAY')+(m.derby?' · THE DERBY':'')+mgSeqTag('result')+'</div>'
       +'<div class="mrBoard"><div class="mrSide">'+crest(idL)+'<b>'+mgEsc(nmL)+'</b></div><div class="mrScore" style="color:'+col+'">'+sL+' – '+sR+'</div><div class="mrSide r"><b>'+mgEsc(nmR)+'</b>'+crest(idR)+'</div></div>'
       +'<div class="mrRes" style="color:'+col+'">'+mgEsc(d.clubName)+' '+mgResultWord(m)+'</div></div>';
     h+='<div class="mrCols"><div class="mrCol"><div class="mrSect">'+mgEsc(nmL.toUpperCase())+'</div>'+(glL.length?glL.map(goal).join(''):none)+'</div>'
@@ -18711,7 +18833,7 @@
     const tot=S0=>{ const o={}; for(const x of Object.values(S0||{})) for(const k in x) o[k]=(o[k]||0)+x[k]; return o; }, totG=tot(MSTAT.G), totR=tot(MSTAT.R);
     const totRow=(lbl,o,sv)=>'<tr class="tot"><td class="l">'+lbl+'</td><td></td><td></td><td>'+(n(o,'g')||'·')+'</td><td>'+(n(o,'a')||'·')+'</td><td>'+n(o,'pa')+'</td><td>'+pct(o)+'</td><td>'+n(o,'sh')+'</td><td>'+n(o,'son')+'</td><td>'+(n(o,'tk')||'·')+'</td><td>'+(n(o,'int')||'·')+'</td><td>'+sv+'</td></tr>';
     const kpOf=t=>{ const lu=LINEUP[t]; return lu?((MSTAT[t]||{})[lu.gk]||{}):{}; };
-    h+='<div class="mrPage" data-mrp="1" style="display:none"><div class="mrHead"><div class="mrLabel">YOUR PLAYERS · '+mgEsc(d.clubName)+' '+m.you+'–'+m.them+' '+mgEsc(opp)+'</div>'
+    h+='<div class="mrPage" data-mrp="1" style="display:none"><div class="mrHead"><div class="mrLabel">YOUR PLAYERS · '+mgEsc(d.clubName)+' '+m.you+'–'+m.them+' '+mgEsc(opp)+mgSeqTag('players')+'</div>'
       +(best?'<div class="mrMotm">★ YOUR BEST · '+(best.num?'#'+best.num+' ':'')+mgEsc(best.name)+' · '+best.r.toFixed(1)+'</div>':'')+'</div>'
       +'<div class="mrStatsBox" data-pages="mrStats"><table class="mrStats"><thead><tr><th class="l">PLAYER</th><th>POS</th><th>RATING</th><th title="Goals">G</th><th title="Assists">A</th><th title="Passes he tried">PASSES</th><th title="The share of them that found one of ours">%</th><th title="Shots he took, blocked and off target included">SHOTS</th><th title="Of his shots, the ones on target">ON TGT</th><th>TACKLES</th><th title="Interceptions">INT</th><th>SAVES</th></tr></thead><tbody>'
       +rows.map(r=>'<tr'+(r===best?' class="motm"':'')+'><td class="l">'+(r.num?'<i>#'+r.num+'</i> ':'')+mgEsc(surname(r.name))+(r===best?' <b class="st">★</b>':'')+(r.sub?' <i class="sub">SUB</i>':'')+'</td><td>'+mgEsc(r.pos)+'</td>'
@@ -18726,12 +18848,11 @@
   // each number counting up -- what the game brought in (the gate, the TV, the week's partners, sponsors and boards; a
   // cup's prize), the wages out, and where it stands now; and the fans the result brought. After the press conference.
   function moneyShow(d){ const M=MGUI.money, el=document.getElementById('moneyModal'); if(!M||!el) return;
-    if(el.classList.contains('on')||document.getElementById('storyModal').classList.contains('on')||(d.press&&d.press.qs&&d.press.qs.length)) return;
-    const mr=document.getElementById('matchReport'); if(mr&&getComputedStyle(mr).display!=='none') return;
+    if(el.classList.contains('on')||mgUpElse('moneyModal')||(d.press&&d.press.qs&&d.press.qs.length)) return;   // (v148: one at a time, after the press)
     MGUI.money=null; const card=el.querySelector('.mnCard'), parts=[];
     if(M.gate) parts.push((M.home?'the gate ':'your share of the gate ')+money(M.gate)); if(M.tv) parts.push('the TV '+money(M.tv)); if(M.pool) parts.push('partners and sponsors '+money(M.pool)); if(M.prize) parts.push('the prize '+money(M.prize));
     const row=(k,lbl,cls)=>'<div class="mnRow '+cls+'" data-mn="'+k+'"><span>'+lbl+'</span><b data-v="0">$0</b></div>';
-    card.innerHTML='<div class="mnTitle">THE MONEY</div><div class="mnSub">'+mgEsc(M.label)+'</div>'
+    card.innerHTML='<div class="mnTitle">THE MONEY</div><div class="mnSub">'+mgEsc(M.label)+mgSeqTag('money')+'</div>'
       +row('from','Before the game','')+row('inc','+ From the game','up')+(parts.length?'<div class="mnParts" data-mn="parts">'+parts.join(' · ')+'</div>':'')
       +(M.wages?row('wages','− Wages','dn'):'')+'<div class="mnLine" data-mn="line"></div>'+row('to','Now in the bank','tot')
       +(M.fans?'<div class="mnFans" data-mn="fans">'+(M.fans>0?'+':'')+M.fans.toLocaleString()+' fans · '+Math.round(M.fansNow).toLocaleString()+' now</div>':'')
@@ -19408,7 +19529,8 @@
     ph.dataset.long='Season '+d.season+' · '+wk+(g?' · '+(mon?'next: ':'')+what+who:'');
     ph.dataset.mid=g&&!mon?MG_DAY[d.wday]+' · '+what+who:wk;
     ph.dataset.short=g&&!mon?(g.kind==='league'?'MD '+(d.md+1):g.short)+(opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):''):mgWeekShort(d);
-    pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d); }
+    pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
+    if(MGUI.seq&&!['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(mgUpOn)) MGUI.seq=null; }   // (v148: the run over)
   // THE PAPERS' BUTTON (v106): off to the side, on the campus's top bar, with how many there are in an orange box -- it
   // pops in when they come, and the button glows till you've opened them. A Monday's pile waits there for you; only a
   // matchday's table opens by itself.

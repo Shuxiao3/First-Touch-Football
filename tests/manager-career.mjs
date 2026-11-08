@@ -538,7 +538,7 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 // joins on under a third of his wage; after the 5th a 16-year-old wonderkid (in the 60s, a ceiling of 85 to 90) asks to
 // join, and you pick where he plays and how ---------------------------------------------------------------------------
 await create('Story Town');
-const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); M.mgSave(d); M.renderHub(); return d.md; }, n);
+const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); d.press = null; M.mgSave(d); M.renderHub(); return d.md; }, n);   // (v148: the press conference sent the assistant, as a player would -- the story waits for it: one at a time)
 const story = () => page.evaluate(() => ({ on: document.getElementById('storyModal').classList.contains('on'), text: document.querySelector('#storyModal .stCard').innerText.replace(/\s+/g, ' ') }));
 const ring = await story();
 await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(60); const call = await story();

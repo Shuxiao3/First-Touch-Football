@@ -53,7 +53,7 @@ window.__after = () => new Promise(res => { const T = window.__T, t0 = T.simNow(
 // --- ON A PHONE: SHOOT, tapped as it comes ------------------------------------------------------------------------
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
-await ctx.addInitScript(() => { try{ localStorage.setItem('ftc_prefs', JSON.stringify({ diff: 'star', halfMin: 4, pv: 1 })); }catch(e){} });
+await ctx.addInitScript(() => { try{ localStorage.setItem('ftc_prefs', JSON.stringify({ diff: 'star', halfMin: 4, pv: 1, ht: 'on', tips: 0, seenCtl: 1 })); }catch(e){} });
 const page = await ctx.newPage();
 const rep = reporter(), { ok, info } = rep;
 page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));

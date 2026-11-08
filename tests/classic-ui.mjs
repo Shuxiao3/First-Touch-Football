@@ -99,7 +99,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU,HALF-TIME,TIPS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
     // new 4, where a 3 picked from now on stays 3
     const mlOn = pg => pg.evaluate(() => { const r = [...document.querySelectorAll('#setRows .setRow')].find(x => /MATCH LENGTH/.test(x.textContent)), on = r && r.querySelector('.setOpt.on'); return on ? on.textContent : null; });
@@ -356,7 +356,7 @@ for(const [w, h] of SIZES){
 // A NARROW PHONE (640x360): the bench on one line, each name inside its token and the number clear of the rating; and
 // his card fits its box, every man's (his ratings with DEF open, his instructions), with the longest name put out of
 // position: his name on one line, his rating amber, and no line of text saying so (nor "on the bench") -- Office and match
-{ const ctx = await browser.newContext({ viewport: { width: 640, height: 360 }, isMobile: true, hasTouch: true });
+{ const ctx = await browser.newContext({ viewport: { width: 640, height: 360 }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);   // (v148: and the controls card taken as seen -- it'd stop PLAY)
   const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   const ri = await page.evaluate(() => { const d = window.__MG.d, lu = d.lineup, on = new Set(lu.atk.concat([lu.gk]));
@@ -470,7 +470,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
       chips: [...document.querySelectorAll('#readout .chip')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.id || e.textContent.trim().slice(0, 6)) }; });
   ok(g.left === 0 && Math.abs(g.width - 844) < 1 && Math.abs(g.height - 390) < 2 && g.W > 1100, 'the game fills the phone: ' + Math.round(g.width) + 'x' + Math.round(g.height) + ', ' + g.W + ' wide inside (no bands)');
   ok(g.inside, 'the buttons stand over the bottom-right corner of the pitch, as they did before the bands');
-  ok(g.chips.length === 6 && g.chips[0] === 'rScore' && g.chips[1] === 'rDir' && g.chips[3] === 'qsBtn' && g.chips[4] === 'rPlayer' && g.chips[5] === 'menuBtn', 'the HUD: score, direction, clock, quick subs, your man\'s window, menu -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
+  ok(g.chips.length === 7 && g.chips[0] === 'rScore' && g.chips[1] === 'rDir' && g.chips[3] === 'qsBtn' && g.chips[4] === 'rPlayer' && g.chips[5] === 'menuBtn' && g.chips[6] === 'ctlBtn', 'the HUD: score, direction, clock, quick subs, your man\'s window, menu, ? (v148: the controls) -- no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
   const e1 = await hudWin(page);
   ok(winOk(e1, false), 'an exhibition: his window says who he is -- a club\'s man has only his surname, so he\'s given a first name (' + e1.num + ' ' + e1.name + ' ' + e1.pos + ')' + (winOk(e1, false) ? '' : ' ' + JSON.stringify(e1)));
   // (looked at two frames on: a tired man standing gets it back quickly, and the game soon switches you to whoever's best placed)

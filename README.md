@@ -416,6 +416,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     share, shots on target of his shots (headers on goal among them, v135), tackles won, interceptions, a keeper's
     saves -- your best on the day starred;
     CONTINUE. Back at the club, after the press conference: THE MONEY (see the manager career).
+  - **After the game, one at a time (v148).** THE RESULT, YOUR PLAYERS, the press conference, THE MONEY, the papers
+    (a story -- the phone, the hometown hero, the wonderkid -- ahead of them all): one at a time, in that order, none
+    opening under another, each with where it is in the run by its title (YOUR PLAYERS · 2 OF 4; the papers' 5 OF 5 when
+    they come). Before, the club drew itself the moment a game ended, before the report was up, and the press
+    conference opened then -- under the report, out of sight, its buttons dead until the report went (three of three
+    full times, measured) -- or, with no press to wait for, THE MONEY did; and the papers never waited for the money.
+  - **Half-time (v148).** The whistle stops the match on a card: the score and the goals, and in a career match both
+    sides' numbers so far (shots, on target, passes, the share found, tackles, saves); SUBS and TACTICS open the match's
+    board (any change: tired or not) and its BACK comes back to the card; SECOND HALF (or `Enter`, `Esc`) plays on. In
+    the settings, HALF-TIME: A BREAK, or PLAY ON as it was -- the whistle, two seconds, and the second half. Never with
+    the computer on both sides. Before, there was no break: a pause was the only moment for a change.
+  - **The quick subs (v148)** with nobody tired say so -- and that ALL SUBS takes anyone off, any time: the tired men
+    are a suggestion, never a gate.
   - **The goal, celebrated** (v106). A goal of theirs: GOAL, big in the middle of the screen with the score under it,
     and play held a moment as before. One of yours: GOAL! grander -- gold, bigger, the scorer's name under it -- and
     the scorer wheels away toward the corner flag at the end he scored at (top left or top right, in front of the far
@@ -2024,6 +2037,14 @@ AI and the stats. Changes to `index.html` aren't carried over to `classic.html` 
 
 ## Controls
 
+**How to play, in the game (v148).** HOW TO PLAY -- these, on a card, the keys or on a touch screen the buttons -- comes
+up before your first career match (KICK OFF from it), and again from **?** over the pitch (right of the menu) and
+CONTROLS in the pause menu, the match waiting while it's up. And the first time each thing comes up in a match you play,
+a word on it over the pitch for a few seconds: shooting (the ball yours within 24 m of their goal), crossing (out wide
+in their half), clearing (deep in your own), passing (the ball yours anywhere else), and defending (theirs). Each
+once, one at a time, at least 8 s apart; TIPS in the settings turns them off, and on again starts them again. Before,
+a career had no word on the controls anywhere: the only teaching was in the labs.
+
 **Desktop**
 
 | Key | Action |
@@ -2272,6 +2293,14 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v148: a matchday in order, how to play, half-time.** After a game you played, what comes up over the club comes
+  one at a time, in order -- THE RESULT, YOUR PLAYERS, the press conference, THE MONEY, the papers -- each saying
+  where it is in the run (2 OF 4). Before, the club drew itself as the game ended, before the report was up, so the
+  press conference opened under the report (three times out of three, measured), out of sight, its buttons dead. HOW
+  TO PLAY, the controls on a card, comes before your first career match and again from ? over the pitch and CONTROLS in
+  the pause menu; and the first time each thing comes up, a word on it over the pitch. Half-time stops on a card: the
+  score, the numbers so far, SUBS, TACTICS, SECOND HALF. See **After the game, one at a time (v148)**, **How to play,
+  in the game (v148)** and **Half-time (v148)**.
 - **v147: a match's numbers and its ratings.** Every ball your keeper plays out is a pass of his in the report, tried
   and (when one of ours takes it) found: before, only the ones you played from his hands counted, as found and never
   tried, so he read 10/0, 15/0 -- and every one had reached one of ours (30 of 30, measured). The report's columns are

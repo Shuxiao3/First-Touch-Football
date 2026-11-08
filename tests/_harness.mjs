@@ -24,8 +24,12 @@ export function reporter(){
 }
 
 // DIFFICULTY (v89): a test plays the computer at STAR -- full strength, as it always played -- unless it sets a level
-// itself (a fresh browser starts at NORMAL). Run before every page load, as an init script.
-export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; if(!o.diff){ o.diff = 'star'; localStorage.setItem('ftc_prefs', JSON.stringify(o)); } }catch(e){} };
+// itself (a fresh browser starts at NORMAL). Run before every page load, as an init script. And (v148) a test plays on
+// at half-time (no break: HALF-TIME's PLAY ON), without the tips over the pitch, the controls card taken as seen --
+// unless it sets them itself (manager-flow.mjs is theirs).
+export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; let ch = false;
+  if(!o.diff){ o.diff = 'star'; ch = true; } if(o.ht == null){ o.ht = 'on'; ch = true; } if(o.tips == null){ o.tips = 0; ch = true; } if(o.seenCtl == null){ o.seenCtl = 1; ch = true; }
+  if(ch) localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} };
 
 // THE MONDAY PAPERS (v103) open over the career hub each Monday, and THE PRESS CONFERENCE after each game (v104). A test
 // of the career that isn't about them puts them aside -- the ✕, or the assistant sent, as a player would -- whenever
