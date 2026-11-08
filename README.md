@@ -2012,10 +2012,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       (v160: on a phone its lines page -- ◀ 1 / 3 ▶ -- between the title and BACK, so BACK is always on the screen; and
       a tap anywhere outside the card closes it. Before, held sideways, three weeks' lines ran some 300 px past the foot
       of the screen with BACK under them, and nothing closed it: the card couldn't be left.)
-    - **What he'd do for your nine (v156).** A man to buy, or a free agent, has YOUR NINE on his card's deal side:
-      your starting nine's average rating now and with him in it -- in for the weakest of yours in his part of the
-      side, if he's better (a keeper for your keeper) -- to the tenth, "~" if he's unscouted (his range's middle); or
-      "no change" if he wouldn't start. One man is a tenth or two on nine: it's there to be seen now.
+    - **What he'd do for your nine (v156; gone in v162).** A man to buy, or a free agent, had YOUR NINE on his card's
+      deal side: your starting nine's average rating now and with him in it, to the tenth, or "no change". It gave the
+      game away -- which men were the better ones, without a rating to go on, an unscouted man's too -- so it's gone:
+      what a man's like is his range till he's scouted, and his rating once he is.
     - **His agent's cut (v156).** A man from your academy sold -- a bid accepted, or the board's sale -- his agent takes a
       tenth of the fee; the bid says so ("academy: $450,000 after his agent"). Measured (League 2, an academy at level 3
       from the start, three seasons with nobody sold): the club's surplus about $1.66M a season; an academy striker or
@@ -2531,6 +2531,9 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v162: no YOUR NINE on a transfer.** A man to buy or sign no longer shows what he'd do for your nine (its average
+  now and with him in it): it told you which men were better without a rating to go on. Scout a man to know him. See
+  **What he'd do for your nine (v156; gone in v162)**.
 - **v161: the tactics board's men move, instructions without the ball only, popularity across the whole game.** Tap
   WITH BALL or WITHOUT and each man's card slides to his spot in that phase, on the training pitch and in a match --
   the small box with the other phase's man under each spot is gone. The instructions are for without the ball only:

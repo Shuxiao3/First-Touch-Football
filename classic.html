@@ -19682,24 +19682,19 @@
       +(O.length?'':'<div class="mgQuick">'+[[1,'HIS WORTH'],[1.25,'+25%'],[1.5,'+50%'],[2,'TWICE']].map(([k,l])=>'<button class="mgMini" data-mg="listset" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
       +'<input class="mgAmtIn" inputmode="numeric" data-amt="listset" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a price of your own"></div>'); }   // (the quick prices with no bids in the way: the card never pages)
   function mgFreeActions(d,p,known){ const a=mgFreeAskSeen(d,p);
-    let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+nineFact(d,p,known)+'</div>';   // (v156)
+    let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+'</div>';
     if(!known) h+=mgScoutBtn(d,p,null);
     return h+mgActRow('SIGN',mgYears()+'<button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN HIM</button>'); }
   // (v151) the bid's quick figures: half their price, three-quarters, their price, a tenth over -- and any figure typed
   const BID_PCT=[[0.5,'HALF'],[0.75,'3/4'],[1,'THEIR PRICE'],[1.1,'+10%']];
   function bidQuick(d,p,ask,act){ return '<div class="mgQuick">'+BID_PCT.map(([k,l])=>'<button class="mgMini" data-mg="'+act+'" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
       +'<input class="mgAmtIn" inputmode="numeric" data-amt="'+act+'" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a figure of your own"></div>'; }   // (v152: on the buttons' row, not one of its own -- a card whose head ran to four lines went over on a narrow phone)
-  // WHAT HE'D DO FOR YOUR NINE (v156): its average rating now and with him in it -- in for the weakest of yours in his
-  // part of the side, if he's better (a keeper for your keeper) -- to the tenth, on a man to buy or sign. One man's a
-  // tenth or two on nine, and a signing showed nothing of it. An unscouted man by what he looks (his range's middle)
-  function nineWith(d,p,ovr){ const xi=mgStarters(d); if(!xi.length) return null; const now=xi.reduce((a,q)=>a+q.ovr,0)/xi.length;
-    const pool=xi.filter(q=>p.role==='GK'?q.role==='GK':q.role===p.role), P=pool.length?pool:xi.filter(q=>q.role!=='GK'), w=P.slice().sort((a,b)=>a.ovr-b.ovr)[0];
-    return { now, then:w&&ovr>w.ovr?now+(ovr-w.ovr)/xi.length:now, out:w&&ovr>w.ovr?w:null }; }
-  const nineFact=(d,p,known)=>{ const n=nineWith(d,p,known?p.ovr:mgSeenOvr(d,p)); if(!n) return ''; const up=n.then-n.now>=0.05;
-    return mgFact('YOUR NINE',up?(known?'':'~')+n.now.toFixed(1)+' → '+n.then.toFixed(1):'no change',up?'var(--good)':'var(--dim)'); };
+  // (v162: gone -- WHAT HE'D DO FOR YOUR NINE, on a man to buy or sign: your nine's average rating now and with him in it.
+  // It told you which men were the better ones without a rating to go on, an unscouted man's too. What a man's like is
+  // his range till he's scouted, and his rating once he is.)
   function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
     let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+(known?mgFact('WORTH',money(mgValue(d,p)),ask>mgValue(d,p)*1.3?'var(--bad)':ask<mgValue(d,p)*0.9?'var(--good)':''):'')   // (v151: what he's worth beside it, once scouted)
-      +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')+nineFact(d,p,known)   // (v156: WHAT HE'D DO FOR YOUR NINE)
+      +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
       +mgFact('CONTRACT','to season '+(p.until||d.season))+'</div>';
     if(!known) h+=mgScoutBtn(d,p,c);
     if(!mgWindowOpen(d)) return h+'<div class="mgAct"><span class="mgActL" style="color:var(--warn)">WINDOW SHUT</span></div>';

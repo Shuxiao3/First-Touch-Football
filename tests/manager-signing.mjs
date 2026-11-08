@@ -1,6 +1,6 @@
-// FOOTBALL CLASSIC, A SIGNING'S WORTH AND A SALE'S (v156): a man to buy or sign shows what he'd do for your nine -- its
-// average now and with him in it, for the weakest of yours in his part of the side -- or "no change"; a man from your
-// academy sold, his agent takes a tenth (in the bank and the week's money); an ambitious man turned down for a bigger
+// FOOTBALL CLASSIC, A SIGNING'S WORTH AND A SALE'S (v156): a man to buy or sign no longer shows what he'd do for your
+// nine (v162: it told you which men were better without a rating to go on -- scouted or not, no YOUR NINE on his card,
+// and the deal side still fits the narrowest phone); a man from your academy sold, his agent takes a tenth (in the bank and the week's money); an ambitious man turned down for a bigger
 // club minds, and says so; a star at a small club draws bids a little more (0.12 a window week, not 0.08) and, when no
 // bid comes, a club watching him -- interest you can see nearly every window. On a copy the test can reach.
 import { open } from './_harness.mjs';
@@ -26,25 +26,23 @@ await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Signing 
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); MGUI.noPile=true; pileHide(); d.budget=2e7; mgSave(d); renderHub(); return 1; })()`);
 
-// --- WHAT HE'D DO FOR YOUR NINE ---------------------------------------------------------------------------------------------------
-let r = await K(`(()=>{ const d=CAREER.data, xi=mgStarters(d), now=xi.reduce((a,q)=>a+q.ovr,0)/xi.length, mids=xi.filter(q=>q.role==='MID'), weak=mids.slice().sort((a,b)=>a.ovr-b.ovr)[0];
-  const all=mgAiClubs(d).flatMap(c=>c.players.map(p=>[p,c])), good=all.find(([p])=>p.role==='MID'&&p.ovr>=weak.ovr+6), poor=all.find(([p])=>p.role==='MID'&&p.ovr<=weak.ovr-3);
-  for(const [p] of [good,poor]) knUp(d,p,3,3);
-  const fact=h=>{ const m=h.match(/<span>YOUR NINE<\\/span><b[^>]*>([^<]*)<\\/b>/); return m?m[1]:null; };
-  return { now:+now.toFixed(1), want:+(now+(good[0].ovr-weak.ovr)/xi.length).toFixed(1), g:fact(mgBuyActions(d,good[0],good[1],true)), p:fact(mgBuyActions(d,poor[0],poor[1],true)), weak:weak.ovr, go:good[0].ovr, po:poor[0].ovr,
-    free:fact(mgFreeActions(d,d.world.free[0],false)) }; })()`);
-info('your nine: ' + JSON.stringify(r));
-ok(r.g === r.now.toFixed(1) + ' → ' + r.want.toFixed(1) && r.p === 'no change' && r.free != null,
-  'a man to buy shows what he\'d do for your nine: rated ' + r.go + ' for your weakest midfielder (' + r.weak + '), "' + r.g + '"; one rated ' + r.po + ', "' + r.p + '"; a free agent the same (' + r.free + ')');
-// it fits the deal side on the narrowest phone
+// --- NOTHING ON WHAT HE'D DO FOR YOUR NINE (v162) ------------------------------------------------------------------------------
+let r = await K(`(()=>{ const d=CAREER.data, all=mgAiClubs(d).flatMap(c=>c.players.map(p=>[p,c])), xi=mgStarters(d), weak=xi.filter(q=>q.role==='MID').sort((a,b)=>a.ovr-b.ovr)[0];
+  const good=all.find(([p])=>p.role==='MID'&&p.ovr>=weak.ovr+6&&!mgKnown(d,p)), poor=all.find(([p])=>p.role==='MID'&&p.ovr<=weak.ovr-3&&!mgKnown(d,p)), txt=h=>h.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ');
+  const seen=[txt(mgBuyActions(d,good[0],good[1],false)), txt(mgBuyActions(d,poor[0],poor[1],false)), txt(mgFreeActions(d,d.world.free[0],false))];
+  knUp(d,good[0],3,3); seen.push(txt(mgBuyActions(d,good[0],good[1],true)));
+  return { nine:seen.filter(t=>/YOUR NINE|→/.test(t)).length, facts:seen.map(t=>t.slice(0,90)), gone:typeof nineWith==='undefined'&&typeof nineFact==='undefined' }; })()`);
+info('the deal side: ' + r.facts.join(' | '));
+ok(!r.nine && r.gone, 'a man to buy or sign shows nothing of what he\'d do for your nine -- unscouted, better or worse than yours, a free agent, or scouted (' + r.facts.length + ' cards)');
+// the deal side on the narrowest phone: on it, and no YOUR NINE
 await page.setViewportSize({ width: 640, height: 360 }); await page.waitForTimeout(150);
 await K(`(()=>{ curTab.market='Search'; openBuilding('market'); paintBuilding(); return 1; })()`); await page.waitForTimeout(200);
 let over = 0, seen = 0;
 for(let i = 0; i < 4; i++){ const rows = page.locator('#bpBody .mgList .mgRow:visible'); if(i >= await rows.count()) break; await rows.nth(i).click(); await page.waitForTimeout(80);
   if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(80); }
   const f = await page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'); return { by: P.scrollHeight - P.clientHeight, nine: /YOUR NINE/.test(P.textContent) }; });
-  seen++; if(f.by > 1 || !f.nine) over++; }
-ok(seen >= 3 && over === 0, 'on the narrowest phone (640x360) the deal side has it and still fits (' + seen + ' men)');
+  seen++; if(f.by > 1 || f.nine) over++; }
+ok(seen >= 3 && over === 0, 'on the narrowest phone (640x360) the deal side fits, and says nothing of your nine (' + seen + ' men)');
 await page.setViewportSize({ width: 1100, height: 1000 }); await K(`(()=>{ hideBldg(); return 1; })()`);
 
 // --- HIS AGENT'S CUT ---------------------------------------------------------------------------------------------------------------
