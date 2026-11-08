@@ -1411,6 +1411,11 @@
   .mgActL b{ font-size:12px; color:var(--ink); letter-spacing:0; }
   .mgActC{ display:flex; align-items:center; gap:4px 6px; margin-left:auto; }
   .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
+  .mgQuick{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:flex-end; margin:2px 0 4px; } .mgQuick .mgMini{ margin:0; padding:3px 6px; }   /* (v151) */
+  .mgAmtIn{ width:118px; font:11px 'FTC Dot',monospace; padding:3px 6px; background:var(--well); color:var(--ink); border:1px solid var(--btnHi); border-radius:4px; }
+  .ldgCard{ max-width:520px; gap:6px; } .ldgSect{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); margin-top:6px; }
+  .ldgRow{ display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--ink2); padding:1px 0; } .ldgRow b{ font-weight:400; color:var(--ink); } .ldgRow.tot{ border-top:1px solid var(--well); padding-top:3px; } .ldgNote{ font-size:11px; color:var(--dim); }
+  #chNetBtn{ cursor:pointer; } #chNetBtn i{ text-decoration:underline dotted; }
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
   .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
@@ -1555,7 +1560,7 @@
         <button class="chMenuBtn cpPapers" data-hub="papers" style="display:none" aria-label="the papers"><svg viewBox="0 0 24 24"><path d="M4 5 H17 V19 H6 Q4 19 4 17 Z"/><path d="M17 9 H20 V17 Q20 19 18 19 H17"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="15" x2="12" y2="15"/></svg>PAPERS<span class="cpBadge" id="cpPapersN"></span></button>
         <button class="chMenuBtn cpDeco" data-hub="decor"><svg viewBox="0 0 24 24"><path d="M12 3 L6 11 H9 L5 17 H19 L15 11 H18 Z"/><line x1="12" y1="17" x2="12" y2="21"/></svg>DECORATE<span class="bPrice"></span></button>
         <button class="chMenuBtn cpMove" data-hub="move"><svg viewBox="0 0 24 24"><path d="M12 3 V21 M3 12 H21"/><path d="M9 6 L12 3 L15 6 M9 18 L12 21 L15 18 M6 9 L3 12 L6 15 M18 9 L21 12 L18 15"/></svg>MOVE</button></div>
-      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet"><i>NET/WK</i><b id="chNet">$0</b></span></div>
+      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet" id="chNetBtn" data-hub="ledger" title="The week’s money"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></span></div>
         <button class="chMenuBtn" data-hub="menu">☰ MENU</button></div>
       <div class="cpPlace" id="cpPlace"></div>
       <div class="cpDay" id="cpDay" aria-hidden="true"><canvas id="cpDayCv"></canvas><div class="cpDayT" id="cpDayT"></div></div>
@@ -1706,6 +1711,7 @@
 <div id="pileModal" class="pauseOv"><div class="pauseCard pileCard"></div></div>
 <div id="pressModal" class="pauseOv"><div class="pauseCard prCard"></div></div>
 <div id="moneyModal" class="pauseOv"><div class="pauseCard mnCard"></div></div>
+<div id="ldgModal" class="pauseOv"><div class="pauseCard ldgCard"></div></div>
 <div id="ctlModal" class="pauseOv"><div class="pauseCard ctlCard"></div></div>
 <div id="htModal" class="pauseOv"><div class="pauseCard htCard"></div></div>
 <div id="menu" class="menuOverlay" style="display:none">
@@ -16760,7 +16766,7 @@
   const MG_DAY={mon:'Monday',wed:'Wednesday',sat:'Saturday'};
   // a new week, its Monday. While the window's open the computer clubs do their business -- most of it in pre-season and
   // the winter break, a little in the weeks between -- and bid for your men; a bid stands for two weeks
-  function mgWeekStart(d){ d.wday='mon'; d.wkN=(d.wkN||0)+1; d.weeks=(d.weeks||0)+1; d.bidMemo={}; let dev=null;
+  function mgWeekStart(d){ d.wday='mon'; d.wkN=(d.wkN||0)+1; d.weeks=(d.weeks||0)+1; ldgCur(d); d.bidMemo={}; let dev=null;   // (v151: THE WEEK'S MONEY from its Monday)
     if(d.weeks%DEV_EVERY===0) dev=mgDevelop(d);   // (every third week: everyone's development)
     injTraining(d);                           // (a week's training: a knock now and then)
     morWeek(d); mgCaptains(d);                // (your men's moods, and the side's)
@@ -16869,7 +16875,7 @@
   const WINDFALL_AMT={1:[40000,160000],2:[110000,400000],3:[270000,1080000],4:[810000,3240000]};   // (v149: 27 times what it was, as the leagues' money went)
   function wkWindfall(d){ if((d.weeks||0)<3||Math.random()>0.1) return null;
     const [lo,hi]=WINDFALL_AMT[d.tier]||WINDFALL_AMT[1], amt=mgRound(lo+(hi-lo)*Math.random()), w=mgPick(WINDFALL.filter(x=>d.phase==='league'||!/TV people/.test(x[0])));
-    const txt=w[0].replace('{club}',d.clubName).replace('{amt}',money(amt)); d.budget+=amt; mgNews(d,txt); return {title:w[1], txt, amt}; }
+    const txt=w[0].replace('{club}',d.clubName).replace('{amt}',money(amt)); d.budget+=amt; ledg(d,'events',amt); mgNews(d,txt); return {title:w[1], txt, amt}; }
   // THE COMMUNITY (about one Monday in six): the town asks something of the club. Say yes and the fans think more of it
   // (a share of the league's usual following: fans, %), sometimes the dressing room too (tm); some cost money (by the
   // league), some a little of the men's legs (tire: off your nine's fitness). Say no and nothing happens.
@@ -16883,7 +16889,7 @@
   function wkCommunity(d){ if((d.weeks||0)<2||Math.random()>0.17) return null; const c=mgPick(COMMUNITY); return {ck:c.k, cost:c.cost?c.cost[(d.tier||1)-1]:0}; }
   const commFans=(d,c)=>Math.round((LOYALTY_BASE[d.tier]||1000)*c.fans/100);
   function commDo(d,x){ const c=COMMUNITY.find(y=>y.k===x.ck); if(!c) return 'That has gone.'; if(x.cost>d.budget) return 'That costs '+money(x.cost)+'.';
-    d.budget-=x.cost; d.loyalty=(d.loyalty??(LOYALTY_BASE[d.tier]||1000))+commFans(d,c);
+    d.budget-=x.cost; ledg(d,'events',-x.cost); d.loyalty=(d.loyalty??(LOYALTY_BASE[d.tier]||1000))+commFans(d,c);
     if(c.tm) d.tm=clamp(Math.round(((d.tm??MOR0)+c.tm)*100)/100,1,10);
     if(c.tire) for(const p of mgStarters(d)) p.cond=Math.max(0.3,condOf(p)-c.tire);
     mgNews(d,d.clubName+' '+c.yes+'.'); return null; }
@@ -16916,14 +16922,14 @@
     return mgWontCome(d,p)||null; }
   function mgLoanIn(d,pid,share){ const f=mgFind(d,pid); if(!f||!f.club||f.mine) return 'He has gone.'; const c=f.club, p=f.p, why=mgLoanWhy(d,p,c); if(why) return why;
     const fee=mgLoanFee(d,p); if(debtOver(d)) return BOARD_NO; if(fee>d.budget) return 'His loan costs '+money(fee)+' up front.';   // (v150: A LOAN'S FEE)
-    d.budget-=fee; c.budget=(c.budget||0)+fee; d.inRed=d.budget<0;
+    d.budget-=fee; c.budget=(c.budget||0)+fee; d.inRed=d.budget<0; ledg(d,'transfers',-fee);
     share=share??mgLoanShare(d,p,c); c.players.splice(c.players.indexOf(p),1); p.loan={from:c.id, until:d.season, share, wage:p.wage, fee}; p.wage=mgRound(p.wage*share);
     mgRosterAdd(d,p); d.bids=(d.bids||[]).filter(b=>b.pid!==pid);
     mgNews(d,p.name+' joins '+d.clubName+' on loan from '+c.name+' to the end of the season, for '+money(fee)+'.'); careerEv(d,p,'On loan at '+clubCode(d,d.clubId)); return null; }
   function mgLoanOut(d,pid,cid){ const i=d.roster.findIndex(p=>p.id===pid), c=d.world.clubs[cid]; if(i<0||!c) return 'He has gone.'; const p=d.roster[i];
     if(p.hometown) return HOME_MSG;   // (v149: HOME TO STAY)
     if(!mgWindowOpen(d)) return 'The transfer window is shut.'; const why=mgCanLose(d,i); if(why) return why; if(c.players.length>=MG_MAX) return c.name+'’s squad is full.';
-    const fee=Math.min(mgLoanFee(d,p),Math.max(0,c.budget||0)); d.budget+=fee; c.budget=(c.budget||0)-fee; d.inRed=d.budget<0;   // (v150: their fee to you)
+    const fee=Math.min(mgLoanFee(d,p),Math.max(0,c.budget||0)); d.budget+=fee; c.budget=(c.budget||0)-fee; d.inRed=d.budget<0; ledg(d,'transfers',fee);   // (v150: their fee to you)
     mgRosterRemove(d,i); p.loan={from:d.clubId, to:c.id, until:d.season, fee}; p.mor=clamp(Math.round(((p.mor??MOR0)+(hvOf(p).am>=6?0.8:0.3))*100)/100,1,10);
     p.num=0; mgNumber(c.players,p); c.players.push(p); delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
     mgNews(d,p.name+' goes on loan to '+c.name+' to the end of the season'+(fee?', for '+money(fee):'')+'.'); careerEv(d,p,'On loan at '+(c.code||c.name)); return null; }
@@ -17599,7 +17605,7 @@
     else for(const p of xh.concat(xa)) p.apps=(p.apps||0)+1;   // (the cups' goals aren't counted: the league's scorers are the league's)
     mgTireGame(d,m[0],xh,live); mgTireGame(d,m[1],xa,live); mgRateGame(d,m,xh,xa,live,mgBigGame(ctx));
     return mine; }
-  const cupPay=(d,id,amt)=>{ if(id===d.clubId) d.budget+=amt; else { const c=d.world.clubs[id]; if(c&&!c.euro) c.budget+=amt; } };
+  const cupPay=(d,id,amt)=>{ if(id===d.clubId){ d.budget+=amt; ledg(d,'prizes',amt); } else { const c=d.world.clubs[id]; if(c&&!c.euro) c.budget+=amt; } };
   // a round played: the money, who's through, the next round drawn -- or the winner
   function mgCupRoundDone(d,key,r,mine){ const K=CUP[key], C=d.cup[key], you=d.clubId;
     if(key==='cl'&&r<6){ for(const m of cupTies(d,key,r)){ if(m[2]>m[3]) cupPay(d,m[0],K.prize[r]); else if(m[3]>m[2]) cupPay(d,m[1],K.prize[r]); }
@@ -17631,7 +17637,7 @@
   // a cup game's money: the gate (or the away share) and the television's bump -- no week's wages or partners (those
   // are the league week's) -- and the prize, if he won a round
   function applyCupGame(d,mine){ const f=computeFinance(d), gate=mine?(mine.home?computeFinance(d,Object.assign({competition:'cup'},mine)).homeGate:f.awayGate):0, tv=mine?broadcastGameBump(d,mine):0, prize=(mine&&mine.prize)||0, income=gate+tv;
-    d.budget=(d.budget||0)+income; d.ledger=d.ledger||[];
+    d.budget=(d.budget||0)+income; d.ledger=d.ledger||[]; ledg(d,'gate',gate); ledg(d,'tv',tv);
     d.ledger.unshift({week:d.week,season:d.season,income:income+prize,gate,tv,wages:0,net:income+prize,budget:Math.round(d.budget),cup:mine?CUP[mine.cup].short+' '+CUP[mine.cup].rs[mine.round]:'CUP'});
     if(d.ledger.length>12) d.ledger.length=12; d.inRed=d.budget<0;
     return {f,gate,tv,income,wages:0,prize,cup:true}; }
@@ -17647,7 +17653,7 @@
     R.pos=pos; R.up=up; R.down=down;
     R.result=pos===1?(d.tier===4?'CHAMPIONS':'CHAMPIONS — PROMOTED'):up?(pos<=2?'PROMOTED':'PROMOTED IN THE PLAYOFFS'):down?'RELEGATED'
             :d.tier===4?(pos===2?'RUNNERS-UP':pos<=6?'TOP SIX':'STAYED UP'):(pos<=6?'LOST IN THE PLAYOFFS':'STAYED UP');
-    R.prize=mgRound(MG_PRIZE[d.tier]*Math.pow((MG_CLUBS+1-pos)/MG_CLUBS,1.6)); d.budget+=R.prize; dealBonuses(d,R);
+    R.prize=mgRound(MG_PRIZE[d.tier]*Math.pow((MG_CLUBS+1-pos)/MG_CLUBS,1.6)); d.budget+=R.prize; ledg(d,'prizes',R.prize); dealBonuses(d,R);
     R.boardSold=boardSale(d);   // (v150: over THE BOARD'S LIMIT still, prize and all: your most valuable man sold)
     for(const t of [1,2,3,4]) R.moves[t].table.forEach((id,i)=>{ const c=d.world.clubs[id]; if(c&&id!==d.clubId) c.budget+=mgRound(MG_PRIZE[t]*Math.pow((MG_CLUBS-i)/MG_CLUBS,1.6)); });
     const M=d.manager; M.history.push({season:d.season,club:d.clubName,tier:d.tier,pos,result:R.result}); if(pos===1) M.titles++; if(up) M.promotions++;
@@ -17898,7 +17904,7 @@
     d.world.free.splice(d.world.free.indexOf(p),1); d.budget-=ask.fee; p.wage=ask.wage; p.until=d.season+years-1; p.idle=0; delete p.bb; mgRosterAdd(d,p);
     mgTx(d,'in',p,'free agent',ask.fee); mgNews(d,d.clubName+' sign free agent '+p.name+(ask.fee?' ('+money(ask.fee)+' to sign him)':'')+'.'); careerEv(d,p,'Joined '+clubCode(d,d.clubId)+(ask.fee?' ('+money(ask.fee)+')':' (free)'));
     return null; }
-  function mgTx(d,dir,p,club,fee){ d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }
+  function mgTx(d,dir,p,club,fee){ if(fee>0) ledg(d,'transfers',dir==='out'?fee:-fee); d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }   // (v151: THE WEEK'S MONEY too)
   // you selling: take a club's offer
   function mgAcceptOffer(d,oid){ const o=(d.offers||[]).find(x=>x.id===oid); if(!o) return 'That offer has gone.';
     const idx=d.roster.findIndex(p=>p.id===o.pid), c=d.world.clubs[o.club]; if(idx<0||!c) return 'That offer has gone.';
@@ -17912,10 +17918,12 @@
     return null; }
   function mgRejectOffer(d,oid){ d.offers=(d.offers||[]).filter(x=>x.id!==oid); }
   // let a man go: half of what's left on his deal is paid off
-  function mgReleaseCost(d,p){ return mgRound(p.wage*((MG_MD-Math.min(d.md,MG_MD))+MG_MD*Math.max(0,(p.until||0)-d.season))*0.5); }
+  // RELEASING A MAN: half of what's left on his deal -- never more than twice what he's worth (v151: a cheap man on a long
+  // deal cost ten and sixteen times his worth to let go)
+  function mgReleaseCost(d,p){ return Math.min(mgRound(p.wage*((MG_MD-Math.min(d.md,MG_MD))+MG_MD*Math.max(0,(p.until||0)-d.season))*0.5),mgRound(2*mgValue(d,p))); }
   function mgRelease(d,idx){ const p=d.roster[idx], why=mgCanLose(d,idx); if(why) return why;
     const cost=mgReleaseCost(d,p); if(cost>d.budget) return 'Paying off his contract costs '+money(cost)+'.';
-    d.budget-=cost; mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.'); careerEv(d,p,'Released by '+clubCode(d,d.clubId));
+    d.budget-=cost; ledg(d,'transfers',-cost); mgRosterRemove(d,idx); mgToFree(d,p); mgNews(d,d.clubName+' release '+p.name+'.'); careerEv(d,p,'Released by '+clubCode(d,d.clubId));
     return null; }
   // a new deal: `years` seasons from next season, at what he asks now (and never shorter than the one he's on)
   // HOW HARD A MAN PUSHES FOR A NEW DEAL (v109): his age and his season. The young are modest -- a man of 22 or
@@ -18030,10 +18038,10 @@
   function mgScout(d,pid){ const L=lvOf(d,'scouting'); if(!L) return 'Build the scouts’ house first.'; const f=mgFind(d,pid); if(!f) return 'He has gone.';
     const k=knOf(d,f.p); if(k>=L) return L<3?'A bigger scouts’ house would find out more.':'Your scouts know all there is.';
     const cost=mgScoutCost(d,f.p,f.club); if(cost>d.budget) return 'Scouting him costs '+money(cost)+'.';
-    d.budget-=cost; knUp(d,f.p,Math.floor(k)+1,L); return null; }
+    d.budget-=cost; ledg(d,'scouting',-cost); knUp(d,f.p,Math.floor(k)+1,L); return null; }
   // an assignment: every man in one position across a league
   function mgScoutGroup(d,tier,role){ if(!lvOf(d,'scouting')) return 'Build the scouts’ house first.'; const cost=MG_SCOUT_COST[tier]*6; if(cost>d.budget) return 'That assignment costs '+money(cost)+'.';
-    d.budget-=cost; const L=lvOf(d,'scouting'); let n=0;
+    d.budget-=cost; ledg(d,'scouting',-cost); const L=lvOf(d,'scouting'); let n=0;
     for(const id of d.div[tier]){ if(id===d.clubId) continue; for(const p of mgPlayersOf(d,id)) if(role==='ALL'||p.role===role){ knUp(d,p,Math.floor(knOf(d,p))+1,L); n++; } }
     mgNews(d,'Your scouts report on '+n+' '+(role==='ALL'?'players':role+'s')+' in '+MG_LEAGUE[tier]+'.'); return null; }
 
@@ -18104,7 +18112,7 @@
   function boardSale(d){ if(!debtOver(d)) return null;
     const L=d.roster.filter(p=>!p.hometown&&!p.loan).sort((a,b)=>mgValue(d,b)-mgValue(d,a)), p=L[0]; if(!p||d.roster.length<=MG_MIN) return null;
     const fee=mgValue(d,p), lt=mgLevelTier(p.ovr), C=mgAiClubs(d).filter(c=>Math.abs(c.tier-lt)<=1&&c.players.length<MG_MAX).sort((a,b)=>b.budget-a.budget), c=C[0]; if(!c) return null;
-    const i=d.roster.indexOf(p); mgRosterRemove(d,i); d.budget+=fee; c.budget-=fee; d.inRed=d.budget<0; if(d.listed) delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
+    const i=d.roster.indexOf(p); mgRosterRemove(d,i); d.budget+=fee; c.budget-=fee; d.inRed=d.budget<0; ledg(d,'transfers',fee); if(d.listed) delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); recFee(d,'fs',p,fee);
     mgNews(d,'The board has sold '+p.name+' to '+c.name+' for '+money(fee)+': the club owed more than it would stand for.'); careerEv(d,p,'Sold to '+(c.code||c.name));
     return {name:p.name, club:c.name, fee}; }
@@ -18142,7 +18150,7 @@
     const popF=clamp(0.65+top/100,0.85,1.6), moodF=clamp(1+0.06*((d.tm??MOR0)-MOR0),0.8,1.25);
     return {wk:Math.round(L*(SHIRT_FAN[tier]||SHIRT_FAN[1])*popF*moodF), popF, moodF, fans:L, top}; }
   // the Monday's sales, into the bank -> for the papers: what came in, and the best sellers' shares
-  function shirtWeek(d){ const s=shirtSales(d); if(!(d.roster||[]).length) return null; d.budget=(d.budget||0)+s.wk; d.inRed=d.budget<0;
+  function shirtWeek(d){ const s=shirtSales(d); if(!(d.roster||[]).length) return null; d.budget=(d.budget||0)+s.wk; d.inRed=d.budget<0; ledg(d,'shirts',s.wk);
     const W=d.roster.map(p=>[p.id,Math.pow(popOf(d,p),2)]).sort((a,b)=>b[1]-a[1]), sum=W.reduce((a,x)=>a+x[1],0)||1;
     d.shirtSeason=(d.shirtSeason&&d.shirtSeason.s===d.season?d.shirtSeason:{s:d.season,n:0}); d.shirtSeason.n+=s.wk;
     return {wk:s.wk, top:W.slice(0,3).map(([id,v])=>[id,Math.round(v/sum*100)]), season:d.shirtSeason.n}; }
@@ -18227,6 +18235,27 @@
     return { wageWk, sponsorWk, broadcastWk, boardsWk, dealsWk, commercialWk, shirtWk, poolWk, capacity, price, loyalty:L, loyMult, demand:pct, rawDemand, attendance,
              homeGate, awayGate, netSteady, netHome, netAway, incomeAvg, netAvg, draw, turn, canPrice:true, soldOut:rawDemand>=1, seats, ticketGate:Math.round(ticketGate) };
   }
+  // THE WEEK'S MONEY (v151): every dollar in and out of the bank this week, by what it was -- the gate, the TV, the
+  // partners, the sponsors, the shirts, prizes, transfers and loans, wages, building, scouting, the week's events -- and
+  // anything else in a line of its own, so the week's lines take the bank from what it was on Monday to what it is now,
+  // to the dollar. Tap NET/WK on the hub: this week so far, last week, and a league week as projected
+  const LDG_NAME={gate:'The gate',tv:'The TV',partners:'Partners',sponsors:'Sponsors (boards, the shirt, names)',shirts:'Shirt sales',prizes:'Prizes',transfers:'Transfers and loans',wages:'Wages',
+    building:'Building and decorating',scouting:'Scouting',events:'The week’s events',other:'Anything else'};
+  function ledg(d,k,v){ if(!v||!d) return; const W=ldgCur(d); W.L[k]=Math.round((W.L[k]||0)+v); }
+  function ldgCur(d){ if(!d.wl||d.wl.w!==(d.weeks||0)){ if(d.wl){ d.wl.b1=Math.round(d.wl.bNow??d.budget); d.wlPrev=d.wl; } d.wl={w:d.weeks||0, s:d.season, b0:Math.round(d.budget||0), L:{}}; } return d.wl; }
+  function ldgRows(W,bNow){ const L=Object.assign({},W.L), known=Object.values(L).reduce((a,v)=>a+v,0), rest=Math.round(bNow-W.b0-known); if(rest) L.other=(L.other||0)+rest;
+    return Object.keys(LDG_NAME).filter(k=>L[k]).map(k=>'<div class="ldgRow"><span>'+LDG_NAME[k]+'</span><b style="color:'+(L[k]>=0?'var(--good)':'var(--bad)')+'">'+(L[k]>=0?'+':'')+money(L[k])+'</b></div>').join('')
+      +'<div class="ldgRow tot"><span>From '+money(W.b0)+' to</span><b>'+money(bNow)+'</b></div>'; }
+  function ldgShow(d){ const W=ldgCur(d), f=computeFinance(d), card=document.querySelector('#ldgModal .ldgCard'), pre=d.phase==='summer'||d.phase==='winter';
+    let h='<div class="pauseTitle">THE WEEK’S MONEY</div><div class="ldgSect">THIS WEEK SO FAR · WEEK '+(d.weeks||0)+'</div>'+ldgRows(W,Math.round(d.budget));
+    if(d.wlPrev) h+='<div class="ldgSect">LAST WEEK</div>'+ldgRows(d.wlPrev,d.wlPrev.b1);
+    const half=Math.round((f.homeGate+f.awayGate)/2), row=(l,v)=>'<div class="ldgRow"><span>'+l+'</span><b>'+(v>=0?'+':'')+money(v)+'</b></div>';
+    h+='<div class="ldgSect">A LEAGUE WEEK, PROJECTED</div>'+row('Partners',f.sponsorWk)+row('The TV',f.broadcastWk)+(f.commercialWk?row('Sponsors',f.commercialWk):'')+row('Shirt sales',f.shirtWk)
+      +row('The gate (home '+money(f.homeGate)+', away '+money(f.awayGate)+', half each)',half)+row('Wages',-f.wageWk)+'<div class="ldgRow tot"><span>Net</span><b>'+(f.netAvg>=0?'+':'')+money(f.netAvg)+'</b></div>'
+      +(pre?'<div class="ldgNote">Pre-season: no games, so no gate, TV, partners’ money or wages till the league starts -- only the shirts come in.</div>':'')
+      +'<div class="cfBtns"><button class="pauseBtn" data-ldg="close">◀ BACK</button></div>';
+    card.innerHTML=h; document.getElementById('ldgModal').classList.add('on'); }
+  document.getElementById('ldgModal').addEventListener('click',e=>{ if(e.target.closest('[data-ldg="close"]')) document.getElementById('ldgModal').classList.remove('on'); });
   // a week of the season: the pool, the gate (home or away) and any TV bump in, the wages out. -> what it came to
   function applyWeek(d, mine){
     const f=computeFinance(d), fh=mine&&mine.home?computeFinance(d,mine):null;   // (a home game: its own crowd -- a derby every fan, a big game more: THE TURNOUT)
@@ -18234,6 +18263,7 @@
     if(fh&&fh.capacity){ d.crowd=d.crowd||{n:0,sum:0}; d.crowd.n++; d.crowd.sum+=fh.attendance/fh.capacity; }   // (the season's home crowds: see A SPONSOR'S BONUS)
     const tv = mine ? broadcastGameBump(d,mine) : 0;
     const income = f.poolWk - f.shirtWk + tv + gate;   // (the shirts are Monday's: see shirtWeek)
+    ledg(d,'partners',f.sponsorWk); ledg(d,'tv',f.broadcastWk+tv); ledg(d,'sponsors',f.commercialWk); ledg(d,'gate',gate); ledg(d,'wages',-f.wageWk);   // (v151: THE WEEK'S MONEY)
     d.budget=(d.budget||0)+income-f.wageWk; d.week=(d.week||0)+1;
     d.ledger=d.ledger||[]; d.ledger.unshift({week:d.week,season:d.season,income,gate,tv,wages:f.wageWk,net:income-f.wageWk,budget:Math.round(d.budget)});
     if(d.ledger.length>12)d.ledger.length=12;
@@ -18411,7 +18441,7 @@
   function dealBonuses(d,R){ const S=stadOf(d); R.bonus=[];
     for(const k of Object.keys(S.deals)){ const x=S.deals[k]; if(!x.m) continue; const i=dealTier(d,x.m);
       if(i<0){ R.bonus.push({sp:x.sp.name, lbl:'not '+DEAL_MET[x.m.k].lab(x.m.t[0][0]), amt:0}); continue; }
-      const amt=x.m.t[i][1]; d.budget+=amt; R.bonus.push({sp:x.sp.name, lbl:DEAL_MET[x.m.k].lab(x.m.t[i][0]), amt});
+      const amt=x.m.t[i][1]; d.budget+=amt; ledg(d,'sponsors',amt); R.bonus.push({sp:x.sp.name, lbl:DEAL_MET[x.m.k].lab(x.m.t[i][0]), amt});
       mgNews(d,x.sp.name+' pay '+d.clubName+' a bonus of '+money(amt)+': '+DEAL_MET[x.m.k].lab(x.m.t[i][0])+'.'); } }
   // a new season: the deals that ran out with the last one end -- the names go back, the boards come down (each for
   // the Monday papers: d.spGone)
@@ -18960,6 +18990,12 @@
     requestAnimationFrame(tick);
     card.querySelector('[data-mn="go"]').onclick=()=>{ el.classList.remove('on'); renderHub(); }; }
 
+  // (v151) a figure typed into a bid or a price: on Enter, or when the field's left -- digits only ($, commas, k and m
+  // allowed: '2.5m', '750k')
+  function amtParse(t){ t=String(t||'').toLowerCase().replace(/[$,\s]/g,''); const m=t.match(/^(\d+(?:\.\d+)?)([km]?)$/); if(!m) return NaN; return Math.round(+m[1]*(m[2]==='m'?1e6:m[2]==='k'?1e3:1)); }
+  function amtGo(el){ const v=amtParse(el.value); if(!(v>0)) return; mgAct(el.dataset.amt,{pid:el.dataset.pid,v:String(v)}); mgRerender(); }
+  document.addEventListener('keydown',e=>{ const el=e.target&&e.target.closest&&e.target.closest('.mgAmtIn'); if(el&&e.key==='Enter'){ e.preventDefault(); amtGo(el); } },true);
+  document.addEventListener('change',e=>{ const el=e.target&&e.target.closest&&e.target.closest('.mgAmtIn'); if(el) amtGo(el); });
   // ---- in-app confirm ----
   let _cfYes=null;
   function showConfirm(msg,onYes,opts){ opts=opts||{}; const m=document.getElementById('confirmModal');
@@ -19108,7 +19144,7 @@
   function bldUp(d,id){ if(id==='stadium') return stadUpgrade(d); if(id==='market') return lvOf(d,'market')?'It’s as good as it gets.':'It isn’t bought: your phone rings on the first day of pre-season.';
     if(debtOver(d)) return BOARD_NO;   // (v150: THE BOARD'S LIMIT)
     const why=bldBlock(d,id); if(why) return why;
-    const nx=lvOf(d,id)+1; d.budget-=bldCost(id,nx); d.lv[id]=nx;
+    const nx=lvOf(d,id)+1; d.budget-=bldCost(id,nx); ledg(d,'building',-bldCost(id,nx)); d.lv[id]=nx;
     if(id==='academy'&&nx===1&&!(d.youth||[]).length) mgYouthIntake(d);
     decoMakeRoom(d);
     mgNews(d,id==='club'?d.clubName+' move into '+CLUB_LV[nx].n.toLowerCase()+'.':nx===1?d.clubName+' open '+BLD_NAME[id]+'.':d.clubName+' build up '+BLD_NAME[id]+' to level '+nx+'.');
@@ -19224,9 +19260,12 @@
   const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, qpSel:null, noPile:false};
   function mgOvrTxt(d,p){ if(mgKnown(d,p)) return String(p.ovr); const r=mgRange(d,p); return r[0]+'–'+r[1]; }
   function mgSortOvr(d,p){ if(mgKnown(d,p)) return p.ovr; const r=mgRange(d,p); return (r[0]+r[1])/2; }
-  // what he'd ask: from his true rating once scouted, else from the middle of his range
-  function mgDemandSeen(d,p,moving){ return mgKnown(d,p)?mgDemand(d,p,moving):mgDemand(d,{ovr:Math.round(mgSortOvr(d,p)),age:p.age},moving); }
-  function mgFreeAskSeen(d,p){ return mgKnown(d,p)?mgFreeAsk(d,p):mgFreeAsk(d,{ovr:Math.round(mgSortOvr(d,p)),age:p.age}); }
+  // what he'd ask: from his true rating once scouted, else (v151) from the rating his wage now says he has -- what a club
+  // pays a man is no secret -- within 15% of what he signs for nineteen times in twenty. From the middle of his range, as
+  // it was, about one time in five: off by up to twice either way, as unscouted ratings are
+  const ovrOfWage=w=>55+Math.log10(Math.max(200,w)/2000)/0.064, mgSeenOvr=(d,p)=>p.wage>0?ovrOfWage(p.wage):mgSortOvr(d,p);
+  function mgDemandSeen(d,p,moving){ return mgKnown(d,p)?mgDemand(d,p,moving):mgDemand(d,{ovr:mgSeenOvr(d,p),age:p.age},moving); }
+  function mgFreeAskSeen(d,p){ return mgKnown(d,p)?mgFreeAsk(d,p):mgFreeAsk(d,{ovr:mgSeenOvr(d,p),age:p.age}); }
   function mgTooBig(d,p){ return mgLevelTier(p.ovr)-d.tier>=2?'<span class="mgTag bad">WON’T COME</span>':''; }
   function mgRow(d,p,o){
     return '<button class="mgRow'+(o.sel?' on':'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos">'+(p.subRole||p.role)+'</span>'
@@ -19340,13 +19379,20 @@
     if(O.length>2) h+='<div class="mgAct"><span class="mgActL">'+(O.length-2)+' MORE BID'+(O.length>3?'S':'')+'</span></div>';
     if(d.listed[p.id]) return h+mgActRow('LISTED <b>'+money(d.listed[p.id])+'</b>','<button class="mgBtn" data-mg="unlist" data-pid="'+p.id+'">TAKE HIM OFF</button>');
     const pr=MGUI.list&&MGUI.list.pid===p.id?MGUI.list.price:mgValue(d,p);
-    return h+mgActRow('PRICE',mgStep('liststep',money(pr))+'<button class="mgBtn" data-mg="list" data-pid="'+p.id+'">LIST HIM</button>'); }
+    return h+mgActRow('PRICE',mgStep('liststep',money(pr))+'<button class="mgBtn" data-mg="list" data-pid="'+p.id+'">LIST HIM</button>')
+      +(O.length?'':'<div class="mgQuick">'+[[1,'HIS WORTH'],[1.25,'+25%'],[1.5,'+50%'],[2,'TWICE']].map(([k,l])=>'<button class="mgMini" data-mg="listset" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
+      +'<input class="mgAmtIn" inputmode="numeric" data-amt="listset" data-pid="'+p.id+'" placeholder="or type a figure" aria-label="a price of your own"></div>'); }   // (the quick prices with no bids in the way: the card never pages)
   function mgFreeActions(d,p,known){ const a=mgFreeAskSeen(d,p);
     let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+'</div>';
     if(!known) h+=mgScoutBtn(d,p,null);
     return h+mgActRow('SIGN',mgYears()+'<button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN HIM</button>'); }
+  // (v151) the bid's quick figures: half their price, three-quarters, their price, a tenth over -- and any figure typed
+  const BID_PCT=[[0.5,'HALF'],[0.75,'3/4'],[1,'THEIR PRICE'],[1.1,'+10%']];
+  function bidQuick(d,p,ask,act){ return '<div class="mgQuick">'+BID_PCT.map(([k,l])=>'<button class="mgMini" data-mg="'+act+'" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
+      +'<input class="mgAmtIn" inputmode="numeric" data-amt="'+act+'" data-pid="'+p.id+'" placeholder="or type a figure" aria-label="a figure of your own"></div>'; }
   function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
-    let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
+    let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+(known?mgFact('WORTH',money(mgValue(d,p)),ask>mgValue(d,p)*1.3?'var(--bad)':ask<mgValue(d,p)*0.9?'var(--good)':''):'')   // (v151: what he's worth beside it, once scouted)
+      +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
       +mgFact('CONTRACT','until season '+(p.until||d.season),'',true)+'</div>';
     if(!known) h+=mgScoutBtn(d,p,c);
     if(!mgWindowOpen(d)) return h+'<div class="mgAct"><span class="mgActL" style="color:var(--warn)">WINDOW SHUT</span></div>';
@@ -19359,7 +19405,7 @@
         '<button class="mgBtn go" data-mg="meet" data-pid="'+p.id+'">MEET IT</button><button class="mgBtn warn" data-mg="walk" data-pid="'+p.id+'">WALK AWAY</button>');
       if(!B.firm) h+=mgActRow('COUNTER',mgStep('bidstep',money(mgCounterFee(d,B)))+'<button class="mgBtn go" data-mg="counter" data-pid="'+p.id+'">COUNTER</button>');   // (HAGGLING: mgCounter)
       return h; }
-    h+=mgActRow('OFFER',mgStep('bidstep',money(fee))+'<button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">BID</button>');
+    h+=mgActRow('OFFER',mgStep('bidstep',money(fee))+'<button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">BID</button>')+bidQuick(d,p,ask,'bidset');
     if(!mgLoanWhy(d,p,c)){ const sh=mgLoanShare(d,p,c); h+=mgActRow('OR A LOAN <b>'+money(mgLoanFee(d,p))+'</b> + <b>'+money(mgRound(p.wage*sh))+'/wk</b>','<button class="mgBtn" data-mg="loanask" data-pid="'+p.id+'">LOAN HIM</button>'); }   // (LOANS: to the season's end, a share of his wage)
     return h; }
 
@@ -19591,7 +19637,8 @@
     document.getElementById('chMeta').textContent=MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d));
     const bEl=document.getElementById('chBudget'); bEl.textContent=money(d.budget); bEl.style.color=d.budget<0?'var(--bad)':'var(--good)';
     document.getElementById('chLoyal').textContent=Math.round(d.loyalty||0).toLocaleString();
-    const nEl=document.getElementById('chNet'); nEl.textContent=(f.netAvg>=0?'+':'')+money(f.netAvg); nEl.style.color=f.netAvg>=0?'var(--good)':'var(--bad)';
+    const pre=d.phase==='summer'||d.phase==='winter', nv=pre?shirtSales(d).wk:f.netAvg, nEl=document.getElementById('chNet'), nl=document.getElementById('chNetLbl');   // (v151: projected, and in a pre-season week what comes in -- the shirts)
+    if(nl) nl.textContent=pre?'PRE-SEASON/WK':'NET/WK (PROJ.)'; nEl.textContent=(nv>=0?'+':'')+money(nv); nEl.style.color=nv>=0?'var(--good)':'var(--bad)';
     const w=[], lu=ensureLineup(d), gk=d.roster[lu.gk], bad=t=>'<span style="color:var(--bad)">'+t+'</span>', info=t=>'<span style="color:var(--warn)">'+t+'</span>';
     if(debtOver(d)) w.push(bad('THE BOARD: '+money(-d.budget-debtLimitOf(d))+' over what it lets the club owe — no signings or building, and if it’s still so at the season’s end your most valuable man is sold'));   // (v150)
     else if(d.budget<0) w.push(bad('IN THE RED — sell before you can buy'));
@@ -19832,6 +19879,8 @@
       case 'papers': pileShow(d,true); return;
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+MG_LEAGUE[d.tier]+': pre-season, and the window is open.','var(--good)'); return;
       case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
+      case 'bidset': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), want=ds.v!=null?+ds.v:mgRound(ask*(+ds.k));   // (v151: a quick figure, or one typed)
+        if(!(want>0)) break; MGUI.bid={pid,fee:Math.max(mgRound(ask*0.5),mgRoundF(want))}; break; }
       case 'bidstep': { const f=mgFind(d,pid); if(!f||!f.club) break; const Bs=mgBidOf(d,pid); if(Bs&&Bs.st==='more'){ mgCounterStep(d,Bs,+ds.dir); break; }   // (haggling: between your last and theirs)
         const ask=mgAsk(d,f.p,f.club), cur=MGUI.bid&&MGUI.bid.pid===pid?MGUI.bid.fee:ask;
         MGUI.bid={pid,fee:Math.max(mgRound(ask*0.5),mgRound(cur+(+ds.dir)*Math.max(10,ask*0.05)))}; break; }
@@ -19861,6 +19910,8 @@
         if(r.msg) say(r.msg,'var(--bad)'); else if(r.ok){ MGUI.offer=null; say(p.name+' signs for '+money(r.wage)+' a week.','var(--good)'); }
         else if(r.counter) say(p.name+' comes back: he’ll sign for '+money(r.counter)+' a week.','var(--warn)'); else say(r.say,'var(--bad)'); break; }
       case 'meetc': { const err=mgMeetC(d,pid); if(!err) MGUI.offer=null; say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
+      case 'listset': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), want=ds.v!=null?+ds.v:mgRound(v*(+ds.k)); if(!(want>0)) break;   // (v151: a quick figure, or one typed)
+        MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRoundF(want))}; break; }
       case 'liststep': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), cur=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:v;
         MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRound(cur+(+ds.dir)*Math.max(10,v*0.1)))}; break; }
       case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(p.hometown){ say(HOME_MSG,'var(--warn)'); break; } if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } if(!d.listed[pid]) p.mor=clamp((p.mor??MOR0)-1,1,10); d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }
@@ -19948,6 +19999,7 @@
     const h=e.target.closest('[data-hub]'); if(!h) return;
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg(); else if(h.dataset.hub==='decor') openBuilding('decor');
     else if(h.dataset.hub==='papers'){ const d=CAREER&&CAREER.data; if(d){ pileShow(d,true); pilesBtn(d); } }
+    else if(h.dataset.hub==='ledger'){ const d=CAREER&&CAREER.data; if(d&&!mgUpElse('ldgModal')) ldgShow(d); }
     else if(h.dataset.hub==='move'){ Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
   });
 

@@ -1702,6 +1702,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       They'll come down three times at most -- the third, or reaching what they'd settle for, is their last word, and
       after it only MEET IT or WALK AWAY. A counter no higher than you bid before moves nothing. (Before v116 you met
       their figure or walked away; a lower bid meant waiting for Monday again.)
+  - **A bid in a tap (v151).** Under OFFER: HALF, 3/4, THEIR PRICE, +10% -- or any figure typed into the field
+    beside them and Enter ("2.5m", "750k", "$1,200,000"; never under half their price). It was − and + alone, 5% a
+    step: a bid at their price from half of it was ten taps. A price to list a man at the same way: HIS WORTH, +25%,
+    +50%, TWICE, or typed (with no bids in the way: the card never pages). Once a man's scouted, his card has what
+    he's WORTH beside what they're ASKING -- in red when they want more than a third over it, green when it's a
+    tenth under. **What he'd want a week**, unscouted, is read from what he's paid now -- what a club pays a man is
+    no secret -- within 15% of what he signs for about nineteen times in twenty; from the middle of his rating's
+    range, as it was, about one time in five (an unscouted rating is eight points wide: the playthrough's "around
+    $520" that signed for $320 was one of those). **Releasing a man** costs half of what's left on his deal, as before,
+    but never more than twice what he's worth (a cheap man on a long deal cost ten and sixteen times his worth).
   - **Your bids, and your budget (v108).** The top line of every transfers tab has your budget (and, once a fee's
     agreed, what's agreed and not yet paid) beside the window. The Bids tab has every bid you've placed: those out
     now -- waiting on Monday, agreed (sign him), or a price they've come back with (MEET IT and WALK AWAY right
@@ -1927,6 +1937,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       times; what's asked, bid or owed for a man as his worth went; the bank 22 times (a club's weeks of income in hand
       as they were); the computer clubs' money as their league's budgets went; the sponsors' fees as the firms' went;
       your seat prices as the going rate went.
+    - **The week's money (v151).** NET/WK on the hub says it's projected -- NET/WK (PROJ.), a league week's partners,
+      TV, sponsors, shirts, half a home gate and half an away one, less the wages -- and in a pre-season week
+      PRE-SEASON/WK, what comes in: the shirts (no games, so no gate, TV, partners or wages till the league starts;
+      before, it showed a league week's figure and only the shirts came in). Tap it: THE WEEK'S MONEY, every dollar in
+      and out of the bank this week by what it was -- the gate, the TV, partners, sponsors, shirts, prizes, transfers
+      and loans, wages, building, scouting, the week's events -- from Monday's bank to what's there now, to the dollar
+      (anything not in a line of its own in one of its own, so the lines always add up); last week's the same, and a
+      league week projected. A game's week runs to the next Monday: played or simulated, its money is last week's.
     - **The board's limit (v150).** What the board lets the club owe -- about two weeks' income: $150,000 in League 2,
       $1M in League 1, $3M in the Championship, $15M in the Premium League -- is read at last (it was set, and nothing
       looked at it). Over it, nothing is bought: no signings, no loans, no building or decorating ("The board won't let
@@ -2371,6 +2389,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v151: the market and the week's money.** A bid in a tap -- HALF, 3/4, THEIR PRICE, +10% -- or any figure typed
+  ("2.5m"), and a list price the same way; once scouted, what a man's worth beside what they ask. What an unscouted
+  man would want a week is read from what he's paid: within 15% nineteen times in twenty (it was one in five).
+  Releasing a man never costs more than twice his worth. NET/WK says it's projected (in pre-season, the shirts), and
+  tapped it's THE WEEK'S MONEY: every dollar of the week by what it was, from Monday's bank to now, to the dollar. See
+  **A bid in a tap (v151)** and **The week's money (v151)**.
 - **v150: the board's limit, loans, deals and moods.** What the board lets the club owe (about two weeks' income: $150,000
   in League 2) is read at last: over it, no signings, loans or building and a word on the hub, and still over it at the
   season's end the board sells your most valuable man (never the hometown hero); a short squad is topped up to thirteen
