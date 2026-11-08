@@ -2176,6 +2176,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
       it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
+    - **Your first week (v157).** A new career opens with YOUR FIRST WEEK over the campus's left: pick your nine
+      (Training), meet the squad (the clubhouse's Squad), answer the phone (Transfers: it rings in pre-season), play
+      your first match -- each ticked as it's done and a tap to where it's done (the match: the week's button, lit);
+      ✕ puts it away, and it goes by itself when all four are. A new career dropped you on the campus with nothing to
+      say what to do first. The menu says NEW CAREER for it.
     - **A path, not a loop (v153).** A building not open yet says under its name in the list what it waits for --
       "needs clubhouse 2" (it was a lock and "2", which read as a building already at level 2) -- and the clubhouse
       what the next one costs, "next $400K", with a bar under it of your money against that. Tapped, a building
@@ -2486,6 +2491,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v157: a new career's first week, empty screens and the match's buttons.** The menu says NEW CAREER (it said NEW
+  GAME). A new career's campus has YOUR FIRST WEEK: pick your nine, meet the squad, answer the phone, play your first
+  match -- ticked as each is done, a tap to where it's done, ✕ to put it away, gone by itself when all four are. An
+  empty screen says why (the club's records "after your first game", a man with "no games yet", a season's form "none
+  yet"), never a bare dash. In a match the score and the clock say what they are when tapped, the menu and the
+  controls by their titles, and the menu's top has the match at a glance: "ARS 0–0 MCI · 0:08 · 3 subs left". See
+  **Your first week (v157)**.
 - **v156: a signing's worth and a sale's.** A man to buy or sign shows what he'd do for your nine, its average now and
   with him in it ("48.3 → 49.0", or "no change"); a man from your academy sold, his agent takes a tenth; an ambitious
   man turned down for a club a league up minds, and says so; a star at a small club draws a bid in 12% of window weeks

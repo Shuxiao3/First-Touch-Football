@@ -133,6 +133,7 @@
   /* FIXED FRAME: a card always fits the screen -- its title and buttons stay put, and only a long middle (.pScroll) goes over pages */
   .pauseCard{ width:100%; max-width:340px; display:flex; flex-direction:column; gap:10px; max-height:100%; min-height:0; overflow:hidden; padding-top:4px; }
   .pauseCard .pauseTitle{ line-height:1.3; flex:none; }
+  .pauseState{ flex:none; text-align:center; font-size:12px; letter-spacing:1px; color:var(--ink2); margin:-6px 0 10px; }   /* (v157: THE MATCH AT A GLANCE) */
   .pScroll{ flex:1 1 auto; min-height:0; overflow:hidden; }
   /* NO SCROLLING (fitBox): what doesn't fit goes over pages, with the pager along the box's foot */
   .fitHide{ display:none !important; }
@@ -633,6 +634,12 @@
   .cpClub img{ width:16px; height:18px; image-rendering:pixelated; }
   .cpClub img:not([src]){ display:none; }
   .cpNotes{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .cpFirst{ position:absolute; left:10px; top:54px; z-index:5; width:min(200px,42%); padding:6px 8px 7px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; }   /* (v157: YOUR FIRST WEEK) */
+  .fwHead{ display:flex; align-items:center; justify-content:space-between; font-size:10px; letter-spacing:1px; color:var(--acc); margin-bottom:3px; }
+  .fwX{ font:11px 'FTC Dot',monospace; color:var(--dim); background:none; border:0; padding:0 2px; cursor:pointer; }
+  .fwRow{ display:flex; gap:6px; width:100%; text-align:left; font:11px 'FTC Dot',monospace; color:var(--ink); background:none; border:0; padding:2px 0; cursor:pointer; }
+  .fwRow b{ width:9px; font-weight:400; color:var(--acc); } .fwRow.done{ color:var(--good); } .fwRow.done b{ color:var(--good); }
+  .chPlay.flash{ outline:2px solid var(--acc); outline-offset:2px; }
   .chMore{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--acc); background:none; border:0; padding:0 2px; cursor:pointer; pointer-events:auto; }   /* (v153) */
   .cpNotes .chWarn{ margin:0; max-width:100%; padding:5px 10px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; line-height:1.4; white-space:normal; text-align:center; }
   .cpFoot{ position:absolute; left:10px; right:10px; bottom:8px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:8px; pointer-events:none; }
@@ -1511,7 +1518,7 @@
       <div class="smSub">nine a side</div>
       <div class="smItems" id="smItems">
         <button class="smBtn" data-act="resume" id="smResume" style="display:none"><span class="mk">▶</span>RESUME MATCH</button>
-        <button class="smBtn" data-act="new"><span class="mk">▶</span>NEW GAME</button>
+        <button class="smBtn" data-act="new"><span class="mk">▶</span>NEW CAREER</button>
         <button class="smBtn" data-act="continue" data-needsave="1"><span class="mk">▶</span>CONTINUE</button>
         <button class="smBtn" data-act="load" data-needsave="1"><span class="mk">▶</span>LOAD GAME</button>
         <button class="smBtn" data-act="exhibition"><span class="mk">▶</span>EXHIBITION</button>
@@ -1609,12 +1616,12 @@
     <div id="dbgText" style="white-space:pre"></div>
   </div>
   <div id="readout">
-    <span class="chip" id="rScore"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
+    <span class="chip xplUI" id="rScore" data-xpl="score"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
     <span class="chip xplUI" id="rDir" style="color:var(--acc)" data-xpl="dir">▶</span>
-    <span class="chip">⏱ <b id="rClock">0:00</b></span>
+    <span class="chip xplUI" id="rClockChip" data-xpl="clock">⏱ <b id="rClock">0:00</b></span>
     <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop">SUBS <b id="qsLeft"></b><i>▾</i></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
     <div class="chip xplUI" id="rPlayer" data-xpl="hud"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
-    <button id="menuBtn" class="chip menuChip">☰</button>
+    <button id="menuBtn" class="chip menuChip" aria-label="pause: the menu" title="Pause: the menu">☰</button>
     <button id="ctlBtn" class="chip menuChip ctlChip" aria-label="how to play: the controls" title="How to play">?</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
   </div>
@@ -1680,6 +1687,7 @@
 <div id="pauseMenu" class="pauseOv">
   <div class="pauseCard pauseMain">
     <div class="pauseTitle">MENU</div>
+    <div class="pauseState" id="pauseState"></div>
     <div class="pauseGrid" id="pauseGrid">
       <button class="pauseBtn" data-pause="tactics">TACTICS</button>
       <button class="pauseBtn" data-pause="skills">SKILL MOVES</button>
@@ -13124,6 +13132,8 @@
     stars:'SKILL STARS, 1 to 5: the skill moves he can do (SKILL MOVES in the menu has each move\'s stars). A young man\'s come as he grows, to about 19 to 23; some lose one past 32.',
     hud:'YOUR MAN, the one with ▽ over him: his number, name and position. STAMINA: his legs this game, spent sprinting; the red tick is as far as they\'ll come back now.',
     dir:'The way you\'re attacking.',
+    score:'THE SCORE: your side on the left.',
+    clock:'THE CLOCK: the game\'s minute, 1 to 45 in the first half and 46 to 90 in the second (each half a few real minutes: Settings).',
     pot:'POTENTIAL: how good he could become, as your coaches or scouts see it. The more they know of him, the closer the range.',
     potNo:'POTENTIAL, not scouted: your scouts haven\'t seen him, so how good he could become is hidden. With a scouts\' house, SCOUT HIM on his card\'s RATINGS side.',
     sixNo:'Not scouted: his six are hidden, and his rating\'s a range, till your scouts have seen him. With a scouts\' house, SCOUT HIM here.',
@@ -15667,7 +15677,11 @@
     if(b.dataset.ht==='go'){ htGo(); return; }
     document.getElementById('htModal').classList.remove('on'); MT.fromHT=true; openMatchTac(); });   // (the board: back from it to here -- closeMatchTac)
   // ===== IN-GAME PAUSE MENU (Tactics / Settings / Exit / Back) =====
-  function openPause(){ if(SCREEN!=='match') return; pauseOpen=true; document.getElementById('pauseMenu').classList.add('on'); }
+  // (v157) THE MATCH AT A GLANCE, at the menu's top: the score, the minute and your subs left -- the HUD's, in one line
+  function pauseState(){ const el=document.getElementById('pauseState'); if(!el) return; const t=id=>(document.getElementById(id)||{}).textContent||'';
+    const subs=typeof SUBS!=='undefined'&&SUBS.G?Math.max(0,SUB_MAX-SUBS.G.used):null;
+    el.textContent=t('tnG')+' '+t('sG')+'–'+t('sR')+' '+t('tnR')+' · '+t('rClock')+(subs!=null?' · '+subs+' sub'+(subs===1?'':'s')+' left':''); }
+  function openPause(){ if(SCREEN!=='match') return; pauseOpen=true; pauseState(); document.getElementById('pauseMenu').classList.add('on'); }
   function closePause(){ pauseOpen=false; document.getElementById('pauseMenu').classList.remove('on'); }
   let _dialsHome=null, _dialsAnchor=null;
   // SETTINGS: what a player sets, one row each (see PREFS); a developer can open the feel dials under it (see DEV)
@@ -16324,11 +16338,13 @@
     if(!b||mg>b.gf-b.ga||(mg===b.gf-b.ga&&gf>b.gf)){ R.bw={gf,ga,opp:clubCode(d,opp),s:d.season}; if(b&&recNews(d)) mgNews(d,'A club record: '+d.clubName+'’s biggest win, '+gf+'–'+ga+'.'); } }
   function recFee(d,k,p,fee){ const R=d.rec=d.rec||{}; if(!(fee>0)||(R[k]&&fee<=R[k].fee)) return; const had=R[k]; R[k]={name:p.name,fee,s:d.season};
     if(had&&recNews(d)) mgNews(d,'A club record: '+(k==='fp'?'the most '+d.clubName+' have ever paid':'the most '+d.clubName+' have ever been paid')+', '+money(fee)+' for '+p.name+'.'); }
-  function mgRecordsHtml(d){ const R=d.rec||{}, who=(x,v)=>x?mgEsc(x.name)+' · '+v:'—';
-    return '<div class="bpSect">CLUB RECORDS</div>'+finRow('Most games',who(R.ap,R.ap&&R.ap.n))+finRow('Most goals',who(R.gl,R.gl&&R.gl.n))
-      +finRow('Youngest to play',who(R.yd,R.yd&&R.yd.age+' (S'+R.yd.s+')'))+finRow('Youngest to score',who(R.ys,R.ys&&R.ys.age+' (S'+R.ys.s+')'))
-      +finRow('Biggest win',R.bw?R.bw.gf+'–'+R.bw.ga+' v '+mgEsc(R.bw.opp)+' (S'+R.bw.s+')':'—')
-      +finRow('Record signing',who(R.fp,R.fp&&money(R.fp.fee)))+finRow('Record sale',who(R.fs,R.fs&&money(R.fs.fee))); }
+  // (v157) an empty record says what sets it -- it was a wall of dashes
+  function mgRecordsHtml(d){ const R=d.rec||{}, yet=t=>'<span style="color:var(--dim)">'+t+'</span>', who=(x,v,t)=>x?mgEsc(x.name)+' · '+v:yet(t);
+    return '<div class="bpSect">CLUB RECORDS</div>'+(Object.keys(R).length?'':'<div class="mgHint">Records are set in your games and the market: the first of each comes with your first game, goal, win, signing and sale.</div>')
+      +finRow('Most games',who(R.ap,R.ap&&R.ap.n,'after your first game'),false,'var(--ink)')+finRow('Most goals',who(R.gl,R.gl&&R.gl.n,'your first goal'),false,'var(--ink)')
+      +finRow('Youngest to play',who(R.yd,R.yd&&R.yd.age+' (S'+R.yd.s+')','after your first game'),false,'var(--ink)')+finRow('Youngest to score',who(R.ys,R.ys&&R.ys.age+' (S'+R.ys.s+')','your first goal'),false,'var(--ink)')
+      +finRow('Biggest win',R.bw?R.bw.gf+'–'+R.bw.ga+' v '+mgEsc(R.bw.opp)+' (S'+R.bw.s+')':yet('your first win'),false,'var(--ink)')
+      +finRow('Record signing',who(R.fp,R.fp&&money(R.fp.fee),'your first fee paid'),false,'var(--ink)')+finRow('Record sale',who(R.fs,R.fs&&money(R.fs.fee),'your first fee taken'),false,'var(--ink)'); }
   // THE SEASON'S END, for the record: the awards -- your league's Player of the Year (v104; its Player of the Season
   // before: yours, and a prize -- see THE PLAYER OF THE MONTH), its best young player (21 or under), both from ten games
   // rated; THE GOLDEN BOOT, its top scorer, and THE GOLDEN GLOVE, the keeper with the most clean sheets from ten games
@@ -18578,7 +18594,7 @@
   // in the league: one to three tiers, the highest reached paying (a harder one more: DEAL_BONUS weeks of its fee). A
   // shirt sponsor asks for a finish or wins, the ground's for full crowds (the season's home games, a share of the seats),
   // a stand's for goals, clean sheets or crowds. Where you stand shows by each deal through the season.
-  const DEAL_MET={pos:{lab:v=>'top '+v, now:v=>v?ordinal(v):'—'}, wins:{lab:v=>v+' wins', now:v=>v+' wins'}, goals:{lab:v=>v+' goals', now:v=>v+' goals'},
+  const DEAL_MET={pos:{lab:v=>'top '+v, now:v=>v?ordinal(v):'no table yet'}, wins:{lab:v=>v+' wins', now:v=>v+' wins'}, goals:{lab:v=>v+' goals', now:v=>v+' goals'},
     cs:{lab:v=>v+' clean sheets', now:v=>v+' clean sheets'}, crowd:{lab:v=>Math.round(v*100)+'% full', now:v=>Math.round(v*100)+'% full'}};
   const DEAL_TIERS={pos:[10,6,2], wins:[9,12,15], goals:[35,42,48], cs:[6,8,10], crowd:[0.55,0.75,0.95]};   // (a typical season: 10 wins, 36 goals, 6 clean sheets; the champions 16, 48, 10)
   const DEAL_PICK={kit:['pos','pos','wins'], ground:['crowd','crowd','pos'], stand:['goals','cs','crowd']};
@@ -19583,7 +19599,7 @@
     if(mgSide==='career') h+=mgCareerSide(d,p,f);
     else if(mgSide==='mind') h+=mgMindSide(d,p,f);
     else if(mgSide==='rate') h+=known?sixHtml(mgStats(p),p.role)+(f.mine&&!sixOpen?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+((p.role==='GK'||p.role==='DEF')?mgFact('ASSISTS · CS',(p.as||0)+' · '+(p.cs||0)):mgFact('ASSISTS',String(p.as||0)))   // (his season, in short facts: a card's text stays short)
-        +mgFact('RATING · FORM',(p.rn?(p.rs/p.rn).toFixed(1):'—')+' · '+(p.fm!=null?p.fm.toFixed(1):'—'),p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'')
+        +mgFact('RATING · FORM',p.rn||p.fm!=null?(p.rn?(p.rs/p.rn).toFixed(1):'none')+' · '+(p.fm!=null?p.fm.toFixed(1):'none'):'none yet',p.fm!=null&&p.fm>=7.2?'var(--good)':p.fm!=null&&p.fm<5.8?'var(--bad)':'')
         +mgFact('FOCUS','<button class="mgMini" data-mg="focus" data-pid="'+p.id+'">'+(p.fo&&DEV_FOCUS[p.fo]?DEV_FOCUS[p.fo]:'BALANCED')+'</button>')+'</div>':f.youth?'':mgScoutFacts(d,p,f))
       :mgSixUnknown(p)+mgScoutBtn(d,p,f.club||null);
     else if(f.mine) h+=ctx==='sale'?mgSaleActions(d,p):mgContractActions(d,p);
@@ -19681,7 +19697,7 @@
       h+='</div>'; }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
     return mgPanes('<div class="sqList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
-  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d); let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'—')+'</div>'+mgCupsSum(d)+'<div class="mgList">';
+  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d); let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'none yet: no games')+'</div>'+mgCupsSum(d)+'<div class="mgList">';
     const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
       return '<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+(pens!=null&&you===them?' P':'')+'</span>'; };
     L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
@@ -19851,12 +19867,12 @@
     return h; }
   function mgScorersTab(d){ const L=[]; for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)) if(p.goals) L.push([p,id]);
     L.sort((a,b)=>b[0].goals-a[0].goals);
-    return '<div class="bpSect">'+MG_LEAGUE[d.tier].toUpperCase()+' · TOP SCORERS</div>'+(L.slice(0,12).map(([p,id],i)=>finRow((i+1)+'. '+mgEsc(p.name)+' ('+mgEsc(d.world.clubs[id].code)+')',p.goals+' goal'+(p.goals>1?'s':''),id===d.clubId,id===d.clubId?'var(--good)':'#cfe7d2')).join('')||'<div class="mgHint">Nobody has scored yet.</div>'); }
+    return '<div class="bpSect">'+MG_LEAGUE[d.tier].toUpperCase()+' · TOP SCORERS</div>'+(L.slice(0,12).map(([p,id],i)=>finRow((i+1)+'. '+mgEsc(p.name)+' ('+mgEsc(d.world.clubs[id].code)+')',p.goals+' goal'+(p.goals>1?'s':''),id===d.clubId,id===d.clubId?'var(--good)':'#cfe7d2')).join('')||'<div class="mgHint">Nobody has scored yet: the top scorers start with the league’s first matchday.</div>'); }
 
   // ---- your house ----
   function mgProfileTab(d){ const M=d.manager; let h='<div class="mgCardName" style="text-align:center">'+mgEsc(M.name)+'</div><div class="mgCardSub" style="text-align:center;margin-bottom:12px">Manager of '+mgEsc(d.clubName)+'</div>';
     h+=finRow('Seasons in charge',String(M.history.length+(d.phase==='review'?0:1)))+finRow('Promotions',String(M.promotions))+finRow('League titles',String(M.titles));
-    return h+finRow('This season',MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d))+' · form '+(mgForm(d).join(' ')||'—')); }
+    return h+finRow('This season',MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d))+' · form '+(mgForm(d).join(' ')||'none yet')); }
   function mgHistoryTab(d){ const H=d.manager.history; if(!H.length) return '<div class="mgHint">Your first season is still going.</div>';
     return '<table class="mgTbl"><thead><tr><th>S</th><th>LEAGUE</th><th>POS</th><th>RESULT</th></tr></thead>'+H.slice().reverse().map(x=>'<tr class="'+(/PROMOTED|CHAMPIONS/.test(x.result)?'up':x.result==='RELEGATED'?'dn':'')+'"><td>'+x.season+'</td><td>'+MG_LEAGUE[x.tier]+'</td><td>'+ordinal(x.pos)+'</td><td>'+x.result+'</td></tr>').join('')+'</table>'; }
 
@@ -19945,7 +19961,7 @@
     ph.dataset.long='Season '+d.season+' · '+wk+(g?' · '+(mon?'next: ':'')+what+who:'');
     ph.dataset.mid=g&&!mon?MG_DAY[d.wday]+' · '+what+who:wk;
     ph.dataset.short=g&&!mon?(g.kind==='league'?'MD '+(d.md+1):g.short)+(opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):''):mgWeekShort(d);
-    pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
+    pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); fwPaint(d); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
     if(MGUI.seq&&!['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(mgUpOn)) MGUI.seq=null; }   // (v148: the run over)
   // THE PAPERS' BUTTON (v106): off to the side, on the campus's top bar, with how many there are in an orange box -- it
   // pops in when they come, and the button glows till you've opened them. A Monday's pile waits there for you; only a
@@ -19962,6 +19978,17 @@
       train:{n:(gk&&gk.role==='GK'?0:1)+hurt.length+tired.length, t:[gk&&gk.role==='GK'?'':'no keeper in goal', hurt.length?plural(hurt.length,'man','men')+' in your nine hurt':'', tired.length?plural(tired.length,'man','men')+' in your nine tired':''].filter(Boolean).join(' · ')},
       stad:{n:sp.length, t:sp.length?plural(sp.length,'sponsor’s offer','sponsors’ offers')+' waiting':''},
       market:{n:off.length+ans.length, t:[off.length?plural(off.length,'bid','bids')+' for your men':'', ans.length?plural(ans.length,'answer','answers')+' to your bids':''].filter(Boolean).join(' · ')} }; }
+  // YOUR FIRST WEEK (v157): a new career's first steps on the campus, ticked as they're done -- pick your nine (Training),
+  // meet the squad (the clubhouse's Squad), answer the phone (Transfers: it rings in pre-season), play your first match
+  // -- each a tap to where it's done, ✕ to put it away; gone by itself when all four are. A new career dropped you on
+  // the campus with nothing to say what to do first
+  function fwSteps(d){ const F=d.fw||{}; return [['nine','Pick your nine','train',!!F.nine],['squad','Meet the squad','club',!!F.squad],['phone','Answer the phone','market',!!lvOf(d,'market')],['play','Play your first match',null,mgForm(d).length>0]]; }
+  function fwPaint(d){ let el=document.getElementById('cpFirst'); const main=document.querySelector('#careerHub .cpMain'); if(!main) return;
+    if(!el){ el=document.createElement('div'); el.id='cpFirst'; el.className='cpFirst'; main.appendChild(el); }
+    const S=d.fw&&!d.fw.off?fwSteps(d):null; if(S&&S.every(x=>x[3])) d.fw.off=1;
+    if(!S||d.fw.off){ el.style.display='none'; return; }
+    el.style.display=''; el.innerHTML='<div class="fwHead"><span>YOUR FIRST WEEK</span><button class="fwX" data-hub="fwoff" aria-label="put it away">✕</button></div>'
+      +S.map(([k,t,go,done])=>'<button class="fwRow'+(done?' done':'')+'"'+(go?' data-hub="fwgo" data-go="'+go+'"':' data-hub="fwplay"')+'><b>'+(done?'✓':'·')+'</b>'+t+'</button>').join(''); }
   function pilesBtn(d){ const b=document.querySelector('#careerHub .cpPapers'), nEl=document.getElementById('cpPapersN'); if(!b||!nEl) return;
     const n=pileLeft(d).length, key=d.pile?(d.pile.w+'.'+(d.pile.day||'mon')):'';
     b.style.display=n?'':'none'; b.classList.toggle('fresh',!!n&&!!d.pile&&!d.pile.opened);
@@ -20109,6 +20136,7 @@
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
+    { const D=CAREER&&CAREER.data; if(D&&D.fw&&id==='train') D.fw.nine=1; }   // (v157: YOUR FIRST WEEK)
     Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',tier:null,ntier:null,role:'ALL',noPile:false,drop:null});   // (the Search's filters stay as you left them; none of its drop-downs open)
     document.getElementById('bpTitle').innerHTML=b.title;
     if(b.tabs&&!curTab[id]) curTab[id]=b.tabs[0];
@@ -20116,6 +20144,7 @@
   // THE BUILDING SCREEN: its tabs up in the header line, its body below (over pages if it's long, or holding panes that
   // are), and a message, if there is one, as a toast along the bottom. A fresh building or tab starts on page 1.
   function paintBuilding(top){ const id=curBldg, b=MG_BLDGS[id]; if(!b) return; if(b.tabs&&!b.tabs.includes(curTab[id])) curTab[id]=b.tabs[0]; const t=b.tabs?curTab[id]:null;   // (a tab that's gone: the first)
+    { const D=CAREER&&CAREER.data; if(D&&D.fw&&id==='club'&&t==='Squad') D.fw.squad=1; }   // (v157: YOUR FIRST WEEK)
     if(id==='stadium'&&CAREER&&CAREER.data) document.getElementById('bpTitle').textContent=groundName(CAREER.data).toUpperCase();   // (the stadium's door opens on its name)
     const D=CAREER&&CAREER.data, off=D&&((BLD_LV[id]&&!lvOf(D,id))||(id==='decor'&&lvOf(D,'club')<DECOR_CL));
     document.getElementById('bpTabs').innerHTML=b.tabs&&!off?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
@@ -20286,6 +20315,9 @@
     const h=e.target.closest('[data-hub]'); if(!h) return;
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg(); else if(h.dataset.hub==='decor') openBuilding('decor');
     else if(h.dataset.hub==='papers'){ const d=CAREER&&CAREER.data; if(d){ pileShow(d,true); pilesBtn(d); } }
+    else if(h.dataset.hub==='fwoff'){ const d=CAREER&&CAREER.data; if(d&&d.fw){ d.fw.off=1; mgSave(d); renderHub(); } }   // (v157: YOUR FIRST WEEK)
+    else if(h.dataset.hub==='fwgo'){ const d=CAREER&&CAREER.data; if(d){ const g=h.dataset.go; if(g==='club') curTab.club='Squad'; openBuilding(g); } }
+    else if(h.dataset.hub==='fwplay'){ const b=document.querySelector('#chBottom .chPlay'); if(b) b.classList.add('flash'), setTimeout(()=>b.classList.remove('flash'),900); }
     else if(h.dataset.hub==='warnall'){ MGUI.warnAll=!MGUI.warnAll; renderHub(); }   // (v153: every warning, or the first three)
     else if(h.dataset.hub==='ledger'){ const d=CAREER&&CAREER.data; if(d&&!mgUpElse('ldgModal')) ldgShow(d); }
     else if(h.dataset.hub==='move'){ Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
@@ -20391,7 +20423,7 @@
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
-    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);
+    mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d); d.fw={};   // (v157: YOUR FIRST WEEK)
     mgNews(d,o.manager+' takes charge of '+o.clubName+' in '+MG_LEAGUE[1]+'. '+MG_WINDOW.summer+' weeks of pre-season; the transfer window is open to the end of the winter break.');
     d.wkN=d.weeks=1; mgAiBids(d,1.5);   // (its first Monday: the world as made, the computer clubs' business from the next)
     mgRivalPick(d); d.potm={s:d.season, snap:{}};   // (the club down the road; the month's players from the first game)
