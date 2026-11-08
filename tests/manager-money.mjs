@@ -52,7 +52,7 @@ ok(!r.kit && !r.stand && !r.ground && r.up === null && r.lvl === 2 && r.b1 === 3
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), was={tier:d.tier, lvl:S.lvl, loy:d.loyalty, md:d.md};
   const gen=(k,n)=>{ const L=[]; for(let i=0;i<n;i++){ const o=spOfferFor(d,k,new Set()); if(o) L.push(o); } return L; }, out={};
   const at=(tier,lvl,fans)=>{ d.tier=tier; S.lvl=lvl; d.loyalty=Math.round((LOYALTY_BASE[tier]||1000)*fans); d.md=0; return Math.round(spStanding(d)*10)/10; };
-  out.st=[at(1,1,1)]; const loc=gen('board',80); out.loc={sz:[...new Set(loc.map(o=>o.sz))].join(), names:loc.slice(0,4).map(o=>o.sp.name+' $'+o.wk), fee:loc.every(o=>o.wk>=45&&o.wk<=120), bonus:loc.some(o=>o.m), yrs:loc.every(o=>o.yrs===1),
+  out.st=[at(1,1,1)]; const loc=gen('board',80); out.loc={sz:[...new Set(loc.map(o=>o.sz))].join(), names:loc.slice(0,4).map(o=>o.sp.name+' $'+o.wk), fee:loc.every(o=>o.wk>=2250&&o.wk<=6000), bonus:loc.some(o=>o.m), yrs:loc.every(o=>o.yrs===1),
     trades:loc.every(o=>SP_SIZES[0].b.some(t=>o.sp.name.endsWith(' '+t))), short:loc.every(o=>o.sp.short.length<=12)};
   out.st.push(at(2,2,1)); const town=gen('board',80); out.town={sz:town.filter(o=>o.sz===1).length, n:town.length};
   out.st.push(at(4,5,2)); const top=gen('kit',60); out.top={sz:[...new Set(top.map(o=>o.sz))].sort().join(), fee:Math.min(...top.map(o=>o.wk))};
@@ -66,7 +66,7 @@ r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d), was={tier:d.tier, lvl:S.lv
   d.tier=was.tier; S.lvl=was.lvl; d.loyalty=was.loy; d.md=was.md; return out; })()`);
 info('who calls: ' + JSON.stringify(r));
 ok(r.st[0] === 0 && r.loc.sz === '0' && r.loc.fee && !r.loc.bonus && r.loc.yrs && r.loc.trades && r.loc.short,
-  'a new club: only local businesses call (' + r.loc.names.join(', ') + '), $45 to $120 a week for a board (v130: it was $15 to $40), to the season\'s end, no bonus');
+  'a new club: only local businesses call (' + r.loc.names.join(', ') + '), $2,250 to $6,000 a week for a board (v149: the real game\'s money -- it was $45 to $120, and $15 to $40 before v130), to the season\'s end, no bonus');
 ok(r.st[1] > 22 && r.town.sz > r.town.n * 0.5 && r.st[2] > 88 && /4/.test(r.top.sz) && r.top.fee >= 2050,   // (a national company's $2,300 and up, a three-season deal a tenth less a week; v130: it was $2,000)
   'a league up and a bigger ground, mostly the town\'s firms (' + r.town.sz + ' of ' + r.town.n + '); at the top with a grand stadium, national companies and global brands (sizes ' + r.top.sz + '), the shirt for ' + r.top.fee + ' a week and up');
 ok(r.metOk && r.base && r.tiers === '1,2,3' && r.harder && /pos/.test(r.kinds) && /crowd/.test(r.kinds) && /goals|cs/.test(r.kinds) && r.gname,

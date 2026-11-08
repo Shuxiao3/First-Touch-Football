@@ -108,7 +108,7 @@ await toPaper(/A SPONSOR CALLS/);
 const spTxt = await top(); await press('spsign');
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); return { ads:S.ads.map(a=>a.sp.name+' $'+a.wk), wk:computeFinance(d).boardsWk, drawn:groundOfYours(d).boards.map(b=>b.short), offers:d.spOff.length }; })()`);
 info('the sponsor: ' + JSON.stringify({ spTxt: spTxt.split('\n'), r }));
-ok(/A local business/.test(spTxt) && /an ad board/.test(spTxt) && /\$\d+ a week, to the end of the season/.test(spTxt) && r.ads.length === 1 && r.wk > 0 && r.drawn[0] !== 'YOUR AD HERE' && r.offers === 0,
+ok(/A local business/.test(spTxt) && /an ad board/.test(spTxt) && /\$[\d,]+ a week, to the end of the season/.test(spTxt) && r.ads.length === 1 && r.wk > 0 && r.drawn[0] !== 'YOUR AD HERE' && r.offers === 0,
   'a sponsor calls -- a local business for the ad board ("' + spTxt.split('\n')[1] + '") -- SIGN, and its name\'s on the board, its fee every week (' + r.ads[0] + ')');
 // a man who's come on: a new deal
 const n7 = await K('CAREER.data.roster[6].name'), w7 = await K('mgRenewWage(CAREER.data,CAREER.data.roster[6])');

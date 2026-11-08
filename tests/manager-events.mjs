@@ -86,7 +86,7 @@ await K('pileHide()');
 // --- THE CUPS' DRAWS, in the papers ---------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, other=d.div[2][0]; d.div[2][0]=d.clubId; d.div[1][d.div[1].indexOf(d.clubId)]=other; d.world.clubs[other].tier=1; d.world.clubs[d.clubId].tier=2; d.tier=2;
   mgNewFixtures(d); d.wkLog={}; mgCupsStart(d); d.md=0; d.phase='league'; pileBuild(d,{dev:null}); const x=pileLeft(d).find(y=>y.k==='cup'); return x?[pileBody(d,x)[0], pileBody(d,x)[1].join(' / ')]:null; })()`);
-ok(r && (/^Coco Cup, first round: (at home to|away at) /.test(r[0]) && /Wednesday of week 5/.test(r[1]) && /\$5,000/.test(r[1]) || /^Coco Cup: a bye to the round of 32/.test(r[0])),
+ok(r && (/^Coco Cup, first round: (at home to|away at) /.test(r[0]) && /Wednesday of week 5/.test(r[1]) && /\$50,000/.test(r[1]) || /^Coco Cup: a bye to the round of 32/.test(r[0])),
   'a League 1 season: the Coco Cup\'s first-round draw in the papers ("' + (r && r[0]) + '", ' + (r && r[1]) + ')');
 r = await K(`(()=>{ const d=CAREER.data; d.wkLog={}; let n=0; while(n++<40){ if(d.wday==='mon'){ mgForward(d); continue; } const g=mgNextGame(d); if(!g) break; mgPlayGame(d,null,null); d.press=null; if(g.kind==='cup'){ const s=mgNextGame(d); if(s){ mgPlayGame(d,null,null); d.press=null; } break; } }   // (the cup's Wednesday, then Saturday: the papers on Monday)
   const L=(d.pile&&d.pile.list||[]).filter(x=>x.k==='cup').map(x=>pileBody(d,x)[0]); return { L, md:d.md }; })()`);

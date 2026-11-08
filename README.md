@@ -1336,7 +1336,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   you name yourself and your club and give it a three-letter short name (it suggests one from the club's name,
   shown on a scoreboard as you type); KIT, its colours; and CREST, its badge. START works from any of them. You
   start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
-  Premium League), with a weak squad of 15 and $20,000. A squad is twenty-one at most (every club's), thirteen at
+  Premium League), with a weak squad of 15 and $250,000 (v149; it was $20,000). A squad is twenty-one at most (every club's), thirteen at
   least; nine start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
   **Selection**). It was fifteen at most, with a bench of four, then twenty with eight starting (v124: a man more
   each for nine a side, a fifth defender among a new squad's fifteen). The game is buying and selling players:
@@ -1723,7 +1723,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Two bids or more over its price for him -- yours, or another club's -- and it knows it has a gem: it sees all
       of his potential, and asks more than the best of them. What it's heard is forgotten when the window shuts.
   - **Wages (v83)** are set by how good a man is when he signs (the wage a man of his rating earns), not haggled
-    over, and they stay put. They climb with his rating faster from v120 -- a 52 (League 2's run of the mill) earns
+    over, and they stay put. (v149: in the real game's money -- $2,000 a week at 55, $69,000 at 79: see **The real
+    game's money (v149)**. The figures below are from before it.) They climb with his rating faster from v120 -- a 52 (League 2's run of the mill) earns
     $110 a week (it was $90), a 60 $280 ($190), a 68 $770 ($420), a 79 $3,020 ($1,200): about a fifth more for League
     2's men, half again for League 1's, twice for the Championship's, two and a half times for the Premium League's,
     as ticket money grows far faster up the leagues than the old wages did. A save from before v120 puts every man's
@@ -1853,16 +1854,72 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     ink (in light, round a dark one). Its colours are the kit's until you pick your own. Every other club's is drawn
     from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
     yours by the club's name on the campus and on its clubhouse and academy. Your short name is yours alone: no other club is given it.
-  - **Money.** Tickets, the club's partners (local firms: $300 a week in League 2, more in each league
-    up), TV, shirt sales, and the ground's boards and sponsors (below). Prize money comes at the end of the season: $12,000 for
-    winning League 2, up to $1.5m for the Premium League, less the lower you finish. The broadcast share follows
+  - **Money.** Tickets, the club's partners (local firms: $15,000 a week in League 2, up to $1.5M in the Premium
+    League -- v149; it was $300), TV ($45,000 a week in League 2 to $3.2M; it was $150 to $15,000), shirt sales, and the
+    ground's boards and sponsors (below). Prize money comes at the end of the season: $500,000 for winning League 2, up to
+    $60M for the Premium League (it was $12,000 and $1.5M), less the lower you finish. All of it in the real game's money
+    since v149: see **The real game's money (v149)**. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the tickets, then the books (the budget, every week of the season, matchdays, the
     season's transfers, the last few weeks). (Until v116 there were concessions too -- food and drink stalls, a
     megastore and a jersey stand, bought on a Concessions tab for a little more from each head at home games; they're
     gone, and a career that had built them got what they cost back.)
-    - **Tickets (v108).** The going rate for a seat is $5 in League 2 (v110; $7 in v108), $10 in League 1, $14 in the
-      Championship and $20 in the Premium League (it was $3, $5, $8 and $14), and a new career starts on it. With the
+    - **The real game's money (v149).** Every figure in the career is now what the real game pays, as the change list
+      the designer wrote set it out. **A man's worth**: $150,000 for a central midfielder of 55 in his prime, each
+      rating point 22% more, by his age and what he could become (as before, but the veteran's slide steeper:
+      three-tenths at 32 and 33, 15% from 34 -- two-fifths and a quarter before), then by his position, and never more
+      than the most the real game has paid for one -- only the generational reach it, from about 92:
+
+      | In his prime | 55 | 65 | 75 | 79 | 85 | 90 | most |
+      | --- | --- | --- | --- | --- | --- | --- | --- |
+      | Striker, winger, wide midfielder (x1.10) | $170k | $1.2M | $8.7M | $19M | $63M | $169M | $200M |
+      | Attacking midfielder (x1.05) | $160k | $1.1M | $8.3M | $18M | $60M | $161M | $190M |
+      | Central midfielder | $150k | $1.1M | $7.9M | $17M | $57M | $154M | $180M |
+      | Holding midfielder (x0.68) | $100k | $740k | $5.4M | $12M | $39M | $104M | $120M |
+      | Centre-back (x0.55) | $83k | $600k | $4.3M | $9.6M | $31M | $84M | $100M |
+      | Full-back (x0.45) | $68k | $490k | $3.5M | $7.8M | $26M | $69M | $80M |
+      | Keeper (x0.38) | $57k | $410k | $3.0M | $6.6M | $22M | $58M | $70M |
+
+      It was $2,000 at 55 and each point a third more (a striker of 79 $2.7M, of 90 $34M; by position a striker 80%
+      over, a winger 60%, a defender a quarter under, a keeper half). A club's asking price is made as before but never
+      more than a quarter over the most for his position. **A wage**: $2,000 a week at 55, each point 16% more -- $1,110
+      at 51, $8,730 at 65, $38,110 at 75, $68,710 at 79, $166,350 at 85, $347,560 at 90, $626,660 at 94 (it was $150 at
+      55 and $3,020 at 79): a new club's 15 on about $10,000 to $17,000 a week, a great side's 21 on $3.5M. A coach
+      twenty times what he was ($1,000 to $20,000 a week). **Round it**: the TV ($45,000 a week in League 2, $250,000,
+      $900,000, $3.2M -- it was $150, $500, $1,800 and $15,000), the partners ($15,000, $60,000, $250,000, $1.5M -- $300
+      to $9,000), a seat ($25, $30, $40, $60 -- $5 to $20), the league prizes ($500,000, $3M, $15M, $60M -- $12,000 to
+      $1.5M), the cups (the Coco Cup $50,000 to $400,000 a round won, the Fashion Cup $500,000 to $5M, the Champions
+      League $12M to be in it, $2.5M a group game won, $8M, $10M and $15M for the knockout rounds), the computer clubs'
+      budgets ($400,000, $3M, $25M, $150M at the summer's reset -- the richest can hold about $345M and sign a $200M
+      man), the sponsors' fees (50 times for a local business to 100 for a world name), the windfalls 27 times, a new
+      club's bank $250,000 ($20,000). What it costs: the buildings (the tables below), scouting a man $3,000 to $100,000
+      ($200 to $6,000), the decorations $2,500 to $200,000 ($150 to $12,000), a community day what its fans pay back in
+      half a season (it took three). Shirt sales are as they were. **A league game's TV money** is the week's broadcast
+      and no more -- what the stadium says is what comes in; a cup tie brings the cameras (80% of a week's on top, more
+      against a better side). It was paid for league games too: a few dollars on the old money, $280,000 a season on
+      the new.
+
+      | A season, measured | The change list | v149 |
+      | --- | --- | --- |
+      | A mid-table League 2 club, before prizes and transfers | ~$1.5M | $1.4M |
+      | ...League 1 | ~$10M | $9.1M |
+      | ...the Championship | ~$38M | $33.7M |
+      | ...the Premium League | ~$162M | $140.6M |
+      | A new club's first season, no transfers (four runs) | ~$1.8M | $1.8M to $2.3M |
+      | The computer clubs' paid moves, two seasons | every band | 47, three of men rated 85+ in the Premium League ($65M on average, $90.5M the most) |
+
+      (Before, a mid-table club made $13,000 a season in League 2 and $5.6M in the Premium League, and a new club
+      $70,000 in its first; the gate was most of a club's money from League 1 up. Now the TV is.) **The hometown hero
+      (HOME TO STAY)** is never sold: no club bids for him, he can't be listed or loaned out, he never asks to leave,
+      and on the selling screen he says so -- "He came home to finish his career here. He won't be sold." He plays,
+      renews, retires or goes when his deal ends as anyone does. **A career from before** is put into the new money
+      once: every man's wage as wages went at his rating (his deal against the going rate kept), a coach's twenty
+      times; what's asked, bid or owed for a man as his worth went; the bank 22 times (a club's weeks of income in hand
+      as they were); the computer clubs' money as their league's budgets went; the sponsors' fees as the firms' went;
+      your seat prices as the going rate went.
+    - **Tickets (v108).** The going rate for a seat is $25 in League 2, $30 in League 1, $40 in the Championship and $60
+      in the Premium League (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
+      $14), and a new career starts on it. With the
       field and bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main
       stand (the North) a fifth over the going rate, the South at it, the ends a fifth under (a quarter while they're
       open terraces) -- and seats sold at a premium come with the ground: VIP seats in the main stand (60 with the big
@@ -1909,10 +1966,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     | Level | Seats | Boards | Costs | Needs |
     | --- | --- | --- | --- | --- |
     | 1 Field & bleachers | 1,800 | 1 | (where you start) | |
-    | 2 Big bleachers, a press box | 4,200 | 3 | $45,000 | the shed |
-    | 3 Covered stands, terraces behind the goals | 8,500 | 6 | $140,000 | the cabin |
-    | 4 Four stands, floodlights | 16,000 | 10 | $380,000 | the clubhouse |
-    | 5 Grand stadium, two tiers | 36,000 | 16 | $1,200,000 | the hall |
+    | 2 Big bleachers, a press box | 4,200 | 3 | $800,000 (v149; it was $45,000) | the shed |
+    | 3 Covered stands, terraces behind the goals | 8,500 | 6 | $3M ($140,000) | the cabin |
+    | 4 Four stands, floodlights | 16,000 | 10 | $10M ($380,000) | the clubhouse |
+    | 5 Grand stadium, two tiers | 36,000 | 16 | $35M ($1.2M) | the hall |
 
     Promotion builds nothing: a bigger league brings more fans (and a sold-out ground lets you put the price up),
     not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
@@ -1966,9 +2023,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       | Clubhouse | Costs | Brings |
       | --- | --- | --- |
       | 1 The shed | (where you start) | the training pitch; the stadium to level 2 |
-      | 2 The cabin | $30,000 | the scouts' house and the physio (to 2); the training pitch to 2; the stadium to 3; the shirt open to sponsors |
-      | 3 The clubhouse | $120,000 | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
-      | 4 The hall | $450,000 | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
+      | 2 The cabin | $400,000 (v149; it was $30,000) | the scouts' house and the physio (to 2); the training pitch to 2; the stadium to 3; the shirt open to sponsors |
+      | 3 The clubhouse | $2M ($120,000) | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
+      | 4 The hall | $8M ($450,000) | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
 
       Its screen: the next clubhouse and what it brings, then your career (your record, season by season); the
       squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
@@ -1978,10 +2035,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
       | Building | 1 | 2 | 3 | 4 |
       | --- | --- | --- | --- | --- |
-      | Training pitch | (where you start) | $10,000 | $40,000 | $120,000 |
-      | Physio | $5,000 | $15,000 | $45,000 | $130,000 |
-      | Scouts' house | $12,000 | $15,000 | $60,000 | |
-      | Youth academy | $25,000 | $25,000 | $120,000 | |
+      | Training pitch | (where you start) | $150,000 | $700,000 | $2.5M |
+      | Physio | $75,000 | $300,000 | $1M | $3M |
+      | Scouts' house | $200,000 | $250,000 | $1.2M | |
+      | Youth academy | $400,000 | $400,000 | $2.5M | |
+
+      (v149: the real game's money -- see **The real game's money (v149)**. They were $10,000, $40,000 and $120,000;
+      $5,000 to $130,000; $12,000 to $60,000; $25,000 to $120,000.)
 
       - **The training pitch** is where the tactics are made (shape, width, style, instructions, who plays and who's
         taken: its Tactics and Selection tabs), and its level is how well your men train (see **What they do**).
@@ -2293,6 +2353,13 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v149: the real game's money.** A man's worth as the real market has it: $150,000 for a midfielder of 55 in his
+  prime, $19M for a striker of 79, $169M for one of 90, and never over the most the real game has paid for his position
+  ($200M a striker, $70M a keeper); a wage $2,000 a week at 55, $69,000 at 79, $627,000 at 94. The TV, the partners, the
+  gate, the prizes, the cups, the computer clubs' budgets and what everything costs rescaled round it, so a mid-table
+  club's season nets about what the change list reckons in every league ($1.4M in League 2 to $141M in the Premium
+  League). A league game's TV money is the week's broadcast and no more. The hometown hero is never sold. A career from
+  before is put into the new money once. See **The real game's money (v149)**.
 - **v148: a matchday in order, how to play, half-time.** After a game you played, what comes up over the club comes
   one at a time, in order -- THE RESULT, YOUR PLAYERS, the press conference, THE MONEY, the papers -- each saying
   where it is in the run (2 OF 4). Before, the club drew itself as the game ended, before the report was up, so the

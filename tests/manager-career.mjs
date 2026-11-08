@@ -84,7 +84,7 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(cr.s === 1 && cr.p === 3 && cr.e === 2 && String(cr.c) === '#1d4fa3,#f2d23c,#ffb43c' && cr.l === 'F', 'your crest as you made it: ' + JSON.stringify(cr));
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
 ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
-ok(d.roster.length === 15 && d.budget === 20000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 15), 'a 15-man squad (every club\'s 15: v124, nine a side), $20,000, the first Monday of pre-season');
+ok(d.roster.length === 15 && d.budget === 250000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 15), 'a 15-man squad (every club\'s 15: v124, nine a side), $250,000 (v149: $20,000 before), the first Monday of pre-season');
 ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{26}$/.test(p.at) && /^[a-s]{26}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point (and his ceilings, his hidden values)');
 ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
@@ -111,7 +111,8 @@ for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'aca
 await page.evaluate(() => { const M = __MG, d = M.d; M.mgMarketOpen(d); M.mgSave(d); M.renderHub(); });   // (the call: see THE FIRST SEASON'S TWO ARRIVALS)
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
 d = await save();
-ok(d.lv.market === 1 && d.budget === 20000 && await page.isVisible('#bldgPanel .bpTab:text-is("Search")'), 'the phone\'s rung: on the transfer market, nothing paid, its tabs open up');
+ok(d.lv.market === 1 && d.budget === 250000 && await page.isVisible('#bldgPanel .bpTab:text-is("Search")'), 'the phone\'s rung: on the transfer market, nothing paid, its tabs open up');
+await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 2000000; M.mgSave(d); });   // (v149: a season's money to spend -- a new club's $250,000 buys one cheap man, if that, at today's prices)
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 let signed = false;
 for(let i = 0; i < 10 && !signed; i++){                          // the first man who'd come and whom we can afford (page 1: ten men)
@@ -120,7 +121,7 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   const card = await page.innerText('#bpBody .mgCard');
   const ask = +(card.match(/ASKING\s*\$([\d,]+)/) || [0, '999999'])[1].replace(/,/g, '');
   if(i === 0) ok(!(await page.$('#bpBody [data-mg="scout"]')) && /scouts’ house/.test(await page.textContent('#bpBody')), 'no scouts\' house: his rating a range, and no SCOUT HIM');
-  if(/won’t drop/.test(card) || ask > 15000){ await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); continue; }
+  if(/won’t drop/.test(card) || ask > 1500000){ await page.click(`#bpBody .mgList .mgRow >> nth=${i}`); continue; }
   for(let k = 0; k < 5; k++){ await page.click('#bpBody [data-mg="bidstep"][data-dir="1"]'); await page.waitForTimeout(20); }   // (+5% a tap)
   if(await page.$('#bpBody [data-mg="scout"]')){ await page.click('#bpBody [data-mg="scout"]'); await page.waitForTimeout(60); ok(/Scouted/.test(await msg()), 'scouted: ' + await msg()); }
   await page.click('#bpBody [data-mg="bid"]'); await page.waitForTimeout(60);
@@ -128,7 +129,7 @@ for(let i = 0; i < 10 && !signed; i++){                          // the first ma
   if(await page.$('#bpBody [data-mg="sign"]')){ await page.click('#bpBody [data-mg="sign"]'); await page.waitForTimeout(60); signed = /Signed/.test(await msg()); }
 }
 d = await save();
-ok(signed && d.roster.length === 16 && d.budget < 20000, 'signed a man for a quarter over the asking price: squad 16, budget ' + d.budget);
+ok(signed && d.roster.length === 16 && d.budget < 2000000, 'signed a man for a quarter over the asking price: squad 16, budget ' + d.budget);
 const newMan = d.roster[15];
 ok(newMan.until >= d.season && newMan.wage > 0 && d.lineup.bench.indexOf(15) >= 5, 'he has a contract, and isn\'t taken till you pick him (the bench is five)');
 
@@ -189,7 +190,7 @@ await page.click('#chBottom [data-mg="review"]'); await page.click('#bldgPanel [
 d = await save();
 ok(d.tier === 2 && d.lg[2].ids.includes(d.clubId) && d.lg[2].fx.filter(day => day.some(m => m[0] === d.clubId || m[1] === d.clubId)).length === 26,
    'promoted: League 1, 26 games');
-ok(d.sponsorWk === 800 && d.stadium.lvl === 1 && d.capacity === 1800, 'the club\'s partners pay League 1\'s rate; the ground is as it was built (promotion builds nothing)');
+ok(d.sponsorWk === 60000 && d.stadium.lvl === 1 && d.capacity === 1800, 'the club\'s partners pay League 1\'s rate; the ground is as it was built (promotion builds nothing)');
 
 // --- the playoffs: a top-six side, until one finishes 3rd to 6th -------------------------------------
 let po = null;
@@ -225,8 +226,8 @@ ok(r.apps.length === 9 && r.apps.every(n => n === 1), 'an appearance each for th
 await create('Ground Town');
 r = await page.evaluate(() => { const M = __MG, d = M.d, S = M.stadOf(d), out = {}, offer = k => { const o = M.spOfferFor(d, k, new Set()); d.spOff = [o]; return o; };
   out.start = { lvl: S.lvl, cap: M.computeFinance(d).capacity, boards: S.boards, ads: S.ads.length, deals: Object.keys(S.deals).length, offers: (d.spOff || []).length };
-  d.budget = 10000; out.poor = M.stadUpgrade(d);
-  d.budget = 100000; out.up = M.stadUpgrade(d); out.lvl2 = { lvl: S.lvl, cap: M.computeFinance(d).capacity, cost: 100000 - d.budget };
+  d.budget = 100000; out.poor = M.stadUpgrade(d);
+  d.budget = 1000000; out.up = M.stadUpgrade(d); out.lvl2 = { lvl: S.lvl, cap: M.computeFinance(d).capacity, cost: 1000000 - d.budget };
   const b0 = d.budget; out.board = M.boardBuy(d); out.boardCost = b0 - d.budget; out.boardsN = S.boards; out.bare = M.computeFinance(d).boardsWk;
   const ob = offer('board'); out.bsign = M.spSign(d, ob.id); out.bagain = M.spSign(d, ob.id); out.boardWk = [ob.wk, M.computeFinance(d).boardsWk, S.ads.length];
   out.kitShut = M.spOpen(d, 'kit'); const ok0 = offer('kit'); out.kitNo = M.spSign(d, ok0.id);
@@ -248,7 +249,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, S = M.stadOf(d), out = 
   return out; });
 info('the ground: ' + JSON.stringify(r));
 ok(r.start.lvl === 1 && r.start.cap === 1800 && r.start.boards === 1 && r.start.ads === 0 && r.start.deals === 0 && r.start.offers === 0, 'a new career\'s ground: a field with two bleachers, 1,800 seats, one board and nothing on it, no sponsors, no offers');
-ok(r.poor && r.up === null && r.lvl2.lvl === 2 && r.lvl2.cap === 4200 && r.lvl2.cost === 45000, 'the next level (big bleachers, 4,200 seats) costs $45,000 -- and waits till you have it');
+ok(r.poor && r.up === null && r.lvl2.lvl === 2 && r.lvl2.cap === 4200 && r.lvl2.cost === 800000, 'the next level (big bleachers, 4,200 seats) costs $800,000 (v149: $45,000 before) -- and waits till you have it');
 ok(/come with the stands/.test(r.board) && r.boardCost === 0 && r.boardsN === 3 && r.bare === 0, 'the boards come with the stands: three at level 2, bare, none to buy');
 ok(r.bsign === null && /gone/.test(r.bagain) && r.boardWk[0] === r.boardWk[1] && r.boardWk[2] === 1, 'a local firm\'s offer for a board signed: its fee (' + r.boardWk[0] + ') every week; the same offer twice, no');
 ok(!r.kitShut && /isn’t open/.test(r.kitNo) && !r.kitStill && r.kitOpen && r.sign === null && r.deal && r.deal.until === r.deal.s + r.deal.yrs - 1 && /already/.test(r.again),
@@ -269,10 +270,10 @@ ok(r.was.ads.length === 1 && /\$20 till S3$/.test(r.was.ads[0]) && !r.was.bids, 
 await create('Club Town');
 r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.div[1].find(id => id !== d.clubId)].players[0].id, out = {};
   const lv = () => JSON.stringify(d.lv), spend = f => { const b = d.budget, e = f(); return [e, b - d.budget]; };
-  out.start = lv(); out.noScout = M.mgScout(d, him); d.budget = 1e7;
+  out.start = lv(); out.noScout = M.mgScout(d, him); d.budget = 1e9;
   out.scout0 = M.bldUp(d, 'scouting'); out.acad0 = M.bldUp(d, 'academy'); out.stad2 = M.bldUp(d, 'stadium'); out.stad3 = M.bldUp(d, 'stadium');
   out.market = spend(() => M.bldUp(d, 'market')); out.physio = spend(() => M.bldUp(d, 'physio')); M.mgMarketOpen(d);
-  d.budget = 1000; out.club2poor = M.bldUp(d, 'club'); d.budget = 1e7; out.tier = d.tier; out.top = d.top || d.tier;
+  d.budget = 1000; out.club2poor = M.bldUp(d, 'club'); d.budget = 1e9; out.tier = d.tier; out.top = d.top || d.tier;
   out.club2b = spend(() => M.bldUp(d, 'club')); out.scout = spend(() => M.bldUp(d, 'scouting')); out.scouted = M.mgScout(d, him);
   out.phys1 = spend(() => M.bldUp(d, 'physio')); out.phys2 = spend(() => M.bldUp(d, 'physio')); out.phys3 = M.bldUp(d, 'physio');
   out.train2 = spend(() => M.bldUp(d, 'train')); out.train3 = M.bldUp(d, 'train'); out.stad3b = M.bldUp(d, 'stadium'); out.acad1 = M.bldUp(d, 'academy');
@@ -291,15 +292,15 @@ ok(/needs clubhouse 2/.test(r.scout0) && /needs clubhouse 3/.test(r.acad0) && /n
   'the shed: no scouts\' house (clubhouse 2) or academy (3), the stadium to level 2 but not 3, and no scouting');
 ok(/phone rings on the first day of pre-season/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
   'in the shed the transfer market isn\'t for sale ("' + r.market[0] + '") and the physio waits for clubhouse 2');
-ok(/budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 30000 && r.tier === 1 && r.top === 1,
-  'the cabin: for the money alone, in League 2 (never promoted) -- $30,000 (v108: it used to wait for League 1)');
-ok(r.phys1[0] === null && r.phys1[1] === 5000 && r.phys2[1] === 15000 && /clubhouse 3/.test(r.phys3), 'the cabin brings the physio ($5,000) and its level 2 ($15,000); its 3rd waits for clubhouse 3');
-ok(r.scout[0] === null && r.scout[1] === 12000 && r.scouted === null && r.train2[1] === 10000 && /clubhouse 3/.test(r.train3) && r.stad3b === null && /clubhouse 3/.test(r.acad1),
-  'with the cabin: the scouts\' house ($12,000) and scouting, the training pitch to level 2 ($10,000), the stadium to 3; not yet the academy');
-ok(r.club3[1] === 120000 && r.acad[0] === null && r.acad[1] === 25000 && r.youth > 0 && /clubhouse 4/.test(r.acad2),
-  'the clubhouse ($120,000): the academy ($25,000), its first ' + r.youth + ' youngsters in at once; its next level waits for the hall');
-ok(r.club4[1] === 450000 && /as good as it gets/.test(r.club5) && r.full === '{"club":4,"train":4,"physio":4,"market":1,"scouting":3,"academy":3} stadium 5' && r.more === 5 && r.news >= 8,
-  'the hall ($450,000): everything to its last level, the stadium to 5, and no further; the news says so as it goes');
+ok(/budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 400000 && r.tier === 1 && r.top === 1,
+  'the cabin: for the money alone, in League 2 (never promoted) -- $400,000 (v149; it was $30,000. v108: it used to wait for League 1)');
+ok(r.phys1[0] === null && r.phys1[1] === 75000 && r.phys2[1] === 300000 && /clubhouse 3/.test(r.phys3), 'the cabin brings the physio ($75,000) and its level 2 ($300,000); its 3rd waits for clubhouse 3');
+ok(r.scout[0] === null && r.scout[1] === 200000 && r.scouted === null && r.train2[1] === 150000 && /clubhouse 3/.test(r.train3) && r.stad3b === null && /clubhouse 3/.test(r.acad1),
+  'with the cabin: the scouts\' house ($200,000) and scouting, the training pitch to level 2 ($150,000), the stadium to 3; not yet the academy');
+ok(r.club3[1] === 2000000 && r.acad[0] === null && r.acad[1] === 400000 && r.youth > 0 && /clubhouse 4/.test(r.acad2),
+  'the clubhouse ($2M): the academy ($400,000), its first ' + r.youth + ' youngsters in at once; its next level waits for the hall');
+ok(r.club4[1] === 8000000 && /as good as it gets/.test(r.club5) && r.full === '{"club":4,"train":4,"physio":4,"market":1,"scouting":3,"academy":3} stadium 5' && r.more === 5 && r.news >= 8,
+  'the hall ($8M): everything to its last level, the stadium to 5, and no further; the news says so as it goes');
 ok(r.pre === '{"club":4,"train":4,"physio":0,"market":1,"scouting":2,"academy":3}' && r.v49[0] === '{"club":1,"train":1,"physio":0,"market":1,"scouting":1,"academy":0}' && r.v49[1] === 2400,
   'careers from before: one built up keeps it all (the hall, its scouting and academy as they were); one that had only begun starts in the shed, its plants\' money back ($2,400)');
 
@@ -405,8 +406,8 @@ await page.click('#cpPlace [data-cp="ok"]'); await page.waitForTimeout(100);
 d = await save();
 ok(decoTabs.join() === 'Trees,Garden,Plaza' && placing.on && placing.k === 'oak' && placing.cls && !placing.panel && /PUT IT HERE/.test(placing.bar),
   'DECORATE: Trees, Garden, Plaza; an oak bought -- the shop shut, the oak over the campus to put down: ' + placing.bar.replace(/\s+/g, ' '));
-ok(red === false && green.ok && green.btn && d.deco.length === 1 && d.deco[0].k === 'oak' && d.deco[0].x === green.x && d.budget === b0 - 1200,
-  'dragged onto the clubhouse it can\'t go (red); onto the lawn it can (green): put down there, $1,200 paid');
+ok(red === false && green.ok && green.btn && d.deco.length === 1 && d.deco[0].k === 'oak' && d.deco[0].x === green.x && d.budget === b0 - 20000,
+  'dragged onto the clubhouse it can\'t go (red); onto the lawn it can (green): put down there, $20,000 paid');
 await page.click('#careerHub [data-hub="move"]'); await page.waitForTimeout(60);
 const oak = await toScreen(d.deco[0].x + 30, d.deco[0].y + 40); await page.mouse.click(oak[0], oak[1]); await page.waitForTimeout(80);
 const picked = await page.evaluate(() => ({ k: __MG.PLACE.k, idx: __MG.PLACE.idx, bar: document.getElementById('cpPlace').textContent }));
@@ -415,7 +416,7 @@ d = await save(); const stored = [d.deco.length, d.store.oak];
 await page.click('#careerHub .cpDeco'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bpBody [data-mg="dout"][data-id="oak"]'); await page.waitForTimeout(120);
 await page.click('#cpPlace [data-cp="ok"]'); await page.waitForTimeout(80);
 d = await save();
-ok(picked.k === 'oak' && /PUT AWAY/.test(picked.bar) && String(stored) === '0,1' && d.deco.length === 1 && !d.store.oak && d.budget === b0 - 1200,
+ok(picked.k === 'oak' && /PUT AWAY/.test(picked.bar) && String(stored) === '0,1' && d.deco.length === 1 && !d.store.oak && d.budget === b0 - 20000,
   'MOVE: tapped, the oak is picked up; PUT AWAY puts it in store; PUT ONE OUT puts it down again (nothing more to pay)');
 r = await page.evaluate(() => { const M = __MG, d = M.d, P = M.cpPieces(d), club = P.find(p => p.id === 'club'), sp = M.CAMPUS_META.deco.oak.s;
   const onIt = M.decoFree(d, 'oak', club.fp[0] + 10, club.fp[1] + club.fp[3] - sp[3] - 2), inStad = M.decoFree(d, 'oak', 300, 20), offEdge = M.decoFree(d, 'oak', 750, 300);
@@ -513,14 +514,14 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
   return out; });
 info('free agents: ' + JSON.stringify(r));
 ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n + ' are 29 or over, and none at 24 or under has more than 4 to grow into');
-ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.3 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.3
+ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.7 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.4   // (v149: the fee rounded to $10,000 at that size)
    && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
   'what they ask (a 60 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
 ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 && r.vet[1] < r.vet[3] && r.vet[1] < 60 && r.vet[2] === 1,
   'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
 // signing a young one: his card says what he wants a week and to sign; SIGN HIM pays the fee
-await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 20000; M.mgMarketOpen(d); M.mgSave(d); });
+await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 250000; M.mgMarketOpen(d); M.mgSave(d); });
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Free agents")'); await page.waitForTimeout(80);
 const fa = await page.evaluate(() => { const M = __MG, d = M.d;
   const p = d.world.free.find(q => q.age >= 21 && q.age <= 26) || Object.assign(d.world.free[0], { age: 23 });

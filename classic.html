@@ -15892,9 +15892,9 @@
   const MG_SAVE_V=4;                                     // a career saved before the week (v3 and older) is cleared
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
-  const MG_PRIZE={1:12000,2:45000,3:180000,4:1500000};   // for winning the league (less the lower you finish)
-  const MG_AI_BUDGET={1:25000,2:120000,3:600000,4:6000000};
-  const MG_SCOUT_COST={1:200,2:600,3:1800,4:6000};       // to scout one man, by the league he plays in
+  const MG_PRIZE={1:500000,2:3000000,3:15000000,4:60000000};   // for winning the league (less the lower you finish; v149: the real game's money -- it was 12,000, 45,000, 180,000 and 1.5M)
+  const MG_AI_BUDGET={1:400000,2:3000000,3:25000000,4:150000000};   // (v149: 25,000, 120,000, 600,000 and 6M before: the richest Premium League clubs can hold about $345M now, and sign a $200M man)
+  const MG_SCOUT_COST={1:3000,2:10000,3:30000,4:100000};       // to scout one man, by the league he plays in (v149: 200, 600, 1,800 and 6,000 before)
   const MG_SCOUT_W={1:4,2:3,3:1};                        // how far an unscouted rating can be off, by your scouting network
   const MG_ROLES=['GK','GK','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','ATT','ATT','ATT','ATT'];   // (MG_SQUAD of them)
   // A SQUAD'S POSITIONS, in MG_ROLES' order (v118): dealt so it can always field a side -- three or four centre-backs and a
@@ -16261,7 +16261,7 @@
   const STAFF_ORDER=['fit','tec','fin','def','gk'], areaOf=k=>STAFF_ORDER.find(a=>COACH_AREA[a].includes(k))||'tec';
   const DEV_FOCUS={fit:'FITNESS',tec:'TECHNICAL',fin:'FINISHING',def:'DEFENDING',gk:'KEEPING'};
   const STAFF_KIND={fit:{n:'fitness'},tec:{n:'technical'},fin:{n:'finishing'},def:{n:'defending'},gk:{n:'goalkeeping'},youth:{n:'youth'}};
-  const staffCap=d=>4+1.5*d.tier, staffWage=r=>mgRound(50*Math.pow(1.45,r-1));
+  const staffCap=d=>4+1.5*d.tier, staffWage=r=>mgRound(1000*Math.pow(1.45,r-1));   // (v149: twenty times what it was, as wages went up)
   const coachOf=(d,k)=>(d.staff||[]).find(c=>c.k===k)||null;
   const youthPost=d=>lvOf(d,'academy')?1:0;
   const coachSpecN=r=>[clamp(Math.round((r-4)/2),0,3),clamp(Math.round((6-r)/2),0,2)];   // (his strengths, his weak spots)
@@ -16368,7 +16368,7 @@
       dm*=morSwing(p,d);
       const back=(MOR0-m)*0.06*(0.6+h.rs/10)*(hasTrait(p,d,'determ')?1.6:1);
       p.mor=clamp(Math.round((m+dm+back)*100)/100,1,10); p.wmw=0; p.kw=(p.kw||0)+1; if(p.kw%4===0) p.kt=(p.kt||0)+1;   // (a trait comes out every four weeks)
-      if(p.mor<=3.5&&h.am>=7&&!p.wantsOut&&!p.loan&&Math.random()<0.25){ p.wantsOut=true; mgNews(d,p.name+' wants to leave '+d.clubName+'.'); }
+      if(p.mor<=3.5&&h.am>=7&&!p.wantsOut&&!p.loan&&!p.hometown&&Math.random()<0.25){ p.wantsOut=true; mgNews(d,p.name+' wants to leave '+d.clubName+'.'); }
       else if(p.wantsOut&&p.mor>=5.5){ delete p.wantsOut; mgNews(d,p.name+' has settled: he wants to stay.'); } }
     d.mgw=0;
     const men=R.reduce((a,p)=>a+(p.mor??MOR0),0)/R.length, lead=R.filter(p=>hasTrait(p,d,'leader')||hasTrait(p,d,'charis')).length, out=R.filter(p=>p.wantsOut).length;
@@ -16432,7 +16432,11 @@
   // A MAN'S WAGE by his rating (v120: steeper -- about a fifth more for League 2's men, half again for League 1's, twice
   // for the Championship's, two and a half times for the Premium League's: ticket money grows far faster up the leagues
   // than v119's wages did, and money came too easily). (v119's: 60 x 10^(0.042 x (rating - 48)): WAGE_OLD)
-  function mgWage(ovr){ return Math.max(30, Math.round(64*Math.pow(10,0.054*(ovr-48))/10)*10); }
+  // A MAN'S WAGE (v149: the real game's money): $2,000 a week at a rating of 55, a rating point 16% more -- about $1,100 at
+  // 51, $8,800 at 65, $38,000 at 75, $69,000 at 79, $166,000 at 85, $348,000 at 90, $627,000 at 94. It was 64 x 10^(0.054 x
+  // (rating - 48)) dollars: $150 at 55, $3,020 at 79 (WAGE_V148, for a career kept from before)
+  function mgWage(ovr){ return Math.max(200, Math.round(2000*Math.pow(10,0.064*(ovr-55))/10)*10); }
+  const WAGE_V148=ovr=>Math.max(30, Math.round(64*Math.pow(10,0.054*(ovr-48))/10)*10);
   const WAGE_OLD=ovr=>Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10);
   // seasons left on his deal, this one included (0: out of contract)
   function mgLeft(d,p){ return Math.max(0,(p.until||0)-d.season+1); }
@@ -16442,12 +16446,26 @@
   // under, a keeper a third: about a rating point's worth -- one point is a third on his price -- and lost in the rest
   // of what goes into one: a club's temperament, whether he's one of its first nine, what its scouts see in him.) By
   // his own position, else his line
-  const POS_PRICE={STK:1.8, WNG:1.6, DM:1, CM:1, AM:1, WM:1, CB:0.75, FB:0.75, GK:0.5, ATT:1.7, MID:1, DEF:0.75};
-  const posPriceF=p=>p?(POS_PRICE[natPos(p)]||POS_PRICE[p.role]||1):1;
+  // THE MARKET AS THE REAL ONE HAS IT (v149): $150,000 for a central midfielder of 55 in his prime, each rating point
+  // 22% more -- $1.1M at 65, $7.9M at 75, $17M at 79, $57M at 85, $153M at 90 -- by his age and what he could become, then
+  // by his position: a striker or a winger (a wide midfielder counts as one) a tenth more, an attacking midfielder a
+  // twentieth, a holding midfielder two-thirds as much, a centre-back 55%, a full-back 45%, a keeper 38% -- and never
+  // more than the most the real game has paid for one: $200M for a striker or a winger, $190M an attacking midfielder,
+  // $180M a central one, $120M a holding one, $100M a centre-back, $80M a full-back, $70M a keeper (only the generational
+  // reach them, from about 92). The veteran's slide steeper: three-tenths at 32 and 33, 15% from 34 (two-fifths and a
+  // quarter before). It was $2,000 at 55 and each point a third more: a striker of 79 $2.7M, of 90 $34M
+  const VAL_POS={STK:[1.1,200e6], WNG:[1.1,200e6], WM:[1.1,200e6], AM:[1.05,190e6], CM:[1,180e6], DM:[0.68,120e6], CB:[0.55,100e6], FB:[0.45,80e6], GK:[0.38,70e6]};
+  const valPos=p=>VAL_POS[natPos(p)]||(p.role==='ATT'?VAL_POS.STK:p.role==='DEF'?VAL_POS.CB:p.role==='GK'?VAL_POS.GK:VAL_POS.CM);
+  const valCurve=ovr=>150000*Math.pow(10,0.086*(ovr-55));
+  const valCap=p=>valPos(p)[1];
   function mgValue(d,p){ const age=p.age||25;
-    const ageF=age<=21?1.35:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.4:0.25;
-    const potF=1+Math.max(0,(p.pot||p.ovr)-p.ovr)*(age<=24?0.03:0.01);
-    return mgRound(2000*Math.pow(10,0.12*(p.ovr-55))*ageF*potF*posPriceF(p)*(mgLeft(d,p)<=1?0.8:1)); }
+    const ageF=age<=21?1.35:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.3:0.15;
+    const potF=1+Math.max(0,(p.pot||p.ovr)-p.ovr)*(age<=24?0.03:0.01), [m,cap]=valPos(p);
+    return mgRound(Math.min(cap,valCurve(p.ovr)*ageF*potF*m*(mgLeft(d,p)<=1?0.8:1))); }
+  // (v149) what he was worth before, for a career kept from before: the old curve and the old prices by position
+  const VAL_V148_POS={STK:1.8, WNG:1.6, DM:1, CM:1, AM:1, WM:1, CB:0.75, FB:0.75, GK:0.5, ATT:1.7, MID:1, DEF:0.75};
+  function valueV148(d,p){ const age=p.age||25, ageF=age<=21?1.35:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.4:0.25, potF=1+Math.max(0,(p.pot||p.ovr)-p.ovr)*(age<=24?0.03:0.01);
+    return Math.max(10,2000*Math.pow(10,0.12*(p.ovr-55))*ageF*potF*(VAL_V148_POS[natPos(p)]||VAL_V148_POS[p.role]||1)*(mgLeft(d,p)<=1?0.8:1)); }
   // the league a man's rating belongs in
   function mgLevelTier(ovr){ return ovr>=MG_LEVEL[4]-4?4:ovr>=MG_LEVEL[3]-4?3:ovr>=MG_LEVEL[2]-4?2:1; }
   // the growth a young man has in him, on average just what he's short of a man of his level in his prime (see
@@ -16838,7 +16856,7 @@
     ['A lifelong fan who made it big in business has sent {club} {amt}.','A benefactor'],
     ['The supporters’ club’s sponsored walk raised {amt} for the club.','The supporters’ walk'],
     ['A sell-on clause from a man the club sold years ago: {amt}, out of the blue.','A sell-on clause']];
-  const WINDFALL_AMT={1:[1500,6000],2:[4000,15000],3:[10000,40000],4:[30000,120000]};
+  const WINDFALL_AMT={1:[40000,160000],2:[110000,400000],3:[270000,1080000],4:[810000,3240000]};   // (v149: 27 times what it was, as the leagues' money went)
   function wkWindfall(d){ if((d.weeks||0)<3||Math.random()>0.1) return null;
     const [lo,hi]=WINDFALL_AMT[d.tier]||WINDFALL_AMT[1], amt=mgRound(lo+(hi-lo)*Math.random()), w=mgPick(WINDFALL.filter(x=>d.phase==='league'||!/TV people/.test(x[0])));
     const txt=w[0].replace('{club}',d.clubName).replace('{amt}',money(amt)); d.budget+=amt; mgNews(d,txt); return {title:w[1], txt, amt}; }
@@ -16849,8 +16867,8 @@
     {k:'school', t:'The primary school asks for a coaching day with the players.', yes:'run a coaching day at the primary school', fans:2, tm:0.1, tire:0.05},
     {k:'charity', t:'The hospital asks for a charity match against the town’s old boys.', yes:'play a charity match for the hospital', fans:3, tm:0.2, tire:0.1},
     {k:'ward', t:'The children’s ward would love a visit from the squad.', yes:'visit the children’s ward', fans:1.5, tm:0.3},
-    {k:'kits', t:'A youth club in town has no money for kits this year.', yes:'buy a youth club its kits', fans:2.5, cost:[600,1500,4000,10000]},
-    {k:'open', t:'The fans ask for an open training day: stewards and a barbecue.', yes:'open training to the fans', fans:3, cost:[400,1000,3000,8000]},
+    {k:'kits', t:'A youth club in town has no money for kits this year.', yes:'buy a youth club its kits', fans:2.5, cost:[3000,12000,37000,175000]},   // (v149: the fans it brings pay it back in half a season -- before, $600 for 25 fans took three)
+    {k:'open', t:'The fans ask for an open training day: stewards and a barbecue.', yes:'open training to the fans', fans:3, cost:[3500,15000,45000,210000]},
     {k:'food', t:'The food bank asks to collect at the gate at your next home game.', yes:'collect for the food bank at the gate', fans:1.5, tm:0.1}];
   function wkCommunity(d){ if((d.weeks||0)<2||Math.random()>0.17) return null; const c=mgPick(COMMUNITY); return {ck:c.k, cost:c.cost?c.cost[(d.tier||1)-1]:0}; }
   const commFans=(d,c)=>Math.round((LOYALTY_BASE[d.tier]||1000)*c.fans/100);
@@ -16886,6 +16904,7 @@
     mgRosterAdd(d,p); d.bids=(d.bids||[]).filter(b=>b.pid!==pid);
     mgNews(d,p.name+' joins '+d.clubName+' on loan from '+c.name+' to the end of the season.'); careerEv(d,p,'On loan at '+clubCode(d,d.clubId)); return null; }
   function mgLoanOut(d,pid,cid){ const i=d.roster.findIndex(p=>p.id===pid), c=d.world.clubs[cid]; if(i<0||!c) return 'He has gone.'; const p=d.roster[i];
+    if(p.hometown) return HOME_MSG;   // (v149: HOME TO STAY)
     if(!mgWindowOpen(d)) return 'The transfer window is shut.'; const why=mgCanLose(d,i); if(why) return why; if(c.players.length>=MG_MAX) return c.name+'’s squad is full.';
     mgRosterRemove(d,i); p.loan={from:d.clubId, to:c.id, until:d.season}; p.mor=clamp(Math.round(((p.mor??MOR0)+(hvOf(p).am>=6?0.8:0.3))*100)/100,1,10);
     p.num=0; mgNumber(c.players,p); c.players.push(p); delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
@@ -17336,7 +17355,7 @@
         if(x.res){ L.push(...x.res.map(t=>mgEsc(t))); next(); return [mgEsc(p.name),L,B]; }
         L.push(morWord(p.mor??MOR0)+' · '+mgWhy(d,p)+(d.listed&&d.listed[p.id]?' · <b>on the transfer list</b>':''));
         L.push('<span class="dim">Talk him round, or put him on the transfer list.</span>');
-        B.push(['TALK HIM ROUND','round']); if(lvOf(d,'market')&&!(d.listed&&d.listed[p.id])) B.push(['LIST HIM','list']); later();
+        B.push(['TALK HIM ROUND','round']); if(lvOf(d,'market')&&!(d.listed&&d.listed[p.id])&&!p.hometown) B.push(['LIST HIM','list']); later();
         return [mgEsc(p.name)+' wants to leave',L,B]; }
       case 'word': { const p=P;
         if(x.res){ L.push(...x.res.map(t=>mgEsc(t))); next(); return [mgEsc(p.name),L,B]; }
@@ -17445,7 +17464,7 @@
       case 'erenew': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q){ err=mgRenew(d,d.roster.indexOf(q),MGUI.years||2); if(!err) showNote(q.name+' has signed a new deal.','var(--good)'); } if(!pileLive(d,x)) x.done=true; break; }
       case 'ego': { const q=d.roster.find(y=>y.id===+b.dataset.pid); if(q) mgLetGo(d,q); if(!pileLive(d,x)) x.done=true; break; }
       case 'eterms': { const q=mgEnding(d).find(y=>(x.pids||[]).includes(y.id)); pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=q?q.id:null; mgSide='deal'; paintBuilding(); return; }   // (to his card, its deal side)
-      case 'list': if(P&&lvOf(d,'market')){ d.listed[P.id]=mgValue(d,P); P.mor=clamp((P.mor??MOR0)+0.5,1,10); mgNews(d,P.name+' is on the transfer list, as he wanted.'); } x.done=true; break;   // (what he asked for: it lifts him a little)
+      case 'list': if(P&&lvOf(d,'market')&&!P.hometown){ d.listed[P.id]=mgValue(d,P); P.mor=clamp((P.mor??MOR0)+0.5,1,10); mgNews(d,P.name+' is on the transfer list, as he wanted.'); } x.done=true; break;   // (what he asked for: it lifts him a little)
       case 'round': if(P){ const m0=P.mor??MOR0; P.mor=clamp(Math.round((m0+1.2+hvOf(P).rs*0.06)*100)/100,1,10);   // (the steadier he is, the more he hears)
           if(P.mor>=5.5){ delete P.wantsOut; mgNews(d,P.name+' has settled: he wants to stay.'); x.res=['You talked him round: he wants to stay.']; }
           else x.res=['He heard you out. '+morWord(P.mor)+' — he still wants to go, for now.']; } else x.done=true; break;
@@ -17497,11 +17516,11 @@
   // Champions League's for every group game won, getting through (through) and being in it (entry).
   const CUP={
     coco:   {name:'Coco Cup', short:'COCO', tiers:[2,3,4], byes:22, rounds:['First round','Round of 32','Round of 16','Quarter-final','Semi-final','Final'],
-             rs:['R1','R32','R16','QF','SF','FINAL'], prize:[5000,10000,20000,40000,80000,200000]},
+             rs:['R1','R32','R16','QF','SF','FINAL'], prize:[50000,75000,100000,150000,250000,400000]},   // (v149: a round won $50,000 to $400,000 -- it was 5,000 to 200,000)
     fashion:{name:'Fashion Cup', short:'FASHION', tiers:[3,4], byes:4, rounds:['First round','Round of 16','Quarter-final','Semi-final','Final'],
-             rs:['R1','R16','QF','SF','FINAL'], prize:[20000,50000,100000,200000,500000]},
+             rs:['R1','R16','QF','SF','FINAL'], prize:[500000,1000000,2000000,3000000,5000000]},   // (v149: $500,000 to $5M -- it was 20,000 to 500,000)
     cl:     {name:'Champions League', short:'CL', rounds:['Group game 1','Group game 2','Group game 3','Group game 4','Group game 5','Group game 6','Quarter-final','Semi-final','Final'],
-             rs:['G1','G2','G3','G4','G5','G6','QF','SF','FINAL'], prize:[40000,40000,40000,40000,40000,40000,350000,500000,1500000], entry:300000, through:200000}};
+             rs:['G1','G2','G3','G4','G5','G6','QF','SF','FINAL'], prize:[2500000,2500000,2500000,2500000,2500000,2500000,8000000,10000000,15000000], entry:12000000, through:6000000}};   // (v149: in it $12M, a group game won $2.5M, the knockouts $8M to $15M -- it was 300,000, 40,000 and 350,000 to 1.5M)
   // the cups' Wednesdays: CUP_CAL[g] is the round played on the Wednesday of league week g+2 (between matchdays g+1 and
   // g+2) -- none in the first three weeks, the last in week 26
   const CUP_CAL={2:['cl',0],3:['coco',0],4:['cl',1],5:['fashion',0],6:['cl',2],7:['coco',1],8:['cl',3],9:['fashion',1],10:['cl',4],11:['coco',2],12:['cl',5],13:['coco',3],
@@ -17726,7 +17745,7 @@
 
   // ---- what a deal costs ----
   // EACH CLUB PRICES ITS OWN MEN (v83), no two quite alike. What a man's worth to it: his rating, his position (the
-  // attackers dearest, then the midfield, the defence, the keepers cheapest: POS_PRICE) and his age -- the younger the
+  // attackers dearest, then the midfield, the defence, the keepers cheapest: VAL_POS, since v149) and his age -- the younger the
   // dearer -- and his potential as far as its scouts can see it (c.sc, 0 to 1: a better league's clubs
   // scout better, as a rule, with plenty either way). A club with poor scouts prices him on what he is now, whatever he
   // might become; one with good scouts on what he could be too. Its temperament on top (c.gr, 0.85 to 1.25), more for
@@ -17735,9 +17754,9 @@
   // him (p.mk: how many, the best of them) it knows it has a gem -- all of his potential, and more than the best bid.
   function mgClubEye(c){ if(c.sc==null){ c.sc=Math.round(clamp(0.1+0.15*(c.tier||1)+(Math.random()-0.5)*0.5,0.05,0.95)*100)/100; c.gr=Math.round((0.85+Math.random()*0.4)*100)/100; } return c; }
   function mgWorth(p,pot){ const age=p.age||25;
-    const ageF=age<=19?1.6:age<=21?1.4:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.4:0.25;
-    const potF=1+Math.max(0,pot-p.ovr)*(age<=21?0.05:age<=24?0.03:0.01);
-    return 2000*Math.pow(10,0.12*(p.ovr-55))*ageF*potF*posPriceF(p); }
+    const ageF=age<=19?1.6:age<=21?1.4:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.3:0.15;   // (v149: the veteran's slide steeper, as mgValue's)
+    const potF=1+Math.max(0,pot-p.ovr)*(age<=21?0.05:age<=24?0.03:0.01), [m,cap]=valPos(p);
+    return Math.min(cap,valCurve(p.ovr)*ageF*potF*m); }   // (v149: the market as the real one has it -- see mgValue)
   function mgPotSeen(c,p){ const mk=p.mk; let eye=c.sc;
     if((p.fm??FORM_BASE)>=7.2) eye=Math.max(eye,0.6);
     if(mk&&mk.n>=2) eye=1;
@@ -17745,7 +17764,7 @@
   function mgAsk(d,p,club){ if(!club) return 0; const c=mgClubEye(club);
     let a=mgWorth(p,mgPotSeen(c,p))*c.gr*(mgEight(c.players).includes(p)?1.35:1.05)*(mgLeft(d,p)<=1?0.8:1);
     if(p.mk&&p.mk.n>=2) a=Math.max(a,p.mk.hi*1.08);
-    return mgRound(a*(isDeadline(d)?DD_ASK:1)); }   // (DEADLINE DAY: they'd sooner have the money)
+    return mgRound(Math.min(valCap(p)*1.25,a*(isDeadline(d)?DD_ASK:1))); }   // (DEADLINE DAY: they'd sooner have the money; v149: never more than a quarter over the most a man of his position fetches)
   // a bid for him over his club's price, heard (yours or another club's): see mgAsk
   function mgBidSeen(p,fee,ask){ if(fee<ask) return; const m=p.mk||(p.mk={n:0,hi:0}); m.n++; m.hi=Math.max(m.hi,fee); }
   // his wage to sign (moving clubs is worth a rise to him; a man a league or more above you wants more again)
@@ -18002,7 +18021,7 @@
   // the computer clubs' bids for your men, a week's worth (k: how busy the week is -- see mgWeekStart)
   function mgAiBids(d,k,prem){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0; k=k??1; prem=prem||1;   // (prem: DEADLINE DAY's)
     const clubs=mgAiClubs(d);
-    for(const p of d.roster){ if(p.loan) continue; const ask=(d.listed&&d.listed[p.id])||(p.wantsOut?mgValue(d,p):0), lt=mgLevelTier(p.ovr);   // (one who wants out: as if he were listed; one on loan isn't yours to sell)
+    for(const p of d.roster){ if(p.loan||p.hometown) continue; const ask=(d.listed&&d.listed[p.id])||(p.wantsOut?mgValue(d,p):0), lt=mgLevelTier(p.ovr);   // (one who wants out: as if he were listed; one on loan isn't yours to sell; v149: the hometown hero never is -- HOME TO STAY)
       if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))*k) continue;
       const fee=mgRound((ask?ask*(0.82+Math.random()*0.26):mgValue(d,p)*(1+Math.random()*0.35))*prem);
       const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<MG_MAX&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
@@ -18035,13 +18054,13 @@
 
   // ===== WAGE & FINANCE LOOP (deletable) ======================================================
   const FIN_TIER={
-    1:{sponsor:300, capacity:1800,  price:5,  debtLimit:3000},     // (price: the going rate for a seat -- v108; it was 3, 5, 8 and 14; League 2's $7 is $5 from v110)
-    2:{sponsor:800, capacity:6000,  price:10, debtLimit:9000},
-    3:{sponsor:2200,capacity:14000, price:14, debtLimit:25000},
-    4:{sponsor:9000,capacity:35000, price:20, debtLimit:120000}
+    1:{sponsor:15000,   capacity:1800,  price:25, debtLimit:150000},     // (price: the going rate for a seat -- v108; it was 3, 5, 8 and 14; League 2's $7 is $5 from v110;
+    2:{sponsor:60000,   capacity:6000,  price:30, debtLimit:1000000},    //  v149, the real game's money: the partners 15,000 to 1.5M a week -- they were 300, 800, 2,200 and 9,000 --
+    3:{sponsor:250000,  capacity:14000, price:40, debtLimit:3000000},    //  a seat $25 to $60 -- it was $5, $10, $14 and $20 -- and what the board lets you owe about two weeks' income:
+    4:{sponsor:1500000, capacity:35000, price:60, debtLimit:15000000}    //  it was 3,000, 9,000, 25,000 and 120,000)
   };
   // pooled (away-revenue analogue): paid EVERY week, scales with tier + league position
-  const TIER_BROADCAST={1:150,2:500,3:1800,4:15000};
+  const TIER_BROADCAST={1:45000,2:250000,3:900000,4:3200000};   // (v149: the real game's TV money -- it was 150, 500, 1,800 and 15,000 a week)
   // (gone in v116: the concessions -- stalls, a megastore and a jersey stand bought for a little more from each head at
   // home games. A career that had built them has what they cost back: see mgMigrate)
   const CONC_GONE={food:1.5,shops:2.2,jerseys:1.8};   // (what each cost, a seat of the ground's capacity)
@@ -18181,6 +18200,33 @@
     d.inRed=d.budget<0;
     return {f,gate,tv,income,wages:f.wageWk};
   }
+  // A CAREER FROM BEFORE THE REAL GAME'S MONEY (v149), put into it once (mgMigrate): every man's wage as wages went at
+  // his rating (his deal against the going rate kept), a coach's twenty times; what's asked, bid or owed for a man as his
+  // worth went; the bank 22 times (a club's weeks of income in hand as they were: income went up 20 to 27 times in every
+  // league); the computer clubs' money as their league's budgets went; the sponsors' fees as the firms' went; your seat
+  // prices as the going rate went; this week's papers likewise
+  function econV149(d){ const W=d.world||{}, clubs=Object.values(W.clubs||{}), all=[...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...clubs.flatMap(c=>c.players||[])];
+    const wUp=(w,o)=>mgRound(w*mgWage(o)/WAGE_V148(o)), vK=p=>p?mgValue(d,p)/valueV148(d,p):30, vUp=(v,p)=>mgRound(v*vK(p)), find=id=>{ const f=mgFind(d,id); return f&&f.p; };
+    for(const p of all){ if(!p) continue;
+      if(p.wage>0) p.wage=wUp(p.wage,p.ovr); if(p.loan&&p.loan.wage>0) p.loan.wage=wUp(p.loan.wage,p.ovr);
+      if(p.cAsk&&p.cAsk.wage>0) p.cAsk.wage=wUp(p.cAsk.wage,p.ovr); if(p.cTalk&&p.cTalk.cnt>0) p.cTalk.cnt=wUp(p.cTalk.cnt,p.ovr);
+      if(p.mk&&p.mk.hi>0) p.mk.hi=vUp(p.mk.hi,p); if(p.bb&&p.bb.fee>0) p.bb.fee=vUp(p.bb.fee,p); }
+    for(const c of [...(d.staff||[]),...((d.cand&&d.cand.list)||[]),...((d.ycand&&d.ycand.list)||[])]) if(c&&c.wage>0) c.wage=mgRound(c.wage*20);
+    for(const id in d.listed||{}) d.listed[id]=vUp(d.listed[id],find(+id));
+    for(const o of d.offers||[]) if(o.fee>0) o.fee=vUp(o.fee,find(o.pid));
+    for(const B of d.bids||[]){ const p=find(B.pid); if(B.fee>0) B.fee=vUp(B.fee,p); if(B.ask>0) B.ask=vUp(B.ask,p); }
+    d.budget=Math.round((d.budget||0)*22);
+    const AIK={1:16,2:25,3:41.7,4:25}; for(const c of clubs) if(c.budget!=null) c.budget=mgRound(Math.max(0,c.budget)*(AIK[c.tier]||25));
+    d.sponsorWk=(FIN_TIER[d.tier]||FIN_TIER[1]).sponsor;
+    const SZK=[50,60,75,90,100], spUp=x=>{ if(!x) return; const k=SZK[(x.sp&&x.sp.sz)??x.sz??0]||50; if(x.wk>0) x.wk=Math.round(x.wk*k); if(x.m&&Array.isArray(x.m.t)) x.m.t=x.m.t.map(([a,v])=>[a,Math.round(v*k)]); };
+    const S=d.stadium; if(S){ (S.ads||[]).forEach(spUp); Object.values(S.deals||{}).forEach(spUp); } (d.spOff||[]).forEach(spUp);
+    const rk=(FIN_TIER[d.tier]||FIN_TIER[1]).price/(({1:5,2:10,3:14,4:20})[d.tier]||5);
+    if(d.ticketPrice!=null) d.ticketPrice=Math.max(1,Math.round(d.ticketPrice*rk)); for(const k in d.seats||{}) if(d.seats[k]!=null) d.seats[k]=Math.max(1,Math.round(d.seats[k]*rk));
+    for(const x of (d.pile&&d.pile.list)||[]){ if(x.k==='comm'){ const c=COMMUNITY.find(y=>y.k===x.ck); x.cost=c&&c.cost?c.cost[(d.tier||1)-1]:0; }
+      else if(x.k==='bboffer'){ const p=find(x.pid); if(x.fee>0) x.fee=vUp(x.fee,p); if(x.back>0) x.back=vUp(x.back,p); }
+      else if(x.k==='windfall'&&x.amt>0) x.amt=mgRound(x.amt*27);
+      else if(x.k==='money') for(const k of ['inc','wages','budget']) if(x[k]) x[k]=Math.round(x[k]*22); }
+    mgNews(d,'The game’s money is the real game’s now -- wages, fees, the TV, the gate and what everything costs -- and the club’s bank with it: '+money(d.budget)+'.'); }
   function finRow(label,val,bold,color){ return '<div style="display:flex;justify-content:space-between;gap:12px;'+(bold?'font-weight:700;':'')+'padding:2px 0"><span style="color:var(--dim)">'+label+'</span><span style="color:'+(color||'var(--good)')+'">'+val+'</span></div>'; }
   // ===== END WAGE & FINANCE LOOP ==============================================================
 
@@ -18199,10 +18245,10 @@
   // SPONSOR'S BONUS). An offer stands two weeks.
   const STAD_LEVELS=[null,
     {n:'Field & bleachers', cap:1800,  boards:1,  ends:false, cost:0,       what:'a pitch and two metal bleachers, one down each side'},
-    {n:'Big bleachers',     cap:4200,  boards:3,  ends:false, cost:45000,   what:'longer, taller bleachers down both sides, a press box on the north one'},
-    {n:'Covered stands',    cap:8500,  boards:6,  ends:true,  cost:140000,  what:'covered stands down both sides, open terraces behind the goals'},
-    {n:'Four stands',       cap:16000, boards:10, ends:true,  cost:380000,  what:'four covered, seated stands, floodlights at the corners'},
-    {n:'Grand stadium',     cap:36000, boards:16, ends:true,  cost:1200000, what:'two tiers all the way round, the corners filled in, a roof over every seat'}];
+    {n:'Big bleachers',     cap:4200,  boards:3,  ends:false, cost:800000,  what:'longer, taller bleachers down both sides, a press box on the north one'},
+    {n:'Covered stands',    cap:8500,  boards:6,  ends:true,  cost:3000000, what:'covered stands down both sides, open terraces behind the goals'},
+    {n:'Four stands',       cap:16000, boards:10, ends:true,  cost:10000000,what:'four covered, seated stands, floodlights at the corners'},
+    {n:'Grand stadium',     cap:36000, boards:16, ends:true,  cost:35000000,what:'two tiers all the way round, the corners filled in, a roof over every seat'}];   // (v149: the real game's money -- they were 45,000, 140,000, 380,000 and 1.2M)
   const STAD_MAX=STAD_LEVELS.length-1;
   const STANDS=[{id:'N',n:'North Stand'},{id:'S',n:'South Stand'},{id:'E',n:'East End'},{id:'W',n:'West End'}];
   const BOARD_RATE={1:0.02,2:0.025,3:0.03,4:0.04};   // (before v103 the boards were let at once, by the week, per board per head through the gate: a save's are kept on at that to its season's end)
@@ -18220,24 +18266,24 @@
   // times what it did, a town firm 2.2 times, a regional company 1.3, a national company or a global brand 1.15: a whole
   // set of deals about a quarter of a League 2 or League 1 side's wages, a third of a Championship side's, half a
   // Premium League side's)
-  const SP_SIZES=[
+  const SP_SIZES=[   // (v149: the fees the real game's money -- 50 times what they were for a local business, 60 a town firm, 75 a regional company, 90 a national one, 100 a world name)
     {n:'local', what:'a local business', many:'local businesses',
      a:['Mario’s','Bev’s','Hilltop','Station Road','Corner','Village','Old Mill','Market St','Kev’s','Sunny’s','Bridge','High Street','Park Lane','Sandra’s','Golden','Green Lane','Abbey','Church St','Mill Lane','Tony’s','Rosie’s','Harbour','Kingsway','Dot’s'],
      b:['Coffee','Tyres','Bakery','Barbers','Butchers','Fish & Chips','Garage','Florist','Hardware','Pizza','Launderette','Driving School','Plumbing','Bike Shop','Pet Shop','Car Wash','Kebabs','Dry Cleaners','Opticians','Taxis','Cafe','Newsagents','Hair Salon','Ironmongers'],
-     fee:{board:[45,120], kit:[180,480], stand:[90,210], ground:[180,450]}, yrs:[1,1]},
+     fee:{board:[2250,6000], kit:[9000,24000], stand:[4500,10500], ground:[9000,22500]}, yrs:[1,1]},
     {n:'town', what:'a firm from the town', many:'the town’s firms',
      a:['Northgate','Copperfield','Westfield','Oakridge','Meadowvale','Stonegate','Kingsgate','Ashford','Lakeside','Fairway','Hillcrest','Brookside'],
      b:['Motors','Builders','Estate Agents','Solicitors','Hotel','Garden Centre','Carpets','Kitchens','Removals','Accountants','Car Sales','Windows','Roofing','Furniture','Vets','Dental Care'],
-     fee:{board:[90,240], kit:[400,1150], stand:[130,350], ground:[330,990]}, yrs:[1,2]},
+     fee:{board:[5400,14400], kit:[24000,69000], stand:[7800,21000], ground:[19800,59400]}, yrs:[1,2]},
     {n:'region', what:'a regional company', many:'regional companies', a:SP_FIRST,
      b:['Brewery','Dairy','Buses','Building Society','Radio','Homes','Logistics','Foods','Water','Cider','Hotels','Construction'],
-     fee:{board:[140,420], kit:[780,2500], stand:[210,680], ground:[590,1950]}, yrs:[1,3]},
+     fee:{board:[10500,31500], kit:[58500,187500], stand:[15750,51000], ground:[44250,146250]}, yrs:[1,3]},
     {n:'nation', what:'a national company', many:'national companies', a:SP_FIRST,
      b:['Bank','Insurance','Energy','Mobile','Air','Motors','Telecom','Supermarkets','Rail','Paints'],
-     fee:{board:[370,1100], kit:[2300,8000], stand:[600,1850], ground:[1700,6000]}, yrs:[2,3]},
+     fee:{board:[33300,99000], kit:[207000,720000], stand:[54000,166500], ground:[153000,540000]}, yrs:[2,3]},
     {n:'world', what:'a global brand', many:'global brands', a:SP_FIRST,
      b:['Airways','Electronics','Cola','Sportswear','Motors','Bank','Software','Energy','Telecom','Mobile'],
-     fee:{board:[1100,3000], kit:[9200,23000], stand:[1850,5200], ground:[6000,17000]}, yrs:[2,3]}];
+     fee:{board:[110000,300000], kit:[920000,2300000], stand:[185000,520000], ground:[600000,1700000]}, yrs:[2,3]}];
   const SP_PLACE={board:'an ad board', kit:'the shirt', ground:'the ground’s name', N:'the North Stand', S:'the South Stand', E:'the East End', W:'the West End'};
   const SP_KINDS=['board','kit','N','S','E','W','ground'];
   const AD_EMPTY={short:'YOUR AD HERE', col:['#f8f8f8','#313852']};   // (a board nobody's taken, as it's drawn)
@@ -18365,7 +18411,11 @@
     const weight=(comp==='cup'?2.5:1)*(1+Math.max(0,(oppOvr-mgStrength(d,d.clubId)))/30);
     if(weight>1.05) d.loyalty+=baseL*0.012*(weight-1)*(won?1.4:1);
     d.loyalty=Math.max(0,Math.round(d.loyalty));
-  }  function broadcastGameBump(d, mine){ if(!mine) return 0; const base=broadcastFor(d);
+  }
+  // THE TV MONEY FOR A GAME (v149: a cup tie's only): a league game's TV is the week's broadcast money and no more -- the
+  // stadium's figure is what comes in -- and a cup tie brings the cameras: 80% of a week's on top, more against a side
+  // better than yours (it was paid for league games too: a few dollars on the old money, $280,000 a season on the new)
+  function broadcastGameBump(d, mine){ if(!mine||(mine.competition||'league')==='league') return 0; const base=broadcastFor(d);
     const oppOvr=mine.oppOvr||60, comp=mine.competition||'league';
     let oppFac=1+Math.max(0,(oppOvr-mgStrength(d,d.clubId)))/40, compFac=(comp==='cup'?1.8:1.0);
     if(comp==='cup'&&oppOvr>=88) compFac*=2.2;
@@ -18989,15 +19039,15 @@
   // THE FIRST SEASON'S TWO ARRIVALS); the rest stand on the campus, on a plot till they're up.
   const CLUB_LV=[null,
     {n:'The shed', cost:0, tier:1},
-    {n:'The cabin', cost:30000, tier:2},
-    {n:'The clubhouse', cost:120000, tier:3},
-    {n:'The hall', cost:450000, tier:4}];
+    {n:'The cabin', cost:400000, tier:2},
+    {n:'The clubhouse', cost:2000000, tier:3},
+    {n:'The hall', cost:8000000, tier:4}];   // (v149: the real game's money, as everything here -- they were 30,000, 120,000 and 450,000)
   const BLD_LV={   // each building's levels (level 1 is putting it up): what it costs, and the clubhouse it needs
-    train:   [null,{cost:0,cl:1},{cost:10000,cl:2},{cost:40000,cl:3},{cost:120000,cl:4}],
+    train:   [null,{cost:0,cl:1},{cost:150000,cl:2},{cost:700000,cl:3},{cost:2500000,cl:4}],
     market:  [null,{cost:0,cl:1,call:true}],   // (never bought: the phone rings)
-    physio:  [null,{cost:5000,cl:2},{cost:15000,cl:2},{cost:45000,cl:3},{cost:130000,cl:4}],
-    scouting:[null,{cost:12000,cl:2},{cost:15000,cl:3},{cost:60000,cl:4}],
-    academy: [null,{cost:25000,cl:3},{cost:25000,cl:4},{cost:120000,cl:4}]};
+    physio:  [null,{cost:75000,cl:2},{cost:300000,cl:2},{cost:1000000,cl:3},{cost:3000000,cl:4}],
+    scouting:[null,{cost:200000,cl:2},{cost:250000,cl:3},{cost:1200000,cl:4}],
+    academy: [null,{cost:400000,cl:3},{cost:400000,cl:4},{cost:2500000,cl:4}]};
   const STAD_CL=[0,1,1,2,3,4], DECOR_CL=3;   // the clubhouse each level of the ground needs; the one the decorations come with
   const BLD_NAME={club:'the clubhouse', train:'the training pitch', market:'the transfer market', physio:'the physio’s clinic', scouting:'the scouts’ house', academy:'the youth academy', stadium:'the stadium'};
   const BLD_WHAT={
@@ -19095,14 +19145,14 @@
       +lvlRows(d,'physio',4,k=>PHYSIO_WEAR[k]+'% slower to tire · '+physFewer(k)+'% fewer injuries · back '+Math.round(PHYSIO_HEAL*k*100)+'% sooner')+lvlNext(d,'physio','BUILD IT UP'); }
   // ---- the decorations: bought one at a time and put where you like on the lawn (not on a building, a plot or another
   // one), moved later, or put away in store. Each is [id, name, tab, price]
-  const DECO_SHOP=[
-    ['oak','Oak','Trees',1200],['bigoak','Big oak','Trees',1800],['maple','Maple','Trees',1400],['maple_gr','Green maple','Trees',1300],['willow','Willow','Trees',1500],
-    ['pine','Pine','Trees',1000],['spruce','Spruce','Trees',900],['round','Round tree','Trees',800],['autumn','Autumn tree','Trees',900],['cone','Cone tree','Trees',700],
-    ['bush','Bush','Trees',600],['fir','Fir','Trees',500],['sapling','Sapling','Trees',250],
-    ['sunflowers','Sunflowers','Garden',300],['yellow','Yellow flowers','Garden',250],['blue','Blue flowers','Garden',250],['bed','Flower bed','Garden',500],
-    ['pot','Big pot','Garden',350],['plant','Pot plant','Garden',200],['pumpkins','Pumpkins','Garden',300],['scarecrow','Scarecrow','Garden',400],['hay','Haystack','Garden',350],['hive','Beehive','Garden',450],
-    ['lamp','Lamp post','Plaza',600],['bench','Bench','Plaza',400],['gbench','Garden bench','Plaza',450],['bin','Bin','Plaza',150],['bikes','Bike rack','Plaza',500],
-    ['statue','The maple leaf','Plaza',6000],['bus','The team bus','Plaza',12000]];
+  const DECO_SHOP=[   // (v149: the real game's money -- each 50/3 of what it was: $2,500 to $200,000)
+    ['oak','Oak','Trees',20000],['bigoak','Big oak','Trees',30000],['maple','Maple','Trees',23300],['maple_gr','Green maple','Trees',21700],['willow','Willow','Trees',25000],
+    ['pine','Pine','Trees',16700],['spruce','Spruce','Trees',15000],['round','Round tree','Trees',13300],['autumn','Autumn tree','Trees',15000],['cone','Cone tree','Trees',11700],
+    ['bush','Bush','Trees',10000],['fir','Fir','Trees',8300],['sapling','Sapling','Trees',4200],
+    ['sunflowers','Sunflowers','Garden',5000],['yellow','Yellow flowers','Garden',4200],['blue','Blue flowers','Garden',4200],['bed','Flower bed','Garden',8300],
+    ['pot','Big pot','Garden',5800],['plant','Pot plant','Garden',3300],['pumpkins','Pumpkins','Garden',5000],['scarecrow','Scarecrow','Garden',6700],['hay','Haystack','Garden',5800],['hive','Beehive','Garden',7500],
+    ['lamp','Lamp post','Plaza',10000],['bench','Bench','Plaza',6700],['gbench','Garden bench','Plaza',7500],['bin','Bin','Plaza',2500],['bikes','Bike rack','Plaza',8300],
+    ['statue','The maple leaf','Plaza',100000],['bus','The team bus','Plaza',200000]];
   function decoFoot(k,x,y){ const D=CAMPUS_META.deco[k]; return D?[x+D.fp[0],y+D.fp[1],D.fp[2],D.fp[3]]:null; }
   const boxHit=(a,b)=>a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3];
   // can one go there? (skip: the one being moved)
@@ -19237,7 +19287,11 @@
     if(T) return h+mgActRow('<span style="color:var(--warn)">HE’LL SIGN FOR</span> <b>'+money(T.cnt)+'/wk</b>','<button class="mgBtn go" data-mg="meetc" data-pid="'+p.id+'">MEET IT</button>');   // (the week he waits on his figure: for the seasons offered, above)
     return h+'<div class="mgAct">'+no+'<button class="mgBtn warn" data-mg="release" data-pid="'+p.id+'">RELEASE HIM ('+money(mgReleaseCost(d,p))+')</button></div>'; }
   // SELLING HIM (the market): what he's worth, the best two bids for him, the transfer list
+  // HOME TO STAY (v149): the hometown hero is never sold -- no club bids for him (mgAiBids), he can't be listed or loaned
+  // out, and on the selling screen he says so. He plays, renews, retires or goes when his deal ends, as anyone does
+  const HOME_MSG='He came home to finish his career here. He won’t be sold.';
   function mgSaleActions(d,p){ let h='<div class="mgFacts">'+mgFact('VALUE',money(mgValue(d,p)))+mgFact('WAGE',money(p.wage)+'/wk')+'</div>';
+    if(p.hometown) return h+'<div class="mgHint">'+HOME_MSG+'</div>';
     const O=(d.offers||[]).filter(o=>o.pid===p.id&&d.world.clubs[o.club]).sort((a,b)=>b.fee-a.fee);
     for(const o of O.slice(0,2)){ const c=d.world.clubs[o.club];
       h+=mgActRow('BID <b style="color:var(--warn)">'+money(o.fee)+'</b> '+mgEsc(c.code||c.name),
@@ -19405,8 +19459,8 @@
     const L=d.roster.filter(p=>!p.loan).sort((a,b)=>(d.listed[b.id]?1:0)-(d.listed[a.id]?1:0)||mgValue(d,b)-mgValue(d,a));
     const away=mgAiClubs(d).flatMap(c=>c.players.filter(p=>p.loan&&p.loan.from===d.clubId).map(p=>surname(p.name)+' at '+mgEsc(c.code||c.name)));   // (yours, out on loan)
     if(away.length) h+='<div class="mgHint">On loan: '+away.join(', ')+', back at the season’s end.</div>';
-    return mgPanes(h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
-      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
+    return mgPanes(h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:p.hometown?'NOT FOR SALE':d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
+      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':p.hometown?'<span class="mgTag">HOME TO STAY</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
 
   // ---- scouting ----
   function mgReportsTab(d){ const K=d.kn||{}, L=Object.keys(K).filter(id=>K[id]>=1).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
@@ -19677,6 +19731,7 @@
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
         p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
       d.w144=true; }
+    if(!d.w149){ econV149(d); d.w149=true; }   // (v149: the real game's money -- econV149)
     return d; }
   let curBldg=null; const curTab={};
   function openBuilding(id){ const b=MG_BLDGS[id]; if(!b) return; curBldg=id; statViewRi=null;
@@ -19766,7 +19821,7 @@
       case 'meetc': { const err=mgMeetC(d,pid); if(!err) MGUI.offer=null; say(err||'He has signed a new deal.',err?'var(--bad)':'var(--good)'); break; }
       case 'liststep': { const p=d.roster.find(x=>x.id===pid); if(!p) break; const v=mgValue(d,p), cur=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:v;
         MGUI.list={pid,price:Math.max(mgRound(v*0.3),mgRound(cur+(+ds.dir)*Math.max(10,v*0.1)))}; break; }
-      case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } if(!d.listed[pid]) p.mor=clamp((p.mor??MOR0)-1,1,10); d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }
+      case 'list': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(p.hometown){ say(HOME_MSG,'var(--warn)'); break; } if(!lvOf(d,'market')){ say('You’re not on the transfer market yet.','var(--bad)'); break; } if(!d.listed[pid]) p.mor=clamp((p.mor??MOR0)-1,1,10); d.listed[pid]=MGUI.list&&MGUI.list.pid===pid?MGUI.list.price:mgValue(d,p); say(p.name+' is on the transfer list at '+money(d.listed[pid])+'.','var(--good)'); break; }
       case 'unlist': delete d.listed[pid]; say('Taken off the transfer list.'); break;
       case 'release': { const i=d.roster.findIndex(p=>p.id===pid), p=d.roster[i]; if(!p) break; const why=mgCanLose(d,i); if(why){ say(why,'var(--bad)'); break; }
         showConfirm('Release '+p.name+'? Paying off his contract costs '+money(mgReleaseCost(d,p))+'.',()=>{ const err=mgRelease(d,d.roster.findIndex(x=>x.id===pid)); if(!err) MGUI.sel=null; say(err||p.name+' has been released.',err?'var(--bad)':'var(--good)'); mgRerender(); },{yes:'Release',danger:true});
@@ -19948,10 +20003,10 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:20000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
+      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights)
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d);

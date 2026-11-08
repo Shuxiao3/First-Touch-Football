@@ -66,8 +66,9 @@ ok(r.goodScouts[1] > r.goodScouts[0] * 1.8, 'one with good scouts on what he cou
 ok(r.form[1] > r.form[0], 'a man in fine form gets noticed, even by poor scouts: ' + r.form.join(' -> '));
 ok(r.temper[0] !== r.temper[1] && new Set(r.temps).size > 1 && new Set(r.eyes).size > 1, 'no two clubs quite alike: the same man ' + r.temper.join(' or ') + ' (temperaments ' + r.temps.slice(0, 5).join(', ') + '...; scouts ' + r.eyes.slice(0, 5).join(', ') + '...)');
 const dn = a => a.every((v, i) => !i || a[i - 1] > v);
-ok(dn(r.pos) && dn(r.posVal) && r.pos[0] >= r.pos[2] * 1.7 && r.pos[1] >= r.pos[2] * 1.5 && r.pos[3] <= r.pos[2] * 0.8 && r.pos[4] <= r.pos[2] * 0.55,
-  'by position, as the real market has it (v119: more so): the same man, rated 66 at 25, asked ' + r.pos.join(', ') + ' as a striker, a winger, a midfielder, a centre-back and a keeper (worth to you ' + r.posVal.join(', ') + ')');
+const nearK = (a, b, k) => Math.abs(a / b - k) <= 0.06;   // (v149: the change list's prices by position -- rounded to the $10,000 or $100,000)
+ok(nearK(r.posVal[0], r.posVal[2], 1.1) && nearK(r.posVal[1], r.posVal[2], 1.1) && nearK(r.posVal[3], r.posVal[2], 0.55) && nearK(r.posVal[4], r.posVal[2], 0.38) && r.pos[0] > r.pos[2] && r.pos[1] > r.pos[2] && r.pos[3] < r.pos[2] * 0.7 && r.pos[4] < r.pos[3],
+  'by position, as the real market has it (v149: the change list\'s -- a striker or a winger a tenth over a midfielder, a centre-back 55%, a keeper 38%): the same man, rated 66 at 25, asked ' + r.pos.join(', ') + ' as a striker, a winger, a midfielder, a centre-back and a keeper (worth to you ' + r.posVal.join(', ') + ')');
 ok(r.gem1 === r.gem0 && r.mk.n === 2 && r.gem2 >= r.gem0 * 1.3 * 1.08 - 10, 'one bid over their price changes nothing (' + r.gem1 + '); a second, and they know they have a gem: ' + r.gem2 + ', over the best bid');
 
 // --- YOUR BIDS ------------------------------------------------------------------------------------------------------------
