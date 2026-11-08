@@ -1990,6 +1990,21 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       and loans, wages, building, scouting, the week's events -- from Monday's bank to what's there now, to the dollar
       (anything not in a line of its own in one of its own, so the lines always add up); last week's the same, and a
       league week projected. A game's week runs to the next Monday: played or simulated, its money is last week's.
+    - **What he'd do for your nine (v156).** A man to buy, or a free agent, has YOUR NINE on his card's deal side:
+      your starting nine's average rating now and with him in it -- in for the weakest of yours in his part of the
+      side, if he's better (a keeper for your keeper) -- to the tenth, "~" if he's unscouted (his range's middle); or
+      "no change" if he wouldn't start. One man is a tenth or two on nine: it's there to be seen now.
+    - **His agent's cut (v156).** A man from your academy sold -- a bid accepted, or the board's sale -- his agent takes a
+      tenth of the fee; the bid says so ("academy: $450,000 after his agent"). Measured (League 2, an academy at level 3
+      from the start, three seasons with nobody sold): the club's surplus about $1.66M a season; an academy striker or
+      winger worth a median $994,000 at 18, $893,000 after a season of his first-team wage, the rest $336,000; the best
+      three $2M to $2.6M -- more than a season's surplus each. The striker and winger premium is the real game's and
+      stays; the cut is a tenth of every academy sale.
+    - **Interest you can see (v156).** A star at a small club (three or more over his league's level) draws a bid in
+      12% of a window's weeks (8% before), and a bid turned down for an ambitious man (Ambition 7 or more) by a club a
+      league or more up costs him 0.6 of his mood (a point if he wanted out), and he says so; a Loyal Servant's glad to
+      stay. When no bid comes, a club may be seen watching him (the news; once a window): a bid or a watching club in
+      about 86% of windows for a man eight over his level, where a bid alone, as it was, came in about half.
     - **The board's limit (v150).** What the board lets the club owe -- about two weeks' income: $150,000 in League 2,
       $1M in League 1, $3M in the Championship, $15M in the Premium League -- is read at last (it was set, and nothing
       looked at it). Over it, nothing is bought: no signings, no loans, no building or decorating ("The board won't let
@@ -2471,6 +2486,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v156: a signing's worth and a sale's.** A man to buy or sign shows what he'd do for your nine, its average now and
+  with him in it ("48.3 → 49.0", or "no change"); a man from your academy sold, his agent takes a tenth; an ambitious
+  man turned down for a club a league up minds, and says so; a star at a small club draws a bid in 12% of window weeks
+  (it was 8%) and, when none comes, a club seen watching him: interest in about nine windows in ten (a bid alone was
+  about half). See **What he'd do for your nine (v156)**, **His agent's cut (v156)** and **Interest you can see
+  (v156)**.
 - **v155: honest numbers.** A man's potential range topped from 23 at what his age actually reaches (it ran up to
   twelve over his potential: on average 7.9 over his rating, now 3.1); a simulated game the same for everyone (your
   physio's hidden +0.4 a level is gone: its help is in the fitness and injuries); a veteran's wage asked once for his

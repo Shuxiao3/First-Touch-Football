@@ -17474,6 +17474,7 @@
       case 'offer': { const o=d.offers.find(y=>y.id===x.oid), p=d.roster.find(q=>q.id===o.pid), c=d.world.clubs[o.club];
         L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · rated '+p.ovr+' · on '+money(p.wage)+'/wk to S'+(p.until||d.season));
         L.push('What he’s worth to you: about '+money(mgValue(d,p))+(d.listed&&d.listed[p.id]?' · listed at '+money(d.listed[p.id]):''));
+        if(p.hg) L.push('<span class="dim">From your academy: his agent takes a tenth -- '+money(o.fee-agentCut(p,o.fee))+' to the club.</span>');   // (v156)
         if(p.wantsOut) L.push('<span class="dim">He wants to leave.</span>');
         if(o.dd) L.push('<span class="dn">A deadline-day bid: it’s gone when the window shuts tonight.</span>');
         B.push(['ACCEPT','accept'],['REJECT','reject']); later();
@@ -17611,7 +17612,7 @@
       case 'next': x.done=true; break;
       case 'later': d.pile.list.splice(d.pile.list.indexOf(x),1); d.pile.list.push(x); break;
       case 'accept': err=mgAcceptOffer(d,x.oid); x.done=true; if(!err) showNote('Sold.','var(--good)'); break;
-      case 'reject': mgRejectOffer(d,x.oid); x.done=true; break;
+      case 'reject': { const msg=mgRejectOffer(d,x.oid); x.done=true; if(msg) showNote(msg,'var(--warn)'); break; }   // (v156: HE HEARS OF IT)
       case 'sign': { const Bd=mgBidOf(d,x.pid); err=Bd?mgSignDeal(d,x.pid,Bd.fee,MGUI.years||2):'That deal has gone.'; if(!err){ x.done=true; showNote('Signed! He joins your squad.','var(--good)'); } break; }
       case 'walk': { const Bw=mgBidOf(d,x.pid); if(Bw) bidLog(d,Bw,'walked'); d.bids=(d.bids||[]).filter(y=>y.pid!==x.pid); x.done=true; break; }
       case 'meet': { const Bd=mgBidOf(d,x.pid); if(!Bd){ x.done=true; break; } const r=mgBid(d,x.pid,Bd.ask); if(!r.ok&&!r.wait&&!r.more) err=r.msg; else MGUI.years=2; break; }
@@ -18046,17 +18047,28 @@
     return null; }
   function mgTx(d,dir,p,club,fee){ if(fee>0) ledg(d,'transfers',dir==='out'?fee:-fee); d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }   // (v151: THE WEEK'S MONEY too)
   // you selling: take a club's offer
+  // HIS AGENT'S CUT (v156): a man from your academy (homegrown) sold, his agent takes a tenth of the fee. The academy's
+  // men cost no fee and no wage till they're promoted, and one sold at 18 or 19 was worth a third of a season's surplus
+  // to the club, the best of them more than a season's (measured: League 2, an academy at level 3, three seasons)
+  const AGENT_CUT=0.1, agentCut=(p,fee)=>p&&p.hg?mgRound(fee*AGENT_CUT):0;
   function mgAcceptOffer(d,oid){ const o=(d.offers||[]).find(x=>x.id===oid); if(!o) return 'That offer has gone.';
     const idx=d.roster.findIndex(p=>p.id===o.pid), c=d.world.clubs[o.club]; if(idx<0||!c) return 'That offer has gone.';
     const why=mgCanLose(d,idx); if(why) return why;
     if(hasTrait(d.roster[idx],d,'loyal')&&!d.roster[idx].wantsOut&&Math.random()<0.5){ d.offers=d.offers.filter(x=>x!==o); return d.roster[idx].name+' doesn’t want to go.'; }
     if(c.budget<o.fee){ d.offers=d.offers.filter(x=>x!==o); return c.name+' can’t find the money any more.'; }
     if(c.players.length>=MG_MAX){ d.offers=d.offers.filter(x=>x!==o); return c.name+'’s squad is full now.'; }
-    const p=mgRosterRemove(d,idx); c.budget-=o.fee; d.budget+=o.fee;
+    const p=mgRosterRemove(d,idx), cut=agentCut(p,o.fee); c.budget-=o.fee; d.budget+=o.fee-cut;
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p);
-    mgTx(d,'out',p,c.name,o.fee); mgNews(d,p.name+' joins '+c.name+' from '+d.clubName+' for '+money(o.fee)+'.'); careerEv(d,p,'Left for '+(c.code||'?')+' ('+money(o.fee)+')'); recFee(d,'fs',p,o.fee);
+    mgTx(d,'out',p,c.name,o.fee); if(cut) ledg(d,'transfers',-cut);   // (v156: HIS AGENT'S CUT, in the week's money)
+    mgNews(d,p.name+' joins '+c.name+' from '+d.clubName+' for '+money(o.fee)+(cut?' (his agent takes '+money(cut)+')':'')+'.'); careerEv(d,p,'Left for '+(c.code||'?')+' ('+money(o.fee)+')'); recFee(d,'fs',p,o.fee);
     return null; }
-  function mgRejectOffer(d,oid){ d.offers=(d.offers||[]).filter(x=>x.id!==oid); }
+  // (v156) HE HEARS OF IT: a bid for one of yours turned down, an ambitious man (Ambition 7 or more) wanting the club a
+  // league or more up minds -- his mood down 0.6, a point if he wanted out -- and says so; a Loyal Servant's glad to stay
+  function mgRejectOffer(d,oid){ const o=(d.offers||[]).find(x=>x.id===oid); d.offers=(d.offers||[]).filter(x=>x.id!==oid); if(!o) return null;
+    const p=d.roster.find(q=>q.id===o.pid), c=d.world.clubs[o.club]; if(!p||!c) return null;
+    if(hvOf(p).am>=7&&c.tier>d.tier){ p.mor=clamp(Math.round(((p.mor??MOR0)-(p.wantsOut?1:0.6))*100)/100,1,10); mgNews(d,p.name+' wanted the move to '+c.name+': he isn’t happy you turned them down.'); return p.name+' wanted the move to '+c.name+': his mood drops.'; }
+    if(hasTrait(p,d,'loyal')) return p.name+' is glad to stay.';
+    return null; }
   // let a man go: half of what's left on his deal is paid off
   // RELEASING A MAN: half of what's left on his deal -- never more than twice what he's worth (v151: a cheap man on a long
   // deal cost ten and sixteen times his worth to let go)
@@ -18197,7 +18209,10 @@
   function mgAiBids(d,k,prem){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0; k=k??1; prem=prem||1;   // (prem: DEADLINE DAY's)
     const clubs=mgAiClubs(d);
     for(const p of d.roster){ if(p.loan||p.hometown) continue; const ask=(d.listed&&d.listed[p.id])||(p.wantsOut?mgValue(d,p):0), lt=mgLevelTier(p.ovr);   // (one who wants out: as if he were listed; one on loan isn't yours to sell; v149: the hometown hero never is -- HOME TO STAY)
-      if(Math.random()>(ask?0.5:(p.ovr>=MG_LEVEL[d.tier]+3?0.08:0.02))*k) continue;
+      const star=!ask&&p.ovr>=MG_LEVEL[d.tier]+3, wid=d.season*2+(d.phase==='winter'||(d.phase==='league'&&d.md>=MG_HALF)?1:0);
+      if(Math.random()>(ask?0.5:(star?0.12:0.02))*k){   // (v156: 0.12 for a man three over his league's level -- it was 0.08: a star at a small club drew nothing)
+        if(star&&p.watch!==wid&&Math.random()<0.12*k){ const W=clubs.filter(c=>c.tier>d.tier||(c.tier===d.tier&&c.budget>mgValue(d,p))); if(W.length){ p.watch=wid; mgNews(d,mgPick(W).name+' have been watching '+p.name+'.'); } }   // (v156: and watched, once a window -- interest you can see)
+        continue; }
       const fee=mgRound((ask?ask*(0.82+Math.random()*0.26):mgValue(d,p)*(1+Math.random()*0.35))*prem);
       const fits=clubs.filter(c=>Math.abs(c.tier-lt)<=1&&c.budget>=fee&&c.players.length<MG_MAX&&!d.offers.some(o=>o.pid===p.id&&o.club===c.id));
       if(!fits.length) continue;
@@ -18252,7 +18267,7 @@
   function boardSale(d){ if(!debtOver(d)) return null;
     const L=d.roster.filter(p=>!p.hometown&&!p.loan).sort((a,b)=>mgValue(d,b)-mgValue(d,a)), p=L[0]; if(!p||d.roster.length<=MG_MIN) return null;
     const fee=mgValue(d,p), lt=mgLevelTier(p.ovr), C=mgAiClubs(d).filter(c=>Math.abs(c.tier-lt)<=1&&c.players.length<MG_MAX).sort((a,b)=>b.budget-a.budget), c=C[0]; if(!c) return null;
-    const i=d.roster.indexOf(p); mgRosterRemove(d,i); d.budget+=fee; c.budget-=fee; d.inRed=d.budget<0; ledg(d,'transfers',fee); if(d.listed) delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
+    const i=d.roster.indexOf(p), cut=agentCut(p,fee); mgRosterRemove(d,i); d.budget+=fee-cut; c.budget-=fee; d.inRed=d.budget<0; ledg(d,'transfers',fee-cut);   // (v156: HIS AGENT'S CUT) if(d.listed) delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); recFee(d,'fs',p,fee);
     mgNews(d,'The board has sold '+p.name+' to '+c.name+' for '+money(fee)+': the club owed more than it would stand for.'); careerEv(d,p,'Sold to '+(c.code||c.name));
     return {name:p.name, club:c.name, fee}; }
@@ -19613,17 +19628,25 @@
       +(O.length?'':'<div class="mgQuick">'+[[1,'HIS WORTH'],[1.25,'+25%'],[1.5,'+50%'],[2,'TWICE']].map(([k,l])=>'<button class="mgMini" data-mg="listset" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
       +'<input class="mgAmtIn" inputmode="numeric" data-amt="listset" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a price of your own"></div>'); }   // (the quick prices with no bids in the way: the card never pages)
   function mgFreeActions(d,p,known){ const a=mgFreeAskSeen(d,p);
-    let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+'</div>';
+    let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+nineFact(d,p,known)+'</div>';   // (v156)
     if(!known) h+=mgScoutBtn(d,p,null);
     return h+mgActRow('SIGN',mgYears()+'<button class="mgBtn go" data-mg="signfree" data-pid="'+p.id+'">SIGN HIM</button>'); }
   // (v151) the bid's quick figures: half their price, three-quarters, their price, a tenth over -- and any figure typed
   const BID_PCT=[[0.5,'HALF'],[0.75,'3/4'],[1,'THEIR PRICE'],[1.1,'+10%']];
   function bidQuick(d,p,ask,act){ return '<div class="mgQuick">'+BID_PCT.map(([k,l])=>'<button class="mgMini" data-mg="'+act+'" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
       +'<input class="mgAmtIn" inputmode="numeric" data-amt="'+act+'" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a figure of your own"></div>'; }   // (v152: on the buttons' row, not one of its own -- a card whose head ran to four lines went over on a narrow phone)
+  // WHAT HE'D DO FOR YOUR NINE (v156): its average rating now and with him in it -- in for the weakest of yours in his
+  // part of the side, if he's better (a keeper for your keeper) -- to the tenth, on a man to buy or sign. One man's a
+  // tenth or two on nine, and a signing showed nothing of it. An unscouted man by what he looks (his range's middle)
+  function nineWith(d,p,ovr){ const xi=mgStarters(d); if(!xi.length) return null; const now=xi.reduce((a,q)=>a+q.ovr,0)/xi.length;
+    const pool=xi.filter(q=>p.role==='GK'?q.role==='GK':q.role===p.role), P=pool.length?pool:xi.filter(q=>q.role!=='GK'), w=P.slice().sort((a,b)=>a.ovr-b.ovr)[0];
+    return { now, then:w&&ovr>w.ovr?now+(ovr-w.ovr)/xi.length:now, out:w&&ovr>w.ovr?w:null }; }
+  const nineFact=(d,p,known)=>{ const n=nineWith(d,p,known?p.ovr:mgSeenOvr(d,p)); if(!n) return ''; const up=n.then-n.now>=0.05;
+    return mgFact('YOUR NINE',up?(known?'':'~')+n.now.toFixed(1)+' → '+n.then.toFixed(1):'no change',up?'var(--good)':'var(--dim)'); };
   function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
     let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+(known?mgFact('WORTH',money(mgValue(d,p)),ask>mgValue(d,p)*1.3?'var(--bad)':ask<mgValue(d,p)*0.9?'var(--good)':''):'')   // (v151: what he's worth beside it, once scouted)
-      +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
-      +mgFact('CONTRACT','until season '+(p.until||d.season),'',true)+'</div>';
+      +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')+nineFact(d,p,known)   // (v156: WHAT HE'D DO FOR YOUR NINE)
+      +mgFact('CONTRACT','to season '+(p.until||d.season))+'</div>';
     if(!known) h+=mgScoutBtn(d,p,c);
     if(!mgWindowOpen(d)) return h+'<div class="mgAct"><span class="mgActL" style="color:var(--warn)">WINDOW SHUT</span></div>';
     const B=mgBidOf(d,p.id);
@@ -19744,7 +19767,7 @@
     if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
     for(const o of O){ const p=d.roster.find(x=>x.id===o.pid), c=d.world.clubs[o.club];
       h+='<div class="mgOffer fitWhole"><div><b>'+mgEsc(c.name)+'</b> <span class="mgCardSub">('+MG_LEAGUE[c.tier]+')</span> bid <b style="color:var(--warn)">'+money(o.fee)+'</b> for <b>'+mgEsc(p.name)+'</b></div>'
-        +'<div class="mgCardSub">'+(p.subRole||p.role)+' · '+p.ovr+' · age '+p.age+' · value '+money(mgValue(d,p))+(d.listed[p.id]?' · you asked '+money(d.listed[p.id]):'')+'</div>'
+        +'<div class="mgCardSub">'+(p.subRole||p.role)+' · '+p.ovr+' · age '+p.age+' · value '+money(mgValue(d,p))+(d.listed[p.id]?' · you asked '+money(d.listed[p.id]):'')+(p.hg?' · academy: '+money(o.fee-agentCut(p,o.fee))+' after his agent':'')+'</div>'
         +'<div class="mgBtns"><button class="mgBtn go" data-mg="accept" data-oid="'+o.id+'">ACCEPT</button><button class="mgBtn warn" data-mg="reject" data-oid="'+o.id+'">REJECT</button></div></div>'; }
     return h; }
   // YOUR BIDS (v108): every bid you've placed -- the ones still out (waiting on Monday, agreed and to be signed, or a
@@ -20185,7 +20208,7 @@
         return; }
       case 'accept': { const err=mgAcceptOffer(d,+ds.oid); say(err||'Sold.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'loanask': { const err=mgLoanIn(d,pid); say(err||'He joins on loan, to the end of the season.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
-      case 'reject': mgRejectOffer(d,+ds.oid); break;
+      case 'reject': { const msg=mgRejectOffer(d,+ds.oid); if(msg) say(msg); break; }   // (v156: HE HEARS OF IT)
       case 'promote': { const err=mgPromoteYouth(d,pid); say(err||'Promoted to the first team.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'ryouth': mgReleaseYouth(d,pid); MGUI.sel=null; break;
       case 'filt': MGUI[ds.k]=ds.k==='tier'||ds.k==='ntier'?+ds.v:ds.v; MGUI.sel=null; MGUI.drop=null; fitForget('L:'+curBldg+'/');
