@@ -1991,6 +1991,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       and loans, wages, building, scouting, the week's events -- from Monday's bank to what's there now, to the dollar
       (anything not in a line of its own in one of its own, so the lines always add up); last week's the same, and a
       league week projected. A game's week runs to the next Monday: played or simulated, its money is last week's.
+      (v160: on a phone its lines page -- ◀ 1 / 3 ▶ -- between the title and BACK, so BACK is always on the screen; and
+      a tap anywhere outside the card closes it. Before, held sideways, three weeks' lines ran some 300 px past the foot
+      of the screen with BACK under them, and nothing closed it: the card couldn't be left.)
     - **What he'd do for your nine (v156).** A man to buy, or a free agent, has YOUR NINE on his card's deal side:
       your starting nine's average rating now and with him in it -- in for the weakest of yours in his part of the
       side, if he's better (a keeper for your keeper) -- to the tenth, "~" if he's unscouted (his range's middle); or
@@ -2510,6 +2513,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v160: the week's money can be left.** On a phone held sideways THE WEEK'S MONEY (NET/WK on the campus) ran past
+  the foot of the screen, BACK with it, and a tap outside it did nothing: the card couldn't be closed. Its lines now
+  page between the title and BACK (◀ 1 / 3 ▶), BACK always on the screen, and a tap anywhere outside the card closes it
+  -- as it does HOW TO PLAY and SKILL MOVES (not the card before your first match, whose button is KICK OFF). Checked
+  on the smallest iPhone held sideways, the new career, the story, the press conference, the papers and a career to
+  take with you have all their buttons on the screen. See **The week's money (v151)**.
 - **v159: an iPhone's controls, whatever it's opened on.** Every word the game says on how to play is about the
   screen's buttons and a finger, on a computer too: HOW TO PLAY (with your corner's − and + and where the skill moves
   are), the tips, each lab's first line and tally, the TUNE drawer's notes, the skill moves page, a drill's "tap the

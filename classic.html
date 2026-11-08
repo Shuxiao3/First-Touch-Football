@@ -1452,7 +1452,7 @@
   .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
   .mgQuick{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:flex-end; margin:2px 0 4px; } .mgQuick .mgMini{ margin:0; padding:3px 6px; }   /* (v151) */
   .mgAmtIn{ flex:1 1 72px; min-width:64px; max-width:118px; width:auto; font:11px 'FTC Dot',monospace; padding:3px 6px; background:var(--well); color:var(--ink); border:1px solid var(--btnHi); border-radius:4px; }
-  .ldgCard{ max-width:520px; gap:6px; } .ldgSect{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); margin-top:6px; }
+  .ldgCard{ max-width:520px; gap:6px; } .ldgCard .cfBtns{ flex:none; margin-top:4px; }   /* (v160: its middle pages, .ldgMid; BACK always on the screen) */ .ldgSect{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); margin-top:6px; }
   .ldgRow{ display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--ink2); padding:1px 0; } .ldgRow b{ font-weight:400; color:var(--ink); } .ldgRow.tot{ border-top:1px solid var(--well); padding-top:3px; } .ldgNote{ font-size:11px; color:var(--dim); }
   #chNetBtn{ cursor:pointer; } #chNetBtn i{ text-decoration:underline dotted; }
   .trend, .mgRow .ovr i.trend{ font-style:normal; font-weight:400; font-size:.55em; margin-left:2px; vertical-align:.45em; }   /* (v152: WHICH WAY HE'S GOING) */
@@ -1911,7 +1911,7 @@
       l.pt=px(l.els[0],'marginTop')+ws.reduce((a,w)=>a+px(w,'marginTop')+px(w,'borderTopWidth')+px(w,'paddingTop'),0);
       l.pb=ws.reduce((a,w)=>a+px(w,'borderBottomWidth')+px(w,'paddingBottom'),0); if(l.pb) l.pb+=px(l.els[0],'marginBottom'); }
     const span=(a,z)=>(a===0?lines[z].b:keepMB+lines[a].pt+lines[z].b-lines[a].t)+lines[z].pb;   // (a page from line a to line z, as tall as it draws)
-    const cap=room-keepH, pages=[], head=i=>lines[i].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr,.instrGrpLbl'); let s0=0;
+    const cap=room-keepH, pages=[], head=i=>lines[i].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr,.instrGrpLbl,.ldgSect'); let s0=0;
     while(s0<lines.length){ let e=s0; while(e+1<lines.length&&span(s0,e+1)<=cap) e++;
       if(e+1<lines.length){ if(e>s0&&head(e)) e--;                          // (a heading goes over with what it heads,
         else if(e-1>s0&&head(e-1)&&!head(e+1)) e-=2; }                      //  and takes at least two of its lines with it)
@@ -1941,7 +1941,7 @@
   // ...repainting a menu, opening one, or turning the phone fits them again (on the next frame, all at once)
   let fitRaf=0;
   const fitObs=new MutationObserver(()=>{ if(!fitRaf) fitRaf=requestAnimationFrame(()=>{ fitRaf=0; fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } }); });
-  function fitWatch(){ for(const id of ['startMenu','careerHub','bldgPanel','settingsOverlay','skillsOverlay','mgrMaker','matchReport','mtacOv','labTune']){ const el=document.getElementById(id);
+  function fitWatch(){ for(const id of ['startMenu','careerHub','bldgPanel','settingsOverlay','skillsOverlay','mgrMaker','matchReport','mtacOv','labTune','ldgModal']){ const el=document.getElementById(id);
     if(el) fitObs.observe(el,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']}); } }
   const fitNow=()=>{ fitObs.disconnect(); try{ fitAll(); } finally { fitWatch(); } };
   addEventListener('resize',fitNow);
@@ -15608,7 +15608,7 @@
   // so a first match was played blind. (v159: the game ships as an iPhone app, so the card, the tips, the labs and the
   // skill moves page speak of the screen's buttons and a finger only, whatever it's opened on. The keys still play, for
   // the tests, but nothing in the game tells a player about them.) =====
-  let ctlThen=null;
+  let ctlThen=null, ctlFirst=false;   // (v160: ctlFirst, the card before your first match: its button KICK OFF, so a tap outside doesn't close it)
   const CTL=[
     ['LEFT','Drag anywhere on the left to steer the man on the ball: he runs with it by himself. Double-tap to sprint.'],
     ['PASS','The big button: pass, the way you’re steering. Tap it twice to loft it; drag off it for a through ball into a run. Tap a team-mate to pass to him.'],
@@ -15618,14 +15618,14 @@
     ['DEFENDING','Tap a team-mate to switch to him, anywhere else to switch the way you’re steering. Hold the big button and your man closes the man on the ball down by himself. SLIDE slides in.'],
     ['CORNERS','Your corner: − and + on the panel over the pitch, how many go into their box and how many stay back; the rest wait in midfield.'],
     ['☰','Pause: tactics, subs, settings, these controls.']];
-  function ctlShow(how){ how=how||{}; ctlThen=how.then||null; ctlOpen=true;
+  function ctlShow(how){ how=how||{}; ctlThen=how.then||null; ctlFirst=!!how.first; ctlOpen=true;
     const T=CTL, card=document.querySelector('#ctlModal .ctlCard');
     card.innerHTML='<div class="pauseTitle">HOW TO PLAY</div><div class="ctlRows">'+T.map(([k,t])=>'<b>'+k+'</b><span>'+t+'</span>').join('')+'</div>'
       +(how.first?'<div class="ctlNote">They’re always on ? over the pitch, and CONTROLS in the menu.</div>':'')
       +'<div class="cfBtns"><button class="pauseBtn" data-ctl="go">'+(how.first?'KICK OFF ▶':how.then?'◀ BACK':'◀ BACK TO THE GAME')+'</button></div>';
     document.getElementById('ctlModal').classList.add('on'); }
   function ctlHide(){ ctlOpen=false; document.getElementById('ctlModal').classList.remove('on'); const f=ctlThen; ctlThen=null; if(f) f(); }
-  document.getElementById('ctlModal').addEventListener('click',e=>{ if(e.target.closest('[data-ctl="go"]')) ctlHide(); });
+  document.getElementById('ctlModal').addEventListener('click',e=>{ if(e.target.closest('[data-ctl="go"]')||(e.target===e.currentTarget&&!ctlFirst)) ctlHide(); });   // (v160: or a tap outside the card)
   document.getElementById('ctlBtn').addEventListener('click',e=>{ e.stopPropagation(); if(SCREEN==='match'&&!ctlOpen&&!pauseOpen&&!menuOpen&&!htOpen) ctlShow(); });
   // the tips: the first of these that's so and not yet seen, the more particular first
   const tipGoalD=c=>Math.hypot((atkOf(c.team)>0?FW:0)-c.x,YC-c.y), tipUp=c=>atkOf(c.team)*(c.x-FW/2);
@@ -15706,7 +15706,7 @@
   let skRaf=0;
   function openSkills(){ skillsOpen=true; renderSkills(); document.getElementById('skillsOverlay').classList.add('on'); skAnimate(); }
   function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
-  document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')) closeSkills(); };
+  document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')||e.target===e.currentTarget) closeSkills(); };   // (v160: or a tap outside the card)
   function renderSkills(){
     document.getElementById('skHint').innerHTML='Start on <b>SKILL</b> and draw; ahead is the way he\'s going, <b>→</b> here.<br>'
       +'Hold <b>SKILL</b> without drawing to shield the ball, or with the stick to strafe';   // (v159: the screen's buttons, on any device)
@@ -18407,16 +18407,19 @@
   function ldgRows(W,bNow){ const L=Object.assign({},W.L), known=Object.values(L).reduce((a,v)=>a+v,0), rest=Math.round(bNow-W.b0-known); if(rest) L.other=(L.other||0)+rest;
     return Object.keys(LDG_NAME).filter(k=>L[k]).map(k=>'<div class="ldgRow"><span>'+LDG_NAME[k]+'</span><b style="color:'+(L[k]>=0?'var(--good)':'var(--bad)')+'">'+(L[k]>=0?'+':'')+money(L[k])+'</b></div>').join('')
       +'<div class="ldgRow tot"><span>From '+money(W.b0)+' to</span><b>'+money(bNow)+'</b></div>'; }
+  // (v160: its lines are a middle that pages -- ◀ 1 / 3 ▶ -- between the title and BACK, as every card's are. They
+  // were the card's own, and on a phone held sideways three weeks of them ran 300 px past the foot of the screen, BACK
+  // with them: the card couldn't be left. And a tap anywhere outside the card closes it, as BACK does.)
   function ldgShow(d){ const W=ldgCur(d), f=computeFinance(d), card=document.querySelector('#ldgModal .ldgCard'), pre=d.phase==='summer'||d.phase==='winter';
-    let h='<div class="pauseTitle">THE WEEK’S MONEY</div><div class="ldgSect">THIS WEEK SO FAR · WEEK '+(d.weeks||0)+'</div>'+ldgRows(W,Math.round(d.budget));
+    let h='<div class="pauseTitle">THE WEEK’S MONEY</div><div class="pScroll ldgMid" data-pages="ldg"><div class="ldgSect">THIS WEEK SO FAR · WEEK '+(d.weeks||0)+'</div>'+ldgRows(W,Math.round(d.budget));
     if(d.wlPrev) h+='<div class="ldgSect">LAST WEEK</div>'+ldgRows(d.wlPrev,d.wlPrev.b1);
     const half=Math.round((f.homeGate+f.awayGate)/2), row=(l,v)=>'<div class="ldgRow"><span>'+l+'</span><b>'+(v>=0?'+':'')+money(v)+'</b></div>';
     h+='<div class="ldgSect">A LEAGUE WEEK, PROJECTED</div>'+row('Partners',f.sponsorWk)+row('The TV',f.broadcastWk)+(f.commercialWk?row('Sponsors',f.commercialWk):'')+row('Shirt sales',f.shirtWk)
       +row('The gate (home '+money(f.homeGate)+', away '+money(f.awayGate)+', half each)',half)+row('Wages',-f.wageWk)+'<div class="ldgRow tot"><span>Net</span><b>'+(f.netAvg>=0?'+':'')+money(f.netAvg)+'</b></div>'
       +(pre?'<div class="ldgNote">Pre-season: no games, so no gate, TV, partners’ money or wages till the league starts -- only the shirts come in.</div>':'')
-      +'<div class="cfBtns"><button class="pauseBtn" data-ldg="close">◀ BACK</button></div>';
-    card.innerHTML=h; document.getElementById('ldgModal').classList.add('on'); }
-  document.getElementById('ldgModal').addEventListener('click',e=>{ if(e.target.closest('[data-ldg="close"]')) document.getElementById('ldgModal').classList.remove('on'); });
+      +'</div><div class="cfBtns"><button class="pauseBtn" data-ldg="close">◀ BACK</button></div>';
+    fitForget('ldg'); card.innerHTML=h; document.getElementById('ldgModal').classList.add('on'); }   // (each time from its first page)
+  document.getElementById('ldgModal').addEventListener('click',e=>{ if(e.target===e.currentTarget||e.target.closest('[data-ldg="close"]')) document.getElementById('ldgModal').classList.remove('on'); });
   // a week of the season: the pool, the gate (home or away) and any TV bump in, the wages out. -> what it came to
   function applyWeek(d, mine){
     const f=computeFinance(d), fh=mine&&mine.home?computeFinance(d,mine):null;   // (a home game: its own crowd -- a derby every fan, a big game more: THE TURNOUT)
