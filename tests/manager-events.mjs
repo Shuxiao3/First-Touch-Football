@@ -128,7 +128,7 @@ await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); return 1; })()`);
 r = await K(`(()=>{ const d=CAREER.data; return { back:pileLeft(d).filter(x=>x.k==='loanback').map(x=>pileBody(d,x)[0]), rival:d.div[d.tier].includes(d.rival) }; })()`);
 ok(r.back.length === 1 && /is back from his loan at /.test(r.back[0]) && r.rival, 'the new season\'s first papers: "' + r.back[0] + '"; and a rival in the league you\'re in now');
 // the market: LOAN HIM on another club's man; the papers' loan calls
-r = await K(`(()=>{ const d=CAREER.data, R=Math.random; Math.random=()=>0.01; const L=wkLoans(d); Math.random=R; d.wday='mon'; pileBuild(d,{dev:null, loans:L}); d.pile.opened=false; renderHub(); pileShow(d,true);
+r = await K(`(()=>{ const d=CAREER.data, R=Math.random; d.budget=Math.max(d.budget,20e6); Math.random=()=>0.01; const L=wkLoans(d); Math.random=R; d.wday='mon'; pileBuild(d,{dev:null, loans:L}); d.pile.opened=false; renderHub(); pileShow(d,true);   // (v150: the money for a loan's fee
   return L.map(x=>x.k).join(' '); })()`);
 await page.waitForTimeout(120);
 let loanTxt = '';
@@ -136,7 +136,7 @@ for(let i = 0; i < 14 && await on('pileModal'); i++){ const t = await page.inner
 const n0 = await K('CAREER.data.roster.length');
 if(loanTxt) await page.click('#pileModal [data-pile="loanin"]'); await page.waitForTimeout(80);
 const n1 = await K('CAREER.data.roster.length');
-ok(/loanin/.test(r) && /you pay \d+% of his wage/.test(loanTxt) && n1 === n0 + 1, 'the papers: a club will lend you a man ("' + loanTxt.split('\n')[1] + '"), and TAKE HIM brings him in');
+ok(/loanin/.test(r) && /\$[\d,]+ up front, and \d+% of his wage/.test(loanTxt) && n1 === n0 + 1, 'the papers: a club will lend you a man ("' + loanTxt.split('\n')[1] + '") -- v150: for a fee up front and a share of his wage -- and TAKE HIM brings him in');
 await K('pileHide()');
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2), e8=mgEight(c.players), p=c.players.find(x=>!e8.includes(x)&&x.role!=='GK'&&!mgLoanWhy(d,x,c));
   mgSide='deal'; curTab.market='Search'; openBuilding('market'); MGUI.sel=p.id; MGUI.tier=c.tier; paintBuilding(); window.__ask=p.id; return p.name; })()`);   // (the card's deal side: OFFER, LOAN HIM)

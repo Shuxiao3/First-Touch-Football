@@ -91,7 +91,7 @@ r = await K(`(()=>{ const d=CAREER.data; d.roster=d.roster.filter(p=>!p.hometown
   return { b0, b1:Math.round(d.budget), pos:mgPos(d) }; })()`);
 const net = r.b1 - r.b0;
 info('the first season: ' + JSON.stringify(r));
-ok(net >= 1.35e6 && net <= 2.7e6, 'a new club\'s first season, no transfers: +$' + M(net) + 'M (' + r.pos + 'th) -- the change list reckons about $1.8M');
+ok(net >= 1.35e6 && net <= 3.3e6, 'a new club\'s first season, no transfers: +$' + M(net) + 'M (' + r.pos + 'th) -- the change list reckons about $1.8M; where it finishes moves it ($1.8M 14th to $2.9M 9th, measured: the TV and the prize go by the table)');
 
 // --- A CAREER KEPT FROM BEFORE: put into the new money, once ------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=JSON.parse(JSON.stringify(CAREER.data)), W=d.world, p=d.roster[0], c=mgAiClubs(d).find(c=>c.tier===4), coach={id:99,k:'tec',r:5,wage:250};

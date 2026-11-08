@@ -1455,14 +1455,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       his form, the side's mood pulling at his, and his resilience bringing him back to settled; the side by its
       men's. Promotion, a title or a cup lifts it; going down sinks it.
     - **What it does**: on match day (that game only, played or simulated) high morale is a little more stamina and
-      composure (+0.5, +1 at the very top); low, less of those and of his reading of the game (-0.5, -1.5 at rock
-      bottom). In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
+      composure (+0.5 at 8, +1 at 9.5 and over); low, less of those and of his reading of the game (-0.5 at 3.5, -1.5
+      at 1.5 and under). Since v150 every point either side of 6.5 counts, along lines through those: +0.17 at 7, +0.83
+      at 9, -0.25 at 5, -0.42 at 4 (a midfielder at 4 rates two points under himself, at 9 one over). Before, nothing at
+      all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once. In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
       unhappy, ambitious man asks to leave: the news says so, clubs bid for him as if he were listed, and he won't
-      renew till he's settled. Putting a man on the transfer list upsets him; a new deal lifts him.
+      renew till he's settled. So does an ambitious man (Ambition 7 or more) turned down twice for a new deal -- NOT
+      NOW, or left waiting till he stops asking (v150); one who isn't sulks a point each time, and a new deal forgets
+      the noes. Putting a man on the transfer list upsets him; a new deal lifts him.
     - **The captain and his vice**: the side's strongest leaders (charisma, with a little for experience) till you
       name them on the DEAL side of a man's card (ARMBAND: C or VC). Named, he's lifted; an ambitious senior passed
       over minds. (C) and (VC) by their names.
-    - **A word with him** (v103; v70's check-ins before): in the Monday papers (below), the two unhappiest men who
+    - **A word with him** (v103; v70's check-ins before; v150: once a week -- a second word the same week, "You've spoken
+      to him this week", does nothing. It lifted him every time, so his mood was yours to pump): in the Monday papers (below), the two unhappiest men who
       aren't asking for something else each ask for a word. TALK TO HIM and it says how he's feeling and why (wants
       more games, his form, the results, his contract...), his fitness, the coaches' word on how he's coming on, and
       brings out a trait; it lifts him a little, more if he's low.
@@ -1531,7 +1536,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Loans**, in the transfer window: a club wants one of your fringe men (out of your nine, 24 or under or
       not happy) to the end of the season and pays his wages -- LET HIM GO and he plays there and comes back when the
       season's over; or lends you one of theirs out of their nine for a share of his wage (30% to all of it, the
-      better he is to them the more) -- TAKE HIM. LOAN HIM on another club's man in the market asks for one yourself
+      better he is to them the more; v150: at least 60% for a man who'd walk into your nine) and a fee up front, an
+      eighth of what he's worth (v150: before, only the wage share -- a season of a man on loan cost 4% to 7% of a
+      season's buying, his club's price and his wage, in the runs measured; it's 16% to 22% now) -- TAKE HIM. The same fee comes to you for a
+      man of yours a club takes on loan. LOAN HIM on another club's man in the market asks for one yourself
       (a man out of their nine, the window open, room in your squad). A man on loan isn't his club's to sell,
       release, renew or lend again till he's back, and nobody bids for him (the transfer list says who of yours is
       out on loan, and doesn't list the man you have on loan; his card says ON LOAN). Everyone goes back at the
@@ -1907,7 +1915,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       | ...League 1 | ~$10M | $9.1M |
       | ...the Championship | ~$38M | $33.7M |
       | ...the Premium League | ~$162M | $140.6M |
-      | A new club's first season, no transfers (four runs) | ~$1.8M | $1.8M to $2.3M |
+      | A new club's first season, no transfers (six runs) | ~$1.8M | $1.8M (14th) to $2.9M (9th): the TV and the prize go by the table |
       | The computer clubs' paid moves, two seasons | every band | 47, three of men rated 85+ in the Premium League ($65M on average, $90.5M the most) |
 
       (Before, a mid-table club made $13,000 a season in League 2 and $5.6M in the Premium League, and a new club
@@ -1919,6 +1927,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       times; what's asked, bid or owed for a man as his worth went; the bank 22 times (a club's weeks of income in hand
       as they were); the computer clubs' money as their league's budgets went; the sponsors' fees as the firms' went;
       your seat prices as the going rate went.
+    - **The board's limit (v150).** What the board lets the club owe -- about two weeks' income: $150,000 in League 2,
+      $1M in League 1, $3M in the Championship, $15M in the Premium League -- is read at last (it was set, and nothing
+      looked at it). Over it, nothing is bought: no signings, no loans, no building or decorating ("The board won't let
+      you spend"), and THE BOARD says how far over on the hub. Still over it when the season ends, prize money and all,
+      and the board sells your most valuable man -- never the hometown hero -- for what he's worth, to the club near
+      his level with the most to spend. In the red but inside the limit, buying waits, as it always did. And a squad
+      that falls under thirteen (or has no keeper) is topped up by the board to thirteen, no more, with free agents to
+      make up the numbers: about nine under the league's level (it was five, as good as the squad they were making up).
     - **Tickets (v108).** The going rate for a seat is $25 in League 2, $30 in League 1, $40 in the Championship and $60
       in the Premium League (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
       $14), and a new career starts on it. With the
@@ -2355,6 +2371,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v150: the board's limit, loans, deals and moods.** What the board lets the club owe (about two weeks' income: $150,000
+  in League 2) is read at last: over it, no signings, loans or building and a word on the hub, and still over it at the
+  season's end the board sells your most valuable man (never the hometown hero); a short squad is topped up to thirteen
+  with men to make up the numbers. A loan costs an eighth of a man's worth up front. An ambitious man turned down twice
+  for a new deal asks to leave. A man's mood counts at every point either side of 6.5, with no dead zone. A word with a
+  man once a week. See **The board's limit (v150)**, **Loans** and **Morale**.
 - **v149: the real game's money.** A man's worth as the real market has it: $150,000 for a midfielder of 55 in his
   prime, $19M for a striker of 79, $169M for one of 90, and never over the most the real game has paid for his position
   ($200M a striker, $70M a keeper); a wage $2,000 a week at 55, $69,000 at 79, $627,000 at 94. The TV, the partners, the

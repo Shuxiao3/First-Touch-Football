@@ -16329,7 +16329,13 @@
   const MOR0=6.5;
   const morWord=m=>m>=8.5?'Delighted':m>=7?'Content':m>=5.5?'Settled':m>=4?'Unsettled':'Unhappy';
   const tmWord=m=>m>=8?'buoyant':m>=6.5?'in good heart':m>=5?'settled':m>=3.5?'uneasy':'low';
-  function morDeltas(m){ m=m??MOR0; return m>=9.5?{stamina:1,composure:1}:m>=8?{stamina:0.5,composure:0.5}:m<=1.5?{stamina:-1.5,composure:-1.5,offIQ:-1.5,defIQ:-1.5}:m<=3.5?{stamina:-0.5,composure:-0.5,offIQ:-0.5,defIQ:-0.5}:null; }
+  // A MAN'S MOOD ON THE PITCH (v150: a dial, not a cliff): every point of it either side of 6.5 counts, along lines through
+  // what it always came to at the steps -- up, his stamina and composure, +0.5 at 8 and +1 at 9.5 and over (+0.17 at 7,
+  // +0.83 at 9); down, those and his reading of the game both ways, -0.5 at 3.5 and -1.5 at 1.5 and under (-0.25 at 5,
+  // -0.42 at 4). Before, nothing at all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once
+  function morDeltas(m){ m=m??MOR0; if(Math.abs(m-6.5)<0.005) return null;
+    if(m>6.5){ const v=m>=9.5?1:m>=8?0.5+0.5*(m-8)/1.5:0.5*(m-6.5)/1.5; return {stamina:v,composure:v}; }
+    const v=m<=1.5?-1.5:m<=3.5?-0.5-(3.5-m)*0.5:-0.5*(6.5-m)/3; return {stamina:v,composure:v,offIQ:v,defIQ:v}; }
   function morStats(p,st){ const dl=morDeltas(p.mor); if(!dl) return Object.assign({},st); const o=Object.assign({},st); for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10); return o; }
   const morOvr=p=>{ const dl=morDeltas(p.mor); if(!dl) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st))-cwOverall(p.role,st); };
   // how far a man's mood moves: his temperament (the calm least, the hot-headed most)
@@ -16378,7 +16384,11 @@
   // how he's coming on, and a little more of his character; it lifts him a little (more if he needs it) -> the lines
   function mgWhy(d,p){ const h=hvOf(p), m=p.mor??MOR0, lu=ensureLineup(d), inXI=[lu.gk,...lu.atk].some(ri=>d.roster[ri]===p);
     return p.wantsOut?'wants to leave':p.inj?'hates being injured':m<5.5&&!inXI&&h.am>=6?'wants more games':(p.fm??FORM_BASE)<5.8?'his form gets to him':(d.tm??MOR0)<4.5?'results get to him':(p.until||0)<=d.season?'his contract':m>=7?'loving his football':m<5.5?'something on his mind':'all’s well'; }
-  function mgTalk(d,p){ const m=p.mor??MOR0, why=mgWhy(d,p), ld=p.ld??0, coach=ld>=1.2?'Sharp in training':ld<=-0.6?'Off the pace in training':'Steady in training';
+  // (v150: once a week -- a second word the same week does nothing: "You've spoken to him this week". It lifted him every
+  // time, so his mood was yours to pump)
+  const TALK_AGAIN='You’ve spoken to him this week.', talkedThisWeek=(d,p)=>p.talkWk!=null&&p.talkWk===(d.weeks||0);
+  function mgTalk(d,p){ if(talkedThisWeek(d,p)) return [TALK_AGAIN];
+    p.talkWk=d.weeks||0; const m=p.mor??MOR0, why=mgWhy(d,p), ld=p.ld??0, coach=ld>=1.2?'Sharp in training':ld<=-0.6?'Off the pace in training':'Steady in training';
     const tr=traitsOf(p,d), known=p.kt||0; let trait=null; if(known<tr.length){ p.kt=known+1; trait=tr[known]; }
     p.mor=clamp(Math.round((m+(m<4?0.8:0.3))*100)/100,1,10);
     return [morWord(m)+' · '+why, p.inj?'Injured · '+injWeeks(p.inj.d)+' to go':'Fitness '+Math.round(condOf(p)*100)+'%', coach].concat(trait?['✓ '+trait.n]:[]); }
@@ -16892,7 +16902,12 @@
   // better he is to them, the more: mgLoanShare). Offers come in the Monday papers both ways; LOAN HIM on another club's
   // man in the market asks for one. A man on loan isn't his club's to sell, release, renew or lend again till he's back,
   // and nobody bids for him; everyone goes back at the season's end (mgLoansHome).
-  function mgLoanShare(d,p,c){ return clamp(Math.round((0.45+0.05*(p.ovr-MG_LEVEL[c.tier]))*20)/20,0.3,1); }
+  function mgLoanShare(d,p,c){ let sh=clamp(Math.round((0.45+0.05*(p.ovr-MG_LEVEL[c.tier]))*20)/20,0.3,1);
+    if(c.id!==d.clubId&&!d.roster.includes(p)){ const nine=mgEight(d.roster), worst=nine.length?Math.min(...nine.map(q=>q.ovr)):0; if(p.ovr>worst) sh=Math.max(sh,0.6); }   // (v150: one who'd walk into your nine: at least 60% of his wage)
+    return sh; }
+  // A LOAN'S FEE (v150): an eighth of what he's worth, to the club that has him, paid the day he goes (it was only a share
+  // of his wage, so a season's loan cost about a seventh of a season's buying -- the fee and his wages)
+  const LOAN_FEE=0.125, mgLoanFee=(d,p)=>mgRound(mgValue(d,p)*LOAN_FEE);
   function mgLoanWhy(d,p,c,xi){ if(!mgWindowOpen(d)) return 'The transfer window is shut.'; if(!lvOf(d,'market')) return 'You’re not on the transfer market yet.';
     if(!c||c.id===d.clubId) return 'He isn’t at another club.'; if(p.loan) return p.loan.from===d.clubId?'He’s yours: on loan at '+c.name+'.':'He’s on loan there himself.';
     if(d.roster.length>=MG_MAX) return 'Your squad is full ('+MG_MAX+' players).'; if(c.players.length<=MG_MIN+1) return c.name+' are short of players.';
@@ -16900,15 +16915,18 @@
     if(p.role==='GK'&&c.players.filter(x=>x.role==='GK').length<=2) return c.name+' won’t lend a keeper.';
     return mgWontCome(d,p)||null; }
   function mgLoanIn(d,pid,share){ const f=mgFind(d,pid); if(!f||!f.club||f.mine) return 'He has gone.'; const c=f.club, p=f.p, why=mgLoanWhy(d,p,c); if(why) return why;
-    share=share??mgLoanShare(d,p,c); c.players.splice(c.players.indexOf(p),1); p.loan={from:c.id, until:d.season, share, wage:p.wage}; p.wage=mgRound(p.wage*share);
+    const fee=mgLoanFee(d,p); if(debtOver(d)) return BOARD_NO; if(fee>d.budget) return 'His loan costs '+money(fee)+' up front.';   // (v150: A LOAN'S FEE)
+    d.budget-=fee; c.budget=(c.budget||0)+fee; d.inRed=d.budget<0;
+    share=share??mgLoanShare(d,p,c); c.players.splice(c.players.indexOf(p),1); p.loan={from:c.id, until:d.season, share, wage:p.wage, fee}; p.wage=mgRound(p.wage*share);
     mgRosterAdd(d,p); d.bids=(d.bids||[]).filter(b=>b.pid!==pid);
-    mgNews(d,p.name+' joins '+d.clubName+' on loan from '+c.name+' to the end of the season.'); careerEv(d,p,'On loan at '+clubCode(d,d.clubId)); return null; }
+    mgNews(d,p.name+' joins '+d.clubName+' on loan from '+c.name+' to the end of the season, for '+money(fee)+'.'); careerEv(d,p,'On loan at '+clubCode(d,d.clubId)); return null; }
   function mgLoanOut(d,pid,cid){ const i=d.roster.findIndex(p=>p.id===pid), c=d.world.clubs[cid]; if(i<0||!c) return 'He has gone.'; const p=d.roster[i];
     if(p.hometown) return HOME_MSG;   // (v149: HOME TO STAY)
     if(!mgWindowOpen(d)) return 'The transfer window is shut.'; const why=mgCanLose(d,i); if(why) return why; if(c.players.length>=MG_MAX) return c.name+'’s squad is full.';
-    mgRosterRemove(d,i); p.loan={from:d.clubId, to:c.id, until:d.season}; p.mor=clamp(Math.round(((p.mor??MOR0)+(hvOf(p).am>=6?0.8:0.3))*100)/100,1,10);
+    const fee=Math.min(mgLoanFee(d,p),Math.max(0,c.budget||0)); d.budget+=fee; c.budget=(c.budget||0)-fee; d.inRed=d.budget<0;   // (v150: their fee to you)
+    mgRosterRemove(d,i); p.loan={from:d.clubId, to:c.id, until:d.season, fee}; p.mor=clamp(Math.round(((p.mor??MOR0)+(hvOf(p).am>=6?0.8:0.3))*100)/100,1,10);
     p.num=0; mgNumber(c.players,p); c.players.push(p); delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
-    mgNews(d,p.name+' goes on loan to '+c.name+' to the end of the season.'); careerEv(d,p,'On loan at '+(c.code||c.name)); return null; }
+    mgNews(d,p.name+' goes on loan to '+c.name+' to the end of the season'+(fee?', for '+money(fee):'')+'.'); careerEv(d,p,'On loan at '+(c.code||c.name)); return null; }
   // the season's over: everyone on loan goes back where he came from (yours with his games there, for the papers)
   function mgLoansHome(d,R){ R.loans=[];
     for(let i=d.roster.length-1;i>=0;i--){ const p=d.roster[i]; if(!p.loan) continue; const c=d.world.clubs[p.loan.from]; mgRosterRemove(d,i); p.wage=p.loan.wage||p.wage; delete p.loan;
@@ -17414,7 +17432,7 @@
         B.push(['LET HIM GO','loanout'],['NO','next']); later(); return [mgEsc(c.name)+' ('+LG_SHORT[c.tier]+') want '+mgEsc(p.name)+' on loan',L,B]; }
       case 'loanin': { const f=mgFind(d,x.pid), p=f.p, c=f.club;
         L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · '+(mgKnown(d,p)?'rated '+p.ovr:'rated '+mgRange(d,p).join('–')));
-        L.push('To the end of the season: you pay '+Math.round(x.share*100)+'% of his wage, <b>'+money(mgRound(p.wage*x.share))+' a week</b>.');
+        L.push('To the end of the season: <b>'+money(mgLoanFee(d,p))+'</b> up front, and '+Math.round(x.share*100)+'% of his wage, <b>'+money(mgRound(p.wage*x.share))+' a week</b>.');
         B.push(['TAKE HIM','loanin'],['NO THANKS','next']); later(); return [mgEsc(c.name)+' will lend you '+mgEsc(p.name),L,B]; }
       case 'loanback': { const p=d.roster.find(q=>q.id===x.pid); L.push(x.apps+' game'+(x.apps===1?'':'s')+', '+x.goals+' goal'+(x.goals===1?'':'s')+' there.'); next();
         return [(p?mgEsc(p.name):'He')+' is back from his loan at '+mgEsc(x.club),L,B]; }
@@ -17630,6 +17648,7 @@
     R.result=pos===1?(d.tier===4?'CHAMPIONS':'CHAMPIONS — PROMOTED'):up?(pos<=2?'PROMOTED':'PROMOTED IN THE PLAYOFFS'):down?'RELEGATED'
             :d.tier===4?(pos===2?'RUNNERS-UP':pos<=6?'TOP SIX':'STAYED UP'):(pos<=6?'LOST IN THE PLAYOFFS':'STAYED UP');
     R.prize=mgRound(MG_PRIZE[d.tier]*Math.pow((MG_CLUBS+1-pos)/MG_CLUBS,1.6)); d.budget+=R.prize; dealBonuses(d,R);
+    R.boardSold=boardSale(d);   // (v150: over THE BOARD'S LIMIT still, prize and all: your most valuable man sold)
     for(const t of [1,2,3,4]) R.moves[t].table.forEach((id,i)=>{ const c=d.world.clubs[id]; if(c&&id!==d.clubId) c.budget+=mgRound(MG_PRIZE[t]*Math.pow((MG_CLUBS-i)/MG_CLUBS,1.6)); });
     const M=d.manager; M.history.push({season:d.season,club:d.clubName,tier:d.tier,pos,result:R.result}); if(pos===1) M.titles++; if(up) M.promotions++;
     const top=d.roster.slice().sort((a,b)=>(b.goals||0)-(a.goals||0))[0]; if(top&&top.goals) R.topScorer={name:top.name,goals:top.goals};
@@ -17673,12 +17692,14 @@
       const fa=d.world.free.filter(p=>p.role===role&&(role==='GK'||natPos(p)===sub)&&Math.abs(mgLevelTier(p.ovr)-c.tier)<=1&&p.ovr>=lvl-10).sort((a,b)=>b.ovr-a.ovr)[0];
       let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=17+Math.floor(Math.random()*5); p=mgNewPlayer(d,role,mgAgeOvr(lvl-1+mgGauss()*3.2,age),age,{sub}); }   // (a youngster with the league's prime in him, give or take: as the world began)
       p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); } }
-  // never short: under thirteen men (or with no keeper) the board signs free agents on one-year deals
+  // never short: under thirteen men (or with no keeper) the board signs free agents on one-year deals -- to thirteen and
+  // no more, and (v150) men to make up the numbers, about nine under the league's level (it was five: as good as the
+  // squad it was making up, near enough)
   function mgTopUpYours(d){ const lvl=MG_LEVEL[d.tier];
     while(d.roster.length<MG_MIN||!d.roster.some(p=>p.role==='GK')){
       const role=d.roster.some(p=>p.role==='GK')?mgNeedRole(d.roster):'GK';
-      const fa=d.world.free.filter(p=>p.role===role&&mgLevelTier(p.ovr)<=d.tier).sort((a,b)=>Math.abs(a.ovr-(lvl-5))-Math.abs(b.ovr-(lvl-5)))[0];
-      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=19+Math.floor(Math.random()*12); p=mgNewPlayer(d,role,mgAgeOvr(lvl-6+mgGauss()*2,age),age); }
+      const fa=d.world.free.filter(p=>p.role===role&&mgLevelTier(p.ovr)<=d.tier&&p.ovr<=lvl-6).sort((a,b)=>Math.abs(a.ovr-(lvl-9))-Math.abs(b.ovr-(lvl-9)))[0];
+      let p=fa; if(fa) d.world.free.splice(d.world.free.indexOf(fa),1); else { const age=19+Math.floor(Math.random()*12); p=mgNewPlayer(d,role,mgAgeOvr(lvl-9+mgGauss()*2,age),age); }
       p.until=d.season; p.wage=mgRound(mgWage(p.ovr)); mgRosterAdd(d,p);
       mgNews(d,'The board signed '+p.name+' ('+p.role+', '+p.ovr+') on a one-year deal to make up the numbers.'); } }
   function mgYouthIntake(d){ const L=Math.max(1,lvOf(d,'academy')), n=2+L; d.youth=d.youth||[]; let got=0;
@@ -17927,7 +17948,7 @@
     if(p.loan) return p.name+' is on loan: his contract is '+mgNameOf(d,p.loan.from)+'’s.';
     if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
     const ask=mgRenewWage(d,p), w=wage!=null?Math.min(mgRound(wage),ask):ask;   // (v110: what was agreed in talks, never over his ask; less pleased under it)
-    p.wage=w; p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5)*(w<ask?0.5:1),1,10); delete p.cAsk; delete p.cTalk; delete p.cGo;
+    p.wage=w; p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5)*(w<ask?0.5:1),1,10); delete p.cAsk; delete p.cTalk; delete p.cGo; delete p.cRef;   // (v150: a new deal forgets the noes)
     mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
   // A MAN WHO'S COME ON (v83): a wage is set by how good a man is when he signs, and it stays put. Once he's worth a good
   // deal more than he's paid -- what he'd get now 30% over it, more for the young and less in his prime or after a fine
@@ -17940,7 +17961,7 @@
       const mkt=mgMarketWage(d,p), P=cPush(d,p), want=mgRenewWage(d,p);
       if(p.cAsk){ if(mkt<p.wage*1.15){ delete p.cAsk; continue; } p.cAsk.wage=want;
         if((d.weeks||0)-p.cAsk.wk>=3){ p.cAsk.wk=d.weeks||0; p.cAsk.n=(p.cAsk.n||0)+1; p.mor=clamp((p.mor??MOR0)-1,1,10);
-          if(p.cAsk.n>=2){ delete p.cAsk; p.cNot=(d.weeks||0)+8; mgNews(d,p.name+' has stopped asking for a new deal. He won’t forget it.'); }
+          if(p.cAsk.n>=2){ delete p.cAsk; p.cNot=(d.weeks||0)+8; if(!cRefused(d,p)) mgNews(d,p.name+' has stopped asking for a new deal. He won’t forget it.'); }
           else mgNews(d,p.name+' is still waiting for a new deal, and he isn’t happy.'); }
         continue; }
       if(p.cNot&&(d.weeks||0)<p.cNot) continue;
@@ -17948,7 +17969,13 @@
       if(mgLeft(d,p)>=2&&mkt>=p.wage*P.at){ p.cAsk={wage:want,wk:d.weeks||0};
         mgNews(d,p.name+(P.form>=0.5?' has had a fine season, and wants a new deal: ':P.young?' has come on, and would like a new deal: ':P.prime?' knows what he’s worth now, and wants a new deal: ':' has come on a lot, and wants a new deal: ')+money(want)+' a week.'); } } }
   function mgContractNo(d,pid){ const p=d.roster.find(x=>x.id===pid); if(!p||!p.cAsk) return 'He isn’t asking.';
-    delete p.cAsk; delete p.cTalk; p.cNot=(d.weeks||0)+8; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' is told he’ll have to wait for a new deal.'); return null; }
+    delete p.cAsk; delete p.cTalk; p.cNot=(d.weeks||0)+8; if(cRefused(d,p)) return null; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' is told he’ll have to wait for a new deal.'); return null; }
+  // TURNED DOWN TWICE (v150): a man who's come on asks for what he's worth; told no -- NOT NOW, or left waiting till he
+  // stops asking -- a second time, an ambitious one (Ambition 7 or more) asks to leave instead of sulking another point:
+  // he won't sign again, and he's on the market as if listed. A new deal forgets the noes. -> true if he's asked out
+  function cRefused(d,p){ p.cRef=(p.cRef||0)+1;
+    if(p.cRef<2||p.hometown||p.wantsOut||hvOf(p).am<7) return false;
+    p.wantsOut=true; p.mor=clamp((p.mor??MOR0)-1,1,10); mgNews(d,p.name+' wants to leave '+d.clubName+': twice he asked for what he’s worth, and twice he was told no.'); return true; }
   // CONTRACT TALKS (v110): offer a man less than he asks (OR OFFER, a step at a time down from his ask), or a longer deal
   // for less. The least he'd take (cFloor) is his ask less his give: the young the most (15% at 20 or under, 10% at 21
   // and 22), anyone else 5%, a fine season taking up to 3 points off it; a Loyal Servant gives 5 more, the Highly
@@ -18068,6 +18095,19 @@
   function broadcastFor(d){ const base=TIER_BROADCAST[d.tier]||TIER_BROADCAST[1], pos=d.lg?mgPos(d):0;
     return Math.round(base*(pos>0?1+(MG_CLUBS-pos)/MG_CLUBS*0.8:1)); }
   function money(n){ n=Math.round(n||0); return (n<0?'-$':'$')+Math.abs(n).toLocaleString(); }
+  // THE BOARD'S LIMIT (v150): what it lets the club owe (FIN_TIER's debtLimit: about two weeks' income), read at last --
+  // it was there, and nothing ever looked at it. Over it: no signings, loans or building, and a word from the board on the
+  // hub; still over it when the season ends, and the board sells your most valuable man (never the hometown hero) to
+  // the club that'll pay most for him. (In the red but inside it, buying waits, as it always did)
+  const debtLimitOf=d=>(FIN_TIER[d.tier]||FIN_TIER[1]).debtLimit, debtOver=d=>(d.budget||0)< -debtLimitOf(d);
+  const BOARD_NO='The board won’t let you spend: you’re over what it lets the club owe.';
+  function boardSale(d){ if(!debtOver(d)) return null;
+    const L=d.roster.filter(p=>!p.hometown&&!p.loan).sort((a,b)=>mgValue(d,b)-mgValue(d,a)), p=L[0]; if(!p||d.roster.length<=MG_MIN) return null;
+    const fee=mgValue(d,p), lt=mgLevelTier(p.ovr), C=mgAiClubs(d).filter(c=>Math.abs(c.tier-lt)<=1&&c.players.length<MG_MAX).sort((a,b)=>b.budget-a.budget), c=C[0]; if(!c) return null;
+    const i=d.roster.indexOf(p); mgRosterRemove(d,i); d.budget+=fee; c.budget-=fee; d.inRed=d.budget<0; if(d.listed) delete d.listed[p.id]; d.offers=(d.offers||[]).filter(o=>o.pid!==p.id);
+    p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); recFee(d,'fs',p,fee);
+    mgNews(d,'The board has sold '+p.name+' to '+c.name+' for '+money(fee)+': the club owed more than it would stand for.'); careerEv(d,p,'Sold to '+(c.code||c.name));
+    return {name:p.name, club:c.name, fee}; }
   // ===== POPULARITY (v105) ===============================================================================================
   // Every man has a popularity, 1-99: how much the fans think of him -- on his card. It comes of how good he is against
   // his league (2.5 a point either side of its level), his season -- goals, assists, a defender's or keeper's clean
@@ -18380,7 +18420,7 @@
       mgNews(d,x.sp.name+'’s deal for '+SP_PLACE[k]+' has run out'+(k==='ground'?': the ground is '+groundDefault(d.clubName)+' again':'')+'.'); } }
     S.ads=S.ads.filter(a=>{ if(a.until>=d.season) return true; gone.push({k:'board',name:a.sp.name}); mgNews(d,a.sp.name+'’s board has come down: their deal has run out.'); return false; }); }
   function boardBuy(d){ stadOf(d); return 'The boards come with the stands: a bigger ground has more.'; }
-  function stadUpgrade(d){ const S=stadOf(d); if(S.lvl>=STAD_MAX) return 'It can’t get any bigger.'; const nx=STAD_LEVELS[S.lvl+1];
+  function stadUpgrade(d){ const S=stadOf(d); if(S.lvl>=STAD_MAX) return 'It can’t get any bigger.'; const nx=STAD_LEVELS[S.lvl+1]; if(debtOver(d)) return BOARD_NO;   // (v150)
     if(lvOf(d,'club')<STAD_CL[S.lvl+1]) return 'That needs clubhouse '+STAD_CL[S.lvl+1]+' ('+CLUB_LV[STAD_CL[S.lvl+1]].n.toLowerCase()+').';
     if((d.budget||0)<nx.cost) return 'Not enough budget.';
     d.budget-=nx.cost; S.lvl++; d.capacity=nx.cap; S.boards=nx.boards;
@@ -19066,6 +19106,7 @@
     const c=bldCost(id,nx); if((d.budget||0)<c) return 'Not enough budget: it costs '+money(c)+'.'; return null; }
   // put a building up, or build it up a level (or move into the next clubhouse): an error, or null
   function bldUp(d,id){ if(id==='stadium') return stadUpgrade(d); if(id==='market') return lvOf(d,'market')?'It’s as good as it gets.':'It isn’t bought: your phone rings on the first day of pre-season.';
+    if(debtOver(d)) return BOARD_NO;   // (v150: THE BOARD'S LIMIT)
     const why=bldBlock(d,id); if(why) return why;
     const nx=lvOf(d,id)+1; d.budget-=bldCost(id,nx); d.lv[id]=nx;
     if(id==='academy'&&nx===1&&!(d.youth||[]).length) mgYouthIntake(d);
@@ -19319,7 +19360,7 @@
       if(!B.firm) h+=mgActRow('COUNTER',mgStep('bidstep',money(mgCounterFee(d,B)))+'<button class="mgBtn go" data-mg="counter" data-pid="'+p.id+'">COUNTER</button>');   // (HAGGLING: mgCounter)
       return h; }
     h+=mgActRow('OFFER',mgStep('bidstep',money(fee))+'<button class="mgBtn go" data-mg="bid" data-pid="'+p.id+'">BID</button>');
-    if(!mgLoanWhy(d,p,c)){ const sh=mgLoanShare(d,p,c); h+=mgActRow('OR A LOAN <b>'+money(mgRound(p.wage*sh))+'/wk</b>','<button class="mgBtn" data-mg="loanask" data-pid="'+p.id+'">LOAN HIM</button>'); }   // (LOANS: to the season's end, a share of his wage)
+    if(!mgLoanWhy(d,p,c)){ const sh=mgLoanShare(d,p,c); h+=mgActRow('OR A LOAN <b>'+money(mgLoanFee(d,p))+'</b> + <b>'+money(mgRound(p.wage*sh))+'/wk</b>','<button class="mgBtn" data-mg="loanask" data-pid="'+p.id+'">LOAN HIM</button>'); }   // (LOANS: to the season's end, a share of his wage)
     return h; }
 
   // ---- the office ----
@@ -19552,7 +19593,8 @@
     document.getElementById('chLoyal').textContent=Math.round(d.loyalty||0).toLocaleString();
     const nEl=document.getElementById('chNet'); nEl.textContent=(f.netAvg>=0?'+':'')+money(f.netAvg); nEl.style.color=f.netAvg>=0?'var(--good)':'var(--bad)';
     const w=[], lu=ensureLineup(d), gk=d.roster[lu.gk], bad=t=>'<span style="color:var(--bad)">'+t+'</span>', info=t=>'<span style="color:var(--warn)">'+t+'</span>';
-    if(d.budget<0) w.push(bad('IN THE RED — sell before you can buy'));
+    if(debtOver(d)) w.push(bad('THE BOARD: '+money(-d.budget-debtLimitOf(d))+' over what it lets the club owe — no signings or building, and if it’s still so at the season’s end your most valuable man is sold'));   // (v150)
+    else if(d.budget<0) w.push(bad('IN THE RED — sell before you can buy'));
     if(isDeadline(d)&&lvOf(d,'market')) w.push(info('DEADLINE DAY — the transfer window shuts tonight'));
     if(!gk||gk.role!=='GK') w.push(bad('No goalkeeper in goal — pick one in Training'));
     if((d.phase==='league'&&d.md>=MG_MD-6)||d.phase==='playoffs'){ const n=d.roster.filter(p=>(p.until||0)<=d.season).length; if(n) w.push(info(n+' contract'+(n>1?'s end':' ends')+' this season — renew in the Clubhouse')); }
