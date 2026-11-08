@@ -2173,6 +2173,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       begun building starts in the shed, keeping what it built, with its plants' money back.
   - Careers save to three slots (`ft_mgr_slot1` to `3` in `localStorage`). Careers from the old player-manager
     mode (`ft_save_*`) aren't carried over.
+    - **Old careers, brought up to date (v154).** A career saved before the season ran in weeks (save version 3
+      and older) was cleared the moment LOAD GAME or NEW GAME opened -- one update could take a player's longest
+      career. Now it's brought up to date as every career is when it's loaded, its season put on a week's Monday
+      where it was (its league and matchday kept), and tried on a copy -- its side, its next game, its money, its
+      table; it's kept if all that goes, and cleared only if it won't. LOAD GAME says which: "Brought up to date
+      from an older build: SLOT 2", or that one couldn't be.
+    - **A career to take with you (v154).** ⇩ by a saved career in LOAD GAME exports it: a line of text (the save
+      gzipped, in base64, `FTC1:` in front; `FTC0:` unzipped, where a browser can't zip) to COPY, or SAVE AS A FILE
+      (`football-classic-<club>-s<season>.ftc`). IMPORT A CAREER, under the slots, takes one back -- pasted, or
+      CHOOSE A FILE -- into the slot you pick (a slot with a career in it asks first), brought up to date and tried
+      as an old career is, and written only if it goes; anything that isn't a career is turned away. A career is
+      about 360,000 characters new, levelling off near 510,000 by its sixth season (the other clubs' 990 men are
+      nine-tenths of it); exported, about a quarter of that. Three full slots are about 1.5 million characters:
+      inside a phone browser's storage, though not by much, so a career you mean to keep is worth exporting.
 
 Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
 AI and the stats. Changes to `index.html` aren't carried over to `classic.html` automatically.
@@ -2435,6 +2449,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v154: a career kept.** A career saved before the season ran in weeks is brought up to date on opening LOAD
+  GAME, not cleared -- tried on a copy, kept if it goes, cleared only if it won't, and LOAD GAME says which. ⇩ by a
+  saved career exports it, a line of text (gzipped: about a quarter of the save) to copy or a file to keep; IMPORT A
+  CAREER takes one back, pasted or from the file, into the slot you pick. See **Old careers, brought up to date
+  (v154)** and **A career to take with you (v154)**.
 - **v153: the campus says what's waiting and what's next.** A building not open yet says what it waits for
   ("needs clubhouse 2", not a lock and "2"), the clubhouse what the next one costs, with a bar of your money against
   it; a building or a level waiting for its clubhouse has THE WAY TO IT, each clubhouse on the way in order, ticked as

@@ -179,7 +179,14 @@
   .leSize input{ width:110px; }
   .leBtn{ font:700 11px 'FTC Dot',monospace; letter-spacing:1px; color:var(--ink2); background:rgb(var(--accRGB) / .06); border:1px solid var(--well); border-radius:8px; padding:7px 10px; cursor:pointer; }
   .leDone{ color:var(--accInk); background:var(--phosphor-dim); border-color:var(--phosphor-dim); }
-  .cfCard{ max-width:430px; }
+  .cfCard{ max-width:430px; } #confirmModal{ z-index:260; }   /* (v154: a confirm's always on top -- over IMPORT A CAREER, which asks one) */
+  .ioCard{ max-width:560px; width:min(560px,94vw); } .ioTitle{ font-size:13px; letter-spacing:1px; color:var(--acc); margin-bottom:4px; }   /* (v154: A CAREER TO TAKE WITH YOU) */
+  .ioSub{ font-size:11px; color:var(--dim); line-height:1.4; margin:4px 0; } .ioMsg{ font-size:11px; min-height:14px; margin:4px 0; }
+  .ioText{ width:100%; height:min(120px,22vh); resize:none; font:10px/1.3 monospace; color:var(--ink); background:var(--well); border:1px solid var(--btnHi); border-radius:4px; padding:6px; word-break:break-all; }
+  .ioBtns{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; } .ioBtns .pauseBtn{ flex:1; min-width:96px; font-size:13px; padding:9px 8px; }
+  .ioSlots{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:10px; letter-spacing:1px; color:var(--dim); margin:6px 0 2px; }
+  .ioSlot{ font:11px 'FTC Dot',monospace; color:var(--ink); background:var(--row); border:1px solid var(--btnHi); border-radius:4px; padding:4px 8px; cursor:pointer; text-align:left; }
+  .ioSlot i{ display:block; font-style:normal; font-size:9px; color:var(--dim); } .ioSlot.on{ border-color:var(--acc); box-shadow:inset 0 0 0 1px var(--acc); }
   .cfMsg{ color:var(--ink2); font-size:13px; line-height:1.55; margin-bottom:6px; }
   .cfBtns,.mkBtns{ display:flex; gap:8px; margin-top:14px; }
   .stCard{ max-width:560px; gap:7px; }
@@ -443,6 +450,8 @@
   .mgMini{ font:inherit; font-size:10px; padding:0 5px; margin-left:3px; border:1px solid var(--line,#3a4a33); border-radius:3px; background:transparent; color:var(--ink); cursor:pointer; }
   .mgInj{ color:var(--bad); font-size:10px; margin-left:5px; font-weight:400; } .injX{ color:var(--bad); font-weight:400; margin-right:3px; }
   .ptk.inj{ opacity:.55; } .ptk.inj .ptkName::before{ content:'✚ '; color:var(--bad); } .selRow.inj{ opacity:.6; }
+  .slotEx{font-size:13px;color:var(--ink);background:var(--row);border:1px solid var(--btnHi);border-radius:6px;padding:8px 11px;cursor:pointer;}   /* (v154: export) */
+  .slotImp{margin-top:4px;}
   .slotDel{font-size:12px;color:var(--bad);background:rgb(var(--badRGB) / .1);border:1px solid #5a2a26;border-radius:6px;padding:9px 11px;cursor:pointer;}
   .smBack{margin-top:14px;min-width:248px;}
   /* exhibition setup: two clubs, the player you control */
@@ -1729,6 +1738,7 @@
     <div class="cfBtns"><button class="pauseBtn pauseBack" data-cf="no">Cancel</button><button class="pauseBtn" data-cf="yes">Confirm</button></div>
   </div>
 </div>
+<div id="ioModal" class="pauseOv"><div class="pauseCard ioCard"></div></div>
 <div id="mgrMaker" class="pauseOv"><div class="pauseCard mkCard"></div></div>
 <div id="storyModal" class="pauseOv"><div class="pauseCard stCard"></div></div>
 <div id="pileModal" class="pauseOv"><div class="pauseCard pileCard"></div></div>
@@ -15951,7 +15961,7 @@
   // after a Wednesday game, the Saturday; after Saturday's, the next Monday. The transfer window is open from the
   // first week of pre-season to the end of the winter break.
   const MG_WINDOW={summer:3, winter:1};                  // weeks: pre-season, and the winter break
-  const MG_SAVE_V=4;                                     // a career saved before the week (v3 and older) is cleared
+  const MG_SAVE_V=4;                                     // a career saved before the week (v3 and older) is brought up to date (v154: it was cleared)
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
   const MG_PRIZE={1:500000,2:3000000,3:15000000,4:60000000};   // for winning the league (less the lower you finish; v149: the real game's money -- it was 12,000, 45,000, 180,000 and 1.5M)
@@ -19100,9 +19110,69 @@
   function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;clearCharge=0;clearFeet=false;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
   function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
-  // careers saved before the week (v3 and older) are cleared -- the season runs in weeks now -- and LOAD / NEW GAME say so
-  function mgSweepOld(){ let n=0; for(const k of SAVE_ORDER){ const d=readSave(k); if(d&&d.kind==='manager'&&(d.v||0)<MG_SAVE_V){ deleteSave(k); n++; } }
-    if(n) try{ localStorage.setItem('ft_mgr_cleared','1'); }catch(e){} }
+  // OLD CAREERS, BROUGHT UP TO DATE (v154). A career saved before the season ran in weeks (v3 and older) was cleared
+  // the moment LOAD or NEW GAME opened: one update could take a player's longest career. Now it's brought up to date
+  // as every career is on loading (mgMigrate), its season put on a week's Monday where it was (mgOldShape), and tried
+  // -- its side, its next game, its money, its table (mgCheck) -- on a copy; kept if it goes, cleared only if it
+  // won't. LOAD GAME says which (the slots brought up to date, or that one couldn't be)
+  function mgOldShape(d){ const P=['summer','league','winter','playoffs','review'];
+    if(!P.includes(d.phase)){ d.md=clamp(d.md||0,0,MG_MD-1); d.phase=d.md>0?'league':'summer'; }   // (a season's part from before the week: where it was)
+    if(d.phase==='summer'&&!(d.day>=1)) d.day=1; d.md=d.md||0; d.season=d.season||1; d.tier=d.tier||1; }
+  function mgCheck(d){ if(!Array.isArray(d.roster)||!d.roster.length||!d.world||!d.world.clubs||!d.lg||!d.lg[d.tier]||!d.manager) throw new Error('not a career');
+    ensureLineup(d); mgStarters(d); mgNextGame(d); computeFinance(d); mgTable(d,d.tier); if(!(mgPos(d)>0)) throw new Error('not in its league'); return true; }
+  function mgSweepOld(){ let gone=0; const moved=[];
+    for(const label of Object.keys(SAVE_KEYS)){ const k=SAVE_KEYS[label], d=readSave(k); if(!d||d.kind!=='manager'||(d.v||0)>=MG_SAVE_V) continue;
+      try{ const c=JSON.parse(JSON.stringify(d)); mgOldShape(c); mgMigrate(c); mgCheck(c); c.from=d.v||0; c.v=MG_SAVE_V; localStorage.setItem(k,JSON.stringify(c)); moved.push(label); }
+      catch(e){ deleteSave(k); gone++; } }
+    try{ if(gone) localStorage.setItem('ft_mgr_cleared','1'); if(moved.length) localStorage.setItem('ft_mgr_moved',moved.join(',')); }catch(e){} }
+  // A CAREER TO TAKE WITH YOU (v154): EXPORT (⇩ by a saved career in LOAD GAME) turns it into a line of text -- the
+  // save, gzipped where the browser can, in base64, "FTC1:" in front (FTC0: plain) -- to copy, or a file to keep;
+  // IMPORT A CAREER takes one back, pasted or from the file, into a slot you pick: brought up to date and tried as an
+  // old career is, written only if it goes. On another device, or after clearing the browser
+  const b64=u=>{ let t=''; for(let i=0;i<u.length;i+=0x8000) t+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000)); return btoa(t); };
+  const unb64=t=>{ const r=atob(t), u=new Uint8Array(r.length); for(let i=0;i<r.length;i++) u[i]=r.charCodeAt(i); return u; };
+  async function saveToText(raw){ const u=new TextEncoder().encode(raw);
+    if(window.CompressionStream){ const z=new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); return 'FTC1:'+b64(z); }
+    return 'FTC0:'+b64(u); }
+  async function textToSave(t){ t=String(t||'').replace(/\s+/g,''); let raw;
+    if(/^FTC1:/.test(t)){ if(!window.DecompressionStream) throw new Error('This browser can’t open a compressed career.'); raw=await new Response(new Blob([unb64(t.slice(5))]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
+    else if(/^FTC0:/.test(t)) raw=new TextDecoder().decode(unb64(t.slice(5)));
+    else if(/^\{/.test(t)) raw=t; else throw new Error('That isn’t a career: it starts FTC1: or FTC0:.');
+    const d=JSON.parse(raw); if(!d||d.kind!=='manager') throw new Error('That isn’t a career.');
+    const c=JSON.parse(JSON.stringify(d)); if((c.v||0)<MG_SAVE_V) mgOldShape(c); mgMigrate(c); mgCheck(c); c.v=MG_SAVE_V; return c; }
+  const IO={};   // (the export or import being shown)
+  function ioPaint(){ const m=document.getElementById('ioModal'), card=m&&m.querySelector('.ioCard'); if(!card) return; let h;
+    if(IO.mode==='out') h='<div class="ioTitle">EXPORT · SLOT '+IO.label+'</div><div class="ioSub">'+mgEsc(IO.what)+'</div>'
+      +'<textarea class="ioText" readonly spellcheck="false">'+IO.text+'</textarea><div class="ioSub">'+IO.text.length.toLocaleString()+' characters. Paste it into IMPORT A CAREER (LOAD GAME) on another device, or keep the file.</div>'
+      +'<div class="ioBtns"><button class="pauseBtn pauseBack" data-io="close">Close</button><button class="pauseBtn" data-io="file">Save as a file</button><button class="pauseBtn" data-io="copy">Copy</button></div>';
+    else h='<div class="ioTitle">IMPORT A CAREER</div><div class="ioSub">Paste an exported career, or choose its file.</div>'
+      +'<textarea class="ioText" spellcheck="false" placeholder="FTC1:..."></textarea><input type="file" class="ioFile" accept=".ftc,.txt,.json,text/plain" hidden>'
+      +'<div class="ioSlots">INTO '+Object.keys(SAVE_KEYS).map(l=>{ const d=readSave(SAVE_KEYS[l]), ok=d&&d.kind==='manager';
+        return '<button class="ioSlot'+(IO.slot===l?' on':'')+'" data-io="slot" data-l="'+l+'">SLOT '+l+'<i>'+(ok?mgEsc(d.clubName)+' · S'+d.season:'empty')+'</i></button>'; }).join('')+'</div>'
+      +'<div class="ioMsg" style="color:'+(IO.err?'var(--bad)':'var(--good)')+'">'+mgEsc(IO.msg||'')+'</div>'
+      +'<div class="ioBtns"><button class="pauseBtn pauseBack" data-io="close">Close</button><button class="pauseBtn" data-io="pick">Choose a file</button><button class="pauseBtn" data-io="in">Import</button></div>';
+    card.innerHTML=h; }
+  async function mgExport(label){ const k=SAVE_KEYS[label], raw=localStorage.getItem(k); if(!raw) return; const d=JSON.parse(raw);
+    Object.assign(IO,{mode:'out', label, what:d.clubName+' · '+MG_LEAGUE[d.tier]+' · season '+d.season+' · '+((d.manager||{}).name||''), text:await saveToText(raw),
+      file:'football-classic-'+String(d.clubName||'career').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-s'+d.season+'.ftc'});
+    ioPaint(); document.getElementById('ioModal').classList.add('on'); }
+  function mgImportOpen(){ const empty=Object.keys(SAVE_KEYS).find(l=>!readSave(SAVE_KEYS[l]));
+    Object.assign(IO,{mode:'in', slot:empty||'1', msg:'', err:false}); ioPaint(); document.getElementById('ioModal').classList.add('on'); }
+  async function ioImport(){ const card=document.querySelector('#ioModal .ioCard'), t=card.querySelector('.ioText').value;
+    let c; try{ c=await textToSave(t); }catch(e){ IO.msg=e&&e.message&&!/JSON|Unexpected|atob|decod|base64/i.test(e.message)?e.message:'That isn’t a career, or it’s been cut short: copy all of it.'; IO.err=true; ioPaint(); card.querySelector('.ioText').value=t; return; }
+    const k=SAVE_KEYS[IO.slot], was=readSave(k), go=()=>{ c.slot='SLOT '+IO.slot; if(!writeSave(k,c)){ IO.msg='Couldn’t save it: the browser’s storage is full.'; IO.err=true; ioPaint(); return; }
+      IO.msg='Imported into SLOT '+IO.slot+': '+c.clubName+', season '+c.season+'.'; IO.err=false; ioPaint(); renderSlots('slotList',false); refreshMenuButtons(); };
+    if(was) showConfirm('SLOT '+IO.slot+' holds a career ('+(was.clubName||'')+'). Importing here deletes it for good.',go,{yes:'Replace it', danger:true}); else go(); }
+  document.addEventListener('click',async e=>{ const b=e.target.closest&&e.target.closest('#ioModal [data-io]'); if(!b) return; const m=document.getElementById('ioModal'), card=m.querySelector('.ioCard'), a=b.dataset.io;
+    if(a==='close'){ m.classList.remove('on'); return; }
+    if(a==='copy'){ const ta=card.querySelector('.ioText'); let done=false; try{ await navigator.clipboard.writeText(IO.text); done=true; }catch(err){ try{ ta.select(); done=document.execCommand('copy'); }catch(err2){} }
+      b.textContent=done?'Copied':'Select it and copy'; return; }
+    if(a==='file'){ const u=URL.createObjectURL(new Blob([IO.text],{type:'text/plain'})), x=document.createElement('a'); x.href=u; x.download=IO.file; document.body.appendChild(x); x.click(); x.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); return; }
+    if(a==='slot'){ const t=card.querySelector('.ioText').value; IO.slot=b.dataset.l; ioPaint(); card.querySelector('.ioText').value=t; return; }
+    if(a==='pick'){ card.querySelector('.ioFile').click(); return; }
+    if(a==='in'){ ioImport(); return; } });
+  document.addEventListener('change',e=>{ const f=e.target&&e.target.closest&&e.target.closest('#ioModal .ioFile'); if(!f||!f.files||!f.files[0]) return;
+    f.files[0].text().then(t=>{ const ta=document.querySelector('#ioModal .ioText'); if(ta) ta.value=t.trim(); IO.msg='The file’s in: IMPORT to bring it in.'; IO.err=false; const m=document.querySelector('#ioModal .ioMsg'); if(m){ m.textContent=IO.msg; m.style.color='var(--good)'; } }); });
   function refreshMenuButtons(){ mgSweepOld();
     const has=anySaves();
     document.querySelectorAll('#smItems .smBtn[data-needsave]').forEach(b=>b.classList.toggle('disabled',!has));
@@ -20315,8 +20385,9 @@
     mmLive(); });
   function renderSlots(containerId,isNew){ mgSweepOld();
     const cont=document.getElementById(containerId); cont.innerHTML='';
-    let cleared=false; try{ cleared=!!localStorage.getItem('ft_mgr_cleared'); }catch(e){}
-    if(cleared){ const n=document.createElement('div'); n.className='slotNote'; n.textContent='Careers from before the season ran in weeks were cleared.'; cont.appendChild(n); }
+    let cleared=false, moved=''; try{ cleared=!!localStorage.getItem('ft_mgr_cleared'); moved=localStorage.getItem('ft_mgr_moved')||''; }catch(e){}
+    if(cleared){ const n=document.createElement('div'); n.className='slotNote'; n.textContent='A career from an older build couldn’t be brought up to date, and was cleared.'; cont.appendChild(n); }
+    if(moved){ const n=document.createElement('div'); n.className='slotNote'; n.style.color='var(--good)'; n.textContent='Brought up to date from an older build: SLOT '+moved.split(',').join(', SLOT ')+'.'; cont.appendChild(n); }   // (v154)
     for(const label of ['1','2','3']){
       const key=SAVE_KEYS[label], d=readSave(key), ok=!!(d&&d.kind==='manager'), name='SLOT '+label;
       const row=document.createElement('div'); row.className='slotRow';
@@ -20325,10 +20396,13 @@
       if(isNew) btn.onclick=()=>{ const go=()=>openMgrMaker(key,label); if(d) showConfirm('This slot holds a saved career ('+name+'). Starting a new one here deletes it for good.', go, {yes:'Delete & continue', danger:true}); else go(); };
       else { if(ok) btn.onclick=()=>openHub(key); else btn.classList.add('disabled'); }
       row.appendChild(btn);
+      if(!isNew && ok){ const ex=document.createElement('button'); ex.className='slotEx'; ex.textContent='⇩'; ex.title='Export this career'; ex.setAttribute('aria-label','export the career in '+name);   // (v154: A CAREER TO TAKE WITH YOU)
+        ex.onclick=(ev)=>{ ev.stopPropagation(); mgExport(label); }; row.appendChild(ex); }
       if(!isNew && d){ const del=document.createElement('button'); del.className='slotDel'; del.textContent='✕';
         del.onclick=(ev)=>{ ev.stopPropagation(); showConfirm('Delete the career in '+name+'? This cannot be undone.', ()=>{ deleteSave(key); renderSlots(containerId,isNew); refreshMenuButtons(); }, {yes:'Delete', danger:true}); }; row.appendChild(del); }
       cont.appendChild(row);
     }
+    if(!isNew){ const im=document.createElement('button'); im.className='smBtn slotImp'; im.innerHTML='<span class="mk">⇧</span>IMPORT A CAREER'; im.onclick=()=>mgImportOpen(); cont.appendChild(im); }   // (v154)
   }
   function startMenuKey(e){
     if(mgMakerOpen()){ if(e.key==='Escape') closeMgrMaker(); else if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT') mgCreate(); return; }
