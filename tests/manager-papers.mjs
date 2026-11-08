@@ -65,7 +65,7 @@ ok(!r.modal && r.left > 0 && await modal(), '✕ puts them aside -- they don\'t 
 // --- the decisions: a club's bid for one of yours, your bid answered, a sponsor, a new deal, one who wants out -------------------
 await K(`(()=>{ const d=CAREER.data, R=d.roster, cl=d.div[1].filter(id=>id!==d.clubId), c=d.world.clubs[cl[0]];
   d.offers=[{id:++d.offerSeq,pid:R[5].id,club:cl[0],fee:3000,wk:d.wkN},{id:++d.offerSeq,pid:R[6].id,club:cl[1],fee:2500,wk:d.wkN}];
-  const t=d.world.clubs[cl[2]], tp=t.players.slice().sort((a,b)=>a.ovr-b.ovr)[0]; d.budget=60000; d.bids=[{pid:tp.id,club:t.id,fee:900,st:'more',ask:mgRound(Math.max(1000,mgAsk(d,tp,t))),rival:null,wk:d.weeks}];
+  const t=d.world.clubs[cl[2]], tp=t.players.slice().sort((a,b)=>a.ovr-b.ovr)[0]; const ask=mgRound(Math.max(1000,mgAsk(d,tp,t))); d.budget=Math.max(60000,ask*2); d.bids=[{pid:tp.id,club:t.id,fee:900,st:'more',ask,rival:null,wk:d.weeks}];   // (the money to meet his price: a bigger club's weakest man can be asked at over $100,000)
   window.__tp=tp.id; d.spOff=[spOfferFor(d,'board',new Set())];
   for(const p of R){ delete p.wantsOut; delete p.cAsk; }   // (nobody else asking for anything this week)
   R[7].cAsk={wage:mgRenewWage(d,R[7]),wk:d.weeks}; R[8].wantsOut=true; R[8].mor=3.2; R[9].wantsOut=true; R[9].mor=3.4;
