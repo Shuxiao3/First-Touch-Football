@@ -965,7 +965,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     were. His rating in a spot is his own in his own position; in a second one, his own less a point for each point of
     IQ he loses there (2); out of position, his rating for that line less 6 (what his attributes make him there, if
     it's not his own line). On the tactics pitch a man's rating is lime in a second position of his and amber out of
-    position, and in Training his card adds what he's rated in his own ("74 at CB"). The computer's clubs pick each
+    position, and his card says why under the number, in Training and in a match: "74 → 72 · second position" (v152;
+    it was "74 at CB", and in a match nothing, and a man two under his rating read as a fault). In Training a second
+    line has him on the day, his fitness and his mood counted as a game counts them: "today 69 · tired, unsettled".
+    The computer's clubs pick each
     spot's man by position: in a new career about 83% of them play in their own, 15% in a second one and 2% out of
     position (v127: 85%, 12% and 3% before -- a holding or an attacking midfielder in a central one's spot is in a
     second position; v118: archetypes are choosier than positions were -- 72%, 27% and under 1% before -- so a computer
@@ -1470,7 +1473,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       to him this week", does nothing. It lifted him every time, so his mood was yours to pump): in the Monday papers (below), the two unhappiest men who
       aren't asking for something else each ask for a word. TALK TO HIM and it says how he's feeling and why (wants
       more games, his form, the results, his contract...), his fitness, the coaches' word on how he's coming on, and
-      brings out a trait; it lifts him a little, more if he's low.
+      brings out a trait; it lifts him a little, more if he's low. **From his card** (v152): the top of a man's
+      PERSONALITY side is his mood and why, and TALK TO HIM, any of yours, any week -- after it, SPOKEN THIS WEEK, and
+      what he said under it till the week's out. Before, only the two unhappiest each Monday could be spoken to: an
+      unsettled man of yours had no remedy you could find.
     - **The Monday papers** (v103). Each Monday the week's papers are on your desk, a pile to go through -- since v106
       waiting off to the side for you: PAPERS on the campus's top bar, how many there are in an orange box on its
       corner (it pops in when they come, and the button glows till you've opened them; v103 to v105 opened the pile by
@@ -1493,7 +1499,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       dressing room's paper is every man in it: the side's mood and how it's moved, then each man's mood and how far
       it's moved since last Monday (the happiest first; one who wants out in red), then who wants to leave and who's
       settled. And the club shop's paper comes before the week's money: the week's shirt sales, the three best sellers
-      and the season's shirts so far (see **Popularity** and **Shirt sales**).
+      and the season's shirts so far (see **Popularity** and **Shirt sales**). Since v152 the dressing room's paper
+      gives the side's mood now, as the pile's head does: it gave it as it was when the papers came, so after a game
+      or a word since, the two differed (6.3 and 6.5).
     - **The matchday paper** (v105). The morning of each of your games -- a Saturday's league or playoff game, a
       Wednesday's cup tie (CUP DAY) -- the table, on a small pile of its own that opens by itself over the hub: every
       club's place, goal difference and points in two columns, who's gone up or down since the last round (▲ ▼), the
@@ -1577,6 +1585,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     what it comes to at his club.
     - **Your three most popular** bring people through the gate -- from 40 between them, 1% more for every 3
       points, up to 20% (the books say so: "Your stars' draw") -- and sell the shirts (see **Shirt sales**).
+  - **A tap says what it is (v152).** On a phone a title's never seen, and the stars by a man's stamina were a
+    mystery. Now a tap on his skill stars, his rating's ▲ or ▼, his potential, his popularity, his fitness or stamina
+    bar, an unscouted man's six, or the match's top right (YOUR MAN, and which way you're attacking) puts what it is
+    in a line by it for a few seconds; a tap anywhere else takes it away. A man your scouts haven't seen has
+    "not scouted" under his rating's range where his potential was "?". And the ▽ is over the man the top right names: your keeper with the ball in his
+    hands is yours to play, and named there, but the ▽ was over nobody.
   - **His story.**
     - **Potential is never a number**, not even your own men's: on their cards and in the lists it's a range round
       it, the same every time you look -- 12 points wide with no coaches, down to 4 with a coach rated 10 (your best;
@@ -1847,6 +1861,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       says how far each of yours came. A line in the news every third week says which of your men moved. Once it's
       built, the youth academy takes in 3 to 5 youngsters aged 16 or 17 every summer, the first of them the day it
       opens (more and better as you build up its facilities). Promote them, or they leave at 19.
+    - **Which way he's going (v152).** A rating shows whole points, so a man coming on could go weeks looking no
+      different (the playthrough: three games in, nobody's had moved). Every third week his rating is now taken to
+      the hundredth -- his attributes with how far each meter has filled -- against the last time, the ticks before
+      counted half as much each time back: up a tenth of a point a tick or more and he has a green ▲ by his rating,
+      down as much a red ▼, on his card, in your squad's list and your academy's, and on his card in Training. A tap
+      on it says how fast, and the coaches' word on him (sharp in training, steady, off the pace). Measured over a
+      whole season, every man at every club (840): of the men whose rating went up, three in four had ▲ at the first
+      tick, three weeks in, and every one who went up two points or more; of the men with ▲ then, one in a hundred
+      ended the season lower. About half the men have an arrow at a time. (A twentieth of a point lit three in four
+      of everyone; three twentieths caught only half the men who came on.) The coaches' paper every third week names
+      who went up or down a point.
     - **The world stays the world.** A new man's prime is drawn round his league's level, and the young are made
       short of it by what they have to grow into, so each generation peaks where the one before did. Twenty
       seasons, simulated: each league's best eights stay within about four points of where they began, and the
@@ -2065,7 +2090,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
       Its screen: the next clubhouse and what it brings, then your career (your record, season by season); the
       squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
-      scorers); the fixtures (yours, then every result). Your crest is on each clubhouse, your three letters on the
+      scorers); the fixtures (yours, then every result: a game to come has the other club's rating -- since v152 its
+      best keeper and eight others' ratings, as they are, the same all week; it was its strength on the day, fitness
+      and all, so a club was 50 on Monday and 51 by Saturday). Your crest is on each clubhouse, your three letters on the
       cabin's board and the hall's sign.
     - **The buildings**, a level at a time (level 1 is putting it up), each level waiting for its clubhouse:
 
@@ -2389,6 +2416,16 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v152: every number explained.** Which way a man's going: a green ▲ by his rating when it's rising, a red ▼
+  when it's falling, read from his rating to the hundredth every third week -- of the men who come on over a season,
+  three in four show ▲ three weeks in (every one who comes on two points or more), and one in a hundred with ▲ then
+  ends lower. TALK TO HIM from any of your men's cards, once a week, with his mood, why, and what he said. One figure
+  for one thing: the papers' head and the dressing room's page give the same morale, and a club's rating in the
+  fixtures is the same all week. A man's number named when it isn't his rating ("52 → 50 · second position", "today
+  47 · tired"); a tap on his stars, arrow, potential ("not scouted", not "?"), popularity, fitness or the match's top
+  right says what it is; the ▽ over your keeper when he's yours. And on a narrow phone the figure field shares the
+  bid buttons' row: a market card whose head ran to four lines went 7 px over (since v151). See **Which way he's
+  going (v152)**, **A word with him**, **A tap says what it is (v152)** and **Positions**.
 - **v151: the market and the week's money.** A bid in a tap -- HALF, 3/4, THEIR PRICE, +10% -- or any figure typed
   ("2.5m"), and a list price the same way; once scouted, what a man's worth beside what they ask. What an unscouted
   man would want a week is read from what he's paid: within 15% nineteen times in twenty (it was one in five).

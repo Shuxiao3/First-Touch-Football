@@ -373,11 +373,13 @@ for(const [w, h] of SIZES){
       clear: T.every(t => !hit(t.querySelector('.ptkNo').getBoundingClientRect(), t.querySelector('.ptkOvr').getBoundingClientRect())) }; });
   ok(bench.n === 5 && bench.rows === 1 && bench.inside && bench.clear, 'a narrow phone (640x360): the bench on one line (its ' + bench.n + ' men), every name inside its token, the number clear of the rating');
   await page.tap(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(100);
-  const said = () => page.evaluate(() => /out of position|on the bench|in reserve|subbed off/.test(document.querySelector('#cTacRight .tbCard').textContent));
+  const said = () => page.evaluate(() => [...document.querySelectorAll('#cTacRight .tbCard .rWhy')].map(e => e.textContent).join(' | '));   // (v152: why his number isn't his rating, under it)
   const head = await page.evaluate(() => { const h = document.querySelector('#cTacRight .mgCardHead'), nm = h.querySelector('.mgCardName'), fs = e => parseFloat(getComputedStyle(e).fontSize), o = h.querySelector('.mgCardOvr');
     return { name: nm.textContent, oneLine: nm.getBoundingClientRect().height < fs(nm) * 2, whole: nm.scrollWidth <= nm.clientWidth + 1, amber: /var\(--warn\)/.test(o.getAttribute('style') || '') }; });
   const oopSaid = await said(); await page.tap('#bpBody .tbBench .ptk >> nth=0'); await page.waitForTimeout(100); const benchSaid = await said();
-  ok(head.oneLine && head.whole && head.amber && !oopSaid && !benchSaid, '...the longest name out of position: "' + head.name + '" whole on one line, his rating amber, and no line saying he\'s out of position (nor, for a man on the bench, that he\'s on it)');
+  info('out of position: ' + JSON.stringify({ head, oopSaid, benchSaid }));
+  ok(head.oneLine && head.whole && head.amber && /^\d+ → \d+ · out of position( \| today \d+ · .+)?$/.test(oopSaid) && !/out of position|on the bench|in reserve|subbed off/.test(benchSaid),
+    '...the longest name out of position: "' + head.name + '" whole on one line, his rating amber, and why under it (v152: "' + oopSaid + '"); a man on the bench, nothing saying so');
   const fits = sel => page.evaluate(sel => { const b = document.querySelector(sel); return b.scrollHeight <= b.clientHeight + 1 && !b.querySelector('.fitPager'); }, sel);
   const walk = async (sel, toks, ins) => { const n = await page.$$eval(toks, ns => ns.length), bad = []; let views = 0;
     for(let i = 0; i < n; i++){ await page.tap(`${toks} >> nth=${i}`); await page.waitForTimeout(60);

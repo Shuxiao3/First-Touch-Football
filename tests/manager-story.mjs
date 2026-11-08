@@ -153,13 +153,14 @@ for(const [w, h] of [[640, 360], [844, 340]]){
   const mindOf = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
     return { side: c.dataset.side, lit: (c.querySelector('.mgSideT.on') || {}).textContent, facts: [...c.querySelectorAll('.mgFact')].map(e => e.querySelector('span').textContent + ':' + e.querySelector('b').textContent),
       tr: [...c.querySelectorAll('.mindT')].map(e => e.textContent), ev: [...c.querySelectorAll('.cvEv')].map(e => e.textContent), tags: c.querySelectorAll('.mgTraits').length,
+      mood: (c.querySelector('.mindTalk .mgActL') || {}).textContent || '', talk: !!c.querySelector('.mindTalk [data-mg="talkcard"]'),
       pos: (c.querySelector('.posRow') || {}).textContent || '', fits: P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1,
       cut: [...c.querySelectorAll('.mgFact b, .mindT span, .cvEv')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) }; });
   await page.click('.mgPaneR .mgSides [data-mside="mind"]'); await page.waitForTimeout(100); const mind = await mindOf();
   info(w + 'x' + h + ' his personality: ' + JSON.stringify(mind));
-  ok(mind.side === 'mind' && mind.lit === 'PERSONALITY' && mind.facts.length === 10 && /^MOOD:/.test(mind.facts[0]) && ['TEMPER', 'WORK', 'LEARNS', 'DRIVE', 'LOYALTY', 'VOICE', 'GRIT', 'BODY', 'SETTLES'].every(k => mind.facts.some(f => f.startsWith(k + ':')))
+  ok(mind.side === 'mind' && mind.lit === 'PERSONALITY' && mind.facts.length === 9 && /^(DELIGHTED|CONTENT|SETTLED|UNSETTLED|UNHAPPY) · ./.test(mind.mood) && mind.talk && ['TEMPER', 'WORK', 'LEARNS', 'DRIVE', 'LOYALTY', 'VOICE', 'GRIT', 'BODY', 'SETTLES'].every(k => mind.facts.some(f => f.startsWith(k + ':')))
      && !mind.facts.some(f => /\d/.test(f.split(':')[1])) && (mind.tr.length > 0 || mind.ev.length === 1) && !mind.tags && /^PLAYS/.test(mind.pos) && mind.fits && !mind.cut.length,
-    w + 'x' + h + ': PERSONALITY: his mood and his character in words, never numbers (' + mind.facts.slice(0, 4).join(', ') + '...), his traits (' + (mind.tr.join(' / ') || mind.ev[0]) + '), all on the card');
+    w + 'x' + h + ': PERSONALITY: his mood and why with TALK TO HIM (v152: "' + mind.mood + '"), his character in words, never numbers (' + mind.facts.slice(0, 4).join(', ') + '...), his traits (' + (mind.tr.join(' / ') || mind.ev[0]) + '), all on the card');
   await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(100); const back = await page.$eval('.mgPaneR .mgCard', c => c.dataset.side);
   ok(back === 'rate', '...and RATINGS turns it back to his ratings');
   await page.click('.mgPaneR .mgSides [data-mside="career"]'); await page.waitForTimeout(80);   // (back to his career, for the checks below)

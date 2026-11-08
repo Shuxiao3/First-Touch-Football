@@ -43,6 +43,10 @@
     padding:4px 9px;font-size:11px;letter-spacing:.5px;color:var(--ink-dim);}
   .chip b{color:var(--phosphor);font-weight:600;}
   .chip b.r{color:var(--red);}
+  #xplTip{ position:fixed; left:0; top:0; z-index:400; max-width:min(300px,88vw); padding:7px 10px; background:rgba(8,14,9,.97); border:1px solid var(--well); border-radius:8px;
+    font:11px 'FTC Dot',monospace; line-height:1.4; color:var(--ink); pointer-events:none; opacity:0; transition:opacity .12s; }   /* (v152: EVERY NUMBER AND MARK EXPLAINED) */
+  #xplTip.on{ opacity:1; }
+  [data-xpl]{ cursor:help; } .xplUI{ pointer-events:auto; }
   .sbCrest{ display:none; width:16px; height:18px; image-rendering:pixelated; vertical-align:middle; margin:-4px 5px -3px -3px; }
   #crR{ margin:-4px -3px -3px 5px; }
 
@@ -765,6 +769,7 @@
   .mgCardName{ font-family:'FTC Dot',monospace; color:var(--ink); font-size:17px; letter-spacing:.4px; }
   .mgCardSub{ color:var(--dim); font-size:11px; margin-top:2px; line-height:1.45; }
   .mgCardOvr{ font-family:'FTC Dot',monospace; color:var(--acc); font-size:26px; line-height:1; text-align:right; white-space:nowrap; }
+  .rWhy{ text-align:right; font-size:10px; line-height:1.3; color:var(--dim); max-width:150px; margin-left:auto; }   /* (v152: WHY HIS NUMBER ISN'T HIS RATING) */
   .mgBars{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:0 14px; margin:6px 0 10px; }
   .mgBtns{ display:flex; gap:7px; flex-wrap:wrap; margin-top:9px; }
   .mgBtn{ flex:1 1 130px; font-family:'FTC Dot',monospace; font-size:13px; letter-spacing:.5px; color:var(--acc); background:rgb(var(--accRGB) / .08); border:1px solid var(--well); border-radius:8px; padding:10px 8px; cursor:pointer; }
@@ -1409,13 +1414,19 @@
   .cvEv{ font-size:11px; color:var(--ink2); line-height:1.5; margin:0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .cvEv i{ font-style:normal; color:var(--dim); margin-right:6px; }
   .mgActL{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; margin-right:auto; }
   .mgActL b{ font-size:12px; color:var(--ink); letter-spacing:0; }
+  .mindTalk .mgActL{ white-space:normal; letter-spacing:0; font-size:11px; color:var(--ink); } .mindTalk .mgActL b{ font-size:11px; letter-spacing:1px; }   /* (v152: A WORD WITH HIM, on his card) */
+  .mindDone{ font:10px 'FTC Dot',monospace; color:var(--dim); letter-spacing:1px; white-space:nowrap; }
+  .mindSaid{ font-size:11px; line-height:1.4; color:var(--ink2); margin:-2px 0 8px; padding:5px 8px; border-left:2px solid var(--well); }
   .mgActC{ display:flex; align-items:center; gap:4px 6px; margin-left:auto; }
   .mgAct .mgBtn{ flex:0 0 auto; min-height:28px; padding:3px 10px; font-size:11px; } .mgAct .mgBtn:only-child{ flex:1 1 auto; }   /* (28 px, as his tactics card's) */
   .mgQuick{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:flex-end; margin:2px 0 4px; } .mgQuick .mgMini{ margin:0; padding:3px 6px; }   /* (v151) */
-  .mgAmtIn{ width:118px; font:11px 'FTC Dot',monospace; padding:3px 6px; background:var(--well); color:var(--ink); border:1px solid var(--btnHi); border-radius:4px; }
+  .mgAmtIn{ flex:1 1 72px; min-width:64px; max-width:118px; width:auto; font:11px 'FTC Dot',monospace; padding:3px 6px; background:var(--well); color:var(--ink); border:1px solid var(--btnHi); border-radius:4px; }
   .ldgCard{ max-width:520px; gap:6px; } .ldgSect{ font:10px 'FTC Dot',monospace; letter-spacing:1px; color:var(--dim); margin-top:6px; }
   .ldgRow{ display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--ink2); padding:1px 0; } .ldgRow b{ font-weight:400; color:var(--ink); } .ldgRow.tot{ border-top:1px solid var(--well); padding-top:3px; } .ldgNote{ font-size:11px; color:var(--dim); }
   #chNetBtn{ cursor:pointer; } #chNetBtn i{ text-decoration:underline dotted; }
+  .trend, .mgRow .ovr i.trend{ font-style:normal; font-weight:400; font-size:.55em; margin-left:2px; vertical-align:.45em; }   /* (v152: WHICH WAY HE'S GOING) */
+  .trend.up, .mgRow .ovr i.trend.up{ color:var(--good); } .trend.dn, .mgRow .ovr i.trend.dn{ color:var(--bad); }
+  .mgRow .ovr i.trend{ font-size:9px; margin-left:1px; vertical-align:2px; }
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
   .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
@@ -1578,10 +1589,10 @@
   </div>
   <div id="readout">
     <span class="chip" id="rScore"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
-    <span class="chip" id="rDir" style="color:var(--acc)">▶</span>
+    <span class="chip xplUI" id="rDir" style="color:var(--acc)" data-xpl="dir">▶</span>
     <span class="chip">⏱ <b id="rClock">0:00</b></span>
     <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop">SUBS <b id="qsLeft"></b><i>▾</i></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
-    <div class="chip" id="rPlayer"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
+    <div class="chip xplUI" id="rPlayer" data-xpl="hud"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
     <button id="menuBtn" class="chip menuChip">☰</button>
     <button id="ctlBtn" class="chip menuChip ctlChip" aria-label="how to play: the controls" title="How to play">?</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
@@ -1709,6 +1720,7 @@
 <div id="mgrMaker" class="pauseOv"><div class="pauseCard mkCard"></div></div>
 <div id="storyModal" class="pauseOv"><div class="pauseCard stCard"></div></div>
 <div id="pileModal" class="pauseOv"><div class="pauseCard pileCard"></div></div>
+<div id="xplTip" role="tooltip"></div>
 <div id="pressModal" class="pauseOv"><div class="pauseCard prCard"></div></div>
 <div id="moneyModal" class="pauseOv"><div class="pauseCard mnCard"></div></div>
 <div id="ldgModal" class="pauseOv"><div class="pauseCard ldgCard"></div></div>
@@ -2681,6 +2693,15 @@
   // a token's or card's mark for how he fits a spot: nothing in his own position, ' sec' in a second, ' oop' out of it
   const fitCls=(nat,role,pos)=>!role||role==='GK'?(role==='GK'&&posFit(nat||'-','GK')!=='main'?' oop':''):{main:'',second:' sec',out:' oop'}[posFit(nat,pos)];
   const FIT_COL={' sec':'var(--good2)',' oop':'var(--warn)'};
+  // WHY HIS NUMBER ISN'T HIS RATING (v152), under it on his card in the tactics and in a match: his rating, then what
+  // he's worth in this spot -- a second position 2 off, out of position more (FIT_PEN) -- and, in the career's tactics,
+  // on the day: his fitness and his mood, what a game's played with (see FITNESS and MORALE). "52 → 50 · second
+  // position". The number was just lower, and read as a fault
+  const fitWhy=fc=>fc===' sec'?'second position':fc===' oop'?'out of position':'in this spot';
+  function ratingWhy(base,at,fc,today,cause){ let h='';
+    if(at!==base) h+='<div class="mgCardSub rWhy">'+base+' → '+at+' · '+fitWhy(fc)+'</div>';
+    if(today!=null&&today!==at) h+='<div class="mgCardSub rWhy">today '+today+' · '+cause+'</div>';
+    return h; }
   // HIS POSITIONS, on his card (v116): PLAYS and the spots that are his own, lit; ALSO and the ones he can play well
   // enough (a second position: a little off his reading of the game, FIT_PEN) -- anywhere else he's out of position.
   // His archetype's (v118: fitPos)
@@ -2735,7 +2756,7 @@
   function careerStars(p){ return p.role==='GK'?1:starsAt(careerStarPot(p),p.age,(p.seed>>>0)||p.id||1); }
   // anyone's: a career man's, else a squad entry's
   function starsOf(x){ return x&&!x.stats&&x.pot!=null?careerStars(x):entryStars(x); }
-  function starsHtml(n){ n=Math.max(1,Math.min(5,n||1)); return '<span class="stars">'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'; }
+  function starsHtml(n,plain){ n=Math.max(1,Math.min(5,n||1)); return '<span class="stars"'+(plain?'':' data-xpl="stars"')+'>'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'; }   // (v152: a man's stars say what they are when tapped -- plain: a move's, on the skill moves page)
   // ============ TEAM INSTRUCTIONS (v112) ============
   // One set for the whole side, by its lines -- not a man's, nor a spot's -- set on the tactics screen and kept with the
   // career or the club. WITHOUT THE BALL: how high the back line holds (dl: metres from our own goal line, at its highest,
@@ -3674,7 +3695,7 @@
   }
   const wrapEl=document.getElementById('stageWrap');
   const touchLive=()=>SCREEN==='match' && !pauseOpen && !menuOpen && !settingsOpen && !skillsOpen && !ctlOpen && !htOpen && !matchOver;
-  const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip,.qsUI,.csUI'));   // on-screen buttons (☰, Trap Lab, quick subs; v142: your corner's set-up) take taps as clicks
+  const onLabUI=t=>!!(t.target&&t.target.closest&&t.target.closest('.labUI,.menuChip,.qsUI,.csUI,.xplUI'));   // (v152: and the top right's tap-to-explain)   // on-screen buttons (☰, Trap Lab, quick subs; v142: your corner's set-up) take taps as clicks
   let swTouch=null;          // a finger on SWITCH: where it landed
   const tapStart={};        // finger id -> where and when it landed, and the team-mate under it (for a touch pass)
   wrapEl.addEventListener('touchstart',e=>{
@@ -13073,6 +13094,29 @@
   // YOUR MAN, top right of the match (#rPlayer): his number, full name and position over his stamina (the red tick: how
   // far it can come back, as over his head) and his skill stars. Written only when something in it changes.
   let rpKey='', rpSt=-1, rpCap=-1;
+  // EVERY NUMBER AND MARK EXPLAINED, A TAP AWAY (v152): a man's stars, his rating's arrow, his potential, his popularity,
+  // his fitness and his stamina, and the match's top right (YOUR MAN, and the way you're attacking) say what they are
+  // when tapped (data-xpl: a key here, or the words themselves), in a line by it for a few seconds. On a phone a
+  // title's never seen, and the stars by his stamina were a mystery
+  const XPL={
+    stars:'SKILL STARS, 1 to 5: the skill moves he can do (SKILL MOVES in the menu has each move\'s stars). A young man\'s come as he grows, to about 19 to 23; some lose one past 32.',
+    hud:'YOUR MAN, the one with ▽ over him: his number, name and position. STAMINA: his legs this game, spent sprinting; the red tick is as far as they\'ll come back now.',
+    dir:'The way you\'re attacking.',
+    pot:'POTENTIAL: how good he could become, as your coaches or scouts see it. The more they know of him, the closer the range.',
+    potNo:'POTENTIAL, not scouted: your scouts haven\'t seen him, so how good he could become is hidden. With a scouts\' house, SCOUT HIM on his card\'s RATINGS side.',
+    sixNo:'Not scouted: his six are hidden, and his rating\'s a range, till your scouts have seen him. With a scouts\' house, SCOUT HIM here.',
+    pop:'POPULARITY, 0 to 100: how the fans see him. Your three most popular bring the crowds in, and the shirts sell by it.',
+    fit:'FITNESS: how fresh he is between games. Tired, he plays below his rating and gets hurt more easily; rest brings it back.',
+    stam:'STAMINA: his legs this game, spent sprinting. The red tick is as far as they\'ll come back now.'
+  };
+  let xplT=null;
+  function xplShow(el){ const k=el.dataset.xpl, txt=XPL[k]||k, tip=document.getElementById('xplTip'); if(!tip||!txt) return;
+    tip.textContent=txt; tip.classList.add('on'); const r=el.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight;
+    let y=r.bottom+6; if(y+th>innerHeight-8) y=Math.max(8,r.top-th-6);
+    tip.style.left=Math.round(clamp(r.left+r.width/2-tw/2,8,Math.max(8,innerWidth-tw-8)))+'px'; tip.style.top=Math.round(y)+'px';
+    clearTimeout(xplT); xplT=setTimeout(()=>tip.classList.remove('on'),5000); }
+  document.addEventListener('click',e=>{ const el=e.target&&e.target.closest&&e.target.closest('[data-xpl]'), tip=document.getElementById('xplTip');
+    if(el) xplShow(el); else if(tip) tip.classList.remove('on'); },true);   // (before the click's own work: a row's tap may paint it over)
   // a man's full name: a career man has one; a club's man in an exhibition has only his surname, so he's given the
   // first name that goes with it (always the same one)
   function fullName(n){ n=String(n||''); return !n||n.includes(' ')?n:MG_FIRST[hashStr('first|'+n)%MG_FIRST.length]+' '+n; }
@@ -14967,7 +15011,7 @@
     // YOUR KEEPER'S TIME (see GK_WAIT): the last GK_WARN of it, a red stopwatch flashing over his head
     if(gkHold===kp&&keeperWaits(kp)&&GK_WAIT-(kp.heldT||0)<=GK_WARN&&Math.floor((GK_WAIT-(kp.heldT||0))*5)%2===0){
       const m=proj(kp.x,kp.y,PLAYER_H+14); drawStopwatch(m.x,m.y-16); }
-    if(controllingKeeper===kp){
+    if(controllingKeeper===kp||controlled===kp){   // (v152: yours in his hands is YOUR MAN, top right: the ▽ over him too -- it was over nobody)
       const m=proj(kp.x,kp.y,PLAYER_H+14);
       ctx.beginPath();
       ctx.moveTo(m.x,m.y+6);ctx.lineTo(m.x-5,m.y-2);ctx.lineTo(m.x+5,m.y-2);
@@ -15339,10 +15383,10 @@
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const pos=si===li.gk?'GK':sl?spotFit(sl):null, at=mtRating(e,role,pos), fc=fitCls(fitPos(e),role,pos), sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
-    const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
+    const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs" data-xpl="stam"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
       +posRowHtml(e)+legs+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div></div></div>';
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+ratingWhy(e.ovr,at,fc)+'</div></div>';   // (v152: the number named)
     return h+sixHtml(e.stats,e.role)+'</div>'; }
   function mtMenuHtml(t,phase){ let h='<div class="tbMenu'+(MT.drop==='style'?' r':'')+'">';
     if(MT.drop==='form'){ const form=formFor(t,phase); h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -15641,7 +15685,7 @@
     document.getElementById('skHint').innerHTML=(isTouch?'Start on <b>SKILL</b> and draw':'Hold the <b>mouse button</b> and draw')+'; ahead is the way he\'s going, <b>→</b> here.<br>'
       +(isTouch?'Hold <b>SKILL</b>':'Hold it')+' without drawing to shield the ball, or with the '+(isTouch?'stick':'keys')+' to strafe';
     document.getElementById('skGrid').innerHTML=SKILL_KINDS.map(k=>'<div class="skCard fitWhole" data-sk="'+k+'"><canvas class="skDraw"></canvas><canvas class="skClip"></canvas>'
-      +'<div class="skTxt"><span class="skName">'+SKILL_NAME[k]+'</span>'+starsHtml(SKILL_STARS[k])+'</div></div>').join(''); }
+      +'<div class="skTxt"><span class="skName">'+SKILL_NAME[k]+'</span>'+starsHtml(SKILL_STARS[k],true)+'</div></div>').join(''); }
   // a canvas at its size on the screen, in device pixels: true when it's (re)sized, and so wants drawing afresh
   function skSize(cv){ const r=window.devicePixelRatio||1, w=Math.round(cv.clientWidth*r), h=Math.round(cv.clientHeight*r);
     if(cv.width===w&&cv.height===h) return false; cv.width=w; cv.height=h; return true; }
@@ -15979,6 +16023,9 @@
   function devUnpack(s){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=devDec(s[i]||'j'); }); if(s.length<DEV_KEYS.length) o.gkHandling=gkHandlingFor(o); return o; }
   function devPackPg(a){ return a.map(v=>Math.round((clamp(v,-1,1)+1)*600).toString(36).padStart(2,'0')).join(''); }
   function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>{ const v=s?parseInt(s.substr(i*2,2),36):NaN; return isFinite(v)?v/600-1:0; }); }
+  // (v152) his rating to the hundredth: his attributes with the way each has come on towards its next half point (the
+  // meters) -- what his rating is on its way to. See WHICH WAY HE'S GOING
+  function devX(role,st,pg){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=st[k]+0.5*(pg[i]||0); }); const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(o,w)-R[1])*K)*10; }
   // HIS HIDDEN VALUES, 1 to 10 in half points, drawn from his seed when he's first seen: how quickly he learns (lr), his
   // professionalism (pro), adaptability (ad), resilience (rs), durability (du), and his character -- charisma (ch),
   // temperament (te: high is calm), ambition (am), loyalty (lo). Never shown as numbers.
@@ -16023,7 +16070,7 @@
   const devMinutes=share=>1-Math.pow(1-clamp(share,0,1),2);
   // ONE TICK for one man. x: {T: his training (0 to 1), gw: his side's games these weeks, M: minutes' worth when he has
   // no side's games to count (pre-season, the academy, no club)} -> his rating's change
-  function devTick(d,p,x){ devInit(p); const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p);
+  function devTick(d,p,x){ devInit(p); const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p), x0=devX(p.role,st,pg);   // (x0: v152, which way he's going)
     const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
     p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
     const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
@@ -16053,7 +16100,19 @@
     p.at=devPack(st); p.bs=devPack(bs); p.pg=devPackPg(pg); p.mw=0; p.wg=0; p.wb=0;
     if(p.fm!=null) p.fm=Math.round((FORM_BASE+(p.fm-FORM_BASE)*0.85)*100)/100;   // (form fades back without games to keep it)
     const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99));
+    { const dx=devX(p.role,st,pg)-x0; p.dv=Math.round((p.dv==null?dx:0.5*p.dv+0.5*dx)*100)/100; }   // (v152: WHICH WAY HE'S GOING)
     return p.ovr-was; }
+  // WHICH WAY HE'S GOING (v152): every development tick (three weeks) his rating to the hundredth (devX) against the
+  // last, the ticks before counted a half less each time back (p.dv: points a tick) -- a tenth of a point a tick or more,
+  // coming on (▲); as much the other way, going back (▼); else as he was. His rating shows whole points only, so a man
+  // coming on could go weeks looking no different: ▲ and ▼ by his rating on his card and in your squad's and your
+  // academy's lists, and a tap on it says how fast, with the coaches' word (p.ld: see A WORD WITH HIM)
+  const DEV_TREND=0.1;
+  const devTrend=p=>p.dv==null?0:p.dv>=DEV_TREND?1:p.dv<=-DEV_TREND?-1:0;
+  const devCoach=p=>{ const ld=p.ld??0; return ld>=1.2?'sharp in training':ld<=-0.6?'off the pace in training':'steady in training'; };
+  function trendHtml(p){ const t=devTrend(p); if(!t) return '';
+    const x=(t>0?'COMING ON: his rating is rising, about +':'GOING BACK: his rating is falling, about ')+p.dv.toFixed(1)+' every three weeks of late (it shows only whole points). The coaches: '+devCoach(p)+'.';
+    return '<i class="trend '+(t>0?'up':'dn')+'" data-xpl="'+mgEsc(x)+'">'+(t>0?'▲':'▼')+'</i>'; }
   // what a side's training is worth (0 to 1): yours by the training pitch's level; the computer's by its league
   const devTrainAi=c=>0.6+0.07*(c.tier||1);   // (yours: devTrainYours, by the pitch and the coaches)
   // EVERY THIRD WEEK, everyone: your squad, your academy (no games: its level's worth), the computer clubs', the free
@@ -16138,6 +16197,8 @@
     if(k>=2){ const r=potRange(p,k===9?potWYours(d,!!f.youth):k>=3?3:5); return r[0]+'–'+r[1]; }
     return k>=1&&!short?potBand(p):'?'; }
   const potMid=(d,p,youth)=>{ const r=potRange(p,potWYours(d,youth)); return (r[0]+r[1])/2; };
+  // (v152) on his card: the range, or why there isn't one -- "?" said nothing
+  function potCardTxt(d,p,f){ const t=potTxt(d,p,f,true); return t==='?'?'<span class="potNo" data-xpl="potNo">not scouted</span>':'potential <span data-xpl="pot">'+t+'</span>'; }   // (not scouted: his rating's a range over it, and a tap says the rest -- "potential not scouted" widened the card's head, and the deal side ran over)
   const kidPot=A=>potRange({id:hashStr(A.name),pot:A.pot,ovr:A.ovr},3);   // (the wonderkid: what the club hears of him)
   // HIS CHARACTER as the scouts tell it: the hidden values that stand out (2 or more from the middle), most first -- a
   // few letters and a word each
@@ -16172,7 +16233,15 @@
       else if(!L) h+='<div class="mgFacts">'+mgFact('SCOUTING','no scouts’ house','var(--dim)',true)+'</div>';
       return h; }
     const hv=hvOf(p), mor=p.mor??MOR0;
-    let h='<div class="mgFacts">'+(f.mine?mgFact('MOOD',morWord(mor),mor>=7?'var(--good)':mor<4?'var(--bad)':mor<5.5?'var(--warn)':'var(--ink)'):'')
+    // (v152) A WORD WITH HIM, from his card: his mood and why (mgWhy), and TALK TO HIM -- once a week (see mgTalk) -- and
+    // what he said, under it, for the rest of the week. It was only in the papers, for the two unhappiest each Monday:
+    // an unsettled man of yours had no remedy you could find
+    let h='';
+    if(f.mine){ const said=MGUI.talk&&MGUI.talk.pid===p.id&&MGUI.talk.w===(d.weeks||0)?MGUI.talk.L:null;
+      h+='<div class="mgAct mindTalk"><span class="mgActL"><b style="color:'+morCol(mor)+'">'+morWord(mor).toUpperCase()+'</b> · '+mgEsc(mgWhy(d,p))+'</span>'
+        +(talkedThisWeek(d,p)?'<span class="mgActC mindDone">SPOKEN THIS WEEK</span>':'<span class="mgActC"><button class="mgBtn" data-mg="talkcard" data-pid="'+p.id+'">TALK TO HIM</button></span>')+'</div>'
+        +(said?'<div class="mindSaid">'+said.map(mgEsc).join(' · ')+'</div>':''); }
+    h+='<div class="mgFacts">'
       +Object.keys(HV_WORDS).map(k=>{ const l=hvLvl(hv[k]); return mgFact(HV_WORDS[k][0],HV_WORDS[k][1][l],HV_PLAIN[k]?'var(--ink)':HV_COL[l]); }).join('')+'</div>';
     const tr=f.mine?traitsOf(p,d).slice(0,p.kt||0):[];
     h+=tr.length?'<div class="mindTr">'+tr.slice(0,3).map(t=>'<div class="mindT"><b>'+t.n+'</b><span>'+t.up+' · '+t.down+'</span></div>').join('')+'</div>'
@@ -16334,6 +16403,7 @@
   // costs his touch and his reading of the game. An unhappy, ambitious man asks to leave.
   const MOR0=6.5;
   const morWord=m=>m>=8.5?'Delighted':m>=7?'Content':m>=5.5?'Settled':m>=4?'Unsettled':'Unhappy';
+  const morCol=m=>m>=7?'var(--good)':m<4?'var(--bad)':m<5.5?'var(--warn)':'var(--ink)';   // (v152: his mood's colour, on his card)
   const tmWord=m=>m>=8?'buoyant':m>=6.5?'in good heart':m>=5?'settled':m>=3.5?'uneasy':'low';
   // A MAN'S MOOD ON THE PITCH (v150: a dial, not a cliff): every point of it either side of 6.5 counts, along lines through
   // what it always came to at the steps -- up, his stamina and composure, +0.5 at 8 and +1 at 9.5 and over (+0.17 at 7,
@@ -16689,6 +16759,12 @@
   function mgSimStr(d,id,xi){ if(id!==d.clubId&&xi) return xi.length?xi.reduce((a,p)=>a+condOvr(p),0)/xi.length:40;
     return mgStrength(d,id)+(id===d.clubId&&d.lv?PHYSIO_SIM[lvOf(d,'physio')]||0:0); }
   const mgXiStr=(d,id,xi)=>id===d.clubId?mgStrength(d,id):mgSimStr(d,id,xi);   // (on the day, without the physio)
+  // A CLUB'S RATING, as shown (v152): its best keeper and eight others, fit to play, their ratings as they are -- not as
+  // fresh as they are today (that's its strength on the day, mgStrength) -- so it's the same on every screen all week.
+  // The fixtures had its strength on the day: 50 on Monday, 51 by Saturday
+  function clubRating(d,id){ let L=mgPlayersOf(d,id).filter(p=>!p.inj); const by=(a,b)=>b.ovr-a.ovr;
+    L=id===d.clubId?mgStarters(d):L.filter(p=>p.role==='GK').sort(by).slice(0,1).concat(L.filter(p=>p.role!=='GK').sort(by).slice(0,OUTFIELD));
+    return L.length?Math.round(L.reduce((a,p)=>a+p.ovr,0)/L.length):40; }
   function mgStrength(d,id){
     if(id===d.clubId){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), D=careerSlots(d.formDef,'def');
       let s=R[lu.gk]?condOvr(R[lu.gk],ovrAt(R[lu.gk],'GK'))+morOvr(R[lu.gk]):30;
@@ -17293,8 +17369,8 @@
   function pileBody(d,x){ const L=[], B=[], next=()=>B.push(['NEXT ▶','next']), later=()=>B.push(['LATER','later',0]);
     const P=x.pid!=null?d.roster.find(q=>q.id===x.pid):null;
     switch(x.k){
-      case 'mor': { const dt=Math.round((x.tm1-x.tm0)*10)/10;
-        L.push('Team morale <b>'+x.tm1.toFixed(1)+'</b> · '+tmWord(x.tm1)+(dt?' · '+pileDelta(dt)+' since last week':' · as it was last week'));
+      case 'mor': { const tmNow=d.tm??x.tm1, dt=Math.round((tmNow-x.tm0)*10)/10;   // (v152: the side's mood now, as the papers' head has it -- not as it was when they came: a game or a word since moves it, and the head and this differed)
+        L.push('Team morale <b>'+tmNow.toFixed(1)+'</b> · '+tmWord(tmNow)+(dt?' · '+pileDelta(dt)+' since last week':' · as it was last week'));
         if(x.all&&x.all.length) L.push('<div class="plMor">'+x.all.map(([id,m,v])=>{ const p=d.roster.find(q=>q.id===id); if(!p) return '';   // (v105: every man, his mood, how it's moved)
             const sn=surname(p.name), two=d.roster.some(q=>q!==p&&surname(q.name)===sn), nm=two?mgEsc(String(p.name).charAt(0))+'. '+sn:sn;   // (two of a name: the initial too)
             return '<span'+(p.wantsOut?' class="out"':'')+' title="'+morWord(m)+'"><i>'+nm+(d.cap===id?' (C)':'')+'</i><b class="'+(m>=7?'up':m<5?'dn':'')+'">'+m.toFixed(1)+'</b>'
@@ -18668,11 +18744,13 @@
     const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, pos=ri===lu.gk?'GK':sl?spotFit(sl):null, at=role?ovrAt(p,role,pos):p.ovr, fc=fitCls(fitPos(p),role,pos), sty=styleOf(p), st=mgStats(p);
-    const c=condOf(p), legs='<div class="mtLegs"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
+    const c=condOf(p), mo=morOvr(p), today=Math.round(condOvr(p,at)+mo), why=[];   // (v152: on the day -- see WHY HIS NUMBER ISN'T HIS RATING)
+    if((1-c)*COND_PEN>=0.5) why.push(c<0.85?'tired':'not quite fresh'); if(mo) why.push(morWord(p.mor??MOR0).toLowerCase());
+    const legs='<div class="mtLegs" data-xpl="fit"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)+legs+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+(at!==p.ovr?'<div class="mgCardSub" style="text-align:right">'+p.ovr+' at '+natPos(p)+'</div>':'')+'</div></div>'
+      +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+trendHtml(p)+'</div>'+ratingWhy(p.ovr,at,fc,today,why.join(', '))+'</div></div>'
       +sixHtml(st,p.role)+'</div>'; }
   // TACTICS: the pitch first, on its side as in a match (your goal on the left) -- the shape, width and style in one row of
   // menus above it, the bench under it, the man you tapped on the right. Hold a man and drag him onto another to swap them
@@ -19317,7 +19395,7 @@
   // were one small button under his rating, DEAL ▶ and so on, a side at a time round the four.)
   const MG_SIDES=[['rate','RATINGS'],['deal','DEAL'],['career','CAREER'],['mind','PERSONALITY']];
   const mgSideTabs=back=>'<div class="mgSides">'+(back||'')+MG_SIDES.map(([k,t])=>'<button class="mgSideT'+(mgSide===k?' on':'')+'" data-mside="'+k+'">'+t+'</button>').join('')+'</div>';
-  const mgSixUnknown=p=>'<div class="six">'+(p.role==='GK'?SIX_GK:SIX).map(([k])=>'<span class="sixC unk"><b>?</b><i>'+k+'</i></span>').join('')+'</div>';
+  const mgSixUnknown=p=>'<div class="six" data-xpl="sixNo">'+(p.role==='GK'?SIX_GK:SIX).map(([k])=>'<span class="sixC unk"><b>?</b><i>'+k+'</i></span>').join('')+'</div>';
   const mgFact=(k,v,c,wide)=>'<div class="mgFact'+(wide?' wide':'')+'"><span>'+k+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+v+'</b></div>';
   const mgActRow=(label,ctl)=>'<div class="mgAct">'+(label?'<span class="mgActL">'+label+'</span>':'')+'<span class="mgActC">'+ctl+'</span></div>';   // (its controls wrap together)
   const mgScoutBtn=(d,p,c)=>lvOf(d,'scouting')?'<div class="mgAct"><button class="mgBtn" data-mg="scout" data-pid="'+p.id+'">SCOUT HIM ('+money(mgScoutCost(d,p,c))+')</button></div>'
@@ -19332,7 +19410,7 @@
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)
       +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
-      +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+'</div><div class="mgCardSub" style="text-align:right">potential '+potTxt(d,p,f,true)+'</div><div class="mgCardSub mgPop" style="text-align:right" title="'+popWord(pop)+'">popularity <b>'+pop+'</b></div></div></div>';   // (POPULARITY: how the fans see him)
+      +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+(f.mine||f.youth?trendHtml(p):'')+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,f)+'</div><div class="mgCardSub mgPop" style="text-align:right" data-xpl="'+mgEsc(popWord(pop).replace(/^./,c=>c.toUpperCase())+'. '+XPL.pop)+'">popularity <b>'+pop+'</b></div></div></div>';   // (POPULARITY: how the fans see him)
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
     if(f.mine&&mgSide==='rate'){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
     if(mgSide==='career') h+=mgCareerSide(d,p,f);
@@ -19381,7 +19459,7 @@
     const pr=MGUI.list&&MGUI.list.pid===p.id?MGUI.list.price:mgValue(d,p);
     return h+mgActRow('PRICE',mgStep('liststep',money(pr))+'<button class="mgBtn" data-mg="list" data-pid="'+p.id+'">LIST HIM</button>')
       +(O.length?'':'<div class="mgQuick">'+[[1,'HIS WORTH'],[1.25,'+25%'],[1.5,'+50%'],[2,'TWICE']].map(([k,l])=>'<button class="mgMini" data-mg="listset" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
-      +'<input class="mgAmtIn" inputmode="numeric" data-amt="listset" data-pid="'+p.id+'" placeholder="or type a figure" aria-label="a price of your own"></div>'); }   // (the quick prices with no bids in the way: the card never pages)
+      +'<input class="mgAmtIn" inputmode="numeric" data-amt="listset" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a price of your own"></div>'); }   // (the quick prices with no bids in the way: the card never pages)
   function mgFreeActions(d,p,known){ const a=mgFreeAskSeen(d,p);
     let h='<div class="mgFacts">'+mgFact('WANTS',(known?'':'~')+money(a.wage)+'/wk')+mgFact('TO SIGN',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'var(--warn)':'')+'</div>';
     if(!known) h+=mgScoutBtn(d,p,null);
@@ -19389,7 +19467,7 @@
   // (v151) the bid's quick figures: half their price, three-quarters, their price, a tenth over -- and any figure typed
   const BID_PCT=[[0.5,'HALF'],[0.75,'3/4'],[1,'THEIR PRICE'],[1.1,'+10%']];
   function bidQuick(d,p,ask,act){ return '<div class="mgQuick">'+BID_PCT.map(([k,l])=>'<button class="mgMini" data-mg="'+act+'" data-pid="'+p.id+'" data-k="'+k+'">'+l+'</button>').join('')
-      +'<input class="mgAmtIn" inputmode="numeric" data-amt="'+act+'" data-pid="'+p.id+'" placeholder="or type a figure" aria-label="a figure of your own"></div>'; }
+      +'<input class="mgAmtIn" inputmode="numeric" data-amt="'+act+'" data-pid="'+p.id+'" placeholder="type a figure" aria-label="a figure of your own"></div>'; }   // (v152: on the buttons' row, not one of its own -- a card whose head ran to four lines went over on a narrow phone)
   function mgBuyActions(d,p,c,known){ const ask=mgAsk(d,p,c);
     let h='<div class="mgFacts">'+mgFact('ASKING',money(ask),'var(--warn)')+(known?mgFact('WORTH',money(mgValue(d,p)),ask>mgValue(d,p)*1.3?'var(--bad)':ask<mgValue(d,p)*0.9?'var(--good)':''):'')   // (v151: what he's worth beside it, once scouted)
       +mgFact('WANTS',(known?'':'~')+money(mgDemandSeen(d,p,true))+'/wk')
@@ -19424,7 +19502,7 @@
       h+='<div class="bpSect">'+{GK:'GOALKEEPERS',DEF:'DEFENDERS',MID:'MIDFIELDERS',ATT:'FORWARDS'}[role]+'</div><div class="mgList">';
       for(const p of L){ const tags=(xi.has(p)?'<span class="mgTag on">XI</span>':subs.has(p)?'<span class="mgTag on">SUB</span>':'')+(d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':'')
           +(p.loan?'<span class="mgTag">LOAN</span>':'')+((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'')+(p.cAsk?'<span class="mgTag bad">WANTS A NEW DEAL</span>':'');
-        h+=mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+potTxt(d,p,{mine:true},true)+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
+        h+=mgRow(d,p,{ovr:p.ovr+trendHtml(p)+'<i class="pot">'+potTxt(d,p,{mine:true},true)+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
       h+='</div>'; }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
     return mgPanes('<div class="sqList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
@@ -19434,12 +19512,12 @@
     L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
       if(m){ const home=m[0]===d.clubId, opp=home?m[1]:m[0], next=nx&&nx.kind==='league'&&i===d.md; let right;
         if(m[2]!=null) right=res(home?m[2]:m[3],home?m[3]:m[2]);
-        else right=next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+Math.round(mgStrength(d,opp))+'</span>';
+        else right=next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+clubRating(d,opp)+'</span>';
         h+='<div class="mgFx'+(next?' next':'')+'"><span class="md">'+(i+1)+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,opp))+'</span>'+right+'</div>'; }
       const c=CUP_CAL[i], C=c&&d.cup&&!d.cup.off&&d.cup.s===d.season&&d.cup[c[0]];   // (the midweek after it: your cup tie, if you're still in)
       if(C&&C.in.includes(d.clubId)){ const K=CUP[c[0]], t=cupTies(d,c[0],c[1]).find(x=>x[0]===d.clubId||x[1]===d.clubId), run=mgCupRun(d,c[0]);
         if(t){ const home=t[0]===d.clubId, next=nx&&nx.kind==='cup'&&nx.key===c[0]&&nx.r===c[1], ko=c[0]!=='cl'||c[1]>=6;
-          const right=t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+Math.round(mgStrength(d,home?t[1]:t[0]))+'</span>';
+          const right=t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+clubRating(d,home?t[1]:t[0])+'</span>';
           h+='<div class="mgFx cup'+(next?' next':'')+'"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,home?t[1]:t[0]))+'</span>'+right+'</div>'; }
         else if(c[0]!=='cl'&&((C.r[c[1]]||{}).byes||[]).includes(d.clubId)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">a bye: through to the '+K.rounds[c[1]+1].toLowerCase()+'</span><span></span></div>';
         else if(/^IN THE/.test(run)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">'+(K.rounds[c[1]].toLowerCase())+', not drawn yet</span><span></span></div>'; }
@@ -19572,7 +19650,7 @@
   // ---- the academy ----
   function mgProspectsTab(d){ const Y=d.youth||[]; let h='<div class="mgHint">Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.</div>';
     if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
-    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:p.ovr+'<i class="pot">'+potTxt(d,p,{youth:true},true)+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
+    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:p.ovr+trendHtml(p)+'<i class="pot">'+potTxt(d,p,{youth:true},true)+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
       MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgFacilitiesTab(d){ const L=lvOf(d,'academy'); let h=finRow('Academy','level '+L+' of 3',true)+finRow('Intake every summer',(2+L)+' youngsters');
     if(L<3){ const c=bldCost('academy',L+1), need=clubNeed('academy',L+1), why=bldBlock(d,'academy');
@@ -19879,6 +19957,8 @@
       case 'papers': pileShow(d,true); return;
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+MG_LEAGUE[d.tier]+': pre-season, and the window is open.','var(--good)'); return;
       case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
+      case 'talkcard': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(talkedThisWeek(d,p)){ say(TALK_AGAIN); break; }   // (v152: A WORD WITH HIM, from his card)
+        const m0=p.mor??MOR0, L=mgTalk(d,p), up=Math.round(((p.mor??MOR0)-m0)*10)/10; MGUI.talk={pid, w:d.weeks||0, L:L.concat(up>0?['mood +'+up.toFixed(1)]:[])}; mgSave(d); break; }
       case 'bidset': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), want=ds.v!=null?+ds.v:mgRound(ask*(+ds.k));   // (v151: a quick figure, or one typed)
         if(!(want>0)) break; MGUI.bid={pid,fee:Math.max(mgRound(ask*0.5),mgRoundF(want))}; break; }
       case 'bidstep': { const f=mgFind(d,pid); if(!f||!f.club) break; const Bs=mgBidOf(d,pid); if(Bs&&Bs.st==='more'){ mgCounterStep(d,Bs,+ds.dir); break; }   // (haggling: between your last and theirs)
