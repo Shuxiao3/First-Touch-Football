@@ -38,28 +38,33 @@ r = await K(`(()=>{ const d=CAREER.data, P=d.roster.map(p=>popOf(d,p)), p=d.rost
   const el=document.querySelector('#bpBody .mgPop b'); return { P, ok:P.every(v=>Number.isInteger(v)&&v>=1&&v<=99), card:el?+el.textContent:null, want:popOf(d,p), name:p.name }; })()`);
 ok(r.ok && r.card === r.want, 'every man has a popularity, 1-99 (' + r.P.join(' ') + '), on his card: ' + r.name + ' ' + r.card);
 await K('hideBldg()');
-r = await K(`(()=>{ const d=CAREER.data, b=Object.assign({},d.roster[1],{id:-7,role:'MID',ovr:MG_LEVEL[d.tier],goals:0,as:0,cs:0,rn:0,rs:0,fame:0,hg:0,age:25,since:d.season}), T=(o,m)=>popTarget(d,Object.assign({},b,o),d.tier,!!m);
-  const t0=T({}); return { t0, up:T({ovr:b.ovr+10})-t0, goals:T({goals:4})-t0, form:T({rn:4,rs:30})-t0, hg:T({hg:1})-t0, fame:T({fame:10})-t0, young:T({age:20})-t0,
-    years:T({since:d.season-2},1)-T({},1), cap:T({id:d.cap},1)-T({},1) }; })()`);
-ok(r.up === 25 && r.goals === 6 && r.form === 12 && r.hg === 6 && r.fame === 10 && r.young === 4 && r.years === 6 && r.cap === 5,
-  'what the fans make of a man: 2.5 a point over his league\'s level (+' + r.up + ' at ten), 1.5 a goal (+' + r.goals + ' for four), his form (+' + r.form + ' at 7.5), the academy (+' + r.hg + '), his honours (+' + r.fame + '), young and good (+' + r.young + '), his years with you (+' + r.years + ' for two), the armband (+' + r.cap + ')');
+r = await K(`(()=>{ const d=CAREER.data, b=Object.assign({},d.roster[1],{id:-7,role:'MID',ovr:72,goals:0,as:0,cs:0,rn:0,rs:0,fame:0,hg:0,age:25,since:d.season}), T=(o,t,m,id)=>popTarget(d,Object.assign({},b,o),t||d.tier,!!m,id);
+  const s8={goals:8,rn:4,rs:30}, keep=d.cup; d.cup={cl:{in:[-99]}}; const cl=T(s8,4,false,-99)-T(s8,4,false,null); d.cup=keep;
+  return { q:[55,60,70,80,90].map(v=>Math.round(popQ(v))), L2:Math.round(T(s8,1)), L1:Math.round(T(s8,2)), CH:Math.round(T(s8,3)), PL:Math.round(T(s8,4)), cl:+cl.toFixed(1),
+    goals1:+(T({goals:4},1)-T({},1)).toFixed(2), goals4:+(T({goals:4},4)-T({},4)).toFixed(2), form4:+(T({rn:4,rs:30},4)-T({},4)).toFixed(2), hg1:+(T({hg:1},1)-T({},1)).toFixed(2), fame:+(T({fame:10},1)-T({},1)).toFixed(2),
+    years:+(T({since:d.season-2},1,1)-T({},1,1)).toFixed(2), cap:+(T({id:d.cap},1,1)-T({},1,1)).toFixed(2) }; })()`);
+info('popularity, across the game: ' + JSON.stringify(r));
+ok(r.q.join() === '6,11,26,49,80' && r.L2 < r.L1 && r.L1 < r.CH && r.CH < r.PL && r.PL - r.L2 >= 15,
+  'one scale for the whole game (v161): how good he is first, on a steep curve (55, 60, 70, 80, 90: ' + r.q.join(', ') + '), and the same man with the same season (a 72, eight goals, 7.5 a game) far better known the bigger the stage -- League 2 ' + r.L2 + ', League 1 ' + r.L1 + ', the Championship ' + r.CH + ', the Premium League ' + r.PL);
+ok(r.goals1 === 1.5 && r.goals4 === 6 && r.form4 === 12 && r.hg1 === 1.5 && r.fame === 10 && r.years === 1.5 && r.cap === 1.25 && r.cl === 12.2,
+  'what he does counts by the stage: four goals +' + r.goals1 + ' in League 2, +' + r.goals4 + ' in the Premium League, his form +' + r.form4 + ' there; the academy +' + r.hg1 + ', two years with you +' + r.years + ', the armband +' + r.cap + ' in League 2; his honours +' + r.fame + ' wherever (they were sized as he won them); a side in the Champions League +' + r.cl + ' on the same season');
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2], t=popTarget(d,p,d.tier,true), s=t>=21?t-20:t+20; p.pop=s; popWeek(d); const a=p.pop;   /* (20 off it, under or over, clear of the floor at 1) */
   const q=mgNewPlayer(d,'MID',60,24,{until:d.season+1}); mgRosterAdd(d,q); const tq=popTarget(d,q,d.tier,true), pq=q.pop; mgRosterRemove(d,d.roster.indexOf(q));
-  return { moved:+Math.abs(a-s).toFixed(2), pq, tq:+(tq-8).toFixed(1) }; })()`);
-ok(Math.abs(r.moved - 4) < 0.11 && Math.abs(r.pq - r.tq) < 0.11, 'a man of yours goes a fifth of the way to it each Monday (20 off it: ' + r.moved + '), and a new man starts eight under it (' + r.pq + ')');
+  return { moved:+Math.abs(a-s).toFixed(2), pq, tq:+(tq-8*POP_STAGE[d.tier]).toFixed(1) }; })()`);
+ok(Math.abs(r.moved - 4) < 0.11 && Math.abs(r.pq - r.tq) < 0.11, 'a man of yours goes a fifth of the way to it each Monday (20 off it: ' + r.moved + '), and a new man starts under it, eight by the stage (' + r.pq + ')');
 r = await K(`(()=>{ const d=CAREER.data; d.potm={s:d.season, snap:{}}; for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)){ p.rn=0; p.rs=0; p.goals=0; }
   const me=d.roster.find(p=>!p.loan); me.rn=4; me.rs=33; me.goals=3; popOf(d,me); const p0=me.pop, f0=me.fame||0; d.wkLog={}; mgPotm(d); const potm=[+(me.pop-p0).toFixed(1), +((me.fame||0)-f0).toFixed(1), !!(d.wkLog.potm&&d.wkLog.potm.you)];
   const st=d.roster[3]; popOf(d,st); const s0=st.pop; d.press={qs:[{q:'?', a:[{t:'He’s the best I’ve worked with.', fx:{pop:[st.id,3]}}]}], i:0}; const said=pressAnswer(d,0); d.press=null;
-  return { potm, press:+(st.pop-s0).toFixed(1), said }; })()`);
-ok(r.potm[2] && r.potm[0] === 10 && r.potm[1] === 5 && r.press === 3 && /popularity/.test(r.said.join(' ')),
-  'an honour lifts him at once: the Player of the Month +' + r.potm[0] + ' (and +' + r.potm[1] + ' to his honours, which last), the manager\'s praise at a press conference +' + r.press + ' ("' + r.said.join(' ') + '")');
+  const sz=POP_STAGE[d.tier]; return { potm, press:+(st.pop-s0).toFixed(1), said, want:[+(10*sz).toFixed(1), Math.round(5*sz*10)/10, +(3*sz).toFixed(1)] }; })()`);
+ok(r.potm[2] && r.potm[0] === r.want[0] && r.potm[1] === r.want[1] && r.press === r.want[2] && /popularity/.test(r.said.join(' ')),
+  'an honour lifts him at once, as big as the stage (League 2: a quarter): the Player of the Month +' + r.potm[0] + ' (and +' + r.potm[1] + ' to his honours, which last), the manager\'s praise at a press conference +' + r.press + ' ("' + r.said.join(' ') + '")');
 
 // --- the fans through the gate, and the shirts -------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, keep=d.roster.map(p=>(popOf(d,p),p.pop)), f0=computeFinance(d); const T=d.roster.slice(0,3); for(const p of d.roster) p.pop=Math.min(p.pop,30); for(const p of T) p.pop=70;
-  const f1=computeFinance(d), books=(mgFinanceTab(d).match(/Your stars’ draw.*?\\+(\\d+)% through the gate/)||[])[1]; const s1=shirtSales(d).wk; for(const p of d.roster) p.pop=40; const s40=shirtSales(d).wk;
-  d.roster.forEach((p,i)=>p.pop=keep[i]); return { d0:f0.draw, d1:f1.draw, a0:f0.attendance/f0.draw, a1:f1.attendance, cap:f1.capacity, books, s1, s40, popF:shirtSales(d).popF }; })()`);
+r = await K(`(()=>{ const d=CAREER.data, keep=d.roster.map(p=>(popOf(d,p),p.pop)), f0=computeFinance(d); const T=d.roster.slice(0,3), as=v=>v/POP_LOCAL[d.tier]; for(const p of d.roster) p.pop=Math.min(p.pop,as(30)); for(const p of T) p.pop=as(70);   /* (v161: by the league's usual -- 70 as before) */
+  const f1=computeFinance(d), books=(mgFinanceTab(d).match(/Your stars’ draw.*?\\+(\\d+)% through the gate/)||[])[1]; const s1=shirtSales(d).wk; for(const p of d.roster) p.pop=as(40); const s40=shirtSales(d).wk;
+  d.roster.forEach((p,i)=>p.pop=keep[i]); return { d0:f0.draw, d1:f1.draw, a0:f0.attendance/f0.draw, a1:f1.attendance, cap:f1.capacity, books, s1, s40, popF:shirtSales(d).popF, at:Math.round(as(70)) }; })()`);
 ok(Math.abs(r.d1 - 1.1) < 1e-9 && Math.abs(r.a1 - r.a0 * 1.1) <= 2 && r.a1 < r.cap && r.books === '10',
-  'your three most popular bring people through the gate: at 70, 10% more (' + Math.round(r.a0) + ' -> ' + r.a1 + '), in the books too ("+' + r.books + '%")');
+  'your three most popular bring people through the gate, against the league\'s usual: at ' + r.at + ' in League 2 (as 70 was before), 10% more (' + Math.round(r.a0) + ' -> ' + r.a1 + '), in the books too ("+' + r.books + '%")');
 ok(r.s1 > r.s40 * 1.2, 'and sell the shirts: ' + r.s1 + ' a week with three at 70, ' + r.s40 + ' with nobody over 40');
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d), w=applyWeek(d,{home:true}), L0=d.ledger.length, b0=d.budget, R=Math.random; Math.random=()=>0.995;
   try{ mgWeekStart(d); } finally { Math.random=R; } const x=d.pile.list.find(y=>y.k==='shirts'), best=popTop(d,1)[0];

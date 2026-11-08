@@ -1289,6 +1289,8 @@
   .tiOpt.on{ color:var(--accInk); background:var(--acc); border-color:var(--acc); }
   .tiPanel.ro .tiOpt{ cursor:default; } .tiPanel.ro .tiOpt:not(.on){ opacity:.55; }
   .tiNote{ font:8px/1.3 'FTC Dot',monospace; color:var(--dim); }
+  .tiWith{ display:flex; flex-direction:column; gap:6px; margin-top:3px; font-size:11px; line-height:1.35; color:var(--ink2); } .tiWith p{ margin:0; }   /* (v161: with the ball, nothing to set) */
+  .tiWith b{ font:11px 'FTC Dot',monospace; font-weight:400; color:var(--acc); letter-spacing:.5px; } .tiWith .tiGoDef{ flex:none; align-self:stretch; margin-top:2px; padding:8px; font-size:12px; }   /* (an .mgBtn grows to 130px in a column: not here) */
   .tiNote b{ color:var(--acc); font-weight:400; }
   .tiPitch{ position:relative; flex:none; height:40px; border-radius:var(--rS); background:repeating-linear-gradient(90deg,#6ec88b 0 8.333%,#5cbc7c 8.333% 16.667%);
     box-shadow:inset 0 0 0 2px #f4fbf2; touch-action:none; cursor:ew-resize; overflow:hidden; }
@@ -1367,13 +1369,7 @@
   .cardBody{ width:36px; height:56px; padding:4px 6px 3px; box-sizing:content-box; flex:none; image-rendering:pixelated; border-radius:var(--r);
     background:linear-gradient(180deg, var(--rowOn) 0 70%, var(--row) 70%); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rimLo); }
   .mgCardHead > .cardBody + div{ margin-right:auto; min-width:0; }
-  /* the other phase's man: a small box with just his number and name, off the corner of his slot -- right and down, so it only
-     clips the corner of a man standing there */
-  .tpitch .tpGhost{ transform:translate(26px,14px); max-width:56px; height:18px; display:flex; align-items:center; padding:0 4px; border-radius:var(--rS);
-    background:rgb(var(--accRGB) / .28); box-shadow:0 0 0 2px rgb(var(--accRGB) / .9); opacity:.9;
-    font:9px/1 'FTC Dot',monospace; font-style:normal; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
-  .tpitch .tpGhost b{ font-weight:400; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .tpitch .tpGhost em{ flex:none; font-style:normal; margin-right:3px; }
+  /* (v161: no box for the other phase's man under each spot any more -- the men slide there as the phase changes: tokSlide) */
   .tacB1 .ptk .ptkOvr, .sqPitch .ptk .ptkOvr, .pxGhost .ptkOvr{ font-size:15px; line-height:1; color:var(--ink); text-shadow:1px 1px 0 var(--ol); }
   .tacB1 .ptk .ptkName, .sqPitch .ptk .ptkName, .pxGhost .ptkName{ flex:0 1 auto; min-width:0; font:9px/1 'FTC Dot',monospace; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }   /* (a long name gives way; his number stays) */
   .tacB1 .ptk.oop, .sqPitch .ptk.oop{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn); } .tacB1 .ptk.oop .ptkOvr, .sqPitch .ptk.oop .ptkOvr{ color:var(--warn); }
@@ -2794,9 +2790,9 @@
   // with the ball far off) and where the side starts to engage (loe: the line of engagement, where its first line
   // stands), which line stands on that (eng: the forwards, with the midfield between them and the back line; or the
   // midfield, with the forwards ahead of it), what the back line does about a runner (dline), how the back and middle lines
-  // go into a man on the ball (dtk, mtk), and what the forwards do (aline). WITH IT: how far each line goes forward (druns,
-  // mruns, aruns) and what the wide men look for (wide). A style picked sets its own (TI_STYLE); change them as you like
-  // from there. (Before v112 each spot in a shape had its own. Before v116 how the side played out from the back was one
+  // go into a man on the ball (dtk, mtk), and what the forwards do (aline). (v161: nothing WITH IT any more -- how far
+  // each line went forward and what the wide men looked for; with the ball a side plays to its style and its men to their
+  // own: see TI_RUNS.) A style picked sets its own (TI_STYLE); change them as you like from there. (Before v112 each spot in a shape had its own. Before v116 how the side played out from the back was one
   // too, BUILD-UP: it comes with the style now -- buildOf.)
   const TI_DL=[15,50], TI_LOE=[30,80], TI_GAP=14;   // where the two lines can go (m from our goal line), and the least room between them
   const TI_OPTS={
@@ -2810,16 +2806,16 @@
            tip:{front:'The midfield jockeys: goal-side, a yard off, in only when the ball’s there to win.', bal:'The midfield picks its moment.', tackle:'The midfield gets tight and goes in for the ball.'}},
     aline:{ph:'def', lbl:'FORWARDS', dflt:'line', opts:[['conserve','CONSERVE'],['line','DEFEND THE LINE'],['press','PRESS UP']],
            tip:{conserve:'Stay up the pitch for the ball out, and save their legs.', line:'Hold the line of engagement, in the way of the passes into midfield.', press:'Go at the ball beyond the line of engagement, and mark the men it could go to.'}},
-    druns:{ph:'atk', lbl:'DEFENDERS', dflt:'support', opts:[['stay','STAY BACK'],['support','SUPPORT'],['push','PUSH UP']],
-           tip:{stay:'The back line stays back, against the counter.', support:'The full-backs join the midfield once we’re in their third.', push:'The full-backs up from the build-up and overlapping; the centre-backs closer to the play.'}},
-    mruns:{ph:'atk', lbl:'MIDFIELD', dflt:'bal', opts:[['behind','STAY BEHIND'],['bal','BALANCED'],['fwd','GET FORWARD']],
-           tip:{behind:'The central midfielders stay behind the ball, and wait at the edge of the box for a cross.', bal:'One holds; the others support between their lines.', fwd:'One holds; the others run in behind and get into the box.'}},
-    aruns:{ph:'atk', lbl:'FORWARDS', dflt:'bal', opts:[['short','COME SHORT'],['bal','BALANCED'],['run','IN BEHIND']],
-           tip:{short:'The strikers drop between their lines for it to feet.', bal:'One pins their last line; the other comes short.', run:'The strikers stay on their last man and run in behind.'}},
-    wide: {ph:'atk', lbl:'WIDE MEN', dflt:'bal', opts:[['feet','TO FEET'],['bal','BALANCED'],['run','IN BEHIND']],
-           tip:{feet:'The wingers and wide midfielders come towards the ball, for it to feet.', bal:'High and wide, running in behind when it’s on.', run:'High, on their last man, and running in behind.'}},
   };
   const TI_KEYS=Object.keys(TI_OPTS);
+  // WITH THE BALL (v161: no longer yours to set -- the instructions are for without it): how far each line goes forward
+  // and what the wide men look for, the same for every side and every style -- a full-back supports, the midfield one
+  // holding and the rest between their lines, a forward pinning their line and one coming short, the wide men high and
+  // wide. What makes a side's play its own with the ball is its style (STYLE_PLAN: WING PLAY's full-backs overlap,
+  // DIRECT goes over the top, a counter breaks...) and each man's habit (INS_LEAN: a wing-back gets forward, a poacher
+  // runs in behind, a false nine drops in). (Before, DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN were set WITH THE BALL;
+  // a career's or a club's settings are dropped as it's loaded: tiClean keeps only TI_KEYS.)
+  const TI_RUNS={druns:'support', mruns:'bal', aruns:'bal', wide:'bal'};
   // what each style plays to, over the defaults: GEGENPRESS high and at them; a DIRECT COUNTER deep, the midfield on its
   // line of engagement
   const TI_STYLE={neutral:{}, control:{}, wing:{}, direct:{}, fluid:{},
@@ -2846,7 +2842,7 @@
     return tiLines(d); }
   // each side's, for the match
   const TI={G:tiDefault(), R:tiDefault()};
-  function ti(team,k){ const o=TI[team]; return o&&o[k]!=null ? o[k] : k==='dl'?32 : k==='loe'?54 : TI_OPTS[k]?TI_OPTS[k].dflt:null; }
+  function ti(team,k){ const o=TI[team]; return o&&o[k]!=null ? o[k] : k==='dl'?32 : k==='loe'?54 : TI_OPTS[k]?TI_OPTS[k].dflt:TI_RUNS[k]??null; }   // (v161: a line's runs with the ball, TI_RUNS -- a test may set one on TI to try the engine)
   function tiM(team,k){ return ti(team,k)*MK; }                     // a line, in pitch units
   // THE OLD POSTURE, for the code that still reads one (TAC[team].def): a high press with the forwards pressing up and the
   // line of engagement in their half; a deep block with the back line deep; else a mid block
@@ -2927,8 +2923,22 @@
   function tiPitchPaint(el,o){ const pc=m=>(m/PITCH_LEN*100).toFixed(1)+'%', B=tiBlockAt(o);
     for(const k of ['dl','loe']){ const l=el.querySelector('[data-til="'+k+'"]'), t=el.querySelector('[data-titag="'+k+'"]'); if(l) l.style.left=pc(o[k]); if(t){ t.style.left=pc(o[k]); t.textContent=(k==='dl'?'DEF ':'ENGAGE ')+Math.round(o[k])+' m'; } }
     for(const d of el.querySelectorAll('[data-tidot]')) d.style.left=pc(B[{def:'D',mid:'M',att:'F'}[d.dataset.tidot]]); }
-  function tiPanelHtml(o,phase,attr,ro,ctx,back){ const ks=TI_KEYS.filter(k=>TI_OPTS[k].ph===phase);
+  // (v161: WITH THE BALL there's nothing to set -- the panel says what the side does instead: its style's way, each man's
+  // own, and a button over to the instructions, without it)
+  const STYLE_WITH={neutral:'positional play -- wide men on the touchlines, two men always open for a pass, runs in behind when they’re on',
+    gegen:'quick and forward, men running in behind, and straight back at the ball for five seconds when it’s lost',
+    control:'short passes and patience -- three men always close for a pass, few long balls, few runs in behind till the chance is clear',
+    wing:'get it wide and get it in -- wingers high on the touchlines, full-backs overlapping, early crosses for the posts',
+    direct:'long balls up to the forwards on their last line, the midfield up behind them for the second ball',
+    fluid:'the moment it’s won, the wide men and a midfielder sprint past the ball and it goes forward on the carry and in quick, short passes',
+    dcounter:'the moment it’s won, long and in behind, for the forwards and the wide men racing up'};
+  function tiWithHtml(attr,style){ const k=styleKey(style||'neutral');
+    return '<div class="tiWith"><p>Nothing to set with the ball: each man plays to his own style -- a wing-back gets forward, a poacher runs in behind -- and the side to its style.</p>'
+      +'<p><b>'+styleName(k)+':</b> '+(STYLE_WITH[k]||STYLE_WITH.neutral)+'.</p>'
+      +'<button class="mgBtn tiGoDef" '+(attr==='mti'?'data-mtph':'data-ctphase')+'="def">WITHOUT THE BALL ▸</button></div>'; }
+  function tiPanelHtml(o,phase,attr,ro,ctx,back,style){ const ks=TI_KEYS.filter(k=>TI_OPTS[k].ph===phase);
     let h='<div class="tiPanel'+(ro?' ro':'')+'"><div class="tiHead"><span>TEAM · '+(phase==='atk'?'WITH THE BALL':'WITHOUT THE BALL')+'</span>'+(back||'')+'</div>';
+    if(!ks.length) return h+tiWithHtml(attr,style)+'</div>';
     if(phase==='def') h+=tiPitchHtml(o,ctx||attr,ro);
     for(const k of ks){ const I=TI_OPTS[k], v=o[k]||I.dflt;
       h+='<div class="tiRow" data-tirow="'+k+'"><span class="tiLbl">'+I.lbl+'</span><span class="tiOpts'+(I.opts.length>3?' four':'')+'">'
@@ -13128,7 +13138,7 @@
     pot:'POTENTIAL: how good he could become, as your coaches or scouts see it. The more they know of him, the closer the range.',
     potNo:'POTENTIAL, not scouted: your scouts haven\'t seen him, so how good he could become is hidden. With a scouts\' house, SCOUT HIM on his card\'s RATINGS side.',
     sixNo:'Not scouted: his six are hidden, and his rating\'s a range, till your scouts have seen him. With a scouts\' house, SCOUT HIM here.',
-    pop:'POPULARITY, 0 to 100: how the fans see him. Your three most popular bring the crowds in, and the shirts sell by it.',
+    pop:'POPULARITY, 1 to 99, across the whole game: 99 the best-known men in it. It takes the top flight to be known at all, and what a man does counts far more in the Premium League and the Champions League than in League 2. Your three most popular bring the crowds in, and the shirts sell by it.',
     fit:'FITNESS: how fresh he is between games. Tired, he plays below his rating and gets hurt more easily; rest brings it back.',
     stam:'STAMINA: his legs this game, spent sprinting. The red tick is as far as they\'ll come back now.'
   };
@@ -15402,7 +15412,7 @@
   function mtTok(t,si,L,T,kind,role,k,pos,n,cc){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);   // (pos: the spot's fit -- spotFit)
     return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
-  function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false);   // (theirs are theirs: their men show their ratings)
+  function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false,TAC.G&&TAC.G.style);   // (theirs are theirs: their men show their ratings)
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const pos=si===li.gk?'GK':sl?spotFit(sl):null, at=mtRating(e,role,pos), fc=fitCls(fitPos(e),role,pos), sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
@@ -15428,9 +15438,6 @@
     let h='<div class="tacB1'+(mine?'':' ro')+'"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-mtph="atk">WITH BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-mtph="def">WITHOUT</button></div>'
       +drop('form',form)+drop('width',wl)+drop('style',sl)+(mine?insBtn():'')+'</div>';
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
-    const oph=phase==='atk'?'def':'atk', oslots=slotsFor(t,formFor(t,oph),oph), oorder=li[oph]||[];
-    for(let i=0;i<oorder.length&&i<oslots.length;i++){ const e=SQUAD[t][oorder[i]]; if(!e) continue; const q=mtPos(t,oslots[i]);
-      h+=ghostTok(q.L,q.T,e.num,surname(e.name),q.k,q.n); }
     h+=mtTok(t,li.gk,5.5,50,'gk','GK',0,'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=mtPos(t,slots[i]); h+=mtTok(t,order[i],q.L,q.T,'field',slots[i].role,q.k,spotFit(slots[i]),q.n,q.cc); }
     h+='</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,0,0,'bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
@@ -15585,7 +15592,7 @@
     const w=e.target.closest('[data-mtwidth]'); if(w){ MT.drop=null; setMenuWidth(t,MT.phase,+w.dataset.mtwidth); renderMatchTac(); return; }
     const s=e.target.closest('[data-mtstyle]'); if(s){ MT.drop=null; if(s.disabled){ renderMatchTac(); return; } setStyle(t,s.dataset.mtstyle);
       if(t==='G'&&CAREER&&CAREER.data){ CAREER.data.style=TAC.G.style; CAREER.data.ti=Object.assign({},TI.G); if(CAREER.key) writeSave(CAREER.key,CAREER.data); } saveSettings(); if(EXH.on&&EXH.play) saveClubSides(); renderMatchTac(); return; }
-    const ph=e.target.closest('[data-mtph]'); if(ph){ MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); return; }
+    const ph=e.target.closest('[data-mtph]'); if(ph){ const box=document.getElementById('mtacBody'), was=tokSpots(box); MT.phase=ph.dataset.mtph; MT.drop=null; renderMatchTac(); tokSlide(box,was); return; }   // (v161: the men slide to their spots)
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; renderMatchTac(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; renderMatchTac(); return; }
     const mi=e.target.closest('[data-mti]'); if(mi){ if(mi.disabled||t!=='G') return; tiNoteK=mi.dataset.mti; setMatchTI(t,mi.dataset.mti,mi.dataset.v); renderMatchTac(); return; }
@@ -17247,7 +17254,7 @@
     if(!S.vet&&d.md>=2){ const role=mgPick(['DEF','DEF','MID','MID','MID','ATT','ATT']),   // (v109: never a keeper)
          from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
       const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
-      p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=15; p.hometown=true; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
+      p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=Math.round(15*(POP_STAGE[d.tier]||0.25)*10)/10; p.hometown=true; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
       mgNews(d,p.name+' ('+p.age+'), once of '+(S.vetFrom||'the top flight')+', comes home to '+d.clubName+' on a fraction of his wage.'); }
     if(!S.kid&&d.md>=5){ S.kid=1; S.kidAsk={name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), ovr:60+Math.floor(Math.random()*10), pot:85+Math.floor(Math.random()*6)};
       mgNews(d,'A 16-year-old, '+S.kidAsk.name+', has asked to join '+d.clubName+'.'); } }
@@ -17258,7 +17265,7 @@
     if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
       for(let i=0;i<300&&cwOverall(p.role,cl)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
       p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
-    p.wage=mgRound(mgWage(p.ovr)*0.5); p.fame=8; mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;   // (the town's heard about him)
+    p.wage=mgRound(mgWage(p.ovr)*0.5); p.fame=Math.round(8*(POP_STAGE[d.tier]||0.25)*10)/10; mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;   // (the town's heard about him)
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+((STYLES[p.style]||{}).name||(role==='GK'?'a keeper':sub))+', rated '+p.ovr+', a ceiling of '+kidPot(A).join('–')+'.');
     return null; }
   function mgMarketOpen(d){ d.lv.market=1; if(d.story) d.story.phone=2; mgNews(d,'The chairman calls: from now on, transfers go through your phone.'); }
@@ -18277,37 +18284,56 @@
     p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(c.players,p); c.players.push(p); recFee(d,'fs',p,fee);
     mgNews(d,'The board has sold '+p.name+' to '+c.name+' for '+money(fee)+': the club owed more than it would stand for.'); careerEv(d,p,'Sold to '+(c.code||c.name));
     return {name:p.name, club:c.name, fee}; }
-  // ===== POPULARITY (v105) ===============================================================================================
-  // Every man has a popularity, 1-99: how much the fans think of him -- on his card. It comes of how good he is against
-  // his league (2.5 a point either side of its level), his season -- goals, assists, a defender's or keeper's clean
-  // sheets, his form (his average rating, three games on) -- his years at the club (yours: 3 a season, to 12), the
-  // armband (5), coming up through your academy (6), being a bright young thing (4: 21 or under, near the league's
-  // level), and his honours (p.fame, to 30: the hometown hero's 15, a wonderkid's 8, a Player of the Month 5 and of the
-  // Year 10, the manager's praise a little; a fifth of it fades each summer). A man of yours (p.pop) goes a fifth of
-  // the way to that each Monday (popWeek), and an honour lifts him there and then (popBump); a new man starts eight
-  // under it -- he has to win the fans over. Anyone else's is what it comes to at his club. Your three most popular
-  // bring people through the gate (popDraw: from 40 between them, 1% more for every 3 points, to 20%) and sell the shirts.
-  function popTarget(d,p,tier,mine){ const lvl=MG_LEVEL[tier||d.tier||1]||55, n=p.rn||0, back=p.role==='GK'||p.role==='DEF';
-    let t=35+2.5*((p.ovr||0)-lvl)+Math.min(15,(p.goals||0)*1.5)+Math.min(6,(p.as||0)*0.6)+(back?Math.min(8,(p.cs||0)*0.8):0)
-      +(n>=3?clamp(((p.rs||0)/n-6.5)*12,-8,12):0)+Math.min(30,p.fame||0)+(p.hg?6:0)+((p.age||25)<=21&&(p.ovr||0)>=lvl-2?4:0);
-    if(mine) t+=Math.min(12,Math.max(0,(d.season||1)-(p.since??d.season))*3)+(d.cap===p.id?5:0);
-    return clamp(t,1,99); }
+  // ===== POPULARITY (v105; v161: across the whole game) ===================================================================
+  // Every man has a popularity, 1-99: how well known he is -- across the whole game, not just his league. 99 is the
+  // best-known in it, a Premium League or Champions League star; a League 2 man is barely known, whatever his season.
+  // It comes first of how good he is (popQ, a steep curve: few below the top flight are known at all -- 60 is 11, 70
+  // is 26, 80 is 49, 90 is 80), then of what he does and where he does it (POP_STAGE: a quarter as much in League
+  // 2 as in the Premium League, two-fifths in League 1, two-thirds in the Championship -- and a side in the Champions
+  // League a third more again, and 5 on top): his season -- goals, assists, a defender's or keeper's clean sheets, his
+  // form (his average rating, three games on) -- his years at the club (yours: 3 a season, to 12), the armband (5), coming
+  // up through your academy (6), being a bright young thing (4: 21 or under, near the league's level); and his honours
+  // (p.fame, to 30: a Player of the Month 5 and of the Year 10, the Golden Boot 8, the hometown hero's and a wonderkid's,
+  // the manager's praise a little -- each as big as the stage it's won on; a fifth of it fades each summer). A man of
+  // yours (p.pop) goes a fifth of the way to that each Monday (popWeek), and an honour lifts him there and then (popBump,
+  // by the stage); a new man starts under it -- he has to win the fans over. Anyone else's is what it comes to at his
+  // club (a man at a club abroad: his season there taken as a good one, as it isn't played here). (Before v161 it went by his league -- 35 at its level, 2.5 a point either side -- so League 2's best were as
+  // well known as the Premium League's, 70 and more, and the best men in the game, abroad, hardly at all.) What it's
+  // worth to the club: popRel.
+  const POP_STAGE={1:0.25,2:0.4,3:0.65,4:1};
+  const popQ=ovr=>99*Math.pow(clamp(((ovr||0)-40)/55,0,1),2.2);
+  const popCL=(d,id)=>{ const C=d.cup&&d.cup.cl; return !!(C&&C.in&&id!=null&&C.in.includes(id)); };   // (a side in this season's Champions League)
+  function popStage(d,tier,id){ return (POP_STAGE[tier||d.tier||1]||0.25)*(popCL(d,id)?1.3:1); }
+  function popTarget(d,p,tier,mine,clubId){ const T=tier||d.tier||1, lvl=MG_LEVEL[T]||55, n=p.rn||0, back=p.role==='GK'||p.role==='DEF', id=clubId!=null?clubId:mine?d.clubId:null;
+    let did=Math.min(15,(p.goals||0)*1.5)+Math.min(6,(p.as||0)*0.6)+(back?Math.min(8,(p.cs||0)*0.8):0)
+      +(n>=3?clamp(((p.rs||0)/n-6.5)*12,-8,12):0)+(p.hg?6:0)+((p.age||25)<=21&&(p.ovr||0)>=lvl-2?4:0);
+    if(mine) did+=Math.min(12,Math.max(0,(d.season||1)-(p.since??d.season))*3)+(d.cap===p.id?5:0);
+    else if(id!=null&&d.world&&(d.world.clubs[id]||{}).euro) did+=12;   // (a man abroad: his season there isn't played here -- taken as a good one)
+    return clamp(popQ(p.ovr)+popStage(d,T,id)*did+(popCL(d,id)?5:0)+Math.min(30,p.fame||0),1,99); }
   function popOf(d,p,club){ if((d.roster||[]).includes(p)){ if(p.pop==null) p.pop=Math.round(popTarget(d,p,d.tier,true)); return Math.round(p.pop); }
-    return Math.round(popTarget(d,p,club?club.tier:d.tier,false)); }
+    return Math.round(popTarget(d,p,club?club.tier:d.tier,false,club?club.id:null)); }
   function popWeek(d){ for(const p of d.roster||[]){ const t=popTarget(d,p,d.tier,true), v=p.pop??t; p.pop=Math.round(clamp(v+(t-v)*0.2,1,99)*10)/10; } }
-  function popBump(d,p,n,fame){ if(!p) return; p.fame=Math.round(Math.min(40,(p.fame||0)+(fame??0))*10)/10;
-    if(d.roster.includes(p)) p.pop=Math.round(clamp((p.pop??popTarget(d,p,d.tier,true))+n,1,99)*10)/10; }
-  const popNew=(d,p)=>{ p.pop=Math.round(clamp(popTarget(d,p,d.tier,true)-8,1,99)*10)/10; };   // (a new man: he has to win them over)
+  // (an honour, or a word from you: n points and fame to his honours, each as big as the stage -- your league's)
+  function popBump(d,p,n,fame){ if(!p) return; const st=POP_STAGE[d.tier||1]||0.25; p.fame=Math.round(Math.min(40,(p.fame||0)+(fame??0)*st)*10)/10;
+    if(d.roster.includes(p)) p.pop=Math.round(clamp((p.pop??popTarget(d,p,d.tier,true))+n*st,1,99)*10)/10; }
+  const popNew=(d,p)=>{ p.pop=Math.round(clamp(popTarget(d,p,d.tier,true)-8*(POP_STAGE[d.tier||1]||0.25),1,99)*10)/10; };   // (a new man: he has to win them over)
   function popTop(d,n){ return (d.roster||[]).slice().sort((a,b)=>popOf(d,b)-popOf(d,a)).slice(0,n||3); }
-  function popStar(d){ const T=popTop(d,3); return T.length?T.reduce((a,p)=>a+popOf(d,p),0)/T.length:0; }
-  const popDraw=d=>clamp(1+(popStar(d)-40)/300,1,1.2);
+  function popStar(d){ const T=popTop(d,3); return T.length?T.reduce((a,p)=>a+(p.pop??popOf(d,p)),0)/T.length:0; }   // (v161: to the tenth -- down in League 2 a point is a big share)
+  // WHAT IT'S WORTH TO THE CLUB (v161): the crowd and the shirts go by your three most popular against your league's
+  // usual -- a League 2 side's best-known men are barely known across the game, but they're its own, and the town comes
+  // for them. popRel: your three as they'd have been before v161 (POP_LOCAL, measured: a league's usual side's three came
+  // to about 46, 44, 47 and 51 then, and come to about 10, 19, 34 and 62 now), so the gate and the shirts are as they
+  // were, league by league.
+  const POP_LOCAL={1:4.5,2:2.3,3:1.4,4:0.82};
+  const popRel=d=>popStar(d)*(POP_LOCAL[d.tier||1]||1);
+  const popDraw=d=>clamp(1+(popRel(d)-40)/300,1,1.2);
   const popWord=v=>v>=85?'an idol':v>=70?'a fans’ favourite':v>=50?'popular':v>=30?'known':'barely known';
   // SHIRT SALES: each Monday, the week's at the club shop (v105: no longer with a matchday's money) -- more the more fans
   // there are (SHIRT_FAN a fan a week, by the league), the more popular your three most popular men (popF: 0.65 and a
-  // hundredth of their popularity, 0.85 to 1.6 -- a star sells shirts) and the happier the club (the dressing room's
+  // hundredth of their popularity against the league's, popRel -- 0.85 to 1.6: a star sells shirts) and the happier the club (the dressing room's
   // mood: 6% a point either side of settled). Who sells the most: shared out by popularity, squared.
   const SHIRT_FAN={1:0.22,2:0.26,3:0.3,4:0.36};
-  function shirtSales(d){ const tier=d.tier||1, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[tier]||1000), top=popStar(d);
+  function shirtSales(d){ const tier=d.tier||1, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[tier]||1000), top=popRel(d);
     const popF=clamp(0.65+top/100,0.85,1.6), moodF=clamp(1+0.06*((d.tm??MOR0)-MOR0),0.8,1.25);
     return {wk:Math.round(L*(SHIRT_FAN[tier]||SHIRT_FAN[1])*popF*moodF), popF, moodF, fans:L, top}; }
   // the Monday's sales, into the bank -> for the papers: what came in, and the best sellers' shares
@@ -18823,12 +18849,12 @@
   // up: a tap on it again, or on a man, and it's his card (v116: before, a button on his card turned it over)
   let cardSide='rate', TARM=null;   // (TARM, v158: the man whose SWAP was tapped -- the next man tapped changes places with him)
   const insBtn=()=>'<button class="mgBtn tbIns'+(cardSide==='instr'?' go':'')+'" data-cside="'+(cardSide==='instr'?'rate':'instr')+'">INSTRUCTIONS</button>';
-  function tiSideHtml(o,phase,attr,ro){ return '<div class="tbCard tiCard">'+tiPanelHtml(o,phase,attr,ro,null,'')+'</div>'; }
+  function tiSideHtml(o,phase,attr,ro,style){ return '<div class="tbCard tiCard">'+tiPanelHtml(o,phase,attr,ro,null,'',style)+'</div>'; }
   // a man tapped while the instructions are up: his card, and INSTRUCTIONS unlit (root: the screen it's on)
   function cardToRate(root){ if(cardSide==='rate') return; cardSide='rate'; const b=root&&root.querySelector('.tbIns'); if(b){ b.classList.remove('go'); b.dataset.cside='instr'; } }
   function paintCareerRight(d){ const rp=document.getElementById('cTacRight'); if(!rp)return; rp.innerHTML=tbCard(d, statViewRi, tacPhase); }
   // THE MAN YOU TAPPED: his rating where he's playing and his six -- or, turned over, the team's instructions
-  function tbCard(d, ri, phase){ if(cardSide==='instr') return tiSideHtml(d.ti||(d.ti=tiDefault(d.style)),phase,'cti',false);
+  function tbCard(d, ri, phase){ if(cardSide==='instr') return tiSideHtml(d.ti||(d.ti=tiDefault(d.style)),phase,'cti',false,d.style);
     const p=d.roster[ri]; if(!p) return '<div class="mgPick0">Tap a player for his card.</div>';
     const lu=d.lineup, f=phase==='def'?d.formDef:d.formation, si=lu[phase].indexOf(ri), sl=si>=0?careerSlots(f,phase)[si]:null;
     const role=ri===lu.gk?'GK':sl?sl.role:null, pos=ri===lu.gk?'GK':sl?spotFit(sl):null, at=role?ovrAt(p,role,pos):p.ovr, fc=fitCls(fitPos(p),role,pos), sty=styleOf(p), st=mgStats(p);
@@ -18874,9 +18900,25 @@
     return '<button class="ptk'+fitCls(fitPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+(TARM===ri?' armed':'')+(p.inj?' inj':'')+'"'
       +(kind==='bench'?'':ptkAt(L,T,slotRole,k,n,cc))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
       +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r,natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
-  // the other phase's shape, under the men: where each of them goes when the ball changes hands -- his number and name in
-  // a small lit box off the bottom-right corner of the spot
-  function ghostTok(L,T,num,name,k,n){ return '<i class="tpGhost" style="left:'+L.toFixed(1)+'%;top:'+ptkTop(T,k,n)+'">'+(num?'<em>#'+num+'</em>':'')+'<b>'+name+'</b></i>'; }
+  // THE MEN MOVE (v161): WITH BALL or WITHOUT tapped, each man's card slides from where he stood to where he goes -- in
+  // place of the small lit box that sat off each spot with the other phase's man in it (gone). tokSpots: each card's
+  // middle on the screen, by its man (data-ri on the training pitch, data-si in a match), taken just before the board is
+  // painted afresh; tokSlide: the new cards drawn at those spots, then eased to their own. Not with Reduce Motion on.
+  function tokSpots(root){ const m=new Map(); if(!root) return m;
+    for(const el of root.querySelectorAll('.tpitch .ptk')){ const k=el.dataset.ri??el.dataset.si, r=el.getBoundingClientRect(); if(k!=null&&r.width) m.set(k,{x:r.left+r.width/2, y:r.top+r.height/2}); }
+    return m; }
+  const TOK_SLIDE=0.42;   // (s)
+  function tokSlide(root,before){ if(!root||!before||!before.size) return 0;
+    try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return 0; }catch(e){}
+    const moved=[];
+    for(const el of root.querySelectorAll('.tpitch .ptk')){ const k=el.dataset.ri??el.dataset.si, b=k!=null&&before.get(k); if(!b) continue;
+      const r=el.getBoundingClientRect(), dx=b.x-(r.left+r.width/2), dy=b.y-(r.top+r.height/2); if(Math.hypot(dx,dy)<1) continue;
+      el.style.transition='none'; el.style.transform='translate(calc(-50% + '+dx.toFixed(1)+'px), calc(-50% + '+dy.toFixed(1)+'px))'; moved.push(el); }
+    if(!moved.length) return 0;
+    void root.offsetWidth;   // (drawn where they were first)
+    for(const el of moved){ el.style.transition='transform '+TOK_SLIDE+'s cubic-bezier(.3,.7,.25,1)'; el.style.transform='';
+      el.addEventListener('transitionend',()=>{ el.style.transition=''; },{once:true}); }
+    return moved.length; }
   function tbMenuHtml(d, phase){ let h='<div class="tbMenu'+(tacDrop==='style'?' r':'')+'">';
     if(tacDrop==='form'){ const form=phase==='def'?d.formDef:d.formation;
       h+='<div class="tbMenuGrid">'+Object.keys(FORMS).map(fm=>{ const off=(phase==='def'?ATK_ONLY:DEF_ONLY).includes(fm);
@@ -18896,9 +18938,6 @@
       +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
       +drop('form',form)+drop('width',wl)+drop('style',sl)+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 9</button></div>';
     h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
-    const oph=phase==='atk'?'def':'atk', oslots=careerSlots(oph==='def'?d.formDef:d.formation,oph,widthSnap(d.width[oph])), oorder=lu[oph]||[];
-    for(let i=0;i<oorder.length&&i<oslots.length;i++){ const p=d.roster[oorder[i]]; if(!p) continue; const q=tbPos(oslots[i].x,oslots[i].y,oslots[i]);
-      h+=ghostTok(q.L,q.T,p.num,surname(p.name),q.k,q.n); }
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', 0, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, q.k, spotFit(slots[i]), q.n, q.cc); }
     h+='</div><div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch, its five: who's taken at all is the Selection tab's)
@@ -20097,7 +20136,10 @@
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
-    if(!d.tk108){ if([3,5,8,14].includes(d.ticketPrice)) d.ticketPrice=null; d.tk108=true; } d.seats=d.seats||{};   // (v108, once: a price left at the old going rate follows the new one)
+    if(!d.tk108){ if([3,5,8,14].includes(d.ticketPrice)) d.ticketPrice=null; d.tk108=true; } d.seats=d.seats||{};
+    if(!d.pop161&&d.world){ const st=POP_STAGE[d.tier||1]||0.25;   // (v161, once: popularity across the whole game -- honours as big as their stage, your men's afresh)
+      for(const p of [...(d.roster||[]),...(d.world.free||[]),...(d.youth||[]),...Object.values(d.world.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.fame) p.fame=Math.round(p.fame*st*10)/10;
+      for(const p of d.roster||[]) p.pop=Math.round(popTarget(d,p,d.tier,true)*10)/10; d.pop161=true; }   // (v108, once: a price left at the old going rate follows the new one)
     { const v=d.story&&d.story.vetId!=null&&(d.roster||[]).find(p=>p.id===d.story.vetId); if(v&&!v.hometown){ v.hometown=true; delete v.cAsk; } }   // (v109: the hometown hero, from before)
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
@@ -20304,7 +20346,7 @@
     if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
     const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
     const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; tacDrop=null; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
-    const cph=e.target.closest('[data-ctphase]'); if(cph){ tacPhase=cph.dataset.ctphase; tacDrop=null; rerenderOffice(); return; }
+    const cph=e.target.closest('[data-ctphase]'); if(cph){ const box=document.getElementById('bpBody'), was=tokSpots(box); tacPhase=cph.dataset.ctphase; tacDrop=null; rerenderOffice(); tokSlide(box,was); return; }   // (v161: the men slide to their spots)
     const ci=e.target.closest('[data-cti]'); if(ci){ const d=CAREER&&CAREER.data; tiNoteK=ci.dataset.cti; if(d&&!ci.disabled){ ensureForms(d); if(tiSet(d.ti,ci.dataset.cti,ci.dataset.v)) mgSave(d); } paintCareerRight(d); return; }   // a team instruction
     const cr=e.target.closest('[data-tirow]'); if(cr){ const d=CAREER&&CAREER.data; tiNoteK=cr.dataset.tirow; if(d) paintCareerRight(d); return; }       // (its note)
     const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cs.disabled){ d.style=setStyle('G',cs.dataset.cstyle); d.ti=tiDefault(d.style); mgSave(d); mgRerender(); } return; }   // (a style sets its instructions too)
@@ -20422,7 +20464,7 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
+      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)

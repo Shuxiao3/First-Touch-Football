@@ -381,10 +381,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     over pages: each has the whole right-hand side, and everything on it fits, down to 640×360. On a short phone his
     figure and name are drawn a little smaller; on a narrow one (700 px wide or less) his name stays on one line. A
     match's tactics have INSTRUCTIONS at the top row's end too, for your side.
-  - **The other phase's shape** is a small lit box with each man's shirt number and name (the number his token
-    shows, so you can tell whose box is whose), off the bottom-right corner of his spot, the forwards' too: on WITH
-    BALL you see where each of them goes without it, and the other way round. It's no longer a full token tucked
-    under the man, with his face, that you couldn't see.
+  - **The other phase's spots** (v161): tap WITH BALL or WITHOUT and each man's card slides from where he stood to
+    where he goes (0.4 s), so you see who moves where, on the training pitch and in a match. There's no box under the
+    spots any more: before, each man's spot in the other phase was a small lit box with his number and name off the
+    corner of his spot (and before that a full token tucked under the man). With Reduce Motion on, the cards go
+    straight to their spots.
   - **In a match**, the pause menu is five buttons: TACTICS, SKILL MOVES, SETTINGS, EXIT and BACK. TACTICS opens the same
     pitch-first screen on the match itself, with each man's stamina on his card (and the two sides: the other team's
     men show their ratings only). Your five subs are on the bench: drag one onto a man to bring him on, on fresh
@@ -898,13 +899,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       sits on it for free: a man who keeps the ball within 5 m of where he had it for 3 s gets the nearest of theirs
       out to him wherever their line is (about 1 to 8 s more, by how deep they sit) -- without it, a man stood still
       on the ball in his own half kept it all day.
-    - **With the ball**: DEFENDERS (STAY BACK, SUPPORT, PUSH UP: the full-backs staying in the back line, joining the midfield in their third
-      as before, or up from the build-up and overlapping, the centre-backs closer to the play); MIDFIELD (STAY BEHIND:
-      the central midfielders behind the ball, waiting at the edge of the box for a cross; BALANCED; GET FORWARD: one
-      holds, the others run in behind and get in the box); FORWARDS (COME SHORT: the strikers drop between their lines
-      for it to feet; BALANCED: one pins their line, the other comes short; IN BEHIND: on their last man, running in
-      behind, and going again sooner); WIDE MEN (TO FEET, BALANCED, IN BEHIND: the wingers and wide midfielders coming
-      to the ball or running in behind). How the side plays out from the back -- the keeper's ball, and how the back
+    - **With the ball: nothing to set (v161).** The instructions are for without the ball. With it, each line's runs
+      are the same for every side -- the full-backs support, one central midfielder holds and the others play between
+      their lines, one forward pins their last line and one comes short, the wide men stay high and wide -- and what
+      makes a side's attacking its own is its style (WING PLAY's full-backs overlap and the crosses come early, DIRECT
+      goes long to the forwards, the counter styles break, GEGENPRESS goes forward quickly...: see **What a style
+      sets**) and each man's habit (a wing-back gets forward, a poacher runs in behind, a false nine drops in, a
+      target man holds it up). WITH BALL's INSTRUCTIONS says so, under the style's name, with a button over to WITHOUT
+      THE BALL. Before, there were four to set: DEFENDERS (STAY BACK, SUPPORT, PUSH UP), MIDFIELD (STAY BEHIND,
+      BALANCED, GET FORWARD), FORWARDS (COME SHORT, BALANCED, IN BEHIND) and WIDE MEN (TO FEET, BALANCED, IN BEHIND);
+      a career's settings for them are dropped as it's loaded. How the side plays out from the back -- the keeper's ball, and how the back
       line moves it on -- was BUILD-UP (SHORT, MIXED, LONG); since v116 it isn't an instruction but the style's:
       CONTROL POSSESSION short, DIRECT and DIRECT COUNTER long, the rest mixed.
     - **What a style sets.** BALANCED, WING PLAY and FLUID COUNTER: the back line at 32 m and the line of engagement at
@@ -1577,19 +1581,33 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       he's come on (four points or more, and within five of their league's level): he goes, the money comes in, and
       the papers say so. If they never do, the clause runs out and he's all yours. SIGN HIM (on the seasons you set),
       NO THANKS or LATER; the clause is on the DEAL side of his card (BUYBACK: who, for what, till when).
-  - **Popularity** (v105). Every man has one, 1 to 99, on his card under his position: how much the fans think of
-    him. It comes of how good he is against his league (2.5 a point either side of its level), his season (1.5 a
-    goal to 15, a little for assists and, for a keeper or a defender, clean sheets; his form: his average rating,
-    from three games, up to 12 for 7.5), his years at the club (3 a season, to 12), the armband (5), coming up
-    through your academy (6), being a bright young thing (4: 21 or under and near the league's level), and his
-    honours (to 30: the hometown hero comes with 15, the wonderkid with 8, a Player of the Month adds 5 and of the
-    Year 10, the manager's praise a little; a fifth of it fades each summer). A man of yours goes a fifth of the way
-    to that each Monday, and an honour lifts him at once too (the Player of the Month 10, of the Year 20; "He's the
-    best I've worked with." at a press conference 3, "He can do a lot better." 2 off; a goal in a derby 1.5, 3 in a
-    win). A new man starts eight under it: he has to win the fans over (the hometown hero needn't). Anyone else's is
-    what it comes to at his club.
-    - **Your three most popular** bring people through the gate -- from 40 between them, 1% more for every 3
-      points, up to 20% (the books say so: "Your stars' draw") -- and sell the shirts (see **Shirt sales**).
+  - **Popularity** (v105; across the whole game since v161). Every man has one, 1 to 99, on his card under his
+    position: how well known he is -- in the whole game, not just his league. 99 is the best-known in it, a Premium
+    League or Champions League star; a League 2 man is barely known however good his season. It comes first of how
+    good he is, on a steep curve (a 60 is 11, a 70 26, an 80 49, a 90 80), and then of what he does and where he does
+    it: his season (1.5 a goal to 15, a little for assists and, for a keeper or a defender, clean sheets; his form: his
+    average rating, from three games, up to 12 for 7.5), his years at the club (3 a season, to 12), the armband (5),
+    coming up through your academy (6), being a bright young thing (4: 21 or under and near the league's level) --
+    all of it counting a quarter as much in League 2 as in the Premium League, two-fifths in League 1 and two-thirds
+    in the Championship, and a third more again (and 5 on top) in a side in this season's Champions League. A man at a
+    club from abroad has his season there taken as a good one, as it isn't played here. Then his honours (to 30: a
+    Player of the Month adds 5 and of the Year 10, the hometown hero and the wonderkid come with some, the manager's
+    praise a little -- each as big as the stage it's won on; a fifth of it fades each summer). A man of yours goes a
+    fifth of the way to that each Monday, and an honour lifts him at once too, by the stage (the Player of the Month 10
+    in the Premium League, 2.5 in League 2; "He's the best I've worked with." at a press conference 3 there; a goal in
+    a derby 1.5, 3 in a win). A new man starts under it (8 in the Premium League, 2 in League 2): he has to win the fans
+    over. Anyone else's is what it comes to at his club. Halfway through a season (v161, measured): League 2's men 3 in
+    the middle and 17 to 19 at best, League 1's 10 and 33 to 37, the Championship's 21 and 52 to 55, the Premium
+    League's 47 and 99, the clubs from abroad 59 and 90 to 98. (Before, it went by his league -- 35 at its level, 2.5 a
+    point either side -- so League 2's best were 70 and more, as well known as the Premium League's, and the best men in
+    the game, abroad, 60 at most. A career from before is brought over once: its honours as big as its league, its
+    men's popularity afresh.)
+    - **Your three most popular** bring people through the gate -- against your league's usual, so a League 2 side's
+      barely-known men draw as well as a Premium League side's stars do there: from 40 between them on the old scale
+      (your three times 4.5 in League 2, 2.3 in League 1, 1.4 in the Championship, 0.82 in the Premium League: a
+      league's usual side's three come to about 10, 19, 34 and 62, and came to 46, 44, 47 and 51 before), 1% more
+      for every 3 points, up to 20% (the books say so: "Your stars' draw") -- and sell the shirts the same way (see
+      **Shirt sales**).
   - **A tap says what it is (v152).** On a phone a title's never seen, and the stars by a man's stamina were a
     mystery. Now a tap on his skill stars, his rating's ▲ or ▼, his potential, his popularity, his fitness or stamina
     bar, an unscouted man's six, or the match's top right (YOUR MAN, and which way you're attacking) puts what it is
@@ -2056,8 +2074,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       money), every week of the year, pre-season and the winter break too, and the Monday papers say what came in
       (THE CLUB SHOP: the week's sales, the best sellers, the season's shirts so far). Your fans buy the shirt --
       $0.22 a fan a week in League 2, up to $0.36 in the Premium League (a new career's 1,000 fans: about $200 a
-      week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity: from 15%
-      less to 60% more; see **Popularity**) and with a happy dressing room (6% a point of the side's mood either side
+      week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity against
+      the league's usual, as the gate has it: from 15% less to 60% more; see **Popularity**) and with a happy dressing room (6% a point of the side's mood either side
       of settled). Who sells the most is shared out by popularity, squared.
   - **The ground.** A new career's is a field with two metal bleachers, one down each side, and one board -- bare
     (YOUR AD HERE) -- round the pitch: 1,800 seats. It's built up a level at a time in the Stadium building (its Stands tab), only when you pay, and only as
@@ -2513,6 +2531,16 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v161: the tactics board's men move, instructions without the ball only, popularity across the whole game.** Tap
+  WITH BALL or WITHOUT and each man's card slides to his spot in that phase, on the training pitch and in a match --
+  the small box with the other phase's man under each spot is gone. The instructions are for without the ball only:
+  with it each man plays to his own style and the side to its (WITH BALL's INSTRUCTIONS says so), and DEFENDERS,
+  MIDFIELD, FORWARDS and WIDE MEN are gone. Popularity is on one scale for the whole game, 99 the best-known men in
+  it: it comes first of how good a man is, and what he does counts by the stage -- a quarter as much in League 2 as
+  in the Premium League, more again in the Champions League. League 2's best are 17 to 19 now (70 and more before),
+  the Premium League's and the best abroad in the 90s. The gate and the shirts go by your stars against your
+  league's usual, so they're as they were. See **The other phase's spots (v161)**, **With the ball: nothing to set
+  (v161)** and **Popularity**.
 - **v160: the week's money can be left.** On a phone held sideways THE WEEK'S MONEY (NET/WK on the campus) ran past
   the foot of the screen, BACK with it, and a tap outside it did nothing: the card couldn't be closed. Its lines now
   page between the title and BACK (◀ 1 / 3 ▶), BACK always on the screen, and a tap anywhere outside the card closes it

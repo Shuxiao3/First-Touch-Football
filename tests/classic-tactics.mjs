@@ -115,15 +115,16 @@ await page.click('#bpBody [data-mg="best8"]'); await page.waitForTimeout(80);
 d = await save();
 ok(d.roster[d.lineup.gk].role === 'GK', 'BEST 9 puts a keeper back in goal');
 
-// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's): INSTRUCTIONS, up in the top row left of BEST 9 (v116), puts
-// the team's for the phase where his card was, and lights up -- with the ball DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN
-// (no BUILD-UP since v116: it comes with the style); without it the lines' own pitch (the defensive line and the line of
-// engagement, to drag: in range, never closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF TACKLES, MID TACKLES and
-// FORWARDS. A man tapped: his card again. Kept with the career, a style's own when it's picked
+// THE TEAM'S INSTRUCTIONS (v112: no man's own, nor a spot's; v161: without the ball only): INSTRUCTIONS, up in the top
+// row left of BEST 9 (v116), puts the team's for the phase where his card was, and lights up. With the ball (v161) there's
+// nothing to set: each man plays to his own style and the side to its, the panel says so, with a button over to WITHOUT
+// THE BALL. Without it the lines' own pitch (the defensive line and the line of engagement, to drag: in range, never
+// closer than 14 m), then ENGAGE WITH, DEFENDERS, DEF TACKLES, MID TACKLES and FORWARDS. A man tapped: his card again.
+// Kept with the career, a style's own when it's picked -- and nothing with the ball kept among them
 const tap = async ri => { await page.click(`#bpBody .tpitch .ptk[data-ri="${ri}"]`); await page.waitForTimeout(60); };
 const panel = () => page.evaluate(() => { const P = document.querySelector('#cTacRight .tiPanel'); return P ? { head: P.querySelector('.tiHead').textContent,
   rows: [...P.querySelectorAll('.tiRow .tiLbl')].map(n => n.textContent), on: [...P.querySelectorAll('.tiOpt.on')].map(n => n.dataset.cti + '=' + n.dataset.v),
-  pitch: !!P.querySelector('.tiPitch'), tags: [...P.querySelectorAll('.tiTag')].map(n => n.textContent), note: P.querySelector('.tiNote').textContent } : null; });
+  pitch: !!P.querySelector('.tiPitch'), tags: [...P.querySelectorAll('.tiTag')].map(n => n.textContent), note: (P.querySelector('.tiNote') || {}).textContent || '' } : null; });
 const cti = async (k, v) => { await page.click(`#cTacRight [data-cti="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
@@ -132,16 +133,14 @@ const insB = () => page.evaluate(() => { const top = document.querySelector('#bp
     flips: document.querySelectorAll('#cTacRight [data-cside]').length, card: !!document.querySelector('#cTacRight .mgCardHead') }; });
 await tap(lu.atk[5]); const ib0 = await insB(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60);
 let pn = await panel(); const ib1 = await insB();
-ok(!ib0.lit && ib0.left && !ib0.flips && ib0.card && ib1.lit && pn && String(pn.rows) === 'DEFENDERS,MIDFIELD,FORWARDS,WIDE MEN' && /WITH THE BALL/.test(pn.head) && !pn.pitch,
-  'INSTRUCTIONS, in the top row just left of BEST 9 (nothing on his card turns it over): lit, the team\'s instructions with the ball where his card was, no BUILD-UP -- ' + (pn && pn.rows.join(', ')));
-await cti('aruns', 'run'); await cti('wide', 'feet');
+const wb = await page.evaluate(() => { const P = document.querySelector('#cTacRight .tiPanel'); return P ? { text: P.innerText.replace(/\s+/g, ' '), opts: P.querySelectorAll('[data-cti]').length, go: !!P.querySelector('.tiGoDef[data-ctphase="def"]') } : null; });
+info('with the ball: ' + (wb && wb.text));
+ok(!ib0.lit && ib0.left && !ib0.flips && ib0.card && ib1.lit && pn && /WITH THE BALL/.test(pn.head) && !pn.pitch && !pn.rows.length && wb && !wb.opts && /Nothing to set with the ball/.test(wb.text) && /GEGENPRESS:/.test(wb.text) && wb.go,
+  'INSTRUCTIONS, in the top row just left of BEST 9 (nothing on his card turns it over): lit -- and with the ball nothing to set: each man to his own style, the side to its (GEGENPRESS), and a button over to WITHOUT THE BALL');
+await page.click('#cTacRight .tiGoDef'); await page.waitForTimeout(60);
 pn = await panel();
-ok(/^WIDE MEN: /.test(pn.note), 'the note under them is the last one touched: ' + pn.note);
-await tap(lu.atk[4]); const ib2 = await insB(), pn2 = await panel(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); pn = await panel();
-ok(!ib2.lit && ib2.card && !pn2 && pn && pn.on.includes('aruns=run') && pn.on.includes('wide=feet'), 'a man tapped: his card, INSTRUCTIONS unlit; INSTRUCTIONS again: the same set, the team\'s -- ' + (pn && pn.on.join(' ')));
-await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);
-pn = await panel();
-ok(pn && String(pn.rows) === 'ENGAGE WITH,DEFENDERS,DEF TACKLES,MID TACKLES,FORWARDS' && pn.pitch && /WITHOUT THE BALL/.test(pn.head), 'without the ball: the lines\' pitch, then ' + (pn && pn.rows.join(', ')));
+ok(pn && String(pn.rows) === 'ENGAGE WITH,DEFENDERS,DEF TACKLES,MID TACKLES,FORWARDS' && pn.pitch && /WITHOUT THE BALL/.test(pn.head) && (await page.$eval('#bpBody .phTab.on', e => e.dataset.ctphase)) === 'def',
+  'its button: WITHOUT, the lines\' pitch, then ' + (pn && pn.rows.join(', ')));
 ok(String(pn.tags) === 'DEF 46 m,ENGAGE 68 m' && pn.on.includes('dtk=tackle') && pn.on.includes('mtk=tackle') && pn.on.includes('aline=press'), 'GEGENPRESS picked, its instructions came with it: ' + pn.tags.join(', ') + ' -- ' + pn.on.join(' '));
 // the lines dragged: the line of engagement up to 74 m; the back line up into it stops at 50 m (as high as it goes); the line
 // of engagement back down into it stops 14 m in front of it
@@ -154,10 +153,14 @@ pn = await panel();
 ok(l1.join() === '46,74' && l2.join() === '50,74' && l3.join() === '50,64' && String(pn.tags) === 'DEF 50 m,ENGAGE 64 m',
   'the lines dragged: the line of engagement up (' + l1 + '), the back line up into it stopping at its highest (' + l2 + '), the line of engagement down into it stopping 14 m short (' + l3 + ')');
 await cti('eng', 'mid'); await cti('dline', 'trap'); await cti('dtk', 'front');
+pn = await panel();
+ok(/^DEF TACKLES: /.test(pn.note), 'the note under them is the last one touched: ' + pn.note);
+await tap(lu.atk[4]); const ib2 = await insB(), pn2 = await panel(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); pn = await panel();
+ok(!ib2.lit && ib2.card && !pn2 && pn && pn.on.includes('dline=trap') && pn.on.includes('dtk=front'), 'a man tapped: his card, INSTRUCTIONS unlit; INSTRUCTIONS again: the same set, the team\'s -- ' + (pn && pn.on.join(' ')));
 d = await save();
 const tiKeep = d.ti;
-ok(tiKeep.eng === 'mid' && tiKeep.dline === 'trap' && tiKeep.dtk === 'front' && tiKeep.mtk === 'tackle' && tiKeep.aline === 'press' && !('build' in tiKeep) && tiKeep.aruns === 'run' && tiKeep.wide === 'feet',
-  'kept with the career: ' + JSON.stringify(tiKeep));
+ok(tiKeep.eng === 'mid' && tiKeep.dline === 'trap' && tiKeep.dtk === 'front' && tiKeep.mtk === 'tackle' && tiKeep.aline === 'press' && !('build' in tiKeep) && !['druns', 'mruns', 'aruns', 'wide'].some(k => k in tiKeep),
+  'kept with the career, and nothing with the ball among it: ' + JSON.stringify(tiKeep));
 const posRi = { st: lu.atk[5], cb: lu.def[0], cm: lu.def[4] };
 await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); const ib3 = await insB();
 ok(!ib3.lit && ib3.card, 'INSTRUCTIONS tapped again: his card back, the button unlit');
@@ -281,7 +284,7 @@ await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout
 const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .tpitch .ptk img.ptkFace').length,
   men: document.querySelectorAll('#mtacBody .tpitch .ptk').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk img').length,
   card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
-ok(mt.ghosts === 8 && mt.faces === mt.men && mt.men === 9 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, the other phase lit under them (' + mt.ghosts + '), no YOU badge');
+ok(mt.ghosts === 0 && mt.faces === mt.men && mt.men === 9 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, no box for the other phase under them (v161), no YOU badge');
 const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent }));
 ok(pre.bench === 5 && /SUBS LEFT 3/.test(pre.head), 'the bench is five, and three subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
@@ -297,11 +300,11 @@ const sub3 = await page.evaluate(() => ({ used: window.__T.SUBS().G.used, head: 
 ok(sub3.used === 3 && /SUBS LEFT 0/.test(sub3.head) && sub3.bench === 2, 'a second sub and a third, and no fourth: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
 await page.click('#mtacOv [data-mt="back"]'); await page.waitForTimeout(80); await page.click('#pauseMenu [data-pause="back"]');
 
-// the holder: told to GET FORWARD the other midfielders go, and one still holds
+// the holder: the midfield going forward (an engine setting since v161 -- each line's runs with the ball are its style's -- set here to try it), one still holds
 const hk = await page.evaluate(() => { const T = window.__T, h0 = T.holderOf('G'); if(!h0) return {}; const keep = T.TI().G.mruns;
   T.TI().G.mruns = 'fwd'; const h1 = T.holderOf('G'); T.TI().G.mruns = keep; T.holderOf('G');
   return { h0: h0.lookKey, h1: h1 && h1.lookKey }; });
-ok(hk.h0 && hk.h1 === hk.h0, 'told to GET FORWARD, the midfield keeps its holder (one holds, the others go)');
+ok(hk.h0 && hk.h1 === hk.h0, 'the midfield going forward, it keeps its holder (one holds, the others go)');
 
 process.exitCode = rep.finish();
 await browser.close();

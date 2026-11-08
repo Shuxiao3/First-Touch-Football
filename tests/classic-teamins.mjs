@@ -3,8 +3,8 @@
 // which line stands on the line of engagement (the forwards, the midfield between them and the back line; or the
 // midfield, the forwards ahead of it), what the back line does about a runner (HOLD THE LINE, OFFSIDE TRAP, FOLLOW
 // RUNNERS, PRESS UP), how the back and middle lines go into a man (STAY IN FRONT, BALANCED, TACKLE), and what the forwards
-// do (CONSERVE, DEFEND THE LINE, PRESS UP). WITH IT: how far each line goes forward and what the wide men look for. A
-// style picked sets its own -- and how the side plays out from the back is its style's (v116: no BUILD-UP to set). Here: the lines' rules; where the block stands for them; the
+// do (CONSERVE, DEFEND THE LINE, PRESS UP). (v161: nothing WITH IT any more -- how far each line went forward and what
+// the wide men looked for: with the ball a side plays to its style, and its men to theirs.) A style picked sets its own -- and how the side plays out from the back is its style's (v116: no BUILD-UP to set). Here: the lines' rules; where the block stands for them; the
 // panel on the smallest phones; and computer v computer matches (every man on the computer, a virtual clock), one side
 // told one thing and then another, the other side on its defaults. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
@@ -114,9 +114,9 @@ const bu = await page.evaluate(async () => { const T = window.__T, kp = T.keeper
   T.setStyle('R', s0); return out; });
 info('the computer\'s keeper, three balls each way (kicked, thrown): DIRECT ' + bu.long + ', CONTROL POSSESSION ' + bu.short);
 ok(bu.long.join() === '3,0' && bu.short.join() === '0,3', 'the build-up by the style: DIRECT, the keeper kicks it long every time (' + bu.long + '); CONTROL POSSESSION, he plays it short every time (' + bu.short + ')');
-const wf = await runs({ wide: 'feet' }, 2), wr = await runs({ wide: 'run' }, 2);   // (two matches each: one alone is noisy)
-info('runs in behind a match, the wide men\'s (all of the side\'s): TO FEET ' + mean(wf, r => r.M.wruns.G) + ' (' + mean(wf, r => r.M.runs.G) + '), IN BEHIND ' + mean(wr, r => r.M.wruns.G) + ' (' + mean(wr, r => r.M.runs.G) + ')');
-ok(mean(wr, r => r.M.wruns.G) > 1.5 * mean(wf, r => r.M.wruns.G), 'the wide men told IN BEHIND make far more runs in behind than told TO FEET (' + mean(wr, r => r.M.wruns.G) + ' a match against ' + mean(wf, r => r.M.wruns.G) + ')');
+// (WIDE MEN TO FEET or IN BEHIND, told, and their runs in behind a match: gone with the instruction, v161)
+const kept = await page.evaluate(() => { const T = window.__T; T.setTI('G', { wide: 'feet', aruns: 'run', mruns: 'fwd', druns: 'push' }); const o = T.TI().G; return ['druns', 'mruns', 'aruns', 'wide'].filter(k => k in o); });
+ok(!kept.length, 'nothing with the ball can be told any more: a set with WIDE MEN, FORWARDS, MIDFIELD or DEFENDERS in it keeps none of them (' + (kept.join(', ') || 'none kept') + ')');
 
 // --- THE PANEL, WITHOUT THE BALL, ON THE SMALLEST PHONES: the lines' pitch and every row on the screen, in a match ----------
 for(const [w, h] of [[640, 360], [844, 340]]){

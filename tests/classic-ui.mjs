@@ -25,7 +25,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES, setCareerForm, FORMS, ATK_ONLY, DEF_ONLY};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -269,33 +269,36 @@ for(const [w, h] of SIZES){
   await touch('touchEnd', c.x + 45, c.y + 23); await page.waitForTimeout(150);
   ok(Math.abs(g0.l - tok.l - 20) < 1.5 && Math.abs(g0.t - tok.t - 10) < 1.5 && Math.abs(g1.l - g0.l - 20) < 1.5 && Math.abs(g1.t - g0.t - 10) < 1.5,
     'the stand-in moves with the finger from where he was picked up (' + [g0.l - tok.l, g0.t - tok.t].map(Math.round) + ', then ' + [g1.l - g0.l, g1.t - g0.t].map(Math.round) + ')');
-  // the tactics: every man on the pitch with his face (not the bench), his card all of him, the other phase's shape lit
-  // under them, no MOVE/SWAP, no essays in the menus
+  // the tactics: every man on the pitch with his face (not the bench), his card all of him, no MOVE/SWAP, no essays in the
+  // menus -- and (v161) no box for the other phase's man under each spot: WITHOUT tapped, the men slide to their spots
   const tv = await page.evaluate(() => { const c = document.querySelector('#cTacRight img.cardBody');
     return { faces: document.querySelectorAll('#bpBody .tpitch .ptk img.ptkFace').length, men: document.querySelectorAll('#bpBody .tpitch .ptk').length,
       benchMen: document.querySelectorAll('#bpBody .tbBench .ptk').length, benchFaces: document.querySelectorAll('#bpBody .tbBench .ptk img').length,
-      ghosts: document.querySelectorAll('#bpBody .tpitch .tpGhost').length, card: c ? [c.naturalWidth, c.naturalHeight] : null, move: !!document.querySelector('[data-imove]') }; });
+      ghosts: document.querySelectorAll('#bpBody .tpitch .tpGhost, #bpBody .tpitch i[class*="Ghost"]').length, card: c ? [c.naturalWidth, c.naturalHeight] : null, move: !!document.querySelector('[data-imove]') }; });
   ok(tv.faces === tv.men && tv.men === 9 && tv.benchMen > 0 && !tv.benchFaces, 'every man on the tactics pitch shows his face (' + tv.faces + '/' + tv.men + '); the bench doesn\'t');
   ok(!!tv.card && tv.card[1] > tv.card[0], 'his card shows all of him, head to toe (' + (tv.card || []).join('x') + ')');
-  ok(tv.ghosts === 8, 'the other phase\'s shape is drawn under the men, lit (' + tv.ghosts + ' ghosts)');
-  // ...each of them a small box with just the name, off the corner of its spot: over a man there by a little at most
-  const gh = await page.evaluate(() => { const toks = [...document.querySelectorAll('#bpBody .tpitch .ptk')].map(e => e.getBoundingClientRect()), out = [];
-    for(const g of document.querySelectorAll('#bpBody .tpitch .tpGhost')){ const r = g.getBoundingClientRect(); let worst = 0;
-      for(const t of toks){ const w = Math.max(0, Math.min(r.right, t.right) - Math.max(r.left, t.left)), h = Math.max(0, Math.min(r.bottom, t.bottom) - Math.max(r.top, t.top)); worst = Math.max(worst, w * h / (r.width * r.height)); }
-      const P = g.parentElement.getBoundingClientRect(), dx = r.left - (P.left + parseFloat(g.style.left) / 100 * P.width);
-      out.push({ face: !!g.querySelector('img'), w: Math.round(r.width), h: Math.round(r.height), over: +worst.toFixed(2), dx: Math.round(dx), inside: r.right <= P.right + 1 }); }
-    const t0 = toks[0]; return { out, tok: [Math.round(t0.width), Math.round(t0.height)] }; });
-  info('the ghosts: ' + JSON.stringify(gh));
-  ok(gh.out.every(g => !g.face && g.w * g.h < 0.4 * gh.tok[0] * gh.tok[1]), 'a ghost has no face, and is a small box (' + gh.out[0].w + 'x' + gh.out[0].h + ', a man ' + gh.tok.join('x') + ')');
-  ok(gh.out.filter(g => g.over > 0.35).length <= 1, 'it sits off the corner of its spot, a man there covering little of it (' + gh.out.map(g => g.over).join(' ') + ')');
-  ok(gh.out.every(g => g.dx > 10 && g.inside), 'every box is off the right of its spot, the forwards\' too, and on the pitch (' + gh.out.map(g => g.dx).join(' ') + ' px right)');
+  ok(tv.ghosts === 0, 'no box for the other phase\'s man under the spots any more (' + tv.ghosts + ')');
+  // ...the shape without the ball a different one: WITHOUT tapped, each man's card slides from his spot with the ball to his spot without it
+  const spots = () => page.$$eval('#bpBody .tpitch .ptk', ns => ns.map(e => { const r = e.getBoundingClientRect(); return { k: e.dataset.ri, x: r.left + r.width / 2, y: r.top + r.height / 2, tf: e.style.transform }; }));
+  const def0 = await page.evaluate(() => { const M = window.__MG, d = M.d, was = d.formDef, f = Object.keys(M.FORMS).find(x => x !== d.formation && !M.ATK_ONLY.includes(x) && !M.DEF_ONLY.includes(x)); M.setCareerForm(d, 'def', f); return was; });
+  await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(600);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const sp0 = await spots(); await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(110); const sp1 = await spots(); await page.waitForTimeout(700); const sp2 = await spots();
+  const far = (a, b) => a && b && Math.hypot(a.x - b.x, a.y - b.y) > 3, by = (S, k) => S.find(q => q.k === k);
+  const moved = sp2.filter(q => far(by(sp0, q.k), q)), between = moved.filter(q => far(by(sp1, q.k), q) && far(by(sp1, q.k), by(sp0, q.k)));
+  info('WITHOUT tapped: ' + moved.length + ' of ' + sp2.length + ' men to new spots, ' + between.length + ' of them on their way 0.11 s in');
+  ok(moved.length >= 3 && between.length === moved.length && sp2.every(q => !q.tf), 'WITHOUT tapped, the men going elsewhere slide there (' + between.length + ' of ' + moved.length + ' on their way 0.11 s in), and settle on their spots');
+  await page.emulateMedia({ reducedMotion: 'reduce' }); await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60); const rmS = await spots();
+  const jumped = rmS.filter(q => far(by(sp2, q.k), q)), onWay = jumped.filter(q => far(by(sp0, q.k), q));
+  ok(jumped.length === moved.length && !onWay.length, 'with Reduce Motion on, they go straight to their spots (' + jumped.length + ' moved, none on the way 0.06 s in)');
+  await page.evaluate(was => { const M = window.__MG; M.setCareerForm(M.d, 'def', was); }, def0); await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(600);
   // ...and each carries his shirt number, as his token does (under his face; in the corner on the bench)
   const nums = await page.evaluate(() => { const no = el => ((el && el.querySelector('.ptkNo, em')) || {}).textContent || '';
     return { men: [...document.querySelectorAll('#bpBody .tpitch .ptk[data-tac="field"]')].map(no), keeper: no(document.querySelector('#bpBody .tpitch .ptk[data-tac="gk"]')),
-      bench: [...document.querySelectorAll('#bpBody .tbBench .ptk')].map(no), ghosts: [...document.querySelectorAll('#bpBody .tpitch .tpGhost')].map(no) }; });
-  const allNo = [nums.keeper, ...nums.men, ...nums.bench], sorted = a => a.slice().sort().join(' ');
-  ok(allNo.every(n => /^#\d+$/.test(n)) && new Set(allNo).size === allNo.length && sorted(nums.ghosts) === sorted(nums.men),
-    'every man shows his shirt number, on the pitch and the bench, and the other phase\'s boxes carry the same ones (' + nums.men.join(' ') + ' | ' + nums.ghosts.join(' ') + ')');
+      bench: [...document.querySelectorAll('#bpBody .tbBench .ptk')].map(no) }; });
+  const allNo = [nums.keeper, ...nums.men, ...nums.bench];
+  ok(allNo.every(n => /^#\d+$/.test(n)) && new Set(allNo).size === allNo.length,
+    'every man shows his shirt number, on the pitch and the bench (' + nums.men.join(' ') + ')');
   // ...and his own position beside his rating; a winger is an attacker, a wide midfielder a midfielder (WM)
   const own = await page.evaluate(() => { const d = window.__MG.d, all = [...d.roster, ...Object.values(d.world.clubs).flatMap(c => c.players || [])];
     return { toks: [...document.querySelectorAll('#bpBody .tpitch .ptk[data-ri], #bpBody .tbBench .ptk[data-ri]')].map(t => { const p = d.roster[+t.dataset.ri];
@@ -309,7 +312,7 @@ for(const [w, h] of SIZES){
   // TEAM's instructions (v112: no man's own) -- no ratings, a row a setting and the one note for the row last touched
   const side = () => page.evaluate(() => { const flips = [...document.querySelectorAll('#cTacRight button[data-cside]')], f = flips[0], fr = f && f.getBoundingClientRect(), o = document.querySelector('#cTacRight .mgCardOvr');
     return { six: document.querySelectorAll('#cTacRight .sixC').length, det: document.querySelectorAll('#cTacRight .sixOpen .statRow').length,
-      instr: document.querySelectorAll('#cTacRight .tiRow').length, head: (document.querySelector('#cTacRight .tiHead') || {}).textContent || '', notes: document.querySelectorAll('#cTacRight .tiNote').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
+      instr: document.querySelectorAll('#cTacRight .tiRow').length, withP: !!document.querySelector('#cTacRight .tiWith .tiGoDef'), head: (document.querySelector('#cTacRight .tiHead') || {}).textContent || '', notes: document.querySelectorAll('#cTacRight .tiNote').length, ovr: !!o, body: !!document.querySelector('#cTacRight .mgCardHead img.cardBody'),
       stars: !!document.querySelector('#cTacRight .stars'), name: (document.querySelector('#cTacRight .mgCardName') || {}).textContent || '',
       flips: flips.length, flip: f ? f.textContent : '', small: !!f && fr.height <= 24 && fr.width <= 90, under: !!f && !!o && fr.top >= o.getBoundingClientRect().bottom - 1,
       seen: [...document.querySelectorAll('#cTacRight .sixOpen .statRow')].every(e => e.getClientRects().length),
@@ -327,8 +330,8 @@ for(const [w, h] of SIZES){
   ok(s1.flips === 0 && i1.there && i1.left && i1.inside && !i1.lit && s1.six === 6 && !s1.instr && s1.body && s1.ovr && s1.stars,
     'his card: his figure, rating and stars, the six -- nothing on it to turn it over: INSTRUCTIONS is up in the top row, just left of BEST 9');
   ok(s2.six === 6 && s2.det === 4 && s2.seen && s2.bars === 4 && /DEFENDING/.test(s2.hd) && !s2.paged && s2.fits, '...tap one and what it\'s made of opens under the six, its name and a coloured bar for each rating, all of it on the card, no pages (DEF: ' + s2.det + ' ratings, ' + s2.bars + ' bars)');
-  ok(i3.lit && s3.flips === 0 && s3.six === 0 && !s3.det && s3.instr === 4 && /^TEAM/.test(s3.head) && s3.notes === 1 && !i4.lit && s4.six === 6,
-    'INSTRUCTIONS, lit: the team\'s instructions where his card was (' + s3.head + ': ' + s3.instr + ' rows and one note), no ratings; tapped again, his card');
+  ok(i3.lit && s3.flips === 0 && s3.six === 0 && !s3.det && s3.instr === 0 && s3.withP && /^TEAM · WITH THE BALL/.test(s3.head) && s3.notes === 0 && !i4.lit && s4.six === 6,
+    'INSTRUCTIONS, lit: the team\'s where his card was -- with the ball (v161) nothing to set, what the side does instead and a button over to WITHOUT THE BALL (' + s3.head + '), no ratings; tapped again, his card');
   ok(!s1.paged && !s3.paged && s1.fits && s3.fits && !s3.desc, 'neither side goes over pages: all of it on the screen');
   ok(!tv.move, 'no MOVE / SWAP button: a man is moved by dragging him');
   // ROOM IN THE TOKENS: the number clear of the top edge, the name of the bottom -- the glyphs themselves, measured off

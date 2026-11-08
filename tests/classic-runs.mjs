@@ -3,7 +3,8 @@
 // then goes; a run carries on when the ball's moved on to another team-mate who can still find him; a wide man runs into
 // the gap in their line in his own channel, not off towards a bigger one on the far side; a run that would land near their
 // goal goes in towards it, into the box, not on down the line; the man who's just played it forward goes again; a
-// forward's run across their line takes a midfielder into the lane it emptied, the midfield told to GET FORWARD (THE THIRD MAN); the
+// forward's run across their line takes a midfielder into the lane it emptied, the midfield going forward (THE THIRD MAN -- v161: set
+// on the engine, as it can't be told any more); the
 // ball through to the box (or near it, in the middle) takes the wide men in at the back post. YOUR THROUGH BALL (v80, v81):
 // into the runner's path, where he's already going, the drag only leaning it (a third of its angle off his line, 15 degrees
 // at most); a man standing still gets it where the drag points. A BALL OVER HIS HEAD (v81): played on ahead of a man on
@@ -48,7 +49,7 @@ await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
   window.__by = (team, pos, ph, i) => window.__men(team).filter(q => T.posOf(q, ph || 'atk') === pos).sort((a, b) => a.homeY - b.homeY)[i || 0];
   // (v112: instructions are the team's -- its lines' -- not a man's: TEAM.G.<key> = setting; cleared, the side's style's own)
   window.__ti = (k, v) => { T.TI().G[k] = v; };
-  window.__clearIns = () => { for(const t of ['G', 'R']){ const d = T.tiDefault('neutral'); for(const k in d) T.TI()[t][k] = d[k]; } };
+  window.__clearIns = () => { for(const t of ['G', 'R']){ const d = T.tiDefault('neutral'); for(const k in d) T.TI()[t][k] = d[k]; for(const k of ['druns', 'mruns', 'aruns', 'wide']) delete T.TI()[t][k]; } };   // (v161: a line's runs with the ball are an engine setting now, set here and there to try it -- back to the style's)
   // City's block: three across their line (u from their goal), three in front of it, the forwards up; their keeper on his line
   window.__city = (uLine, ws, uMid) => { const R = window.__men('R'), back = R.filter(q => T.posOf(q, 'def') === 'CB'), rest = R.filter(q => !back.includes(q));
     back.forEach((q, i) => window.__at(q, uLine, ws[i]));
