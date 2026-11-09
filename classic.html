@@ -266,6 +266,11 @@
   .plTitle{ font:14px 'FTC Dot',monospace; color:#1f2340; line-height:1.3; margin-bottom:6px; }
   .plLine{ font-size:12px; line-height:1.45; } .plLine b{ color:#1f2340; } .plLine .up{ color:#0e7a3c; } .plLine .dn{ color:#a82028; } .plLine .dim{ color:#7a7262; }
   .plRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; line-height:1.35; padding:3px 0; border-top:1px dotted #d9d1b6; }
+  /* A PAPER'S FACTS (v176, J4): its numbers first, a chip each, label over value */
+  .plFacts{ display:flex; flex-wrap:wrap; gap:4px; margin:1px 0 6px; }
+  .plF{ display:inline-flex; flex-direction:column; min-width:0; padding:2px 7px 3px; border-radius:3px; background:#e6dfc9; box-shadow:inset 0 -1px 0 #cfc7ae; }
+  .plF i{ font:7px 'FTC Dot',monospace; font-style:normal; letter-spacing:1px; color:#7a7262; } .plF b{ font:12px 'FTC Dot',monospace; color:#1f2340; white-space:nowrap; }
+  .plF b.up{ color:#0e7a3c; } .plF b.dn{ color:#a82028; }
   .plRow button{ font:11px 'FTC Dot',monospace; color:#1f2340; background:#fffdf6; border:1px solid #b9b195; border-radius:6px; padding:3px 8px; cursor:pointer; }
   .plRowBtns{ display:flex; gap:6px; flex:0 0 auto; }
   .plYrs{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font:11px 'FTC Dot',monospace; color:#1f2340; }
@@ -17856,12 +17861,17 @@
   const pileDelta=v=>(v>0?'<span class="up">+':'<span class="dn">')+v.toFixed(1)+'</span>';
   const pileOffer=(d,p)=>'<div class="plYrs">OR OFFER <button data-pile="ofr" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(cOfferOf(d,p))+' A WEEK</b><button data-pile="ofr" data-dir="1" data-pid="'+p.id+'">+</button></div>';
   const pileYears=(d,lbl)=>'<div class="plYrs">'+lbl+' <button data-pile="yrs" data-dir="-1">−</button><b>'+(MGUI.years||2)+' SEASON'+((MGUI.years||2)>1?'S':'')+'</b><button data-pile="yrs" data-dir="1">+</button></div>';
+  // A PAPER'S FACTS (v176, the handoff's J4): a factual paper leads with its numbers, a chip each, under its headline,
+  // and its words after them say no number the headline or the strip shows (the narrative ones -- a man who wants a word,
+  // one who wants to leave, a deal run out -- are the game's voice, and stay words)
+  const plF=F=>'<div class="plFacts">'+F.filter(Boolean).map(([l,v,c])=>'<span class="plF"><i>'+l+'</i><b'+(c?' class="'+c+'"':'')+'>'+v+'</b></span>').join('')+'</div>';
+  const plWk=(v,u)=>money(v)+(u||'/WK');
   // one paper: [its title, its lines, its buttons ([label, action, wide?])]
   function pileBody(d,x){ const L=[], B=[], next=()=>B.push(['NEXT ▶','next']), later=()=>B.push(['LATER','later',0]);
     const P=x.pid!=null?d.roster.find(q=>q.id===x.pid):null;
     switch(x.k){
       case 'mor': { const tmNow=d.tm??x.tm1, dt=Math.round((tmNow-x.tm0)*10)/10;   // (v152: the side's mood now, as the papers' head has it -- not as it was when they came: a game or a word since moves it, and the head and this differed)
-        L.push('Team morale <b>'+tmNow.toFixed(1)+'</b> · '+tmWord(tmNow)+(dt?' · '+pileDelta(dt)+' since last week':' · as it was last week'));
+        L.push(plF([['THIS WEEK',dt?(dt>0?'+':'')+dt.toFixed(1):'±0',dt>0?'up':dt<0?'dn':''],x.out.length&&['WANT OUT',String(x.out.length),'dn'],x.settled.length&&['SETTLED',String(x.settled.length),'up']]));   // (v176: the morale's in the head -- the strip the week's)
         if(x.all&&x.all.length) L.push('<div class="plMor">'+x.all.map(([id,m,v])=>{ const p=d.roster.find(q=>q.id===id); if(!p) return '';   // (v105: every man, his mood, how it's moved)
             const sn=surname(p.name), two=d.roster.some(q=>q!==p&&surname(q.name)===sn), nm=two?mgEsc(String(p.name).charAt(0))+'. '+sn:sn;   // (two of a name: the initial too)
             return '<span'+(p.wantsOut?' class="out"':'')+' title="'+morWord(m)+'"><i>'+nm+(d.cap===id?' (C)':'')+'</i><b class="'+(m>=7?'up':m<5?'dn':'')+'">'+m.toFixed(1)+'</b>'
@@ -17873,58 +17883,62 @@
         if(!x.up.length&&!x.down.length) L.push('<span class="dim">Nobody’s mood has moved much this week.</span>');
         next(); return ['The dressing room is '+tmWord(x.tm1),L,B]; }
       case 'deadline': { const o=x.big!=null?(d.offers||[]).find(y=>y.id===x.big):null, p=o&&d.roster.find(q=>q.id===o.pid), c=o&&d.world.clubs[o.club];
+        L.push(plF([['BIDS IN',String(x.n||0)],['PRICES','−'+Math.round((1-DD_ASK)*100)+'%','up'],p&&c&&['LATE BID',money(o.fee),'up']]));
         L.push('The window shuts tonight: nobody comes or goes again till the summer.');
-        if(x.n) L.push('The clubs are desperate: <b>'+x.n+' bid'+(x.n>1?'s':'')+'</b> in for your men today.');
-        if(p&&c) L.push('<span class="up">Late in: '+mgEsc(c.name)+' want '+mgEsc(p.name)+', and bid '+money(o.fee)+'.</span>');
-        L.push('The sellers have cut their prices ('+Math.round((1-DD_ASK)*100)+'% down), and any bid you make is answered today.');
+        if(x.n) L.push('The clubs are desperate for your men today.');
+        if(p&&c) L.push('<span class="up">Late in: '+mgEsc(c.name)+' want '+mgEsc(p.name)+'.</span>');
+        L.push('The sellers have cut their prices, and any bid you make is answered today.');
         if(lvOf(d,'market')) B.push(['TO THE MARKET','market']); next(); return ['Deadline day',L,B]; }
       case 'bboffer': { const f=mgFind(d,x.pid), p=f.p, c=f.club;
         L.push('<div class="plRow"><span><b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · '+(mgKnown(d,p)?'rated '+p.ovr:'rated '+mgRange(d,p).join('–'))+' · '+(x.why==='raw'?'too raw for their first team':'not doing it for them')+'</span><button data-pile="look" data-pid="'+p.id+'">LOOK</button></div>');
-        L.push('<b>'+money(x.fee)+'</b>, a fifth under their price. He’d earn '+money(mgDemandSeen(d,p,true))+' a week.'+(d.roster.length>=MG_MAX?' <span class="dn">Your squad is full.</span>':''));
-        L.push('<span class="dn">The catch: a buyback clause. To the end of season '+x.until+' they can have him back for '+money(x.back)+', and will if he comes on.</span>');
+        L.unshift(plF([['FEE',money(x.fee)],['WAGE',plWk(mgDemandSeen(d,p,true))],['BUYBACK',money(x.back),'dn'],['TILL','S'+x.until]]));
+        L.push('A fifth under their price.'+(d.roster.length>=MG_MAX?' <span class="dn">Your squad is full.</span>':''));
+        L.push('<span class="dn">The catch: a buyback clause. Till then they can have him back, and will if he comes on.</span>');
         L.push(pileYears(d,'HIS CONTRACT')); B.push(['SIGN HIM','bbsign'],['NO THANKS','next']); later();
         return [mgEsc(c.name)+' ('+LG_SHORT[c.tier]+') offer you '+mgEsc(p.name),L,B]; }
-      case 'bbback': L.push('He’s come on: rated '+x.ovr+' now, '+x.ovr0+' when he came. The clause lets them, and they have.'); L.push('<span class="up">'+money(x.fee)+' in the bank.</span>'); next();
+      case 'bbback': L.push(plF([['IN THE BANK','+'+money(x.fee),'up'],['RATED',x.ovr0+' → '+x.ovr]])); L.push('He’s come on. The clause lets them, and they have.'); next();
         return [mgEsc(x.club)+' take '+mgEsc(x.name)+' back',L,B];
       case 'bbend': L.push('Nobody can take him off you now'+(x.club?': '+mgEsc(x.club)+' never used it.':'.')); next();
         return ['The buyback clause on '+(P?mgEsc(P.name):'him')+' has run out',L,B];
       case 'shirts': { const tops=(x.top||[]).map(([id,sh])=>{ const p=d.roster.find(q=>q.id===id); return p?mgEsc(p.name)+' <span class="dim">('+sh+'%)</span>':''; }).filter(Boolean);
+        L.push(plF([['THIS SEASON',money(x.season)]]));
         if(tops.length) L.push('The best sellers: '+tops.join(', ')+'.');
-        L.push('Shirts this season: <b>'+money(x.season)+'</b>.');
         L.push('<span class="dim">The more popular your men, the more shirts go (each man’s popularity is on his card).</span>');
         next(); return ['The club shop: +'+money(x.wk)+' in shirts this week',L,B]; }
       case 'table': { const me=x.rows.findIndex(r=>r.id===d.clubId), opp=d.world.clubs[x.opp], oi=x.rows.findIndex(r=>r.id===x.opp), mv=me>=0?x.rows[me].mv:0;
-        L.push('Today: '+mgEsc(x.label)+' · '+(x.home?'at home to ':'away at ')+'<b>'+mgEsc(opp?opp.name:'?')+'</b>'+(oi>=0&&x.rows[oi].p?' ('+ordinal(oi+1)+')':'')+(isDerby(d,x.opp)?' <span class="dn">· the derby</span>':''));
-        { const tv=tmOvr(d), tm=d.tm??MOR0; L.push('The dressing room: '+tmWord(tm)+' ('+tm.toFixed(1)+')'+(Math.abs(tv)>=0.05?' · <span class="'+(tv>0?'up':'dn')+'">'+(tv>0?'+':'')+tv.toFixed(1)+'</span> on each man’s rating today':' · no more or less on the day')); }   // (v155: THE DRESSING ROOM ON THE PITCH)
+        { const tv=tmOvr(d), tm=d.tm??MOR0; L.push(plF([oi>=0&&x.rows[oi].p&&['THEY\u2019RE',ordinal(oi+1).toUpperCase()],['ON THE DAY',Math.abs(tv)>=0.05?(tv>0?'+':'')+tv.toFixed(1):'±0',tv>=0.05?'up':tv<=-0.05?'dn':'']]));   // (v176: the numbers first -- the morale's in the head)
+          L.push('Today: '+mgEsc(x.label)+' · '+(x.home?'at home to ':'away at ')+'<b>'+mgEsc(opp?opp.name:'?')+'</b>'+(isDerby(d,x.opp)?' <span class="dn">· the derby</span>':''));
+          L.push('The dressing room: '+tmWord(tm)+(Math.abs(tv)>=0.05?', '+(tv>0?'on':'off')+' each man’s rating today':', no more or less on the day')+'.'); }   // (v155: THE DRESSING ROOM ON THE PITCH)
         L.push(pileTable(d,x)); const gp=pileGaps(d,x); if(gp) L.push(gp+(mv?' · '+(mv>0?'<span class="up">up '+mv:'<span class="dn">down '+(-mv))+'</span> since the last round':'')+'.');
         if(x.rows.every(r=>!r.p)){ next(); return ['The season starts today: everyone on nothing',L,B]; }
         next(); return [(me>=0?ordinal(me+1)+' in '+MG_LEAGUE[x.tier]:MG_LEAGUE[x.tier])+(me>=0&&x.rows[me].p?', '+x.rows[me].pts+' point'+(x.rows[me].pts===1?'':'s'):''),L,B]; }
       case 'offer': { const o=d.offers.find(y=>y.id===x.oid), p=d.roster.find(q=>q.id===o.pid), c=d.world.clubs[o.club];
-        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · rated '+p.ovr+' · on '+money(p.wage)+'/wk to S'+(p.until||d.season));
-        L.push('What he’s worth to you: about '+money(mgValue(d,p))+(d.listed&&d.listed[p.id]?' · listed at '+money(d.listed[p.id]):''));
+        L.push(plF([['WORTH',money(mgValue(d,p))],d.listed&&d.listed[p.id]&&['LISTED',money(d.listed[p.id])],['RATED',String(p.ovr)],['AGE',String(p.age)],['WAGE',plWk(p.wage)],['DEAL','S'+(p.until||d.season)]]));
+        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p));
         if(p.hg) L.push('<span class="dim">From your academy: his agent takes a tenth -- '+money(o.fee-agentCut(p,o.fee))+' to the club.</span>');   // (v156)
         if(p.wantsOut) L.push('<span class="dim">He wants to leave.</span>');
         if(o.dd) L.push('<span class="dn">A deadline-day bid: it’s gone when the window shuts tonight.</span>');
         B.push(['ACCEPT','accept'],['REJECT','reject']); later();
         return [mgEsc(c?c.name:'A club')+' bid '+money(o.fee)+' for '+mgEsc(p.name),L,B]; }
       case 'bid': { const Bd=mgBidOf(d,x.pid), f=mgFind(d,x.pid), p=f.p, c=f.club;
-        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · '+(mgKnown(d,p)?'rated '+p.ovr:'rated '+mgRange(d,p).join('–'))+' · '+mgEsc(c?c.name:''));
-        if(Bd.st==='yes'){ L.push('He’d sign for '+money(mgDemand(d,p,true))+' a week.'+(d.roster.length>=MG_MAX?' <span class="dn">Your squad is full.</span>':''));
+        L.push(plF([Bd.st==='yes'?['WAGE',plWk(mgDemand(d,p,true))]:['YOUR BID',money(Bd.fee)],['RATED',mgKnown(d,p)?String(p.ovr):mgRange(d,p).join('–')],['AGE',String(p.age)]]));
+        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · '+mgEsc(c?c.name:''));
+        if(Bd.st==='yes'){ L.push('He’d sign for that.'+(d.roster.length>=MG_MAX?' <span class="dn">Your squad is full.</span>':''));
           L.push(pileYears(d,'HIS CONTRACT')); B.push(['SIGN HIM','sign'],['WALK AWAY','walk']); later();
           return [mgEsc(c?c.name:'They')+' accept your '+money(Bd.fee),L,B]; }
-        L.push(Bd.firm?'Their last word: meet it, or he stays.':Bd.rival?'Another club’s in for him: match it this week and he’s yours.':'They want more than your '+money(Bd.fee)+'.');
+        L.push(Bd.firm?'Their last word: meet it, or he stays.':Bd.rival?'Another club’s in for him: match it this week and he’s yours.':'They want more than you bid.');
         if(!Bd.firm) L.push('<div class="plYrs">COUNTER <button data-pile="cfee" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(mgCounterFee(d,Bd))+'</b><button data-pile="cfee" data-dir="1" data-pid="'+p.id+'">+</button></div>');   // (HAGGLING: mgCounter)
         B.push(['MEET '+money(Bd.ask),'meet']); if(!Bd.firm) B.push(['COUNTER','counter']); B.push(['WALK AWAY','walk']); later();
         return [mgEsc(c?c.name:'They')+' want '+money(Bd.ask)+' for '+mgEsc(p.name),L,B]; }
       case 'sponsor': { const o=d.spOff.find(y=>y.id===x.oid), Z=SP_SIZES[o.sz]||SP_SIZES[0];
-        L.push(mgEsc(Z.what.charAt(0).toUpperCase()+Z.what.slice(1))+', and they’d like '+SP_PLACE[o.k]+(o.ground?' — the ground would be <b>'+mgEsc(o.ground)+'</b>':'')+'.');
-        L.push('<b>'+money(o.wk)+' a week</b>, '+spTerm(d,o.yrs)+'.');
+        L.push(plF([['A WEEK',money(o.wk),'up'],['TILL','S'+((d.season||1)+o.yrs-1)],['FIRM',Z.n.toUpperCase()]]));
+        L.push(mgEsc(Z.what.charAt(0).toUpperCase()+Z.what.slice(1))+', and they’d like '+SP_PLACE[o.k]+(o.ground?': the ground would be <b>'+mgEsc(o.ground)+'</b>':'')+'.');
         if(o.m) L.push('Bonus at the season’s end: '+dealMetTxt(o.m)+'.');
         L.push('<span class="dim">The offer stands to '+((d.weeks||0)-o.at>=1?'the end of this week':'next Monday')+'.</span>');
         B.push(['SIGN','spsign'],['NO THANKS','spno']); later();
         return [spChip(o.sp)+' '+mgEsc(o.sp.name),L,B]; }
       case 'contract': { const p=P, T=cTalkOf(d,p), ban=cTalkBan(d,p);
-        L.push('He’s on '+money(p.wage)+' a week to S'+(p.until||d.season)+', and asks for <b>'+money(mgRenewWage(d,p))+'</b>.');
+        L.push(plF([['ON',plWk(p.wage)],['ASKS',plWk(mgRenewWage(d,p)),'dn'],['DEAL','S'+(p.until||d.season)]]));
         L.push('<span class="dim">'+cGiveTxt(d,p)+' Say not now and he’ll mind, and ask again in eight weeks.</span>');
         L.push(pileYears(d,'A NEW DEAL, FROM NEXT SEASON:'));
         if(T) L.push('<b>He’ll sign for '+money(T.cnt)+' a week</b>, for '+T.y+' season'+(T.y>1?'s':'')+'.');
@@ -17940,9 +17954,10 @@
         B.push(['TALK TERMS','eterms']); later();
         return [(E.length>1?E.length+' deals end':'A deal ends')+' with this season',L,B]; }
       case 'gold': { const yours=['boot','glove'].some(k=>x[k]&&x[k].you);
+        { const F=[]; for(const [k,u] of [['boot','GOALS'],['glove','CLEAN SHEETS']]){ const g=x[k]; if(g) F.push([u,String(g.n)]); if(g&&g.you) F.push(['PRIZE',money(g.prize),'up'],['FANS','+'+g.fans,'up']); } L.push(plF(F)); }
         for(const [k,t,u] of [['boot','The Golden Boot','goal'],['glove','The Golden Glove','clean sheet']]){ const g=x[k]; if(!g) continue;
-          L.push('<b>'+t+'</b>: '+mgEsc(g.name)+' · '+mgEsc(g.club)+' · '+g.n+' '+u+(g.n>1?'s':''));
-          if(g.you) L.push('<span class="up">Yours!</span> The league pays <b>'+money(g.prize)+'</b>, and the fans love it: <span class="up">+'+g.fans+' fans</span>.'); }
+          L.push('<b>'+t+'</b>: '+mgEsc(g.name)+' · '+mgEsc(g.club));
+          if(g.you) L.push('<span class="up">Yours!</span> The league pays the prize, and the fans love it.'); }
         next(); return [(yours?'Yours! ':'')+[x.boot&&'The Golden Boot',x.glove&&(x.boot?'the':'The')+' Golden Glove'].filter(Boolean).join(' and '),L,B]; }
       case 'out': { const p=P;
         if(x.res){ L.push(...x.res.map(t=>mgEsc(t))); next(); return [mgEsc(p.name),L,B]; }
@@ -17957,15 +17972,17 @@
       case 'bidoff': next(); return [mgEsc(x.txt),L,B];
       case 'spend': L.push('<span class="dim">'+(x.place==='board'?'The board is free for someone else.':'It’s free for someone else.')+'</span>'); next();
         return [mgEsc(x.name)+'’s deal for '+SP_PLACE[x.place]+' has run out',L,B];
-      case 'phys': { const hurt=new Set(x.hurt.map(h=>h.pid));
-        for(const h of x.hurt){ const p=d.roster.find(q=>q.id===h.pid); if(p) L.push('<b>'+mgEsc(p.name)+'</b>: '+INJ_NAME[h.k]+(h.how?', '+mgEsc(h.how):'')+' · '+(p.inj?injWeeks(p.inj.d)+' out':'back already')); }
+      case 'phys': { const hurt=new Set(x.hurt.map(h=>h.pid)), outs=d.roster.filter(p=>p.inj);
+        if(outs.length) L.push(plF(outs.map(p=>[surname(p.name).toUpperCase(),'OUT '+injShort(p.inj.d).toUpperCase(),'dn'])));   // (v176: who's out and how long, first)
+        for(const h of x.hurt){ const p=d.roster.find(q=>q.id===h.pid); if(p) L.push('<b>'+mgEsc(p.name)+'</b>: '+INJ_NAME[h.k]+(h.how?', '+mgEsc(h.how):'')+(p.inj?'':' · back already')); }
         for(const id of x.back){ const p=d.roster.find(q=>q.id===id); if(p&&!p.inj) L.push('<span class="up">'+mgEsc(p.name)+' is fit again</span>'); }
-        for(const p of d.roster) if(p.inj&&!hurt.has(p.id)) L.push(mgEsc(p.name)+': '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+' to go');
+        for(const p of d.roster) if(p.inj&&!hurt.has(p.id)) L.push(mgEsc(p.name)+': '+INJ_NAME[p.inj.k]);
         const out=d.roster.filter(p=>p.inj).length; if(!L.length) L.push('No knocks, nobody in the treatment room.');
         next(); return [out?out+' out injured'+(x.back.length?', '+x.back.length+' fit again':''):x.back.length?'Everyone’s fit again':'Everyone’s fit',L,B]; }
-      case 'dev': { const say=([id,dl])=>{ const p=d.roster.find(q=>q.id===id); return p?mgEsc(p.name)+' '+(dl>0?'<span class="up">+'+dl:'<span class="dn">'+dl)+'</span> → '+p.ovr:''; };
-        if(x.up.length) L.push('Coming on: '+x.up.slice(0,4).map(say).filter(Boolean).join(', ')+(x.up.length>4?' and '+(x.up.length-4)+' more':''));
-        if(x.down.length) L.push('Going back: '+x.down.slice(0,3).map(say).filter(Boolean).join(', '));
+      case 'dev': { const chip=([id,dl])=>{ const p=d.roster.find(q=>q.id===id); return p?[surname(p.name).toUpperCase(),(dl>0?'+':'')+dl+' → '+p.ovr,dl>0?'up':'dn']:null; };   // (v176: a chip a man, his change and his rating now)
+        if(x.up.length||x.down.length) L.push(plF(x.up.slice(0,6).map(chip).concat(x.down.slice(0,3).map(chip))));
+        if(x.up.length>6) L.push('<span class="dim">…and '+(x.up.length-6)+' more coming on.</span>');
+        if(!x.up.length&&!x.down.length) L.push('<span class="dim">Nobody’s moved a point.</span>');
         next(); return ['Three weeks on: who’s coming on',L,B]; }
       case 'scout': { for(const id of x.pids){ const f=mgFind(d,id); if(!f||!f.club||f.mine) continue; const p=f.p;
           L.push('<div class="plRow"><span><b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · '+p.age+' · '+mgEsc(f.club.name)+' · '+(mgKnown(d,p)?'rated '+p.ovr:'rated '+mgRange(d,p).join('–'))+' · asking '+money(mgAsk(d,p,f.club))+'</span><button data-pile="look" data-pid="'+p.id+'">LOOK</button></div>'); }
@@ -17973,47 +17990,48 @@
         next(); return ['Worth a look',L,B]; }
       case 'next': { const c=d.world.clubs[x.opp]; if(!c){ next(); return ['Your next game',L,B]; }
         const row=d.lg&&d.lg[c.tier]?mgTable(d,c.tier).findIndex(r=>r.id===c.id):-1, fm=mgFormOf(d,c.id), top=(c.players||[]).slice().sort((a,b)=>(b.goals||0)-(a.goals||0))[0];
-        L.push(mgEsc(x.label)+' · '+(x.home?'at home':'away'));
-        if(row>=0&&d.md>0) L.push('They’re '+ordinal(row+1)+' in '+MG_LEAGUE[c.tier]+(fm?' · form '+fm.split('').join(' '):''));
-        if(top&&(top.goals||0)>0) L.push('Their top scorer: '+mgEsc(top.name)+' ('+top.goals+')');
+        L.push(plF([row>=0&&d.md>0&&['THEY’RE',ordinal(row+1).toUpperCase()],fm&&['FORM',fm.split('').join(' ')],top&&(top.goals||0)>0&&['TOP SCORER',mgEsc(surname(top.name)).toUpperCase()+' '+top.goals]]));
+        L.push(mgEsc(x.label)+' · '+(x.home?'at home':'away')+(row>=0&&d.md>0?' · '+MG_LEAGUE[c.tier]:''));
         next(); return [(x.home?'At home to ':'Away at ')+mgEsc(c.name),L,B]; }
       case 'potm': case 'poty': { const ttl=x.k==='poty'?'Player of the Year':'Player of the Month';
-        L.push(mgEsc(x.name)+' · '+mgEsc(x.club)+' · '+x.avg.toFixed(1)+' over '+x.n+' games'+(x.g?', '+x.g+' goal'+(x.g>1?'s':''):''));
-        if(x.you) L.push('<b>The league pays '+money(x.prize)+'</b>, and the fans love it: <span class="up">+'+x.fans+' fans</span>.');
+        L.push(plF([['RATED',x.avg.toFixed(1)],['GAMES',String(x.n)],x.g&&['GOALS',String(x.g)],x.you&&['PRIZE',money(x.prize),'up'],x.you&&['FANS','+'+x.fans,'up']]));
+        L.push(mgEsc(x.name)+' · '+mgEsc(x.club));
+        if(x.you) L.push('The league pays the club, and the fans love it.');
         else if(x.best) L.push('<span class="dim">Your best: '+mgEsc(x.best.name)+', '+x.best.avg.toFixed(1)+'.</span>');
         next(); return [(x.you?'Yours! ':'')+ttl+': '+mgEsc(x.name),L,B]; }
-      case 'windfall': L.push(mgEsc(x.txt)); L.push('In the bank: <b>'+money(d.budget)+'</b>'); next(); return [mgEsc(x.title)+': +'+money(x.amt),L,B];
+      case 'windfall': L.push(plF([['IN THE BANK',money(d.budget)]])); L.push(mgEsc(x.txt)); next(); return [mgEsc(x.title)+': +'+money(x.amt),L,B];
       case 'comm': { const c=COMMUNITY.find(y=>y.k===x.ck); if(!c){ next(); return ['The community',L,B]; }
-        L.push('Say yes and the fans think more of the club: about <span class="up">+'+commFans(d,c)+' fans</span>'+(c.tm?', and the dressing room enjoys it':'')+'.');
-        if(x.cost) L.push('It costs <b>'+money(x.cost)+'</b>.'); if(c.tire) L.push('<span class="dim">It takes a little out of your nine’s legs.</span>');
+        L.push(plF([['FANS','+'+commFans(d,c),'up'],x.cost&&['COSTS',money(x.cost),'dn']]));
+        L.push('Say yes and the fans think more of the club'+(c.tm?', and the dressing room enjoys it':'')+'.');
+        if(c.tire) L.push('<span class="dim">It takes a little out of your nine’s legs.</span>');
         B.push(['YES','commyes'],['NOT THIS TIME','next']); return [mgEsc(c.t),L,B]; }
       case 'cup': { const K=CUP[x.key];
         if(x.out){ next(); return ['Out of the '+K.name+' in the '+K.rounds[x.r].toLowerCase(),L,B]; }
         if(x.bye){ L.push('<span class="dim">The best clubs in it skip the first round.</span>'); next(); return [K.name+': a bye to the '+K.rounds[x.r].toLowerCase(),L,B]; }
         if(x.group){ L.push('Drawn with '+x.group.map(id=>mgEsc(mgNameOf(d,id))).join(', ')+'.'); L.push('Six group games on Wednesdays; the top two go through to the quarter-finals.'); next(); return ['The Champions League group draw',L,B]; }
-        const wk=cupWeek(x.key,x.r); if(wk) L.push('On the Wednesday of week '+wk+'.');
-        L.push('Win it and the club gets <b>'+money(K.prize[x.r])+'</b>.'+(isDerby(d,x.opp)?' <span class="dn">A derby!</span>':''));
+        const wk=cupWeek(x.key,x.r); L.push(plF([['WIN IT',money(K.prize[x.r]),'up'],wk&&['WEEK',String(wk)]]));
+        L.push((wk?'On a Wednesday.':'')+(isDerby(d,x.opp)?' <span class="dn">A derby!</span>':''));
         next(); return [K.name+', '+K.rounds[x.r].toLowerCase()+': '+(x.home?'at home to ':'away at ')+mgEsc(mgNameOf(d,x.opp)),L,B]; }
       case 'derby': { const c=d.world.clubs[x.opp]; if(!c){ next(); return ['Derby week',L,B]; } const R=d.derbyRec||{w:0,d:0,l:0};
         const row=d.lg&&d.lg[c.tier]?mgTable(d,c.tier).findIndex(r=>r.id===c.id):-1, fm=mgFormOf(d,c.id);
+        L.push(plF([row>=0&&d.md>0&&['THEY’RE',ordinal(row+1).toUpperCase()],fm&&['FORM',fm.split('').join(' ')],R.w+R.d+R.l&&['WON',String(R.w),'up'],R.w+R.d+R.l&&['DRAWN',String(R.d)],R.w+R.d+R.l&&['LOST',String(R.l),'dn']]));
         L.push('The town’s talking about nothing else. '+mgEsc(x.label)+', '+(x.home?'at home: every last fan will be there':'away'));
-        if(row>=0&&d.md>0) L.push('They’re '+ordinal(row+1)+(fm?' · form '+fm.split('').join(' '):''));
-        if(R.w+R.d+R.l) L.push('Your derbies with them: won '+R.w+', drawn '+R.d+', lost '+R.l+'.');
         L.push('<span class="dim">A derby counts for more, in the dressing room and with the fans, win or lose.</span>');
         next(); return ['Derby week: '+(x.home?'at home to ':'away at ')+mgEsc(c.name),L,B]; }
       case 'loanout': { const p=P, c=d.world.clubs[x.cid];
-        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · rated '+p.ovr+' · '+morWord(p.mor??MOR0).toLowerCase());
-        L.push('To the end of the season, and they pay his wages: <span class="up">'+money(p.wage)+' a week</span> off yours. He plays there, and comes back when it’s over.');
+        L.push(plF([['OFF YOUR WAGES',plWk(p.wage),'up'],['RATED',String(p.ovr)],['AGE',String(p.age)]]));
+        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · '+morWord(p.mor??MOR0).toLowerCase());
+        L.push('To the end of the season, and they pay his wages. He plays there, and comes back when it’s over.');
         B.push(['LET HIM GO','loanout'],['NO','next']); later(); return [mgEsc(c.name)+' ('+LG_SHORT[c.tier]+') want '+mgEsc(p.name)+' on loan',L,B]; }
       case 'loanin': { const f=mgFind(d,x.pid), p=f.p, c=f.club;
-        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · age '+p.age+' · '+(mgKnown(d,p)?'rated '+p.ovr:'rated '+mgRange(d,p).join('–')));
-        L.push('To the end of the season: <b>'+money(mgLoanFee(d,p))+'</b> up front, and '+Math.round(x.share*100)+'% of his wage, <b>'+money(mgRound(p.wage*x.share))+' a week</b>.');
+        L.push(plF([['UP FRONT',money(mgLoanFee(d,p))],['WAGE',plWk(mgRound(p.wage*x.share))],['SHARE',Math.round(x.share*100)+'%'],['RATED',mgKnown(d,p)?String(p.ovr):mgRange(d,p).join('–')],['AGE',String(p.age)]]));
+        L.push('<b>'+mgEsc(p.name)+'</b> · '+natPos(p)+' · to the end of the season');
         B.push(['TAKE HIM','loanin'],['NO THANKS','next']); later(); return [mgEsc(c.name)+' will lend you '+mgEsc(p.name),L,B]; }
-      case 'loanback': { const p=d.roster.find(q=>q.id===x.pid); L.push(x.apps+' game'+(x.apps===1?'':'s')+', '+x.goals+' goal'+(x.goals===1?'':'s')+' there.'); next();
+      case 'loanback': { const p=d.roster.find(q=>q.id===x.pid); L.push(plF([['GAMES',String(x.apps)],['GOALS',String(x.goals)]])); next();
         return [(p?mgEsc(p.name):'He')+' is back from his loan at '+mgEsc(x.club),L,B]; }
       case 'money': { const net=x.inc-x.wages;
-        L.push('In <b>'+money(x.inc)+'</b> · wages out <b>'+money(x.wages)+'</b> · '+(net>=0?'<span class="up">+':'<span class="dn">')+money(net)+'</span>');
-        L.push('In the bank: '+(x.budget<0?'<span class="dn">'+money(x.budget)+' — in the red</span>':'<b>'+money(x.budget)+'</b>'));
+        L.push(plF([['IN',money(x.inc),'up'],['WAGES',money(x.wages),'dn'],['IN THE BANK',money(x.budget),x.budget<0?'dn':'']]));
+        if(x.budget<0) L.push('<span class="dn">In the red.</span>');
         next(); return [(net>=0?'Up ':'Down ')+money(Math.abs(net))+' on the week',L,B]; }
     }
     next(); return ['',L,B]; }

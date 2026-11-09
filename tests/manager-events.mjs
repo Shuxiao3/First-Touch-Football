@@ -79,14 +79,14 @@ const commTxt = await page.innerText('#pileModal .plPaper').catch(() => '');
 const c0 = await K(`(()=>{ const d=CAREER.data; return { b:d.budget, f:d.loyalty, n:commFans(d,COMMUNITY.find(c=>c.k==='kits')) }; })()`);
 await page.click('#pileModal [data-pile="commyes"]'); await page.waitForTimeout(80);
 r = await K(`(()=>{ const d=CAREER.data; return { b:d.budget, f:d.loyalty }; })()`);
-ok(/youth club/.test(commTxt) && /\+\d+ fans/.test(commTxt) && /costs \$600/.test(commTxt) && r.b === c0.b - 600 && r.f === c0.f + c0.n,
+ok(/youth club/.test(commTxt) && /FANS\s*\+\d+/.test(commTxt) && /COSTS\s*\$600/.test(commTxt)   /* (v176: the numbers first, a chip each) */ && r.b === c0.b - 600 && r.f === c0.f + c0.n,
   'the community asks (a youth club\'s kits): YES costs what it said ($600) and the fans think more of the club (+' + c0.n + ')');
 await K('pileHide()');
 
 // --- THE CUPS' DRAWS, in the papers ---------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, other=d.div[2][0]; d.div[2][0]=d.clubId; d.div[1][d.div[1].indexOf(d.clubId)]=other; d.world.clubs[other].tier=1; d.world.clubs[d.clubId].tier=2; d.tier=2;
   mgNewFixtures(d); d.wkLog={}; mgCupsStart(d); d.md=0; d.phase='league'; pileBuild(d,{dev:null}); const x=pileLeft(d).find(y=>y.k==='cup'); return x?[pileBody(d,x)[0], pileBody(d,x)[1].join(' / ')]:null; })()`);
-ok(r && (/^Coco Cup, first round: (at home to|away at) /.test(r[0]) && /Wednesday of week 5/.test(r[1]) && /\$50,000/.test(r[1]) || /^Coco Cup: a bye to the round of 32/.test(r[0])),
+ok(r && (/^Coco Cup, first round: (at home to|away at) /.test(r[0]) && /WEEK<\/i><b>5</.test(r[1]) && /WIN IT<\/i><b class="up">\$50,000</.test(r[1]) || /^Coco Cup: a bye to the round of 32/.test(r[0])),
   'a League 1 season: the Coco Cup\'s first-round draw in the papers ("' + (r && r[0]) + '", ' + (r && r[1]) + ')');
 r = await K(`(()=>{ const d=CAREER.data; d.wkLog={}; let n=0; while(n++<40){ if(d.wday==='mon'){ mgForward(d); continue; } const g=mgNextGame(d); if(!g) break; mgPlayGame(d,null,null); d.press=null; if(g.kind==='cup'){ const s=mgNextGame(d); if(s){ mgPlayGame(d,null,null); d.press=null; } break; } }   // (the cup's Wednesday, then Saturday: the papers on Monday)
   const L=(d.pile&&d.pile.list||[]).filter(x=>x.k==='cup').map(x=>pileBody(d,x)[0]); return { L, md:d.md }; })()`);
@@ -136,7 +136,7 @@ for(let i = 0; i < 14 && await on('pileModal'); i++){ const t = await page.inner
 const n0 = await K('CAREER.data.roster.length');
 if(loanTxt) await page.click('#pileModal [data-pile="loanin"]'); await page.waitForTimeout(80);
 const n1 = await K('CAREER.data.roster.length');
-ok(/loanin/.test(r) && /\$[\d,]+ up front, and \d+% of his wage/.test(loanTxt) && n1 === n0 + 1, 'the papers: a club will lend you a man ("' + loanTxt.split('\n')[1] + '") -- v150: for a fee up front and a share of his wage -- and TAKE HIM brings him in');
+ok(/loanin/.test(r) && /UP FRONT\s*\$[\d,]+/.test(loanTxt) && /SHARE\s*\d+%/.test(loanTxt) && /WAGE\s*\$[\d,]+\/WK/.test(loanTxt) && n1 === n0 + 1,   /* (v176: the numbers first, a chip each) */ 'the papers: a club will lend you a man ("' + loanTxt.split('\n')[1] + '") -- v150: for a fee up front and a share of his wage -- and TAKE HIM brings him in');
 await K('pileHide()');
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).find(c=>c.tier===d.tier&&c.players.length>MG_MIN+2), e8=mgEight(c.players), p=c.players.find(x=>!e8.includes(x)&&x.role!=='GK'&&!mgLoanWhy(d,x,c));
   mgSide='deal'; curTab.market='Search'; openBuilding('market'); MGUI.sel=p.id; MGUI.tier=c.tier; paintBuilding(); window.__ask=p.id; return p.name; })()`);   // (the card's deal side: OFFER, LOAN HIM)

@@ -50,7 +50,7 @@ info('the side\'s mood on the day: ' + JSON.stringify(r));
 ok(r.mid.o === 0 && r.hi.o >= 0.3 && r.hi.o <= 0.7 && r.lo.o <= -0.9 && r.lo.o >= -1.8 && r.lo.o < -2 * r.hi.o && r.hi.s > r.mid.s && r.mid.s > r.lo.s && r.hi.st > r.mid.st && r.lo.st < r.mid.st,
   'the dressing room\'s mood on match day: ' + r.lo.o + ' on each man\'s rating at 1 (v170: 0.6 off a stat at 3 and under, where it was a quarter, as much as a buoyant one gives), 0 at 6.5, +' + r.b8.o + ' at 8 (buoyant), +' + r.hi.o + ' at 10 -- in a simulated game (the side ' + r.lo.s + ' / ' + r.mid.s + ' / ' + r.hi.s + ') and one you play (his composure ' + r.lo.st + ' / ' + r.mid.st + ' / ' + r.hi.st + ')');
 r = await K(`(()=>{ const d=CAREER.data; while(d.phase!=='league'||!mgNextGame(d)) mgForward(d); d.tm=8.6; const g=mgNextGame(d); d.wday='sat'; pileMatchday(d); const x=d.pile.list.find(y=>y.k==='table'); const [t,L]=pileBody(d,x); d.wday='mon'; return L.join(' | ').replace(/<[^>]+>/g,''); })()`);
-ok(/The dressing room: buoyant \(8\.6\) · \+0\.\d on each man’s rating today/.test(r), 'the matchday\'s paper says it: "' + (r.match(/The dressing room[^|]*/) || [''])[0].trim() + '"');
+ok(/ON THE DAY\+0\.\d/.test(r) && /The dressing room: buoyant, on each man’s rating today/.test(r), 'the matchday\'s paper says it, the number first (v176): "' + (r.match(/ON THE DAY[^|]*/) || [''])[0].trim() + '", "' + (r.match(/The dressing room[^|]*/) || [''])[0].trim() + '"');
 
 // --- A MAN SETTLING IN ---------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d)[0], base=c.players.filter(p=>p.age<=21&&p.role!=='GK').sort((a,b)=>(b.pot-b.ovr)-(a.pot-a.ovr))[0];

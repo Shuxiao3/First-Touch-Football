@@ -88,10 +88,10 @@ r = await K(`(()=>{ const d=CAREER.data; hideBldg(); mgWeekStart(d); const was=d
   d.pile.opened=false; pileShow(d,true); const H=document.querySelector('#pileModal .plHead');
   if(!H) return { why:{ left:pileLeft(d).length, up:['storyModal','matchReport','pressModal','moneyModal'].filter(k=>mgUpOn(k)), money:!!MGUI.money, press:!!(d.press&&d.press.qs&&d.press.qs.length) } };
   const head=H.textContent;
-  let body=''; for(let k=0;k<12&&!body;k++){ const t=document.querySelector('#pileModal .plTitle'), L=document.querySelector('#pileModal .plPaper').textContent; if(/Team morale/.test(L)) body=L; else { const n=document.querySelector('#pileModal [data-pile="next"],#pileModal [data-pile="later"]'); if(!n) break; n.click(); } }
-  pileHide(); return { head:(head.match(/MORALE\\s*([0-9.]+)/)||[])[1], body:(body.match(/Team morale\\s*([0-9.]+)/)||[])[1], tm:d.tm.toFixed(1), was:was.toFixed(1) }; })()`);
+  let body=''; for(let k=0;k<12&&!body;k++){ const t=document.querySelector('#pileModal .plTitle').textContent, L=document.querySelector('#pileModal .plPaper').textContent; if(/^The dressing room is/.test(t)) body=L; else { const n=document.querySelector('#pileModal [data-pile="next"],#pileModal [data-pile="later"]'); if(!n) break; n.click(); } }
+  pileHide(); return { head:(head.match(/MORALE\\s*([0-9.]+)/)||[])[1], body:!!body, again:/Team morale/.test(body), week:/THIS WEEK/.test(body), tm:d.tm.toFixed(1), was:was.toFixed(1) }; })()`);   // (v176: the page doesn't say the head's figure again)
 if(r.why) info('the papers would not open: ' + JSON.stringify(r.why));
-ok(r.head && r.head === r.body && r.body === r.tm, 'the papers\' head and the dressing room\'s page give the side\'s mood as one: ' + r.head + ' and ' + r.body + ' (it moved from ' + r.was + ' after they came: the page said ' + r.was + ')');
+ok(r.head && r.head === r.tm && r.body && !r.again && r.week, 'the papers\' head gives the side\'s mood as it is now (' + r.head + ', moved from ' + r.was + ' after they came), and the dressing room\'s page doesn\'t say it again: its strip has the week\'s change');
 r = await K(`(()=>{ const d=CAREER.data, L=d.lg[d.tier], m=L.fx[Math.max(d.md+1,1)].find(x=>x[0]===d.clubId||x[1]===d.clubId), opp=m[0]===d.clubId?m[1]:m[0], c=d.world.clubs[opp];
   const md=Math.max(d.md+1,1)+1, shown=()=>{ const row=mgFixturesTab(d).split('<div class="mgFx').find(x=>x.includes('<span class="md">'+md+'</span>')); return row?+(row.match(/#5d7350">(\\d+)</)||[])[1]:null; };
   const a=shown(), s0=mgStrength(d,opp); for(const p of c.players) p.cond=0.7; const b=shown(), s1=mgStrength(d,opp); for(const p of c.players) p.cond=1;

@@ -1746,7 +1746,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       week (who's coming on, who's going back), the scouts' (with a scouts' house and the window open: three men worth
       a look, LOOK to go to him in the market), your next game (where, their place and form, their top scorer) and the
       week's money. LATER puts a paper to the bottom; ✕ puts the pile aside, and PAPERS (with how many are left) opens
-      it again. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
+      it again. **The numbers first (v176):** a factual paper leads with its facts, a chip each under its headline --
+      a bid's WORTH, RATED, AGE, WAGE and DEAL; a sponsor's A WEEK, TILL and FIRM; a new deal's ON and ASKS; the
+      physio's man by man, OUT 3W; the coaches' SMITH +2 → 61; the next game's THEY'RE 6TH, FORM and TOP SCORER; the
+      week's IN, WAGES and IN THE BANK -- and its words after them say no number the headline or the strip shows (the
+      dressing room's page has the week's change, the morale itself being in the pile's head). The ones that are the
+      game's voice -- a man who wants a word, one who wants to leave, a deal run out -- stay words. A decision you leave is in next Monday's pile while it stands (STILL WAITING): an offer for one of
       yours or a sponsor's lapses after two weeks. What you decide there is decided as it would be anywhere else --
       the market, the stadium, the clubhouse -- and done there instead, it's gone from the pile. Since v105 the
       dressing room's paper is every man in it: the side's mood and how it's moved, then each man's mood and how far
@@ -2827,6 +2832,10 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v176: the papers, numbers first.** Every factual Monday paper leads with its facts, a chip each under its
+  headline (the handoff's J4), and its words after them no longer say a number the headline or the strip shows: the
+  dressing room's change, a bid's worth and terms, a sponsor's fee, a new deal's ask, who's out and how long, who's
+  coming on, the next game, the week's money. See **The Monday papers**.
 - **v175: the ground from above.** The Stadium rebuilt to the handoff's J4: the Stands tab a plan of the ground, each
   stand with its name, the level as pips, its price and how full it is, beside SEATS, FANS, FULL and BOARDS and the
   ground's five levels as a path with BUILD IT; the Sponsors tab with its money as tiles, the sizes of firm calling
