@@ -7,7 +7,7 @@
 // man of theirs on its line it bulges away from him and still gets to the spot; with one off to the side short of the
 // spot, 2 m off its line, it bulges away from him and bends round onto the spot (v169: from the start, the more as it
 // slows -- it hooked in late), coming in turned toward his side -- by then 36 degrees of turn on it at Curve 10 (a 16 m
-// ball), none at 1. Curve 1 bends nothing (v169), a cross included.
+// ball), none at 1. Curve 1 bends nothing (v169) -- but a cross: that bends by tenths, a tenth of Curve 10's at 1 (v180).
 // And a shot's curl is worked out as before.
 // On a copy of the game that lets the test set the scene and reach the cross, the passes and the reading of the ball.
 import { open } from './_harness.mjs';
@@ -63,10 +63,10 @@ for(const face of ['byline', 'back', 'side']) for(const cv of [1, 10]) X[face + 
 info('crosses: ' + Object.values(X).map(r => `${r.face} Curve ${r.cv}: bows ${Math.round(r.bow)} px ${r.toGoal > 0 ? 'toward goal (out)' : 'away from goal (in)'}, down ${r.at ? Math.round(r.at.miss) + ' px off the spot at ' + r.at.t.toFixed(2) + ' s, ' + Math.round(r.at.z) + ' px up' : 'never'}; read ${Math.round(r.err)} px out`).join('; '));
 ok(X.byline10.toGoal > 0 && X.byline10.bow > 35, 'facing the byline it\'s an outswinger: it bows out toward the goal line and bends away from it (' + Math.round(X.byline10.bow) + ' px)');
 ok(X.back10.toGoal < 0 && X.back10.bow > 35, 'facing back toward his own goal, an inswinger (' + Math.round(X.back10.bow) + ' px)');
-ok(!X.byline1.spin && !X.back1.spin && !X.side1.spin && X.byline1.bow < 15 && X.back1.bow < 15, 'Curve 1 doesn\'t bend it: no spin on it at all (v169), off its line only by the cross\'s own error (' + Math.round(X.byline1.bow) + ', ' + Math.round(X.back1.bow) + ', ' + Math.round(X.side1.bow) + ' px)');
+ok(X.byline1.bow < X.byline10.bow / 4 && X.back1.bow < X.back10.bow / 4, 'Curve 1 bends it a tenth as much as Curve 10 (v180: 10% a point) -- it bows ' + Math.round(X.byline1.bow) + ' and ' + Math.round(X.back1.bow) + ' px, against ' + Math.round(X.byline10.bow) + ' and ' + Math.round(X.back10.bow) + ' (v169-v179: none at all)');
 ok(Object.values(X).every(r => r.at && r.at.miss < 18 && r.at.t < 1.25 && r.at.z > 25), 'every one still comes down on the spot (within 0.7 m), on time and at head height');
 ok(Object.values(X).every(r => r.err < 12), 'its flight is read as it swings (within 12 px, 0.7 s ahead)');
-ok(Math.abs(X.byline10.q - 0.95) < 0.005 && X.byline1.q === 0, 'a Curve 10 cross counts as curling 0.95 of the most a cross can (' + X.byline10.q.toFixed(2) + ': v169, the most a twentieth less), a Curve 1 one not at all (' + X.byline1.q.toFixed(2) + ')');
+ok(Math.abs(X.byline10.q - 0.95) < 0.005 && Math.abs(X.byline1.q - 0.095) < 0.005, 'a Curve 10 cross counts as curling 0.95 of the most a cross can (' + X.byline10.q.toFixed(2) + ': v169, the most a twentieth less), a Curve 1 one a tenth of that (' + X.byline1.q.toFixed(3) + ': v180, 10% a point -- none before)');
 
 // HARDER TO CLEAR: the same header clearance off a cross curling all the way and off a straight one (the same dice)
 const clr = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && q.role !== 'G'), b = T.ball(), out = {}, R = Math.random; T.freeze();

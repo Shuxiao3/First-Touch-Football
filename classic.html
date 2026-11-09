@@ -4583,7 +4583,7 @@
     const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
     const err=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
     const ang=Math.atan2(a.y,a.x)+err, out=Math.max(push*(1+0.8*(1-s)*(1-s)),floor);
-    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; p.noTouchT=0.12+0.15*(1-s);
+    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow; p.noTouchT=0.12+0.15*(1-s);
     ball.vx=Math.cos(ang)*out; ball.vy=Math.sin(ang)*out; ball.z=1; ball.vz=30+60*(1-s);
     if(up){ ball.x=bx; ball.y=by; ball.z=z0; ball.vz=20+40*(1-s); }   // off his chest or thigh, from where he met it
     p.facing={x:a.x,y:a.y};
@@ -6672,6 +6672,10 @@
   function legsOf(p){ return (0.78+0.22*clamp(p.stamina??1,0,1))*(0.74+0.26*(p.staminaCap??1)); }
   // ACCELERATION stat -> the accel coefficient (endpoints: 1 => 0.05, 10 => 0.5)
   function accelStatOf(p){   return statLerp(statOf(p,'acceleration', P.accel.val),0.05,0.5); }
+  // (v180) A SLOW STARTER: under Acceleration 5.5 he builds speed a touch slower again, ACC_LOW less at 1 -- a tenth --
+  // half that at 3.25, none from 5.5 up
+  const ACC_LOW=0.1;
+  function accLowOf(p){ const s=statOf(p,'acceleration',P.accel.val); return 1-ACC_LOW*clamp((5.5-(isFinite(s)?s:5.5))/4.5,0,1); }
   // AGILITY stat -> the agility coefficient (endpoints: 1 => 0.2, 10 => 0.5)
   function agilityStatOf(p){ return statLerp(statOf(p,'agility',       P.agility.val),0.2, 0.5); }
   // the physio, for your side in a career match: how much slower the legs go, and how much of them comes back at half-time
@@ -7102,12 +7106,21 @@
     if(inBox(q)) return mv>80&&inBox(L) ? L : {x:q.x, y:q.y};
     return mv>80&&inBox(L) ? L : null;
   }
-  // the men a cross of yours could be for, nearest the ball first: {q, x, y (where it goes), d}
+  // (v180) THE HEART OF THE BOX, where a cross goes: no further out than CROSS_ZD (12 m, between the penalty spot and the
+  // edge of the box) nor wider than CROSS_ZW (9 m off the middle), nor on the goal line. A cross for a man further out
+  // or wider is aimed into it, as near him as it allows -- he goes in to meet it there (see crossMeet) -- and a man well
+  // out of it (CROSS_ZOUT, 2.5 m beyond it and more) isn't one to cross to while there's one of ours in it. (Till v180 a
+  // cross went to a man as far out as 15 m, the edge of the box, with no chance from there.)
+  const CROSS_ZD=12*MK, CROSS_ZW=9*MK, CROSS_ZOUT=2.5*MK;
+  function crossZone(atk,sp){ const gx=atk>0?FW:0, dd=atk*(gx-sp.x); return {x:gx-atk*clamp(dd,1.5*MK,CROSS_ZD), y:YC+clamp(sp.y-YC,-CROSS_ZW,CROSS_ZW)}; }
+  // the men a cross of yours could be for, nearest the ball first: {q, x, y (where it goes: in the heart of the box), d}
   function crossMen(p,low){
-    const J=PLAN[p.team]&&PLAN[p.team].last, out=[];
+    const J=PLAN[p.team]&&PLAN[p.team].last, out=[], atk=atkOf(p.team);
     for(const q of players){ if(q.team!==p.team||q===p||q.state!=='normal'||inOffsidePos(q)) continue;
-      const a=crossAimFor(p,q,J,low); if(a) out.push({q, x:a.x, y:a.y, d:Math.hypot(a.x-ball.x,a.y-ball.y)}); }
-    return out.sort((a,b)=>a.d-b.d);
+      const a=crossAimFor(p,q,J,low); if(!a) continue; const z=crossZone(atk,a);
+      out.push({q, x:z.x, y:z.y, d:Math.hypot(z.x-ball.x,z.y-ball.y), off:Math.hypot(a.x-z.x,a.y-z.y)}); }
+    const near=out.filter(m=>m.off<CROSS_ZOUT);                       // (v180: anyone in it first -- the man out on the edge only if nobody is)
+    return (near.length?near:out).sort((a,b)=>a.d-b.d);
   }
   // the man a charge c (0..1) picks: the bar shared out between them, nearest first
   function crossPick(p,c,low){ const M=crossMen(p,low); return M.length ? M[Math.min(M.length-1,Math.floor(clamp(c,0,1)*M.length))] : null; }
@@ -7130,13 +7143,15 @@
   function cross(charge,low){
     if(!crossOK(controlled)) return;                            // (carried out past 24 m while it was held: no cross)
     if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>cross(charge,low)); return; }
-    const c=clamp(charge||0,0,1), p=controlled, atk=atkOf(p.team), pick=crossPick(p,c,low);
+    const c=clamp(charge||0,0,1), p=controlled, atk=atkOf(p.team), aimC=cornerAimOn()?restartInfo:null, pick=aimC?null:crossPick(p,c,low);
     let tq=null, tx, ty;
-    if(pick){ tq=pick.q; tx=pick.x; ty=pick.y; }
+    if(aimC){ tq=cornerAimMan(aimC); tx=aimC.aim.x; ty=aimC.aim.y; }   // (v180: your corner -- to your reticle)
+    else if(pick){ tq=pick.q; tx=pick.x; ty=pick.y; }
     else {                                   // nobody in their box or on his way in: the forward or midfielder nearest the penalty spot
       const pen={x:atk>0?FW-BX*0.66:BX*0.66, y:YC}; let bs=1e9;
       for(const q of players){ if(q.team!==p.team||q===p||(q.role!=='ATT'&&q.role!=='MID')) continue; const d=dist(q,pen); if(d<bs){ bs=d; tq=q; } }
       if(tq){ tx=tq.x+tq.vx*0.4; ty=tq.y+tq.vy*0.4; } else { tx=pen.x; ty=pen.y; }
+      const z=crossZone(atk,{x:tx,y:ty}); tx=z.x; ty=z.y;              // (v180: into the heart of the box)
     }
     crossGoneAt=performance.now();
     if(low) lowCross(p,tq,tx,ty);
@@ -7340,15 +7355,16 @@
     let best=null;
     const consider=(sp,who,ours)=>{
       const T=tOf(sp), theirs=theirsAt(sp), margin=Math.min(theirs,T+0.6)-Math.max(ours,T);
-      const sc=margin-0.2*Math.max(0,Math.abs(sp.y-YC)-GOAL_W/2)/100-0.12*Math.max(0,atk*(goalX-sp.x)-200)/100;   // (a header from wide of the post, or from further out, is worth less)
+      const sc=margin-0.2*Math.max(0,Math.abs(sp.y-YC)-GOAL_W/2)/100-0.3*Math.max(0,atk*(goalX-sp.x)-200)/100;   // (a header from wide of the post, or from further out, is worth less -- v180: further out much less, 0.3 for every 4.4 m beyond 9 m: it was 0.12)
       if(ours<=T+0.05 && (!best||sc>best.sc)) best={x:sp.x,y:sp.y,who,margin,ours,theirs,sc}; };
     const mates=teamOf(p.team).filter(q=>q!==p&&q.state==='normal'&&!inOffsidePos(q));
     for(const q of mates){
       const j=J&&J.get(q);
-      if(j&&BOX_SPOT.has(j.job)){ const B={x:j.bx!=null?j.bx:j.x, y:j.by!=null?j.by:j.y}; if(inBox(B)) consider(B,q,oursAt(q,B)); continue; }   // his spot in the box (held at their line: on his run in behind it)
-      if(inBox(q)) consider({x:q.x,y:q.y},q,0);                                     // to him, where he is
+      const Z=sp=>crossZone(atk,sp), at=(sp,t0)=>{ const z=Z(sp); return [z, Math.hypot(z.x-sp.x,z.y-sp.y)<1?t0:oursAt(q,z)]; };   // (v180: into the heart of the box -- he goes in to it)
+      if(j&&BOX_SPOT.has(j.job)){ const B={x:j.bx!=null?j.bx:j.x, y:j.by!=null?j.by:j.y}; if(inBox(B)){ const [z,t]=at(B,oursAt(q,B)); consider(z,q,t); } continue; }   // his spot in the box (held at their line: on his run in behind it)
+      if(inBox(q)){ const [z,t]=at({x:q.x,y:q.y},0); consider(z,q,t); }                // to him, where he is
       const T=tOf(q), L={x:q.x+q.vx*T,y:q.y+q.vy*T};
-      if(Math.hypot(q.vx,q.vy)>80 && inBox(L)) consider(L,q,0);                     // ...or where his run takes him
+      if(Math.hypot(q.vx,q.vy)>80 && inBox(L)){ const [z,t]=at(L,0); consider(z,q,t); }   // ...or where his run takes him
     }
     if(!best) for(const sp of [{x:goalX-atk*150,y:YC+side*80},{x:goalX-atk*260,y:YC},{x:goalX-atk*170,y:YC-side*110}]){
       let ours=1e9, who=null;
@@ -7410,6 +7426,10 @@
     return false;
   }
   function queueAtFeet(fn){ actQ={fn,until:simNow+0.6}; }
+  // (v180) NO THROUGH BALL OFF HIS FIRST TOUCH: a pass pressed with the ball still loose off his first touch (ball.touchAt,
+  // up to FT_THRU_T on), played as he gets to it, goes as a pass to the man however it was asked for -- as a one-touch
+  // pass always has (firstTouchPass); the computer's first-time ball is never through either (obChoose)
+  const FT_THRU_T=0.9;
   function actStep(){
     if(!actQ) return;
     if(gatherForAction()){ const q=actQ; actQ=null; q.fn(); }
@@ -7471,7 +7491,9 @@
     o=o||{};
     if(keeperInHand()){ keeperPass(controlled,charge,o); return; }   // (your keeper, the ball in his hands: thrown -- v114)
     if(myThrow()){ throwYours(charge,o); return; }                  // (a throw-in, in your man's hands: thrown -- v138)
-    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>doPass(charge,o)); return; }
+    const loose0=myLooseBall();
+    if(!gatherForAction()){ if(myLooseBall()) queueAtFeet(()=>doPass(charge,Object.assign({},o,{atFeet:true}))); return; }
+    if(o.thru&&(o.atFeet||loose0)&&simNow-(ball.touchAt??-9)<FT_THRU_T) o=Object.assign({},o,{thru:null});   // (v180: played off his first touch, it's a pass, not a through ball)
     const p=controlled;
     const atk=atkOf(p.team);
 
@@ -8261,7 +8283,10 @@
   // at Curve 1 and 45 at 10, as much as the pass needs (thruNeed); v169: by the table, none at 1 and 43 at 10, by how far
   // (d, if it's given: the length of the pass).
   const CURL_F=1700*0.85, CROSS_BEND=0.6, PASS_BEND=0.28, THRU_BEND=0.785, SHOT_CURL=0.3;
-  function crossBendOf(p){ return CROSS_BEND*curvePot(p); }
+  // (v180) A CROSS BENDS BY CURVE IN STEPS OF A TENTH: 10% of the most a cross can be bent at Curve 1, 20% at 2 ... all of it
+  // at 10 (crossPot) -- not the through ball's table (CURVE_POT: none at 1, half at 7). (v169-v179: the table.)
+  function crossPot(p){ let s=statOf(p,'curve',P.curve.val); s=clamp(isFinite(s)?s:5.5,1,10); return CURVE_TOP*s/10; }
+  function crossBendOf(p){ return CROSS_BEND*crossPot(p); }
   function passBendOf(p,d){ return PASS_BEND*curvePot(p)*(d==null?1:curveLenK(d)); }
   function thruBendOf(p,d){ return THRU_BEND*curvePot(p)*(d==null?1:curveLenK(d)); }
   // A THROUGH BALL ROUND THEIR BACK LINE (thruArcs): bent along a steady arc through a gap in it and onto the runner, as
@@ -8823,6 +8848,16 @@
   function restartHeld(p){ const R=restartInfo; return !!R&&restartT>0&&R.set&&R.taker===p; }   // the man over it, about to take it
   function myThrow(){ const h=restartHolder(); return !!h&&h===controlled&&h.team==='G'; }       // yours: PASS throws it
   function restartYours(R){ return !!R&&R.set&&R.taker===controlled&&R.team==='G'&&canSwitch()&&!window.__aiAll; }
+  // YOUR CORNER'S RETICLE (v180): set over the ball, the stick moves a target round their box -- it starts 8.5 m out in the
+  // middle (CORNER_AIM0) and goes at CORNER_AIM_V, anywhere in the box but on the goal line -- and your cross (or the one
+  // taken for you when your time's up) goes there, for the man of ours who'll get to it first. (Till v180 the cross went
+  // to the man your hold picked, or, taken for you, wherever the computer's corner would have gone.)
+  const CORNER_AIM0=8.5*MK, CORNER_AIM_V=12*MK;
+  function cornerAimOn(){ const R=restartInfo; return !!R&&restartT>0&&R.type==='corner'&&R.set&&!!R.aim&&restartYours(R); }
+  function cornerAimClamp(R){ const atk=atkOf(R.team), gx=atk>0?FW:0, A=R.aim;
+    A.x=atk>0?clamp(A.x,gx-PA_D,gx-1.5*MK):clamp(A.x,gx+1.5*MK,gx+PA_D); A.y=clamp(A.y,YC-PA_HW,YC+PA_HW); }
+  function cornerAimMan(R){ const A=R.aim; let b=null, bd=1e9; for(const q of players){ if(q.team!==R.team||q===R.taker||q.isGK||q.benched||q.state!=='normal') continue;
+    const d=Math.hypot(q.x-A.x,q.y-A.y); if(d<bd){ bd=d; b=q; } } return b; }
   // YOUR CORNER'S SET-UP (v142): while a corner of yours is being taken -- him walking to it, and over it -- you pick how many
   // of your men go in the box and how many stay back in your own half for the break (the panel at the top: − and +, or
   // Q E and Z C); the rest go to midfield, the edge of the box first. It's kept for your corners after. The computer's:
@@ -8916,6 +8951,7 @@
     const p=Rs.taker, st=restartStand(Rs,p);
     p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false; p.state='normal'; p.stateT=0; p.noTouchT=0; p.skill=null;
     Rs.set=true; Rs.heldT=0; const w=RS_SET[Rs.type]; Rs.wait=w[0]+Math.random()*(w[1]-w[0]);
+    if(Rs.type==='corner'&&Rs.team==='G'&&!Rs.aim){ const a=atkOf(Rs.team); Rs.aim={x:(a>0?FW:0)-a*CORNER_AIM0, y:YC}; }   // (v180: your corner's reticle -- see cornerAimOn)
     ball.vx=ball.vy=ball.vz=0; ball.lastTouch=p.team; possTeam=p.team;
     if(Rs.type==='throw'){ p.facing={x:0,y:Rs.y<YC?1:-1}; ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z; }
     else { const a=restartAimPt(Rs), dx=a.x-Rs.x, dy=a.y-Rs.y, l=Math.hypot(dx,dy)||1; p.facing={x:dx/l,y:dy/l};
@@ -8957,7 +8993,8 @@
       if(late){ const atk=atkOf(p.team), inw=Rs.y<YC?1:-1; throwWind(Rs,null,clamp(p.x+atk*12*MK,MK,FW-MK),Rs.y+inw*4*MK); }   // (nobody to throw it to: down the line)
       return;
     }
-    ball.cornerAt=simNow; const cs=crossSpot(p); aiCross(p,cs); restartDone();   // a corner: into the box, to the best of ours there (crossSpot)
+    const mineAim=Rs.aim&&restartYours(Rs), cs=mineAim?{x:Rs.aim.x, y:Rs.aim.y, who:cornerAimMan(Rs)}:crossSpot(p);   // (v180: yours, to your reticle)
+    ball.cornerAt=simNow; aiCross(p,cs); restartDone();   // a corner: into the box, to the best of ours there (crossSpot)
     if(p.team==='G'&&cs&&cs.who&&canSwitch()&&!window.__aiAll) crossToHim(cs.who,cs.x,cs.y,p);   // (v142: yours, taken for you: you're on the man it's for)
   }
   // it's been taken: play's on -- and nobody's offside from it (the snapshot of who was, taken as it was played, dropped)
@@ -9009,6 +9046,10 @@
     throwWind(Rs,q,q?q.x:clamp(p.x+a.x*dI,MK,FW-MK),q?q.y:clamp(p.y+a.y*dI,MK,FH-MK));   // (v140: wound up first; it goes to where he is then -- throwRelease)
   }
   // THE PLACES, for everyone but him (restartTarget gives each man's, every frame)
+  // THE CORNER'S MEN IN MIDFIELD (v180): neither in the box nor back -- between the edge of the box and halfway, 24 to 36 m
+  // out (m from the goal line, m across toward the corner it's taken from). (v138-v179: on the edge of the box, 16 to 19 m
+  // out, then 26 m and 32 m.)
+  const CORNER_MID=[[26,3],[24,-9],[29,-1],[32,12],[32,-12],[36,3],[36,-15]];
   function restartPlan(Rs){
     const T=Rs.team, atk=atkOf(T), plan=new Map(); Rs.plan=plan;
     if(Rs.type==='goalkick') return;                                     // (v140: the keeper walking to it -- see restartTarget)
@@ -9034,7 +9075,7 @@
     const boxMen=[]; Rs.boxMen=boxMen;
     for(const pt of [U(6.5,sy*3),U(7.5,-sy*3.5),U(11,sy*0.5),U(9.5,-sy*8),U(8.5,sy*0.5),U(13,-sy*4)].slice(0,box.length)){ const q=nearest(box,pt); if(q){ plan.set(q,pt); boxMen.push(q); } }
     const edgeMen=[];
-    for(const pt of [U(17.5,sy*2.5),U(16,-sy*7),U(19,-sy*1),U(26,sy*9),U(26,-sy*9),U(32,sy*1),U(32,-sy*14)].slice(0,edge.length)){ const q=nearest(edge,pt); if(q){ plan.set(q,pt); edgeMen.push(q); } }
+    for(const pt of CORNER_MID.map(([d,o])=>U(d,sy*o)).slice(0,edge.length)){ const q=nearest(edge,pt); if(q){ plan.set(q,pt); edgeMen.push(q); } }
     for(const pt of [{x:FW/2-atk*6*MK,y:YC-sy*9*MK},{x:FW/2-atk*11*MK,y:YC+sy*5*MK},{x:FW/2-atk*8*MK,y:YC+sy*16*MK},{x:FW/2-atk*14*MK,y:YC-sy*16*MK},{x:FW/2-atk*18*MK,y:YC}].slice(0,rest.length)){ const q=nearest(rest,pt); if(q) plan.set(q,pt); }
     // theirs: one left up, a man on each of ours in the box (a defender before a midfielder), one on the near post, one on
     // the six-yard line, then the edge
@@ -9072,14 +9113,15 @@
     if(p===Rs.taker){
       if(Rs.set){ const st=restartStand(Rs,p); p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false;
         if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
-        else { ball.x=Rs.x; ball.y=Rs.y; ball.z=0; }
+        else { ball.x=Rs.x; ball.y=Rs.y; ball.z=0;
+          if(cornerAimOn()&&hi&&(hi.ix||hi.iy)){ const l=Math.hypot(hi.ix,hi.iy)||1; Rs.aim.x+=hi.ix/Math.max(1,l)*CORNER_AIM_V*dt; Rs.aim.y+=hi.iy/Math.max(1,l)*CORNER_AIM_V*dt; cornerAimClamp(Rs); } }   // (v180: the stick moves your reticle)
         ball.vx=ball.vy=ball.vz=0; return true; }
       const w=restartWalkTo(Rs,p), d=Math.hypot(w.x-p.x,w.y-p.y), ai=steer(p,w.x,w.y,1);
-      p.sprint=d>4*MK&&p.stamina>0.15; stepOutfield(p,ai.ix,ai.iy,dt); return true;
+      p.sprint=d>4*MK; stepOutfield(p,ai.ix,ai.iy,dt); return true;   // (v180: flat out however tired -- at a dead ball it costs him nothing: see stepOutfield)
     }
     if(p===controlled&&!window.__aiAll){ stepOutfield(p,hi.ix,hi.iy,dt); restartKeepOff(Rs,p); return true; }
     const t=restartTarget(Rs,p), d=Math.hypot(t.x-p.x,t.y-p.y), ai=arrive(p,t.x,t.y);
-    p.sprint=d>7*MK&&p.stamina>0.3; stepOutfield(p,ai.ix,ai.iy,dt); restartKeepOff(Rs,p); return true;
+    p.sprint=d>7*MK; stepOutfield(p,ai.ix,ai.iy,dt); restartKeepOff(Rs,p); return true;   // (v180: the same)
   }
   // A GOAL KICK: the other side out of the penalty area till it's taken -- where they go is outside it (boxOut), and a man
   // out of it can't come back in (keepOutOfBox); one in it when it's given walks out
@@ -10296,6 +10338,13 @@
     v=Math.max(v,sv,X?X.P*X.v:0)+obGain(C,bx);
     return {kind:'takeon', key:'t', who:d, side, keen, clear:cover>=1, P:pb, v, loss:C.lossHere, ev:pb*v-(1-pb)*C.lossHere};
   }
+  // (v180) NOT A HOPELESS ONE: a shot that would go in less than OB_SHOT_MIN of the time (one in 25) he doesn't take -- he
+  // carries it on, or passes it, to a better one. His finishing and, from beyond 18 m, his long shots are in that
+  // (obFinish), so a man who can't strike it from range doesn't try: straight on with the way clear and his finishing
+  // 5.5, Long shots 3 tries it from 18.5 m and not 19, Long shots 10 from 19 m and not 20 (the table's 1 in 100 there).
+  // (Till v180 a shot of 1 in 100 was still on his list, out to 34 m, and with his choice misjudged -- the more so the
+  // lower his Off IQ -- now and then taken.)
+  const OB_SHOT_MIN=0.04;
   function obShotOpt(p,C){
     const d=Math.hypot(C.gx-p.x,YC-p.y); if(d>34*OBM||C.atk*(C.gx-p.x)<40) return null;
     if(shotAngleOf(p,C.gx)<0.1) return null;
@@ -10303,6 +10352,7 @@
     let xg=obXg0(p.x,p.y,C.gx)*(0.3+0.7*c.qLane)*obFinish(C,p.x,p.y);   // anyone in the way of the corner he'd go for; his finishing
     if(C.prD<45) xg*=0.8;                                               // rushed
     xg=clamp(xg,0,0.95);
+    if(xg<OB_SHOT_MIN) return null;                                     // (v180: no hopeless shot -- see OB_SHOT_MIN)
     return {kind:'shot', key:'s', P:xg, v:1, loss:0.003, ev:xg-(1-xg)*0.003, rel:true};
   }
   function obCrossOpt(p,C){
@@ -10353,7 +10403,7 @@
     const otMax=oneTouchMax();
     if(looking){ const sh=opts.find(o=>o.kind==='shot'&&o.rel&&ftBoxOf(p,C,o.P)); if(sh){ sh.score=sh.ev; return sh; } }   // (v169: in their box, a chance worth it: first time, whatever else he might weigh)
     for(const o of opts){
-      if(looking && o.kind==='pass' && o.d>otMax) continue;               // first time, only a short ball (see firstTouchPass)
+      if(looking && o.kind==='pass' && (o.d>otMax||o.thru)) continue;    // first time, only a short ball (see firstTouchPass) -- and never through (v180)
       let s=o.ev+obGauss()*(sdA+sdR*Math.abs(o.ev));
       if(ob.plan&&o.key===ob.plan.key) s+=(C.prD<150?0.5:1)*(0.0015+0.1*Math.abs(o.ev));   // (less so with a man coming)
       if(looking&&o.rel){ const ft=o.kind==='shot'&&o.P>=FT_XG?ftFinishOf(p):0;
@@ -12234,7 +12284,12 @@
     else if(p.goingForBall) MAX *= statLerp(statOf(p,'offIQ',P.offIQ.val),1.0,1.10);  // Off IQ receiving burst: arrive on a ball meant for you a beat sooner (+10% at Off IQ 10)
     let accelMul=1;
 
-    if(wantSprint && !empty){
+    if(deadBall()&&!matchOver){
+      // (v180) AT A DEAD BALL -- a throw-in, a corner, a goal kick, a goal, offside -- getting to his place costs him nothing:
+      // he sprints if he likes, and gets his breath back as if he stood still (the ceiling untouched)
+      if(wantSprint&&!empty) accelMul=1.25;
+      p.stamina=clamp(p.stamina + dt*staminaRecOf(p), 0, p.staminaCap);
+    } else if(wantSprint && !empty){
       accelMul=1.25;
       const pace=sprintPace(p), drain=(hasBall ? drainSprintBallOf(p) : drainSprintOf(p))*pace;   // sprint stamina drain, by the ground covered (A SPRINT'S COST, v121)
       p.stamina=clamp(p.stamina - dt*drain, 0, 1);
@@ -12290,7 +12345,7 @@
       }
       // acceleration: full when going with your momentum, weak when fighting it
       const turnFactor=clamp((align+1)/2, 0, 1);        // 0 reversing .. 1 forward
-      const ACC=(900+1700*acc)*accelMul*capFatigue;     // base accel scales with ACCELERATION, sprint & wear
+      const ACC=(900+1700*acc)*accelMul*capFatigue*accLowOf(p);   // base accel scales with ACCELERATION, sprint & wear (v180: and a slow starter's a touch slower -- accLowOf)
       let eff=ACC*(0.25+0.75*turnFactor);               // reversing accelerates slowly
       // SPRINT MOMENTUM makes a turn sluggish: while you still carry sprint momentum, your
       // steering authority into a new direction is cut — the harder the turn, the less you can
@@ -12616,7 +12671,7 @@
     ball.z=Math.max(ball.z,1);
     endCurve();
     ball.cushBy=null; ball.lastTouch=p.team;
-    ball.dribbler=p; ball.dribbleGrace=0.85;   // still your ball: it's yours again once it's in your reach (see attemptCaptures)
+    ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow;   // still your ball: it's yours again once it's in your reach (see attemptCaptures; touchAt: v180, FT_THRU_T)
     p.noTouchT=0.12+0.2*(1-s);
     // a computer player doesn't know where its touch went any sooner than you would (see the AI step)
     if(p!==controlled) p.touchLagT=P.aiReact.val*statLerp(statOf(p,'agility',P.agility.val),1.25,0.75)*cpu(p).react;
@@ -14834,7 +14889,9 @@
     if(controlled){ const R=controlROf(controlled), inIt=ball.z<26&&dist(controlled,ball)<R+ball.r;
       ctx.save(); if(!inIt) ctx.globalAlpha=0.55; pixelRing(controlled.x,controlled.y,R,'#9dff3c','rgba(14,58,30,.6)',true); ctx.restore(); }
     // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
-    if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
+    if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)&&!cornerAimOn()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
+    if(cornerAimOn()){ const A=restartInfo.aim, k=0.75+0.25*Math.sin(performance.now()/160);   // (v180: your corner's reticle -- see cornerAimOn)
+      ctx.save(); ctx.globalAlpha=k; pixelRing(A.x,A.y,30,'#ffb43c','rgba(58,38,8,.6)',true); pixelRing(A.x,A.y,10,'#ffb43c','rgba(58,38,8,.6)'); ctx.restore(); }
     // your keeper with it: the same ring on the man he'll play it to (see keeperPlay) -- not you (PLAYER), nor a hoof
     if(gkHold&&keeperWaits(gkHold)){
       if(puntOn()){ const S=puntSpot(gkHold,clearCharge); pixelRing(S.x,S.y,18,'#7fd8ff','rgba(8,40,58,.6)',true); if(S.q) pixelRing(S.q.x,S.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }   // (v169: your keeper's punt as you charge it: where it'll come down, and the man it's for if it's his)
@@ -15361,6 +15418,7 @@
     ctx.restore();
     { const Rs=restartInfo;                                  // (v138: yours to take -- the last GK_WARN of your time, the stopwatch)
       if(Rs&&restartT>0&&Rs.taker===p&&restartYours(Rs)&&restartYoursT(Rs)-Rs.heldT<=GK_WARN&&Math.floor((restartYoursT(Rs)-Rs.heldT)*5)%2===0){ const m=proj(p.x,p.y,PLAYER_H+14); drawStopwatch(m.x,m.y-16); } }
+    if(isHurt(p)){ const m=proj(p.x,p.y,p.z+PLAYER_H+(p===controlled?30:22)); drawHurtMark(m.x,m.y); }   // (v180: hurt -- see hurtInMatch)
     // --- stamina bar for ALL players, with a red MAX-CAP line ---
     {
       const isYou=(p===controlled);
@@ -15400,6 +15458,10 @@
     }
   }
 
+  // (v180) a hurt man's mark: a red cross on a white square, edged dark, centred on (x,y)
+  function drawHurtMark(x,y){ x=Math.round(x); y=Math.round(y);
+    ctx.fillStyle='#2a0d10'; ctx.fillRect(x-8,y-8,16,16); ctx.fillStyle='#fff4ef'; ctx.fillRect(x-6.5,y-6.5,13,13);
+    ctx.fillStyle='#e8322a'; ctx.fillRect(x-1.75,y-5,3.5,10); ctx.fillRect(x-5,y-1.75,10,3.5); }
   // a red stopwatch centred on (x,y): its button on top, a white face and one hand
   function drawStopwatch(x,y){ x=Math.round(x); y=Math.round(y);
     ctx.fillStyle='#2a0d10'; ctx.fillRect(x-4,y-17,8,6);
@@ -15907,7 +15969,8 @@
   // itself: when one of yours gets too tired (QS_TIRED) the chip lights up, that's all. Tap a line and he's on at the next
   // break in play (v179: see subsAtBreak) -- there and then if the ball's dead already -- his line ringed till then (tap
   // it again and he stays on); as from the match's tactics. ALL SUBS opens the match's tactics. The keeper isn't one.
-  // One of yours hurt in a career match comes off by himself (qsAutoHurt), at the next break too. (Till v179 a sub was
+  // One of yours hurt in a career match stays on, a red cross over his head, first on the list till you take him off
+  // (v180: from v116 he came off by himself, for the man the quick subs now offer). (Till v179 a sub was
   // made there and then, mid-move -- or, the man coming off having the ball, as soon as he'd played it: when a match's
   // only dead balls were the goals and half-time, a sub that waited for one could wait a half.) =====
   const QS_TIRED=0.7, QS_LIST=0.9;   // (v179: his ceiling at 70%, about 8% off his top speed, lights the chip -- it was 60%, a tenth off; and a man's on the list once his ceiling's under 90% -- it was 85%)
@@ -15934,20 +15997,12 @@
   function shotSeen(p){ if(!careerFix||!p) return; for(const q of players) if(!q.benched) mStat(q,q.team===p.team?'shm':'shf'); }
   // a man hurt in a career match (his squad index, by side): slowed, no sprinting, the injury his after it
   const HURT={G:new Set(),R:new Set()};
+  // v180: he stays on, slowed, a red cross over his head (drawHurtMark), till you take him off -- the quick subs put him
+  // first, with the bench's man for his spot (any of them: he's hurt), and he goes at the next break in play as any sub
+  // does. (v116-v179 he came off by himself.)
   function hurtInMatch(p){ HURT[p.team].add(p.squadIdx); p.staminaCap=Math.min(p.staminaCap??1,0.4); p.stamina=Math.min(p.stamina??1,p.staminaCap); p.sprint=false;
-    if(p.team==='G'){ const e=SQUAD.G[p.squadIdx]; QS.msgT=3; QS.key=''; const m=document.getElementById('qsMsg'); if(m) m.innerHTML='✚ '+(e?surname(e.name):'')+' IS HURT';
-      qsAutoHurt(p); } }
-  // YOURS HURT IN A CAREER MATCH (v116): off he comes, if you've a sub left -- your planned man for him if you'd one,
-  // else the one on the bench who'd do his job best (anyone will do: he's hurt) -- at the next break in play (v179; till
-  // then he plays on slowed, as he does with none left: see qsMake)
-  function qsAutoHurt(p){
-    if(!careerFix||!qsLive()) return;
-    const si=p.squadIdx, sl=qsSlot(si); if(!sl) return;
-    const plan=qsPlanned().find(s=>s.out===si); let inn=plan?plan.inn:null;
-    if(inn==null){ let bv=-1; for(const b of mtBench('G')){ const e=SQUAD.G[b]; if(!e||e.role==='GK'||HURT.G.has(b)) continue;
-      const v=mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); if(v>bv){ bv=v; inn=b; } } }
-    if(inn==null) return;
-    qsMake({out:si, inn, cap:p.staminaCap??1, pos:sl.pos, tired:true, planned:!!plan}); }
+    if(p.team==='G'){ const e=SQUAD.G[p.squadIdx]; QS.msgT=3; QS.key=''; const m=document.getElementById('qsMsg'); if(m) m.innerHTML='✚ '+(e?surname(e.name):'')+' IS HURT'; } }
+  const isHurt=p=>!!p&&p.squadIdx!=null&&!!HURT[p.team]&&HURT[p.team].has(p.squadIdx);
   const QS={open:false, msgT:0, key:''};
   const qsLegs=c=>0.74+0.26*c;                                        // what his ceiling leaves of his top speed (stepOutfield's capFatigue)
   function qsLive(){ return SCREEN==='match'&&!LAB.on&&!practice&&!matchOver&&!!LINEUP.G&&!!SQUAD.G&&((mtCanSub('G')&&mtBench('G').length>0)||SUBS.G.q.length>0); }   // (v179: or one waiting)
@@ -15963,9 +16018,16 @@
     for(const s of SUBS.G.q){ usedIn.add(s.inn); usedOut.add(s.out); }
     const line=(p,inn,planned)=>{ const si=p.squadIdx, cap=p.staminaCap??1, sl=qsSlot(si), eo=SQUAD.G[si], ei=SQUAD.G[inn]; if(!sl||!eo||!ei) return null;
       usedIn.add(inn); usedOut.add(si); return {out:si, inn, cap, rOut:mtRating(eo,sl.role,spotFit(sl)), rIn:mtRating(ei,sl.role,spotFit(sl)), pos:sl.pos, tired:cap<QS_TIRED, planned}; };
-    for(const s of qsPlanned()){ if(out.length>=n) break; if(usedIn.has(s.inn)||usedOut.has(s.out)) continue;   // (yours first, tired or not)
-      const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out), r=p&&line(p,s.inn,true); if(r) out.push(r); }
     const bench=mtBench('G').filter(si=>{ const e=SQUAD.G[si]; return e&&e.role!=='GK'&&!usedIn.has(si); });
+    // (v180) a man who's hurt first of all, a cross by him: your planned man for him if you'd one, else the bench's best at
+    // his spot (anyone will do: he's hurt) -- he stays on till you take him off
+    const bestFor=si=>{ const sl=qsSlot(si); if(!sl) return null; let best=null, bv=-1;
+      for(const b of bench){ if(usedIn.has(b)) continue; const e=SQUAD.G[b], v=mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); if(v>bv){ bv=v; best=b; } } return best; };
+    for(const p of players){ if(out.length>=n) break; if(p.team!=='G'||!isHurt(p)||usedOut.has(p.squadIdx)) continue;
+      const plan=qsPlanned().find(s=>s.out===p.squadIdx&&!usedIn.has(s.inn)), inn=plan?plan.inn:bestFor(p.squadIdx);
+      if(inn!=null){ const r=line(p,inn,!!plan); if(r) out.push(r); } }
+    for(const s of qsPlanned()){ if(out.length>=n) break; if(usedIn.has(s.inn)||usedOut.has(s.out)) continue;   // (yours next, tired or not)
+      const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out), r=p&&line(p,s.inn,true); if(r) out.push(r); }
     const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&!usedOut.has(p.squadIdx)).sort((a,b)=>(a.staminaCap??1)-(b.staminaCap??1));
     for(const p of men){ const cap=p.staminaCap??1; if(out.length>=n||cap>=QS_LIST) break;   // (nobody fresh needs taking off)
       const sl=qsSlot(p.squadIdx), eo=SQUAD.G[p.squadIdx]; if(!sl||!eo) continue;

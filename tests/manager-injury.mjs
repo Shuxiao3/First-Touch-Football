@@ -5,8 +5,9 @@
 // 28 a tear or worse takes something off his legs for good, and their decline comes sooner. He heals by the day and
 // comes back short of fitness. The computer never picks a man who's hurt; yours, if he's in your nine at kick-off, is
 // replaced by the best fit off the bench, and the injured aren't among the subs. A season of them, the news saying who.
-// In a live match he slows (no sprinting, his legs' ceiling down to 40%, not back at half-time), tops the quick subs
-// (the chip lights, it doesn't drop down) and the report lists him. And everywhere he's marked: the squad, Training's
+// In a live match he slows (no sprinting, his legs' ceiling down to 40%, not back at half-time) and stays on, a red
+// cross over his head, till you take him off (v180): he tops the quick subs (the chip lights, it doesn't drop down), and
+// tapped he goes at the next break in play. The report lists him. And everywhere he's marked: the squad, Training's
 // Selection, the tactics pitch, his card, the hub. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -106,32 +107,49 @@ r = await K(`(()=>{ const d=CAREER.data; d.news.length=0; let n=0, mine=0; const
 info('a season: ' + JSON.stringify(r));
 ok(r.n >= 150 && r.n <= 500 && r.news === r.mine, 'a season: ' + r.n + ' injuries across the four leagues (about ' + (r.n / 56).toFixed(1) + ' a club), ' + r.mine + ' of yours, each in the news');
 
-// --- a live match: hurt in it -- v116: yours comes off for your planned man for him, else the bench's best at his spot
-// (rated by the spot's fit: v127, a back three's outside spot takes a full-back too) -- v179: at the next break in play,
-// slowed till then (here the ball's sent out for a throw-in); with no subs left he plays on, slowed ------------------------
+// --- a live match: hurt in it -- v180: he stays on, slowed, a red cross over his head, till you take him off: the quick
+// subs put him first, for your planned man for him if you'd one, else the bench's best at his spot (rated by the spot's
+// fit: v127, a back three's outside spot takes a full-back too); tapped, he goes at the next break in play (v179: here the
+// ball's sent out for a throw-in). A break with nothing asked and he's still on. With no subs left he plays on, slowed.
+// (v116-v179 he came off by himself.) ------------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; mgNewSeason(d); d.story={vet:2,kid:2,phone:2}; for(const p of d.roster){ delete p.inj; delete p.injB; } d.qsubs=[]; INJ_OFF=true; while(!mgNextGame(d)) mgForward(d); mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(1500);
+await K(`(()=>{ window.__hm={n:0}; const o=drawHurtMark; drawHurtMark=function(x,y){ window.__hm.n++; return o(x,y); }; return 1; })()`);   // (the cross over his head, counted as it's drawn)
+await page.waitForTimeout(400); const hm0 = await K(`window.__hm.n`);
 const hurtMan = (pick, plan) => K(`(()=>{ const d=CAREER.data, rid=si=>d.roster[SQUAD.G[si].ri].id;
   const p=players.filter(q=>q.team==='G'&&!HURT.G.has(q.squadIdx)&&qsSlot(q.squadIdx))[${pick}], si=p.squadIdx, sl=qsSlot(si);
   const val=b=>{ const e=SQUAD.G[b]; return mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); }, bench=mtBench('G').filter(b=>SQUAD.G[b].role!=='GK'&&!HURT.G.has(b)).sort((a,b)=>val(a)-val(b));
-  const worst=bench[0], best=bench[bench.length-1]; if(${plan}) d.qsubs=[{off:rid(si), on:rid(worst)}];
+  const worst=bench[0], best=bench[bench.length-1]; d.qsubs=${plan}?[{off:rid(si), on:rid(worst)}]:[];
   if(ball.ownedBy===p||ball.dribbler===p){ ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; }
-  const name=SQUAD.G[si].name; hurtInMatch(p); const waited=SUBS.G.q.some(x=>x.out===si), waitOn=players.some(x=>x.team==='G'&&x.squadIdx===si);
-  if(waited){ gkHold=null; ball.ownedBy=null; ball.dribbler=null; ball.x=FW/2; ball.y=-ball.r*3; ball.lastTouch='R'; checkOutOfPlay(); subsAtBreak();   // (v179: the ball out for a throw-in -- the break he waits for)
-    restartInfo=null; restartT=0; outBall=null; ball.x=FW/2; ball.y=YC; ball.vx=ball.vy=0; ball.lastTouch=null; }   // (and the throw-in put away again: the scenes after want a loose ball)
+  const onNow=()=>players.some(x=>x.team==='G'&&x.squadIdx===si);
+  const out=()=>{ gkHold=null; ball.ownedBy=null; ball.dribbler=null; ball.x=FW/2; ball.y=-ball.r*3; ball.lastTouch='R'; checkOutOfPlay(); subsAtBreak(); };   // (the ball out for a throw-in: a break in play)
+  const away=()=>{ restartInfo=null; restartT=0; outBall=null; ball.x=FW/2; ball.y=YC; ball.vx=ball.vy=0; ball.lastTouch=null; };   // (and the throw-in put away again: the scenes after want a loose ball)
+  const name=SQUAD.G[si].name; hurtInMatch(p);
+  const msg0=document.getElementById('qsMsg').textContent, queued0=SUBS.G.q.length, mark=isHurt(p);
+  out(); const brk=deadBall(), onAtBreak=onNow(); away();
+  QS.key=''; qsTick(0); const hot=document.getElementById('qsWrap').classList.contains('hot');
+  QS.open=true; QS.key=''; qsTick(0); const row0=((document.querySelector('#qsDrop .qsRow')||{}).textContent||'').trim(); QS.open=false; QS.key=''; qsTick(0);
+  const sug=qsSuggest(), first=sug[0]||null; let waited=false, waitOn=false;
+  if(first){ qsMake(first); waited=SUBS.G.q.some(x=>x.out===si); waitOn=onNow(); if(waited){ out(); away(); } }
   const q=players.find(x=>x.team==='G'&&x.squadIdx===si);
-  return { si, name, worst, best, hurt:HURT.G.has(si), on:!!q, cap:q?+q.staminaCap.toFixed(2):null, worstOn:players.some(x=>x.team==='G'&&x.squadIdx===worst), bestOn:players.some(x=>x.team==='G'&&x.squadIdx===best),
+  return { si, name, worst, best, hurt:HURT.G.has(si), mark, msg0, queued0, brk, onAtBreak, hot, row0, n:sug.length, first:first&&{out:first.out, inn:first.inn, planned:first.planned},
+    on:!!q, cap:q?+q.staminaCap.toFixed(2):null, worstOn:players.some(x=>x.team==='G'&&x.squadIdx===worst), bestOn:players.some(x=>x.team==='G'&&x.squadIdx===best),
     used:SUBS.G.used, waited, waitOn, msg:document.getElementById('qsMsg').textContent }; })()`);
 const h1 = await hurtMan(1, true), h2 = await hurtMan(2, false);
 await K(`(()=>{ SUBS.G.used=SUB_MAX; return 1; })()`); const h3 = await hurtMan(0, false);
 await page.waitForTimeout(700);
 const live = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${h3.si}); return { cap:p?+p.staminaCap.toFixed(2):null, sprint:!!(p&&p.sprint) }; })()`);
-info('hurt in a live match: ' + JSON.stringify({ h1, h2, h3, live }));
-ok(h1.hurt && !h1.on && h1.worstOn && h1.worst !== h1.best && h1.used === 1 && /✚ .* HURT · .* ON/.test(h1.msg) && (!h1.waited || h1.waitOn),
-  'hurt in the match, one of yours comes off at the next break in play (' + (h1.waited ? 'on till the ball went out for a throw-in' : 'the ball dead already') + ') -- for the man you planned for him (the bench\'s weakest at his spot, not its best): "' + h1.msg + '"');
-ok(h2.hurt && !h2.on && h2.bestOn && h2.used === 2, '...with no plan for him, the bench\'s best at his spot comes on (one more sub used: ' + h2.used + ')');
-ok(h3.hurt && h3.on && live.cap !== null && live.cap <= 0.4 && h3.used === 3, '...and with no subs left he plays on, slowed (his legs\' ceiling at ' + Math.round((live.cap || 0) * 100) + '%)');
+const hm1 = await K(`window.__hm.n`);
+info('hurt in a live match: ' + JSON.stringify({ h1, h2, h3, live, hm0, hm1 }));
+ok(h1.hurt && h1.mark && h1.queued0 === 0 && /✚ .* IS HURT/.test(h1.msg0) && h1.brk && h1.onAtBreak && h1.hot && /^✚/.test(h1.row0),
+  'hurt in the match, one of yours stays on: nothing asked for him, still on at a break in play; the chip lights and he tops its list with a cross by him ("' + h1.msg0 + '", "' + h1.row0 + '")');
+ok(h1.first && h1.first.out === h1.si && h1.first.inn === h1.worst && h1.first.planned && h1.worst !== h1.best && !h1.on && h1.worstOn && h1.used === 1 && /✚ .* HURT · .* ON/.test(h1.msg) && (!h1.waited || h1.waitOn),
+  '...tapped, he comes off at the next break in play (' + (h1.waited ? 'on till the ball went out for a throw-in' : 'the ball dead already') + ') -- for the man you planned for him (the bench\'s weakest at his spot, not its best): "' + h1.msg + '"');
+ok(h2.hurt && h2.onAtBreak && h2.first && h2.first.out === h2.si && h2.first.inn === h2.best && !h2.first.planned && !h2.on && h2.bestOn && h2.used === 2,
+  '...with no plan for him, the bench\'s best at his spot is the one offered, and on (one more sub used: ' + h2.used + ')');
+ok(h3.hurt && h3.on && h3.n === 0 && live.cap !== null && live.cap <= 0.4 && h3.used === 3, '...and with no subs left he plays on, slowed (his legs\' ceiling at ' + Math.round((live.cap || 0) * 100) + '%)');
+ok(hm0 === 0 && hm1 > 0, 'the red cross over his head is drawn while he\'s on hurt (' + hm1 + ' frames), and over nobody before (' + hm0 + ')');
 await K(`(()=>{ half=1; ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=null; ball.vx=ball.vy=0; matchClock=halfLenSec(); return 1; })()`); await page.waitForTimeout(2600);   // (nobody's ball as the clock runs out: no advantage to play, the whistle at once)
 const ht = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${h3.si}); return { half, cap:p?+p.staminaCap.toFixed(2):null }; })()`);
 ok(ht.half === 2 && ht.cap !== null && ht.cap <= 0.4, 'half-time: the others get some of their legs back, he doesn\'t (' + Math.round(ht.cap * 100) + '%)');

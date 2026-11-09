@@ -154,6 +154,7 @@ const cross = spotOut => page.evaluate(spotOut => {
   window.__park([]); kp.x = kp.homeX; kp.y = T.YC; kp.mode = 'line'; kp.claimCd = 0; kp.diveT = 0; kp.groundT = 0;
   const b = T.ball(), sx = gx - atk * 140, sy = T.YC - 420, tx = gx - atk * spotOut, ty = T.YC, t = 0.95, zH = 34 * 1.15;
   b.ownedBy = null; b.dribbler = null; b.x = sx; b.y = sy; b.z = 2; b.vx = (tx - sx) / t; b.vy = (ty - sy) / t; b.vz = (zH + 260 * t * t) / t;
+  b.curveSpin = 0; b.curveSpinT = 0; b.curveK = 0; b.crossCurl = 0;   // (v180: a straight ball -- the spin left on it by the cross in the scene before could still bend this one away from him)
   b.crossBy = 'G'; b.crossT = 1.6; b.lastTouch = 'G'; b.shotT = 0; b.kickBy = 'G'; b.kickP = null; b.lastTouchP = null;   // (struck by one of yours, as a cross is: not the last scene's kick)
   return window.__until(2, () => T.gkHold() === kp ? { caught: true, z: Math.round(b.z), out: Math.round(Math.abs(gx - kp.x)) } : b.z <= 0 ? { caught: false } : undefined);
 }, spotOut);

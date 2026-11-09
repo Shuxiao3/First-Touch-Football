@@ -6,7 +6,9 @@
 // whose ceiling has begun to go (under CAP_SAVE) saves his sprints for what matters -- none of the opportunistic ones,
 // the critical ones still. THE LAST OF HIS LEGS: no slide tackle on an empty bar; one off the end of a sprint, on what's
 // left -- it takes the last of it -- and then none till a quarter of the bar is back; the computer's men the same.
-// On a copy of the game that lets the test pause it, step a man by hand, play it all on the computer, see each
+// AT A DEAD BALL (v180) a sprint costs nothing: he gets his breath back as if he stood still, the ceiling untouched, and
+// the men going to their places at a restart sprint however tired. A SLOW STARTER (v180): under Acceleration 5.5 a man
+// builds speed a touch slower again (a tenth less at 1). On a copy of the game that lets the test pause it, step a man by hand, play it all on the computer, see each
 // half-time's ceilings and count the computer's sprint calls.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -17,7 +19,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, controlled:()=>controlled, ball:()=>ball, P, MK, FW, FH, YC, stepOutfield, statOf, drainSprintOf, staminaCapDrainOf, sprintSpeedOf, '
-  + 'startSlide, slideAt, canSlide, resetKickoff, get SPRINT_TOP(){ return SPRINT_TOP; }, get CAP_WEAR(){ return CAP_WEAR; }, capRate:()=>capRate(), halfLenSec:()=>halfLenSec(), PREFS, get CAP_SAVE(){ return CAP_SAVE; }, get SLIDE_BACK(){ return SLIDE_BACK; }, grade:()=>lastGrade, half:()=>half, clock:()=>matchClock, pause:v=>{ pauseOpen=v; }, setControlled, '
+  + 'startSlide, slideAt, canSlide, resetKickoff, brk:v=>{ breakT=v; }, deadBall:()=>deadBall(), accLowOf, setAccLow:v=>{ ACC_LOW=v; }, simNow:()=>simNow, check:()=>checkOutOfPlay(), rs:()=>restartInfo, get SPRINT_TOP(){ return SPRINT_TOP; }, get CAP_WEAR(){ return CAP_WEAR; }, capRate:()=>capRate(), halfLenSec:()=>halfLenSec(), PREFS, get CAP_SAVE(){ return CAP_SAVE; }, get SLIDE_BACK(){ return SLIDE_BACK; }, grade:()=>lastGrade, half:()=>half, clock:()=>matchClock, pause:v=>{ pauseOpen=v; }, setControlled, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');   // your man on the computer too
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');   // (nothing drawn: quicker)
@@ -29,6 +31,7 @@ patch("      resetKickoff(); lastGrade='HALF TIME';", "      if(window.__HT) win
 patch('        p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));',
   "        if(window.__PC&&!reacting&&(ai.ix||ai.iy)&&!p.planned){ const g=window.__PC[(p.staminaCap??1)<CAP_SAVE?'tired':'fresh']; g.n++; if(doSprint&&critical) g.crit++; else if(doSprint) g.opp++; if(!critical&&opportunistic&&sta>0.55) g.oppWant++; }\n"
   + '        p.sprint = reacting ? false : (doSprint && (ai.ix||ai.iy));');
+patch('  const ACC_LOW=0.1;', '  let ACC_LOW=0.1;');   // (the slow starter's extra, turned off to compare)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-stamina-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -67,6 +70,52 @@ ok(A.fast.bar / A.fast.was >= 1.1 && A.fast.bar / A.fast.was <= 1.25 && A.slow.b
   'the quickest (Speed 10, ' + A.fast.m + ' m) pays about a fifth more a second (' + A.fast.bar + '), a slow man (Speed 2, ' + A.slow.m + ' m) about a quarter less (' + A.slow.bar + ')');
 ok([A.fast, A.slow].every(x => Math.abs(x.perM / A.mid.perM - 1) < 0.05) && A.slow.cap < A.mid.cap && A.mid.cap < A.fast.cap,
   'a metre flat out costs the same whoever runs it (' + [A.fast.perM, A.mid.perM, A.slow.perM].join(', ') + ' of the bar), and the ceiling wears in step (' + [A.fast.cap, A.mid.cap, A.slow.cap].join(', ') + ' a second)');
+
+// --- (v180) AT A DEAD BALL: two seconds flat out, half his bar left and his ceiling at 0.9 -- in play, and with the ball
+// dead (the game paused, him stepped by hand) ---------------------------------------------------------------------------
+const D = await page.evaluate(() => {
+  const T = window.__T; T.pause(true); T.freeze();
+  const G = T.players().filter(q => q.team === 'G' && !q.isGK && q !== T.controlled()), p = G[0], keep = { stats: p.stats, x: p.x, y: p.y };
+  const bl = T.ball(); bl.ownedBy = null; bl.x = 40; bl.y = 40; bl.vx = bl.vy = 0;
+  const run = dead => { p.stats = Object.assign({}, keep.stats, { speed: 6.5, stamina: 5.5 }); p.x = 160; p.y = T.YC; p.vx = p.vy = 0; p.state = 'normal'; p.stamina = 0.5; p.staminaCap = 0.9; p.gassed = false; p.goingForBall = p.intercepting = false; p.engageCap = 1;
+    T.brk(dead ? 5 : 0); const dl = T.deadBall(), x0 = p.x, dt = 1 / 60;
+    for(let i = 0; i < 120; i++){ p.sprint = true; T.stepOutfield(p, 1, 0, dt); }
+    T.brk(0); return { dead: dl, m: +((p.x - x0) / T.MK).toFixed(2), bar: +p.stamina.toFixed(3), cap: +p.staminaCap.toFixed(4) }; };
+  const live = run(false), dead = run(true);
+  p.stats = keep.stats; p.x = keep.x; p.y = keep.y; p.vx = p.vy = 0; p.sprint = false; p.stamina = p.staminaCap = 1;
+  // ...and the slow starter: from a standstill, flat out for half a second, at Acceleration 1, 3.25, 5.5 and 10 -- as it
+  // is, and with the extra turned off (v179)
+  const go = acc => { p.stats = Object.assign({}, keep.stats, { speed: 6.5, acceleration: acc, stamina: 5.5 }); p.x = 160; p.y = T.YC; p.vx = p.vy = 0; p.state = 'normal'; p.stamina = p.staminaCap = 1; p.gassed = false;
+    const x0 = p.x, dt = 1 / 60; for(let i = 0; i < 30; i++){ p.sprint = true; T.stepOutfield(p, 1, 0, dt); } return +((p.x - x0) / T.MK).toFixed(3); };
+  const acc = {};
+  for(const a of [1, 3.25, 5.5, 10]){ T.setAccLow(0.1); const now = go(a); T.setAccLow(0); const was = go(a); T.setAccLow(0.1);
+    p.stats = Object.assign({}, keep.stats, { acceleration: a }); acc[a] = { now, was, k: +T.accLowOf(p).toFixed(3) }; }
+  p.stats = keep.stats; p.x = keep.x; p.y = keep.y; p.vx = p.vy = 0; p.sprint = false; p.stamina = p.staminaCap = 1;
+  return { live, dead, acc };
+});
+info('a dead ball, and a slow starter: ' + JSON.stringify(D));
+ok(D.dead.dead && !D.live.dead && D.dead.bar > 0.5 && D.dead.cap === 0.9 && D.live.bar < 0.5 && D.live.cap < 0.9 && D.dead.m >= D.live.m * 0.97,
+  'at a dead ball two seconds flat out cost him nothing: his bar up from 0.5 to ' + D.dead.bar + ' and his ceiling where it was (0.9), ' + D.dead.m + ' m covered -- in play the same run takes it to ' + D.live.bar + ', the ceiling to ' + D.live.cap + ' (' + D.live.m + ' m)');
+const A1 = D.acc[1], A3 = D.acc[3.25], A5 = D.acc[5.5], A10 = D.acc[10];
+ok(A1.k === 0.9 && A3.k === 0.95 && A5.k === 1 && A10.k === 1 && A1.now < A1.was && A3.now < A3.was && A1.was - A1.now > A3.was - A3.now && A5.now === A5.was && A10.now === A10.was,
+  'a slow starter builds speed a touch slower again: half a second flat out from a standstill ' + A1.now + ' m at Acceleration 1 (' + A1.was + ' m before v180), ' + A3.now + ' at 3.25 (' + A3.was + '), ' + A5.now + ' at 5.5 and ' + A10.now + ' at 10 as they were');
+
+// --- (v180) A RESTART, ALL OF THEM TIRED: a throw-in of ours, every man of ours with a tenth of his bar -- the one who
+// takes it goes to it flat out and gets his breath back on the way ------------------------------------------------------
+const RS = await page.evaluate(async () => {
+  const T = window.__T; T.freeze(); const bl = T.ball(), G = T.players().filter(q => q.team === 'G' && !q.isGK);
+  G.forEach((q, i) => { q.stamina = 0.1; q.staminaCap = 0.95; q.gassed = false; q.x = T.FW / 2 + (i - 3) * 3 * T.MK; q.y = T.YC + (i % 2 ? 2 : -2) * T.MK; q.vx = q.vy = 0; q.state = 'normal'; });   // (all of them in the middle: whoever takes it has 25 m and more to go)
+  bl.ownedBy = null; bl.dribbler = null; bl.x = T.FW / 2; bl.y = -bl.r * 3; bl.vx = bl.vy = 0; bl.z = 0; bl.lastTouch = 'R';
+  T.check(); const R = T.rs(); if(!R) return { none: true };
+  T.pause(false); const t0 = T.simNow(), seen = { sprint: 0, n: 0 }; let tk = null;
+  await new Promise(res => { (function tick(){ const R2 = T.rs(); tk = tk || (R2 && R2.taker); if(tk && !(R2 && R2.set)){ seen.n++; if(tk.sprint) seen.sprint++; }
+    if(T.simNow() - t0 >= 1 || (R2 && R2.set)) return res(); requestAnimationFrame(tick); })(); });
+  T.pause(true); const out = { type: R.type, team: R.team, taker: tk ? tk.num : null, yours: tk === T.controlled(), seen, bar: tk ? +tk.stamina.toFixed(3) : null, cap: tk ? +tk.staminaCap.toFixed(3) : null,
+    others: +(G.filter(q => q !== tk).reduce((a, q) => a + q.stamina, 0) / Math.max(1, G.length - 1)).toFixed(3) };
+  T.freeze(); for(const q of T.players()){ q.stamina = q.staminaCap = 1; } return out; });
+info('a restart, all tired: ' + JSON.stringify(RS));
+ok(RS.type === 'throw' && RS.team === 'G' && RS.seen.n > 10 && RS.seen.sprint / RS.seen.n > 0.8 && RS.bar > 0.1 && RS.cap === 0.95 && RS.others > 0.1,
+  'a throw-in of ours with all of them at a tenth of the bar: the man taking it goes to it flat out (' + RS.seen.sprint + ' frames of ' + RS.seen.n + '), his bar up to ' + RS.bar + ' on the way and his ceiling untouched (' + RS.cap + '), the rest up to ' + RS.others + ' on average (till v180 a man under 0.15 walked to it, and under 0.3 to his place)');
 
 // --- THE LAST OF HIS LEGS: one of theirs on the ball 30 px in front of your man, the game paused -----------------------
 const L = await page.evaluate(() => {

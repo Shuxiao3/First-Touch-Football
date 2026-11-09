@@ -263,13 +263,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **A corner**: the nearest of the side who isn't a forward or a centre-back (they're wanted in the box), the better
     crosser first, takes it from the quadrant. Four of his best in the air go into the box -- the near post, the far
     post, the spot and the back post -- a forward or a centre-back first, the nearer the box the likelier; one goes to
-    the edge of the box and two stay back for the break. Theirs leave one man up, put a man goal-side of each man in the
+    midfield, 24 to 36 m out (v180: he stood on the edge of the box), and two stay back for the break. Theirs leave one man up, put a man goal-side of each man in the
     box, one on the near post and one on the six-yard line, and stand 9.15 m off the ball. The computer's taker waits
     for his men to be on their spots (up to 3.5 s once he's over it) and crosses it to the best placed of them; with it
     on its way, anyone of his in the box goes for it, a centre-back too. Yours: you're put on him, over the ball -- the
-    stick doesn't walk him off it -- and CROSS crosses it in (held longer, to a man further across, as any cross of
-    yours), PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you after 8 s
-    (v142: 5 s), the stopwatch over him for the last two. Crossed, by you or for you, you're on the man it's for
+    stick doesn't walk him off it: it moves your reticle (v180: see **Your corner's reticle**) -- and CROSS crosses it
+    in, to the reticle, PASS plays it short to the man you aim at, SHOOT has a go; left alone, it's crossed for you
+    after 8 s (v142: 5 s), to the reticle too, the stopwatch over him for the last two. Crossed, by you or for you, you're on the man it's for
     (v142: see **You're on the man it's for**).
     - **Your corner's set-up** (v142): while a corner of yours is being taken -- your man walking to it, and over it --
       a panel at the top of the screen says how many of your men are IN THE BOX, how many are BACK for the break, in
@@ -277,9 +277,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       and `C` one fewer and one more back (on a phone, tap the panel's − and +); at most six in the box and five
       back, and one more of either only if there's a man in midfield for it. Your men go at once. Back, a defender
       before a midfielder before a forward, the weaker in the air before the better; in the box, the best in the air
-      of the rest, a forward or a centre-back first, the nearer the box the likelier; midfield, the edge of the box
-      first, then further out. It starts at four in the box and two back, as the computer's, and it's kept for your
+      of the rest, a forward or a centre-back first, the nearer the box the likelier; midfield,
+      between the edge of the box and halfway, 24 to 36 m out (v180; it was the edge of the box first, 16 to 19 m out). It starts at four in the box and two back, as the computer's, and it's kept for your
       corners after (on the device, with your settings). The computer's own corners are as they were.
+    - **Your corner's reticle** (v180): over the ball, the stick moves a reticle -- an amber ring, pulsing -- round
+      their box. It starts 8.5 m out in the middle and goes at 12 m a second, anywhere in the penalty area but the
+      1.5 m by the goal line, and your cross goes there (CROSS's hold picks no man at a corner, and there's no amber
+      ring under one); left alone, the one crossed for you goes there too. You're on the man of ours who'll get to it
+      first. The computer's corners have none. Till v180 your cross went to the man your hold picked, and the one
+      crossed for you wherever the computer's would have gone.
   - **A goal kick** is the keeper's, from his six-yard box, as it was (yours: you're on him -- see **Your keeper with it
     in his hands**). The other side go out of his penalty area, and none of them can come back into it till it's taken.
     He walks to it (v140), up off the turf first if he's down -- 7 m takes him about a second and a quarter; he was put
@@ -477,8 +483,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     saying how many wait), the sub counted, the word ON AT THE BREAK; at the next break -- the ball out for a throw-in,
     a corner or a goal kick, till it's taken; a goal, till the kick-off's played; offside's free kick; the whistle --
     on he comes, every one waiting at once. Tap a ringed line again and he stays on. With the ball dead already (or at
-    half-time, from its card) he's on there and then. One of yours hurt in a career match goes at the next break too,
-    slowed till then. Till v179 a sub was made there and then, mid-move -- a man with the ball at his feet once he'd
+    half-time, from its card) he's on there and then. One of yours hurt in a career match stays on, a red cross over his
+    head, till you take him off (v180): he tops the list, and tapped he goes at the next break like any sub. Till v179 a sub was made there and then, mid-move -- a man with the ball at his feet once he'd
     played it -- because a match's only dead balls were the goals and half-time, and a sub that waited for one could
     wait a half; since v138 the ball goes out. ALL SUBS opens TACTICS for any other sub. The keeper is never one of
     the quick subs' lines. With no subs left it goes, and it isn't there in a lab. (In v63 it was twice the size, and
@@ -569,6 +575,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it isn't played first time: the screen says TOO FAR TO PLAY FIRST TIME, and you take it as normal. With nobody
     near enough the way you've aimed, it's a short ball (14 m) into the space there. The computer's first-time
     passes, played while it's still looking up, are short too: a longer ball waits for a touch.
+  - **No through ball off a first touch (v180).** A one-touch pass was never a through ball, and now nor is a pass
+    played off your first touch: pressed with the ball still loose off his trap or a directional touch (up to 0.9 s
+    after it), a drag off PASS plays it to the man that way as a pass, not into the space ahead of him -- played as
+    he gets to the ball. Once it's at his feet, or off a touch longer ago, a drag plays it through as ever. The
+    computer never picks a through ball first time either: it waits for a touch.
 - **A shot at a ball that's nobody's (v139).** With the ball not at anyone's feet and not in a keeper's hands -- bouncing
   loose in the box, a pass on its way to you, one of theirs gone astray -- SHOOT is a shot. In your reach that moment it's
   struck first time (or headed, at your head in their box); otherwise it's asked for (SHOT … on the screen) and your
@@ -1266,11 +1277,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     man of 7 or 8 bent it nearly as a 9 or 10 did -- and short passes bent as much as any. So now:
     - **A share of the most, by his Curve:** none at Curve 1, 5% at 2, 10% at 3, 15% at 4, a quarter at 5, 35% at 6,
       half at 7, 65% at 8, 80% at 9 and all of it at 10, in between by how far he is between them (30% at 5.5); and
-      the most is a twentieth less than it was. Shots, crosses and passes alike. (It went evenly from a little at
+      the most is a twentieth less than it was. Shots, crosses and passes alike (v180: crosses by tenths instead -- see **A cross bends by Curve a tenth at a time**). (It went evenly from a little at
       Curve 1 to all of it at 10: two-thirds of it at 7, more than three-quarters at 8.) A through ball by the spot,
       needing all its bend on a middling ball: none at Curve 1, 13° at 5.5, 21° at 7, 28° at 8, 34° at 9, 43° at 10
       (6, 26, 32, 36, 41 and 45). A long pass 15° at most (16), the computer's round their line 41° (43). A Curve 1
-      cross has no spin on it at all, and a Curve 10 one swings a twentieth less; a shot's curl the same -- none at
+      cross had no spin on it at all (v180: a tenth of Curve 10's), and a Curve 10 one swings a twentieth less; a shot's curl the same -- none at
       Curve 1, a Curve 1 man's swiped shot goes where it's swiped -- and the computer's shooter curls one only with
       enough on it to beat the keeper, from about Curve 6.5 (it was 3.5).
     - **By how far it's going:** a pass or a through ball bends best over a middling distance -- all of it from 17 m
@@ -1291,6 +1302,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       80 → 76, 79 → 79, 82 → 81. The computer's, chosen as it chooses, getting to their man: through a gap 71 → 66,
       82 → 85, 80 → 80; with one of theirs off the runner 90 → 87, 95 → 93, 94 → 95. With no bend at all a Curve 1
       ball loses 3 to 5 in 100; at 8 and 10 they're as they were. These move a few in 100 from one run to the next.
+  - **A cross bends by Curve a tenth at a time (v180).** A cross takes 10% of the most a cross can bend at Curve 1,
+    20% at 2 and so on, all of it at 10 -- not the table above (none at Curve 1, half at 7). From the byline a Curve 1
+    cross bows 3 or 4 px (about 0.15 m) where Curve 10's bows 43 or 44 (1.9 m), and counts as curling 0.095 -- for the
+    keeper coming for it and the header off it -- where Curve 10's counts 0.95. Through balls, long passes and shots
+    keep the table. (v169-v179: the table for crosses too, so no bend at Curve 1.)
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for his line (see **Ratings**).
 
@@ -1438,6 +1454,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     33 → 0; at 10, shots 83 → 81 (first time 50 → 81), holding on 8 → 0. The rest are passes cut out before he gets
     there: at Off IQ 1 he waits for it and their man nips in, as before (58 → 62 in 100). At the edge of the box and
     outside it, as it was.
+  - **Not a hopeless one (v180).** A shot that would go in less than one time in 25, as he sees it -- the chance from
+    there, how clear his way to goal is, his finishing and, from beyond 18 m, his Long shots -- isn't on his list at
+    all: he carries it on, or passes it, to a better one. Straight on with the way clear and his finishing 5.5, a man
+    of Long shots 1 tries it from 18 m and no further, 3 from 18.5 m, 5.5 and 10 from 19 m: from straight out the
+    chance falls to 1 in 100 by 20 m. Twelve computer-against-computer matches on each, every outfielder's Long shots
+    3 (a lower league's), v179 → v180: shots 10.3 → 5.9 a match, from 20 m and further 43 → 8 in all and from 25 m
+    and further 30 → 1, goals 25 → 25. Till v180 a shot of 1 in 100 stayed on his list, out to 34 m, and his choice
+    -- misjudged the more, the lower his Off IQ -- took one now and then.
   - **The computer's passer** picks his pass a moment before he strikes it, so the game could tell the man it's for
     where it's going early. It doesn't: that would be reading the passer's mind. He reads it from the strike.
   - **Over whole matches** (16 six-minute computer-against-computer games on each, per 6 minutes, before → now):
@@ -1505,6 +1529,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it, the man it's for has an amber ring under him. It goes where the computer's would for him (his spot, where he
     is, or his run), timed as the computer's is, and your Crossing aims it. It used to go to whichever man was
     nearest the penalty spot every time, and the hold only made it float or drive.
+    - **Into the heart of the box (v180).** A cross goes no further out than 12 m (between the penalty spot and the
+      edge of the box), no wider than 9 m off the middle and not within 1.5 m of the goal line: one for a man further
+      out or wider goes as near him as that allows, and he goes in to meet it. A man well out of it -- 2.5 m beyond
+      it and more, as on the edge of the box -- isn't one of the men your hold picks from while any of ours is in it;
+      on his own, the cross goes in front of him, 12 m out. Yours and the computer's alike, and the computer counts a
+      header from further out for much less (0.3 for every 4.4 m beyond 9 m, where it was 0.12). Till v180 a cross
+      could go to a man on the edge of the box, 15 or 16 m out, with no chance from there.
     - **Double-tap it for a low driven cross** to the man the second press picks (a quick second tap: the nearest;
       hold it: further across). It's flat and quick, up to 30 m/s, and comes in at his knees, low enough to take or
       hit first time. He reads it as he would a pass (his Off IQ), and their men can cut it out as they would one.
@@ -1665,8 +1696,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       SIMULATE), gives his place to the best fit off the bench -- a man of his line, the fittest -- and the hub says so;
       nobody hurt is among the subs.
     - **In a match you play**, a man can get hurt in it: he slows (his legs' ceiling down to 40%), can't sprint, and
-      doesn't get better at half-time. ✚ HE'S HURT comes up by the quick subs, and he tops their list with the best
-      man to take off for (the chip lights; it never drops down on its own). With no subs left he plays on. The
+      doesn't get better at half-time, and a red cross on a white square stays over his head while he's on (v180;
+      theirs too). ✚ (HIS NAME) IS HURT comes up by the quick subs, and he stays on till you take him off: he tops
+      their list -- for your planned man for him if you'd one, else the bench's best at his spot -- the chip lit (it
+      never drops down on its own), and tapped he comes off at the next break in play, as any sub does. (v116-v179
+      he came off by himself.) With no subs left he plays on. The
       report lists him. In a simulated game it's a roll for each man at his share of it.
     - **Where you see it**: OUT and the weeks out by his name in the squad lists (v171: OUT 3W; it was ✚) and ✚ in Training's Selection list, his
       token on the tactics pitch faded, ✚ INJURED · a strain · 2 weeks on his card, the hub (✚ and who, and whether
@@ -2890,6 +2924,23 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v180: the hurt stay on till you take them off; your corner aimed; crosses into the heart of the box; no hopeless
+  shots.** A man of yours hurt in a match stays on, slowed, a red cross over his head (theirs too), till you take him
+  off: he tops the quick subs -- your planned man for him, else the bench's best at his spot -- the chip lit, and
+  tapped he goes at the next break in play (v116-v179 he came off by himself). At your corner the stick moves a
+  reticle round their box -- 8.5 m out in the middle to start, anywhere in the box but the goal line -- and your
+  cross goes there, as does the one crossed for you when your time's up. The corner's men in midfield stand between
+  the edge of the box and halfway, 24 to 36 m out (on the edge of the box before). A cross goes into the heart of the
+  box -- no further out than 12 m, no wider than 9 m off the middle: a man on the edge of the box isn't crossed to
+  while one of ours is in it, and on his own the cross goes in front of him; yours and the computer's. A cross bends
+  by Curve in tenths, 10% of the most at Curve 1 up to all of it at 10 (it had the through ball's table, none at 1).
+  A pass off your first touch is never a through ball, nor the computer's first-time ball. The computer doesn't take
+  a shot that goes in less than one time in 25: twelve computer matches with every man at Long shots 3, shots from
+  25 m and further 30 → 1, goals level. A sprint at a dead ball costs nothing, the bar filling as if he stood still,
+  and the men going to their places sprint however tired. A man under Acceleration 5.5 builds speed a touch slower
+  again (a tenth at 1). See **Your corner's reticle**, **Into the heart of the box**, **A cross bends by Curve a tenth
+  at a time**, **No through ball off a first touch**, **Not a hopeless one**, **Nothing at a dead ball** and **In a
+  match you play**.
 - **v179: subs at a break in play, tired men flagged sooner, volleys less true, a twentieth off top speed.** A sub
   asked for with the ball in play -- a quick sub's line, or TACTICS -- waits for the next break in play (a throw-in, a
   corner, a goal kick, a goal, offside, the whistle) and comes on then, his line ringed till then; tap it again and he
@@ -3721,9 +3772,18 @@ test, and like the Trap Lab the values are the game's settings.
   it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
   him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
+  A slow starter (v180): under Acceleration 5.5 a man builds his speed a touch slower again -- a tenth slower at 1,
+  a twentieth at 3.25 -- so half a second flat out from a standstill takes him 3.43 m at Acceleration 1 (it was
+  3.49), 3.56 at 3.25 (3.59), and 3.66 at 5.5 and 3.75 at 10 as before.
 - **Stamina (v121)** — two things: the bar, which a sprint drains and a jog or a stand fills again, and the
   ceiling under it, which every sprint wears down for the rest of the half. A tired man is slower: at 70% of both,
   about a seventh.
+  - **Nothing at a dead ball (v180).** With the ball out -- a throw-in, a corner, a goal kick, till it's taken -- a
+    goal till the kick-off, offside's free kick, half-time: a sprint costs nothing, the bar fills as if he stood still
+    and the ceiling isn't touched, and the men going to their places sprint however tired (till v180 a man with under 0.3
+    of the bar walked there, the taker under 0.15). Two seconds flat out with half the bar left and a ceiling of 0.9: at a dead
+    ball, the bar up to 0.9 and the ceiling 0.9; in play, the bar down to 0.29 and the ceiling to 0.889. A throw-in of
+    ours with every man at a tenth of the bar: the taker goes to it flat out, his bar up to 0.58 on the way.
   - **The ceiling goes by the match, not the minute** (v136). It wears as a 3-minute half wears it, whatever the
     half's length: a second of it three quarters as fast at 4 minutes, three fifths at 5, so the legs go over a match
     as they did at 3 minutes. The bar, back within a few seconds of a sprint, goes by the second as it always has.
