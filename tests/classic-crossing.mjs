@@ -81,11 +81,13 @@ ok(marked.T.cleared + marked.T.keeper + (marked.T.punched || 0) >= 3 && hd(marke
 // THE KEEPER (v107): your cross to the nearest of your men in the box, two of ours and two of theirs, from the byline --
 // one he used to come off his line for two times in three. He waits for it to come down more, reads it longer, is a
 // touch slower off his line, gets a hand to it a touch less far, and comes only for one dropping in his six-yard box.
-const yoursNear = await page.evaluate(n => new Promise(res => { const T = window.__T, L = T.LAB; T.P.crossing.val = 8;
+// (v169: the crosser with a crossing winger's Curve, 7.5 -- at the default 5.5, since Curve by level, his ball swings
+// half as much as it did and the keeper comes and takes about a third of them: 7 to 16 of 30, against 2 to 4.)
+const yoursNear = await page.evaluate(n => new Promise(res => { const T = window.__T, L = T.LAB; T.P.crossing.val = 8; const cv0 = T.P.curve.val; T.P.curve.val = 7.5;
   Object.assign(L, { auto: true, cWho: 'you', cKeep: true, ct: null, cFrom: 25, cAtk: 2, cDef: 2 }); T.cast(); T.serve();
   const w0 = performance.now();
   (function tick(){ const r = L.rep; if(r && !r.cross && !r.done && T.simNow() - r.t0 >= 1.4 && T.mine()) T.crossYou(0);
-    if((L.ct && L.ct.n >= n) || performance.now() - w0 > 150000){ L.auto = false; return res(Object.assign({}, L.ct)); } requestAnimationFrame(tick); })(); }), 30);
+    if((L.ct && L.ct.n >= n) || performance.now() - w0 > 150000){ L.auto = false; T.P.curve.val = cv0; return res(Object.assign({}, L.ct)); } requestAnimationFrame(tick); })(); }), 30);
 info('your cross to your nearest man, 2 v 2 from the byline: ' + JSON.stringify(yoursNear));
 const kpN = yoursNear.keeper + (yoursNear.punched || 0);
 ok(yoursNear.n >= 30 && kpN <= 14 && yoursNear.head + yoursNear.cleared > kpN,

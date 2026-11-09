@@ -13469,7 +13469,7 @@
     if(shootHeld&&myBall())shootCharge=clamp(shootCharge+dt/0.57,0,1);
     if(crossHeld&&myBall())crossCharge=clamp(crossCharge+dt/0.7,0,1);
     if(clearFeet&&!myBall()&&!keeperInHand()){ clearFeet=false; clearHeld=false; clearCharge=0; }          // (lost it winding up: nothing -- v169: not your keeper's punt, it's in his hands)
-    if(clearHeld&&(clearFeet||clearArm>0)) clearCharge=clamp(clearCharge+dt/(keeperInHand()?PUNT_FILL:CLEAR_FILL),0,1);
+    if(clearHeld&&(clearFeet||clearArm>0)) clearCharge=clamp(clearCharge+dt/(controlled&&controlled.isGK?PUNT_FILL:CLEAR_FILL),0,1);   // (v169: your keeper's punt fills as slowly at his feet as in his hands)
 
     if(LAB.on) labStep(dt,rdt);
     let hi=humanIntent(); HI=hi;

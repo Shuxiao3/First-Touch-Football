@@ -122,14 +122,18 @@ const back = await page.evaluate(() => new Promise(res => { const T = window.__T
 info('your pass back to your keeper: ' + JSON.stringify(back));
 ok(back.how === 'feet' && back.you, 'you pass it back to your keeper (facing him, PASS): he has it at his feet, not his hands, and you\'re on him');
 const st = await yours('stick'), ps = await yours('pass'), tk = await yours('tackle');
-// CLEAR with it at his feet: his long ball, pinged (v115)
-await scene('G', 'back'); await page.evaluate(() => { window.__b0 = { x: window.__T.ball().x, y: window.__T.ball().y }; window.__t0 = window.__T.now(); }); await pressKey('KeyL');
-const ft = await page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(), kp = T.keepers().find(k => k.team === 'G'), b0 = window.__b0; let gone = null;
-  (function tick(){ const t = T.now() - window.__t0; if(gone === null && b.ownedBy !== kp) gone = t;
-    if(gone !== null && ((t - gone > 0.25 && b.z <= 0.5) || b.ownedBy || t - gone > 4)) return res({ land: +(Math.hypot(b.x - b0.x, b.y - b0.y) / T.MK).toFixed(1), grade: T.grade() });
-    if(t > 6) return res({ land: null }); requestAnimationFrame(tick); })(); }));
-info('CLEAR with it at his feet: ' + JSON.stringify(ft));
-ok(ft.land >= 25, 'CLEAR with it at his feet: his long ball, pinged (first down ' + ft.land + ' m out), not an outfielder\'s clearance');
+// CLEAR with it at his feet: his punt (v115), as far as it's held (v169) -- a tap a short one, held the whole way long
+const clearAtFeet = async held => { await scene('G', 'back'); await page.evaluate(() => { window.__b0 = { x: window.__T.ball().x, y: window.__T.ball().y }; window.__t0 = window.__T.now(); });
+  if(held) await page.evaluate(() => new Promise(res => { const T = window.__T, t0 = T.now(); dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyL' }));   // (held 1.2 s, in the game's own time)
+    (function tick(){ if(T.now() - t0 >= 1.2){ dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyL' })); return res(); } requestAnimationFrame(tick); })(); }));
+  else await pressKey('KeyL');
+  return page.evaluate(() => new Promise(res => { const T = window.__T, b = T.ball(), kp = T.keepers().find(k => k.team === 'G'), b0 = window.__b0; let gone = null;
+    (function tick(){ const t = T.now() - window.__t0; if(gone === null && b.ownedBy !== kp) gone = t;
+      if(gone !== null && ((t - gone > 0.25 && b.z <= 0.5) || b.ownedBy || t - gone > 4)) return res({ land: +(Math.hypot(b.x - b0.x, b.y - b0.y) / T.MK).toFixed(1), grade: T.grade() });
+      if(t > 7) return res({ land: null }); requestAnimationFrame(tick); })(); })); };
+const ft = await clearAtFeet(false), fh = await clearAtFeet(true);
+info('CLEAR with it at his feet, tapped: ' + JSON.stringify(ft) + '; held: ' + JSON.stringify(fh));
+ok(ft.land !== null && ft.land >= 12 && ft.land <= 24 && fh.land >= 45, 'CLEAR with it at his feet: his punt, as far as it\'s held -- a tap a short one (first down ' + ft.land + ' m out), held the whole way ' + fh.land + ' m (v169; v115 to v168, a long ball pinged at once whatever the press)');
 info('your keeper on the ball -- the stick: ' + JSON.stringify(st) + '; PASS: ' + JSON.stringify(ps) + '; one of theirs at him: ' + JSON.stringify(tk));
 ok(st.ran > 1.5 && st.still && st.you, 'your keeper with it at his feet: the stick takes him on with it (' + st.ran + ' m in 0.8 s, the ball still his)');
 ok(ps.out && ps.out.to && ps.you === 'the man it\'s for' && !ps.hands, 'PASS plays it up the pitch to one of ours (' + (ps.out && ps.out.off) + '° off him: a keeper\'s passing), and you go with it, on to him');
