@@ -1711,6 +1711,7 @@
   .mtacBody .ptk{ position:absolute; }
   .mtacBody .tbBench .ptk{ position:relative; }
   .tacB1 .ptk.dim{ opacity:.45; }
+  .tacB1 .ptk.qWait{ outline:2px dashed var(--warn); outline-offset:3px; }   /* (v179: a sub waiting for the next break in play) */
   .tacB1.ro .ptk{ cursor:pointer; }
   .tbBenchNone{ font-size:10px; color:var(--dim2); }
   .mtLegs{ display:flex; align-items:center; gap:8px; font:10px 'FTC Dot',monospace; color:var(--dim); margin:6px 2px 0; }
@@ -6665,7 +6666,7 @@
     return p.posPen={a:p.slotAtk, d:p.slotDef, e:p.squadIdx, s:p.style, offIQ:FIT_PEN[posFit(nat,spotFit(p.slotAtk))].offIQ, defIQ:FIT_PEN[posFit(nat,spotFit(p.slotDef))].defIQ}; }
   // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/134, 10 => 166/228)
   function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
-  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),134, 228); }
+  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),127, 217); }   // (v179: a twentieth slower flat out -- it was 134 to 228)
   // HIS LEGS: what tiredness leaves of his top speed -- his stamina now, and the ceiling the match has worn it down to
   // (see stepOutfield): 1 fresh, about 0.9 a tired man, 0.64 at the very worst
   function legsOf(p){ return (0.78+0.22*clamp(p.stamina??1,0,1))*(0.74+0.26*(p.staminaCap??1)); }
@@ -6682,8 +6683,10 @@
   // ceiling it wears goes the same way (CAP_WEAR a second at that pace; before v121 0.007 a second at any speed). His
   // Stamina sets what a metre costs, as before. (v123: a metre a fifth dearer than v121 made it -- the fastest man paid
   // what he always had, SPRINT_TOP 228 -- and the ceiling worn faster, 0.0045 then: half-time found the sides fresh as
-  // the kick-off.) (sprintPace: from a quarter, a sprint from standing still, to Speed 10's and a burst over it)
-  const SPRINT_TOP=190, CAP_WEAR=0.0075;
+  // the kick-off.) (sprintPace: from a quarter, a sprint from standing still, to Speed 10's and a burst over it) (v179:
+  // 181, a twentieth down with everyone's top speed -- it was 190 -- so a second flat out costs what it did: the legs go
+  // over a match as they did)
+  const SPRINT_TOP=181, CAP_WEAR=0.0075;
   // THE CEILING BY THE MATCH, NOT THE MINUTE (v136): it wears as a 3-minute half wears it, whatever the half's length --
   // CAP_WEAR is a 3-minute half's, and a longer half wears it slower (capRate: three quarters as fast a second at 4
   // minutes, three fifths at 5), so the legs go as they did at 3 minutes over the match. (A man's stamina between sprints,
@@ -7681,7 +7684,7 @@
   }
   function slideShotStrike(p){
     const atk=atkOf(p.team), aim=p===controlled?Math.max(-1,Math.min(1,curIy)):0;
-    shootAt(p,atk,aim,0.4,0,P.firstTouchAcc.val*SLIDE_SHOT_ACC);
+    shootAt(p,atk,aim,0.4,0,P.firstTouchAcc.val*SLIDE_SHOT_ACC*volleyMul(p));
     lastGrade='SLIDING FINISH!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.2;
   }
   function commandShoot(mate){
@@ -7874,11 +7877,18 @@
     const relSpd=Math.hypot(ball.vx-p.vx,ball.vy-p.vy);
     return relSpd < cleanSpdOf(p);                             // within clean-touch speed
   }
+  // A VOLLEY (v179): a ball struck first time is harder to keep true the higher it is and the quicker it comes -- as a
+  // one-touch pass's is (oneTouchDifficulty): up to FT_VOLLEY less of his accuracy than one rolling to him at walking pace
+  // -- 0.72 of it at his waist at 32 m/s, 0.86 at his knee at 22 m/s. Yours, the sliding finish, and the computer's
+  // first-time finish alike. (Till v179 a volley went as true as a ball along the grass, and the computer's first-time
+  // finish as true as a settled one.)
+  const FT_VOLLEY=0.4;
+  function volleyMul(p){ const d=oneTouchDifficulty(p).d; return 1-FT_VOLLEY*d; }
   function firstTimeShot(){
     const atk=atkOf(controlled.team);
     const aim=Math.max(-1,Math.min(1,curIy));
     // a quick-charge based on how long K is held would need a frame; first-time is a snap strike
-    shootAt(controlled,atk,aim,0.55,aiCurlFor(controlled,atk),P.firstTouchAcc.val);
+    shootAt(controlled,atk,aim,0.55,aiCurlFor(controlled,atk),P.firstTouchAcc.val*volleyMul(controlled));
     curveArmed=true;curveT=1.0;            // can still bend the live first-time shot briefly
     lastGrade='FIRST-TIME!';gradeColor=controlled.team==='G'?'#9dff3c':'#ff5a4d';gradeFade=1.0;
   }
@@ -10388,7 +10398,7 @@
     p.sprint=p.stamina>0.1; p.dbgTag='OB-TAKEON';
     return steer(p,C.gx,clamp(p.y+(YC-p.y)*0.3,60,FH-60),1.0);
   }
-  function obExec(p,o,C){
+  function obExec(p,o,C,ft){   // (ft: struck first time, still getting it under control -- see onBall's looking)
     const ob=p.ob; p.dbgTag='OB-'+o.kind.toUpperCase();
     if(o.kind==='pass'){
       const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
@@ -10400,7 +10410,7 @@
     }
     if(o.kind==='shot'){
       const dG=Math.abs(C.gx-p.x);
-      shootAt(p,C.atk,clamp((YC-p.y)/(GOAL_W*0.9),-1,1),clamp(0.62+dG/1100,0.62,1),aiCurlFor(p,C.atk)); ob.done=true;
+      shootAt(p,C.atk,clamp((YC-p.y)/(GOAL_W*0.9),-1,1),clamp(0.62+dG/1100,0.62,1),aiCurlFor(p,C.atk),ft?volleyMul(p):undefined); ob.done=true;   // (v179: first time, a volley's height and pace cost it -- see FT_VOLLEY)
       return steer(p,C.gx,YC);
     }
     if(o.kind==='cross'){
@@ -10461,7 +10471,7 @@
         if(pick.kind==='pass' && C.prD>140 && turnWorst(p,(pick.tx-ball.x)/(pick.d||1),(pick.ty-ball.y)/(pick.d||1))>0.026){   // (over ~1.5 deg at worst, and time to do it)
           ob.set={q:pick.q, tx:pick.tx, ty:pick.ty, until:simNow+0.3}; const l=pick.d||1;
           p.dbgTag='OB-SET'; return steer(p,p.x+(pick.tx-ball.x)/l*30,p.y+(pick.ty-ball.y)/l*30,0.25); }
-        return obExec(p,pick,C); }
+        return obExec(p,pick,C,looking); }
       if(pick&&pick.kind==='takeon'){ if(!p.takeOn) p.takeOn={who:pick.who, side:pick.side, keen:pick.keen, clear:pick.clear, phase:'approach', t:1.3, at:simNow}; }
       else if(pick){ p.takeOn=null; ob.plan=pick; }
     }
@@ -13883,6 +13893,7 @@
     }
     netRelax(dt);
     checkOutOfPlay();                                  // (v138: over a line, it's out)
+    subsAtBreak();                                     // (v179: a sub waiting, the ball dead: on he comes)
 
     if(scoredT>0){scoredT-=dt;if(scoredT<=0){
       celebEnd();
@@ -14285,7 +14296,7 @@
   }
   function newMatch(){
     labOff(); if(practice){ practice=null; pball.on=false; prioritizeDials(null); }   // matches never run as a drill
-    meMatch=null; SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}}; qsReset(); HURT.G.clear(); HURT.R.clear(); MSTAT.G={}; MSTAT.R={};
+    meMatch=null; SUBS={G:{used:0,on:[],off:[],q:[]},R:{used:0,on:[],off:[],q:[]}}; qsReset(); HURT.G.clear(); HURT.R.clear(); MSTAT.G={}; MSTAT.R={};
     goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0; celebEnd();
     ball.lastTouchP=null;ball.prevTouchP=null;
     advOn=false;
@@ -14360,6 +14371,7 @@
       resetKickoff(); lastGrade='HALF TIME'; gradeColor='#ffb43c'; gradeFade=2.2;
       switchEnds();                 // swap which goal each team attacks
       resetKickoff('R');            // the team that didn't start (Red) kicks off the second half
+      subsAtBreak();                // (v179: subs waiting come on at the whistle, before the card)
       if(htWants()) htShow();       // (v148: the break -- the score, the numbers so far, subs and tactics)
       return;
     }
@@ -15805,10 +15817,10 @@
   // in a career match, drag one off the bench onto a man to bring him on (SUB_MAX a match; the man off can't come back).
   // The other side: look, don't touch. =====
   const SUB_MAX=3;
-  let SUBS={G:{used:0,on:[],off:[]},R:{used:0,on:[],off:[]}};
+  let SUBS={G:{used:0,on:[],off:[],q:[]},R:{used:0,on:[],off:[],q:[]}};   // (q, v179: subs waiting for a break in play -- see subsAtBreak)
   const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false, fromHT:false};   // (v148: fromHT -- opened from half-time, and back to it)
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
-  const mtCanSub=t=>t==='G'&&SUBS.G.used<SUB_MAX;
+  const mtCanSub=t=>t==='G'&&subsLeft()>0;
   function mtRating(e,role,pos){ return !e?0:rateAt(e.role,e.ovr,e.stats,fitPos(e),role,pos); }
   // how far a line's men spread down the tactics pitch: a WIDE line's end men reach its edges, so a COMPACT four still has room between its men
   const TOK_SPREAD=1.13;
@@ -15819,7 +15831,7 @@
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,L,T,kind,role,k,pos,n,cc){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);   // (pos: the spot's fit -- spotFit)
-    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(kind==='bench'&&!mtBenchOK(t)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
+    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(t==='G'&&SUBS.G.q.some(x=>x.out===si||x.inn===si)?' qWait':'')+(kind==='bench'&&!mtBenchOK(t)&&!SUBS.G.q.some(x=>x.inn===si)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
   function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false,TAC.G&&TAC.G.style);   // (theirs are theirs: their men show their ratings)
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
@@ -15853,7 +15865,7 @@
     h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
     document.getElementById('mtacBody').innerHTML=h+'</div>';
     document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
-    document.getElementById('mtSubs').textContent=MT.pre?'BEFORE KICK-OFF':mtBench('G').length||SUBS.G.used?'SUBS LEFT '+(SUB_MAX-SUBS.G.used):''; }
+    document.getElementById('mtSubs').textContent=MT.pre?'BEFORE KICK-OFF':mtBench('G').length||SUBS.G.used?'SUBS LEFT '+subsLeft()+(SUBS.G.q.length?' · '+SUBS.G.q.length+' AT THE BREAK':''):''; }
   // pre: before an exhibition's kick-off (kickOffExhibition) -- ◀ CLUBS back to the setup screen, KICK OFF ▶ to play, and a
   // man off the bench for one in the team a change of team, not a sub (mtLineup)
   function openMatchTac(pre){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.arm=null; MT.pre=!!pre; menuOpen=true;
@@ -15866,7 +15878,8 @@
   function mtShut(){ MT.pre=false; MT.drop=null; menuOpen=false; document.getElementById('mtacOv').classList.remove('on','pre'); }
   function mtKickOff(){ mtShut(); resetKickoff('G'); }                // (everyone in his spot in the shape you've picked)
   function mtBackToClubs(){ mtShut(); showStartMenu(); startExhibition(); }
-  const mtBenchOK=t=>t==='G'&&(MT.pre||SUBS.G.used<SUB_MAX);           // (a man off the bench: before kick-off any, after it a sub)
+  const subsLeft=()=>SUB_MAX-SUBS.G.used-SUBS.G.q.length;              // (v179: those waiting for a break in play counted)
+  const mtBenchOK=t=>t==='G'&&(MT.pre||subsLeft()>0);                  // (a man off the bench: before kick-off any, after it a sub)
   // BEFORE KICK-OFF a man off the bench for one in the team is a change of team: the two swap (the other to the bench, and
   // back again if you like), nothing counted. Kept with the side, as the shapes are.
   function mtLineup(t,out,inn){ const li=LINEUP[t], e=SQUAD[t][inn]; if(!e) return false;
@@ -15891,11 +15904,26 @@
   // down a short list, a sub a line: in a career match your planned subs first (the training pitch's Selection tab: see
   // qsPlanned), then your most tired men (his ceiling, staminaCap: what he can get his legs back to), each with the man
   // on the bench who'd do his job best, when he would on his fresh legs against the tired man's. It never drops down by
-  // itself: when one of yours gets too tired (QS_TIRED) the chip lights up, that's all. Tap a line and he's on there and
-  // then, as from the match's tactics -- it doesn't wait for a dead ball, a match has two or three (the goals, half
-  // time) -- or, the man coming off having the ball, as soon as he's played it. ALL SUBS opens the match's tactics.
-  // The keeper isn't one. One of yours hurt in a career match comes off by himself (qsAutoHurt). =====
-  const QS_TIRED=0.6;                                                 // (his ceiling at 60%: about a tenth off his top speed)
+  // itself: when one of yours gets too tired (QS_TIRED) the chip lights up, that's all. Tap a line and he's on at the next
+  // break in play (v179: see subsAtBreak) -- there and then if the ball's dead already -- his line ringed till then (tap
+  // it again and he stays on); as from the match's tactics. ALL SUBS opens the match's tactics. The keeper isn't one.
+  // One of yours hurt in a career match comes off by himself (qsAutoHurt), at the next break too. (Till v179 a sub was
+  // made there and then, mid-move -- or, the man coming off having the ball, as soon as he'd played it: when a match's
+  // only dead balls were the goals and half-time, a sub that waited for one could wait a half.) =====
+  const QS_TIRED=0.7, QS_LIST=0.9;   // (v179: his ceiling at 70%, about 8% off his top speed, lights the chip -- it was 60%, a tenth off; and a man's on the list once his ceiling's under 90% -- it was 85%)
+  // A BREAK IN PLAY (v179): the ball out -- a throw-in, a corner, a goal kick, till it's taken -- a goal till the kick-off's
+  // played, offside's free kick, the whistle. A sub comes on only then: asked for with the ball in play, he waits on the
+  // touchline (SUBS[t].q) and comes on at the next one, every one waiting at once (subsAtBreak, every frame). One whose
+  // man has gone off another way since, or is on already, goes; at full time the rest are forgotten.
+  function deadBall(){ return restartOn()||!!(gkHold&&gkHold.goalKick)||scoredT>0||offsideT>0||kickT>0||breakT>0; }
+  const subStill=(t,s)=>{ const li=LINEUP[t]; return !!li&&(li.gk===s.out||li.atk.includes(s.out))&&mtBench(t).includes(s.inn); };
+  function subQ(t,s){ const p=players.find(q=>q.team===t&&q.squadIdx===s.out)||keepers.find(k=>k.team===t&&LINEUP[t].gk===s.out), sl=qsSlot(s.out);
+    SUBS[t].q=SUBS[t].q.filter(x=>x.out!==s.out&&x.inn!==s.inn);       // (either of them waiting already: this one instead)
+    SUBS[t].q.push(Object.assign({cap:p?(p.staminaCap??1):1, pos:sl?sl.pos:'GK', tired:false, planned:false}, s)); }
+  function subsAtBreak(){ const Q=SUBS.G.q; if(!Q||!Q.length) return;
+    if(matchOver){ SUBS.G.q=[]; return; }
+    if(!deadBall()) return;
+    SUBS.G.q=[]; for(const s of Q) qsDo(s); }
   // WHAT EACH MAN DID in a career match (by side and squad index): passes tried (pa) and found (pc), shots (sh) and on
   // target (son), goals (g), own goals (og), assists (a), tackles won (tk), interceptions (int), the ball lost (lost), a
   // keeper's saves (sav) -- read at the end for his rating (see MATCH RATINGS)
@@ -15909,9 +15937,9 @@
   function hurtInMatch(p){ HURT[p.team].add(p.squadIdx); p.staminaCap=Math.min(p.staminaCap??1,0.4); p.stamina=Math.min(p.stamina??1,p.staminaCap); p.sprint=false;
     if(p.team==='G'){ const e=SQUAD.G[p.squadIdx]; QS.msgT=3; QS.key=''; const m=document.getElementById('qsMsg'); if(m) m.innerHTML='✚ '+(e?surname(e.name):'')+' IS HURT';
       qsAutoHurt(p); } }
-  // YOURS HURT IN A CAREER MATCH (v116): off he comes there and then, if you've a sub left -- your planned man for him if
-  // you'd one, else the one on the bench who'd do his job best (anyone will do: he's hurt) -- once he's played the ball if
-  // he has it (qsMake). With none left, he plays on, slowed
+  // YOURS HURT IN A CAREER MATCH (v116): off he comes, if you've a sub left -- your planned man for him if you'd one,
+  // else the one on the bench who'd do his job best (anyone will do: he's hurt) -- at the next break in play (v179; till
+  // then he plays on slowed, as he does with none left: see qsMake)
   function qsAutoHurt(p){
     if(!careerFix||!qsLive()) return;
     const si=p.squadIdx, sl=qsSlot(si); if(!sl) return;
@@ -15920,9 +15948,9 @@
       const v=mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); if(v>bv){ bv=v; inn=b; } } }
     if(inn==null) return;
     qsMake({out:si, inn, cap:p.staminaCap??1, pos:sl.pos, tired:true, planned:!!plan}); }
-  const QS={open:false, pend:null, msgT:0, key:''};
+  const QS={open:false, msgT:0, key:''};
   const qsLegs=c=>0.74+0.26*c;                                        // what his ceiling leaves of his top speed (stepOutfield's capFatigue)
-  function qsLive(){ return SCREEN==='match'&&!LAB.on&&!practice&&!matchOver&&!!LINEUP.G&&!!SQUAD.G&&mtCanSub('G')&&mtBench('G').length>0; }
+  function qsLive(){ return SCREEN==='match'&&!LAB.on&&!practice&&!matchOver&&!!LINEUP.G&&!!SQUAD.G&&((mtCanSub('G')&&mtBench('G').length>0)||SUBS.G.q.length>0); }   // (v179: or one waiting)
   function qsSlot(si){ const k=LINEUP.G.atk.indexOf(si), sl=k>=0?slotsFor('G',formFor('G','atk'),'atk')[k]:null; return sl?{role:sl.role,pos:sl.pos,fit:sl.fit}:null; }   // (v127: its fit too -- a back three's outside spot takes a full-back)
   // your planned subs (a career's Selection tab: d.qsubs, pairs of roster ids) as this match has them: the man to come off
   // still on the pitch, the one to come on still on the bench
@@ -15930,68 +15958,72 @@
     const siOf=id=>SQUAD.G.findIndex(e=>e&&e.ri!=null&&d.roster[e.ri]&&d.roster[e.ri].id===id), bench=mtBench('G');
     return d.qsubs.map(q=>({out:siOf(q.off), inn:siOf(q.on)})).filter(s=>s.out>=0&&s.inn>=0&&bench.includes(s.inn)&&players.some(p=>p.team==='G'&&p.squadIdx===s.out)); }
   function qsSuggest(){
-    const left=SUB_MAX-SUBS.G.used-(QS.pend?1:0); if(left<=0) return [];
-    const n=Math.min(3,left), out=[], usedIn=new Set(), usedOut=new Set();
-    if(QS.pend){ usedIn.add(QS.pend.inn); usedOut.add(QS.pend.out); }
+    const left=subsLeft(), n=Math.min(3-SUBS.G.q.length,left); if(n<=0) return [];   // (three lines at most, those waiting among them)
+    const out=[], usedIn=new Set(), usedOut=new Set();
+    for(const s of SUBS.G.q){ usedIn.add(s.inn); usedOut.add(s.out); }
     const line=(p,inn,planned)=>{ const si=p.squadIdx, cap=p.staminaCap??1, sl=qsSlot(si), eo=SQUAD.G[si], ei=SQUAD.G[inn]; if(!sl||!eo||!ei) return null;
       usedIn.add(inn); usedOut.add(si); return {out:si, inn, cap, rOut:mtRating(eo,sl.role,spotFit(sl)), rIn:mtRating(ei,sl.role,spotFit(sl)), pos:sl.pos, tired:cap<QS_TIRED, planned}; };
     for(const s of qsPlanned()){ if(out.length>=n) break; if(usedIn.has(s.inn)||usedOut.has(s.out)) continue;   // (yours first, tired or not)
       const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out), r=p&&line(p,s.inn,true); if(r) out.push(r); }
     const bench=mtBench('G').filter(si=>{ const e=SQUAD.G[si]; return e&&e.role!=='GK'&&!usedIn.has(si); });
     const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&!usedOut.has(p.squadIdx)).sort((a,b)=>(a.staminaCap??1)-(b.staminaCap??1));
-    for(const p of men){ const cap=p.staminaCap??1; if(out.length>=n||cap>=0.85) break;   // (nobody fresh needs taking off)
+    for(const p of men){ const cap=p.staminaCap??1; if(out.length>=n||cap>=QS_LIST) break;   // (nobody fresh needs taking off)
       const sl=qsSlot(p.squadIdx), eo=SQUAD.G[p.squadIdx]; if(!sl||!eo) continue;
       const rOut=mtRating(eo,sl.role,spotFit(sl)); let best=null, bv=HURT.G.has(p.squadIdx)?-1:rOut*qsLegs(cap)+1;   // (he has to be better than the tired man is now; anyone, for a man who's hurt)
       for(const si of bench){ if(usedIn.has(si)) continue; const e=SQUAD.G[si], r=mtRating(e,sl.role,spotFit(sl)), v=r*qsLegs(e.cond??1); if(v>bv){ bv=v; best=si; } }
       if(best!=null){ const r=line(p,best,false); if(r) out.push(r); } }
     return out; }
-  function qsDo(s){ const eo=SQUAD.G[s.out], ei=SQUAD.G[s.inn]; QS.pend=null;
-    if(!mtCanSub('G')||!eo||!ei||!matchSub('G',s.out,s.inn)) return;
-    QS.open=false; QS.msgT=2.5; rpKey='';
-    document.getElementById('qsMsg').innerHTML=HURT.G.has(s.out)?'✚ '+surname(eo.name)+' HURT · '+surname(ei.name)+' ON':surname(ei.name)+' ON · '+surname(eo.name)+' OFF'; }
-  function qsMake(s){ const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out);
-    if(p&&ball.ownedBy===p){ QS.pend=s; return; }                    // (not with the ball at his feet: once he's played it)
-    qsDo(s); }
-  function qsRender(sug){ const w=document.getElementById('qsWrap'), left=SUB_MAX-SUBS.G.used;
-    w.classList.toggle('open',QS.open); w.classList.toggle('hot',sug.some(s=>s.tired)||!!QS.pend); document.getElementById('qsBtn').disabled=!qsLive();
+  function qsDo(s){ const eo=SQUAD.G[s.out], ei=SQUAD.G[s.inn];
+    if(SUBS.G.used>=SUB_MAX||!eo||!ei||!subStill('G',s)||!matchSub('G',s.out,s.inn)) return false;
+    QS.open=false; QS.msgT=2.5; QS.key=''; rpKey='';
+    document.getElementById('qsMsg').innerHTML=HURT.G.has(s.out)?'✚ '+surname(eo.name)+' HURT · '+surname(ei.name)+' ON':surname(ei.name)+' ON · '+surname(eo.name)+' OFF'; return true; }
+  // a sub asked for: on now if the ball's dead, else waiting for the next break in play (v179: see subsAtBreak)
+  function qsMake(s){ if(deadBall()){ qsDo(s); return; }
+    subQ('G',s); QS.open=false; QS.msgT=2.5; QS.key='';
+    const ei=SQUAD.G[s.inn]; document.getElementById('qsMsg').innerHTML=(ei?surname(ei.name):'')+' ON AT THE BREAK'; }
+  function qsRender(sug){ const w=document.getElementById('qsWrap'), left=subsLeft();
+    w.classList.toggle('open',QS.open); w.classList.toggle('hot',sug.some(s=>s.tired)||SUBS.G.q.length>0); document.getElementById('qsBtn').disabled=!qsLive();
     document.getElementById('qsBtn').setAttribute('aria-expanded',QS.open?'true':'false');
     document.getElementById('qsLeft').textContent=left;
     document.getElementById('qsMsg').classList.toggle('on',QS.msgT>0&&!QS.open);
     if(!QS.open) return;
     // a line a sub: the man off (his stamina's ceiling under him) ▸ the man on; yours planned lit down the left, a tired
-    // man's amber, one waiting on the man off playing the ball ringed (… for ▸)
+    // man's amber, one waiting for the next break in play ringed (… for ▸: v179)
     const row=(s,wait)=>{ const eo=SQUAD.G[s.out], ei=SQUAD.G[s.inn], pc=Math.round(s.cap*100);
-      return '<button class="qsRow'+(s.planned?' plan':'')+(s.tired?' tired':'')+(wait?' wait':'')+'" data-qs="'+s.out+':'+s.inn+'" title="'+s.pos+' '+s.rOut+' ▸ '+s.rIn+'">'
+      return '<button class="qsRow'+(s.planned?' plan':'')+(s.tired?' tired':'')+(wait?' wait':'')+'" data-qs="'+s.out+':'+s.inn+'" title="'+(s.pos||'')+(s.rOut!=null?' '+s.rOut+' ▸ '+s.rIn:'')+(wait?' · at the next break':'')+'">'
         +'<span class="qsOut"><span class="nm">'+(HURT.G.has(s.out)?'<b class="injX">✚</b>':'')+'#'+eo.num+' '+surname(eo.name)+'</span>'
         +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">'+(wait?'…':'▸')+'</span>'
         +'<span class="qsIn"><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span></span></button>'; };
-    const h=(QS.pend?row(QS.pend,true):'')+sug.map(s=>row(s,false)).join('');
-    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet: any change, any time, from ALL SUBS</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }   // (v148: the tired ones are a suggestion; anyone can come off)
+    const h=SUBS.G.q.map(s=>row(s,true)).join('')+sug.map(s=>row(s,false)).join('');
+    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet: any change from ALL SUBS</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }   // (v148: the tired ones are a suggestion; anyone can come off)
   // every frame of a match (from the HUD): show it or not, the man coming off once he's played it, and drawn again only
   // when something on it has changed
   function qsTick(dt){
     const w=document.getElementById('qsWrap'), live=qsLive();
     if(QS.msgT>0) QS.msgT-=dt;
     w.classList.toggle('on',live||QS.msgT>0);                         // (the last sub's word on who's on stays up its while)
-    if(!live){ QS.open=false; QS.pend=null; const key='off|'+(QS.msgT>0); if(key!==QS.key){ QS.key=key; qsRender([]); } return; }
-    if(QS.pend){ const p=players.find(q=>q.team==='G'&&q.squadIdx===QS.pend.out); if(!p||ball.ownedBy!==p) qsDo(QS.pend); }
+    if(!live){ QS.open=false; const key='off|'+(QS.msgT>0); if(key!==QS.key){ QS.key=key; qsRender([]); } return; }
     const sug=qsSuggest();
-    const key=[QS.open,!!QS.pend&&QS.pend.out,QS.msgT>0,SUBS.G.used,...sug.map(s=>s.out+'>'+s.inn+'@'+Math.round(s.cap*100))].join('|');
+    const key=[QS.open,SUBS.G.q.map(s=>s.out+'>'+s.inn).join(','),QS.msgT>0,SUBS.G.used,...sug.map(s=>s.out+'>'+s.inn+'@'+Math.round(s.cap*100))].join('|');
     if(key!==QS.key){ QS.key=key; qsRender(sug); } }
-  function qsReset(){ QS.open=false; QS.pend=null; QS.msgT=0; QS.key=''; }
+  function qsReset(){ QS.open=false; QS.msgT=0; QS.key=''; }
   document.getElementById('qsWrap').addEventListener('click',e=>{
     const b=e.target.closest('#qsBtn,[data-qs]'); if(!b) return; b.blur();
     if(b.id==='qsBtn') QS.open=!QS.open;                               // (only ever opened, and shut, by a press)
     else if(b.dataset.qs==='all'){ QS.open=false; closePause(); openMatchTac(); }
-    else { const [out,inn]=b.dataset.qs.split(':').map(Number), s=qsSuggest().find(x=>x.out===out&&x.inn===inn)||(QS.pend&&QS.pend.out===out?QS.pend:null);
-      if(s===QS.pend) QS.pend=null; else if(s) qsMake(s); }            // (the one waiting on him playing it: tap it again, and he stays on)
+    else { const [out,inn]=b.dataset.qs.split(':').map(Number), w=SUBS.G.q.findIndex(x=>x.out===out&&x.inn===inn);
+      if(w>=0) SUBS.G.q.splice(w,1);                                    // (one waiting for the break: tap it again, and he stays on)
+      else { const s=qsSuggest().find(x=>x.out===out&&x.inn===inn); if(s) qsMake(s); } }
     QS.key=''; qsRender(qsLive()?qsSuggest():[]); });                  // (drawn now: with a menu up, the match -- and qsTick -- has stopped)
   function mtSwap(a,b){ const t=MT.team, li=LINEUP[t]; if(t!=='G'||a.si===b.si) return; const kinds=[a.kind,b.kind].sort().join('+');
     if(kinds==='field+field'){ const ph=MT.phase, i=li[ph].indexOf(a.si), j=li[ph].indexOf(b.si); if(i>=0&&j>=0) mtSwapPos(t,ph,i,j); }
     else if(kinds==='bench+field'||kinds==='bench+gk'){ const inn=a.kind==='bench'?a.si:b.si, out=a.kind==='bench'?b.si:a.si, eo=SQUAD[t][out], ei=SQUAD[t][inn];
       if(MT.pre){ if(mtLineup(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' in for '+(eo?eo.name:'')+' · no sub used','var(--good)'); } return; }
+      SUBS[t].q=SUBS[t].q.filter(x=>x.out!==out&&x.inn!==inn);         // (v179: either of them waiting already -- this one instead)
       if(!mtCanSub(t)){ mtMsg('No subs left this match.'); return; }
-      if(matchSub(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' · '+(SUB_MAX-SUBS[t].used)+' sub'+(SUB_MAX-SUBS[t].used===1?'':'s')+' left','var(--good)'); } }
+      const nl=()=>subsLeft()+' sub'+(subsLeft()===1?'':'s')+' left';
+      if(MT.fromHT||htOpen||deadBall()){ if(matchSub(t,out,inn)){ MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' · '+nl(),'var(--good)'); } }
+      else { subQ(t,{out,inn}); MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' at the next break · '+nl(),'var(--good)'); } }   // (v179: the ball's in play -- see subsAtBreak)
     else if(kinds==='field+gk') mtMsg('Change your keeper with a sub off the bench.'); }
   document.getElementById('mtacOv').addEventListener('click',e=>{ const t=MT.team;
     const b=e.target.closest('[data-mt]'); if(b){ if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='kick'){ mtKickOff(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; renderMatchTac(); return; } }

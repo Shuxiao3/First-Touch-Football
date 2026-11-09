@@ -15,8 +15,9 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, atkOf, simNow:()=>simNow, controlled:()=>controlled, setCtl:q=>setControlled(q), ballAt, '
   + 'startSlideShot, slideShotLenOf, pressK, releaseShoot, shotQ:()=>shotQ, curve:()=>curveArmed, label:()=>{ const b=document.getElementById("shootBtn"); return b?b.textContent:""; }, '
+  + 'volleyMul, firstTimeShot, ftAcc:()=>P.firstTouchAcc.val, '
   + 'freeze:()=>{ restartT=0; restartInfo=null; offsideT=0; offsidePass=null; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; skill=null; matchClock=0; advOn=false; endCurve(); recvAuto=null; oneTouch=null; ftAim=null; shotQ=null; }};\n  const LAB_TITLE=');
-patch("    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots');\n", "    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots'); if(window.__shot) window.__shot(p, p.state==='slide'?'sliding finish':ball.ownedBy===p?'after his touch':'first time');\n");
+patch("    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots');\n", "    mStat(p,'sh'); shotSeen(p); if(meIs(p)) meBump('shots'); window.__acc=accMul; if(window.__shot) window.__shot(p, p.state==='slide'?'sliding finish':ball.ownedBy===p?'after his touch':'first time');\n");
 patch("    lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;\n  }", "    lastGrade='HEADER!'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.4;\n    if(window.__shot) window.__shot(p,'header');\n  }");
 patch("    p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;", "    if(window.__slide) window.__slide(p); p.state='slide';p.stateT=0.45*slideLenOf(p)*staFac;");
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-loose-')), 'classic.html');
@@ -164,6 +165,17 @@ ok(!r.tackled && r.noShot, 'slid into the man on the ball, it\'s no tackle: he k
 ok(r.slideShot === 'sliding finish' && r.toGoal, 'slid into a ball nobody\'s, it\'s a shot at goal');
 ok(r.armed && !r.armedAfter && r.asked, 'your shot saved and parried: K is a shot again, asked for -- not a bend on the old one');
 ok(r.ownHalfAsked === false, 'in your own half, K at a ball nobody\'s asks for no shot (v140)');
+// A VOLLEY (v179): struck first time, the ball's height and pace cost it some of his first-time accuracy -- rolling to
+// him at walking pace none, at his knee at 22 m/s a seventh, at his waist at 32 m/s more than a quarter -- and the
+// strike carries what's left
+const vol = await pg.evaluate(() => { const T = window.__T, b = T.ball(), out = {}; window.__scene('ground', 3); const st = window.__st;
+  for(const [k, z, v] of [['ground', 0, 100], ['knee', 13, 550], ['waist', 26, 800]]){ T.freeze(); st.vx = st.vy = 0; st.state = 'normal';
+    Object.assign(b, { ownedBy: null, dribbler: null, x: st.x + 10, y: st.y, z, vz: 0, vx: -v, vy: 0, shotT: 0 });
+    const m = T.volleyMul(st); window.__acc = null; T.firstTimeShot(); out[k] = { m: +m.toFixed(3), acc: +(window.__acc / T.ftAcc()).toFixed(3) }; }
+  T.freeze(); return out; });
+info('volleys, what each keeps of his first-time accuracy: ' + JSON.stringify(vol));
+ok(vol.ground.m === 1 && Math.abs(vol.knee.m - 0.857) < 0.01 && Math.abs(vol.waist.m - 0.715) < 0.01 && ['ground', 'knee', 'waist'].every(k => Math.abs(vol[k].acc - vol[k].m) < 0.002),
+  'a volley: rolling to him at walking pace it keeps all his first-time accuracy, at his knee at 22 m/s ' + vol.knee.m + ', at his waist at 32 m/s ' + vol.waist.m + ' -- and the strike goes with it (v178: all of it, whatever the ball)');
 
 process.exitCode = rep.finish();
 await browser.close();

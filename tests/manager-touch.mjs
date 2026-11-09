@@ -96,9 +96,9 @@ const armTxt = await page.textContent('#mtacOv [data-mtarm]');
 await page.tap('#mtacOv [data-mtarm]'); await page.waitForTimeout(150);
 const armed = await page.$$eval('#mtacOv .ptk.armed', ns => ns.length);
 await page.locator('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"]').nth(2).tap(); await page.waitForTimeout(250);
-const used = await K('SUBS.G.used'), offNow = await K(`SUBS.G.off.includes(${offSi})`);
-info('the match: ' + JSON.stringify({ inMatch, armTxt, armed, used, offNow }));
-ok(inMatch === 'match' && /SWAP/.test(armTxt) && armed === 1 && used === 1 && offNow, 'PLAY, then ALL SUBS: a man on the bench tapped, SWAP on his card, a man on the pitch tapped -- he\'s on, one sub used, no drag');
+const used = await K('SUBS.G.used'), offNow = await K(`SUBS.G.off.includes(${offSi})`), waits = await K(`SUBS.G.q.some(x=>x.out===${offSi})`), ringed = await page.$$eval('#mtacOv .ptk.qWait', ns => ns.length);
+info('the match: ' + JSON.stringify({ inMatch, armTxt, armed, used, offNow, waits, ringed }));
+ok(inMatch === 'match' && /SWAP/.test(armTxt) && armed === 1 && ((used === 1 && offNow) || (used === 0 && waits && ringed === 2)), 'PLAY, then ALL SUBS: a man on the bench tapped, SWAP on his card, a man on the pitch tapped -- he\'s on, one sub used, no drag (v179: the ball in play, the two ringed till the next break)');
 
 process.exitCode = rep.finish();
 await browser.close();

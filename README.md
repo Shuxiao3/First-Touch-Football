@@ -467,15 +467,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     down, a sub a line -- the man coming off, his stamina under him, ▸ the man coming on: in a career match your
     planned subs first (Training's **Subs** tab), then your most tired men (by how far his stamina can come back, the
     red tick), each with the man on the bench who'd do his job best, when on fresh legs he'd do it better than the
-    tired man can now (his rating at the spot, the tired man's taken down by what his legs have left). Three lines at
-    most: 200 px wide and under 120 high. It only ever drops down when you press it, and stays down until you press
-    it again. When one of yours gets too tired -- his stamina only able to come back to 60%, about a tenth off his
-    top speed -- the chip lights up amber, and that's all. Tap a line and he's on there and then, as from TACTICS; a
-    man coming off with the ball at his feet goes as soon as he's played it, his line ringed till then (tap it again
-    and he stays on). It doesn't wait for the ball to go dead: a match has two or three dead balls, the goals and half
-    time, so a sub that waited for one could wait a half. ALL SUBS opens TACTICS for any other sub. The keeper is never
-    one of them. With no subs left it goes, and it isn't there in a lab. (In v63 it was twice the size, and it dropped
-    down by itself.)
+    tired man can now (his rating at the spot, the tired man's taken down by what his legs have left) -- a man on the
+    list once his stamina can only come back to under 90% (v179; it was 85%). Three lines at most: 200 px wide and
+    under 120 high. It only ever drops down when you press it, and stays down until you press it again. When one of
+    yours gets too tired -- his stamina only able to come back to 70%, about 8% off his top speed (v179; it was 60%, a
+    tenth off) -- the chip lights up amber, and that's all.
+  - **A sub comes on at a break in play (v179).** Tap a line, or make the change in TACTICS, with the ball in play and
+    the man coming on waits on the touchline: his line ringed (and both men ringed on TACTICS' pitch, its SUBS LEFT
+    saying how many wait), the sub counted, the word ON AT THE BREAK; at the next break -- the ball out for a throw-in,
+    a corner or a goal kick, till it's taken; a goal, till the kick-off's played; offside's free kick; the whistle --
+    on he comes, every one waiting at once. Tap a ringed line again and he stays on. With the ball dead already (or at
+    half-time, from its card) he's on there and then. One of yours hurt in a career match goes at the next break too,
+    slowed till then. Till v179 a sub was made there and then, mid-move -- a man with the ball at his feet once he'd
+    played it -- because a match's only dead balls were the goals and half-time, and a sub that waited for one could
+    wait a half; since v138 the ball goes out. ALL SUBS opens TACTICS for any other sub. The keeper is never one of
+    the quick subs' lines. With no subs left it goes, and it isn't there in a lab. (In v63 it was twice the size, and
+    it dropped down by itself.)
   - **The match report** (v106), after a career match you played, is two screens. THE RESULT: the score between
     the two clubs with their crests, each side's goals -- the minute, the scorer, who made it -- anyone hurt, and
     where it leaves you (the league position and how it moved; through or out of a cup; the playoffs); NEXT. YOUR
@@ -494,8 +501,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     board (any change: tired or not) and its BACK comes back to the card; SECOND HALF (or `Enter`, `Esc`) plays on. In
     the settings, HALF-TIME: A BREAK, or PLAY ON as it was -- the whistle, two seconds, and the second half. Never with
     the computer on both sides. Before, there was no break: a pause was the only moment for a change.
-  - **The quick subs (v148)** with nobody tired say so -- and that ALL SUBS takes anyone off, any time: the tired men
-    are a suggestion, never a gate.
+  - **The quick subs (v148)** with nobody tired say so -- and that ALL SUBS takes anyone off, any time (on at the next
+    break in play since v179): the tired men are a suggestion, never a gate.
   - **The goal, celebrated** (v106). A goal of theirs: GOAL, big in the middle of the screen with the score under it,
     and play held a moment as before. One of yours: GOAL! grander -- gold, bigger, the scorer's name under it -- and
     the scorer wheels away toward the corner flag at the end he scored at (top left or top right, in front of the far
@@ -578,6 +585,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     the man on the ball, he keeps it. How far the slide goes is his Shot accuracy -- his finishing -- not his Slide
     tackle: about 1.4 m at 1 to 3 m at 10 (a slide tackle's 1.6 m to 5.2 m), with his foot at the end of it. It costs
     half a slide tackle's stamina.
+  - **A volley (v179).** Struck first time, a ball is harder to keep true the higher it is and the quicker it comes, as
+    a one-touch pass is: up at his waist and coming quickly (32 m/s) it keeps 0.72 of his accuracy, at his knee (22
+    m/s) 0.86, rolling to him at walking pace all of it -- two-fifths less at the most. Yours, the sliding finish and
+    the computer's first-time finish alike (the computer's kept all of it before, settled or not). From 12 m out,
+    inside the posts, 2000 each, before → now: yours on the grass 74% → 75% (as it was), at the knee 74% → 71%, at the
+    waist 76% → 70%; the computer's on the grass 79% → 81% (as it was), at the knee 81% → 75%, at the waist 82% → 71%.
   - **After your shot's saved** (or blocked), SHOOT is a shot again -- it used to bend the old one for the rest of its
     1.1 s, so a rebound in that time got nothing.
   - (Before, on a phone, SHOOT was a slide tackle at any loose ball not in your reach that moment -- a pass a fraction
@@ -2877,6 +2890,15 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v179: subs at a break in play, tired men flagged sooner, volleys less true, a twentieth off top speed.** A sub
+  asked for with the ball in play -- a quick sub's line, or TACTICS -- waits for the next break in play (a throw-in, a
+  corner, a goal kick, a goal, offside, the whistle) and comes on then, his line ringed till then; tap it again and he
+  stays on; with the ball dead, there and then. The quick subs' chip lights up for a man whose stamina can only come
+  back to 70% (it was 60%), and the list takes a man under 90% (it was 85%). A ball struck first time keeps less of
+  his accuracy the higher and quicker it comes -- a quick volley at the waist 0.72 of it -- yours, the sliding finish
+  and the computer's first-time finish: from 12 m out, your volleys at the waist 76% inside the posts → 70%, the
+  computer's 82% → 71%. Every man's top speed is a twentieth down (5.1 to 8.7 m/s flat out, it was 5.4 to
+  9.1), a second flat out costing what it did. See **A sub comes on at a break in play**, **A volley** and **Pace**.
 - **v177: state, not sentences, everywhere.** The handoff's J1 audit: no building's screen shows a sentence longer than
   a label by default -- the fixtures' form as dots, NO CUPS, the squad pitch's shape, the Selection tab's HOW IT WORKS,
   and an empty list a chip, their words a tap away. See **State, not sentences (v177)**.
@@ -3692,8 +3714,9 @@ test, and like the Trap Lab the values are the game's settings.
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
   playing style; see [Playing styles](#playing-styles).
-- **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.4 m/s
-  flat out at 1, up to 6.6 and 9.1 m/s at 10. With the ball at his feet he's slower, by a fifth at
+- **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.1 m/s
+  flat out at 1, up to 6.6 and 8.7 m/s at 10 (v179: a twentieth off flat out for everyone -- it was 5.4 and 9.1 --
+  and a second flat out tires him as it did). With the ball at his feet he's slower, by a fifth at
   Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
   it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind

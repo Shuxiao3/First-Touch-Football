@@ -2,8 +2,10 @@
 // a match). Pressed -- and only pressed: it never drops down by itself, and stays down until you press it again -- it
 // drops down a short list, a sub a line, small: in a career match your planned subs first (the training pitch's
 // Selection tab), then your most tired men, each with the man on the bench who'd do his job best on fresh legs. When one of yours
-// gets too tired the chip lights up. A tap makes the sub there and then (the man on fresh legs, one fewer, the man off
-// gone for good); one coming off with the ball at his feet goes once he's played it. With no subs left it's gone, and
+// gets too tired the chip lights up (v179: his ceiling under 70% -- it was 60%). v179: A TAP MAKES THE SUB AT THE NEXT
+// BREAK IN PLAY -- a throw-in, a goal kick -- the man waiting, his line ringed, the sub counted; tapped again, he stays
+// on; with the ball dead already, there and then (the man on fresh legs, one fewer, the man off gone for good). (Till
+// v179 there and then always, and a man with the ball at his feet once he'd played it.) With no subs left it's gone, and
 // it's never there in a lab. A tap on it is a tap on it, not on the game. ALL SUBS opens the match's tactics. The
 // Selection tab: tap a man on the pitch and one on the bench to pair them, up to three; in the match they're first.
 // On a copy of the game that lets the test reach the match's men and its subs, and the career.
@@ -50,6 +52,8 @@ ok(!S.open, 'pressed again, it goes back up');
 const worn = await K(`(()=>{ const p=players.filter(q=>q.team==='G'&&q!==controlled)[1]; p.staminaCap=0.5; p.stamina=0.45; return {si:p.squadIdx, name:p.pname}; })()`);
 await simFor(1.5); S = await state();
 ok(!S.open && S.hot, 'one of yours worn down to half his ceiling: it doesn\'t drop down by itself, the chip just lights up');
+const thr = await K('({ tired:QS_TIRED, list:QS_LIST })');
+ok(thr.tired === 0.7 && thr.list === 0.9, 'it lights up for a man whose stamina can only come back to under 70% (v179; it was 60%), and he\'s on the list under 90% (it was 85%)');
 await page.click('#qsBtn'); await page.waitForTimeout(150); S = await state();
 const sug = await K(`qsSuggest().map(s=>({out:s.out,inn:s.inn,rIn:s.rIn,rOut:s.rOut,cap:s.cap}))`);
 const best = await K(`(()=>{ const s=qsSuggest()[0], sl=qsSlot(s.out); return Math.max(...mtBench('G').filter(si=>SQUAD.G[si].role!=='GK').map(si=>mtRating(SQUAD.G[si],sl.role,spotFit(sl)))); })()`);   // (his spot's fit: v127, a back three's outside spot takes a full-back too)
@@ -59,38 +63,52 @@ ok(S.rows.length >= 1 && S.rows[0].text.includes(worn.name.split(' ').slice(-1)[
 const dropBox = await box('#qsDrop');
 ok(dropBox.w <= 210 && S.rows.every(r => r.h <= 30) && /▸/.test(S.rows[0].text) && !/OFF|ON |FRESH/.test(S.rows[0].text), `small: ${Math.round(dropBox.w)} px wide, a sub a line ${Math.round(S.rows[0].h)} px high ("${S.rows[0].text}")`);
 
-// THE SUB: tap his line -- the bench man's on in his place there and then, fresh; two left; the man off can't come back
-await page.click('#qsDrop .qsRow'); await page.waitForTimeout(250);
+// THE SUB (v179: at the next break in play): the ball in play -- our keeper with it in his hands, nothing to send it out
+// for a few seconds -- tap his line: he's waiting, still on, his line ringed, the sub counted; the ball out over the
+// touchline, a throw-in: the bench man's on in his place, fresh; two left; the man off can't come back
+const live = () => K(`(()=>{ const kp=keepers.find(k=>k.team==='G'); restartT=0; restartInfo=null; scoredT=0; offsideT=0; kickT=0; kp.mode='hold'; kp.holdT=1.0; kp.heldT=0; kp.goalKick=false; kp.x=kp.homeX; kp.y=YC; gkHold=kp;
+  ball.ownedBy=null; ball.dribbler=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; return !deadBall(); })()`);
+const outBall = () => K(`(()=>{ gkHold=null; for(const k of keepers) if(k.mode==='hold') k.mode='line'; ball.ownedBy=null; ball.dribbler=null; ball.x=FW/2; ball.y=-ball.r*3; ball.vx=0; ball.vy=-60; ball.z=0; ball.vz=0; ball.lastTouch='R'; return 1; })()`);
+const isLive = await live();
+await page.click('#qsDrop .qsRow'); await page.waitForTimeout(150);
+const wait1 = await K(`({ stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${sug[0].out}), q:SUBS.G.q.length, used:SUBS.G.used })`); S = await state();
+ok(isLive && wait1.stillOn && wait1.q === 1 && wait1.used === 0 && S.left === '2' && S.hot && /AT THE BREAK/.test(S.msg),
+  `tapped with the ball in play: he waits for the next break in play -- still on, the sub counted (${S.left} left), "${S.msg}"`);
+await outBall(); await page.waitForTimeout(300);
 const after = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${sug[0].inn}); return { on:!!p, name:p&&p.pname, cap:p&&+p.staminaCap.toFixed(2), st:p&&+p.stamina.toFixed(2),
-  offOn:players.some(q=>q.team==='G'&&q.squadIdx===${sug[0].out}), used:SUBS.G.used, benchHasOff:mtBench('G').includes(${sug[0].out}) }; })()`);
+  offOn:players.some(q=>q.team==='G'&&q.squadIdx===${sug[0].out}), used:SUBS.G.used, q:SUBS.G.q.length, benchHasOff:mtBench('G').includes(${sug[0].out}), thr:!!lastRestart&&lastRestart.type==='throw' }; })()`);
 S = await state();
-ok(after.on && !after.offOn && after.cap >= 0.99 && after.st >= 0.9, `a tap on his line: ${after.name} on in his place there and then, on fresh legs`);
-ok(after.used === 1 && S.left === '2' && !after.benchHasOff, 'one sub fewer (2 left), and the man off isn\'t on the bench to come back');
-ok(!S.open && /ON .* OFF/.test(S.msg), `it goes back up and says who's on and who's off ("${S.msg}")`);
+ok(after.thr && after.on && !after.offOn && after.cap >= 0.99 && after.st >= 0.9 && after.q === 0, `the ball out for a throw-in: ${after.name} on in his place, on fresh legs`);
+ok(after.used === 1 && S.left === '2' && !after.benchHasOff, 'one sub used (2 left), and the man off isn\'t on the bench to come back');
+ok(!S.open && /ON .* OFF/.test(S.msg), `it says who's on and who's off ("${S.msg}")`);
 
-// ON THE BALL: the rest worn down, the first it suggests made your man, the ball at his feet (and you not touching
-// anything, he keeps it) -- tapped, he stays on until he's played it
+// TAP IT AGAIN: the rest worn down, the ball in play; the first it suggests tapped -- waiting, his line ringed; tapped
+// again, the sub's off and he stays on; tapped once more, waiting; then the ball out over our own end line off one of
+// theirs, a goal kick: off he goes (one left)
 await K(`players.filter(q=>q.team==='G'&&q.squadIdx!==${sug[0].inn}).forEach((q,i)=>{ q.staminaCap=0.45+i*0.01; q.stamina=0.4; })`);
-// (in open play: in a restart, a goal and its kick-off, or with the keeper's ball in his hands, the ball goes to whoever
-// takes it -- and the man off at once)
-await page.waitForFunction(() => window.__K.ev('!(restartT>0||scoredT>0||offsideT>0||breakT>0||celeb||kickT>0||gkHold)'), null, { timeout: 30000 });
-// (and nobody of theirs near enough to take it off him while the tap goes in: on a slow machine more of the match goes by)
-const w2 = await K(`(()=>{ const s=qsSuggest()[0]; if(!s) return null; const p=players.find(q=>q.team==='G'&&q.squadIdx===s.out); setControlled(p); own(p,p.r+ball.r+4);
-  for(const q of players){ if(q.team!=='R') continue; const dx=q.x-p.x, dy=q.y-p.y, dd=Math.hypot(dx,dy)||1; if(dd<320){ q.x=clamp(p.x+dx/dd*320,q.r,FW-q.r); q.y=clamp(p.y+dy/dd*320,q.r,FH-q.r); q.vx=q.vy=0; } }
-  return {si:s.out, row:s.out+':'+s.inn}; })()`);
-await page.click('#qsBtn'); await page.waitForTimeout(150);
+await page.waitForTimeout(300); await live();
+const w2 = await K(`(()=>{ const s=qsSuggest()[0]; return s?{si:s.out, row:s.out+':'+s.inn}:null; })()`);
+if(!(await state()).open){ await page.click('#qsBtn'); await page.waitForTimeout(150); }
 await page.click(`#qsDrop .qsRow[data-qs="${w2 && w2.row}"]`); await page.waitForTimeout(120);
-const held = await K(`({ stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${w2 && w2.si}), pend:!!QS.pend, used:SUBS.G.used })`); S = await state();
-ok(w2 && held.stillOn && held.pend && held.used === 1 && S.rows.some(r => r.wait), 'one coming off with the ball at his feet stays on while he has it (his line lit, waiting)');
-await K(`(()=>{ ball.ownedBy=null; ball.dribbler=null; ball.x=FW/2; ball.y=40; ball.vx=ball.vy=0; })()`); await page.waitForTimeout(250);
-const gone = await K(`({ stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${w2 && w2.si}), used:SUBS.G.used })`); S = await state();
-ok(!gone.stillOn && gone.used === 2 && S.shown && S.left === '1', '...and goes as soon as he\'s off the ball (one left)');
-
-// THE THIRD: the last one, its word on who's on, then the chip goes
+if(!(await state()).open){ await page.click('#qsBtn'); await page.waitForTimeout(150); }
+S = await state(); const ringed = S.rows.some(r => r.wait && r.qs === (w2 && w2.row)), q1 = await K('SUBS.G.q.length');
+await page.click(`#qsDrop .qsRow[data-qs="${w2 && w2.row}"]`); await page.waitForTimeout(150);
+const cancelled = await K(`({ q:SUBS.G.q.length, stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${w2 && w2.si}), used:SUBS.G.used })`); S = await state();
+ok(w2 && ringed && q1 === 1 && cancelled.q === 0 && cancelled.stillOn && cancelled.used === 1 && S.left === '2', 'tapped with the ball in play, his line ringed and waiting; tapped again, he stays on (the sub back: 2 left)');
 if(!S.open){ await page.click('#qsBtn'); await page.waitForTimeout(150); }
-await page.click('#qsDrop .qsRow'); await page.waitForTimeout(200);
-const g3 = await K(`({ used:SUBS.G.used, t:simNow })`); S = await state();
-ok(g3.used === 3 && S.shown && /ON .* OFF/.test(S.msg) && S.left === '0', `a third sub (three a match), and its word on who's on ("${S.msg}")`);
+await page.click(`#qsDrop .qsRow[data-qs="${w2 && w2.row}"]`); await page.waitForTimeout(120);
+await K(`(()=>{ gkHold=null; for(const k of keepers) if(k.mode==='hold') k.mode='line'; const a=atkOf('G'), gx=a>0?0:FW; ball.ownedBy=null; ball.dribbler=null; ball.x=gx-a*ball.r*3; ball.y=YC+GOAL_W; ball.vx=-a*60; ball.vy=0; ball.z=0; ball.vz=0; ball.lastTouch='R'; return 1; })()`);
+await page.waitForTimeout(300);
+const gone = await K(`({ stillOn:players.some(q=>q.team==='G'&&q.squadIdx===${w2 && w2.si}), used:SUBS.G.used, gk:!!lastRestart&&lastRestart.type==='goalkick', dead:deadBall() })`); S = await state();
+ok(gone.gk && !gone.stillOn && gone.used === 2 && S.shown && S.left === '1', 'tapped once more, waiting; the ball out off one of theirs over our end line, a goal kick: off he goes (one left)');
+
+// THE THIRD: with the ball dead already (the goal kick not taken yet) a tap's a sub there and then -- its word on who's
+// on, then the chip goes
+if(!S.open){ await page.click('#qsBtn'); await page.waitForTimeout(150); }
+await K(`(()=>{ const kp=keepers.find(k=>k.team==='G'); if(!(gkHold&&gkHold.goalKick)){ kp.mode='hold'; kp.holdT=1.0; kp.heldT=0; kp.goalKick=true; gkHold=kp; } else gkHold.heldT=0; return deadBall(); })()`);
+await page.click('#qsDrop .qsRow'); await page.waitForTimeout(150);
+const g3 = await K(`({ used:SUBS.G.used, q:SUBS.G.q.length, t:simNow })`); S = await state();
+ok(g3.used === 3 && g3.q === 0 && S.shown && /ON .* OFF/.test(S.msg) && S.left === '0', `the ball dead already (a goal kick to be taken): a third sub there and then (three a match), and its word on who's on ("${S.msg}")`);
 await page.waitForFunction(t => window.__K.ev('simNow') > t + 2.8, g3.t, { timeout: 30000, polling: 100 }); S = await state();
 ok(!S.shown, '...and then, no subs left, the chip\'s gone');
 await browser.close();
@@ -164,10 +182,11 @@ const M = await pc.evaluate(() => [...document.querySelectorAll('#qsDrop .qsRow'
 info('the career match, pressed: ' + JSON.stringify({ want, rows: M, tired }));
 ok(M.length >= 2 && M[0].plan && M[1].plan && M[0].qs === want[0] && M[1].qs === want[1] && !tired, 'in the match, pressed with nobody tired: your two planned subs first on the list, lit as yours');
 await pc.click('#qsDrop .qsRow >> nth=0'); await pc.waitForTimeout(250);
-const subbed = () => KC(`(()=>{ const [o,i]=${JSON.stringify(want[0])}.split(':').map(Number); return { on:players.some(q=>q.team==='G'&&q.squadIdx===i), off:players.some(q=>q.team==='G'&&q.squadIdx===o), used:SUBS.G.used, wait:!!QS.pend }; })()`);
-let done = await subbed(); const waited = done.wait;   // (the man coming off on the ball -- the kick-off's, say -- goes once he's played it)
-for(let i = 0; i < 150 && done.wait; i++){ await pc.waitForTimeout(100); done = await subbed(); }   // (up to 15 s: a busy machine plays slowly)
-ok(done.on && !done.off && done.used === 1, 'a tap on the first: that sub, there and then' + (waited ? ' (once the man coming off had played the ball)' : ''));
+const subbed = () => KC(`(()=>{ const [o,i]=${JSON.stringify(want[0])}.split(':').map(Number); return { on:players.some(q=>q.team==='G'&&q.squadIdx===i), off:players.some(q=>q.team==='G'&&q.squadIdx===o), used:SUBS.G.used, wait:SUBS.G.q.some(x=>x.out===o&&x.inn===i) }; })()`);
+let done = await subbed(); const waited = done.wait;   // (v179: the ball in play, he waits for the next break)
+if(waited){ await KC(`(()=>{ gkHold=null; for(const k of keepers) if(k.mode==='hold') k.mode='line'; ball.ownedBy=null; ball.dribbler=null; ball.x=FW/2; ball.y=-ball.r*3; ball.vx=0; ball.vy=-60; ball.z=0; ball.vz=0; ball.lastTouch='R'; return 1; })()`);   // (the ball out for a throw-in)
+  for(let i = 0; i < 50 && done.wait; i++){ await pc.waitForTimeout(100); done = await subbed(); } }
+ok(done.on && !done.off && done.used === 1, 'a tap on the first: that sub' + (waited ? ', at the next break in play (the ball out for a throw-in)' : ', there and then (the ball dead)'));
 await b4.close();
 
 process.exit(rep.finish() ? 1 : 0);
