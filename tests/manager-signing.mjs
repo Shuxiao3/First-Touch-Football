@@ -28,7 +28,8 @@ await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(
 
 // --- NOTHING ON WHAT HE'D DO FOR YOUR NINE (v162) ------------------------------------------------------------------------------
 let r = await K(`(()=>{ const d=CAREER.data, all=mgAiClubs(d).flatMap(c=>c.players.map(p=>[p,c])), xi=mgStarters(d), weak=xi.filter(q=>q.role==='MID').sort((a,b)=>a.ovr-b.ovr)[0];
-  const good=all.find(([p])=>p.role==='MID'&&p.ovr>=weak.ovr+6&&!mgKnown(d,p)), poor=all.find(([p])=>p.role==='MID'&&p.ovr<=weak.ovr-3&&!mgKnown(d,p)), txt=h=>h.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ');
+  const mids=all.filter(([p])=>p.role==='MID'&&!mgKnown(d,p)).sort((a,b)=>a[0].ovr-b[0].ovr);   // (v177: the world's random -- a man that much worse isn't always in it: the worst there is, then)
+  const good=all.find(([p])=>p.role==='MID'&&p.ovr>=weak.ovr+6&&!mgKnown(d,p))||mids[mids.length-1], poor=all.find(([p])=>p.role==='MID'&&p.ovr<=weak.ovr-3&&!mgKnown(d,p))||mids[0], txt=h=>h.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ');
   const seen=[txt(mgBuyActions(d,good[0],good[1],false)), txt(mgBuyActions(d,poor[0],poor[1],false)), txt(mgFreeActions(d,d.world.free[0],false))];
   knUp(d,good[0],3,3); seen.push(txt(mgBuyActions(d,good[0],good[1],true)));
   return { nine:seen.filter(t=>/YOUR NINE|→/.test(t)).length, facts:seen.map(t=>t.slice(0,90)), gone:typeof nineWith==='undefined'&&typeof nineFact==='undefined' }; })()`);
