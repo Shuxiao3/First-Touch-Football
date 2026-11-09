@@ -51,9 +51,11 @@ ok(r.n0 === 0 && r.n4 === 1 && r.of === 2, 'yours come out over his first weeks:
 // --- the side's mood: results against what was expected; the captain's character -------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, s=mgStrength(d,d.clubId); const run=(cap,res,opp)=>{ d.tm=6.5; const c=d.roster.find(x=>x.id===d.cap); c.hv=HV(cap); morAfterGame(d,{win:res===1,draw:res===0,oppOvr:opp}); return +(d.tm-6.5).toFixed(2); };
   const lu=ensureLineup(d); d.cap=d.roster[lu.atk[0]].id;
-  return { upset:run({},1,s+10), expected:run({},1,s-10), shock:run({},-1,s-10), leaderLoss:run({ch:8.5,te:7},-1,s-10), hotLoss:run({te:2},-1,s-10) }; })()`);
+  const run10=()=>{ d.tm=6.5; const c=d.roster.find(x=>x.id===d.cap); c.hv=HV({}); for(let i=0;i<10;i++) morAfterGame(d,{win:false,draw:false,oppOvr:s+10}); return +(d.tm-6.5).toFixed(2); };
+  return { upset:run({},1,s+10), expected:run({},1,s-10), shock:run({},-1,s-10), leaderLoss:run({ch:8.5,te:7},-1,s-10), hotLoss:run({te:2},-1,s-10), betterLoss:run({},-1,s+10), ten:run10() }; })()`);
 info('the side after a game: ' + JSON.stringify(r));
 ok(r.upset > r.expected && r.expected > 0 && r.shock < 0 && r.leaderLoss > r.shock && r.hotLoss < r.shock, 'a win over a better side lifts it most (' + r.upset + ', an expected one ' + r.expected + '); a shock loss sinks it (' + r.shock + '), less under a Natural Leader\'s armband (' + r.leaderLoss + '), more under a hot-head\'s (' + r.hotLoss + ')');
+ok(r.betterLoss <= -0.4 && r.betterLoss > r.shock && r.ten <= -2.5, 'and no defeat is a shrug (v170): losing to a better side costs ' + r.betterLoss + ' (it was about -0.14), and ten in a row ' + r.ten + ' before any coming back');
 
 // --- his week: minutes against what he expects ------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, lu=ensureLineup(d), star=d.roster[lu.atk[0]], sub=d.roster[lu.bench[2]];
@@ -67,8 +69,17 @@ r = await K(`(()=>{ const d=CAREER.data, tm0=d.tm, lu=ensureLineup(d), p=d.roste
   p.mor=9.6; const hi=entry(); p.mor=1; const lo=entry(); p.mor=6.5; const mid=entry(); const s0=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=1; const sLow=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=9.6; const sHigh=mgStrength(d,d.clubId); for(const q of d.roster) q.mor=6.5; d.tm=tm0;
   return { hi:[hi.stamina-st.stamina,hi.composure-st.composure,hi.offIQ-st.offIQ], lo:[lo.stamina-st.stamina,lo.composure-st.composure,lo.offIQ-st.offIQ,lo.defIQ-st.defIQ], mid:mid.stamina===st.stamina&&mid.offIQ===st.offIQ, s:[+(sLow-s0).toFixed(1),+(sHigh-s0).toFixed(1)] }; })()`);
 info('match day: ' + JSON.stringify(r));
-ok(r.hi.join() === '1,1,0' && r.lo.every((v, i) => v < 0 && v >= -1.5) && r.mid, 'match day: on top of the world, +1 stamina and composure (his reading of the game as it is); at rock bottom, down to -1.5 on stamina, composure, Off IQ and Def IQ; settled, as he is');
+ok(r.hi.join() === '1,1,0' && r.lo.every((v, i) => v < -2 && v >= -2.75) && r.mid, 'match day: on top of the world, +1 stamina and composure (his reading of the game as it is); at rock bottom, -2.75 on every attribute (v170: it was -1.5 on stamina, composure, Off IQ and Def IQ; one already low only down to 1): ' + r.lo.join(', ') + '; settled, as he is');
 ok(r.s[0] < 0 && r.s[1] > 0, 'and a simulated game feels it: the side ' + r.s[0] + ' on paper all low, +' + r.s[1] + ' all high');
+
+// --- the dressing room on the pitch, and no healing at the bottom (v170) -------------------------------------------------------
+r = await K(`(()=>{ const d=CAREER.data, tm0=d.tm, lu=ensureLineup(d), p=d.roster[lu.bench[0]]||d.roster[d.roster.length-1];
+  d.tm=3; const low=tmOvr(d); d.tm=10; const high=tmOvr(d); d.tm=6.5;
+  p.hv=HV({am:7}); p.mor=3; p.fm=FORM_BASE; const path=[]; for(let i=0;i<4;i++){ d.mgw=2; for(const q of d.roster) q.wmw=2; p.wmw=0; d.tm=6.5; d.wday='mon'; morWeek(d); path.push(+p.mor.toFixed(2)); }
+  d.tm=tm0; return { low, high, path }; })()`);
+info('the dressing room and the bottom: ' + JSON.stringify(r));
+ok(r.low <= -0.5 && r.high > 0 && r.high < -r.low, 'a dressing room in the gutter (3) costs the side ' + r.low + ' a man on the day (v170: it was a quarter of a point a stat, as much as a buoyant one gives -- that\'s +' + r.high + ')');
+ok(r.path.slice(0, 3).every(m => m < 4), 'a benched, ambitious man at 3 is still under 4 three weeks on with nothing done for him (' + r.path.join(', ') + '): out of there it\'s minutes, results and a word');
 
 // --- development: a long low costs his touch ------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, mk=()=>{ const p=mgNewPlayer(d,'MID',64,27,{pot:64,sub:'CM'}); p.hv=HV({}); p.seed=4242; p.mo=0; p.fm=6.6; return p; }, a=mk(), b=JSON.parse(JSON.stringify(a));

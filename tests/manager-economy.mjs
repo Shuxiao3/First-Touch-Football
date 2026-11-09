@@ -68,6 +68,16 @@ ok([1, 2, 3, 4].every(t => Math.abs(r.mid[t].net / want[t] - 1) <= 0.25),
   'a mid-table club\'s season before prizes and transfers: ' + [1, 2, 3, 4].map(t => '$' + M(r.mid[t].net) + 'M (the change list: ~$' + M(want[t]) + 'M)').join(', ') + ' -- each within a quarter');
 ok(r.prize[1] === 500000 && r.prize[4] === 60e6 && r.ai[1] === 400000 && r.ai[4] === 150e6 && r.cl.join() === '12000000,2500000,8000000,15000000' && r.fa.join() === '500000,5000000' && r.coco.join() === '50000,400000',
   'the league prizes ($0.5M to $60M), the computer clubs\' budgets ($0.4M to $150M), the Champions League ($12M in it, $2.5M a group game won, $8M to $15M a knockout round), the cups ($0.5M to $5M a round, $50k to $400k)');
+// (v170) THE HANDOFF'S TUNING: the Player of the Month's prize, the shirts, the league prize's floor and its own line,
+// and the computer clubs' dearest deals
+const T = await K(`(()=>{ return { potm:[1,2,3,4].map(t=>POTM_PRIZE[t]), shirt:[1,2,3,4].map(t=>SHIRT_FAN[t]), share:[1,2,7,13,14].map(p=>+lgPrizeShare(p).toFixed(3)), last:mgRound(MG_PRIZE[1]*lgPrizeShare(MG_CLUBS)),
+  lname:LDG_NAME.league, top:+(AI_DEAL_SHARE[1]*345e6/1e6).toFixed(1), floor:+(AI_SETTLE*250e6/1e6).toFixed(1), clubs:MG_CLUBS }; })()`);
+info('the handoff\'s tuning: ' + JSON.stringify(T));
+ok(T.potm.join() === '25000,100000,300000,1000000', 'the Player of the Month\'s prize: $25k, $100k, $300k, $1M by the league (v170: $2,500 to $40,000) -- the Player of the Year four times it, the Golden Boot and Glove twice');
+ok(T.shirt.join() === '3.3,3.9,4.5,5.4', 'shirts: $3.30 to $5.40 a fan a week (v170: 22 to 36 cents)');
+ok(T.clubs === 14 && T.share[0] === 1 && T.share[4] === 0.1 && T.share[3] === 0.1 && T.share[2] > 0.1 && T.last === 50000 && T.lname === 'League prize money',
+  'the league\'s prize money never under a tenth of the champions\' (' + T.share.join(', ') + ' for 1st, 2nd, 7th, 13th, 14th): 14th in League 2 $' + T.last + ' (v170: $7,300), on a line of its own in the week\'s money ("' + T.lname + '")');
+ok(T.top >= T.floor, 'the richest Premium League club ($345M) can go for a man asking $250M: what his club would settle for ($' + T.floor + 'M) is within the 65% it spends on one man ($' + T.top + 'M; v170: only an ask under 60% of its money, $207M)');
 ok(r.club.join() === '400000,2000000,8000000' && r.train.join() === '150000,700000,2500000' && r.physio.join() === '75000,300000,1000000,3000000' && r.scout.join() === '200000,250000,1200000'
   && r.acad.join() === '400000,400000,2500000' && r.stad.join() === '800000,3000000,10000000,35000000' && r.scoutOne[1] === 3000 && r.scoutOne[4] === 100000 && r.deco[0] === 2500 && r.deco[1] === 200000,
   'what it costs: the clubhouse $0.4M, $2M, $8M; the stadium $0.8M to $35M; the rest as the change list has them; scouting a man $3k to $100k; the decorations $2,500 to $200,000');

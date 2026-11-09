@@ -1646,20 +1646,29 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Morale**, 1 to 10 (6.5 settled): each of yours his own, the side its own. After each game the side moves by
       the result against what was expected -- beating a better side lifts it most, a shock defeat sinks it -- its
       falls softened by a leader with the armband (a Natural Leader by about four tenths, the vice for the captain
-      when he's out) and sharpened by a hot-head's. Every Monday each man moves by the week's minutes against what he
-      expects (the better and the more ambitious expect more, a team player less; the easily frustrated mind most),
-      his form, the side's mood pulling at his, and his resilience bringing him back to settled; the side by its
-      men's. Promotion, a title or a cup lifts it; going down sinks it.
+      when he's out) and sharpened by a hot-head's. No defeat is a shrug (v170): before any of that a defeat counts
+      at least 0.35 of a result -- losing to a better side cost about a tenth of one, and now costs about half a
+      point, ten in a row nearly five. Every Monday each man moves by the week's minutes against what he expects (the
+      better and the more ambitious expect more, a team player less; the easily frustrated mind most), his form, the
+      side's mood pulling at his, and his resilience bringing him back to settled -- half as quick under 4 (v170): a
+      miserable man doesn't heal by the calendar, it's minutes, results and a word that bring him round (a benched,
+      ambitious man at 3 is still under 3.5 three weeks on); the side by its men's. Promotion, a title or a cup lifts
+      it; going down sinks it.
     - **What it does**: on match day (that game only, played or simulated) high morale is a little more stamina and
-      composure (+0.5 at 8, +1 at 9.5 and over); low, less of those and of his reading of the game (-0.5 at 3.5, -1.5
-      at 1.5 and under). Since v150 every point either side of 6.5 counts, along lines through those: +0.17 at 7, +0.83
-      at 9, -0.25 at 5, -0.42 at 4 (a midfielder at 4 rates two points under himself, at 9 one over). Before, nothing at
-      all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once. **The dressing room on the
-      pitch (v155)**: the side's mood is a little more of every man's stamina, composure and reading of the game on top
-      of his own, along a line -- a quarter of a point at 10, as much off at 3 and under: half a point of each man's
-      rating at its ends, +0.2 at 8 (buoyant), -0.3 at 4.5 (uneasy) -- played or simulated alike, and the matchday's
-      paper says what it's worth today ("The dressing room: buoyant (8.6) · +0.3 on each man's rating today"). It
-      touched nothing on the pitch before: the side's spirit was only the shirts. In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
+      composure: +0.17 at 7, +0.5 at 8, +0.83 at 9, +1 at 9.5 and over (a midfielder at 9 rates two points over
+      himself). Low morale costs far more (v170): half a point off every attribute he has for each point under 6.5,
+      2.75 at most -- -0.75 at 5, -1.25 at 4, -1.75 at 3, -2.75 at 1 -- so a man at 4 plays 1.25 under himself on
+      the attributes' scale, 13 points off his card's rating, and a side all at rock bottom about 24 points weaker
+      on paper. Misery costs more than happiness pays. (v150 to v169 it was only his stamina, composures and reading
+      of the game, and much less: -0.25 at 5, -0.42 at 4, -1.5 at 1.5 and under -- a midfielder at 4 rated a point
+      under himself. Before v150, nothing at all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it
+      at once.) **The dressing room on the pitch (v155)**: the side's mood is a little more of every man's stamina,
+      composure and reading of the game on top of his own, along a line -- a quarter of a point at 10 (+0.5 on each
+      man's rating) and, below settled (v170), 0.6 off at 3 and under: a dressing room in the gutter costs each man
+      1.3 points of his rating on the day (it was a quarter of a point a stat, half a point of rating, as on the way
+      up) -- played or simulated alike, and the matchday's paper says what it's worth today ("The dressing room:
+      buoyant (8.6) · +0.3 on each man's rating today"). It touched nothing on the pitch before v155: the side's
+      spirit was only the shirts. In training it steadies or upsets him, and a long low costs his touch and his reading of the game. An
       unhappy, ambitious man asks to leave: the news says so, clubs bid for him as if he were listed, and he won't
       renew till he's settled. So does an ambitious man (Ambition 7 or more) turned down twice for a new deal -- NOT
       NOW, or left waiting till he stops asking (v150); one who isn't sulks a point each time, and a new deal forgets
@@ -1751,9 +1760,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       out on loan, and doesn't list the man you have on loan; his card says ON LOAN). Everyone goes back at the
       season's end: in the review, and the Monday papers say how yours did.
     - **The Player of the Month**: every four league weeks, your league's best over them (three games rated at
-      least; the best average rating, goals to split a tie). One of yours: the league pays the club ($2,500 in
-      League 2, $6,000, $15,000, $40,000 in the Premium League), the fans love it (3% more of the league's usual
-      following) and he's lifted. Another club's: the papers say who, and who your best was.
+      least; the best average rating, goals to split a tie). One of yours: the league pays the club ($25,000 in
+      League 2, $100,000, $300,000, $1M in the Premium League -- v170: it was $2,500 to $40,000, never rescaled with
+      v149's money; the Player of the Year four times it, the Golden Boot and Glove twice), the fans love it (3% more
+      of the league's usual following) and he's lifted. Another club's: the papers say who, and who your best was.
     - **Deadline day** (v105): the winter break's Monday is the window's last day -- it shuts when the week's done,
       till the summer -- and its paper comes straight after the dressing room's (the hub says so too). The clubs
       that still need someone are desperate: the bids for your men come thick and fast (two-thirds more than in a
@@ -2107,7 +2117,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       85+ men went from about 20 to 140).
   - **The computer clubs** buy from each other and from the free agents while the window's open (most of it in
     pre-season and the winter break, a little in the weeks between), bid for your players, and fill their squads up
-    every summer.
+    every summer. A club goes for a man if he'd come within what it spends on one man -- 60% of its money, the
+    Premium League's 65% -- haggled down as far as his club would settle (86% of the ask), and pays what it can, never
+    more than the ask nor under that (v170: only for an ask under 60% of its money, at the ask, so a man of 92 or more
+    asking $230M to $250M could never move between computer clubs).
     - **Who they pick.** Their best keeper and eight best outfielders on the day, but not always. Up to three men too
       tired for a game (under 90% fit; under 78% in a big one: the Champions League, a cup's last two rounds, the
       playoffs) sit it out for a fresh man not much worse. Their young men (21 and under) get a start now and then in
@@ -2128,7 +2141,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Money.** Tickets, the club's partners (local firms: $15,000 a week in League 2, up to $1.5M in the Premium
     League -- v149; it was $300), TV ($45,000 a week in League 2 to $3.2M; it was $150 to $15,000), shirt sales, and the
     ground's boards and sponsors (below). Prize money comes at the end of the season: $500,000 for winning League 2, up to
-    $60M for the Premium League (it was $12,000 and $1.5M), less the lower you finish. All of it in the real game's money
+    $60M for the Premium League (it was $12,000 and $1.5M), less the lower you finish -- but never under a tenth of the
+    champions' (v170: 14th in League 2 had $7,300, under two days' wages for a season's work; it's $50,000), and on a
+    line of its own in the week's money, League prize money. All of it in the real game's money
     since v149: see **The real game's money (v149)**. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
     has it all: the gate and the tickets, then the books (the budget, every week of the season, matchdays, the
@@ -2276,8 +2291,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Shirt sales** come in at the start of each week, on its Monday (v105: they used to come with a matchday's
       money), every week of the year, pre-season and the winter break too, and the Monday papers say what came in
       (THE CLUB SHOP: the week's sales, the best sellers, the season's shirts so far). Your fans buy the shirt --
-      $0.22 a fan a week in League 2, up to $0.36 in the Premium League (a new career's 1,000 fans: about $200 a
-      week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity against
+      $3.30 a fan a week in League 2, up to $5.40 in the Premium League (v170: fifteen times what it was, 22 to 36
+      cents, never rescaled with v149's money; a new career's 1,000 fans: about $3,300 a week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity against
       the league's usual, as the gate has it: from 15% less to 60% more; see **Popularity**) and with a happy dressing room (6% a point of the side's mood either side
       of settled). Who sells the most is shared out by popularity, squared.
   - **The ground.** A new career's is a field with two metal bleachers, one down each side, and one board -- bare
@@ -2749,6 +2764,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v170: the handoff's tuning and morale.** The money: the Player of the Month's prize $25,000 to $1M by the league
+  (it was $2,500 to $40,000, never rescaled), shirts $3.30 to $5.40 a fan a week (22 to 36 cents), the league's prize
+  money never under a tenth of the champions' and on a line of its own in the week's money (14th in League 2 had
+  $7,300), and the computer clubs' dearest deals within reach (a man asking $250M could never move between them).
+  Morale, harder at the bottom: below settled, half a point off every attribute a man has for each point under 6.5,
+  2.75 at most (a man at 4 rates 13 under himself; it was a point); a dressing room in the gutter costs each man 1.3
+  points on the day (half a point); a defeat counts at least 0.35 of a result before his leaders soften it (losing to
+  a better side was nearly free); and under 4 a man comes back half as quick of his own accord. Happiness pays as it
+  did. See **Morale**, **The Player of the Month**, **Money**, **Shirt sales** and **The computer clubs**.
 - **v169: Curve by level and length; the hook by its spin; no backspin; the keeper's punt as far as it's held;
   first-time shots in the box; a quick flick for the first touch.** Curve by level: of the most a ball can be bent,
   none at Curve 1, a quarter at 5, half at 7, 65% at 8, 80% at 9 and all of it at 10 (5% at 2, 10% at 3, 15% at 4, 35%

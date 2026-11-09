@@ -16201,6 +16201,10 @@
   const MG_LEAGUE={1:'League 2',2:'League 1',3:'Championship',4:'Premium League'};
   const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
   const MG_PRIZE={1:500000,2:3000000,3:15000000,4:60000000};   // for winning the league (less the lower you finish; v149: the real game's money -- it was 12,000, 45,000, 180,000 and 1.5M)
+  // ...and finishing lower: the share of it by where you finish -- falling away with the 1.6 power of the places from the
+  // foot, but never under a tenth of it (v170: 14th had $7,300 in League 2, under two days' wages for a season's work)
+  const LG_PRIZE_FLOOR=0.1;
+  function lgPrizeShare(pos){ return Math.max(LG_PRIZE_FLOOR,Math.pow((MG_CLUBS+1-pos)/MG_CLUBS,1.6)); }
   const MG_AI_BUDGET={1:400000,2:3000000,3:25000000,4:150000000};   // (v149: 25,000, 120,000, 600,000 and 6M before: the richest Premium League clubs can hold about $345M now, and sign a $200M man)
   const MG_SCOUT_COST={1:3000,2:10000,3:30000,4:100000};       // to scout one man, by the league he plays in (v149: 200, 600, 1,800 and 6,000 before)
   const MG_SCOUT_W={1:4,2:3,3:1};                        // how far an unscouted rating can be off, by your scouting network
@@ -16693,21 +16697,26 @@
   const morWord=m=>m>=8.5?'Delighted':m>=7?'Content':m>=5.5?'Settled':m>=4?'Unsettled':'Unhappy';
   const morCol=m=>m>=7?'var(--good)':m<4?'var(--bad)':m<5.5?'var(--warn)':'var(--ink)';   // (v152: his mood's colour, on his card)
   const tmWord=m=>m>=8?'buoyant':m>=6.5?'in good heart':m>=5?'settled':m>=3.5?'uneasy':'low';
-  // A MAN'S MOOD ON THE PITCH (v150: a dial, not a cliff): every point of it either side of 6.5 counts, along lines through
-  // what it always came to at the steps -- up, his stamina and composure, +0.5 at 8 and +1 at 9.5 and over (+0.17 at 7,
-  // +0.83 at 9); down, those and his reading of the game both ways, -0.5 at 3.5 and -1.5 at 1.5 and under (-0.25 at 5,
-  // -0.42 at 4). Before, nothing at all from 3.6 to 7.9 -- where nearly everyone lives -- and then all of it at once
+  // A MAN'S MOOD ON THE PITCH (v150: a dial, not a cliff): every point of it either side of 6.5 counts. Up, his stamina
+  // and composure, +0.5 at 8 and +1 at 9.5 and over (+0.17 at 7, +0.83 at 9). Down (v170: harder, and all of him),
+  // MOR_DOWN[0] off every attribute he has a point under 6.5, MOR_DOWN[1] at most -- -0.75 at 5, -1.25 at 4, -1.75 at
+  // 3, -2.75 at 1: misery costs more than happiness pays. (v150-v169: only his stamina, composures and reading of the
+  // game, and much less -- -0.25 at 5, -0.42 at 4, -1.5 at 1.5 and under. Before v150, nothing at all from 3.6 to 7.9.)
+  const MOR_DOWN=[0.5,2.75];
   function morDeltas(m){ m=m??MOR0; if(Math.abs(m-6.5)<0.005) return null;
     if(m>6.5){ const v=m>=9.5?1:m>=8?0.5+0.5*(m-8)/1.5:0.5*(m-6.5)/1.5; return {stamina:v,composure:v,compFinal:v}; }
-    const v=m<=1.5?-1.5:m<=3.5?-0.5-(3.5-m)*0.5:-0.5*(6.5-m)/3; return {stamina:v,composure:v,compFinal:v,offIQ:v,defIQ:v}; }
+    return {all:-Math.min(MOR_DOWN[1],MOR_DOWN[0]*(6.5-m))}; }   // (all: every attribute he has -- morStats)
   // THE DRESSING ROOM ON THE PITCH (v155): the side's mood (d.tm) is a little more of every man's stamina, composure
-  // and reading of the game on match day, on top of his own -- along a line, a quarter of a point at 10, as much off
-  // at 3 and under -- about half a point of a man's rating either way at its ends, a fifth at 8 (buoyant). It touched
-  // nothing on the pitch: the side's spirit was only the shirts. In a game you play and one simulated alike; the
-  // matchday's paper says what it's worth today
-  const tmV=tm=>tm==null?0:clamp(((tm??MOR0)-MOR0)/3.5,-1,1)*0.25;
+  // and reading of the game on match day, on top of his own -- along a line, a quarter of a point at 10 (about half a
+  // point of a man's rating, a fifth at 8, buoyant) and, below settled (v170), TM_DOWN off at 3 and under: a dressing
+  // room in the gutter drags the whole side (v155-v169: a quarter off, as on the way up). It touched nothing on the
+  // pitch: the side's spirit was only the shirts. In a game you play and one simulated alike; the matchday's paper says
+  // what it's worth today
+  const TM_DOWN=0.6;
+  const tmV=tm=>{ if(tm==null) return 0; const x=clamp(((tm??MOR0)-MOR0)/3.5,-1,1); return x>=0?x*0.25:x*TM_DOWN; };
   function morStats(p,st,tm){ const dl=morDeltas(p.mor), v=tmV(tm); if(!dl&&!v) return Object.assign({},st); const o=Object.assign({},st);
-    if(dl) for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10);
+    if(dl&&dl.all!=null){ for(const k in o) if(typeof o[k]==='number') o[k]=clamp(o[k]+dl.all,1,10); }   // (v170: below settled, every attribute he has)
+    else if(dl) for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10);
     if(v) for(const k of ['stamina','composure','compFinal','offIQ','defIQ']) o[k]=clamp(o[k]+v,1,10);
     return o; }
   const morOvr=(p,tm)=>{ if(!morDeltas(p.mor)&&!tmV(tm)) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st,tm))-cwOverall(p.role,st); };
@@ -16734,20 +16743,24 @@
     for(const q of d.roster) if(q!==p&&hvOf(q).am>=7&&(q.age||25)>=27&&leadOf(q,d)>=leadOf(p,d)) q.mor=clamp((q.mor??MOR0)-1,1,10);   // (an ambitious senior passed over minds)
     mgNews(d,p.name+' is '+d.clubName+'’s new captain.'); return null; }
   // after each of your games: the side by the result against what was expected (beating a better side lifts it most),
-  // its leaders softening the falls
+  // its leaders softening the falls -- and a defeat never less than DEFEAT_FLOOR of a result's worth before that (v170:
+  // losing to a stronger side was nearly free, a tenth of one)
+  const DEFEAT_FLOOR=0.35;
   function morAfterGame(d,mine){ if(!mine) return;
     const exp=clamp(0.5+(mgStrength(d,d.clubId)-(mine.oppOvr||60))*0.03,0.1,0.9), got=mine.win?1:mine.draw?0.5:0;
-    let dt=(got-exp)*1.4*(mine.derby?DERBY_X:1); dt*=dt<0?tmSwing(d):0.9+0.1*tmSwing(d);
+    let dt=(mine.win||mine.draw?got-exp:Math.min(-exp,-DEFEAT_FLOOR))*1.4*(mine.derby?DERBY_X:1); dt*=dt<0?tmSwing(d):0.9+0.1*tmSwing(d);
     d.tm=clamp(Math.round(((d.tm??MOR0)+dt)*100)/100,1,10); }
   // EVERY MONDAY, each of yours: the week's minutes against what he expects (the better and the more ambitious expect
   // more, a team player less; the frustrated mind most), his form, the side's mood pulling at his, his resilience
-  // bringing him back to settled -- and the side's by its men's (an unhappy man drags it, its leaders lift it)
+  // bringing him back to settled (v170: half as quick under 4) -- and the side's by its men's (an unhappy man drags it,
+  // its leaders lift it)
+  const MOR_LOW=4;
   function morWeek(d){ const R=d.roster; if(!R.length) return; const avg=R.reduce((a,p)=>a+p.ovr,0)/R.length, gw=d.mgw||0;
     for(const p of R){ const h=hvOf(p), m=p.mor??MOR0;
       const expect=clamp(0.55+(p.ovr-avg)*0.05+(h.am-5.5)*0.05-(hasTrait(p,d,'team')?0.15:0),0.05,1), share=gw?Math.min(1,(p.wmw||0)/gw):expect;
       let dm=(share-expect)*(share<expect&&hasTrait(p,d,'frust')?0.9:0.6)+((p.fm??FORM_BASE)-FORM_BASE)*0.2+((d.tm??MOR0)-m)*0.12-(p.inj?0.05:0);
       dm*=morSwing(p,d);
-      const back=(MOR0-m)*0.06*(0.6+h.rs/10)*(hasTrait(p,d,'determ')?1.6:1);
+      const back=(MOR0-m)*(m<MOR_LOW?0.03:0.06)*(0.6+h.rs/10)*(hasTrait(p,d,'determ')?1.6:1);   // (v170: half as quick back under MOR_LOW -- out of there it's minutes, results and a word that bring him round, not the calendar)
       p.mor=clamp(Math.round((m+dm+back)*100)/100,1,10); p.wmw=0; p.kw=(p.kw||0)+1; if(p.kw%4===0) p.kt=(p.kt||0)+1;   // (a trait comes out every four weeks)
       if(p.mor<=3.5&&h.am>=7&&!p.wantsOut&&!p.loan&&!p.hometown&&Math.random()<0.25){ p.wantsOut=true; mgNews(d,p.name+' wants to leave '+d.clubName+'.'); }
       else if(p.wantsOut&&p.mor>=5.5){ delete p.wantsOut; mgNews(d,p.name+' has settled: he wants to stay.'); } }
@@ -17384,8 +17397,11 @@
   // THE PLAYER OF THE MONTH: every four league weeks, your league's best over them -- three games rated at least, the
   // best average rating (goals to split a tie). Yours, and the league pays the club a prize (POTM_PRIZE), the fans love
   // it (3% more of the league's usual following) and he's lifted; the papers say who it was either way. THE PLAYER OF THE
-  // YEAR is the season's (see mgSeasonStory): yours, four times the prize and 8% more fans.
-  const POTM_PRIZE={1:2500,2:6000,3:15000,4:40000};
+  // YEAR is the season's (see mgSeasonStory): yours, four times the prize and 8% more fans. (v170: $25,000, $100,000,
+  // $300,000 and $1M, by the league -- it was 2,500, 6,000, 15,000 and 40,000, never rescaled with v149's money, and had
+  // fallen from a third of a week's pooled income to under 4%; the Golden Boot and Glove, twice it, and the Player of
+  // the Year, four times, with it)
+  const POTM_PRIZE={1:25000,2:100000,3:300000,4:1000000};
   function potmSnap(d){ const S={}; for(const id of d.div[d.tier]||[]) for(const p of mgPlayersOf(d,id)) S[p.id]=[p.rs||0,p.rn||0,p.goals||0]; d.potm={s:d.season, snap:S}; }
   function mgPotm(d){ if(!d.potm||d.potm.s!==d.season){ potmSnap(d); return; } const S=d.potm.snap, L=[];
     for(const id of d.div[d.tier]||[]) for(const p of mgPlayersOf(d,id)){ const z=S[p.id]||[0,0,0], n=(p.rn||0)-z[1]; if(n<3) continue; L.push({p,id,n,avg:((p.rs||0)-z[0])/n,g:(p.goals||0)-z[2]}); }
@@ -18032,9 +18048,9 @@
     R.pos=pos; R.up=up; R.down=down;
     R.result=pos===1?(d.tier===4?'CHAMPIONS':'CHAMPIONS — PROMOTED'):up?(pos<=2?'PROMOTED':'PROMOTED IN THE PLAYOFFS'):down?'RELEGATED'
             :d.tier===4?(pos===2?'RUNNERS-UP':pos<=6?'TOP SIX':'STAYED UP'):(pos<=6?'LOST IN THE PLAYOFFS':'STAYED UP');
-    R.prize=mgRound(MG_PRIZE[d.tier]*Math.pow((MG_CLUBS+1-pos)/MG_CLUBS,1.6)); d.budget+=R.prize; ledg(d,'prizes',R.prize); dealBonuses(d,R);
+    R.prize=mgRound(MG_PRIZE[d.tier]*lgPrizeShare(pos)); d.budget+=R.prize; ledg(d,'league',R.prize); dealBonuses(d,R);
     R.boardSold=boardSale(d);   // (v150: over THE BOARD'S LIMIT still, prize and all: your most valuable man sold)
-    for(const t of [1,2,3,4]) R.moves[t].table.forEach((id,i)=>{ const c=d.world.clubs[id]; if(c&&id!==d.clubId) c.budget+=mgRound(MG_PRIZE[t]*Math.pow((MG_CLUBS-i)/MG_CLUBS,1.6)); });
+    for(const t of [1,2,3,4]) R.moves[t].table.forEach((id,i)=>{ const c=d.world.clubs[id]; if(c&&id!==d.clubId) c.budget+=mgRound(MG_PRIZE[t]*lgPrizeShare(i+1)); });
     const M=d.manager; M.history.push({season:d.season,club:d.clubName,tier:d.tier,pos,result:R.result}); if(pos===1) M.titles++; if(up) M.promotions++;
     const top=d.roster.slice().sort((a,b)=>(b.goals||0)-(a.goals||0))[0]; if(top&&top.goals) R.topScorer={name:top.name,goals:top.goals};
     R.cups=['coco','fashion','cl'].map(k=>[k,mgCupRun(d,k)]).filter(x=>x[1]); R.cupWin={};
@@ -18461,7 +18477,13 @@
     if(from){ from.players.splice(from.players.indexOf(p),1); from.budget+=fee; } else d.world.free.splice(d.world.free.indexOf(p),1);
     to.budget-=fee; p.until=d.season+1+Math.floor(Math.random()*3); p.wage=mgRound(mgWage(p.ovr)); p.num=0; mgNumber(to.players,p); to.players.push(p);
     if(to.tier===d.tier||(from&&from.tier===d.tier)) mgNews(d,to.name+' sign '+p.name+(from?' from '+from.name+' for '+money(fee):' on a free')+'.'); }
-  // the computer clubs' business among themselves (and with the free agents), a week's worth (k as for the bids)
+  // the computer clubs' business among themselves (and with the free agents), a week's worth (k as for the bids). A club
+  // goes for a man if he'd come within what it spends on one man (AI_DEAL_SHARE of its money: 60%, the Premium League's
+  // 65%) haggled down as far as his club would settle (AI_SETTLE of the ask), and pays what it can, no more than the ask
+  // and never under what they'd settle for. (v170: it went only for a man asking no more than 60% of its money, at the
+  // ask -- so the richest Premium League club could spend $207M at most, and a man of 92 or more asking $230M to $250M
+  // could never move between computer clubs.)
+  const AI_DEAL_SHARE=[0.6,0.65], AI_SETTLE=0.86;
   function mgAiTrades(d,k){ const clubs=mgAiClubs(d), F=d.world.free;
     const n=Math.round((5+Math.floor(Math.random()*5))*(k??1));
     for(let k=0;k<n;k++){ const b=mgPick(clubs), xi=mgEight(b.players); if(!xi.length) continue;
@@ -18472,7 +18494,9 @@
         if(src&&(src.tier>b.tier+1||(src.tier>b.tier&&mgEight(src.players).includes(p)))) continue;   // a bigger club's regulars stay
         if(!src&&mgLevelTier(p.ovr)>b.tier+1) continue;
         if(src&&(src.players.length<=MG_MIN||(p.role==='GK'&&src.players.filter(x=>x.role==='GK').length<=2))) continue;
-        const fee=src?mgAsk(d,p,src):0; if(fee>b.budget*0.6) continue;
+        const ask=src?mgAsk(d,p,src):0, most=b.budget*(b.tier===4?AI_DEAL_SHARE[1]:AI_DEAL_SHARE[0]);   // (v170: what the club spends on one man at most)
+        if(ask*AI_SETTLE>most) continue;                                    // (more than he'd go for, haggled down as far as they'd settle: out of reach)
+        const fee=src?mgRound(Math.max(ask*AI_SETTLE,Math.min(ask,most))):0;
         if(!best||p.ovr>best.ovr){ best=p; bestClub=src; bestFee=fee; } }
       if(best) mgMoveAi(d,best,bestClub,b,bestFee); }
     for(const c of clubs){ mgRefill(d,c); mgTrimAi(d,c); } }
@@ -18557,8 +18581,10 @@
   // SHIRT SALES: each Monday, the week's at the club shop (v105: no longer with a matchday's money) -- more the more fans
   // there are (SHIRT_FAN a fan a week, by the league), the more popular your three most popular men (popF: 0.65 and a
   // hundredth of their popularity against the league's, popRel -- 0.85 to 1.6: a star sells shirts) and the happier the club (the dressing room's
-  // mood: 6% a point either side of settled). Who sells the most: shared out by popularity, squared.
-  const SHIRT_FAN={1:0.22,2:0.26,3:0.3,4:0.36};
+  // mood: 6% a point either side of settled). Who sells the most: shared out by popularity, squared. (v170: fifteen
+  // times what it was -- $3.30 to $5.40 a fan a week, it was 22 to 36 cents, never rescaled with v149's money: a few
+  // hundred dollars a week against a pool of tens of thousands, and popularity counted for next to nothing)
+  const SHIRT_FAN={1:3.3,2:3.9,3:4.5,4:5.4};
   function shirtSales(d){ const tier=d.tier||1, L=d.loyalty!=null?d.loyalty:(LOYALTY_BASE[tier]||1000), top=popRel(d);
     const popF=clamp(0.65+top/100,0.85,1.6), moodF=clamp(1+0.06*((d.tm??MOR0)-MOR0),0.8,1.25);
     return {wk:Math.round(L*(SHIRT_FAN[tier]||SHIRT_FAN[1])*popF*moodF), popF, moodF, fans:L, top}; }
@@ -18686,7 +18712,7 @@
   // partners, the sponsors, the shirts, prizes, transfers and loans, wages, building, scouting, the week's events -- and
   // anything else in a line of its own, so the week's lines take the bank from what it was on Monday to what it is now,
   // to the dollar. Tap NET/WK on the hub: this week so far, last week, and a league week as projected
-  const LDG_NAME={gate:'The gate',tv:'The TV',partners:'Partners',sponsors:'Sponsors (boards, the shirt, names)',shirts:'Shirt sales',prizes:'Prizes',transfers:'Transfers and loans',wages:'Wages',
+  const LDG_NAME={gate:'The gate',tv:'The TV',partners:'Partners',sponsors:'Sponsors (boards, the shirt, names)',shirts:'Shirt sales',league:'League prize money',prizes:'Prizes',transfers:'Transfers and loans',wages:'Wages',
     building:'Building and decorating',scouting:'Scouting',events:'The week’s events',other:'Anything else'};
   function ledg(d,k,v){ if(!v||!d) return; const W=ldgCur(d); W.L[k]=Math.round((W.L[k]||0)+v); }
   function ldgCur(d){ if(!d.wl||d.wl.w!==(d.weeks||0)){ if(d.wl){ d.wl.b1=Math.round(d.wl.bNow??d.budget); d.wlPrev=d.wl; } d.wl={w:d.weeks||0, s:d.season, b0:Math.round(d.budget||0), L:{}}; } return d.wl; }

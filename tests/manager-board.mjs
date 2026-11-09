@@ -29,15 +29,17 @@ await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeo
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); d.phase='summer'; d.day=1; mgSave(d); renderHub(); return 1; })()`);
 
 // --- A MAN'S MOOD: a dial, not a cliff -----------------------------------------------------------------------------------------
-let r = await K(`(()=>{ const at=m=>{ const x=morDeltas(m); return x?+(x.composure).toFixed(2):0; }, n=m=>{ const x=morDeltas(m); return x?Object.keys(x).length:0; };
-  const p=CAREER.data.roster.find(q=>q.role==='MID'), was=p.mor, ovr=m=>{ p.mor=m; return +morOvr(p).toFixed(2); }, o={ m4:ovr(4), m65:ovr(6.5), m9:ovr(9) }; p.mor=was;
-  return { v:[1,1.5,2.5,3.5,4,5,6,6.5,7,8,9,9.5,10].map(at), n:[n(3),n(8)], o }; })()`);
+let r = await K(`(()=>{ const at=m=>{ const x=morDeltas(m); return x?+(x.all??x.composure).toFixed(2):0; }, n=m=>{ const x=morDeltas(m); return x?(x.all!=null?'all':Object.keys(x).length):0; };
+  const p=CAREER.data.roster.find(q=>q.role==='MID'), was=p.mor, ovr=m=>{ p.mor=m; return +morOvr(p).toFixed(2); }, o={ m4:ovr(4), m65:ovr(6.5), m9:ovr(9) };
+  p.mor=4; const st=mgStats(p), lo=morStats(p,st), ks=Object.keys(st).filter(k=>typeof st[k]==='number'&&st[k]>=2.25), mean=+(ks.reduce((a,k)=>a+lo[k]-st[k],0)/ks.length).toFixed(2); p.mor=was;   // (those not already near the floor of 1)
+  return { v:[1,1.5,2.5,3.5,4,5,6,6.5,7,8,9,9.5,10].map(at), n:[n(3),n(8)], o, mean4:mean, nk:ks.length }; })()`);
 info('mood -> composure (and the rest): ' + JSON.stringify(r));
 const [m1, m15, m25, m35, m4, m5, m6, m65, m7, m8, m9, m95, m10] = r.v;
-ok(m1 === -1.5 && m15 === -1.5 && m35 === -0.5 && m8 === 0.5 && m95 === 1 && m10 === 1 && m65 === 0,
-  'at the old steps what it always came to: -1.5 at 1.5 and under, -0.5 at 3.5, +0.5 at 8, +1 at 9.5 and over; nothing at 6.5');
-ok(m4 < 0 && m5 < 0 && m6 < 0 && m7 > 0 && m9 > 0 && m4 < m5 && m5 < m6 && m7 < m8 && m8 < m9 && m25 < m35 && r.n[0] === 5 && r.n[1] === 3 && r.o.m4 < 0 && r.o.m9 > 0 && r.o.m65 === 0,
-  'and every point between counts -- no dead zone: ' + [4, 5, 6, 7, 9].map((m, i) => m + ': ' + [m4, m5, m6, m7, m9][i]).join(', ') + '; a midfielder at 4 rates ' + r.o.m4 + ', at 9 +' + r.o.m9 + ' (low: his stamina, both composures -- v163: in traffic and in the final third -- and both IQs; high: stamina and both composures)');
+ok(m1 === -2.75 && m15 === -2.5 && m25 === -2 && m35 === -1.5 && m4 === -1.25 && m5 === -0.75 && m6 === -0.25 && m65 === 0 && m8 === 0.5 && m95 === 1 && m10 === 1,
+  'below settled, half a point off every attribute a point under 6.5, -2.75 at most (v170): -0.75 at 5, -1.25 at 4, -1.5 at 3.5, -2.75 at 1 (v150-v169: -0.25, -0.42, -0.5, -1.5); above, as it was, +0.5 at 8 and +1 at 9.5 and over; nothing at 6.5');
+ok(m7 > 0 && m9 > 0 && m7 < m8 && m8 < m9 && r.n[0] === 'all' && r.n[1] === 3 && r.o.m4 <= -10 && r.o.m9 > 0 && r.o.m65 === 0,
+  'and every point between counts -- no dead zone: ' + [4, 5, 6, 7, 9].map((m, i) => m + ': ' + [m4, m5, m6, m7, m9][i]).join(', ') + '; below settled every attribute he has (v170: it was his stamina, both composures and both IQs), above his stamina and both composures; a midfielder at 4 rates ' + r.o.m4 + ' (v169: -1), at 9 +' + r.o.m9);
+ok(Math.abs(r.mean4 + 1.25) < 0.01 && Math.abs(r.o.m4 / 10 + 1.25) < 0.1, 'a man at 4: each of his ' + r.nk + ' attributes off the floor 1.25 under what it is (' + r.mean4 + '), his rating ' + r.o.m4 + ' -- on the attributes\' scale 1.25 under his card\'s (the handoff\'s M1)');
 
 // --- A WORD WITH HIM: once a week --------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2]; p.mor=3; const a=mgTalk(d,p), m1=p.mor, b=mgTalk(d,p), m2=p.mor; d.weeks=(d.weeks||0)+1; const c=mgTalk(d,p), m3=p.mor; return { a:a[0], b, m:[3,m1,m2,m3], c:c[0] }; })()`);
