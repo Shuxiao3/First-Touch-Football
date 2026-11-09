@@ -2,8 +2,9 @@
 // of his own goal it stops some 13-24 m away by the man's Heading -- the computer's, and yours (J) off a cross coming
 // across at 700 px/s -- and never as far as a kick. A CLEARANCE BY FOOT carries to about halfway: short of it for a
 // man rated low in Shot power and Def IQ, past it for one rated high. A KEEPER COMING FOR A CROSS gets it: a ball at
-// his hands as he gets under it is his (it used to drop behind him -- his read of where it would come down ran out a
-// moment before he got there, and he turned back for his line); over a run of crosses toward 7 m out, one of theirs
+// his hands as he gets under it is his to deal with (it used to drop behind him -- his read of where it would come down
+// ran out a moment before he got there, and he turned back for his line) -- caught coming at him, punched going across
+// him and away (v178); over a run of crosses toward 7 m out, one of theirs
 // attacking each, he never comes for one and concedes, and gets the ones he comes for; and a ball that drops in his
 // six-yard box he comes for, and has. On a copy of the game that lets the test set the scene: everyone else held out
 // of the way, the clock held (no half time in the middle of it).
@@ -84,24 +85,26 @@ ok(CT.tap.pressed && CT.tap.land < 0.55 * CT.full.land && CT.tap.land > 6 && CT.
 
 // AT HIS HANDS: our keeper come for a cross, five metres off his line, the ball right by him at 60 px and dropping, going
 // across him -- too late now to read where it'll come down (it never will, in his reach, after he's had a moment to
-// read it: crossClaim's null) -- with nobody near: he catches it; with one of theirs right with him, he punches it.
-const atHands = rival => page.evaluate(rival => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), b = T.ball(), out = -kp.side, gx = kp.side < 0 ? 0 : T.FW;
+// read it: crossClaim's null) -- and he deals with it there and then. v178: going across him and away, 0.8 m off, he
+// punches it (he catches only what comes to him; v177 caught it, with nobody near); coming across at him, he has it;
+// with one of theirs right with him, he punches it.
+const atHands = (rival, dir = 1) => page.evaluate(({ rival, dir }) => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), b = T.ball(), out = -kp.side, gx = kp.side < 0 ? 0 : T.FW;
   const R = T.players().filter(q => q.team === 'R' && q.role !== 'G'), att = R[0];
   T.setControlled(T.players().find(q => q.team === 'G' && q.role === 'DEF'));            // (you're ours again, as in a game)
   const park = () => { for(const q of T.players()) if(!(rival && q === att)){ q.x = T.FW / 2 + out * 400 + (q.team === 'R' ? 0 : 60); q.y = 60; q.vx = q.vy = 0; } };
   T.freeze(); T.drop(); park(); window.__punch = 0;
   Object.assign(kp, { x: gx + out * 5 * T.MK, y: T.YC, mode: 'claimX', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0, spreadT: 0, gkRoaming: false });
-  Object.assign(b, { ownedBy: null, dribbler: null, x: kp.x, y: kp.y + 20, z: 60, vx: 0, vy: 300, vz: -180, crossT: 1, crossBy: 'R', shotT: 0, lastTouch: 'R', curveSpinT: 0 });
+  Object.assign(b, { ownedBy: null, dribbler: null, x: kp.x, y: kp.y + 20, z: 60, vx: 0, vy: 300 * dir, vz: -180, crossT: 1, crossBy: 'R', shotT: 0, lastTouch: 'R', curveSpinT: 0 });
   if(rival){ att.x = b.x + out * 18; att.y = b.y + 14; att.z = 10; att.vx = att.vy = 0; att.state = 'normal'; }
   const unread = !T.crossClaim(kp), t0 = T.simNow();
   (function tick(){ park(); if(rival){ att.x = b.x + out * 18; att.y = b.y + 14; }
     if(T.gkHold() === kp) return res({ unread, how: 'caught' });
     if(window.__punch) return res({ unread, how: 'punched' });
     if(T.simNow() - t0 > 0.5) return res({ unread, how: kp.mode });
-    requestAnimationFrame(tick); })(); }), rival);
-const ah = await atHands(false), ahc = await atHands(true);
-info('at his hands, too late to read where it comes down: ' + JSON.stringify(ah) + '; one of theirs with him: ' + JSON.stringify(ahc));
-ok(ah.unread && ah.how === 'caught' && ahc.how === 'punched', 'a cross at his hands as he gets under it is his: caught, or punched with one of theirs with him (not left to drop behind him)');
+    requestAnimationFrame(tick); })(); }), { rival, dir });
+const ah = await atHands(false), ahIn = await atHands(false, -1), ahc = await atHands(true);
+info('at his hands, too late to read where it comes down -- going across him and away: ' + JSON.stringify(ah) + '; across at him: ' + JSON.stringify(ahIn) + '; one of theirs with him: ' + JSON.stringify(ahc));
+ok(ah.unread && ah.how === 'punched' && ahIn.unread && ahIn.how === 'caught' && ahc.how === 'punched', 'a cross at his hands as he gets under it is dealt with, not left to drop behind him: going across him and away, punched (v177 caught it); across at him, caught; one of theirs with him, punched');
 
 // A RUN OF CROSSES: their man whips it in from the byline (or from 18 m out on the wing) toward 7 m out, one of theirs
 // attacking it and one of ours marking him (yours); everyone else parked. He never comes for one (claimX, before any

@@ -170,10 +170,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     a stretch: 61 px at the very most (Heading 10, at the top of his leap; 47 standing), against the keeper's 78
     (82 before v107).
     Yours used to reach 51 px over your head, up to 97 px, and your clearing header 87 px, over the keeper's hands.
-  - **Catch it or punch it.** Comfortably under it (it'll come to his body, him going to it), he catches it. If he
-    only just gets there, at the end of his reach, or one of theirs is up with him and it isn't dropping into his
-    midriff, he punches it clear: up and away to the side it's on, 12 to 18 m, nobody's ball. The Crossing Lab calls
-    it PUNCHED CLEAR.
+  - **He reads it first (v178).** Struck, the cross has him set where he is for a moment -- his read, by his
+    Reflexes: 0.4 s at 1, 0.33 s at 5.5, 0.26 s at 10 -- and only then does he go. He comes for the same crosses he
+    did; he gets to them later, and at a stretch more often than not. (Till v178 that moment only decided which
+    crosses he went for: he was off his line the instant it was struck, there with the moment to spare and set for it.)
+  - **Catch it or punch it.** He catches only what comes to him (v178): the ball's way, over the next moment, passing
+    within a quarter of his reach of where he stands -- two-fifths for a keeper of Handling 10 -- a short step (a
+    quarter of a metre) allowed. Anything he has to go for he punches clear: across him at a stretch, or with one of
+    theirs up with him (2 m from it) and it not already in his midriff. Up and away to the side it's on, 12 to 18 m,
+    nobody's ball; how far he can get a fist to it is as it was. The Crossing Lab calls it PUNCHED CLEAR. Your cross
+    to your nearest man, two of ours and two of theirs, 60 crosses: he came for 20 and caught 5, punching 15 (v177:
+    14, all caught). Till v178 he caught anything he could bring to four-fifths of his reach running to it for a
+    quarter of a second (two metres for most): all but a handful of the crosses he came for.
 - **The keeper's hands (Handling).** Whatever shot he gets to -- on his line, at the end of a dive, or coming for it --
   he holds only if it's slow enough as it reaches him and close enough to his body. How slow and how close is his
   **Handling**, a keeper's stat like the rest (1 to 10; an average side's keeper has 7): up to 430 px/s right at him at
@@ -1992,7 +2000,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     club (see **Bids** and **What a club asks**). Once a fee's agreed you agree his contract: 1 to 4 seasons at the
     wage he asks, which isn't up for haggling (see **Wages**). A man rated two leagues above yours won't come. Put a man on the transfer list at your price
     (the market's Selling tab) and clubs bid for him -- most in pre-season and the winter break, now and then in the
-    weeks between (now and then they bid for your best men anyway); a bid stands for two weeks; accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
+    weeks between (now and then they bid for your best men anyway -- never for a man you signed on a free, while he's on that deal: see **Free agents**); a bid stands for two weeks; accept or reject. Free agents sign any time, with no fee to a club (see **Free agents**). In the red you
     can't buy or sign anyone until you're back in the black, but selling still works. All of it needs you on the
     transfer market first: your phone, which rings on the first day of pre-season (see above); till then nobody's
     bought, sold or signed, and nobody bids for your men.
@@ -2109,9 +2117,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
     standard, the best of them kept in the pool from one summer to the next and the young ones growing while they
     waited, all for an ordinary wage.
-    - **Who's out there.** Three in four of the men a summer brings are 29 to 35, a point and a half under the
-      level they played at for every year past 29; the rest are younger men nobody kept, a little under it and with
-      next to nothing left to grow into. Players out of contract, released or let go join them.
+    - **Who's out there.** Nobody wanted them (v178). Three in four of the men a summer brings are 29 to 35, two
+      points under the level they played at for every year past 29; the rest are younger men nobody kept, a little
+      under it and with next to nothing left to grow into. The level they played at was eight under a mid-table
+      side's in League 2 or League 1 (give or take three): of 3000 the middle man is rated 43, one in twenty 53 or
+      more, one in thirty at League 2's mid-table (55) or over. Players out of contract, released or let go join them.
+      (Till v178 it was four under, give or take four, a point and a half a year, and a sixth of them from the
+      Championship: the middle man 50, one in twenty 65, a third at League 2's mid-table or over -- a new career in
+      League 2, its nine averaging 50, could sign a dozen men better than its league's mid-table for a wage.)
     - **No young man with a future is left without a club.** One of 24 or under whose ceiling is 5 or more above him
       is signed by a club at his ceiling's level the day he's free (yours included, if you let his deal run out).
     - **A season without a club** he hardly grows -- little training, no games -- and loses his sharpness and his
@@ -2119,8 +2132,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       he's out of the game.
     - **What they ask.** From 29, his wage, as from anyone. Younger, he reckons he's worth more than the club that
       let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
-      sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. A 60 in League 2 asks $550 a
-      week and $6,600 to sign at 21, $390 and $2,300 at 25, and $220 at 29.
+      sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. And a man who'd walk into most
+      sides in your league knows it (v178): two weeks of his wage to sign for every point he's over its mid-table less
+      three (over 52 in League 2, 60 in League 1, 68 in the Championship, 76 in the Premium League), thirty weeks at
+      most, at any age and on top of the young man's. In League 2 a 52 of 29 asks $1,300 a week and nothing to sign;
+      a 58 of 29 $3,100 and $37,200 to sign; a 62 of 29 $6,500 and $130,000 (half a new career's budget); a 58 of 23
+      $6,600 and $139,000.
+    - **Signed on a free, nobody bids for him (v178).** Nobody wanted him while he was without a club, so nobody bids
+      for him while he's on the deal he signed with you -- not in the window, not on deadline day, not a club watching
+      him -- unless you list him, he wants out, or he's come on four points since he signed. A new deal with you ends
+      it: he's yours then, like anyone. (Till v178 a man you'd picked up for nothing could draw bids within the week.)
   - **Scouting** needs the scouts' house built (see **The campus**). What you know of a man at another club (or a
     free agent) goes in levels, as far as your scouts' house's level:
     - **None**: a rating range, 8 points wide, 6 and then 2 as you grow your scouting network; ? for the rest.
@@ -2840,6 +2861,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v178: keepers punch, and free agents are what nobody wanted.** A keeper coming for a cross stands his read out
+  before he goes (0.4 s at Reflexes 1, 0.26 at 10 -- he used to be off his line the instant it was struck), and
+  catches only what comes to him, punching anything he has to go for: your cross to your nearest man, he came for 20
+  of 60 and caught 5 (v177: 14, all caught). How far he comes and how far he can punch it are as they were. Free
+  agents are weaker -- eight under their leagues' mid-table, League 2's or League 1's, the middle man 43 (he was 50,
+  one in twenty 65) -- a man who'd walk into most sides in your league wants two weeks' wage to sign for every point
+  over its mid-table less three, and nobody bids for a man you signed on a free while he's on that deal (deadline day
+  included) unless you list him, he wants out or he's come on four points. See **He reads it first**, **Catch it or
+  punch it** and **Free agents**.
 - **v177: state, not sentences, everywhere.** The handoff's J1 audit: no building's screen shows a sentence longer than
   a label by default -- the fixtures' form as dots, NO CUPS, the squad pitch's shape, the Selection tab's HOW IT WORKS,
   and an empty list a chip, their words a tap away. See **State, not sentences (v177)**.
@@ -3600,7 +3630,8 @@ test, and like the Trap Lab the values are the game's settings.
     his run). And on his way back to his line he's still a keeper: a shot on him he saves if he can (he was a
     spectator), and he isn't jerked back to his line in a frame -- he gets back himself.
   - **He comes for the ones that are his.** Deciding to come he takes a moment to read it -- his Reflexes: 0.4 s at 1,
-    0.33 s at 5.5, 0.26 s at 10 (v107; it was 0.32 / 0.26 / 0.2, and 0.12 s for everyone before v85) -- and comes only
+    0.33 s at 5.5, 0.26 s at 10 (v107; it was 0.32 / 0.26 / 0.2, and 0.12 s for everyone before v85; since v178 he
+    stands that moment out before he goes -- see **He reads it first**) -- and comes only
     for a ball dropping in his six-yard box or half a metre past it (v107: it was a metre past, and 2.7 m wider) while
     it's still over their heads. Since v107 he also waits for it to come down a little more (3.1 m up, it was 3.3 --
     still over any man's head), comes off his line a touch slower (1.2 times his Speed, it was 1.25) and gets a hand to

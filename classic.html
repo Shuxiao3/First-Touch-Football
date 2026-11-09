@@ -6246,7 +6246,7 @@
       if(practiceT<=0 && !ball.ownedBy){
         ball.x=p.x; ball.y=p.y; ball.z=0; ball.vx=ball.vy=ball.vz=0;
         crossToTarget(p, controlled);              // proper cross (Cross accuracy + Cross loft, pace auto) — no skying
-        ball.crossBy=p.team; ball.crossT=1.6; ball.crossFor=null;   // mark a live cross so it can be headed / defended
+        ball.crossBy=p.team; ball.crossT=CROSS_LIVE; ball.crossFor=null;   // mark a live cross so it can be headed / defended
         practiceT=3.4;
       }
       return true;
@@ -7143,7 +7143,7 @@
       const G=520, T=clamp(0.7+0.0008*d,0.6,1.2), zH=PLAYER_H*1.15;
       curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,tx,ty,tq);   // (swinging: crossSwing)
       ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
-      ball.crossBy=p.team; ball.crossT=1.6; ball.crossFor=null;   // live cross -> forwards attack it
+      ball.crossBy=p.team; ball.crossT=CROSS_LIVE; ball.crossFor=null;   // live cross -> forwards attack it
       recordPassTeam(p.team,p); passPose(p);
       crossToHim(tq,tx,ty,p);                          // (v142: you're on the man it's for -- you stayed on the crosser, K telling him to head it)
       lastGrade='CROSS'; gradeColor='#9dff3c'; gradeFade=1.0;
@@ -7370,7 +7370,7 @@
     const G=520, T=clamp(0.7+0.0008*d, 0.6, 1.2), zH=PLAYER_H*1.15;
     curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,target.x,target.y,cs&&cs.who);   // (swinging: crossSwing)
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
-    ball.crossBy=p.team;ball.crossT=1.6;ball.crossFor=null;
+    ball.crossBy=p.team;ball.crossT=CROSS_LIVE;ball.crossFor=null;
     recordPassTeam(p.team,p); passPose(p);
     if(p.team!=='G') crossSwitch(cs&&cs.who);   // (theirs, coming in at you: see crossSwitch)
   }
@@ -12930,7 +12930,11 @@
   // A CROSS HE CAN CLAIM: where, along the ball's flight, it first comes down within his reach (GK_CLAIM_H, hands up) in
   // his patch (the six-yard box and a little more) at a moment he can be there -- or null. In the air, no drag: as it
   // flies (see the physics step). DECIDING TO COME (v85) he takes a moment to read it -- GK_READ, his Reflexes: 0.4 s at
-  // 1, 0.33 at 5.5, 0.26 at 10 (v107; it was 0.32 to 0.2, and 0.12 for everyone before v85) -- and comes only for one that
+  // 1, 0.33 at 5.5, 0.26 at 10 (v107; it was 0.32 to 0.2, and 0.12 for everyone before v85). Since v178 he stands that
+  // moment out: struck, the cross has him set where he is till GK_READ has gone (kp.xGo, from the strike: CROSS_LIVE),
+  // and only then does he go -- before, it only decided which crosses he went for, and he was off his line the instant it
+  // was struck, there with that moment to spare and set for it (so he caught them). He comes for the same crosses; he
+  // gets to them later, at full stretch more often than not (and see gkTakeCross). He comes only for one that
   // drops in his six-yard box (or half a metre past it, and not much wider: v107, it was a metre deeper and 2.7 m wider)
   // while it's still over their heads (AIR_REACH: as high as the computer's men go up for one): a ball that's his, not
   // one he'd have to fight them for. v107 also has him wait for it to come down a little more (GK_CLAIM_H: 3.1 m, it was
@@ -12942,7 +12946,8 @@
   // six-yard box and a little more) -- and a ball at his hands now counts (it used to look only ahead, a moment's read
   // first, so a cross going across him at his hands was one he could never get, and he turned back under it). wide: the
   // whole of his box (a ball he's already gone for).
-  const GK_CLAIM_H=PLAYER_H*2.3, GK_READ=[0.4,0.26], GK_RUN=1.2, GK_GRAB=0.92;
+  const GK_CLAIM_H=PLAYER_H*2.3, GK_READ=[0.4,0.26], GK_RUN=1.2, GK_GRAB=0.92, CROSS_LIVE=1.6;   // (CROSS_LIVE: ball.crossT as a cross is struck, s)
+  const gkRead=kp=>GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6;
   // HIS WAY TO IT (v87): the run from where he is to where he'd take it (his body to within his reach of it), and the
   // men in the way. He can't go through one of theirs: one in his way, he has to go round (GK_ROUND: a stride and a half
   // more, and a check in his run); two or more, and it's shut -- he can't get there, and won't go. Nor will he go for one
@@ -12986,7 +12991,7 @@
   }
   function crossClaim(kp,committed,wide){
     const glX=kp.side<0?0:FW, v=keeperSpdOf(kp)*GK_RUN, reach=(reachOf(kp)+ball.r)*(1-CURL_CLAIM*crossCurlQ())*GK_GRAB;   // (a curling one's harder to claim)
-    const cl=gkType(kp).claim, react=committed?0:GK_READ[0]-(GK_READ[0]-GK_READ[1])*reflexOf(kp)/0.6, dX=wide?PA_D:committed?GA_D+80:(GA_D+MK*0.5)*cl, dY=wide?PA_HW:committed?GA_HW+60:(GA_HW+40)*cl, lo=committed?0:AIR_REACH;   // (cl: his archetype's patch)
+    const cl=gkType(kp).claim, react=committed?0:gkRead(kp), dX=wide?PA_D:committed?GA_D+80:(GA_D+MK*0.5)*cl, dY=wide?PA_HW:committed?GA_HW+60:(GA_HW+40)*cl, lo=committed?0:AIR_REACH;   // (cl: his archetype's patch)
     for(let t=committed?0:0.04;t<=1.6;t+=0.04){
       const z=ball.z+ball.vz*t-260*t*t; if(z<0) return null;          // down before he could get it: just a loose ball then
       if(z>GK_CLAIM_H) continue;                                       // still over his reach
@@ -13000,16 +13005,21 @@
     }
     return null;
   }
-  // AT HIS HANDS (a cross he's come for, or a ball in the air he's gone at): catch it or punch it -- by the nearest he can
-  // get it to his body in the next moment (it coming on, him going to it, while it's still up), he's comfortable and
-  // catches it, or only gets there at the end of his reach, and punches it clear; and with one of theirs up with him, he
-  // punches anything that isn't already in his midriff. -> true if he's dealt with it
+  // AT HIS HANDS (a cross he's come for, or a ball in the air he's gone at): catch it or punch it, as soon as it's in his
+  // reach (R -- how far he can get a fist to it, unchanged). v178: HE CATCHES ONLY WHAT COMES TO HIM -- its way over the
+  // next moment (while it's still up) passing within CATCH_FAR of R of where he stands, a short step allowed (CATCH_STEP,
+  // a quarter of a metre): a quarter of R for a keeper of no Handling, two-fifths for the best. Anything else he has to
+  // go for, and he punches it clear; and with one of theirs up with him (2 m from it) he punches anything that isn't in
+  // his midriff already (CATCH_RIVAL of R). (v85-v177: he caught anything he could bring to four-fifths of his reach,
+  // running to it for a quarter of a second -- two metres for most -- and all but a handful of the crosses he came for.)
+  // -> true if he's dealt with it
+  const CATCH_FAR=[0.25,0.4], CATCH_STEP=0.25*PX_M, CATCH_RIVAL=0.12;
   function gkTakeCross(kp,spd){
     const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())*GK_GRAB, dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
     if(!(dd<R&&ball.z<=GK_CLAIM_H+8)) return false;
-    let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-spd*GK_RUN*t)); }
-    const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50);
-    if(far>0.8||(rival&&dd/R>0.3)){ keeperPunch(kp); return true; }
+    let near=dd; for(let t=0.025;t<=0.25;t+=0.025){ const B=ballAt(t); if(B.z<=0||B.z>GK_CLAIM_H+8) break; near=Math.min(near,Math.max(0,Math.hypot(B.x-kp.x,B.y-kp.y)-CATCH_STEP)); }
+    const far=near/R, rival=players.some(o=>o.team!==kp.team&&o.state==='normal'&&Math.hypot(o.x-ball.x,o.y-ball.y)<50), cf=CATCH_FAR[0]+(CATCH_FAR[1]-CATCH_FAR[0])*handlingOf(kp);
+    if(far>cf||(rival&&dd/R>CATCH_RIVAL)){ keeperPunch(kp); return true; }
     kp.gkRoaming=false; kp.mode='hold'; kp.holdT=1.15+Math.random()*0.45; kp.heldT=0; gkHold=kp;
     ball.cushBy=null; offsidePass=null; ball.crossT=0; ball.crossBy=null; ball.shotT=0; ball.lastTouch=kp.team; endCurve();
     lastGrade='CLAIMED'; gradeColor='#ffb43c'; gradeFade=1.2;
@@ -13137,7 +13147,7 @@
     // CLAIMING A CROSS: one of theirs whipped into his patch that he can get to while it's still at his hands (crossClaim)
     // -- he comes for it (from his line, or on his way back to it) and catches it, over their heads
     if((kp.mode==='line'||kp.mode==='return')&&kp.claimCd<=0&&ball.crossT>0&&ball.crossBy&&ball.crossBy!==kp.team&&!ball.ownedBy&&!gkHold&&ball.z>0
-       &&kp.diveT<=0&&kp.groundT<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&!(LAB.on&&LAB.kind==='shoot')&&crossClaim(kp)) kp.mode='claimX';
+       &&kp.diveT<=0&&kp.groundT<=0&&scoredT<=0&&offsideT<=0&&restartT<=0&&!(LAB.on&&LAB.kind==='shoot')&&crossClaim(kp)){ kp.mode='claimX'; kp.xGo=simNow+Math.max(0,gkRead(kp)-(CROSS_LIVE-ball.crossT)); }   // (v178: he goes once he's read it -- see GK_READ)
     // (a shot on him as he gets back -- one of theirs heading it on after he's come for it: he's set for it where he is,
     // and saves what he can -- see the save, below. v85: on his way back he was a spectator)
     if(kp.mode==='return'&&ball.shotT>0&&ball.shotBy&&ball.shotBy!==kp.team&&!ball.ownedBy&&!gkHold&&scoredT<=0) kp.mode='line';
@@ -13152,6 +13162,7 @@
       if(live&&gkTakeCross(kp,spd)) return;                             // (at his hands: his)
       const cs=live?crossClaim(kp,true):null;
       if(!cs){ kp.mode='return'; return; }                // (headed on, cleared, or he can't get there now)
+      if(simNow<(kp.xGo||0)){ kp.runDir=null; return; }    // (v178: still reading it, set where he is -- see GK_READ)
       const gl=kp.side<0?0:FW, dx=cs.x-kp.x, dy=cs.y-kp.y, l=Math.hypot(dx,dy)||1, mv=Math.min(l,spd*GK_RUN*dt);
       kp.x+=dx/l*mv; kp.y+=dy/l*mv; kp.runDir={x:dx/l,y:dy/l};             // (the way he's going: his own men shoved off it, see separateBodies)
       kp.x=kp.side<0?clamp(kp.x,gl,gl+GA_D+80):clamp(kp.x,gl-GA_D-80,gl); kp.y=clamp(kp.y,YC-GA_HW-60,YC+GA_HW+60);
@@ -17116,11 +17127,15 @@
     for(const p of d.roster) p.until=d.season+Math.floor(Math.random()*3);
     for(let i=0;i<40;i++) d.world.free.push(mgNewFreeAgent(d));
   }
-  // A MAN WITHOUT A CLUB, as a summer finds him: most are old hands of 29 to 35 gone past their best, a point and a half
-  // under the level they played at for every year past 29; the rest younger men nobody kept, a little under it, with
-  // little left to grow into (and asking over the odds all the same: see mgFreeAsk)
-  function mgNewFreeAgent(d){ const old=Math.random()<0.75, lv=mgPick([1,1,1,2,2,3]), peak=MG_LEVEL[lv]-4+mgGauss()*4;
-    const age=old?29+Math.floor(Math.random()*7):19+Math.floor(Math.random()*10), v=old?peak-(age-29)*1.5-Math.random()*2:peak-3-Math.random()*4;
+  // A MAN WITHOUT A CLUB, as a summer finds him: most are old hands of 29 to 35 gone past their best, two points under
+  // the level they played at for every year past 29; the rest younger men nobody kept, a little under it, with little
+  // left to grow into (and asking over the odds all the same: see mgFreeAsk). Nobody wanted them: they played eight
+  // under their leagues' mid-table (give or take three), in League 2 or League 1: one in thirty is up to League 2's
+  // mid-table now. (v178: it was four under, give or take four, a point and a half a year, and a sixth of them from the
+  // Championship -- a third of them at League 2's mid-table or over, up to 65 and more, against a new career's nine of
+  // 50, and all for a wage)
+  function mgNewFreeAgent(d){ const old=Math.random()<0.75, lv=mgPick([1,1,1,1,2,2]), peak=MG_LEVEL[lv]-8+mgGauss()*3;
+    const age=old?29+Math.floor(Math.random()*7):19+Math.floor(Math.random()*10), v=old?peak-(age-29)*2-Math.random()*2:peak-3-Math.random()*4;
     const p=mgNewPlayer(d,mgPick(MG_ROLES),v,age,{until:0,pot:old?null:v+Math.random()*3}); p.idle=0; return p; }
   // out of contract, released or let go: a season's clock starts on him -- unless he's young with a future, and a club
   // has him the same day (mgSnapUp; `from`: not the club that let him go)
@@ -17532,7 +17547,7 @@
   const DD_BID=1.2, DD_ASK=0.85;
   const isDeadline=d=>d.phase==='winter';
   function ddDay(d){ const out={n:(d.offers||[]).filter(o=>o.wk===d.wkN).length, big:null};
-    if(lvOf(d,'market')&&Math.random()<0.6){ const top=d.roster.filter((p,i)=>!p.loan&&!mgCanLose(d,i)).sort((a,b)=>b.ovr-a.ovr).slice(0,3), p=top.length?mgPick(top):null;
+    if(lvOf(d,'market')&&Math.random()<0.6){ const top=d.roster.filter((p,i)=>!p.loan&&!mgFaKept(d,p)&&!mgCanLose(d,i)).sort((a,b)=>b.ovr-a.ovr).slice(0,3), p=top.length?mgPick(top):null;
       if(p){ const fee=mgRound(mgValue(d,p)*(1.5+Math.random()*0.3)), cl=mgAiClubs(d).filter(c=>c.tier>=Math.min(4,d.tier+1)&&c.budget>=fee&&c.players.length<MG_MAX);
         if(cl.length){ const c=mgPick(cl); d.offers=(d.offers||[]).filter(o=>!(o.pid===p.id&&o.club===c.id)); d.offerSeq=d.offerSeq||0;
           const o={id:++d.offerSeq, pid:p.id, club:c.id, fee, wk:d.wkN||0, dd:1}; d.offers.push(o); out.big=o.id; out.n++;
@@ -18387,9 +18402,13 @@
   function mgDemand(d,p,moving){ return mgRound(mgWage(p.ovr)*(moving?1.1:1)*(1+0.15*Math.max(0,mgLevelTier(p.ovr)-d.tier))); }   // (v155: no 0.85 from 31 -- his age is in what he's worth already; a veteran asked less to move than to stay)
   // A FREE AGENT'S PRICE: from 29 he asks his wage, as from anyone; younger, he reckons he's worth more than the club
   // that let him go did, and asks it -- up to two and a half times his wage at 21 and under, sliding to his wage at 29
-  // -- and a fee to sign of up to twelve weeks of that, the younger he is the more. -> {wage, fee}
-  function mgFreeAsk(d,p){ const young=clamp((29-(p.age||25))/8,0,1), wage=mgRound(mgDemand(d,p,false)*(1+1.5*young));
-    return {wage, fee:young>0?mgRound(wage*12*young):0}; }
+  // -- and a fee to sign of up to twelve weeks of that, the younger he is the more. And a man who'd walk into most sides
+  // in your league knows it (v178): FREE_OVER weeks of his wage to sign for every point he's over its mid-table less
+  // three (MG_LEVEL: over 52 in League 2 -- a man of 58, 12 weeks; one of 62, 20; FREE_OVER_MAX at most), at any age, on
+  // top of the young man's -- a released man of 62 is a signing, not a gift. -> {wage, fee}
+  const FREE_OVER=2, FREE_OVER_MAX=30;
+  function mgFreeAsk(d,p){ const young=clamp((29-(p.age||25))/8,0,1), wage=mgRound(mgDemand(d,p,false)*(1+1.5*young)), over=Math.max(0,(p.ovr||0)-(MG_LEVEL[d.tier||1]-3));
+    const wk=(young>0?12*young:0)+Math.min(FREE_OVER_MAX,over*FREE_OVER); return {wage, fee:wk>0?mgRound(wage*wk):0}; }   // (nothing to sign is nothing: mgRound never goes under $10)
   function mgWontCome(d,p){ const lt=mgLevelTier(p.ovr); return lt-d.tier>=2?p.name+' won’t drop down to '+MG_LEAGUE[d.tier]+' — he’s a '+MG_LEAGUE[lt]+' player.':null; }
   // YOUR BIDS (v83): not a yes or no on the spot. A quarter over their price and they take it there and then; over it,
   // as often as not, though a club may sit on it to see who else comes in; from 85% of it up, they make you wait while
@@ -18490,7 +18509,7 @@
     if(d.roster.length>=MG_MAX) return 'Your squad is full ('+MG_MAX+' players).';
     if(d.budget<0&&d.roster.length>=MG_MIN) return 'You’re in the red: sell before you sign anyone.';
     const ask=mgFreeAsk(d,p); if(ask.fee>d.budget) return 'He wants '+money(ask.fee)+' to sign: you have '+money(d.budget)+'.';
-    d.world.free.splice(d.world.free.indexOf(p),1); d.budget-=ask.fee; p.wage=ask.wage; p.until=d.season+years-1; p.idle=0; delete p.bb; mgRosterAdd(d,p);
+    d.world.free.splice(d.world.free.indexOf(p),1); d.budget-=ask.fee; p.wage=ask.wage; p.until=d.season+years-1; p.idle=0; delete p.bb; p.fa=p.ovr; mgRosterAdd(d,p);   // (v178: p.fa, what he was when you signed him on a free -- see mgFaKept)
     mgTx(d,'in',p,'free agent',ask.fee); mgNews(d,d.clubName+' sign free agent '+p.name+(ask.fee?' ('+money(ask.fee)+' to sign him)':'')+'.'); careerEv(d,p,'Joined '+clubCode(d,d.clubId)+(ask.fee?' ('+money(ask.fee)+')':' (free)'));
     return null; }
   function mgTx(d,dir,p,club,fee){ if(fee>0) ledg(d,'transfers',dir==='out'?fee:-fee); d.tx=d.tx||[]; d.tx.unshift({s:d.season,dir,name:p.name,ovr:p.ovr,club,fee}); if(d.tx.length>60) d.tx.length=60; }   // (v151: THE WEEK'S MONEY too)
@@ -18556,7 +18575,7 @@
     if(p.loan) return p.name+' is on loan: his contract is '+mgNameOf(d,p.loan.from)+'’s.';
     if(p.wantsOut) return p.name+' won’t sign: he wants to leave.';
     const ask=mgRenewWage(d,p), w=wage!=null?Math.min(mgRound(wage),ask):ask;   // (v110: what was agreed in talks, never over his ask; less pleased under it)
-    p.wage=w; p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5)*(w<ask?0.5:1),1,10); delete p.cAsk; delete p.cTalk; delete p.cGo; delete p.cRef;   // (v150: a new deal forgets the noes)
+    p.wage=w; p.until=Math.max(p.until||0,d.season+years); p.mor=clamp((p.mor??MOR0)+(p.cAsk?1:0.5)*(w<ask?0.5:1),1,10); delete p.cAsk; delete p.cTalk; delete p.cGo; delete p.cRef; delete p.fa;   // (v150: a new deal forgets the noes; v178: and that you picked him up for nothing -- see mgFaKept)
     mgNews(d,p.name+' signs a new deal with '+d.clubName+' until season '+p.until+'.'); return null; }
   // A MAN WHO'S COME ON (v83): a wage is set by how good a man is when he signs, and it stays put. Once he's worth a good
   // deal more than he's paid -- what he'd get now 30% over it, more for the young and less in his prime or after a fine
@@ -18654,9 +18673,15 @@
 
   // ---- the computer clubs in a window: offers for your men, and deals between themselves ----
   // the computer clubs' bids for your men, a week's worth (k: how busy the week is -- see mgWeekStart)
+  // SIGNED ON A FREE (v178): nobody wanted him while he was without a club, so nobody bids for him while he's on the deal
+  // he signed with you -- not a club in the land, deadline day included -- unless you list him, or he wants out, or he's
+  // come on since (FA_GROWN: four points over what he was when you signed him). A new deal with you ends it: he's yours
+  // then, like any other. (v177 and before: a man you'd picked up for nothing drew bids within the week.)
+  const FA_GROWN=4, mgFaKept=(d,p)=>p.fa!=null&&p.ovr<p.fa+FA_GROWN&&!(d.listed&&d.listed[p.id])&&!p.wantsOut;
   function mgAiBids(d,k,prem){ if(!mgWindowOpen(d)||!lvOf(d,'market')) return; d.offers=d.offers||[]; d.offerSeq=d.offerSeq||0; k=k??1; prem=prem||1;   // (prem: DEADLINE DAY's)
     const clubs=mgAiClubs(d);
     for(const p of d.roster){ if(p.loan||p.hometown) continue; const ask=(d.listed&&d.listed[p.id])||(p.wantsOut?mgValue(d,p):0), lt=mgLevelTier(p.ovr);   // (one who wants out: as if he were listed; one on loan isn't yours to sell; v149: the hometown hero never is -- HOME TO STAY)
+      if(mgFaKept(d,p)) continue;   // (v178: nor one you signed on a free -- see mgFaKept)
       const star=!ask&&p.ovr>=MG_LEVEL[d.tier]+3, wid=d.season*2+(d.phase==='winter'||(d.phase==='league'&&d.md>=MG_HALF)?1:0);
       if(Math.random()>(ask?0.5:(star?0.12:0.02))*k){   // (v156: 0.12 for a man three over his league's level -- it was 0.08: a star at a small club drew nothing)
         if(star&&p.watch!==wid&&Math.random()<0.12*k){ const W=clubs.filter(c=>c.tier>d.tier||(c.tier===d.tier&&c.budget>mgValue(d,p))); if(W.length){ p.watch=wid; mgNews(d,mgPick(W).name+' have been watching '+p.name+'.'); } }   // (v156: and watched, once a window -- interest you can see)
@@ -20385,7 +20410,7 @@
     const L=mkSorted(d,d.world.free.filter(p=>(pos==='ALL'||natPos(p)===pos)&&(arch==='ALL'||p.style===arch)).map(p=>[p,null,mgFreeAskSeen(d,p).wage]),srt);
     const r='<div class="mgList plList plOther">'+(L.length?'':'<div class="mgHint">No free agent fits that.</div>')+mkPotHint(d,L,srt)
       +L.map(([p,,w])=>mgRow(d,p,{ovr:mgOvrTxt(d,p), pot:srt==='pot'?potTxt(d,p,{free:true},true):null, right:money(w)+'/wk', sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)})).join('')+'</div>';
-    return mgPanes(plHead(h.replace('<div class="mgSum mkLine">','<div class="mgSum mkLine"><span data-xpl="Without a club: mostly old hands. The young ask more, and a fee to sign.">'+plCount(L.length,L.length===1?'FREE AGENT':'FREE AGENTS')+'</span>'),'WAGE',true,srt==='pot')+r, card); }   // (v171: what they are, a tap on the count -- it was a line over the list)
+    return mgPanes(plHead(h.replace('<div class="mgSum mkLine">','<div class="mgSum mkLine"><span data-xpl="Without a club: mostly old hands. The young ask more, and a fee to sign; so does a man good enough for your league.">'+plCount(L.length,L.length===1?'FREE AGENT':'FREE AGENTS')+'</span>'),'WAGE',true,srt==='pot')+r, card); }   // (v171: what they are, a tap on the count -- it was a line over the list)
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     const nb=(d.bids||[]).length; if(nb) h+='<div class="mgHint">Your own bids ('+nb+' out) are in Bids.</div>';
     h+='<div class="bpSect">FOR YOUR MEN</div>';

@@ -33,6 +33,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'CAMPUS, CAMPUS_META, crestFor, lvOf, bldUp, bldBlock, mgScout, mgMigrate, mgStrength, mgSimStr, cpPieces, decoFree, decoMakeRoom, physioWear, physioBack, get FORMS(){ return FORMS; }, '
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
+  + 'mgAiBids, mgRenew, ddDay, mgFaKept, FREE_OVER, FREE_OVER_MAX, FA_GROWN, '
   + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
@@ -502,13 +503,19 @@ ok(!tapped.on && tapped.wk === 2 && twice === 3 && !escd.on && escd.wk === 3 && 
 
 // --- FREE AGENTS: mostly old hands gone past their best, asking their wage; a younger man asks over the odds -- two and
 // a half times his wage at 21, sliding to his wage at 29 -- and up to twelve weeks of that to sign; none young with a
-// future (a club has him the day he's free); a season without a club nobody grows, and the old lose a point more ------
+// future (a club has him the day he's free); a season without a club nobody grows, and the old lose a point more. v178:
+// nobody wanted them -- eight under their leagues' mid-table, League 2's or League 1's -- and a man who'd walk into
+// most sides in your league wants FREE_OVER weeks of his wage to sign for every point over its mid-table less three;
+// and nobody bids for a man you've signed on a free (mgFaKept) -----------------------------------------------------------
 await create('Free Town');
 const money = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
 r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out = { n: F.length, old: F.filter(p => p.age >= 29).length };
   out.room = Math.max(0, ...F.filter(p => p.age <= 24).map(p => p.pot - p.ovr));
-  const man = age => ({ ovr: 60, age, role: 'MID' }), ask = age => Object.assign(M.mgFreeAsk(d, man(age)), { fair: M.mgDemand(d, man(age), false) });
-  Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33) });
+  const man = (age, ovr) => ({ ovr: ovr || 52, age, role: 'MID' }), ask = (age, ovr) => Object.assign(M.mgFreeAsk(d, man(age, ovr)), { fair: M.mgDemand(d, man(age, ovr), false) });
+  Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33), o58: ask(29, 58), o62: ask(29, 62), o70: ask(29, 70), y58: ask(25, 58), tier: d.tier, fo: M.FREE_OVER, foMax: M.FREE_OVER_MAX });
+  // (the generator: 3000 men as summers bring them, against League 2's mid-table)
+  const G = []; for(let i = 0; i < 3000; i++) G.push(M.mgNewFreeAgent(d).ovr); G.sort((a, b) => a - b);
+  out.gen = { med: G[1500], q95: G[2850], atLv: G.filter(v => v >= M.MG_LEVEL[1]).length / G.length, at60: G.filter(v => v >= 60).length / G.length };
   const mk = (age, ovr) => { const p = M.mgNewFreeAgent(d); p.role = 'MID'; p.age = age; delete p.at; p.pot = ovr; p.ovr = ovr; M.mgSetOvr(p, ovr); return p; };
   const young = mk(22, 55), vet = mk(31, 60), twin = JSON.parse(JSON.stringify(vet));   // (the vet's twin at a club: training and games)
   for(let w = 1; w <= 10; w++){ d.weeks = 3 * w; M.devTick(d, young, { T: 0.35, M: 0.15 }); M.devTick(d, vet, { T: 0.35, M: 0.15 }); M.devTick(d, twin, { T: 0.75, gw: 3 }); twin.mw = 3; }
@@ -519,9 +526,14 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
   return out; });
 info('free agents: ' + JSON.stringify(r));
 ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n + ' are 29 or over, and none at 24 or under has more than 4 to grow into');
+ok(r.gen.med <= 46 && r.gen.q95 <= 56 && r.gen.atLv < 0.07 && r.gen.at60 < 0.01,
+  'nobody wanted them: of 3000 free agents the middle man is rated ' + r.gen.med + ', one in twenty ' + r.gen.q95 + ' or more, ' + (r.gen.atLv * 100).toFixed(1) + '% at League 2\'s mid-table (55) or over and ' + (r.gen.at60 * 100).toFixed(1) + '% at 60 (v177: 50, 65, a third and one in seven)');
+const wks = a => a.fee / a.wage;
+ok(r.tier === 1 && Math.abs(wks(r.o58) - 6 * r.fo) < 0.6 && Math.abs(wks(r.o62) - 10 * r.fo) < 0.6 && Math.abs(wks(r.o70) - r.foMax) < 0.6 && 18 * r.fo > r.foMax && r.o58.wage === r.o58.fair && Math.abs(wks(r.y58) - (6 + 6 * r.fo)) < 0.8,
+  'one who\'d walk into most sides in League 2 wants a fee to sign at any age, two weeks\' wage for every point over 52: a 58 of 29 ' + money(r.o58.fee) + ' (' + wks(r.o58).toFixed(1) + ' weeks of his ' + money(r.o58.wage) + '), a 62 ' + wks(r.o62).toFixed(1) + ' weeks, a 70 thirty at most (' + wks(r.o70).toFixed(1) + '); at 25 on top of the young man\'s six (' + wks(r.y58).toFixed(1) + ')');
 ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.7 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.4   // (v149: the fee rounded to $10,000 at that size)
    && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
-  'what they ask (a 60 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
+  'what they ask (a 52 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
 ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 && r.vet[1] < r.vet[3] && r.vet[1] < 60 && r.vet[2] === 1,
   'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
@@ -539,6 +551,26 @@ d = await save(); const him = d.roster.find(p => p.id === fa.id);
 ok(/TO SIGN/.test(faCard) && fa.fee > 0 && him && him.wage === fa.wage && d.budget === fa.budget - fa.fee,
   'a ' + fa.age + '-year-old signed: ' + money(fa.fee) + ' to sign him (the budget ' + money(fa.budget) + ' to ' + money(d.budget) + '), ' + money(fa.wage) + '/wk');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
+// (v178) NOBODY BIDS FOR HIM: in pre-season, made a star (three over League 2's mid-table -- a club would watch him,
+// and bid one week in eight), 300 weeks' worth of bids for your men and none for him, nor watching; listed, they bid;
+// come on four points since he signed, they bid; and on a new deal with you, they bid. Deadline day: him the best of your
+// squad and none of the late bids for him (200 deadline days); as he was when he signed no longer, some
+const nb = await page.evaluate(id => { const M = __MG, d = M.d, p = d.roster.find(q => q.id === id), lv = M.MG_LEVEL[d.tier], out = { fa: p.fa, ovr0: p.ovr };
+  d.phase = 'summer'; d.listed = d.listed || {}; delete p.wantsOut;
+  const set = v => { p.ovr = v; M.mgSetOvr(p, v); p.ovr = v; };
+  const bids = () => { let n = 0; for(let i = 0; i < 300; i++){ d.offers = []; M.mgAiBids(d, 1); if(d.offers.some(o => o.pid === p.id)) n++; } return n; };
+  const watched = () => d.news.filter(x => x.t.endsWith(' have been watching ' + p.name + '.')).length;
+  set(lv + 3); out.kept = M.mgFaKept(d, p); out.watch = -watched(); out.star = bids(); out.watch += watched();
+  d.listed[p.id] = 20000; out.listed = bids(); delete d.listed[p.id];
+  set(p.fa + M.FA_GROWN); out.grownKept = M.mgFaKept(d, p); out.grown = bids(); set(lv + 3);
+  const late = () => { let n = 0; for(let i = 0; i < 200; i++){ d.offers = []; M.ddDay(d); if(d.offers.some(o => o.dd && o.pid === p.id)) n++; } return n; };
+  const fa0 = p.fa, top = Math.max(...d.roster.map(q => q.ovr)) + 1; set(top); p.fa = top; out.dd = late(); out.ddFree = (delete p.fa, late()); p.fa = fa0; set(lv + 3);
+  out.renew = M.mgRenew(d, d.roster.indexOf(p), 2); out.faAfter = p.fa ?? null; out.renewed = bids();
+  d.offers = []; set(out.ovr0); d.phase = 'league'; M.mgSave(d); return out; }, fa.id);
+info('signed on a free, the bids: ' + JSON.stringify(nb));
+ok(nb.fa === 56 && nb.kept && nb.star === 0 && nb.watch === 0 && nb.listed > 30 && !nb.grownKept && nb.grown > 5 && nb.renew === null && nb.faAfter === null && nb.renewed > 5,
+  'nobody bids for a man you signed on a free (he was ' + nb.fa + '): a star now, 300 weeks of bids and none for him, nor watching him; listed, ' + nb.listed + '; come on four points, ' + nb.grown + '; on a new deal, ' + nb.renewed + ' (v177: a star drew bids within the week)');
+ok(nb.dd === 0 && nb.ddFree > 10, 'deadline day: the best of your squad, signed on a free, draws none of the late bids (200 deadline days; ' + nb.ddFree + ' once he isn\'t)');
 
 // --- THE FIRST SEASON'S TWO ARRIVALS: after the 2nd game a hometown veteran of the top flight (rated in the 70s, 33 to 35)
 // joins on under a third of his wage; after the 5th a 16-year-old wonderkid (in the 60s, a ceiling of 85 to 90) asks to

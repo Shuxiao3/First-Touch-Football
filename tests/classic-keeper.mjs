@@ -5,7 +5,10 @@
 // down about where he is; v115: it was pinged at once to the best man that way, up to 60 m off, however short the press). The
 // computer's keeper plays it out himself, as before. IN THE AIR no man gets to a ball higher than a keeper: a header
 // tops out at 61 px (Heading 10, at the top of his leap), the keeper's hands at 82; and a keeper coming for a cross
-// catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. HIS WAY TO IT
+// catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. v178: struck, the
+// cross has him set where he is till he's read it (GK_READ at his Reflexes), and then he goes; and at his hands he
+// catches only what comes to him -- straight at him he has it, across him 0.7 of his reach off he punches it, and one a
+// third of his reach off (and a step) a keeper of Handling 10 catches where one of Handling 1 punches. HIS WAY TO IT
 // (v87): three of theirs stood across his way to it and he doesn't come (he can't go through them); two of ours on his
 // line, and he does -- they're shoved aside, off it, not on ahead of him. On a copy of the game that lets the test set
 // the scene, give the keeper the ball and count the stopwatch's frames.
@@ -19,6 +22,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, controlled:()=>controlled, simNow:()=>simNow, gkHold:()=>gkHold, TI:()=>TI, gkHowOf, gkTarget, '
   + 'GK:()=>[GK_WAIT,GK_WARN], FW, FH, YC, atkOf, tryHeaderContact, tryDefHeaderContact, aiCross, crossClaim, GKH:()=>GK_CLAIM_H, '
+  + 'gkTakeCross, gkRead:kp=>gkRead(kp), reachOf, endCurve, GRAB:()=>GK_GRAB, CATCH:()=>[CATCH_FAR,CATCH_STEP,CATCH_RIVAL], '
   + 'ht:v=>{ if(v!=null) headerT=v; return headerT; }, dht:v=>{ if(v!=null) defHeaderT=v; return defHeaderT; }, drop:()=>{ gkHold=null; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }, '
   + 'puntOn, puntSpot, hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
@@ -128,15 +132,39 @@ const cross = rival => page.evaluate(rival => new Promise(res => { const T = win
   cr.stats = Object.assign({}, cr.stats, { crossing: 10, curve: 1 });   // (a true ball to the spot: since v107 a lesser crosser's can drop short, out of the keeper's patch)
   Object.assign(b, { ownedBy: null, dribbler: null, x: cr.x, y: cr.y - 20, z: 0, vx: 0, vy: 0, vz: 0, crossT: 0, shotT: 0 });
   T.aiCross(cr, { x: gx + out * 90, y: T.YC + 30, who: null }); const t0 = T.simNow();
+  let tc = null, p0 = null, tm = null;   // (v178: when he decided it was his, and when he first moved off that spot)
   (function tick(){ park(); cr.x = gx + out * 30; cr.y = T.YC + 520;
     if(rival){ const d = Math.hypot(b.x - att.x, b.y - att.y) || 1; att.x = b.x + (out * 18); att.y = b.y + 14; att.vx = att.vy = 0; }
-    if(T.gkHold() === kp) return res({ how: 'caught', t: +(T.simNow() - t0).toFixed(2) });
-    if(window.__punch) return res({ how: 'punched', t: +(T.simNow() - t0).toFixed(2), away: Math.round((b.x - kp.x) * out), up: Math.round(b.vz) });
+    if(kp.mode === 'claimX' && tc == null){ tc = T.simNow(); p0 = { x: kp.x, y: kp.y }; }
+    if(tc != null && tm == null && Math.hypot(kp.x - p0.x, kp.y - p0.y) > 3) tm = T.simNow();
+    const lag = { decide: tc == null ? null : +(tc - t0).toFixed(3), go: tm == null ? null : +(tm - t0).toFixed(3), read: +T.gkRead(kp).toFixed(3) };
+    if(T.gkHold() === kp) return res({ how: 'caught', t: +(T.simNow() - t0).toFixed(2), lag });
+    if(window.__punch) return res({ how: 'punched', t: +(T.simNow() - t0).toFixed(2), away: Math.round((b.x - kp.x) * out), up: Math.round(b.vz), lag });
     if(T.simNow() - t0 > 3) return res({ how: 'neither' });
     requestAnimationFrame(tick); })(); }), rival);
 const alone = await cross(false), contested = await cross(true);
 info('a cross into the six-yard box: ' + JSON.stringify(alone) + '; with one of theirs up with him: ' + JSON.stringify(contested));
 ok(alone.how === 'caught' && contested.how === 'punched', 'the keeper catches a cross he\'s comfortably under, and punches it with one of theirs up with him');
+ok(alone.lag.decide != null && alone.lag.decide <= 0.1 && alone.lag.go != null && alone.lag.go >= alone.lag.read - 1 / 60 && alone.lag.go <= alone.lag.read + 0.1,
+  'struck, the cross is his at once (' + alone.lag.decide + ' s) but he stands, reading it, and goes at ' + alone.lag.go + ' s (his read at his Reflexes: ' + alone.lag.read + ' s; v177: off his line the instant it was struck)');
+// AT HIS HANDS (v178): the ball 0.85 of his reach from him, at his hands' height, nobody of theirs anywhere near -- coming
+// straight at him; across him, passing 0.7 of his reach off; and across him a third of his reach (and the step) off, for
+// a keeper of Handling 1 and of Handling 10. What he does with it there and then (gkTakeCross)
+const hands = await page.evaluate(() => { const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), b = T.ball(), out = -kp.side, res = {}, st0 = kp.stats; T.freeze();
+  for(const q of T.players()) if(q !== kp){ q.x = T.FW / 2; q.y = 40; q.vx = q.vy = 0; }
+  const STEP = T.CATCH()[1];
+  const one = (k, hand, off) => { T.drop(); window.__punch = 0; kp.stats = Object.assign({}, st0, { gkHandling: hand });
+    Object.assign(kp, { x: kp.homeX, y: T.YC, mode: 'claimX', claimCd: 0, diveT: 0, groundT: 0, holdT: 0, heldT: 0, vx: 0, vy: 0, xGo: 0 });
+    T.endCurve(); Object.assign(b, { ownedBy: null, dribbler: null, lob: null, crossT: 0, shotT: 0, z: 50, vz: 0 });
+    const R = (T.reachOf(kp) + b.r + 10) * T.GRAB(), o = typeof off === 'function' ? off(R) : off;
+    if(o === 0){ b.x = kp.x + out * 0.85 * R; b.y = kp.y; b.vx = -out * 300; b.vy = 0; }
+    else { b.x = kp.x + out * o * R; b.y = kp.y - Math.sqrt(0.85 * 0.85 - o * o) * R; b.vx = 0; b.vy = 300; }
+    const took = T.gkTakeCross(kp, 150); res[k] = { took, how: T.gkHold() === kp ? 'caught' : window.__punch ? 'punched' : 'neither', R: Math.round(R), off: +o.toFixed(2) }; };
+  one('at', 5, 0); one('across', 10, 0.7); one('h1', 1, R => 0.32 + STEP / R); one('h10', 10, R => 0.32 + STEP / R);
+  kp.stats = st0; T.drop(); kp.mode = 'line'; window.__punch = 0; return res; });
+info('at his hands: ' + JSON.stringify(hands));
+ok(hands.at.how === 'caught' && hands.across.how === 'punched' && hands.h1.how === 'punched' && hands.h10.how === 'caught',
+  'he catches only what comes to him: straight at him, caught; across him ' + hands.across.off + ' of his reach off, punched (Handling 10 -- v177 caught it, a stride and in); ' + hands.h1.off + ' off, Handling 1 punches it and Handling 10 catches it');
 
 // HIS WAY TO IT: the same cross; where he'd take it read first, with nobody about; then men stood still in his way: three
 // of theirs abreast across his line to it, half way and a body's width apart -- or two of ours on it, 40% and 70% of the
