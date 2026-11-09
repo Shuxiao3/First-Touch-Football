@@ -125,17 +125,18 @@ await K(`(()=>{ const d=CAREER.data; d.lv.train=2; d.lv.academy=1; d.staff=[]; d
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(120);
 const tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent.trim()));
 await page.click('#bldgPanel .bpTab:text-is("Staff")'); await page.waitForTimeout(150);
-const s0 = await page.evaluate(() => ({ hint: document.querySelector('#bpBody .mgHint').textContent.trim(), vac: document.querySelectorAll('#bpBody .mgRow.vac').length }));
+const posts = () => page.evaluate(() => ({ hint: document.querySelector('#bpBody .plSum span').textContent.trim(), vac: document.querySelectorAll('#bpBody .coPost.vac').length, tiles: [...document.querySelectorAll('#bpBody .coPost')].map(e => e.querySelector('.clLbl').textContent + ':' + e.querySelector('b').textContent).join(' '), rows: document.querySelectorAll('#bpBody .coRow').length }));   // (v174: the posts as tiles, the men to hire as rows)
+const s0 = await posts();
 const fin = await K('FIN');
 await page.evaluate(id => document.querySelector(`#bpBody .mgRow[data-cid="${id}"]`).click(), fin); await page.waitForTimeout(120);
 const cardTxt = await page.innerText('#bpBody .mgPaneR .mgCard').catch(() => '');
 await page.click('#bpBody [data-mg="chire"]'); await page.waitForTimeout(150);
 r = await K(`(()=>{ const d=CAREER.data; return { n:d.staff.length, k:d.staff[0]&&d.staff[0].k }; })()`);
-const s1 = await page.evaluate(() => ({ hint: document.querySelector('#bpBody .mgHint').textContent.trim(), vac: document.querySelectorAll('#bpBody .mgRow.vac').length }));
+const s1 = await posts();
 info('the Staff tab: ' + JSON.stringify({ s0, card: cardTxt.split('\n').join(' / '), s1 }));
-ok(tabs.join() === 'Tactics,Selection,Staff,Pitch' && s0.hint === '0 of 5 posts filled' && s0.vac === 5 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
-   && r.n === 1 && r.k === 'fin' && s1.hint === '1 of 5 posts filled' && s1.vac === 4,
-  'the Staff tab: ' + s0.hint + ', each post a line (vacant till filled); a man\'s card says what he\'s good and poor at; HIRE, and the post is his (' + s1.hint + ')');
+ok(tabs.join() === 'Tactics,Selection,Staff,Pitch' && s0.hint === '0 OF 5 POSTS' && s0.vac === 5 && s0.tiles === 'FIT:VACANT TEC:VACANT FIN:VACANT DEF:VACANT GK:VACANT' && s0.rows === 10 && /finishing coach · rated 5\.0/.test(cardTxt) && /GOOD AT/.test(cardTxt) && /POOR AT/.test(cardTxt) && /HIRE/.test(cardTxt)
+   && r.n === 1 && r.k === 'fin' && s1.hint === '1 OF 5 POSTS' && s1.vac === 4 && /FIN:FEATHERSTONEHAUGH/.test(s1.tiles) && s1.rows === 9,
+  'the Staff tab: ' + s0.hint + ', a tile a post (VACANT till filled), the ten men to hire a row each; a man\'s card says what he\'s good and poor at; HIRE, and the post is his (' + s1.hint + ': ' + s1.tiles + ')');
 
 // ...and on a phone: the tab bar, a coach's card, a man's card with his FOCUS, all fit, nothing long on them
 await page.setViewportSize({ width: 640, height: 360 }); await page.waitForTimeout(250);
@@ -144,7 +145,7 @@ const fit = () => page.evaluate(() => { const P = document.querySelector('.mgPan
     long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'],
     cut: c ? [...c.querySelectorAll('.mgFact b, .coChips b')].filter(b => b.scrollWidth > b.clientWidth + 1 || b.getBoundingClientRect().right > c.getBoundingClientRect().right + 1).map(b => b.textContent) : [] }; });
 const sid = await K('(MGUI.csel=null, CAREER.data.staff[0].id)');
-await page.evaluate(id => document.querySelector(`#bpBody .mgRow[data-cid="${id}"]`).click(), sid); await page.waitForTimeout(150);
+await page.evaluate(id => document.querySelector(`#bpBody [data-mg="csel"][data-cid="${id}"]`).click(), sid); await page.waitForTimeout(150);   // (v174: his post's tile)
 const f1 = await fit(), rel = await page.textContent('#bpBody [data-mg="cfire"]').catch(() => '');
 info('640x360, a coach\'s card: ' + JSON.stringify(f1));
 ok(f1.fits && f1.tabs && !f1.long.length && !f1.cut.length && /RELEASE \(\$[\d,]+\)/.test(rel), '640x360: the five tabs fit, and a coach\'s card with what he\'s good and poor at, and RELEASE (' + rel + '), nothing long or cut on it');
@@ -154,14 +155,14 @@ await K(`(()=>{ const d=CAREER.data; d.lv.academy=1; d.lv.club=3; d.ycand=null; 
 await page.click('#chCampus [data-bldg="academy"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(120);
 const atabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent.trim()));
 await page.click('#bldgPanel .bpTab:text-is("Coach")'); await page.waitForTimeout(150);
-const y0 = await page.textContent('#bpBody .mgHint'), yc = await K('window.YCID');
+const ytile = () => page.$eval('#bpBody .coPost', e => e.textContent + ' ' + (e.dataset.xpl || '')), y0 = await ytile(), yc = await K('window.YCID');   // (v174: the youth coach's post a tile)
 await page.evaluate(id => document.querySelector(`#bpBody .mgRow[data-cid="${id}"]`).click(), yc); await page.waitForTimeout(120);
 const yf = await fit(), ycard = await page.innerText('#bpBody .mgPaneR .mgCard').catch(() => '');
 await page.click('#bpBody [data-mg="chire"]'); await page.waitForTimeout(150);
-const y1 = await page.textContent('#bpBody .mgHint'), yk = await K(`CAREER.data.staff.filter(c=>c.k==='youth').length`);
+const y1 = await page.$eval('#bpBody .plSum span', e => e.textContent + ' ' + e.dataset.xpl), y1t = await ytile(), yk = await K(`CAREER.data.staff.filter(c=>c.k==='youth').length`);
 info('the academy\'s coach: ' + JSON.stringify({ atabs, y0, card: ycard.split('\n').join(' / '), y1, yf }));
-ok(atabs.join() === 'Prospects,Coach,Facilities' && /No youth coach/.test(y0) && /youth coach · rated 5\.0/.test(ycard) && /GOOD AT/.test(ycard) && /POOR AT/.test(ycard) && /(Fitness|Technical|Finishing|Defending|Keeping)/.test(ycard)
-   && /trains the academy/.test(y1) && yk === 1 && yf.fits && !yf.long.length && !yf.cut.length,
+ok(atabs.join() === 'Prospects,Coach,Facilities' && /^YOUTHVACANT/.test(y0) && /No youth coach/.test(y0) && !/VACANT/.test(y1t) && /youth coach · rated 5\.0/.test(ycard) && /GOOD AT/.test(ycard) && /POOR AT/.test(ycard) && /(Fitness|Technical|Finishing|Defending|Keeping)/.test(ycard)
+   && /^1 OF 1 POST /.test(y1) && /trains the academy/.test(y1) && yk === 1 && yf.fits && !yf.long.length && !yf.cut.length,
   'the academy\'s COACH tab: its own youth coach (' + y0.trim() + '), his card -- good and poor at whole fields -- fitting a phone, HIRE (' + y1.trim() + ')');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(150);

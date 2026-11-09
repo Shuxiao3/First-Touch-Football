@@ -1903,9 +1903,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       **technical** (ball control, dribbling, short and long passing, crossing, curve, composure in traffic -- v163),
       **finishing** (shot accuracy and power, long shots, heading, Off IQ, final third composure), **defending** (tackling, sliding, interceptions, Def IQ) and
       **goalkeeping** (reflexes, reach, diving, handling, distribution, a keeper's speed). The Training building's **Staff**
-      tab has a line for each post (vacant till filled) and two men to hire for each, new ones every four weeks.
-    - **The academy's youth coach** is the academy's, never the first team's: its **Coach** tab, a post of his own,
-      two men to hire every four weeks. He's good and poor at whole fields of his lads' game (fitness, technical,
+      tab (v174) has the five posts as tiles across the top -- FIT, TEC, FIN, DEF, GK, each with its coach's name (or
+      VACANT) and his rating as five pips, half a pip a point, and NEW on them in the week new men come -- and under
+      them the men to hire, two for each post, new ones every four weeks: a row each (his post on a coloured chip, his
+      name, WON'T COME if he's too good for your league, his rating and its pips, his wage), the list scrolling under
+      the posts and the count over it (1 OF 5 POSTS · 9 TO HIRE · NEXT IN 3 WKS). A held post's tile is its coach's
+      card; a vacant one says what to do. (It was a line a post, "vacant" in words.)
+    - **The academy's youth coach** is the academy's, never the first team's: its **Coach** tab, a post of his own
+      (a YOUTH tile, as the Staff tab's), two men to hire every four weeks. He's good and poor at whole fields of his lads' game (fitness, technical,
       finishing, defending, keeping), by his rating the same way as the first team's coaches; he trains the academy
       0.04 a point (a field he's good at half as well again, one he's poor at not at all) on top of its level's 0.6 +
       0.1 a level.
@@ -2813,6 +2818,10 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v174: the coaches' posts as tiles.** The Staff tab (and the academy's Coach tab) rebuilt to the handoff's J4: the
+  posts as tiles across the top, each with its coach (or VACANT), his rating as pips and NEW in the week new men come;
+  the men to hire a dense row each under them, the list scrolling, the posts filled, the men to hire and the next
+  lot's week counted over it. See **Five coaches, a post for each from the start**.
 - **v173: a building's screen.** The training pitch, the physio, the scouts' house and the academy, and a building not
   yet up, on one screen each (the handoff's J4): its level as pips, what it does as the numbers it changes with the
   next level's beside them, its levels as a path with a lock on one its clubhouse isn't up to, your money against the
