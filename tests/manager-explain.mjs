@@ -57,13 +57,13 @@ ok(r.up >= 50 && r.upA >= 0.6 * r.up && r.upD <= 0.03 * r.up && r.a1back <= 0.05
 // on his card and in the squad's list, a tap says how fast and the coaches' word
 const pT = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.role!=='GK'); p.dv=0.4; p.ld=1.5; MGUI.sel=null; mgSide='rate'; curTab.club='Squad'; openBuilding('club'); paintBuilding(); return p.id; })()`);
 await page.waitForTimeout(150);
-const rowUp = await page.evaluate(id => !!document.querySelector('#bpBody .mgRow[data-pid="' + id + '"] .ovr .trend.up'), pT);
+const rowUp = await page.evaluate(id => !!document.querySelector('#bpBody .mgRow[data-pid="' + id + '"] .nm .trend.up'), pT);   // (v171: by his name, as J3 has the row)
 await K(`(()=>{ MGUI.sel=${pT}; paintBuilding(); return 1; })()`); await page.waitForTimeout(120);
 r = await page.evaluate(() => ({ card: !!document.querySelector('#bpBody .mgCardOvr .trend.up') })); r.row = rowUp;
 await page.click('#bpBody .mgCardOvr .trend.up'); await page.waitForTimeout(60);
 const tTrend = await tip();
 ok(r.row && r.card && /COMING ON/.test(tTrend) && /\+0\.4/.test(tTrend) && /sharp in training/.test(tTrend),
-  'his ▲ by his rating in the squad\'s list and on his card; tapped: "' + tTrend + '"');
+  'his ▲ by his name in the squad\'s list and by his rating on his card; tapped: "' + tTrend + '"');
 
 // --- A WORD WITH HIM, FROM HIS CARD -----------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.role!=='GK'&&q.id!==MGUI.sel); p.mor=5; delete p.talkWk; MGUI.sel=p.id; mgSide='mind'; paintBuilding(); return { pid:p.id, why:mgWhy(d,p) }; })()`);
