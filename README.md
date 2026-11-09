@@ -332,6 +332,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     when tapped, and the name what the building is for. The scouts' Assignments are a grid, a league a row with its
     price, a button a line. (They were a picture and rows of words, a line a level and the price at the foot, over two
     pages; a building not up was a paragraph and THE WAY TO IT.)
+  - **State, not sentences (v177).** The handoff's rules for every career screen, audited: what a thing is shows as
+    pips, dots, bars, chips and numbers, a label is a word or two, and the sentence that explains it is a tap on it
+    (the dotted underline marks one). The last of the explaining lines on a building's screen went with the audit: the
+    fixtures' form is five dots (green a win, amber a draw, red a defeat), a season with no cups a NO CUPS chip, the
+    squad's little pitch its shape (3-3-2 WITH THE BALL, how to put a man on it a tap away), the Selection tab's how a
+    tap on HOW IT WORKS, and an empty list a chip -- NO BIDS OUT, NO OFFERS, NO REPORTS YET, EMPTY -- with what to do
+    a tap away. The news, like the papers' stories, is the game's voice and stays words; the campus's line of what
+    has a deadline stays a line of short phrases.
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
@@ -2832,6 +2840,9 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v177: state, not sentences, everywhere.** The handoff's J1 audit: no building's screen shows a sentence longer than
+  a label by default -- the fixtures' form as dots, NO CUPS, the squad pitch's shape, the Selection tab's HOW IT WORKS,
+  and an empty list a chip, their words a tap away. See **State, not sentences (v177)**.
 - **v176: the papers, numbers first.** Every factual Monday paper leads with its facts, a chip each under its
   headline (the handoff's J4), and its words after them no longer say a number the headline or the strip shows: the
   dressing room's change, a bid's worth and terms, a sponsor's fee, a new deal's ask, who's out and how long, who's

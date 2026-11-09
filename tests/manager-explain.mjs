@@ -103,8 +103,8 @@ ok(r.a === r.want && r.b === r.a && r.s1 < r.s0 - 1, 'a club\'s rating in the fi
 r = await K(`(()=>{ const d=CAREER.data, lu=ensureLineup(d), A=careerSlots(d.formation,'atk');
   let hit=null; for(let i=0;i<lu.atk.length&&!hit;i++){ const sl=A[i]; if(!sl) continue; for(const ri of lu.atk){ const p=d.roster[ri]; if(fitCls(fitPos(p),sl.role,spotFit(sl))===' sec'){ hit={i,ri}; break; } } }
   if(!hit) return {none:true};
-  const j=lu.atk.indexOf(hit.ri), k=hit.i; [lu.atk[j],lu.atk[k]]=[lu.atk[k],lu.atk[j]]; const p=d.roster[hit.ri]; p.cond=1; p.mor=MOR0;
-  const card1=tbCard(d,hit.ri,'atk'); p.cond=0.7; p.mor=3; const mo=morOvr(p), card2=tbCard(d,hit.ri,'atk'); p.cond=1; p.mor=MOR0;
+  const j=lu.atk.indexOf(hit.ri), k=hit.i; [lu.atk[j],lu.atk[k]]=[lu.atk[k],lu.atk[j]]; const p=d.roster[hit.ri], tm0=d.tm; d.tm=MOR0; p.cond=1; p.mor=MOR0;   // (v177: the side settled -- its mood was chance, and showed on his card)
+  const card1=tbCard(d,hit.ri,'atk'); p.cond=0.7; p.mor=3; const mo=morOvr(p), card2=tbCard(d,hit.ri,'atk'); p.cond=1; p.mor=MOR0; d.tm=tm0;
   const at=ovrAt(p,A[k].role,spotFit(A[k])); return { ovr:p.ovr, at, card1, card2, mo }; })()`);
 const why = h => (h.match(/<div class="mgCardSub rWhy">([^<]*)<\/div>/g) || []).map(x => x.replace(/<[^>]+>/g, '')).join(' | ');
 if(r.none) ok(false, 'a man in a second position to look at');

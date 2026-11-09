@@ -1528,7 +1528,8 @@
   .plTop .mgTierStep{ gap:3px; } .plTop .mgTierStep .mgAdj{ width:26px; height:26px; min-height:26px; font-size:11px; } .plTop .mkFilters .mgTierStep b{ min-width:64px; font-size:10px; }
   .plTop .mgChip{ min-height:26px; padding:3px 7px; font-size:9px; }
   @media (max-width:720px){ .plTop .mkDrop{ padding:1px 5px; } .plTop .mgChip{ padding:3px 5px; } .plTop .mkFilters .mgTierStep b{ min-width:54px; font-size:9.5px; } }   /* (one line of filters on a narrow phone too) */
-  .plTop [data-xpl]{ text-decoration:underline dotted; text-decoration-color:var(--dim2); text-underline-offset:3px; }
+  .plTop [data-xpl], .qpHow, .sqPitchHint[data-xpl], .mgSum [data-xpl]{ text-decoration:underline dotted; text-decoration-color:var(--dim2); text-underline-offset:3px; }
+  .mgSum .clChip[data-xpl]{ text-decoration:none; }
   .plCols{ display:flex; align-items:center; gap:6px; padding:0 6px 2px 9px; font-size:7.5px; line-height:10px; letter-spacing:.8px; color:var(--dim2); }
   .plCols .pc{ width:26px; flex:none; text-align:center; } .plCols .nm{ flex:1; min-width:0; } .plCols .ovr{ flex:none; width:34px; text-align:right; }
   .plCols .mor{ flex:none; width:30px; text-align:center; } .plCols .fit{ flex:none; width:24px; text-align:center; } .plCols .amt{ flex:none; width:58px; text-align:right; }
@@ -19475,7 +19476,8 @@
     let plan=''; for(let k=0;k<SUB_MAX;k++){ const q=plans[k];
       plan+=q?'<div class="qpRow qpPair"><span class="slK">'+(k+1)+'</span><span class="slNm">'+tag(q.off)+' ▸ '+tag(q.on)+'</span><button class="qpX" data-mg="qpdel" data-k="'+k+'" aria-label="take this sub off the plan">✕</button></div>'
         :'<div class="qpRow qpPair empty"><span class="slK">'+(k+1)+'</span><span class="slNm">—</span></div>'; }
-    plan+='<div class="qpHint">'+(MGUI.selPick!=null?'Now the man to swap him with (him again: let go).':sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.':'Tap a man on the pitch, then one on the bench: in the match they\'re first on your quick subs. Your keeper or a man not taken, tapped, then anyone: they swap.')+'</div>';
+    plan+='<div class="qpHint">'+(MGUI.selPick!=null?'Now the man to swap him with (him again: let go).':sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.'
+      :'<span class="qpHow" data-xpl="Tap a man on the pitch, then one on the bench: in the match they\u2019re first on your quick subs. Your keeper or a man not taken, tapped, then anyone: they swap.">HOW IT WORKS</span>')+'</div>';   // (v177: J1 -- the how a tap away)
     return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb,SUB_MAX+2)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)
       +'<div class="selCol qpCol" data-grp="qs"><div class="selHd">QUICK SUBS · '+plans.length+' OF '+SUB_MAX+'</div>'+plan+'</div></div></div>'; }
   // a man of the pitch and one of the bench, tapped in turn: paired (taking the place of either's last pair)
@@ -20290,7 +20292,7 @@
     let h='<div class="sqPitchW"><div class="tpitch sqPitch"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', 0, 'GK');
     for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, q.k, spotFit(slots[i]), q.n, q.cc); }   // (v127: its fit, and four lines in five columns)
-    return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
+    return h+'</div><div class="sqPitchHint" data-xpl="Hold a man in the list and drop him on a spot to put him there.">'+d.formation+' WITH THE BALL</div></div>'; }   // (v177: J1 -- the how a tap away)
   // THE SQUAD (v171, J3): every man on one list that scrolls, keepers, defenders, midfielders and forwards in turn and
   // the best first in each -- his line on his chip, no headings -- under a head that stays: how many (every row), the
   // wage bill, and the deals running out as a badge
@@ -20304,7 +20306,8 @@
       h+=mgRow(d,p,{ovr:String(p.ovr), trend:true, right:money(p.wage), tags, sel:MGUI.sel===p.id, edge:xi.has(p)?'xi':subs.has(p)?'sub':p.loan?'loan':d.listed[p.id]?'listed':''}); }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
     return mgPanes(plHead(top,'WAGE')+'<div class="sqList plList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
-  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d); let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'none yet: no games')+'</div>'+mgCupsSum(d)+'<div class="mgList">';
+  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d), F=mgForm(d,5);   // (v177: J1 -- the form as dots, what they are a tap away)
+    let h='<div class="mgSum">'+MG_LEAGUE[d.tier].toUpperCase()+' · S'+d.season+' · <span data-xpl="'+xq(F.length?'The last '+F.length+' league results, the latest last: '+F.join(' ')+'.':'Form: none yet, no games.')+'">FORM <span class="clDots">'+[0,1,2,3,4].map(i=>'<i'+(F[i]?' class="'+F[i]+'"':'')+'></i>').join('')+'</span></span></div>'+mgCupsSum(d)+'<div class="mgList">';
     const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
       return '<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+(pens!=null&&you===them?' P':'')+'</span>'; };
     L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
@@ -20323,11 +20326,11 @@
     return h+'</div>'; }
   // the cups this season, a line each: how far you've gone in each you're in (your Champions League group's table too)
   function mgCupsSum(d){ const C=d.cup, cur=C&&!C.off&&C.s===d.season; let h='';
-    if(!cur) return '<div class="mgHint">The cups start with next season.</div>';
+    if(!cur) return '<div class="mgSum"><span class="clChip dim" data-xpl="The cups start with next season.">NO CUPS YET</span></div>';   // (v177: J1 -- a chip, the why a tap away)
     for(const k of ['coco','fashion','cl']){ const run=mgCupRun(d,k); if(!run) continue;
       h+=finRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),true,/WINNERS/.test(run)?'var(--good)':/^OUT|RUNNERS/.test(run)?'var(--bad)':'var(--ink)');
       if(k==='cl'){ const G=C.cl.gr.find(g=>g.ids.includes(d.clubId)); if(G) mgTableOf(G.ids,G.fx).forEach((r,i)=>{ h+=finRow((i+1)+'. '+mgEsc(mgNameOf(d,r.id)),r.p+' played · '+r.pts+' pts',false,r.id===d.clubId?'var(--good)':'#cfe7d2'); }); } }
-    return h||'<div class="mgHint">'+(d.tier===1?'League 2 plays only the league: the Coco Cup comes with League 1.':'No cups for you this season.')+'</div>'; }
+    return h||'<div class="mgSum"><span class="clChip dim" data-xpl="'+xq(d.tier===1?'League 2 plays only the league: the Coco Cup comes with League 1.':'No cups for you this season.')+'">NO CUPS</span></div>'; }
   function mgFinanceTab(d){ const f=computeFinance(d); let h=finRow('Budget',money(d.budget),true,d.budget<0?'var(--bad)':'var(--good)');
     if(d.budget<0) h+='<div class="mgHint" style="color:var(--bad)">In the red: you can’t buy or sign anyone until you’re back in the black. Selling still works.</div>';
     h+='<div class="bpSect">EVERY WEEK OF THE SEASON</div>'+finRow('Partners',money(f.sponsorWk))+finRow('Broadcast',money(f.broadcastWk))+finRow('Shirt sales (each Monday)',money(f.shirtWk))
@@ -20386,7 +20389,7 @@
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     const nb=(d.bids||[]).length; if(nb) h+='<div class="mgHint">Your own bids ('+nb+' out) are in Bids.</div>';
     h+='<div class="bpSect">FOR YOUR MEN</div>';
-    if(!O.length) h+='<div class="mgHint">No offers right now.'+(Object.keys(d.listed||{}).length?'':' Put players on the transfer list (Selling) to draw bids.')+'</div>';
+    if(!O.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="'+xq(Object.keys(d.listed||{}).length?'No club has bid for your listed men yet.':'Put players on the transfer list (Selling) to draw bids.')+'">NO OFFERS</span></div>';   // (v177: J1)
     for(const o of O){ const p=d.roster.find(x=>x.id===o.pid), c=d.world.clubs[o.club];
       h+='<div class="mgOffer fitWhole"><div><b>'+mgEsc(c.name)+'</b> <span class="mgCardSub">('+MG_LEAGUE[c.tier]+')</span> bid <b style="color:var(--warn)">'+money(o.fee)+'</b> for <b>'+mgEsc(p.name)+'</b></div>'
         +'<div class="mgCardSub">'+(p.subRole||p.role)+' · '+p.ovr+' · age '+p.age+' · value '+money(mgValue(d,p))+(d.listed[p.id]?' · you asked '+money(d.listed[p.id]):'')+(p.hg?' · academy: '+money(o.fee-agentCut(p,o.fee))+' after his agent':'')+'</div>'
@@ -20406,7 +20409,7 @@
     const now=log.filter(e=>e.season===S), got=now.filter(e=>e.out==='signed');
     h+='<div class="mgSum">This season: '+(now.length+live.length)+' bid'+(now.length+live.length===1?'':'s')+' · '+got.length+' signed'+(got.length?' for '+money(got.reduce((a,e)=>a+e.fee,0)):'')+'</div>';
     h+='<div class="bpSect">OUT NOW · '+live.length+'</div>';
-    if(!live.length) h+='<div class="mgHint">'+(mgWindowOpen(d)?'No bids out. Find a man in Search and bid from his card.':'No bids out: the window’s shut.')+'</div>';
+    if(!live.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="'+xq(mgWindowOpen(d)?'Find a man in Search and bid from his card.':'The window\u2019s shut.')+'">NO BIDS OUT</span></div>';   // (v177: J1)
     for(const {b,f} of live){ const st=b.st==='yes'?'<b style="color:var(--good)">AGREED</b>: sign him':b.st==='wait'?'an answer on Monday':'<b style="color:var(--warn)">THEY WANT '+money(b.ask)+'</b>'+(b.rival?' · a rival’s in':'');
       h+='<div class="mgOffer fitWhole mgBidLive"><div><b>'+mgEsc(f.p.name)+'</b> <span class="mgCardSub">'+mgEsc(f.club.code||f.club.name)+'</span> · bid <b>'+money(b.fee)+'</b> · '+st+'</div>'
         +'<div class="mgBtns">'+(b.st==='more'?'<button class="mgBtn go" data-mg="meet" data-pid="'+b.pid+'">MEET IT</button><button class="mgBtn warn" data-mg="walk" data-pid="'+b.pid+'">WALK AWAY</button>':'')
@@ -20427,7 +20430,7 @@
   // ---- scouting ----
   function mgReportsTab(d){ const K=d.kn||{}, L=Object.keys(K).filter(id=>K[id]>=1).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
     let h='<div class="mgSum"><span data-xpl="A report loses a level when the season ends.">'+plCount(L.length,'SCOUTED')+'</span></div>';   // (v171: a tap for what becomes of a report)
-    if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
+    if(!L.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="Scout a player from the market, or send your scouts round a league (Assignments).">NO REPORTS YET</span></div>';   // (v177: J1)
     return mgPanes(plHead(h,'ASKING',true,true)+'<div class="mgList plList plOther">'+L.map(f=>mgRow(d,f.p,{ovr:String(f.p.ovr), pot:potTxt(d,f.p,f,true), club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
       right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
       MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
@@ -20444,7 +20447,7 @@
 
   // ---- the academy ----
   function mgProspectsTab(d){ const Y=d.youth||[]; let h='';   // (v171: what they are, a tap on the count -- it was two lines over the list)
-    if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
+    if(!Y.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="A new intake arrives every summer.">EMPTY</span></div>';   // (v177: J1)
     return mgPanes(plHead('<div class="mgSum"><span data-xpl="Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.">'+plCount(Y.length,Y.length===1?'YOUNGSTER':'YOUNGSTERS')+'</span></div>'+h,null,false,true)+'<div class="mgList plList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:String(p.ovr), pot:potTxt(d,p,{youth:true},true), trend:true, right:null, sel:MGUI.sel===p.id})).join('')+'</div>',   // (v171: his potential a column, his age by his name -- no AGE column)
       MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgFacilitiesTab(d){ return bldScreen(d,'academy',BS.academy); }   // (v173: J4)

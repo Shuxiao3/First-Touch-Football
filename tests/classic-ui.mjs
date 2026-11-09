@@ -151,6 +151,7 @@ for(const [w, h] of SIZES){
       ok(r.right && r.s === 1 && Math.abs(r.mid[0]) <= 2, 'CAMPUS MENU: RIGHT puts the buildings down the right, the campus as it was'); }
   }
   await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once; NEXT DAY's sunset is manager-career.mjs's)
+  const audit = [];   // (v177, the handoff's J1: no sentence longer than a label on a building's screen, by default -- its words a tap away)
   for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'academy']){
     await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
     let tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
@@ -169,7 +170,9 @@ for(const [w, h] of SIZES){
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
     if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn', '#bpBody .clGo .mgBtn', '#bpBody .bsTiles']);
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
-      await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench', '.selRow']); }
+      await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench', '.selRow']);
+      if(w === 844 && h === 390 && !(b === 'club' && t === 'News')) for(const x of await page.evaluate(() => [...document.querySelectorAll('#bldgPanel *')].filter(e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
+          .map(e => [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').replace(/\s+/g, ' ').trim()).filter(t => t.length > 48))) audit.push(b + ' / ' + t + ': "' + x.slice(0, 70) + '"'); }   // (v177: J1's audit -- the news is the game's voice)
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
   await page.tap('#careerHub [data-hub="decor"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
@@ -177,6 +180,7 @@ for(const [w, h] of SIZES){
     await check('decorate / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.decoCard']); }
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
+  if(w === 844 && h === 390) ok(!audit.length, 'J1\'s audit: no building\'s screen, any tab, shows a sentence longer than a label by default (48 characters; the news excepted)' + (audit.length ? ' -- ' + audit.slice(0, 4).join(' | ') : ''));
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (3-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
     await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
