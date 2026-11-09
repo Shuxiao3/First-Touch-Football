@@ -6664,9 +6664,9 @@
   function posPenOf(p){ const c=p.posPen; if(c&&c.a===p.slotAtk&&c.d===p.slotDef&&c.e===p.squadIdx&&c.s===p.style) return c;
     const nat=fitOfP(p);   // (his archetype's fit: v118)
     return p.posPen={a:p.slotAtk, d:p.slotDef, e:p.squadIdx, s:p.style, offIQ:FIT_PEN[posFit(nat,spotFit(p.slotAtk))].offIQ, defIQ:FIT_PEN[posFit(nat,spotFit(p.slotDef))].defIQ}; }
-  // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/134, 10 => 166/228)
+  // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/137.5, 10 => 166/217 -- px a second, 25 to the metre)
   function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
-  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),127, 217); }   // (v179: a twentieth slower flat out -- it was 134 to 228)
+  function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),137.5, 217); }   // (v181: a Speed 1 man 5.5 m/s flat out, the quickest 8.7 as v179 left them -- v179 took a twentieth off everyone's, 134 to 228 down to 127 to 217, the slowest down to 5.1)
   // HIS LEGS: what tiredness leaves of his top speed -- his stamina now, and the ceiling the match has worn it down to
   // (see stepOutfield): 1 fresh, about 0.9 a tired man, 0.64 at the very worst
   function legsOf(p){ return (0.78+0.22*clamp(p.stamina??1,0,1))*(0.74+0.26*(p.staminaCap??1)); }
@@ -6683,7 +6683,8 @@
   function physioBack(p){ return PHYSIO_HT[p.team==='G'&&careerFix&&careerFix.physio||0]/100; }   // (half of what the half took, without one: v121; it was a quarter)
   // A SPRINT'S COST (v121): what tires a man is the ground he covers flat out, not the seconds -- the same metre costs
   // the same whoever runs it, so a quick man pays for his pace. A second at SPRINT_TOP (a Speed 6 man's top speed)
-  // costs what a second flat out cost anyone before v121; Speed 10's a fifth more, Speed 2's about a quarter less. The
+  // costs what a second flat out cost anyone before v121; Speed 10's a fifth more, Speed 2's about a fifth less (v181: a
+  // quarter less while the slowest were slower -- see sprintSpeedOf). The
   // ceiling it wears goes the same way (CAP_WEAR a second at that pace; before v121 0.007 a second at any speed). His
   // Stamina sets what a metre costs, as before. (v123: a metre a fifth dearer than v121 made it -- the fastest man paid
   // what he always had, SPRINT_TOP 228 -- and the ceiling worn faster, 0.0045 then: half-time found the sides fresh as

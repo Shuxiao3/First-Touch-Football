@@ -2924,6 +2924,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v181: the slowest flat out at 5.5 m/s.** A Speed 1 man's top speed is 5.5 m/s again (v179's twentieth off took
+  him to 5.1; it was 5.4 before that), the quickest still 8.7, everyone between on the line from one to the other --
+  Speed 5.5 7.1 m/s (6.9 in v180). A metre flat out still costs the same whoever runs it, so a slow man's second
+  flat out now costs a bit more: a Speed 2 man's about a fifth less than a Speed 6 man's, where it was a quarter
+  less. See **Pace, with the ball and without**.
 - **v180: the hurt stay on till you take them off; your corner aimed; crosses into the heart of the box; no hopeless
   shots.** A man of yours hurt in a match stays on, slowed, a red cross over his head (theirs too), till you take him
   off: he tops the quick subs -- your planned man for him, else the bench's best at his spot -- the chip lit, and
@@ -3765,16 +3770,18 @@ test, and like the Trap Lab the values are the game's settings.
   the simulation does (pass range, spray, sprint speed, trap window, tackle reach, dive
   range, shot odds) reads from a stat, not a constant. Each outfielder's stats are built around a
   playing style; see [Playing styles](#playing-styles).
-- **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.1 m/s
-  flat out at 1, up to 6.6 and 8.7 m/s at 10 (v179: a twentieth off flat out for everyone -- it was 5.4 and 9.1 --
-  and a second flat out tires him as it did). With the ball at his feet he's slower, by a fifth at
+- **Pace, with the ball and without** — Speed sets how fast a man runs: 3.8 m/s at a jog and 5.5 m/s
+  flat out at 1, up to 6.6 and 8.7 m/s at 10 (v181: the slowest back up to 5.5 flat out, the quickest left where v179
+  put them; v179 had taken a twentieth off everyone's flat out -- 5.4 to 5.1 at 1, 9.1 to 8.7 at 10 -- a second flat
+  out tiring him as it did). With the ball at his feet he's slower, by a fifth at
   Dribbling 1 and a twentieth at 10. Sprinting with it tires him a little more than sprinting without
   it, and running with it at a jog tires him a little (well under half what it once did); without the
   ball, a jog gets his breath back. So a man through on goal with a defender of his own pace 4 m behind
   him, sprinting after him, gets his shot off before he's caught, from the edge of the box or closer.
   A slow starter (v180): under Acceleration 5.5 a man builds his speed a touch slower again -- a tenth slower at 1,
-  a twentieth at 3.25 -- so half a second flat out from a standstill takes him 3.43 m at Acceleration 1 (it was
-  3.49), 3.56 at 3.25 (3.59), and 3.66 at 5.5 and 3.75 at 10 as before.
+  a twentieth at 3.25 -- so half a second flat out from a standstill takes a Speed 6.5 man 3.49 m at Acceleration 1
+  (3.56 without it), 3.63 at 3.25 (3.66), and 3.73 at 5.5 and 3.83 at 10 as ever (v181's numbers: v180's were a
+  touch less, his top speed then a little lower).
 - **Stamina (v121)** — two things: the bar, which a sprint drains and a jog or a stand fills again, and the
   ceiling under it, which every sprint wears down for the rest of the half. A tired man is slower: at 70% of both,
   about a seventh.
@@ -3789,7 +3796,8 @@ test, and like the Trap Lab the values are the game's settings.
     as they did at 3 minutes. The bar, back within a few seconds of a sprint, goes by the second as it always has.
   - **A sprint costs by the ground it covers, not the seconds.** A metre flat out costs the same whoever runs it, so
     pace has a price: a Speed 6 or 7 man pays a second what a second flat out cost anyone before v121, the quickest
-    (Speed 10) a fifth more, a Speed 2 man about a quarter less. His Stamina sets what a metre costs, as before. The
+    (Speed 10) a fifth more, a Speed 2 man about a fifth less (v181; a quarter less while the slowest were slower). His
+    Stamina sets what a metre costs, as before. The
     ceiling wears the same way: 0.0075 a second at a Speed 6 man's pace in a 3-minute half (before v121 0.007 a second
     at any speed; v136: less a second in a longer half, see above).
     (v123: v121 had the quickest man pay what he always had and the ceiling wear at 0.0045, and the sides came to

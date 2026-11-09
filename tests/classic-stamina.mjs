@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, STAMINA (v121, v123). A SPRINT'S COST: what tires a man is the ground he covers flat out, not the
 // seconds -- the same metre costs the same whoever runs it: a Speed 6.5 man pays what a second flat out cost anyone
-// before v121, the quickest a fifth more, a slow one about a quarter less -- and the ceiling under his bar wears the
+// before v121, the quickest a fifth more, a slow one about a fifth less (v181; a quarter before the slowest were made
+// quicker flat out -- Speed 1 5.5 m/s, Speed 10 8.68) -- and the ceiling under his bar wears the
 // same way. HALF TIME gives back half of what the half took from the ceiling (it was a quarter). So after a half on the
 // computer the sides are tired but not spent. PACING: a computer player
 // whose ceiling has begun to go (under CAP_SAVE) saves his sprints for what matters -- none of the opportunistic ones,
@@ -51,9 +52,9 @@ const A = await page.evaluate(() => {
     for(let i = 0; i < 60; i++){ p.sprint = true; T.stepOutfield(p, 1, 0, dt); }
     const m = (p.x - x0) / T.MK, bar = 1 - p.stamina, cap = 1 - p.staminaCap;
     return { m: +m.toFixed(2), bar: +bar.toFixed(4), cap: +cap.toFixed(5), perM: +(bar / m).toFixed(5), top: T.sprintSpeedOf(p), was: +T.drainSprintOf(p).toFixed(4), wasCap: +(0.007 * T.staminaCapDrainOf(p)).toFixed(5), nowCap: +(T.CAP_WEAR * T.capRate() * T.staminaCapDrainOf(p)).toFixed(5) }; };
-  const fast = run(10), mid = run(6.5), slow = run(2);
+  const fast = run(10), mid = run(6.5), slow = run(2), one = run(1);
   p.stats = keep.stats; p.x = keep.x; p.y = keep.y; p.vx = p.vy = 0; p.sprint = false; p.stamina = p.staminaCap = 1;
-  return { fast, mid, slow };
+  return { fast, mid, slow, one };
 });
 info('a second flat out: ' + JSON.stringify(A));
 // (v136) THE HALF'S LENGTH: 4 minutes unless you pick another, and the ceiling worn as a 3-minute half wears it over the
@@ -64,10 +65,11 @@ const HL = await page.evaluate(() => { const T = window.__T, was = T.P.halfMin.v
   T.P.halfMin.val = was; return r; });
 info('the half: ' + JSON.stringify(HL));
 ok(HL.def === 4 && HL.secs === 240 && HL.k3 === 1 && HL.k4 === 0.75 && HL.k5 === 0.6, 'a half is 4 minutes unless you pick another (it was 3), and its ceiling wears as a 3-minute half\'s over the match: ' + HL.k4 + ' as fast a second at 4, ' + HL.k5 + ' at 5 (v136)');
+ok(A.one.top === 137.5 && A.fast.top === 217, 'top speed flat out: Speed 1 ' + (A.one.top / 25) + ' m/s, Speed 10 ' + (A.fast.top / 25) + ' m/s (v181: the slowest back up to 5.5 -- v179 had them all a twentieth down, Speed 1 to 5.08, Speed 10 to 8.68)');
 ok(Math.abs(A.mid.bar / A.mid.was - 1) < 0.08 && Math.abs(A.mid.cap / A.mid.nowCap - 1) < 0.08,
   'a Speed 6.5 man (' + A.mid.m + ' m in the second flat out) pays what a second cost anyone before v121 (' + A.mid.bar + ' of his bar, against ' + A.mid.was + '), his ceiling ' + A.mid.cap + ' a second');
 ok(A.fast.bar / A.fast.was >= 1.1 && A.fast.bar / A.fast.was <= 1.25 && A.slow.bar / A.slow.was >= 0.65 && A.slow.bar / A.slow.was <= 0.85,
-  'the quickest (Speed 10, ' + A.fast.m + ' m) pays about a fifth more a second (' + A.fast.bar + '), a slow man (Speed 2, ' + A.slow.m + ' m) about a quarter less (' + A.slow.bar + ')');
+  'the quickest (Speed 10, ' + A.fast.m + ' m) pays about a fifth more a second (' + A.fast.bar + '), a slow man (Speed 2, ' + A.slow.m + ' m) about a fifth less (' + A.slow.bar + '; v181 -- a quarter less while the slowest were slower)');
 ok([A.fast, A.slow].every(x => Math.abs(x.perM / A.mid.perM - 1) < 0.05) && A.slow.cap < A.mid.cap && A.mid.cap < A.fast.cap,
   'a metre flat out costs the same whoever runs it (' + [A.fast.perM, A.mid.perM, A.slow.perM].join(', ') + ' of the bar), and the ceiling wears in step (' + [A.fast.cap, A.mid.cap, A.slow.cap].join(', ') + ' a second)');
 

@@ -55,7 +55,8 @@ await page.fill('#bpBody .mgAmtIn[data-amt="bidset"]', '2.5m'); await page.press
 await page.fill('#bpBody .mgAmtIn[data-amt="bidset"]', '10'); await page.press('#bpBody .mgAmtIn[data-amt="bidset"]', 'Enter'); await page.waitForTimeout(80); const tiny = await fee();
 info('their price $' + ask.toLocaleString() + ': ' + quick.join(' / ') + ' -> ' + got.join(', ') + '; typed 2.5m -> ' + typed + ', typed 10 -> ' + tiny);
 const near = (a, b) => Math.abs(a - b) <= Math.max(100, b * 0.01);
-ok(quick.join() === 'HALF,3/4,THEIR PRICE,+10%' && near(got[0], ask * 0.5) && near(got[1], ask * 0.75) && got[2] === ask && near(got[3], ask * 1.1) && typed === 2500000 && near(tiny, ask * 0.5),
+const want = await K(`[0.5,0.75,1.1].map(k=>mgRound(${ask}*k))`);   // (v181: each a round figure as the game rounds it -- $100,000s from $1M: a 1% allowance failed when 1.1 times the price came to just over $1M)
+ok(quick.join() === 'HALF,3/4,THEIR PRICE,+10%' && got[0] === want[0] && got[1] === want[1] && got[2] === ask && got[3] === want[2] && typed === 2500000 && tiny === want[0],
   'a bid in a tap: HALF, 3/4, THEIR PRICE, +10% -- or any figure typed (2.5m: $' + (typed || 0).toLocaleString() + '; under half their price, half: $' + (tiny || 0).toLocaleString() + ') -- one tap, or a field, a figure and Enter');
 r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).find(k=>k.tier===d.tier), p=c.players.find(x=>!mgWontCome(d,x)); const before=mgBuyActions(d,p,c,false); knUp(d,p,3,3); const after=mgBuyActions(d,p,c,true); return { before:/WORTH/.test(before), after:/WORTH/.test(after), v:mgValue(d,p), ask:mgAsk(d,p,c) }; })()`);
 ok(!r.before && r.after, 'once he\'s scouted, what he\'s worth ($' + r.v.toLocaleString() + ') beside what they ask ($' + r.ask.toLocaleString() + '): a dear price in red, a cheap one in green');
