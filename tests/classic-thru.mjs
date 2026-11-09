@@ -3,7 +3,8 @@
 // there -- and bends on round onto the runner along a steady arc (the same turn every metre, however it slows), as much
 // as that takes and as much as the passer's Curve gives him (6 degrees of turn at Curve 1, 43 at 10 -- v165: 34 before). The pass is chosen
 // on that path, not on a straight line through a man. The ball goes the way it was chosen for, a read of its path reads
-// the bend, and a touch on the way ends it.
+// the bend, and a touch on the way ends it. (v168: out wide it's hooked in late, as the coached balls were, when that's
+// the safer -- as it is in the scene here.)
 // On a copy of the game that lets the test set the scene and reach the passes.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -14,7 +15,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, P, FW, FH, YC, MK, atkOf, simNow:()=>simNow, '
-  + 'obThruBall, obPassOpt, obCtx, thruDoors, thruArcs, arcAt, thruArcOf, ballAt, passLead, '
+  + 'obThruBall, obPassOpt, obCtx, thruDoors, thruArcs, arcAt, thruArcOf, ballAt, passLead, hookTurn:th=>th*Math.pow(THRU_MEET,THRU_HOOK), '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');   // (the scenes' runners are in behind)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-thru-')), 'classic.html');
@@ -122,7 +123,8 @@ ok(choice[10] && choice[10].thru && choice[10].arc > 0 && choice[10].bow < -0.3,
 ok(choice[10] && (!choice[1] || choice[1].P < choice[10].P - 0.04), 'Curve 1: he can\'t bend it enough, so it\'s the riskier ball (' + (choice[1] ? choice[1].P : 'not on') + ' against ' + (choice[10] && choice[10].P) + ')');
 
 // OUT WIDE: their outside man 20 m off the middle, the runner outside him (24 m off it) going in behind down the line,
-// the passer 18 m off it; the ball goes between their man and the touchline, bent away from him, and stays in. Against
+// the passer 18 m off it; the ball goes between their man and the touchline, bent away from him -- round him on a
+// steady arc, or (v168) hooked in late as the coached balls were, whichever's the safer -- and stays in. Against
 // Curve 1, the same ball's chance
 const wideP1 = await page.evaluate(() => { const S = window.__scene(1, 6, 20, { u: 26, w: 24, v: 7.5 }), { T, p, q, b, Y } = S; p.y = Y(18); b.y = p.y;
   const C = T.obCtx(p, S.atk, S.atk > 0 ? T.FW : 0); const R = Math.random; Math.random = () => 0.5; let o; try { o = T.obPassOpt(p, q, C); } finally { Math.random = R; }
@@ -133,16 +135,16 @@ const wide = await page.evaluate(() => new Promise(res => {
   const C = T.obCtx(p, S.atk, S.atk > 0 ? T.FW : 0);
   const R = Math.random; Math.random = () => 0.5; let o; try { o = T.obPassOpt(p, q, C); } finally { Math.random = R; }
   if(!o || !o.thru){ return res({ o: null }); }
-  { const R = Math.random; Math.random = () => 0.5; try { T.obThruBall(p, q, o.tx, o.ty, o.thru, o.arc); } finally { Math.random = R; } }
+  { const R = Math.random; Math.random = () => 0.5; try { T.obThruBall(p, q, o.tx, o.ty, o.thru, o.arc, o.hook); } finally { Math.random = R; } }   // (as the game strikes it)
   const t0 = T.simNow(), edge = T.FH / 2 / M; let wMax = 0, outside = false;
   (function tick(){ S.A.x = X(27); S.A.y = Y(6); S.B.x = X(27); S.B.y = Y(20); S.A.noTouchT = S.B.noTouchT = 99; q.x = X(-30); q.y = Y(30); q.vx = q.vy = 0;
     const t = T.simNow() - t0, w = (b.y - T.YC) / M, u = (b.x - T.FW / 2) / M * S.atk; wMax = Math.max(wMax, w);
     if(Math.abs(u - 27) < 0.6 && w > 20 + 2.5) outside = true;
-    if(t > 2.4 || (t > 0.3 && Math.hypot(b.vx, b.vy) < 20)){ const r = { arc: o.arc ? +(o.arc.th * 57.3).toFixed(1) : 0, side: o.arc ? o.arc.side : 0, wMax: +wMax.toFixed(1), edge: +edge.toFixed(1), outside, P: +o.P.toFixed(3) };
+    if(t > 2.4 || (t > 0.3 && Math.hypot(b.vx, b.vy) < 20)){ const r = { arc: o.arc ? +(o.arc.th * 57.3).toFixed(1) : 0, hook: !o.arc && o.hook ? +(T.hookTurn(o.hook.th) * 57.3).toFixed(1) : 0, side: o.arc ? o.arc.side : o.hook ? o.hook.side : 0, wMax: +wMax.toFixed(1), edge: +edge.toFixed(1), outside, P: +o.P.toFixed(3) };
       b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = 0; b.curveSpinT = 0; b.arcK = 0; return res(r); }
     requestAnimationFrame(tick); })(); }));
 info('out wide: ' + JSON.stringify(wide));
-ok(wide.arc > 0 && wide.outside, 'out wide, a ball in behind goes between their outside man and the touchline, bent away from him (' + wide.arc + '°)');
+ok((wide.arc > 0 || wide.hook > 0) && wide.outside, 'out wide, a ball in behind goes between their outside man and the touchline, bent away from him (' + (wide.arc ? 'round him, ' + wide.arc + '°' : wide.hook ? 'hooked in late, ' + wide.hook + '° by the spot' : 'straight') + ')');
 ok(wideP1 < wide.P - 0.15, '...and it\'s on because he can bend it: the same ball at Curve 1 has ' + wideP1 + ' of getting there to his ' + wide.P);
 ok(wide.wMax < wide.edge - 1, '...and stays in (' + wide.wMax + ' m off the middle at most; the line\'s at ' + wide.edge + ')');
 

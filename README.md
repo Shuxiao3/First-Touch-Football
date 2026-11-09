@@ -1166,6 +1166,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Where it's met stays.** Played half that again across toward the passer's side, as drawn, your through balls
       were lost far more often (the man of theirs on that side got there): through a gap at Curve 10, 50 in 100 yours
       against 69; with a fifth of it across, 65. So it's still played along the runner's line.
+    - **Out wide, the computer's hooked too.** Its ball in behind down the line, between their outside man and the
+      touchline, now hooks in late as drawn (34° by the spot) where it went round him on a steady arc (43°): with
+      less bend on the hook, that's become the safer of the two.
     - **What it comes to.** Your through balls on the same 1000 scenes a Curve: through a gap, 71 in 100 yours at
       Curve 1 and 68 at 10 (70 and 70 in v167); with one of theirs off the runner, 80 and 82 (82 and 89). There the
       v167 hook kept more: a curling ball is harder for them to deal with, and the bend no longer goes on balls whose
@@ -2708,9 +2711,9 @@ test, and like the Trap Lab the values are the game's settings.
 - **v168: through balls, as much bend as they need.** From the second coaching round: by the spot a through ball has
   turned 6° at Curve 1 and 45° at 10 (it was 9° and 72°), times as much as the pass needs -- all of it with one of
   theirs in its way, little through a clear lane -- and it's met four-fifths of the way along its curve, still turning.
-  Its belly away from a man in its way, else the nearest short of the spot. The drawn spots, across toward the
-  passer's side, were tried and not taken: more of your through balls were lost. See **Through balls, as much bend as
-  they need (v168)**.
+  Its belly away from a man in its way, else the nearest short of the spot. Out wide, the computer's ball in behind
+  down the line is hooked in late too, now the safer. The drawn spots, across toward the passer's side, were tried
+  and not taken: more of your through balls were lost. See **Through balls, as much bend as they need (v168)**.
 - **v167: through balls bent as they were drawn; no lofted passes; backspin.** A through ball sets off a little wide
   and hooks in late onto the spot, as the ones drawn on the coaching page did -- 9° of turn at Curve 1, 72° at 10 (it
   was 29°) -- its belly away from the nearest of theirs short of the spot, or straight through a gap between two of
