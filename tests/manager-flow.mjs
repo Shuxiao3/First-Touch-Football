@@ -75,7 +75,7 @@ const tipAt = async upM => { await K(`(()=>{ ${quiet} const c=controlled&&contro
     ball.x=c.x+atk*(c.r+ball.r+4); ball.y=c.y; ball.z=0; ball.vx=ball.vy=ball.vz=0; own(c,c.r+ball.r+4); TIP.gap=0; TIP.t=0; return 1; })()`);
   await page.waitForTimeout(250); return K(`({ on:document.getElementById('tipBar').classList.contains('on'), text:document.getElementById('tipBar').innerText, seen:PREFS.tipsSeen })`); };
 const tip1 = await tipAt(-5);
-ok(tip1.on && /PASS/.test(tip1.text) && /loft/.test(tip1.text) && tip1.seen === 'p', 'the ball yours for the first time: a word on passing over the pitch ("' + tip1.text + '")');
+ok(tip1.on && /PASS/.test(tip1.text) && /through ball/.test(tip1.text) && !/loft/.test(tip1.text) && tip1.seen === 'p', 'the ball yours for the first time: a word on passing -- and the through ball, no lofted pass now (v167) ("' + tip1.text + '")');
 await K(`(()=>{ TIP.t=0; document.getElementById('tipBar').classList.remove('on'); return 1; })()`);
 const tip2 = await tipAt(-5);
 const tip3 = await tipAt(34);

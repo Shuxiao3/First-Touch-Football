@@ -306,6 +306,7 @@ const flick = async (dx, dy) => { await finger('touchStart', skillAt.x, skillAt.
 const passTo = (gap, charge, sx) => mp.evaluate(({ gap, charge, sx }) => { const T = window.__T, atk = T.atkOf('G'), mates = T.players().filter(q => q.team === 'G'), a = mates[0], r = mates[1];
   T.setControlled(a); T.freeze();
   for(const q of T.players()) if(q !== a && q !== r){ q.x = T.FW / 2 - atk * 900; q.y = 40; q.vx = q.vy = 0; }
+  a.stats = Object.assign({}, a.stats, { longPass: 1 });   // (v167: a long pass from a man with the Long passing for it checks up where it lands -- these are about the first touch, so his doesn't)
   a.x = T.FW / 2 - atk * gap; a.y = T.YC; a.vx = a.vy = 0; a.noTouchT = 0; r.x = T.FW / 2; r.y = T.YC + 100; r.vx = r.vy = 0; r.facing = { x: -atk, y: 0 }; r.noTouchT = 0; r.reactUntil = 0; r.state = 'normal';
   const b = T.ball(); b.ownedBy = a; b.dribbler = null; b.x = a.x + atk * 20; b.y = a.y; b.z = 0; b.vx = b.vy = b.vz = 0;
   const R = Math.random; Math.random = () => 0.5; try { T.doPass(charge, { target: r }); } finally { Math.random = R; }

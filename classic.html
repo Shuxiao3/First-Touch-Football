@@ -1563,7 +1563,7 @@
 <header>
   <h1>FOOTBALL<span class="dot">.</span> CLASSIC</h1>
   <div class="tag">
-    <span>left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; double-tap PASS to loft it, drag off PASS for a through ball into his run, leaned that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
+    <span>left: drag to move (double-tap sprint) · big button = TRAP / CALL / PASS by moment (tap anywhere right also traps; drag off PASS for a through ball into his run, leaned that way) · SHOOT / SHOOT! / SLIDE · CROSS (hold it longer for a man further across; double-tap: a low driven cross) / CROSS! (CLEAR in your own half) · with the ball, swipe right side to shoot (bend the swipe to curl it)</span>
   </div>
 </header>
 
@@ -2098,11 +2098,11 @@
     ftWin:    {val:0.2,min:0.05,max:0.5,step:0.01,label:'First touch: drag window (s)',hint:'How long after your finger lands on TRAP a drag still aims the touch. The press itself is timed from the moment your finger lands; drag before the ball gets to you, or just after, and the touch goes that way.'},
     ftDrag:   {val:24,min:8,max:80,step:2,label:'First touch: drag to aim (px)',hint:'How far your finger has to move from where it landed on TRAP before it counts as a direction (screen pixels). Less = a shorter flick aims it, more = a sloppy tap won\'t.'},
     // pass types (tune them live in the Pass Lab)
-    passDtap: {val:150,min:60,max:350,step:10,label:'Pass: double-tap window (ms)',hint:'How soon the second tap of a double-tap (a lofted pass) has to follow the first. A quick single tap waits this long before it goes, to see whether a second tap is coming, so shorter = snappier taps but a quicker double-tap needed.'},
+    passDtap: {val:150,min:60,max:350,step:10,label:'Cross: double-tap window (ms)',hint:'How soon the second tap of CROSS (a low driven cross) has to follow the first. A quick single tap on CROSS waits this long before it goes, to see whether a second tap is coming. (PASS has no double-tap: v167.)'},
     passDrag: {val:28,min:12,max:80,step:2,label:'Pass: drag for a through ball (px)',hint:'On touch, how far you have to drag off the PASS button for it to be a through ball rather than a plain pass.'},
     thruLead: {val:1,min:0.4,max:2,step:0.05,label:'Through ball: lead ×',hint:'How far ahead of the receiver a through ball is played (130 to 230 px at 1x, longer for longer passes). Bigger = further into space, more for them to run onto.'},
-    loftHang: {val:1,min:0.6,max:1.6,step:0.05,label:'Lofted pass: hang time ×',hint:'How long a lofted pass stays up (0.65 to 1.45 s at 1x, longer for longer passes). Higher = a higher, slower ball that drops more steeply.'},
-    lobCheck: {val:0.5,min:0.1,max:1,step:0.05,label:'Lofted pass: pace kept on landing',hint:'A lofted pass checks up where it lands (backspin): this is the share of its pace it keeps through that first bounce. 1 = no check-up at all.'},
+    loftHang: {val:1,min:0.6,max:1.6,step:0.05,label:'Keeper\'s long ball: hang time ×',hint:'How long your keeper\'s long ball (CLEAR or SHOOT with it in his hands) stays up (0.65 to 1.45 s at 1x, longer for longer balls). Higher = a higher, slower ball that drops more steeply. (No lofted passes: v167.)'},
+    lobCheck: {val:0.5,min:0.1,max:1,step:0.05,label:'Chip over a man: pace kept on landing',hint:'Your chip over a man on the run checks up where it drops (backspin): this is the share of its pace it keeps through that first bounce. 1 = no check-up at all. (A long pass\'s backspin goes by Long passing: v167.)'},
     // swipe shots (tune them live in the Shooting Lab)
     swipeCurl:{val:2,min:0,max:4,step:0.1,label:'Swipe shot: curl ×',hint:'How hard a fully bent swipe curls the ball. The Curve stat scales it again.'},
     swipePow: {val:3.2,min:1.4,max:6,step:0.1,label:'Swipe shot: flick for full power',hint:'How fast a flick (in screen widths per second, over its quickest 70 ms) gives a full-power shot. Lower = full power comes easier.'},
@@ -3659,7 +3659,7 @@
   function noSwitch(p){}
 
   const ball={x:FW/2,y:FH/2,vx:0,vy:0,r:8,roll:0,z:0,vz:0,
-              ownedBy:null,cushBy:null,cushQ:0,cushZ:0,lastTouch:null,shotBy:null,shotT:0,curveSpin:0,curveSpinT:0,curveK:0,arcK:0,arcLeft:0,crossBy:null,crossT:0,lastTouchP:null,prevTouchP:null,mePassBy:null,mePassT:0,
+              ownedBy:null,cushBy:null,cushQ:0,cushZ:0,lastTouch:null,shotBy:null,shotT:0,curveSpin:0,curveSpinT:0,curveK:0,arcK:0,arcLeft:0,arcLen:0,arcM:1,arcU:0,crossBy:null,crossT:0,lastTouchP:null,prevTouchP:null,mePassBy:null,mePassT:0,
               dribbler:null,dribbleGrace:0};
   function mkKeeper(side,team){
     return {x:side<0?26:FW-26,homeX:side<0?26:FW-26,y:YC,side,team,r:12,
@@ -3690,10 +3690,10 @@
   let trapping=0,trapHeld=false,lastGrade='',gradeColor='#9dff3c',gradeFade=0,lastTouchDir=null;
   let trapPressT=-9,trapCd=0,simNow=0;   // when trap was last pressed; re-press lockout; sim clock (s)
   let kickHeld=false,kickCharge=0,shootHeld=false,shootCharge=0;
-  // PASS TYPES: a double-tap puts the pass in the air; on touch, dragging off the PASS button plays it through,
-  // led the way you dragged. A quick tap has to wait a moment to know it isn't the first half of a double-tap.
-  let passPend=null;        // a quick-tap pass held back for the double-tap window: {charge, at}
-  let passLoft=false;       // this press is the second tap of a double-tap
+  // PASS TYPES: on touch, dragging off the PASS button plays it through, led the way you dragged. (v167: a double-tap
+  // put the pass in the air, and a quick tap had to wait a moment to know it wasn't the first half of one -- no more.)
+  let passPend=null;        // (v167: always null -- a tap's pass isn't held back for a second tap any more)
+  let passLoft=false;       // (v167: always false -- no lofted pass)
   let passDown=null;        // the PASS press in progress: {t, x, y, lx, ly} (+ pts/w/h for a touch's trail)
   let thruMark=null;        // where the last through ball was played to, shown briefly on the pitch
   const DTAP_PRESS=220;      // ms a press must be under to count as a tap (the window and the drag are dials: passDtap, passDrag)
@@ -3755,7 +3755,7 @@
       if(e.code==='Backquote'){ DBG=!DBG; }
       if(e.code==='KeyV'){ try{SPRITE.enable(!SPRITE.enabled);}catch(_){} }   // toggle sprites
       if(e.code==='KeyJ'){
-        if(myBall()||keeperInHand()||myThrow())passPress();      // you have it (or it's a touch away) -> pass (double-tap: in the air); your keeper's in his hands: thrown (v114); a throw-in in yours: thrown (v138)
+        if(myBall()||keeperInHand()||myThrow())passPress();      // you have it (or it's a touch away) -> pass; your keeper's in his hands: thrown (v114); a throw-in in yours: thrown (v138)
         else if(defHeaderReady()){controlled.vz=headJumpVz(controlled);defHeaderT=0.85;}  // head a cross clear
         else if(firstTouchBall(controlled))firstTouchPass();   // strikeable loose ball -> first-time pass
         else if(incomingAny())queueOneTouch();         // it's on its way to you -> pass it first time when it gets there
@@ -3850,7 +3850,7 @@
       tapStart[t.identifier]=onBtn?null:{x:t.clientX,y:t.clientY,t:performance.now(),q:(myBall()||incomingAny()||keeperInHand()||myThrow())?mateAtClient(t.clientX,t.clientY):null};
       if(t.target===btns.kick){
         if(myBall()||keeperInHand()||myThrow()){
-          { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; double-tap lofts it; drag off it for a through ball)
+          { passPress(t.clientX,t.clientY,r); kickTouchId=t.identifier; }                                      // controlled possession: PASS (hold to charge; drag off it for a through ball)
         }
         else if((ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G')) callPass();                    // teammate has it: CALL for it (your keeper: PASS, he plays it out)
         else if(incomingAny()){ queueOneTouch(); otTouch={id:t.identifier,x:t.clientX,y:t.clientY}; }               // on its way to you: ONE-TOUCH pass (swipe off it to aim it)
@@ -5057,7 +5057,7 @@
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
     trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'First-touch spread',aiReact:'AI reaction',
     ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
-    passAcc:'Short passing',longPass:'Long passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Double-tap window',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Lofted pass hang time',lobCheck:'Lofted pass check-up',
+    passAcc:'Short passing',longPass:'Long passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Cross double-tap',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Long ball hang time',lobCheck:'Chip check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',gkHandling:'Keeper handling',
     skCutPop:'Knock-on · push',oneTouchErr:'One-touch · worst spray',oneTouchMax:'One-touch · longest',turnPassErr:'Turn-and-pass · worst spray',skRainbowDist:'Rainbow · lead',skRainbowH:'Rainbow · height',skRainbowT:'Rainbow · wind-up',
@@ -5082,13 +5082,13 @@
     aiReact:'How long the AI takes to react to where its own touch went. Until then it eases off what it was doing. 0 = instant.',
     passAcc:'Your short passing (1 to 10): how true a pass goes up to 12 m -- and less of it the longer it is, none from 32 m.',
     longPass:'Your long passing (1 to 10): how true a ball of 32 m or more goes (a share of a shorter one from 12 m), and how far you can hit it well.',
-    passLoft:'How high a normal pass is struck. The default stays low over short range and clears a man halfway along a medium pass; double-tap for a lofted one.',
+    passLoft:'How high a pass is struck. The default stays low over short range and clears a man halfway along a medium pass.',
     passPace:'How firmly a normal pass is struck. Higher = there sooner, but harder to control when it arrives.',
-    passDtap:'How quickly the second tap of a double-tap has to come. A single tap waits this long.',
+    passDtap:'How quickly the second tap of CROSS has to come for a low driven cross. A single tap on CROSS waits this long.',
     passDrag:'How far you drag off PASS (touch) before it is a through ball.',
     thruLead:'How far ahead of the receiver a through ball goes. Bigger = more to run onto.',
-    loftHang:'How long a lofted pass stays up. Longer = higher, slower, steeper drop.',
-    lobCheck:'Pace a lofted pass keeps when it lands (it checks up). 100% = no check-up.',
+    loftHang:'How long your keeper’s long ball stays up. Longer = higher, slower, steeper drop.',
+    lobCheck:'Pace your chip over a man keeps when it drops (it checks up). 100% = no check-up. A long pass’s check-up goes by Long passing.',
     shotPower:'Your shot power (1 to 10): pace and how far it carries.',
     shotAcc:'Your shot accuracy (1 to 10): how close to the aim it flies. Corners are only a few px inside the posts.',
     curve:'Your curve (1 to 10): how hard a shot bends when you bend the swipe.',
@@ -5358,7 +5358,7 @@
     labEl.labResult.innerHTML=shown&&(shown.pass||shown.done)?passLabText(shown):passLabHint();
     labEl.labTally.textContent=passLabTallyText();
   }
-  function passLabHint(){ return 'Tap <b>PASS</b> · <b>double-tap</b> to loft it · <b>drag off PASS</b> for a through ball'; }   // (v159: the screen's buttons, on any device)
+  function passLabHint(){ return 'Tap <b>PASS</b> · <b>drag off PASS</b> for a through ball'; }   // (v159: the screen's buttons, on any device)
   function passLabText(r){
     const head=`<span class="lsv">${plName(PL_DISTS,r.dSet)} ${r.d} px · ${r.run?'running':'standing'}${r.def!=='none'?' · defender '+(r.def==='lane'?'in the lane':'marking'):''}</span>`;
     if(!r.pass) return `${head} <b style="color:${PL_COL.lost}">LOST IT</b> before you passed`;
@@ -6304,6 +6304,16 @@
   // and a bent ball is a bent ball.)
   const PASS_SHORT_M=12, PASS_LONG_M=32;
   const passLongT=d=>clamp(((d||0)/MK-PASS_SHORT_M)/(PASS_LONG_M-PASS_SHORT_M),0,1);
+  // BACKSPIN (v167): a long pass from a man with the Long passing for it checks up where it lands, as the lofted pass did
+  // -- that kept half its pace through the first bounce (lobCheck), and stopped too dead for a pass. A pass keeps
+  // BACKSPIN_KEEP of its pace through that bounce: all of it at Long passing 1, 60% at 10 -- by how much of it is a
+  // long pass (passLongT: none up to 12 m, all of it from 32 m). It comes to the man it's for the softer, the easier to
+  // take; everyone reading the ball reads it (ballAt). The check, as the lofted pass's was, is for a ball still on the
+  // line it was struck on (give or take its bend): a touch on the way that turns it takes it off.
+  const BACKSPIN_KEEP=[1,0.6];
+  function backspinKeep(p,d){ return 1-(1-statLerp(statOf(p,'longPass',P.longPass.val),BACKSPIN_KEEP[0],BACKSPIN_KEEP[1]))*passLongT(d); }
+  function backspin(p,d,dx,dy){ const k=backspinKeep(p,d);   // (t: when it should come down -- a touch on the way that changes that takes the check off it too)
+    ball.lob=k<0.995&&ball.vz>0?{x:dx,y:dy,k,t:simNow+(ball.vz+Math.sqrt(ball.vz*ball.vz+2*520*Math.max(0,ball.z)))/520}:null; }
   function passStatAt(p,d){ const t=passLongT(d), sh=statOf(p,'passAcc',P.passAcc.val); return t<=0?sh:t>=1?statOf(p,'longPass',P.longPass.val):sh+(statOf(p,'longPass',P.longPass.val)-sh)*t; }
   // PASS ACCURACY (the pass's stat, 1..10, d its length: none, short) -> short-pass accuracy (0.92=>1, 0.97=>10) and long-pass
   // accuracy (0.20=>1, 0.90=>10). per-player stats override the global baseline dials.
@@ -6625,7 +6635,7 @@
     ball.vz=sol.vz;
     ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
     ball.intendedRcv=mate; ball.rcvRunner=(mate.gapRun>0 || Math.hypot(mate.vx,mate.vy)>runSpeedOf(mate)*0.7); ball.thru=null; ball.lob=null;
-    ball.passerRef=p;
+    ball.passerRef=p; backspin(p,d,ax,ay);                    // (v167: a long one checks up where it lands, by his Long passing)
     recordPassTeam(p.team,p); passPose(p);
   }
   // ---- KEEPER DISTRIBUTION: land the ball ON the receiver for ANY distance ----
@@ -6750,7 +6760,7 @@
 
   // YOUR KEEPER WITH IT IN HIS HANDS (v114): you're on him the moment he has it -- not left on whoever you were. The stick
   // turns him and walks him round his box; PASS plays it to the man you're aiming at as a pass would pick him (that way,
-  // the free one; a tap on a man, him) -- thrown: along the grass, or double-tapped, overarm -- and you go with it; with
+  // the free one; a tap on a man, him) -- thrown along the grass (v167: no double-tapped overarm throw) -- and you go with it; with
   // nobody that way, thrown into the space that way. A goal kick the same, kicked (it's on the ground). CLEAR -- or SHOOT,
   // from his hands -- pings a long pass (keeperLong). His time up (GK_WAIT), it goes to the man you've got lit -- or,
   // nobody, where the side's BUILD-UP says (distribute)
@@ -6772,22 +6782,20 @@
     if(!q&&o.timeUp){ distribute(kp,true); kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0; return; }   // (his time up, nobody lit: the side's way)
     if(q){ const tx=q.x+q.vx*0.35, ty=q.y+q.vy*0.35, d=Math.hypot(tx-ball.x,ty-ball.y), fl=Math.hypot(tx-kp.x,ty-kp.y)||1;
       kp.facing={x:(tx-kp.x)/fl,y:(ty-kp.y)/fl};
-      if(kp.goalKick&&o.loft) gkLaunch(kp,tx,ty);                        // (a goal kick, double-tapped: chipped)
-      else if(o.loft){ const T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val; gkShort(kp,tx,ty,loftVh(d,T),260*T); }   // overarm: up and over, as your lofted pass flies
-      else { const sol=passSolve(d); gkShort(kp,tx,ty,sol.vh,sol.vz); }   // along the grass, as a pass would go (a goal kick: kicked so)
+      { const sol=passSolve(d); gkShort(kp,tx,ty,sol.vh,sol.vz); }     // along the grass, as a pass would go (a goal kick: kicked so) -- v167: no double-tapped throw over the top or chipped goal kick
       ball.intendedRcv=q; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=kp; }
     else { const d=kp.goalKick?clamp(420+charge*700,420,GK_KICKPASS):clamp(300+charge*460,300,GK_THROW);   // nobody that way: into the space (further, held)
       const tx=clamp(ball.x+a.x*d,40,FW-40), ty=clamp(ball.y+a.y*d,40,FH-40), sol=passSolve(Math.hypot(tx-ball.x,ty-ball.y));
-      const dd=Math.hypot(tx-ball.x,ty-ball.y), T=clamp(0.55+dd/900,0.65,1.45)*P.loftHang.val;
-      if(o.loft) gkShort(kp,tx,ty,loftVh(dd,T),260*T); else gkShort(kp,tx,ty,sol.vh,sol.vz);
+      gkShort(kp,tx,ty,sol.vh,sol.vz);
       ball.intendedRcv=null; }                                           // (nobody's: you go on to the nearest of ours -- gkHandBack)
     kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0;
     if(q) passSwitch(q);
   }
   // THE KEEPER'S LONG BALL (v115): CLEAR -- from his hands or at his feet -- or SHOOT from his hands. Not a defender's
   // clearance: a long pass, pinged to the man you're aiming at (the stick, else the way he faces), picked as a pass picks
-  // him but further on (the longer the better, 10 m to 60 m out), on a lofted pass's flight to his feet, struck by the
-  // keeper's distribution; you go with it. Nobody that way: long into the space that way
+  // him but further on (the longer the better, 10 m to 60 m out), up in the air and down at his feet as the lofted pass
+  // flew (v167: that's gone; this isn't), struck by the keeper's distribution; you go with it. Nobody that way: long into
+  // the space that way
   const GK_LONGPASS=1350;
   function keeperLongTarget(kp,ax,ay){ let best=null, bs=-1e9;
     for(const q of players){ if(q.team!==kp.team) continue;
@@ -6802,7 +6810,7 @@
     const tx=q?q.x+q.vx*0.5:clamp(ball.x+a.x*1050,40,FW-40), ty=q?q.y+q.vy*0.5:clamp(ball.y+a.y*1050,40,FH-40);
     const d=Math.hypot(tx-ball.x,ty-ball.y), T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, f=Math.hypot(tx-kp.x,ty-kp.y)||1;
     kp.facing={x:(tx-kp.x)/f,y:(ty-kp.y)/f};
-    gkShort(kp,tx,ty,loftVh(d,T),260*T,true);                 // (pinged, as your lofted pass flies -- a goal kick's too)
+    gkShort(kp,tx,ty,loftVh(d,T),260*T,true);                 // (pinged, as the lofted pass flew -- a goal kick's too)
     ball.intendedRcv=q||null; ball.rcvRunner=false; ball.thru=null; ball.lob=null; ball.passerRef=kp;
     if(held){ kp.mode='return'; kp.claimCd=1.6; gkHold=null; kp.heldT=0; }
     if(q&&kp.team==='G') passSwitch(q);
@@ -7233,30 +7241,24 @@
   // Press PASS with the ball (x,y: where a finger came down, r: the canvas box -- touch only).
   function passPress(x,y,r){
     const now=performance.now();
-    if(passPend&&now>passPend.at){ passFlush(); return; }   // the first pass's moment is up: that one goes now
-    passLoft=!!passPend;                                    // the second tap of a double-tap: this one goes in the air
-    passPend=null;                                          // (it replaces the ground pass held back from the first)
-    kickHeld=true; kickCharge=0;
+    kickHeld=true; kickCharge=0;                            // (v167: no lofted pass, so no second tap to wait for)
     passDown={t:now,x,y,lx:x,ly:y};
     if(r){ passDown.pts=[{x:x-r.left,y:y-r.top,t:now}]; passDown.w=r.width; passDown.h=r.height; passDown.kind='pass'; }
   }
-  // Let go of PASS: a drag off the button plays it through, the second tap of a double-tap lofts it, a held
-  // (charged) press goes at once -- and a quick tap waits a moment in case it's the first half of a double-tap.
+  // Let go of PASS: a drag off the button plays it through; otherwise it's a pass, there and then -- a tap no longer
+  // waits a moment in case a second is coming (v167: no lofted pass, no double-tap).
   function passRelease(){
     const d=passDown; passDown=null;
     if(!kickHeld) return;
     kickHeld=false;
-    const loft=passLoft; passLoft=false;
     let thru=null;
     if(d&&d.x!=null){ const dx=d.lx-d.x, dy=d.ly-d.y; if(Math.hypot(dx,dy)>=P.passDrag.val) thru={dx,dy}; }
     if(d&&swipeTrail&&d.pts&&swipeTrail.pts===d.pts){ swipeTrail.endT=performance.now(); swipeTrail.shot=!!thru&&ball.ownedBy===controlled; }
     if(!myBall()&&!keeperInHand()&&!myThrow()){ kickCharge=0; return; }
     const charge=kickCharge; kickCharge=0;
-    if(thru||loft||!d||performance.now()-d.t>DTAP_PRESS) doPass(charge,{loft,thru});
-    else passPend={charge,at:performance.now()+P.passDtap.val};
+    doPass(charge,{thru});
   }
-  function passFlush(){ const pp=passPend; passPend=null; if(pp) doPass(pp.charge,{}); }
-  function passStep(){ if(passPend&&performance.now()>passPend.at) passFlush(); if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); shotStep(); }   // (every frame; v139: shotStep)
+  function passStep(){ if(crossPend&&performance.now()>crossPend.at) crossFlush(); actStep(); shotStep(); }   // (every frame; v139: shotStep)
 
   // WHO YOUR PASS IS FOR (v134): the man the way you aim it -- the stick, or the way he faces -- at the range you held
   // PASS for (passRange: a tap about 12 m, held half its fill 24 m, all of it 42 m). The way you aim counts most: within
@@ -7285,7 +7287,7 @@
     if(gk && gkA<=PASS_GK.ang && gkD<=PASS_GK.d && near>=PASS_GK.clear && passScore(p,gk,gkA,gkD,dI)>bs) return gk;
     return best;
   }
-  // The pass itself. o.loft: in the air, over them; o.thru: {dx,dy} a screen direction to play it through.
+  // The pass itself. o.thru: {dx,dy} a screen direction to play it through. (v167: no o.loft -- no lofted pass.)
   function doPass(charge,o){
     o=o||{};
     if(keeperInHand()){ keeperPass(controlled,charge,o); return; }   // (your keeper, the ball in his hands: thrown -- v114)
@@ -7313,22 +7315,15 @@
       const aerr=passSpray(d, p)+turnSpray(p,dx,dy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-      if(o.loft){
-        // LOFTED: up over everyone and down at their feet -- no drag in the air, so it lands d away after T
-        const T=clamp(0.55+d/900,0.65,1.45)*P.loftHang.val, vh=loftVh(d,T), cu=d>=500?passCurl(p,best,lead.x,lead.y,true):null;   // (a long one bent into his path, if it helps)
-        ball.vz=260*T;
-        if(cu) ball.lob=curlFlight(ax,ay,d/T,T,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }   // it checks up where it lands (see the bounce)
-        ball.intendedRcv=best; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // the receiver goes to where it drops
-      } else {
-        const sol=passSolve(d);
+      { const sol=passSolve(d);
         ball.vx=ax*sol.vh;
         ball.vy=ay*sol.vh;
-        ball.vz=sol.vz;                               // loft slides with charge
-      }
+        ball.vz=sol.vz;
+        backspin(p,d,ax,ay); }                        // (v167: a long one, checking up where it lands by his Long passing)
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       mStat(p,'pa'); if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
       recordPassTeam(p.team,p); passPose(p);
-      labOnPass(o.loft?'LOFTED PASS':'PASS',best,lead);
+      labOnPass('PASS',best,lead);
       passSwitch(best);
     } else {
       // no good target: raw directional kick where aimed -- or into space the way you dragged. Along the grass it dies
@@ -7336,13 +7331,13 @@
       // your own goal rolled on toward it); in the air, as it did
       if(o.thru){ const u=screenDirToPitch(o.thru.dx,o.thru.dy,p.y); aimx=u.x; aimy=u.y; }
       { const te=turnSpray(p,aimx,aimy), c=Math.cos(te), sn=Math.sin(te); const ax=aimx*c-aimy*sn; aimy=aimx*sn+aimy*c; aimx=ax; }
-      const dR=passRange(charge), vz0=o.loft?320:clamp(dR*0.22,0,520)*P.passLoft.val, power=o.loft?620:gkSolvePower(dR,vz0);   // (gkSolvePower: the pace that has it come to rest there)
+      const dR=passRange(charge), vz0=clamp(dR*0.22,0,520)*P.passLoft.val, power=gkSolvePower(dR,vz0);   // (gkSolvePower: the pace that has it come to rest there)
       ball.vx=aimx*power+p.vx*0.3;
       ball.vy=aimy*power+p.vy*0.3;
       ball.vz=vz0;
       ball.ownedBy=null;p.noTouchT=0.3;ball.lastTouch=p.team;
       recordPassTeam(p.team,p); passPose(p);
-      labOnPass(o.thru?'KICK INTO SPACE':o.loft?'LOFTED KICK':'KICK (nobody that way)',null,null);
+      labOnPass(o.thru?'KICK INTO SPACE':'KICK (nobody that way)',null,null);
     }
   }
   // Pace along the ground that carries a lofted ball (vz = 260*T) d in T seconds: there's no drag in the air,
@@ -7367,7 +7362,7 @@
     const lim=THRU_LEAN+(Math.PI-THRU_LEAN)*(1-w), a=clamp(da*(1/3+2/3*(1-w)),-lim,lim), c=Math.cos(a), sn=Math.sin(a);
     return {x:gx*c-gy*sn, y:gx*sn+gy*c, w};
   }
-  function thruBall(p,mate,drag,loft){
+  function thruBall(p,mate,drag){
     const u=thruDir(mate,screenDirToPitch(drag.dx,drag.dy,mate.y));
     const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
@@ -7376,21 +7371,16 @@
     const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
     let tA;
-    const sol=loft?null:passSolve(d);                        // CLASSIC: hit like any pass, just into the space ahead of him
-    const cu=loft?passCurl(p,mate,L.x,L.y,true):passCurl(p,mate,L.x,L.y,false,{vz:sol.vz,vh:sol.vh,tA:d/sol.vh});   // (bent, if it helps -- v165: along the grass, as a through ball)
-    if(loft){
-      tA=clamp(tRun,0.7,1.5)*P.loftHang.val;
-      const vh=loftVh(d,tA);
-      ball.vz=260*tA; if(cu) ball.lob=curlFlight(ax,ay,d/tA,tA,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }
-    } else {
-      if(cu) curlGround(ax,ay,d,sol.vh,sol.vz,cu.bend,cu.side,1800); else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; }
-      ball.vz=sol.vz;
-      tA=d/sol.vh;
-    }
+    const sol=passSolve(d);                                  // CLASSIC: hit like any pass, just into the space ahead of him
+    const H=thruHook(p,L.x,L.y,sol.vz,sol.vh);               // (v167: hooked in late onto the spot, as it was drawn -- or straight)
+    if(H) hookBall(H,sol.vh*H.Lp/d,aerr);                    // (the longer way round as quick: there when it would have been)
+    else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; ball.curveSpin=0; ball.curveSpinT=0; ball.arcK=0; ball.thruCurl=0; }
+    ball.vz=sol.vz;
+    tA=d/sol.vh;
+    { const l=Math.hypot(ball.vx,ball.vy)||1; backspin(p,d,ball.vx/l,ball.vy/l); }   // (v167: a long one checks up where it lands, by his Long passing)
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=mate; ball.rcvRunner=false; ball.passerRef=p;
     ball.thru={x:L.x,y:L.y,until:simNow+tA+1.5};             // the receiver runs onto it (see aiBrain)
-    ball.thruCurl=!loft&&cu&&ball.curveSpinT>0?cu.bend:0;    // (v165: the bend on it -- thruCurlQ)
     mStat(p,'pa'); if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
     recordPassTeam(p.team,p); passPose(p);
     thruMark={x:L.x,y:L.y,t:performance.now()};
@@ -7577,6 +7567,7 @@
       ball.vx=dxk*sol.vh; ball.vy=dyk*sol.vh; ball.vz=sol.vz+D.z*1.5;
     }
     ball.ownedBy=null;ball.dribbler=null;ball.dribbleGrace=0;p.noTouchT=0.3;ball.lastTouch=p.team;ball.z=Math.max(ball.z,1);
+    ball.lob=null;                                            // (v167: struck first time, no backspin on it -- nor the check of the ball it met)
     endCurve(); recordPassTeam(p.team,p); passPose(p);
     mStat(p,'pa'); if(meIs(p)){ meBump('passes'); ball.mePassBy=p; ball.mePassT=matchClock; }
     labOnPass('ONE-TOUCH PASS',best,null);
@@ -8036,11 +8027,11 @@
     if(ball.curveSpinT<=0||ball.ownedBy||gkHold){ball.curveSpinT=0;ball.arcK=0;return;}
     ball.curveSpinT-=dt;
     const sp=Math.hypot(ball.vx,ball.vy)||1;
-    if(ball.arcK>0){                             // a through ball round their line (obThruBall): the same turn every metre, however it slows
+    if(ball.arcK>0){                             // a through ball round their line (obThruBall), or hooked (v167): its turn by how far it's gone, however it slows (arcTurn)
       const hd=Math.atan2(ball.vy,ball.vx), off=Math.abs(Math.atan2(Math.sin(hd-ball.arcHd),Math.cos(hd-ball.arcHd)));
       if(off>0.05||sp>ball.arcSp*1.02+1){ ball.arcK=0; ball.curveSpinT=0; return; }   // (touched, or off a post: it isn't that pass any more)
-      const a=-ball.curveSpin*ball.arcK*Math.min(sp*dt,ball.arcLeft), c=Math.cos(a), sn=Math.sin(a), vx=ball.vx;
-      ball.vx=vx*c-ball.vy*sn; ball.vy=vx*sn+ball.vy*c;
+      const a=arcTurn(sp*dt,ball.arcLeft,ball.arcU||0), c=Math.cos(a), sn=Math.sin(a), vx=ball.vx;
+      ball.vx=vx*c-ball.vy*sn; ball.vy=vx*sn+ball.vy*c; ball.arcU=arcW;
       ball.arcLeft-=sp*dt; ball.arcHd=Math.atan2(ball.vy,ball.vx); ball.arcSp=sp;
       if(ball.arcLeft<=0){ ball.arcK=0; ball.curveSpinT=0; }
       return;
@@ -8060,8 +8051,8 @@
   // the harder, so it's aimed by flying it first, as a swiped shot's curl is (curlGround). How much: a cross turns by
   // CROSS_BEND over its flight (Curve 1 .. 10); a pass by what it needs, up to PASS_BEND (2 to 16 degrees: it was up to 40,
   // a banana that took a long ball round anyone in its way). A THROUGH BALL (v165), up to THRU_BEND: 2 degrees at Curve 1
-  // as before, 29 at 10 (it had a long pass's 16).
-  const CURL_F=1700*0.85, CROSS_BEND=[0.08,0.6], PASS_BEND=[0.04,0.28], THRU_BEND=[0.04,0.50];
+  // as before, 29 at 10 (it had a long pass's 16) -- v167: 9 at Curve 1, 72 at 10, hooked in late as it was drawn (thruHook).
+  const CURL_F=1700*0.85, CROSS_BEND=[0.08,0.6], PASS_BEND=[0.04,0.28], THRU_BEND=[0.15,1.25];
   function crossBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),CROSS_BEND[0],CROSS_BEND[1]); }
   function passBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),PASS_BEND[0],PASS_BEND[1]); }
   function thruBendOf(p){ return statLerp(statOf(p,'curve',P.curve.val),THRU_BEND[0],THRU_BEND[1]); }
@@ -8070,6 +8061,11 @@
   // before -- over 15 m, a few centimetres off its line to a metre and a quarter)
   const THRU_ARC=[0.10,0.75];
   function thruArcOf(p){ return statLerp(statOf(p,'curve',P.curve.val),THRU_ARC[0],THRU_ARC[1]); }
+  // ...and it's as hard to deal with as it was (thruCurlQ): as curling as a through ball can be from ARC_CURL of turn
+  // (29 degrees: v165's most for a through ball; v167's through ball turns up to 72, and against that a ball round their
+  // line would have counted for less)
+  const ARC_CURL=0.5;
+  function arcCurl(th){ return Math.min(1,th/ARC_CURL)*THRU_BEND[1]; }
   // a ball to fly at v (on a straight line) in the air for T along (cx,cy), bent by `bend` swinging `side` (+1/-1, as
   // applyAICurve takes it); struck from the grass lifted at vz, it's struck harder by what the grass takes off it on the
   // way up (takeoffKeep). Returns the way it comes down.
@@ -8117,46 +8113,87 @@
   const CURL_HEAD=0.10, CURL_CLAIM=0.15;
   function crossCurlQ(){ return ball.crossT>0 ? clamp((ball.crossCurl||0)/CROSS_BEND[1],0,1) : 0; }
   // A CURLING THROUGH BALL (v165) is harder to deal with, as a curling cross is: by the bend it was struck with (against a
-  // through ball's most at Curve 10, THRU_BEND -- or more, round their line), till anyone gets a touch on it. A man of
+  // through ball's most at Curve 10, THRU_BEND), till anyone gets a touch on it. A man of
   // theirs has up to CURL_CUT less reach for it and a touch on it the worse by up to CURL_TOUCH -- and the computer's men
   // read it so (cutOut; the passer choosing it, obPassOpt) -- and the man it's for takes it the cleaner, by up to
   // CURL_EASE: it comes to him the way it was bent for him. Straight, or at Curve 1, it's as it was.
   const CURL_CUT=0.2, CURL_TOUCH=0.25, CURL_EASE=0.12;
   function thruCurlQ(){ return ball.thru ? clamp((ball.thruCurl||0)/THRU_BEND[1],0,1) : 0; }
-  // A PASS THAT BENDS (a through ball, a long pass): only when it helps. One of theirs in its way along the grass, it
-  // bends round him (bulging away from him, as far as takes it 2 m wide of him); the man it's for running across its
-  // line, it bends into his path, so it comes to him going his way. As much as that takes, up to PASS_BEND at the
-  // passer's Curve. In the air (air), nobody's in its way.
-  // A THROUGH BALL (th, v165): up to THRU_BEND. A man it'll be over the head of as it gets to him (struck lifted at th.vz,
-  // along at th.vh) isn't in its way: it used to bend round men it was flying over. With nobody in its way and one of
-  // theirs closing on where it's going (thruCloser: it getting there in th.tA), it's bent away from him, bulging away
-  // from him as round a man in its way -- all the bend he has if it's a race, less the further behind it he'd be -- and
-  // is the harder for him to deal with (thruCurlQ). Otherwise into the runner's path, from 3 degrees off his line (a
-  // long pass, 7).
-  // THE MAN CLOSING ON IT: of theirs (not the keeper), the one who'd be soonest where a through ball's going, off a
-  // moment after it's struck and to within a stride of it; and how much of a race it is -- 1 with him there by the time
-  // it is, nothing with him THRU_RACE or more behind it.
-  const THRU_RACE=0.5;
-  function thruCloser(p,tx,ty,tA){ let o=null, ot=1e9;
-    for(const x of players) if(x.team!==p.team&&x.state==='normal'){ const t=0.15+Math.max(0,Math.hypot(x.x-tx,x.y-ty)-25)/sprintSpeedOf(x); if(t<ot){ ot=t; o=x; } }
-    return o?{o, k:clamp((tA+THRU_RACE-ot)/THRU_RACE,0,1)}:null; }
-  function passCurl(p,q,tx,ty,air,th){
+  // A PASS THAT BENDS (a long pass): only when it helps. One of theirs in its way along the grass, it bends round him
+  // (bulging away from him, as far as takes it 2 m wide of him); the man it's for running across its line, it bends into
+  // his path, so it comes to him going his way. As much as that takes, up to PASS_BEND at the passer's Curve. In the air
+  // (air), nobody's in its way. (v167: a through ball isn't bent here now -- it's hooked, thruHook.)
+  function passCurl(p,q,tx,ty,air){
     const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy); if(d<200) return null;
-    const cx=dx/d, cy=dy/d, max=th?thruBendOf(p):passBendOf(p);
+    const cx=dx/d, cy=dy/d, max=passBendOf(p);
     if(!air){ let lane=null, s0=0, off0=0;
       for(const o of players){ if(o.team===p.team) continue;
         const ox=o.x-ball.x, oy=o.y-ball.y, s=ox*cx+oy*cy, off=oy*cx-ox*cy;           // along its line; across it (+: to its left)
         if(s<70||s>d-50||Math.abs(off)>40) continue;
-        if(th&&th.vz>0&&th.vh>0){ const t=s/th.vh; if(th.vz*t-260*t*t>=12) continue; }   // (v165: over his head as it gets to him)
         if(!lane||s<s0){ lane=o; s0=s; off0=off; } }
       if(lane) return {bend:Math.min(max,Math.max(0.1,2*d*(50-Math.abs(off0))/(s0*(d-s0)))), side:off0>0?-1:1, why:'round'}; }
-    if(th&&th.tA>0){ const C=thruCloser(p,tx,ty,th.tA);                              // (v165: the man closing on it)
-      if(C&&C.k>0&&max*C.k>=0.02){ const off=(C.o.y-ball.y)*cx-(C.o.x-ball.x)*cy; return {bend:max*C.k, side:off>0?-1:1, why:'away'}; } }
     const mv=Math.hypot(q.vx,q.vy); if(mv<90) return null;
     const ang=Math.atan2(cx*q.vy-cy*q.vx, cx*q.vx+cy*q.vy);                              // his run, against its line
-    if(Math.abs(ang)<(th?0.05:0.12)||Math.abs(ang)>2.0) return null;                    // (along it already, or coming back to it)
+    if(Math.abs(ang)<0.12||Math.abs(ang)>2.0) return null;                               // (along it already, or coming back to it)
     return {bend:Math.min(max,2*Math.abs(ang)), side:ang>0?-1:1, why:'path'};
   }
+  // A THROUGH BALL, BENT AS IT WAS DRAWN (v167): set off a little wide, it runs on almost straight and hooks in late onto
+  // the spot -- the turn on it comes with the cube of the way it's gone (THRU_HOOK: an eighth of it done halfway along, a
+  // third two-thirds of the way) -- with as much turn on it as the passer's Curve gives him (THRU_BEND): none on a ball of
+  // 11 m or less, all of it from 15 m. Its belly is on the far side from one of theirs in its way along the grass (one
+  // it's not over the head of, struck lifted at vz and along at vh), or else from the nearest of theirs to where it's
+  // going, within THRU_HOOK_NEAR, short of it (bent round him, as every one was drawn: a man beyond the spot it would
+  // only turn in toward); nobody there, it goes straight. Unless that takes it nearer their men than another way would
+  // -- hooked the other way, half as much either way, or straight (a runner through a gap between two of them: its
+  // belly would take it into the other) -- by how close it passes each of them along the way (within a few metres:
+  // THRU_HOOK_ROOM), by a clear margin. (v165 bent it only as far as helped -- round a man in its way, away from one
+  // closing on where it was going, or into the runner's path -- 2 degrees at Curve 1, 29 at 10.)
+  const THRU_HOOK=3, THRU_HOOK_NEAR=18, THRU_HOOK_ROOM=2;
+  // the ways it could go: hooked as drawn, the other way, half as much each way, straight (null) -- or null, nobody of
+  // theirs near it (straight)
+  function thruHookWays(p,tx,ty,vz,vh){
+    const dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy), th=thruBendOf(p)*clamp((d/MK-11)/4,0,1); if(th<0.02) return null;
+    const cx=dx/d, cy=dy/d; let lane=null, s0=0, offL=0, near=null, nd=THRU_HOOK_NEAR*MK, offN=0;
+    for(const o of players){ if(o.team===p.team) continue;
+      const ox=o.x-ball.x, oy=o.y-ball.y, s=ox*cx+oy*cy, off=oy*cx-ox*cy, t=vh>0?s/vh:0;   // along its line; across it (+: to its left)
+      if(s>=70&&s<=d-50&&Math.abs(off)<=40&&!(vz>0&&vz*t-260*t*t>=12)&&(!lane||s<s0)){ lane=o; s0=s; offL=off; }
+      const od=Math.hypot(o.x-tx,o.y-ty); if(s<d&&od<nd){ nd=od; near=o; offN=off; } }
+    if(!lane&&!near) return null;
+    const side=(lane?offL:offN)>0?-1:1;
+    return [hookArc(cx,cy,d,th,side), hookArc(cx,cy,d,th,-side), hookArc(cx,cy,d,th/2,side), hookArc(cx,cy,d,th/2,-side), null];
+  }
+  function thruHook(p,tx,ty,vz,vh){
+    const W=thruHookWays(p,tx,ty,vz,vh); if(!W) return null;
+    const o0={x:ball.x,y:ball.y}, lam=THRU_HOOK_ROOM*MK;
+    const crowd=pts=>{ let c=0; for(const o of players){ if(o.team===p.team) continue; let m=1e9;   // (how close it passes their men: e^-(distance/room) each)
+      for(let i=0;i+1<pts.length;i++){ const a=pts[i], b=pts[i+1], sx=b.x-a.x, sy=b.y-a.y, f=clamp(((o.x-a.x)*sx+(o.y-a.y)*sy)/(sx*sx+sy*sy||1),0,1); m=Math.min(m,Math.hypot(a.x+sx*f-o.x,a.y+sy*f-o.y)); }
+      c+=Math.exp(-m/lam); } return c; };
+    let best=W[0], bc=crowd([o0,...best.at]);
+    for(const H of W.slice(1)){ const c=crowd(H?[o0,...H.at]:[o0,{x:tx,y:ty}]); if(c<bc-0.03){ best=H; bc=c; } }
+    return best;
+  }
+  // THE HOOK from the ball to d along (cx,cy), turning th all told and swinging `side` (as curveSpin): the way it sets off
+  // (h0), how far it goes (Lp: a touch further than d -- 7% at 72 degrees) and where it is an eighth of the way along, a
+  // quarter, ... (at, for hookAt)
+  function hookArc(cx,cy,d,th,side){
+    const n=48, cum=[]; let re=0, im=0;
+    for(let i=0;i<n;i++){ const a=-side*th*Math.pow((i+0.5)/n,THRU_HOOK); re+=Math.cos(a)/n; im+=Math.sin(a)/n; if((i+1)%6===0) cum.push(re,im); }
+    const h0=Math.atan2(cy,cx)-Math.atan2(im,re), Lp=d/Math.hypot(re,im), c=Math.cos(h0), sn=Math.sin(h0), at=[];
+    for(let k=0;k<8;k++){ const u=cum[2*k], w=cum[2*k+1]; at.push({x:ball.x+Lp*(u*c-w*sn), y:ball.y+Lp*(u*sn+w*c)}); }
+    return {th, side, h0, Lp, at};
+  }
+  function hookAt(H,f){ return H.at[clamp(Math.round(f*8),1,8)-1]; }
+  // the ball struck on it at v, off its line by aerr
+  function hookBall(H,v,aerr){ const h=H.h0+aerr;
+    ball.vx=Math.cos(h)*v; ball.vy=Math.sin(h)*v; ball.curveSpin=H.side; ball.curveSpinT=9; ball.curveK=0;
+    ball.arcK=H.th/H.Lp; ball.arcLen=H.Lp; ball.arcLeft=H.Lp; ball.arcM=THRU_HOOK; ball.arcU=0; ball.arcHd=h; ball.arcSp=v; ball.thruCurl=H.th; }
+  // A BALL ALONG AN ARC (a through ball round their line, or hooked): its turn by how far it's gone, however it slows --
+  // ds further on with `left` still to go, from the way it was going (the way it should be going u of the way along) to
+  // the way it should be going halfway through the step, arcW of the way (so it finishes where it was meant to however
+  // quick it is). The arc's turn is arcK a pixel on the whole, coming with the arcM power of the way it's gone.
+  let arcW=0;
+  function arcTurn(ds,left,u){ const L=ball.arcLen||left, m=ball.arcM||1; arcW=clamp((L-left+Math.min(ds,left)/2)/L,0,1);
+    return -ball.curveSpin*ball.arcK*L*(Math.pow(arcW,m)-Math.pow(u,m)); }
   // Cosmetic: a short timer the sprites read to play the side-foot strike in the pass's direction.
   const PASS_POSE_T=0.36;
   function passPose(p){ const l=Math.hypot(ball.vx,ball.vy)||1; p.passPoseDir={x:ball.vx/l,y:ball.vy/l}; p.passPoseT=PASS_POSE_T; }
@@ -8194,7 +8231,7 @@
     }
     return {x:lx, y:ly, running:true};
   }
-  function passTo(p,mate,loft=0){
+  function passTo(p,mate){
     const atk=atkOf(p.team);
     ball.passerRef=p;                                        // remembered by the receiver (anti ping-pong)
     mStat(p,'pa'); if(meIs(p)) meBump('passes');
@@ -8224,14 +8261,15 @@
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     // POWER solved so it ARRIVES at the receiver: chipped over a man in the way, otherwise the normal flight to his feet
-    const chipTgt=chipOverWindow(p, lead.x, lead.y);
+    const chipTgt=null;                                       // (v167: no chip over a man in the way -- no lofted passes)
     const sol=chipTgt ? chipSolve(d,(chipTgt.x-ball.x)*dx+(chipTgt.y-ball.y)*dy) : passSolve(d);
-    const cu=(!chipTgt&&!loft&&(running||d>=600)) ? passCurl(p,mate,lead.x,lead.y,false) : null;   // (a ball in behind or a long one: bent, if it helps)
+    const cu=(!chipTgt&&(running||d>=600)) ? passCurl(p,mate,lead.x,lead.y,false) : null;   // (a ball in behind or a long one: bent, if it helps)
     if(cu) curlGround(ax,ay,d,sol.vh,sol.vz,cu.bend,cu.side,1800); else { ball.vx=ax*sol.vh; ball.vy=ay*sol.vh; }
-    ball.vz=sol.vz+loft;
+    ball.vz=sol.vz;
     ball.ownedBy=null;p.noTouchT=0.3;
     ball.lastTouch=p.team;
     ball.intendedRcv=mate; ball.rcvRunner=running; ball.thru=null; ball.lob=null;   // tell the receiver a ball is coming (and whether it's a run in behind)
+    backspin(p,d,dx,dy);                                      // (v167: a long one checks up where it lands, by his Long passing)
     recordPassTeam(p.team,p); passPose(p);
     // locked: no auto-switch
   }
@@ -8923,19 +8961,21 @@
   function ballAt(t){
     const G=520, lam=Math.max(1e-3,-3.2*Math.log(1-clamp(P.friction.val,0.001,0.999)));
     const tAir=(ball.z>12||ball.vz>0) ? (ball.vz+Math.sqrt(Math.max(0,ball.vz*ball.vz+2*G*ball.z)))/G : 0;
+    const kB=ball.lob&&tAir>0 ? (ball.lob.k!=null?ball.lob.k:P.lobCheck.val) : 1;   // (v167: the check where it lands -- backspin)
     const z=t<=tAir ? Math.max(0,ball.z+ball.vz*t-G*t*t/2) : 0;
     const tUp=(ball.vz>0&&ball.z<12) ? Math.min(tAir,(12-ball.z)/ball.vz) : 0;   // (just struck, rising: the grass drags at it till it's 12 px up -- see takeoffKeep)
     if(ball.curveSpinT>0 && ball.curveSpin && !ball.ownedBy){
-      const F=CURL_F*(ball.curveK||curveOf()), st=1/60, arc=ball.arcK>0; let x=ball.x, y=ball.y, vx=ball.vx, vy=ball.vy, u=0, left=ball.arcLeft;
+      const F=CURL_F*(ball.curveK||curveOf()), st=1/60, arc=ball.arcK>0; let x=ball.x, y=ball.y, vx=ball.vx, vy=ball.vy, u=0, left=ball.arcLeft, au=ball.arcU||0;
       while(u<t-1e-9){ const h=Math.min(st,t-u);
-        if(arc){ if(left>0){ const sp=Math.hypot(vx,vy)||1, a=-ball.curveSpin*ball.arcK*Math.min(sp*h,left), c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; left-=sp*h; } }   // (a through ball's arc)
+        if(arc){ if(left>0){ const sp=Math.hypot(vx,vy)||1, a=arcTurn(sp*h,left,au), c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; left-=sp*h; au=arcW; } }   // (a through ball's arc, or its hook -- v167)
         else if(u<ball.curveSpinT){ const sp=Math.hypot(vx,vy)||1, a=-ball.curveSpin*F/sp*h, c=Math.cos(a), sn=Math.sin(a), nx=vx*c-vy*sn; vy=vx*sn+vy*c; vx=nx; }
+        if(kB<1&&u<tAir&&u+h>=tAir){ vx*=kB; vy*=kB; }   // (v167: it lands, and checks up)
         x+=vx*h; y+=vy*h; if(u<tUp||u>=tAir){ const k=Math.exp(-lam*h); vx*=k; vy*=k; } u+=h; }
       return {x, y, z};
     }
     const kU=Math.exp(-lam*tUp), up=tUp>0?(1-kU)/lam:0;                // (how far it goes while it's dragged up off the grass, and what's left of its pace)
     if(t<=tAir){ const k=t<=tUp ? (1-Math.exp(-lam*t))/lam : up+kU*(t-tUp); return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z}; }
-    const k=up+kU*(tAir-tUp)+kU*(1-Math.exp(-lam*(t-tAir)))/lam;
+    const k=up+kU*(tAir-tUp)+kB*kU*(1-Math.exp(-lam*(t-tAir)))/lam;   // (v167: kB, checked up where it landed)
     return {x:ball.x+ball.vx*k, y:ball.y+ball.vy*k, z:0};
   }
   // CUTTING OUT A PASS: of the side without the ball, the computer player who can get onto the pass's path soonest -- low
@@ -9487,7 +9527,7 @@
   // A defender sitting in the MIDDLE of a LONG lane can be chipped over: by the time the ball
   // reaches them it's above head height, and it drops onto the receiver beyond. Returns that
   // opponent (the one we'd loft over) or null. Same thresholds feed laneClearance + passTo.
-  function chipOverWindow(p, tx, ty){
+  function chipOverWindow(p, tx, ty){   // (v167: unused -- no chip over a man, no lofted passes)
     const direct=(TAC[p.team]&&TAC[p.team].off==='direct');   // DIRECT teams go over the top sooner
     const dx=tx-p.x, dy=ty-p.y, len=Math.hypot(dx,dy)||1;
     if(len<=(direct?340:420)) return null;             // only long enough passes can be lofted over
@@ -9628,26 +9668,9 @@
     for(let i=1;i<=8;i++){ const u=1-d*i/8*k/v0; F.push({f:i/8, t:u>0?-Math.log(u)/k:9, z:0}); }
     return F;
   }
-  // SWITCHING PLAY: with his side of the pitch crowded (three or more of theirs more than ours within 18 m of the ball), a
-  // ball out to a man in space on the far side, further than he'd pass it along the ground -- lofted up over everyone
-  // and down at the man's feet, as your double-tapped lofted pass is, checking up where it lands. An average passer can
-  // hit one 45 m, a good one 55. Up for longer the further it goes, but not much over 7 m high.
-  function obLobT(d){ return clamp(0.55+d/900,0.65,1.65)*P.loftHang.val; }
-  function obLobFlight(d){
-    const T=obLobT(d), vz=260*T, F=[];                                  // (no drag in the air: it covers d evenly)
-    for(let i=1;i<=8;i++){ const t=T*i/8; F.push({f:i/8, t, z:Math.max(0,vz*t-260*t*t)}); }
-    return F;
-  }
-  function obLobBall(p,q,tx,ty){
-    let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, T=obLobT(d), vh=loftVh(d,T);
-    const cu=passCurl(p,q,tx,ty,true);                                   // (bent into his path, if that helps)
-    ball.vz=260*T; if(cu) ball.lob=curlFlight(ax,ay,d/T,T,cu.bend,cu.side,ball.vz); else { ball.vx=ax*vh; ball.vy=ay*vh; ball.lob={x:ax,y:ay}; }
-    ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
-    ball.intendedRcv=q; ball.rcvRunner=false; ball.passerRef=p; ball.thru=null;   // he goes to where it drops
-    mStat(p,'pa'); if(meIs(p)) meBump('passes');
-    recordPassTeam(p.team,p); passPose(p);
-  }
+  // (v167: SWITCHING PLAY's lofted ball -- out to a man in space on the far side, up over everyone and down at his feet,
+  // checking up where it landed -- is gone, with every lofted pass: a ball further than he'd play it along the ground
+  // isn't on.)
   // THE GAPS IN THEIR BACK LINE, for a ball from where it is to (tx,ty) beyond the line: the line, their deepest men
   // (the keeper aside) and any within 5 m of the last of them, ahead of the ball; a gap between two of them 3 m or more
   // apart, or between the outside one and the touchline when (tx,ty) is out there past him. Each: the middle of it.
@@ -9688,21 +9711,22 @@
   // top: how far ahead of him it goes errs with the passer's Off IQ (by up to 60% at 1, 10% at 10), and how hard it's
   // hit with his Passing. (It used to go at up to 1500 px/s, dead on target, and nobody could get to it.) Bent round
   // their line (arc, from thruArcs): set off that way, as much turn on it, a touch harder for the longer way round.
-  function obThruBall(p,q,tx,ty,tA,arc){
+  // Otherwise hooked in late as it was drawn (thruHook, v167), weighted for the way round it goes -- hooked as it was
+  // chosen (hook: its turn and which way; null, straight), or as thruHook has it.
+  function obThruBall(p,q,tx,ty,tA,arc,hook){
     const atk=atkOf(p.team), le=(Math.random()*2-1)*statLerp(statOf(p,'offIQ',P.offIQ.val),0.6,0.1);
     tx=q.x+(tx-q.x)*(1+le); ty=q.y+(ty-q.y)*(1+le);
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const lane=laneClearance(p,q), fwd=clamp(atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
     let acc=kickAccOf(p,d); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
     const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
-    const R=arc?d/(2*Math.sin(arc.th/2)):0, Lp=arc?R*arc.th:d;
+    const R=arc?d/(2*Math.sin(arc.th/2)):0, H=arc?null:hook===undefined?thruHook(p,tx,ty,0,0):hook?hookArc(dx,dy,d,hook.th,hook.side):null, Lp=arc?R*arc.th:H?H.Lp:d;
     const v0=obThruV0(Lp,tA).v0*(1+obGauss()*statLerp(passStatAt(p,Lp),0.14,0.05));   // (over- or under-hit: 14% at the pass's stat 1, 5% at 10 -- v163: Short and Long passing by its length)
     if(arc){ const h=Math.atan2(dy,dx)+arc.side*arc.th/2+aerr;
-      ball.vx=Math.cos(h)*v0; ball.vy=Math.sin(h)*v0; ball.thruCurl=arc.th;   // (v165: the bend on it -- thruCurlQ)
-      ball.curveSpin=arc.side; ball.curveSpinT=9; ball.curveK=0; ball.arcK=1/R; ball.arcLeft=Lp; ball.arcHd=h; ball.arcSp=v0; }
-    else { const cu=passCurl(p,q,tx,ty,false,{tA}), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;   // (bent, if it helps -- v165: as a through ball)
-      if(cu) curlGround(ax,ay,d,v0,0,cu.bend,cu.side,Math.max(v0,P.thruPace.val)); else { ball.vx=ax*v0; ball.vy=ay*v0; }
-      ball.thruCurl=cu&&ball.curveSpinT>0?cu.bend:0; }
+      ball.vx=Math.cos(h)*v0; ball.vy=Math.sin(h)*v0; ball.thruCurl=arcCurl(arc.th);   // (v165: the bend on it -- thruCurlQ)
+      ball.curveSpin=arc.side; ball.curveSpinT=9; ball.curveK=0; ball.arcK=1/R; ball.arcLen=Lp; ball.arcLeft=Lp; ball.arcM=1; ball.arcU=0; ball.arcHd=h; ball.arcSp=v0; }
+    else if(H) hookBall(H,v0,aerr);                                      // (v167: hooked in late)
+    else { ball.vx=(dx*ca-dy*sa)*v0; ball.vy=(dx*sa+dy*ca)*v0; ball.curveSpin=0; ball.curveSpinT=0; ball.arcK=0; ball.thruCurl=0; }
     ball.vz=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
     ball.intendedRcv=q; ball.rcvRunner=true; ball.passerRef=p; ball.lob=null;
@@ -9829,16 +9853,15 @@
   function obPassOpt(p,q,C){
     const L=passLead(p,q), tx=L.x, ty=L.y, dx=tx-ball.x, dy=ty-ball.y, d=Math.hypot(dx,dy);
     if(d<90) return null;                                                // (a tap to a man beside him)
-    let lob=false;
-    if(d>C.range*1.3){                                                   // out of his range along the ground: only the
-      if(C.crowd<3||L.running||d>C.lobD||Math.abs(ty-p.y)<20*OBM||obNearAt(C.opps,q.x,q.y,0)<250) return null;   // switch, with his side
-      lob=true;                                                          // crowded, to a man in space out on the far side
-    }
-    // to his feet as passTo strikes it (chipped over a man in the way on a long one), or into his path weighted to
-    // get there with him, or the switch
+    const lob=false;                                                     // (v167: no lofted switch of play)
+    if(d>C.range*1.3) return null;                                       // out of his range along the ground: no ball
+    // to his feet as passTo strikes it, or into his path weighted to get there with him
     const tQ=L.running?Math.max(0,Math.hypot(q.x-tx,q.y-ty)-20)/sprintSpeedOf(q):0, tA=Math.max(0.45,tQ);
-    const chip=(L.running||lob)?null:chipOverWindow(p,tx,ty);
-    const F=lob?obLobFlight(d):L.running?obThruFlight(d,tA):obFlight(d,chip?((chip.x-ball.x)*dx+(chip.y-ball.y)*dy)/d:0), tEnd=F[7].t;
+    // (v167: a ball into his path, hooked in late as it was drawn -- straight if the way round is further than he can get
+    // it there. No lofted switch, no chip.)
+    let H=L.running?thruHook(p,tx,ty,0,0):null;
+    if(H&&obThruFlight(H.Lp,tA)[7].t>4) H=null;
+    const F=L.running?obThruFlight(H?H.Lp:d,tA):obFlight(d,0), tEnd=F[7].t;
     if(tEnd>4) return null;
     // the race for it along the way: each opponent's best chance, where he'd cut it out -- along its line, or, a ball
     // into a runner's path in behind their line, along each way round it he could bend it (thruArcs): the best of them
@@ -9857,9 +9880,9 @@
         const pi=1/(1+Math.exp(m/0.09));                                 // gets there with a tenth of a second to spare: ~75%
         safe*=1-pi; if(pi>worst){ worst=pi; cx=mx; cy=my; } }
       return {safe, cx, cy}; };
-    let rc=raceOn(F, f=>({x:ball.x+dx*f, y:ball.y+dy*f})), arc=null, tE=tEnd;
+    let rc=raceOn(F, H?f=>hookAt(H,f):f=>({x:ball.x+dx*f, y:ball.y+dy*f}), H?clamp(H.th/THRU_BEND[1],0,1):0), arc=null, tE=tEnd;
     if(L.running) for(const A of thruArcs(p,tx,ty,d)){ const Fa=obThruFlight(A.L,tA); if(Fa[7].t>4) continue;
-      const ra=raceOn(Fa, f=>arcAt(A,f), clamp(A.th/THRU_BEND[1],0,1)); if(ra.safe>rc.safe+0.02){ rc=ra; arc=A; tE=Fa[7].t; } }
+      const ra=raceOn(Fa, f=>arcAt(A,f), arcCurl(A.th)/THRU_BEND[1]); if(ra.safe>rc.safe+0.02){ rc=ra; arc=A; tE=Fa[7].t; } }
     const {safe, cx, cy}=rc;
     // struck as passTo will strike it: how far off line it may go, against how far the receiver can reach for it
     const lane=laneClearance(p,q), fwd=clamp(C.atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
@@ -9867,10 +9890,10 @@
     let amp=((1-acc)*0.06+(1-longAccOf(p,d))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
     if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
     amp+=0.5*turnWorst(p,dx/(d||1),dy/(d||1));                         // (a ball he'd have to turn and play at once)
-    const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30)+(lob?runSpeedOf(q)*Math.max(0,tEnd-0.4)*0.8:0);   // (a long ball up: he has time to get under it)
+    const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30);
     const pAcc=lat<=reachL?1:clamp(reachL/lat,0.2,1);
     // how close they'll be on him when it gets there
-    const nd=obNearAt(C.opps,tx,ty,Math.max(tE,tQ),C.atk,lob?2:1), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
+    const nd=obNearAt(C.opps,tx,ty,Math.max(tE,tQ),C.atk,1), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
     const P_=safe*pAcc*pCtl;
     let v=obVal(p.team,tx,ty)*obRoom(nd);
     if(L.running||C.atk*(q.vx||0)>80) v*=1.08;                         // on the move: he can go at them straight away
@@ -9889,18 +9912,16 @@
     else if(sty==='counter'&&transitionT[p.team]>0){ const bk=TAC[p.team].brk;                       // on the break: a DIRECT one in behind, a FLUID one short and on
       if(bk==='direct'&&fwdD>350&&(q.role==='ATT'||L.running)) v*=1.35; else if(bk==='fluid'&&fwdD>0&&d<360) v*=1.15; }
     else if(sty==='wing'){ const wideQ=Math.abs(ty-YC)>FH*0.28, wideP=Math.abs(p.y-YC)>FH*0.28;
-      if(wideQ&&!wideP) v*=1.15;                                                        // out to the flanks
-      if(lob&&wideQ) v*=1.25; }                                                            // (and the switch to the far flank)
+      if(wideQ&&!wideP) v*=1.15; }                                                      // out to the flanks
     else if(sty==='direct'){ if(fwdD>350&&(q.role==='ATT'||L.running)) v*=1.35; else if(fwdD<0) v*=0.85;
       if(fwdD>0) v*=1+0.35*clamp((d-350)/450,0,1); else if(d<260) v*=0.85; }                        // (the longer the ball forward, the better; no little square balls)
     else if(sty==='counter'&&transitionT[p.team]>0){ if(fwdD>250) v*=L.running?1.6:1.4; else if(fwdD<0) v*=0.7; }   // (on the break: in behind, above all)
-    if(lob) v*=0.85;                                                    // switched out wide he's on his own: nobody close to play with
     if(q.num==null) v*=0.6;                                             // our keeper: he'll often have to kick it long
     if(fwdD<-3*OBM&&!(Math.abs(C.gx-tx)<BX+80&&Math.abs(ty-YC)<BY+10)){ const high=C.u>FW*0.5;   // A BALL BACK (v111: see OB_AGGR)
       v*=high?OB_AGGR.backHigh:OB_AGGR.back; if(high&&C.prD<4*OBM) v*=OB_AGGR.backPressed; if(simNow-obPoss[p.team].fwdT<3) v*=OB_AGGR.backAfter; }
     v+=obGain(C,tx);
     const loss=obVal(C.opp,cx,cy)*C.M.risk;
-    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob, arc};
+    return {kind:'pass', key:'p'+(q.num!=null?q.num:'k'), q, tx, ty, d, P:P_, v, loss, ev:P_*v-(1-P_)*loss, rel:true, thru:L.running?tA:0, lob, arc, hook:H?{th:H.th, side:H.side}:null};
   }
   // carrying it: a dozen headings round the way we're going (behind him only matters with a man on him)
   const OB_HEAD=[0,0.38,-0.38,0.75,-0.75,1.15,-1.15,1.57,-1.57,2.1,-2.1,2.65,-2.65,Math.PI], OB_RUN=600;
@@ -10145,7 +10166,7 @@
     if(o.kind==='pass'){
       const deepWide=Math.abs(C.gx-p.x)<BX+110&&Math.abs(p.y-YC)>GOAL_W*0.5+20;
       if(C.atk*(o.tx-p.x)>3*OBM) obPoss[p.team].fwdT=simNow;            // (a ball forward: see OB_AGGR's backAfter)
-      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru,o.arc); else if(o.lob) obLobBall(p,o.q,o.tx,o.ty); else passTo(p,o.q);
+      if(o.thru) obThruBall(p,o.q,o.tx,o.ty,o.thru,o.arc,o.hook); else passTo(p,o.q);
       ob.done=true;
       if(deepWide&&Math.abs(C.gx-o.tx)<BX+80&&Math.abs(o.ty-YC)<BY+10&&C.atk*(o.tx-p.x)<=40){ lastGrade='CUTBACK'; gradeColor=p.team==='G'?'#9dff3c':'#ff5a4d'; gradeFade=1.0; }
       return steer(p,C.gx,YC);
@@ -13564,9 +13585,9 @@
       if(ball.z>0||ball.vz!==0){
         ball.vz-=520*dt;ball.z+=ball.vz*dt;
         if(ball.z<=0){ball.z=0;ball.vz=ball.vz<-40?-ball.vz*0.45:0;
-          if(ball.lob){   // a lofted pass checks up where it lands (backspin) -- if it's still on the line it was struck on
-            const sp=Math.hypot(ball.vx,ball.vy)||1;
-            if((ball.vx*ball.lob.x+ball.vy*ball.lob.y)/sp>0.995){ const k=P.lobCheck.val; ball.vx*=k; ball.vy*=k; ball.vz*=Math.min(1,k); }
+          if(ball.lob){   // it checks up where it lands (backspin) -- if it's still on the line it was struck on (v167: a long pass's, by his Long passing, give or take its bend; a chip over a man's, lobCheck)
+            const sp=Math.hypot(ball.vx,ball.vy)||1, L=ball.lob, bs=L.k!=null;
+            if((ball.vx*L.x+ball.vy*L.y)/sp>(bs?0.9:0.995)&&(!bs||Math.abs(simNow-L.t)<0.25)){ const k=bs?L.k:P.lobCheck.val; ball.vx*=k; ball.vy*=k; ball.vz*=Math.min(1,k); }
             ball.lob=null; }}
       }
       ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
@@ -13694,7 +13715,7 @@
           const dragged=kickHeld&&passDown&&passDown.x!=null&&Math.hypot(passDown.lx-passDown.x,passDown.ly-passDown.y)>=P.passDrag.val;
           const gkYours=!!gkHold&&gkHold.team==='G'&&keeperWaits(gkHold);   // (your keeper's ball: PASS plays it out -- see keeperPlay)
           const thr=myThrow();                                                // (v138: a throw-in in your man's hands)
-          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':(kickHeld&&passLoft?'LOB':'PASS'))) : thr ? 'THROW' : gkYours ? 'PASS' : (oursHave?'CALL':incomingAny()?'1-TOUCH':controlled&&controlled.adOn?'DEFEND':'SWITCH');
+          btns.kick.textContent = mine ? (lockT?'TRAP':(dragged?'THRU':'PASS')) : thr ? 'THROW' : gkYours ? 'PASS' : (oursHave?'CALL':incomingAny()?'1-TOUCH':controlled&&controlled.adOn?'DEFEND':'SWITCH');
           btns.kick.classList.toggle('mCall', !mine && !thr && !gkYours && oursHave);
           btns.kick.classList.toggle('mTrap', (!mine && !thr && !oursHave) || lockT);
         }
@@ -15763,7 +15784,7 @@
   let ctlThen=null, ctlFirst=false;   // (v160: ctlFirst, the card before your first match: its button KICK OFF, so a tap outside doesn't close it)
   const CTL=[
     ['LEFT','Drag anywhere on the left to steer the man on the ball: he runs with it by himself. Double-tap to sprint.'],
-    ['PASS','The big button: pass, the way you’re steering. Tap it twice to loft it; drag off it for a through ball into a run. Tap a team-mate to pass to him.'],
+    ['PASS','The big button: pass, the way you’re steering. Drag off it for a through ball into a run. Tap a team-mate to pass to him.'],
     ['SHOOT','Hold it to wind up, let go to strike -- or swipe the right of the screen, bending the swipe to curl it. At a cross it heads it at goal.'],
     ['CROSS','From out wide: hold it longer for a man further across, tap it twice for a low, driven one. In your own half it clears it.'],
     ['SKILL','Hold it and draw from it for a skill move: a flick ahead, a drag back, a circle. His stars say which he can do; SKILL MOVES in the menu has them all.'],
@@ -15785,7 +15806,7 @@
     {k:'s', when:c=>myBall()&&tipGoalD(c)<24*MK, txt:'Hold <b>SHOOT</b>, let go to strike · or swipe the right of the screen, bending it to curl'},
     {k:'c', when:c=>myBall()&&tipUp(c)>FW*0.2&&Math.abs(c.y-YC)>FH*0.27, txt:'<b>CROSS</b> · hold it longer for a man further across'},
     {k:'k', when:c=>myBall()&&tipUp(c)<-FW*0.2, txt:'In your own half <b>CROSS</b> clears it'},
-    {k:'p', when:c=>myBall(), txt:'<b>PASS</b>, the way you’re steering · tap it twice to loft it, drag off it for a through ball'},
+    {k:'p', when:c=>myBall(), txt:'<b>PASS</b>, the way you’re steering · drag off it for a through ball into a run'},
     {k:'d', when:c=>!!ball.ownedBy&&ball.ownedBy.team!==c.team, txt:'They have it: tap a team-mate to switch to him · hold the big button and your man closes them down · <b>SLIDE</b> slides in'}];
   const TIP={t:0, gap:0};
   function tipTick(dt){ const el=document.getElementById('tipBar'); if(!el) return;

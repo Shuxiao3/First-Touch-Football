@@ -23,7 +23,13 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
   + 'reset:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; for(const t of ["G","R"]){ PLAN[t]=mkPlanState(); playEye[t].t=-9; ballEye[t].t=-9; } '
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9}); transitionT[t]=0; } '
   + 'for(const q of players){ q.runSeen=null; q.runCd=0; q.gapRun=0; } ball.thru=null; ball.intendedRcv=null; ball.passerRef=null; simNow+=0.5; }, '
-  + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }};\n  const LAB_TITLE=');
+  + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
+  // (v167: there's no lofted through ball now; a long ball up over him from behind -- the keeper's long ball still flies
+  // so -- struck by hand on the lofted through ball's flight, to the spot ahead of him a through ball goes to)
+  + 'longBall:(p,mate,drag)=>{ const u=thruDir(mate,screenDirToPitch(drag.dx,drag.dy,mate.y)), lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val, L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)}; '
+  + 'let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d; const tA=clamp(dist(mate,L)/sprintSpeedOf(mate),0.7,1.5)*P.loftHang.val, vh=loftVh(d,tA); '
+  + 'ball.vx=dx*vh; ball.vy=dy*vh; ball.vz=260*tA; ball.lob={x:dx,y:dy}; ball.ownedBy=null; ball.curveSpinT=0; ball.arcK=0; ball.thruCurl=0; p.noTouchT=0.3; ball.lastTouch=p.team; '
+  + 'ball.intendedRcv=mate; ball.rcvRunner=false; ball.passerRef=p; ball.thru={x:L.x,y:L.y,until:simNow+tA+1.5}; }};\n  const LAB_TITLE=');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-runs-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -202,13 +208,13 @@ r = await page.evaluate(() => new Promise(res => { const T = window.__T; T.reset
   for(const q of [cm, w]){ q.state = 'normal'; q.stateT = 0; q.noTouchT = 0; q.z = 0; q.vz = 0; q.stamina = q.staminaCap = 1; }   // (v165: the two of them as the scene wants them, whatever the scenes before left them doing)
   Object.assign(cm.stats, { passAcc: 6.5, longPass: 6.5, curve: 8, offIQ: 8.5 }); Object.assign(w.stats, { speed: 9.5, acceleration: 9.5, agility: 9.5, offIQ: 6.5, ballControl: 8, stamina: 5.5 });   // (v146: the two the scene was set on -- Liverpool's men in these spots change with the types)
   window.__give(cm); T.setControlled(window.__by('G', 'CB', 'atk', 0));       // (the computer runs him, not you: you're on a centre-back out of it)
-  T.thruBall(cm, w, { dx: a * 60, dy: 0 }, true);                              // (lofted, over his head: the computer can still play one)
+  T.longBall(cm, w, { dx: a * 60, dy: 0 });                                   // (lofted, over his head -- see longBall)
   let back = 0, minV = 1e9, n = 0;
   (function tick(){ const B = T.ball(); if(B.z > 0 && B.ownedBy !== w && Math.hypot(B.x - w.x, B.y - w.y) > 3 * T.MK){ n++; if(w.facing.x * a < 0) back++; minV = Math.min(minV, a * w.vx); }   // (in flight, till it's on him)
     const got = T.ball().ownedBy === w, t = T.simNow() - t0;
     if(got || t > 3.5) return res({ got, t: +t.toFixed(2), back, n, minV: Math.round(minV), ran: Math.round(a * (w.x - x0) / T.MK) });
     requestAnimationFrame(tick); })(); }));
-info('a ball lofted over his head, him sprinting on: ' + JSON.stringify(r));
+info('a long ball over his head, him sprinting on: ' + JSON.stringify(r));
 ok(r.got && r.n > 10 && r.back === 0 && r.minV > 120, `played over his head from 16 m behind him as he sprints on: he never turns round while it's in the air (${r.back} of ${r.n} frames facing back), keeps going (never under ${r.minV} px/s forward), and has it at ${r.t} s, ${r.ran} m on`);   // (v146: 120 -- a pass a little long now and then and he eases to 136-143 px/s, still running: one run in six or so on v143 and on v146 alike; it was 150)
 
 process.exitCode = rep.finish();

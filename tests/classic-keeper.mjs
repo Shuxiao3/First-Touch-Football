@@ -80,10 +80,10 @@ const pu = await yours('pass', 'up'), pd = await yours('pass', 'down');
 info('PASS with the stick up: ' + JSON.stringify(pu.out) + '; down: ' + JSON.stringify(pd.out));
 ok(pu.out && pd.out && pu.out.t < 1.2 && pu.out.rcv >= 0 && pd.out.rcv >= 0 && pu.out.side < 0 && pd.out.side > 0 && pu.out.you === pu.out.rcv && pd.out.you === pd.out.rcv,
   'PASS throws it at once to the man you aim at -- the stick up, a man up that way (' + pu.out.rcv + '); down, down that way (' + pd.out.rcv + ') -- and you go with it, on to him');
-// two taps: overarm, up in the air -- a tap's along the grass
+// two taps (v167: no lofted pass, so no overarm throw) -- the same as one: at once, along the grass
 const lf = await yours('loft', 'fwd'), gr = await yours('pass', 'fwd');
 info('two taps: ' + JSON.stringify(lf.out) + '; one: ' + JSON.stringify(gr.out));
-ok(lf.out && gr.out && lf.out.rcv >= 0 && lf.out.vz > gr.out.vz + 30, 'two taps of PASS: thrown overarm, up in the air (' + lf.out.vz + ' up), a tap along the grass (' + gr.out.vz + ')');
+ok(lf.out && gr.out && lf.out.rcv >= 0 && lf.out.t < 1.2 && Math.abs(lf.out.vz - gr.out.vz) <= 5, 'two taps of PASS: no overarm throw now -- it goes at once, along the grass as a tap does (' + lf.out.vz + ' up; a tap, ' + gr.out.vz + ')');
 // CLEAR, and SHOOT: a long pass, pinged to the man you aim at -- further on than a throw -- and you go with it (v115)
 const cl = await yours('clear', null), sh = await yours('shoot', null), cu = await yours('clear', 'up');
 info('CLEAR: ' + JSON.stringify(cl.out) + '; SHOOT: ' + JSON.stringify(sh.out) + '; CLEAR, the stick up: ' + JSON.stringify(cu.out));

@@ -2,10 +2,11 @@
 // facing the byline, an inswinger facing back toward his own goal -- by more the higher his Curve, aimed so it still
 // comes down on the spot (on time, at head height); everyone reading it reads its swing. A curling cross is harder to
 // head clear (a weaker, wilder clearance, and less of a chance in a duel) and to claim (a little less reach for the
-// keeper). A through ball to a man running across its line bends a little into his path (no more than 10 degrees: it
-// was a banana); one with a man of theirs on its line bends a little away from him, not round him; one to a man running
-// along its line goes straight. A long ball over the top to a man running across bends a little into his path too. And
-// a shot's curl is worked out as before.
+// keeper). A through ball (v167) is hooked in late as it was drawn: with nobody of theirs near where it's going it goes
+// straight, however the man it's for is running; with a man of theirs on its line it bulges away from him, a little,
+// and still gets to the spot; with one off to the side short of the spot it bulges away from him and hooks in late,
+// coming onto the spot turned in toward his side -- 72 degrees of turn on it at Curve 10, 9 at 1. And a shot's curl is
+// worked out as before.
 // On a copy of the game that lets the test set the scene and reach the cross, the passes and the reading of the ball.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -16,7 +17,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, P, FW, FH, YC, MK, atkOf, simNow:()=>simNow, STAT_LABEL, '
-  + 'aiCross, ballAt, crossCurlQ, headClear, obThruBall, obLobBall, curlSwing, crossClaim, reachOf, keeperSpdOf, CB:()=>CROSS_BEND, PB:()=>PASS_BEND, CH:()=>GK_CLAIM_H, GR:()=>[GK_RUN,GK_GRAB], '
+  + 'aiCross, ballAt, crossCurlQ, headClear, obThruBall, curlSwing, crossClaim, reachOf, keeperSpdOf, CB:()=>CROSS_BEND, PB:()=>PASS_BEND, CH:()=>GK_CLAIM_H, GR:()=>[GK_RUN,GK_GRAB], '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');   // (the scenes' runners are beyond everyone)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-curve-')), 'classic.html');
@@ -86,42 +87,48 @@ const cl = await page.evaluate(() => { const T = window.__T, kp = T.keepers()[0]
 info('a cross he can just get to (' + cl.L + ' m off): ' + (cl[0] ? 'claimed' : 'left') + ' straight, ' + (cl[1] ? 'claimed' : 'left') + ' curling');
 ok(cl[0] && !cl[1], 'a curling cross is a little harder for the keeper to claim: one he\'d just get to straight, he can\'t');
 
-// THROUGH BALLS: the computer's, 11 m into the path of a runner, struck true. He runs across its line at 60°, or
-// along it; or along it with one of theirs sat 0.6 m off its line half-way (not touching it). Curve 1 and 10. Where it
-// gets to (against where it was played to), which way it's going as it gets there (+: turned toward his run), and how
-// near the man in the way it passes.
-const thru = (cv, run, lane, lob) => page.evaluate(({ cv, run, lane, lob }) => new Promise(res => {
+// THROUGH BALLS (v167): the computer's into the path of a runner, struck true. 12 m, nobody of theirs near where it's
+// going: he runs across its line at 60°, or along it. 12 m along his line with one of theirs sat 0.6 m off it half-way
+// (not touching it). 16 m with one of theirs 5 m short of the spot and 4 m off its line. Curve 1 and 10. Where it gets
+// to (against where it was played to), which way it's going as it gets there (+: turned toward the man's side of its
+// line), how far it bulges off its line (+: to his side), and how near the man in the way it passes.
+const thru = (cv, run, man) => page.evaluate(({ cv, run, man }) => new Promise(res => {
   const T = window.__T, R = T.players().filter(q => q.team === 'R' && q.role !== 'G'), G = T.players().filter(q => q.team === 'G' && q.role !== 'G'); T.freeze();
   const p = R[0], q = R[1], o = G[1], atk = T.atkOf('R'), keep = p.stats;
   p.stats = Object.assign({}, keep, { curve: cv, passAcc: 10, longPass: 10, offIQ: 10 });
-  const D = lob ? 800 : 280, ang = run === 'across' ? 60 / 57.3 : 0, rv = 170, b = T.ball();
+  const D = man === 'short' ? 360 : 280, ang = run === 'across' ? 60 / 57.3 : 0, rv = 170, b = T.ball();
   const park = () => { for(const x of T.players()) if(x !== p && x !== q && x !== o){ x.x = T.FW / 2; x.y = 40; x.vx = x.vy = 0; } for(const k of T.keepers()) k.y = 30; };
   park(); p.x = T.FW / 2 - atk * 300; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
   b.ownedBy = null; b.dribbler = null; b.x = p.x + atk * 20; b.y = p.y; b.z = 0; b.vx = b.vy = b.vz = 0;
   const x0 = b.x, y0 = b.y, tx = x0 + atk * D, ty = T.YC, cx = atk, cy = 0, rvx = atk * Math.cos(ang) * rv, rvy = -Math.sin(ang) * rv;
-  const oAt = () => { o.x = lane ? x0 + atk * D * 0.5 : T.FW / 2; o.y = lane ? T.YC + 16 : 80; o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 99; };   // (the man in the way doesn't touch it: how far round him it goes)
+  const oAt = () => { if(man === 'lane'){ o.x = x0 + atk * D * 0.5; o.y = T.YC + 16; } else if(man === 'short'){ o.x = tx - atk * 5 * T.MK; o.y = T.YC + 4 * T.MK; } else { o.x = T.FW / 2; o.y = 80; }
+    o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 99; };   // (the man of theirs doesn't touch it: how it's bent for him)
   oAt(); q.vx = rvx; q.vy = rvy; q.x = tx - rvx * 3; q.y = ty - rvy * 3;    // (far back on his run: he's not there before it)
-  { const R = Math.random; Math.random = () => 0.5; try { if(lob) T.obLobBall(p, q, tx, ty); else T.obThruBall(p, q, tx, ty, 0.9); } finally { Math.random = R; } }   // (struck true: no error in its weight or line)
-  const spin = b.curveSpinT > 0, t0 = T.simNow(), spot = !lob && b.thru ? { x: b.thru.x, y: b.thru.y } : { x: tx, y: ty }, moved = Math.hypot(spot.x - tx, spot.y - ty); let near = 1e9, at = null, hd = 0;
+  const oSide = Math.sign((o.y - y0) * cx - (o.x - x0) * cy) || 1;
+  { const R = Math.random; Math.random = () => 0.5; try { T.obThruBall(p, q, tx, ty, man === 'short' ? 1.5 : 0.9); } finally { Math.random = R; } }   // (struck true: no error in its weight or line)
+  const spin = b.curveSpinT > 0, t0 = T.simNow(), spot = b.thru ? { x: b.thru.x, y: b.thru.y } : { x: tx, y: ty }, moved = Math.hypot(spot.x - tx, spot.y - ty); let near = 1e9, at = null, hd = 0, bow = 0;
   (function tick(){
     park(); oAt(); q.x = tx - rvx * 3; q.y = ty - rvy * 3; q.vx = rvx; q.vy = rvy;
-    const t = T.simNow() - t0, s = (b.x - x0) * cx + (b.y - y0) * cy;
-    if(!b.ownedBy) hd = Math.atan2(cx * b.vy - cy * b.vx, cx * b.vx + cy * b.vy) * 57.3 * (Math.sign(rvy * atk) || 1);
-    if(lane && b.z < 30) near = Math.min(near, Math.hypot(b.x - o.x, b.y - o.y));
-    if(!at && (lob ? t > 0.3 && b.z <= 0.5 : s >= D - 3)) at = { t, miss: Math.hypot(b.x - spot.x, b.y - spot.y), hd };
-    if(at || b.ownedBy || t > 3){ p.stats = keep; const r = { cv, run, lane, lob, spin, at, cutOut: b.ownedBy === o, near, moved: Math.round(moved) };
-      b.ownedBy = null; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0; b.curveSpinT = 0; return res(r); }
-    requestAnimationFrame(tick); })(); }), { cv, run, lane, lob });
+    const t = T.simNow() - t0, s = (b.x - x0) * cx + (b.y - y0) * cy, off = ((b.y - y0) * cx - (b.x - x0) * cy) * oSide;
+    if(!b.ownedBy) hd = Math.atan2(cx * b.vy - cy * b.vx, cx * b.vx + cy * b.vy) * 57.3 * oSide;
+    if(s > 0 && s < D && Math.abs(off) > Math.abs(bow)) bow = off;
+    if(man === 'lane' && b.z < 30) near = Math.min(near, Math.hypot(b.x - o.x, b.y - o.y));
+    if(!at && s >= D - 3) at = { t, miss: Math.hypot(b.x - spot.x, b.y - spot.y), hd };
+    if(at || b.ownedBy || t > 3.5){ p.stats = keep; const r = { cv, run, man, spin, at, cutOut: b.ownedBy === o, near, bow: +(bow / T.MK).toFixed(2), moved: Math.round(moved) };
+      b.ownedBy = null; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0; b.curveSpinT = 0; b.arcK = 0; return res(r); }
+    requestAnimationFrame(tick); })(); }), { cv, run, man });
 const P = {};
-for(const cv of [1, 10]){ P['x' + cv] = await thru(cv, 'across', false, false); P['a' + cv] = await thru(cv, 'along', false, false);
-  P['l' + cv] = await thru(cv, 'along', true, false); P['o' + cv] = await thru(cv, 'across', false, true); }
-info('through balls: ' + Object.entries(P).map(([k, r]) => `${r.lob ? 'over the top' : 'along the grass'}, ${r.lane ? 'a man on its line' : 'run ' + r.run}, Curve ${r.cv}: ${r.spin ? 'bent' : 'straight'}, ${r.at ? 'got there ' + Math.round(r.at.miss) + ' px off, turned ' + Math.round(r.at.hd) + '° his way' : r.cutOut ? 'cut out' : 'never got there'}${r.lane ? ', ' + Math.round(r.near) + ' px off the man' : ''}`).join('; '));
-ok(P.x10.spin && P.x10.at && P.x10.at.hd >= 10 && P.x10.at.hd <= 16 && P.x10.at.miss < 15, 'a through ball to a man running across its line bends into his path at Curve 10 -- more since v165, still no banana (gets there turned ' + (P.x10.at ? Math.round(P.x10.at.hd) : '-') + '° his way; 7° before, and 17° when it was a banana)');
-ok(P.x1.at && Math.abs(P.x1.at.hd) <= 3, '...hardly at all at Curve 1 (' + (P.x1.at ? Math.round(P.x1.at.hd) : '-') + '°)');
-ok(!P.a1.spin && !P.a10.spin && P.a10.at && P.a10.at.miss < 12, 'to a man running along its line it goes straight');
-ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.near - P.l1.near >= 5 && P.l10.near - P.l1.near <= 12 && P.l10.moved === 0,
-  'with one of theirs on its line it bends away from him, a little further than it did (v165, a through ball\'s bend): Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + '; it was 3 px), still to the spot');
-ok(P.o10.spin && P.o10.at && P.o10.at.hd >= 5 && P.o10.at.hd <= 10 && P.o10.at.miss < 45, 'a long ball over the top to a man running across bends a little into his path and comes down by the spot (' + (P.o10.at ? Math.round(P.o10.at.miss) + ' px off, turned ' + Math.round(P.o10.at.hd) + '°' : '-') + ')');
+for(const cv of [1, 10]){ P['x' + cv] = await thru(cv, 'across', null); P['a' + cv] = await thru(cv, 'along', null);
+  P['l' + cv] = await thru(cv, 'along', 'lane'); P['s' + cv] = await thru(cv, 'along', 'short'); }
+info('through balls: ' + Object.entries(P).map(([k, r]) => `${r.man === 'lane' ? 'a man on its line' : r.man === 'short' ? 'a man short of the spot' : 'nobody near, run ' + r.run}, Curve ${r.cv}: ${r.spin ? 'bent' : 'straight'}, ${r.at ? 'got there ' + Math.round(r.at.miss) + ' px off, turned ' + Math.round(r.at.hd) + '° his way' : r.cutOut ? 'cut out' : 'never got there'}, bulging ${r.bow} m${r.man === 'lane' ? ', ' + Math.round(r.near) + ' px off the man' : ''}`).join('; '));
+ok(!P.x1.spin && !P.x10.spin && !P.a1.spin && !P.a10.spin && P.x10.at && P.a10.at && P.x10.at.miss < 12 && P.a10.at.miss < 12,
+  'with nobody of theirs near where it\'s going a through ball goes straight to the spot, however he\'s running -- across its line or along it (v167: it bent into his path)');
+ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.bow < 0 && P.l10.near - P.l1.near >= 5 && P.l10.near - P.l1.near <= 16 && P.l10.moved === 0,
+  'with one of theirs on its line it bulges away from him and still gets to the spot: Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + ')');
+ok(P.s10.spin && P.s10.at && P.s10.at.miss < 12 && P.s10.bow <= -1.8 && P.s10.bow >= -3.2 && P.s10.at.hd >= 40 && P.s10.at.hd <= 62,
+  'with one of theirs short of the spot, off to the side, it bulges away from him and hooks in late onto the spot at Curve 10 (' + P.s10.bow + ' m off its line, coming in turned ' + (P.s10.at ? Math.round(P.s10.at.hd) : '-') + '° toward his side, ' + (P.s10.at ? Math.round(P.s10.at.miss) : '-') + ' px off the spot)');
+ok(P.s1.spin && P.s1.at && P.s1.at.miss < 12 && P.s1.bow < 0 && P.s1.bow > -0.6 && P.s1.at.hd > 0 && P.s1.at.hd <= 9,
+  '...and hardly at all at Curve 1 (' + P.s1.bow + ' m, turned ' + (P.s1.at ? Math.round(P.s1.at.hd) : '-') + '°)');
 
 // A SHOT'S CURL is worked out as before
 const sw = await page.evaluate(() => { const T = window.__T, P = T.P;
