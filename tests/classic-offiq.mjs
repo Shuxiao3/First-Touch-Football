@@ -3,7 +3,8 @@
 // (less as it gets to him), and a good one goes to meet it while a poor one lets it come. A cross: only the two of ours
 // best placed go for it, and a good one meets it at the first point of its flight he can get to at head height, timing
 // his run, where a poor one goes where it comes down -- so he heads it more often. A high-percentage chance (xG 0.3 or
-// better) a high Off IQ hits first time. Your own man, the stick left alone after your pass, reads it too.
+// better) a high Off IQ hits first time; in their box (v169) anyone does, on a chance as good as his Off IQ asks (0.15 at
+// 1, 0.06 at 10). Your own man, the stick left alone after your pass, reads it too.
 // Everyone on the computer, on a copy of the game that tells the test of every touch, header and shot, and where a man
 // goes for a pass.
 import { open } from './_harness.mjs';
@@ -65,6 +66,8 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
     rcv.x = U(T.BX + 110 + jx); rcv.y = T.YC + 40 + jy; rcv.facing = { x: atk, y: 0 }; opp.x = U(T.BX + 70 + jx); opp.y = T.YC + 25 + jy; opp.facing = { x: -atk, y: 0 }; }
   else if(scene === 'cutback'){ pas.x = U(70); pas.y = T.YC + 250; pas.facing = { x: -atk, y: 0 };
     rcv.x = U(T.BX + 110 + jx); rcv.y = T.YC + 40 + jy; rcv.facing = { x: -atk, y: 0 }; }
+  else if(scene === 'boxside'){ pas.x = U(T.BX + 420); pas.y = T.YC + 300; pas.facing = { x: atk, y: 0 };   // (v169: a ball into the box to him 11 m out, off the middle, one of theirs 6 m off closing)
+    rcv.x = U(T.BX + 70 + jx); rcv.y = T.YC - 120 + jy; rcv.facing = { x: -atk, y: 0 }; opp.x = rcv.x + atk * 30; opp.y = rcv.y - 125; opp.facing = { x: 0, y: 1 }; }
   else if(scene === 'square'){ pas.x = U(550); pas.y = T.YC + 330; pas.facing = { x: 0, y: -1 };
     rcv.x = U(550 + jx); rcv.y = T.YC + 20 + jy; rcv.facing = { x: atk, y: 0 }; }
   else { pas.x = T.FW / 2 - atk * 220; pas.y = T.YC; pas.facing = { x: atk, y: 0 }; rcv.x = T.FW / 2 + atk * 140 + jx; rcv.y = T.YC + 130 + jy; rcv.facing = { x: -atk, y: 0 };
@@ -87,7 +90,7 @@ const run = (scene, iq, i) => page.evaluate(({ scene, iq, i }) => new Promise(re
       b.ownedBy = null; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0; b.crossT = 0; b.crossBy = null; return res(out); }
     requestAnimationFrame(tick); })(); }), { scene, iq, i });
 const S = {};
-for(const scene of ['midfield', 'cutback', 'square', 'cross']) for(const iq of [1, 10]){ const R = [], n = scene === 'cross' ? 32 : 10;   // (32 crosses: the marker goes to meet it too, so each one's a contest)
+for(const scene of ['midfield', 'cutback', 'boxside', 'square', 'cross']) for(const iq of [1, 10]){ const R = [], n = scene === 'cross' ? 32 : 10;   // (32 crosses: the marker goes to meet it too, so each one's a contest)
   for(let i = 0; i < n; i++) R.push(await run(scene, iq, i)); S[scene + iq] = R; }
 const avg = a => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length), cnt = (R, k) => R.filter(r => r.k === k).length;
 const mv = iq => S['midfield' + iq].filter(r => r.moved !== undefined).map(r => r.moved), tw = iq => S['midfield' + iq].filter(r => r.toward !== undefined).map(r => r.toward);
@@ -96,8 +99,10 @@ info(`midfield: he goes for it ${avg(mv(1)).toFixed(2)} s after the pass at Off 
 ok(Math.min(...mv(1)) >= 0.35 && Math.max(...mv(10)) <= 0.12, 'a pass to him: he goes for it once he\'s read it -- not before 0.35 s at Off IQ 1, inside 0.12 s at 10');
 ok(cnt(S.midfield10, 'his') === 10 && med(tw(10)) >= 20 && med(tw(10)) - med(tw(1)) >= 15 && Math.abs(med(tw(1))) < 25, '...at 10 he comes to meet it (' + med(tw(10)) + ' px nearer the ball), at 1 he lets it come to him (' + med(tw(1)) + ' px)');
 const ft = (sc, iq) => S[sc + iq].filter(r => r.k === 'shot' && r.after <= 0.06), shots = (sc, iq) => S[sc + iq].filter(r => r.after != null).map(r => r.after + ' s, xG ' + (r.xg || 0).toFixed(2)).join('; ');
-for(const sc of ['cutback', 'square']) info((sc === 'cutback' ? 'a ball pulled back to him 13 m out: ' : 'a ball squared to him 22 m out: ') + [1, 10].map(iq => `Off IQ ${iq}: ${cnt(S[sc + iq], 'shot')} shots, ${ft(sc, iq).length} first time (${shots(sc, iq)})`).join(' -- '));
-ok(ft('cutback', 10).length >= 8 && ft('cutback', 1).length <= 1, 'a good chance pulled back to him, nobody on him: Off IQ 10 hits it first time (' + ft('cutback', 10).length + ' of 10), Off IQ 1 takes a touch (' + ft('cutback', 1).length + ' first time)');
+for(const sc of ['cutback', 'boxside', 'square']) info((sc === 'cutback' ? 'a ball pulled back to him at the edge of their box: ' : sc === 'boxside' ? 'a ball into the box to him 11 m out, one of theirs 6 m off: ' : 'a ball squared to him 22 m out: ') + [1, 10].map(iq => `Off IQ ${iq}: ${cnt(S[sc + iq], 'shot')} shots, ${ft(sc, iq).length} first time (${shots(sc, iq)})`).join(' -- '));
+ok(ft('cutback', 10).length >= 8 && ft('cutback', 1).length <= 3, 'a good chance pulled back to him at the edge of their box, nobody on him: Off IQ 10 hits it first time (' + ft('cutback', 10).length + ' of 10), Off IQ 1 takes a touch (' + ft('cutback', 1).length + ' first time)');
+ok(ft('boxside', 10).length >= 7 && ft('boxside', 10).length === cnt(S.boxside10, 'shot') && ft('boxside', 1).length * 2 > cnt(S.boxside1, 'shot') && cnt(S.boxside1, 'nothing') === 0 && cnt(S.boxside10, 'nothing') === 0,
+  'in their box (v169) he hits it first time: every shot at Off IQ 10 (' + ft('boxside', 10).length + ' of ' + cnt(S.boxside10, 'shot') + '), most at 1 (' + ft('boxside', 1).length + ' of ' + cnt(S.boxside1, 'shot') + ': a slimmer chance than 0.15 he still takes a touch to), and none holds on to it without a shot (v168: Off IQ 1 held it 3 s, or lost it, most times)');
 ok(ft('square', 10).length <= 1 && [...ft('cutback', 10), ...ft('square', 10)].every(r => r.xg >= 0.3), '...not a chance under xG 0.3: squared to him 22 m out, Off IQ 10 takes a touch too (' + ft('square', 10).length + ' first time)');
 info('a cross: ' + [1, 10].map(iq => `Off IQ ${iq}: headed ${cnt(S['cross' + iq], 'headed')}, cleared ${cnt(S['cross' + iq], 'cleared')} of 32`).join('; '));
 ok(cnt(S.cross10, 'headed') >= 10 && cnt(S.cross10, 'headed') - cnt(S.cross1, 'headed') >= 5, 'a cross to him with a marker on him: he heads it far more at Off IQ 10 (' + cnt(S.cross10, 'headed') + ' of 32) than at 1 (' + cnt(S.cross1, 'headed') + ')');

@@ -1,7 +1,8 @@
 // FOOTBALL CLASSIC, YOUR KEEPER: with the ball in his hands you're on him (v114) -- the stick walks him round his box,
-// PASS throws it to the man you aim at (twice: overarm), CLEAR or SHOOT boots it downfield -- and if you do nothing, once
-// he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head, it goes to the man you have lit (v115:
-// CLEAR is his long ball -- a long pass pinged to the man you aim at, not a defender's clearance). The
+// PASS throws it to the man you aim at (twice: overarm), CLEAR or SHOOT punts it as far as you hold it -- and if you do
+// nothing, once he's had it 5 s, the last 2 s of that with a red stopwatch flashing over his head, it goes to the man you
+// have lit (v169: a tapped punt goes a short way into the space, held it goes further, and it's to a man only when it comes
+// down about where he is; v115: it was pinged at once to the best man that way, up to 60 m off, however short the press). The
 // computer's keeper plays it out himself, as before. IN THE AIR no man gets to a ball higher than a keeper: a header
 // tops out at 61 px (Heading 10, at the top of his leap), the keeper's hands at 82; and a keeper coming for a cross
 // catches it when he's comfortably under it, and punches it clear when one of theirs is up with him. HIS WAY TO IT
@@ -20,7 +21,7 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
   + 'GK:()=>[GK_WAIT,GK_WARN], FW, FH, YC, atkOf, tryHeaderContact, tryDefHeaderContact, aiCross, crossClaim, GKH:()=>GK_CLAIM_H, '
   + 'ht:v=>{ if(v!=null) headerT=v; return headerT; }, dht:v=>{ if(v!=null) defHeaderT=v; return defHeaderT; }, drop:()=>{ gkHold=null; }, '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }, '
-  + 'hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
+  + 'puntOn, puntSpot, hold:kp=>{ kp.mode="hold"; kp.holdT=1.0; kp.heldT=0; kp.x=kp.homeX; kp.y=YC; gkHold=kp; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.x=kp.x-kp.side*18; ball.y=kp.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }};\n  const LAB_TITLE=');
 patch('  function drawStopwatch(x,y){', '  function drawStopwatch(x,y){ window.__sw=(window.__sw||0)+1;');
 patch('  function keeperPunch(kp){\n', '  function keeperPunch(kp){\n    window.__punch=(window.__punch||0)+1;\n');
 patch('      else{\n        let ai=aiBrain(p,dt);', '      else if(p.__hold){ p.vx=p.vy=0; }\n      else{\n        let ai=aiBrain(p,dt);');   // (a man the test stands still)
@@ -37,16 +38,17 @@ await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector
 // not), SHOOT -- or
 // nothing, his time running out. When it's gone: who it was for, who you're on, how high it went up and where it first
 // came down; and how many frames the stopwatch showed in his first 3 s and after.
-const yours = (act, dir) => page.evaluate(({ act, dir }) => new Promise(res => {
+const yours = (act, dir, o) => page.evaluate(({ act, dir, o }) => new Promise(res => {   // (o.hold: CLEAR or SHOOT held that long, s; o.man: one of ours, i, put m metres straight up the pitch from the keeper)
   const T = window.__T, kp = T.keepers().find(k => k.team === 'G'), atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
   T.freeze();
   const gx = atk > 0 ? 0 : T.FW, spots = G.map((q, i) => ({ q, x: gx + atk * (300 + i * 150), y: T.YC + (i % 2 ? 1 : -1) * (120 + 40 * i) }));
+  o = o || {}; if(o.man){ spots[o.man.i].x = kp.homeX + atk * o.man.m * 22.5; spots[o.man.i].y = T.YC; }
   const place = () => { for(const s of spots){ s.q.x = s.x; s.q.y = s.y; s.q.vx = s.q.vy = 0; }
     for(const [i, o] of R.entries()){ o.x = atk > 0 ? T.FW - 40 : 40; o.y = T.FH - 60 - i * 40; o.vx = o.vy = 0; } };
   const key = (type, code) => window.dispatchEvent(new KeyboardEvent(type, { code, key: code.slice(-1).toLowerCase() }));
   const stick = { up: 'KeyW', down: 'KeyS', fwd: atk > 0 ? 'KeyD' : 'KeyA' }[dir];
-  place(); T.hold(kp); window.__sw = 0;
-  const t0 = T.simNow(), x0 = kp.x, y0 = kp.y; let sw3 = 0, swEnd = 0, frames3 = 0, framesEnd = 0, on = false, out = null, step = 0, inBox = true;
+  place(); T.hold(kp); kp.facing = { x: atk, y: 0 }; window.__sw = 0;   // (facing up the pitch)
+  const t0 = T.simNow(), x0 = kp.x, y0 = kp.y; let sw3 = 0, swEnd = 0, frames3 = 0, framesEnd = 0, on = false, out = null, step = 0, inBox = true, charging = false;
   (function tick(){
     const t = T.simNow() - t0, b = T.ball();
     if(T.gkHold() === kp){ place(); if(T.controlled() === kp) on = true;
@@ -55,16 +57,17 @@ const yours = (act, dir) => page.evaluate(({ act, dir }) => new Promise(res => {
     else if(!out){ out = { t: +t.toFixed(2), rcv: b.intendedRcv ? G.indexOf(b.intendedRcv) : -1, side: b.intendedRcv ? Math.sign(b.intendedRcv.y - kp.y) : 0, you: T.controlled() === kp ? 'keeper' : G.indexOf(T.controlled()),
         vz: Math.round(b.vz), bx: b.x, by: b.y, land: null }; if(stick) key('keyup', stick); }
     else if(out.land == null){ place();   // (where it first comes down, or where it's taken)
-      if((t - out.t > 0.25 && b.z <= 0.5) || b.ownedBy || t - out.t > 4) out.land = +(Math.hypot(b.x - out.bx, b.y - out.by) / 22.5).toFixed(1); }
+      if((t - out.t > 0.25 && b.z <= 0.5) || b.ownedBy || t - out.t > 4){ out.land = +(Math.hypot(b.x - out.bx, b.y - out.by) / 22.5).toFixed(1); out.dy = Math.sign(Math.round(b.y - out.by)); } }
     if(act !== 'none' && step === 0 && t >= 0.5){ step = 1; if(stick) key('keydown', stick); }
     if(step === 1 && t >= 0.7){ step = 2;
       if(act === 'pass') { key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); }
       if(act === 'loft') { key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); key('keydown', 'KeyJ'); key('keyup', 'KeyJ'); }
-      if(act === 'clear'){ key('keydown', 'KeyL'); key('keyup', 'KeyL'); }
-      if(act === 'shoot'){ key('keydown', 'KeyK'); key('keyup', 'KeyK'); } }
+      if(act === 'clear'){ key('keydown', 'KeyL'); if(!o.hold) key('keyup', 'KeyL'); }
+      if(act === 'shoot'){ key('keydown', 'KeyK'); if(!o.hold) key('keyup', 'KeyK'); } }
+    if(step === 2 && o.hold){ if(T.puntOn()) charging = true; if(t >= 0.7 + o.hold){ step = 3; key('keyup', act === 'shoot' ? 'KeyK' : 'KeyL'); } }
     if(act === 'walk' && t >= 1.7){ key('keyup', stick); return res({ on, held: T.gkHold() === kp, inBox, moved: +(Math.hypot(kp.x - x0, kp.y - y0) / 22.5).toFixed(1), dy: Math.sign(kp.y - y0) }); }
-    if((out && out.land != null) || t > 9) return res({ act, dir, on, out, sw3, swEnd, frames3, framesEnd });
-    requestAnimationFrame(tick); })(); }), { act, dir });
+    if((out && out.land != null) || t > 9) return res({ act, dir, on, out, sw3, swEnd, frames3, framesEnd, charging });
+    requestAnimationFrame(tick); })(); }), { act, dir, o: o || {} });
 
 // THE MOMENT HE HAS IT: you're on him; the stick walks him round his box with it in his hands
 const w = await yours('walk', 'down');
@@ -84,12 +87,19 @@ ok(pu.out && pd.out && pu.out.t < 1.2 && pu.out.rcv >= 0 && pd.out.rcv >= 0 && p
 const lf = await yours('loft', 'fwd'), gr = await yours('pass', 'fwd');
 info('two taps: ' + JSON.stringify(lf.out) + '; one: ' + JSON.stringify(gr.out));
 ok(lf.out && gr.out && lf.out.rcv >= 0 && lf.out.t < 1.2 && Math.abs(lf.out.vz - gr.out.vz) <= 5, 'two taps of PASS: no overarm throw now -- it goes at once, along the grass as a tap does (' + lf.out.vz + ' up; a tap, ' + gr.out.vz + ')');
-// CLEAR, and SHOOT: a long pass, pinged to the man you aim at -- further on than a throw -- and you go with it (v115)
-const cl = await yours('clear', null), sh = await yours('shoot', null), cu = await yours('clear', 'up');
-info('CLEAR: ' + JSON.stringify(cl.out) + '; SHOOT: ' + JSON.stringify(sh.out) + '; CLEAR, the stick up: ' + JSON.stringify(cu.out));
-ok(cl.out && sh.out && cl.out.t < 1.2 && cl.out.rcv >= 0 && cl.out.you === cl.out.rcv && sh.out.rcv >= 0 && cl.out.land >= 30 && cl.out.land > gr.out.land + 10,
-  'CLEAR -- or SHOOT -- pings a long pass to one of ours up the pitch (man ' + (cl.out && cl.out.rcv) + ', first down ' + (cl.out ? cl.out.land : '-') + ' m out; a throw along the grass ' + (gr.out ? gr.out.land : '-') + ' m), and you go with it');
-ok(cu.out && cu.out.rcv >= 0 && cu.out.side < 0 && cu.out.you === cu.out.rcv, 'and it\'s aimed like a pass: the stick up, it\'s to a man up that way (' + (cu.out && cu.out.rcv) + ')');
+// CLEAR, and SHOOT (v169): his punt, as far as you hold it, the way he faces (up the pitch) or the stick points. A tap: a
+// short one, 20 m or so, into the space there -- nobody of ours about where it comes down, so it's nobody's; held the
+// whole way: 60 m; held about half way with one of ours about where that comes down (40 m straight up the pitch): it's
+// his, down at his feet, and you go with him. (v115 to v168: a tap pinged it at once to the best man that way, 30 m on.)
+const cl = await yours('clear', null), sh = await yours('shoot', null), cf = await yours('clear', null, { hold: 1.2 }),
+  cm = await yours('clear', null, { hold: 0.45, man: { i: 3, m: 40 } }), sm = await yours('shoot', null, { hold: 0.45, man: { i: 3, m: 40 } }), cu = await yours('clear', 'up');
+info('CLEAR tapped: ' + JSON.stringify(cl.out) + '; SHOOT tapped: ' + JSON.stringify(sh.out) + '; CLEAR held 1.2 s: ' + JSON.stringify(cf.out) + '; held 0.45 s, one of ours 40 m up: CLEAR ' + JSON.stringify(cm.out) + ', SHOOT ' + JSON.stringify(sm.out) + '; tapped, the stick up: ' + JSON.stringify(cu.out));
+ok(cl.out && sh.out && cl.out.t < 1.2 && cl.out.rcv === -1 && sh.out.rcv === -1 && cl.out.land >= 16 && cl.out.land <= 24 && sh.out.land >= 16 && sh.out.land <= 24,
+  'a tap of CLEAR -- or SHOOT -- punts it only a short way, into the space up the pitch: nobody\'s (first down ' + (cl.out ? cl.out.land : '-') + ' m out, ' + (sh.out ? sh.out.land : '-') + ' off SHOOT; v168: pinged at once 30 m and more, to a man)');
+ok(cf.out && cf.out.land >= 54 && cf.out.land <= 63, '...held the whole way it goes 60 m (' + (cf.out ? cf.out.land : '-') + ' m)');
+ok(cm.charging && cm.out && cm.out.rcv === 3 && cm.out.you === 3 && Math.abs(cm.out.land - 39) < 5 && sm.out && sm.out.rcv === 3 && sm.out.you === 3,
+  '...and held about half way, with one of ours about where it comes down, it\'s to him at his feet and you go with him -- CLEAR or SHOOT (man ' + (cm.out && cm.out.rcv) + ', ' + (cm.out ? cm.out.land : '-') + ' m; charging the while)');
+ok(cu.out && cu.out.rcv === -1 && cu.out.dy < 0 && cu.out.land >= 16 && cu.out.land <= 24, 'it goes the way you aim it: the stick up, a short one up that way (' + (cu.out ? cu.out.land : '-') + ' m)');
 // THE COMPUTER'S KEEPER plays it out by himself, as before
 const ai = await page.evaluate(() => new Promise(res => { const T = window.__T, kp = T.keepers().find(k => k.team === 'R'); T.freeze(); T.hold(kp);
   const t0 = T.simNow(); (function tick(){ const t = T.simNow() - t0; if(T.gkHold() !== kp || t > 6) return res({ t, held: T.gkHold() === kp }); requestAnimationFrame(tick); })(); }));

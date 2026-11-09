@@ -2,10 +2,12 @@
 // facing the byline, an inswinger facing back toward his own goal -- by more the higher his Curve, aimed so it still
 // comes down on the spot (on time, at head height); everyone reading it reads its swing. A curling cross is harder to
 // head clear (a weaker, wilder clearance, and less of a chance in a duel) and to claim (a little less reach for the
-// keeper). A through ball (v167, v168) is hooked in late as it was drawn, as much as it needs: with nobody of theirs
-// near it goes straight, however the man it's for is running; with a man of theirs on its line it bulges away from him
-// and still gets to the spot; with one off to the side short of the spot, 2 m off its line, it bulges away from him and
-// hooks in late, coming onto the spot turned in toward his side -- by then 43 degrees of turn on it at Curve 10, 6 at 1.
+// keeper). A through ball (v167, v168, v169) is hooked in late as it was drawn, as much as it needs and as much as his
+// Curve and its length allow: with nobody of theirs near it goes straight, however the man it's for is running; with a
+// man of theirs on its line it bulges away from him and still gets to the spot; with one off to the side short of the
+// spot, 2 m off its line, it bulges away from him and bends round onto the spot (v169: from the start, the more as it
+// slows -- it hooked in late), coming in turned toward his side -- by then 36 degrees of turn on it at Curve 10 (a 16 m
+// ball), none at 1. Curve 1 bends nothing (v169), a cross included.
 // And a shot's curl is worked out as before.
 // On a copy of the game that lets the test set the scene and reach the cross, the passes and the reading of the ball.
 import { open } from './_harness.mjs';
@@ -43,7 +45,7 @@ const cross = (face, cv) => page.evaluate(({ face, cv }) => new Promise(res => {
   park(); put(); p.facing = face === 'byline' ? { x: atk, y: 0 } : face === 'back' ? { x: -atk, y: 0 } : { x: 0, y: -1 };
   const spot = { x: gx - atk * 170, y: T.YC - 110 }, b = T.ball();
   b.ownedBy = null; b.dribbler = null; b.x = p.x; b.y = p.y; b.z = 0; b.vx = b.vy = b.vz = 0;
-  T.aiCross(p, { x: spot.x, y: spot.y, who: null });
+  T.aiCross(p, { x: spot.x, y: spot.y, who: null }); const spin = b.curveSpin !== 0 && b.curveSpinT > 0;
   const x0 = b.x, y0 = b.y, d = Math.hypot(spot.x - x0, spot.y - y0), cx = (spot.x - x0) / d, cy = (spot.y - y0) / d, q = T.crossCurlQ(), t0 = T.simNow();
   let bow = 0, at = null, pred = null, err = 0;
   (function tick(){
@@ -54,22 +56,22 @@ const cross = (face, cv) => page.evaluate(({ face, cv }) => new Promise(res => {
     if(pred && !pred.done && t >= pred.t - 1e-6){ pred.done = true; err = Math.hypot(pred.p.x - b.x, pred.p.y - b.y); }
     if(!at && s >= d - 2) at = { t, miss: Math.hypot(b.x - spot.x, b.y - spot.y), z: b.z };
     if((at && pred && pred.done) || t > 2.5){ p.stats = keep; b.x = T.FW / 2; b.y = T.YC; b.vx = b.vy = b.vz = 0; b.z = 0;
-      return res({ face, cv, q, toGoal: Math.round(bow * -cy * atk) , bow: Math.abs(bow), at, err }); }   // (bowing toward the goal line: an outswinger)
+      return res({ face, cv, q, spin, toGoal: Math.round(bow * -cy * atk) , bow: Math.abs(bow), at, err }); }   // (bowing toward the goal line: an outswinger)
     requestAnimationFrame(tick); })(); }), { face, cv });
 const X = {};
 for(const face of ['byline', 'back', 'side']) for(const cv of [1, 10]) X[face + cv] = await cross(face, cv);
 info('crosses: ' + Object.values(X).map(r => `${r.face} Curve ${r.cv}: bows ${Math.round(r.bow)} px ${r.toGoal > 0 ? 'toward goal (out)' : 'away from goal (in)'}, down ${r.at ? Math.round(r.at.miss) + ' px off the spot at ' + r.at.t.toFixed(2) + ' s, ' + Math.round(r.at.z) + ' px up' : 'never'}; read ${Math.round(r.err)} px out`).join('; '));
 ok(X.byline10.toGoal > 0 && X.byline10.bow > 35, 'facing the byline it\'s an outswinger: it bows out toward the goal line and bends away from it (' + Math.round(X.byline10.bow) + ' px)');
 ok(X.back10.toGoal < 0 && X.back10.bow > 35, 'facing back toward his own goal, an inswinger (' + Math.round(X.back10.bow) + ' px)');
-ok(X.byline1.bow < 15 && X.back1.bow < 15, 'Curve 1 barely bends it (' + Math.round(X.byline1.bow) + ', ' + Math.round(X.back1.bow) + ' px)');
+ok(!X.byline1.spin && !X.back1.spin && !X.side1.spin && X.byline1.bow < 15 && X.back1.bow < 15, 'Curve 1 doesn\'t bend it: no spin on it at all (v169), off its line only by the cross\'s own error (' + Math.round(X.byline1.bow) + ', ' + Math.round(X.back1.bow) + ', ' + Math.round(X.side1.bow) + ' px)');
 ok(Object.values(X).every(r => r.at && r.at.miss < 18 && r.at.t < 1.25 && r.at.z > 25), 'every one still comes down on the spot (within 0.7 m), on time and at head height');
 ok(Object.values(X).every(r => r.err < 12), 'its flight is read as it swings (within 12 px, 0.7 s ahead)');
-ok(X.byline10.q > 0.99 && X.byline1.q < 0.15, 'a Curve 10 cross counts as curling all the way (' + X.byline10.q.toFixed(2) + '), a Curve 1 one hardly (' + X.byline1.q.toFixed(2) + ')');
+ok(Math.abs(X.byline10.q - 0.95) < 0.005 && X.byline1.q === 0, 'a Curve 10 cross counts as curling 0.95 of the most a cross can (' + X.byline10.q.toFixed(2) + ': v169, the most a twentieth less), a Curve 1 one not at all (' + X.byline1.q.toFixed(2) + ')');
 
 // HARDER TO CLEAR: the same header clearance off a cross curling all the way and off a straight one (the same dice)
 const clr = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && q.role !== 'G'), b = T.ball(), out = {}, R = Math.random; T.freeze();
   try { for(const k of [0, 1]){ Math.random = () => 0.9; p.x = 300; p.y = T.YC; b.ownedBy = null; b.x = 300; b.y = T.YC; b.z = 60; b.vx = 300; b.vy = 0; b.vz = 0;
-    b.crossT = 1; b.crossCurl = k * T.CB()[1]; T.headClear(p); out[k] = Math.hypot(b.vx, b.vy); } } finally { Math.random = R; }
+    b.crossT = 1; b.crossCurl = k * T.CB(); T.headClear(p); out[k] = Math.hypot(b.vx, b.vy); } } finally { Math.random = R; }
   b.vx = b.vy = 0; b.z = 0; return out; });
 info('a headed clearance: ' + Math.round(clr[0]) + ' px/s off a straight cross, ' + Math.round(clr[1]) + ' off a curling one');
 ok(Math.abs(clr[1] / clr[0] - 0.8) < 0.01, 'off a curling cross a headed clearance goes a fifth less far');
@@ -80,7 +82,7 @@ ok(Math.abs(clr[1] / clr[0] - 0.8) < 0.01, 'off a curling cross a headed clearan
 const cl = await page.evaluate(() => { const T = window.__T, kp = T.keepers()[0], b = T.ball(), out = {}; T.freeze();
   const glX = kp.side < 0 ? 0 : T.FW, z0 = T.CH() - 4;
   const at = (L, k) => { kp.x = glX - kp.side * 30; kp.y = T.YC; b.ownedBy = null; b.x = kp.x; b.y = kp.y + L; b.z = z0; b.vx = 1; b.vy = 0; b.vz = 0;
-    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB()[1]; b.curveSpinT = 0; return !!T.crossClaim(kp, true); };
+    b.crossT = 1; b.crossBy = kp.team === 'G' ? 'R' : 'G'; b.crossCurl = k * T.CB(); b.curveSpinT = 0; return !!T.crossClaim(kp, true); };
   let lo = 0, hi = 400; for(let i = 0; i < 30; i++){ const m = (lo + hi) / 2; if(at(m, 0)) lo = m; else hi = m; }   // (the furthest off he can just get to it, straight)
   out.L = +(lo / T.MK).toFixed(2); for(const k of [0, 1]) out[k] = at(lo, k);
   b.crossT = 0; b.crossBy = null; b.z = 0; b.x = T.FW / 2; b.y = T.YC; return out; });
@@ -123,12 +125,12 @@ for(const cv of [1, 10]){ P['x' + cv] = await thru(cv, 'across', null); P['a' + 
 info('through balls: ' + Object.entries(P).map(([k, r]) => `${r.man === 'lane' ? 'a man on its line' : r.man === 'short' ? 'a man short of the spot' : 'nobody near, run ' + r.run}, Curve ${r.cv}: ${r.spin ? 'bent' : 'straight'}, ${r.at ? 'got there ' + Math.round(r.at.miss) + ' px off, turned ' + Math.round(r.at.hd) + '° his way' : r.cutOut ? 'cut out' : 'never got there'}, bulging ${r.bow} m${r.man === 'lane' ? ', ' + Math.round(r.near) + ' px off the man' : ''}`).join('; '));
 ok(!P.x1.spin && !P.x10.spin && !P.a1.spin && !P.a10.spin && P.x10.at && P.a10.at && P.x10.at.miss < 12 && P.a10.at.miss < 12,
   'with nobody of theirs near where it\'s going a through ball goes straight to the spot, however he\'s running -- across its line or along it (v167: it bent into his path)');
-ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.bow < 0 && P.l10.near - P.l1.near >= 12 && P.l10.near - P.l1.near <= 32 && P.l10.moved === 0,
-  'with one of theirs on its line it bulges away from him and still gets to the spot: Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + ')');
-ok(P.s10.spin && P.s10.at && P.s10.at.miss < 12 && P.s10.bow <= -0.9 && P.s10.bow >= -2.0 && P.s10.at.hd >= 22 && P.s10.at.hd <= 40,
-  'with one of theirs short of the spot, off to the side, it bulges away from him and hooks in late onto the spot at Curve 10 (' + P.s10.bow + ' m off its line, coming in turned ' + (P.s10.at ? Math.round(P.s10.at.hd) : '-') + '° toward his side, ' + (P.s10.at ? Math.round(P.s10.at.miss) : '-') + ' px off the spot)');
-ok(P.s1.spin && P.s1.at && P.s1.at.miss < 12 && P.s1.bow < 0 && P.s1.bow > -0.6 && P.s1.at.hd > 0 && P.s1.at.hd <= 9,
-  '...and hardly at all at Curve 1 (' + P.s1.bow + ' m, turned ' + (P.s1.at ? Math.round(P.s1.at.hd) : '-') + '°)');
+ok(P.l10.spin && !P.l1.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.bow < 0 && P.l10.near - P.l1.near >= 8 && P.l10.near - P.l1.near <= 32 && P.l10.moved === 0,
+  'with one of theirs on its line it bulges away from him and still gets to the spot: Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 does straight (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + '; v169, a 12 m ball: half the bend it could have from 17 m)');
+ok(P.s10.spin && P.s10.at && P.s10.at.miss < 12 && P.s10.bow <= -0.9 && P.s10.bow >= -2.0 && P.s10.at.hd >= 14 && P.s10.at.hd <= 34,
+  'with one of theirs short of the spot, off to the side, it bulges away from him and bends round onto the spot at Curve 10 (' + P.s10.bow + ' m off its line, coming in turned ' + (P.s10.at ? Math.round(P.s10.at.hd) : '-') + '° toward his side, ' + (P.s10.at ? Math.round(P.s10.at.miss) : '-') + ' px off the spot; v169, bending from the start: not as steep a dip at the end)');
+ok(!P.s1.spin && P.s1.at && P.s1.at.miss < 12 && Math.abs(P.s1.bow) < 0.1,
+  '...and at Curve 1 not at all: straight to the spot (v169 -- ' + P.s1.bow + ' m off its line)');
 
 // A SHOT'S CURL is worked out as before
 const sw = await page.evaluate(() => { const T = window.__T, P = T.P;

@@ -1,7 +1,8 @@
 // FOOTBALL CLASSIC, THROUGH BALLS ROUND THEIR LINE: the computer's through ball to a man running in behind their back
 // line goes through a gap in it -- between two of them, or between the outside one and the touchline when the run's out
 // there -- and bends on round onto the runner along a steady arc (the same turn every metre, however it slows), as much
-// as that takes and as much as the passer's Curve gives him (6 degrees of turn at Curve 1, 43 at 10 -- v165: 34 before). The pass is chosen
+// as that takes and as much as the passer's Curve and the ball's length give him (v169: none at Curve 1, 41 degrees of
+// turn at 10 on a ball of 17 m to 27 m, less on a shorter or longer one; v168: 6 at 1 and 43 at 10; v165: 34). The pass is chosen
 // on that path, not on a straight line through a man. The ball goes the way it was chosen for, a read of its path reads
 // the bend, and a touch on the way ends it. (v168: out wide it's hooked in late, as the coached balls were, when that's
 // the safer -- as it is in the scene here.)
@@ -15,7 +16,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, P, FW, FH, YC, MK, atkOf, simNow:()=>simNow, '
-  + 'obThruBall, obPassOpt, obCtx, thruDoors, thruArcs, arcAt, thruArcOf, ballAt, passLead, hookTurn:th=>th*Math.pow(THRU_MEET,THRU_HOOK), '
+  + 'obThruBall, obPassOpt, obCtx, thruDoors, thruArcs, arcAt, thruArcOf, ballAt, passLead, hookTurn:th=>th*arcShare(THRU_MEET,1,HOOK_SLOW), '
   + 'freeze:()=>{ restartT=0; offsideT=0; scoredT=0; gkHold=null; skill=null; oneTouch=null; ftAim=null; recvAuto=null; }};\n  const LAB_TITLE=');
 patch('  function checkOffsideTouch(t){\n', '  function checkOffsideTouch(t){\n    if(window.__noOffside) return false;\n');   // (the scenes' runners are in behind)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-thru-')), 'classic.html');
@@ -28,13 +29,13 @@ await page.evaluate(() => { window.__noOffside = true;
   // THE SCENE: R attacking; u metres into their half, w metres off the middle. The passer 18 m in with the ball at his
   // feet, two of theirs in a line 27 m in (A and B, at wA and wB), a man of ours (the runner, out of the way unless asked
   // for); everyone else parked back in our half by the near touchline, their keeper on his line.
-  window.__scene = (cv, wA, wB, run) => { const T = window.__T, M = T.MK, atk = T.atkOf('R'); T.freeze();
+  window.__scene = (cv, wA, wB, run, pu) => { const T = window.__T, M = T.MK, atk = T.atkOf('R'); T.freeze();   // (pu: the passer that far in, not 18 m)
     const X = u => T.FW / 2 + atk * u * M, Y = w => T.YC + w * M;
     const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
     const p = R[0], q = R[1], A = G[0], B = G[1];
     for(const o of T.players()) if(o !== p && o !== q && o !== A && o !== B){ o.x = X(-30); o.y = Y(-30); o.vx = o.vy = 0; o.noTouchT = 99; }
     for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; }
-    p.stats = Object.assign({}, p.stats, { curve: cv, passAcc: 10, longPass: 10, offIQ: 10 }); p.x = X(18); p.y = Y(0); p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
+    p.stats = Object.assign({}, p.stats, { curve: cv, passAcc: 10, longPass: 10, offIQ: 10 }); p.x = X(pu ?? 18); p.y = Y(0); p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
     A.x = X(27); A.y = Y(wA); B.x = X(27); B.y = Y(wB);
     for(const o of [A, B]){ o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 99; }
     if(run){ q.x = X(run.u); q.y = Y(run.w); q.vx = atk * run.v * M; q.vy = (run.vw || 0) * M; q.state = 'normal'; }
@@ -53,29 +54,31 @@ ok(doors.gap.length === 1 && doors.gap[0][0] === 27 && doors.gap[0][1] === 0.6, 
 ok(doors.wide.length === 2 && doors.wide[1][1] > 4.6 + 3, '...to a man out past the outside one, the gap between him and the touchline too');
 ok(doors.short.length === 0, 'a ball that stops short of their line has no gap to go through');
 
-// THE BEND: a ball 12 m to a spot 31 m in, straight behind the passer's line, the gap's middle 0.6 m to one side of it
-// at their line -- 26 degrees of turn to go through it. Curve 10 takes it through the middle; Curve 1 gets 6 degrees of
-// turn on it and no further.
+// THE BEND: a ball 17 m to a spot 31 m in (the passer 13 m in), straight behind the passer's line, the gap's middle
+// 0.6 m to one side of it at their line -- 22 degrees of turn to go through it. Curve 10 takes it through the middle;
+// Curve 1 can't bend it at all (v169). (It was a 12 m ball, the passer 18 m in: on a short ball now Curve 10 has only
+// half its bend, not the 26 degrees that one takes. Much over 18 m the computer's ball along the grass doesn't get
+// there at its top pace, so it's no longer than this.)
 const arcs = await page.evaluate(() => { const out = {};
-  for(const cv of [10, 1]){ const S = window.__scene(cv, -3.4, 4.6), { T, M, X, Y, b } = S, tx = X(31), ty = Y(0), d = Math.hypot(tx - b.x, ty - b.y);
+  for(const cv of [10, 1]){ const S = window.__scene(cv, -3.4, 4.6, null, 13), { T, M, X, Y, b } = S, tx = X(31), ty = Y(0), d = Math.hypot(tx - b.x, ty - b.y);
     const A = T.thruArcs(S.p, tx, ty, d), door = { x: X(27), y: Y(0.6) };
     out[cv] = A.map(a => { let near = 1e9; for(let i = 0; i <= 400; i++){ const pt = T.arcAt(a, i / 400); near = Math.min(near, Math.hypot(pt.x - door.x, pt.y - door.y)); }
       const end = T.arcAt(a, 1); return { deg: +(a.th * 57.3).toFixed(1), near: +(near / M).toFixed(2), end: +(Math.hypot(end.x - tx, end.y - ty) / M).toFixed(3), side: a.side }; });
-    out['max' + cv] = +(T.thruArcOf(S.p) * 57.3).toFixed(1); }
+    out['max' + cv] = +(T.thruArcOf(S.p, d) * 57.3).toFixed(1); out.len = +(d / M).toFixed(1); }
   return out; });
-info('the bend: Curve 10 (' + arcs.max10 + '° at most): ' + JSON.stringify(arcs[10]) + '; Curve 1 (' + arcs.max1 + '°): ' + JSON.stringify(arcs[1]));
-ok(Math.abs(arcs.max10 - 43) < 0.2 && Math.abs(arcs.max1 - 5.7) < 0.2, 'as much bend as his Curve gives him: 6 degrees of turn at Curve 1, 43 at 10 (v165: 34 before)');
-ok(arcs[10].length && arcs[10][0].near < 0.15 && arcs[10][0].deg > 20 && arcs[10][0].deg < 30 && arcs[10][0].end < 0.01, 'Curve 10: bent through the middle of the gap (' + (arcs[10][0] && arcs[10][0].near) + ' m off it, ' + (arcs[10][0] && arcs[10][0].deg) + '° of turn) and on to the spot');
-ok(arcs[1].length && arcs[1][0].deg === arcs.max1 && arcs[1][0].near > 0.4 && arcs[1][0].end < 0.01, 'Curve 1: as far that way as he can bend it (' + (arcs[1][0] && arcs[1][0].deg) + '°), ' + (arcs[1][0] && arcs[1][0].near) + ' m short of the middle of the gap');
+info('the bend, a ' + arcs.len + ' m ball: Curve 10 (' + arcs.max10 + '° at most): ' + JSON.stringify(arcs[10]) + '; Curve 1 (' + arcs.max1 + '°): ' + JSON.stringify(arcs[1]));
+ok(Math.abs(arcs.max10 - 40.8) < 0.2 && arcs.max1 === 0, 'as much bend as his Curve gives him: none at Curve 1, 41 degrees of turn at 10 (v169; v168: 6 and 43; v165: 34 at 10)');
+ok(arcs[10].length && arcs[10][0].near < 0.15 && arcs[10][0].deg > 17 && arcs[10][0].deg < 26 && arcs[10][0].end < 0.01, 'Curve 10: bent through the middle of the gap (' + (arcs[10][0] && arcs[10][0].near) + ' m off it, ' + (arcs[10][0] && arcs[10][0].deg) + '° of turn) and on to the spot');
+ok(arcs[1].length === 0, 'Curve 1: no way round their line -- he can\'t bend it at all (v169: it was as far as 6 degrees would take it)');
 
-// STRUCK ON IT: the Curve 10 ball, struck true (no error in its line or weight), to get there in 1.1 s; A and B don't
+// STRUCK ON IT: the Curve 10 ball, struck true (no error in its line or weight), to get there in 1.4 s; A and B don't
 // touch it. Where it goes against the arc it was chosen on, how near the middle of the gap it passes, how near the spot
 // it gets and how hard it's going there; the path a read of it from 0.15 s in has for half a second on (and the same
 // for the ball struck straight there, as the game reads any ball)
 const flight = (mode) => page.evaluate(mode => new Promise(res => {
-  const S = window.__scene(10, -3.4, 4.6), { T, M, X, Y, b, p, q } = S, tx = X(31), ty = Y(0), d = Math.hypot(tx - b.x, ty - b.y);
+  const S = window.__scene(10, -3.4, 4.6, null, 13), { T, M, X, Y, b, p, q } = S, tx = X(31), ty = Y(0), d = Math.hypot(tx - b.x, ty - b.y);   // (v169: the 17 m ball, as above)
   const deflect = mode === 'knocked', A = T.thruArcs(p, tx, ty, d)[0];
-  { const R = Math.random; Math.random = () => 0.5; try { T.obThruBall(p, q, tx, ty, 1.1, mode === 'straight' ? null : A); } finally { Math.random = R; } }
+  { const R = Math.random; Math.random = () => 0.5; try { T.obThruBall(p, q, tx, ty, 1.4, mode === 'straight' ? null : A, null); } finally { Math.random = R; } }   // (no hook: straight, or the arc)
   const t0 = T.simNow(), door = { x: X(27), y: Y(0.6) }, pts = [];
   const arc = []; for(let i = 0; i <= 600; i++) arc.push(T.arcAt(A, i / 600));
   let off = 0, nearDoor = 1e9, nearEnd = 1e9, spEnd = 0, read = null, readAt = null, still = null, bent = null, kill = null, hd = [];
@@ -87,8 +90,10 @@ const flight = (mode) => page.evaluate(mode => new Promise(res => {
     const de = Math.hypot(b.x - tx, b.y - ty); if(de < nearEnd){ nearEnd = de; spEnd = sp; }
     if(de > 1.5 * M) off = Math.max(off, m);
     nearDoor = Math.min(nearDoor, Math.hypot(b.x - door.x, b.y - door.y));
+    pts.push([t, b.x, b.y]);
     if(!read && t >= 0.15){ read = T.ballAt(0.5); readAt = t + 0.5; }
-    if(read && !still && t >= readAt){ still = Math.hypot(b.x - read.x, b.y - read.y) / M; }
+    if(read && still === null && t >= readAt){ const a = pts[pts.length - 2], c = pts[pts.length - 1], f = (readAt - a[0]) / ((c[0] - a[0]) || 1);   // (where it was just when the read had it: between the frames either side -- v169, a quicker ball than the 12 m one)
+      still = Math.hypot(a[1] + (c[1] - a[1]) * f - read.x, a[2] + (c[2] - a[2]) * f - read.y) / M; }
     if(bent === null && t >= 0.5) bent = b.arcK > 0;
     if(deflect && t >= 0.3 && kill === null){ const c = Math.cos(0.35), s = Math.sin(0.35), vx = b.vx; b.vx = vx * c - b.vy * s; b.vy = vx * s + b.vy * c; kill = -1; }
     else if(kill === -1){ kill = b.arcK; }

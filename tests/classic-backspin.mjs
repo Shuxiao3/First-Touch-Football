@@ -1,10 +1,9 @@
-// FOOTBALL CLASSIC, NO LOFTED PASSES; BACKSPIN (v167). There's no lofted pass any more -- no double-tap of PASS to put
-// it in the air, so a tap of PASS goes at once (it used to wait in case a second tap was coming), and the computer never
-// lofts one (no lofted switch of play, no chip over a man in the way). Instead a long pass from a man with the Long
-// passing for it checks up where it lands, as the lofted ball did -- that kept half its pace through the bounce, and
-// stopped too dead for a pass: at Long passing 10 a pass keeps 60% of it, a touch less of a check than that; at 1, all of
-// it; by how much of a long pass it is (none up to 12 m, all of it from 32 m). It comes to the man it's for the softer,
-// everyone reading the ball reads the check, and a touch on the way that turns it takes the check off it.
+// FOOTBALL CLASSIC, NO LOFTED PASSES (v167); NO BACKSPIN (v169). There's no lofted pass any more -- no double-tap of PASS
+// to put it in the air, so a tap of PASS goes at once (it used to wait in case a second tap was coming), and the computer
+// never lofts one (no lofted switch of play, no chip over a man in the way). And no backspin (v169): a long pass runs on
+// through its bounce as any pass does, whatever his Long passing -- the same pace through it at Long passing 1, 5.5 and
+// 10, the same way on, your through ball the same. (v167 to v168 a long one checked up where it landed: through the
+// bounce it kept 60% of its pace at Long passing 10, all of it at 1.)
 // On a copy of the game that lets the test reach inside, its frames pumped (no vsync).
 import { open, startExhibition } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -52,15 +51,8 @@ ok(tap.gone && tap.to && tap.pend === null && tap.loft === false, 'a tap of PASS
 ok(Math.abs(tap.vz - tap.want) <= 1 && tap.second <= tap.before && tap.second < tap.vz, 'two taps are just a pass, struck as low as any pass that long (' + tap.vz + ' px/s up, as one is struck: ' + tap.want + '), and a second tap doesn\'t put it up in the air');
 ok(!tap.lofted, 'no lofted pass left in the game: no lofted switch of play for the computer, nothing holding a tap back');
 
-// HOW MUCH OF ITS PACE IT KEEPS through the bounce, by his Long passing and how long the pass is
-const keep = await K(`(()=>{ const S=window.__sc(30,1), out={}; for(const lp of [1,5.5,10]){ S.p.stats.longPass=lp; out[lp]={}; for(const m of [12,22,30,40]) out[lp][m]=+backspinKeep(S.p,m*MK).toFixed(3); } ball.ownedBy=null; return out; })()`);
-info('the pace it keeps through the bounce, by Long passing (rows) and length in metres: ' + JSON.stringify(keep));
-ok(keep[10][40] === 0.6 && keep[5.5][40] === 0.8 && keep[1][40] === 1 && keep[1][30] === 1, 'a pass of 32 m or more keeps 60% of its pace through the bounce at Long passing 10, 80% at 5.5, all of it at 1');
-ok(keep[10][12] === 1 && keep[10][22] === 0.8 && keep[10][30] === 0.64, '...by how much of a long pass it is: none up to 12 m, half of the check at 22 m (' + keep[10][22] + '), nine-tenths at 30 m (' + keep[10][30] + ')');
-
 // A 33 M PASS, struck true, everyone out of its way once it's gone: where it lands, how far it runs on, how quick it is
-// when it gets to where it was for -- at Long passing 1, 5.5 and 10, and with the lofted ball's check (half its pace
-// kept) on it; and where the game read it would stop when it was struck, and a read of it with no check on it
+// through the bounce and when it gets to where it was for -- at Long passing 1, 5.5 and 10
 const fly = (lp, k, turn) => page.evaluate(({ lp, k, turn }) => new Promise(res => { const K = window.__K;
   K.ev(`(()=>{ const S=window.__sc(34,${lp}), R=Math.random; Math.random=()=>0.5; try{ passTo(S.p,S.q); } finally { Math.random=R; }
     if(${k}!==null&&ball.lob) ball.lob.k=${k};
@@ -77,22 +69,19 @@ const fly = (lp, k, turn) => page.evaluate(({ lp, k, turn }) => new Promise(res 
         through:+(F.post/(F.pre||1)).toFixed(2), atMan:F.atT==null?null:Math.round(F.atT/M*10)/10,
         readErr:+(Math.hypot(ball.x-F.read.x,ball.y-F.read.y)/M).toFixed(1), flatErr:+(Math.hypot(ball.x-F.flat.x,ball.y-F.flat.y)/M).toFixed(1) }; })()`));
     requestAnimationFrame(tick); })(); }), { lp, k, turn });
-const F1 = await fly(1, null, false), F5 = await fly(5.5, null, false), F10 = await fly(10, null, false), FL = await fly(10, 0.5, false), FT = await fly(10, null, true);
-info('a 33 m pass at Long passing 1: ' + JSON.stringify(F1) + '; 5.5: ' + JSON.stringify(F5) + '; 10: ' + JSON.stringify(F10) + '; the lofted ball\'s check: ' + JSON.stringify(FL) + '; Long passing 10, turned on the way: ' + JSON.stringify(FT));
-const rel = F => +(F.through / F1.through).toFixed(2);   // (the grass takes its bit of each that frame, check or none: against Long passing 1's)
-ok(F1.keep === 1 && Math.abs(rel(F10) - 0.6) < 0.03 && Math.abs(rel(F5) - 0.8) < 0.03, 'through the bounce it keeps 80% of its pace at Long passing 5.5 (' + rel(F5) + '), 60% at 10 (' + rel(F10) + '), against all of it at 1');
-ok(F10.restM < F5.restM - 1 && F5.restM < F1.restM - 1 && F10.restM > F10.landM, 'so it stops the sooner the better his Long passing: ' + F1.restM + ' m on at 1, ' + F5.restM + ' at 5.5, ' + F10.restM + ' at 10 (landing ' + F10.landM + ' m on)');
-ok(F10.runOn > FL.runOn && F10.runOn < FL.runOn + 2.5, 'at Long passing 10 it checks up a touch less than the lofted ball did: it runs ' + F10.runOn + ' m on from where it lands, the lofted ball\'s check ' + FL.runOn + ' m');
-ok(F10.atMan !== null && F1.atMan !== null && F10.atMan < F1.atMan * 0.8, 'it comes to the man it was for the softer: ' + F10.atMan + ' m/s at Long passing 10, ' + F1.atMan + ' at 1');
-ok(F10.readErr < F10.flatErr / 2 && F10.readErr <= F1.readErr + 0.3, 'everyone reading the ball reads the check: where it stops is ' + F10.readErr + ' m from where the game read it would when it was struck, no further out than a ball with no check on it (' + F1.readErr + ' m: the read has a lifted ball drag-free all the way to the grass) -- a read leaving the check out would be ' + F10.flatErr + ' m out');
-ok(rel(FT) >= 0.97 && FT.restM > F10.restM + 1, 'a touch on the way that turns it takes the check off it (through the bounce it keeps ' + rel(FT) + ' of what it would)');
+const F1 = await fly(1, null, false), F5 = await fly(5.5, null, false), F10 = await fly(10, null, false);
+info('a 33 m pass at Long passing 1: ' + JSON.stringify(F1) + '; 5.5: ' + JSON.stringify(F5) + '; 10: ' + JSON.stringify(F10));
+const rel = F => +(F.through / F1.through).toFixed(2);   // (the grass takes its bit of each that frame: against Long passing 1's)
+ok(F1.keep === 1 && F5.keep === 1 && F10.keep === 1 && Math.abs(rel(F10) - 1) < 0.03 && Math.abs(rel(F5) - 1) < 0.03, 'no backspin: through the bounce it keeps as much of its pace at Long passing 10 (' + rel(F10) + ') and 5.5 (' + rel(F5) + ') as at 1 (v167-v168: 60% and 80%)');
+ok(Math.abs(F10.restM - F1.restM) < 1 && Math.abs(F5.restM - F1.restM) < 1 && F10.restM > F10.landM + 2, '...so it runs on as far whatever his Long passing: it stops ' + F1.restM + ' m on at 1, ' + F5.restM + ' at 5.5, ' + F10.restM + ' at 10 (landing ' + F10.landM + ' m on)');
+ok(F10.atMan !== null && F1.atMan !== null && Math.abs(F10.atMan - F1.atMan) < 0.5, '...and comes to the man it was for as quick: ' + F10.atMan + ' m/s at Long passing 10, ' + F1.atMan + ' at 1');
 
-// YOUR THROUGH BALL, 25 m: it checks up the same, by his Long passing
+// YOUR THROUGH BALL, 25 m, at Long passing 10: no check on it either
 const th = await K(`(()=>{ const S=window.__sc(18,10), R=Math.random; Math.random=()=>0.5; let o; S.q.vx=S.atk*7*MK;
-  try{ thruBall(S.p,S.q,{dx:S.atk,dy:0},false); const d=Math.hypot(ball.thru.x-ball.x,ball.thru.y-ball.y); o={ m:+(d/MK).toFixed(1), k:ball.lob?+ball.lob.k.toFixed(2):1, want:+backspinKeep(S.p,d).toFixed(2) }; } finally { Math.random=R; }
+  try{ thruBall(S.p,S.q,{dx:S.atk,dy:0},false); const d=Math.hypot(ball.thru.x-ball.x,ball.thru.y-ball.y); o={ m:+(d/MK).toFixed(1), k:ball.lob&&ball.lob.k!=null?+ball.lob.k.toFixed(2):1 }; } finally { Math.random=R; }
   ball.ownedBy=null; ball.thru=null; ball.lob=null; ball.vx=ball.vy=ball.vz=0; ball.z=0; ball.x=FW/2; ball.y=YC; endCurve(); ball.arcK=0; return o; })()`);
 info('your through ball at Long passing 10: ' + JSON.stringify(th));
-ok(th.k < 1 && th.k === th.want, 'your through ball checks up the same, a ' + th.m + ' m one keeping ' + th.k + ' of its pace through the bounce');
+ok(th.k === 1, 'your through ball doesn\'t check up either: a ' + th.m + ' m one at Long passing 10 keeps all its pace through the bounce');
 
 // THE COMPUTER: with a man of his free out on the far side, and one of theirs in the way of a long ball to his feet --
 // along the ground, every time: no lofted switch, no chip

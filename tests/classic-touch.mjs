@@ -331,6 +331,13 @@ info('directional first touch: ' + JSON.stringify({ p1, a1, t1, p2, t2, p3, a3, 
 ok(p1.on && a1 && /^TOUCH/.test(t1.grade) && t1.x * atkM > 0.9 && t1.sp > 100, 'a 24 m pass, the stick held on up the pitch: a flick that way on SKILL sends his first touch that way (' + t1.grade + ', ' + t1.sp + ' px/s)');
 ok(p2.on && /^TOUCH/.test(t2.grade) && t2.y < -0.9 && t2.loose && t2.sp > 80, 'a 10 m pass, the flick ending just after it got to him: still his first touch, pushed the way you flicked (' + t2.grade + '), not a skill move');
 ok(p3.on && p3.steer && a3 && a3.d > 450 && a3.y > 0.9 && /^TOUCH/.test(t3.grade) && t3.y > 0.9, 'a 30 m pass, yours to steer, flicked with it ' + (a3 && a3.d) + ' px off: armed at once, and he meets it and takes it that way (' + t3.grade + ')');
+// (4) a QUICK flick, as a phone often gives one: only its two ends, with a single move between -- a 20 m pass, the stick
+// left alone, flicked 40 px across (v169: it needed three points to be read at all, so it went unread and he killed it dead)
+const quickFlick = async (dx, dy) => { await finger('touchStart', skillAt.x, skillAt.y); await finger('touchMove', skillAt.x + dx, skillAt.y + dy); await finger('touchEnd', skillAt.x + dx, skillAt.y + dy); };
+const p4 = await passTo(450, 0.5, 0); await mp.waitForTimeout(120); await quickFlick(0, -40);
+const a4 = await mp.evaluate(() => { const f = window.__T.ftAim(); return f ? { x: +f.d.x.toFixed(2), y: +f.d.y.toFixed(2) } : null; }), t4 = await firstTouch();
+info('a quick flick: ' + JSON.stringify({ p4, a4, t4 }));
+ok(p4.on && a4 && a4.y < -0.9 && /^TOUCH/.test(t4.grade) && t4.y < -0.9, 'a quick flick, its two ends and one move between, arms it too and he takes it that way (' + t4.grade + '; v168: unread, killed dead)');
 await mob.close();
 
 process.exitCode = rep.finish();

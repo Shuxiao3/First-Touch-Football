@@ -537,7 +537,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   A drag or a held press still does what it did before (the stick, a swipe shot, a skill-move drawing).
 - **Through balls along the grass** are struck like an ordinary pass (the same pace and lift for the distance), into
   the space ahead of the man. Yours are always along the grass (v81: no lofted through ball), and since v167 the
-  computer's are too: there's no lofted pass in the game (see **No lofted passes; backspin (v167)**). (Where yours
+  computer's are too: there's no lofted pass in the game (see **No lofted passes (v167); no backspin (v169)**). (Where yours
   goes: into the runner's path, the drag leaning it -- see *Controls*.)
 - **The computer's through ball** along the grass is struck to die where the runner will be, but never harder than
   900 px/s (the Computer through ball dial; it was 1500, quicker than anyone could get across to). A long one would
@@ -663,6 +663,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     within 6 m of you, from as far as 40 m off. It stays armed until the ball gets to you, or someone else touches it.
     (It used to need the ball heading straight at you from within 15 m, unless you'd left the stick alone since the
     pass.)
+  - **A quick flick counts (v169).** A phone often gives a quick flick as no more than its two ends, with a single move
+    between; the game needed three points to read any drawing, so a flick like that went unread and he took the ball
+    dead. A straight flick needs only its two ends now.
   - **A flick begun as the ball gets to you, or up to 0.2 s after,** is still your first touch, as long as it ends
     within 0.6 s. The ball is still on your foot, so it goes the way you flicked rather than turning into a cut. On a
     short pass the ball is often there before the flick is done.
@@ -835,10 +838,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     him), along the grass as a pass would go, and you go with it, on to him (`J` `J` threw it overarm, up and over,
     till v167: two taps now throw it as one does);
     a tap on a team-mate throws it to him, a drag off PASS throws it that way, and with nobody that way it's thrown
-    into the space. CLEAR -- or SHOOT -- is his long ball (v115): not a defender's clearance but a long pass, pinged to
-    the man you're aiming at (picked as a pass picks him, the further on the better, 10 m to 60 m out), up in the air
-    and down at him (still lofted: v167 took away the lofted pass, not this), and you go with it; with nobody that way, long into the space that way. (In v114 it was booted as
-    far up as it would go, a clearance.) A goal kick is the same, kicked -- the
+    into the space. CLEAR -- or SHOOT -- is his punt (v115; v169, as far as you hold it): held, it charges (the ring
+    round the ball), and let go it's punted the way you're aiming, as far as it was charged -- a tap 20 m, the whole
+    charge (0.9 s) 60 m. It's to a man of ours only if he'll be about where it comes down (within 6 m): then it's down
+    at his feet, and you go with him; otherwise it's into the space there, for whoever gets to it. While it charges,
+    where it'll come down is ringed on the pitch, and so is he if it's his. Up in the air and down (still lofted: v167
+    took away the lofted pass, not this). (v115 to v168 it was pinged at once to the best man that way, 10 m to 60 m
+    out, however short the press -- a tap went 60 m -- and it came down a twentieth long, over his head: a ball for a
+    man 53 m up came down 64 m out. In v114 it was booted as far up as it would go, a clearance.) A goal kick is the same, kicked -- the
     ball's on the ground, so the stick turns him but he stays at it. He still has 5 s: for the last 2 s a red
     stopwatch flashes over his head, and when it's up it goes to the man you've got lit (with nobody lit, where the
     side's style says). Before v114 you were left on an outfielder and PASS played it out by the BUILD-UP -- short to
@@ -1175,6 +1182,35 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       way is clear (with the full bend on every one that has someone to bend round, it was 86). The computer's, chosen
       as it chooses: through a gap 71 and 80 in 100 getting to their man (about 72 and 72), with one of theirs off the
       runner 90 and 94 (91 and 92). These move a few in 100 from one run of the same scenes to the next.
+  - **Curve by level, by length and by the spin on it (v169).** Curve was too strong in the middle of the scale -- a
+    man of 7 or 8 bent it nearly as a 9 or 10 did -- and short passes bent as much as any. So now:
+    - **A share of the most, by his Curve:** none at Curve 1, 5% at 2, 10% at 3, 15% at 4, a quarter at 5, 35% at 6,
+      half at 7, 65% at 8, 80% at 9 and all of it at 10, in between by how far he is between them (30% at 5.5); and
+      the most is a twentieth less than it was. Shots, crosses and passes alike. (It went evenly from a little at
+      Curve 1 to all of it at 10: two-thirds of it at 7, more than three-quarters at 8.) A through ball by the spot,
+      needing all its bend on a middling ball: none at Curve 1, 13° at 5.5, 21° at 7, 28° at 8, 34° at 9, 43° at 10
+      (6, 26, 32, 36, 41 and 45). A long pass 15° at most (16), the computer's round their line 41° (43). A Curve 1
+      cross has no spin on it at all, and a Curve 10 one swings a twentieth less; a shot's curl the same -- none at
+      Curve 1, a Curve 1 man's swiped shot goes where it's swiped -- and the computer's shooter curls one only with
+      enough on it to beat the keeper, from about Curve 6.5 (it was 3.5).
+    - **By how far it's going:** a pass or a through ball bends best over a middling distance -- all of it from 17 m
+      to 27 m; less on a short one, none at 8 m or less and half at 12 m (a short pass); less on a long one, 80% at
+      32 m (a long pass) and half from 42 m. A cross's swing and a shot's curl as they were. The computer's through
+      ball along the grass doesn't get much past 18 m at its top pace, so most of his are bent less than they were.
+    - **The hook, by the spin on it.** A ball with spin on it is pushed sideways by the air it drags round with it --
+      quicker past one side than the other (Bernoulli: the Magnus effect) -- the harder the quicker it's going, so it
+      turns as its spin over its pace; and along the grass its pace falls off steadily with the way it's gone. So a
+      hooked through ball bends from the moment it's struck and the more as it slows: by halfway to the spot two-fifths
+      of the turn it has by the spot, by three-quarters of the way two-thirds of it, and on it bends past the spot
+      (v167-v168, fitted to the drawings: the cube of the way it had gone -- straight, then a dip at the end, 15% of
+      it halfway, 46% three-quarters). A Curve 10 ball 19 m to the spot, needing all its bend, has turned 43° by the
+      spot, bulging 1.8 m off its line; on a 16 m ball with a man of theirs 2 m off its line, it comes in turned 20°
+      toward the runner's side, where the dip had it 31°.
+    - **What it comes to**, on the same 1000 scenes a Curve as before (v168 → now). Your through balls ending up
+      yours, through a gap: 71 → 67 in 100 at Curve 1, 67 → 68 at 8, 68 → 69 at 10; with one of theirs off the runner,
+      80 → 76, 79 → 79, 82 → 81. The computer's, chosen as it chooses, getting to their man: through a gap 71 → 66,
+      82 → 85, 80 → 80; with one of theirs off the runner 90 → 87, 95 → 93, 94 → 95. With no bend at all a Curve 1
+      ball loses 3 to 5 in 100; at 8 and 10 they're as they were. These move a few in 100 from one run to the next.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for his line (see **Ratings**).
 
@@ -1218,21 +1254,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     move them -- his best and his ceiling the same way. They develop like the rest: Long passing with the technical
     coach, as Short passing and Composure in traffic now do; Final third composure with the finishing coach, and with
     a man's reading of the game it keeps growing into his thirties.
-- **No lofted passes; backspin (v167).**
+- **No lofted passes (v167); no backspin (v169).**
   - **No lofted passes.** There's no double-tap of PASS to put it in the air any more: two taps are a pass, struck
     as low as any pass that long, so a tap of PASS goes at once (it waited 0.15 s in case a second tap was coming).
     Your keeper has no overarm throw (two taps throw it as one does), and the computer never lofts one: no lofted
     switch of play out to a man on the far side, no chip over a man in the way of a long ball. A long pass still has
     the lift it always had (the longer, the higher); goal kicks, the keeper's long ball, crosses (a double-tap of
     CROSS is still the low one), clearances and the skill moves are as they were.
-  - **Backspin.** A long pass from a man with the Long passing for it checks up where it lands, as the lofted pass
-    did -- that kept half its pace through the first bounce, and stopped too dead for a pass. At Long passing 10 a
-    pass keeps 60% of its pace through the bounce, a touch less of a check than that; at 5.5, 80%; at 1, all of it --
-    by how much of a long pass it is: none up to 12 m, all of it from 32 m (at 22 m, half the check). Yours and the
-    computer's, through balls too. A 33 m pass (it comes down 31 m on) stops 37 m on at Long passing 10, 39 at 5.5
-    and 46 at 1 -- from where it lands it runs on 5.8 m, where the lofted pass's check had it run 4.8 -- and gets to
-    the man it's for at 8 m/s, against 17 at 1. Everyone reading the ball reads the check, and a touch on the way
-    that turns it takes the check off it.
+  - **No backspin (v169).** A long pass runs on through its bounce as any pass does, whatever his Long passing: the
+    same pace through it at Long passing 1, 5.5 and 10, the same way on, through balls too. (v167 to v168 a long pass
+    from a man with the Long passing for it checked up where it landed: through the bounce it kept 60% of its pace at
+    Long passing 10, 80% at 5.5, all of it at 1, by how much of a long pass it was -- a 33 m pass stopped 37 m on at
+    Long passing 10 and 46 at 1, and got to the man it was for at 8 m/s against 17.)
 - **Ratings (v122).** A man's rating is a weighted average of his stats (times ten), the weights out of 5 and set by
   his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. What his line's game
   is made of counts 5, then 4 and 2, and every other outfield stat 1, so even a defender's shooting counts a little:
@@ -1317,6 +1350,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     5.5 or under, all the way from 9. Measured, a ball pulled back from the byline to a man 13 m out with nobody
     near him, 10 each, hit first time (before → now): 0 → 9 at Off IQ 10, 0 → 0 at 5.5 and 1. Squared to him 22 m
     out, nothing like a chance from there, Off IQ 10 takes a touch first.
+  - **In their box, first time (v169).** In their box anyone hits it first time, on a chance as good as his Off IQ
+    asks of it -- 0.15 at Off IQ 1, 0.1 at 5.5, 0.06 at 10 -- whatever else he might weigh: the touch first was what
+    got him closed down and the ball taken off him. A ball played into the box to him 11 m out, off the middle, with
+    one of theirs 6 m off and closing, per 100 (v168 → now): at Off IQ 1, shots 17 → 38, all of them first time now
+    (8 before), and holding on to it 3 s without a shot 25 → 0; at 5.5, shots 42 → 69 (first time 33 → 69), holding on
+    33 → 0; at 10, shots 83 → 81 (first time 50 → 81), holding on 8 → 0. The rest are passes cut out before he gets
+    there: at Off IQ 1 he waits for it and their man nips in, as before (58 → 62 in 100). At the edge of the box and
+    outside it, as it was.
   - **The computer's passer** picks his pass a moment before he strikes it, so the game could tell the man it's for
     where it's going early. It doesn't: that would be reading the passer's mind. He reads it from the strike.
   - **Over whole matches** (16 six-minute computer-against-computer games on each, per 6 minutes, before → now):
@@ -2497,8 +2538,8 @@ into a pass. Running with the ball never sets that off.
 **Passes** — tap PASS for a low, firm pass to the teammate your move stick points at (or the
 way you're facing): the longer it is, the more it's lifted, but never so hard it arrives too hot to
 control. **Double-tap** it for a **lofted pass** (the button reads LOB on the second
-tap). (Football Classic, v167: no lofted pass -- two taps are a pass, and a long one from a man with the Long passing
-for it checks up where it lands: see **No lofted passes; backspin (v167)**.) **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
+tap). (Football Classic, v167: no lofted pass -- two taps are a pass; v169: and no backspin on a long one: see **No
+lofted passes (v167); no backspin (v169)**.) **Press PASS and drag** off the button for a **through ball**: the stick still picks who gets
 it. To a man on a run it's played into his path, where he's already going (the spot he's running to,
 or the way he's running), and the drag only leans it: a third of the drag's angle off his line, 15° at
 most either side (v81; it was half, and 25°). Drag along his run and it goes dead along it; drag across
@@ -2708,6 +2749,20 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v169: Curve by level and length; the hook by its spin; no backspin; the keeper's punt as far as it's held;
+  first-time shots in the box; a quick flick for the first touch.** Curve by level: of the most a ball can be bent,
+  none at Curve 1, a quarter at 5, half at 7, 65% at 8, 80% at 9 and all of it at 10 (5% at 2, 10% at 3, 15% at 4, 35%
+  at 6), and the most a twentieth less -- a man of 7 or 8 bent it nearly as a 9 or 10 did. A pass or a through ball
+  bends best over a middling distance: all of it from 17 m to 27 m, none at 8 m or less, half at 12 m and from 42 m.
+  A hooked through ball bends from the moment it's struck and the more as it slows, as the spin on it has it, where
+  it ran straight and dipped at the end. No backspin on long passes. The keeper's CLEAR or LONG from his hands is a
+  punt, as far as you hold it -- a tap 20 m, the whole charge 60 m -- to a man only if it comes down about where he
+  is, the spot ringed as it charges (a tap went 60 m, and it came down a twentieth long, over his head). In their box
+  the computer hits a chance first time when it's as good as his Off IQ asks (0.15 at 1, 0.06 at 10), rather than
+  taking a touch and having it taken off him. And a quick flick on SKILL, which a phone often gives as only its two
+  ends, is read now: a flicked first touch like that went unread and he took the ball dead. See **Curve by level, by
+  length and by the spin on it (v169)**, **No lofted passes (v167); no backspin (v169)**, **Your keeper with it in his
+  hands (v114)**, **In their box, first time (v169)** and **Directional first touch**.
 - **v168: through balls, as much bend as they need.** From the second coaching round: by the spot a through ball has
   turned 6° at Curve 1 and 45° at 10 (it was 9° and 72°), times as much as the pass needs -- all of it with one of
   theirs in its way, little through a clear lane -- and it's met four-fifths of the way along its curve, still turning.
@@ -2722,7 +2777,7 @@ test, and like the Trap Lab the values are the game's settings.
   pass any more: no double-tap of PASS (a tap goes at once), no overarm throw for your keeper, no lofted switch or chip
   for the computer. Instead a long pass from a man with the Long passing for it checks up where it lands, as the
   lofted ball did, a touch less at Long passing 10 (60% of its pace kept through the bounce, against 50%). See
-  **Through balls, bent as they were drawn (v167)** and **No lofted passes; backspin (v167)**.
+  **Through balls, bent as they were drawn (v167)** and **No lofted passes (v167); no backspin (v169)**.
 - **v166: on a computer, an iPhone held sideways.** Opened on a computer, the page puts up a phone held sideways (an
   iPhone 15 or 16's screen, 852 x 393) as big as the window takes, and runs the game in it as on the phone: laid out
   for it, the screen's buttons on it, the mouse a finger (a touch where it's pressed; the click after a touch the game
@@ -3248,9 +3303,11 @@ test, and like the Trap Lab the values are the game's settings.
     deliberate strike now counts as the striker's touch: in a Star-level test nine headed goals of nine went to the
     header, each with the crosser's assist (the build before: seven of seven credited, but no assists; on Normal two
     of four).
-- **The keeper's long ball (v115).** His CLEAR isn't a defender's clearance any more: it's a long pass, pinged to the
-  man you're aiming at -- the stick picks him as it would a pass, the further on the better, out to 60 m -- on a
-  lofted pass's flight, and you go with it. On a touch screen the button reads LONG when you're on him with it.
+- **The keeper's punt (v115; v169).** His CLEAR isn't a defender's clearance: it's his punt, up in the air and down,
+  the way you're aiming and as far as you hold it (v169: a tap 20 m, the whole charge 60 m), to a man of ours only if
+  he'll be about where it comes down -- where it'll land is ringed as it charges. (v115 to v168: a long pass, pinged at
+  once to the man the stick picked, the further on the better, out to 60 m.) On a touch screen the button reads LONG
+  when you're on him with it.
 - **Your keeper with it in his hands (v114).** You're on him the moment he has it -- not left on an outfielder with
   PASS playing it out for you. The stick walks him round his box and aims; PASS throws it to the man you're aiming at
   (`J` `J`: overarm), and you go with it; CLEAR or SHOOT boots it downfield (a long pass to the man you aim at since

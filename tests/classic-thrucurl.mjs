@@ -1,10 +1,13 @@
-// FOOTBALL CLASSIC, CURVE IN THROUGH BALLS (v165; v167, bent as it was drawn; v168, as much as it needs): a through
-// ball hooks in late -- set off a little wide, almost straight, the turn coming with the cube of the way it's gone --
-// and is met four-fifths of the way along its curve, still turning: left alone it bends on past the spot. By the spot it
-// has turned as much as the passer's Curve gives him, 6 degrees at Curve 1 and 45 at 10 (a long pass, still 16 at most;
-// the computer's round their back line, 6 to 43), times as much as the pass needs it: all of it with the straight ball
-// passing within 1.75 m of one of theirs, none with it 4.75 m clear of them all, more the longer the ball; none on a ball
-// of 8 m or less. Its belly is on the far side from a man of theirs in its way, or else from the nearest of theirs short
+// FOOTBALL CLASSIC, CURVE IN THROUGH BALLS (v165; v167, bent as it was drawn; v168, as much as it needs; v169, by the
+// table and the length; v169, by the spin on it): a through ball, set off a little wide, bends from the moment it's
+// struck and the more as it slows -- it turns as its spin over its pace, and its pace falls off along the grass -- and
+// is met four-fifths of the way along its curve, still turning: left alone it bends on past the spot. (v167-v168 the
+// turn came with the cube of the way it had gone: straight, then a dip.) By the spot it has turned as much as the passer's Curve gives him, by the table -- none at Curve 1, 5%
+// of the most at 2, 10% at 3, 15% at 4, a quarter at 5, 35% at 6, half at 7, 65% at 8, 80% at 9, all of it at 10, the
+// most 43 degrees (a twentieth less than it was) -- and the pass's length: all of it from 17 m to 27 m, none at 8 m or
+// less, half at 12, 80% at 32, half from 42 (a long pass 15 degrees at most; the computer's round their back line, 41);
+// times as much as the pass needs it: all of it with the straight ball passing within 1.75 m of one of theirs, none with
+// it 4.75 m clear of them all, more the longer the ball. Its belly is on the far side from a man of theirs in its way, or else from the nearest of theirs short
 // of the spot within 18 m -- unless another way (hooked the other way, half as much, or straight) clearly keeps it
 // further from their men: a runner through a gap between two of them gets it straight. Nobody there, or only a man
 // beyond the spot, it goes straight. It's played as far ahead of the runner as ever, along his line, finishes on the
@@ -34,12 +37,17 @@ await page.evaluate(() => { window.__noOffside = true; });
 await startExhibition(page); await page.waitForTimeout(800);
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 
-// THE BEND IT MAY HAVE: a through ball's and a long pass's, by Curve; and round their line
-const B = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&!q.isGK), keep=p.stats, at=cv=>{ p.stats=Object.assign({},keep,{curve:cv}); return { thru:+(thruBendOf(p)*57.3).toFixed(1), pass:+(passBendOf(p)*57.3).toFixed(1), arc:+(thruArcOf(p)*57.3).toFixed(1) }; };
-  const r={1:at(1), 10:at(10)}; p.stats=keep; return r; })()`);
-info('the bend it may have, degrees of turn: ' + JSON.stringify(B));
-ok(B[1].thru === 6 && B[10].thru === 45 && B[10].pass === 16, 'a through ball: 6 degrees of turn by the spot at Curve 1, 45 at 10, as the second round was drawn (v167: 9 and 72, all of it by the spot) -- a long pass still 16 at most (' + B[10].pass + ')');
-ok(B[1].arc === 5.7 && B[10].arc === 43, 'the computer\'s round their line: 6 degrees at Curve 1, 43 at 10, as before');
+// THE BEND IT MAY HAVE (v169): the share of the most his Curve gives him, by the table; a through ball's, a long
+// pass's and the computer's round their line, by Curve; and the share of it a pass of each length may have
+const B = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&!q.isGK), keep=p.stats, at=cv=>{ p.stats=Object.assign({},keep,{curve:cv}); return { pot:+curvePot(p).toFixed(4), thru:+(thruBendOf(p)*57.3).toFixed(1), pass:+(passBendOf(p)*57.3).toFixed(1), arc:+(thruArcOf(p)*57.3).toFixed(1) }; };
+  const r={lv:{}, len:{}}; for(const cv of [1,2,3,4,5,5.5,6,7,8,9,10]) r.lv[cv]=at(cv); for(const m of [5,8,10,12,14.5,17,22,27,32,37,42,55]) r.len[m]=+curveLenK(m*MK).toFixed(3); p.stats=keep; return r; })()`);
+info('the bend it may have, degrees of turn by Curve: ' + JSON.stringify(B.lv) + '; the share of it by length (m): ' + JSON.stringify(B.len));
+const TABLE = { 1: 0, 2: 0.05, 3: 0.10, 4: 0.15, 5: 0.25, 5.5: 0.30, 6: 0.35, 7: 0.50, 8: 0.65, 9: 0.80, 10: 1 };
+ok(Object.entries(TABLE).every(([cv, t]) => Math.abs(B.lv[cv].pot - 0.95 * t) < 1e-3), 'his Curve gives him the table\'s share of the most: none at 1, 5% at 2, 10% at 3, 15% at 4, a quarter at 5, 35% at 6, half at 7, 65% at 8, 80% at 9, all of it at 10, in between by how far he is between them (5.5: 30%) -- the most a twentieth less than it was (' + Object.keys(TABLE).map(cv => cv + ' ' + B.lv[cv].pot).join(', ') + ')');
+ok(B.lv[1].thru === 0 && B.lv[7].thru === 21.4 && B.lv[8].thru === 27.8 && B.lv[9].thru === 34.2 && B.lv[10].thru === 42.7, 'a through ball: none by the spot at Curve 1, 21 degrees at 7, 28 at 8, 34 at 9, 43 at 10 (v168: 6, 32, 36, 41 and 45)');
+ok(B.lv[10].pass === 15.2 && B.lv[1].pass === 0 && B.lv[10].arc === 40.8 && B.lv[1].arc === 0, 'a long pass 15 at most, the computer\'s round their line 41 (v168: 16 and 43), none at Curve 1');
+const LEN = { 5: 0, 8: 0, 10: 0.25, 12: 0.5, 14.5: 0.75, 17: 1, 22: 1, 27: 1, 32: 0.8, 37: 0.65, 42: 0.5, 55: 0.5 };
+ok(Object.entries(LEN).every(([m, k]) => Math.abs(B.len[m] - k) < 1e-3), 'it bends best over a middling distance: all of it from 17 m to 27 m; none at 8 m or less, half at 12 (a short pass); 80% at 32 (a long pass), half from 42 m (' + Object.keys(LEN).map(m => m + ' m ' + B.len[m]).join(', ') + ')');
 
 // THE SCENE: G attacking, u metres into their half, w metres off the middle. The passer 10 m in with the ball at his
 // feet, the runner 22 m in and 6 m off the middle going straight in behind at 7.5 m/s; D, one of theirs, 20 m in and 2 m
@@ -68,12 +76,12 @@ await K(`(()=>{ window.__sc=(cv,o)=>{ o=o||{}; restartT=0; offsideT=0; scoredT=0
 // where it's played to
 const A = {}; for(const cv of [1, 5.5, 10]) A[cv] = await K(`window.__thru(${cv})`);
 info('your through ball, D in its way: ' + JSON.stringify(A));
-ok(A[10].turn === 45 && A[5.5].turn === 25.5 && A[1].turn === 6, 'with a man in its way it needs all the bend the passer has: turned ' + A[10].turn + '° by the spot at Curve 10, ' + A[5.5].turn + ' at 5.5, ' + A[1].turn + ' at 1');
-ok(A[10].side === A[10].away && A[1].side === A[1].away, 'its belly away from him');
+ok(A[10].turn === 42.7 && A[5.5].turn === 12.8 && A[1].turn === 0, 'with a man in its way, a 19 m ball, it needs all the bend the passer has: turned ' + A[10].turn + '° by the spot at Curve 10, ' + A[5.5].turn + ' at 5.5, none at 1 (v168: 45, 25.5 and 6)');
+ok(A[10].side === A[10].away && A[5.5].side === A[5.5].away && A[1].side === 0, 'its belly away from him (at Curve 1, straight)');
 ok(A[10].y === A[1].y && A[5.5].y === A[1].y, 'to the same spot whatever his Curve: where the runner\'s run and the drag put it (' + A[10].y + ' m off the middle)');
 // (the runner 13.4 m from the passer: 120 px and 0.15 of that, 165 px)
 ok(Math.abs(A[1].ahead - 165.3 / 22.5) < 0.15 && Math.abs(A[1].across) < 0.15 && Math.abs(A[10].ahead - A[1].ahead) < 0.05, 'played ' + A[1].ahead + ' m ahead of him along his line, as before, whatever his Curve (the second round\'s balls were met half that again across toward the passer\'s side: played there, more were lost)');
-ok(A[10].q === 1 && A[5.5].q > 0.5 && A[5.5].q < 0.6 && A[1].q > 0.1 && A[1].q < 0.15, 'it carries its bend: as curling as a through ball can be at Curve 10 (' + A[10].q + '), about half that at 5.5 (' + A[5.5].q + '), a little at 1 (' + A[1].q + ')');
+ok(A[10].q === 0.95 && A[5.5].q > 0.27 && A[5.5].q < 0.3 && A[1].q === 0, 'it carries its bend: at Curve 10, 0.95 of the most a through ball can have (' + A[10].q + '), 0.3 at 5.5 (' + A[5.5].q + '), none at 1 (v168: 1, about half and a little)');
 
 // YOUR MAN, RUN ONTO IT: once it's played he's yours, run onto it with the stick left alone -- to the spot it was
 // played to, not where it would come down if it went straight
@@ -103,8 +111,8 @@ const fl = await page.evaluate(() => new Promise(res => { const K = window.__K;
 info('its flight at Curve 10: ' + JSON.stringify(fl));
 ok(fl.miss < 0.25, 'it finishes on the spot it was played to (' + fl.miss + ' m off it, ' + fl.chord + ' m away)');
 ok(fl.bow <= -1.1 && fl.bow >= -2.4, 'it bulges away from him, ' + (-fl.bow) + ' m off its line by the spot (the second round\'s: 0.8 to 2.9 m)');
-ok(fl.turn >= 38 && fl.turn <= 50 && fl.half >= 0.06 && fl.half <= 0.22 && fl.threeQ >= 0.32 && fl.threeQ <= 0.55,
-  'and hooks in late: ' + fl.turn + '° of turn on it by the spot, ' + Math.round(fl.half * 100) + '% of that done halfway there, ' + Math.round(fl.threeQ * 100) + '% three-quarters of the way');
+ok(fl.turn >= 38 && fl.turn <= 50 && fl.half >= 0.3 && fl.half <= 0.48 && fl.threeQ >= 0.56 && fl.threeQ <= 0.74,
+  'and bends from the moment it\'s struck, the more as it slows (the spin on it: v169 -- v167-v168 it ran on straight and dipped late, 6-22% of the turn done halfway): ' + fl.turn + '° of turn on it by the spot, ' + Math.round(fl.half * 100) + '% of that done halfway there, ' + Math.round(fl.threeQ * 100) + '% three-quarters of the way');
 ok(fl.after > 5, '...and it\'s still turning past the spot, as the second round\'s balls were: ' + fl.after + '° more by 1.15 s');
 ok(fl.readErr.every(e => e !== null && e < 1.6) && fl.readErr[2] < fl.flatErr[2] / 2,
   'everyone reading the ball reads its hook: where it is 0.4, 0.8 and 1 s on, within ' + Math.max(...fl.readErr) + ' m of where the game read it would be when it was struck (a read of it going straight: ' + fl.flatErr.join(', ') + ' m out)');
@@ -124,17 +132,17 @@ const W = await K(`(()=>{ const S=window.__sc(10), {p,r,D}=S, D2=players.find(q=
   away(); D.x=ball.x+a*5*M; D.y=ball.y+3*M; out.m8=go(8); out.m13=go(13);
   away(); ball.ownedBy=null; return out; })()`);
 info('which way, and how much (side -1: its belly up the screen; +1: down it): ' + JSON.stringify(W));
-ok(W.below && W.above && W.below.side === -1 && W.above.side === 1 && Math.abs(W.below.turn - 18) < 1 && W.above.turn === W.below.turn,
+ok(W.below && W.above && W.below.side === -1 && W.above.side === 1 && Math.abs(W.below.turn - 17.1) < 0.3 && W.above.turn === W.below.turn,
   'one of theirs short of the spot, 4 m off its line: bulging the other way, whichever side he\'s on, with as much bend as that needs (' + W.below.turn + '° by the spot: four-tenths of it)');
-ok(W.lane && W.lane.side === -1 && W.lane.turn === 45, 'one in its way, 0.6 m off its line half-way: all the bend there is, bulging away from him (' + (W.lane && W.lane.turn) + '°)');
+ok(W.lane && W.lane.side === -1 && W.lane.turn === 42.7, 'one in its way, 0.6 m off its line half-way: all the bend there is, bulging away from him (' + (W.lane && W.lane.turn) + '°)');
 ok(W.gap === null, 'a runner through a gap between two of them: straight -- its belly would take it into one of them');
 ok(W.nobody === null && W.beyond === null, 'nobody of theirs within 18 m of the spot, or only a man beyond it: straight');
-ok(W.m8 === null && W.m13 && W.m13.turn > 22 && W.m13.turn < 25, 'an 8 m ball: straight; a 13 m one with a man 3 m off its line, bent ' + (W.m13 && W.m13.turn) + '° by the spot');
+ok(W.m8 === null && W.m13 && W.m13.turn > 12 && W.m13.turn < 15, 'an 8 m ball: straight; a 13 m one with a man 3 m off its line, bent ' + (W.m13 && W.m13.turn) + '° by the spot (v168: 23.5 -- a short ball, it has 60% of what it could have from 17 m)');
 
 // THE COMPUTER'S, along the grass into a runner's path with D short of the spot: hooked the same, and read exactly
 const cpu = await K(`(()=>{ const S=window.__sc(10), {p,r}=S; const R=Math.random; Math.random=()=>0.5; let o;
   try{ ball.ownedBy=null; obThruBall(p,r,S.X(28),S.Y(-6),1.3,null); const t=[0.4,0.8].map(x=>ballAt(x));
-    o={ hooked:ball.arcK>0&&ball.arcM===3, turn:+(ball.thruCurl*57.3).toFixed(1), read:t.map(q=>[q.x,q.y]) }; } finally { Math.random=R; }
+    o={ hooked:ball.arcK>0&&ball.arcA>0, turn:+(ball.thruCurl*57.3).toFixed(1), read:t.map(q=>[q.x,q.y]) }; } finally { Math.random=R; }
   window.__cp={S, t0:simNow}; window.__park(S); return o; })()`);
 const cpuAt = await page.evaluate(() => new Promise(res => { const K = window.__K, got = [];
   (function tick(){ const t = K.ev('(()=>{ window.__park(window.__cp.S); return [simNow-window.__cp.t0, ball.x, ball.y]; })()'); got.push(t);
@@ -142,27 +150,27 @@ const cpuAt = await page.evaluate(() => new Promise(res => { const K = window.__
 const posAt = tt => { for(let i = 1; i < cpuAt.length; i++) if(cpuAt[i][0] >= tt){ const a = cpuAt[i - 1], b = cpuAt[i], f = (tt - a[0]) / ((b[0] - a[0]) || 1); return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; } return null; };
 const cErr = [0.4, 0.8].map((tt, i) => { const q = posAt(tt); return q ? +(Math.hypot(q[0] - cpu.read[i][0], q[1] - cpu.read[i][1]) / 22.5).toFixed(2) : null; });
 info('the computer\'s: ' + JSON.stringify({ hooked: cpu.hooked, turn: cpu.turn, readErr: cErr }));
-ok(cpu.hooked && cpu.turn > 15 && cpu.turn <= 45, 'the computer\'s through ball is hooked in late the same, as much as it needs (' + cpu.turn + '° by the spot at Curve 10)');
+ok(cpu.hooked && cpu.turn > 15 && cpu.turn <= 42.7, 'the computer\'s through ball is hooked in late the same, as much as it needs (' + cpu.turn + '° by the spot at Curve 10)');
 ok(cErr.every(e => e !== null && e < 0.3), '...and read exactly as it goes: along the grass, where it is 0.4 and 0.8 s on is where the game read it would be (' + cErr.join(', ') + ' m)');
 
 // HARDER TO GET A FOOT TO: a ball of ours going past D on its way through to a man of ours, 0.9 of his reach for it off
-// him and coming to him (him facing it); curling as a through ball does at Curve 10's full bend, and straight. The moment
+// him and coming to him (him facing it); curling as much as a through ball can, and straight. The moment
 // it's there, as the game decides who gets a touch on it
 const reach = curl => K(`(()=>{ const S=window.__sc(1,{Du:-20,Dw:-20}), {D,r}=S, R=winReachR(D)*(0.45+0.55*interceptReachOf(D))*cpu(D).reach;
   r.x=S.X(-38); r.y=S.Y(20); r.vx=r.vy=0; D.x=S.X(20); D.y=S.Y(0); D.vx=D.vy=0; D.facing={x:-S.atk,y:0}; D.faceAvg={x:-S.atk,y:0}; D.noTouchT=0; D.reachT=-1;
   const g=0.9*R+ball.r, ax=0.5*g; ball.ownedBy=null; ball.dribbler=null; ball.dribbleGrace=0; ball.shotT=0; ball.x=D.x-S.atk*ax; ball.y=D.y+Math.sqrt(g*g-ax*ax); ball.z=0; ball.vz=0; ball.vx=S.atk*420; ball.vy=0;
   ball.lastTouch='G'; ball.intendedRcv=r; ball.passerRef=S.p; ball.thru={x:D.x+S.atk*300,y:ball.y,until:simNow+5};
-  ball.curveSpin=1; ball.curveK=0; ball.arcK=0; ball.curveSpinT=9; ball.thruCurl=${curl ? 'THRU_BEND[1]' : 0};
+  ball.curveSpin=1; ball.curveK=0; ball.arcK=0; ball.curveSpinT=9; ball.thruCurl=${curl ? 'THRU_BEND' : 0};
   const q=thruCurlQ(); attemptCaptures(); const cut=ball.lastTouch==='R'||ball.ownedBy===D;
   ball.ownedBy=null; ball.thru=null; ball.vx=ball.vy=0; ball.x=FW/2; ball.y=YC; endCurve(); return { cut, R:+R.toFixed(1), off:+g.toFixed(1), q:+q.toFixed(2) }; })()`);
 const Rc = await reach(true), Rs = await reach(false);
 info('at 0.9 of his reach off him: curling ' + JSON.stringify(Rc) + ', straight ' + JSON.stringify(Rs));
 ok(Rs.q === 0 && Rs.cut, 'a ball 0.9 of his reach off him, straight: he gets a foot to it');
-ok(Rc.q === 1 && !Rc.cut, '...curling as a through ball at Curve 10: it\'s out of his reach (a fifth less of it)');
+ok(Rc.q === 1 && !Rc.cut, '...curling as much as a through ball can: it\'s out of his reach (a fifth less of it)');
 
-// THE TOUCH ON IT: D getting to it, and the man it's for -- the average of 2000 of each, curling at Curve 10's full bend
-// and straight
-const T = await K(`(()=>{ const S=window.__sc(1,{Du:-20,Dw:-20}), {D,r}=S, n=2000, avg=(p,icp,curl)=>{ let s=0; for(let i=0;i<n;i++){ ball.thru={x:0,y:0,until:simNow+5}; ball.intendedRcv=r; ball.lastTouch='G'; ball.thruCurl=curl?THRU_BEND[1]:0; ball.vx=300; ball.vy=0; ball.z=0; s+=touchQuality(p,icp); } return s/n; };
+// THE TOUCH ON IT: D getting to it, and the man it's for -- the average of 2000 of each, curling as much as a through
+// ball can and straight
+const T = await K(`(()=>{ const S=window.__sc(1,{Du:-20,Dw:-20}), {D,r}=S, n=2000, avg=(p,icp,curl)=>{ let s=0; for(let i=0;i<n;i++){ ball.thru={x:0,y:0,until:simNow+5}; ball.intendedRcv=r; ball.lastTouch='G'; ball.thruCurl=curl?THRU_BEND:0; ball.vx=300; ball.vy=0; ball.z=0; s+=touchQuality(p,icp); } return s/n; };
   ball.ownedBy=null; const o={ theirs:+(avg(D,true,true)-avg(D,true,false)).toFixed(3), his:+(avg(r,false,true)-avg(r,false,false)).toFixed(3) }; ball.thru=null; ball.thruCurl=0; ball.vx=0; return o; })()`);
 info('a curling through ball against a straight one, the touch on it (0..1, on average): ' + JSON.stringify(T));
 ok(T.theirs < -0.15, 'a man of theirs getting to a curling one has the worse touch on it (' + T.theirs + ')');
