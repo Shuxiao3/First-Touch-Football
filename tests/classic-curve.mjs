@@ -2,11 +2,11 @@
 // facing the byline, an inswinger facing back toward his own goal -- by more the higher his Curve, aimed so it still
 // comes down on the spot (on time, at head height); everyone reading it reads its swing. A curling cross is harder to
 // head clear (a weaker, wilder clearance, and less of a chance in a duel) and to claim (a little less reach for the
-// keeper). A through ball (v167) is hooked in late as it was drawn: with nobody of theirs near where it's going it goes
-// straight, however the man it's for is running; with a man of theirs on its line it bulges away from him, a little,
-// and still gets to the spot; with one off to the side short of the spot it bulges away from him and hooks in late,
-// coming onto the spot turned in toward his side -- 72 degrees of turn on it at Curve 10, 9 at 1. And a shot's curl is
-// worked out as before.
+// keeper). A through ball (v167, v168) is hooked in late as it was drawn, as much as it needs: with nobody of theirs
+// near it goes straight, however the man it's for is running; with a man of theirs on its line it bulges away from him
+// and still gets to the spot; with one off to the side short of the spot, 2 m off its line, it bulges away from him and
+// hooks in late, coming onto the spot turned in toward his side -- by then 43 degrees of turn on it at Curve 10, 6 at 1.
+// And a shot's curl is worked out as before.
 // On a copy of the game that lets the test set the scene and reach the cross, the passes and the reading of the ball.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -89,7 +89,7 @@ ok(cl[0] && !cl[1], 'a curling cross is a little harder for the keeper to claim:
 
 // THROUGH BALLS (v167): the computer's into the path of a runner, struck true. 12 m, nobody of theirs near where it's
 // going: he runs across its line at 60°, or along it. 12 m along his line with one of theirs sat 0.6 m off it half-way
-// (not touching it). 16 m with one of theirs 5 m short of the spot and 4 m off its line. Curve 1 and 10. Where it gets
+// (not touching it). 16 m with one of theirs 5 m short of the spot and 2 m off its line. Curve 1 and 10. Where it gets
 // to (against where it was played to), which way it's going as it gets there (+: turned toward the man's side of its
 // line), how far it bulges off its line (+: to his side), and how near the man in the way it passes.
 const thru = (cv, run, man) => page.evaluate(({ cv, run, man }) => new Promise(res => {
@@ -101,7 +101,7 @@ const thru = (cv, run, man) => page.evaluate(({ cv, run, man }) => new Promise(r
   park(); p.x = T.FW / 2 - atk * 300; p.y = T.YC; p.vx = p.vy = 0; p.facing = { x: atk, y: 0 };
   b.ownedBy = null; b.dribbler = null; b.x = p.x + atk * 20; b.y = p.y; b.z = 0; b.vx = b.vy = b.vz = 0;
   const x0 = b.x, y0 = b.y, tx = x0 + atk * D, ty = T.YC, cx = atk, cy = 0, rvx = atk * Math.cos(ang) * rv, rvy = -Math.sin(ang) * rv;
-  const oAt = () => { if(man === 'lane'){ o.x = x0 + atk * D * 0.5; o.y = T.YC + 16; } else if(man === 'short'){ o.x = tx - atk * 5 * T.MK; o.y = T.YC + 4 * T.MK; } else { o.x = T.FW / 2; o.y = 80; }
+  const oAt = () => { if(man === 'lane'){ o.x = x0 + atk * D * 0.5; o.y = T.YC + 16; } else if(man === 'short'){ o.x = tx - atk * 5 * T.MK; o.y = T.YC + 2 * T.MK; } else { o.x = T.FW / 2; o.y = 80; }
     o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 99; };   // (the man of theirs doesn't touch it: how it's bent for him)
   oAt(); q.vx = rvx; q.vy = rvy; q.x = tx - rvx * 3; q.y = ty - rvy * 3;    // (far back on his run: he's not there before it)
   const oSide = Math.sign((o.y - y0) * cx - (o.x - x0) * cy) || 1;
@@ -123,9 +123,9 @@ for(const cv of [1, 10]){ P['x' + cv] = await thru(cv, 'across', null); P['a' + 
 info('through balls: ' + Object.entries(P).map(([k, r]) => `${r.man === 'lane' ? 'a man on its line' : r.man === 'short' ? 'a man short of the spot' : 'nobody near, run ' + r.run}, Curve ${r.cv}: ${r.spin ? 'bent' : 'straight'}, ${r.at ? 'got there ' + Math.round(r.at.miss) + ' px off, turned ' + Math.round(r.at.hd) + '° his way' : r.cutOut ? 'cut out' : 'never got there'}, bulging ${r.bow} m${r.man === 'lane' ? ', ' + Math.round(r.near) + ' px off the man' : ''}`).join('; '));
 ok(!P.x1.spin && !P.x10.spin && !P.a1.spin && !P.a10.spin && P.x10.at && P.a10.at && P.x10.at.miss < 12 && P.a10.at.miss < 12,
   'with nobody of theirs near where it\'s going a through ball goes straight to the spot, however he\'s running -- across its line or along it (v167: it bent into his path)');
-ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.bow < 0 && P.l10.near - P.l1.near >= 5 && P.l10.near - P.l1.near <= 16 && P.l10.moved === 0,
+ok(P.l10.spin && P.l10.at && P.l10.at.miss < 10 && P.l10.bow < 0 && P.l10.near - P.l1.near >= 12 && P.l10.near - P.l1.near <= 32 && P.l10.moved === 0,
   'with one of theirs on its line it bulges away from him and still gets to the spot: Curve 10 takes it ' + Math.round(P.l10.near - P.l1.near) + ' px further off him than Curve 1 (' + Math.round(P.l10.near) + ' against ' + Math.round(P.l1.near) + ')');
-ok(P.s10.spin && P.s10.at && P.s10.at.miss < 12 && P.s10.bow <= -1.8 && P.s10.bow >= -3.2 && P.s10.at.hd >= 40 && P.s10.at.hd <= 62,
+ok(P.s10.spin && P.s10.at && P.s10.at.miss < 12 && P.s10.bow <= -0.9 && P.s10.bow >= -2.0 && P.s10.at.hd >= 22 && P.s10.at.hd <= 40,
   'with one of theirs short of the spot, off to the side, it bulges away from him and hooks in late onto the spot at Curve 10 (' + P.s10.bow + ' m off its line, coming in turned ' + (P.s10.at ? Math.round(P.s10.at.hd) : '-') + '° toward his side, ' + (P.s10.at ? Math.round(P.s10.at.miss) : '-') + ' px off the spot)');
 ok(P.s1.spin && P.s1.at && P.s1.at.miss < 12 && P.s1.bow < 0 && P.s1.bow > -0.6 && P.s1.at.hd > 0 && P.s1.at.hd <= 9,
   '...and hardly at all at Curve 1 (' + P.s1.bow + ' m, turned ' + (P.s1.at ? Math.round(P.s1.at.hd) : '-') + '°)');

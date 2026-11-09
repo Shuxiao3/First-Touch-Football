@@ -1137,6 +1137,41 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       plays them (10 m on average, against 8). Played that far ahead (30% further), 57 in 100 of your through balls
       ended up yours through a gap at Curve 1, against 67 before: the runner got there later, their keeper sooner. So
       it's played as far ahead as it always was.
+  - **Through balls, as much bend as they need (v168).** The second coaching round: twelve more moments with a Curve 1
+    ball and a Curve 10 ball to draw on each (nine were drawn), each line made a smooth curve the game could strike,
+    with the spot it's met at marked on it. What they showed:
+    - **Less bend, met on the curve.** The Curve 10 balls bowed about half as far as the game's by the spot (0.8 to
+      2.9 m, where the game's bowed 2.5 to 5.4 m: "curve 10 is overshooting"), had turned 30° to 50° by the time they
+      were met, about four-fifths of the way along the line, and were still turning: left alone, they bent on past the
+      spot. The Curve 1 balls were close to straight, 2° to 4° by the spot.
+    - **Only as much as it needs.** The clearer the straight ball's way, the less the Curve 10 ball bent: straight with
+      4 m clear of everyone (the nearest man 4 m from the spot, behind it); about 45° with one of theirs in its way; a
+      little more on a longer ball. Its belly away from a man in its way, else the nearest short of the spot (seven of
+      the eight bent ones).
+    - **Met toward the passer's side.** Every spot was on the passer's side of the runner's line: as far ahead of him
+      as the game's, and about half that again across.
+    So now:
+    - **Bent as much as it needs.** By the spot a through ball has turned as much as the passer's Curve gives him, 6°
+      at Curve 1 and 45° at 10 (v167: 9° and 72°, all of it by the spot), times as much as the pass needs: all of it
+      with the straight ball to the spot passing within 1.75 m of one of theirs, none with it 4.75 m clear of them all,
+      and a little more for each metre over 15 m (none on a ball of 8 m or less, all of it from 11 m). Through an open
+      lane a Curve 10 ball goes nearly straight, as a Curve 1 ball would.
+    - **Met on its curve.** It's met four-fifths of the way along its curve, the turn still coming, so left alone it
+      bends on past the spot. Struck that much harder for the longer way round, it gets there when it would have.
+    - **Round whom.** Its belly away from a man of theirs in its way (within 2.5 m of the straight ball, a tenth of the
+      way along or more and not at the spot: not the man closing down the passer), else from the nearest of theirs
+      short of the spot within 18 m; another way only when that's clearly the safer, by a wider margin than before.
+      Played to the spots drawn, it bends seven of the eight bent balls the way they were drawn (the eighth was bent
+      toward its man), within about 7° of the drawn bend on average.
+    - **Where it's met stays.** Played half that again across toward the passer's side, as drawn, your through balls
+      were lost far more often (the man of theirs on that side got there): through a gap at Curve 10, 50 in 100 yours
+      against 69; with a fifth of it across, 65. So it's still played along the runner's line.
+    - **What it comes to.** Your through balls on the same 1000 scenes a Curve: through a gap, 71 in 100 yours at
+      Curve 1 and 68 at 10 (70 and 70 in v167); with one of theirs off the runner, 80 and 82 (82 and 89). There the
+      v167 hook kept more: a curling ball is harder for them to deal with, and the bend no longer goes on balls whose
+      way is clear (with the full bend on every one that has someone to bend round, it was 86). The computer's, chosen
+      as it chooses: through a gap 71 and 80 in 100 getting to their man (about 72 and 72), with one of theirs off the
+      runner 90 and 94 (91 and 92). These move a few in 100 from one run of the same scenes to the next.
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
   shows: a man's rating comes from weights for his line (see **Ratings**).
 
@@ -2670,6 +2705,12 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v168: through balls, as much bend as they need.** From the second coaching round: by the spot a through ball has
+  turned 6° at Curve 1 and 45° at 10 (it was 9° and 72°), times as much as the pass needs -- all of it with one of
+  theirs in its way, little through a clear lane -- and it's met four-fifths of the way along its curve, still turning.
+  Its belly away from a man in its way, else the nearest short of the spot. The drawn spots, across toward the
+  passer's side, were tried and not taken: more of your through balls were lost. See **Through balls, as much bend as
+  they need (v168)**.
 - **v167: through balls bent as they were drawn; no lofted passes; backspin.** A through ball sets off a little wide
   and hooks in late onto the spot, as the ones drawn on the coaching page did -- 9° of turn at Curve 1, 72° at 10 (it
   was 29°) -- its belly away from the nearest of theirs short of the spot, or straight through a gap between two of
