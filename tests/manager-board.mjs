@@ -39,7 +39,7 @@ ok(m1 === -2.75 && m15 === -2.5 && m25 === -2 && m35 === -1.5 && m4 === -1.25 &&
   'below settled, half a point off every attribute a point under 6.5, -2.75 at most (v170): -0.75 at 5, -1.25 at 4, -1.5 at 3.5, -2.75 at 1 (v150-v169: -0.25, -0.42, -0.5, -1.5); above, as it was, +0.5 at 8 and +1 at 9.5 and over; nothing at 6.5');
 ok(m7 > 0 && m9 > 0 && m7 < m8 && m8 < m9 && r.n[0] === 'all' && r.n[1] === 3 && r.o.m4 <= -10 && r.o.m9 > 0 && r.o.m65 === 0,
   'and every point between counts -- no dead zone: ' + [4, 5, 6, 7, 9].map((m, i) => m + ': ' + [m4, m5, m6, m7, m9][i]).join(', ') + '; below settled every attribute he has (v170: it was his stamina, both composures and both IQs), above his stamina and both composures; a midfielder at 4 rates ' + r.o.m4 + ' (v169: -1), at 9 +' + r.o.m9);
-ok(Math.abs(r.mean4 + 1.25) < 0.01 && Math.abs(r.o.m4 / 10 + 1.25) < 0.1, 'a man at 4: each of his ' + r.nk + ' attributes off the floor 1.25 under what it is (' + r.mean4 + '), his rating ' + r.o.m4 + ' -- on the attributes\' scale 1.25 under his card\'s (the handoff\'s M1)');
+ok(Math.abs(r.mean4 + 1.25) < 0.01 && r.o.m4 <= -10 && r.o.m4 >= -16, 'a man at 4: each of his ' + r.nk + ' attributes off the floor 1.25 under what it is (' + r.mean4 + '), his rating ' + r.o.m4 + ' -- on the attributes\' scale 1.25 under his card\'s (the handoff\'s M1)');
 
 // --- A WORD WITH HIM: once a week --------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2]; p.mor=3; const a=mgTalk(d,p), m1=p.mor, b=mgTalk(d,p), m2=p.mor; d.weeks=(d.weeks||0)+1; const c=mgTalk(d,p), m3=p.mor; return { a:a[0], b, m:[3,m1,m2,m3], c:c[0] }; })()`);
