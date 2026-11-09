@@ -20070,7 +20070,7 @@
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length;
     const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean)), subs=new Set(lu.bench.slice(0,BENCH_N).map(i=>R[i]).filter(Boolean));
     const L=['GK','DEF','MID','ATT'].flatMap(role=>R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr));
-    const top='<div class="mgSum plSum">'+plCount(L.length)+' <i>of '+MG_MAX+'</i> · '+money(f.wageWk)+'/WK'+(ending?' · '+plSt(ending+' DEAL'+(ending>1?'S END':' ENDS'),'bad'):'')+'</div>';
+    const top='<div class="mgSum plSum"><span data-xpl="A squad is '+MG_MAX+' at most and '+MG_MIN+' at least.">'+plCount(L.length)+' <i>of '+MG_MAX+'</i></span> · '+money(f.wageWk)+'/WK'+(ending?' · '+plSt(ending+' DEAL'+(ending>1?'S END':' ENDS'),'bad'):'')+'</div>';
     let h='';
     for(const p of L){ const bid=(d.offers||[]).some(o=>o.pid===p.id);
       const tags=((p.until||0)<=S?plSt('DEAL ENDS','bad'):'')+(p.cAsk?plSt('NEW DEAL'):'')+(p.wantsOut?plSt('UNSETTLED','bad'):'')+(p.bb?plSt('BUYBACK'):'')+(bid?plSt('WANTED','ok'):'');
