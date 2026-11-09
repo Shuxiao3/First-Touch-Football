@@ -44,8 +44,8 @@ const pr = await page.evaluate(() => { const M = window.__M, out = {}, R = M.cwM
     out[l] = { fastPace: +avg(fast, m => m.pace).toFixed(2), slowPace: +avg(slow, m => m.pace).toFixed(2), gap: +(avg(slow, m => m.rest) - avg(fast, m => m.rest)).toFixed(2), ovr: +avg(men, m => m.ovr).toFixed(1) }; }
   return out; });
 info('men made at 70, the quickest quarter against the slowest: ' + JSON.stringify(pr));
-ok(['DEF', 'MID', 'ATT'].every(l => pr[l].gap >= 0.4 && Math.abs(pr[l].ovr - 70) <= 1),
-  'the quickest quarter of men made at 70 have that much less of the rest of their game than the slowest: ' + pr.DEF.gap + ' of a point for a defender, ' + pr.MID.gap + ' for a midfielder, ' + pr.ATT.gap + ' for a forward (v143: 0.70, 0.00 and 0.38) -- all of them rated 70');
+ok(['DEF', 'MID', 'ATT'].every(l => pr[l].gap >= 0.3 && Math.abs(pr[l].ovr - 70) <= 1),   // (v183: how much is the master sheet's numbers' -- 1.4, 0.36 and 0.55 with them; 0.4 at least till v182)
+  'the quickest quarter of men made at 70 have that much less of the rest of their game than the slowest: ' + pr.DEF.gap + ' of a point for a defender, ' + pr.MID.gap + ' for a midfielder, ' + pr.ATT.gap + ' for a forward (v143: 0.70, 0.00 and 0.38; the master sheet\'s numbers since v182) -- all of them rated 70');
 
 // --- DEVELOPMENT, AND A CAREER KEPT FROM BEFORE ----------------------------------------------------------------------------------
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150); await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);

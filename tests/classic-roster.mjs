@@ -54,10 +54,16 @@ const st = await page.evaluate(() => { const M = window.__M, out = {}, med = a =
   return out; });
 const low = k => Math.min(...['passAcc', 'ballControl', 'tackle', 'interceptions', 'defIQ', 'offIQ', 'shotAcc', 'stamina', 'strength', 'dribbling'].map(x => st[k][x]));
 info('at a rating of 65, the middle of: ' + Object.entries(st).map(([k, v]) => k + ' ' + JSON.stringify(v)).join(' | '));
-ok(st.covermid.speed > st.anchor.speed && st.covermid.speed > st.deepcreator.speed && st.covermid.interceptions >= st.deepcreator.interceptions && st.covermid.defIQ >= st.boxtobox.defIQ + 1,
-  'the cover midfielder: quicker than the holders (pace ' + st.covermid.speed + ' against the anchor\'s ' + st.anchor.speed + ' and the deep creator\'s ' + st.deepcreator.speed + '), and he reads it -- interceptions ' + st.covermid.interceptions + ', Def IQ ' + st.covermid.defIQ);
-ok(low('completemid') >= low('boxtobox') && low('completemid') >= low('mezzala') && low('completemid') >= low('covermid') && low('completemid') >= low('playmaker') && st.boxtobox.stamina > Math.max(st.completemid.stamina, st.covermid.stamina, st.mezzala.stamina),
-  'the complete midfielder has no weak spot -- his worst a ' + low('completemid') + ' (the box-to-box\'s ' + low('boxtobox') + ', the mezzala\'s ' + low('mezzala') + ', the cover midfielder\'s ' + low('covermid') + ') -- and the box-to-box the engine: stamina ' + st.boxtobox.stamina);
+// (v183: the types' make is the master sheet's -- what's checked is that its order holds at the same rating: wherever two
+// of a line's types are three points or more apart on the sheet's 1 to 20, the one with more has more here too. It
+// checked the cover midfielder against the holders and the complete midfielder's weakest stat, as v143 and v144 made them)
+const ord = await page.evaluate(KEYS => { const M = window.__M, ks = Object.keys(KEYS), out = { pairs: 0, wrong: [] };
+  for(const a of ks) for(const b of ks){ if(a >= b || M.STYLES[a].role !== M.STYLES[b].role) continue; const r = M.STYLES[a].role;
+    for(const x of Object.keys(KEYS[a])){ if(x === 'ovr') continue; const sa = 2 * (M.ARCH[r][x] + (M.STYLES[a].d[x] || 0)), sb = 2 * (M.ARCH[r][x] + (M.STYLES[b].d[x] || 0));
+      if(Math.abs(sa - sb) < 3) continue; out.pairs++; if((sa > sb) !== (KEYS[a][x] > KEYS[b][x])) out.wrong.push(a + '/' + b + ' ' + x + ' sheet ' + sa + '-' + sb + ', at 65 ' + KEYS[a][x] + '-' + KEYS[b][x]); } }
+  return out; }, st);
+info('the sheet\'s order at a rating of 65: ' + JSON.stringify(ord));
+ok(ord.pairs >= 40 && ord.wrong.length === 0, 'at the same rating the types keep the master sheet\'s order: every one of ' + ord.pairs + ' stats where two of a line\'s types are three points or more apart on the sheet');
 ok(st.paceywinger.speed >= st.winger.speed + 0.5 && st.paceywinger.crossing < st.winger.crossing,
   'the pacey winger: the quickest of the wingers (' + st.paceywinger.speed + ', the winger ' + st.winger.speed + '), paid for in the rest -- crossing ' + st.paceywinger.crossing + ' to the winger\'s ' + st.winger.crossing);
 ok(st.mezzala.dribbling >= st.boxtobox.dribbling + 1 && st.mezzala.dribbling >= st.ballwinner.dribbling + 1,
