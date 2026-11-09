@@ -17865,7 +17865,7 @@
   // A PAPER'S FACTS (v176, the handoff's J4): a factual paper leads with its numbers, a chip each, under its headline,
   // and its words after them say no number the headline or the strip shows (the narrative ones -- a man who wants a word,
   // one who wants to leave, a deal run out -- are the game's voice, and stay words)
-  const plF=F=>'<div class="plFacts">'+F.filter(Boolean).map(([l,v,c])=>'<span class="plF"><i>'+l+'</i><b'+(c?' class="'+c+'"':'')+'>'+v+'</b></span>').join('')+'</div>';
+  const plF=F=>{ F=F.filter(Boolean); return F.length?'<div class="plFacts">'+F.map(([l,v,c])=>'<span class="plF"><i>'+l+'</i><b'+(c?' class="'+c+'"':'')+'>'+v+'</b></span>').join('')+'</div>':''; };   // (nothing to show: no strip)
   const plWk=(v,u)=>money(v)+(u||'/WK');
   // one paper: [its title, its lines, its buttons ([label, action, wide?])]
   function pileBody(d,x){ const L=[], B=[], next=()=>B.push(['NEXT ▶','next']), later=()=>B.push(['LATER','later',0]);

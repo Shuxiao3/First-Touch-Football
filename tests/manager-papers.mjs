@@ -55,7 +55,7 @@ await page.click('#careerHub .cpPapers'); await page.waitForTimeout(150);
 r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { kinds:L.map(x=>x.k), head:document.querySelector('#pileModal .plHead').textContent, wk:mgWeekShort(d), fresh:document.querySelector('#careerHub .cpPapers').classList.contains('fresh') }; })()`);
 const first = await top();
 info('the first pile: ' + JSON.stringify({ r, first }));
-ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /Team morale \d+\.\d/.test(first) && /MORALE \d+\.\d/.test(r.head) && /TO GO/.test(r.head) && !r.fresh,
+ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /THIS WEEK\s*(±0|[+-]\d+\.\d)/.test(first) && !/Team morale/.test(first) && /MORALE \d+\.\d/.test(r.head)   /* (v176: the morale in the head, the page's strip the week's change) */ && /TO GO/.test(r.head) && !r.fresh,
   'PAPERS pressed (' + r.wk + '): the dressing room on top ("' + first.split('\n')[1] + '"), the side\'s morale over the pile, and the button\'s glow gone');
 await press('close');
 r = await K(`(()=>{ const d=CAREER.data; renderHub(); return { modal:document.getElementById('pileModal').classList.contains('on'), left:pileLeft(d).length }; })()`);
@@ -81,7 +81,7 @@ await toPaper(new RegExp('bid \\$3,000 for ' + n5));
 const offTxt = await top(); const b0 = await K('CAREER.data.budget');
 await press('accept');
 r = await K(`(()=>{ const d=CAREER.data; return { gone:!d.roster.some(p=>p.name===${JSON.stringify(n5)}), budget:d.budget }; })()`);
-ok(/A BID FOR ONE OF YOURS/.test(offTxt) && /NEW/.test(offTxt) && /rated \d+/.test(offTxt) && r.gone && r.budget === b0 + 3000, 'a club\'s bid for one of yours: ACCEPT sells him (' + n5 + ' gone, $3,000 in)');
+ok(/A BID FOR ONE OF YOURS/.test(offTxt) && /NEW/.test(offTxt) && /RATED\s*\d+/.test(offTxt) && /WORTH\s*\$[\d,]+/.test(offTxt)   /* (v176: a chip each) */ && r.gone && r.budget === b0 + 3000, 'a club\'s bid for one of yours: ACCEPT sells him (' + n5 + ' gone, $3,000 in)');
 await toPaper(new RegExp('for ' + n6)); await press('reject');
 r = await K(`(()=>{ const d=CAREER.data; return { offers:d.offers.length, still:d.roster.some(p=>p.name===${JSON.stringify(n6)}) }; })()`);
 ok(r.offers === 0 && r.still, 'REJECT turns it down: he stays');
@@ -108,7 +108,7 @@ await toPaper(/A SPONSOR CALLS/);
 const spTxt = await top(); await press('spsign');
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); return { ads:S.ads.map(a=>a.sp.name+' $'+a.wk), wk:computeFinance(d).boardsWk, drawn:groundOfYours(d).boards.map(b=>b.short), offers:d.spOff.length }; })()`);
 info('the sponsor: ' + JSON.stringify({ spTxt: spTxt.split('\n'), r }));
-ok(/A local business/.test(spTxt) && /an ad board/.test(spTxt) && /\$[\d,]+ a week, to the end of the season/.test(spTxt) && r.ads.length === 1 && r.wk > 0 && r.drawn[0] !== 'YOUR AD HERE' && r.offers === 0,
+ok(/A local business/.test(spTxt) && /an ad board/.test(spTxt) && /A WEEK\s*\$[\d,]+/.test(spTxt) && /TILL\s*S1/.test(spTxt)   /* (v176: a chip each) */ && r.ads.length === 1 && r.wk > 0 && r.drawn[0] !== 'YOUR AD HERE' && r.offers === 0,
   'a sponsor calls -- a local business for the ad board ("' + spTxt.split('\n')[1] + '") -- SIGN, and its name\'s on the board, its fee every week (' + r.ads[0] + ')');
 // a man who's come on: a new deal
 const n7 = await K('CAREER.data.roster[6].name'), w7 = await K('mgRenewWage(CAREER.data,CAREER.data.roster[6])');
@@ -158,9 +158,9 @@ for(let i = 0; i < 20 && Object.keys(reports).length < want.length; i++){ const 
 info('the reports: ' + JSON.stringify(reports));
 const n2 = await K('CAREER.data.roster[2].name'), n4 = await K('CAREER.data.roster[4].name');
 ok(reports.phys && reports.phys.includes(n2 + ': a strain, in training') && reports.phys.includes(n4 + ' is fit again'), 'the physio: who\'s hurt, how and for how long, who\'s fit again');
-ok(reports.dev && /Coming on: .+ \+2 → \d+/.test(reports.dev) && /Going back: .+ -1 → \d+/.test(reports.dev), 'the coaches, every third week: who\'s coming on and who\'s going back');
+ok(reports.dev && /[A-Z]+ \/ \+2 → \d+/.test(reports.dev) && /[A-Z]+ \/ -1 → \d+/.test(reports.dev),   /* (v176: a chip a man, his change and his rating now) */ 'the coaches, every third week: who\'s coming on and who\'s going back');
 ok(reports.next && /^(Derby week: )?(At home to|Away at|at home to|away at) /.test(reports.next) && /Matchday 1/.test(reports.next), 'the next game: who, where (' + (reports.next || '').split(' / ')[0] + ')');
-ok(reports.money && /In \$4,000 · wages out \$1,100 · \+\$2,900/.test(reports.money), 'the week\'s money: in, out, and in the bank');
+ok(reports.money && /Up \$2,900 on the week/.test(reports.money) && /IN \/ \$4,000/.test(reports.money) && /WAGES \/ \$1,100/.test(reports.money) && /IN THE BANK \/ \$[\d,]+/.test(reports.money),   /* (v176: the numbers first) */ 'the week\'s money: in, out, and in the bank');
 
 // --- sponsors over the weeks: the businesses round the corner call about the board ------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); S.ads=[]; d.spOff=[]; S.wait={}; const seen=[]; let first=-1;
