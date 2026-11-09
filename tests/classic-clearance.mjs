@@ -136,7 +136,7 @@ info('crosses toward 7 m out, from the byline: ' + JSON.stringify(byl) + '; from
 const came = t => Object.entries(t).filter(([k]) => k.startsWith('came:')).reduce((s, [, n]) => s + n, 0), got = t => (t['came:caught'] || 0) + (t['came:punched'] || 0);
 ok(!byl['came:goal'] && !deep['came:goal'] && !six['came:goal'], 'he never comes for one and lets it in');
 ok(got(byl) + got(deep) >= 0.8 * (came(byl) + came(deep)), 'he gets the ones he comes for (' + (got(byl) + got(deep)) + ' of ' + (came(byl) + came(deep)) + ' toward 7 m, caught or punched; the rest he leaves to us, set on his line)');
-ok(came(six) >= 5 && got(six) >= 5, 'a ball dropping in his six-yard box he comes for, and has (' + got(six) + ' of 6)');
+ok(came(six) >= 5 && got(six) >= 5, 'a ball dropping in his six-yard box he comes for, and deals with (' + got(six) + ' of 6, caught or punched)');
 
 process.exitCode = rep.finish();
 await browser.close();

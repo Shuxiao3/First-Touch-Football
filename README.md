@@ -174,14 +174,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     Reflexes: 0.4 s at 1, 0.33 s at 5.5, 0.26 s at 10 -- and only then does he go. He comes for the same crosses he
     did; he gets to them later, and at a stretch more often than not. (Till v178 that moment only decided which
     crosses he went for: he was off his line the instant it was struck, there with the moment to spare and set for it.)
-  - **Catch it or punch it.** He catches only what comes to him (v178): the ball's way, over the next moment, passing
-    within a quarter of his reach of where he stands -- two-fifths for a keeper of Handling 10 -- a short step (a
-    quarter of a metre) allowed. Anything he has to go for he punches clear: across him at a stretch, or with one of
-    theirs up with him (2 m from it) and it not already in his midriff. Up and away to the side it's on, 12 to 18 m,
-    nobody's ball; how far he can get a fist to it is as it was. The Crossing Lab calls it PUNCHED CLEAR. Your cross
-    to your nearest man, two of ours and two of theirs, 60 crosses: he came for 20 and caught 5, punching 15 (v177:
-    14, all caught). Till v178 he caught anything he could bring to four-fifths of his reach running to it for a
-    quarter of a second (two metres for most): all but a handful of the crosses he came for.
+  - **Catch it or punch it.** He catches only what comes straight to him (v178): the ball's way, over the next
+    moment, passing within 0.15 of his reach of him at Handling 1, 0.3 at 10 -- into his chest -- a short step (a
+    quarter of a metre) allowed. Anything else he punches clear: across him at a stretch, or with one of theirs up with
+    him (2 m from it) and it not already in his midriff. Up and away to the side it's on, 12 to 18 m, nobody's ball;
+    how far he can get a fist to it is as it was. The Crossing Lab calls it PUNCHED CLEAR. Your cross to your nearest
+    man, two of ours and two of theirs, 140 crosses: he came for 25 and punched all 25 (v177: 26 of 120, all caught).
+    A poor crosser's ball that hangs and drifts in on him he still catches (Crossing 4, from the byline: 7 of the 7 he
+    came for), and a true one aimed at his spot. Till v178 he caught anything he could bring to four-fifths of his
+    reach running to it for a quarter of a second (two metres for most): all but a handful of the crosses he came
+    for. (Tried for v178 and dropped: a quarter of his reach to two-fifths -- still two in three of your crosses to
+    your nearest man that he came for, met at full stride three and a half metres off his line; and no catch after a
+    run of more than 2 m -- no catch at all, not even of a ball dropping on him, which he meets three metres early,
+    where it first comes down within his reach.)
 - **The keeper's hands (Handling).** Whatever shot he gets to -- on his line, at the end of a dive, or coming for it --
   he holds only if it's slow enough as it reaches him and close enough to his body. How slow and how close is his
   **Handling**, a keeper's stat like the rest (1 to 10; an average side's keeper has 7): up to 430 px/s right at him at
@@ -2124,7 +2129,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       more, one in thirty at League 2's mid-table (55) or over. Players out of contract, released or let go join them.
       (Till v178 it was four under, give or take four, a point and a half a year, and a sixth of them from the
       Championship: the middle man 50, one in twenty 65, a third at League 2's mid-table or over -- a new career in
-      League 2, its nine averaging 50, could sign a dozen men better than its league's mid-table for a wage.)
+      League 2, its nine averaging 50, could sign a dozen men at its league's mid-table or better for a wage.)
     - **No young man with a future is left without a club.** One of 24 or under whose ceiling is 5 or more above him
       is signed by a club at his ceiling's level the day he's free (yours included, if you let his deal run out).
     - **A season without a club** he hardly grows -- little training, no games -- and loses his sharpness and his
@@ -2863,13 +2868,13 @@ test, and like the Trap Lab the values are the game's settings.
     80 matches), until nine a side made it bigger again (v125).
 - **v178: keepers punch, and free agents are what nobody wanted.** A keeper coming for a cross stands his read out
   before he goes (0.4 s at Reflexes 1, 0.26 at 10 -- he used to be off his line the instant it was struck), and
-  catches only what comes to him, punching anything he has to go for: your cross to your nearest man, he came for 20
-  of 60 and caught 5 (v177: 14, all caught). How far he comes and how far he can punch it are as they were. Free
-  agents are weaker -- eight under their leagues' mid-table, League 2's or League 1's, the middle man 43 (he was 50,
-  one in twenty 65) -- a man who'd walk into most sides in your league wants two weeks' wage to sign for every point
-  over its mid-table less three, and nobody bids for a man you signed on a free while he's on that deal (deadline day
-  included) unless you list him, he wants out or he's come on four points. See **He reads it first**, **Catch it or
-  punch it** and **Free agents**.
+  catches only what comes straight to him, punching the rest: your cross to your nearest man, he came for 25 of 140
+  and punched all 25 (v177: 26 of 120, all caught). How far he comes and how far he can punch it are as they were. Free
+  agents are weaker -- eight under their leagues' mid-table, League 2's or League 1's: the middle man 43 where he was
+  50, one in twenty 53 or more where it was 65 -- a man who'd walk into most sides in your league wants two weeks'
+  wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
+  he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
+  reads it first**, **Catch it or punch it** and **Free agents**.
 - **v177: state, not sentences, everywhere.** The handoff's J1 audit: no building's screen shows a sentence longer than
   a label by default -- the fixtures' form as dots, NO CUPS, the squad pitch's shape, the Selection tab's HOW IT WORKS,
   and an empty list a chip, their words a tap away. See **State, not sentences (v177)**.

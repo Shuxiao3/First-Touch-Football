@@ -92,6 +92,7 @@ info('your cross to your nearest man, 2 v 2 from the byline: ' + JSON.stringify(
 const kpN = yoursNear.keeper + (yoursNear.punched || 0);
 ok(yoursNear.n >= 30 && kpN <= 14 && yoursNear.head + yoursNear.cleared > kpN,
   'your cross to your nearest man: the keeper has ' + kpN + ' of ' + yoursNear.n + ' (two in three before v107) -- the rest headed, by ours (' + yoursNear.head + ') or cleared (' + yoursNear.cleared + ')');
+ok(kpN === 0 || (yoursNear.punched || 0) > 2 * yoursNear.keeper, 'and he punches them, not catches them: ' + (yoursNear.punched || 0) + ' punched, ' + yoursNear.keeper + ' caught (v178: he catches only what comes straight to him; v177 caught them all)');
 
 // how wide it goes, drawn 20,000 times: its line (the mean, and the worst, in degrees) and its weight (the mean share
 // it's over or short, and how often short), from the byline (f 0) and from 24 m out (f 1), at Crossing 1, 8 and 10

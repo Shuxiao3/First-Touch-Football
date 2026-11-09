@@ -13006,14 +13006,17 @@
     return null;
   }
   // AT HIS HANDS (a cross he's come for, or a ball in the air he's gone at): catch it or punch it, as soon as it's in his
-  // reach (R -- how far he can get a fist to it, unchanged). v178: HE CATCHES ONLY WHAT COMES TO HIM -- its way over the
-  // next moment (while it's still up) passing within CATCH_FAR of R of where he stands, a short step allowed (CATCH_STEP,
-  // a quarter of a metre): a quarter of R for a keeper of no Handling, two-fifths for the best. Anything else he has to
-  // go for, and he punches it clear; and with one of theirs up with him (2 m from it) he punches anything that isn't in
-  // his midriff already (CATCH_RIVAL of R). (v85-v177: he caught anything he could bring to four-fifths of his reach,
-  // running to it for a quarter of a second -- two metres for most -- and all but a handful of the crosses he came for.)
-  // -> true if he's dealt with it
-  const CATCH_FAR=[0.25,0.4], CATCH_STEP=0.25*PX_M, CATCH_RIVAL=0.12;
+  // reach (R -- how far he can get a fist to it, unchanged). v178: HE CATCHES ONLY WHAT COMES STRAIGHT TO HIM -- its way
+  // over the next moment (while it's still up) passing within CATCH_FAR of R of where he is, a short step allowed
+  // (CATCH_STEP, a quarter of a metre): 0.15 of R for a keeper of no Handling, 0.3 for the best -- into his chest. Anything
+  // else he punches clear; and with one of theirs up with him (2 m from it) he punches anything that isn't in his midriff
+  // already (CATCH_RIVAL of R). (v85-v177: he caught anything he could bring to four-fifths of his reach, running to it
+  // for a quarter of a second -- two metres for most -- and all but a handful of the crosses he came for. Tried for v178:
+  // a quarter of R to two-fifths, still two in three of your crosses to your nearest man that he came for, three and a
+  // half metres off his line at full stride; and no catch at all after a run of more than 2 m, none at all -- he meets
+  // even a ball dropping on him three metres early, where it first comes down within his reach.) -> true if he's dealt
+  // with it
+  const CATCH_FAR=[0.15,0.3], CATCH_STEP=0.25*PX_M, CATCH_RIVAL=0.12;
   function gkTakeCross(kp,spd){
     const R=(reachOf(kp)+ball.r+10)*(1-CURL_CLAIM*crossCurlQ())*GK_GRAB, dd=Math.hypot(ball.x-kp.x,ball.y-kp.y);
     if(!(dd<R&&ball.z<=GK_CLAIM_H+8)) return false;
