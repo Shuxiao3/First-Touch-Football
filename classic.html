@@ -614,10 +614,6 @@
   .bProg i{ display:block; height:100%; background:var(--good); }
   .pBar{ display:inline-block; vertical-align:middle; width:60px; height:5px; margin-left:6px; background:var(--well); border-radius:2px; overflow:hidden; }
   .pBar i{ display:block; height:100%; background:var(--good); }
-  .pathL{ margin:6px 0 2px; font-size:11px; } .pathH{ font-size:10px; letter-spacing:1px; color:var(--dim); margin-bottom:2px; }
-  .pathR{ display:flex; align-items:center; gap:6px; padding:1px 0; color:var(--dim); } .pathR b{ width:10px; flex:none; font-weight:400; }
-  .pathR span{ flex:1 1 auto; min-width:0; } .pathR em{ font-style:normal; white-space:nowrap; }
-  .pathR.done{ color:var(--good); } .pathR.next{ color:var(--ink); } .pathR.next b{ color:var(--acc); }
   .bpLvl b.done, .bpLvl span.done{ color:var(--good); }
   .bPrice{ align-items:center; gap:2px; }
   .lkI{ width:7px; height:9px; flex:none; fill:none; stroke:currentColor; stroke-width:1.4; }
@@ -1613,6 +1609,24 @@
   #bpBody .clRec em{ flex:0 1 auto; min-width:0; font-style:normal; font-size:8px; letter-spacing:.3px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #bpBody .clRec.none b{ color:var(--dim2); }
   #bpBody .clGrid [data-xpl]{ cursor:help; }
+  /* A BUILDING'S SCREEN (v173, the handoff's J4): its picture, its level as pips, what it does as the numbers it
+     changes (now, and the next level's beside it), its levels as a path, your money against the next and the button */
+  #bpBody .bsWrap{ display:flex; gap:14px; height:100%; min-height:0; font-size:11px; line-height:1.2; color:var(--ink2); }
+  #bpBody .bsWrap .bpBuildPic, #bpBody .bsWrap .bpPhone{ align-self:flex-start; }
+  #bpBody .bsMain{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:10px; }
+  #bpBody .bsMain .clId{ height:auto; min-height:22px; flex-wrap:wrap; }
+  #bpBody .bsIco svg{ width:18px; height:18px; fill:none; stroke:var(--acc); stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; display:block; }
+  #bpBody .bsPips{ display:inline-flex; gap:3px; } #bpBody .bsPips i{ width:8px; height:8px; border-radius:2px; background:var(--well); } #bpBody .bsPips i.on{ background:var(--acc); }
+  #bpBody .clChip.warn{ color:var(--warn); background:rgb(255 170 60 / .12); } #bpBody .clChip.dim{ color:var(--dim); background:var(--row); }
+  #bpBody .bsTiles{ display:grid; gap:4px; max-width:520px; }
+  #bpBody .bsTiles .clTile b{ font-size:14px; } #bpBody .bsTiles .clTile em{ display:block; font-style:normal; font-size:8px; letter-spacing:.3px; color:var(--dim); white-space:nowrap; }
+  #bpBody .bsTiles .clTile.off b{ color:var(--dim); }
+  #bpBody .bsMain .clNodes{ max-width:420px; } #bpBody .bsMain .clNode{ width:64px; }
+  #bpBody .clNode.lock i{ box-shadow:inset 0 0 0 2px var(--warn); } #bpBody .clNode .lkI{ width:6px; height:8px; margin-top:2px; color:var(--warn); }
+  #bpBody .bsMain .clGo{ max-width:460px; }
+  #bpBody .bsAssign{ display:grid; grid-template-columns:auto repeat(4,minmax(0,1fr)); gap:4px 6px; align-items:center; max-width:520px; }
+  #bpBody .bsAssign .clLbl{ font-size:8px; } #bpBody .bsAssign .clLbl b{ display:block; font-size:9px; font-weight:400; color:var(--warn); letter-spacing:.3px; }
+  #bpBody .bsAssign .mgBtn{ min-height:28px; padding:2px 4px; font-size:10px; margin:0; }
   @media (max-width:720px){ #bpBody .clGrid{ gap:0 10px; } #bpBody .clNode{ width:50px; } #bpBody .clB b{ font-size:6.5px; letter-spacing:0; } #bpBody .clTile{ padding:3px 4px 5px; } #bpBody .clTile b{ font-size:12px; } }
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
@@ -19827,9 +19841,9 @@
   // A PATH, NOT A LOOP (v153). What a clubhouse UNLOCKS, in a list of what it lets you build (clubUnlocks) -- it said
   // "put up the physio's clinic; build up the training pitch to 2", and beside a level's "clubhouse 2" that read as what
   // the clubhouse needed: a loop. A clubhouse by its own short name for the campus's rail ("CABIN": the clubhouse a
-  // building waits for -- it was the number, "PHYSIO 2", which read as a building already at level 2). And THE WAY TO
-  // IT (pathHtml): what stands before a building or its next level, in order -- each clubhouse on the way, then it --
-  // ticked as it's done (✓), the next to buy lit with your money against its price (▸), the rest after it (·)
+  // building waits for -- it was the number, "PHYSIO 2", which read as a building already at level 2). (THE WAY TO IT,
+  // a list of each clubhouse on the way to a building or its next level, ✓ ▸ ·, went with v173: a building's screen
+  // shows its levels as a path, the clubhouse a level waits for on a chip, and your money against the next clubhouse)
   const clubShort=lv=>CLUB_LV[lv].n.replace(/^the /i,'').toUpperCase();
   const pBar=(have,cost)=>'<span class="pBar"><i style="width:'+Math.round(100*clamp((have||0)/Math.max(1,cost),0,1))+'%"></i></span>';
   const capFirst=t=>String(t).replace(/^./,c=>c.toUpperCase());
@@ -19838,46 +19852,16 @@
     for(const k of B.stad) L.push('the stadium to level '+k);
     if(B.decor) L.push('decorations'); if(lv===2) L.push('the shirt for sponsors');
     return L; }
-  function pathHtml(d,id,lv,label){ const need=clubNeed(id,lv), cl=lvOf(d,'club'), b=Math.round(d.budget||0), R=[]; let lit=false;
-    const row=(st,name,cost)=>'<div class="pathR '+st+'"><b>'+(st==='done'?'✓':st==='next'?'▸':'·')+'</b><span>'+name+'</span>'
-      +(cost==null||st==='done'?'':'<em>'+(st==='next'?money(Math.max(0,b))+' of '+money(cost)+pBar(b,cost):money(cost))+'</em>')+'</div>';
-    R.push(row('done',CLUB_LV[cl].n+' · clubhouse '+cl));
-    for(let k=cl+1;k<=need;k++){ R.push(row(lit?'later':'next',CLUB_LV[k].n+' · clubhouse '+k,CLUB_LV[k].cost)); lit=true; }
-    R.push(row(lit?'later':'next',label,bldCost(id,lv)));
-    return '<div class="pathL"><div class="pathH">THE WAY TO IT</div>'+R.join('')+'</div>'; }
-  function clubBringsTxt(lv){ const B=clubBrings(lv), L=[];
-    if(B.put.length) L.push('put up '+B.put.join(', '));
-    if(B.more.length) L.push('build up the '+B.more.join(', the '));
-    if(B.stad.length) L.push('the stadium to '+B.stad.join(' and '));
-    if(B.decor) L.push('decorations');
-    if(lv===2) L.push('the shirt open to sponsors');
-    return L.join('; '); }
   // a building's picture for its screen: the piece itself (with your crest), or the phone
   const PHONE_SVG='<svg viewBox="0 0 24 34"><rect x="2" y="1" width="20" height="32" rx="3"/><rect x="4.5" y="5" width="15" height="22"/><line x1="9" y1="30" x2="15" y2="30"/></svg>';
   function bldPic(d,p,key){ const c=d.world.clubs[d.clubId]||{}, u=CAMPUS.preview(p,250,200,{crest:crestFor(c),code:c.code},key);
     return u?'<img class="bpBuildPic" src="'+u+'" alt="">':''; }
   // a building that isn't up: what it's for, and what it costs -- or the clubhouse it needs
-  function mgBuildBody(d,id){ if(id==='market') return '<div class="bpBuild fitWhole"><div class="bpPhone">'+PHONE_SVG+'</div><div class="bpBuildTxt"><div class="bpSect">YOUR PHONE</div>'
-      +'<div class="stadWhat">'+BLD_WHAT.market+'</div><div class="stadWhat">'+(d.story&&d.story.phone===1?'It’s ringing: answer it.':'It hasn’t rung yet: it will when the transfer window opens.')+'</div></div></div>';
-    const need=clubNeed(id,1), lock=lvOf(d,'club')<need, c=bldCost(id,1), ok=(d.budget||0)>=c;
-    let h='<div class="bpBuild fitWhole">'+(id==='market'?'<div class="bpPhone">'+PHONE_SVG+'</div>':bldPic(d,CAMPUS_META.bld[id],'b:'+id))+'<div class="bpBuildTxt"><div class="bpSect">'+(lock?'NEEDS '+CLUB_LV[need].n.toUpperCase()+' · CLUBHOUSE '+need:'NOT BUILT YET')+'</div>'
-      +'<div class="stadWhat">'+BLD_WHAT[id]+'</div>';
-    h+=lock?pathHtml(d,id,1,capFirst(BLD_NAME[id]))   // (v153: THE WAY TO IT)
-      :finRow('It costs',money(c),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,ok?'var(--good)':'var(--bad)');
-    h+='</div></div>';
-    return h+(lock?'<button class="mgBtn bpPin" data-mg="goclub">◀ THE CLUBHOUSE</button>'
-      :'<button class="mgBtn go bpPin" data-mg="up" data-b="'+id+'"'+(ok?'':' disabled')+'>'+(id==='market'?'GET ON IT':'BUILD IT')+' — '+money(c)+'</button>'); }
+  function mgBuildBody(d,id){ if(id==='market') return '<div class="bsWrap fitWhole"><div class="bpPhone">'+PHONE_SVG+'</div><div class="bsMain"><div class="clId"><b class="clName" data-xpl="'+xq(BLD_WHAT.market)+'">YOUR PHONE</b>'
+      +(d.story&&d.story.phone===1?'<span class="clChip warn" data-xpl="It’s ringing: answer it.">RINGING</span>':'<span class="clChip dim" data-xpl="It hasn’t rung yet: it will when the transfer window opens.">NOT YET</span>')+'</div></div></div>';
+    return bldScreen(d,id,BS[id]); }   // (v173: J4 -- what it does at level 1, its levels, the clubhouse it waits for or BUILD IT; it was a paragraph and THE WAY TO IT)
   // the levels of a building, a line each: what each brings, the one it's at lit, the clubhouse a later one needs
-  function lvlRows(d,id,max,what){ const L=lvOf(d,id); let h='<div class="bpLvl">';
-    for(let k=1;k<=max;k++){ const need=clubNeed(id,k), lock=k>L&&lvOf(d,'club')<need;
-      h+='<b class="'+(k===L?'now':'')+'">'+(k===L?'▶ ':'')+'LEVEL '+k+'</b><span class="'+(k===L?'now':'')+'">'+what(k)+(lock?' · clubhouse '+need:'')+'</span>'; }
-    return h+'</div>'; }
   // its next level: what it costs and the button (or why not)
-  function lvlNext(d,id,verb){ const L=lvOf(d,id); if(L>=bldMax(id)) return '<div class="stadWhat">It’s as good as it gets.</div>';
-    const c=bldCost(id,L+1), why=bldBlock(d,id);
-    return finRow('Level '+(L+1)+' costs',money(c),true,'var(--ink)')+finRow('Your budget',money(d.budget),false,(d.budget||0)>=c?'var(--good)':'var(--bad)')
-      +(why&&/clubhouse/.test(why)?pathHtml(d,id,L+1,'Level '+(L+1)):why&&!/budget/.test(why)?'<div class="stadWhat">'+why+'</div>':'')   // (v153: THE WAY TO IT)
-      +'<button class="mgBtn go bpPin" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'>'+verb+' — '+money(c)+'</button>'; }
   // ---- the clubhouse: what it is, what the next one brings, and your career ----
   // THE CLUBHOUSE (v172, the handoff's J2): the club on one screen, said in state, not sentences. On the left the club
   // now: who you are (the crest, the name, the league and where you stand in it, the season and the week); the money,
@@ -19939,23 +19923,64 @@
       +card('RECORD SIGNING',R.fp,R.fp&&kPrice(R.fp.fee),R.fp&&sur(R.fp),R.fp&&'The record signing: '+R.fp.name+', '+money(R.fp.fee)+'.','with your first fee paid')
       +card('RECORD SALE',R.fs,R.fs&&kPrice(R.fs.fee),R.fs&&sur(R.fs),R.fs&&'The record sale: '+R.fs.name+', '+money(R.fs.fee)+'.','with your first fee taken')+'</div></div>';
     return '<div class="clGrid"><div class="clCol">'+l+'</div><div class="clCol">'+r+'</div></div>'; }
+  // A BUILDING'S SCREEN (v173, the handoff's J4): one screen for the training pitch, the physio, the scouts' network
+  // and the academy's facilities -- and for one not yet up. Its picture; its name and its level as pips (or NOT BUILT,
+  // or the clubhouse it waits for, as a chip); what it does as the numbers it changes, a tile each (o.tiles(level):
+  // [label, value, what it means]), the next level's beside each; its levels as a path (✓ done, the one it's at
+  // filled, the next with its price -- or a lock and the clubhouse it needs -- then the rest); your money against the
+  // next (or against the clubhouse it waits for) and the button. Every tile and node says the rest when tapped
+  // (o.lvl(k): what level k brings, in words); o.what, what the building is for, a tap on its name. It was a picture,
+  // rows of words, a line a level and the price over two pages
+  function bldScreen(d,id,o){ const L=lvOf(d,id), mx=bldMax(id), nx=L+1, cl=lvOf(d,'club'), b=Math.round(d.budget||0), top=L>=mx;
+    const need=top?0:clubNeed(id,nx), lock=!top&&cl<need, cost=top?0:bldCost(id,nx), why=top?null:bldBlock(d,id);
+    const pic=o.pic||bldPic(d,id==='train'?CAMPUS_META.train[Math.max(1,L)]:CAMPUS_META.bld[id],(id==='train'?'train'+Math.max(1,L):'b:'+id));
+    let h='<div class="clId"><span class="bsIco">'+bldSvg(id)+'</span><b class="clName"'+(o.what?' data-xpl="'+xq(o.what)+'"':'')+'>'+o.name+'</b>'
+      +(L?'<span class="bsPips" data-xpl="'+xq('Level '+L+' of '+mx+'.')+'">'+Array.from({length:mx},(_,k)=>'<i'+(k<L?' class="on"':'')+'></i>').join('')+'</span><span class="clChip">LEVEL '+L+' OF '+mx+'</span>'
+          :'<span class="clChip dim">NOT BUILT</span>')
+      +(lock?'<span class="clChip warn" data-xpl="'+xq((L?'Level '+nx:capFirst(BLD_NAME[id]))+' needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').')+'">NEEDS '+clubShort(need)+'</span>':'')+'</div>';
+    const now=o.tiles(Math.max(1,L)), then=top?null:o.tiles(L?nx:1);
+    h+='<div class="bsTiles" style="grid-template-columns:repeat('+(now.length>3?Math.ceil(now.length/2):now.length)+',minmax(0,1fr))">'+now.map((t,i)=>{   /* (six: three and three) */ const n=L&&then&&then[i]&&then[i][1]!==t[1]?then[i][1]:null;
+      return '<div class="clTile'+(L?'':' off')+'" data-xpl="'+xq((L?'':'At level 1: ')+t[2]+(n?' Level '+nx+': '+n+'.':''))+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b>'+(n?'<em>LEVEL '+nx+' ▸ '+n+'</em>':L?'':'<em>AT LEVEL 1</em>')+'</div>'; }).join('')+'</div>';
+    const node=k=>{ const st=k<L?'done':k===L?'now':k===nx?'next':'later', nd=clubNeed(id,k), lk=k>L&&cl<nd, c=bldCost(id,k);
+      return '<span class="clNode '+st+(lk?' lock':'')+'" data-xpl="'+xq('Level '+k+(k<=L?'':(c?', '+money(c):', free'))+': '+o.lvl(k)+'.'+(lk?' It needs clubhouse '+nd+' ('+CLUB_LV[nd].n.toLowerCase()+').':''))+'"><i>'+(st==='done'?'✓':'')+'</i><b>LEVEL '+k+'</b>'
+        +(lk?LOCK_SVG:st==='next'?'<em>'+(c?kPrice(c):'FREE')+'</em>':'')+'</span>'; };
+    h+='<div class="clPath"><span class="clLbl">LEVELS</span><div class="clNodes">'+Array.from({length:mx},(_,i)=>(i?'<s'+(i<L?' class="done"':'')+'></s>':'')+node(i+1)).join('')+'</div>';
+    if(top) h+='<div class="clGo"><em style="color:var(--good)" data-xpl="It is as good as it gets.">AS GOOD AS IT GETS</em></div>';
+    else if(lock){ const k=cl+1, C=CLUB_LV[k];   // (the clubhouse on the way: your money against it, and off to it)
+      h+='<div class="clGo"><span class="clHave" data-xpl="'+xq('First '+C.n.toLowerCase()+' (clubhouse '+k+'): '+money(C.cost)+'; you have '+money(b)+'.'+(need>k?' Then clubhouse '+need+'.':''))+'">'+pBar(b,C.cost)+'<em>'+clubShort(k)+' '+kMoney(Math.max(0,b))+' / '+kPrice(C.cost)+'</em></span>'
+        +'<button class="mgBtn" data-mg="goclub">◀ CLUBHOUSE</button></div>'; }
+    else h+='<div class="clGo"><span class="clHave" data-xpl="'+xq((L?'Level '+nx:capFirst(BLD_NAME[id]))+' costs '+money(cost)+'; you have '+money(b)+'.')+'">'+pBar(b,cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(cost)+'</em></span>'
+        +'<button class="mgBtn go" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'>'+(L?o.verb||'BUILD IT UP':'BUILD IT')+'</button></div>';
+    return '<div class="bsWrap fitWhole">'+pic+'<div class="bsMain">'+h+'</div>'+(o.extra||'')+'</div></div>'; }
+  // what each building does, level by level, as numbers (bldScreen's tiles) and in words (its nodes)
+  const BS={
+    train:{name:'TRAINING PITCH', verb:'BUILD IT UP', what:'The training pitch: each level trains everyone a little better. Every shape, style and team instruction is yours from the start.',
+      tiles:k=>[['TRAINING','×'+(0.58+0.07*k).toFixed(2),'How fast your men develop in training: ×'+(0.58+0.07*k).toFixed(2)+' (×0.86 at level 4).'],['TACTICS','ALL','Every shape, style and team instruction is yours from the start.']],
+      lvl:k=>trainAdds(k)},
+    physio:{name:'PHYSIO', verb:'BUILD IT UP', what:BLD_WHAT.physio,
+      tiles:k=>[['TIRING',PHYSIO_WEAR[k]?'−'+PHYSIO_WEAR[k]+'%':'±0','In a game they tire '+(PHYSIO_WEAR[k]?PHYSIO_WEAR[k]+'% more slowly.':'as ever.')],['HALF-TIME',PHYSIO_HT[k]+'%','At half-time '+PHYSIO_HT[k]+'% of the legs they have lost come back.'],
+        ['A DAY','+'+(COND_DAY[k]*100).toFixed(1)+'%','Between games they are '+(COND_DAY[k]*100).toFixed(1)+'% fitter a day.'],['INJURIES','−'+physFewer(k)+'%',physFewer(k)+'% fewer injuries, and lighter ones.'],
+        ['BACK SOONER',Math.round(PHYSIO_HEAL*k*100)+'%','Back from an injury '+Math.round(PHYSIO_HEAL*k*100)+'% sooner.'],['BACK FIT',Math.round((INJ_FIT+PHYSIO_FIT*k)*100)+'%','Back from one '+Math.round((INJ_FIT+PHYSIO_FIT*k)*100)+'% fit.']],
+      lvl:k=>PHYSIO_WEAR[k]+'% slower to tire, '+physFewer(k)+'% fewer injuries, back '+Math.round(PHYSIO_HEAL*k*100)+'% sooner'},
+    scouting:{name:'SCOUTS’ HOUSE', verb:'GROW IT', what:BLD_WHAT.scouting,
+      tiles:k=>[['RANGE',String(MG_SCOUT_W[k]*2),'A man you haven’t scouted shows as a range of ratings '+MG_SCOUT_W[k]*2+' wide.'],['REPORTS',k+' OF 3','A report at best: '+SCOUT_TELLS[k]+'.'],
+        ['A MAN',kPrice(MG_SCOUT_COST[1])+'+','Scouting one man costs '+money(MG_SCOUT_COST[1])+' in League 2, up to '+money(MG_SCOUT_COST[4])+' in the Premium League.']],
+      lvl:k=>'unscouted ratings within '+MG_SCOUT_W[k]*2+' points; a report at best '+SCOUT_TELLS[k]},
+    academy:{name:'ACADEMY', verb:'BUILD IT UP', what:BLD_WHAT.academy,
+      tiles:k=>[['INTAKE',String(2+k),(2+k)+' youngsters join every summer (eight at most in the academy).'],['RATED',(36+k*3)+'–'+(45+k*3),'They arrive rated '+(36+k*3)+' to '+(45+k*3)+' (2 more a league up).'],
+        ['CEILING','+14–'+(24+k*5),'Room to grow: their potential 14 to '+(24+k*5)+' over their rating.']],
+      lvl:k=>'an intake of '+(2+k)+', rated '+(36+k*3)+' to '+(45+k*3)}};
   // ---- the training pitch's level: what each brings ----
   const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
   // (v130: every shape, style and team instruction from the start -- a level trains everyone a little better, no more)
   function trainAdds(lv){ return (lv===1?'every shape, style and team instruction · ':'')+'training ×'+(0.58+0.07*lv).toFixed(2); }
-  function mgTrainTab(d){ return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.train[lvOf(d,'train')],'train'+lvOf(d,'train'))
-      +'<div class="bpBuildTxt"><div class="bpSect">THE TRAINING PITCH · LEVEL '+lvOf(d,'train')+' OF 4</div><div class="stadWhat">Each level trains everyone a little better. Every shape, style and team instruction is yours from the start.</div></div></div>'
-      +lvlRows(d,'train',4,trainAdds)+lvlNext(d,'train','BUILD IT UP'); }   // (the levels and the price over pages, if they must)
+  function mgTrainTab(d){ return bldScreen(d,'train',BS.train); }   // (v173: J4 -- it was the picture, a sentence, a line a level and the price)
   // ---- the physio ----
   // THE PHYSIO: stamina on match day (tiring more slowly through a game, more of their legs back at half-time, fitter again
   // between games) and injuries (fewer and lighter, back from one sooner and fitter: see INJURIES)
   const PHYSIO_HT=[50,60,70,78,85], PHYSIO_WEAR=[0,8,16,24,32], PHYSIO_SIM=[0,.4,.8,1.2,1.6];   // (PHYSIO_HT: v121, with half back at half-time for anyone; it was 25 to 65)
   const physFewer=L=>Math.round((1-(1.6-0.12*Math.min(10,5.5+PHYSIO_DU*L))/(1.6-0.12*5.5))*100);   // (an ordinary man's injuries, fewer by)
-  function mgPhysioBody(d){ const L=lvOf(d,'physio');
-    return '<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.bld.physio,'b:physio')+'<div class="bpBuildTxt"><div class="bpSect">THE PHYSIO · LEVEL '+L+' OF 4</div>'
-      +finRow('In a game',PHYSIO_WEAR[L]?'tiring '+PHYSIO_WEAR[L]+'% slower':'tiring as ever')+finRow('At half-time',PHYSIO_HT[L]+'% of lost legs back')+finRow('Between games',(COND_DAY[L]*100).toFixed(1)+'% fitter a day')
-      +finRow('Injuries',L?physFewer(L)+'% fewer, lighter':'as they come')+finRow('Back from one',(L?Math.round(PHYSIO_HEAL*L*100)+'% sooner, ':'')+Math.round((INJ_FIT+PHYSIO_FIT*L)*100)+'% fit')+'</div></div>'
-      +lvlRows(d,'physio',4,k=>PHYSIO_WEAR[k]+'% slower to tire · '+physFewer(k)+'% fewer injuries · back '+Math.round(PHYSIO_HEAL*k*100)+'% sooner')+lvlNext(d,'physio','BUILD IT UP'); }
+  function mgPhysioBody(d){ return bldScreen(d,'physio',BS.physio); }   // (v173: J4 -- its numbers in tiles, its levels a path; it was rows of words over two pages)
   // ---- the decorations: bought one at a time and put where you like on the lawn (not on a building, a plot or another
   // one), moved later, or put away in store. Each is [id, name, tab, price]
   const DECO_SHOP=[   // (v149: the real game's money -- each 50/3 of what it was: $2,500 to $200,000)
@@ -20310,29 +20335,23 @@
     return mgPanes(plHead(h,'ASKING',true,true)+'<div class="mgList plList plOther">'+L.map(f=>mgRow(d,f.p,{ovr:String(f.p.ovr), pot:potTxt(d,f.p,f,true), club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
       right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
       MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
-  function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes.</div>';
-    for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · '+money(c)+' EACH</div><div class="mgBtns">';
-      for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>';
-      h+='</div>'; }
-    return h; }
+  // SEND THE SCOUTS ROUND A LEAGUE (v173, J4): the four leagues a row each, its price by it, a button for each line --
+  // what it does a tap on its name (it was a paragraph, and the leagues over two pages)
+  function mgAssignTab(d){ const L=lvOf(d,'scouting');
+    let h='<div class="clId"><span class="bsIco">'+bldSvg('scouting')+'</span><b class="clName" data-xpl="'+xq('Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes (level '+L+').')+'">ASSIGNMENTS</b>'
+      +'<span class="clChip" data-xpl="'+xq('Reports go as far as your scouts’ house: level '+L+' of 3.')+'">REPORTS TO LEVEL '+L+'</span></div><div class="bsAssign">';
+    for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<span class="clLbl" data-xpl="'+xq('Every man in one position in '+MG_LEAGUE[t]+': '+money(c)+'.')+'">'+MG_LEAGUE[t].toUpperCase()+'<b>'+kPrice(c)+' EACH</b></span>';
+      for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>'; }
+    return '<div class="bsWrap fitWhole"><div class="bsMain">'+h+'</div></div></div>'; }
   const SCOUT_TELLS={1:'his rating; where he could get to',2:'his potential within ten; his character',3:'his potential within six; more of him'};
-  function mgNetworkTab(d){ const L=lvOf(d,'scouting'); let h=finRow('Scouting network','level '+L+' of 3',true)+finRow('Unscouted ratings are within',MG_SCOUT_W[L]*2+' points')
-      +finRow('Reports, at best',SCOUT_TELLS[L]||'—');
-    if(L<3){ const c=bldCost('scouting',L+1), need=clubNeed('scouting',L+1), why=bldBlock(d,'scouting');
-      if(lvOf(d,'club')<need) h+='<div class="stadWhat">Level '+(L+1)+' needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').</div>';
-      h+='<button class="stadBtn" data-mg="up" data-b="scouting"'+(why?' disabled':'')+'>Grow the network to level '+(L+1)+' (ranges of '+MG_SCOUT_W[L+1]*2+')  —  '+money(c)+'</button>'; }
-    return h+'<div class="mgHint">Scouting one player costs '+money(MG_SCOUT_COST[1])+' in League 2, rising to '+money(MG_SCOUT_COST[4])+' in the Premium League.</div>'; }
+  function mgNetworkTab(d){ return bldScreen(d,'scouting',BS.scouting); }   // (v173: J4)
 
   // ---- the academy ----
   function mgProspectsTab(d){ const Y=d.youth||[]; let h='';   // (v171: what they are, a tap on the count -- it was two lines over the list)
     if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
     return mgPanes(plHead('<div class="mgSum"><span data-xpl="Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.">'+plCount(Y.length,Y.length===1?'YOUNGSTER':'YOUNGSTERS')+'</span></div>'+h,null,false,true)+'<div class="mgList plList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:String(p.ovr), pot:potTxt(d,p,{youth:true},true), trend:true, right:null, sel:MGUI.sel===p.id})).join('')+'</div>',   // (v171: his potential a column, his age by his name -- no AGE column)
       MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
-  function mgFacilitiesTab(d){ const L=lvOf(d,'academy'); let h=finRow('Academy','level '+L+' of 3',true)+finRow('Intake every summer',(2+L)+' youngsters');
-    if(L<3){ const c=bldCost('academy',L+1), need=clubNeed('academy',L+1), why=bldBlock(d,'academy');
-      if(lvOf(d,'club')<need) h+='<div class="stadWhat">Level '+(L+1)+' needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').</div>';
-      h+='<button class="stadBtn" data-mg="up" data-b="academy"'+(why?' disabled':'')+'>Build up to level '+(L+1)+' (a bigger, better intake)  —  '+money(c)+'</button>'; }
-    return h; }
+  function mgFacilitiesTab(d){ return bldScreen(d,'academy',BS.academy); }   // (v173: J4)
 
   // ---- the newsstand ----
   function mgHeadlinesTab(d){ return (d.news||[]).slice(0,45).map(n=>'<div class="mgNews"><i>S'+n.s+' · '+mgEsc(n.w)+'</i>'+mgEsc(n.t)+'</div>').join('')||'<div class="mgHint">No news yet.</div>'; }

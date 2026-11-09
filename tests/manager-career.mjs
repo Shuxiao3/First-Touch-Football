@@ -96,14 +96,15 @@ ok(JSON.stringify(d.lv) === '{"club":1,"train":1,"physio":0,"market":0,"scouting
 for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'academy']){
   await page.click(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
   const tabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent)), chip = await page.textContent(`#chCampus [data-bldg="${b}"] .bPrice`);
-  if(b === 'market'){ const sect = await page.textContent('#bpBody .bpSect'), body = await page.textContent('#bpBody');
-    ok(!tabs.length && sect === 'YOUR PHONE' && /hasn’t rung yet: it will when the transfer window opens/.test(body) && !(await page.$('#bpFoot [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
+  if(b === 'market'){ const sect = await page.textContent('#bpBody .clName'), body = await page.$eval('#bpBody .clChip', e => e.textContent + ' ' + e.dataset.xpl);   // (v173: its state a chip, the words a tap on it)
+    ok(!tabs.length && sect === 'YOUR PHONE' && /^NOT YET /.test(body) && /hasn’t rung yet: it will when the transfer window opens/.test(body) && !(await page.$('#bpBody [data-mg="up"]')) && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
       'market: your phone, not for sale -- it hasn\'t rung yet (locked in the menu)'); }
-  else if(['physio', 'scouting', 'academy'].includes(b)){ const sect = await page.textContent('#bpBody .bpSect');
-    const sub = await page.$eval(`#chCampus [data-bldg="${b}"] .bn`, e => e.dataset.sub || ''), path = await page.$$eval('#bpBody .pathR', ns => ns.map(n => n.className.replace('pathR ', '')));   // (v153: what it waits for, and THE WAY TO IT)
-    ok(!tabs.length && /^NEEDS THE (CABIN|CLUBHOUSE) · CLUBHOUSE [23]$/.test(sect) && /^needs clubhouse [23]$/.test(sub) && path[0] === 'done' && path[1] === 'next' && path[path.length - 1] !== 'done'
-       && await page.$('#bpFoot [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
-      b + ': ' + sect.toLowerCase() + ' ("' + sub + '" in the menu), the way to it (' + path.join(', ') + '), and a way to the clubhouse'); }
+  else if(['physio', 'scouting', 'academy'].includes(b)){ const sect = await page.$$eval('#bpBody .clId .clChip', ns => ns.map(n => n.textContent).join(' · '));   // (v173: NOT BUILT, and the clubhouse it waits for, as chips)
+    const sub = await page.$eval(`#chCampus [data-bldg="${b}"] .bn`, e => e.dataset.sub || ''), path = await page.$$eval('#bpBody .clNode', ns => ns.map(n => n.className.replace('clNode ', '')));
+    const way = await page.$eval('#bpBody .clGo .clHave', e => e.textContent);
+    ok(!tabs.length && /^NOT BUILT · NEEDS (CABIN|CLUBHOUSE)$/.test(sect) && /^needs clubhouse [23]$/.test(sub) && path[0] === 'next lock' && path.slice(1).every(x => /^later/.test(x)) && /^(CABIN|CLUBHOUSE) \$/.test(way)
+       && await page.$('#bpBody .clGo [data-mg="goclub"]') && await page.$eval(`#chCampus [data-bldg="${b}"]`, e => e.classList.contains('locked')),
+      b + ': ' + sect.toLowerCase() + ' ("' + sub + '" in the menu), its levels (' + path.join(', ') + '), the clubhouse on the way against your money (' + way + '), and a way to the clubhouse'); }
   else { for(const t of tabs){ await page.click(`#bldgPanel .bpTab:text-is("${t}")`); await page.waitForTimeout(60); }
     ok(tabs.length >= 2, b + ': ' + (await page.textContent('#bpTitle')) + ' -- ' + tabs.join(', ')); }
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(50);
@@ -329,8 +330,8 @@ ok(!l1.forms.length && l1.open === nForms && nForms === 11 && !l1.styles && /GEG
   'training pitch level 1: all ' + l1.open + ' shapes and every style open from the start (v130: they were locked by its level), and every team instruction (v106, the team\'s from v112: ' + l1.instr + ')');
 ok(!l4.forms.length && l4.open === nForms && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: the same');
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); }); await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.waitForTimeout(80);
-const pitchTxt = await page.textContent('#bpBody'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
-ok(/Every shape, style and team instruction is yours from the start/.test(pitchTxt) && /training ×0\.65/.test(pitchTxt) && !/opens more shapes/.test(pitchTxt), 'the training pitch says so, and what each level trains (×0.65 at 1)');
+const pitchTxt = await page.evaluate(() => { const b = document.getElementById('bpBody'); return b.innerText.replace(/\s+/g, ' ') + ' ' + [...b.querySelectorAll('[data-xpl]')].map(e => e.dataset.xpl).join(' '); }); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);   // (v173: its numbers in tiles, its words a tap away)
+ok(/Every shape, style and team instruction is yours from the start/.test(pitchTxt) && /TRAINING ×0\.65/.test(pitchTxt) && /TACTICS ALL/.test(pitchTxt) && !/opens more shapes/.test(pitchTxt), 'the training pitch says so, and what each level trains (×0.65 at 1)');
 
 // --- WHO YOU TAKE: the training pitch's Selection tab -- the squad (twenty-one at most) as one list, wrapped in three columns:
 // the keeper and the eight on the pitch, the bench's five, the rest not taken. A bar dragged onto the pitch's part (or one

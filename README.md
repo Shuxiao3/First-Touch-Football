@@ -320,6 +320,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     brings, a season's league and finish, who holds a record and when it was set, or what sets it. (It was the
     clubhouse's picture, a paragraph on the next one, every clubhouse's unlocks in sentences, then your career, your
     seasons and the records in rows, over five pages.)
+  - **A building's screen (v173).** The training pitch (its Pitch tab), the physio, the scouts' house (Network) and
+    the academy (Facilities) each have one screen in the Clubhouse's manner, and so does a building that isn't up yet.
+    Its picture; its name and its level as pips (or NOT BUILT, and NEEDS CABIN or whichever clubhouse it waits for, on
+    a chip); what it does as the numbers it changes, a tile each, with the next level's under it -- the physio's
+    TIRING −8% (LEVEL 2 ▸ −16%), HALF-TIME 60%, A DAY +5.2%, INJURIES −13%, BACK SOONER 10% and BACK FIT 84%; the
+    training pitch's TRAINING ×0.65 and TACTICS ALL; the scouts' RANGE 8, REPORTS 1 OF 3 and what a man costs; the
+    academy's INTAKE 3, RATED 39–48 and CEILING +14–29 -- then its levels as a path (✓ done, the one it's at filled, the
+    next with its price, a lock on any its clubhouse isn't up to), your money against the next and BUILD IT UP (or,
+    while it waits, your money against the clubhouse on the way and ◀ CLUBHOUSE). Every tile and level says the rest
+    when tapped, and the name what the building is for. The scouts' Assignments are a grid, a league a row with its
+    price, a button a line. (They were a picture and rows of words, a line a level and the price at the foot, over two
+    pages; a building not up was a paragraph and THE WAY TO IT.)
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
@@ -2430,7 +2442,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
         up to 7.5% at 4; in a simulated game nothing more (v155: it was 0.4 a level on your side's rating, hidden, and no
         computer club's physio did the same -- its help is in the fitness and the injuries, as theirs is). Injuries: each level is a
         point more durability for every man (fewer and lighter: half as many with the best), 10% sooner back, and 4%
-        fitter on his return (see **Injuries**). Its screen says all of it, level by level.
+        fitter on his return (see **Injuries**). Its screen says all of it, in the numbers it changes (see **A
+        building's screen (v173)**).
       - **The scouts' house** is scouting (see **Scouting**): its level is the network's.
       - **The youth academy**: its first intake the day it opens, then one every summer; its level is its facilities'.
     - **Decorations** come with the clubhouse (level 3): DECORATE, at the campus's top, sells thirty -- thirteen
@@ -2468,8 +2481,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **A path, not a loop (v153).** A building not open yet says under its name in the list what it waits for --
       "needs clubhouse 2" (it was a lock and "2", which read as a building already at level 2) -- and the clubhouse
       what the next one costs, "next $400K", with a bar under it of your money against that. Tapped, a building
-      waiting for its clubhouse (or a level of one) has THE WAY TO IT: each clubhouse on the way, in order, then it --
-      ✓ the ones you have, ▸ the next to buy with your money against its price and a bar, · the rest with theirs.
+      waiting for its clubhouse (or a level of one) had THE WAY TO IT: each clubhouse on the way, in order, then it --
+      ✓ the ones you have, ▸ the next to buy with your money against its price and a bar, · the rest with theirs (v173:
+      its levels a path with a lock on one its clubhouse isn't up to, NEEDS CABIN on a chip, and your money against the
+      clubhouse on the way: see **A building's screen (v173)**).
       The clubhouse says what the next one UNLOCKS, and its list has each clubhouse ticked as it's done, the next lit,
       each one's price. It said the next "puts up the physio's clinic... builds up the training pitch to 2", and beside
       a level's "clubhouse 2" that read as what the clubhouse needed: a loop, the playthrough said. From the campus
@@ -2798,6 +2813,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v173: a building's screen.** The training pitch, the physio, the scouts' house and the academy, and a building not
+  yet up, on one screen each (the handoff's J4): its level as pips, what it does as the numbers it changes with the
+  next level's beside them, its levels as a path with a lock on one its clubhouse isn't up to, your money against the
+  next and the button (or against the clubhouse it waits for, and the way there). The scouts' Assignments a grid. See
+  **A building's screen (v173)**.
 - **v172: the Clubhouse on one screen.** The Club tab rebuilt (the handoff's J2): who you are, the money, the fans,
   the week's net and the dressing room as tiles; the form as dots and the next game; the six buildings as tiles with
   their levels as pips (a tap goes there; those the next clubhouse brings ringed); the clubhouse's path as nodes, your

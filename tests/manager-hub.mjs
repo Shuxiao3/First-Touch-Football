@@ -39,14 +39,19 @@ info('the rail at clubhouse 1: ' + JSON.stringify(R));
 ok(R.physio.locked && R.physio.sub === 'needs clubhouse 2' && R.scouting.sub === 'needs clubhouse 2' && R.academy.sub === 'needs clubhouse 3' && !/\d/.test(R.physio.price + R.academy.price)
    && R.club.sub === 'next $400K' && R.club.bar === '63%',
   'the rail: a locked building says what it waits for ("' + R.physio.sub + '", "' + R.academy.sub + '" -- it was a lock and "2", which read as a building at level 2); the clubhouse what the next costs ("' + R.club.sub + '"), your $250,000 a bar ' + R.club.bar + ' of the way');
-let r = await K(`(()=>{ const d=CAREER.data, rows=h=>[...h.matchAll(/<div class="pathR (\\w+)"><b>([^<]*)<\\/b><span>([^<]*)<\\/span>(?:<em>([^<]*))?/g)].map(m=>[m[1],m[2],m[3],m[4]||'']); return { acad:rows(mgBuildBody(d,'academy')), phys:rows(mgBuildBody(d,'physio')) }; })()`);
-info('the academy, the way to it: ' + JSON.stringify(r.acad));
-ok(r.acad.map(x => x[0] + ':' + x[2]).join(' | ') === 'done:The shed · clubhouse 1 | next:The cabin · clubhouse 2 | later:The clubhouse · clubhouse 3 | later:The youth academy'
-   && r.acad[1][3] === '$250,000 of $400,000' && r.acad[2][3] === '$2,000,000' && r.acad[3][3] === '$400,000' && r.acad.map(x => x[1]).join('') === '✓▸··',
-  'a building waiting for its clubhouse: THE WAY TO IT, in order -- ✓ the shed, ▸ the cabin ($250,000 of $400,000), · the clubhouse ($2,000,000), · the academy ($400,000)');
-r = await K(`(()=>{ const d=CAREER.data, b=d.budget; d.budget=1e7; bldUp(d,'club'); bldUp(d,'physio'); bldUp(d,'physio'); d.budget=b; renderHub();
-  const h=lvlNext(d,'physio','BUILD IT UP'), rows=[...h.matchAll(/<div class="pathR (\\w+)"><b>([^<]*)<\\/b><span>([^<]*)<\\/span>/g)].map(m=>m[1]+':'+m[3]); return { rows, lv:lvOf(d,'physio') }; })()`);
-ok(r.lv === 2 && r.rows.join(' | ') === 'done:The cabin · clubhouse 2 | next:The clubhouse · clubhouse 3 | later:Level 3', 'a level waiting for its clubhouse (the physio\'s 3rd at the cabin): ' + r.rows.join(', '));
+// (v173: a building's screen -- its levels a path with a lock on a level its clubhouse isn't up to, the clubhouse it
+// waits for on a chip, your money against the next clubhouse and a way there; it was THE WAY TO IT, a list)
+const scr = k => `(h=>{ const B=document.createElement('div'); B.innerHTML=h; const go=B.querySelector('.clGo .clHave');
+  return { chips:[...B.querySelectorAll('.clId .clChip')].map(e=>e.textContent).join(' · '), nodes:[...B.querySelectorAll('.clNode')].map(e=>e.className.replace('clNode ','')), n1:(B.querySelector('.clNode.next')||{dataset:{}}).dataset.xpl||'',
+    go:go&&go.textContent, gox:go&&go.dataset.xpl, club:!!B.querySelector('.clGo [data-mg="goclub"]'), up:!!B.querySelector('[data-mg="up"]') }; })(${k})`;
+let r = await K(`(()=>{ const d=CAREER.data; return { acad:${scr("mgBuildBody(d,'academy')")} }; })()`);
+info('the academy, waiting: ' + JSON.stringify(r.acad));
+ok(r.acad.chips === 'NOT BUILT · NEEDS CLUBHOUSE' && r.acad.nodes.join(' | ') === 'next lock | later lock | later lock' && /^Level 1, \$400,000: .*It needs clubhouse 3 \(the clubhouse\)\.$/.test(r.acad.n1)
+   && r.acad.go === 'CABIN $250K / $400K' && r.acad.gox === 'First the cabin (clubhouse 2): $400,000; you have $250,000. Then clubhouse 3.' && r.acad.club && !r.acad.up,
+  'a building waiting for its clubhouse: NEEDS CLUBHOUSE, its levels locked, level 1 its price and the clubhouse it needs a tap away; the cabin first, your money against it ($250K of $400K), then clubhouse 3; ◀ CLUBHOUSE, no BUILD IT');
+r = await K(`(()=>{ const d=CAREER.data, b=d.budget; d.budget=1e7; bldUp(d,'club'); bldUp(d,'physio'); bldUp(d,'physio'); d.budget=b; renderHub(); return { lv:lvOf(d,'physio'), s:${scr("mgPhysioBody(d)")} }; })()`);
+ok(r.lv === 2 && r.s.chips === 'LEVEL 2 OF 4 · NEEDS CLUBHOUSE' && r.s.nodes.join(' | ') === 'done | now | next lock | later lock' && /^CLUBHOUSE \$[\d.]+[KM]? \/ \$2M$/.test(r.s.go) && /^First the clubhouse \(clubhouse 3\): \$2,000,000; you have \$/.test(r.s.gox) && r.s.club && !r.s.up,
+  'a level waiting for its clubhouse (the physio\'s 3rd at the cabin): ' + r.s.nodes.join(', ') + ', the clubhouse on the way (' + r.s.go + ')');
 R = await rail();
 ok(!R.physio.locked && R.physio.sub === '' && R.scouting.price === '$200K' && R.academy.sub === 'needs clubhouse 3' && R.club.sub === 'next $2M', 'at the cabin: the scouts\' house its price ($200K), the academy still "needs clubhouse 3", the clubhouse "next $2M"');
 r = await K(`(()=>{ const d=CAREER.data; curTab.club='Club'; openBuilding('club'); const B=document.getElementById('bpBody');

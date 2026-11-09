@@ -64,7 +64,7 @@ r = await K(`(()=>{ const d=CAREER.data, p=XP(); delete p.injB; delete p.cond; c
 info('the physio: ' + JSON.stringify(r));
 ok(r.R.every((v, i) => !i || v < r.R[i - 1]) && Math.abs(r.ratio - 0.49) < 0.02, 'each physio level is a point more durability for everyone: an ordinary man\'s risk a game ' + r.R.join('%, ') + '% at levels 0 to 4 (half at the best)');
 ok(r.s4 < r.s0 * 0.8 && r.b0 === 0.8 && r.b4 === 0.96 && r.cap === 10, 'lighter too (a tear or worse ' + r.s0 + '% of the time with none, ' + r.s4 + '% with the best), and back fitter (' + r.b0 + ', ' + r.b4 + ' with the best); nobody past 10');
-ok(/In a game tiring 16% slower/.test(r.screen) && /Injuries \d+% fewer, lighter/.test(r.screen) && /Back from one 20% sooner, 88% fit/.test(r.screen), 'the physio\'s screen says what it does: ' + r.screen.slice(r.screen.indexOf('THE PHYSIO'), r.screen.indexOf('THE PHYSIO') + 190));
+ok(/TIRING −16%/.test(r.screen) && /INJURIES −\d+%/.test(r.screen) && /BACK SOONER 20%/.test(r.screen) && /BACK FIT 88%/.test(r.screen), 'the physio\'s screen says what it does, in the numbers it changes (v173): ' + r.screen.slice(r.screen.indexOf('PHYSIO'), r.screen.indexOf('PHYSIO') + 190));
 
 // --- late in a career: a bad one takes something off his legs, and they go sooner ------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, a=XP(30), b=XCL(a), a0=devUnpack(a.at), K4=['speed','acceleration','agility','stamina'];

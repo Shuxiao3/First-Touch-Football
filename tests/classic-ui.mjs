@@ -154,20 +154,20 @@ for(const [w, h] of SIZES){
   for(const b of ['club', 'train', 'stadium', 'market', 'physio', 'scouting', 'academy']){
     await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
     let tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent));
-    if(!tabs.length && await page.$('#bpFoot [data-mg="goclub"]')){   // (not yet: what it is, the clubhouse it needs -- then the clubhouse built up to it)
-      await check(b + ' / waits for its clubhouse', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="goclub"]']);
+    if(!tabs.length && await page.$('#bpBody .clGo [data-mg="goclub"]')){   // (not yet: what it is, the clubhouse it needs -- then the clubhouse built up to it; v173: ◀ CLUBHOUSE on its screen)
+      await check(b + ' / waits for its clubhouse', ['.bpTopBack', '#bpBody', '#bpBody .clGo [data-mg="goclub"]', '#bpBody .bsTiles', '#bpBody .clNodes']);
       await page.evaluate(() => { const M = window.__MG, d = M.d; d.budget = 1e9; d.top = 4; while(M.lvOf(d, 'club') < 4) M.bldUp(d, 'club'); M.mgSave(d); M.renderHub(); });
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80); }
-    if(!tabs.length && await page.$('#bpFoot [data-mg="up"]') && !(await page.$('#bpBody .bpLvl'))){   // (one to buy: what it'd cost, BUILD IT -- then its own screen)
-      await check(b + ' / to buy', ['.bpTopBack', '#bpBody', '#bpFoot [data-mg="up"]']);
-      await page.evaluate(() => { window.__MG.d.budget = 1e9; }); await page.tap('#bpFoot [data-mg="up"]'); await page.waitForTimeout(150);
+    if(!tabs.length && await page.$('#bpBody .clGo [data-mg="up"]') && await page.$('#bpBody .clChip.dim')){   // (one to buy: NOT BUILT, what it'd do, BUILD IT -- then its own screen)
+      await check(b + ' / to buy', ['.bpTopBack', '#bpBody', '#bpBody .clGo [data-mg="up"]', '#bpBody .bsTiles']);
+      await page.evaluate(() => { window.__MG.d.budget = 1e9; }); await page.tap('#bpBody .clGo [data-mg="up"]'); await page.waitForTimeout(150);
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
     if(!tabs.length && b === 'market'){   // (your phone, before it rings: what it's for -- then the call, and its tabs)
       await check(b + ' / before the call', ['.bpTopBack', '#bpBody']);
       await page.evaluate(() => { const M = window.__MG; M.mgMarketOpen(M.d); M.mgSave(M.d); M.renderHub(); });
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap(`#chCampus [data-bldg="${b}"]`); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
       tabs = await page.$$eval('#bpTabs .bpTab', ns => ns.map(n => n.textContent)); }
-    if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn']);
+    if(!tabs.length) await check(b, ['.bpTopBack', '#bpBody', '.mgPager', '#bpFoot .mgBtn', '#bpBody .clGo .mgBtn', '#bpBody .bsTiles']);
     for(const t of tabs){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(80);
       await check(b + ' / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.mgPager', '.tbTop .tbDrop', '.tbBest', '.tbBench', '.selRow']); }
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
