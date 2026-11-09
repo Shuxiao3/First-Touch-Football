@@ -65,7 +65,7 @@ await page.click('#pauseMenu [data-pause="back"]'); await page.waitForTimeout(20
 // --- THE QUICK SUBS: anyone, tired or not -----------------------------------------------------------------------------------------
 await K(`(()=>{ for(const p of players) if(p.team==='G'){ p.staminaCap=1; p.stamina=1; } QS.open=true; qsRender(qsSuggest()); return 1; })()`);
 r = await page.innerText('#qsDrop');
-ok(/any change, any time/.test(r) && /ALL SUBS/.test(r), 'the quick subs with nobody tired: "' + r.split('\n')[0] + '" -- and ALL SUBS (any man off)');
+ok(/any change from ALL SUBS/.test(r) && /ALL SUBS/.test(r), 'the quick subs with nobody tired: "' + r.split('\n')[0] + '" -- and ALL SUBS (any man off; v179: at the next break in play, not "any time")');
 await K(`(()=>{ QS.open=false; qsRender(qsSuggest()); return 1; })()`);
 
 // --- THE TIPS: the first time each comes up ------------------------------------------------------------------------------------

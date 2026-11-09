@@ -20,7 +20,7 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
 patch('\n    draw();\n', '\n    if(!window.__noDraw) draw();\n');
 patch('      if(p===controlled){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }', '      if(p===controlled&&!window.__aiAll){ if(!skillStep(p,dt)) stepOutfield(p,hi.ix,hi.iy,dt); }');
 patch('carry(p,dt,p===controlled?(hi.ix||hi.iy):true)', 'carry(p,dt,(p===controlled&&!window.__aiAll)?(hi.ix||hi.iy):true)');
-patch("  function obExec(p,o,C){\n    const ob=p.ob;", "  function obExec(p,o,C){\n    if(window.__obl&&o.kind==='pass') window.__obl.push({t:p.team, f:C.atk*(o.tx-p.x)/OBM, u:C.u/FW, s:simNow});\n    const ob=p.ob;");
+patch("  function obExec(p,o,C,ft){   // (ft: struck first time, still getting it under control -- see onBall's looking)\n    const ob=p.ob;", "  function obExec(p,o,C,ft){\n    if(window.__obl&&o.kind==='pass') window.__obl.push({t:p.team, f:C.atk*(o.tx-p.x)/OBM, u:C.u/FW, s:simNow});\n    const ob=p.ob;");
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-forward-')), 'classic.html');
 writeFileSync(copy, src);
 
