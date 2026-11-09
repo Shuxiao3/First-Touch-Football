@@ -244,6 +244,31 @@ for(const [w, h] of SIZES){
       await page.evaluate(n0 => { const M = window.__MG, d = M.d; d.lineup = null; d.roster.splice(n0); M.mgSave(d); M.renderHub(); }, n0);
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   }
+  { // THE CLUBHOUSE ON ONE SCREEN (v172: the handoff's J2) -- its Club tab at every size: no pages and nothing off the
+    // screen; who you are (the crest, the name, the league and the place, the season), BANK, FANS, the week's net and
+    // MORALE, five form dots and the next game, the six buildings with their levels as pips, the clubhouse's four as
+    // nodes with your money against the next and MOVE IN, three career numbers, a chip a season, the seven records --
+    // no words longer than a label, and every figure a tap from its sentence
+    const lv0 = await page.evaluate(() => { const d = __MG.d, v = d.lv.club; d.lv.club = 1; __MG.mgSave(d); return v; });   // (at the shed: the hall's after, as an earlier scene left it)
+    await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Club")'); await page.waitForTimeout(150);
+    const club = () => page.evaluate(() => { const B = document.getElementById('bpBody'), br = B.getBoundingClientRect(), q = s => [...B.querySelectorAll(s)];
+      const out = q('.clGrid *').filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && (r.bottom > br.bottom + 1 || r.right > br.right + 1 || r.top < br.top - 1 || r.left < br.left - 1); }).map(e => e.className).slice(0, 3);
+      const long = q('.clGrid *').filter(e => !e.children.length && !e.closest('.clName') && e.textContent.trim().length > 24).map(e => e.textContent.trim());
+      return { paged: !!B.querySelector('.fitPager'), out, long, id: !!B.querySelector('.clId .clCrest[src]') && !!B.querySelector('.clName') && q('.clId .clChip').length === 2 && !!B.querySelector('.clWk'),
+        tiles: q('.clTile .clLbl').map(e => e.textContent).join(' '), dots: q('.clDots i').length, next: !!B.querySelector('.clNext'),
+        campus: q('.clCampus .clB').map(e => e.dataset.b + ':' + e.querySelectorAll('.clPips i').length).join(' '), nodes: q('.clNode').map(e => e.className.replace('clNode ', '')).join(' '),
+        go: !!B.querySelector('.clGo .pBar') && !!B.querySelector('.clGo [data-mg="up"][data-b="club"]'), best: (B.querySelector('.clGo') || {}).textContent, nums: q('.clNum .clLbl').map(e => e.textContent).join(' '), chips: q('.clS').length, recs: q('.clRec').length,
+        noTap: q('.clTile, .clDots, .clNext, .clNode, .clNum, .clS, .clRec, .clChip, .clWk, .clHave').filter(e => !e.dataset.xpl).map(e => e.className) }; });
+    const c = await club();
+    await page.evaluate(lv => { const d = __MG.d; d.lv.club = lv; __MG.mgSave(d); }, lv0); await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(80); await page.tap('#bpTabs .bpTab:text-is("Club")'); await page.waitForTimeout(150);
+    const c4 = await club();
+    if(w === 844 && h === 390) info('the Clubhouse: ' + JSON.stringify(c) + ' / at clubhouse ' + lv0 + ': ' + JSON.stringify({ nodes: c4.nodes, go: c4.go, best: c4.best, paged: c4.paged, out: c4.out }));
+    ok(!c.paged && !c.out.length && c.id && c.tiles === 'BANK FANS PRE/WK MORALE' && c.dots === 5 && c.next && c.campus === 'club:4 train:4 stadium:5 physio:4 scouting:3 academy:3'
+       && c.nodes === 'now next later later' && c.go && c.nums === 'SEASONS PROMOTIONS TITLES' && c.chips === 1 && c.recs === 7 && !c.long.length && !c.noTap.length
+       && lv0 === 4 && c4.nodes === 'done done done now' && !c4.go && c4.best === 'THE BEST THERE IS' && !c4.paged && !c4.out.length,
+      w + 'x' + h + ': the Clubhouse on one screen, no pages and nothing off it -- who you are, the money, the fans, the week\'s net, the dressing room, the form and the next game, the six buildings and their levels, the clubhouse\'s path and MOVE IN, your career, a chip a season, the seven records; nothing longer than a label, every figure a tap from its sentence; in the hall, every clubhouse done and THE BEST THERE IS'
+      + (c.paged || c.out.length || c.long.length || c.noTap.length ? ' -- ' + JSON.stringify({ paged: c.paged, out: c.out, long: c.long, noTap: c.noTap }) : ''));
+    await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)

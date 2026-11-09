@@ -1550,6 +1550,70 @@
   .plFade{ position:absolute; left:0; right:2px; bottom:0; height:30px; pointer-events:none; background:linear-gradient(to bottom, transparent, var(--win) 80%); display:flex; justify-content:center; align-items:flex-end; padding-bottom:4px; }
   .plFade.end{ display:none; }
   .plMore{ font-size:8px; letter-spacing:1px; color:var(--ink); background:var(--row); border-radius:9px; padding:1px 8px; box-shadow:inset 0 0 0 1px var(--well); font-weight:400; }
+  /* THE CLUBHOUSE ON ONE SCREEN (v172, the handoff's J2): two columns -- the club now (who, the money, the fans, the
+     week's net, the dressing room, the form and the next game, the six buildings, the clubhouse's path) and the club's
+     story (your career in three numbers and a chip a season, its seven records) -- every figure a tap from its sentence */
+  #bpBody .clGrid{ display:grid; grid-template-columns:1.12fr 1fr; gap:0 14px; height:100%; min-height:0; font-size:11px; line-height:1.2; color:var(--ink2); }
+  #bpBody .clCol{ display:flex; flex-direction:column; gap:6px; min-width:0; min-height:0; }
+  #bpBody .clGrow{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }   /* (the campus and the records take what height there is to spare) */
+  #bpBody .clGrow > .clRecs{ flex:1 1 auto; min-height:0; grid-auto-rows:minmax(0,1fr); }
+  #bpBody .clCol:first-child{ justify-content:space-between; }   /* (the club now, spread down the screen's height) */
+  #bpBody .clCampus{ height:60px; grid-auto-rows:minmax(0,1fr); } #bpBody .clB{ justify-content:center; }
+  #bpBody .clRecs{ max-height:176px; } #bpBody .clRec{ justify-content:center; }
+  #bpBody .clLbl{ display:block; font-size:7px; letter-spacing:.9px; color:var(--dim2); font-style:normal; }
+  #bpBody .clId{ display:flex; align-items:center; gap:6px; min-width:0; height:22px; }
+  #bpBody .clCrest{ width:22px; height:22px; flex:none; image-rendering:pixelated; }
+  #bpBody .clName{ flex:0 1 auto; min-width:0; font-size:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clChip{ flex:none; font-size:8px; letter-spacing:.6px; padding:2px 5px; border-radius:4px; color:var(--acc); background:rgb(var(--accRGB) / .12); white-space:nowrap; }
+  #bpBody .clWk{ margin-left:auto; flex:none; font-size:8px; letter-spacing:.6px; color:var(--dim); white-space:nowrap; }
+  #bpBody .clTiles{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+  #bpBody .clTile, #bpBody .clNum, #bpBody .clRec{ min-width:0; border-radius:var(--rS,4px); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well); }
+  #bpBody .clTile{ padding:3px 6px 5px; }
+  #bpBody .clTile b{ display:block; font-size:13px; font-weight:400; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clTile b .trend{ font-size:9px; vertical-align:2px; }
+  #bpBody .clSeg{ display:inline-flex; gap:1px; margin-right:4px; vertical-align:1px; } #bpBody .clSeg s{ width:3px; height:9px; background:var(--well); text-decoration:none; } #bpBody .clSeg s.on{ background:currentColor; }
+  #bpBody .clForm{ display:flex; align-items:center; gap:6px; height:16px; white-space:nowrap; }
+  #bpBody .clForm .clLbl{ display:inline; }
+  #bpBody .clDots{ display:inline-flex; gap:3px; margin-right:6px; } #bpBody .clDots i{ width:8px; height:8px; border-radius:50%; background:var(--well); }
+  #bpBody .clDots i.W{ background:var(--good); } #bpBody .clDots i.D{ background:var(--warn); } #bpBody .clDots i.L{ background:var(--bad); }
+  #bpBody .clNext{ font-size:10px; font-weight:400; color:var(--ink); } #bpBody .clNext em{ font-style:normal; font-size:8px; color:var(--dim); margin-left:3px; }
+  #bpBody .clCampus{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; }
+  #bpBody .clB{ position:relative; min-width:0; min-height:0; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 1px 5px; border:0; border-radius:var(--r); cursor:pointer;
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font:inherit; }
+  #bpBody .clB svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
+  #bpBody .clB b{ font-size:7px; letter-spacing:.3px; font-weight:400; color:inherit; white-space:nowrap; }
+  #bpBody .clPips{ display:flex; gap:2px; } #bpBody .clPips i{ width:4px; height:4px; background:rgb(0 0 0 / .3); } #bpBody .clPips i.on{ background:currentColor; }
+  #bpBody .clB.on{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #bpBody .clB.lock{ opacity:.45; } #bpBody .clB .lkI{ position:absolute; top:3px; right:3px; }
+  #bpBody .clB.nx::after{ content:''; position:absolute; inset:-3px; border:1px dashed var(--acc); border-radius:calc(var(--r) + 2px); pointer-events:none; }
+  #bpBody .clPath{ display:flex; flex-direction:column; gap:4px; }
+  #bpBody .clNodes{ display:flex; align-items:flex-start; padding:0 2px; }
+  #bpBody .clNode{ flex:none; width:60px; display:flex; flex-direction:column; align-items:center; gap:1px; text-align:center; }
+  #bpBody .clNode i{ width:13px; height:13px; border-radius:50%; font-style:normal; font-size:8px; line-height:13px; color:var(--good); box-shadow:inset 0 0 0 2px var(--well); }
+  #bpBody .clNode.done i{ box-shadow:inset 0 0 0 2px var(--good); }
+  #bpBody .clNode.now i{ background:var(--acc); box-shadow:0 0 0 2px rgb(var(--accRGB) / .35); }
+  #bpBody .clNode.next i{ box-shadow:inset 0 0 0 2px var(--acc); }
+  #bpBody .clNode b{ font-size:7px; letter-spacing:.3px; font-weight:400; color:var(--ink2); white-space:nowrap; }
+  #bpBody .clNode.now b{ color:var(--acc); } #bpBody .clNode em{ font-style:normal; font-size:8px; color:var(--warn); }
+  #bpBody .clNode.later{ opacity:.45; }
+  #bpBody .clNodes s{ flex:1 1 0; height:2px; margin-top:6px; background:var(--well); text-decoration:none; } #bpBody .clNodes s.done{ background:var(--good); }
+  #bpBody .clGo{ display:flex; align-items:center; gap:8px; min-height:26px; }
+  #bpBody .clGo .clHave{ flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:8px; }
+  #bpBody .clGo .pBar{ flex:1 1 auto; width:auto; height:6px; margin:0; } #bpBody .clGo em{ font-style:normal; font-size:9px; white-space:nowrap; color:var(--ink2); }
+  #bpBody .clGo .mgBtn{ flex:none; min-height:26px; padding:2px 12px; font-size:10px; }
+  #bpBody .clCareer{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
+  #bpBody .clNum{ padding:2px 6px 4px; text-align:center; } #bpBody .clNum b{ display:block; font-size:18px; font-weight:400; line-height:1.15; color:var(--acc); }
+  #bpBody .clSeasons{ display:flex; gap:3px; overflow:hidden; height:16px; }
+  #bpBody .clS{ flex:none; font-size:8px; letter-spacing:.4px; line-height:12px; padding:2px 5px 1px; border-radius:4px; color:var(--ink2); box-shadow:inset 0 0 0 1px var(--well); white-space:nowrap; }
+  #bpBody .clS.up{ color:var(--good); } #bpBody .clS.dn{ color:var(--bad); } #bpBody .clS.live{ color:var(--acc); background:rgb(var(--accRGB) / .12); box-shadow:inset 0 0 0 1px var(--acc); }
+  #bpBody .clRecs{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; }
+  #bpBody .clRec{ padding:2px 6px 4px; display:flex; flex-direction:column; }
+  #bpBody .clRec span{ display:flex; align-items:baseline; gap:6px; min-width:0; }
+  #bpBody .clRec b{ flex:none; font-size:13px; font-weight:400; color:var(--ink); }
+  #bpBody .clRec em{ flex:0 1 auto; min-width:0; font-style:normal; font-size:8px; letter-spacing:.3px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clRec.none b{ color:var(--dim2); }
+  #bpBody .clGrid [data-xpl]{ cursor:help; }
+  @media (max-width:720px){ #bpBody .clGrid{ gap:0 10px; } #bpBody .clNode{ width:50px; } #bpBody .clB b{ font-size:6.5px; letter-spacing:0; } #bpBody .clTile{ padding:3px 4px 5px; } #bpBody .clTile b{ font-size:12px; } }
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
   .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
@@ -16610,12 +16674,6 @@
   function recFee(d,k,p,fee){ const R=d.rec=d.rec||{}; if(!(fee>0)||(R[k]&&fee<=R[k].fee)) return; const had=R[k]; R[k]={name:p.name,fee,s:d.season};
     if(had&&recNews(d)) mgNews(d,'A club record: '+(k==='fp'?'the most '+d.clubName+' have ever paid':'the most '+d.clubName+' have ever been paid')+', '+money(fee)+' for '+p.name+'.'); }
   // (v157) an empty record says what sets it -- it was a wall of dashes
-  function mgRecordsHtml(d){ const R=d.rec||{}, yet=t=>'<span style="color:var(--dim)">'+t+'</span>', who=(x,v,t)=>x?mgEsc(x.name)+' · '+v:yet(t);
-    return '<div class="bpSect">CLUB RECORDS</div>'+(Object.keys(R).length?'':'<div class="mgHint">Records are set in your games and the market: the first of each comes with your first game, goal, win, signing and sale.</div>')
-      +finRow('Most games',who(R.ap,R.ap&&R.ap.n,'after your first game'),false,'var(--ink)')+finRow('Most goals',who(R.gl,R.gl&&R.gl.n,'your first goal'),false,'var(--ink)')
-      +finRow('Youngest to play',who(R.yd,R.yd&&R.yd.age+' (S'+R.yd.s+')','after your first game'),false,'var(--ink)')+finRow('Youngest to score',who(R.ys,R.ys&&R.ys.age+' (S'+R.ys.s+')','your first goal'),false,'var(--ink)')
-      +finRow('Biggest win',R.bw?R.bw.gf+'–'+R.bw.ga+' v '+mgEsc(R.bw.opp)+' (S'+R.bw.s+')':yet('your first win'),false,'var(--ink)')
-      +finRow('Record signing',who(R.fp,R.fp&&money(R.fp.fee),'your first fee paid'),false,'var(--ink)')+finRow('Record sale',who(R.fs,R.fs&&money(R.fs.fee),'your first fee taken'),false,'var(--ink)'); }
   // THE SEASON'S END, for the record: the awards -- your league's Player of the Year (v104; its Player of the Season
   // before: yours, and a prize -- see THE PLAYER OF THE MONTH), its best young player (21 or under), both from ten games
   // rated; THE GOLDEN BOOT, its top scorer, and THE GOLDEN GLOVE, the keeper with the most clean sheets from ten games
@@ -17184,6 +17242,7 @@
         for(const n of mine.scorers||[]) popBump(d,d.roster.find(p=>p.name===n),mine.win?3:1.5,1); } }   // (THE DERBY: the fans feel it more; a goal in one, they won't forget)
     const wk=g.kind==='cup'?applyCupGame(d,mine):applyWeek(d,mine), budAfter=d.budget;
     const rep={g,mine,wk,budAfter,posBefore,posAfter:mgPos(d),loyDelta:Math.round(d.loyalty||0)-loyBefore,budBefore,live:!!score,inj:INJ_NOW.slice(),rat:RAT_NOW.slice().sort((a,b)=>b.r-a.r)};
+    if(mine) d.loyD=rep.loyDelta;   // (v172: the fans your last game won or lost -- the Clubhouse's ▲ ▼)
     if(mine) mgNews(d,g.label+': '+d.clubName+' '+mine.you+'–'+mine.them+' '+mgNameOf(d,mine.opp)+(mine.home?'':' (away)')+(mine.pens?(mine.through?', won on penalties':', lost on penalties'):'')+'.');
     if(g.kind==='league') mgAfterRound(d); else if(g.kind==='playoff') mgAfterPlayoffRound(d);
     mgAfterGame(d,g);
@@ -19820,19 +19879,66 @@
       +(why&&/clubhouse/.test(why)?pathHtml(d,id,L+1,'Level '+(L+1)):why&&!/budget/.test(why)?'<div class="stadWhat">'+why+'</div>':'')   // (v153: THE WAY TO IT)
       +'<button class="mgBtn go bpPin" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'>'+verb+' — '+money(c)+'</button>'; }
   // ---- the clubhouse: what it is, what the next one brings, and your career ----
-  function mgClubTab(d){ const L=lvOf(d,'club'), C=CLUB_LV[L], N=CLUB_LV[L+1];
-    let h='<div class="bpBuild fitWhole">'+bldPic(d,CAMPUS_META.club[L],'club'+L)+'<div class="bpBuildTxt"><div class="bpSect">'+C.n.toUpperCase()+' · CLUBHOUSE '+L+' OF 4</div>';
-    if(N){ const why=bldBlock(d,'club');
-      h+='<div class="stadWhat">Next, '+N.n.toLowerCase()+'. It unlocks '+andList(clubUnlocks(L+1))+'.</div>'
-        +finRow('It costs',money(N.cost),true,'var(--ink)')+finRow('Your budget',money(d.budget)+pBar(d.budget,N.cost),false,(d.budget||0)>=N.cost?'var(--good)':'var(--bad)')
-        +(why&&!/budget/.test(why)?'<div class="stadWhat" style="color:var(--warn)">'+why+'</div>':'')+'</div></div>'
-        +'<button class="mgBtn go bpPin" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN — '+money(N.cost)+'</button>'; }
-    else h+='<div class="stadWhat">It’s the best there is: everything’s open to you.</div></div></div>';
-    h+='<div class="bpSect">EACH CLUBHOUSE, AND WHAT IT UNLOCKS</div><div class="bpLvl">';   // (v153: ticked as they're done, the next lit, each one's price)
-    for(let k=1;k<CLUB_LV.length;k++){ const c=k<=L?'done':k===L+1?'now':'';
-      h+='<b class="'+c+'">'+(k<=L?'✓ ':k===L+1?'▸ ':'· ')+CLUB_LV[k].n.toUpperCase()+'</b><span class="'+c+'">'+(k===1?'the training pitch, the stadium to level '+STAD_CL.lastIndexOf(1):andList(clubUnlocks(k)))+(k>L?' · '+money(CLUB_LV[k].cost):'')+'</span>'; }
-    h+='</div><div class="bpSect">YOUR CAREER</div>'+mgProfileTab(d)+mgHistoryTab(d)+mgRecordsHtml(d);
-    return h; }
+  // THE CLUBHOUSE (v172, the handoff's J2): the club on one screen, said in state, not sentences. On the left the club
+  // now: who you are (the crest, the name, the league and where you stand in it, the season and the week); the money,
+  // the fans (▲ ▼ by your last game), the week's net and the dressing room as four tiles; the last five league results
+  // as dots and the next game; the six buildings as tiles -- each one's level as pips, the clubhouse lit, one not yet
+  // open dimmed with a lock, and those the next clubhouse opens or builds up ringed (a tap goes to the building) -- and
+  // the clubhouse's own path, its four as nodes (done ✓, the one you're in filled, the next with its price, the rest
+  // dim), your money against the next one's price and the button to move in. On the right the club's story: your career
+  // in three numbers and a chip a season (the season on now lit), and the club's seven records, the record first and
+  // who holds it beside it ("—" till one's set). Every tile, dot, node, chip and card says the rest when tapped
+  // (data-xpl); it was a picture, a paragraph, a list of every clubhouse in sentences and the career in rows, over five pages
+  const CL_SIX=['club','train','stadium','physio','scouting','academy'], CL_NM={club:'CLUB',train:'TRAINING',stadium:'STADIUM',physio:'PHYSIO',scouting:'SCOUTS',academy:'ACADEMY'};
+  const bldSvg=id=>{ const e=document.querySelector('#chCampus [data-bldg="'+id+'"] svg'); return e?e.outerHTML:''; };   // (the campus menu's icon)
+  const xq=t=>mgEsc(String(t)).replace(/"/g,'&quot;');   // (words for a data-xpl)
+  const kMoney=v=>{ v=Math.round(v||0); return (v<0?'−':'')+kPrice(Math.abs(v)); };
+  // which buildings a clubhouse opens or lets you build up (for the ring on their tiles)
+  function clubTouches(lv){ const o=new Set(); for(const id in BLD_LV) BLD_LV[id].forEach((x,k)=>{ if(x&&x.cl===lv&&!x.call&&!(id==='train'&&k===1)) o.add(id); });
+    if(STAD_LEVELS.some((x,k)=>k>1&&STAD_CL[k]===lv)) o.add('stadium'); return o; }
+  function mgClubTab(d){ const L=lvOf(d,'club'), N=CLUB_LV[L+1], c=d.world.clubs[d.clubId]||{}, u=crestURL(crestFor(c)), pos=mgPos(d), M=d.manager, R=d.rec||{};
+    const f=computeFinance(d), pre=d.phase==='summer'||d.phase==='winter', nv=pre?shirtSales(d).wk:f.netAvg, tm=d.tm??MOR0, fans=Math.round(d.loyalty||0), fd=d.loyD||0, b=Math.round(d.budget||0);
+    const tile=(lbl,v,x,col)=>'<div class="clTile" data-xpl="'+xq(x)+'"><i class="clLbl">'+lbl+'</i><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>';
+    let l='<div class="clId">'+(u?'<img class="clCrest" src="'+u+'" alt="">':'')+'<b class="clName">'+mgEsc(d.clubName)+'</b>'
+      +'<span class="clChip" data-xpl="'+xq(d.clubName+' play in '+MG_LEAGUE[d.tier]+'.')+'">'+MG_LEAGUE[d.tier].toUpperCase()+'</span>'
+      +'<span class="clChip" data-xpl="'+xq(d.md>0?ordinal(pos)+' in '+MG_LEAGUE[d.tier]+' after '+Math.min(d.md,MG_MD)+' of '+MG_MD+' games.':'No league games yet: the table starts with the first matchday.')+'">'+(d.md>0?ordinal(pos).toUpperCase():'—')+'</span>'
+      +'<span class="clWk" data-xpl="'+xq('Season '+d.season+' · '+mgPhaseLabel(d)+'.')+'">S'+d.season+' · '+mgWeekShort(d).toUpperCase()+'</span></div>';
+    l+='<div class="clTiles">'+tile('BANK',kMoney(b),'Budget: '+money(b)+(b<0?', in the red.':'.'),b<0?'var(--bad)':'var(--good)')
+      +tile('FANS',fans.toLocaleString()+(fd?'<i class="trend '+(fd>0?'up':'dn')+'">'+(fd>0?'▲':'▼')+'</i>':''),'Fans: '+fans.toLocaleString()+(fd?' ('+(fd>0?'+':'')+fd+' after your last game).':'.'),'var(--warn)')
+      +tile(pre?'PRE/WK':'NET/WK',(nv>=0?'+':'')+kMoney(nv),pre?'What comes in a pre-season week (the shirts): '+money(nv)+'.':'The week’s money, projected: '+(nv>=0?'+':'')+money(nv)+' on an ordinary week.',nv>=0?'var(--good)':'var(--bad)')
+      +tile('MORALE','<span class="clSeg" style="color:'+morCol(tm)+'">'+[1,2,3,4,5,6,7,8,9,10].map(k=>'<s'+(k<=Math.round(tm)?' class="on"':'')+'></s>').join('')+'</span>'+tm.toFixed(1),'The dressing room, 1 to 10: '+tmWord(tm)+' ('+tm.toFixed(1)+').')+'</div>';
+    const F=mgForm(d,5), g=mgNextGame(d), op=g&&d.world.clubs[g.opp];
+    l+='<div class="clForm"><span class="clLbl">FORM</span><span class="clDots" data-xpl="'+xq(F.length?'The last '+F.length+' league results, the latest last: '+F.join(' ')+'.':'No league results yet.')+'">'+[0,1,2,3,4].map(i=>'<i'+(F[i]?' class="'+F[i]+'"':'')+'></i>').join('')+'</span>'
+      +'<span class="clLbl">NEXT</span><b class="clNext" data-xpl="'+xq(g&&op?g.label+': '+(g.home?'at home to ':'away at ')+op.name+'.':'No game this week'+(pre?': '+(d.phase==='summer'?'pre-season':'the winter break')+'.':'.'))+'">'+(g&&op?(g.home?'vs ':'@ ')+mgEsc(op.code||op.name)+'<em>'+(g.kind==='league'?'MD '+(d.md+1):mgEsc(g.short||(g.kind==='playoff'?'PLAYOFF':'')))+'</em>':'—')+'</b></div>';
+    const nx=N?clubTouches(L+1):new Set();
+    l+='<div><span class="clLbl">CAMPUS</span><div class="clCampus">'+CL_SIX.map(id=>{ const v=lvOf(d,id), mx=bldMax(id), lock=!v&&lvOf(d,'club')<clubNeed(id,1);
+        return '<button class="clB'+(id==='club'?' on':'')+(lock?' lock':'')+(nx.has(id)?' nx':'')+'" data-mg="goto" data-b="'+id+'">'+bldSvg(id)+'<b>'+CL_NM[id]+'</b><span class="clPips">'
+          +Array.from({length:mx},(_,k)=>'<i'+(k<v?' class="on"':'')+'></i>').join('')+'</span>'+(lock?LOCK_SVG:'')+'</button>'; }).join('')+'</div></div>';
+    const node=k=>{ const st=k<L?'done':k===L?'now':k===L+1?'next':'later', C=CLUB_LV[k], un=k>1?andList(clubUnlocks(k)):'the training pitch and the stadium to level '+STAD_CL.lastIndexOf(1);
+      return '<span class="clNode '+st+'" data-xpl="'+xq(capFirst(C.n.toLowerCase())+(k<L?', done: it brought ':k===L?', yours now: it brought ':', '+money(C.cost)+': it brings ')+un+'.')+'"><i>'+(st==='done'?'✓':'')+'</i><b>'+clubShort(k)+'</b>'+(st==='next'?'<em>'+kPrice(C.cost)+'</em>':'')+'</span>'; };
+    const why=N&&bldBlock(d,'club');
+    l+='<div class="clPath"><span class="clLbl">CLUBHOUSE '+L+' OF '+(CLUB_LV.length-1)+'</span><div class="clNodes">'+CLUB_LV.slice(1).map((_,i)=>(i?'<s'+(i<L?' class="done"':'')+'></s>':'')+node(i+1)).join('')+'</div>'
+      +(N?'<div class="clGo"><span class="clHave" data-xpl="'+xq(capFirst(N.n.toLowerCase())+' costs '+money(N.cost)+'; you have '+money(b)+'. It brings '+andList(clubUnlocks(L+1))+' (ringed on the campus).')+'">'+pBar(b,N.cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(N.cost)+'</em></span>'
+          +'<button class="mgBtn go" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN</button></div>'
+         :'<div class="clGo"><em style="color:var(--good)" data-xpl="The best there is: everything is open to you.">THE BEST THERE IS</em></div>')+'</div>';
+    // the club's story
+    const H=M.history, seasons=H.length+(d.phase==='review'?0:1), num=(v,lbl,x)=>'<div class="clNum" data-xpl="'+xq(x)+'"><b>'+v+'</b><i class="clLbl">'+lbl+'</i></div>';
+    let r='<div><span class="clLbl">'+mgEsc(M.name).toUpperCase()+'</span><div class="clCareer">'+num(seasons,'SEASONS',seasons+' season'+(seasons>1?'s':'')+' in charge of '+d.clubName+'.')
+      +num(M.promotions,'PROMOTIONS',M.promotions?M.promotions+' promotion'+(M.promotions>1?'s':'')+' won.':'No promotions yet.')+num(M.titles,'TITLES',M.titles?M.titles+' league title'+(M.titles>1?'s':'')+'.':'No league titles yet.')+'</div></div>';
+    const chip=x=>'<span class="clS'+(/PROMOTED|CHAMPIONS/.test(x.result)?' up':x.result==='RELEGATED'?' dn':'')+'" data-xpl="'+xq('Season '+x.season+': '+MG_LEAGUE[x.tier]+', '+ordinal(x.pos)+(x.result?' · '+x.result.toLowerCase():'')+'.')+'">S'+x.season+' · '+ordinal(x.pos).toUpperCase()+'</span>';
+    r+='<div class="clSeasons">'+H.slice(d.phase==='review'?-6:-5).map(chip).join('')
+      +(d.phase==='review'?'':'<span class="clS live" data-xpl="'+xq('Season '+d.season+', on now: '+MG_LEAGUE[d.tier]+(d.md>0?', '+ordinal(pos)+'.':'.'))+'">S'+d.season+' · '+(d.md>0?ordinal(pos).toUpperCase():'NOW')+'</span>')+'</div>';
+    const sur=x=>mgEsc(surname(x.name)).toUpperCase();
+    const card=(lbl,x,v,who,said,yet)=>'<div class="clRec'+(x?'':' none')+'" data-xpl="'+xq(x?said:'Set '+yet+'.')+'"><i class="clLbl">'+lbl+'</i><span><b>'+(x?v:'—')+'</b><em>'+(x?who:'')+'</em></span></div>';
+    r+='<div class="clGrow"><span class="clLbl">CLUB RECORDS</span><div class="clRecs">'
+      +card('MOST GAMES',R.ap,R.ap&&R.ap.n,R.ap&&sur(R.ap),R.ap&&'Most games for the club: '+R.ap.name+', '+R.ap.n+'.','after your first game')
+      +card('MOST GOALS',R.gl,R.gl&&R.gl.n,R.gl&&sur(R.gl),R.gl&&'Most goals for the club: '+R.gl.name+', '+R.gl.n+'.','with your first goal')
+      +card('YOUNGEST',R.yd,R.yd&&R.yd.age,R.yd&&sur(R.yd)+' · S'+R.yd.s,R.yd&&'The youngest to play for the club: '+R.yd.name+', '+R.yd.age+' (season '+R.yd.s+').','after your first game')
+      +card('YOUNGEST SCORER',R.ys,R.ys&&R.ys.age,R.ys&&sur(R.ys)+' · S'+R.ys.s,R.ys&&'The youngest to score for the club: '+R.ys.name+', '+R.ys.age+' (season '+R.ys.s+').','with your first goal')
+      +card('BIGGEST WIN',R.bw,R.bw&&R.bw.gf+'–'+R.bw.ga,R.bw&&'v '+mgEsc(R.bw.opp).toUpperCase()+' · S'+R.bw.s,R.bw&&'The biggest win: '+R.bw.gf+'–'+R.bw.ga+' v '+R.bw.opp+' (season '+R.bw.s+').','with your first win')
+      +card('RECORD SIGNING',R.fp,R.fp&&kPrice(R.fp.fee),R.fp&&sur(R.fp),R.fp&&'The record signing: '+R.fp.name+', '+money(R.fp.fee)+'.','with your first fee paid')
+      +card('RECORD SALE',R.fs,R.fs&&kPrice(R.fs.fee),R.fs&&sur(R.fs),R.fs&&'The record sale: '+R.fs.name+', '+money(R.fs.fee)+'.','with your first fee taken')+'</div></div>';
+    return '<div class="clGrid"><div class="clCol">'+l+'</div><div class="clCol">'+r+'</div></div>'; }
   // ---- the training pitch's level: what each brings ----
   const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
   // (v130: every shape, style and team instruction from the start -- a level trains everyone a little better, no more)
@@ -20249,11 +20355,6 @@
     return '<div class="bpSect">'+MG_LEAGUE[d.tier].toUpperCase()+' · TOP SCORERS</div>'+(L.slice(0,12).map(([p,id],i)=>finRow((i+1)+'. '+mgEsc(p.name)+' ('+mgEsc(d.world.clubs[id].code)+')',p.goals+' goal'+(p.goals>1?'s':''),id===d.clubId,id===d.clubId?'var(--good)':'#cfe7d2')).join('')||'<div class="mgHint">Nobody has scored yet: the top scorers start with the league’s first matchday.</div>'); }
 
   // ---- your house ----
-  function mgProfileTab(d){ const M=d.manager; let h='<div class="mgCardName" style="text-align:center">'+mgEsc(M.name)+'</div><div class="mgCardSub" style="text-align:center;margin-bottom:12px">Manager of '+mgEsc(d.clubName)+'</div>';
-    h+=finRow('Seasons in charge',String(M.history.length+(d.phase==='review'?0:1)))+finRow('Promotions',String(M.promotions))+finRow('League titles',String(M.titles));
-    return h+finRow('This season',MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d))+' · form '+(mgForm(d).join(' ')||'none yet')); }
-  function mgHistoryTab(d){ const H=d.manager.history; if(!H.length) return '<div class="mgHint">Your first season is still going.</div>';
-    return '<table class="mgTbl"><thead><tr><th>S</th><th>LEAGUE</th><th>POS</th><th>RESULT</th></tr></thead>'+H.slice().reverse().map(x=>'<tr class="'+(/PROMOTED|CHAMPIONS/.test(x.result)?'up':x.result==='RELEGATED'?'dn':'')+'"><td>'+x.season+'</td><td>'+MG_LEAGUE[x.tier]+'</td><td>'+ordinal(x.pos)+'</td><td>'+x.result+'</td></tr>').join('')+'</table>'; }
 
   // ---- the end of the season ----
   function mgReviewBody(d){ const R=d.review; if(!R) return '<div class="mgHint">The season is still going.</div>';
@@ -20638,6 +20739,7 @@
         say(err||(id==='club'?'You’ve moved into '+CLUB_LV[lvOf(d,'club')].n.toLowerCase()+'.':was?BLD_NAME[id].charAt(0).toUpperCase()+BLD_NAME[id].slice(1)+' is at level '+lvOf(d,id)+'.':BLD_NAME[id].charAt(0).toUpperCase()+BLD_NAME[id].slice(1)+(id==='market'?': you’re on it.':' is open.')),err?'var(--bad)':'var(--good)');
         if(!err&&!was&&BLD_LV[id]&&MG_BLDGS[id].tabs) curTab[id]=MG_BLDGS[id].tabs[0]; break; }
       case 'goclub': openBuilding('club'); return;
+      case 'goto': if(MG_BLDGS[ds.b]) openBuilding(ds.b); return;   // (v172: a tile on the Clubhouse's campus strip)
       case 'dbuy': case 'dout': { const err=placeStart(d,ds.id,a==='dbuy'); if(err) say(err,'var(--bad)'); else return; break; }
       case 'scoutgrp': { const err=mgScoutGroup(d,+ds.t,ds.r); say(err||'Your scouts have reported back: see Reports.',err?'var(--bad)':'var(--good)'); break; }
       case 'best8': mgAutoLineup(d); statViewRi=null; say('Your best nine are picked.','var(--good)'); break;

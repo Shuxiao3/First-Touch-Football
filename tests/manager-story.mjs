@@ -200,10 +200,12 @@ ok(/A full report/.test(msg) && k3.facts.length === 4 && !k3.more && k3.fits && 
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 // the club's records, in the Clubhouse
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Club")'); await page.waitForTimeout(200);
-const club = await K(`(()=>{ const t=document.getElementById('bpBody').textContent; return t.slice(t.indexOf('CLUB RECORDS')); })()`);
-info('the Clubhouse: ' + club.slice(0, 260));
-ok(/^CLUB RECORDS/.test(club) && /Most games\s*Kit Young/.test(club) && /Biggest win\s*6–0 v \w+ \(S1\)/.test(club) && /Record signing.*\$80,000/.test(club) && /Record sale.*\$120,000/.test(club),
-  'the Clubhouse\'s CLUB RECORDS: most games, most goals, the youngest, the biggest win, the record signing and sale');
+const club = await K(`(()=>{ const o={}; for(const c of document.querySelectorAll('#bpBody .clRec')) o[c.querySelector('.clLbl').textContent]={ v:c.querySelector('b').textContent, who:c.querySelector('em').textContent, x:c.dataset.xpl }; return o; })()`);   // (v172: a card a record, J2)
+info('the Clubhouse\'s records: ' + JSON.stringify(club));
+const C = club, has = k => C[k] && C[k].v !== '—';
+ok(Object.keys(C).length === 7 && C['MOST GAMES'].who === 'YOUNG' && /^Most games for the club: Kit Young, \d+\.$/.test(C['MOST GAMES'].x) && C['BIGGEST WIN'].v === '6–0' && /^v [A-Z ]+ · S1$/.test(C['BIGGEST WIN'].who)
+   && C['RECORD SIGNING'].v === '$80K' && /\$80,000\.$/.test(C['RECORD SIGNING'].x) && C['RECORD SALE'].v === '$120K' && /\$120,000\.$/.test(C['RECORD SALE'].x) && has('MOST GOALS') && has('YOUNGEST') && has('YOUNGEST SCORER'),
+  'the Clubhouse\'s CLUB RECORDS, a card each, the record first and who holds it beside it: most games (' + C['MOST GAMES'].v + ' ' + C['MOST GAMES'].who + '), most goals, the youngest, the biggest win (6–0 ' + C['BIGGEST WIN'].who + '), the record signing ($80K) and sale ($120K), the rest a tap away');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

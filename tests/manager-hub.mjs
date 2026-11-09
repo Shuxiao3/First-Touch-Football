@@ -49,10 +49,14 @@ r = await K(`(()=>{ const d=CAREER.data, b=d.budget; d.budget=1e7; bldUp(d,'club
 ok(r.lv === 2 && r.rows.join(' | ') === 'done:The cabin · clubhouse 2 | next:The clubhouse · clubhouse 3 | later:Level 3', 'a level waiting for its clubhouse (the physio\'s 3rd at the cabin): ' + r.rows.join(', '));
 R = await rail();
 ok(!R.physio.locked && R.physio.sub === '' && R.scouting.price === '$200K' && R.academy.sub === 'needs clubhouse 3' && R.club.sub === 'next $2M', 'at the cabin: the scouts\' house its price ($200K), the academy still "needs clubhouse 3", the clubhouse "next $2M"');
-r = await K(`(()=>{ const d=CAREER.data; curTab.club='Club'; openBuilding('club'); const h=mgClubTab(d); hideBldg(); return { next:(h.match(/Next, [^<]*/)||[''])[0], each:[...h.matchAll(/<b class="(\\w*)">([^<]*)<\\/b><span class="\\w*">([^<]*)<\\/span>/g)].map(m=>m[2]+' :: '+m[3]) }; })()`);
-info('the clubhouse: ' + r.next + ' / ' + r.each.join(' / '));
-ok(/^Next, the clubhouse\. It unlocks the youth academy/.test(r.next) && !/put up|build up/.test(r.next) && /^✓ THE SHED/.test(r.each[0]) && /^✓ THE CABIN/.test(r.each[1]) && /^▸ THE CLUBHOUSE :: the youth academy.* · \$2,000,000$/.test(r.each[2]) && /^· THE HALL/.test(r.each[3]),
-  'the clubhouse says what the next UNLOCKS ("' + r.next.slice(0, 60) + '..."), each one ticked as it\'s done, the next lit with its price -- not "put up... build up the training pitch to 2", which read as what it needed');
+r = await K(`(()=>{ const d=CAREER.data; curTab.club='Club'; openBuilding('club'); const B=document.getElementById('bpBody');
+  const nodes=[...B.querySelectorAll('.clNode')].map(n=>({ st:n.className.replace('clNode ',''), t:n.textContent, x:n.dataset.xpl })), go=B.querySelector('.clGo .clHave'), btn=B.querySelector('.clGo [data-mg="up"][data-b="club"]');
+  const rings=[...B.querySelectorAll('.clB.nx')].map(e=>e.dataset.b).join(','), locks=[...B.querySelectorAll('.clB.lock')].map(e=>e.dataset.b).join(','); hideBldg();
+  return { nodes, go:go&&go.textContent, gox:go&&go.dataset.xpl, btn:!!btn, rings, locks }; })()`);   // (v172: the path as nodes, J2 -- it was "Next, ..." and a list of every clubhouse in sentences)
+info('the clubhouse: ' + JSON.stringify(r));
+ok(r.nodes.map(n => n.st + ':' + n.t).join(' | ') === 'done:✓SHED | now:CABIN | next:CLUBHOUSE$2M | later:HALL' && /^The clubhouse, \$2,000,000: it brings the youth academy/.test(r.nodes[2].x) && !/put up|build up/.test(r.nodes[2].x)
+   && /^\$[\d.]+[KM]? \/ \$2M$/.test(r.go) && /^The clubhouse costs \$2,000,000; you have \$/.test(r.gox) && r.btn && /academy/.test(r.rings) && r.locks === 'academy',
+  'the clubhouse\'s path: ✓ the shed, the cabin it\'s in, the clubhouse next with its price ($2M), the hall; tapped, what the next BRINGS ("' + r.nodes[2].x.slice(0, 60) + '..."), your money against its price and MOVE IN, and the academy it opens ringed on the campus (locked till then)');
 
 // --- WHAT'S WAITING ON YOU -----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, R=d.roster, S=d.season, c=mgAiClubs(d).find(k=>k.tier===d.tier), xi=mgStarters(d);

@@ -50,15 +50,16 @@ ok(r0.off && r0.games >= 1 && r2 === null, 'all four done: it goes by itself (' 
 
 // --- AN EMPTY SCREEN SAYS WHY --------------------------------------------------------------------------------------------------
 let r = await K(`(()=>{ const d=CAREER.data, keep=d.rec, p=d.roster.find(q=>!q.rn), strip=h=>h.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ');
-  d.rec={}; const rec=strip(mgRecordsHtml(d)); d.rec=keep; const p0=JSON.parse(JSON.stringify(d.roster[0])); delete p0.rn; delete p0.fm;
+  d.rec={}; const ch=mgClubTab(d), recs=[...ch.matchAll(/<div class="clRec none" data-xpl="([^"]*)"><i class="clLbl">([^<]*)<\\/i><span><b>([^<]*)<\\/b>/g)].map(m=>[m[2],m[3],m[1]]); d.rec=keep; const p0=JSON.parse(JSON.stringify(d.roster[0])); delete p0.rn; delete p0.fm;   // (v172: a card a record, "—" till it's set, why a tap away)
   const k=JSON.stringify(d.lg[d.tier].fx), f=d.lg[d.tier]; const saved=JSON.parse(JSON.stringify(f.fx)); for(const day of f.fx) for(const m of day){ m[2]=null; m[3]=null; }
   const fx=strip(mgFixturesTab(d)).slice(0,120); f.fx=saved;
   const sc=d.div[d.tier].flatMap(id=>mgPlayersOf(d,id)), g=sc.map(q=>q.goals); for(const q of sc) q.goals=0; const top=strip(mgScorersTab(d)); sc.forEach((q,i)=>q.goals=g[i]);
-  return { rec, dash:/ — /.test(' '+rec+' '), fx, top }; })()`);
+  return { recs, fx, top }; })()`);
 info('empty: ' + JSON.stringify(r));
-ok(!r.dash && /after your first game/.test(r.rec) && /your first win/.test(r.rec) && /your first fee paid/.test(r.rec) && /Records are set in your games and the market/.test(r.rec)
+const why = k => (r.recs.find(x => x[0] === k) || [])[2] || '';
+ok(r.recs.length === 7 && r.recs.every(x => x[1] === '—') && why('MOST GAMES') === 'Set after your first game.' && why('BIGGEST WIN') === 'Set with your first win.' && why('RECORD SIGNING') === 'Set with your first fee paid.'
    && /form none yet/.test(r.fx) && /start with the league’s first matchday/.test(r.top),
-  'an empty screen says why: the club\'s records ("after your first game", "your first win", "your first fee paid"), a season\'s form ("none yet: no games"), the top scorers -- no bare dashes');
+  'an empty screen says why: the club\'s records, "—" on each card till it\'s set and why a tap on it (v172: "Set after your first game.", "Set with your first win.", "Set with your first fee paid."), a season\'s form ("none yet: no games"), the top scorers');
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.role!=='GK'), keep=[p.rn,p.rs,p.fm]; delete p.rn; delete p.fm; mgSide='rate'; curTab.club='Squad'; openBuilding('club'); MGUI.sel=p.id; paintBuilding();
   const t=[...document.querySelectorAll('#bpBody .mgCard .mgFact')].map(e=>e.textContent).find(x=>/RATING/.test(x)); hideBldg(); [p.rn,p.rs,p.fm]=keep; return t; })()`);
 ok(/RATING · FORM\s*none yet$/.test(r), 'a man with no games: "' + r + '"');

@@ -304,6 +304,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     WKS or WINDOW SHUT, its sentence a tap on it. In the squad a finger up or down the list scrolls it and a finger
     across a man carries him to a spot on the little pitch. The academy, the scouts' reports and a market list sorted
     by POTENTIAL give his potential a column of its own, POT; the squad list doesn't show it (it's on his card).
+  - **The Clubhouse on one screen (v172).** The Clubhouse's Club tab is the club at a glance, in two columns with no
+    pages, its figures in tiles, dots, pips and chips and not a sentence among them. On the left the club now: the
+    crest, the name, the league and your place in it, the season and the week; BANK, FANS (▲ or ▼ by what your last
+    game did to them), the week's net (PRE/WK in pre-season and the winter break: the shirts) and MORALE (the dressing
+    room, ten bars and its number); the last five league results as dots and the next game (vs for a home one, @ for
+    an away one); the six buildings as tiles, each one's levels as pips, the clubhouse lit, one that isn't open yet
+    dimmed with a lock -- a tap on one goes there -- and the ones the next clubhouse opens or lets you build up ringed;
+    and the clubhouse's own path, its four as nodes (✓ the ones you've moved out of, the one you're in filled, the next
+    with its price, the rest dim), your money against the next one's price, and MOVE IN. On the right the club's
+    story: your seasons, promotions and titles as three big numbers, a chip a season (S4 · 1ST: green for a promotion
+    or a title, red for a relegation; the season on now lit), and the club's seven records, a card each, the record
+    first and who holds it beside it (212 MORLEY), "—" till one's set. Every tile, dot, node, chip and card says the
+    rest when tapped: the exact money, the fans won or lost, what the dressing room's mood means, what a clubhouse
+    brings, a season's league and finish, who holds a record and when it was set, or what sets it. (It was the
+    clubhouse's picture, a paragraph on the next one, every clubhouse's unlocks in sentences, then your career, your
+    seasons and the records in rows, over five pages.)
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
@@ -1866,7 +1882,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       and the next Monday papers. The Golden Boot or Glove one of yours: twice the month's prize ($5,000 in League 2),
       4% more fans, a lift; either way the winners are famous for it, and on the summer's first paper (THE LEAGUE).
       Any of these honours counts as a fine season when a man asks for a new deal.
-    - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS): the most games and goals for the club, the
+    - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS: a card each since v172): the most games and goals for the club, the
       youngest to play and to score, the biggest win, the record signing and sale. They're kept from your first
       season; from your second the news says when one goes (in the first, every debut would be one).
   - **The staff and training focus.**
@@ -2381,8 +2397,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       | 3 The clubhouse | $2M ($120,000) | the youth academy, decorations; the scouts', training pitch and physio to 3; the stadium to 4 |
       | 4 The hall | $8M ($450,000) | the academy to 2 and 3, the training pitch and physio to 4; the stadium to 5 |
 
-      Its screen: the next clubhouse and what it brings, then your career (your record, season by season); the
-      squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
+      Its screen: the club at a glance (v172: see **The Clubhouse on one screen (v172)**; it was the next clubhouse
+      and what it brings, then your career, season by season); the squad and their contracts (a new deal, releasing a man); the news; the league (all four tables, the top
       scorers); the fixtures (yours, then every result: a game to come has the other club's rating -- since v152 its
       best keeper and eight others' ratings, as they are, the same all week; it was its strength on the day, fitness
       and all, so a club was 50 on Monday and 51 by Saturday). Your crest is on each clubhouse, your three letters on the
@@ -2782,6 +2798,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v172: the Clubhouse on one screen.** The Club tab rebuilt (the handoff's J2): who you are, the money, the fans,
+  the week's net and the dressing room as tiles; the form as dots and the next game; the six buildings as tiles with
+  their levels as pips (a tap goes there; those the next clubhouse brings ringed); the clubhouse's path as nodes, your
+  money against the next and MOVE IN; your career in three numbers and a chip a season; the seven records a card each.
+  No pages and no sentences: each is a tap away. See **The Clubhouse on one screen (v172)**.
 - **v171: lists of players you swipe.** The squad, the market's lists, the scouts' reports and the academy are one
   list each, swiped with a finger, never pages (the coaches to hire too): a man a line (a coloured position chip, his
   name and ▲ or ▼, his age, his rating, five mood dots and a fitness bar for your own, his wage or price), an edge
