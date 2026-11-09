@@ -282,11 +282,28 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
 - **Made for a phone held sideways.** Every screen fits 844×390, 844×340 (Safari's bar showing) and 667×375 (an
   iPhone SE), and no word or number runs out of its box (checked at 640×360 up to 932×430).
-  - **Nothing scrolls.** A list or a table with more in it than fits shows a page of it, with ◀ 2 / 3 ▶ along its
-    foot; hold an arrow to flip through the pages. Pages break between rows, never through one: a list keeps its
-    filters on every page, a table keeps its head row, and a heading moves over with the rows it heads. A player's
-    card never goes over pages, anywhere: it's made to fit. Measured on a new career at 844×390: the squad over 4 pages, the transfer market's list of League 2
-    over 42 (5 to a page, the league and the positions on one line above them), the league table over 3.
+  - **Nothing scrolls -- but a list of players (v171).** A list or a table with more in it than fits shows a page of
+    it, with ◀ 2 / 3 ▶ along its foot; hold an arrow to flip through the pages. Pages break between rows, never through
+    one: a table keeps its head row, and a heading moves over with the rows it heads. A player's card never goes over
+    pages, anywhere: it's made to fit. Measured on a new career at 844×390: the league table over 3. (Until v171 the
+    lists of players went over pages too: the squad over 4, the market's list of League 2 over 42.)
+  - **A list of players you swipe (v171).** The squad, the market's search, free agents and selling list, the scouts'
+    reports and the academy are one list each, moved up and down with a finger -- never pages, never a button to see
+    more (the coaches you can hire scroll the same way). A man is one line: his position in a coloured chip (keepers yellow, defenders
+    blue, midfielders green, forwards red), his name with ▲ or ▼ if he's on the way up or down, his age (and his club,
+    if he isn't yours), his rating, then for your own men five mood dots and a thin fitness bar, and his wage or
+    price. A coloured edge on the left marks your starting nine (a fainter one the subs), a man away on loan and a man
+    on the transfer list. Words only when there's something to do about him, two at most and coloured: DEAL ENDS, NEW
+    DEAL, UNSETTLED, BUYBACK, WANTED, OUT 3W. The line over the list -- how many are in it and, in the squad, the
+    wage bill and how many deals end -- the market's filters and the column heads stay put as the list moves under
+    them; a fade along its foot with 6 MORE on it says how many are still below, and goes at the end. A list keeps its
+    place when you tap a man or drop him on the pitch, and starts at the top when you change a filter. On a phone held
+    sideways (844×390) 12 rows of the squad show at once and 11 of the market's (11 and 10 on an iPhone SE; it was 4 to a page). What used
+    to be a line or two over a list -- what free agents are, how selling works, what a youngster costs you, when a
+    report fades -- is a tap on its count (the dotted underline), and the transfer window is a badge, WINDOW OPEN · 17
+    WKS or WINDOW SHUT, its sentence a tap on it. In the squad a finger up or down the list scrolls it and a finger
+    across a man carries him to a spot on the little pitch. The academy, the scouts' reports and a market list sorted
+    by POTENTIAL give his potential a column of its own, POT; the squad list doesn't show it (it's on his card).
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
     What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
@@ -305,8 +322,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
   - **The buildings.** One line across the top: ◀ CAMPUS, the building, its tabs. A message shows as a toast along the
-    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (over pages if
-    it's long) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
+    bottom. The squad, the market's lists, the scouts' reports and the academy put the list on the left (swiped, v171:
+    see above) and the man you tap on the right. His card is drawn as on the tactics screen, never goes over pages and
     has no long text on it: his figure, name, own position, style, age, stars, rating and potential (as you know it:
     see **His story**) on top, then the spots he plays (v116): PLAYS and the ones that are his own, lit green, ALSO and
     the ones he can play well enough (a second position: a little off his reading of the game), outlined -- his
@@ -995,11 +1012,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it). Before, nothing was lost in a match, and a man was only rated afresh for a spot in another line (a winger at
     wide midfield was rated as a midfielder: 90 down to 78; now 88).
   - **Moving men is a drag.** Touch a man and move your finger, and he's up at once: there's no hold to wait for
-    (nothing scrolls, so a moving finger can only mean him). A tap, however long, only shows his card. With a
+    (nothing on the pitch scrolls, so a moving finger can only mean him). A tap, however long, only shows his card. With a
     mouse, just drag. He stays where you picked him up and moves with your finger from there. While he's up, every spot on the pitch shows what he'd be rated
     there, in the scheme's colour in his own position, lime in a second one and amber out of position. Drop him on another man and they swap
     spots (in the shape you're looking at), or on a sub and the sub comes on (in both shapes). In the clubhouse's
-    Squad tab you can drop a man from the list onto a small pitch above his card.
+    Squad tab you can drop a man from the list onto a small pitch above his card (v171: a finger across him carries
+    him; up or down, it scrolls the list).
 - **Clearances read the game.** Def IQ decides how far a clearance can go and how surely it finds a team-mate up the
   pitch. That covers your CLEAR, the computer's clearances and headed clearances.
   - **Your clearance, charged (v107).** With the ball at your feet in your own half, CLEAR (`L`, or CROSS on a phone)
@@ -1588,7 +1606,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       doesn't get better at half-time. ✚ HE'S HURT comes up by the quick subs, and he tops their list with the best
       man to take off for (the chip lights; it never drops down on its own). With no subs left he plays on. The
       report lists him. In a simulated game it's a roll for each man at his share of it.
-    - **Where you see it**: ✚ and the weeks out by his name in the squad lists and Training's Selection list, his
+    - **Where you see it**: OUT and the weeks out by his name in the squad lists (v171: OUT 3W; it was ✚) and ✚ in Training's Selection list, his
       token on the tactics pitch faded, ✚ INJURED · a strain · 2 weeks on his card, the hub (✚ and who, and whether
       he's in your nine), and the news.
   - **Match ratings and form.** Every man who plays gets a rating for the game, 3 to 10 (6 an ordinary one).
@@ -1918,7 +1936,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     sorted by drop-downs whose options take the list's place while one's open: POSITION (his own: GK, CB, FB, DM, CM,
     AM, WM, WNG, STK -- v127: DM and AM again; from v118 to v126 a CM was both), TYPE (his archetype -- a position's own once one's picked, the
     commonest first, and picking one picks its position; with every position, all 31 of them, open across the whole
-    screen), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, a man they haven't looked at
+    screen), SORT (RATING, POTENTIAL as your scouts know it -- the list shows it then, in a POT column since v171, a man they haven't looked at
     closely a ? and last -- PRICE ▲ cheapest first, PRICE ▼ dearest first, AGE ▲ youngest first, AGE ▼ oldest first:
     v117), and IN BUDGET, only the men you could pay for. The Free agents tab has POSITION, TYPE and SORT too (v117),
     its price the wage he'd ask (WAGE ▲, WAGE ▼); the two tabs share what you've picked. (Before v116: the league and
@@ -1999,7 +2017,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     2's men, half again for League 1's, twice for the Championship's, two and a half times for the Premium League's,
     as ticket money grows far faster up the leagues than the old wages did. A save from before v120 puts every man's
     wage up the same way, in the world as well as your squad. A man who's come on a lot -- worth 30% more than he's paid, with more than this season
-    left on his deal -- asks for a new one: WANTS A NEW DEAL on the squad list, HE WANTS A NEW DEAL on his card, and
+    left on his deal -- asks for a new one: NEW DEAL on the squad list (v171; it was WANTS A NEW DEAL), HE WANTS A NEW DEAL on his card, and
     the news says so. GIVE IT HIM (his new wage from now, the deal no shorter than the one he's on), or NOT NOW: that
     stings, a point off his mood, and he asks again in eight weeks. Leave him waiting, and every three weeks it costs
     him a point: twice, and then he stops asking (he won't forget it) and asks again eight weeks on.
@@ -2764,6 +2782,15 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v171: lists of players you swipe.** The squad, the market's lists, the scouts' reports and the academy are one
+  list each, swiped with a finger, never pages (the coaches to hire too): a man a line (a coloured position chip, his
+  name and ▲ or ▼, his age, his rating, five mood dots and a fitness bar for your own, his wage or price), an edge
+  for your nine, the subs, a loan or the transfer list, and words only for what needs doing (DEAL ENDS, NEW DEAL,
+  UNSETTLED, BUYBACK, WANTED, OUT 3W). The count, the filters and the column heads stay put over it, 6 MORE at its
+  foot till the end, and it keeps its place when you tap a man or drop one on the pitch. 12 rows of the squad on a
+  phone at once (it was 4 to a page), 11 of the market's. The sentences over the lists are a tap on their count, the
+  window a badge; potential a POT column where a list has it; in the squad, up or down scrolls and across carries a
+  man to the pitch. See **A list of players you swipe (v171)**.
 - **v170: the handoff's tuning and morale.** The money: the Player of the Month's prize $25,000 to $1M by the league
   (it was $2,500 to $40,000, never rescaled), shirts $3.30 to $5.40 a fan a week (22 to 36 cents), the league's prize
   money never under a tenth of the champions' and on a line of its own in the week's money (14th in League 2 had

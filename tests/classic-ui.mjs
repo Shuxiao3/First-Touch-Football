@@ -1,9 +1,9 @@
 // FOOTBALL CLASSIC ON A PHONE, LANDSCAPE: every screen fits -- its title, tabs and main buttons on the screen at
-// 844x390, 844x340 (Safari's bar showing) and 667x375 (an iPhone SE) -- and nothing scrolls: what doesn't fit goes over
-// pages (◀ 1 / 3 ▶): the start menu, Settings (a player's settings only: the feel dials are the game's own, a
+// 844x390, 844x340 (Safari's bar showing) and 667x375 (an iPhone SE) -- and nothing scrolls but a list of players (v171:
+// swiped, its filters and count fixed over it, N MORE at its foot): what else doesn't fit goes over pages (◀ 1 / 3 ▶): the start menu, Settings (a player's settings only: the feel dials are the game's own, a
 // developer's with ?dev), SKILL MOVES (every move over pages, its name whole, its drawing drawn and its clip playing; from
 // the pause menu too, the match waiting while it's open), the exhibition setup, a new career (Start on screen), the hub,
-// every building's tabs (the Selection tab's bars too), the market's pages, the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
+// every building's tabs (the Selection tab's bars too), the market's list and the squad's (25 men, every one reached by a finger), the tactics, the pause menu and the match's tactics, the match report. The menus are framed in pixels
 // (a dark outline, a light rim, rounded corners), in four colour schemes. A finger that moves on a man lifts him at once
 // (a tap just shows his card) and the stand-in follows it from where he was picked up; the men on the tactics pitch show
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
@@ -25,7 +25,7 @@ let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
-patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES, setCareerForm, FORMS, ATK_ONLY, DEF_ONLY};\n  // ===== END MANAGER CAREER');
+patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES, setCareerForm, FORMS, ATK_ONLY, DEF_ONLY, mgNewPlayer};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
 writeFileSync(copy, src);
 
@@ -35,6 +35,7 @@ const SIZES = [[844, 390], [844, 340], [667, 375]];
 
 // on screen: every one of these is wholly inside the viewport (and the page itself doesn't scroll) -- and NOTHING
 // scrolls: no box on the screen can be scrolled, and a box too short for what's in it is over pages, nothing cut off
+// (v171: but a list of players, .plPane, is the one box that scrolls -- swiped, never paged)
 async function onScreen(page, sels){ return page.evaluate(sels => { const W = innerWidth, H = innerHeight, out = [];
   for(const s of sels) for(const el of document.querySelectorAll(s)){ const cs = getComputedStyle(el); if(cs.display === 'none' || cs.visibility === 'hidden') continue;
     const r = el.getBoundingClientRect(); if(r.width < 1 || r.height < 1) continue;
@@ -42,7 +43,7 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
   const se = document.scrollingElement; if(se.scrollHeight > H + 1) out.push('the page scrolls (' + se.scrollHeight + ')');
   const shown = el => { for(let e = el; e && e !== document.body; e = e.parentElement){ const c = getComputedStyle(e); if(c.display === 'none' || c.visibility === 'hidden') return false; } return el.getClientRects().length > 0; };
   for(const el of document.querySelectorAll('body *')){ const cs = getComputedStyle(el);
-    if((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 || /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) && shown(el))
+    if((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 && !el.classList.contains('plPane') || /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) && shown(el))
       out.push('a box scrolls: ' + (el.id || el.className)); }
   for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
   return out; }, sels); }
@@ -191,16 +192,58 @@ for(const [w, h] of SIZES){
     ok(cpt.n === 9 && sq.n === 9 && !cpt.over && !cpt.out && !sq.over && !sq.out && !wde.over && !wde.out && wde.span > cpt.span + 20,
       w + 'x' + h + ': a four across the middle -- COMPACT, nobody overlaps or hangs off the pitch (the training pitch\'s and the Squad\'s); WIDE, the four spread ' + cpt.span + ' -> ' + wde.span + ' px'
       + (cpt.over + sq.over + wde.over ? ' -- overlaps: ' + [cpt.over, sq.over, wde.over].join('/') : '') + (cpt.out + sq.out + wde.out ? ' -- off the pitch by ' + Math.max(cpt.out, sq.out, wde.out) + ' px' : '')); }
-  if(w === 844 && h === 390){   // A LONG LIST GOES OVER PAGES: the market's, with ◀ 1 / n ▶ under it -- ▶ turns the page, the filters stay
-    await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
-    const pg = () => page.evaluate(() => { const b = document.querySelector('#bpBody .mgPaneL [data-pages]'), rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length);
-      return { at: (b.querySelector('.fitPager b') || {}).textContent || '', rows: rows.length, first: rows[0] && rows[0].dataset.pid, filters: !!b.querySelector('.mgFilters:not(.fitHide) [data-k="mpos"]'),   /* (v116: the POSITION drop-down, where the ALL GK DEF MID ATT chips were) */
-        fits: rows.every(r => r.getBoundingClientRect().bottom <= b.querySelector('.fitPager').getBoundingClientRect().top + 1) }; });
-    const p1 = await pg(); await page.tap('#bpBody .mgPaneL .fitPager [data-fitgo="1"]'); await page.waitForTimeout(120); const p2 = await pg();
-    info('the market list: ' + JSON.stringify({ p1, p2 }));
-    ok(/^1 \/ \d+$/.test(p1.at) && /^2 \//.test(p2.at) && p1.rows >= 3 && p2.rows >= 3 && p1.first !== p2.first && p2.filters && p1.fits && p2.fits,
-      'a long list goes over pages: ' + p1.at + ' with ' + p1.rows + ' rows, ▶ for page ' + p2.at + ', the filters on every page, every row above the pager');
-    await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
+  { // A LIST OF PLAYERS SCROLLS (v171: the handoff's J3), never over pages -- a finger up it, no buttons. The market's at
+    // 844x390: no pager, eleven rows and more on the screen at once, the count over it the rows in it, a swipe moves it and
+    // the filters and the column heads stay put (sticky), N MORE counts down and goes at the end, where the last man is.
+    // Then the squad's, at every size: 25 men in it, every one reached by swiping from the top, the count 25, eleven rows
+    // and more seen at once on a phone (844x390, 667x375; Safari's bar showing, 844x340, ten); and a finger ACROSS a man,
+    // toward the little pitch, still carries him to a spot
+    const cdp = await ctx.newCDPSession(page), T = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });
+    const swipe = async (sel, dy) => { const r = await page.$eval(sel, e => { const q = e.getBoundingClientRect(); return { x: q.left + q.width * 0.4, y: q.top + q.height * 0.8 }; });
+      await T('touchStart', r.x, r.y); for(let i = 1; i <= 10; i++){ await T('touchMove', r.x, r.y - dy * i / 10); await page.waitForTimeout(16); }
+      await page.waitForTimeout(120); await T('touchEnd', r.x, r.y - dy); await page.waitForTimeout(150); };   // (held still at the end: no fling)
+    const look = sel => page.evaluate(sel => { const b = document.querySelector(sel), br = b.getBoundingClientRect(), t = b.querySelector('.plTop'), top = t ? t.getBoundingClientRect().bottom : br.top;
+      const rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length), seen = rows.filter(r => { const q = r.getBoundingClientRect(); return q.top >= top - 1 && q.bottom <= br.bottom + 1; }).map(r => r.dataset.pid);
+      const fade = b.parentElement.querySelector(':scope > .plFade'), f = b.querySelector('.mkFilters'), fr = f && f.getBoundingClientRect(), c = b.querySelector('.plCols'), cr = c && c.getBoundingClientRect();
+      return { pager: !!b.parentElement.querySelector('.fitPager, [data-pages]'), rows: rows.length, seen, n: +((b.querySelector('.plN') || {}).textContent), last: rows.length ? seen.includes(rows[rows.length - 1].dataset.pid) : true,
+        more: fade && !fade.classList.contains('end') ? parseInt(fade.textContent) || 0 : 0, end: !!fade && fade.classList.contains('end'), st: Math.round(b.scrollTop), max: b.scrollHeight - b.clientHeight,
+        stuck: (!f || fr.top >= br.top - 1 && fr.bottom <= top + 1) && !!cr && cr.top >= br.top - 1 && cr.bottom <= top + 1 }; }, sel);
+    const L = '#bpBody .mgPaneL .plPane';
+    if(w === 844 && h === 390){
+      await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
+      const a = await look(L); await swipe(L, 150); const b = await look(L);
+      await page.evaluate(L => { const e = document.querySelector(L); e.scrollTop = e.scrollHeight; e.dispatchEvent(new Event('scroll')); }, L); await page.waitForTimeout(100); const z = await look(L);
+      info('the market list: ' + JSON.stringify({ top: { rows: a.rows, seen: a.seen.length, n: a.n, more: a.more }, swiped: { st: b.st, seen: b.seen.length, more: b.more, stuck: b.stuck }, end: { st: z.st, max: z.max, last: z.last, more: z.more, end: z.end } }));
+      ok(!a.pager && a.rows > 30 && a.n === a.rows && a.seen.length >= 11 && a.more > 0 && a.more <= a.rows - a.seen.length, 'the market\'s list: no pages, ' + a.seen.length + ' rows on the screen at once, ' + a.n + ' over it and ' + a.rows + ' in it, ' + a.more + ' MORE');
+      ok(b.st >= 100 && b.more < a.more && b.stuck && !b.seen.includes(a.seen[0]), 'a finger up it: it moves (' + b.st + ' px), N MORE counts down (' + a.more + ' -> ' + b.more + '), the filters and the column heads stay where they were');
+      ok(z.st >= z.max - 1 && z.last && z.end && z.more === 0, 'at its foot: the last man on the screen, and no N MORE');
+      await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
+    { const n0 = await page.evaluate(() => { const M = window.__MG, d = M.d, n0 = d.roster.length, R = ['GK', 'DEF', 'MID', 'ATT'];
+        while(d.roster.length < 25) d.roster.push(M.mgNewPlayer(d, R[d.roster.length % 4], 45, 24)); M.mgSave(d); M.renderHub(); return n0; });
+      await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
+      const a = await look(L), got = new Set(a.seen); let z = a, k = 0;
+      while(z.st < z.max - 1 && k++ < 20){ await swipe(L, 120); z = await look(L); z.seen.forEach(x => got.add(x)); }
+      const want = w === 844 && h === 340 ? 10 : 11, back = (await onScreen(page, ['.bpTopBack', '#bpTabs .bpTab', '.plTop'])).length;
+      info(w + 'x' + h + ' the squad: ' + JSON.stringify({ n: a.n, rows: a.rows, seen: a.seen.length, swipes: k, reached: got.size, more0: a.more, endMore: z.more, end: z.end }));
+      ok(!a.pager && a.n === 25 && a.rows === 25 && a.seen.length >= want && got.size === 25 && z.end && !back,
+        w + 'x' + h + ': a squad of 25 -- ' + a.seen.length + ' rows seen at once, every man reached by swiping from the top (' + got.size + ' in ' + k + ' swipes, no taps), 25 over the list and 25 in it');
+      const pick = await page.evaluate(() => { const d = window.__MG.d, lu = d.lineup, on = new Set([lu.gk, ...lu.atk]), ri = d.roster.findIndex((p, i) => !on.has(i) && p.role !== 'GK'); return { ri, pid: d.roster[ri].id, to: lu.atk[2] }; });
+      const r = await page.$eval(`#bpBody .sqList .mgRow[data-pid="${pick.pid}"]`, e => { e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(); return { x: q.left + q.width * 0.3, y: q.top + q.height / 2 }; });
+      await page.waitForTimeout(100); const t = await page.$eval(`#bpBody .sqPitch .ptk[data-ri="${pick.to}"]`, e => { const q = e.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; });
+      const st0 = await page.$eval(L, e => e.scrollTop); await T('touchStart', r.x, r.y);
+      for(let i = 1; i <= 3; i++){ await T('touchMove', r.x + i * 6, r.y); await page.waitForTimeout(16); }
+      for(let i = 1; i <= 10; i++){ await T('touchMove', r.x + 18 + (t.x - r.x - 18) * i / 10, r.y + (t.y - r.y) * i / 10); await page.waitForTimeout(16); }
+      await T('touchEnd', t.x, t.y); await page.waitForTimeout(250);
+      const c = await page.evaluate(([ri, st0, L]) => ({ in: window.__MG.d.lineup.atk[2] === ri, st: Math.abs(document.querySelector(L) ? document.querySelector(L).scrollTop - st0 : 0) }), [pick.ri, st0, L]);
+      ok(c.in && c.st <= 2, w + 'x' + h + ': a finger across a man in the list, toward the little pitch, carries him to a spot -- and the list, redrawn, is where it was (' + c.st + ' px out)');
+      { await page.evaluate(L => { const e = document.querySelector(L); e.scrollTop = e.scrollHeight; e.dispatchEvent(new Event('scroll')); }, L); await page.waitForTimeout(80);
+        const s0 = await page.$eval(L, e => e.scrollTop), pid = (await look(L)).seen.slice(-2)[0];
+        await page.tap(`#bpBody .sqList .mgRow[data-pid="${pid}"]`); await page.waitForTimeout(150);
+        const p = await page.evaluate(([L, pid]) => ({ st: document.querySelector(L).scrollTop, on: !!document.querySelector(`#bpBody .sqList .mgRow.on[data-pid="${pid}"]`), card: !!document.querySelector('#bpBody .mgPaneR .mgCard') }), [L, pid]);
+        ok(p.on && p.card && Math.abs(p.st - s0) <= 2, w + 'x' + h + ': a man near the foot of the list tapped: his card, his row lit, and the list where it was (' + Math.round(s0) + ' -> ' + Math.round(p.st) + ' px)'); }
+      await page.evaluate(n0 => { const M = window.__MG, d = M.d; d.lineup = null; d.roster.splice(n0); M.mgSave(d); M.renderHub(); }, n0);
+      await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
+  }
   // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)

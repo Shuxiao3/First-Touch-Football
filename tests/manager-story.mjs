@@ -174,8 +174,8 @@ for(const [w, h] of [[640, 360], [844, 340]]){
      && cv.ev.join('|') === 'S5L2 best young player|S4Won the Champions League' && /^FOR STO/.test(cv.fact[0]) && /^potential \d+–\d+$/.test(cv.pot),
     w + 'x' + h + ': his career: this season and his last three (' + cv.rows.slice(1, 3).join(' / ') + '), his last two moments, his games and goals for you; his potential a range (' + cv.pot + ')');
   ok(cv.fits && !cv.long.length && !cv.cut.length, w + 'x' + h + ': his career fits the card, nothing long or cut on it' + (cv.fits && !cv.long.length && !cv.cut.length ? '' : ' ' + JSON.stringify(cv)));
-  const pots = await page.$$eval('.mgPaneL .mgRow .pot', ns => ns.map(n => n.textContent));
-  ok(pots.length >= 12 && pots.every(t => /^\d+–\d+$/.test(t)), w + 'x' + h + ': the squad list\'s potentials, ranges all (' + pots.slice(0, 3).join(', ') + '...)');
+  const rows = await page.$$eval('.mgPaneL .sqList .mgRow', ns => ns.map(n => ({ ovr: (n.querySelector('.ovr') || {}).textContent, pot: !!n.querySelector('.pot') })));   // (v171: the list's rows as J3 has them)
+  ok(rows.length >= 12 && rows.every(r => /^\d+$/.test(r.ovr) && !r.pot), w + 'x' + h + ': the squad list: his rating on every row, a number (' + rows.slice(0, 3).map(r => r.ovr).join(', ') + '...) -- his potential a range on his card, as above');
   await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 }
 // another club's man, well scouted: his character on his card, SCOUT MORE while the house can tell more

@@ -1288,7 +1288,6 @@
   .mgPaneW{ flex:1 1 0; } .mgPaneW .mgPaneScroll{ padding-left:10px; } .mgPaneW .mgFilters{ flex-wrap:wrap; padding:2px 2px 4px; } .mgPaneW .mgChip{ flex:none; white-space:nowrap; }
   .mkMenu.lots{ grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); }
   .mkMenu .tbOpt i{ font-size:7px; letter-spacing:1px; line-height:1; }
-  .mgRow .ovr .mkPot{ font:7px 'FTC Dot',monospace; font-style:normal; color:var(--dim); margin-right:3px; letter-spacing:1px; }
   .mgTierStep .mgAdj{ width:32px; height:32px; font-size:13px; }
   .mgTierStep b{ font:11px 'FTC Dot',monospace; font-weight:400; color:var(--ink); min-width:96px; text-align:center; white-space:nowrap; }
   #bpBody.panes .mgSum{ text-align:left; }
@@ -1373,7 +1372,7 @@
   .sqPitch .ptk .ptkOvr{ font-size:12px !important; }
   .sqPitch .ptk .ptkName{ font-size:8px !important; }
   .sqPitch .ptk.dropOver{ background:var(--acc); }
-  .sqList .mgRow{ -webkit-touch-callout:none; touch-action:none; }   /* (a finger that moves on him carries him: see pxDrag) */
+  .sqList .mgRow{ -webkit-touch-callout:none; touch-action:pan-y; }   /* (v171: a finger up or down the list scrolls it; across, toward the pitch, carries him -- see pxDrag's panY) */
   /* WHO YOU TAKE: the squad as one list wrapped into three columns -- the nine, the bench, the rest -- a bar a man */
   .selB{ display:flex; flex-direction:column; height:100%; min-height:0; padding:8px 12px 10px; }
   .selCols{ flex:1 1 auto; min-height:0; display:flex; gap:10px; }
@@ -1514,6 +1513,43 @@
   .trend, .mgRow .ovr i.trend{ font-style:normal; font-weight:400; font-size:.55em; margin-left:2px; vertical-align:.45em; }   /* (v152: WHICH WAY HE'S GOING) */
   .trend.up, .mgRow .ovr i.trend.up{ color:var(--good); } .trend.dn, .mgRow .ovr i.trend.dn{ color:var(--bad); }
   .mgRow .ovr i.trend{ font-size:9px; margin-left:1px; vertical-align:2px; }
+  /* PLAYER LISTS SCROLL (v171, the handoff's J3): the list's side of the pane is one surface a finger swipes, no pages;
+     its head (the count, the wage bill, the filters, the columns) fixed over it; a row a man, dense; a fade at its foot
+     and how many more are under it, gone at the end */
+  .mgPaneL .mgPaneScroll.plPane{ overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-top:0; padding-bottom:22px; }
+  .mgPaneL{ position:relative; }
+  .plTop{ position:sticky; top:0; z-index:3; background:var(--win); padding-top:4px; margin:0 -2px; padding-left:2px; padding-right:2px; }
+  .plTop .mgSum{ line-height:1.3; margin-bottom:2px; } .plTop .mgHint{ margin-bottom:4px; }
+  /* (its filters slimmer than elsewhere -- more of the list on the screen -- and the line over the list a tap from what
+     it used to say in a sentence: the count's dotted underline) */
+  .plTop .mkFilters{ gap:3px; padding:0 2px; margin-bottom:3px; }
+  .plTop .mkDrop{ min-height:26px; padding:1px 6px; gap:0; line-height:1.05; } .plTop .mkDrop i{ font-size:7px; letter-spacing:.6px; }
+  .plTop .mgTierStep{ gap:3px; } .plTop .mgTierStep .mgAdj{ width:26px; height:26px; min-height:26px; font-size:11px; } .plTop .mkFilters .mgTierStep b{ min-width:64px; font-size:10px; }
+  .plTop .mgChip{ min-height:26px; padding:3px 7px; font-size:9px; }
+  @media (max-width:720px){ .plTop .mkDrop{ padding:1px 5px; } .plTop .mgChip{ padding:3px 5px; } .plTop .mkFilters .mgTierStep b{ min-width:54px; font-size:9.5px; } }   /* (one line of filters on a narrow phone too) */
+  .plTop [data-xpl]{ text-decoration:underline dotted; text-decoration-color:var(--dim2); text-underline-offset:3px; }
+  .plCols{ display:flex; align-items:center; gap:6px; padding:0 6px 2px 9px; font-size:7.5px; line-height:10px; letter-spacing:.8px; color:var(--dim2); }
+  .plCols .pc{ width:26px; flex:none; text-align:center; } .plCols .nm{ flex:1; min-width:0; } .plCols .ovr{ flex:none; width:34px; text-align:right; }
+  .plCols .mor{ flex:none; width:30px; text-align:center; } .plCols .fit{ flex:none; width:24px; text-align:center; } .plCols .amt{ flex:none; width:58px; text-align:right; }
+  .plList{ display:flex; flex-direction:column; gap:2px; }
+  .mgRow.pl{ position:relative; min-height:0; height:22px; padding:0 6px 0 9px; gap:6px; font-size:11px; border-radius:var(--rS,4px); }
+  .mgRow.pl::before{ content:''; position:absolute; left:0; top:3px; bottom:3px; width:3px; border-radius:2px; background:transparent; }
+  .mgRow.pl.xi::before{ background:var(--acc); } .mgRow.pl.sub::before{ background:rgb(var(--accRGB) / .4); }
+  .mgRow.pl.loan::before{ background:var(--good); } .mgRow.pl.listed::before{ background:var(--warn); }
+  .mgRow.pl .pc{ width:26px; flex:none; text-align:center; font-size:8px; line-height:13px; border-radius:3px; color:#0b0f1e; font-weight:700; letter-spacing:.3px; }
+  .mgRow.pl .pc.GK{ background:#f0c24a; } .mgRow.pl .pc.DEF{ background:#5aa9ea; } .mgRow.pl .pc.MID{ background:#67cf74; } .mgRow.pl .pc.ATT{ background:#ee6a62; }
+  .mgRow.pl .nm{ font-size:11px; } .mgRow.pl .sub{ font-size:9px; margin-left:3px; }
+  .mgRow.pl .ovr{ min-width:34px; width:34px; font-size:12px; }
+  .mgRow.pl .mor{ flex:none; width:30px; display:flex; gap:2px; justify-content:center; } .mgRow.pl .mor i{ width:4px; height:4px; border-radius:50%; background:var(--well); } .mgRow.pl .mor i.on{ background:currentColor; }
+  .mgRow.pl .fit{ flex:none; width:24px; height:3px; background:var(--well); border-radius:2px; overflow:hidden; } .mgRow.pl .fit i{ display:block; height:100%; }
+  .mgRow.pl .amt{ width:58px; font-size:10px; }
+  .mgRow.pl .pt, .plCols .pt{ flex:none; width:40px; text-align:right; white-space:nowrap; } .mgRow.pl .pt{ font-size:9px; color:var(--dim); }   /* (v171: his potential, a column of its own where a list has it) */
+  .plOther .mor, .plOther .fit{ display:none; }   /* (another club's men: their mood and fitness are theirs to know) */
+  .plSt{ display:inline-block; font-size:7.5px; letter-spacing:.5px; border-radius:3px; padding:0 3px; margin-left:4px; vertical-align:1px; color:var(--warn); box-shadow:inset 0 0 0 1px currentColor; }
+  .plSt.bad{ color:var(--bad); } .plSt.ok{ color:var(--good); }
+  .plFade{ position:absolute; left:0; right:2px; bottom:0; height:30px; pointer-events:none; background:linear-gradient(to bottom, transparent, var(--win) 80%); display:flex; justify-content:center; align-items:flex-end; padding-bottom:4px; }
+  .plFade.end{ display:none; }
+  .plMore{ font-size:8px; letter-spacing:1px; color:var(--ink); background:var(--row); border-radius:9px; padding:1px 8px; box-shadow:inset 0 0 0 1px var(--well); font-weight:400; }
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
   .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
@@ -1914,9 +1950,18 @@
   // name and rating) shows on every page. It runs whenever one of the menus repaints (fitWatch); a box keeps its page
   // by its key.
   const FITPG={};                                      // the page each box is on
+  const PLSCR={};                                      // (v171) how far down each list of players was scrolled -- kept as it's redrawn (a man picked, one dropped on the pitch)
   let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
-  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; }
+  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; plFootAll(root); }
+  // A SCROLLING LIST'S FOOT (v171): how many rows are still under the bottom of it -- "6 MORE" on a fade -- gone at the
+  // end; kept up as it scrolls (once a pane, the listener stays with it)
+  function plFootAll(root){ for(const b of (root||document).querySelectorAll('.plPane')) plFoot(b); }
+  function plFoot(b){ const f=b.parentElement&&b.parentElement.querySelector(':scope > .plFade'); if(!f) return;
+    if(!b.dataset.plOn){ b.dataset.plOn=1; const k=b.dataset.pl; if(k&&PLSCR[k]) b.scrollTop=PLSCR[k];   // (redrawn: where it was)
+      b.addEventListener('scroll',()=>{ if(k) PLSCR[k]=b.scrollTop; plFoot(b); },{passive:true}); }
+    const bot=b.getBoundingClientRect().bottom-18, rows=[...b.querySelectorAll('.mgRow')].filter(r=>r.getClientRects().length), n=rows.filter(r=>r.getBoundingClientRect().top>bot).length;
+    f.classList.toggle('end',!n); const m=f.querySelector('.plMore'); if(m) m.textContent=n?n+' MORE':''; }
   // THE BENCH ON ONE LINE, under the pitch: its five (a match's: who's left on it). If they don't all fit, they go a page
   // at a time with a small button that turns to the next (1/2 ▶, round to the first again) rather than a second line that
   // would take the pitch's height. (Who isn't taken at all is the Selection tab's, not the pitch's.)
@@ -1935,7 +1980,7 @@
   document.addEventListener('click',e=>{ const g=e.target.closest('[data-benchgo]'); if(!g) return; e.stopPropagation(); e.preventDefault();
     const b=g.closest('.tbBench'); if(!b) return; const key=b.dataset.bench||'bench'; BENCHPG[key]=((BENCHPG[key]||0)+1)%Math.max(1,+b.dataset.bpages||1);
     fitObs.disconnect(); try{ fitBench(b); } finally { fitWatch(); } },true);
-  function fitForget(part){ for(const k in FITPG) if(k.includes(part)) delete FITPG[k]; }   // (back to page 1)
+  function fitForget(part){ for(const k in FITPG) if(k.includes(part)) delete FITPG[k]; for(const k in PLSCR) if(k.includes(part)) delete PLSCR[k]; }   // (back to page 1 -- and a list of players back to its top)
   function fitBox(box){
     for(const x of box.querySelectorAll(':scope > .fitPager')) x.remove();
     for(const x of box.querySelectorAll('.fitHide')) x.classList.remove('fitHide');
@@ -19852,10 +19897,24 @@
   function mgDemandSeen(d,p,moving){ return mgKnown(d,p)?mgDemand(d,p,moving):mgDemand(d,{ovr:mgSeenOvr(d,p),age:p.age},moving); }
   function mgFreeAskSeen(d,p){ return mgKnown(d,p)?mgFreeAsk(d,p):mgFreeAsk(d,{ovr:mgSeenOvr(d,p),age:p.age}); }
   function mgTooBig(d,p){ return mgLevelTier(p.ovr)-d.tier>=2?'<span class="mgTag bad">WON’T COME</span>':''; }
-  function mgRow(d,p,o){
-    return '<button class="mgRow'+(o.sel?' on':'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos">'+(p.subRole||p.role)+'</span>'
-      +'<span class="nm">'+mgEsc(p.name)+' <span class="sub">'+p.age+(o.club?' · '+mgEsc(o.club):'')+'</span>'+(p.inj?'<b class="mgInj">✚ '+injShort(p.inj.d)+'</b>':'')+(o.tags||'')+'</span>'
-      +'<span class="ovr">'+o.ovr+'</span><span class="amt">'+(o.right||'')+'</span></button>'; }
+  // A PLAYER IN A LIST (v171, the handoff's J3: dense, and said in state, not words): his position on a chip coloured by
+  // his line (keeper, defence, midfield, attack), his name with which way he's going (▲ ▼: o.trend) and his age, his
+  // rating, his mood as five dots and his fitness as a thin bar (yours only: another club's are theirs to know), and the
+  // figure the list is for (his wage, the ask). An edge down his left marks him: in the side (o.edge xi), a sub, a
+  // loanee, listed. A word only when there's something to do about him (o.tags: DEAL ENDS, NEW DEAL, UNSETTLED, BUYBACK,
+  // OUT 3W, WANTED -- plSt). The rest is on his card.
+  function plMor(p){ const m=p.mor??MOR0, n=clamp(Math.round(m/2),0,5); let h='<span class="mor" title="mood '+m.toFixed(1)+'" style="color:'+morCol(m)+'">'; for(let i=0;i<5;i++) h+='<i'+(i<n?' class="on"':'')+'></i>'; return h+'</span>'; }
+  function plFit(p){ const c=condOf(p); return '<span class="fit" title="fitness '+Math.round(c*100)+'%"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.9?'var(--good)':c>=0.75?'var(--warn)':'var(--bad)')+'"></i></span>'; }
+  const plSt=(w,k)=>'<span class="plSt'+(k?' '+k:'')+'">'+w+'</span>';
+  function mgRow(d,p,o){ const mine=(d.roster||[]).includes(p)||(d.youth||[]).includes(p);
+    return '<button class="mgRow pl'+(o.sel?' on':'')+(o.edge?' '+o.edge:'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos pc '+(p.role||'')+'">'+(p.subRole||p.role)+'</span>'
+      +'<span class="nm">'+mgEsc(p.name)+(o.trend?trendHtml(p):'')+'<span class="sub">'+p.age+(o.club?' · '+mgEsc(o.club):'')+'</span>'+(p.inj&&!o.noInj?plSt('OUT '+injShort(p.inj.d).toUpperCase(),'bad'):'')+(o.tags||'')+'</span>'
+      +'<span class="ovr">'+o.ovr+'</span>'+(o.pot!=null?'<span class="pt">'+o.pot+'</span>':'')+(mine?plMor(p)+plFit(p):'')+(o.right===null?'':'<span class="amt">'+(o.right||'')+'</span>')+'</button>'; }   // (o.pot: the POT column; o.right null: no amount)
+  // ...and the list's head, fixed over it as it scrolls: what it holds (its count -- every row in it -- and, the squad's,
+  // the wage bill), its filters, and what each column is
+  function plHead(top,amt,other,pot){ return '<div class="plTop">'+top+'<div class="plCols"><span class="pc">POS</span><span class="nm">NAME</span><span class="ovr">OVR</span>'+(pot?'<span class="pt">POT</span>':'')
+    +(other?'':'<span class="mor">MOOD</span><span class="fit">FIT</span>')+(amt===null?'':'<span class="amt">'+(amt||'WAGE')+'</span>')+'</div></div>'; }   // (amt null: no amount column; pot: a POT column)
+  function plCount(n,what){ return '<b class="plN">'+n+'</b> '+(what||(n===1?'PLAYER':'PLAYERS')); }
   function mgChipBtns(key,opts,cur){ return opts.map(o=>'<button class="mgChip'+(String(o[0])===String(cur)?' on':'')+'" data-mg="filt" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>').join(''); }
   function mgChips(key,opts,cur){ return '<div class="mgFilters fitKeep">'+mgChipBtns(key,opts,cur)+'</div>'; }
   // ...the league to look in, a step at a time (one line with the positions: more of the list on each page)
@@ -19881,18 +19940,18 @@
     if(g) h+='<div class="sixOpen'+(g[2].length>3?' long':'')+'"><div class="sixHd">'+g[1].toUpperCase()+'</div>'+g[2].map(x=>{ const v=+st[x]||0;
       return '<div class="statRow"><span class="sl">'+(STAT_LABEL[x]||x)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv" style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</span></div>'; }).join('')+'</div>';
     return h; }
-  // A LIST AND ITS MAN: the list on the left, going over pages (fitBox) with its filters on every page if it's long;
-  // the man picked on the right, his card, which never goes over pages: it fits
+  // A LIST AND ITS MAN: the list on the left, one that scrolls (v171: plHead's head fixed over it, plFoot's N MORE at
+  // its foot -- it went over pages); the man picked on the right, his card, which never goes over pages: it fits
   // ...or one pane across the whole screen (a drop-down too long for the list's side: every archetype, v118)
   function mgPaneWide(h){ return '<div class="mgPanes"><div class="mgPane mgPaneW"><div class="mgPaneScroll">'+h+'</div></div></div>'; }
   function mgPanes(left,right,foot,top){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
-    return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll" data-pages="L:'+k+'">'+left+'</div>'+(foot||'')+'</div>'
+    return '<div class="mgPanes"><div class="mgPane mgPaneL"><div class="mgPaneScroll plPane" data-pl="L:'+k+'">'+left+'</div><div class="plFade end"><b class="plMore"></b></div>'+(foot||'')+'</div>'   // (v171: it scrolls -- J3; it went over pages)
     +'<div class="mgPane mgPaneR">'+(top||'')+'<div class="mgPaneScroll">'+(right||(top?'':'<div class="mgPick0">Tap a player to see him here.</div>'))+'</div></div></div>'; }
   // the top of every transfers tab: the window, and the money you have (v108) -- what's agreed and not yet paid too
   function mgWindowLine(d){ const w=mgWindowWeeks(d), b=Math.round(d.budget||0), agreed=(d.bids||[]).filter(x=>x.st==='yes').reduce((a,x)=>a+x.fee,0);
     const bud='<span class="mkBud">BUDGET <b style="color:'+(b<0?'var(--bad)':'var(--good)')+'">'+money(b)+'</b>'+(agreed?' · '+money(agreed)+' agreed':'')+'</span>';
-    return mgWindowOpen(d)?'<div class="mgSum mkLine"><span style="color:var(--good)">THE WINDOW IS OPEN · '+(w>1?w+' WEEKS LEFT':'ITS LAST WEEK')+'</span>'+bud+'</div>'
-    :'<div class="mgSum mkLine"><span>The window is shut until the summer. Free agents can sign any time.</span>'+bud+'</div>'; }
+    return mgWindowOpen(d)?'<div class="mgSum mkLine"><span style="color:var(--good)" data-xpl="The transfer window is open: '+(w>1?w+' weeks left':'its last week')+' to buy, sell and loan.">WINDOW OPEN · '+(w>1?w+' WKS':'LAST WEEK')+'</span>'+bud+'</div>'
+    :'<div class="mgSum mkLine"><span style="color:var(--warn)" data-xpl="The window is shut until the summer. Free agents can sign any time.">WINDOW SHUT</span>'+bud+'</div>'; }   // (v171: a badge, the sentence a tap away -- the list's top ran to two lines on a narrow phone)
   // ONE MAN, CLOSE UP, as his tactics card is: his figure, name, own position, style, age, stars, the spots he plays
   // (posRowHtml), rating and potential on top; a tab for each side along its foot: his ratings (the six), his deal (what
   // he earns or costs, and what you can do about him, each on a line), his career (see HIS STORY), his personality
@@ -20005,17 +20064,19 @@
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', 'atk', 'GK', 0, 'GK');
     for(let i=0;i<lu.atk.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, lu.atk[i], q.L, q.T, 'field', 'atk', slots[i].role, q.k, spotFit(slots[i]), q.n, q.cc); }   // (v127: its fit, and four lines in five columns)
     return h+'</div><div class="sqPitchHint">'+d.formation+' with the ball · hold a man in the list and drop him on a spot</div></div>'; }
-  function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length; let h='';
-    h+='<div class="mgSum">'+R.length+' players (most '+MG_MAX+', fewest '+MG_MIN+') · wages '+money(f.wageWk)+'/wk'+(ending?' · <span style="color:var(--warn)">'+ending+' deal'+(ending>1?'s end':' ends')+' this season</span>':'')+'</div>';
+  // THE SQUAD (v171, J3): every man on one list that scrolls, keepers, defenders, midfielders and forwards in turn and
+  // the best first in each -- his line on his chip, no headings -- under a head that stays: how many (every row), the
+  // wage bill, and the deals running out as a badge
+  function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length;
     const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean)), subs=new Set(lu.bench.slice(0,BENCH_N).map(i=>R[i]).filter(Boolean));
-    for(const role of ['GK','DEF','MID','ATT']){ const L=R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr); if(!L.length) continue;
-      h+='<div class="bpSect">'+{GK:'GOALKEEPERS',DEF:'DEFENDERS',MID:'MIDFIELDERS',ATT:'FORWARDS'}[role]+'</div><div class="mgList">';
-      for(const p of L){ const tags=(xi.has(p)?'<span class="mgTag on">XI</span>':subs.has(p)?'<span class="mgTag on">SUB</span>':'')+(d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':'')
-          +(p.loan?'<span class="mgTag">LOAN</span>':'')+((d.offers||[]).some(o=>o.pid===p.id)?'<span class="mgTag">BID</span>':'')+((p.until||0)<=S?'<span class="mgTag bad">DEAL ENDS</span>':'')+(p.cAsk?'<span class="mgTag bad">WANTS A NEW DEAL</span>':'');
-        h+=mgRow(d,p,{ovr:p.ovr+trendHtml(p)+'<i class="pot">'+potTxt(d,p,{mine:true},true)+'</i>', right:money(p.wage)+'/wk', tags, sel:MGUI.sel===p.id}); }
-      h+='</div>'; }
+    const L=['GK','DEF','MID','ATT'].flatMap(role=>R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr));
+    const top='<div class="mgSum plSum">'+plCount(L.length)+' <i>of '+MG_MAX+'</i> · '+money(f.wageWk)+'/WK'+(ending?' · '+plSt(ending+' DEAL'+(ending>1?'S END':' ENDS'),'bad'):'')+'</div>';
+    let h='';
+    for(const p of L){ const bid=(d.offers||[]).some(o=>o.pid===p.id);
+      const tags=((p.until||0)<=S?plSt('DEAL ENDS','bad'):'')+(p.cAsk?plSt('NEW DEAL'):'')+(p.wantsOut?plSt('UNSETTLED','bad'):'')+(p.bb?plSt('BUYBACK'):'')+(bid?plSt('WANTED','ok'):'');
+      h+=mgRow(d,p,{ovr:String(p.ovr), trend:true, right:money(p.wage), tags, sel:MGUI.sel===p.id, edge:xi.has(p)?'xi':subs.has(p)?'sub':p.loan?'loan':d.listed[p.id]?'listed':''}); }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
-    return mgPanes('<div class="sqList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
+    return mgPanes(plHead(top,'WAGE')+'<div class="sqList plList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
   function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d); let h='<div class="mgSum">'+MG_LEAGUE[d.tier]+' · season '+d.season+' · form '+(mgForm(d).join(' ')||'none yet: no games')+'</div>'+mgCupsSum(d)+'<div class="mgList">';
     const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
       return '<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+(pens!=null&&you===them?' P':'')+'</span>'; };
@@ -20081,21 +20142,20 @@
     const L=[]; for(const id of d.div[t]){ if(id===d.clubId) continue; const c=d.world.clubs[id];
       for(const p of c.players){ if(pos!=='ALL'&&natPos(p)!==pos) continue; if(arch!=='ALL'&&p.style!==arch) continue; const ask=mgAsk(d,p,c); if(bud&&ask>d.budget) continue; L.push([p,c,ask]); } }
     mkSorted(d,L,srt);
-    h+='<div class="mgList">'+(L.length?'':'<div class="mgHint">Nobody in '+MG_LEAGUE[t]+' fits that.</div>')+mkPotHint(d,L,srt);
-    for(const [p,c,ask] of L){ const B=mgBidOf(d,p.id); h+=mgRow(d,p,{ovr:srt==='pot'?'<i class="mkPot">POT</i>'+potTxt(d,p,{club:c},true):mgOvrTxt(d,p), club:c.code, right:money(ask), sel:MGUI.sel===p.id,
+    let r='<div class="mgList plList plOther">'+(L.length?'':'<div class="mgHint">Nobody in '+MG_LEAGUE[t]+' fits that.</div>')+mkPotHint(d,L,srt);
+    for(const [p,c,ask] of L){ const B=mgBidOf(d,p.id); r+=mgRow(d,p,{ovr:mgOvrTxt(d,p), pot:srt==='pot'?potTxt(d,p,{club:c},true):null, club:c.code, right:money(ask), sel:MGUI.sel===p.id,
       tags:knTag(d,p)+mgTooBig(d,p)+(B?'<span class="mgTag'+(B.st==='more'?' bad':' on')+'">'+({yes:'AGREED',wait:'BID IN',more:'THEY WANT MORE'}[B.st]||'')+'</span>':'')}); }
-    return mgPanes(h+'</div>', card); }
+    return mgPanes(plHead(h.replace('<div class="mgSum mkLine">','<div class="mgSum mkLine"><span>'+plCount(L.length)+'</span>'),'ASKING',true,srt==='pot')+r+'</div>', card); }
   // FREE AGENTS: POSITION, TYPE and SORT as the Search has them (v117), the price the wage he'd ask
   function mgFreeTab(d){ const pos=MGUI.mpos||'ALL', arch=MGUI.arch||'ALL', srt=MGUI.sort||'ovr';
-    let h=mgWindowLine(d)+'<div class="mgSum">Without a club: mostly old hands. The young ask more, and a fee to sign.</div>'
-      +'<div class="mgFilters mkFilters fitKeep">'+mkDrop('mpos','POSITION',MK_POS,pos)+mkDrop('arch','TYPE',mkArchOpts(pos),arch)+mkDrop('sort','SORT',MK_SORT_FREE,srt)+'</div>';
+    let h=mgWindowLine(d)+'<div class="mgFilters mkFilters fitKeep">'+mkDrop('mpos','POSITION',MK_POS,pos)+mkDrop('arch','TYPE',mkArchOpts(pos),arch)+mkDrop('sort','SORT',MK_SORT_FREE,srt)+'</div>';
     let card=''; if(MGUI.sel){ const f=mgFind(d,MGUI.sel); if(f&&f.free) card=mgCard(d,MGUI.sel); }
     const D={mpos:[MK_POS,pos],arch:[mkArchOpts(pos),arch],sort:[MK_SORT_FREE,srt]}[MGUI.drop];
     if(D) return D[0].length>24?mgPaneWide(h+mkMenu(MGUI.drop,D[0],D[1])):mgPanes(h+mkMenu(MGUI.drop,D[0],D[1]), card);
     const L=mkSorted(d,d.world.free.filter(p=>(pos==='ALL'||natPos(p)===pos)&&(arch==='ALL'||p.style===arch)).map(p=>[p,null,mgFreeAskSeen(d,p).wage]),srt);
-    h+='<div class="mgList">'+(L.length?'':'<div class="mgHint">No free agent fits that.</div>')+mkPotHint(d,L,srt)
-      +L.map(([p,,w])=>mgRow(d,p,{ovr:srt==='pot'?'<i class="mkPot">POT</i>'+potTxt(d,p,{free:true},true):mgOvrTxt(d,p), right:money(w)+'/wk', sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)})).join('')+'</div>';
-    return mgPanes(h, card); }
+    const r='<div class="mgList plList plOther">'+(L.length?'':'<div class="mgHint">No free agent fits that.</div>')+mkPotHint(d,L,srt)
+      +L.map(([p,,w])=>mgRow(d,p,{ovr:mgOvrTxt(d,p), pot:srt==='pot'?potTxt(d,p,{free:true},true):null, right:money(w)+'/wk', sel:MGUI.sel===p.id, tags:knTag(d,p)+mgTooBig(d,p)})).join('')+'</div>';
+    return mgPanes(plHead(h.replace('<div class="mgSum mkLine">','<div class="mgSum mkLine"><span data-xpl="Without a club: mostly old hands. The young ask more, and a fee to sign.">'+plCount(L.length,L.length===1?'FREE AGENT':'FREE AGENTS')+'</span>'),'WAGE',true,srt==='pot')+r, card); }   // (v171: what they are, a tap on the count -- it was a line over the list)
   function mgOffersTab(d){ let h=mgWindowLine(d); const O=(d.offers||[]).filter(o=>d.roster.some(p=>p.id===o.pid)&&d.world.clubs[o.club]);
     const nb=(d.bids||[]).length; if(nb) h+='<div class="mgHint">Your own bids ('+nb+' out) are in Bids.</div>';
     h+='<div class="bpSect">FOR YOUR MEN</div>';
@@ -20130,18 +20190,18 @@
       const more=e.out==='signed'?' for '+money(e.fee):e.out==='no'&&e.ask?' · they’d want ~'+money(e.ask):e.out==='rival'&&e.to?': '+mgEsc(e.to)+(e.rf?' paid '+money(e.rf):''):'';
       h+='<div class="mgBidRow"><span class="who"><b>'+mgEsc(e.name)+'</b> <span class="mgCardSub">'+mgEsc(e.club)+' · S'+e.season+'</span></span><span class="fee">'+money(e.fee)+'</span><span class="out" style="color:'+o[1]+'">'+o[0]+more+'</span></div>'; }
     return h; }
-  function mgSellingTab(d){ let h=mgWindowLine(d)+'<div class="mgHint">Pick a man to put him on the transfer list at your price. Clubs bid for listed men every day a window is open, and now and then for your best men anyway.</div>';
+  function mgSellingTab(d){ let h=mgWindowLine(d);   // (v171: how selling works, a tap on the count -- it was two lines over the list)
     const L=d.roster.filter(p=>!p.loan).sort((a,b)=>(d.listed[b.id]?1:0)-(d.listed[a.id]?1:0)||mgValue(d,b)-mgValue(d,a));
     const away=mgAiClubs(d).flatMap(c=>c.players.filter(p=>p.loan&&p.loan.from===d.clubId).map(p=>surname(p.name)+' at '+mgEsc(c.code||c.name)));   // (yours, out on loan)
     if(away.length) h+='<div class="mgHint">On loan: '+away.join(', ')+', back at the season’s end.</div>';
-    return mgPanes(h+'<div class="mgList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), right:p.hometown?'NOT FOR SALE':d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
-      tags:d.listed[p.id]?'<span class="mgTag">FOR SALE</span>':p.hometown?'<span class="mgTag">HOME TO STAY</span>':''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
+    return mgPanes(plHead(h.replace('<div class="mgSum mkLine">','<div class="mgSum mkLine"><span data-xpl="Pick a man to put him on the transfer list at your price. Clubs bid for listed men every day a window is open, and now and then for your best men anyway.">'+plCount(L.length)+'</span>'),'PRICE')+'<div class="mgList plList">'+L.map(p=>mgRow(d,p,{ovr:String(p.ovr), trend:true, right:p.hometown?'':d.listed[p.id]?money(d.listed[p.id]):money(mgValue(d,p)), sel:MGUI.sel===p.id,
+      edge:d.listed[p.id]?'listed':'', tags:p.hometown?plSt('HOME TO STAY'):''})).join('')+'</div>', MGUI.sel&&d.roster.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'sale'):''); }
 
   // ---- scouting ----
   function mgReportsTab(d){ const K=d.kn||{}, L=Object.keys(K).filter(id=>K[id]>=1).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
-    let h='<div class="mgSum">'+L.length+' scouted. A report loses a level when the season ends.</div>';
+    let h='<div class="mgSum"><span data-xpl="A report loses a level when the season ends.">'+plCount(L.length,'SCOUTED')+'</span></div>';   // (v171: a tap for what becomes of a report)
     if(!L.length) h+='<div class="mgHint">No reports yet: scout a player from the market, or send your scouts round a league (Assignments).</div>';
-    return mgPanes(h+'<div class="mgList">'+L.map(f=>mgRow(d,f.p,{ovr:f.p.ovr+'<i class="pot">'+potTxt(d,f.p,f,true)+'</i>', club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
+    return mgPanes(plHead(h,'ASKING',true,true)+'<div class="mgList plList plOther">'+L.map(f=>mgRow(d,f.p,{ovr:String(f.p.ovr), pot:potTxt(d,f.p,f,true), club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
       right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
       MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgAssignTab(d){ let h='<div class="mgHint">Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes.</div>';
@@ -20158,9 +20218,9 @@
     return h+'<div class="mgHint">Scouting one player costs '+money(MG_SCOUT_COST[1])+' in League 2, rising to '+money(MG_SCOUT_COST[4])+' in the Premium League.</div>'; }
 
   // ---- the academy ----
-  function mgProspectsTab(d){ const Y=d.youth||[]; let h='<div class="mgHint">Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.</div>';
+  function mgProspectsTab(d){ const Y=d.youth||[]; let h='';   // (v171: what they are, a tap on the count -- it was two lines over the list)
     if(!Y.length) h+='<div class="mgHint">The academy is empty. A new intake arrives every summer.</div>';
-    return mgPanes(h+'<div class="mgList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:p.ovr+trendHtml(p)+'<i class="pot">'+potTxt(d,p,{youth:true},true)+'</i>', right:'age '+p.age, sel:MGUI.sel===p.id})).join('')+'</div>',
+    return mgPanes(plHead('<div class="mgSum"><span data-xpl="Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.">'+plCount(Y.length,Y.length===1?'YOUNGSTER':'YOUNGSTERS')+'</span></div>'+h,null,false,true)+'<div class="mgList plList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:String(p.ovr), pot:potTxt(d,p,{youth:true},true), trend:true, right:null, sel:MGUI.sel===p.id})).join('')+'</div>',   // (v171: his potential a column, his age by his name -- no AGE column)
       MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
   function mgFacilitiesTab(d){ const L=lvOf(d,'academy'); let h=finRow('Academy','level '+L+' of 3',true)+finRow('Intake every summer',(2+L)+' youngsters');
     if(L<3){ const c=bldCost('academy',L+1), need=clubNeed('academy',L+1), why=bldBlock(d,'academy');
@@ -20673,7 +20733,9 @@
     root.addEventListener('contextmenu',e=>{ if(e.target.closest(sel)) e.preventDefault(); });
     root.addEventListener('touchmove',e=>{ if(st&&st.live) e.preventDefault(); },{passive:false});   // no scrolling under a man you're carrying
     addEventListener('pointermove',e=>{ if(!st||e.pointerId!==st.id) return; const dx=e.clientX-st.x0, dy=e.clientY-st.y0;
-      if(!st.live){ if(Math.hypot(dx,dy)<(st.mouse?6:8)) return; start(st.x0,st.y0); }   // (from where he was picked up: the copy then moves as far as the finger has)
+      if(!st.live){ if(Math.hypot(dx,dy)<(st.mouse?6:8)) return;
+        if(o.panY&&!st.mouse&&Math.abs(dy)>Math.abs(dx)){ st=null; return; }   // (v171: a finger up or down a list that scrolls is a swipe -- it's left to scroll; across, it carries him)
+        start(st.x0,st.y0); }   // (from where he was picked up: the copy then moves as far as the finger has)
       e.preventDefault(); st.ghost.style.left=(e.clientX-st.dx)+'px'; st.ghost.style.top=(e.clientY-st.dy)+'px';
       const u=document.elementFromPoint(e.clientX,e.clientY), t=u&&u.closest(o.target||sel), over=(t&&t!==st.el&&root.contains(t))?t:null;
       if(over!==st.over){ if(st.over) st.over.classList.remove('dropOver'); st.over=over; if(over) over.classList.add('dropOver'); if(o.over) o.over(over); } },{passive:false});
@@ -20706,7 +20768,7 @@
     cancel(){ rerenderOffice(); } });
 
   // the squad list: drop a man on the mini-pitch
-  pxDrag(document.getElementById('bldgPanel'), '.sqList .mgRow[data-pid]', { target:'.sqPitch .ptk[data-ri]',
+  pxDrag(document.getElementById('bldgPanel'), '.sqList .mgRow[data-pid]', { target:'.sqPitch .ptk[data-ri]', panY:true,
     lift(){ const d=CAREER&&CAREER.data, R=document.querySelector('#bpBody .mgPaneR'); if(!d||!R||R.querySelector('.sqPitch')) return;   // (his card was up: the team, to drop him on)
       MGUI.sel=null; R.innerHTML=mgSquadPitch(d)+'<div class="mgPaneScroll"></div>'; },
     ghost(row){ const d=CAREER&&CAREER.data, p=d&&d.roster.find(x=>x.id===+row.dataset.pid), g=document.createElement('div'); g.className='ptk pxGhost';
