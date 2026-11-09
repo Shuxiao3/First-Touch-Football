@@ -19908,7 +19908,7 @@
   const plSt=(w,k)=>'<span class="plSt'+(k?' '+k:'')+'">'+w+'</span>';
   function mgRow(d,p,o){ const mine=(d.roster||[]).includes(p)||(d.youth||[]).includes(p);
     return '<button class="mgRow pl'+(o.sel?' on':'')+(o.edge?' '+o.edge:'')+'" data-mg="sel" data-pid="'+p.id+'"><span class="pos pc '+(p.role||'')+'">'+(p.subRole||p.role)+'</span>'
-      +'<span class="nm">'+mgEsc(p.name)+(o.trend?trendHtml(p):'')+'<span class="sub">'+p.age+(o.club?' · '+mgEsc(o.club):'')+'</span>'+(p.inj&&!o.noInj?plSt('OUT '+injShort(p.inj.d).toUpperCase(),'bad'):'')+(o.tags||'')+'</span>'
+      +'<span class="nm">'+mgEsc(p.name)+(o.trend?trendHtml(p):'')+'<span class="sub">'+p.age+(o.club?' · '+mgEsc(o.club):'')+'</span>'+(p.inj&&!o.noInj?plSt('OUT '+injShort(p.inj.d).toUpperCase(),'bad inj'):'')+(o.tags||'')+'</span>'
       +'<span class="ovr">'+o.ovr+'</span>'+(o.pot!=null?'<span class="pt">'+o.pot+'</span>':'')+(mine?plMor(p)+plFit(p):'')+(o.right===null?'':'<span class="amt">'+(o.right||'')+'</span>')+'</button>'; }   // (o.pot: the POT column; o.right null: no amount)
   // ...and the list's head, fixed over it as it scrolls: what it holds (its count -- every row in it -- and, the squad's,
   // the wage bill), its filters, and what each column is

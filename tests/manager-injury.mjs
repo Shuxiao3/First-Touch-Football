@@ -146,11 +146,11 @@ await page.click('#bldgPanel .bpTab:text-is("Selection")'); await page.waitForTi
 const sel = await page.$$eval('#bpBody .selRow.inj .injX', ns => ns.length);
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(120);
-const row = await page.$$eval('#bpBody .mgRow .mgInj', ns => ns.map(n => n.textContent));
+const row = await page.$$eval('#bpBody .mgRow .plSt.inj', ns => ns.map(n => n.textContent));   // (v171: OUT 2W by his name)
 const hn = await K('HURTNAME'); await page.click(`#bpBody .mgRow:has-text("${hn}")`); await page.waitForTimeout(120);
 const card = await page.innerText('#bpBody .mgCard').catch(() => '');
 info('marked: ' + JSON.stringify({ warn, tok, sel, row, card: card.split('\n').find(l => /INJURED/.test(l)) }));
-ok(/✚/.test(warn) && /in your nine/.test(warn) && tok >= 1 && sel === 1 && row.length === 1 && /2w/.test(row[0]) && /INJURED · a strain · 2 weeks/.test(card),
+ok(/✚/.test(warn) && /in your nine/.test(warn) && tok >= 1 && sel === 1 && row.length === 1 && /^OUT 2W$/.test(row[0]) && /INJURED · a strain · 2 weeks/.test(card),
   'marked everywhere: the hub ("' + warn.split('·').find(x => /✚/.test(x)).trim() + '"), the tactics pitch, the Selection list, the squad (' + row[0] + '), his card');
 
 process.exitCode = rep.finish() ? 1 : 0;

@@ -184,7 +184,7 @@ await K(`(()=>{ const d=CAREER.data; d.bids=d.bids.filter(b=>b.pid!==${r3.id}); 
 // THE SEARCH'S FILTERS (v116): POSITION, TYPE, SORT (rating, potential, price either way, age) and IN BUDGET
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
 await K(`(()=>{ const d=CAREER.data; d.budget=20000; Object.assign(MGUI,{mpos:'ALL',arch:'ALL',sort:'ovr',cheap:false,drop:null,sel:null}); mgRerender(); return 1; })()`); await page.waitForTimeout(60);
-const rows = () => page.evaluate(() => [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r => ({ id: +r.dataset.pid, pos: r.querySelector('.pos').textContent, amt: +r.querySelector('.amt').textContent.replace(/[^\d]/g, ''), ovr: r.querySelector('.ovr').textContent })));
+const rows = () => page.evaluate(() => [...document.querySelectorAll('#bpBody .mgPaneL .mgRow')].map(r => ({ id: +r.dataset.pid, pos: r.querySelector('.pos').textContent, amt: +r.querySelector('.amt').textContent.replace(/[^\d]/g, ''), ovr: r.querySelector('.ovr').textContent, pt: (r.querySelector('.pt') || {}).textContent || '' })));   // (pt: v171's POT column)
 const pick = async (k, v) => { await page.click(`#bpBody [data-mg="mdrop"][data-k="${k}"]`); await page.waitForTimeout(60); const opts = await page.$$eval('#bpBody .mkMenu [data-mg="filt"]', ns => ns.map(n => n.textContent));
   await page.click(`#bpBody .mkMenu [data-mg="filt"][data-k="${k}"][data-v="${v}"]`); await page.waitForTimeout(80); return opts; };
 const all0 = await rows();
@@ -223,7 +223,7 @@ info('free agents, sorted: ' + JSON.stringify({ n: faAll, young: fa1.slice(0, 4)
 ok(String(faSort) === 'RATING,POTENTIAL,WAGE ▲,WAGE ▼,AGE ▲,AGE ▼' && fa1.length === faAll && asc(fa1) && desc(fa2) && asc(fa3) && desc(fa4) && faPosOpts.length === 10 && fa5.every(r => r.pos === 'CB'),
   'free agents: POSITION, TYPE and SORT too -- age youngest or oldest first (' + fa1[0] + ' / ' + fa2[0] + '), the wage he asks either way, CBs only (' + fa5.length + ' of ' + faAll + ')');
 await page.click('#bldgPanel .bpTab:text-is("Search")'); await page.waitForTimeout(80);
-ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^POT/.test(pot[0].ovr), 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list (' + pot[0].ovr + '); the rest after');
+ok(potKnown.slice(0, 4).every(v => v > 0) && desc(potKnown.filter(v => v > 0)) && potKnown.slice(4).every(v => v < 0) && /^\d+(–\d+)?$/.test(pot[0].pt) && pot.slice(-1)[0].pt === '?', 'SORT POTENTIAL: the men your scouts know, best first, their potential in the list\'s POT column (' + pot[0].pt + '; v171 -- it took the rating\'s place); the rest after (' + pot.slice(-1)[0].pt + ')');
 ok(inBud.length > 0 && inBud.length < all0.length && inBud.every(r => r.amt <= budNow), 'IN BUDGET: only the men you could pay for (' + inBud.length + ', all at or under ' + budNow + ')');
 // the Bids tab's history (v108): the one you signed, and the one you walked away from -- and the season's count
 await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
