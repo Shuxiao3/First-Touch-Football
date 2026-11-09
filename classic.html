@@ -20734,6 +20734,7 @@
     if(!d.pop161&&d.world){ const st=POP_STAGE[d.tier||1]||0.25;   // (v161, once: popularity across the whole game -- honours as big as their stage, your men's afresh)
       for(const p of [...(d.roster||[]),...(d.world.free||[]),...(d.youth||[]),...Object.values(d.world.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.fame) p.fame=Math.round(p.fame*st*10)/10;
       for(const p of d.roster||[]) p.pop=Math.round(popTarget(d,p,d.tier,true)*10)/10; d.pop161=true; }   // (v108, once: a price left at the old going rate follows the new one)
+    if(!d.fa178){ for(const p of d.roster||[]) if(p.fa==null&&!p.loan){ const t=(d.tx||[]).find(x=>x.dir==='in'&&x.name===p.name); if(t&&t.club==='free agent') p.fa=t.ovr; } d.fa178=true; }   // (v178, once: the men you signed on a free, by the transfers' log -- his last arrival, and what he was then: see mgFaKept)
     { const v=d.story&&d.story.vetId!=null&&(d.roster||[]).find(p=>p.id===d.story.vetId); if(v&&!v.hometown){ v.hometown=true; delete v.cAsk; } }   // (v109: the hometown hero, from before)
     const W=d.world||{}, all=[...(d.roster||[]), ...(W.free||[]), ...(d.youth||[]), ...Object.values(W.clubs||{}).flatMap(c=>c.players||[])];
     for(const p of all) if(p&&p.style==='widemid'&&p.subRole==='CM') p.subRole='WM';   // (a wide midfielder used to be filed as a CM)
@@ -21061,7 +21062,7 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
+      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, fa178:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)

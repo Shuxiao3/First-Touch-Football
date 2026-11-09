@@ -571,6 +571,13 @@ info('signed on a free, the bids: ' + JSON.stringify(nb));
 ok(nb.fa === 56 && nb.kept && nb.star === 0 && nb.watch === 0 && nb.listed > 30 && !nb.grownKept && nb.grown > 5 && nb.renew === null && nb.faAfter === null && nb.renewed > 5,
   'nobody bids for a man you signed on a free (he was ' + nb.fa + '): a star now, 300 weeks of bids and none for him, nor watching him; listed, ' + nb.listed + '; come on four points, ' + nb.grown + '; on a new deal, ' + nb.renewed + ' (v177: a star drew bids within the week)');
 ok(nb.dd === 0 && nb.ddFree > 10, 'deadline day: the best of your squad, signed on a free, draws none of the late bids (200 deadline days; ' + nb.ddFree + ' once he isn\'t)');
+// a career from before v178: the men you'd signed on a free are found in the transfers' log (his last arrival, and what
+// he was then); one you bought isn't marked
+const mig = await page.evaluate(() => { const M = __MG, d = M.d, [a, b] = d.roster.filter(q => !q.loan && q.fa == null).slice(0, 2);
+  d.tx.unshift({ s: d.season, dir: 'in', name: b.name, ovr: b.ovr, club: 'Somewhere FC', fee: 1000 }, { s: d.season, dir: 'in', name: a.name, ovr: a.ovr - 1, club: 'free agent', fee: 0 });
+  delete d.fa178; M.mgMigrate(d); const out = { a: a.fa ?? null, aOvr: a.ovr, b: b.fa ?? null, flag: d.fa178 === true };
+  delete a.fa; d.tx.splice(0, 2); M.mgSave(d); return out; });
+ok(mig.a === mig.aOvr - 1 && mig.b === null && mig.flag, 'a career from before v178: a man whose last arrival was as a free agent is marked signed on a free (as he was then, ' + mig.a + '); one you bought, not');
 
 // --- THE FIRST SEASON'S TWO ARRIVALS: after the 2nd game a hometown veteran of the top flight (rated in the 70s, 33 to 35)
 // joins on under a third of his wage; after the 5th a 16-year-old wonderkid (in the 60s, a ceiling of 85 to 90) asks to

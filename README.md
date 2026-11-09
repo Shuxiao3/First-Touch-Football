@@ -2146,7 +2146,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Signed on a free, nobody bids for him (v178).** Nobody wanted him while he was without a club, so nobody bids
       for him while he's on the deal he signed with you -- not in the window, not on deadline day, not a club watching
       him -- unless you list him, he wants out, or he's come on four points since he signed. A new deal with you ends
-      it: he's yours then, like anyone. (Till v178 a man you'd picked up for nothing could draw bids within the week.)
+      it: he's yours then, like anyone. (Till v178 a man you'd picked up for nothing could draw bids within the week.
+      A career from before v178 finds its men signed on a free in the transfers' log, as they were when they came --
+      one you've given a new deal since among them, as the log can't tell.)
   - **Scouting** needs the scouts' house built (see **The campus**). What you know of a man at another club (or a
     free agent) goes in levels, as far as your scouts' house's level:
     - **None**: a rating range, 8 points wide, 6 and then 2 as you grow your scouting network; ? for the rest.
