@@ -71,9 +71,9 @@ ok(ease[0] > 0 && ease[1] < ease[0] && ease[2] < ease[1] && ease[3] < ease[0] * 
 // THE COMPUTER'S THROUGH BALL: along the grass, struck to die where the runner will be -- but never harder than the
 // Computer through ball dial (900 px/s; it was 1500, and nobody could get across to it). Its weight errs with Passing:
 // struck a hundred times each, a Passing 1 man's pace spreads two or three times as wide as a 10's.
-const tb = await page.evaluate(() => { const T = window.__T, c = T.controlled(), mates = T.players().filter(q => q.team === c.team && q !== c), q = mates[0], b = T.ball(), keep = c.stats.passAcc, out = {};
+const tb = await page.evaluate(() => { const T = window.__T, c = T.controlled(), mates = T.players().filter(q => q.team === c.team && q !== c), q = mates[0], b = T.ball(), keep = c.stats.passAcc, keepL = c.stats.longPass, out = {};
   T.freeze(); const ox = c.x, oy = c.y;
-  const hit = (d, tA, acc) => { c.stats.passAcc = acc; c.x = ox; c.y = oy; q.x = ox + 300; q.y = oy; q.vx = q.vy = 0; b.ownedBy = c;   // (him standing: nothing to bend it into)
+  const hit = (d, tA, acc) => { c.stats.passAcc = acc; c.stats.longPass = acc; c.x = ox;   // (v169: Long passing too -- an 18 m ball is three-tenths a long pass since v163, and his own Long passing left the spread by Passing on the edge of the check) c.y = oy; q.x = ox + 300; q.y = oy; q.vx = q.vy = 0; b.ownedBy = c;   // (him standing: nothing to bend it into)
     b.x = c.x + 20; b.y = c.y; b.z = 0;
     T.obThruBall(c, q, b.x + d, b.y, tA); const sp = Math.hypot(b.vx, b.vy); b.vx = b.vy = 0; return { sp, vz: b.vz }; };
   out.cap = T.P.thruPace.val; out.need = Math.round(T.obThruV0(600, 0.45).v0);
@@ -81,7 +81,7 @@ const tb = await page.evaluate(() => { const T = window.__T, c = T.controlled(),
   out.shortNeed = Math.round(T.obThruV0(220, 0.8).v0);
   const sd = acc => { const v = []; for(let i = 0; i < 100; i++) v.push(hit(400, 0.6, acc).sp); const m = v.reduce((a, x) => a + x, 0) / v.length; return Math.sqrt(v.reduce((a, x) => a + (x - m) * (x - m), 0) / v.length) / m; };
   out.sd1 = +sd(1).toFixed(3); out.sd10 = +sd(10).toFixed(3);
-  c.stats.passAcc = keep; c.x = ox; c.y = oy; return out; });
+  c.stats.passAcc = keep; c.stats.longPass = keepL; c.x = ox; c.y = oy; return out; });
 info('the computer\'s through ball: ' + JSON.stringify(tb));
 ok(tb.cap === 900 && Math.abs(tb.long.sp - 900) < 1 && tb.long.vz === 0, 'a long through ball that would need ' + tb.need + ' px/s to get there in time is struck at ' + Math.round(tb.long.sp) + ', along the grass');
 ok(Math.abs(tb.short.sp - tb.shortNeed) < 1, '...a short one at what it needs (' + Math.round(tb.short.sp) + ' px/s)');
