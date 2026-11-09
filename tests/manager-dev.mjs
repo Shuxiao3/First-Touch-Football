@@ -54,13 +54,22 @@ r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
   const p=D.roster.find(q=>q.role==='DEF')||mgAiClubs(D).flatMap(c=>c.players).find(q=>q.role==='DEF'), st=devUnpack(p.at), at=o2=>cwOverall('DEF',Object.assign({},st,o2));
   o.shoot=[at({shotAcc:1,shotPower:1,longShots:1}),at({shotAcc:10,shotPower:10,longShots:10})]; o.tackle=[at({tackle:1,slideTackle:1,interceptions:1}),at({tackle:10,slideTackle:10,interceptions:10})];
   // a world rated on v121's weights, read now: every man rated again (his potential too), the leagues where they were
+  // (v182) a world as a save from before v122 holds it: its men made the old way -- each style's offsets as they were (d181),
+  // put on with the rest of his game (never his pace) moved to his rating -- not from the master sheet's numbers, which
+  // no save that old has
+  const oldMake=p=>{ const role=p.role, T=p.ovr, s=cwStatsForOVR(role,T,cwMul((p.seed>>>0)||1)), d=(STYLES[p.style]&&STYLES[p.style].d181)||{}, w=OVR_W[role], main=ovrMainBut(role);
+    for(const k in d) s[k]=clamp(Math.round((s[k]+d[k])*2)/2,1,10);
+    for(let it=0;it<12;it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main) s[k]=clamp(s[k]+step,1,10); }
+    const ks=ovrMainBut(role).sort((a,b)=>w[a]-w[b]); for(let it=0;it<60;it++){ const cur=cwOverall(role,s); if(cur===T) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<T?0.5:-0.5),1,10); }
+    return s; };
   const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free], old=q=>clamp(Math.round(ovrMean(devUnpack(q.at),OVR_W_V121[q.role])*10),30,95);
-  const keep=all.map(q=>[q.ovr,q.pot]), tier=()=>{ const t={}; for(const c of mgAiClubs(D)){ (t[c.tier]=t[c.tier]||[]).push(...c.players.map(q=>q.ovr)); } return Object.values(t).map(v=>v.reduce((a,x)=>a+x,0)/v.length); };
+  const keep=all.map(q=>[q.ovr,q.pot,q.at]); for(const q of all) if(q.at&&q.style) q.at=devPack(oldMake(q));
+  const tier=()=>{ const t={}; for(const c of mgAiClubs(D)){ (t[c.tier]=t[c.tier]||[]).push(...c.players.map(q=>q.ovr)); } return Object.values(t).map(v=>v.reduce((a,x)=>a+x,0)/v.length); };
   for(const q of all) q.ovr=old(q); const was=tier(), w0=all.map(q=>q.ovr); delete D.w122; mgMigrate(D);
   const dd=all.map((q,i)=>q.ovr-w0[i]), now=tier();
   o.mig={ flag:D.w122, rated:all.every(q=>q.ovr===clamp(cwOverall(q.role,devUnpack(q.at)),30,95)), mean:+(dd.reduce((a,v)=>a+v,0)/dd.length).toFixed(2), most:Math.max(...dd.map(Math.abs)),
     same:+(dd.filter(v=>v===0).length/dd.length).toFixed(2), tiers:was.map((v,i)=>+(now[i]-v).toFixed(2)) };
-  all.forEach((q,i)=>{ q.ovr=keep[i][0]; q.pot=keep[i][1]; });
+  all.forEach((q,i)=>{ q.ovr=keep[i][0]; q.pot=keep[i][1]; q.at=keep[i][2]; });
   return o; })()`);
 info('ratings out of 5: ' + JSON.stringify(r));
 ok(r.every && r.gkOk, 'every outfield stat counts for every outfield line, 1 to 5 (the line\'s game 5) -- and his pace above all since v144, speed 6 and acceleration 5; a keeper\'s: his keeping, his feet a little (' + r.gk + ')');

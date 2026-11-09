@@ -2930,11 +2930,67 @@
     complete:{longPass:1,compFinal:1}, poacher:{longPass:-1.5,compFinal:2}, speedster:{longPass:-0.5}, target:{compFinal:0.5}, falsenine:{longPass:1,compFinal:0.5},
     allround:{}, shotstopper:{longPass:-0.5}, sweeperkeeper:{longPass:1}};
   for(const k in STYLE_NEW_D) if(STYLES[k]) Object.assign(STYLES[k].d||(STYLES[k].d={}), STYLE_NEW_D[k]);
+  // (v182) EVERY PLAYSTYLE'S USUAL MAKE, FROM THE MASTER SHEET: what a man of each style has in every stat at his style's
+  // usual level (what these numbers rate: STYLE_REF -- his line's usual man's is 69, 67 or 72), 1 to 20 -- the game's 1 to 10 in half
+  // points -- set by hand on the master sheet and tuned stat by stat across the styles: the outfield ones on the Stats
+  // by Playstyle sheet, the keepers on the master sheet. In OUT_KEYS' order (speed, acceleration, agility, stamina,
+  // strength, ball control, dribbling, short passing, long passing, composure in traffic, final third composure,
+  // crossing, heading, slide tackle, tackle, interceptions, Off IQ, Def IQ, shot power, curve, long shots, shot accuracy),
+  // a keeper's then GK_KEYS' (keeper speed, reflexes, reach, diving, distribution, handling). A style's offsets (d) are
+  // these less his line's averages (ARCH), so his line's average plus his style is the sheet; a man's made from them
+  // (cwStatsForOVR; an exhibition side's, genStyledStats) -- his level moving him from his style's own,
+  // a bell curve's spread (MAKE_SD), and the odd half point nudged to the rating he's made to. His line's averages, and
+  // so every rating, are as they were. (Till v182 a style was a handful of offsets on its line's averages: the ones
+  // above and STYLE_NEW_D.)
+  const STYLE_SHEET={
+    stopper:[14,8,7,12,18,10,7,11,12,10,6,7,18,17,18,16,9,17,10,8,8,7], cover:[13,13,9,14,14,10,8,11,12,10,6,8,15,17,16,17,9,18,9,8,8,7],   // CB
+    ballplayer:[11,10,10,12,12,12,11,13,15,10,7,10,14,14,14,14,11,14,10,12,10,9], widecb:[13,10,12,15,12,11,9,12,12,7,7,11,14,15,15,16,10,14,9,9,9,9],
+    libero:[11,10,11,13,10,13,12,14,12,13,8,10,12,15,14,14,12,13,10,10,11,11],
+    fullback:[15,14,14,16,12,14,12,13,13,11,9,15,12,15,14,15,12,14,10,12,10,10], wingback:[16,14,14,17,10,14,14,13,13,10,10,15,7,14,11,11,13,13,9,13,13,13],   // FB
+    deffb:[12,12,12,15,13,12,10,12,12,9,7,12,14,16,15,15,10,15,10,10,8,8], invfb:[12,10,14,14,10,14,14,15,13,14,10,12,9,14,13,14,13,13,10,13,13,11],
+    ballwinner:[13,15,14,17,12,13,12,13,11,11,10,10,12,15,17,15,11,15,13,10,10,11], deepcreator:[11,12,13,14,10,15,14,15,17,15,13,13,10,11,11,12,16,12,14,16,14,12],   // DM
+    anchor:[11,12,13,15,15,13,12,14,12,13,9,10,14,14,15,17,11,16,13,10,10,9],
+    completemid:[13,12,13,16,12,15,14,15,13,15,12,13,11,12,13,14,14,13,13,13,13,13], boxtobox:[13,12,13,19,13,13,12,14,12,13,14,12,13,12,12,13,13,14,14,12,10,14],   // CM
+    covermid:[13,13,13,17,12,13,12,14,12,11,10,11,11,14,15,15,11,15,12,10,11,11], mezzala:[13,13,13,14,9,15,14,15,16,14,14,15,9,8,9,10,16,10,13,15,15,13],
+    playmaker:[12,13,14,14,8,17,15,17,14,16,15,15,9,8,8,9,17,8,13,17,15,14], trequartista:[13,14,14,15,8,16,15,16,13,15,16,13,11,8,8,8,17,9,15,15,16,15],   // AM
+    shadow:[15,12,13,15,11,15,13,14,11,13,16,11,14,10,8,8,16,9,15,14,14,16],
+    widemid:[15,14,14,17,11,15,15,14,14,14,12,15,10,12,12,13,13,13,12,13,12,11], mwinger:[17,15,15,16,9,14,13,13,12,8,10,14,7,11,9,8,12,11,11,11,10,11],   // WM
+    wideplaymaker:[13,13,14,15,10,16,16,14,16,12,14,16,7,9,9,8,15,8,12,16,14,14],
+    winger:[16,16,16,13,8,14,15,14,12,12,14,17,8,7,8,9,14,10,14,14,14,14], trickster:[15,16,18,13,6,15,19,14,13,15,14,14,8,7,6,7,14,7,14,14,14,14],   // WNG
+    paceywinger:[19,17,15,13,7,14,15,13,10,11,12,12,7,7,6,8,13,7,13,12,13,13], invwinger:[15,17,16,14,9,15,16,14,12,14,15,14,9,8,8,9,15,9,15,15,17,15],
+    complete:[15,14,15,14,12,14,14,14,12,14,16,13,13,8,9,9,15,11,16,13,15,16], poacher:[14,16,13,13,13,14,13,12,9,15,17,9,15,7,8,8,17,9,17,12,15,18],   // STK
+    speedster:[18,15,13,13,9,13,14,12,10,11,14,12,10,6,7,7,13,7,15,11,12,13], target:[12,14,11,14,16,15,14,15,12,15,17,12,17,8,10,9,14,10,16,12,16,17],
+    falsenine:[15,15,16,14,10,16,16,16,12,16,14,14,11,7,8,8,16,9,14,14,15,15],
+    allround:[10,10,11,12,12,10,7,11,10,13,6,6,10,6,8,10,10,11,8,6,6,6,13,15,15,15,13,14], shotstopper:[10,10,11,12,12,10,7,10,9,13,6,6,10,6,8,10,10,11,8,6,6,6,10,17,16,16,11,12],   // GK
+    sweeperkeeper:[10,10,11,12,12,11,7,13,12,15,6,6,10,6,8,10,10,11,8,6,6,6,16,13,13,14,16,15]
+  };
+  for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S) continue; const A=ARCH[S.role], keys=S.role==='GK'?[...OUT_KEYS,...GK_KEYS]:OUT_KEYS, d={};
+    keys.forEach((x,i)=>{ const v=STYLE_SHEET[k][i]; if(v!=null&&v/2!==A[x]) d[x]=v/2-A[x]; }); S.d181=S.d; S.d=d; }   // (d181: the offsets till v182, for a career kept from before -- see the tests)
+  // (v182) EACH STYLE'S OWN USUAL LEVEL: what the sheet's numbers rate (unrounded, in stat points) -- a man is made from his
+  // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
+  const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
+  // (v182) THE SPREAD, A BELL CURVE: a made man's stats scatter round his style's on a normal curve (normInv: Acklam's
+  // approximation, one draw a stat, so the draws that follow are as they were), MAKE_SD a standard deviation -- 0.4 of a
+  // point, the master sheet's 0.8 on its 1 to 20 scale: two men in three within that of it, nineteen in twenty within
+  // twice that, and never more than two and a half times it. (It was an even spread, 0.7 either way: the same width
+  // measured that way, flat-topped.) An exhibition side's men scatter twice as widely, as they always did (their even
+  // 1.5 either way, half that on pace: about 0.87 and 0.43).
+  function normInv(p){
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
+          b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+          c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+          e=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    const tail=q=>(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((e[0]*q+e[1])*q+e[2])*q+e[3])*q+1);
+    if(p<0.02425) return tail(Math.sqrt(-2*Math.log(p)));
+    if(p>0.97575) return -tail(Math.sqrt(-2*Math.log(1-p)));
+    const q=p-0.5, r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  const bellDev=(u,sd)=>sd*clamp(normInv(clamp(u,1e-6,1-1e-6)),-2.5,2.5);
+  const MAKE_SD=0.4, MAKE_SD_NEW=0.32, EXH_SD=0.87;   // (MAKE_SD_NEW: Long passing's and Final third composure's own, with 0.6 of their parent's on top -- 0.4 in all)
   // a man's new two from his old ones (newStatsFill): his Short passing and Composure, moved by how his role's and
   // archetype's Long passing and Final third composure differ from them -- and (made, not carried over) a little of his own
   // either way, from a hash of the rest, so his long game isn't simply his short one
   function newStatsFor(st,role,style,own){ const A=ARCH[role]||ARCH.MID, d=(STYLES[style]&&STYLES[style].d)||{}, o={};
-    const h=k=>own?((hashStr(STAT_KEYS_V162.map(x=>st[x]).join(',')+'|'+k)/4294967296)*2-1)*0.8:0;
+    const h=k=>own?bellDev(hashStr(STAT_KEYS_V162.map(x=>st[x]).join(',')+'|'+k)/4294967296,0.46):0;   // (v182: a bell curve -- it was even, 0.8 either way)
     o.longPass=clamp(Math.round(((+st.passAcc||5.5)+(A.longPass+(d.longPass||0))-(A.passAcc+(d.passAcc||0))+h('lp'))*2)/2,1,10);
     o.compFinal=clamp(Math.round(((+st.composure||5.5)+(A.compFinal+(d.compFinal||0))-(A.composure+(d.composure||0))+h('cf'))*2)/2,1,10);
     return o; }
@@ -3219,11 +3275,11 @@
     const st={}, d=(STYLES[style]&&STYLES[style].d)||{};
     for(const k of STAT_KEYS_V162){ if(k==='gkHandling') continue; const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
       const m=ARCH[role][k]+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);
-      st[k]=Math.max(1,Math.min(10,Math.round((m+(R()*2-1)*sp)*2)/2)); }
+      st[k]=Math.max(1,Math.min(10,Math.round((m+bellDev(R(),sp*EXH_SD/1.5))*2)/2)); }   // (v182: a bell curve, as wide as the even spread was)
     // (Handling came later than the rest: its spread from a hash of his other stats, not from R -- so every club's men
     // keep the stats they had)
     const hj=hashStr(STAT_KEYS_V162.map(k=>st[k]).join(','))/4294967296;
-    st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+(hj*2-1)*1.5)*2)/2));
+    st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+bellDev(hj,EXH_SD))*2)/2));
     Object.assign(st,newStatsFor(st,role,style,true));   // (v163: Long passing and Final third composure, after: nobody's old stats move)
     return st;
   }
@@ -3271,7 +3327,7 @@
   // often as they would now) -- or, leaning no way much, an all-rounder
   const GK_LEAN={shotstopper:0.3, sweeperkeeper:-0.15};   // (v144: no One-on-one keeper)
   function gkInferType(st){ let best='allround', bs=0.1;
-    for(const k in GK_LEAN){ const d=STYLES[k].d; let s=0, L=0; for(const x in d){ const b=ARCH.GK[x]; s+=((st[x]??b)-b)*d[x]; L+=d[x]*d[x]; }
+    for(const k in GK_LEAN){ const d=STYLES[k].d; let s=0, L=0; for(const x of GK_KEYS){ if(!d[x]) continue; const b=ARCH.GK[x]; s+=((st[x]??b)-b)*d[x]; L+=d[x]*d[x]; }   // (v182: his keeping only -- a style's every stat has an offset now)
       s=s/Math.sqrt(L)+GK_LEAN[k]; if(s>bs){ bs=s; best=k; } }
     return best; }
   const NAMES=['Vega','Brandt','Okafor','Sato','Lindqvist','Moreau','Adeyemi','Ferraro','Novak','Costa','Haines','Reuben','Mbeki','Ericsson','Volkov','Ishida','Caro','Pulis','Soto','Friel','Tanaka','Olsen','Bauer','Naranjo','Esposito','Hale','Drummond','Cisse','Holt','Marek','Dietz','Quill'];
@@ -16445,21 +16501,23 @@
   // attacking midfielder each half as common as a central one (v127: CM, DM and AM two to one to one)
   function cwSubRole(role,rng){ if(role==='GK')return 'GK'; if(role==='DEF')return rng()<0.4?'FB':'CB';
     if(role==='MID'){ const r=rng(); return r<0.25?'WM':r<0.625?'CM':r<0.8125?'DM':'AM'; } return rng()<0.45?'WNG':'STK'; }
-  // a generated player's style: its offsets on top of his stats, then the whole block nudged back to the rating he
-  // was made for (so a stopper's lost pace comes back as strength and heading, not as a lower rating)
-  function cwStyleStats(role,s,style,T){
-    const d=(STYLES[style]&&STYLES[style].d)||{}, w=OVR_W[role], main=ovrMainBut(role);   // (v144: his pace isn't what's moved to make his rating: the rest of his game pays for it -- PACE, THE DEAREST)
-    for(const k in d) s[k]=clamp(Math.round((s[k]+d[k])*2)/2,1,10);
-    if(w) for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
-    return s; }
   function cwMul(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
   function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return Math.max(1,Math.min(99,Math.round((R[0]+(ovrMean(st,w)-R[1])*K)*10))); }   // (A MAN'S RATING)
   function cwOverallX(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }   // (v155: his rating unrounded -- what the side's mood is worth to him)
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
-  function cwStatsForOVR(role,T,rng){ const base=ARCH[role],w=OVR_W[role],B=OVR_REF[role][0],delta=T/10-B,s={}, main=ovrMainBut(role);   // (B: the usual make's rating, in stat points; v144: his pace not moved to make it)
-    for(const k of STAT_KEYS_V162){ const onW=(w[k]||0)>=2; let v=base[k]+(onW?delta:delta*0.55)+(rng()*2-1)*0.7; s[k]=clamp(Math.round(v*2)/2,1,10); }
-    for(const k of NEW_STAT_KEYS){ const onW=(w[k]||0)>=2, par=k==='longPass'?'passAcc':'composure'; let v=base[k]+(onW?delta:delta*0.55)+0.6*(s[par]-base[par]-((w[par]||0)>=2?delta:delta*0.55))+(rng()*2-1)*0.5; s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
+  // A MAN MADE TO A RATING (T), of a style: his style's usual make (his line's averages and its offsets -- the master sheet's
+  // numbers, v182) moved from what that make rates (STYLE_REF; with no style, his line's usual man's: OVR_REF) to T -- all of
+  // what his line's game is made of the whole way, the rest about half as far -- each stat scattered on a bell curve
+  // (MAKE_SD), and the rest of his game, never his pace, nudged by the half point to the rating. So the shape his style is
+  // given holds at any rating: a style whose numbers rate over his line's usual man has them all a touch lower at the same
+  // rating, one whose rate under a touch higher. (Till v182 a man was made from his line's usual level, his style's offsets
+  // put on after and the rest of his game moved by however far they took him off the rating: a style rated well over his
+  // line's had his main stats squeezed -- cwStyleStats, gone.)
+  function cwStatsForOVR(role,T,rng,style){ const S=style&&STYLES[style], d=(S&&S.d)||{}, base=k=>ARCH[role][k]+(d[k]||0), w=OVR_W[role],
+      B=S&&STYLE_REF[style]!=null?STYLE_REF[style]:OVR_REF[role][0], delta=T/10-B, s={}, main=ovrMainBut(role), lv=k=>(w[k]||0)>=2?delta:delta*0.55;   // (B: the make's rating, in stat points; v144: his pace not moved to make it)
+    for(const k of STAT_KEYS_V162){ let v=base(k)+lv(k)+bellDev(rng(),MAKE_SD); s[k]=clamp(Math.round(v*2)/2,1,10); }
+    for(const k of NEW_STAT_KEYS){ const par=k==='longPass'?'passAcc':'composure'; let v=base(k)+lv(k)+0.6*(s[par]-base(par)-lv(par))+bellDev(rng(),MAKE_SD_NEW); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
     for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwStyleFor(tier,rng){
@@ -16529,8 +16587,7 @@
   // his stats as he's first made: the role's averages moved to his rating, his style on top, then nudged until they rate
   // exactly what he is (from then on they're his own: see PLAYER DEVELOPMENT)
   function mgDeriveStats(p){
-    const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1));
-    if(p.style) cwStyleStats(p.role,s,p.style,p.ovr);   // (a keeper's too: v118)
+    const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1),p.style);   // (his style's make: a keeper's too, v118)
     const w=OVR_W[p.role]||OVR_W.MID, ks=ovrMainBut(p.role).sort((a,b)=>w[a]-w[b]);   // the lightest of the stats that make his game first: small steps (v144: never his pace)
     for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }
     return s; }
@@ -16584,7 +16641,7 @@
   function devRel(p){ const w=OVR_W_DEV[p.role]||OVR_W_DEV.MID, mx=Math.max(...Object.values(w)),   // (v144: the weights before pace was dearest -- OVR_W_DEV)
      sd=(STYLES[p.style]&&STYLES[p.style].d)||{}, o={};
     for(const k of DEV_KEYS){ let r=(w[k]||0)>=2?0.35+0.65*w[k]/mx:0.15;   // (a lesser stat, 1: as one that counted for nothing grew, before v122)
-      if(sd[k]>0) r=Math.min(1,r+0.25); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }
+      if(sd[k]>0) r=Math.min(1,r+0.25*Math.min(1,sd[k])); if(devGroup(k)==='men') r=Math.max(r,0.5); o[k]=r; } return o; }   // (v182: by how far over his line's his style has it -- a point and more, all of it; a style's every stat has an offset now, from the sheet)
   // his ceilings: his attributes as he's made, lifted (most where it matters to him) till they rate his potential;
   // reading the game a point more besides (it grows with the years)
   function devCeil(p,st){ const rel=devRel(p), T=Math.max(p.pot||p.ovr,p.ovr);
@@ -20822,7 +20879,7 @@
         for(const k of NEW_STAT_KEYS){ cl[k]=Math.max(cl[k],at[k]); bs[k]=Math.max(bs[k],at[k]); }
         p.at=devPack(at); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,at),30,99); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
       d.st163=true; }
-    for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes as they were)
+    for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes made at the ratings they had -- since v182 from the master sheet's numbers, so not quite as they were)
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
     if(!d.tk108){ if([3,5,8,14].includes(d.ticketPrice)) d.ticketPrice=null; d.tk108=true; } d.seats=d.seats||{};

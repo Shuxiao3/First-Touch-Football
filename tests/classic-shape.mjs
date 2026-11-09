@@ -152,6 +152,7 @@ ok(holdC.h1.tr, 'a cover CB (v118) picks up the runner at once, his line told to
 const holdCpu = sty => page.evaluate(sty => { const T = window.__T; T.reset(); window.__home('G', 15); window.__homeDef('R');
   const G = window.__men('G'), c = G.find(q => window.__pos(q, 'atk') === 'CM'), st = G.find(q => window.__pos(q, 'atk') === 'ST');
   const cb = window.__men('R').find(q => q.slotDef && q.slotDef.pos === 'CB'); cb.style = sty;
+  cb.stats = Object.assign({}, cb.stats, { defIQ: 8.5 });   // (v182: how far ahead he reads the run, pinned -- an exhibition side's men come from the master sheet's numbers now, and this one read it less)
   window.__give(c, 42, 16);
   const s0 = T.blockSpot(cb), [u0, w0] = window.__uw('G', s0.x, s0.y);
   window.__at(st, u0 - 4, w0); const a = T.atkOf('G'); st.vx = a * 8 * T.MK; st.seenVx = st.vx; st.vy = st.seenVy = 0;

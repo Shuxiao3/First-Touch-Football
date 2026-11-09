@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  // ===== END MANAGER CAREER', '  window.__M={STYLES, SUB_STYLES, ARCH, typeKept, inferStyle, posFit, natPos, CLUBS, clubSquadGen, clubSide, slotStylesFor, cwStatsForOVR, cwStyleStats, cwOverall, cwMul, '
+patch('  // ===== END MANAGER CAREER', '  window.__M={STYLES, SUB_STYLES, ARCH, typeKept, inferStyle, posFit, natPos, CLUBS, clubSquadGen, clubSide, slotStylesFor, cwStatsForOVR, cwOverall, cwMul, STYLE_REF, OUT_KEYS, GK_KEYS, OVR_REF, mgDeriveStats, '
   + 'mgMigrate, mgStats, get d(){ return CAREER&&CAREER.data; }};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-roster-')), 'classic.html');
 writeFileSync(copy, src);
@@ -48,8 +48,8 @@ ok(ro.fit === 'ballwinner .Ms...., completemid .sMs..., covermid .sM...., mezzal
 const st = await page.evaluate(() => { const M = window.__M, out = {}, med = a => { a = a.slice().sort((x, y) => x - y); return a[a.length >> 1]; };
   const KEYS = ['speed', 'interceptions', 'defIQ', 'dribbling', 'stamina', 'crossing', 'passAcc', 'ballControl', 'tackle', 'offIQ', 'shotAcc', 'strength'];
   for(const [k, role] of [['anchor', 'MID'], ['deepcreator', 'MID'], ['ballwinner', 'MID'], ['completemid', 'MID'], ['boxtobox', 'MID'], ['covermid', 'MID'], ['mezzala', 'MID'], ['playmaker', 'MID'], ['winger', 'ATT'], ['paceywinger', 'ATT']]){
-    const S = { ovr: [] }; for(const x of KEYS) S[x] = [];
-    for(let i = 0; i < 60; i++){ const s = M.cwStatsForOVR(role, 65, M.cwMul(1000 + i)); M.cwStyleStats(role, s, k, 65); for(const x of KEYS) S[x].push(s[x]); S.ovr.push(M.cwOverall(role, s)); }
+    const S = { ovr: [] }; for(const x of KEYS) S[x] = [];   // (v182: his style's make in one -- cwStatsForOVR takes it)
+    for(let i = 0; i < 60; i++){ const s = M.cwStatsForOVR(role, 65, M.cwMul(1000 + i), k); for(const x of KEYS) S[x].push(s[x]); S.ovr.push(M.cwOverall(role, s)); }
     out[k] = { ovr: med(S.ovr) }; for(const x of KEYS) out[k][x] = med(S[x]); }
   return out; });
 const low = k => Math.min(...['passAcc', 'ballControl', 'tackle', 'interceptions', 'defIQ', 'offIQ', 'shotAcc', 'stamina', 'strength', 'dribbling'].map(x => st[k][x]));
@@ -63,6 +63,24 @@ ok(st.paceywinger.speed >= st.winger.speed + 0.5 && st.paceywinger.crossing < st
 ok(st.mezzala.dribbling >= st.boxtobox.dribbling + 1 && st.mezzala.dribbling >= st.ballwinner.dribbling + 1,
   'the mezzala dribbles (' + st.mezzala.dribbling + ', the box-to-box ' + st.boxtobox.dribbling + ', the ball-winner ' + st.ballwinner.dribbling + ')');
 ok(Object.values(st).every(v => Math.abs(v.ovr - 65) <= 1), 'and every one of them is the rating he was made for: a type is the kind of man, not how good (' + Object.values(st).map(v => v.ovr).join(' ') + ')');
+
+// --- (v182) THE MASTER SHEET: every type's usual make is the sheet's numbers (his line's averages and the type's offsets,
+// halved from its 1 to 20) -- made as a career makes a man, at the rating those numbers rate, 200 men of each average
+// them, every one exactly the rating he was made for; and his stats scatter on a bell curve, 0.4 of a point a standard deviation, never more than a point off
+// once rounded (an even spread, 0.7 either way, the same width, had a third of them on the value, none a point off) -----
+const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, worstK: '', off: 0, n: 0 };
+  for(const k in M.STYLES){ const S = M.STYLES[k], role = S.role, keys = role === 'GK' ? [...M.OUT_KEYS, ...M.GK_KEYS] : M.OUT_KEYS, T = Math.round(M.STYLE_REF[k] * 10), sum = {};
+    for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
+    let e = 0; for(const x of keys) e += Math.abs(sum[x] / 200 - (M.ARCH[role][x] + (S.d[x] || 0))) * 2; e /= keys.length;   // (on the sheet's 1 to 20)
+    if(e > out.worst){ out.worst = +e.toFixed(3); out.worstK = k; } }
+  // the spread: a winger's pace, 3000 of him at his style's rating -- how far off his style's, in half points
+  const W = 'winger', role = 'ATT', T = Math.round(M.STYLE_REF[W] * 10), want = M.ARCH[role].speed + (M.STYLES[W].d.speed || 0), h = {};
+  for(let i = 0; i < 3000; i++){ const s = M.cwStatsForOVR(role, T, M.cwMul(20000 + i), W); const o = s.speed - want; h[o] = (h[o] || 0) + 1; }
+  out.on = +((h[0] || 0) / 3000).toFixed(3); out.pt = +(Object.entries(h).filter(([o]) => Math.abs(+o) >= 1).reduce((a, [, n]) => a + n, 0) / 3000).toFixed(3);
+  out.far = Object.keys(h).filter(o => Math.abs(+o) > 1.01).length; out.h = h; return out; });
+info('the master sheet: ' + JSON.stringify(sh));
+ok(sh.worst <= 0.25 && sh.off === 0, 'every type made at the rating its numbers rate has the master sheet\'s numbers -- 200 men of each, the worst a ' + sh.worst + ' of a point off them on average (the ' + sh.worstK + '), on the sheet\'s 1 to 20 -- and every one of the ' + sh.n + ' the rating he was made for');
+ok(sh.on >= 0.40 && sh.on <= 0.55 && sh.pt >= 0.03 && sh.pt <= 0.10 && sh.far === 0, 'and they scatter on a bell curve: ' + Math.round(sh.on * 100) + '% on his style\'s pace, ' + Math.round(sh.pt * 100) + '% a point off it, none further (an even spread as wide had a third on it and none a point off)');
 
 // --- THE EXHIBITION CLUBS' MEN --------------------------------------------------------------------------------------------
 const ex = await page.evaluate(() => { const M = window.__M, n = {}, at = { DM: {}, CM: {}, AM: {} };
