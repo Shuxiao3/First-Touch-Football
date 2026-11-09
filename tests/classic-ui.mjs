@@ -269,6 +269,21 @@ for(const [w, h] of SIZES){
       w + 'x' + h + ': the Clubhouse on one screen, no pages and nothing off it -- who you are, the money, the fans, the week\'s net, the dressing room, the form and the next game, the six buildings and their levels, the clubhouse\'s path and MOVE IN, your career, a chip a season, the seven records; nothing longer than a label, every figure a tap from its sentence; in the hall, every clubhouse done and THE BEST THERE IS'
       + (c.paged || c.out.length || c.long.length || c.noTap.length ? ' -- ' + JSON.stringify({ paged: c.paged, out: c.out, long: c.long, noTap: c.noTap }) : ''));
     await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
+  if(w === 844 && h === 390){ // THE GROUND FROM ABOVE (v175: the handoff's J4) -- the Stands tab: the pitch and its stands round it, each with
+    // its name, the ground's level as pips, its price on a chip and how full it is; the ends only once there are covered
+    // stands; SEATS, FANS, FULL and BOARDS; the five levels as a path, your money against the next, BUILD IT
+    const plan = async () => { await page.tap('#chCampus [data-bldg="stadium"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Stands")'); await page.waitForTimeout(150);
+      const r = await page.evaluate(() => { const B = document.getElementById('bpBody'), q = s => [...B.querySelectorAll(s)];
+        return { stands: q('.sgS:not(.none)').map(e => e.className.replace('sgS ', '') + ':' + e.querySelector('b').textContent + ':' + e.querySelectorAll('.bsPips i.on').length + ':' + (e.querySelector('.sgPrice') || {}).textContent + ':' + !!e.querySelector('.sgFill i') + ':' + !!e.dataset.xpl).join(' '),
+          ends: q('.sgS.none').length, pitch: !!B.querySelector('.sgPitch'), tiles: q('.sgSide .clTile .clLbl').map(e => e.textContent).join(' '), nodes: q('.sgSide .clNode').length, build: !!B.querySelector('.sgSide [data-stad="upgrade"]'), paged: !!B.querySelector('.fitPager') }; });
+      await page.tap('.bpTopBack'); await page.waitForTimeout(80); return r; };
+    const lv0 = await page.evaluate(() => { const d = __MG.d, v = d.stadium.lvl; d.stadium.lvl = 1; __MG.mgSave(d); return v; }), p1 = await plan();
+    await page.evaluate(() => { const d = __MG.d; d.stadium.lvl = 4; __MG.mgSave(d); }); const p4 = await plan();
+    await page.evaluate(lv => { const d = __MG.d; d.stadium.lvl = lv; __MG.mgSave(d); }, lv0);
+    info('the ground from above: ' + JSON.stringify({ p1, p4 }));
+    ok(/^n:BLEACHERS:1:\$\d+:true:true s:BLEACHERS:1:\$\d+:true:true$/.test(p1.stands) && p1.ends === 2 && p1.pitch && p1.tiles === 'SEATS FANS FULL BOARDS' && p1.nodes === 5 && p1.build && !p1.paged
+       && /^n:NORTH STAND:4:\$\d+:true:true w:WEST END:4:\$\d+:true:true e:EAST END:4:\$\d+:true:true s:SOUTH STAND:4:\$\d+:true:true$/.test(p4.stands) && p4.ends === 0 && !p4.paged,
+      'the Stands tab, the ground from above: at level 1 the bleachers down both sides and no ends, at 4 four stands, each with its name, the level as pips, its price, how full it is and its words a tap away; SEATS, FANS, FULL, BOARDS; the five levels and BUILD IT; no pages'); }
   // a match: the pause menu, the match's tactics, the report
   const mf = [], mcheck = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) mf.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   for(let i = 0; i < 8; i++){ if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(100); }   // (by its selector: the Monday papers put aside redraw the hub)

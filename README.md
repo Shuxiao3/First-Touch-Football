@@ -2360,8 +2360,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
     Promotion builds nothing: a bigger league brings more fans (and a sold-out ground lets you put the price up),
     not more seats. The stands change to match in the match itself (the far one; see the pitch above), and the
-    Stands tab shows that stand as it is and as the next level would build it, with your boards and names on. The
-    building's door reads the ground's name.
+    Stands tab (v175) shows the ground from above: the pitch, and round it each stand it has -- its name (a sponsor's
+    once it has one), the ground's level as pips, its price on a chip and how full it is as a bar, a tap for its seats,
+    price, rate and crowd; the bleachers at level 1 down both sides, the ends once there are covered stands -- the
+    premium seats as chips under it and the far stand as it is, boards and names on (not on a short phone); beside it
+    SEATS, FANS, FULL and BOARDS, the next level's beside each, and the ground's five levels as a path, your money
+    against the next and BUILD IT (or the clubhouse it waits for). (Before v175: that stand as it is and as the next
+    level would build it, and four sentences.) The building's door reads the ground's name.
     - **Sponsors** (v103) come to you: nobody's heard of a new club. It starts with its one board bare and no
       offers; they come in the Monday papers, a firm calling about a free place now and then (the longer it's been
       free, the likelier -- a new club's first call usually comes in its first few weeks), two at most in a week,
@@ -2379,7 +2384,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Stands, the East and West Ends); the ground's name once there are four (level 4; never a corner shop's). A
       deal holds its fee wherever you go, and ends when its seasons are up (the news says so, the name goes back,
       the board comes down, and the Monday papers say so too). The Sponsors tab in the Stadium shows each board and
-      place, who has it, the offers waiting (SIGN, NO) and who's calling now; the advertisers' names go on the boards
+      place, who has it, the offers waiting (SIGN, NO) and who's calling now (v175: SPONSORS, PARTNERS and TV a week
+      as tiles; CALLING, the five sizes of firm with the one calling lit, your standing and the mark for the next; each
+      place a row with its firm's size as five squares, the size calling for a free one outlined, a tap saying what the
+      next size would pay; a place not open yet a chip naming what it waits for: NEEDS CABIN, COVERED STANDS, FOUR
+      STANDS); the advertisers' names go on the boards
       along the far touchline, the shirt sponsor's colours on the kit (a patch on the chest), the ground's name and
       the North Stand's on the far stand and over the kick-off. The club's partners still pay their share every week,
       as before. (On a new club's first season this is about $25,000 less than signing everything there was on the
@@ -2818,6 +2827,11 @@ test, and like the Trap Lab the values are the game's settings.
     shots 17.2, most of the new ones from 20 m and more, and it played cramped. Then v55's, a twentieth shorter
     (v57). What was kept was v54's pitch with a twentieth off its length (not measured: too small a step to show in
     80 matches), until nine a side made it bigger again (v125).
+- **v175: the ground from above.** The Stadium rebuilt to the handoff's J4: the Stands tab a plan of the ground, each
+  stand with its name, the level as pips, its price and how full it is, beside SEATS, FANS, FULL and BOARDS and the
+  ground's five levels as a path with BUILD IT; the Sponsors tab with its money as tiles, the sizes of firm calling
+  and your standing against the next, and each place's firm size as squares; the Money tab's figures as four tiles,
+  their sentences a tap away. See **The ground** and **Sponsors**.
 - **v174: the coaches' posts as tiles.** The Staff tab (and the academy's Coach tab) rebuilt to the handoff's J4: the
   posts as tiles across the top, each with its coach (or VACANT), his rating as pips and NEW in the week new men come;
   the men to hire a dense row each under them, the list scrolling, the posts filled, the men to hire and the next

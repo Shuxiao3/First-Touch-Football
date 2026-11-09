@@ -1627,6 +1627,37 @@
   #bpBody .bsAssign{ display:grid; grid-template-columns:auto repeat(4,minmax(0,1fr)); gap:4px 6px; align-items:center; max-width:520px; }
   #bpBody .bsAssign .clLbl{ font-size:8px; } #bpBody .bsAssign .clLbl b{ display:block; font-size:9px; font-weight:400; color:var(--warn); letter-spacing:.3px; }
   #bpBody .bsAssign .mgBtn{ min-height:28px; padding:2px 4px; font-size:10px; margin:0; }
+  /* THE GROUND (v175, J4): a plan of it from above, the stands round the pitch each with its pips, price and crowd */
+  #bpBody .sgWrap{ display:flex; gap:14px; height:100%; min-height:0; font-size:11px; line-height:1.2; color:var(--ink2); }
+  #bpBody .sgLeft{ flex:1 1 52%; min-width:0; display:flex; flex-direction:column; gap:8px; }
+  #bpBody .sgPic{ width:100%; max-width:380px; } @media (max-height:360px){ #bpBody .sgPic{ display:none; } }
+  #bpBody .sgPlan{ min-width:0; display:grid; grid-template-columns:62px minmax(0,1fr) 62px; grid-template-rows:auto minmax(70px,1fr) auto; gap:4px; align-self:flex-start; }
+  #bpBody .sgS{ min-width:0; display:flex; flex-direction:column; gap:2px; padding:3px 6px 5px; border-radius:var(--rS,4px); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well); }
+  #bpBody .sgS.n{ grid-column:2; grid-row:1; } #bpBody .sgS.s{ grid-column:2; grid-row:3; } #bpBody .sgS.w{ grid-column:1; grid-row:2; justify-content:center; } #bpBody .sgS.e{ grid-column:3; grid-row:2; justify-content:center; }
+  #bpBody .sgS.none{ background:transparent; box-shadow:inset 0 0 0 1px var(--well); opacity:.5; justify-content:center; align-items:center; }
+  #bpBody .sgS b{ font-size:9px; font-weight:400; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.3px; }
+  #bpBody .sgS .sgL{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+  #bpBody .sgPrice{ font-size:10px; padding:0 5px; border-radius:3px; color:var(--warn); background:rgb(255 170 60 / .12); white-space:nowrap; }
+  #bpBody .sgFill{ height:3px; border-radius:2px; background:var(--well); overflow:hidden; } #bpBody .sgFill i{ display:block; height:100%; }
+  #bpBody .sgPitch{ grid-column:2; grid-row:2; position:relative; border-radius:3px; background:#3c8d47; box-shadow:inset 0 0 0 2px rgb(255 255 255 / .55); min-height:70px; }
+  #bpBody .sgPitch::before{ content:''; position:absolute; left:50%; top:2px; bottom:2px; width:2px; margin-left:-1px; background:rgb(255 255 255 / .55); }
+  #bpBody .sgPitch::after{ content:''; position:absolute; left:50%; top:50%; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; box-shadow:inset 0 0 0 2px rgb(255 255 255 / .55); }
+  #bpBody .sgPrem{ grid-column:1 / 4; grid-row:4; display:flex; gap:4px; flex-wrap:wrap; }
+  #bpBody .sgPrem .clChip{ font-size:8px; }
+  #bpBody .sgSide{ flex:1 1 48%; min-width:0; display:flex; flex-direction:column; gap:10px; }
+  #bpBody .sgSide .bsTiles{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #bpBody .sgSide .clNode{ width:54px; } #bpBody .sgSide .clNode b{ font-size:6.5px; }
+  /* sponsors' tiers: a firm's size, a square a step, the one it's at lit */
+  .spTier{ flex:none; display:inline-flex; gap:2px; } .spTier i{ width:7px; height:7px; border-radius:1px; background:var(--well); } .spTier i.on{ background:var(--acc); } .spTier i.call{ box-shadow:inset 0 0 0 1px var(--acc); }
+  .spCall{ display:flex; align-items:center; gap:8px; margin:2px 0 6px; font-size:10px; color:var(--dim); flex-wrap:wrap; }
+  .spCall .spT{ display:inline-flex; gap:3px; } .spCall .spT span{ font-size:8px; letter-spacing:.5px; padding:1px 4px; border-radius:3px; box-shadow:inset 0 0 0 1px var(--well); color:var(--dim); }
+  .spCall .spT span.on{ color:var(--accInk); background:var(--acc); box-shadow:none; } .spCall b{ color:var(--ink); font-weight:400; }
+  .spTiles{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; margin-bottom:6px; }
+  .spTiles .clTile, .stTiles .clTile{ min-width:0; border-radius:var(--rS,4px); background:var(--row); box-shadow:inset 0 -2px 0 0 var(--well); padding:3px 6px 5px; }
+  .spTiles .clTile .clLbl, .stTiles .clTile .clLbl{ display:block; font-size:7px; letter-spacing:.9px; color:var(--dim2); font-style:normal; }
+  #bldgPanel .bpBody .spTiles .clTile b, #bldgPanel .bpBody .stTiles .clTile b{ display:block; font-size:13px; font-weight:400; color:var(--ink); white-space:nowrap; }
+  .stTiles{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; margin-bottom:6px; }
+  .spRow .k[data-xpl], .bpSect[data-xpl]{ cursor:help; }
   /* THE COACHES (v174, J4): the posts as tiles over the list of men to hire, a dense row each */
   .coPosts{ display:grid; gap:4px; margin-bottom:5px; }
   .coPost{ position:relative; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:1px; padding:3px 6px 4px 8px; border:0; border-radius:var(--rS,4px); cursor:pointer; text-align:left;
@@ -18781,13 +18812,13 @@
   function seatNext(lv){ return lv===1?'The big bleachers bring a price for each stand, and 60 VIP seats.':lv===2?'Covered stands bring the two ends and 150 VIP seats.'
     :lv===3?'Four stands bring 300 VIP seats and twelve executive boxes.':lv===4?'The grand stadium brings 600 VIP seats, thirty boxes and the members’ club.':''; }
   // the stadium's tickets: each section, its seats, its price (− / +), what it'll sell and what that takes (v108)
-  function seatTable(d,f){ const lv=stadOf(d).lvl, R=f.seats; let h='<div class="bpSect">TICKETS · '+money(f.ticketGate)+' A HOME GAME</div><div class="tkTbl">';
+  function seatTable(d,f){ const lv=stadOf(d).lvl, R=f.seats, say=(lv===1?'One price for the bleachers: the going rate in '+MG_LEAGUE[d.tier]+' is $'+goingRate(d)+'. ':'Each stand priced on its own: the dearer against its rate, the emptier it is. ')+seatNext(lv);
+    let h='<div class="bpSect" data-xpl="'+xq(say)+'">TICKETS · '+money(f.ticketGate)+' A HOME GAME</div><div class="tkTbl">';   // (v175: what the prices do, a tap on the head)
     for(const x of R){ const pct=x.cap?Math.round(x.att/x.cap*100):0;
       h+='<div class="tkRow'+(x.prem?' prem':'')+'" data-seat="'+x.id+'"><span class="tkN">'+mgEsc(x.n)+'<i>'+x.cap.toLocaleString()+' seats · rate $'+Math.round(x.fair)+'</i></span>'
         +'<span class="tkP"><button class="chBtn2 tkB" data-stad="seat-" data-id="'+x.id+'">−</button><b>$'+x.price+'</b><button class="chBtn2 tkB" data-stad="seat+" data-id="'+x.id+'">+</button></span>'
         +'<span class="tkS"><span><b style="color:'+(pct>=95?'var(--good)':pct<50?'var(--warn)':'var(--ink)')+'">'+pct+'%</b> · '+x.att.toLocaleString()+'</span><i>'+money(Math.round(x.price*x.att))+'</i></span></div>'; }
-    h+='</div><div class="stadWhat">'+(lv===1?'One price for the bleachers: the going rate in '+MG_LEAGUE[d.tier]+' is $'+goingRate(d)+'. ':'Each stand priced on its own: the dearer against its rate, the emptier it is. ')
-      +seatNext(lv)+'</div><button class="stadBtn" data-stad="seatrate">BACK TO THE GOING RATE</button>';
+    h+='</div><button class="stadBtn" data-stad="seatrate">BACK TO THE GOING RATE</button>';
     return h; }
   function computeFinance(d,m){   // (m: a home game being played -- its turnout; none, a league game as projected)
     const tier=d.tier||1, ft=FIN_TIER[tier]||FIN_TIER[1];
@@ -19454,47 +19485,69 @@
   // ---- Stadium screen ----
   function stadPrice(d){ const ft=FIN_TIER[d.tier]||FIN_TIER[1]; return d.ticketPrice!=null?d.ticketPrice:ft.price; }
   function spChip(sp){ return sp?'<span class="spChip" style="background:'+sp.col[0]+';color:'+sp.col[1]+'">'+mgEsc(sp.short)+'</span>':''; }
+  // THE GROUND FROM ABOVE (v175, the handoff's J4): the pitch, and round it each stand it has -- its name (a sponsor's
+  // once it has one), the ground's level as pips, its price on a chip, how full it is as a bar; a tap, its seats, price,
+  // rate and crowd (the bleachers at level 1 are one, down both sides) -- the premium seats as chips under it; beside it
+  // SEATS, FANS, FULL and GATE as tiles, and the ground's five levels as a path with your money against the next and
+  // BUILD IT, or the clubhouse it waits for. (It was two pictures, now and next, and four sentences)
+  const STAD_SHORT=[null,'FIELD','BLEACHERS','COVERED','4 STANDS','GRAND'];
+  function stadPlan(d,f){ const S=stadOf(d), lv=S.lvl, R=f.seats, by=id=>R.find(x=>x.id===id), B=by('B'), pips='<span class="bsPips">'+Array.from({length:STAD_MAX},(_,k)=>'<i'+(k<lv?' class="on"':'')+'></i>').join('')+'</span>';
+    const blk=(pos,id)=>{ const x=(pos==='e'||pos==='w')&&!STAD_LEVELS[lv].ends?null:(B||by(id)); if(!x) return '<div class="sgS '+pos+' none"><i class="clLbl">'+(pos==='e'?'EAST':'WEST')+'</i></div>';
+      const pct=x.cap?Math.round(x.att/x.cap*100):0, nm=B?'BLEACHERS':standName(d,id).toUpperCase();
+      return '<div class="sgS '+pos+'" data-xpl="'+xq((B?'The bleachers, down both sides: ':standName(d,id)+': ')+x.cap.toLocaleString()+' seats at $'+x.price+' (the rate $'+Math.round(x.fair)+'); '+x.att.toLocaleString()+' a game, '+pct+'% full.')+'">'
+        +'<b>'+mgEsc(nm)+'</b><span class="sgL">'+pips+'<span class="sgPrice">$'+x.price+'</span></span><span class="sgFill"><i style="width:'+pct+'%;background:'+(pct>=95?'var(--good)':pct<50?'var(--warn)':'var(--acc)')+'"></i></span></div>'; };
+    const prem=R.filter(x=>x.prem);
+    const plan='<div class="sgPlan">'+blk('n','N')+blk('w','W')+'<div class="sgPitch"></div>'+blk('e','E')+blk('s','S')
+      +(prem.length?'<div class="sgPrem">'+prem.map(x=>{ const pct=x.cap?Math.round(x.att/x.cap*100):0; return '<span class="clChip" data-xpl="'+xq(x.n+': '+x.cap+' seats at $'+x.price+'; '+pct+'% sold.')+'">'+mgEsc(x.n.replace(/^The /,'').toUpperCase())+' $'+x.price+' · '+pct+'%</span>'; }).join('')+'</div>':'')+'</div>';
+    let pic=''; try{ const u=PITCH.picture(groundOfYours(d),190); if(u) pic='<img class="stadPic sgPic" src="'+u+'" alt="" data-xpl="'+xq('The North Stand as it is, its boards and all.')+'">'; }catch(e){}   // (your ground, as the match shows it: not on a short phone)
+    const L=STAD_LEVELS[lv], nx=STAD_LEVELS[lv+1], cl=lvOf(d,'club'), b=Math.round(d.budget||0), need=nx?STAD_CL[lv+1]:0, lock=nx&&cl<need, ok=nx&&!lock&&b>=nx.cost;
+    let side='<div class="clId"><span class="bsIco">'+bldSvg('stadium')+'</span><b class="clName" data-xpl="'+xq(L.n+': '+L.what+'.')+'">'+mgEsc(groundName(d).toUpperCase())+'</b><span class="clChip">LEVEL '+lv+' OF '+STAD_MAX+'</span>'
+      +(lock?'<span class="clChip warn" data-xpl="'+xq('The next ground needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').')+'">NEEDS '+clubShort(need)+'</span>':'')+'</div>';
+    side+='<div class="bsTiles">'+[['SEATS',f.capacity.toLocaleString(),nx?nx.cap.toLocaleString():null,'Capacity: '+f.capacity.toLocaleString()+' seats.'+(nx?' The next ground: '+nx.cap.toLocaleString()+'. A bigger ground is harder to fill.':'')],
+        ['FANS',Math.round(f.loyalty).toLocaleString(),null,'You have '+Math.round(f.loyalty).toLocaleString()+' fans: '+(f.rawDemand>=1?'you’re turning some away.':'there are seats to spare.')],
+        ['FULL',Math.round(f.demand*100)+'%',null,'A league game’s crowd, projected: '+f.attendance.toLocaleString()+', '+Math.round(f.demand*100)+'% full.'],
+        ['BOARDS',S.ads.length+' OF '+S.boards,nx?String(nx.boards):null,'Ad boards: '+S.ads.length+' of '+S.boards+' taken.'+(nx?' The next ground has '+nx.boards+'.':'')]]
+      .map(t=>'<div class="clTile" data-xpl="'+xq(t[3])+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b>'+(t[2]?'<em>LEVEL '+(lv+1)+' ▸ '+t[2]+'</em>':'')+'</div>').join('')+'</div>';
+    const node=k=>{ const st=k<lv?'done':k===lv?'now':k===lv+1?'next':'later', nd=STAD_CL[k]||0, lk=k>lv&&cl<nd, Lk=STAD_LEVELS[k];
+      return '<span class="clNode '+st+(lk?' lock':'')+'" data-xpl="'+xq(Lk.n+(k<=lv?'':', '+money(Lk.cost))+': '+Lk.what+'; '+Lk.cap.toLocaleString()+' seats, '+Lk.boards+' boards.'+(k>1?' '+seatNext(k-1):'')+(lk?' It needs clubhouse '+nd+' ('+CLUB_LV[nd].n.toLowerCase()+').':''))+'"><i>'+(st==='done'?'✓':'')+'</i><b>'+STAD_SHORT[k]+'</b>'
+        +(lk?LOCK_SVG:st==='next'?'<em>'+kPrice(Lk.cost)+'</em>':'')+'</span>'; };
+    side+='<div class="clPath"><span class="clLbl">THE GROUND</span><div class="clNodes">'+Array.from({length:STAD_MAX},(_,i)=>(i?'<s'+(i<lv?' class="done"':'')+'></s>':'')+node(i+1)).join('')+'</div>';
+    if(!nx) side+='<div class="clGo"><em style="color:var(--good)" data-xpl="It can’t get any bigger.">AS BIG AS IT GETS</em></div>';
+    else if(lock){ const k=cl+1, C=CLUB_LV[k];
+      side+='<div class="clGo"><span class="clHave" data-xpl="'+xq('First '+C.n.toLowerCase()+' (clubhouse '+k+'): '+money(C.cost)+'; you have '+money(b)+'.'+(need>k?' Then clubhouse '+need+'.':''))+'">'+pBar(b,C.cost)+'<em>'+clubShort(k)+' '+kMoney(Math.max(0,b))+' / '+kPrice(C.cost)+'</em></span><button class="mgBtn" data-mg="goclub">◀ CLUBHOUSE</button></div>'; }
+    else side+='<div class="clGo"><span class="clHave" data-xpl="'+xq(nx.n+' costs '+money(nx.cost)+'; you have '+money(b)+'.')+'">'+pBar(b,nx.cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(nx.cost)+'</em></span><button class="mgBtn go" data-stad="upgrade"'+(ok?'':' disabled')+'>BUILD IT</button></div>';
+    return '<div class="sgWrap fitWhole"><div class="sgLeft">'+plan+pic+'</div><div class="sgSide">'+side+'</div></div></div>'; }
   function renderStadiumTab(d, tab){ const f=computeFinance(d), S=stadOf(d), L=STAD_LEVELS[S.lvl]; let h='';
-    if(tab==='Stands'){
-      const gy=groundOfYours(d), pic=lv=>{ let u=''; try{ u=PITCH.picture(Object.assign({},gy,{lvl:lv}),190); }catch(e){} return u?'<img class="stadPic" src="'+u+'" alt="">':''; };
-      h+='<div class="stadPics"><figure>'+pic(S.lvl)+'<figcaption>NOW · LEVEL '+S.lvl+' OF '+STAD_MAX+'</figcaption></figure>'
-        +(S.lvl<STAD_MAX?'<figure>'+pic(S.lvl+1)+'<figcaption>NEXT · '+STAD_LEVELS[S.lvl+1].n.toUpperCase()+'</figcaption></figure>':'')+'</div>';
-      h+=finRow(L.n, f.capacity.toLocaleString()+' seats', true, 'var(--ink)');
-      h+='<div class="stadWhat">'+L.what+'. Stands: '+stadStands(d).map(x=>mgEsc(standName(d,x.id))).join(' · ')+'.</div>';
-      if(S.lvl<STAD_MAX){ const nx=STAD_LEVELS[S.lvl+1], need=STAD_CL[S.lvl+1], lock=lvOf(d,'club')<need, ok=(d.budget||0)>=nx.cost&&!lock;
-        h+='<div class="stadWhat">Next, '+nx.what+': '+nx.cap.toLocaleString()+' seats, '+nx.boards+' boards'+(nx.ends&&!L.ends?', and two more stands to name':'')+'.</div>';
-        if(lock) h+='<div class="stadWhat" style="color:var(--warn)">It needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').</div>';
-        h+='<button class="stadBtn" data-stad="upgrade"'+(ok?'':' disabled')+'>BUILD IT  —  '+money(nx.cost)+'</button>';
-        h+='<div class="stadWhat">A bigger ground is harder to fill. You have '+Math.round(f.loyalty).toLocaleString()+' fans; '+(f.rawDemand>=1?'you’re turning some away.':'there are seats to spare.')+' '+seatNext(S.lvl)+'</div>'; }
-      else h+='<div class="stadWhat">It can’t get any bigger.</div>';
+    if(tab==='Stands'){ h+=stadPlan(d,f);   // (v175: a plan of the ground, its levels a path -- J4; it was two pictures and four sentences)
     } else if(tab==='Sponsors'){
       // the boards and the places, who has each and what it pays; then the offers waiting (they come in the Monday
       // papers: see SPONSORS); and who calls now -- the size of firm the club's got to
-      const off=d.spOff||[], sz=spSizeNow(d);
-      h+='<div class="bpSect">SPONSORS · '+money(f.dealsWk+f.boardsWk)+' A WEEK</div>';
-      h+='<div class="spRow"><span class="k">BOARDS</span><span class="v">'+S.ads.length+' of '+S.boards+' taken'+(S.lvl<STAD_MAX?' · more with bigger stands':'')+'</span><span class="amt">'+money(f.boardsWk)+'/wk</span></div>';
-      for(const a of S.ads) h+='<div class="spRow">'+spChip(a.sp)+'<span class="v">'+mgEsc(a.sp.name)+'</span><span class="amt">'+money(a.wk)+'/wk · till S'+a.until+'</span></div>';
-      const row=(k,lbl,shut)=>{ const x=S.deals[k];
-        return '<div class="spRow"><span class="k">'+lbl+'</span>'+(x?spChip(x.sp)+'<span class="v">'+mgEsc(k==='ground'?x.ground:x.sp.name)+'</span><span class="amt">'+money(x.wk)+'/wk · till S'+x.until+'</span>'
-          :'<span class="v dim">'+mgEsc(shut||'Free: no sponsor yet')+'</span>')+'</div>'
+      const off=d.spOff||[], sz=spSizeNow(d), st=spStanding(d), nxt=sz<SP_SIZES.length-1?22*(sz+1):null, fee=(z,k)=>{ const F=SP_SIZES[z].fee[k==='kit'?'kit':k==='ground'?'ground':k==='board'?'board':'stand']; return kPrice(F[0])+'–'+kPrice(F[1]); };
+      const tier=(x,k)=>'<span class="spTier" data-xpl="'+xq((x?'This deal: '+SP_SIZES[x.sp.sz||0].what+'.':'Who calls for it now: '+SP_SIZES[sz].many+', '+fee(sz,k)+' a week.')+(nxt!=null?' '+capFirst(SP_SIZES[sz+1].many)+' would pay '+fee(sz+1,k)+'.':''))+'">'+SP_SIZES.map((z,i)=>'<i class="'+(x?(i===(x.sp.sz||0)?'on':''):(i===sz?'call':''))+'"></i>').join('')+'</span>';
+      h+='<div class="spTiles">'+[['SPONSORS',money(f.dealsWk+f.boardsWk)+'/wk','Your sponsors: '+money(f.dealsWk+f.boardsWk)+' a week, the boards and the deals.'],['PARTNERS',money(f.sponsorWk)+'/wk','The club’s partners pay '+money(f.sponsorWk)+' a week, more the higher the league and your place in it.'],
+        ['TV',money(f.broadcastWk)+'/wk','TV pays '+money(f.broadcastWk)+' a week, more the higher the league and your place in it.']].map(t=>'<div class="clTile" data-xpl="'+xq(t[2])+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b></div>').join('')+'</div>';
+      h+='<div class="spCall" data-xpl="'+xq('Sponsors come to you, in Monday’s papers: right now it’s '+SP_SIZES[sz].many+' who call. The bigger the club gets (its league, its fans, its ground, its place) the bigger the firms, and the more they pay. Your standing: '+Math.round(st)+(nxt!=null?'; '+SP_SIZES[sz+1].many+' at '+nxt+'.':'.'))+'"><span class="clLbl" style="font-size:7px;letter-spacing:.9px">CALLING</span><span class="spT">'
+        +SP_SIZES.map((z,i)=>'<span'+(i===sz?' class="on"':'')+'>'+z.n.toUpperCase()+'</span>').join('')+'</span><span>STANDING <b>'+Math.round(st)+'</b>'+(nxt!=null?' · <b>'+nxt+'</b> FOR '+SP_SIZES[sz+1].n.toUpperCase():'')+'</span></div>';   // (v175: the firms' sizes, the one calling lit, where you stand and the next one's mark -- J4)
+      h+='<div class="spRow"><span class="k" data-xpl="'+xq('Ad boards round the pitch: '+S.ads.length+' of '+S.boards+' taken'+(S.lvl<STAD_MAX?'; more with bigger stands.':'.'))+'">BOARDS</span><span class="v">'+S.ads.length+' of '+S.boards+' taken</span>'+tier(null,'board')+'<span class="amt">'+money(f.boardsWk)+'/wk</span></div>';
+      for(const a of S.ads) h+='<div class="spRow">'+spChip(a.sp)+'<span class="v">'+mgEsc(a.sp.name)+'</span>'+tier(a,'board')+'<span class="amt">'+money(a.wk)+'/wk · till S'+a.until+'</span></div>';
+      const row=(k,lbl,shut,lock)=>{ const x=S.deals[k];
+        return '<div class="spRow"><span class="k">'+lbl+'</span>'+(x?spChip(x.sp)+'<span class="v">'+mgEsc(k==='ground'?x.ground:x.sp.name)+'</span>'+tier(x,k)+'<span class="amt">'+money(x.wk)+'/wk · till S'+x.until+'</span>'
+          :shut?'<span class="v"><span class="clChip warn" data-xpl="'+xq(shut)+'">'+lock+'</span></span>':'<span class="v dim">FREE</span>'+tier(null,k))+'</div>'
           +(x&&x.m?'<div class="spBonus">BONUS · '+dealMetTxt(x.m)+dealNowTxt(d,x.m.k)+'</div>':''); };
-      h+=row('kit','SHIRT',S.deals.kit||spOpen(d,'kit')?'':'Open to sponsors once you move into the cabin (clubhouse 2)');
+      h+=row('kit','SHIRT',S.deals.kit||spOpen(d,'kit')?'':'Open to sponsors once you move into the cabin (clubhouse 2).','NEEDS CABIN');
       if(S.lvl>=3) for(const st of stadStands(d)) h+=row(st.id,st.n.toUpperCase());
-      else { for(const st of stadStands(d)) if(S.deals[st.id]) h+=row(st.id,st.n.toUpperCase()); h+=row('_','STANDS','Their names, once there are covered stands'); }
-      h+=row('ground','GROUND',S.deals.ground||S.lvl>=4?'':groundName(d)+': its name, once there are four stands');
+      else { for(const st of stadStands(d)) if(S.deals[st.id]) h+=row(st.id,st.n.toUpperCase()); h+=row('_','STANDS','Their names, once there are covered stands (the ground’s level 3).','COVERED STANDS'); }
+      h+=row('ground','GROUND',S.deals.ground||S.lvl>=4?'':groundName(d)+': its name, once there are four stands (the ground’s level 4).','FOUR STANDS');
       if(off.length){ h+='<div class="bpSect">OFFERS · '+off.length+'</div>';
         for(const o of off) h+='<div class="spRow">'+spChip(o.sp)+'<span class="v">'+mgEsc(o.sp.name)+' <span class="sub">'+mgEsc(SP_PLACE[o.k])+(o.ground?' · “'+mgEsc(o.ground)+'”':'')+'</span></span><span class="amt">'+money(o.wk)+'/wk · '+spTerm(d,o.yrs)+'</span>'
           +'<button class="stadBtn" data-stad="spsign" data-id="'+o.id+'">SIGN</button><button class="stadBtn" data-stad="spno" data-id="'+o.id+'">NO</button></div>'
           +(o.m?'<div class="spBonus">BONUS · '+dealMetTxt(o.m)+'</div>':''); }
-      h+='<div class="stadWhat">Sponsors come to you, in Monday’s papers: right now it’s '+SP_SIZES[sz].many+' who call. The bigger the club gets — its league, its fans, its ground — the bigger the firms, and the more they pay.</div>';
-      h+='<div class="stadWhat">Every week too: the club’s partners '+money(f.sponsorWk)+' and TV '+money(f.broadcastWk)+', more the higher the league and your place in it.</div>';
     } else {
       // Money: the gate and the ticket price, then the club's books
-      h+=finRow('Club loyalty', Math.round(f.loyalty).toLocaleString()+' fans', true, 'var(--warn)');
-      h+=finRow('Capacity', f.capacity.toLocaleString()+' · '+L.n.toLowerCase());
-      h+=finRow('Projected attendance', f.attendance.toLocaleString()+' · '+Math.round(f.demand*100)+'% full'+(f.soldOut?'  SOLD OUT':''));
-      h+='<div class="stadWhat">Not every fan comes to every game: a league game brings about '+Math.round(f.turn*100)+'% of them at the going rate, more when you’re high in the table or the game’s big, every one for a derby.</div>';
-      h+=finRow('Home gate / home game', money(f.homeGate));
+      h+='<div class="stTiles">'+[['FANS',Math.round(f.loyalty).toLocaleString(),'Club loyalty: '+Math.round(f.loyalty).toLocaleString()+' fans, everyone who’d ever come.','var(--warn)'],
+        ['SEATS',f.capacity.toLocaleString(),'Capacity: '+f.capacity.toLocaleString()+' seats, '+L.n.toLowerCase()+'.'],
+        ['CROWD',f.attendance.toLocaleString()+(f.soldOut?' · FULL':' · '+Math.round(f.demand*100)+'%'),'A league game’s crowd, projected: '+f.attendance.toLocaleString()+', '+Math.round(f.demand*100)+'% full. Not every fan comes to every game: a league game brings about '+Math.round(f.turn*100)+'% of them at the going rate, more when you’re high in the table or the game’s big, every one for a derby.'],
+        ['GATE',money(f.homeGate),'The gate at a home game: '+money(f.homeGate)+'.','var(--good)']].map(t=>'<div class="clTile" data-xpl="'+xq(t[2])+'"><i class="clLbl">'+t[0]+'</i><b'+(t[3]?' style="color:'+t[3]+'"':'')+'>'+t[1]+'</b></div>').join('')+'</div>';   // (v175: four tiles, the words a tap away -- J4)
       h+=seatTable(d,f);
       h+='<div class="bpSect">THE BOOKS</div>'+mgFinanceTab(d);
     }
