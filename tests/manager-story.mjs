@@ -61,14 +61,18 @@ ok(r.kn === 1 && r.gone && r.rec, 'a career saved before: each man it had scoute
 r = await K(`(()=>{ const d=CAREER.data; d.staff=[]; d.kn={}; const P=d.roster.concat(mgAiClubs(d).slice(0,8).flatMap(c=>c.players)); let contains=true, wide=true, inside=true, same=true;
   for(const p of P) for(const w of [2,3,5,6]){ const g=potRange(p,w); if(!(g[0]<=p.pot&&p.pot<=g[1])) contains=false; if(g[1]-g[0]<2) wide=false; if(g[0]<Math.min(p.ovr,p.pot)||g[1]>99) inside=false; if(potRange(p,w).join()!==g.join()) same=false; }
   const wd=t=>{ const m=String(t).match(/^(\\d+)–(\\d+)$/); return m?m[2]-m[1]:null; };
-  const y=mgNewPlayer(d,'MID',60,19,{pot:82,sub:'CM'}); y.id=999901; const mine0=potTxt(d,y,{mine:true},true);
-  d.staff=[{id:1,k:'tec',r:10,wage:1,name:'x'}]; const mine10=potTxt(d,y,{mine:true},true); d.staff=[{id:2,k:'youth',r:5,wage:1,name:'y'}]; const ac=potTxt(d,y,{youth:true},true), sq=potTxt(d,y,{mine:true},true); d.staff=[];
+  // (v194: a range is shown as the ratings shown -- stretched over 60 -- so its width is read in his rating itself, and
+  // the card's text checked to be that range as shown)
+  const iw=(p,w)=>{ const g=potRange(p,w); return g[1]-g[0]; }, as=(p,w)=>rangeShown(potRange(p,w));
+  const y=mgNewPlayer(d,'MID',60,19,{pot:82,sub:'CM'}); y.id=999901; const mine0=potTxt(d,y,{mine:true},true), e0=as(y,potWYours(d,false)), w0=iw(y,potWYours(d,false));
+  d.staff=[{id:1,k:'tec',r:10,wage:1,name:'x'}]; const mine10=potTxt(d,y,{mine:true},true), e10=as(y,potWYours(d,false)), w10=iw(y,potWYours(d,false));
+  d.staff=[{id:2,k:'youth',r:5,wage:1,name:'y'}]; const ac=potTxt(d,y,{youth:true},true), eac=as(y,potWYours(d,true)), wac=iw(y,potWYours(d,true)), sq=potTxt(d,y,{mine:true},true), esq=as(y,potWYours(d,false)), wsq=iw(y,potWYours(d,false)); d.staff=[];
   const o=mgNewPlayer(d,'ATT',66,20,{pot:84,sub:'STK'}); o.id=999902; const T={}; for(const k of [0,1,2,3]){ d.kn[o.id]=k; T[k]=[potTxt(d,o,{}),potTxt(d,o,{},true)]; } delete d.kn[o.id];
-  return { n:P.length, contains, wide, inside, same, mine0, w0:wd(mine0), w10:wd(mine10), wac:wd(ac), wsq:wd(sq), T, w2:wd(T[2][0]), w3:wd(T[3][0]), kid:kidPot({name:'Leo Test',ovr:64,pot:88}) }; })()`);
+  return { n:P.length, contains, wide, inside, same, mine0, w0, w10, wac, wsq, shownOk:mine0===e0&&mine10===e10&&ac===eac&&sq===esq, T, w2:iw(o,5), w3:iw(o,3), t2ok:T[2][0]===as(o,5), t3ok:T[3][0]===as(o,3), kid:kidPot({name:'Leo Test',ovr:64,pot:88}) }; })()`);
 info('potential: ' + JSON.stringify(r));
 ok(r.contains && r.wide && r.inside && r.same, 'potential as a range, ' + r.n + ' men at four widths: always round the real one, never narrower than two, inside his rating and 99, the same every time');
-ok(r.w0 === 12 && r.w10 === 4 && r.wac === 8 && r.wsq === 12, 'your own men\'s by your best coach: ' + r.mine0 + ' with none (12 wide), 4 wide with a 10; the academy\'s by its youth coach (a 5: 8 wide)');
-ok(r.T[0].join() === '?,?' && r.T[1][0] === 'a Premium League player' && r.T[1][1] === '?' && r.w2 === 10 && r.w3 === 6,
+ok(r.w0 === 12 && r.w10 === 4 && r.wac === 8 && r.wsq === 12 && r.shownOk, 'your own men\'s by your best coach: ' + r.mine0 + ' with none (12 wide in his rating itself, wider shown over 60 -- v194), 4 wide with a 10; the academy\'s by its youth coach (a 5: 8 wide)');
+ok(r.T[0].join() === '?,?' && r.T[1][0] === 'a Premium League player' && r.T[1][1] === '?' && r.w2 === 10 && r.w3 === 6 && r.t2ok && r.t3ok,
   'another club\'s: unscouted ?, scouted once the league it could take him to ("' + r.T[1][0] + '", ? in a list), twice ' + r.T[2][0] + ', three times ' + r.T[3][0]);
 ok(r.kid[0] <= 88 && r.kid[1] >= 88 && r.kid[1] - r.kid[0] === 6, 'the wonderkid\'s ceiling, as the club hears it: ' + r.kid.join('–'));
 

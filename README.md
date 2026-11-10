@@ -1414,6 +1414,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   (a new world made on v121 and read on v122: about half the men the same, most of the rest a point either way, a
   few two, the leagues' averages where they were). Played somewhere else, a man's rating is his own in his own positions, two less in a
   second one, six less out of position -- and out in another line he's rated on that line's weights, then six less.
+  - **The rating shown (v194).** What a card, a list, a fixture or a line of news shows is a man's rating stretched at
+    the top: up to 60 as it is, every point over 60 a point and a fifth, 99 at most -- 60 shows 60, 70 shows 72, 80
+    shows 84, 86 shows 91. The best are rated higher and the low end stays where it was. Nobody's stats change, and
+    neither does anything the game works out from a rating -- how good a man is made, his wage and his price, a side's
+    strength, a simulated result -- which all read the rating itself. A scout's range, a ceiling and a change in a
+    rating are shown the same way, and an exhibition side's OVR is the average of what its starters' cards show.
   - **Pace, the dearest of all (v144).** Speed weighs the most in every outfielder's rating, 6 -- above every other
     stat -- and acceleration 5 (they were 4 and 2 for a defender, 2 and 1 for a midfielder, 4 and 4 for a forward). A
     usual man of each line still rates what he did (69, 67, 72 at the averages), but three points more pace on him is
@@ -2949,6 +2955,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v194: the best rated higher.** The rating a card shows is stretched over 60, each point over it a point and a
+  fifth (99 at most): 70 shows 72, 80 shows 84, 86 shows 91, and 60 and under are as they were. Stats, and everything
+  worked out from a rating -- wages, prices, a side's strength, simulated results -- are as they were. On the
+  exhibition screen Arsenal show 81 (77 before) and Manchester City 80, their best man 91; Hull City still 62. See
+  **The rating shown**.
 - **v193: a playstyle's strengths surer than its weaknesses.** How widely a new man's stats scatter round his
   playstyle's goes by how good it is at each: half a point a standard deviation on its best stats (the sheet's 1), 0.7
   on its worst (the sheet's 1.4), and the rest on a straight line between by where they sit on the sheet -- a Stopper's
