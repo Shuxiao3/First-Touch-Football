@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_D, PA_HW, GOAL_W, atkOf, keeperOf, inOffsidePos, passTo, doPass, '
-  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, THROW_D, WIND:THROW_WIND, LIFT:THROW_LIFT, FOLLOW:THROW_FOLLOW, RUN:OUTBALL_RUN, FADE:OUTBALL_FADE}; }, '
+  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, TZ:throwZ, THROW_D, WIND:THROW_WIND, LIFT:THROW_LIFT, FOLLOW:THROW_FOLLOW, RUN:OUTBALL_RUN, FADE:OUTBALL_FADE}; }, '
   + 'outBall:()=>outBall, newAlpha:()=>newBallAlpha(), pose:p=>throwPoseOf(p), keepers:()=>keepers, rs:()=>restartInfo, rt:()=>restartT, last:()=>lastRestart, check:()=>checkOutOfPlay(), '
   + 'give:(t,tm,x,y)=>doRestart(t,tm,x,y), controlled:()=>controlled, gk:()=>gkHold, offsideT:()=>offsideT, offsidePass:()=>offsidePass, simNow:()=>simNow, '
   + 'setFree:v=>{ freePlay=v; }, grade:()=>lastGrade, ballAt, '
@@ -60,7 +60,7 @@ r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = 
   const R = T.rs(); res.type = R && R.type; res.team = R && R.team;
   res.walk = await window.__run(4, () => T.rs() && T.rs().set);
   const tk = T.rs().taker; res.onLine = Math.abs(tk.y) < 0.5;
-  res.hands = Math.abs(b.z - T.RS.THROW_Z) < 1 && Math.hypot(b.x - tk.x, b.y - tk.y) < 2; res.faces = +tk.facing.y.toFixed(2);
+  res.hands = Math.abs(b.z - T.RS.TZ(tk)) < 1 && Math.hypot(b.x - tk.x, b.y - tk.y) < 2; res.faces = +tk.facing.y.toFixed(2);
   let minOff = 1e9, touched = false; const lt = b.lastTouchP;
   res.held = await window.__run(T.RS.LATE.throw + 1, () => { for(const q of T.players()) if(q.team !== tk.team) minOff = Math.min(minOff, Math.hypot(q.x - tk.x, q.y - tk.y));
     if(T.rs() && b.ownedBy) touched = true; return !T.rs(); });

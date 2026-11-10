@@ -800,9 +800,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
   in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
   style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
-  a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a slightly different
-  height. A player's look is seeded from his name, so he looks the same every match (the eye colour is drawn last,
-  so nobody's other picks changed when it came in). Keepers get their own skin, hair and eye colour.
+  a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a height. A player's
+  look is seeded from his name, so he looks the same every match (the eye colour is drawn last, so nobody's other
+  picks changed when it came in). Keepers get their own skin, hair and eye colour.
+  - **Short, medium or tall (v184).** A tall man's sprite has two rows more than a medium one and a short man's two
+    fewer: one at the knee (the row under his shorts) and one in his boots (their top row). His head, his shirt and
+    his feet are as drawn, and his feet stay on his spot. Where those rows are is read off the drawn sheet cell by
+    cell; a slide, and a keeper's dive or spread, are left as drawn. His height is seeded from his name like the rest
+    of his look (a career man's from himself) and weighted by his line -- short, medium and tall out of 100: keepers
+    5, 35 and 60; defenders 15, 45 and 40; midfielders 35, 50 and 15; forwards 30, 45 and 25. At a throw-in he holds
+    the ball in front of his face wherever it is, 2 px higher for a tall man and 2 lower for a short one. His card
+    says his height, after his position and style. Each look used to be scaled 0.95 to 1.06, which would have
+    blurred the three heights together, so that's gone. For now it's only how he looks: no header, reach or turn
+    goes by it.
   - The art follows the reference overworld sprites (the handheld Gen-5 style). The head is about two-thirds of the
     figure, on a short, stocky body with the hands held out from the sides. The hair falls in clumps under a band of
     sheen, with the fringe hanging to the eyes and the outline in black. The face is small and framed by the hair,
@@ -2924,6 +2934,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v184: players are short, medium or tall.** Every man is one of three heights, 2 px apart on his 32 px sprite: a
+  tall man two rows taller, one at the knee and one in his boots, a short man two rows shorter, his head, shirt and
+  feet as drawn and his feet on his spot. It's seeded like his look, from his name (a career man's from himself), and
+  weighted by his line: 60 keepers in 100 are tall, 40 defenders, 25 forwards and 15 midfielders (35 midfielders in
+  100 are short). His card says it. The old 0.95 to 1.06 scale on each look is gone. For now it's only how he looks.
+  See **Every player looks like himself**.
 - **v183: the sheet's pace, stamina and strength tuned again.** 79 numbers from the Stats by Playstyle sheet, all
   speed, acceleration, agility, stamina and strength (the Wide midfielder's stamina 15, the Box-to-box's 17, the
   Wing-back quicker at 17, the Stopper 13), so the game and both sheets have the same numbers. What each archetype's

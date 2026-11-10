@@ -3410,6 +3410,14 @@
     'Udeh','Upton','Vance','Varga','Voss','Wade','Ward','Weller','Wilde','Winter','Wolfe','Yates','Yilmaz','Zamora','Zeller'];
   function rng32(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
   function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  // HEIGHT (v184): every man is short, medium or tall. It's seeded like his look, from his name (a career man's from
+  // himself, so he's the same height at every club), and weighted by his line: keepers and defenders the tallest,
+  // midfielders the shortest. On the pitch a tall man is drawn HEIGHT_PX taller and a short one HEIGHT_PX shorter (THE
+  // HEIGHTS, in SPRITE). For now it's only how he looks: no header, reach or turn goes by it.
+  const HEIGHT_PX=2, HEIGHT_NAME={'-1':'short','0':'medium','1':'tall'};
+  const HEIGHT_W={GK:[5,35,60], DEF:[15,45,40], MID:[35,50,15], FWD:[30,45,25]};   // short, medium, tall, out of 100
+  function heightFrom(seed,role){ const w=HEIGHT_W[role]||[25,50,25], u=rng32(hashStr('height|'+seed))()*(w[0]+w[1]+w[2]);
+    return u<w[0]?-1:u<w[0]+w[1]?0:1; }
   // one fixed shuffle of the surnames, dealt out seven to a club and then one more each, and one more again (v124: the
   // ninth man): nobody shares a name
   const CLUB_NAME_DEAL=(()=>{ const R=rng32(hashStr('ft-club-names')), a=CLUB_SURNAMES.slice();
@@ -8889,7 +8897,8 @@
   // back for THROW_WIND -- it goes up THROW_LIFT -- and lets it go, his hands coming down to his chest for THROW_FOLLOW. (The
   // ball hung over his head and went)
   const THROW_WIND=0.25, THROW_LIFT=2, THROW_FOLLOW=0.3;
-  function throwBallY(p,Rs){ return p.y+(Rs.y<YC?0.5:-0.5); }   // (v141: in front of him -- toward you from the far touchline, away from you, behind his head, from the near)
+  function throwBallY(p,Rs){ return p.y+(Rs.y<YC?0.5:-0.5); }
+  const throwZ=p=>THROW_Z+HEIGHT_PX*(SPRITE.lookOf(p).ht||0)*SPRITE.cfg.scale;   // (v184: in front of his face wherever his face is -- a tall man holds it a little higher, a short man lower)   // (v141: in front of him -- toward you from the far touchline, away from you, behind his head, from the near)
   function throwPoseOf(p){ const Rs=restartInfo;
     if(Rs&&restartT>0&&Rs.set&&Rs.type==='throw'&&Rs.taker===p) return Rs.windT>0?'wind':'hold';
     return p.throwFollowT>0?'follow':null; }
@@ -9010,7 +9019,7 @@
     Rs.set=true; Rs.heldT=0; const w=RS_SET[Rs.type]; Rs.wait=w[0]+Math.random()*(w[1]-w[0]);
     if(Rs.type==='corner'&&Rs.team==='G'&&!Rs.aim){ const a=atkOf(Rs.team); Rs.aim={x:(a>0?FW:0)-a*CORNER_AIM0, y:YC}; }   // (v180: your corner's reticle -- see cornerAimOn)
     ball.vx=ball.vy=ball.vz=0; ball.lastTouch=p.team; possTeam=p.team;
-    if(Rs.type==='throw'){ p.facing={x:0,y:Rs.y<YC?1:-1}; ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z; }
+    if(Rs.type==='throw'){ p.facing={x:0,y:Rs.y<YC?1:-1}; ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=throwZ(p); }
     else { const a=restartAimPt(Rs), dx=a.x-Rs.x, dy=a.y-Rs.y, l=Math.hypot(dx,dy)||1; p.facing={x:dx/l,y:dy/l};
       ball.x=Rs.x; ball.y=Rs.y; ball.z=0; ball.ownedBy=p; ball.dribbler=null; ball.dribbleGrace=0; ball.passerRef=null; }
     for(const t of ['G','R']) if(PLAN[t]) PLAN[t].last=null;   // (the plan from before it went out: gone stale -- a corner goes to the men where they are)
@@ -9169,7 +9178,7 @@
     p.intercepting=false; p.goingForBall=false; p.dash=false; p.planned=false; p.engageCap=1; p.runTarget=null; p.gapRun=0; p.recover=false; p.pressRun=false;
     if(p===Rs.taker){
       if(Rs.set){ const st=restartStand(Rs,p); p.x=st.x; p.y=st.y; p.vx=p.vy=0; p.sprint=false;
-        if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=THROW_Z+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
+        if(Rs.type==='throw'){ if(restartYours(Rs)&&!(Rs.windT>0)) p.facing=restartAim(p,Rs); ball.x=p.x; ball.y=throwBallY(p,Rs); ball.z=throwZ(p)+(Rs.windT>0?THROW_LIFT*(1-Rs.windT/THROW_WIND):0); }
         else { ball.x=Rs.x; ball.y=Rs.y; ball.z=0;
           if(cornerAimOn()&&hi&&(hi.ix||hi.iy)){ const l=Math.hypot(hi.ix,hi.iy)||1; Rs.aim.x+=hi.ix/Math.max(1,l)*CORNER_AIM_V*dt; Rs.aim.y+=hi.iy/Math.max(1,l)*CORNER_AIM_V*dt; cornerAimClamp(Rs); } }   // (v180: the stick moves your reticle)
         ball.vx=ball.vy=ball.vz=0; return true; }
@@ -15200,14 +15209,15 @@
                        :{crop:28,mop:20,bald:7,afro:3,long:12,mohawk:5,bun:8});
       const ovs=[]; if(style!=='long'&&R()<0.24) ovs.push('beard'); if(R()<0.11) ovs.push('band');
       const boots=wpick(R,{black:30,white:16,orange:9,yellow:7,cyan:7,pink:6,red:7,gold:5,lime:6,blue:7});
-      const size=0.95+R()*0.11;                                                // a little taller or shorter
+      R();   // (v184: this draw scaled him 0.95-1.06; it's still drawn so the eyes after it come out as they were -- his height is HEIGHT now)
       const eyes=wpick(R, dark?{dark:62,brown:34,hazel:4}:mid?{dark:30,brown:44,hazel:14,green:6,grey:6}
                       :{brown:30,dark:10,hazel:14,green:16,blue:22,grey:8});   // drawn last: the rest of a look is as it was
-      return {style, ovs, tone, hair, boots, size, eyes, key:style+'+'+ovs.join('+')+'|'+tone+'|'+hair+'|'+boots+'|'+eyes};
+      return {style, ovs, tone, hair, boots, eyes, key:style+'+'+ovs.join('+')+'|'+tone+'|'+hair+'|'+boots+'|'+eyes};
     }
     function lookOf(p){
       const seed=p.lookKey!=null?'id|'+p.lookKey:((TEAM[p.team]&&TEAM[p.team].code)||p.team)+'|'+(p.pname||('#'+(p.num!=null?p.num:'')))+(p.side!=null?'|gk':'');   // a career man looks the same at any club
-      if(!p._look||p._lookSeed!==seed){ p._look=makeLook(seed); p._lookSeed=seed; }
+      if(!p._look||p._lookSeed!==seed){ const L=makeLook(seed); L.ht=heightFrom(seed,p.side!=null?'GK':(p.natRole||p.role||'')); L.key+='|h'+L.ht;   // (v184: his height, by his own line)
+        p._look=L; p._lookSeed=seed; }
       return p._look;
     }
     function lookSwaps(L){
@@ -15233,6 +15243,46 @@
       }));
       return cfg.composed[key]=c;
     }
+    // THE HEIGHTS (v184): a tall man's sheet has HEIGHT_PX rows more in every cell and a short man's HEIGHT_PX fewer -- one
+    // at the knee (the row under his shorts) and one in his boots (their top row), as the mock-up had it -- so his head,
+    // his shirt and his feet are as drawn and his feet stay on his spot: everything over the knee goes up (or down). Where
+    // those rows are is read off the drawn sheet, cell by cell, by the colours of its shorts and boots; a slide, and a
+    // keeper's dive or spread, are left as drawn.
+    const hRowsAt={}, hSheets={};
+    function heightRows(img,drawn,skip,key){                // -> per row of cells, per frame: [knee row, boot row], or null
+      if(hRowsAt[key]) return hRowsAt[key];
+      const c=document.createElement('canvas'); c.width=img.width; c.height=img.height; const x=c.getContext('2d'); x.drawImage(img,0,0);
+      let d; try{ d=x.getImageData(0,0,c.width,c.height).data; }catch(e){ return hRowsAt[key]=[]; }
+      const set=k=>new Set(((drawn||{})[k]||[]).map(h=>{ const v=rgb(h); return v[0]<<16|v[1]<<8|v[2]; })), SH=set('shorts'), BO=set('boots');
+      const out=[];
+      for(let r=0;r<Math.floor(c.height/CELL);r++){ const row=[]; out.push(row);
+        for(let f=0;f<Math.floor(c.width/CELL);f++){ let sBot=-1; const boot=[];
+          if(!skip(r)) for(let y=0;y<CELL;y++){ let sh=false, bo=false;
+            for(let xx=0;xx<CELL;xx++){ const i=((r*CELL+y)*c.width+f*CELL+xx)*4; if(!d[i+3]) continue;
+              const v=d[i]<<16|d[i+1]<<8|d[i+2]; if(SH.has(v)) sh=true; if(BO.has(v)) bo=true; }
+            if(sh) sBot=y; if(bo) boot.push(y); }
+          const bTop=boot.find(y=>y>sBot), knee=sBot+1;   // (a raised boot above his shorts doesn't count)
+          row.push(sBot>=0&&bTop!=null&&Math.max(knee+1,bTop)<CELL-1?[knee,Math.max(knee+1,bTop)]:null); } }
+      return hRowsAt[key]=out;
+    }
+    function heighten(src,rows,ht,key){                    // -> src (a sheet in its drawn colours) at height ht: -1, 0 or 1
+      if(!ht) return src; key+='|h'+ht; if(hSheets[key]) return hSheets[key];
+      const c=document.createElement('canvas'); c.width=src.width; c.height=src.height; const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+      const nK=Math.ceil(HEIGHT_PX/2), nB=HEIGHT_PX-nK;     // (the rows at the knee, and in the boots)
+      for(let r=0;r<Math.floor(src.height/CELL);r++) for(let f=0;f<Math.floor(src.width/CELL);f++){
+        const R=rows[r]&&rows[r][f], ox=f*CELL, oy=r*CELL;
+        if(!R){ x.drawImage(src,ox,oy,CELL,CELL,ox,oy,CELL,CELL); continue; }
+        const [kn,bt]=R; let L=[];
+        if(ht>0){ for(let y=0;y<CELL;y++){ L.push(y); if(y===kn) for(let k=0;k<nK;k++) L.push(y); if(y===bt) for(let k=0;k<nB;k++) L.push(y); }
+          L=L.slice(L.length-CELL); }                       // (the empty rows over his head go)
+        else { const drop=new Set(); for(let k=0;k<nK;k++) drop.add(kn+k); for(let k=0;k<nB;k++) drop.add(bt+k);
+          L=[]; for(let y=0;y<CELL;y++) if(!drop.has(y)) L.push(y); while(L.length<CELL) L.unshift(-1); }
+        L.forEach((sy,dy)=>{ if(sy>=0) x.drawImage(src,ox,oy+sy,CELL,1,ox,oy+dy,CELL,1); });
+      }
+      return hSheets[key]=c;
+    }
+    const bodyRows=()=>heightRows(cfg.body,PARTS.drawn,r=>r>=ANIM.slide.row,'body');
+    const lookSrc=(style,ovs,ht)=>heighten(composeLook(style,ovs),bodyRows(),ht,'look|'+style+'+'+ovs.join('+'));
     // a shirt sponsor's patch on the chest, in each cell facing the camera (SE, S, SW): two rows at the top of the shirt
     // below the chin, four pixels wide (three when he's half turned), over the shirt only, the middle of the lower row in
     // the sponsor's second colour (its name, as far as eight pixels go). Found once a body.
@@ -15265,8 +15315,8 @@
       const tk=teamKit(p.team);                            // a club's kit in an exhibition (and its sponsor's colours, after the three)
       if(tk){ Object.assign(swaps,kitSwaps(tk)); key+='|'+tk.join(''); }
       if(cfg.looks[key]) return cfg.looks[key];
-      const src=composeLook(style,ovs), c=bake(swaps,0,0,0,0,src,PARTS.drawn);
-      if(tk&&tk[3]) paintLogo(c,logoSpots(src,style+'+'+ovs.join('+')),tk[3],tk[4]);
+      const src=lookSrc(style,ovs,L.ht), c=bake(swaps,0,0,0,0,src,PARTS.drawn);   // (v184: at his height)
+      if(tk&&tk[3]) paintLogo(c,logoSpots(src,style+'+'+ovs.join('+')+'|h'+L.ht),tk[3],tk[4]);
       return cfg.looks[key]=c;
     }
     const snap8=(dx,dy)=>((Math.round(Math.atan2(dy,dx)/(Math.PI/4))%8)+8)%8;   // 0=E, clockwise
@@ -15295,31 +15345,31 @@
     // and skin's pixels copied from his frame (THROW_SRC: where each is in it); winding up, a pixel higher with it; thrown,
     // his hands down at his chest
     const THROW_SRC={S:{row:2,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[20,24],SKD:[10,24]}, N:{row:6,O:[9,22],SLV:[10,22],TRM:[10,23],SKN:[10,24],SKD:[11,24]}};
-    function throwArm(top,x){                              // his left arm, short as ever: his hand at row `top`, its outer edge at column x
-      const px=[[x,top-1,'O'],[x+1,top-1,'O']];            // (the top of his hand)
-      for(let y=top;y<=21;y++){
-        const m=y<=top+1?['SKD','SKN']:y===21?['SLV','SLV']:y===20?['TRM','TRM']:['SKD','SKN'];   // his hand; his forearm; the sleeve's hem; the sleeve into his shoulder
+    function throwArm(top,x,u){                            // his left arm, short as ever: his hand at row `top`, its outer edge at column x (u: his height's shift)
+      const px=[[x,top-1,'O'],[x+1,top-1,'O']]; u=u||0;    // (the top of his hand)
+      for(let y=top;y<=21+u;y++){
+        const m=y<=top+1?['SKD','SKN']:y===21+u?['SLV','SLV']:y===20+u?['TRM','TRM']:['SKD','SKN'];   // his hand; his forearm; the sleeve's hem; the sleeve into his shoulder
         px.push([x-1,y,'O'],[x,y,m[0]],[x+1,y,m[1]],[x+2,y,'O']);
       }
       return px;
     }
     function drawThrow(p,base,pose){
-      const V=THROW_SRC[p.facing&&p.facing.y<0?'N':'S'], sz=lookOf(p).size, sc=base.scale*cfg.scale*sz, sheet=sheetFor(p), oy=V.row*CELL;
+      const V=THROW_SRC[p.facing&&p.facing.y<0?'N':'S'], u=-HEIGHT_PX*(lookOf(p).ht||0), sc=base.scale*cfg.scale, sheet=sheetFor(p), oy=V.row*CELL;   // (u: v184, his rows over the knee moved by his height)
       const x0=Math.round(base.x-AX*sc), y0=Math.round(base.y-AY*sc), P=v=>Math.round(v*sc);
       const blit=(sx,sy,w,h,dx,dy)=>ctx.drawImage(sheet,sx,oy+sy,w,h,x0+P(dx),y0+P(dy),P(dx+w)-P(dx),P(dy+h)-P(dy));
-      const top=pose==='follow'?20:clamp(Math.round(AY-(ball.z||0)/(cfg.scale*sz)-2.7),14,20), ax=pose==='follow'?10:9;   // (his hands at the ball's lower half -- its bottom sits ball.z up -- and either side of it; thrown, at his chest)
+      const top=pose==='follow'?20+u:clamp(Math.round(AY-(ball.z||0)/cfg.scale-2.7),14+u,20+u), ax=pose==='follow'?10:9;   // (his hands at the ball's lower half -- its bottom sits ball.z up -- and either side of it; thrown, at his chest)
       ctx.save(); ctx.imageSmoothingEnabled=false;
-      blit(0,0,CELL,24,0,0); blit(12,24,8,2,12,24); blit(0,26,CELL,CELL-26,0,26);   // his frame, the hanging hands left out
-      const dot=(m,x,y)=>{ const q=V[m]; blit(q[0],q[1],1,1,x,y); };
-      for(const y of [24,25]){ dot('O',11,y); dot('O',20,y); }                   // (his sides there, closed)
-      for(const [x,y,m] of throwArm(top,ax)){ dot(m,x,y); dot(m,31-x,y); }        // both arms: the right the left's mirror
+      blit(0,0,CELL,24+u,0,0); blit(12,24+u,8,2,12,24+u); blit(0,26+u,CELL,CELL-26-u,0,26+u);   // his frame, the hanging hands left out
+      const dot=(m,x,y)=>{ const q=V[m]; blit(q[0],q[1]+u,1,1,x,y); };
+      for(const y of [24+u,25+u]){ dot('O',11,y); dot('O',20,y); }               // (his sides there, closed)
+      for(const [x,y,m] of throwArm(top,ax,u)){ dot(m,x,y); dot(m,31-x,y); }      // both arms: the right the left's mirror
       ctx.restore(); return true;
     }
     function draw(p,base){
       if(!(cfg.enabled&&cfg.ready)) return false;
       { const tp=throwPoseOf(p); if(tp) return drawThrow(p,base,tp); }          // (v140: a throw-in)
       const [name,f,dx,dy]=pick(p), A=ANIM[name];
-      const sc=base.scale*cfg.scale*lookOf(p).size, row=A.row+snap8(dx,dy);
+      const sc=base.scale*cfg.scale, row=A.row+snap8(dx,dy);   // (v184: no more scaling him 0.95-1.06 -- his height's in his sheet)
       const sz=Math.round(CELL*sc), x=Math.round(base.x-AX*sc), y=Math.round(base.y-AY*sc);   // whole pixels: no shimmer
       ctx.save(); ctx.imageSmoothingEnabled=false;
       ctx.drawImage(sheetFor(p), clamp(f,0,A.n-1)*CELL, row*CELL, CELL, CELL, x, y, sz, sz);
@@ -15330,7 +15380,7 @@
     // (0..7 from E, clockwise), his feet at x,y, k canvas px to a pitch px. False while the sprites are off.
     function drawTo(c2,p,name,f,dir,x,y,k){
       if(!(cfg.enabled&&cfg.ready)) return false;
-      const A=ANIM[name]||ANIM.idle, sc=k*cfg.scale*lookOf(p).size, sz=Math.round(CELL*sc);
+      const A=ANIM[name]||ANIM.idle, sc=k*cfg.scale, sz=Math.round(CELL*sc);
       c2.save(); c2.imageSmoothingEnabled=false;
       c2.drawImage(sheetFor(p), clamp(f,0,A.n-1)*CELL, (A.row+(dir&7))*CELL, CELL, CELL, Math.round(x-AX*sc), Math.round(y-AY*sc), sz, sz);
       c2.restore(); return true;
@@ -15355,8 +15405,9 @@
     function gkSheet(kp){
       const top=(TEAM[kp.team]&&TEAM[kp.team].gk)||'#f2e14c', L=lookOf(kp), key=kp.team+'|'+top+'|'+L.key;
       const sw=lookSwaps(L); delete sw.boots;              // (his boots are drawn under the gloves' colours)
+      const src=heighten(cfg.gk.img,heightRows(cfg.gk.img,GK_DRAWN,r=>GKR.dive!=null&&r>=GKR.dive,'gk'),L.ht,'gk');   // (v184: at his height; a dive and a spread as drawn)
       return cfg.gk.looks[key]||(cfg.gk.looks[key]=bake(Object.assign({shirt:rampOf(top,KIT_FLOOR), shorts:GK_DARK, trim:GK_DARK},sw),
-        0,0,0,0,cfg.gk.img,GK_DRAWN));
+        0,0,0,0,src,GK_DRAWN));
     }
     const holding=kp=>gkHold===kp && !kp.goalKick && !(kp.diveT>0) && !(kp.groundT>0);   // (a goal kick's on the ground, not in his gloves)
     function pickKeeper(kp){                               // -> [row, frame]
@@ -15429,10 +15480,10 @@
     const cuts={}, FACE={x:8,y:6,w:16,h:16}, BODY={x:7,y:3,w:18,h:28};   // in the 32 px cell: the head is rows 7-20, his feet row 29
     function cut(who,kit,R){
       if(!cfg.ready||!cfg.body) return '';
-      const L=lookOf(who), key=L.key+'|'+(kit?kit.join(''):'')+'|'+R.y+R.h;
+      const L=lookOf(who), ht=R===BODY?L.ht:0, key=L.key+'|'+(kit?kit.join(''):'')+'|'+R.y+R.h;   // (v184: all of him at his height; his face the same at any)
       if(cuts[key]) return cuts[key];
-      const src=composeLook(L.style,L.ovs), cell=bake(Object.assign({}, kit?kitSwaps(kit):{}, lookSwaps(L)),0,(ANIM.idle.row+2)*CELL,CELL,CELL,src,PARTS.drawn);
-      if(kit&&kit[3]) paintLogo(cell,logoSpots(src,L.style+'+'+L.ovs.join('+')),kit[3],kit[4],0,(ANIM.idle.row+2)*CELL);   // (the shirt sponsor's patch)
+      const src=lookSrc(L.style,L.ovs,ht), cell=bake(Object.assign({}, kit?kitSwaps(kit):{}, lookSwaps(L)),0,(ANIM.idle.row+2)*CELL,CELL,CELL,src,PARTS.drawn);
+      if(kit&&kit[3]) paintLogo(cell,logoSpots(src,L.style+'+'+L.ovs.join('+')+'|h'+ht),kit[3],kit[4],0,(ANIM.idle.row+2)*CELL);   // (the shirt sponsor's patch)
       const c=document.createElement('canvas'); c.width=R.w; c.height=R.h;
       const x=c.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(cell,R.x,R.y,R.w,R.h,0,0,R.w,R.h);
       try{ return cuts[key]=c.toDataURL(); }catch(e){ return ''; }
@@ -15440,7 +15491,7 @@
     const face=(who,kit)=>cut(who,kit,FACE), body=(who,kit)=>cut(who,kit,BODY);
     return { get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, get keeperReady(){return cfg.gk.ready;},
              enable(v){cfg.enabled=(v!==false);}, disable(){cfg.enabled=false;},
-             load, loadParts, draw, drawTo, shadowTo, pick, pickKeeper, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
+             load, loadParts, draw, drawTo, shadowTo, pick, pickKeeper, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow, heightRows:()=>({body:cfg.body?bodyRows():null, gk:cfg.gk.img?heightRows(cfg.gk.img,GK_DRAWN,r=>GKR.dive!=null&&r>=GKR.dive,'gk'):null}), lookSrc,
              flush(){ cfg.looks={}; cfg.gk.looks={}; } };
   })();
   SPRITE.loadParts(PLAYER_BODY,PLAYER_HEADS); SPRITE.loadKeeper(KEEPER_SHEET); SPRITE.enable();   // art is embedded -> on by default
@@ -15948,7 +15999,7 @@
   const mtKeeperKit=t=>keeperKit(teamKit(t),TEAM[t]&&TEAM[t].gk);   // his keeper's top in this match
   // the man as the match has him (his look), or as his squad entry has him if he isn't on
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
-    ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
+    ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey, natRole:e.role}:{team:t}); };
   function mtTok(t,si,L,T,kind,role,k,pos,n,cc){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);   // (pos: the spot's fit -- spotFit)
     return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(t==='G'&&SUBS.G.q.some(x=>x.out===si||x.inn===si)?' qWait':'')+(kind==='bench'&&!mtBenchOK(t)&&!SUBS.G.q.some(x=>x.inn===si)?' dim':'')+'"'+(kind==='bench'?'':ptkAt(L,T,role,k,n,cc))
       +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r,natPos(e),surname(e.name),e.num)+'</button>'; }
@@ -15957,7 +16008,7 @@
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
     const pos=si===li.gk?'GK':sl?spotFit(sl):null, at=mtRating(e,role,pos), fc=fitCls(fitPos(e),role,pos), sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs" data-xpl="stam"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
-    let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
+    let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+' · '+heightWord(mtWho(t,si))+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
       +posRowHtml(e)+legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+'</div>'+ratingWhy(e.ovr,at,fc)
       +(t==='G'&&!SUBS.G.off.includes(si)?'<button class="mgMini tSwap" data-mtarm="'+si+'">'+(MT.arm===si?'NOW THE OTHER MAN':'SWAP')+'</button>':'')+'</div></div>';   // (v152: the number named; v158: A TAP TO SWAP)
@@ -19064,7 +19115,7 @@
     if(!p){ MGUI.signQ=[]; m.classList.remove('on'); return; }
     const sty=styleOf(p), kit=careerKit(d), lu=ensureLineup(d), bi=lu.bench.indexOf(d.roster.indexOf(p)), xi=mgStarters(d).includes(p);
     const where=xi?'In your nine':bi>=0&&bi<BENCH_N?'On your bench':'In your squad: not in your nine or on the bench yet (Training’s Selection)';
-    let h='<div class="pauseTitle">'+SIGN_TITLE[e.k]+'</div><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+    let h='<div class="pauseTitle">'+SIGN_TITLE[e.k]+'</div><div class="mgCardHead">'+bodyImg({lookKey:p.id,natRole:p.role},p.role==='GK'?keeperKit(kit):kit)
       +'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div><div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p),true):'')+'</div>'
       +'<div class="mgCardSub signWhere">'+where+'</div></div>'
       +'<div class="cardEnd"><div class="mgCardOvr">'+p.ovr+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,mgFind(d,p.id))+'</div></div></div>';
@@ -19520,7 +19571,7 @@
     const c=condOf(p), mo=morOvr(p,d.tm), mine=morOvr(p), today=Math.round(condOvr(p,at)+mo), why=[];   // (v152: on the day -- see WHY HIS NUMBER ISN'T HIS RATING; v155: the side's mood too)
     if((1-c)*COND_PEN>=0.5) why.push(c<0.85?'tired':'not quite fresh'); if(Math.abs(mine)>=0.5) why.push(morWord(p.mor??MOR0).toLowerCase()); if(Math.abs(mo-mine)>=0.3) why.push('the dressing room '+tmWord(d.tm??MOR0));
     const legs='<div class="mtLegs" data-xpl="fit"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
-    return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
+    return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id,natRole:p.role},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)+legs+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+at+trendHtml(p)+'</div>'+ratingWhy(p.ovr,at,fc,today,why.join(', '))+'<button class="mgMini tSwap" data-tarm="'+ri+'">'+(TARM===ri?'NOW THE OTHER MAN':'SWAP')+'</button></div></div>'
@@ -19533,6 +19584,7 @@
   function tbPos(x,y,s){ return {L:100-y, T:50+(clamp(x,6,94)-50)*TOK_SPREAD, k:s?s.idx-(s.count-1)/2:0, n:s?s.count:1, cc:s&&s.nLines===4?[s.line+1,5]:null}; }   // a portrait slot (x across, y from their goal) on the sideways pitch
   // a man's face for the menus, in his club's kit (SPRITE.face): an <img>, or nothing while the art loads
   function faceImg(who,kit,cls){ const u=SPRITE.face(who,kit); return u?'<img class="'+(cls||'ptkFace')+'" src="'+u+'" alt="" draggable="false">':''; }
+  const heightWord=who=>HEIGHT_NAME[SPRITE.lookOf(who).ht];   // (v184: short, medium or tall, on his card)
   function bodyImg(who,kit){ const u=SPRITE.body(who,kit); return u?'<img class="cardBody" src="'+u+'" alt="" draggable="false">':''; }   // all of him, for his card
   const careerKit=d=>{ const c=d&&d.world&&d.world.clubs&&d.world.clubs[d.clubId], k=c&&c.home, x=d&&d.stadium&&d.stadium.deals&&d.stadium.deals.kit;
     return k?(x?k.slice(0,3).concat(x.sp.col):k):null; };   // (with the shirt sponsor's colours after the three, when there is one)
@@ -20380,9 +20432,9 @@
   function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p), pop=popOf(d,p,f.club);
     const where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+MG_LEAGUE[f.club.tier], wont=!f.mine&&!f.youth&&!!mgWontCome(d,p);
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
-    let h='<div class="mgCard" data-side="'+mgSide+'"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+    let h='<div class="mgCard" data-side="'+mgSide+'"><div class="mgCardHead">'+bodyImg({lookKey:p.id,natRole:p.role},p.role==='GK'?keeperKit(kit):kit)
       +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+(f.mine&&d.cap===p.id?' (C)':f.mine&&d.vice===p.id?' (VC)':'')+'</div>'
-      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
+      +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · '+heightWord({lookKey:p.id,natRole:p.role})+' · age\u00a0'+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)
       +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+MG_LEAGUE[d.tier]+'</div>':'')+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?p.ovr:mgOvrTxt(d,p))+(f.mine||f.youth?trendHtml(p):'')+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,f)+'</div><div class="mgCardSub mgPop" style="text-align:right" data-xpl="'+mgEsc(popWord(pop).replace(/^./,c=>c.toUpperCase())+'. '+XPL.pop)+'">popularity <b>'+pop+'</b></div></div></div>';   // (POPULARITY: how the fans see him)
