@@ -102,7 +102,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
   a marker under the man you're on more than as how far he can get to the ball.) The ring under whoever had the ball
-  is gone. The ball is drawn in whole pixels like the players: white with
+  is gone. Since v190 it's drawn smooth -- round dots spaced evenly the whole way round, a dark edge just under them so
+  they read on the light turf -- as are the other rings on the grass (the amber one on the man your cross is for, your
+  corner's reticle, where your keeper's punt comes down); they were in the pitch's 2 px whole pixels, and the dots
+  came out uneven, running together down the ring's sides. The ball is drawn in whole pixels like the players: white with
   dark patches, turning as it rolls, its patches amber while it's bending. It has a pixel shadow, and a solid ring
   marks where it will land while it's in the air.
 - **A goal goes in the net.** A ball that crosses the line between the posts and under the bar carries on into the
@@ -2976,6 +2979,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v190: the ring on the grass drawn smooth.** The dotted ring round the man you control is round dots spaced evenly
+  the whole way round, drawn smooth, not in the pitch's 2 px whole pixels -- where its dots bunched and ran together
+  down its sides. The other rings on the grass go smooth with it: the amber one on the man your cross is for, your
+  corner's reticle, and where your keeper's punt will come down. See **On the pitch**.
 - **v189: the slide as it was.** The slide and getting up off the turf are the ones the game had from the start again
   -- tucked under him, legs out the way he's going, a puff of dust behind, then up on one knee -- their pixels as they
   were, with his own head on them, in place of v187's and v188's stretched out flat. See **Every body frame by hand**.

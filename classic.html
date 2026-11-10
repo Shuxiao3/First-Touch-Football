@@ -14981,15 +14981,15 @@
     // ball touching it is in his reach (its middle within his reach and the ball's own size: see attemptCaptures), and
     // the ring's bright while one's in it, faint while it's out of his reach
     if(controlled){ const R=controlROf(controlled), inIt=ball.z<26&&dist(controlled,ball)<R+ball.r;
-      ctx.save(); if(!inIt) ctx.globalAlpha=0.55; pixelRing(controlled.x,controlled.y,R,'#9dff3c','rgba(14,58,30,.6)',true); ctx.restore(); }
+      ctx.save(); if(!inIt) ctx.globalAlpha=0.55; groundRing(controlled.x,controlled.y,R,'#9dff3c','rgba(14,58,30,.6)',true); ctx.restore(); }
     // your cross as you charge it (or a tap waiting for a second): an amber ring on the man it's for (see crossPick)
-    if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)&&!cornerAimOn()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) pixelRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
+    if(controlled&&(crossHeld||crossPend)&&myBall()&&crossOK(controlled)&&!cornerAimOn()){ const t=crossPick(controlled,crossHeld?crossCharge:crossPend.charge,crossHeld&&crossLow); if(t) groundRing(t.q.x,t.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }
     if(cornerAimOn()){ const A=restartInfo.aim, k=0.75+0.25*Math.sin(performance.now()/160);   // (v180: your corner's reticle -- see cornerAimOn)
-      ctx.save(); ctx.globalAlpha=k; pixelRing(A.x,A.y,30,'#ffb43c','rgba(58,38,8,.6)',true); pixelRing(A.x,A.y,10,'#ffb43c','rgba(58,38,8,.6)'); ctx.restore(); }
+      ctx.save(); ctx.globalAlpha=k; groundRing(A.x,A.y,30,'#ffb43c','rgba(58,38,8,.6)',true); groundRing(A.x,A.y,10,'#ffb43c','rgba(58,38,8,.6)'); ctx.restore(); }
     // your keeper with it: the same ring on the man he'll play it to (see keeperPlay) -- not you (PLAYER), nor a hoof
     if(gkHold&&keeperWaits(gkHold)){
-      if(puntOn()){ const S=puntSpot(gkHold,clearCharge); pixelRing(S.x,S.y,18,'#7fd8ff','rgba(8,40,58,.6)',true); if(S.q) pixelRing(S.q.x,S.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }   // (v169: your keeper's punt as you charge it: where it'll come down, and the man it's for if it's his)
-      else { const t=keeperInHand()?(a=>keeperPassTarget(gkHold,a.x,a.y))(keeperAim(gkHold)):gkTarget(gkHold,gkHowOf(gkHold.team)); if(t&&t!==controlled) pixelRing(t.x,t.y,22,'#ffb43c','rgba(58,38,8,.6)'); } }
+      if(puntOn()){ const S=puntSpot(gkHold,clearCharge); groundRing(S.x,S.y,18,'#7fd8ff','rgba(8,40,58,.6)',true); if(S.q) groundRing(S.q.x,S.q.y,22,'#ffb43c','rgba(58,38,8,.6)'); }   // (v169: your keeper's punt as you charge it: where it'll come down, and the man it's for if it's his)
+      else { const t=keeperInHand()?(a=>keeperPassTarget(gkHold,a.x,a.y))(keeperAim(gkHold)):gkTarget(gkHold,gkHowOf(gkHold.team)); if(t&&t!==controlled) groundRing(t.x,t.y,22,'#ffb43c','rgba(58,38,8,.6)'); } }
     if(LAB.on) labDrawPitch();
 
     if(shootCharge>0.02&&ball.ownedBy===controlled){
@@ -15679,17 +15679,21 @@
     }
   }
 
-  // A RING ON THE GRASS in the pitch's whole pixels (2 px, as the pitch art is drawn), round (cx,cy) at R on the pitch,
-  // with a dark edge under it if asked (it reads on the light turf); dotted if asked, every other pixel of it
-  function pixelRing(cx,cy,R,col,edge,dotted){
-    const n=Math.max(32,Math.ceil(R*3.6)), seen=new Set(), pts=[];
-    for(let i=0;i<n;i++){
-      const a=i/n*Math.PI*2, s=proj(cx+Math.cos(a)*R,cy+Math.sin(a)*R), x=Math.floor(s.x/2), y=Math.floor(s.y/2), k=x*8192+y;
-      if(!seen.has(k)){ seen.add(k); pts.push(x*2,y*2); }
-    }
-    const on=i=>!dotted||(i>>1)%2===0&&!(i===pts.length-2&&i>0);   // (not the last one next to the first)
-    if(edge){ ctx.fillStyle=edge; for(let i=0;i<pts.length;i+=2) if(on(i)) ctx.fillRect(pts[i],pts[i+1]+2,2,2); }
-    ctx.fillStyle=col; for(let i=0;i<pts.length;i+=2) if(on(i)) ctx.fillRect(pts[i],pts[i+1],2,2);
+  // A RING ON THE GRASS round (cx,cy) at R on the pitch -- the circle on the ground as the camera sees it -- with a dark
+  // edge just under it if asked (it reads on the light turf); dotted if asked. v190: drawn smooth, a clean line or round
+  // dots spaced evenly the whole way round (as many as fit a dot every RING_DOT px, so none bunch where it closes). It was
+  // in the pitch's 2 px whole pixels, and its dots came out uneven: running together down its sides, gappy along the front.
+  const RING_DOT=6;
+  function groundRing(cx,cy,R,col,edge,dotted){
+    const n=Math.max(40,Math.ceil(R*1.6)), P=[]; let L=0;
+    for(let i=0;i<n;i++){ const a=i/n*Math.PI*2; P.push(proj(cx+Math.cos(a)*R,cy+Math.sin(a)*R)); }
+    for(let i=0;i<n;i++){ const p=P[i], q=P[(i+1)%n]; L+=Math.hypot(q.x-p.x,q.y-p.y); }
+    const path=dy=>{ ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p.x,p.y+dy):ctx.moveTo(p.x,p.y+dy)); ctx.closePath(); };
+    const w=dotted?2.6:2, gap=L/Math.max(6,Math.round(L/RING_DOT));
+    ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round'; if(dotted) ctx.setLineDash([0.01,gap-0.01]);
+    if(edge){ ctx.strokeStyle=edge; ctx.lineWidth=w+0.4; path(1.5); ctx.stroke(); }
+    ctx.strokeStyle=col; ctx.lineWidth=w; path(0); ctx.stroke();
+    ctx.restore();
   }
   // THE BALL in whole pixels, as the players are: a 9x9 sprite at their scale, sitting on a pixel shadow. Six frames of
   // it turning as it rolls -- about one of its own five-fold axes, so the sixth comes round to the first -- and its
@@ -15751,7 +15755,7 @@
     const inHands=!!restartHolder();                         // (v138: a throw-in, over his head)
     if(ball.z>14&&px&&!inHands){
       const pulse=0.6+0.4*Math.sin(performance.now()/180);
-      pixelRing(ball.x,ball.y,ball.r*1.7,'rgba(255,255,255,'+(0.3+0.4*pulse).toFixed(2)+')');
+      groundRing(ball.x,ball.y,ball.r*1.7,'rgba(255,255,255,'+(0.3+0.4*pulse).toFixed(2)+')');
       const a=proj(ball.x,ball.y,0), b=proj(ball.x,ball.y,ball.z);
       ctx.fillStyle='rgba(255,255,255,.6)'; ctx.fillRect(Math.floor(a.x/2)*2,Math.floor(a.y/2)*2,2,2);
       ctx.fillStyle='rgba(255,255,255,.14)'; for(let y=Math.round(b.y)+4;y<a.y-3;y+=4) ctx.fillRect(Math.round(a.x),y,1,2);   // a faint dotted tether
