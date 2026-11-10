@@ -806,9 +806,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Short, medium or tall (v184).** A tall man's sprite has two rows more than a medium one and a short man's two
     fewer: one at the knee (the row under his shorts) and one in his boots (their top row). His head, his shirt and
     his feet are as drawn, and his feet stay on his spot. Where those rows are is read off the drawn sheet cell by
-    cell; a slide, and a keeper's dive or spread, are left as drawn. His height is seeded from his name like the rest
-    of his look (a career man's from himself) and weighted by his line -- short, medium and tall out of 100: keepers
-    5, 35 and 60; defenders 15, 45 and 40; midfielders 35, 50 and 15; forwards 30, 45 and 25. At a throw-in he holds
+    cell; a slide is left as drawn. His height is seeded from his name like the rest of his look (a career man's from
+    himself) and weighted by his line -- short, medium and tall out of 100: defenders 15, 45 and 40; midfielders 35,
+    50 and 15; forwards 30, 45 and 25. Keepers are all one height, as drawn (v185). At a throw-in he holds
     the ball in front of his face wherever it is, 2 px higher for a tall man and 2 lower for a short one. His card
     says his height, after his position and style. Each look used to be scaled 0.95 to 1.06, which would have
     blurred the three heights together, so that's gone. For now it's only how he looks: no header, reach or turn
@@ -2934,6 +2934,8 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v185: keepers all one height.** Every keeper is medium, as drawn: in v184 60 in 100 were tall and 5 short. The
+  outfield heights are as v184 had them. See **Every player looks like himself**.
 - **v184: players are short, medium or tall.** Every man is one of three heights, 2 px apart on his 32 px sprite: a
   tall man two rows taller, one at the knee and one in his boots, a short man two rows shorter, his head, shirt and
   feet as drawn and his feet on his spot. It's seeded like his look, from his name (a career man's from himself), and
