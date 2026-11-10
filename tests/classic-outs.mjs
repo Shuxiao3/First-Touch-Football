@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
 patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keepers, ball:()=>ball, FW, FH, YC, MK, PA_D, PA_HW, GOAL_W, atkOf, keeperOf, inOffsidePos, passTo, doPass, '
-  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, TZ:throwZ, THROW_D, WIND:THROW_WIND, LIFT:THROW_LIFT, FOLLOW:THROW_FOLLOW, RUN:OUTBALL_RUN, FADE:OUTBALL_FADE}; }, '
+  + 'get RS(){ return {YOURS:RS_YOURS, LATE:RS_LATE, OFF:RS_OFF, THROW_Z, THROW_D, WIND:THROW_WIND, LIFT:THROW_LIFT, FOLLOW:THROW_FOLLOW, RUN:OUTBALL_RUN, FADE:OUTBALL_FADE}; }, '
   + 'outBall:()=>outBall, newAlpha:()=>newBallAlpha(), pose:p=>throwPoseOf(p), keepers:()=>keepers, rs:()=>restartInfo, rt:()=>restartT, last:()=>lastRestart, check:()=>checkOutOfPlay(), '
   + 'give:(t,tm,x,y)=>doRestart(t,tm,x,y), controlled:()=>controlled, gk:()=>gkHold, offsideT:()=>offsideT, offsidePass:()=>offsidePass, simNow:()=>simNow, '
   + 'setFree:v=>{ freePlay=v; }, grade:()=>lastGrade, ballAt, '
@@ -60,7 +60,7 @@ r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = 
   const R = T.rs(); res.type = R && R.type; res.team = R && R.team;
   res.walk = await window.__run(4, () => T.rs() && T.rs().set);
   const tk = T.rs().taker; res.onLine = Math.abs(tk.y) < 0.5;
-  res.hands = Math.abs(b.z - T.RS.TZ(tk)) < 1 && Math.hypot(b.x - tk.x, b.y - tk.y) < 2; res.faces = +tk.facing.y.toFixed(2);
+  res.hands = Math.abs(b.z - T.RS.THROW_Z) < 1 && Math.hypot(b.x - tk.x, b.y - tk.y) < 2; res.faces = +tk.facing.y.toFixed(2);
   let minOff = 1e9, touched = false; const lt = b.lastTouchP;
   res.held = await window.__run(T.RS.LATE.throw + 1, () => { for(const q of T.players()) if(q.team !== tk.team) minOff = Math.min(minOff, Math.hypot(q.x - tk.x, q.y - tk.y));
     if(T.rs() && b.ownedBy) touched = true; return !T.rs(); });
@@ -199,14 +199,14 @@ ok(r.nw[0] === 0 && r.nw[1] === 0 && r.nw[2] > 0 && r.nw[2] < 1 && r.nw[3] > r.n
 // --- THE THROW, DRAWN: held in front of his face; wound up, a little higher; gone, his hands down, him where he is ------
 r = await page.evaluate(async () => { const T = window.__T, b = T.ball(), res = {};
   T.freeze(); b.ownedBy = null; b.x = T.FW * 0.6; b.y = -12; b.vx = b.vy = 0; b.z = 0; b.lastTouch = 'G'; T.check();
-  await window.__run(4, () => T.rs() && T.rs().set); const tk = T.rs().taker; res.hold = T.pose(tk); res.z0 = Math.round(b.z); res.zAt = Math.round(T.RS.TZ(tk));   // (v184: where his height has him hold it)
+  await window.__run(4, () => T.rs() && T.rs().set); const tk = T.rs().taker; res.hold = T.pose(tk); res.z0 = Math.round(b.z);
   await window.__run(4, () => !T.rs() || T.rs().windT > 0); res.wind = T.pose(tk); const tw = T.simNow();
   let top = 0; await window.__run(1, () => { if(T.rs()) top = Math.max(top, b.z); return !T.rs(); }); res.windFor = +(T.simNow() - tw).toFixed(2); res.lift = Math.round(top - res.z0);
   res.follow = T.pose(tk); const fx = tk.x, fy = tk.y;
   await window.__run(T.RS.FOLLOW - 0.06); res.still = Math.hypot(tk.x - fx, tk.y - fy) < 1; res.during = T.pose(tk);
   await window.__run(0.15); res.after = T.pose(tk); T.freeze(); return res; });
 info('the throw, drawn: ' + JSON.stringify(r));
-ok(r.hold === 'hold' && r.z0 === r.zAt && Math.abs(r.zAt - 15) <= 4, 'he holds it in front of his face in both hands (' + r.z0 + ' px up, at his height), his arms as short as ever (his frame\'s hanging hands left out, his arms drawn bent up to it -- v141)');
+ok(r.hold === 'hold' && r.z0 === 15, 'he holds it in front of his face in both hands, his arms as short as ever (his frame\'s hanging hands left out, his arms drawn bent up to it -- v141)');
 ok(r.wind === 'wind' && Math.abs(r.windFor - 0.25) <= 0.07 && r.lift >= 2, 'to throw it he takes it back -- ' + r.lift + ' px up over ' + r.windFor + ' s -- and lets it go');
 ok(r.follow === 'follow' && r.during === 'follow' && r.still && r.after === null, 'gone, his arms come down in front of him, him where he is for a moment, then he\'s off');
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Football Classic -- the far stands in layers, so a match can fill them to the crowd that came (v186), and the
-supporters in them drawn the way the players are (v187).
+supporters in them drawn pixel by pixel (v187).
 
 For each of the five grounds this draws the stand with tools/sprites/make_pitch_art.py's own code -- its old little
 two-pixel fans left out -- at twice the size, and seats it at that size: rows of steps, and on them supporters seen from
@@ -72,7 +72,7 @@ BODY_UP = ['.Vv.snnns.Vv.', '....SSssz....', '....ssszz....']        # arms up: 
 FAN_H, FAN_W = 13, 15
 
 def small_fan(R, dim=1.0):
-    """one supporter, 13 rows by 15: a head the players' shape and colouring, his shoulders, his hands"""
+    """one supporter, 13 rows by 15: a head in the players' colouring, his shoulders, his hands"""
     woman = R.random() < 0.42
     style = R.choice(['flong', 'fbob', 'fpony', 'flong'] if woman else ['crop', 'crop', 'mop', 'spiky', 'afro', 'bald', 'mop'])
     tone = min(6, int(R.random() * R.random() * 7.6 + R.random() * 1.4))

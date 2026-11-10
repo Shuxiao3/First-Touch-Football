@@ -801,46 +801,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     TUNE. TUNE has Crossing, Curve, Heading, Off IQ, Def IQ and the keeper's reach and speed.
   - Keys: `1`-`4` from, `C` crosser, `,` `.` ours, `[` `]` theirs, `B` keeper.
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
-  in one of seven hairstyles: mop, crop, bald, afro, spiky, mohawk or a side parting (v187: the spikes and the side
-  parting took the long hair's and the bun's places, at their odds). A beard and a headband can go over any style,
-  and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
-  a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a height. A player's
-  look is seeded from his name, so he looks the same every match (the eye colour is drawn last, so nobody's other
-  picks changed when it came in). Keepers get their own skin, hair and eye colour.
-  - **Short, medium or tall (v184).** A tall man's sprite has two rows more than a medium one and a short man's two
-    fewer, between his shirt and his boots: on the redrawn men (v187) a tall man gets a row more of knee and a row
-    more of sock, and a short man loses a row of his shorts and his sock, so he keeps his knees. His head, his shirt
-    and his feet are as drawn, and his feet stay on his spot. Where those rows are is read off the drawn sheet cell by
-    cell; a slide is left as drawn. His height is seeded from his name like the rest of his look (a career man's from
-    himself) and weighted by his line -- short, medium and tall out of 100: defenders 15, 45 and 40; midfielders 35,
-    50 and 15; forwards 30, 45 and 25. Keepers are all one height, as drawn (v185). At a throw-in he holds
-    the ball in front of his face wherever it is, 2 px higher for a tall man and 2 lower for a short one. His card
-    says his height, after his position and style. Each look used to be scaled 0.95 to 1.06, which would have
-    blurred the three heights together, so that's gone. For now it's only how he looks: no header, reach or turn
-    goes by it.
-  - **Drawn by hand (v187; every body frame by hand, v188).** Every part is drawn pixel by pixel in the style of the
-    reference overworld sprites (the handheld Gen-5 style) -- the proportions, the lighting and the shading taken off
-    them, not the characters. The head is wider than it's tall, 17 pixels across, with a thatch of hair in three tones
-    lit from the top left: a light band up there, the dark low on the right. The eyes are two pixels wide, the way the
-    reference sheets draw them (v188): the lid and the iris over the white and the pupil, the pupils turned in, under a
-    brow; the cheeks and jaw are outlined in the skin's own maroon. The body is eight rows of shirt and shorts with the
-    hands out at the sides, two by two in the skin's light. The outline is black, softened to navy along the top and to
-    the skin's own maroon round the hands. Each head is drawn in five views -- facing you, half turned, side on, half
-    away and away -- and the other three are those mirrored; the diagonals follow an 8-direction reference for the
-    angles only. The side of the head runs straight down past the ears (the first draw had them a pixel out on each
-    side just under the hair, which looked like horns).
-  - **Every body frame by hand (v188).** Every frame of every body is drawn pixel by pixel, outline and all, in the
-    five views: standing, the four of the run, the shot's wind-up and strike, and the pass's backswing and side-foot
-    (they came off a small posing rig before, which gave the run a hand swinging up by his head and legs that never
-    looked quite right). **The slide as it was (v189):** the slide and getting up off the turf are the ones the game had
-    from the start -- down on his hip tucked under him, his legs out the way he's going, a puff of dust kicked up behind,
-    then up on one knee -- their pixels as they were, with his own head on them (v187 and v188 stretched him out flat). Running, as the reference sheets walk: the stride low, his
-    legs apart and the front foot a pixel nearer you, then the passing a pixel up, one leg under him and the other knee
-    coming through, his arms swinging; half turned, his legs side by side under him, the near foot a pixel lower and
-    the near arm the whole one, the far one peeping out. The keeper has his own: set with his knees out and his gloves
-    up, the ball gathered into his chest, the dive (two legs trailing, the far one a little bent) and going down big;
-    his run, his side-step and his kick are the outfield ones with gloves for hands. The keepers wear their own hair,
-    put on their sheet the way an outfielder's is (they had one drawn head between them before v187).
+  in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
+  style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
+  a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a slightly different
+  height. A player's look is seeded from his name, so he looks the same every match (the eye colour is drawn last,
+  so nobody's other picks changed when it came in). Keepers get their own skin, hair and eye colour.
+  - The art follows the reference overworld sprites (the handheld Gen-5 style). The head is about two-thirds of the
+    figure, on a short, stocky body with the hands held out from the sides. The hair falls in clumps under a band of
+    sheen, with the fringe hanging to the eyes and the outline in black. The face is small and framed by the hair,
+    with 2×2 eyes (lid and iris over white and pupil, the pupils turned in) and a one-pixel mouth. Bald heads keep
+    their brows.
+  - The diagonals follow an 8-direction reference: turned toward you the face slides to that side and the ear to
+    the other; turned away, the cheek and ear show at the edge.
   - Every sprite stands on a flat oval shadow of whole sprite pixels instead of the soft one, which comes back if
     the sprites are switched off (`V`).
 - **The pitch is in the town's style.** It's drawn the way Ekat's tiles are: mint turf mown in the 14 bands and specked,
@@ -860,7 +832,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     centred on halfway, and none on a new career's field; away from a career, the old stand with the game's words
     on its boards.
   - The camera's far touchline is now 100 px down the screen instead of 64, so the stand shows over it.
-  - **The supporters (v187).** The fans are drawn the way the players are, in rows on the steps: seen from the chest
+  - **The supporters (v187).** The fans are drawn pixel by pixel, in rows on the steps: seen from the chest
     up with their hands on the seat in front, the front row up against the wall, men and women with the players' skin
     tones and hair, a few with their arms up. They're smaller than the men on the pitch, as they're further off, and
     quieter in colour (the back rows a touch dimmer), so they don't take the eye off the game: 111 in the first
@@ -870,11 +842,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     `python3 tools/clips/make_stand_layers.py`, which seats the supporters. `PITCH.enable(false)` in the console puts
     the old vector pitch back.
   - The labs' tally line sits on a dark pill now that it's over the turf rather than a night sky.
-  The parts come from `python3 tools/clips/make_players.py` (v187), which reads the pixel grids in
-  `tools/clips/players_art/` -- the heads, and since v188 every body frame (`frames.txt`, the keepers' own in
-  `keepers.txt`) -- and writes the outfield sheet, the heads, the keepers' sheet and where each head goes into the page
-  (`--sheet out.png` draws them all to look at instead). A career player's look is seeded from the
-  player himself, so he looks the same at every club.
+  The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
+  `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. A career
+  player's look is seeded from the player himself, so he looks the same at every club.
 - **Headers are a real leap.** Going up for a header lifts a player's feet 8 px (Heading 1) to 14 px (Heading 10),
   a quarter to two-fifths of his height. It used to be up to 83 px, over two and a half times his height. That
   covers your attacking header (K), your defensive one (J) and the computer's. Your header arms in their box
@@ -2979,6 +2949,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v191: the players back as they were, and no heights.** The redrawn players of v187 to v189 are gone: every man
+  is the original sheet's again -- its bodies, its run and slide, the seven hairstyles mop, crop, bald, afro, long,
+  mohawk and bun -- and the keepers have their one drawn head back. Short, medium and tall (v184 and v185) are gone
+  with them: no height on anybody's card, a throw-in held where it always was, and each man a touch bigger or smaller
+  as before v184. The supporters in the stands (v187), the crowd as the gate brings it (v186) and the smooth ring on
+  the grass (v190) stay. See **Every player looks like himself**.
 - **v190: the ring on the grass drawn smooth.** The dotted ring round the man you control is round dots spaced evenly
   the whole way round, drawn smooth, not in the pitch's 2 px whole pixels -- where its dots bunched and ran together
   down its sides. The other rings on the grass go smooth with it: the amber one on the man your cross is for, your
@@ -4458,14 +4434,13 @@ The head is bigger than the arms can reach past, so the gloves are painted in fr
 a pixel artist would. The spread is drawn facing us whichever way he faces: side on, a man down on one knee
 with his arms out reads as a man standing. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
 
-Football Classic (`classic.html`) has its players in parts (a body sheet, every hairstyle's head, and where the head
-sits in each cell) so each player can be put together and recoloured. Since v187 they're drawn by hand, in
-`tools/clips/players_art/`, and `make_players.py` writes them in -- the outfield sheet, the heads and the keepers'
-sheet together; `make_player_sheet.py --embed-classic` and `make_keeper_sheet.py --embed-classic` would put the old
-art back. The stands are two steps, the strips and then the supporters in them:
+Football Classic (`classic.html`) takes the same art split into parts (a body sheet, every hairstyle's head, and
+where the head sits in each cell) so each player can be put together and recoloured. Write them in with these (the
+stands are two steps, the strips and then the supporters in them):
 
 ```sh
-python3 tools/clips/make_players.py                          # the players and the keepers (--sheet out.png to look at them)
+python3 tools/sprites/make_player_sheet.py --embed-classic
+python3 tools/sprites/make_keeper_sheet.py --embed-classic
 python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch, a strip a ground level (assets/sprites/pitch_far_1..5.png)
 python3 tools/clips/make_stand_layers.py                     # ...and its supporters, at twice the strip's pixels
 python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9 frames (assets/sprites/ball_preview.png)
