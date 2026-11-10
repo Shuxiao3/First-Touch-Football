@@ -2937,7 +2937,8 @@
   // (v182) EVERY PLAYSTYLE'S USUAL MAKE, FROM THE MASTER SHEET: what a man of each style has in every stat at his style's
   // usual level (what these numbers rate: STYLE_REF -- his line's usual man's is 69, 67 or 72), 1 to 20 -- the game's 1 to 10 in half
   // points -- set by hand on the master sheet and tuned stat by stat across the styles: the outfield ones on the Stats
-  // by Playstyle sheet, the keepers on the master sheet. In OUT_KEYS' order (speed, acceleration, agility, stamina,
+  // by Playstyle sheet (v192: brought down across the board there, about a point and a quarter on its scale, a little
+  // more off a style's weaker stats), the keepers on the master sheet. In OUT_KEYS' order (speed, acceleration, agility, stamina,
   // strength, ball control, dribbling, short passing, long passing, composure in traffic, final third composure,
   // crossing, heading, slide tackle, tackle, interceptions, Off IQ, Def IQ, shot power, curve, long shots, shot accuracy),
   // a keeper's then GK_KEYS' (keeper speed, reflexes, reach, diving, distribution, handling). A style's offsets (d) are
@@ -2947,24 +2948,24 @@
   // so every rating, are as they were. (Till v182 a style was a handful of offsets on its line's averages: the ones
   // above and STYLE_NEW_D.)
   const STYLE_SHEET={
-    stopper:[13,8,8,11,18,10,7,11,12,10,6,7,18,17,18,16,9,17,10,8,8,7], cover:[12,12,10,11,15,10,8,11,12,10,6,8,15,17,16,17,9,18,9,8,8,7],   // CB
-    ballplayer:[11,10,10,12,13,12,11,13,15,10,7,10,14,14,14,14,11,14,10,12,10,9], widecb:[13,10,12,12,14,11,9,12,12,7,7,11,14,15,15,16,10,14,9,9,9,9],
-    libero:[12,10,11,12,11,13,12,14,12,13,8,10,12,15,14,14,12,13,10,10,11,11],
-    fullback:[15,14,13,15,11,14,12,13,13,11,9,15,12,15,14,15,12,14,10,12,10,10], wingback:[17,15,15,16,8,14,14,13,13,10,10,15,7,14,11,11,13,13,9,13,13,13],   // FB
-    deffb:[13,13,13,13,12,12,10,12,12,9,7,12,14,16,15,15,10,15,10,10,8,8], invfb:[13,11,14,13,9,14,14,15,13,14,10,12,9,14,13,14,13,13,10,13,13,11],
-    ballwinner:[13,14,14,16,12,13,12,13,11,11,10,10,12,15,17,15,11,15,13,10,10,11], deepcreator:[11,12,12,13,10,15,14,15,17,15,13,13,10,11,11,12,16,12,14,16,14,12],   // DM
-    anchor:[11,12,11,14,14,13,12,14,12,13,9,10,14,14,15,17,11,16,13,10,10,9],
-    completemid:[13,13,13,15,11,15,14,15,13,15,12,13,11,12,13,14,14,13,13,13,13,13], boxtobox:[13,13,12,17,11,13,12,14,12,13,14,12,13,12,12,13,13,14,14,12,10,14],   // CM
-    covermid:[13,14,13,15,12,13,12,14,12,11,10,11,11,14,15,15,11,15,12,10,11,11], mezzala:[13,13,13,13,9,15,14,15,16,14,14,15,9,8,9,10,16,10,13,15,15,13],
-    playmaker:[13,13,14,12,8,17,15,17,14,16,15,15,9,8,8,9,17,8,13,17,15,14], trequartista:[14,14,14,14,8,16,15,16,13,15,16,13,11,8,8,8,17,9,15,15,16,15],   // AM
-    shadow:[15,12,13,14,11,15,13,14,11,13,16,11,14,10,8,8,16,9,15,14,14,16],
-    widemid:[15,14,13,15,9,15,15,14,14,14,12,15,10,12,12,13,13,13,12,13,12,11], mwinger:[17,15,15,15,9,14,13,13,12,8,10,14,7,11,9,8,12,11,11,11,10,11],   // WM
-    wideplaymaker:[14,14,14,13,8,16,16,14,16,12,14,16,7,9,9,8,15,8,12,16,14,14],
-    winger:[16,16,16,13,8,14,15,14,12,12,14,17,8,7,8,9,14,10,14,14,14,14], trickster:[15,16,18,12,7,15,19,14,13,15,14,14,8,7,6,7,14,7,14,14,14,14],   // WNG
-    paceywinger:[19,17,15,12,7,14,15,13,10,11,12,12,7,7,6,8,13,7,13,12,13,13], invwinger:[15,16,17,12,8,15,16,14,12,14,15,14,9,8,8,9,15,9,15,15,17,15],
-    complete:[15,14,14,12,12,14,14,14,12,14,16,13,13,8,9,9,15,11,16,13,15,16], poacher:[14,16,13,12,14,14,13,12,9,15,17,9,15,7,8,8,17,9,17,12,15,18],   // STK
-    speedster:[18,15,14,13,9,13,14,12,10,11,14,12,10,6,7,7,13,7,15,11,12,13], target:[11,13,12,13,16,15,14,15,12,15,17,12,17,8,10,9,14,10,16,12,16,17],
-    falsenine:[15,15,16,13,9,16,16,16,12,16,14,14,11,7,8,8,16,9,14,14,15,15],
+    stopper:[10,8,8,11,16,8,6,9,11,7,5,5,16,14,16,15,8,16,9,6,6,7], cover:[10,11,9,11,14,8,7,9,11,7,5,6,13,15,15,16,8,17,9,6,6,7],   // CB
+    ballplayer:[9,9,9,12,12,10,9,12,15,9,6,8,12,13,12,13,10,14,9,13,8,7], widecb:[11,9,11,12,13,9,9,10,11,6,6,10,12,16,14,15,9,13,8,7,7,7],
+    libero:[10,9,10,12,11,12,11,13,12,12,8,8,12,12,12,12,11,14,10,9,8,8],
+    fullback:[13,13,12,15,10,13,11,12,12,9,8,14,9,14,11,13,11,13,8,12,9,8], wingback:[15,14,14,16,7,13,12,12,12,7,11,16,5,13,9,9,12,12,10,13,12,10],   // FB
+    deffb:[11,12,12,13,11,10,10,11,11,7,6,11,12,16,13,14,9,13,8,8,7,7], invfb:[11,10,13,13,8,13,12,14,12,12,9,11,7,14,11,13,12,12,10,12,11,8],
+    ballwinner:[11,13,13,16,11,11,11,12,9,11,9,8,10,15,16,13,10,14,11,8,9,8], deepcreator:[9,11,11,13,9,14,12,14,16,14,10,13,8,10,10,11,15,13,12,15,13,9],   // DM
+    anchor:[9,11,10,14,13,11,10,13,11,10,7,8,14,14,14,17,10,15,11,7,8,8],
+    completemid:[11,12,12,15,10,14,12,14,12,14,11,12,9,11,11,11,13,11,12,13,11,9], boxtobox:[11,12,11,17,10,12,11,13,10,11,13,11,11,11,11,12,12,12,13,11,9,12],   // CM
+    covermid:[11,13,12,15,11,12,11,13,10,11,9,9,10,15,13,13,10,14,10,8,11,8], mezzala:[11,12,12,13,8,14,12,14,15,12,13,15,7,8,8,9,15,9,12,15,13,9],
+    playmaker:[11,12,13,12,7,16,13,16,13,16,14,15,7,5,5,6,16,5,13,17,15,11], trequartista:[12,13,13,14,7,15,13,15,12,13,15,13,8,5,5,5,16,4,14,15,15,14],   // AM
+    shadow:[13,11,12,14,10,14,12,13,9,12,15,10,12,7,4,6,15,5,14,13,12,14],
+    widemid:[13,13,12,15,8,14,13,13,13,11,11,14,8,12,10,10,12,10,10,13,12,9], mwinger:[15,14,14,15,8,13,12,12,10,7,9,14,7,10,10,7,11,10,10,10,9,9],   // WM
+    wideplaymaker:[12,13,13,13,7,15,14,13,14,12,13,16,6,7,6,6,14,6,12,16,13,11],
+    winger:[14,15,15,13,7,13,13,13,11,11,13,17,7,7,6,8,13,7,12,14,13,11], trickster:[13,15,17,12,6,14,17,13,12,13,13,14,6,4,6,5,13,5,12,14,13,11],   // WNG
+    paceywinger:[16,16,14,12,6,13,13,12,8,10,12,13,6,6,6,5,12,5,13,12,11,10], invwinger:[13,15,16,12,7,14,14,13,11,13,14,14,7,5,6,8,14,5,13,15,16,12],
+    complete:[13,13,13,12,11,13,12,13,10,13,15,12,11,7,6,7,14,7,14,13,13,13], poacher:[12,15,12,12,13,12,10,12,6,13,16,7,13,5,6,5,16,6,16,11,14,16],   // STK
+    speedster:[16,14,15,13,8,11,12,12,7,10,13,12,11,6,4,6,12,5,14,10,13,13], target:[9,12,11,13,15,14,12,14,10,14,16,11,15,6,7,6,13,8,15,9,15,15],
+    falsenine:[13,14,14,13,8,15,14,15,9,15,13,13,8,6,7,6,15,6,13,14,14,13],
     allround:[10,10,11,12,12,10,7,11,10,13,6,6,10,6,8,10,10,11,8,6,6,6,13,15,15,15,13,14], shotstopper:[10,10,11,12,12,10,7,10,9,13,6,6,10,6,8,10,10,11,8,6,6,6,10,17,16,16,11,12],   // GK
     sweeperkeeper:[10,10,11,12,12,11,7,13,12,15,6,6,10,6,8,10,10,11,8,6,6,6,16,13,13,14,16,15]
   };
@@ -2974,11 +2975,11 @@
   // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
   const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
   // (v182) THE SPREAD, A BELL CURVE: a made man's stats scatter round his style's on a normal curve (normInv: Acklam's
-  // approximation, one draw a stat, so the draws that follow are as they were), MAKE_SD a standard deviation -- 0.4 of a
-  // point, the master sheet's 0.8 on its 1 to 20 scale: two men in three within that of it, nineteen in twenty within
-  // twice that, and never more than two and a half times it. (It was an even spread, 0.7 either way: the same width
-  // measured that way, flat-topped.) An exhibition side's men scatter twice as widely, as they always did (their even
-  // 1.5 either way, half that on pace: about 0.87 and 0.43).
+  // approximation, one draw a stat, so the draws that follow are as they were), MAKE_SD a standard deviation -- half a
+  // point, the sheet's 1 on its 1 to 20 scale (v192: it was 0.4, the sheet's 0.8): two men in three within that of it,
+  // nineteen in twenty within twice that, and never more than two and a half times it. (Before v182 it was an even
+  // spread, 0.7 either way.) An exhibition side's men scatter wider, as they always did (their even 1.5 either way, half
+  // that on pace: about 0.87 and 0.43).
   function normInv(p){
     const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
           b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
@@ -2989,7 +2990,7 @@
     if(p>0.97575) return -tail(Math.sqrt(-2*Math.log(1-p)));
     const q=p-0.5, r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
   const bellDev=(u,sd)=>sd*clamp(normInv(clamp(u,1e-6,1-1e-6)),-2.5,2.5);
-  const MAKE_SD=0.4, MAKE_SD_NEW=0.32, EXH_SD=0.87;   // (MAKE_SD_NEW: Long passing's and Final third composure's own, with 0.6 of their parent's on top -- 0.4 in all)
+  const MAKE_SD=0.5, MAKE_SD_NEW=0.4, EXH_SD=0.87;   // (MAKE_SD_NEW: Long passing's and Final third composure's own, with 0.6 of their parent's on top -- 0.5 in all; v192: 0.4 and 0.32)
   // a man's new two from his old ones (newStatsFill): his Short passing and Composure, moved by how his role's and
   // archetype's Long passing and Final third composure differ from them -- and (made, not carried over) a little of his own
   // either way, from a hash of the rest, so his long game isn't simply his short one

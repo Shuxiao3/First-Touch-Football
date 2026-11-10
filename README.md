@@ -2949,6 +2949,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v192: the playstyles brought down, and spread wider.** Every outfield playstyle's numbers are the Stats by
+  Playstyle sheet's as you brought them down across the board: 585 of 682 changed, about a point and a quarter on its
+  1 to 20, a little more off each one's weaker stats. A new man's stats scatter half a point a standard deviation round
+  his playstyle's (the sheet's 1; it was 0.4, the sheet's 0.8). In a career his rating still says how good he is: a man
+  of a given rating is about as good as before, his lesser stats a little lower and his main ones a touch higher.
+  Exhibition sides aren't made to a rating, so they come down about six points: their starters average 68 (74 before),
+  Arsenal's 77 and Hull City's 62. See **The master sheet's numbers**.
 - **v191: the players back as they were, and no heights.** The redrawn players of v187 to v189 are gone: every man
   is the original sheet's again -- its bodies, its run and slide, the seven hairstyles mop, crop, bald, afro, long,
   mohawk and bun -- and the keepers have their one drawn head back. Short, medium and tall (v184 and v185) are gone
@@ -4228,16 +4235,21 @@ across archetypes; what changes is the kind of player.
 
 **The master sheet's numbers (v182).** Every archetype's usual make -- what a man of it has in each stat -- is the
 master sheet's, set by hand stat by stat on 1 to 20 (the game's 1 to 10 in half points) and tuned across the
-archetypes one stat at a time; the keepers' from the master sheet as it was saved. A man is still made to a rating, now
-from his archetype's own level -- what its numbers rate: the Inverted winger's 76, the Playmaker's 73, the Anchor's 65 --
-all of his game moved together to his rating, what his line's game is made of the whole way and the rest about half as
-far, so the shape the sheet gives his archetype holds at any rating: at the rating its numbers rate he has them, within
-a tenth of a point on average on the sheet's scale; at a midfielder's usual 67 a Playmaker has what a midfielder's game is
-made of about a point and a quarter under them and the rest about half that, an Anchor (65) a touch over. His stats scatter round that on a bell curve, 0.4 of a point a standard deviation --
-the sheet's 0.8 (it was an even spread, as wide but flat-topped) -- and the odd half point is nudged to make his rating
-exact, never his pace. (Till v182 a man was made from his line's usual level, his archetype's handful of offsets put on
-after and the rest of his game moved by however far they took him off his rating.) An exhibition side's men come from
-the same numbers, scattered twice as widely as a career's as they always were, and aren't made to a rating. "Good at"
+archetypes one stat at a time; the keepers' from the master sheet as it was saved. (v192: the outfield numbers brought
+down across the board on the Stats by Playstyle sheet, about a point and a quarter on its scale, a little more off each
+archetype's weaker stats.) A man is still made to a rating, from his archetype's own level -- what its numbers rate:
+the False nine's and the Inverted winger's 68, the Playmaker's 66, the Anchor's 58 (v192; 76, 73 and 65 for the last
+three before) -- all of his game moved together to his rating, what his line's game is made of the whole way and the
+rest about half as far, so the shape the sheet gives his archetype holds at any rating: at the rating its numbers rate
+he has them, within a tenth of a point on average on the sheet's scale. So in a career the sheet says what kind of
+player he is and his rating how good: bringing the sheet down left a man of a given rating about as good as he was,
+his lesser stats about a fifth of a point lower on the cards and what his line's game is made of a touch higher. His
+stats scatter round that on a bell curve, half a point a standard deviation -- the sheet's 1 (v192: it was 0.4, the
+sheet's 0.8; before v182 an even spread) -- and the odd half point is nudged to make his rating exact, never his pace.
+(Till v182 a man was made from his line's usual level, his archetype's handful of offsets put on after and the rest of
+his game moved by however far they took him off his rating.) An exhibition side's men come from the same numbers plus
+their club's strength, scattered wider than a career's as they always were, and aren't made to a rating: bringing the
+sheet down took about six points off every exhibition side (Arsenal's starters average 77, Hull City's 62). "Good at"
 below is what each archetype is for; the sheet's numbers say how much.
 
 Since v118 the archetype, not the position, says **where a man can play**: PLAYS, the spots that are his own, and

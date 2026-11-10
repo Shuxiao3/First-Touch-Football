@@ -61,8 +61,10 @@ await page.evaluate(() => { const T = window.__T, M = T.MK, L = T.FW / M;
     back.forEach((q, i) => window.__at(q, uLine, ws[i]));
     rest.forEach((q, i) => i < 3 ? window.__at(q, uMid, [-22, 0, 22][i]) : window.__at(q, 62, i === 3 ? 0 : -16));   // (a second forward out of the scenes' way)
     const k = T.keepers().find(q => q.team === 'R'); window.__at(k, 1, 0); };
-  // Liverpool deep, out of it (their back two, the men not in the scene)
-  window.__liv = () => { window.__men('G').forEach((q, i) => window.__at(q, 22, -20 + i * 7)); };
+  // Liverpool deep, out of it (their back two, the men not in the scene). (v192: their Long passing -- how far a man on the
+  // ball can find a run -- set at 8, as most of their side had before the playstyle sheet came down: the scenes are about
+  // the runs, built round passers who can find them, not about this season's numbers)
+  window.__liv = () => { window.__men('G').forEach((q, i) => { window.__at(q, 22, -20 + i * 7); if(q.stats && q.role !== 'GK') q.stats.longPass = 8; }); };
   // the ball at q's feet, facing up the pitch
   window.__give = q => { const B = T.ball(), a = T.atkOf(q.team); B.x = q.x + a * 14; B.y = q.y; B.z = 0; B.vx = B.vy = B.vz = 0; B.thru = null; T.own(q, 14, true); };
   // the ball played by p to q, on its way (from p's feet, 600 px/s along the ground)

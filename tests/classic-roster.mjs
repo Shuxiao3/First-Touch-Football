@@ -66,14 +66,14 @@ info('the sheet\'s order at a rating of 65: ' + JSON.stringify(ord));
 ok(ord.pairs >= 40 && ord.wrong.length === 0, 'at the same rating the types keep the master sheet\'s order: every one of ' + ord.pairs + ' stats where two of a line\'s types are three points or more apart on the sheet');
 ok(st.paceywinger.speed >= st.winger.speed + 0.5 && st.paceywinger.crossing < st.winger.crossing,
   'the pacey winger: the quickest of the wingers (' + st.paceywinger.speed + ', the winger ' + st.winger.speed + '), paid for in the rest -- crossing ' + st.paceywinger.crossing + ' to the winger\'s ' + st.winger.crossing);
-ok(st.mezzala.dribbling >= st.boxtobox.dribbling + 1 && st.mezzala.dribbling >= st.ballwinner.dribbling + 1,
+ok(st.mezzala.dribbling >= st.boxtobox.dribbling + 0.5 && st.mezzala.dribbling >= st.ballwinner.dribbling + 0.5,   // (v192: a point over them on the sheet, half a point here -- two before)
   'the mezzala dribbles (' + st.mezzala.dribbling + ', the box-to-box ' + st.boxtobox.dribbling + ', the ball-winner ' + st.ballwinner.dribbling + ')');
 ok(Object.values(st).every(v => Math.abs(v.ovr - 65) <= 1), 'and every one of them is the rating he was made for: a type is the kind of man, not how good (' + Object.values(st).map(v => v.ovr).join(' ') + ')');
 
 // --- (v182) THE MASTER SHEET: every type's usual make is the sheet's numbers (his line's averages and the type's offsets,
 // halved from its 1 to 20) -- made as a career makes a man, at the rating those numbers rate, 200 men of each average
-// them, every one exactly the rating he was made for; and his stats scatter on a bell curve, 0.4 of a point a standard deviation, never more than a point off
-// once rounded (an even spread, 0.7 either way, the same width, had a third of them on the value, none a point off) -----
+// them, every one exactly the rating he was made for; and his stats scatter on a bell curve, half a point a standard deviation -- the sheet's 1 (v192:
+// 0.4, the sheet's 0.8, till then) -- about two in five on the value once rounded, one in eight a point off, hardly any further ---------------------
 const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, worstK: '', off: 0, n: 0 };
   for(const k in M.STYLES){ const S = M.STYLES[k], role = S.role, keys = role === 'GK' ? [...M.OUT_KEYS, ...M.GK_KEYS] : M.OUT_KEYS, T = Math.round(M.STYLE_REF[k] * 10), sum = {};
     for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
@@ -83,10 +83,11 @@ const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, w
   const W = 'winger', role = 'ATT', T = Math.round(M.STYLE_REF[W] * 10), want = M.ARCH[role].speed + (M.STYLES[W].d.speed || 0), h = {};
   for(let i = 0; i < 3000; i++){ const s = M.cwStatsForOVR(role, T, M.cwMul(20000 + i), W); const o = s.speed - want; h[o] = (h[o] || 0) + 1; }
   out.on = +((h[0] || 0) / 3000).toFixed(3); out.pt = +(Object.entries(h).filter(([o]) => Math.abs(+o) >= 1).reduce((a, [, n]) => a + n, 0) / 3000).toFixed(3);
-  out.far = Object.keys(h).filter(o => Math.abs(+o) > 1.01).length; out.h = h; return out; });
+  out.far = +(Object.entries(h).filter(([o]) => Math.abs(+o) > 1.01).reduce((a, [, n]) => a + n, 0) / 3000).toFixed(3);
+  out.most = Math.max(...Object.keys(h).map(o => Math.abs(+o))); out.h = h; return out; });
 info('the master sheet: ' + JSON.stringify(sh));
 ok(sh.worst <= 0.25 && sh.off === 0, 'every type made at the rating its numbers rate has the master sheet\'s numbers -- 200 men of each, the worst a ' + sh.worst + ' of a point off them on average (the ' + sh.worstK + '), on the sheet\'s 1 to 20 -- and every one of the ' + sh.n + ' the rating he was made for');
-ok(sh.on >= 0.40 && sh.on <= 0.55 && sh.pt >= 0.03 && sh.pt <= 0.10 && sh.far === 0, 'and they scatter on a bell curve: ' + Math.round(sh.on * 100) + '% on his style\'s pace, ' + Math.round(sh.pt * 100) + '% a point off it, none further (an even spread as wide had a third on it and none a point off)');
+ok(sh.on >= 0.33 && sh.on <= 0.44 && sh.pt >= 0.09 && sh.pt <= 0.18 && sh.far <= 0.02 && sh.most <= 1.5, 'and they scatter on a bell curve half a point wide: ' + Math.round(sh.on * 100) + '% on his style\'s pace, ' + Math.round(sh.pt * 100) + '% a point or more off it, ' + (sh.far * 100).toFixed(1) + '% more than a point, none more than a point and a half (at 0.4: nearly half on it, one in sixteen a point off, none further)');
 
 // --- THE EXHIBITION CLUBS' MEN --------------------------------------------------------------------------------------------
 const ex = await page.evaluate(() => { const M = window.__M, n = {}, at = { DM: {}, CM: {}, AM: {} };

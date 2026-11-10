@@ -92,6 +92,10 @@ const crosses = (diff, N) => page.evaluate(({ diff, N }) => new Promise(res => {
   const kp = T.keepers().find(k => k.team === 'G'), out = -kp.side, gx = kp.side < 0 ? 0 : T.FW, MK = T.MK;
   const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
   const cr = R.find(q => q.role === 'MID') || R[0], att = R.find(q => q.role === 'ATT') || R[1], mk = G.find(q => q.role === 'DEF') || G[0];
+  // (v192: the crosser and the man attacking it as the scene was built round -- the playstyle sheet came down about a point,
+  // and the scene's about who's credited and what your man does, not how often a weaker forward gets to a cross)
+  cr.stats = Object.assign({}, cr.stats, { crossing: 7 });
+  att.stats = Object.assign({}, att.stats, { speed: 8, acceleration: 9, agility: 9, offIQ: 8, heading: 4.5 });
   T.setControlled(mk); const tally = { cleared: 0, goal: 0, n: 0, theirs: 0, assist: 0 }; let i = 0; const nm = q => q.pname || q.name;
   const one = () => { if(i >= N) return res(tally); const sd = i++ % 2 ? 1 : -1;
     T.freeze(); T.drop();

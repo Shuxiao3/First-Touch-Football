@@ -37,6 +37,7 @@ const SCENE = `window.__scene = (kind, i) => { const T = window.__T, b = T.ball(
   b.ownedBy = null; b.dribbler = null; b.dribbleGrace = 0; b.lastTouch = 'G'; b.shotT = 0; b.crossT = 0; b.intendedRcv = null; b.z = 0; b.vz = 0;
   if(kind === 'ground'){ b.x = st.x - atk * 18 * T.MK; b.y = st.y + 6 * T.MK; const d = Math.hypot(st.x - b.x, st.y - b.y); b.vx = (st.x - b.x) / d * 520; b.vy = (st.y - b.y) / d * 520; b.intendedRcv = st; }
   if(kind === 'air'){ b.x = st.x - atk * 16 * T.MK; b.y = st.y - 8 * T.MK; b.vx = st.x - b.x; b.vy = st.y - b.y; b.vz = 270; b.z = 1; b.intendedRcv = st; }
+  if(kind === 'stretch') st.stats = Object.assign({}, st.stats, { shotAcc: 8 });   // (v192: a finisher of 8, as the scene was built round -- the sliding finish's reach is his Shot accuracy)
   if(kind === 'across' || kind === 'stretch'){ const fast = kind === 'stretch'; st.x = gx - atk * 14 * T.MK; b.x = st.x + atk * (fast ? 3.3 : 2.6) * T.MK; b.y = st.y - 5 * T.MK; b.vy = fast ? 720 : 520; b.vx = 0; b.lastTouch = 'R';
     const d = T.players().filter(p => p.team === 'R')[0]; d.x = st.x + atk * 4 * T.MK; d.y = st.y + 15 * T.MK; for(const k of T.keepers()) k.claimCd = 5; }
   window.__ev = { shot: null, slide: null }; window.__kind = kind;
