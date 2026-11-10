@@ -53,7 +53,8 @@ export async function pileAside(page){
   });
   // (and THE MONEY back at the club after a match you played, v106: CONTINUE)
   await page.addLocatorHandler(page.locator('#moneyModal.on'), async () => {
-    await page.evaluate(() => { const x = document.querySelector('#moneyModal.on [data-mn="go"]'); if(x) x.click(); else { const m = document.getElementById('moneyModal'); if(m) m.classList.remove('on'); } });
+    await page.evaluate(() => { for(let i = 0; i < 2; i++){ const x = document.querySelector('#moneyModal.on [data-mn="go"]'); if(x) x.click(); }   // (v186: THE GATE, then THE MONEY -- two pages after a home game)
+      const m = document.getElementById('moneyModal'); if(m && m.classList.contains('on') && !m.querySelector('[data-mn="go"]')) m.classList.remove('on'); });
   });
   // (and THE PRESS CONFERENCE after a game, v104: SEND THE ASSISTANT)
   await page.addLocatorHandler(page.locator('#pressModal.on'), async () => {

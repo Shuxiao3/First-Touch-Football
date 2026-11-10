@@ -72,6 +72,14 @@ ok(r[0].men <= 2 && r[0].cams + r[0].tv === 0 && r[1].men > r[0].men && r[2].tv 
 
 // --- THE MONEY ------------------------------------------------------------------------------------------------------------------
 await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(400);
+// (v186) after a home game THE GATE comes up first: who came, stand by stand, and what they paid -- as the books have it
+const gate = await K(`(()=>{ const d=CAREER.data, c=document.querySelector('#moneyModal .mnCard'), G=d.lastGate; if(!c||!/THE GATE/.test(c.textContent)) return null;
+  return { rows:[...c.querySelectorAll('.gtRow')].map(r=>r.dataset.seat).join(), big:c.querySelector('.gtBig').textContent, seats:G.seats.map(x=>x.id).join(), att:G.att, cap:G.cap, gate:G.gate,
+    sum:G.seats.reduce((a,x)=>a+x.att,0), take:Math.round(G.seats.reduce((a,x)=>a+x.att*x.price,0)), led:d.ledger[0].gate, text:c.textContent }; })()`);
+if(gate){ info('THE GATE: ' + gate.big + ' · ' + gate.rows);
+  ok(gate.rows === gate.seats && gate.sum === gate.att && gate.take === gate.gate && gate.led === gate.gate && gate.big.includes(gate.att.toLocaleString()) && gate.text.includes('Taken at the gate'),
+    'THE GATE first, after a home game: every stand its crowd, seats, price and takings; they add up to the crowd (' + gate.att + ' of ' + gate.cap + ') and to the gate the books took');
+  await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(250); }
 const vals = await page.$$eval('#moneyModal .mnRow', ns => ns.map(n => ({ k: n.dataset.mn, v: n.querySelector('b').textContent })));
 r = await K(`(()=>{ const d=CAREER.data; return { ledger:d.ledger[0], budget:Math.round(d.budget), fans:document.querySelector('#moneyModal .mnFans')?document.querySelector('#moneyModal .mnFans').textContent:'' }; })()`);
 const num = t => (t.includes('−') || t.includes('-') ? -1 : 1) * +t.replace(/[^\d]/g, '');

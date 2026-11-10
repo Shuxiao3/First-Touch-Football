@@ -2402,6 +2402,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       his level with the most to spend. In the red but inside the limit, buying waits, as it always did. And a squad
       that falls under thirteen (or has no keeper) is topped up by the board to thirteen, no more, with free agents to
       make up the numbers: about nine under the league's level (it was five, as good as the squad they were making up).
+    - **Nobody tells you the crowd (v186).** Setting ticket prices no longer shows how many will come or what they'll
+      pay: the stadium's screens, the stands' plan and the books showed a league game's crowd, projected, stand by
+      stand. Now you find out on the day. The far stand in the match is as full as its seats sold -- the share of its
+      fans that came are drawn, the same ones each time at that ground, the rest of the stand empty -- and at full
+      time, after a home game you played, THE GATE comes up before THE MONEY: the crowd of the capacity, then each
+      stand's crowd, seats, share full, price and takings, and what the gate took. That game is what the stadium
+      shows afterwards: LAST CROWD and LAST GATE on the Money tab, what each section sold on the ticket table, how full
+      each stand was on the plan (all blank before your first home game), and the picture of your ground as full as it
+      last was. The books and the hub's NET/WK count the gate as it's gone -- half the last home gate, half the last
+      share away, nothing till both are known -- not as it's guessed. A match away, or one that isn't a career's, has
+      the ground's usual crowd: a third of the first bleacher up to nine in ten of the grand stadium.
+      The stands come in three layers for it (every seat taken, nobody in, and whose pixel is whose), from
+      `python3 tools/clips/make_stand_layers.py`, which draws them with `tools/sprites/make_pitch_art.py`'s own code.
     - **Tickets (v108).** The going rate for a seat is $25 in League 2, $30 in League 1, $40 in the Championship and $60
       in the Premium League (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
       $14), and a new career starts on it. With the
@@ -2934,6 +2947,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v186: nobody tells you the crowd.** No projected crowd or gate when you set ticket prices: the stadium's screens
+  show the last home game's instead (blank before the first). The far stand in a match is as full as its seats sold,
+  and at full time THE GATE says who came, stand by stand, and what they paid, before THE MONEY. The books and NET/WK
+  count the gate as the last games took it. See **Nobody tells you the crowd**.
 - **v185: keepers all one height.** Every keeper is medium, as drawn: in v184 60 in 100 were tall and 5 short. The
   outfield heights are as v184 had them. See **Every player looks like himself**.
 - **v184: players are short, medium or tall.** Every man is one of three heights, 2 px apart on his 32 px sprite: a

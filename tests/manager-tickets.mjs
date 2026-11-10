@@ -81,11 +81,35 @@ await page.click('#bpBody .tkRow[data-seat="vip"] [data-stad="seat-"]'); await p
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d); return { seats:JSON.stringify(d.seats), head:(document.querySelector('#bpBody .bpSect')||{}).textContent, gate:f.ticketGate,
   shown:[...document.querySelectorAll('#bpBody .tkRow[data-seat="N"] .tkP b')].map(b=>b.textContent).join() }; })()`);
 info('the Money tab: ' + JSON.stringify(rows.map(x => x.id)) + ', then ' + JSON.stringify(r));
-ok(rows.map(x => x.id).join() === 'N,S,vip' && rows.every(x => /seats/.test(x.t) && /%/.test(x.t)) && r.seats === '{"N":34,"vip":95}' && r.shown === '$34',
-  'the Money tab: each section with its seats, its price and − / +, what it sells and takes; + + on the North: $30 to $34; − on the VIP seats: $100 to $95 (a twentieth of the going rate a step)');
+ok(rows.map(x => x.id).join() === 'N,S,vip' && rows.every(x => /seats/.test(x.t) && /no home game yet/.test(x.t) && !/%/.test(x.t)) && r.seats === '{"N":34,"vip":95}' && r.shown === '$34',
+  'the Money tab: each section with its seats, its price and − / +, and no crowd foretold (v186: "no home game yet"); + + on the North: $30 to $34; − on the VIP seats: $100 to $95 (a twentieth of the going rate a step)');
 await page.click('#bpBody [data-stad="seatrate"]'); await page.waitForTimeout(80);
 r = await K(`(()=>{ const d=CAREER.data; return { seats:JSON.stringify(d.seats), own:d.ticketPrice, n:computeFinance(d).seats[0].price }; })()`);
 ok(r.seats === '{}' && r.own === null && r.n === 30, 'BACK TO THE GOING RATE: every price its rate again (the North $' + r.n + ')');
+
+// --- NOBODY'S TOLD HOW MANY WILL COME (v186): the screens show the last home game's crowd, the stand is as full as it sold ---
+r = await K(`(()=>{ const d=CAREER.data, bp=document.getElementById('bpBody'), txt=bp.textContent, f0=computeFinance(d);
+  const before={ none:d.lastGate==null, head:bp.querySelector('.bpSect').textContent, tiles:[...bp.querySelectorAll('.stTiles .clTile')].map(t=>t.textContent).join(' | '), proj:/projected/i.test(bp.innerHTML), fill0:standFill(d), pic:groundOfYours(d).fill };
+  const mine={opp:(d.clubId+1)%MG_CLUBS, home:true, you:1, them:0, win:true, draw:false, oppOvr:mgStrength(d,(d.clubId+1)%MG_CLUBS), competition:'league'};
+  const want=computeFinance(d,mine), wk=applyWeek(d,mine), G=d.lastGate;
+  const same=G&&G.att===want.attendance&&G.gate===want.homeGate&&G.seats.length===want.seats.length&&G.seats.every((x,i)=>x.id===want.seats[i].id&&x.att===want.seats[i].att&&x.price===want.seats[i].price);
+  const N=G.seats.find(x=>x.id==='N'), gr=groundOfYours(d); PITCH.setGround(Object.assign({},gr,{fill:standFill(d,mine)})); const cr=PITCH.cfg.crowd; PITCH.setGround(null);
+  applyWeek(d,{opp:(d.clubId+2)%MG_CLUBS, home:false, you:0, them:0, win:false, draw:true, oppOvr:60, competition:'league'});
+  const GS=gateSoFar(d), f=computeFinance(d);
+  return { before, same, ledGate:wk?null:null, att:G.att, cap:G.cap, gate:G.gate, fillN:+(N.att/N.cap).toFixed(3), fill:+standFill(d).toFixed(3), cr, away:d.lastAway, awayWas:f0.awayGate>0,
+    half:GS.half, net:weekNetNow(d,f), steady:f.netAvg-Math.round((f.homeGate+f.awayGate)/2) }; })()`);
+info('before a home game: ' + JSON.stringify(r.before) + '; after: ' + JSON.stringify({ att: r.att, cap: r.cap, gate: r.gate, fill: r.fill, crowd: r.cr, away: r.away, half: r.half }));
+ok(r.before.none && r.before.head.trim() === 'TICKETS' && /LAST CROWD—/.test(r.before.tiles) && /LAST GATE—/.test(r.before.tiles) && !r.before.proj && r.before.fill0 === 0 && r.before.pic === 0,
+  'before a home game the stadium tells you no crowd: TICKETS with no takings on its head, LAST CROWD and LAST GATE blank, nothing projected, the ground\'s picture empty');
+ok(r.same && r.fill === r.fillN, 'a home game played: its gate is kept as it was, stand by stand (' + r.att + ' of ' + r.cap + ', $' + r.gate + '), and the stand shown is as full as it sold (' + r.fill + ')');
+ok(r.cr && Math.abs(r.cr.here / r.cr.fans - r.fill) < 0.04, 'the far stand in the match: ' + (r.cr && r.cr.here) + ' of its ' + (r.cr && r.cr.fans) + ' fans drawn -- the share that came, within four in a hundred');
+ok(r.away > 0 && r.half === Math.round((r.gate + r.away) / 2) && r.net === r.steady + r.half, 'the books: a week\'s gate is half the last home gate and half the last share away, as they went -- not projected');
+await K(`(()=>{ paintBuilding(); return 1; })()`); await page.waitForTimeout(150);
+r = await K(`(()=>{ const d=CAREER.data, bp=document.getElementById('bpBody'), G=d.lastGate; return { head:bp.querySelector('.bpSect').textContent, rows:[...bp.querySelectorAll('.tkRow .tkS')].map(x=>x.textContent).join(' | '),
+  tiles:[...bp.querySelectorAll('.stTiles .clTile')].map(t=>t.textContent).join(' | '), att:G.att.toLocaleString(), gate:money(G.gate) }; })()`);
+info('after it: ' + JSON.stringify(r));
+ok(r.head.includes('LAST HOME GAME ' + r.gate) && /last game/.test(r.rows) && /%/.test(r.rows) && r.tiles.includes('LAST CROWD' + r.att) && r.tiles.includes('LAST GATE' + r.gate),
+  'after it the Money tab shows that game: LAST HOME GAME ' + r.gate + ' on the tickets\' head, each section what it sold, LAST CROWD ' + r.att + ', LAST GATE ' + r.gate);
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

@@ -79,12 +79,12 @@ r = await K(`(()=>{ const d=CAREER.data; while(d.phase!=='league'||!mgNextGame(d
   const P=d.wlPrev, W=d.wl, sum=X=>Object.values(X.L).reduce((a,v)=>a+v,0);
   return { lbl:document.getElementById('chNetLbl').textContent, b0:P.b0, b1:P.b1, restP:P.b1-P.b0-sum(P), L:P.L, restW:Math.round(d.budget)-W.b0-sum(W), W:W.L, now:Math.round(d.budget) }; })()`);
 info('the game\'s week: ' + JSON.stringify(r));
-ok(r.lbl === 'NET/WK (PROJ.)' && Math.abs(r.restP) <= 1 && Math.abs(r.restW) <= 1 && r.L.wages < 0 && r.L.tv > 0 && r.L.partners > 0,
-  'in the league NET/WK says it\'s projected; the game\'s week, line by line (' + Object.entries(r.L).map(([k, v]) => k + ' ' + v).join(', ') + '), takes its Monday\'s $' + r.b0.toLocaleString() + ' to the next Monday\'s $' + r.b1.toLocaleString() + ', and this week\'s (' + Object.entries(r.W).map(([k, v]) => k + ' ' + v).join(', ') + ') to the $' + r.now.toLocaleString() + ' in the bank -- nothing left over');
+ok(r.lbl === 'NET/WK' && Math.abs(r.restP) <= 1 && Math.abs(r.restW) <= 1 && r.L.wages < 0 && r.L.tv > 0 && r.L.partners > 0,
+  'in the league NET/WK (v186: the gate as it\'s gone, no longer marked projected); the game\'s week, line by line (' + Object.entries(r.L).map(([k, v]) => k + ' ' + v).join(', ') + '), takes its Monday\'s $' + r.b0.toLocaleString() + ' to the next Monday\'s $' + r.b1.toLocaleString() + ', and this week\'s (' + Object.entries(r.W).map(([k, v]) => k + ' ' + v).join(', ') + ') to the $' + r.now.toLocaleString() + ' in the bank -- nothing left over');
 await page.click('#chNetBtn'); await page.waitForTimeout(150);
 r = await page.evaluate(() => ({ on: document.getElementById('ldgModal').classList.contains('on'), t: document.querySelector('#ldgModal .ldgCard').innerText }));
-ok(r.on && /THE WEEK’S MONEY/.test(r.t) && /THIS WEEK SO FAR/.test(r.t) && /A LEAGUE WEEK, PROJECTED/.test(r.t) && /Wages/.test(r.t) && /The TV/.test(r.t),
-  'NET/WK tapped: THE WEEK\'S MONEY -- this week so far, line by line from Monday\'s bank, and a league week projected');
+ok(r.on && /THE WEEK’S MONEY/.test(r.t) && /THIS WEEK SO FAR/.test(r.t) && /A LEAGUE WEEK, AS IT’S GONE/.test(r.t) && /Wages/.test(r.t) && /The TV/.test(r.t),
+  'NET/WK tapped: THE WEEK\'S MONEY -- this week so far, line by line from Monday\'s bank, and a league week as it\'s gone');
 await page.click('#ldgModal [data-ldg="close"]'); await page.waitForTimeout(80);
 // a week on: last week's lines kept, and they still add up; a release and a scout's report in this one
 r = await K(`(()=>{ const d=CAREER.data; mgForward(d); while(!mgNextGame(d)) mgForward(d); const P=d.wlPrev; const kP=Object.values(P.L).reduce((a,v)=>a+v,0);

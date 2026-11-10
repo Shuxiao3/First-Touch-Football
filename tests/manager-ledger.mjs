@@ -61,8 +61,8 @@ ok(pages >= 2 && /^1 \/ \d+$/.test(c.pager) && /THIS WEEK SO FAR/.test(c.shown[0
 let stays = true;
 for(let i = 1; i < pages; i++){ await page.tap('#ldgModal .fitPager [data-fitgo="1"]'); await page.waitForTimeout(150); const n = await card(); stays = stays && n.on && n.backHit; seen.push(...n.shown); }
 const missing = c.all.filter(t => !seen.includes(t));
-ok(stays && !missing.length && seen.some(t => /LAST WEEK/.test(t)) && seen.some(t => /A LEAGUE WEEK, PROJECTED/.test(t)),
-  'every line on one of the ' + pages + ' pages -- last week, a league week projected -- and turning them leaves it open, BACK on each' + (missing.length ? ' (missing: ' + missing.join(' | ') + ')' : ''));
+ok(stays && !missing.length && seen.some(t => /LAST WEEK/.test(t)) && seen.some(t => /A LEAGUE WEEK, AS IT’S GONE/.test(t)),
+  'every line on one of the ' + pages + ' pages -- last week, a league week as it\'s gone (v186: not projected) -- and turning them leaves it open, BACK on each' + (missing.length ? ' (missing: ' + missing.join(' | ') + ')' : ''));
 await page.tap('#ldgModal .ldgRow:not(.fitHide) >> nth=0'); await page.waitForTimeout(150);
 const afterRow = await isOn('ldgModal');
 await page.tap('#ldgModal [data-ldg="close"]'); await page.waitForTimeout(150);

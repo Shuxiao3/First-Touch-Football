@@ -114,6 +114,9 @@ const pressFirst = u.L[0] === 'pressModal';
 ok(u.L.length === 1 && (pressFirst ? u.tag.includes('· 3 OF ' + n) : u.L[0] === 'moneyModal'), 'CONTINUE: ' + (pressFirst ? 'the press conference, alone, "3 OF ' + n + '"' : 'THE MONEY, alone'));
 if(pressFirst){ await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u); }
 ok(u.L.length === 1 && u.L[0] === 'moneyModal' && u.tag.some(t => /OF/.test(t)), 'then THE MONEY, alone, "' + u.tag.join('') + '"');
+if(await K(`/THE GATE/.test(document.querySelector('#moneyModal .mnCard').textContent)`)){   // (v186: THE GATE, then THE MONEY, in the one window)
+  await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u);
+  ok(u.L.length === 1 && u.L[0] === 'moneyModal' && u.tag.some(t => /OF/.test(t)), 'THE GATE first after a home game, then THE MONEY, "' + u.tag.join('') + '"'); }
 await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u);
 ok(u.L.length <= 1 && (u.L.length === 0 || (u.L[0] === 'pileModal' && u.tag.includes('· ' + n + ' OF ' + n))), 'then ' + (u.L.length ? 'the papers, "' + n + ' OF ' + n + '"' : 'the club, nothing more up'));
 ok(steps.every(s => s.L.length <= 1), 'never two at once: ' + steps.map(s => s.L.join('+') || 'none').join(' > '));
