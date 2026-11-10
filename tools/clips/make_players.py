@@ -9,7 +9,9 @@ line softened to navy on top and to the skin's own maroon round the hands and th
     players_art/hair_*.txt      a hairstyle laid over it, the same five views
     players_art/over.txt        the beard and the headband
     players_art/frames.txt      every outfield body frame -- standing, running, shooting, passing, the slide and up
-                                off the turf -- in the five views, outline and all
+                                off the turf -- in the five views, outline and all (the slide and getting up are the ones
+                                the game had from the start, tools/sprites/make_player_sheet.py's, their pixels as they
+                                were: v189)
     players_art/keepers.txt     the keeper's own: set, the ball in his gloves, the dive, going down big
 
 A keeper's run, side-step and kick are the outfield frames with gloves for his hands; his dive the other way is the
@@ -40,6 +42,7 @@ RAMPS = {'skin': [(120, 64, 64), (184, 112, 80), (224, 160, 120), (248, 208, 184
          'shorts': [(72, 72, 96), (152, 160, 184), (216, 220, 232), (248, 248, 248)],
          'boots': [(16, 16, 24), (44, 44, 56), (72, 72, 92), (144, 144, 168)]}
 RAMPS['socks'] = RAMPS['shirt']               # (socks in the shirt's colours: a kit swap recolours both)
+RAMPS['dust'] = [(150, 132, 104), (200, 186, 150), (226, 216, 186), (246, 242, 226)]   # (kicked up by the slide: no kit's)
 RAMPS['gloves'] = [(64, 68, 76), (184, 190, 198), (232, 236, 240), (252, 253, 254)]
 RAMPS['ball'] = [(28, 30, 26), (164, 170, 158), (236, 240, 230), (250, 251, 246)]
 BLACK = (0, 0, 0); SOFT = (52, 58, 96)       # the outline, and its softer navy on the lit edges
@@ -74,13 +77,14 @@ def load_heads():
 # ---- the bodies, every frame drawn by hand: a letter a pixel, each a colour of the drawn palette (see frames.txt)
 PX = {'K': BLACK, 'k': SOFT, 'r': RAMPS['skin'][0],
       'Y': RAMPS['shirt'][0], 'z': RAMPS['shirt'][1], 's': RAMPS['shirt'][2], 'S': RAMPS['shirt'][3],
-      't': RAMPS['trim'][1], 'T': RAMPS['trim'][2], 'U': RAMPS['trim'][3],
+      'm': RAMPS['trim'][0], 't': RAMPS['trim'][1], 'T': RAMPS['trim'][2], 'U': RAMPS['trim'][3],
       'L': RAMPS['shorts'][0], 'j': RAMPS['shorts'][1], 'h': RAMPS['shorts'][2], 'H': RAMPS['shorts'][3],
       'e': RAMPS['skin'][1], 'a': RAMPS['skin'][2], 'A': RAMPS['skin'][3],
       'o': RAMPS['socks'][1], 'O': RAMPS['socks'][2], 'Q': RAMPS['socks'][3],
       'v': RAMPS['boots'][0], 'b': RAMPS['boots'][1], 'B': RAMPS['boots'][2], 'V': RAMPS['boots'][3],
       'q': RAMPS['gloves'][1], 'g': RAMPS['gloves'][2], 'G': RAMPS['gloves'][3],
-      'X': RAMPS['ball'][0], 'x': RAMPS['ball'][1], 'w': RAMPS['ball'][2], 'W': RAMPS['ball'][3]}
+      'X': RAMPS['ball'][0], 'x': RAMPS['ball'][1], 'w': RAMPS['ball'][2], 'W': RAMPS['ball'][3],
+      '1': RAMPS['dust'][0], '2': RAMPS['dust'][1], '3': RAMPS['dust'][2], '4': RAMPS['dust'][3]}
 
 def read_frames(fn):
     """'# animation frame view hx hy headview' then 'row|pixels' -> {(animation, frame, view): {at, hv, rows}}"""

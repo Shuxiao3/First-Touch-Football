@@ -6,6 +6,7 @@
 #   shirt  Y z s S (line, shadow, base, light)       trim  t T U       shorts  L j h H
 #   skin   e a A                                       socks o O Q (the shirt's colours)
 #   boots  v b B V                                     gloves q g G      ball  X x w W
+#   the trim's line m; the dust the slide kicks up 1 2 3 4 (line, shadow, base, light)
 #        0         1         2         3
 #        01234567890123456789012345678901
 # idle 0 S 5 2 S
@@ -521,102 +522,129 @@
 28|............KBBBBBbbK
 29|............KbbbbbbbK
 30|.............KKKKKKK
-# slide 0 S 5 6 S
-24|.......kk.kSSSTeeeTsssK.kk
-25|......rAaKKSSssssssszKKaar
-26|......raeK.KHHhhhhhhjK.Keer
-27|.......rr.KHhhjKKKhhjK..rr
-28|..........KAAaK...KAaeK
-29|.........KVBBbK...KBBbbK
-30|.........KBbbbK...KBbbbK
-31|..........KKKK.....KKKK
+# slide and up off the turf: the slide the game had from the start (tools/sprites/make_player_sheet.py), its pixels as they were (v189)
+# slide 0 S 7 5 S
+19|..........KKK
+20|.........KeetKK
+21|.........KeetzzKKK1
+22|..........KtzSSSST21
+23|...........KzsSSSssKK
+24|............KssssssssK
+25|............KHHhssssssK
+26|............KAaHhhhzssK
+27|............KBBjhhhzssTK
+28|............KBbeeaaezTeK
+29|............KBbKKaaeeeeK
+30|............KszKKbbKKKK
+31|.............KK..KK
 # slide 1 S 5 4 S
-23|.........kSSSTeeeTsssK
-24|........kSSKSSSssszKszK
-25|.......rAaKKSSsssszKKaar
-26|.......raeK.KHHhhhhjK.Keer
-27|........rr.KAHhhLhhjAK.rr
-28|..........KAAaKKKKKAaeK
-29|..........KVBbK...KBBbK
-30|..........KBbbK...KBbbK
-31|...........KKK.....KKK
-# slide 0 SE 3 8 SE
-22|.......................KK
-23|......................KbbK
-24|.....................KbbK
-25|..........kSSSsszK..KOoK
-26|.........rAaKSsszzKKKaeK
-27|.........raeKHHhhhjjKKKK
-28|..........rrKHhhhjjKAAaKKK
-29|.............KKKKKKKAAaKQOVBK
-30|....................KKKKKKbbbK
-31|..........................KKK
-# slide 1 SE 5 4 SE
-23|..........kSSSTeeTssK
-24|.........kSSKSSSssszK
-25|........rAaKKSSsssszKer
-26|........raeK.KHHhhhhjKer
-27|.........rr.KAHhhLhhjAKr
-28|...........KAAaKKKKAaeK
-29|...........KVBbK..KBBbK
-30|...........KBbbbK.KBbbbK
-31|............KKKK...KKKK
-# slide 0 E 1 9 E
-22|....................KK
-23|...................KaeK
-24|...................KaoK
-25|...............KKKKKooK
-26|..............KHHhjKbbK
-27|.rAK..........KHhhjjAaQOoVBBbK
-28|.raK...........KKhjjAaQOoBbbbbK
-29|..rr............KKKKKKKKKKKKKK
-# slide 1 E 6 4 E
-23|.............kSSTeK
-24|............kSSSsszK
-25|............KSSrAarK
-26|...........KKHhraerK
-27|..........KAAaHhrrjK
-28|..........KAAaKKaaeK
-29|..........KQOoK.KBBbK
-30|..........KVBBbKKBbbbK
-31|...........KKKKK.KKKK
-# slide 0 NE 3 8 NE
-22|.....................KKKK
-23|....................KVBbK
-24|....................KQOoK
-25|..........kSSTTTsKKKAAK
-26|.........rAaKSssszKAAaK
-27|.........raeKHHhhjjKKK
-28|..........rrKHhhhjjK
-29|............KaaeKKKKK
-30|............KbbvK
-31|.............KKK
-# slide 1 NE 5 4 NE
-23|..........kSSTTTTTssK
-24|..........kSSSSssszKSzK
-25|........raKKSSssssszKKaar
-26|........reK.KHHhhhhhjKeer
-27|.........r.KaHhhhLhhjaKrr
-28|...........KaAaKKKKKAAaK
-29|...........KBBbK...KVBbK
-30|...........KbbbK...KBbbbK
-31|............KKK.....KKKK
-# slide 0 N 5 6 N
-24|.......kk.kSSSTTTTTsssK.kk
-25|......rAaKKSSssssssszKKaar
-26|......raeK.KHHhhhhhhjK.Keer
-27|.......rr.KHhhjKKKhhjK..rr
-28|..........KaAaK...KaaeK
-29|..........KQOoK...KOOoK
-30|..........KbbvK...KbbvK
-31|...........KKK.....KKK
-# slide 1 N 5 4 N
-23|.........kSSSTTTTTsssK
-24|........kSSKSSSssszKszK
-25|.......rAaKKSSsssszKKaar
-26|.......raeK.KHHhhhhjK.Keer
-27|........rr.KaHhhLhhjaK.rr
-28|..........KaAaKKKKKaaeK
-29|..........KBBbK...KBBbK
-30|..........KbbbK...KbbbK
-31|...........KKK.....KKK
+20|..............KKKK
+21|...........KKKSsssKKK
+22|..........KSsSSSSssssK
+23|..........KSsSSTTssszzK
+24|.........KTTsSTTTtszzzK
+25|.........KaaTssssszztTK
+26|.........KaaaaazzjjzeeK
+27|..........KKKaaeejjKKK
+28|............KaeKKeeK
+29|............KBbK.KK
+30|............KBbK
+31|.............KK
+# slide 0 SE 5 4 SE
+20|................KK
+21|..........KKKKKKTTK
+22|.........KaaTSSSsssKK
+23|.........KaaTSSsssszzK
+24|..........KTssssszzzzK
+25|..........122ssHhhhjYtK
+26|..........1222HHhLLLmeK
+27|...........11KHHABBbeeK
+28|..............KaaBbbKK
+29|...............KasbzK
+30|................KKBbK
+31|..................KK
+# slide 1 SE 6 3 SE
+19|...................KK
+20|...............KKKKzzK
+21|..............KSsssszK
+22|.............KzSSssszK
+23|............KSSSSTTTzK
+24|............KSSsssTzeK
+25|............KSTTszzjK
+26|............KTaaYajK
+27|.............KaaraeK
+28|.............KeereK
+29|..............KbBBK
+30|...............KBBK
+31|................KK
+# slide 0 E 4 7 E
+23|..............KKKK
+24|...........11KzSszK
+25|..........142aTSszK
+26|.........141aaeYzzhKKK
+27|.........121TeTYzhhjBBK
+28|..........141YYzhhhaBBbK
+29|..........1332zvhjaaabbK
+30|...........121KbjjaazszK
+31|............1..KKKKKKKK
+# slide 1 E 8 4 E
+20|................KKK
+21|...............KsssK
+22|..............KSSssTK
+23|..............KSSYYTK
+24|..............KSSSzzK
+25|.............KzsssszK
+26|............KbbHYsseK
+27|............KbbjLsTaeK
+28|.............KKejLTaeK
+29|...............KKBYvbK
+30|................KzBBbK
+31|.................KKKK
+# slide 0 NE 2 7 NE
+21|..............KK
+22|............KKTTK
+23|...........KzSSTsK..KK
+24|...........KzYSYYAKKBBK
+25|..........1443YSTeeeabbK
+26|..........1443YsTeLhaszK
+27|..........14444YzTLjezbK
+28|..........133432ejjjeKK
+29|..........122332KKKKK
+30|...........11221
+31|.............11
+# slide 1 NE 6 3 NE
+20|.............KKKKKK
+21|............KsSSssTK
+22|...........KsSSSSSszK
+23|...........KtmSSSSsssK
+24|...........KersssssssKK
+25|............KBHzzzzssTaK
+26|............KBshhhhjsTeK
+27|...........KBBbrrhjjeKK
+28|...........KBbbeBBBzbK
+29|............KKKKKKbzbK
+30|..................KKK
+# slide 0 N 3 8 N
+21|.................KK
+22|.............KKKKbbKKK
+23|............KTTTSsbTaaK
+24|..........KKSSSSSsSTaaK
+25|.........KssSYYYSSSsTK
+26|.........KzzY443YsszzK
+27|........KtzzY44333jKK
+28|........KettY4433321
+29|........Keeeb3333321
+30|.........KKKKb22221
+31|.............K1111
+# slide 1 N 5 3 N
+20|...........KKKKKKKKKK
+21|..........KSssSssssSsK
+22|..........KSsSSSSssSsK
+23|.........KSsSSSSssszzzK
+24|.........KTsssssszzzzzK
+25|.........KaTHHHzzhhKKK
+26|.........KaeBBBhhjjK
+27|..........KKKBBehjbK
+28|............KBBehbbK
+29|............KBBKKKK
+30|.............KK

@@ -5,7 +5,9 @@
 // a side parting where the long hair and the bun were, at their odds), each head 21 by 19, its sides running straight down
 // past his ears (they stuck out a pixel just under the hair, like horns), and the keepers in their own hair. v188, every
 // body frame drawn by hand: standing, running, shooting or passing, his arms never come up past his shoulders (the posed
-// run had a hand swinging up by his head). On a copy of the game that lets the test reach the players.
+// run had a hand swinging up by his head). v189: the slide is the one the game had from the start -- tucked under him, his
+// legs out the way he's going, a puff of dust kicked up behind -- not v187's and v188's, stretched out flat with no dust.
+// On a copy of the game that lets the test reach the players.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -76,6 +78,12 @@ const v = await page.evaluate(() => {
   for(let r = 0; r < 32; r++) for(let f = 0; f < 4; f++){ let top = -1;
     for(let y = 0; y < 32 && top < 0; y++) for(let x = 0; x < 32; x++) if(B.d[(((r * 32 + y) * B.w) + f * 32 + x) * 4 + 3]){ top = y; break; }
     if(top >= 0 && top < 20) out.high.push(r + ',' + f + ' row ' + top); }
+  // v189: the dust the slide kicks up (the old sheet's own colours), in the slide every way and nowhere else
+  const DUST = new Set(['#968468', '#c8ba96', '#e2d8ba', '#f6f2e2']), hx = (d, i) => '#' + [0, 1, 2].map(k => d[i + k].toString(16).padStart(2, '0')).join('');
+  out.dust = []; out.dustElse = 0;
+  for(let r = 0; r < 40; r++) for(let f = 0; f < 4; f++){ let n = 0;
+    for(let y = 0; y < 32; y++) for(let x = 0; x < 32; x++){ const i = (((r * 32 + y) * B.w) + f * 32 + x) * 4; if(B.d[i + 3] && DUST.has(hx(B.d, i))) n++; }
+    if(r >= 32 && f === 0) out.dust.push(n); else out.dustElse += n; }
   return out; });
 info('hairstyles dealt to 600 men: ' + JSON.stringify(v.seen));
 ok(v.styles.join() === 'mop,crop,bald,afro,spiky,mohawk,side' && v.cell.join() === '21,19,21', 'seven hairstyles drawn, each head 21 by 19 (' + v.styles.join(', ') + ')');
@@ -83,6 +91,7 @@ ok(!v.horns.length, 'every head\'s sides run straight down past his ears, no row
 ok(Object.keys(v.seen).every(k => v.styles.includes(k)) && v.seen.spiky > 0 && v.seen.side > 0 && !v.seen.long && !v.seen.bun, 'every man gets a hairstyle that\'s drawn: spikes and side partings now, no long hair or buns');
 ok(v.gk.cells >= 70 && v.gk.headed === v.gk.cells, 'the keepers wear their own hair: a head on every one of the ' + v.gk.cells + ' cells of their sheet');
 ok(!v.high.length, 'standing, running, shooting or passing, nothing of him comes up past his shoulders -- no arm swinging up by his head (' + (v.high.join('; ') || 'none') + ')');
+ok(v.dust.length === 8 && v.dust.every(n => n > 0) && v.dustElse === 0, 'the slide is the one the game had from the start: a puff of dust kicked up behind him every way he slides (' + v.dust.join(', ') + ' pixels of it), and nowhere else');
 
 process.exitCode = rep.finish();
 await browser.close();

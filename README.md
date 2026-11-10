@@ -827,9 +827,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     angles only. The side of the head runs straight down past the ears (the first draw had them a pixel out on each
     side just under the hair, which looked like horns).
   - **Every body frame by hand (v188).** Every frame of every body is drawn pixel by pixel, outline and all, in the
-    five views: standing, the four of the run, the shot's wind-up and strike, the pass's backswing and side-foot, the
-    slide and getting up off the turf (they came off a small posing rig before, which gave the run a hand swinging up
-    by his head and legs that never looked quite right). Running, as the reference sheets walk: the stride low, his
+    five views: standing, the four of the run, the shot's wind-up and strike, and the pass's backswing and side-foot
+    (they came off a small posing rig before, which gave the run a hand swinging up by his head and legs that never
+    looked quite right). **The slide as it was (v189):** the slide and getting up off the turf are the ones the game had
+    from the start -- down on his hip tucked under him, his legs out the way he's going, a puff of dust kicked up behind,
+    then up on one knee -- their pixels as they were, with his own head on them (v187 and v188 stretched him out flat). Running, as the reference sheets walk: the stride low, his
     legs apart and the front foot a pixel nearer you, then the passing a pixel up, one leg under him and the other knee
     coming through, his arms swinging; half turned, his legs side by side under him, the near foot a pixel lower and
     the near arm the whole one, the far one peeping out. The keeper has his own: set with his knees out and his gloves
@@ -2974,6 +2976,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v189: the slide as it was.** The slide and getting up off the turf are the ones the game had from the start again
+  -- tucked under him, legs out the way he's going, a puff of dust behind, then up on one knee -- their pixels as they
+  were, with his own head on them, in place of v187's and v188's stretched out flat. See **Every body frame by hand**.
 - **v188: every body frame drawn by hand.** The players' bodies were posed by a small rig; now every frame is drawn
   pixel by pixel in the five views -- standing, running, the shot, the pass, the slide and getting up -- and the
   keeper's set, the ball in his gloves, the dive and going down big. The run steps the way the reference sheets walk,
