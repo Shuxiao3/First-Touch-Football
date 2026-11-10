@@ -2949,6 +2949,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v193: a playstyle's strengths surer than its weaknesses.** How widely a new man's stats scatter round his
+  playstyle's goes by how good it is at each: half a point a standard deviation on its best stats (the sheet's 1), 0.7
+  on its worst (the sheet's 1.4), and the rest on a straight line between by where they sit on the sheet -- a Stopper's
+  strength 1, his speed 1.2, his crossing 1.4. (v192 had 1 on every stat.) Exhibition sides scatter as they did. See
+  **The master sheet's numbers**.
 - **v192: the playstyles brought down, and spread wider.** Every outfield playstyle's numbers are the Stats by
   Playstyle sheet's as you brought them down across the board: 585 of 682 changed, about a point and a quarter on its
   1 to 20, a little more off each one's weaker stats. A new man's stats scatter half a point a standard deviation round
@@ -4244,8 +4249,12 @@ rest about half as far, so the shape the sheet gives his archetype holds at any 
 he has them, within a tenth of a point on average on the sheet's scale. So in a career the sheet says what kind of
 player he is and his rating how good: bringing the sheet down left a man of a given rating about as good as he was,
 his lesser stats about a fifth of a point lower on the cards and what his line's game is made of a touch higher. His
-stats scatter round that on a bell curve, half a point a standard deviation -- the sheet's 1 (v192: it was 0.4, the
-sheet's 0.8; before v182 an even spread) -- and the odd half point is nudged to make his rating exact, never his pace.
+stats scatter round that on a bell curve as wide as his archetype is good at each (v193): half a point a standard
+deviation on its best stats -- the sheet's 1 -- up to 0.7 on its worst (the sheet's 1.4), the rest on a straight line
+between by where they sit between its best and its worst on the sheet, so a man is surer to have his archetype's
+strengths than its weaknesses: a Stopper's strength scatters 1 on the sheet's scale, his speed 1.2 and his crossing
+1.4. (v192: half a point on every stat; v182: 0.4; before v182 an even spread.) The odd half point is nudged to make
+his rating exact, never his pace.
 (Till v182 a man was made from his line's usual level, his archetype's handful of offsets put on after and the rest of
 his game moved by however far they took him off his rating.) An exhibition side's men come from the same numbers plus
 their club's strength, scattered wider than a career's as they always were, and aren't made to a rating: bringing the

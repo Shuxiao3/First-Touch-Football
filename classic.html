@@ -2944,7 +2944,7 @@
   // a keeper's then GK_KEYS' (keeper speed, reflexes, reach, diving, distribution, handling). A style's offsets (d) are
   // these less his line's averages (ARCH), so his line's average plus his style is the sheet; a man's made from them
   // (cwStatsForOVR; an exhibition side's, genStyledStats) -- his level moving him from his style's own,
-  // a bell curve's spread (MAKE_SD), and the odd half point nudged to the rating he's made to. His line's averages, and
+  // a bell curve's spread (MAKE_SD_OF), and the odd half point nudged to the rating he's made to. His line's averages, and
   // so every rating, are as they were. (Till v182 a style was a handful of offsets on its line's averages: the ones
   // above and STYLE_NEW_D.)
   const STYLE_SHEET={
@@ -2975,11 +2975,13 @@
   // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
   const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
   // (v182) THE SPREAD, A BELL CURVE: a made man's stats scatter round his style's on a normal curve (normInv: Acklam's
-  // approximation, one draw a stat, so the draws that follow are as they were), MAKE_SD a standard deviation -- half a
-  // point, the sheet's 1 on its 1 to 20 scale (v192: it was 0.4, the sheet's 0.8): two men in three within that of it,
-  // nineteen in twenty within twice that, and never more than two and a half times it. (Before v182 it was an even
-  // spread, 0.7 either way.) An exhibition side's men scatter wider, as they always did (their even 1.5 either way, half
-  // that on pace: about 0.87 and 0.43).
+  // approximation, one draw a stat, so the draws that follow are as they were): two men in three within a standard
+  // deviation of it, nineteen in twenty within two, and never more than two and a half. (v193) HOW WIDE BY HOW GOOD HIS
+  // STYLE IS AT IT: a style's best stats scatter half a point a standard deviation (the sheet's 1 on its 1 to 20), the
+  // ones it's worst at 0.7 (the sheet's 1.4), and the rest on a straight line between, by where each sits between its
+  // best and its worst on the sheet (MAKE_SD_OF) -- a man of a style is surer to have its strengths than its weaknesses.
+  // (v192: half a point on every stat; v182: 0.4; before v182 an even spread, 0.7 either way.) An exhibition side's men
+  // scatter wider, as they always did (their even 1.5 either way, half that on pace: about 0.87 and 0.43).
   function normInv(p){
     const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
           b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
@@ -2990,7 +2992,17 @@
     if(p>0.97575) return -tail(Math.sqrt(-2*Math.log(1-p)));
     const q=p-0.5, r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
   const bellDev=(u,sd)=>sd*clamp(normInv(clamp(u,1e-6,1-1e-6)),-2.5,2.5);
-  const MAKE_SD=0.5, MAKE_SD_NEW=0.4, EXH_SD=0.87;   // (MAKE_SD_NEW: Long passing's and Final third composure's own, with 0.6 of their parent's on top -- 0.5 in all; v192: 0.4 and 0.32)
+  const MAKE_SD_LO=0.5, MAKE_SD_HI=0.7, EXH_SD=0.87;   // (v193: a style's best stats and its worst; v192 had 0.5 on all of them)
+  // each style's spread, stat by stat: MAKE_SD_LO on its best, MAKE_SD_HI on its worst, a straight line between -- a
+  // keeper's over his keeping and the rest alike, an outfielder's over his 22 (a keeper's stats, which he hasn't got, at
+  // MAKE_SD_HI); a man without a style by his line's averages ('@DEF' and the like)
+  const MAKE_SD_OF={};
+  function makeSdFrom(vals){ const ks=Object.keys(vals), vs=ks.map(k=>vals[k]), hi=Math.max(...vs), lo=Math.min(...vs), o={};
+    for(const k of ks) o[k]=hi>lo?MAKE_SD_LO+(MAKE_SD_HI-MAKE_SD_LO)*(hi-vals[k])/(hi-lo):MAKE_SD_LO;
+    return o; }
+  for(const k in STYLES){ const S=STYLES[k], keys=S.role==='GK'?ALL_STAT_KEYS:OUT_KEYS, v={}; for(const x of keys) v[x]=ARCH[S.role][x]+(S.d[x]||0); MAKE_SD_OF[k]=makeSdFrom(v); }
+  for(const r in ARCH){ const keys=r==='GK'?ALL_STAT_KEYS:OUT_KEYS, v={}; for(const x of keys) v[x]=ARCH[r][x]; MAKE_SD_OF['@'+r]=makeSdFrom(v); }
+  function makeSdOf(style,role,k){ const t=(style&&MAKE_SD_OF[style])||MAKE_SD_OF['@'+role]; return t&&t[k]!=null?t[k]:MAKE_SD_HI; }
   // a man's new two from his old ones (newStatsFill): his Short passing and Composure, moved by how his role's and
   // archetype's Long passing and Final third composure differ from them -- and (made, not carried over) a little of his own
   // either way, from a hash of the rest, so his long game isn't simply his short one
@@ -16540,15 +16552,16 @@
   // A MAN MADE TO A RATING (T), of a style: his style's usual make (his line's averages and its offsets -- the master sheet's
   // numbers, v182) moved from what that make rates (STYLE_REF; with no style, his line's usual man's: OVR_REF) to T -- all of
   // what his line's game is made of the whole way, the rest about half as far -- each stat scattered on a bell curve
-  // (MAKE_SD), and the rest of his game, never his pace, nudged by the half point to the rating. So the shape his style is
+  // (MAKE_SD_OF), and the rest of his game, never his pace, nudged by the half point to the rating. So the shape his style is
   // given holds at any rating: a style whose numbers rate over his line's usual man has them all a touch lower at the same
   // rating, one whose rate under a touch higher. (Till v182 a man was made from his line's usual level, his style's offsets
   // put on after and the rest of his game moved by however far they took him off the rating: a style rated well over his
   // line's had his main stats squeezed -- cwStyleStats, gone.)
   function cwStatsForOVR(role,T,rng,style){ const S=style&&STYLES[style], d=(S&&S.d)||{}, base=k=>ARCH[role][k]+(d[k]||0), w=OVR_W[role],
       B=S&&STYLE_REF[style]!=null?STYLE_REF[style]:OVR_REF[role][0], delta=T/10-B, s={}, main=ovrMainBut(role), lv=k=>(w[k]||0)>=2?delta:delta*0.55;   // (B: the make's rating, in stat points; v144: his pace not moved to make it)
-    for(const k of STAT_KEYS_V162){ let v=base(k)+lv(k)+bellDev(rng(),MAKE_SD); s[k]=clamp(Math.round(v*2)/2,1,10); }
-    for(const k of NEW_STAT_KEYS){ const par=k==='longPass'?'passAcc':'composure'; let v=base(k)+lv(k)+0.6*(s[par]-base(par)-lv(par))+bellDev(rng(),MAKE_SD_NEW); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
+    for(const k of STAT_KEYS_V162){ let v=base(k)+lv(k)+bellDev(rng(),makeSdOf(style,role,k)); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v193: as wide as his style is good at it -- MAKE_SD_OF)
+    for(const k of NEW_STAT_KEYS){ const par=k==='longPass'?'passAcc':'composure', sd=makeSdOf(style,role,k), sp=makeSdOf(style,role,par), own=Math.sqrt(Math.max(0,sd*sd-0.36*sp*sp));   // (its own, so with 0.6 of its parent's on top it's sd in all)
+      let v=base(k)+lv(k)+0.6*(s[par]-base(par)-lv(par))+bellDev(rng(),own); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
     for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
     return s; }
   function cwStyleFor(tier,rng){

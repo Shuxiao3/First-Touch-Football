@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  // ===== END MANAGER CAREER', '  window.__M={STYLES, SUB_STYLES, ARCH, typeKept, inferStyle, posFit, natPos, CLUBS, clubSquadGen, clubSide, slotStylesFor, cwStatsForOVR, cwOverall, cwMul, STYLE_REF, OUT_KEYS, GK_KEYS, OVR_REF, mgDeriveStats, '
+patch('  // ===== END MANAGER CAREER', '  window.__M={STYLES, SUB_STYLES, ARCH, typeKept, inferStyle, posFit, natPos, CLUBS, clubSquadGen, clubSide, slotStylesFor, cwStatsForOVR, cwOverall, cwMul, STYLE_REF, OUT_KEYS, GK_KEYS, OVR_REF, mgDeriveStats, MAKE_SD_OF, '
   + 'mgMigrate, mgStats, get d(){ return CAREER&&CAREER.data; }};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-roster-')), 'classic.html');
 writeFileSync(copy, src);
@@ -72,22 +72,32 @@ ok(Object.values(st).every(v => Math.abs(v.ovr - 65) <= 1), 'and every one of th
 
 // --- (v182) THE MASTER SHEET: every type's usual make is the sheet's numbers (his line's averages and the type's offsets,
 // halved from its 1 to 20) -- made as a career makes a man, at the rating those numbers rate, 200 men of each average
-// them, every one exactly the rating he was made for; and his stats scatter on a bell curve, half a point a standard deviation -- the sheet's 1 (v192:
-// 0.4, the sheet's 0.8, till then) -- about two in five on the value once rounded, one in eight a point off, hardly any further ---------------------
+// them, every one exactly the rating he was made for; and his stats scatter on a bell curve as wide as his style is good at them (v193): its best stats
+// half a point a standard deviation (the sheet's 1), its worst 0.7 (1.4), the rest between in the sheet's order (v192: half a point on all of them) ------
 const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, worstK: '', off: 0, n: 0 };
   for(const k in M.STYLES){ const S = M.STYLES[k], role = S.role, keys = role === 'GK' ? [...M.OUT_KEYS, ...M.GK_KEYS] : M.OUT_KEYS, T = Math.round(M.STYLE_REF[k] * 10), sum = {};
     for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
     let e = 0; for(const x of keys) e += Math.abs(sum[x] / 200 - (M.ARCH[role][x] + (S.d[x] || 0))) * 2; e /= keys.length;   // (on the sheet's 1 to 20)
     if(e > out.worst){ out.worst = +e.toFixed(3); out.worstK = k; } }
-  // the spread: a winger's pace, 3000 of him at his style's rating -- how far off his style's, in half points
-  const W = 'winger', role = 'ATT', T = Math.round(M.STYLE_REF[W] * 10), want = M.ARCH[role].speed + (M.STYLES[W].d.speed || 0), h = {};
-  for(let i = 0; i < 3000; i++){ const s = M.cwStatsForOVR(role, T, M.cwMul(20000 + i), W); const o = s.speed - want; h[o] = (h[o] || 0) + 1; }
-  out.on = +((h[0] || 0) / 3000).toFixed(3); out.pt = +(Object.entries(h).filter(([o]) => Math.abs(+o) >= 1).reduce((a, [, n]) => a + n, 0) / 3000).toFixed(3);
-  out.far = +(Object.entries(h).filter(([o]) => Math.abs(+o) > 1.01).reduce((a, [, n]) => a + n, 0) / 3000).toFixed(3);
-  out.most = Math.max(...Object.keys(h).map(o => Math.abs(+o))); out.h = h; return out; });
+  // the spread by how good his style is at it: 3000 Pacey wingers at his style's rating -- his pace, his best (and never
+  // nudged to the rating), and his Def IQ, his worst (a forward's minor stat: never nudged either)
+  const W = 'paceywinger', role = 'ATT', T = Math.round(M.STYLE_REF[W] * 10), made = [];
+  for(let i = 0; i < 3000; i++) made.push(M.cwStatsForOVR(role, T, M.cwMul(20000 + i), W));
+  const sdOf = x => { const a = made.map(s => s[x]), m = a.reduce((p, q) => p + q, 0) / a.length; return +Math.sqrt(a.reduce((p, q) => p + (q - m) * (q - m), 0) / a.length).toFixed(3); };
+  out.paceSd = sdOf('speed'); out.defSd = sdOf('defIQ');
+  // and the table: every style's best stat 0.5, its worst 0.7, and the rest between in the order the sheet has them
+  out.bad = [];
+  for(const k in M.MAKE_SD_OF){ if(k[0] === '@') continue; const t = M.MAKE_SD_OF[k], S = M.STYLES[k], v = x => M.ARCH[S.role][x] + (S.d[x] || 0), ks = Object.keys(t), sds = ks.map(x => t[x]);
+    if(Math.abs(Math.min(...sds) - 0.5) > 1e-9 || Math.abs(Math.max(...sds) - 0.7) > 1e-9) out.bad.push(k + ' ' + Math.min(...sds) + ' to ' + Math.max(...sds));
+    for(const a of ks) if(ks.some(b => v(a) > v(b) && !(t[a] < t[b])) || ks.some(b => v(a) === v(b) && t[a] !== t[b])) out.bad.push(k + ' ' + a); }
+  const st = M.MAKE_SD_OF.stopper; out.stopper = { strength: st.strength, speed: +st.speed.toFixed(3), crossing: st.crossing };
+  return out; });
 info('the master sheet: ' + JSON.stringify(sh));
 ok(sh.worst <= 0.25 && sh.off === 0, 'every type made at the rating its numbers rate has the master sheet\'s numbers -- 200 men of each, the worst a ' + sh.worst + ' of a point off them on average (the ' + sh.worstK + '), on the sheet\'s 1 to 20 -- and every one of the ' + sh.n + ' the rating he was made for');
-ok(sh.on >= 0.33 && sh.on <= 0.44 && sh.pt >= 0.09 && sh.pt <= 0.18 && sh.far <= 0.02 && sh.most <= 1.5, 'and they scatter on a bell curve half a point wide: ' + Math.round(sh.on * 100) + '% on his style\'s pace, ' + Math.round(sh.pt * 100) + '% a point or more off it, ' + (sh.far * 100).toFixed(1) + '% more than a point, none more than a point and a half (at 0.4: nearly half on it, one in sixteen a point off, none further)');
+ok(!sh.bad.length && sh.stopper.strength === 0.5 && sh.stopper.crossing === 0.7 && sh.stopper.speed > 0.5 && sh.stopper.speed < 0.7,
+  'how widely a style\'s men scatter goes by how good it is at the stat: its best half a point a standard deviation (the sheet\'s 1), its worst 0.7 (1.4), the rest between in the sheet\'s order -- the Stopper\'s strength ' + sh.stopper.strength + ', his speed ' + sh.stopper.speed + ', his crossing ' + sh.stopper.crossing + (sh.bad.length ? ' (out: ' + sh.bad.slice(0, 4).join(', ') + ')' : ''));
+ok(sh.paceSd >= 0.47 && sh.paceSd <= 0.58 && sh.defSd >= 0.62 && sh.defSd <= 0.78,
+  'and so they do: 3000 Pacey wingers made at his rating, his pace (his best) ' + sh.paceSd + ' a standard deviation and his Def IQ (his worst) ' + sh.defSd + ' (each rounded to the half point)');
 
 // --- THE EXHIBITION CLUBS' MEN --------------------------------------------------------------------------------------------
 const ex = await page.evaluate(() => { const M = window.__M, n = {}, at = { DM: {}, CM: {}, AM: {} };
