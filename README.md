@@ -1420,6 +1420,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     neither does anything the game works out from a rating -- how good a man is made, his wage and his price, a side's
     strength, a simulated result -- which all read the rating itself. A scout's range, a ceiling and a change in a
     rating are shown the same way, and an exhibition side's OVR is the average of what its starters' cards show.
+    (v195: it's stretched from his exact rating -- the whole number the game keeps and the fraction his stats put on
+    it -- so every number comes up; stretched from the whole numbers alone, 63, 69, 75, 81, 87 and 93 never did.)
   - **Pace, the dearest of all (v144).** Speed weighs the most in every outfielder's rating, 6 -- above every other
     stat -- and acceleration 5 (they were 4 and 2 for a defender, 2 and 1 for a midfielder, 4 and 4 for a forward). A
     usual man of each line still rates what he did (69, 67, 72 at the averages), but three points more pace on him is
@@ -2955,6 +2957,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v195: every rating shows.** The stretched rating a card shows is worked out from a man's exact rating, the
+  fraction his stats put on the whole number included, so every number from 60 to 99 can come up: stretched from the
+  whole numbers alone, 63, 69, 75, 81, 87 and 93 never did. Nobody's shown rating moves by more than a point. A side's
+  rating in the fixtures is the average of what its men's cards show. See **The rating shown**.
 - **v194: the best rated higher.** The rating a card shows is stretched over 60, each point over it a point and a
   fifth (99 at most): 70 shows 72, 80 shows 84, 86 shows 91, and 60 and under are as they were. Stats, and everything
   worked out from a rating -- wages, prices, a side's strength, simulated results -- are as they were. On the
