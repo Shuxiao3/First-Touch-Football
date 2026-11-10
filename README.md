@@ -815,22 +815,27 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     says his height, after his position and style. Each look used to be scaled 0.95 to 1.06, which would have
     blurred the three heights together, so that's gone. For now it's only how he looks: no header, reach or turn
     goes by it.
-  - **Drawn by hand (v187).** Every part is drawn again, pixel by pixel, in the style of the reference overworld
-    sprites (the handheld Gen-5 style) -- the proportions, the lighting and the shading taken off them, not the
-    characters. The head is wider than it's tall, 17 pixels across, with a thatch of hair in three tones lit from the
-    top left: a light band up there, the dark low on the right. The eyes are two pixels wide, white on the outside and
-    the iris over the pupil on the inside, under a brow. The body is eight rows of shirt and shorts with the hands out
-    at the sides, two by two in the skin's light (a keeper's gloves three by three). The outline is black, softened to
-    navy along the top and to the skin's own maroon round the hands. The legs are three wide, stepping a pixel
-    sideways a row at most, with a two-row boot under each; walking, he stands, then steps with the whole of him a
-    pixel up and his legs wide, then stands, then steps. Each head is drawn in five views -- facing you, half turned,
-    side on, half away and away -- and the other three are those mirrored; the diagonals follow an 8-direction
-    reference for the angles only. The side of the head runs straight down past the ears (the first draw had them
-    a pixel out on each side just under the hair, which looked like horns).
-  - The standing, running, shooting and passing bodies come off a small pixel rig posed from the old sheet's
-    skeleton; the bodies no rig can pose are drawn by hand: the slide, the keeper's dives (two legs trailing, the far
-    one a little bent) and going down big, and the ball in his gloves. The keepers wear their own hair now, put on
-    their sheet the way an outfielder's is (they had one drawn head between them).
+  - **Drawn by hand (v187; every body frame by hand, v188).** Every part is drawn pixel by pixel in the style of the
+    reference overworld sprites (the handheld Gen-5 style) -- the proportions, the lighting and the shading taken off
+    them, not the characters. The head is wider than it's tall, 17 pixels across, with a thatch of hair in three tones
+    lit from the top left: a light band up there, the dark low on the right. The eyes are two pixels wide, the way the
+    reference sheets draw them (v188): the lid and the iris over the white and the pupil, the pupils turned in, under a
+    brow; the cheeks and jaw are outlined in the skin's own maroon. The body is eight rows of shirt and shorts with the
+    hands out at the sides, two by two in the skin's light. The outline is black, softened to navy along the top and to
+    the skin's own maroon round the hands. Each head is drawn in five views -- facing you, half turned, side on, half
+    away and away -- and the other three are those mirrored; the diagonals follow an 8-direction reference for the
+    angles only. The side of the head runs straight down past the ears (the first draw had them a pixel out on each
+    side just under the hair, which looked like horns).
+  - **Every body frame by hand (v188).** Every frame of every body is drawn pixel by pixel, outline and all, in the
+    five views: standing, the four of the run, the shot's wind-up and strike, the pass's backswing and side-foot, the
+    slide and getting up off the turf (they came off a small posing rig before, which gave the run a hand swinging up
+    by his head and legs that never looked quite right). Running, as the reference sheets walk: the stride low, his
+    legs apart and the front foot a pixel nearer you, then the passing a pixel up, one leg under him and the other knee
+    coming through, his arms swinging; half turned, his legs side by side under him, the near foot a pixel lower and
+    the near arm the whole one, the far one peeping out. The keeper has his own: set with his knees out and his gloves
+    up, the ball gathered into his chest, the dive (two legs trailing, the far one a little bent) and going down big;
+    his run, his side-step and his kick are the outfield ones with gloves for hands. The keepers wear their own hair,
+    put on their sheet the way an outfielder's is (they had one drawn head between them before v187).
   - Every sprite stands on a flat oval shadow of whole sprite pixels instead of the soft one, which comes back if
     the sprites are switched off (`V`).
 - **The pitch is in the town's style.** It's drawn the way Ekat's tiles are: mint turf mown in the 14 bands and specked,
@@ -860,9 +865,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     `python3 tools/clips/make_stand_layers.py`, which seats the supporters. `PITCH.enable(false)` in the console puts
     the old vector pitch back.
   - The labs' tally line sits on a dark pill now that it's over the turf rather than a night sky.
-  The parts come from `python3 tools/clips/make_players.py` (v187), which draws them from the pixel grids in
-  `tools/clips/players_art/` and writes the outfield sheet, the heads, the keepers' sheet and where each head goes
-  into the page (`--sheet out.png` draws them all to look at instead). A career player's look is seeded from the
+  The parts come from `python3 tools/clips/make_players.py` (v187), which reads the pixel grids in
+  `tools/clips/players_art/` -- the heads, and since v188 every body frame (`frames.txt`, the keepers' own in
+  `keepers.txt`) -- and writes the outfield sheet, the heads, the keepers' sheet and where each head goes into the page
+  (`--sheet out.png` draws them all to look at instead). A career player's look is seeded from the
   player himself, so he looks the same at every club.
 - **Headers are a real leap.** Going up for a header lifts a player's feet 8 px (Heading 1) to 14 px (Heading 10),
   a quarter to two-fifths of his height. It used to be up to 83 px, over two and a half times his height. That
@@ -2968,6 +2974,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v188: every body frame drawn by hand.** The players' bodies were posed by a small rig; now every frame is drawn
+  pixel by pixel in the five views -- standing, running, the shot, the pass, the slide and getting up -- and the
+  keeper's set, the ball in his gloves, the dive and going down big. The run steps the way the reference sheets walk,
+  no hand swings up by his head, and half turned his legs stay side by side under him. The heads keep their
+  hairstyles with the reference sheets' eyes (lid and iris over white and pupil) and the cheeks outlined in the skin's
+  own line. See **Every body frame by hand**.
 - **v187: the players and the stands redrawn.** Every part of the players is drawn again by hand from the reference
   sprites: seven hairstyles (spikes and a side parting in for the long hair and the bun), beards and headbands, the
   slide, and the keepers -- set, side-stepping, running, the ball in their gloves, the kick, the dives and going down

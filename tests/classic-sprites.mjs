@@ -3,8 +3,9 @@
 // rest of his look, and every sprite stands on a flat oval of whole pixels instead of the soft shadow (which is back
 // when the sprites are switched off). THE REDRAWN MEN (v187): every part drawn again by hand -- seven hairstyles (spikes and
 // a side parting where the long hair and the bun were, at their odds), each head 21 by 19, its sides running straight down
-// past his ears (they stuck out a pixel just under the hair, like horns), and the keepers in their own hair. On a copy of
-// the game that lets the test reach the players.
+// past his ears (they stuck out a pixel just under the hair, like horns), and the keepers in their own hair. v188, every
+// body frame drawn by hand: standing, running, shooting or passing, his arms never come up past his shoulders (the posed
+// run had a hand swinging up by his head). On a copy of the game that lets the test reach the players.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -70,12 +71,18 @@ const v = await page.evaluate(() => {
     for(let y = 0; y < 32; y++) for(let x = 0; x < 32; x++){ const i = (((r * 32 + y) * G.w) + f * 32 + x) * 4 + 3; if(G.d[i]) a++; if(K.d[i]) b++; }
     if(a){ cells++; if(b > a + 40) headed++; } }
   out.gk = { cells, headed };
+  // v188: the bodies (no heads on them) -- standing, running, shooting and passing -- nothing above his shoulders, row 20
+  const B = px(S.cfg.body); out.high = [];
+  for(let r = 0; r < 32; r++) for(let f = 0; f < 4; f++){ let top = -1;
+    for(let y = 0; y < 32 && top < 0; y++) for(let x = 0; x < 32; x++) if(B.d[(((r * 32 + y) * B.w) + f * 32 + x) * 4 + 3]){ top = y; break; }
+    if(top >= 0 && top < 20) out.high.push(r + ',' + f + ' row ' + top); }
   return out; });
 info('hairstyles dealt to 600 men: ' + JSON.stringify(v.seen));
 ok(v.styles.join() === 'mop,crop,bald,afro,spiky,mohawk,side' && v.cell.join() === '21,19,21', 'seven hairstyles drawn, each head 21 by 19 (' + v.styles.join(', ') + ')');
 ok(!v.horns.length, 'every head\'s sides run straight down past his ears, no row or two standing out like horns (' + (v.horns.join('; ') || 'none') + ')');
 ok(Object.keys(v.seen).every(k => v.styles.includes(k)) && v.seen.spiky > 0 && v.seen.side > 0 && !v.seen.long && !v.seen.bun, 'every man gets a hairstyle that\'s drawn: spikes and side partings now, no long hair or buns');
 ok(v.gk.cells >= 70 && v.gk.headed === v.gk.cells, 'the keepers wear their own hair: a head on every one of the ' + v.gk.cells + ' cells of their sheet');
+ok(!v.high.length, 'standing, running, shooting or passing, nothing of him comes up past his shoulders -- no arm swinging up by his head (' + (v.high.join('; ') || 'none') + ')');
 
 process.exitCode = rep.finish();
 await browser.close();
