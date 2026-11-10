@@ -798,14 +798,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     TUNE. TUNE has Crossing, Curve, Heading, Off IQ, Def IQ and the keeper's reach and speed.
   - Keys: `1`-`4` from, `C` crosser, `,` `.` ours, `[` `]` theirs, `B` keeper.
 - **Every player looks like himself.** Players are put together from swappable parts. There's a body and a head
-  in one of seven hairstyles: mop, crop, bald, afro, long, mohawk or bun. A beard and a headband can go over any
-  style, and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
+  in one of seven hairstyles: mop, crop, bald, afro, spiky, mohawk or a side parting (v187: the spikes and the side
+  parting took the long hair's and the bun's places, at their odds). A beard and a headband can go over any style,
+  and the headband is in the kit's trim colour. On top of that each player gets one of seven skin tones,
   a hair colour (natural shades, plus the odd dyed one), an eye colour, a boot colour and a height. A player's
   look is seeded from his name, so he looks the same every match (the eye colour is drawn last, so nobody's other
   picks changed when it came in). Keepers get their own skin, hair and eye colour.
   - **Short, medium or tall (v184).** A tall man's sprite has two rows more than a medium one and a short man's two
-    fewer: one at the knee (the row under his shorts) and one in his boots (their top row). His head, his shirt and
-    his feet are as drawn, and his feet stay on his spot. Where those rows are is read off the drawn sheet cell by
+    fewer, between his shirt and his boots: on the redrawn men (v187) a tall man gets a row more of knee and a row
+    more of sock, and a short man loses a row of his shorts and his sock, so he keeps his knees. His head, his shirt
+    and his feet are as drawn, and his feet stay on his spot. Where those rows are is read off the drawn sheet cell by
     cell; a slide is left as drawn. His height is seeded from his name like the rest of his look (a career man's from
     himself) and weighted by his line -- short, medium and tall out of 100: defenders 15, 45 and 40; midfielders 35,
     50 and 15; forwards 30, 45 and 25. Keepers are all one height, as drawn (v185). At a throw-in he holds
@@ -813,13 +815,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     says his height, after his position and style. Each look used to be scaled 0.95 to 1.06, which would have
     blurred the three heights together, so that's gone. For now it's only how he looks: no header, reach or turn
     goes by it.
-  - The art follows the reference overworld sprites (the handheld Gen-5 style). The head is about two-thirds of the
-    figure, on a short, stocky body with the hands held out from the sides. The hair falls in clumps under a band of
-    sheen, with the fringe hanging to the eyes and the outline in black. The face is small and framed by the hair,
-    with 2×2 eyes (lid and iris over white and pupil, the pupils turned in) and a one-pixel mouth. Bald heads keep
-    their brows.
-  - The diagonals follow an 8-direction reference: turned toward you the face slides to that side and the ear to
-    the other; turned away, the cheek and ear show at the edge.
+  - **Drawn by hand (v187).** Every part is drawn again, pixel by pixel, in the style of the reference overworld
+    sprites (the handheld Gen-5 style) -- the proportions, the lighting and the shading taken off them, not the
+    characters. The head is wider than it's tall, 17 pixels across, with a thatch of hair in three tones lit from the
+    top left: a light band up there, the dark low on the right. The eyes are two pixels wide, white on the outside and
+    the iris over the pupil on the inside, under a brow. The body is eight rows of shirt and shorts with the hands out
+    at the sides, two by two in the skin's light (a keeper's gloves three by three). The outline is black, softened to
+    navy along the top and to the skin's own maroon round the hands. The legs are three wide, stepping a pixel
+    sideways a row at most, with a two-row boot under each; walking, he stands, then steps with the whole of him a
+    pixel up and his legs wide, then stands, then steps. Each head is drawn in five views -- facing you, half turned,
+    side on, half away and away -- and the other three are those mirrored; the diagonals follow an 8-direction
+    reference for the angles only. The side of the head runs straight down past the ears (the first draw had them
+    a pixel out on each side just under the hair, which looked like horns).
+  - The standing, running, shooting and passing bodies come off a small pixel rig posed from the old sheet's
+    skeleton; the bodies no rig can pose are drawn by hand: the slide, the keeper's dives (two legs trailing, the far
+    one a little bent) and going down big, and the ball in his gloves. The keepers wear their own hair now, put on
+    their sheet the way an outfielder's is (they had one drawn head between them).
   - Every sprite stands on a flat oval shadow of whole sprite pixels instead of the soft one, which comes back if
     the sprites are switched off (`V`).
 - **The pitch is in the town's style.** It's drawn the way Ekat's tiles are: mint turf mown in the 14 bands and specked,
@@ -839,12 +850,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     centred on halfway, and none on a new career's field; away from a career, the old stand with the game's words
     on its boards.
   - The camera's far touchline is now 100 px down the screen instead of 64, so the stand shows over it.
-  - The strips come from `python3 tools/sprites/make_pitch_art.py --embed-classic`. `PITCH.enable(false)` in the
-    console puts the old vector pitch back.
+  - **The supporters (v187).** The fans are drawn the way the players are, in rows on the steps: seen from the chest
+    up with their hands on the seat in front, the front row up against the wall, men and women with the players' skin
+    tones and hair, a few with their arms up. They're smaller than the men on the pitch, as they're further off, and
+    quieter in colour (the back rows a touch dimmer), so they don't take the eye off the game: 111 in the first
+    bleacher, 334 in the second, 299 under the covered stand, 317 in the timber stand and 440 over the grand
+    stadium's two tiers. The strips are drawn at twice the stand's pixels for it.
+  - The strips come from `python3 tools/sprites/make_pitch_art.py --embed-classic`, then
+    `python3 tools/clips/make_stand_layers.py`, which seats the supporters. `PITCH.enable(false)` in the console puts
+    the old vector pitch back.
   - The labs' tally line sits on a dark pill now that it's over the turf rather than a night sky.
-  The parts come from `tools/sprites/make_player_sheet.py --embed-classic`; the styles are in
-  `tools/sprites/head_variants.py`, and `assets/sprites/player_looks_preview.png` shows a few looks. A career
-  player's look is seeded from the player himself, so he looks the same at every club.
+  The parts come from `python3 tools/clips/make_players.py` (v187), which draws them from the pixel grids in
+  `tools/clips/players_art/` and writes the outfield sheet, the heads, the keepers' sheet and where each head goes
+  into the page (`--sheet out.png` draws them all to look at instead). A career player's look is seeded from the
+  player himself, so he looks the same at every club.
 - **Headers are a real leap.** Going up for a header lifts a player's feet 8 px (Heading 1) to 14 px (Heading 10),
   a quarter to two-fifths of his height. It used to be up to 83 px, over two and a half times his height. That
   covers your attacking header (K), your defensive one (J) and the computer's. Your header arms in their box
@@ -2414,7 +2433,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       share away, nothing till both are known -- not as it's guessed. A match away, or one that isn't a career's, has
       the ground's usual crowd: a third of the first bleacher up to nine in ten of the grand stadium.
       The stands come in three layers for it (every seat taken, nobody in, and whose pixel is whose), from
-      `python3 tools/clips/make_stand_layers.py`, which draws them with `tools/sprites/make_pitch_art.py`'s own code.
+      `python3 tools/clips/make_stand_layers.py`, which draws them with `tools/sprites/make_pitch_art.py`'s own code
+      and seats the supporters (v187). Since v187 exactly that share of the seats is taken, the first so many in the
+      ground's own order, not each seat on a throw of the dice.
     - **Tickets (v108).** The going rate for a seat is $25 in League 2, $30 in League 1, $40 in the Championship and $60
       in the Premium League (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
       $14), and a new career starts on it. With the
@@ -2947,6 +2968,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v187: the players and the stands redrawn.** Every part of the players is drawn again by hand from the reference
+  sprites: seven hairstyles (spikes and a side parting in for the long hair and the bun), beards and headbands, the
+  slide, and the keepers -- set, side-stepping, running, the ball in their gloves, the kick, the dives and going down
+  big -- who wear their own hair now. Short men keep their knees. The supporters in all five stands are drawn the
+  same way, from the chest up and smaller, and a crowd takes exactly its share of the seats. See **Every player looks
+  like himself** and **The supporters**.
 - **v186: nobody tells you the crowd.** No projected crowd or gate when you set ticket prices: the stadium's screens
   show the last home game's instead (blank before the first). The far stand in a match is as full as its seats sold,
   and at full time THE GATE says who came, stand by stand, and what they paid, before THE MONEY. The books and NET/WK
@@ -4407,13 +4434,16 @@ The head is bigger than the arms can reach past, so the gloves are painted in fr
 a pixel artist would. The spread is drawn facing us whichever way he faces: side on, a man down on one knee
 with his arms out reads as a man standing. `keeper_sheet.json` has the layout and `keeper_sheet_preview.png` every frame.
 
-Football Classic (`classic.html`) takes the same art split into parts (a body sheet, every hairstyle's head, and
-where the head sits in each cell) so each player can be put together and recoloured. Write them in with:
+Football Classic (`classic.html`) has its players in parts (a body sheet, every hairstyle's head, and where the head
+sits in each cell) so each player can be put together and recoloured. Since v187 they're drawn by hand, in
+`tools/clips/players_art/`, and `make_players.py` writes them in -- the outfield sheet, the heads and the keepers'
+sheet together; `make_player_sheet.py --embed-classic` and `make_keeper_sheet.py --embed-classic` would put the old
+art back. The stands are two steps, the strips and then the supporters in them:
 
 ```sh
-python3 tools/sprites/make_player_sheet.py --embed-classic
-python3 tools/sprites/make_keeper_sheet.py --embed-classic
+python3 tools/clips/make_players.py                          # the players and the keepers (--sheet out.png to look at them)
 python3 tools/sprites/make_pitch_art.py --embed-classic     # the far side of the pitch, a strip a ground level (assets/sprites/pitch_far_1..5.png)
+python3 tools/clips/make_stand_layers.py                     # ...and its supporters, at twice the strip's pixels
 python3 tools/sprites/make_ball.py --embed-classic           # the ball: six 9x9 frames (assets/sprites/ball_preview.png)
 ```
 

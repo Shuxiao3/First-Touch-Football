@@ -45,7 +45,11 @@ ok(d.roster.filter(p => p.apps === 1).length === 9, 'the nine who started have a
 ok(d.week === 1 && d.ledger.length === 1, 'the week was paid');
 await page.click('#mrContinueBtn'); await page.waitForTimeout(250);
 await page.evaluate(() => { const b = document.querySelector('#pressModal.on [data-pr="skip"]'); if(b) b.click(); }); await page.waitForTimeout(250);   // (the press first)
-const money = await page.innerText('#moneyModal').catch(() => '');
+let money = await page.innerText('#moneyModal').catch(() => '');
+if(/THE GATE/.test(money)){   // (a home game -- a new career's first game is home or away as its fixtures fall: THE GATE comes first, v186)
+  ok(/Taken at the gate/.test(money), 'a home game: THE GATE first, who came and what they paid');
+  await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(250);
+  money = await page.innerText('#moneyModal').catch(() => ''); }
 ok(/THE MONEY/.test(money) && /Before the game/.test(money) && /From the game/.test(money) && /Wages/.test(money) && /Now in the bank/.test(money) && /fans/.test(money),
   'back at the club, after the press: THE MONEY -- before the game, from it, the wages, now in the bank, and the fans');
 await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(150);

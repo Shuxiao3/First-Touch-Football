@@ -61,6 +61,19 @@ ok(Object.keys(meta.panels).length === 5 && !badPanel.length, 'every level\'s na
   + (badPanel.map(([l, p]) => 'level ' + l + ': ' + JSON.stringify(p)).join('; ') || 'all five') + ')');
 const pics = await page.evaluate(() => [1, 2, 3, 4, 5].map(l => PITCH.picture({ lvl: l, boards: [], stand: 'North Stand' }, 190).length));
 ok(pics.every(n => n > 1000), 'the Stands tab gets a picture of every level (' + pics.join(', ') + ' characters of PNG)');
+// THE SUPPORTERS (v187): drawn the way the players are, at twice the stand's pixels -- the full stand, the empty one and the
+// fans' map all that size, the full one the empty one but for the fans; and a crowd takes exactly its share of the seats
+const st = await page.evaluate(() => { const C = PITCH.cfg, out = [];
+  const px = im => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0); return x.getImageData(0, 0, c.width, c.height).data; };
+  for(const l of [1, 2, 3, 4, 5]){ const F = px(C.strips[l]), E = px(C.empty[l]), M = px(C.fans[l]), ids = new Set(); let off = 0;
+    for(let i = 0; i < F.length; i += 4){ if(M[i + 3]){ ids.add(M[i] << 8 | M[i + 1]); continue; } if(F[i] !== E[i] || F[i + 1] !== E[i + 1] || F[i + 2] !== E[i + 2] || F[i + 3] !== E[i + 3]) off++; }
+    PITCH.setGround({ lvl: l, fill: 0.5, name: 'Test Park', boards: [] });
+    out.push({ l, w: [C.strips[l].width, C.empty[l].width, C.fans[l].width], h: [C.strips[l].height, C.empty[l].height, C.fans[l].height], off, fans: ids.size, cr: C.crowd }); }
+  PITCH.setGround(null); return out; });
+info('the stands\' supporters: ' + st.map(s => 'level ' + s.l + ' ' + s.fans + ' (half full: ' + (s.cr && s.cr.here) + ')').join(', '));
+ok(meta.px === 2 && st.every(s => s.w.every(w => w === meta.w * 2) && s.h.every(h => h === meta.h * 2)), 'every stand drawn at twice its pixels, full, empty and the fans\' map alike (' + meta.w * 2 + ' by ' + meta.h * 2 + ')');
+ok(st.every(s => s.off === 0 && s.fans >= 100), 'each full stand is the empty one but for its supporters, ' + st.map(s => s.fans).join(', ') + ' of them -- nothing in front of them (a wall, a post) belongs to anybody');
+ok(st.every(s => s.cr && s.cr.fans === s.fans && s.cr.here === Math.round(s.fans / 2)), 'half a gate fills exactly half the seats: ' + st.map(s => s.cr && s.cr.here + ' of ' + s.cr.fans).join(', '));
 // A TWENTIETH WIDER (v125, nine a side): a real pitch's markings at 22.5 px to its metre (25, the men's, at first) on one
 // 99.75 m long and 71.4 wide -- it was 99.75 by 68 (and 105 m long in v125) -- and the camera as it was: the far touchline under
 // the stand, the near one about nineteen-twentieths of the way down (nine-tenths on the narrower one), the men as big as

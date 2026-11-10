@@ -1,0 +1,101 @@
+# the bodies drawn by hand. '# name view hx hy' (where the head's grid goes in the cell), then 'row|pixels'.
+#  0         1         2         3
+#  01234567890123456789012345678901
+# slide S 5 5
+24|........Ss.zSssssssz.sz
+25|......AA...hHhhhhhhj...AA
+26|......Aa..hhj.....hhj..aA
+27|..........NNn.....NNn
+28|..........BBb.....OOo
+29|..........bbb.....BBb
+# slide N 5 5
+24|........Ss.zSssssssz.sz
+25|......AA...zsssssssz...AA
+26|......Aa...zsssssssz...aA
+27|...........hHhhhhhhj
+28|..........BhhhhLhhhjB
+29|..........bjjjj.jjjjb
+# slide E 1 9
+26|.................hhjNnoob
+27|...............Sshhhhnn
+28|...AA.zSssssssshhhhjNNOOoBBb
+29|...Aa..zzzzzzzzjjjj.NnOOoBBb
+# slide SE 3 7
+26|......zs..zSssshhNnOo
+27|....AA....zsshhhhjnOoBB
+28|....Aa.....jhhhhNNOObb
+29|.............jjjnnOOoBBb
+# slide NE 3 7
+25|...................BB
+26|......zs..zSsssz.oobb
+27|....AA....zsssshhn
+28|....Aa....zshhhhhj
+29|...........jjjjjj
+# diveup E 10 5
+10|...........................GGg
+11|...........................Ggg
+12|...........................ggq
+15|...........................GGg
+16|...........................Ggg
+17|...........zSss............ggq
+18|..........zSssss
+19|.........zSsssss
+20|........zSssssss
+21|.......hHzssssss
+22|......hHHhzsssss
+23|.....hHHhhjzsss
+24|....hHh.hjj
+25|...NNn.nnj
+26|..OOo.oon
+27|.OOo..oo
+28|BBB..bbo
+29|bbb..bb
+# divedown E 10 10
+5|bbb.bb
+6|BBB.bbo
+7|.OOo.oo
+8|..OOo.oon
+9|...NNn.nnj
+10|....hHh.hjj
+11|.....hHHhhjzsss
+12|......hHHhzsssss
+13|.......hHzssssss
+14|........zSssssss
+15|.........zSsssss
+16|..........zSssss
+17|...........zSss
+21|...........................GGg
+22|...........................Ggg
+23|...........................ggq
+26|...........................GGg
+27|...........................Ggg
+28|...........................ggq
+# spread S 5 6
+24|.......Sss.zSssssssz.ssz
+25|..GGgSss...zsssssssz...sszGGg
+26|..Ggg......hHhhhhhhj......Ggg
+27|..ggq.....hhj....hhhj.....ggq
+28|..........NNn.....hhjNnOOoBB
+29|..........BBb........nnOOoBBb
+# hold S 0 0
+22|..........Ss..WWw..sz
+23|...........GgWWWwwGg
+24|...........gqWwXwwgq
+25|..............wwx
+# hold N 0 0
+22|..........Ss.......sz
+23|..........ss.......sz
+# hold E 0 0
+22|..............Ss..WWw
+23|...............ssGgWww
+24|.................gqXww
+25|..................wwx
+# hold SE 0 0
+22|...........Ss...WWw.z
+23|.............GgWWWwwGg
+24|.............gqWwXwwgq
+25|................wwx
+# hold NE 0 0
+22|...........Ss......Ww
+23|...........ss......wwg
+24|...................wxq

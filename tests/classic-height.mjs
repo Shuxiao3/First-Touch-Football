@@ -1,8 +1,10 @@
 // FOOTBALL CLASSIC, HEIGHT (v184): every outfield man is short, medium or tall -- seeded like his look, from his name (a
 // career man's from himself), and weighted by his line: defenders the tallest, midfielders the shortest. A tall man's
-// sprite has two rows more and a short man's two fewer, at the knee and in his boots, so his head, shirt and feet are as
-// drawn and his feet stay on his spot; a slide is left as drawn. Keepers are all one height, as drawn (v185). The old
-// 0.95-1.06 scale on each look is gone. At a throw-in he holds the ball in front of his face wherever his face is. His card says his height.
+// sprite has two rows more and a short man's two fewer, between his shirt and his boots (v187, the redrawn men: a row more
+// of knee and of sock; a row fewer of shorts and of sock, so a short man keeps his knees), so his head, shirt and feet are
+// as drawn and his feet stay on his spot; a slide is left as drawn. Keepers are all one height, as drawn (v185), under
+// their own hair (v187). The old 0.95-1.06 scale on each look is gone. At a throw-in he holds the ball in front of his
+// face wherever his face is. His card says his height.
 // For now that's all it is: no header, reach or turn goes by it. On a copy of the game that lets the test reach inside.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -40,16 +42,18 @@ ok(r.share.GK[1] === 100, 'keepers are all one height, medium (v185)');
 r = await page.evaluate(() => { const T = window.__T, S = window.SPRITE, out = { men: [] };
   for(const p of [...T.players(), ...T.keepers()]){ const L = S.lookOf(p), role = p.side != null ? 'GK' : p.natRole;
     out.men.push({ ht: L.ht, key: L.key.endsWith('|h' + L.ht), own: L.ht === T.heightFrom(p._lookSeed, role), size: L.size, gk: p.side != null }); }
-  // the keepers' sheets: as drawn, every cell (the parts' own keeper sheet, recoloured, the same shape)
-  const im = S.cfg.gk.img, c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0);
-  const a0 = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; out.gkSame = [];
-  for(const k in S.cfg.gk.looks){ const g = S.cfg.gk.looks[k], d = g.getContext('2d').getImageData(0, 0, g.width, g.height).data; let same = g.width === c.width && g.height === c.height;
+  // the keepers' sheets: as drawn, every cell (the parts' own keeper sheet with his own head on it -- v187 -- recoloured, the same shape)
+  const px = c => { if(!c.getContext){ const x = document.createElement('canvas'); x.width = c.width; x.height = c.height; x.getContext('2d').drawImage(c, 0, 0); c = x; }
+    return c.getContext('2d').getImageData(0, 0, c.width, c.height).data; };
+  out.gkSame = [];
+  for(const kp of T.keepers()){ const L = S.lookOf(kp), k = Object.keys(S.cfg.gk.looks).find(q => q.endsWith('|' + L.key)); if(!k) continue;
+    const g = S.cfg.gk.looks[k], src = S.gkSrc(L.style, L.ovs), a0 = px(src), d = px(g); let same = g.width === src.width && g.height === src.height && src !== S.cfg.gk.img;
     for(let i = 3; same && i < d.length; i += 4) if(!d[i] !== !a0[i]) same = false; out.gkSame.push(same); }
   return out; });
 info('heights on the pitch: ' + r.men.map(m => m.ht).join(' '));
 ok(r.men.length === 18 && r.men.every(m => [-1, 0, 1].includes(m.ht) && m.key && m.own), 'all 18 men have a height of their own, by their line, in their sheet\'s key');
 ok(r.men.filter(m => m.gk).length === 2 && r.men.filter(m => m.gk).every(m => m.ht === 0) && r.gkSame.length >= 2 && r.gkSame.every(Boolean),
-  'both keepers are medium, and every keeper\'s sheet has the drawn keeper\'s shape in every cell (' + r.gkSame.length + ' sheets)');
+  'both keepers are medium, and every keeper\'s sheet has the drawn keeper\'s shape, under his own hair, in every cell (' + r.gkSame.length + ' sheets)');
 ok(new Set(r.men.map(m => m.ht)).size >= 2, 'not all one height (' + [...new Set(r.men.map(m => m.ht))].join(', ') + ')');
 ok(r.men.every(m => m.size === undefined), 'no look carries the old 0.95-1.06 scale any more');
 
@@ -64,7 +68,7 @@ r = await page.evaluate(() => { const T = window.__T, S = window.SPRITE, CELL = 
       if(!c){ bad.push(tag + ' ' + r + ',' + f + ' no rows'); return; }
       const [t1, b1] = span(dh, W, r, f); n++;
       if(t1 !== t0 - 2 * ht || b1 !== b0) bad.push(tag + ' ' + r + ',' + f + ' ' + [t0, b0] + '->' + [t1, b1]); })); return n; };
-  for(const st of ['mop', 'crop', 'bald', 'afro', 'long', 'mohawk', 'bun']) for(const ht of [-1, 1]){
+  for(const st of ['mop', 'crop', 'bald', 'afro', 'spiky', 'mohawk', 'side']) for(const ht of [-1, 1]){   // (v187: spikes and a side parting for the long hair and the bun)
     const d0 = data(S.lookSrc(st, ['band'], 0)), W = S.lookSrc(st, [], 0).width;
     out.cells += check([d0], W, H.body, ht, data(S.lookSrc(st, ['band'], ht)), out.bad, 32, st); }
   return out; });
