@@ -53,7 +53,8 @@ r = await K(`(()=>{ const d=CAREER.data; while(d.phase!=='league'||!mgNextGame(d
 ok(/ON THE DAY\+0\.\d/.test(r) && /The dressing room: buoyant, on each man’s rating today/.test(r), 'the matchday\'s paper says it, the number first (v176): "' + (r.match(/ON THE DAY[^|]*/) || [''])[0].trim() + '", "' + (r.match(/The dressing room[^|]*/) || [''])[0].trim() + '"');
 
 // --- A MAN SETTLING IN ---------------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d)[0], base=c.players.filter(p=>p.age<=21&&p.role!=='GK').sort((a,b)=>(b.pot-b.ovr)-(a.pot-a.ovr))[0];
+// (v201: the first computer club with a man of 21 or under -- a world's first club, Mancunian City with its two stars, can have none)
+r = await K(`(()=>{ const d=CAREER.data, young=p=>p.age<=21&&p.role!=='GK', c=mgAiClubs(d).find(k=>k.players.some(young)), base=c.players.filter(young).sort((a,b)=>(b.pot-b.ovr)-(a.pot-a.ovr))[0];
   const run=(ad,move)=>{ const p=JSON.parse(JSON.stringify(base)), hv=typeof p.hv==='string'?p.hv.split(''):p.hv.slice(); hv[HV_KEYS.indexOf('ad')]=devEnc(ad); p.hv=typeof p.hv==='string'?hv.join(''):hv; delete p.dc; delete p.mvw;
     devTick(d,p,{T:0.9,gw:4,cid:c.id}); if(move) p.dc='elsewhere'; const w0=d.weeks; d.weeks=w0+3; devTick(d,p,{T:0.9,gw:4,cid:c.id}); d.weeks=w0; return { ld:p.ld, mvw:p.mvw!=null }; };
   const a10=run(10,true), a1=run(1,true), stay=run(10,false), stay1=run(1,false); return { a10, a1, stay, stay1 }; })()`);

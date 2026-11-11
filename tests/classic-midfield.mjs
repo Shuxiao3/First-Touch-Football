@@ -76,8 +76,10 @@ ok(b3.fit === 'fullback m, wingback m, deffb m, invfb m, stopper m, cover m, bal
 // --- THE CLUBS: a squad for its shape ---------------------------------------------------------------------------------------
 const cl = await page.evaluate(() => { const M = window.__M, out = [];
   for(const c of M.CLUBS){ const sq = M.clubSquadGen(c).slice(1, 9), sl = M.slotsFor('G', c.form, 'atk');
-    const mis = sq.map((e, i) => M.posFit(M.fitPos(e), M.spotFit(sl[i]))).filter(f => f !== 'main').length;
-    if(M.FORMS[c.form].length === 4 || mis) out.push(c.id + ' ' + c.form + ' ' + sq.map(e => M.natPos(e)).join(' ') + (mis ? ' (' + mis + ' off)' : '')); }
+    const off = sq.map((e, i) => M.posFit(M.fitPos(e), M.spotFit(sl[i])) !== 'main'), mis = off.filter((f, i) => f && !sq[i].star).length, sm = off.filter((f, i) => f && sq[i].star).length;
+    // (v201: a star in a second position of his isn't the squad's making -- he's placed with his club's other stars, as
+    // many in their own positions as can be: classic-exh)
+    if(M.FORMS[c.form].length === 4 || mis) out.push(c.id + ' ' + c.form + ' ' + sq.map(e => M.natPos(e)).join(' ') + (mis ? ' (' + mis + ' off)' : '') + (sm ? ' [a star in a second position]' : '')); }
   return out; });
 info('the clubs in four lines: ' + cl.join(' | '));
 ok(cl.filter(x => /\(/.test(x)).length <= 1 && cl.filter(x => / 3-1-3-1 | 3-2-1-2 | 3-1-2-2 | 3-2-2-1 | 4-1-2-1 /.test(x)).length === 5
@@ -168,14 +170,17 @@ ok(kept.pos === 'anchor DM, shadow AM, playmaker AM', 'a career saved before: a 
 const LN = { CB: 0, FB: 0, DM: 1, CM: 1, AM: 1, WM: 1, W: 2, ST: 2 }, far = kept.moved.split(' ').filter(m => { const [a, b] = m.split('>'); return Math.abs(LN[a] - LN[b]) > 1; });
 ok(kept.form === '3-4-1' && /^CB>CB CB>CB /.test(kept.moved) && /ST>ST/.test(kept.moved) && !far.length && kept.same,
   'a career kept in 2-4-2: it plays 3-4-1, its centre-backs and a striker where they were, nobody more than a line from his old spot, the same eight without the ball (' + kept.moved + ')');
-const ex = await page.evaluate(() => { const M = window.__M, c = M.CLUBS.find(k => k.id === 'TOT'), sq = M.clubSquadGen(c);
-  // Tottenham's side as the exhibition kept it in 2-3-3 (CB CB WM CM WM W ST W): the same men, in their old spots
-  const order = [1, 2, 3, 4, 5, 6, 7, 8], was = ['CB', 'CB', 'WM', 'CM', 'WM', 'W', 'ST', 'W'];
-  localStorage.setItem('ft_clubsq', JSON.stringify({ TOT: { squad: sq, lineup: { gk: 0, atk: order.slice(), def: order.slice() }, form: '2-3-3', dform: '3-3-2' } }));
-  const s = M.clubSide('TOT'), sp = M.slotsFor('G', s.form, 'atk').map(x => x.pos); localStorage.removeItem('ft_clubsq');
-  return { form: s.form, moved: order.map((si, i) => was[i] + '>' + sp[s.lineup.atk.indexOf(si)]).join(' ') }; });
-info('an exhibition side kept in 2-3-3: read as ' + ex.form + ', its men ' + ex.moved);
-ok(ex.form === '3-2-3' && /^CB>CB CB>CB /.test(ex.moved) && / W>W ST>ST W>W$/.test(ex.moved), 'an exhibition side kept in 2-3-3: it plays 3-2-3, its front three and centre-backs where they were (' + ex.moved + ')');
+const ex = await page.evaluate(() => { const M = window.__M;
+  // a side as the exhibition kept it in 2-3-3 (CB CB WM CM WM W ST W): the same men, in their old spots. (v201: Brighton's,
+  // a side with no star in it, where it was Tottenham's -- see the star below)
+  const kept = id => { const sq = M.clubSquadGen(M.CLUBS.find(k => k.id === id)), order = [1, 2, 3, 4, 5, 6, 7, 8], was = ['CB', 'CB', 'WM', 'CM', 'WM', 'W', 'ST', 'W'];
+    localStorage.setItem('ft_clubsq', JSON.stringify({ [id]: { squad: sq, lineup: { gk: 0, atk: order.slice(), def: order.slice() }, form: '2-3-3', dform: '3-3-2' } }));
+    const s = M.clubSide(id), sp = M.slotsFor('G', s.form, 'atk').map(x => x.pos), at = i => sp[s.lineup.atk.indexOf(i)], k = sq.findIndex(e => e.star); localStorage.removeItem('ft_clubsq');
+    return { form: s.form, moved: order.map((si, i) => was[i] + '>' + at(si)).join(' '), star: k > 0 ? sq[k].name + ' ' + was[k - 1] + '>' + at(k) : '' }; };
+  return { bha: kept('BHA'), tot: kept('TOT') }; });
+info('an exhibition side kept in 2-3-3: Brighton\'s read as ' + ex.bha.form + ', its men ' + ex.bha.moved + '; Tottenham\'s ' + ex.tot.moved);
+ok(ex.bha.form === '3-2-3' && /^CB>CB CB>CB /.test(ex.bha.moved) && / W>W ST>ST W>W$/.test(ex.bha.moved), 'an exhibition side kept in 2-3-3: it plays 3-2-3, its front three and centre-backs where they were (' + ex.bha.moved + ')');
+ok(ex.tot.star === 'Soo-min Hyuk WM>W', '...and a star in it to the spot nearest his old one that he can play: Tottenham\'s Soo-min Hyuk, a wide runner, from a wide midfielder\'s spot to a winger\'s, not into the middle (' + ex.tot.star + ')');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

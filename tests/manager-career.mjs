@@ -740,11 +740,17 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   out.sync = [mc0.name + ' > ' + mc1.name, mp1.sp, mp1.age - age0, M.STAR_KEYS.every((k, i) => st1[k] === ms.v[i] / 2), mc1.players.length === parisN, d.roster.includes(vp) && vp.sp === 4].join(' | ');
   const again = mp1.id + ':' + mp1.age; M.mgMigrate(d); out.syncOnce = (where('mancala')[1].id + ':' + where('mancala')[1].age) === again;
   Object.assign(ms, keepM); Object.assign(vs, keepV);
+  // (v201) a career from before v200: its stars as v200 had them -- Mancala then a ball-winner with Nagala Kone's
+  // numbers (a wing-back on the sheet since: he becomes one), Luka Magic as he was (four years on in his career: kept)
+  const [, mp2] = where('mancala'), [, lp] = where('magic'); M.mgMigrate(d);
+  for(const p of [mp2, lp]){ delete p.starSig; delete p.starAge; } mp2.style = 'ballwinner'; mp2.subRole = 'DM'; mp2.role = 'MID'; const lAge = lp.age += 4;
+  M.mgMigrate(d); out.pre200 = [mp2.style, mp2.subRole, mp2.role, lp.age === lAge].join(' ');
   return out; });
 info('the stars in a career: ' + r.ovr);
-ok(r.at && r.made, 'a new career: the fifteen stars at their clubs (Livermoore, Chaelsae, Mancunian City and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
+ok(r.at && r.made, 'a new career: the thirty-three stars at their clubs (the Premier League\'s counterparts and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
+ok(r.pre200 === 'wingback FB DEF true', 'a career from before v200 (v201): a star changed on the sheet since is as he is now (Mancala a wing-back: ' + r.pre200 + '), one unchanged kept as his career made him');
 ok(r.sync === 'Madrid Royale > Paris Eiffel | 5 | 2 | true | true | true' && r.syncOnce, 'a star changed on the sheet (v200): a saved career has him as he is now when it\'s loaded -- ' + r.sync + ' (club, skill stars, years older, numbers, in for a man at his new club, one of yours changed and still yours) -- once');
-ok(r.kept && r.mig === r.n && r.n === 15 && r.once && r.v198 === 'Van Veers / Chaelsae', 'a club from abroad\'s new squad keeps its stars; a career from before gets all fifteen when it\'s loaded, once; one from v198 has Van Veers by his name now and gets Nagala Kone at Chaelsae (' + r.v198 + ')');
+ok(r.kept && r.mig === r.n && r.n === 33 && r.once && r.v198 === 'Van Veers / Chaelsae', 'a club from abroad\'s new squad keeps its stars; a career from before gets all thirty-three when it\'s loaded, once; one from v198 has Van Veers by his name now and gets Nagala Kone at Chaelsae (' + r.v198 + ')');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
 ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }

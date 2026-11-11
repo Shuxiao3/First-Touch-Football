@@ -2043,14 +2043,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Vallera is Madrid Royale, and so on down the list: their new levels come with the next season's squads) and the
       other two made; one from v196 keeps its eleven as they are and gets Seville FC. An exhibition has them too
       (v198: see **Exhibition**).
-    - **The stars** (v198): the fifteen men made by hand are at their clubs in a career, once -- a new career's
-      from the start, one from before from when it's loaded: Van Veers at Livermoore, Nagala Kone at Chaelsae (v199),
-      Igor Viking and Kyle da Bastion at Mancunian City, the other eleven at the clubs from abroad (as in an
-      exhibition). A saved career knows each by the name the list has for him now (v199: Van Vander's Van Veers).
+    - **The stars** (v198): the thirty-three men made by hand (v201) are at their clubs in a career, once -- a new
+      career's from the start, one from before from when it's loaded: the Premier League's at their clubs' career
+      counterparts (Arsenio, Ashton Town, Chaelsae, Livermoore, Mancunian City, Mancunian United, Tot in Haem Spurns),
+      the rest at the clubs from abroad (as in an exhibition). A saved career knows each by the name the list has for him now (v199: Van Vander's Van Veers).
       His skill stars are the sheet's at any age (v200). A star changed on the sheet reaches a saved career too when
       it's loaded (v200): his name, numbers (his ceiling too), age (by as much as it changed), position, playstyle and
       skill stars -- and his club, if he's still a computer club's or a free agent (one you've signed stays yours). Each is in for the weakest man
-      in his position there, as he was made: his numbers (his ceiling too), his age, his rating (Messiah Petita 94 in
+      in his position there -- else for a man the club can spare, in a position it has more men in than its shapes
+      need (v201: so every club still has a man for each of its spots) -- as he was made: his numbers (his ceiling too), his age, his rating (Messiah Petita 94 in
       the game's own terms, 99 on his card), his playstyle **UNIQUE**. A club from abroad keeps its stars through its
       new squad each season. From there a star's career is anyone's: he ages, he can be bought and sold (those at home;
       the clubs from abroad aren't on the market), and in time he retires.
@@ -2821,13 +2822,19 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   them in it is billed CONTINENTAL CHAMPIONS CUP. Madrid Royale and Catalunya Garnet are rated 85, Paris Eiffel 83,
   Bohemia Munich 81, Seville FC 68. While the full list is open, the two cards fold their kits away to give it room
   on a phone's short screen.
-- **The stars (v198)**, fifteen men made by hand, play for their clubs: Messiah Petita, Yemen and Anders Nesta for
-  Catalunya Garnet; Christian Star, Luka Magic and Mancala for Madrid Royale; Michaelangelo Donnatello and Needemeyer
-  for Paris Eiffel; Le CutInside for Bohemia Munich; Paul Madreen for Milan Red; Jobe Bowling for Dortmund Yellow; Van
-  Veers for Liverpool; Nagala Kone for Chelsea (v199); Igor Viking and Kyle da Bastion for Manchester City. Each is in for the man in his position, in
-  that man's shirt, with his own numbers exactly as he was made (his card from 79 to 99), and his playstyle reads
+- **The stars (v198)**, thirty-three men made by hand (v201; fifteen before), play for their clubs. In the Champions
+  Cup: Messiah Petita, Yemen, Anders Nesta and Hernan Javier for Catalunya Garnet; Christian Star, Luka Magic, Mancala
+  and Zacary Zayn for Madrid Royale; Le CutInside, Bobby Lebowski and Tomas Lamb for Bohemia Munich; Michaelangelo
+  Donnatello and Needemeyer for Paris Eiffel; Paul Madreen and Ruby Ganga for Milan Red; Jobe Bowling and Yanet Audi
+  for Dortmund Yellow; Paolo Zeevata and Lorena Parlor for Bergamont Juvenile; Greasy Man for Madrid Athletics; Lorry
+  Maddsen for Milan Centrale. In the Premier League: Torrent Hendrinks and Paul Worra for Arsenal; Paul Jolla for
+  Aston Villa; Nagala Kone and Alan Haggerd for Chelsea; Van Veers and Mo Celeste for Liverpool; Igor Hollinger and
+  Kyle da Bastion for Manchester City; Ryan Kane and Peter Sole for Manchester United; Soo-min Hyuk for Tottenham. A
+  club's stars are placed together (v201), each in for the man in a spot of his own position where there's one for
+  him, else one of his second positions -- as many at home as can be, none out of position -- in that man's shirt,
+  with his own numbers exactly as he was made, and his playstyle reads
   **UNIQUE**: underneath he plays like the style he was made on (a false nine, a complete forward, a ball-winner...),
-  which is what his side asks of him. Everyone else at Liverpool, Chelsea and Manchester City is the man he was; a side
+  which is what his side asks of him. Everyone else at the Premier League's clubs is the man he was; a side
   of theirs you'd kept from before gets its stars too, each in for the man he replaces, and a kept side's stars are as
   the list has them now (v199: a new name, new numbers; a star a club no longer has gives it back the man he was in
   for). They're made on the Signature Players sheet, skill stars and all (v200: each star's skill stars are his
@@ -2850,8 +2857,8 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   | 3-2-1-2 | Brighton *(v127; 3-4-1 before)* |
   | 3-1-2-2 | Hull City *(v127; 2-4-2 before)* |
   | 3-2-2-1 | Chelsea *(v127; 3-4-1 before)* |
-  | 4-2-2 | Brentford, Nottingham Forest |
-  | 4-3-1 | Crystal Palace, Ipswich Town, Manchester United |
+  | 4-2-2 | Brentford, Manchester United *(v201; 4-3-1 before: two in the middle for its two stars)*, Nottingham Forest |
+  | 4-3-1 | Crystal Palace, Ipswich Town |
   | 4-1-3 | Manchester City |
   | 4-1-2-1 | Sunderland *(v127; 4-3-1 before)* |
 
@@ -3006,6 +3013,18 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v201: thirty-three stars.** The Signature Players sheet's every star is in: eighteen new -- Bobby Lebowski, Torrent
+  Hendrinks, Ryan Kane, Mo Celeste, Alan Haggerd, Soo-min Hyuk, Peter Sole, Paul Worra, Greasy Man, Paolo Zeevata, Yanet
+  Audi, Paul Jolla, Tomas Lamb, Ruby Ganga, Lorry Maddsen, Lorena Parlor, Zacary Zayn and Hernan Javier -- and the
+  fifteen as the sheet has them now: Mancala a wing-back of his own, Igor Viking Igor Hollinger, and skill move levels
+  set (Needemeyer, Yemen and Mancala five; Igor Hollinger and Nagala Kone one). A club's stars are placed together, as
+  many in their own positions as can be (28 of the 33; the other 5 in a second position of theirs, none out of
+  position), and Manchester United line up 4-2-2 for Ryan Kane and Peter Sole. In a career a star comes in for the weakest
+  man in his position at his club, else for one the club can spare -- not, as before, the weakest of his line, which
+  could leave a club with two stars in midfield without a man for one of its midfield spots. A saved career gets the
+  new ones when it's loaded and has the changed ones as they are now -- one from before v200 too, its stars taken as
+  v200 had them.
+  Names as on the sheet, the first and last words capitalised. See **The stars**.
 - **v200: the stars' skill stars, and the sheet's changes everywhere.** Each star's skill stars (the skill moves he
   can do) are his own, set on the Signature Players sheet; each keeps what the game had drawn for him till they're
   changed there (Messiah Petita, Michaelangelo Donnatello, Le CutInside, Anders Nesta and Needemeyer four; Christian

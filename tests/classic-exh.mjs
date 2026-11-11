@@ -115,10 +115,15 @@ const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)
   out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
   return out; })()`);
 info('the squads: ' + JSON.stringify(sq));
-const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE'.split(',');   // (v199: Nagala Kone at Chelsea)
+const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE,lebowski:BOH,hendrinks:ARS,kane:MUN,celeste:LIV,haggerd:CHE,hyuk:TOT,sole:MUN,worra:ARS,greasy:ATH,zeevata:JUV,audi:DOR,jolla:AVL,lamb:BOH,ganga:RED,maddsen:CEN,parlor:JUV,zayn:ROY,javier:CAT'.split(',');   // (v199: Nagala Kone at Chelsea; v201: the sheet's thirty-three)
 const got = sq.stars.split(',');
-ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 15 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
-  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fifteen stars each at his club, UNIQUE, his numbers and skill stars as made; the Premier League\'s men otherwise as they were (Liverpool\'s, Chelsea\'s and City\'s stars in for theirs, in their shirts)');
+ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 33 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
+  'the squads: 32 clubs of fourteen, nobody\'s name twice; the thirty-three stars each at his club, UNIQUE, his numbers and skill stars as made; the Premier League\'s men otherwise as they were (its clubs\' stars in for theirs, in their shirts)');
+// (v201) a club's stars placed together: as many in their own positions as can be -- Madrid Royale's four, Catalunya
+// Garnet's four, each club's -- none out of position, and on a tie a man in his own line (Arsenal's anchor in midfield)
+const fit = await K(`(()=>{ const out={own:0,second:0,out:0,worra:''}; for(const c of EXH_CLUBS){ const sq=clubSquadGen(c), pos=POS_OF[c.form], L0=FORMS[c.form][0];
+  sq.forEach((e,i)=>{ if(!e.star||!i) return; const f=starFit(STARS.find(s=>s.key===e.star),pos[i-1],i-1,L0); out[['out','second','own'][f]]++; if(e.star==='worra') out.worra=pos[i-1]; }); } return out; })()`);
+ok(fit.out === 0 && fit.own >= 27 && fit.worra === 'CM', 'a club\'s stars placed together: ' + fit.own + ' in their own positions, ' + fit.second + ' in a second one, none out of position (Arsenal\'s anchor in midfield, not at the back: ' + fit.worra + ')');
 const keptStars = await K(`(()=>{ const saved=STARS.splice(0), plain=clubSquadGen(clubById('MCI')); STARS.push(...saved);
   const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.MCI={squad:plain, lineup:defaultLineup(), form:'4-1-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
   const s=clubSide('MCI'), at=L=>L.map((e,i)=>e&&e.star?e.name+'@'+i:'').filter(Boolean).join(','); return [at(s.squad), at(clubSquadGen(clubById('MCI')))]; })()`);
@@ -126,7 +131,7 @@ ok(keptStars[0] && keptStars[0] === keptStars[1], 'a side kept from before its s
 // (v199) a side kept with a star as he was (Liverpool's Van Vander, other numbers): he's as the list has him now (Van
 // Veers); and a star kept at a club that hasn't him now (Arsenal, say): the man he was in for is back
 const synced = await K(`(()=>{ const gl=clubSquadGen(clubById('LIV')), j=gl.findIndex(e=>e.star==='vander'), old=JSON.parse(JSON.stringify(gl));
-  old[j].name='Van Vander'; old[j].stats=Object.assign({},old[j].stats,{speed:1}); const ga=clubSquadGen(clubById('ARS')), olda=JSON.parse(JSON.stringify(ga)), k=7;
+  old[j].name='Van Vander'; old[j].stats=Object.assign({},old[j].stats,{speed:1}); const ga=clubSquadGen(clubById('ARS')), olda=JSON.parse(JSON.stringify(ga)), k=ga.findIndex((e,i)=>i>0&&!e.star);   // (a man of Arsenal's own, no star of theirs)
   olda[k]=Object.assign(JSON.parse(JSON.stringify(gl[j])),{was:ga[k].name});
   const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.LIV={squad:old, lineup:defaultLineup(), form:'3-2-3'}; o.ARS={squad:olda, lineup:defaultLineup(), form:'3-2-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
   const L=clubSide('LIV').squad[j], A=clubSide('ARS').squad[k], S=STARS.find(x=>x.key==='vander');
@@ -134,7 +139,7 @@ const synced = await K(`(()=>{ const gl=clubSquadGen(clubById('LIV')), j=gl.find
 ok(synced.liv === 'Van Veers true' && /true false$/.test(synced.ars), 'a side kept with a star as he was gets him as he is now (' + synced.liv + '); one kept with a star the club hasn\'t now gets its own man back (' + synced.ars + ')');
 await page.click('#exhGo'); await page.waitForTimeout(600);
 const m = await K(`({ score: document.getElementById('rScore').textContent.replace(/\\s+/g,' '), stars: SQUAD.R.filter(e=>e.star).map(e=>e.name+':'+styleOf(e).name) })`);
-ok(/ROY/.test(m.score) && m.stars.length === 3 && m.stars.every(x => /:Unique$/.test(x)), 'kick off against them: ' + m.score + ', their three stars in it, each UNIQUE (' + m.stars.join(', ') + ')');
+ok(/ROY/.test(m.score) && m.stars.length === 4 && m.stars.every(x => /:Unique$/.test(x)), 'kick off against them: ' + m.score + ', their four stars in it, each UNIQUE (' + m.stars.join(', ') + ')');
 await page.evaluate(() => { localStorage.removeItem('ft_clubsq'); });
 await browser.close();
 
