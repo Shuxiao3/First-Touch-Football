@@ -3147,7 +3147,7 @@
   // is and where his potential would take him -- and his age
   function careerStarPot(p){ if(p.role==='GK') return 1;
     if(p.sp==null) p.sp=starPot(starPos(p),((p.ovr||60)+(p.pot||p.ovr||60))/2,rng32(((p.seed>>>0)||p.id||1)^0x9E3779B9)()); return p.sp; }
-  function careerStars(p){ return p.role==='GK'?1:starsAt(careerStarPot(p),p.age,(p.seed>>>0)||p.id||1); }
+  function careerStars(p){ return p.role==='GK'?1:p.star&&p.sp?p.sp:starsAt(careerStarPot(p),p.age,(p.seed>>>0)||p.id||1); }   // (v200: a star's are the sheet's, at any age)
   // anyone's: a career man's, else a squad entry's
   function starsOf(x){ return x&&!x.stats&&x.pot!=null?careerStars(x):entryStars(x); }
   function starsHtml(n,plain){ n=Math.max(1,Math.min(5,n||1)); return '<span class="stars"'+(plain?'':' data-xpl="stars"')+'>'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'; }   // (v152: a man's stars say what they are when tapped -- plain: a move's, on the skill moves page)
@@ -3466,27 +3466,28 @@
   // Fourteen men made by hand on the Signature Players sheet, each as he was made there: his numbers on the sheet's 1
   // to 20 (STAR_KEYS' order; halved, the game's), his age, his position and the style he plays like (base: his habits,
   // what a side asks of him). His playstyle is shown as UNIQUE (styleOf). ex: his exhibition club, where he's in for
-  // the man in his position (starsIn); career: his club in a career (THE STARS IN A CAREER). (v199: Nagala Kone for
+  // the man in his position (starsIn); career: his club in a career (THE STARS IN A CAREER). sk: his skill stars, his
+  // own (v200: set on the sheet -- each had what the game drew for him before). sheet: his own on the sheet (its id). (v199: Nagala Kone for
   // Chelsea; Van Vander is Van Veers -- his key the one a v198 career knows him by. Mancala has Nagala Kone's numbers
   // till his own are made: they were one man in v198.)
   const STAR_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','longPass','composure','compFinal','crossing','heading',
     'slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const STARS=[
-    {key:'petita',     name:'Messiah Petita',           ex:'CAT', career:'Catalunya Garnet', pos:'ST', base:'falsenine',   age:24, v:[18,20,20,14,12,20,20,19,18,20,19,16,9,6,8,7,20,6,16,18,17,20,7,7,7,7,9,7]},
-    {key:'star',       name:'Christian Star',           ex:'ROY', career:'Madrid Royale',    pos:'ST', base:'complete',    age:26, v:[19,18,16,17,16,18,18,16,15,18,20,12,17,6,8,8,20,6,20,16,17,18,7,7,7,7,9,7]},
-    {key:'magic',      name:'Luka Magic',               ex:'ROY', career:'Madrid Royale',    pos:'CM', base:'completemid', age:27, v:[15,16,16,19,13,18,16,19,17,18,16,17,11,13,15,15,17,16,13,17,13,14,7,7,7,7,9,7]},
-    {key:'donnatello', name:'Michaelangelo Donnatello', ex:'PAR', career:'Paris Eiffel',     pos:'ST', base:'speedster',   age:27, v:[20,20,18,14,12,18,18,14,12,17,19,12,12,8,6,6,19,6,16,17,16,17,7,7,7,7,9,7]},
-    {key:'cutinside',  name:'Le CutInside',             ex:'BOH', career:'Bohemia Munich',   pos:'W', base:'invwinger',   age:28, v:[17,19,17,16,12,16,18,16,13,16,17,10,16,8,9,8,18,8,15,18,19,16,7,7,7,7,9,7]},
-    {key:'madreen',    name:'Paul Madreen',             ex:'RED', career:'Milan Red',        pos:'CB', base:'widecb',      age:27, v:[16,16,15,17,18,14,12,16,13,15,8,15,19,19,20,20,13,20,14,10,7,10,7,7,7,7,9,7]},
-    {key:'mancala',    name:'Mancala',                  ex:'ROY', career:'Madrid Royale',    pos:'DM', base:'ballwinner',  age:25, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8]},
-    {key:'yemen',      name:'Yemen',                    ex:'CAT', career:'Catalunya Garnet', pos:'W', base:'invwinger',   age:26, v:[18,19,16,14,10,18,19,17,17,16,17,16,9,6,7,7,17,10,15,17,18,17,7,7,7,7,9,7]},
-    {key:'nesta',      name:'Anders Nesta',             ex:'CAT', career:'Catalunya Garnet', pos:'CM', base:'completemid', age:28, v:[13,15,16,19,13,19,18,20,18,20,16,16,9,11,12,12,19,13,12,16,14,14,7,7,7,7,9,7]},
-    {key:'vander',     name:'Van Veers',                ex:'LIV', career:'Livermoore',       pos:'CB', base:'ballplayer',  age:27, v:[15,12,9,16,20,14,10,14,16,14,9,7,20,16,20,17,11,20,14,12,10,10,7,7,7,7,9,7]},
-    {key:'viking',     name:'Igor Viking',              ex:'MCI', career:'Mancunian City',   pos:'ST', base:'poacher',     age:22, v:[20,17,11,14,20,16,12,14,10,14,20,12,20,7,8,6,20,10,20,15,17,18,7,7,7,7,9,7]},
-    {key:'bastion',    name:'Kyle da Bastion',          ex:'MCI', career:'Mancunian City',   pos:'CM', base:'mezzala',     age:27, v:[15,14,12,17,12,18,17,17,19,16,16,19,12,8,12,11,18,13,15,20,14,15,7,7,7,7,9,7]},
-    {key:'needemeyer', name:'Needemeyer',               ex:'PAR', career:'Paris Eiffel',     pos:'W', base:'trickster',   age:25, v:[17,18,18,13,9,19,20,18,15,18,18,15,7,5,6,7,18,5,16,16,17,16,7,7,7,7,9,7]},
-    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',  pos:'CM', base:'boxtobox',    age:27, v:[16,14,15,19,13,17,15,16,15,16,17,13,15,14,16,16,17,16,17,14,15,16,7,7,7,7,9,7]},
-    {key:'kone',       name:'Nagala Kone',              ex:'CHE', career:'Chaelsae',         pos:'DM', base:'ballwinner',  age:25, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8]}];
+    {key:'petita',     name:'Messiah Petita',           ex:'CAT', career:'Catalunya Garnet', pos:'ST', base:'falsenine',   age:24, sk:4, v:[18,20,20,14,12,20,20,19,18,20,19,16,9,6,8,7,20,6,16,18,17,20,7,7,7,7,9,7], sheet:'pmwbapqn91ra'},
+    {key:'star',       name:'Christian Star',           ex:'ROY', career:'Madrid Royale',    pos:'ST', base:'complete',    age:26, sk:3, v:[19,18,16,17,16,18,18,16,15,18,20,12,17,6,8,8,20,6,20,16,17,18,7,7,7,7,9,7], sheet:'pmwbatyor6e'},
+    {key:'magic',      name:'Luka Magic',               ex:'ROY', career:'Madrid Royale',    pos:'CM', base:'completemid', age:27, sk:3, v:[15,16,16,19,13,18,16,19,17,18,16,17,11,13,15,15,17,16,13,17,13,14,7,7,7,7,9,7], sheet:'pmwbbscej38i'},
+    {key:'donnatello', name:'Michaelangelo Donnatello', ex:'PAR', career:'Paris Eiffel',     pos:'ST', base:'speedster',   age:27, sk:4, v:[20,20,18,14,12,18,18,14,12,17,19,12,12,8,6,6,19,6,16,17,16,17,7,7,7,7,9,7], sheet:'pmwbb3wfr3ws'},
+    {key:'cutinside',  name:'Le CutInside',             ex:'BOH', career:'Bohemia Munich',   pos:'W', base:'invwinger',   age:28, sk:4, v:[17,19,17,16,12,16,18,16,13,16,17,10,16,8,9,8,18,8,15,18,19,16,7,7,7,7,9,7], sheet:'pmwbc37wo6rr'},
+    {key:'madreen',    name:'Paul Madreen',             ex:'RED', career:'Milan Red',        pos:'CB', base:'widecb',      age:27, sk:1, v:[16,16,15,17,18,14,12,16,13,15,8,15,19,19,20,20,13,20,14,10,7,10,7,7,7,7,9,7], sheet:'pmwbba9bz1um'},
+    {key:'mancala',    name:'Mancala',                  ex:'ROY', career:'Madrid Royale',    pos:'DM', base:'ballwinner',  age:25, sk:2, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8], sheet:'pmancala199'},
+    {key:'yemen',      name:'Yemen',                    ex:'CAT', career:'Catalunya Garnet', pos:'W', base:'invwinger',   age:26, sk:3, v:[18,19,16,14,10,18,19,17,17,16,17,16,9,6,7,7,17,10,15,17,18,17,7,7,7,7,9,7], sheet:'pmwbccd1z5qg'},
+    {key:'nesta',      name:'Anders Nesta',             ex:'CAT', career:'Catalunya Garnet', pos:'CM', base:'completemid', age:28, sk:4, v:[13,15,16,19,13,19,18,20,18,20,16,16,9,11,12,12,19,13,12,16,14,14,7,7,7,7,9,7], sheet:'pmwbc5jz53sh'},
+    {key:'vander',     name:'Van Veers',                ex:'LIV', career:'Livermoore',       pos:'CB', base:'ballplayer',  age:27, sk:1, v:[15,12,9,16,20,14,10,14,16,14,9,7,20,16,20,17,11,20,14,12,10,10,7,7,7,7,9,7], sheet:'pmwbc92b44jf'},
+    {key:'viking',     name:'Igor Viking',              ex:'MCI', career:'Mancunian City',   pos:'ST', base:'poacher',     age:22, sk:3, v:[20,17,11,14,20,16,12,14,10,14,20,12,20,7,8,6,20,10,20,15,17,18,7,7,7,7,9,7], sheet:'pmwbaytbv6af'},
+    {key:'bastion',    name:'Kyle da Bastion',          ex:'MCI', career:'Mancunian City',   pos:'CM', base:'mezzala',     age:27, sk:2, v:[15,14,12,17,12,18,17,17,19,16,16,19,12,8,12,11,18,13,15,20,14,15,7,7,7,7,9,7], sheet:'pmwbbob961ry'},
+    {key:'needemeyer', name:'Needemeyer',               ex:'PAR', career:'Paris Eiffel',     pos:'W', base:'trickster',   age:25, sk:4, v:[17,18,18,13,9,19,20,18,15,18,18,15,7,5,6,7,18,5,16,16,17,16,7,7,7,7,9,7], sheet:'pmwbbf9q71st'},
+    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',  pos:'CM', base:'boxtobox',    age:27, sk:3, v:[16,14,15,19,13,17,15,16,15,16,17,13,15,14,16,16,17,16,17,14,15,16,7,7,7,7,9,7], sheet:'pmwbbzsvib2'},
+    {key:'kone',       name:'Nagala Kone',              ex:'CHE', career:'Chaelsae',         pos:'DM', base:'ballwinner',  age:25, sk:3, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8], sheet:'pmwbbu6fn5a7'}];
   const starStats=s=>{ const o={}; STAR_KEYS.forEach((k,i)=>{ o[k]=s.v[i]/2; }); return o; };
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
     'Avila','Bailey','Baird','Banda','Barros','Bastian','Beaumont','Bekele','Belov','Bergen','Bishop','Blake','Bonnet','Booth','Borg',
@@ -3588,7 +3589,7 @@
     for(const s of STARS){ if(s.ex!==club.id) continue; let at=-1;
       for(const want of STAR_NEAR[s.pos]||[]){ at=pos.findIndex((x,k)=>x===want&&!done.has(k+1)&&sq[k+1]); if(at>=0) break; }
       if(at<0) continue; const i=at+1, was=sq[i]; done.add(i);
-      const e={name:s.name, num:was.num, role:STYLES[s.base].role, style:s.base, defPers:PERS3[hashStr('ft-star-'+s.key)%3], stats:starStats(s), uniq:true, star:s.key, was:was.name};
+      const e={name:s.name, num:was.num, role:STYLES[s.base].role, style:s.base, defPers:PERS3[hashStr('ft-star-'+s.key)%3], stats:starStats(s), uniq:true, star:s.key, was:was.name, stars:s.sk};
       e.ovr=overallOf(e); sq[i]=e; }
     return sq; }
   function clubOvr(sq,li){ const xi=li?[li.gk,...(li.atk||[])].map(i=>sq[i]).filter(Boolean):sq;   // the starters (the bench doesn't count)
@@ -3612,7 +3613,7 @@
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       for(const g of gen) if(g.star&&!o.squad.some(e=>e&&e.star===g.star)){ const j=o.squad.findIndex(e=>e&&e.name===g.was); if(j>=0) o.squad[j]=JSON.parse(JSON.stringify(g)); }   // (v198: a side kept from before its stars: each in for the man he's in for)
       o.squad.forEach((e,i)=>{ if(!e||!e.star) return; const g=gen.find(x=>x.star===e.star);   // (v199: each star kept as the list has him now -- his name, numbers and style; one no longer the club's, the man he was in for back)
-        if(g) Object.assign(e,{name:g.name, style:g.style, stats:JSON.parse(JSON.stringify(g.stats)), ovr:g.ovr, uniq:true});
+        if(g) Object.assign(e,{name:g.name, style:g.style, stats:JSON.parse(JSON.stringify(g.stats)), ovr:g.ovr, uniq:true, stars:g.stars});
         else { const back=gen.find(x=>x.name===e.was)||gen[i]; if(back) o.squad[i]=JSON.parse(JSON.stringify(back)); } });
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeKept(e.style,e.role,e.stats);   // (an archetype kept under an older name: TYPE_WAS -- v143: or gone, TYPE_GONE)
         if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
@@ -18516,8 +18517,23 @@
       mgStarPut(c,mgStarMake(d,s)); W.stars[s.key]=1; } }
   function mgStarMake(d,s){ const st=starStats(s), S=STYLES[s.base], ovr=clamp(cwOverall(S.role,st),30,99);
     const p=mgNewPlayer(d,S.role,ovr,s.age,{sub:S.sub,pot:ovr});
-    Object.assign(p,{name:s.name, style:s.base, subRole:S.sub, star:s.key, uniq:true}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
+    Object.assign(p,{name:s.name, style:s.base, subRole:S.sub, star:s.key, uniq:true, sp:s.sk, starSig:starSig(s), starAge:s.age}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
     return p; }
+  // A STAR CHANGED ON THE SHEET (v200) reaches a saved career when it's loaded: his name, numbers (his ceiling too), age
+  // (by as much as it changed), position, style and skill stars -- and his club, if he's still a computer club's or a
+  // free agent (one of yours stays yours). One from before v200 is taken as he is, his skill stars the sheet's.
+  const starSig=s=>hashStr(JSON.stringify([s.name,s.ex,s.career,s.pos,s.base,s.age,s.sk,s.v]));
+  function mgStarSync(d){ const W=d.world; if(!W||!W.clubs) return;
+    const clubs=Object.values(W.clubs), lists=[d.roster||[], d.youth||[], W.free||[], ...clubs.map(c=>c.players||[])];
+    for(const s of STARS){ let L=null, p=null; for(const l of lists){ p=l.find(x=>x&&x.star===s.key)||null; if(p){ L=l; break; } } if(!p) continue;
+      const sig=starSig(s);
+      if(p.starSig==null){ p.starSig=sig; p.starAge=s.age; p.sp=s.sk; continue; }
+      if(p.starSig===sig) continue;
+      const S=STYLES[s.base], st=starStats(s), ovr=clamp(cwOverall(S.role,st),30,99);
+      Object.assign(p,{name:s.name, style:s.base, role:S.role, subRole:S.sub, uniq:true, sp:s.sk}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
+      if(p.starAge!=null&&s.age!==p.starAge) p.age=Math.max(16,p.age+s.age-p.starAge); p.starAge=s.age; p.starSig=sig;
+      const mine=L===d.roster||L===d.youth, home=clubs.find(c=>c.players===L), to=clubs.find(c=>c.name===s.career&&c.id!==d.clubId);
+      if(!mine&&to&&home!==to){ L.splice(L.indexOf(p),1); mgStarPut(to,p); } } }
   function mgStarPut(c,p){ const L=c.players, line=L.filter(x=>!x.loan&&!x.star&&x.role===p.role), same=line.filter(x=>x.subRole===p.subRole);
     const out=(same.length?same:line).sort((a,b)=>a.ovr-b.ovr)[0]; if(out) L[L.indexOf(out)]=p; else L.push(p); mgNumber(L,p); }
   const cupBest=(d,ids)=>ids.slice().sort((a,b)=>mgStrength(d,b)-mgStrength(d,a));
@@ -21150,7 +21166,7 @@
       delete d.built; delete d.decor; }
     d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
     if(!d.cup){ d.cup={s:d.season,off:true}; d.mw=d.md-1; }   // (a career from before the cups: they start with its next season)
-    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgStarsIn(d); mgStarNames(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars; v199: by their names now)
+    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgStarsIn(d); mgStarNames(d); mgStarSync(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars; v199: by their names now; v200: as the sheet has them)
     delete d.clHold;   // (v196's holders: no place of their own from v197)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     if(d.div&&d.rival==null) mgRivalPick(d); if(d.div&&!d.potm) potmSnap(d);   // (a career from before v104: a rival, and the month from now)

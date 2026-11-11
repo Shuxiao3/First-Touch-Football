@@ -721,7 +721,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   const where = k => { for(const c of Object.values(W.clubs)){ const p = c.players.find(x => x.star === k); if(p) return [c, p]; } return [null, null]; };
   out.at = E.map(s => (where(s.key)[0] || {}).name || '-').join(',') === E.map(s => s.career).join(',');
   out.made = E.every(s => { const [c, p] = where(s.key), st = M.devUnpack(p.at);
-    return p.uniq && M.styleOf(p).name === 'Unique' && p.style === s.base && p.age === s.age && p.pot === p.ovr && p.at === p.cl && c.players.length === 15 && M.STAR_KEYS.every((k, i) => st[k] === s.v[i] / 2); });
+    return p.uniq && M.styleOf(p).name === 'Unique' && p.style === s.base && p.age === s.age && p.pot === p.ovr && p.at === p.cl && p.sp === s.sk && c.players.length === 15 && M.STAR_KEYS.every((k, i) => st[k] === s.v[i] / 2); });
   out.ovr = E.map(s => s.name + ' ' + where(s.key)[1].ovr).join(', ');
   const ids = () => E.map(s => (where(s.key)[1] || {}).id).join(), before = ids();
   M.mgEuro(d, true); out.kept = ids() === before && W.euro.every(id => W.clubs[id].players.length === 15);
@@ -730,9 +730,20 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   // a career from v198: Van Veers as Van Vander, no Nagala Kone -- loaded, he's Van Veers and Nagala Kone's at Chaelsae
   where('vander')[1].name = 'Van Vander'; const [kc, kp] = where('kone'); kc.players.splice(kc.players.indexOf(kp), 1); delete W.stars.kone;
   M.mgMigrate(d); out.v198 = where('vander')[1].name + ' / ' + ((where('kone')[0] || {}).name || '-');
+  // (v200) a star changed on the sheet: loaded, a saved career has him as he is now -- numbers, skill stars, age (by as
+  // much as it changed), club; one of yours (Van Veers signed) takes the change but stays yours
+  const ms = E.find(x => x.key === 'mancala'), vs = E.find(x => x.key === 'vander'), keepM = JSON.parse(JSON.stringify(ms)), keepV = JSON.parse(JSON.stringify(vs));
+  const [mc0, mp0] = where('mancala'), age0 = mp0.age, [vc, vp] = where('vander'); vc.players.splice(vc.players.indexOf(vp), 1); d.roster.push(vp);
+  Object.assign(ms, { v: ms.v.map(x => Math.min(20, x + 1)), sk: 5, career: 'Paris Eiffel', age: ms.age + 2 }); Object.assign(vs, { sk: 4, career: 'Mancunian City' });
+  const parisN = Object.values(W.clubs).find(c => c.name === 'Paris Eiffel').players.length;   // (its squad as it is: he's in for a man)
+  M.mgMigrate(d); const [mc1, mp1] = where('mancala'), st1 = M.devUnpack(mp1.at);
+  out.sync = [mc0.name + ' > ' + mc1.name, mp1.sp, mp1.age - age0, M.STAR_KEYS.every((k, i) => st1[k] === ms.v[i] / 2), mc1.players.length === parisN, d.roster.includes(vp) && vp.sp === 4].join(' | ');
+  const again = mp1.id + ':' + mp1.age; M.mgMigrate(d); out.syncOnce = (where('mancala')[1].id + ':' + where('mancala')[1].age) === again;
+  Object.assign(ms, keepM); Object.assign(vs, keepV);
   return out; });
 info('the stars in a career: ' + r.ovr);
 ok(r.at && r.made, 'a new career: the fifteen stars at their clubs (Livermoore, Chaelsae, Mancunian City and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
+ok(r.sync === 'Madrid Royale > Paris Eiffel | 5 | 2 | true | true | true' && r.syncOnce, 'a star changed on the sheet (v200): a saved career has him as he is now when it\'s loaded -- ' + r.sync + ' (club, skill stars, years older, numbers, in for a man at his new club, one of yours changed and still yours) -- once');
 ok(r.kept && r.mig === r.n && r.n === 15 && r.once && r.v198 === 'Van Veers / Chaelsae', 'a club from abroad\'s new squad keeps its stars; a career from before gets all fifteen when it\'s loaded, once; one from v198 has Van Veers by his name now and gets Nagala Kone at Chaelsae (' + r.v198 + ')');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });

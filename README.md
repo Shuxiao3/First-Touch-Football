@@ -2046,7 +2046,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **The stars** (v198): the fifteen men made by hand are at their clubs in a career, once -- a new career's
       from the start, one from before from when it's loaded: Van Veers at Livermoore, Nagala Kone at Chaelsae (v199),
       Igor Viking and Kyle da Bastion at Mancunian City, the other eleven at the clubs from abroad (as in an
-      exhibition). A saved career knows each by the name the list has for him now (v199: Van Vander's Van Veers). Each is in for the weakest man
+      exhibition). A saved career knows each by the name the list has for him now (v199: Van Vander's Van Veers).
+      His skill stars are the sheet's at any age (v200). A star changed on the sheet reaches a saved career too when
+      it's loaded (v200): his name, numbers (his ceiling too), age (by as much as it changed), position, playstyle and
+      skill stars -- and his club, if he's still a computer club's or a free agent (one you've signed stays yours). Each is in for the weakest man
       in his position there, as he was made: his numbers (his ceiling too), his age, his rating (Messiah Petita 94 in
       the game's own terms, 99 on his card), his playstyle **UNIQUE**. A club from abroad keeps its stars through its
       new squad each season. From there a star's career is anyone's: he ages, he can be bought and sold (those at home;
@@ -2827,7 +2830,8 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   which is what his side asks of him. Everyone else at Liverpool, Chelsea and Manchester City is the man he was; a side
   of theirs you'd kept from before gets its stars too, each in for the man he replaces, and a kept side's stars are as
   the list has them now (v199: a new name, new numbers; a star a club no longer has gives it back the man he was in
-  for). They're made on the Signature Players sheet. See **The stars**.
+  for). They're made on the Signature Players sheet, skill stars and all (v200: each star's skill stars are his
+  own, from the sheet -- before, the game drew them like anyone's). See **The stars**.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
   Your team wears its home kit. The opponent wears theirs too, unless the shirts are too alike to
@@ -3002,6 +3006,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v200: the stars' skill stars, and the sheet's changes everywhere.** Each star's skill stars (the skill moves he
+  can do) are his own, set on the Signature Players sheet; each keeps what the game had drawn for him till they're
+  changed there (Messiah Petita, Michaelangelo Donnatello, Le CutInside, Anders Nesta and Needemeyer four; Christian
+  Star, Luka Magic, Yemen, Igor Viking, Jobe Bowling and Nagala Kone three; Mancala and Kyle da Bastion two; Paul
+  Madreen and Van Veers one). In a career they're his at any age. A star changed on the sheet now reaches a saved
+  career when it's loaded -- his name, numbers, age, position, playstyle, skill stars, and his club unless you've
+  signed him -- as well as exhibitions and new careers. Each star knows his own entry on the sheet. See **The stars**.
 - **v199: Nagala Kone, and Van Veers.** Nagala Kone, a holding midfielder off the Signature Players sheet, plays
   for Chelsea (Chaelsae in a career), in for the man in his position; a saved career gets him when it's loaded. Van
   Vander is Van Veers, as the sheet has him: a saved career renames him, and a side kept in an exhibition gets each of

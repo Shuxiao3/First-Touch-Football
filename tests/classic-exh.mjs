@@ -109,7 +109,7 @@ ok(tabs === 'PREMIER LEAGUE*,CHAMPIONS CUP' && plN === 20 && ccIds === 'JUV,BOH,
   'the picker: the Premier League\'s twenty and the Champions Cup\'s twelve a tab each; Madrid Royale picked (' + roy.meta + '), the match billed "' + bill.split(' · ').slice(0, 2).join(' · ') + '"');
 const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)]);
   const names=all.flatMap(([c,s])=>s.map(e=>e.name)); out.n=names.length; out.dup=names.length-new Set(names).size;
-  out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&STAR_KEYS.every((k,i)=>e.stats[k]===S.v[i]/2)?'ok':'bad'); })).join(',');
+  out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&e.stars===S.sk&&entryStars(e)===S.sk&&STAR_KEYS.every((k,i)=>e.stats[k]===S.v[i]/2)?'ok':'bad'); })).join(',');   // (v200: his skill stars the sheet's)
   const saved=STARS.splice(0), plain=CLUBS.map(c=>clubSquadGen(c)); STARS.push(...saved);   // (the Premier League's squads without them)
   out.same=CLUBS.every((c,ci)=>{ const a=plain[ci], b=clubSquadGen(c); return a.length===b.length&&a.every((e,i)=>b[i].star?b[i].was===e.name&&b[i].num===e.num:b[i].name===e.name&&b[i].ovr===e.ovr&&b[i].style===e.style); });
   out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
@@ -118,7 +118,7 @@ info('the squads: ' + JSON.stringify(sq));
 const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE'.split(',');   // (v199: Nagala Kone at Chelsea)
 const got = sq.stars.split(',');
 ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 15 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
-  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fifteen stars each at his club, UNIQUE, his numbers as made; the Premier League\'s men otherwise as they were (Liverpool\'s, Chelsea\'s and City\'s stars in for theirs, in their shirts)');
+  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fifteen stars each at his club, UNIQUE, his numbers and skill stars as made; the Premier League\'s men otherwise as they were (Liverpool\'s, Chelsea\'s and City\'s stars in for theirs, in their shirts)');
 const keptStars = await K(`(()=>{ const saved=STARS.splice(0), plain=clubSquadGen(clubById('MCI')); STARS.push(...saved);
   const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.MCI={squad:plain, lineup:defaultLineup(), form:'4-1-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
   const s=clubSide('MCI'), at=L=>L.map((e,i)=>e&&e.star?e.name+'@'+i:'').filter(Boolean).join(','); return [at(s.squad), at(clubSquadGen(clubById('MCI')))]; })()`);
