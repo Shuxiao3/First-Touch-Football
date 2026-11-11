@@ -89,6 +89,44 @@ await page.click('#exhTac'); await page.waitForTimeout(300);
 await page.click('#mtacBody [data-mtdrop="style"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtstyle="gegen"]'); await page.waitForTimeout(80);
 const own = await page.evaluate(() => { const o = JSON.parse(localStorage.getItem('ft_clubsq') || '{}'); return { has: 'style' in (o.LIV || {}), style: window.__K.ev('TAC.G.style') }; });
 ok(own.style === 'gegen' && !own.has, 'set back to the club\'s own way, nothing\'s kept as a change: it\'s the club\'s again');
+
+// THE CONTINENTAL CHAMPIONS CUP'S CLUBS AND THE STARS (v198): the picker's two lists, a tab each -- the Premier League's
+// twenty and the Champions Cup's twelve, by name -- a Champions Cup club on the setup screen (the match billed as one);
+// each of their men named from his country's names (nobody's name twice in the game); the fourteen stars each in his
+// club's squad in for the man in his position, in his shirt, his numbers as he was made (halved), his playstyle UNIQUE;
+// the Premier League's squads otherwise as they were; a side kept from before its stars gets them, each in for his man
+await page.click('#mtacOv .bpTopBack'); await page.waitForTimeout(200);
+await page.click('#exhSideR .exhClub'); await page.waitForTimeout(150);
+const tabs = await page.$$eval('#exhGrid .exhComp', bs => bs.map(b => b.textContent + (b.classList.contains('on') ? '*' : '')).join(','));
+const plN = await page.$$eval('#exhGrid .exhChip', bs => bs.length);
+await page.click('#exhGrid [data-comp="cc"]'); await page.waitForTimeout(150);
+const ccIds = await page.$$eval('#exhGrid .exhChip', bs => bs.map(b => b.dataset.id).join(','));
+await page.click('#exhGrid [data-id="ROY"]'); await page.waitForTimeout(150);
+const roy = await card('R'), bill = (await page.textContent('#exhLeague')).trim();
+info('the picker: ' + JSON.stringify({ tabs, plN, ccIds, roy, bill }));
+ok(tabs === 'PREMIER LEAGUE*,CHAMPIONS CUP' && plN === 20 && ccIds === 'JUV,BOH,CAT,DOR,IST,LIS,ATH,ROY,CEN,RED,PAR,SEV'
+   && roy.name === 'Madrid Royale' && /^ROY · OVR \d+ · 3-1-3-1 · /.test(roy.meta) && roy.style === 'CONTROL POSSESSION' && /^CONTINENTAL CHAMPIONS CUP · 2026\/27/.test(bill),
+  'the picker: the Premier League\'s twenty and the Champions Cup\'s twelve a tab each; Madrid Royale picked (' + roy.meta + '), the match billed "' + bill.split(' · ').slice(0, 2).join(' · ') + '"');
+const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)]);
+  const names=all.flatMap(([c,s])=>s.map(e=>e.name)); out.n=names.length; out.dup=names.length-new Set(names).size;
+  out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&STAR_KEYS.every((k,i)=>e.stats[k]===S.v[i]/2)?'ok':'bad'); })).join(',');
+  const saved=STARS.splice(0), plain=CLUBS.map(c=>clubSquadGen(c)); STARS.push(...saved);   // (the Premier League's squads without them)
+  out.same=CLUBS.every((c,ci)=>{ const a=plain[ci], b=clubSquadGen(c); return a.length===b.length&&a.every((e,i)=>b[i].star?b[i].was===e.name&&b[i].num===e.num:b[i].name===e.name&&b[i].ovr===e.ovr&&b[i].style===e.style); });
+  out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
+  return out; })()`);
+info('the squads: ' + JSON.stringify(sq));
+const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR'.split(',');
+const got = sq.stars.split(',');
+ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 14 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
+  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fourteen stars each at his club, UNIQUE, his numbers as made; the Premier League\'s men otherwise as they were (Liverpool\'s and City\'s stars in for theirs, in their shirts)');
+const keptStars = await K(`(()=>{ const saved=STARS.splice(0), plain=clubSquadGen(clubById('MCI')); STARS.push(...saved);
+  const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.MCI={squad:plain, lineup:defaultLineup(), form:'4-1-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
+  const s=clubSide('MCI'), at=L=>L.map((e,i)=>e&&e.star?e.name+'@'+i:'').filter(Boolean).join(','); return [at(s.squad), at(clubSquadGen(clubById('MCI')))]; })()`);
+ok(keptStars[0] && keptStars[0] === keptStars[1], 'a side kept from before its stars (City\'s) gets them, each in for the man he replaces: ' + keptStars[0]);
+await page.click('#exhGo'); await page.waitForTimeout(600);
+const m = await K(`({ score: document.getElementById('rScore').textContent.replace(/\\s+/g,' '), stars: SQUAD.R.filter(e=>e.star).map(e=>e.name+':'+styleOf(e).name) })`);
+ok(/ROY/.test(m.score) && m.stars.length === 3 && m.stars.every(x => /:Unique$/.test(x)), 'kick off against them: ' + m.score + ', their three stars in it, each UNIQUE (' + m.stars.join(', ') + ')');
+await page.evaluate(() => { localStorage.removeItem('ft_clubsq'); });
 await browser.close();
 
 // ON A PHONE: TACTICS, the screen and its KICK OFF on it, a tap kicks off

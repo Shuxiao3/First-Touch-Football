@@ -2041,7 +2041,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       else. A club in the leagues with one of their letters keeps them (the club from abroad takes others), and none
       made since takes theirs. A career from before v196 has its ten old clubs from abroad renamed in place (Inter
       Vallera is Madrid Royale, and so on down the list: their new levels come with the next season's squads) and the
-      other two made; one from v196 keeps its eleven as they are and gets Seville FC.
+      other two made; one from v196 keeps its eleven as they are and gets Seville FC. An exhibition has them too
+      (v198: see **Exhibition**).
+    - **The stars** (v198): the fourteen men made by hand are at their clubs in a career, once -- a new career's
+      from the start, one from before from when it's loaded: Van Vander at Livermoore, Igor Viking and Kyle da Bastion
+      at Mancunian City, the other eleven at the clubs from abroad (as in an exhibition). Each is in for the weakest man
+      in his position there, as he was made: his numbers (his ceiling too), his age, his rating (Messiah Petita 94 in
+      the game's own terms, 99 on his card), his playstyle **UNIQUE**. A club from abroad keeps its stars through its
+      new squad each season. From there a star's career is anyone's: he ages, he can be bought and sold (those at home;
+      the clubs from abroad aren't on the market), and in time he retires.
     - **Every round is on a Wednesday**, in the league week its calendar says: the Continental Champions Cup's six group games
       in weeks 4, 6, 8, 10, 12 and 14, its quarter-finals, semi-finals and final in 18, 21 and 26; the Coco Cup's six
       rounds in weeks 5, 9, 13, 15, 19 and 22; the Fashion Cup's five in 7, 11, 17, 20 and 24 -- none in the league's
@@ -2795,9 +2803,28 @@ mentions them (v159: it ships as an iPhone app); the tests drive it with them.
 ## Exhibition
 
 **EXHIBITION** opens a match setup before kick-off. Pick **your team** and the **opponent** from the
-2026/27 Premier League (◀ ▶ step through the clubs; tap a club for the full list), then pick the
+2026/27 Premier League or the Continental Champions Cup (◀ ▶ step through the clubs, the Premier League's and then
+the Champions Cup's; tap a club for the full list, a tab each: PREMIER LEAGUE and CHAMPIONS CUP), then pick the
 player **you control** from your team's eight outfielders (a striker by default; switching clubs keeps you
 in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves.
+
+- **The Continental Champions Cup's twelve (v198)** are the career's clubs from abroad: Bergamont Juvenile, Bohemia
+  Munich, Catalunya Garnet, Dortmund Yellow, Istanbul FC, Lisbon FC, Madrid Athletics, Madrid Royale, Milan Centrale,
+  Milan Red, Paris Eiffel and Seville FC, in their career colours and letters, each in a shape and a way of playing of
+  its own (Madrid Royale 3-1-3-1 CONTROL POSSESSION, Catalunya Garnet 3-2-3 CONTROL POSSESSION, Bohemia Munich 3-2-3
+  GEGENPRESS, Paris Eiffel 4-1-3 FLUID COUNTER, Madrid Athletics 4-2-2 DIRECT COUNTER, and so on) and made at their
+  career level, their men named from their own countries' names (nobody's name is used twice). A match with one of
+  them in it is billed CONTINENTAL CHAMPIONS CUP. Madrid Royale and Catalunya Garnet are rated 85, Paris Eiffel 83,
+  Bohemia Munich 81, Seville FC 68. While the full list is open, the two cards fold their kits away to give it room
+  on a phone's short screen.
+- **The stars (v198)**, fourteen men made by hand, play for their clubs: Messiah Petita, Yemen and Anders Nesta for
+  Catalunya Garnet; Christian Star, Luka Magic and Mancala for Madrid Royale; Michaelangelo Donnatello and Needemeyer
+  for Paris Eiffel; Le CutInside for Bohemia Munich; Paul Madreen for Milan Red; Jobe Bowling for Dortmund Yellow; Van
+  Vander for Liverpool; Igor Viking and Kyle da Bastion for Manchester City. Each is in for the man in his position, in
+  that man's shirt, with his own numbers exactly as he was made (his card from 79 to 99), and his playstyle reads
+  **UNIQUE**: underneath he plays like the style he was made on (a false nine, a complete forward, a ball-winner...),
+  which is what his side asks of him. Everyone else at Liverpool and Manchester City is the man he was; a side of
+  theirs you'd kept from before gets its stars too, each in for the man he replaces. See **The stars**.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
   Your team wears its home kit. The opponent wears theirs too, unless the shirts are too alike to
@@ -2972,6 +2999,15 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v198: the stars, and the Champions Cup in an exhibition.** The fourteen men made on the Signature Players sheet
+  are in the game, each at his club with his numbers exactly as made and his playstyle shown as UNIQUE (he plays like
+  the style he was made on): Messiah Petita, Yemen and Anders Nesta at Catalunya Garnet; Christian Star, Luka Magic
+  and Mancala at Madrid Royale; Michaelangelo Donnatello and Needemeyer at Paris Eiffel; Le CutInside at Bohemia
+  Munich; Paul Madreen at Milan Red; Jobe Bowling at Dortmund Yellow; Van Vander at Liverpool (Livermoore in a career);
+  Igor Viking and Kyle da Bastion at Manchester City (Mancunian City). An exhibition can pick the Continental Champions
+  Cup's twelve clubs (a tab of their own in the full list), each in its colours, shape and way of playing, its men
+  named from its own country's names. A career gets the stars once, a saved one when it's loaded, and the clubs from
+  abroad keep theirs through their new squads each season. See **Exhibition** and **The stars**.
 - **v197: Seville FC.** A twelfth club from abroad, from Spain: **Seville FC** (SEV), in white with red, a point
   under the Premier Division's mid-table side, like Lisbon FC. Twelve from abroad and the Premier Division's top four
   make the sixteen, so the extra place v196 gave the holders (or the fifth) is gone: the top four go in, and nobody

@@ -34,7 +34,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
   + 'mgAiBids, mgRenew, ddDay, mgFaKept, FREE_OVER, FREE_OVER_MAX, FA_GROWN, '
-  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, EURO_CLUBS, MG_LEAGUE, mgEuroClubs, '
+  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, EURO_CLUBS, MG_LEAGUE, mgEuroClubs, mgEuro, STARS, STAR_KEYS, styleOf, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
@@ -710,6 +710,27 @@ ok(r.v196.n === 12 && r.v196.same && r.v196.pai === 'PAI' && r.v196.sev === 'Sev
   'a career from v196: its eleven kept as they were (Paris Eiffel still ' + r.v196.pai + '), Seville FC made the twelfth with a squad');
 ok(r.mig.n === 12 && r.mig.same && r.mig.names && r.mig.made && r.mig.par !== 'PAR' && r.mig.parHere === 'PAR' && r.mig.red === 'RED' && r.mig.flag && r.mig.again,
   'a career from before v196: its ten clubs from abroad renamed in place (ids and all), the other two made with squads; a club here with PAR keeps it (Paris Eiffel is ' + r.mig.par + '), the old letters give way (Milan Red is ' + r.mig.red + ', Red Star Ardelia\'s once); once only');
+
+// THE STARS IN A CAREER (v198): a new career has the fourteen at their clubs -- Van Vander at Livermoore, Igor Viking and
+// Kyle da Bastion at Mancunian City, the rest at the clubs from abroad -- each in for the weakest man in his position
+// there (the squad still fifteen), as he was made: his numbers, his age, his style, his potential his rating, his
+// playstyle UNIQUE on his card. A club from abroad's new squad each season keeps its stars; a career from before gets
+// them when it's loaded, once.
+await create('Star Town');
+r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STARS, out = {};
+  const where = k => { for(const c of Object.values(W.clubs)){ const p = c.players.find(x => x.star === k); if(p) return [c, p]; } return [null, null]; };
+  out.at = E.map(s => (where(s.key)[0] || {}).name || '-').join(',') === E.map(s => s.career).join(',');
+  out.made = E.every(s => { const [c, p] = where(s.key), st = M.devUnpack(p.at);
+    return p.uniq && M.styleOf(p).name === 'Unique' && p.style === s.base && p.age === s.age && p.pot === p.ovr && p.at === p.cl && c.players.length === 15 && M.STAR_KEYS.every((k, i) => st[k] === s.v[i] / 2); });
+  out.ovr = E.map(s => s.name + ' ' + where(s.key)[1].ovr).join(', ');
+  const ids = () => E.map(s => (where(s.key)[1] || {}).id).join(), before = ids();
+  M.mgEuro(d, true); out.kept = ids() === before && W.euro.every(id => W.clubs[id].players.length === 15);
+  for(const c of Object.values(W.clubs)) c.players = c.players.filter(p => !p.star); delete W.stars;   // (a career from before: no stars, none on record)
+  M.mgMigrate(d); out.mig = E.filter(s => where(s.key)[1]).length; const once = ids(); M.mgMigrate(d); out.once = ids() === once;
+  return out; });
+info('the stars in a career: ' + r.ovr);
+ok(r.at && r.made, 'a new career: the fourteen stars at their clubs (Livermoore, Mancunian City and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
+ok(r.kept && r.mig === 14 && r.once, 'a club from abroad\'s new squad keeps its stars; a career from before gets all fourteen when it\'s loaded, once');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
 ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }

@@ -19,6 +19,7 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, ball:()=>ball, F
   + 'noPlan:()=>{ for(const t of ["G","R"]) if(PLAN[t]) PLAN[t].last=null; }, manFor:(q,by)=>crossManFor(q,by), '
   + 'freeze:()=>{ restartT=0; restartInfo=null; offsideT=0; offsidePass=null; scoredT=0; gkHold=null; kickT=0; kickBy=null; kickTo=null; skill=null; matchClock=0; advOn=false; recvAuto=null; shotQ=null; }};\n  const LAB_TITLE=');
 patch('  function headOnGoal(p){', '  function headOnGoal(p){ if(window.__hd) window.__hd.push(p===controlled?"you":"mate");');   // (who heads it)
+patch('  const starStats=', '  STARS.length=0;\n  const starStats=');   // (v198: City\'s men as they were, without its two stars -- all of them line up at these corners)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-cset-')), 'classic.html');
 writeFileSync(copy, src);
 
