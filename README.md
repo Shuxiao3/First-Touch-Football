@@ -1436,12 +1436,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     on these, once, his potential too: on average no change (-0.1), the quick types up -- a wide runner +3.8, a
     wing-back +1.5, a speedster +0.9 -- and the slow ones down: an anchor -2.1, a stopper -1.9, a target man -1.5, a deep
     creator -1.4. Exhibition matches computer v computer score as they did (40 a version: 1.73 goals and 9.7 shots a
-    match, against 1.63 and 9.7).
+    match, against 1.63 and 9.7). (v203: in a man's rating pace now counts as much as his playstyle is about pace --
+    see **By his playstyle**; men are still made with their pace priced as here.)
   - **By his playstyle (v202).** A man is rated on what his playstyle is good at: each playstyle has weights of its
     own, from its numbers on the master sheet -- its best stats count 5, its worst 1, the rest between by where each
-    sits -- and pace counts most for every outfielder, as it has since v144 (speed 6, acceleration 5). So a wing-back's
-    crossing and stamina count 5 and his heading 1, a stopper's heading and tackling 5 and his dribbling 1, a deep
-    creator's long passing 5. Till v202 a man was rated on his line's weights: a wing-back on a centre-back's, a winger
+    sits. So a wing-back's crossing and stamina count 5 and his heading 1, a stopper's heading and tackling 5 and his
+    dribbling 1, a deep creator's long passing 5. Pace goes by the same measure (v203): speed and acceleration count as
+    much as his playstyle is about pace, by where each sits among all its numbers -- a speedster's 5 and 4, a pacey
+    winger's 5 and 5, a stopper's 3 and 2, an anchor's and a target man's 2 and 3 (in v202 they were 6 and 5 for
+    every outfielder, as they'd been since v144, more than anything else: a stopper's speed over his heading). Till v202 a man was rated on his line's weights: a wing-back on a centre-back's, a winger
     on a striker's. Each playstyle's usual man still rates what he did, at any level, so the leagues and the positions
     stay where they were (a new career's men within a tenth of a point of what their line's weights gave them, by
     position, and about half a point either way a man); nobody's stats change, and men are made as they always were
@@ -3042,6 +3045,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v203: pace by playstyle.** In a man's rating, speed and acceleration count as much as his playstyle is about pace,
+  like everything else in it -- a speedster's 5 and 4, a pacey winger's 5 and 5, a stopper's 3 and 2, a target man's 2
+  and 3 -- where they were 6 and 5 for everyone, more than any other stat. Each playstyle's usual man still rates what
+  he did, so the leagues stay where they are; a quick man of a slow playstyle rates a little lower and a slow one a
+  little higher. The stars move a point at most (Bobby Lebowski and Anders Nesta up one; Paul Madreen, Lorry Maddsen,
+  Zacary Zayn, Igor Hollinger and Alan Haggerd down one). A saved career is rated again when it's loaded. See **By his
+  playstyle**.
 - **v202: ratings by playstyle, and the clubs as set.** A man's rating is worked out from what his playstyle is good
   at: its best stats on the master sheet count 5, its worst 1, the rest between, and pace still counts most (speed 6,
   acceleration 5) -- where it used to be his line's weights, a wing-back rated like a centre-back. Each playstyle's

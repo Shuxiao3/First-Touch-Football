@@ -28,10 +28,13 @@ const newCareer = `mgNewCareer({slot:'x', manager:'Sam Okafor', clubName:'Fenmoo
 const w = await K(`(()=>{ const bad=[]; let n=0;
   for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S||S.role==='GK') continue; n++; const W=OVR_STY[k], P=STYLE_SHEET[k], ks=OUT_KEYS.filter(x=>x!=='speed'&&x!=='acceleration');
     const hi=Math.max(...ks.map(x=>P[OUT_KEYS.indexOf(x)])), lo=Math.min(...ks.map(x=>P[OUT_KEYS.indexOf(x)]));
-    if(!W||W.speed!==6||W.acceleration!==5||ks.some(x=>W[x]<1||W[x]>5)||ks.some(x=>P[OUT_KEYS.indexOf(x)]===hi&&W[x]!==5)||ks.some(x=>P[OUT_KEYS.indexOf(x)]===lo&&W[x]!==1)) bad.push(k); }
-  return { n, bad, wb:OVR_STY.wingback, st:OVR_STY.stopper, dc:OVR_STY.deepcreator, gk:ovrStyleKey('GK','shotstopper') }; })()`);
+    const lo2=Math.min(...OUT_KEYS.map(x=>P[OUT_KEYS.indexOf(x)])), hi2=Math.max(...OUT_KEYS.map(x=>P[OUT_KEYS.indexOf(x)])), pw=x=>Math.round(1+4*(P[OUT_KEYS.indexOf(x)]-lo2)/Math.max(1,hi2-lo2));   // (v203: pace by playstyle -- among all his numbers)
+    if(!W||W.speed!==pw('speed')||W.acceleration!==pw('acceleration')||ks.some(x=>W[x]<1||W[x]>5)||ks.some(x=>P[OUT_KEYS.indexOf(x)]===hi&&W[x]!==5)||ks.some(x=>P[OUT_KEYS.indexOf(x)]===lo&&W[x]!==1)) bad.push(k); }
+  const pace=k=>OVR_STY[k].speed+'/'+OVR_STY[k].acceleration;
+  return { n, bad, wb:OVR_STY.wingback, st:OVR_STY.stopper, dc:OVR_STY.deepcreator, gk:ovrStyleKey('GK','shotstopper'), pace:['stopper','speedster','target','paceywinger','anchor'].map(k=>k+' '+pace(k)).join(', ') }; })()`);
 info('a wing-back\'s weights: ' + JSON.stringify(w.wb));
-ok(w.n === 31 && !w.bad.length && w.gk === null, 'every outfield playstyle (' + w.n + ') rated on its own weights: its best stats 5, its worst 1, the rest between, and pace above all, speed 6 and acceleration 5; a keeper by his line\'s' + (w.bad.length ? ': ' + w.bad.join(', ') : ''));
+ok(w.n === 31 && !w.bad.length && w.gk === null, 'every outfield playstyle (' + w.n + ') rated on its own weights: its best stats 5, its worst 1, the rest between -- pace too, by where it sits among all its numbers (v203); a keeper by his line\'s' + (w.bad.length ? ': ' + w.bad.join(', ') : ''));
+ok(/stopper 3\/2/.test(w.pace) && /speedster 5\/4/.test(w.pace) && /target 2\/3/.test(w.pace), 'pace counts as much as a playstyle is about pace: ' + w.pace + ' (speed/acceleration; 6/5 for everyone in v202)');
 ok(w.wb.crossing === 5 && w.wb.stamina === 5 && w.wb.heading === 1 && w.st.heading === 5 && w.st.tackle === 5 && w.st.dribbling === 1 && w.dc.longPass === 5 && w.dc.heading === 1,
   'what each is about counts most: a wing-back\'s crossing and stamina 5 and heading 1, a stopper\'s heading and tackling 5 and dribbling 1, a deep creator\'s long passing 5');
 const cal = await K(`(()=>{ let worst=0; for(const k in OVR_STY){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10);
@@ -54,6 +57,8 @@ ok(!cw.stale && Object.values(cw.by).every(v => Math.abs(v) < 0.5) && cw.mad < 1
 const old = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs).find(x=>!x.euro&&x.id!==d.clubId), p=c.players.find(x=>x.role!=='GK'&&Math.abs(cwOverall(x.role,mgStats(x),x.style)-cwOverall(x.role,mgStats(x)))>=1);
   if(!p) return null; const want=cwOverall(p.role,mgStats(p),p.style); p.ovr=cwOverall(p.role,mgStats(p)); delete d.w202; mgMigrate(d); return { was:cwOverall(p.role,mgStats(p)), want, now:p.ovr, flag:d.w202 }; })()`);
 ok(old && old.now === old.want && old.flag === true, 'a career saved before v202: every man rated again by his playstyle when it\'s loaded (' + JSON.stringify(old) + ')');
+const old3 = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs).find(x=>!x.euro&&x.id!==d.clubId), p=c.players.find(x=>x.role!=='GK'); const want=p.ovr; p.ovr=1; d.wr=202; mgMigrate(d); return { want, now:p.ovr, wr:d.wr }; })()`);
+ok(old3.now === old3.want && old3.wr === 203, 'a career saved on v202\'s weights: rated again on these when it\'s loaded (' + JSON.stringify(old3) + ')');
 const kept = await K(`(()=>{ const sq=clubSquadGen(clubById('LIV')); for(const e of sq) e.ovr=1;
   localStorage.setItem('ft_clubsq',JSON.stringify({LIV:{squad:sq, lineup:defaultLineup(), form:'3-2-3', dform:null, sig:clubSig(clubById('LIV'))}}));
   const s=clubSide('LIV'); localStorage.removeItem('ft_clubsq'); return s.squad.every(e=>e.ovr===overallOf(e)&&e.ovr>1); })()`);

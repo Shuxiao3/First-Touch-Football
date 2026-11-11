@@ -2980,17 +2980,21 @@
   // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
   const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
   // (v202) A MAN'S RATING BY HIS PLAYSTYLE: what counts toward it is what his playstyle is good at -- its best stats on the
-  // master sheet 5 each, its worst 1, the rest on a straight line between by where each sits -- and pace above all, as it
-  // was (v144): speed 6 and acceleration 5 for every outfielder. So a wing-back's crossing and stamina count for a lot, a
-  // stopper's heading and tackling, a deep creator's passing; till v202 a man was rated by his line's weights, a wing-back
-  // on a centre-back's and a winger on a striker's. Set (OVR_STY_CAL) so that a man of the style's usual make rates what he
+  // master sheet 5 each, its worst 1, the rest on a straight line between by where each sits. So a wing-back's crossing
+  // and stamina count for a lot, a stopper's heading and tackling, a deep creator's passing; till v202 a man was rated by
+  // his line's weights, a wing-back on a centre-back's and a winger on a striker's. (v203) PACE BY PLAYSTYLE: speed and
+  // acceleration count as much as his playstyle is about pace, on the same 1 to 5 by where each sits among all its
+  // numbers -- a speedster's 5 and 4, a stopper's 3 and 2, a target man's 2 and 3. In v202 they were 6 and 5 for every
+  // outfielder, as v144 had them: more than anything else, a stopper's speed over his heading. Set (OVR_STY_CAL) so that a man of the style's usual make rates what he
   // did, at any level -- each playstyle's men as good on average as they were, nobody's stats touched; what moves a man is
   // how he compares with his style's usual one at what that style does. A keeper's as it was (his line's: OVR_W.GK). A man
   // is still MADE by his line's weights (cwStatsForOVR, mgDeriveStats: cwOverall with no style), so the men are the men
   // they were; it's only his rating that's his style's.
   const OVR_PACE_W={speed:6, acceleration:5}, OVR_STY={}, OVR_STY_CAL={};
+  const OVR_RATE_V=203;   // (the weights' version: a saved career's men rated again when it moves -- see mgMigrate)
   for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S||S.role==='GK') continue; const P=STYLE_SHEET[k], v=x=>P[OUT_KEYS.indexOf(x)], ks=OUT_KEYS.filter(x=>!OVR_PACE_W[x]);
     const lo=Math.min(...ks.map(v)), hi=Math.max(...ks.map(v)), w=Object.assign({},OVR_PACE_W); for(const x of ks) w[x]=Math.round(1+4*(v(x)-lo)/Math.max(1,hi-lo));
+    const lo2=Math.min(...OUT_KEYS.map(v)), hi2=Math.max(...OUT_KEYS.map(v)); for(const x in OVR_PACE_W) w[x]=Math.round(1+4*(v(x)-lo2)/Math.max(1,hi2-lo2));   // (v203: his pace among all his numbers)
     // (calibrated as OVR_K is: a man's level moves what his line's game is made of the whole way and the rest about half as
     // far -- cwStatsForOVR -- so the style's own weights are stretched to move his rating with his level as his line's did)
     const wl=OVR_W[S.role], mv=x=>(wl[x]||0)>=2?1:0.55, sl=W=>{ let a=0,t=0; for(const x in W){ a+=W[x]*mv(x); t+=W[x]; } return a/t; };
@@ -21286,10 +21290,10 @@
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
         p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
       d.w144=true; }
-    if(!d.w202){ const W=d.world||{};   // (v202: rated again by his playstyle -- A MAN'S RATING BY HIS PLAYSTYLE -- his potential too; his stats as they were)
+    if(!d.w202||d.wr!==OVR_RATE_V){ const W=d.world||{};   // (v202: rated again by his playstyle -- A MAN'S RATING BY HIS PLAYSTYLE -- his potential too; his stats as they were. v203: again, pace by playstyle)
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
         p.ovr=clamp(cwOverall(p.role,devUnpack(p.at),p.style),30,p.star?99:95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)); }
-      d.w202=true; }
+      d.w202=true; d.wr=OVR_RATE_V; }
     if(!d.w149){ econV149(d); d.w149=true; }   // (v149: the real game's money -- econV149)
     return d; }
   let curBldg=null; const curTab={};
@@ -21587,7 +21591,7 @@
       budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, fa178:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w144:true, w149:true, w202:true };   // (w120: on v120's wages from the start; w122, w144: rated on today's weights; w149: in the real game's money; w202: rated by playstyle)
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w144:true, w149:true, w202:true, wr:OVR_RATE_V };   // (w120: on v120's wages from the start; w122, w144: rated on today's weights; w149: in the real game's money; w202, wr: rated by playstyle, on the weights as they are -- OVR_RATE_V)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d); d.fw={};   // (v157: YOUR FIRST WEEK)
