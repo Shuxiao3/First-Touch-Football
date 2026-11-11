@@ -72,7 +72,7 @@ r = await K(`(()=>{ const d=CAREER.data; d.staff=[]; d.kn={}; const P=d.roster.c
 info('potential: ' + JSON.stringify(r));
 ok(r.contains && r.wide && r.inside && r.same, 'potential as a range, ' + r.n + ' men at four widths: always round the real one, never narrower than two, inside his rating and 99, the same every time');
 ok(r.w0 === 12 && r.w10 === 4 && r.wac === 8 && r.wsq === 12 && r.shownOk, 'your own men\'s by your best coach: ' + r.mine0 + ' with none (12 wide in his rating itself, wider shown over 60 -- v194), 4 wide with a 10; the academy\'s by its youth coach (a 5: 8 wide)');
-ok(r.T[0].join() === '?,?' && r.T[1][0] === 'a Premium League player' && r.T[1][1] === '?' && r.w2 === 10 && r.w3 === 6 && r.t2ok && r.t3ok,
+ok(r.T[0].join() === '?,?' && r.T[1][0] === 'a Premier Division player' && r.T[1][1] === '?' && r.w2 === 10 && r.w3 === 6 && r.t2ok && r.t3ok,
   'another club\'s: unscouted ?, scouted once the league it could take him to ("' + r.T[1][0] + '", ? in a list), twice ' + r.T[2][0] + ', three times ' + r.T[3][0]);
 ok(r.kid[0] <= 88 && r.kid[1] >= 88 && r.kid[1] - r.kid[0] === 6, 'the wonderkid\'s ceiling, as the club hears it: ' + r.kid.join('–'));
 
@@ -115,20 +115,20 @@ r = await K(`(()=>{ const d=CAREER.data, A=CL[6].players, B=CL[7].players, X=A.f
   const W=d.roster.find(p=>p.role!=='GK'&&p.id!==KID); W.until=d.season+2; X.age=26; Y.age=20;
   const set=(p,n,avg,g)=>{ p.rn=n; p.rs=Math.round(n*avg*10)/10; p.apps=n; p.goals=g; }; set(X,20,8.1,3); set(Y,12,7.6,1); set(Z,22,6.9,31); set(W,8,9,2); set(G,20,6.5,0); G.cs=50;
   d.news=[]; d.phase='league'; mgSeasonEnd(d); const R=d.review;
-  return { aw:R.awards.map(a=>[a.t,a.name===X.name?'X':a.name===Y.name?'Y':a.name===Z.name?'Z':a.name===W.name?'W':a.name===G.name?'G':a.name,a.v,a.you]), news:d.news.filter(n=>/League 2’s/.test(n.t)).map(n=>n.t),
+  return { aw:R.awards.map(a=>[a.t,a.name===X.name?'X':a.name===Y.name?'Y':a.name===Z.name?'Z':a.name===W.name?'W':a.name===G.name?'G':a.name,a.v,a.you]), news:d.news.filter(n=>/Division 2’s/.test(n.t)).map(n=>n.t),
     zev:Z.evs.map(e=>e[1]), gev:G.evs.map(e=>e[1]), xev:X.evs.map(e=>e[1]), xh:X.hist, wev:W.evs.map(e=>e[1]), wh:W.hist&&W.hist[W.hist.length-1], all:d.roster.every(p=>p.hist&&p.hist.length&&p.hist[p.hist.length-1][0]===d.season), zh:!!Z.hist }; })()`);
 info('the season\'s end: ' + JSON.stringify(r));
 ok(r.aw.map(a => a.slice(0, 3).join(' ')).join(' | ') === 'Player of the Year X 8.1 | Best young player Y 7.6 | Golden Boot Z 31 goals | Golden Glove G 50 clean sheets | Your Player of the Year W 9.0' && r.aw[4][3] === true,
   'the awards: the league\'s Player of the Year (from ten games), its best young player (21 or under), the Golden Boot (its top scorer), the Golden Glove (the keeper with the most clean sheets, v110), and your own Player of the Year (from five)');
-ok(r.news.length === 4 && /is League 2’s player of the year \(8\.1\)/.test(r.news.join()) && /wins League 2’s Golden Boot \(31 goals\)/.test(r.news.join()) && /wins League 2’s Golden Glove \(50 clean sheets\)/.test(r.news.join())
-  && r.xev.includes('L2 Player of the Year') && r.zev.includes('L2 Golden Boot') && r.gev.includes('L2 Golden Glove') && r.wev.includes('STO Player of the Year'),
-  'the league\'s four in the news ("wins League 2’s Golden Boot (31 goals)"); on their records ("L2 Player of the Year", "L2 Golden Boot", "L2 Golden Glove", "STO Player of the Year")');
+ok(r.news.length === 4 && /is Division 2’s player of the year \(8\.1\)/.test(r.news.join()) && /wins Division 2’s Golden Boot \(31 goals\)/.test(r.news.join()) && /wins Division 2’s Golden Glove \(50 clean sheets\)/.test(r.news.join())
+  && r.xev.includes('D2 Player of the Year') && r.zev.includes('D2 Golden Boot') && r.gev.includes('D2 Golden Glove') && r.wev.includes('STO Player of the Year'),
+  'the league\'s four in the news ("wins Division 2’s Golden Boot (31 goals)"); on their records ("D2 Player of the Year", "D2 Golden Boot", "D2 Golden Glove", "STO Player of the Year")');
 ok(r.all && r.wh[0] === 1 && r.wh[1] === 'STO' && r.wh[3] === 8 && r.wh[6] === 90 && r.xh && r.xh[0][3] === 20 && r.xh[0][6] === 81 && r.zh,
   'a season\'s line for each of your men (' + JSON.stringify(r.wh) + ') and for the award winners elsewhere (' + JSON.stringify(r.xh[0]) + ')');
 await page.click('#chCampus [data-bldg="review"]').catch(() => {}); await page.waitForTimeout(200);
 let txt = await page.textContent('#bpBody').catch(() => '');
 if(!/THE AWARDS/.test(txt)){ await K(`(()=>{ openBuilding('review'); return 1; })()`); await page.waitForTimeout(200); txt = await page.textContent('#bpBody').catch(() => ''); }
-ok(/THE AWARDS · LEAGUE 2/.test(txt) && /Player of the Year/.test(txt) && /Golden Boot/.test(txt) && /Golden Glove/.test(txt), 'the season\'s review: THE AWARDS, the Golden Boot and the Golden Glove among them');
+ok(/THE AWARDS · DIVISION 2/.test(txt) && /Player of the Year/.test(txt) && /Golden Boot/.test(txt) && /Golden Glove/.test(txt), 'the season\'s review: THE AWARDS, the Golden Boot and the Golden Glove among them');
 await K(`(()=>{ hideBldg(); return 1; })()`).catch(() => {});
 r = await K(`(()=>{ const d=CAREER.data, W=d.roster.find(p=>p.hist&&p.hist.length); mgNewSeason(d); return { s:d.season, apps:W.apps, rn:W.rn, kept:W.hist.length>=1 }; })()`);
 ok(r.s === 2 && r.apps === 0 && r.rn === 0 && r.kept, 'a new season: the numbers start again, the record stays');
@@ -136,7 +136,7 @@ ok(r.s === 2 && r.apps === 0 && r.rn === 0 && r.kept, 'a new season: the numbers
 // --- the card: three sides; his career, in short lines, on a phone ---------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(x=>x.id===KID); p.name='Kit Young'; p.hist=[]; d.season=6;   // (six seasons on: five on his record)
   for(let s=1;s<=5;s++) p.hist.push([s,'STO',Math.min(4,s),20+s,s*3,s,64+s]); p.apps=7; p.goals=2; p.as=1; p.rn=7; p.rs=48.3;
-  p.evs=[[3,'Debut for STO'],[4,'Won the Champions League'],[5,'L2 best young player']]; mgSave(d); renderHub(); return p.id; })()`);
+  p.evs=[[3,'Debut for STO'],[4,'Won the Continental Champions Cup'],[5,'D2 best young player']]; mgSave(d); renderHub(); return p.id; })()`);
 const kid = r;
 for(const [w, h] of [[640, 360], [844, 340]]){
   await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(200);
@@ -174,8 +174,8 @@ for(const [w, h] of [[640, 360], [844, 340]]){
       long: [...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32).map(e => e.textContent.trim()),
       cut: [...c.querySelectorAll('.mgFact b, .cvEv')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent), pot: (c.querySelector('.cardEnd .mgCardSub') || {}).textContent }; });
   info(w + 'x' + h + ' his career: ' + JSON.stringify(Object.assign({ flips }, cv)));
-  ok(cv.rows.length === 5 && cv.now && cv.rows[1].replace(/\s/g, '') === 'S6L2STO7216.9' && cv.rows[2].replace(/\s/g, '') === 'S5PLSTO251556.9'
-     && cv.ev.join('|') === 'S5L2 best young player|S4Won the Champions League' && /^FOR STO/.test(cv.fact[0]) && /^potential \d+–\d+$/.test(cv.pot),
+  ok(cv.rows.length === 5 && cv.now && cv.rows[1].replace(/\s/g, '') === 'S6D2STO7216.9' && cv.rows[2].replace(/\s/g, '') === 'S5PDSTO251556.9'
+     && cv.ev.join('|') === 'S5D2 best young player|S4Won the Continental Champions Cup' && /^FOR STO/.test(cv.fact[0]) && /^potential \d+–\d+$/.test(cv.pot),
     w + 'x' + h + ': his career: this season and his last three (' + cv.rows.slice(1, 3).join(' / ') + '), his last two moments, his games and goals for you; his potential a range (' + cv.pot + ')');
   ok(cv.fits && !cv.long.length && !cv.cut.length, w + 'x' + h + ': his career fits the card, nothing long or cut on it' + (cv.fits && !cv.long.length && !cv.cut.length ? '' : ' ' + JSON.stringify(cv)));
   const rows = await page.$$eval('.mgPaneL .sqList .mgRow', ns => ns.map(n => ({ ovr: (n.querySelector('.ovr') || {}).textContent, pot: !!n.querySelector('.pot') })));   // (v171: the list's rows as J3 has them)

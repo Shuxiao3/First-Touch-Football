@@ -81,7 +81,7 @@ r = await K(`(()=>{ const d=CAREER.data, lim=debtLimitOf(d); d.budget=-lim+50000
   return { lim, red, over, b1, b2, s2, bid:bid&&bid.msg }; })()`);
 info('the limit: ' + JSON.stringify(r));
 ok(r.lim === 150000 && /IN THE RED/.test(r.red) && /THE BOARD: \$200,000 over/.test(r.over) && /board won’t let you spend/.test(r.b2) && /board won’t let you spend/.test(r.s2) && /in the red/.test(r.bid),
-  'League 2\'s limit $150,000: in the red but inside it, IN THE RED as before; $200,000 over it, the board says so on the hub ("' + r.over.split('·')[0].trim().slice(0, 80) + '...") and no building ("' + r.b2 + '") or signing');
+  'Division 2\'s limit $150,000: in the red but inside it, IN THE RED as before; $200,000 over it, the board says so on the hub ("' + r.over.split('·')[0].trim().slice(0, 80) + '...") and no building ("' + r.b2 + '") or signing');
 r = await K(`(()=>{ const d=CAREER.data, lim=debtLimitOf(d), hero=mgNewPlayer(d,'ATT',79,34,{until:d.season+1}); hero.hometown=true; mgRosterAdd(d,hero);
   const L=d.roster.filter(p=>!p.hometown&&!p.loan).sort((a,b)=>mgValue(d,b)-mgValue(d,a)), top=L[0], v=mgValue(d,top), n0=d.roster.length;
   d.budget=-lim-v*2; const b0=d.budget, sold=boardSale(d);
@@ -94,7 +94,7 @@ ok(r.sold && r.gone && r.heroStays && r.paid === r.v && !!r.at && r.none === nul
 // --- THE BOARD TOPS UP A SHORT SQUAD -----------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data; d.roster=d.roster.filter(p=>!p.hometown).slice(0,10); const n0=d.roster.length, ids=new Set(d.roster.map(p=>p.id)); mgTopUpYours(d);
   const added=d.roster.filter(p=>!ids.has(p.id)); return { n0, n:d.roster.length, ovrs:added.map(p=>p.ovr), lvl:MG_LEVEL[d.tier] }; })()`);
-ok(r.n === 13 && r.ovrs.every(o => o <= r.lvl - 4), 'a squad of ' + r.n0 + ': the board signs three to make thirteen, no more -- men to make up the numbers (rated ' + r.ovrs.join(', ') + ', League 2\'s level ' + r.lvl + ')');
+ok(r.n === 13 && r.ovrs.every(o => o <= r.lvl - 4), 'a squad of ' + r.n0 + ': the board signs three to make thirteen, no more -- men to make up the numbers (rated ' + r.ovrs.join(', ') + ', Division 2\'s level ' + r.lvl + ')');
 
 process.exitCode = rep.finish();
 await browser.close();

@@ -2,7 +2,7 @@
 // three letters, no other club's) and its crest (made on the card) -- walk every building, buy, sell and sign in
 // pre-season, simulate a season a week at a time (pre-season, the league's weeks, the winter break) to the review,
 // start the next one. Then, on a copy of
-// the game that lets the test reach the season code: a strong side is promoted (and lands in League 1 with a full
+// the game that lets the test reach the season code: a strong side is promoted (and lands in Division 1 with a full
 // fixture list, its ground as it was), a top-six side plays the playoffs, the goals in a played match go to the men
 // who scored them, and THE GROUND: a field with two bleachers to start, built up a level at a time, its boards coming
 // with the stands (one to start, bare), sponsors' offers for a board, the shirt (from the second season), the stands'
@@ -10,8 +10,8 @@
 // CLUBHOUSE and what it unlocks: a new career has the shed, the stadium and a rough training pitch; the transfer market
 // (your phone) and the physio are the first things to buy; each clubhouse after it needs the next league up and the
 // money, and opens the next buildings and levels (the stadium's too); the training pitch's level locks shapes, styles
-// and instructions; FITNESS AND THE CUPS (a game's cost, a day's rest by the physio, League 2 league-only and always
-// fresh, the Championship's Coco and Fashion Cups midweek, the Premium League's Champions League, a busy season with no
+// and instructions; FITNESS AND THE CUPS (a game's cost, a day's rest by the physio, Division 2 league-only and always
+// fresh, the National Division's Coco and Fashion Cups midweek, the Premier Division's Continental Champions Cup, a busy season with no
 // physio against the best); WHO YOU TAKE, its Selection tab's list (a bar dragged onto the pitch's part, or off it, changes
 // places; on the bench or in the rest it goes in where it's put, the others moving along); the physio's level shows in
 // a match (half-time, tiring) and a simulated one; decorations bought one at a
@@ -34,7 +34,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
   + 'mgAiBids, mgRenew, ddDay, mgFaKept, FREE_OVER, FREE_OVER_MAX, FA_GROWN, '
-  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, '
+  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, EURO_CLUBS, MG_LEAGUE, mgEuroClubs, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
@@ -84,10 +84,10 @@ ok(String(d.colors) === '#1d4fa3,#f2d23c', 'the colours you picked');
   ok(me.code === 'FMR' && d.clubCode === 'FMR' && Object.values(d.world.clubs).filter(c => c.code === 'FMR').length === 1, 'your club is FMR, and no other club is');
   ok(cr.s === 1 && cr.p === 3 && cr.e === 2 && String(cr.c) === '#1d4fa3,#f2d23c,#ffb43c' && cr.l === 'F', 'your crest as you made it: ' + JSON.stringify(cr));
   ok(/^data:image\/png/.test(await page.getAttribute('#chCrest', 'src')), 'and over the club\'s name in town'); }
-ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in League 2');
+ok(d.tier === 1 && [1, 2, 3, 4].every(t => d.div[t].length === 14) && d.div[1].includes(d.clubId), 'four leagues of 14, you in Division 2');
 ok(d.roster.length === 15 && d.budget === 250000 && d.phase === 'summer' && d.day === 1 && d.wday === 'mon' && d.wkN === 1 && Object.values(d.world.clubs).every(c => c.id === d.clubId || c.players.length === 15), 'a 15-man squad (every club\'s 15: v124, nine a side), $250,000 (v149: $20,000 before), the first Monday of pre-season');
 ok(!d.roster.some(p => p.stats) && d.roster.every(p => /^[a-s]{28}$/.test(p.at) && /^[a-s]{28}$/.test(p.cl) && /^[a-s]{9}$/.test(p.hv)), 'each man\'s own attributes in the save, a letter a half point -- 28 since v163 (and his ceilings, his hidden values)');
-ok((await page.textContent('#chMeta')).includes('League 2'), 'the hub: ' + await page.textContent('#chMeta'));
+ok((await page.textContent('#chMeta')).includes('Division 2'), 'the hub: ' + await page.textContent('#chMeta'));
 
 // --- every building, every tab: a new career has the shed, the stadium and the training pitch; the transfer market is
 // your phone, not bought (it rings on the first day of pre-season); the physio, the scouts' house and the academy wait for the next
@@ -189,12 +189,12 @@ await create('Strong Town');
 let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.roster) M.mgSetOvr(p, 75);
   let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
   M.mgSave(d); M.renderHub(); return { pos: d.review.pos, result: d.review.result, up: d.review.up }; });
-ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins League 2: ' + r.result);
+ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins Division 2: ' + r.result);
 await page.click('#chBottom [data-mg="review"]'); await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
 ok(d.tier === 2 && d.lg[2].ids.includes(d.clubId) && d.lg[2].fx.filter(day => day.some(m => m[0] === d.clubId || m[1] === d.clubId)).length === 26,
-   'promoted: League 1, 26 games');
-ok(d.sponsorWk === 60000 && d.stadium.lvl === 1 && d.capacity === 1800, 'the club\'s partners pay League 1\'s rate; the ground is as it was built (promotion builds nothing)');
+   'promoted: Division 1, 26 games');
+ok(d.sponsorWk === 60000 && d.stadium.lvl === 1 && d.capacity === 1800, 'the club\'s partners pay Division 1\'s rate; the ground is as it was built (promotion builds nothing)');
 
 // --- the playoffs: a top-six side, until one finishes 3rd to 6th -------------------------------------
 let po = null;
@@ -269,7 +269,7 @@ ok(r.old.lvl === 3 && r.old.cap === 8500 && r.fresh === 1, 'a save from before: 
 ok(r.was.ads.length === 1 && /\$20 till S3$/.test(r.was.ads[0]) && !r.was.bids, 'a save from before v103: its boards let at once become deals to its season\'s end, as many as the ground has now (' + r.was.ads[0] + ')');
 
 // --- THE CLUBHOUSE AND WHAT IT UNLOCKS: the market not for sale (the phone), the physio with the cabin; the next clubhouse for the
-// money alone (v108: it used to need the next league up too) -- all of them in League 2; each one opens more (the scouts' house with the cabin, the academy and the
+// money alone (v108: it used to need the next league up too) -- all of them in Division 2; each one opens more (the scouts' house with the cabin, the academy and the
 // decorations with the clubhouse, the last levels with the hall), the stadium's levels too ------------------------------
 await create('Club Town');
 r = await page.evaluate(() => { const M = __MG, d = M.d, him = d.world.clubs[d.div[1].find(id => id !== d.clubId)].players[0].id, out = {};
@@ -297,7 +297,7 @@ ok(/needs clubhouse 2/.test(r.scout0) && /needs clubhouse 3/.test(r.acad0) && /n
 ok(/phone rings on the first day of pre-season/.test(r.market[0]) && r.market[1] === 0 && /needs clubhouse 2/.test(r.physio[0]) && r.physio[1] === 0,
   'in the shed the transfer market isn\'t for sale ("' + r.market[0] + '") and the physio waits for clubhouse 2');
 ok(/budget/.test(r.club2poor) && r.club2b[0] === null && r.club2b[1] === 400000 && r.tier === 1 && r.top === 1,
-  'the cabin: for the money alone, in League 2 (never promoted) -- $400,000 (v149; it was $30,000. v108: it used to wait for League 1)');
+  'the cabin: for the money alone, in Division 2 (never promoted) -- $400,000 (v149; it was $30,000. v108: it used to wait for Division 1)');
 ok(r.phys1[0] === null && r.phys1[1] === 75000 && r.phys2[1] === 300000 && /clubhouse 3/.test(r.phys3), 'the cabin brings the physio ($75,000) and its level 2 ($300,000); its 3rd waits for clubhouse 3');
 ok(r.scout[0] === null && r.scout[1] === 200000 && r.scouted === null && r.train2[1] === 150000 && /clubhouse 3/.test(r.train3) && r.stad3b === null && /clubhouse 3/.test(r.acad1),
   'with the cabin: the scouts\' house ($200,000) and scouting, the training pitch to level 2 ($150,000), the stadium to 3; not yet the academy');
@@ -504,7 +504,7 @@ ok(!tapped.on && tapped.wk === 2 && twice === 3 && !escd.on && escd.wk === 3 && 
 // --- FREE AGENTS: mostly old hands gone past their best, asking their wage; a younger man asks over the odds -- two and
 // a half times his wage at 21, sliding to his wage at 29 -- and up to twelve weeks of that to sign; none young with a
 // future (a club has him the day he's free); a season without a club nobody grows, and the old lose a point more. v178:
-// nobody wanted them -- eight under their leagues' mid-table, League 2's or League 1's -- and a man who'd walk into
+// nobody wanted them -- eight under their leagues' mid-table, Division 2's or Division 1's -- and a man who'd walk into
 // most sides in your league wants FREE_OVER weeks of his wage to sign for every point over its mid-table less three;
 // and nobody bids for a man you've signed on a free (mgFaKept) -----------------------------------------------------------
 await create('Free Town');
@@ -513,7 +513,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
   out.room = Math.max(0, ...F.filter(p => p.age <= 24).map(p => p.pot - p.ovr));
   const man = (age, ovr) => ({ ovr: ovr || 52, age, role: 'MID' }), ask = (age, ovr) => Object.assign(M.mgFreeAsk(d, man(age, ovr)), { fair: M.mgDemand(d, man(age, ovr), false) });
   Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33), o58: ask(29, 58), o62: ask(29, 62), o70: ask(29, 70), y58: ask(25, 58), tier: d.tier, fo: M.FREE_OVER, foMax: M.FREE_OVER_MAX });
-  // (the generator: 3000 men as summers bring them, against League 2's mid-table)
+  // (the generator: 3000 men as summers bring them, against Division 2's mid-table)
   const G = []; for(let i = 0; i < 3000; i++) G.push(M.mgNewFreeAgent(d).ovr); G.sort((a, b) => a - b);
   out.gen = { med: G[1500], q95: G[2850], atLv: G.filter(v => v >= M.MG_LEVEL[1]).length / G.length, at60: G.filter(v => v >= 60).length / G.length };
   const mk = (age, ovr) => { const p = M.mgNewFreeAgent(d); p.role = 'MID'; p.age = age; delete p.at; p.pot = ovr; p.ovr = ovr; M.mgSetOvr(p, ovr); return p; };
@@ -527,13 +527,13 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
 info('free agents: ' + JSON.stringify(r));
 ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n + ' are 29 or over, and none at 24 or under has more than 4 to grow into');
 ok(r.gen.med <= 46 && r.gen.q95 <= 56 && r.gen.atLv < 0.07 && r.gen.at60 < 0.01,
-  'nobody wanted them: of 3000 free agents the middle man is rated ' + r.gen.med + ', one in twenty ' + r.gen.q95 + ' or more, ' + (r.gen.atLv * 100).toFixed(1) + '% at League 2\'s mid-table (55) or over and ' + (r.gen.at60 * 100).toFixed(1) + '% at 60 (v177: 50, 65, a third and one in seven)');
+  'nobody wanted them: of 3000 free agents the middle man is rated ' + r.gen.med + ', one in twenty ' + r.gen.q95 + ' or more, ' + (r.gen.atLv * 100).toFixed(1) + '% at Division 2\'s mid-table (55) or over and ' + (r.gen.at60 * 100).toFixed(1) + '% at 60 (v177: 50, 65, a third and one in seven)');
 const wks = a => a.fee / a.wage;
 ok(r.tier === 1 && Math.abs(wks(r.o58) - 6 * r.fo) < 0.6 && Math.abs(wks(r.o62) - 10 * r.fo) < 0.6 && Math.abs(wks(r.o70) - r.foMax) < 0.6 && 18 * r.fo > r.foMax && r.o58.wage === r.o58.fair && Math.abs(wks(r.y58) - (6 + 6 * r.fo)) < 0.8,
-  'one who\'d walk into most sides in League 2 wants a fee to sign at any age, two weeks\' wage for every point over 52: a 58 of 29 ' + money(r.o58.fee) + ' (' + wks(r.o58).toFixed(1) + ' weeks of his ' + money(r.o58.wage) + '), a 62 ' + wks(r.o62).toFixed(1) + ' weeks, a 70 thirty at most (' + wks(r.o70).toFixed(1) + '); at 25 on top of the young man\'s six (' + wks(r.y58).toFixed(1) + ')');
+  'one who\'d walk into most sides in Division 2 wants a fee to sign at any age, two weeks\' wage for every point over 52: a 58 of 29 ' + money(r.o58.fee) + ' (' + wks(r.o58).toFixed(1) + ' weeks of his ' + money(r.o58.wage) + '), a 62 ' + wks(r.o62).toFixed(1) + ' weeks, a 70 thirty at most (' + wks(r.o70).toFixed(1) + '); at 25 on top of the young man\'s six (' + wks(r.y58).toFixed(1) + ')');
 ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.7 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.4   // (v149: the fee rounded to $10,000 at that size)
    && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
-  'what they ask (a 52 in League 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
+  'what they ask (a 52 in Division 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
 ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 && r.vet[1] < r.vet[3] && r.vet[1] < 60 && r.vet[2] === 1,
   'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
@@ -551,7 +551,7 @@ d = await save(); const him = d.roster.find(p => p.id === fa.id);
 ok(/TO SIGN/.test(faCard) && fa.fee > 0 && him && him.wage === fa.wage && d.budget === fa.budget - fa.fee,
   'a ' + fa.age + '-year-old signed: ' + money(fa.fee) + ' to sign him (the budget ' + money(fa.budget) + ' to ' + money(d.budget) + '), ' + money(fa.wage) + '/wk');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
-// (v178) NOBODY BIDS FOR HIM: in pre-season, made a star (three over League 2's mid-table -- a club would watch him,
+// (v178) NOBODY BIDS FOR HIM: in pre-season, made a star (three over Division 2's mid-table -- a club would watch him,
 // and bid one week in eight), 300 weeks' worth of bids for your men and none for him, nor watching; listed, they bid;
 // come on four points since he signed, they bid; and on a new deal with you, they bid. Deadline day: him the best of your
 // squad and none of the late bids for him (200 deadline days); as he was when he signed no longer, some
@@ -606,8 +606,8 @@ ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.
 
 // --- FITNESS AND THE CUPS: a man's fitness carries from one game to the next -- a game costs him a quarter of it or so,
 // a day's rest gives some back (more with a better physio) -- and a live match starts with it as his legs' ceiling.
-// League 2 plays only the league, a game a week, and your eight are fresh for every one. League 1 and up play the Coco
-// Cup, the Championship and up the Fashion Cup too, the Premium League's top six the Champions League (with ten from
+// Division 2 plays only the league, a game a week, and your eight are fresh for every one. Division 1 and up play the Coco
+// Cup, the National Division and up the Fashion Cup too, the Premier Division's top four the Continental Champions Cup (with eleven from
 // abroad): each round midweek, after the league matchday its calendar says ------------------------------------------
 { await create('Cup Town');
 const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
@@ -626,11 +626,11 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { v
   out.in = ['coco', 'fashion', 'cl'].map(k => d.cup[k].in.includes(d.clubId) ? 1 : 0).join('');
   return out; });
 let sn = await season();
-info('fitness: ' + JSON.stringify(r) + '; League 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low }));
+info('fitness: ' + JSON.stringify(r) + '; Division 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low }));
 ok(r.after >= 0.6 && r.after <= 0.8 && r.day0 === 0.045 && r.day4 === 0.075 && r.entry === 0.6,
   'a game costs a man ' + Math.round((1 - r.after) * 100) + '% of his fitness; a day\'s rest gives back 4.5% with no physio, 7.5% with the best; a live match takes his fitness with him (his legs\' ceiling)');
 ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low >= 0.85 && sn.avg >= 0.98 && sn.wins === '111',
-  'League 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; a man whose stamina has faded a little short: ' + Math.round(sn.low * 100) + '%); the cups are played above it, each to a winner');
+  'Division 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; a man whose stamina has faded a little short: ' + Math.round(sn.low * 100) + '%); the cups are played above it, each to a winner');
 
 await create('Cup City');
 r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };
@@ -646,11 +646,11 @@ const cupAt = sn.seq.map((x, i) => [x, i]).filter(([x]) => /@/.test(x));
 const onCal = cupAt.every(([x, i]) => { const m = x.match(/^(\w+?)(\d+)@(\d+)$/), c = cal[m[3]]; return c && c[0] === m[1] && String(c[1]) === m[2] && sn.seq[i - 1] === 'l' + m[3]; });
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Fixtures")'); await page.waitForTimeout(80);
 const fxCup = await page.$$eval('#bpBody .mgFx.cup', ns => ns.map(n => n.querySelector('.md').textContent)); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
-info('Championship: ' + JSON.stringify({ r: { coco: r.coco, fashion: r.fashion, cl: r.cl, in: r.in }, cups: cupAt.map(x => x[0]), hub: sn.hub, runs: sn.runs, fxCup }));
-ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,10,6' && !r.l2 && r.abroad,
-  'the cups: the Coco Cup League 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the Championship and up (28: twelve ties, four byes), the Champions League six from the Premium League and ten from abroad in four groups of four; none for League 2, and the clubs from abroad in no league');
+info('National Division: ' + JSON.stringify({ r: { coco: r.coco, fashion: r.fashion, cl: r.cl, in: r.in }, cups: cupAt.map(x => x[0]), hub: sn.hub, runs: sn.runs, fxCup }));
+ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,11,5' && !r.l2 && r.abroad,
+  'the cups: the Coco Cup Division 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the National Division and up (28: twelve ties, four byes), the Continental Champions Cup five from the Premier Division (v196: the top four and one more -- in a first season its five strongest) and eleven from abroad in four groups of four; none for Division 2, and the clubs from abroad in no league');
 ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.wins === '111' && /coco/.test(sn.runs) && /fashion/.test(sn.runs) && sn.ledgerCup && fxCup.length >= 1,
-  'in the Championship, the Coco and Fashion Cups (no Champions League): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
+  'in the National Division, the Coco and Fashion Cups (no Continental Champions Cup): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
   + sn.runs + '); every cup won by someone');
 
 const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };
@@ -662,8 +662,46 @@ await create('Busy Town'); const in0 = await busy(0), b0 = await season();
 await create('Busy Town'); const in4 = await busy(4), b4 = await season();
 info('a busy season: ' + JSON.stringify({ none: [b0.seq.length, b0.avg, b0.low], best: [b4.seq.length, b4.avg, b4.low] }));
 ok(in0 && in4 && b0.seq.filter(x => /^cl/.test(x)).length >= 6 && b0.avg < 0.9 && b0.low < 0.7 && b4.avg > 0.95 && b4.low > b0.low,
-  'the Premium League\'s top six in the Champions League (six group games and more, midweek): with no physio your eight start a game ' + Math.round(b0.avg * 100) + '% fit on average, down to '
+  'the Premier Division\'s top four in the Continental Champions Cup (six group games and more, midweek): with no physio your eight start a game ' + Math.round(b0.avg * 100) + '% fit on average, down to '
   + Math.round(b0.low * 100) + '%; with the best physio ' + Math.round(b4.avg * 100) + '% (the most tired ' + Math.round(b4.low * 100) + '%: a man with poor Stamina, or past 30, still runs down)');
+
+// THE CONTINENTAL CHAMPIONS CUP (v196): the leagues' new names; the eleven clubs from abroad, each in its own colours
+// and letters; who's in -- the Premier Division's top four, then the holders if they're ours and not in already (from
+// any league), else the fifth; the season's end keeps the top five and the winners for the next; and a career from
+// before has its ten old clubs from abroad renamed in place (ids and all), the eleventh made, its own letters kept
+r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.EURO_CLUBS, out = {};
+  out.leagues = [1, 2, 3, 4].map(t => M.MG_LEAGUE[t]).join();
+  out.names = W.euro.map(id => W.clubs[id].name).join(); out.codes = W.euro.map(id => W.clubs[id].code).join();
+  out.kits = W.euro.every((id, i) => { const c = W.clubs[id], e = E[i]; return c.euro && c.tier === 4 && c.colors.join() === e[3].join() && c.home[0] === e[3][0] && c.home[1] === e[3][1] && c.home[2] === (e[4] ? e[3][0] : e[3][1]) && c.away[0] === e[3][1]; });
+  out.end = { n: d.clQual.length, top: d.clQual.join() === d.review.moves[4].table.slice(0, 5).join(), held: d.clHold != null && d.clHold === d.cup.cl.win };
+  const P = d.div[4].filter(x => x !== d.clubId), a = P.slice(0, 5), x3 = d.div[3][0], ours = () => { M.mgCupsStart(d); return d.cup.cl.in.filter(id => !W.clubs[id].euro).join(); };
+  d.clQual = a; d.clHold = null; out.none = ours() === a.join() && d.cup.cl.in.length === 16 && d.cup.cl.held === null;
+  const avg = id => W.clubs[id].players.reduce((t, p) => t + p.ovr, 0) / W.clubs[id].players.length;   // (the squads made afresh with the season: at their levels)
+  out.lvl = W.euro.map(id => Math.round(avg(id) - M.MG_LEVEL[4] - W.clubs[id].bias)); out.gap = +(avg(W.euro[0]) - avg(W.euro[10])).toFixed(1);
+  d.clHold = x3; out.held = ours() === a.slice(0, 4).concat([x3]).join() && d.cup.cl.held === x3;
+  d.clHold = a[1]; out.inAlready = ours() === a.join();
+  d.clHold = W.euro[0]; out.abroad = ours() === a.join();
+  d.clHold = d.clubId; out.you = ours() === a.slice(0, 4).concat([d.clubId]).join() && /are in the Continental Champions Cup as the holders \(\$12,000,000\): drawn with /.test(d.news[0].t);
+  // a career from before v196: its ten clubs from abroad under their old names and letters (Red Star Ardelia's RED among
+  // them), no eleventh; a club here has PAR
+  const OLD = [['Inter Vallera', 'VAL'], ['Real Montalba', 'MON'], ['Dinamo Korvesk', 'DIN'], ['Olympia Thessara', 'OLY'], ['Sporting Lusano', 'LUS'], ['Union Brennstadt', 'UNI'],
+    ['Athletic Corvara', 'COR'], ['Lokomotiv Savro', 'LOK'], ['Red Star Ardelia', 'RED'], ['FC Vestholm', 'VES']];
+  const ids = W.euro.slice(0, 10), gone = W.euro[10]; ids.forEach((id, i) => { W.clubs[id].name = OLD[i][0]; W.clubs[id].code = OLD[i][1]; });
+  delete W.clubs[gone]; W.euro = ids.slice(); delete W.eu196; const par = d.div[2][0], parWas = W.clubs[par].code; W.clubs[par].code = 'PAR';
+  M.mgMigrate(d); const C = id => W.clubs[id];
+  out.mig = { n: W.euro.length, same: W.euro.slice(0, 10).join() === ids.join(), names: W.euro.map(id => C(id).name).join() === E.map(e => e[0]).join(),
+    eleventh: !ids.includes(W.euro[10]) && C(W.euro[10]).euro && C(W.euro[10]).players.length >= 9, par: C(W.euro[3]).code, parHere: C(par).code, red: C(W.euro[5]).code, flag: !!W.eu196 };
+  const twice = W.euro.join(); M.mgMigrate(d); out.mig.again = W.euro.join() === twice;
+  W.clubs[par].code = parWas; return out; });
+info('the Continental Champions Cup: ' + JSON.stringify(r));
+ok(r.leagues === 'Division 2,Division 1,National Division,Premier Division'
+   && r.names === 'Madrid Royale,Catalunya Garnet,Madrid Athletics,Paris Eiffel,Milan Centrale,Milan Red,Bergamont Juvenile,Bohemia Munich,Dortmund Yellow,Lisbon FC,Istanbul FC'
+   && r.codes === 'ROY,CAT,ATH,PAR,CEN,RED,JUV,BOH,DOR,LIS,IST' && r.kits && r.gap >= 4,
+  'the leagues are Division 2, Division 1, the National Division and the Premier Division; the eleven from abroad, each in its own colours and letters, their squads made each season at their level (' + r.lvl.join(',') + ' off it; Madrid Royale\'s men ' + r.gap + ' better than Istanbul FC\'s)');
+ok(r.end.n === 5 && r.end.top && r.end.held && r.none && r.held && r.inAlready && r.abroad && r.you,
+  'who\'s in: the season\'s end keeps the Premier Division\'s top five and the winners; the top four go in, then the holders if they\'re ours and not in already (from the National Division too), else the fifth -- the holders one of the four, or from abroad: the fifth; yours in as the holders says so in the news');
+ok(r.mig.n === 11 && r.mig.same && r.mig.names && r.mig.eleventh && r.mig.par !== 'PAR' && r.mig.parHere === 'PAR' && r.mig.red === 'RED' && r.mig.flag && r.mig.again,
+  'a career from before: its ten clubs from abroad renamed in place (ids and all), the eleventh made with a squad; a club here with PAR keeps it (Paris Eiffel is ' + r.mig.par + '), the old letters give way (Milan Red is ' + r.mig.red + ', Red Star Ardelia\'s once); once only');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
 ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }

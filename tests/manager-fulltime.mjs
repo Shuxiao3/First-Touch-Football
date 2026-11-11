@@ -2,7 +2,7 @@
 // THE RESULT (the score between the two clubs, each side's goals with the minute and who made it, where it leaves you;
 // NEXT) and YOUR PLAYERS (a row for every man who played: rating, goals, assists, passes, shots, tackles, interceptions,
 // saves; the man of the match starred; CONTINUE) -- the press conference in a press room drawn by the league (a back
-// room in League 2, the full room with its photographers in the Premium League, the stars on a Champions League night),
+// room in Division 2, the full room with its photographers in the Premier Division, the stars on a Continental Champions Cup night),
 // then THE MONEY back at the club (before the game, from the game, the wages, now -- as the books have it), and the
 // Monday papers waiting off to the side. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
@@ -68,7 +68,7 @@ ok(await on('pressModal') && r && r.room === r.tier && r.cols > 12 && r.w === 12
 r = await K(`(()=>{ const n=l=>{ const S=prScene(l,['#c0392b','#fff'],7); return { men:S.men.length, cams:S.cams.filter(c=>!c.tv).length, tv:S.cams.filter(c=>c.tv).length }; }; return [1,2,3,4,5].map(n); })()`);
 info('the rooms: ' + JSON.stringify(r));
 ok(r[0].men <= 2 && r[0].cams + r[0].tv === 0 && r[1].men > r[0].men && r[2].tv === 1 && r[3].men >= 12 && r[3].cams >= 4 && r[4].men === r[3].men,
-  'the room grows with the league: League 2 a reporter or two and no cameras; League 1 more; the Championship a TV camera; the Premium League (and a Champions League night) ' + r[3].men + ' of them and ' + r[3].cams + ' photographers');
+  'the room grows with the league: Division 2 a reporter or two and no cameras; Division 1 more; the National Division a TV camera; the Premier Division (and a Continental Champions Cup night) ' + r[3].men + ' of them and ' + r[3].cams + ' photographers');
 
 // --- THE MONEY ------------------------------------------------------------------------------------------------------------------
 await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(400);

@@ -1,4 +1,4 @@
-// FOOTBALL CLASSIC, TICKETS (v108). The going rate for a seat is $5 in League 2 (v110; $7 in v108, $3 before), and $10,
+// FOOTBALL CLASSIC, TICKETS (v108). The going rate for a seat is $5 in Division 2 (v110; $7 in v108, $3 before), and $10,
 // $14 and $20 up the leagues.
 // The field and bleachers: one price for the lot. From the big bleachers on, each stand has its own -- the main stand a
 // fifth over the going rate, the South at it, the ends under it -- and seats sold at a premium come with the ground: VIP
@@ -31,11 +31,11 @@ await page.fill('#mgName', 'Kit Varga'); await page.fill('#mgClubIn', 'Turnstile
 await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); pileHide(); return 1; })()`);
 
-// --- THE GOING RATE: $5 in League 2, one price for the bleachers --------------------------------------------------------
+// --- THE GOING RATE: $5 in Division 2, one price for the bleachers --------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d), s=f.seats; d.loyalty=1000; const f1=computeFinance(d);
   return { rates:[1,2,3,4].map(t=>FIN_TIER[t].price), own:d.ticketPrice, n:s.length, id:s[0].id, price:s[0].price, cap:s[0].cap, att:f1.attendance, gate:f1.ticketGate }; })()`);
 ok(r.rates.join() === '25,30,40,60' && r.own === null && r.n === 1 && r.id === 'B' && r.price === 25 && r.cap === 1800 && r.gate === r.att * 25,
-  'the going rate (v149: the real game\'s money -- it was $5, $10, $14 and $20): $25 a seat in League 2 (' + r.rates.join(', ') + ' up the leagues); a new career\'s one price for the bleachers is it ($' + r.price + ', ' + r.att + ' of 1,800 at 1,000 fans)');
+  'the going rate (v149: the real game\'s money -- it was $5, $10, $14 and $20): $25 a seat in Division 2 (' + r.rates.join(', ') + ' up the leagues); a new career\'s one price for the bleachers is it ($' + r.price + ', ' + r.att + ' of 1,800 at 1,000 fans)');
 // the dearer, the emptier -- and the fans feel it
 r = await K(`(()=>{ const d=CAREER.data, a=p=>{ d.ticketPrice=p; const f=computeFinance(d); return [f.attendance, f.ticketGate, +seatPriceRatio(d).toFixed(2)]; }, o={ cheap:a(20), rate:a(25), dear:a(35), steep:a(50) }; d.ticketPrice=null; return o; })()`);
 info('the bleachers at $20 / $25 / $35 / $50: ' + JSON.stringify(r));
@@ -52,7 +52,7 @@ ok(r[1].ids === 'B' && r[2].ids === 'N,S,vip' && r[3].ids === 'N,S,E,W,vip' && r
   'one price for the bleachers; with the big bleachers the North and South each their own and VIP seats; the ends with covered stands; executive boxes with four stands; the members\' club in the grand stadium -- every seat counted once');
 const fe = await K(`(()=>{ const d=CAREER.data; return [seatFair(d,'E',3), seatFair(d,'E',4)]; })()`);
 ok(/N\$30 S\$25 vip\$100/.test(r[2].prices) && /E\$19 W\$19/.test(r[3].prices) && /E\$20 W\$20/.test(r[4].prices) && /box\$350/.test(r[4].prices) && /club\$175/.test(r[5].prices) && fe[0] === 18.75 && fe[1] === 20,
-  'their going rates in League 2: the main stand $30, the South $25, VIP seats $100; open terraces $19, seated ends $20 (' + fe.join(' and ') + ' before rounding); a box\'s seat $350, the members\' club $175');
+  'their going rates in Division 2: the main stand $30, the South $25, VIP seats $100; open terraces $19, seated ends $20 (' + fe.join(' and ') + ' before rounding); a box\'s seat $350, the members\' club $175');
 // per stand: dearer in the North, only the North thins
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); S.lvl=3; d.loyalty=6000; const g=()=>Object.fromEntries(computeFinance(d).seats.map(x=>[x.id,x.att]));
   const a=g(); d.seats={N:80}; const b=g(); d.seats={}; S.lvl=1; return { a, b }; })()`);
@@ -60,11 +60,11 @@ ok(r.b.N < r.a.N && r.b.S === r.a.S && r.b.E === r.a.E, 'the North at $80: the N
 // premium seats: the money in the town -- more the higher the league
 r = await K(`(()=>{ const d=CAREER.data, S=stadOf(d); S.lvl=4; const v=(t,L)=>{ d.tier=t; d.loyalty=L; const x=computeFinance(d).seats.find(x=>x.id==='vip'); return x.att/x.cap; };
   const o={ l2:+v(1,1400).toFixed(2), pl:+v(4,30000).toFixed(2) }; d.tier=1; d.loyalty=1000; S.lvl=1; return o; })()`);
-ok(r.l2 < 0.5 && r.pl > 0.9, 'VIP seats sell to the money in the town: ' + Math.round(r.l2 * 100) + '% of them in League 2, ' + Math.round(r.pl * 100) + '% in the Premium League');
+ok(r.l2 < 0.5 && r.pl > 0.9, 'VIP seats sell to the money in the town: ' + Math.round(r.l2 * 100) + '% of them in Division 2, ' + Math.round(r.pl * 100) + '% in the Premier Division');
 
 // --- UP A LEAGUE: an untouched price follows the going rate; yours stays yours --------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data; d.ticketPrice=null; d.tier=2; const a=computeFinance(d).seats[0].price; d.ticketPrice=40; const b=computeFinance(d).seats[0].price; d.tier=1; d.ticketPrice=null; return { a, b }; })()`);
-ok(r.a === 30 && r.b === 40, 'up to League 1: a price left alone goes up with the going rate ($' + r.a + '); one you set stays ($' + r.b + ')');
+ok(r.a === 30 && r.b === 40, 'up to Division 1: a price left alone goes up with the going rate ($' + r.a + '); one you set stays ($' + r.b + ')');
 // --- A SAVE FROM BEFORE: the old default price follows the new going rate, once ------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, old=JSON.parse(JSON.stringify(d)); delete old.tk108; old.ticketPrice=3; mgMigrate(old); const a=old.ticketPrice;
   const set=JSON.parse(JSON.stringify(d)); delete set.tk108; set.ticketPrice=9; mgMigrate(set); const b=set.ticketPrice;

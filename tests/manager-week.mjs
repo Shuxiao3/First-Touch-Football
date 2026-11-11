@@ -77,7 +77,7 @@ ok(r.inBreak.phase === 'winter' && r.inBreak.md === 13 && r.inBreak.open && r.in
 const wl = await K('mgWindowLine(CAREER.data)');
 ok(/shut until the summer/.test(wl), 'the market says the window\'s shut until the summer');
 
-// --- a two-game week: a Premium League club in the Champions League, its first group game on week 4's Wednesday ----
+// --- a two-game week: a Premier Division club in the Continental Champions Cup, its first group game on week 4's Wednesday ----
 r = await K(`(()=>{ const d=CAREER.data; const other=d.div[4][0]; d.div[4][0]=d.clubId; d.div[1][d.div[1].indexOf(d.clubId)]=other; d.world.clubs[other].tier=1; d.world.clubs[d.clubId].tier=4; d.tier=4;
   for(const p of d.roster) mgSetOvr(p,Math.round(MG_LEVEL[4]+(p.ovr-50)*0.5)); mgAutoLineup(d); d.md=0; d.mw=-1; d.phase='league'; d.wday='mon'; mgNewFixtures(d);
   d.clQual=[d.clubId,...d.div[4].filter(x=>x!==d.clubId).slice(0,5)]; mgCupsStart(d); mgFreshen(d);
@@ -85,7 +85,7 @@ r = await K(`(()=>{ const d=CAREER.data; const other=d.div[4][0]; d.div[4][0]=d.
   mgSave(d); renderHub(); return { seen, wday:d.wday, md:d.md }; })()`);
 info('the first four weeks: ' + r.seen.join(' '));
 ok(!r.seen.slice(0, 6).some(x => /:cl|:cup/.test(x)) && r.seen.includes('mon4:cl') && r.seen.includes('wed4:cup') && r.seen.indexOf('wed4:cup') + 1 === r.seen.indexOf('sat4:league'),
-  'no cup game in the league\'s first three weeks; in week 4, Monday, Wednesday\'s Champions League game, then Saturday\'s league game');
+  'no cup game in the league\'s first three weeks; in week 4, Monday, Wednesday\'s Continental Champions Cup game, then Saturday\'s league game');
 r = await K(`(()=>{ const d=CAREER.data; d.md=3; d.mw=1; d.wday='mon'; for(const t of [1,2,3,4]) for(const m of d.lg[t].fx[3]){ m[2]=null; m[3]=null; }
   for(const g of d.cup.cl.gr) for(const m of g.fx[0]){ m[2]=null; m[3]=null; } mgSave(d); renderHub(); return 1; })()`);
 const m4 = [await bottom(), await page.getAttribute('#chPhase', 'data-long')];
@@ -95,7 +95,7 @@ await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(80);
 d = await save(); const sat = [await bottom(), await mid(), d.wday];
 await page.click('#chBottom [data-mg="sim"]'); await page.waitForTimeout(80);
 d = await save();
-ok(/FORWARD TO MATCHDAY/.test(m4[0]) && /next: Champions League · Group game 1/.test(m4[1]) && /SIMULATE/.test(wed[0]) && /^Wednesday · Champions League · Group game 1/.test(wed[1])
+ok(/FORWARD TO MATCHDAY/.test(m4[0]) && /next: Continental Champions Cup · Group game 1/.test(m4[1]) && /SIMULATE/.test(wed[0]) && /^Wednesday · Continental Champions Cup · Group game 1/.test(wed[1])
    && sat[2] === 'sat' && /SIMULATE/.test(sat[0]) && /^Saturday · Matchday 4\/26/.test(sat[1]) && d.wday === 'mon' && d.md === 4,
   'week 4 on the hub: Monday (' + m4[1].replace(/^Season \d+ · /, '') + '), Wednesday morning (' + wed[1] + '), Saturday morning (' + sat[1] + '), then Monday');
 
@@ -108,7 +108,7 @@ r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; 
   const lg=diff(c,{kind:'league'}), big=diff(c,{kind:'cup',key:'cl',r:2});
   const tired={ league:lg.n, big:big.n, fresh:lg.x.filter(p=>!lg.base.includes(p)).every(p=>condOf(p)>=AI_REST) };
   for(const p of b8) delete p.cond;
-  // a lesser cup: the Premium League's clubs in the Coco Cup put out four youngsters or reserves among their seven
+  // a lesser cup: the Premier Division's clubs in the Coco Cup put out four youngsters or reserves among their seven
   const coco=pl.map(k=>{ const r=diff(k,{kind:'cup',key:'coco',r:0}); return r.n+r.base.filter(p=>p.role!=='GK'&&(p.age||25)<=AI_YOUNG).length; });
   const sum=(L,ctx)=>L.reduce((a,k)=>a+diff(k,ctx).n,0), l1=d.div[2].map(id=>d.world.clubs[id]).filter(Boolean);
   const out={ tired, coco, l1chg:sum(l1,{kind:'cup',key:'coco',r:0}), final:sum(pl,{kind:'cup',key:'coco',r:5}), cl:sum(pl,{kind:'cup',key:'cl',r:0}), league:sum(pl,{kind:'league'}) };
@@ -116,7 +116,7 @@ r = await K(`(()=>{ const d=CAREER.data, rnd=Math.random; Math.random=()=>0.99; 
 info('their nine: ' + JSON.stringify(r));
 ok(r.tired.league >= 1 && r.tired.league <= 4 && r.tired.fresh && r.tired.big === 0, 'his best nine at 80% for a league game: ' + r.tired.league + ' rested for fresh men (three outfielders at most, and the keeper if there\'s another); in a big game they play');
 ok(r.coco.every(n => n >= 4) && r.l1chg === 0 && r.final === 0 && r.cl === 0 && r.league === 0,
-  'the Premium League in the Coco Cup: four of the seven youngsters or reserves (' + r.coco.join(',') + '); League 1 in it, the final, the Champions League, an ordinary league game when fresh: the best');
+  'the Premier Division in the Coco Cup: four of the seven youngsters or reserves (' + r.coco.join(',') + '); Division 1 in it, the final, the Continental Champions Cup, an ordinary league game when fresh: the best');
 
 // a settled league: a club safe and out of the top six with three games left; and promotion sure
 r = await K(`(()=>{ const d=CAREER.data, t=2, L=d.lg[t], ids=L.ids.slice();

@@ -172,7 +172,7 @@ r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.role==='ATT')||d.r
 await page.waitForTimeout(120);
 const onGold = await toPaper(/Golden Boot/);
 const g0 = await top();
-ok(r.aw === r.name && r.you && r.prize === r.exp && r.db >= r.prize && r.fans > 0 && /The league pays .+ for .+’s Golden Boot\./.test(r.news) && r.ev.includes('L2 Golden Boot')
+ok(r.aw === r.name && r.you && r.prize === r.exp && r.db >= r.prize && r.fans > 0 && /The league pays .+ for .+’s Golden Boot\./.test(r.news) && r.ev.includes('D2 Golden Boot')
   && onGold && /THE LEAGUE/.test(g0) && /Yours!/.test(g0) && /The Golden Boot/.test(g0) && new RegExp(r.name).test(g0) && /GOALS\s*99/.test(g0) && /PRIZE\s*\$/.test(g0),   // (v176: the numbers first, a chip each)
   'the Golden Boot, one of yours (99 goals): the league pays twice a Player of the Month\'s prize ($' + r.prize + ') and the fans come (+' + r.fans + '); on his record, in the news, and on the summer\'s first paper (THE LEAGUE: "Yours! The Golden Boot ...")');
 

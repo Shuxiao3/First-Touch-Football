@@ -291,7 +291,7 @@ r = await K(`(()=>{ const d=CAREER.data, base=d.roster.find(p=>p.role!=='GK'&&!p
 // still for a defender, clean sheets for a keeper or defender; a Player of the Month; not his ratings
 const fine = await K(`(()=>{ const d=CAREER.data, base=d.roster.find(p=>!p.loan&&!p.hometown), keep=JSON.parse(JSON.stringify(base)), f=(role,o)=>{ Object.assign(base,{role, rn:10, rs:62, goals:0, as:0, cs:0, evs:[], hist:[]},o); return +cForm(d,base).toFixed(2); };
   const out={ att10:f('ATT',{goals:10}), att14:f('ATT',{goals:14}), att19:f('ATT',{goals:19}), mid11:f('MID',{goals:9,as:4}), def5:f('DEF',{goals:4,as:1}), def9cs:f('DEF',{cs:9}),
-    gk12cs:f('GK',{cs:12}), gk20g:f('GK',{goals:20}), rated:f('MID',{rn:10, rs:80}), potm:f('MID',{evs:[[d.season,'L2 Player of the Month']]}), potmOld:f('MID',{evs:[[d.season-1,'L2 Player of the Month']]}) };
+    gk12cs:f('GK',{cs:12}), gk20g:f('GK',{goals:20}), rated:f('MID',{rn:10, rs:80}), potm:f('MID',{evs:[[d.season,'D2 Player of the Month']]}), potmOld:f('MID',{evs:[[d.season-1,'D2 Player of the Month']]}) };
   for(const k of Object.keys(keep)) base[k]=keep[k]; return out; })()`);
 info('a fine season: ' + JSON.stringify(fine));
 ok(fine.att10 === 0.1 && fine.att14 === 0.5 && fine.att19 === 1 && fine.mid11 === 0.5 && fine.def5 === 0.5 && fine.def9cs === 0.5 && fine.gk12cs === 1 && fine.gk20g === 0 && fine.rated === 0 && fine.potm === 0.75 && fine.potmOld === 0,

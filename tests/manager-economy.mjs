@@ -67,7 +67,7 @@ ok([1, 2, 3, 4].every(t => r.mid[t].partners === [0, 15000, 60000, 250000, 15000
 ok([1, 2, 3, 4].every(t => Math.abs(r.mid[t].net / want[t] - 1) <= 0.25),
   'a mid-table club\'s season before prizes and transfers: ' + [1, 2, 3, 4].map(t => '$' + M(r.mid[t].net) + 'M (the change list: ~$' + M(want[t]) + 'M)').join(', ') + ' -- each within a quarter');
 ok(r.prize[1] === 500000 && r.prize[4] === 60e6 && r.ai[1] === 400000 && r.ai[4] === 150e6 && r.cl.join() === '12000000,2500000,8000000,15000000' && r.fa.join() === '500000,5000000' && r.coco.join() === '50000,400000',
-  'the league prizes ($0.5M to $60M), the computer clubs\' budgets ($0.4M to $150M), the Champions League ($12M in it, $2.5M a group game won, $8M to $15M a knockout round), the cups ($0.5M to $5M a round, $50k to $400k)');
+  'the league prizes ($0.5M to $60M), the computer clubs\' budgets ($0.4M to $150M), the Continental Champions Cup ($12M in it, $2.5M a group game won, $8M to $15M a knockout round), the cups ($0.5M to $5M a round, $50k to $400k)');
 // (v170) THE HANDOFF'S TUNING: the Player of the Month's prize, the shirts, the league prize's floor and its own line,
 // and the computer clubs' dearest deals
 const T = await K(`(()=>{ return { potm:[1,2,3,4].map(t=>POTM_PRIZE[t]), shirt:[1,2,3,4].map(t=>SHIRT_FAN[t]), share:[1,2,7,13,14].map(p=>+lgPrizeShare(p).toFixed(3)), last:mgRound(MG_PRIZE[1]*lgPrizeShare(MG_CLUBS)),
@@ -76,8 +76,8 @@ info('the handoff\'s tuning: ' + JSON.stringify(T));
 ok(T.potm.join() === '25000,100000,300000,1000000', 'the Player of the Month\'s prize: $25k, $100k, $300k, $1M by the league (v170: $2,500 to $40,000) -- the Player of the Year four times it, the Golden Boot and Glove twice');
 ok(T.shirt.join() === '3.3,3.9,4.5,5.4', 'shirts: $3.30 to $5.40 a fan a week (v170: 22 to 36 cents)');
 ok(T.clubs === 14 && T.share[0] === 1 && T.share[4] === 0.1 && T.share[3] === 0.1 && T.share[2] > 0.1 && T.last === 50000 && T.lname === 'League prize money',
-  'the league\'s prize money never under a tenth of the champions\' (' + T.share.join(', ') + ' for 1st, 2nd, 7th, 13th, 14th): 14th in League 2 $' + T.last + ' (v170: $7,300), on a line of its own in the week\'s money ("' + T.lname + '")');
-ok(T.top >= T.floor, 'the richest Premium League club ($345M) can go for a man asking $250M: what his club would settle for ($' + T.floor + 'M) is within the 65% it spends on one man ($' + T.top + 'M; v170: only an ask under 60% of its money, $207M)');
+  'the league\'s prize money never under a tenth of the champions\' (' + T.share.join(', ') + ' for 1st, 2nd, 7th, 13th, 14th): 14th in Division 2 $' + T.last + ' (v170: $7,300), on a line of its own in the week\'s money ("' + T.lname + '")');
+ok(T.top >= T.floor, 'the richest Premier Division club ($345M) can go for a man asking $250M: what his club would settle for ($' + T.floor + 'M) is within the 65% it spends on one man ($' + T.top + 'M; v170: only an ask under 60% of its money, $207M)');
 ok(r.club.join() === '400000,2000000,8000000' && r.train.join() === '150000,700000,2500000' && r.physio.join() === '75000,300000,1000000,3000000' && r.scout.join() === '200000,250000,1200000'
   && r.acad.join() === '400000,400000,2500000' && r.stad.join() === '800000,3000000,10000000,35000000' && r.scoutOne[1] === 3000 && r.scoutOne[4] === 100000 && r.deco[0] === 2500 && r.deco[1] === 200000,
   'what it costs: the clubhouse $0.4M, $2M, $8M; the stadium $0.8M to $35M; the rest as the change list has them; scouting a man $3k to $100k; the decorations $2,500 to $200,000');
@@ -113,7 +113,7 @@ r = await K(`(()=>{ const d=JSON.parse(JSON.stringify(CAREER.data)), W=d.world, 
   mgMigrate(d); once.again=d.budget===once.budget&&p.wage===once.wage; once.w0=w0; once.v0=v0; return once; })()`);
 info('a career from before: ' + JSON.stringify(r));
 ok(r.flag && r.budget === 45000 * 22 && Math.abs(r.wage - r.want) <= r.want * 0.02 && r.coach === 5000 && r.ai === 150e6 && Math.abs(r.listed - r.value) <= r.value * 0.02 && r.price === 35 && r.again,
-  'a career from before: the bank $45,000 -> $' + r.budget.toLocaleString() + ' (22 times), a man on the going wage still on it ($' + r.w0 + ' -> $' + r.wage.toLocaleString() + '), a coach $250 -> $' + r.coach.toLocaleString() + ', a Premium League club $6M -> $' + M(r.ai) + 'M, a man listed at his worth still at it ($' + r.v0.toLocaleString() + ' -> $' + r.listed.toLocaleString() + '), a $7 seat $' + r.price + ' -- and only once');
+  'a career from before: the bank $45,000 -> $' + r.budget.toLocaleString() + ' (22 times), a man on the going wage still on it ($' + r.w0 + ' -> $' + r.wage.toLocaleString() + '), a coach $250 -> $' + r.coach.toLocaleString() + ', a Premier Division club $6M -> $' + M(r.ai) + 'M, a man listed at his worth still at it ($' + r.v0.toLocaleString() + ' -> $' + r.listed.toLocaleString() + '), a $7 seat $' + r.price + ' -- and only once');
 
 process.exitCode = rep.finish();
 await browser.close();

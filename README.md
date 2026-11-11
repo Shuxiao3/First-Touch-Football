@@ -308,7 +308,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it, with ◀ 2 / 3 ▶ along its foot; hold an arrow to flip through the pages. Pages break between rows, never through
     one: a table keeps its head row, and a heading moves over with the rows it heads. A player's card never goes over
     pages, anywhere: it's made to fit. Measured on a new career at 844×390: the league table over 3. (Until v171 the
-    lists of players went over pages too: the squad over 4, the market's list of League 2 over 42.)
+    lists of players went over pages too: the squad over 4, the market's list of Division 2 over 42.)
   - **A list of players you swipe (v171).** The squad, the market's search, free agents and selling list, the scouts'
     reports and the academy are one list each, moved up and down with a finger -- never pages, never a button to see
     more (the coaches you can hire scroll the same way). A man is one line: his position in a coloured chip (keepers yellow, defenders
@@ -722,12 +722,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
   **Skill stars** say which moves a man has, one to five, and they're nothing to do with his ratings. Each man has a
   ceiling, drawn once for him from the odds for his position in the league his rating belongs in (halfway between his
-  rating and his potential, for a career's men); a keeper always has one star. In the Premium League most wingers have
+  rating and his potential, for a career's men); a keeper always has one star. In the Premier Division most wingers have
   three or four and one in fourteen has five; most strikers three, some four, and one in fifty five; midfielders mostly
   one to three, with five very rare (one in 330 in the middle, one in 170 attacking, one in a hundred out wide);
   centre-backs one or two, three at most; full-backs one to three, and never more than one five-star full-back in the
   world. The leagues below have fewer: nobody in the bottom two has five, and their defenders nearly all one or two. A
-  new career's world has about three or four five-star men, most of them Premium League wingers.
+  new career's world has about three or four five-star men, most of them Premier Division wingers.
   - **His stars grow with him.** A young man is a star or two short of his ceiling and grows into it between 19 and 23;
     about half lose one between 32 and 35. When one of yours gains or loses a star, the news says so. An exhibition
     club's men have no age, so they play at their ceiling.
@@ -1375,7 +1375,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **Ratings (v122).** A man's rating is a weighted average of his stats (times ten), the weights out of 5 and set by
   his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. What his line's game
   is made of counts 5, then 4 and 2, and every other outfield stat 1, so even a defender's shooting counts a little:
-  a League 2 centre-back goes from 49 to 55 with his three shooting stats taken from all 1s to all 10s (his tackling
+  a Division 2 centre-back goes from 49 to 55 with his three shooting stats taken from all 1s to all 10s (his tackling
   the same way: 37 to 65). Before v122 the weights were 1 to 3 and a good many stats counted for nothing -- crossing
   and curve for anyone. A keeper's rating is his keeping, and a little his feet.
 
@@ -1409,7 +1409,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   as he did. A career's 990 men, measured: four in five rated the same after, the rest a point either way.)
   Keepers: Reflexes 5, Reach 5, Diving 4, Handling 4, Distribution 4, Keeper speed 2; Composure, Passing and Ball
   control 1 each (Short passing and Composure in traffic: a keeper's as they were). The scale is kept where it was: a man of his line's usual make rates what he did before at any
-  level, so a League 2 man is still rated as one and prices and wages don't move with the change; what moves a man is
+  level, so a Division 2 man is still rated as one and prices and wages don't move with the change; what moves a man is
   how his lesser stats compare with a usual one's. A career from before v122 has every man rated again on these, once
   (a new world made on v121 and read on v122: about half the men the same, most of the rest a point either way, a
   few two, the leagues' averages where they were). Played somewhere else, a man's rating is his own in his own positions, two less in a
@@ -1660,8 +1660,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **The career is a manager's career.** You don't play in it. On the first screen, NEW CAREER, three tabs: CLUB, where
   you name yourself and your club and give it a three-letter short name (it suggests one from the club's name,
   shown on a scoreboard as you type); KIT, its colours; and CREST, its badge. START works from any of them. You
-  start in League 2, the bottom of four 14-club leagues (League 2, League 1, Championship,
-  Premium League), with a weak squad of 15 and $250,000 (v149; it was $20,000). A squad is twenty-one at most (every club's), thirteen at
+  start in Division 2, the bottom of four 14-club leagues (Division 2, Division 1, National Division,
+  Premier Division), with a weak squad of 15 and $250,000 (v149; it was $20,000). A squad is twenty-one at most (every club's), thirteen at
   least; nine start, five are on the bench, and the rest aren't taken (the training pitch's Selection tab: see
   **Selection**). It was fifteen at most, with a bench of four, then twenty with eight starting (v124: a man more
   each for nine a side, a fifth defender among a new squad's fifteen). The game is buying and selling players:
@@ -1674,7 +1674,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       START THE SEASON after pre-season, BACK TO THE LEAGUE after the winter break). On the matchday's morning you PLAY
       it (the live match, in your colours, with the home side in its home kit) or SIMULATE it, and after it you're on
       the next Monday. In a week with a Wednesday cup game you go from it to Saturday morning (your team can still
-      change, for tired legs), then to Monday. League 2 has no cups, so never two games in a week.
+      change, for tired legs), then to Monday. Division 2 has no cups, so never two games in a week.
     - The days between go by on their own: the other clubs' games, your men getting their legs back. The money still
       moves once a league game, as it did (a week without one costs and earns nothing).
   - **The league.** The top two go up. 3rd to 6th play off for a third place: one-game semis
@@ -1683,7 +1683,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Fitness carries from one game to the next.** Every man has it (100%: fresh). A game costs him about a quarter of
     it -- 22% with Stamina 10, up to 33% with Stamina 1, a point more a year past 30; taken off, 60% of that; brought
     on, 40% -- and every day after it he gets some back: 4.5% a day with no physio, up to 7.5% with the best (the
-    computer's clubs: by their league, the Premium League's the best). A live match starts with it as his legs'
+    computer's clubs: by their league, the Premier Division's the best). A live match starts with it as his legs'
     ceiling: a man 60% fit can't get past 60% of his legs all game (and comes back at half-time only as far as
     that), so he's slower from the kick-off. In a simulated game he counts 15 points under his rating for all he's
     short of fresh (at 80%, 3 under). Who plays for you is yours (Training's Selection tab shows each man's fitness as a bar along his name, the
@@ -1692,7 +1692,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       man's fitness reads between games is what he'll start the next one with.
     - **Two games a week, and only a good physio keeps up**: four days from Saturday to the Wednesday game, three to
       the next Saturday's. In
-      the Premium League with the Champions League and the cups and no rotating, a side with no physio starts its
+      the Premier Division with the Continental Champions Cup and the cups and no rotating, a side with no physio starts its
       games about 70% fit on average, at worst under half; with the best, 99% (a season each, simulated). Even
       then a man with poor Stamina, or past 30, can run down to 60% or so: a game costs him more than two days' rest
       gives back, so rest him now and then.
@@ -1761,7 +1761,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       counts in his development: in good form he grows faster (twins at 19, a season: 13.8 half points against 7.9);
       in poor form his touch, his reading of the game and his composure slip (not his legs).
     - **What match actions build** is only two things: his goals a little more finishing (each worth less -- five
-      goals in three weeks against one is no more growth all told) and big games (the Champions League, a cup's last
+      goals in three weeks against one is no more growth all told) and big games (the Continental Champions Cup, a cup's last
       two rounds, the playoffs) a little more composure. Funnelling everything through one man doesn't make him a
       star.
     - **Where you see it**: the report lists your men's ratings, the best starred; his card has THIS SEASON (games,
@@ -1850,16 +1850,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Wednesday's cup tie (CUP DAY) -- the table, on a small pile of its own that opens by itself over the hub: every
       club's place, goal difference and points in two columns, who's gone up or down since the last round (▲ ▼), the
       places that go up (green), to the playoffs (gold) and down (red) marked down the side, yours shaded and today's
-      opponents in red. Over it, where you stand ("5th in League 2, 18 points"), today's game (where, and their
+      opponents in red. Over it, where you stand ("5th in Division 2, 18 points"), today's game (where, and their
       place), and in a line how far you are off the top, the top two, the playoffs or the drop. The season's first
       day has everyone on nothing. NEXT and it's read; the table's in the Clubhouse's League tab too.
     - **The hub** says when the dressing room is low or buoyant, and who wants to leave.
   - **The press conference** (v104). After each of your games, played or simulated, the press want a word -- its own
     screen, after the match report and before the money and the Monday papers -- in a press room drawn beside the
-    questions as big as the club's league (v106): League 2's a back room -- a painted wall with a damp patch, a small
-    window, a calendar, a folding table, one microphone, a plastic cup, two reporters; League 1 a banner in the club's
-    colours, a cloth on the table, two microphones, four reporters with their hands up; the Championship the sponsors'
-    wall, a name plate, three microphones, a TV camera and the odd flash; the Premium League (and any Champions League
+    questions as big as the club's league (v106): Division 2's a back room -- a painted wall with a damp patch, a small
+    window, a calendar, a folding table, one microphone, a plastic cup, two reporters; Division 1 a banner in the club's
+    colours, a cloth on the table, two microphones, four reporters with their hands up; the National Division the sponsors'
+    wall, a name plate, three microphones, a TV camera and the odd flash; the Premier Division (and any Continental Champions Cup
     night, under its stars) the full room -- a long table, a row of microphones, two rows of reporters, TV cameras at
     the sides, photographers at the front and their cameras going off (small flashes; none with reduced motion). Two
     questions: the result's (a derby's, a cup tie's, a big win's or a heavy defeat's its own), then one of your men's
@@ -1871,8 +1871,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **The week's events** (v104), in the Monday papers:
     - **Windfalls**, about one Monday in ten (not in a career's first weeks): money nobody planned on -- a will, a
       council grant, the supporters' lottery win, an insurance payout, the TV picking your game, a benefactor, a
-      sponsored walk, an old sell-on clause -- $1,500 to $6,000 in League 2, up to $30,000 to $120,000 in the
-      Premium League, in the bank at once.
+      sponsored walk, an old sell-on clause -- $1,500 to $6,000 in Division 2, up to $30,000 to $120,000 in the
+      Premier Division, in the bank at once.
     - **The community**, about one Monday in six: the town asks something of the club -- a coaching day at the
       primary school, a charity match for the hospital, a visit to the children's ward, a youth club's kits, an open
       training day, a collection for the food bank. YES and the fans think more of the club (1.5% to 3% more of the
@@ -1883,7 +1883,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       their form, your record against them); the result counts 1.6 times as much in the dressing room and with the
       fans, win or lose, and a home derby brings every fan the club has, as many as the ground holds (v120; it was a
       quarter more at the gate: see **The turnout**). The press conference after it has its own question.
-    - **The cups' draws**: your first round (or a bye, or the Champions League group), and after each round you're
+    - **The cups' draws**: your first round (or a bye, or the Continental Champions Cup group), and after each round you're
       through, the next draw -- who, home or away, the Wednesday it's on and what winning it pays; or that you're out.
     - **Loans**, in the transfer window: a club wants one of your fringe men (out of your nine, 24 or under or
       not happy) to the end of the season and pays his wages -- LET HIM GO and he plays there and comes back when the
@@ -1898,7 +1898,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       season's end: in the review, and the Monday papers say how yours did.
     - **The Player of the Month**: every four league weeks, your league's best over them (three games rated at
       least; the best average rating, goals to split a tie). One of yours: the league pays the club ($25,000 in
-      League 2, $100,000, $300,000, $1M in the Premium League -- v170: it was $2,500 to $40,000, never rescaled with
+      Division 2, $100,000, $300,000, $1M in the Premier Division -- v170: it was $2,500 to $40,000, never rescaled with
       v149's money; the Player of the Year four times it, the Golden Boot and Glove twice), the fans love it (3% more
       of the league's usual following) and he's lifted. Another club's: the papers say who, and who your best was.
     - **Deadline day** (v105): the winter break's Monday is the window's last day -- it shuts when the week's done,
@@ -1910,7 +1910,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       the window shuts) -- with no Monday left to wait for. TO THE MARKET goes straight there.
     - **A youngster on a buyback clause** (v105): now and then in a window (about one week in five of pre-season
       and the winter break, one in sixteen of the league's first half) a bigger club -- a league or more above yours;
-      in the Premium League, one of its top five -- offers you a youngster it has no use for yet: 21 or under, out of
+      in the Premier Division, one of its top five -- offers you a youngster it has no use for yet: 21 or under, out of
       its nine, too raw for its first team or not doing it there, no worse than your weakest in his part of the side
       less two, with more to come, at a fee you can find. A fifth under their price, on a buyback clause: at the start
       of either window, to the end of next season, they can have him back for twice what you paid -- and they will if
@@ -1918,29 +1918,29 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       the papers say so. If they never do, the clause runs out and he's all yours. SIGN HIM (on the seasons you set),
       NO THANKS or LATER; the clause is on the DEAL side of his card (BUYBACK: who, for what, till when).
   - **Popularity** (v105; across the whole game since v161). Every man has one, 1 to 99, on his card under his
-    position: how well known he is -- in the whole game, not just his league. 99 is the best-known in it, a Premium
-    League or Champions League star; a League 2 man is barely known however good his season. It comes first of how
+    position: how well known he is -- in the whole game, not just his league. 99 is the best-known in it, a Premier
+    Division or Continental Champions Cup star; a Division 2 man is barely known however good his season. It comes first of how
     good he is, on a steep curve (a 60 is 11, a 70 26, an 80 49, a 90 80), and then of what he does and where he does
     it: his season (1.5 a goal to 15, a little for assists and, for a keeper or a defender, clean sheets; his form: his
     average rating, from three games, up to 12 for 7.5), his years at the club (3 a season, to 12), the armband (5),
     coming up through your academy (6), being a bright young thing (4: 21 or under and near the league's level) --
-    all of it counting a quarter as much in League 2 as in the Premium League, two-fifths in League 1 and two-thirds
-    in the Championship, and a third more again (and 5 on top) in a side in this season's Champions League. A man at a
+    all of it counting a quarter as much in Division 2 as in the Premier Division, two-fifths in Division 1 and two-thirds
+    in the National Division, and a third more again (and 5 on top) in a side in this season's Continental Champions Cup. A man at a
     club from abroad has his season there taken as a good one, as it isn't played here. Then his honours (to 30: a
     Player of the Month adds 5 and of the Year 10, the hometown hero and the wonderkid come with some, the manager's
     praise a little -- each as big as the stage it's won on; a fifth of it fades each summer). A man of yours goes a
     fifth of the way to that each Monday, and an honour lifts him at once too, by the stage (the Player of the Month 10
-    in the Premium League, 2.5 in League 2; "He's the best I've worked with." at a press conference 3 there; a goal in
-    a derby 1.5, 3 in a win). A new man starts under it (8 in the Premium League, 2 in League 2): he has to win the fans
-    over. Anyone else's is what it comes to at his club. Halfway through a season (v161, measured): League 2's men 3 in
-    the middle and 17 to 19 at best, League 1's 10 and 33 to 37, the Championship's 21 and 52 to 55, the Premium
-    League's 47 and 99, the clubs from abroad 59 and 90 to 98. (Before, it went by his league -- 35 at its level, 2.5 a
-    point either side -- so League 2's best were 70 and more, as well known as the Premium League's, and the best men in
+    in the Premier Division, 2.5 in Division 2; "He's the best I've worked with." at a press conference 3 there; a goal in
+    a derby 1.5, 3 in a win). A new man starts under it (8 in the Premier Division, 2 in Division 2): he has to win the fans
+    over. Anyone else's is what it comes to at his club. Halfway through a season (v161, measured): Division 2's men 3 in
+    the middle and 17 to 19 at best, Division 1's 10 and 33 to 37, the National Division's 21 and 52 to 55, the Premier
+    Division's 47 and 99, the clubs from abroad 59 and 90 to 98. (Before, it went by his league -- 35 at its level, 2.5 a
+    point either side -- so Division 2's best were 70 and more, as well known as the Premier Division's, and the best men in
     the game, abroad, 60 at most. A career from before is brought over once: its honours as big as its league, its
     men's popularity afresh.)
-    - **Your three most popular** bring people through the gate -- against your league's usual, so a League 2 side's
-      barely-known men draw as well as a Premium League side's stars do there: from 40 between them on the old scale
-      (your three times 4.5 in League 2, 2.3 in League 1, 1.4 in the Championship, 0.82 in the Premium League: a
+    - **Your three most popular** bring people through the gate -- against your league's usual, so a Division 2 side's
+      barely-known men draw as well as a Premier Division side's stars do there: from 40 between them on the old scale
+      (your three times 4.5 in Division 2, 2.3 in Division 1, 1.4 in the National Division, 0.82 in the Premier Division: a
       league's usual side's three come to about 10, 19, 34 and 62, and came to 46, 44, 47 and 51 before), 1% more
       for every 3 points, up to 20% (the books say so: "Your stars' draw") -- and sell the shirts the same way (see
       **Shirt sales**).
@@ -1980,9 +1980,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       ten games rated; v104, its Player of the Season before), its best young player (21 or under), the Golden Boot
       (its top scorer, assists then rating to split a tie) and the Golden Glove (v110: the keeper with the most clean
       sheets, from ten games), and your own Player of the Year (from five). The league's Player of the Year one of
-      yours: the league pays the club four times the month's prize ($10,000 in League 2, up to $160,000 in the Premium
-      League), the fans love it (8% more of the league's usual following) and he's lifted -- in the review, the news
-      and the next Monday papers. The Golden Boot or Glove one of yours: twice the month's prize ($5,000 in League 2),
+      yours: the league pays the club four times the month's prize ($10,000 in Division 2, up to $160,000 in the Premier
+      Division), the fans love it (8% more of the league's usual following) and he's lifted -- in the review, the news
+      and the next Monday papers. The Golden Boot or Glove one of yours: twice the month's prize ($5,000 in Division 2),
       4% more fans, a lift; either way the winners are famous for it, and on the summer's first paper (THE LEAGUE).
       Any of these honours counts as a fine season when a man asks for a new deal.
     - **The club's records** (the Clubhouse's Club tab, CLUB RECORDS: a card each since v172): the most games and goals for the club, the
@@ -2007,7 +2007,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       0.1 a level.
     - **A coach** is rated 1 to 10 in half points; the better he is the more he costs (about $50 a week for a 1,
       $220 for a 5, $1,400 for a 10), and the best won't come to a small club (above 4 + 1.5 a league up: 5.5 in
-      League 2, 10 in the Premium League). Hiring needs the post empty (release the man in it first) and four
+      Division 2, 10 in the Premier Division). Hiring needs the post empty (release the man in it first) and four
       weeks' wages in the budget; releasing one pays him four weeks. Their wages go on the weekly bill.
     - **What he's good and poor at**: each is strong in some of his field and weak in some of it, by his rating --
       up to 3, two weak spots and nothing special; 4, one weak spot; 5, one of each; 6, one strength; 7 and 8, two
@@ -2024,32 +2024,45 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       FORM beside FOCUS.
     - **A career saved before**: its tactics coach becomes the defending coach, every coach gets what he's good and
       poor at, the men to hire are made again, and a focus on PHYSICAL becomes FITNESS (on MENTAL, BALANCED).
-  - **The cups.** League 2's clubs play only the league. League 1 and up play the **Coco Cup** (the league clubs' cup:
-    the 42 clubs of League 1, the Championship and the Premium League), the Championship and up the **Fashion Cup**
-    too (their 28), and the Premium League's top six play the next season's **Champions League** (the first season,
-    its six best), with ten clubs from abroad (made up, around the Premium League's best, a new squad each season).
-    - **Every round is on a Wednesday**, in the league week its calendar says: the Champions League's six group games
+  - **The cups.** Division 2's clubs play only the league. Division 1 and up play the **Coco Cup** (the league clubs'
+    cup: the 42 clubs of Division 1, the National Division and the Premier Division), the National Division and up the
+    **Fashion Cup** too (their 28), and the next season's **Continental Champions Cup** (v196: it was the Champions
+    League) is sixteen: the Premier Division's top four, one more of ours -- the holders if they aren't in already
+    (wherever they finished, whatever league they're in), else the fifth -- and eleven clubs from abroad. In a first
+    season it's the Premier Division's five strongest.
+    - **The clubs from abroad** (v196): **Madrid Royale** (ROY), **Catalunya Garnet** (CAT), **Madrid Athletics**
+      (ATH), **Paris Eiffel** (PAR), **Milan Centrale** (CEN), **Milan Red** (RED), **Bergamont Juvenile** (JUV),
+      **Bohemia Munich** (BOH), **Dortmund Yellow** (DOR), **Lisbon FC** (LIS) and **Istanbul FC** (IST), each in its
+      own colours (Madrid Royale all in white, Dortmund Yellow in yellow and black, and so on) and a new squad each
+      season at its level: the Premier Division's mid-table side and its own few points either side -- Madrid Royale
+      seven up, the best in the game; Bohemia Munich and Paris Eiffel six; Catalunya Garnet five; Milan Centrale four;
+      Madrid Athletics three; Dortmund Yellow two; Milan Red one; Bergamont Juvenile level; Lisbon FC one down and
+      Istanbul FC two. They play nothing else. A club in the leagues with one of their letters keeps them (the club
+      from abroad takes others), and none made since takes theirs. A career from before has its ten old clubs from
+      abroad renamed in place (Inter Vallera is Madrid Royale, and so on down the list: their new levels come with the
+      next season's squads) and the eleventh made.
+    - **Every round is on a Wednesday**, in the league week its calendar says: the Continental Champions Cup's six group games
       in weeks 4, 6, 8, 10, 12 and 14, its quarter-finals, semi-finals and final in 18, 21 and 26; the Coco Cup's six
       rounds in weeks 5, 9, 13, 15, 19 and 22; the Fashion Cup's five in 7, 11, 17, 20 and 24 -- none in the league's
-      first three weeks. A cup game is the week's first matchday on the hub (COCO R32, CL G1 and so on) when you're in
+      first three weeks. A cup game is the week's first matchday on the hub (COCO R32, CCC G1 and so on) when you're in
       that Wednesday's round; one you're not in is played on the way to Saturday.
     - **A tie is one game** at the home side's ground (the draw says who's at home), penalties if it's level. The
       Coco Cup's first round is ten ties, its 22 best clubs through on a bye; the Fashion Cup's twelve, with four
-      byes. The Champions League draws four groups of four from four pots by strength; each plays the others home
+      byes. The Continental Champions Cup draws four groups of four from four pots by strength; each plays the others home
       and away, and each group's winners are at home in the quarter-finals to another group's runners-up.
     - **The money**: the gate (or the away share) and a television bump for each game, and prize money for each round
       won -- the Coco Cup $5,000 for the first up to $200,000 for the final, the Fashion Cup $20,000 up to $500,000;
-      the Champions League $300,000 to be in it, $40,000 a group game won, $200,000 for getting through, then
+      the Continental Champions Cup $300,000 to be in it, $40,000 a group game won, $200,000 for getting through, then
       $350,000, $500,000 and $1.5m. No week's wages or partners' money: those are the league week's. The cup games
       count as appearances; their goals aren't the league's.
-    - **Where to see them**: the Clubhouse's Fixtures tab says how far you are in each, your Champions League group's
+    - **Where to see them**: the Clubhouse's Fixtures tab says how far you are in each, your Continental Champions Cup group's
       table, and has your cup ties among the league's games; the match report, the season review and the news too.
       A career from before the cups has none that season: they start with its next.
   - **Your phone rings on the first day of pre-season (v83)**, the window's first day: it's the chairman -- from now
     on transfers go through it (agents, other clubs, free agents) -- and TRANSFERS opens in the menu (ANSWER, then GOT
     IT). The transfer market is never bought. (It used to ring after your second game.)
   - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
-    70 to 79, once of a Premium League club, who'll play for the club he grew up with on under a third of his wage,
+    70 to 79, once of a Premier Division club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. He came home to play, not for the money: he never asks for a new deal, however well
     he does, and a new one keeps him on what he's on (v109). Where he plays and how are the luck of the draw, but
     he's never a keeper (v109). After matchday 5 a wonderkid asks to join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a
@@ -2116,7 +2129,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **What a club asks (v83)**: each club prices its own men, no two quite alike.
     - **His position (v116; v119 more so)**, as the real market has it: goals cost the most. A striker asks 80% more
       than a midfielder of the same rating and age, a winger 60% more, a defender a quarter less, a keeper half -- a
-      25-year-old rated 66 in League 2 about $79,000 as a striker, $70,000 on the wing, $44,000 in midfield, $33,000 at
+      25-year-old rated 66 in Division 2 about $79,000 as a striker, $70,000 on the wing, $44,000 in midfield, $33,000 at
       centre-back, $22,000 in goal. What he's worth to you (his VALUE) goes the same way. (v116's was an attacker 30%
       over a midfielder, a defender a fifth under and a keeper a third: about one rating point's worth -- a point is a
       third on a man's price -- so a striker a point below a midfielder, or at a club pricing him a little low, cost the
@@ -2136,9 +2149,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       of his potential, and asks more than the best of them. What it's heard is forgotten when the window shuts.
   - **Wages (v83)** are set by how good a man is when he signs (the wage a man of his rating earns), not haggled
     over, and they stay put. (v149: in the real game's money -- $2,000 a week at 55, $69,000 at 79: see **The real
-    game's money (v149)**. The figures below are from before it.) They climb with his rating faster from v120 -- a 52 (League 2's run of the mill) earns
-    $110 a week (it was $90), a 60 $280 ($190), a 68 $770 ($420), a 79 $3,020 ($1,200): about a fifth more for League
-    2's men, half again for League 1's, twice for the Championship's, two and a half times for the Premium League's,
+    game's money (v149)**. The figures below are from before it.) They climb with his rating faster from v120 -- a 52 (Division 2's run of the mill) earns
+    $110 a week (it was $90), a 60 $280 ($190), a 68 $770 ($420), a 79 $3,020 ($1,200): about a fifth more for Division
+    2's men, half again for Division 1's, twice for the National Division's, two and a half times for the Premier Division's,
     as ticket money grows far faster up the leagues than the old wages did. A save from before v120 puts every man's
     wage up the same way, in the world as well as your squad. A man who's come on a lot -- worth 30% more than he's paid, with more than this season
     left on his deal -- asks for a new one: NEW DEAL on the squad list (v171; it was WANTS A NEW DEAL), HE WANTS A NEW DEAL on his card, and
@@ -2184,17 +2197,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Squads, as the world is made** (v110): about three men in ten are youngsters of 17 to 22 (it was one in ten),
     the rest 18 to 34, most about 26 -- a new squad of fourteen has two to five of them, rated under what they'll
     become; across the league about three in ten.
-  - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premium League
+  - **Free agents** are mostly old hands past their best. They used to be any age from 18 to 34, up to Premier Division
     standard, the best of them kept in the pool from one summer to the next and the young ones growing while they
     waited, all for an ordinary wage.
     - **Who's out there.** Nobody wanted them (v178). Three in four of the men a summer brings are 29 to 35, two
       points under the level they played at for every year past 29; the rest are younger men nobody kept, a little
       under it and with next to nothing left to grow into. The level they played at was eight under a mid-table
-      side's in League 2 or League 1 (give or take three): of 3000 the middle man is rated 43, one in twenty 53 or
-      more, one in thirty at League 2's mid-table (55) or over. Players out of contract, released or let go join them.
+      side's in Division 2 or Division 1 (give or take three): of 3000 the middle man is rated 43, one in twenty 53 or
+      more, one in thirty at Division 2's mid-table (55) or over. Players out of contract, released or let go join them.
       (Till v178 it was four under, give or take four, a point and a half a year, and a sixth of them from the
-      Championship: the middle man 50, one in twenty 65, a third at League 2's mid-table or over -- a new career in
-      League 2, its nine averaging 50, could sign a dozen men at its league's mid-table or better for a wage.)
+      National Division: the middle man 50, one in twenty 65, a third at Division 2's mid-table or over -- a new career in
+      Division 2, its nine averaging 50, could sign a dozen men at its league's mid-table or better for a wage.)
     - **No young man with a future is left without a club.** One of 24 or under whose ceiling is 5 or more above him
       is signed by a club at his ceiling's level the day he's free (yours included, if you let his deal run out).
     - **A season without a club** he hardly grows -- little training, no games -- and loses his sharpness and his
@@ -2204,8 +2217,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
       sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. And a man who'd walk into most
       sides in your league knows it (v178): two weeks of his wage to sign for every point he's over its mid-table less
-      three (over 52 in League 2, 60 in League 1, 68 in the Championship, 76 in the Premium League), thirty weeks at
-      most, at any age and on top of the young man's. In League 2 a 52 of 29 asks $1,300 a week and nothing to sign;
+      three (over 52 in Division 2, 60 in Division 1, 68 in the National Division, 76 in the Premier Division), thirty weeks at
+      most, at any age and on top of the young man's. In Division 2 a 52 of 29 asks $1,300 a week and nothing to sign;
       a 58 of 29 $3,100 and $37,200 to sign; a 62 of 29 $6,500 and $130,000 (half a new career's budget); a 58 of 23
       $6,600 and $139,000.
     - **Signed on a free, nobody bids for him (v178).** Nobody wanted him while he was without a club, so nobody bids
@@ -2217,9 +2230,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Scouting** needs the scouts' house built (see **The campus**). What you know of a man at another club (or a
     free agent) goes in levels, as far as your scouts' house's level:
     - **None**: a rating range, 8 points wide, 6 and then 2 as you grow your scouting network; ? for the rest.
-    - **A report** (one scouting, $200 a man in League 2 up to $6,000 in the Premium League, or an assignment: your
+    - **A report** (one scouting, $200 a man in Division 2 up to $6,000 in the Premier Division, or an assignment: your
       scouts round a league's goalkeepers, defenders, midfielders or forwards): his exact rating and attributes, and
-      COULD BE -- the league his potential could take him to (a League 1 player, a Premium League star...).
+      COULD BE -- the league his potential could take him to (a Division 1 player, a Premier Division star...).
     - **A second** (SCOUT MORE on his card, a scouts' house at 2 or more): his potential within ten points, and the
       two things about his character that stand out most, a word each -- WORK (a model pro, a hard worker, cuts
       corners), LEARNS (quickly, slowly), BODY (robust, injury-prone), TEMPER (calm, volatile), DRIVE (ambitious,
@@ -2275,17 +2288,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **The computer clubs** buy from each other and from the free agents while the window's open (most of it in
     pre-season and the winter break, a little in the weeks between), bid for your players, and fill their squads up
     every summer. A club goes for a man if he'd come within what it spends on one man -- 60% of its money, the
-    Premium League's 65% -- haggled down as far as his club would settle (86% of the ask), and pays what it can, never
+    Premier Division's 65% -- haggled down as far as his club would settle (86% of the ask), and pays what it can, never
     more than the ask nor under that (v170: only for an ask under 60% of its money, at the ask, so a man of 92 or more
     asking $230M to $250M could never move between computer clubs).
     - **Who they pick.** Their best keeper and eight best outfielders on the day, but not always. Up to three men too
-      tired for a game (under 90% fit; under 78% in a big one: the Champions League, a cup's last two rounds, the
+      tired for a game (under 90% fit; under 78% in a big one: the Continental Champions Cup, a cup's last two rounds, the
       playoffs) sit it out for a fresh man not much worse. Their young men (21 and under) get a start now and then in
-      the league, and three of them once the league's settled for the club (promotion sure -- in the Premium League a
-      Champions League place -- or the top six out of reach with relegation out of reach too: by the last few weeks a
+      the league, and three of them once the league's settled for the club (promotion sure -- in the Premier Division
+      a Continental Champions Cup place, the top four (v196: the top six before) -- or the top six out of reach (the
+      Premier Division's top five, as the fifth may go in) with relegation out of reach too: by the last few weeks a
       good few clubs have nothing left to play for). In a cup below its level a club rests its regulars: two leagues
-      above the cup's lowest (the Premium League in the Coco Cup), four of its eight are youngsters (or the reserves),
-      a league above, one or two. The Champions League, a cup's last two rounds and the playoffs get their best.
+      above the cup's lowest (the Premier Division in the Coco Cup), four of its eight are youngsters (or the reserves),
+      a league above, one or two. The Continental Champions Cup, a cup's last two rounds and the playoffs get their best.
       When you play them live, the nine they picked are the nine you face. Each has its own style, with shapes and widths to suit it: a wing side
     plays wide with three up, a counter-attacking side compact, a direct counter deep and compact without the ball.
     The better leagues have more control and gegenpressing sides, the lower ones more direct play and deep counters.
@@ -2295,11 +2309,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     ink (in light, round a dark one). Its colours are the kit's until you pick your own. Every other club's is drawn
     from its name and colours, the same each time. The crests sit beside the short names on the scoreboard, and
     yours by the club's name on the campus and on its clubhouse and academy. Your short name is yours alone: no other club is given it.
-  - **Money.** Tickets, the club's partners (local firms: $15,000 a week in League 2, up to $1.5M in the Premium
-    League -- v149; it was $300), TV ($45,000 a week in League 2 to $3.2M; it was $150 to $15,000), shirt sales, and the
-    ground's boards and sponsors (below). Prize money comes at the end of the season: $500,000 for winning League 2, up to
-    $60M for the Premium League (it was $12,000 and $1.5M), less the lower you finish -- but never under a tenth of the
-    champions' (v170: 14th in League 2 had $7,300, under two days' wages for a season's work; it's $50,000), and on a
+  - **Money.** Tickets, the club's partners (local firms: $15,000 a week in Division 2, up to $1.5M in the Premier
+    Division -- v149; it was $300), TV ($45,000 a week in Division 2 to $3.2M; it was $150 to $15,000), shirt sales, and the
+    ground's boards and sponsors (below). Prize money comes at the end of the season: $500,000 for winning Division 2, up to
+    $60M for the Premier Division (it was $12,000 and $1.5M), less the lower you finish -- but never under a tenth of the
+    champions' (v170: 14th in Division 2 had $7,300, under two days' wages for a season's work; it's $50,000), and on a
     line of its own in the week's money, League prize money. All of it in the real game's money
     since v149: see **The real game's money (v149)**. The broadcast share follows
     your league position, and the partners' money grows when you go up. The ground doesn't. The Stadium's Money tab
@@ -2330,11 +2344,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       rounded to the $1,000, a negotiation in 9% steps. **A wage**: $2,000 a week at 55, each point 16% more -- $1,110
       at 51, $8,730 at 65, $38,110 at 75, $68,710 at 79, $166,350 at 85, $347,560 at 90, $626,660 at 94 (it was $150 at
       55 and $3,020 at 79): a new club's 15 on about $10,000 to $17,000 a week, a great side's 21 on $3.5M. A coach
-      twenty times what he was ($1,000 to $20,000 a week). **Round it**: the TV ($45,000 a week in League 2, $250,000,
+      twenty times what he was ($1,000 to $20,000 a week). **Round it**: the TV ($45,000 a week in Division 2, $250,000,
       $900,000, $3.2M -- it was $150, $500, $1,800 and $15,000), the partners ($15,000, $60,000, $250,000, $1.5M -- $300
       to $9,000), a seat ($25, $30, $40, $60 -- $5 to $20), the league prizes ($500,000, $3M, $15M, $60M -- $12,000 to
-      $1.5M), the cups (the Coco Cup $50,000 to $400,000 a round won, the Fashion Cup $500,000 to $5M, the Champions
-      League $12M to be in it, $2.5M a group game won, $8M, $10M and $15M for the knockout rounds), the computer clubs'
+      $1.5M), the cups (the Coco Cup $50,000 to $400,000 a round won, the Fashion Cup $500,000 to $5M, the Continental Champions
+      Cup $12M to be in it, $2.5M a group game won, $8M, $10M and $15M for the knockout rounds), the computer clubs'
       budgets ($400,000, $3M, $25M, $150M at the summer's reset -- the richest can hold about $345M and sign a $200M
       man), the sponsors' fees (50 times for a local business to 100 for a world name), the windfalls 27 times, a new
       club's bank $250,000 ($20,000). What it costs: the buildings (the tables below), scouting a man $3,000 to $100,000
@@ -2346,15 +2360,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 
       | A season, measured | The change list | v149 |
       | --- | --- | --- |
-      | A mid-table League 2 club, before prizes and transfers | ~$1.5M | $1.4M |
-      | ...League 1 | ~$10M | $9.1M |
-      | ...the Championship | ~$38M | $33.7M |
-      | ...the Premium League | ~$162M | $140.6M |
+      | A mid-table Division 2 club, before prizes and transfers | ~$1.5M | $1.4M |
+      | ...Division 1 | ~$10M | $9.1M |
+      | ...the National Division | ~$38M | $33.7M |
+      | ...the Premier Division | ~$162M | $140.6M |
       | A new club's first season, no transfers (six runs) | ~$1.8M | $1.8M (14th) to $2.9M (9th): the TV and the prize go by the table |
-      | The computer clubs' paid moves, two seasons | every band | 47, three of men rated 85+ in the Premium League ($65M on average, $90.5M the most) |
+      | The computer clubs' paid moves, two seasons | every band | 47, three of men rated 85+ in the Premier Division ($65M on average, $90.5M the most) |
 
-      (Before, a mid-table club made $13,000 a season in League 2 and $5.6M in the Premium League, and a new club
-      $70,000 in its first; the gate was most of a club's money from League 1 up. Now the TV is.) **The hometown hero
+      (Before, a mid-table club made $13,000 a season in Division 2 and $5.6M in the Premier Division, and a new club
+      $70,000 in its first; the gate was most of a club's money from Division 1 up. Now the TV is.) **The hometown hero
       (HOME TO STAY)** is never sold: no club bids for him, he can't be listed or loaned out, he never asks to leave,
       and on the selling screen he says so -- "He came home to finish his career here. He won't be sold." He plays,
       renews, retires or goes when his deal ends as anyone does. **A career from before** is put into the new money
@@ -2392,7 +2406,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       had your whole nine picked again for you (the best of them by rating, him in it if he was good enough) and was
       listed twice, so a lineup you'd set was gone after a signing.
     - **His agent's cut (v156).** A man from your academy sold -- a bid accepted, or the board's sale -- his agent takes a
-      tenth of the fee; the bid says so ("academy: $450,000 after his agent"). Measured (League 2, an academy at level 3
+      tenth of the fee; the bid says so ("academy: $450,000 after his agent"). Measured (Division 2, an academy at level 3
       from the start, three seasons with nobody sold): the club's surplus about $1.66M a season; an academy striker or
       winger worth a median $994,000 at 18, $893,000 after a season of his first-team wage, the rest $336,000; the best
       three $2M to $2.6M -- more than a season's surplus each. The striker and winger premium is the real game's and
@@ -2402,8 +2416,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       league or more up costs him 0.6 of his mood (a point if he wanted out), and he says so; a Loyal Servant's glad to
       stay. When no bid comes, a club may be seen watching him (the news; once a window): a bid or a watching club in
       about 86% of windows for a man eight over his level, where a bid alone, as it was, came in about half.
-    - **The board's limit (v150).** What the board lets the club owe -- about two weeks' income: $150,000 in League 2,
-      $1M in League 1, $3M in the Championship, $15M in the Premium League -- is read at last (it was set, and nothing
+    - **The board's limit (v150).** What the board lets the club owe -- about two weeks' income: $150,000 in Division 2,
+      $1M in Division 1, $3M in the National Division, $15M in the Premier Division -- is read at last (it was set, and nothing
       looked at it). Over it, nothing is bought: no signings, no loans, no building or decorating ("The board won't let
       you spend"), and THE BOARD says how far over on the hub. Still over it when the season ends, prize money and all,
       and the board sells your most valuable man -- never the hometown hero -- for what he's worth, to the club near
@@ -2425,8 +2439,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       `python3 tools/clips/make_stand_layers.py`, which draws them with `tools/sprites/make_pitch_art.py`'s own code
       and seats the supporters (v187). Since v187 exactly that share of the seats is taken, the first so many in the
       ground's own order, not each seat on a throw of the dice.
-    - **Tickets (v108).** The going rate for a seat is $25 in League 2, $30 in League 1, $40 in the Championship and $60
-      in the Premium League (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
+    - **Tickets (v108).** The going rate for a seat is $25 in Division 2, $30 in Division 1, $40 in the National Division and $60
+      in the Premier Division (v149; it was $5 -- v110; $7 in v108 -- $10, $14 and $20, and before that $3, $5, $8 and
       $14), and a new career starts on it. With the
       field and bleachers it's one price for the lot. From the big bleachers on, each stand has its own -- the main
       stand (the North) a fifth over the going rate, the South at it, the ends a fifth under (a quarter while they're
@@ -2436,13 +2450,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       club (800 seats, the grand stadium) at seven. The fans who'd come at the going rate share out over the stands by
       their seats, and each stand thins the dearer it is against its own rate (fuller the cheaper, to its seats -- and
       never past its share of the fans: see **The turnout**); the
-      premium seats sell to the money in the town -- about a fifth of them in League 2, all of them in the Premium
-      League -- and mind the price more. The fans see the prices too: dearer than the going rate, their loyalty slips
+      premium seats sell to the money in the town -- about a fifth of them in Division 2, all of them in the Premier
+      Division -- and mind the price more. The fans see the prices too: dearer than the going rate, their loyalty slips
       (more after a defeat); cheaper, it grows. A price you've never touched goes up with the going rate when you're
       promoted; one you've set stays. On the Money tab, each section: its seats and going rate, its price with − and
       +, how full it'll be, how many and what it takes; and BACK TO THE GOING RATE. (There's no longer a rule that the
       price can only go up while the ground's 85% full.) A save from before v108 left at the old going rate moves to
-      the new one. In money: a first season in League 2 now ends with $140,000 to $172,000 in the bank, against
+      the new one. In money: a first season in Division 2 now ends with $140,000 to $172,000 in the bank, against
       $84,000 to $87,000 on v107 (three simulated seasons each). (v120's turnout and wages: see below.)
     - **The turnout (v120).** The club's fans are everyone who'd ever come: the most a game can bring, not who
       comes. A league game at the going rate brings about seven in ten of them -- up to a tenth more top of the league,
@@ -2452,7 +2466,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       only up to its share of the fans. The Money tab's projected attendance says how full the ground will be and
       what share of the fans a league game brings. (Before v120 every fan came to every game, and a popular side or
       cheap seats brought more people than the club had fans: a new career's 1,000 fans filled 1,150 to 1,300 seats.)
-      Two simulated seasons from a new career in League 2 (four careers, doing nothing in the market): the first ends
+      Two simulated seasons from a new career in Division 2 (four careers, doing nothing in the market): the first ends
       with $83,000 to $107,000 in the bank (v119: $125,000 to $169,000; v120's wages count in this too), and the second
       adds $82,000 to $95,000 (v119: $114,000 to $148,000).
     - **The money** (v106), back at the club after a match you played, after the press conference: a line at a time,
@@ -2463,7 +2477,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Shirt sales** come in at the start of each week, on its Monday (v105: they used to come with a matchday's
       money), every week of the year, pre-season and the winter break too, and the Monday papers say what came in
       (THE CLUB SHOP: the week's sales, the best sellers, the season's shirts so far). Your fans buy the shirt --
-      $3.30 a fan a week in League 2, up to $5.40 in the Premium League (v170: fifteen times what it was, 22 to 36
+      $3.30 a fan a week in Division 2, up to $5.40 in the Premier Division (v170: fifteen times what it was, 22 to 36
       cents, never rescaled with v149's money; a new career's 1,000 fans: about $3,300 a week) -- more the more popular your three most popular men (0.65 and a hundredth of their popularity against
       the league's usual, as the gate has it: from 15% less to 60% more; see **Popularity**) and with a happy dressing room (6% a point of the side's mood either side
       of settled). Who sells the most is shared out by popularity, squared.
@@ -2957,6 +2971,17 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v196: the Continental Champions Cup.** The career's top competition is the **Continental Champions Cup** (CCC
+  on the fixtures; it was the Champions League) and the leagues are **Division 2**, **Division 1**, the **National
+  Division** and the **Premier Division** (League 2, League 1, the Championship and the Premium League before; on a
+  man's record D2, D1, ND and PD). The clubs from abroad are eleven: Madrid Royale, Catalunya Garnet, Madrid
+  Athletics, Paris Eiffel, Milan Centrale, Milan Red, Bergamont Juvenile, Bohemia Munich, Dortmund Yellow, Lisbon FC
+  and Istanbul FC, each in its own colours and letters, Madrid Royale the best side in the game. With them go the
+  Premier Division's top four and one more of ours, the holders if they aren't in already, else the fifth: sixteen,
+  in four groups of four as before. A season's review says TOP FOUR for third and fourth (TOP SIX before), and a
+  computer club in the Premier Division has something to play for while fifth is in reach (sixth before). A saved
+  career has its ten old clubs from abroad renamed in place (ids, squads and all) and the eleventh added; one saved at
+  a season's end sends the top four and the fifth, as the holders aren't on its record. See **The cups**.
 - **v195: every rating shows.** The stretched rating a card shows is worked out from a man's exact rating, the
   fraction his stats put on the whole number included, so every number from 60 to 99 can come up: stretched from the
   whole numbers alone, 63, 69, 75, 81, 87 and 93 never did. Nobody's shown rating moves by more than a point. A side's

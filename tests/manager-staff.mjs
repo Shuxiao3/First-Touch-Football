@@ -65,8 +65,8 @@ r = await K(`(()=>{ const d=CAREER.data; d.lv.train=1; d.lv.academy=1; d.staff=[
   d.lv.academy=0; const y0=mgHireCoach(d,mk('youth',4).id); d.lv.academy=1; const y1=mgHireCoach(d,mk('youth',4).id);
   return { hires, dup, big, poor, y0, y1, kinds:d.staff.map(c=>c.k).join(','), cap1:staffCap(d), news:d.news[0].t }; })()`);
 info('hiring: ' + JSON.stringify(r));
-ok(r.hires.every(e => e === null) && /You have a finishing coach: release him first/.test(r.dup) && /won’t come to League 2/.test(r.big) && /Not enough budget/.test(r.poor),
-  'all five posts from the start, a level-1 training pitch or not; one in each ("' + r.dup + '"); the best won\'t come to League 2 (above ' + r.cap1 + '); four weeks\' wages in the budget');
+ok(r.hires.every(e => e === null) && /You have a finishing coach: release him first/.test(r.dup) && /won’t come to Division 2/.test(r.big) && /Not enough budget/.test(r.poor),
+  'all five posts from the start, a level-1 training pitch or not; one in each ("' + r.dup + '"); the best won\'t come to Division 2 (above ' + r.cap1 + '); four weeks\' wages in the budget');
 ok(/needs the academy/.test(r.y0) && r.y1 === null && r.kinds === 'fit,tec,fin,gk,youth' && /joins Coach Town as youth coach/.test(r.news), 'the youth coach with the academy; the hired man makes the news (' + r.news + ')');
 r = await K(`(()=>{ const d=CAREER.data, f=computeFinance(d).wageWk, pw=d.roster.reduce((a,p)=>a+(p.wage||0),0), sw=d.staff.reduce((a,c)=>a+c.wage,0);
   const c=d.staff.find(x=>x.k==='fit'), b0=d.budget, e=mgReleaseCoach(d,c.id); return { bill:f===pw+sw, sw, e, paid:b0-d.budget, wage4:c.wage*4, left:d.staff.length, news:d.news[0].t }; })()`);
