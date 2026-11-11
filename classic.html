@@ -2362,24 +2362,25 @@
   const TAC={G:{style:'neutral',def:'neutral',off:'neutral',brk:null,width:widthObj()}, R:{style:'neutral',def:'neutral',off:'neutral',brk:null,width:widthObj()}};
   // THE TEAM STYLES: one choice for a side's whole game -- how it plays with the ball (off: the engine's attacking style)
   // and how it defends without it (def: its block -- 'press' high, a 'neutral' mid block, a 'lowblock' sitting deep);
-  // brk: how a counter-attacking side breaks (fluid: on the carry and short, quick passes; direct: long, in behind)
+  // brk: how a counter-attacking side breaks (v204: COUNTER-ATTACK's mixed -- in behind when the run's on, else on the
+  // carry and in short, quick passes; till v204 there were two counters, FLUID COUNTER's on the carry and short and
+  // DIRECT COUNTER's long and in behind, and a side kept as either is a COUNTER-ATTACK now: styleKey)
   const STYLE_TAC={
     neutral: {off:'neutral', def:'neutral'},
     gegen:   {off:'gegen',   def:'press'},
     control: {off:'control', def:'neutral'},
     wing:    {off:'wing',    def:'neutral'},
     direct:  {off:'direct',  def:'neutral'},
-    fluid:   {off:'counter', def:'neutral',  brk:'fluid'},
-    dcounter:{off:'counter', def:'lowblock', brk:'direct'}};
-  const STYLE_LIST=[['neutral','BALANCED'],['gegen','GEGENPRESS'],['control','CONTROL POSSESSION'],['wing','WING PLAY'],['direct','DIRECT'],['fluid','FLUID COUNTER'],['dcounter','DIRECT COUNTER']];
+    counter: {off:'counter', def:'lowblock', brk:'mixed'}};
+  const STYLE_LIST=[['neutral','BALANCED'],['gegen','GEGENPRESS'],['control','CONTROL POSSESSION'],['wing','WING PLAY'],['direct','DIRECT'],['counter','COUNTER-ATTACK']];
   const styleName=k=>(STYLE_LIST.find(s=>s[0]===k)||STYLE_LIST[0])[1];
   // a style as saved before the posture went into it (a style, and a posture beside it): tiki-taka keeps the ball now as
-  // CONTROL POSSESSION, a counter that sat deep is a DIRECT COUNTER and one that didn't FLUID, and a balanced side that
-  // pressed high GEGENPRESS; anything else, BALANCED
+  // CONTROL POSSESSION, a counter a COUNTER-ATTACK, and a balanced side that pressed high GEGENPRESS; anything else,
+  // BALANCED. (v204: FLUID COUNTER and DIRECT COUNTER, from v116 to v203, are COUNTER-ATTACK too.)
   function styleKey(s,posture){
+    if(s==='fluid'||s==='dcounter') return 'counter';
     if(STYLE_TAC[s]&&(s!=='neutral'||posture!=='press')) return s;
     if(s==='tiki') return 'control';
-    if(s==='counter') return posture==='lowblock'?'dcounter':'fluid';
     return posture==='press'?'gegen':'neutral'; }
   // (a style picked sets its team instructions too -- TI_STYLE -- and the block the side defends in follows them: tiPosture)
   function setStyle(t,s,posture){ const k=styleKey(s,posture), S=STYLE_TAC[k]; Object.assign(TAC[t],{style:k, off:S.off, def:S.def, brk:S.brk||null});
@@ -2396,8 +2397,7 @@
     control:'Keep the ball: three men always close for a pass, short passes and patience, few long balls and few runs in behind until the chance is clear. Without it, a mid block, and straight back at the ball for two seconds when it\u2019s lost.',
     wing:'Get it wide and get it in: wingers high on the touchlines, full-backs (where the shape has them) overlapping on the ball\u2019s side, early crosses, the forwards attacking the near and far posts. Without it, a mid block.',
     direct:'Get it forward quickly: long balls up to the forwards on their last line, the midfielders up behind them for the second ball, the keeper kicking long. Without it, a mid block.',
-    fluid:'A mid block with one forward up on halfway. The moment it\u2019s won the wide men and a midfielder sprint up past the ball and it goes forward on the carry and in short, quick passes, for as long as the break keeps going.',
-    dcounter:'Two tight banks at the edge of the box with one forward up on halfway. The moment it\u2019s won it goes long, in behind, for the forwards and the wide men racing up; the keeper kicks long.'};
+    counter:'A compact block a little deep, the midfield on its line of engagement, one forward up on halfway. The moment it\u2019s won it goes: in behind when the run\u2019s on, else forward on the carry and in short, quick passes, the wide men and a midfielder sprinting up past the ball.'};
 
   // when a team loses the ball, remember whether it was lost in the OPPONENT's half.
   // (used by low-block teams: if lost high, hold a neutral shape until the ball crosses
@@ -3206,15 +3206,15 @@
   // runs in behind, a false nine drops in). (Before, DEFENDERS, MIDFIELD, FORWARDS and WIDE MEN were set WITH THE BALL;
   // a career's or a club's settings are dropped as it's loaded: tiClean keeps only TI_KEYS.)
   const TI_RUNS={druns:'support', mruns:'bal', aruns:'bal', wide:'bal'};
-  // what each style plays to, over the defaults: GEGENPRESS high and at them; a DIRECT COUNTER deep, the midfield on its
-  // line of engagement
-  const TI_STYLE={neutral:{}, control:{}, wing:{}, direct:{}, fluid:{},
+  // what each style plays to, over the defaults: GEGENPRESS high and at them; a COUNTER-ATTACK a little deep, the midfield
+  // on its line of engagement
+  const TI_STYLE={neutral:{}, control:{}, wing:{}, direct:{},
     gegen:{dl:46, loe:68, dtk:'tackle', mtk:'tackle', aline:'press'},
-    dcounter:{dl:20, loe:34, eng:'mid'}};
+    counter:{dl:24, loe:42, eng:'mid'}};   // (v204: COUNTER-ATTACK between where FLUID COUNTER, 32 and 54, and DIRECT COUNTER, 20 and 34, sat)
   // HOW A SIDE PLAYS OUT FROM THE BACK comes with its style: CONTROL POSSESSION short (the keeper to the nearest man who's
-  // free, the back line split wide for it), DIRECT and a DIRECT COUNTER long (the keeper launches it up to the forwards,
-  // the back line looks for them), the rest mixed (short when it's on, long when it isn't)
-  const BUILD_STYLE={control:'short', direct:'long', dcounter:'long'};
+  // free, the back line split wide for it), DIRECT long (the keeper launches it up to the forwards, the back line looks for
+  // them), the rest mixed (short when it's on, long when it isn't) -- a COUNTER-ATTACK too (v204; DIRECT COUNTER's was long)
+  const BUILD_STYLE={control:'short', direct:'long'};
   const buildOfStyle=s=>BUILD_STYLE[styleKey(s||'neutral')]||'mixed';
   const buildOf=t=>buildOfStyle(TAC[t]&&TAC[t].style);
   function tiDefault(style){ const o={dl:32, loe:54}; for(const k of TI_KEYS) o[k]=TI_OPTS[k].dflt; return Object.assign(o, TI_STYLE[styleKey(style||'neutral')]||{}); }
@@ -3320,8 +3320,7 @@
     control:'short passes and patience -- three men always close for a pass, few long balls, few runs in behind till the chance is clear',
     wing:'get it wide and get it in -- wingers high on the touchlines, full-backs overlapping, early crosses for the posts',
     direct:'long balls up to the forwards on their last line, the midfield up behind them for the second ball',
-    fluid:'the moment it’s won, the wide men and a midfielder sprint past the ball and it goes forward on the carry and in quick, short passes',
-    dcounter:'the moment it’s won, long and in behind, for the forwards and the wide men racing up'};
+    counter:'the moment it’s won it goes -- in behind when the run’s on, else forward on the carry and in quick, short passes, the wide men and a midfielder sprinting past the ball'};
   function tiWithHtml(attr,style){ const k=styleKey(style||'neutral');
     return '<div class="tiWith"><p>Nothing to set with the ball: each man plays to his own style -- a wing-back gets forward, a poacher runs in behind -- and the side to its style.</p>'
       +'<p><b>'+styleName(k)+':</b> '+(STYLE_WITH[k]||STYLE_WITH.neutral)+'.</p>'
@@ -3441,13 +3440,13 @@
   // (then it's kept with the club: clubSide, saveClubSides)
   const CLUBS=[
     {id:'ARS',name:'Arsenal',           form:'3-2-3', style:'control', str:1.2, home:['#d4202a','#ffffff','#ffffff'], away:['#f2d23c','#1d2b5c','#1d2b5c']},
-    {id:'AVL',name:'Aston Villa',       form:'3-4-1', style:'fluid', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
+    {id:'AVL',name:'Aston Villa',       form:'3-4-1', style:'counter', str:0.8, home:['#7a1e3c','#8fc5ea','#ffffff'], away:['#8fc5ea','#7a1e3c','#7a1e3c']},
     {id:'BOU',name:'Bournemouth',       form:'3-3-2', style:'gegen', str:0.5, home:['#c8102e','#141414','#141414'], away:['#f4f4f4','#c8102e','#f4f4f4']},
     {id:'BRE',name:'Brentford',         form:'4-2-2', style:'direct', str:0.3, home:['#e30613','#ffffff','#141414'], away:['#f5d000','#13294b','#13294b']},
     {id:'BHA',name:'Brighton',          form:'3-2-1-2', style:'control', str:0.4, home:['#0057b8','#ffffff','#ffffff'], away:['#f9e547','#0057b8','#0057b8']},
     {id:'CHE',name:'Chelsea',           form:'3-2-2-1', style:'wing', str:0.4, home:['#034694','#ffffff','#034694'], away:['#f5f5f5','#034694','#f5f5f5']},
     {id:'COV',name:'Coventry City',     form:'3-3-2', style:'neutral', str:0.0, home:['#7cc3ec','#ffffff','#ffffff'], away:['#1b2a4a','#7cc3ec','#1b2a4a']},
-    {id:'CRY',name:'Crystal Palace',    form:'4-3-1', style:'dcounter', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
+    {id:'CRY',name:'Crystal Palace',    form:'4-3-1', style:'counter', str:0.1, home:['#1b458f','#c4122e','#1b458f'], away:['#f2f2f2','#c4122e','#f2f2f2']},
     {id:'EVE',name:'Everton',           form:'3-3-2', style:'direct', str:0.2, home:['#003399','#ffffff','#ffffff'], away:['#f5a623','#141414','#141414']},
     {id:'FUL',name:'Fulham',            form:'3-4-1', style:'neutral', str:0.2, home:['#ffffff','#141414','#141414'], away:['#141414','#cc0000','#141414']},
     {id:'HUL',name:'Hull City',         form:'3-1-2-2', style:'neutral', str:-0.2,home:['#f5a12d','#141414','#141414'], away:['#ffffff','#f5a12d','#ffffff']},
@@ -3457,8 +3456,8 @@
     {id:'MCI',name:'Manchester City',   form:'4-1-3', style:'control', str:1.1, home:['#6cabdd','#ffffff','#ffffff'], away:['#1c2c5b','#6cabdd','#1c2c5b']},
     {id:'MUN',name:'Manchester United', form:'4-2-2', style:'wing', str:0.9, home:['#da291c','#ffffff','#ffffff'], away:['#f2f2f2','#da291c','#141414']},
     {id:'NEW',name:'Newcastle United',  form:'3-3-2', style:'gegen', str:0.3, home:['#241f20','#ffffff','#241f20'], away:['#e8e8e8','#241f20','#e8e8e8']},
-    {id:'NFO',name:'Nottingham Forest', form:'4-2-2', style:'dcounter', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
-    {id:'SUN',name:'Sunderland',        form:'4-1-2-1', style:'fluid', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
+    {id:'NFO',name:'Nottingham Forest', form:'4-2-2', style:'counter', str:0.0, home:['#dd0000','#ffffff','#ffffff'], away:['#f2f2f2','#dd0000','#dd0000']},
+    {id:'SUN',name:'Sunderland',        form:'4-1-2-1', style:'counter', str:0.4, home:['#eb172b','#ffffff','#141414'], away:['#0b1d3a','#eb172b','#0b1d3a']},
     {id:'TOT',name:'Tottenham Hotspur', form:'3-1-3-1', style:'wing', str:0.1, home:['#ffffff','#132257','#132257'], away:['#132257','#ffffff','#132257']}
   ];
   // ============ CLUBS (exhibition, v198): the Continental Champions Cup's twelve ============
@@ -3470,8 +3469,8 @@
   const CC_CLUBS=[
     {id:'ROY', name:'Madrid Royale',      bias:7,  colors:['#f4f4f4','#5a2d82'], alt:true,  land:'es', form:'3-1-3-1', style:'control'},
     {id:'CAT', name:'Catalunya Garnet',   bias:5,  colors:['#7a1e3c','#1d4fa3'], alt:false, land:'es', form:'3-2-3',   style:'control'},
-    {id:'ATH', name:'Madrid Athletics',   bias:3,  colors:['#d4202a','#1d4fa3'], alt:false, land:'es', form:'4-2-2',   style:'dcounter'},
-    {id:'PAR', name:'Paris Eiffel',       bias:6,  colors:['#132257','#d4202a'], alt:true,  land:'fr', form:'4-1-3',   style:'fluid'},
+    {id:'ATH', name:'Madrid Athletics',   bias:3,  colors:['#d4202a','#1d4fa3'], alt:false, land:'es', form:'4-2-2',   style:'counter'},
+    {id:'PAR', name:'Paris Eiffel',       bias:6,  colors:['#132257','#d4202a'], alt:true,  land:'fr', form:'4-1-3',   style:'counter'},
     {id:'CEN', name:'Milan Centrale',     bias:4,  colors:['#1d4fa3','#161616'], alt:false, land:'it', form:'3-1-2-2', style:'direct'},
     {id:'RED', name:'Milan Red',          bias:1,  colors:['#d4202a','#161616'], alt:false, land:'it', form:'4-3-1',   style:'wing'},
     {id:'JUV', name:'Bergamont Juvenile', bias:0,  colors:['#161616','#f4f4f4'], alt:false, land:'it', form:'3-3-2',   style:'neutral'},
@@ -3697,7 +3696,7 @@
       if(FORM_GONE[formWas9(o.form)]&&Array.isArray(li.atk)&&li.atk.length===OUTFIELD) li.atk=mapShapeOrder(formWas9(o.form),f,li.atk,li.atk.map(nat));
       if(o.dform&&FORM_GONE[formWas9(o.dform)]&&Array.isArray(li.def)&&li.def.length===OUTFIELD) li.def=mapShapeOrder(formWas9(o.dform),df,li.def,li.def.map(nat));
       return {squad:o.squad, lineup:o.lineup, form:f, dform:df, ti:o.ti&&typeof o.ti==='object'?o.ti:null,
-        style:STYLE_TAC[o.style]?o.style:null, width:o.width||null};   // (its team instructions, if you've changed its style's: setTI cleans them)
+        style:STYLE_TAC[o.style]?o.style:(o.style==='fluid'||o.style==='dcounter')?'counter':null, width:o.width||null};   // (v204: either counter, a COUNTER-ATTACK)   // (its team instructions, if you've changed its style's: setTI cleans them)
     }
     return {squad:clubSquadGen(clubById(id)), lineup:defaultLineup(), form:clubById(id).form, dform:null, ti:null, style:null, width:null};
   }
@@ -10291,7 +10290,7 @@
     else if(off==='wing'){ M.cross=1.35; M.carry=1.1; M.crossLead=0.2; }    // (the forwards attack the box as he shapes to cross)
     else if(off==='counter'&&!tr){ M.risk=1.1; M.patience=6; M.fwd=1.1; }        // (settled: no frills -- forward when it's on, no long spells on it)
     if(tr){ M.fwd*=1.6; M.tempo*=0.45; M.carry*=1.3; M.risk*=0.7; M.range*=1.25; M.patience=2; M.gain=3;   // (on the break, every yard counts)
-      if(brk==='fluid'){ M.carry*=1.15; M.range*=0.85; } else if(brk==='direct'){ M.range*=1.2; M.fwd*=1.15; M.risk*=0.85; } }   // (FLUID runs it and plays it short; DIRECT goes long)
+      if(brk==='mixed'){ M.carry*=1.07; M.fwd*=1.07; M.risk*=0.92; } }   // (v204: COUNTER-ATTACK half way between FLUID's running it and playing it short, carry 1.15 and range 0.85, and DIRECT's going long, range 1.2, forward 1.15 and risk 0.85)
     const pw=posOf(p,'atk');
     // THE BUILD-UP (the style's: buildOf): a back-line man on it in our half plays it short and safe, or looks long
     if(roleIn(p,'atk')==='DEF' && (atkOf(p.team)>0?p.x:FW-p.x)<FW*0.5){ const b=buildOf(p.team);
@@ -10452,8 +10451,8 @@
     // forwards for a direct one
     const sty=TAC[p.team]?TAC[p.team].off:'neutral', fwdD=C.atk*(tx-p.x);
     if(sty==='control') v*= d<320?1.15 : d>520?0.76 : 1;
-    else if(sty==='counter'&&transitionT[p.team]>0){ const bk=TAC[p.team].brk;                       // on the break: a DIRECT one in behind, a FLUID one short and on
-      if(bk==='direct'&&fwdD>350&&(q.role==='ATT'||L.running)) v*=1.35; else if(bk==='fluid'&&fwdD>0&&d<360) v*=1.15; }
+    else if(sty==='counter'&&transitionT[p.team]>0){                                                // on the break: in behind when the run's on, else short and on (v204: one counter; DIRECT's 1.35 in behind, FLUID's 1.15 short)
+      if(fwdD>350&&(q.role==='ATT'||L.running)) v*=1.25; else if(fwdD>0&&d<360) v*=1.1; }
     else if(sty==='wing'){ const wideQ=Math.abs(ty-YC)>FH*0.28, wideP=Math.abs(p.y-YC)>FH*0.28;
       if(wideQ&&!wideP) v*=1.15; }                                                      // out to the flanks
     else if(sty==='direct'){ if(fwdD>350&&(q.role==='ATT'||L.running)) v*=1.35; else if(fwdD<0) v*=0.85;
@@ -10876,7 +10875,7 @@
   };
   // a side's settings now: a counter-attacking side that's just won it goes for it
   function stylePlan(team){ const off=TAC[team]?TAC[team].off:'neutral', S=STYLE_PLAN[off]||STYLE_PLAN.neutral;
-    return (off==='counter'&&transitionT[team]>0) ? Object.assign({},S,{runK:TAC[team].brk==='fluid'?2.2:2.6, restMid:false, wideAdv:440, sup:TAC[team].brk==='fluid'?2:1, brk:true}) : S; }   // (FLUID keeps a man near him for the short one)
+    return (off==='counter'&&transitionT[team]>0) ? Object.assign({},S,{runK:2.4, restMid:false, wideAdv:440, sup:2, brk:true}) : S; }   // (v204: one counter -- FLUID's 2.2 and a man near him, DIRECT's 2.6 and none)   // (FLUID keeps a man near him for the short one)
   const PIVOT_GAP=[320,80];   // (v132: the pivot off the back line, px: settled, and more building from the back -- see teamPlan)
   const SUP_MID=0.8;          // (v132: what a support spot 6 to 11 m ahead of the ball costs a central midfielder in the build-up: see planSupport)
   const MID_UP=10*MK;         // (v132: how far short of his spot a midfielder sprints to it, building up: see teamPlan)
@@ -16765,10 +16764,10 @@
     return s; }
   function cwStyleFor(tier,rng){
     const r=rng();
-    const T = tier>=4 ? [['control',.25],['gegen',.2],['neutral',.2],['wing',.15],['fluid',.12],['direct',.04],['dcounter',.04]]
-          : tier===3 ? [['neutral',.25],['wing',.2],['control',.15],['gegen',.15],['fluid',.1],['direct',.08],['dcounter',.07]]
-          : tier===2 ? [['neutral',.25],['direct',.2],['wing',.15],['dcounter',.12],['fluid',.1],['gegen',.1],['control',.08]]
-          :            [['direct',.3],['neutral',.22],['dcounter',.18],['wing',.14],['fluid',.08],['gegen',.08]];
+    const T = tier>=4 ? [['control',.25],['gegen',.2],['neutral',.2],['wing',.15],['counter',.16],['direct',.04]]   // (v204: COUNTER-ATTACK as common as the two counters were together)
+          : tier===3 ? [['neutral',.25],['wing',.2],['control',.15],['gegen',.15],['counter',.17],['direct',.08]]
+          : tier===2 ? [['neutral',.25],['direct',.2],['wing',.15],['counter',.22],['gegen',.1],['control',.08]]
+          :            [['direct',.3],['neutral',.22],['counter',.26],['wing',.14],['gegen',.08]];
     let a=0; for(const t of T){ a+=t[1]; if(r<=a) return t[0]; } return 'neutral';
   }
   const MG_CLUBS=14, MG_SQUAD=15, MG_MAX=21, MG_MIN=13, MG_MD=26, MG_HALF=13;   // a squad: fifteen to start, twenty-one at most (v124: a man more each, for nine a side)
@@ -19709,14 +19708,14 @@
   // up front, a counter-attacking one a back three -- and which of those its name draws (the same every season)
   // (v127: the four-line shapes in place of the two with two at the back, and of one shape each for the counter-attacking
   // styles -- a passing side has an AM, a wing side two wide midfielders either side of one, a direct side two up front
-  // ahead of a CM, a fluid counter two DMs, a direct counter a DM in front of a back four)
+  // ahead of a CM, a counter two DMs or a DM in front of a back four -- v204: one COUNTER-ATTACK, its shapes both counters')
   const CW_STYLE_FORMS={control:['3-4-1','3-3-2','3-2-1-2'], gegen:['3-3-2','3-2-3','4-1-3'], wing:['3-2-3','4-1-3','3-1-3-1'], direct:['4-2-2','3-3-2','3-1-2-2'],
-    fluid:['4-2-2','3-3-2','3-2-2-1'], dcounter:['4-3-1','4-2-2','4-1-2-1'], neutral:['3-3-2','3-2-3','3-4-1','4-3-1']};
+    counter:['4-2-2','4-3-1','3-2-2-1','4-1-2-1'], neutral:['3-3-2','3-2-3','3-4-1','4-3-1']};   // (v204: COUNTER-ATTACK's, FLUID COUNTER's and DIRECT COUNTER's together)
   function cwFormFor(club){ if(!club) return '3-3-2'; if(club.form&&FORMS[club.form]) return club.form;   // (v202: one set on the sheet -- cwClubSet)
     const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
   // ...and its width: a wing side wide with the ball, a counter-attacking side compact; a deep block compact without it
   function cwWidthFor(club){ const st=styleKey(club&&club.style);
-    return {atk:st==='wing'?1.18:(st==='fluid'||st==='dcounter')?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
+    return {atk:st==='wing'?1.18:st==='counter'?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
   // a career player's style: as made, or for one signed before styles, the one his stats fit (your own pro has none)
   function careerStyle(p){ if(!p||p.me||!ARCH[p.role]) return p&&p.style; if(p.style&&(TYPE_WAS[p.style]||TYPE_GONE[p.style])) p.style=typeKept(p.style,p.role,p.at?mgStats(p):(p.stats||{}));   // (v143: a type that's gone, too)
     if(!p.style) p.style=inferStyle(p.role,p.subRole,p.at?mgStats(p):(p.stats||{})); return p.style; }
@@ -21261,6 +21260,7 @@
     for(const p of all) if(p){ if(TYPE_WAS[p.style]||TYPE_GONE[p.style]) p.style=typeKept(p.style,p.role,mgStats(p));   // (v118: the Creator's a Trequartista; v143: an Inside forward's the winger his stats fit best)
       const S=STYLES[p.style]; if(p.role==='MID'&&cenMid(p.subRole)&&S&&S.role==='MID'&&cenMid(S.sub)) p.subRole=S.sub;   // (v127: a central midfielder's position is his archetype's -- an anchor's a DM, a shadow striker's an AM)
       if(p.role==='GK'&&!p.style) p.style=inferStyle('GK','GK',mgStats(p)); }                                                         // (...and a keeper has an archetype: the one his keeping fits best)
+    for(const c of Object.values(W.clubs||{})) if((c.style==='fluid'||c.style==='dcounter')&&!c.form&&c.id!==d.clubId) c.form=({fluid:['4-2-2','3-3-2','3-2-2-1'], dcounter:['4-3-1','4-2-2','4-1-2-1']})[c.style][cwHash(7,c.name||'')%3];   // (v204: a club that played either counter keeps the shape it had, as a COUNTER-ATTACK)
     for(const c of [d, ...Object.values(W.clubs||{})]) if('posture' in c||!STYLE_TAC[c.style]){ c.style=styleKey(c.style,c.posture); delete c.posture; }   // (a style and a posture: one style now)
     if(W.clubs&&W.free) for(const c of Object.values(W.clubs)) if(c.id!==d.clubId&&(c.players||[]).length>MG_MAX) mgTrimAi(d,c);   // (squads were up to 22; your own men stay)
     if(W.clubs&&W.free) mgSweepFree(d);                                                           // (a young man with a future left without a club, from before: signed)

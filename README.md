@@ -898,15 +898,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       full-backs: see below), early crosses and the forwards attacking the near and far posts. A mid block without it.
     - **DIRECT**: forward quickly. Long balls up to the forwards, the midfielders up behind them for the second ball,
       and the keeper kicking long. A mid block without it.
-    - **FLUID COUNTER**: a mid block with one forward up on halfway. When the ball's won, the wide men and a
-      midfielder sprint up past it and it goes forward on the carry and in short, quick passes, a man staying near
-      the ball for the next one, for as long as the break keeps going (up to 10 s).
-    - **DIRECT COUNTER**: two tight banks at the edge of the box, narrow and compact, nobody stepping out until the
-      ball is in its half, and one forward up on halfway. When it's won it goes long, in behind, at once, for the
-      forwards and the wide men racing up, and the keeper kicks long.
+    - **COUNTER-ATTACK** (v204, in place of FLUID COUNTER and DIRECT COUNTER): a compact block a little deep -- the
+      back line at 24 m, the midfield on the line of engagement at 42 m, narrow, nobody stepping out till the ball's
+      in its half -- and one forward up on halfway. When the ball's won it goes: in behind when the run's on, else
+      forward on the carry and in short, quick passes, the wide men and a midfielder sprinting up past the ball and a
+      man staying near it for the next one, for as long as the break keeps going (up to 10 s). Mixed from the back.
+      (Till v204 there were two: FLUID COUNTER, a mid block that broke on the carry and short, and DIRECT COUNTER, two
+      tight banks at the edge of the box that broke long and in behind and kicked long from the back. A side, a club
+      or a career kept as either is a COUNTER-ATTACK; a career's club that played either keeps the shape it had.)
     - A save from before keeps its way of playing, yours and every club's: TIKI-TAKA is CONTROL POSSESSION; a
-      COUNTER is a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise; BALANCED with PRESS HIGH is
-      GEGENPRESS; any other style keeps its name and now defends in its own block.
+      COUNTER is a COUNTER-ATTACK (v204; a DIRECT COUNTER if it sat deep and a FLUID COUNTER otherwise from v116 to
+      v203); BALANCED with PRESS HIGH is GEGENPRESS; any other style keeps its name and now defends in its own block.
     - **Measured.** Each style against a BALANCED side, the computer playing both sides, two 30-minute games with the
       ends swapped (ARS v MCI), per 15 minutes of the style's side. Ball: its share of the time a man of either side
       had it. Average pass, under 13 m, 25 m or more: of its passes that reached one of its own. Spread: how far apart
@@ -1019,11 +1021,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       BALANCED, GET FORWARD), FORWARDS (COME SHORT, BALANCED, IN BEHIND) and WIDE MEN (TO FEET, BALANCED, IN BEHIND);
       a career's settings for them are dropped as it's loaded. How the side plays out from the back -- the keeper's ball, and how the back
       line moves it on -- was BUILD-UP (SHORT, MIXED, LONG); since v116 it isn't an instruction but the style's:
-      CONTROL POSSESSION short, DIRECT and DIRECT COUNTER long, the rest mixed.
-    - **What a style sets.** BALANCED, WING PLAY and FLUID COUNTER: the back line at 32 m and the line of engagement at
+      CONTROL POSSESSION short, DIRECT long, the rest mixed (DIRECT COUNTER's was long till v204).
+    - **What a style sets.** BALANCED and WING PLAY (and FLUID COUNTER, till v204): the back line at 32 m and the line of engagement at
       54 m (where the old mid block stood), everything else BALANCED (and the defenders HOLD THE LINE, the forwards
       DEFEND THE LINE, the full-backs SUPPORT). GEGENPRESS: 46 m and 68 m, both lines TACKLE, the forwards PRESS UP.
-      DIRECT COUNTER: 20 m and 34 m, the midfield on the line of engagement (and long from the back, as DIRECT;
+      COUNTER-ATTACK (v204): 24 m and 42 m, the midfield on the line of engagement (DIRECT COUNTER's were 20 m and 34 m,
+      and long from the back, as DIRECT;
       CONTROL POSSESSION short: the style's own, no instruction since v116). The computer's clubs play their style's -- they used to have no
       instructions at all. (The block the old code still reads -- high press, mid block, low block -- follows them: a
       high one with the forwards pressing up and the line of engagement at 62 m or more, a low one with the back line
@@ -2836,7 +2839,7 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   Munich, Catalunya Garnet, Dortmund Yellow, Istanbul FC, Lisbon FC, Madrid Athletics, Madrid Royale, Milan Centrale,
   Milan Red, Paris Eiffel and Seville FC, in their career colours and letters, each in a shape and a way of playing of
   its own (Madrid Royale 3-1-3-1 CONTROL POSSESSION, Catalunya Garnet 3-2-3 CONTROL POSSESSION, Bohemia Munich 3-2-3
-  GEGENPRESS, Paris Eiffel 4-1-3 FLUID COUNTER, Madrid Athletics 4-2-2 DIRECT COUNTER, and so on) and made at their
+  GEGENPRESS, Paris Eiffel 4-1-3 and Madrid Athletics 4-2-2 COUNTER-ATTACK (v204; FLUID and DIRECT COUNTER before), and so on) and made at their
   career level, their men named from their own countries' names (nobody's name is used twice). A match with one of
   them in it is billed CONTINENTAL CHAMPIONS CUP. Madrid Royale and Catalunya Garnet are rated 85, Paris Eiffel 83,
   Bohemia Munich 81, Seville FC 68. While the full list is open, the two cards fold their kits away to give it room
@@ -2903,8 +2906,7 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   | GEGENPRESS | Bournemouth, Liverpool, Newcastle United |
   | WING PLAY | Chelsea, Leeds United, Manchester United, Tottenham Hotspur |
   | DIRECT | Brentford, Everton |
-  | FLUID COUNTER | Aston Villa, Sunderland |
-  | DIRECT COUNTER | Crystal Palace, Nottingham Forest |
+  | COUNTER-ATTACK *(v204)* | Aston Villa, Crystal Palace, Nottingham Forest, Sunderland *(the first and last FLUID COUNTER before, the middle two DIRECT COUNTER)* |
   | BALANCED | Coventry City, Fulham, Hull City |
 
   Change your club's style or width (before kick-off or in the match) and the club keeps it, as it keeps a shape;
@@ -3045,6 +3047,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v204: one COUNTER-ATTACK.** FLUID COUNTER and DIRECT COUNTER are one style, COUNTER-ATTACK: a compact block a
+  little deep (the back line at 24 m, the midfield on the line of engagement at 42 m: between the two), one forward up,
+  and when it's won it goes in behind when the run's on, else forward on the carry and in short, quick passes; mixed
+  from the back. Aston Villa, Crystal Palace, Nottingham Forest, Sunderland, Paris Eiffel and Madrid Athletics play it.
+  A side, a club or a career kept as either counter is a COUNTER-ATTACK; a career's club that played either keeps the
+  shape it had. Six styles to pick from now.
 - **v203: pace by playstyle.** In a man's rating, speed and acceleration count as much as his playstyle is about pace,
   like everything else in it -- a speedster's 5 and 4, a pacey winger's 5 and 5, a stopper's 3 and 2, a target man's 2
   and 3 -- where they were 6 and 5 for everyone, more than any other stat. Each playstyle's usual man still rates what

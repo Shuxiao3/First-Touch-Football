@@ -43,19 +43,19 @@ const kickOff = async () => { await page.goto('file://' + copy); await page.wait
 await kickOff();
 const R = await page.evaluate(() => { const T = window.__T, L = (o, k) => { const x = Object.assign({}, o); T.tiLines(x, k); return [x.dl, x.loe]; };
   const out = { lines: { upInto: L({ dl: 48, loe: 54 }, 'dl'), downInto: L({ dl: 40, loe: 30 }, 'loe'), tooHigh: L({ dl: 80, loe: 99 }), tooLow: L({ dl: 2, loe: 9 }) } };
-  out.styles = {}; for(const s of ['neutral', 'gegen', 'dcounter', 'control', 'direct']){ const d = T.tiDefault(s); out.styles[s] = [d.dl, d.loe, d.eng, d.aline, d.dtk, T.buildOfStyle(s)].join('/'); }
+  out.styles = {}; for(const s of ['neutral', 'gegen', 'counter', 'control', 'direct']){ const d = T.tiDefault(s); out.styles[s] = [d.dl, d.loe, d.eng, d.aline, d.dtk, T.buildOfStyle(s)].join('/'); }
   out.noBuild = !('build' in T.tiDefault('control')) && !('build' in T.tiDefault('direct'));
   // the block with the ball far off (their keeper's end), each way of standing on the line of engagement
   T.freeze(); const atk = T.atkOf('G'), far = atk > 0 ? T.FW - 60 : 60, m = u => +(u / T.MK).toFixed(1);
   const at = o => { T.setTI('G', o); T.seen('G', far, T.FW / 2 > 0 ? 765 : 765); const B = T.block('G'); return [m(B.uD), m(B.uM), m(B.uF)]; };
   out.block = { fwd: at({ dl: 30, loe: 56 }), mid: at({ dl: 30, loe: 56, eng: 'mid' }), midPress: at({ dl: 30, loe: 56, eng: 'mid', aline: 'press' }), deep: at({ dl: 18, loe: 36 }), high: at({ dl: 46, loe: 70 }) };
-  out.posture = ['neutral', 'gegen', 'dcounter'].map(s => { T.setStyle('G', s); return T.TAC.G.def; });
+  out.posture = ['neutral', 'gegen', 'counter'].map(s => { T.setStyle('G', s); return T.TAC.G.def; });
   return out; });
 info('lines: ' + JSON.stringify(R.lines) + ' -- styles: ' + JSON.stringify(R.styles) + ' -- block (back, middle, first, m): ' + JSON.stringify(R.block));
 ok(R.lines.upInto.join() === '40,54' && R.lines.downInto.join() === '40,54' && R.lines.tooHigh.join() === '50,80' && R.lines.tooLow.join() === '15,30',
   'the lines: the back line pushed up into the line of engagement stops 14 m short, the line of engagement pulled down into it the same; neither goes past its range (back 15-50 m, engagement 30-80 m)');
-ok(R.noBuild && R.styles.neutral === '32/54/fwd/line/bal/mixed' && R.styles.gegen === '46/68/fwd/press/tackle/mixed' && R.styles.dcounter === '20/34/mid/line/bal/long' && R.styles.control.endsWith('/short') && R.styles.direct.endsWith('/long'),
-  'a style picked sets its own: BALANCED a mid block, GEGENPRESS high and at them, DIRECT COUNTER deep with the midfield on its line; and plays out from the back its way, no BUILD-UP to set -- CONTROL short, DIRECT and DIRECT COUNTER long, the rest mixed: ' + JSON.stringify(R.styles));
+ok(R.noBuild && R.styles.neutral === '32/54/fwd/line/bal/mixed' && R.styles.gegen === '46/68/fwd/press/tackle/mixed' && R.styles.counter === '24/42/mid/line/bal/mixed' && R.styles.control.endsWith('/short') && R.styles.direct.endsWith('/long'),
+  'a style picked sets its own: BALANCED a mid block, GEGENPRESS high and at them, COUNTER-ATTACK a little deep with the midfield on its line (v204: where DIRECT COUNTER sat at 20 and 34); and plays out from the back its way, no BUILD-UP to set -- CONTROL short, DIRECT long, the rest mixed: ' + JSON.stringify(R.styles));
 const near = (a, b, e) => Math.abs(a - b) <= (e || 0.6);
 ok(near(R.block.fwd[0], 30) && near(R.block.fwd[2], 56) && near(R.block.fwd[1], 43) && near(R.block.mid[1], 56) && near(R.block.mid[2], 62) && near(R.block.midPress[2], 66.5)
    && near(R.block.deep[0], 18) && near(R.block.deep[2], 36) && near(R.block.high[0], 46) && near(R.block.high[2], 70),

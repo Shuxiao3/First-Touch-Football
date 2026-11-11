@@ -30,7 +30,7 @@ const g0 = await card('G'), r0 = await card('R');
 const all = await K(`CLUBS.map(c=>c.id+':'+c.style).join(' ')`), kinds = await K(`new Set(CLUBS.map(c=>c.style)).size`);
 info('the clubs: ' + all);
 ok(g0.name === 'Liverpool' && g0.style === 'GEGENPRESS' && r0.name === 'Manchester City' && r0.style === 'CONTROL POSSESSION', `on the setup screen, each club's way of playing under its shape: ${g0.name} ${g0.style}, ${r0.name} ${r0.style}`);
-ok(kinds >= 6 && /BRE:direct/.test(all) && /CRY:dcounter/.test(all) && /AVL:fluid/.test(all), `the twenty clubs play ${kinds} different ways, not all BALANCED`);
+ok(kinds >= 6 && /BRE:direct/.test(all) && /CRY:counter/.test(all) && /AVL:counter/.test(all), `the twenty clubs play ${kinds} different ways, not all BALANCED (v204: Crystal Palace and Aston Villa both COUNTER-ATTACK)`);
 await page.click('#exhSideR [data-exh="next"]'); await page.waitForTimeout(80); const r1 = await card('R');
 await page.click('#exhSideR [data-exh="prev"]'); await page.waitForTimeout(80);
 ok(r1.name === 'Manchester United' && r1.style === 'WING PLAY', `...the next club, its own: ${r1.name} ${r1.style}`);

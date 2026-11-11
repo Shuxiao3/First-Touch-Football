@@ -440,7 +440,7 @@ for(const [w, h] of SIZES){
   ok(Object.values(room).every(v => v.n >= 5 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length }))), offMenu = await onScreen(page, ['.tbMenu .tbOpt']);
-  ok(opts.length === 7 && opts.every(o => !o.i) && !offMenu.length, 'the style menu: seven names, no descriptions, all of it on the screen (' + opts.map(o => o.t).join(', ') + ')' + (offMenu.length ? ' -- ' + offMenu[0] : ''));
+  ok(opts.length === 6 && opts.every(o => !o.i) && !offMenu.length, 'the style menu: six names (v204: one COUNTER-ATTACK), no descriptions, all of it on the screen (' + opts.map(o => o.t).join(', ') + ')' + (offMenu.length ? ' -- ' + offMenu[0] : ''));
   await ctx.close(); }
 
 // A NARROW PHONE (640x360): the bench on one line, each name inside its token and the number clear of the rating; and

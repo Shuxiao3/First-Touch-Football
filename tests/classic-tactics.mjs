@@ -26,7 +26,7 @@ const { ok, info } = rep;
 const save = () => page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 
 // --- the computer defends in a shape there is (none for attacking only now: v127) ------------------------------------
-const STYLES = ['neutral','gegen','control','wing','direct','fluid','dcounter'];
+const STYLES = ['neutral','gegen','control','wing','direct','counter'];   // (v204: one COUNTER-ATTACK for the two counters)
 const bad = await page.evaluate(STYLES => { const T = window.__T, out = [];
   for(const c of T.CLUBS) for(const po of ['press','neutral','lowblock']){ const f = T.defFormFor(c.form, po); if(T.ATK_ONLY.includes(f) || !T.POS_OF[f]) out.push(c.id + ' ' + po + ' ' + f); }
   for(const st of STYLES) for(let i = 0; i < 40; i++){ const club = { name: 'Club ' + i, style: st };   // (each style without the ball in its own block)
@@ -74,27 +74,27 @@ await menu('width');
 const widths = await page.$$eval('#bpBody [data-cwidth]', ns => ns.map(n => n.textContent));
 ok(String(widths) === 'COMPACT,BALANCED,WIDE', 'width: ' + widths.join(' / '));
 await shut();
-// seven styles, each with its own block without the ball: no posture to set (a gegenpress presses high, a direct counter sits deep)
+// six styles, each with its own block without the ball: no posture to set (a gegenpress presses high, a counter-attack sits a little deep)
 ok(!(await page.$('#bpBody [data-tdrop="posture"]')) && !(await page.$('#bpBody [data-cposture]')), 'without the ball: no posture menu');
 await menu('style');
 const styles = await page.$$eval('#bpBody [data-cstyle]', ns => ns.map(n => n.textContent));
-ok(String(styles) === 'BALANCED,GEGENPRESS,CONTROL POSSESSION,WING PLAY,DIRECT,FLUID COUNTER,DIRECT COUNTER', 'the styles: ' + styles.join(' / '));
-await page.click('#bpBody [data-cstyle="dcounter"]'); await page.waitForTimeout(80);
+ok(String(styles) === 'BALANCED,GEGENPRESS,CONTROL POSSESSION,WING PLAY,DIRECT,COUNTER-ATTACK', 'the styles: ' + styles.join(' / '));
+await page.click('#bpBody [data-cstyle="counter"]'); await page.waitForTimeout(80);
 d = await save();
-ok(d.style === 'dcounter' && !('posture' in d), 'picked without the ball, it is the style (nothing else saved): ' + d.style);
+ok(d.style === 'counter' && !('posture' in d), 'picked without the ball, it is the style (nothing else saved): ' + d.style);
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
-ok(!(await page.$('#bpBody [data-tdrop="posture"]')) && /DIRECT COUNTER/.test(await page.textContent('#bpBody [data-tdrop="style"]')), 'with the ball: the same style, and no posture menu');
+ok(!(await page.$('#bpBody [data-tdrop="posture"]')) && /COUNTER-ATTACK/.test(await page.textContent('#bpBody [data-tdrop="style"]')), 'with the ball: the same style, and no posture menu');
 await pick('style', '[data-cstyle="gegen"]');
 d = await save();
 ok(d.style === 'gegen', 'GEGENPRESS picked: ' + d.style);
 const blocks = await page.evaluate(STYLES => { const T = window.__T, o = {};
   for(const s of STYLES){ T.setStyle('R', s); o[s] = [T.TAC.R.off, T.TAC.R.def, T.TAC.R.brk].filter(Boolean).join('/'); }
   T.setStyle('R', 'neutral');
-  o.old = [['tiki','neutral'], ['counter','lowblock'], ['counter','neutral'], ['counter','press'], ['neutral','press'], ['neutral','lowblock'], ['wing','press']].map(a => T.styleKey(a[0], a[1])).join();
+  o.old = [['tiki','neutral'], ['counter','lowblock'], ['counter','neutral'], ['counter','press'], ['neutral','press'], ['neutral','lowblock'], ['wing','press'], ['fluid',null], ['dcounter',null]].map(a => T.styleKey(a[0], a[1])).join();
   return o; }, STYLES);
-ok(blocks.gegen === 'gegen/press' && blocks.dcounter === 'counter/lowblock/direct' && blocks.fluid === 'counter/neutral/fluid' && blocks.control === 'control/neutral'
+ok(blocks.gegen === 'gegen/press' && blocks.counter === 'counter/lowblock/mixed' && blocks.control === 'control/neutral'
    && ['neutral','wing','direct'].every(s => blocks[s] === s + '/neutral'), 'each style its own block: ' + JSON.stringify(blocks));
-ok(blocks.old === 'control,dcounter,fluid,fluid,gegen,neutral,wing', 'an old save\'s style and posture read as one of the new styles (tiki-taka, counter low / mid / high, balanced pressing, balanced low, wing pressing): ' + blocks.old);
+ok(blocks.old === 'control,counter,counter,counter,gegen,neutral,wing,counter,counter', 'an old save\'s style and posture read as one of the new styles (tiki-taka, counter low / mid / high, balanced pressing, balanced low, wing pressing; v204: FLUID COUNTER and DIRECT COUNTER a COUNTER-ATTACK): ' + blocks.old);
 
 // DRAGGING: pick a man up and put him on another (a mouse drags at once; a finger holds him first: see classic-ui)
 const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
@@ -236,7 +236,8 @@ ok(marks.n >= 8 && !marks.bad.length, 'on the tactics pitch a man in a second po
 ok(marks.rate[1] === marks.rate[0] && marks.rate[2] < marks.rate[0] && marks.rate[0] - marks.rate[2] <= 3 && marks.rate[3] < marks.rate[2],
   'his rating: his own in his own position (' + marks.rate[1] + '), a little less in a second (' + marks.rate[2] + '), less again out of position (' + marks.rate[3] + ')');
 const cl = marks.clubs, all = cl.main + cl.second + cl.out;
-ok(cl.main / all >= 0.5 && cl.out / all <= 0.05, 'the computer\'s clubs pick each spot\'s man by position: ' + Math.round(cl.main / all * 100) + '% in their own, ' + Math.round(cl.second / all * 100) + '% in a second, ' + Math.round(cl.out / all * 100) + '% out of position');
+ok(cl.main / all >= 0.5 && cl.out / all <= 0.08,   // (v204: over thirty new worlds 1.6% to 6.4% out of position, 3.2% to 7% before the counters were one; 5% failed one world in four, so 8%)
+   'the computer\'s clubs pick each spot\'s man by position: ' + Math.round(cl.main / all * 100) + '% in their own, ' + Math.round(cl.second / all * 100) + '% in a second, ' + Math.round(cl.out / all * 100) + '% out of position');
 const cd = marks.clubsDef, allD = cd.main + cd.second + cd.out;
 ok(marks.hold.join() === 'CB,CM' && cd.out / allD <= 0.10,   // (v118: archetypes are choosier than positions were -- about 6% now, 4% before; over 120 new worlds 3.6% to 8.8%, so 10%: 8% failed one world in fourteen)
    'who defends where: his own position before another (a 3-2-3 defending in a 4-3-1: the anchor drops into the back four, not the playmaker: ' + marks.hold.join(' / ') + '; the computer\'s clubs without the ball ' + Math.round(cd.main / allD * 100) + '% in their own, ' + Math.round(cd.second / allD * 100) + '% in a second, ' + (cd.out / allD * 100).toFixed(1) + '% out of position)');
