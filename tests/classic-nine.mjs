@@ -47,13 +47,14 @@ const cl = await page.evaluate(() => { const N = window.__N, out = { bad: [], na
     if(sq.length !== 14) out.bad.push(c.id + ' ' + sq.length + ' men');
     const old = xi.filter((e, i) => i !== at);                                   // (the eight from before, in their order)
     old.forEach((e, i) => { const want = D[(i < 7 ? ci * 7 + i : K * 7 + ci) % D.length]; if(e.name !== want && !(e.star && e.was === want)) out.bad.push(c.id + ' ' + e.name + ' for ' + want); });   // (v198: or a star in for him -- Liverpool's and City's)
-    const cb = xi[at]; if(cb.role !== 'DEF' || !N.SQ_CB.includes(cb.style) || cb.name !== D[(K * 8 + ci) % D.length] || at !== 1 + Math.floor(L[0] / 2)) out.bad.push(c.id + ' ninth ' + cb.name + ' ' + cb.style + ' at ' + at);
+    const cb = xi[at], want9 = D[(K * 8 + ci) % D.length];   // (v205: or a star set in for him on the sheet -- Van Veers in the middle of Liverpool's three)
+    if(cb.role !== 'DEF' || (cb.star ? cb.was !== want9 : (!N.SQ_CB.includes(cb.style) || cb.name !== want9)) || at !== 1 + Math.floor(L[0] / 2)) out.bad.push(c.id + ' ninth ' + cb.name + ' ' + cb.style + ' at ' + at);
     xi.slice(1).forEach((e, i) => { const p = pos[i], r = p === 'CB' || p === 'FB' ? 'DEF' : p === 'ST' || p === 'W' ? 'ATT' : 'MID'; if(e.role !== r) out.bad.push(c.id + ' ' + e.name + ' ' + e.role + ' at ' + p);
       if(p === 'FB' && !['fullback', 'deffb', 'invfb', 'wingback'].includes(e.style)) out.bad.push(c.id + ' ' + e.name + ' a ' + e.style + ' at FB'); });
     out.names.push(...sq.map(e => e.name)); out.n++; });
   out.dupes = out.names.length - new Set(out.names).size; out.names = out.names.length; return out; });
 info('the clubs: ' + JSON.stringify(cl));
-ok(cl.n === 20 && !cl.bad.length, 'every club nine and a bench of five: its eight from before, named as they were (but for a star in for one, v198), each in his line, a full-back at each end of a back four, and a ninth -- a centre-back of its own -- in the middle of its back line' + (cl.bad.length ? ': ' + cl.bad.slice(0, 4).join(', ') : ''));
+ok(cl.n === 20 && !cl.bad.length, 'every club nine and a bench of five: its eight from before, named as they were (but for a star in for one, v198), each in his line, a full-back at each end of a back four, and a ninth -- a centre-back of its own, or a star set in for him (v205) -- in the middle of its back line' + (cl.bad.length ? ': ' + cl.bad.slice(0, 4).join(', ') : ''));
 ok(cl.dupes === 0, 'nobody shares a name (' + cl.names + ' men)');
 
 // --- A MATCH: nine a side, each in a spot of his shape -----------------------------------------------------------------

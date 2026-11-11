@@ -1458,6 +1458,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     rating his stats make him. The stars moved most: Mancala 74 to 80, Nagala Kone 79 to 83, Kyle da Bastion 89 to 92,
     Lorry Maddsen 92 to 95, Paolo Zeevata 86 to 79 (a defender's numbers on a wing-back), Van Veers 90 to 87, Greasy
     Man 85 to 82. A man's bars on a card (the stats that make his game) are his playstyle's that count 4 and up.
+    **As set on the sheet (v205):** the weights are now each playstyle's as set on the Signature Players sheet's
+    Ratings page, stat by stat, 0 to 5 -- and 0 doesn't count at all (a stopper's and a cover centre-back's crossing).
+    Pace with them: a stopper's speed and acceleration 2 and 2, a speedster's 5 and 5, a target man's 3 and 3.
+    Calibrated as before, so each playstyle's usual man still rates what he did; the stars moved three points at most
+    on their cards (Paolo Zeevata 79 to 82, Michaelangelo Donnatello 93 to 95, Van Veers 87 to 89; Lorry Maddsen 94 to
+    93, Hernan Javier 93 to 92, Le CutInside 90 to 89), as the sheet showed them. A saved career is rated again when
+    it's loaded.
 - **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
   yours when you've passed to him and left the stick alone.
   - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
@@ -2838,8 +2845,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 - **The Continental Champions Cup's twelve (v198)** are the career's clubs from abroad: Bergamont Juvenile, Bohemia
   Munich, Catalunya Garnet, Dortmund Yellow, Istanbul FC, Lisbon FC, Madrid Athletics, Madrid Royale, Milan Centrale,
   Milan Red, Paris Eiffel and Seville FC, in their career colours and letters, each in a shape and a way of playing of
-  its own (Madrid Royale 3-1-3-1 CONTROL POSSESSION, Catalunya Garnet 3-2-3 CONTROL POSSESSION, Bohemia Munich 3-2-3
-  GEGENPRESS, Paris Eiffel 4-1-3 and Madrid Athletics 4-2-2 COUNTER-ATTACK (v204; FLUID and DIRECT COUNTER before), and so on) and made at their
+  its own (Madrid Royale 3-1-3-1 CONTROL POSSESSION, Catalunya Garnet 3-2-3 CONTROL POSSESSION, Bohemia Munich 4-1-3
+  BALANCED and wide, Paris Eiffel 3-2-3 BALANCED and wide, Madrid Athletics 4-2-2 and Bergamont Juvenile 3-2-2-1
+  COUNTER-ATTACK -- v205, as set on the sheet -- and so on) and made at their
   career level, their men named from their own countries' names (nobody's name is used twice). A match with one of
   them in it is billed CONTINENTAL CHAMPIONS CUP. Madrid Royale and Catalunya Garnet are rated 85, Paris Eiffel 83,
   Bohemia Munich 81, Seville FC 68. While the full list is open, the two cards fold their kits away to give it room
@@ -2848,9 +2856,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   Cup: Messiah Petita, Yemen, Anders Nesta and Hernan Javier for Catalunya Garnet; Christian Star, Luka Magic, Mancala
   and Zacary Zayn for Madrid Royale; Le CutInside, Bobby Lebowski and Tomas Lamb for Bohemia Munich; Michaelangelo
   Donnatello and Needemeyer for Paris Eiffel; Paul Madreen and Ruby Ganga for Milan Red; Jobe Bowling and Yanet Audi
-  for Dortmund Yellow; Paolo Zeevata and Lorena Parlor for Bergamont Juvenile; Greasy Man for Madrid Athletics; Lorry
-  Maddsen for Milan Centrale. In the Premier League: Torrent Hendrinks and Paul Worra for Arsenal; Paul Jolla for
-  Aston Villa; Nagala Kone and Alan Haggerd for Chelsea; Van Veers and Mo Celeste for Liverpool; Igor Hollinger and
+  for Dortmund Yellow; Paolo Zeevata, Lorena Parlor and Paul Jolla (v205; Aston Villa's till then) for Bergamont
+  Juvenile; Greasy Man for Madrid Athletics; Lorry Maddsen for Milan Centrale. In the Premier League: Torrent
+  Hendrinks and Paul Worra for Arsenal; Nagala Kone and Alan Haggerd for Chelsea; Van Veers and Mo Celeste for Liverpool; Igor Hollinger and
   Kyle da Bastion for Manchester City; Ryan Kane and Peter Sole for Manchester United; Soo-min Hyuk for Tottenham. A
   club's stars are placed together (v201), each in for the man in a spot of his own position where there's one for
   him, else one of his second positions -- as many at home as can be, none out of position -- in that man's shirt,
@@ -2876,14 +2884,13 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   |---|---|
   | 3-3-2 | Bournemouth, Coventry City, Everton, Newcastle United |
   | 3-2-3 | Arsenal, Leeds United, Liverpool |
-  | 3-4-1 | Aston Villa, Fulham |
+  | 3-4-1 | Aston Villa, Fulham, Manchester City *(v205; 4-1-3 before)* |
   | 3-1-3-1 | Tottenham Hotspur *(v127; 2-3-3 before)* |
   | 3-2-1-2 | Brighton *(v127; 3-4-1 before)* |
   | 3-1-2-2 | Hull City *(v127; 2-4-2 before)* |
   | 3-2-2-1 | Chelsea *(v127; 3-4-1 before)* |
   | 4-2-2 | Brentford, Manchester United *(v201; 4-3-1 before: two in the middle for its two stars)*, Nottingham Forest |
   | 4-3-1 | Crystal Palace, Ipswich Town |
-  | 4-1-3 | Manchester City |
   | 4-1-2-1 | Sunderland *(v127; 4-3-1 before)* |
 
   Both sides kick off in their club's shape, and a club's squad is made for it: wingers on the flanks
@@ -2902,12 +2909,17 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
   | Style | Clubs |
   |---|---|
-  | CONTROL POSSESSION | Arsenal, Brighton, Ipswich Town, Manchester City |
-  | GEGENPRESS | Bournemouth, Liverpool, Newcastle United |
-  | WING PLAY | Chelsea, Leeds United, Manchester United, Tottenham Hotspur |
-  | DIRECT | Brentford, Everton |
-  | COUNTER-ATTACK *(v204)* | Aston Villa, Crystal Palace, Nottingham Forest, Sunderland *(the first and last FLUID COUNTER before, the middle two DIRECT COUNTER)* |
-  | BALANCED | Coventry City, Fulham, Hull City |
+  | CONTROL POSSESSION | Manchester City |
+  | GEGENPRESS | Brighton, Liverpool |
+  | WING PLAY | Brentford, Crystal Palace, Leeds United, Manchester United |
+  | DIRECT | Chelsea, Everton, Hull City, Sunderland, Tottenham Hotspur |
+  | COUNTER-ATTACK *(v204)* | Bournemouth, Coventry City, Fulham |
+  | BALANCED | Arsenal, Aston Villa, Ipswich Town, Newcastle United, Nottingham Forest |
+
+  (v205: as set on the Signature Players sheet. Till then Arsenal, Brighton and Ipswich Town kept the ball,
+  Bournemouth and Newcastle pressed, Chelsea and Tottenham played on the wings, Brentford went direct, Aston Villa,
+  Crystal Palace, Nottingham Forest and Sunderland counter-attacked and Coventry, Fulham and Hull were BALANCED.
+  Manchester City play a 3-4-1 now, a 4-1-3 before.)
 
   Change your club's style or width (before kick-off or in the match) and the club keeps it, as it keeps a shape;
   set it back to the club's own and nothing's kept as a change.
@@ -2921,7 +2933,13 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   League's under their career names (Arsenio as Arsenal, Mancunian City as Manchester City...; Fulham and Ipswich have
   none), the clubs from abroad as themselves -- its shape and style from a new career's start, and in a saved career
   as soon as it's loaded (till v202 a career club's style was drawn at random and its shape from that); and in a
-  match its stars play in their spots.
+  match its stars play in their spots. **(v205)** On the sheet's Teams page (its Clubs page till then) a club can
+  also have a shape of its own without the ball, a width of its own and team instructions of its own, and they go in
+  the same way, in an exhibition and a career. Without them it plays its style's: its style's block without the ball
+  (an exhibition side went by whatever block the last match had left till v205) and its style's width (an exhibition
+  side was BALANCED whatever its style; a career's played its style's already). Paris Eiffel defend in a 3-3-2, their
+  forwards conserving, and play wide with the ball; Bohemia Munich play wide. A side you keep now keeps its width as
+  it is; one kept from before with none is BALANCED, as it was.
 - **TACTICS before kick-off.** Beside KICK OFF on the setup screen, TACTICS sets the match up and waits: its tactics
   screen comes up before kick-off -- your shapes with the ball and without it, width, style, every man's card and the
   team's instructions, the other side's to look at. ◀ CLUBS goes back to the setup screen, KICK OFF ▶ plays it, everyone
@@ -3047,6 +3065,15 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v205: the sheet's clubs and weights.** What was set on the Signature Players sheet goes in: each playstyle's
+  rating weights as set on its Ratings page, 0 to 5 a stat (the stars move three points at most; see **By his
+  playstyle**); twenty-two clubs' styles and shapes as set on its Teams page (Manchester City a 3-4-1, Bohemia Munich
+  a 4-1-3, Paris Eiffel a 3-2-3, Bergamont Juvenile a 3-2-2-1; see the tables under **Every club has its own shape** and **Every club has its own way of playing**), their
+  stars in the spots set for them, Paris Eiffel's 3-3-2 without the ball, their forwards conserving, and Paris and
+  Bohemia Munich wide; and Paul Jolla to Bergamont Juvenile. A club can have a shape without the ball, a width and
+  team instructions of its own now; one without plays its style's, in an exhibition as in a career (an exhibition
+  side used to be BALANCED in width whatever its style, and defend in whatever block the last match had left). A
+  saved career has its clubs set so, Paul Jolla moved and every man rated again when it's loaded.
 - **v204: one COUNTER-ATTACK.** FLUID COUNTER and DIRECT COUNTER are one style, COUNTER-ATTACK: a compact block a
   little deep (the back line at 24 m, the midfield on the line of engagement at 42 m: between the two), one forward up,
   and when it's won it goes in behind when the run's on, else forward on the carry and in short, quick passes; mixed

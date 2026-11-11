@@ -25,6 +25,10 @@ patch('  const LAB_TITLE=', '  window.__T={players:()=>players, keepers:()=>keep
   + 'for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } for(const t of ["G","R"]){ Object.assign(pressSt[t],{until:-9,cd:-9,t:-1,on:false,swarm:-9,lastU:null}); transitionT[t]=0; } for(const q of players) q.runSeen=null; simNow+=0.5; }, '
   + 'adv:dt=>{ simNow+=dt; for(const c of [blockCache,endsCache,markCache,swarmCache]){ c.G=null; c.R=null; } }, '
   + 'setGk:k=>{ gkHold=k; ball.ownedBy=null; ball.x=k.x; ball.y=k.y; ball.z=6; ball.vx=ball.vy=ball.vz=0; }, setCtl:q=>{ controlled=q; }};\n  const LAB_TITLE=');
+// (v205: City are a 3-4-1 on the sheet now, and a club defends in its own style's block from kick-off -- these scenes are
+// Liverpool's 3-2-3 / 3-4-1 against City's 4-1-3 / 4-3-1, both BALANCED from the start, as they were made)
+patch("{id:'LIV',name:'Liverpool',         form:'3-2-3', style:'gegen'", "{id:'LIV',name:'Liverpool',         form:'3-2-3', style:'neutral'");
+patch("{id:'MCI',name:'Manchester City',   form:'3-4-1', style:'control'", "{id:'MCI',name:'Manchester City',   form:'4-1-3', style:'neutral'");
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-shape-')), 'classic.html');
 writeFileSync(copy, src);
 

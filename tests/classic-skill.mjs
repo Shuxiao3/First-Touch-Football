@@ -111,7 +111,8 @@ ok(somb.five.n >= 20 && somb.five.kinds.join() === 'sombrero' && !somb.four.n &&
 const oneVone = (pos, role, me, him, i) => page.evaluate(({ pos, role, me, him, i }) => new Promise(res => {
   const T = window.__T; T.freeze(); window.__SK = [];
   const R = T.players().filter(q => q.team === 'R'), G = T.players().filter(q => q.team === 'G');
-  const p = R[1], d = G[1], atk = T.atkOf('R'), U = u => atk > 0 ? u : T.FW - u, keep = { s: p.stats, a: p.slotAtk, d: d.stats, st: p.stars };
+  const p = R[1], d = G[1], atk = T.atkOf('R'), U = u => atk > 0 ? u : T.FW - u, keep = { s: p.stats, a: p.slotAtk, d: d.stats, st: p.stars, sty: p.style };
+  if(pos === 'W') p.style = 'winger';   // (v205: a winger's archetype, whoever's in that spot -- City's 3-4-1 puts a stopper there, who's slower to try one)
   p.slotAtk = Object.assign({}, keep.a, { pos, role, wide: 1, lineSize: 3, isWidthLine: true, si: -1 }); T.applySlot(p, p.slotAtk);
   p.stats = Object.assign({}, keep.s, { dribbling: me, ballControl: me, agility: me, speed: 7 }); p.stars = 3;
   d.stats = Object.assign({}, keep.d, { tackle: him, defIQ: him, agility: him });
@@ -124,7 +125,7 @@ const oneVone = (pos, role, me, him, i) => page.evaluate(({ pos, role, me, him, 
   const t0 = T.simNow();
   (function tick(){ park();
     if(window.__SK.length || T.simNow() - t0 > 3){ const out = { move: window.__SK.length ? window.__SK[0].kind : null };
-      p.stats = keep.s; d.stats = keep.d; p.slotAtk = keep.a; T.applySlot(p, keep.a); p.stars = keep.st; return res(out); }
+      p.stats = keep.s; d.stats = keep.d; p.slotAtk = keep.a; T.applySlot(p, keep.a); p.stars = keep.st; p.style = keep.sty; return res(out); }
     requestAnimationFrame(tick); })(); }), { pos, role, me, him, i });
 await page.evaluate(() => { window.__aiAll = true; });
 const runs = async (pos, role, me, him, n) => { const r = []; for(let i = 0; i < n; i++) r.push(await oneVone(pos, role, me, him, i)); return r; };

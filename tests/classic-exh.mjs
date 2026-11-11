@@ -30,7 +30,7 @@ const g0 = await card('G'), r0 = await card('R');
 const all = await K(`CLUBS.map(c=>c.id+':'+c.style).join(' ')`), kinds = await K(`new Set(CLUBS.map(c=>c.style)).size`);
 info('the clubs: ' + all);
 ok(g0.name === 'Liverpool' && g0.style === 'GEGENPRESS' && r0.name === 'Manchester City' && r0.style === 'CONTROL POSSESSION', `on the setup screen, each club's way of playing under its shape: ${g0.name} ${g0.style}, ${r0.name} ${r0.style}`);
-ok(kinds >= 6 && /BRE:direct/.test(all) && /CRY:counter/.test(all) && /AVL:counter/.test(all), `the twenty clubs play ${kinds} different ways, not all BALANCED (v204: Crystal Palace and Aston Villa both COUNTER-ATTACK)`);
+ok(kinds >= 6 && /BRE:wing/.test(all) && /CRY:wing/.test(all) && /SUN:direct/.test(all) && /COV:counter/.test(all), `the twenty clubs play ${kinds} different ways, not all BALANCED (v205: as set on the sheet -- Brentford and Crystal Palace WING PLAY, Sunderland DIRECT, Coventry City COUNTER-ATTACK)`);
 await page.click('#exhSideR [data-exh="next"]'); await page.waitForTimeout(80); const r1 = await card('R');
 await page.click('#exhSideR [data-exh="prev"]'); await page.waitForTimeout(80);
 ok(r1.name === 'Manchester United' && r1.style === 'WING PLAY', `...the next club, its own: ${r1.name} ${r1.style}`);
@@ -115,7 +115,7 @@ const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)
   out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
   return out; })()`);
 info('the squads: ' + JSON.stringify(sq));
-const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE,lebowski:BOH,hendrinks:ARS,kane:MUN,celeste:LIV,haggerd:CHE,hyuk:TOT,sole:MUN,worra:ARS,greasy:ATH,zeevata:JUV,audi:DOR,jolla:AVL,lamb:BOH,ganga:RED,maddsen:CEN,parlor:JUV,zayn:ROY,javier:CAT'.split(',');   // (v199: Nagala Kone at Chelsea; v201: the sheet's thirty-three)
+const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE,lebowski:BOH,hendrinks:ARS,kane:MUN,celeste:LIV,haggerd:CHE,hyuk:TOT,sole:MUN,worra:ARS,greasy:ATH,zeevata:JUV,audi:DOR,jolla:JUV,lamb:BOH,ganga:RED,maddsen:CEN,parlor:JUV,zayn:ROY,javier:CAT'.split(',');   // (v199: Nagala Kone at Chelsea; v201: the sheet's thirty-three; v205: Paul Jolla to Bergamont Juvenile)
 const got = sq.stars.split(',');
 ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 33 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
   'the squads: 32 clubs of fourteen, nobody\'s name twice; the thirty-three stars each at his club, UNIQUE, his numbers and skill stars as made; the Premier League\'s men otherwise as they were (its clubs\' stars in for theirs, in their shirts)');

@@ -27,7 +27,9 @@ patch('  function own(p,carryDist,keepPos){\n', '  function own(p,carryDist,keep
 patch('  function receiveTouch(p,s,intercept){\n', '  function receiveTouch(p,s,intercept){\n    ' + ev('touch') + '\n');
 patch("p.dbgTag='RECEIVE';", "p.dbgTag='RECEIVE'; if(window.__RT&&!window.__RT.has(p)) window.__RT.set(p,{x:tgx,y:tgy,px:p.x,py:p.y,bx:ball.x,by:ball.y});");   // (where he goes for it)
 patch("    if(o.kind==='shot'){\n      const dG=Math.abs(C.gx-p.x);", "    if(o.kind==='shot'){\n      " + ev('xg', ', P:o.P') + "\n      const dG=Math.abs(C.gx-p.x);");
-patch('  const starStats=', '  STARS.length=0;\n  const starStats=');   // (v198: the scenes are City\'s men as they were -- without its two stars, Kyle da Bastion the midfielder these scenes pass to)
+patch('  const starStats=', '  STARS.length=0;\n  const starStats=');
+patch("{id:'MCI',name:'Manchester City',   form:'3-4-1', style:'control'", "{id:'MCI',name:'Manchester City',   form:'4-1-3', style:'control'");   // (v205: City's men as they were, in the 4-1-3 the scenes were made in -- a 3-4-1 on the sheet now)
+patch("{id:'ARS',name:'Arsenal',           form:'3-2-3', style:'neutral'", "{id:'ARS',name:'Arsenal',           form:'3-2-3', style:'control'");   // (...against Arsenal as they played then)   // (v198: the scenes are City\'s men as they were -- without its two stars, Kyle da Bastion the midfielder these scenes pass to)
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-offiq-')), 'classic.html');
 writeFileSync(copy, src);
 
