@@ -34,7 +34,7 @@ const tip = () => page.evaluate(() => { const t = document.getElementById('xplTi
 
 // --- WHICH WAY HE'S GOING ------------------------------------------------------------------------------------------------------
 let r = await K(`(()=>{ const d=CAREER.data, c=JSON.parse(JSON.stringify(d)), none=d.roster.every(p=>p.dv==null&&!trendHtml(p));
-  const p=c.roster.filter(q=>q.role!=='GK').sort((a,b)=>a.age-b.age)[0], X=()=>devX(p.role,devUnpack(p.at),devUnpackPg(p.pg));
+  const p=c.roster.filter(q=>q.role!=='GK').sort((a,b)=>a.age-b.age)[0], X=()=>devX(p.role,devUnpack(p.at),devUnpackPg(p.pg),p.style);   // (v202: by his playstyle)
   const x0=X(); devTick(c,p,{T:1,gw:1,M:1}); const x1=X(), dv1=p.dv; devTick(c,p,{T:1,gw:1,M:1}); const x2=X(), dv2=p.dv;
   const t=v=>devTrend({dv:v});
   return { none, dv1, want1:Math.round((x1-x0)*100)/100, dv2, want2:Math.round((0.5*dv1+0.5*(x2-x1))*100)/100, age:p.age, marks:[t(0.1),t(0.09),t(-0.09),t(-0.1),t(null)] }; })()`);

@@ -2979,6 +2979,25 @@
   // (v182) EACH STYLE'S OWN USUAL LEVEL: what the sheet's numbers rate (unrounded, in stat points) -- a man is made from his
   // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
   const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
+  // (v202) A MAN'S RATING BY HIS PLAYSTYLE: what counts toward it is what his playstyle is good at -- its best stats on the
+  // master sheet 5 each, its worst 1, the rest on a straight line between by where each sits -- and pace above all, as it
+  // was (v144): speed 6 and acceleration 5 for every outfielder. So a wing-back's crossing and stamina count for a lot, a
+  // stopper's heading and tackling, a deep creator's passing; till v202 a man was rated by his line's weights, a wing-back
+  // on a centre-back's and a winger on a striker's. Set (OVR_STY_CAL) so that a man of the style's usual make rates what he
+  // did, at any level -- each playstyle's men as good on average as they were, nobody's stats touched; what moves a man is
+  // how he compares with his style's usual one at what that style does. A keeper's as it was (his line's: OVR_W.GK). A man
+  // is still MADE by his line's weights (cwStatsForOVR, mgDeriveStats: cwOverall with no style), so the men are the men
+  // they were; it's only his rating that's his style's.
+  const OVR_PACE_W={speed:6, acceleration:5}, OVR_STY={}, OVR_STY_CAL={};
+  for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S||S.role==='GK') continue; const P=STYLE_SHEET[k], v=x=>P[OUT_KEYS.indexOf(x)], ks=OUT_KEYS.filter(x=>!OVR_PACE_W[x]);
+    const lo=Math.min(...ks.map(v)), hi=Math.max(...ks.map(v)), w=Object.assign({},OVR_PACE_W); for(const x of ks) w[x]=Math.round(1+4*(v(x)-lo)/Math.max(1,hi-lo));
+    // (calibrated as OVR_K is: a man's level moves what his line's game is made of the whole way and the rest about half as
+    // far -- cwStatsForOVR -- so the style's own weights are stretched to move his rating with his level as his line's did)
+    const wl=OVR_W[S.role], mv=x=>(wl[x]||0)>=2?1:0.55, sl=W=>{ let a=0,t=0; for(const x in W){ a+=W[x]*mv(x); t+=W[x]; } return a/t; };
+    const st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10);
+    const K=OVR_K[S.role]*sl(wl)/sl(w); OVR_STY[k]=w; OVR_STY_CAL[k]={A:STYLE_REF[k]-K*ovrMean(st,w), K}; }
+  // the stats that make his game, as his rating has them: his playstyle's that count 4 and up, the most first (else his line's)
+  const ovrMainOf=(role,style)=>{ const k=ovrStyleKey(role,style); if(!k) return ovrMain(role); const w=OVR_STY[k]; return Object.keys(w).filter(x=>w[x]>=4).sort((a,b)=>w[b]-w[a]||OUT_KEYS.indexOf(a)-OUT_KEYS.indexOf(b)); };
   // (v182) THE SPREAD, A BELL CURVE: a made man's stats scatter round his style's on a normal curve (normInv: Acklam's
   // approximation, one draw a stat, so the draws that follow are as they were): two men in three within a standard
   // deviation of it, nineteen in twenty within two, and never more than two and a half. (v193) HOW WIDE BY HOW GOOD HIS
@@ -3087,7 +3106,7 @@
   function ovrShown(r){ const n=+r; if(r==null||r===''||!isFinite(n)) return r;
     return n<=OVR_SHOW_FROM?Math.round(n):Math.min(99,Math.round(OVR_SHOW_FROM+(n-OVR_SHOW_FROM)*OVR_SHOW_K)); }
   function ovrFrac(p){ try{ const st=p&&(p.stats||(p.at?mgStats(p):null)), role=p&&p.role; if(!st||!OVR_W[role]||p.ovr==null) return 0;
-    return clamp(cwOverallX(role,st)-p.ovr,-0.49,0.49); }catch(e){ return 0; } }
+    return clamp(cwOverallX(role,st,p.style)-p.ovr,-0.49,0.49); }catch(e){ return 0; } }
   const ovrShownOf=(p,r)=>ovrShown((r!=null?r:p.ovr)+ovrFrac(p));   // (his rating, or a rating of his -- in a spot, on the day -- as shown)
   const rangeShown=r=>ovrShown(r[0])+'–'+ovrShown(r[1]);          // (a ceiling's range)
   const rangeShownOf=(p,r)=>ovrShownOf(p,r[0])+'–'+ovrShownOf(p,r[1]);   // (a scout's range of his rating)
@@ -3380,7 +3399,7 @@
   function gkHandlingFor(st){ const w=OVR_W_V121.GK; let s=0,t=0; for(const k in w) if(k!=='gkHandling'){ s+=(+st[k]||5.5)*w[k]; t+=w[k]; }   // (v121's weights: a save from before Handling reads as it always did)
     return clamp(Math.round(s/t*2)/2,1,10); }
   function gkHandlingFill(st){ if(st&&st.gkHandling==null) st.gkHandling=gkHandlingFor(st); return st; }
-  function overallOf(entry){ return cwOverall(entry.role,entry.stats); }
+  function overallOf(entry){ return cwOverall(entry.role,entry.stats,entry.style); }   // (v202: by his playstyle)
   const SQUAD_ROLES=['GK','DEF','DEF','DEF','MID','MID','MID','ATT','ATT'];
   // a shape's squad: the keeper, then each line's men in turn -- the order a lineup fills the shape's places in (form: a
   // shape's name, or its lines)
@@ -3462,6 +3481,24 @@
   const EXH_CLUBS=CLUBS.concat(CC_ORDER);                            // (every club an exhibition has: the arrows go through them all)
   const CC_LEAGUE='CONTINENTAL CHAMPIONS CUP · 2026/27';            // (an exhibition with one of them in it)
   const clubById=id=>EXH_CLUBS.find(c=>c.id===id)||null;
+  // (v202) EACH CLUB AS IT'S SET ON THE SIGNATURE PLAYERS SHEET: its shape (form) and way of playing (style), above, and
+  // where each of its stars plays -- CLUB_SPOTS: his spot in its shape, 0 the first outfield spot of POS_OF's (one not
+  // given is placed as starsIn places him). A career's club of the same name plays the same way: the Premier League's
+  // by their career names (CLUB_CAREER; Fulham and Ipswich have none), the Champions Cup's by their own -- cwClubSet.
+  const CLUB_CAREER={ARS:'Arsenio', AVL:'Ashton Town', BOU:'BurnMouth', BRE:'Brewford', BHA:'Bright Album', CHE:'Chaelsae', COV:'Coventease',
+    CRY:'Crystal Palazzo', EVE:'Everteen', HUL:'Hull Citty', LEE:'Lead United', LIV:'Livermoore', MCI:'Mancunian City', MUN:'Mancunian United',
+    NEW:'NewKassel', NFO:'NottingHill Frost', SUN:'Sunnyland', TOT:'Tot in Haem Spurns'};
+  const CLUB_SPOTS={};
+  // a career club's settings, by its name: {id, form, style, spots} (null: a club of the career's own)
+  function cwClubSet(name){ if(!name) return null; const c=CC_CLUBS.find(x=>x.name===name)||CLUBS.find(x=>CLUB_CAREER[x.id]===name);
+    return c?{id:c.id, form:c.form, style:c.style, spots:CLUB_SPOTS[c.id]||{}}:null; }
+  // what a club's settings come to, to tell a side kept from before they changed (see clubSide)
+  const clubSig=c=>c?hashStr(JSON.stringify([c.form,c.style,CLUB_SPOTS[c.id]||{}])):0;
+  // (a side kept before v202: kept under the settings v202 starts from -- stamped so, as the game loads)
+  function clubSidesStamp(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{}; let n=0;
+    for(const id in all){ const c=clubById(id); if(c&&all[id]&&all[id].sig==null){ all[id].sig=clubSig(c); n++; } }
+    if(n) localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
+  clubSidesStamp();
   // ============ THE STARS (v198) ============
   // Fourteen men made by hand on the Signature Players sheet, each as he was made there: his numbers on the sheet's 1
   // to 20 (STAR_KEYS' order; halved, the game's), his age, his position and the style he plays like (base: his habits,
@@ -3608,7 +3645,11 @@
     return P.some(x=>S.plays.includes(x))?2:P.some(x=>(S.also||[]).includes(x))?1:0; }
   const starLine=pos=>pos==='CB'||pos==='FB'?'DEF':pos==='W'||pos==='ST'?'ATT':'MID';   // (a tie: the spot in his own line -- a holding midfielder's second positions, centre-back and central midfield: the midfield)
   function starsIn(club,sq){ const form=FORMS[club.form]?club.form:'3-3-2', pos=POS_OF[form]||POS_OF['3-3-2'], L0=FORMS[form][0], mine=STARS.filter(s=>s.ex===club.id);
-    const out=mine.filter(s=>s.pos!=='GK').slice(0,pos.length), gk=mine.find(s=>s.pos==='GK'), used=[];
+    const all=mine.filter(s=>s.pos!=='GK').slice(0,pos.length), gk=mine.find(s=>s.pos==='GK'), used=[];
+    // (v202: those given a spot on the sheet in it -- CLUB_SPOTS -- and the rest placed round them)
+    const want=CLUB_SPOTS[club.id]||{}, fixed=[];
+    for(const s of all){ const k=want[s.key]; if(Number.isInteger(k)&&k>=0&&k<pos.length&&!used[k]&&sq[k+1]){ used[k]=true; fixed.push([s,k]); } }
+    const out=all.filter(s=>!fixed.some(f=>f[0]===s));
     let best=null, top=-1;
     const pick=(i,score,asg)=>{ if(i===out.length){ if(score>top){ top=score; best=asg.slice(); } return; }
       for(let k=0;k<pos.length;k++){ if(used[k]||!sq[k+1]) continue; used[k]=true; asg.push(k); pick(i+1,score+10*starFit(out[i],pos[k],k,L0)+(starLine(pos[k])===(STYLES[out[i].base]||{}).role?1:0),asg); asg.pop(); used[k]=false; } };
@@ -3616,6 +3657,7 @@
     const put=(s,i)=>{ const was=sq[i]; if(!was) return;
       const e={name:s.name, num:was.num, role:STYLES[s.base].role, style:s.base, defPers:PERS3[hashStr('ft-star-'+s.key)%3], stats:starStats(s), uniq:true, star:s.key, was:was.name, stars:s.sk};
       e.ovr=overallOf(e); sq[i]=e; };
+    for(const [s,k] of fixed) put(s,k+1);
     if(best) out.forEach((s,j)=>put(s,best[j]+1));
     if(gk) put(gk,0);
     return sq; }
@@ -3632,6 +3674,7 @@
   // 3-3-2 its 2-3-2 grew into), else as generated, in the club's own shape
   function clubSide(id){
     let o=null; try{ o=(JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{})[id]||null; }catch(e){}
+    if(o&&o.sig!=null&&o.sig!==clubSig(clubById(id))) o=null;   // (v202: its club set another way on the sheet since: as it's set now)
     if(o&&Array.isArray(o.squad)&&o.squad.length>=7&&o.lineup){
       const club=clubById(id), gen=clubSquadGen(club);
       if(o.lineup.atk&&o.lineup.atk.length===OUTFIELD-1&&o.squad.length>OUTFIELD){ const fa=formOKAtk(o.form,club.form), cb=gen[clubCB9At(club)];   // (v124: kept with seven outfielders: the club's ninth man, at the back)
@@ -3644,7 +3687,7 @@
         else { const back=gen.find(x=>x.name===e.was)||gen[i]; if(back) o.squad[i]=JSON.parse(JSON.stringify(back)); } });
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeKept(e.style,e.role,e.stats);   // (an archetype kept under an older name: TYPE_WAS -- v143: or gone, TYPE_GONE)
         if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
-      for(const e of o.squad) if(e&&e.stats) gkHandlingFill(e.stats);                                                            // (and before Handling)
+      for(const e of o.squad) if(e&&e.stats){ gkHandlingFill(e.stats); e.ovr=overallOf(e); }                                      // (and before Handling; v202: each rated as ratings go now -- by his playstyle)
       const f=formOKAtk(o.form,'3-3-2'), df=o.dform?formOKDef(o.dform,defFormFor(f)):null, li=o.lineup, nat=i=>fitPos(o.squad[i]);
       // (v127: kept in a shape that's gone -- two at the back -- each man to the nearest spot of the one it's read as: mapShapeOrder)
       if(FORM_GONE[formWas9(o.form)]&&Array.isArray(li.atk)&&li.atk.length===OUTFIELD) li.atk=mapShapeOrder(formWas9(o.form),f,li.atk,li.atk.map(nat));
@@ -3659,7 +3702,7 @@
     const to={}; keep.forEach((i,k)=>to[i]=k); o.squad=keep.map(i=>o.squad[i]);
     li.gk=to[li.gk]; li.atk=(li.atk||[]).map(i=>to[i]); li.def=(li.def||li.atk).map(i=>to[i]); }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
-    const side=(id,t,form,dform)=>{ const o={squad:SQUAD[t], lineup:LINEUP[t], form, dform}, c=clubById(id)||{};
+    const side=(id,t,form,dform)=>{ const o={squad:SQUAD[t], lineup:LINEUP[t], form, dform, sig:clubSig(clubById(id))}, c=clubById(id)||{};
       if(TAC[t].style!==(c.style||'neutral')) o.style=TAC[t].style;                    // (kept only if it isn't the club's own)
       if(JSON.stringify(TI[t])!==JSON.stringify(tiDefault(TAC[t].style))) o.ti=Object.assign({},TI[t]);   // (and its team instructions, only if they aren't its style's)
       if(JSON.stringify(widthObj(TAC[t].width))!==JSON.stringify(widthObj())) o.width=widthObj(TAC[t].width);
@@ -3867,7 +3910,7 @@
     if(Array.isArray(li.def)&&li.def.length===OUTFIELD-1) li.def.splice(mid(fd),0,k); }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.uniq=!!entry.uniq; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   for(const t of ['G','R']) if(goneForm[t]&&LINEUP[t]&&SQUAD[t]&&LINEUP[t].atk.length===OUTFIELD){   // (v127: kept in a shape that's gone -- see mapShapeOrder)
@@ -13844,14 +13887,15 @@
   document.addEventListener('click',e=>{ const el=e.target&&e.target.closest&&e.target.closest('[data-xpl]'), tip=document.getElementById('xplTip');
     if(el) xplShow(el); else if(tip) tip.classList.remove('on'); },true);   // (before the click's own work: a row's tap may paint it over)
   // a man's full name: a career man has one; a club's man in an exhibition has only his surname, so he's given the
-  // first name that goes with it (always the same one)
-  function fullName(n){ n=String(n||''); return !n||n.includes(' ')?n:MG_FIRST[hashStr('first|'+n)%MG_FIRST.length]+' '+n; }
+  // first name that goes with it (always the same one) -- but a star is called what he's called (v202: Mancala,
+  // Needemeyer and Yemen go by the one name)
+  function fullName(n,uniq){ n=String(n||''); return !n||uniq||n.includes(' ')?n:MG_FIRST[hashStr('first|'+n)%MG_FIRST.length]+' '+n; }
   function playerHud(){
     const p=controlled; if(!p) return;
     const pos=natPos({role:p.natRole||p.role, subRole:p.subRole, style:p.style}), key=p.team+'|'+p.pname+'|'+p.num+'|'+pos+'|'+p.stars;
     if(key!==rpKey){ rpKey=key;
       document.getElementById('rpNum').textContent=p.num!=null?'#'+p.num:'';
-      document.getElementById('rpName').textContent=fullName(p.pname);
+      document.getElementById('rpName').textContent=fullName(p.pname,p.uniq);
       document.getElementById('rpPos').textContent=pos;
       document.getElementById('rpStars').innerHTML=starsHtml(p.stars); }
     const st=Math.round(clamp(p.stamina,0,1)*100), cap=Math.round(clamp(p.staminaCap===undefined?1:p.staminaCap,0,1)*100);
@@ -16693,8 +16737,12 @@
     if(role==='MID'){ const r=rng(); return r<0.25?'WM':r<0.625?'CM':r<0.8125?'DM':'AM'; } return rng()<0.45?'WNG':'STK'; }
   function cwMul(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
   function cwHash(seed,str){ let h=seed>>>0; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),0x01000193)>>>0; } return h>>>0; }
-  function cwOverall(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return Math.max(1,Math.min(99,Math.round((R[0]+(ovrMean(st,w)-R[1])*K)*10))); }   // (A MAN'S RATING)
-  function cwOverallX(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }   // (v155: his rating unrounded -- what the side's mood is worth to him)
+  // (A MAN'S RATING; v202: by his playstyle -- style -- when it's one of his line's, else by his line's weights, as a man is made)
+  function ovrStyleKey(role,style){ const k=style&&(TYPE_WAS[style]||style); return k&&OVR_STY[k]&&STYLES[k].role===role?k:null; }
+  function cwOverall(role,st,style){ return Math.max(1,Math.min(99,Math.round(cwOverallX(role,st,style)))); }
+  function cwOverallX(role,st,style){ const s=role==='GK'?null:ovrStyleKey(role,style);   // (v155: his rating unrounded -- what the side's mood is worth to him)
+    if(s){ const c=OVR_STY_CAL[s]; return (c.A+c.K*ovrMean(st,OVR_STY[s]))*10; }
+    const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
   // A MAN MADE TO A RATING (T), of a style: his style's usual make (his line's averages and its offsets -- the master sheet's
   // numbers, v182) moved from what that make rates (STYLE_REF; with no style, his line's usual man's: OVR_REF) to T -- all of
@@ -16783,11 +16831,12 @@
 
   // ---- players ----
   // his stats as he's first made: the role's averages moved to his rating, his style on top, then nudged until they rate
-  // exactly what he is (from then on they're his own: see PLAYER DEVELOPMENT)
+  // exactly what he is (from then on they're his own: see PLAYER DEVELOPMENT) -- v202: what he is by his playstyle's
+  // weights, a half point here and there on what his line's made him
   function mgDeriveStats(p){
     const s=cwStatsForOVR(p.role,p.ovr,cwMul((p.seed>>>0)||1),p.style);   // (his style's make: a keeper's too, v118)
     const w=OVR_W[p.role]||OVR_W.MID, ks=ovrMainBut(p.role).sort((a,b)=>w[a]-w[b]);   // the lightest of the stats that make his game first: small steps (v144: never his pace)
-    for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }
+    for(let it=0; it<60; it++){ const cur=cwOverall(p.role,s,p.style); if(cur===p.ovr) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<p.ovr?0.5:-0.5),1,10); }   // (v202: to the rating his playstyle's weights give)
     return s; }
   // his stats: his own attributes (p.at), read once per string
   const MG_STATS=new Map();
@@ -16824,7 +16873,7 @@
   function devUnpackPg(s){ return DEV_KEYS.map((k,i)=>{ const v=s?parseInt(s.substr(i*2,2),36):NaN; return isFinite(v)?v/600-1:0; }); }
   // (v152) his rating to the hundredth: his attributes with the way each has come on towards its next half point (the
   // meters) -- what his rating is on its way to. See WHICH WAY HE'S GOING
-  function devX(role,st,pg){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=st[k]+0.5*(pg[i]||0); }); const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(o,w)-R[1])*K)*10; }
+  function devX(role,st,pg,style){ const o={}; DEV_KEYS.forEach((k,i)=>{ o[k]=st[k]+0.5*(pg[i]||0); }); return cwOverallX(role,o,style); }   // (v202: by his playstyle)
   // HIS HIDDEN VALUES, 1 to 10 in half points, drawn from his seed when he's first seen: how quickly he learns (lr), his
   // professionalism (pro), adaptability (ad), resilience (rs), durability (du), and his character -- charisma (ch),
   // temperament (te: high is calm), ambition (am), loyalty (lo). Never shown as numbers.
@@ -16844,17 +16893,18 @@
   // reading the game a point more besides (it grows with the years)
   function devCeil(p,st){ const rel=devRel(p), T=Math.max(p.pot||p.ovr,p.ovr);
     const at=lift=>{ const c={}; for(const k of DEV_KEYS) c[k]=Math.min(10,st[k]+lift*rel[k]+(DEV_MEN_EXTRA[k]||0)); return c; };
-    let lo=0, hi=6; for(let i=0;i<18;i++){ const m=(lo+hi)/2; if(cwOverall(p.role,at(m))<T) lo=m; else hi=m; }
+    let lo=0, hi=6; for(let i=0;i<18;i++){ const m=(lo+hi)/2; if(cwOverall(p.role,at(m),p.style)<T) lo=m; else hi=m; }   // (v202: as his playstyle rates them)
     const c=at(hi); for(const k of DEV_KEYS) c[k]=Math.max(st[k],Math.round(c[k]*2)/2); return c; }
   // a man as first seen: his attributes from his rating (as they always were), his ceilings, his hidden values
   function devInit(p){ if(!p||p.at) return; const st=mgDeriveStats(p);
     p.at=devPack(st); p.cl=devPack(devCeil(p,st)); p.bs=p.at; p.pg=''; p.mo=0; hvOf(p);
-    p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+    if(ovrStyleKey(p.role,p.style)) p.ovr=clamp(cwOverall(p.role,st,p.style),30,95);   // (v202: made by his line's weights and nudged to his rating by his playstyle's -- this is it, should the nudging have fallen short)
+    p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)); }
   // his rating set by hand (the board's signings, a test): every attribute that counts moved till it rates that
   function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),30,95);
-    for(let it=0; it<400; it++){ const cur=cwOverall(p.role,st); if(cur===v) break; const up=cur<v, k=ks[it%ks.length]; st[k]=clamp(st[k]+(up?0.5:-0.5),1,10); }
+    for(let it=0; it<400; it++){ const cur=cwOverall(p.role,st,p.style); if(cur===v) break; const up=cur<v, k=ks[it%ks.length]; st[k]=clamp(st[k]+(up?0.5:-0.5),1,10); }
     const cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at); for(const k of DEV_KEYS){ cl[k]=Math.max(cl[k],st[k]); bs[k]=Math.max(bs[k],st[k]); }
-    p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
+    p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99)); }
   // the age curves: how much of his growth an attribute still has in it, and what age takes off it each tick (in half points)
   function devAgeGrow(g,a){ if(g==='phy') return a<=21?1:a<=23?0.75:a<=26?0.35:a<=28?0.1:0;
     if(g==='tec') return a<=21?1:a<=24?0.8:a<=27?0.4:a<=30?0.15:a<=32?0.05:0;
@@ -16875,7 +16925,7 @@
     // the one of his nine hidden values nothing read
     if(x.cid!=null){ if(p.dc===undefined) p.dc=x.cid; else if(p.dc!==x.cid){ p.dc=x.cid; p.mvw=d.weeks||0; } }
     const settle=p.mvw!=null&&(d.weeks||0)-p.mvw<12?0.9+0.02*hvOf(p).ad:1;
-    const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p), x0=devX(p.role,st,pg);   // (x0: v152, which way he's going)
+    const h=hvOf(p), st=devUnpack(p.at), cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at), pg=devUnpackPg(p.pg), rel=devRel(p), x0=devX(p.role,st,pg,p.style);   // (x0: v152, which way he's going)
     const r=cwMul(cwHash((p.seed>>>0)||1,'dev'+d.season+'.'+(d.weeks||0))), z=()=>(r()+r()+r()+r()-2)/0.577;
     p.mo=Math.round(clamp(0.75*(p.mo||0)+0.35*z(),-2,2)*100)/100; const momF=Math.exp(0.3*p.mo);
     const M=x.M!=null?x.M:x.gw>0?devMinutes((p.mw||0)/x.gw):0.6;
@@ -16904,8 +16954,8 @@
     p.ld=Math.round((pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0)-pg0)*100)/100;   // (how he came on, these weeks: for the coaches' word)
     p.at=devPack(st); p.bs=devPack(bs); p.pg=devPackPg(pg); p.mw=0; p.wg=0; p.wb=0;
     if(p.fm!=null) p.fm=Math.round((FORM_BASE+(p.fm-FORM_BASE)*0.85)*100)/100;   // (form fades back without games to keep it)
-    const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99));
-    { const dx=devX(p.role,st,pg)-x0; p.dv=Math.round((p.dv==null?dx:0.5*p.dv+0.5*dx)*100)/100; }   // (v152: WHICH WAY HE'S GOING)
+    const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99));
+    { const dx=devX(p.role,st,pg,p.style)-x0; p.dv=Math.round((p.dv==null?dx:0.5*p.dv+0.5*dx)*100)/100; }   // (v152: WHICH WAY HE'S GOING)
     return p.ovr-was; }
   // WHICH WAY HE'S GOING (v152): every development tick (three weeks) his rating to the hundredth (devX) against the
   // last, the ticks before counted a half less each time back (p.dv: points a tick) -- a tenth of a point a tick or more,
@@ -17262,9 +17312,9 @@
     else if(dl) for(const k in dl) o[k]=clamp(o[k]+dl[k],1,10);
     if(v) for(const k of ['stamina','composure','compFinal','offIQ','defIQ']) o[k]=clamp(o[k]+v,1,10);
     return o; }
-  const morOvr=(p,tm)=>{ if(!morDeltas(p.mor)&&!tmV(tm)) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st,tm))-cwOverall(p.role,st); };
+  const morOvr=(p,tm)=>{ if(!morDeltas(p.mor)&&!tmV(tm)) return 0; const st=mgStats(p); return cwOverall(p.role,morStats(p,st,tm),p.style)-cwOverall(p.role,st,p.style); };
   // what the side's mood is worth to a man today, on average over your nine: a rating's worth, to the tenth
-  function tmOvr(d){ const xi=mgStarters(d); if(!xi.length) return 0; return Math.round(xi.reduce((a,p)=>{ const st=morStats(p,mgStats(p)); return a+cwOverallX(p.role,morStats(p,mgStats(p),d.tm))-cwOverallX(p.role,st); },0)/xi.length*10)/10; }
+  function tmOvr(d){ const xi=mgStarters(d); if(!xi.length) return 0; return Math.round(xi.reduce((a,p)=>{ const st=morStats(p,mgStats(p)); return a+cwOverallX(p.role,morStats(p,mgStats(p),d.tm),p.style)-cwOverallX(p.role,st,p.style); },0)/xi.length*10)/10; }
   // how far a man's mood moves: his temperament (the calm least, the hot-headed most)
   function morSwing(p,d){ const h=hvOf(p); let s=1.3-0.08*h.te; if(hasTrait(p,d,'calm')) s*=0.6; if(hasTrait(p,d,'hot')) s*=1.5; return clamp(s,0.4,2.2); }
   // ...and the side's: its men's temperament, softened by its leaders -- the captain's character most, the vice's half
@@ -17355,7 +17405,7 @@
     p.inj={k:kind,d:days}; delete p.injB;
     if((kind==='tear'||kind==='serious')&&(p.age||25)>=28){ devInit(p); const st=devUnpack(p.at), bs=devUnpack(p.bs||p.at), legs=['speed','acceleration','agility','stamina'];
       for(const k of legs.slice(0,kind==='serious'?3:1)){ st[k]=Math.max(1,st[k]-0.5); bs[k]=Math.min(bs[k],st[k]); }
-      p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st),30,95); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
+      p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
     if(!c){ mgNews(d,p.name+' is out for '+injWeeks(days)+' ('+INJ_NAME[kind]+(how?', '+how:'')+').'); INJ_NOW.push({name:p.name,num:p.num,k:kind,d:days}); if(d.roster.includes(p)) wkLog(d).hurt.push({pid:p.id,k:kind,d:days,how:how||''});
       // OUT OF THE SIDE (v116): one of your nine hurt is switched out there and then -- the fittest best fit off the bench
       // in his place (mgFitXI), so the Selection tab's never left with him in it
@@ -17423,8 +17473,9 @@
               until:o.until!=null?o.until:d.season+Math.floor(Math.random()*4), seed:(Math.random()*4294967296)>>>0, num:0, apps:0, goals:0 };
     p.style=styleForSub(sub,Math.random());                        // (his archetype, by how common each is in his position -- a keeper's too: v118)
     p.pot=o.pot!=null?Math.min(94,Math.max(p.ovr,Math.round(o.pot))):mgPotFor(age,p.ovr);
-    p.wage=mgRound(mgWage(p.ovr)*(0.85+Math.random()*0.3));
+    const wf=0.85+Math.random()*0.3;
     devInit(p);                                                    // (his attributes, ceilings and hidden values: his own from now)
+    p.wage=mgRound(mgWage(p.ovr)*wf);                              // (v202: on the rating his stats make him, by his playstyle)
     careerStarPot(p);                                              // (his skill-star ceiling, by his position and potential)
     if(p.sp===5&&natPos(p)==='FB'&&mgFiveStarFB(d,p)) p.sp=4;      // (one five-star full-back in the world at most)
     return p; }
@@ -17455,10 +17506,10 @@
   function mgMakeClub(d,name,tier,bias,o){ o=o||{};
     let pri=o.colors&&o.colors[0], sec=o.colors&&o.colors[1];
     if(!pri){ for(let t=0;t<40;t++){ pri=mgPick(MG_PALETTE).c; sec=mgPick(MG_PALETTE).c; if(pri!==sec&&kitApart(pri,sec)>=0.55) break; } }
-    const k=mgKits(pri,sec,o.alt!=null?o.alt:Math.random()<0.4), style=cwStyleFor(tier,Math.random);   // (o.alt: v196, the clubs from abroad)
+    const k=mgKits(pri,sec,o.alt!=null?o.alt:Math.random()<0.4), style=o.set?o.set.style:cwStyleFor(tier,Math.random);   // (o.alt: v196, the clubs from abroad; o.set: v202, its settings -- cwClubSet)
     const c={ id:'c'+(d.world.nextClub++), name, code:'', tier, colors:[pri,sec], home:k.home, away:k.away, style,
               budget:o.budget!=null?o.budget:mgRound(MG_AI_BUDGET[tier]*(0.6+Math.random()*0.8)), players:[] };
-    c.code=o.code||mgCodeFor(d,name); if(o.crest) c.crest=o.crest; d.world.clubs[c.id]=c;
+    c.code=o.code||mgCodeFor(d,name); if(o.crest) c.crest=o.crest; if(o.set) c.form=o.set.form; d.world.clubs[c.id]=c;
     const lvl=MG_LEVEL[tier]+(bias||0);
     mgFillSquad(d,c,lvl,o.form);
     mgNumber(c.players);
@@ -17473,7 +17524,7 @@
     const names={4:CW_PL.slice(0,14), 3:CW_PL.slice(14).concat(CW_CHAMP.slice(0,8)), 2:CW_CHAMP.slice(8).concat(mgTownNames(2,used)), 1:mgTownNames(13,used)};
     for(const t of [4,3,2,1]){
       const biases=mgShuffle([-4,-3,-2,-1,-1,0,0,0,1,1,2,3,4,4]);
-      names[t].forEach((nm,i)=>{ const b=(t===4&&CW_PL_BIAS[nm]!=null)?CW_PL_BIAS[nm]*0.8:biases[i]; d.div[t].push(mgMakeClub(d,nm,t,b).id); });
+      names[t].forEach((nm,i)=>{ const b=(t===4&&CW_PL_BIAS[nm]!=null)?CW_PL_BIAS[nm]*0.8:biases[i]; d.div[t].push(mgMakeClub(d,nm,t,b,{set:cwClubSet(nm)}).id); });
     }
     const you=mgMakeClub(d,o.clubName,1,-4,{colors:o.colors,budget:0,code:o.code,crest:o.crest,form:'3-3-2'});   // (dealt for the 3-3-2 you start in: v127)
     d.clubId=you.id; d.div[1].push(you.id);
@@ -18056,8 +18107,8 @@
     const role=SUB_ROLE[sub]||'MID', p=mgNewPlayer(d,role,A.ovr,16,{sub,pot:A.pot,until:d.season+2});
     p.name=A.name; if(STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style: a keeper's too, v118)
     if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
-      for(let i=0;i<300&&cwOverall(p.role,cl)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
-      p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
+      for(let i=0;i<300&&cwOverall(p.role,cl,p.style)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
+      p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99)); }
     p.wage=mgRound(mgWage(p.ovr)*0.5); p.fame=Math.round(8*(POP_STAGE[d.tier]||0.25)*10)/10; mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;   // (the town's heard about him)
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+((STYLES[p.style]||{}).name||(role==='GK'?'a keeper':sub))+', rated '+ovrShownOf(p)+', a ceiling of '+rangeShown(kidPot(A))+'.');
     return null; }
@@ -18529,7 +18580,7 @@
     W.euro.forEach((id,i)=>{ if(re[i]) W.clubs[id].code=''; });   // (their old letters first, so none of them -- Red Star Ardelia's RED -- stands in the way)
     EURO_CLUBS.forEach((e,i)=>{ const c=W.clubs[W.euro[i]];
       if(c){ if(re[i]) euroDress(d,c,e); }
-      else { const n=mgMakeClub(d,e[0],4,e[1],{colors:e[3],code:e[2],alt:e[4]}); euroDress(d,n,e); W.euro.push(n.id); made.add(n.id); } });
+      else { const n=mgMakeClub(d,e[0],4,e[1],{colors:e[3],code:e[2],alt:e[4],set:cwClubSet(e[0])}); euroDress(d,n,e); W.euro.push(n.id); made.add(n.id); } });
     W.euroN=EURO_CLUBS.length; delete W.eu196; return made; }
   function mgEuro(d,fresh){ const W=d.world, made=mgEuroClubs(d);
     if(fresh) for(const id of W.euro){ const c=W.clubs[id]; if(!c||made.has(id)) continue; const lvl=MG_LEVEL[4]+(c.bias||0), stars=c.players.filter(p=>p.star); c.players=[];
@@ -18541,12 +18592,16 @@
   // rating and his potential from them. A club from abroad keeps its stars through its new squad each season (mgEuro).
   // From there his career is anyone's: he ages, can be bought and sold, and retires.
   // ...and each star's name as the list has it now, wherever he is (v199: Van Vander's Van Veers)
+  // (v202) each club set on the sheet as it's set now -- its way of playing and its shape -- in a saved career too, every
+  // time it's loaded (never yours)
+  function mgClubSets(d){ for(const c of Object.values((d.world||{}).clubs||{})){ if(c.id===d.clubId) continue; const set=cwClubSet(c.name); if(!set) continue;
+    if(STYLE_TAC[set.style]) c.style=set.style; if(FORMS[set.form]) c.form=set.form; } }
   function mgStarNames(d){ const W=d.world||{}, by={}; for(const s of STARS) by[s.key]=s.name;
     for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.star&&by[p.star]) p.name=by[p.star]; }
   function mgStarsIn(d){ const W=d.world; if(!W||!W.clubs) return; W.stars=W.stars||{};
     for(const s of STARS){ if(W.stars[s.key]) continue; const c=Object.values(W.clubs).find(x=>x.name===s.career&&x.id!==d.clubId); if(!c) continue;
       mgStarPut(c,mgStarMake(d,s)); W.stars[s.key]=1; } }
-  function mgStarMake(d,s){ const st=starStats(s), S=STYLES[s.base], ovr=clamp(cwOverall(S.role,st),30,99);
+  function mgStarMake(d,s){ const st=starStats(s), S=STYLES[s.base], ovr=clamp(cwOverall(S.role,st,s.base),30,99);
     const p=mgNewPlayer(d,S.role,ovr,s.age,{sub:S.sub,pot:ovr});
     Object.assign(p,{name:s.name, style:s.base, subRole:S.sub, star:s.key, uniq:true, sp:s.sk, starSig:starSig(s), starAge:s.age}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
     return p; }
@@ -18564,7 +18619,7 @@
       const sig=starSig(s);
       if(p.starSig==null){ const was=STAR_V200[s.key]; p.starSig=was?was[0]:sig; p.starAge=was?was[1]:s.age; p.sp=s.sk; if(p.starSig===sig) continue; }   // (from before v200: as v200 had him, then whatever's changed)
       if(p.starSig===sig) continue;
-      const S=STYLES[s.base], st=starStats(s), ovr=clamp(cwOverall(S.role,st),30,99);
+      const S=STYLES[s.base], st=starStats(s), ovr=clamp(cwOverall(S.role,st,s.base),30,99);
       Object.assign(p,{name:s.name, style:s.base, role:S.role, subRole:S.sub, uniq:true, sp:s.sk}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
       if(p.starAge!=null&&s.age!==p.starAge) p.age=Math.max(16,p.age+s.age-p.starAge); p.starAge=s.age; p.starSig=sig;
       const mine=L===d.roster||L===d.youth, home=clubs.find(c=>c.players===L), to=clubs.find(c=>c.name===s.career&&c.id!==d.clubId);
@@ -19637,6 +19692,8 @@
     // each spot to whoever's best in it on the day (his rating there, as fresh as he is, a little extra in his own
     // position): the best pairings first
     const spots=careerSlots(form,'atk'), line=new Array(spots.length).fill(null), V=[];
+    const set=cwClubSet(club.name), want=set&&set.form===form&&!(d&&club.id===d.clubId)?set.spots:null;   // (v202: a star in the spot his club gives him on the sheet)
+    if(want) for(const p of ps){ const k=p.star?want[p.star]:null; if(Number.isInteger(k)&&k>=0&&k<spots.length&&!line[k]&&!used.has(p)&&p.role!=='GK'&&!p.inj){ line[k]=p; used.add(p); } }
     for(const p of ps) if(!used.has(p)&&p.role!=='GK') spots.forEach((sl,si)=>V.push({p,si,v:condOvr(p,ovrAt(p,sl.role,spotFit(sl)))+(posFit(fitPos(p),spotFit(sl))==='main'?1:0)}));
     V.sort((a,b)=>b.v-a.v);
     for(const c of V){ if(line[c.si]||used.has(c.p)) continue; line[c.si]=c.p; used.add(c.p); }
@@ -19651,7 +19708,8 @@
   // ahead of a CM, a fluid counter two DMs, a direct counter a DM in front of a back four)
   const CW_STYLE_FORMS={control:['3-4-1','3-3-2','3-2-1-2'], gegen:['3-3-2','3-2-3','4-1-3'], wing:['3-2-3','4-1-3','3-1-3-1'], direct:['4-2-2','3-3-2','3-1-2-2'],
     fluid:['4-2-2','3-3-2','3-2-2-1'], dcounter:['4-3-1','4-2-2','4-1-2-1'], neutral:['3-3-2','3-2-3','3-4-1','4-3-1']};
-  function cwFormFor(club){ if(!club) return '3-3-2'; const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
+  function cwFormFor(club){ if(!club) return '3-3-2'; if(club.form&&FORMS[club.form]) return club.form;   // (v202: one set on the sheet -- cwClubSet)
+    const L=CW_STYLE_FORMS[club.style]||CW_STYLE_FORMS.neutral; return L[cwHash(7,club.name||'')%L.length]; }
   // ...and its width: a wing side wide with the ball, a counter-attacking side compact; a deep block compact without it
   function cwWidthFor(club){ const st=styleKey(club&&club.style);
     return {atk:st==='wing'?1.18:(st==='fluid'||st==='dcounter')?0.84:1, def:postureOf(st)==='lowblock'?0.84:1}; }
@@ -20637,7 +20695,7 @@
   function mgStep(act,label){ return '<div class="mgStep"><button class="mgAdj" data-mg="'+act+'" data-dir="-1">−</button><b>'+label+'</b><button class="mgAdj" data-mg="'+act+'" data-dir="1">+</button></div>'; }
   function mgYears(){ const y=MGUI.years||2; return mgStep('yrs',y+' season'+(y>1?'s':'')); }
   function mgBars(p){ const st=mgStats(p); let h='<div class="mgBars">';
-    for(const k of ovrMain(p.role)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
+    for(const k of ovrMainOf(p.role,p.style)){ const v=st[k]; h+='<div class="statRow"><span class="sl">'+(STAT_LABEL[k]||k)+'</span><span class="statBar"><i style="width:'+((clamp(v,1,10)-1)/9*100).toFixed(0)+'%"></i></span><span class="sv">'+v.toFixed(1)+'</span></div>'; }
     return h+'</div>'; }
   // THE SIX: a man in six numbers, each the average of its stats (1-10) -- tap one to open what it's made of
   // (how he moves; his body and the air -- Heading's a duel at both ends; on the ball -- Curve bends his shots, crosses and
@@ -21210,7 +21268,7 @@
       delete d.built; delete d.decor; }
     d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
     if(!d.cup){ d.cup={s:d.season,off:true}; d.mw=d.md-1; }   // (a career from before the cups: they start with its next season)
-    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgStarsIn(d); mgStarNames(d); mgStarSync(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars; v199: by their names now; v200: as the sheet has them)
+    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgClubSets(d); mgStarsIn(d); mgStarNames(d); mgStarSync(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars; v199: by their names now; v200: as the sheet has them)
     delete d.clHold;   // (v196's holders: no place of their own from v197)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     if(d.div&&d.rival==null) mgRivalPick(d); if(d.div&&!d.potm) potmSnap(d);   // (a career from before v104: a rival, and the month from now)
@@ -21228,6 +21286,10 @@
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
         p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
       d.w144=true; }
+    if(!d.w202){ const W=d.world||{};   // (v202: rated again by his playstyle -- A MAN'S RATING BY HIS PLAYSTYLE -- his potential too; his stats as they were)
+      for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at),p.style),30,p.star?99:95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)); }
+      d.w202=true; }
     if(!d.w149){ econV149(d); d.w149=true; }   // (v149: the real game's money -- econV149)
     return d; }
   let curBldg=null; const curTab={};
@@ -21525,7 +21587,7 @@
       budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, fa178:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
-      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w149:true };   // (w120: on v120's wages from the start; w122: rated on v122's weights; w149: in the real game's money)
+      lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w144:true, w149:true, w202:true };   // (w120: on v120's wages from the start; w122, w144: rated on today's weights; w149: in the real game's money; w202: rated by playstyle)
     mgBuildWorld(d,{clubName:o.clubName,colors:o.colors,code:o.code,crest:o.crest});
     d.clubCode=d.world.clubs[d.clubId].code;
     mgAutoLineup(d); mgNewFixtures(d); mgCupsStart(d); for(const p of d.roster){ p.s0=p.ovr; p.since=1; p.mor=MOR0; } d.tm=MOR0; mgCaptains(d); d.fw={};   // (v157: YOUR FIRST WEEK)

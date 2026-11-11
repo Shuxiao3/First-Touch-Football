@@ -68,7 +68,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Stat Town'); await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 r = await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); MGUI.noPile=true; pileHide(); const all=[...d.roster,...Object.values(d.world.clubs).flatMap(c=>c.players)];
-  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p)),30,95)) }; })()`);
+  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p),p.style),30,95)) }; })()`);   // (v202: by his playstyle)
 ok(r.st163 && r.len === '28' && r.rated, 'a new career: every man\'s 28 attributes, the new two among them (' + r.n + ' men), each rated by them');
 
 // --- A CAREER FROM BEFORE ---------------------------------------------------------------------------------------------------------------

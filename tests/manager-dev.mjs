@@ -33,7 +33,7 @@ await K(`(()=>{ window.D=mgNewCareer({slot:'1',manager:'T',clubName:'Dev Town',c
 // --- stored attributes -----------------------------------------------------------------------------------------
 r = await K(`(()=>{ const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free];
   const okAt=all.every(p=>/^[a-s]{28}$/.test(p.at)&&/^[a-s]{28}$/.test(p.cl)&&/^[a-s]{28}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));   // (v163: 28, Long passing and Final third composure last)
-  const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at)),30,95)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)));
+  const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at),p.style),30,95)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)));   // (v202: by his playstyle)
   const under=all.every(p=>{ const a=devUnpack(p.at), c=devUnpack(p.cl); return DEV_KEYS.every(k=>c[k]>=a[k]); });
   const hv=all.flatMap(p=>Object.values(hvOf(p))), hvMean=hv.reduce((a,b)=>a+b,0)/hv.length;
   const p=D.roster[0], s0=JSON.stringify(mgStats(p)), a=devUnpack(p.at); a.speed=Math.min(10,a.speed+1.5); p.at=devPack(a);
@@ -104,12 +104,12 @@ ok(r.seen.filter(x => /dev/.test(x)).every(x => +x.split(':')[0] % 3 === 0) && r
 ok(r.same, 'the same week from the same save, twice: the same development to the half point (a reload changes nothing)');
 
 // --- twins: the same 18-year-old, two careers ----------------------------------------------------------------------
-r = await K(`(()=>{ const a=XMK(18,58,72), b=XCLONE(a), c=XCLONE(a); hvOf(a);
+r = await K(`(()=>{ const a=XMK(18,58,72), b=XCLONE(a), c=XCLONE(a), s0=a.ovr; hvOf(a);   // (v202: made at 58 on his line's weights, rated by his playstyle -- 58 or a point either side: from where he starts)
   XTICKS(a,10,{T:0.95,gw:4,share:1}); XTICKS(b,10,{T:0.55,gw:4,share:0}); XTICKS(c,10,{T:0.75,gw:4,share:0.5});
   const prog=p=>{ const st=devUnpack(p.at), pg=devUnpackPg(p.pg); return +DEV_KEYS.reduce((s,k,i)=>s+st[k]*2+pg[i],0).toFixed(2); };   // (in half points, the meters too)
-  return { start:58, starter:a.ovr, bench:b.ovr, half:c.ovr, pot:a.pot, prog:[prog(a),prog(c),prog(b)] }; })()`);
-ok(r.prog[0] > r.prog[1] && r.prog[1] > r.prog[2] && r.starter - r.bench >= 2 && r.bench >= r.start - 1,   // (v144: on the bench with poor training a point down at most -- bad weeks take a little of his legs, and his pace counts the most now; it was never down)
-  'twins at 18 (58, a ceiling of ' + r.pot + '), a season on: a regular with good training ' + r.starter + ', half the games ' + r.half + ', on the bench with poor training ' + r.bench + ' (all he\'s grown, in half points: ' + r.prog.join(', ') + ')');
+  return { start:s0, starter:a.ovr, bench:b.ovr, half:c.ovr, pot:a.pot, prog:[prog(a),prog(c),prog(b)] }; })()`);
+ok(r.prog[0] > r.prog[1] && r.prog[1] > r.prog[2] && r.starter - r.bench >= 2 && r.bench >= r.start - 2,   // (v144: on the bench with poor training a point down at most -- bad weeks take a little of his legs, and his pace counts the most now; it was never down. v202: two at most -- a complete midfielder's stamina counts 5 by his playstyle, 4 by his line)
+  'twins at 18 (' + r.start + ', a ceiling of ' + r.pot + '), a season on: a regular with good training ' + r.starter + ', half the games ' + r.half + ', on the bench with poor training ' + r.bench + ' (all he\'s grown, in half points: ' + r.prog.join(', ') + ')');
 
 // --- the ceiling: reached, never passed ------------------------------------------------------------------------------
 r = await K(`(()=>{ const p=XMK(19,60,70); for(let i=0;i<80;i++){ XTICKS(p,1,{T:1,gw:3,share:1}); p.age=19+Math.floor(i/10)>23?23:19+Math.floor(i/10); }

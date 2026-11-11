@@ -1318,7 +1318,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     keeper coming for it and the header off it -- where Curve 10's counts 0.95. Through balls, long passes and shots
     keep the table. (v169-v179: the table for crosses too, so no bend at Curve 1.)
 - **The six** on a player's card are each the average of the attributes under them. They're only what the card
-  shows: a man's rating comes from weights for his line (see **Ratings**).
+  shows: a man's rating comes from his playstyle's weights (v202; his line's before -- see **Ratings**).
 
   | | Attributes |
   | --- | --- |
@@ -1373,7 +1373,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     Long passing 10, 80% at 5.5, all of it at 1, by how much of a long pass it was -- a 33 m pass stopped 37 m on at
     Long passing 10 and 46 at 1, and got to the man it was for at 8 m/s against 17.)
 - **Ratings (v122).** A man's rating is a weighted average of his stats (times ten), the weights out of 5 and set by
-  his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. What his line's game
+  his line -- keeper, defender, midfielder, attacker -- not his exact position or his archetype. (v202: by his
+  playstyle now -- see **By his playstyle**, below; the table is his line's, which a man is still made by.) What his line's game
   is made of counts 5, then 4 and 2, and every other outfield stat 1, so even a defender's shooting counts a little:
   a Division 2 centre-back goes from 49 to 55 with his three shooting stats taken from all 1s to all 10s (his tackling
   the same way: 37 to 65). Before v122 the weights were 1 to 3 and a good many stats counted for nothing -- crossing
@@ -1436,6 +1437,21 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     wing-back +1.5, a speedster +0.9 -- and the slow ones down: an anchor -2.1, a stopper -1.9, a target man -1.5, a deep
     creator -1.4. Exhibition matches computer v computer score as they did (40 a version: 1.73 goals and 9.7 shots a
     match, against 1.63 and 9.7).
+  - **By his playstyle (v202).** A man is rated on what his playstyle is good at: each playstyle has weights of its
+    own, from its numbers on the master sheet -- its best stats count 5, its worst 1, the rest between by where each
+    sits -- and pace counts most for every outfielder, as it has since v144 (speed 6, acceleration 5). So a wing-back's
+    crossing and stamina count 5 and his heading 1, a stopper's heading and tackling 5 and his dribbling 1, a deep
+    creator's long passing 5. Till v202 a man was rated on his line's weights: a wing-back on a centre-back's, a winger
+    on a striker's. Each playstyle's usual man still rates what he did, at any level, so the leagues and the positions
+    stay where they were (a new career's men within a tenth of a point of what their line's weights gave them, by
+    position, and about half a point either way a man); nobody's stats change, and men are made as they always were
+    -- by their line's weights, then nudged a half point here and there to the rating they're made at, by their
+    playstyle's. What moves a rating now is how a man compares with his playstyle's usual one at what that playstyle
+    does. Keepers are rated as they were. A career from before v202 has every man rated again, once,
+    his potential too; a side kept in an exhibition is rated again as it's loaded; and a new man's wage is set on the
+    rating his stats make him. The stars moved most: Mancala 74 to 80, Nagala Kone 79 to 83, Kyle da Bastion 89 to 92,
+    Lorry Maddsen 92 to 95, Paolo Zeevata 86 to 79 (a defender's numbers on a wing-back), Van Veers 90 to 87, Greasy
+    Man 85 to 82. A man's bars on a card (the stats that make his game) are his playstyle's that count 4 and up.
 - **Off IQ meets the ball.** A man a ball's played to reads it as well as his Off IQ lets him: the computer's men, and
   yours when you've passed to him and left the stick alone.
   - **He sees it's his a beat after it's struck:** 0.4 s at Off IQ 1, 0.23 s at 5.5, 0.05 s at 10. Till then he
@@ -2834,7 +2850,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   him, else one of his second positions -- as many at home as can be, none out of position -- in that man's shirt,
   with his own numbers exactly as he was made, and his playstyle reads
   **UNIQUE**: underneath he plays like the style he was made on (a false nine, a complete forward, a ball-winner...),
-  which is what his side asks of him. Everyone else at the Premier League's clubs is the man he was; a side
+  which is what his side asks of him, and he's rated as one (v202). A star with one name goes by it (v202: Mancala,
+  Needemeyer and Yemen; in a match, a club's man with only his surname is given a first name in his window, a star
+  isn't). Where each plays can be set (v202: see **The clubs, as set**). Everyone else at the Premier League's clubs is the man he was; a side
   of theirs you'd kept from before gets its stars too, each in for the man he replaces, and a kept side's stars are as
   the list has them now (v199: a new name, new numbers; a star a club no longer has gives it back the man he was in
   for). They're made on the Signature Players sheet, skill stars and all (v200: each star's skill stars are his
@@ -2888,6 +2906,17 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
   Change your club's style or width (before kick-off or in the match) and the club keeps it, as it keeps a shape;
   set it back to the club's own and nothing's kept as a change.
+- **The clubs, as set (v202).** Each club's shape, its way of playing and where each of its stars plays are set on the
+  Signature Players sheet's Clubs page -- the Premier League's twenty and the Champions Cup's twelve -- and go into the
+  game as the stars do. A star given a spot plays in it (one in a second position of his, or out of it, if that's
+  where he's put); the rest are placed round him as before, as many in their own positions as can be, and the squad
+  players are made for the shape. A side you'd kept with a club stays as you left it while the club's set the same
+  way; once it's set another way, the side starts again from the new settings (one kept from before v202 is taken as
+  kept under the settings v202 starts from). In a career, a club of the same name plays the same way -- the Premier
+  League's under their career names (Arsenio as Arsenal, Mancunian City as Manchester City...; Fulham and Ipswich have
+  none), the clubs from abroad as themselves -- its shape and style from a new career's start, and in a saved career
+  as soon as it's loaded (till v202 a career club's style was drawn at random and its shape from that); and in a
+  match its stars play in their spots.
 - **TACTICS before kick-off.** Beside KICK OFF on the setup screen, TACTICS sets the match up and waits: its tactics
   screen comes up before kick-off -- your shapes with the ball and without it, width, style, every man's card and the
   team's instructions, the other side's to look at. ◀ CLUBS goes back to the setup screen, KICK OFF ▶ plays it, everyone
@@ -3013,6 +3042,16 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v202: ratings by playstyle, and the clubs as set.** A man's rating is worked out from what his playstyle is good
+  at: its best stats on the master sheet count 5, its worst 1, the rest between, and pace still counts most (speed 6,
+  acceleration 5) -- where it used to be his line's weights, a wing-back rated like a centre-back. Each playstyle's
+  usual man rates what he did, so the leagues stay where they were and nobody's stats change; what's moved is the
+  rating of a man who's better or worse than usual at what his playstyle does (Mancala 74 to 80, Kyle da Bastion 89
+  to 92, Paolo Zeevata 86 to 79). Saved careers are rated again when loaded. Each club's shape, way of playing and
+  where its stars play can be set on the Signature Players sheet's new Clubs page, for an exhibition and for its club
+  in a career (which now plays the same way); a side kept with a club starts again once the club's set another way.
+  A star with one name -- Mancala, Needemeyer, Yemen -- isn't given a first name in his window in a match. A new man's
+  wage is set on the rating his stats make him. See **By his playstyle** and **The clubs, as set**.
 - **v201: thirty-three stars.** The Signature Players sheet's every star is in: eighteen new -- Bobby Lebowski, Torrent
   Hendrinks, Ryan Kane, Mo Celeste, Alan Haggerd, Soo-min Hyuk, Peter Sole, Paul Worra, Greasy Man, Paolo Zeevata, Yanet
   Audi, Paul Jolla, Tomas Lamb, Ruby Ganga, Lorry Maddsen, Lorena Parlor, Zacary Zayn and Hernan Javier -- and the

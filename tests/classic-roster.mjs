@@ -72,11 +72,11 @@ ok(Object.values(st).every(v => Math.abs(v.ovr - 65) <= 1), 'and every one of th
 
 // --- (v182) THE MASTER SHEET: every type's usual make is the sheet's numbers (his line's averages and the type's offsets,
 // halved from its 1 to 20) -- made as a career makes a man, at the rating those numbers rate, 200 men of each average
-// them, every one exactly the rating he was made for; and his stats scatter on a bell curve as wide as his style is good at them (v193): its best stats
+// them, every one exactly the rating he was made for (v202: by his playstyle's weights); and his stats scatter on a bell curve as wide as his style is good at them (v193): its best stats
 // half a point a standard deviation (the sheet's 1), its worst 0.7 (1.4), the rest between in the sheet's order (v192: half a point on all of them) ------
 const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, worstK: '', off: 0, n: 0 };
   for(const k in M.STYLES){ const S = M.STYLES[k], role = S.role, keys = role === 'GK' ? [...M.OUT_KEYS, ...M.GK_KEYS] : M.OUT_KEYS, T = Math.round(M.STYLE_REF[k] * 10), sum = {};
-    for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
+    for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s, k) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
     let e = 0; for(const x of keys) e += Math.abs(sum[x] / 200 - (M.ARCH[role][x] + (S.d[x] || 0))) * 2; e /= keys.length;   // (on the sheet's 1 to 20)
     if(e > out.worst){ out.worst = +e.toFixed(3); out.worstK = k; } }
   // the spread by how good his style is at it: 3000 Pacey wingers at his style's rating -- his pace, his best (and never
