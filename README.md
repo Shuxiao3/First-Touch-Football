@@ -2026,21 +2026,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       poor at, the men to hire are made again, and a focus on PHYSICAL becomes FITNESS (on MENTAL, BALANCED).
   - **The cups.** Division 2's clubs play only the league. Division 1 and up play the **Coco Cup** (the league clubs'
     cup: the 42 clubs of Division 1, the National Division and the Premier Division), the National Division and up the
-    **Fashion Cup** too (their 28), and the next season's **Continental Champions Cup** (v196: it was the Champions
-    League) is sixteen: the Premier Division's top four, one more of ours -- the holders if they aren't in already
-    (wherever they finished, whatever league they're in), else the fifth -- and eleven clubs from abroad. In a first
-    season it's the Premier Division's five strongest.
-    - **The clubs from abroad** (v196): **Madrid Royale** (ROY), **Catalunya Garnet** (CAT), **Madrid Athletics**
-      (ATH), **Paris Eiffel** (PAR), **Milan Centrale** (CEN), **Milan Red** (RED), **Bergamont Juvenile** (JUV),
-      **Bohemia Munich** (BOH), **Dortmund Yellow** (DOR), **Lisbon FC** (LIS) and **Istanbul FC** (IST), each in its
-      own colours (Madrid Royale all in white, Dortmund Yellow in yellow and black, and so on) and a new squad each
-      season at its level: the Premier Division's mid-table side and its own few points either side -- Madrid Royale
-      seven up, the best in the game; Bohemia Munich and Paris Eiffel six; Catalunya Garnet five; Milan Centrale four;
-      Madrid Athletics three; Dortmund Yellow two; Milan Red one; Bergamont Juvenile level; Lisbon FC one down and
-      Istanbul FC two. They play nothing else. A club in the leagues with one of their letters keeps them (the club
-      from abroad takes others), and none made since takes theirs. A career from before has its ten old clubs from
-      abroad renamed in place (Inter Vallera is Madrid Royale, and so on down the list: their new levels come with the
-      next season's squads) and the eleventh made.
+    **Fashion Cup** too (their 28), and the Premier Division's top four play the next season's **Continental Champions
+    Cup** (v196: it was the Champions League) with the twelve clubs from abroad: sixteen. In a first season it's the
+    Premier Division's four strongest. (v196 had eleven from abroad, and one more of ours: the holders if they weren't
+    in already, else the fifth. Seville FC, the twelfth, made that place theirs in v197.)
+    - **The clubs from abroad** (v196; Seville FC from v197): **Madrid Royale** (ROY), **Catalunya Garnet** (CAT),
+      **Madrid Athletics** (ATH), **Seville FC** (SEV), **Paris Eiffel** (PAR), **Milan Centrale** (CEN), **Milan Red**
+      (RED), **Bergamont Juvenile** (JUV), **Bohemia Munich** (BOH), **Dortmund Yellow** (DOR), **Lisbon FC** (LIS)
+      and **Istanbul FC** (IST), each in its own colours (Madrid Royale all in white, Seville FC white with red,
+      Dortmund Yellow in yellow and black, and so on) and a new squad each season at its level: the Premier Division's
+      mid-table side and its own few points either side -- Madrid Royale seven up, the best in the game; Bohemia Munich
+      and Paris Eiffel six; Catalunya Garnet five; Milan Centrale four; Madrid Athletics three; Dortmund Yellow two;
+      Milan Red one; Bergamont Juvenile level; Lisbon FC and Seville FC one down and Istanbul FC two. They play nothing
+      else. A club in the leagues with one of their letters keeps them (the club from abroad takes others), and none
+      made since takes theirs. A career from before v196 has its ten old clubs from abroad renamed in place (Inter
+      Vallera is Madrid Royale, and so on down the list: their new levels come with the next season's squads) and the
+      other two made; one from v196 keeps its eleven as they are and gets Seville FC.
     - **Every round is on a Wednesday**, in the league week its calendar says: the Continental Champions Cup's six group games
       in weeks 4, 6, 8, 10, 12 and 14, its quarter-finals, semi-finals and final in 18, 21 and 26; the Coco Cup's six
       rounds in weeks 5, 9, 13, 15, 19 and 22; the Fashion Cup's five in 7, 11, 17, 20 and 24 -- none in the league's
@@ -2295,8 +2296,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       tired for a game (under 90% fit; under 78% in a big one: the Continental Champions Cup, a cup's last two rounds, the
       playoffs) sit it out for a fresh man not much worse. Their young men (21 and under) get a start now and then in
       the league, and three of them once the league's settled for the club (promotion sure -- in the Premier Division
-      a Continental Champions Cup place, the top four (v196: the top six before) -- or the top six out of reach (the
-      Premier Division's top five, as the fifth may go in) with relegation out of reach too: by the last few weeks a
+      a Continental Champions Cup place, the top four (v196: the top six before) -- or the top six out of reach (in
+      the Premier Division the top four: v197) with relegation out of reach too: by the last few weeks a
       good few clubs have nothing left to play for). In a cup below its level a club rests its regulars: two leagues
       above the cup's lowest (the Premier Division in the Coco Cup), four of its eight are youngsters (or the reserves),
       a league above, one or two. The Continental Champions Cup, a cup's last two rounds and the playoffs get their best.
@@ -2971,6 +2972,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v197: Seville FC.** A twelfth club from abroad, from Spain: **Seville FC** (SEV), in white with red, a point
+  under the Premier Division's mid-table side, like Lisbon FC. Twelve from abroad and the Premier Division's top four
+  make the sixteen, so the extra place v196 gave the holders (or the fifth) is gone: the top four go in, and nobody
+  else of ours. A computer club in the Premier Division has something to play for while the top four are in reach
+  (fifth in v196). A saved career keeps its eleven as they are and gets Seville FC; one from before v196 gets its ten
+  renamed and the other two. See **The cups**.
 - **v196: the Continental Champions Cup.** The career's top competition is the **Continental Champions Cup** (CCC
   on the fixtures; it was the Champions League) and the leagues are **Division 2**, **Division 1**, the **National
   Division** and the **Premier Division** (League 2, League 1, the Championship and the Premium League before; on a

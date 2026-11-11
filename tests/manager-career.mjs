@@ -647,8 +647,8 @@ const onCal = cupAt.every(([x, i]) => { const m = x.match(/^(\w+?)(\d+)@(\d+)$/)
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Fixtures")'); await page.waitForTimeout(80);
 const fxCup = await page.$$eval('#bpBody .mgFx.cup', ns => ns.map(n => n.querySelector('.md').textContent)); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 info('National Division: ' + JSON.stringify({ r: { coco: r.coco, fashion: r.fashion, cl: r.cl, in: r.in }, cups: cupAt.map(x => x[0]), hub: sn.hub, runs: sn.runs, fxCup }));
-ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,11,5' && !r.l2 && r.abroad,
-  'the cups: the Coco Cup Division 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the National Division and up (28: twelve ties, four byes), the Continental Champions Cup five from the Premier Division (v196: the top four and one more -- in a first season its five strongest) and eleven from abroad in four groups of four; none for Division 2, and the clubs from abroad in no league');
+ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,12,4' && !r.l2 && r.abroad,
+  'the cups: the Coco Cup Division 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the National Division and up (28: twelve ties, four byes), the Continental Champions Cup four from the Premier Division (in a first season its four strongest) and twelve from abroad (v197) in four groups of four; none for Division 2, and the clubs from abroad in no league');
 ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.wins === '111' && /coco/.test(sn.runs) && /fashion/.test(sn.runs) && sn.ledgerCup && fxCup.length >= 1,
   'in the National Division, the Coco and Fashion Cups (no Continental Champions Cup): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
   + sn.runs + '); every cup won by someone');
@@ -665,43 +665,51 @@ ok(in0 && in4 && b0.seq.filter(x => /^cl/.test(x)).length >= 6 && b0.avg < 0.9 &
   'the Premier Division\'s top four in the Continental Champions Cup (six group games and more, midweek): with no physio your eight start a game ' + Math.round(b0.avg * 100) + '% fit on average, down to '
   + Math.round(b0.low * 100) + '%; with the best physio ' + Math.round(b4.avg * 100) + '% (the most tired ' + Math.round(b4.low * 100) + '%: a man with poor Stamina, or past 30, still runs down)');
 
-// THE CONTINENTAL CHAMPIONS CUP (v196): the leagues' new names; the eleven clubs from abroad, each in its own colours
-// and letters; who's in -- the Premier Division's top four, then the holders if they're ours and not in already (from
-// any league), else the fifth; the season's end keeps the top five and the winners for the next; and a career from
-// before has its ten old clubs from abroad renamed in place (ids and all), the eleventh made, its own letters kept
+// THE CONTINENTAL CHAMPIONS CUP (v196; v197: Seville FC the twelfth from abroad, and the top four alone go in): the
+// leagues' new names; the twelve clubs from abroad, each in its own colours and letters; who's in -- the Premier
+// Division's top four last season, in a first season its four strongest -- and the season's end keeping the top four
+// for the next; a career from before v196 has its ten old clubs from abroad renamed in place (ids and all) and the
+// other two made, its own letters kept; one from v196 keeps its eleven as they are and gets the twelfth
 r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.EURO_CLUBS, out = {};
   out.leagues = [1, 2, 3, 4].map(t => M.MG_LEAGUE[t]).join();
   out.names = W.euro.map(id => W.clubs[id].name).join(); out.codes = W.euro.map(id => W.clubs[id].code).join();
-  out.kits = W.euro.every((id, i) => { const c = W.clubs[id], e = E[i]; return c.euro && c.tier === 4 && c.colors.join() === e[3].join() && c.home[0] === e[3][0] && c.home[1] === e[3][1] && c.home[2] === (e[4] ? e[3][0] : e[3][1]) && c.away[0] === e[3][1]; });
-  out.end = { n: d.clQual.length, top: d.clQual.join() === d.review.moves[4].table.slice(0, 5).join(), held: d.clHold != null && d.clHold === d.cup.cl.win };
-  const P = d.div[4].filter(x => x !== d.clubId), a = P.slice(0, 5), x3 = d.div[3][0], ours = () => { M.mgCupsStart(d); return d.cup.cl.in.filter(id => !W.clubs[id].euro).join(); };
-  d.clQual = a; d.clHold = null; out.none = ours() === a.join() && d.cup.cl.in.length === 16 && d.cup.cl.held === null;
+  out.kits = W.euro.length === E.length && W.euro.every((id, i) => { const c = W.clubs[id], e = E[i]; return c.euro && c.tier === 4 && c.colors.join() === e[3].join() && c.home[0] === e[3][0] && c.home[1] === e[3][1] && c.home[2] === (e[4] ? e[3][0] : e[3][1]) && c.away[0] === e[3][1]; });
+  out.end = { n: d.clQual.length, top: d.clQual.join() === d.review.moves[4].table.slice(0, 4).join(), hold: d.clHold === undefined };
+  const P = d.div[4].filter(x => x !== d.clubId), a = P.slice(0, 4), ours = () => { M.mgCupsStart(d); return d.cup.cl.in.filter(id => !W.clubs[id].euro).join(); };
+  d.clQual = a; out.top4 = ours() === a.join() && d.cup.cl.in.length === 16 && d.cup.cl.in.filter(id => W.clubs[id].euro).length === 12;
   const avg = id => W.clubs[id].players.reduce((t, p) => t + p.ovr, 0) / W.clubs[id].players.length;   // (the squads made afresh with the season: at their levels)
   out.lvl = W.euro.map(id => Math.round(avg(id) - M.MG_LEVEL[4] - W.clubs[id].bias)); out.gap = +(avg(W.euro[0]) - avg(W.euro[10])).toFixed(1);
-  d.clHold = x3; out.held = ours() === a.slice(0, 4).concat([x3]).join() && d.cup.cl.held === x3;
-  d.clHold = a[1]; out.inAlready = ours() === a.join();
-  d.clHold = W.euro[0]; out.abroad = ours() === a.join();
-  d.clHold = d.clubId; out.you = ours() === a.slice(0, 4).concat([d.clubId]).join() && /are in the Continental Champions Cup as the holders \(\$12,000,000\): drawn with /.test(d.news[0].t);
+  delete d.clQual; const best = d.div[4].slice().sort((x, y) => M.mgStrength(d, y) - M.mgStrength(d, x)).slice(0, 4); out.first = ours() === best.join();
+  d.clQual = [d.clubId].concat(a.slice(0, 3)); ours(); out.news = /^Busy Town are in the Continental Champions Cup \(\$12,000,000\): drawn with /.test(d.news[0].t);   // (yours in the four: the news says so)
+  // a career from v196: its eleven as they were (a club here had PAR, so Paris Eiffel's PAI), no Seville FC -- it keeps
+  // the eleven untouched and gets the twelfth
+  const par = d.div[2][0], parWas = W.clubs[par].code, C = id => W.clubs[id];
+  const eleven = W.euro.slice(0, 11), sev = W.euro[11]; W.clubs[par].code = 'PAR'; C(eleven[3]).code = 'PAI';
+  delete W.clubs[sev]; W.euro = eleven.slice(); W.eu196 = true; delete W.euroN;
+  M.mgMigrate(d);
+  out.v196 = { n: W.euro.length, same: W.euro.slice(0, 11).join() === eleven.join(), pai: C(eleven[3]).code, sev: C(W.euro[11]).name + ' ' + C(W.euro[11]).code, squad: C(W.euro[11]).players.length >= 9, flag: W.euroN === 12 && !W.eu196 };
   // a career from before v196: its ten clubs from abroad under their old names and letters (Red Star Ardelia's RED among
-  // them), no eleventh; a club here has PAR
+  // them), no eleventh or twelfth; a club here has PAR
   const OLD = [['Inter Vallera', 'VAL'], ['Real Montalba', 'MON'], ['Dinamo Korvesk', 'DIN'], ['Olympia Thessara', 'OLY'], ['Sporting Lusano', 'LUS'], ['Union Brennstadt', 'UNI'],
     ['Athletic Corvara', 'COR'], ['Lokomotiv Savro', 'LOK'], ['Red Star Ardelia', 'RED'], ['FC Vestholm', 'VES']];
-  const ids = W.euro.slice(0, 10), gone = W.euro[10]; ids.forEach((id, i) => { W.clubs[id].name = OLD[i][0]; W.clubs[id].code = OLD[i][1]; });
-  delete W.clubs[gone]; W.euro = ids.slice(); delete W.eu196; const par = d.div[2][0], parWas = W.clubs[par].code; W.clubs[par].code = 'PAR';
-  M.mgMigrate(d); const C = id => W.clubs[id];
+  const ids = W.euro.slice(0, 10); ids.forEach((id, i) => { C(id).name = OLD[i][0]; C(id).code = OLD[i][1]; });
+  for(const id of W.euro.slice(10)) delete W.clubs[id]; W.euro = ids.slice(); delete W.euroN;
+  M.mgMigrate(d);
   out.mig = { n: W.euro.length, same: W.euro.slice(0, 10).join() === ids.join(), names: W.euro.map(id => C(id).name).join() === E.map(e => e[0]).join(),
-    eleventh: !ids.includes(W.euro[10]) && C(W.euro[10]).euro && C(W.euro[10]).players.length >= 9, par: C(W.euro[3]).code, parHere: C(par).code, red: C(W.euro[5]).code, flag: !!W.eu196 };
+    made: W.euro.slice(10).every(id => !ids.includes(id) && C(id).euro && C(id).players.length >= 9), par: C(W.euro[3]).code, parHere: C(par).code, red: C(W.euro[5]).code, flag: W.euroN === 12 };
   const twice = W.euro.join(); M.mgMigrate(d); out.mig.again = W.euro.join() === twice;
   W.clubs[par].code = parWas; return out; });
 info('the Continental Champions Cup: ' + JSON.stringify(r));
 ok(r.leagues === 'Division 2,Division 1,National Division,Premier Division'
-   && r.names === 'Madrid Royale,Catalunya Garnet,Madrid Athletics,Paris Eiffel,Milan Centrale,Milan Red,Bergamont Juvenile,Bohemia Munich,Dortmund Yellow,Lisbon FC,Istanbul FC'
-   && r.codes === 'ROY,CAT,ATH,PAR,CEN,RED,JUV,BOH,DOR,LIS,IST' && r.kits && r.gap >= 4,
-  'the leagues are Division 2, Division 1, the National Division and the Premier Division; the eleven from abroad, each in its own colours and letters, their squads made each season at their level (' + r.lvl.join(',') + ' off it; Madrid Royale\'s men ' + r.gap + ' better than Istanbul FC\'s)');
-ok(r.end.n === 5 && r.end.top && r.end.held && r.none && r.held && r.inAlready && r.abroad && r.you,
-  'who\'s in: the season\'s end keeps the Premier Division\'s top five and the winners; the top four go in, then the holders if they\'re ours and not in already (from the National Division too), else the fifth -- the holders one of the four, or from abroad: the fifth; yours in as the holders says so in the news');
-ok(r.mig.n === 11 && r.mig.same && r.mig.names && r.mig.eleventh && r.mig.par !== 'PAR' && r.mig.parHere === 'PAR' && r.mig.red === 'RED' && r.mig.flag && r.mig.again,
-  'a career from before: its ten clubs from abroad renamed in place (ids and all), the eleventh made with a squad; a club here with PAR keeps it (Paris Eiffel is ' + r.mig.par + '), the old letters give way (Milan Red is ' + r.mig.red + ', Red Star Ardelia\'s once); once only');
+   && r.names === 'Madrid Royale,Catalunya Garnet,Madrid Athletics,Paris Eiffel,Milan Centrale,Milan Red,Bergamont Juvenile,Bohemia Munich,Dortmund Yellow,Lisbon FC,Istanbul FC,Seville FC'
+   && r.codes === 'ROY,CAT,ATH,PAR,CEN,RED,JUV,BOH,DOR,LIS,IST,SEV' && r.kits && r.gap >= 4,
+  'the leagues are Division 2, Division 1, the National Division and the Premier Division; the twelve from abroad (Seville FC the twelfth, v197), each in its own colours and letters, their squads made each season at their level (' + r.lvl.join(',') + ' off it; Madrid Royale\'s men ' + r.gap + ' better than Istanbul FC\'s)');
+ok(r.end.n === 4 && r.end.top && r.end.hold && r.top4 && r.first && r.news,
+  'who\'s in: the season\'s end keeps the Premier Division\'s top four for the next (no holders on record), and they go in with the twelve from abroad -- sixteen; in a first season its four strongest');
+ok(r.v196.n === 12 && r.v196.same && r.v196.pai === 'PAI' && r.v196.sev === 'Seville FC SEV' && r.v196.squad && r.v196.flag,
+  'a career from v196: its eleven kept as they were (Paris Eiffel still ' + r.v196.pai + '), Seville FC made the twelfth with a squad');
+ok(r.mig.n === 12 && r.mig.same && r.mig.names && r.mig.made && r.mig.par !== 'PAR' && r.mig.parHere === 'PAR' && r.mig.red === 'RED' && r.mig.flag && r.mig.again,
+  'a career from before v196: its ten clubs from abroad renamed in place (ids and all), the other two made with squads; a club here with PAR keeps it (Paris Eiffel is ' + r.mig.par + '), the old letters give way (Milan Red is ' + r.mig.red + ', Red Star Ardelia\'s once); once only');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
 ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }

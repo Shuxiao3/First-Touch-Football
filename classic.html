@@ -17429,13 +17429,13 @@
     return xi.concat(out); }
   // a computer club's league is settled when nothing it does can change where it finishes: promotion sure (in the
   // Premier Division, a Continental Champions Cup place: the top four -- v196, the top six before), or the places above
-  // out of reach (the top six, the playoffs; in the Premier Division the top five, as the fifth may go in) and relegation
-  // out of reach too
+  // out of reach (the top six, the playoffs; in the Premier Division the top four -- v197, the fifth's no place now) and
+  // relegation out of reach too
   function mgSettled(d,id){ const c=d.world.clubs[id]; if(!c||c.euro||!d.lg||!d.lg[c.tier]) return false;
     const T=mgTable(d,c.tier), me=T.find(r=>r.id===id); if(!me) return false;
     const max=r=>r.pts+3*(MG_MD-r.p), rest=T.filter(r=>r.id!==id);
     if(rest.filter(r=>max(r)>=me.pts).length<(c.tier===4?4:2)) return true;
-    return rest.filter(r=>r.pts>max(me)).length>=(c.tier===4?5:6)&&(c.tier===1||rest.filter(r=>max(r)<me.pts).length>=3); }
+    return rest.filter(r=>r.pts>max(me)).length>=(c.tier===4?4:6)&&(c.tier===1||rest.filter(r=>max(r)<me.pts).length>=3); }
   // who plays for a side: yours, the nine you picked; the computer's, its nine for the game -- in the game you play
   // against it, the nine that played (MG_LIVE_XI, set as it kicks off)
   let MG_LIVE_XI=null;
@@ -18359,10 +18359,10 @@
 
   // ===== THE CUPS ====================================================================================================
   // Division 2's clubs play only the league. Division 1's and up are in the COCO CUP (the league clubs' cup), the
-  // National Division's and up in the FASHION CUP too, and the next season's CONTINENTAL CHAMPIONS CUP (v196: it was the
-  // Champions League, the Premium League's top six and ten clubs from abroad) is the Premier Division's top four, the
-  // eleven clubs from abroad and one more of ours -- the holders if they aren't in already, else the fifth: four groups
-  // of four, home and away, the top two through to the quarter-finals.
+  // National Division's and up in the FASHION CUP too, and the Premier Division's top four play the next season's
+  // CONTINENTAL CHAMPIONS CUP with the twelve clubs from abroad (v196: it was the Champions League, the Premium League's
+  // top six and ten from abroad; v197: twelve -- v196's eleven took the holders or the fifth with them): four groups of
+  // four, home and away, the top two through to the quarter-finals.
   // Every other tie is one game at the home side's ground, penalties if it's level. A round is played midweek, three
   // days after a league game and four before the next -- CUP_CAL: the league matchday it comes after -- so the higher
   // up a club is, the more of its weeks have two games in them. Prize money for every round won (prize), the
@@ -18378,27 +18378,31 @@
   // g+2) -- none in the first three weeks, the last in week 26
   const CUP_CAL={2:['cl',0],3:['coco',0],4:['cl',1],5:['fashion',0],6:['cl',2],7:['coco',1],8:['cl',3],9:['fashion',1],10:['cl',4],11:['coco',2],12:['cl',5],13:['coco',3],
     15:['fashion',2],16:['cl',6],17:['coco',4],18:['fashion',3],19:['cl',7],20:['coco',5],22:['fashion',4],24:['cl',8]};
-  // THE CLUBS FROM ABROAD (v196: the eleven -- they were ten made-up names): made once, a squad each made afresh every
-  // season at its level (the Premier Division's mid-table side and its bias either side: Madrid Royale's the best in
-  // the game), each in its own colours. [name, bias, scoreboard code, colours, shorts the shirt's colour]
+  // THE CLUBS FROM ABROAD (v196: the eleven -- they were ten made-up names; v197: Seville FC the twelfth): made once, a
+  // squad each made afresh every season at its level (the Premier Division's mid-table side and its bias either side:
+  // Madrid Royale's the best in the game), each in its own colours. [name, bias, scoreboard code, colours, shorts the
+  // shirt's colour] -- a new one goes on the end, as a career's are matched to the list in its order
   const EURO_CLUBS=[['Madrid Royale',7,'ROY',['#f4f4f4','#5a2d82'],true],['Catalunya Garnet',5,'CAT',['#7a1e3c','#1d4fa3'],false],
     ['Madrid Athletics',3,'ATH',['#d4202a','#1d4fa3'],false],['Paris Eiffel',6,'PAR',['#132257','#d4202a'],true],
     ['Milan Centrale',4,'CEN',['#1d4fa3','#161616'],false],['Milan Red',1,'RED',['#d4202a','#161616'],false],
     ['Bergamont Juvenile',0,'JUV',['#161616','#f4f4f4'],false],['Bohemia Munich',6,'BOH',['#d4202a','#f4f4f4'],true],
     ['Dortmund Yellow',2,'DOR',['#f2d23c','#161616'],false],['Lisbon FC',-1,'LIS',['#0e7a3c','#f4f4f4'],false],
-    ['Istanbul FC',-2,'IST',['#ffb43c','#d4202a'],false]];
+    ['Istanbul FC',-2,'IST',['#ffb43c','#d4202a'],false],['Seville FC',-1,'SEV',['#f4f4f4','#d4202a'],true]];
   // (v196) a club from abroad as EURO_CLUBS has it: name, level, colours, kits, and its code unless a club here has it
   function euroDress(d,c,e){ const used=new Set(Object.values(d.world.clubs).filter(x=>x!==c).map(x=>x.code)); if(d.world.reserved) used.add(d.world.reserved);
     c.name=e[0]; c.bias=e[1]; c.euro=true; c.code=''; c.code=used.has(e[2])?mgCodeFor(d,e[0]):e[2];
     c.colors=e[3].slice(); const k=mgKits(e[3][0],e[3][1],e[4]); c.home=k.home; c.away=k.away; return c; }
-  // the clubs from abroad, once a career: a new one's made; one from before v196 has its ten renamed in place (ids,
-  // squads and all: their new levels come with the next season's squads) and the eleventh made -> the ids made now
-  function mgEuroClubs(d){ const W=d.world, made=new Set(); W.euro=(W.euro||[]).filter(id=>W.clubs[id]); if(W.eu196) return made;
-    for(const id of W.euro) W.clubs[id].code='';   // (the old ten's letters first, so none of them -- Red Star Ardelia's RED -- stands in the way)
+  // the clubs from abroad, once a career and again whenever the list grows: a new career's made; one from before v196 has
+  // its ten renamed in place (ids, squads and all: their new levels come with the next season's squads); and whatever
+  // the list has that a career hasn't yet is made (v197: Seville FC, and v196's eleventh for a career older still) ->
+  // the ids made now
+  function mgEuroClubs(d){ const W=d.world, made=new Set(); W.euro=(W.euro||[]).filter(id=>W.clubs[id]); if(W.euroN===EURO_CLUBS.length) return made;
+    const re=W.euro.map((id,i)=>!!EURO_CLUBS[i]&&W.clubs[id].name!==EURO_CLUBS[i][0]);   // (the ones to rename: a career from before v196's ten)
+    W.euro.forEach((id,i)=>{ if(re[i]) W.clubs[id].code=''; });   // (their old letters first, so none of them -- Red Star Ardelia's RED -- stands in the way)
     EURO_CLUBS.forEach((e,i)=>{ const c=W.clubs[W.euro[i]];
-      if(c) euroDress(d,c,e);
+      if(c){ if(re[i]) euroDress(d,c,e); }
       else { const n=mgMakeClub(d,e[0],4,e[1],{colors:e[3],code:e[2],alt:e[4]}); euroDress(d,n,e); W.euro.push(n.id); made.add(n.id); } });
-    W.eu196=true; return made; }
+    W.euroN=EURO_CLUBS.length; delete W.eu196; return made; }
   function mgEuro(d,fresh){ const W=d.world, made=mgEuroClubs(d);
     if(fresh) for(const id of W.euro){ const c=W.clubs[id]; if(!c||made.has(id)) continue; const lvl=MG_LEVEL[4]+(c.bias||0); c.players=[];
       mgFillSquad(d,c,lvl); mgNumber(c.players); }
@@ -18410,19 +18414,17 @@
   function mgCupsStart(d){ const C={s:d.season};
     for(const k of ['coco','fashion']){ const K=CUP[k], ids=K.tiers.flatMap(t=>d.div[t]), S=cupBest(d,ids);
       C[k]={in:ids, r:[{ties:cupDraw(S.slice(K.byes)), byes:S.slice(0,K.byes)}], win:null}; }
-    // (v196) the Continental Champions Cup's sixteen: the Premier Division's top four last season, the holders if they're
-    // ours and not in already (from any league) else the fifth, and the eleven from abroad -- in a first season the
-    // Premier Division's five strongest
-    const q=(d.clQual||[]).filter(id=>d.world.clubs[id]&&d.div[4].includes(id)), q5=q.length>=5?q.slice(0,5):cupBest(d,d.div[4]).slice(0,5);
-    const h=d.clHold, top4=q5.slice(0,4), held=h!=null&&!top4.includes(h)&&[1,2,3,4].some(t=>d.div[t].includes(h))?h:null;
-    const all=top4.concat([held!=null?held:q5[4]]).concat(mgEuro(d,true)).slice(0,16), S=cupBest(d,all), gr=[0,1,2,3].map(()=>({ids:[],fx:null}));
+    // (v197) the Continental Champions Cup's sixteen: the Premier Division's top four last season (in a first season its
+    // four strongest) and the twelve from abroad -- v196's eleven took the holders or the fifth with them
+    const q=(d.clQual||[]).filter(id=>d.world.clubs[id]&&d.div[4].includes(id)), q4=q.length>=4?q.slice(0,4):cupBest(d,d.div[4]).slice(0,4);
+    const all=q4.concat(mgEuro(d,true)).slice(0,16), S=cupBest(d,all), gr=[0,1,2,3].map(()=>({ids:[],fx:null}));
     for(let p=0;p<4;p++) mgShuffle(S.slice(p*4,p*4+4)).forEach((id,i)=>gr[i].ids.push(id));
     for(const g of gr){ const f=cwFixtures(g.ids); g.fx=f.map(day=>day.map(m=>[m[0],m[1],null,null])).concat(f.map(day=>day.map(m=>[m[1],m[0],null,null]))); }
-    C.cl={in:all, gr, ko:[], win:null, held};
+    C.cl={in:all, gr, ko:[], win:null};
     d.cup=C; d.mw=-1;
     for(const k of ['coco','fashion','cl']) if(C[k].in.includes(d.clubId)){
       if(k==='cl'){ d.budget+=CUP.cl.entry; const G=gr.find(g=>g.ids.includes(d.clubId));
-        mgNews(d,d.clubName+' are in the '+CUP.cl.name+(held===d.clubId?' as the holders':'')+' ('+money(CUP.cl.entry)+'): drawn with '+G.ids.filter(x=>x!==d.clubId).map(x=>mgNameOf(d,x)).join(', ')+'.');
+        mgNews(d,d.clubName+' are in the '+CUP.cl.name+' ('+money(CUP.cl.entry)+'): drawn with '+G.ids.filter(x=>x!==d.clubId).map(x=>mgNameOf(d,x)).join(', ')+'.');
         wkLog(d).cup.push({key:'cl', r:0, group:G.ids.filter(x=>x!==d.clubId)}); }
       else { const t=C[k].r[0].ties.find(m=>m[0]===d.clubId||m[1]===d.clubId);
         mgNews(d,CUP[k].name+' '+CUP[k].rounds[0].toLowerCase()+': '+(t?mgNameOf(d,t[0])+' v '+mgNameOf(d,t[1]):d.clubName+' are through to the '+CUP[k].rounds[1].toLowerCase()+' on a bye')+'.');
@@ -18510,7 +18512,7 @@
     const top=d.roster.slice().sort((a,b)=>(b.goals||0)-(a.goals||0))[0]; if(top&&top.goals) R.topScorer={name:top.name,goals:top.goals};
     R.cups=['coco','fashion','cl'].map(k=>[k,mgCupRun(d,k)]).filter(x=>x[1]); R.cupWin={};
     for(const k of ['coco','fashion','cl']){ const C=d.cup&&d.cup.s===d.season&&d.cup[k]; if(C&&C.win) R.cupWin[k]=C.win; }
-    d.clQual=R.moves[4].table.slice(0,5); d.clHold=R.cupWin.cl||null;   // (v196: the Premier Division's top five and the Continental Champions Cup's winners -- next season's: see the cups)
+    d.clQual=R.moves[4].table.slice(0,4);   // (the Premier Division's top four: next season's Continental Champions Cup -- v197; v196 kept the fifth and the holders too)
     mgSeasonStory(d,R);   // (the awards, what your men won, each man's season for the record: see HIS STORY)
     mgLoansHome(d,R);     // (everyone on loan back where he came from: see LOANS)
     mgAgeWorld(d,R);
@@ -21030,7 +21032,8 @@
       delete d.built; delete d.decor; }
     d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
     if(!d.cup){ d.cup={s:d.season,off:true}; d.mw=d.md-1; }   // (a career from before the cups: they start with its next season)
-    if(d.world&&d.world.clubs) mgEuroClubs(d);   // (v196: the eleven clubs from abroad -- a career's old ten renamed, the eleventh made)
+    if(d.world&&d.world.clubs) mgEuroClubs(d);   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC)
+    delete d.clHold;   // (v196's holders: no place of their own from v197)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     if(d.div&&d.rival==null) mgRivalPick(d); if(d.div&&!d.potm) potmSnap(d);   // (a career from before v104: a rival, and the month from now)
     if(d.concOwned){ const cap=d.capacity!=null?d.capacity:(FIN_TIER[d.tier]||FIN_TIER[1]).capacity, back=Object.keys(d.concOwned).filter(k=>d.concOwned[k]&&CONC_GONE[k]).reduce((a,k)=>a+Math.round(cap*CONC_GONE[k]),0);
