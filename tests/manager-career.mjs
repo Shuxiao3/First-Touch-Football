@@ -711,8 +711,8 @@ ok(r.v196.n === 12 && r.v196.same && r.v196.pai === 'PAI' && r.v196.sev === 'Sev
 ok(r.mig.n === 12 && r.mig.same && r.mig.names && r.mig.made && r.mig.par !== 'PAR' && r.mig.parHere === 'PAR' && r.mig.red === 'RED' && r.mig.flag && r.mig.again,
   'a career from before v196: its ten clubs from abroad renamed in place (ids and all), the other two made with squads; a club here with PAR keeps it (Paris Eiffel is ' + r.mig.par + '), the old letters give way (Milan Red is ' + r.mig.red + ', Red Star Ardelia\'s once); once only');
 
-// THE STARS IN A CAREER (v198): a new career has the fourteen at their clubs -- Van Vander at Livermoore, Igor Viking and
-// Kyle da Bastion at Mancunian City, the rest at the clubs from abroad -- each in for the weakest man in his position
+// THE STARS IN A CAREER (v198): a new career has the fifteen at their clubs -- Van Veers at Livermoore, Nagala Kone at
+// Chaelsae (v199), Igor Viking and Kyle da Bastion at Mancunian City, the rest at the clubs from abroad -- each in for the weakest man in his position
 // there (the squad still fifteen), as he was made: his numbers, his age, his style, his potential his rating, his
 // playstyle UNIQUE on his card. A club from abroad's new squad each season keeps its stars; a career from before gets
 // them when it's loaded, once.
@@ -726,11 +726,14 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   const ids = () => E.map(s => (where(s.key)[1] || {}).id).join(), before = ids();
   M.mgEuro(d, true); out.kept = ids() === before && W.euro.every(id => W.clubs[id].players.length === 15);
   for(const c of Object.values(W.clubs)) c.players = c.players.filter(p => !p.star); delete W.stars;   // (a career from before: no stars, none on record)
-  M.mgMigrate(d); out.mig = E.filter(s => where(s.key)[1]).length; const once = ids(); M.mgMigrate(d); out.once = ids() === once;
+  M.mgMigrate(d); out.mig = E.filter(s => where(s.key)[1]).length; const once = ids(); M.mgMigrate(d); out.once = ids() === once; out.n = E.length;
+  // a career from v198: Van Veers as Van Vander, no Nagala Kone -- loaded, he's Van Veers and Nagala Kone's at Chaelsae
+  where('vander')[1].name = 'Van Vander'; const [kc, kp] = where('kone'); kc.players.splice(kc.players.indexOf(kp), 1); delete W.stars.kone;
+  M.mgMigrate(d); out.v198 = where('vander')[1].name + ' / ' + ((where('kone')[0] || {}).name || '-');
   return out; });
 info('the stars in a career: ' + r.ovr);
-ok(r.at && r.made, 'a new career: the fourteen stars at their clubs (Livermoore, Mancunian City and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
-ok(r.kept && r.mig === 14 && r.once, 'a club from abroad\'s new squad keeps its stars; a career from before gets all fourteen when it\'s loaded, once');
+ok(r.at && r.made, 'a new career: the fifteen stars at their clubs (Livermoore, Chaelsae, Mancunian City and the clubs from abroad), each as he was made, his playstyle UNIQUE, the squads still fifteen');
+ok(r.kept && r.mig === r.n && r.n === 15 && r.once && r.v198 === 'Van Veers / Chaelsae', 'a club from abroad\'s new squad keeps its stars; a career from before gets all fifteen when it\'s loaded, once; one from v198 has Van Veers by his name now and gets Nagala Kone at Chaelsae (' + r.v198 + ')');
 
 r = await page.evaluate(() => { const M = __MG, d = M.d; delete d.cup; delete d.mw; M.mgMigrate(d); return { off: !!(d.cup && d.cup.off), g: (M.mgNextGame(d) || {}).kind || null }; });
 ok(r.off && r.g !== 'cup', 'a career from before the cups: none this season (they start with its next)'); }

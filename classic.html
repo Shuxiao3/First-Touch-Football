@@ -3466,7 +3466,9 @@
   // Fourteen men made by hand on the Signature Players sheet, each as he was made there: his numbers on the sheet's 1
   // to 20 (STAR_KEYS' order; halved, the game's), his age, his position and the style he plays like (base: his habits,
   // what a side asks of him). His playstyle is shown as UNIQUE (styleOf). ex: his exhibition club, where he's in for
-  // the man in his position (starsIn); career: his club in a career (THE STARS IN A CAREER).
+  // the man in his position (starsIn); career: his club in a career (THE STARS IN A CAREER). (v199: Nagala Kone for
+  // Chelsea; Van Vander is Van Veers -- his key the one a v198 career knows him by. Mancala has Nagala Kone's numbers
+  // till his own are made: they were one man in v198.)
   const STAR_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','longPass','composure','compFinal','crossing','heading',
     'slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const STARS=[
@@ -3479,11 +3481,12 @@
     {key:'mancala',    name:'Mancala',                  ex:'ROY', career:'Madrid Royale',    pos:'DM', base:'ballwinner',  age:25, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8]},
     {key:'yemen',      name:'Yemen',                    ex:'CAT', career:'Catalunya Garnet', pos:'W', base:'invwinger',   age:26, v:[18,19,16,14,10,18,19,17,17,16,17,16,9,6,7,7,17,10,15,17,18,17,7,7,7,7,9,7]},
     {key:'nesta',      name:'Anders Nesta',             ex:'CAT', career:'Catalunya Garnet', pos:'CM', base:'completemid', age:28, v:[13,15,16,19,13,19,18,20,18,20,16,16,9,11,12,12,19,13,12,16,14,14,7,7,7,7,9,7]},
-    {key:'vander',     name:'Van Vander',               ex:'LIV', career:'Livermoore',       pos:'CB', base:'ballplayer',  age:27, v:[15,12,9,16,20,14,10,14,16,14,9,7,20,16,20,17,11,20,14,12,10,10,7,7,7,7,9,7]},
+    {key:'vander',     name:'Van Veers',                ex:'LIV', career:'Livermoore',       pos:'CB', base:'ballplayer',  age:27, v:[15,12,9,16,20,14,10,14,16,14,9,7,20,16,20,17,11,20,14,12,10,10,7,7,7,7,9,7]},
     {key:'viking',     name:'Igor Viking',              ex:'MCI', career:'Mancunian City',   pos:'ST', base:'poacher',     age:22, v:[20,17,11,14,20,16,12,14,10,14,20,12,20,7,8,6,20,10,20,15,17,18,7,7,7,7,9,7]},
     {key:'bastion',    name:'Kyle da Bastion',          ex:'MCI', career:'Mancunian City',   pos:'CM', base:'mezzala',     age:27, v:[15,14,12,17,12,18,17,17,19,16,16,19,12,8,12,11,18,13,15,20,14,15,7,7,7,7,9,7]},
     {key:'needemeyer', name:'Needemeyer',               ex:'PAR', career:'Paris Eiffel',     pos:'W', base:'trickster',   age:25, v:[17,18,18,13,9,19,20,18,15,18,18,15,7,5,6,7,18,5,16,16,17,16,7,7,7,7,9,7]},
-    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',  pos:'CM', base:'boxtobox',    age:27, v:[16,14,15,19,13,17,15,16,15,16,17,13,15,14,16,16,17,16,17,14,15,16,7,7,7,7,9,7]}];
+    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',  pos:'CM', base:'boxtobox',    age:27, v:[16,14,15,19,13,17,15,16,15,16,17,13,15,14,16,16,17,16,17,14,15,16,7,7,7,7,9,7]},
+    {key:'kone',       name:'Nagala Kone',              ex:'CHE', career:'Chaelsae',         pos:'DM', base:'ballwinner',  age:25, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8]}];
   const starStats=s=>{ const o={}; STAR_KEYS.forEach((k,i)=>{ o[k]=s.v[i]/2; }); return o; };
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
     'Avila','Bailey','Baird','Banda','Barros','Bastian','Beaumont','Bekele','Belov','Bergen','Bishop','Blake','Bonnet','Booth','Borg',
@@ -3608,6 +3611,9 @@
       if(o.squad.length<gen.length){ o.squad.push(...gen.slice(o.squad.length)); fitLineup(o.lineup,o.squad.length); }   // kept from before: their eighth man (six-a-side) and the bench back
       else if(o.squad.length>gen.length) trimSide(o, gen.length);                                                           // ...or a bench of six: four of them
       for(const g of gen) if(g.star&&!o.squad.some(e=>e&&e.star===g.star)){ const j=o.squad.findIndex(e=>e&&e.name===g.was); if(j>=0) o.squad[j]=JSON.parse(JSON.stringify(g)); }   // (v198: a side kept from before its stars: each in for the man he's in for)
+      o.squad.forEach((e,i)=>{ if(!e||!e.star) return; const g=gen.find(x=>x.star===e.star);   // (v199: each star kept as the list has him now -- his name, numbers and style; one no longer the club's, the man he was in for back)
+        if(g) Object.assign(e,{name:g.name, style:g.style, stats:JSON.parse(JSON.stringify(g.stats)), ovr:g.ovr, uniq:true});
+        else { const back=gen.find(x=>x.name===e.was)||gen[i]; if(back) o.squad[i]=JSON.parse(JSON.stringify(back)); } });
       o.squad.forEach((e,i)=>{ const g=gen[i]; if(e.style) e.style=typeKept(e.style,e.role,e.stats);   // (an archetype kept under an older name: TYPE_WAS -- v143: or gone, TYPE_GONE)
         if(e.role!=='GK' && !e.style && g && g.name===e.name && g.role===e.role){ e.style=g.style; e.stats=g.stats; e.ovr=g.ovr; } });   // saved before styles: restyled
       for(const e of o.squad) if(e&&e.stats) gkHandlingFill(e.stats);                                                            // (and before Handling)
@@ -18502,6 +18508,9 @@
   // man in his position there (else in his line; never a man on loan), as he was made: his numbers his ceiling too, his
   // rating and his potential from them. A club from abroad keeps its stars through its new squad each season (mgEuro).
   // From there his career is anyone's: he ages, can be bought and sold, and retires.
+  // ...and each star's name as the list has it now, wherever he is (v199: Van Vander's Van Veers)
+  function mgStarNames(d){ const W=d.world||{}, by={}; for(const s of STARS) by[s.key]=s.name;
+    for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]) if(p&&p.star&&by[p.star]) p.name=by[p.star]; }
   function mgStarsIn(d){ const W=d.world; if(!W||!W.clubs) return; W.stars=W.stars||{};
     for(const s of STARS){ if(W.stars[s.key]) continue; const c=Object.values(W.clubs).find(x=>x.name===s.career&&x.id!==d.clubId); if(!c) continue;
       mgStarPut(c,mgStarMake(d,s)); W.stars[s.key]=1; } }
@@ -21141,7 +21150,7 @@
       delete d.built; delete d.decor; }
     d.deco=d.deco||[]; d.store=d.store||{}; d.story=d.story||{vet:2,kid:2};   // (a career from before: its first season's long gone)
     if(!d.cup){ d.cup={s:d.season,off:true}; d.mw=d.md-1; }   // (a career from before the cups: they start with its next season)
-    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgStarsIn(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars)
+    if(d.world&&d.world.clubs){ mgEuroClubs(d); mgStarsIn(d); mgStarNames(d); }   // (v196: the clubs from abroad -- a career's old ten renamed, the rest made; v197: Seville FC. v198: and the stars; v199: by their names now)
     delete d.clHold;   // (v196's holders: no place of their own from v197)
     d.top=Math.max(d.top||1,d.tier||1,...((d.manager&&d.manager.history)||[]).map(x=>x.tier||1));
     if(d.div&&d.rival==null) mgRivalPick(d); if(d.div&&!d.potm) potmSnap(d);   // (a career from before v104: a rival, and the month from now)

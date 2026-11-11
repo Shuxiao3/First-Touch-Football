@@ -2043,9 +2043,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Vallera is Madrid Royale, and so on down the list: their new levels come with the next season's squads) and the
       other two made; one from v196 keeps its eleven as they are and gets Seville FC. An exhibition has them too
       (v198: see **Exhibition**).
-    - **The stars** (v198): the fourteen men made by hand are at their clubs in a career, once -- a new career's
-      from the start, one from before from when it's loaded: Van Vander at Livermoore, Igor Viking and Kyle da Bastion
-      at Mancunian City, the other eleven at the clubs from abroad (as in an exhibition). Each is in for the weakest man
+    - **The stars** (v198): the fifteen men made by hand are at their clubs in a career, once -- a new career's
+      from the start, one from before from when it's loaded: Van Veers at Livermoore, Nagala Kone at Chaelsae (v199),
+      Igor Viking and Kyle da Bastion at Mancunian City, the other eleven at the clubs from abroad (as in an
+      exhibition). A saved career knows each by the name the list has for him now (v199: Van Vander's Van Veers). Each is in for the weakest man
       in his position there, as he was made: his numbers (his ceiling too), his age, his rating (Messiah Petita 94 in
       the game's own terms, 99 on his card), his playstyle **UNIQUE**. A club from abroad keeps its stars through its
       new squad each season. From there a star's career is anyone's: he ages, he can be bought and sold (those at home;
@@ -2817,14 +2818,16 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
   them in it is billed CONTINENTAL CHAMPIONS CUP. Madrid Royale and Catalunya Garnet are rated 85, Paris Eiffel 83,
   Bohemia Munich 81, Seville FC 68. While the full list is open, the two cards fold their kits away to give it room
   on a phone's short screen.
-- **The stars (v198)**, fourteen men made by hand, play for their clubs: Messiah Petita, Yemen and Anders Nesta for
+- **The stars (v198)**, fifteen men made by hand, play for their clubs: Messiah Petita, Yemen and Anders Nesta for
   Catalunya Garnet; Christian Star, Luka Magic and Mancala for Madrid Royale; Michaelangelo Donnatello and Needemeyer
   for Paris Eiffel; Le CutInside for Bohemia Munich; Paul Madreen for Milan Red; Jobe Bowling for Dortmund Yellow; Van
-  Vander for Liverpool; Igor Viking and Kyle da Bastion for Manchester City. Each is in for the man in his position, in
+  Veers for Liverpool; Nagala Kone for Chelsea (v199); Igor Viking and Kyle da Bastion for Manchester City. Each is in for the man in his position, in
   that man's shirt, with his own numbers exactly as he was made (his card from 79 to 99), and his playstyle reads
   **UNIQUE**: underneath he plays like the style he was made on (a false nine, a complete forward, a ball-winner...),
-  which is what his side asks of him. Everyone else at Liverpool and Manchester City is the man he was; a side of
-  theirs you'd kept from before gets its stars too, each in for the man he replaces. See **The stars**.
+  which is what his side asks of him. Everyone else at Liverpool, Chelsea and Manchester City is the man he was; a side
+  of theirs you'd kept from before gets its stars too, each in for the man he replaces, and a kept side's stars are as
+  the list has them now (v199: a new name, new numbers; a star a club no longer has gives it back the man he was in
+  for). They're made on the Signature Players sheet. See **The stars**.
 
 - Each side plays in its club colours, and the scoreboard reads the club codes (`ARS 0 : 0 LIV`).
   Your team wears its home kit. The opponent wears theirs too, unless the shirts are too alike to
@@ -2999,6 +3002,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v199: Nagala Kone, and Van Veers.** Nagala Kone, a holding midfielder off the Signature Players sheet, plays
+  for Chelsea (Chaelsae in a career), in for the man in his position; a saved career gets him when it's loaded. Van
+  Vander is Van Veers, as the sheet has him: a saved career renames him, and a side kept in an exhibition gets each of
+  its stars as the list has him now. Mancala stays at Madrid Royale, with Nagala Kone's numbers till his own are made
+  on the sheet (in v198 the two were one man). Luka Magic keeps his name. See **The stars**.
 - **v198: the stars, and the Champions Cup in an exhibition.** The fourteen men made on the Signature Players sheet
   are in the game, each at his club with his numbers exactly as made and his playstyle shown as UNIQUE (he plays like
   the style he was made on): Messiah Petita, Yemen and Anders Nesta at Catalunya Garnet; Christian Star, Luka Magic

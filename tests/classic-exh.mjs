@@ -115,14 +115,23 @@ const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)
   out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
   return out; })()`);
 info('the squads: ' + JSON.stringify(sq));
-const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR'.split(',');
+const want = 'petita:CAT,star:ROY,magic:ROY,donnatello:PAR,cutinside:BOH,madreen:RED,mancala:ROY,yemen:CAT,nesta:CAT,vander:LIV,viking:MCI,bastion:MCI,needemeyer:PAR,bowling:DOR,kone:CHE'.split(',');   // (v199: Nagala Kone at Chelsea)
 const got = sq.stars.split(',');
-ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 14 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
-  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fourteen stars each at his club, UNIQUE, his numbers as made; the Premier League\'s men otherwise as they were (Liverpool\'s and City\'s stars in for theirs, in their shirts)');
+ok(sq.n === 32 * 14 && sq.dup === 0 && got.length === 15 && want.every(w => { const [k, c] = w.split(':'); return got.includes(c + ':' + k + ':ok'); }) && sq.same,
+  'the squads: 32 clubs of fourteen, nobody\'s name twice; the fifteen stars each at his club, UNIQUE, his numbers as made; the Premier League\'s men otherwise as they were (Liverpool\'s, Chelsea\'s and City\'s stars in for theirs, in their shirts)');
 const keptStars = await K(`(()=>{ const saved=STARS.splice(0), plain=clubSquadGen(clubById('MCI')); STARS.push(...saved);
   const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.MCI={squad:plain, lineup:defaultLineup(), form:'4-1-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
   const s=clubSide('MCI'), at=L=>L.map((e,i)=>e&&e.star?e.name+'@'+i:'').filter(Boolean).join(','); return [at(s.squad), at(clubSquadGen(clubById('MCI')))]; })()`);
 ok(keptStars[0] && keptStars[0] === keptStars[1], 'a side kept from before its stars (City\'s) gets them, each in for the man he replaces: ' + keptStars[0]);
+// (v199) a side kept with a star as he was (Liverpool's Van Vander, other numbers): he's as the list has him now (Van
+// Veers); and a star kept at a club that hasn't him now (Arsenal, say): the man he was in for is back
+const synced = await K(`(()=>{ const gl=clubSquadGen(clubById('LIV')), j=gl.findIndex(e=>e.star==='vander'), old=JSON.parse(JSON.stringify(gl));
+  old[j].name='Van Vander'; old[j].stats=Object.assign({},old[j].stats,{speed:1}); const ga=clubSquadGen(clubById('ARS')), olda=JSON.parse(JSON.stringify(ga)), k=7;
+  olda[k]=Object.assign(JSON.parse(JSON.stringify(gl[j])),{was:ga[k].name});
+  const o=JSON.parse(localStorage.getItem('ft_clubsq')||'{}'); o.LIV={squad:old, lineup:defaultLineup(), form:'3-2-3'}; o.ARS={squad:olda, lineup:defaultLineup(), form:'3-2-3'}; localStorage.setItem('ft_clubsq',JSON.stringify(o));
+  const L=clubSide('LIV').squad[j], A=clubSide('ARS').squad[k], S=STARS.find(x=>x.key==='vander');
+  return { liv: L.name+' '+(L.stats.speed===S.v[0]/2), ars: A.name+' '+(A.name===ga[k].name)+' '+!!A.star }; })()`);
+ok(synced.liv === 'Van Veers true' && /true false$/.test(synced.ars), 'a side kept with a star as he was gets him as he is now (' + synced.liv + '); one kept with a star the club hasn\'t now gets its own man back (' + synced.ars + ')');
 await page.click('#exhGo'); await page.waitForTimeout(600);
 const m = await K(`({ score: document.getElementById('rScore').textContent.replace(/\\s+/g,' '), stars: SQUAD.R.filter(e=>e.star).map(e=>e.name+':'+styleOf(e).name) })`);
 ok(/ROY/.test(m.score) && m.stars.length === 3 && m.stars.every(x => /:Unique$/.test(x)), 'kick off against them: ' + m.score + ', their three stars in it, each UNIQUE (' + m.stars.join(', ') + ')');
