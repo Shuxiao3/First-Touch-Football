@@ -4651,6 +4651,11 @@ Career saves and squads persist to `localStorage`; the feel dials persist throug
 
 ## Sprites
 
+`sprite-sheets/` has every sheet Football Classic draws, as `classic.html` carries them (the players, their heads and
+the keepers, the stands and their supporters, the campus, the ball), the original First Touch sheets, and the references
+the player sent (character sheets, the eight-direction angles, the Fulltime 9 and DS screens); its README says what each
+is and how it's laid out.
+
 `assets/sprites/player_sheet.png` is the player sheet: 32×32 cells, 4 columns (frames) by 40
 rows (5 animations × 8 directions). Rows run animation-major, and directions follow the
 engine's `snap8` order — `atan2` on screen in 45° steps from East, clockwise:
