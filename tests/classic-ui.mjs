@@ -183,6 +183,16 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
   if(w === 844 && h === 390) ok(!audit.length, 'J1\'s audit: no building\'s screen, any tab, shows a sentence longer than a label by default (48 characters; the news excepted)' + (audit.length ? ' -- ' + audit.slice(0, 4).join(' | ') : ''));
+  if(w === 844 && h === 390){   // (v207) THE CAREER'S TYPE: Roboto Condensed, carried in the page, in three weights by what the words are
+    await page.tap('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
+    await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
+    const ty = await page.evaluate(async () => { await document.fonts.ready;
+      const W = s => { const e = document.querySelector(s); if(!e) return 'none'; const c = getComputedStyle(e); return c.fontWeight + ' ' + c.fontFamily.split(',')[0].replace(/["']/g, ''); };
+      return { faces: [...document.fonts].filter(f => f.family.replace(/["']/g, '') === 'Roboto Condensed' && f.status === 'loaded').map(f => String(f.weight)).sort().join(' '),
+        title: W('#bpTitle'), head: W('.ftH'), button: W('#bpBody .tbBest'), nav: W('#chCampus .bldg .bn'), tab: W('#bpTabs .bpTab'), label: W('#bpBody .tbDrop i'), desc: W('#cTacRight .mgCardSub'), stat: W('#cpStats .cpSt b') }; });
+    await page.tap('.bpTopBack'); await page.waitForTimeout(80);
+    const want = { title: '700', head: '700', button: '700', nav: '600', tab: '600', label: '600', desc: '400', stat: '400' }, off = Object.entries(want).filter(([k, v]) => ty[k] !== v + ' Roboto Condensed').map(([k]) => k + ' ' + ty[k]);
+    ok(ty.faces === '400 600 700' && !off.length, 'the career in Roboto Condensed, carried in the page (' + ty.faces + '): Bold for titles, section headers and buttons, SemiBold for the menu, tabs and labels, Regular for small stats and descriptions' + (off.length ? ' -- ' + off.join(' | ') : '')); }
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (3-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
     await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);

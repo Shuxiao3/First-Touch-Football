@@ -372,7 +372,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **One font** for everything, menus and match alike: DotGothic16 (Fontworks, SIL Open Font License), cut to the
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
-    `assets/fonts/OFL-DotGothic16.txt`.
+    `assets/fonts/OFL-DotGothic16.txt`. The career's screens have their own (below).
+  - **The career's font (v207)** is Roboto Condensed (the Roboto Project Authors, SIL Open Font License; its licence is
+    in a comment beside it in `classic.html`), carried in the page in three weights, each cut to the Latin letters and
+    the punctuation (about 16 KB a weight): **Bold** (700) for page titles, section headers and buttons, and the big
+    numbers (his rating, his six, the rating on a man's token); **SemiBold** (600) for the menu, the tabs and labels;
+    **Regular** (400) for small stats and descriptions. The few symbols it hasn't (arrows, stars, ticks, ▶ ◀) come from
+    the phone's own font. In v206 the career used the phone's rounded system font.
   - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
     how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
     graphics, the colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
@@ -2656,8 +2662,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       it). MOVE picks one up again (tap it, drag it, ✓), or PUT AWAY puts it in store, to put out again (PUT ONE OUT,
       in the shop) for nothing. One in the way of a building as it goes up or grows goes into store by itself.
       They're for looks only.
-    - **Fulltime 9's look (v206).** The career's screens are cream, forest green, yellow and navy, their words in a
-      plain sans-serif (the pixel font stays on the game's other screens and in a match). Along the top of every
+    - **Fulltime 9's look (v206).** The career's screens are cream, forest green, yellow and navy, their words in
+      Roboto Condensed (v207: see **The career's font (v207)**; the pixel font stays on the game's other screens and in a match). Along the top of every
       career screen: the Fulltime 9 mark, your crest and club, the day and the week (put shorter where there's less
       room), the season and your division, your phone, the week's button -- FORWARD TO MATCHDAY (or NEXT WEEK) on a
       Monday, SIMULATE and PLAY on a matchday's morning -- and ☰ MENU. Down the left (the right, if Settings says
@@ -3086,6 +3092,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v207: the career in Roboto Condensed.** The career's screens are in Roboto Condensed, carried in the page so every
+  phone shows the same: Bold for page titles, section headers and buttons, SemiBold for the menu, the tabs and labels,
+  Regular for small stats and descriptions. It was the phone's own rounded font. Settings credits it beside DotGothic16.
+  See **The career's font (v207)**.
 - **v206: Fulltime 9's look for the career.** The career's screens in cream, forest green, yellow and navy, after the
   Fulltime 9 pictures: a bar along the top of every one (your club, the day and the week, the season, your phone, the
   week's button, the menu), the buildings down the left with Squad and Tactics among them, the home screen the campus
