@@ -2626,8 +2626,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
         balanced and direct styles, the rest locked on the menus till 2, 3 or 4; the team instructions have been
         open from the start since v112, every player instruction since v106). Its Pitch tab says so, and what each
         level trains.
+        - **Its Tactics tab, upright (v206).** The pitch stands up the middle of the screen, their goal at the top,
+          each man all of him in the club's kit (the keeper in his) over his rating and position and his name, his shirt
+          number on a tag at his shoulder; a man is a fifth of the pitch wide and a sixth of it tall, as big as the
+          lines allow in every shape (nobody over another or off it, either phase, COMPACT or WIDE); down the left WITH BALL and WITHOUT, the shape, the width and the style -- each a menu, with ◀
+          and ▶ either side of it for the one before or after (the style sets its instructions, as the menu does) --
+          the back line and the line of engagement as bars where the screen's tall enough, INSTRUCTIONS and BEST 9;
+          down the right the card of the man you tapped, and the bench's five under it. A man's moved as he was: dragged
+          onto another, or tapped and SWAP. It was a pitch on its side across the screen, a face on each man, the menus
+          along the top.
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
-        day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
+        day of pre-season, and from then the phone in the top bar is the market, straight in (v206; it was TRANSFERS
+        in the menu). Till then it's locked.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
         (32% at 4); at half-time they get back half of the legs they've lost without one, 60% at level 1, 70% at 2,
         78% at 3 and 85% at 4 (v121; it was a quarter, up to 65%); between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
@@ -2646,14 +2656,25 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       it). MOVE picks one up again (tap it, drag it, ✓), or PUT AWAY puts it in store, to put out again (PUT ONE OUT,
       in the shop) for nothing. One in the way of a building as it goes up or grows goes into store by itself.
       They're for looks only.
-    - The buildings are listed down the left (the right, if Settings says so): Clubhouse, Training, Stadium,
-      Transfers, Physio, Scouting, Academy -- one to buy with its price, one not open yet with a lock and the
+    - **Fulltime 9's look (v206).** The career's screens are cream, forest green, yellow and navy, their words in a
+      plain sans-serif (the pixel font stays on the game's other screens and in a match). Along the top of every
+      career screen: the Fulltime 9 mark, your crest and club, the day and the week (put shorter where there's less
+      room), the season and your division, your phone, the week's button -- FORWARD TO MATCHDAY (or NEXT WEEK) on a
+      Monday, SIMULATE and PLAY on a matchday's morning -- and ☰ MENU. Down the left (the right, if Settings says
+      so), the menu: Clubhouse, Squad (the clubhouse's Squad tab), Tactics (the training pitch's), Stadium, Physio,
+      Scouting, Academy, the one you're in lit -- one to buy with its price, one not open yet with a lock and the
       clubhouse it needs, a badge where something's waiting (bids for your men in a window, the academy's
-      youngsters). The week's button is at the foot: FORWARD TO MATCHDAY (or NEXT WEEK) on a Monday, SIMULATE and PLAY
-      on a matchday's morning. The week and its day, the next match, the budget, the fans
-      and the week's net run along the campus's own foot, put shorter where there's less room.
+      youngsters). The top bar and the menu stay on a building's screen, so another building is a tap away; only on
+      the shortest screens (370 px high and under) a building has the whole screen, and on a phone the menu is down
+      to its icons while one's open. The home screen is the campus with four cards round it: **Next Game** (the two
+      clubs' crests, the competition, home or away; PLAY MATCH on the day), **News & Papers** (the latest three, a
+      tap for the news, and how many papers are still to read), **Fixtures** (your next three in the league; VIEW
+      FIXTURES) and **Club Overview** (league position, the record, the funds, the fans, the week's net -- a tap for
+      the week's money -- and the stadium's capacity), all of it the career's own. The week, the next match, the
+      budget, the fans and the week's net used to run along the campus's foot, the week's button under the list.
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
-      it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
+      it, and you're in. ◀ CAMPUS takes the camera back out. From a building's screen, another in the menu opens
+      straight away (v206). One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
     - **Touch first (v158).** A drag was the only way to move a man in three places; now each has a tap. Training's
       Selection: your keeper or a man not taken, tapped, is lit; then any man, and they swap (him again: let go) --
@@ -2693,8 +2714,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       break's, the last four weeks' and the playoffs': a deal can't run out unsaid.
     - **The day's end.** When the week moves on (FORWARD TO MATCHDAY, NEXT WEEK) the sun goes down behind your
       stadium as it stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new
-      day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
-      doesn't see it.
+      day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it -- anywhere,
+      the top bar and the cards too (v206); a player whose system asks for less motion doesn't see it.
     - It's drawn as the club is: the stadium at its level with its name on it (on the gate at levels 1 and 2, a board
       on the stand's roof at 3 and 4, big letters on the bowl at 5), the clubhouse at its level, each building or its
       plot, the decorations where you put them.
@@ -3065,6 +3086,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v206: Fulltime 9's look for the career.** The career's screens in cream, forest green, yellow and navy, after the
+  Fulltime 9 pictures: a bar along the top of every one (your club, the day and the week, the season, your phone, the
+  week's button, the menu), the buildings down the left with Squad and Tactics among them, the home screen the campus
+  with Next Game, News & Papers, Fixtures and Club Overview round it, and the training pitch's Tactics upright -- their
+  goal at the top, each man all of him in your kit, the menus down the left with a step either way, his card and the
+  bench down the right. The transfer market is the phone in the top bar. Nothing a career does has changed, and a saved
+  one opens as it was. See **Fulltime 9's look (v206)** and **Its Tactics tab, upright (v206)**.
 - **v205: the sheet's clubs and weights.** What was set on the Signature Players sheet goes in: each playstyle's
   rating weights as set on its Ratings page, 0 to 5 a stat (the stars move three points at most; see **By his
   playstyle**); twenty-two clubs' styles and shapes as set on its Teams page (Manchester City a 3-4-1, Bohemia Munich

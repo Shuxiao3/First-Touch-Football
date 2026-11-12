@@ -47,12 +47,14 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
       out.push('a box scrolls: ' + (el.id || el.className)); }
   for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
   return out; }, sels); }
-// NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads, top to bottom
+// NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads across it (top to
+// bottom on a sideways pitch; side to side on an upright one, the training pitch's since v206)
 const apart = (page, sel) => page.evaluate(sel => { const P = document.querySelector(sel), pr = P.getBoundingClientRect(), T = [...P.querySelectorAll('.ptk')].map(e => e.getBoundingClientRect());
   let over = 0, out = 0; for(let i = 0; i < T.length; i++){ const a = T[i]; out = Math.max(out, pr.left - a.left, a.right - pr.right, pr.top - a.top, a.bottom - pr.bottom);
     for(let j = i + 1; j < T.length; j++){ const b = T[j]; if(Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) over++; } }
   const M = [...P.querySelectorAll('.ptk[data-role="MID"]')].map(e => e.getBoundingClientRect());
-  return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
+  const up = pr.height > pr.width;
+  return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(up ? Math.max(...M.map(r => r.right)) - Math.min(...M.map(r => r.left)) : Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
 // HIS STAMINA on his card in a match: the word, a bar and no figure -- the button that turns the card over level with the bar's foot
 // YOUR MAN'S WINDOW in a match, top right beside the menu: what it says (his number, name, position, how many of its
 // stars are lit, how far its stamina bar is filled) against the man you control, and where it sits among the HUD's chips

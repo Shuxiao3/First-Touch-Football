@@ -613,7 +613,7 @@ ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.
 const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
   while(d.phase !== 'review' && n++ < 500){ if(d.wday === 'mon'){ M.mgForward(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
     kick.push(M.mgStarters(d).filter(p => !p.inj && !(p.injB > 0)).map(M.condOf)); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
-    if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('chPhase').textContent; }
+    if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('ftNext').textContent; }   // (v206: the hub's Next Game card says it)
     M.mgPlayGame(d, null, null); if(g.kind === 'cup' && d.ledger[0] && d.ledger[0].cup) ledgerCup = true; }   // (the books keep the last twelve: looked at as it's played)
   M.mgSave(d); M.renderHub(); const all = kick.flat();
   return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),

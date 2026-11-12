@@ -650,7 +650,7 @@
   .cpPlace .mgBtn{ flex:none; min-height:32px; }
   .cpPlN{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:11px; color:var(--ink); padding:0 4px; }
   #careerHub.placing .cpPlace{ display:flex; }
-  #careerHub.dayscene .cpNav{ pointer-events:none; }
+  #careerHub.dayscene .cpNav, #careerHub.dayscene .ftTop, #careerHub.dayscene .ftCard{ pointer-events:none; }   /* (v206: the top bar and the cards wait with the menu; a tap on them ends the day's end) */
   #careerHub.placing .cpFoot, #careerHub.placing .cpTop{ display:none; }
   #careerHub.placing .cpNav{ pointer-events:none; opacity:.5; }
   #careerHub.placing .cpHots{ pointer-events:none; }
@@ -1729,6 +1729,241 @@
   /* scrollbars */
   *{ scrollbar-color:var(--btnHi) var(--well); scrollbar-width:thin; }
   ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-track{ background:var(--well); } ::-webkit-scrollbar-thumb{ background:var(--btnHi); }
+
+  /* ===== (v206) FULLTIME 9: THE CAREER SCREENS' LOOK -- the approved reference: cream panels with a thin navy outline,
+     forest-green section headers, yellow for what's picked or primary, a green CONTINUE; a top bar and a menu down the
+     left on every career screen. The game's own scheme, put in these colours inside the hub only (the match and the
+     menus keep theirs); --acc is the green here, so text that was the accent reads on cream, and the few fills that
+     should be yellow say so below. UI text in a clean rounded sans; the pixel font for the mark. ===== */
+  #careerHub{ --ftGreen:#1F5E2E; --ftOk:#3E8E41; --ftCream:#FAF3E2; --ftYellow:#FFE37A; --ftNavy:#2C3E50; --ftAlt:#E8DCC8; --ftMuted:#D5CEBF;
+    --ftSans:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+    --ftTopH:clamp(40px,10.6vh,76px); --ftNavW:clamp(128px,15.8vw,214px); --ftGap:clamp(6px,1.25vh,12px); --ftR:clamp(9px,1.7vh,14px);
+    --ftH1:clamp(12px,2.75vh,21px); --ftT:clamp(10.5px,2.1vh,16px); --ftS:clamp(9px,1.7vh,13px); --ftBtnH:clamp(30px,6.6vh,48px);
+    --bg:#F3EAD6; --win:#FAF3E2; --well:#E8DCC8; --ol:#2C3E50; --rim:#FFFDF7; --rimLo:#E8DCC8;
+    --btnT:#FFFBF1; --btnM:#FAF3E2; --btnB:#F1E6CF; --btnInk:#2C3E50; --btnSh:transparent;
+    --acc:#1F5E2E; --accM:#24693A; --accB:#174A24; --accInk:#FFFFFF; --accSh:transparent; --accRGB:31 94 46;
+    --ink:#2C3E50; --ink2:#3E5367; --dim:#66727F; --dim2:#86909A; --row:#F1E7D3; --rowOn:#FFE9A3;
+    --good:#2E7D32; --good2:#5A8F1E; --goodRGB:46 125 50; --warn:#A86200; --warnRGB:168 98 0; --bad:#C0392B; --badRGB:192 57 43;
+    --bench:var(--bg); --panel:var(--win); --edge:var(--well); --phosphor:var(--acc); --phosphor-dim:var(--accB); --amber:var(--warn); --red:var(--bad);
+    --ink-dim:var(--dim); --btn:var(--btnM); --btnHov:var(--btnT); --btnHi:var(--rim); --btnLo:var(--well); --frame:var(--rim); --frameSh:var(--rimLo); --accHi:var(--accSh); --accLo:var(--accB);
+    --rWin:var(--ftR); --r:9px;
+    --pxOut:0 0 0 2px var(--ol); --pxWin:0 0 0 2px var(--ol); --pxRim:inset 0 -2px 0 0 rgba(44,62,80,.12);
+    --pxBtn:0 0 0 2px var(--ol), inset 0 -3px 0 0 rgba(44,62,80,.12); --pxBtnOn:0 0 0 2px var(--ol), inset 0 -3px 0 0 rgba(0,0,0,.14); --pxBtnDown:0 0 0 2px var(--ol), inset 0 2px 0 0 rgba(44,62,80,.2);
+    --fillBtn:var(--btnM); --fillAcc:var(--acc);
+    background:#EADFC6; color:var(--ink); font-family:var(--ftSans); font-weight:500; }
+  #careerHub, #careerHub *{ font-family:var(--ftSans) !important; text-shadow:none !important; }
+  #careerHub .ftLogo{ font-family:'FTC Dot',monospace !important; }
+  #careerHub b, #careerHub strong, #careerHub button, #careerHub h3{ font-weight:700; }
+  /* the yellow ones: a tab, a choice or the main button picked */
+  #careerHub .bpTab.on, #careerHub .mgBtn.go, #careerHub .mgTag.on, #careerHub .tbOpt.on, #careerHub .formBtn.on, #careerHub .phTab.on, #careerHub .tbDrop.on, #careerHub .ftPlay, #careerHub .ftChip, #careerHub .bBadge{
+    background:var(--ftYellow) !important; color:var(--ftNavy) !important; border-color:var(--ftNavy) !important; }
+
+  /* the frame: the top bar across, the menu down the left (the right, if Settings says so), the screen beside it */
+  #careerHub.show{ display:grid; }
+  #careerHub{ grid-template-columns:var(--ftNavW) minmax(0,1fr); grid-template-rows:var(--ftTopH) minmax(0,1fr); grid-template-areas:"top top" "nav main"; gap:var(--ftGap);
+    padding:max(var(--ftGap),env(safe-area-inset-top)) max(var(--ftGap),env(safe-area-inset-right)) max(var(--ftGap),env(safe-area-inset-bottom)) max(var(--ftGap),env(safe-area-inset-left)); }
+  #careerHub.cpRight{ grid-template-columns:minmax(0,1fr) var(--ftNavW); grid-template-areas:"top top" "main nav"; }
+  @media (max-height:520px), (max-width:900px){   /* (a phone: in a building the menu's its icons, so the screen keeps its room) */
+    #careerHub.inBldg{ --ftNavW:52px; }
+    #careerHub.inBldg .cpBldgs .bldg .bn, #careerHub.inBldg .cpBldgs .bldg .bPrice{ display:none !important; }
+    #careerHub.inBldg .cpBldgs .bldg:not(.ftPhone){ justify-content:center; padding:0; } }
+
+  /* THE TOP BAR: the mark, your club, the day and the week, the season and the division, your phone, the week's button, the menu */
+  .ftTop{ grid-area:top; position:relative; display:flex; align-items:center; gap:clamp(8px,1.4vw,22px); min-width:0; padding:0 clamp(8px,1.1vw,16px);
+    background:var(--ftCream); border-radius:var(--ftR); box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.08); overflow:hidden; }
+  .ftMark{ flex:none; display:flex; align-items:center; gap:clamp(5px,.8vw,10px); height:72%; padding-right:clamp(8px,1.4vw,22px); border-right:2px solid rgba(44,62,80,.22); color:var(--ink); }
+  .ftBall{ width:clamp(22px,5.2vh,42px); height:clamp(22px,5.2vh,42px); fill:#fff; stroke:var(--ol); stroke-width:1.5; stroke-linejoin:round; }
+  .ftBall .pent{ fill:var(--ol); }
+  .ftLogo{ font-size:clamp(15px,3.7vh,31px); letter-spacing:.5px; white-space:nowrap; color:var(--ink); }
+  #careerHub .ftClub{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:clamp(5px,.8vw,10px); margin:0; }
+  #careerHub .ftClub .chCrest{ width:clamp(20px,5vh,40px); height:auto; }
+  #careerHub .ftClub .chClub{ font-size:clamp(13px,3.1vh,25px) !important; font-weight:800; color:var(--ink); letter-spacing:0; }
+  .ftSub, .ftWhenT span, .ftSeason span{ display:block; font-size:var(--ftS); font-weight:600; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:0; text-transform:none; margin:0; }
+  .ftWhen{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:clamp(5px,.8vw,10px); }
+  .ftCal{ flex:none; width:clamp(18px,4.4vh,34px); height:clamp(18px,4.4vh,34px); fill:#fff; stroke:var(--ol); stroke-width:1.6; }
+  .ftCal line{ stroke:var(--ol); } .ftCal .d{ fill:var(--ol); stroke:none; } .ftCal rect:first-child{ fill:#fff; }
+  .ftWhenT, .ftSeason{ min-width:0; display:flex; flex-direction:column; justify-content:center; }
+  .ftWhenT b, .ftSeason b{ font-size:var(--ftT); font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #careerHub #chPhase{ font-size:var(--ftS); color:var(--ink2); text-transform:none; }
+  .ftSeason{ flex:0 1 auto; padding-left:clamp(8px,1.4vw,20px); border-left:2px solid rgba(44,62,80,.22); }
+  .ftPhoneSlot{ flex:none; margin-left:auto; width:var(--ftBtnH); height:var(--ftBtnH); pointer-events:none; }
+  #ftTop .chBottom{ flex:none; display:flex; gap:6px; margin:0; }
+  #ftTop .chBottom button{ min-height:var(--ftBtnH); margin:0; padding:0 clamp(10px,1.3vw,20px); border:0; border-radius:10px; font-size:var(--ftT); font-weight:800; letter-spacing:.2px; white-space:nowrap; line-height:1; }
+  #ftTop .chPlay{ background:var(--ftOk); color:#fff; box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(0,0,0,.2); }
+  #ftTop .chBtn2{ background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.1); }
+  #careerHub .ftMenu{ flex:none; display:flex; align-items:center; min-height:var(--ftBtnH); height:auto; padding:0 12px; font-size:var(--ftT); }
+  @media (max-width:1100px){ .ftLogo, .ftMenu span{ display:none; } .ftMark{ padding-right:clamp(6px,1vw,14px); } }
+  @media (max-width:760px){ .ftSub, .ftCal{ display:none; } .ftSeason{ padding-left:8px; } }
+
+  /* THE MENU: a row a place -- green with a gold line when you're there, cream when it's open to you, grey and locked when it isn't */
+  #careerHub .cpNav{ grid-area:nav; width:auto; min-width:0; min-height:0; padding:0; background:none; box-shadow:none; border-radius:0; display:flex; flex-direction:column; }
+  #careerHub .cpBldgs{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:clamp(4px,1.1vh,10px); }
+  #careerHub .cpBldgs .bldg{ flex:1 1 0; min-height:26px; max-height:clamp(34px,9vh,68px); gap:clamp(6px,1vw,12px); padding:0 clamp(6px,.9vw,14px); border:0; border-radius:clamp(8px,1.5vh,12px);
+    background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.1); font-size:clamp(12px,2.75vh,21px); font-weight:800; letter-spacing:.1px; }
+  #careerHub .cpBldgs .bldg svg{ width:clamp(16px,3.9vh,28px); height:clamp(16px,3.9vh,28px); stroke-width:1.9; }
+  #careerHub .cpBldgs .bldg .bn{ text-transform:none; }
+  #careerHub .cpBldgs .bldg .bn[data-sub]:not([data-sub=""])::after{ font-size:clamp(8px,1.45vh,11px); font-weight:600; opacity:.8; }
+  #careerHub .cpBldgs .bldg.on{ background:var(--ftGreen); color:#fff; box-shadow:0 0 0 2px var(--ol), inset 0 0 0 3px var(--ftYellow), inset 0 -4px 0 rgba(0,0,0,.15); }
+  #careerHub .cpBldgs .bldg.sel{ background:var(--ftGreen); color:#fff; }
+  #careerHub .cpBldgs .bldg.locked{ background:var(--ftMuted); color:#7A7468; box-shadow:0 0 0 2px #A39C8B; opacity:1; }
+  #careerHub .cpBldgs .bldg.unbuilt{ background:var(--ftCream); color:var(--ink2); box-shadow:0 0 0 2px var(--ol), inset 0 0 0 4px var(--ftCream), inset 0 0 0 5px rgba(44,62,80,.28); }
+  #careerHub .cpBldgs .bldg .bPrice{ font-size:var(--ftS); color:inherit; }
+  #careerHub .cpBldgs .bldg .lkI{ width:clamp(9px,1.9vh,14px); height:clamp(12px,2.4vh,18px); }
+  #careerHub .bBadge{ border-radius:999px; box-shadow:0 0 0 1.5px var(--ol); font-size:var(--ftS); font-weight:800; }
+  #careerHub .bProg{ left:clamp(8px,1vw,14px); right:clamp(8px,1vw,14px); bottom:4px; height:3px; background:rgba(44,62,80,.15); }
+  /* YOUR PHONE: the transfer market's on it, not the campus -- up in the top bar, in the room kept for it there (ftPhone) */
+  #careerHub .cpBldgs .bldg.ftPhone{ position:absolute; z-index:7; flex:none; min-height:0; max-height:none; width:var(--ftBtnH); height:var(--ftBtnH); padding:0; justify-content:center; gap:0; border-radius:12px; }
+  #careerHub .cpBldgs .bldg.ftPhone .bn, #careerHub .cpBldgs .bldg.ftPhone .bPrice{ display:none !important; }
+  #careerHub .cpBldgs .bldg.ftPhone .bBadge{ position:absolute; top:-6px; right:-6px; }
+  #careerHub .cpBldgs .bldg.ftPhone.locked::after{ content:''; position:absolute; right:3px; bottom:3px; width:8px; height:8px; border-radius:2px; background:#7A7468; }
+
+  /* HOME: the campus, the next game, the news and the papers, the fixtures, the club */
+  #careerHub .cpMain{ grid-area:main; position:relative; min-width:0; min-height:0; display:grid; overflow:visible; border-radius:0; background:none; box-shadow:none;
+    grid-template-columns:minmax(0,1.3fr) minmax(0,.86fr) minmax(0,.92fr); grid-template-rows:minmax(0,1.12fr) minmax(0,1fr);
+    grid-template-areas:"campus campus next" "news fix over"; gap:var(--ftGap); }
+  #careerHub .cpMain::after{ display:none; }
+  .ftCampus{ grid-area:campus; position:relative; min-width:0; min-height:0; overflow:hidden; border-radius:var(--ftR); background:#65815e; box-shadow:0 0 0 2px var(--ol); }
+  .ftCard{ min-width:0; min-height:0; display:flex; flex-direction:column; overflow:hidden; background:var(--ftCream); border-radius:var(--ftR); box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.07); }
+  .ftNext{ grid-area:next; } .ftNews{ grid-area:news; } .ftFix{ grid-area:fix; } .ftOver{ grid-area:over; }
+  #careerHub .ftH{ flex:none; display:flex; align-items:center; gap:8px; margin:0; padding:clamp(3px,.85vh,9px) clamp(8px,1vw,14px); background:var(--ftGreen); color:#fff; font-size:var(--ftH1); font-weight:800; letter-spacing:.1px; line-height:1.2; }
+  .ftH > span:first-child{ flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ftHx{ flex:none; display:flex; }
+  .ftBody{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; overflow:hidden; padding:clamp(2px,.7vh,9px) clamp(6px,.9vw,12px); }
+  .ftNone{ margin:auto; font-size:var(--ftS); color:var(--dim); }
+  .ftNx{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:space-around; gap:4px; }
+  .ftTeam{ min-width:0; flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:clamp(1px,.5vh,5px); }
+  .ftTeam b{ max-width:100%; font-size:var(--ftT); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ftCr{ display:block; flex:none; width:clamp(22px,7.6vh,62px); height:clamp(25px,8.5vh,70px); image-rendering:pixelated; object-fit:contain; }
+  .ftVs{ flex:none; font-size:var(--ftT); font-weight:800; color:var(--ink2); }
+  .ftNxM{ flex:none; text-align:center; font-size:var(--ftS); font-weight:600; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:clamp(1px,.4vh,4px) 0 clamp(3px,.7vh,8px); }
+  .ftPlay{ flex:none; display:flex; align-items:center; justify-content:center; gap:10px; min-height:clamp(28px,7vh,54px); border:0; border-radius:12px; font-size:clamp(13px,3.1vh,25px); font-weight:800;
+    box-shadow:0 0 0 2px var(--ol), inset 0 -4px 0 rgba(0,0,0,.12); cursor:pointer; }
+  .ftPlay i{ font-style:normal; font-size:.8em; }
+  .ftNxW{ flex:none; text-align:center; font-size:var(--ftS); font-weight:600; color:var(--dim); padding:clamp(2px,.6vh,6px) 0; }
+  .ftRow{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:8px; align-items:center; width:100%; margin:0; padding:clamp(2px,.65vh,7px) 2px; border:0; border-bottom:1px solid rgba(44,62,80,.14);
+    background:none; color:var(--ink); text-align:left; cursor:pointer; }
+  .ftRow b{ grid-column:1; min-width:0; font-size:var(--ftT); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ftRow i{ grid-column:1; min-width:0; font-style:normal; font-size:var(--ftS); font-weight:500; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ftRow em{ grid-column:2; grid-row:1 / span 2; font-style:normal; font-weight:800; font-size:var(--ftH1); color:var(--ink); }
+  .ftChip{ flex:none; border:0; border-radius:999px; padding:1px 10px; font-size:var(--ftS); font-weight:800; box-shadow:0 0 0 2px var(--ol); cursor:pointer; line-height:1.5; }
+  .ftFx{ display:flex; align-items:center; gap:clamp(4px,.6vw,8px); min-width:0; padding:clamp(1px,.45vh,5px) 0; border-bottom:1px solid rgba(44,62,80,.14); font-size:var(--ftT); font-weight:700; }
+  .ftFx .md{ flex:none; width:2.3em; color:var(--ink2); }
+  .ftFx .ftCr{ width:clamp(13px,3.6vh,28px); height:clamp(15px,4vh,31px); }
+  .ftFx .nm{ flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ftFx .ha{ flex:none; color:var(--ink2); }
+  .ftMore{ flex:none; margin-top:auto; align-self:center; min-height:clamp(24px,5.4vh,40px); padding:0 14px; border:0; border-radius:10px; background:var(--ftCream); color:var(--ink);
+    box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.1); font-size:var(--ftS); font-weight:800; cursor:pointer; white-space:nowrap; }
+  .ftMore i{ font-style:normal; }
+  #careerHub .cpStats{ flex:1 1 auto; min-height:0; height:auto; display:flex; flex-direction:column; justify-content:space-evenly; align-items:stretch; gap:0; padding:clamp(2px,.6vh,8px) clamp(8px,1vw,14px);
+    overflow:hidden; white-space:nowrap; background:none; box-shadow:none; border-radius:0; }
+  #careerHub .cpSt{ flex:0 1 auto; display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; margin:0; padding:clamp(1px,.35vh,4px) 0; border:0; border-bottom:1px solid rgba(44,62,80,.12);
+    background:none; font-size:var(--ftT); color:var(--ink); letter-spacing:0; text-align:left; }
+  #careerHub .cpSt:last-child{ border-bottom:0; }
+  #careerHub .cpSt i{ font-style:normal; font-weight:700; color:var(--ink); min-width:0; overflow:hidden; text-overflow:ellipsis; text-transform:none; }
+  #careerHub .cpSt b{ flex:none; font-size:var(--ftT); font-weight:800; color:var(--ink); }
+  #careerHub .cpNet{ width:100%; cursor:pointer; }
+  /* the campus's own: the news in a line, the papers, DECORATE and MOVE, YOUR FIRST WEEK -- cream on it */
+  #careerHub .cpClub{ display:none !important; }
+  #careerHub .cpTop{ left:8px; right:8px; top:8px; }
+  #careerHub .chMenuBtn{ background:var(--ftCream); color:var(--ink); border:0; border-radius:10px; box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(44,62,80,.1); font-size:var(--ftS); font-weight:800; }
+  #careerHub .cpNotes .chWarn, #careerHub .cpFirst{ background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); border-radius:10px; }
+  #careerHub .cpFirst{ top:48px; }
+  #careerHub .fwHead{ color:var(--ftGreen); font-weight:800; }
+  #careerHub .cpPlace{ background:var(--ftCream); box-shadow:0 0 0 2px var(--ol); }
+  #careerHub .cpTag b{ background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); }
+
+  /* A BUILDING'S SCREEN: in the screen's place, the top bar and the menu still there; its name on a green bar, its tabs cream (the open one yellow) */
+  #careerHub #bldgPanel{ position:relative; inset:auto; grid-area:main; z-index:63; min-width:0; min-height:0; padding:clamp(5px,1vh,10px); border-radius:var(--ftR);
+    background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); }
+  #careerHub #bldgPanel .bpInner{ max-width:none; }
+  #careerHub .bpHead{ min-height:clamp(32px,7vh,50px); padding:3px clamp(3px,.6vw,8px); border-radius:calc(var(--ftR) - 3px); background:var(--ftGreen); }
+  #careerHub #bldgPanel h3{ color:#fff; font-size:var(--ftH1); font-weight:800; letter-spacing:.2px; }
+  #careerHub .bpTopBack{ min-height:clamp(26px,5.6vh,40px); padding:0 12px; border:0; border-radius:9px; background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); font-size:var(--ftS); font-weight:800; }
+  #careerHub .bpTab{ min-height:clamp(26px,5.6vh,40px); padding:0 clamp(8px,1vw,14px); border:0; border-radius:9px; background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); font-size:var(--ftS); font-weight:800; }
+  #careerHub .bpMsg{ background:var(--ftCream); color:var(--ink); border:2px solid var(--ol); }
+  @media (max-height:420px){   /* (a phone held sideways: the frame as slim as it goes, so a list keeps its rows) */
+    #careerHub{ --ftTopH:34px; --ftBtnH:28px; --ftGap:5px; }
+    #careerHub #bldgPanel{ padding:3px; } #careerHub #bldgPanel .bpInner{ gap:3px; }
+    #careerHub .bpHead{ min-height:28px; padding:2px 3px; }
+    #careerHub .bpTopBack, #careerHub .bpTab{ min-height:24px; }
+    #careerHub .mgRow.pl{ height:20px; } }
+  @media (max-height:370px){   /* (the smallest: Safari's bars showing -- in a building the screen has the height, the top bar back on the campus) */
+    #careerHub.inBldg{ grid-template-rows:0 minmax(0,1fr); grid-template-columns:0 minmax(0,1fr); gap:0; }
+    #careerHub.inBldg.cpRight{ grid-template-columns:minmax(0,1fr) 0; }
+    #careerHub.inBldg .ftTop, #careerHub.inBldg .cpNav{ display:none; } }
+
+  /* THE TACTICS (the training pitch's, v206): down the left, with the ball or without it and the three menus, each with a
+     step either way, the lines in brief, INSTRUCTIONS and BEST 9; the pitch upright in the middle, their goal at the top,
+     each man all of him in the club's kit over his rating and position, his name under them; his card and the bench down
+     the right */
+  #careerHub .tacV{ flex-direction:row; gap:clamp(6px,1vw,14px); padding:clamp(3px,.6vh,8px); }
+  #careerHub .tacV .tbTop{ position:relative; flex:0 0 clamp(142px,21%,262px); min-width:0; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; gap:clamp(5px,1.1vh,10px); padding:0; }
+  #careerHub .tacV .tbSeg{ display:flex; gap:5px; flex:none; }
+  #careerHub .tacV .tbSeg .phTab{ flex:1 1 0; min-width:0; min-height:clamp(28px,6vh,44px); padding:0 4px; border:0; border-radius:9px; background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); font-size:var(--ftS); font-weight:800; white-space:nowrap; }
+  #careerHub .tacV .tbSel{ display:flex; align-items:stretch; gap:4px; min-width:0; flex:none; }
+  #careerHub .tacV .tbStep{ flex:none; width:clamp(22px,4.6vh,34px); margin:0; padding:0; border:0; border-radius:8px; background:var(--ftCream); color:var(--ink); box-shadow:0 0 0 2px var(--ol); font-size:var(--ftS); cursor:pointer; }
+  #careerHub .tacV .tbDropW{ position:static; flex:1 1 auto; min-width:0; display:flex; }
+  #careerHub .tacV .tbDrop{ flex:1 1 auto; min-width:0; align-items:center; justify-content:center; gap:0; min-height:clamp(32px,7vh,52px); padding:1px 5px; border:0; border-radius:9px;
+    background:var(--ftYellow); color:var(--ink); box-shadow:0 0 0 2px var(--ol), inset 0 -3px 0 rgba(0,0,0,.1); font-size:var(--ftT); font-weight:800; overflow:hidden; text-overflow:ellipsis; }
+  #careerHub .tacV .tbDrop i{ font-style:normal; font-size:clamp(7.5px,1.45vh,11px); font-weight:700; color:var(--ink2); letter-spacing:.6px; }
+  #careerHub .tacV .tbMenu{ top:0; left:calc(100% + 8px); }
+  #careerHub .tacV .tbLines{ flex:none; display:flex; flex-direction:column; gap:3px; padding:clamp(4px,.8vh,8px) 8px; background:var(--ftCream); border-radius:9px; box-shadow:0 0 0 2px var(--ol); }
+  #careerHub .tacV .tbLines > div{ display:flex; align-items:center; gap:6px; font-size:var(--ftS); min-width:0; }
+  #careerHub .tacV .tbLines > div > i{ flex:0 0 4.6em; font-style:normal; font-weight:700; color:var(--ink); white-space:nowrap; }
+  #careerHub .tacV .tbLines b{ flex:none; margin-left:auto; font-weight:800; color:var(--ink); }
+  .tbBar{ flex:1 1 auto; display:flex; gap:2px; min-width:24px; }
+  .tbBar i{ flex:1 1 0; height:clamp(6px,1.4vh,10px); border-radius:2px; background:#D9CDB4; box-shadow:inset 0 0 0 1px rgba(44,62,80,.35); }
+  .tbBar i.on{ background:#E9B21E; }
+  #careerHub .tacV .tbAct{ flex:none; display:flex; gap:6px; margin-top:auto; }
+  #careerHub .tacV .tbAct .tbIns, #careerHub .tacV .tbAct .tbBest{ flex:1 1 0 !important; min-width:0; margin:0 !important; min-height:clamp(28px,6vh,44px); padding:0 3px !important; font-size:clamp(8px,1.75vh,13px); letter-spacing:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #careerHub .tacV .tbAct .tbIns{ flex-grow:1.35 !important; }
+  #careerHub .tacV .tbHint{ flex:none; font-size:clamp(8px,1.5vh,11px); color:var(--dim); text-align:center; }
+  @media (max-height:430px){ #careerHub .tacV .tbLines, #careerHub .tacV .tbHint{ display:none; } }
+  @media (max-width:760px){ #careerHub .tacV .tbTop{ flex-basis:118px; } #careerHub .tacV .tbStep{ width:18px; } #careerHub .tacV .tbDrop{ font-size:clamp(9.5px,1.9vh,13px); } }
+  #careerHub .tacV .mgCardName{ font-size:clamp(12px,2.7vh,20px); }
+  #careerHub .tpitch.sqPitch{ --rowH:37px; }   /* (a man's height and two between the men in a line) */
+  #careerHub .tpitch.sqPitch .ptk .ptkPos{ position:static; }   /* (his position beside his rating, in the line with it, so it stays on his token) */
+  @media (max-width:760px){ #careerHub .tacV .tbSeg .phTab{ letter-spacing:0; padding:0 2px; } #careerHub .tacV .tbAct{ flex-direction:column; gap:5px; } }   /* (a narrow phone: WITH BALL whole, and INSTRUCTIONS over BEST 9, each its full name) */
+  @media (max-width:700px){ #careerHub .tbRight .mgCardHead > .cardEnd{ max-width:86px; } #careerHub .tbRight .cardEnd .mgCardSub{ white-space:normal; font-size:10px; line-height:1.15; text-align:right; } }   /* (a narrow card: why his rating isn't his own, in a few short lines under it, so his name and style keep their room) */
+  #careerHub .tpitch.sqPitch .ptk{ height:35px; --hh:19px; }
+  @media (max-width:760px){ #careerHub .tpitch.sqPitch .ptk{ width:56px; --hw:30px; } }   /* (four columns across the Squad's little pitch beside the menu) */
+  #careerHub #bpBody .mgPaneR *, #careerHub #bpBody .tbRight *{ letter-spacing:0; }
+  @media (max-width:700px){ #careerHub .mgFacts{ column-gap:10px; } #careerHub .mgFact{ gap:5px; } #careerHub .mgFact span{ font-size:9px; } }   /* (the narrowest phone: a fact's label and its value side by side, whole) */
+  @media (max-width:700px){ #careerHub .mgPaneR .mgCardHead .mgCardName{ line-height:1.2; } #careerHub .mgPaneR .mgCardHead .mgCardSub{ line-height:1.2; }
+    #careerHub .mgPaneR .mgCardHead .signWhere, #careerHub .mgPaneR .mgCardHead .cardWhere{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } }   /* (...and his card's head shorter: his club on one line, so the deal side fits) */
+  #careerHub .tacV .tbMain{ flex:1 1 auto; min-width:0; min-height:0; display:flex; gap:clamp(6px,1vw,14px); }
+  #careerHub .tacV .tbLeft{ flex:none; height:100%; min-height:0; padding:0; display:flex; }
+  #careerHub .tacV .tpitch.tpV{ flex:none; height:100%; min-height:0; aspect-ratio:70/100; min-width:calc(5.4 * var(--tw)); box-sizing:border-box;
+    --tw:clamp(38px,9.4vh,70px); --th:clamp(38px,10.5vh,80px); --colW:calc(var(--tw) + 3px); --rowH:var(--th);
+    background:repeating-linear-gradient(180deg,#5fb86f 0 10%,#54ae65 10% 20%); border-radius:10px; box-shadow:0 0 0 2px var(--ol), inset 0 0 0 3px #f4fbf2; }
+  @supports (width:1cqw){ #careerHub .tacV .tpitch.tpV{ container-type:size; min-width:205px; --tw:clamp(38px,20cqw,70px); --th:clamp(38px,16cqh,80px); } }   /* (a man a fifth of the pitch wide, so a phone has room for his name and a four across is still wider WIDE than COMPACT; and a sixth of it tall, as tall as the lines allow) */
+  .tpV .tpHalf{ left:3px; right:3px; top:50%; bottom:auto; width:auto; height:2px; margin:-1px 0 0; }
+  .tpV .tpCirc{ width:30%; }
+  .tpV .tpSpot{ left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#f4fbf2; }
+  .tpV .tpBox.l, .tpV .tpBox.r{ left:22%; right:22%; width:auto; height:15%; }
+  .tpV .tpBox.l{ top:auto; bottom:3px; } .tpV .tpBox.r{ top:3px; bottom:auto; }
+  .tpV .tpSix{ left:36%; right:36%; height:6%; box-shadow:inset 0 0 0 2px #f4fbf2; }
+  .tpV .tpSix.l{ bottom:3px; } .tpV .tpSix.r{ top:3px; }
+  #careerHub .tacV .tpV .ptk{ width:var(--tw); height:var(--th); --hw:calc(var(--tw) / 2 + 2px); --hh:calc(var(--th) / 2 + 2px); padding:0 0 6px; gap:0;
+    flex-direction:column; align-items:center; justify-content:flex-end; background:none; box-shadow:none; border-radius:8px; }
+  #careerHub .tacV .tpV .ptk .ptkFig{ flex:1 1 auto; min-height:0; width:auto; height:auto; max-width:72%; object-fit:contain; image-rendering:pixelated; }
+  #careerHub .tacV .tpV .ptk .ptkTxt{ flex:none; width:100%; gap:1px; padding:0; }
+  #careerHub .tacV .tpV .ptk .ptkOvr{ display:inline-block; padding:0 4px; border-radius:4px; background:var(--ftNavy); color:#fff; font-size:clamp(9px,1.9vh,14px); font-weight:800; line-height:1.25; box-shadow:0 0 0 1px #f4fbf2; }
+  #careerHub .tacV .tpV .ptk .ptkPos{ position:static; color:#cfe0f5; font-size:.78em; margin-left:2px; }
+  #careerHub .tacV .tpV .ptk .ptkNm{ max-width:100%; padding:0 2px; border-radius:3px; background:rgba(16,40,22,.62); gap:2px; }
+  #careerHub .tacV .tpV .ptk .ptkName{ font-size:clamp(7.5px,1.45vh,11px); color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #careerHub .tacV .tpV .ptk .ptkNo{ position:absolute; top:0; right:0; padding:0 2px; border-radius:3px; background:rgba(16,40,22,.62); font-size:clamp(7px,1.3vh,10px); line-height:1.3; color:#e4efe5; text-shadow:none; }   /* (his shirt number on a tag at his shoulder, so his name has the width under him) */
+  #careerHub .tacV .tpV .ptk.statview{ background:rgba(255,227,122,.42); box-shadow:0 0 0 2px var(--ftYellow); }
+  #careerHub .tacV .tpV .ptk.oop{ box-shadow:0 0 0 2px #B86E00; } #careerHub .tacV .tpV .ptk.oop.statview{ box-shadow:0 0 0 2px var(--ftYellow), 0 0 0 4px #B86E00; }
+  #careerHub .tacV .tpV .ptk.oop .ptkOvr{ background:#B86E00; color:#fff; }
+  #careerHub .tacV .tpV .ptk.sec .ptkOvr{ background:#5E8F22; color:#fff; }
+  #careerHub .tacV .tpV .ptk.dropOver{ background:rgba(255,227,122,.6); }
+  #careerHub .tacV .tbSide{ flex:1 1 0; min-width:0; min-height:0; display:flex; flex-direction:column; gap:clamp(5px,1vh,10px); }
+  #careerHub .tacV .tbRight{ flex:1 1 auto; min-height:0; padding:clamp(4px,.8vh,10px) clamp(6px,.8vw,12px); background:var(--ftCream); border-radius:10px; box-shadow:0 0 0 2px var(--ol); }
+  #careerHub .tacV .tbBench{ flex:none; flex-wrap:nowrap; gap:4px; padding:0; }
+  #careerHub .tacV .tbBench .ptk{ flex:1 1 0; min-width:0; max-width:none; height:clamp(36px,8vh,46px); padding:0 3px; }
+  #careerHub .tacV .tbBench .ptk .ptkTxt{ padding:4px 0 3px; gap:1px; }
+  #careerHub .tacV .tbBench .ptk .ptkOvr{ font-size:clamp(11px,2.4vh,15px); line-height:1.1; }
 </style>
 </head>
 <body>
@@ -1809,31 +2044,52 @@
   </div>
   <div id="matchReport"></div>
   <div id="careerHub">
-    <nav class="cpNav" aria-label="Buildings">
-      <div class="chId"><img id="chCrest" class="chCrest" alt="">
-        <div class="chIdT"><div class="chClub" id="chClub">YOUR CLUB</div><div class="chMeta" id="chMeta">Division 2</div></div></div>
-      <div class="cpBldgs" id="chCampus">
-        <button class="bldg" data-bldg="club"><svg viewBox="0 0 24 24"><path d="M3.5 12 L12 5 L20.5 12"/><path d="M6 11 V20 H18 V11"/><rect x="10" y="14.5" width="4" height="5.5"/><path d="M12 5 V1.5 L15.5 2.6 L12 3.7"/></svg><span class="bn">CLUBHOUSE</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="train"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12"/><line x1="12" y1="6" x2="12" y2="18"/><circle cx="12" cy="12" r="2.6"/><rect x="2.5" y="9.5" width="2.6" height="5"/><rect x="18.9" y="9.5" width="2.6" height="5"/></svg><span class="bn">TRAINING</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="stadium"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/><ellipse cx="12" cy="12" rx="4.5" ry="2.3"/></svg><span class="bn">STADIUM</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="market"><svg viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><line x1="9.5" y1="5.5" x2="14.5" y2="5.5"/></svg><span class="bn">TRANSFERS</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="physio"><svg viewBox="0 0 24 24"><path d="M9 3.5 H15 V9 H20.5 V15 H15 V20.5 H9 V15 H3.5 V9 H9 Z"/></svg><span class="bn">PHYSIO</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="scouting"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15" r="3.5"/><circle cx="16.5" cy="15" r="3.5"/><path d="M4.6 13 L7 5 H10 L11 12.5"/><path d="M19.4 13 L17 5 H14 L13 12.5"/><line x1="11" y1="14" x2="13" y2="14"/></svg><span class="bn">SCOUTING</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="academy"><svg viewBox="0 0 24 24"><path d="M2.5 9.5 L12 5 L21.5 9.5 L12 14 Z"/><path d="M6.5 11.5 V16 Q12 19 17.5 16 V11.5"/><line x1="21.5" y1="9.5" x2="21.5" y2="15"/></svg><span class="bn">ACADEMY</span><span class="bBadge"></span><span class="bPrice"></span></button>
-      </div>
+    <div class="ftTop" id="ftTop">
+      <div class="ftMark" aria-hidden="true"><svg viewBox="0 0 24 24" class="ftBall"><circle cx="12" cy="12" r="10"/><path class="pent" d="M12 7.6 L16.2 10.6 L14.6 15.5 H9.4 L7.8 10.6 Z"/><path d="M12 2 V7.6 M21.5 9 L16.2 10.6 M17.9 20.1 L14.6 15.5 M6.1 20.1 L9.4 15.5 M2.5 9 L7.8 10.6"/></svg><span class="ftLogo">Fulltime 9</span></div>
+      <div class="chId ftClub"><img id="chCrest" class="chCrest" alt="">
+        <div class="chIdT"><div class="chClub" id="chClub">YOUR CLUB</div><div class="ftSub">Career Mode</div></div></div>
+      <div class="ftWhen"><svg viewBox="0 0 24 24" class="ftCal"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><rect class="d" x="6.5" y="13" width="3" height="2.4"/><rect class="d" x="10.5" y="13" width="3" height="2.4"/><rect class="d" x="14.5" y="13" width="3" height="2.4"/></svg>
+        <div class="ftWhenT"><b id="ftDay">Monday</b><span id="chPhase"></span></div></div>
+      <div class="ftSeason"><b id="ftSeasonN">Season 1</b><span class="chMeta" id="chMeta">Division 2</span></div>
+      <span class="ftPhoneSlot" id="ftPhoneSlot" aria-hidden="true"></span>
       <div class="chBottom" id="chBottom"></div>
+      <button class="chMenuBtn ftMenu" data-hub="menu" aria-label="the menu">☰<span> MENU</span></button>
+    </div>
+    <nav class="cpNav" aria-label="Buildings">
+      <div class="cpBldgs" id="chCampus">
+        <button class="bldg" data-bldg="club"><svg viewBox="0 0 24 24"><path d="M3.5 12 L12 5 L20.5 12"/><path d="M6 11 V20 H18 V11"/><rect x="10" y="14.5" width="4" height="5.5"/><path d="M12 5 V1.5 L15.5 2.6 L12 3.7"/></svg><span class="bn">Clubhouse</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="squad"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="8.5" r="2.5"/><path d="M2.5 19.5 Q2.5 13 8 13 Q13.5 13 13.5 19.5 Z"/><path d="M14.5 13.4 Q15.5 13 16.5 13 Q21.5 13 21.5 19 H15.6"/></svg><span class="bn">Squad</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="train"><svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="1.5"/><path d="M6 8 L8.5 10.5 M8.5 8 L6 10.5"/><circle cx="16.5" cy="15" r="1.6"/><path d="M8 15 Q12 9 15 13"/><path d="M13.6 11.6 L15 13 L13.2 13.6"/></svg><span class="bn">Tactics</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="stadium"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/><ellipse cx="12" cy="12" rx="4.5" ry="2.3"/></svg><span class="bn">Stadium</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="physio"><svg viewBox="0 0 24 24"><path d="M9 3.5 H15 V9 H20.5 V15 H15 V20.5 H9 V15 H3.5 V9 H9 Z"/></svg><span class="bn">Physio</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="scouting"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15" r="3.5"/><circle cx="16.5" cy="15" r="3.5"/><path d="M4.6 13 L7 5 H10 L11 12.5"/><path d="M19.4 13 L17 5 H14 L13 12.5"/><line x1="11" y1="14" x2="13" y2="14"/></svg><span class="bn">Scouting</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="academy"><svg viewBox="0 0 24 24"><path d="M2.5 9.5 L12 5 L21.5 9.5 L12 14 Z"/><path d="M6.5 11.5 V16 Q12 19 17.5 16 V11.5"/><line x1="21.5" y1="9.5" x2="21.5" y2="15"/></svg><span class="bn">Academy</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg ftPhone" data-bldg="market" aria-label="your phone: the transfer market"><svg viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><line x1="9.5" y1="5.5" x2="14.5" y2="5.5"/></svg><span class="bn">Phone</span><span class="bBadge"></span><span class="bPrice"></span></button>
+      </div>
     </nav>
     <div class="cpMain">
+      <div class="ftCampus">
       <div class="cpView" id="cpView"><div class="cpWorld" id="cpWorld"><canvas id="cpCanvas" width="768" height="448" role="img" aria-label="your club's campus"></canvas><div class="cpHots" id="cpHots"></div></div><div class="cpTag" id="cpTag" aria-hidden="true"></div></div>
       <div class="cpTop"><div class="cpClub"><img id="cpCrest" alt=""><span id="cpClubN"></span></div>
         <div class="cpNotes"><div class="chWarn" id="chWarn" style="display:none"></div><div class="chWarn" id="chNote" style="display:none;color:var(--warn)"></div></div>
         <button class="chMenuBtn cpPapers" data-hub="papers" style="display:none" aria-label="the papers"><svg viewBox="0 0 24 24"><path d="M4 5 H17 V19 H6 Q4 19 4 17 Z"/><path d="M17 9 H20 V17 Q20 19 18 19 H17"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="15" x2="12" y2="15"/></svg>PAPERS<span class="cpBadge" id="cpPapersN"></span></button>
         <button class="chMenuBtn cpDeco" data-hub="decor"><svg viewBox="0 0 24 24"><path d="M12 3 L6 11 H9 L5 17 H19 L15 11 H18 Z"/><line x1="12" y1="17" x2="12" y2="21"/></svg>DECORATE<span class="bPrice"></span></button>
         <button class="chMenuBtn cpMove" data-hub="move"><svg viewBox="0 0 24 24"><path d="M12 3 V21 M3 12 H21"/><path d="M9 6 L12 3 L15 6 M9 18 L12 21 L15 18 M6 9 L3 12 L6 15 M18 9 L21 12 L18 15"/></svg>MOVE</button></div>
-      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet" id="chNetBtn" data-hub="ledger" title="The week’s money"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></span></div>
-        <button class="chMenuBtn" data-hub="menu">☰ MENU</button></div>
       <div class="cpPlace" id="cpPlace"></div>
       <div class="cpDay" id="cpDay" aria-hidden="true"><canvas id="cpDayCv"></canvas><div class="cpDayT" id="cpDayT"></div></div>
+      </div>
+      <section class="ftCard ftNext" aria-label="the next game"><h3 class="ftH"><span>Next Game</span></h3><div class="ftBody" id="ftNext"></div></section>
+      <section class="ftCard ftNews" aria-label="news and papers"><h3 class="ftH"><span>News &amp; Papers</span><span class="ftHx" id="ftNewsN"></span></h3><div class="ftBody" id="ftNews"></div></section>
+      <section class="ftCard ftFix" aria-label="fixtures"><h3 class="ftH"><span>Fixtures</span></h3><div class="ftBody" id="ftFix"></div></section>
+      <section class="ftCard ftOver" aria-label="the club"><h3 class="ftH"><span>Club Overview</span></h3>
+        <div class="cpStats" id="cpStats">
+          <div class="cpSt"><i>League Position</i><b id="ftPos">-</b></div>
+          <div class="cpSt"><i>Record</i><b id="ftRec">-</b></div>
+          <div class="cpSt"><i>Funds</i><b id="chBudget">$0</b></div>
+          <div class="cpSt cpFans"><i>Fans</i><b id="chLoyal" style="color:var(--warn)">0</b></div>
+          <button class="cpSt cpNet" id="chNetBtn" data-hub="ledger" title="The week’s money"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></button>
+          <div class="cpSt"><i>Stadium Capacity</i><b id="ftCap">-</b></div>
+        </div></section>
     </div>
     <div id="bldgPanel"><div class="bpInner">
       <div class="bpHead"><button class="bpTopBack" data-hub="bldgback" aria-label="back to the campus">◀ CAMPUS</button><h3 id="bpTitle"></h3><div class="bpTabs" id="bpTabs"></div></div>
@@ -19916,7 +20172,15 @@
   const PTK_COL={DEF:1,MID:2,ATT:3};
   // (n: how many in his line; cc: his line's column and how many there are, the keeper's included, for a shape in four
   // lines -- v127: five columns, each line its own)
-  const ptkAt=(L,T,role,k,n,cc)=>{ const c=cc?cc[0]:(PTK_COL[role]||0), N=cc?cc[1]:4;
+  // (v206) THE PORTRAIT PITCH (the training pitch's Tactics, Fulltime 9): their goal at the top, each line its own row
+  // from the keeper's at the foot up -- the same keep-apart sums turned on their side: a line a man's height from the
+  // next, the men in a line a man's width apart at least (--colW), never off the pitch
+  let TB_V=false;
+  const ptkAcross=(T,k,n)=>{ if(!k) return T.toFixed(1)+'%'; const st='max('+((T-50)/k).toFixed(2)+'%, var(--colW))';
+    return 'calc(50% + '+k+' * '+(n>=2?'min('+st+', calc((100% - 2 * var(--hw)) / '+(n-1)+'))':st)+')'; };
+  const ptkAtV=(L,T,role,k,n,cc)=>{ const c=cc?cc[0]:(PTK_COL[role]||0), N=cc?cc[1]:4;
+    return ' style="top:clamp(calc(var(--hh)*'+(2*(N-1-c)+1)+'),'+(100-L).toFixed(1)+'%,calc(100% - var(--hh)*'+(2*c+1)+'));left:clamp(var(--hw),'+ptkAcross(T,k,n)+',calc(100% - var(--hw)))"'; };
+  const ptkAt=(L,T,role,k,n,cc)=>{ if(TB_V) return ptkAtV(L,T,role,k,n,cc); const c=cc?cc[0]:(PTK_COL[role]||0), N=cc?cc[1]:4;
     return ' style="left:clamp(calc(var(--hw)*'+(2*c+1)+'),'+L.toFixed(1)+'%,calc(100% - var(--hw)*'+(2*N-1-2*c)+'));top:clamp(var(--hh),'+ptkTop(T,k,n)+',calc(100% - var(--hh)))"'; };
   // how far down: his line's middle, then k men along it (T is where its step puts him) -- the step never less than a man's height, so on a short
   // pitch a line spreads rather than its men overlap; and never more than the pitch has room for, n men in his line (v124)
@@ -19927,7 +20191,9 @@
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
     return '<button class="ptk'+fitCls(fitPos(p),slotRole,pos)+(ri===statViewRi?' statview':'')+(TARM===ri?' armed':'')+(p.inj?' inj':'')+'"'
       +(kind==='bench'?'':ptkAt(L,T,slotRole,k,n,cc))+' data-tac="'+kind+'" data-ri="'+ri+'" data-phase="'+phase+'"'+(slotRole?' data-role="'+slotRole+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'
-      +ptkBody(kind==='bench'?'':faceImg({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r==null||r===''?r:ovrShownOf(p,r),natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
+      +ptkBody(kind==='bench'?'':(TB_V?figImg:faceImg)({lookKey:p.id},kind==='gk'?keeperKit(careerKit(d)):careerKit(d)),r==null||r===''?r:ovrShownOf(p,r),natPos(p),surname(p.name),p.num)+condBar(p,'ptkCond')+'</button>'; }
+  // (v206) all of him on the portrait pitch, in the club's kit -- the same little man as his card's (SPRITE.body)
+  function figImg(who,kit){ const u=SPRITE.body(who,kit); return u?'<img class="ptkFace ptkFig" src="'+u+'" alt="" draggable="false">':''; }
   // THE MEN MOVE (v161): WITH BALL or WITHOUT tapped, each man's card slides from where he stood to where he goes -- in
   // place of the small lit box that sat off each spot with the other phase's man in it (gone). tokSpots: each card's
   // middle on the screen, by its man (data-ri on the training pitch, data-si in a match), taken just before the board is
@@ -19962,14 +20228,24 @@
     const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(tacDrop===k?' on':'')+'" data-tdrop="'+k+'"><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+' ▾</button>'+(tacDrop===k?tbMenuHtml(d,phase):'')+'</span>';
     const wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
     const sl=(STYLE_LIST.find(t=>t[0]===styleKey(d.style))||STYLE_LIST[0])[1];   // (one style, with the ball and without it)
-    let h='<div class="tacB1"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
+    // (v206) FULLTIME 9's TACTICS: down the left, with the ball or without it, the shape, the width and the style (each a
+    // menu, and a step either way), the team's lines in brief, INSTRUCTIONS and BEST 9; the pitch upright in the middle,
+    // their goal at the top; his card and the bench down the right
+    const step=k=>'<button class="tbStep" data-cstep="'+k+':-1" aria-label="the one before">◀</button>'+drop(k,{form:form,width:wl,style:sl}[k])+'<button class="tbStep" data-cstep="'+k+':1" aria-label="the next one">▶</button>';
+    const T=d.ti||tiDefault(d.style), bar=(v,lo,hi)=>{ const n=Math.round(1+5*clamp((v-lo)/(hi-lo),0,1)); let b=''; for(let i=1;i<=6;i++) b+='<i'+(i<=n?' class="on"':'')+'></i>'; return '<span class="tbBar">'+b+'</span>'; };
+    let h='<div class="tacB1 tacV"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
       +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop('style',sl)+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 9</button></div>';
-    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpBox l"></i><i class="tpBox r"></i>';
+      +'<div class="tbSel">'+step('form')+'</div><div class="tbSel">'+step('width')+'</div><div class="tbSel">'+step('style')+'</div>'
+      +'<div class="tbLines"><div><i>Back line</i>'+bar(T.dl,TI_DL[0],TI_DL[1])+'<b>'+T.dl+' m</b></div><div><i>Engage</i>'+bar(T.loe,TI_LOE[0],TI_LOE[1])+'<b>'+T.loe+' m</b></div></div>'
+      +'<div class="tbAct">'+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 9</button></div>'
+      +'<div class="tbHint">Drag a man onto another to swap them</div></div>';
+    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch tpV" data-phase="'+phase+'"><i class="tpHalf"></i><i class="tpCirc"></i><i class="tpSpot"></i><i class="tpBox l"></i><i class="tpBox r"></i><i class="tpSix l"></i><i class="tpSix r"></i>';
+    TB_V=true;
     const g=tbPos(TAC_GK[0],TAC_GK[1]); h+=tbTok(d, lu.gk, g.L, g.T, 'gk', phase, 'GK', 0, 'GK');
     for(let i=0;i<order.length&&i<slots.length;i++){ const q=tbPos(slots[i].x,slots[i].y,slots[i]); h+=tbTok(d, order[i], q.L, q.T, 'field', phase, slots[i].role, q.k, spotFit(slots[i]), q.n, q.cc); }
-    h+='</div><div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch, its five: who's taken at all is the Selection tab's)
-    h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
+    TB_V=false;
+    h+='</div></div><div class="tbSide"><div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div>'   // (his card, top to bottom)
+      +'<div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, 0,0, 'bench', phase, null)).join('')+'</div></div></div>';   // (the bench, its five: who's taken at all is the Selection tab's)
     return h+'</div>'; }
   function setCareerForm(d, phase, form){ ensureForms(d);
     if(phase==='def'){ if(ATK_ONLY.includes(form)||!FORMS[form]) return; d.formDef=form; } else { if(DEF_ONLY.includes(form)||!FORMS[form]) return; d.formation=form; }
@@ -20773,7 +21049,7 @@
       +'<div><div class="mgCardName">'+(f.mine&&p.num?'#'+p.num+' ':'')+mgEsc(p.name)+(f.mine&&d.cap===p.id?' (C)':f.mine&&d.vice===p.id?' (VC)':'')+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(known&&p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
       +posRowHtml(p)
-      +(where?'<div class="mgCardSub">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+lgThe(d.tier)+'</div>':'')+'</div>'
+      +(where?'<div class="mgCardSub cardWhere">'+mgEsc(where)+'</div>':'')+(wont?'<div class="mgCardSub" style="color:var(--bad)">won’t drop to '+lgThe(d.tier)+'</div>':'')+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?ovrShownOf(p):mgOvrTxt(d,p))+(f.mine||f.youth?trendHtml(p):'')+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,f)+'</div><div class="mgCardSub mgPop" style="text-align:right" data-xpl="'+mgEsc(popWord(pop).replace(/^./,c=>c.toUpperCase())+'. '+XPL.pop)+'">popularity <b>'+pop+'</b></div></div></div>';   // (POPULARITY: how the fans see him)
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
     if(f.mine&&mgSide==='rate'){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
@@ -21125,10 +21401,15 @@
     document.getElementById('chBottom').innerHTML=b;
     // along the campus's foot: the week and its day, and the game (on a Monday, the week's first) -- put shorter, if the
     // strip's short of room -- the money, the fans
-    const ph=document.getElementById('chPhase'), wk=mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'', what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):'';
+    // the week, its day and its game, long and short as the strip had them (v206: kept for what reads them); up in the top
+    // bar it shows the week alone, as long as it goes (show / showS), the day over it, the season and the division beside it
+    const ph=document.getElementById('chPhase'), wk=mgPhaseLabel(d), who=g&&opp?' · '+(g.home?'vs ':'@ ')+opp.name:'', what=g?g.label+(g.kind==='league'?'/'+MG_MD:''):'', dayRx=/ · (Monday|Wednesday|Saturday|Mon|Wed|Sat)$/;
     ph.dataset.long='Season '+d.season+' · '+wk+(g?' · '+(mon?'next: ':'')+what+who:'');
     ph.dataset.mid=g&&!mon?MG_DAY[d.wday]+' · '+what+who:wk;
     ph.dataset.short=g&&!mon?(g.kind==='league'?'MD '+(d.md+1):g.short)+(opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):''):mgWeekShort(d);
+    ph.dataset.show=wk.replace(dayRx,''); ph.dataset.showS=mgWeekShort(d).replace(dayRx,'');
+    document.getElementById('ftDay').textContent=MG_DAY[d.wday||'mon']; document.getElementById('ftSeasonN').textContent='Season '+d.season;
+    ftHome(d); ftNav(); ftPhone();
     pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); fwPaint(d); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
     if(MGUI.seq&&!['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(mgUpOn)) MGUI.seq=null; }   // (v148: the run over)
   // THE PAPERS' BUTTON (v106): off to the side, on the campus's top bar, with how many there are in an orange box -- it
@@ -21151,7 +21432,7 @@
   // -- each a tap to where it's done, ✕ to put it away; gone by itself when all four are. A new career dropped you on
   // the campus with nothing to say what to do first
   function fwSteps(d){ const F=d.fw||{}; return [['nine','Pick your nine','train',!!F.nine],['squad','Meet the squad','club',!!F.squad],['phone','Answer the phone','market',!!lvOf(d,'market')],['play','Play your first match',null,mgForm(d).length>0]]; }
-  function fwPaint(d){ let el=document.getElementById('cpFirst'); const main=document.querySelector('#careerHub .cpMain'); if(!main) return;
+  function fwPaint(d){ let el=document.getElementById('cpFirst'); const main=document.querySelector('#careerHub .ftCampus')||document.querySelector('#careerHub .cpMain'); if(!main) return;   // (v206: on the campus)
     if(!el){ el=document.createElement('div'); el.id='cpFirst'; el.className='cpFirst'; main.appendChild(el); }
     const S=d.fw&&!d.fw.off?fwSteps(d):null; if(S&&S.every(x=>x[3])) d.fw.off=1;
     if(!S||d.fw.off){ el.style.display='none'; return; }
@@ -21162,6 +21443,39 @@
     b.style.display=n?'':'none'; b.classList.toggle('fresh',!!n&&!!d.pile&&!d.pile.opened);
     if(String(n)!==nEl.textContent){ nEl.textContent=n||''; if(n&&(MGUI.pileKey!==key||n>(MGUI.pileN||0))){ nEl.classList.remove('pop'); void nEl.offsetWidth; nEl.classList.add('pop'); } }
     MGUI.pileKey=key; MGUI.pileN=n; }
+
+  // ===== (v206) FULLTIME 9: THE HOME SCREEN'S CARDS, THE MENU'S PLACE, YOUR PHONE =====
+  // the next game (the two crests, the competition, PLAY MATCH on its day), the news (the latest three, the papers to
+  // read), your next three in the league, and the club's figures -- all as the career has them
+  function ftCrest(club){ const u=club?crestURL(crestFor(club)):''; return u?'<img class="ftCr" src="'+u+'" alt="">':'<span class="ftCr"></span>'; }
+  function ftHome(d){ const me=d.world.clubs[d.clubId], g=mgNextGame(d), opp=g&&mgClub(d,g.opp), mon=d.wday!=='wed'&&d.wday!=='sat';
+    const nx=document.getElementById('ftNext');
+    if(nx){ let h;
+      if(g&&opp){ const H=g.home?me:opp, A=g.home?opp:me;
+        h='<div class="ftNx"><div class="ftTeam">'+ftCrest(H)+'<b>'+mgEsc(H.name)+'</b></div><span class="ftVs">vs</span><div class="ftTeam">'+ftCrest(A)+'<b>'+mgEsc(A.name)+'</b></div></div>'
+          +'<div class="ftNxM">'+mgEsc((g.kind==='league'?MG_LEAGUE[d.tier]+' · ':'')+g.label)+' · '+(g.home?'Home':'Away')+'</div>'
+          +(mon?'<div class="ftNxW">'+(g.kind==='cup'?'Wednesday':'Saturday')+'</div>':'<button class="ftPlay" data-mg="play">Play Match <i>▶</i></button>'); }
+      else h='<div class="ftNx"><div class="ftTeam">'+ftCrest(me)+'<b>'+mgEsc(me.name)+'</b></div></div><div class="ftNxM">'+mgEsc(mgPhaseLabel(d).replace(/ · (Monday|Wednesday|Saturday)$/,''))+'</div>'
+        +'<div class="ftNxW">'+(d.phase==='summer'?'The league starts after pre-season':d.phase==='winter'?'The league starts again after the break':d.phase==='review'?'The season’s over':'No game this week')+'</div>';
+      nx.innerHTML=h; }
+    const nw=document.getElementById('ftNews'), N=(d.news||[]).slice(0,3), np=pileLeft(d).length;
+    if(nw) nw.innerHTML=N.length?N.map(n=>'<button class="ftRow" data-ftgo="club" data-go="News"><b>'+mgEsc(n.t)+'</b><i>Season '+n.s+' · '+mgEsc(n.w)+'</i><em>›</em></button>').join(''):'<div class="ftNone">No news yet</div>';
+    const nn=document.getElementById('ftNewsN'); if(nn) nn.innerHTML=np?'<button class="ftChip" data-hub="papers">'+np+' to read</button>':'';
+    const fx=document.getElementById('ftFix');
+    if(fx){ const L=d.lg&&d.lg[d.tier], out=[];
+      if(L&&d.phase!=='playoffs'&&d.phase!=='review') for(let i=d.phase==='league'?d.md:0;i<L.fx.length&&out.length<3;i++){ const m=L.fx[i].find(x=>x[0]===d.clubId||x[1]===d.clubId); if(!m||m[2]!=null) continue;
+        const home=m[0]===d.clubId, o=home?m[1]:m[0]; out.push('<div class="ftFx"><span class="md">W'+(i+1)+'</span>'+ftCrest(mgClub(d,o))+'<span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,o))+'</span><span class="ha">'+(home?'H':'A')+'</span></div>'); }
+      fx.innerHTML=(out.join('')||'<div class="ftNone">'+(d.phase==='playoffs'?'The playoffs':'No league games left')+'</div>')+'<button class="ftMore" data-ftgo="club" data-go="Fixtures">View Fixtures <i>»</i></button>'; }
+    const T=mgTable(d,d.tier).find(r=>r.id===d.clubId)||{w:0,d:0,l:0}, set=(id,t)=>{ const el=document.getElementById(id); if(el) el.textContent=t; };
+    set('ftPos',ordinal(mgPos(d))); set('ftRec',T.w+'W '+T.d+'D '+T.l+'L'); set('ftCap',(STAD_LEVELS[stadOf(d).lvl]||STAD_LEVELS[1]).cap.toLocaleString()); }
+  // where you are, lit in the menu: the building and its tab (the clubhouse's Squad is SQUAD; on the campus, CLUBHOUSE)
+  function ftNav(){ const hub=document.getElementById('careerHub'); if(!hub) return; const b=curBldg, on=!b?'club':b==='club'&&curTab.club==='Squad'?'squad':b;
+    hub.querySelectorAll('#chCampus .bldg').forEach(e=>e.classList.toggle('on',e.dataset.bldg===on)); hub.classList.toggle('inBldg',!!b); }
+  // your phone, laid over the room the top bar keeps for it
+  function ftPhone(){ const hub=document.getElementById('careerHub'), ph=hub&&hub.querySelector('#chCampus .ftPhone'), slot=document.getElementById('ftPhoneSlot'); if(!ph||!slot) return;
+    const s=slot.getBoundingClientRect(), h=hub.getBoundingClientRect(); if(!s.width) return;
+    ph.style.left=Math.round(s.left-h.left)+'px'; ph.style.top=Math.round(s.top-h.top)+'px'; }
+  try{ new ResizeObserver(()=>{ ftPhone(); cpFitStats(); }).observe(document.getElementById('ftTop')); }catch(e){ addEventListener('resize',()=>ftPhone()); }
   // ---- THE CAMPUS VIEW: the picture fitted to the space beside the menu -- at 1x (or more, to fill a big screen), the
   // middle of it in the middle -- and its buildings to tap; a building opens with the camera going in on it, and coming
   // back out to the campus closes it the same way
@@ -21230,8 +21544,8 @@
     CPV.s=s; CPV.tx=Math.round(keep(vw/2-(cx+cw/2)*s,vw,M.w*s)); CPV.ty=Math.round(keep(vh/2-(cy+ch/2)*s,vh,M.h*s));
     if(!CPV.zoomed) cpWorld(false,CPV.s,CPV.tx,CPV.ty); cpFitStats(); }
   // the strip as long as it goes: the phase put shorter, then no NET/WK, then no FANS
-  function cpFitStats(){ const st=document.getElementById('cpStats'), ph=document.getElementById('chPhase'); if(!st||!ph||!st.clientWidth) return; const v=ph.dataset;
-    for(const [t,hide] of [[v.long,''],[v.mid,''],[v.mid,'net'],[v.mid,'net fans'],[v.short,'net fans']]){ ph.textContent=t||''; st.dataset.hide=hide; if(st.scrollWidth<=st.clientWidth+1) break; } }
+  function cpFitStats(){ const ph=document.getElementById('chPhase'); if(!ph||!ph.clientWidth) return; const v=ph.dataset;   // (v206: the week, up in the top bar, as long as there's room for)
+    for(const t of [v.show,v.showS]){ ph.textContent=t||''; if(ph.scrollWidth<=ph.clientWidth+1) break; } }
   const cpStill=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
   // a building's button, or the building itself on the campus: its button lit, the camera in on it (its name over it), in
   function cpGo(id){ const d=CAREER&&CAREER.data; if(CPV.busy||!d||!MG_BLDGS[id]) return;
@@ -21249,7 +21563,7 @@
   function cpBack(){ document.querySelectorAll('#chCampus .bldg.sel').forEach(e=>e.classList.remove('sel'));
     if(!CPV.zoomed) return; CPV.zoomed=null; cpWorld(!cpStill(),CPV.s,CPV.tx,CPV.ty); }
   try{ new ResizeObserver(()=>cpFit()).observe(document.getElementById('cpView')); }catch(e){ addEventListener('resize',()=>cpFit()); }
-  function hideBldg(){ tacDrop=null; curBldg=null; document.getElementById('bldgPanel').classList.remove('show'); document.getElementById('bpBody').innerHTML=''; cpBack(); }   // (none of it left behind in the page)
+  function hideBldg(){ tacDrop=null; curBldg=null; document.getElementById('bldgPanel').classList.remove('show'); document.getElementById('bpBody').innerHTML=''; cpBack(); ftNav(); }   // (none of it left behind in the page)
   function hideHub(){ document.getElementById('careerHub').classList.remove('show'); hideBldg();
     const dy=document.getElementById('cpDay'); if(dy&&dy.onclick) dy.onclick();   // (left part way: the day's end ends, a decoration being put down is left)
     if(PLACE.on){ PLACE.on=false; placeUI(); } }
@@ -21339,7 +21653,7 @@
     if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
     foot.classList.toggle('on',foot.children.length>0);
-    paintBpMsg(); }
+    paintBpMsg(); ftNav(); }
   let _bpMsgShown='', _bpMsgT=null;
   function paintBpMsg(){ const el=document.getElementById('bpMsg'); if(!el) return; const m=MGUI.msg||'';
     if(!m){ el.classList.remove('on'); _bpMsgShown=''; return; }
@@ -21481,7 +21795,11 @@
     tx.textContent=''; tx.classList.remove('on'); el.classList.remove('fade'); el.classList.add('on'); hub.classList.add('dayscene'); el.onclick=end; raf=requestAnimationFrame(frame); }
   function pauseFromMatch(){ if(matchReturn==='hub' && CAREER){ document.getElementById('stageWrap').classList.remove('menuMode'); showHubScreen(); } else { resumable=true; showStartMenu(); } }
   document.getElementById('careerHub').addEventListener('click',e=>{
-    const bl=e.target.closest('[data-bldg]'); if(bl){ cpGo(bl.dataset.bldg); return; }
+    if(e.isTrusted&&e.currentTarget.classList.contains('dayscene')){ const sc=document.getElementById('cpDay'); if(sc&&sc.onclick) sc.onclick(); return; }   // (v206: the day's end -- a tap anywhere ends it, the week's button and the top bar too, as when the menu lay over the campus; a click from code goes through)
+    const bl=e.target.closest('[data-bldg]'); if(bl){ let id=bl.dataset.bldg;   // (v206: SQUAD is the clubhouse's Squad, TACTICS the training pitch's Tactics; from a building, straight to the next)
+      if(id==='squad'){ id='club'; curTab.club='Squad'; } else if(id==='train'&&bl.closest('#chCampus')) curTab.train='Tactics'; else if(id==='club'&&curTab.club==='Squad') curTab.club='Club';
+      if(curBldg&&bl.closest('#chCampus')){ if(MG_BLDGS[id]&&!CPV.busy) openBuilding(id); } else cpGo(id); return; }
+    const fg=e.target.closest('[data-ftgo]'); if(fg){ const id=fg.dataset.ftgo; if(fg.dataset.go) curTab[id]=fg.dataset.go; if(curBldg) openBuilding(id); else cpGo(id); return; }   // (v206: a home card's way in)
     const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',drop:null}); paintBuilding(true); } return; }
     if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; paintBuilding(); return; }
@@ -21489,6 +21807,11 @@
     const ms=e.target.closest('[data-mside]'); if(ms){ mgSide=ms.dataset.mside; paintBuilding(); return; }
     const td=e.target.closest('[data-tdrop]'); if(td){ tacDrop=tacDrop===td.dataset.tdrop?null:td.dataset.tdrop; rerenderOffice(); return; }
     if(tacDrop&&!e.target.closest('.tbMenu')){ tacDrop=null; rerenderOffice(); if(!e.target.closest('[data-tac],[data-ctphase],[data-mg]')) return; }   // a tap off an open menu closes it
+    const stp=e.target.closest('[data-cstep]'); if(stp){ const d=CAREER&&CAREER.data; if(!d) return; const [k,dir]=stp.dataset.cstep.split(':'), ph=tacPhase||'atk', n=+dir; tacDrop=null;   // (v206: ◀ ▶ beside a menu)
+      if(k==='form'){ const L=Object.keys(FORMS).filter(f=>!(ph==='def'?ATK_ONLY:DEF_ONLY).includes(f)), cur=ph==='def'?d.formDef:d.formation, i=L.indexOf(cur); setCareerForm(d, ph, L[(i+n+L.length)%L.length]); }
+      else if(k==='width'){ const W=WIDTHS.map(x=>x[2]), i=W.indexOf(widthSnap(d.width[ph])); setCareerWidth(d, ph, W[Math.max(0,Math.min(W.length-1,i+n))]); }
+      else if(k==='style'){ const L=STYLE_LIST.map(t=>t[0]), i=L.indexOf(styleKey(d.style)); d.style=setStyle('G',L[(i+n+L.length)%L.length]); d.ti=tiDefault(d.style); mgSave(d); mgRerender(); }   // (as the menu does: the style sets its instructions too)
+      return; }
     const cf=e.target.closest('[data-cform]'); if(cf){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cf.disabled) setCareerForm(d, cf.dataset.cphase, cf.dataset.cform); return; }
     const cw=e.target.closest('[data-cwidth]'); if(cw){ const d=CAREER&&CAREER.data; tacDrop=null; if(d) setCareerWidth(d, cw.dataset.cphase, +cw.dataset.cwidth); return; }
     const cph=e.target.closest('[data-ctphase]'); if(cph){ const box=document.getElementById('bpBody'), was=tokSpots(box); tacPhase=cph.dataset.ctphase; tacDrop=null; rerenderOffice(); tokSlide(box,was); return; }   // (v161: the men slide to their spots)
