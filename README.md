@@ -84,20 +84,84 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     grass that catches him up from behind, the way he's running, he takes in his stride. It no longer comes off his back.
   - **A man going after a ball that's running away from him** chases it. A man darting across to cut out their
     pass goes flat out for the spot and stretches for it as he gets there.
-  - **Turned away from it, he can't take it.** If the ball is behind him as it reaches him (more than 110° from the
-    way he faces), or it's coming at him from behind where he can't see it, he gets nothing on it. If it runs into
+  - **Turned away from it, he can't take it.** If the ball is behind him as it reaches him (further than his Back to it
+    angle from the way he faces: 110° at Ball control 5, 80° at 1, 125° at 10 -- v208, it was 110° for everyone), or
+    it's coming at him from behind where he can't see it, he gets nothing on it. If it runs into
     him it comes off him, a little bounce and most of its pace gone, and it's nobody's. If not, it goes past him.
     A ball in the air is the same: one dropping onto his back comes off him, one over his head goes on.
     (Dead or crawling balls he just turns and picks up.)
-  - **Side-on, the touch is harder**, up to a quarter of the way from the easiest touch to the hardest. Cutting out
-    their pass is a stretch whichever way he faces, as it always was.
+  - **Toward the edge of his cone, the touch is harder** (v208: Ball control's cone, below -- it was harder side-on for
+    everyone, up to a quarter of the way from the easiest touch to the hardest). Cutting out their pass is a stretch
+    whichever way he faces, as it always was.
   - The sprite faces the ball while he does all this, so you see him side-step and back-pedal.
   - Measured over eight three-minute computer-against-computer matches, men took 54 to 77% of their passes with
     their backs to the ball before any of this, and 0 to 2% now. Goals, shots and interceptions are as they were: 18
     goals, 45 shots and 14.5 interceptions a match, against 18, 42 and 14.0. A ball comes off someone's back about
     eight times a match.
-  - The dials, in the Trap Lab's TUNE: Body turn ×, Side-step speed, Back-pedal speed, Touch off-square and Back to
-    it from (°).
+  - The dials, in the Trap Lab's TUNE: Body turn ×, Side-step speed, Back-pedal speed, the cone's (v208: its width at
+    Ball control 1, 5 and 10, its clean middle, the touch at its edge, how much less sure it is there), Back to it
+    from (°, at Ball control 5) and the reach at Ball control 1 and 10.
+- **Ball control's cone, and Dribbling at his feet (v208).** Two stats that each mean something you can see, the rest
+  of the game as it was.
+  - **The cone.** A man takes a ball in a cone in front of him, centred on the way he faces, not the way he's moving:
+    side-stepping across or backing off, facing the ball, it doesn't turn. In all it's 120° wide at Ball control 1,
+    180° at 5 and 210° at 10, on a smooth curve through the three (154° at 3, 185° at 5.5, 201° at 7.5), half of it
+    either side of his front. Its middle is clean: a ball 15° off a man with Ball control 1, or 30° off one with 5 or
+    10, is as easy as one straight at him. From there the touch gets harder the nearer the edge, a bit at a time, up to
+    a quarter of the way from the easiest touch to the hardest at the edge, and less sure (its spread 40% wider). Past
+    the edge it's harder again, up to twice that at his Back to it angle, which moves with the cone (80° at Ball control
+    1, 110° at 5, 125° at 10). Past that he can't take it at all: it comes off him or goes past him. It tells under
+    pressure as well: before, a man pressed in their third took it as well side-on as square on.
+  - Measured, the touch (1 is perfect; over 0.8 PERFECT, over 0.55 CLEAN) by how far off the way he faces it comes,
+    and X where he can't take it:
+
+    | Ball control, the moment | 0° | 45° | 60° | 75° | 90° | 105° | 120° |
+    | --- | --- | --- | --- | --- | --- | --- | --- |
+    | 1, nobody near | 0.87 | 0.80 | 0.78 | 0.71 | X | X | X |
+    | 1, a man 1.6 m off | 0.50 | 0.44 | 0.41 | 0.35 | X | X | X |
+    | 5, nobody near | 0.90 | 0.89 | 0.87 | 0.84 | 0.83 | 0.78 | X |
+    | 5, a man 1.6 m off | 0.63 | 0.62 | 0.59 | 0.56 | 0.56 | 0.51 | X |
+    | 10, nobody near | 0.94 | 0.94 | 0.93 | 0.92 | 0.89 | 0.89 | 0.85 |
+    | 10, a man 1.6 m off | 0.77 | 0.77 | 0.76 | 0.74 | 0.73 | 0.72 | 0.70 |
+
+    Rolled at a man stood still who can't turn to it, slow or quick: at Ball control 1 he takes it from 0° and 45° and
+    not from 90°, at 5 from 90° and not 120°, at 10 from 120° (nobody could before) and not from behind. You and the
+    computer alike. A man the ball's coming to still turns to face it as quickly as his Off IQ lets him, so a poor
+    touch needs him square to it in time; a good one can take it from wider. Cutting out their pass is as it was (that's
+    Interceptions), and so is a runner taking a through ball in his stride.
+  - **The reach** is as it was, 18 at Ball control 1 to 32 at 10: where he first meets the ball, all the way round.
+  - **Dribbling: how close it stays.** Every stride he knocks it on, and it's back at his feet: out to 28 px from his
+    middle at Dribbling 5.5 (as every man's went before, whatever his Dribbling: 27), 35 at 1 and 21 at 10, on average
+    21, 25 and 18 px. Flat out, or getting going, a poor dribbler's knock goes further (39 px at Dribbling 1); a good
+    one's doesn't. It's never stuck to him: even at 10 it's touched on every stride.
+  - **Turning with it: Agility turns his body, Dribbling has the ball keep up.** Every quarter of a radian or so his
+    run swings round at pace, a touch takes the ball round with him: none at Dribbling 10, more the worse he dribbles,
+    and the more off the line he meant. It comes back to his feet as quickly as he dribbles (0.6 times the 5.5 rate at
+    1, 1.6 times at 10), and what's left of the last counts. So a quick man who can't dribble, whose body turns fast,
+    has the touches come on top of each other: cutting this way and that at a sprint, Dribbling 1, it was loose 57% of
+    the time at Agility 10 against 38% at Agility 1. A slow-turning man who can dribble keeps it at his feet all the way
+    round (21.8 px at most); he just takes longer about it. Stood still, the ball comes round to the way he's facing in
+    a quarter turn in 0.1 s at Dribbling 10, 0.15 s at 5.5 and 0.25 s at 1 (it was 0.15 s for everyone).
+  - **A touch that gets away.** A touch that would take the ball more than 28 px out from his feet, what's left of the
+    last one included, gets away from him: it runs on loose, anyone's to nick, until he's caught it up. Running straight,
+    even flat out, it doesn't happen at all for a man of 3 or better and only now and then at 1: in open space a poor
+    dribbler is still a threat. Cutting this way and that at a sprint at Dribbling 1 it got away five times in 5 s, and
+    he was back on it inside 0.62 s each time with nobody near. Never at 5.5 or 10.
+  - **Out of a skill move,** the ball isn't quite at his feet: out to 43 px from his middle after a drag-back at
+    Dribbling 1 and back in 0.52 s, 30 px at 5.5 (0.15 s), 26 px at 10 (0.07 s) -- the moment a poor dribbler has to
+    get it back, and a man can get at it. The moves themselves are as they were: their timing, their stars, how they
+    sell the man in front.
+  - **His own touch, got back, isn't jumped to his feet.** A ball he'd knocked or touched off himself, or a dead one,
+    is taken where it is, and the carry brings it in, as quickly as he dribbles. A perfect first touch is dead where he
+    meets it and slides in to his feet; it used to jump to them.
+  - Everything is the same for you and the computer: its men carry it exactly as yours do at each Dribbling.
+  - Over 45 minutes of computer against computer at 60 frames a second, the matches play as they did: 28.0 passes a
+    minute (28.1 before), 2.8 tackles (2.5), 6.7 turnovers (6.6), 0.91 shots and headers (the same), 12 goals (14).
+  - The dials (Settings; the Dribble drill floats them to the top): Dribbling: touch each stride, knocked on flat out,
+    a cut, back at his feet, a touch that gets away, after a skill move, the ball round with him; Ball control: the
+    cone at 1, 5 and 10, its clean middle, less sure at the edge, the reach at 1 and 10; and Touch at the cone's edge.
+    Knock-on variance is how uneven the touches are (less so the better he dribbles). Knock-on touch is now only the
+    drill's demo ball.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -754,7 +818,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
   commits. A move sells the man in front of you for a moment, the longer the better you are than him (see **The
   computer does skill moves**). Each move costs a little stamina. How quick a move is and how far it carries you is
-  your Dribbling: the times and distances here are at Dribbling 10.
+  your Dribbling: the times and distances here are at Dribbling 10. So is how cleanly you come out of it (v208): at
+  Dribbling 10 the ball's at your feet, ready for the next turn or burst; at 1 it's off them a moment, a heavy touch on
+  top of it gets away from you, and a man close by can get at it.
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
   arrives, by the First touch push dial (your own pace along it is added).
@@ -786,7 +852,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - Chips: DEFENDER (stands and waits, closes you down, or presses at a sprint), FROM (5, 10 or 16 m), SLIDES
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
-    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines.
+    the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines
+    (v208: and how far off his feet the ball is out of a move, how quickly it's back, and how fast it comes round with him).
     A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
     as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
     measured).
@@ -3092,6 +3159,23 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v208: Dribbling and Ball control, each with its own job.** Ball control is the cone in front of a man that he takes
+  a ball in, round the way he faces (not the way he's moving): 120° in all at 1, 180° at 5, 210° at 10, a smooth curve
+  between, the touch harder a bit at a time toward its edge and less sure there, and past his Back to it angle (80°,
+  110°, 125°) he can't take it at all. It tells under pressure too, where before facing counted for nothing once he was
+  pressed. Dribbling is the ball at his feet once he has it: each stride's knock out to 28 px from his middle at 5.5 (as
+  everyone's went before), 35 at 1, 21 at 10, a poor dribbler's further flat out; every cut at pace takes it round with
+  him, more the worse he dribbles, and back as quick as he dribbles, so a quick man who can't dribble turns away from it;
+  a touch that would take it 28 px out gets away from him, loose and anyone's, till he's caught it up (cutting at a
+  sprint at Dribbling 1, never running straight from 3 up, never at 5.5); out of a skill move the ball's off his feet a
+  moment by his Dribbling; the ball comes round with him quicker the better he dribbles (0.1 s a quarter turn at 10,
+  0.25 s at 1). His own touch got back, and a perfect first touch, are taken where they are and brought in, not jumped to
+  his feet. The same for you and the computer. Agility still turns his body, Strength still shields, the reach is still
+  18 to 32, and the skill moves keep their timing, stars and the way they sell a man. Over 45 minutes of computer against
+  computer at 60 frames a second, before and after: 28.1 and 28.0 passes a minute, 2.5 and 2.8 tackles, 6.6 and 6.7
+  turnovers, 0.91 shots and headers both, 14 and 12 goals. New dials for both, and new tests:
+  `tests/classic-dribble.mjs`. See **Ball control's cone, and Dribbling at his feet (v208)**. The skill moves' clips are
+  recorded again.
 - **v207: the career in Roboto Condensed.** The career's screens are in Roboto Condensed, carried in the page so every
   phone shows the same: Bold for page titles, section headers and buttons, SemiBold for the menu, the tabs and labels,
   Regular for small stats and descriptions. It was the phone's own rounded font. Settings credits it beside DotGothic16.
