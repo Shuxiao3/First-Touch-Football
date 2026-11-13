@@ -223,6 +223,33 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     of matches to the next (Version 209 on its own gave 40 goals and 26 in two lots of 90 minutes).
   - The dials (Settings): Agility: round the ball to go, going before it's in front, getting going the other way; Off
     IQ: a pass before he's ready, getting a pass ready.
+- **Off IQ on a run (v211).** How a man reads a run off the ball: seeing it, timing it, holding it, keeping it,
+  calling it off. Everyone's but the man you control (he makes his own runs) -- your side's and the computer's alike.
+  - **Seeing it.** A run that's on, a man of Off IQ 5.5 or better sees at once, as before; one of 1 is 0.4 s late (0.2
+    s at 3.25). He needs a gap in their line to see one at all: 6 m between two of theirs is enough at Off IQ 5.5 (as
+    before) and 10, not at 1; 5 m only at 10. And the better his Off IQ the further off he sees one from: a striker
+    told to run in behind, 19.1 m short of their line at 5.5 (as before), 1.2 times as far at 10 and 0.75 times at 1.
+    Two runs as good as each other, the brighter man's goes.
+  - **Timed with the man on the ball.** Waiting on their line for a ball played up to a team-mate, he goes as that man
+    is about ready to play it -- his pass got ready (v210), and the computer's look up off its touch -- so as to be
+    over their line a beat after it's played, not before: off by 0.02 s at Off IQ 10, 0.1 s at 5.5 and 0.29 s at 1
+    either way. As the man on the ball's ready to play it: at Off IQ 10 he's onside every time, 1.2 m short of their
+    line and at 8.1 m/s; at 5.5 offside 8 times in 100, at 4.7 m/s; at 1, 30 times in 100 -- too early -- and slow off
+    the mark, 2.7 m/s.
+  - **Held onside.** Waiting on their line he keeps onside by 2.2 m at Off IQ 10, 1.3 m at 5.5 (as before) and 0.3 m
+    at 1, wherever their line goes: it steps up 3 m and so does he.
+  - **His lane kept.** Their line shifts across and one of theirs is in his lane: he moves his run back into the gap,
+    0.65 m of it in a fifth of a second at Off IQ 5.5, 1.05 m at 10, about 1.5 m in a second at either; at Off IQ 1 he
+    runs where he first meant to.
+  - **Called off.** The man on the ball closed down, or one of theirs into the way through to where the run's going:
+    he calls it off and comes back into it, free to go again in a moment -- after 0.2 s at Off IQ 10, 0.55 s at 5.5
+    and 1.55 s at 1 (his run all but over by then). Gone past their line before it's played, he's back onside after
+    0.15 s at Off IQ 10, 0.43 s at 5.5 and 1.23 s at 1, to wait on it again.
+  - In a match (computer against computer; 180 minutes before, 90 after): 28.6 and 28.3 passes a minute, 2.5 and 2.4
+    tackles, 6.4 and 6.1 turnovers, 0.68 and 0.72 shots a minute (0.16 and 0.18 headers), 28.7 and 29.0 goals in 90
+    minutes, the chances' xG 0.23 a minute both.
+  - The dials (Settings): Off IQ: slow to see a run, timing the run, held onside by, keeping his lane, calling a run
+    off, pressure to call it off.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3225,6 +3252,14 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v211: Off IQ on a run.** How a man reads a run off the ball is his Off IQ: how soon he sees one's on (and how
+  narrow a gap, from how far off), when he goes -- with the man on the ball about ready to play it, so as to be over
+  their line a beat after it's played, not before -- how far onside he waits, how well he keeps his lane as their line
+  shifts, and how soon he calls a run off when the man on the ball's closed down or the way through is shut, or gets
+  back onside when he's gone too soon. At Off IQ 5.5 he sees runs as before and waits as far onside; at 10 he's onside
+  every time the man on the ball's ready, and flat out; at 1 he's often offside, and slow off the mark. The same for
+  your side's men and the computer's. New dials, and a new test: `tests/classic-runiq.mjs`. See **Off IQ on a run
+  (v211)**.
 - **v210: receive, settle, then go; and a pass got ready.** A ball a man has just received beside or behind him, the
   way he wants to go: he has to get round it first, as fast as his Agility turns him, his pace and acceleration cut
   till it's in front of him (never frozen; on the run, no quicker than he's going; in front of him already, nothing

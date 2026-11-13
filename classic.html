@@ -2576,6 +2576,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     // (v210) OFF IQ, GETTING A PASS READY: after he's received it, settled it or turned, a pass is the truer the readier he is
     prepErr:{val:6,min:0,max:20,step:0.5,label:'Off IQ: a pass before he\'s ready (°)',hint:'(v210) A pass played the moment he has the ball (just received, or just round it) goes up to this far off line, the worst of it, less and less as he gets it ready.'},
     prepTime:{val:0.5,min:0.1,max:1.5,step:0.05,label:'Off IQ: getting a pass ready (s)',hint:'(v210) How long that takes him at Off IQ 5.5: 1.6 times as long at 1, 0.4 times at 10. Off IQ is how soon he is ready, not how good the pass is once he is. A pass after he has turned to play it builds the same way: his sense of where he is facing catches up at 0.5 s at Off IQ 1, 0.31 at 5.5, 0.12 at 10.'},
+    // (v211) OFF IQ, RUNS OFF THE BALL: seeing the run, timing it with the man on the ball, holding it onside, keeping its lane, calling it off
+    runSee:{val:0.4,min:0,max:1.5,step:0.05,label:'Off IQ: slow to see a run (s)',hint:'(v211) How late a man of Off IQ 1 sees a run that is on, less and less up to none at 5.5 and better. He needs a wider gap in their line to see one at all, too: 1.3 times as wide at Off IQ 1, 0.8 times at 10 (as before at 5.5); and a man of 10 sees one from 1.2 times as far short of their line, one of 1 from 0.75 times.'},
+    runTime:{val:0.1,min:0,max:0.6,step:0.01,label:'Off IQ: timing the run (s)',hint:'(v211) Waiting on their line, a man goes as the man on the ball is about ready to play it (his pass got ready, and the computer\'s look up), a beat before -- so as to be on his way, still onside, as it is played: off by about this much, early or late, at Off IQ 5.5 -- three times as much at 1, a fifth at 10. Too early and he is past their line before it is played: offside.'},
+    runHold:{val:1.3,min:-1,max:3,step:0.1,label:'Off IQ: held onside by (m)',hint:'(v211) Waiting on their line, how far onside he keeps, at Off IQ 5.5 (as before): 2.2 m at 10, 0.3 m at 1 -- the line steps up, and he is past it.'},
+    runLane:{val:0.35,min:0,max:1,step:0.05,label:'Off IQ: keeping his lane',hint:'(v211) Their line shifts across: how much of the way to the gap he moves his run each fifth of a second, at Off IQ 5.5 (twice as much at 10, none at 1 -- he runs where he first meant to).'},
+    runQuit:{val:0.5,min:0.05,max:3,step:0.05,label:'Off IQ: calling a run off (s)',hint:'(v211) The man on the ball closed down (Off IQ: pressure to call it off), or the way through to where the run is going shut: how long before he calls it off and comes back into it, at Off IQ 5.5 -- 0.15 s at 10; three times as long at 1, the run mostly over by then. Gone offside before the ball is played, he gets back onside after 0.4 s at 5.5 (0.12 s at 10, 1.2 s at 1).'},
+    runQuitP:{val:0.85,min:0.2,max:1,step:0.05,label:'Off IQ: pressure to call it off',hint:'(v211) This much pressure on the man on the ball (one of theirs stood 2.5 m off him or nearer, or closing on him hard from further) and a run waiting on his pass is called off.'},
     pressIn:{val:40,min:10,max:120,step:5,label:'Pressure: right on him (px)',hint:'(v209) A man of theirs this close (from his middle; 25 px = 1 m) is full pressure on him.'},
     pressOut:{val:160,min:60,max:320,step:5,label:'Pressure: none past (px)',hint:'(v209) ...and one further off than this is none at all: in between, the nearer the more.'},
     pressLook:{val:0.25,min:0,max:0.8,step:0.05,label:'Pressure: closing (s)',hint:'(v209) A man running at him counts as if he were where he will be this long from now: sprinting at him he is more pressure than one stood there, or going away.'},
@@ -11662,13 +11669,33 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // the lane into their line for q's run: the gaps between the men on (or just in front of) their line, the touchlines the
   // edges; his own lane if he's in a gap (a stride in from the man at its edge), else the near side of the nearest --
   // within lim of the middle (a forward's), never more than a quarter of the pitch across. -> {y, lo, hi} or null
-  function runGap(team,q,lim){
+  // (v211) OFF IQ, RUNS OFF THE BALL. Seeing the run (how soon, how narrow a gap, from how far off), timing it with the
+  // man on the ball, holding it onside, keeping its lane as their line shifts, calling it off when it's gone. iqK: 1 at
+  // Off IQ 5.5 (everyone's before), lo at 1, hi at 10, in a straight line between.
+  function iqK(p,lo,hi){ const q=offIQf(p); return q<0.5?lo+(1-lo)*q*2:1+(hi-1)*(q-0.5)*2; }
+  const RUN_PICK=0.4;   // (the brighter of two runs as good goes: by up to RUN_PICK/2 either way)
+  function runSeeOf(q){ return P.runSee.val*Math.max(0,1-2*offIQf(q)); }   // how late he sees it, s: none at 5.5 and up
+  function runNeedOf(q){ return 120*iqK(q,1.3,0.8); }                       // the gap in their line he needs to see one at all, px
+  function runSdOf(q){ return P.runTime.val*iqK(q,3,0.2); }                 // how far off his timing is, s, either way
+  function runHoldOf(q){ return P.runHold.val*MK*iqK(q,0.25,1.7); }         // held onside by, px
+  function runLeadOf(q){ return 0.112*runHoldOf(q)/MK-0.11; }              // he goes this long before the man on the ball is ready, s: over their line a beat after, 0.18 s, as it's played (flat out from standing, 1.3 m takes 0.22 s)
+  function runLaneOf(q){ return P.runLane.val*iqK(q,0,2); }                 // of the way to the gap, each fifth of a second
+  function runQuitOf(q){ return P.runQuit.val*iqK(q,3,0.3); }               // calling it off, s
+  function runBackOf(q){ return 0.4*iqK(q,3,0.3); }                         // offside before it's played: back onside, s
+  // when the man on the ball is ready to play it (now, or long since): round the ball and his pass got ready (settleOf,
+  // prepTimeOf), and the computer's look up off his touch (obStart)
+  function passReadyAt(c){ if(!c) return simNow; let t=c.prepT>0?c.prepT+prepTimeOf(c):-9;
+    if(c.settleT>0&&c.settleNow>0) t=Math.max(t,simNow+prepTimeOf(c));   // (still getting round it: not yet)
+    if(c!==controlled&&c.ob&&!c.ob.done&&simNow-c.ob.seen<0.1) t=Math.max(t,c.ob.look);
+    return t; }
+  function runGap(team,q,lim,need){
+    need=need||120;   // (v211: the gap he needs to see a run in at all -- his Off IQ: runNeedOf)
     const def=team==='G'?'R':'G', ol=offsideLineX(team), atk=atkOf(team);
     const dys=players.filter(p=>p.team===def && atk*(p.x-ol)>-160).map(p=>p.y).sort((a,b)=>a-b);
     const edges=[40,...dys,FH-40]; let best=null, bs=-1e9;
     for(let i=0;i<edges.length-1;i++){
-      let lo=edges[i]+60, hi=edges[i+1]-60; if(lim!=null){ lo=Math.max(lo,YC-lim); hi=Math.min(hi,YC+lim); }
-      if(hi-lo<0 || edges[i+1]-edges[i]<120) continue;
+      let lo=edges[i]+need/2, hi=edges[i+1]-need/2; if(lim!=null){ lo=Math.max(lo,YC-lim); hi=Math.min(hi,YC+lim); }
+      if(hi-lo<0 || edges[i+1]-edges[i]<need) continue;
       const y=clamp(q.y,lo,hi), off=Math.abs(y-q.y); if(off>FH*0.25) continue;
       const sc=Math.min(edges[i+1]-edges[i],500)-off*1.5;                      // (a wide one near him beats a wider one further off)
       if(sc>bs){ bs=sc; best={y,lo,hi}; }
@@ -11682,7 +11709,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     S.runs=S.runs.filter(R=>{ const q=R.p, r=ball.intendedRcv;
       const elsewhere=!!r && r!==q && !ball.ownedBy && ball.lastTouch===team &&                     // the pass went to a man who can't find him
         (dist(r,q)>passRangeOf(r)*1.4 || Math.hypot(r.x-R.x,r.y-R.y)>passRangeOf(r)*1.8);
-      return players.includes(q) && simNow<=R.until && Math.hypot(q.x-R.x,q.y-R.y)>=50 && !elsewhere &&
+      return players.includes(q) && simNow<=R.until && Math.hypot(q.x-R.x,q.y-R.y)>=50 && !elsewhere && !R.quit &&   // (v211: or called off)
              !(!(q.gapRun>0) && inOffsidePos(q)); });                                                     // left offside, nothing coming
     const onBall=(ball.ownedBy===c || ball.dribbler===c) && c!==gkHold;
     const fwdPass=inFlight && atk*ball.vx>-0.3*Math.hypot(ball.vx,ball.vy);                 // (on its way to him, and not played back)
@@ -11707,9 +11734,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           if(!kind) continue;
           const go=nr==='run'||(nr==='fwd'&&U(c.x)>FW*0.5); if(go) kind+=1.5;  // told to run in behind (a wide midfielder told FORWARD, once we're up the pitch)
           if(q===passer && (q.role==='ATT'||isWideMan(q)||nr==='run') && atk*(c.x-q.x)>0) kind+=1.2;   // he's just played it forward: he goes again
-          const reach=(j.job==='PIN'?330:(j.job==='WIDTH'||j.job==='OVERLAP')?600:j.job==='POCKET'?400:300)*Math.max(1,eager)*(go?1.3:1);
+          const reach=(j.job==='PIN'?330:(j.job==='WIDTH'||j.job==='OVERLAP')?600:j.job==='POCKET'?400:300)*Math.max(1,eager)*(go?1.3:1)*iqK(q,0.75,1.2);   // (v211: seen from further off the better his Off IQ)
           const toLine=uol-U(q.x); if(toLine<-15 || toLine>reach) continue;
-          const st=q.role==='ATT'&&!isWideMan(q); let g=runGap(team,q,st?PA_HW-60:null);
+          const st=q.role==='ATT'&&!isWideMan(q); let g=runGap(team,q,st?PA_HW-60:null,runNeedOf(q)), fromGap=!!g;   // (v211: the gap he sees; fromGap: his lane is it, to keep)
           if(!g){ if(j.job!=='PIN'&&j.job!=='OVERLAP') continue; g={y:q.y}; }
           // the lane: an overlap goes down the line (so does a wide midfielder told FORWARD and WIDE); a wide man told to
           // play narrow or cut inside runs in towards goal; a forward bends in a little, and towards the space behind a
@@ -11717,19 +11744,23 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           const wdq=pa==='WM'?insOf(q,'wmWidth'):pa==='W'?insOf(q,'wWidth'):'bal';
           let ly=clamp(st?g.y+(YC-g.y)*0.3:g.y,60,FH-60);
           if(st && eng && Math.abs(eng.y-ly)<15*MK) ly=clamp(ly+(eng.y-ly)*0.4,g.lo!=null?g.lo:60,g.hi!=null?g.hi:FH-60);
-          if(j.job==='OVERLAP'||(pa==='WM'&&nr==='fwd'&&wdq==='wide')) ly=YC+wideSide(q)*FH*0.40;
-          else if((pa==='WM'&&wdq==='narrow')||(pa==='W'&&wdq==='inside')) ly=YC+wideSide(q)*FH*0.12;
+          if(j.job==='OVERLAP'||(pa==='WM'&&nr==='fwd'&&wdq==='wide')){ ly=YC+wideSide(q)*FH*0.40; fromGap=false; }
+          else if((pa==='WM'&&wdq==='narrow')||(pa==='W'&&wdq==='inside')){ ly=YC+wideSide(q)*FH*0.12; fromGap=false; }
           // (never a run straight at the man on the ball: him out wide on this man's flank, it goes on past him -- overlapY)
-          if(!st && Math.abs(c.y-YC)>FH*0.18 && wideSide(q)===Math.sign(c.y-YC) && Math.abs(ly-c.y)<8*MK) ly=overlapY(c,wideSide(q));
+          if(!st && Math.abs(c.y-YC)>FH*0.18 && wideSide(q)===Math.sign(c.y-YC) && Math.abs(ly-c.y)<8*MK){ ly=overlapY(c,wideSide(q)); fromGap=false; }
           if(S.runs.some(R=>Math.abs((R.ly??R.y)-ly)<FH*0.25)) continue;        // a second run goes down another lane
           const L={x:U(Math.min(uol+230,FW-140)), y:ly};
           // landing near their goal: in towards it -- into the box -- not on down the line (an overlap, or a man told to stay wide, excepted)
-          { const dG=FW-U(L.x); if(!st && j.job!=='OVERLAP' && wdq!=='wide' && dG<22*MK){ const cap=PA_HW*(0.6+0.4*clamp((dG-8*MK)/(12*MK),0,1)); L.y=YC+Math.sign(L.y-YC)*Math.min(Math.abs(L.y-YC),cap); } }
+          let capY=null; { const dG=FW-U(L.x); if(!st && j.job!=='OVERLAP' && wdq!=='wide' && dG<22*MK){ const cap=PA_HW*(0.6+0.4*clamp((dG-8*MK)/(12*MK),0,1)); capY=cap; L.y=YC+Math.sign(L.y-YC)*Math.min(Math.abs(L.y-YC),cap); } }
           if(dist(c,q)>passRangeOf(c)*1.3 || dist(c,L)>passRangeOf(c)*1.7 || laneClearance(c,L)<0.35) continue;   // (a ball over the top can go further than one to feet)
-          const sc=kind-toLine/400; if(sc>bsc){ bsc=sc; best={q,L,st,ly,go}; }
+          // (v211: SEEING IT. The run's on: how soon he sees it is his Off IQ -- runSeeOf -- and the brighter of two runs as
+          // good goes)
+          if(q.runSeeL==null||simNow-q.runSeeL>0.1) q.runSeeT=simNow; q.runSeeL=simNow;
+          if(simNow-q.runSeeT<runSeeOf(q)) continue;
+          const sc=kind-toLine/400+RUN_PICK*(offIQf(q)-0.5); if(sc>bsc){ bsc=sc; best={q,L,st,ly,go,fromGap,capY}; }
         }
         if(best){ const q=best.q;
-          S.runs.push({p:q, x:best.L.x, y:best.L.y, ly:best.ly, t0:simNow, until:simNow+(fwdPass?2.8:2.2), wait:fwdPass}); q.gapRun=fwdPass?2.2:1.6; q.runCd=best.go?2.0:3.0;   // (told IN BEHIND: he goes again sooner)
+          S.runs.push({p:q, x:best.L.x, y:best.L.y, ly:best.ly, t0:simNow, until:simNow+(fwdPass?2.8:2.2), wait:fwdPass, lane:best.fromGap, st:best.st, cap:best.capY}); q.gapRun=fwdPass?2.2:1.6; q.runCd=best.go?2.0:3.0;   // (told IN BEHIND: he goes again sooner)
           S.runGapT=simNow+(fwdPass?0.35:0.8)/Math.max(0.5,eager);               // (as a pass is played, the next goes with him: a moment apart, not a second)
           // THE THIRD MAN: a forward's run across their line empties the lane he was in -- a midfielder told to run in
           // behind, near it, goes into it, up to their line (a man there for the pass into the space: the run takes the
@@ -11747,11 +11778,28 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     // (the ball's arrived -- at the feet of one of ours, or it's gone: the waiting's over)
     for(const R of S.runs) if(R.wait && (ball.ownedBy || ball.dribbler || ball.lastTouch!==team || !ball.intendedRcv)) R.wait=false;
-    for(const R of S.runs){ const q=R.p, onLine=!R.wait && !R.third && (U(q.x)>=uol-60 || simNow-R.t0>0.7);   // arc onto their line first (and wait there), then go
+    // (v211) OFF IQ ON THE RUN. TIMED WITH THE MAN ON THE BALL: he waits on their line till a beat before the man on the
+    // ball is ready to play it (passReadyAt, runLeadOf), off one way or the other by his runSdOf -- too early, and he's past
+    // their line before it's played; HELD ONSIDE while he waits by runHoldOf; gone offside before it's played, back
+    // onside after runBackOf, then off again; THE LANE KEPT as their line shifts, back to the gap he's going for
+    // (runLaneOf); CALLED OFF after runQuitOf -- the man on the ball closed down, or the way through to where it's going
+    // shut: back into it, and free to go again in a moment
+    const cOn=(ball.ownedBy===c||ball.dribbler===c)&&c!==gkHold, rdy=cOn?passReadyAt(c):simNow;
+    for(const R of S.runs){ const q=R.p;
+      if(R.err==null) R.err=obGauss()*runSdOf(q);
+      if(!R.wait && !R.went && !R.back && (!cOn || simNow>=rdy-runLeadOf(q)+R.err)) R.went=true;
+      if(R.went && cOn){ if(!inOffsidePos(q)) R.offT=null; else if(R.offT==null) R.offT=simNow; else if(simNow-R.offT>=runBackOf(q)){ R.went=false; R.back=true; R.offT=null; } }
+      if(R.back && (!cOn || (!inOffsidePos(q) && U(q.x)<=uol-10))){ R.back=false; R.went=true; }
+      if(cOn && !R.wait){ const bad=pressureOn(c)>P.runQuitP.val || laneClearance(c,{x:R.x,y:R.y})<0.2;
+        if(!bad) R.badT=null; else if(R.badT==null) R.badT=simNow; else if(simNow-R.badT>=runQuitOf(q)){ R.quit=true; q.gapRun=0; q.runCd=Math.max(q.runCd||0,0.8); continue; } }
+      if(R.lane && !R.inside && simNow-(R.laneT??-9)>=0.2){ R.laneT=simNow; const k=runLaneOf(q), g=k>0?runGap(team,q,R.st?PA_HW-60:null,runNeedOf(q)):null;
+        if(g && Math.abs(g.y-R.y)<FH*0.15){ let y2=clamp(R.st?g.y+(YC-g.y)*0.3:g.y,60,FH-60); if(R.cap!=null) y2=YC+Math.sign(y2-YC)*Math.min(Math.abs(y2-YC),R.cap);
+          const ny=R.y+(y2-R.y)*Math.min(1,k); if(!cOn || laneClearance(c,{x:R.x,y:ny})>=0.3){ R.y=ny; R.ly=ny; } } }
+      const onLine=!R.wait && !R.third && R.went && (U(q.x)>=uol-60 || simNow-R.t0>0.7);   // arc onto their line first (and wait there -- v211: till it's time), then go
       // (the man on the ball, out wide, drifted into his lane -- shown down the line: round the inside of him instead,
       // across the back of him first if he's in the way)
       const rs=Math.sign(R.y-YC); if(c!==gkHold && rs===Math.sign(c.y-YC) && Math.abs(c.y-YC)>FH*0.18 && Math.abs(R.y-c.y)<5*MK && U(q.x)<U(c.x)+60){ R.y=YC+rs*(rs*(c.y-YC)-9*MK); R.inside=true; }
-      let rx=onLine?R.x:U(uol-30); if(R.inside && c!==gkHold && rs*(q.y-c.y)>-3*MK && Math.hypot(q.x-c.x,q.y-c.y)<8*MK) rx=c.x-atk*2*MK;
+      let rx=onLine?R.x:U(uol-runHoldOf(q)); if(R.inside && c!==gkHold && rs*(q.y-c.y)>-3*MK && Math.hypot(q.x-c.x,q.y-c.y)<8*MK) rx=c.x-atk*2*MK;
       if(R.third) R.x=rx;                                                           // (the third man: up to their line, as it moves)
       S.jobs.set(q,{x:rx, y:R.y, job:'RUN', sprint:true, lx:R.x, ly:R.y}); }   // (lx, ly: where the run's going, past the arc along their line)
   }
@@ -13041,6 +13089,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     // CARRYING THE BALL costs top speed — set by the Dribbling stat (endpoint penalties)
     if(hasBall) MAX *= (1 - dribSpeedPenOf(p));
     const settle=hasBall?settleOf(p,ix,iy):0, settleK=1-(1-P.settleSlow.val)*settle;   // (v210: round the ball first -- settleOf)
+    p.settleNow=settle;   // (v211: still getting round it -- a run waiting on his pass waits on that too: passReadyAt)
     if(settle>0) MAX=Math.max(MAX*settleK,Math.min(MAX,Math.hypot(p.vx,p.vy)));   // (no quicker till it's round: the pace he has, on the run, he keeps)
     if(p.stamina>p.staminaCap)p.stamina=p.staminaCap;
     if(p===controlled&&(kickHeld||shootHeld)&&ball.ownedBy===controlled)MAX*=0.7;
