@@ -2569,6 +2569,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure in traffic (stat 1–10)',hint:'(v209) How well a player does the ordinary things under pressure, anywhere on the pitch: his first touch, his passing (all but the final ball into a scoring position: Final third composure), his touches running with it. In space it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, loose touches); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
     // (v209) PRESSURE: how hemmed in a man on the ball is, from every man of theirs near him -- how near, how fast he's
     // closing, and how many of them -- one number, 0 to 1, that every touch, pass, cross, dribble and shot reads
+    // (v210) AGILITY, RECEIVING: a ball he's just received beside or behind him -- he has to get round it before he can go
+    settleTurn:{val:6,min:1,max:15,step:0.5,label:'Agility: round the ball to go (rad/s)',hint:'(v210) A ball he has just received beside or behind him: how fast he gets round it, to have it in front of him going the way he wants, at Agility 5.5 (half as fast at 1, 1.5 times at 10). Ball control is how cleanly he took it; this is his body.'},
+    settleSlow:{val:0.45,min:0,max:1,step:0.05,label:'Agility: going before it\'s in front',hint:'(v210) ...and till he has, how much of his pace and his acceleration he has: this share with it right behind him, more as it comes round, all of it once it is within 30° of the way he is going. Not frozen: never less than this; and on the run already, he keeps the pace he has -- no quicker till it is round.'},
+    turnBack:{val:0.25,min:0,max:0.6,step:0.01,label:'Agility: getting going the other way',hint:'(v210) How much of his acceleration a man has going the opposite way to how he is moving, at Agility 5.5 (0.15 at 1, 0.35 at 10): turning and going again after a turn. It was 0.25 for everyone.'},
+    // (v210) OFF IQ, GETTING A PASS READY: after he's received it, settled it or turned, a pass is the truer the readier he is
+    prepErr:{val:6,min:0,max:20,step:0.5,label:'Off IQ: a pass before he\'s ready (°)',hint:'(v210) A pass played the moment he has the ball (just received, or just round it) goes up to this far off line, the worst of it, less and less as he gets it ready.'},
+    prepTime:{val:0.5,min:0.1,max:1.5,step:0.05,label:'Off IQ: getting a pass ready (s)',hint:'(v210) How long that takes him at Off IQ 5.5: 1.6 times as long at 1, 0.4 times at 10. Off IQ is how soon he is ready, not how good the pass is once he is. A pass after he has turned to play it builds the same way: his sense of where he is facing catches up at 0.5 s at Off IQ 1, 0.31 at 5.5, 0.12 at 10.'},
     pressIn:{val:40,min:10,max:120,step:5,label:'Pressure: right on him (px)',hint:'(v209) A man of theirs this close (from his middle; 25 px = 1 m) is full pressure on him.'},
     pressOut:{val:160,min:60,max:320,step:5,label:'Pressure: none past (px)',hint:'(v209) ...and one further off than this is none at all: in between, the nearer the more.'},
     pressLook:{val:0.25,min:0,max:0.8,step:0.05,label:'Pressure: closing (s)',hint:'(v209) A man running at him counts as if he were where he will be this long from now: sprinting at him he is more pressure than one stood there, or going away.'},
@@ -7270,7 +7277,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function turnWorst(p,dx,dy){
     const f=p&&(p.faceAvg||p.facing); if(!f) return 0;
     const k=clamp((Math.acos(clamp(f.x*dx+f.y*dy,-1,1))-0.35)/(Math.PI-0.35),0,1);
-    return P.turnPassErr.val*Math.PI/180*k*statLerp(statOf(p,'offIQ',P.offIQ.val),1,0.2);
+    // (v210: Off IQ by how soon his sense of where he's facing catches up -- faceAvg, trackFacing -- not by taking a flat
+    // share off: 0.6 of the dial for everyone, as 5.5 had it (1 at Off IQ 1, 0.2 at 10, before); and a pass before he's
+    // ready, just after he's got the ball, on top -- prepWorst)
+    return P.turnPassErr.val*Math.PI/180*k*0.6+prepWorst(p);
   }
   function turnSpray(p,dx,dy){ return turnWorst(p,dx,dy)*(Math.random()+Math.random()+Math.random()-1.5)*1.15; }
   // WATCHING THE BALL: a man the ball is coming to -- played to him, loose and his to go and get, a pass of theirs he's
@@ -7345,7 +7355,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const S=clamp(P.pedalSide.val*(1+0.08*ag),0.3,1), B=clamp(P.pedalBack.val*(1+0.1*ag),0.2,S);
     return c>=0 ? 1-(1-c)*(1-S) : S+c*(S-B); }
   // (the way he's been facing, kept up each frame)
-  function trackFacing(p,dt){ const f=p.facing; if(!f) return; const a=p.faceAvg||(p.faceAvg={x:f.x,y:f.y}), k=1-Math.exp(-dt/0.3); a.x+=(f.x-a.x)*k; a.y+=(f.y-a.y)*k; }
+  function trackFacing(p,dt){ const f=p.facing; if(!f) return; const a=p.faceAvg||(p.faceAvg={x:f.x,y:f.y}), k=1-Math.exp(-dt/statLerp(statOf(p,'offIQ',P.offIQ.val),0.5,0.12)); a.x+=(f.x-a.x)*k; a.y+=(f.y-a.y)*k; }
   // a player's strength (0..1). per-player stat if set, else the global dial.
   // ===== PER-PLAYER STAT MAPPING =====
   // A stat is 1..10. statLerp maps it linearly onto a [lo(=stat 1) .. hi(=stat 10)] value range.
@@ -13030,6 +13040,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     // CARRYING THE BALL costs top speed — set by the Dribbling stat (endpoint penalties)
     if(hasBall) MAX *= (1 - dribSpeedPenOf(p));
+    const settle=hasBall?settleOf(p,ix,iy):0, settleK=1-(1-P.settleSlow.val)*settle;   // (v210: round the ball first -- settleOf)
+    if(settle>0) MAX=Math.max(MAX*settleK,Math.min(MAX,Math.hypot(p.vx,p.vy)));   // (no quicker till it's round: the pace he has, on the run, he keeps)
     if(p.stamina>p.staminaCap)p.stamina=p.staminaCap;
     if(p===controlled&&(kickHeld||shootHeld)&&ball.ownedBy===controlled)MAX*=0.7;
 
@@ -13065,7 +13077,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       // acceleration: full when going with your momentum, weak when fighting it
       const turnFactor=clamp((align+1)/2, 0, 1);        // 0 reversing .. 1 forward
       const ACC=(900+1700*acc)*accelMul*capFatigue*accLowOf(p);   // base accel scales with ACCELERATION, sprint & wear (v180: and a slow starter's a touch slower -- accLowOf)
-      let eff=ACC*(0.25+0.75*turnFactor);               // reversing accelerates slowly
+      const back=P.turnBack.val*statLerp(statOf(p,'agility',P.agility.val),0.6,1.4);   // (v210: going again the other way is Agility's -- 0.25 for everyone before)
+      let eff=ACC*(back+(1-back)*turnFactor)*settleK;      // reversing accelerates slowly (v210: and round the ball first)
       // SPRINT MOMENTUM makes a turn sluggish: while you still carry sprint momentum, your
       // steering authority into a new direction is cut — the harder the turn, the less you can
       // push, so you mostly just decelerate until your speed drops. Eases as you slow down.
@@ -13562,6 +13575,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;ball.selfLob=null;
     p.touchLagT=0;
     ball.dribEsc=null; p.touchOff=0; p.touchKnock=0; p.touchSp=psp; p.cutVa=null; p.cutAcc=0;   // (v208: at his feet -- see gather and runTouch)
+    if(!wasOwner&&(!reGather||(ball.touchAt!=null&&simNow-ball.touchAt<1.5&&p.settleTouch!==ball.touchAt))){ p.settleT=simNow; p.prepT=simNow; p.settleTouch=reGather?ball.touchAt:null; }   // (v210: a fresh ball -- a pass, his first touch, a loose one: settle it, then get a pass ready; once a touch, not again each time he gathers his own knock-on)
     if(!wasOwner){
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
         actQ=null; swipeShot=null; } }                       // a fresh ball (a pass, a restart, a lab serve): a press waiting on the last one doesn't carry over
@@ -13604,6 +13618,30 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // (v208) DRIBBLING, THE BALL AT HIS FEET. dribQ: his Dribbling as a share (0 at 1, a half at 5.5, 1 at 10); dribK: a
   // multiplier that's lo at Dribbling 1, 1 at 5.5 and hi at 10, in straight lines between
   function dribQ(p){ return clamp((statOf(p,'dribbling',P.dribbling.val)-1)/9,0,1); }
+  // (v210) RECEIVE, SETTLE, THEN GO. A ball he's just received (a pass, his first touch, one he's cut out, a loose one he's
+  // picked up) that's beside him or behind him, the way he wants to go: he has to get round it -- as fast as his Agility
+  // turns him (settleTurn) -- and till it's in front of him (within SETTLE_FRONT of the way he's going) he can't go at it
+  // flat out: his pace and his acceleration are cut, the more the further round it is (to settleSlow with it right behind
+  // him; on the run already, he keeps the pace he has, he just goes no quicker). Already in front of him, nothing
+  // changes. Ball control is how cleanly he took it, Dribbling how close he keeps it once he's going. settleOf: 0
+  // settled .. 1 right behind him, this frame (ix,iy: the way he means to go).
+  const SETTLE_FRONT=30*Math.PI/180, SETTLE_MAX=1.5;
+  function settleRateOf(p){ const a=clamp((statOf(p,'agility',P.agility.val)-1)/9,0,1); return P.settleTurn.val*(a<0.5?0.5+a:1+(a-0.5)); }
+  function settleOf(p,ix,iy){
+    if(!(p.settleT>0)||ball.ownedBy!==p) return 0;
+    if(simNow-p.settleT>SETTLE_MAX){ p.settleT=0; p.prepT=simNow; return 0; }
+    const bx=ball.x-p.x, by=ball.y-p.y, bl=Math.hypot(bx,by); if(bl<1) return 0;
+    let wx=ix, wy=iy; if(!(wx||wy)){ wx=p.facing?p.facing.x:0; wy=p.facing?p.facing.y:0; }
+    const wl=Math.hypot(wx,wy); if(wl<1e-6) return 0;
+    const th=Math.acos(clamp((bx*wx+by*wy)/(bl*wl),-1,1));
+    if(th<=SETTLE_FRONT){ p.settleT=0; p.prepT=simNow; return 0; }   // (in front of him: settled -- and the pass he'll play starts getting ready now)
+    return clamp((th-SETTLE_FRONT)/(Math.PI*2/3-SETTLE_FRONT),0,1);
+  }
+  // (v210) GETTING A PASS READY: Off IQ is how soon he's ready to play it, not how good it is once he is. From the moment
+  // he has the ball (or has just got round it: settleOf), a pass is up to prepErr off line, the worst of it, less and less
+  // till he's ready at prepTime (1.6 times as long at Off IQ 1, 0.4 times at 10)
+  function prepTimeOf(p){ const q=clamp((statOf(p,'offIQ',P.offIQ.val)-1)/9,0,1); return P.prepTime.val*(q<0.5?1.6-1.2*q:1-1.2*(q-0.5)); }
+  function prepWorst(p){ if(!p||!(p.prepT>0)||ball.ownedBy!==p) return 0; const r=clamp((simNow-p.prepT)/prepTimeOf(p),0,1); return P.prepErr.val*Math.PI/180*(1-r)*(1-r); }
   function dribK(p,lo,hi){ const q=dribQ(p); return q<0.5?lo+(1-lo)*q*2:1+(hi-1)*(q-0.5)*2; }
   // A CUT (v208): every CUT_TRIG of a radian his run swings round at pace, a touch takes the ball round with him
   const CUT_TRIG=0.45, ESC_RUN=1.2, ESC_MAX=30;   // (a touch that's got away runs on ESC_RUN times as far as it would have gone out, ESC_MAX px at most, past where he'd have been)
@@ -13701,7 +13739,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     // him -> I roll him and turn almost normally; weaker -> he blocks me off and my turn stalls.
     // (v208: how fast the ball comes round with him at all is his Dribbling -- ballFollow, 9.5 rad/s at 5.5, 0.6 times it
     // at 1 and 1.3 times at 10; it was 9.5 for everyone. Agility is how fast his body turns: stepOutfield.)
-    const follow=P.ballFollow.val*dribK(p,0.6,1.3);
+    const settling=p.settleT>0, follow=settling?settleRateOf(p):P.ballFollow.val*dribK(p,0.6,1.3);   // (v210: just received, he gets round it at his Agility's pace; once he's going, the ball keeps up by his Dribbling)
     let turnCap=follow;
     {
       let opp=null,od=1e9;
@@ -13720,7 +13758,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         }
       }
     }
-    if(roll!=null){ turnCap=Math.min(turnCap,roll);                   // (v133: round him at BALL_ROLL at most -- and one well off his run straight across to the front: the carry's spring takes it there along the line, not round him)
+    if(roll!=null&&!settling){ turnCap=Math.min(turnCap,roll);        // (v133: round him at BALL_ROLL at most -- and one well off his run straight across to the front: the carry's spring takes it there along the line, not round him; v210: not one he's just received, which he gets round at his Agility's pace)
       if(Math.abs(d)>BODY_LEAD){ p.carryAngle+=d-Math.sign(d)*BODY_LEAD; d=Math.sign(d)*BODY_LEAD; } }
     p.carryAngle+=clamp(d,-turnCap*dt,turnCap*dt);
     if(!isFinite(p.carryAngle)) p.carryAngle=Math.atan2(ball.y-p.y,ball.x-p.x)||0;

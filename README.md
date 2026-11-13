@@ -191,6 +191,38 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     0.15 headers), 37 goals and 40. With a cross feeling it as a pass does it was 0.70 shots and 30 goals.
   - The dials (Settings): Pressure: right on him, none past, closing, closing at most, each man more, on his dribbling;
     and Final ball: a scoring position.
+- **Receive, settle, then go; and a pass got ready (v210).** Agility's job and Off IQ's, on the ball.
+  - **Getting round the ball.** A ball a man has just received -- a pass, his first touch, one he's cut out, a loose
+    one he's picked up -- that's beside or behind him, the way he wants to go: he has to get round it before he can go
+    at it. He comes round it as fast as his Agility turns him (6 radians a second at 5.5, 3 at 1, 9 at 10), and till
+    it's in front of him (within 30° of the way he's going) his pace and his acceleration are cut, the more the
+    further round it is, to 45% of them with it right behind him. Never frozen: he's moving off within a quarter of a
+    second whatever. On the run already, he keeps the pace he has; he just can't go any quicker till it's round.
+    Already in front of him, nothing changes. Ball control is how cleanly he took it; Dribbling how close he keeps it
+    once he's going.
+  - Measured, stood still with the stick held on up the pitch: with the ball in front of him he's away (85% of his
+    running pace) in 0.07 s, as before, at any Agility; with it beside him in 0.43 s at Agility 1, 0.27 s at 5.5 and
+    0.20 s at 10; behind him 0.97 s, 0.53 s and 0.38 s (2.7, 3.8 and 4.1 m covered in the first second, against 5.0 m
+    with it in front). Running at 3.5 m/s, a ball received beside him: never slower than that while he gets round it,
+    4.0 m/s 0.2 s on, against 5.2 m/s with it in front. You and the computer's men alike. Before, it made no difference
+    where the ball was.
+  - **Getting going the other way** is Agility's too: running one way and pushed the other, a man has 0.15 of his
+    acceleration against his momentum at Agility 1, 0.25 at 5.5 (everyone's before) and 0.35 at 10 -- half his pace
+    back the other way in 0.33 s, 0.25 s and 0.22 s.
+  - **A pass got ready: Off IQ is how soon, not how good.** The moment a man has the ball, or has just got round it, a
+    pass goes up to 6° off line (a first touch knocked on, from when he gathers it -- once, not again each time he
+    gathers a knock-on as he goes), the worst of it, less and less as he gets it ready: ready in 0.3 s at Off IQ 10,
+    0.5 s at 5.5 and 0.8 s at 1. Played at once a 15 m pass is 3° off on average at any Off IQ, 0.9° once he's ready;
+    a quarter of a second in, 1.6° at Off IQ 1 and 0.9° at 10. A pass after he's turned to play it builds the same
+    way: right round, 8.4° at the worst for everyone the moment he's turned (it was 14° at Off IQ 1 and 2.8° at 10,
+    a flat share off), and his sense of where he's facing catches up in 0.5 s at Off IQ 1, 0.31 s at 5.5 (as before)
+    and 0.12 s at 10. A first-time pass, a ball he never had, has none of it: it has its own.
+  - In a match (computer against computer, 180 minutes each, before and after): 28.6 passes a minute both, 2.3 and 2.5
+    tackles, 6.2 and 6.4 turnovers, 0.72 and 0.68 shots a minute (0.18 and 0.16 headers), 66 goals and 57; the chances'
+    xG 0.29 and 0.23 a minute (over 90 minutes each). A touch slower at getting at goal -- within the swing from one lot
+    of matches to the next (Version 209 on its own gave 40 goals and 26 in two lots of 90 minutes).
+  - The dials (Settings): Agility: round the ball to go, going before it's in front, getting going the other way; Off
+    IQ: a pass before he's ready, getting a pass ready.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -713,12 +745,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     before, 6 first-time shots and 6 headers now; a ball rolling across him 12 slide tackles before, 12 first-time
     shots now.)
 - **Turning and passing costs accuracy.** A pass played the moment you've turned to face it goes less true than one
-  you've been lined up for. The game reads your facing over the last ~0.3 s against the way the ball goes.
-  - **The angle.** Up to 20° costs nothing. At Off IQ 1 the worst spray is 6.1° turned square and 14° right round
-    (the Turn-and-pass: worst spray dial, in the Pass Lab's TUNE). Most passes land well inside the worst.
-  - **Off IQ** is the only stat that matters here: at 10 the penalty is a fifth of what it is at 1.
-  - **Facing it for a moment takes it away.** Turned square and held there, the penalty is 76% after 0.1 s, 44% after
-    0.3 s, 14% after 0.6 s and gone by 1 s.
+  you've been lined up for. The game reads your facing over the last moment (0.3 s at Off IQ 5.5) against the way the
+  ball goes.
+  - **The angle.** Up to 20° costs nothing. The worst spray is 3.7° turned square and 8.4° right round, at any Off IQ
+    the moment he's turned (0.6 of the Turn-and-pass: worst spray dial, in the Pass Lab's TUNE). Most passes land well
+    inside the worst.
+  - **Off IQ** is how soon it wears off (v210): his sense of where he's facing catches up in 0.5 s at Off IQ 1, 0.31 s
+    at 5.5 and 0.12 s at 10 -- not a share taken off it (it was all of it at 1, a fifth at 10). See **Receive, settle,
+    then go; and a pass got ready (v210)**.
+  - **Facing it for a moment takes it away.** Turned square and held there, at Off IQ 5.5 the penalty is 76% after
+    0.1 s, 44% after 0.3 s, 14% after 0.6 s and gone by 1 s.
   - **Every pass gets it**, yours and the computer's, one-touch passes and through balls included. The computer
     knows it. With time on the ball (nobody within 5.6 m), a man about to play it across his body turns to face it
     for 0.3 s first. With a man close, he plays it as he is. Measured over 15-minute computer-against-computer
@@ -3189,6 +3225,14 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v210: receive, settle, then go; and a pass got ready.** A ball a man has just received beside or behind him, the
+  way he wants to go: he has to get round it first, as fast as his Agility turns him, his pace and acceleration cut
+  till it's in front of him (never frozen; on the run, no quicker than he's going; in front of him already, nothing
+  changes) -- behind him, away in 0.97 s at Agility 1, 0.53 s at 5.5, 0.38 s at 10, against 0.07 s with it in front.
+  Agility is also how well he gets going again the other way. Off IQ is how soon a pass is ready, not how good it is
+  once it is: the moment he has the ball, or has just got round it or turned, a pass goes less true, ready in 0.3 s at
+  Off IQ 10, 0.5 s at 5.5, 0.8 s at 1 (a flat share off the turn penalty before). The same for you and the computer.
+  New dials, and a new test: `tests/classic-settle.mjs`. See **Receive, settle, then go; and a pass got ready (v210)**.
 - **v209: pressure, and composure by the action.** Pressure is one number for how hemmed in a man on the ball is, read
   by every touch, pass, cross, dribble and shot: every man of theirs near him counts, the nearer the more (full at
   1.6 m, none from about 7 m), as if nearer still when he's running at him (never more than 1.6 m nearer), and more of

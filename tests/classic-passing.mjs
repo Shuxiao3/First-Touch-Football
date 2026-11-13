@@ -52,15 +52,17 @@ const tap2 = await page.evaluate(() => { const T = window.__T, c = T.controlled(
   const used = T.touchPass(near); return { used, queued: !!T.oneTouch() }; });
 ok(tap2.used && tap2.queued, 'a tap on the man 14 m away: queued to go first time');
 
-// turning and passing: lined up, nothing; turned square, some; right round, the most -- and Off IQ takes it down to a fifth
+// turning and passing: lined up, nothing; turned square, some; right round, the most -- the same at any Off IQ the moment
+// he's turned (v210: Off IQ is how soon it wears off, his sense of where he's facing catching up -- see classic-settle --
+// not a share taken off it: it was all of it at Off IQ 1, a fifth at 10)
 const tw = await page.evaluate(() => { const T = window.__T, c = T.controlled(), atk = c.team === 'G' ? 1 : -1, deg = r => +(r * 57.3).toFixed(2), keep = c.stats.offIQ, out = {};
   c.faceAvg = { x: atk, y: 0 };
   for(const iq of [1, 10]){ c.stats.offIQ = iq; out[iq] = { ahead: deg(T.turnWorst(c, atk, 0)), slight: deg(T.turnWorst(c, Math.cos(0.3) * atk, Math.sin(0.3))), square: deg(T.turnWorst(c, 0, 1)), back: deg(T.turnWorst(c, -atk, 0)) }; }
   c.stats.offIQ = keep; out.dial = T.P.turnPassErr.val; return out; });
 info(JSON.stringify(tw));
 ok(tw[1].ahead === 0 && tw[1].slight === 0, 'lined up (or nearly): no turn penalty');
-ok(tw[1].square > 4 && tw[1].back > tw[1].square && Math.abs(tw[1].back - tw.dial) < 0.01, 'Off IQ 1: ' + tw[1].square + ' deg at worst turned square, ' + tw[1].back + ' right round');
-ok(Math.abs(tw[10].back - tw[1].back * 0.2) < 0.01 && Math.abs(tw[10].square - tw[1].square * 0.2) < 0.01, 'Off IQ 10: a fifth of it (' + tw[10].back + ' deg right round)');
+ok(tw[1].square > 2 && tw[1].back > tw[1].square && Math.abs(tw[1].back - tw.dial * 0.6) < 0.01, 'the moment he\'s turned: ' + tw[1].square + ' deg at worst turned square, ' + tw[1].back + ' right round (0.6 of the dial, ' + tw.dial + ')');
+ok(Math.abs(tw[10].back - tw[1].back) < 0.01 && Math.abs(tw[10].square - tw[1].square) < 0.01, '...as much at Off IQ 10 as at 1 (' + tw[10].back + ' deg right round): Off IQ is how soon it wears off, not a share off it');
 // facing the new way for a moment takes it away: turned square, the penalty eases off over ~0.3 s as he keeps facing it
 const ease = await page.evaluate(() => { const T = window.__T, c = T.controlled(), atk = c.team === 'G' ? 1 : -1, deg = r => +(r * 57.3).toFixed(2), out = [];
   c.facing = { x: 0, y: 1 }; c.faceAvg = { x: atk, y: 0 }; out.push(deg(T.turnWorst(c, 0, 1)));
