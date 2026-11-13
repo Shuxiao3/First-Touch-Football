@@ -19,8 +19,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **The first touch is the player's own.** There's nothing to time, for you or the computer. As the ball reaches a
   man, his touch is judged from his Ball control and Composure, and how much they matter depends on the moment.
   Knocking it about at the back with nobody near, nearly anyone takes it cleanly: a defender rated 3 for both is clean
-  or better every time, and perfect most of it. Pressure counts the nearest opponent, closer still if he's closing in:
-  full inside 1.6 m, none beyond 5.6 m. Under pressure or in the final third, the touch is only as good as the player.
+  or better every time, and perfect most of it. Pressure is every man of theirs near him (v209: see **Pressure, and
+  composure by the action**; it was the nearest alone, closer still if he was closing in, full inside 1.6 m and none
+  beyond 5.6 m). Under pressure or in the final third, the touch is only as good as the player.
   Measured over exhibition matches, with everyone given the same stats:
 
   | Ball control / Composure | At the back, nobody near | Under pressure | Final third |
@@ -162,6 +163,34 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     cone at 1, 5 and 10, its clean middle, less sure at the edge, the reach at 1 and 10; and Touch at the cone's edge.
     Knock-on variance is how uneven the touches are (less so the better he dribbles). Knock-on touch is now only the
     drill's demo ball.
+- **Pressure, and composure by the action (v209).** How hemmed in a man on the ball is, and how well he copes with it.
+  - **Pressure** is one number, read by every touch, pass, cross, dribble and shot. (There were two: the nearest man
+    alone for a pass or a shot, out to 8.8 m; the nearest, closer still if he was closing, for a touch, out to 5.6 m.)
+    Every man of theirs near him counts. One right on him, 1.6 m or nearer, is full pressure; 3 m off 0.77, 5 m 0.40,
+    none from about 7 m. Running at him, a man counts as if he were where he'll be a quarter of a second on, but never
+    more than 1.6 m nearer, so his pace isn't counted twice: at 8 m/s from 5 m he's 0.73, from 7 m 0.35. Going away
+    he's no more than one stood there. The nearest counts in full, the next half of what he would alone, the one after
+    a quarter, and so on: one man at 3 m is 0.77, two 0.86, three 0.89, four 0.90, never more than full. A man on the
+    ground is none.
+  - **Composure in traffic** is the ordinary things, wherever he is: his first touch, a pass, his touches running with it.
+    Under full pressure, at 1, how far each touch goes is half as uneven again; at 10 next to no different.
+  - **Final third composure** is the big moments, wherever he is: the final ball into a scoring position (a pass or a
+    cross into their box, or anywhere central a shot would be worth 0.05 or more, out to about 18 m) and every shot,
+    a header at goal too. (From v163 to v208 it was by where he was: traffic in his own half and the middle, the
+    final third's from 62% of the way up.)
+  - **A cross feels pressure now,** half as much as a pass does. It never did before.
+  - Measured with a man right on him, mean degrees off line: an ordinary 15 m pass 1.65° at Composure in traffic 1,
+    1.37° at 5, 0.96° at 10 (0.87° with nobody near, at any composure); a ball into their box 1.68°, 1.35°, 0.95° by
+    Final third composure; a cross into it 2.64°, 2.24°, 1.80° (1.74° with nobody near). Your shot at a corner from
+    20 m with a man on you spreads 4.8° either side of its line at Final third composure 1 and 4.1° at 10; your
+    Composure in traffic makes no difference.
+  - **Composure doesn't decide.** The computer no longer weighs a man's Final third composure in how keen he is to
+    shoot (it was 0.94 to 1.06 of his appetite): composure is how well he does a thing, never what he does.
+  - Over 90 minutes of computer against computer at 60 frames a second, the matches play as they did: 28.0 passes a
+    minute before and 28.4 after, 2.3 tackles both, 5.8 and 6.3 turnovers, 0.80 shots a minute both (and 0.16 and
+    0.15 headers), 37 goals and 40. With a cross feeling it as a pass does it was 0.70 shots and 30 goals.
+  - The dials (Settings): Pressure: right on him, none past, closing, closing at most, each man more, on his dribbling;
+    and Final ball: a scoring position.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -1421,10 +1450,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     one-touch pass and a throw-in by Short. Composure and Curve come in as they always did. Measured on the pitch, nobody
     near: a man of Short 10 and Long 1 is 0.05° off on average at 8 m and 10.6° at 40 m; one of Short 1 and Long 10,
     0.14° and 1.35°.
-  - **Composure, where he is.** The composure a man plays with is his Composure in traffic in his own half and the
-    middle, his Final third composure going into theirs -- from 62% of the way up the pitch, all of it at 74% -- in
-    everything composure did: pressure on a pass, a shot or a touch, and the touch in the final third. The computer
-    weighs a man's Final third composure in how keen he is to shoot. A mood high or low, the dressing room and the
+  - **Composure, by what he does (v209).** Composure in traffic is for the ordinary things wherever he is, Final third
+    composure for the final ball into a scoring position and every shot (see **Pressure, and composure by the action
+    (v209)**). From v163 to v208 it went by where he was: his Composure in traffic in his own half and the middle, his
+    Final third composure going into theirs (from 62% of the way up the pitch, all of it at 74%), and the computer
+    weighed a man's Final third composure in how keen he was to shoot. A mood high or low, the dressing room and the
     big games move both.
   - **Every man has both.** A role's usual make: a keeper's Long passing 5 (Short 5.5), a defender's 5.5 (6), a
     midfielder's 6.5 (7.5), a forward's 5 (6); Final third composure 3, 4.5, 6 and 7 (Composure in traffic 6.5, 6, 6.5,
@@ -3159,6 +3189,16 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v209: pressure, and composure by the action.** Pressure is one number for how hemmed in a man on the ball is, read
+  by every touch, pass, cross, dribble and shot: every man of theirs near him counts, the nearer the more (full at
+  1.6 m, none from about 7 m), as if nearer still when he's running at him (never more than 1.6 m nearer), and more of
+  them more pressure, less and less for each one more, never past full. It was the nearest man alone. Composure goes by
+  what he does, not where he is: Composure in traffic for his first touch, a pass and his touches running with it,
+  anywhere; Final third composure for the final ball into a scoring position (into their box, or central and worth 0.05
+  xG) and every shot. A cross feels pressure now, half as much as a pass. Composure no longer makes the computer keener
+  to shoot. Over 90 minutes of computer against computer the matches play as they did (0.80 shots a minute both, 37
+  goals and 40). New dials, and a new test: `tests/classic-pressure.mjs`. See **Pressure, and composure by the action
+  (v209)**.
 - **v208: Dribbling and Ball control, each with its own job.** Ball control is the cone in front of a man that he takes
   a ball in, round the way he faces (not the way he's moving): 120° in all at 1, 180° at 5, 210° at 10, a smooth curve
   between, the touch harder a bit at a time toward its edge and less sure there, and past his Back to it angle (80°,

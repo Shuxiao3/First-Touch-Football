@@ -43,22 +43,24 @@ r = await K(`(()=>{ const c=players.find(q=>q.team==='G'&&!q.isGK), keep=c.stats
   const far=[]; for(const o of [...players,...keepers]) if(o.team!==c.team){ far.push([o,o.x,o.y]); o.x=atk>0?FW*0.97:FW*0.03; o.y=40; }   // (nobody near him)
   const spr=(st,m)=>{ c.stats=Object.assign({},keep,st); let s=0; for(let i=0;i<4000;i++) s+=Math.abs(passSpray(m*MK,c)); c.stats=keep; return +(s/4000*180/Math.PI).toFixed(3); };
   const S={passAcc:10,longPass:1}, L={passAcc:1,longPass:10};
-  const out={ s8:spr(S,8), l8:spr(L,8), s40:spr(S,40), l40:spr(L,40), pf:+pressFactor(c).toFixed(2) };
+  const out={ s8:spr(S,8), l8:spr(L,8), s40:spr(S,40), l40:spr(L,40), pf:+pressureOn(c).toFixed(2) };
   c.stats=Object.assign({},keep,S); out.rS=Math.round(passRangeOf(c)); c.stats=Object.assign({},keep,L); out.rL=Math.round(passRangeOf(c)); c.stats=keep;
   for(const [o,x,y] of far){ o.x=x; o.y=y; } [c.x,c.y]=where; return out; })()`);
 info('the spray, degrees off on average -- Short 10/Long 1: ' + r.s8 + ' at 8 m, ' + r.s40 + ' at 40 m; Short 1/Long 10: ' + r.l8 + ', ' + r.l40 + ' (pressure ' + r.pf + ')');
 ok(r.pf === 0 && r.s8 < r.l8 * 0.5 && r.l40 < r.s40 * 0.25, 'on the pitch, nobody near: the short passer is truer at 8 m (' + r.s8 + '° to ' + r.l8 + '°), the long passer far truer at 40 m (' + r.l40 + '° to ' + r.s40 + '°)');
 ok(r.rS === 281 && r.rL === 713, 'how far a man can hit it well goes by his Long passing: ' + r.rS + ' px at Long 1, ' + r.rL + ' at 10');
 
-// --- COMPOSURE, WHERE HE IS ----------------------------------------------------------------------------------------------------------
+// --- COMPOSURE BY THE ACTION (v209; v163-v208 it went by where he was: traffic in his own half and the middle, the final
+// third's from 62% of the way up) -----------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const c=players.find(q=>q.team==='G'&&!q.isGK), keep=c.stats, atk=atkOf(c.team), where=[c.x,c.y]; c.stats=Object.assign({},keep,{composure:9,compFinal:2}); c.y=YC;
-  const at=f=>{ c.x=atk>0?f*FW:(1-f)*FW; return +composureAt(c).toFixed(2); }, out={ own:at(0.3), mid:at(0.55), half:at(0.68), deep:at(0.85) };
   const o=players.find(q=>q.team!==c.team&&!q.isGK), ow=[o.x,o.y], others=[]; for(const q of [...players,...keepers]) if(q.team!==c.team&&q!==o){ others.push([q,q.x,q.y]); q.x=atk>0?FW*0.5:FW*0.5; q.y=10; }
-  const pl=f=>{ c.x=atk>0?f*FW:(1-f)*FW; o.x=c.x+atk*40; o.y=c.y; return +poiseLoss(c).toFixed(2); }; out.plOwn=pl(0.3); out.plDeep=pl(0.85);
+  const goal=atk>0?FW:0, box={x:goal-atk*10*MK,y:YC}, mid={x:FW/2,y:YC-200};
+  const pl=(f,k)=>{ c.x=atk>0?f*FW:(1-f)*FW; o.x=c.x+atk*40; o.y=c.y; return +poiseLoss(c,k).toFixed(2); };
+  const out={ passOwn:pl(0.3,'traffic'), passDeep:pl(0.85,'traffic'), shotOwn:pl(0.3,'final'), shotDeep:pl(0.85,'final'), box:finalBall(c,box), mid:finalBall(c,mid) };
   for(const [q,x,y] of others){ q.x=x; q.y=y; } [o.x,o.y]=ow; c.stats=keep; [c.x,c.y]=where; return out; })()`);
-info('composure where he is (in traffic 9, final third 2): ' + JSON.stringify(r));
-ok(r.own === 9 && r.mid === 9 && r.half === 5.5 && r.deep === 2 && r.plOwn === 0.2 && r.plDeep === 0.9,
-  'the composure he plays with: in traffic in his own half and the middle (9), the final third\'s going into theirs -- half and half at 68% of the way up (5.5), all of it deep in it (2); a man on him costs 0.2 back there, 0.9 there');
+info('composure by the action (in traffic 9, final third 2), a man on him: ' + JSON.stringify(r));
+ok(r.passOwn === 0.2 && r.passDeep === 0.2 && r.shotOwn === 0.9 && r.shotDeep === 0.9 && r.box && !r.mid,
+  'the composure he plays with goes by what he does, not where he is: an ordinary pass by his Composure in traffic (0.2 lost with a man on him, in his own half and deep in theirs), a shot or a final ball into their box by his Final third composure (0.9 lost, from either)');
 
 // --- EVERY MAN HAS BOTH ----------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const all=[...SQUAD.G,...SQUAD.R]; return { n:all.length, both:all.filter(e=>isFinite(e.stats.longPass)&&isFinite(e.stats.compFinal)).length }; })()`);

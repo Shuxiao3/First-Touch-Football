@@ -2565,8 +2565,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
     ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. (v208) And the cone in front of him that he takes it in: 120° in all at 1, 180° at 5, 210° at 10, round the way he faces (the Ball control dials below). Baseline for all players.'},
-    compFinal:{val:5.5,min:1,  max:10,  step:0.1, label:'Final third composure (stat 1–10)',hint:'Composure in the final third: from 62% of the way up the pitch it takes over from Composure in traffic, all of it by 74% -- pressure on a pass, a shot or a touch there, and the touch in the final third. It weighs too in how keen a man is to shoot.'},
-    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure in traffic (stat 1–10)',hint:'(v163: in his own half and the middle -- Final third composure takes over going into theirs.) How well a player performs with defenders right on top of them. Affects passing and shooting UNDER PRESSURE, and the first touch when pressed or in the final third — in space at the back it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, wild shots); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
+    compFinal:{val:5.5,min:1,  max:10,  step:0.1, label:'Final third composure (stat 1–10)',hint:'(v209) How well he plays the big moments under pressure: the final pass into a scoring position, a cross into one, and every shot, wherever he is. 1 = pressure bites in full; 10 = he shrugs off 90% of it. (v163-v208 it was his composure anywhere from 62% of the way up the pitch, and it made him keener to shoot: it no longer changes what he decides.)'},
+    composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure in traffic (stat 1–10)',hint:'(v209) How well a player does the ordinary things under pressure, anywhere on the pitch: his first touch, his passing (all but the final ball into a scoring position: Final third composure), his touches running with it. In space it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, loose touches); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
+    // (v209) PRESSURE: how hemmed in a man on the ball is, from every man of theirs near him -- how near, how fast he's
+    // closing, and how many of them -- one number, 0 to 1, that every touch, pass, cross, dribble and shot reads
+    pressIn:{val:40,min:10,max:120,step:5,label:'Pressure: right on him (px)',hint:'(v209) A man of theirs this close (from his middle; 25 px = 1 m) is full pressure on him.'},
+    pressOut:{val:160,min:60,max:320,step:5,label:'Pressure: none past (px)',hint:'(v209) ...and one further off than this is none at all: in between, the nearer the more.'},
+    pressLook:{val:0.25,min:0,max:0.8,step:0.05,label:'Pressure: closing (s)',hint:'(v209) A man running at him counts as if he were where he will be this long from now: sprinting at him he is more pressure than one stood there, or going away.'},
+    pressClose:{val:40,min:0,max:120,step:5,label:'Pressure: closing, at most (px)',hint:'(v209) ...but never more than this much nearer than he is, however fast he comes: one man, counted once.'},
+    pressMore:{val:0.5,min:0,max:1,step:0.05,label:'Pressure: each man more',hint:'(v209) The nearest man of theirs counts in full; the next this much of what he would alone, the one after this much of that again, and so on -- more of them is more pressure, but less and less, and never more than full.'},
+    pressDrib:{val:0.6,min:0,max:2,step:0.05,label:'Pressure: on his dribbling',hint:'(v209) How much less even, and less sure of its line, a man\'s touch running with it is under full pressure, less his Composure in traffic.'},
+    finalXg:{val:0.05,min:0.01,max:0.3,step:0.01,label:'Final ball: a scoring position (xG)',hint:'(v209) A pass or a cross into their box, or to anywhere else a shot would be worth this much or more (central, up to about 18 m out), is a final ball: it goes by Final third composure.'},
     knockOn:   {val:120,min:120, max:1600,step:5,  label:'Knock-on touch (drill demo)',hint:'The Dribble drill\'s demo ball only (v208: a match\'s touches are the Dribbling dials): forward nudge per stride. Bigger = the ball rolls much further out ahead.'},
     knockVar:  {val:0.8, min:0,   max:0.8, step:0.02,label:'Knock-on variance',hint:'Random spread on each touch: how far it goes and which way. Higher = looser, less predictable dribbling (v208: less so for a good dribbler).'},
     speed:     {val:5.5, min:1,   max:10,  step:0.1, label:'Speed (stat 1–10)',hint:'Outfielder speed as a 1–10 stat. 1 = 100 run / 140 sprint; 10 = 160 run / 220 sprint. Baseline for all players (per-player ratings override this later).'},
@@ -7229,7 +7238,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function crossFarOf(out){ return clamp((out-CROSS_TRUE)/(CROSS_MAX-CROSS_TRUE),0,1); }   // 0 level with the six-yard box or nearer .. 1 at 24 m out
   function crossFar(team,x){ return crossFarOf(crossOut(team,x)); }
   function crossOK(p){ return crossOut(p.team,ball.x)<=CROSS_MAX; }                    // the ball near enough their byline for p to cross it
-  function crossSpray(p,f){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*cpu(p).spray*(Math.random()-Math.random()); }
+  const CROSS_POISE=0.5;   // (v209: how much pressure, less his composure, widens a cross -- half what it does a pass: a cross never felt it before)
+  function crossSpray(p,f,dest){ f=f||0; return ((1-crossAccOf(p))*0.20*(1+f)+0.05*f)*(1+passPoise(p,dest)*CROSS_POISE)*cpu(p).spray*(Math.random()-Math.random()); }   // (v209: and pressure, less his composure -- Final third composure into a scoring position, as a pass)
   const CROSS_SHORT=0.22, CROSS_LONG=0.08;
   function crossOver(p,f){ f=f||0; const a=crossAccOf(p), w=clamp((0.9-a)/0.7,0,1), far=f*(0.10+(1-a)*0.12), tri=()=>Math.abs(Math.random()-Math.random());
     const short=Math.random()<0.5+0.25*w;                                                // (a poor crosser: mostly short)
@@ -7245,12 +7255,12 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // PASS spray: a signed angular error (radians). Base drift from the passer's short-pass accuracy,
   // PLUS a distance term that grows sharply as their long-pass accuracy drops. shortOverride lets a
   // caller (AI context risk, first-time) substitute an already-adjusted short accuracy.
-  function passSpray(d, p, shortOverride){
+  function passSpray(d, p, shortOverride, dest){   // (dest: where it's going -- v209, a final ball goes by Final third composure)
     const sa = (shortOverride!=null) ? clamp(shortOverride,0,1) : kickAccOf(p,d);
     const la = longAccOf(p,d);
     const base   = (1-sa)*0.06;
     const longErr= (1-la)*clamp((d-250)/650,0,1)*0.45;   // big spread: up to ~25° at the worst
-    return (base+longErr)*(1+poiseLoss(p)*0.9)*cpu(p).spray*(Math.random()*2-1);   // composure: pressure widens the spray (and DIFFICULTY, the computer's)
+    return (base+longErr)*(1+passPoise(p,dest)*0.9)*cpu(p).spray*(Math.random()*2-1);   // composure: pressure widens the spray (and DIFFICULTY, the computer's)
   }
   // TURNING AND PASSING: a pass played the moment he's turned to face it goes less true than one he's been lined up for.
   // His facing, read over the last ~0.3 s (faceAvg: midway through a turn it's short, about square), against the way the
@@ -7455,7 +7465,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const target={x:mate.x+mate.vx*0.3, y:mate.y+mate.vy*0.3};
     let dx=target.x-ball.x, dy=target.y-ball.y;
     const d0=Math.hypot(dx,dy)||1;dx/=d0;dy/=d0;
-    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out)
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f,target), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const G=520, T=clamp(0.6+d/2400,0.6,1.15);
@@ -7482,7 +7492,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const lead={x:mate.x+mate.vx*0.5+(curIx*60),y:mate.y+mate.vy*0.5+(curIy*60)};
     let dx=lead.x-ball.x,dy=lead.y-ball.y;
     const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-    const aerr=passSpray(d, p)+turnSpray(p,dx,dy);
+    const aerr=passSpray(d, p, undefined, lead)+turnSpray(p,dx,dy);
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const frPerSec=Math.pow(1-P.friction.val,3.2);
@@ -7843,7 +7853,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if(low) lowCross(p,tq,tx,ty);
     else {
       let dx=tx-ball.x, dy=ty-ball.y; const d0=Math.hypot(dx,dy)||1; dx/=d0; dy/=d0;
-      const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+crossOver(p,f));
+      const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f,{x:tx,y:ty}), ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+crossOver(p,f));
       const G=520, T=clamp(0.7+0.0008*d,0.6,1.2), zH=PLAYER_H*1.15;
       curlCross(p,ax,ay,d,T,(zH+G*0.5*T*T)/T,tx,ty,tq);   // (swinging: crossSwing)
       ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team;
@@ -7863,7 +7873,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   const LOWX_V=680, LOWX_Z=9;
   function lowCross(p,q,tx,ty){
     let dx=tx-ball.x, dy=ty-ball.y; const d0=Math.hypot(dx,dy)||1; dx/=d0; dy/=d0;
-    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f)*0.8, ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+0.8*crossOver(p,f));
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f,{x:tx,y:ty})*0.8, ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca, d=d0*(1+0.8*crossOver(p,f));
     const T=Math.max(0.38+0.0006*d, d/LOWX_V), vz=(LOWX_Z+260*T*T)/T, vh=d/T/takeoffKeep(vz);   // (struck that bit harder for the grass at its take-off: takeoffKeep)
     ball.vx=ax*vh; ball.vy=ay*vh; ball.vz=vz; ball.curveSpin=0; ball.curveSpinT=0; ball.curveK=0; ball.crossCurl=0;
     ball.ownedBy=null; p.noTouchT=0.3; ball.lastTouch=p.team; ball.crossBy=null; ball.crossT=0;
@@ -8066,7 +8076,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const target = cs ? {x:cs.x, y:cs.y} : {x:atk>0?FW-BX*0.66:BX*0.66, y:YC};
     let dx=target.x-ball.x, dy=target.y-ball.y;
     const d0=Math.hypot(dx,dy)||1;dx/=d0;dy/=d0;
-    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out: see CROSS_MAX)
+    const f=crossFar(p.team,ball.x), aerr=crossSpray(p,f,target), d=d0*(1+crossOver(p,f));   // (out wider, and over or short, the further out: see CROSS_MAX)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
     const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     // It gets to the spot in T, coming down through head height there -- where the man attacking it meets it (see
@@ -8199,7 +8209,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       let dx=lead.x-ball.x,dy=lead.y-ball.y;
       const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
       // pass accuracy: angular drift that grows with distance and missing accuracy, and with a quick turn to play it
-      const aerr=passSpray(d, p)+turnSpray(p,dx,dy);
+      const aerr=passSpray(d, p, undefined, lead)+turnSpray(p,dx,dy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       { const sol=passSolve(d);
@@ -8257,7 +8267,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const lead=clamp(120+dist(p,mate)*0.15,130,230)*P.thruLead.val;
     const L={x:clamp(mate.x+u.x*lead,30,FW-30), y:clamp(mate.y+u.y*lead,30,FH-30)};
     let dx=L.x-ball.x, dy=L.y-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
-    const aerr=passSpray(d,p)+turnSpray(p,dx,dy);
+    const aerr=passSpray(d,p,undefined,L)+turnSpray(p,dx,dy);
     const ca=Math.cos(aerr), sa=Math.sin(aerr), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const tRun=dist(mate,L)/sprintSpeedOf(mate);           // when they can be there
     let tA;
@@ -8441,7 +8451,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if(best){
       const lead={x:best.x+best.vx*0.35+atk*40, y:best.y+best.vy*0.35};
       let dx=lead.x-ball.x,dy=lead.y-ball.y; const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-      const aerr=passSpray(d,p)+err+turnSpray(p,dx,dy);
+      const aerr=passSpray(d,p,undefined,lead)+err+turnSpray(p,dx,dy);
       const ca=Math.cos(aerr),sa=Math.sin(aerr);
       const ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
       const sol=passSolve(d);
@@ -8626,7 +8636,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     let dx=gx-ball.x, dy=ty-ball.y, dG=Math.hypot(dx,dy);
     if(!isFinite(dG)||dG<0.001){ dx=atkOf(p.team); dy=0; dG=1; }
     dx/=dG; dy/=dG;
-    const dev=((1-clamp(headAccOf(p),0,1))*0.25+0.03)*(Math.random()*2-1);   // header accuracy (Heading stat)
+    const dev=((1-clamp(headAccOf(p),0,1))*0.25+0.03)*(1+0.5*poiseLoss(p,'final'))*(Math.random()*2-1);   // header accuracy (Heading stat; v209: a header at goal is a shot -- pressure, less his Final third composure)
     const ca=Math.cos(dev), sa=Math.sin(dev), ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
     const speed=headPowerOf(p)+Math.hypot(ball.vx,ball.vy)*0.15;         // header power (Heading stat) + redirected pace
     ball.vx=ax*speed; ball.vy=ay*speed; ball.vz=30;                     // (headers go down)
@@ -8863,7 +8873,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     dx/=distG;dy/=distG;
     const ftMul = (accMul!==undefined)?accMul:1;             // first-touch strikes are less accurate
     const xb=clamp(across||0,0,1.5);                          // struck across his body (a swipe off his line: swipeAcross)
-    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p)*0.25)*(1-0.8*Math.min(1,xb))*cpu(p).shot,0,1);   // composure: pressure saps shot accuracy (and DIFFICULTY, the computer's)
+    const effAcc = clamp(shotAccOf(p)*ftMul*(1-poiseLoss(p,'final')*0.25)*(1-0.8*Math.min(1,xb))*cpu(p).shot,0,1);   // composure: pressure saps shot accuracy -- every shot by his Final third composure (v209) -- (and DIFFICULTY, the computer's)
     // LONG SHOTS: shots from beyond the box edge lose pace and accuracy unless the dial is high.
     const dGoalAbs2 = Math.hypot(gx-ball.x, YC-ball.y);      // true distance to goal centre (wide shots travel further)
     const longRange = clamp((dGoalAbs2-330)/370, 0, 1);      // 0 at the box edge, full penalty by 700 out
@@ -9200,7 +9210,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     acc -= (0.10*fwd + 0.10*lenRisk + 0.16*(1-lane));         // forward/long/threaded -> worse
     acc=clamp(acc,0.6,1);
     // gentle angular error, scaled down so even risky passes mostly find a teammate
-    let aerr=passSpray(d, p, acc);
+    let aerr=passSpray(d, p, acc, mate);
     if(p.role==='DEF' && mate.role==='DEF') aerr*=0.45;      // defenders keep it tidy between themselves
     aerr+=turnSpray(p,dx,dy);                                 // (turned and played it at once: less true)
     const ca=Math.cos(aerr),sa=Math.sin(aerr);
@@ -9864,20 +9874,43 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     return clear;
   }
   // ===== COMPOSURE (performance under defensive pressure) =====
-  // pressFactor: how closed-down a player is by the nearest opponent. ~1 right on top, 0 when none within ~220u.
-  function pressFactor(p){
+  // PRESSURE (v209): how hemmed in a man is, 0 (nobody near) .. 1. Each man of theirs counts by how near he is -- full
+  // within pressIn, nothing past pressOut, in a straight line between -- and as if he were nearer by how fast he's closing
+  // on him (where he'll be pressLook s on, never more than pressClose px nearer: one man counted once, not again for his
+  // pace). The nearest counts in full; the next pressMore of his own, the one after pressMore of that, and so on, so more
+  // men are more pressure but less and less, and never past 1. A man on the ground or stumbling is none. Every touch,
+  // pass, cross, dribble and shot reads it (it was two: the nearest man alone for a pass or a shot, out to 8.8 m; the
+  // nearest closing for a touch, out to 5.6 m).
+  function pressureOn(p){
     if(!p||!p.team) return 0;
-    const o=nearestOppTo(p,p); if(!o) return 0;
-    return clamp(1-(dist(o,p)-40)/180, 0, 1);
+    const In=P.pressIn.val, Out=Math.max(In+1,P.pressOut.val), cs=[];
+    for(const o of players.concat(keepers)){
+      if(o.team===p.team||o.benched||o.state==='getup'||o.state==='stumble') continue;
+      const dx=p.x-o.x, dy=p.y-o.y, g=Math.hypot(dx,dy)||1; if(g>Out+P.pressClose.val) continue;
+      const closing=Math.max(0,((o.vx||0)*dx+(o.vy||0)*dy)/g), d=g-Math.min(P.pressClose.val,closing*P.pressLook.val);
+      const c=clamp(1-(d-In)/(Out-In),0,1); if(c>0) cs.push(c);
+    }
+    if(!cs.length) return 0;
+    cs.sort((a,b)=>b-a);
+    let free=1-cs[0], w=P.pressMore.val;
+    for(let i=1;i<cs.length;i++){ free*=1-w*cs[i]; w*=P.pressMore.val; }
+    return clamp(1-free,0,1);
   }
-  // COMPOSURE, WHERE HE IS (v163): his Composure in traffic in his own half and the middle, his Final third composure
-  // into theirs, and a blend of the two on the way in (as finalThirdOf goes, from 62% of the way up the pitch to 74%).
-  // Every place composure counted -- pressure on a pass, a shot or a touch, a touch in the final third -- reads this.
-  function composureAt(p){ const t=p&&p.team?finalThirdOf(p):0, c=statOf(p,'composure',P.composure.val); return t<=0?c:c+(statOf(p,'compFinal',P.compFinal.val)-c)*t; }
+  // COMPOSURE BY THE ACTION (v209): Composure in traffic for the ordinary things, anywhere on the pitch -- his first touch,
+  // a pass, his touches running with it -- and Final third composure for the big moments: the final pass into a scoring
+  // position, a cross into one (finalBall), and every shot. (v163-v208 it was by where he was: traffic in his own half
+  // and the middle, the final third's from 62% of the way up.) Both read the same pressure, and neither changes what a
+  // man decides. kind: 'final' or (anything else) traffic.
+  function composureStat(p,kind){ return kind==='final'?statOf(p,'compFinal',P.compFinal.val):statOf(p,'composure',P.composure.val); }
   // composureOf: the FRACTION of pressure a player shrugs off. stat 1 => 0.0 (full penalty), stat 10 => 0.9.
-  function composureOf(p){ return statLerp(composureAt(p), 0.0, 0.9); }
+  function composureOf(p,kind){ return statLerp(composureStat(p,kind), 0.0, 0.9); }
   // poiseLoss: net wobble under pressure, 0 (unaffected / in space / ice-cold) .. 1 (max). drives touch/pass/shot.
-  function poiseLoss(p){ return pressFactor(p)*(1-composureOf(p)); }
+  function poiseLoss(p,kind){ return pressureOn(p)*(1-composureOf(p,kind)); }
+  // a FINAL BALL (v209): a pass or a cross from p into a scoring position, going the way his side attacks -- into their
+  // box, or anywhere a shot would be worth finalXg or more (central, up to about 18 m out)
+  function finalBall(p,dest){ if(!(p&&p.team&&dest&&isFinite(dest.x)&&isFinite(dest.y))) return false; const gx=atkOf(p.team)>0?FW:0;
+    return (Math.abs(dest.x-gx)<PA_D&&Math.abs(dest.y-YC)<PA_HW)||obXg0(dest.x,dest.y,gx)>=P.finalXg.val; }
+  function passPoise(p,dest){ return poiseLoss(p,finalBall(p,dest)?'final':'traffic'); }
   // WHOSE BALL IT IS, for everyone off it: the man on it; else a dribbler whose touch is running on ahead of him (his
   // again in a stride or two); else a pass on its way to a team-mate -- the man it's for, while it's still coming to
   // him (a ball into space for him to run onto, until it should have reached the spot). Null when it's nobody's: a
@@ -10680,7 +10713,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     let dx=tx-ball.x, dy=ty-ball.y; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
     const lane=laneClearance(p,q), fwd=clamp(atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
     let acc=kickAccOf(p,d); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
-    const aerr=passSpray(d,p,acc)+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
+    const aerr=passSpray(d,p,acc,{x:tx,y:ty})+turnSpray(p,dx,dy), ca=Math.cos(aerr), sa=Math.sin(aerr);
     const R=arc?d/(2*Math.sin(arc.th/2)):0, H=arc?null:hook===undefined?thruHook(p,tx,ty,0,0):hook?hookArc(dx,dy,d,hook.th,hook.side):null, Lp=arc?R*arc.th:H?H.Ls:d;
     const v0=obThruV0(Lp,tA).v0*(1+obGauss()*statLerp(passStatAt(p,Lp),0.14,0.05));   // (over- or under-hit: 14% at the pass's stat 1, 5% at 10 -- v163: Short and Long passing by its length)
     if(arc){ const h=Math.atan2(dy,dx)+arc.side*arc.th/2+aerr;
@@ -10765,7 +10798,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     C.urge=obUrge(p,C);
     // his finishing against the table's average man (and from range, his long shots); his crossing, and who of ours
     // would be first to a cross
-    C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*statLerp(statOf(p,'compFinal',P.compFinal.val),0.94,1.06)*M.shoot;   // (v163: his Final third composure)
+    C.fin=statLerp(statOf(p,'shotAcc',P.shotAcc.val),0.82,1.18)*M.shoot;   // (v209: composure no longer makes him keener -- it's how well he does it, not what he does; v163-v208 Final third composure weighed in, 0.94 to 1.06)
     C.finLong=statLerp(statOf(p,'longShots',P.longShots.val),0.6,1.4)*M.longShot;
     C.crs=statLerp(statOf(p,'crossing',P.crossing.val),0.7,1.1); C.cAcc=crossAccOf(p);
     C.cs=C.u>FW*0.45?crossSpot(p):null;
@@ -10848,13 +10881,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     // struck as passTo will strike it: how far off line it may go, against how far the receiver can reach for it
     const lane=laneClearance(p,q), fwd=clamp(C.atk*(q.x-p.x)/500,0,1), lenRisk=clamp((d-260)/600,0,1);
     let acc=kickAccOf(p,d); acc+=(1-acc)*(1-fwd)*lane*0.9; acc-=0.10*fwd+0.10*lenRisk+0.16*(1-lane); acc=clamp(acc,0.6,1);
-    let amp=((1-acc)*0.06+(1-longAccOf(p,d))*clamp((d-250)/650,0,1)*0.45)*(1+poiseLoss(p)*0.9);
+    let amp=((1-acc)*0.06+(1-longAccOf(p,d))*clamp((d-250)/650,0,1)*0.45)*(1+passPoise(p,{x:tx,y:ty})*0.9);
     if(p.role==='DEF'&&q.role==='DEF') amp*=0.45;
     amp+=0.5*turnWorst(p,dx/(d||1),dy/(d||1));                         // (a ball he'd have to turn and play at once)
     const lat=d*Math.sin(amp), reachL=controlROf(q)+ball.r+(L.running?50:30);
     const pAcc=lat<=reachL?1:clamp(reachL/lat,0.2,1);
     // how close they'll be on him when it gets there
-    const nd=obNearAt(C.opps,tx,ty,Math.max(tE,tQ),C.atk,1), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q));
+    const nd=obNearAt(C.opps,tx,ty,Math.max(tE,tQ),C.atk,1), pCtl=1-0.3*clamp(1-(nd-30)/70,0,1)*(1-0.5*composureOf(q,'traffic'));
     const P_=safe*pAcc*pCtl;
     let v=obVal(p.team,tx,ty)*obRoom(nd);
     if(L.running||C.atk*(q.vx||0)>80) v*=1.08;                         // on the move: he can go at them straight away
@@ -13143,15 +13176,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function trapGrade(s){ return s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY'; }
   // PRESSURE on a touch: the nearest opponent -- where he'll be a moment from now, at the rate he's closing.
   // 0 = nobody within 5.6 m, 1 = a man right on him (inside 1.6 m)
-  function touchPressure(p){
-    let d=1e9;
-    for(const o of players.concat(keepers)){
-      if(o.team===p.team||o.benched||o.state==='getup') continue;
-      const dx=p.x-o.x, dy=p.y-o.y, g=Math.hypot(dx,dy)||1;
-      d=Math.min(d, g-Math.max(0,((o.vx||0)*dx+(o.vy||0)*dy)/g)*0.2);
-    }
-    return clamp(1-(d-40)/100,0,1);
-  }
+  function touchPressure(p){ return pressureOn(p); }   // (v209: the one pressure there is -- see pressureOn)
   // how far into the final third he is, going his own side's way: 0 short of it, 1 well into it
   function finalThirdOf(p){ const u=atkOf(p.team)>0?p.x:FW-p.x; return clamp((u/FW-0.62)/0.12,0,1); }
   // how hard this touch is: 0 = nobody near and it's at the back .. 1 = as hard as a first touch gets
@@ -13292,7 +13317,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
   // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
   function touchQuality(p,intercept){
-    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(composureAt(p)-1)/9;   // (v163: his composure where he is)
+    const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(composureStat(p,'traffic')-1)/9;   // (v209: his Composure in traffic, wherever he is -- v163-v208, his composure where he was)
     const D=touchDifficulty(p,intercept)+(intercept||inStride(p)?0:coneOff(p)*P.turnTouch.val), k=intercept?0.3*bc+0.7*cp:0.45*bc+0.55*cp;   // (v208: the edge of his cone or past it, on top of everything else -- pressed, it still tells, where the rest stops at as hard as it gets; v146: cutting one out, his composure most of all)
     let m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
     if(!intercept&&p===ball.intendedRcv) m+=CURL_EASE*thruCurlQ();   // (v165: a through ball bent for him: the cleaner to take)
@@ -13318,10 +13343,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   }
   let aiLastE=0;                             // the last AI press error, kept even when it missed (for the lab)
   function aiTrapTiming(p,intercept){        // an AI press error in seconds, or null when it misses it entirely
-    let oppD=1e9;
-    for(const o of players)if(o.team!==p.team){const dd=dist(o,p);if(dd<oppD)oppD=dd;}
-    const pressure=clamp(1-(oppD-40)/180,0,1);
-    let sd=statLerp(statOf(p,'ballControl',P.ballControl.val),0.065,0.028)*(1+0.7*pressure*(1-composureOf(p)))*P.aiTouch.val;
+    const pressure=pressureOn(p);   // (v209)
+    let sd=statLerp(statOf(p,'ballControl',P.ballControl.val),0.065,0.028)*(1+0.7*pressure*(1-composureOf(p,'traffic')))*P.aiTouch.val;
     if(intercept) sd*=1.3-0.5*interceptReachOf(p);   // cutting out someone else's pass is a stretch
     const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
     const e=trapSweet()+g*sd, W=trapWindowOf(p);
@@ -13608,13 +13631,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function dribBackOf(p){ return P.dribBack.val*dribK(p,0.6,1.6); }
   function runTouch(p,speed,cut){
     const q=dribQ(p), pen=1-dribSpeedPenOf(p), run=runSpeedOf(p)*pen, spr=sprintSpeedOf(p)*pen;
-    const pace=clamp((speed-0.3*run)/(0.7*run),0,1.4), even=Math.max(0,1+(Math.random()*2-1)*P.knockVar.val*0.45*dribK(p,1.3,0.4));
+    const shaky=1+P.pressDrib.val*poiseLoss(p,'traffic');   // (v209: pressure, less his Composure in traffic: less even, less sure of its line)
+    const pace=clamp((speed-0.3*run)/(0.7*run),0,1.4), even=Math.max(0,1+(Math.random()*2-1)*P.knockVar.val*0.45*dribK(p,1.3,0.4)*shaky);
     const lb=dribBackOf(p), sb=showsOf(lb), sk=showsOf(lb*STRIDE_SNAP);
     let X=0, Y=0;
     if(cut>0) X=P.dribTurn.val*cut*pace*Math.pow(1-q,1.2)*even;
     else { const flat=clamp((speed-run)/Math.max(1,spr-run),0,1), gain=clamp((speed-(p.touchSp||0))/Math.max(1,0.8*run),0,1);
       Y=(P.dribTouch.val*dribK(p,1.5,0.4)+P.dribSprint.val*Math.max(flat,gain)*Math.pow(1-q,1.3))*even/sk; p.touchSp=speed; }
-    p.carryAngle+=(Math.random()+Math.random()+Math.random()-1.5)*2*P.knockVar.val*(cut>0?0.25*Math.min(cut,1.2)*pace*Math.pow(1-q,1.2):0.08*(1-q));
+    p.carryAngle+=(Math.random()+Math.random()+Math.random()-1.5)*2*P.knockVar.val*(cut>0?0.25*Math.min(cut,1.2)*pace*Math.pow(1-q,1.2):0.08*(1-q))*shaky;
     const off=(p.touchOff||0)+X, kn=(p.touchKnock||0)+Y, out=off*sb+kn*sk;   // (how far out from his feet it would go)
     if(out>P.dribLoose.val&&ball.z<6){
       const dx=Math.cos(p.carryAngle), dy=Math.sin(p.carryAngle), along=Math.max(0,p.vx*dx+p.vy*dy), ue=escapePace(along,Math.min(ESC_MAX,out*ESC_RUN));
