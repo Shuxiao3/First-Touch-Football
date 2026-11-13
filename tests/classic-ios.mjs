@@ -73,8 +73,8 @@ for(const kind of Object.keys(pc.labs)){
   ok(!bad(all).length && a.intro === b.intro && a.cue === b.cue && a.auto === b.auto && !/<kbd/.test(a.chips) && /\btap\b/i.test(a.cue),
     'the ' + kind + ' lab: its first line and its tally the phone\'s on both pages, "tap ▶ ..." for the next ball, no key on a chip' + (bad(all).length ? ' (' + bad(all).join(', ') + ')' : ''));
 }
-ok(/^Tap <b>TRAP<\/b>/.test(pc.labs.trap.intro) && /^Tap <b>PASS<\/b>/.test(pc.labs.pass.hint) && /<b>Swipe<\/b>/.test(pc.labs.shoot.hint) && /^Start on <b>SKILL<\/b>/.test(pc.labs.dribble.hint) && /^Hold <b>CROSS<\/b>/.test(pc.labs.cross.hint),
-  'each lab starts with its button: tap TRAP, tap PASS, swipe (or hold SHOOT), start on SKILL, hold CROSS');
+ok(/^Flick on <b>SKILL<\/b>/.test(pc.labs.trap.intro) && /^Tap <b>PASS<\/b>/.test(pc.labs.pass.hint) && /<b>Swipe<\/b>/.test(pc.labs.shoot.hint) && /^Start on <b>SKILL<\/b>/.test(pc.labs.dribble.hint) && /^Hold <b>CROSS<\/b>/.test(pc.labs.cross.hint),
+  'each lab starts with its button: flick on SKILL (v212: the Trap Lab\'s touch is a match\'s -- it was tap TRAP), tap PASS, swipe (or hold SHOOT), start on SKILL, hold CROSS');
 const tuneBad = pc.tune.filter(t => bad(t).length), dialBad = pc.dials.filter(t => bad(t).length);
 ok(!tuneBad.length && !dialBad.length, 'the TUNE drawer\'s notes and the settings\' dials: no key, no mouse' + (tuneBad.concat(dialBad).length ? ' -- ' + tuneBad.concat(dialBad).join(' | ').slice(0, 300) : ''));
 

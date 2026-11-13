@@ -250,6 +250,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     minutes, the chances' xG 0.23 a minute both.
   - The dials (Settings): Off IQ: slow to see a run, timing the run, held onside by, keeping his lane, calling a run
     off, pressure to call it off.
+- **The Trap Lab, back; and the directional first touch, with the stick held (v212).**
+  - **TRAP LAB is back on the start menu,** first of the labs, taking the ball as a match does: your first touch your
+    own, a flick on SKILL to send it a way. No press to time, so no timing meter. Each ball reads out its touch, its
+    grade, the way it went against the way you flicked, and how soon he's on it again. See **Trap Lab**.
+  - **Flick, then hold the stick the way you flicked:** you still go to meet the ball, and your first touch takes it
+    that way. Before, holding the stick that way took you off the ball's line before it got to you, and it ran past
+    you -- 8 balls in 14, flicked 30° to 150° off its line, a 12 m and a 24 m pass at Ball control 5.5. Now none: all
+    14 taken within 15° of the flick, and on it again in 0.13 to 0.17 s. Leave the stick alone and you meet it, as
+    before; hold it well away from the flick (more than 100°) and it's yours to go where you like.
+  - A flick that ends just after he's taken it is still his first touch, off his foot, as before: the lab says so.
+  - The old timed press is gone from the lab too: its four dials, and the drag on TRAP's three, are off Settings.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -928,7 +939,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     short pass the ball is often there before the flick is done.
   - **While it comes, you open your body to it:** halfway round from the ball toward the way you flicked, but never
     more than 60° off the ball or off the way it's coming, so you're never turned away from it.
-  - **Leave the stick alone and you go to meet it.**
+  - **Leave the stick alone and you go to meet it** -- or hold it the way you flicked, as you would to go after the
+    ball (v212): you still go to meet it, and your first touch takes it that way; the stick's yours again once you've
+    touched it. Held that way before, it took you off the ball's line before it got to you, and it ran past you: 8
+    balls in 14 flicked 30° to 150° off its line, the stick then held that way. Now none, all taken within a few
+    degrees of the flick.
 
 - **Dribble Lab instead of Trap Lab.** You start on a mark with the ball and one defender ahead, and try to get
   past him. You have all five stars there, to practise every move. A run is called BEAT HIM once you're 1.8 m past him with the ball, or TACKLED, LOST IT, or TOO SLOW
@@ -2908,7 +2923,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       nine-tenths of it); exported, about a quarter of that. Three full slots are about 1.5 million characters:
       inside a phone browser's storage, though not by much, so a career you mean to keep is worth exporting.
 
-Drills and the labs still lock you to one player. The Trap Lab code is still in the file but has no menu entry. Everything else is unchanged, including the
+Drills and the labs still lock you to one player. The Trap Lab is back on the start menu (v212), taking the ball as a match does. Everything else is unchanged, including the
 AI and the stats. Changes to `index.html` aren't carried over to `classic.html` automatically.
 
 ## Controls
@@ -3143,6 +3158,19 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
 ## Trap Lab
 
+**Football Classic (v212):** TRAP LAB is back on the start menu, first of the labs, and takes the ball as a match does.
+There's no press to time, so no timing meter and no guide: your first touch is your own (Ball control, Composure, the
+moment), and a flick on SKILL as the ball comes, or just as it gets to you, sends it that way. Hold the stick the way
+you flicked and you still meet the ball. For every ball the result line gives the touch's grade, how much of its pace it
+kept and which way it went; for a flicked one, which way you flicked against which way it went (the arrows as they look
+on the screen) and whether your flick ended just after he'd taken it (off his foot); and how soon he's on it again.
+The tally counts the grades, the balls that ran past, and the flicked touches with how far off they went on average.
+The computer's man takes it with his own first touch, on a tally of his own. The chips are SERVE, PACE, LINE, NEXT,
+TIME, RECEIVER and ▶ SERVE. ⚙ TUNE (in developer mode) holds the first touch's dials: Ball control, the directional
+touch's push and aim error, the cone, the reach, the pace a touch keeps and the computer's touch. The old timed press
+is gone: its sweet spot, window, late tolerance and lockout, and the drag on TRAP, are off Settings. The rest of this
+section is the original game's Trap Lab.
+
 **TRAP LAB** on the start menu is a practice session for testing and tuning the first touch.
 A ball machine serves at you (or at an AI receiver) and the lab shows, for every ball:
 
@@ -3252,6 +3280,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v212: the Trap Lab, back; and the directional first touch, with the stick held.** TRAP LAB is on the start menu
+  again, taking the ball as a match does (no timed press): a flick on SKILL sends your first touch a way, and the lab
+  reads out each touch, its grade, the way it went against the way you flicked, and how soon you're on it again. And
+  the fix it was brought back for: flick, then hold the stick the way you flicked, and you still meet the ball -- it
+  used to take you off its line, and 8 balls in 14 ran past you; now none. New test: `tests/classic-traplab.mjs`. See
+  **The Trap Lab, back; and the directional first touch, with the stick held (v212)** and **Trap Lab**.
 - **v211: Off IQ on a run.** How a man reads a run off the ball is his Off IQ: how soon he sees one's on (and how
   narrow a gap, from how far off), when he goes -- with the man on the ball about ready to play it, so as to be over
   their line a beat after it's played, not before -- how far onside he waits, how well he keeps his lane as their line
