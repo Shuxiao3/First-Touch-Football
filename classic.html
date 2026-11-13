@@ -2562,10 +2562,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   if(isTouch) document.body.classList.add('touch');
 
   // ===== dials =====
-  const SETTINGS_V=74;
+  const SETTINGS_V=75;
   const P={
     friction:  {val:0.5, min:0.10,max:0.95,step:0.005,label:'Ball friction / carry',hint:'LOW = the ball keeps rolling and carries far (slower kicks reach further). HIGH = it drags to a stop quickly.'},
-    ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it: knocking it about at the back with nobody near, nearly everyone takes it cleanly; pressed, or in the final third, the touch is only as good as Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. (v208) And the cone in front of him that he takes it in: 120° in all at 1, 180° at 5, 210° at 10, round the way he faces (the Ball control dials below). Baseline for all players.'},
+    ballControl:{val:5.5,min:1,  max:10,  step:0.1, label:'Ball control (stat 1–10)',hint:'The first touch as a 1–10 stat, with Composure. There is no timing to it, but even with nobody near it is only as good as his Ball control and the ball let it be (v214): a soft ball easier, a firm one harder; pressed, or in the final third, it drops, the less the better his Ball control and Composure. Also the reach: 1 = 18, 10 = 32 (where you first meet the ball, and take it back after a touch), and the fastest ball you can strike first-time cleanly: 400 to 700. (v208) And the cone in front of him that he takes it in: 120° in all at 1, 180° at 5, 210° at 10, round the way he faces (the Ball control dials below). Baseline for all players.'},
     compFinal:{val:5.5,min:1,  max:10,  step:0.1, label:'Final third composure (stat 1–10)',hint:'(v209) How well he plays the big moments under pressure: the final pass into a scoring position, a cross into one, and every shot, wherever he is. 1 = pressure bites in full; 10 = he shrugs off 90% of it. (v163-v208 it was his composure anywhere from 62% of the way up the pitch, and it made him keener to shoot: it no longer changes what he decides.)'},
     composure:{val:5.5,min:1,  max:10,  step:0.1, label:'Composure in traffic (stat 1–10)',hint:'(v209) How well a player does the ordinary things under pressure, anywhere on the pitch: his first touch, his passing (all but the final ball into a scoring position: Final third composure), his touches running with it. In space it changes next to nothing. 1 = pressure bites in full (heavy touches, sprayed passes, loose touches); 10 = shrugs off ~90% of pressure and plays almost as cleanly as if unmarked.'},
     // (v209) PRESSURE: how hemmed in a man on the ball is, from every man of theirs near him -- how near, how fast he's
@@ -2686,7 +2686,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     trapPop:  {val:1,min:0,max:2.5,step:0.05,label:'Trap: bounce pop ×',hint:'How high the ball hops off the touch. A bad touch always pops higher than a good one; this scales both.'},
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap Lab: re-press lockout (s)',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.',gone:true},
     // directional first touch (touch screens): press TRAP and drag the way you want the ball to go
-    ftPush:   {val:55,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (a flick on SKILL as the ball comes, in a match or the Trap Lab). Running along your aim adds your own pace on top, so the ball stays just ahead of you.'},
+    ftPush:   {val:100,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (a flick on SKILL as the ball comes, in a match or the Trap Lab). Running along your aim adds your own pace on top. It is away from him till he has caught it up (v214: about 2 m ahead of him going after it, and on it again in about 0.6 s at Ball control 5.5; it was 55, and his again a fifth of a second on).'},
     ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed.'},
     ftTurn:   {val:1,min:0,max:1.6,step:0.05,label:'First touch: turn difficulty',hint:'How much turning the ball (aiming away from where it would bounce off you anyway) narrows the timing window. 1 = a full turn halves it on a 450 ball, and quicker balls are harder to turn. 0 = every direction is as easy as the next.',gone:true},
     ftWin:    {val:0.2,min:0.05,max:0.5,step:0.01,label:'First touch: drag window (s)',hint:'How long after your finger lands on TRAP a drag still aims the touch. The press itself is timed from the moment your finger lands; drag before the ball gets to you, or just after, and the touch goes that way.',gone:true},
@@ -3006,6 +3006,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         if(v<73){ if(P.trapKeepBad.val===0.7) P.trapKeepBad.val=0.63; }   // a botched touch runs a little less far
         if(v<74){ if(P.aiTouch.val===1.1) P.aiTouch.val=1; if(P.trapKeepGood.val===0.12) P.trapKeepGood.val=0.06;   // the first touch is the player's own now (no timing):
                   if(P.trapKeepBad.val===0.63) P.trapKeepBad.val=0.45; if(P.gatherR.val===28) P.gatherR.val=20; }    // a kinder bounce, and a smaller reach to gather it in
+        if(v<75){ if(P.ftPush.val===55) P.ftPush.val=100; }   // (v214) a directional first touch pushed into space, away from him till he's caught it up
         }
         applyPrefs();                    // the player's own settings win over anything saved with the dials
         if(o.__fG){ if(FORM_GONE[formWas9(o.__fG)]) goneForm.G=formWas9(o.__fG); myForm=formOKAtk(o.__fG,myForm); }
@@ -5313,6 +5314,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const ang=Math.atan2(a.y,a.x)+err, out=Math.max(push*(1+0.8*(1-s)*(1-s)),floor);
     ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow; p.noTouchT=0.12+0.15*(1-s);
     ball.vx=Math.cos(ang)*out; ball.vy=Math.sin(ang)*out; ball.z=1; ball.vz=30+60*(1-s);
+    ball.dribEsc={p, t:simNow, dx:Math.cos(ang), dy:Math.sin(ang), ft:true};   // (v214: pushed into space -- he can't have it back till he's caught it up, as a touch of his that gets away: escaping -- and then only at his feet: FT_TAKE. It was his again as soon as it was in his reach, a fifth of a second on)
+    if(ball.z<WAIST){ const d0=p.r+ball.r+4; ball.x=p.x+Math.cos(ang)*d0; ball.y=p.y+Math.sin(ang)*d0; }   // (v214: off his foot on the side it's going -- it started in front of him, the way he faced to meet it, and a ball sent on behind him spent its push getting past him)
     if(up){ ball.x=bx; ball.y=by; ball.z=z0; ball.vz=20+40*(1-s); }   // off his chest or thigh, from where he met it
     if(LAB.on){ const off=Math.acos(clamp(Math.cos(ang)*a.x+Math.sin(ang)*a.y,-1,1))*180/Math.PI;   // (v212: the Trap Lab -- where you flicked it against where it went)
       labOnTouch(p,s,null,{sp:inSp,keep:out/Math.max(1,inSp),u:0,dx:inSp>1?ivx/inSp:0,dy:inSp>1?ivy/inSp:0,z:z0,aim:{aim:{x:a.x,y:a.y},aimErr:off}},true); }
@@ -5933,7 +5936,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     trapKeepBad:'Pace kept at the very edge of the window. Never above 100%.',
     trapPop:'How high the ball hops off the touch.',
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
-    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). A flick on SKILL as the ball comes, or as it gets to you.',
+    ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). It is away from him till he has caught it up. A flick on SKILL as the ball comes, or as it gets to you.',
     ftErr:'How far off your aim a directional touch strays at the worst timing.',
     ftTurn:'How much turning the ball narrows the window. 0 = every direction is as easy.',
     ftWin:'How long after your finger lands a drag still aims the touch (before the ball gets to you, or just after).',
@@ -7151,7 +7154,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // feet: the magnet only steers him.
   const MAG_R=2.6*MK, MAG_K=[0.25,0.6], MAG_FAST=380;
   function magnetPull(p,ix,iy){
-    if(!p||ball.ownedBy||gkHold||ball.z>=24||p.state!=='normal'||skillOf(p)||LAB.on) return null;
+    if(!p||ball.ownedBy||gkHold||ball.z>=24||p.state!=='normal'||skillOf(p)||(LAB.on&&LAB.kind!=='trap')) return null;   // (v214: in the Trap Lab too, as in a match -- a touch comes off him there now)
     if(ball.shotT>0||ball.crossT>0) return null;                                        // (a shot or a cross on its way)
     const r=ball.intendedRcv; if(r&&r!==p&&ball.lastTouch===r.team) return null;        // (a pass on its way to someone else)
     if(ball.dribbler&&ball.dribbler!==p&&ball.dribbleGrace>0) return null;              // (someone else's knock-on: his, or one of theirs in his stride)
@@ -13233,7 +13236,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // harder the longer it's come and if it's come back to him: passLenD)
   function touchDifficulty(p,intercept){
     let D=1-(1-touchPressure(p))*(1-0.6*finalThirdOf(p));
-    D+=clamp((Math.hypot(ball.vx,ball.vy)-450)/1250,0,0.2)+(ball.z>=12?0.12:0);   // a hard-hit ball, or one in the air
+    D+=(ball.z>=12?0.12:0);   // a ball in the air (v214: a hard-hit one's pace counts in touchQuality, from any pace -- it was only over 20 m/s, here)
     if(intercept) D=Math.max(D,ICP_D)+0.15*(1-interceptReachOf(p));             // cutting out their pass is a stretch (v146: from 0.55)
     else D+=(inStride(p)?offSquare(p)*P.turnTouch.val:0)+passLenD(p);   // a man through on a ball in his stride not turned to it (it's on him from behind: how far he's turned from it, as for everyone before v208 -- see touchQuality for Ball control's cone), and v146: a long one, or one played back to him (passLenD)
     return clamp(D,0,1);
@@ -13245,7 +13248,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // CUTTING ONE OUT (v146): a man taking their pass is reacting to it, at a stretch -- his touch is the worse for it,
   // 0.08 off at Composure 10 to 0.24 at 1, and less sure (ICP_SD the spread): a composed man still takes it clean more
   // often than not, a nervy one loose. It was rarely loose and never heavy.
-  const ICP_DROP=[0.08,0.16], ICP_SD=1.3;
+  const ICP_DROP=[0.12,0.12], ICP_SD=0.7;   // (v214: 0.08 and 0.16, 1.3 -- on v214's touch, cutting one out comes out much as it did: 8 in 100 PERFECT, 41 LOOSE or HEAVY, where it was 9 and 42)
   function passLenD(p){ const f=ball.passFrom; if(!f||f.team!==p.team||f.by===p||ball.lastTouch!==p.team) return 0;
     const len=Math.hypot(p.x-f.x,p.y-f.y)/MK, back=atkOf(p.team)*(f.x-p.x)>3*MK;
     return PASS_LEN_D*clamp((len-15)/25,0,1)+(back?BACK_D:0); }
@@ -13363,14 +13366,21 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
     if(LAB.on&&LAB.kind==='cross'&&LAB.rep&&LAB.rep.cross) crossLabFinish('blocked');
   }
-  // the touch, 0..1 (trapGrade). Easy, it's near-perfect whatever his stats (Ball control adds a little); the
-  // harder it gets, the more it comes down to Ball control and Composure -- and the wider the spread.
+  // the touch, 0..1 (trapGrade). (v214) BALL CONTROL FIRST, AND THE BALL'S PACE: even with nobody near him, it's only as
+  // good as his Ball control and the ball let it be -- a soft ball easier, a firm one harder (TQ_PACE) -- and the harder
+  // it gets (pressure, the final third, his cone's edge: touchDifficulty), the further it drops, the less the more
+  // composed and the better his Ball control. Before v214 an easy one was all but perfect whatever his stats: 93 in
+  // 100 of a side's own touches with nobody near PERFECT in a match, and the Trap Lab's every ball.
+  const TQ_BASE=0.59, TQ_BC=0.28, TQ_CP=0.03, TQ_DROP=[0.24,0.24], TQ_SD=[0.18,0.03,0];   // (the touch with nobody near: 0.59 at Ball control 1, 0.87 at 10, give or take TQ_SD -- less sure the worse he is)
+  const TQ_PACE={mid:400, slow:0.10, fast:0.14};
+  const TQ_CONE=0.2;   // (the edge of his cone, or past it -- turnTouch at the edge, twice it at his Back to it angle: 0.05 off the touch at the edge, pressed or not)   // (a ball at 400 px/s -- 18 m/s, a firm pass -- as it is; one at 100 or less 0.10 the easier, one at 800 or more 0.14 the harder)
+  function touchPaceOf(sp){ return TQ_PACE.slow*clamp((TQ_PACE.mid-sp)/300,0,1)-TQ_PACE.fast*clamp((sp-TQ_PACE.mid)/400,0,1); }
   function touchQuality(p,intercept){
     const bc=(statOf(p,'ballControl',P.ballControl.val)-1)/9, cp=(composureStat(p,'traffic')-1)/9;   // (v209: his Composure in traffic, wherever he is -- v163-v208, his composure where he was)
-    const D=touchDifficulty(p,intercept)+(intercept||inStride(p)?0:coneOff(p)*P.turnTouch.val), k=intercept?0.3*bc+0.7*cp:0.45*bc+0.55*cp;   // (v208: the edge of his cone or past it, on top of everything else -- pressed, it still tells, where the rest stops at as hard as it gets; v146: cutting one out, his composure most of all)
-    let m =(0.86+0.07*bc+0.02*cp)*(1-D)+(0.34+0.60*k)*D;
+    const D=touchDifficulty(p,intercept), cone=intercept||inStride(p)?0:coneOff(p)*P.turnTouch.val, k=intercept?0.3*bc+0.7*cp:0.45*bc+0.55*cp;   // (v208: the edge of his cone or past it, on top of everything else -- pressed, it still tells; v214: a cost of its own, TQ_CONE; v146: cutting one out, his composure most of all)
+    let m=TQ_BASE+TQ_BC*bc+TQ_CP*cp+touchPaceOf(Math.hypot(ball.vx,ball.vy))-D*(TQ_DROP[0]-TQ_DROP[1]*k)-cone*TQ_CONE;   // (v214: pressed, from 0.24 off at Ball control and Composure 1 to nothing at 10 -- about as hard as it was before v214 under pressure, from a lower start)
     if(!intercept&&p===ball.intendedRcv) m+=CURL_EASE*thruCurlQ();   // (v165: a through ball bent for him: the cleaner to take)
-    let sd=((0.085-0.035*bc)*(1-Math.min(D,1))+(0.16-0.07*k)*Math.min(D,1))*P.aiTouch.val*(intercept||inStride(p)?1:1+P.coneSpread.val*coneOff(p));   // (v208: less sure toward the edge of his cone)
+    let sd=(TQ_SD[0]-TQ_SD[1]*bc+TQ_SD[2]*Math.min(D+cone,1))*P.aiTouch.val*(intercept||inStride(p)?1:1+P.coneSpread.val*coneOff(p));   // (v208: less sure toward the edge of his cone)
     if(intercept){ m-=ICP_DROP[0]+ICP_DROP[1]*(1-cp)+CURL_TOUCH*thruCurlQ(); sd*=ICP_SD; }   // (v146: cutting their pass out, a touch the worse -- the less composed, the worse again: CUT_OUT; v165: a curling through ball, the worse again)
     const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
     return clamp(m+g*sd,0,1);
@@ -13453,7 +13463,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     ball.z=Math.max(ball.z,1);
     endCurve();
     ball.cushBy=null; ball.lastTouch=p.team;
-    ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow;   // still your ball: it's yours again once it's in your reach (see attemptCaptures; touchAt: v180, FT_THRU_T)
+    ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow; ball.touchS=s; ball.touchSAt=simNow;   // still your ball: it's yours again once it's in your reach (see attemptCaptures; touchAt: v180, FT_THRU_T; touchS: v214, CLEAN_CREDIT)
     p.noTouchT=0.12+0.2*(1-s);
     // a computer player doesn't know where its touch went any sooner than you would (see the AI step)
     if(p!==controlled) p.touchLagT=P.aiReact.val*statLerp(statOf(p,'agility',P.agility.val),1.25,0.75)*cpu(p).react;
@@ -13540,8 +13550,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       // GATHER: a ball that's yours (your own touch or knock-on), or a dead one, is collected once it's in your
       // reach. A trap comes off you at the gather radius and you can't take it back for a moment (noTouchT,
       // longer after a worse touch): a good touch is at your feet straight away, a heavy one has got away.
-      const mine=ball.dribbler===p&&ball.dribbleGrace>0;
-      if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<controlROf(p)+ball.r&&!(mine&&escaping(p))){   // (v208: his touch that's got away, still running on from him: not yet)
+      const mine=ball.dribbler===p&&ball.dribbleGrace>0, ftOut=mine&&ftPushed(p);   // (v214: his directional touch, pushed into space: his again at his feet, FT_TAKE -- not anywhere in his reach)
+      if((mine||(ballSp<DEAD_BALL&&ball.z<6))&&gap<(ftOut?FT_TAKE:controlROf(p))+ball.r&&!(mine&&escaping(p))){   // (v208: his touch that's got away, still running on from him: not yet)
         if(checkOffsideTouch(p))return;
         endCurve(); gather(p);                     // (v208: taken where it is, and brought in -- it used to jump to his feet)
         return;
@@ -13598,7 +13608,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;ball.selfLob=null;
     p.touchLagT=0;
     ball.dribEsc=null; p.touchOff=0; p.touchKnock=0; p.touchSp=psp; p.cutVa=null; p.cutAcc=0;   // (v208: at his feet -- see gather and runTouch)
-    if(!wasOwner&&(!reGather||(ball.touchAt!=null&&simNow-ball.touchAt<1.5&&p.settleTouch!==ball.touchAt))){ p.settleT=simNow; p.prepT=simNow; p.settleTouch=reGather?ball.touchAt:null; }   // (v210: a fresh ball -- a pass, his first touch, a loose one: settle it, then get a pass ready; once a touch, not again each time he gathers his own knock-on)
+    if(!wasOwner&&(!reGather||(ball.touchAt!=null&&simNow-ball.touchAt<1.5&&p.settleTouch!==ball.touchAt))){ const cr=reGather&&ball.touchSAt===ball.touchAt&&ball.touchS>0.55?Math.min(simNow-ball.touchAt,CLEAN_CREDIT):0;   // (v214: a CLEAN touch taken back -- he's been on it since the touch, up to CLEAN_CREDIT: as a PERFECT one, dead at his feet, counts from it)
+      p.settleT=simNow-cr; p.prepT=simNow-cr; p.settleTouch=reGather?ball.touchAt:null; }   // (v210: a fresh ball -- a pass, his first touch, a loose one: settle it, then get a pass ready; once a touch, not again each time he gathers his own knock-on)
     if(!wasOwner){
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
         actQ=null; swipeShot=null; } }                       // a fresh ball (a pass, a restart, a lab serve): a press waiting on the last one doesn't carry over
@@ -13711,6 +13722,16 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     p.touchOff=off; p.touchKnock=kn;
     return false;
   }
+  // A DIRECTIONAL FIRST TOUCH (v214), pushed into space: once he's caught it up he takes it at his feet -- within FT_TAKE of
+  // his middle, the gather radius and a little -- not anywhere in his reach, the ring round him: a good touch from a man
+  // with a big reach would be his again from a stride and a half off, and look as if it had never left him. For as long as
+  // it's his touch (FT_TAKE_T).
+  const FT_TAKE=26, FT_TAKE_T=1.5;
+  function ftPushed(p){ const E=ball.dribEsc; return !!(E&&E.ft&&E.p===p&&simNow-E.t<FT_TAKE_T); }
+  // A CLEAN TOUCH, TAKEN BACK (v214): the ball a step off him, his again a moment later -- he's been on it since the touch,
+  // so his settle and the pass he's getting ready count from it, up to CLEAN_CREDIT, as a PERFECT one's do. (A LOOSE or
+  // HEAVY one he has to go and get, and a directional one he runs onto, count from when he has it.)
+  const CLEAN_CREDIT=0.35;
   // his touch that's got away is still running on from him: he can't have it back till he's caught it up (v208)
   function escaping(p){ const E=ball.dribEsc; if(!E||E.p!==p||simNow-E.t>0.9) return false;
     return (ball.vx-p.vx)*E.dx+(ball.vy-p.vy)*E.dy>12; }   // (still going away from him the way it was pushed)

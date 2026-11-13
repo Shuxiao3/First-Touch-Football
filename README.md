@@ -17,18 +17,22 @@ The same game played like any other football game, and nine a side since v124: e
 is still seven and a keeper). It's a copy of `index.html` with two changes:
 
 - **The first touch is the player's own.** There's nothing to time, for you or the computer. As the ball reaches a
-  man, his touch is judged from his Ball control and Composure, and how much they matter depends on the moment.
-  Knocking it about at the back with nobody near, nearly anyone takes it cleanly: a defender rated 3 for both is clean
-  or better every time, and perfect most of it. Pressure is every man of theirs near him (v209: see **Pressure, and
-  composure by the action**; it was the nearest alone, closer still if he was closing in, full inside 1.6 m and none
-  beyond 5.6 m). Under pressure or in the final third, the touch is only as good as the player.
-  Measured over exhibition matches, with everyone given the same stats:
+  man, his touch is judged from his Ball control and Composure, the ball's pace, and the moment. Even with nobody near
+  it's only as good as his Ball control (v214): a defender rated 3 for both takes about three in four clean or better
+  and one in five PERFECT; one rated 8, nearly every one clean and more than half PERFECT. A soft ball is easier, a
+  firm one harder. Pressure is every man of theirs near him (v209: see **Pressure, and composure by the action**; it
+  was the nearest alone, closer still if he was closing in, full inside 1.6 m and none beyond 5.6 m). Under pressure
+  or in the final third the touch drops from there, the less the better his Ball control and Composure.
+  With everyone given the same stats, a ball at 18 m/s, he facing it (v214):
 
   | Ball control / Composure | At the back, nobody near | Under pressure | Final third |
   | --- | --- | --- | --- |
-  | 3 / 3 | 100% clean or better (85% perfect) | 33% | 46% |
-  | 5.5 / 5.5 | 100% (97% perfect) | 85% | 89% |
-  | 8 / 8 | 100% (100% perfect) | 100% | 100% |
+  | 3 / 3 | 72% clean or better (21% perfect) | 34% | 50% |
+  | 5.5 / 5.5 | 88% (38% perfect) | 67% | 77% |
+  | 8 / 8 | 97% (59% perfect) | 93% | 95% |
+
+  Before v214 an easy ball was near-perfect whatever his stats: clean or better every time at the back with nobody
+  near, 85% to 99% PERFECT (and under pressure 31%, 76% and 100%; in the final third 76%, 97% and 100%).
 
   The grades are PERFECT, CLEAN, LOOSE and HEAVY (the game no longer shows them; you see the touch itself).
   - A PERFECT touch along the grass is dead at his feet.
@@ -284,6 +288,31 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     3-2-3 (2) in itself when its side gegenpresses, else 3-4-1, or 4-3-1 sitting deep.
   - **A side kept for an exhibition club in 3-1-2-2 or 3-2-2-1** is dealt afresh once for the shape's new spots, as
     one kept for a club set another way on the sheet is (v202). Every other club's kept side stays as you left it.
+- **The first touch only as good as the man, and a directional touch into space (v214).**
+  - **Not every ball PERFECT.** Even with nobody near, a first touch is only as good as the man's Ball control and the
+    ball let it be: a soft ball is easier, a firm one harder. Before, an easy ball was all but perfect whatever his
+    stats: in a match 93 in 100 of a side's own touches with nobody near came out PERFECT, and in the Trap Lab nearly
+    every ball did. Now, on a ball at 20 m/s with nobody near, a Ball control 5.5 man (the Trap Lab's own) takes about
+    a third PERFECT, half CLEAN and one in seven LOOSE; one rated 10, two in three PERFECT; one rated 1, one in eight.
+  - **Under pressure, and in the final third,** it drops from there, the less the better his Ball control and
+    Composure, much as before: about as hard as it was for a poor player, a little harder for a good one (see **The
+    first touch is the player's own**). Cutting out their pass comes out as it did.
+  - **In a match** (computer against computer): a side's own touches 48% PERFECT, 40% CLEAN and 12% LOOSE or worse,
+    where they were 73%, 25% and 2%. Passes and turnovers near enough as they were (29.5 and 7.2 a minute, 29.2 and
+    6.7 before), goals about as many (0.31 a minute, 0.32), but fewer shots: 0.51 a minute where it was 0.91 -- an
+    attack gets to a shot less often when not every touch is dead at a man's feet (over 65 and 95 minutes).
+  - **A CLEAN touch, taken back a moment later, counts as received from the touch:** his settle and the pass he's
+    getting ready start from it, as a PERFECT one's do, up to a third of a second. Without that, every CLEAN touch
+    cost a man a fifth of a second before he could play it. A LOOSE or HEAVY one he has to go and get, and a
+    directional one he runs onto, count from when he has it.
+  - **A directional first touch is pushed into space.** A flick on SKILL as the ball comes sends it out ahead of him,
+    and he can't have it back until he's caught it up and it's at his feet. It used to be his again a fifth of a
+    second after the touch, while it was still inside his reach ring (his Ball control), so it never really went
+    anywhere. Now it gets about 2 m from him as he goes after it, and he's on it again in about half a second, whatever
+    his Ball control. It also leaves his foot on the side it's going: it started in front of him, the way he faced to
+    meet it, and a ball sent on behind him spent its push getting past him. The push dial is 100 (it was 55).
+  - **The Trap Lab:** taken as they come, its balls show the spread; a touch that comes off him, he goes to get with
+    the stick left alone, as in a match (the magnet works in the Trap Lab now).
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -949,7 +978,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   top of it gets away from you, and a man close by can get at it.
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
-  arrives, by the First touch push dial (your own pace along it is added).
+  arrives, by the First touch push dial (your own pace along it is added). It's pushed into space (v214): it leaves
+  your foot on the side it's going and you can't have it back until you've caught it up and it's at your feet -- about
+  2 m from you as you go after it, and on it again in about half a second. (It was yours again a fifth of a second on,
+  still inside your reach ring, and hardly went anywhere; the push dial is 100, it was 55.)
   - **Any ball on its way to you arms it:** one played to you, one led into space ahead of you, or one whose path runs
     within 6 m of you, from as far as 40 m off. It stays armed until the ball gets to you, or someone else touches it.
     (It used to need the ball heading straight at you from within 15 m, unless you'd left the stick alone since the
@@ -3183,6 +3215,11 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
 ## Trap Lab
 
+**Football Classic (v214):** taken as they come, the touch is only as good as the man: at the lab's Ball control 5.5,
+about a third PERFECT, half CLEAN and one in seven LOOSE on a 20 m/s ball (it was nearly every one PERFECT). A touch
+that comes off him, he goes to get with the stick left alone, as in a match (the magnet works in the Trap Lab). A
+flicked touch is pushed into space, about 2 m from him before he's on it again.
+
 **Football Classic (v212):** TRAP LAB is back on the start menu, first of the labs, and takes the ball as a match does.
 There's no press to time, so no timing meter and no guide: your first touch is your own (Ball control, Composure, the
 moment), and a flick on SKILL as the ball comes, or just as it gets to you, sends it that way. Hold the stick the way
@@ -3305,6 +3342,14 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v214: the first touch only as good as the man, and a directional touch into space.** Even with nobody near, a
+  first touch is only as good as the man's Ball control and the ball's pace (a Ball control 5.5 man takes a 20 m/s
+  ball about a third PERFECT, where nearly every one was), and under pressure much as before. A directional first
+  touch is pushed into space and is his again only once he's caught it up and it's at his feet (about 2 m from him,
+  half a second; it was his again a fifth of a second on). A CLEAN touch, taken back, counts as received from the touch.
+  In a match, goals about as many, fewer shots. The magnet works in the Trap Lab. New checks in
+  `tests/classic-traplab.mjs`; `classic-touch`, `classic-cutout` read v214's touch. See **The first touch only as
+  good as the man, and a directional touch into space (v214)**.
 - **v213: copies of a shape.** The formations as set on the Signature Players sheet: five copies -- 3-3-2 (2),
   3-2-3 (2), 3-2-1-2 (2), 4-3-1 (2) and 4-1-2-1 (2), each a shape's lines with its spots set another way, on the menus
   after the one it's a copy of -- and 3-1-2-2's DM and 3-2-2-1's two CMs. A copy plays by its spots: three central men

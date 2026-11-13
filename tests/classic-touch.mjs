@@ -56,12 +56,15 @@ const odds = (u, man, bc, cp, n = 800, back = false) => page.evaluate(({ u, man,
   p.stats = keep; return out; }, { u, man, bc, cp, n, back });
 const pc = v => Math.round(v * 100) + '%';
 await page.evaluate(() => window.__T.freeze());
-const backPoor = await odds(0.25, 0, 3, 3), backPoorPressed = await odds(0.25, 30, 3, 3), backGoodPressed = await odds(0.25, 30, 9, 9);
-info('at the back: ' + JSON.stringify({ backPoor, backPoorPressed, backGoodPressed }));
+const backPoor = await odds(0.25, 0, 3, 3), backPoorPressed = await odds(0.25, 30, 3, 3), backGoodPressed = await odds(0.25, 30, 9, 9), backGood = await odds(0.25, 0, 9, 9);
+info('at the back: ' + JSON.stringify({ backPoor, backGood, backPoorPressed, backGoodPressed }));
 ok(backPoor.pressure === 0 && backPoor.third === 0, 'the scene: at the back with nobody within 6 m (pressure ' + backPoor.pressure + ')');
-ok(backPoor.clean >= 0.97 && backPoor.perfect >= 0.7 && backPoor.heavy === 0, 'a poor defender (Ball control 3, Composure 3) at the back with nobody near: clean or better ' + pc(backPoor.clean) + ', perfect ' + pc(backPoor.perfect));
+// (v214: with nobody near it's only as good as he is -- before, a poor defender took nearly every one PERFECT, and the
+// Trap Lab's every ball was)
+ok(backPoor.clean >= 0.6 && backPoor.clean <= 0.86 && backPoor.perfect <= 0.35 && backPoor.heavy <= 0.04, 'a poor defender (Ball control 3, Composure 3) at the back with nobody near: only as good as he is -- clean or better ' + pc(backPoor.clean) + ', PERFECT ' + pc(backPoor.perfect) + ' (v214: it was nearly every one PERFECT)');
+ok(backGood.perfect >= 0.55 && backGood.clean >= 0.95 && backGood.perfect >= backPoor.perfect + 0.3, '...a good one (9, 9): PERFECT ' + pc(backGood.perfect) + ', clean or better ' + pc(backGood.clean));
 ok(backPoorPressed.pressure === 1 && backPoorPressed.clean <= 0.6, '...with a man 1.2 m off him: clean or better only ' + pc(backPoorPressed.clean));
-ok(backGoodPressed.clean >= 0.95, 'a good one (9, 9) with the same man on him: still clean or better ' + pc(backGoodPressed.clean));
+ok(backGoodPressed.clean >= 0.8 && backGoodPressed.clean >= backPoorPressed.clean + 0.4 && backGoodPressed.perfect < backGood.perfect, 'a good one (9, 9) with the same man on him: still clean or better ' + pc(backGoodPressed.clean) + ' -- though fewer PERFECT than with nobody near (' + pc(backGoodPressed.perfect) + ', ' + pc(backGood.perfect) + '): pressure costs the best a little (v214)');
 const thirdPoor = await odds(0.8, 0, 3, 3), thirdGood = await odds(0.8, 0, 9, 9);
 info('the final third, nobody near: ' + JSON.stringify({ thirdPoor, thirdGood }));
 ok(thirdPoor.third === 1 && thirdPoor.pressure === 0, 'the scene: well into the final third, nobody near');
@@ -74,7 +77,7 @@ ok(bcHi.clean - bcLo.clean >= 0.2, 'so does Ball control (2: ' + pc(bcLo.clean) 
 // fewer perfect, and a worse touch on average (not fewer clean or better: square to it that's every one, and turned all
 // but a few in a thousand, so 800 tries came out level about one time in twenty)
 const backTurned = await odds(0.25, 0, 3, 3, 800, true);
-ok(backTurned.perfect <= backPoor.perfect - 0.25 && backTurned.mean <= backPoor.mean - 0.05, 'his back to the ball as it gets to him, the same man takes it worse: perfect ' + pc(backTurned.perfect) + ' (square to it ' + pc(backPoor.perfect) + '), his touch ' + backTurned.mean + ' on average (' + backPoor.mean + '), clean or better ' + pc(backTurned.clean));
+ok(backTurned.mean <= backPoor.mean - 0.08 && backTurned.clean <= backPoor.clean - 0.15, 'his back to the ball as it gets to him, the same man takes it worse: perfect ' + pc(backTurned.perfect) + ' (square to it ' + pc(backPoor.perfect) + '), his touch ' + backTurned.mean + ' on average (' + backPoor.mean + '), clean or better ' + pc(backTurned.clean));
 
 // NO TIMING: a ball rolled to a man is taken as it arrives, nothing pressed. The spread off (First-touch spread 0), so
 // each touch is the likely one: PERFECT at the back with nobody near (dead at his feet); with a man on him in the final
@@ -290,12 +293,13 @@ const airTouch = (bc, z, n) => page.evaluate(({ bc, z, n }) => new Promise(res =
     if(out.length >= n){ m.stats = keep; return res(out); }
     requestAnimationFrame(tick);
   })(); }), { bc, z, n });
-const chest10 = await airTouch(10, 27, 6), chest1 = await airTouch(1, 27, 6), knee10 = await airTouch(10, 15, 3);
+const chest10 = await airTouch(10, 27, 6), chest1 = await airTouch(1, 27, 6), knee10 = await airTouch(10, 15, 6);
 const mean = a => +(a.reduce((s, t) => s + (t.keep || 0), 0) / a.length).toFixed(2);
 info('above the waist: ' + JSON.stringify({ chest10, chest1, knee10 }));
 ok(chest10.every(t => t.grade !== 'none' && t.grade !== 'PERFECT' && t.keep >= 0.15 && t.z > 12), 'chest high at Ball control 10: never PERFECT, it comes off him a little (' + chest10.map(t => t.grade + ' ' + t.keep).join(', ') + ' of its pace), from his chest');
 ok(chest1.every(t => t.grade !== 'none' && t.grade !== 'PERFECT' && t.keep >= 0.4) && mean(chest1) >= 2 * mean(chest10), '...at Ball control 1, a long way (' + mean(chest1) + ' of its pace on average, ' + mean(chest10) + ' at 10)');
-ok(knee10.every(t => t.grade === 'PERFECT' && t.keep < 0.1), 'knee high, below the waist, Ball control 10 still kills it (' + knee10.map(t => t.grade + ' ' + t.keep).join(', ') + ')');
+ok(knee10.every(t => t.grade === 'PERFECT' || t.grade === 'CLEAN' || t.grade === 'LOOSE') && knee10.filter(t => t.grade === 'LOOSE').length <= 1 && knee10.filter(t => t.grade === 'PERFECT').length >= 2 && knee10.filter(t => t.grade === 'PERFECT').every(t => t.keep < 0.1),
+  'knee high, below the waist, a PERFECT touch is to be had: Ball control 10 kills it dead more often than not (' + knee10.map(t => t.grade + ' ' + t.keep).join(', ') + '; v214: every one, before)');
 
 // DIRECTIONAL FIRST TOUCH, as played on a phone: you pass, you're put on the man it's going to, and a flick on SKILL
 // sends his first touch that way. (A pass hit without its spray, so it goes where it's aimed.)
@@ -310,6 +314,7 @@ const flick = async (dx, dy) => { await finger('touchStart', skillAt.x, skillAt.
   await finger('touchEnd', skillAt.x + dx, skillAt.y + dy); };
 const passTo = (gap, charge, sx) => mp.evaluate(({ gap, charge, sx }) => { const T = window.__T, atk = T.atkOf('G'), mates = T.players().filter(q => q.team === 'G'), a = mates[0], r = mates[1];
   T.setControlled(a); T.freeze();
+  T.P.aiTouch.val = 0; r.stats = Object.assign({}, r.stats, { ballControl: 10, composure: 10, compFinal: 10 });   // (v214: a receiver who takes it clean, his likely touch -- what's read here is the flick; how far his touch strays for his Ball control is the scenes' above)
   for(const q of T.players()) if(q !== a && q !== r){ q.x = T.FW / 2 - atk * 900; q.y = 40; q.vx = q.vy = 0; }
   a.stats = Object.assign({}, a.stats, { longPass: 1 });   // (v167: a long pass from a man with the Long passing for it checks up where it lands -- these are about the first touch, so his doesn't)
   a.x = T.FW / 2 - atk * gap; a.y = T.YC; a.vx = a.vy = 0; a.noTouchT = 0; r.x = T.FW / 2; r.y = T.YC + 100; r.vx = r.vy = 0; r.facing = { x: -atk, y: 0 }; r.noTouchT = 0; r.reactUntil = 0; r.state = 'normal';
