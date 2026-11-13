@@ -261,6 +261,29 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     before; hold it well away from the flick (more than 100°) and it's yours to go where you like.
   - A flick that ends just after he's taken it is still his first touch, off his foot, as before: the lab says so.
   - The old timed press is gone from the lab too: its four dials, and the drag on TRAP's three, are off Settings.
+- **Copies of a shape (v213).** The formations as set on the Signature Players sheet: five copies, each a shape's lines
+  with its spots set another way, named for its lines and its number as the sheet names them, on every shape menu (the
+  match's tactics, the career's training pitch) right after the one it's a copy of. Sixteen shapes in all, four rows of
+  four on the menus.
+  - **The copies.** 3-3-2 (2): three central midfielders and two strikers. 3-2-3 (2): two DMs behind the front three.
+    3-2-1-2 (2): two central midfielders, an AM and two wingers up front, no striker. 4-3-1 (2): three central
+    midfielders. 4-1-2-1 (2): a central midfielder, two AMs and a striker.
+  - **3-1-2-2 and 3-2-2-1, as the sheet has them now.** 3-1-2-2's man in front of the back three is a DM (he was a
+    central midfielder), and 3-2-2-1's two there are central midfielders (they were DMs). Hull City and Milan Centrale
+    play 3-1-2-2; Chelsea and Bergamont Juvenile 3-2-2-1, where Nagala Kone and Lorena Parlor, both DMs, now stand in a
+    central midfielder's spot, a second position of theirs.
+  - **A copy plays by its spots.** A line of three with a central man at each end (a CM's, DM's, AM's or ST's spot)
+    stands in off the touchlines, two-thirds as wide as one with wide men at its ends, and its end men play in the
+    middle rather than holding the width: with the ball, in a computer match, 3-3-2 (2)'s end CMs were 14.6 m from the
+    middle on average, 3-3-2's WMs 23.0 m. Two wingers on their own up front stand as wide as the back line's ends and
+    hold the width, as two wide midfielders on their own do: 3-2-1-2 (2)'s 23.8 m, 3-2-1-2's strikers 12.6 m.
+  - **Its men drawn for its spots,** wherever a squad is made for a shape: a winger's spot a winger's in a line of two,
+    a central spot a central man's at the end of a line, and a back line with no wide man ahead of it (no WM or W) has
+    wing-backs at its ends -- 3-3-2 (2)'s, 4-3-1 (2)'s and 4-1-2-1 (2)'s.
+  - **Without the ball** a copy defends as the shape it's a copy of, or in itself where that one defends in its own:
+    3-2-3 (2) in itself when its side gegenpresses, else 3-4-1, or 4-3-1 sitting deep.
+  - **A side kept for an exhibition club in 3-1-2-2 or 3-2-2-1** is dealt afresh once for the shape's new spots, as
+    one kept for a club set another way on the sheet is (v202). Every other club's kept side stays as you left it.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -1037,11 +1060,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   DEFENSE tab, each with its own formation, width and way of playing (the pitch there is drawn the right way round
   again: it had been squeezed into the Office's narrow one, cutting off the keeper). In a career, the training pitch's
   Tactics tab has the same settings under WITH THE BALL and WITHOUT THE BALL.
-  - **Formations.** There are eleven shapes for eight outfielders (v127): 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2,
-    3-1-2-2, 3-2-2-1, 4-2-2, 4-3-1, 4-1-3 and 4-1-2-1, in that order on the menus. Five are in four lines, with a
-    holding midfielder's spot (DM) and an attacking midfielder's (AM) where they have them: 3-1-3-1 is a DM, two wide
-    midfielders either side of an AM, and a striker; 3-2-1-2 two central midfielders, an AM and two strikers; 3-1-2-2 a
-    central midfielder, two wide midfielders and two strikers; 3-2-2-1 two DMs, two wide midfielders and a striker;
+  - **Formations.** There are sixteen shapes for eight outfielders: eleven (v127) -- 3-3-2, 3-2-3, 3-4-1, 3-1-3-1,
+    3-2-1-2, 3-1-2-2, 3-2-2-1, 4-2-2, 4-3-1, 4-1-3 and 4-1-2-1, in that order on the menus -- and five copies of
+    theirs, each right after the one it's a copy of (v213: see **Copies of a shape (v213)**). Five of the eleven are
+    in four lines, with a holding midfielder's spot (DM) and an attacking midfielder's (AM) where they have them:
+    3-1-3-1 is a DM, two wide midfielders either side of an AM, and a striker; 3-2-1-2 two central midfielders, an AM
+    and two strikers; 3-1-2-2 a DM, two wide midfielders and two strikers; 3-2-2-1 two central midfielders, two wide
+    midfielders and a striker (v213, as set on the sheet: 3-1-2-2's was a central midfielder, 3-2-2-1's two were DMs);
     4-1-2-1 a DM, two wide midfielders and a striker. 4-1-3's one in the middle is a central midfielder. Every shape is
     for either phase. (v124 had eight, each one of the seven-outfielder shapes with a man more at the back; 2-4-2 and
     2-3-3, two at the back and for attacking only, went in v127, and 5-2-1 and 5-1-2, five at the back and for defending
@@ -3280,6 +3305,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v213: copies of a shape.** The formations as set on the Signature Players sheet: five copies -- 3-3-2 (2),
+  3-2-3 (2), 3-2-1-2 (2), 4-3-1 (2) and 4-1-2-1 (2), each a shape's lines with its spots set another way, on the menus
+  after the one it's a copy of -- and 3-1-2-2's DM and 3-2-2-1's two CMs. A copy plays by its spots: three central men
+  in a line stand in off the touchlines and play in the middle, two wingers on their own up front out wide; a squad
+  made for it is drawn for its spots; it defends as the one it's a copy of. A side kept for an exhibition club in
+  3-1-2-2 or 3-2-2-1 is dealt afresh. The shape menus are four across. New test: `tests/classic-copies.mjs`. See
+  **Copies of a shape (v213)**.
 - **v212: the Trap Lab, back; and the directional first touch, with the stick held.** TRAP LAB is on the start menu
   again, taking the ball as a match does (no timed press): a flick on SKILL sends your first touch a way, and the lab
   reads out each touch, its grade, the way it went against the way you flicked, and how soon you're on it again. And

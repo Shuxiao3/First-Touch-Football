@@ -56,12 +56,12 @@ const pick = async (k, sel) => { await menu(k); await page.click('#bpBody ' + se
 ok(await page.isVisible('#bpBody [data-ctphase="atk"]') && await page.isVisible('#bpBody [data-ctphase="def"]'), 'WITH THE BALL / WITHOUT THE BALL');
 await menu('form');
 ok(!(await page.isDisabled('#bpBody [data-cform="3-1-3-1"]')), 'with the ball, 3-1-3-1 can be picked');
-ok((await page.$$('#bpBody [data-cform]')).length === 11 && !(await page.$('#bpBody [data-cform="5-2-1"]')) && !(await page.$('#bpBody [data-cform="2-3-3"]')), 'eleven shapes, none with five or two at the back (v126: 5-2-1 and 5-1-2 gone; v127: 2-3-3 and 2-4-2)');
+ok((await page.$$('#bpBody [data-cform]')).length === 16 && !(await page.$('#bpBody [data-cform="5-2-1"]')) && !(await page.$('#bpBody [data-cform="2-3-3"]')), 'sixteen shapes (v213: five of them copies), none with five or two at the back (v126: 5-2-1 and 5-1-2 gone; v127: 2-3-3 and 2-4-2)');
 await page.click('#bpBody [data-cform="3-2-3"]'); await page.waitForTimeout(80);
 await pick('width', '[data-cwidth="1.18"]');
 await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(80);
 await menu('form');
-ok((await page.$$('#bpBody [data-cform]:not([disabled])')).length === 11, 'without it, every one of them can be picked too (v127: none for attacking only)');
+ok((await page.$$('#bpBody [data-cform]:not([disabled])')).length === 16, 'without it, every one of them can be picked too (v127: none for attacking only)');
 await page.click('#bpBody [data-cform="4-2-2"]'); await page.waitForTimeout(80);
 ok((await save()).formDef === '4-2-2', 'without it, a back four: 4-2-2');
 await pick('form', '[data-cform="4-3-1"]');

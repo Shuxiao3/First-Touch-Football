@@ -46,7 +46,7 @@ const reps = () => mp.evaluate(() => { const m = document.getElementById('labTal
 // a ball served; a flick on SKILL (dx, dy on the screen) begun as the ball comes within `at` px of him, the stick then held
 // that way, as you'd go after it; what the lab says of it
 const ball = async (d, at) => { const n0 = await reps(); await mp.tap('#labGoChip');
-  if(d){ for(let i = 0; i < 300; i++){ const g = await mp.evaluate(() => window.__T.gap()); if(g != null && g < (at ?? 160)) break; await mp.waitForTimeout(5); }
+  if(d){ for(let i = 0; i < 300; i++){ const g = await mp.evaluate(() => window.__T.gap()); if(g != null && g < (at ?? 300)) break; await mp.waitForTimeout(5); }   // (v213: 300 px, in good time with the machine busy -- at 160 a flick could end after he'd taken it)
     await flick(d[0], d[1]); await mp.evaluate(d => { const l = Math.hypot(d[0], d[1]); window.__stick = { x: d[0] / l, y: d[1] / l }; }, d); }
   let txt = ''; for(let i = 0; i < 120; i++){ await mp.waitForTimeout(60); if(await reps() > n0){ txt = await mp.textContent('#labResult'); break; } }
   await mp.evaluate(() => { window.__stick = null; }); await mp.waitForTimeout(300); return txt; };

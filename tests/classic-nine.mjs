@@ -25,8 +25,8 @@ const { ok, info } = rep;
 
 // --- THE SHAPES ----------------------------------------------------------------------------------------------------------
 const sh = await page.evaluate(() => { const N = window.__N, out = { bad: [] };
-  out.names = Object.keys(N.FORMS).join(' ');
-  for(const [f, L] of Object.entries(N.FORMS)){ if(L.reduce((a, b) => a + b, 0) !== 8 || f !== L.join('-')) out.bad.push(f + ' lines'); if((N.POS_OF[f] || []).length !== 8) out.bad.push(f + ' spots'); }
+  out.names = Object.keys(N.FORMS).join(', '); out.n = Object.keys(N.FORMS).length;   // (v213: a copy's name is its lines and its number -- 3-2-3 (2))
+  for(const [f, L] of Object.entries(N.FORMS)){ if(L.reduce((a, b) => a + b, 0) !== 8 || f.replace(/ \(\d+\)$/, '') !== L.join('-')) out.bad.push(f + ' lines'); if((N.POS_OF[f] || []).length !== 8) out.bad.push(f + ' spots'); }
   out.from7 = Object.entries(N.FORM_FROM_7).filter(([o, n]) => { const a = o.split('-').map(Number), b = n.split('-').map(Number);
     const back = b[0] === a[0] + 1 && b[1] === a[1] && b[2] === a[2], mid = a[0] === 4 && b[0] === 4 && b[1] === a[1] + 1 && b[2] === a[2];   // (a back four already: a man more in midfield)
     return !((back || mid) && (N.FORMS[n] || N.FORM_GONE[n])); }).map(x => x.join('>'));   // (v127: 1-4-2's 2-4-2 and 1-3-3's 2-3-3 are gone, read on as their nearest)
@@ -36,7 +36,7 @@ const sh = await page.evaluate(() => { const N = window.__N, out = { bad: [] };
   out.fb = Object.entries(N.POS_OF).filter(([f, P]) => { const n = N.FORMS[f][0], back = P.slice(0, n); return n >= 4 ? !(back[0] === 'FB' && back[n - 1] === 'FB' && back.slice(1, -1).every(p => p === 'CB')) : !back.every(p => p === 'CB'); }).map(x => x[0]);
   return out; });
 info('the shapes: ' + sh.names + '; read from old saves: ' + sh.read);
-ok(!sh.bad.length && sh.names.split(' ').length === 11 && !/(^| )[25]-/.test(sh.names), 'eleven shapes (v127), none with five or two at the back, every one\'s lines adding up to eight and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
+ok(!sh.bad.length && sh.n === 16 && !/(^| )[25]-/.test(sh.names), 'sixteen shapes -- the eleven of v127 and five copies of theirs (v213) -- none with five or two at the back, every one\'s lines adding up to eight, its name its lines (and a copy\'s number), and its spots eight long' + (sh.bad.length ? ': ' + sh.bad.join(', ') : ''));
 ok(!sh.from7.length && sh.read === '3-3-2 3-2-3 4-3-1 4-2-2 4-3-1 4-2-2 3-3-2 3-3-2 3-4-1 3-2-3 x', 'each seven-outfielder shape grows into one with a man more at the back (2-3-2 3-3-2, 1-3-3 2-3-3 and on to 3-2-3), one with four at the back already a man more in midfield (4-2-1 4-3-1, 4-1-2 4-2-2), a six-outfielder one through them (2-3-1 3-3-2), and the ones gone read as their nearest (5-2-1 4-3-1, 5-1-2 4-2-2, 2-4-2 3-4-1, 2-3-3 3-2-3)' + (sh.from7.length ? ': ' + sh.from7.join(', ') : ''));
 ok(sh.only[0] === '' && sh.only[1] === '', 'every shape for attacking and defending alike (v127: two at the back, for attacking only, gone; v126: five at the back, for defending only)');
 ok(!sh.fb.length, 'a back three is centre-backs, a back four has a full-back at each end' + (sh.fb.length ? ': ' + sh.fb.join(', ') : ''));

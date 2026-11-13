@@ -327,7 +327,7 @@ await page.evaluate(() => { const d = __MG.d; d.lv.train = 4; __MG.mgSave(d); })
 const l4 = await locks();
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 info('training locks: ' + JSON.stringify({ l1, l4, nForms }));
-ok(!l1.forms.length && l1.open === nForms && nForms === 11 && !l1.styles && /GEGENPRESS/.test(l1.free) && /CONTROL POSSESSION/.test(l1.free) && !/locked/.test(l1.instr) && l1.instr.length > 0,
+ok(!l1.forms.length && l1.open === nForms && nForms === 16 && !l1.styles && /GEGENPRESS/.test(l1.free) && /CONTROL POSSESSION/.test(l1.free) && !/locked/.test(l1.instr) && l1.instr.length > 0,
   'training pitch level 1: all ' + l1.open + ' shapes and every style open from the start (v130: they were locked by its level), and every team instruction (v106, the team\'s from v112: ' + l1.instr + ')');
 ok(!l4.forms.length && l4.open === nForms && !l4.styles && !/locked/.test(l4.instr), 'built up to level 4: the same');
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); }); await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.waitForTimeout(80);

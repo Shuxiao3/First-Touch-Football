@@ -1,4 +1,4 @@
-// FOOTBALL CLASSIC, THE MIDFIELD (v127): eleven shapes -- 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2, 3-1-2-2, 3-2-2-1, 4-2-2,
+// FOOTBALL CLASSIC, THE MIDFIELD (v127; v213, sixteen with five copies -- classic-copies.mjs): eleven shapes -- 3-3-2, 3-2-3, 3-4-1, 3-1-3-1, 3-2-1-2, 3-1-2-2, 3-2-2-1, 4-2-2,
 // 4-3-1, 4-1-3, 4-1-2-1 -- five of them in four lines, with a holding midfielder's spot (DM) and an attacking midfielder's
 // (AM) where they have them; DM and AM positions of their own again, the central midfield archetypes sorted among the
 // three, each covering the next one along; a holding and an attacking midfielder each half as common as a central one, a
@@ -36,10 +36,11 @@ const sh = await page.evaluate(() => { const M = window.__M, P = M.POS_OF;
   return { names: Object.keys(M.FORMS).join(' '), four: four.join(' '), dmam: dmam.join(' '),
     spots: ['3-1-3-1', '3-2-1-2', '3-1-2-2', '3-2-2-1', '4-1-2-1', '4-1-3'].map(f => f + ': ' + P[f].join(' ')) }; });
 info('the shapes: ' + sh.names + ' | ' + sh.spots.join(' | '));
-ok(sh.names === '3-3-2 3-2-3 3-4-1 3-1-3-1 3-2-1-2 3-1-2-2 3-2-2-1 4-2-2 4-3-1 4-1-3 4-1-2-1', 'the eleven shapes, in their order on the menus (' + sh.names + ')');
-ok(sh.four === '3-1-3-1 3-2-1-2 3-1-2-2 3-2-2-1 4-1-2-1' && sh.dmam === '3-1-3-1 3-2-1-2 3-2-2-1 4-1-2-1', 'five in four lines; the DM and AM spots only in four of them (' + sh.dmam + ')');
-ok(sh.spots.join(' | ') === '3-1-3-1: CB CB CB DM WM AM WM ST | 3-2-1-2: CB CB CB CM CM AM ST ST | 3-1-2-2: CB CB CB CM WM WM ST ST | 3-2-2-1: CB CB CB DM DM WM WM ST | 4-1-2-1: FB CB CB FB DM WM WM ST | 4-1-3: FB CB CB FB CM W ST W',
-  'each as asked: 3-1-3-1 a DM, two WMs and an AM; 3-2-1-2 two CMs and an AM; 3-1-2-2 a CM and two WMs; 3-2-2-1 two DMs and two WMs; 4-1-2-1 a DM and two WMs; 4-1-3\'s one in the middle a CM');
+ok(sh.names === '3-3-2 3-3-2 (2) 3-2-3 3-2-3 (2) 3-4-1 3-1-3-1 3-2-1-2 3-2-1-2 (2) 3-1-2-2 3-2-2-1 4-2-2 4-3-1 4-3-1 (2) 4-1-3 4-1-2-1 4-1-2-1 (2)', 'the shapes, in their order on the menus -- the eleven, and (v213) five copies, each after its own (' + sh.names + ')');
+ok(sh.four === '3-1-3-1 3-2-1-2 3-2-1-2 (2) 3-1-2-2 3-2-2-1 4-1-2-1 4-1-2-1 (2)' && sh.dmam === '3-1-3-1 3-2-1-2 3-1-2-2 4-1-2-1 3-2-3 (2) 3-2-1-2 (2) 4-1-2-1 (2)',
+  'seven in four lines (two of them copies); the DM and AM spots in six of them, and in 3-2-3 (2) -- 3-2-2-1 has none since v213 (' + sh.dmam + ')');
+ok(sh.spots.join(' | ') === '3-1-3-1: CB CB CB DM WM AM WM ST | 3-2-1-2: CB CB CB CM CM AM ST ST | 3-1-2-2: CB CB CB DM WM WM ST ST | 3-2-2-1: CB CB CB CM CM WM WM ST | 4-1-2-1: FB CB CB FB DM WM WM ST | 4-1-3: FB CB CB FB CM W ST W',
+  'each as set: 3-1-3-1 a DM, two WMs and an AM; 3-2-1-2 two CMs and an AM; 3-1-2-2 a DM and two WMs (v213, on the sheet: a CM before); 3-2-2-1 two CMs and two WMs (v213: two DMs before); 4-1-2-1 a DM and two WMs; 4-1-3\'s one in the middle a CM');
 
 // --- POSITIONS AND ARCHETYPES --------------------------------------------------------------------------------------------
 const po = await page.evaluate(() => { const M = window.__M, S = M.SUB_STYLES, w = k => S[k].reduce((a, x) => a + M.STYLES[x].w, 0), out = {};
@@ -83,8 +84,8 @@ const cl = await page.evaluate(() => { const M = window.__M, out = [];
   return out; });
 info('the clubs in four lines: ' + cl.join(' | '));
 ok(cl.filter(x => /\(/.test(x)).length <= 1 && cl.filter(x => / 3-1-3-1 | 3-2-1-2 | 3-1-2-2 | 3-2-2-1 | 4-1-2-1 /.test(x)).length === 5
-  && cl.some(x => /^TOT 3-1-3-1 CB CB CB DM WM AM WM STK/.test(x)) && cl.some(x => /^CHE 3-2-2-1 CB CB CB DM DM WM WM/.test(x)) && cl.some(x => /^BHA 3-2-1-2 CB CB CB CM CM AM/.test(x)),
-  'five of the clubs play the four-line shapes, each with a squad made for its spots -- a DM in a DM\'s, an AM in an AM\'s -- and every club\'s men in their own positions (a second striker who\'s a winger aside)');
+  && cl.some(x => /^TOT 3-1-3-1 CB CB CB DM WM AM WM STK/.test(x)) && cl.some(x => /^HUL 3-1-2-2 CB CB CB DM WM WM/.test(x)) && cl.some(x => /^BHA 3-2-1-2 CB CB CB CM CM AM/.test(x)),
+  'five of the clubs play the four-line shapes, each with a squad made for its spots -- a DM in a DM\'s, an AM in an AM\'s -- and every club\'s men in their own positions (a second striker who\'s a winger aside, and a star in a second position of his: Chelsea\'s Kone, a DM, in 3-2-2-1\'s CM spot since v213)');
 
 // --- THE TACTICS: a four-line shape drawn in four lines -----------------------------------------------------------------
 // (set as the page loads: one set just before a reload can be lost -- v131, it started the wrong clubs now and then)
@@ -99,7 +100,7 @@ const tk = await page.evaluate(() => { const M = window.__M, at = {};
 info('Tottenham\'s 3-1-3-1 on the match\'s tactics pitch (across): ' + JSON.stringify(tk.x) + '; 3-2-2-1 on the career\'s (down): ' + tk.cs);
 ok(tk.forms[0] === '3-1-3-1' && tk.x.CB < tk.x.DM && tk.x.DM < tk.x.AM && tk.x.AM < tk.x.ST && Math.abs(tk.x.WM - tk.x.AM) < 3 && tk.x['CB/FB'] < tk.x.DM,
   'a four-line shape on the match\'s tactics pitch: four lines, back to front -- the back three, the DM, the WMs and the AM, the striker');
-ok(tk.cs === 'CB@70 CB@70 CB@70 DM@54 DM@54 WM@36 WM@36 ST@18', '...and on the career\'s: four lines, its two midfield lines between the back line and the forward (' + tk.cs + ')');
+ok(tk.cs === 'CB@70 CB@70 CB@70 CM@54 CM@54 WM@36 WM@36 ST@18', '...and on the career\'s: four lines, its two midfield lines between the back line and the forward (' + tk.cs + ')');
 await page.evaluate(() => { const o = document.getElementById('mtacOv'); if(o) o.classList.remove('on', 'pre'); });
 
 // --- A MATCH: four lines with the ball and without it -----------------------------------------------------------------------
@@ -131,7 +132,7 @@ ok(u1('RatkCM') + 1 < u1('RatkAM') && u1('RatkAM') < u1('RatkST') && u1('RdefCM'
   '3-2-1-2: the AM between the two CMs and the strikers, with the ball (' + u1('RatkCM') + ', ' + u1('RatkAM') + ', ' + u1('RatkST') + ' m) and without it (' + u1('RdefCM') + ', ' + u1('RdefAM') + ', ' + u1('RdefST') + ')');
 const m2 = await lines('HUL', 'SUN'), v2 = (k, i) => m2.out[k] ? m2.out[k][i] : NaN;
 info('Hull 3-1-2-2 v Sunderland 4-1-2-1, [depth, across] in m: ' + JSON.stringify(m2.out));
-ok(v2('GatkWM', 1) > 18 && v2('GatkCM', 1) < 10 && v2('GatkCM', 0) < v2('GatkWM', 0), '3-1-2-2: its two WMs on their own in a line play wide (' + v2('GatkWM', 1) + ' m across with the ball), the CM central behind them');
+ok(v2('GatkWM', 1) > 18 && v2('GatkDM', 1) < 10 && v2('GatkDM', 0) < v2('GatkWM', 0), '3-1-2-2: its two WMs on their own in a line play wide (' + v2('GatkWM', 1) + ' m across with the ball), the DM central behind them (v213: a CM before)');
 ok(v2('RdefDM', 0) < v2('RdefWM', 0) && v2('RdefCB', 0) < v2('RdefDM', 0) && v2('RatkDM', 0) < v2('RatkWM', 0), '4-1-2-1: the DM between the back four and the WMs (' + v2('RdefCB', 0) + ', ' + v2('RdefDM', 0) + ', ' + v2('RdefWM', 0) + ' m out without the ball)');
 
 // --- A NEW CAREER'S WORLD, AND WHAT'S KEPT FROM BEFORE ------------------------------------------------------------------------

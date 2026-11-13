@@ -379,7 +379,7 @@ for(const [w, h] of SIZES){
   ok(tv.ghosts === 0, 'no box for the other phase\'s man under the spots any more (' + tv.ghosts + ')');
   // ...the shape without the ball a different one: WITHOUT tapped, each man's card slides from his spot with the ball to his spot without it
   const spots = () => page.$$eval('#bpBody .tpitch .ptk', ns => ns.map(e => { const r = e.getBoundingClientRect(); return { k: e.dataset.ri, x: r.left + r.width / 2, y: r.top + r.height / 2, tf: e.style.transform }; }));
-  const def0 = await page.evaluate(() => { const M = window.__MG, d = M.d, was = d.formDef, f = Object.keys(M.FORMS).find(x => x !== d.formation && !M.ATK_ONLY.includes(x) && !M.DEF_ONLY.includes(x)); M.setCareerForm(d, 'def', f); return was; });
+  const def0 = await page.evaluate(() => { const M = window.__MG, d = M.d, was = d.formDef, f = Object.keys(M.FORMS).find(x => M.FORMS[x].join() !== M.FORMS[d.formation].join() && !M.ATK_ONLY.includes(x) && !M.DEF_ONLY.includes(x)); M.setCareerForm(d, 'def', f); return was; });   // (other lines: v213, a copy of the shape is next on the list now)
   await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(600);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const sp0 = await spots(); await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(110); const sp1 = await spots(); await page.waitForTimeout(700); const sp2 = await spots();

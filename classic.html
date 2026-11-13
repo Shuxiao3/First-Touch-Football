@@ -1419,7 +1419,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   .tbIns + .tbBest{ margin-left:0; }   /* (INSTRUCTIONS left of BEST 9, the two at the row's end) */
   .tbMenu{ position:absolute; top:calc(100% + 6px); left:0; z-index:30; width:max-content; max-width:min(400px,70vw); background:var(--win); box-shadow:var(--pxWin); border-radius:var(--rWin);
     padding:10px; display:flex; flex-direction:column; gap:6px; }
-  .tbMenuGrid{ display:grid; grid-template-columns:repeat(5,auto); gap:6px; }
+  .tbMenuGrid{ display:grid; grid-template-columns:repeat(4,auto); gap:6px; }   /* (v213: four across -- sixteen shapes in four rows) */
   .tbMenuGrid2{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }   /* (the seven styles, two by two: all on the screen) */
   .tbMenuNote{ font-size:10px; color:var(--dim); }
   .tbMenu.r{ left:auto; right:0; }
@@ -2715,17 +2715,27 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // four at the back, have a man more in midfield instead: 4-2-1 is 4-3-1, 4-1-2 is 4-2-2)
   // (v127: the eleven shapes below, in this order on the menus -- seven with three at the back, four with four, five of
   // them in four lines -- and 2-4-2 and 2-3-3, the two with two at the back, are gone)
-  const FORMS={'3-3-2':[3,3,2],'3-2-3':[3,2,3],'3-4-1':[3,4,1],'3-1-3-1':[3,1,3,1],'3-2-1-2':[3,2,1,2],'3-1-2-2':[3,1,2,2],'3-2-2-1':[3,2,2,1],
-               '4-2-2':[4,2,2],'4-3-1':[4,3,1],'4-1-3':[4,1,3],'4-1-2-1':[4,1,2,1]};
+  // (v213: and the COPIES, as made on the Signature Players sheet: a shape's lines with its spots set another way, named
+  // for its lines and its number as the sheet names it -- 3-2-3 (2) -- each on the menus after the one it's a copy of.
+  // Sixteen shapes in all.)
+  const FORMS={'3-3-2':[3,3,2],'3-3-2 (2)':[3,3,2],'3-2-3':[3,2,3],'3-2-3 (2)':[3,2,3],'3-4-1':[3,4,1],'3-1-3-1':[3,1,3,1],
+               '3-2-1-2':[3,2,1,2],'3-2-1-2 (2)':[3,2,1,2],'3-1-2-2':[3,1,2,2],'3-2-2-1':[3,2,2,1],
+               '4-2-2':[4,2,2],'4-3-1':[4,3,1],'4-3-1 (2)':[4,3,1],'4-1-3':[4,1,3],'4-1-2-1':[4,1,2,1],'4-1-2-1 (2)':[4,1,2,1]};
+  const formOrig=f=>String(f).replace(/ \(\d+\)$/,'');   // (v213: the shape a copy is of -- any other shape's own name)
   // WHAT EACH SPOT IS, line by line from the back, each line from the side's left: a centre-back (CB), a full-back (FB:
   // the outside men of a back four), a holding midfielder (DM), a central midfielder (CM), an attacking midfielder (AM),
   // a wide midfielder (WM), a winger (W: the outside men of a front three) or a striker (ST). (v127: DM and AM are spots
   // of their own, in the four-line shapes; the outside men of a back three are CBs who can as well be FBs -- see spotFit.)
+  // (v213: as set on the Signature Players sheet -- 3-1-2-2's man in front of the back three a DM, he was a CM; 3-2-2-1's
+  // two there CMs, they were DMs -- and the copies': 3-3-2 (2) three CMs; 3-2-3 (2) two DMs behind its front three;
+  // 3-2-1-2 (2) two wingers up front, no striker; 4-3-1 (2) three CMs; 4-1-2-1 (2) a CM and two AMs)
   const POS_OF={
     '3-3-2':['CB','CB','CB','WM','CM','WM','ST','ST'],   '3-2-3':['CB','CB','CB','CM','CM','W','ST','W'],    '3-4-1':['CB','CB','CB','WM','CM','CM','WM','ST'],
-    '3-1-3-1':['CB','CB','CB','DM','WM','AM','WM','ST'], '3-2-1-2':['CB','CB','CB','CM','CM','AM','ST','ST'], '3-1-2-2':['CB','CB','CB','CM','WM','WM','ST','ST'],
-    '3-2-2-1':['CB','CB','CB','DM','DM','WM','WM','ST'], '4-2-2':['FB','CB','CB','FB','CM','CM','ST','ST'],   '4-3-1':['FB','CB','CB','FB','WM','CM','WM','ST'],
-    '4-1-3':['FB','CB','CB','FB','CM','W','ST','W'],     '4-1-2-1':['FB','CB','CB','FB','DM','WM','WM','ST'] };
+    '3-1-3-1':['CB','CB','CB','DM','WM','AM','WM','ST'], '3-2-1-2':['CB','CB','CB','CM','CM','AM','ST','ST'], '3-1-2-2':['CB','CB','CB','DM','WM','WM','ST','ST'],
+    '3-2-2-1':['CB','CB','CB','CM','CM','WM','WM','ST'], '4-2-2':['FB','CB','CB','FB','CM','CM','ST','ST'],   '4-3-1':['FB','CB','CB','FB','WM','CM','WM','ST'],
+    '4-1-3':['FB','CB','CB','FB','CM','W','ST','W'],     '4-1-2-1':['FB','CB','CB','FB','DM','WM','WM','ST'],
+    '3-3-2 (2)':['CB','CB','CB','CM','CM','CM','ST','ST'], '3-2-3 (2)':['CB','CB','CB','DM','DM','W','ST','W'], '3-2-1-2 (2)':['CB','CB','CB','CM','CM','AM','W','W'],
+    '4-3-1 (2)':['FB','CB','CB','FB','CM','CM','CM','ST'], '4-1-2-1 (2)':['FB','CB','CB','FB','CM','AM','AM','ST'] };
   const OUTFIELD=8;
   // A SPOT'S FIT (v127): the positions at home in a spot, read against a man's PLAYS (see posFit) -- the spot's own, but
   // at the outside of a back three a centre-back's or a full-back's ('CB/FB'): a FB is as much at home there as a CB,
@@ -2755,6 +2765,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // (v126: they were a back five)
   function defFormFor(atkForm,posture){
     const press=posture==='press', sit=posture==='lowblock';
+    const of=formOrig(atkForm); if(of!==atkForm&&FORMS[atkForm]&&FORMS[of]){ const d=defFormFor(of,posture); return d===of?atkForm:d; }   // (v213: a copy as the one it's a copy of -- in itself where that defends in its own shape)
     switch(atkForm){
       case '3-2-3': return press?'3-2-3':sit?'4-3-1':'3-4-1';
       case '4-1-3': return press?'4-1-3':'4-3-1';
@@ -3138,6 +3149,15 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   }
 
   let players=[],controlled=null;
+  // HOW FAR APART A LINE'S MEN STAND, from the gap every line has (see slotsFor): two wide midfielders on their own in a
+  // line as wide as the widest line's ends (v127), and (v213) two wingers on their own up front the same -- 3-2-1-2 (2)'s;
+  // a line of three or more with a central man at each end -- a CM's, DM's, AM's or ST's spot: 3-3-2 (2)'s and 4-3-1
+  // (2)'s three CMs -- two-thirds of it, in off the touchlines (P: the shape's spots, b0 the line's first, n its men)
+  const CENTRAL_SPOT={CM:1,DM:1,AM:1,ST:1};
+  function lineGap(P,b0,n,gap,maxN){ const a=P[b0], z=P[b0+n-1];
+    if(n===2&&(a==='WM'||a==='W')&&z===a) return gap*(maxN-1);
+    if(n>=3&&CENTRAL_SPOT[a]&&CENTRAL_SPOT[z]) return gap*0.65;
+    return gap; }
   // compute the ordered slot list (role/frac/home/line metadata) for a formation
   function slotsFor(team,formName,phase){
     const lines=FORMS[formName];
@@ -3153,8 +3173,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     lines.forEach((count,li)=>{
       const role=roleMap[li];
       const frac=lines.length===4&&role==='MID'?MID4_FRAC[li-1]:ROLE_FRAC[role];
-      // (v127: two wide midfielders on their own in a line stand as wide as the widest line's ends, not a pair's width apart)
-      const b0=slots.length, g=count===2&&P[b0]==='WM'&&P[b0+1]==='WM'?gap*(maxCount-1):gap;
+      // (v127: two wide midfielders on their own in a line stand as wide as the widest line's ends, not a pair's width apart;
+      // v213: two wingers too, and a line of central men in off the touchlines -- lineGap)
+      const b0=slots.length, g=lineGap(P,b0,count,gap,maxCount);
       for(let i=0;i<count;i++){
         const pos=P[slots.length]||role;
         slots.push({
@@ -3173,7 +3194,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // A SIDE KEPT IN A SHAPE THAT'S GONE (v127: 2-4-2, 2-3-3; v126: five at the back): each man to the spot of the shape it's
   // read as nearest his old one -- depth counting for more than width, his own position before another (as mapDefOrder)
   // -> the order for the new shape. (Where a shape's spots stand, roughly, from its name alone: shapeXY.)
-  function shapeXY(name){ const L=String(name).split('-').map(Number), R=linesRoles(L), m=Math.max(...L), out=[];
+  function shapeXY(name){ const L=FORMS[name]||String(name).split('-').map(Number), R=linesRoles(L), m=Math.max(...L), out=[];
     L.forEach((n,li)=>{ const x=L.length===4&&R[li]==='MID'?MID4_FRAC[li-1]:ROLE_FRAC[R[li]]; for(let i=0;i<n;i++) out.push({x, y:m>1?(i-(n-1)/2)/(m-1):0}); });
     return out; }
   function mapShapeOrder(fromForm,toForm,order,nat){ const A=shapeXY(fromForm), D=slotsFor('G',toForm,'atk'), n=Math.min(order.length,A.length,D.length);
@@ -3839,16 +3860,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // the styles each place in a shape calls for (as SQUAD_STYLES does for 3-3-2): out wide in a line of three or more, a
   // winger's (at the back, see SQ_WB); the middle of midfield, the holder's first; the middle up front, a striker's
   // (form: a shape's name, or its lines; pos: its spots, for lines -- v127: a holding or an attacking midfielder's spot
-  // one of theirs, and a wide midfielder's spot a wide midfielder's in a line of any size)
+  // one of theirs, and a wide midfielder's spot a wide midfielder's in a line of any size. v213: every spot its own -- a
+  // winger's spot a winger's in a line of two, a central one a central man's at the end of a line -- and width ahead of
+  // the back line only from a WM or a W: a back line with none ahead of it, as 3-3-2 (2)'s, is wing-backs at its ends)
   function slotStylesFor(form,pos){
     const L=Array.isArray(form)?form:(FORMS[form]||FORMS['3-3-2']), R=linesRoles(L), out=[null], P=pos||(Array.isArray(form)?[]:POS_OF[form]||[]);
-    const wideAhead=L.some((n,i)=>R[i]!=='DEF'&&n>=3)||P.some(x=>x==='WM'||x==='W');
+    const wideAhead=P.length?P.some(x=>x==='WM'||x==='W'):L.some((n,i)=>R[i]!=='DEF'&&n>=3);
     let at=0;
     L.forEach((n,li)=>{ const role=R[li]; let cen=0;
       for(let k=0;k<n;k++){ const wide=n>=3&&(k===0||k===n-1), sp=P[at++];
         if(role==='DEF') out.push(!wide?SQ_CB : !wideAhead?SQ_WB : n>=4?SQ_FB : SQ_CBW);
-        else if(role==='MID') out.push(sp==='DM'?SQ_DM : sp==='AM'?SQ_AM : (sp?sp==='WM':wide)?SQ_WM : (cen++===0?SQ_CM1:SQ_CM));
-        else out.push(wide?SQ_W:SQ_ST); } });   // (v143: the second in the middle up front a striker too -- or an Inside forward, before)
+        else if(role==='MID') out.push(sp==='DM'?SQ_DM : sp==='AM'?SQ_AM : sp==='W'?SQ_W : sp==='ST'?SQ_ST : (sp?sp==='WM':wide)?SQ_WM : (cen++===0?SQ_CM1:SQ_CM));
+        else out.push(sp==='DM'?SQ_DM : sp==='AM'?SQ_AM : sp==='CM'?SQ_CM : sp==='WM'?SQ_WM : (sp?sp==='W':wide)?SQ_W:SQ_ST); } });   // (v143: the second in the middle up front a striker too -- or an Inside forward, before)
     return out; }
   function genSquad(){ const sq=[]; topUpSquad(sq); return sq; }
   // new squads, and those saved in the six- or seven-a-side days: fill up to a keeper and eight
@@ -3926,7 +3949,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function cwClubSet(name){ if(!name) return null; const c=CC_CLUBS.find(x=>x.name===name)||CLUBS.find(x=>CLUB_CAREER[x.id]===name);
     return c?{id:c.id, form:c.form, style:c.style, spots:CLUB_SPOTS[c.id]||{}, dform:c.dform||null, width:c.width||null, ti:c.ti||null}:null; }   // (v205: its shape without the ball, width and instructions too)
   // what a club's settings come to, to tell a side kept from before they changed (see clubSide)
-  const clubSig=c=>c?hashStr(JSON.stringify([c.form,c.style,CLUB_SPOTS[c.id]||{}].concat(c.dform||c.width||c.ti?[c.dform||null,c.width||null,c.ti||null]:[]))):0;   // (v205: its extras, when it has any)
+  // (v213: and the spots of its shapes, where they've been set another way on the sheet since its side could be kept --
+  // SPOTS_WERE, each such shape's spots before: a side kept in one is dealt afresh for its new spots, once)
+  const SPOTS_WERE={'3-1-2-2':'CB CB CB CM WM WM ST ST','3-2-2-1':'CB CB CB DM DM WM WM ST'};
+  const spotsSince=f=>SPOTS_WERE[f]&&POS_OF[f]&&SPOTS_WERE[f]!==POS_OF[f].join(' ')?[f+': '+POS_OF[f].join(' ')]:[];
+  const clubSig=c=>c?hashStr(JSON.stringify([c.form,c.style,CLUB_SPOTS[c.id]||{}].concat(c.dform||c.width||c.ti?[c.dform||null,c.width||null,c.ti||null]:[]).concat(spotsSince(c.form),c.dform?spotsSince(c.dform):[]))):0;   // (v205: its extras, when it has any)
   // (a side kept before v202: kept under the settings v202 starts from -- stamped so, as the game loads)
   function clubSidesStamp(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{}; let n=0;
     for(const id in all){ const c=clubById(id); if(c&&all[id]&&all[id].sig==null){ all[id].sig=clubSig(c); n++; } }
@@ -10052,8 +10079,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // a WIDE MAN: a winger or wide midfielder -- the flank man of a midfield or front line of three or more (or of the
   // line that gives the team its width). In possession he holds the touchline: the central support jobs aren't his.
   function isWideMan(q){   // (v127: a wide midfielder's spot too, in a line of two -- 3-1-2-2's, 3-2-2-1's and 4-1-2-1's)
-    return (q.role==='MID'||q.role==='ATT') &&
-           ((q.isWidthLine && Math.abs(q.wide)===1) || (q.slotAtk && Math.abs(q.slotAtk.wide)===1 && (q.slotAtk.lineSize>=3||q.slotAtk.pos==='WM')));
+    // (v213: and a winger's in a line of two -- 3-2-1-2 (2)'s -- but never a central man's at the end of a line, a CM's,
+    // DM's, AM's or ST's: a copy's three CMs all play in the middle)
+    const s=q.slotAtk;
+    return (q.role==='MID'||q.role==='ATT') && !(s&&CENTRAL_SPOT[s.pos]) &&
+           ((q.isWidthLine && Math.abs(q.wide)===1) || (s && Math.abs(s.wide)===1 && (s.lineSize>=3||s.pos==='WM'||s.pos==='W')));
   }
   // the HOLDING MIDFIELDER: in possession one midfielder stays behind the ball as the screen against a counter --
   // the most central of the midfield (the deeper of two central ones; an Anchor if he's anywhere near the middle).
@@ -12821,7 +12851,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     let u = role==='DEF'?B.uD : role==='MID'?B.uM : B.uF;
     // A FOUR-LINE SHAPE'S OTHER MIDFIELD LINE (v127: lineMz): halfway back to the back line -- the screen in front of it --
     // or halfway up to the forwards, behind them. Two wide midfielders on their own in a line spread as a four would
-    const mz=role==='MID'?(s.mz||0):0, nW=n===2&&s.pos==='WM'?4:n;
+    const mz=role==='MID'?(s.mz||0):0, nW=n===2&&(s.pos==='WM'||s.pos==='W')?4:n;   // (v213: two wingers on their own up front too)
     if(mz<0) u=B.uD+(B.uM-B.uD)*0.5; else if(mz>0) u=B.uM+(B.uF-B.uM)*0.5;
     const uLoose=role==='DEF'&&isCpu(p)?looseLine(p,u):null;          // (v131: the computer's back line as straight as its Def IQ -- his spot holding it)
     if(role==='ATT'){
@@ -20317,7 +20347,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     // proportionally narrower, so a 2-man line stays tight and central rather than splayed wide.
     const EDGE=43, WMAX=1.4;
     const gap = maxCnt>1 ? (2*EDGE/(maxCnt-1)) * (wMul/WMAX) : 0;
-    lines.forEach((cnt,li)=>{ const role=roles[li], y=lines.length===4?Y4[li]:Y[role], b0=out.length, g=cnt===2&&P[b0]==='WM'&&P[b0+1]==='WM'?gap*(maxCnt-1):gap;   // (two wide midfielders on their own in a line: as wide as the widest line -- as slotsFor)
+    lines.forEach((cnt,li)=>{ const role=roles[li], y=lines.length===4?Y4[li]:Y[role], b0=out.length, g=lineGap(P,b0,cnt,gap,maxCnt);   // (two wide midfielders on their own in a line: as wide as the widest line -- as slotsFor; v213: lineGap)
       for(let i=0;i<cnt;i++){ const x=clamp(50+(i-(cnt-1)/2)*g, 6, 94), pos=P[out.length]||role;
         out.push({ x:+x.toFixed(1), y, role, count:cnt, idx:i, line:li, nLines:lines.length, wide: cnt>=2 && (i===0||i===cnt-1), pos, fit:spotFitOf(pos,role,cnt,i) }); }
     });
