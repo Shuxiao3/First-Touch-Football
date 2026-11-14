@@ -120,6 +120,13 @@ for(const [w, h] of SIZES){
     const wp = await was.newPage(); await wp.goto('file://' + copy); await wp.waitForTimeout(500);
     const kept = await wp.evaluate(() => ({ theme: document.documentElement.dataset.theme || '', btn: getComputedStyle(document.querySelector('#smItems .smBtn:not(.sel)')).backgroundImage })); await was.close();
     ok(one.opts === 0 && one.rules === 0 && kept.theme === '' && /106, 168, 248/.test(kept.btn), 'one colour scheme: no COLOURS in Settings, no other scheme in the page, and a RUBY picked before opens in BLUE (' + kept.btn.slice(0, 48) + ')');
+    // (v222) THE TITLE PAGE'S PICTURE: a stadium behind the start menu, under a wash of the screen colour; the picture decodes;
+    // no other screen has it
+    const tp = await page.evaluate(async () => { const c = getComputedStyle(document.getElementById('startMenu')), m = c.backgroundImage.match(/url\("?(data:image\/webp;base64,[^")]+)/);
+      const dims = m ? await new Promise(res => { const i = new Image(); i.onload = () => res([i.naturalWidth, i.naturalHeight]); i.onerror = () => res(null); i.src = m[1]; }) : null;
+      const plain = ['exhPanel', 'careerHub', 'settingsOverlay', 'newPanel'].every(id => { const n = document.getElementById(id); return !n || !/url\(/.test(getComputedStyle(n).backgroundImage); });
+      return { wash: /rgba\(18, 26, 51, 0\.62\)/.test(c.backgroundImage), size: c.backgroundSize, dims, plain }; });
+    ok(tp.wash && tp.dims && tp.dims[0] === 1586 && tp.dims[1] === 992 && /cover/.test(tp.size) && tp.plain, 'the title page has its stadium picture (' + (tp.dims || ['none']).join(' x ') + '), filling the screen under a wash of the screen colour, and no other screen has it (v222)');
     ok(/FTC Dot/.test(one.font), 'one font throughout (' + one.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);

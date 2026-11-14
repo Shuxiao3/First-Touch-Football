@@ -411,6 +411,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **One colour scheme (v221).** Players no longer pick the colours: COLOURS is gone from Settings, and the game is
   in its one scheme, the blue one (blue buttons, orange for what's picked) that was the default. RUBY, SILVER and MINT
   are gone with it, and a player who had picked one of them sees the blue scheme.
+- **A picture behind the title page (v222).** The start menu has a stadium behind it: match day, a full crowd, the
+  floodlights up and a manager watching from the front of the stand. A wash of the screen's blue lies over it, darkest
+  at the top behind the title and at the foot behind the build number, so the words and the buttons read and the picture
+  still shows. It fills the screen from its middle on any phone. Only the title page has it; every other screen is as it was.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3426,6 +3430,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v222: a picture behind the title page.** The start menu shows a stadium on match day under a wash of the screen
+  colour, deepest behind the title and the build number. New check in `tests/classic-ui.mjs`. See **A picture behind the
+  title page (v222)**.
 - **v221: one colour scheme.** Settings' COLOURS is gone: the game is in one scheme, the blue one that was the default,
   and RUBY, SILVER and MINT are gone with it; a pick saved before opens in blue. New check in `tests/classic-ui.mjs`.
   See **One colour scheme (v221)**.
