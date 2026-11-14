@@ -40,7 +40,7 @@ ok(reach.lo === 18 && reach.hi === 32 && reach.mid === 25, 'the reach: ' + reach
 // u: how far up the pitch he is, going his side's way (0.25 = at the back, 0.8 = the final third); man: an opponent
 // that far away (px; 25 = 1 m), or nobody near; he faces the ball as it comes (he'd have turned to it), or, back,
 // faces away from it (he didn't get round in time)
-const odds = (u, man, bc, cp, n = 800, back = false) => page.evaluate(({ u, man, bc, cp, n, back }) => {
+const odds = (u, man, bc, cp, n = 4000, back = false) => page.evaluate(({ u, man, bc, cp, n, back }) => {   // (v215: 4000 draws, from 800 -- at 800 the Composure pair's at-the-back gap, 2.7 points against a limit of 5, came out over it about one run in fifteen)
   const T = window.__T, p = T.players().find(q => q !== T.controlled() && q.team === 'G'), atk = T.atkOf('G');
   for(const q of T.players()) if(q.team !== 'G'){ q.x = atk > 0 ? T.FW - 60 : 60; q.y = 80; q.vx = q.vy = 0; q.state = 'normal'; }
   p.x = atk > 0 ? T.FW * u : T.FW * (1 - u); p.y = T.YC + 200; p.vx = p.vy = 0;
@@ -75,8 +75,8 @@ const bcLo = await odds(0.25, 30, 2, 6), bcHi = await odds(0.25, 30, 9, 6);
 ok(bcHi.clean - bcLo.clean >= 0.2, 'so does Ball control (2: ' + pc(bcLo.clean) + ', 9: ' + pc(bcHi.clean) + ')');
 // SQUARE TO IT: the same man, his back to the ball as it reaches him (he didn't turn to it in time), takes it worse --
 // fewer perfect, and a worse touch on average (not fewer clean or better: square to it that's every one, and turned all
-// but a few in a thousand, so 800 tries came out level about one time in twenty)
-const backTurned = await odds(0.25, 0, 3, 3, 800, true);
+// but a few in a thousand, so 800 tries came out level about one time in twenty; v215: 4000 tries, as every scene here)
+const backTurned = await odds(0.25, 0, 3, 3, 4000, true);
 ok(backTurned.mean <= backPoor.mean - 0.08 && backTurned.clean <= backPoor.clean - 0.15, 'his back to the ball as it gets to him, the same man takes it worse: perfect ' + pc(backTurned.perfect) + ' (square to it ' + pc(backPoor.perfect) + '), his touch ' + backTurned.mean + ' on average (' + backPoor.mean + '), clean or better ' + pc(backTurned.clean));
 
 // NO TIMING: a ball rolled to a man is taken as it arrives, nothing pressed. The spread off (First-touch spread 0), so
