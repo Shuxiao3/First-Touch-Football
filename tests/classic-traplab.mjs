@@ -5,7 +5,9 @@
 // screen), and how soon he's on it again. Played on a phone, with real flicks on SKILL, on a copy of the game whose stick
 // the test can hold (to go after the ball the way you flicked it, as you would). (v214) Taken as they come, the touch is only as good as
 // the man: a Ball control 5.5 man's -- the lab's own -- is PERFECT now and then, not every time; and a flicked touch is
-// pushed into space, away from him till he's caught it up, not his again the moment it's in his reach.
+// pushed into space, away from him till he's caught it up, not his again the moment it's in his reach. (v215) Flicked, the
+// stick left alone till he's touched it, he meets it; held, the stick's yours and he goes where you push it (v212 had him
+// meet it all the same: taken out). And the touch pops up off his foot, 9 to 12 px, under the 12 a ball's in the air at.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -18,7 +20,11 @@ patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy
   '    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy/l;}}\n    if(window.__stick&&(window.__stick.x||window.__stick.y)){ ix=window.__stick.x; iy=window.__stick.y; }');   // (a stick the test can hold)
 patch('  const LAB_TITLE=', `  window.__T={ gap:()=>{ const r=LAB.recv==='ai'?labRecv():controlled; return r?Math.hypot(ball.x-r.x,ball.y-r.y):null; }, armed:()=>!!ftAim, owned:()=>!!ball.ownedBy,
     bc:v=>{ P.ballControl.val=v; if(controlled) controlled.stats=Object.assign({},controlled.stats||{},{ballControl:v}); },
-    mine:()=>!!controlled&&ball.dribbler===controlled&&!ball.ownedBy, own:()=>!!controlled&&ball.ownedBy===controlled, spread:v=>{ P.aiTouch.val=v; },
+    mine:()=>!!controlled&&ball.dribbler===controlled&&!ball.ownedBy, own:()=>!!controlled&&ball.ownedBy===controlled, z:()=>ball.z,
+    held:(sx,sy,fx,fy)=>{ const c=controlled; if(!c) return null; const was=Object.assign({},ball), ra=recvAuto, fa=ftAim;   // (v215: the way he goes, a flick (fx,fy) asked for and the stick at (sx,sy), the ball on its way 40 px to one side of him, 300 px off)
+      ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.z=0; ball.vz=0; ball.x=c.x-300; ball.y=c.y-40*fy; ball.vx=450; ball.vy=0; recvAuto=null;
+      ftAim={p:c,d:{x:fx,y:fy},until:simNow+1,lt:ball.lastTouch}; window.__stick=(sx||sy)?{x:sx,y:sy}:null; const r=humanIntent(); window.__stick=null;
+      Object.assign(ball,was); recvAuto=ra; ftAim=fa; return r?{ix:+r.ix.toFixed(2),iy:+r.iy.toFixed(2)}:null; }, spread:v=>{ P.aiTouch.val=v; },
     toBall:()=>{ const r=controlled; if(!r) return null; const dx=ball.x-r.x, dy=ball.y-r.y, l=Math.hypot(dx,dy); return l>1?{x:dx/l,y:dy/l}:null; },
     odds:(v,n)=>{ const r=controlled, o={P:0,C:0,L:0,H:0}; if(!r) return o; const was=Object.assign({},ball), R=controlROf(r);
       ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.passFrom=null; ball.thru=null; ball.z=0; ball.x=r.x-R; ball.y=r.y; ball.vx=v; ball.vy=0; const f=r.facing; r.facing={x:-1,y:0};
@@ -54,15 +60,15 @@ const flick = async (dx, dy) => { await finger('touchStart', skillAt.x, skillAt.
 const reps = () => mp.evaluate(() => { const m = document.getElementById('labTally').textContent.match(/^(\d+) ball/); return m ? +m[1] : 0; });
 // a ball served; a flick on SKILL (dx, dy on the screen) begun as the ball comes within `at` px of him, the stick then held
 // that way, as you'd go after it; what the lab says of it
-const away = {};   // (v214: for each flicked ball, the furthest it got from him before he was on it again, px)
+const away = {}, hop = {};   // (v214: for each flicked ball, the furthest it got from him before he was on it again, px; v215: and how high it popped up off his foot)
 const ball = async (d, at, tag) => { const n0 = await reps(); await mp.tap('#labGoChip');
   if(d){ for(let i = 0; i < 300; i++){ const g = await mp.evaluate(() => window.__T.gap()); if(g != null && g < (at ?? 300)) break; await mp.waitForTimeout(5); }   // (v213: 300 px, in good time with the machine busy -- at 160 a flick could end after he'd taken it)
-    await flick(d[0], d[1]); await mp.evaluate(d => { const l = Math.hypot(d[0], d[1]); window.__stick = { x: d[0] / l, y: d[1] / l };
-      // (v214: once he's touched it, after the ball, as you would -- the magnet's off in the labs: a touch that strays, he steers onto)
-      window.__far = 0; const t0 = performance.now(); (function chase(){ const T = window.__T; if(T.own() || performance.now() - t0 > 5000) return;
-        if(T.mine()){ window.__far = Math.max(window.__far, T.gap() || 0); const v = T.toBall(); if(v) window.__stick = v; } requestAnimationFrame(chase); })(); }, d); }
+    await flick(d[0], d[1]); await mp.evaluate(d => { window.__stick = null;   // (v215: the stick left alone till he's touched it -- he meets it; held, the stick's his to go where you push: see THE STICK HELD)
+      // (v214: once he's touched it, after the ball, as you would)
+      window.__far = 0; window.__zmax = 0; const t0 = performance.now(); (function chase(){ const T = window.__T; if(T.own() || performance.now() - t0 > 5000) return;
+        if(T.mine()){ window.__far = Math.max(window.__far, T.gap() || 0); window.__zmax = Math.max(window.__zmax, T.z()); const v = T.toBall(); if(v) window.__stick = v; } requestAnimationFrame(chase); })(); }, d); }
   let txt = ''; for(let i = 0; i < 120; i++){ await mp.waitForTimeout(60); if(await reps() > n0){ txt = await mp.textContent('#labResult'); break; } }
-  if(d && tag) away[tag] = Math.round(await mp.evaluate(() => window.__far || 0));
+  if(d && tag){ away[tag] = Math.round(await mp.evaluate(() => window.__far || 0)); hop[tag] = +(await mp.evaluate(() => window.__zmax || 0)).toFixed(1); }
   await mp.evaluate(() => { window.__stick = null; }); await mp.waitForTimeout(300); return txt; };
 
 // --- YOUR TOUCH, LEFT ALONE --------------------------------------------------------------------------------------------
@@ -87,22 +93,29 @@ const off = t => { const m = t.match(/went (\d+)° off/); return /and it went th
 ok(Object.keys(want).every(k => new RegExp('TOUCH ' + want[k][1]).test(got[k])), 'a flick on SKILL sends his first touch the way you flicked, up, right, down, left and up and across alike (the arrows as they look on the screen: ' + Object.keys(want).map(k => (got[k].match(/TOUCH (\S)/) || [])[1]).join(' ') + ')');
 const again = t => { const m = t.match(/on it again in ([\d.]+) s/); return m ? +m[1] : null; };
 ok(Object.keys(want).every(k => off(got[k]) <= 15 && /on it again/.test(got[k])), '...within a few degrees of it (v214: 15, as it looks on the screen -- the likely touch of a Ball control 10 man strays up to 12 on the pitch: ' + Object.keys(want).map(k => off(got[k]) + '°').join(', ') + '), and going after it you\'re on it again');
+ok(Object.keys(want).every(k => hop[k] >= 7 && hop[k] < 12), 'it pops up off his foot as it goes: ' + Object.keys(want).map(k => hop[k] + ' px').join(', ') + ' high at the most, under the 12 a ball\'s in the air at, so he can take it on the hop (v215: about 2 px off a PERFECT touch before, nothing you\'d see)');
 ok(Object.keys(want).every(k => away[k] >= 38 && again(got[k]) >= 0.4 && again(got[k]) <= 1.5), 'pushed into space, away from him till he\'s caught it up and taken it at his feet: ' + Object.keys(want).map(k => away[k] + ' px').join(', ') + ' from him at the most (1.7 m and more), and on it again in ' + Object.keys(want).map(k => again(got[k]) + ' s').join(', ') + ' (v214: his again as soon as it was in his reach, a fifth of a second on -- 23 to 30 px from him at the most)');
 
 // --- FLICKED IN TIME, OR JUST AFTER: the same touch either way --------------------------------------------------------
 await mp.tap('#labBar [data-lab="pace"]'); await mp.waitForTimeout(60);   // (the next pace up: still quick enough...)
 let slowSet = false; for(let i = 0; i < 6 && !slowSet; i++){ if(/250/.test(await mp.textContent('#labPaceV'))) slowSet = true; else { await mp.tap('#labBar [data-lab="pace"]'); await mp.waitForTimeout(60); } }
-// a slow ball, flicked in good time -- 13 m off -- and the stick then held the way you flicked (v212: before, that took
-// him off the ball's line before it got to him, and it ran past him -- wide of his reach)
+// a slow ball, flicked in good time -- 13 m off -- and the stick then left alone (v215: as before v212 -- held, it's yours)
 const inTime = { down: await ball([0, 60], 330), up: await ball([0, -60], 330), right: await ball([60, 0], 330) }, early = inTime.down;
-info('slow balls flicked in good time, the stick held that way: ' + JSON.stringify(inTime));
+info('slow balls flicked in good time, the stick left alone: ' + JSON.stringify(inTime));
 await mp.evaluate(() => window.__T.spread(0));   // (v214: his likely touch -- a Ball control 10 man's, PERFECT: what's read is the flick that ends after he's taken it, which he has to have taken)
 const lateOne = await ball([0, -60], 37);   // (begun as it gets to him: his reach, at Ball control 10 -- v214: 30, a 5.5 man's)
 await mp.evaluate(() => window.__T.spread(1));
 info('a slow ball, flicked at once: ' + early + ' -- one flicked as it got to him: ' + lateOne);
 ok(slowSet && Object.entries({ down: '↓', up: '↑', right: '→' }).every(([k, a]) => new RegExp('TOUCH ' + a).test(inTime[k]) && !/just after he took it/.test(inTime[k]) && !/OUT OF REACH|RAN PAST/.test(inTime[k])),
-  'a slow ball flicked in good time, the stick then held the way you flicked: he still meets it, and his first touch itself goes that way, down, up and right (v212: it took him off its line, and it ran past him)');
+  'a slow ball flicked in good time, the stick then left alone: he meets it, and his first touch itself goes that way, down, up and right');
 ok(/TOUCH ↑/.test(lateOne) && /just after he took it/.test(lateOne), 'a flick begun as the ball gets to him, ending just after he\'s taken it: still his first touch, off his foot -- and the lab says so');
+
+// --- THE STICK HELD AFTER A FLICK: YOURS (v215) -------------------------------------------------------------------------
+// a flick one way across the pitch, the ball on its way to pass 40 px to the other side of him: the stick left alone, he
+// goes across to meet it; held the way you flicked, he goes that way, as you push (v212 had him meet it all the same)
+const alone = await mp.evaluate(() => window.__T.held(0, 0, 0, -1)), heldUp = await mp.evaluate(() => window.__T.held(0, -1, 0, -1));
+info('the way he goes, a flick asked for: the stick left alone ' + JSON.stringify(alone) + ', held the way you flicked ' + JSON.stringify(heldUp));
+ok(alone && heldUp && alone.ix < -0.5 && alone.iy > 0.1 && heldUp.iy < -0.99 && Math.abs(heldUp.ix) < 0.01, 'a flick asked for, the stick left alone: he goes to meet the ball, on toward it and across to its line; held the way you flicked, the stick\'s yours and he goes where you push it, away from its line (v215: v212 had him meet it all the same -- taken out)');
 
 // --- IN THE AIR, AND THE COMPUTER'S MAN --------------------------------------------------------------------------------
 while(!/CHEST/.test(await mp.textContent('#labServeV'))){ await mp.tap('#labBar [data-lab="serve"]'); await mp.waitForTimeout(60); }

@@ -139,23 +139,19 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     middle at Dribbling 5.5 (as every man's went before, whatever his Dribbling: 27), 35 at 1 and 21 at 10, on average
     21, 25 and 18 px. Flat out, or getting going, a poor dribbler's knock goes further (39 px at Dribbling 1); a good
     one's doesn't. It's never stuck to him: even at 10 it's touched on every stride.
-  - **Turning with it: Agility turns his body, Dribbling has the ball keep up.** Every quarter of a radian or so his
-    run swings round at pace, a touch takes the ball round with him: none at Dribbling 10, more the worse he dribbles,
-    and the more off the line he meant. It comes back to his feet as quickly as he dribbles (0.6 times the 5.5 rate at
-    1, 1.6 times at 10), and what's left of the last counts. So a quick man who can't dribble, whose body turns fast,
-    has the touches come on top of each other: cutting this way and that at a sprint, Dribbling 1, it was loose 57% of
-    the time at Agility 10 against 38% at Agility 1. A slow-turning man who can dribble keeps it at his feet all the way
-    round (21.8 px at most); he just takes longer about it. Stood still, the ball comes round to the way he's facing in
-    a quarter turn in 0.1 s at Dribbling 10, 0.15 s at 5.5 and 0.25 s at 1 (it was 0.15 s for everyone).
-  - **A touch that gets away.** A touch that would take the ball more than 28 px out from his feet, what's left of the
-    last one included, gets away from him: it runs on loose, anyone's to nick, until he's caught it up. Running straight,
-    even flat out, it doesn't happen at all for a man of 3 or better and only now and then at 1: in open space a poor
-    dribbler is still a threat. Cutting this way and that at a sprint at Dribbling 1 it got away five times in 5 s, and
-    he was back on it inside 0.62 s each time with nobody near. Never at 5.5 or 10.
-  - **Out of a skill move,** the ball isn't quite at his feet: out to 43 px from his middle after a drag-back at
-    Dribbling 1 and back in 0.52 s, 30 px at 5.5 (0.15 s), 26 px at 10 (0.07 s) -- the moment a poor dribbler has to
-    get it back, and a man can get at it. The moves themselves are as they were: their timing, their stars, how they
-    sell the man in front.
+  - **Turning with it: Agility turns his body, Dribbling has the ball keep up.** The ball comes round with him at his
+    Dribbling's pace: stood still, round to the way he's facing in a quarter turn in 0.1 s at Dribbling 10, 0.15 s at
+    5.5 and 0.25 s at 1 (it was 0.15 s for everyone). A slow-turning man who can dribble keeps it at his feet all the
+    way round; he just takes longer about it. (v208 to v214, every quarter of a radian or so his run swung round at pace
+    a touch also knocked it out from his feet, more the worse he dribbled, so a quick man who couldn't dribble turned
+    away from it -- loose 57% of the time cutting at a sprint at Dribbling 1 and Agility 10. Taken out in v215.)
+  - **A touch that got away (v208 to v214; taken out in v215).** A touch that would have taken the ball more than 28 px
+    out from his feet got away from him, loose and anyone's, till he'd caught it up: cutting this way and that at a
+    sprint at Dribbling 1, five times in 5 s. Since v215 nothing on the run gets away: it's his, at his feet.
+  - **Out of a skill move (v208 to v214; taken out in v215)** the ball wasn't quite at his feet: out to 43 px from his
+    middle after a drag-back at Dribbling 1 and back in 0.52 s, 30 px at 5.5, 26 px at 10. Since v215 it's at his feet
+    at once, whatever his Dribbling. The moves themselves are as they were: their timing, their stars, how they sell
+    the man in front.
   - **His own touch, got back, isn't jumped to his feet.** A ball he'd knocked or touched off himself, or a dead one,
     is taken where it is, and the carry brings it in, as quickly as he dribbles. A perfect first touch is dead where he
     meets it and slides in to his feet; it used to jump to them.
@@ -163,7 +159,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - Over 45 minutes of computer against computer at 60 frames a second, the matches play as they did: 28.0 passes a
     minute (28.1 before), 2.8 tackles (2.5), 6.7 turnovers (6.6), 0.91 shots and headers (the same), 12 goals (14).
   - The dials (Settings; the Dribble drill floats them to the top): Dribbling: touch each stride, knocked on flat out,
-    a cut, back at his feet, a touch that gets away, after a skill move, the ball round with him; Ball control: the
+    back at his feet, the ball round with him (v215: a cut, a touch that gets away and after a skill move, gone); Ball control: the
     cone at 1, 5 and 10, its clean middle, less sure at the edge, the reach at 1 and 10; and Touch at the cone's edge.
     Knock-on variance is how uneven the touches are (less so the better he dribbles). Knock-on touch is now only the
     drill's demo ball.
@@ -258,11 +254,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **TRAP LAB is back on the start menu,** first of the labs, taking the ball as a match does: your first touch your
     own, a flick on SKILL to send it a way. No press to time, so no timing meter. Each ball reads out its touch, its
     grade, the way it went against the way you flicked, and how soon he's on it again. See **Trap Lab**.
-  - **Flick, then hold the stick the way you flicked:** you still go to meet the ball, and your first touch takes it
-    that way. Before, holding the stick that way took you off the ball's line before it got to you, and it ran past
-    you -- 8 balls in 14, flicked 30° to 150° off its line, a 12 m and a 24 m pass at Ball control 5.5. Now none: all
-    14 taken within 15° of the flick, and on it again in 0.13 to 0.17 s. Leave the stick alone and you meet it, as
-    before; hold it well away from the flick (more than 100°) and it's yours to go where you like.
+  - **Flick, then hold the stick the way you flicked (v212 to v214; taken out in v215):** you still went to meet the
+    ball, and your first touch took it that way. Before, holding the stick that way took you off the ball's line before
+    it got to you, and it ran past you -- 8 balls in 14, flicked 30° to 150° off its line, a 12 m and a 24 m pass at
+    Ball control 5.5. Since v215 the stick held is yours again: you go where you push it, as before v212 (the magnet
+    still bends you onto a slow ball near you); leave it alone and you go to meet it.
   - A flick that ends just after he's taken it is still his first touch, off his foot, as before: the lab says so.
   - The old timed press is gone from the lab too: its four dials, and the drag on TRAP's three, are off Settings.
 - **Copies of a shape (v213).** The formations as set on the Signature Players sheet: five copies, each a shape's lines
@@ -313,6 +309,27 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     meet it, and a ball sent on behind him spent its push getting past him. The push dial is 100 (it was 55).
   - **The Trap Lab:** taken as they come, its balls show the spread; a touch that comes off him, he goes to get with
     the stick left alone, as in a match (the magnet works in the Trap Lab now).
+- **Three of the changes since v207 taken out, and a directional touch that pops up (v215).**
+  - **Taken out, as you chose from the list of changes since v207:** a cut at pace no longer pushes the ball out from
+    his feet, and a touch on the run never gets away from him (v208); out of a skill move the ball's at his feet at once
+    (v208); and the stick held after a flick is yours again, so he goes where you push it (v212 had him meet the ball
+    all the same). The other nineteen stay as they were.
+  - **Cutting at pace:** the ball comes round with him at his Dribbling's pace, as it did, but a cut no longer knocks it
+    out from his feet: through the cuts it's as close as running straight flat out, out to 39, 28 and 19 px from his
+    middle at Dribbling 1, 5.5 and 10 (straight: 39, 28 and 19). It's never loose: v208 to v214, cutting this way and
+    that at a sprint, a Dribbling 1 man's touch got away from him two times and more in 5 s, and a quick man who couldn't
+    dribble turned away from it. The stride's knock is as it was (further the worse he dribbles, flat out further still).
+  - **Out of a skill move** the ball's within 27 px of his middle 0.07 s after it, at Dribbling 1, 5.5 and 10 alike (a
+    Dribbling 1 man's was out to 43 px and back in 0.52 s). The moves are as they were; the skill moves page's clips
+    are recorded again.
+  - **The stick held after a flick on SKILL:** leave it alone and he goes to meet the ball, as ever; hold it, and he goes
+    where you push it, as before v212. In the Trap Lab, its balls served at you, you still meet every one: a quick
+    ball's on you before you've gone far, and the magnet (on there since v214) bends you onto a slow one near you.
+  - **The directional first touch pops up off his foot** as it goes: about 8 px (0.4 m) off a perfect touch, 11 off the
+    worst, and down in 0.35 to 0.4 s with a little bounce -- under the 12 px a ball counts as in the air, so he can take
+    it on the hop as he catches it up, and the grass slows it as ever. It was 2 px off a perfect touch, nothing you'd
+    see. It's still pushed into space: in the Trap Lab, 41 px (1.8 m) from him and his again in 0.43 s.
+  - The dials gone from Settings: Dribbling: a cut, a touch that gets away, after a skill move.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -973,15 +990,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   showing takes it, just as he would off the stick. Beating a man means moving the ball out of his reach as he
   commits. A move sells the man in front of you for a moment, the longer the better you are than him (see **The
   computer does skill moves**). Each move costs a little stamina. How quick a move is and how far it carries you is
-  your Dribbling: the times and distances here are at Dribbling 10. So is how cleanly you come out of it (v208): at
-  Dribbling 10 the ball's at your feet, ready for the next turn or burst; at 1 it's off them a moment, a heavy touch on
-  top of it gets away from you, and a man close by can get at it.
+  your Dribbling: the times and distances here are at Dribbling 10. Out of it the ball's at your feet, ready for the
+  next turn or burst, whatever your Dribbling (v215: v208 to v214 a poor dribbler's was off his feet a moment).
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
   arrives, by the First touch push dial (your own pace along it is added). It's pushed into space (v214): it leaves
   your foot on the side it's going and you can't have it back until you've caught it up and it's at your feet -- about
   2 m from you as you go after it, and on it again in about half a second. (It was yours again a fifth of a second on,
-  still inside your reach ring, and hardly went anywhere; the push dial is 100, it was 55.)
+  still inside your reach ring, and hardly went anywhere; the push dial is 100, it was 55.) It pops up off your foot as
+  it goes (v215), about 8 px, 0.4 m, and comes down as you catch it up. After the flick, leave the stick alone and you
+  go to meet the ball; hold it and it's yours, you go where you push it (v215, as before v212).
   - **Any ball on its way to you arms it:** one played to you, one led into space ahead of you, or one whose path runs
     within 6 m of you, from as far as 40 m off. It stays armed until the ball gets to you, or someone else touches it.
     (It used to need the ball heading straight at you from within 15 m, unless you'd left the stick alone since the
@@ -1015,7 +1033,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     (whether he slides in), plus the usual NEXT, TIME, NEW BALL and TUNE.
   - TUNE has the skill-move dials, which also apply in matches: the croqueta's and the roulette's distance and time,
     the knock-on's push and time, the rainbow's lead, height and wind-up, the first-touch push, and the Dribbling, Agility and Tackling baselines
-    (v208: and how far off his feet the ball is out of a move, how quickly it's back, and how fast it comes round with him).
+    (v208: and how quickly a ball out from his feet is back, and how fast it comes round with him; v215: how far off his feet it was out of a move, gone).
     A move's time and distance are the dials' at Dribbling 10. At the Dribbling dial's 5.5 a move takes 1.23 times
     as long and goes 85% as far, so set it to 10 for moves as quick as they were (and as the timings above were
     measured).
@@ -3215,6 +3233,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
 ## Trap Lab
 
+**Football Classic (v215):** a flicked touch pops up off his foot as it goes, about 8 px (0.4 m), and comes down as he
+catches it up. After a flick, the stick held is yours: he goes where you push it.
+
 **Football Classic (v214):** taken as they come, the touch is only as good as the man: at the lab's Ball control 5.5,
 about a third PERFECT, half CLEAN and one in seven LOOSE on a 20 m/s ball (it was nearly every one PERFECT). A touch
 that comes off him, he goes to get with the stick left alone, as in a match (the magnet works in the Trap Lab). A
@@ -3222,8 +3243,8 @@ flicked touch is pushed into space, about 2 m from him before he's on it again.
 
 **Football Classic (v212):** TRAP LAB is back on the start menu, first of the labs, and takes the ball as a match does.
 There's no press to time, so no timing meter and no guide: your first touch is your own (Ball control, Composure, the
-moment), and a flick on SKILL as the ball comes, or just as it gets to you, sends it that way. Hold the stick the way
-you flicked and you still meet the ball. For every ball the result line gives the touch's grade, how much of its pace it
+moment), and a flick on SKILL as the ball comes, or just as it gets to you, sends it that way. Leave the stick alone
+and you meet the ball; hold it and it's yours (v215: v212 to v214 you met it all the same). For every ball the result line gives the touch's grade, how much of its pace it
 kept and which way it went; for a flicked one, which way you flicked against which way it went (the arrows as they look
 on the screen) and whether your flick ended just after he'd taken it (off his foot); and how soon he's on it again.
 The tally counts the grades, the balls that ran past, and the flicked touches with how far off they went on average.
@@ -3342,6 +3363,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v215: three changes taken out, and a directional touch that pops up.** From the list of changes since v207, as
+  chosen: a cut at pace no longer pushes the ball out from his feet and nothing on the run gets away from him (v208);
+  out of a skill move the ball's at his feet at once (v208); the stick held after a flick is yours again (v212). The
+  directional first touch pops up off his foot, about 8 px. Their three dials are gone, and the skill moves' clips are
+  recorded again. `tests/classic-dribble.mjs` and `tests/classic-traplab.mjs` check the new ways. See **Three of the
+  changes since v207 taken out, and a directional touch that pops up (v215)**.
 - **v214: the first touch only as good as the man, and a directional touch into space.** Even with nobody near, a
   first touch is only as good as the man's Ball control and the ball's pace (a Ball control 5.5 man takes a 20 m/s
   ball about a third PERFECT, where nearly every one was), and under pressure much as before. A directional first

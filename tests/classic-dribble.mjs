@@ -1,7 +1,8 @@
 // FOOTBALL CLASSIC, DRIBBLING AND BALL CONTROL (v208). Dribbling is the ball at his feet once he has it: how far each
-// stride's touch takes it, how much further flat out and cutting at pace, how quickly it's back at his feet (after a
-// touch, a cut, a ball he's just got back, a skill move), and a touch that gets away from a poor dribbler altogether --
-// Agility turns his body, Dribbling has the ball keep up with it. Ball control is the cone in front of him he takes a ball
+// stride's touch takes it, how much further flat out, how quickly it's back at his feet (after a touch, a ball he's just
+// got back) -- Agility turns his body, Dribbling has the ball keep up with it. (v215: v208's cut at pace that pushed it out
+// from his feet, the touch that got away from a poor dribbler altogether, and the ball off his feet coming out of a skill
+// move, taken out: through a cut it's as close as running straight, it's never loose, and out of a move it's at his feet.) Ball control is the cone in front of him he takes a ball
 // in, centred on the way he faces (not the way he's moving): 120° in all at 1, 180° at 5, 210° at 10, on a smooth curve,
 // the touch harder the nearer the edge, not all at once; past his Back to it angle he can't take it at all. Compared at
 // 1, 5.5 and 10, everything else held level, for you and the computer alike. The game run at a steady 60 frames a
@@ -159,19 +160,20 @@ ok(G[1] > G[5.5] + 4 && G[5.5] > G[10] + 4, 'getting going, a poor dribbler\'s f
 ok(C[1].sprint.max > C[1].jog.max + 2.5 && C[10].sprint.max <= C[10].jog.max + 1 && C[1].sprint.max > C[10].sprint.max + 15,
   'a poor dribbler knocks it further ahead flat out (Dribbling 1 out to ' + C[1].sprint.max + ' px, running ' + C[1].jog.max + '); a good one doesn\'t (Dribbling 10: ' + C[10].sprint.max + ', running ' + C[10].jog.max + ')');
 ok([1, 5.5, 10].every(D => C[D].jog.got === 0 && C[D].sprint.got === 0), 'running straight, even flat out, it never gets away from anyone: he\'s still effective in open space with it');
-ok(C[1].zig.got >= 2 && C[1].zig.loose > 0.1 && C[5.5].zig.got === 0 && C[10].zig.got === 0 && C[5.5].zigJog.got === 0,
-  'cutting this way and that at a sprint, a Dribbling 1 man\'s touch gets away from him (' + C[1].zig.got + ' times in 5 s, loose ' + Math.round(C[1].zig.loose * 100) + '% of it); never at 5.5 or 10');
-ok(C[1].zig.mean > C[5.5].zig.mean + 8 && C[5.5].zig.mean > C[10].zig.mean + 4, '...and the more he dribbles the closer it stays through the cuts (' + C[1].zig.mean + ', ' + C[5.5].zig.mean + ', ' + C[10].zig.mean + ' px on average)');
-ok(!C[1].zig.lost && !C[1].zigJog.lost && Math.max(C[1].zig.longest, C[1].zigJog.longest) <= 0.8, '...but it\'s never gone for good: he\'s back on it inside ' + Math.max(C[1].zig.longest, C[1].zigJog.longest) + ' s each time, nobody near');
+ok([1, 5.5, 10].every(D => C[D].zig.got === 0 && C[D].zigJog.got === 0 && !C[D].zig.lost && !C[D].zigJog.lost),
+  'cutting this way and that, at a sprint or a jog, it never gets away from anyone, a Dribbling 1 man included (v215: v208 had his touch get away from him, two times and more in 5 s cutting at a sprint -- taken out)');
+ok([1, 5.5, 10].every(D => C[D].zig.max <= C[D].sprint.max + 3 && C[D].zig.mean <= C[D].sprint.mean + 1.5),
+  '...nor do the cuts push it out from his feet: as close through them as running straight flat out, the stride\'s knock all there is to it (furthest ' + [1, 5.5, 10].map(D => C[D].zig.max + '/' + C[D].sprint.max).join(', ') + ' px cutting/straight, at Dribbling 1, 5.5, 10)');
+ok(C[1].zig.mean > C[5.5].zig.mean + 2.5 && C[5.5].zig.mean > C[10].zig.mean + 2.5, '...and the better he dribbles the closer it stays, cutting as running straight (' + C[1].zig.mean + ', ' + C[5.5].zig.mean + ', ' + C[10].zig.mean + ' px on average)');
 
-// AGILITY TURNS HIM, DRIBBLING THE BALL: the same cuts at a sprint -- quick of body (Agility 10) and a poor dribbler, his
-// touches come on top of each other and it gets away from him more than a slow one's (Agility 1); a slow-turning man with
-// Dribbling 10 has it at his feet all through, he just takes longer about it
+// AGILITY TURNS HIM, DRIBBLING THE BALL: the same cuts at a sprint, quick of body (Agility 10) or slow (Agility 1) -- it's
+// never loose (v215: v208 had a quick man who couldn't dribble turn away from it); a slow-turning man with Dribbling 10 has
+// it at his feet all through, he just takes longer about it
 const both = async (D, A) => { const a = sum(await carry(D, A, zig(8, 0.75, 1), 6), 0.75), b = sum(await carry(D, A, zig(8, 0.75, 1), 6), 0.75);   // (twice over: which touches get away isn't the same run to run)
   return { loose: +((a.loose + b.loose) / 2).toFixed(2), got: a.got + b.got, mean: +((a.mean + b.mean) / 2).toFixed(1), max: Math.max(a.max, b.max) }; };
 const A10 = await both(1, 10), A1 = await both(1, 1), D10A1 = await both(10, 1);
 info('cutting at a sprint, Dribbling 1: Agility 10 ' + JSON.stringify(A10) + ', Agility 1 ' + JSON.stringify(A1) + '; Dribbling 10, Agility 1 ' + JSON.stringify(D10A1));
-ok(A10.loose >= A1.loose + 0.04, 'a quick man who can\'t dribble turns away from it: loose ' + Math.round(A10.loose * 100) + '% of the time at Agility 10 against ' + Math.round(A1.loose * 100) + '% at 1 (Dribbling 1, the same cuts at a sprint)');
+ok(A10.got === 0 && A1.got === 0 && A10.loose === 0 && A1.loose === 0, 'a man who can\'t dribble, quick of body or slow, never turns away from it: never loose through the same cuts at a sprint, at Agility 10 or 1 (v215: v208 had the quick one lose it ' + 'more)');
 ok(D10A1.got === 0 && D10A1.max <= 26, 'a slow-turning man who can dribble (Agility 1, Dribbling 10) keeps it at his feet through every cut (' + D10A1.max + ' px at most)');
 
 // THE BALL ROUND WITH HIM: stood still, the stick swung square across -- how long the ball takes to come round to the
@@ -201,8 +203,9 @@ info('carried straight on at 130 px/s, yours and the computer\'s (mean px from h
 ok([1, 5.5, 10].every(D => Math.abs(same[D].you - same[D].them) <= 1) && same[1].them > same[10].them + 6, 'the computer\'s men carry it the same as yours at each Dribbling (' + [1, 5.5, 10].map(D => same[D].you + '/' + same[D].them).join(', ') + ')');
 
 // ===== OUT OF A SKILL MOVE =====
-// a drag-back from a run: as it ends, how far out from his feet the ball is, and how soon it's back at them -- quicker the
-// better he dribbles; the move itself as long as ever (its timing is the skill move's own)
+// a drag-back from a run: as it ends, how soon the ball's at his feet -- at once, whatever his Dribbling (v215: v208 had it
+// off them a moment, a poor dribbler's further off and longer); the move itself as long as ever (its timing is the skill
+// move's own)
 const move = D => page.evaluate(D => new Promise(res => { const T = window.__T, atk = T.atkOf('G'), m = T.controlled(), b = T.ball();
   T.freeze(); T.P.knockVar.val = 0; for(const q of T.players()) if(q !== m){ q.x = 60; q.y = 60; q.vx = q.vy = 0; }
   const keep = m.stats; m.stats = Object.assign({}, keep, { dribbling: D, agility: 5.5, speed: 6 }); m.stars = 5;
@@ -219,23 +222,19 @@ const move = D => page.evaluate(D => new Promise(res => { const T = window.__T, 
   })(); }), D);
 const M = {}; for(const D of [1, 5.5, 10]) M[D] = await move(D);
 info('out of a drag-back (how long the move took, the furthest out the ball got from his middle after it, how soon it was back within 27 px): ' + JSON.stringify(M));
-ok(M[1].far > M[5.5].far + 3 && M[5.5].far > M[10].far + 1 && M[10].far <= 27, 'coming out of a drag-back the ball is the further from his feet the worse he dribbles: out to ' + M[10].far + ' px at Dribbling 10, ' + M[5.5].far + ' at 5.5, ' + M[1].far + ' at 1');
-ok(M[10].back != null && M[1].back != null && M[1].back > M[10].back && !M[1].lost, '...back at his feet in ' + M[10].back + ' s at 10 and ' + M[1].back + ' s at 1, still his');
+ok([1, 5.5, 10].every(D => M[D].back != null && M[D].back <= 0.12 && !M[D].lost), 'coming out of a drag-back the ball\'s at his feet at once, whatever his Dribbling: within 27 px of his middle ' + [1, 5.5, 10].map(D => M[D].back + ' s').join(', ') + ' after it, at Dribbling 1, 5.5 and 10 -- his stride\'s knock takes it on from there as ever (v215: v208 had a poor dribbler\'s off his feet a moment, and back later than a good one\'s)');
 
-// A TOUCH THAT'S GOT AWAY IS ANYONE'S: one of a poor dribbler's, running on loose, and one of theirs in its way takes it
-const nick = await page.evaluate(() => new Promise(res => { const T = window.__T, atk = T.atkOf('G'), m = T.controlled(), b = T.ball(), o = T.players().find(q => q.team !== 'G' && q.role !== 'G');
-  T.freeze(); for(const q of T.players()) if(q !== m && q !== o){ q.x = 60; q.y = 60; q.vx = q.vy = 0; }
+// NOTHING GETS AWAY (v215): a poor dribbler's stride knock on top of a ball well out from his feet -- what got away from
+// him, v208 to v214, loose and anyone's -- is still his, at his feet
+const keepIt = await page.evaluate(() => { const T = window.__T, atk = T.atkOf('G'), m = T.controlled(), b = T.ball();
+  T.freeze(); for(const q of T.players()) if(q !== m){ q.x = 60; q.y = 60; q.vx = q.vy = 0; }
   const keep = m.stats; m.stats = Object.assign({}, keep, { dribbling: 1, speed: 6 });
   m.x = T.FW / 2; m.y = T.YC; m.vx = atk * 150; m.vy = 0; m.state = 'normal'; m.facing = { x: atk, y: 0 }; m.carryAngle = atk > 0 ? 0 : Math.PI;
   b.x = m.x + atk * 25; b.y = m.y; b.z = 0; b.vx = m.vx; b.vy = 0; T.own(m, 25); m.touchOff = 60;
-  const away = T.runTouch(m, 150, 0);   // (on top of what's left of the last, it's more than he can keep)
-  const okeep = o.stats; o.stats = Object.assign({}, okeep, { interceptions: 10, tackle: 10, defIQ: 10, composure: 10, ballControl: 10 });   // (a man who'll keep it)
-  o.x = m.x + atk * 95; o.y = m.y + 6; o.vx = o.vy = 0; o.state = 'normal'; o.noTouchT = 0; o.facing = { x: -atk, y: 0 };
-  const t0 = T.simNow(); let touched = false;
-  (function tick(){ touched = touched || b.lastTouch === o.team;
-    if(b.ownedBy || T.simNow() - t0 > 1.5){ m.stats = keep; o.stats = okeep; return res({ away, touched, his: b.ownedBy === o, mine: b.ownedBy === m }); } requestAnimationFrame(tick); })(); }));
-info('a poor dribbler\'s touch that got away, one of theirs in its way: ' + JSON.stringify(nick));
-ok(nick.away && nick.touched, 'a touch that\'s got away from him runs on loose, anyone\'s: one of theirs in its way gets to it first' + (nick.his ? ' and has it' : ' (it came off him)'));
+  T.runTouch(m, 150); const r = { his: b.ownedBy === m, loose: !b.ownedBy, knock: +(m.touchKnock || 0).toFixed(1) };
+  m.touchOff = 0; m.touchKnock = 0; m.stats = keep; return r; });
+info('a Dribbling 1 man\'s stride knock on top of a ball 60 px out from his feet: ' + JSON.stringify(keepIt));
+ok(keepIt.his && !keepIt.loose, 'a poor dribbler\'s knock on top of a ball well out from his feet is still his, not loose (v215: v208 to v214 it got away from him, anyone\'s to nick)');
 
 process.exitCode = rep.finish();
 await browser.close();
