@@ -384,6 +384,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     off his front as he struck a corner).
   - The dial: Ball control: the ball round to his front (it was Dribbling: the ball round with him). Agility: round the
     ball to go is gone. The skill moves page's clips are recorded again.
+- **After your first touch: no spinning round, and you go to it (v219).**
+  - **Your own touch, loose by you** -- off your first touch, a heavy touch, out of a move -- **you go to it first.**
+    Push the stick more than 35° round from it and you're steered to it instead, coming at it from the side you're
+    pushing toward; once it's at your feet you turn with it, the ball coming round across your front at your Ball
+    control's pace (v218). You used to spin straight round the way you pushed, up to 167° in a frame, and run off from
+    your own touch with it behind you, and when you did get it, it came all the way round you. A 16 m pass, a scrappy
+    first touch likely and the stick pushed up the pitch: you had it back 4 times in 8; now 8 in 8, in front of you going
+    up the pitch inside 1.2 s, the ball never going back on itself.
+  - **With the ball, or your own touch loose by you, you never turn round in a frame:** your body turns as fast as your
+    Agility turns your run, or half as fast again as your Ball control brings the ball round, whichever's the quicker --
+    14° a frame at the most there. In v218 it could still jump 35° at once; before that, all the way round.
+  - The computer's men as they were.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3427,6 +3439,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v219: after your first touch, no spinning round.** Your own touch loose by you, you go to it first -- pushed more
+  than 35° away from it, you're steered to it from the side you're pushing toward -- and turn with it once it's at your
+  feet; with the ball your body never turns round in a frame. You used to spin straight round the way you pushed and
+  leave a loose touch behind you (you had it back 4 times in 8; now 8 in 8). New checks in `tests/classic-touch.mjs`.
+  See **After your first touch: no spinning round, and you go to it (v219)**.
 - **v218: turning with the ball, round his front at his Ball control's pace.** The ball comes round the way he's turning,
   across his front, never round his back (with it off to one side and him turning the other way it used to take the
   short way, round behind him); off his front, yours can turn away from it only half as fast as it comes round, so he

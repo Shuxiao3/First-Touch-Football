@@ -301,6 +301,38 @@ ok(chest1.every(t => t.grade !== 'none' && t.grade !== 'PERFECT' && t.keep >= 0.
 ok(knee10.every(t => t.grade === 'PERFECT' || t.grade === 'CLEAN' || t.grade === 'LOOSE') && knee10.filter(t => t.grade === 'LOOSE').length <= 1 && knee10.filter(t => t.grade === 'PERFECT').length >= 2 && knee10.filter(t => t.grade === 'PERFECT').every(t => t.keep < 0.1),
   'knee high, below the waist, a PERFECT touch is to be had: Ball control 10 kills it dead more often than not (' + knee10.map(t => t.grade + ' ' + t.keep).join(', ') + '; v214: every one, before)');
 
+// AFTER YOUR FIRST TOUCH (v219): a 16 m pass to your man, facing the passer, a scrappy touch likely (the spread 1.6), and the
+// stick pushed up the pitch -- away from where it came -- as it gets to him: he doesn't spin round in a frame and leave it
+// behind him; he goes to it, and turns with it, the ball coming round one way, across his front, to in front of him. Frame
+// by frame from his first touch, 1.2 s: the most his body turns in a frame, whether it came round without going back on
+// itself, and where it ends up
+const after = await page.evaluate(() => new Promise(res => { const T = window.__T, atk = T.atkOf('G'), b = T.ball(), out = []; let k = 0;
+  const W = x => Math.atan2(Math.sin(x), Math.cos(x)), D = x => Math.round(x * 180 / Math.PI), up = atk > 0 ? 0 : Math.PI;
+  const one = () => { if(k >= 8){ window.__stick = null; T.P.aiTouch.val = 1; return res(out); } k++;
+    const mates = T.players().filter(q => q.team === 'G'), a = mates[0], rc = mates[1];
+    T.setControlled(a); T.freeze(); T.P.aiTouch.val = 1.6; window.__stick = null;
+    for(const q of T.players()) if(q !== a && q !== rc){ q.x = T.FW / 2 - atk * 900; q.y = 40; q.vx = q.vy = 0; }
+    rc.stats = Object.assign({}, rc.stats, { ballControl: 5.5, composure: 5.5, agility: 5.5, dribbling: 5.5 });
+    a.stats = Object.assign({}, a.stats, { longPass: 1 }); a.x = T.FW / 2 - atk * 360; a.y = T.YC; a.vx = a.vy = 0; a.noTouchT = 0;
+    rc.x = T.FW / 2; rc.y = T.YC; rc.vx = rc.vy = 0; rc.facing = { x: -atk, y: 0 }; rc.noTouchT = 0; rc.state = 'normal';
+    b.ownedBy = a; b.dribbler = null; b.x = a.x + atk * 20; b.y = a.y; b.z = 0; b.vx = b.vy = b.vz = 0;
+    const R = Math.random; Math.random = () => 0.5; try { T.doPass(0.45, { target: rc }); } finally { Math.random = R; }
+    let touched = false, f0 = null, maxStep = 0, prevB = null, back = 0, n = 0, gotIt = false, t = 0;
+    (function tick(){ n++; const d = Math.hypot(b.x - rc.x, b.y - rc.y);
+      if(d < 120 && !window.__stick) T.stick(atk, 0);
+      if(!touched && (b.ownedBy === rc || b.dribbler === rc)){ touched = true; f0 = Math.atan2(rc.facing.y, rc.facing.x); }
+      if(touched){ t++; const fa = Math.atan2(rc.facing.y, rc.facing.x); maxStep = Math.max(maxStep, Math.abs(W(fa - f0))); f0 = fa;
+        if(b.ownedBy === rc){ gotIt = true; const ba = W(Math.atan2(b.y - rc.y, b.x - rc.x) - up);   // (where it is round him, from up the pitch)
+          if(prevB != null && Math.abs(ba) > Math.abs(prevB) + 0.05) back = Math.max(back, Math.abs(ba) - Math.abs(prevB)); prevB = ba; } }
+      if(t >= 72 || n > 400){ const ba = b.ownedBy === rc ? D(W(Math.atan2(b.y - rc.y, b.x - rc.x) - up)) : null;
+        out.push({ grade: T.lastGrade(), maxStep: D(maxStep), back: D(back), gotIt, ballAt: ba }); return one(); }
+      requestAnimationFrame(tick); })(); };
+  one(); }));
+info('after his first touch, the stick pushed up the pitch (grade, the most his body turned in a frame deg, the most it went back on itself deg, his at his feet, where the ball is from up the pitch at 1.2 s): ' + JSON.stringify(after));
+ok(after.every(a => a.maxStep <= 15), 'after his first touch he never spins round in a frame -- his body turns ' + Math.max(...after.map(a => a.maxStep)) + '° in a frame at the most (v219: he used to turn straight round, up to 174° in a frame, and leave a loose touch behind him)');
+ok(after.filter(a => a.gotIt).length >= 6 && after.filter(a => a.gotIt).every(a => a.back <= 8 && a.ballAt != null && Math.abs(a.ballAt) <= 30),
+  '...he goes to it and turns with it: his at his feet ' + after.filter(a => a.gotIt).length + ' times of ' + after.length + ', the ball coming round one way, never back on itself by more than ' + Math.max(0, ...after.filter(a => a.gotIt).map(a => a.back)) + '°, and in front of him going up the pitch at 1.2 s (' + after.map(a => a.ballAt).join('°, ') + '°)');
+
 // DIRECTIONAL FIRST TOUCH, as played on a phone: you pass, you're put on the man it's going to, and a flick on SKILL
 // sends his first touch that way. (A pass hit without its spray, so it goes where it's aimed.)
 const mob = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });

@@ -7156,6 +7156,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if(ftAim&&!ix&&!iy){ const c=controlled, m=meetPoint(c), dx=m.x-c.x, dy=m.y-c.y, d=Math.hypot(dx,dy);
       return d>8?{ix:dx/d, iy:dy/d}:{ix:0,iy:0}; }
     const gd=guardIntent(controlled,ix,iy); if(gd) return gd;           // (just won it: not back into the man he took it from -- AFTER A TACKLE)
+    const ot=ownTouchTurn(controlled,ix,iy); if(ot) return ot;          // (v219: your own touch, loose by you -- you go to it first: see YOUR OWN TOUCH)
     const mg=magnetPull(controlled,ix,iy); if(mg) return mg;            // (a loose ball by you: see MAGNET)
     if(!ix&&!iy&&assistOn()){ const c=controlled, H=assistSpot(c);       // (DIFFICULTY's assist: he goes to meet their cross)
       if(H){ const dx=H.x-c.x, dy=H.y-c.y, d=Math.hypot(dx,dy); if(d>10) return {ix:dx/d, iy:dy/d}; } }
@@ -7181,6 +7182,22 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     const r=aerialRival(p);
     if(r&&Math.random()>1-aerialOdds(r,p)-CURL_HEAD*crossCurlQ()) headOnGoal(r);
     else headClear(p);
+  }
+  // (v219) YOUR OWN TOUCH, LOOSE BY YOU -- off your first touch, a heavy touch, out of a move -- you go to it first. Pushed
+  // more than BALL_FRONT round from it, you're steered to it instead, coming at it from the side you're pushing toward
+  // (BALL_FRONT off the line to it), and once it's at your feet you turn with it at your Ball control's pace (ballLeash).
+  // You used to turn straight the way you pushed, in a frame, and run off from it with it behind you; and when you did
+  // get it, it came all the way round you. Within OWN_R of you, while it's still your touch; pushing at it, as you push.
+  const OWN_R=3.5*MK;
+  function ownTouchTurn(p,ix,iy){
+    if(!p||!(ix||iy)||ball.ownedBy||gkHold||ball.dribbler!==p||!(ball.dribbleGrace>0)||ball.z>=24||p.state!=='normal'||skillOf(p)) return null;
+    const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy); if(d<1||d>OWN_R) return null;
+    const ba=Math.atan2(dy,dx), off=angW(Math.atan2(iy,ix)-ba);
+    if(Math.abs(off)<=BALL_FRONT) return null;
+    let side=off<0?-1:1; if(Math.abs(off)>2.6&&p.ownSide&&simNow-p.ownSideT<0.2) side=p.ownSide;   // (straight away from it: round the side he'd taken a moment ago -- not flipping as it rolls across the line)
+    p.ownSide=side; p.ownSideT=simNow;
+    const a=ba+side*BALL_FRONT, il=Math.min(1,Math.hypot(ix,iy));
+    return {ix:Math.cos(a)*il, iy:Math.sin(a)*il};
   }
   // THE MAGNET (v88): the ball loose a stride or two from your man -- your own knock-on or a heavy touch, one that's come
   // off him, one knocked loose -- and he's drawn to it till it's at his feet. Whichever way you're pushing he bends toward
@@ -13213,7 +13230,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       if(!watch && !held && !p.adFace && !p.obFace && !guardOn(p) && (!softIn || nsp>30 || il2>=0.35)){
         const useV=softIn && nsp>30, l=useV?nsp:(il2||1), fxx=(useV?p.vx:ix)/l, fyy=(useV?p.vy:iy)/l;
         if(isFinite(fxx)&&isFinite(fyy)&&(fxx||fyy)){
-          if(p===controlled&&withBall(p)){ const L=ballLeash(p,Math.atan2(p.facing.y,p.facing.x),Math.atan2(fyy,fxx),dt); p.facing={x:Math.cos(L.a),y:Math.sin(L.a)}; }   // (v218: his body round no quicker than ballLeash lets it)
+          const ownLoose=p===controlled&&ball.dribbler===p&&ball.dribbleGrace>0&&!ball.ownedBy;
+          if(p===controlled&&(withBall(p)||ownLoose)){ const a0=Math.atan2(p.facing.y,p.facing.x), aw=withBall(p)?ballLeash(p,a0,Math.atan2(fyy,fxx),dt).a:Math.atan2(fyy,fxx),   // (v218: his body round no quicker than ballLeash lets it --
+              mx=Math.max(0.6+ag*16,1.5*ballTurnOf(p))*dt, a=a0+clamp(angW(aw-a0),-mx,mx); p.facing={x:Math.cos(a),y:Math.sin(a)}; }   // v219: and with the ball, or his own touch loose by him, never round in a frame -- as fast as his Agility turns his run, or half as fast again as his Ball control brings the ball round, whichever's the quicker)
           else p.facing={x:fxx,y:fyy};
         }
       }
