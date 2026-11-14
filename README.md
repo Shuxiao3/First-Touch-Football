@@ -376,6 +376,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     behind him, away in 0.55 s at Ball control 1, 0.37 s at 5.5 and 0.30 s at 10, whatever his Agility. Agility still
     turns his body and gets him going again the other way. The computer's men bring it round at their Ball control's
     pace too, keeping it within 35° of their run as before, never round their backs.
+  - **In a match** (computer against computer, 50 minutes) it plays as it did: passes 29.2 a minute (29.5 over v215's two
+    runs), shots 0.76 (0.67), goals 0.30 (0.30), turnovers 7.1 (7.4), passes cut out 7.1 (8.7) -- all within what these
+    move by from one run to the next.
+  - A ball handed to a man at a restart comes round to his front the short way from where it is; only one he's been
+    carrying keeps coming round the way it was (it could send a ball he'd last had long before the long way round, still
+    off his front as he struck a corner).
   - The dial: Ball control: the ball round to his front (it was Dribbling: the ball round with him). Agility: round the
     ball to go is gone. The skill moves page's clips are recorded again.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
