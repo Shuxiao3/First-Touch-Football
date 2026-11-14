@@ -5306,23 +5306,38 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // anyone's to nick, and the grass still slows it as ever. (It was 30 to 90 px/s: 2 px high off a perfect touch, nothing
   // you'd see, and 8 off the worst.)
   const FT_HOP=[90,15];
+  // (v216) WHERE IT IS, AND ROUND HIM. The touch is taken where the ball meets him, and he turns to go after it at his own
+  // pace. It used to be pulled in to his feet, put round on the side it was going, and him turned that way, all the moment
+  // he touched it: the two of them jumped round together. Sent on behind him -- its line through him, within his body and
+  // the ball's (p.r+ball.r, and a little) -- it curls round him instead, on a circle about him as far out as it met him
+  // (FT_ROUND_MIN at the least): off his foot across him, and round, till it's going the way you flicked it, then on
+  // (ftRoundStep). Its push has as much again as it takes to get round him, or out to his side, so it ends up about as far
+  // from him whichever way it's sent (FT_SIDE: where, out to that side, it used to start).
+  const FT_SIDE=24, FT_ROUND_MIN=26, FT_ROUND_T=0.6;
   function directionalTouch(p,s){
     const a=ftAim.d; ftAim=null; if(!(s>=0)) s=1;
     const up=ball.z>WAIST, z0=ball.z, bx=ball.x, by=ball.y, inSp=Math.hypot(ball.vx,ball.vy), floor=up?airKeepOf(p)*inSp:0, ivx=ball.vx, ivy=ball.vy;
     if(up) s=Math.min(s,AIR_CAP);                         // (above the waist: never perfect, see airKeepOf)
-    own(p,p.r+ball.r+5);
+    own(p,dist(p,ball),true);                                // (v216: taken where it is)
     const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999)));
     const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
     const err=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
-    const ang=Math.atan2(a.y,a.x)+err, out=Math.max(push*(1+0.8*(1-s)*(1-s)),floor);
-    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85; ball.touchAt=simNow; p.noTouchT=0.12+0.15*(1-s);
-    ball.vx=Math.cos(ang)*out; ball.vy=Math.sin(ang)*out; ball.z=1; ball.vz=FT_HOP[0]+FT_HOP[1]*(1-s);   // (v215: the hop -- see FT_HOP)
+    const ang=Math.atan2(a.y,a.x)+err, dx=Math.cos(ang), dy=Math.sin(ang);
+    // (v216) where the ball is on him, against the way it's going: along, the cosine of the angle between them; across, its
+    // sine, signed -- round him if its line runs through him; and how much further it has to go than from out to his side
+    const ox=ball.x-p.x, oy=ball.y-p.y, od=Math.hypot(ox,oy)||1, along=(ox*dx+oy*dy)/od, across=(ox*dy-oy*dx)/od;
+    const round=!up&&along<0&&od*Math.abs(across)<p.r+ball.r+4, rOrb=Math.max(od,FT_ROUND_MIN), side=across<0?-1:1;
+    const extra=round?rOrb*(Math.acos(clamp(along,-1,1))-Math.PI/2)+FT_SIDE:Math.max(0,FT_SIDE-od*along);
+    const out=Math.max(push*(1+0.8*(1-s)*(1-s))+extra*k,floor);
+    ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85+(round?0.25:0); ball.touchAt=simNow; p.noTouchT=0.12+0.15*(1-s);   // (v216: a quarter of a second more his own touch, curling round him)
+    ball.vx=dx*out; ball.vy=dy*out; ball.z=1; ball.vz=FT_HOP[0]+FT_HOP[1]*(1-s);   // (v215: the hop -- see FT_HOP)
     ball.dribEsc={p, t:simNow, dx:Math.cos(ang), dy:Math.sin(ang), ft:true};   // (v214: pushed into space -- he can't have it back till he's caught it up, as a touch of his that gets away: escaping -- and then only at his feet: FT_TAKE. It was his again as soon as it was in his reach, a fifth of a second on)
-    if(ball.z<WAIST){ const d0=p.r+ball.r+4; ball.x=p.x+Math.cos(ang)*d0; ball.y=p.y+Math.sin(ang)*d0; }   // (v214: off his foot on the side it's going -- it started in front of him, the way he faced to meet it, and a ball sent on behind him spent its push getting past him)
     if(up){ ball.x=bx; ball.y=by; ball.z=z0; ball.vz=20+40*(1-s); }   // off his chest or thigh, from where he met it
     if(LAB.on){ const off=Math.acos(clamp(Math.cos(ang)*a.x+Math.sin(ang)*a.y,-1,1))*180/Math.PI;   // (v212: the Trap Lab -- where you flicked it against where it went)
       labOnTouch(p,s,null,{sp:inSp,keep:out/Math.max(1,inSp),u:0,dx:inSp>1?ivx/inSp:0,dy:inSp>1?ivy/inSp:0,z:z0,aim:{aim:{x:a.x,y:a.y},aimErr:off}},true); }
-    p.facing={x:a.x,y:a.y};
+    ball.ftRound=null;
+    if(round){ const tx=-oy/od*side, ty=ox/od*side; ball.vx=tx*out; ball.vy=ty*out; ball.ftRound={p,t:simNow,dx,dy,side,r:rOrb}; }   // (v216: off his foot across him, to curl round -- see ftRoundStep)
+    // (v216: and he isn't turned that way at once -- he turns to go after it at his own pace, as he'd turn with it)
     lastGrade='TOUCH '+labArrow(a.x,a.y)+(s>0.55?'':' · '+trapGrade(s)); gradeColor=s>0.55?'#78c8ff':s>0.3?'#ffb43c':'#ff5a4d'; gradeFade=0.8;
   }
   // the drawing: on SKILL (touch) or with the mouse held down (a computer)
@@ -13609,7 +13624,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     ball.ownedBy=p;
     ball.dribbler=null;ball.dribbleGrace=0;ball.intendedRcv=null;ball.thru=null;ball.lob=null;ball.selfLob=null;
     p.touchLagT=0;
-    ball.dribEsc=null; p.touchOff=0; p.touchKnock=0; p.touchSp=psp;   // (v208: at his feet -- see gather and runTouch)
+    ball.dribEsc=null; ball.ftRound=null; p.touchOff=0; p.touchKnock=0; p.touchSp=psp;   // (v208: at his feet -- see gather and runTouch; v216: no longer curling round anyone)
     if(!wasOwner&&(!reGather||(ball.touchAt!=null&&simNow-ball.touchAt<1.5&&p.settleTouch!==ball.touchAt))){ const cr=reGather&&ball.touchSAt===ball.touchAt&&ball.touchS>0.55?Math.min(simNow-ball.touchAt,CLEAN_CREDIT):0;   // (v214: a CLEAN touch taken back -- he's been on it since the touch, up to CLEAN_CREDIT: as a PERFECT one, dead at his feet, counts from it)
       p.settleT=simNow-cr; p.prepT=simNow-cr; p.settleTouch=reGather?ball.touchAt:null; }   // (v210: a fresh ball -- a pass, his first touch, a loose one: settle it, then get a pass ready; once a touch, not again each time he gathers his own knock-on)
     if(!wasOwner){
@@ -13712,7 +13727,20 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // his touch that's got away is still running on from him: he can't have it back till he's caught it up (v208; since v215
   // only a directional first touch, pushed into space -- a touch on the run no longer gets away)
   function escaping(p){ const E=ball.dribEsc; if(!E||E.p!==p||simNow-E.t>0.9) return false;
+    if(ball.ftRound&&ball.ftRound.p===p) return true;   // (v216: still curling round him -- not his till it's away and he's caught it up)
     return (ball.vx-p.vx)*E.dx+(ball.vy-p.vy)*E.dy>12; }   // (still going away from him the way it was pushed)
+  // (v216) A DIRECTIONAL TOUCH CURLING ROUND HIM (see directionalTouch): its way turns, as fast as its pace takes it round a
+  // circle of r about him, the way it's going round, till it's going the way you flicked it -- then it runs on straight.
+  // Done with once anyone has it, or someone else touches it, or after FT_ROUND_T.
+  function ftRoundStep(dt){
+    const F=ball.ftRound; if(!F) return;
+    if(ball.ownedBy||ball.dribbler!==F.p||simNow-F.t>FT_ROUND_T||ball.z>=PLAYER_H){ ball.ftRound=null; return; }
+    const sp=Math.hypot(ball.vx,ball.vy); if(sp<1){ ball.ftRound=null; return; }
+    const ux=ball.vx/sp, uy=ball.vy/sp, rem=F.side*Math.atan2(ux*F.dy-uy*F.dx, ux*F.dx+uy*F.dy), step=sp*dt/F.r;
+    if(rem<=step){ ball.vx=F.dx*sp; ball.vy=F.dy*sp; ball.ftRound=null; return; }   // (round: on the way you flicked it)
+    const c=Math.cos(F.side*step), sn=Math.sin(F.side*step);
+    ball.vx=sp*(ux*c-uy*sn); ball.vy=sp*(ux*sn+uy*c);
+  }
   // HE'S BACK ON IT (v208): his own touch, or a dead ball, taken where it is -- it used to jump to his feet -- with most of
   // the difference in pace taken off it, and the carry brings it in as quickly as he dribbles (dribBack)
   function gather(p){
@@ -14752,6 +14780,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       blockShots(ball.x-ball.vx*dt,ball.y-ball.vy*dt);
       crossBlock(ball.x-ball.vx*dt,ball.y-ball.vy*dt);    // (a cross into a man in its way: see crossBlock)
       spreadBlock(ball.x-ball.vx*dt,ball.y-ball.vy*dt);   // (a keeper down big in its way: see spreadBlock)
+      ftRoundStep(dt);   // (v216: a directional touch curling round him -- its way turned after the sweeps above have read this frame's)
       // a live shot skids with much less drag so it carries to goal; normal balls use full friction
       const fcoef = ball.shotT>0 ? P.friction.val*0.3 : P.friction.val;
       const fr=Math.pow(1-fcoef,dt*3.2);

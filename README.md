@@ -305,8 +305,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     and he can't have it back until he's caught it up and it's at his feet. It used to be his again a fifth of a
     second after the touch, while it was still inside his reach ring (his Ball control), so it never really went
     anywhere. Now it gets about 2 m from him as he goes after it, and he's on it again in about half a second, whatever
-    his Ball control. It also leaves his foot on the side it's going: it started in front of him, the way he faced to
-    meet it, and a ball sent on behind him spent its push getting past him. The push dial is 100 (it was 55).
+    his Ball control. It also left his foot on the side it was going, put there the moment he touched it (v216: taken
+    where it meets him now, curling round him if it's sent on behind him -- see **A directional touch without the jump
+    (v216)**). The push dial is 100 (it was 55).
   - **The Trap Lab:** taken as they come, its balls show the spread; a touch that comes off him, he goes to get with
     the stick left alone, as in a match (the magnet works in the Trap Lab now).
 - **Three of the changes since v207 taken out, and a directional touch that pops up (v215).**
@@ -329,7 +330,21 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     worst, and down in 0.35 to 0.4 s with a little bounce -- under the 12 px a ball counts as in the air, so he can take
     it on the hop as he catches it up, and the grass slows it as ever. It was 2 px off a perfect touch, nothing you'd
     see. It's still pushed into space: in the Trap Lab, 41 px (1.8 m) from him and his again in 0.43 s.
+  - **In a match** (computer against computer, two runs of 50 minutes on each): passes 29.5 a minute (28.8 before),
+    shots 0.67 (0.70) and goals 0.30 (0.34) about the same -- shots and tackles came out higher in one run and lower in
+    the other. Turnovers 7.4 (6.4) and passes cut out 8.7 (7.3) came out a little up in both, most likely the computer's
+    men passing sooner now a cut or a skill move doesn't leave the ball off their feet.
   - The dials gone from Settings: Dribbling: a cut, a touch that gets away, after a skill move.
+- **A directional touch without the jump (v216).**
+  - **Taken where it meets him:** a flick on SKILL sends the ball on from where it meets his foot, and he turns to go
+    after it at his own pace (his Agility), as he would turning with it. Before, the moment he touched it the ball was
+    put round on the side it was going -- 38 px across for one sent out to his side, 54 px for one sent on behind him --
+    and he was turned that way at once: the two of them jumped round together.
+  - **Sent on behind him, it curls round him:** off his foot across him and round, as far out as it met him (never
+    nearer his middle than about 30 px; his body and the ball's are 20), till it's going the way you flicked it, then
+    on. Its push has as much again as it takes to get round him, or out to his side, so it ends up about as far from
+    him whichever way it's sent: in the Trap Lab 43 to 51 px from him at the most, and his again in 0.6 to 0.9 s.
+  - The rest of it is as it was: the hop, pushed into space, his at his feet once he's caught it up.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -994,8 +1009,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   next turn or burst, whatever your Dribbling (v215: v208 to v214 a poor dribbler's was off his feet a moment).
 
   **Directional first touch:** a flick on SKILL while a pass is coming to you pushes your first touch that way as it
-  arrives, by the First touch push dial (your own pace along it is added). It's pushed into space (v214): it leaves
-  your foot on the side it's going and you can't have it back until you've caught it up and it's at your feet -- about
+  arrives, by the First touch push dial (your own pace along it is added). It goes on from where it meets your foot,
+  and you turn to go after it at your own pace; sent on behind you, it curls round you (v216). It's pushed into space
+  (v214): you can't have it back until you've caught it up and it's at your feet -- about
   2 m from you as you go after it, and on it again in about half a second. (It was yours again a fifth of a second on,
   still inside your reach ring, and hardly went anywhere; the push dial is 100, it was 55.) It pops up off your foot as
   it goes (v215), about 8 px, 0.4 m, and comes down as you catch it up. After the flick, leave the stick alone and you
@@ -3233,6 +3249,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
 ## Trap Lab
 
+**Football Classic (v216):** a flicked touch goes on from where it met him, and he turns to go after it at his own
+pace; one sent on behind him curls round him. It used to jump round to the side it was going, and him with it.
+
 **Football Classic (v215):** a flicked touch pops up off his foot as it goes, about 8 px (0.4 m), and comes down as he
 catches it up. After a flick, the stick held is yours: he goes where you push it.
 
@@ -3363,6 +3382,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v216: a directional touch without the jump.** A flick on SKILL sends the ball on from where it meets his foot, and
+  he turns to go after it at his own pace; one sent on behind him curls round him, never through him. It used to be put
+  round on the side it was going, and him turned that way, the moment he touched it. New checks in
+  `tests/classic-traplab.mjs`; `classic-touch` reads a curled touch's way once it's round. See **A directional touch
+  without the jump (v216)**.
 - **v215: three changes taken out, and a directional touch that pops up.** From the list of changes since v207, as
   chosen: a cut at pace no longer pushes the ball out from his feet and nothing on the run gets away from him (v208);
   out of a skill move the ball's at his feet at once (v208); the stick held after a flick is yours again (v212). The

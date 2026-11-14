@@ -8,6 +8,9 @@
 // pushed into space, away from him till he's caught it up, not his again the moment it's in his reach. (v215) Flicked, the
 // stick left alone till he's touched it, he meets it; held, the stick's yours and he goes where you push it (v212 had him
 // meet it all the same: taken out). And the touch pops up off his foot, 9 to 12 px, under the 12 a ball's in the air at.
+// (v216) The touch is taken where the ball meets him, and he isn't turned the way you flicked it the moment he touches it
+// -- the ball used to jump round to that side of him, and him with it; sent on behind him, it curls round him, never
+// through him, and goes on the way you flicked it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -21,6 +24,13 @@ patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy
 patch('  const LAB_TITLE=', `  window.__T={ gap:()=>{ const r=LAB.recv==='ai'?labRecv():controlled; return r?Math.hypot(ball.x-r.x,ball.y-r.y):null; }, armed:()=>!!ftAim, owned:()=>!!ball.ownedBy,
     bc:v=>{ P.ballControl.val=v; if(controlled) controlled.stats=Object.assign({},controlled.stats||{},{ballControl:v}); },
     mine:()=>!!controlled&&ball.dribbler===controlled&&!ball.ownedBy, own:()=>!!controlled&&ball.ownedBy===controlled, z:()=>ball.z,
+    curl:(fx,fy)=>{ const c=controlled; if(!c) return null; const was=Object.assign({},ball), wf=c.facing, wa=ftAim, wn=c.noTouchT;   // (v216: a ball rolled at him from 30 px in front, the way he faces, and a flick (fx,fy) as it comes: where it is the moment he's touched it, the way he faces then, and its way on, stepped 1 s, how near him it ever comes)
+      c.facing={x:-1,y:0}; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=c; ball.lastTouch=c.team; ball.z=0; ball.vz=0; ball.x=c.x-30; ball.y=c.y; ball.vx=300; ball.vy=0;
+      const x0=ball.x, y0=ball.y; ftAim={p:c,d:{x:fx,y:fy},until:simNow+1,lt:ball.lastTouch}; directionalTouch(c,1);
+      const r={jump:+Math.hypot(ball.x-x0,ball.y-y0).toFixed(1), facing:{x:+c.facing.x.toFixed(2),y:+c.facing.y.toFixed(2)}, curling:!!ball.ftRound, near:99};
+      for(let i=0;i<60;i++){ ball.x+=ball.vx/60; ball.y+=ball.vy/60; ftRoundStep(1/60); r.near=Math.min(r.near,Math.hypot(ball.x-c.x,ball.y-c.y)); }
+      const sp=Math.hypot(ball.vx,ball.vy); r.dir={x:+(ball.vx/sp).toFixed(2),y:+(ball.vy/sp).toFixed(2)}; r.near=+r.near.toFixed(1);
+      Object.assign(ball,was); ball.ftRound=null; c.facing=wf; ftAim=wa; c.noTouchT=wn; return r; },
     held:(sx,sy,fx,fy)=>{ const c=controlled; if(!c) return null; const was=Object.assign({},ball), ra=recvAuto, fa=ftAim;   // (v215: the way he goes, a flick (fx,fy) asked for and the stick at (sx,sy), the ball on its way 40 px to one side of him, 300 px off)
       ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=null; ball.z=0; ball.vz=0; ball.x=c.x-300; ball.y=c.y-40*fy; ball.vx=450; ball.vy=0; recvAuto=null;
       ftAim={p:c,d:{x:fx,y:fy},until:simNow+1,lt:ball.lastTouch}; window.__stick=(sx||sy)?{x:sx,y:sy}:null; const r=humanIntent(); window.__stick=null;
@@ -116,6 +126,15 @@ ok(/TOUCH ↑/.test(lateOne) && /just after he took it/.test(lateOne), 'a flick 
 const alone = await mp.evaluate(() => window.__T.held(0, 0, 0, -1)), heldUp = await mp.evaluate(() => window.__T.held(0, -1, 0, -1));
 info('the way he goes, a flick asked for: the stick left alone ' + JSON.stringify(alone) + ', held the way you flicked ' + JSON.stringify(heldUp));
 ok(alone && heldUp && alone.ix < -0.5 && alone.iy > 0.1 && heldUp.iy < -0.99 && Math.abs(heldUp.ix) < 0.01, 'a flick asked for, the stick left alone: he goes to meet the ball, on toward it and across to its line; held the way you flicked, the stick\'s yours and he goes where you push it, away from its line (v215: v212 had him meet it all the same -- taken out)');
+
+// --- WHERE IT IS, AND ROUND HIM (v216) ---------------------------------------------------------------------------------
+// a ball rolled at him from in front, the way he faces: flicked on behind him (the way it's going) and out to his side
+const behind = await mp.evaluate(() => window.__T.curl(1, 0)), aside = await mp.evaluate(() => window.__T.curl(0, 1));
+info('the touch, a ball from in front of him: flicked on behind him ' + JSON.stringify(behind) + ', out to his side ' + JSON.stringify(aside));
+ok(behind && aside && behind.jump < 1 && aside.jump < 1 && behind.facing.x < -0.99 && aside.facing.x < -0.99,
+  'the touch is taken where the ball meets him, and he\'s still facing the way he met it the moment after -- he turns to go after it at his own pace (v216: it jumped round to the side it was going, ' + 'and he was turned that way, the moment he touched it)');
+ok(behind.curling && behind.near >= 24 && behind.dir.x > 0.99 && !aside.curling && aside.near >= 24 && aside.dir.y > 0.99,
+  'flicked on behind him it curls round him, never nearer his middle than ' + behind.near + ' px (his body and the ball\'s, 20), and goes on the way you flicked it (' + JSON.stringify(behind.dir) + '); out to his side, straight that way (' + JSON.stringify(aside.dir) + ')');
 
 // --- IN THE AIR, AND THE COMPUTER'S MAN --------------------------------------------------------------------------------
 while(!/CHEST/.test(await mp.textContent('#labServeV'))){ await mp.tap('#labBar [data-lab="serve"]'); await mp.waitForTimeout(60); }

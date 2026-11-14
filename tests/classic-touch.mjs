@@ -322,7 +322,7 @@ const passTo = (gap, charge, sx) => mp.evaluate(({ gap, charge, sx }) => { const
   const R = Math.random; Math.random = () => 0.5; try { T.doPass(charge, { target: r }); } finally { Math.random = R; }
   T.stick(sx * atk, 0); return { on: T.controlled() === r, d: Math.round(Math.hypot(b.x - r.x, b.y - r.y)) }; }, { gap, charge, sx });
 const firstTouch = () => mp.evaluate(() => new Promise(res => { const T = window.__T, r = T.controlled(), b = T.ball(), t0 = performance.now();
-  (function tick(){ if(b.dribbler === r || b.ownedBy === r){ const sp = Math.hypot(b.vx, b.vy) || 1; T.stick(0, 0); return res({ grade: T.lastGrade(), x: +(b.vx / sp).toFixed(2), y: +(b.vy / sp).toFixed(2), sp: Math.round(sp) }); }
+  (function tick(){ if((b.dribbler === r || b.ownedBy === r) && !b.ftRound){ const sp = Math.hypot(b.vx, b.vy) || 1; T.stick(0, 0); return res({ grade: T.lastGrade(), x: +(b.vx / sp).toFixed(2), y: +(b.vy / sp).toFixed(2), sp: Math.round(sp) }); }   // (v216: once a touch sent on behind him has curled round him -- the way it goes on)
     if(performance.now() - t0 > 4000){ T.stick(0, 0); return res({ grade: 'none' }); } requestAnimationFrame(tick); })(); }));
 const atkM = await mp.evaluate(() => window.__T.atkOf('G'));
 // (1) a 24 m pass, your stick held on up the pitch (away from it), a flick that way as it comes
