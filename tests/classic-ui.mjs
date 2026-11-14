@@ -100,7 +100,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,COLOURS,CAMPUS MENU,HALF-TIME,TIPS,TEXT SIZE' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
+    ok(String(st.rows) === 'MATCH LENGTH,DIFFICULTY,EXHIBITION OPPONENTS,GRAPHICS,CAMPUS MENU,HALF-TIME,TIPS,TEXT SIZE' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials');
     // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
     // new 4, where a 3 picked from now on stays 3
     const mlOn = pg => pg.evaluate(() => { const r = [...document.querySelectorAll('#setRows .setRow')].find(x => /MATCH LENGTH/.test(x.textContent)), on = r && r.querySelector('.setOpt.on'); return on ? on.textContent : null; });
@@ -113,13 +113,14 @@ for(const [w, h] of SIZES){
     const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && radius >= 8 && btnR >= 5, 'the menus are framed in pixels: a dark outline, a light rim, rounded corners (' + radius + ' / ' + btnR + ' px)');
-    const look = async () => page.evaluate(() => ({ theme: document.documentElement.dataset.theme || 'blue', btn: getComputedStyle(document.querySelector('#setRows .setOpt:not(.on)')).backgroundImage.slice(0, 40),
-      font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }));
-    for(let i = 0; i < 3 && !(await page.isVisible('#setRows [data-pref="theme"][data-val="ruby"]')); i++){ await page.tap('#settingsOverlay [data-fitgo="1"]'); await page.waitForTimeout(150); }   // (on a phone, COLOURS is over the page)
-    const l0 = await look(); await page.tap('#setRows [data-pref="theme"][data-val="ruby"]'); await page.waitForTimeout(100); const l1 = await look();
-    await page.tap('#setRows [data-pref="theme"][data-val="blue"]'); await page.waitForTimeout(100); const l2 = await look();
-    ok(l0.theme === 'blue' && l1.theme === 'ruby' && l1.btn !== l0.btn && l2.btn === l0.btn, 'COLOURS swaps the scheme (blue -> ruby -> blue): ' + l0.btn + ' / ' + l1.btn);
-    ok(/FTC Dot/.test(l0.font), 'one font throughout (' + l0.font + ')');
+    // (v221) ONE COLOUR SCHEME: no COLOURS row, no other scheme in the stylesheet, and a pick saved from before (RUBY) opens in BLUE
+    const one = await page.evaluate(() => { let rules = 0; for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } for(const r of rs) if(r.selectorText && /data-theme/.test(r.selectorText)) rules++; }
+      return { opts: document.querySelectorAll('#setRows [data-pref="theme"]').length, rules, font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }; });
+    const was = await browser.newContext({ viewport: { width: 1100, height: 800 } }); await was.addInitScript(() => { try{ localStorage.setItem('ftc_prefs', JSON.stringify({ theme: 'ruby', diff: 'star', pv: 1 })); }catch(e){} });
+    const wp = await was.newPage(); await wp.goto('file://' + copy); await wp.waitForTimeout(500);
+    const kept = await wp.evaluate(() => ({ theme: document.documentElement.dataset.theme || '', btn: getComputedStyle(document.querySelector('#smItems .smBtn:not(.sel)')).backgroundImage })); await was.close();
+    ok(one.opts === 0 && one.rules === 0 && kept.theme === '' && /106, 168, 248/.test(kept.btn), 'one colour scheme: no COLOURS in Settings, no other scheme in the page, and a RUBY picked before opens in BLUE (' + kept.btn.slice(0, 48) + ')');
+    ok(/FTC Dot/.test(one.font), 'one font throughout (' + one.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);
   await page.tap('#smItems [data-act="skills"]'); await page.waitForTimeout(300);

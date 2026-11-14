@@ -408,6 +408,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - The rest of the career goes back with them: a building's screen covers the campus again (◀ CAMPUS to come back),
     and the transfer market is TRANSFERS in the menu, not a phone in a top bar. Roboto Condensed isn't carried any
     more. Nothing a career does has changed, and a saved one opens as it was.
+- **One colour scheme (v221).** Players no longer pick the colours: COLOURS is gone from Settings, and the game is
+  in its one scheme, the blue one (blue buttons, orange for what's picked) that was the default. RUBY, SILVER and MINT
+  are gone with it, and a player who had picked one of them sees the blue scheme.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -674,18 +677,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     has a deadline stays a line of short phrases.
   - **The menus are pixel windows**, after a handheld RPG's menu kit: a dark outline round rounded corners, a thin
     light rim inside it, buttons in two tones (a light top over a darker band) and text with a one-pixel shadow.
-    What's picked is lit in the scheme's second colour; being lit is the only mark. Nothing you tap is under 36 px.
-  - **Four colour schemes**, in Settings → COLOURS: BLUE (blue buttons, orange for what's picked; the default),
-    RUBY (red and gold), SILVER (grey and blue) and MINT (teal and pink). A money figure, a result or a rating is
-    green, yellow or red by how good it is, in any scheme; in a match PASS is green, SHOOT red, CROSS amber and
-    SKILL blue.
+    What's picked is lit orange; being lit is the only mark. Nothing you tap is under 36 px.
+  - **One colour scheme** (v221): blue buttons, orange for what's picked. A money figure, a result or a rating is
+    green, yellow or red by how good it is; in a match PASS is green, SHOOT red, CROSS amber and SKILL blue. Until
+    v221 Settings had COLOURS, four schemes to pick from (BLUE, RUBY, SILVER, MINT); a pick saved then isn't read.
   - **One font** for everything, menus and match alike: DotGothic16 (Fontworks, SIL Open Font License), cut to the
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
     `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
     how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
-    graphics, the colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
+    graphics and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
     plus the button layout on a touch screen. Settings also credits the campus's tilesets and the font. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
     labs' TUNE and EDIT STATS) with `?dev` in the address or five taps on the build number on the start menu.
@@ -3424,6 +3426,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v221: one colour scheme.** Settings' COLOURS is gone: the game is in one scheme, the blue one that was the default,
+  and RUBY, SILVER and MINT are gone with it; a pick saved before opens in blue. New check in `tests/classic-ui.mjs`.
+  See **One colour scheme (v221)**.
 - **v220: the career's home and Tactics as they were.** Fulltime 9's look (v206) and its type (v207) are taken off the
   career: the home screen is the campus with the menu down the left and the money along its foot again, the Tactics the
   pitch on its side with a face on each man, and every career screen is in the pixel kit and the pixel font, in the
