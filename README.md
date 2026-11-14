@@ -396,6 +396,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     Agility turns your run, or half as fast again as your Ball control brings the ball round, whichever's the quicker --
     14° a frame at the most there. In v218 it could still jump 35° at once; before that, all the way round.
   - The computer's men as they were.
+- **The career's home and Tactics as they were (v220).** Fulltime 9's look, tried in v206 with its type in v207, is
+  taken off: the career is in the pixel kit again, in the scheme Settings has, its words in the pixel font.
+  - **The home screen** is the campus with the menu down the left -- your crest and club, then Clubhouse, Training,
+    Stadium, Transfers, Physio, Scouting and Academy, the week's button at its foot -- and the week, the budget, the
+    fans and the week's net along the campus's foot, as it was before v206. The bar across the top and the four cards
+    round the campus (Next Game, News & Papers, Fixtures, Club Overview) are gone.
+  - **The Tactics** is the pitch on its side again, a face on each man: WITH BALL and WITHOUT, the shape, the width and
+    the style along the top with INSTRUCTIONS and BEST 9, the bench under the pitch, his card down the right. It was
+    upright, each man all of him in the club's kit, the menus down the left.
+  - The rest of the career goes back with them: a building's screen covers the campus again (◀ CAMPUS to come back),
+    and the transfer market is TRANSFERS in the menu, not a phone in a top bar. Roboto Condensed isn't carried any
+    more. Nothing a career does has changed, and a saved one opens as it was.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -670,13 +682,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **One font** for everything, menus and match alike: DotGothic16 (Fontworks, SIL Open Font License), cut to the
     characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
     and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
-    `assets/fonts/OFL-DotGothic16.txt`. The career's screens have their own (below).
-  - **The career's font (v207)** is Roboto Condensed (the Roboto Project Authors, SIL Open Font License; its licence is
-    in a comment beside it in `classic.html`), carried in the page in three weights, each cut to the Latin letters and
-    the punctuation (about 16 KB a weight): **Bold** (700) for page titles, section headers and buttons, and the big
-    numbers (his rating, his six, the rating on a man's token); **SemiBold** (600) for the menu, the tabs and labels;
-    **Regular** (400) for small stats and descriptions. The few symbols it hasn't (arrows, stars, ticks, ▶ ◀) come from
-    the phone's own font. In v206 the career used the phone's rounded system font.
+    `assets/fonts/OFL-DotGothic16.txt`.
   - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
     how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
     graphics, the colours and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
@@ -2951,18 +2957,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
         balanced and direct styles, the rest locked on the menus till 2, 3 or 4; the team instructions have been
         open from the start since v112, every player instruction since v106). Its Pitch tab says so, and what each
         level trains.
-        - **Its Tactics tab, upright (v206).** The pitch stands up the middle of the screen, their goal at the top,
-          each man all of him in the club's kit (the keeper in his) over his rating and position and his name, his shirt
-          number on a tag at his shoulder; a man is a fifth of the pitch wide and a sixth of it tall, as big as the
-          lines allow in every shape (nobody over another or off it, either phase, COMPACT or WIDE); down the left WITH BALL and WITHOUT, the shape, the width and the style -- each a menu, with ◀
-          and ▶ either side of it for the one before or after (the style sets its instructions, as the menu does) --
-          the back line and the line of engagement as bars where the screen's tall enough, INSTRUCTIONS and BEST 9;
-          down the right the card of the man you tapped, and the bench's five under it. A man's moved as he was: dragged
-          onto another, or tapped and SWAP. It was a pitch on its side across the screen, a face on each man, the menus
-          along the top.
       - **The transfer market** is your phone, not a building on the campus, and not bought: it rings on the first
-        day of pre-season, and from then the phone in the top bar is the market, straight in (v206; it was TRANSFERS
-        in the menu). Till then it's locked.
+        day of pre-season, and from then TRANSFERS in the menu, straight in. Till then it's locked in the menu.
       - **The physio** is stamina on match day and injuries. Match day: through a game their legs go 8% slower a level
         (32% at 4); at half-time they get back half of the legs they've lost without one, 60% at level 1, 70% at 2,
         78% at 3 and 85% at 4 (v121; it was a quarter, up to 65%); between games they get fit again sooner (see **Fitness**): 4.5% a day without one, 5.2% at level 1
@@ -2981,25 +2977,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       it). MOVE picks one up again (tap it, drag it, ✓), or PUT AWAY puts it in store, to put out again (PUT ONE OUT,
       in the shop) for nothing. One in the way of a building as it goes up or grows goes into store by itself.
       They're for looks only.
-    - **Fulltime 9's look (v206).** The career's screens are cream, forest green, yellow and navy, their words in
-      Roboto Condensed (v207: see **The career's font (v207)**; the pixel font stays on the game's other screens and in a match). Along the top of every
-      career screen: the Fulltime 9 mark, your crest and club, the day and the week (put shorter where there's less
-      room), the season and your division, your phone, the week's button -- FORWARD TO MATCHDAY (or NEXT WEEK) on a
-      Monday, SIMULATE and PLAY on a matchday's morning -- and ☰ MENU. Down the left (the right, if Settings says
-      so), the menu: Clubhouse, Squad (the clubhouse's Squad tab), Tactics (the training pitch's), Stadium, Physio,
-      Scouting, Academy, the one you're in lit -- one to buy with its price, one not open yet with a lock and the
+    - The buildings are listed down the left (the right, if Settings says so): Clubhouse, Training, Stadium,
+      Transfers, Physio, Scouting, Academy -- one to buy with its price, one not open yet with a lock and the
       clubhouse it needs, a badge where something's waiting (bids for your men in a window, the academy's
-      youngsters). The top bar and the menu stay on a building's screen, so another building is a tap away; only on
-      the shortest screens (370 px high and under) a building has the whole screen, and on a phone the menu is down
-      to its icons while one's open. The home screen is the campus with four cards round it: **Next Game** (the two
-      clubs' crests, the competition, home or away; PLAY MATCH on the day), **News & Papers** (the latest three, a
-      tap for the news, and how many papers are still to read), **Fixtures** (your next three in the league; VIEW
-      FIXTURES) and **Club Overview** (league position, the record, the funds, the fans, the week's net -- a tap for
-      the week's money -- and the stadium's capacity), all of it the career's own. The week, the next match, the
-      budget, the fans and the week's net used to run along the campus's foot, the week's button under the list.
+      youngsters). The week's button is at the foot: FORWARD TO MATCHDAY (or NEXT WEEK) on a Monday, SIMULATE and PLAY
+      on a matchday's morning. The week and its day, the next match, the budget, the fans
+      and the week's net run along the campus's own foot, put shorter where there's less room.
     - Tap a building, in the list or on the campus: its button lights, the camera goes in on it with its name over
-      it, and you're in. ◀ CAMPUS takes the camera back out. From a building's screen, another in the menu opens
-      straight away (v206). One to buy says what it's for, what it costs and what
+      it, and you're in. ◀ CAMPUS takes the camera back out. One to buy says what it's for, what it costs and what
       you've got (BUILD IT); one not open yet, what it's for and the clubhouse it needs.
     - **Touch first (v158).** A drag was the only way to move a man in three places; now each has a tap. Training's
       Selection: your keeper or a man not taken, tapped, is lit; then any man, and they swap (him again: let go) --
@@ -3039,8 +3024,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       break's, the last four weeks' and the playoffs': a deal can't run out unsaid.
     - **The day's end.** When the week moves on (FORWARD TO MATCHDAY, NEXT WEEK) the sun goes down behind your
       stadium as it stands, the stars come out, the moon comes up and goes down, and the sun comes up again, the new
-      day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it -- anywhere,
-      the top bar and the cards too (v206); a player whose system asks for less motion doesn't see it.
+      day written over it (WEEK 5 OF 26 · SATURDAY): three seconds, the menu waiting. A tap (or `Esc`) ends it; a player whose system asks for less motion
+      doesn't see it.
     - It's drawn as the club is: the stadium at its level with its name on it (on the gate at levels 1 and 2, a board
       on the stand's roof at 3 and 4, big letters on the bowl at 5), the clubhouse at its level, each building or its
       plot, the decorations where you put them.
@@ -3439,6 +3424,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v220: the career's home and Tactics as they were.** Fulltime 9's look (v206) and its type (v207) are taken off the
+  career: the home screen is the campus with the menu down the left and the money along its foot again, the Tactics the
+  pitch on its side with a face on each man, and every career screen is in the pixel kit and the pixel font, in the
+  scheme Settings has. Nothing a career does has changed. New checks in `tests/classic-ui.mjs`;
+  `tests/manager-career.mjs` reads the cup game off the campus's strip again. See **The career's home and Tactics as
+  they were (v220)**.
 - **v219: after your first touch, no spinning round.** Your own touch loose by you, you go to it first -- pushed more
   than 35° away from it, you're steered to it from the side you're pushing toward -- and turn with it once it's at your
   feet; with the ball your body never turns round in a frame. You used to spin straight round the way you pushed and
@@ -3533,14 +3524,14 @@ test, and like the Trap Lab the values are the game's settings.
 - **v207: the career in Roboto Condensed.** The career's screens are in Roboto Condensed, carried in the page so every
   phone shows the same: Bold for page titles, section headers and buttons, SemiBold for the menu, the tabs and labels,
   Regular for small stats and descriptions. It was the phone's own rounded font. Settings credits it beside DotGothic16.
-  See **The career's font (v207)**.
+  Taken off again in v220.
 - **v206: Fulltime 9's look for the career.** The career's screens in cream, forest green, yellow and navy, after the
   Fulltime 9 pictures: a bar along the top of every one (your club, the day and the week, the season, your phone, the
   week's button, the menu), the buildings down the left with Squad and Tactics among them, the home screen the campus
   with Next Game, News & Papers, Fixtures and Club Overview round it, and the training pitch's Tactics upright -- their
   goal at the top, each man all of him in your kit, the menus down the left with a step either way, his card and the
   bench down the right. The transfer market is the phone in the top bar. Nothing a career does has changed, and a saved
-  one opens as it was. See **Fulltime 9's look (v206)** and **Its Tactics tab, upright (v206)**.
+  one opens as it was. Taken off again in v220: see **The career's home and Tactics as they were (v220)**.
 - **v205: the sheet's clubs and weights.** What was set on the Signature Players sheet goes in: each playstyle's
   rating weights as set on its Ratings page, 0 to 5 a stat (the stars move three points at most; see **By his
   playstyle**); twenty-two clubs' styles and shapes as set on its Teams page (Manchester City a 3-4-1, Bohemia Munich

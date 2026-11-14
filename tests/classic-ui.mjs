@@ -47,14 +47,12 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
       out.push('a box scrolls: ' + (el.id || el.className)); }
   for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
   return out; }, sels); }
-// NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads across it (top to
-// bottom on a sideways pitch; side to side on an upright one, the training pitch's since v206)
+// NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads, top to bottom
 const apart = (page, sel) => page.evaluate(sel => { const P = document.querySelector(sel), pr = P.getBoundingClientRect(), T = [...P.querySelectorAll('.ptk')].map(e => e.getBoundingClientRect());
   let over = 0, out = 0; for(let i = 0; i < T.length; i++){ const a = T[i]; out = Math.max(out, pr.left - a.left, a.right - pr.right, pr.top - a.top, a.bottom - pr.bottom);
     for(let j = i + 1; j < T.length; j++){ const b = T[j]; if(Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) over++; } }
   const M = [...P.querySelectorAll('.ptk[data-role="MID"]')].map(e => e.getBoundingClientRect());
-  const up = pr.height > pr.width;
-  return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(up ? Math.max(...M.map(r => r.right)) - Math.min(...M.map(r => r.left)) : Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
+  return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(Math.max(...M.map(r => r.bottom)) - Math.min(...M.map(r => r.top))) : 0 }; }, sel);
 // HIS STAMINA on his card in a match: the word, a bar and no figure -- the button that turns the card over level with the bar's foot
 // YOUR MAN'S WINDOW in a match, top right beside the menu: what it says (his number, name, position, how many of its
 // stars are lit, how far its stamina bar is filled) against the man you control, and where it sits among the HUD's chips
@@ -183,16 +181,23 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
   if(w === 844 && h === 390) ok(!audit.length, 'J1\'s audit: no building\'s screen, any tab, shows a sentence longer than a label by default (48 characters; the news excepted)' + (audit.length ? ' -- ' + audit.slice(0, 4).join(' | ') : ''));
-  if(w === 844 && h === 390){   // (v207) THE CAREER'S TYPE: Roboto Condensed, carried in the page, in three weights by what the words are
+  if(w === 844 && h === 390){   // (v220) THE CAREER BACK IN THE PIXEL KIT: Fulltime 9's look (v206) and its type (v207) taken off the hub and the Tactics
+    const hub = await page.evaluate(() => { const q = s => document.querySelector(s), fam = e => getComputedStyle(e).fontFamily.split(',')[0].replace(/["']/g, '').trim();
+      const hex = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(), n = parseInt(hex.slice(1), 16);
+      return { ft: [...document.querySelectorAll('#ftTop, .ftCard, .ftCampus, .tacV, .tpV, .ptkFig')].length, crest: !!q('.cpNav #chClub'), week: !!q('.cpNav #chBottom'), strip: !!q('.cpFoot #cpStats'),
+        font: fam(q('#chClub')), bg: getComputedStyle(q('#careerHub')).backgroundColor, want: 'rgb(' + (n >> 16) + ', ' + (n >> 8 & 255) + ', ' + (n & 255) + ')',
+        roboto: [...document.fonts].some(f => /Roboto/.test(f.family)) }; });
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
     await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
-    const ty = await page.evaluate(async () => { await document.fonts.ready;
-      const W = s => { const e = document.querySelector(s); if(!e) return 'none'; const c = getComputedStyle(e); return c.fontWeight + ' ' + c.fontFamily.split(',')[0].replace(/["']/g, ''); };
-      return { faces: [...document.fonts].filter(f => f.family.replace(/["']/g, '') === 'Roboto Condensed' && f.status === 'loaded').map(f => String(f.weight)).sort().join(' '),
-        title: W('#bpTitle'), head: W('.ftH'), button: W('#bpBody .tbBest'), nav: W('#chCampus .bldg .bn'), tab: W('#bpTabs .bpTab'), label: W('#bpBody .tbDrop i'), desc: W('#cTacRight .mgCardSub'), stat: W('#cpStats .cpSt b') }; });
+    const tac = await page.evaluate(() => { const p = document.querySelector('#bpBody .tpitch').getBoundingClientRect(), b = document.querySelector('#bpBody .tbBench').getBoundingClientRect();
+      return { wide: p.width > p.height, under: b.top >= p.bottom - 1, faces: document.querySelectorAll('#bpBody .tpitch .ptkFace').length, figs: document.querySelectorAll('#bpBody .ptkFig, #bpBody .tpV').length,
+        font: getComputedStyle(document.getElementById('bpTitle')).fontFamily.split(',')[0].replace(/["']/g, '').trim() }; });
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
-    const want = { title: '700', head: '700', button: '700', nav: '600', tab: '600', label: '600', desc: '400', stat: '400' }, off = Object.entries(want).filter(([k, v]) => ty[k] !== v + ' Roboto Condensed').map(([k]) => k + ' ' + ty[k]);
-    ok(ty.faces === '400 600 700' && !off.length, 'the career in Roboto Condensed, carried in the page (' + ty.faces + '): Bold for titles, section headers and buttons, SemiBold for the menu, tabs and labels, Regular for small stats and descriptions' + (off.length ? ' -- ' + off.join(' | ') : '')); }
+    ok(!hub.ft && hub.crest && hub.week && hub.strip && hub.font === 'FTC Dot' && hub.bg === hub.want && !hub.roboto,
+      'the career\'s home in the pixel kit again: no top bar, cards or cream (the hub on the scheme\'s ' + hub.bg + '), the crest, club and week\'s button down the menu, the money along the campus\'s foot, its words in FTC Dot (no Roboto Condensed carried)');
+    ok(tac.wide && tac.under && tac.faces === 9 && !tac.figs && tac.font === 'FTC Dot',
+      'the Tactics as it was: the pitch on its side, the nine shown by their faces (' + tac.faces + '), the bench under it, the title in FTC Dot');
+  }
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (3-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
     await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(120);
