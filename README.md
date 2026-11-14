@@ -141,7 +141,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     one's doesn't. It's never stuck to him: even at 10 it's touched on every stride.
   - **Turning with it: Agility turns his body, Dribbling has the ball keep up.** The ball comes round with him at his
     Dribbling's pace: stood still, round to the way he's facing in a quarter turn in 0.1 s at Dribbling 10, 0.15 s at
-    5.5 and 0.25 s at 1 (it was 0.15 s for everyone). A slow-turning man who can dribble keeps it at his feet all the
+    5.5 and 0.25 s at 1 (it was 0.15 s for everyone). (v218: his Ball control's pace now, the same quarter turns at Ball
+    control 10, 5.5 and 1, and round his front the way he's turning -- see **Turning with the ball (v218)**.) A slow-turning man who can dribble keeps it at his feet all the
     way round; he just takes longer about it. (v208 to v214, every quarter of a radian or so his run swung round at pace
     a touch also knocked it out from his feet, more the worse he dribbled, so a quick man who couldn't dribble turned
     away from it -- loose 57% of the time cutting at a sprint at Dribbling 1 and Agility 10. Taken out in v215.)
@@ -194,7 +195,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
 - **Receive, settle, then go; and a pass got ready (v210).** Agility's job and Off IQ's, on the ball.
   - **Getting round the ball.** A ball a man has just received -- a pass, his first touch, one he's cut out, a loose
     one he's picked up -- that's beside or behind him, the way he wants to go: he has to get round it before he can go
-    at it. He comes round it as fast as his Agility turns him (6 radians a second at 5.5, 3 at 1, 9 at 10), and till
+    at it. He comes round it as fast as his Agility turns him (6 radians a second at 5.5, 3 at 1, 9 at 10; v218: it comes
+    round to his front as fast as his Ball control brings it, 9.5 radians a second at 5.5, 5.7 at 1, 12.4 at 10), and till
     it's in front of him (within 30° of the way he's going) his pace and his acceleration are cut, the more the
     further round it is, to 45% of them with it right behind him. Never frozen: he's moving off within a quarter of a
     second whatever. On the run already, he keeps the pace he has; he just can't go any quicker till it's round.
@@ -357,6 +359,25 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     poor one's touch heavier.
   - The dials: Directional touch: aim at Ball control 1 and at 10 (20° and 2°), weight at 1 and at 10 (a third and a
     twentieth), on a curve kind to a decent touch. The old aim error dial is gone from Settings.
+- **Turning with the ball: round his front, at his Ball control's pace (v218).**
+  - **The ball comes round the way he's turning, across his front.** With it off to one side and you turning the other
+    way, it used to take the short way to where you now faced, and once you'd turned more than half round from it that
+    was round your back: 90° off to his left and the stick pushed 135° round to his right, it went to 117°, then 172°
+    -- behind him -- and on round. Now it comes clockwise across his front: 81°, 60°, 30°, straight ahead, and on round.
+  - **He can't turn at full speed till it's in front of him.** Off his front (more than 35° round from the way he faces
+    or runs), yours turns away from it only half as fast as it comes round, so it's round first; with it in front he
+    turns with it no quicker than it comes, leading it by 35° at most. From a standing start the other way he turns
+    where he stands, bringing it round, then goes. In the case above, a tenth of a second on he's 16° round at Ball
+    control 1, 27° at 5.5 and 35° at 10 (he used to be round at once), and the ball's in front of where he's going in
+    0.75 s, 0.47 s and 0.38 s.
+  - **How fast it comes round to his front is his Ball control:** 9.5 radians a second at 5.5, 0.6 times that at 1, 1.3
+    times at 10 -- a quarter turn in 0.25 s, 0.15 s and 0.1 s. It was his Dribbling (v208), and one he'd just received
+    beside or behind him came round as fast as his Agility turned him (v210): that one's his Ball control too now --
+    behind him, away in 0.55 s at Ball control 1, 0.37 s at 5.5 and 0.30 s at 10, whatever his Agility. Agility still
+    turns his body and gets him going again the other way. The computer's men bring it round at their Ball control's
+    pace too, keeping it within 35° of their run as before, never round their backs.
+  - The dial: Ball control: the ball round to his front (it was Dribbling: the ball round with him). Agility: round the
+    ball to go is gone. The skill moves page's clips are recorded again.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3400,6 +3421,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v218: turning with the ball, round his front at his Ball control's pace.** The ball comes round the way he's turning,
+  across his front, never round his back (with it off to one side and him turning the other way it used to take the
+  short way, round behind him); off his front, yours can turn away from it only half as fast as it comes round, so he
+  can't turn at full speed till it's in front of him. How fast it comes round is his Ball control (it was his Dribbling,
+  and one just received, his Agility). New checks in `tests/classic-settle.mjs`; `classic-dribble` reads the ball round
+  by Ball control. See **Turning with the ball: round his front, at his Ball control's pace (v218)**.
 - **v217: Ball control places a directional touch.** How near the way you flicked it a directional first touch goes, and
   how near the weight you meant, is the man's Ball control: typically 1° off and just the weight he meant at 10, 5° off
   and a seventh heavy or light at 5.5, 12° off and a third at 1 (it was 2°, 5° and 9°, the touch for the moment alone).

@@ -177,16 +177,16 @@ ok(A10.got === 0 && A1.got === 0 && A10.loose === 0 && A1.loose === 0, 'a man wh
 ok(D10A1.got === 0 && D10A1.max <= 26, 'a slow-turning man who can dribble (Agility 1, Dribbling 10) keeps it at his feet through every cut (' + D10A1.max + ' px at most)');
 
 // THE BALL ROUND WITH HIM: stood still, the stick swung square across -- how long the ball takes to come round to the
-// way he faces (it's his Dribbling, not his Agility: ballFollow 9.5 rad/s at 5.5)
+// way he faces (v218: it's his Ball control -- it was his Dribbling -- not his Agility: ballFollow 9.5 rad/s at 5.5)
 const roundT = await page.evaluate(() => { const T = window.__T, atk = T.atkOf('G'), m = T.controlled(), b = T.ball(), dt = 1 / 60, out = {};
   T.freeze(); for(const q of T.players()) if(q !== m){ q.x = 60; q.y = 60; q.vx = q.vy = 0; }
   const keep = m.stats;
-  for(const D of [1, 5.5, 10]){ m.stats = Object.assign({}, keep, { dribbling: D }); m.x = T.FW / 2; m.y = T.YC; m.vx = m.vy = 0; m.state = 'normal';
+  for(const D of [1, 5.5, 10]){ m.stats = Object.assign({}, keep, { ballControl: D, dribbling: 5.5 }); m.x = T.FW / 2; m.y = T.YC; m.vx = m.vy = 0; m.state = 'normal';
     b.x = m.x + atk * 25; b.y = m.y; b.z = 0; b.vx = b.vy = 0; T.own(m, 25); m.carryAngle = atk > 0 ? 0 : Math.PI; m.facing = { x: 0, y: 1 };
     let t = 0; for(; t < 2; t += dt){ T.carry(m, dt, false); b.x += b.vx * dt; b.y += b.vy * dt; if(Math.sin(m.carryAngle) > 0.99) break; }
     out[D] = +t.toFixed(2); }
   m.stats = keep; return out; });
-ok(roundT[1] > roundT[5.5] * 1.4 && roundT[5.5] > roundT[10] * 1.15, 'the ball comes round with him the quicker the better he dribbles: a quarter turn in ' + roundT[10] + ' s at Dribbling 10, ' + roundT[5.5] + ' s at 5.5, ' + roundT[1] + ' s at 1');
+ok(roundT[1] > roundT[5.5] * 1.4 && roundT[5.5] > roundT[10] * 1.15, 'the ball comes round to his front the quicker the better his Ball control: a quarter turn in ' + roundT[10] + ' s at Ball control 10, ' + roundT[5.5] + ' s at 5.5, ' + roundT[1] + ' s at 1 (v218: it was his Dribbling)');
 
 // THE SAME FOR THE COMPUTER: one of its men carrying it straight on, the carry stepped on its own -- as far from him as
 // yours at each Dribbling
