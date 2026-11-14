@@ -10,7 +10,9 @@
 // meet it all the same: taken out). And the touch pops up off his foot, 9 to 12 px, under the 12 a ball's in the air at.
 // (v216) The touch is taken where the ball meets him, and he isn't turned the way you flicked it the moment he touches it
 // -- the ball used to jump round to that side of him, and him with it; sent on behind him, it curls round him, never
-// through him, and goes on the way you flicked it.
+// through him, and goes on the way you flicked it. (v217) Ball control places it: how near the way you flicked it, and how
+// near the weight you meant -- a Ball control 10 man's within a degree or two and the weight he meant, a Ball control 1
+// man's often well off and heavy or light.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -24,6 +26,15 @@ patch('    if(padId!==null){const l=Math.hypot(pdx,pdy);if(l>10){ix=pdx/l;iy=pdy
 patch('  const LAB_TITLE=', `  window.__T={ gap:()=>{ const r=LAB.recv==='ai'?labRecv():controlled; return r?Math.hypot(ball.x-r.x,ball.y-r.y):null; }, armed:()=>!!ftAim, owned:()=>!!ball.ownedBy,
     bc:v=>{ P.ballControl.val=v; if(controlled) controlled.stats=Object.assign({},controlled.stats||{},{ballControl:v}); },
     mine:()=>!!controlled&&ball.dribbler===controlled&&!ball.ownedBy, own:()=>!!controlled&&ball.ownedBy===controlled, z:()=>ball.z,
+    dirOdds:(bcv,n)=>{ const c=controlled; if(!c) return null; const was=Object.assign({},ball), wf=c.facing, wa=ftAim, wn=c.noTouchT, ws=c.stats, wx=c.x, wy=c.y;   // (v217: a ball at 450 from 30 px in front, the way he faces, flicked out to his side, n times at Ball control bcv: how far off the flick it goes, degrees, and how far it runs, px)
+      c.stats=Object.assign({},ws||{},{ballControl:bcv}); const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999))), off=[], run=[];
+      for(let i=0;i<n;i++){ c.x=wx; c.y=wy; c.vx=c.vy=0; c.facing={x:-1,y:0}; c.noTouchT=0;
+        ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=c; ball.lastTouch=c.team; ball.passFrom=null; ball.z=0; ball.vz=0; ball.x=c.x-30; ball.y=c.y; ball.vx=450; ball.vy=0;
+        const s=touchQuality(c,false); ftAim={p:c,d:{x:0,y:1},until:simNow+1,lt:ball.lastTouch}; directionalTouch(c,s);
+        off.push(Math.abs(Math.atan2(ball.vx,ball.vy))*180/Math.PI); run.push(Math.hypot(ball.vx,ball.vy)/k); }
+      off.sort((a,b)=>a-b); run.sort((a,b)=>a-b); const q=(A,f)=>A[Math.floor(f*(A.length-1))], m=run.reduce((a,v)=>a+v,0)/n;
+      Object.assign(ball,was); ball.ftRound=null; c.facing=wf; ftAim=wa; c.noTouchT=wn; c.stats=ws; c.x=wx; c.y=wy;
+      return { off:+q(off,0.5).toFixed(1), off90:+q(off,0.9).toFixed(1), weight:+((q(run,0.9)-q(run,0.1))/m).toFixed(2) }; },
     curl:(fx,fy)=>{ const c=controlled; if(!c) return null; const was=Object.assign({},ball), wf=c.facing, wa=ftAim, wn=c.noTouchT;   // (v216: a ball rolled at him from 30 px in front, the way he faces, and a flick (fx,fy) as it comes: where it is the moment he's touched it, the way he faces then, and its way on, stepped 1 s, how near him it ever comes)
       c.facing={x:-1,y:0}; ball.ownedBy=null; ball.dribbler=null; ball.intendedRcv=c; ball.lastTouch=c.team; ball.z=0; ball.vz=0; ball.x=c.x-30; ball.y=c.y; ball.vx=300; ball.vy=0;
       const x0=ball.x, y0=ball.y; ftAim={p:c,d:{x:fx,y:fy},until:simNow+1,lt:ball.lastTouch}; directionalTouch(c,1);
@@ -135,6 +146,16 @@ ok(behind && aside && behind.jump < 1 && aside.jump < 1 && behind.facing.x < -0.
   'the touch is taken where the ball meets him, and he\'s still facing the way he met it the moment after -- he turns to go after it at his own pace (v216: it jumped round to the side it was going, ' + 'and he was turned that way, the moment he touched it)');
 ok(behind.curling && behind.near >= 24 && behind.dir.x > 0.99 && !aside.curling && aside.near >= 24 && aside.dir.y > 0.99,
   'flicked on behind him it curls round him, never nearer his middle than ' + behind.near + ' px (his body and the ball\'s, 20), and goes on the way you flicked it (' + JSON.stringify(behind.dir) + '); out to his side, straight that way (' + JSON.stringify(aside.dir) + ')');
+
+// --- BALL CONTROL PLACES IT (v217) ------------------------------------------------------------------------------------
+// the same ball, flicked out to his side, 2000 times at Ball control 1, 5.5 and 10: how far off the flick it typically goes
+// (and one in ten worse), and how far off the weight he meant (the spread of how far it runs, a share of its run)
+const dq = {}; for(const v of [1, 5.5, 10]) dq[v] = await mp.evaluate(v => window.__T.dirOdds(v, 2000), v);
+info('the directional touch by Ball control (typical degrees off the flick, one in ten worse, the spread of its weight): ' + JSON.stringify(dq));
+ok(dq[10].off <= 2 && dq[10].off90 <= 4 && dq[5.5].off >= 3 && dq[5.5].off <= 7 && dq[1].off >= 9 && dq[1].off90 >= 20,
+  'Ball control places a directional touch: typically ' + dq[10].off + '° off the way you flicked it at 10, ' + dq[5.5].off + '° at 5.5, ' + dq[1].off + '° at 1 (one in ten worse than ' + dq[10].off90 + '°, ' + dq[5.5].off90 + '°, ' + dq[1].off90 + '°; v216: 2°, 5° and 9°, the touch for the moment alone)');
+ok(dq[10].weight <= 0.16 && dq[5.5].weight >= 0.18 && dq[5.5].weight <= 0.45 && dq[1].weight >= 0.5,
+  '...and its weight: how far it runs spread ' + Math.round(dq[10].weight * 100) + '% at 10, ' + Math.round(dq[5.5].weight * 100) + '% at 5.5, ' + Math.round(dq[1].weight * 100) + '% at 1 (v216: 9%, 16% and 25%)');
 
 // --- IN THE AIR, AND THE COMPUTER'S MAN --------------------------------------------------------------------------------
 while(!/CHEST/.test(await mp.textContent('#labServeV'))){ await mp.tap('#labBar [data-lab="serve"]'); await mp.waitForTimeout(60); }

@@ -345,6 +345,18 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     on. Its push has as much again as it takes to get round him, or out to his side, so it ends up about as far from
     him whichever way it's sent: in the Trap Lab 43 to 51 px from him at the most, and his again in 0.6 to 0.9 s.
   - The rest of it is as it was: the hop, pushed into space, his at his feet once he's caught it up.
+- **Ball control places a directional touch (v217).**
+  - **How near the way you flicked it** a directional first touch goes, and **how near the weight you meant**, is the
+    man's Ball control now. With nobody near, a ball flicked out to his side: at Ball control 10 typically 1° off (one in
+    ten worse than 2.4°) and just the weight he meant, give or take a twentieth; at 5.5, 5° off (one in ten past 11°)
+    and a seventh heavy or light; at 1, 12° off (one in ten past 28°) and a third heavy or light -- it runs anywhere from
+    93 to 190 px where he meant 124. It was the touch for the moment alone: 2°, 5° and 9° off typically, and its weight
+    barely his at all.
+  - **The moment still tells,** a little: pressed, his Composure, a quick ball or turned from it widen both, up to half as
+    much again on the worst touch -- with a man 1.2 m from him, 13° off at Ball control 1, 5° at 5.5, 1° at 10, and a
+    poor one's touch heavier.
+  - The dials: Directional touch: aim at Ball control 1 and at 10 (20° and 2°), weight at 1 and at 10 (a third and a
+    twentieth), on a curve kind to a decent touch. The old aim error dial is gone from Settings.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -1015,7 +1027,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   2 m from you as you go after it, and on it again in about half a second. (It was yours again a fifth of a second on,
   still inside your reach ring, and hardly went anywhere; the push dial is 100, it was 55.) It pops up off your foot as
   it goes (v215), about 8 px, 0.4 m, and comes down as you catch it up. After the flick, leave the stick alone and you
-  go to meet the ball; hold it and it's yours, you go where you push it (v215, as before v212).
+  go to meet the ball; hold it and it's yours, you go where you push it (v215, as before v212). How near the way you
+  flicked it the touch goes, and how near the weight you meant, is your Ball control (v217): within a degree or two
+  and just the weight at 10, typically 12° off and a third heavy or light at 1.
   - **Any ball on its way to you arms it:** one played to you, one led into space ahead of you, or one whose path runs
     within 6 m of you, from as far as 40 m off. It stays armed until the ball gets to you, or someone else touches it.
     (It used to need the ball heading straight at you from within 15 m, unless you'd left the stick alone since the
@@ -3249,6 +3263,9 @@ in the same position). **KICK OFF** (or `Enter`) starts it; `Esc` or BACK leaves
 
 ## Trap Lab
 
+**Football Classic (v217):** how near the way you flicked it a touch goes, and its weight, is the man's Ball control: at
+the lab's 5.5, typically 5° off and a seventh heavy or light; set Ball control in ⚙ TUNE to feel a 10's or a 1's.
+
 **Football Classic (v216):** a flicked touch goes on from where it met him, and he turns to go after it at his own
 pace; one sent on behind him curls round him. It used to jump round to the side it was going, and him with it.
 
@@ -3269,7 +3286,8 @@ on the screen) and whether your flick ended just after he'd taken it (off his fo
 The tally counts the grades, the balls that ran past, and the flicked touches with how far off they went on average.
 The computer's man takes it with his own first touch, on a tally of his own. The chips are SERVE, PACE, LINE, NEXT,
 TIME, RECEIVER and ▶ SERVE. ⚙ TUNE (in developer mode) holds the first touch's dials: Ball control, the directional
-touch's push and aim error, the cone, the reach, the pace a touch keeps and the computer's touch. The old timed press
+touch's push and (v217) its aim and weight at Ball control 1 and 10, the cone, the reach, the pace a touch keeps and the
+computer's touch. The old timed press
 is gone: its sweet spot, window, late tolerance and lockout, and the drag on TRAP, are off Settings. The rest of this
 section is the original game's Trap Lab.
 
@@ -3382,6 +3400,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v217: Ball control places a directional touch.** How near the way you flicked it a directional first touch goes, and
+  how near the weight you meant, is the man's Ball control: typically 1° off and just the weight he meant at 10, 5° off
+  and a seventh heavy or light at 5.5, 12° off and a third at 1 (it was 2°, 5° and 9°, the touch for the moment alone).
+  New dials for it; the old aim error is gone. New checks in `tests/classic-traplab.mjs`. See **Ball control places a
+  directional touch (v217)**.
 - **v216: a directional touch without the jump.** A flick on SKILL sends the ball on from where it meets his foot, and
   he turns to go after it at his own pace; one sent on behind him curls round him, never through him. It used to be put
   round on the side it was going, and him turned that way, the moment he touched it. New checks in

@@ -2685,7 +2685,12 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     trapLock: {val:0.35,min:0,max:1,step:0.05,label:'Trap Lab: re-press lockout (s)',hint:'TRAP LAB ONLY (its timed press): a match\'s first touch has no timing. A press that catches nothing locks the next press out for this long, so mashing the button is worse than timing it.',gone:true},
     // directional first touch (touch screens): press TRAP and drag the way you want the ball to go
     ftPush:   {val:100,min:15,max:160,step:5,label:'First touch: push distance',hint:'How far a perfect DIRECTIONAL first touch rolls from a standing start (a flick on SKILL as the ball comes, in a match or the Trap Lab). Running along your aim adds your own pace on top. It is away from him till he has caught it up (v214: about 2 m ahead of him going after it, and on it again in about 0.6 s at Ball control 5.5; it was 55, and his again a fifth of a second on).'},
-    ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed.'},
+    ftErr:    {val:35,min:0,max:90,step:1,label:'First touch: aim error (°)',hint:'How far a directional touch strays from your aim at the worst timing (a typical miss, not the limit). Perfect timing puts it right where you aimed. (v217: the old Trap Lab press only -- a directional touch\'s aim is Ball control\'s now: the Directional touch dials.)',gone:true},
+    // (v217) BALL CONTROL PLACES A DIRECTIONAL TOUCH: how near the way you flicked it, and how near the weight you meant
+    ftAimLo:  {val:20,min:0,max:60,step:1,label:'Directional touch: aim at Ball control 1 (°)',hint:'(v217) How far off the way you flicked it a directional first touch typically goes (one standard deviation) for a man with Ball control 1. A curve runs down to the next dial at 10, kind to a decent touch: 8° at 5.5. A worse touch for the moment -- pressed, his Composure, a quick ball, turned from it -- goes a little wider again.'},
+    ftAimHi:  {val:2,min:0,max:30,step:0.5,label:'Directional touch: aim at Ball control 10 (°)',hint:'(v217) ...and for a man with Ball control 10.'},
+    ftWtLo:   {val:0.32,min:0,max:1,step:0.01,label:'Directional touch: weight at Ball control 1',hint:'(v217) How far off the weight you meant a directional first touch typically is, heavy or light, as a share of its push (one standard deviation), for a man with Ball control 1: at 0.32, a third. The same curve down to the next dial at 10: 0.14 at 5.5. A worse touch for the moment is heavier and wider again.'},
+    ftWtHi:   {val:0.05,min:0,max:0.5,step:0.01,label:'Directional touch: weight at Ball control 10',hint:'(v217) ...and for a man with Ball control 10.'},
     ftTurn:   {val:1,min:0,max:1.6,step:0.05,label:'First touch: turn difficulty',hint:'How much turning the ball (aiming away from where it would bounce off you anyway) narrows the timing window. 1 = a full turn halves it on a 450 ball, and quicker balls are harder to turn. 0 = every direction is as easy as the next.',gone:true},
     ftWin:    {val:0.2,min:0.05,max:0.5,step:0.01,label:'First touch: drag window (s)',hint:'How long after your finger lands on TRAP a drag still aims the touch. The press itself is timed from the moment your finger lands; drag before the ball gets to you, or just after, and the touch goes that way.',gone:true},
     ftDrag:   {val:24,min:8,max:80,step:2,label:'First touch: drag to aim (px)',hint:'How far your finger has to move from where it landed on TRAP before it counts as a direction (screen pixels). Less = a shorter flick aims it, more = a sloppy tap won\'t.',gone:true},
@@ -3049,7 +3054,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     keeper:   ['gkReflex','keeperSpd','gkDiveRange','gkReach','gkHandling'],
     gkdist:   ['gkDistribution','keeperSpd'],
     firsttouch:['ballControl','cone1','cone5','cone10','coneCore','turnTouch','coneSpread','reachLo','reachHi','aiTouch','aiReact','firstTouchAcc'],
-    traplab:  ['ballControl','ftPush','ftErr','cone1','cone5','cone10','coneCore','turnTouch','coneSpread','awayAngle','reachLo','reachHi','airKeepGood','airKeepBad','trapKeepGood','trapKeepBad','trapPop','gatherR','aiTouch','aiReact','bodyTurn','pedalSide','pedalBack'],   // (v212: the first touch as a match has it)
+    traplab:  ['ballControl','ftPush','ftAimLo','ftAimHi','ftWtLo','ftWtHi','cone1','cone5','cone10','coneCore','turnTouch','coneSpread','awayAngle','reachLo','reachHi','airKeepGood','airKeepBad','trapKeepGood','trapKeepBad','trapPop','gatherR','aiTouch','aiReact','bodyTurn','pedalSide','pedalBack'],   // (v212: the first touch as a match has it)
     passlab:  ['oneTouchErr','oneTouchMax','turnPassErr','thruPace','passAcc','longPass','passLoft','passPace','passDtap','passDrag','thruLead','loftHang','lobCheck','ballControl','aiTouch','aiReact'],
     dribblelab:['skSpinDist','skCroqDist','skCutPop','skRainbowDist','skRainbowH','skSpinT','skCroqT','skCutT','skRainbowT','ftPush','dribbling','dribBack','ballFollow','agility','tackle'],
     shootlab: ['shotPower','shotAcc','curve','longShots','swipeCurl','swipePow','swipeBow','swipeFree','swipeCross','blockReach','blockIQ','gkReflex','gkReach','gkDiveRange','gkHandling'],
@@ -5321,14 +5326,23 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     own(p,dist(p,ball),true);                                // (v216: taken where it is)
     const k=3.2*Math.log(1/(1-clamp(P.friction.val,0.001,0.999)));
     const push=P.ftPush.val*k+Math.max(0,p.vx*a.x+p.vy*a.y);
-    const err=clamp((Math.random()+Math.random()+Math.random()-1.5)*2*(1-s)*P.ftErr.val,-90,90)*Math.PI/180;
+    // (v217) BALL CONTROL PLACES IT: how near the way you flicked it the touch goes -- ftAimHi to ftAimLo degrees off as a
+    // typical miss, Ball control 10 to 1 -- and how near the weight you meant, ftWtHi to ftWtLo of its push heavy or light,
+    // on a curve kind to a decent touch (8° and a seventh at 5.5). The touch for the moment (s: pressed, his Composure, the
+    // ball's pace, turned from it) widens both a little, half as much again at its worst, a third less at its best. It
+    // was the touch for the moment alone, up to 35° off at its worst whatever his Ball control: 2° off at 10 and 9° at 1,
+    // typically, and its weight barely his at all.
+    const bcq=clamp((statOf(p,'ballControl',P.ballControl.val)-1)/9,0,1), bcw=Math.pow(1-bcq,1.5), sw=0.6+0.8*(1-s);
+    const aimSd=(P.ftAimHi.val+(P.ftAimLo.val-P.ftAimHi.val)*bcw)*sw, wtSd=(P.ftWtHi.val+(P.ftWtLo.val-P.ftWtHi.val)*bcw)*sw;
+    const bell=()=>(Math.random()+Math.random()+Math.random()-1.5)*2;   // (one standard deviation, never past three)
+    const err=clamp(bell()*aimSd,-90,90)*Math.PI/180, wt=Math.max(0.45,1+bell()*wtSd);
     const ang=Math.atan2(a.y,a.x)+err, dx=Math.cos(ang), dy=Math.sin(ang);
     // (v216) where the ball is on him, against the way it's going: along, the cosine of the angle between them; across, its
     // sine, signed -- round him if its line runs through him; and how much further it has to go than from out to his side
     const ox=ball.x-p.x, oy=ball.y-p.y, od=Math.hypot(ox,oy)||1, along=(ox*dx+oy*dy)/od, across=(ox*dy-oy*dx)/od;
     const round=!up&&along<0&&od*Math.abs(across)<p.r+ball.r+4, rOrb=Math.max(od,FT_ROUND_MIN), side=across<0?-1:1;
     const extra=round?rOrb*(Math.acos(clamp(along,-1,1))-Math.PI/2)+FT_SIDE:Math.max(0,FT_SIDE-od*along);
-    const out=Math.max(push*(1+0.8*(1-s)*(1-s))+extra*k,floor);
+    const out=Math.max(push*wt*(1+0.8*(1-s)*(1-s))+extra*k,floor);   // (v217: its weight, Ball control's -- see wt)
     ball.ownedBy=null; ball.dribbler=p; ball.dribbleGrace=0.85+(round?0.25:0); ball.touchAt=simNow; p.noTouchT=0.12+0.15*(1-s);   // (v216: a quarter of a second more his own touch, curling round him)
     ball.vx=dx*out; ball.vy=dy*out; ball.z=1; ball.vz=FT_HOP[0]+FT_HOP[1]*(1-s);   // (v215: the hop -- see FT_HOP)
     ball.dribEsc={p, t:simNow, dx:Math.cos(ang), dy:Math.sin(ang), ft:true};   // (v214: pushed into space -- he can't have it back till he's caught it up, as a touch of his that gets away: escaping -- and then only at his feet: FT_TAKE. It was his again as soon as it was in his reach, a fifth of a second on)
@@ -5935,7 +5949,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   // ----- tune drawer: the first touch's dials, kept in sync with the main settings sliders -----
   const LAB_DIAL_NAMES={ballControl:'Ball control',trapSweet:'Sweet spot',trapWin:'Window ×',trapLate:'Late tolerance',
     trapKeepGood:'Pace kept · perfect',trapKeepBad:'Pace kept · botched',trapPop:'Bounce pop ×',trapLock:'Re-press lockout',gatherR:'Gather radius',aiTouch:'First-touch spread',aiReact:'AI reaction',
-    ftPush:'Directional · push',ftErr:'Directional · aim error',ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
+    ftPush:'Directional · push',ftErr:'Directional · aim error',ftAimLo:'Directional · aim at Ball control 1',ftAimHi:'Directional · aim at Ball control 10',ftWtLo:'Directional · weight at Ball control 1',ftWtHi:'Directional · weight at Ball control 10',   // (v217)ftTurn:'Directional · turn difficulty',ftWin:'Directional · drag window',ftDrag:'Directional · drag to aim',
     passAcc:'Short passing',longPass:'Long passing',passLoft:'Pass loft',passPace:'Pass pace',passDtap:'Cross double-tap',passDrag:'Drag for a through ball',thruLead:'Through-ball lead',loftHang:'Long ball hang time',lobCheck:'Chip check-up',
     shotPower:'Shot power',shotAcc:'Shot accuracy',curve:'Curve',longShots:'Long shots',swipeCurl:'Swipe curl',swipePow:'Flick for full power',swipeBow:'Bend for full spin',
     gkReflex:'Keeper reflexes',gkReach:'Keeper reach',gkDiveRange:'Keeper diving',gkHandling:'Keeper handling',
@@ -5956,6 +5970,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     trapLock:'Dead time after a press that caught nothing, so mashing loses.',
     ftPush:'How far a perfect directional touch rolls from standing (your own run is added on top). It is away from him till he has caught it up. A flick on SKILL as the ball comes, or as it gets to you.',
     ftErr:'How far off your aim a directional touch strays at the worst timing.',
+    ftAimLo:'How far off your flick a Ball control 1 man\'s directional touch typically goes. 8° at 5.5, down to the next at 10.',
+    ftAimHi:'...and a Ball control 10 man\'s.',
+    ftWtLo:'How far off the weight you meant a Ball control 1 man\'s directional touch typically is, heavy or light. A seventh at 5.5.',
+    ftWtHi:'...and a Ball control 10 man\'s.',
     ftTurn:'How much turning the ball narrows the window. 0 = every direction is as easy.',
     ftWin:'How long after your finger lands a drag still aims the touch (before the ball gets to you, or just after).',
     ftDrag:'How far your finger moves before it counts as a direction.',
@@ -6011,7 +6029,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     if(['passAcc','longPass','shotPower','shotAcc','curve','longShots','gkReflex','gkReach','gkDiveRange','gkHandling'].includes(k)) return v.toFixed(1);
     if(k==='gatherR') return v+' (reach '+Math.round(controlROf({stats:{}}))+')';
     if(k==='ftPush') return v+' (≈'+(v/controlROf({stats:{}})).toFixed(1)+' rings)';
-    if(k==='ftErr') return v+'°';
+    if(k==='ftErr'||k==='ftAimLo'||k==='ftAimHi') return v+'°';
+    if(k==='ftWtLo'||k==='ftWtHi') return '±'+Math.round(v*100)+'%';   // (v217)
     if(k==='ftWin') return Math.round(v*1000)+' ms';
     if(k==='ftDrag') return Math.round(v)+' px';
     if(k==='ballControl'){ const pr={stats:{}}; return v.toFixed(1)+' · ring '+Math.round(controlROf(pr))+' · '+Math.round(trapWindowOf(pr)*1000)+' ms'; }
