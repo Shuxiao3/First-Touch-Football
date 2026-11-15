@@ -428,6 +428,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   and SKILL MOVES are off the title page, as that layout has them; they're still in the game. And SKILL MOVES no
   longer freezes: its clips could start a moment before 0 on a busy phone, find no picture for the ball, and stop
   every drawing and clip until the page was opened again.
+- **A footer along the career (v225).** Every career page -- the campus and each building, every tab -- has the
+  Fulltime 9 kit's bushes and grass along its foot: the bushes as drawn at each end and the grass repeating between
+  them, so it fits any phone, 8% of the screen's height (24 to 64 px). It has a band of its own under the page, so it
+  covers nothing. On a short phone (380 px tall or less) the page comes halfway down into it, the footer behind; on the
+  shortest (350 px or less, a phone's browser with its bar showing) the page keeps all the room it had, with the
+  grass along its foot and the bushes at the screen's edges, so a man's card still fits on one page there.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3444,6 +3450,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v225: a footer along the career.** The kit's bushes and grass along the foot of the campus and every building
+  page, in a band of their own (cut into the bushes at each end and a stretch of grass that repeats, so it fits any
+  width). The page stops above the band; halfway into it at 380 px tall or less; where it always did at 350 px or
+  less. The market's list shows 10 rows at once on an 844x390 phone (11 before). A new check in
+  `tests/classic-ui.mjs`. See **A footer along the career (v225)**.
 - **v224: Roboto Condensed, and the title page from the Studio.** Roboto Condensed is the one font for words and
   figures (the pixel font only for symbols), buttons semibold, its three weights loaded at the start. The title page
   as finalized in the Studio: five buttons in one centred column; the labs and SKILL MOVES off it. Player tokens'

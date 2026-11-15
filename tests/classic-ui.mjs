@@ -97,6 +97,7 @@ for(const [w, h] of SIZES){
   await page.goto('file://' + copy); await page.waitForTimeout(700);
   const fails = [], check = async (what, sels) => { const bad = await onScreen(page, sels); if(bad.length) fails.push(what + ': ' + bad.slice(0, 2).join('; ')); };
   await check('start menu', ['#smItems .smBtn']);
+  const footOnTitle = await page.evaluate(() => [...document.querySelectorAll('.cfFoot')].filter(f => f.getClientRects().length).length);   // (v225: the footer's the career's alone)
   await page.tap('#smItems [data-act="settings"]'); await page.waitForTimeout(150);
   await check('settings', ['#settingsOverlay .pauseTitle', '#setRows .setOpt', '[data-setclose]']);
   if(w === 844 && h === 390){
@@ -219,6 +220,23 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   ok(!fails.length, w + 'x' + h + ': every menu screen fits, and nothing on it scrolls (one waiting for its clubhouse, one to buy, every building\'s every tab, DECORATE)' + (fails.length ? ' -- ' + fails.slice(0, 3).join(' | ') : ''));
   if(w === 844 && h === 390) ok(!audit.length, 'J1\'s audit: no building\'s screen, any tab, shows a sentence longer than a label by default (48 characters; the news excepted)' + (audit.length ? ' -- ' + audit.slice(0, 4).join(' | ') : ''));
+  { // (v225) THE FOOTER: the Fulltime 9 kit's bushes and grass along the foot of the campus and of every building -- at the very
+    // foot, the full width, 8% of the screen's height (24 to 64 px), the bushes as drawn at each end and the grass repeating
+    // between them, behind the page and taking no taps; the page stops above it (380 px tall or less: halfway into it; 350 px
+    // or less: where it always stopped), and it's on no screen outside the career
+    const foot = sel => page.evaluate(sel => { const f = document.querySelector(sel + ' > .cfFoot'); if(!f || !f.getClientRects().length) return null;
+      const r = f.getBoundingClientRect(), cs = getComputedStyle(f), part = c => { const e = f.querySelector(c), s = getComputedStyle(e); return { w: e.getBoundingClientRect().width, img: /^url\("?data:image\/webp/.test(s.backgroundImage), rep: s.backgroundRepeat }; };
+      const page = sel === '#careerHub' ? ['.cpNav', '.cpMain'] : ['#bldgPanel .bpInner'], low = Math.max(...page.map(s => document.querySelector(s).getBoundingClientRect().bottom));
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, h: r.height, z: cs.zIndex, pe: cs.pointerEvents, L: part('.cfL'), M: part('.cfM'), R: part('.cfR'), low, W: innerWidth, H: innerHeight }; }, sel);
+    const want = Math.min(64, Math.max(24, h * 0.08)), stop = h > 380 ? h - want - 2 : h > 350 ? h - want * 0.5 : h - 8;
+    const good = f => !!f && Math.abs(f.bottom - f.H) < 1 && f.left === 0 && Math.abs(f.right - f.W) < 1 && Math.abs(f.h - want) < 1 && f.z === '-1' && f.pe === 'none'
+      && f.L.img && f.M.img && f.R.img && Math.abs(f.L.w - f.h * 406 / 107) < 1.5 && Math.abs(f.R.w - f.h * 232 / 107) < 1.5 && /round/.test(f.M.rep) && f.low <= stop + 1;
+    const hubF = await foot('#careerHub');
+    await page.tap('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(100); const bldF = await foot('#bldgPanel');
+    await page.tap('.bpTopBack'); await page.waitForTimeout(80);
+    ok(good(hubF) && good(bldF) && footOnTitle === 0, w + 'x' + h + ': the footer along the foot of the campus and the Clubhouse, and not on the title page -- the full width, ' + (hubF ? Math.round(hubF.h * 10) / 10 : '-') + ' px tall (8% of the screen), the bushes as drawn at each end ('
+      + (hubF ? Math.round(hubF.L.w) + ' and ' + Math.round(hubF.R.w) : '-') + ' px wide) and the grass repeating between, behind the page and taking no taps; the page ending at '
+      + (hubF ? Math.round(hubF.low) + ' and ' + Math.round(bldF ? bldF.low : 0) : '-') + ' px (' + (h > 380 ? 'above it' : h > 350 ? 'halfway into it' : 'where it always did') + ') (v225)'); }
   if(w === 844 && h === 390){   // (v220) THE CAREER BACK IN THE PIXEL KIT: Fulltime 9's look (v206) and its type (v207) taken off the hub and the Tactics
     const hub = await page.evaluate(() => { const q = s => document.querySelector(s), fam = e => getComputedStyle(e).fontFamily.split(',')[0].replace(/["']/g, '').trim();
       const hex = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(), n = parseInt(hex.slice(1), 16);
@@ -273,7 +291,7 @@ for(const [w, h] of SIZES){
       const a = await look(L); await swipe(L, 150); const b = await look(L);
       await page.evaluate(L => { const e = document.querySelector(L); e.scrollTop = e.scrollHeight; e.dispatchEvent(new Event('scroll')); }, L); await page.waitForTimeout(100); const z = await look(L);
       info('the market list: ' + JSON.stringify({ top: { rows: a.rows, seen: a.seen.length, n: a.n, more: a.more }, swiped: { st: b.st, seen: b.seen.length, more: b.more, stuck: b.stuck }, end: { st: z.st, max: z.max, last: z.last, more: z.more, end: z.end } }));
-      ok(!a.pager && a.rows > 30 && a.n === a.rows && a.seen.length >= 11 && a.more > 0 && a.more <= a.rows - a.seen.length, 'the market\'s list: no pages, ' + a.seen.length + ' rows on the screen at once, ' + a.n + ' over it and ' + a.rows + ' in it, ' + a.more + ' MORE');
+      ok(!a.pager && a.rows > 30 && a.n === a.rows && a.seen.length >= 10 && a.more > 0 && a.more <= a.rows - a.seen.length, 'the market\'s list: no pages, ' + a.seen.length + ' rows on the screen at once, ' + a.n + ' over it and ' + a.rows + ' in it, ' + a.more + ' MORE');   // (v225: 10 rows, the footer under the page; 11 before)
       ok(b.st >= 100 && b.more < a.more && b.stuck && !b.seen.includes(a.seen[0]), 'a finger up it: it moves (' + b.st + ' px), N MORE counts down (' + a.more + ' -> ' + b.more + '), the filters and the column heads stay where they were');
       ok(z.st >= z.max - 1 && z.last && z.end && z.more === 0, 'at its foot: the last man on the screen, and no N MORE');
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
