@@ -127,6 +127,20 @@ for(const [w, h] of SIZES){
       const plain = ['exhPanel', 'careerHub', 'settingsOverlay', 'newPanel'].every(id => { const n = document.getElementById(id); return !n || !/url\(/.test(getComputedStyle(n).backgroundImage); });
       return { wash: /rgba\(18, 26, 51, 0\.62\)/.test(c.backgroundImage), size: c.backgroundSize, dims, plain }; });
     ok(tp.wash && tp.dims && tp.dims[0] === 1586 && tp.dims[1] === 992 && /cover/.test(tp.size) && tp.plain, 'the title page has its stadium picture (' + (tp.dims || ['none']).join(' x ') + '), filling the screen under a wash of the screen colour, and no other screen has it (v222)');
+    // (v223) THE TITLE IS THE LOGO: Fulltime 9's logo where the words were, as tall as there's room for, above the menu and never
+    // on it, and the whole menu on the screen -- the shortest phone, an iPhone 15, and a Pro Max (whose menu ran off the bottom)
+    const logoAt = async (w, h) => { const c = await browser.newContext({ viewport: { width: w, height: h } });
+      await c.addInitScript(() => { try{ localStorage.setItem('ftc_prefs', JSON.stringify({ diff: 'star', pv: 1 })); }catch(e){} });
+      const pg = await c.newPage(); await pg.goto('file://' + copy); await pg.waitForTimeout(600);
+      const r = await pg.evaluate(() => { const img = document.querySelector('#startMenu .smLogo img'); if(!img) return null; const b = img.getBoundingClientRect();
+        const btns = [...document.querySelectorAll('#smItems .smBtn')].filter(x => x.offsetParent).map(x => x.getBoundingClientRect());
+        return { nat: [img.naturalWidth, img.naturalHeight], alt: img.alt, top: b.top, bottom: b.bottom, h: b.height, first: Math.min(...btns.map(x => x.top)), last: Math.max(...btns.map(x => x.bottom)),
+          words: /FOOTBALL\.? CLASSIC/i.test(document.getElementById('startMenu').innerText) }; });
+      await c.close(); return r; };
+    const sizes = [[844, 340], [852, 393], [932, 430]], lg = [];
+    for(const [w, h] of sizes) lg.push(await logoAt(w, h));
+    ok(lg.every((r, i) => r && r.nat[0] === 491 && r.nat[1] === 159 && /Fulltime 9/.test(r.alt) && !r.words && r.top >= 0 && r.bottom <= r.first && r.last <= sizes[i][1]) && lg[1].h > lg[0].h,
+      'the title is the Fulltime 9 logo, above the menu with the menu whole on the screen: ' + lg.map((r, i) => r ? sizes[i].join('x') + ' ' + Math.round(r.h) + ' px tall, the last button at ' + Math.round(r.last) : 'no logo').join('; ') + ' (v223)');
     ok(/FTC Dot/.test(one.font), 'one font throughout (' + one.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);

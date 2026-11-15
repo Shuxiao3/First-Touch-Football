@@ -415,6 +415,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   floodlights up and a manager watching from the front of the stand. A wash of the screen's blue lies over it, darkest
   at the top behind the title and at the foot behind the build number, so the words and the buttons read and the picture
   still shows. It fills the screen from its middle on any phone. Only the title page has it; every other screen is as it was.
+- **The Fulltime 9 logo on the title page (v223).** The title page's words (FOOTBALL. CLASSIC, nine a side) are now
+  the logo: FULLTIME 9, A SOCCER MANAGEMENT GAME, a ball flying over it, over the stadium picture. It's as tall as the
+  screen has room for above the menu, 44 to 100 px on a phone held sideways (93 on an iPhone 15) and up to 140 on a
+  tablet, and never touches the buttons. On a Pro Max or Plus held sideways the menu now takes the same two columns as
+  other phones, so all of it fits (it ran off the bottom before). The page's name elsewhere is still Football Classic.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3430,6 +3435,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v223: the logo on the title page.** Fulltime 9's logo in place of the title page's words, sized to the room above
+  the menu (44 to 100 px on a phone, up to 140 on a tablet); a Pro Max's or Plus's menu in two columns so it fits. New
+  check in `tests/classic-ui.mjs`. See **The Fulltime 9 logo on the title page (v223)**.
 - **v222: a picture behind the title page.** The start menu shows a stadium on match day under a wash of the screen
   colour, deepest behind the title and the build number. New check in `tests/classic-ui.mjs`. See **A picture behind the
   title page (v222)**.
