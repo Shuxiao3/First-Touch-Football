@@ -57,7 +57,8 @@ info('the card: ' + c.top + ' to ' + c.bottom + ' px of ' + c.vh + ', BACK ' + c
 ok(c.on && c.top >= 0 && c.bottom <= c.vh && c.back[1] <= c.vh && c.backHit && c.cut <= 1,
   'NET/WK: the week\'s money, the card on the screen and BACK on it, a tap away (' + c.back.join('-') + ' px of ' + c.vh + ')');
 const pages = c.pager ? +c.pager.split('/')[1] : 1, seen = [...c.shown];
-ok(pages >= 2 && /^1 \/ \d+$/.test(c.pager) && /THIS WEEK SO FAR/.test(c.shown[0]), 'its lines page between the title and BACK: ' + c.pager + ', this week so far first');
+// (v224: in Roboto Condensed its lines can all fit at once -- one page, no pager, is the card whole; more go over pages)
+ok((pages >= 2 ? /^1 \/ \d+$/.test(c.pager) : !c.pager && c.shown.length === c.all.length) && /THIS WEEK SO FAR/.test(c.shown[0]), (pages >= 2 ? 'its lines page between the title and BACK: ' + c.pager : 'its lines all on the one page between the title and BACK (' + c.all.length + ' of them; v224)') + ', this week so far first');
 let stays = true;
 for(let i = 1; i < pages; i++){ await page.tap('#ldgModal .fitPager [data-fitgo="1"]'); await page.waitForTimeout(150); const n = await card(); stays = stays && n.on && n.backHit; seen.push(...n.shown); }
 const missing = c.all.filter(t => !seen.includes(t));
@@ -70,7 +71,7 @@ const afterBack = await isOn('ldgModal');
 ok(afterRow && !afterBack, 'a tap on the card leaves it open; BACK closes it');
 await page.tap('#chNetBtn'); await page.waitForTimeout(350);
 c = await card();
-ok(c.on && /^1 \//.test(c.pager || ''), 'opened again: on its first page (' + c.pager + ')');
+ok(c.on && (pages >= 2 ? /^1 \//.test(c.pager || '') : !c.pager), 'opened again: on its first page (' + (c.pager || 'the one page') + ')');
 let pt = await outside('#ldgModal .ldgCard');
 await page.touchscreen.tap(pt.x, pt.y); await page.waitForTimeout(200);
 ok(!(await isOn('ldgModal')), 'a tap outside the card, on the dimmed screen round it (' + pt.room + ' px of it): closed');

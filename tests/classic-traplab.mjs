@@ -62,14 +62,14 @@ await mp.goto('file://' + copy); await mp.waitForTimeout(700);
 
 // --- ON THE START MENU, AND IN -------------------------------------------------------------------------------------------
 const onMenu = await mp.isVisible('#smItems [data-act="traplab"]');
-await mp.tap('#smItems [data-act="traplab"]'); await mp.waitForTimeout(300);
+await mp.$eval('#smItems [data-act="traplab"]', b => b.click()); await mp.waitForTimeout(300);
 const intro = await mp.evaluate(() => document.getElementById('labResult').innerHTML);   // (before the machine's first ball)
 await mp.waitForTimeout(900);
 const inLab = await mp.evaluate(() => document.getElementById('stageWrap').dataset.labkind);
 const bar = await mp.evaluate(() => [...document.querySelectorAll('#labBar .labChip')].filter(e => e.offsetParent).map(e => e.textContent.replace(/\s+/g, ' ').trim()));
 const meter = await mp.isVisible('#labMeter');
 info('the lab: ' + inLab + ' -- "' + intro.replace(/<[^>]+>/g, '') + '" -- chips: ' + bar.join(' | '));
-ok(onMenu && inLab === 'trap', 'TRAP LAB is on the start menu again, and opens the Trap Lab');
+ok(!onMenu && inLab === 'trap', 'TRAP LAB is off the title page since v224 (as laid out in the Studio; v212 had put it back), and still opens the Trap Lab');
 ok(/^Flick on <b>SKILL<\/b>/.test(intro) && !meter && !bar.some(t => /GUIDE/.test(t)), 'it says to flick on SKILL, as in a match -- no timing meter and no guide, as there\'s no press to time');
 
 if(/AUTO/.test(await mp.textContent('#labAutoV'))){ await mp.tap('#labBar [data-lab="auto"]'); await mp.waitForTimeout(100); }   // (balls on cue)
@@ -174,7 +174,7 @@ ok(/flicked, \d+° off on average/.test(tally), 'your tally counts the touches y
 const dials = await mp.evaluate(() => ['trapSweet', 'trapWin', 'trapLate', 'trapLock', 'ftTurn', 'ftWin', 'ftDrag'].filter(k => document.querySelector('[data-dial-key="' + k + '"]')));
 ok(!dials.length, 'the old timed press\'s dials are gone from Settings (sweet spot, window, late tolerance, lockout, and the drag on TRAP)' + (dials.length ? ': ' + dials.join(', ') : ''));
 await mp.tap('#labExitBtn'); await mp.waitForTimeout(600);
-ok(await mp.isVisible('#smItems [data-act="traplab"]'), 'EXIT LAB goes back to the start menu');
+ok(await mp.isVisible('#smItems [data-act="new"]'), 'EXIT LAB goes back to the start menu');
 await mob.close();
 
 process.exitCode = rep.finish();

@@ -28,8 +28,8 @@ writeFileSync(copy, src);
 const { browser, page, rep } = await open({ fastFrames: true, url: 'file://' + copy });
 const { ok, info } = rep;
 const labBtn = await page.evaluate(() => { const b = document.querySelector('#smItems [data-act="crosslab"]'); if(!b) return null; const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, row: b.parentElement.classList.contains('smRow') }; });
-ok(labBtn && labBtn.w > 0 && labBtn.row, 'CROSSING LAB on the start menu, with the other labs');
-await page.click('#smItems [data-act="crosslab"]'); await page.waitForTimeout(600);
+ok(labBtn && labBtn.row && labBtn.w === 0, 'CROSSING LAB is in the game with the other labs, off the title page since v224 (as laid out in the Studio)');
+await page.$eval('#smItems [data-act="crosslab"]', b => b.click()); await page.waitForTimeout(600);
 
 // THE BOX SPOTS: 1, 2 and 3 of ours in the box, nobody of theirs; read 1.3 s in (the computer crosses at 1.4 s)
 const box = n => page.evaluate(n => new Promise(res => { const T = window.__T, L = T.LAB;
@@ -146,7 +146,7 @@ ok(!yours.crossed && yours.has && yours2.crossed && !!yours2.result && /CROSS/.t
 await browser.close();
 const R2 = await open({ url: 'file://' + copy }), page2 = R2.page;
 R2.rep.errs = rep.errs;   // (one tally of page errors, and of checks: rep's)
-await page2.click('#smItems [data-act="crosslab"]'); await page2.waitForTimeout(500);
+await page2.$eval('#smItems [data-act="crosslab"]', b => b.click()); await page2.waitForTimeout(500);
 const press = async seq => {
   await page2.evaluate(() => { const T = window.__T, L = T.LAB; Object.assign(L, { auto: false, cWho: 'you', cFrom: 180, cAtk: 3, cDef: 0, cKeep: true }); L.ct = null; T.cast(); T.serve(); });
   await page2.waitForTimeout(1500);

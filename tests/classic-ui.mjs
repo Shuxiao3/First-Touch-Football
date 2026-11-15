@@ -82,6 +82,8 @@ async function skillsPage(page){
   const px = () => page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).map(c => {
     const sum = cv => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let h = 0, n = 0; for(let i = 0; i < d.length; i += 4){ h = (h * 31 + d[i] + d[i + 1] * 3 + d[i + 2] * 7) >>> 0; if(d[i + 3]) n++; } return [h, n]; };
     return { drawn: sum(c.querySelector('.skDraw'))[1], clip: sum(c.querySelector('.skClip'))[0] }; }));
+  // (v224: the last page's cards drawn before they're sampled -- a frame can come late after a page turns, and that isn't a fault)
+  await page.waitForFunction(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).every(c => c.querySelector('.skDraw').dataset.drawn), null, { timeout: 1500 }).catch(() => {});
   const a = await px(); await page.waitForTimeout(450); const b = await px();
   return { all, seen, cut, pages, drawn: a.length > 0 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
 async function newCareer(page){
@@ -141,14 +143,28 @@ for(const [w, h] of SIZES){
     for(const [w, h] of sizes) lg.push(await logoAt(w, h));
     ok(lg.every((r, i) => r && r.nat[0] === 491 && r.nat[1] === 159 && /Fulltime 9/.test(r.alt) && !r.words && r.top >= 0 && r.bottom <= r.first && r.last <= sizes[i][1]) && lg[1].h > lg[0].h,
       'the title is the Fulltime 9 logo, above the menu with the menu whole on the screen: ' + lg.map((r, i) => r ? sizes[i].join('x') + ' ' + Math.round(r.h) + ' px tall, the last button at ' + Math.round(r.last) : 'no logo').join('; ') + ' (v223)');
-    ok(/FTC Dot/.test(one.font), 'one font throughout (' + one.font + ')');
+    // (v224) THE TITLE PAGE AS LAID OUT IN THE STUDIO, AND ONE FONT: CONTINUE, LOAD GAME, NEW CAREER, EXHIBITION and SETTINGS in one
+    // column down the middle, 257 wide and 12 apart, NEW CAREER lit with no game saved, the labs off it; Roboto Condensed for every word
+    { const c = await browser.newContext({ viewport: { width: 852, height: 393 } }); const pg = await c.newPage(); await pg.goto('file://' + copy); await pg.waitForTimeout(800);
+      const t = await pg.evaluate(async () => { await document.fonts.ready;
+        const btns = [...document.querySelectorAll('#smItems .smBtn')].filter(b => b.offsetParent).map(b => { const r = b.getBoundingClientRect();
+          return { t: b.textContent.replace('▶', '').trim(), l: r.left, w: r.width, top: r.top, bottom: r.bottom, sel: b.classList.contains('sel'), font: getComputedStyle(b).fontFamily }; });
+        let ftc = 0; for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } for(const r of rs) if(r.selectorText && r.style && /^\s*['"]?FTC Dot/.test(r.style.fontFamily || '')) ftc++; }   // (style rules: the pixel font's own @font-face is there for the symbols)
+        return { btns, ftc, rc: document.fonts.check('600 14px "Roboto Condensed"'), labs: [...document.querySelectorAll('#smItems [data-act$="lab"], #smItems [data-act="skills"]')].filter(b => b.offsetParent).length }; });
+      await c.close();
+      const bt = t.btns, gaps = bt.slice(1).map((x, i) => Math.round(x.top - bt[i].bottom)), lit = bt.find(x => x.sel);
+      ok(bt.map(x => x.t).join(',') === 'CONTINUE,LOAD GAME,NEW CAREER,EXHIBITION,SETTINGS' && bt.every(x => Math.abs(x.l - bt[0].l) < 1 && Math.abs(x.w - 257) < 1.5 && Math.abs(x.l + x.w / 2 - 426) < 1.5)
+        && gaps.every(g => g === 12) && lit && lit.t === 'NEW CAREER' && t.labs === 0,
+        'the title page as laid out in the Studio: ' + bt.map(x => x.t).join(', ') + ', one column down the middle, ' + Math.round(bt[0] ? bt[0].w : 0) + ' wide, ' + gaps.join('/') + ' apart, ' + (lit ? lit.t : 'nothing') + ' lit, ' + t.labs + ' labs (v224)');
+      ok(t.rc && t.ftc === 0 && bt.every(x => /^"?Roboto Condensed/.test(x.font)), 'one font for every word: Roboto Condensed, loaded, and no rule leading with the pixel font (kept for the symbols alone) (v224)'); }
+    ok(/^"?Roboto Condensed/.test(one.font), 'one font throughout: Roboto Condensed since v224 (' + one.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);
-  await page.tap('#smItems [data-act="skills"]'); await page.waitForTimeout(300);
+  await page.$eval('#smItems [data-act="skills"]', b => b.click()); await page.waitForTimeout(300);
   await check('skill moves', ['#skillsOverlay .pauseTitle', '#skillsOverlay .skHint', '#skGrid .skCard', '[data-skclose]']);
   { const sk = await skillsPage(page);
     ok(sk.all.length === 9 && sk.seen.join() === sk.all.join() && !sk.cut.length && sk.drawn && sk.moving,
-      w + 'x' + h + ': SKILL MOVES: all nine moves over ' + sk.pages + ' page' + (sk.pages > 1 ? 's' : '') + ', each name whole, what to draw drawn and its clip playing' + (sk.cut.length ? ' -- cut: ' + sk.cut.join(', ') : '')); }
+      w + 'x' + h + ': SKILL MOVES: all nine moves over ' + sk.pages + ' page' + (sk.pages > 1 ? 's' : '') + ', each name whole, what to draw drawn and its clip playing' + (sk.cut.length ? ' -- cut: ' + sk.cut.join(', ') : '') + (sk.seen.join() !== sk.all.join() ? ' -- seen ' + sk.seen.join(' ') : '') + (!sk.drawn ? ' -- not drawn' : '') + (!sk.moving ? ' -- clips still' : '')); }
   await page.tap('[data-skclose]'); await page.waitForTimeout(100);
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(200);
   await check('exhibition', ['#exhGo', '#exhPanel [data-act="back"]']);
@@ -215,10 +231,10 @@ for(const [w, h] of SIZES){
       return { wide: p.width > p.height, under: b.top >= p.bottom - 1, faces: document.querySelectorAll('#bpBody .tpitch .ptkFace').length, figs: document.querySelectorAll('#bpBody .ptkFig, #bpBody .tpV').length,
         font: getComputedStyle(document.getElementById('bpTitle')).fontFamily.split(',')[0].replace(/["']/g, '').trim() }; });
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
-    ok(!hub.ft && hub.crest && hub.week && hub.strip && hub.font === 'FTC Dot' && hub.bg === hub.want && !hub.roboto,
-      'the career\'s home in the pixel kit again: no top bar, cards or cream (the hub on the scheme\'s ' + hub.bg + '), the crest, club and week\'s button down the menu, the money along the campus\'s foot, its words in FTC Dot (no Roboto Condensed carried)');
-    ok(tac.wide && tac.under && tac.faces === 9 && !tac.figs && tac.font === 'FTC Dot',
-      'the Tactics as it was: the pitch on its side, the nine shown by their faces (' + tac.faces + '), the bench under it, the title in FTC Dot');
+    ok(!hub.ft && hub.crest && hub.week && hub.strip && hub.font === 'Roboto Condensed' && hub.bg === hub.want && hub.roboto,
+      'the career\'s home in the pixel kit again: no top bar, cards or cream (the hub on the scheme\'s ' + hub.bg + '), the crest, club and week\'s button down the menu, the money along the campus\'s foot, its words in Roboto Condensed (v224; FTC Dot from v220)');
+    ok(tac.wide && tac.under && tac.faces === 9 && !tac.figs && tac.font === 'Roboto Condensed',
+      'the Tactics as it was: the pitch on its side, the nine shown by their faces (' + tac.faces + '), the bench under it, the title in Roboto Condensed (v224)');
   }
   { // THE WIDTH SHOWS ON THE PITCH and nobody overlaps: a four across the middle (3-4-1), COMPACT and WIDE, on the training pitch and the clubhouse's Squad
     await page.evaluate(() => { const d = window.__MG.d; d.lv.train = 4; window.__MG.mgSave(d); });   // (every shape: the training pitch's locks are manager-career.mjs's)
@@ -475,7 +491,7 @@ for(const [w, h] of SIZES){
   await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(120);
   await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150); room.squad = await pads('#bpBody .sqPitch .ptk');
   await page.tap('.bpTopBack'); await page.waitForTimeout(80); await page.tap('#chCampus [data-bldg="train"]'); await page.waitForTimeout(120); await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(150);
-  const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + Math.round(v.top) + ' px over the number, ' + Math.round(v.bottom) + ' under the name').join('; ');
+  const rm = Object.entries(room).map(([k, v]) => k + ' ' + v.n + ' men, ' + v.top.toFixed(1) + ' px over the number, ' + v.bottom.toFixed(1) + ' under the name').join('; ');
   ok(Object.values(room).every(v => v.n >= 5 && v.top >= 5 && v.bottom >= 2), 'room in every token: ' + rm);
   await page.tap('[data-tdrop="style"]'); await page.waitForTimeout(100);
   const opts = await page.$$eval('.tbMenu .tbOpt', ns => ns.map(n => ({ t: n.textContent, i: n.querySelectorAll('i').length }))), offMenu = await onScreen(page, ['.tbMenu .tbOpt']);
@@ -550,7 +566,8 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     return { fits: !!P && P.scrollHeight <= P.clientHeight + 1 && P.scrollWidth <= P.clientWidth + 1, paged: !!(P && P.querySelector('.fitPager')), flips: c ? c.querySelectorAll('.mgSides [data-mside]').length : 0, tabsIn: (t => !!t && !!P && t.getBoundingClientRect().bottom <= P.getBoundingClientRect().bottom + 1)(c && c.querySelector('.mgSides')),
       tabH: c && c.querySelector('.mgSideT') ? Math.round(c.querySelector('.mgSideT').getBoundingClientRect().height) : 0, tabCut: c ? [...c.querySelectorAll('.mgSideT')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [],
       long: c ? [...c.querySelectorAll('.mgHint')].concat([...c.querySelectorAll('*')].filter(e => !e.closest('.mgCardHead') && !e.children.length && e.textContent.trim().length > 32)).map(e => e.textContent.trim().slice(0, 40)) : ['no card'],
-      cut: c ? [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [] }; });
+      cut: c ? [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) : [],
+      over: P && P.scrollHeight > P.clientHeight + 1 ? P.scrollHeight + ' in ' + P.clientHeight + '; two lines: ' + [...P.querySelectorAll('*')].filter(e => !e.children.length && e.textContent.trim() && e.getClientRects().length > 1).map(e => e.textContent.trim().slice(0, 24)).join(' | ') : '' }; });
   const views = [], bad = [];
   const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
     const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
@@ -630,6 +647,21 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     mate = await page.evaluate(() => { const T = window.__T; const c = T.controlled(); for(const q of T.players()){ if(q.team !== c.team || q === c || q.role === 'G') continue; const s = T.scr(q); if(s.x > 20 && s.x < 440 && s.y > 60 && s.y < 330 && T.mateAt(s.x, s.y) === q) return { num: q.num, x: s.x, y: s.y }; } return null; });
     if(!mate) break; await touch('touchStart', mate.x, mate.y); n2 = await who(); await touch('touchEnd', mate.x, mate.y); }
   ok(grass && n1 === n0 && mate && n2 === mate.num, 'a tap on the grass doesn\'t switch you (#' + n0 + ' still); a tap on one of your men does (#' + n2 + ')');
+  await ctx.close(); }
+
+// (v224) SKILL MOVES WHEN THE FIRST FRAME IS STAMPED BEFORE THE PAGE OPENED: a frame's time can be a moment before the
+// tap that opened the page (a busy phone, or a tap handled inside a frame). The clips used to go to frame -1 then, the
+// ball had no picture, and the throw stopped every clip for good; now they start at 0 and play, nothing thrown
+{ const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true }); await ctx.addInitScript(STAR);
+  const page = await ctx.newPage(); await pileAside(page); const errs = []; page.on('pageerror', e => errs.push(e.message.slice(0, 70)));
+  await page.goto('file://' + copy); await page.waitForTimeout(700);
+  await page.evaluate(() => { const real = performance.now.bind(performance); performance.now = () => real() + 80;   // (the page opened 80 ms "after" the next frames)
+    try{ document.querySelector('#smItems [data-act="skills"]').click(); } finally { performance.now = real; } });
+  await page.waitForTimeout(500);
+  const px = () => page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).map(c => { const cv = c.querySelector('.skClip'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+    let h = 0; for(let i = 0; i < d.length; i += 4) h = (h * 31 + d[i] + d[i + 1] * 3 + d[i + 2] * 7) >>> 0; return h; }));
+  const a = await px(); await page.waitForTimeout(450); const b = await px();
+  ok(!errs.length && a.length > 0 && a.some((h, i) => b[i] !== undefined && h !== b[i]), 'SKILL MOVES opened with the first frames stamped before it: the clips play from the start, nothing thrown (' + (errs[0] || 'no errors') + ') (v224)');
   await ctx.close(); }
 
 process.exitCode = rep.finish();

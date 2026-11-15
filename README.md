@@ -420,6 +420,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   screen has room for above the menu, 44 to 100 px on a phone held sideways (93 on an iPhone 15) and up to 140 on a
   tablet, and never touches the buttons. On a Pro Max or Plus held sideways the menu now takes the same two columns as
   other phones, so all of it fits (it ran off the bottom before). The page's name elsewhere is still Football Classic.
+- **Roboto Condensed, and the title page as laid out in the Studio (v224).** Every word and figure in the game
+  is in Roboto Condensed now (the pixel font is kept only for its symbols), with buttons in its semibold. The title
+  page is the one laid out and finalized in the Studio: CONTINUE, LOAD GAME, NEW CAREER, EXHIBITION and SETTINGS
+  in one column down the middle, 257 px wide and 12 apart, the words in the middle of each, under the logo (now 44
+  to 110 px tall on a phone, as the shorter menu leaves room). The labs (TRAP, DRIBBLE, PASS, SHOOTING, CROSSING)
+  and SKILL MOVES are off the title page, as that layout has them; they're still in the game. And SKILL MOVES no
+  longer freezes: its clips could start a moment before 0 on a busy phone, find no picture for the ball, and stop
+  every drawing and clip until the page was opened again.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -690,10 +698,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **One colour scheme** (v221): blue buttons, orange for what's picked. A money figure, a result or a rating is
     green, yellow or red by how good it is; in a match PASS is green, SHOOT red, CROSS amber and SKILL blue. Until
     v221 Settings had COLOURS, four schemes to pick from (BLUE, RUBY, SILVER, MINT); a pick saved then isn't read.
-  - **One font** for everything, menus and match alike: DotGothic16 (Fontworks, SIL Open Font License), cut to the
-    characters the game shows, its letters respaced to their own widths, and the few symbols it lacks (▶ ◀ ▾ ✕ ☰
-    and the like) drawn in on its own dot grid. `tools/fonts/make_ui_font.py` builds it; the licence is in
-    `assets/fonts/OFL-DotGothic16.txt`.
+  - **One font** for every word and figure, menus and match alike (v224): Roboto Condensed (the Roboto Project
+    Authors, SIL Open Font License), in three weights, embedded in the page; buttons are in its semibold. Its
+    symbols (▶ ◀ ▾ ★ ✓ ✕ ☰ ✚ and the like), which Roboto Condensed doesn't draw, still come from DotGothic16
+    (Fontworks, SIL Open Font License), the game's one font until v224, cut to the game's characters with those
+    symbols drawn in on its dot grid (`tools/fonts/make_ui_font.py`; the licence is in `assets/fonts/OFL-DotGothic16.txt`).
   - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
     how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
     graphics and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
@@ -3435,6 +3444,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v224: Roboto Condensed, and the title page from the Studio.** Roboto Condensed is the one font for words and
+  figures (the pixel font only for symbols), buttons semibold, its three weights loaded at the start. The title page
+  as finalized in the Studio: five buttons in one centred column; the labs and SKILL MOVES off it. Player tokens'
+  two lines closer, to keep the room over and under them in the new font. SKILL MOVES' clips never start before 0
+  (a frame stamped before the page opened sent them to frame -1, and the ball's missing picture stopped them all).
+  New checks in `tests/classic-ui.mjs`; the tests open the labs from code; `tests/manager-ledger.mjs` takes the
+  week's money on one page. See **Roboto Condensed, and the title page as laid out in the Studio (v224)**.
 - **v223: the logo on the title page.** Fulltime 9's logo in place of the title page's words, sized to the room above
   the menu (44 to 100 px on a phone, up to 140 on a tablet); a Pro Max's or Plus's menu in two columns so it fits. New
   check in `tests/classic-ui.mjs`. See **The Fulltime 9 logo on the title page (v223)**.
