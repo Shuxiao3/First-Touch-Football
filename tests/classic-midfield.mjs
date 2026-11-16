@@ -94,12 +94,12 @@ await page.reload(); await page.waitForTimeout(700);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show'); await page.click('#exhGo'); await page.waitForTimeout(800);
 await page.evaluate(() => window.__M.openMatchTac(false)); await page.waitForTimeout(300);   // (drawn afresh for the side on the pitch now)
 const tk = await page.evaluate(() => { const M = window.__M, at = {};
-  for(const t of document.querySelectorAll('#mtacBody .tpitch .ptk[data-mtk="field"]')){ const r = t.getBoundingClientRect(), k = t.dataset.pos; (at[k] = at[k] || []).push(Math.round(r.left + r.width / 2)); }
+  for(const t of document.querySelectorAll('#mtacBody .tpitch .ptk[data-mtk="field"]')){ const r = t.getBoundingClientRect(), k = t.dataset.pos; (at[k] = at[k] || []).push(Math.round(r.top + r.height / 2)); }   // (v226: how far down the upright pitch)
   const mean = a => a ? a.reduce((s, v) => s + v, 0) / a.length : NaN;
   return { forms: M.forms(), x: Object.fromEntries(Object.entries(at).map(([k, v]) => [k, Math.round(mean(v))])), cs: M.careerSlots('3-2-2-1', 'atk').map(s => s.pos + '@' + s.y).join(' ') }; });
-info('Tottenham\'s 3-1-3-1 on the match\'s tactics pitch (across): ' + JSON.stringify(tk.x) + '; 3-2-2-1 on the career\'s (down): ' + tk.cs);
-ok(tk.forms[0] === '3-1-3-1' && tk.x.CB < tk.x.DM && tk.x.DM < tk.x.AM && tk.x.AM < tk.x.ST && Math.abs(tk.x.WM - tk.x.AM) < 3 && tk.x['CB/FB'] < tk.x.DM,
-  'a four-line shape on the match\'s tactics pitch: four lines, back to front -- the back three, the DM, the WMs and the AM, the striker');
+info('Tottenham\'s 3-1-3-1 on the match\'s tactics pitch (how far down it): ' + JSON.stringify(tk.x) + '; 3-2-2-1 on the career\'s (down): ' + tk.cs);
+ok(tk.forms[0] === '3-1-3-1' && tk.x.CB > tk.x.DM && tk.x.DM > tk.x.AM && tk.x.AM > tk.x.ST && Math.abs(tk.x.WM - tk.x.AM) < 3 && tk.x['CB/FB'] > tk.x.DM,
+  'a four-line shape on the match\'s tactics pitch (upright, v226): four lines, from its foot up -- the back three, the DM, the WMs and the AM, the striker');
 ok(tk.cs === 'CB@70 CB@70 CB@70 CM@54 CM@54 WM@36 WM@36 ST@18', '...and on the career\'s: four lines, its two midfield lines between the back line and the forward (' + tk.cs + ')');
 await page.evaluate(() => { const o = document.getElementById('mtacOv'); if(o) o.classList.remove('on', 'pre'); });
 

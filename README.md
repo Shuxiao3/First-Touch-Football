@@ -434,6 +434,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   covers nothing. On a short phone (380 px tall or less) the page comes halfway down into it, the footer behind; on the
   shortest (350 px or less, a phone's browser with its bar showing) the page keeps all the room it had, with the
   grass along its foot and the bushes at the screen's edges, so a man's card still fits on one page there.
+- **The tactics pitch upright (v226).** The formation stands on the pitch picture put in the Studio (Retro Pixel
+  Soccer Field), seen from behind your goal: your goal at the foot, theirs at the top, each line of men a row across it -- the keeper, the back
+  line, the midfield, the forwards -- set where the picture has that part of the pitch, by its own perspective (the
+  far half drawn shorter than the near). Each row is a man's height from the next at least, its men a man's width
+  apart and inside the touchlines; a line of four narrows its men to fit. On a phone 760 px wide or more the bench
+  stands down the pitch's side, so the pitch has the height; on a narrower one it's under it, as before. The same on
+  the Squad tab's little pitch and in a match's TACTICS, for either side. (The instructions' little pitch of the
+  lines without the ball is still on its side.)
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -743,9 +751,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     itself (◀ TEAM in its tabs, or a tap on him in the list, for the little pitch), and the little pitch comes back as you pick
     a man up to drop on it.
   - **Tactics** (in a career, on the training pitch: every shape and style from the start -- v130: its level decided
-    which your side could have; see **The campus**). The pitch first, on its side as in a match, your goal on the left. Above it, one
+    which your side could have; see **The campus**). The pitch first, upright (v226: on the Studio's pitch picture, your goal at its foot; it was on its side, as in a match). Above it, one
     row: with or without the ball, then menus for the shape, the width and the style -- just the names, the style's
-    seven two to a line -- and, at its end, INSTRUCTIONS and BEST 9 (v116: INSTRUCTIONS was a button on his card). Under the pitch, on one line, the bench: five men, the subs you'll have in a
+    seven two to a line -- and, at its end, INSTRUCTIONS and BEST 9 (v116: INSTRUCTIONS was a button on his card). Beside the pitch, on one line, the bench (down its side on a phone 760 px wide or more, under it on a narrower one: v226): five men, the subs you'll have in a
     match, and no one else (who's taken at all is the Selection tab's: below). Drag one onto a man on the pitch, or
     on the bench, to swap them. BEST 9 puts the next keeper first on the bench and the best four of the rest after
     him. The tokens narrow to fit; if they still don't, they show a page at a time, with a small 1/2 ▶ button to
@@ -3450,6 +3458,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v226: the tactics pitch upright.** The Tactics, a match's TACTICS and the Squad tab's little pitch draw the
+  formation upright on the Studio's pitch picture, Retro Pixel Soccer Field (your goal at the foot), each line a row placed by the picture's
+  perspective, the rows a man's height apart and every line inside the touchlines. The bench stands down the pitch's
+  side on a phone 760 px wide or more. Checks in `tests/classic-ui.mjs` and `tests/classic-midfield.mjs` changed to
+  match. See **The tactics pitch upright (v226)**.
 - **v225: a footer along the career.** The kit's bushes and grass along the foot of the campus and every building
   page, in a band of their own (cut into the bushes at each end and a stretch of grass that repeats, so it fits any
   width). The page stops above the band; halfway into it at 380 px tall or less; where it always did at 350 px or
