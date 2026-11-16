@@ -27,7 +27,7 @@ writeFileSync(copy, src);
 const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
 // a virtual clock: frames as fast as they'll go, a five-minute half
-await page.addInitScript(() => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; o.diff = o.diff || 'star'; o.halfMin = 5; localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} });
+await page.addInitScript(() => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; o.diff = o.diff || 'star'; o.dk = 1; o.halfMin = 5; localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} });
 await page.addInitScript(() => { let vt = 0; const ch = new MessageChannel(), q = [];
   ch.port1.onmessage = () => { const cbs = q.splice(0); vt += 33; for(const cb of cbs){ try{ cb(vt); }catch(e){} } };
   window.requestAnimationFrame = cb => { q.push(cb); if(q.length === 1) ch.port2.postMessage(0); return 0; }; });

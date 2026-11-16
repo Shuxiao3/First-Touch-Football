@@ -24,11 +24,12 @@ export function reporter(){
 }
 
 // DIFFICULTY (v89): a test plays the computer at STAR -- full strength, as it always played -- unless it sets a level
-// itself (a fresh browser starts at NORMAL). Run before every page load, as an init script. And (v148) a test plays on
+// itself (v228: a fresh browser starts at CHAMPION, the one level with no choice, and the game keeps a level only with dk,
+// settings kept since then -- so a level a test sets goes with dk). Run before every page load, as an init script. And (v148) a test plays on
 // at half-time (no break: HALF-TIME's PLAY ON), without the tips over the pitch, the controls card taken as seen --
 // unless it sets them itself (manager-flow.mjs is theirs).
 export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; let ch = false;
-  if(!o.diff){ o.diff = 'star'; ch = true; } if(o.ht == null){ o.ht = 'on'; ch = true; } if(o.tips == null){ o.tips = 0; ch = true; } if(o.seenCtl == null){ o.seenCtl = 1; ch = true; }
+  if(!o.diff || o.dk !== 1){ o.diff = o.diff || 'star'; o.dk = 1; ch = true; } if(o.ht == null){ o.ht = 'on'; ch = true; } if(o.tips == null){ o.tips = 0; ch = true; } if(o.seenCtl == null){ o.seenCtl = 1; ch = true; }
   if(ch) localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} };
 
 // THE MONDAY PAPERS (v103) open over the career hub each Monday, and THE PRESS CONFERENCE after each game (v104). A test

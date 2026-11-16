@@ -95,8 +95,8 @@
   canvas{display:block;width:100%;height:auto;border-radius:10px;
     border:1px solid var(--edge);
     box-shadow:0 14px 40px rgba(0,0,0,.55), inset 0 0 60px rgba(0,0,0,.3);}
-  #readout{position:absolute;top:10px;left:10px;right:10px;
-    display:flex;gap:8px;pointer-events:none;flex-wrap:wrap;}
+  #readout{position:absolute;top:10px;left:max(34px, env(safe-area-inset-left));right:max(26px, env(safe-area-inset-right));   /* (v228: as the Studio's match screen has it, clear of a notch) */
+    display:flex;gap:11.5px;pointer-events:none;flex-wrap:wrap;}
   .chip{background:rgba(8,14,9,.72);border:1px solid var(--edge);border-radius:6px;
     padding:4px 9px;font-size:11px;letter-spacing:.5px;color:var(--ink-dim);}
   .chip b{color:var(--phosphor);font-weight:600;}
@@ -148,12 +148,14 @@
   #pad.sprint .stick{background:rgb(var(--warnRGB) / .75);}
   .actBtn{position:absolute;width:64px;height:64px;border-radius:50%;display:none;
     align-items:center;justify-content:center;text-align:center;z-index:6;
-    font-size:11px;font-weight:700;letter-spacing:.4px;line-height:1.15;}
-  /* thumb-arc cluster around the bottom-right corner: KICK biggest & nearest, SHOOT above, CROSS beside, CALL on the diagonal */
-  #kickBtn{width:76px;height:76px;font-size:13px;right:max(12px, env(safe-area-inset-right));bottom:12px;background:rgb(var(--goodRGB) / .18);border:2.5px solid var(--good);color:var(--good);}   /* PASS green, SHOOT red, CROSS amber, SKILL blue */
-  #shootBtn{right:max(18px, env(safe-area-inset-right));bottom:102px;background:rgb(var(--badRGB) / .16);border:2px solid var(--red);color:var(--red);}
-  #skillBtn{right:102px;bottom:100px;width:58px;height:58px;background:rgba(120,200,255,.14);border:2px solid #78c8ff;color:#78c8ff;}
-  #crossBtn{right:100px;bottom:16px;background:rgb(var(--warnRGB) / .14);border:2px solid var(--amber);color:var(--amber);}
+    font-size:11px;font-weight:700;letter-spacing:.4px;line-height:1.15;
+    --bR:max(42px, env(safe-area-inset-right)); --bB:max(21px, env(safe-area-inset-bottom));}
+  /* (v228) the cluster as the Studio's match screen has it: PASS the biggest, in from the corner; SHOOT over it, SKILL on
+     the diagonal, CROSS beside it -- each measured from PASS's corner, so the lot moves in together clear of a notch */
+  #kickBtn{width:96px;height:96px;font-size:15px;right:var(--bR);bottom:var(--bB);background:rgb(var(--goodRGB) / .18);border:2.5px solid var(--good);color:var(--good);}   /* PASS green, SHOOT red, CROSS amber, SKILL blue */
+  #shootBtn{right:var(--bR);bottom:calc(var(--bB) + 111.5px);background:rgb(var(--badRGB) / .16);border:2px solid var(--red);color:var(--red);}
+  #skillBtn{right:calc(var(--bR) + 90.5px);bottom:calc(var(--bB) + 96px);width:58px;height:58px;background:rgba(120,200,255,.14);border:2px solid #78c8ff;color:#78c8ff;}
+  #crossBtn{right:calc(var(--bR) + 116.5px);bottom:calc(var(--bB) + 5px);background:rgb(var(--warnRGB) / .14);border:2px solid var(--amber);color:var(--amber);}
   .actBtn.dimBtn{opacity:.32;}
   /* (v142) your corner's set-up: how many in the box, how many back, the rest in midfield */
   #cornerSet{position:absolute;top:56px;left:50%;transform:translateX(-50%);display:none;z-index:7;pointer-events:auto;
@@ -414,7 +416,6 @@
   #tipBar{ position:absolute; left:50%; top:48px; transform:translateX(-50%); width:max-content; max-width:min(580px,92%); padding:7px 12px; border-radius:8px; background:rgb(0 0 0 / .74);
     color:var(--ink); font:12px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.5px; line-height:1.4; text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; z-index:30; }
   #tipBar.on{ opacity:1; } #tipBar b{ color:var(--acc); font-weight:400; }
-  #ctlBtn{ margin-left:0; } #stageWrap.labMode #ctlBtn{ display:none; }   /* (right of the menu: your man's window stays beside it) */
   .menuOverlay{position:fixed;inset:0;z-index:50;background:rgba(4,8,5,.86);
     display:flex;align-items:flex-start;justify-content:center;overflow:hidden;backdrop-filter:blur(2px);
     padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));}
@@ -526,7 +527,6 @@
   #exhPanel .exhGo{flex:none;}
   #exhPanel h3{margin-bottom:4px;}
   .exhLeague{font-size:10px;letter-spacing:3px;color:var(--dim2);margin-bottom:10px;}
-  .exhDiff{font:inherit;letter-spacing:inherit;color:var(--phosphor);background:none;border:1px solid var(--phosphor-dim);padding:1px 6px;cursor:pointer;}
   .exhTeams{display:flex;align-items:stretch;justify-content:center;gap:8px;width:100%;}
   .exhSide{flex:1 1 0;min-width:0;border:1px solid var(--well);border-radius:10px;padding:7px 6px 6px;background:rgb(var(--accRGB) / .04);}
   .exhSide.you{border-color:var(--phosphor-dim);}
@@ -1058,7 +1058,8 @@
   #stageWrap.labMode #labHud{display:flex;}
   #stageWrap.labMode.labTuneOpen #labTune{display:block;}
   #stageWrap.menuMode .labUI{display:none !important;}
-  #stageWrap.labMode #rScore, #stageWrap.labMode #rDir{display:none;}
+  #stageWrap.labMode #rScore, #stageWrap.labMode #rDir, #stageWrap.labMode #rTheir{display:none;}
+  #stageWrap.labMode #rPlayer{margin-left:auto;}   /* (v228: in a lab your man's window starts the right-hand group) */
   #stageWrap.labMode #labExitBtn{display:inline-block;margin-left:0;color:var(--red);}
   #stageWrap[data-labkind="trap"] #labHud [data-kinds]:not([data-kinds~="trap"]),
   #stageWrap[data-labkind="pass"] #labHud [data-kinds]:not([data-kinds~="pass"]),
@@ -1230,8 +1231,19 @@
   /* the match: its chips, framed like everything else */
   #readout .chip, .menuChip{ background:rgba(20,26,44,.88); border:0; border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); color:var(--ink2); }
   /* your man, top right (see playerHud): number, full name and position over his stamina and his skill stars */
-  #rPlayer{ margin-left:auto; width:210px; display:flex; flex-direction:column; justify-content:center; gap:4px; padding:3px 9px; }
+  #rPlayer{ width:169px; display:flex; flex-direction:column; justify-content:center; gap:4px; padding:3px 9px; }
   #rPlayer ~ .menuChip{ margin-left:0; }
+  /* (v228) THE STUDIO'S MATCH SCREEN: the clock and the score on the left; on the right SUBS, the way you're kicking, THEIR
+     MAN (see theirHud), YOUR MAN and the menu, a little wider */
+  #rDir{ margin-left:auto; }
+  #qsWrap.on ~ #rDir{ margin-left:0; }
+  #menuBtn{ min-width:32px; text-align:center; }
+  #rTheir{ width:90.5px; display:flex; flex-direction:column; justify-content:center; gap:4px; padding:3px 8px; }
+  #rTheir .rpTop b{ color:var(--red); }
+  #rtName{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
+  /* (a narrower phone: closer to the edges and to each other, THEIR MAN narrower, so the row stays one line) */
+  @media (max-width:760px){ #readout{ left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); gap:8px; } #rTheir{ width:80px; } }
+  @media (max-width:600px){ #readout{ left:max(8px, env(safe-area-inset-left)); right:max(8px, env(safe-area-inset-right)); gap:6px; } #rPlayer{ width:140px; } #rTheir{ width:72px; } }
   .rpTop{ display:flex; align-items:baseline; gap:6px; white-space:nowrap; line-height:13px; }
   .rpTop b{ color:var(--acc); font-weight:400; }
   #rpName{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; color:var(--ink); }
@@ -1244,7 +1256,6 @@
   .qsUI{ pointer-events:auto; }
   #qsWrap{ display:none; position:relative; margin-left:auto; }
   #qsWrap.on{ display:flex; }
-  #qsWrap.on ~ #rPlayer{ margin-left:0; }
   #qsBtn{ cursor:pointer; font-family:'Roboto Condensed','FTC Dot',sans-serif; display:flex; align-items:center; gap:6px; min-height:34px; padding:0 10px; }
   #qsBtn b{ color:var(--acc); font-weight:400; }
   #qsBtn i{ font-style:normal; font-size:9px; color:var(--dim); }
@@ -1879,13 +1890,13 @@
     <div id="dbgText" style="white-space:pre"></div>
   </div>
   <div id="readout">
-    <span class="chip xplUI" id="rScore" data-xpl="score"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
-    <span class="chip xplUI" id="rDir" style="color:var(--acc)" data-xpl="dir">▶</span>
     <span class="chip xplUI" id="rClockChip" data-xpl="clock">⏱ <b id="rClock">0:00</b></span>
+    <span class="chip xplUI" id="rScore" data-xpl="score"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
     <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop">SUBS <b id="qsLeft"></b><i>▾</i></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
+    <span class="chip xplUI" id="rDir" style="color:var(--acc)" data-xpl="dir">▶</span>
+    <div class="chip xplUI" id="rTheir" data-xpl="their"><div class="rpTop"><b id="rtNum"></b><span id="rtName"></span></div><div class="rpBot"><span id="rtPos"></span><span class="statBar"><i id="rtSt"></i></span></div></div>
     <div class="chip xplUI" id="rPlayer" data-xpl="hud"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
     <button id="menuBtn" class="chip menuChip" aria-label="pause: the menu" title="Pause: the menu">☰</button>
-    <button id="ctlBtn" class="chip menuChip ctlChip" aria-label="how to play: the controls" title="How to play">?</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
   </div>
   <div id="labHud" class="labUI">
@@ -2500,13 +2511,15 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:4, oppShift:0, art:true, side:'left', diff:'normal', pv:1, cornerBox:4, cornerBack:2, ht:'wait', tips:1, tipsSeen:'', seenCtl:0};   // (v142: cornerBox, cornerBack -- your corners' set-up; v148: ht -- a break at half-time or PLAY ON; tips, tipsSeen -- a word on the controls the first time each comes up; seenCtl -- the controls card seen before a first career match)
+  const PREFS={halfMin:4, oppShift:0, art:true, side:'left', diff:'champion', pv:1, dk:1, cornerBox:4, cornerBack:2, ht:'wait', tips:1, tipsSeen:'', seenCtl:0};   // (v142: cornerBox, cornerBack -- your corners' set-up; v148: ht -- a break at half-time or PLAY ON; tips, tipsSeen -- a word on the controls the first time each comes up; seenCtl -- the controls card seen before a first career match)
   // (v136: 4 minutes a half unless you pick another -- it was 3. Settings kept from before kept the old 3 along with
   // everything else, picked or not, so a kept 3 from then is the new 4; pv marks settings kept since)
-  try{ const sp=JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}; if(!sp.pv&&+sp.halfMin===3) delete sp.halfMin; Object.assign(PREFS, sp, {pv:1}); }catch(e){}
+  // (v228: CHAMPION the one level for now -- no choice in SETTINGS or on the exhibition screen -- so a level kept from when
+  // there was one goes; dk marks settings kept since)
+  try{ const sp=JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}; if(!sp.pv&&+sp.halfMin===3) delete sp.halfMin; if(sp.dk!==1) delete sp.diff; Object.assign(PREFS, sp, {pv:1, dk:1}); }catch(e){}
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
-  // played) and CHAMPION (a notch past that). Its side only: the other side to yours (R); your own team-mates play as they
+  // played) and CHAMPION (a notch past that). (v228: CHAMPION's the level, with no choice for now; the others stay here.) Its side only: the other side to yours (R); your own team-mates play as they
   // always have, and the labs and drills are as they were. What each turns, for the computer's men:
   //  read   -- how far along your man's run they read him (readRun: Def IQ's read, times this)
   //  react  -- how long between their reads of the man on the ball, how loosely they track him (perceived), and how long
@@ -2528,7 +2541,7 @@
     star:    {read:1,   react:1,   press:1,   tackle:1,   spray:1,   shot:1,   think:1,  slow:1,   reach:1,   assist:false},
     champion:{read:1.12,react:0.88,press:1.2, tackle:1.12,spray:0.88,shot:1.06,think:0.7,slow:0.9, reach:1.05,assist:false}};
   const DIFF_NAMES={relaxed:'RELAXED',normal:'NORMAL',pro:'PRO',star:'STAR',champion:'CHAMPION'};
-  const diffOf=()=>DIFFS[PREFS.diff]||DIFFS.normal;
+  const diffOf=()=>DIFFS[PREFS.diff]||DIFFS.champion;
   const cpuT=t=>(t==='R'&&!LAB.on&&!practice)?diffOf():DIFFS.star;      // (the computer's side, in a match)
   const cpu=p=>cpuT(p&&p.team);
   function applyPrefs(){ P.halfMin.val=clamp(Math.round(+PREFS.halfMin||4),3,5); P.oppShift.val=clamp(+PREFS.oppShift||0,-3,3);
@@ -14208,7 +14221,8 @@
 
   // YOUR MAN, top right of the match (#rPlayer): his number, full name and position over his stamina (the red tick: how
   // far it can come back, as over his head) and his skill stars. Written only when something in it changes.
-  let rpKey='', rpSt=-1, rpCap=-1;
+  let rpKey='', rpSt=-1, rpCap=-1, rpFit='';
+  addEventListener('resize',()=>{ rpKey=''; rtKey=''; });   // (v228: written afresh at the new width)
   // EVERY NUMBER AND MARK EXPLAINED, A TAP AWAY (v152): a man's stars, his rating's arrow, his potential, his popularity,
   // his fitness and his stamina, and the match's top right (YOUR MAN, and the way you're attacking) say what they are
   // when tapped (data-xpl: a key here, or the words themselves), in a line by it for a few seconds. On a phone a
@@ -14216,6 +14230,7 @@
   const XPL={
     stars:'SKILL STARS, 1 to 5: the skill moves he can do (SKILL MOVES in the menu has each move\'s stars). A young man\'s come as he grows, to about 19 to 23; some lose one past 32.',
     hud:'YOUR MAN, the one with ▽ over him: his number, name and position. STAMINA: his legs this game, spent sprinting; the red tick is as far as they\'ll come back now.',
+    their:'THEIR MAN, the one you\'re up against: theirs on the ball, or else the one nearest your man -- his number, name and position, and how much is left in his legs.',
     dir:'The way you\'re attacking.',
     score:'THE SCORE: your side on the left.',
     clock:'THE CLOCK: the game\'s minute, 1 to 45 in the first half and 46 to 90 in the second (each half a few real minutes: Settings).',
@@ -14249,6 +14264,30 @@
     const st=Math.round(clamp(p.stamina,0,1)*100), cap=Math.round(clamp(p.staminaCap===undefined?1:p.staminaCap,0,1)*100);
     if(st!==rpSt){ rpSt=st; const i=document.getElementById('rpSt'); i.style.width=st+'%'; i.style.background=st>60?'':st>30?'var(--warn)':'var(--bad)'; }
     if(cap!==rpCap){ rpCap=cap; const s=document.getElementById('rpCap'); s.style.left=cap+'%'; s.style.display=cap<100?'':'none'; }
+    // (v228) the window's narrower (the Studio's match screen): a name too long for it has his first name's initial
+    if(rpFit!==rpKey){ const nm=document.getElementById('rpName'); if(nm.clientWidth>0){ rpFit=rpKey; const f=nm.textContent;
+      if(nm.scrollWidth>nm.clientWidth+1&&f.includes(' ')) nm.textContent=f[0]+'. '+f.slice(f.indexOf(' ')+1); } }
+  }
+
+  // (v228) THEIR MAN, beside yours (#rTheir): theirs on the ball (their keeper holding it too), or else the one of theirs
+  // nearest your man -- kept till another is clearly nearer, so it doesn't flick between two -- his number, surname and
+  // position over his stamina. Written only when something in it changes.
+  let rtKey='', rtSt=-1, rtWho=null;
+  function theirMan(){ const c=controlled; if(!c) return null;
+    const on=(gkHold&&gkHold.team!==c.team)?gkHold:(ball.ownedBy||ball.dribbler);
+    if(on&&on.team!==c.team) return on;
+    let best=null, bd=Infinity; for(const q of players){ if(q.team===c.team) continue; const d=Math.hypot(q.x-c.x,q.y-c.y); if(d<bd){ bd=d; best=q; } }
+    if(rtWho&&rtWho!==best&&rtWho.team!==c.team&&players.includes(rtWho)&&Math.hypot(rtWho.x-c.x,rtWho.y-c.y)<bd*1.25+12) return rtWho;
+    return best; }
+  function theirHud(){
+    const p=theirMan(); if(!p) return; rtWho=p;
+    const nm=String(p.pname||p.name||''), pos=natPos({role:p.natRole||p.role, subRole:p.subRole, style:p.style}), key=p.team+'|'+nm+'|'+p.num+'|'+pos;
+    if(key!==rtKey){ rtKey=key;
+      document.getElementById('rtNum').textContent=p.num!=null?'#'+p.num:'';
+      document.getElementById('rtName').textContent=nm.split(' ').slice(-1)[0];   // (his surname, as on the subs' list)
+      document.getElementById('rtPos').textContent=pos; }
+    const st=Math.round(clamp(p.stamina===undefined?1:p.stamina,0,1)*100);
+    if(st!==rtSt){ rtSt=st; const i=document.getElementById('rtSt'); i.style.width=st+'%'; i.style.background=st>60?'':st>30?'var(--warn)':'var(--bad)'; }
   }
 
   // ===== sim =====
@@ -14654,7 +14693,7 @@
     }
     { const d=document.getElementById('rDir');
       if(d) d.textContent = atkOf('G')>0 ? '▶' : '◀'; }
-    playerHud(); qsTick(dt); tipTick(dt);
+    playerHud(); theirHud(); qsTick(dt); tipTick(dt);
     if(LAB.on) labHud();
     if(gradeFade>0) gradeFade-=dt;
     if(venueT>0) venueT-=dt;   // a touch's grade is kept (lastGrade) but no longer shown
@@ -16751,8 +16790,8 @@
         if(role){ const fc=fitCls(fitPos(e),role,pos); t.dataset.fit=mtRating(e,role,pos); t.classList.toggle('fitOop',fc===' oop'); t.classList.toggle('fitSec',fc===' sec'); } } },
     drop(a,b){ mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si:+b.dataset.si,kind:b.dataset.mtk}); renderMatchTac(); },
     cancel(){ renderMatchTac(); } });
-  // ===== HOW TO PLAY (v148): the controls on a card -- before your first career match, from CONTROLS in the pause menu
-  // and from ? on the scoreboard (a match waits while it's up). And the first time each thing comes up in a match you
+  // ===== HOW TO PLAY (v148): the controls on a card -- before your first career match, and from CONTROLS in the pause
+  // menu (a match waits while it's up; v228: the ? that was on the scoreboard went with the Studio's match screen). And the first time each thing comes up in a match you
   // play, a word on it over the pitch for a few seconds -- one at a time, each once (TIPS in the settings: off; on again,
   // and they start again). Before, a career had no word on the controls anywhere -- the only teaching was in the labs --
   // so a first match was played blind. (v159: the game ships as an iPhone app, so the card, the tips, the labs and the
@@ -16771,12 +16810,11 @@
   function ctlShow(how){ how=how||{}; ctlThen=how.then||null; ctlFirst=!!how.first; ctlOpen=true;
     const T=CTL, card=document.querySelector('#ctlModal .ctlCard');
     card.innerHTML='<div class="pauseTitle">HOW TO PLAY</div><div class="ctlRows">'+T.map(([k,t])=>'<b>'+k+'</b><span>'+t+'</span>').join('')+'</div>'
-      +(how.first?'<div class="ctlNote">They’re always on ? over the pitch, and CONTROLS in the menu.</div>':'')
+      +(how.first?'<div class="ctlNote">They’re always under CONTROLS in the menu, ☰ over the pitch.</div>':'')
       +'<div class="cfBtns"><button class="pauseBtn" data-ctl="go">'+(how.first?'KICK OFF ▶':how.then?'◀ BACK':'◀ BACK TO THE GAME')+'</button></div>';
     document.getElementById('ctlModal').classList.add('on'); }
   function ctlHide(){ ctlOpen=false; document.getElementById('ctlModal').classList.remove('on'); const f=ctlThen; ctlThen=null; if(f) f(); }
   document.getElementById('ctlModal').addEventListener('click',e=>{ if(e.target.closest('[data-ctl="go"]')||(e.target===e.currentTarget&&!ctlFirst)) ctlHide(); });   // (v160: or a tap outside the card)
-  document.getElementById('ctlBtn').addEventListener('click',e=>{ e.stopPropagation(); if(SCREEN==='match'&&!ctlOpen&&!pauseOpen&&!menuOpen&&!htOpen) ctlShow(); });
   // the tips: the first of these that's so and not yet seen, the more particular first
   const tipGoalD=c=>Math.hypot((atkOf(c.team)>0?FW:0)-c.x,YC-c.y), tipUp=c=>atkOf(c.team)*(c.x-FW/2);
   const TIPS=[
@@ -16826,7 +16864,6 @@
   // SETTINGS: what a player sets, one row each (see PREFS); a developer can open the feel dials under it (see DEV)
   const SET_ROWS=[
     ['halfMin','MATCH LENGTH',[[3,'3 MIN'],[4,'4 MIN'],[5,'5 MIN']],'a half; the clock still reads 1–90'],
-    ['diff','DIFFICULTY',DIFF_KEYS.map(k=>[k,DIFF_NAMES[k]]),'how well the computer plays'],
     ['oppShift','EXHIBITION OPPONENTS',[[-3,'PUB'],[-1.5,'EASY'],[0,'NORMAL'],[1.5,'HARD'],[3,'ELITE']],'their stats, against the clubs as they are (career matches are as they are)'],
     ['art','GRAPHICS',[[true,'PIXEL ART'],[false,'SIMPLE']],'pixel players, pitch and ball, or plain shapes'],
     ['side','CAMPUS MENU',[['left','LEFT'],['right','RIGHT']],'the side of the career’s campus its buildings are listed down'],
@@ -16836,7 +16873,7 @@
   function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
     el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
       +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
-  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='side'||k==='diff'||k==='ht'||k==='text')?raw:+raw; if(k==='tips'&&PREFS.tips) PREFS.tipsSeen=''; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
+  function setPref(k,raw){ PREFS[k]=k==='art'?raw==='true':(k==='side'||k==='ht'||k==='text')?raw:+raw; if(k==='tips'&&PREFS.tips) PREFS.tipsSeen=''; savePrefs(); applyPrefs(); saveSettings(); renderSetRows(); }
   function showDevDials(on){ const dials=document.getElementById('dials'), box=document.getElementById('settingsDials');
     if(on&&DEV&&dials){ if(!_dialsHome){ _dialsHome=dials.parentNode; _dialsAnchor=dials.nextSibling; } box.appendChild(dials); box.classList.add('on'); }
     else { if(dials&&_dialsHome&&dials.parentNode!==_dialsHome) _dialsHome.insertBefore(dials,_dialsAnchor); box.classList.remove('on'); } }
@@ -16941,7 +16978,7 @@
   // ===== BUTTON LAYOUT (touch screens): where PASS, SHOOT and CROSS sit, and how big -- yours to arrange =====
   // Each is kept as its centre, a share of the way across and down the game screen (so it lands in the same place on
   // any phone), and a size against the standard one. Nothing kept = the standard cluster in the bottom right.
-  const BTN_BASE={kick:{size:76,r:12,b:12,font:13},shoot:{size:64,r:18,b:102,font:11},cross:{size:64,r:100,b:16,font:11},skill:{size:58,r:102,b:100,font:11}};
+  const BTN_BASE={kick:{size:96,r:42,b:21,font:15},shoot:{size:64,r:42,b:132.5,font:11},cross:{size:64,r:158.5,b:26,font:11},skill:{size:58,r:132.5,b:117,font:11}};   // (v228: the Studio's match screen)
   const BTN_NAME={kick:'PASS',shoot:'SHOOT',cross:'CROSS',skill:'SKILL'};
   let btnLayout={}, layoutOpen=false, leSel='kick', leDraft=null;
   try{ const o=JSON.parse(localStorage.getItem('ft_btnlayout')||'null'); if(o&&typeof o==='object') btnLayout=o; }catch(e){}
@@ -20748,7 +20785,7 @@
   }
   function renderExh(){
     const cc=[EXH.you,EXH.opp].some(id=>(clubById(id)||{}).cc);   // (v198: one from the Champions Cup in it -- a Champions Cup night)
-    document.getElementById('exhLeague').innerHTML=(cc?CC_LEAGUE:CLUB_LEAGUE)+' · <button class="exhDiff" data-exh="diff">'+DIFF_NAMES[PREFS.diff in DIFFS?PREFS.diff:'normal']+' ▸</button>';
+    document.getElementById('exhLeague').innerHTML=(cc?CC_LEAGUE:CLUB_LEAGUE);   // (v228: no difficulty to tap through: CHAMPION)
     for(const t of ['G','R']){ const el=document.getElementById('exhSide'+t); el.innerHTML=exhSideHTML(t); el.classList.toggle('you',t==='G'); }
     document.querySelectorAll('#exhPanel canvas.exhKit').forEach(cv=>{ const k=cv.dataset.kit.split(','); if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); });
     const grid=document.getElementById('exhGrid');
@@ -20777,7 +20814,6 @@
     else if(a==='grid'){ exhGridSide=(exhGridSide===t)?null:t; exhGridComp=null; }
     else if(a==='comp'){ exhGridComp=b.dataset.comp; fitForget('exhGrid'); }   // (v198: the other list, from its first page)
     else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }
-    else if(a==='diff'){ const i=DIFF_KEYS.indexOf(PREFS.diff); PREFS.diff=DIFF_KEYS[(i+1)%DIFF_KEYS.length]; savePrefs(); try{ renderSetRows(); }catch(_){} }   // (the difficulty: tap through them)
     saveExh(); renderExh();
   });
   function resumeMatch(){ document.getElementById('stageWrap').classList.remove('menuMode'); hideStartMenu(); SCREEN='match'; }

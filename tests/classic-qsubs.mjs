@@ -1,4 +1,5 @@
-// FOOTBALL CLASSIC, QUICK SUBS: at the top of the screen, left of your man's card, SUBS and how many you've left (three
+// FOOTBALL CLASSIC, QUICK SUBS: at the top of the screen, first of the right-hand group (v228: the Studio's match screen;
+// it was just left of your man's card), SUBS and how many you've left (three
 // a match). Pressed -- and only pressed: it never drops down by itself, and stays down until you press it again -- it
 // drops down a short list, a sub a line, small: in a career match your planned subs first (the training pitch's
 // Selection tab), then your most tired men, each with the man on the bench who'd do his job best on fresh legs. When one of yours
@@ -36,10 +37,11 @@ const state = () => page.evaluate(() => { const w = document.getElementById('qsW
     rows: [...document.querySelectorAll('#qsDrop .qsRow')].map(r => ({ qs: r.dataset.qs, text: r.innerText.replace(/\s+/g, ' ').trim(), plan: r.classList.contains('plan'), wait: r.classList.contains('wait'), h: r.getBoundingClientRect().height })),
     none: !!document.querySelector('#qsDrop .qsNone'), msg: document.getElementById('qsMsg').classList.contains('on') ? document.getElementById('qsMsg').innerText : '' }; });
 
-// THE CHIP: there at kick-off, SUBS 3, just left of your man's card on the same line
-let S = await state(); const chip = await box('#qsWrap'), card = await box('#rPlayer');
+// THE CHIP: there at kick-off, SUBS 3, first of the top row's right-hand group -- just left of the way you're kicking, on
+// your man's card's line (v228: the Studio's match screen; it was just left of the card)
+let S = await state(); const chip = await box('#qsWrap'), card = await box('#rPlayer'), dir = await box('#rDir'), score = await box('#rScore');
 ok(S.shown && S.left === '3' && !S.open, 'at kick-off the SUBS chip is up there, with 3 left, shut');
-ok(chip && card && chip.r <= card.l && card.l - chip.r < 16 && Math.abs(chip.t - card.t) < 2, 'it sits just left of your man\'s card, on the same line');
+ok(chip && card && dir && score && chip.r <= dir.l && dir.l - chip.r < 16 && chip.l > score.r && Math.abs(chip.t - card.t) < 2, 'it sits first on the right, just left of the way you\'re kicking (' + Math.round(dir.l - chip.r) + ' px), on your man\'s card\'s line (v228)');
 await page.click('#qsBtn'); await page.waitForTimeout(150); S = await state();
 ok(S.open && S.none && S.rows.length === 0, 'pressed at kick-off, nobody tired: "No one\'s tired yet", no lines');
 await simFor(12); S = await state();

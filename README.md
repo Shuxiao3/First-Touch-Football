@@ -446,6 +446,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   stands down the pitch's side, so the pitch has the height; on a narrower one it's under it, as before. The same on
   the Squad tab's little pitch and in a match's TACTICS, for either side. (The instructions' little pitch of the
   lines without the ball is still on its side.)
+- **The match screen from the Studio (v228).** The match's top row and its buttons are where the Studio's Match screen
+  has them, as exported from there. Along the top: the clock, then the score, on the left; on the right SUBS (when
+  there are subs to make), the way you're kicking, THEIR MAN, your man's window (169 px wide; it was 210) and the menu,
+  a little wider. THEIR MAN, beside yours, is the one you're up against: theirs on the ball (their keeper holding it
+  too), or else the one of theirs nearest your man, kept until another is clearly nearer so it doesn't flick between
+  two -- his number in red, his surname and position over his stamina; a tap says what it is. A name too long for your
+  man's narrower window has his first name's initial. The ? that opened the controls has gone from the top row: they're
+  under CONTROLS in the pause menu. PASS is bigger (96 px; it was 76) and in from the corner, 42 px from the right and
+  21 from the foot; SHOOT stands over it, SKILL on the diagonal and CROSS beside it, each placed from PASS's corner, so
+  the lot moves in together clear of a phone's notch, as the top row does. On a phone narrower than 760 px the row sits
+  closer to the edges and to itself, with THEIR MAN a little narrower, so it stays on one line down to 568 px. The stick
+  still starts wherever your thumb lands on the left, and BUTTON LAYOUT's RESET is the new cluster.
+- **Champion, the one difficulty for now (v228).** The computer's side plays at CHAMPION, a notch past full strength,
+  in every match (the labs and drills as they were). There's no DIFFICULTY row in SETTINGS and nothing to tap on the
+  exhibition screen; a level kept from when there was a choice opens at CHAMPION. The five levels are still in the
+  game, for when there's a choice again.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -722,7 +738,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     (Fontworks, SIL Open Font License), the game's one font until v224, cut to the game's characters with those
     symbols drawn in on its dot grid (`tools/fonts/make_ui_font.py`; the licence is in `assets/fonts/OFL-DotGothic16.txt`).
   - **Settings** are a player's: match length (3, 4 or 5 minutes a half: 4 unless you pick another, v136 -- it was 3),
-    how good exhibition opponents are, the DIFFICULTY (v89), pixel or simple
+    how good exhibition opponents are (v228: no DIFFICULTY for now -- the computer plays at CHAMPION), pixel or simple
     graphics and which side of the career's campus its buildings are listed down, kept in this browser (`ftc_prefs`),
     plus the button layout on a touch screen. Settings also credits the campus's tilesets and the font. The 92 feel dials are the game's
     own tuning: players never see them and their saved values aren't loaded. A developer gets them back (with the
@@ -815,12 +831,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     legs. That's three subs a match (it was two), and a man taken off can't come back. Every exhibition club has a bench of five
     too (a keeper, a man for each line and another defender), a little short of its starters.
     Swapping men's spots is free, and the other side is there to look at.
-  - **The match** has the score, the way you're kicking and the clock along the top, then, top right beside the
-    menu, **your man's window**: his number, full name and position over his stamina bar (the red tick on it is
+  - **The match** has the clock and the score along the top on the left, then on the right SUBS, the way you're
+    kicking, THEIR MAN (v228: the one you're up against) and, beside the menu, **your man's window**: his number, full name and position over his stamina bar (the red tick on it is
     how far it can come back, as over his head) and his skill stars, lit gold up to his number, so you know what
     he can do with the ball. Switch and it's the new man's. A club's man in an exhibition has only his surname
     on his card, so the window gives him a first name, always the same one. No stars over anyone's head now.
-  - **Quick subs**, just left of your man's window: SUBS and how many you've left. Press it and a small list drops
+  - **Quick subs**, first on the right of the top row (v228; it was just left of your man's window): SUBS and how many you've left. Press it and a small list drops
     down, a sub a line -- the man coming off, his stamina under him, ▸ the man coming on: in a career match your
     planned subs first (Training's **Subs** tab), then your most tired men (by how far his stamina can come back, the
     red tick), each with the man on the bench who'd do his job best, when on fresh legs he'd do it better than the
@@ -2344,7 +2360,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       **Shirt sales**).
   - **A tap says what it is (v152).** On a phone a title's never seen, and the stars by a man's stamina were a
     mystery. Now a tap on his skill stars, his rating's ▲ or ▼, his potential, his popularity, his fitness or stamina
-    bar, an unscouted man's six, or the match's top right (YOUR MAN, and which way you're attacking) puts what it is
+    bar, an unscouted man's six, or the match's top right (YOUR MAN, THEIR MAN since v228, and which way you're attacking) puts what it is
     in a line by it for a few seconds; a tap anywhere else takes it away. A man your scouts haven't seen has
     "not scouted" under his rating's range where his potential was "?". And the ▽ is over the man the top right names: your keeper with the ball in his
     hands is yours to play, and named there, but the ▽ was over nobody.
@@ -3462,6 +3478,16 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v228: the match screen from the Studio; CHAMPION the one difficulty.** The Match screen's export from the Studio
+  built in: the clock and the score on the left of the top row; SUBS, the way you're kicking, a new THEIR MAN chip (theirs
+  on the ball, or else the nearest to your man), your man's window (169 px) and a wider menu on the right; no ? (the
+  controls are in the pause menu); PASS 96 px and in from the corner, SHOOT, SKILL and CROSS placed from it, all clear of
+  a notch. A long name in your man's window has his first name's initial. And the computer plays at CHAMPION with no
+  choice for now: no DIFFICULTY row in SETTINGS, no chip on the exhibition screen, a level kept from before opens at
+  CHAMPION (`dk` marks settings kept since). Tests: `classic-ui.mjs` checks the row and the buttons where the Studio has
+  them and THEIR MAN; `classic-difficulty.mjs` the fresh and kept level and that there's no choice; `manager-flow.mjs`
+  and `manager-firstweek.mjs` the controls from the pause menu only; the harness keeps a test's level with `dk`. See
+  **The match screen from the Studio (v228)** and **Champion, the one difficulty for now (v228)**.
 - **v227: the title page's stadium from the Studio.** The title screen's export from the Studio built in: its picture,
   the stadium by day (1672 x 941), behind the title page in place of v222's, under the same wash. The check in
   `tests/classic-ui.mjs` takes the new size. See **The title page's stadium from the Studio (v227)**.

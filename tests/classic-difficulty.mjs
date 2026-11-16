@@ -1,6 +1,7 @@
 // FOOTBALL CLASSIC, DIFFICULTY (v89): five levels -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it
-// always played) and CHAMPION (a notch past it). A fresh browser starts at NORMAL; it's a row in SETTINGS and a tap on the
-// exhibition screen, and it's kept. It turns the computer's side only -- how wide its passes, crosses and shots go, how far
+// always played) and CHAMPION (a notch past it). (v228) CHAMPION's the level, with no choice for now: a fresh browser starts
+// at it, there's no row for it in SETTINGS and nothing to tap on the exhibition screen, and a level kept from when there was
+// a choice opens at CHAMPION. The five levels are still in the game (a test sets one). It turns the computer's side only -- how wide its passes, crosses and shots go, how far
 // along your man's run its men read him, how keen they are to go to ground, how far they reach to cut out a pass, how
 // noisy its choices are -- your own men as they always were. On RELAXED and NORMAL your man heads their cross clear himself
 // if you don't; at STAR he doesn't. On a copy of the game that lets the test reach the computer's men and set the scene.
@@ -26,31 +27,28 @@ const srv = http.createServer((req, res) => { if(req.url.split('?')[0] === '/cla
 await new Promise(r => srv.listen(0, '127.0.0.1', r));
 const URL_ = 'http://127.0.0.1:' + srv.address().port + '/classic.html';
 
-// a fresh browser, nothing kept: it's NORMAL (a page of its own: the harness starts its pages at STAR)
+// a fresh browser, nothing kept: it's CHAMPION; and one that kept NORMAL from before (no dk) opens at CHAMPION too (a page
+// of its own: the harness starts its pages at STAR)
 const { browser, page, rep } = await open({ url: URL_ });
 const { ok, info } = rep;
 { const fp = await browser.newPage(); await fp.goto(URL_); await fp.waitForTimeout(500);
-  const fresh = await fp.evaluate(() => window.__T.PREFS.diff); await fp.close();
-  ok(fresh === 'normal', 'a fresh browser starts at NORMAL (' + fresh + ')'); }
+  const fresh = await fp.evaluate(() => window.__T.PREFS.diff);
+  await fp.evaluate(() => localStorage.setItem('ftc_prefs', JSON.stringify({ diff: 'normal', pv: 1, halfMin: 5 }))); await fp.reload(); await fp.waitForTimeout(500);
+  const was = await fp.evaluate(() => ({ diff: window.__T.PREFS.diff, halfMin: window.__T.PREFS.halfMin })); await fp.close();
+  ok(fresh === 'champion', 'a fresh browser starts at CHAMPION (' + fresh + ') -- v228');
+  ok(was.diff === 'champion' && was.halfMin === 5, 'a browser that kept NORMAL from when there was a choice opens at CHAMPION, the rest of its settings as they were (' + was.diff + ', ' + was.halfMin + ' min a half)'); }
 
-// SETTINGS: the row, its five levels, picked and kept
+// NO CHOICE FOR NOW: no DIFFICULTY row in SETTINGS, and the exhibition screen's line under the title has nothing to tap
 await page.click('#smItems [data-act="settings"]').catch(() => {});
 await page.waitForTimeout(300);
-const row = await page.evaluate(() => [...document.querySelectorAll('#setRows .setOpt[data-pref="diff"]')].map(b => b.textContent));
-info('the DIFFICULTY row: ' + JSON.stringify(row));
-ok(row.join(',') === 'RELAXED,NORMAL,PRO,STAR,CHAMPION', 'SETTINGS has a DIFFICULTY row: RELAXED, NORMAL, PRO, STAR, CHAMPION');
-await page.click('#setRows .setOpt[data-pref="diff"][data-val="champion"]');
-await page.reload(); await page.waitForTimeout(600);
-const kept = await page.evaluate(() => window.__T.PREFS.diff);
-ok(kept === 'champion', 'picked, it\'s kept (' + kept + ' after a reload)');
-
-// THE EXHIBITION SCREEN: it's there under the title, a tap takes it on to the next (CHAMPION round to RELAXED)
+const row = await page.evaluate(() => ({ opts: document.querySelectorAll('#setRows .setOpt[data-pref="diff"]').length, rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent) }));
+info('the Settings rows: ' + JSON.stringify(row.rows));
+ok(row.opts === 0 && !row.rows.includes('DIFFICULTY') && row.rows.length >= 6, 'SETTINGS has no DIFFICULTY row (' + row.rows.join(', ') + ')');
+await page.click('[data-setclose]').catch(() => {}); await page.waitForTimeout(150);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');
-const chip0 = await page.textContent('#exhPanel .exhDiff');
-await page.click('#exhPanel .exhDiff'); await page.waitForTimeout(100);
-const chip1 = await page.textContent('#exhPanel .exhDiff'), now1 = await page.evaluate(() => window.__T.PREFS.diff);
-info('the exhibition screen: ' + JSON.stringify({ chip0, chip1, now1 }));
-ok(/CHAMPION/.test(chip0) && /RELAXED/.test(chip1) && now1 === 'relaxed', 'on the exhibition screen, a tap takes it to the next level (' + chip0.trim() + ' → ' + chip1.trim() + ')');
+const lg = await page.evaluate(() => ({ chip: document.querySelectorAll('#exhPanel .exhDiff, #exhPanel [data-exh="diff"]').length, text: document.getElementById('exhLeague').textContent }));
+info('the exhibition screen: ' + JSON.stringify(lg));
+ok(lg.chip === 0 && !/RELAXED|NORMAL|PRO|STAR|CHAMPION|▸/.test(lg.text), 'the exhibition screen has nothing to tap for it: "' + lg.text + '"');
 await page.click('#exhGo'); await page.waitForTimeout(800);
 
 // THE COMPUTER'S SIDE ONLY: with the same draws, at each level -- a long pass's spread and a cross's spread, by a man of

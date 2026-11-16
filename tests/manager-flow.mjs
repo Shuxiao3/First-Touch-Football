@@ -1,6 +1,6 @@
 // FOOTBALL CLASSIC, A MATCHDAY'S FLOW (v148): before your first career match, HOW TO PLAY -- the controls on a card,
-// KICK OFF from it -- and the card again from ? over the pitch and CONTROLS in the pause menu, the match waiting while it's
-// up; the first time each thing comes up, a word on it over the pitch (once each). At half-time the match stops on a card:
+// KICK OFF from it -- and the card again from CONTROLS in the pause menu (v228: the ? over the pitch went with the Studio's
+// match screen), the match waiting while it's up; the first time each thing comes up, a word on it over the pitch (once each). At half-time the match stops on a card:
 // the score, the numbers so far, SUBS and TACTICS (the board, and back to the card), SECOND HALF; HALF-TIME's PLAY ON in
 // the settings plays on. The quick subs say anyone can come off, tired or not. And after the game, what comes up over the
 // club comes one at a time, in order, each saying where it is in the run: the press conference (or the money) no longer
@@ -48,19 +48,19 @@ await page.click('#ctlModal [data-ctl="go"]'); await page.waitForTimeout(2500);
 r = await K(`({ screen:SCREEN, on:document.getElementById('ctlModal').classList.contains('on'), fix:!!careerFix })`);
 ok(r.screen === 'match' && !r.on && r.fix, 'KICK OFF: the card gone, the match on');
 
-// --- ? over the pitch, and CONTROLS in the pause menu: the match waits ---------------------------------------------------------
-await page.click('#ctlBtn'); await page.waitForTimeout(150);
-const t0 = await simAt(); await page.waitForTimeout(800); const t1 = await simAt();
-r = await K(`({ on:document.getElementById('ctlModal').classList.contains('on'), btn:document.querySelector('#ctlModal [data-ctl="go"]').textContent })`);
-ok(r.on && t1 === t0 && /BACK TO THE GAME/.test(r.btn), '? over the pitch: the card, the match waiting (' + t0.toFixed(2) + ' s, then ' + t1.toFixed(2) + ')');
-await page.click('#ctlModal [data-ctl="go"]'); await page.waitForTimeout(600);
-ok(!(await on('ctlModal')) && (await simAt()) > t1, '...and back to the game, the clock going again');
+// --- CONTROLS in the pause menu: the match waits (v228: no ? over the pitch -- the Studio's match screen has none) ------------------
+r = await K(`({ q:!!document.getElementById('ctlBtn') })`);
+ok(!r.q, 'no ? over the pitch: the controls are in the menu (v228)');
 await page.keyboard.press('Escape'); await page.waitForTimeout(150);
 await page.click('#pauseMenu [data-pause="controls"]'); await page.waitForTimeout(150);
+const t0 = await simAt(); await page.waitForTimeout(800); const t1 = await simAt();
 const fromPause = await on('ctlModal');
+r = await K(`({ btn:document.querySelector('#ctlModal [data-ctl="go"]').textContent })`);
+ok(fromPause && t1 === t0 && /BACK/.test(r.btn), 'CONTROLS in the pause menu: the card, the match waiting (' + t0.toFixed(2) + ' s, then ' + t1.toFixed(2) + ')');
 await page.click('#ctlModal [data-ctl="go"]'); await page.waitForTimeout(150);
-ok(fromPause && await on('pauseMenu'), 'CONTROLS in the pause menu: the card, and BACK to the menu');
-await page.click('#pauseMenu [data-pause="back"]'); await page.waitForTimeout(200);
+ok(await on('pauseMenu'), '...BACK to the menu');
+await page.click('#pauseMenu [data-pause="back"]'); await page.waitForTimeout(600);
+ok(!(await on('ctlModal')) && (await simAt()) > t1, '...and back to the game, the clock going again');
 
 // --- THE QUICK SUBS: anyone, tired or not -----------------------------------------------------------------------------------------
 await K(`(()=>{ for(const p of players) if(p.team==='G'){ p.staminaCap=1; p.stamina=1; } QS.open=true; qsRender(qsSuggest()); return 1; })()`);

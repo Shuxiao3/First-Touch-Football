@@ -31,7 +31,7 @@ writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
-await page.addInitScript(() => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; o.diff = o.diff || 'star'; o.halfMin = 5; localStorage.setItem('ftc_prefs', JSON.stringify(o));
+await page.addInitScript(() => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; o.diff = o.diff || 'star'; o.dk = 1; o.halfMin = 5; localStorage.setItem('ftc_prefs', JSON.stringify(o));
   localStorage.setItem('ft_exh', JSON.stringify({ you: 'ARS', opp: 'AVL' })); }catch(e){} });
 await page.addInitScript(() => { let vt = 0; const ch = new MessageChannel(), q = [];
   ch.port1.onmessage = () => { const cbs = q.splice(0); vt += 33; for(const cb of cbs){ try{ cb(vt); }catch(e){} } };

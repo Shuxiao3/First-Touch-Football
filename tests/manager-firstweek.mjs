@@ -68,12 +68,12 @@ ok(/RATING · FORM\s*none yet$/.test(r), 'a man with no games: "' + r + '"');
 await K(`(()=>{ hubToMenu(); return 1; })()`); await page.waitForTimeout(200);
 await startExhibition(page); await page.waitForTimeout(1500);
 r = await page.evaluate(() => { const has = id => { const e = document.getElementById(id); return !!e && !!(e.dataset.xpl || e.title || e.getAttribute('aria-label') || e.textContent.trim().length > 2); };
-  return { score: document.getElementById('rScore').dataset.xpl, clock: document.getElementById('rClockChip').dataset.xpl, ui: ['rScore', 'rClockChip', 'rDir', 'rPlayer'].every(id => document.getElementById(id).classList.contains('xplUI')),
-    menu: document.getElementById('menuBtn').title, ctl: document.getElementById('ctlBtn').title, subs: document.getElementById('qsBtn').textContent.trim(), all: ['rScore', 'rDir', 'rClockChip', 'qsBtn', 'rPlayer', 'menuBtn', 'ctlBtn'].every(has) }; });
+  return { score: document.getElementById('rScore').dataset.xpl, clock: document.getElementById('rClockChip').dataset.xpl, their: document.getElementById('rTheir').dataset.xpl, ui: ['rScore', 'rClockChip', 'rDir', 'rTheir', 'rPlayer'].every(id => document.getElementById(id).classList.contains('xplUI')),
+    menu: document.getElementById('menuBtn').title, ctl: !document.getElementById('ctlBtn'), subs: document.getElementById('qsBtn').textContent.trim(), all: ['rScore', 'rDir', 'rClockChip', 'qsBtn', 'rTheir', 'rPlayer', 'menuBtn'].every(has) }; });
 await page.evaluate(() => document.getElementById('rClockChip').click()); await page.waitForTimeout(60);
 const tip = await page.evaluate(() => { const t = document.getElementById('xplTip'); return t.classList.contains('on') ? t.textContent : ''; });
-ok(r.all && r.ui && r.score === 'score' && r.clock === 'clock' && /Pause/.test(r.menu) && /How to play/.test(r.ctl) && /^SUBS/.test(r.subs) && /THE CLOCK/.test(tip),
-  'in a match every chip and button says what it is: the score and the clock a tap ("' + tip.slice(0, 50) + '..."), the menu and the controls their titles, SUBS its word');
+ok(r.all && r.ui && r.score === 'score' && r.clock === 'clock' && r.their === 'their' && /Pause/.test(r.menu) && r.ctl && /^SUBS/.test(r.subs) && /THE CLOCK/.test(tip),
+  'in a match every chip and button says what it is: the score, the clock and THEIR MAN a tap ("' + tip.slice(0, 50) + '..."), the menu its title, SUBS its word (v228: no ? -- the controls are in the menu)');
 await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
 const st = await page.textContent('#pauseState');
 ok(/^\S+ \d+–\d+ \S+ · \d+:\d\d · \d subs? left$/.test(st), 'the menu\'s top: the match at a glance -- "' + st + '"');
