@@ -434,6 +434,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   covers nothing. On a short phone (380 px tall or less) the page comes halfway down into it, the footer behind; on the
   shortest (350 px or less, a phone's browser with its bar showing) the page keeps all the room it had, with the
   grass along its foot and the bushes at the screen's edges, so a man's card still fits on one page there.
+- **The title page's stadium from the Studio (v227).** The picture behind the title page is the one its screen has in
+  the Studio and was exported from there: the stadium by day under a blue sky, a manager in a cap watching from the
+  front of the stand (1672 x 941), under the same wash of the screen colour as before, so the logo and the buttons
+  read. The buttons, the logo and their places were already as laid out there (v224).
 - **The tactics pitch upright (v226).** The formation stands on the pitch picture put in the Studio (Retro Pixel
   Soccer Field), seen from behind your goal: your goal at the foot, theirs at the top, each line of men a row across it -- the keeper, the back
   line, the midfield, the forwards -- set where the picture has that part of the pitch, by its own perspective (the
@@ -3458,6 +3462,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v227: the title page's stadium from the Studio.** The title screen's export from the Studio built in: its picture,
+  the stadium by day (1672 x 941), behind the title page in place of v222's, under the same wash. The check in
+  `tests/classic-ui.mjs` takes the new size. See **The title page's stadium from the Studio (v227)**.
 - **v226: the tactics pitch upright.** The Tactics, a match's TACTICS and the Squad tab's little pitch draw the
   formation upright on the Studio's pitch picture, Retro Pixel Soccer Field (your goal at the foot), each line a row placed by the picture's
   perspective, the rows a man's height apart and every line inside the touchlines. The bench stands down the pitch's

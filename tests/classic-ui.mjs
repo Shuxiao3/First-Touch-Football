@@ -129,7 +129,7 @@ for(const [w, h] of SIZES){
       const dims = m ? await new Promise(res => { const i = new Image(); i.onload = () => res([i.naturalWidth, i.naturalHeight]); i.onerror = () => res(null); i.src = m[1]; }) : null;
       const plain = ['exhPanel', 'careerHub', 'settingsOverlay', 'newPanel'].every(id => { const n = document.getElementById(id); return !n || !/url\(/.test(getComputedStyle(n).backgroundImage); });
       return { wash: /rgba\(18, 26, 51, 0\.62\)/.test(c.backgroundImage), size: c.backgroundSize, dims, plain }; });
-    ok(tp.wash && tp.dims && tp.dims[0] === 1586 && tp.dims[1] === 992 && /cover/.test(tp.size) && tp.plain, 'the title page has its stadium picture (' + (tp.dims || ['none']).join(' x ') + '), filling the screen under a wash of the screen colour, and no other screen has it (v222)');
+    ok(tp.wash && tp.dims && tp.dims[0] === 1672 && tp.dims[1] === 941 && /cover/.test(tp.size) && tp.plain, 'the title page has its stadium picture, the Studio\'s since v227 (' + (tp.dims || ['none']).join(' x ') + '), filling the screen under a wash of the screen colour, and no other screen has it (v222)');
     // (v223) THE TITLE IS THE LOGO: Fulltime 9's logo where the words were, as tall as there's room for, above the menu and never
     // on it, and the whole menu on the screen -- the shortest phone, an iPhone 15, and a Pro Max (whose menu ran off the bottom)
     const logoAt = async (w, h) => { const c = await browser.newContext({ viewport: { width: w, height: h } });
