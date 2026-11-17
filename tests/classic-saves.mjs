@@ -202,7 +202,7 @@ r = await page.evaluate(() => { const T = window.__T, R = T.rng32(7), hs = [];
   return { arch: T.ARCH.GK.gkHandling, w: T.OVR_W.GK.gkHandling, wDive: T.OVR_W.GK.gkDiveRange, mean: +(hs.reduce((a, b) => a + b, 0) / hs.length).toFixed(2), halves: hs.every(v => v * 2 === Math.round(v * 2) && v >= 1 && v <= 10),
     before, after, fill: filled.gkHandling, han: /data-six="HAN"/.test(six), cmp: /data-six="CMP"/.test(six), kicks: /data-six="KIC"/.test(six), dial: T.P.gkHandling.val }; });
 info('handling: ' + JSON.stringify(r));
-ok(r.arch === 7 && r.w === r.wDive && r.dial === 5.5 && Math.abs(r.mean - 7) < 0.6 && r.halves, 'Handling is a keeper\'s stat: 7 for an average side\'s, in half points (60 drawn: ' + r.mean + ' on average), weighed in his rating as Diving is');
+ok(r.arch === 7 && r.w === r.wDive && r.dial === 5.5 && Math.abs(r.mean - 6) < 0.6 && r.halves, 'Handling is a keeper\'s stat: 6 for an average side\'s (v229: a point down, his line\'s 7 less one, as every stat is), in half points (60 drawn: ' + r.mean + ' on average), weighed in his rating as Diving is');
 ok(r.before === r.after && r.han && r.kicks && !r.cmp, 'a keeper made before it gets his from the rest of his keeping (' + r.fill + '), his rating unchanged (' + r.after + '); his six: DIV REF REA SPD KIC HAN');
 
 // --- THE END LINES: a goal kick for the side whose goal it is -- or, off one of that side, a corner to the other (v138) --

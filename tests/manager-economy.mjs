@@ -35,18 +35,19 @@ let r = await K(`(()=>{ const d=CAREER.data, role={STK:'ATT',WNG:'ATT',WM:'MID',
   const man=(pos,ovr,age,pot)=>({role:role[pos],subRole:pos,ovr,pot:pot??ovr,age:age??26,until:d.season+3,style:null}), v=(pos,ovr,age,pot)=>mgValue(d,man(pos,ovr,age,pot));
   const caps=Object.fromEntries(['STK','WNG','WM','AM','CM','DM','CB','FB','GK'].map(k=>[k,v(k,95)]));
   const club=mgAiClubs(d).find(c=>c.tier===4), star=man('GK',95); star.id=-1; const ask=mgAsk(d,star,club);
-  return { stk79:v('STK',79), cm65:v('CM',65), cm55:v('CM',55), stk90:v('STK',90), caps, age:[v('CM',75,28),v('CM',75,32),v('CM',75,34)], ask, gkCap:valCap(star),
-    wage:[51,55,65,75,79,85,90,94].map(mgWage), staff:[1,5,9].map(staffWage), start:d.budget, bill:d.roster.reduce((a,p)=>a+p.wage,0), n:d.roster.length, avg:+(d.roster.reduce((a,p)=>a+p.ovr,0)/d.roster.length).toFixed(1) }; })()`);
+  // (v229: every rating two up, the money where it was for a man of his standing -- each figure at two over what it was)
+  return { stk79:v('STK',81), cm65:v('CM',67), cm55:v('CM',57), stk90:v('STK',92), caps, age:[v('CM',77,28),v('CM',77,32),v('CM',77,34)], ask, gkCap:valCap(star),
+    wage:[53,57,67,77,81,87,92,96].map(mgWage), staff:[1,5,9].map(staffWage), start:d.budget, bill:d.roster.reduce((a,p)=>a+p.wage,0), n:d.roster.length, avg:+(d.roster.reduce((a,p)=>a+p.ovr,0)/d.roster.length).toFixed(1) }; })()`);
 info('values and wages: ' + JSON.stringify(r));
 const M = x => +(x / 1e6).toFixed(1);
 ok(Math.abs(r.stk79 - 19e6) <= 1e6 && Math.abs(r.cm65 - 1.1e6) <= 0.1e6 && r.cm55 === 150000 && Math.abs(r.stk90 - 169e6) <= 2e6,
-  'in his prime, a striker of 79 is worth $' + M(r.stk79) + 'M, a midfielder of 65 $' + M(r.cm65) + 'M (of 55 $' + r.cm55.toLocaleString() + '), a striker of 90 $' + M(r.stk90) + 'M');
+  'in his prime, a striker of 81 is worth $' + M(r.stk79) + 'M, a midfielder of 67 $' + M(r.cm65) + 'M (of 57 $' + r.cm55.toLocaleString() + '), a striker of 92 $' + M(r.stk90) + 'M (79, 65, 55 and 90 before v229)');
 ok(r.caps.STK === 200e6 && r.caps.WNG === 200e6 && r.caps.WM === 200e6 && r.caps.AM === 190e6 && r.caps.CM === 180e6 && r.caps.DM === 120e6 && r.caps.CB === 100e6 && r.caps.FB === 80e6 && r.caps.GK === 70e6,
   'and never more than the most the real game has paid: at 95, $' + Object.entries(r.caps).map(([k, x]) => k + ' ' + M(x) + 'M').join(', '));
 ok(Math.abs(r.age[1] / r.age[0] - 0.3) < 0.02 && Math.abs(r.age[2] / r.age[0] - 0.15) < 0.02 && r.ask <= r.gkCap * 1.25,
   'the veteran\'s slide: at 32 three-tenths of his prime\'s worth, at 34 15%; an asking price never more than a quarter over his position\'s most (a keeper of 95: $' + M(r.ask) + 'M asked)');
 ok(Math.abs(r.wage[0] - 1100) <= 30 && r.wage[1] === 2000 && Math.abs(r.wage[4] - 69000) <= 1000 && Math.abs(r.wage[7] - 627000) <= 3000 && r.staff[0] === 1000,
-  'a wage of $' + r.wage.map(w => w.toLocaleString()).join(', $') + ' a week at 51, 55, 65, 75, 79, 85, 90 and 94; a coach $' + r.staff.map(w => w.toLocaleString()).join(', $') + ' at 1, 5 and 9 (twenty times what it was)');
+  'a wage of $' + r.wage.map(w => w.toLocaleString()).join(', $') + ' a week at 53, 57, 67, 77, 81, 87, 92 and 96 (51 to 94 before v229); a coach $' + r.staff.map(w => w.toLocaleString()).join(', $') + ' at 1, 5 and 9 (twenty times what it was)');
 ok(r.start === 250000 && r.bill >= 9000 && r.bill <= 20000, 'a new club: $' + r.start.toLocaleString() + ' in the bank, its ' + r.n + ' men (rated ' + r.avg + ') on $' + r.bill.toLocaleString() + ' a week');
 
 // --- THE MONEY ROUND IT ----------------------------------------------------------------------------------------------------------
@@ -105,9 +106,10 @@ ok(net >= 1.35e6 && net <= 3.3e6, 'a new club\'s first season, no transfers: +$'
 
 // --- A CAREER KEPT FROM BEFORE: put into the new money, once ------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=JSON.parse(JSON.stringify(CAREER.data)), W=d.world, p=d.roster[0], c=mgAiClubs(d).find(c=>c.tier===4), coach={id:99,k:'tec',r:5,wage:250};
-  // (as v148 had it: the old wages, the old bank, the old budgets)
-  const all=[...d.roster,...(W.free||[]),...Object.values(W.clubs).flatMap(c=>c.players||[])]; for(const q of all) q.wage=WAGE_V148(q.ovr);
-  d.staff=[coach]; d.budget=45000; c.budget=6000000; d.listed={[p.id]:Math.round(valueV148(d,p))}; d.ticketPrice=7; delete d.w149;
+  // (as v148 had it: the old wages, the old bank, the old budgets -- v229: each man's money at what he was rated then, two
+  // down on today's, as the migration reads it)
+  const all=[...d.roster,...(W.free||[]),...Object.values(W.clubs).flatMap(c=>c.players||[])]; for(const q of all) q.wage=WAGE_V148(q.ovr-2);
+  d.staff=[coach]; d.budget=45000; c.budget=6000000; d.listed={[p.id]:Math.round(valueV148(d,Object.assign({},p,{ovr:p.ovr-2,pot:p.pot!=null?p.pot-2:p.pot})))}; d.ticketPrice=7; delete d.w149;
   const w0=p.wage, v0=d.listed[p.id];
   mgMigrate(d); const once={ budget:d.budget, wage:p.wage, want:mgWage(p.ovr), coach:coach.wage, ai:c.budget, listed:d.listed[p.id], value:mgValue(d,p), price:d.ticketPrice, flag:d.w149 };
   mgMigrate(d); once.again=d.budget===once.budget&&p.wage===once.wage; once.w0=w0; once.v0=v0; return once; })()`);

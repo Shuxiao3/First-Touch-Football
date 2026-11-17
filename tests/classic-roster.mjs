@@ -49,26 +49,27 @@ const st = await page.evaluate(() => { const M = window.__M, out = {}, med = a =
   const KEYS = ['speed', 'interceptions', 'defIQ', 'dribbling', 'stamina', 'crossing', 'passAcc', 'ballControl', 'tackle', 'offIQ', 'shotAcc', 'strength'];
   for(const [k, role] of [['anchor', 'MID'], ['deepcreator', 'MID'], ['ballwinner', 'MID'], ['completemid', 'MID'], ['boxtobox', 'MID'], ['covermid', 'MID'], ['mezzala', 'MID'], ['playmaker', 'MID'], ['winger', 'ATT'], ['paceywinger', 'ATT']]){
     const S = { ovr: [] }; for(const x of KEYS) S[x] = [];   // (v182: his style's make in one -- cwStatsForOVR takes it)
-    for(let i = 0; i < 60; i++){ const s = M.cwStatsForOVR(role, 65, M.cwMul(1000 + i), k); for(const x of KEYS) S[x].push(s[x]); S.ovr.push(M.cwOverall(role, s)); }
+    for(let i = 0; i < 60; i++){ const s = M.cwStatsForOVR(role, 67, M.cwMul(1000 + i), k);   // (v229: 67, where 65 was -- every rating two up)
+      for(const x of KEYS) S[x].push(s[x]); S.ovr.push(M.cwOverall(role, s)); }
     out[k] = { ovr: med(S.ovr) }; for(const x of KEYS) out[k][x] = med(S[x]); }
   return out; });
 const low = k => Math.min(...['passAcc', 'ballControl', 'tackle', 'interceptions', 'defIQ', 'offIQ', 'shotAcc', 'stamina', 'strength', 'dribbling'].map(x => st[k][x]));
-info('at a rating of 65, the middle of: ' + Object.entries(st).map(([k, v]) => k + ' ' + JSON.stringify(v)).join(' | '));
+info('at a rating of 67, the middle of: ' + Object.entries(st).map(([k, v]) => k + ' ' + JSON.stringify(v)).join(' | '));
 // (v183: the types' make is the master sheet's -- what's checked is that its order holds at the same rating: wherever two
 // of a line's types are three points or more apart on the sheet's 1 to 20, the one with more has more here too. It
 // checked the cover midfielder against the holders and the complete midfielder's weakest stat, as v143 and v144 made them)
 const ord = await page.evaluate(KEYS => { const M = window.__M, ks = Object.keys(KEYS), out = { pairs: 0, wrong: [] };
   for(const a of ks) for(const b of ks){ if(a >= b || M.STYLES[a].role !== M.STYLES[b].role) continue; const r = M.STYLES[a].role;
     for(const x of Object.keys(KEYS[a])){ if(x === 'ovr') continue; const sa = 2 * (M.ARCH[r][x] + (M.STYLES[a].d[x] || 0)), sb = 2 * (M.ARCH[r][x] + (M.STYLES[b].d[x] || 0));
-      if(Math.abs(sa - sb) < 3) continue; out.pairs++; if((sa > sb) !== (KEYS[a][x] > KEYS[b][x])) out.wrong.push(a + '/' + b + ' ' + x + ' sheet ' + sa + '-' + sb + ', at 65 ' + KEYS[a][x] + '-' + KEYS[b][x]); } }
+      if(Math.abs(sa - sb) < 3) continue; out.pairs++; if((sa > sb) !== (KEYS[a][x] > KEYS[b][x])) out.wrong.push(a + '/' + b + ' ' + x + ' sheet ' + sa + '-' + sb + ', at 67 ' + KEYS[a][x] + '-' + KEYS[b][x]); } }
   return out; }, st);
-info('the sheet\'s order at a rating of 65: ' + JSON.stringify(ord));
+info('the sheet\'s order at a rating of 67: ' + JSON.stringify(ord));
 ok(ord.pairs >= 40 && ord.wrong.length === 0, 'at the same rating the types keep the master sheet\'s order: every one of ' + ord.pairs + ' stats where two of a line\'s types are three points or more apart on the sheet');
 ok(st.paceywinger.speed >= st.winger.speed + 0.5 && st.paceywinger.crossing < st.winger.crossing,
   'the pacey winger: the quickest of the wingers (' + st.paceywinger.speed + ', the winger ' + st.winger.speed + '), paid for in the rest -- crossing ' + st.paceywinger.crossing + ' to the winger\'s ' + st.winger.crossing);
 ok(st.mezzala.dribbling >= st.boxtobox.dribbling + 0.5 && st.mezzala.dribbling >= st.ballwinner.dribbling + 0.5,   // (v192: a point over them on the sheet, half a point here -- two before)
   'the mezzala dribbles (' + st.mezzala.dribbling + ', the box-to-box ' + st.boxtobox.dribbling + ', the ball-winner ' + st.ballwinner.dribbling + ')');
-ok(Object.values(st).every(v => Math.abs(v.ovr - 65) <= 1), 'and every one of them is the rating he was made for: a type is the kind of man, not how good (' + Object.values(st).map(v => v.ovr).join(' ') + ')');
+ok(Object.values(st).every(v => Math.abs(v.ovr - 67) <= 1), 'and every one of them is the rating he was made for: a type is the kind of man, not how good (' + Object.values(st).map(v => v.ovr).join(' ') + ')');
 
 // --- (v182) THE MASTER SHEET: every type's usual make is the sheet's numbers (his line's averages and the type's offsets,
 // halved from its 1 to 20) -- made as a career makes a man, at the rating those numbers rate, 200 men of each average
@@ -79,12 +80,14 @@ const sh = await page.evaluate(() => { const M = window.__M, out = { worst: 0, w
     for(let i = 0; i < 200; i++){ const s = M.mgDeriveStats({ role, ovr: T, style: k, seed: 5000 + i }); if(M.cwOverall(role, s, k) !== T) out.off++; out.n++; for(const x of keys) sum[x] = (sum[x] || 0) + s[x]; }   // (as a career makes him)
     let e = 0; for(const x of keys) e += Math.abs(sum[x] / 200 - (M.ARCH[role][x] + (S.d[x] || 0))) * 2; e /= keys.length;   // (on the sheet's 1 to 20)
     if(e > out.worst){ out.worst = +e.toFixed(3); out.worstK = k; } }
-  // the spread by how good his style is at it: 3000 Pacey wingers at his style's rating -- his pace, his best (and never
-  // nudged to the rating), and his Def IQ, his worst (a forward's minor stat: never nudged either)
-  const W = 'paceywinger', role = 'ATT', T = Math.round(M.STYLE_REF[W] * 10), made = [];
+  // the spread by how good his style is at it: 3000 Wide runners at his style's rating -- his pace, his best (and never
+  // nudged to the rating), and his heading, his worst (a minor stat: never nudged either). (v229: it was the Pacey
+  // winger's pace and Def IQ -- his Def IQ a 2 on the sheet now, the game's 1, and no man goes under that: there a stat
+  // scatters only upwards)
+  const W = 'mwinger', role = 'MID', T = Math.round(M.STYLE_REF[W] * 10), made = [];
   for(let i = 0; i < 3000; i++) made.push(M.cwStatsForOVR(role, T, M.cwMul(20000 + i), W));
   const sdOf = x => { const a = made.map(s => s[x]), m = a.reduce((p, q) => p + q, 0) / a.length; return +Math.sqrt(a.reduce((p, q) => p + (q - m) * (q - m), 0) / a.length).toFixed(3); };
-  out.paceSd = sdOf('speed'); out.defSd = sdOf('defIQ');
+  out.paceSd = sdOf('speed'); out.defSd = sdOf('heading');
   // and the table: every style's best stat 0.5, its worst 0.7, and the rest between in the order the sheet has them
   out.bad = [];
   for(const k in M.MAKE_SD_OF){ if(k[0] === '@') continue; const t = M.MAKE_SD_OF[k], S = M.STYLES[k], v = x => M.ARCH[S.role][x] + (S.d[x] || 0), ks = Object.keys(t), sds = ks.map(x => t[x]);
@@ -97,7 +100,7 @@ ok(sh.worst <= 0.25 && sh.off === 0, 'every type made at the rating its numbers 
 ok(!sh.bad.length && sh.stopper.strength === 0.5 && sh.stopper.crossing === 0.7 && sh.stopper.speed > 0.5 && sh.stopper.speed < 0.7,
   'how widely a style\'s men scatter goes by how good it is at the stat: its best half a point a standard deviation (the sheet\'s 1), its worst 0.7 (1.4), the rest between in the sheet\'s order -- the Stopper\'s strength ' + sh.stopper.strength + ', his speed ' + sh.stopper.speed + ', his crossing ' + sh.stopper.crossing + (sh.bad.length ? ' (out: ' + sh.bad.slice(0, 4).join(', ') + ')' : ''));
 ok(sh.paceSd >= 0.47 && sh.paceSd <= 0.58 && sh.defSd >= 0.62 && sh.defSd <= 0.78,
-  'and so they do: 3000 Pacey wingers made at his rating, his pace (his best) ' + sh.paceSd + ' a standard deviation and his Def IQ (his worst) ' + sh.defSd + ' (each rounded to the half point)');
+  'and so they do: 3000 Wide runners made at his rating, his pace (his best) ' + sh.paceSd + ' a standard deviation and his heading (his worst) ' + sh.defSd + ' (each rounded to the half point)');
 
 // --- THE EXHIBITION CLUBS' MEN --------------------------------------------------------------------------------------------
 const ex = await page.evaluate(() => { const M = window.__M, n = {}, at = { DM: {}, CM: {}, AM: {} };

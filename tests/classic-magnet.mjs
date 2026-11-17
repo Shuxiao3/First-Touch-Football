@@ -27,6 +27,7 @@ await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector
 const scene = (o) => page.evaluate(o => new Promise(res => { const T = window.__T, MK = T.MK, b = T.ball();
   const me = T.players().find(q => q.team === 'G' && q.role === 'MID'), them = T.players().find(q => q.team === 'R' && q.role === 'ATT');
   T.freeze(); T.setControlled(me);
+  if(!me.__was){ me.__was = true; me.stats = Object.fromEntries(Object.entries(me.stats).map(([k, v]) => [k, typeof v === 'number' ? Math.min(10, v + 1) : v])); }   // (v229: his stats a point up, as they were before every stat came down a point -- the scenes are about the magnet, on the man they were set on)
   for(const q of T.players()) if(q !== me && !(o.theirs && q === them)){ q.x = T.FW / 2 + (q.team === 'R' ? 0.35 : -0.35) * T.FW; q.y = 40 + 12 * T.players().indexOf(q); q.vx = q.vy = 0; q.__script = p => { p.vx = p.vy = 0; }; }
   for(const k of T.keepers()){ k.x = k.homeX; k.y = T.YC; }
   const x0 = T.FW / 2 - T.atkOf('G') * 18 * MK, y0 = T.YC;

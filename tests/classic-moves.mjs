@@ -269,8 +269,8 @@ const odds = await cp.evaluate(() => { const T = window.__T, O = T.STAR_ODDS, o 
   o.mid = pl('DM')[4] <= 0.5 && pl('CM')[4] <= 0.5 && pl('AM')[4] <= 1 && pl('WM')[4] > pl('AM')[4] && pl('WM')[4] < pl('STK')[4];
   o.fb = pl('FB')[4] <= 1;
   // drawn: u spread evenly over 0..1 gives each ceiling its share
-  const n = [0, 0, 0, 0, 0]; for(let i = 0; i < 10000; i++) n[T.starPot('WNG', 80, (i + 0.5) / 10000) - 1]++;
-  o.drawn = n.map(x => x / 100); o.leagues = [T.starLeague(58), T.starLeague(59), T.starLeague(67), T.starLeague(75)].join('');
+  const n = [0, 0, 0, 0, 0]; for(let i = 0; i < 10000; i++) n[T.starPot('WNG', 82, (i + 0.5) / 10000) - 1]++;   // (v229: 82, 80 before -- every rating two up)
+  o.drawn = n.map(x => x / 100); o.leagues = [T.starLeague(60), T.starLeague(61), T.starLeague(69), T.starLeague(77)].join('');   // (v229: two up with the ratings)
   return o; });
 info('a top-league winger\'s ceiling 1..5, drawn: ' + odds.drawn.join('% ') + '%');
 ok(odds.sums && odds.leagues === '1234' && odds.drawn.join() === '0,13,45,38,4', 'each position\'s odds in each league add up, and a draw gives each ceiling its share');

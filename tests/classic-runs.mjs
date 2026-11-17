@@ -124,6 +124,7 @@ r = await page.evaluate(() => { const T = window.__T; T.reset(); window.__clearI
   const cm = window.__by('G', 'CM', 'atk', 1), st = window.__by('G', 'ST'), wr = window.__by('G', 'W', 'atk', 1), wl = window.__by('G', 'W', 'atk', 0);
   window.__at(cm, 66, 11); window.__at(st, 64, -12); window.__at(wl, 55, -28); window.__at(wr, 74, 26);
   st.runCd = 9; wl.runCd = 9;   // (him the only one to go: the others just gone, and not yet ready to go again)
+  wr.stats.offIQ = Math.max(wr.stats.offIQ, 5.5);   // (v229: his Off IQ the 5.5 he had before every stat came down a point -- from there up he sees a run at once, runSeeOf: the scene's about where it lands)
   window.__give(cm); const p = window.__plan(); const run = p.jobs.find(j => j.job === 'RUN'); return { run, p, runs: p.runs, uol: p.uol }; });
 info('their line 17 m out, the right winger 26 m across: ' + show(r.p));
 ok(r.run && r.run.pos === 'W' && Math.abs(r.run.w) < 26 - 4, `his run goes in towards their goal, not on down his touchline: landing ${r.run && r.run.w} m across (he's 26 m across)`);

@@ -70,19 +70,37 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Stat Town'); await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 r = await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); MGUI.noPile=true; pileHide(); const all=[...d.roster,...Object.values(d.world.clubs).flatMap(c=>c.players)];
-  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p),p.style),30,95)) }; })()`);   // (v202: by his playstyle)
+  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p),p.style),32,97)) }; })()`);   // (v202: by his playstyle)
 ok(r.st163 && r.len === '28' && r.rated, 'a new career: every man\'s 28 attributes, the new two among them (' + r.n + ' men), each rated by them');
 
 // --- A CAREER FROM BEFORE ---------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, keep=d.roster.map(p=>[p.at,p.cl,p.bs,p.ovr,p.pot]); for(const p of d.roster){ p.at=p.at.slice(0,26); p.cl=p.cl.slice(0,26); p.bs=p.bs.slice(0,26); } delete d.st163; mgMigrate(d);
   const bad=[]; for(const p of d.roster){ const st=mgStats(p), A=ARCH[p.role], s=STYLES[p.style]&&STYLES[p.style].d||{};
     const lp=clamp(Math.round((st.passAcc+(A.longPass+(s.longPass||0))-(A.passAcc+(s.passAcc||0)))*2)/2,1,10), cf=clamp(Math.round((st.composure+(A.compFinal+(s.compFinal||0))-(A.composure+(s.composure||0)))*2)/2,1,10);
-    if(p.at.length!==28||st.longPass!==lp||st.compFinal!==cf||p.ovr!==clamp(cwOverall(p.role,st),30,99)||devUnpack(p.cl).longPass<st.longPass) bad.push(p.name); }
+    if(p.at.length!==28||st.longPass!==lp||st.compFinal!==cf||p.ovr!==clamp(cwOverall(p.role,st),32,99)||devUnpack(p.cl).longPass<st.longPass) bad.push(p.name); }
   const eg=d.roster.find(p=>p.style==='deepcreator'||p.style==='playmaker'||p.style==='ballplayer')||d.roster[1], es=mgStats(eg);
   const out={ st163:!!d.st163, bad, n:d.roster.length, eg:[eg.style,es.passAcc,es.longPass,es.composure,es.compFinal] };
   d.roster.forEach((p,i)=>{ [p.at,p.cl,p.bs,p.ovr,p.pot]=keep[i]; }); return out; })()`);
 info('a career from before: ' + JSON.stringify(r));
 ok(r.st163 && !r.bad.length, 'a career from before (26 attributes a man): once, as it\'s loaded, every man\'s Long passing and Final third composure from his own Short passing and Composure, moved as his role and archetype move them (' + r.eg.join(' ') + '), his ceiling with them, and his rating on the new weights (' + r.n + ' men)');
+
+// --- (v229) EVERY STAT A POINT LOWER, EVERY RATING TWO UP ---------------------------------------------------------------------------------------
+// The sheets' numbers two lower (a point on the game's 1 to 10) and the ratings calibrated two higher: the leagues' levels
+// 57, 65, 73 and 81, the Premier Division's men about 81 on average. A career as v228 saved it (every stat a point up on
+// today's, every rating two down), loaded: once, every stat a point down and every man two up on his rating, his wage as it
+// was; loaded again, nothing more. (On a copy of the career.)
+r = await K(`(()=>{ const now=CAREER.data, d=JSON.parse(JSON.stringify(now)), men=x=>[...x.roster,...x.world.free,...Object.values(x.world.clubs).flatMap(c=>c.players)];
+  const avg=(x,t)=>{ const ov=(x.div[t]||[]).flatMap(id=>(x.world.clubs[id]||{}).players||[]).map(p=>p.ovr); return +(ov.reduce((a,v)=>a+v,0)/ov.length).toFixed(2); };
+  const all=men(d), was=men(now);
+  for(const p of all){ for(const f of ['at','cl','bs']) if(p[f]){ const o=devUnpack(p[f]); for(const k in o) o[k]=clamp(o[k]+STAT_DROP,1,10); p[f]=devPack(o); } if(p.ovr!=null) p.ovr-=2; if(p.pot!=null) p.pot-=2; if(p.fa!=null) p.fa-=2; }
+  const old=[1,2,3,4].map(t=>avg(d,t)); delete d.st229; d.wr=228; mgMigrate(d);
+  const mig=[1,2,3,4].map(t=>avg(d,t)), at=all.map(p=>p.at).join(), ov=all.map(p=>p.ovr).join(); mgMigrate(d);
+  let same=0; all.forEach((p,i)=>{ const a=devUnpack(p.at), b=devUnpack(was[i].at); if(Object.keys(b).every(k=>a[k]===b[k]||b[k]>9)) same++; });
+  return { lv:[1,2,3,4].map(t=>MG_LEVEL[t]), now:[1,2,3,4].map(t=>avg(now,t)), up:mig.map((v,i)=>+(v-old[i]).toFixed(2)), again:all.map(p=>p.at).join()===at&&all.map(p=>p.ovr).join()===ov,
+    same, n:all.length, wages:all.every((p,i)=>p.wage===was[i].wage), flag:!!d.st229 }; })()`);
+info('v229, a point lower and two up: ' + JSON.stringify(r));
+ok(r.lv.join() === '57,65,73,81' && Math.abs(r.now[3] - 81) <= 1, 'the leagues\' levels 57, 65, 73 and 81 (two up on 55, 63, 71 and 79), and a new career\'s Premier Division men ' + r.now[3] + ' on average (its four leagues ' + r.now.join(', ') + ')');
+ok(r.flag && r.up.every(v => Math.abs(v - 2) <= 0.3) && r.same >= r.n * 0.95 && r.wages && r.again, 'a career from before, loaded: every stat a point lower (' + r.same + ' of ' + r.n + ' men as a new career has them -- a 9.5 or a 10 comes back a 9), each league two up on its rating (' + r.up.join(', ') + '), every wage as it was; loaded again, nothing more');
 
 // --- THE CARD ------------------------------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster.find(q=>q.role==='MID'); curTab.club='Squad'; openBuilding('club'); MGUI.sel=p.id; mgSide='rate'; sixOpen='PAS'; paintBuilding();

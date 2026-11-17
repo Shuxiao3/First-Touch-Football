@@ -511,11 +511,11 @@ await create('Free Town');
 const money = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
 r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out = { n: F.length, old: F.filter(p => p.age >= 29).length };
   out.room = Math.max(0, ...F.filter(p => p.age <= 24).map(p => p.pot - p.ovr));
-  const man = (age, ovr) => ({ ovr: ovr || 52, age, role: 'MID' }), ask = (age, ovr) => Object.assign(M.mgFreeAsk(d, man(age, ovr)), { fair: M.mgDemand(d, man(age, ovr), false) });
-  Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33), o58: ask(29, 58), o62: ask(29, 62), o70: ask(29, 70), y58: ask(25, 58), tier: d.tier, fo: M.FREE_OVER, foMax: M.FREE_OVER_MAX });
+  const man = (age, ovr) => ({ ovr: ovr || 54, age, role: 'MID' }), ask = (age, ovr) => Object.assign(M.mgFreeAsk(d, man(age, ovr)), { fair: M.mgDemand(d, man(age, ovr), false) });
+  Object.assign(out, { a21: ask(21), a25: ask(25), a29: ask(29), a33: ask(33), o60: ask(29, 60), o64: ask(29, 64), o72: ask(29, 72), y60: ask(25, 60), tier: d.tier, fo: M.FREE_OVER, foMax: M.FREE_OVER_MAX });   // (v229: two up with the ratings)
   // (the generator: 3000 men as summers bring them, against Division 2's mid-table)
   const G = []; for(let i = 0; i < 3000; i++) G.push(M.mgNewFreeAgent(d).ovr); G.sort((a, b) => a - b);
-  out.gen = { med: G[1500], q95: G[2850], atLv: G.filter(v => v >= M.MG_LEVEL[1]).length / G.length, at60: G.filter(v => v >= 60).length / G.length };
+  out.gen = { med: G[1500], q95: G[2850], atLv: G.filter(v => v >= M.MG_LEVEL[1]).length / G.length, at62: G.filter(v => v >= 62).length / G.length };
   const mk = (age, ovr) => { const p = M.mgNewFreeAgent(d); p.role = 'MID'; p.age = age; delete p.at; p.pot = ovr; p.ovr = ovr; M.mgSetOvr(p, ovr); return p; };
   const young = mk(22, 55), vet = mk(31, 60), twin = JSON.parse(JSON.stringify(vet));   // (the vet's twin at a club: training and games)
   for(let w = 1; w <= 10; w++){ d.weeks = 3 * w; M.devTick(d, young, { T: 0.35, M: 0.15 }); M.devTick(d, vet, { T: 0.35, M: 0.15 }); M.devTick(d, twin, { T: 0.75, gw: 3 }); twin.mw = 3; }
@@ -526,14 +526,14 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, F = d.world.free, out =
   return out; });
 info('free agents: ' + JSON.stringify(r));
 ok(r.old >= r.n / 2 && r.room <= 4, 'the free agents: ' + r.old + ' of ' + r.n + ' are 29 or over, and none at 24 or under has more than 4 to grow into');
-ok(r.gen.med <= 46 && r.gen.q95 <= 56 && r.gen.atLv < 0.07 && r.gen.at60 < 0.01,
-  'nobody wanted them: of 3000 free agents the middle man is rated ' + r.gen.med + ', one in twenty ' + r.gen.q95 + ' or more, ' + (r.gen.atLv * 100).toFixed(1) + '% at Division 2\'s mid-table (55) or over and ' + (r.gen.at60 * 100).toFixed(1) + '% at 60 (v177: 50, 65, a third and one in seven)');
+ok(r.gen.med <= 48 && r.gen.q95 <= 58 && r.gen.atLv < 0.07 && r.gen.at62 < 0.01,
+  'nobody wanted them: of 3000 free agents the middle man is rated ' + r.gen.med + ', one in twenty ' + r.gen.q95 + ' or more, ' + (r.gen.atLv * 100).toFixed(1) + '% at Division 2\'s mid-table (57) or over and ' + (r.gen.at62 * 100).toFixed(1) + '% at 62 (v177: 52, 67, a third and one in seven -- v229: every rating two up)');
 const wks = a => a.fee / a.wage;
-ok(r.tier === 1 && Math.abs(wks(r.o58) - 6 * r.fo) < 0.6 && Math.abs(wks(r.o62) - 10 * r.fo) < 0.6 && Math.abs(wks(r.o70) - r.foMax) < 0.6 && 18 * r.fo > r.foMax && r.o58.wage === r.o58.fair && Math.abs(wks(r.y58) - (6 + 6 * r.fo)) < 0.8,
-  'one who\'d walk into most sides in Division 2 wants a fee to sign at any age, two weeks\' wage for every point over 52: a 58 of 29 ' + money(r.o58.fee) + ' (' + wks(r.o58).toFixed(1) + ' weeks of his ' + money(r.o58.wage) + '), a 62 ' + wks(r.o62).toFixed(1) + ' weeks, a 70 thirty at most (' + wks(r.o70).toFixed(1) + '); at 25 on top of the young man\'s six (' + wks(r.y58).toFixed(1) + ')');
+ok(r.tier === 1 && Math.abs(wks(r.o60) - 6 * r.fo) < 0.6 && Math.abs(wks(r.o64) - 10 * r.fo) < 0.6 && Math.abs(wks(r.o72) - r.foMax) < 0.6 && 18 * r.fo > r.foMax && r.o60.wage === r.o60.fair && Math.abs(wks(r.y60) - (6 + 6 * r.fo)) < 0.8,
+  'one who\'d walk into most sides in Division 2 wants a fee to sign at any age, two weeks\' wage for every point over 54: a 60 of 29 ' + money(r.o60.fee) + ' (' + wks(r.o60).toFixed(1) + ' weeks of his ' + money(r.o60.wage) + '), a 64 ' + wks(r.o64).toFixed(1) + ' weeks, a 72 thirty at most (' + wks(r.o72).toFixed(1) + '); at 25 on top of the young man\'s six (' + wks(r.y60).toFixed(1) + ')');
 ok(Math.abs(r.a21.wage / r.a21.fair - 2.5) < 0.06 && Math.abs(r.a21.fee / r.a21.wage - 12) < 0.7 && Math.abs(r.a25.wage / r.a25.fair - 1.75) < 0.06 && Math.abs(r.a25.fee / r.a25.wage - 6) < 0.4   // (v149: the fee rounded to $10,000 at that size)
    && r.a29.wage === r.a29.fair && !r.a29.fee && r.a33.wage === r.a33.fair && !r.a33.fee,
-  'what they ask (a 52 in Division 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
+  'what they ask (a 54 in Division 2): at 21 ' + money(r.a21.wage) + '/wk and ' + money(r.a21.fee) + ' to sign (his wage ' + money(r.a21.fair) + '); at 25 ' + money(r.a25.wage) + ' and ' + money(r.a25.fee) + '; at 29 and 33 his wage and nothing to sign');
 ok(r.young[0] === 23 && r.young[1] <= 55 && r.young[2] === 1 && r.vet[0] === 32 && r.vet[1] < r.vet[3] && r.vet[1] < 60 && r.vet[2] === 1,
   'a season without a club (little training, no games): the young man doesn\'t grow (55 to ' + r.young[1] + '), the old one loses more than he would at a club (60 to ' + r.vet[1] + '; at a club ' + r.vet[3] + ')');
 ok(!r.star.free && r.star.club, 'a 21-year-old with a future let go: ' + r.star.club + ' have him the same day');
@@ -542,7 +542,8 @@ await page.evaluate(() => { const M = __MG, d = M.d; d.budget = 250000; M.mgMark
 await page.click('#chCampus [data-bldg="market"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Free agents")'); await page.waitForTimeout(80);
 const fa = await page.evaluate(() => { const M = __MG, d = M.d;
   const p = d.world.free.find(q => q.age >= 21 && q.age <= 26) || Object.assign(d.world.free[0], { age: 23 });
-  Object.assign(p, { ovr: 56, pot: 57 }); M.MGUI.sel = p.id; M.mgRerender(); const a = M.mgFreeAsk(d, p); return { id: p.id, age: p.age, wage: a.wage, fee: a.fee, budget: d.budget }; });
+  Object.assign(p, { ovr: 58, pot: 59 }); M.MGUI.sel = p.id;   // (v229: 58, 56 before -- every rating two up)
+  M.mgRerender(); const a = M.mgFreeAsk(d, p); return { id: p.id, age: p.age, wage: a.wage, fee: a.fee, budget: d.budget }; });
 await page.waitForTimeout(80);
 if(await page.$('#bpBody [data-mside="deal"]')){ await page.click('#bpBody [data-mside="deal"]'); await page.waitForTimeout(60); }   // (his card turned over: his deal)
 const faCard = await page.innerText('#bpBody .mgCard');
@@ -568,7 +569,7 @@ const nb = await page.evaluate(id => { const M = __MG, d = M.d, p = d.roster.fin
   out.renew = M.mgRenew(d, d.roster.indexOf(p), 2); out.faAfter = p.fa ?? null; out.renewed = bids();
   d.offers = []; set(out.ovr0); d.phase = 'league'; M.mgSave(d); return out; }, fa.id);
 info('signed on a free, the bids: ' + JSON.stringify(nb));
-ok(nb.fa === 56 && nb.kept && nb.star === 0 && nb.watch === 0 && nb.listed > 30 && !nb.grownKept && nb.grown > 5 && nb.renew === null && nb.faAfter === null && nb.renewed > 5,
+ok(nb.fa === 58 && nb.kept && nb.star === 0 && nb.watch === 0 && nb.listed > 30 && !nb.grownKept && nb.grown > 5 && nb.renew === null && nb.faAfter === null && nb.renewed > 5,
   'nobody bids for a man you signed on a free (he was ' + nb.fa + '): a star now, 300 weeks of bids and none for him, nor watching him; listed, ' + nb.listed + '; come on four points, ' + nb.grown + '; on a new deal, ' + nb.renewed + ' (v177: a star drew bids within the week)');
 ok(nb.dd === 0 && nb.ddFree > 10, 'deadline day: the best of your squad, signed on a free, draws none of the late bids (200 deadline days; ' + nb.ddFree + ' once he isn\'t)');
 // a career from before v178: the men you'd signed on a free are found in the transfers' log (his last arrival, and what
@@ -594,7 +595,7 @@ ok(ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(cal
 await games(1); const s1b = await story(); await games(1); const s2 = await story();
 const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, role: p.role, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
 await page.click('#storyModal [data-st="ok"]'); await page.waitForTimeout(60); const s3 = await story();
-ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 70 && vet.ovr <= 79 && vet.age >= 33 && vet.age <= 35 && vet.role !== 'GK' && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
+ok(!s1b.on && s2.on && /HOMETOWN HERO/.test(s2.text) && vet && vet.ovr >= 72 && vet.ovr <= 81 && vet.age >= 33 && vet.age <= 35 && vet.role !== 'GK' && vet.wage < vet.fair / 3 && vet.until === vet.season + 1 && !s3.on,
   'then a veteran comes home: ' + (vet ? vet.age + ', rated ' + vet.ovr + ', ' + vet.role + ' (never a keeper), on ' + money(vet.wage) + '/wk (he\'d ask ' + money(vet.fair) + ')' : 'nobody') + ' -- "' + s2.text.slice(0, 90) + '..."');
 await games(2); const s4 = await story(); await games(1); const s5 = await story();
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="invwinger"]'); await page.waitForTimeout(40);
@@ -661,7 +662,7 @@ const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = 
 await create('Busy Town'); const in0 = await busy(0), b0 = await season();
 await create('Busy Town'); const in4 = await busy(4), b4 = await season();
 info('a busy season: ' + JSON.stringify({ none: [b0.seq.length, b0.avg, b0.low], best: [b4.seq.length, b4.avg, b4.low] }));
-ok(in0 && in4 && b0.seq.filter(x => /^cl/.test(x)).length >= 6 && b0.avg < 0.9 && b0.low < 0.7 && b4.avg > 0.95 && b4.low > b0.low,
+ok(in0 && in4 && b0.seq.filter(x => /^cl/.test(x)).length >= 6 && b0.avg < 0.9 && b0.low < 0.7 && b4.avg > 0.93 && b4.low > b0.low,   // (v229: 0.93 -- every man's Stamina a point lower, the best physio's side a point or two less fresh; 0.95 before)
   'the Premier Division\'s top four in the Continental Champions Cup (six group games and more, midweek): with no physio your eight start a game ' + Math.round(b0.avg * 100) + '% fit on average, down to '
   + Math.round(b0.low * 100) + '%; with the best physio ' + Math.round(b4.avg * 100) + '% (the most tired ' + Math.round(b4.low * 100) + '%: a man with poor Stamina, or past 30, still runs down)');
 

@@ -133,7 +133,7 @@ const watch = await page.evaluate(() => {
     for(let t = 0; t < 0.8; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); b.x += b.vx * dt; v = Math.max(v, Math.hypot(p.vx, p.vy)); }
     out.runner = { share: +(v / run).toFixed(2), face: +(p.facing.x * atk).toFixed(2) }; }
   { const b = scene(5.5, -atk * 260, atk * 380); b.thru = { until: T.simNow() + 5 }; p.facing = { x: atk, y: 0 }; let v = 0, face = 1;   // ...and one that comes to him from behind
-    for(let t = 0; t < 0.9; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); b.x += b.vx * dt; if(t > 0.6){ v = Math.max(v, Math.hypot(p.vx, p.vy)); face = Math.min(face, p.facing.x * atk); } }
+    for(let t = 0; t < 0.8; t += dt){ p.sprint = true; T.stepOutfield(p, atk, 0, dt); b.x += b.vx * dt; if(t > 0.6){ v = Math.max(v, Math.hypot(p.vx, p.vy)); face = Math.min(face, p.facing.x * atk); } }   // (v229: to 0.8 s, the ball still behind him -- by 0.9 it's level with him, a frame either way with his Agility)
     out.behind = { share: +(v / run).toFixed(2), face: +face.toFixed(2), watching: !!p.watching }; }
   { const b = scene(5.5, atk * 250, -atk * 400), o = T.players().find(q => q.team !== p.team); b.lastTouch = o.team; b.intendedRcv = o;   // their pass, across him
     p.facing = { x: 0, y: 1 }; let v = 0, w = 0;

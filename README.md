@@ -462,6 +462,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   in every match (the labs and drills as they were). There's no DIFFICULTY row in SETTINGS and nothing to tap on the
   exhibition screen; a level kept from when there was a choice opens at CHAMPION. The five levels are still in the
   game, for when there's a choice again.
+- **Every stat two lower on the sheets, every rating two higher (v229).** Every number on the playstyle sheets (1 to
+  20) is two lower than it was -- a point on the game's 1 to 10, so every man's every stat is a point down, the stars'
+  too -- and the ratings are calibrated two higher: the leagues' mid-tables are 57, 65, 73 and 81 (55, 63, 71 and 79
+  before), every man in them two up -- a Premier Division squad averages about 80 to 81, all its men counted (about
+  78.5 before), and the cards, which stretch a rating over 60 (v194), show its mid-table side's 85. A rating is a weighted average of a man's stats, each playstyle's weights set so its usual man rates
+  where he should: the weights decide which stats count most, never how high ratings sit, so it's that setting that
+  moved -- a line's usual man rates 71, 69 or 74 (69, 67 and 72 before). Everything that goes by how good a man is
+  moved two up with it, so a man of the same standing keeps his money and his fame: a wage $2,000 at 57 and $69,000
+  at 81, a worth $150,000 for a central midfielder of 57, popularity, the skill stars' league bands, the free agents'
+  fees, the youth intake, the wonderkid (62 to 71) and the hometown veteran (72 to 81), and what an unscouted man's
+  pay says he's rated; a rating runs 32 to 97 (99 for a star), a ceiling to 96. On the pitch every man is a point
+  worse at everything, both sides alike, and a style's weakest stats (a 4 on the sheets before, a 2 now) sit on the
+  game's floor of 1. A career saved before has every stat a point lower once as it's loaded and every man two up on
+  his rating, on the same wage; kept exhibition sides and edited squads the same.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -1813,7 +1827,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     it -- so every number comes up; stretched from the whole numbers alone, 63, 69, 75, 81, 87 and 93 never did.)
   - **Pace, the dearest of all (v144).** Speed weighs the most in every outfielder's rating, 6 -- above every other
     stat -- and acceleration 5 (they were 4 and 2 for a defender, 2 and 1 for a midfielder, 4 and 4 for a forward). A
-    usual man of each line still rates what he did (69, 67, 72 at the averages), but three points more pace on him is
+    usual man of each line still rates what he did (69, 67, 72 at the averages; 71, 69 and 74 since v229), but three points more pace on him is
     now worth 6 points of rating to a defender, 7 to a midfielder and 7 to a forward (it was 4, 2 and 5). A man is made
     to a rating, and his pace is left as it comes while the rest of his game is moved to make it -- so a quick man pays
     for it in the rest of his game: of men made at 70, the quickest quarter have 0.91 of a point less of the rest of
@@ -2334,7 +2348,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   - **Popularity** (v105; across the whole game since v161). Every man has one, 1 to 99, on his card under his
     position: how well known he is -- in the whole game, not just his league. 99 is the best-known in it, a Premier
     Division or Continental Champions Cup star; a Division 2 man is barely known however good his season. It comes first of how
-    good he is, on a steep curve (a 60 is 11, a 70 26, an 80 49, a 90 80), and then of what he does and where he does
+    good he is, on a steep curve (a 62 is 11, a 72 26, an 82 49, a 92 80 -- each a 60, 70, 80 and 90 before v229), and then of what he does and where he does
     it: his season (1.5 a goal to 15, a little for assists and, for a keeper or a defender, clean sheets; his form: his
     average rating, from three games, up to 12 for 7.5), his years at the club (3 a season, to 12), the armband (5),
     coming up through your academy (6), being a bright young thing (4: 21 or under and near the league's level) --
@@ -2490,10 +2504,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     on transfers go through it (agents, other clubs, free agents) -- and TRANSFERS opens in the menu (ANSWER, then GOT
     IT). The transfer market is never bought. (It used to ring after your second game.)
   - **Two men come to you in your first season.** After matchday 2 (once you've taken the call) a veteran comes home: a man of 33 to 35, rated
-    70 to 79, once of a Premier Division club, who'll play for the club he grew up with on under a third of his wage,
+    72 to 81 (70 to 79 before v229), once of a Premier Division club, who'll play for the club he grew up with on under a third of his wage,
     to the end of next season. He came home to play, not for the money: he never asks for a new deal, however well
     he does, and a new one keeps him on what he's on (v109). Where he plays and how are the luck of the draw, but
-    he's never a keeper (v109). After matchday 5 a wonderkid asks to join: 16, rated 60 to 69, with a ceiling of 85 to 90 (the card gives it as a
+    he's never a keeper (v109). After matchday 5 a wonderkid asks to join: 16, rated 62 to 71, with a ceiling of 87 to 92 (60 to 69 and 85 to 90 before v229) (the card gives it as a
     range six wide). You pick where he plays and his style (the card says what each style does), and he signs for
     half his wage, to the end of the season after next -- and waits his first season before he asks for more (v109).
     Both go straight into your squad, even a full one; a card on the hub tells you, and so does the news.
@@ -2576,7 +2590,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       Two bids or more over its price for him -- yours, or another club's -- and it knows it has a gem: it sees all
       of his potential, and asks more than the best of them. What it's heard is forgotten when the window shuts.
   - **Wages (v83)** are set by how good a man is when he signs (the wage a man of his rating earns), not haggled
-    over, and they stay put. (v149: in the real game's money -- $2,000 a week at 55, $69,000 at 79: see **The real
+    over, and they stay put. (v149: in the real game's money -- $2,000 a week at 55, $69,000 at 79, and at 57 and 81 since v229: see **The real
     game's money (v149)**. The figures below are from before it.) They climb with his rating faster from v120 -- a 52 (Division 2's run of the mill) earns
     $110 a week (it was $90), a 60 $280 ($190), a 68 $770 ($420), a 79 $3,020 ($1,200): about a fifth more for Division
     2's men, half again for Division 1's, twice for the National Division's, two and a half times for the Premier Division's,
@@ -2631,8 +2645,8 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     - **Who's out there.** Nobody wanted them (v178). Three in four of the men a summer brings are 29 to 35, two
       points under the level they played at for every year past 29; the rest are younger men nobody kept, a little
       under it and with next to nothing left to grow into. The level they played at was eight under a mid-table
-      side's in Division 2 or Division 1 (give or take three): of 3000 the middle man is rated 43, one in twenty 53 or
-      more, one in thirty at Division 2's mid-table (55) or over. Players out of contract, released or let go join them.
+      side's in Division 2 or Division 1 (give or take three): of 3000 the middle man is rated 45, one in twenty 55 or
+      more, one in thirty at Division 2's mid-table (57) or over (v229: each two up, as every rating is). Players out of contract, released or let go join them.
       (Till v178 it was four under, give or take four, a point and a half a year, and a sixth of them from the
       National Division: the middle man 50, one in twenty 65, a third at Division 2's mid-table or over -- a new career in
       Division 2, its nine averaging 50, could sign a dozen men at its league's mid-table or better for a wage.)
@@ -2645,9 +2659,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       let him go did: up to two and a half times his wage at 21 and under, sliding to his wage at 29, and a fee to
       sign of up to twelve weeks of that (TO SIGN on his card), the younger the more. And a man who'd walk into most
       sides in your league knows it (v178): two weeks of his wage to sign for every point he's over its mid-table less
-      three (over 52 in Division 2, 60 in Division 1, 68 in the National Division, 76 in the Premier Division), thirty weeks at
-      most, at any age and on top of the young man's. In Division 2 a 52 of 29 asks $1,300 a week and nothing to sign;
-      a 58 of 29 $3,100 and $37,200 to sign; a 62 of 29 $6,500 and $130,000 (half a new career's budget); a 58 of 23
+      three (over 54 in Division 2, 62 in Division 1, 70 in the National Division, 78 in the Premier Division; v229: each two up), thirty weeks at
+      most, at any age and on top of the young man's. In Division 2 a 54 of 29 asks $1,300 a week and nothing to sign;
+      a 60 of 29 $3,100 and $37,200 to sign; a 64 of 29 $6,500 and $130,000 (half a new career's budget); a 60 of 23
       $6,600 and $139,000.
     - **Signed on a free, nobody bids for him (v178).** Nobody wanted him while he was without a club, so nobody bids
       for him while he's on the deal he signed with you -- not in the window, not on deadline day, not a club watching
@@ -2750,12 +2764,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
     megastore and a jersey stand, bought on a Concessions tab for a little more from each head at home games; they're
     gone, and a career that had built them got what they cost back.)
     - **The real game's money (v149).** Every figure in the career is now what the real game pays, as the change list
-      the designer wrote set it out. **A man's worth**: $150,000 for a central midfielder of 55 in his prime, each
+      the designer wrote set it out. **A man's worth**: $150,000 for a central midfielder of 57 in his prime (55 before v229: every figure in this
+      table is at two over the rating it was), each
       rating point 22% more, by his age and what he could become (as before, but the veteran's slide steeper:
       three-tenths at 32 and 33, 15% from 34 -- two-fifths and a quarter before), then by his position, and never more
-      than the most the real game has paid for one -- only the generational reach it, from about 92:
+      than the most the real game has paid for one -- only the generational reach it, from about 94:
 
-      | In his prime | 55 | 65 | 75 | 79 | 85 | 90 | most |
+      | In his prime | 57 | 67 | 77 | 81 | 87 | 92 | most |
       | --- | --- | --- | --- | --- | --- | --- | --- |
       | Striker, winger, wide midfielder (x1.10) | $165k | $1.2M | $8.7M | $19M | $63M | $169M | $200M |
       | Attacking midfielder (x1.05) | $158k | $1.1M | $8.3M | $18M | $60M | $161M | $190M |
@@ -2769,9 +2784,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
       over, a winger 60%, a defender a quarter under, a keeper half). A club's asking price is made as before but never
       more than a quarter over the most for his position. Money is rounded a notch finer from $10,000 to $1M than it
       was (to the $100 under $100,000, the $1,000 under $1M), now wages and most fees live there: an $11,000 ask was
-      rounded to the $1,000, a negotiation in 9% steps. **A wage**: $2,000 a week at 55, each point 16% more -- $1,110
-      at 51, $8,730 at 65, $38,110 at 75, $68,710 at 79, $166,350 at 85, $347,560 at 90, $626,660 at 94 (it was $150 at
-      55 and $3,020 at 79): a new club's 15 on about $10,000 to $17,000 a week, a great side's 21 on $3.5M. A coach
+      rounded to the $1,000, a negotiation in 9% steps. **A wage**: $2,000 a week at 57, each point 16% more -- $1,110
+      at 53, $8,730 at 67, $38,110 at 77, $68,710 at 81, $166,350 at 87, $347,560 at 92, $626,660 at 96 (each at 55 to 94
+      before v229; it was $150 at 55 and $3,020 at 79): a new club's 15 on about $10,000 to $17,000 a week, a great side's 21 on $3.5M. A coach
       twenty times what he was ($1,000 to $20,000 a week). **Round it**: the TV ($45,000 a week in Division 2, $250,000,
       $900,000, $3.2M -- it was $150, $500, $1,800 and $15,000), the partners ($15,000, $60,000, $250,000, $1.5M -- $300
       to $9,000), a seat ($25, $30, $40, $60 -- $5 to $20), the league prizes ($500,000, $3M, $15M, $60M -- $12,000 to
@@ -3478,6 +3493,17 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v229: every stat two lower on the sheets, every rating two higher.** STYLE_SHEET and the stars' numbers two lower,
+  a man's stats a point lower in the game (STAT_DROP), the ratings calibrated two higher (OVR_LIFT: STYLE_REF and
+  OVR_REF 0.2 up), the leagues' levels 57, 65, 73 and 81. The money, popularity, skill stars, free agents' fees, youth
+  intake, the story's two men, a cup tie's TV bonus (against a side of 90), the rating clamps and the ceiling two up
+  with them, and an unscouted man's rating read from his wage on the new base. Careers (`st229`), kept exhibition
+  sides and edited squads (squads v2) take the drop once. Tests: `classic-stats.mjs` checks the levels, a new career's
+  Premier Division and a career from before loaded once; checks that set men at fixed ratings or rebuilt old careers
+  moved two up (`classic-clubs`, `classic-moves`, `classic-pace`, `classic-roster`, `classic-saves`,
+  `manager-career`, `manager-deadline`, `manager-dev`, `manager-economy`); scenes that rode on a
+  man's own numbers set them (`classic-runs`, `classic-shots`, `classic-magnet`, `classic-touch`). See **Every stat
+  two lower on the sheets, every rating two higher (v229)**.
 - **v228: the match screen from the Studio; CHAMPION the one difficulty.** The Match screen's export from the Studio
   built in: the clock and the score on the left of the top row; SUBS, the way you're kicking, a new THEIR MAN chip (theirs
   on the ball, or else the nearest to your man), your man's window (169 px) and a wider menu on the right; no ? (the

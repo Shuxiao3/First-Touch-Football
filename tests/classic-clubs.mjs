@@ -52,7 +52,7 @@ ok(cal.own > 2 * cal.off && cal.own > cal.lineOwn && cal.off < cal.lineOff, 'a w
 const cw = await K(`(()=>{ const pos={}, d=${newCareer}; let n=0, ad=0;
   for(const p of [...d.world.free, ...Object.values(d.world.clubs).flatMap(c=>c.players)]){ if(p.star||p.role==='GK') continue; const st=mgStats(p), x=cwOverallX(p.role,st,p.style)-cwOverallX(p.role,st);
     const a=pos[p.subRole]=pos[p.subRole]||{n:0,s:0}; a.n++; a.s+=x; n++; ad+=Math.abs(x);
-    if(p.ovr!==clamp(cwOverall(p.role,st,p.style),30,95)) return { stale:p.name }; }
+    if(p.ovr!==clamp(cwOverall(p.role,st,p.style),32,97)) return { stale:p.name }; }
   const by={}; for(const k in pos) by[k]=+(pos[k].s/pos[k].n).toFixed(2); return { by, mad:ad/n, n }; })()`);
 info('a new career\'s men, by playstyle against by line: ' + JSON.stringify(cw.by) + ', ' + (cw.mad || 0).toFixed(2) + ' either way on average (' + cw.n + ' men)');
 ok(!cw.stale && Object.values(cw.by).every(v => Math.abs(v) < 0.5) && cw.mad < 1.2, 'a new career\'s men rated by their playstyles, each position within half a point on average of what their line\'s weights gave' + (cw.stale ? ' (' + cw.stale + ' rated on the old weights)' : ''));
@@ -60,7 +60,7 @@ const old = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs)
   if(!p) return null; const want=cwOverall(p.role,mgStats(p),p.style); p.ovr=cwOverall(p.role,mgStats(p)); delete d.w202; mgMigrate(d); return { was:cwOverall(p.role,mgStats(p)), want, now:p.ovr, flag:d.w202 }; })()`);
 ok(old && old.now === old.want && old.flag === true, 'a career saved before v202: every man rated again by his playstyle when it\'s loaded (' + JSON.stringify(old) + ')');
 const old3 = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs).find(x=>!x.euro&&x.id!==d.clubId), p=c.players.find(x=>x.role!=='GK'); const want=p.ovr; p.ovr=1; d.wr=204; mgMigrate(d); return { want, now:p.ovr, wr:d.wr }; })()`);
-ok(old3.now === old3.want && old3.wr === 205, 'a career saved on v204\'s weights: rated again on the sheet\'s when it\'s loaded (' + JSON.stringify(old3) + ')');
+ok(old3.now === old3.want && old3.wr === 229, 'a career saved on v204\'s weights: rated again on the sheet\'s when it\'s loaded (' + JSON.stringify(old3) + ')');
 const kept = await K(`(()=>{ const sq=clubSquadGen(clubById('LIV')); for(const e of sq) e.ovr=1;
   localStorage.setItem('ft_clubsq',JSON.stringify({LIV:{squad:sq, lineup:defaultLineup(), form:'3-2-3', dform:null, sig:clubSig(clubById('LIV'))}}));
   const s=clubSide('LIV'); localStorage.removeItem('ft_clubsq'); return s.squad.every(e=>e.ovr===overallOf(e)&&e.ovr>1); })()`);

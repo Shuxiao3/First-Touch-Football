@@ -2892,7 +2892,8 @@
     p.lineSize=s.lineSize;p.lineIdx=s.lineIdx;p.isWidthLine=s.isWidthLine;p.wide=s.wide;p.mz=s.mz||0;
   }
   // ============ SQUADS: unique per-player stat blocks ============
-  const SQUAD_V=1;
+  const SQUAD_V=2;   // (v229: 1 before -- a side kept from then has every stat a point lower, once: STAT_DROP)
+  const statsDrop229=st=>{ if(st) for(const k in st) if(typeof st[k]==='number') st[k]=Math.max(1,Math.min(10,st[k]-STAT_DROP)); };
   let menuOpen=false, pauseOpen=false, settingsOpen=false, skillsOpen=false, ctlOpen=false, htOpen=false;   // (v148: the controls card, half-time)
   // (v163) TWO STATS SPLIT IN TWO: Passing is SHORT PASSING now (passAcc, as it was kept) beside LONG PASSING (longPass),
   // and Composure is COMPOSURE IN TRAFFIC (composure) beside FINAL THIRD COMPOSURE (compFinal) -- see THE PASS'S STAT and
@@ -2948,9 +2949,16 @@
   // OVR_REF: the usual make's average under v121's weights and under these. OVR_K: the lesser stats (1) move about half
   // as far as the rest with a man's level (see cwStatsForOVR), so the average is stretched a little to keep a usual man at
   // any level where he was -- a League 2 man's rating as it was, a Premium League man's too
+  // (v229) EVERY STAT A POINT LOWER, EVERY RATING TWO HIGHER: every number on the playstyle sheets came down 2 (a point
+  // on the game's 1 to 10: STAT_DROP) and the rating went up 2 (OVR_LIFT, in stat points: a fifth of one) -- so a man of
+  // the usual make for his line is a point down on ARCH in every stat and rates two over what that make did, and every
+  // man in the game the same: a point lower in everything, two higher on his rating. The Premier Division's mid-table
+  // side rates 81 (it was 79), every league two up with it (MG_LEVEL); what a man earns, fetches and is known for, his
+  // skill stars and what the academy brings, all as they were for a man of his standing (keyed two up).
+  const STAT_DROP=1, OVR_LIFT=0.2;
   const OVR_REF={}, OVR_K={};
   for(const r in OVR_W){ const w=OVR_W[r], tot=Object.values(w).reduce((a,v)=>a+v,0), ones=Object.values(w).filter(v=>v===1).length;
-    OVR_REF[r]=[ovrMean(ARCH[r],OVR_W_V121[r]), ovrMean(ARCH[r],w)]; OVR_K[r]=1/(1-0.45*ones/tot); }
+    OVR_REF[r]=[ovrMean(ARCH[r],OVR_W_V121[r])+OVR_LIFT, ovrMean(ARCH[r],w)-STAT_DROP]; OVR_K[r]=1/(1-0.45*ones/tot); }
   // ============ PLAYING STYLES: ARCHETYPES ============
   // Every player has an archetype within his position (keepers too: v118), and his stats are built around it: the role's
   // averages (ARCH) shifted by the archetype's offsets. Pace above all -- centre-backs and holding midfielders are the
@@ -3051,7 +3059,7 @@
     allround:{}, shotstopper:{longPass:-0.5}, sweeperkeeper:{longPass:1}};
   for(const k in STYLE_NEW_D) if(STYLES[k]) Object.assign(STYLES[k].d||(STYLES[k].d={}), STYLE_NEW_D[k]);
   // (v182) EVERY PLAYSTYLE'S USUAL MAKE, FROM THE MASTER SHEET: what a man of each style has in every stat at his style's
-  // usual level (what these numbers rate: STYLE_REF -- his line's usual man's is 69, 67 or 72), 1 to 20 -- the game's 1 to 10 in half
+  // usual level (what these numbers rate: STYLE_REF -- his line's usual man's is 71, 69 or 74), 1 to 20 -- the game's 1 to 10 in half
   // points -- set by hand on the master sheet and tuned stat by stat across the styles: the outfield ones on the Stats
   // by Playstyle sheet (v192: brought down across the board there, about a point and a quarter on its scale, a little
   // more off a style's weaker stats), the keepers on the master sheet. In OUT_KEYS' order (speed, acceleration, agility, stamina,
@@ -3062,28 +3070,28 @@
   // (cwStatsForOVR; an exhibition side's, genStyledStats) -- his level moving him from his style's own,
   // a bell curve's spread (MAKE_SD_OF), and the odd half point nudged to the rating he's made to. His line's averages, and
   // so every rating, are as they were. (Till v182 a style was a handful of offsets on its line's averages: the ones
-  // above and STYLE_NEW_D.)
+  // above and STYLE_NEW_D.) (v229: every number two lower than v228's, and every rating two higher -- STAT_DROP)
   const STYLE_SHEET={
-    stopper:[10,8,8,11,16,8,6,9,11,7,5,5,16,14,16,15,8,16,9,6,6,7], cover:[10,11,9,11,14,8,7,9,11,7,5,6,13,15,15,16,8,17,9,6,6,7],   // CB
-    ballplayer:[9,9,9,12,12,10,9,12,15,9,6,8,12,13,12,13,10,14,9,13,8,7], widecb:[11,9,11,12,13,9,9,10,11,6,6,10,12,16,14,15,9,13,8,7,7,7],
-    libero:[10,9,10,12,11,12,11,13,12,12,8,8,12,12,12,12,11,14,10,9,8,8],
-    fullback:[13,13,12,15,10,13,11,12,12,9,8,14,9,14,11,13,11,13,8,12,9,8], wingback:[15,14,14,16,7,13,12,12,12,7,11,16,5,13,9,9,12,12,10,13,12,10],   // FB
-    deffb:[11,12,12,13,11,10,10,11,11,7,6,11,12,16,13,14,9,13,8,8,7,7], invfb:[11,10,13,13,8,13,12,14,12,12,9,11,7,14,11,13,12,12,10,12,11,8],
-    ballwinner:[11,13,13,16,11,11,11,12,9,11,9,8,10,15,16,13,10,14,11,8,9,8], deepcreator:[9,11,11,13,9,14,12,14,16,14,10,13,8,10,10,11,15,13,12,15,13,9],   // DM
-    anchor:[9,11,10,14,13,11,10,13,11,10,7,8,14,14,14,17,10,15,11,7,8,8],
-    completemid:[11,12,12,15,10,14,12,14,12,14,11,12,9,11,11,11,13,11,12,13,11,9], boxtobox:[11,12,11,17,10,12,11,13,10,11,13,11,11,11,11,12,12,12,13,11,9,12],   // CM
-    covermid:[11,13,12,15,11,12,11,13,10,11,9,9,10,15,13,13,10,14,10,8,11,8], mezzala:[11,12,12,13,8,14,12,14,15,12,13,15,7,8,8,9,15,9,12,15,13,9],
-    playmaker:[11,12,13,12,7,16,13,16,13,16,14,15,7,5,5,6,16,5,13,17,15,11], trequartista:[12,13,13,14,7,15,13,15,12,13,15,13,8,5,5,5,16,4,14,15,15,14],   // AM
-    shadow:[13,11,12,14,10,14,12,13,9,12,15,10,12,7,4,6,15,5,14,13,12,14],
-    widemid:[13,13,12,15,8,14,13,13,13,11,11,14,8,12,10,10,12,10,10,13,12,9], mwinger:[15,14,14,15,8,13,12,12,10,7,9,14,7,10,10,7,11,10,10,10,9,9],   // WM
-    wideplaymaker:[12,13,13,13,7,15,14,13,14,12,13,16,6,7,6,6,14,6,12,16,13,11],
-    winger:[14,15,15,13,7,13,13,13,11,11,13,17,7,7,6,8,13,7,12,14,13,11], trickster:[13,15,17,12,6,14,17,13,12,13,13,14,6,4,6,5,13,5,12,14,13,11],   // WNG
-    paceywinger:[16,16,14,12,6,13,13,12,8,10,12,13,6,6,6,5,12,5,13,12,11,10], invwinger:[13,15,16,12,7,14,14,13,11,13,14,14,7,5,6,8,14,5,13,15,16,12],
-    complete:[13,13,13,12,11,13,12,13,10,13,15,12,11,7,6,7,14,7,14,13,13,13], poacher:[12,15,12,12,13,12,10,12,6,13,16,7,13,5,6,5,16,6,16,11,14,16],   // STK
-    speedster:[16,14,15,13,8,11,12,12,7,10,13,12,11,6,4,6,12,5,14,10,13,13], target:[9,12,11,13,15,14,12,14,10,14,16,11,15,6,7,6,13,8,15,9,15,15],
-    falsenine:[13,14,14,13,8,15,14,15,9,15,13,13,8,6,7,6,15,6,13,14,14,13],
-    allround:[10,10,11,12,12,10,7,11,10,13,6,6,10,6,8,10,10,11,8,6,6,6,13,15,15,15,13,14], shotstopper:[10,10,11,12,12,10,7,10,9,13,6,6,10,6,8,10,10,11,8,6,6,6,10,17,16,16,11,12],   // GK
-    sweeperkeeper:[10,10,11,12,12,11,7,13,12,15,6,6,10,6,8,10,10,11,8,6,6,6,16,13,13,14,16,15]
+    stopper:[8,6,6,9,14,6,4,7,9,5,3,3,14,12,14,13,6,14,7,4,4,5], cover:[8,9,7,9,12,6,5,7,9,5,3,4,11,13,13,14,6,15,7,4,4,5],   // CB
+    ballplayer:[7,7,7,10,10,8,7,10,13,7,4,6,10,11,10,11,8,12,7,11,6,5], widecb:[9,7,9,10,11,7,7,8,9,4,4,8,10,14,12,13,7,11,6,5,5,5],
+    libero:[8,7,8,10,9,10,9,11,10,10,6,6,10,10,10,10,9,12,8,7,6,6],
+    fullback:[11,11,10,13,8,11,9,10,10,7,6,12,7,12,9,11,9,11,6,10,7,6], wingback:[13,12,12,14,5,11,10,10,10,5,9,14,3,11,7,7,10,10,8,11,10,8],   // FB
+    deffb:[9,10,10,11,9,8,8,9,9,5,4,9,10,14,11,12,7,11,6,6,5,5], invfb:[9,8,11,11,6,11,10,12,10,10,7,9,5,12,9,11,10,10,8,10,9,6],
+    ballwinner:[9,11,11,14,9,9,9,10,7,9,7,6,8,13,14,11,8,12,9,6,7,6], deepcreator:[7,9,9,11,7,12,10,12,14,12,8,11,6,8,8,9,13,11,10,13,11,7],   // DM
+    anchor:[7,9,8,12,11,9,8,11,9,8,5,6,12,12,12,15,8,13,9,5,6,6],
+    completemid:[9,10,10,13,8,12,10,12,10,12,9,10,7,9,9,9,11,9,10,11,9,7], boxtobox:[9,10,9,15,8,10,9,11,8,9,11,9,9,9,9,10,10,10,11,9,7,10],   // CM
+    covermid:[9,11,10,13,9,10,9,11,8,9,7,7,8,13,11,11,8,12,8,6,9,6], mezzala:[9,10,10,11,6,12,10,12,13,10,11,13,5,6,6,7,13,7,10,13,11,7],
+    playmaker:[9,10,11,10,5,14,11,14,11,14,12,13,5,3,3,4,14,3,11,15,13,9], trequartista:[10,11,11,12,5,13,11,13,10,11,13,11,6,3,3,3,14,2,12,13,13,12],   // AM
+    shadow:[11,9,10,12,8,12,10,11,7,10,13,8,10,5,2,4,13,3,12,11,10,12],
+    widemid:[11,11,10,13,6,12,11,11,11,9,9,12,6,10,8,8,10,8,8,11,10,7], mwinger:[13,12,12,13,6,11,10,10,8,5,7,12,5,8,8,5,9,8,8,8,7,7],   // WM
+    wideplaymaker:[10,11,11,11,5,13,12,11,12,10,11,14,4,5,4,4,12,4,10,14,11,9],
+    winger:[12,13,13,11,5,11,11,11,9,9,11,15,5,5,4,6,11,5,10,12,11,9], trickster:[11,13,15,10,4,12,15,11,10,11,11,12,4,2,4,3,11,3,10,12,11,9],   // WNG
+    paceywinger:[14,14,12,10,4,11,11,10,6,8,10,11,4,4,4,3,10,3,11,10,9,8], invwinger:[11,13,14,10,5,12,12,11,9,11,12,12,5,3,4,6,12,3,11,13,14,10],
+    complete:[11,11,11,10,9,11,10,11,8,11,13,10,9,5,4,5,12,5,12,11,11,11], poacher:[10,13,10,10,11,10,8,10,4,11,14,5,11,3,4,3,14,4,14,9,12,14],   // STK
+    speedster:[14,12,13,11,6,9,10,10,5,8,11,10,9,4,2,4,10,3,12,8,11,11], target:[7,10,9,11,13,12,10,12,8,12,14,9,13,4,5,4,11,6,13,7,13,13],
+    falsenine:[11,12,12,11,6,13,12,13,7,13,11,11,6,4,5,4,13,4,11,12,12,11],
+    allround:[8,8,9,10,10,8,5,9,8,11,4,4,8,4,6,8,8,9,6,4,4,4,11,13,13,13,11,12], shotstopper:[8,8,9,10,10,8,5,8,7,11,4,4,8,4,6,8,8,9,6,4,4,4,8,15,14,14,9,10],   // GK
+    sweeperkeeper:[8,8,9,10,10,9,5,11,10,13,4,4,8,4,6,8,8,9,6,4,4,4,14,11,11,12,14,13]
   };
   for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S) continue; const A=ARCH[S.role], keys=S.role==='GK'?[...OUT_KEYS,...GK_KEYS]:OUT_KEYS, d={};
     keys.forEach((x,i)=>{ const v=STYLE_SHEET[k][i]; if(v!=null&&v/2!==A[x]) d[x]=v/2-A[x]; }); S.d181=S.d; S.d=d; }   // (d181: the offsets till v182, for a career kept from before -- see the tests)
@@ -3117,7 +3125,7 @@
     winger:[5,5,4,2,1,5,5,4,3,3,4,5,1,1,1,1,4,1,3,4,3,3], trickster:[4,5,5,2,1,5,5,4,3,4,4,4,1,1,1,1,4,1,3,4,3,3], paceywinger:[5,5,5,2,1,5,5,4,3,3,4,5,1,1,1,1,4,1,3,4,3,3], invwinger:[4,5,5,2,1,5,5,4,3,4,4,4,2,1,1,1,4,1,4,5,4,4],
     complete:[4,4,4,3,4,5,3,3,2,3,5,2,4,1,1,1,5,1,5,3,4,5], poacher:[4,5,4,3,5,5,3,3,2,3,5,1,5,1,1,1,5,1,5,3,4,5], speedster:[5,5,5,3,3,5,4,3,2,3,5,3,3,1,1,1,5,1,5,3,4,5], target:[3,3,3,3,5,5,3,4,2,3,5,2,5,1,1,1,5,1,5,3,4,5], falsenine:[4,5,5,3,2,5,4,4,2,3,5,3,3,1,1,1,5,1,5,3,4,5]};
   const OVR_PACE_W={speed:6, acceleration:5}, OVR_STY={}, OVR_STY_CAL={};
-  const OVR_RATE_V=205;   // (the weights' version: a saved career's men rated again when it moves -- see mgMigrate. v205: the sheet's)
+  const OVR_RATE_V=229;   // (the weights' version: a saved career's men rated again when it moves -- see mgMigrate. v205: the sheet's; v229: every rating two higher)
   for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S||S.role==='GK') continue; const P=STYLE_SHEET[k], v=x=>P[OUT_KEYS.indexOf(x)], ks=OUT_KEYS.filter(x=>!OVR_PACE_W[x]);
     const lo=Math.min(...ks.map(v)), hi=Math.max(...ks.map(v)), w=Object.assign({},OVR_PACE_W); for(const x of ks) w[x]=Math.round(1+4*(v(x)-lo)/Math.max(1,hi-lo));
     const lo2=Math.min(...OUT_KEYS.map(v)), hi2=Math.max(...OUT_KEYS.map(v)); for(const x in OVR_PACE_W) w[x]=Math.round(1+4*(v(x)-lo2)/Math.max(1,hi2-lo2));   // (v203: his pace among all his numbers)
@@ -3278,9 +3286,9 @@
   // anyone's
   const starPos=e=>{ const k=typeNow(e&&e.style); return k==='trequartista'||k==='shadow'||k==='playmaker'?'AM':k==='trickster'?'TRK':natPos(e); };   // (v143: a playmaker's an attacking midfielder's)
   // the league a rating belongs in (as mgLevelTier has it: this runs before the career's levels exist)
-  function starLeague(r){ return r>=75?4:r>=67?3:r>=59?2:1; }
+  function starLeague(r){ return r>=77?4:r>=69?3:r>=61?2:1; }   // (v229: two up with the ratings -- 75, 67 and 59 before; a man with no rating 62, 60 before)
   // his ceiling: u (0..1, drawn for him) against his position's odds in the league his potential rating belongs in
-  function starPot(pos,rating,u){ const o=(STAR_ODDS[pos]||STAR_ODDS.DM)[starLeague(rating||60)-1]; let s=0;
+  function starPot(pos,rating,u){ const o=(STAR_ODDS[pos]||STAR_ODDS.DM)[starLeague(rating||62)-1]; let s=0;
     for(let i=0;i<5;i++){ s+=o[i]/100; if(u<s) return i+1; } return 5; }
   // his stars at this age: a star or two short till he's grown into them (at 19 to 23), and perhaps one gone at 32 to 35
   function starsAt(sp,age,seed){
@@ -3296,7 +3304,7 @@
   // a career man's: his ceiling, drawn the first time he's seen and kept (p.sp) -- for the league between where his rating
   // is and where his potential would take him -- and his age
   function careerStarPot(p){ if(p.role==='GK') return 1;
-    if(p.sp==null) p.sp=starPot(starPos(p),((p.ovr||60)+(p.pot||p.ovr||60))/2,rng32(((p.seed>>>0)||p.id||1)^0x9E3779B9)()); return p.sp; }
+    if(p.sp==null) p.sp=starPot(starPos(p),((p.ovr||62)+(p.pot||p.ovr||62))/2,rng32(((p.seed>>>0)||p.id||1)^0x9E3779B9)()); return p.sp; }
   function careerStars(p){ return p.role==='GK'?1:p.star&&p.sp?p.sp:starsAt(careerStarPot(p),p.age,(p.seed>>>0)||p.id||1); }   // (v200: a star's are the sheet's, at any age)
   // anyone's: a career man's, else a squad entry's
   function starsOf(x){ return x&&!x.stats&&x.pot!=null?careerStars(x):entryStars(x); }
@@ -3466,12 +3474,12 @@
   function genStyledStats(role,style,R,shift){
     const st={}, d=(STYLES[style]&&STYLES[style].d)||{};
     for(const k of STAT_KEYS_V162){ if(k==='gkHandling') continue; const sp=(style&&STYLE_PACE_KEYS.includes(k))?0.75:1.5;
-      const m=ARCH[role][k]+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);
+      const m=ARCH[role][k]-(STYLES[style]?0:STAT_DROP)+(d[k]||0)+((role==='GK'||!GK_KEYS.includes(k))?(shift||0):0);   // (v229: with no style, his line's averages a point down)
       st[k]=Math.max(1,Math.min(10,Math.round((m+bellDev(R(),sp*EXH_SD/1.5))*2)/2)); }   // (v182: a bell curve, as wide as the even spread was)
     // (Handling came later than the rest: its spread from a hash of his other stats, not from R -- so every club's men
     // keep the stats they had)
     const hj=hashStr(STAT_KEYS_V162.map(k=>st[k]).join(','))/4294967296;
-    st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0):0)+bellDev(hj,EXH_SD))*2)/2));
+    st.gkHandling=Math.max(1,Math.min(10,Math.round((ARCH[role].gkHandling+(role==='GK'?(shift||0)-STAT_DROP:0)+bellDev(hj,EXH_SD))*2)/2));   // (v229: a keeper's a point down, as his other stats are)
     Object.assign(st,newStatsFor(st,role,style,true));   // (v163: Long passing and Final third composure, after: nobody's old stats move)
     return st;
   }
@@ -3637,6 +3645,11 @@
     for(const id in all){ const c=clubById(id); if(c&&all[id]&&all[id].sig==null){ all[id].sig=clubSig(c); n++; } }
     if(n) localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
   clubSidesStamp();
+  // (v229) a side kept from before: every man a point lower in every stat, once (st229), as every side made now is
+  function clubSidesV229(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{}; let n=0;
+    for(const id in all){ const o=all[id]; if(o&&!o.st229&&Array.isArray(o.squad)){ for(const e of o.squad) statsDrop229(e&&e.stats); o.st229=true; n++; } }
+    if(n) localStorage.setItem('ft_clubsq',JSON.stringify(all)); }catch(e){} }
+  clubSidesV229();
   // ============ THE STARS (v198) ============
   // Fourteen men made by hand on the Signature Players sheet, each as he was made there: his numbers on the sheet's 1
   // to 20 (STAR_KEYS' order; halved, the game's), his age, his position and the style he plays like (base: his habits,
@@ -3646,43 +3659,43 @@
   // Chelsea; Van Vander is Van Veers -- his key the one a v198 career knows him by. Mancala has Nagala Kone's numbers
   // till his own are made: they were one man in v198.) (v201: thirty-three, the sheet's every star; each keeps the key
   // he first went in under -- viking is Igor Hollinger, vander Van Veers. Names as on the sheet, the first and last
-  // words capitalised.)
+  // words capitalised.) (v229: every number two lower than the sheet had them -- STAT_DROP -- each rating two higher)
   const STAR_KEYS=['speed','acceleration','agility','stamina','strength','ballControl','dribbling','passAcc','longPass','composure','compFinal','crossing','heading',
     'slideTackle','tackle','interceptions','offIQ','defIQ','shotPower','curve','longShots','shotAcc','keeperSpd','gkReflex','gkReach','gkDiveRange','gkDistribution','gkHandling'];
   const STARS=[
-    {key:'petita',     name:'Messiah Petita',           ex:'CAT', career:'Catalunya Garnet',   pos:'ST', base:'falsenine',     age:24, sk:3, v:[17,20,20,14,12,20,20,19,18,20,19,16,9,6,8,7,20,6,16,18,17,20,7,7,7,7,9,7], sheet:'pmwbapqn91ra'},
-    {key:'star',       name:'Christian Star',           ex:'ROY', career:'Madrid Royale',      pos:'ST', base:'complete',      age:26, sk:4, v:[19,18,16,17,16,18,18,16,15,17,20,12,17,6,8,8,20,6,20,16,18,18,7,7,7,7,9,7], sheet:'pmwbatyor6e'},
-    {key:'magic',      name:'Luka Magic',               ex:'ROY', career:'Madrid Royale',      pos:'CM', base:'completemid',   age:27, sk:3, v:[15,16,16,19,13,18,16,19,17,18,16,17,11,13,15,15,17,16,13,17,13,14,7,7,7,7,9,7], sheet:'pmwbbscej38i'},
-    {key:'donnatello', name:'Michaelangelo Donnatello', ex:'PAR', career:'Paris Eiffel',       pos:'ST', base:'speedster',     age:27, sk:4, v:[20,19,18,14,12,18,18,14,12,17,19,12,12,8,6,6,19,6,17,17,17,17,7,7,7,7,9,7], sheet:'pmwbb3wfr3ws'},
-    {key:'cutinside',  name:'Le CutInside',             ex:'BOH', career:'Bohemia Munich',     pos:'W',  base:'invwinger',     age:28, sk:3, v:[17,19,17,16,12,16,18,16,13,16,17,10,16,8,9,8,18,8,15,18,19,16,7,7,7,7,9,7], sheet:'pmwbc37wo6rr'},
-    {key:'madreen',    name:'Paul Madreen',             ex:'RED', career:'Milan Red',          pos:'CB', base:'widecb',        age:27, sk:2, v:[16,16,15,17,18,14,12,16,13,15,8,15,19,19,20,20,13,20,14,10,7,10,7,7,7,7,9,7], sheet:'pmwbba9bz1um'},
-    {key:'mancala',    name:'Mancala',                  ex:'ROY', career:'Madrid Royale',      pos:'FB', base:'wingback',      age:25, sk:5, v:[17,15,15,17,11,18,16,15,14,13,15,17,8,12,10,11,17,14,13,17,14,12,7,7,7,7,9,7], sheet:'pmancala199'},
-    {key:'yemen',      name:'Yemen',                    ex:'CAT', career:'Catalunya Garnet',   pos:'W',  base:'invwinger',     age:26, sk:5, v:[18,19,16,14,10,18,19,17,17,16,17,16,9,6,7,7,17,10,15,17,18,17,7,7,7,7,9,7], sheet:'pmwbccd1z5qg'},
-    {key:'nesta',      name:'Anders Nesta',             ex:'CAT', career:'Catalunya Garnet',   pos:'CM', base:'completemid',   age:28, sk:3, v:[13,15,16,20,13,18,19,20,18,20,18,16,9,11,12,12,19,13,12,16,14,14,7,7,7,7,9,7], sheet:'pmwbc5jz53sh'},
-    {key:'vander',     name:'Van Veers',                ex:'LIV', career:'Livermoore',         pos:'CB', base:'ballplayer',    age:27, sk:1, v:[15,12,9,16,20,14,10,14,16,14,9,7,20,16,20,17,11,20,14,12,10,10,7,7,7,7,9,7], sheet:'pmwbc92b44jf'},
-    {key:'viking',     name:'Igor Hollinger',           ex:'MCI', career:'Mancunian City',     pos:'ST', base:'poacher',       age:22, sk:1, v:[20,15,11,14,19,15,12,14,10,14,19,12,18,7,8,6,19,10,20,13,15,18,7,7,7,7,9,7], sheet:'pmwbaytbv6af'},
-    {key:'bastion',    name:'Kyle da Bastion',          ex:'MCI', career:'Mancunian City',     pos:'CM', base:'mezzala',       age:27, sk:3, v:[16,14,13,18,14,18,17,18,19,16,18,19,12,8,12,11,18,12,18,20,17,15,7,7,7,7,9,7], sheet:'pmwbbob961ry'},
-    {key:'needemeyer', name:'Needemeyer',               ex:'PAR', career:'Paris Eiffel',       pos:'W',  base:'trickster',     age:25, sk:5, v:[17,18,18,13,9,19,20,18,15,18,18,15,7,5,6,7,18,5,16,16,17,16,7,7,7,7,9,7], sheet:'pmwbbf9q71st'},
-    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',    pos:'CM', base:'boxtobox',      age:27, sk:3, v:[16,14,15,19,13,18,16,16,15,15,16,13,15,14,16,16,17,14,17,14,15,16,7,7,7,7,9,7], sheet:'pmwbbzsvib2'},
-    {key:'kone',       name:'Nagala Kone',              ex:'CHE', career:'Chaelsae',           pos:'DM', base:'ballwinner',    age:25, sk:1, v:[15,19,18,20,16,12,11,13,11,13,9,10,12,19,20,20,13,20,10,9,7,8,8,8,8,8,10,8], sheet:'pmwbbu6fn5a7'},
-    {key:'lebowski',   name:'Bobby Lebowski',           ex:'BOH', career:'Bohemia Munich',     pos:'ST', base:'complete',      age:27, sk:3, v:[14,15,13,16,14,17,15,16,13,17,19,14,17,9,9,10,19,8,18,16,18,18,7,7,7,7,9,7], sheet:'pmwbizk7q5t3'},
-    {key:'hendrinks',  name:'Torrent Hendrinks',        ex:'ARS', career:'Arsenio',            pos:'ST', base:'speedster',     age:28, sk:4, v:[19,18,17,16,13,17,16,15,11,16,18,14,14,9,7,9,19,8,17,15,18,18,7,7,7,7,9,7], sheet:'pmwbj5l8q114'},
-    {key:'kane',       name:'Ryan Kane',                ex:'MUN', career:'Mancunian United',   pos:'CM', base:'covermid',      age:27, sk:2, v:[15,14,13,19,16,17,14,17,16,15,13,13,13,16,18,18,14,17,12,11,14,10,7,7,7,7,9,7], sheet:'pmwbja5a31n6'},
-    {key:'celeste',    name:'Mo Celeste',               ex:'LIV', career:'Livermoore',         pos:'W',  base:'invwinger',     age:27, sk:3, v:[17,19,18,16,14,18,19,17,15,17,19,15,12,7,8,8,17,8,15,16,18,17,7,7,7,7,9,7], sheet:'pmwbjf8kg3vj'},
-    {key:'haggerd',    name:'Alan Haggerd',             ex:'CHE', career:'Chaelsae',           pos:'WM', base:'wideplaymaker', age:25, sk:4, v:[17,18,18,15,12,18,18,15,12,18,16,15,10,4,5,7,17,5,15,15,16,16,7,7,7,7,9,7], sheet:'pmwbjk77q62q'},
-    {key:'hyuk',       name:'Soo-min Hyuk',             ex:'TOT', career:'Tot in Haem Spurns', pos:'WM', base:'mwinger',       age:27, sk:3, v:[18,16,15,18,13,15,16,17,12,15,17,15,11,10,11,9,16,10,16,16,17,15,7,7,7,7,9,7], sheet:'pmwbk7m2756k'},
-    {key:'sole',       name:'Peter Sole',               ex:'MUN', career:'Mancunian United',   pos:'DM', base:'deepcreator',   age:28, sk:3, v:[13,11,14,18,13,18,17,18,20,18,14,17,11,8,11,15,18,14,17,15,17,14,8,8,8,8,10,8], sheet:'pmwbkcuq66zg'},
-    {key:'worra',      name:'Paul Worra',               ex:'ARS', career:'Arsenio',            pos:'DM', base:'anchor',        age:27, sk:2, v:[14,14,12,19,17,16,13,16,16,14,11,11,16,16,18,20,14,17,17,10,15,12,8,8,8,8,10,8], sheet:'pmwbkrvhs1qp'},
-    {key:'greasy',     name:'Greasy Man',               ex:'ATH', career:'Madrid Athletics',   pos:'AM', base:'trequartista',  age:27, sk:3, v:[16,17,16,17,11,17,16,16,14,16,17,12,15,12,11,11,16,11,15,14,15,16,7,7,7,7,9,7], sheet:'pmwbkwn1h4cw'},
-    {key:'zeevata',    name:'Paolo Zeevata',            ex:'JUV', career:'Bergamont Juvenile', pos:'FB', base:'wingback',      age:26, sk:2, v:[16,15,16,19,14,17,13,17,15,13,10,18,14,15,16,17,14,16,13,15,9,7,7,7,7,7,9,7], sheet:'pmwblak0555k'},
-    {key:'audi',       name:'Yanet Audi',               ex:'DOR', career:'Dortmund Yellow',    pos:'ST', base:'speedster',     age:22, sk:3, v:[20,17,13,16,13,16,14,13,11,13,15,11,15,6,8,6,16,5,19,14,13,15,7,7,7,7,9,7], sheet:'pmwblgi8e36y'},
-    {key:'jolla',      name:'Paul Jolla',               ex:'JUV', career:'Bergamont Juvenile', pos:'ST', base:'falsenine',     age:21, sk:3, v:[15,18,17,14,12,17,15,16,14,15,15,12,12,6,8,7,15,6,15,15,16,13,7,7,7,7,9,7], sheet:'pmwbljwtbxc'},
-    {key:'lamb',       name:'Tomas Lamb',               ex:'BOH', career:'Bohemia Munich',     pos:'FB', base:'invfb',         age:27, sk:2, v:[15,17,19,19,9,17,15,15,15,17,11,17,8,19,17,19,16,19,9,15,11,9,7,7,7,7,9,7], sheet:'pmwbln68c3g7'},
-    {key:'ganga',      name:'Ruby Ganga',               ex:'RED', career:'Milan Red',          pos:'CM', base:'completemid',   age:29, sk:3, v:[16,16,15,18,16,18,16,18,17,16,16,17,17,15,15,14,17,14,18,16,16,15,7,7,7,7,9,7], sheet:'pmwblwdv16ff'},
-    {key:'maddsen',    name:'Lorry Maddsen',            ex:'CEN', career:'Milan Centrale',     pos:'CB', base:'libero',        age:24, sk:3, v:[15,18,15,18,15,17,14,18,18,15,11,13,14,16,17,18,16,17,18,12,17,13,7,7,7,7,9,7], sheet:'pmwbm1waz3b8'},
-    {key:'parlor',     name:'Lorena Parlor',            ex:'JUV', career:'Bergamont Juvenile', pos:'DM', base:'deepcreator',   age:29, sk:3, v:[13,14,14,15,9,18,17,18,19,18,17,16,10,7,9,13,17,8,14,18,14,11,7,7,7,7,9,7], sheet:'pmwbmhh552y1'},
-    {key:'zayn',       name:'Zacary Zayn',              ex:'ROY', career:'Madrid Royale',      pos:'AM', base:'playmaker',     age:26, sk:4, v:[15,18,17,18,13,20,18,18,19,18,16,18,14,6,7,11,20,8,18,19,18,14,7,7,7,7,9,7], sheet:'pmwbmmu2027w'},
-    {key:'javier',     name:'Hernan Javier',            ex:'CAT', career:'Catalunya Garnet',   pos:'CM', base:'completemid',   age:29, sk:3, v:[15,16,18,18,13,19,18,20,18,20,15,16,10,10,11,13,19,12,13,17,16,15,7,7,7,7,9,7], sheet:'pmwbmri214y4'}];
+    {key:'petita',     name:'Messiah Petita',           ex:'CAT', career:'Catalunya Garnet',   pos:'ST', base:'falsenine',     age:24, sk:3, v:[15,18,18,12,10,18,18,17,16,18,17,14,7,4,6,5,18,4,14,16,15,18,5,5,5,5,7,5], sheet:'pmwbapqn91ra'},
+    {key:'star',       name:'Christian Star',           ex:'ROY', career:'Madrid Royale',      pos:'ST', base:'complete',      age:26, sk:4, v:[17,16,14,15,14,16,16,14,13,15,18,10,15,4,6,6,18,4,18,14,16,16,5,5,5,5,7,5], sheet:'pmwbatyor6e'},
+    {key:'magic',      name:'Luka Magic',               ex:'ROY', career:'Madrid Royale',      pos:'CM', base:'completemid',   age:27, sk:3, v:[13,14,14,17,11,16,14,17,15,16,14,15,9,11,13,13,15,14,11,15,11,12,5,5,5,5,7,5], sheet:'pmwbbscej38i'},
+    {key:'donnatello', name:'Michaelangelo Donnatello', ex:'PAR', career:'Paris Eiffel',       pos:'ST', base:'speedster',     age:27, sk:4, v:[18,17,16,12,10,16,16,12,10,15,17,10,10,6,4,4,17,4,15,15,15,15,5,5,5,5,7,5], sheet:'pmwbb3wfr3ws'},
+    {key:'cutinside',  name:'Le CutInside',             ex:'BOH', career:'Bohemia Munich',     pos:'W',  base:'invwinger',     age:28, sk:3, v:[15,17,15,14,10,14,16,14,11,14,15,8,14,6,7,6,16,6,13,16,17,14,5,5,5,5,7,5], sheet:'pmwbc37wo6rr'},
+    {key:'madreen',    name:'Paul Madreen',             ex:'RED', career:'Milan Red',          pos:'CB', base:'widecb',        age:27, sk:2, v:[14,14,13,15,16,12,10,14,11,13,6,13,17,17,18,18,11,18,12,8,5,8,5,5,5,5,7,5], sheet:'pmwbba9bz1um'},
+    {key:'mancala',    name:'Mancala',                  ex:'ROY', career:'Madrid Royale',      pos:'FB', base:'wingback',      age:25, sk:5, v:[15,13,13,15,9,16,14,13,12,11,13,15,6,10,8,9,15,12,11,15,12,10,5,5,5,5,7,5], sheet:'pmancala199'},
+    {key:'yemen',      name:'Yemen',                    ex:'CAT', career:'Catalunya Garnet',   pos:'W',  base:'invwinger',     age:26, sk:5, v:[16,17,14,12,8,16,17,15,15,14,15,14,7,4,5,5,15,8,13,15,16,15,5,5,5,5,7,5], sheet:'pmwbccd1z5qg'},
+    {key:'nesta',      name:'Anders Nesta',             ex:'CAT', career:'Catalunya Garnet',   pos:'CM', base:'completemid',   age:28, sk:3, v:[11,13,14,18,11,16,17,18,16,18,16,14,7,9,10,10,17,11,10,14,12,12,5,5,5,5,7,5], sheet:'pmwbc5jz53sh'},
+    {key:'vander',     name:'Van Veers',                ex:'LIV', career:'Livermoore',         pos:'CB', base:'ballplayer',    age:27, sk:1, v:[13,10,7,14,18,12,8,12,14,12,7,5,18,14,18,15,9,18,12,10,8,8,5,5,5,5,7,5], sheet:'pmwbc92b44jf'},
+    {key:'viking',     name:'Igor Hollinger',           ex:'MCI', career:'Mancunian City',     pos:'ST', base:'poacher',       age:22, sk:1, v:[18,13,9,12,17,13,10,12,8,12,17,10,16,5,6,4,17,8,18,11,13,16,5,5,5,5,7,5], sheet:'pmwbaytbv6af'},
+    {key:'bastion',    name:'Kyle da Bastion',          ex:'MCI', career:'Mancunian City',     pos:'CM', base:'mezzala',       age:27, sk:3, v:[14,12,11,16,12,16,15,16,17,14,16,17,10,6,10,9,16,10,16,18,15,13,5,5,5,5,7,5], sheet:'pmwbbob961ry'},
+    {key:'needemeyer', name:'Needemeyer',               ex:'PAR', career:'Paris Eiffel',       pos:'W',  base:'trickster',     age:25, sk:5, v:[15,16,16,11,7,17,18,16,13,16,16,13,5,3,4,5,16,3,14,14,15,14,5,5,5,5,7,5], sheet:'pmwbbf9q71st'},
+    {key:'bowling',    name:'Jobe Bowling',             ex:'DOR', career:'Dortmund Yellow',    pos:'CM', base:'boxtobox',      age:27, sk:3, v:[14,12,13,17,11,16,14,14,13,13,14,11,13,12,14,14,15,12,15,12,13,14,5,5,5,5,7,5], sheet:'pmwbbzsvib2'},
+    {key:'kone',       name:'Nagala Kone',              ex:'CHE', career:'Chaelsae',           pos:'DM', base:'ballwinner',    age:25, sk:1, v:[13,17,16,18,14,10,9,11,9,11,7,8,10,17,18,18,11,18,8,7,5,6,6,6,6,6,8,6], sheet:'pmwbbu6fn5a7'},
+    {key:'lebowski',   name:'Bobby Lebowski',           ex:'BOH', career:'Bohemia Munich',     pos:'ST', base:'complete',      age:27, sk:3, v:[12,13,11,14,12,15,13,14,11,15,17,12,15,7,7,8,17,6,16,14,16,16,5,5,5,5,7,5], sheet:'pmwbizk7q5t3'},
+    {key:'hendrinks',  name:'Torrent Hendrinks',        ex:'ARS', career:'Arsenio',            pos:'ST', base:'speedster',     age:28, sk:4, v:[17,16,15,14,11,15,14,13,9,14,16,12,12,7,5,7,17,6,15,13,16,16,5,5,5,5,7,5], sheet:'pmwbj5l8q114'},
+    {key:'kane',       name:'Ryan Kane',                ex:'MUN', career:'Mancunian United',   pos:'CM', base:'covermid',      age:27, sk:2, v:[13,12,11,17,14,15,12,15,14,13,11,11,11,14,16,16,12,15,10,9,12,8,5,5,5,5,7,5], sheet:'pmwbja5a31n6'},
+    {key:'celeste',    name:'Mo Celeste',               ex:'LIV', career:'Livermoore',         pos:'W',  base:'invwinger',     age:27, sk:3, v:[15,17,16,14,12,16,17,15,13,15,17,13,10,5,6,6,15,6,13,14,16,15,5,5,5,5,7,5], sheet:'pmwbjf8kg3vj'},
+    {key:'haggerd',    name:'Alan Haggerd',             ex:'CHE', career:'Chaelsae',           pos:'WM', base:'wideplaymaker', age:25, sk:4, v:[15,16,16,13,10,16,16,13,10,16,14,13,8,2,3,5,15,3,13,13,14,14,5,5,5,5,7,5], sheet:'pmwbjk77q62q'},
+    {key:'hyuk',       name:'Soo-min Hyuk',             ex:'TOT', career:'Tot in Haem Spurns', pos:'WM', base:'mwinger',       age:27, sk:3, v:[16,14,13,16,11,13,14,15,10,13,15,13,9,8,9,7,14,8,14,14,15,13,5,5,5,5,7,5], sheet:'pmwbk7m2756k'},
+    {key:'sole',       name:'Peter Sole',               ex:'MUN', career:'Mancunian United',   pos:'DM', base:'deepcreator',   age:28, sk:3, v:[11,9,12,16,11,16,15,16,18,16,12,15,9,6,9,13,16,12,15,13,15,12,6,6,6,6,8,6], sheet:'pmwbkcuq66zg'},
+    {key:'worra',      name:'Paul Worra',               ex:'ARS', career:'Arsenio',            pos:'DM', base:'anchor',        age:27, sk:2, v:[12,12,10,17,15,14,11,14,14,12,9,9,14,14,16,18,12,15,15,8,13,10,6,6,6,6,8,6], sheet:'pmwbkrvhs1qp'},
+    {key:'greasy',     name:'Greasy Man',               ex:'ATH', career:'Madrid Athletics',   pos:'AM', base:'trequartista',  age:27, sk:3, v:[14,15,14,15,9,15,14,14,12,14,15,10,13,10,9,9,14,9,13,12,13,14,5,5,5,5,7,5], sheet:'pmwbkwn1h4cw'},
+    {key:'zeevata',    name:'Paolo Zeevata',            ex:'JUV', career:'Bergamont Juvenile', pos:'FB', base:'wingback',      age:26, sk:2, v:[14,13,14,17,12,15,11,15,13,11,8,16,12,13,14,15,12,14,11,13,7,5,5,5,5,5,7,5], sheet:'pmwblak0555k'},
+    {key:'audi',       name:'Yanet Audi',               ex:'DOR', career:'Dortmund Yellow',    pos:'ST', base:'speedster',     age:22, sk:3, v:[18,15,11,14,11,14,12,11,9,11,13,9,13,4,6,4,14,3,17,12,11,13,5,5,5,5,7,5], sheet:'pmwblgi8e36y'},
+    {key:'jolla',      name:'Paul Jolla',               ex:'JUV', career:'Bergamont Juvenile', pos:'ST', base:'falsenine',     age:21, sk:3, v:[13,16,15,12,10,15,13,14,12,13,13,10,10,4,6,5,13,4,13,13,14,11,5,5,5,5,7,5], sheet:'pmwbljwtbxc'},
+    {key:'lamb',       name:'Tomas Lamb',               ex:'BOH', career:'Bohemia Munich',     pos:'FB', base:'invfb',         age:27, sk:2, v:[13,15,17,17,7,15,13,13,13,15,9,15,6,17,15,17,14,17,7,13,9,7,5,5,5,5,7,5], sheet:'pmwbln68c3g7'},
+    {key:'ganga',      name:'Ruby Ganga',               ex:'RED', career:'Milan Red',          pos:'CM', base:'completemid',   age:29, sk:3, v:[14,14,13,16,14,16,14,16,15,14,14,15,15,13,13,12,15,12,16,14,14,13,5,5,5,5,7,5], sheet:'pmwblwdv16ff'},
+    {key:'maddsen',    name:'Lorry Maddsen',            ex:'CEN', career:'Milan Centrale',     pos:'CB', base:'libero',        age:24, sk:3, v:[13,16,13,16,13,15,12,16,16,13,9,11,12,14,15,16,14,15,16,10,15,11,5,5,5,5,7,5], sheet:'pmwbm1waz3b8'},
+    {key:'parlor',     name:'Lorena Parlor',            ex:'JUV', career:'Bergamont Juvenile', pos:'DM', base:'deepcreator',   age:29, sk:3, v:[11,12,12,13,7,16,15,16,17,16,15,14,8,5,7,11,15,6,12,16,12,9,5,5,5,5,7,5], sheet:'pmwbmhh552y1'},
+    {key:'zayn',       name:'Zacary Zayn',              ex:'ROY', career:'Madrid Royale',      pos:'AM', base:'playmaker',     age:26, sk:4, v:[13,16,15,16,11,18,16,16,17,16,14,16,12,4,5,9,18,6,16,17,16,12,5,5,5,5,7,5], sheet:'pmwbmmu2027w'},
+    {key:'javier',     name:'Hernan Javier',            ex:'CAT', career:'Catalunya Garnet',   pos:'CM', base:'completemid',   age:29, sk:3, v:[13,14,16,16,11,17,16,18,16,18,13,14,8,8,9,11,17,10,11,15,14,13,5,5,5,5,7,5], sheet:'pmwbmri214y4'}];
   const starStats=s=>{ const o={}; STAR_KEYS.forEach((k,i)=>{ o[k]=s.v[i]/2; }); return o; };
   const CLUB_SURNAMES=['Abbott','Acosta','Adair','Ahlberg','Aiken','Albu','Alder','Amadi','Ambrose','Anand','Arden','Arnaud','Ashby',
     'Avila','Bailey','Baird','Banda','Barros','Bastian','Beaumont','Bekele','Belov','Bergen','Bishop','Blake','Bonnet','Booth','Borg',
@@ -3841,7 +3854,7 @@
     const to={}; keep.forEach((i,k)=>to[i]=k); o.squad=keep.map(i=>o.squad[i]);
     li.gk=to[li.gk]; li.atk=(li.atk||[]).map(i=>to[i]); li.def=(li.def||li.atk).map(i=>to[i]); }
   function saveClubSides(){ try{ const all=JSON.parse(localStorage.getItem('ft_clubsq')||'{}')||{};
-    const side=(id,t,form,dform)=>{ const o={squad:SQUAD[t], lineup:LINEUP[t], form, dform, sig:clubSig(clubById(id))}, c=clubById(id)||{};
+    const side=(id,t,form,dform)=>{ const o={squad:SQUAD[t], lineup:LINEUP[t], form, dform, sig:clubSig(clubById(id)), st229:true}, c=clubById(id)||{};   // (v229: kept as the stats go now)
       if(TAC[t].style!==(c.style||'neutral')) o.style=TAC[t].style;                    // (kept only if it isn't the club's own)
       if(JSON.stringify(TI[t])!==JSON.stringify(tiDefault(TAC[t].style))) o.ti=Object.assign({},TI[t]);   // (and its team instructions, only if they aren't its style's)
       o.width=widthObj(TAC[t].width);   // (v205: always -- a side kept from before with none is BALANCED, as it was)
@@ -4031,10 +4044,11 @@
     }
   }
   function loadSquads(){
-    try{ const raw=localStorage.getItem('ft7_squads'); if(raw){ const o=JSON.parse(raw); if(o.__v===SQUAD_V&&o.SQUAD&&o.LINEUP){ SQUAD=o.SQUAD; LINEUP=o.LINEUP;
+    try{ const raw=localStorage.getItem('ft7_squads'); if(raw){ const o=JSON.parse(raw); if((o.__v===SQUAD_V||o.__v===1)&&o.SQUAD&&o.LINEUP){ SQUAD=o.SQUAD; LINEUP=o.LINEUP;
+      const was1=o.__v===1; if(was1) for(const t of ['G','R']) for(const e of SQUAD[t]||[]) statsDrop229(e&&e.stats);   // (v229: kept from before, a point lower in everything)
       for(const t of ['G','R']) if(SQUAD[t]&&SQUAD[t].length===OUTFIELD&&LINEUP[t]) squadAddCB(SQUAD[t],LINEUP[t],formFor(t,'atk'),formFor(t,'def'),null);   // (v124: one kept with seven outfielders: an eighth, at the back)
       const grew=['G','R'].some(t=>SQUAD[t]&&SQUAD[t].length<SQUAD_ROLES.length); normalizeSquads();
-      if(grew) localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP}));   // keep the man who came back
+      if(grew||was1) localStorage.setItem('ft7_squads',JSON.stringify({__v:SQUAD_V,SQUAD,LINEUP}));   // keep the man who came back (v229: and the side a point lower)
       return; } } }catch(e){}
     SQUAD={G:genSquad(),R:genSquad()}; LINEUP={G:defaultLineup(),R:defaultLineup()}; saveSquads();
   }
@@ -17137,7 +17151,7 @@
   // rating, one whose rate under a touch higher. (Till v182 a man was made from his line's usual level, his style's offsets
   // put on after and the rest of his game moved by however far they took him off the rating: a style rated well over his
   // line's had his main stats squeezed -- cwStyleStats, gone.)
-  function cwStatsForOVR(role,T,rng,style){ const S=style&&STYLES[style], d=(S&&S.d)||{}, base=k=>ARCH[role][k]+(d[k]||0), w=OVR_W[role],
+  function cwStatsForOVR(role,T,rng,style){ const S=style&&STYLES[style], d=(S&&S.d)||{}, base=k=>ARCH[role][k]-(S?0:STAT_DROP)+(d[k]||0), w=OVR_W[role],   // (v229: with no style, his line's averages a point down)
       B=S&&STYLE_REF[style]!=null?STYLE_REF[style]:OVR_REF[role][0], delta=T/10-B, s={}, main=ovrMainBut(role), lv=k=>(w[k]||0)>=2?delta:delta*0.55;   // (B: the make's rating, in stat points; v144: his pace not moved to make it)
     for(const k of STAT_KEYS_V162){ let v=base(k)+lv(k)+bellDev(rng(),makeSdOf(style,role,k)); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v193: as wide as his style is good at it -- MAKE_SD_OF)
     for(const k of NEW_STAT_KEYS){ const par=k==='longPass'?'passAcc':'composure', sd=makeSdOf(style,role,k), sp=makeSdOf(style,role,par), own=Math.sqrt(Math.max(0,sd*sd-0.36*sp*sp));   // (its own, so with 0.6 of its parent's on top it's sd in all)
@@ -17165,7 +17179,7 @@
   // Continental Champions Cup was the Champions League; the older notes here still use the old names)
   const MG_LEAGUE={1:'Division 2',2:'Division 1',3:'National Division',4:'Premier Division'};
   const lgThe=t=>(t>=3?'the ':'')+MG_LEAGUE[t];   // (v196: a league in a sentence -- "the Premier Division", "Division 2")
-  const MG_LEVEL={1:55,2:63,3:71,4:79};                  // a mid-table side's rating in each league
+  const MG_LEVEL={1:57,2:65,3:73,4:81};                  // a mid-table side's rating in each league (v229: two up -- it was 55, 63, 71 and 79: STAT_DROP)
   const MG_PRIZE={1:500000,2:3000000,3:15000000,4:60000000};   // for winning the league (less the lower you finish; v149: the real game's money -- it was 12,000, 45,000, 180,000 and 1.5M)
   // ...and finishing lower: the share of it by where you finish -- falling away with the 1.6 power of the places from the
   // foot, but never under a tenth of it (v170: 14th had $7,300 in League 2, under two days' wages for a season's work)
@@ -17283,13 +17297,13 @@
   // a man as first seen: his attributes from his rating (as they always were), his ceilings, his hidden values
   function devInit(p){ if(!p||p.at) return; const st=mgDeriveStats(p);
     p.at=devPack(st); p.cl=devPack(devCeil(p,st)); p.bs=p.at; p.pg=''; p.mo=0; hvOf(p);
-    if(ovrStyleKey(p.role,p.style)) p.ovr=clamp(cwOverall(p.role,st,p.style),30,95);   // (v202: made by his line's weights and nudged to his rating by his playstyle's -- this is it, should the nudging have fallen short)
-    p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)); }
+    if(ovrStyleKey(p.role,p.style)) p.ovr=clamp(cwOverall(p.role,st,p.style),32,97);   // (v202: made by his line's weights and nudged to his rating by his playstyle's -- this is it, should the nudging have fallen short)
+    p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),32,99)); }
   // his rating set by hand (the board's signings, a test): every attribute that counts moved till it rates that
-  function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),30,95);
+  function mgSetOvr(p,v){ devInit(p); const st=devUnpack(p.at), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((a,b)=>w[b]-w[a]); v=clamp(Math.round(v),32,97);
     for(let it=0; it<400; it++){ const cur=cwOverall(p.role,st,p.style); if(cur===v) break; const up=cur<v, k=ks[it%ks.length]; st[k]=clamp(st[k]+(up?0.5:-0.5),1,10); }
     const cl=devUnpack(p.cl), bs=devUnpack(p.bs||p.at); for(const k of DEV_KEYS){ cl[k]=Math.max(cl[k],st[k]); bs[k]=Math.max(bs[k],st[k]); }
-    p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99)); }
+    p.at=devPack(st); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),32,97); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),32,99)); }
   // the age curves: how much of his growth an attribute still has in it, and what age takes off it each tick (in half points)
   function devAgeGrow(g,a){ if(g==='phy') return a<=21?1:a<=23?0.75:a<=26?0.35:a<=28?0.1:0;
     if(g==='tec') return a<=21?1:a<=24?0.8:a<=27?0.4:a<=30?0.15:a<=32?0.05:0;
@@ -17339,7 +17353,7 @@
     p.ld=Math.round((pg.reduce((a,v)=>a+v,0)+DEV_KEYS.reduce((a,k)=>a+st[k]*2,0)-pg0)*100)/100;   // (how he came on, these weeks: for the coaches' word)
     p.at=devPack(st); p.bs=devPack(bs); p.pg=devPackPg(pg); p.mw=0; p.wg=0; p.wb=0;
     if(p.fm!=null) p.fm=Math.round((FORM_BASE+(p.fm-FORM_BASE)*0.85)*100)/100;   // (form fades back without games to keep it)
-    const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99));
+    const was=p.ovr; p.ovr=clamp(cwOverall(p.role,st,p.style),32,97); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),32,99));
     { const dx=devX(p.role,st,pg,p.style)-x0; p.dv=Math.round((p.dv==null?dx:0.5*p.dv+0.5*dx)*100)/100; }   // (v152: WHICH WAY HE'S GOING)
     return p.ovr-was; }
   // WHICH WAY HE'S GOING (v152): every development tick (three weeks) his rating to the hundredth (devX) against the
@@ -17725,7 +17739,7 @@
   // losing to a stronger side was nearly free, a tenth of one)
   const DEFEAT_FLOOR=0.35;
   function morAfterGame(d,mine){ if(!mine) return;
-    const exp=clamp(0.5+(mgStrength(d,d.clubId)-(mine.oppOvr||60))*0.03,0.1,0.9), got=mine.win?1:mine.draw?0.5:0;
+    const exp=clamp(0.5+(mgStrength(d,d.clubId)-(mine.oppOvr||62))*0.03,0.1,0.9), got=mine.win?1:mine.draw?0.5:0;
     let dt=(mine.win||mine.draw?got-exp:Math.min(-exp,-DEFEAT_FLOOR))*1.4*(mine.derby?DERBY_X:1); dt*=dt<0?tmSwing(d):0.9+0.1*tmSwing(d);
     d.tm=clamp(Math.round(((d.tm??MOR0)+dt)*100)/100,1,10); }
   // EVERY MONDAY, each of yours: the week's minutes against what he expects (the better and the more ambitious expect
@@ -17790,7 +17804,7 @@
     p.inj={k:kind,d:days}; delete p.injB;
     if((kind==='tear'||kind==='serious')&&(p.age||25)>=28){ devInit(p); const st=devUnpack(p.at), bs=devUnpack(p.bs||p.at), legs=['speed','acceleration','agility','stamina'];
       for(const k of legs.slice(0,kind==='serious'?3:1)){ st[k]=Math.max(1,st[k]-0.5); bs[k]=Math.min(bs[k],st[k]); }
-      p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),30,95); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
+      p.at=devPack(st); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,st,p.style),32,97); p.decl=Math.min(0.12,(p.decl||0)+(kind==='serious'?0.06:0.03)); }
     if(!c){ mgNews(d,p.name+' is out for '+injWeeks(days)+' ('+INJ_NAME[kind]+(how?', '+how:'')+').'); INJ_NOW.push({name:p.name,num:p.num,k:kind,d:days}); if(d.roster.includes(p)) wkLog(d).hurt.push({pid:p.id,k:kind,d:days,how:how||''});
       // OUT OF THE SIDE (v116): one of your nine hurt is switched out there and then -- the fittest best fit off the bench
       // in his place (mgFitXI), so the Selection tab's never left with him in it
@@ -17811,7 +17825,7 @@
   // A MAN'S WAGE (v149: the real game's money): $2,000 a week at a rating of 55, a rating point 16% more -- about $1,100 at
   // 51, $8,800 at 65, $38,000 at 75, $69,000 at 79, $166,000 at 85, $348,000 at 90, $627,000 at 94. It was 64 x 10^(0.054 x
   // (rating - 48)) dollars: $150 at 55, $3,020 at 79 (WAGE_V148, for a career kept from before)
-  function mgWage(ovr){ return Math.max(200, Math.round(2000*Math.pow(10,0.064*(ovr-55))/10)*10); }
+  function mgWage(ovr){ return Math.max(200, Math.round(2000*Math.pow(10,0.064*(ovr-57))/10)*10); }   // (v229: every rating two higher, the money where it was for a man of his standing -- $2,000 at 57, $69,000 at 81)
   const WAGE_V148=ovr=>Math.max(30, Math.round(64*Math.pow(10,0.054*(ovr-48))/10)*10);
   const WAGE_OLD=ovr=>Math.max(30, Math.round(60*Math.pow(10,0.042*(ovr-48))/10)*10);
   // seasons left on his deal, this one included (0: out of contract)
@@ -17832,7 +17846,7 @@
   // quarter before). It was $2,000 at 55 and each point a third more: a striker of 79 $2.7M, of 90 $34M
   const VAL_POS={STK:[1.1,200e6], WNG:[1.1,200e6], WM:[1.1,200e6], AM:[1.05,190e6], CM:[1,180e6], DM:[0.68,120e6], CB:[0.55,100e6], FB:[0.45,80e6], GK:[0.38,70e6]};
   const valPos=p=>VAL_POS[natPos(p)]||(p.role==='ATT'?VAL_POS.STK:p.role==='DEF'?VAL_POS.CB:p.role==='GK'?VAL_POS.GK:VAL_POS.CM);
-  const valCurve=ovr=>150000*Math.pow(10,0.086*(ovr-55));
+  const valCurve=ovr=>150000*Math.pow(10,0.086*(ovr-57));   // (v229: two up with the ratings -- $17M at 81)
   const valCap=p=>valPos(p)[1];
   function mgValue(d,p){ const age=p.age||25;
     const ageF=age<=21?1.35:age<=24?1.2:age<=28?1:age<=31?0.65:age<=33?0.3:0.15;
@@ -17846,7 +17860,7 @@
   function mgLevelTier(ovr){ return ovr>=MG_LEVEL[4]-4?4:ovr>=MG_LEVEL[3]-4?3:ovr>=MG_LEVEL[2]-4?2:1; }
   // the growth a young man has in him, on average just what he's short of a man of his level in his prime (see
   // mgAgeOvr): some more, some less, so that a world's generations peak where the one before did
-  function mgPotFor(age,ovr){ const g=age<=18?4+Math.random()*12:age<=21?2+Math.random()*8:age<=24?Math.random()*5:age<=27?Math.random()*2:0; return Math.min(94,Math.round(ovr+g)); }
+  function mgPotFor(age,ovr){ const g=age<=18?4+Math.random()*12:age<=21?2+Math.random()*8:age<=24?Math.random()*5:age<=27?Math.random()*2:0; return Math.min(96,Math.round(ovr+g)); }   // (v229: 94 before)
   // a man made for a level (his prime's): the young that much short of it (they grow into it), the old past their best
   function mgAgeOvr(lvl,age){ return lvl-(age<=18?10:age<=21?6:age<=24?2.5:age<=29?0:age===30?1:age===31?2:age===32?3:age===33?4.5:6); }
   // a man's age as the world is made: about one in five a youngster of 17 to 22 (v110: three in ten of them in all, with
@@ -17854,10 +17868,10 @@
   function mgAge(){ return Math.random()<0.22?17+Math.floor(Math.random()*6):18+Math.round((Math.random()+Math.random()+Math.random())/3*16); }
   function mgNewPlayer(d,role,ovr,age,o){ o=o||{};
     const sub=o.sub||cwSubRole(role,Math.random);
-    const p={ id:d.world.nextId++, name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), role, subRole:sub, age, ovr:clamp(Math.round(ovr),30,95), pot:0, wage:0,
+    const p={ id:d.world.nextId++, name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), role, subRole:sub, age, ovr:clamp(Math.round(ovr),32,97), pot:0, wage:0,
               until:o.until!=null?o.until:d.season+Math.floor(Math.random()*4), seed:(Math.random()*4294967296)>>>0, num:0, apps:0, goals:0 };
     p.style=styleForSub(sub,Math.random());                        // (his archetype, by how common each is in his position -- a keeper's too: v118)
-    p.pot=o.pot!=null?Math.min(94,Math.max(p.ovr,Math.round(o.pot))):mgPotFor(age,p.ovr);
+    p.pot=o.pot!=null?Math.min(96,Math.max(p.ovr,Math.round(o.pot))):mgPotFor(age,p.ovr);
     const wf=0.85+Math.random()*0.3;
     devInit(p);                                                    // (his attributes, ceilings and hidden values: his own from now)
     p.wage=mgRound(mgWage(p.ovr)*wf);                              // (v202: on the rating his stats make him, by his playstyle)
@@ -18482,10 +18496,10 @@
     if(!S.phone&&!lvOf(d,'market')&&mgWindowOpen(d)) S.phone=1;
     if(!S.vet&&d.md>=2){ const role=mgPick(['DEF','DEF','MID','MID','MID','ATT','ATT']),   // (v109: never a keeper)
          from=mgPick(d.div[4].map(id=>d.world.clubs[id]).filter(Boolean));
-      const p=mgNewPlayer(d,role,70+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});
+      const p=mgNewPlayer(d,role,72+Math.floor(Math.random()*10),33+Math.floor(Math.random()*3),{until:d.season+1});   // (v229: 72 to 81, two up with the ratings)
       p.wage=mgRound(mgWage(p.ovr)*0.3); p.fame=Math.round(15*(POP_STAGE[d.tier]||0.25)*10)/10; p.hometown=true; mgRosterAdd(d,p); p.pop=Math.round(popTarget(d,p,d.tier,true)); S.vet=1; S.vetId=p.id; S.vetFrom=from?from.name:'';   // (the hometown hero: they know him already)
       mgNews(d,p.name+' ('+p.age+'), once of '+(S.vetFrom||'the top flight')+', comes home to '+d.clubName+' on a fraction of his wage.'); }
-    if(!S.kid&&d.md>=5){ S.kid=1; S.kidAsk={name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), ovr:60+Math.floor(Math.random()*10), pot:85+Math.floor(Math.random()*6)};
+    if(!S.kid&&d.md>=5){ S.kid=1; S.kidAsk={name:mgPick(MG_FIRST)+' '+mgPick(MG_LAST), ovr:62+Math.floor(Math.random()*10), pot:87+Math.floor(Math.random()*6)};   // (v229: two up with the ratings)
       mgNews(d,'A 16-year-old, '+S.kidAsk.name+', has asked to join '+d.clubName+'.'); } }
   // the wonderkid signs, where (sub) and how (style) you chose: a three-season youth deal, half his wage
   function mgSignKid(d,sub,style){ const S=d.story, A=S&&S.kidAsk; if(!A||S.kid!==1) return 'He has gone.';
@@ -18493,7 +18507,7 @@
     p.name=A.name; if(STYLES[style]&&STYLES[style].sub===sub&&p.style!==style){ p.style=style; delete p.at; p.pot=A.pot; devInit(p); }   // (made again in his style: a keeper's too, v118)
     if(p.pot<A.pot){ const cl=devUnpack(p.cl), w=OVR_W[p.role]||OVR_W.MID, ks=ovrMain(p.role).sort((x,y)=>w[y]-w[x]);   // (his ceilings, rounded to half points, can come
       for(let i=0;i<300&&cwOverall(p.role,cl,p.style)<A.pot;i++){ const k=ks[i%ks.length]; if(cl[k]<10) cl[k]+=0.5; }         //  out a point or two short of what he was told: lifted to it)
-      p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),30,99)); }
+      p.cl=devPack(cl); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl,p.style),32,99)); }
     p.wage=mgRound(mgWage(p.ovr)*0.5); p.fame=Math.round(8*(POP_STAGE[d.tier]||0.25)*10)/10; mgRosterAdd(d,p); S.kid=2; S.kidId=p.id;   // (the town's heard about him)
     mgNews(d,A.name+' (16) signs for '+d.clubName+': '+((STYLES[p.style]||{}).name||(role==='GK'?'a keeper':sub))+', rated '+ovrShownOf(p)+', a ceiling of '+rangeShown(kidPot(A))+'.');
     return null; }
@@ -18988,7 +19002,7 @@
   function mgStarsIn(d){ const W=d.world; if(!W||!W.clubs) return; W.stars=W.stars||{};
     for(const s of STARS){ if(W.stars[s.key]) continue; const c=Object.values(W.clubs).find(x=>x.name===s.career&&x.id!==d.clubId); if(!c) continue;
       mgStarPut(c,mgStarMake(d,s)); W.stars[s.key]=1; } }
-  function mgStarMake(d,s){ const st=starStats(s), S=STYLES[s.base], ovr=clamp(cwOverall(S.role,st,s.base),30,99);
+  function mgStarMake(d,s){ const st=starStats(s), S=STYLES[s.base], ovr=clamp(cwOverall(S.role,st,s.base),32,99);
     const p=mgNewPlayer(d,S.role,ovr,s.age,{sub:S.sub,pot:ovr});
     Object.assign(p,{name:s.name, style:s.base, subRole:S.sub, star:s.key, uniq:true, sp:s.sk, starSig:starSig(s), starAge:s.age}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
     return p; }
@@ -19006,7 +19020,7 @@
       const sig=starSig(s);
       if(p.starSig==null){ const was=STAR_V200[s.key]; p.starSig=was?was[0]:sig; p.starAge=was?was[1]:s.age; p.sp=s.sk; if(p.starSig===sig) continue; }   // (from before v200: as v200 had him, then whatever's changed)
       if(p.starSig===sig) continue;
-      const S=STYLES[s.base], st=starStats(s), ovr=clamp(cwOverall(S.role,st,s.base),30,99);
+      const S=STYLES[s.base], st=starStats(s), ovr=clamp(cwOverall(S.role,st,s.base),32,99);
       Object.assign(p,{name:s.name, style:s.base, role:S.role, subRole:S.sub, uniq:true, sp:s.sk}); p.at=devPack(st); p.cl=p.at; p.bs=p.at; p.ovr=ovr; p.pot=ovr;
       if(p.starAge!=null&&s.age!==p.starAge) p.age=Math.max(16,p.age+s.age-p.starAge); p.starAge=s.age; p.starSig=sig;
       const mine=L===d.roster||L===d.youth, home=clubs.find(c=>c.players===L), to=clubs.find(c=>c.name===s.career&&c.id!==d.clubId);
@@ -19176,7 +19190,7 @@
       p.until=d.season; p.wage=mgRound(mgWage(p.ovr)); mgRosterAdd(d,p);
       mgNews(d,'The board signed '+p.name+' ('+p.role+', '+ovrShownOf(p)+') on a one-year deal to make up the numbers.'); } }
   function mgYouthIntake(d){ const L=Math.max(1,lvOf(d,'academy')), n=2+L; d.youth=d.youth||[]; let got=0;
-    for(let i=0;i<n&&d.youth.length<8;i++,got++){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), ovr=36+L*3+Math.random()*9+(d.tier-1)*2;
+    for(let i=0;i<n&&d.youth.length<8;i++,got++){ const role=mgPick(['GK','DEF','DEF','MID','MID','MID','ATT','ATT']), ovr=38+L*3+Math.random()*9+(d.tier-1)*2;   // (v229: two up with the ratings)
       const p=mgNewPlayer(d,role,ovr,16+Math.floor(Math.random()*2),{pot:ovr+14+Math.random()*(10+L*5),until:0}); p.wage=0; d.youth.push(p); }
     if(got) mgNews(d,got+' youngster'+(got>1?'s have':' has')+' joined the academy.'); }
   // the new season: clubs change leagues, the computer's squads and the free agents are refreshed, the academy takes
@@ -19268,7 +19282,7 @@
   // that let him go did, and asks it -- up to two and a half times his wage at 21 and under, sliding to his wage at 29
   // -- and a fee to sign of up to twelve weeks of that, the younger he is the more. And a man who'd walk into most sides
   // in your league knows it (v178): FREE_OVER weeks of his wage to sign for every point he's over its mid-table less
-  // three (MG_LEVEL: over 52 in League 2 -- a man of 58, 12 weeks; one of 62, 20; FREE_OVER_MAX at most), at any age, on
+  // three (MG_LEVEL: over 54 in League 2 -- a man of 60, 12 weeks; one of 64, 20; FREE_OVER_MAX at most; v229: two up), at any age, on
   // top of the young man's -- a released man of 62 is a signing, not a gift. -> {wage, fee}
   const FREE_OVER=2, FREE_OVER_MAX=30;
   function mgFreeAsk(d,p){ const young=clamp((29-(p.age||25))/8,0,1), wage=mgRound(mgDemand(d,p,false)*(1+1.5*young)), over=Math.max(0,(p.ovr||0)-(MG_LEVEL[d.tier||1]-3));
@@ -19516,7 +19530,7 @@
   function knAge(d){ const K=d.kn||{}; for(const id in K){ K[id]=Math.round((K[id]-1)*100)/100; if(K[id]<=0) delete K[id]; } d.kn=K; }   // (the season's end)
   const knTag=(d,p)=>{ const k=knOf(d,p); return k>=1?'<span class="mgTag on">SCOUTED'+(k>=3?' ★★':k>=2?' ★':'')+'</span>':''; };
   function mgRange(d,p){ const w=Math.max(1,Math.round(MG_SCOUT_W[Math.max(1,lvOf(d,'scouting'))]*(1-Math.min(1,knOf(d,p))))), off=(Math.imul(p.id+d.season*7919,2654435761)>>>0)%(2*w+1);
-    const lo=clamp(p.ovr-off,30,95); return [lo,lo+2*w]; }
+    const lo=clamp(p.ovr-off,32,97); return [lo,lo+2*w]; }
   function mgScoutCost(d,p,club){ return MG_SCOUT_COST[club?club.tier:mgLevelTier(p.ovr)]; }
   function mgScout(d,pid){ const L=lvOf(d,'scouting'); if(!L) return 'Build the scouts’ house first.'; const f=mgFind(d,pid); if(!f) return 'He has gone.';
     const k=knOf(d,f.p); if(k>=L) return L<3?'A bigger scouts’ house would find out more.':'Your scouts know all there is.';
@@ -19633,10 +19647,10 @@
   // well known as the Premium League's, 70 and more, and the best men in the game, abroad, hardly at all.) What it's
   // worth to the club: popRel.
   const POP_STAGE={1:0.25,2:0.4,3:0.65,4:1};
-  const popQ=ovr=>99*Math.pow(clamp(((ovr||0)-40)/55,0,1),2.2);
+  const popQ=ovr=>99*Math.pow(clamp(((ovr||0)-42)/55,0,1),2.2);   // (v229: two up with the ratings)
   const popCL=(d,id)=>{ const C=d.cup&&d.cup.cl; return !!(C&&C.in&&id!=null&&C.in.includes(id)); };   // (a side in this season's Continental Champions Cup)
   function popStage(d,tier,id){ return (POP_STAGE[tier||d.tier||1]||0.25)*(popCL(d,id)?1.3:1); }
-  function popTarget(d,p,tier,mine,clubId){ const T=tier||d.tier||1, lvl=MG_LEVEL[T]||55, n=p.rn||0, back=p.role==='GK'||p.role==='DEF', id=clubId!=null?clubId:mine?d.clubId:null;
+  function popTarget(d,p,tier,mine,clubId){ const T=tier||d.tier||1, lvl=MG_LEVEL[T]||57, n=p.rn||0, back=p.role==='GK'||p.role==='DEF', id=clubId!=null?clubId:mine?d.clubId:null;
     let did=Math.min(15,(p.goals||0)*1.5)+Math.min(6,(p.as||0)*0.6)+(back?Math.min(8,(p.cs||0)*0.8):0)
       +(n>=3?clamp(((p.rs||0)/n-6.5)*12,-8,12):0)+(p.hg?6:0)+((p.age||25)<=21&&(p.ovr||0)>=lvl-2?4:0);
     if(mine) did+=Math.min(12,Math.max(0,(d.season||1)-(p.since??d.season))*3)+(d.cap===p.id?5:0);
@@ -19852,7 +19866,9 @@
   // league); the computer clubs' money as their league's budgets went; the sponsors' fees as the firms' went; your seat
   // prices as the going rate went; this week's papers likewise
   function econV149(d){ const W=d.world||{}, clubs=Object.values(W.clubs||{}), all=[...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...clubs.flatMap(c=>c.players||[])];
-    const wUp=(w,o)=>mgRound(w*mgWage(o)/WAGE_V148(o)), vK=p=>p?mgValue(d,p)/valueV148(d,p):30, vUp=(v,p)=>mgRound(v*vK(p)), find=id=>{ const f=mgFind(d,id); return f&&f.p; };
+    // (v229: this runs after the career's men are two up on their ratings -- mgMigrate -- so the old money's read at
+    // what each was rated then, two down)
+    const wUp=(w,o)=>mgRound(w*mgWage(o)/WAGE_V148(o-2)), vK=p=>p?mgValue(d,p)/valueV148(d,{...p,ovr:p.ovr-2,pot:p.pot!=null?p.pot-2:p.pot}):30, vUp=(v,p)=>mgRound(v*vK(p)), find=id=>{ const f=mgFind(d,id); return f&&f.p; };
     for(const p of all){ if(!p) continue;
       if(p.wage>0) p.wage=wUp(p.wage,p.ovr); if(p.loan&&p.loan.wage>0) p.loan.wage=wUp(p.loan.wage,p.ovr);
       if(p.cAsk&&p.cAsk.wage>0) p.cAsk.wage=wUp(p.cAsk.wage,p.ovr); if(p.cTalk&&p.cTalk.cnt>0) p.cTalk.cnt=wUp(p.cTalk.cnt,p.ovr);
@@ -20053,7 +20069,7 @@
     const pr=seatPriceRatio(d);                    // (v108: the stands' prices against their going rates, by their seats)
     if(pr<1) d.loyalty+=baseL*0.02*(1-pr);
     else d.loyalty-=baseL*0.025*(pr-1)*(lost?2:1);
-    const oppOvr=mine.oppOvr||60, comp=mine.competition||'league';
+    const oppOvr=mine.oppOvr||62, comp=mine.competition||'league';
     const weight=(comp==='cup'?2.5:1)*(1+Math.max(0,(oppOvr-mgStrength(d,d.clubId)))/30);
     if(weight>1.05) d.loyalty+=baseL*0.012*(weight-1)*(won?1.4:1);
     d.loyalty=Math.max(0,Math.round(d.loyalty));
@@ -20062,9 +20078,9 @@
   // stadium's figure is what comes in -- and a cup tie brings the cameras: 80% of a week's on top, more against a side
   // better than yours (it was paid for league games too: a few dollars on the old money, $280,000 a season on the new)
   function broadcastGameBump(d, mine){ if(!mine||(mine.competition||'league')==='league') return 0; const base=broadcastFor(d);
-    const oppOvr=mine.oppOvr||60, comp=mine.competition||'league';
+    const oppOvr=mine.oppOvr||62, comp=mine.competition||'league';
     let oppFac=1+Math.max(0,(oppOvr-mgStrength(d,d.clubId)))/40, compFac=(comp==='cup'?1.8:1.0);
-    if(comp==='cup'&&oppOvr>=88) compFac*=2.2;
+    if(comp==='cup'&&oppOvr>=90) compFac*=2.2;   // (v229: 90, two up with the ratings -- 88 before)
     return Math.round(base*(oppFac*compFac-1)); }
   function ordinal(n){ const s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
   // ===== YOUR LINEUP & TACTICS (career) ======================================================
@@ -21010,9 +21026,9 @@
         ['A MAN',kPrice(MG_SCOUT_COST[1])+'+','Scouting one man costs '+money(MG_SCOUT_COST[1])+' in '+lgThe(1)+', up to '+money(MG_SCOUT_COST[4])+' in '+lgThe(4)+'.']],
       lvl:k=>'unscouted ratings within '+MG_SCOUT_W[k]*2+' points; a report at best '+SCOUT_TELLS[k]},
     academy:{name:'ACADEMY', verb:'BUILD IT UP', what:BLD_WHAT.academy,
-      tiles:k=>[['INTAKE',String(2+k),(2+k)+' youngsters join every summer (eight at most in the academy).'],['RATED',(36+k*3)+'–'+(45+k*3),'They arrive rated '+(36+k*3)+' to '+(45+k*3)+' (2 more a league up).'],
+      tiles:k=>[['INTAKE',String(2+k),(2+k)+' youngsters join every summer (eight at most in the academy).'],['RATED',(38+k*3)+'–'+(47+k*3),'They arrive rated '+(38+k*3)+' to '+(47+k*3)+' (2 more a league up).'],
         ['CEILING','+14–'+(24+k*5),'Room to grow: their potential 14 to '+(24+k*5)+' over their rating.']],
-      lvl:k=>'an intake of '+(2+k)+', rated '+(36+k*3)+' to '+(45+k*3)}};
+      lvl:k=>'an intake of '+(2+k)+', rated '+(38+k*3)+' to '+(47+k*3)}};
   // ---- the training pitch's level: what each brings ----
   const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
   // (v130: every shape, style and team instruction from the start -- a level trains everyone a little better, no more)
@@ -21067,7 +21083,7 @@
   // what he'd ask: from his true rating once scouted, else (v151) from the rating his wage now says he has -- what a club
   // pays a man is no secret -- within 15% of what he signs for nineteen times in twenty. From the middle of his range, as
   // it was, about one time in five: off by up to twice either way, as unscouted ratings are
-  const ovrOfWage=w=>55+Math.log10(Math.max(200,w)/2000)/0.064, mgSeenOvr=(d,p)=>p.wage>0?ovrOfWage(p.wage):mgSortOvr(d,p);
+  const ovrOfWage=w=>57+Math.log10(Math.max(200,w)/2000)/0.064, mgSeenOvr=(d,p)=>p.wage>0?ovrOfWage(p.wage):mgSortOvr(d,p);   // (v229: 57, as mgWage has it -- two up with the ratings)
   function mgDemandSeen(d,p,moving){ return mgKnown(d,p)?mgDemand(d,p,moving):mgDemand(d,{ovr:mgSeenOvr(d,p),age:p.age},moving); }
   function mgFreeAskSeen(d,p){ return mgKnown(d,p)?mgFreeAsk(d,p):mgFreeAsk(d,{ovr:mgSeenOvr(d,p),age:p.age}); }
   function mgTooBig(d,p){ return mgLevelTier(p.ovr)-d.tier>=2?'<span class="mgTag bad">WON’T COME</span>':''; }
@@ -21641,8 +21657,16 @@
       for(const p of [...(d.roster||[]),...(d.world.free||[]),...(d.youth||[]),...Object.values(d.world.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at||p.at.length>=28) continue;
         const up=str=>{ const o=devUnpack(str); Object.assign(o,newStatsFor(o,p.role,p.style,false)); return o; }, at=up(p.at), cl=up(p.cl||p.at), bs=up(p.bs||p.at);
         for(const k of NEW_STAT_KEYS){ cl[k]=Math.max(cl[k],at[k]); bs[k]=Math.max(bs[k],at[k]); }
-        p.at=devPack(at); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,at),30,99); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),30,99)); }
+        p.at=devPack(at); p.cl=devPack(cl); p.bs=devPack(bs); p.ovr=clamp(cwOverall(p.role,at),32,99); p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,cl),32,99)); }
       d.st163=true; }
+    if(!d.st229&&d.world){   // (v229, once, before anything rates a man: EVERY STAT A POINT LOWER -- his stats, his best and his ceiling -- and a man not made yet two up on his rating, so he's made on the new scale; he's rated again below, two higher. What you signed a free agent at, and the youngster asking for a trial, two up too)
+      const all=[...(d.roster||[]),...(d.world.free||[]),...(d.youth||[]),...Object.values(d.world.clubs||{}).flatMap(c=>c.players||[])];
+      for(const p of all){ if(!p) continue;
+        if(p.at){ for(const f of ['at','cl','bs']) if(p[f]){ const o=devUnpack(p[f]); for(const k in o) o[k]=clamp(o[k]-STAT_DROP,1,10); p[f]=devPack(o); } }
+        else { if(p.ovr!=null) p.ovr+=2; if(p.pot!=null) p.pot+=2; }
+        if(p.fa!=null) p.fa+=2; }
+      const K=d.story&&d.story.kidAsk; if(K){ if(K.ovr!=null) K.ovr+=2; if(K.pot!=null) K.pot+=2; }
+      d.st229=true; }
     for(const p of [...(d.roster||[]),...((d.world||{}).free||[]),...(d.youth||[]),...Object.values((d.world||{}).clubs||{}).flatMap(c=>c.players||[])]) if(p&&!p.at) devInit(p);   // (a career from before development: everyone's attributes made at the ratings they had -- since v182 from the master sheet's numbers, so not quite as they were)
       else if(p&&p.at.length<DEV_KEYS.length){ for(const f of ['at','cl','bs']) if(p[f]) p[f]=devPack(devUnpack(p[f])); if(p.pg) p.pg=devPackPg(devUnpackPg(p.pg)); }   // (and from before Handling: his from the rest of his keeping)
     d.bidMemo=d.bidMemo||{}; d.scoutLvl=d.scoutLvl||1; d.academy=d.academy||1; d.seven=true;
@@ -21681,15 +21705,15 @@
       d.w120=true; }   // (v120: every man's wage up as wages went up -- his deal's terms against the going rate kept)
     if(!d.w122){ const W=d.world||{};   // (v122: every man rated again on the new weights -- A MAN'S RATING -- his potential too)
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
-        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),32,97); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),32,99)); }
       d.w122=true; }
     if(!d.w144){ const W=d.world||{};   // (v144: rated again with pace the dearest -- PACE, THE DEAREST OF ALL -- his potential too)
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
-        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),30,95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),30,99)); }
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at)),32,97); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl)),32,99)); }
       d.w144=true; }
     if(!d.w202||d.wr!==OVR_RATE_V){ const W=d.world||{};   // (v202: rated again by his playstyle -- A MAN'S RATING BY HIS PLAYSTYLE -- his potential too; his stats as they were. v203: again, pace by playstyle)
       for(const p of [...(d.roster||[]),...(d.youth||[]),...(W.free||[]),...Object.values(W.clubs||{}).flatMap(c=>c.players||[])]){ if(!p||!p.at) continue;
-        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at),p.style),30,p.star?99:95); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)); }
+        p.ovr=clamp(cwOverall(p.role,devUnpack(p.at),p.style),32,p.star?99:97); if(p.cl) p.pot=Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),32,99)); }
       d.w202=true; d.wr=OVR_RATE_V; }
     if(!d.w149){ econV149(d); d.w149=true; }   // (v149: the real game's money -- econV149)
     return d; }
@@ -21985,7 +22009,7 @@
     const d={ v:MG_SAVE_V, kind:'manager', slot:o.slot, created:Date.now(), updated:Date.now(),
       manager:{name:o.manager,titles:0,promotions:0,history:[]}, clubName:o.clubName, colors:o.colors,
       tier:1, season:1, phase:'summer', day:1, md:0, week:0, wkN:0, weeks:0, wday:'mon',
-      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, fa178:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
+      budget:250000, sponsorWk:ft.sponsor, capacity:STAD_LEVELS[1].cap, stadium:{lvl:1,ads:[],deals:{}}, spOff:[], firstSeason:1, ticketPrice:null, tk108:true, pop161:true, st163:true, st229:true, fa178:true, seats:{}, loyalty:LOYALTY_BASE[1], streak:0,
       formation:'3-3-2', width:{atk:1,def:1}, style:'neutral', seven:true, eight:true,
       listed:{}, offers:[], offerSeq:0, bidMemo:{}, kn:{}, rec:{}, scoutLvl:1, academy:1, youth:[], news:[], tx:[], ledger:[],
       lv:{club:1,train:1,physio:0,market:0,scouting:0,academy:0}, top:1, deco:[], store:{}, story:{vet:0,kid:0,phone:0}, w120:true, w122:true, w144:true, w149:true, w202:true, wr:OVR_RATE_V };   // (w120: on v120's wages from the start; w122, w144: rated on today's weights; w149: in the real game's money; w202, wr: rated by playstyle, on the weights as they are -- OVR_RATE_V)

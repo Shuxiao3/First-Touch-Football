@@ -167,13 +167,14 @@ ok(edge && !edge.caught, 'one to the edge of the box, he leaves');
 // it goes slower and wilder
 const sw = await page.evaluate(() => {
   const T = window.__T, c = T.controlled(), atk = T.atkOf(c.team); T.freeze(); c.facing = { x: atk, y: 0 };
+  const keep = c.stats; c.stats = Object.assign({}, keep, { shotAcc: 7, shotPower: 7, composure: 7, compFinal: 7, curve: 5.5 });   // (v229: his shooting set, as the other scenes set theirs -- the swipe's what's measured, not this season's numbers)
   const across = [0, 30, 60, 90, 120, 150, 180].map(a => +T.swipeAcross(c, { x: atk * Math.cos(a * Math.PI / 180), y: Math.sin(a * Math.PI / 180) }).toFixed(2));
   const shots = x => { let sp = 0, s1 = 0, s2 = 0; const n = 300; const b = T.ball();
     for(let i = 0; i < n; i++){ b.ownedBy = c; b.x = c.x + atk * 20; b.y = c.y; b.z = 0; b.vx = b.vy = 0; c.vx = c.vy = 0;
       T.shootAt(c, atk, 0.6, 0.8, 0, undefined, 0, x); const a = Math.atan2(b.vy, b.vx * atk); sp += Math.hypot(b.vx, b.vy); s1 += a; s2 += a * a; }
     b.vx = b.vy = 0; b.shotT = 0; b.shotBy = null; return { sp: Math.round(sp / n), sd: +(Math.sqrt(Math.max(0, s2 / n - (s1 / n) ** 2)) * 180 / Math.PI).toFixed(2) }; };
   c.x = (atk > 0 ? T.FW : 0) - atk * 300; c.y = T.YC;   // (on the edge of the box: no long-range penalty)
-  return { across, square: shots(0), turned: shots(1) };
+  const out = { across, square: shots(0), turned: shots(1) }; c.stats = keep; return out;
 });
 info('swipes: ' + JSON.stringify(sw));
 ok(sw.across[0] === 0 && sw.across[1] < 0.1 && sw.across[3] > 0.4 && sw.across[3] < 0.6 && sw.across[5] === 1, 'off his line: ' + sw.across.join(', ') + ' at 0, 30, 60, 90, 120, 150, 180 degrees');

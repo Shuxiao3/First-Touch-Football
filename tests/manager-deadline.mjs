@@ -38,14 +38,14 @@ r = await K(`(()=>{ const d=CAREER.data, P=d.roster.map(p=>popOf(d,p)), p=d.rost
   const el=document.querySelector('#bpBody .mgPop b'); return { P, ok:P.every(v=>Number.isInteger(v)&&v>=1&&v<=99), card:el?+el.textContent:null, want:popOf(d,p), name:p.name }; })()`);
 ok(r.ok && r.card === r.want, 'every man has a popularity, 1-99 (' + r.P.join(' ') + '), on his card: ' + r.name + ' ' + r.card);
 await K('hideBldg()');
-r = await K(`(()=>{ const d=CAREER.data, b=Object.assign({},d.roster[1],{id:-7,role:'MID',ovr:72,goals:0,as:0,cs:0,rn:0,rs:0,fame:0,hg:0,age:25,since:d.season}), T=(o,t,m,id)=>popTarget(d,Object.assign({},b,o),t||d.tier,!!m,id);
+r = await K(`(()=>{ const d=CAREER.data, b=Object.assign({},d.roster[1],{id:-7,role:'MID',ovr:74,goals:0,as:0,cs:0,rn:0,rs:0,fame:0,hg:0,age:25,since:d.season}), T=(o,t,m,id)=>popTarget(d,Object.assign({},b,o),t||d.tier,!!m,id);
   const s8={goals:8,rn:4,rs:30}, keep=d.cup; d.cup={cl:{in:[-99]}}; const cl=T(s8,4,false,-99)-T(s8,4,false,null); d.cup=keep;
-  return { q:[55,60,70,80,90].map(v=>Math.round(popQ(v))), L2:Math.round(T(s8,1)), L1:Math.round(T(s8,2)), CH:Math.round(T(s8,3)), PL:Math.round(T(s8,4)), cl:+cl.toFixed(1),
+  return { q:[57,62,72,82,92].map(v=>Math.round(popQ(v))), L2:Math.round(T(s8,1)), L1:Math.round(T(s8,2)), CH:Math.round(T(s8,3)), PL:Math.round(T(s8,4)), cl:+cl.toFixed(1),
     goals1:+(T({goals:4},1)-T({},1)).toFixed(2), goals4:+(T({goals:4},4)-T({},4)).toFixed(2), form4:+(T({rn:4,rs:30},4)-T({},4)).toFixed(2), hg1:+(T({hg:1},1)-T({},1)).toFixed(2), fame:+(T({fame:10},1)-T({},1)).toFixed(2),
     years:+(T({since:d.season-2},1,1)-T({},1,1)).toFixed(2), cap:+(T({id:d.cap},1,1)-T({},1,1)).toFixed(2) }; })()`);
 info('popularity, across the game: ' + JSON.stringify(r));
 ok(r.q.join() === '6,11,26,49,80' && r.L2 < r.L1 && r.L1 < r.CH && r.CH < r.PL && r.PL - r.L2 >= 15,
-  'one scale for the whole game (v161): how good he is first, on a steep curve (55, 60, 70, 80, 90: ' + r.q.join(', ') + '), and the same man with the same season (a 72, eight goals, 7.5 a game) far better known the bigger the stage -- Division 2 ' + r.L2 + ', Division 1 ' + r.L1 + ', the National Division ' + r.CH + ', the Premier Division ' + r.PL);
+  'one scale for the whole game (v161): how good he is first, on a steep curve (57, 62, 72, 82, 92: ' + r.q.join(', ') + '), and the same man with the same season (a 74, eight goals, 7.5 a game) far better known the bigger the stage -- Division 2 ' + r.L2 + ', Division 1 ' + r.L1 + ', the National Division ' + r.CH + ', the Premier Division ' + r.PL);
 ok(r.goals1 === 1.5 && r.goals4 === 6 && r.form4 === 12 && r.hg1 === 1.5 && r.fame === 10 && r.years === 1.5 && r.cap === 1.25 && r.cl === 12.2,
   'what he does counts by the stage: four goals +' + r.goals1 + ' in Division 2, +' + r.goals4 + ' in the Premier Division, his form +' + r.form4 + ' there; the academy +' + r.hg1 + ', two years with you +' + r.years + ', the armband +' + r.cap + ' in Division 2; his honours +' + r.fame + ' wherever (they were sized as he won them); a side in the Continental Champions Cup +' + r.cl + ' on the same season');
 r = await K(`(()=>{ const d=CAREER.data, p=d.roster[2], t=popTarget(d,p,d.tier,true), s=t>=21?t-20:t+20; p.pop=s; popWeek(d); const a=p.pop;   /* (20 off it, under or over, clear of the floor at 1) */

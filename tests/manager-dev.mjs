@@ -33,7 +33,7 @@ await K(`(()=>{ window.D=mgNewCareer({slot:'1',manager:'T',clubName:'Dev Town',c
 // --- stored attributes -----------------------------------------------------------------------------------------
 r = await K(`(()=>{ const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free];
   const okAt=all.every(p=>/^[a-s]{28}$/.test(p.at)&&/^[a-s]{28}$/.test(p.cl)&&/^[a-s]{28}$/.test(p.bs)&&/^[a-s]{9}$/.test(p.hv));   // (v163: 28, Long passing and Final third composure last)
-  const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at),p.style),30,95)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)));   // (v202: by his playstyle)
+  const rates=all.every(p=>p.ovr===clamp(cwOverall(p.role,devUnpack(p.at),p.style),32,97)), pot=all.every(p=>p.pot>=p.ovr&&p.pot===Math.max(p.ovr,clamp(cwOverall(p.role,devUnpack(p.cl),p.style),30,99)));   // (v202: by his playstyle)
   const under=all.every(p=>{ const a=devUnpack(p.at), c=devUnpack(p.cl); return DEV_KEYS.every(k=>c[k]>=a[k]); });
   const hv=all.flatMap(p=>Object.values(hvOf(p))), hvMean=hv.reduce((a,b)=>a+b,0)/hv.length;
   const p=D.roster[0], s0=JSON.stringify(mgStats(p)), a=devUnpack(p.at); a.speed=Math.min(10,a.speed+1.5); p.at=devPack(a);
@@ -49,7 +49,7 @@ r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
   o.every=lines.every(l=>OUTF.every(k=>OVR_W[l][k]>=1&&OVR_W[l][k]<=6)&&Object.values(OVR_W[l]).some(v=>v===5)&&OVR_W[l].speed===6&&OUTF.every(k=>k==='speed'||OVR_W[l][k]<6)&&OVR_W[l].acceleration===5);   // (v144: pace the dearest -- speed 6, above every other, acceleration 5)
   o.gk=Object.entries(OVR_W.GK).map(([k,v])=>k+' '+v).join(', ');
   o.gkOk=GK_KEYS.every(k=>OVR_W.GK[k]>=2)&&['composure','passAcc','ballControl'].every(k=>OVR_W.GK[k]===1)&&Object.keys(OVR_W.GK).length===9;
-  o.usual=['GK','DEF','MID','ATT'].map(r=>cwOverall(r,ARCH[r])+'/'+Math.round(OVR_REF[r][0]*10));
+  o.usual=['GK','DEF','MID','ATT'].map(r=>{ const s={}; for(const k in ARCH[r]) s[k]=ARCH[r][k]-STAT_DROP; return cwOverall(r,s)+'/'+Math.round(OVR_REF[r][0]*10); });   // (v229: his line's averages a point down, two up on what they rated then)
   // a defender: his shooting 1 and 10, and his tackling the same way
   const p=D.roster.find(q=>q.role==='DEF')||mgAiClubs(D).flatMap(c=>c.players).find(q=>q.role==='DEF'), st=devUnpack(p.at), at=o2=>cwOverall('DEF',Object.assign({},st,o2));
   o.shoot=[at({shotAcc:1,shotPower:1,longShots:1}),at({shotAcc:10,shotPower:10,longShots:10})]; o.tackle=[at({tackle:1,slideTackle:1,interceptions:1}),at({tackle:10,slideTackle:10,interceptions:10})];
@@ -63,21 +63,26 @@ r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
     const ks=ovrMainBut(role).sort((a,b)=>w[a]-w[b]); for(let it=0;it<60;it++){ const cur=cwOverall(role,s); if(cur===T) break; const k=ks[it%ks.length]; s[k]=clamp(s[k]+(cur<T?0.5:-0.5),1,10); }
     return s; };
   const all=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players),...D.world.free], old=q=>clamp(Math.round(ovrMean(devUnpack(q.at),OVR_W_V121[q.role])*10),30,95);
-  const keep=all.map(q=>[q.ovr,q.pot,q.at]); for(const q of all) if(q.at&&q.style) q.at=devPack(oldMake(q));
+  // (v229: and every stat a point up on today's, as a save from before v229 has them -- loaded, they come down a point
+  // and the man's rated two up: every man the migration touches put back after)
+  const up=x=>{ const o=devUnpack(x); for(const k in o) o[k]=clamp(o[k]+STAT_DROP,1,10); return devPack(o); }, every=[...new Set([...D.roster,...(D.youth||[]),...D.world.free,...Object.values(D.world.clubs).flatMap(c=>c.players||[])])];
+  const keepAll=every.map(q=>[q.ovr,q.pot,q.at,q.cl,q.bs,q.fa]), ka=D.story&&D.story.kidAsk?Object.assign({},D.story.kidAsk):null;
+  for(const q of all) if(q.at&&q.style) q.at=devPack(oldMake(q));
+  for(const q of every){ if(q.at) q.at=up(q.at); if(q.cl) q.cl=up(q.cl); if(q.bs) q.bs=up(q.bs); }
   const tier=()=>{ const t={}; for(const c of mgAiClubs(D)){ (t[c.tier]=t[c.tier]||[]).push(...c.players.map(q=>q.ovr)); } return Object.values(t).map(v=>v.reduce((a,x)=>a+x,0)/v.length); };
-  for(const q of all) q.ovr=old(q); const was=tier(), w0=all.map(q=>q.ovr); delete D.w122; mgMigrate(D);
+  for(const q of all) q.ovr=old(q); const was=tier(), w0=all.map(q=>q.ovr); delete D.w122; delete D.st229; mgMigrate(D);
   const dd=all.map((q,i)=>q.ovr-w0[i]), now=tier();
-  o.mig={ flag:D.w122, rated:all.every(q=>q.ovr===clamp(cwOverall(q.role,devUnpack(q.at)),30,95)), mean:+(dd.reduce((a,v)=>a+v,0)/dd.length).toFixed(2), most:Math.max(...dd.map(Math.abs)),
+  o.mig={ flag:D.w122, rated:all.every(q=>q.ovr===clamp(cwOverall(q.role,devUnpack(q.at)),32,97)), mean:+(dd.reduce((a,v)=>a+v,0)/dd.length).toFixed(2), most:Math.max(...dd.map(Math.abs)),
     same:+(dd.filter(v=>v===0).length/dd.length).toFixed(2), tiers:was.map((v,i)=>+(now[i]-v).toFixed(2)) };
-  all.forEach((q,i)=>{ q.ovr=keep[i][0]; q.pot=keep[i][1]; q.at=keep[i][2]; });
+  every.forEach((q,i)=>{ [q.ovr,q.pot,q.at,q.cl,q.bs,q.fa]=keepAll[i]; }); if(ka) D.story.kidAsk=ka;
   return o; })()`);
 info('ratings out of 5: ' + JSON.stringify(r));
 ok(r.every && r.gkOk, 'every outfield stat counts for every outfield line, 1 to 5 (the line\'s game 5) -- and his pace above all since v144, speed 6 and acceleration 5; a keeper\'s: his keeping, his feet a little (' + r.gk + ')');
 ok(r.usual.every(x => x.split('/')[0] === x.split('/')[1]), 'a man of each line\'s usual make rates what he did on v121\'s weights (' + r.usual.join(', ') + ')');
 ok(r.shoot[1] > r.shoot[0] && r.shoot[1] - r.shoot[0] >= 3 && r.shoot[1] - r.shoot[0] <= 8 && r.tackle[1] - r.tackle[0] > 2 * (r.shoot[1] - r.shoot[0]),
   'a defender\'s shooting counts a little now: ' + r.shoot.join(' -> ') + ' from all 1s to all 10s (his tackling the same way: ' + r.tackle.join(' -> ') + ')');
-ok(r.mig.flag && r.mig.rated && Math.abs(r.mig.mean) <= 0.5 && r.mig.most <= 8 && r.mig.tiers.every(v => Math.abs(v) <= 0.5),   // (v144: a quick man or a slow one moves further, his pace dearer -- up to 6 here; it was 3 at most on v122's weights)
-  'a career rated on v121\'s weights, read: every man rated again on these (' + Math.round(r.mig.same * 100) + '% the same, ' + (r.mig.mean >= 0 ? '+' : '') + r.mig.mean + ' on average, none by more than ' + r.mig.most + '), each league\'s average where it was (' + r.mig.tiers.join(', ') + ')');
+ok(r.mig.flag && r.mig.rated && Math.abs(r.mig.mean - 2) <= 0.5 && r.mig.most <= 10 && r.mig.tiers.every(v => Math.abs(v - 2) <= 0.5),   // (v229: two up -- every rating two higher, every stat a point lower)   // (v144: a quick man or a slow one moves further, his pace dearer -- up to 6 here; it was 3 at most on v122's weights)
+  'a career rated on v121\'s weights, read: every man rated again on these (' + Math.round(r.mig.same * 100) + '% the same, ' + (r.mig.mean >= 0 ? '+' : '') + r.mig.mean + ' on average, none by more than ' + r.mig.most + '), each league\'s average where it was, two up as every rating is now (' + r.mig.tiers.join(', ') + ')');
 
 // --- a career from before Handling (v77): 25 letters a man -- his Handling from the rest of his keeping, his rating as it was
 r = await K(`(()=>{ const ps=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players)].filter(p=>p.role==='GK').slice(0,6), cut=s=>s.slice(0,25);
