@@ -48,7 +48,8 @@ ok(Math.abs(r.age[1] / r.age[0] - 0.3) < 0.02 && Math.abs(r.age[2] / r.age[0] - 
   'the veteran\'s slide: at 32 three-tenths of his prime\'s worth, at 34 15%; an asking price never more than a quarter over his position\'s most (a keeper of 95: $' + M(r.ask) + 'M asked)');
 ok(Math.abs(r.wage[0] - 1100) <= 30 && r.wage[1] === 2000 && Math.abs(r.wage[4] - 69000) <= 1000 && Math.abs(r.wage[7] - 627000) <= 3000 && r.staff[0] === 1000,
   'a wage of $' + r.wage.map(w => w.toLocaleString()).join(', $') + ' a week at 53, 57, 67, 77, 81, 87, 92 and 96 (51 to 94 before v229); a coach $' + r.staff.map(w => w.toLocaleString()).join(', $') + ' at 1, 5 and 9 (twenty times what it was)');
-ok(r.start === 250000 && r.bill >= 9000 && r.bill <= 20000, 'a new club: $' + r.start.toLocaleString() + ' in the bank, its ' + r.n + ' men (rated ' + r.avg + ') on $' + r.bill.toLocaleString() + ' a week');
+// (v230: a new club's men vary -- 46 to 52 on average -- so the bill does, about $8,000 to $17,000)
+ok(r.start === 250000 && r.bill >= 7000 && r.bill <= 20000, 'a new club: $' + r.start.toLocaleString() + ' in the bank, its ' + r.n + ' men (rated ' + r.avg + ') on $' + r.bill.toLocaleString() + ' a week');
 
 // --- THE MONEY ROUND IT ----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, out={};

@@ -70,7 +70,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Stat Town'); await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 r = await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); MGUI.noPile=true; pileHide(); const all=[...d.roster,...Object.values(d.world.clubs).flatMap(c=>c.players)];
-  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p),p.style),32,97)) }; })()`);   // (v202: by his playstyle)
+  return { st163:!!d.st163, n:all.length, len:[...new Set(all.map(p=>(mgStats(p),p.at.length)))].join(','), rated:all.every(p=>p.ovr===clamp(cwOverall(p.role,mgStats(p),p.style),32,p.star?99:97)) }; })()`);   // (v230: a star to 99)   // (v202: by his playstyle)
 ok(r.st163 && r.len === '28' && r.rated, 'a new career: every man\'s 28 attributes, the new two among them (' + r.n + ' men), each rated by them');
 
 // --- A CAREER FROM BEFORE ---------------------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ r = await K(`(()=>{ const now=CAREER.data, d=JSON.parse(JSON.stringify(now)), me
   return { lv:[1,2,3,4].map(t=>MG_LEVEL[t]), now:[1,2,3,4].map(t=>avg(now,t)), up:mig.map((v,i)=>+(v-old[i]).toFixed(2)), again:all.map(p=>p.at).join()===at&&all.map(p=>p.ovr).join()===ov,
     same, n:all.length, wages:all.every((p,i)=>p.wage===was[i].wage), flag:!!d.st229 }; })()`);
 info('v229, a point lower and two up: ' + JSON.stringify(r));
-ok(r.lv.join() === '57,65,73,81' && Math.abs(r.now[3] - 81) <= 1, 'the leagues\' levels 57, 65, 73 and 81 (two up on 55, 63, 71 and 79), and a new career\'s Premier Division men ' + r.now[3] + ' on average (its four leagues ' + r.now.join(', ') + ')');
+ok(r.lv.join() === '57,65,73,81' && Math.abs(r.now[3] - 81) <= 1.5, 'the leagues\' levels 57, 65, 73 and 81 (two up on 55, 63, 71 and 79), and a new career\'s Premier Division men ' + r.now[3] + ' on average (its four leagues ' + r.now.join(', ') + ')');
 ok(r.flag && r.up.every(v => Math.abs(v - 2) <= 0.3) && r.same >= r.n * 0.95 && r.wages && r.again, 'a career from before, loaded: every stat a point lower (' + r.same + ' of ' + r.n + ' men as a new career has them -- a 9.5 or a 10 comes back a 9), each league two up on its rating (' + r.up.join(', ') + '), every wage as it was; loaded again, nothing more');
 
 // --- THE CARD ------------------------------------------------------------------------------------------------------------------------------

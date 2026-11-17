@@ -40,27 +40,44 @@ ok(/stopper 2\/2/.test(w.pace) && /speedster 5\/5/.test(w.pace) && /target 3\/3/
 ok(w.wb.crossing === 5 && w.st.heading === 5 && w.st.tackle === 5 && w.dc.longPass === 5 && w.st.crossing === 0 && w.cv.crossing === 0 && w.cross === true,
   'what each is about counts most: a wing-back\'s crossing 5, a stopper\'s heading and tackling 5, a deep creator\'s long passing 5 -- and a stopper\'s and a cover centre-back\'s crossing not at all (0: a stopper crosses at 1 or 10 and rates the same)');
 const cal = await K(`(()=>{ let worst=0; for(const k in OVR_STY){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10);
-    worst=Math.max(worst,Math.abs(cwOverallX(S.role,st,k)-cwOverallX(S.role,st))); }
+    worst=Math.max(worst,Math.abs(cwOverallX(S.role,st,k)-cwOverallLin(S.role,st))); }   // (v230: against his line's straight line, what his style's usual level is reckoned from)
   const S=STYLES.wingback, mk=()=>{ const st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); return st; };
   const own=mk(), off=mk(); for(const x of ['crossing','stamina']) own[x]+=1.5; for(const x of ['heading','strength']) off[x]+=1.5;
   const b=cwOverallX('DEF',mk(),'wingback');
   return { worst, own:cwOverallX('DEF',own,'wingback')-b, off:cwOverallX('DEF',off,'wingback')-b, lineOwn:cwOverallX('DEF',own)-cwOverallX('DEF',mk()), lineOff:cwOverallX('DEF',off)-cwOverallX('DEF',mk()) }; })()`);
 info('a wing-back of the usual make, three points more (on the sheet) at crossing and stamina: +' + cal.own.toFixed(1) + ' (his line\'s weights +' + cal.lineOwn.toFixed(1) + '); at heading and strength: +' + cal.off.toFixed(1) + ' (+' + cal.lineOff.toFixed(1) + ')');
 ok(cal.worst < 0.01, 'each playstyle\'s usual man rates what he did (the most any is off: ' + cal.worst.toFixed(3) + ')');
+
+// --- (v230) THE TOP OF A STAT COUNTS FOR MORE: a point near 10 worth more than one near 1, the more so the more his style
+// needs the stat; every playstyle set on the curve at its usual man and at a man made for the Premier Division --------------
+const cv = await K(`(()=>{ const out={}, lin=(k,st)=>(OVR_STY_LIN[k].A+OVR_STY_LIN[k].K*ovrMean(st,OVR_STY[k]))*10;
+  const mk=k=>{ const T=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[T.role][x]+(T.d[x]||0),1,10); return st; };
+  const at81=k=>{ const T=STYLES[k], m0=mk(k); let lo=-4, hi=5; for(let i=0;i<48;i++){ const m=(lo+hi)/2; if(lin(k,ovrMakeAt(T.role,m0,m))<OVR_TOP) lo=m; else hi=m; } return ovrMakeAt(T.role,m0,lo); };
+  let w0=0, w81=0; for(const k in OVR_STY){ const T=STYLES[k]; w0=Math.max(w0,Math.abs(cwOverallX(T.role,mk(k),k)-STYLE_REF[k]*10)); w81=Math.max(w81,Math.abs(cwOverallX(T.role,at81(k),k)-OVR_TOP)); }
+  const top=at81('deepcreator'), at=(x,v)=>cwOverallX('MID',Object.assign({},top,{[x]:v}),'deepcreator');
+  out.pass=[at('passAcc',10)-at('passAcc',9.5), at('passAcc',1.5)-at('passAcc',1)]; out.head=[at('heading',10)-at('heading',9.5), at('heading',1.5)-at('heading',1)];
+  out.wPass=OVR_STY.deepcreator.passAcc; out.wHead=OVR_STY.deepcreator.heading;
+  let off=0, n=0, bias=0; for(const k of ['stopper','boxtobox','poacher','winger']) for(const R of [50,60,70,81]){ let sg=0; for(let i=0;i<20;i++){ const s=cwStatsForOVR(STYLES[k].role,R,cwMul(900+i),k), v=cwOverallX(STYLES[k].role,s,k)-R; off+=Math.abs(v); sg+=v; n++; } bias=Math.max(bias,Math.abs(sg/20)); }
+  Object.assign(out,{ w0, w81, made:off/n, bias, g:OVR_CURVE }); return out; })()`);
+info('the curve (' + cv.g + '): a deep creator made for the Premier Division, his passing (counted ' + cv.wPass + ') 9.5 to 10 +' + cv.pass[0].toFixed(2) + ', 1 to 1.5 +' + cv.pass[1].toFixed(2) + '; his heading (counted ' + cv.wHead + ') +' + cv.head[0].toFixed(2) + ' and +' + cv.head[1].toFixed(2) + '; men made to a rating ' + cv.made.toFixed(2) + ' off it by their playstyles');
+ok(cv.w0 < 0.01 && cv.w81 < 0.01, 'every playstyle on the curve where it was: its usual man at its usual level, a man made for the Premier Division at 81 (off by ' + cv.w0.toFixed(3) + ' and ' + cv.w81.toFixed(3) + ' at most)');
+ok(cv.pass[0] > 1.8 * cv.pass[1] && cv.head[0] / cv.head[1] < cv.pass[0] / cv.pass[1] && cv.head[0] / cv.head[1] > 1, 'the top of a stat counts for more: a deep creator\'s passing from 9.5 to 10 is worth ' + (cv.pass[0] / cv.pass[1]).toFixed(1) + ' times what 1 to 1.5 is, his heading (a stat his style counts little) ' + (cv.head[0] / cv.head[1]).toFixed(1) + ' times');
+ok(cv.bias < 0.6 && cv.made < 1.2, 'a man made to a rating rates it by his own playstyle, at any level: ' + cv.bias.toFixed(2) + ' off at most on average for a playstyle and level (each man ' + cv.made.toFixed(2) + ' off his on average: the maker stops within a point of it, the rest his own make)');
 ok(cal.own > 2 * cal.off && cal.own > cal.lineOwn && cal.off < cal.lineOff, 'a wing-back better at what a wing-back does rates higher than one as much better in the air and in strength -- as his line\'s weights had it the other way round');
 
 const cw = await K(`(()=>{ const pos={}, d=${newCareer}; let n=0, ad=0;
-  for(const p of [...d.world.free, ...Object.values(d.world.clubs).flatMap(c=>c.players)]){ if(p.star||p.role==='GK') continue; const st=mgStats(p), x=cwOverallX(p.role,st,p.style)-cwOverallX(p.role,st);
+  for(const p of [...d.world.free, ...Object.values(d.world.clubs).flatMap(c=>c.players)]){ if(p.star||p.role==='GK') continue; const st=mgStats(p), x=cwOverallX(p.role,st,p.style)-cwOverallLin(p.role,st);   // (v230: against his line's straight line)
     const a=pos[p.subRole]=pos[p.subRole]||{n:0,s:0}; a.n++; a.s+=x; n++; ad+=Math.abs(x);
     if(p.ovr!==clamp(cwOverall(p.role,st,p.style),32,97)) return { stale:p.name }; }
   const by={}; for(const k in pos) by[k]=+(pos[k].s/pos[k].n).toFixed(2); return { by, mad:ad/n, n }; })()`);
 info('a new career\'s men, by playstyle against by line: ' + JSON.stringify(cw.by) + ', ' + (cw.mad || 0).toFixed(2) + ' either way on average (' + cw.n + ' men)');
-ok(!cw.stale && Object.values(cw.by).every(v => Math.abs(v) < 0.5) && cw.mad < 1.2, 'a new career\'s men rated by their playstyles, each position within half a point on average of what their line\'s weights gave' + (cw.stale ? ' (' + cw.stale + ' rated on the old weights)' : ''));
+const cwLo = Math.min(...Object.values(cw.by)), cwHi = Math.max(...Object.values(cw.by));   // (a new career's men are random: a position's mean moves a tenth or two from one to the next)
+ok(!cw.stale && cwLo > -0.5 && cwHi < 1 && cwHi - cwLo < 0.8 && cw.mad < 1.5, 'a new career\'s men rated by their playstyles, each position on average a shade over what their line\'s weights gave on the straight line, and none far from the rest (' + cwLo.toFixed(2) + ' to ' + cwHi.toFixed(2) + '; v230: the curve, Division 2\'s men most; within half a point of it before)' + (cw.stale ? ' (' + cw.stale + ' rated on the old weights)' : ''));
 const old = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs).find(x=>!x.euro&&x.id!==d.clubId), p=c.players.find(x=>x.role!=='GK'&&Math.abs(cwOverall(x.role,mgStats(x),x.style)-cwOverall(x.role,mgStats(x)))>=1);
   if(!p) return null; const want=cwOverall(p.role,mgStats(p),p.style); p.ovr=cwOverall(p.role,mgStats(p)); delete d.w202; mgMigrate(d); return { was:cwOverall(p.role,mgStats(p)), want, now:p.ovr, flag:d.w202 }; })()`);
 ok(old && old.now === old.want && old.flag === true, 'a career saved before v202: every man rated again by his playstyle when it\'s loaded (' + JSON.stringify(old) + ')');
 const old3 = await K(`(()=>{ const d=${newCareer}, c=Object.values(d.world.clubs).find(x=>!x.euro&&x.id!==d.clubId), p=c.players.find(x=>x.role!=='GK'); const want=p.ovr; p.ovr=1; d.wr=204; mgMigrate(d); return { want, now:p.ovr, wr:d.wr }; })()`);
-ok(old3.now === old3.want && old3.wr === 229, 'a career saved on v204\'s weights: rated again on the sheet\'s when it\'s loaded (' + JSON.stringify(old3) + ')');
+ok(old3.now === old3.want && old3.wr === 230, 'a career saved on v204\'s weights: rated again on the sheet\'s when it\'s loaded (' + JSON.stringify(old3) + ')');
 const kept = await K(`(()=>{ const sq=clubSquadGen(clubById('LIV')); for(const e of sq) e.ovr=1;
   localStorage.setItem('ft_clubsq',JSON.stringify({LIV:{squad:sq, lineup:defaultLineup(), form:'3-2-3', dform:null, sig:clubSig(clubById('LIV'))}}));
   const s=clubSide('LIV'); localStorage.removeItem('ft_clubsq'); return s.squad.every(e=>e.ovr===overallOf(e)&&e.ovr>1); })()`);

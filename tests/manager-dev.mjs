@@ -72,7 +72,7 @@ r = await K(`(()=>{ const OUTF=OUT_KEYS, lines=['DEF','MID','ATT'], o={};
   const tier=()=>{ const t={}; for(const c of mgAiClubs(D)){ (t[c.tier]=t[c.tier]||[]).push(...c.players.map(q=>q.ovr)); } return Object.values(t).map(v=>v.reduce((a,x)=>a+x,0)/v.length); };
   for(const q of all) q.ovr=old(q); const was=tier(), w0=all.map(q=>q.ovr); delete D.w122; delete D.st229; mgMigrate(D);
   const dd=all.map((q,i)=>q.ovr-w0[i]), now=tier();
-  o.mig={ flag:D.w122, rated:all.every(q=>q.ovr===clamp(cwOverall(q.role,devUnpack(q.at)),32,97)), mean:+(dd.reduce((a,v)=>a+v,0)/dd.length).toFixed(2), most:Math.max(...dd.map(Math.abs)),
+  o.mig={ flag:D.w122, rated:all.every(q=>q.ovr===clamp(cwOverall(q.role,devUnpack(q.at)),32,q.star?99:97)), mean:+(dd.reduce((a,v)=>a+v,0)/dd.length).toFixed(2), most:Math.max(...dd.map(Math.abs)),
     same:+(dd.filter(v=>v===0).length/dd.length).toFixed(2), tiers:was.map((v,i)=>+(now[i]-v).toFixed(2)) };
   every.forEach((q,i)=>{ [q.ovr,q.pot,q.at,q.cl,q.bs,q.fa]=keepAll[i]; }); if(ka) D.story.kidAsk=ka;
   return o; })()`);
@@ -81,8 +81,8 @@ ok(r.every && r.gkOk, 'every outfield stat counts for every outfield line, 1 to 
 ok(r.usual.every(x => x.split('/')[0] === x.split('/')[1]), 'a man of each line\'s usual make rates what he did on v121\'s weights (' + r.usual.join(', ') + ')');
 ok(r.shoot[1] > r.shoot[0] && r.shoot[1] - r.shoot[0] >= 3 && r.shoot[1] - r.shoot[0] <= 8 && r.tackle[1] - r.tackle[0] > 2 * (r.shoot[1] - r.shoot[0]),
   'a defender\'s shooting counts a little now: ' + r.shoot.join(' -> ') + ' from all 1s to all 10s (his tackling the same way: ' + r.tackle.join(' -> ') + ')');
-ok(r.mig.flag && r.mig.rated && Math.abs(r.mig.mean - 2) <= 0.5 && r.mig.most <= 10 && r.mig.tiers.every(v => Math.abs(v - 2) <= 0.5),   // (v229: two up -- every rating two higher, every stat a point lower)   // (v144: a quick man or a slow one moves further, his pace dearer -- up to 6 here; it was 3 at most on v122's weights)
-  'a career rated on v121\'s weights, read: every man rated again on these (' + Math.round(r.mig.same * 100) + '% the same, ' + (r.mig.mean >= 0 ? '+' : '') + r.mig.mean + ' on average, none by more than ' + r.mig.most + '), each league\'s average where it was, two up as every rating is now (' + r.mig.tiers.join(', ') + ')');
+ok(r.mig.flag && r.mig.rated && r.mig.mean >= 2 && r.mig.mean <= 4 && r.mig.most <= 12 && r.mig.tiers.every(v => v >= 1.5 && v <= 5),   // (v229: two up -- every rating two higher, every stat a point lower; v230: a little more on the curve, the lower leagues most)   // (v144: a quick man or a slow one moves further, his pace dearer -- up to 6 here; it was 3 at most on v122's weights)
+  'a career rated on v121\'s weights, read: every man rated again on these (' + Math.round(r.mig.same * 100) + '% the same, ' + (r.mig.mean >= 0 ? '+' : '') + r.mig.mean + ' on average, none by more than ' + r.mig.most + '), each league\'s average where it was, two up as every rating is now and a little more on the curve, the lower leagues most (' + r.mig.tiers.join(', ') + ')');
 
 // --- a career from before Handling (v77): 25 letters a man -- his Handling from the rest of his keeping, his rating as it was
 r = await K(`(()=>{ const ps=[...D.roster,...mgAiClubs(D).flatMap(c=>c.players)].filter(p=>p.role==='GK').slice(0,6), cut=s=>s.slice(0,25);

@@ -267,11 +267,12 @@ ok(m.sty[0] === 'gegen' && m.sty[1] === 'press' && m.sty[3] === m.sty[4], 'your 
 ok(m.stars.every(s => s >= 1 && s <= 5) && m.stars.join() === m.want.join(), 'every man in the match has his own skill stars (one to five, for his age): ' + m.stars.join(''));
 // IN THE MATCH: a man's spots cost him -- with the ball his Off IQ, without it his Def IQ -- as they fit his position
 const iq = await page.evaluate(() => { const T = window.__T, p = T.players().find(q => q.team === 'G' && (T.POS_SECOND[T.fitOfP(q)] || []).length) || T.players().find(q => q.team === 'G');   // (a man with a second position: his archetype's, v118)
+  const keepIQ = [p.stats.offIQ, p.stats.defIQ]; p.stats.offIQ = Math.max(p.stats.offIQ, 5); p.stats.defIQ = Math.max(p.stats.defIQ, 5);   // (v230: 5 at least while he's looked at -- a man made with an IQ of 2 has hardly a cost to show over the floor of 1)
   const nat = T.fitOfP(p), keep = [p.slotAtk, p.slotDef], base = [+p.stats.offIQ.toFixed(2), +p.stats.defIQ.toFixed(2)], spot = pos => Object.assign({}, p.slotAtk, { pos, fit: pos });   // (its fit its own: v127, a back three's outside spot's is CB/FB)
   const at = (a, d) => { p.slotAtk = spot(a); p.slotDef = spot(d); return [+T.statOf(p, 'offIQ', 0).toFixed(2), +T.statOf(p, 'defIQ', 0).toFixed(2)]; };
   const own = (T.POS_MAIN[nat] || ['CB'])[0], sec = (T.POS_SECOND[nat] || ['FB'])[0], away = ['ST', 'CB', 'FB', 'W'].find(s => T.posFit(nat, s) === 'out');
   const r = { nat, base, own: at(own, own), secAtk: at(sec, own), secDef: at(own, sec), out: at(away, away) };
-  p.slotAtk = keep[0]; p.slotDef = keep[1]; return r; });
+  p.slotAtk = keep[0]; p.slotDef = keep[1]; p.stats.offIQ = keepIQ[0]; p.stats.defIQ = keepIQ[1]; return r; });
 info('a ' + iq.nat + ' (Off IQ, Def IQ ' + iq.base.join(', ') + '): ' + JSON.stringify(iq));
 ok(iq.own.join() === iq.base.join() && iq.secAtk[0] < iq.base[0] && iq.secAtk[1] === iq.base[1] && iq.secDef[0] === iq.base[0] && iq.secDef[1] < iq.base[1]
    && iq.base[0] - iq.secAtk[0] > iq.base[1] - iq.secDef[1] && iq.out[0] < iq.secAtk[0] && iq.out[1] < iq.secDef[1],

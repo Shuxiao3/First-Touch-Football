@@ -84,8 +84,8 @@ const cr = await page.evaluate(() => { const M = window.__M, d = JSON.parse(JSON
 info('development and a career kept from before: ' + JSON.stringify(cr));
 ok(cr.relMid[0] < cr.relMid[1] && cr.relCb[0] < cr.relCb[1], 'his development reckons what matters to him as it did: a playmaker\'s passing before his pace (' + cr.relMid.join(' / ') + '), a centre-back\'s tackling before his (' + cr.relCb.join(' / ') + ', a ' + cr.cbStyle + ': one whose style isn\'t quicker than his line\'s)');
 ok(cr.flag && cr.rated, 'a career kept from before: every man rated again on the new weights, once, his potential too');
-ok(Math.abs(cr.mean - 2) <= 0.5 && cr.by.mwinger > 2 && cr.by.speedster > 2 && cr.by.stopper < 2 && cr.by.anchor < 2 && cr.by.target < 2,   // (v229: about two up on average, as every rating is)
-  '...the quick ones up and the slow ones down, about two up on average as every rating is now (' + (cr.mean >= 0 ? '+' : '') + cr.mean + '): ' + Object.entries(cr.by).map(([k, v]) => k + ' ' + (v >= 0 ? '+' : '') + v).join(', '));
+ok(cr.mean >= 1.5 && cr.mean <= 4 && cr.by.mwinger > cr.mean && cr.by.speedster > cr.mean && cr.by.stopper < cr.mean && cr.by.anchor < cr.mean && cr.by.target < cr.mean,   // (v229: about two up on average, as every rating is; v230: a little more on the curve)
+  '...the quick ones up and the slow ones down, about two up on average as every rating is now, a little more on the curve (' + (cr.mean >= 0 ? '+' : '') + cr.mean + '): ' + Object.entries(cr.by).map(([k, v]) => k + ' ' + (v >= 0 ? '+' : '') + v).join(', '));
 
 process.exitCode = rep.finish();
 await browser.close();

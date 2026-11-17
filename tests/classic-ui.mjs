@@ -582,7 +582,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   const page = await ctx.newPage(); await pileAside(page); page.on('pageerror', e => rep.errs.push('PAGEERROR: ' + e.message));
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   const R = await page.evaluate(() => { const d = window.__MG.d, R = d.roster, other = Object.values(d.world.clubs).filter(c => c.id !== d.clubId);
-    d.listed[R[3].id] = 900; d.offers = d.offers || []; d.offerSeq = d.offerSeq || 0;   // a man listed, a man with three bids, the longest name
+    d.listed[R[3].id] = 900; R[3].ovr = 85; d.offers = d.offers || []; d.offerSeq = d.offerSeq || 0;   // a man listed, a man with three bids, the longest name (v230: the listed man rated 85 -- a new deal's six-figure wage, its row the longest)
     for(const [k, fee] of [[0, 12500], [1, 9800], [2, 9000]]) d.offers.push({ id: ++d.offerSeq, pid: R[5].id, club: other[k].id, fee });
     R[0].name = 'Samuel Lindqvist'; window.__MG.mgSave(d); return R.map(p => String(p.id)); });
   const card = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P && P.querySelector('.mgCard');

@@ -1729,6 +1729,7 @@
   .mgAct .mgStep{ margin:0; gap:4px; } .mgAct .mgStep b{ min-width:70px; font-size:12px; } .mgAct .mgAdj{ width:28px; height:28px; min-height:28px; font-size:14px; }
   .cWage{ display:inline-flex; align-items:center; gap:3px; vertical-align:middle; } .mgAct .cWage .cAdj{ width:22px; height:22px; min-height:22px; font-size:12px; border-radius:6px; padding:0; }
   .mgAct .cWage .cAdj:disabled{ opacity:.35; cursor:default; }   /* (v110: the wage in his new-deal row, − / +) */
+  @media (max-height:360px){ .mgAct{ margin-top:4px; } .mgActC{ gap:4px; } .mgAct .mgStep{ gap:3px; } .mgAct .mgStep b{ min-width:54px; } .mgAct .mgBtn{ padding:3px 8px; } }   /* (v230: on the shortest phones his new-deal row on one line, a star's wage and all -- it wrapped, and a listed man's deal ran 5 px over. 54 px: 5 seasons, the longest) */
   @media (max-height:360px), (max-width:700px){ .mgPaneR .cardBody{ width:26px; height:40px; } .mgPaneR .mgCardName{ font-size:15px; } .mgPaneR .mgCardHead{ gap:8px; } }
   .cardEnd{ flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
   .cardFlip{ width:72px; min-height:20px; padding:0; text-align:center; border:0; border-radius:var(--rS); cursor:pointer; font:8px 'Roboto Condensed','FTC Dot',sans-serif; white-space:nowrap;
@@ -2959,6 +2960,25 @@
   const OVR_REF={}, OVR_K={};
   for(const r in OVR_W){ const w=OVR_W[r], tot=Object.values(w).reduce((a,v)=>a+v,0), ones=Object.values(w).filter(v=>v===1).length;
     OVR_REF[r]=[ovrMean(ARCH[r],OVR_W_V121[r])+OVR_LIFT, ovrMean(ARCH[r],w)-STAT_DROP]; OVR_K[r]=1/(1-0.45*ones/tot); }
+  // (v230) THE TOP OF A STAT COUNTS FOR MORE: a point near 10 is worth more to a man's rating than a point near 1 -- the
+  // more so the more his playstyle needs the stat. A stat's value in his rating is x + g*(w/wmax)*(x-1)^3/243 (ovrVal): a
+  // point of it is worth 1 at the foot of the scale and 1 + g*(w/wmax) at the top (g: OVR_CURVE), w the weight his style
+  // (or his line) gives it, wmax the most it gives any -- a playmaker's passing a point dearer at 10 than at 1, his heading
+  // hardly so. Every playstyle, and every line (keepers, and the men as they're made), is set on it at two makes
+  // (ovrCurveCal): its usual man rates what he did, and a man made for the Premier Division's level (OVR_TOP: MG_LEVEL[4])
+  // rates that still -- so the leagues are where they were, a man between the two a shade under what he was, and one whose
+  // best is at the top of the scale over it, the more the more of his style's own game is up there.
+  const OVR_CURVE=1, OVR_TOP=81, OVR_LINE_CAL={};
+  const ovrWMax=w=>{ let m=0; for(const k in w) if(w[k]>m) m=w[k]; return m||1; };
+  const ovrVal=(x,wr)=>x+OVR_CURVE*wr*Math.pow(Math.max(0,x-1),3)/243;
+  const ovrMeanV=(st,w)=>{ const mx=ovrWMax(w); let s=0,t=0; for(const k in w){ s+=ovrVal(st[k]||5.5,w[k]/mx)*w[k]; t+=w[k]; } return s/t; };
+  // a make at a level: his line's game moved the whole way, the rest about half as far -- as cwStatsForOVR makes a man
+  const ovrMakeAt=(role,make0,d)=>{ const wl=OVR_W[role]||OVR_W.MID, o={}; for(const x in make0) o[x]=clamp(make0[x]+((wl[x]||0)>=2?d:d*0.55),1,10); return o; };
+  // the curve's own A and K for weights w: make0 rates what linR (the straight-line rating, in stat points) has it at, and
+  // the make linR puts at OVR_TOP rates that too
+  function ovrCurveCal(role,w,make0,linR){ const r0=linR(make0), top=OVR_TOP/10; let lo=-4, hi=5;
+    for(let i=0;i<48;i++){ const m=(lo+hi)/2; if(linR(ovrMakeAt(role,make0,m))<top) lo=m; else hi=m; }
+    const v0=ovrMeanV(make0,w), v1=ovrMeanV(ovrMakeAt(role,make0,(lo+hi)/2),w), K=(top-r0)/Math.max(1e-6,v1-v0); return {A:r0-K*v0, K}; }
   // ============ PLAYING STYLES: ARCHETYPES ============
   // Every player has an archetype within his position (keepers too: v118), and his stats are built around it: the role's
   // averages (ARCH) shifted by the archetype's offsets. Pace above all -- centre-backs and holding midfielders are the
@@ -3097,7 +3117,7 @@
     keys.forEach((x,i)=>{ const v=STYLE_SHEET[k][i]; if(v!=null&&v/2!==A[x]) d[x]=v/2-A[x]; }); S.d181=S.d; S.d=d; }   // (d181: the offsets till v182, for a career kept from before -- see the tests)
   // (v182) EACH STYLE'S OWN USUAL LEVEL: what the sheet's numbers rate (unrounded, in stat points) -- a man is made from his
   // style's, not his line's (see cwStatsForOVR), so the shape the sheet gives his style holds at any rating
-  const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallX(S.role,st)/10; }
+  const STYLE_REF={}; for(const k in STYLES){ const S=STYLES[k], st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10); STYLE_REF[k]=cwOverallLin(S.role,st)/10; }   // (v230: the straight line's, as it was -- the curve is set on it)
   // (v202) A MAN'S RATING BY HIS PLAYSTYLE: what counts toward it is what his playstyle is good at -- its best stats on the
   // master sheet 5 each, its worst 1, the rest on a straight line between by where each sits. So a wing-back's crossing
   // and stamina count for a lot, a stopper's heading and tackling, a deep creator's passing; till v202 a man was rated by
@@ -3124,8 +3144,8 @@
     widemid:[4,4,4,4,2,5,5,4,4,3,3,4,1,2,2,2,3,3,2,3,2,2], mwinger:[5,5,4,4,1,5,5,4,3,1,3,4,1,2,1,1,3,2,2,3,2,2], wideplaymaker:[4,4,4,3,1,5,5,4,4,3,4,5,1,1,1,1,5,2,3,4,3,2],
     winger:[5,5,4,2,1,5,5,4,3,3,4,5,1,1,1,1,4,1,3,4,3,3], trickster:[4,5,5,2,1,5,5,4,3,4,4,4,1,1,1,1,4,1,3,4,3,3], paceywinger:[5,5,5,2,1,5,5,4,3,3,4,5,1,1,1,1,4,1,3,4,3,3], invwinger:[4,5,5,2,1,5,5,4,3,4,4,4,2,1,1,1,4,1,4,5,4,4],
     complete:[4,4,4,3,4,5,3,3,2,3,5,2,4,1,1,1,5,1,5,3,4,5], poacher:[4,5,4,3,5,5,3,3,2,3,5,1,5,1,1,1,5,1,5,3,4,5], speedster:[5,5,5,3,3,5,4,3,2,3,5,3,3,1,1,1,5,1,5,3,4,5], target:[3,3,3,3,5,5,3,4,2,3,5,2,5,1,1,1,5,1,5,3,4,5], falsenine:[4,5,5,3,2,5,4,4,2,3,5,3,3,1,1,1,5,1,5,3,4,5]};
-  const OVR_PACE_W={speed:6, acceleration:5}, OVR_STY={}, OVR_STY_CAL={};
-  const OVR_RATE_V=229;   // (the weights' version: a saved career's men rated again when it moves -- see mgMigrate. v205: the sheet's; v229: every rating two higher)
+  const OVR_PACE_W={speed:6, acceleration:5}, OVR_STY={}, OVR_STY_CAL={}, OVR_STY_LIN={};   // (v230: OVR_STY_LIN the straight line's, OVR_STY_CAL the curve's)
+  const OVR_RATE_V=230;   // (the weights' version: a saved career's men rated again when it moves -- see mgMigrate. v205: the sheet's; v229: every rating two higher; v230: the curve)
   for(const k in STYLE_SHEET){ const S=STYLES[k]; if(!S||S.role==='GK') continue; const P=STYLE_SHEET[k], v=x=>P[OUT_KEYS.indexOf(x)], ks=OUT_KEYS.filter(x=>!OVR_PACE_W[x]);
     const lo=Math.min(...ks.map(v)), hi=Math.max(...ks.map(v)), w=Object.assign({},OVR_PACE_W); for(const x of ks) w[x]=Math.round(1+4*(v(x)-lo)/Math.max(1,hi-lo));
     const lo2=Math.min(...OUT_KEYS.map(v)), hi2=Math.max(...OUT_KEYS.map(v)); for(const x in OVR_PACE_W) w[x]=Math.round(1+4*(v(x)-lo2)/Math.max(1,hi2-lo2));   // (v203: his pace among all his numbers)
@@ -3134,7 +3154,10 @@
     // far -- cwStatsForOVR -- so the style's own weights are stretched to move his rating with his level as his line's did)
     const wl=OVR_W[S.role], mv=x=>(wl[x]||0)>=2?1:0.55, sl=W=>{ let a=0,t=0; for(const x in W){ a+=W[x]*mv(x); t+=W[x]; } return a/t; };
     const st={}; for(const x of ALL_STAT_KEYS) st[x]=clamp(ARCH[S.role][x]+(S.d[x]||0),1,10);
-    const K=OVR_K[S.role]*sl(wl)/sl(w); OVR_STY[k]=w; OVR_STY_CAL[k]={A:STYLE_REF[k]-K*ovrMean(st,w), K}; }
+    const K=OVR_K[S.role]*sl(wl)/sl(w), lin={A:STYLE_REF[k]-K*ovrMean(st,w), K}; OVR_STY[k]=w; OVR_STY_LIN[k]=lin;
+    OVR_STY_CAL[k]=ovrCurveCal(S.role,w,st,x=>lin.A+lin.K*ovrMean(x,w)); }   // (v230: on the curve, set at his usual make and at the Premier Division's)
+  for(const r in OVR_W){ const mk={}; for(const x of ALL_STAT_KEYS) mk[x]=clamp(ARCH[r][x]-STAT_DROP,1,10);   // (v230: each line's usual man, as v229 makes him)
+    OVR_LINE_CAL[r]=ovrCurveCal(r,OVR_W[r],mk,x=>cwOverallLin(r,x)/10); }
   // the stats that make his game, as his rating has them: his playstyle's that count 4 and up, the most first (else his line's)
   const ovrMainOf=(role,style)=>{ const k=ovrStyleKey(role,style); if(!k) return ovrMain(role); const w=OVR_STY[k]; return Object.keys(w).filter(x=>w[x]>=4).sort((a,b)=>w[b]-w[a]||OUT_KEYS.indexOf(a)-OUT_KEYS.indexOf(b)); };
   // (v182) THE SPREAD, A BELL CURVE: a made man's stats scatter round his style's on a normal curve (normInv: Acklam's
@@ -17140,8 +17163,11 @@
   function ovrStyleKey(role,style){ const k=style&&(TYPE_WAS[style]||style); return k&&OVR_STY[k]&&STYLES[k].role===role?k:null; }
   function cwOverall(role,st,style){ return Math.max(1,Math.min(99,Math.round(cwOverallX(role,st,style)))); }
   function cwOverallX(role,st,style){ const s=role==='GK'?null:ovrStyleKey(role,style);   // (v155: his rating unrounded -- what the side's mood is worth to him)
-    if(s){ const c=OVR_STY_CAL[s]; return (c.A+c.K*ovrMean(st,OVR_STY[s]))*10; }
-    const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }
+    if(s){ const c=OVR_STY_CAL[s]; return (c.A+c.K*ovrMeanV(st,OVR_STY[s]))*10; }   // (v230: on the curve -- ovrMeanV)
+    const c=OVR_LINE_CAL[role]||OVR_LINE_CAL.MID; if(!c) return cwOverallLin(role,st); return (c.A+c.K*ovrMeanV(st,OVR_W[role]||OVR_W.MID))*10; }
+  // (v230) the straight-line rating, as it was till v230: what each playstyle's usual level (STYLE_REF) and the curve's
+  // calibration are reckoned from
+  function cwOverallLin(role,st){ const w=OVR_W[role]||OVR_W.MID, R=OVR_REF[role]||OVR_REF.MID, K=OVR_K[role]||OVR_K.MID; return (R[0]+(ovrMean(st,w)-R[1])*K)*10; }
   function cwWmean(p,w){ let s=0,wt=0; for(const k in w){ s+=p[k]*w[k]; wt+=w[k]; } return s/wt; }
   // A MAN MADE TO A RATING (T), of a style: his style's usual make (his line's averages and its offsets -- the master sheet's
   // numbers, v182) moved from what that make rates (STYLE_REF; with no style, his line's usual man's: OVR_REF) to T -- all of
@@ -17152,12 +17178,19 @@
   // put on after and the rest of his game moved by however far they took him off the rating: a style rated well over his
   // line's had his main stats squeezed -- cwStyleStats, gone.)
   function cwStatsForOVR(role,T,rng,style){ const S=style&&STYLES[style], d=(S&&S.d)||{}, base=k=>ARCH[role][k]-(S?0:STAT_DROP)+(d[k]||0), w=OVR_W[role],   // (v229: with no style, his line's averages a point down)
-      B=S&&STYLE_REF[style]!=null?STYLE_REF[style]:OVR_REF[role][0], delta=T/10-B, s={}, main=ovrMainBut(role), lv=k=>(w[k]||0)>=2?delta:delta*0.55;   // (B: the make's rating, in stat points; v144: his pace not moved to make it)
+      B=S&&STYLE_REF[style]!=null?STYLE_REF[style]:OVR_REF[role][0], delta=ovrDeltaFor(role,T,S?style:null,base,T/10-B), s={}, main=ovrMainBut(role), lv=k=>(w[k]||0)>=2?delta:delta*0.55;   // (B: the make's rating, in stat points; v144: his pace not moved to make it. v230: the level on the curve -- ovrDeltaFor)
     for(const k of STAT_KEYS_V162){ let v=base(k)+lv(k)+bellDev(rng(),makeSdOf(style,role,k)); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v193: as wide as his style is good at it -- MAKE_SD_OF)
     for(const k of NEW_STAT_KEYS){ const par=k==='longPass'?'passAcc':'composure', sd=makeSdOf(style,role,k), sp=makeSdOf(style,role,par), own=Math.sqrt(Math.max(0,sd*sd-0.36*sp*sp));   // (its own, so with 0.6 of its parent's on top it's sd in all)
       let v=base(k)+lv(k)+0.6*(s[par]-base(par)-lv(par))+bellDev(rng(),own); s[k]=clamp(Math.round(v*2)/2,1,10); }   // (v163: after the rest, a little of his short game in his long one)
-    for(let it=0; it<12; it++){ const cur=cwOverall(role,s); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }
+    for(let it=0; it<12; it++){ const cur=cwOverall(role,s,S?style:undefined); if(Math.abs(cur-T)<=1) break; const step=cur<T?0.5:-0.5; for(const k of main){ s[k]=clamp(s[k]+step,1,10); } }   // (v230: to the rating his playstyle gives him -- his line's before)
     return s; }
+  // (v230) THE LEVEL A MAN'S MADE AT: where his style's usual make (his line's, with no style) rates T on the curve -- the
+  // whole of it moved as cwStatsForOVR moves it. On the straight line it was T/10 less the make's own level (d0); on the
+  // curve a man below his style's usual level is made a shade lower than that, one between it and the Premier Division's
+  // a shade higher
+  function ovrDeltaFor(role,T,style,base,d0){ const m0={}; for(const k of ALL_STAT_KEYS) m0[k]=base(k);
+    const rt=x=>cwOverallX(role,ovrMakeAt(role,m0,x),style||undefined); let lo=d0-3, hi=d0+3;
+    for(let i=0;i<32;i++){ const m=(lo+hi)/2; if(rt(m)<T) lo=m; else hi=m; } return (lo+hi)/2; }
   function cwStyleFor(tier,rng){
     const r=rng();
     const T = tier>=4 ? [['control',.25],['gegen',.2],['neutral',.2],['wing',.15],['counter',.16],['direct',.04]]   // (v204: COUNTER-ATTACK as common as the two counters were together)

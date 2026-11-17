@@ -34,7 +34,7 @@ src = src.replace(anchor, '  window.__MG={get d(){ return CAREER&&CAREER.data; }
   + 'get DECO_SHOP(){ return DECO_SHOP; }, get BLD_LV(){ return BLD_LV; }, get CLUB_LV(){ return CLUB_LV; }, get PLACE(){ return PLACE; }, set fix(v){ careerFix=v; }, '
   + 'mgFreeAsk, mgDemand, mgNewFreeAgent, mgIdleYear, mgSetOvr, devTick, devUnpack, mgToFree, mgRerender, get MGUI(){ return MGUI; }, ensureLineup, careerLineupYours, get MG_MAX(){ return MG_MAX; }, '
   + 'mgAiBids, mgRenew, ddDay, mgFaKept, FREE_OVER, FREE_OVER_MAX, FA_GROWN, '
-  + 'mgCupsStart, condOf, condTire, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, EURO_CLUBS, MG_LEAGUE, mgEuroClubs, mgEuro, STARS, STAR_KEYS, styleOf, '
+  + 'mgCupsStart, condOf, condTire, condCost, COND_DAY, mgRest, mgNewFixtures, mgAutoLineup, mgPlayoffsOut, get CUP_CAL(){ return CUP_CAL; }, MG_LEVEL, EURO_CLUBS, MG_LEAGUE, mgEuroClubs, mgEuro, STARS, STAR_KEYS, styleOf, '
   + 'get G(){ return MATCH_GROUND; }, get V(){ return VENUE; }, get T(){ return TEAM; }};\n' + anchor);
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-mgr-')), 'classic.html');
 writeFileSync(copy, src);
@@ -601,7 +601,7 @@ await games(2); const s4 = await story(); await games(1); const s5 = await story
 await page.click('#storyModal [data-st="pos"][data-v="WNG"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="sty"][data-v="invwinger"]'); await page.waitForTimeout(40);
 const s6 = await story(); await page.click('#storyModal [data-st="sign"]'); await page.waitForTimeout(60); const s7 = await story();
 const kid = await page.evaluate(() => { const d = __MG.d, p = d.roster.find(x => x.id === d.story.kidId); return p && { age: p.age, ovr: p.ovr, pot: p.pot, role: p.role, sub: p.subRole, style: p.style, story: d.story.kid }; });
-ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 60 && kid.ovr <= 69 && kid.pot >= 85 && kid.pot <= 91
+ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.test(s6.text) && !s7.on && kid && kid.age === 16 && kid.ovr >= 61 && kid.ovr <= 72 && kid.pot >= 87 && kid.pot <= 93
    && kid.role === 'ATT' && kid.sub === 'WNG' && kid.style === 'invwinger' && kid.story === 2,   // (v143: an inverted winger -- the inside forward's gone)
   'after the 5th, a wonderkid asks to join; WNG and INVERTED WINGER picked, he signs: ' + (kid ? kid.age + ', rated ' + kid.ovr + ', a ceiling of ' + kid.pot + ', ' + kid.sub + ' ' + kid.style : 'nobody'));
 
@@ -613,11 +613,11 @@ ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.
 { await create('Cup Town');
 const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
   while(d.phase !== 'review' && n++ < 500){ if(d.wday === 'mon'){ M.mgForward(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
-    kick.push(M.mgStarters(d).filter(p => !p.inj && !(p.injB > 0)).map(M.condOf)); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
+    kick.push(M.mgStarters(d).filter(p => !p.inj && !(p.injB > 0)).map(p => [M.condOf(p), M.condCost(p)])); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
     if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('chPhase').textContent; }
     M.mgPlayGame(d, null, null); if(g.kind === 'cup' && d.ledger[0] && d.ledger[0].cup) ledgerCup = true; }   // (the books keep the last twelve: looked at as it's played)
-  M.mgSave(d); M.renderHub(); const all = kick.flat();
-  return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
+  M.mgSave(d); M.renderHub(); const all = kick.flat().map(e => e[0]), wk = 7 * M.COND_DAY[0], keep = kick.flat().filter(e => e[1] <= wk).map(e => e[0]);   // (keep: men a week's rest keeps up with)
+  return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), lowKeep: Math.min(...keep), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
     runs: (d.review && d.review.cups || []).map(x => x.join(' ')).join(', '), ledgerCup }; });
 r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { vet: 2, kid: 2, phone: 2 };
   const p = d.roster[d.lineup.atk[0]]; M.condTire(p, 1); out.after = +M.condOf(p).toFixed(3);
@@ -627,11 +627,11 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { v
   out.in = ['coco', 'fashion', 'cl'].map(k => d.cup[k].in.includes(d.clubId) ? 1 : 0).join('');
   return out; });
 let sn = await season();
-info('fitness: ' + JSON.stringify(r) + '; Division 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low }));
+info('fitness: ' + JSON.stringify(r) + '; Division 2: ' + JSON.stringify({ games: sn.seq.length, avg: sn.avg, low: sn.low, lowKeep: sn.lowKeep }));
 ok(r.after >= 0.6 && r.after <= 0.8 && r.day0 === 0.045 && r.day4 === 0.075 && r.entry === 0.6,
   'a game costs a man ' + Math.round((1 - r.after) * 100) + '% of his fitness; a day\'s rest gives back 4.5% with no physio, 7.5% with the best; a live match takes his fitness with him (his legs\' ceiling)');
-ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.low >= 0.85 && sn.avg >= 0.98 && sn.wins === '111',
-  'Division 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; a man whose stamina has faded a little short: ' + Math.round(sn.low * 100) + '%); the cups are played above it, each to a winner');
+ok(r.in === '000' && !sn.seq.some(x => /@/.test(x)) && sn.lowKeep >= 0.95 && sn.low >= 0.6 && sn.avg >= 0.98 && sn.wins === '111',   // (v230: a man a game costs more than a week gives back, by his Stamina and age, runs down a little; the rest are fresh)
+  'Division 2 plays only the league (' + sn.seq.length + ' games): a game a week, your eight fresh for them (' + Math.round(sn.avg * 1000) / 10 + '% on average; every man a week\'s rest keeps up with ' + Math.round(sn.lowKeep * 100) + '% or more; the most tired of all ' + Math.round(sn.low * 100) + '%: one a game costs more than a week gives back, by his Stamina or age, runs down a little); the cups are played above it, each to a winner');
 
 await create('Cup City');
 r = await page.evaluate(() => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };

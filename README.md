@@ -476,6 +476,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   worse at everything, both sides alike, and a style's weakest stats (a 4 on the sheets before, a 2 now) sit on the
   game's floor of 1. A career saved before has every stat a point lower once as it's loaded and every man two up on
   his rating, on the same wage; kept exhibition sides and edited squads the same.
+- **The top of a stat counts for more (v230).** A point near the top of a stat is worth more to a man's rating than
+  one near the foot of it, the more so the more his playstyle needs the stat: a stat's value in his rating grows as
+  x + (w/wmax)(x - 1)^3/243 (OVR_CURVE 1), so a point of a stat his style counts most is worth twice as much at 10 as at
+  1, and one it counts little hardly more. A deep creator made for the Premier Division gains 0.62 when his passing goes
+  from 9.5 to 10 and 0.32 when it goes from 1 to 1.5; his heading, which his style counts 2 of 5, much the same at either
+  end. Every playstyle is set on the curve at two makes -- its usual man rates what he did, and a man made for the
+  Premier Division's 81 rates that -- so the leagues are where they were: a man of his style's usual shape a shade
+  under what he was between the two, one whose best stats are near the top over it, and the lower leagues' men a little
+  over (a low stat costs less than it did). Men are made to their ratings on their own playstyle's curve. The stars rate
+  half a point higher on average, three at most (Van Veers 91 to 94, Nagala Kone 86 to 89); a career saved before is
+  rated again as it's loaded, its Division 2 men about a point and a half up, the Premier Division's about half a point.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3493,6 +3504,21 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v230: the top of a stat counts for more.** A stat's value in a rating is x + g(w/wmax)(x - 1)^3/243 with g 1
+  (OVR_CURVE): a point near 10 worth up to twice one near 1, by how much his playstyle counts the stat. Each playstyle and
+  each line is set on it at its usual make and at the Premier Division's (OVR_TOP 81, ovrCurveCal), the straight line
+  kept for what's reckoned from it (cwOverallLin, STYLE_REF); a man is made to a rating at the level his own playstyle's
+  curve puts it (ovrDeltaFor) and nudged by that rating. Saved careers are rated again (OVR_RATE_V 230). The Signature
+  Players sheet rates its stars on the same curve. Tests: `classic-clubs.mjs` checks the curve (where each playstyle is
+  set, a deep creator's passing at the top and at the foot, men made to their ratings) and compares playstyles with their
+  line's straight line; the migration checks in `classic-pace`, `manager-dev` and `classic-stats` allow for the curve's
+  lift and a star's 99; `manager-economy`'s floor on a new club's wage bill is lower; `manager-career` takes the
+  wonderkid's 87 to 92 (left at 85 to 91 in v229) and lets a man whose game costs more than a week's rest, by his Stamina
+  or age, run down a little in Division 2 (the rest fresh); `classic-tactics` looks at what a man's spots cost his IQs
+  with both lifted to 5 (one made with an Off IQ of 2 had no cost to show over the floor of 1). Also: on the shortest phones (360 px high and under) a man's
+  new-deal row stays on one line, a six-figure wage and all (the seasons figure 54 px wide, the gaps and AGREE a little
+  tighter): it wrapped, and a listed man's deal side ran 5 px over the card (`classic-ui.mjs` lists him rated 85 now, so
+  his row carries the longest wage). See **The top of a stat counts for more (v230)**.
 - **v229: every stat two lower on the sheets, every rating two higher.** STYLE_SHEET and the stars' numbers two lower,
   a man's stats a point lower in the game (STAT_DROP), the ratings calibrated two higher (OVR_LIFT: STYLE_REF and
   OVR_REF 0.2 up), the leagues' levels 57, 65, 73 and 81. The money, popularity, skill stars, free agents' fees, youth
