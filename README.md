@@ -3515,7 +3515,9 @@ test, and like the Trap Lab the values are the game's settings.
   lift and a star's 99; `manager-economy`'s floor on a new club's wage bill is lower; `manager-career` takes the
   wonderkid's 87 to 92 (left at 85 to 91 in v229) and lets a man whose game costs more than a week's rest, by his Stamina
   or age, run down a little in Division 2 (the rest fresh); `classic-tactics` looks at what a man's spots cost his IQs
-  with both lifted to 5 (one made with an Off IQ of 2 had no cost to show over the floor of 1). Also: on the shortest phones (360 px high and under) a man's
+  with both lifted to 5 (one made with an Off IQ of 2 had no cost to show over the floor of 1), `manager-honest` the
+  dressing room's mood on the side's most composed man (the same floor), and `classic-shots` their cross switching you
+  with a crosser of Crossing 10 (a poor one's goes wide at random, and you're rightly put on whoever's nearest). Also: on the shortest phones (360 px high and under) a man's
   new-deal row stays on one line, a six-figure wage and all (the seasons figure 54 px wide, the gaps and AGREE a little
   tighter): it wrapped, and a listed man's deal side ran 5 px over the card (`classic-ui.mjs` lists him rated 85 now, so
   his row carries the longest wage). See **The top of a stat counts for more (v230)**.

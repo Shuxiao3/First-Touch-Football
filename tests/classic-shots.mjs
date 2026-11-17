@@ -137,11 +137,12 @@ const xsw = await page.evaluate(() => {
   tgt.x = ownX + atk * 190; tgt.y = T.YC + 20; tgt.vx = tgt.vy = 0;
   mk.x = tgt.x - atk * 25; mk.y = tgt.y + 30; other.x = ownX + atk * 240; other.y = T.YC - 120;
   const b = T.ball(); b.ownedBy = w; b.x = w.x; b.y = w.y + 20; b.z = 0; b.vx = b.vy = b.vz = 0;
+  const keepX = w.stats.crossing; w.stats.crossing = 10;   // (v230: a good crosser, so it comes where it's meant -- a poor one's goes wide at random, and you're rightly put on whoever's nearest that)
   T.aiCross(w, { x: tgt.x, y: tgt.y, who: tgt });
   const onMarker = T.controlled() === mk;
   // ...and one for nobody in particular: you're put on whoever's nearest where it comes down to head height
   T.freeze(); T.setControlled(far); b.ownedBy = w; b.x = w.x; b.y = w.y + 20; b.z = 0; b.vx = b.vy = b.vz = 0;
-  T.aiCross(w, { x: other.x + atk * 20, y: other.y });
+  T.aiCross(w, { x: other.x + atk * 20, y: other.y }); w.stats.crossing = keepX;
   return { onMarker, onNearest: T.controlled() === other, was: G.indexOf(T.controlled()) };
 });
 info('their cross: ' + JSON.stringify(xsw));

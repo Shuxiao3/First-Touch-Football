@@ -44,7 +44,8 @@ r = await K(`(()=>{ const d=CAREER.data, V=mgAiClubs(d).flatMap(c=>c.players).fi
 ok(r.n > 0 && r.ok, 'a veteran (31 and over) moving within his level asks at least what he\'d earn staying (' + r.n + ' men; ' + JSON.stringify(r.r) + ' [age, rating, asks, staying]) -- not 0.85 of it again');
 
 // --- THE DRESSING ROOM ON THE PITCH ---------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data, keep=d.tm, at=tm=>{ d.tm=tm; return { o:tmOvr(d), s:Math.round(mgStrength(d,d.clubId)*100)/100, st:careerLineupYours(d).squad[1].stats.composure }; };
+r = await K(`(()=>{ const d=CAREER.data, keep=d.tm; d.tm=MOR0; const sq0=careerLineupYours(d).squad; let ix=1; sq0.forEach((e,i)=>{ if(e.stats.composure>sq0[ix].stats.composure) ix=i; });   // (v230: the side's most composed man -- one made with 1 has nothing for a bad mood to take)
+  const at=tm=>{ d.tm=tm; return { o:tmOvr(d), s:Math.round(mgStrength(d,d.clubId)*100)/100, st:careerLineupYours(d).squad[ix].stats.composure }; };
   const lo=at(1), mid=at(MOR0), hi=at(10), b8=at(8); d.tm=keep; return { lo, mid, hi, b8 }; })()`);
 info('the side\'s mood on the day: ' + JSON.stringify(r));
 ok(r.mid.o === 0 && r.hi.o >= 0.3 && r.hi.o <= 0.7 && r.lo.o <= -0.9 && r.lo.o >= -1.8 && r.lo.o < -2 * r.hi.o && r.hi.s > r.mid.s && r.mid.s > r.lo.s && r.hi.st > r.mid.st && r.lo.st < r.mid.st,
