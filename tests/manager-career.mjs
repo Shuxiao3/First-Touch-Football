@@ -722,7 +722,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   const where = k => { for(const c of Object.values(W.clubs)){ const p = c.players.find(x => x.star === k); if(p) return [c, p]; } return [null, null]; };
   out.at = E.map(s => (where(s.key)[0] || {}).name || '-').join(',') === E.map(s => s.career).join(',');
   out.made = E.every(s => { const [c, p] = where(s.key), st = M.devUnpack(p.at);
-    return p.uniq && M.styleOf(p).name === 'Unique' && p.style === s.base && p.age === s.age && p.pot === p.ovr && p.at === p.cl && p.sp === s.sk && c.players.length === 15 && M.STAR_KEYS.every((k, i) => st[k] === s.v[i] / 2); });
+    return p.uniq && M.styleOf(p).name === 'Unique' && p.style === s.base && p.age === s.age && p.pot === p.ovr && p.at === p.cl && p.sp === s.sk && c.players.length === 15 && M.STAR_KEYS.every((k, i) => st[k] === Math.max(1, s.v[i] / 2)); });   // (v231: a 1 on the sheet is the game's 1)
   out.ovr = E.map(s => s.name + ' ' + where(s.key)[1].ovr).join(', ');
   const ids = () => E.map(s => (where(s.key)[1] || {}).id).join(), before = ids();
   M.mgEuro(d, true); out.kept = ids() === before && W.euro.every(id => W.clubs[id].players.length === 15);
@@ -738,7 +738,7 @@ r = await page.evaluate(() => { const M = __MG, d = M.d, W = d.world, E = M.STAR
   Object.assign(ms, { v: ms.v.map(x => Math.min(20, x + 1)), sk: 5, career: 'Paris Eiffel', age: ms.age + 2 }); Object.assign(vs, { sk: 4, career: 'Mancunian City' });
   const parisN = Object.values(W.clubs).find(c => c.name === 'Paris Eiffel').players.length;   // (its squad as it is: he's in for a man)
   M.mgMigrate(d); const [mc1, mp1] = where('mancala'), st1 = M.devUnpack(mp1.at);
-  out.sync = [mc0.name + ' > ' + mc1.name, mp1.sp, mp1.age - age0, M.STAR_KEYS.every((k, i) => st1[k] === ms.v[i] / 2), mc1.players.length === parisN, d.roster.includes(vp) && vp.sp === 4].join(' | ');
+  out.sync = [mc0.name + ' > ' + mc1.name, mp1.sp, mp1.age - age0, M.STAR_KEYS.every((k, i) => st1[k] === Math.max(1, ms.v[i] / 2)), mc1.players.length === parisN, d.roster.includes(vp) && vp.sp === 4].join(' | ');
   const again = mp1.id + ':' + mp1.age; M.mgMigrate(d); out.syncOnce = (where('mancala')[1].id + ':' + where('mancala')[1].age) === again;
   Object.assign(ms, keepM); Object.assign(vs, keepV);
   // (v201) a career from before v200: its stars as v200 had them -- Mancala then a ball-winner with Nagala Kone's

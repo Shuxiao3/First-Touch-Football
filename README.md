@@ -487,6 +487,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   over (a low stat costs less than it did). Men are made to their ratings on their own playstyle's curve. The stars rate
   half a point higher on average, three at most (Van Veers 91 to 94, Nagala Kone 86 to 89); a career saved before is
   rated again as it's loaded, its Division 2 men about a point and a half up, the Premier Division's about half a point.
+- **The stars as the sheet has them now (v231).** Thirty of the thirty-three stars were remade on the Signature
+  Players sheet, most of them with their best numbers higher and their weakest lower, and on the curve (v230) that rates
+  them higher: 1.7 on average. Mancala goes from 82 to 90, Paul Worra from 84 to 91, Paolo Zeevata from 84 to 90, Alan
+  Haggerd from 85 to 90 and Ryan Kane from 89 to 94; Tomas Lamb comes down from 95 to 92 and Soo-min Hyuk from 88 to 86.
+  Messiah Petita, Christian Star and Paul Madreen are at 99, the most a star shows. A 1 on the sheet is the game's 1, as a
+  2 is (the game's numbers run 1 to 10). A saved career has them as they are now when it's loaded, as with any change on
+  the sheet.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3504,6 +3511,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v231: the stars as the sheet has them now.** Thirty of STARS' lines take the sheet's numbers (its players; its
+  clubs, formations and weights unchanged), their names, clubs, positions, playstyles, ages and skill stars as they were:
+  shown ratings 1.7 up on average, from -3 (Tomas Lamb) to +8 (Mancala). starStats floors a star's numbers at 1: a 1 on
+  the sheet's 1 to 20 halved to 0.5, under the game's scale (a career's packed numbers kept it at 1 already, so a star
+  made there no longer matched his sheet), and the sheet's rating code does the same. A saved career's stars are made
+  again as it's loaded (starSig). The sheet's thirty marked IN THE GAME (v231). Tests: `manager-career` and `classic-exh`
+  compare a star's numbers with the sheet's halves floored at 1.
 - **v230: the top of a stat counts for more.** A stat's value in a rating is x + g(w/wmax)(x - 1)^3/243 with g 1
   (OVR_CURVE): a point near 10 worth up to twice one near 1, by how much his playstyle counts the stat. Each playstyle and
   each line is set on it at its usual make and at the Premier Division's (OVR_TOP 81, ovrCurveCal), the straight line

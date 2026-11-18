@@ -109,7 +109,7 @@ ok(tabs === 'PREMIER LEAGUE*,CHAMPIONS CUP' && plN === 20 && ccIds === 'JUV,BOH,
   'the picker: the Premier League\'s twenty and the Champions Cup\'s twelve a tab each; Madrid Royale picked (' + roy.meta + '), the match billed "' + bill.split(' · ').slice(0, 2).join(' · ') + '"');
 const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)]);
   const names=all.flatMap(([c,s])=>s.map(e=>e.name)); out.n=names.length; out.dup=names.length-new Set(names).size;
-  out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&e.stars===S.sk&&entryStars(e)===S.sk&&STAR_KEYS.every((k,i)=>e.stats[k]===S.v[i]/2)?'ok':'bad'); })).join(',');   // (v200: his skill stars the sheet's)
+  out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&e.stars===S.sk&&entryStars(e)===S.sk&&STAR_KEYS.every((k,i)=>e.stats[k]===Math.max(1,S.v[i]/2))?'ok':'bad'); })).join(',');   // (v200: his skill stars the sheet's)
   const saved=STARS.splice(0), plain=CLUBS.map(c=>clubSquadGen(c)); STARS.push(...saved);   // (the Premier League's squads without them)
   out.same=CLUBS.every((c,ci)=>{ const a=plain[ci], b=clubSquadGen(c); return a.length===b.length&&a.every((e,i)=>b[i].star?b[i].was===e.name&&b[i].num===e.num:b[i].name===e.name&&b[i].ovr===e.ovr&&b[i].style===e.style); });
   out.ovr=CC_CLUBS.map(c=>c.id+' '+clubOvrShown(clubSquadGen(c).slice(0,9))).join(', ');
