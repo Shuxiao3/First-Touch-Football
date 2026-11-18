@@ -1270,7 +1270,11 @@
   .sbNums{ position:relative; width:28px; display:flex; flex-direction:column; background:var(--win); border-radius:var(--rS); overflow:hidden; }
   #readout .sbNums b, #readout .sbNums b.r{ flex:1; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; line-height:20px; color:var(--ink); }
   .sbNums s{ flex:none; display:block; height:2px; margin:0 4px; background:var(--rimLo); }
-  .sbNums::before{ content:''; position:absolute; left:0; top:0; width:3px; height:20px; background:linear-gradient(var(--acc) 0 54%, var(--accM) 54% 66%, var(--accB) 66% 100%); }
+  /* (v233) by each side's score a strip in the colour of the shirt it's wearing (its change kit's when the shirts clash,
+     as on the pitch), the way the scoreboards on TV show a side: a faint light rim, so a dark shirt still shows */
+  .sbNums::before, .sbNums::after{ content:''; position:absolute; left:0; width:4px; height:20px; box-shadow:inset 0 0 0 1px rgb(233 240 255 / .34); }
+  .sbNums::before{ top:0; background:var(--kitG,#84dc34); }
+  .sbNums::after{ bottom:0; background:var(--kitR,#d43434); }
   /* (v232) THE REST OF THE TOP ROW, in the score box's way: in each rimmed chip a dark well with the figure (yours in
      orange) over a small word, and a lighter panel for the rest -- an orange stripe down your man's, a grey one down
      theirs; the way you're kicking and the menu a well each. Their sizes and places as before */
@@ -4068,6 +4072,10 @@
   //      the colour a body is drawn in without sprites, and the keeper's top ----
   const TEAM_DEF={G:{code:'GRN',name:'GREEN',col:'#9dff3c',kit:null,gk:'#5fae4b'}, R:{code:'RED',name:'RED',col:'#ff5a4d',kit:null,gk:'#c4564b'}};
   const TEAM={G:Object.assign({},TEAM_DEF.G), R:Object.assign({},TEAM_DEF.R)};
+  // (v233) the shirt a side is wearing, for its strip in the score box: its club kit's (the change kit's when the shirts
+  // clash), else the drawn GRN / RED kit's
+  const SHIRT_DEF={G:'#84dc34', R:'#d43434'};
+  function shirtCol(t){ const k=teamKit(t); return k&&k[0]?k[0]:SHIRT_DEF[t]; }
   // the ground the match is at: its level (the far stand drawn to match), the boards along the front, the stand's name;
   // null away from a career (the old stand, the game's own words on the boards). VENUE: its name, at kick-off.
   let MATCH_GROUND=null, VENUE='', venueT=0;
@@ -4104,7 +4112,7 @@
     teamLabels(); try{ SPRITE.flush(); }catch(e){}
   }
   function setTeamsDefault(){ TEAM.G=Object.assign({},TEAM_DEF.G); TEAM.R=Object.assign({},TEAM_DEF.R); setMatchGround(null); teamLabels(); try{ SPRITE.flush(); }catch(e){} }
-  { const g=keeperTops('#84dc34','#d43434');                          // the GRN / RED keepers: tops unlike either kit
+  { const g=keeperTops(SHIRT_DEF.G,SHIRT_DEF.R);                      // the GRN / RED keepers: tops unlike either kit
     TEAM_DEF.G.gk=TEAM.G.gk=g.G; TEAM_DEF.R.gk=TEAM.R.gk=g.R; }
   function teamLabels(){
     const g=document.getElementById('tnG'), r=document.getElementById('tnR');
@@ -4112,6 +4120,7 @@
     for(const t of ['G','R']){ const im=document.getElementById(t==='G'?'crG':'crR'); if(!im) continue;
       const u=TEAM[t].crest?crestURL(TEAM[t].crest):''; if(u){ im.src=u; im.style.display='inline-block'; } else { im.removeAttribute('src'); im.style.display='none'; }
       const cd=document.getElementById(t==='G'?'tnG':'tnR'); if(cd) cd.style.display=u?'none':''; }   // (v232: the letters only where there's no crest)
+    const sc=document.getElementById('rScore'); if(sc){ sc.style.setProperty('--kitG',shirtCol('G')); sc.style.setProperty('--kitR',shirtCol('R')); }   // (v233: each side's strip)
     document.querySelectorAll('.mteam').forEach(b=>{ b.textContent=b.dataset.mteam==='G'?'your team ('+TEAM.G.code+')':'opponent ('+TEAM.R.code+')'; });
   }
   let SQUAD={G:null,R:null}, LINEUP={G:null,R:null};

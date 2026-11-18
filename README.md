@@ -496,12 +496,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   the sheet.
 - **The match screen as the scoreboard mockups have it (v232).** The clock and the score are one box at the top left:
   the clock in orange in a dark well with its half under it, the two crests (a club's letters where it has none), and
-  the score in a narrow panel, yours on top beside an orange stripe. The rest of the top row is built the same way, a
+  the score in a narrow panel, yours on top (v233: by each score a strip in that side's shirt). The rest of the top row is built the same way, a
   rimmed chip with a dark well and a lighter panel: SUBS with how many are left; the way you're kicking; THEIR MAN with
   his number and position in the well, his name and his legs in the panel (a grey stripe); YOUR MAN with yours in orange,
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Each side's colour in the score box (v233).** By each side's score is a strip in the colour of the shirt it's
+  wearing, the way the scoreboards on TV show a side: its change kit's when the shirts clash, as on the pitch, so
+  Liverpool against Arsenal are their dark green. A faint light rim keeps a dark shirt (black, navy, a dark change kit)
+  from vanishing into the box. Your side is still the top row.
 - **On the pitch.** The man you control has a dotted green ring on the grass round his reach: how far from him he
   can take the ball, by his Ball control. A ball touching the ring is in his reach. The ring's bright while the
   ball's in it and faint while it's out of his reach. (It was a solid ring at his reach, always the same, and read as
@@ -3519,6 +3523,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v233: each side's strip in the shirt it's wearing.** `.sbNums::before` and `::after`, 4 px wide by each score, take
+  --kitG and --kitR, which teamLabels() sets on #rScore from shirtCol(t): the club kit's shirt being worn (matchKits'
+  change or third kit when the home shirts clash), else the drawn GRN / RED kit's (SHIRT_DEF, the shirts the keepers'
+  tops are picked against). An inset rim at a third of the ink's white keeps a dark one in sight; the orange stripe
+  that marked your score is gone. Tests: `classic-ui.mjs` checks both strips against the shirts on the pitch, and
+  Liverpool's change kit against Arsenal. `exhibition-setup.mjs` is back as it was before v232: it plays First Touch
+  Football (index.html), which v232 didn't change.
 - **v232: the match screen as the scoreboard mockups have it.** #rBox holds the clock (#rClockChip: #rClock, and #rHalf
   1ST HALF / 2ND HALF; a word in place of a time, HALF TIME, FULL TIME or a lab's name, smaller and the well wider) and
   the score (#rScore: each club's crest, #tnG / #tnR shown only where there's none, and #sG / #sR in a 28 px panel), 122 x
@@ -3527,8 +3538,7 @@ test, and like the Trap Lab the values are the game's settings.
   buttons keep their text (the code still writes PASS, THRU, SWITCH and the rest) with a drawing before it (.actBtn::before,
   masked by an SVG per mode) and a ring in --ring; the pulse and the armed glow keep the ring. Tests: `classic-ui.mjs`
   checks the new look (the box, the row's height, each button's ring and drawing) and finds the score box where the clock
-  and the score were; `exhibition-setup.mjs` reads the clubs and the score from their own parts. YOUR MAN's name shares its line with his
-  stars, so it has 76 px: about 19 names in 20 fit whole, and a longer one has his first name as an initial (the v228
+  and the score were. YOUR MAN's name shares its line with his stars, so it has 76 px: about 19 names in 20 fit whole, and a longer one has his first name as an initial (the v228
   rule, T. Hendrinks); `manager-explain.mjs` takes that shorter name as his.
 - **v231: the stars as the sheet has them now.** Thirty of STARS' lines take the sheet's numbers (its players; its
   clubs, formations and weights unchanged), their names, clubs, positions, playstyles, ages and skill stars as they were:

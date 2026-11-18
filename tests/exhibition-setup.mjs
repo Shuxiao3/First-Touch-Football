@@ -50,8 +50,7 @@ ok(mine.i === 1 && mine.role === 'DEF', 'you can pick another player: ' + mine.n
 const customBefore = await page.evaluate(() => localStorage.getItem('ft7_squads'));
 await page.click('#exhGo'); await page.waitForTimeout(800);
 ok(!(await page.isVisible('#startMenu')), 'KICK OFF starts the match');
-const sb = [await text(page, '#tnG'), await text(page, '#sG'), await text(page, '#sR'), await text(page, '#tnR')].join(' ');   // (v232: the score box -- each club's crest, its letters where it has none)
-ok(sb === 'ARS 0 0 LIV', 'the score box has the clubs: ' + sb);
+ok((await text(page, '#rScore')).replace(/\s+/g, ' ') === 'ARS 0 : 0 LIV', 'the score reads the club codes: ' + await text(page, '#rScore'));
 await page.click('#menuBtn'); await page.click('#pauseMenu [data-pause="tactics"]'); await page.waitForTimeout(200);
 const youTab = await page.$$eval('#menuBody .sqTab', bs => (bs.find(b => /▶/.test(b.textContent)) || {}).textContent || '');
 ok(youTab.includes(mine.name.replace(/^#\d+ /, '')), 'you control the player you picked: ' + youTab);
@@ -105,7 +104,7 @@ await page.click('#labExitBtn'); await page.waitForTimeout(200);
   const sel = await ph.$eval('#exhPlayers .exhPl.sel', b => +b.dataset.i);
   ok(sel === 3, 'phone: a tap picks your player');
   await ph.tap('#exhGo'); await ph.waitForTimeout(600);
-  ok(!(await ph.isVisible('#startMenu')) && /^[A-Z]{3}$/.test(await text(ph, '#tnR')), 'phone: KICK OFF starts it: ' + (await text(ph, '#tnG')) + ' v ' + (await text(ph, '#tnR')));
+  ok(!(await ph.isVisible('#startMenu')) && /^[A-Z]{3}$/.test(await text(ph, '#tnR')), 'phone: KICK OFF starts it: ' + (await text(ph, '#rScore')).replace(/\s+/g, ' '));
   await ctx.close();
 }
 

@@ -23,7 +23,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, shirt:t=>shirtCol(t), sides:(g,r)=>{ if(g){ EXH.play.you=g; EXH.play.opp=r; setTeamsFromClubs(); } return [EXH.play.you,EXH.play.opp]; }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
 patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES, setCareerForm, FORMS, ATK_ONLY, DEF_ONLY, mgNewPlayer};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
@@ -663,11 +663,21 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     return { box: [Math.round(R('rBox').width), Math.round(R('rBox').height)], well: Math.round(R('rClockChip').width), clock: cs('rClock').color, half: document.getElementById('rHalf').textContent,
       nums: Math.round(document.querySelector('#rScore .sbNums').getBoundingClientRect().width), right: ['qsBtn', 'rDir', 'rTheir', 'rPlayer', 'menuBtn'].map(id => Math.round(R(id).height)),
       wells: ['qsBtn', 'rTheir', 'rPlayer'].every(id => document.querySelector('#' + id + ' .hW') && document.querySelector('#' + id + ' .hW').getBoundingClientRect().width > 20),
-      btns: ['kickBtn', 'shootBtn', 'crossBtn', 'skillBtn'].map(btn) }; });
+      btns: ['kickBtn', 'shootBtn', 'crossBtn', 'skillBtn'].map(btn),
+      // (v233) by each side's score a strip in the shirt it's wearing
+      strips: ['::before', '::after'].map(ps => getComputedStyle(document.querySelector('#rScore .sbNums'), ps).backgroundColor),
+      shirts: ['G', 'R'].map(t => { const h = window.__T.shirt(t); return 'rgb(' + [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ') + ')'; }) }; });
   info('the match screen\'s look (v232): ' + JSON.stringify(look));
   ok(look.box[0] === 122 && look.box[1] === 46 && look.well >= 60 && look.clock === 'rgb(255, 156, 64)' && /^(1ST|2ND) HALF$/.test(look.half) && look.nums === 28 && look.right.every(h => h === 36) && look.wells
      && look.btns.every(b => b.ring && b.ico),
     'the match screen as the mockups have it (v232): one score box ' + look.box.join(' x ') + ' -- the clock in orange in its well, "' + look.half + '" under it, the score in a ' + look.nums + ' px panel; SUBS, THEIR MAN and YOUR MAN a well and a panel each, the row 36 px; every button a ring with a drawing over its name');
+  ok(look.strips[0] === look.shirts[0] && look.strips[1] === look.shirts[1] && look.strips[0] !== look.strips[1],
+    'by each side\'s score a strip in the shirt it\'s wearing (v233): ' + look.strips.join(' over ') + ' -- the shirts on the pitch ' + look.shirts.join(' and '));
+  // ...and when the shirts clash, the change kit's: Liverpool out of red against Arsenal (then the sides as they were)
+  const clash = await page.evaluate(() => { const T = window.__T, was = T.sides(), n = document.querySelector('#rScore .sbNums'), col = ps => getComputedStyle(n, ps).backgroundColor;
+    T.sides('ARS', 'LIV'); const r = { top: col('::before'), bottom: col('::after'), shirt: T.shirt('R') }; T.sides(was[0], was[1]); return r; });
+  ok(clash.top === 'rgb(212, 32, 42)' && clash.bottom === 'rgb(14, 59, 46)' && clash.shirt === '#0e3b2e',
+    '...the change kit\'s when the shirts clash: Arsenal\'s red ' + clash.top + ' over Liverpool\'s change green ' + clash.bottom);
   const e1 = await hudWin(page);
   ok(winOk(e1, false), 'an exhibition: his window says who he is -- a club\'s man has only his surname, so he\'s given a first name (' + e1.num + ' ' + e1.name + ' ' + e1.pos + ')' + (winOk(e1, false) ? '' : ' ' + JSON.stringify(e1)));
   // (looked at two frames on: a tired man standing gets it back quickly, and the game soon switches you to whoever's best placed)
