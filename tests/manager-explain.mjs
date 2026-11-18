@@ -126,7 +126,7 @@ await K(`(()=>{ hideBldg(); return 1; })()`);
 // --- THE MATCH'S TOP RIGHT, AND THE ▽ -------------------------------------------------------------------------------------------------
 await K(`(()=>{ hubToMenu(); return 1; })()`); await page.waitForTimeout(200);
 await startExhibition(page); await page.waitForTimeout(1500);
-const same = () => K(`(()=>{ const c=controlled; return { tri:window.__tri===c, name:document.getElementById('rpName').textContent===fullName(c.pname), pos:document.getElementById('rpPos').textContent, gk:keepers.includes(c) }; })()`);
+const same = () => K(`(()=>{ const c=controlled; return { tri:window.__tri===c, name:(t=>{ const f=fullName(c.pname); return t===f||(f.includes(' ')&&t===f[0]+'. '+f.slice(f.indexOf(' ')+1)); })(document.getElementById('rpName').textContent), pos:document.getElementById('rpPos').textContent, gk:keepers.includes(c) }; })()`);
 await K(`(()=>{ window.__tri=null; return 1; })()`); await page.waitForTimeout(150);
 const s1 = await same();
 await K(`(()=>{ const kp=keepers.find(k=>k.team==='G'); Object.assign(ball,{ownedBy:null,dribbler:null,x:kp.x,y:kp.y,z:20,vx:0,vy:0,vz:0}); kp.gkRoaming=false; kp.mode='hold'; kp.holdT=9; kp.heldT=0; gkHold=kp; window.__tri=null; return 1; })()`);

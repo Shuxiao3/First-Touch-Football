@@ -645,16 +645,29 @@ for(const [w, h] of [[844, 340], [640, 360]]){
       btn: Object.fromEntries(['kickBtn','shootBtn','crossBtn','skillBtn'].map((id, i) => [id, [+b[i].width.toFixed(1), +(s.right - b[i].right).toFixed(1), +(s.bottom - b[i].bottom).toFixed(1)]])) }; });
   ok(g.left === 0 && Math.abs(g.width - 844) < 1 && Math.abs(g.height - 390) < 2 && g.W > 1100, 'the game fills the phone: ' + Math.round(g.width) + 'x' + Math.round(g.height) + ', ' + g.W + ' wide inside (no bands)');
   ok(g.inside, 'the buttons stand over the bottom-right corner of the pitch, as they did before the bands');
-  ok(g.chips.join(' ') === 'rClockChip rScore qsBtn rDir rTheir rPlayer menuBtn', 'the HUD (v228: the Studio\'s match screen): the clock and the score; SUBS, the way you\'re kicking, THEIR MAN, your man\'s window and the menu -- no ? (the controls are in the menu), no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
+  ok(g.chips.join(' ') === 'rBox qsBtn rDir rTheir rPlayer menuBtn', 'the HUD (v228: the Studio\'s match screen; v232: the clock and the score one box): the score box; SUBS, the way you\'re kicking, THEIR MAN, your man\'s window and the menu -- no ? (the controls are in the menu), no ball speed, possession or touch grade (' + g.chips.join(' ') + ')');
   // (where the Studio puts them, on its 852 x 393 phone: the clock 34 px in, the menu 26 px from the right, 11.5 px
   // between; your man's window 169 wide, theirs 90.5, the menu 32 -- and the buttons from the bottom-right corner)
   { const A = g.at, ids = g.chips, near = (a, b, t = 1) => Math.abs(a - b) <= t, gaps = ids.slice(1).map((id, i) => +(A[id][0] - (g.width - A[ids[i]][1])).toFixed(1));
     info('the HUD at 844 x 390: ' + JSON.stringify({ at: A, btn: g.btn, gaps }));
-    ok(near(A.rClockChip[0], 34) && near(A.rScore[0], 34 + A.rClockChip[2] + 11.5) && near(A.menuBtn[1], 26) && near(A.menuBtn[2], 32) && near(A.rPlayer[2], 169) && near(A.rTheir[2], 90.5)
+    ok(near(A.rBox[0], 34) && near(A.rBox[2], 122) && near(A.menuBtn[1], 26) && near(A.menuBtn[2], 32) && near(A.rPlayer[2], 169) && near(A.rTheir[2], 90.5)
       && ['rDir', 'rTheir', 'rPlayer', 'menuBtn'].every(id => near(gaps[ids.indexOf(id) - 1], 11.5)),
-      'the row where the Studio has it: the clock ' + A.rClockChip[0] + ' px in, the menu ' + A.menuBtn[1] + ' px from the right, ' + gaps.join(' / ') + ' px between; your man\'s window ' + A.rPlayer[2] + ' wide, theirs ' + A.rTheir[2] + ', the menu ' + A.menuBtn[2]);
+      'the row where the Studio has it: the score box ' + A.rBox[0] + ' px in and ' + A.rBox[2] + ' wide (v232), the menu ' + A.menuBtn[1] + ' px from the right, ' + gaps.join(' / ') + ' px between; your man\'s window ' + A.rPlayer[2] + ' wide, theirs ' + A.rTheir[2] + ', the menu ' + A.menuBtn[2]);
     const B = g.btn, want = { kickBtn: [96, 42, 21], shootBtn: [64, 42, 132.5], crossBtn: [64, 158.5, 26], skillBtn: [58, 132.5, 117] };
     ok(Object.keys(want).every(k => want[k].every((v, i) => near(B[k][i], v))), 'the buttons where the Studio has them, from the bottom-right corner (size, right, bottom): PASS ' + B.kickBtn.join('/') + ', SHOOT ' + B.shootBtn.join('/') + ', CROSS ' + B.crossBtn.join('/') + ', SKILL ' + B.skillBtn.join('/')); }
+  // (v232) the match screen as the scoreboard mockups have it: the score box (the clock in its well, in orange, its half
+  // under it; the crests or the clubs' letters; the score in a narrow panel), the rest of the row a well and a panel
+  // each at 36 px, and the buttons rings in their own colours with a drawing over the name
+  const look = await page.evaluate(() => { const cs = (id, ps) => getComputedStyle(document.getElementById(id), ps), R = id => document.getElementById(id).getBoundingClientRect();
+    const btn = id => { const c = cs(id), b = cs(id, '::before'); return { ring: /inset/.test(c.boxShadow) && /radial-gradient/.test(c.backgroundImage), ico: /svg/.test(b.webkitMaskImage || b.maskImage || ''), w: Math.round(R(id).width) }; };
+    return { box: [Math.round(R('rBox').width), Math.round(R('rBox').height)], well: Math.round(R('rClockChip').width), clock: cs('rClock').color, half: document.getElementById('rHalf').textContent,
+      nums: Math.round(document.querySelector('#rScore .sbNums').getBoundingClientRect().width), right: ['qsBtn', 'rDir', 'rTheir', 'rPlayer', 'menuBtn'].map(id => Math.round(R(id).height)),
+      wells: ['qsBtn', 'rTheir', 'rPlayer'].every(id => document.querySelector('#' + id + ' .hW') && document.querySelector('#' + id + ' .hW').getBoundingClientRect().width > 20),
+      btns: ['kickBtn', 'shootBtn', 'crossBtn', 'skillBtn'].map(btn) }; });
+  info('the match screen\'s look (v232): ' + JSON.stringify(look));
+  ok(look.box[0] === 122 && look.box[1] === 46 && look.well >= 60 && look.clock === 'rgb(255, 156, 64)' && /^(1ST|2ND) HALF$/.test(look.half) && look.nums === 28 && look.right.every(h => h === 36) && look.wells
+     && look.btns.every(b => b.ring && b.ico),
+    'the match screen as the mockups have it (v232): one score box ' + look.box.join(' x ') + ' -- the clock in orange in its well, "' + look.half + '" under it, the score in a ' + look.nums + ' px panel; SUBS, THEIR MAN and YOUR MAN a well and a panel each, the row 36 px; every button a ring with a drawing over its name');
   const e1 = await hudWin(page);
   ok(winOk(e1, false), 'an exhibition: his window says who he is -- a club\'s man has only his surname, so he\'s given a first name (' + e1.num + ' ' + e1.name + ' ' + e1.pos + ')' + (winOk(e1, false) ? '' : ' ' + JSON.stringify(e1)));
   // (looked at two frames on: a tired man standing gets it back quickly, and the game soon switches you to whoever's best placed)

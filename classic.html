@@ -1252,6 +1252,77 @@
   .rpBot .statBar{ position:relative; flex:1; height:6px; }
   .rpBot .statBar s{ position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--bad); }
   .rpBot .stars{ font-size:10px; letter-spacing:0; }
+  /* (v232) THE SCORE BOX, top left (the scoreboard mockups' E9): the clock in a dark well with its half under it, the two
+     crests (a club's letters where it has none), and the score in a narrow panel, yours on top by the orange stripe --
+     one rimmed chip; a word in place of a time (HALF TIME, FULL TIME, a lab's name) smaller, the box wider for it */
+  #readout{ --chipBg:rgb(20 26 44 / .88); align-items:flex-start; }
+  #readout #rBox{ display:flex; gap:2px; padding:2px; height:46px; box-sizing:border-box; }
+  #rClockChip{ min-width:60px; padding:0 4px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; background:var(--well); border-radius:var(--rS); }
+  #readout #rClock{ font-size:18px; font-weight:700; letter-spacing:.5px; line-height:20px; color:var(--acc); white-space:nowrap; }
+  #rClockChip.word #rClock{ font-size:11px; line-height:13px; letter-spacing:1px; }
+  #rHalf{ font-style:normal; font-size:7px; font-weight:600; letter-spacing:1px; line-height:8px; color:var(--rimLo); white-space:nowrap; }
+  #rClockChip.word #rHalf{ display:none; }
+  #rScore{ display:flex; gap:2px; }
+  .sbTeams{ width:26px; display:flex; flex-direction:column; }
+  .sbTeam{ flex:1; display:flex; align-items:center; justify-content:center; }
+  #readout .sbCrest{ width:auto; height:15px; margin:0; }
+  .sbCode{ font-size:8px; font-weight:700; letter-spacing:.5px; color:var(--ink2); }
+  .sbNums{ position:relative; width:28px; display:flex; flex-direction:column; background:var(--win); border-radius:var(--rS); overflow:hidden; }
+  #readout .sbNums b, #readout .sbNums b.r{ flex:1; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; line-height:20px; color:var(--ink); }
+  .sbNums s{ flex:none; display:block; height:2px; margin:0 4px; background:var(--rimLo); }
+  .sbNums::before{ content:''; position:absolute; left:0; top:0; width:3px; height:20px; background:linear-gradient(var(--acc) 0 54%, var(--accM) 54% 66%, var(--accB) 66% 100%); }
+  /* (v232) THE REST OF THE TOP ROW, in the score box's way: in each rimmed chip a dark well with the figure (yours in
+     orange) over a small word, and a lighter panel for the rest -- an orange stripe down your man's, a grey one down
+     theirs; the way you're kicking and the menu a well each. Their sizes and places as before */
+  #readout .hW{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; background:var(--well); border-radius:var(--rS); }
+  #readout .hW small{ font-size:7px; font-weight:600; letter-spacing:1px; line-height:8px; color:var(--rimLo); }
+  #readout .hP{ position:relative; display:flex; flex-direction:column; justify-content:center; gap:4px; background:var(--win); border-radius:var(--rS); overflow:hidden; }
+  #readout #qsBtn{ display:flex; gap:2px; padding:2px; height:36px; min-height:0; box-sizing:border-box; }
+  #qsBtn .hW{ flex:0 0 38px; flex-direction:column-reverse; }
+  #readout #qsBtn .hW b{ font-size:16px; font-weight:700; line-height:17px; color:var(--acc); }
+  #qsBtn .hP{ flex:1 1 auto; min-width:21px; align-items:center; }
+  #readout #qsBtn .hP i{ font-style:normal; font-size:10px; color:var(--ink2); }
+  #readout #rDir, #readout #menuBtn{ height:36px; padding:0; box-sizing:border-box; display:flex; align-items:center; justify-content:center; background:var(--well);
+    box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi), inset 0 0 0 3px var(--chipBg); }
+  #readout #rDir{ width:23px; color:var(--acc); font-size:12px; }
+  #readout #menuBtn{ color:var(--ink2); font-size:13px; }
+  #readout #rTheir, #readout #rPlayer{ flex-direction:row; justify-content:flex-start; gap:2px; padding:2px; height:36px; box-sizing:border-box; }
+  #rTheir .hW{ flex:0 0 25px; }
+  #readout #rTheir .hW b{ font-size:11px; font-weight:700; line-height:12px; color:var(--ink2); }
+  #rTheir .hP{ flex:1 1 auto; min-width:0; padding:0 4px 0 7px; gap:5px; }
+  #rTheir .hP::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--rimLo); }
+  #readout #rtName{ font-size:10.5px; font-weight:700; line-height:12px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:none; }
+  #readout .hP .statBar{ position:relative; flex:none; height:3px; border-radius:2px; }
+  #readout .hP .statBar i{ background:var(--good); }
+  #rPlayer .hW{ flex:0 0 28px; }
+  #readout #rPlayer .hW b{ font-size:13px; font-weight:700; line-height:14px; color:var(--acc); }
+  #rPlayer .hP{ flex:1 1 auto; min-width:0; padding:0 5px 0 8px; }
+  #rPlayer .hP::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--acc) 0 54%, var(--accM) 54% 66%, var(--accB) 66% 100%); }
+  #rPlayer .hRow{ display:flex; align-items:center; gap:4px; min-width:0; }
+  #readout #rpName{ flex:1; min-width:0; font-size:12px; font-weight:700; line-height:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #rpStars .stars{ font-size:8px; letter-spacing:.5px; }
+  #rPlayer .hLegs{ gap:4px; }
+  #readout #rPlayer .hLegs small{ font-size:6px; line-height:7px; }
+  #readout #rPlayer .hLegs .statBar{ flex:1 1 auto; height:4px; }
+  #rPlayer .hLegs .statBar s{ position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--bad); }
+  /* (v232) THE BUTTONS, as the mockups have them: a ring in each one's colour inside a dark outline, a see-through middle
+     lit a little from above, a line drawing over its name -- PASS orange, SHOOT red, CROSS blue, SKILL gold (as the
+     stars are); without the ball SWITCH, SLIDE and CLEAR with their own drawings. The same sizes and places */
+  #kickBtn, #shootBtn, #crossBtn, #skillBtn, #kickBtn.mTrap, #kickBtn.mCall, #shootBtn.mSlide, #crossBtn.mClear{ border:0; color:var(--ink);
+    flex-direction:column; gap:3px; font-size:10px; font-weight:700; letter-spacing:1.5px; line-height:1; text-shadow:0 1px 0 var(--ol), 0 0 3px var(--ol);
+    --abSh:0 0 0 2px rgb(11 15 30 / .75), inset 0 0 0 3px var(--ring), inset 0 0 0 5px rgb(11 15 30 / .28), inset 0 0 12px -3px var(--ring), 0 3px 0 rgb(11 15 30 / .22);
+    background:radial-gradient(circle at 50% 28%, rgb(58 79 140 / .34), rgb(24 33 63 / .26) 60%, rgb(11 15 30 / .30)); box-shadow:var(--abSh); }
+  .actBtn::before{ content:''; flex:none; width:var(--icoW,17px); height:var(--icoW,17px); background:var(--ring); -webkit-mask:var(--ico) center / contain no-repeat; mask:var(--ico) center / contain no-repeat; }
+  #kickBtn{ --ring:var(--acc); --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12H18M13 7l5 5-5 5'/%3E%3C/svg%3E"); --icoW:24px; font-size:13px; gap:4px; }
+  #kickBtn.mTrap{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8.5H17M14 5.5l3 3-3 3M19 15.5H7M10 12.5l-3 3 3 3'/%3E%3C/svg%3E"); }
+  #kickBtn.mCall{ --ring:rgb(var(--accRGB) / .55); color:var(--ink2); }
+  #shootBtn{ --ring:var(--bad); --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='6.5'/%3E%3Cpath d='M12 2.5V6M12 18v3.5M2.5 12H6M18 12h3.5'/%3E%3C/svg%3E"); }
+  #shootBtn.mSlide{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 6l11 11M16 11v6h-6M3 13h3.5M5 18h3'/%3E%3C/svg%3E"); }
+  #crossBtn{ --ring:var(--btnT); --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 18Q9 5 19 9'/%3E%3Cpath d='M14.5 6l5 3-3.5 4'/%3E%3C/svg%3E"); }
+  #crossBtn.mClear{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20V5M7 10l5-5 5 5'/%3E%3C/svg%3E"); }
+  #skillBtn{ --ring:#ffd27a; --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l1.9 7.1L21 12l-7.1 1.9L12 21l-1.9-7.1L3 12l7.1-1.9z'/%3E%3C/svg%3E"); --icoW:15px; font-size:9px; gap:2px; }
+  #crossBtn.armed{ box-shadow:var(--abSh), 0 0 14px 3px rgba(223,230,212,.5); filter:brightness(1.3); }
+  @keyframes cmdPulse{ 0%,100%{ box-shadow:var(--abSh), 0 0 0 0 rgba(233,245,236,0); } 50%{ box-shadow:var(--abSh), 0 0 13px 2px rgba(233,245,236,.28); } }
   /* QUICK SUBS, left of your man's card (see qsTick): SUBS and how many are left, dropping down your suggested subs */
   .qsUI{ pointer-events:auto; }
   #qsWrap{ display:none; position:relative; margin-left:auto; }
@@ -1891,12 +1962,11 @@
     <div id="dbgText" style="white-space:pre"></div>
   </div>
   <div id="readout">
-    <span class="chip xplUI" id="rClockChip" data-xpl="clock">⏱ <b id="rClock">0:00</b></span>
-    <span class="chip xplUI" id="rScore" data-xpl="score"><img id="crG" class="sbCrest" alt=""><span id="tnG">GRN</span> <b id="sG">0</b> : <b class="r" id="sR">0</b> <span id="tnR">RED</span><img id="crR" class="sbCrest" alt=""></span>
-    <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop">SUBS <b id="qsLeft"></b><i>▾</i></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
-    <span class="chip xplUI" id="rDir" style="color:var(--acc)" data-xpl="dir">▶</span>
-    <div class="chip xplUI" id="rTheir" data-xpl="their"><div class="rpTop"><b id="rtNum"></b><span id="rtName"></span></div><div class="rpBot"><span id="rtPos"></span><span class="statBar"><i id="rtSt"></i></span></div></div>
-    <div class="chip xplUI" id="rPlayer" data-xpl="hud"><div class="rpTop"><b id="rpNum"></b><span id="rpName"></span><span id="rpPos"></span></div><div class="rpBot"><span>STAMINA</span><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span><span id="rpStars"></span></div></div>
+    <div class="chip" id="rBox"><span class="xplUI" id="rClockChip" data-xpl="clock"><b id="rClock">0:00</b><i id="rHalf"></i></span><span class="xplUI" id="rScore" data-xpl="score"><span class="sbTeams"><span class="sbTeam"><img id="crG" class="sbCrest" alt=""><span id="tnG" class="sbCode">GRN</span></span><span class="sbTeam"><img id="crR" class="sbCrest" alt=""><span id="tnR" class="sbCode">RED</span></span></span><span class="sbNums"><b id="sG">0</b><s></s><b class="r" id="sR">0</b></span></span></div>
+    <span id="qsWrap" class="qsUI"><button id="qsBtn" class="chip" aria-expanded="false" aria-controls="qsDrop"><span class="hW"><small>SUBS</small><b id="qsLeft"></b></span><span class="hP"><i>▾</i></span></button><div id="qsDrop"></div><div id="qsMsg"></div></span>
+    <span class="chip xplUI" id="rDir" data-xpl="dir">▶</span>
+    <div class="chip xplUI" id="rTheir" data-xpl="their"><span class="hW"><b id="rtNum"></b><small id="rtPos"></small></span><span class="hP"><span id="rtName"></span><span class="statBar"><i id="rtSt"></i></span></span></div>
+    <div class="chip xplUI" id="rPlayer" data-xpl="hud"><span class="hW"><b id="rpNum"></b><small id="rpPos"></small></span><span class="hP"><span class="hRow"><span id="rpName"></span><span id="rpStars"></span></span><span class="hRow hLegs"><small>STAMINA</small><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span></span></span></div>
     <button id="menuBtn" class="chip menuChip" aria-label="pause: the menu" title="Pause: the menu">☰</button>
     <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
   </div>
@@ -4040,7 +4110,8 @@
     const g=document.getElementById('tnG'), r=document.getElementById('tnR');
     if(g) g.textContent=TEAM.G.code; if(r) r.textContent=TEAM.R.code;
     for(const t of ['G','R']){ const im=document.getElementById(t==='G'?'crG':'crR'); if(!im) continue;
-      const u=TEAM[t].crest?crestURL(TEAM[t].crest):''; if(u){ im.src=u; im.style.display='inline-block'; } else { im.removeAttribute('src'); im.style.display='none'; } }
+      const u=TEAM[t].crest?crestURL(TEAM[t].crest):''; if(u){ im.src=u; im.style.display='inline-block'; } else { im.removeAttribute('src'); im.style.display='none'; }
+      const cd=document.getElementById(t==='G'?'tnG':'tnR'); if(cd) cd.style.display=u?'none':''; }   // (v232: the letters only where there's no crest)
     document.querySelectorAll('.mteam').forEach(b=>{ b.textContent=b.dataset.mteam==='G'?'your team ('+TEAM.G.code+')':'opponent ('+TEAM.R.code+')'; });
   }
   let SQUAD={G:null,R:null}, LINEUP={G:null,R:null};
@@ -14703,6 +14774,8 @@
                 : breakT>0&&half===2 ? 'HALF TIME'
                 : mm+':'+String(ss).padStart(2,'0');
       document.getElementById('rClock').textContent=lbl;
+      { const isT=/^\d+:\d\d$/.test(lbl), ck=document.getElementById('rClockChip'), hf=document.getElementById('rHalf');   // (v232: the score box's clock)
+        if(ck) ck.classList.toggle('word',!isT); if(hf) hf.textContent=isT?(half===1?'1ST HALF':'2ND HALF'):''; }
       if(isTouch){   // context-sensitive button labels
         const mine=myBall();                // your own knock-on / trap a touch away is still yours
         const oursHave=(ball.ownedBy&&ball.ownedBy.team==='G')||(gkHold&&gkHold.team==='G');
