@@ -49,10 +49,16 @@ ok(roll.presserWho === 'WNG,STK' && roll.foxWho === 'STK,AM,WNG', 'Presser only 
 await K(`startExhibition()`); await page.waitForTimeout(300); await K(`kickOffExhibition()`); await page.waitForTimeout(1500);
 const mt = await K(`(()=>{ const all=players;   // (the outfielders: the keepers are set apart -- see the README's note on v234)
   const match=all.every(p=>{ const e=(SQUAD[p.team]||[]).find(x=>x.name===p.pname); return !!e&&JSON.stringify(p.pk)===JSON.stringify(perksOfEntry(e)); });   // (by his name: a keeper's squadIdx isn't his entry's)
-  const st=STARS[0], was=st.pk; st.pk=['godspeed','fox']; const sp=perksOfEntry({star:st.key, name:'x', style:'poacher'}); st.pk=['godspeed','fox','apex','maestro','leader']; const four=perksOfEntry({star:st.key}); st.pk=was;
-  return { match, n:all.length, with:all.filter(p=>p.pk&&p.pk.length).length, star:sp, starNone:perksOfEntry({star:st.key}), four:four.join(), maxPer:PERK_SET.maxPer, cap:PERK_MAX }; })()`);
+  const st=STARS[0], was=st.pk; st.pk=['godspeed','fox']; const sp=perksOfEntry({star:st.key, name:'x', style:'poacher'}); st.pk=['godspeed','fox','apex','maestro','leader']; const four=perksOfEntry({star:st.key}); st.pk=null; const none=perksOfEntry({star:st.key}); st.pk=was;
+  const given=STARS.filter(s=>s.pk&&s.pk.length), bad=given.filter(s=>s.pk.length>3||s.pk.some(k=>!PERKS[k])).map(s=>s.key);
+  const one=['aura','leader'].every(k=>{ const ex=given.filter(s=>s.pk.includes(k)).map(s=>s.ex); return new Set(ex).size===ex.length; });
+  const inMatch=players.filter(p=>STARS.some(s=>s.pk&&s.pk.length&&s.name===p.pname)).map(p=>({n:p.pname,pk:p.pk.join()}));
+  const okMatch=inMatch.every(m=>STARS.find(s=>s.name===m.n).pk.slice(0,3).join()===m.pk);
+  return { match, n:all.length, with:all.filter(p=>p.pk&&p.pk.length).length, star:sp, starNone:none, given:given.length, bad, one, inMatch, okMatch, petita:(STARS.find(s=>s.key==='petita').pk||[]).join(), four:four.join(), maxPer:PERK_SET.maxPer, cap:PERK_MAX }; })()`);
 ok(mt.match && mt.n === 16, 'in an exhibition every outfielder has his squad entry\'s perks (' + mt.with + ' of the 16 have one)');
 ok(mt.star.join() === 'godspeed,fox' && mt.starNone.length === 0, 'a star has what he\'s given on the sheet and nothing rolled: ' + mt.star.join(', ') + ' (none given: none)');
+ok(mt.given >= 25 && mt.bad.length === 0 && mt.one && mt.petita === 'untouchable,quickshot,whipped', 'the sheet\'s perks in the game: ' + mt.given + ' stars given some, none more than three or unknown, Aura and Leader one a club; Messiah Petita ' + mt.petita);
+ok(mt.okMatch && mt.inMatch.length > 0, 'a star in a match plays with the sheet\'s perks (' + mt.inMatch.map(m=>m.n+': '+m.pk).join('; ') + ')');
 ok(mt.four === 'godspeed,fox,apex' && mt.maxPer === 3 && mt.cap === 3, 'three perks a man at most: a star given five has the first three (' + mt.four + '); a man rolls three at most')
 
 // --- THE SUPERSTAR PERKS ON HIS NUMBERS: Godspeed, Untouchable, Predator, Maestro, Leader, Tiki taka, Aura -------------

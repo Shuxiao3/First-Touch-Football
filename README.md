@@ -502,6 +502,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The stars' perks (v236).** Each star plays with the perks given him on the Signature Players sheet (three at
+  most): 25 of the 33 have some, from Messiah Petita's Untouchable, Quickshot and Whipped to Van Veers' Aura Defense,
+  Shot blocker and Clear head. Six have numbers changed there too (Luka Magic, Michaelangelo Donnatello, Messiah
+  Petita, Torrent Hendrinks, Ryan Kane, Zacary Zayn), as the sheet has them now.
 - **Ten more perks (v235).** Shot blocker (centre-backs: his block reach 30% bigger), Interceptor (a 20% bigger burst
   onto a pass he's cutting out), Clear head (headed clearances find a team-mate 50% more surely), Hook slide (a slide
   tackle pops the ball up behind him), Hold up (strikers: Strength +2 holding it up, Short passing +2 on the pass after),
@@ -3538,6 +3542,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v236: the stars' perks from the sheet.** STARS' pk, as the Signature Players sheet gives each (players/<id>'s pk,
+  matched by sheet id), and the sheet's numbers for the stars changed since v231. Tests: `classic-perks.mjs` checks
+  every star's perks are known and three at most, Aura and Leader one a club, and a star in a match has his.
 - **v235: ten more regular perks.** In PERKS: shotblock (blockReachOf), interceptor (the Def IQ burst in stepOutfield,
   its extra share bigger), clearhead (headClear's chance of a target and its error, and the defensive header's error),
   hookslide (slideContact sends the ball back over him: -170 px/s, up 150), holdup (perkTick: Strength while shieldingNow,
