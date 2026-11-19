@@ -57,7 +57,7 @@ const mt = await K(`(()=>{ const all=players;   // (the outfielders: the keepers
   return { match, n:all.length, with:all.filter(p=>p.pk&&p.pk.length).length, star:sp, starNone:none, given:given.length, bad, one, inMatch, okMatch, petita:(STARS.find(s=>s.key==='petita').pk||[]).join(), four:four.join(), maxPer:PERK_SET.maxPer, cap:PERK_MAX }; })()`);
 ok(mt.match && mt.n === 16, 'in an exhibition every outfielder has his squad entry\'s perks (' + mt.with + ' of the 16 have one)');
 ok(mt.star.join() === 'godspeed,fox' && mt.starNone.length === 0, 'a star has what he\'s given on the sheet and nothing rolled: ' + mt.star.join(', ') + ' (none given: none)');
-ok(mt.given >= 25 && mt.bad.length === 0 && mt.one && mt.petita === 'untouchable,quickshot,whipped', 'the sheet\'s perks in the game: ' + mt.given + ' stars given some, none more than three or unknown, Aura and Leader one a club; Messiah Petita ' + mt.petita);
+ok(mt.given >= 25 && mt.bad.length === 0 && mt.one && mt.petita === 'untouchable,quickshot,widevision', 'the sheet\'s perks in the game: ' + mt.given + ' stars given some, none more than three or unknown, Aura and Leader one a club; Messiah Petita ' + mt.petita);
 ok(mt.okMatch && mt.inMatch.length > 0, 'a star in a match plays with the sheet\'s perks (' + mt.inMatch.map(m=>m.n+': '+m.pk).join('; ') + ')');
 ok(mt.four === 'godspeed,fox,apex' && mt.maxPer === 3 && mt.cap === 3, 'three perks a man at most: a star given five has the first three (' + mt.four + '); a man rolls three at most')
 

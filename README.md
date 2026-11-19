@@ -502,6 +502,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The sheets' changes (v238).** The stars' perks as the Signature Players sheet has them now (30 of the 33 with
+  some; Torrent Hendrinks' numbers changed there too), and a False nine keener on a run in behind: 0.7 of a man with no
+  lean either way, where he was 0.5, as the new Playstyle Tendencies sheet has it.
 - **Seven more perks, and the near post (v237).** Wide vision (a pass before he's ready goes half as far off line),
   Last ditch (the last man back, his slide goes and reaches 20% further), Screamer (a shot from outside the box loses
   35% less of its pace), Cushion (his first touch on a pass from 25 m or more 30% cleaner), Contest (Strength +1.5 with
@@ -3549,6 +3552,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v238: the sheets' changes.** STARS' pk and v from the Signature Players sheet; RUN_MUL's falsenine 0.7 from the
+  Playstyle Tendencies sheet (styles/<key>: only what differs from OB_TYPE, RUN_MUL, SKILL_KEEN, HOLD_PREF, CARRY_WAY and
+  GK_TYPE, as the game has them).
 - **v237: seven more perks; near post and far post.** In PERKS: widevision (prepWorst), lastditch (slideLenOf and
   slideHitOf by lastDitchK: lastMan, none of his side's outfielders nearer his own goal), screamer (shootAt's LONG_PACE
   loss), cushion (touchDifficulty, by passLenM), contest (perkTick: ballLooseNow) and pest (perkTick: pestNow); the old
