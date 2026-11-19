@@ -1,5 +1,5 @@
 // FOOTBALL CLASSIC, PERKS (v234): what a man does on the pitch beyond his numbers. Regular perks come by chance -- each
-// one his position can have at its chance, three times as likely for the playstyles it suits, two a man at most -- and
+// one his position can have at its chance, three times as likely for the playstyles it suits, three a man at most -- and
 // are the same every time for the same man (rolled from his career id, or his name and playstyle); a star has what he's
 // given on the Signature Players sheet. Each perk does what the Perks Master Sheet says: Presser, Jumper, Whipped pass,
 // Bend it like.., Screamer, Touch pass, Reliable, Fox in the box, Quickshot, Press resistant; and the superstar ones,
@@ -38,7 +38,7 @@ const roll = await K(`(()=>{ const per={}, tally={}, fav={}; let men=0, over=0, 
   const share=s=>+(per[s].a/per[s].n).toFixed(2);
   return { men, over, wrong, same, CB:share('CB'), AM:share('AM'), STK:share('STK'), GK:share('GK'), presserWho:PERKS.presser.who.join(), foxWho:PERKS.fox.who.join(), rate }; })()`);
 info('rolled: ' + JSON.stringify(roll));
-ok(roll.over === 0 && roll.wrong === 0 && roll.same === 34 * 50, 'a man rolls only perks his position can have, two at most, and the same ones every time (' + roll.men + ' men)');
+ok(roll.over === 0 && roll.wrong === 0 && roll.same === 34 * 50, 'a man rolls only perks his position can have, three at most, and the same ones every time (' + roll.men + ' men)');
 ok(near(roll.CB, 0.34, 0.03) && near(roll.AM, 0.47, 0.03) && near(roll.STK, 0.48, 0.03) && roll.GK <= 0.07,
   'about a third of centre-backs have a perk, nearly half of strikers and attacking midfielders, hardly any keepers (Reliable): CB ' + roll.CB + ', AM ' + roll.AM + ', ST ' + roll.STK + ', GK ' + roll.GK + ' -- as the sheet works it out');
 ok(Object.values(roll.rate).every(r => r.fav > 2.4 * r.other && near(r.other, 0.04, 0.012)),
@@ -49,10 +49,11 @@ ok(roll.presserWho === 'WNG,STK' && roll.foxWho === 'STK,AM,WNG', 'Presser only 
 await K(`startExhibition()`); await page.waitForTimeout(300); await K(`kickOffExhibition()`); await page.waitForTimeout(1500);
 const mt = await K(`(()=>{ const all=players;   // (the outfielders: the keepers are set apart -- see the README's note on v234)
   const match=all.every(p=>{ const e=(SQUAD[p.team]||[]).find(x=>x.name===p.pname); return !!e&&JSON.stringify(p.pk)===JSON.stringify(perksOfEntry(e)); });   // (by his name: a keeper's squadIdx isn't his entry's)
-  const st=STARS[0], was=st.pk; st.pk=['godspeed','fox']; const sp=perksOfEntry({star:st.key, name:'x', style:'poacher'}); st.pk=was;
-  return { match, n:all.length, with:all.filter(p=>p.pk&&p.pk.length).length, star:sp, starNone:perksOfEntry({star:st.key}) }; })()`);
+  const st=STARS[0], was=st.pk; st.pk=['godspeed','fox']; const sp=perksOfEntry({star:st.key, name:'x', style:'poacher'}); st.pk=['godspeed','fox','apex','maestro','leader']; const four=perksOfEntry({star:st.key}); st.pk=was;
+  return { match, n:all.length, with:all.filter(p=>p.pk&&p.pk.length).length, star:sp, starNone:perksOfEntry({star:st.key}), four:four.join(), maxPer:PERK_SET.maxPer, cap:PERK_MAX }; })()`);
 ok(mt.match && mt.n === 16, 'in an exhibition every outfielder has his squad entry\'s perks (' + mt.with + ' of the 16 have one)');
 ok(mt.star.join() === 'godspeed,fox' && mt.starNone.length === 0, 'a star has what he\'s given on the sheet and nothing rolled: ' + mt.star.join(', ') + ' (none given: none)');
+ok(mt.four === 'godspeed,fox,apex' && mt.maxPer === 3 && mt.cap === 3, 'three perks a man at most: a star given five has the first three (' + mt.four + '); a man rolls three at most')
 
 // --- THE SUPERSTAR PERKS ON HIS NUMBERS: Godspeed, Untouchable, Predator, Maestro, Leader, Tiki taka, Aura -------------
 const fx = await K(`(()=>{ const all=players.concat(keepers), G=players.filter(p=>p.team==='G'), R=players.filter(p=>p.team==='R');

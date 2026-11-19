@@ -4170,11 +4170,11 @@
     if(Array.isArray(li.def)&&li.def.length===OUTFIELD-1) li.def.splice(mid(fd),0,k); }
   // ===== PERKS (v234): what a man does on the pitch beyond his numbers. Regular perks come to men by chance -- each one
   // his position can have, at its chance, PERK_SET.favMul times as likely for the playstyles it suits, PERK_SET.maxPer a
-  // man at most -- and stay his (rolled from his career id, or his name and playstyle: the same man, the same perks).
+  // man at most (three: PERK_MAX, a star's too) -- and stay his (rolled from his career id, or his name and playstyle: the same man, the same perks).
   // Superstar perks, and any regular ones, go to the stars they're given to on the Signature Players sheet (STARS' pk);
   // a star isn't rolled. Every number is the Perks Master Sheet's, on the game's 1 to 10 scale. (A man's character traits
   // -- TRAITS: Natural Leader and the rest -- are another thing.)
-  const PERK_SET={favMul:3, maxPer:2};
+  const PERK_SET={favMul:3, maxPer:3}, PERK_MAX=3;   // (PERK_MAX: no man has more, a star included)
   const PK_OUT=['CB','FB','DM','CM','AM','WM','WNG','STK'];
   const PERKS={
     presser:    {n:'Presser',         kind:'reg', who:['WNG','STK'], chance:5, favs:['complete','speedster','paceywinger','winger'], p:{drain:50}},
@@ -4226,10 +4226,10 @@
   function rollPerks(seed,sub,style){ const R=rng32(hashStr('perks|'+seed)), hits=[];
     for(const k of PERK_REG){ const d=PERKS[k], r=R(); if(!sub||d.who.indexOf(sub)<0) continue;
       const c=Math.min(0.95,d.chance/100*(d.favs.indexOf(style)>=0?PERK_SET.favMul:1)); if(r<c) hits.push([k,c]); }
-    return hits.sort((a,b)=>b[1]-a[1]).slice(0,PERK_SET.maxPer).map(h=>h[0]); }
-  function starPerks(key){ const s=STARS.find(x=>x.key===key); return s&&Array.isArray(s.pk)?s.pk.filter(k=>PERKS[k]):[]; }
+    return hits.sort((a,b)=>b[1]-a[1]).slice(0,Math.min(PERK_SET.maxPer,PERK_MAX)).map(h=>h[0]); }
+  function starPerks(key){ const s=STARS.find(x=>x.key===key); return s&&Array.isArray(s.pk)?s.pk.filter(k=>PERKS[k]).slice(0,PERK_MAX):[]; }
   // what a man in a squad has: a star what he's given; a career man his own (kept: careerPerks); anyone else rolled
-  function perksOfEntry(e){ if(!e) return []; if(e.star) return starPerks(e.star); if(Array.isArray(e.pk)) return e.pk.filter(k=>PERKS[k]);
+  function perksOfEntry(e){ if(!e) return []; if(e.star) return starPerks(e.star); if(Array.isArray(e.pk)) return e.pk.filter(k=>PERKS[k]).slice(0,PERK_MAX);
     return rollPerks(e.lookKey!=null?'c'+e.lookKey:'n'+(e.name||'')+'|'+(e.style||''), pkSub(e), e.style); }
   function careerPerks(p){ if(!p) return []; if(p.star) return starPerks(p.star);
     if(!Array.isArray(p.pk)) p.pk=rollPerks('c'+p.id, p.subRole||pkSub(p), p.style);

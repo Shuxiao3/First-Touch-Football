@@ -504,7 +504,7 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   see-through middle and a line drawing over the name, and their sizes and places as they were.
 - **Perks (v234).** What a man does on the pitch beyond his numbers, a chip each on his card (a superstar's in gold; a
   tap says what it does). Regular perks come to men by chance -- each one his position can have, likelier for the
-  playstyles it suits, two a man at most -- and stay his: Presser, Jumper, Whipped pass, Bend it like.., Screamer, Touch
+  playstyles it suits -- and stay his, three a man at most (a star too): Presser, Jumper, Whipped pass, Bend it like.., Screamer, Touch
   pass, Reliable, Fox in the box, Quickshot and Press resistant. About a third of defenders and midfielders have one,
   nearly half of the forwards. Superstar perks go to the stars you give them on the Signature Players sheet: Untouchable,
   Apex, Godspeed, Predator, Tiki taka, Maestro, Aura Defense and Glorious Leader (one man with each of those two at a
@@ -3531,7 +3531,7 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
-- **v234: perks.** PERKS, and PERK_SET (favMul 3, maxPer 2), with each perk's numbers as the Perks Master Sheet has them.
+- **v234: perks.** PERKS, and PERK_SET (favMul 3, maxPer 3; PERK_MAX 3 for any man, a star included), with each perk's numbers as the Perks Master Sheet has them.
   rollPerks(seed, sub, style) rolls a man's regular perks from rng32(hashStr('perks|'+seed)): the seed his career id
   ('c'+id; kept on him as p.pk -- careerPerks) or 'n'+name+'|'+style. A star's are STARS' pk (starPerks), never rolled.
   applyEntry gives a match player his entry's (perksOfEntry). Each frame perkTick sets p.pkm, what his perks add just
