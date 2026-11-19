@@ -620,7 +620,7 @@ const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], ki
   return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), lowKeep: Math.min(...keep), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
     runs: (d.review && d.review.cups || []).map(x => x.join(' ')).join(', '), ledgerCup }; });
 r = await page.evaluate(() => { const M = __MG, d = M.d, out = {}; d.story = { vet: 2, kid: 2, phone: 2 };
-  const p = d.roster[d.lineup.atk[0]]; M.condTire(p, 1); out.after = +M.condOf(p).toFixed(3);
+  const p = d.roster[d.lineup.atk[0]]; p.pk = []; M.condTire(p, 1); out.after = +M.condOf(p).toFixed(3);   // (v234: without his perks -- Reliable would get his legs back quicker: see classic-perks)
   d.lv.physio = 0; M.mgRest(d, 1); out.day0 = +(M.condOf(p) - out.after).toFixed(3);
   d.lv.physio = 4; M.mgRest(d, 1); out.day4 = +(M.condOf(p) - out.after - out.day0).toFixed(3); d.lv.physio = 0;
   p.cond = 0.6; out.entry = M.careerLineupYours(d).squad.find(e => e.lookKey === p.id).cond; delete p.cond;
