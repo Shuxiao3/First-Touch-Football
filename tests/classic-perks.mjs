@@ -2,7 +2,7 @@
 // one his position can have at its chance, three times as likely for the playstyles it suits, three a man at most -- and
 // are the same every time for the same man (rolled from his career id, or his name and playstyle); a star has what he's
 // given on the Signature Players sheet. Each perk does what the Perks Master Sheet says: Presser, Jumper, Whipped pass,
-// Bend it like.., Screamer, Touch pass, Reliable, Fox in the box, Quickshot, Press resistant; and the superstar ones,
+// Bend it like.., Finesse (Screamer before v237), Touch pass, Reliable, Fox in the box, Quickshot, Press resistant; and the superstar ones,
 // Untouchable, Apex, Godspeed, Predator, Tiki taka, Maestro, Aura Defense and Glorious Leader (one of each of those two a
 // side). They show as chips on a man's card. (A man's character traits -- Natural Leader and the rest -- are another thing.)
 // On a copy of the game that lets the test reach inside.
@@ -39,8 +39,8 @@ const roll = await K(`(()=>{ const per={}, tally={}, fav={}; let men=0, over=0, 
   return { men, over, wrong, same, CB:share('CB'), AM:share('AM'), STK:share('STK'), GK:share('GK'), presserWho:PERKS.presser.who.join(), foxWho:PERKS.fox.who.join(), rate }; })()`);
 info('rolled: ' + JSON.stringify(roll));
 ok(roll.over === 0 && roll.wrong === 0 && roll.same === 34 * 50, 'a man rolls only perks his position can have, three at most, and the same ones every time (' + roll.men + ' men)');
-ok(near(roll.CB, 0.58, 0.03) && near(roll.AM, 0.60, 0.03) && near(roll.STK, 0.63, 0.03) && roll.GK <= 0.14,
-  'with twenty regular perks (v235) about six in ten outfielders have one, keepers about one in ten (Reliable, Doctor from Ibiza, Big game player): CB ' + roll.CB + ', AM ' + roll.AM + ', ST ' + roll.STK + ', GK ' + roll.GK + ' -- as the sheet works it out');
+ok(near(roll.CB, 0.67, 0.03) && near(roll.AM, 0.68, 0.03) && near(roll.STK, 0.72, 0.03) && roll.GK <= 0.14,
+  'with twenty-six regular perks (v237) about seven in ten outfielders have one, keepers about one in ten (Reliable, Doctor from Ibiza, Big game player): CB ' + roll.CB + ', AM ' + roll.AM + ', ST ' + roll.STK + ', GK ' + roll.GK + ' -- as the sheet works it out');
 ok(Object.values(roll.rate).every(r => r.fav > 2.4 * r.other && near(r.other, 0.04, 0.012)),
   'a perk comes three times as often to the playstyles it suits (4 in 100 men, 12 in 100 of those): ' + JSON.stringify(roll.rate));
 ok(roll.presserWho === 'WNG,STK' && roll.foxWho === 'STK,AM,WNG', 'Presser only for attackers; Fox in the box for strikers, attacking midfielders and wingers');
@@ -113,10 +113,10 @@ const rg = await K(`(()=>{ const G=players.filter(p=>p.team==='G'), R=players.fi
   a.pk=[]; const v0=headJumpVz(a); a.pk=['jumper']; const v1=headJumpVz(a); a.pk=['apex']; const sx=a.x; a.x=FW/2+atkOf(a.team)*200; const v2=headJumpVz(a); a.x=FW/2-atkOf(a.team)*200; const v3=headJumpVz(a); a.x=sx;
   out.jump={j:+(v1/v0).toFixed(4), apexThem:+(v2/v0).toFixed(4), apexUs:+(v3/v0).toFixed(4)};
   a.pk=[]; const h0=headPowerOf(a); a.pk=['apex']; out.head=+(headPowerOf(a)/h0).toFixed(3);
-  // Curve: Whipped pass on his passes, Bend it like.. on his crosses, Screamer on his long shots -- 1.5 more, up to 10
+  // Curve: Whipped pass on his passes, Bend it like.. on his crosses, Finesse on his long shots (Screamer before v237) -- 1.5 more, up to 10
   const c0=a.stats.curve; a.stats.curve=6; a.pk=[]; const pb0=passBendOf(a), cr0=crossPot(a), lg0=curveOf(a,true);
   a.pk=['whipped']; const pb1=passBendOf(a); a.stats.curve=7.5; a.pk=[]; const pb15=passBendOf(a); a.stats.curve=6;
-  a.pk=['bendit']; const cr1=crossPot(a); a.pk=['screamer']; const lg1=curveOf(a,true), sh1=curveOf(a,false);
+  a.pk=['bendit']; const cr1=crossPot(a); a.pk=['finesse']; const lg1=curveOf(a,true), sh1=curveOf(a,false);
   a.stats.curve=9.5; a.pk=['whipped']; const capd=passBendOf(a); a.pk=[]; a.stats.curve=10; const ten=passBendOf(a);
   PERKS.whipped.p.over=true; a.stats.curve=9.5; a.pk=['whipped']; const ov=passBendOf(a); PERKS.whipped.p.over=false; a.stats.curve=c0;
   out.curve={pass:+(pb1/pb15).toFixed(3), passUp:+(pb1/pb0).toFixed(2), cross:+(cr1/cr0).toFixed(3), long:+(lg1/lg0).toFixed(2), shortShot:+(sh1/lg0).toFixed(3), capd:+(capd/ten).toFixed(3), over:+(ov/ten).toFixed(3)};
@@ -135,7 +135,7 @@ ok(near(rg.jump.j, Math.sqrt(1.2), 0.002) && near(rg.jump.apexThem, Math.sqrt(1.
   'Jumper: 20% higher off the ground (take-off ' + rg.jump.j + ' times as quick); Apex 35% higher at their goal (' + rg.jump.apexThem + '), as he was at ours');
 ok(rg.head === 1.2, 'Apex: heads it 20% harder');
 ok(rg.curve.pass === 1 && rg.curve.passUp > 1.2 && rg.curve.cross === 1.25 && rg.curve.long > 1.2 && rg.curve.shortShot === 1 && rg.curve.capd === 1 && rg.curve.over > 1,
-  'Curve 1.5 more: a Whipped pass bends as a Curve 7.5 man\'s (Curve 6), Bend it like.. crosses as a 7.5 (a quarter more), Screamer from outside the box (not inside it); up to 10, over it only if the sheet says so -- ' + JSON.stringify(rg.curve));
+  'Curve 1.5 more: a Whipped pass bends as a Curve 7.5 man\'s (Curve 6), Bend it like.. crosses as a 7.5 (a quarter more), Finesse from outside the box (not inside it); up to 10, over it only if the sheet says so -- ' + JSON.stringify(rg.curve));
 ok(rg.touch === 0.75, 'Touch pass: a pass played first time sprays a quarter less');
 ok(rg.press.k === 0.75 && (rg.press.t === null || rg.press.t === 0.75), 'Press resistant: a quarter less of the pressure counts in his touch and his dribbling');
 ok(rg.fox.near && !rg.fox.far && !rg.fox.theirs, 'Fox in the box: a rebound 4 m from him -- he\'s onto it the instant it comes off; 14 m off, not; one of theirs, not');
@@ -172,6 +172,54 @@ const nv2 = await K(`(()=>{ const d=mgNewCareer({slot:'x', manager:'Sam Okafor',
   return { ibiza:(20-p.inj.d)/(20-q.inj.d), big }; })()`);
 ok(near(nv2.ibiza, 1.75, 0.01), 'Doctor from Ibiza: back from an injury 75% faster (' + nv2.ibiza + ' times the days a day)');
 ok(nv2.big === 1, 'Big game player: in a cup tie, composure +1');
+// --- v237: WIDE VISION, LAST DITCH, SCREAMER (NEW), FINESSE, CUSHION, CONTEST, PEST; NEAR AND FAR POST ---------------
+const v7 = await K(`(()=>{ const out={}, a=players.find(x=>x.team==='G'&&x!==controlled), keep=a.pk, kb={x:ball.x,y:ball.y,z:ball.z,o:ball.ownedBy,pf:ball.passFrom,lt:ball.lastTouch};
+  // Wide vision: a pass before he's ready half as far off line
+  ball.ownedBy=a; a.prepT=simNow; a.pk=[]; const w0=prepWorst(a); a.pk=['widevision']; const w1=prepWorst(a); out.wide=+(w1/w0).toFixed(3);
+  // Last ditch: the last man back, his slide 20% further and its reach 20% further; not the last man, as he was
+  const own=atkOf(a.team)>0?-1:1, mates=players.filter(q=>q.team===a.team&&q!==a), deep=Math.max(...mates.map(q=>own*q.x)), kx=a.x;
+  a.pk=[]; const h0=slideHitOf(a), l0=slideLenOf(a); a.pk=['lastditch']; a.x=own*(deep+40); const h1=slideHitOf(a), l1=slideLenOf(a), last=lastMan(a);
+  a.x=own*(deep-40); const h2=slideHitOf(a); a.x=kx;
+  out.ditch={hit:+(h1/h0).toFixed(3), len:+(l1/l0).toFixed(3), notLast:+(h2/h0).toFixed(3), last};
+  // Cushion: a long ball of ours (30 m), his touch 30% easier; a short one (10 m) as it was
+  ball.ownedBy=null; ball.lastTouch=a.team; ball.z=0; for(const q of players) if(q.team!==a.team){ q._kx=q.x; q._ky=q.y; q.x=a.x+(a.x<FW/2?400:-400); q.y=a.y; }
+  a.pk=[]; ball.passFrom={x:a.x-30*MK, y:a.y, team:a.team, by:null}; const d0=touchDifficulty(a,false); a.pk=['cushion']; const d1=touchDifficulty(a,false);
+  ball.passFrom={x:a.x-10*MK, y:a.y, team:a.team, by:null}; a.pk=[]; const s0=touchDifficulty(a,false); a.pk=['cushion']; const s1=touchDifficulty(a,false);
+  for(const q of players) if(q._kx!=null){ q.x=q._kx; q.y=q._ky; delete q._kx; delete q._ky; }
+  out.cushion={long:+(d1/d0).toFixed(3), short:s1===s0, d0:+d0.toFixed(3)};
+  // Contest: a loose ball, Strength +1.5; one somebody has, his own
+  const ks=a.stats.strength; a.stats.strength=5; a.pk=['contest']; ball.ownedBy=null; ball.dribbler=null; perkTick(); const c1=statOf(a,'strength',5)-a.stats.strength;
+  const opp=players.find(q=>q.team!==a.team); ball.ownedBy=opp; perkTick(); const c2=statOf(a,'strength',5)-a.stats.strength; out.contest={loose:c1, held:c2}; a.stats.strength=ks;
+  // Pest: their ball, him the nearest of ours to it, Acceleration and Agility +2; another of ours nearer, his own
+  a.pk=['pest']; ball.x=a.x+3; ball.y=a.y; perkTick(); const p1=[statOf(a,'acceleration',5)-a.stats.acceleration, statOf(a,'agility',5)-a.stats.agility];
+  const m=mates[0], mk={x:m.x,y:m.y}; m.x=ball.x+1; m.y=ball.y; perkTick(); const p2=statOf(a,'acceleration',5)-a.stats.acceleration; m.x=mk.x; m.y=mk.y;
+  ball.ownedBy=null; perkTick(); const p3=statOf(a,'acceleration',5)-a.stats.acceleration; out.pest={near:p1, notNearest:p2, loose:p3};
+  // Screamer: a shot from 25 m out loses 35% less of its pace; Finesse (Screamer before) bends it
+  const c=controlled, ck=c.pk, cs={x:c.x,y:c.y,vx:c.vx,vy:c.vy}, gx=atkOf(c.team)>0?FW:0, sx=gx-atkOf(c.team)*560;
+  const shot=pk=>{ c.pk=pk; c.x=sx-atkOf(c.team)*8; c.y=YC; c.vx=0; c.vy=0; ball.ownedBy=c; ball.x=sx; ball.y=YC; ball.z=0; shootAt(c,atkOf(c.team),0,1); return Math.hypot(ball.vx,ball.vy); };
+  const sp0=shot([]), sp1=shot(['screamer']), lr=clamp((560-330)/370,0,1), pen=lr*(1-longShotsOf(c))*LONG_PACE;
+  out.screamer={plain:Math.round(sp0), with:Math.round(sp1), lossCut:+(1-(1-sp1/(sp0/(1-pen)))/pen).toFixed(3)};
+  out.finesse={curve:+(curveOf(Object.assign({},c,{pk:['finesse']}),true)/Math.max(1e-9,curveOf(Object.assign({},c,{pk:[]}),true))).toFixed(3), name:PERKS.finesse.n, newName:PERKS.screamer.n};
+  // near post and far post (inside the box, off to one side)
+  ball.y=YC+60; ball.x=gx-atkOf(c.team)*200; const nearTy=YC+90, farTy=YC-90;
+  out.post={near:postK(nearTy,0.1,200,false), farLow:postK(farTy,0.1,200,false), farHigh:postK(farTy,1,600,false), long:postK(nearTy,0.1,200,true), sideNear:postSide(nearTy), sideFar:postSide(farTy)};
+  ball.y=YC; out.post.middle=postK(nearTy,0.1,200,false);
+  // a career man with Screamer from before v237 has Finesse now; a star given it on the sheet too
+  const d=mgNewCareer({slot:'x', manager:'Sam Okafor', clubName:'Fenmoor Athletic', colors:['#d4202a','#ffffff'], code:'FEN', crest:null}), r=d.roster.find(q=>q.role!=='GK');
+  r.pk=['screamer','engine']; delete r.pkv; const mig=careerPerks(r).join(); r.pk=['screamer']; const kept=careerPerks(r).join();
+  out.mig={old:mig, new:kept, star:(STARS.find(x=>x.key==='cutinside').pk||[]).join()};
+  c.pk=ck; Object.assign(c,cs); a.pk=keep; ball.x=kb.x; ball.y=kb.y; ball.z=kb.z; ball.ownedBy=kb.o; ball.passFrom=kb.pf; ball.lastTouch=kb.lt; ball.vx=0; ball.vy=0; perkTick(); return out; })()`);
+info('v237 perks: ' + JSON.stringify(v7));
+ok(v7.wide === 0.5, 'Wide vision: a pass before he\'s ready goes half as far off line (' + v7.wide + ')');
+ok(v7.ditch.hit === 1.2 && v7.ditch.len === 1.2 && v7.ditch.notLast === 1, 'Last ditch: the last man back, his slide goes 20% further and reaches 20% further; not the last man, as he was');
+ok(near(v7.cushion.long, 0.7, 0.001) && v7.cushion.short === true, 'Cushion: a long ball (30 m) 30% easier to take (' + v7.cushion.long + '); a short one (10 m) as it was');
+ok(v7.contest.loose === 1.5 && v7.contest.held === 0, 'Contest: with the ball loose, Strength +1.5; with somebody on it, his own');
+ok(v7.pest.near[0] === 2 && v7.pest.near[1] === 2 && v7.pest.notNearest === 0 && v7.pest.loose === 0, 'Pest: their ball and him the nearest of his side to it, Acceleration and Agility +2; another nearer, or a loose ball, his own');
+ok(v7.screamer.with > v7.screamer.plain && near(v7.screamer.lossCut, 0.35, 0.02), 'Screamer: from 25 m out a shot loses 35% less of its pace (' + v7.screamer.plain + ' px/s, ' + v7.screamer.with + ' with it: ' + v7.screamer.lossCut + ' of the loss gone)');
+ok(v7.finesse.name === 'Finesse' && v7.finesse.newName === 'Screamer' && v7.finesse.curve >= 1, 'Finesse is what Screamer was (a long shot\'s curl, Curve +1.5); Screamer is the new one');
+ok(v7.mig.old === 'finesse,engine' && v7.mig.new === 'screamer' && v7.mig.star === 'finesse', 'a career man with Screamer from before v237 has Finesse now (a new one keeps the new Screamer); Le CutInside, given it on the sheet, Finesse');
+ok(v7.post.sideNear === 'near' && v7.post.sideFar === 'far' && v7.post.near === 0.8 && v7.post.farLow === 1.2 && v7.post.farHigh === 1 && v7.post.long === 1 && v7.post.middle === 1,
+  'near post 20% less spray, far post along the ground 20% more (a high one as it was); from outside the box or the middle, as it was');
 // --- QUICKSHOT, RELIABLE, MAESTRO'S TOUCH, AND THE CARDS ----------------------------------------------------------------
 const qs = await K(`(()=>{ const c=controlled, keep=c.pk; const t0=0.57; c.pk=['quickshot'];
   const fill=hasPk(c,'quickshot')?t0/(1+PERKS.quickshot.p.charge/100):t0; c.pk=keep; return {fill:+fill.toFixed(3)}; })()`);

@@ -502,6 +502,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Seven more perks, and the near post (v237).** Wide vision (a pass before he's ready goes half as far off line),
+  Last ditch (the last man back, his slide goes and reaches 20% further), Screamer (a shot from outside the box loses
+  35% less of its pace), Cushion (his first touch on a pass from 25 m or more 30% cleaner), Contest (Strength +1.5 with
+  the ball loose) and Pest (Acceleration and Agility +2 as the nearest of his side to their ball). What was Screamer, a
+  long shot's curl, is Finesse now: a saved career's men and the stars who had it have Finesse. All regular: with
+  twenty-six, about seven in ten outfielders have one. And from inside the box, off to one side, a shot at the near post
+  sprays a fifth less and one along the ground at the far post a fifth more (a long shot, or one from the middle, as before).
 - **The stars' perks (v236).** Each star plays with the perks given him on the Signature Players sheet (three at
   most): 25 of the 33 have some, from Messiah Petita's Untouchable, Quickshot and Whipped to Van Veers' Aura Defense,
   Shot blocker and Clear head. Six have numbers changed there too (Luka Magic, Michaelangelo Donnatello, Messiah
@@ -3542,6 +3549,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v237: seven more perks; near post and far post.** In PERKS: widevision (prepWorst), lastditch (slideLenOf and
+  slideHitOf by lastDitchK: lastMan, none of his side's outfielders nearer his own goal), screamer (shootAt's LONG_PACE
+  loss), cushion (touchDifficulty, by passLenM), contest (perkTick: ballLooseNow) and pest (perkTick: pestNow); the old
+  screamer is finesse, in the same place in PERKS so a man rolls as he did (careerPerks maps a saved career's, once:
+  p.pkv 237). postK (POST_NEAR 0.8, POST_FAR 1.2) scales a shot's spray by postSide, the post it's going for before any
+  curl's aim inside; the far post's only along the ground (its peak a third of GOAL_H or lower), neither from outside the
+  box or within POST_SIDE of the middle. Tests: `classic-perks.mjs`.
 - **v236: the stars' perks from the sheet.** STARS' pk, as the Signature Players sheet gives each (players/<id>'s pk,
   matched by sheet id), and the sheet's numbers for the stars changed since v231. Tests: `classic-perks.mjs` checks
   every star's perks are known and three at most, Aura and Leader one a club, and a star in a match has his.
