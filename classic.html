@@ -512,6 +512,9 @@
   .slotRow{display:flex;align-items:center;gap:8px;min-width:320px;margin-bottom:8px;}
   .slotRow .slotBtn{flex:1;text-align:left;font-size:13px;}
   .slotNote{font-size:11px;color:var(--warn);margin:0 0 8px;max-width:340px;}
+  /* (v234) HIS PERKS: a chip each under his name, a superstar's in the stars' gold (see PERKS) */
+  .pkRow{ display:flex; flex-wrap:wrap; gap:3px; margin-top:3px; } .pkTag{ font-size:9px; font-weight:700; letter-spacing:.3px; padding:1px 5px; border:1px solid var(--rimLo,#7f93c4); border-radius:3px; color:var(--ink); white-space:nowrap; }
+  .pkTag.pkStar{ border-color:#ffd27a; color:#ffd27a; }
   .mgTraits{ display:flex; flex-wrap:wrap; gap:3px; margin-top:2px; } .trTag{ font-size:9px; padding:1px 4px; border:1px solid var(--line,#3a4a33); border-radius:3px; color:var(--ink); white-space:nowrap; }
   .mgMini{ font:inherit; font-size:10px; padding:0 5px; margin-left:3px; border:1px solid var(--line,#3a4a33); border-radius:3px; background:transparent; color:var(--ink); cursor:pointer; }
   .mgInj{ color:var(--bad); font-size:10px; margin-left:5px; font-weight:400; } .injX{ color:var(--bad); font-weight:400; margin-right:3px; }
@@ -4165,9 +4168,78 @@
     sq.push(e); if(!li) return;
     if(Array.isArray(li.atk)&&li.atk.length===OUTFIELD-1) li.atk.splice(mid(fa),0,k);
     if(Array.isArray(li.def)&&li.def.length===OUTFIELD-1) li.def.splice(mid(fd),0,k); }
+  // ===== PERKS (v234): what a man does on the pitch beyond his numbers. Regular perks come to men by chance -- each one
+  // his position can have, at its chance, PERK_SET.favMul times as likely for the playstyles it suits, PERK_SET.maxPer a
+  // man at most -- and stay his (rolled from his career id, or his name and playstyle: the same man, the same perks).
+  // Superstar perks, and any regular ones, go to the stars they're given to on the Signature Players sheet (STARS' pk);
+  // a star isn't rolled. Every number is the Perks Master Sheet's, on the game's 1 to 10 scale. (A man's character traits
+  // -- TRAITS: Natural Leader and the rest -- are another thing.)
+  const PERK_SET={favMul:3, maxPer:2};
+  const PK_OUT=['CB','FB','DM','CM','AM','WM','WNG','STK'];
+  const PERKS={
+    presser:    {n:'Presser',         kind:'reg', who:['WNG','STK'], chance:5, favs:['complete','speedster','paceywinger','winger'], p:{drain:50}},
+    jumper:     {n:'Jumper',          kind:'reg', who:PK_OUT, chance:4, favs:['target','stopper','anchor','cover'], p:{jump:20}},
+    whipped:    {n:'Whipped pass',    kind:'reg', who:PK_OUT, chance:4, favs:['playmaker','deepcreator','wideplaymaker','ballplayer','trequartista'], p:{curve:1.5, over:false}},
+    bendit:     {n:'Bend it like..',  kind:'reg', who:PK_OUT, chance:4, favs:['winger','wingback','fullback','widemid','mwinger'], p:{curve:1.5, over:false}},
+    screamer:   {n:'Screamer',        kind:'reg', who:PK_OUT, chance:4, favs:['completemid','boxtobox','invwinger','trequartista','complete'], p:{curve:1.5, over:false}},
+    touchpass:  {n:'Touch pass',      kind:'reg', who:PK_OUT, chance:4, favs:['playmaker','completemid','deepcreator','falsenine','mezzala'], p:{acc:25}},
+    reliable:   {n:'Reliable',        kind:'reg', who:PK_OUT.concat('GK'), chance:5, favs:['boxtobox','fullback','wingback','widemid','ballwinner'], p:{rec:50}},
+    fox:        {n:'Fox in the box',  kind:'reg', who:['STK','AM','WNG'], chance:5, favs:['poacher','shadow','complete'], p:{range:6, burst:15}},
+    quickshot:  {n:'Quickshot',       kind:'reg', who:PK_OUT, chance:4, favs:['poacher','speedster','shadow','invwinger','complete'], p:{charge:35}},
+    pressres:   {n:'Press resistant', kind:'reg', who:PK_OUT, chance:4, favs:['trickster','trequartista','playmaker','falsenine','mezzala','libero'], p:{cut:25}},
+    untouchable:{n:'Untouchable',     kind:'super', p:{angle:40, str:2, acc:3, overStr:true, overAcc:true}},
+    apex:       {n:'Apex',            kind:'super', p:{head:20, jump:35, shot:2, over:true}},
+    godspeed:   {n:'Godspeed',        kind:'super', p:{speed:12}},
+    predator:   {n:'Predator',        kind:'super', p:{speed:2, acc:2, str:2, over:true}},
+    tikitaka:   {n:'Tiki taka',       kind:'super', p:{per:0.1, cap:3}},
+    maestro:    {n:'Maestro',         kind:'super', p:{aim:60, ground:true, boost:2, secs:1, over:true}},
+    aura:       {n:'Aura Defense',    kind:'super', one:true, p:{range:5, offiq:2, ctrl:1}},
+    leader:     {n:'Glorious Leader', kind:'super', one:true, p:{comp:0.5}}};
+  const PERK_KEYS=Object.keys(PERKS), PERK_REG=PERK_KEYS.filter(k=>PERKS[k].kind==='reg');
+  const PK=k=>PERKS[k].p;
+  const hasPk=(p,k)=>!!(p&&p.pk&&p.pk.indexOf(k)>=0);
+  const pkSign=v=>(v>0?'+':'')+(+v).toFixed(v%1?1:0);
+  // in a sentence, as the sheet has it
+  function perkLine(k){ const u=PK(k), ov=o=>o?'':' (up to 10)';
+    switch(k){
+      case 'presser': return 'Loses '+u.drain+'% less stamina while his side is without the ball.';
+      case 'jumper': return 'Jumps '+u.jump+'% higher for a header.';
+      case 'whipped': return 'His passes bend as if his Curve were '+u.curve+' higher'+ov(u.over)+'.';
+      case 'bendit': return 'His crosses swing as if his Curve were '+u.curve+' higher'+ov(u.over)+'.';
+      case 'screamer': return 'His shots from outside the box curl as if his Curve were '+u.curve+' higher'+ov(u.over)+'.';
+      case 'touchpass': return 'His one-touch passes are '+u.acc+'% more accurate.';
+      case 'reliable': return 'Gets his legs back '+u.rec+'% quicker between matches.';
+      case 'fox': return 'Onto a parry or a block within '+u.range+' m of him the instant it comes off, '+u.burst+'% quicker to it.';
+      case 'quickshot': return 'Charges a shot '+u.charge+'% faster.';
+      case 'pressres': return 'Pressure costs his ball control and dribbling '+u.cut+'% less.';
+      case 'untouchable': return 'Dribbling, the angle a man can take it from is '+u.angle+'% smaller; Strength '+pkSign(u.str)+' and with the ball Acceleration '+pkSign(u.acc)+'.';
+      case 'apex': return 'Heads it '+u.head+'% harder, jumps '+u.jump+'% higher for a header at their goal, Shot power '+pkSign(u.shot)+' from outside the box.';
+      case 'godspeed': return 'Runs as if his Speed were '+u.speed+'.';
+      case 'predator': return 'Onto a team-mate’s through ball: Speed, Acceleration and Strength '+pkSign(u.speed)+' till he has it.';
+      case 'tikitaka': return 'Every pass his side completes in a row: '+pkSign(u.per)+' to everyone’s Short passing and Composure in traffic, up to '+pkSign(u.cap)+'.';
+      case 'maestro': return 'His directional first touch '+u.aim+'% truer'+(u.ground?', kept on the ground':'')+'; then '+u.secs+' s of Speed, Acceleration and Agility '+pkSign(u.boost)+'.';
+      case 'aura': return 'Opponents within '+u.range+' m of him: Off IQ '+pkSign(-u.offiq)+', Ball control '+pkSign(-u.ctrl)+'. One a side.';
+      case 'leader': return 'Every team-mate’s composure '+pkSign(u.comp)+'. One a side.';
+    } return ''; }
+  // his position for his perks: his sub-role, else his playstyle's
+  function pkSub(e){ return (e&&(e.subRole||(e.role==='GK'?'GK':STYLES[e.style]&&STYLES[e.style].sub)))||null; }
+  function rollPerks(seed,sub,style){ const R=rng32(hashStr('perks|'+seed)), hits=[];
+    for(const k of PERK_REG){ const d=PERKS[k], r=R(); if(!sub||d.who.indexOf(sub)<0) continue;
+      const c=Math.min(0.95,d.chance/100*(d.favs.indexOf(style)>=0?PERK_SET.favMul:1)); if(r<c) hits.push([k,c]); }
+    return hits.sort((a,b)=>b[1]-a[1]).slice(0,PERK_SET.maxPer).map(h=>h[0]); }
+  function starPerks(key){ const s=STARS.find(x=>x.key===key); return s&&Array.isArray(s.pk)?s.pk.filter(k=>PERKS[k]):[]; }
+  // what a man in a squad has: a star what he's given; a career man his own (kept: careerPerks); anyone else rolled
+  function perksOfEntry(e){ if(!e) return []; if(e.star) return starPerks(e.star); if(Array.isArray(e.pk)) return e.pk.filter(k=>PERKS[k]);
+    return rollPerks(e.lookKey!=null?'c'+e.lookKey:'n'+(e.name||'')+'|'+(e.style||''), pkSub(e), e.style); }
+  function careerPerks(p){ if(!p) return []; if(p.star) return starPerks(p.star);
+    if(!Array.isArray(p.pk)) p.pk=rollPerks('c'+p.id, p.subRole||pkSub(p), p.style);
+    return p.pk; }
+  // the chips on a card: his perks, a superstar's gold
+  function perkChips(pk){ if(!pk||!pk.length) return '';
+    return '<div class="pkRow">'+pk.filter(k=>PERKS[k]).map(k=>'<span class="pkTag'+(PERKS[k].kind==='super'?' pkStar':'')+'" title="'+String(perkLine(k)).replace(/"/g,'&quot;')+'">'+PERKS[k].n+'</span>').join('')+'</div>'; }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.uniq=!!entry.uniq; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.uniq=!!entry.uniq; p.pk=perksOfEntry(entry); p.pkm=null; p.pko=null; p.foxT=0; p.maestroT=0; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   for(const t of ['G','R']) if(goneForm[t]&&LINEUP[t]&&SQUAD[t]&&LINEUP[t].atk.length===OUTFIELD){   // (v127: kept in a shape that's gone -- see mapShapeOrder)
@@ -5127,7 +5199,7 @@
     const bcq=clamp((statOf(p,'ballControl',P.ballControl.val)-1)/9,0,1), bcw=Math.pow(1-bcq,1.5), sw=0.6+0.8*(1-s);
     const aimSd=(P.ftAimHi.val+(P.ftAimLo.val-P.ftAimHi.val)*bcw)*sw, wtSd=(P.ftWtHi.val+(P.ftWtLo.val-P.ftWtHi.val)*bcw)*sw;
     const bell=()=>(Math.random()+Math.random()+Math.random()-1.5)*2;   // (one standard deviation, never past three)
-    const err=clamp(bell()*aimSd,-90,90)*Math.PI/180, wt=Math.max(0.45,1+bell()*wtSd);
+    const mae=hasPk(p,'maestro')?1-PK('maestro').aim/100:1, err=clamp(bell()*aimSd*mae,-90,90)*Math.PI/180, wt=Math.max(0.45,1+bell()*wtSd*mae);   // (v234: Maestro, truer)
     const ang=Math.atan2(a.y,a.x)+err, dx=Math.cos(ang), dy=Math.sin(ang);
     // (v216) where the ball is on him, against the way it's going: along, the cosine of the angle between them; across, its
     // sine, signed -- round him if its line runs through him; and how much further it has to go than from out to his side
@@ -5139,6 +5211,7 @@
     ball.vx=dx*out; ball.vy=dy*out; ball.z=1; ball.vz=FT_HOP[0]+FT_HOP[1]*(1-s);   // (v215: the hop -- see FT_HOP)
     ball.dribEsc={p, t:simNow, dx:Math.cos(ang), dy:Math.sin(ang), ft:true};   // (v214: pushed into space -- he can't have it back till he's caught it up, as a touch of his that gets away: escaping -- and then only at his feet: FT_TAKE. It was his again as soon as it was in his reach, a fifth of a second on)
     if(up){ ball.x=bx; ball.y=by; ball.z=z0; ball.vz=20+40*(1-s); }   // off his chest or thigh, from where he met it
+    if(hasPk(p,'maestro')){ if(PK('maestro').ground){ ball.z=1; ball.vz=0; } p.maestroT=simNow+PK('maestro').secs; }   // (v234: Maestro -- on the ground, and away)
     if(LAB.on){ const off=Math.acos(clamp(Math.cos(ang)*a.x+Math.sin(ang)*a.y,-1,1))*180/Math.PI;   // (v212: the Trap Lab -- where you flicked it against where it went)
       labOnTouch(p,s,null,{sp:inSp,keep:out/Math.max(1,inSp),u:0,dx:inSp>1?ivx/inSp:0,dy:inSp>1?ivy/inSp:0,z:z0,aim:{aim:{x:a.x,y:a.y},aimErr:off}},true); }
     ball.ftRound=null;
@@ -7004,9 +7077,10 @@
     const r=ball.intendedRcv; if(r&&r!==p&&ball.lastTouch===r.team) return null;        // (a pass on its way to someone else)
     if(ball.dribbler&&ball.dribbler!==p&&ball.dribbleGrace>0) return null;              // (someone else's knock-on: his, or one of theirs in his stride)
     const dx=ball.x-p.x, dy=ball.y-p.y, d=Math.hypot(dx,dy);
-    if(d>MAG_R||d<1) return null;
+    const MR=p.foxT>simNow?Math.max(MAG_R,PK('fox').range*MK):MAG_R;   // (v234: your Fox, onto a rebound: drawn to it from his reach)
+    if(d>MR||d<1) return null;
     const ux=dx/d, uy=dy/d, bs=Math.hypot(ball.vx,ball.vy);
-    if(bs>MAG_FAST&&!(ball.dribbler===p&&ball.dribbleGrace>0)) return null;             // (a ball hit, not a loose one)
+    if(bs>MAG_FAST&&!(ball.dribbler===p&&ball.dribbleGrace>0)&&!(p.foxT>simNow)) return null;             // (a ball hit, not a loose one)
     if((ball.vx*ux+ball.vy*uy)>sprintSpeedOf(p)*0.9) return null;                       // (going away from him quicker than he can run)
     if(!ix&&!iy) return {ix:ux, iy:uy};                                                 // (stick alone: he goes to it)
     const into=ix*ux+iy*uy, near=1-d/MAG_R;
@@ -7100,7 +7174,7 @@
   // defensive clearance: how hard he heads it away, by his Heading (and the dial): the forehead, not a boot -- from 8 m
   // out it stops ~13 m away at Heading 3, ~17 m at 5.5, ~21 m at 9 (v85: it was the dial alone, and went 20-40 m)
   function headClearOf(p){ return (headPowerOf(p)*0.5+110)*(P.headClear.val/470); }
-  function headPowerOf(p){ return statLerp(statOf(p,'heading',P.heading.val), 200, 500); }     // attacking header launch power
+  function headPowerOf(p){ return statLerp(statOf(p,'heading',P.heading.val), 200, 500)*(hasPk(p,'apex')?1+PK('apex').head/100:1); }   // (v234: Apex heads it harder)     // attacking header launch power
   // PASS spray: a signed angular error (radians). Base drift from the passer's short-pass accuracy,
   // PLUS a distance term that grows sharply as their long-pass accuracy drops. shortOverride lets a
   // caller (AI context risk, first-time) substitute an already-adjusted short accuracy.
@@ -7201,16 +7275,50 @@
   // a player's strength (0..1). per-player stat if set, else the global dial.
   // ===== PER-PLAYER STAT MAPPING =====
   // A stat is 1..10. statLerp maps it linearly onto a [lo(=stat 1) .. hi(=stat 10)] value range.
-  function statLerp(s,lo,hi){ s=clamp(isFinite(s)?s:5.5,1,10); return lo+(s-1)/9*(hi-lo); }
+  function statLerp(s,lo,hi){ s=clamp(isFinite(s)?s:5.5,1,15); return lo+(s-1)/9*(hi-lo); }   // (v234: up to 15 -- only a perk takes a stat over 10, where it may: see perkTick)
   // read a player's stat; undefined per-player => use the global stat dial as the baseline.
   function statOf(p,key,dialVal){ let s=p&&p.stats&&p.stats[key];
     if(!isFinite(s)&&(key==='longPass'||key==='compFinal')) s=p&&p.stats&&p.stats[key==='longPass'?'passAcc':'composure'];   // (v163: a new one missing -- the one it came from; neither -- its own dial)
     if(!isFinite(s)) return dialVal;
-    return (key==='offIQ'||key==='defIQ')&&p.slotAtk?Math.max(1,s-posPenOf(p)[key]):s; }   // (his IQ, less what his spots cost him)
+    if((key==='offIQ'||key==='defIQ')&&p.slotAtk) s=Math.max(1,s-posPenOf(p)[key]);   // (his IQ, less what his spots cost him)
+    const m=p.pkm&&p.pkm[key]; return m?clamp(s+m,1,p.pko&&p.pko[key]?15:Math.max(10,s)):s; }   // (v234: what his perks add just now -- see perkTick)
   // what his spots cost him in the match: his Off IQ for the one he takes with the ball, his Def IQ for the one without it
   function posPenOf(p){ const c=p.posPen; if(c&&c.a===p.slotAtk&&c.d===p.slotDef&&c.e===p.squadIdx&&c.s===p.style) return c;
     const nat=fitOfP(p);   // (his archetype's fit: v118)
     return p.posPen={a:p.slotAtk, d:p.slotDef, e:p.squadIdx, s:p.style, offIQ:FIT_PEN[posFit(nat,spotFit(p.slotAtk))].offIQ, defIQ:FIT_PEN[posFit(nat,spotFit(p.slotDef))].defIQ}; }
+  // ===== PERKS IN A MATCH (v234): each frame, what each man's perks add to his numbers just now (p.pkm; p.pko: which of
+  // them may go over 10, up to 15) -- his own (Godspeed, Untouchable on the ball, Predator onto a team-mate's through ball,
+  // Maestro after his touch) and his side's (Glorious Leader, Tiki taka) or theirs (Aura Defense, near him). One Leader
+  // and one Aura a side counts: the first. ----
+  let tikiRun={G:0,R:0};
+  // (the regular perks' numbers where they're used)
+  function presserK(p){ return hasPk(p,'presser')&&!teamHasBall(p.team)?1-PK('presser').drain/100:1; }   // Presser: a sprint without the ball costs this much
+  function presResK(p){ return hasPk(p,'pressres')?1-PK('pressres').cut/100:1; }                        // Press resistant: this much of the pressure counts
+  const pkCurve=(p,k)=>hasPk(p,k)?PK(k).curve:0, pkCurveOv=(p,k)=>hasPk(p,k)&&!!PK(k).over;            // Whipped pass, Bend it like.., Screamer
+  // Fox in the box: a parry or a block -- his side's shot -- within his reach: he's onto it at once (FOX: aiBrain; MAX: stepOutfield; the magnet, yours)
+  function foxRebound(team){ if(!team) return; const R=PK('fox').range*MK; for(const p of players) if(p.team===team&&hasPk(p,'fox')&&Math.hypot(p.x-ball.x,p.y-ball.y)<R) p.foxT=simNow+1.5; }
+  function predatorRun(p){ return !!ball.thru&&ball.intendedRcv===p&&!ball.ownedBy&&!gkHold&&simNow<ball.thru.until&&ball.lastTouch===p.team; }
+  function perkTick(){
+    const all=players.concat(keepers), lead={G:null,R:null}, aura={G:null,R:null}, tiki={G:0,R:0};
+    for(const p of all){ p.pkm=null; p.pko=null; if(!p.pk||!p.pk.length) continue;
+      if(!lead[p.team]&&hasPk(p,'leader')) lead[p.team]=p;
+      if(!aura[p.team]&&hasPk(p,'aura')) aura[p.team]=p;
+      if(hasPk(p,'tikitaka')) tiki[p.team]++; }
+    const add=(p,k,v,over)=>{ if(!v) return; (p.pkm||(p.pkm={}))[k]=(p.pkm[k]||0)+v; if(over) (p.pko||(p.pko={}))[k]=true; };
+    for(const p of all){
+      if(p.pk&&p.pk.length){
+        if(hasPk(p,'godspeed')) add(p,'speed',Math.max(0,PK('godspeed').speed-((p.stats&&p.stats.speed)||5.5)),true);
+        if(hasPk(p,'untouchable')&&(ball.ownedBy===p||(ball.dribbler===p&&ball.dribbleGrace>0))){ const u=PK('untouchable'); add(p,'strength',u.str,u.overStr); add(p,'acceleration',u.acc,u.overAcc); }
+        if(hasPk(p,'predator')&&predatorRun(p)){ const u=PK('predator'); add(p,'speed',u.speed,u.over); add(p,'acceleration',u.acc,u.over); add(p,'strength',u.str,u.over); }
+        if(hasPk(p,'maestro')&&p.maestroT>simNow){ const u=PK('maestro'); add(p,'speed',u.boost,u.over); add(p,'acceleration',u.boost,u.over); add(p,'agility',u.boost,u.over); }
+      }
+      const t=p.team, L=lead[t];
+      if(L&&L!==p){ const c=PK('leader').comp; add(p,'composure',c); add(p,'compFinal',c); }
+      if(tiki[t]&&tikiRun[t]>0){ const u=PK('tikitaka'), b=Math.min(u.cap,tikiRun[t]*u.per*tiki[t]); add(p,'passAcc',b); add(p,'composure',b); }
+      const A=aura[t==='G'?'R':'G'];
+      if(A&&Math.hypot(p.x-A.x,p.y-A.y)<PK('aura').range*MK){ add(p,'offIQ',-PK('aura').offiq); add(p,'ballControl',-PK('aura').ctrl); }
+    }
+  }
   // SPEED stat -> non-sprint & sprint top speed (endpoints: 1 => 96/137.5, 10 => 166/217 -- px a second, 25 to the metre)
   function runSpeedOf(p){    return statLerp(statOf(p,'speed',        P.speed.val), 96, 166); }
   function sprintSpeedOf(p){ return statLerp(statOf(p,'speed',        P.speed.val),137.5, 217); }   // (v181: a Speed 1 man 5.5 m/s flat out, the quickest 8.7 as v179 left them -- v179 took a twentieth off everyone's, 134 to 228 down to 127 to 217, the slowest down to 5.1)
@@ -7270,7 +7378,7 @@
   // STRENGTH stat (1..10) -> physics 0.1..1.0. per-player stats.strength overrides the team dial.
   function strengthOf(p){
     let stat;
-    if(p&&p.stats&&isFinite(p.stats.strength)) stat=p.stats.strength;
+    if(p&&p.stats&&isFinite(p.stats.strength)) stat=statOf(p,'strength',p.stats.strength);   // (v234: with his perks)
     else if(p&&p.team==='R') stat=P.strengthR.val;
     else stat=P.strengthG.val;
     return statLerp(stat,0.1,1.0);
@@ -8144,7 +8252,9 @@
   }
   // GOING UP FOR A HEADER: the take-off speed (players fall at 700 px/s^2) that lifts his feet 8 px (Heading 1)
   // to 14 px (Heading 10) -- a quarter to two-fifths of his height. The header's reach above his head does the rest.
-  function headJumpVz(p){ return Math.sqrt(2*700*statLerp(statOf(p,'heading',P.heading.val),8,14)); }
+  function headJumpVz(p){ return Math.sqrt(2*700*statLerp(statOf(p,'heading',P.heading.val),8,14)*leapK(p)); }
+  // (v234) a Jumper leaps PERKS.jumper's share higher; Apex his share again at their goal (a header in their half)
+  function leapK(p){ return (hasPk(p,'jumper')?1+PK('jumper').jump/100:1)*(hasPk(p,'apex')&&(p.x-FW/2)*atkOf(p.team)>0?1+PK('apex').jump/100:1); }
   // HOW HIGH A MAN CAN HEAD IT: the top of his head where he is (on the ground or up in his leap) and HEAD_UP over it at a
   // stretch -- 61 px at the very most (Heading 10, at the top of his leap), well under a keeper's hands (GK_CLAIM_H, 78 px):
   // no man but a keeper ever gets to a ball higher than a keeper could. (It was 51 px over his head: up to 97.)
@@ -8281,7 +8391,7 @@
     if(!aimx&&!aimy){aimx=p.facing.x;aimy=p.facing.y;}
     const al=Math.hypot(aimx,aimy)||1;aimx/=al;aimy/=al;
     const D=oneTouchDifficulty(p), sk=oneTouchSkill(p);
-    const worst=P.oneTouchErr.val*Math.PI/180*D.d*(1-0.75*sk);   // the extra spray this ball, for this man
+    const worst=P.oneTouchErr.val*Math.PI/180*D.d*(1-0.75*sk)*(hasPk(p,'touchpass')?1-PK('touchpass').acc/100:1);   // (v234: Touch pass)   // the extra spray this ball, for this man
     // pick a teammate roughly in the aimed direction (or the one you tapped)
     let best=null,bs=-1e9;
     for(const q of players){
@@ -8638,8 +8748,8 @@
     // The curl DIRECTION, amount, and whether it actually helps are all decided in shootAt.
     return statOf(p,'curve',P.curve.val) >= 3.5 ? 1 : 0;
   }
-  function shotPowerOf(p){ return statLerp(statOf(p,'shotPower',P.shotPower.val), 600, 900); }   // shot power stat -> px/s
-  function curveOf(p){ return SHOT_CURL*curvePot(p); }           // Curve stat -> a shot's bend strength, by the table (curvePot -- v169: none at Curve 1, 0.285 at 10; it was 0.05 to 0.3, evenly). Crosses, passes: CROSS_BEND, PASS_BEND
+  function shotPowerOf(p,b,ov){ const s=statOf(p,'shotPower',P.shotPower.val); return statLerp(b?clamp(s+b,1,ov?15:10):s, 600, 900); }   // (v234: b, Apex's from outside the box)   // shot power stat -> px/s
+  function curveOf(p,long){ return SHOT_CURL*curvePot(p,long?pkCurve(p,'screamer'):0,!!long&&pkCurveOv(p,'screamer')); }   // (v234: long, a shot from outside the box -- Screamer's)           // Curve stat -> a shot's bend strength, by the table (curvePot -- v169: none at Curve 1, 0.285 at 10; it was 0.05 to 0.3, evenly). Crosses, passes: CROSS_BEND, PASS_BEND
   function longShotsOf(p){ return statLerp(statOf(p,'longShots',P.longShots.val), 0.1, 0.6); }     // long-shots stat -> distance hold-up
   // Angle (radians) the goal mouth subtends at p's position. Bigger = more open net.
   // Naturally folds in BOTH distance (farther = smaller) and lateral position (wider = smaller),
@@ -8686,6 +8796,7 @@
     let ty=YC+aim*(GOAL_W/2-14);
     const manual=(p===controlled), aimed=Math.abs(aim)>0.25;   // player picked a corner -> honor it
     const distG0=Math.hypot(gx-ball.x, ty-ball.y);
+    const longShot=Math.hypot(gx-ball.x, YC-ball.y)>330;    // (v234: from outside the box -- Screamer's curl, Apex's power)
 
     // un-aimed / AI shots: score the shot to EACH corner and aim at the higher-quality one.
     // Corner quality = can the keeper physically get there before the ball (reaction gap + footwork
@@ -8704,7 +8815,7 @@
     if(aiCurl && !manual){
       const kpC = keepers.find(k=>k.team!==p.team) || null;
       const dGoalC = Math.hypot(gx-ball.x, YC-ball.y);
-      const cvC = curveOf(p);                               // this shooter's bend strength (v169: 0 at Curve 1 .. 0.285 at 10, by the table -- so over 0.12, enough to be worth it, from Curve 6.5 or so: it was 3.5)
+      const cvC = curveOf(p,longShot);                               // this shooter's bend strength (v169: 0 at Curve 1 .. 0.285 at 10, by the table -- so over 0.12, enough to be worth it, from Curve 6.5 or so: it was 3.5)
       const cornerSign = (ty < YC) ? -1 : 1;                // chosen corner: -1 top, +1 bottom
       const frontal = Math.abs(ball.y-YC) < 0.55*Math.abs(gx-ball.x);   // within ~29° of the goal axis --
       // from oblique/wide spots the outward bend points AWAY from the goal plane and carries the far-corner
@@ -8732,13 +8843,13 @@
     const dev=((1-effAcc)*(0.05+0.13*charge)*(1+longPen*1.5) + longPen*0.14)*(Math.random()*2-1);
     const ca=Math.cos(dev),sa=Math.sin(dev);
     let ax=dx*ca-dy*sa, ay=dx*sa+dy*ca;
-    const speed=shotPowerOf(p)*(0.68+0.32*charge)*(1-longPen*LONG_PACE)*(1-0.45*Math.min(1,xb));
+    const speed=shotPowerOf(p,longShot&&hasPk(p,'apex')?PK('apex').shot:0,PK('apex').over)*(0.68+0.32*charge)*(1-longPen*LONG_PACE)*(1-0.45*Math.min(1,xb));
     // SWIPE CURL (touch): the swipe's bow sets the spin (-1..1, sign = which way it bends; Curve stat sets how
     // hard). Struck out to the side the swipe bowed by exactly what the curl will swing back, so it bends
     // round onto the spot the swipe pointed at instead of curling off it.
-    if(manual && spin && Math.abs(spin)>0.02 && curveOf(p)>0){   // (v169: at Curve 1 it goes where it's swiped, straight)
+    if(manual && spin && Math.abs(spin)>0.02 && curveOf(p,longShot)>0){   // (v169: at Curve 1 it goes where it's swiped, straight)
       const side=Math.sign(spin), vz=(60+200*charge)*Math.min(1,Math.max(0.4,distG/600));   // (vz as struck below)
-      let force=1700*P.swipeCurl.val*curveOf(p)*Math.abs(spin), swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side);
+      let force=1700*P.swipeCurl.val*curveOf(p,longShot)*Math.abs(spin), swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side);
       // more bend than a 23 deg swing-out (a big curler from far) is toned down to fit, so it still finds the spot
       for(let i=0;i<2&&Math.abs(swing)>0.4;i++){ force*=0.4/Math.abs(swing); swing=curlSwing(speed,vz,distG,force,SWIPE_SPIN_T,side); }
       const pre=clamp(-swing,-0.45,0.45);
@@ -8811,7 +8922,8 @@
   // them (CURVE_POT); and the most a twentieth less than it was (CURVE_TOP). Shots, crosses and passes alike. (v168 and
   // before: a little at Curve 1, then evenly up to all of it at 10 -- a man of 7 or 8 bent it nearly as a 9 or 10 did.)
   const CURVE_POT=[0,0.05,0.10,0.15,0.25,0.35,0.50,0.65,0.80,1.00], CURVE_TOP=0.95;
-  function curvePot(p){ let s=statOf(p,'curve',P.curve.val); s=clamp(isFinite(s)?s:5.5,1,10);
+  function curvePot(p,b,ov){ let s=statOf(p,'curve',P.curve.val); s=clamp((isFinite(s)?s:5.5)+(b||0),1,ov?15:10);   // (v234: b, a perk's Curve; ov, over 10 if it takes him there)
+    if(s>10) return CURVE_TOP*(CURVE_POT[9]+(s-10)*(CURVE_POT[9]-CURVE_POT[8]));
     const i=Math.min(8,Math.floor(s-1)), f=s-1-i; return CURVE_TOP*(CURVE_POT[i]+(CURVE_POT[i+1]-CURVE_POT[i])*f); }
   // ...AND BY HOW FAR IT'S GOING (v169): a pass bends best over a middling distance -- all of it from 17 m to 27 m; less
   // on a short one, none at 8 m or less and half at a short pass's length (PASS_SHORT_M, 12 m); less on a long one, 80% at a
@@ -8830,15 +8942,15 @@
   const CURL_F=1700*0.85, CROSS_BEND=0.6, PASS_BEND=0.28, THRU_BEND=0.785, SHOT_CURL=0.3;
   // (v180) A CROSS BENDS BY CURVE IN STEPS OF A TENTH: 10% of the most a cross can be bent at Curve 1, 20% at 2 ... all of it
   // at 10 (crossPot) -- not the through ball's table (CURVE_POT: none at 1, half at 7). (v169-v179: the table.)
-  function crossPot(p){ let s=statOf(p,'curve',P.curve.val); s=clamp(isFinite(s)?s:5.5,1,10); return CURVE_TOP*s/10; }
+  function crossPot(p){ let s=statOf(p,'curve',P.curve.val); s=clamp((isFinite(s)?s:5.5)+pkCurve(p,'bendit'),1,pkCurveOv(p,'bendit')?15:10); return CURVE_TOP*s/10; }   // (v234: Bend it like..)
   function crossBendOf(p){ return CROSS_BEND*crossPot(p); }
-  function passBendOf(p,d){ return PASS_BEND*curvePot(p)*(d==null?1:curveLenK(d)); }
-  function thruBendOf(p,d){ return THRU_BEND*curvePot(p)*(d==null?1:curveLenK(d)); }
+  function passBendOf(p,d){ return PASS_BEND*curvePot(p,pkCurve(p,'whipped'),pkCurveOv(p,'whipped'))*(d==null?1:curveLenK(d)); }   // (v234: Whipped pass)
+  function thruBendOf(p,d){ return THRU_BEND*curvePot(p,pkCurve(p,'whipped'),pkCurveOv(p,'whipped'))*(d==null?1:curveLenK(d)); }
   // A THROUGH BALL ROUND THEIR BACK LINE (thruArcs): bent along a steady arc through a gap in it and onto the runner, as
   // much turn over its length as that takes, up to THRU_ARC at the passer's Curve (v169: by the table, none at 1 and 41 at
   // 10, by how far -- it was 6 at 1 and 43 at 10; v165: 34 at 10 -- over 15 m, a few centimetres off its line to a metre)
   const THRU_ARC=0.75;
-  function thruArcOf(p,d){ return THRU_ARC*curvePot(p)*(d==null?1:curveLenK(d)); }
+  function thruArcOf(p,d){ return THRU_ARC*curvePot(p,pkCurve(p,'whipped'),pkCurveOv(p,'whipped'))*(d==null?1:curveLenK(d)); }
   // ...and it's as hard to deal with as it was (thruCurlQ): as curling as a through ball can be from ARC_CURL of turn
   // (29 degrees: v165's most for a through ball; v167's through ball turns up to 72, and against that a ball round their
   // line would have counted for less)
@@ -9088,7 +9200,9 @@
     const bl=Math.hypot(bx,by)||1; bx/=bl; by/=bl;
     // if the ball points the same way as the defender -> exposed; opposite -> shielded
     const dot=bx*tx+by*ty;            // 1 showing it to them, -1 hidden behind body
-    return clamp((dot+1)/2,0,1);
+    let e=clamp((dot+1)/2,0,1);
+    if(hasPk(carrier,'untouchable')){ const th=Math.acos(clamp(dot,-1,1))/Math.max(0.1,1-PK('untouchable').angle/100); e=(Math.cos(Math.min(Math.PI,th))+1)/2; }   // (v234: Untouchable -- the angle it shows to a man that much smaller)
+    return e;
   }
   function isBehind(carrier,tackler){ // kept for slide-from-behind guard
     const f=carrier.facing;
@@ -11085,7 +11199,7 @@
     const pr=C.presser, inbound=pr&&C.prD<130&&((pr.vx||0)*(p.x-pr.x)+(pr.vy||0)*(p.y-pr.y))/Math.max(1,C.prD)>40;
     const closing=pr&&(C.prD<75||inbound)&&simNow-ob.scanT>0.08;
     if(simNow>=ob.next||closing){
-      ob.scanT=simNow; ob.next=simNow+statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.14)*C.M.tempo;
+      ob.scanT=simNow; ob.next=simNow+statLerp(statOf(p,'offIQ',P.offIQ.val),0.3,0.14)*C.M.tempo/(hasPk(p,'quickshot')&&Math.abs(goalX-p.x)<700?1+PK('quickshot').charge/100:1);   // (v234: Quickshot -- in range, he gets it away sooner)
       const opts=obOptions(p,C,ob), pick=obChoose(p,ob,opts,looking,C);
       p.obLast={t:simNow, opts, pick, looking};
       if(pick&&pick.rel){ p.takeOn=null;
@@ -11691,6 +11805,11 @@
         p.dbgTag='DEF-CROSS'; p.sprint=p.stamina>0.1; p.dash=true;
         return steer(p,H.x,H.y,1.0);
       }
+    }
+    // (v234) FOX IN THE BOX: a parry or a block near him -- he's onto it the instant it comes off (see foxRebound)
+    if(p!==controlled && p.foxT>simNow && p.state==='normal' && !ball.ownedBy && !gkHold && ball.z<60){
+      p.dbgTag='FOX'; p.goingForBall=true; p.sprint=p.stamina>0.05;
+      return steer(p, ball.x+ball.vx*0.12, ball.y+ball.vy*0.12, 1.0);
     }
     // CLOSE LOOSE BALL: if a loose ball is right next to me, go take it regardless of shape/role -- unless it's a team-mate's
     // touch or a pass to a team-mate (I don't take it off him), or our cross coming in at a height to head (see ATTACK A
@@ -12894,6 +13013,7 @@
     if(p.engageCap<1){ MAX *= p.engageCap; p.engageCap=1; }    // an AI defender coming in under control (aiBrain sets it each frame)
     if(p.intercepting) MAX *= statLerp(defIQof(p),1.0,1.15);   // Def IQ interception burst (+15% at Def IQ 10)
     else if(p.goingForBall) MAX *= statLerp(statOf(p,'offIQ',P.offIQ.val),1.0,1.10);  // Off IQ receiving burst: arrive on a ball meant for you a beat sooner (+10% at Off IQ 10)
+    if(p.foxT>simNow&&!ball.ownedBy) MAX *= 1+PK('fox').burst/100;   // (v234: Fox in the box, onto the rebound)
     let accelMul=1;
 
     if(deadBall()&&!matchOver){
@@ -12903,9 +13023,9 @@
       p.stamina=clamp(p.stamina + dt*staminaRecOf(p), 0, p.staminaCap);
     } else if(wantSprint && !empty){
       accelMul=1.25;
-      const pace=sprintPace(p), drain=(hasBall ? drainSprintBallOf(p) : drainSprintOf(p))*pace;   // sprint stamina drain, by the ground covered (A SPRINT'S COST, v121)
+      const pace=sprintPace(p), pk=presserK(p), drain=(hasBall ? drainSprintBallOf(p) : drainSprintOf(p))*pace*pk;   // sprint stamina drain, by the ground covered (A SPRINT'S COST, v121; v234: a Presser's without the ball, less)
       p.stamina=clamp(p.stamina - dt*drain, 0, 1);
-      p.staminaCap=clamp(p.staminaCap - dt*CAP_WEAR*capRate()*pace*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);   // (capRate: v136)
+      p.staminaCap=clamp(p.staminaCap - dt*CAP_WEAR*capRate()*pace*staminaCapDrainOf(p)*physioWear(p)*pk, 0.30, 1);   // (capRate: v136)
     } else if(p.sprint && moving && empty){
       // trying to sprint with NOTHING left -> burns into the max (cap) itself
       p.staminaCap=clamp(p.staminaCap - dt*0.035*capRate()*staminaCapDrainOf(p)*physioWear(p), 0.30, 1);
@@ -13084,7 +13204,7 @@
   function trapGrade(s){ return s>0.8?'PERFECT':s>0.55?'CLEAN':s>0.3?'LOOSE':'HEAVY'; }
   // PRESSURE on a touch: the nearest opponent -- where he'll be a moment from now, at the rate he's closing.
   // 0 = nobody within 5.6 m, 1 = a man right on him (inside 1.6 m)
-  function touchPressure(p){ return pressureOn(p); }   // (v209: the one pressure there is -- see pressureOn)
+  function touchPressure(p){ return pressureOn(p)*presResK(p); }   // (v234: Press resistant -- less of it in his touch)   // (v209: the one pressure there is -- see pressureOn)
   // how far into the final third he is, going his own side's way: 0 short of it, 1 well into it
   function finalThirdOf(p){ const u=atkOf(p.team)>0?p.x:FW-p.x; return clamp((u/FW-0.62)/0.12,0,1); }
   // how hard this touch is: 0 = nobody near and it's at the back .. 1 = as hard as a first touch gets
@@ -13198,7 +13318,7 @@
     }
     if(!hit) return;
     ball.x=x0+sx*ht; ball.y=y0+sy*ht;
-    deflectOff(hit,0.3,0.6);
+    deflectOff(hit,0.3,0.6); foxRebound(ball.shotBy);   // (v234: a Fox near it is onto it)
     ball.shotT=0; ball.shotBy=null; hit.noTouchT=0.3; mStat(hit,'blk');   // (v147: a block in his numbers -- his rating counts it)
     lastGrade='BLOCKED!'; gradeColor='#ffb43c'; gradeFade=1.0;
     if(LAB.on&&LAB.kind==='shoot') labOnSave('blocked');
@@ -13260,7 +13380,7 @@
   let aiLastE=0;                             // the last AI press error, kept even when it missed (for the lab)
   function aiTrapTiming(p,intercept){        // an AI press error in seconds, or null when it misses it entirely
     const pressure=pressureOn(p);   // (v209)
-    let sd=statLerp(statOf(p,'ballControl',P.ballControl.val),0.065,0.028)*(1+0.7*pressure*(1-composureOf(p,'traffic')))*P.aiTouch.val;
+    let sd=statLerp(statOf(p,'ballControl',P.ballControl.val),0.065,0.028)*(1+0.7*pressure*presResK(p)*(1-composureOf(p,'traffic')))*P.aiTouch.val;
     if(intercept) sd*=1.3-0.5*interceptReachOf(p);   // cutting out someone else's pass is a stretch
     const g=(Math.random()+Math.random()+Math.random()-1.5)*2;   // bell curve, sd 1
     const e=trapSweet()+g*sd, W=trapWindowOf(p);
@@ -13457,6 +13577,7 @@
     // A CHANGE OF HANDS: a loose ball of theirs picked up -- or theirs at a man's feet last, as when a tackle, a block or a
     // first touch made it ours before one of ours had it at his feet (the last touch alone missed nearly all of those)
     const lostBy=(prevTeam&&prevTeam!==p.team)?prevTeam:(possTeam&&possTeam!==p.team)?possTeam:null;
+    if(lostBy) tikiRun[lostBy]=0;                              // (v234: theirs now -- their passes in a row start again)
     possTeam=p.team;
     const reGather=ball.dribbler===p&&ball.dribbleGrace>0;     // catching up with your own knock-on / trapped ball
     const ownLob=ball.selfLob===p, psp=Math.hypot(p.vx,p.vy);   // (one he's flicked up over a man and run on to: dropping at his feet as he goes)
@@ -13469,7 +13590,7 @@
     if(!wasOwner){
       if(p===controlled&&!reGather){ p.passLockT=(P.passLock?P.passLock.val:0.25);   // touch: a tap right after receiving means TRAP, never pass
         actQ=null; swipeShot=null; } }                       // a fresh ball (a pass, a restart, a lab serve): a press waiting on the last one doesn't carry over
-    if(!wasOwner&&ball.passerRef&&ball.passerRef!==p){ if(ball.passerRef.team===p.team) mStat(ball.passerRef,'pc'); else mStat(p,'int'); }   // (a pass found, or cut out)
+    if(!wasOwner&&ball.passerRef&&ball.passerRef!==p){ if(ball.passerRef.team===p.team){ mStat(ball.passerRef,'pc'); tikiRun[p.team]++; if(p!==controlled&&hasPk(p,'maestro')) p.maestroT=simNow+PK('maestro').secs; } else { mStat(p,'int'); tikiRun[ball.passerRef.team]=0; } }   // (a pass found, or cut out -- v234: a side's passes in a row, for Tiki taka)
     if(!wasOwner) meOnReceive(p, ball.passerRef);
     if(!wasOwner&&!reGather) ball.gotT=simNow;                // (a fresh ball: see FT_LATE)
     ball.passerRef=null;
@@ -13531,7 +13652,7 @@
   // he has the ball (or has just got round it: settleOf), a pass is up to prepErr off line, the worst of it, less and less
   // till he's ready at prepTime (1.6 times as long at Off IQ 1, 0.4 times at 10)
   function prepTimeOf(p){ const q=clamp((statOf(p,'offIQ',P.offIQ.val)-1)/9,0,1); return P.prepTime.val*(q<0.5?1.6-1.2*q:1-1.2*(q-0.5)); }
-  function prepWorst(p){ if(!p||!(p.prepT>0)||ball.ownedBy!==p) return 0; const r=clamp((simNow-p.prepT)/prepTimeOf(p),0,1); return P.prepErr.val*Math.PI/180*(1-r)*(1-r); }
+  function prepWorst(p){ if(!p||!(p.prepT>0)||ball.ownedBy!==p) return 0; const r=clamp((simNow-p.prepT)/prepTimeOf(p),0,1); return P.prepErr.val*Math.PI/180*(1-r)*(1-r)*(hasPk(p,'touchpass')?1-PK('touchpass').acc/100:1); }   // (v234: Touch pass, first time)
   function dribK(p,lo,hi){ const q=dribQ(p); return q<0.5?lo+(1-lo)*q*2:1+(hi-1)*(q-0.5)*2; }
   // (v218) THE BALL ROUND TO HIS FRONT IS HIS BALL CONTROL: ballFollow rad/s at 5.5, 0.6 times it at 1, 1.3 times at 10,
   // the way he's turning, as he turns with it or once he has it beside or behind him (v208 to v217 it was his Dribbling,
@@ -13568,7 +13689,7 @@
   function dribBackOf(p){ return P.dribBack.val*dribK(p,0.6,1.6); }
   function runTouch(p,speed){
     const q=dribQ(p), pen=1-dribSpeedPenOf(p), run=runSpeedOf(p)*pen, spr=sprintSpeedOf(p)*pen;
-    const shaky=1+P.pressDrib.val*poiseLoss(p,'traffic');   // (v209: pressure, less his Composure in traffic: less even, less sure of its line)
+    const shaky=1+P.pressDrib.val*poiseLoss(p,'traffic')*presResK(p);   // (v234: Press resistant)   // (v209: pressure, less his Composure in traffic: less even, less sure of its line)
     const even=Math.max(0,1+(Math.random()*2-1)*P.knockVar.val*0.45*dribK(p,1.3,0.4)*shaky), sk=showsOf(dribBackOf(p)*STRIDE_SNAP);
     const flat=clamp((speed-run)/Math.max(1,spr-run),0,1), gain=clamp((speed-(p.touchSp||0))/Math.max(1,0.8*run),0,1);
     p.touchKnock=(p.touchKnock||0)+(P.dribTouch.val*dribK(p,1.5,0.4)+P.dribSprint.val*Math.max(flat,gain)*Math.pow(1-q,1.3))*even/sk; p.touchSp=speed;
@@ -14233,6 +14354,7 @@
     kp.claimCd=Math.max(kp.claimCd,dived?0.4:0.6); if(dived){ kp.diveT=0; kp.groundT=0.5; }   // (down, or set again: a moment)
     lastGrade=dived?'DIVING SAVE!':wide?'PUSHED WIDE!':'PARRIED!'; gradeColor='#ffb43c'; gradeFade=1.4;
     if(LAB.on) labOnSave((dived?'diving, ':'')+(wide?'pushed wide':'parried'));
+    foxRebound(kp.team==='G'?'R':'G');                       // (v234: off his hands -- a Fox near it is onto it)
     return wide?'wide':'front';
   }
 
@@ -14470,6 +14592,7 @@
     const seeK=1-Math.exp(-dt/0.35);
     for(const p of players){ p.seenVx=(p.seenVx||0)+(p.vx-(p.seenVx||0))*seeK; p.seenVy=(p.seenVy||0)+(p.vy-(p.seenVy||0))*seeK; }   // how others read a man's running: a beat late (see blockSpot)
     for(const p of players) trackFacing(p,dt);
+    perkTick();                                                       // (v234: what each man's perks add just now)
     for(const p of players){p.tackleCd-=dt;p.noTouchT-=dt;if(p.throwFollowT>0)p.throwFollowT-=dt;if(p.skillCd>0)p.skillCd-=dt;if(p.shotPoseT>0)p.shotPoseT-=dt;if(p.passPoseT>0)p.passPoseT-=dt;if(p.cmdShoot>0)p.cmdShoot-=dt;if(p.gapRun>0)p.gapRun-=dt;
       if(!p.facing||!isFinite(p.facing.x)||!isFinite(p.facing.y)) p.facing={x:atkOf(p.team),y:0};}
     for(const kp of keepers){ if(!kp.facing||!isFinite(kp.facing.x)||!isFinite(kp.facing.y)) kp.facing={x:atkOf(kp.team),y:0}; }
@@ -14487,7 +14610,7 @@
       const fillT = statLerp(statOf(controlled,'longPass',P.longPass.val), 0.72, 0.50);
       kickCharge=clamp(kickCharge+dt/fillT,0,1);
     }
-    if(shootHeld&&myBall())shootCharge=clamp(shootCharge+dt/0.57,0,1);
+    if(shootHeld&&myBall())shootCharge=clamp(shootCharge+dt/(0.57/(hasPk(controlled,'quickshot')?1+PK('quickshot').charge/100:1)),0,1);   // (v234: Quickshot)
     if(crossHeld&&myBall())crossCharge=clamp(crossCharge+dt/0.7,0,1);
     if(clearFeet&&!myBall()&&!keeperInHand()){ clearFeet=false; clearHeld=false; clearCharge=0; }          // (lost it winding up: nothing -- v169: not your keeper's punt, it's in his hands)
     if(clearHeld&&(clearFeet||clearArm>0)) clearCharge=clamp(clearCharge+dt/(controlled&&controlled.isGK?PUNT_FILL:CLEAR_FILL),0,1);   // (v169: your keeper's punt fills as slowly at his feet as in his hands)
@@ -15124,7 +15247,7 @@
   function newMatch(){
     labOff(); if(practice){ practice=null; pball.on=false; prioritizeDials(null); }   // matches never run as a drill
     meMatch=null; SUBS={G:{used:0,on:[],off:[],q:[]},R:{used:0,on:[],off:[],q:[]}}; qsReset(); HURT.G.clear(); HURT.R.clear(); MSTAT.G={}; MSTAT.R={};
-    goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0; celebEnd();
+    goalLog=[];scoreG=0;scoreR=0;matchClock=0;half=1;matchOver=false;breakT=0; celebEnd(); tikiRun={G:0,R:0};
     ball.lastTouchP=null;ball.prevTouchP=null;
     advOn=false;
     freePlay=false; const fb=document.getElementById('freeBtn'); if(fb)fb.textContent='FREE PLAY: OFF';
@@ -16699,7 +16822,7 @@
     const pos=si===li.gk?'GK':sl?spotFit(sl):null, at=mtRating(e,role,pos), fc=fitCls(fitPos(e),role,pos), sty=styleOf(e), p=si===li.gk?keepers.find(q=>q.team===t):players.find(q=>q.team===t&&q.squadIdx===si);
     const lg=p&&role&&role!=='GK'?clamp(p.stamina,0,1):null, legs=lg==null?'':'<div class="mtLegs" data-xpl="stam"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(lg*100)+'%;background:'+(lg>0.6?'':lg>0.3?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     let h='<div class="tbCard"><div class="mgCardHead'+(legs?' hasLegs':'')+'">'+bodyImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div><div class="mgCardName">#'+e.num+' '+mgEsc(e.name)+'</div><div class="mgCardSub">'+natPos(e)+(sty?' · '+sty.name:'')+(e.role!=='GK'?' · '+starsHtml(entryStars(e)):'')+'</div>'
-      +posRowHtml(e)+legs+'</div>'
+      +posRowHtml(e)+legs+perkChips(perksOfEntry(e))+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+ovrShownOf(e,at)+'</div>'+ratingWhy(e.ovr,at,fc,null,null,e)
       +(t==='G'&&!SUBS.G.off.includes(si)?'<button class="mgMini tSwap" data-mtarm="'+si+'">'+(MT.arm===si?'NOW THE OTHER MAN':'SWAP')+'</button>':'')+'</div></div>';   // (v152: the number named; v158: A TAP TO SWAP)
     return h+sixHtml(e.stats,e.role)+'</div>'; }
@@ -18097,7 +18220,7 @@
   const condOvr=(p,v)=>(v!=null?v:p.ovr)-(1-condOf(p))*COND_PEN;   // what he's worth on the day
   function condCost(p){ return clamp(0.22+0.012*(10-(mgStats(p).stamina||5))+0.01*Math.max(0,(p.age||25)-30),0.2,0.4); }
   function condTire(p,share){ if(p&&share>0) p.cond=clamp(condOf(p)-condCost(p)*share,COND_MIN,1); }
-  function mgRest(d,days){ if(!(days>0)) return; const back=(p,r)=>{ if(p.cond==null) return; p.cond=Math.min(1,p.cond+r*days); if(p.cond>=1) delete p.cond; };
+  function mgRest(d,days){ if(!(days>0)) return; const back=(p,r)=>{ if(p.cond==null) return; p.cond=Math.min(1,p.cond+r*days*(careerPerks(p).indexOf('reliable')>=0?1+PK('reliable').rec/100:1)); if(p.cond>=1) delete p.cond; };   // (v234: Reliable)
     const yr=COND_DAY[lvOf(d,'physio')]||COND_DAY[0]; for(const p of d.roster) back(p,yr);
     for(const c of Object.values(d.world.clubs)){ if(c.id===d.clubId) continue; const r=COND_DAY[clamp(c.tier||1,1,4)]; for(const p of c.players) back(p,r); } }
   function mgFreshen(d){ for(const p of d.roster) delete p.cond; for(const c of Object.values(d.world.clubs)) for(const p of c.players) delete p.cond; }
@@ -20204,7 +20327,7 @@
   // if it has one of its men for it, else in one of his second ones (see POSITIONS); short of a position, the best man
   // left. (No shape: the first nine.)
   function careerSquad(club,form,pool){   // (pool: the men it picked for the game, else its whole squad)
-    const d=CAREER&&CAREER.data, ps=pool||club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), uniq:p.uniq, defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p), risk:d&&p.role!=='GK'?injRisk(d,p,1,club):0 });
+    const d=CAREER&&CAREER.data, ps=pool||club.players||[], ent=(p,i)=>({ name:p.name, num:p.num||i+1, role:p.role, subRole:p.subRole, style:careerStyle(p), uniq:p.uniq, defPers:p.defPers||'default', stats:Object.assign({},mgStats(p)), ovr:p.ovr, lookKey:p.id, stars:careerStars(p), cond:condOf(p), risk:d&&p.role!=='GK'?injRisk(d,p,1,club):0, pk:careerPerks(p) });
     if(!form||!FORMS[form]) return ps.slice(0,1+OUTFIELD).map(ent);
     const used=new Set(), best=f=>{ let b=null; for(const p of ps) if(!used.has(p)&&f(p)&&(!b||condOvr(p)>condOvr(b))) b=p; if(b) used.add(b); return b; };
     const gk=best(p=>p.role==='GK')||best(()=>true);
@@ -20343,7 +20466,7 @@
   function careerLineupYours(d){ const lu=ensureLineup(d), R=d.roster;
     const starters=lu.atk.slice().sort((a,b)=>a-b), order=[lu.gk,...starters,...lu.bench.filter(ri=>R[ri]&&!R[ri].inj).slice(0,BENCH_N)], sIdx={};   // (the bench comes too: the subs, five fit ones)
     order.forEach((ri,i)=>sIdx[ri]=i);
-    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),uniq:p.uniq,defPers:p.defPers||'default',stats:morStats(p,mgStats(p),d.tm),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null)}; });   // (his mood's in his legs and his head today: see MORALE)
+    const squad=order.map((ri,i)=>{ const p=R[ri]; return {ri,me:p.me,name:p.name,num:p.num||i+1,role:p.role,subRole:p.subRole,style:careerStyle(p),uniq:p.uniq,defPers:p.defPers||'default',stats:morStats(p,mgStats(p),d.tm),ovr:p.ovr,lookKey:p.id,stars:careerStars(p),cond:condOf(p),risk:p.role==='GK'?0:injRisk(d,p,1,null),pk:careerPerks(p)}; });   // (his mood's in his legs and his head today: see MORALE)
     const lineup={ gk:0, atk:lu.atk.map(ri=>sIdx[ri]), def:lu.def.map(ri=>sIdx[ri]) };
     return {squad,lineup}; }
   // your side's shapes and spots changed in a match (the pause menu): the career keeps them
@@ -20386,7 +20509,7 @@
     const legs='<div class="mtLegs" data-xpl="fit"><span>FITNESS</span><span class="statBar"><i style="width:'+Math.round(c*100)+'%;background:'+(c>=0.85?'':c>=0.65?'var(--warn)':'var(--bad)')+'"></i></span></div>';
     return '<div class="tbCard"><div class="mgCardHead hasLegs">'+bodyImg({lookKey:p.id},ri===lu.gk||p.role==='GK'?keeperKit(careerKit(d)):careerKit(d))+'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div>'
       +'<div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p)):'')+'</div>'
-      +posRowHtml(p)+legs+'</div>'
+      +posRowHtml(p)+legs+perkChips(careerPerks(p))+'</div>'
       +'<div class="cardEnd"><div class="mgCardOvr"'+(fc?' style="color:'+FIT_COL[fc]+'"':'')+'>'+ovrShownOf(p,at)+trendHtml(p)+'</div>'+ratingWhy(p.ovr,at,fc,today,why.join(', '),p)+'<button class="mgMini tSwap" data-tarm="'+ri+'">'+(TARM===ri?'NOW THE OTHER MAN':'SWAP')+'</button></div></div>'
       +sixHtml(st,p.role)+'</div>'; }
   // TACTICS: the pitch first, on its side as in a match (your goal on the left) -- the shape, width and style in one row of
@@ -21285,6 +21408,7 @@
       +'<div class="cardEnd"><div class="mgCardOvr">'+(known?ovrShownOf(p):mgOvrTxt(d,p))+(f.mine||f.youth?trendHtml(p):'')+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,f)+'</div><div class="mgCardSub mgPop" style="text-align:right" data-xpl="'+mgEsc(popWord(pop).replace(/^./,c=>c.toUpperCase())+'. '+XPL.pop)+'">popularity <b>'+pop+'</b></div></div></div>';   // (POPULARITY: how the fans see him)
     if(p.inj&&(f.mine||known)) h+='<div class="mgCardSub" style="color:var(--bad)">✚ INJURED · '+INJ_NAME[p.inj.k]+' · '+injWeeks(p.inj.d)+'</div>';
     if(f.mine&&mgSide==='rate'){ const tr=traitsOf(p,d).slice(0,p.kt||0); if(tr.length) h+='<div class="mgTraits">'+tr.slice(0,3).map(t=>'<span class="trTag" title="'+mgEsc(t.up+' · '+t.down)+'">'+t.n+'</span>').join('')+'</div>'; }
+    if(mgSide==='rate') h+=perkChips(careerPerks(p));   // (v234: his perks, anyone's -- they're what he does on the pitch)
     if(mgSide==='career') h+=mgCareerSide(d,p,f);
     else if(mgSide==='mind') h+=mgMindSide(d,p,f);
     else if(mgSide==='rate') h+=known?sixHtml(mgStats(p),p.role)+(f.mine&&!sixOpen?'<div class="mgFacts">'+mgFact('GAMES · GOALS',(p.apps||0)+' · '+(p.goals||0))+((p.role==='GK'||p.role==='DEF')?mgFact('ASSISTS · CS',(p.as||0)+' · '+(p.cs||0)):mgFact('ASSISTS',String(p.as||0)))   // (his season, in short facts: a card's text stays short)

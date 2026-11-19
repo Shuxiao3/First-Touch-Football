@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Perks (v234).** What a man does on the pitch beyond his numbers, a chip each on his card (a superstar's in gold; a
+  tap says what it does). Regular perks come to men by chance -- each one his position can have, likelier for the
+  playstyles it suits, two a man at most -- and stay his: Presser, Jumper, Whipped pass, Bend it like.., Screamer, Touch
+  pass, Reliable, Fox in the box, Quickshot and Press resistant. About a third of defenders and midfielders have one,
+  nearly half of the forwards. Superstar perks go to the stars you give them on the Signature Players sheet: Untouchable,
+  Apex, Godspeed, Predator, Tiki taka, Maestro, Aura Defense and Glorious Leader (one man with each of those two at a
+  club). Their numbers, and how common the regular ones are, are on the Perks Master Sheet. (A man's character traits,
+  Natural Leader and the rest, are another thing and stay as they were.)
 - **Each side's colour in the score box (v233).** By each side's score is a strip in the colour of the shirt it's
   wearing, the way the scoreboards on TV show a side: its change kit's when the shirts clash, as on the pitch, so
   Liverpool against Arsenal are their dark green. A faint light rim keeps a dark shirt (black, navy, a dark change kit)
@@ -3523,6 +3531,26 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v234: perks.** PERKS, and PERK_SET (favMul 3, maxPer 2), with each perk's numbers as the Perks Master Sheet has them.
+  rollPerks(seed, sub, style) rolls a man's regular perks from rng32(hashStr('perks|'+seed)): the seed his career id
+  ('c'+id; kept on him as p.pk -- careerPerks) or 'n'+name+'|'+style. A star's are STARS' pk (starPerks), never rolled.
+  applyEntry gives a match player his entry's (perksOfEntry). Each frame perkTick sets p.pkm, what his perks add just
+  now, and p.pko, which of them may go over 10; statOf adds them: Godspeed (Speed 12), Untouchable on the ball (Strength
+  +2, Acceleration +3), Predator onto a team-mate's through ball (predatorRun), Maestro after his touch (p.maestroT),
+  Glorious Leader's team-mates (both composures +0.5, up to 10), Tiki taka (tikiRun: a side's completed passes in a row,
+  ended by an interception or a change of hands; +0.1 a pass for each man with it, +3 at most, up to 10) and Aura
+  Defense's opponents within 5 m (Off IQ -2, Ball control -1); one Leader and one Aura a side counts. statLerp takes a
+  stat up to 15 (only a perk takes one over 10). The rest where they're used: presserK in the sprint's drain and the
+  ceiling's wear; leapK in headJumpVz (Jumper; Apex at their goal); headPowerOf (Apex); curvePot(p,b,ov) for passes and
+  through balls (Whipped pass), crossPot (Bend it like..), and for a shot from outside the box curveOf(p,long) and
+  shotPowerOf(p,b,ov) (Screamer, Apex); the one-touch spray and prepWorst (Touch pass); mgRest (Reliable); foxRebound
+  from keeperSave's parries and blockShots, the FOX rule in aiBrain, the burst in stepOutfield and your man's magnet (Fox
+  in the box); the shot's charge, and the computer's on-ball cadence in range (Quickshot); touchPressure, runTouch's
+  shake and aiTrapTiming (Press resistant: presResK -- the game's pressK is the K key); ballExposure (Untouchable's
+  angle); directionalTouch (Maestro; a computer Maestro's pace comes on taking a team-mate's pass). perkChips draws them
+  on the match card, the career tactics card and a career man's ratings side. Tests: `classic-perks.mjs`. Seen while
+  testing, not changed here: an exhibition's or a career match's keepers keep the men the game loaded with, not their
+  squads' keepers (applyKeeperStats runs once, at load).
 - **v233: each side's strip in the shirt it's wearing.** `.sbNums::before` and `::after`, 4 px wide by each score, take
   --kitG and --kitR, which teamLabels() sets on #rScore from shirtCol(t): the club kit's shirt being worn (matchKits'
   change or third kit when the home shirts clash), else the drawn GRN / RED kit's (SHIRT_DEF, the shirts the keepers'
