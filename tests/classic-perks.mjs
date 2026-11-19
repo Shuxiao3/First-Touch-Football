@@ -39,8 +39,8 @@ const roll = await K(`(()=>{ const per={}, tally={}, fav={}; let men=0, over=0, 
   return { men, over, wrong, same, CB:share('CB'), AM:share('AM'), STK:share('STK'), GK:share('GK'), presserWho:PERKS.presser.who.join(), foxWho:PERKS.fox.who.join(), rate }; })()`);
 info('rolled: ' + JSON.stringify(roll));
 ok(roll.over === 0 && roll.wrong === 0 && roll.same === 34 * 50, 'a man rolls only perks his position can have, three at most, and the same ones every time (' + roll.men + ' men)');
-ok(near(roll.CB, 0.34, 0.03) && near(roll.AM, 0.47, 0.03) && near(roll.STK, 0.48, 0.03) && roll.GK <= 0.07,
-  'about a third of centre-backs have a perk, nearly half of strikers and attacking midfielders, hardly any keepers (Reliable): CB ' + roll.CB + ', AM ' + roll.AM + ', ST ' + roll.STK + ', GK ' + roll.GK + ' -- as the sheet works it out');
+ok(near(roll.CB, 0.58, 0.03) && near(roll.AM, 0.60, 0.03) && near(roll.STK, 0.63, 0.03) && roll.GK <= 0.14,
+  'with twenty regular perks (v235) about six in ten outfielders have one, keepers about one in ten (Reliable, Doctor from Ibiza, Big game player): CB ' + roll.CB + ', AM ' + roll.AM + ', ST ' + roll.STK + ', GK ' + roll.GK + ' -- as the sheet works it out');
 ok(Object.values(roll.rate).every(r => r.fav > 2.4 * r.other && near(r.other, 0.04, 0.012)),
   'a perk comes three times as often to the playstyles it suits (4 in 100 men, 12 in 100 of those): ' + JSON.stringify(roll.rate));
 ok(roll.presserWho === 'WNG,STK' && roll.foxWho === 'STK,AM,WNG', 'Presser only for attackers; Fox in the box for strikers, attacking midfielders and wingers');
@@ -134,6 +134,38 @@ ok(rg.touch === 0.75, 'Touch pass: a pass played first time sprays a quarter les
 ok(rg.press.k === 0.75 && (rg.press.t === null || rg.press.t === 0.75), 'Press resistant: a quarter less of the pressure counts in his touch and his dribbling');
 ok(rg.fox.near && !rg.fox.far && !rg.fox.theirs, 'Fox in the box: a rebound 4 m from him -- he\'s onto it the instant it comes off; 14 m off, not; one of theirs, not');
 
+// --- THE TEN OF v235 ----------------------------------------------------------------------------------------------------
+const nv = await K(`(()=>{ const G=players.filter(p=>p.team==='G'), R=players.filter(p=>p.team==='R'), a=G[1], c=R[1], keep=a.pk, keepC=c.pk, out={};
+  // Shot blocker: his block reach 30% bigger
+  a.pk=[]; const b0=blockReachOf(a); a.pk=['shotblock']; out.block=+(blockReachOf(a)/b0).toFixed(3);
+  // Engine: a sprint costs 20% less (and with Presser, without the ball, both)
+  a.pk=['engine']; out.engine=+presserK(a).toFixed(3); a.pk=['engine','presser']; const kb=ball.ownedBy; ball.ownedBy=c; out.both=+presserK(a).toFixed(3); ball.ownedBy=kb;
+  // Hold up: shielding, Strength +2; then a pass in the next 2 s, Short passing +2
+  a.pk=['holdup']; const ko=ball.ownedBy, km=holdMode; ball.ownedBy=a; holdMode={p:a,kind:'shield'}; perkTick(); const s1=statOf(a,'strength',5)-a.stats.strength;
+  holdMode=null; perkTick(); const pa1=statOf(a,'passAcc',5)-a.stats.passAcc; a.holdUpT=simNow-1; perkTick(); const pa2=statOf(a,'passAcc',5)-a.stats.passAcc;
+  out.hold={s:s1, pass:pa1, later:pa2}; ball.ownedBy=ko; holdMode=km;
+  // Clutch: the second half's last third (the last 15 of 90): Final third composure and Shot accuracy +1.5
+  a.pk=['clutch']; const kh=half, kc=matchClock; half=2; matchClock=halfLenSec()*0.8; perkTick(); const cl=statOf(a,'shotAcc',5)-a.stats.shotAcc; half=1; perkTick(); const cl0=statOf(a,'shotAcc',5)-a.stats.shotAcc; half=kh; matchClock=kc;
+  out.clutch={late:+cl.toFixed(2), early:cl0};
+  // Big game player: not in an exhibition
+  a.pk=['biggame']; perkTick(); out.bigExh=statOf(a,'composure',5)-a.stats.composure;
+  // Phantom: a defender reads his run as if his Def IQ were 2 lower
+  c.pk=[]; const base={x:a.x,y:a.y}; a.vx=200; a.vy=0; const r0=readRun(c,a,base,true); a.pk=['phantom']; const r1=readRun(c,a,base,true);
+  out.phantom={plain:Math.round(r0.x-base.x), phantom:Math.round(r1.x-base.x)};
+  a.pk=keep; c.pk=keepC; perkTick(); return out; })()`);
+info('v235 perks: ' + JSON.stringify(nv));
+ok(nv.block === 1.3, 'Shot blocker: his block reach 30% bigger');
+ok(nv.engine === 0.8 && nv.both === 0.4, 'Engine: a sprint costs 20% less (with Presser too, without the ball, 60% less)');
+ok(nv.hold.s === 2 && nv.hold.pass === 2 && nv.hold.later === 0, 'Hold up: holding it off, Strength +2; his pass straight after, Short passing +2; later, his own');
+ok(nv.clutch.late === 1.5 && nv.clutch.early === 0, 'Clutch: the last 15 minutes, Shot accuracy +1.5; before then, his own');
+ok(nv.bigExh === 0, 'Big game player: nothing in an exhibition (cup ties and derbies are a career\'s)');
+ok(nv.phantom.phantom < nv.phantom.plain, 'Phantom: a defender reads his run less far (' + nv.phantom.plain + ' px ahead of where he is, ' + nv.phantom.phantom + ' with Phantom)');
+const nv2 = await K(`(()=>{ const d=mgNewCareer({slot:'x', manager:'Sam Okafor', clubName:'Fenmoor Athletic', colors:['#d4202a','#ffffff'], code:'FEN', crest:null});
+  const p=d.roster.find(q=>q.role!=='GK'), q=d.roster.find(q=>q!==p&&q.role!=='GK'); p.pk=['ibiza']; q.pk=[]; p.inj={d:20}; q.inj={d:20}; injHeal(d,4);
+  const k=careerFix; careerFix={kind:'cup'}; const a=players.find(x=>x.team==='G'&&x!==controlled); const kp=a.pk; a.pk=['biggame']; perkTick(); const big=statOf(a,'composure',5)-a.stats.composure; a.pk=kp; careerFix=k; perkTick();
+  return { ibiza:(20-p.inj.d)/(20-q.inj.d), big }; })()`);
+ok(near(nv2.ibiza, 1.75, 0.01), 'Doctor from Ibiza: back from an injury 75% faster (' + nv2.ibiza + ' times the days a day)');
+ok(nv2.big === 1, 'Big game player: in a cup tie, composure +1');
 // --- QUICKSHOT, RELIABLE, MAESTRO'S TOUCH, AND THE CARDS ----------------------------------------------------------------
 const qs = await K(`(()=>{ const c=controlled, keep=c.pk; const t0=0.57; c.pk=['quickshot'];
   const fill=hasPk(c,'quickshot')?t0/(1+PERKS.quickshot.p.charge/100):t0; c.pk=keep; return {fill:+fill.toFixed(3)}; })()`);

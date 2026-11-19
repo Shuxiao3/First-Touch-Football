@@ -502,6 +502,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Ten more perks (v235).** Shot blocker (centre-backs: his block reach 30% bigger), Interceptor (a 20% bigger burst
+  onto a pass he's cutting out), Clear head (headed clearances find a team-mate 50% more surely), Hook slide (a slide
+  tackle pops the ball up behind him), Hold up (strikers: Strength +2 holding it up, Short passing +2 on the pass after),
+  Engine (sprinting costs 20% less), Doctor from Ibiza (back from injury 75% faster), Big game player (composure +1 in
+  cup ties and derbies), Clutch (Final third composure and Shot accuracy +1.5 in the last 15 minutes) and Phantom
+  (defenders read his runs as if their Def IQ were 2 lower). All regular: with twenty, about six in ten outfielders have
+  one. Tune how common each is on the Perks Master Sheet.
 - **Perks (v234).** What a man does on the pitch beyond his numbers, a chip each on his card (a superstar's in gold; a
   tap says what it does). Regular perks come to men by chance -- each one his position can have, likelier for the
   playstyles it suits -- and stay his, three a man at most (a star too): Presser, Jumper, Whipped pass, Bend it like.., Screamer, Touch
@@ -3531,6 +3538,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v235: ten more regular perks.** In PERKS: shotblock (blockReachOf), interceptor (the Def IQ burst in stepOutfield,
+  its extra share bigger), clearhead (headClear's chance of a target and its error, and the defensive header's error),
+  hookslide (slideContact sends the ball back over him: -170 px/s, up 150), holdup (perkTick: Strength while shieldingNow,
+  then Short passing till p.holdUpT), engine (presserK, every sprint), ibiza (injHeal), biggame (bigGameNow: a career
+  cup tie or isDerby, cached on careerFix), clutch (clutchNow: the second half's last third for 15 of 90) and phantom
+  (readRun: the defender's Def IQ less 2 for a runner off the ball). Tests: `classic-perks.mjs` checks seven of them
+  directly (Interceptor, Clear head and Hook slide by where they're used).
 - **v234: perks.** PERKS, and PERK_SET (favMul 3, maxPer 3; PERK_MAX 3 for any man, a star included), with each perk's numbers as the Perks Master Sheet has them.
   rollPerks(seed, sub, style) rolls a man's regular perks from rng32(hashStr('perks|'+seed)): the seed his career id
   ('c'+id; kept on him as p.pk -- careerPerks) or 'n'+name+'|'+style. A star's are STARS' pk (starPerks), never rolled.

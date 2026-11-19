@@ -4187,6 +4187,16 @@
     fox:        {n:'Fox in the box',  kind:'reg', who:['STK','AM','WNG'], chance:5, favs:['poacher','shadow','complete'], p:{range:6, burst:15}},
     quickshot:  {n:'Quickshot',       kind:'reg', who:PK_OUT, chance:4, favs:['poacher','speedster','shadow','invwinger','complete'], p:{charge:35}},
     pressres:   {n:'Press resistant', kind:'reg', who:PK_OUT, chance:4, favs:['trickster','trequartista','playmaker','falsenine','mezzala','libero'], p:{cut:25}},
+    shotblock:  {n:'Shot blocker',    kind:'reg', who:['CB'], chance:5, favs:['stopper','cover','widecb'], p:{reach:30}},                                       // (v235: the ten after)
+    interceptor:{n:'Interceptor',     kind:'reg', who:['CB','FB','DM','CM'], chance:4, favs:['cover','covermid','anchor','ballwinner','deffb'], p:{burst:20}},
+    clearhead:  {n:'Clear head',      kind:'reg', who:['CB','FB','DM'], chance:4, favs:['stopper','cover','anchor','deffb'], p:{acc:50}},
+    hookslide:  {n:'Hook slide',      kind:'reg', who:['CB','FB','DM','CM'], chance:4, favs:['ballwinner','stopper','deffb','widecb'], p:{}},
+    holdup:     {n:'Hold up',         kind:'reg', who:['STK'], chance:5, favs:['target','complete','falsenine'], p:{str:2, pass:2, secs:2}},
+    engine:     {n:'Engine',          kind:'reg', who:PK_OUT, chance:4, favs:['boxtobox','wingback','widemid','ballwinner','mwinger'], p:{cost:20}},
+    ibiza:      {n:'Doctor from Ibiza', kind:'reg', who:PK_OUT.concat('GK'), chance:3, favs:[], p:{heal:75}},
+    biggame:    {n:'Big game player', kind:'reg', who:PK_OUT.concat('GK'), chance:3, favs:[], p:{comp:1}},
+    clutch:     {n:'Clutch',          kind:'reg', who:PK_OUT, chance:4, favs:['poacher','complete','shadow','trequartista'], p:{up:1.5, mins:15}},
+    phantom:    {n:'Phantom',         kind:'reg', who:['AM','CM','WM','WNG','STK'], chance:4, favs:['shadow','poacher','mezzala','invwinger'], p:{iq:2}},
     untouchable:{n:'Untouchable',     kind:'super', p:{angle:40, str:2, acc:3, overStr:true, overAcc:true}},
     apex:       {n:'Apex',            kind:'super', p:{head:20, jump:35, shot:2, over:true}},
     godspeed:   {n:'Godspeed',        kind:'super', p:{speed:12}},
@@ -4212,6 +4222,16 @@
       case 'fox': return 'Onto a parry or a block within '+u.range+' m of him the instant it comes off, '+u.burst+'% quicker to it.';
       case 'quickshot': return 'Charges a shot '+u.charge+'% faster.';
       case 'pressres': return 'Pressure costs his ball control and dribbling '+u.cut+'% less.';
+      case 'shotblock': return 'Gets in the way of shots: his block reach '+u.reach+'% bigger.';
+      case 'interceptor': return 'A '+u.burst+'% bigger burst of pace onto a pass he\u2019s cutting out.';
+      case 'clearhead': return 'His headed clearances find a team-mate '+u.acc+'% more surely.';
+      case 'hookslide': return 'A slide tackle pops the ball up behind him instead of on the way he slid.';
+      case 'holdup': return 'Holding it up (SKILL held): Strength '+pkSign(u.str)+'; a pass in the '+u.secs+' s after, Short passing '+pkSign(u.pass)+'.';
+      case 'engine': return 'Sprinting costs him '+u.cost+'% less stamina.';
+      case 'ibiza': return 'Comes back from an injury '+u.heal+'% faster.';
+      case 'biggame': return 'Composure '+pkSign(u.comp)+' in cup ties and derbies.';
+      case 'clutch': return 'In the last '+u.mins+' minutes, Final third composure and Shot accuracy '+pkSign(u.up)+'.';
+      case 'phantom': return 'Off the ball, defenders read his runs as if their Def IQ were '+u.iq+' lower.';
       case 'untouchable': return 'Dribbling, the angle a man can take it from is '+u.angle+'% smaller; Strength '+pkSign(u.str)+' and with the ball Acceleration '+pkSign(u.acc)+'.';
       case 'apex': return 'Heads it '+u.head+'% harder, jumps '+u.jump+'% higher for a header at their goal, Shot power '+pkSign(u.shot)+' from outside the box.';
       case 'godspeed': return 'Runs as if his Speed were '+u.speed+'.';
@@ -4239,7 +4259,7 @@
     return '<div class="pkRow">'+pk.filter(k=>PERKS[k]).map(k=>'<span class="pkTag'+(PERKS[k].kind==='super'?' pkStar':'')+'" title="'+String(perkLine(k)).replace(/"/g,'&quot;')+'">'+PERKS[k].n+'</span>').join('')+'</div>'; }
   function exhibOppShift(){ try{ return CAREER ? 0 : ((P.oppShift&&P.oppShift.val)||0); }catch(e){ return 0; } }   // try: CAREER is TDZ at boot-time buildTeams
   function applyEntry(p,entry,idx){ if(!entry)return; p.stats={...entry.stats};
-    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.uniq=!!entry.uniq; p.pk=perksOfEntry(entry); p.pkm=null; p.pko=null; p.foxT=0; p.maestroT=0; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
+    if(p.team==='R'){ const _os=exhibOppShift(); if(_os){ for(const k in p.stats) p.stats[k]=clamp(p.stats[k]+_os,1,10); } } p.defPers=entry.defPers; p.pname=entry.name; p.uniq=!!entry.uniq; p.pk=perksOfEntry(entry); p.pkm=null; p.pko=null; p.foxT=0; p.maestroT=0; p.holdUpT=0; p.natRole=entry.role; p.subRole=entry.subRole; p.style=typeNow(entry.style); p.rosterRi=(entry.ri!=null?entry.ri:null); p.ovr=entry.ovr; p.num=entry.num; p.me=!!entry.me; p.lookKey=entry.lookKey!=null?entry.lookKey:null; p.stars=entryStars(entry); p.cond0=entry.cond!=null?entry.cond:1; if(idx!=null)p.squadIdx=idx; }
   function applyKeeperStats(){ for(const t of ['G','R']){ const kp=keepers.find(k=>k.team===t); if(kp&&SQUAD[t]) applyEntry(kp, SQUAD[t][LINEUP[t].gk], LINEUP[t].gk); } }
   loadSquads(); normalizeSquads();
   for(const t of ['G','R']) if(goneForm[t]&&LINEUP[t]&&SQUAD[t]&&LINEUP[t].atk.length===OUTFIELD){   // (v127: kept in a shape that's gone -- see mapShapeOrder)
@@ -7292,11 +7312,14 @@
   // and one Aura a side counts: the first. ----
   let tikiRun={G:0,R:0};
   // (the regular perks' numbers where they're used)
-  function presserK(p){ return hasPk(p,'presser')&&!teamHasBall(p.team)?1-PK('presser').drain/100:1; }   // Presser: a sprint without the ball costs this much
+  function presserK(p){ return (hasPk(p,'presser')&&!teamHasBall(p.team)?1-PK('presser').drain/100:1)*(hasPk(p,'engine')?1-PK('engine').cost/100:1); }   // (v235: Engine, any sprint)   // Presser: a sprint without the ball costs this much
   function presResK(p){ return hasPk(p,'pressres')?1-PK('pressres').cut/100:1; }                        // Press resistant: this much of the pressure counts
   const pkCurve=(p,k)=>hasPk(p,k)?PK(k).curve:0, pkCurveOv=(p,k)=>hasPk(p,k)&&!!PK(k).over;            // Whipped pass, Bend it like.., Screamer
   // Fox in the box: a parry or a block -- his side's shot -- within his reach: he's onto it at once (FOX: aiBrain; MAX: stepOutfield; the magnet, yours)
   function foxRebound(team){ if(!team) return; const R=PK('fox').range*MK; for(const p of players) if(p.team===team&&hasPk(p,'fox')&&Math.hypot(p.x-ball.x,p.y-ball.y)<R) p.foxT=simNow+1.5; }
+  // (v235) a cup tie or a derby, in a career; the last minutes of a match (of 90: the second half's last third, for 15)
+  function bigGameNow(){ const f=careerFix; if(!f) return false; if(f.big==null) f.big=f.kind==='cup'||!!(CAREER&&CAREER.data&&f.opp!=null&&isDerby(CAREER.data,f.opp)); return f.big; }
+  function clutchNow(){ return half===2&&!matchOver&&matchClock>=halfLenSec()*(1-PK('clutch').mins/45); }
   function predatorRun(p){ return !!ball.thru&&ball.intendedRcv===p&&!ball.ownedBy&&!gkHold&&simNow<ball.thru.until&&ball.lastTouch===p.team; }
   function perkTick(){
     const all=players.concat(keepers), lead={G:null,R:null}, aura={G:null,R:null}, tiki={G:0,R:0};
@@ -7310,6 +7333,9 @@
         if(hasPk(p,'godspeed')) add(p,'speed',Math.max(0,PK('godspeed').speed-((p.stats&&p.stats.speed)||5.5)),true);
         if(hasPk(p,'untouchable')&&(ball.ownedBy===p||(ball.dribbler===p&&ball.dribbleGrace>0))){ const u=PK('untouchable'); add(p,'strength',u.str,u.overStr); add(p,'acceleration',u.acc,u.overAcc); }
         if(hasPk(p,'predator')&&predatorRun(p)){ const u=PK('predator'); add(p,'speed',u.speed,u.over); add(p,'acceleration',u.acc,u.over); add(p,'strength',u.str,u.over); }
+        if(hasPk(p,'holdup')&&ball.ownedBy===p){ const u=PK('holdup'); if(shieldingNow(p)){ p.holdUpT=simNow+u.secs; add(p,'strength',u.str); } else if(p.holdUpT>simNow) add(p,'passAcc',u.pass); }   // (v235: Hold up)
+        if(hasPk(p,'biggame')&&bigGameNow()){ const c=PK('biggame').comp; add(p,'composure',c); add(p,'compFinal',c); }
+        if(hasPk(p,'clutch')&&clutchNow()){ const u=PK('clutch').up; add(p,'compFinal',u); add(p,'shotAcc',u); }
         if(hasPk(p,'maestro')&&p.maestroT>simNow){ const u=PK('maestro'); add(p,'speed',u.boost,u.over); add(p,'acceleration',u.boost,u.over); add(p,'agility',u.boost,u.over); }
       }
       const t=p.team, L=lead[t];
@@ -8612,9 +8638,10 @@
     const iq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1), cq=crossCurlQ();   // (a curling cross: up to a fifth less far, twice as wild)
     let dx=atkOf(p.team), dy=(ball.y>=YC?1:-1)*0.6; const l=Math.hypot(dx,dy); dx/=l; dy/=l;
     const sp=headClearOf(p)*(0.9+0.25*iq)*(1-0.2*cq);
-    const tg=Math.random()<(0.15+0.6*iq)*(1-0.5*cq) ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77,sp*0.35) : null;   // (in the air ~0.77 s; a man nearer than a kick's)
+    const chk=hasPk(p,'clearhead')?1+PK('clearhead').acc/100:1;   // (v235: Clear head)
+    const tg=Math.random()<Math.min(0.95,(0.15+0.6*iq)*(1-0.5*cq)*chk) ? clearTarget(p,dx,dy,1.0,sp*0.8,0.77,sp*0.35) : null;   // (in the air ~0.77 s; a man nearer than a kick's)
     if(tg){ dx=(tg.x-p.x)/tg.d; dy=(tg.y-p.y)/tg.d; }
-    const err=(0.04+0.12*(1-iq))*(1+cq)*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
+    const err=(0.04+0.12*(1-iq))*(1+cq)/chk*(Math.random()*2-1), ca=Math.cos(err), sa=Math.sin(err);
     ball.vx=(dx*ca-dy*sa)*sp; ball.vy=(dx*sa+dy*ca)*sp; ball.vz=200;
     ball.ownedBy=null; ball.cushBy=null; ball.lastTouch=p.team; ball.crossT=0; ball.crossBy=null; ball.shotBy=null; ball.shotT=0;
     endCurve(); recordPassTeam(p.team,p); ball.kickP=null; mStat(p,'clr');   // (a header)
@@ -8694,7 +8721,7 @@
       const aimPt = tgt ? {x:tgt.x+tgt.vx*0.3, y:tgt.y+tgt.vy*0.3} : {x:FW/2, y:YC};
       let dxh=aimPt.x-ball.x, dyh=aimPt.y-ball.y; const dl=Math.hypot(dxh,dyh)||1; dxh/=dl; dyh/=dl;
       const diq=clamp((statOf(p,'defIQ',P.defIQ.val)-1)/9,0,1);
-      const dev=(1-clamp(headAccOf(p),0,1))*0.22*(1.3-0.6*diq)*(Math.random()*2-1);   // clearance accuracy to the teammate (Heading, and Def IQ)
+      const dev=(1-clamp(headAccOf(p),0,1))*0.22*(1.3-0.6*diq)/(hasPk(p,'clearhead')?1+PK('clearhead').acc/100:1)*(Math.random()*2-1);   // (v235: Clear head)   // clearance accuracy to the teammate (Heading, and Def IQ)
       const ca=Math.cos(dev),sa=Math.sin(dev);
       const cx=dxh*ca-dyh*sa, cy=dxh*sa+dyh*ca;
       const incoming=Math.hypot(ball.vx,ball.vy);
@@ -9446,13 +9473,13 @@
       winBall(p,carrier);
       { const st=statLerp(statOf(p,'slideTackle',P.slideTackle.val),0.65,1.05);   // taken out by a slide: 0.65 s at stat 1, 1.05 s at 10
         carrier.stateT=st; carrier.noTouchT=st+0.2; }
-      ball.vx=p.slideDx*340;ball.vy=p.slideDy*340;ball.vz=35;
+      if(hasPk(p,'hookslide')){ ball.vx=-p.slideDx*170; ball.vy=-p.slideDy*170; ball.vz=150; } else { ball.vx=p.slideDx*340;ball.vy=p.slideDy*340;ball.vz=35; }   // (v235: Hook slide -- popped up behind him)
     } else if(!carrier&&!p.slideTried){
       p.slideTried=true;
       if(!checkOffsideTouch(p)){
-        ball.vx=p.slideDx*300+p.vx*0.3;
-        ball.vy=p.slideDy*300+p.vy*0.3;
-        ball.vz=30;ball.cushBy=null;ball.lastTouch=p.team;
+        ball.vx=hasPk(p,'hookslide')?-p.slideDx*170:p.slideDx*300+p.vx*0.3;
+        ball.vy=hasPk(p,'hookslide')?-p.slideDy*170:p.slideDy*300+p.vy*0.3;
+        ball.vz=hasPk(p,'hookslide')?150:30;ball.cushBy=null;ball.lastTouch=p.team;
       }
     }
   }
@@ -12940,7 +12967,7 @@
   // fifth off his read; never under 40% of it
   function readLegs(p){ return clamp(1-2*(1-legsOf(p)),0.4,1); }
   function readRun(p,c,base,off){   // (off: a runner without the ball)
-    const iq=Math.min(0.98,clamp((defIQof(p)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p)*cpu(p).read*(off&&isCpu(p)?CPU_RUN.read:1)), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;   // (cpu: DIFFICULTY; CPU_RUN: a runner off the ball, the computer's read of him -- v128)
+    const iq=Math.min(0.98,clamp((defIQof(p)-(off&&hasPk(c,'phantom')?PK('phantom').iq:0)-1)/9,0,1)*RUN_READ[off?'off':'ball']*readLegs(p)*cpu(p).read*(off&&isCpu(p)?CPU_RUN.read:1)), t=runLeadT(p,c), lx=c.x+c.vx*t, ly=c.y+c.vy*t;   // (cpu: DIFFICULTY; CPU_RUN: a runner off the ball, the computer's read of him -- v128)
     return {x:clamp(base.x+(lx-base.x)*iq,20,FW-20), y:clamp(base.y+(ly-base.y)*iq,20,FH-20)};
   }
   // a defender's DELAYED, NOISY read of the carrier — they don't track perfectly.
@@ -13011,7 +13038,7 @@
     const sprintingNow = wantSprint && !empty;
     let MAX = (sprintingNow ? sprintSpeedOf(p) : runSpeedOf(p)) * fatigue;
     if(p.engageCap<1){ MAX *= p.engageCap; p.engageCap=1; }    // an AI defender coming in under control (aiBrain sets it each frame)
-    if(p.intercepting) MAX *= statLerp(defIQof(p),1.0,1.15);   // Def IQ interception burst (+15% at Def IQ 10)
+    if(p.intercepting) MAX *= 1+(statLerp(defIQof(p),1.0,1.15)-1)*(hasPk(p,'interceptor')?1+PK('interceptor').burst/100:1);   // (v235: Interceptor, a bigger burst)   // Def IQ interception burst (+15% at Def IQ 10)
     else if(p.goingForBall) MAX *= statLerp(statOf(p,'offIQ',P.offIQ.val),1.0,1.10);  // Off IQ receiving burst: arrive on a ball meant for you a beat sooner (+10% at Off IQ 10)
     if(p.foxT>simNow&&!ball.ownedBy) MAX *= 1+PK('fox').burst/100;   // (v234: Fox in the box, onto the rebound)
     let accelMul=1;
@@ -13305,7 +13332,7 @@
   // or a leg, losing most of its pace, and it's a loose ball. How close is his block reach: the Shot block dial, a little
   // more or less for his Def IQ. Swept along the ball's path this frame (x0,y0 to where it is now), so a hard shot can't
   // skip through a man between two frames. A slow one (a scuff, a roller) is just a ball he can take (attemptCaptures).
-  function blockReachOf(p){ return P.blockReach.val*statLerp(defIQof(p),1-P.blockIQ.val,1+P.blockIQ.val); }
+  function blockReachOf(p){ return P.blockReach.val*statLerp(defIQof(p),1-P.blockIQ.val,1+P.blockIQ.val)*(hasPk(p,'shotblock')?1+PK('shotblock').reach/100:1); }   // (v235: Shot blocker)
   function blockShots(x0,y0){
     if(!(ball.shotT>0)||!ball.shotBy||ball.ownedBy||gkHold||scoredT>0||ball.z>=PLAYER_H*1.3) return;
     const sx=ball.x-x0, sy=ball.y-y0, L2=sx*sx+sy*sy, sp=Math.hypot(ball.vx,ball.vy);
@@ -18049,7 +18076,7 @@
       // in his place (mgFitXI), so the Selection tab's never left with him in it
       if(d.roster.includes(p)&&d.lineup){ for(const [o,i] of mgFitXI(d)) if(o===p) mgNews(d,surname(i.name)+' takes his place in the side.'); } } }
   // the days go by: the injured heal, the fit come out of their risky weeks
-  function injHeal(d,n){ const heal=(p,L)=>{ if(p.inj){ p.inj.d-=n; if(p.inj.d<=0){ delete p.inj; p.injB=INJ_BACK; p.cond=Math.min(condOf(p),INJ_FIT+PHYSIO_FIT*L); if(d.roster.includes(p)) wkLog(d).back.push(p.id); } } else if(p.injB>0){ p.injB-=n; if(p.injB<=0) delete p.injB; } };
+  function injHeal(d,n){ const heal=(p,L)=>{ if(p.inj){ p.inj.d-=n*(careerPerks(p).indexOf('ibiza')>=0?1+PK('ibiza').heal/100:1); if(p.inj.d<=0){ delete p.inj; p.injB=INJ_BACK; p.cond=Math.min(condOf(p),INJ_FIT+PHYSIO_FIT*L); if(d.roster.includes(p)) wkLog(d).back.push(p.id); } } else if(p.injB>0){ p.injB-=n; if(p.injB<=0) delete p.injB; } };
     const L=lvOf(d,'physio'); for(const p of [...d.roster,...(d.youth||[])]) heal(p,L);   // (back as fit as his physio gets him)
     for(const c of mgAiClubs(d)) for(const p of c.players) heal(p,injPhysio(d,p,c)); }
   // after a simulated game: each man who played it, at his share's risk
