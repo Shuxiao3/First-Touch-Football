@@ -47,6 +47,12 @@ ok(roll.presserWho === 'WNG,STK' && roll.foxWho === 'STK,AM,WNG', 'Presser only 
 
 // --- IN A MATCH: a man takes his squad entry's perks; a star what he's given --------------------------------------------
 await K(`startExhibition()`); await page.waitForTimeout(300); await K(`kickOffExhibition()`); await page.waitForTimeout(1500);
+
+// (v239) the keepers too: each plays with his own squad entry's numbers, not the ones the game loaded with
+const gk = await K(`(()=>{ const os=exhibOppShift()||0; return ['G','R'].map(t=>{ const kp=keepers.find(k=>k.team===t), e=SQUAD[t][LINEUP[t].gk];
+  const want={}; for(const k in e.stats) want[k]=t==='R'?clamp(e.stats[k]+os,1,10):e.stats[k];
+  return {t, name:kp.pname, entry:e.name, same:JSON.stringify(kp.stats)===JSON.stringify(want), reflex:kp.stats.gkReflex, want:want.gkReflex}; }); })()`);
+ok(gk.every(g => g.same && g.name === g.entry), 'each keeper plays with his own squad\'s numbers (' + gk.map(g => g.t + ': ' + g.name + ', Reflexes ' + g.reflex).join('; ') + ')');
 const mt = await K(`(()=>{ const all=players;   // (the outfielders: the keepers are set apart -- see the README's note on v234)
   const match=all.every(p=>{ const e=(SQUAD[p.team]||[]).find(x=>x.name===p.pname); return !!e&&JSON.stringify(p.pk)===JSON.stringify(perksOfEntry(e)); });   // (by his name: a keeper's squadIdx isn't his entry's)
   const st=STARS[0], was=st.pk; st.pk=['godspeed','fox']; const sp=perksOfEntry({star:st.key, name:'x', style:'poacher'}); st.pk=['godspeed','fox','apex','maestro','leader']; const four=perksOfEntry({star:st.key}); st.pk=null; const none=perksOfEntry({star:st.key}); st.pk=was;

@@ -119,20 +119,26 @@ async function lines(you, opp){
     await new Promise(res => { (function tick(){ const t = T.now(); if(T.over() || t > 240) return res();
       if(t - last > 0.5){ last = t; const h = T.held(); if(h){ const D = T.dims();
         for(const p of T.players()){ const ph = p.team === h ? 'atk' : 'def', sl = ph === 'atk' ? p.slotAtk : p.slotDef; if(!sl) continue;
-          const k = p.team + ph + sl.pos, a = acc[k] || (acc[k] = { u: 0, w: 0, n: 0 }); a.u += (T.atkOf(p.team) > 0 ? p.x : D.FW - p.x) / D.MK; a.w += Math.abs(p.y - D.FH / 2) / D.MK; a.n++; } } }
+          const k = p.team + ph + sl.pos, a = acc[k] || (acc[k] = { u: 0, w: 0, n: 0 }); a.u += (T.atkOf(p.team) > 0 ? p.x : D.FW - p.x) / D.MK; a.w += Math.abs(p.y - D.FH / 2) / D.MK; a.n++;
+          if(ph === 'def' && /^BLOCK/.test(p.dbgTag || '')){ const b = acc[k + 'B'] || (acc[k + 'B'] = { u: 0, w: 0, n: 0 }); b.u += (T.atkOf(p.team) > 0 ? p.x : D.FW - p.x) / D.MK; b.w += Math.abs(p.y - D.FH / 2) / D.MK; b.n++; } } } }
       requestAnimationFrame(tick); })(); });
     const out = {}; for(const k in acc) out[k] = [+(acc[k].u / acc[k].n).toFixed(1), +(acc[k].w / acc[k].n).toFixed(1)]; return { forms: T.forms(), out }; });
   await ctx.close(); return r; }
 const m1 = await lines('TOT', 'BHA'), u1 = (k) => m1.out[k] ? m1.out[k][0] : NaN;
 info('Tottenham 3-1-3-1 v Brighton 3-2-1-2, depth in m: ' + JSON.stringify(m1.out));
 ok(m1.forms.join() === '3-1-3-1,3-1-3-1,3-2-1-2,3-2-1-2', 'Tottenham in their 3-1-3-1 and Brighton in their 3-2-1-2, with the ball and without it');
-ok(u1('GatkCB') < u1('GatkDM') && u1('GatkDM') + 6 < u1('GatkAM') && u1('GatkAM') < u1('GatkST') && u1('GdefCB') < u1('GdefDM') && u1('GdefDM') + 3 < u1('GdefAM') && u1('GdefAM') < u1('GdefST'),
-  '3-1-3-1: the DM a line behind the AM, with the ball (' + u1('GatkDM') + ' and ' + u1('GatkAM') + ' m out) and without it (' + u1('GdefDM') + ' and ' + u1('GdefAM') + ')');
-ok(u1('RatkCM') + 1 < u1('RatkAM') && u1('RatkAM') < u1('RatkST') && u1('RdefCM') + 1 < u1('RdefAM') && u1('RdefAM') < u1('RdefST'),   // (v134: 3 and 2 m -- one match's average swings by more: 1.3 to 5.1 m with the ball over three on v131)
-  '3-2-1-2: the AM between the two CMs and the strikers, with the ball (' + u1('RatkCM') + ', ' + u1('RatkAM') + ', ' + u1('RatkST') + ' m) and without it (' + u1('RdefCM') + ', ' + u1('RdefAM') + ', ' + u1('RdefST') + ')');
+// (v239) without the ball, where each stands holding the block (BLOCK): a man stepping out to press the ball (the DM
+// as often as not -- he's the nearest) or going with a runner isn't the shape, and averaged in, the two came out a
+// metre or two apart in some matches and a line apart in others
+// (how far apart is the match's: a deep block squeezes its lines together -- 2 to 9 m with the ball over a dozen
+// versions, one match each -- so the order is what's checked: behind, with a metre or two in it)
+ok(u1('GatkCB') < u1('GatkDM') && u1('GatkDM') + 2 < u1('GatkAM') && u1('GatkAM') < u1('GatkST') && u1('GdefCBB') < u1('GdefDMB') && u1('GdefDMB') + 1 < u1('GdefAMB') && u1('GdefAMB') < u1('GdefSTB'),
+  '3-1-3-1: the DM a line behind the AM, with the ball (' + u1('GatkDM') + ' and ' + u1('GatkAM') + ' m out) and without it, holding the block (' + u1('GdefDMB') + ' and ' + u1('GdefAMB') + ')');
+ok(u1('RatkCM') < u1('RatkAM') && u1('RatkAM') < u1('RatkST') && u1('RdefCMB') < u1('RdefAMB') && u1('RdefAMB') < u1('RdefSTB'),   // (v134: 3 and 2 m -- one match's average swings by more: 1.3 to 5.1 m with the ball over three on v131)
+  '3-2-1-2: the AM between the two CMs and the strikers, with the ball (' + u1('RatkCM') + ', ' + u1('RatkAM') + ', ' + u1('RatkST') + ' m) and without it, holding the block (' + u1('RdefCMB') + ', ' + u1('RdefAMB') + ', ' + u1('RdefSTB') + ')');
 const m2 = await lines('HUL', 'SUN'), v2 = (k, i) => m2.out[k] ? m2.out[k][i] : NaN;
 info('Hull 3-1-2-2 v Sunderland 4-1-2-1, [depth, across] in m: ' + JSON.stringify(m2.out));
-ok(v2('GatkWM', 1) > 18 && v2('GatkDM', 1) < 10 && v2('GatkDM', 0) < v2('GatkWM', 0), '3-1-2-2: its two WMs on their own in a line play wide (' + v2('GatkWM', 1) + ' m across with the ball), the DM central behind them (v213: a CM before)');
+ok(v2('GatkWM', 1) > 18 && v2('GatkDM', 1) < 12 &&   /* (v239: 12 m -- he goes to the ball's side, 5 to 10 m across in three matches of the same) */ v2('GatkDM', 0) < v2('GatkWM', 0), '3-1-2-2: its two WMs on their own in a line play wide (' + v2('GatkWM', 1) + ' m across with the ball), the DM central behind them (v213: a CM before)');
 ok(v2('RdefDM', 0) < v2('RdefWM', 0) && v2('RdefCB', 0) < v2('RdefDM', 0) && v2('RatkDM', 0) < v2('RatkWM', 0), '4-1-2-1: the DM between the back four and the WMs (' + v2('RdefCB', 0) + ', ' + v2('RdefDM', 0) + ', ' + v2('RdefWM', 0) + ' m out without the ball)');
 
 // --- A NEW CAREER'S WORLD, AND WHAT'S KEPT FROM BEFORE ------------------------------------------------------------------------

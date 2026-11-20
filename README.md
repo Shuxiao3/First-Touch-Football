@@ -502,6 +502,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Keepers as their squads have them (v239).** In an exhibition or a career match each keeper now plays with his own
+  numbers: before, both played with the keepers the game had loaded with (Reflexes 6.5 each, where a club's might have
+  8.5 or 9.5). Two tests that failed most runs now measure what they mean to: a defender's read of a runner only while
+  he's on the runner, and a midfield's lines in the order they stand while holding the block.
 - **The sheets' changes (v238).** The stars' perks as the Signature Players sheet has them now (30 of the 33 with
   some; Torrent Hendrinks' numbers changed there too), and a False nine keener on a run in behind: 0.7 of a man with no
   lean either way, where he was 0.5, as the new Playstyle Tendencies sheet has it.
@@ -3552,6 +3556,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v239: keepers, and two steadier tests.** buildTeams calls applyKeeperStats once the keepers exist (buildTeams.gk),
+  so every exhibition and career match sets them from SQUAD and LINEUP as it does the outfielders (it ran once, at
+  load). `classic-perks.mjs` checks both keepers against their squad entries. `classic-shots.mjs`: the runner check
+  averages three runs, frames tagged TRACK or PAIR only. `classic-midfield.mjs`: without the ball, depths from frames
+  tagged BLOCK; the lines' order checked, by a metre or two, not a fixed gap (a match's own block depth sets that).
 - **v238: the sheets' changes.** STARS' pk and v from the Signature Players sheet; RUN_MUL's falsenine 0.7 from the
   Playstyle Tendencies sheet (styles/<key>: only what differs from OB_TYPE, RUN_MUL, SKILL_KEEN, HOLD_PREF, CARRY_WAY and
   GK_TYPE, as the game has them).

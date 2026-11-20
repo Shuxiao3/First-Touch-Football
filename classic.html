@@ -4298,6 +4298,7 @@
     players=[...layoutTeam('G'),...layoutTeam('R')];
     const mine=players.filter(p=>p.team==='G');
     controlled=mine.find(p=>p.me) || mine.sort((a,b)=>b.homeX-a.homeX)[0];   // (who kicks off, or has the ball, is yours from there)
+    if(buildTeams.gk) applyKeeperStats();   // (v239: the keepers too, from the squads as they are now -- before, only as the game loaded, so an exhibition's or a career's keeper played as the boot-time one)
   }
   buildTeams();
 
@@ -4467,6 +4468,7 @@
   }
   const keepers=[mkKeeper(-1,'G'),mkKeeper(1,'R')];
   applyKeeperStats();
+  buildTeams.gk=true;   // (v239: from here on buildTeams sets the keepers as well)
   let gkHold=null,controllingKeeper=null;
   let HI={ix:0,iy:0};                        // (this frame's stick: humanIntent -- your keeper at his feet moves by it too)
   let DBG=false; const dbgEl=document.getElementById('dbg');

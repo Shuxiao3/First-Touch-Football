@@ -94,7 +94,7 @@ ok(read1.ahead <= -10 && read10.ahead - read1.ahead >= 40, '...at Def IQ 1 he go
 // A RUNNER INTO SPACE, OFF THE BALL: you, without it, running in behind across one of their centre-backs' zone while a
 // team-mate holds it (one of theirs on him) -- at Def IQ 10 the centre-back goes with you off where the run's taking you,
 // dropping off into the space you're running into; at Def IQ 1 off where you are, and lets you right up to him
-const offBall = iq => page.evaluate(iq => {
+const offBall1 = (iq, vy0) => page.evaluate(([iq, vy0]) => {
   const T = window.__T, atk = T.atkOf('G'), G = T.players().filter(q => q.team === 'G'), R = T.players().filter(q => q.team === 'R');
   const o = G[1], c = G[0], m = R.find(q => q.role !== 'DEF') || R[0], d = R.find(q => q.role === 'DEF' && q !== m);
   T.setControlled(o); T.freeze();
@@ -111,15 +111,21 @@ const offBall = iq => page.evaluate(iq => {
   // (he starts on his own spot in their back line, you 6 m upfield of it in his zone, running in behind across it)
   o.x = T.FW / 2; o.y = 60; const sp0 = T.blockSpot(d);
   d.x = sp0.x; d.y = sp0.y; d.vx = d.vy = 0; d.state = 'normal'; d.stamina = d.staminaCap = 1; d.tackleCd = 99;
-  o.x = sp0.x - atk * 150; o.y = sp0.y - 60; o.vx = atk * 150; o.vy = 80; o.seenVx = o.vx; o.seenVy = o.vy; o.state = 'normal'; o.stamina = o.staminaCap = 1; o.facing = { x: atk, y: 0 };
+  o.x = sp0.x - atk * 150; o.y = sp0.y - 60; o.vx = atk * 150; o.vy = vy0; o.seenVx = o.vx; o.seenVy = o.vy; o.state = 'normal'; o.stamina = o.staminaCap = 1; o.facing = { x: atk, y: 0 };
   T.stick(atk * 0.88, 0.47); const t0 = T.simNow(), path = [];
   return window.__until(1.4, () => undefined, () => { hold(); o.sprint = true; d.tackleCd = 99; d.noTouchT = 0.2;
     const t = T.simNow() - t0, v = Math.hypot(o.vx, o.vy) || 1;
     path.push({ t, ahead: Math.round(((d.x - o.x) * o.vx + (d.y - o.y) * o.vy) / v), goalSide: Math.round((d.x - o.x) * atk), tag: d.dbgTag }); })
     .then(() => { T.stick(0, 0); o.stats = keep.o; d.stats = keep.d; Object.assign(LL, LL0);
-      const late = path.filter(s => s.t >= 0.5), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
-      return { ahead: mean('ahead'), goalSide: mean('goalSide'), tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
-}, iq);
+      const late = path.filter(s => s.t >= 0.5 && /TRACK|PAIR/.test(s.tag || '')), mean = k => Math.round(late.reduce((a, s) => a + s[k], 0) / Math.max(1, late.length));
+      return { ahead: mean('ahead'), goalSide: mean('goalSide'), n: late.length, tags: [...new Set(path.map(s => s.tag))].join(' ') }; });
+}, [iq, vy0]);
+// (v239) three runs at different angles, and only while he's on the runner (TRACK, PAIR): at Def IQ 10 he may first step
+// toward the man on the ball (PRESS), which says nothing of how well he reads the run -- one run, all of it, came out
+// either way from one version to the next
+const offBall = async iq => { const r = []; for (const vy of [40, 80, 120]) r.push(await offBall1(iq, vy));
+  const m = k => Math.round(r.reduce((a, x) => a + x[k] * x.n, 0) / Math.max(1, r.reduce((a, x) => a + x.n, 0)));
+  return { ahead: m('ahead'), goalSide: m('goalSide'), tags: [...new Set(r.flatMap(x => x.tags.split(' ')))].join(' ') }; };
 const off10 = await offBall(10), off1 = await offBall(1);
 info('a runner into space: ' + JSON.stringify({ off10, off1 }));
 ok(/TRACK|PAIR/.test(off10.tags) && /TRACK|PAIR/.test(off1.tags), 'he picks up the runner in his zone (' + off10.tags + ' / ' + off1.tags + ')');
