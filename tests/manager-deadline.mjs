@@ -21,6 +21,7 @@ writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy, papers: true });   // (it goes through the papers itself)
 const { ok, info } = rep;
+await page.evaluate(() => { window.__pwOff = true; });   // (v241: it puts the papers aside and goes on, so no word about papers unread; manager-papers tests that)
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 const on = id => page.evaluate(id => document.getElementById(id).classList.contains('on'), id);
 const aside = () => K(`(()=>{ const d=CAREER.data; if(d.pile) d.pile.opened=true; d.press=null; pileHide(); document.getElementById('pressModal').classList.remove('on'); return 1; })()`);
