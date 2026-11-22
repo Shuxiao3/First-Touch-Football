@@ -29,7 +29,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Flow Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); while(!mgNextGame(d)) mgForward(d); d.pile=null; mgSave(d); renderHub(); return 1; })()`);
 const on = id => page.evaluate(id => document.getElementById(id).classList.contains('on'), id);
 const simAt = () => K('simNow');
@@ -66,7 +66,13 @@ ok(!(await on('ctlModal')) && (await simAt()) > t1, '...and back to the game, th
 // --- THE QUICK SUBS: anyone, tired or not -----------------------------------------------------------------------------------------
 await K(`(()=>{ for(const p of players) if(p.team==='G'){ p.staminaCap=1; p.stamina=1; } QS.open=true; qsRender(qsSuggest()); return 1; })()`);
 r = await page.innerText('#qsDrop');
-ok(/any change from ALL SUBS/.test(r) && /ALL SUBS/.test(r), 'the quick subs with nobody tired: "' + r.split('\n')[0] + '" -- and ALL SUBS (any man off; v179: at the next break in play, not "any time")');
+ok(/^No one’s tired yet$|^No one's tired yet$/m.test(r) && /FORCE SUB/.test(r) && !/ALL SUBS/.test(r), 'v242: the quick subs with nobody tired: just "' + r.split('\n')[0] + '" -- and FORCE SUB in place of ALL SUBS');
+// (v242) FORCE SUB: the most tired man off -- not tired enough to be offered -- for the bench's best at his spot, at the next break
+r = await K(`(()=>{ const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&qsSlot(p.squadIdx)); men[2].staminaCap=0.95; const want=men[2].squadIdx, s=qsForce();
+  const was=SUBS.G.q.length; document.querySelector('#qsDrop [data-qs="force"]').click(); const q=SUBS.G.q.slice(), done=SUBS.G.used;
+  return { want, out:s&&s.out, inn:s&&s.inn, bench:mtBench('G').includes(s&&s.inn), queued:q.some(x=>x.out===want)||done>0, was, open:QS.open }; })()`);
+ok(r.out === r.want && r.bench && r.queued && !r.open, 'v242: FORCE SUB takes off the most tired man (ceiling 95%, under nobody\'s threshold) for a man off the bench -- on at the next break (' + JSON.stringify(r) + ')');
+await K(`(()=>{ SUBS.G.q=[]; QS.open=false; for(const p of players) if(p.team==='G'){ p.staminaCap=1; p.stamina=1; } return 1; })()`);
 await K(`(()=>{ QS.open=false; qsRender(qsSuggest()); return 1; })()`);
 
 // --- THE TIPS: the first time each comes up ------------------------------------------------------------------------------------
@@ -100,26 +106,40 @@ await K(`(()=>{ PREFS.ht='on'; half=1; endHalf(); return 1; })()`); await page.w
 ok(!(await on('htModal')), 'HALF-TIME set to PLAY ON: the whistle and on, as it was');
 await K(`(()=>{ PREFS.ht='wait'; return 1; })()`);
 
-// --- AFTER THE GAME: one at a time -------------------------------------------------------------------------------------------------
+// --- AFTER THE GAME: one at a time (v242: no "N OF 4" under any of them; the STADIUM and FUND SUMMARY a line a press) -----------
 await K(`(()=>{ finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(600);
-const ups = () => K(`(()=>{ const L=['storyModal','matchReport','pressModal','moneyModal','pileModal'].filter(mgUpOn); return { L, seq:MGUI.seq&&MGUI.seq.slice(), tag:[...document.querySelectorAll('.seqTag')].filter(x=>x.offsetParent).map(x=>x.textContent.trim()) }; })()`);
+const ups = () => K(`(()=>{ const L=['storyModal','matchReport','pressModal','moneyModal','pileModal'].filter(mgUpOn); return { L, seq:MGUI.seq&&MGUI.seq.slice(), tag:[...document.querySelectorAll('.seqTag')].filter(x=>x.offsetParent).map(x=>x.textContent.trim()), of:/\\b\\d OF \\d\\b/.test([...document.querySelectorAll('#matchReport,#pressModal,#moneyModal,#pileModal')].filter(e=>e.offsetParent||e.classList.contains('on')).map(e=>e.innerText).join(' ').replace(/QUESTION \\d+ OF \\d+/g,'')) }; })()`);   // (a question's own count isn't the queue's)
 const steps = [];
 let u = await ups(); steps.push(u);
-info('full time: up ' + JSON.stringify(u.L) + ', the run ' + JSON.stringify(u.seq) + ', ' + JSON.stringify(u.tag));
-const n = u.seq ? u.seq.length : 0;
-ok(u.L.length === 1 && u.L[0] === 'matchReport' && u.tag[0] === '· 1 OF ' + n && n >= 4, 'full time: THE RESULT, and nothing under it -- "1 OF ' + n + '" (the run: ' + (u.seq || []).join(', ') + ')');
+info('full time: up ' + JSON.stringify(u.L) + ', the run ' + JSON.stringify(u.seq));
+ok(u.L.length === 1 && u.L[0] === 'matchReport' && !u.tag.length && !u.of, 'full time: THE RESULT, nothing under it, and no "1 OF 4" (v242)');
 await page.click('#mrNextBtn'); await page.waitForTimeout(200); u = await ups(); steps.push(u);
-ok(u.L.length === 1 && u.L[0] === 'matchReport' && u.tag.includes('· 2 OF ' + n), 'NEXT: YOUR PLAYERS, "2 OF ' + n + '"');
+ok(u.L.length === 1 && u.L[0] === 'matchReport' && !u.tag.length && !u.of, 'NEXT: YOUR PLAYERS, no "2 OF 4"');
 await page.click('#mrContinueBtn'); await page.waitForTimeout(300); u = await ups(); steps.push(u);
 const pressFirst = u.L[0] === 'pressModal';
-ok(u.L.length === 1 && (pressFirst ? u.tag.includes('· 3 OF ' + n) : u.L[0] === 'moneyModal'), 'CONTINUE: ' + (pressFirst ? 'the press conference, alone, "3 OF ' + n + '"' : 'THE MONEY, alone'));
+ok(u.L.length === 1 && !u.of && (pressFirst || u.L[0] === 'moneyModal'), 'CONTINUE: ' + (pressFirst ? 'the press conference, alone, no "3 OF 4"' : 'the money, alone'));
 if(pressFirst){ await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u); }
-ok(u.L.length === 1 && u.L[0] === 'moneyModal' && u.tag.some(t => /OF/.test(t)), 'then THE MONEY, alone, "' + u.tag.join('') + '"');
-if(await K(`/THE GATE/.test(document.querySelector('#moneyModal .mnCard').textContent)`)){   // (v186: THE GATE, then THE MONEY, in the one window)
-  await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u);
-  ok(u.L.length === 1 && u.L[0] === 'moneyModal' && u.tag.some(t => /OF/.test(t)), 'THE GATE first after a home game, then THE MONEY, "' + u.tag.join('') + '"'); }
+// a summary: its title alone at first, NEXT bringing up a line a press, CONTINUE once they're all up
+const card = () => K(`(()=>{ const c=document.querySelector('#moneyModal .mnCard'); return { title:c.querySelector('.mnTitle').textContent, shown:[...c.querySelectorAll('.mnList > .on')].map(e=>e.innerText.replace(/\\s+/g,' ').trim()),
+  all:c.querySelectorAll('.mnList > *').length, btn:c.querySelector('[data-mn="go"]').textContent.trim(), red:[...c.querySelectorAll('.mnList > .on.dn')].map(e=>e.innerText.split('\\n')[0]) }; })()`);
+const through = async () => { const first = await card(), seen = [first]; for(let i = 0; i < first.all; i++){ await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(40); seen.push(await card()); } return seen; };
+ok(u.L.length === 1 && u.L[0] === 'moneyModal' && !u.of, 'then the money, alone, no "4 OF 5"');
+let c0 = await card();
+if(c0.title === 'STADIUM SUMMARY'){   // (after a home game: the ground first)
+  const S = await through(), end = S[S.length - 1], money = t => +t.replace(/[^0-9]/g, '');
+  const stands = end.shown.slice(1, -1), prices = stands.map(t => +((t.match(/× \$(\d+)/) || [])[1] || 0));
+  ok(S[0].shown.length === 0 && /^NEXT/.test(S[0].btn) && S.slice(1, -1).every((x, i) => x.shown.length === i + 1 && /^NEXT/.test(x.btn)) && /^CONTINUE/.test(end.btn),
+    'v242: THE STADIUM SUMMARY starts with its title alone; NEXT brings up a line a press (' + (S.length - 1) + ' lines), and with the last up it reads CONTINUE');
+  ok(/^Fans in the ground/.test(end.shown[0]) && prices.length >= 1 && prices.every((p, i) => !i || p >= prices[i - 1]) && /^Taken at the gate/.test(end.shown[end.shown.length - 1]),
+    'v242: the fans first, then each part of the ground, its fans and its price, cheapest first ($' + prices.join(', $') + '), then the gate in all');
+  await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u); c0 = await card(); }
+{ const S = await through(), end = S[S.length - 1], iG = end.shown.findIndex(t => /^The gate/.test(t)), iW = end.shown.findIndex(t => /^Wages/.test(t));
+  info('the fund summary: ' + end.shown.join(' | '));
+  ok(c0.title === 'FUND SUMMARY' && S[0].shown.length === 0 && /^CONTINUE/.test(end.btn) && /^At the start of the week/.test(end.shown[0]) && end.shown.some(t => /^This week/.test(t)) && end.shown.some(t => /^Now in the bank/.test(t)),
+    'v242: THE FUND SUMMARY (THE MONEY till now): from the start of the week, a line a press, to this week\'s net and the bank now, then CONTINUE');
+  ok(iW < 0 || (iW > iG && end.red.includes(end.shown[iW].split(' ')[0]) || end.red.some(t => /^Wages/.test(t))), 'v242: the wages after the gate, in red' + (iW < 0 ? ' (none this week)' : '')); }
 await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u);
-ok(u.L.length <= 1 && (u.L.length === 0 || (u.L[0] === 'pileModal' && u.tag.includes('· ' + n + ' OF ' + n))), 'then ' + (u.L.length ? 'the papers, "' + n + ' OF ' + n + '"' : 'the club, nothing more up'));
+ok(u.L.length <= 1 && (u.L.length === 0 || u.L[0] === 'pileModal') && !u.of, 'then ' + (u.L.length ? 'the papers' : 'the club, nothing more up'));
 ok(steps.every(s => s.L.length <= 1), 'never two at once: ' + steps.map(s => s.L.join('+') || 'none').join(' > '));
 
 process.exitCode = rep.finish();

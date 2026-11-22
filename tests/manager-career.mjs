@@ -49,7 +49,7 @@ async function create(club){
   if(await page.isVisible('#confirmModal.on')) await page.click('#confirmModal [data-cf="yes"]');
   await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', club);
-  await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+  await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
   if(club !== 'Story Town') await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); });   // (its two arrivals: only Story Town's)
 }
 const msg = () => page.$eval('#bpMsg', e => e.classList.contains('on') ? e.textContent : '').catch(() => '');   // (a toast along the bottom)
@@ -67,14 +67,22 @@ await page.fill('#mgCode', 'fm'); await page.waitForTimeout(30);
 ok(await page.isDisabled('#mgGo'), 'two letters: START waits for a third');
 await page.fill('#mgCode', 'fmr'); await page.waitForTimeout(30);
 ok(await page.inputValue('#mgCode') === 'FMR' && !(await page.isDisabled('#mgGo')) && await page.textContent('#mkSbCode') === 'FMR', 'three letters, in capitals: FMR');
-await page.click('#mgrMaker [data-mm="tab"][data-t="kit"]');
+// (v242) the three steps in order: KIT and CREST locked till NEXT has got you there; START CAREER only on the last
+{ const r = await page.evaluate(() => { const t = k => document.querySelector('#mgrMaker [data-mm="tab"][data-t="'+k+'"]'), g = document.getElementById('mgGo');
+    return { kit: t('kit').disabled, crest: t('crest').disabled, btn: g.textContent.trim(), act: g.dataset.mm, sb: !!document.querySelector('#mkSbBox .mkSbClk') && !!document.querySelector('#mkSbBox .mkSbNums') }; });
+  ok(r.kit && r.crest && /^Next/.test(r.btn) && r.act === 'next', 'v242: on CLUB, KIT and CREST are locked and the button is NEXT (' + JSON.stringify(r) + ')');
+  ok(r.sb, 'v242: ON THE SCOREBOARD is a mock of the match\'s score box: the clock in its well, the crests and letters, the score by the strips'); }
+await page.click('#mgGo');
+{ const r = await page.evaluate(() => ({ tab: (document.querySelector('#mgrMaker .mkTab.on')||{}).dataset.t, crest: document.querySelector('#mgrMaker [data-mm="tab"][data-t="crest"]').disabled, club: document.querySelector('#mgrMaker [data-mm="tab"][data-t="club"]').disabled, btn: document.getElementById('mgGo').textContent.trim() }));
+  ok((r.tab === 'kit' && r.crest && !r.club && /^Next/.test(r.btn)), 'v242: NEXT took you to KIT -- CLUB open to go back to, CREST still locked, NEXT again (' + JSON.stringify(r) + ')'); }
 await page.click('#mgrMaker [data-mm="pri"][data-c="#1d4fa3"]'); await page.click('#mgrMaker [data-mm="sec"][data-c="#f2d23c"]');
-await page.click('#mgrMaker [data-mm="tab"][data-t="crest"]');
+await page.click('#mgGo');
+ok(/Start career/i.test(await page.textContent('#mgGo')) && (await page.getAttribute('#mgGo', 'data-mm')) === 'go', 'v242: on CREST, the last, the button is START CAREER');
 const crestTo = async (k, want) => { for(let i = 0; i < 12; i++){ const v = await page.$$eval('#mgrMaker .mkCrVal', ns => ns.map(n => n.textContent));
   if(v[{ s: 0, p: 1, e: 2 }[k]] === want) return true; await page.click(`#mgrMaker [data-mm="cr"][data-k="${k}"][data-d="1"]`); } return false; };
 ok(await crestTo('s', 'ROUND') && await crestTo('p', 'HOOPS') && await crestTo('e', 'STAR'), 'the crest: round, hooped, a star');
 await page.click('#mgrMaker [data-mm="part"][data-i="2"]'); await page.click('#mgrMaker [data-mm="crc"][data-c="#ffb43c"]');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 ok(await page.evaluate(() => JSON.stringify(__MG.d.story)) === '{"vet":0,"kid":0,"phone":1}', 'a new career has its first season\'s two arrivals to come, and the phone ringing (the window\'s first day)');
 await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); });   // (they're Story Town's, below)
 let d = await save();
@@ -176,7 +184,16 @@ for(let i = 0; i < 40 && /FORWARD|SIMULATE/.test(await bottom()); i++){ const fw
 for(let i = 0; i < 3 && !/REVIEW/.test(await bottom()); i++){ await page.click('#chBottom [data-mg="continue"]'); await page.waitForTimeout(50); }
 d = await save();
 ok(d.phase === 'review' && d.review && d.review.pos >= 1, 'the season ends in the review: ' + (d.review && d.review.pos + ', ' + d.review.result));
-await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(80);
+await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(150);
+// (v242) the review's pages: NEXT along the foot, a small arrow back by it once past the first, START SEASON 2 on the last;
+// the pages' own arrows not shown
+{ const foot = () => page.evaluate(() => { const f = document.getElementById('bpFoot'), pg = document.querySelector('#bpBody > .fitPager');
+    return { next: !!f.querySelector('[data-mg="rvnext"]'), back: !!f.querySelector('[data-mg="rvback"]'), start: !!f.querySelector('[data-mg="newseason"]'), text: f.innerText.replace(/\s+/g, ' ').trim(), pager: !!pg && getComputedStyle(pg).display !== 'none' }; });
+  let f = await foot(); const f0 = f; let pages = 1;
+  for(let i = 0; i < 12 && f.next; i++){ await page.click('#bpFoot [data-mg="rvnext"]'); await page.waitForTimeout(120); f = await foot(); pages++; }
+  ok(!f0.back && !f0.pager && (f0.next || f0.start) && f.start && !f.next && (pages === 1 || f.back), 'v242: the review -- ' + (pages > 1 ? 'NEXT through its ' + pages + ' pages, the arrow back by it after the first, ' : 'one page, ') + 'START SEASON 2 on the last; no ◀ 1 / ' + pages + ' ▶ (' + f.text + ')');
+  if(pages > 1){ await page.click('#bpFoot [data-mg="rvback"]'); await page.waitForTimeout(120); const b = await foot();
+    ok(b.next && !b.start, 'v242: the arrow back: a page back, and NEXT again'); await page.click('#bpFoot [data-mg="rvnext"]'); await page.waitForTimeout(120); } }
 ok((await page.innerText('#bldgPanel')).includes('START SEASON 2'), 'the review offers season 2');
 await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
@@ -190,7 +207,9 @@ let r = await page.evaluate(() => { const M = __MG, d = M.d; for(const p of d.ro
   let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); }
   M.mgSave(d); M.renderHub(); return { pos: d.review.pos, result: d.review.result, up: d.review.up }; });
 ok(r.pos === 1 && r.up && /CHAMPIONS/.test(r.result), 'a squad of 75s wins Division 2: ' + r.result);
-await page.click('#chBottom [data-mg="review"]'); await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
+await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(120);
+for(let i = 0; i < 12 && await page.$('#bpFoot [data-mg="rvnext"]'); i++){ await page.click('#bpFoot [data-mg="rvnext"]'); await page.waitForTimeout(80); }   // (v242: NEXT to the last page)
+await page.click('#bldgPanel [data-mg="newseason"]'); await page.waitForTimeout(120);
 d = await save();
 ok(d.tier === 2 && d.lg[2].ids.includes(d.clubId) && d.lg[2].fx.filter(day => day.some(m => m[0] === d.clubId || m[1] === d.clubId)).length === 26,
    'promoted: Division 1, 26 games');

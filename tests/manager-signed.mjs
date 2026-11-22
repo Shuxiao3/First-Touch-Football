@@ -40,7 +40,7 @@ const outside = async () => { const r = await page.evaluate(() => { const c = do
 // --- a new career, by taps ------------------------------------------------------------------------------------------------------
 await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.tap('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
-await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Signing Town'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Signing Town'); await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); d.budget=2e7; MGUI.noPile=true; pileHide(); if(d.fw) d.fw.off=true; renderHub(); return 1; })()`);
 
 // --- A FREE AGENT, SIGNED ---------------------------------------------------------------------------------------------------------

@@ -34,7 +34,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Ade Moss'); await page.fill('#mgClubIn', 'Contract Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); await page.waitForTimeout(150);
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 }); await page.waitForTimeout(150);
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); pileHide();
   window.HV=(o)=>{ const k=['lr','pro','ad','rs','du','ch','te','am','lo'], v=Object.assign({lr:5.5,pro:5.5,ad:5.5,rs:5.5,du:5.5,ch:5.5,te:5.5,am:5.5,lo:5.5},o); return k.map(x=>devEnc(v[x])).join(''); };
   // a man made plain for a test: rated 65 (worth hundreds a week -- v120's wages: a 70 is near a thousand), no traits, settled, no season to speak of, two seasons left

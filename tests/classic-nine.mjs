@@ -89,7 +89,7 @@ ok(qm.n.join() === '9,9' && qm.role === 'DEF' && qm.atk.split(',')[mid(qm.f[0])]
 // --- A CAREER saved with seven outfielders: its shapes grow, its eighth comes off the bench into the middle of the back line
 await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150); await page.click('#newSlotList .slotBtn >> nth=0');
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 }); await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 const cr = await page.evaluate(() => { const N = window.__N, d0 = N.d, R = d0.roster;
   const fresh = { roster: R.length, atk: N.ensureLineup(d0).atk.length, form: d0.formation, eight: !!d0.eight };
   // the same squad as a v123 save had it: 2-3-2 with the ball, 3-3-1 without, seven outfielders, no flag

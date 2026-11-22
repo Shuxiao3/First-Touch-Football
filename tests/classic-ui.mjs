@@ -43,7 +43,7 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
   const se = document.scrollingElement; if(se.scrollHeight > H + 1) out.push('the page scrolls (' + se.scrollHeight + ')');
   const shown = el => { for(let e = el; e && e !== document.body; e = e.parentElement){ const c = getComputedStyle(e); if(c.display === 'none' || c.visibility === 'hidden') return false; } return el.getClientRects().length > 0; };
   for(const el of document.querySelectorAll('body *')){ const cs = getComputedStyle(el);
-    if((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 && !el.classList.contains('plPane') || /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) && shown(el))
+    if((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 && !el.classList.contains('plPane') && !el.classList.contains('setScroll') || /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) && shown(el))
       out.push('a box scrolls: ' + (el.id || el.className)); }
   for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
   return out; }, sels); }
@@ -89,7 +89,7 @@ async function skillsPage(page){
   return { all, seen, cut, pages, drawn: a.length > 0 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
-  await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+  await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
   await page.evaluate(() => { const d = __MG.d; d.story = { vet: 2, kid: 2, phone: 2 }; __MG.mgSave(d); __MG.renderHub(); }); }   // (the first season's two arrivals: manager-career's)
 
 for(const [w, h] of SIZES){
@@ -104,7 +104,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
       dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
-    ok(String(st.rows) === 'MATCH LENGTH,EXHIBITION OPPONENTS,GRAPHICS,CAMPUS MENU,HALF-TIME,TIPS,TEXT SIZE' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials -- and no DIFFICULTY (v228: CHAMPION, no choice for now)');
+    ok(String(st.rows) === 'MATCH LENGTH,CAMPUS MENU,HALF-TIME,TIPS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials -- and no DIFFICULTY (v228: CHAMPION), no EXHIBITION OPPONENTS, GRAPHICS or TEXT SIZE (v242)');
     // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
     // new 4, where a 3 picked from now on stays 3
     const mlOn = pg => pg.evaluate(() => { const r = [...document.querySelectorAll('#setRows .setRow')].find(x => /MATCH LENGTH/.test(x.textContent)), on = r && r.querySelector('.setOpt.on'); return on ? on.textContent : null; });
@@ -402,8 +402,9 @@ for(const [w, h] of SIZES){
   await page.goto('file://' + copy); await page.waitForTimeout(700); await newCareer(page);
   await page.evaluate(() => { const M = __MG, d = M.d; let n = 0; while(d.phase !== 'review' && n++ < 300){ if(d.wday === 'mon') M.mgForward(d); else M.mgPlayGame(d, null, null); } M.mgSave(d); M.renderHub(); });
   await page.tap('#chBottom [data-mg="review"]'); await page.waitForTimeout(200);
-  const bad = await onScreen(page, ['#bpFoot [data-mg="newseason"]', '.bpTopBack', '#bpBody']);
-  ok(!bad.length && await page.isVisible('#bpFoot [data-mg="newseason"]'), 'the season review: START SEASON 2 pinned on the screen' + (bad.length ? ' -- ' + bad.join(' | ') : ''));
+  const btn = await page.$('#bpFoot [data-mg="rvnext"]') ? '#bpFoot [data-mg="rvnext"]' : '#bpFoot [data-mg="newseason"]';   // (v242: NEXT till the last page)
+  const bad = await onScreen(page, [btn, '.bpTopBack', '#bpBody']);
+  ok(!bad.length && await page.isVisible(btn), 'the season review: its button (' + (await page.textContent(btn)).trim() + ') pinned on the screen' + (bad.length ? ' -- ' + bad.join(' | ') : ''));
   await ctx.close(); }
 
 // A FINGER: touch a man and move, and he's up at once -- no hold (a tap only shows his card) -- the tactics, on a real touch

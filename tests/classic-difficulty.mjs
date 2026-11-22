@@ -43,7 +43,7 @@ await page.click('#smItems [data-act="settings"]').catch(() => {});
 await page.waitForTimeout(300);
 const row = await page.evaluate(() => ({ opts: document.querySelectorAll('#setRows .setOpt[data-pref="diff"]').length, rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent) }));
 info('the Settings rows: ' + JSON.stringify(row.rows));
-ok(row.opts === 0 && !row.rows.includes('DIFFICULTY') && row.rows.length >= 6, 'SETTINGS has no DIFFICULTY row (' + row.rows.join(', ') + ')');
+ok(row.opts === 0 && !row.rows.includes('DIFFICULTY') && row.rows.length >= 4, 'SETTINGS has no DIFFICULTY row (' + row.rows.join(', ') + ')');
 await page.click('[data-setclose]').catch(() => {}); await page.waitForTimeout(150);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');
 const lg = await page.evaluate(() => ({ chip: document.querySelectorAll('#exhPanel .exhDiff, #exhPanel [data-exh="diff"]').length, text: document.getElementById('exhLeague').textContent }));

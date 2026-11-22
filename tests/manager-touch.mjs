@@ -28,7 +28,7 @@ const K = s => page.evaluate(s => window.__K.ev(s), s);
 await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200);
 await page.tap('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Touch Town');
-await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); d.budget=5e6; MGUI.noPile=true; pileHide(); renderHub(); return 1; })()`); await page.waitForTimeout(150);
 ok(await K('!!CAREER&&!!CAREER.data'), 'a new career from the menu, by taps');
 
@@ -77,10 +77,10 @@ const hit = await page.evaluate(() => { const el = document.querySelector('#cpFi
   return { w: Math.round(b.width), h: Math.round(b.height), right: at(b.right + 6, b.top + b.height / 2), below: at(b.left + b.width / 2, b.bottom + 6) }; });
 ok(hit && hit.right && hit.below, 'the smallest button (YOUR FIRST WEEK\'s ✕, ' + (hit && hit.w + 'x' + hit.h) + ' px) takes a tap 6 px off it, to the side and below');
 
-// --- TEXT SIZE ---------------------------------------------------------------------------------------------------------------
-const ts = await K(`(()=>{ setPref('text','l'); curTab.club='Squad'; openBuilding('club'); paintBuilding(); const z=getComputedStyle(document.getElementById('bpBody')).zoom, row=document.querySelector('#setRows')?'':''; const big=document.documentElement.dataset.text;
-  renderSetRows(); const opt=!!document.querySelector('#setRows [data-pref="text"][data-val="l"].on'); setPref('text','n'); const z2=getComputedStyle(document.getElementById('bpBody')).zoom; hideBldg(); return { z, big, opt, z2 }; })()`);
-ok(ts.big === 'large' && +ts.z > 1.1 && ts.opt && +ts.z2 === 1, 'Settings has TEXT SIZE: LARGE puts a building\'s screens a size up (zoom ' + ts.z + '), NORMAL back');
+// --- TEXT SIZE (v158-v241; v242: gone -- the career's text as it is) ----------------------------------------------------------
+const ts = await K(`(()=>{ renderSetRows(); const opt=!!document.querySelector('#setRows [data-pref="text"]'); curTab.club='Squad'; openBuilding('club'); paintBuilding();
+  const z=getComputedStyle(document.getElementById('bpBody')).zoom, big=document.documentElement.dataset.text||''; hideBldg(); return { opt, z, big, pref:PREFS.text }; })()`);
+ok(!ts.opt && +ts.z === 1 && !ts.big && ts.pref === 'n', 'v242: no TEXT SIZE in Settings any more; a building\'s screens at their own size (zoom ' + ts.z + ')');
 
 // --- a match, and a sub, by taps -----------------------------------------------------------------------------------------------
 for(let i = 0; i < 8; i++){ if(await page.$('#chBottom [data-mg="play"]')) break; if(!(await page.$('#chBottom [data-mg="forward"]'))) break; await page.tap('#chBottom [data-mg="forward"]'); await page.waitForTimeout(250); await K(`(()=>{ MGUI.noPile=true; pileHide(); return 1; })()`); }
@@ -89,7 +89,9 @@ if(await page.$('#ctlModal.on')){ await page.tap('#ctlModal [data-ctl="go"], #ct
 await page.waitForTimeout(1500);
 const inMatch = await K('SCREEN');
 await page.tap('#qsBtn'); await page.waitForTimeout(200);
-await page.tap('#qsDrop .qsAll'); await page.waitForSelector('#mtacOv.on', { timeout: 4000 }); await page.waitForTimeout(200);   // (ALL SUBS: the match's tactics)
+if(await page.$('#qsDrop [data-qs="all"]')) await page.tap('#qsDrop [data-qs="all"]');   // (ALL SUBS: the match's tactics)
+else { await page.tap('#qsBtn'); await page.waitForTimeout(150); await K(`(()=>{ openPause(); return 1; })()`); await page.waitForTimeout(150); await page.tap('#pauseMenu [data-pause="tactics"]'); }   // (v242: nobody tired, the drop-down's FORCE SUB -- the board from the menu's TACTICS)
+await page.waitForSelector('#mtacOv.on', { timeout: 4000 }); await page.waitForTimeout(200);
 const offSi = await page.$eval('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(async () => +(await page.locator('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"]').nth(2).getAttribute('data-si')));
 await page.locator('#mtacOv .tbBench .ptk').first().tap(); await page.waitForTimeout(150);
 const armTxt = await page.textContent('#mtacOv [data-mtarm]');

@@ -1,4 +1,4 @@
-// FOOTBALL CLASSIC, THE WEEK'S MONEY ON A PHONE (v160), the smallest iPhone held sideways (667x375, touch only): NET/WK
+// FOOTBALL CLASSIC, THE WEEK'S MONEY ON A PHONE (v160; v242: the card's gone, NET/WK only a figure -- what's left below), the smallest iPhone held sideways (667x375, touch only): NET/WK
 // on the campus opens the week's money -- this week so far, last week, a league week projected -- and its lines page
 // (◀ 1 / 3 ▶) between the title and BACK, as every card's do, so BACK is always on the screen and every line is on one
 // of the pages; the arrows and a tap on the card leave it open; BACK closes it, and it opens again on its first page;
@@ -37,7 +37,7 @@ const outside = sel => page.evaluate(sel => { const r = document.querySelector(s
 await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200);
 await page.tap('#newSlotList .slotBtn >> nth=0'); await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Ledger Town');
-await page.tap('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 const wk = await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); if(d.fw) d.fw.off=true; let i=0;
   while(i<80&&(d.phase!=='league'||(d.weeks||0)<4)){ if(mgNextGame(d)&&d.wday!=='mon') mgSim(d); else mgForward(d); i++; }
   MGUI.noPile=true; pileHide(); for(const id of ['pressModal','moneyModal','pileModal','storyModal']) document.getElementById(id).classList.remove('on');
@@ -45,36 +45,11 @@ const wk = await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; m
 await page.waitForTimeout(300);
 info('the career: ' + JSON.stringify(wk));
 
-// --- NET/WK: the week's money, all of it on the screen ---------------------------------------------------------------------------
+let pt;
+// --- NET/WK (v160-v241: it opened THE WEEK'S MONEY; v242: that's gone -- the week's lines are the FUND SUMMARY's after a match) ----
 await page.tap('#chNetBtn'); await page.waitForTimeout(350);
-const card = () => K(`(()=>{ const c=document.querySelector('#ldgModal .ldgCard'), cr=c.getBoundingClientRect(), b=c.querySelector('[data-ldg="close"]'), br=b.getBoundingClientRect(), at=document.elementFromPoint(br.left+br.width/2,br.top+br.height/2);
-  const shown=[...c.querySelectorAll('.ldgSect,.ldgRow,.ldgNote')].filter(e=>e.getClientRects().length&&!e.closest('.fitHide')).map(e=>e.textContent.trim());
-  const all=[...c.querySelectorAll('.ldgSect,.ldgRow,.ldgNote')].map(e=>e.textContent.trim());
-  const pg=c.querySelector('.fitPager b'); return { on:document.getElementById('ldgModal').classList.contains('on'), top:Math.round(cr.top), bottom:Math.round(cr.bottom), vh:innerHeight,
-    back:[Math.round(br.top),Math.round(br.bottom)], backHit:!!at&&(at===b||b.contains(at)), cut:c.scrollHeight-c.clientHeight, pager:pg?pg.textContent:null, shown, all }; })()`);
-let c = await card();
-info('the card: ' + c.top + ' to ' + c.bottom + ' px of ' + c.vh + ', BACK ' + c.back.join(' to ') + ', page ' + c.pager + ', ' + c.all.length + ' lines in all');
-ok(c.on && c.top >= 0 && c.bottom <= c.vh && c.back[1] <= c.vh && c.backHit && c.cut <= 1,
-  'NET/WK: the week\'s money, the card on the screen and BACK on it, a tap away (' + c.back.join('-') + ' px of ' + c.vh + ')');
-const pages = c.pager ? +c.pager.split('/')[1] : 1, seen = [...c.shown];
-// (v224: in Roboto Condensed its lines can all fit at once -- one page, no pager, is the card whole; more go over pages)
-ok((pages >= 2 ? /^1 \/ \d+$/.test(c.pager) : !c.pager && c.shown.length === c.all.length) && /THIS WEEK SO FAR/.test(c.shown[0]), (pages >= 2 ? 'its lines page between the title and BACK: ' + c.pager : 'its lines all on the one page between the title and BACK (' + c.all.length + ' of them; v224)') + ', this week so far first');
-let stays = true;
-for(let i = 1; i < pages; i++){ await page.tap('#ldgModal .fitPager [data-fitgo="1"]'); await page.waitForTimeout(150); const n = await card(); stays = stays && n.on && n.backHit; seen.push(...n.shown); }
-const missing = c.all.filter(t => !seen.includes(t));
-ok(stays && !missing.length && seen.some(t => /LAST WEEK/.test(t)) && seen.some(t => /A LEAGUE WEEK, AS IT’S GONE/.test(t)),
-  'every line on one of the ' + pages + ' pages -- last week, a league week as it\'s gone (v186: not projected) -- and turning them leaves it open, BACK on each' + (missing.length ? ' (missing: ' + missing.join(' | ') + ')' : ''));
-await page.tap('#ldgModal .ldgRow:not(.fitHide) >> nth=0'); await page.waitForTimeout(150);
-const afterRow = await isOn('ldgModal');
-await page.tap('#ldgModal [data-ldg="close"]'); await page.waitForTimeout(150);
-const afterBack = await isOn('ldgModal');
-ok(afterRow && !afterBack, 'a tap on the card leaves it open; BACK closes it');
-await page.tap('#chNetBtn'); await page.waitForTimeout(350);
-c = await card();
-ok(c.on && (pages >= 2 ? /^1 \//.test(c.pager || '') : !c.pager), 'opened again: on its first page (' + (c.pager || 'the one page') + ')');
-let pt = await outside('#ldgModal .ldgCard');
-await page.touchscreen.tap(pt.x, pt.y); await page.waitForTimeout(200);
-ok(!(await isOn('ldgModal')), 'a tap outside the card, on the dimmed screen round it (' + pt.room + ' px of it): closed');
+{ const r = await K(`(()=>({ on:document.getElementById('ldgModal').classList.contains('on'), hub:!!document.getElementById('chNetBtn').closest('[data-hub]'), net:document.getElementById('chNetBtn').textContent.trim(), wl:!!(CAREER.data.wl&&CAREER.data.wl.L) }))()`);
+  ok(!r.on && !r.hub && r.net.length > 0 && r.wl, 'v242: NET/WK is just the figure now (' + r.net + '): a tap opens nothing; the week\'s books are still kept, for the FUND SUMMARY (' + JSON.stringify(r) + ')'); }
 
 // --- HOW TO PLAY and SKILL MOVES: a tap outside closes them too; not the card before your first match ---------------------------
 await K(`(()=>{ ctlShow(); return 1; })()`); await page.waitForTimeout(150);

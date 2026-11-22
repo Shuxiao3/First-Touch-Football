@@ -23,7 +23,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Signing Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); MGUI.noPile=true; pileHide(); d.budget=2e7; mgSave(d); renderHub(); return 1; })()`);
 
 // --- NOTHING ON WHAT HE'D DO FOR YOUR NINE (v162) ------------------------------------------------------------------------------

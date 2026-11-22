@@ -146,7 +146,7 @@ await page.click('#smItems [data-act="new"]').catch(async () => { await page.rel
 await page.waitForTimeout(150); await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 if(await page.isVisible('#confirmModal.on')) await page.click('#confirmModal [data-cf="yes"]');
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 }); await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 const wd = await page.evaluate(() => { const M = window.__M, d = M.d, n = { CM: 0, DM: 0, AM: 0 }, short = [];
   for(const c of Object.values(d.world.clubs)){ if(c.id === d.clubId) continue; const have = {};
     for(const p of c.players){ const s = M.natPos(p); have[s] = (have[s] || 0) + 1; if(n[s] != null) n[s]++; }

@@ -29,7 +29,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Ade Moss'); await page.fill('#mgClubIn', 'Market Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 }); await page.waitForTimeout(150);
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 }); await page.waitForTimeout(150);
 
 // --- THE PHONE: it rings on the first day of pre-season -------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, m=document.getElementById('storyModal'); return { phase:d.phase, day:d.day, md:d.md, phone:d.story.phone, on:m.classList.contains('on'), text:m.innerText.replace(/\\s+/g,' ') }; })()`);

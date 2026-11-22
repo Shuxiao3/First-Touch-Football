@@ -383,6 +383,8 @@
   .mkpWage{ font-size:9px; color:var(--dim2); }
   #settingsDials{ display:none; margin-top:6px; }
   .setMid{ display:flex; flex-direction:column; gap:10px; }
+  .pScroll.setScroll{ overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding-right:2px; }   /* (v242: it scrolls) */
+  #settingsOverlay.fromMatch .setMenuOnly{ display:none; }   /* (v242: SKILL MOVES and LABS from the menus, not from a match's) */
   .setMid > *{ flex:none; }
   #settingsDials.on{ display:block; }
   .devOnly{ display:none; } body.dev .devOnly{ display:block; }
@@ -750,8 +752,9 @@
   @media (max-width:560px){ .mrCols{ grid-template-columns:1fr; } }
   .mrScore{ font-family:'Roboto Condensed','FTC Dot',sans-serif;font-size:44px;font-weight:700;letter-spacing:2px;line-height:1; }
   .mrPage{ height:100%; display:flex; flex-direction:column; gap:8px; min-height:0; }
-  .mrHead{ text-align:center; } .mrBoard{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; margin-top:6px; }
-  .mrSide{ display:flex; align-items:center; gap:8px; justify-content:flex-end; min-width:0; } .mrSide.r{ justify-content:flex-start; }
+  .mrHead{ text-align:center; } .mrBoard{ display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:14px; margin-top:6px; }
+  .mrSide{ display:grid; grid-template-columns:30px minmax(0,1fr); align-items:center; gap:10px; min-width:0; } .mrSide.r{ grid-template-columns:minmax(0,1fr) 30px; }
+  .mrSide b{ text-align:right; } .mrSide.r b{ text-align:left; } .mrSide .mrCrest{ justify-self:center; }   /* (v242: the crests at the same place either side, a name between each and the score) */
   .mrSide b{ font:16px 'Roboto Condensed','FTC Dot',sans-serif; font-weight:400; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mrCrest{ width:26px; height:30px; image-rendering:pixelated; flex:none; }
   #matchReport .mrBoard .mrScore{ font-size:46px; margin-top:0; }
@@ -771,6 +774,10 @@
   .mnRow{ display:flex; justify-content:space-between; align-items:baseline; padding:4px 2px; font-size:13px; color:var(--ink2); opacity:0; transform:translateY(6px); transition:opacity .25s, transform .25s; }
   .mnRow b{ font:18px 'Roboto Condensed','FTC Dot',sans-serif; font-weight:400; color:var(--ink); } .mnRow.up b{ color:var(--good); } .mnRow.dn b{ color:var(--bad); } .mnRow.tot b{ font-size:24px; }
   .mnRow.on, .mnParts.on, .mnFans.on, .mnLine.on{ opacity:1; transform:none; }
+  /* (v242) the STADIUM and FUND SUMMARY: a list that scrolls, a line at a time; under a stand's name its fans and price */
+  .mnCard{ max-height:calc(100dvh - 20px); } .mnList{ display:flex; flex-direction:column; gap:2px; overflow-y:auto; min-height:0; flex:1 1 auto; overscroll-behavior:contain; }
+  .mnList > *{ flex:none; } .mnRow span i{ display:block; font-style:normal; font-size:10.5px; color:var(--dim); margin-top:1px; }
+  .mnRow.big b{ font-size:24px; } .mnRow.net{ border-top:2px dashed var(--well); padding-top:6px; margin-top:2px; }
   /* (v186) THE GATE: who came, stand by stand */
   .gtBig{ text-align:center; font-size:12px; color:var(--ink2); padding:2px 0 4px; } .gtBig b{ font:22px 'Roboto Condensed','FTC Dot',sans-serif; font-weight:400; color:var(--ink); }
   .gtTbl{ display:flex; flex-direction:column; gap:1px; } .gtRow{ display:grid; grid-template-columns:1fr auto 38px 34px 64px; gap:8px; align-items:baseline; font-size:11.5px; color:var(--ink2); padding:2px; }
@@ -939,6 +946,21 @@
   .mkSb{ display:inline-flex; align-items:center; gap:6px; padding:5px 10px; font-size:13px; letter-spacing:.5px; color:var(--ink2); background:rgba(20,26,44,.88); border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--btnHi); }
   .mkSb b{ color:var(--phosphor); font-weight:600; } .mkSb b.r{ color:var(--red); }
   .mkSb img{ width:16px; height:18px; image-rendering:pixelated; }
+  /* (v242) ON THE SCOREBOARD: a mock of the match's score box (E9) -- the clock in its well, your crest and letters over
+     theirs, the score by a strip in your shirt's colour -- to see how they'll look in a match */
+  .mkSbBox{ display:inline-flex; gap:3px; padding:3px; height:56px; box-sizing:border-box; margin-top:2px; background:rgb(20 26 44 / .9); border-radius:var(--rWin,6px); box-shadow:var(--pxWin,0 0 0 1px #000); --kitG:#84dc34; --kitR:#8a93a8; }
+  .mkSbClk{ min-width:64px; padding:0 4px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; background:var(--well); border-radius:var(--rS,4px); }
+  .mkSbClk b{ font-size:19px; font-weight:700; line-height:21px; color:var(--acc); } .mkSbClk i{ font-style:normal; font-size:7px; font-weight:600; letter-spacing:1px; color:var(--rimLo); }
+  .mkSbTeams{ display:flex; flex-direction:column; justify-content:space-around; min-width:56px; padding:0 2px; }
+  .mkSbTeams > span{ display:flex; align-items:center; gap:4px; height:22px; }
+  .mkSbTeams img{ height:17px; width:auto; image-rendering:pixelated; } .mkSbOpp{ display:inline-block; width:15px; height:17px; border-radius:3px 3px 8px 8px; background:var(--well); }
+  .mkSbTeams em{ font-style:normal; font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--ink2); }
+  .mkSbNums{ position:relative; width:30px; display:flex; flex-direction:column; background:var(--win); border-radius:var(--rS,4px); overflow:hidden; }
+  .mkSbNums b{ flex:1; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:var(--ink); }
+  .mkSbNums s{ flex:none; display:block; height:2px; margin:0 4px; background:var(--rimLo); }
+  .mkSbNums::before, .mkSbNums::after{ content:''; position:absolute; left:0; width:4px; height:24px; box-shadow:inset 0 0 0 1px rgb(233 240 255 / .34); }
+  .mkSbNums::before{ top:0; background:var(--kitG); } .mkSbNums::after{ bottom:0; background:var(--kitR); }
+  .mkTab:disabled{ opacity:.45; cursor:default; }
   .mkCrest{ display:flex; gap:16px; align-items:flex-start; }
   .mkCrest canvas{ flex:none; width:80px; height:90px; image-rendering:pixelated; margin-top:4px; }
   .mkCrCtl{ flex:1; min-width:0; }
@@ -1062,6 +1084,8 @@
   .bpFoot{ display:none; flex:none; gap:8px; justify-content:center; }
   .bpFoot.on{ display:flex; }
   .bpFoot .mrContinue{ margin-top:0; padding:11px 0; max-width:520px; }
+  #bpBody[data-pages="B:review/"] > .fitPager{ display:none; }   /* (v242: the season review turns its pages with NEXT and the arrow by it) */
+  .bpFoot .rvBack{ flex:none; width:40px; min-height:40px; padding:0; margin-right:6px; font-size:14px; }
   #bldgPanel .bpBody b{ color:var(--acc); }
   /* ===== TRAP LAB ===== */
   .labUI{display:none;}
@@ -1907,9 +1931,21 @@
     <div class="smPanel" id="newPanel" data-pages="newPanel">
       <div class="smCenter">
         <h3>NEW CAREER</h3>
-        <div style="color:#9bb88a;font-size:12px;max-width:380px;line-height:1.6;margin-bottom:16px">You are the manager: pick a slot for your new career.</div>
         <div id="newSlotList"></div>
         <button class="smBtn smBack" data-act="back"><span class="mk">◀</span>BACK</button>
+      </div>
+    </div>
+    <div class="smPanel" id="labsPanel">
+      <div class="smCenter">
+        <h3>LABS</h3>
+        <div class="smItems smLabs">
+          <button class="smBtn" data-act="traplab"><span class="mk">▶</span>TRAP LAB</button>
+          <button class="smBtn" data-act="dribblelab"><span class="mk">▶</span>DRIBBLE LAB</button>
+          <button class="smBtn" data-act="passlab"><span class="mk">▶</span>PASS LAB</button>
+          <button class="smBtn" data-act="shootlab"><span class="mk">▶</span>SHOOTING LAB</button>
+          <button class="smBtn" data-act="crosslab"><span class="mk">▶</span>CROSSING LAB</button>
+        </div>
+        <button class="smBtn smBack" data-act="labsback"><span class="mk">◀</span>BACK</button>
       </div>
     </div>
     <div class="smPanel" id="hubPanel" data-pages="hubPanel">
@@ -1961,7 +1997,7 @@
         <button class="chMenuBtn cpPapers" data-hub="papers" style="display:none" aria-label="the papers"><svg viewBox="0 0 24 24"><path d="M4 5 H17 V19 H6 Q4 19 4 17 Z"/><path d="M17 9 H20 V17 Q20 19 18 19 H17"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="15" x2="12" y2="15"/></svg>PAPERS<span class="cpBadge" id="cpPapersN"></span></button>
         <button class="chMenuBtn cpDeco" data-hub="decor"><svg viewBox="0 0 24 24"><path d="M12 3 L6 11 H9 L5 17 H19 L15 11 H18 Z"/><line x1="12" y1="17" x2="12" y2="21"/></svg>DECORATE<span class="bPrice"></span></button>
         <button class="chMenuBtn cpMove" data-hub="move"><svg viewBox="0 0 24 24"><path d="M12 3 V21 M3 12 H21"/><path d="M9 6 L12 3 L15 6 M9 18 L12 21 L15 18 M6 9 L3 12 L6 15 M18 9 L21 12 L18 15"/></svg>MOVE</button></div>
-      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet" id="chNetBtn" data-hub="ledger" title="The week’s money"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></span></div>
+      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet" id="chNetBtn"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></span></div>
         <button class="chMenuBtn" data-hub="menu">☰ MENU</button></div>
       <div class="cpPlace" id="cpPlace"></div>
       <div class="cpDay" id="cpDay" aria-hidden="true"><canvas id="cpDayCv"></canvas><div class="cpDayT" id="cpDayT"></div></div>
@@ -2071,9 +2107,11 @@
 <div id="settingsOverlay" class="pauseOv">
   <div class="pauseCard settingsCard">
     <div class="pauseTitle">SETTINGS</div>
-    <div class="pScroll setMid" data-pages="settings">
+    <div class="pScroll setMid setScroll">
       <div class="setRows" id="setRows"></div>
       <button class="pauseBtn layoutEntry" data-setlayout="1">BUTTON LAYOUT ▶</button>
+      <button class="pauseBtn setMenuOnly" data-setskills="1">SKILL MOVES ▶</button>
+      <button class="pauseBtn setMenuOnly" data-setlabs="1">LABS ▶</button>
       <button class="pauseBtn devOnly" data-setdev="1">ADVANCED · DEV ▶</button>
       <div id="settingsDials"></div>
       <div class="setCredits">The career's campus is drawn from tilesets by TerribleJared, with VeonTrainer and Ekat99, and HimuraKenshin2010's shop items. The font is Roboto Condensed by the Roboto Project Authors (SIL Open Font License); its symbols are DotGothic16's, by Fontworks (SIL Open Font License).</div>
@@ -2222,7 +2260,7 @@
   const PLSCR={};                                      // (v171) how far down each list of players was scrolled -- kept as it's redrawn (a man picked, one dropped on the pitch)
   let fitGoTo=null;                                    // a part to bring up: the page it's on is shown (a category just opened)
   const fitPH=()=>innerHeight<=360?32:40;              // the pager's height (smaller on a short phone)
-  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; plFootAll(root); }
+  function fitAll(root){ for(const b of (root||document).querySelectorAll('[data-pages]')) fitBox(b); for(const b of (root||document).querySelectorAll('.tbBench')) fitBench(b); fitGoTo=null; plFootAll(root); rvFoot(); }
   // A SCROLLING LIST'S FOOT (v171): how many rows are still under the bottom of it -- "6 MORE" on a fade -- gone at the
   // end; kept up as it scrolls (once a pane, the listener stays with it)
   function plFootAll(root){ for(const b of (root||document).querySelectorAll('.plPane')) plFoot(b); }
@@ -2257,7 +2295,8 @@
     for(const x of box.querySelectorAll('.fitHide')) x.classList.remove('fitHide');
     box.classList.remove('fitPaged'); box.style.height=''; box.scrollTop=0;
     const goto=fitGoTo&&box.querySelector(fitGoTo); if(goto) fitGoTo=null;
-    if(!box.getClientRects().length||box.scrollHeight<=box.clientHeight+1) return;   // (not showing, or it fits)
+    if(!box.getClientRects().length) return;                                        // (not showing)
+    if(box.scrollHeight<=box.clientHeight+1){ const f=FITPG[box.dataset.pages]; if(f) f.n=1; return; }   // (it fits: v242, one page, kept for the review's NEXT)
     const padT=parseFloat(getComputedStyle(box).paddingTop)||0, R0=box.getBoundingClientRect();
     const room=box.clientHeight-padT-fitPH()-4, keep=el=>el.matches('thead,.fitKeep');   // (the pager sits over the box's foot, padding and all)
     const open=el=>{ if(keep(el)||!el.children.length||el.matches('button,a,input,select,textarea,label,img,canvas,svg,tr,.fitWhole')) return false;
@@ -2290,8 +2329,8 @@
       if(e+1<lines.length){ if(e>s0&&head(e)) e--;                          // (a heading goes over with what it heads,
         else if(e-1>s0&&head(e-1)&&!head(e+1)) e-=2; }                      //  and takes at least two of its lines with it)
       pages.push([s0,e]); s0=e+1; }
-    if(pages.length<2) return;
-    const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0});
+    if(pages.length<2){ const f=FITPG[box.dataset.pages]; if(f) f.n=1; return; }
+    const st=FITPG[box.dataset.pages]||(FITPG[box.dataset.pages]={p:0}); st.n=pages.length;   // (v242: how many, for the review's NEXT)
     if(goto){ const li=lines.findIndex(l=>l.els.some(x=>x===goto||x.contains(goto)||goto.contains(x))), pi=pages.findIndex(([a,z])=>li>=a&&li<=z); if(pi>=0) st.p=pi; }
     st.p=clamp(st.p,0,pages.length-1);
     const [a,z]=pages[st.p];
@@ -2600,12 +2639,12 @@
   function setDev(v){ DEV=!!v; try{ localStorage.setItem('ftc_dev',DEV?'1':'0'); }catch(e){} document.body.classList.toggle('dev',DEV); }
   document.body.classList.toggle('dev',DEV);
   // ===== A PLAYER'S SETTINGS: the match length, how good exhibition opponents are, the look -- kept in this browser
-  const PREFS={halfMin:4, oppShift:0, art:true, side:'left', diff:'champion', pv:1, dk:1, cornerBox:4, cornerBack:2, ht:'wait', tips:1, tipsSeen:'', seenCtl:0};   // (v142: cornerBox, cornerBack -- your corners' set-up; v148: ht -- a break at half-time or PLAY ON; tips, tipsSeen -- a word on the controls the first time each comes up; seenCtl -- the controls card seen before a first career match)
+  const PREFS={halfMin:4, oppShift:3, art:true, side:'left', diff:'champion', pv:1, dk:1, cornerBox:4, cornerBack:2, ht:'wait', tips:1, tipsSeen:'', seenCtl:0};   // (v142: cornerBox, cornerBack -- your corners' set-up; v148: ht -- a break at half-time or PLAY ON; tips, tipsSeen -- a word on the controls the first time each comes up; seenCtl -- the controls card seen before a first career match)
   // (v136: 4 minutes a half unless you pick another -- it was 3. Settings kept from before kept the old 3 along with
   // everything else, picked or not, so a kept 3 from then is the new 4; pv marks settings kept since)
   // (v228: CHAMPION the one level for now -- no choice in SETTINGS or on the exhibition screen -- so a level kept from when
   // there was one goes; dk marks settings kept since)
-  try{ const sp=JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}; if(!sp.pv&&+sp.halfMin===3) delete sp.halfMin; if(sp.dk!==1) delete sp.diff; Object.assign(PREFS, sp, {pv:1, dk:1}); }catch(e){}
+  try{ const sp=JSON.parse(localStorage.getItem('ftc_prefs')||'{}')||{}; if(!sp.pv&&+sp.halfMin===3) delete sp.halfMin; if(sp.dk!==1) delete sp.diff; if(sp.ev!==1) sp.oppShift=3; Object.assign(PREFS, sp, {pv:1, dk:1, ev:1, art:true, text:'n'}); }catch(e){}   // (v242: no choice of these any more -- the exhibition's opponents ELITE, kept from before or not (ev marks settings kept since), pixel art, the career's text as it is)
   function savePrefs(){ try{ localStorage.setItem('ftc_prefs',JSON.stringify(PREFS)); }catch(e){} }
   // DIFFICULTY (v89): how well the computer plays -- RELAXED, NORMAL, PRO, STAR (the computer at full strength, as it always
   // played) and CHAMPION (a notch past that). (v228: CHAMPION's the level, with no choice for now; the others stay here.) Its side only: the other side to yours (R); your own team-mates play as they
@@ -9597,7 +9636,7 @@
   function cornerCounts(Rs,n){ const mine=Rs.team==='G';
     const back=clamp(Math.round(mine?+PREFS.cornerBack||0:2),0,Math.min(CORNER_MAX.back,n)), box=clamp(Math.round(mine?+PREFS.cornerBox||0:4),0,Math.min(CORNER_MAX.box,n-back));
     return {box, back, mid:Math.max(0,n-box-back)}; }
-  function cornerSetOn(){ const Rs=restartInfo; return !!Rs&&restartT>0&&Rs.type==='corner'&&Rs.team==='G'&&canSwitch()&&!window.__aiAll; }
+  function cornerSetOn(){ const Rs=restartInfo; return !!Rs&&restartT>0&&Rs.type==='corner'&&Rs.team==='G'&&canSwitch()&&!window.__aiAll&&!QS.open; }   // (v242: not while the subs' drop-down is open; back when it shuts)
   function cornerSetAdj(kind,d){ const Rs=restartInfo; if(!cornerSetOn()) return;
     const n=players.filter(q=>q.team==='G'&&q!==Rs.taker&&!q.benched).length, c=cornerCounts(Rs,n);
     if(kind==='box') PREFS.cornerBox=clamp(c.box+d,0,Math.min(CORNER_MAX.box,n-c.back)); else PREFS.cornerBack=clamp(c.back+d,0,Math.min(CORNER_MAX.back,n-c.box));
@@ -17053,7 +17092,17 @@
         +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">'+(wait?'…':'▸')+'</span>'
         +'<span class="qsIn"><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span></span></button>'; };
     const h=SUBS.G.q.map(s=>row(s,true)).join('')+sug.map(s=>row(s,false)).join('');
-    document.getElementById('qsDrop').innerHTML=(h||'<div class="qsNone">No one\'s tired yet: any change from ALL SUBS</div>')+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'; }   // (v148: the tired ones are a suggestion; anyone can come off)
+    document.getElementById('qsDrop').innerHTML=h?h+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'
+      :'<div class="qsNone">No one\'s tired yet</div><button class="qsAll qsForce" data-qs="force"'+(qsForce()?'':' disabled')+'>FORCE SUB ▸</button>'; }   // (v242: nobody tired -- FORCE SUB)
+  // FORCE SUB (v242): with nobody tired enough to be offered, the most tired man on (his ceiling, then his legs now) off for
+  // the man on the bench who'd do his job best -- at the next break in play, as any sub
+  function qsForce(){ if(subsLeft()<=SUBS.G.q.length) return null; const usedIn=new Set(SUBS.G.q.map(x=>x.inn)), usedOut=new Set(SUBS.G.q.map(x=>x.out));
+    const bench=mtBench('G').filter(si=>{ const e=SQUAD.G[si]; return e&&e.role!=='GK'&&!usedIn.has(si); }); if(!bench.length) return null;
+    const men=players.filter(p=>p.team==='G'&&p.squadIdx!=null&&!usedOut.has(p.squadIdx)&&qsSlot(p.squadIdx)).sort((a,b)=>((a.staminaCap??1)-(b.staminaCap??1))||((a.stamina??1)-(b.stamina??1)));
+    for(const p of men){ const sl=qsSlot(p.squadIdx), eo=SQUAD.G[p.squadIdx]; if(!sl||!eo) continue; let best=null, bv=-1;
+      for(const si of bench){ const e=SQUAD.G[si], v=mtRating(e,sl.role,spotFit(sl))*qsLegs(e.cond??1); if(v>bv){ bv=v; best=si; } }
+      if(best!=null){ const ei=SQUAD.G[best]; return {out:p.squadIdx, inn:best, cap:p.staminaCap??1, rOut:mtRating(eo,sl.role,spotFit(sl)), rIn:mtRating(ei,sl.role,spotFit(sl)), pos:sl.pos, tired:false, planned:false}; } }
+    return null; }
   // every frame of a match (from the HUD): show it or not, the man coming off once he's played it, and drawn again only
   // when something on it has changed
   function qsTick(dt){
@@ -17069,6 +17118,7 @@
     const b=e.target.closest('#qsBtn,[data-qs]'); if(!b) return; b.blur();
     if(b.id==='qsBtn') QS.open=!QS.open;                               // (only ever opened, and shut, by a press)
     else if(b.dataset.qs==='all'){ QS.open=false; closePause(); openMatchTac(); }
+    else if(b.dataset.qs==='force'){ const s=qsForce(); if(s) qsMake(s); }   // (v242)
     else { const [out,inn]=b.dataset.qs.split(':').map(Number), w=SUBS.G.q.findIndex(x=>x.out===out&&x.inn===inn);
       if(w>=0) SUBS.G.q.splice(w,1);                                    // (one waiting for the break: tap it again, and he stays on)
       else { const s=qsSuggest().find(x=>x.out===out&&x.inn===inn); if(s) qsMake(s); } }
@@ -17179,14 +17229,13 @@
   function closePause(){ pauseOpen=false; document.getElementById('pauseMenu').classList.remove('on'); }
   let _dialsHome=null, _dialsAnchor=null;
   // SETTINGS: what a player sets, one row each (see PREFS); a developer can open the feel dials under it (see DEV)
+  // (v242: one list that scrolls, no pages; GRAPHICS, EXHIBITION OPPONENTS and TEXT SIZE gone -- pixel art, the exhibition's
+  // opponents at ELITE and the career's text as it is, always; SKILL MOVES and LABS open from here, but not in a match)
   const SET_ROWS=[
     ['halfMin','MATCH LENGTH',[[3,'3 MIN'],[4,'4 MIN'],[5,'5 MIN']],'a half; the clock still reads 1–90'],
-    ['oppShift','EXHIBITION OPPONENTS',[[-3,'PUB'],[-1.5,'EASY'],[0,'NORMAL'],[1.5,'HARD'],[3,'ELITE']],'their stats, against the clubs as they are (career matches are as they are)'],
-    ['art','GRAPHICS',[[true,'PIXEL ART'],[false,'SIMPLE']],'pixel players, pitch and ball, or plain shapes'],
     ['side','CAMPUS MENU',[['left','LEFT'],['right','RIGHT']],'the side of the career’s campus its buildings are listed down'],
     ['ht','HALF-TIME',[['wait','A BREAK'],['on','PLAY ON']],'a break with the score and the numbers so far, for subs and tactics -- or straight on'],
-    ['tips','TIPS',[[1,'ON'],[0,'OFF']],'a word on the controls the first time each comes up in a match (on again: from the start)'],
-    ['text','TEXT SIZE',[['n','NORMAL'],['l','LARGE']],'the career’s screens: larger text, and larger buttons with it (v158)']];
+    ['tips','TIPS',[[1,'ON'],[0,'OFF']],'a word on the controls the first time each comes up in a match (on again: from the start)']];
   function renderSetRows(){ const el=document.getElementById('setRows'); if(!el) return;
     el.innerHTML=SET_ROWS.map(([k,lbl,opts,hint])=>'<div class="setRow"><div class="setLbl">'+lbl+'<i>'+hint+'</i></div><div class="setOpts">'
       +opts.map(([v,t])=>'<button class="setOpt'+(PREFS[k]===v?' on':'')+'" data-pref="'+k+'" data-val="'+v+'">'+t+'</button>').join('')+'</div></div>').join(''); }
@@ -17208,7 +17257,8 @@
   const SK_SPEED=0.8, SK_DEPTH=0.55, SK_MAN={team:'G',lookKey:'skill-clip-man'}, SK_DEF={team:'R',lookKey:'skill-clip-def'}, SK_ANIMS=['idle','run','shoot','pass','slide'];
   let skRaf=0;
   function openSkills(){ skillsOpen=true; renderSkills(); document.getElementById('skillsOverlay').classList.add('on'); skAnimate(); }
-  function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
+  let skFromSet=false;   // (v242: opened from SETTINGS: back to it)
+  function closeSkills(){ skillsOpen=false; cancelAnimationFrame(skRaf); document.getElementById('skillsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); else if(skFromSet){ skFromSet=false; openSettings(); } }
   document.getElementById('skillsOverlay').onclick=e=>{ if(e.target.closest('[data-skclose]')||e.target===e.currentTarget) closeSkills(); };   // (v160: or a tap outside the card)
   function renderSkills(){
     document.getElementById('skHint').innerHTML='Start on <b>SKILL</b> and draw; ahead is the way he\'s going, <b>→</b> here.<br>'
@@ -17275,7 +17325,8 @@
     if(SPRITE.drawTo(x,q.p,SK_ANIMS[q.an]||'idle',q.fr,q.dir,sx,sy,k)) return;
     const h=26*k, w=9*k; x.fillStyle=q.p.team==='G'?'#84dc34':'#d43434'; x.fillRect(sx-w/2,sy-h,w,h);   // (the plain man, with the sprites off)
     x.fillStyle='#f2d0b0'; x.beginPath(); x.arc(sx,sy-h-4*k,5*k,0,Math.PI*2); x.fill(); }
-  function openSettings(){ renderSetRows(); showDevDials(false); settingsOpen=true; document.getElementById('settingsOverlay').classList.add('on'); }
+  function openSettings(){ renderSetRows(); showDevDials(false); settingsOpen=true; const ov=document.getElementById('settingsOverlay');
+    ov.classList.toggle('fromMatch',SCREEN==='match'); const sc=ov.querySelector('.setScroll'); if(sc) sc.scrollTop=0; ov.classList.add('on'); }
   function closeSettings(){ showDevDials(false); settingsOpen=false; document.getElementById('settingsOverlay').classList.remove('on'); if(SCREEN==='match') openPause(); }
   document.getElementById('pauseMenu').onclick=(e)=>{ const b=e.target.closest('[data-pause]'); if(!b)return; const a=b.dataset.pause;
     if(a==='tactics'){ closePause(); openMatchTac(); }
@@ -17291,6 +17342,8 @@
     if(pf) setPref(pf.dataset.pref,pf.dataset.val);
     else if(e.target.closest('[data-setdev]')) showDevDials(!document.getElementById('settingsDials').classList.contains('on'));
     else if(e.target.closest('[data-setclose]')) closeSettings();
+    else if(e.target.closest('[data-setskills]')){ document.getElementById('settingsOverlay').classList.remove('on'); settingsOpen=false; skFromSet=true; openSkills(); }   // (v242: and back here after)
+    else if(e.target.closest('[data-setlabs]')){ document.getElementById('settingsOverlay').classList.remove('on'); settingsOpen=false; showSub('labsPanel'); }   // (v242: the labs, a page of their own)
     else if(e.target.closest('[data-setlayout]')){ document.getElementById('settingsOverlay').classList.remove('on'); openLayout(); } };   // (still in Settings: the match stays paused)
   // ===== BUTTON LAYOUT (touch screens): where PASS, SHOOT and CROSS sit, and how big -- yours to arrange =====
   // Each is kept as its centre, a share of the way across and down the game screen (so it lands in the same place on
@@ -18876,7 +18929,7 @@
   function mgUpOn(id){ const el=document.getElementById(id); return !!el&&(id==='matchReport'?getComputedStyle(el).display!=='none':el.classList.contains('on')); }
   function mgUpElse(id){ return ['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(k=>k!==id&&mgUpOn(k)); }
   // ...and after a game you played each says where it is in the run (MGUI.seq: what's coming, set at full time)
-  function mgSeqTag(k){ const S=MGUI.seq, i=S?S.indexOf(k):-1; return i<0?'':'<span class="seqTag"> · '+(i+1)+' OF '+S.length+'</span>'; }
+  function mgSeqTag(k){ return ''; }   // (v148-v241: · N OF 5 after each card's title, the queue's place; v242: gone)
   // would the papers open by themselves after this game (a matchday's pile, not yet opened)?
   function mgPileDue(d){ return !!(d.pile&&(d.pile.day||'mon')!=='mon'&&!d.pile.opened&&pileLeft(d).length); }
   // THE PRESS ROOM (v106): a little scene beside the questions, as big as the club's league. League 2's a back room --
@@ -20956,41 +21009,42 @@
     const pg=k=>{ el.querySelectorAll('.mrPage').forEach(x=>{ x.style.display=x.dataset.mrp===String(k)?'':'none'; }); fitNow(); };   // (v147: measured as it shows -- a page shown by its style wasn't, and on a short screen the table ran off its foot)
     document.getElementById('mrNextBtn').onclick=()=>pg(1);
     document.getElementById('mrContinueBtn').onclick=()=>{ el.style.display='none'; renderHub(); }; }
-  // THE MONEY, back at the club after a match you played (v106): where the bank stood before it, then -- a line at a time,
-  // each number counting up -- what the game brought in (the gate, the TV, the week's partners, sponsors and boards; a
-  // cup's prize), the wages out, and where it stands now; and the fans the result brought. After the press conference.
+  // BACK AT THE CLUB AFTER A MATCH YOU PLAYED (v242), after the press conference: the STADIUM SUMMARY after a home game --
+  // who came, then what each part of the ground took, its fans and its price, the cheapest seats first and the VIP seats
+  // last, then the gate in all -- and then the FUND SUMMARY: the week's money from where the bank stood as it began, what
+  // came in (the gate, the TV, the partners, the sponsors, the shirts...), the wages out in red, the week's net and where
+  // it stands now. Each starts with its title alone; NEXT brings up the next line, and with the last one up it reads
+  // CONTINUE. A long one scrolls. (v106-v241: THE GATE and THE MONEY, every line at once.)
   function moneyShow(d){ const M=MGUI.money, el=document.getElementById('moneyModal'); if(!M||!el) return;
     if(el.classList.contains('on')||mgUpElse('moneyModal')||(d.press&&d.press.qs&&d.press.qs.length)) return;   // (v148: one at a time, after the press)
-    MGUI.money=null; const card=el.querySelector('.mnCard'), parts=[];
-    if(M.crowd&&!M.gateDone){   // THE GATE (v186): who came, stand by stand, and what they paid -- then the money
-      const G=M.crowd, pc=(a,c)=>c?Math.round(a/c*100):0;
-      card.innerHTML='<div class="mnTitle">THE GATE</div><div class="mnSub">'+mgEsc(M.label)+mgSeqTag('gate')+'</div>'
-        +'<div class="gtBig"><b>'+G.att.toLocaleString()+'</b> of '+G.cap.toLocaleString()+' · '+(G.att>=G.cap?'FULL':pc(G.att,G.cap)+'% full')+(G.derby?' · THE DERBY':'')+'</div>'
-        +'<div class="gtTbl">'+G.seats.map(x=>'<div class="gtRow" data-seat="'+x.id+'"><span>'+mgEsc(x.n)+'</span><i>'+x.att.toLocaleString()+' / '+x.cap.toLocaleString()+'</i><em style="color:'+(pc(x.att,x.cap)>=95?'var(--good)':pc(x.att,x.cap)<50?'var(--warn)':'var(--ink2)')+'">'+pc(x.att,x.cap)+'%</em><i>$'+x.price+'</i><b>'+money(Math.round(x.att*x.price))+'</b></div>').join('')+'</div>'
-        +'<div class="mnRow tot on"><span>Taken at the gate</span><b style="color:var(--good)">'+money(G.gate)+'</b></div>'
-        +'<button class="mrContinue mnGo" data-mn="go">CONTINUE ▶</button>';
-      el.classList.add('on');
-      card.querySelector('[data-mn="go"]').onclick=()=>{ M.gateDone=true; MGUI.money=M; el.classList.remove('on'); moneyShow(d); };
-      return; }
-    if(M.gate) parts.push((M.home?'the gate ':'your share of the gate ')+money(M.gate)); if(M.tv) parts.push('the TV '+money(M.tv)); if(M.pool) parts.push('partners and sponsors '+money(M.pool)); if(M.prize) parts.push('the prize '+money(M.prize));
-    const row=(k,lbl,cls)=>'<div class="mnRow '+cls+'" data-mn="'+k+'"><span>'+lbl+'</span><b data-v="0">$0</b></div>';
-    card.innerHTML='<div class="mnTitle">THE MONEY</div><div class="mnSub">'+mgEsc(M.label)+mgSeqTag('money')+'</div>'
-      +row('from','Before the game','')+row('inc','+ From the game','up')+(parts.length?'<div class="mnParts" data-mn="parts">'+parts.join(' · ')+'</div>':'')
-      +(M.wages?row('wages','− Wages','dn'):'')+'<div class="mnLine" data-mn="line"></div>'+row('to','Now in the bank','tot')
-      +(M.fans?'<div class="mnFans" data-mn="fans">'+(M.fans>0?'+':'')+M.fans.toLocaleString()+' fans · '+Math.round(M.fansNow).toLocaleString()+' now</div>':'')
-      +'<button class="mrContinue mnGo" data-mn="go">CONTINUE ▶</button>';
+    MGUI.money=null; const card=el.querySelector('.mnCard'), lines=[], fmt=v=>(v<0?'−':'+')+money(Math.abs(v));
+    const row=(cls,l,v,sub)=>'<div class="mnRow '+cls+'"><span>'+l+(sub?'<i>'+sub+'</i>':'')+'</span><b>'+v+'</b></div>';
+    let title, done;
+    if(M.crowd&&!M.gateDone){ const G=M.crowd, pc=(a,c)=>c?Math.round(a/c*100):0; title='STADIUM SUMMARY';
+      lines.push(row('big','Fans in the ground',G.att.toLocaleString(),'of '+G.cap.toLocaleString()+' · '+(G.att>=G.cap?'full':pc(G.att,G.cap)+'% full')+(G.derby?' · the derby':'')));
+      for(const x of G.seats.slice().sort((a,b)=>a.price-b.price)) lines.push('<div class="mnRow" data-seat="'+x.id+'"><span>'+mgEsc(x.n)+'<i>'+x.att.toLocaleString()+' fans × $'+x.price+'</i></span><b>'+money(x.att*x.price)+'</b></div>');
+      lines.push(row('tot up','Taken at the gate',money(G.gate)));
+      done=()=>{ M.gateDone=true; MGUI.money=M; el.classList.remove('on'); moneyShow(d); }; }
+    else { title='FUND SUMMARY';
+      // the week the game was in: this one if its money's in it, else the one before with this one's since (the club is on
+      // to a Monday by now, its shirt sales in); no books for either, the game's own money
+      const cur=d.wl&&d.wl.w===(d.weeks||0)?d.wl:null, prev=d.wlPrev||null, game=W=>!!(W&&W.L&&['gate','tv','partners','wages'].some(k=>W.L[k]));
+      const now=Math.round(d.budget??M.to); let b0=M.from, L={gate:M.gate||0, tv:M.tv||0, partners:M.pool||0, prizes:M.prize||0, wages:-(M.wages||0)};
+      if(game(cur)){ b0=Math.round(cur.b0); L=Object.assign({},cur.L); }
+      else if(game(prev)){ b0=Math.round(prev.b0); L={}; for(const W of [prev,cur]) if(W) for(const k in W.L) L[k]=(L[k]||0)+W.L[k]; }
+      const known=Object.values(L).reduce((a,v)=>a+v,0), rest=Math.round(now-b0-known); if(rest) L.other=(L.other||0)+rest;   // (it adds up to the bank as it is)
+      lines.push(row('','At the start of the week',money(b0)));
+      for(const k of ['gate','tv','partners','sponsors','shirts','league','prizes','wages','transfers','building','scouting','events','other']) if(Math.round(L[k]||0)) lines.push(row(L[k]>=0?'up':'dn',LDG_NAME[k],fmt(Math.round(L[k]))));
+      const net=now-b0; lines.push(row('net '+(net>=0?'up':'dn'),'This week',fmt(net)));
+      lines.push(row('tot','Now in the bank',money(now)));
+      if(M.fans) lines.push('<div class="mnFans">'+(M.fans>0?'+':'')+M.fans.toLocaleString()+' fans · '+Math.round(M.fansNow).toLocaleString()+' now</div>');
+      done=()=>{ el.classList.remove('on'); renderHub(); }; }
+    card.innerHTML='<div class="mnTitle">'+title+'</div><div class="mnList">'+lines.join('')+'</div><button class="mrContinue mnGo" data-mn="go">NEXT ▶</button>';
     el.classList.add('on');
-    const still=matchMedia('(prefers-reduced-motion: reduce)').matches, seq=[['from',M.from,0],['inc',M.inc,0.7],['parts',null,1.0],['wages',-M.wages,1.6],['line',null,2.3],['to',M.to,2.4],['fans',null,3.1]];
-    const show=(k,v)=>{ const r=card.querySelector('[data-mn="'+k+'"]'); if(!r) return null; r.classList.add('on'); return r.querySelector('b'); };
-    const fmt=v=>(v<0?'−':'')+money(Math.abs(v));
-    let t0=performance.now(); const set=new Set();
-    const tick=now=>{ if(!el.classList.contains('on')) return; const t=still?99:(now-t0)/1000; let more=false;
-      for(const [k,v,at] of seq){ if(t<at){ more=true; continue; } const b=show(k); if(b==null||v==null) continue;
-        const f=Math.min(1,(t-at)/0.6), e=1-Math.pow(1-f,3), from=k==='to'?M.from:0; b.textContent=fmt(Math.round(from+(v-from)*e)); if(f<1) more=true;
-        if(k==='to') b.style.color=v>=0?'var(--good)':'var(--bad)'; }
-      if(more) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
-    card.querySelector('[data-mn="go"]').onclick=()=>{ el.classList.remove('on'); renderHub(); }; }
+    const items=[...card.querySelectorAll('.mnList > *')], go=card.querySelector('[data-mn="go"]'); let shown=0;
+    go.onclick=()=>{ if(shown>=items.length){ done(); return; }
+      const it=items[shown++]; it.classList.add('on'); try{ it.scrollIntoView({block:'nearest'}); }catch(e){}
+      go.innerHTML=shown>=items.length?'CONTINUE ▶':'NEXT ▶'; }; }
 
   // (v151) a figure typed into a bid or a price: on Enter, or when the field's left -- digits only ($, commas, k and m
   // allowed: '2.5m', '750k')
@@ -21010,7 +21064,7 @@
   // ===== END MANAGER CAREER ===================================================================
 
   function clearInputs(){ try{ for(const k in keys)keys[k]=false; }catch(e){} try{ trapDrag=null; aimLate=null; aimShow=null; }catch(e){} try{ trapHeld=false;kickHeld=false;crossHeld=false;crossPend=null;crossLow=false;clearHeld=false;clearArm=0;clearCharge=0;clearFeet=false;swipe=null;swipeShot=null;passPend=null;passDown=null;passLoft=false;actQ=null; }catch(e){} try{ if(controlled)controlled.sprint=false; }catch(e){} }
-  function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
+  function hideSubs(){ ['loadPanel','newPanel','hubPanel','exhPanel','labsPanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
   function showSub(id){ hideSubs(); document.getElementById(id).classList.add('show'); }
   // OLD CAREERS, BROUGHT UP TO DATE (v154). A career saved before the season ran in weeks (v3 and older) was cleared
   // the moment LOAD or NEW GAME opened: one update could take a player's longest career. Now it's brought up to date
@@ -21787,7 +21841,14 @@
     for(const t of [4,3,2,1]){ const mv=R.moves[t]; h+=finRow(MG_LEAGUE[t]+' champions',mgEsc(mgNameOf(d,mv.table[0])),false,'var(--ink)');
       if(mv.up.length) h+=finRow(' up',mv.up.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--good)');
       if(mv.down.length) h+=finRow(' down',mv.down.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--bad)'); }
-    return h+'<button class="mrContinue bpPin" data-mg="newseason">START SEASON '+(R.season+1)+' ▶</button>'; }
+    return h; }   // (v242: its button is NEXT till the last page -- see rvFoot)
+  // THE SEASON REVIEW'S FOOT (v242): NEXT till the last page, then START SEASON; once past the first, a small arrow back
+  // left of it. The pages' own arrows aren't shown.
+  function rvFoot(){ const foot=document.getElementById('bpFoot'), d=CAREER&&CAREER.data; if(!foot||curBldg!=='review'||!d||!d.review) return;
+    const st=FITPG['B:review/']||{p:0,n:1}, last=st.p>=(st.n||1)-1;
+    const want=(st.p>0?'<button class="mgAdj rvBack" data-mg="rvback" aria-label="the page before">◀</button>':'')
+      +(last?'<button class="mrContinue" data-mg="newseason">START SEASON '+(d.review.season+1)+' ▶</button>':'<button class="mrContinue" data-mg="rvnext">NEXT ▶</button>');
+    if(foot.dataset.rv!==want||!foot.children.length){ foot.innerHTML=want; foot.dataset.rv=want; } foot.classList.add('on'); }
 
   // ---- the town (until it can be walked round: its buildings in a row) ----
   function renderHub(){ const d=CAREER&&CAREER.data; if(!d) return; const f=computeFinance(d);
@@ -22069,7 +22130,8 @@
     body.innerHTML=renderBuildingBody(id); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes);
     if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
-    foot.classList.toggle('on',foot.children.length>0);
+    foot.classList.toggle('on',foot.children.length>0); foot.dataset.rv='';
+    if(id==='review'){ fitNow(); rvFoot(); }   // (v242: the review's NEXT, from its pages)
     paintBpMsg(); }
   let _bpMsgShown='', _bpMsgT=null;
   function paintBpMsg(){ const el=document.getElementById('bpMsg'); if(!el) return; const m=MGUI.msg||'';
@@ -22108,6 +22170,7 @@
       case 'continue': if(d.phase==='playoffs') mgPlayoffsOut(d); mgSave(d); renderHub(); return;
       case 'review': openBuilding('review'); return;
       case 'papers': pileShow(d,true); return;
+      case 'rvnext': case 'rvback': { const st=FITPG['B:review/']||(FITPG['B:review/']={p:0}); st.p=Math.max(0,st.p+(a==='rvnext'?1:-1)); fitNow(); rvFoot(); return; }   // (v242)
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+lgThe(d.tier)+': pre-season, and the window is open.','var(--good)'); return;
       case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
       case 'talkcard': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(talkedThisWeek(d,p)){ say(TALK_AGAIN); break; }   // (v152: A WORD WITH HIM, from his card)
@@ -22242,7 +22305,6 @@
     else if(h.dataset.hub==='fwgo'){ const d=CAREER&&CAREER.data; if(d){ const g=h.dataset.go; if(g==='club') curTab.club='Squad'; openBuilding(g); } }
     else if(h.dataset.hub==='fwplay'){ const b=document.querySelector('#chBottom .chPlay'); if(b) b.classList.add('flash'), setTimeout(()=>b.classList.remove('flash'),900); }
     else if(h.dataset.hub==='warnall'){ MGUI.warnAll=!MGUI.warnAll; renderHub(); }   // (v153: every warning, or the first three)
-    else if(h.dataset.hub==='ledger'){ const d=CAREER&&CAREER.data; if(d&&!mgUpElse('ldgModal')) ldgShow(d); }
     else if(h.dataset.hub==='move'){ Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
   });
 
@@ -22365,7 +22427,7 @@
   function mmReady(){ return !!(MM.name.trim()&&MM.club.trim()&&/^[A-Z]{3}$/.test(MM.code)); }
   function openMgrMaker(key,label){ const c=mgPick(MG_PALETTE.filter(p=>p.c!=='#f4f4f4')), sec=kitApart(c.c,'#f4f4f4')>=0.55?'#f4f4f4':'#161616';
     const R=n=>Math.floor(Math.random()*n);
-    Object.assign(MM,{key,label,name:'',club:'',code:'',codeSet:false,pri:c.c,sec,crestCols:false,tab:'club',part:0,
+    Object.assign(MM,{key,label,name:'',club:'',code:'',codeSet:false,pri:c.c,sec,crestCols:false,tab:'club',seen:0,part:0,
       crest:{s:R(CREST_SHAPES.length),p:R(CREST_PATTERNS.length),e:1+R(CREST_EMBLEMS.length-1),c:[c.c,sec,'#f4f4f4'],l:'A'}});
     hideStartMenu(); renderMgrMaker(); document.getElementById('mgrMaker').classList.add('on');
     if(!isTouch) document.getElementById('mgName').focus(); }   // (on a phone the keyboard waits for a tap)
@@ -22373,7 +22435,7 @@
   function closeMgrMaker(){ document.getElementById('mgrMaker').classList.remove('on'); showStartMenu(); }
   function renderMgrMaker(){ const card=document.querySelector('#mgrMaker .mkCard'); mmSync();
     const sw=(which,cur)=>'<div class="mgSw">'+MG_PALETTE.map(p=>'<button class="hsSw'+(p.c===cur?' on':'')+'" style="background:'+p.c+'" data-mm="'+which+'" data-c="'+p.c+'" title="'+p.n+'" aria-label="'+p.n+'"></button>').join('')+'</div>';
-    const tab=(k,n)=>'<button class="mkTab'+(MM.tab===k?' on':'')+'" data-mm="tab" data-t="'+k+'">'+n+'</button>';
+    const tab=(k,n)=>'<button class="mkTab'+(MM.tab===k?' on':'')+'" data-mm="tab" data-t="'+k+'"'+(MM_STEPS.indexOf(k)>(MM.seen||0)?' disabled':'')+'>'+n+'</button>';   // (v242: a step not reached yet, locked)
     let body='';
     if(MM.tab==='kit') body='<div class="mgMakerKit"><canvas id="mgKitCv" width="72" height="72"></canvas><div class="mgMakerCols"><div class="mgLbl">SHIRT</div>'+sw('pri',MM.pri)+'<div class="mgLbl">TRIM &amp; SHORTS</div>'+sw('sec',MM.sec)+'</div></div>';
     else if(MM.tab==='crest'){ const cr=MM.crest, row=(k,lbl,list)=>'<div class="mkCrRow"><span class="mgLbl">'+lbl+'</span><button class="mkAdj" data-mm="cr" data-k="'+k+'" data-d="-1" aria-label="previous '+lbl.toLowerCase()+'">◀</button><span class="mkCrVal">'+list[cr[k]]+'</span><button class="mkAdj" data-mm="cr" data-k="'+k+'" data-d="1" aria-label="next '+lbl.toLowerCase()+'">▶</button></div>';
@@ -22382,12 +22444,16 @@
         +sw('crc',cr.c[MM.part])+'</div></div>'; }
     else body='<div class="mkStep">You are the manager. You start in '+MG_LEAGUE[1]+', the bottom of four leagues, with a weak squad and '+money(20000)+'.</div>'
       +'<div class="mkGrid"><div><label class="mgLbl" for="mgName">YOUR NAME</label><input class="mkInput" id="mgName" maxlength="22" autocomplete="off" placeholder="Manager name" value="'+mgEsc(MM.name)+'">'
-      +'<label class="mgLbl" for="mgClubIn">YOUR CLUB</label><input class="mkInput" id="mgClubIn" maxlength="24" autocomplete="off" placeholder="Club name" value="'+mgEsc(MM.club)+'"></div>'
+      +'<label class="mgLbl" for="mgClubIn">YOUR CLUB</label><input class="mkInput" id="mgClubIn" maxlength="20" autocomplete="off" placeholder="Club name" value="'+mgEsc(MM.club)+'"></div>'
       +'<div><label class="mgLbl" for="mgCode">SHORT NAME · 3 LETTERS</label><input class="mkInput mkCode" id="mgCode" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC" value="'+mgEsc(MM.codeSet?MM.code:'')+'">'
-      +'<div class="mgLbl">ON THE SCOREBOARD</div><div class="mkSb"><img id="mkSbCrest" alt=""><span id="mkSbCode"></span> <b>0</b> : <b class="r">0</b> <span>OPP</span></div></div></div>';
+      +'<div class="mgLbl">ON THE SCOREBOARD</div><div class="mkSbBox" id="mkSbBox"><span class="mkSbClk"><b>0:00</b><i>1ST HALF</i></span>'
+      +'<span class="mkSbTeams"><span><img id="mkSbCrest" alt=""><em id="mkSbCode"></em></span><span><i class="mkSbOpp"></i><em>OPP</em></span></span>'
+      +'<span class="mkSbNums"><b>0</b><s></s><b>0</b></span></div></div></div>';
     card.innerHTML='<div class="pauseTitle">NEW CAREER</div><div class="mkTabs">'+tab('club','CLUB')+tab('kit','KIT')+tab('crest','CREST')+'</div>'
       +'<div class="mkBody">'+body+'</div>'
-      +'<div class="mkBtns"><button class="pauseBtn pauseBack" data-mm="cancel">Cancel</button><button class="pauseBtn" data-mm="go" id="mgGo"'+(mmReady()?'':' disabled')+'>Start career</button></div>';
+      +'<div class="mkBtns"><button class="pauseBtn pauseBack" data-mm="cancel">Cancel</button>'+(MM.tab==='crest'
+        ?'<button class="pauseBtn" data-mm="go" id="mgGo"'+(mmReady()?'':' disabled')+'>Start career</button>'
+        :'<button class="pauseBtn" data-mm="next" id="mgGo"'+(mmCanNext()?'':' disabled')+'>Next ▶</button>')+'</div>';
     if(MM.tab==='kit'){ const cv=document.getElementById('mgKitCv'), k=[MM.pri,MM.sec,MM.sec]; if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); }
     if(MM.tab==='crest'){ const cv=document.getElementById('mgCrestCv'), g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height); g.drawImage(crestCanvas(MM.crest,5),0,0); }
     mmLive(); }
@@ -22395,14 +22461,21 @@
     const c=document.getElementById('mgCode'); if(c&&!MM.codeSet&&document.activeElement!==c) c.placeholder=MM.code||'ABC';
     const sc=document.getElementById('mkSbCode'); if(sc) sc.textContent=MM.code||'???';
     const im=document.getElementById('mkSbCrest'); if(im) im.src=crestURL(MM.crest);
-    const g=document.getElementById('mgGo'); if(g) g.disabled=!mmReady(); }
+    const bx=document.getElementById('mkSbBox'); if(bx) bx.style.setProperty('--kitG',MM.pri);
+    const g=document.getElementById('mgGo'); if(g) g.disabled=MM.tab==='crest'?!mmReady():!mmCanNext(); }
+  // (v242) the steps, in order: you can go back to one you've been through, not on past the one you're on -- NEXT takes
+  // you on (from CLUB once your name, the club's and its letters are in), and START CAREER is on the last
+  const MM_STEPS=['club','kit','crest'];
+  function mmCanNext(){ return MM.tab!=='club'||mmReady(); }
+  function mmNext(){ mmSync(); const i=MM_STEPS.indexOf(MM.tab); if(i<0||i>=MM_STEPS.length-1){ mgCreate(); return; }
+    if(!mmCanNext()) return; MM.tab=MM_STEPS[i+1]; MM.seen=Math.max(MM.seen||0,i+1); renderMgrMaker(); }
   function mgCreate(){ mmSync(); if(!mmReady()) return;
     const d=mgNewCareer({slot:MM.label, manager:MM.name.trim(), clubName:MM.club.trim(), colors:[MM.pri,MM.sec], code:MM.code, crest:Object.assign({},MM.crest,{c:MM.crest.c.slice()})});
     if(!writeSave(MM.key,d)){ showConfirm('Couldn’t save the new career: the browser’s storage is full. Delete an old save and try again.',()=>{},{yes:'OK'}); return; }
     document.getElementById('mgrMaker').classList.remove('on'); openHub(MM.key); }
   document.getElementById('mgrMaker').addEventListener('click',e=>{ const b=e.target.closest('[data-mm]'); if(!b||b.disabled) return; const a=b.dataset.mm;
-    if(a==='cancel') closeMgrMaker(); else if(a==='go') mgCreate();
-    else if(a==='tab'){ MM.tab=b.dataset.t; renderMgrMaker(); }
+    if(a==='cancel') closeMgrMaker(); else if(a==='go') mgCreate(); else if(a==='next') mmNext();
+    else if(a==='tab'){ if(MM_STEPS.indexOf(b.dataset.t)<=(MM.seen||0)){ MM.tab=b.dataset.t; renderMgrMaker(); } }
     else if(a==='pri'||a==='sec'){ MM[a]=b.dataset.c; renderMgrMaker(); }
     else if(a==='cr'){ const k=b.dataset.k, n=(k==='s'?CREST_SHAPES:k==='p'?CREST_PATTERNS:CREST_EMBLEMS).length; MM.crest[k]=((MM.crest[k]|0)+(+b.dataset.d)+n)%n; renderMgrMaker(); }
     else if(a==='part'){ MM.part=+b.dataset.i; renderMgrMaker(); }
@@ -22425,22 +22498,20 @@
       if(isNew) btn.onclick=()=>{ const go=()=>openMgrMaker(key,label); if(d) showConfirm('This slot holds a saved career ('+name+'). Starting a new one here deletes it for good.', go, {yes:'Delete & continue', danger:true}); else go(); };
       else { if(ok) btn.onclick=()=>openHub(key); else btn.classList.add('disabled'); }
       row.appendChild(btn);
-      if(!isNew && ok){ const ex=document.createElement('button'); ex.className='slotEx'; ex.textContent='⇩'; ex.title='Export this career'; ex.setAttribute('aria-label','export the career in '+name);   // (v154: A CAREER TO TAKE WITH YOU)
-        ex.onclick=(ev)=>{ ev.stopPropagation(); mgExport(label); }; row.appendChild(ex); }
       if(!isNew && d){ const del=document.createElement('button'); del.className='slotDel'; del.textContent='✕';
         del.onclick=(ev)=>{ ev.stopPropagation(); showConfirm('Delete the career in '+name+'? This cannot be undone.', ()=>{ deleteSave(key); renderSlots(containerId,isNew); refreshMenuButtons(); }, {yes:'Delete', danger:true}); }; row.appendChild(del); }
       cont.appendChild(row);
     }
-    if(!isNew){ const im=document.createElement('button'); im.className='smBtn slotImp'; im.innerHTML='<span class="mk">⇧</span>IMPORT A CAREER'; im.onclick=()=>mgImportOpen(); cont.appendChild(im); }   // (v154)
+    // (v154-v241: EXPORT by each saved slot and IMPORT A CAREER under them; v242: gone -- careers save themselves)
   }
   function startMenuKey(e){
-    if(mgMakerOpen()){ if(e.key==='Escape') closeMgrMaker(); else if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT') mgCreate(); return; }
+    if(mgMakerOpen()){ if(e.key==='Escape') closeMgrMaker(); else if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT') mmNext(); return; }
     if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // typing in a field never drives the menu
     if(SCREEN==='hub'){ if(e.key==='Escape'){ const dy=document.getElementById('cpDay');
         if(dy&&dy.onclick) dy.onclick();                                          // the day's end, ended
         else if(PLACE.on) placeAct(PLACE.move&&!PLACE.k?'done':'no');             // a decoration being put down or moved, left
         else if(document.getElementById('bldgPanel').classList.contains('show')) hideBldg(); else hubToMenu(); } return; }
-    const subOpen=['loadPanel','newPanel','hubPanel','exhPanel'].some(id=>document.getElementById(id).classList.contains('show'));
+    const subOpen=['loadPanel','newPanel','hubPanel','exhPanel','labsPanel'].some(id=>document.getElementById(id).classList.contains('show'));
     if(e.key==='Escape'){ if(subOpen){ hideSubs(); refreshMenuButtons(); } return; }
     if(document.getElementById('exhPanel').classList.contains('show') && e.code==='Enter'){ kickOffExhibition(); e.preventDefault(); return; }
     if(subOpen) return;
@@ -22463,6 +22534,7 @@
     else if(act==='continue'){ const k=mostRecentKey(); if(k)openHub(k); }
     else if(act==='load'){ renderSlots('slotList',false); showSub('loadPanel'); }
     else if(act==='new'){ renderSlots('newSlotList',true); showSub('newPanel'); }
+    else if(act==='labsback'){ hideSubs(); refreshMenuButtons(); openSettings(); }   // (v242: back to SETTINGS)
     else if(act==='back'){ hideSubs(); refreshMenuButtons(); }
     else if(act==='menu'){ showStartMenu(); }
   });

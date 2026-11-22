@@ -39,7 +39,7 @@ ok(!(await page.evaluate(() => localStorage.getItem('ft_mgr_slot2'))) && /cleare
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Week Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 await K("CAREER.data.story={vet:2,kid:2,phone:2}; CAREER.data.lv.market=1; mgSave(CAREER.data); renderHub();");
 let d = await save();
 const w1 = [await bottom(), await mid()];

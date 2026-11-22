@@ -3,8 +3,8 @@
 // costs to release a man, never more than twice what he's worth; a bid set in a tap -- half their price, three-quarters,
 // their price, a tenth over -- or any figure typed ('2.5m'), and a price to list him at the same way; once scouted, what
 // he's worth beside what they ask. And THE WEEK'S MONEY: NET/WK on the hub says it's projected (in pre-season, what comes
-// in: the shirts), and tapped it shows every dollar of the week by what it was -- this week so far, last week, a league
-// week projected -- from Monday's bank to now, to the dollar. On a copy the test can reach.
+// in: the shirts), and every dollar of the week is kept by what it was -- this week so far, last week -- from Monday's bank
+// to now, to the dollar (v242: a tap on NET/WK opens nothing now; the lines are the FUND SUMMARY's). On a copy the test can reach.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -25,7 +25,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Market Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 8000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 8000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); mgMarketOpen(d); mgSave(d); renderHub(); return 1; })()`);
 
 // --- WHAT HE'D ASK, UNSCOUTED -------------------------------------------------------------------------------------------------
@@ -81,11 +81,10 @@ r = await K(`(()=>{ const d=CAREER.data; while(d.phase!=='league'||!mgNextGame(d
 info('the game\'s week: ' + JSON.stringify(r));
 ok(r.lbl === 'NET/WK' && Math.abs(r.restP) <= 1 && Math.abs(r.restW) <= 1 && r.L.wages < 0 && r.L.tv > 0 && r.L.partners > 0,
   'in the league NET/WK (v186: the gate as it\'s gone, no longer marked projected); the game\'s week, line by line (' + Object.entries(r.L).map(([k, v]) => k + ' ' + v).join(', ') + '), takes its Monday\'s $' + r.b0.toLocaleString() + ' to the next Monday\'s $' + r.b1.toLocaleString() + ', and this week\'s (' + Object.entries(r.W).map(([k, v]) => k + ' ' + v).join(', ') + ') to the $' + r.now.toLocaleString() + ' in the bank -- nothing left over');
+// (v160-v241: NET/WK tapped opened THE WEEK'S MONEY; v242: the books are gone -- a tap opens nothing, and the week's lines are the FUND SUMMARY's after a match)
 await page.click('#chNetBtn'); await page.waitForTimeout(150);
-r = await page.evaluate(() => ({ on: document.getElementById('ldgModal').classList.contains('on'), t: document.querySelector('#ldgModal .ldgCard').innerText }));
-ok(r.on && /THE WEEK’S MONEY/.test(r.t) && /THIS WEEK SO FAR/.test(r.t) && /A LEAGUE WEEK, AS IT’S GONE/.test(r.t) && /Wages/.test(r.t) && /The TV/.test(r.t),
-  'NET/WK tapped: THE WEEK\'S MONEY -- this week so far, line by line from Monday\'s bank, and a league week as it\'s gone');
-await page.click('#ldgModal [data-ldg="close"]'); await page.waitForTimeout(80);
+r = await page.evaluate(() => ({ on: document.getElementById('ldgModal').classList.contains('on'), hub: document.getElementById('careerHub').classList.contains('show') }));
+ok(!r.on && r.hub, 'v242: NET/WK tapped opens nothing now (the hub as it was): the week\'s lines are the FUND SUMMARY\'s after a match');
 // a week on: last week's lines kept, and they still add up; a release and a scout's report in this one
 r = await K(`(()=>{ const d=CAREER.data; mgForward(d); while(!mgNextGame(d)) mgForward(d); const P=d.wlPrev; const kP=Object.values(P.L).reduce((a,v)=>a+v,0);
   d.lv.scouting=1; const f=mgAiClubs(d).find(c=>c.tier===d.tier).players[2]; mgScout(d,f.id); const i=d.roster.length-1; mgRelease(d,i);

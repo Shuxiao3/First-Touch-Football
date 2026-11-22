@@ -16,7 +16,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0');
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 if(await page.isVisible('#storyModal.on')){ await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
 await page.emulateMedia({ reducedMotion: 'reduce' });   // (the days just turn: NEXT DAY's sunset is manager-career.mjs's)
 for(let i = 0; i < 8 && !/PLAY/.test(await page.textContent('#chBottom')); i++){ await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(50); }
@@ -45,13 +45,15 @@ ok(d.roster.filter(p => p.apps === 1).length === 9, 'the nine who started have a
 ok(d.week === 1 && d.ledger.length === 1, 'the week was paid');
 await page.click('#mrContinueBtn'); await page.waitForTimeout(250);
 await page.evaluate(() => { const b = document.querySelector('#pressModal.on [data-pr="skip"]'); if(b) b.click(); }); await page.waitForTimeout(250);   // (the press first)
+const allLines = () => page.evaluate(() => { for(let i = 0; i < 40; i++){ const g = document.querySelector('#moneyModal.on [data-mn="go"]'); if(!g || /CONTINUE/.test(g.textContent)) break; g.click(); } });   // (v242: a line a press)
 let money = await page.innerText('#moneyModal').catch(() => '');
-if(/THE GATE/.test(money)){   // (a home game -- a new career's first game is home or away as its fixtures fall: THE GATE comes first, v186)
-  ok(/Taken at the gate/.test(money), 'a home game: THE GATE first, who came and what they paid');
-  await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(250);
-  money = await page.innerText('#moneyModal').catch(() => ''); }
-ok(/THE MONEY/.test(money) && /Before the game/.test(money) && /From the game/.test(money) && /Wages/.test(money) && /Now in the bank/.test(money) && /fans/.test(money),
-  'back at the club, after the press: THE MONEY -- before the game, from it, the wages, now in the bank, and the fans');
+if(/STADIUM SUMMARY/.test(money)){   // (a home game -- a new career's first game is home or away as its fixtures fall: the ground first, v186)
+  await allLines(); money = await page.innerText('#moneyModal').catch(() => '');
+  ok(/Fans in the ground/.test(money) && /Taken at the gate/.test(money), 'a home game: THE STADIUM SUMMARY first, who came and what they paid (v242)');
+  await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(250); }
+await allLines(); money = await page.innerText('#moneyModal').catch(() => '');
+ok(/FUND SUMMARY/.test(money) && /At the start of the week/.test(money) && /Wages/.test(money) && /This week/.test(money) && /Now in the bank/.test(money) && /fans/.test(money),
+  'back at the club, after the press: THE FUND SUMMARY -- the week from its start, the wages, the week\'s net, now in the bank, and the fans (v242: THE MONEY till now)');
 await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(150);
 ok(await page.isVisible('#careerHub') && /Matchday 2/.test(await page.getAttribute('#chPhase', 'data-long')), 'back on the campus for matchday 2');
 

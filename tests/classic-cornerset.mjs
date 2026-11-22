@@ -133,5 +133,13 @@ ok(kHead >= 4 && r.K.every(t => t.goingUp && !t.slid && !t.upEarly), 'K pressed 
 ok(r.K.filter(t => t.hd.length).every(t => t.away), 'and it\'s away off his head -- not chested down by him again as it leaves it');
 ok(r.none.every(t => t.hd.length === 0 && !t.slid && !t.goingUp), 'no K: no header, no slide, not going up for it (' + r.none.map(t => t.grade).join(', ') + ')');
 
+// (v242) the corner's box and the subs' drop-down, one at a time: the drop-down opened over it hides the box; shut, it's back
+{ await page.evaluate(() => { const P = window.__T.prefs(); P.cornerBox = 4; P.cornerBack = 2; window.__T.freeze(); window.__corner(); }); await page.evaluate(() => window.__run(0.2)); const shown = await panel();
+  const qs = () => page.evaluate(() => { const b = document.getElementById('qsBtn'); if(b && !b.disabled){ b.click(); return true; } return false; });
+  if(await qs()){ await page.evaluate(() => window.__run(0.1)); const hid = await panel(), open = await page.evaluate(() => document.getElementById('qsWrap').classList.contains('open'));
+    await qs(); await page.evaluate(() => window.__run(0.1)); const back = await panel();
+    ok(shown.on && open && !hid.on && back.on, 'v242: the subs\' drop-down opened during your corner: the corner\'s box gives way to it; the drop-down shut, the box is back'); }
+  else info('v242: no quick subs to open in this match -- the corner and the drop-down not tried together'); }
+
 process.exitCode = rep.finish();
 await browser.close();

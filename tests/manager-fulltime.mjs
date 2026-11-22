@@ -3,7 +3,7 @@
 // NEXT) and YOUR PLAYERS (a row for every man who played: rating, goals, assists, passes, shots, tackles, interceptions,
 // saves; the man of the match starred; CONTINUE) -- the press conference in a press room drawn by the league (a back
 // room in Division 2, the full room with its photographers in the Premier Division, the stars on a Continental Champions Cup night),
-// then THE MONEY back at the club (before the game, from the game, the wages, now -- as the books have it), and the
+// then (v242) the STADIUM SUMMARY and the FUND SUMMARY back at the club, a line a press (as the books have it), and the
 // Monday papers waiting off to the side. On a copy of the game that lets the test reach it.
 import { open } from './_harness.mjs';
 import { readFileSync, writeFileSync, mkdtempSync } from 'fs';
@@ -28,7 +28,7 @@ await page.click('#smItems [data-act="new"]'); await page.waitForTimeout(150);
 await page.click('#newSlotList .slotBtn >> nth=0'); await page.waitForTimeout(100);
 await page.waitForSelector('#mgrMaker.on', { timeout: 4000 });
 await page.fill('#mgName', 'Kit Varga'); await page.fill('#mgClubIn', 'Fulltime Town');
-await page.click('#mgGo'); await page.waitForSelector('#careerHub.show', { timeout: 6000 });
+await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
 await K(`(()=>{ const d=CAREER.data; d.story={vet:2,kid:2,phone:2}; mgStoryShow(d); let n=0; while(!(d.phase==='league'&&d.wday==='sat')&&n++<20) mgForward(d); if(d.pile) d.pile.opened=true; pileHide(); mgSave(d); renderHub(); return 1; })()`);
 
 // --- SIM THE REST: kick off, a few seconds of it, then the pause menu's SIM THE REST ----------------------------------------------
@@ -72,21 +72,30 @@ ok(r[0].men <= 2 && r[0].cams + r[0].tv === 0 && r[1].men > r[0].men && r[2].tv 
 
 // --- THE MONEY ------------------------------------------------------------------------------------------------------------------
 await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(400);
-// (v186) after a home game THE GATE comes up first: who came, stand by stand, and what they paid -- as the books have it
-const gate = await K(`(()=>{ const d=CAREER.data, c=document.querySelector('#moneyModal .mnCard'), G=d.lastGate; if(!c||!/THE GATE/.test(c.textContent)) return null;
-  return { rows:[...c.querySelectorAll('.gtRow')].map(r=>r.dataset.seat).join(), big:c.querySelector('.gtBig').textContent, seats:G.seats.map(x=>x.id).join(), att:G.att, cap:G.cap, gate:G.gate,
-    sum:G.seats.reduce((a,x)=>a+x.att,0), take:Math.round(G.seats.reduce((a,x)=>a+x.att*x.price,0)), led:d.ledger[0].gate, text:c.textContent }; })()`);
-if(gate){ info('THE GATE: ' + gate.big + ' · ' + gate.rows);
-  ok(gate.rows === gate.seats && gate.sum === gate.att && gate.take === gate.gate && gate.led === gate.gate && gate.big.includes(gate.att.toLocaleString()) && gate.text.includes('Taken at the gate'),
-    'THE GATE first, after a home game: every stand its crowd, seats, price and takings; they add up to the crowd (' + gate.att + ' of ' + gate.cap + ') and to the gate the books took');
-  await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(250); }
-const vals = await page.$$eval('#moneyModal .mnRow', ns => ns.map(n => ({ k: n.dataset.mn, v: n.querySelector('b').textContent })));
-r = await K(`(()=>{ const d=CAREER.data; return { ledger:d.ledger[0], budget:Math.round(d.budget), fans:document.querySelector('#moneyModal .mnFans')?document.querySelector('#moneyModal .mnFans').textContent:'' }; })()`);
-const num = t => (t.includes('−') || t.includes('-') ? -1 : 1) * +t.replace(/[^\d]/g, '');
-const M = Object.fromEntries(vals.map(x => [x.k, num(x.v)]));
-info('the money: ' + JSON.stringify({ M, ledger: r.ledger }));
-ok(await on('moneyModal') && M.from === before.bud && M.inc === r.ledger.income && M.wages === -r.ledger.wages && M.to === r.ledger.budget && M.from + M.inc + M.wages === M.to && /fans/.test(r.fans),
-  'back at the club: THE MONEY -- before the game ' + M.from + ', from the game +' + M.inc + ', wages ' + M.wages + ', now ' + M.to + ': as the books have it; and the fans');
+// (v186) after a home game the ground comes up first -- v242: the STADIUM SUMMARY, a line a press: who came, then each part
+// of the ground (its fans and price, the cheapest first), then the gate in all -- as the books have it
+const press = async n => { for(let i = 0; i < n; i++){ await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(30); } };
+const gate = await K(`(()=>{ const d=CAREER.data, c=document.querySelector('#moneyModal .mnCard'), G=d.lastGate; if(!c||!/STADIUM SUMMARY/.test(c.textContent)) return null;
+  const rows=[...c.querySelectorAll('.mnList > [data-seat]')];
+  return { rows:rows.map(r=>r.dataset.seat).join(), want:G.seats.slice().sort((a,b)=>a.price-b.price).map(x=>x.id).join(), first:c.querySelector('.mnList > *').textContent, n:c.querySelectorAll('.mnList > *').length,
+    shown:c.querySelectorAll('.mnList > .on').length, att:G.att, cap:G.cap, gate:G.gate, sum:G.seats.reduce((a,x)=>a+x.att,0), take:Math.round(G.seats.reduce((a,x)=>a+x.att*x.price,0)),
+    paid:rows.reduce((a,r)=>a+(+r.querySelector('b').textContent.replace(/[^0-9]/g,'')),0), led:d.ledger[0].gate, text:c.textContent }; })()`);
+if(gate){ info('THE STADIUM SUMMARY: ' + gate.first + ' · ' + gate.rows);
+  ok(gate.shown === 0 && gate.rows === gate.want && gate.sum === gate.att && gate.take === gate.gate && Math.abs(gate.paid - gate.gate) <= gate.rows.split(',').length && gate.led === gate.gate && gate.first.includes(gate.att.toLocaleString()) && gate.text.includes('Taken at the gate'),
+    'v242: THE STADIUM SUMMARY first, after a home game -- nothing up till NEXT; then the crowd (' + gate.att + ' of ' + gate.cap + '), each part of the ground cheapest first, its fans and price; they add up to the gate the books took');
+  await press(gate.n + 1); }
+// v242: THE FUND SUMMARY (THE MONEY till now): the week from where the bank stood as it began -- each line, the wages in red,
+// the week's net, the bank now -- adding up
+const fund = await K(`(()=>{ const d=CAREER.data, c=document.querySelector('#moneyModal .mnCard'); if(!c||!/FUND SUMMARY/.test(c.textContent)) return null;
+  const num=t=>(/[−-]/.test(t)?-1:1)*(+t.replace(/[^0-9]/g,'')), rows=[...c.querySelectorAll('.mnList > .mnRow')].map(r=>({ l:r.querySelector('span').childNodes[0].textContent, v:num(r.querySelector('b').textContent), cls:r.className }));
+  const game=W=>!!(W&&W.L&&['gate','tv','partners','wages'].some(k=>W.L[k])), wk=game(d.wl)?d.wl:game(d.wlPrev)?d.wlPrev:null;   // (the week the game was in)
+  return { rows, b0:wk?Math.round(wk.b0):null, bank:Math.round(d.budget), n:c.querySelectorAll('.mnList > *').length, fans:!!c.querySelector('.mnFans') }; })()`);
+{ const R = fund ? fund.rows : [], first = R[0] || {}, now = R.find(x => /^Now in the bank/.test(x.l)) || {}, net = R.find(x => /^This week/.test(x.l)) || {}, mid = R.filter(x => x !== first && x !== now && x !== net), wages = R.find(x => /^Wages/.test(x.l));
+  info('the fund summary: ' + R.map(x => x.l + ' ' + x.v).join(' | '));
+  ok(!!fund && first.v === fund.b0 && now.v === fund.bank && mid.reduce((a, x) => a + x.v, 0) === now.v - first.v && net.v === now.v - first.v && fund.fans,
+    'v242: THE FUND SUMMARY -- from ' + first.v + ' at the start of the week the game was in, its lines (' + mid.map(x => x.l).join(', ') + ') to ' + now.v + ' now: they add up, the net ' + net.v + '; and the fans');
+  ok(!wages || (wages.v < 0 && / dn/.test(wages.cls) && R.indexOf(wages) > R.findIndex(x => /^The gate|^The TV/.test(x.l))), 'v242: the wages after what came in, in red (' + (wages ? wages.v : 'none') + ')');
+  await press(fund ? fund.n : 0); }
 await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(200);
 r = await K(`(()=>{ const d=CAREER.data, b=document.querySelector('#careerHub .cpPapers'); return { wday:d.wday, pile:document.getElementById('pileModal').classList.contains('on'), side:!!b&&getComputedStyle(b).display!=='none', n:+document.getElementById('cpPapersN').textContent, left:pileLeft(d).length }; })()`);
 ok(!(await on('moneyModal')) && r.wday === 'mon' && !r.pile && r.side && r.n === r.left && r.left > 0, 'CONTINUE: the club, Monday -- the papers waiting off to the side, ' + r.n + ' in the orange box');

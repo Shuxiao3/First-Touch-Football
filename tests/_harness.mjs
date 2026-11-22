@@ -30,6 +30,7 @@ export function reporter(){
 // unless it sets them itself (manager-flow.mjs is theirs).
 export const STAR = () => { try{ const o = JSON.parse(localStorage.getItem('ftc_prefs') || '{}') || {}; let ch = false;
   if(!o.diff || o.dk !== 1){ o.diff = o.diff || 'star'; o.dk = 1; ch = true; } if(o.ht == null){ o.ht = 'on'; ch = true; } if(o.tips == null){ o.tips = 0; ch = true; } if(o.seenCtl == null){ o.seenCtl = 1; ch = true; }
+  if(o.ev == null){ o.oppShift = 0; o.ev = 1; ch = true; }   // (v242: the exhibition's opponents ELITE in the game -- the tests' matches as they were built, as they are; ev 0 for settings from before v242)
   if(ch) localStorage.setItem('ftc_prefs', JSON.stringify(o)); }catch(e){} };
 
 // THE MONDAY PAPERS (v103) open over the career hub each Monday, and THE PRESS CONFERENCE after each game (v104). A test
@@ -55,7 +56,7 @@ export async function pileAside(page){
   });
   // (and THE MONEY back at the club after a match you played, v106: CONTINUE)
   await page.addLocatorHandler(page.locator('#moneyModal.on'), async () => {
-    await page.evaluate(() => { for(let i = 0; i < 2; i++){ const x = document.querySelector('#moneyModal.on [data-mn="go"]'); if(x) x.click(); }   // (v186: THE GATE, then THE MONEY -- two pages after a home game)
+    await page.evaluate(() => { for(let i = 0; i < 80; i++){ const x = document.querySelector('#moneyModal.on [data-mn="go"]'); if(x) x.click(); else break; }   // (v186: THE GATE, then THE MONEY; v242: the STADIUM and FUND SUMMARY, a line a press, then CONTINUE)
       const m = document.getElementById('moneyModal'); if(m && m.classList.contains('on') && !m.querySelector('[data-mn="go"]')) m.classList.remove('on'); });
   });
   // (and THE PRESS CONFERENCE after a game, v104: SEND THE ASSISTANT)

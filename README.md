@@ -502,6 +502,23 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Your notes on the screen templates (v242).** SETTINGS is one list that scrolls, with no pages: MATCH LENGTH, CAMPUS
+  MENU, HALF-TIME and TIPS, then BUTTON LAYOUT, SKILL MOVES and LABS. GRAPHICS, EXHIBITION OPPONENTS and TEXT SIZE are
+  gone: the game is pixel art, an exhibition's opponents are ELITE and the text is its usual size, even for settings kept
+  from before with other choices in them. LABS opens a page of the five labs whose BACK goes to SETTINGS, and SKILL MOVES
+  comes back to SETTINGS too; from a match's menu SETTINGS has neither (the menu has its own SKILL MOVES). Careers save
+  themselves, so the slots have no export and LOAD GAME no IMPORT A CAREER, and the hub's NET/WK opens nothing now. A new
+  career goes CLUB, KIT, CREST with NEXT (Enter too): a step not reached yet can't be picked, START CAREER is on the crest
+  page only, the club's name is 20 letters at most, and ON THE SCOREBOARD shows the match's score box with your crest and
+  short name, its strip in your shirt. In a match the corner panel and the subs' list are never up together: open the
+  subs and the panel waits, back when they shut. With nobody tired the subs' list says "No one's tired yet" and FORCE SUB
+  takes the most tired man off for the best on the bench for his place. After a match the cards have no "N OF M" over
+  them, and the result's crests sit at the same place either side, a long name cut short between each and the score. The
+  money comes on two cards a line at a time, NEXT for the next line and CONTINUE once they're all there, scrolling when
+  long: STADIUM SUMMARY (the fans in the ground, each stand from the cheapest seats to the dearest as fans x price, then
+  what was taken at the gate) and FUND SUMMARY (the bank at the start of the week, the gate, TV, partners, sponsors,
+  shirts and the rest in, wages and the rest out in red, the week's net in green or red, what's in the bank now). The
+  season review turns its pages with NEXT and a small arrow back, START SEASON on the last.
 - **A word before you go on with papers unread (v241).** Press the hub's button to go on (NEXT WEEK, FORWARD TO
   MATCHDAY and the rest) with papers still on the desk and a paper comes up first: BEFORE YOU GO ON, how many you
   haven't read, and the papers themselves, those that need an answer first and marked (four at most, then "and N more").
@@ -3564,6 +3581,20 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v242: the templates' notes.** SET_ROWS is halfMin, side, ht and tips; the settings card's middle is `.pScroll.setScroll`
+  (it scrolls; no fitBox pages) with BUTTON LAYOUT, SKILL MOVES (data-setskills; skFromSet sends closeSkills back to
+  SETTINGS) and LABS (data-setlabs: the new #labsPanel smPanel, its labsback to SETTINGS), and #settingsOverlay.fromMatch
+  hides .setMenuOnly. The prefs loader sets pv, dk, art true and text 'n' every time, and oppShift 3 once, for settings
+  without ev (ev 1 marks settings kept since). The harness's STAR sets oppShift 0 and ev 1 so the tests' exhibitions play
+  as they were built; `classic-settings.mjs` sets ev 0 to check the change. renderSlots has no export and no import, and
+  #chNetBtn no data-hub. The maker: MM.seen, MM_STEPS, mmCanNext and mmNext (its button and Enter), #mkSbBox.
+  cornerSetOn needs !QS.open. qsRender with no suggestions: .qsNone and FORCE SUB (qsForce: the lowest staminaCap, then
+  stamina, off for the best bench man for the slot, through qsMake). mgSeqTag returns ''. .mrBoard and .mrSide are grids
+  with the crests at fixed columns. moneyShow builds two cards of .mnList rows shown one a press; the fund card's week is
+  d.wl when it has a game's lines (gate, tv, partners, wages), else d.wlPrev with d.wl added (the club's already on the
+  next Monday), else the match's own numbers, and whatever's left of the bank's move is "other". The season review's foot
+  is rvFoot, from FITPG['B:review/'] (fitBox records n 1 when it fits), rvnext and rvback in mgAct, its pager hidden.
+  Tests: `classic-settings.mjs` (new); the manager tests' 41 clicks on #mgGo are NEXT, NEXT, START CAREER now.
 - **v241: the papers left unread.** mgAct's 'forward' asks paperWarnShow(d) first (unless ds.sure, from its GO ON
   ANYWAY, or window.__pwOff, a test's): with pileLeft(d) not empty it fills #paperWarn from pileBody and pileStamp -- a
   paper needs an answer when its buttons are more than NEXT -- PW_ROWS (4) rows, those first. The harness's pileAside sets
