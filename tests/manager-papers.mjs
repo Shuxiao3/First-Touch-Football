@@ -180,6 +180,36 @@ for(let i = 0; i < 6 && await modal(); i++){
   const b = await page.$('#pileModal .plBtns [data-pile="next"]') || await page.$('#pileModal .plBtns [data-pile="later"]'); if(!b) break; await b.click(); await page.waitForTimeout(60); }
 ok(fits.length >= 2 && fits.every(Boolean), 'on a phone held sideways (844x390), each paper and its buttons on the screen (' + fits.length + ' papers)');
 
+// --- (v241) ON WITH PAPERS UNREAD: a word first -- what's still on the desk, the decisions marked; a tap off it as it was, READ
+// THEM opens the pile, GO ON ANYWAY goes on ---------------------------------------------------------------------------------------
+await page.setViewportSize({ width: 1100, height: 1000 });
+await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.spOff=[spOfferFor(d,'board',new Set())]; d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; pileBuild(d,{dev:null}); d.pile.opened=true; pileHide(); renderHub(); return 1; })()`);
+await page.waitForTimeout(100);
+const day = () => K(`mgPhaseLabel(CAREER.data)+'|'+CAREER.data.wday+'|'+CAREER.data.day+'|'+CAREER.data.md`);
+const warnOn = () => page.evaluate(() => document.getElementById('paperWarn').classList.contains('on'));
+const unread = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { n:L.length, dec:L.filter(x=>pileBody(d,x)[2].some(([,a])=>a!=='next')).length, fwd:!!document.querySelector('#chBottom [data-mg="forward"]') }; })()`);
+const d0 = await day();
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
+const w1 = await page.evaluate(() => { const c = document.querySelector('#paperWarn .pwCard'), R = [...c.querySelectorAll('.pwRow:not(.more)')];
+  return { on: document.getElementById('paperWarn').classList.contains('on'), rows: R.length, dec: R.filter(r => r.querySelector('em.dec')).length, decFirst: R.every((r, i) => i === 0 || !r.querySelector('em.dec') || R[i - 1].querySelector('em.dec')), more: (c.querySelector('.pwRow.more b') || {}).textContent || '', text: c.innerText }; });
+const d1 = await day();
+info('the warning: ' + JSON.stringify({ unread, w1: { on: w1.on, rows: w1.rows, dec: w1.dec, head: w1.text.split('\n').slice(0, 3).join(' / ') } }));
+ok(unread.fwd && unread.n >= 2 && w1.on && w1.rows === Math.min(unread.n, 4) && w1.dec === Math.min(unread.dec, 4) && w1.decFirst && (unread.n > 4 ? w1.more === 'and ' + (unread.n - 4) + ' more' : !w1.more)
+  && new RegExp(unread.n + ' UNREAD · ' + unread.dec + ' NEEDS? AN ANSWER').test(w1.text) && new RegExp('You haven’t read ' + unread.n + ' of this week’s papers').test(w1.text) && /BEFORE YOU GO ON/.test(w1.text) && d1 === d0,
+  'on with ' + unread.n + ' papers unread (' + unread.dec + ' needing an answer): a word first, those that need an answer listed first, four at most (' + w1.rows + ', then "' + w1.more + '"), and the day not gone on');
+await page.mouse.click(6, 6); await page.waitForTimeout(100);
+ok(!(await warnOn()) && (await day()) === d0, 'a tap off it: gone, and nothing else changed');
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
+await page.click('#paperWarn [data-pw="read"]'); await page.waitForTimeout(150);
+ok(!(await warnOn()) && await modal() && (await day()) === d0, 'READ THEM: the papers open, the day still to come');
+await press('close');
+await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
+const again = await warnOn();
+await page.click('#paperWarn [data-pw="go"]'); await page.waitForTimeout(250);
+await page.waitForFunction(() => !document.getElementById('careerHub').classList.contains('dayscene'), null, { timeout: 8000 }).catch(() => {});
+const d2 = await day();
+ok(again && !(await warnOn()) && d2 !== d0, 'put down again, and on: the word again, then GO ON ANYWAY goes on (' + d0 + ' → ' + d2 + ')');
+
 function money0(v){ return '$' + Math.round(v).toLocaleString('en-US'); }
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

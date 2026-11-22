@@ -502,6 +502,11 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **A word before you go on with papers unread (v241).** Press the hub's button to go on (NEXT WEEK, FORWARD TO
+  MATCHDAY and the rest) with papers still on the desk and a paper comes up first: BEFORE YOU GO ON, how many you
+  haven't read, and the papers themselves, those that need an answer first and marked (four at most, then "and N more").
+  READ THEM opens the pile; GO ON ANYWAY goes on, a decision you leave waiting in next Monday's papers while it stands,
+  as before; a tap off it leaves things as they were.
 - **Every window boxed as the match screen's (v240).** The menus, the career's windows and cards, the match report and
   the tactics take the look of the boxes along the top of a match: a dark outline, one thin light rim inside it and a dark
   see-through fill, with 6 px corners (a 2 px light rim over a darker one, on the window colour, with 10 px corners, before).
@@ -3559,6 +3564,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v241: the papers left unread.** mgAct's 'forward' asks paperWarnShow(d) first (unless ds.sure, from its GO ON
+  ANYWAY, or window.__pwOff, a test's): with pileLeft(d) not empty it fills #paperWarn from pileBody and pileStamp -- a
+  paper needs an answer when its buttons are more than NEXT -- PW_ROWS (4) rows, those first. The harness's pileAside sets
+  __pwOff with the rest of the papers put aside, as does `manager-flow.mjs`; `manager-papers.mjs` checks the warning.
 - **v240: windows as the match screen's boxes.** --pxWin is the outline and a 1 px --rim (the darker --rimLo ring gone),
   --rWin 6 px (it was 10), and every rule pairing --pxWin with var(--win) fills with --boxBg, rgb(20 26 44 / .9), the match
   chips' own; the campus picture's frame (.cpMain::after) the same thin rim. Tests: `classic-ui.mjs`.

@@ -19,6 +19,7 @@ const copy = join(mkdtempSync(join(tmpdir(), 'ftf-flow-')), 'classic.html');
 writeFileSync(copy, src);
 
 const { browser, page, rep } = await open({ url: 'file://' + copy, papers: true });
+await page.addInitScript(() => { window.__pwOff = true; }); await page.evaluate(() => { window.__pwOff = true; });   // (v241: no word about the papers it leaves unread as it goes on -- not what it's testing)
 const { ok, info } = rep;
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 // (a browser that's never seen the card: the tips on, a break at half-time -- the harness takes them as seen and off;

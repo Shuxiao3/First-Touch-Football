@@ -292,6 +292,13 @@
   .plTr.you{ background:#e2d9b8; color:#1f2340; } .plTr.opp span:nth-child(3){ color:#a82028; }
   .plTr .mv{ font-size:8px; } .plTr .mv.up{ color:#0e7a3c; } .plTr .mv.dn{ color:#a82028; }
   .plBtns{ display:flex; flex-wrap:wrap; gap:8px; } .plBtns .pauseBtn{ flex:1; min-width:110px; font-size:14px; padding:11px 6px; }
+  /* (v241) THE PAPERS LEFT UNREAD: what's still on the desk, a row each, the ones that need an answer marked */
+  .pwRows{ display:flex; flex-direction:column; margin:2px 0 4px; }
+  .pwRow{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:baseline; padding:4px 0; border-top:1px dotted #d9d1b6; font-size:12px; line-height:1.35; }
+  .pwRow i{ font:10px 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:1.5px; color:#a82028; white-space:nowrap; }
+  .pwRow b{ font-weight:400; color:#1f2340; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .pwRow.more b{ color:#7a7262; }
+  .pwRow em{ font:10px 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:1px; color:#7a7262; white-space:nowrap; } .pwRow em.dec{ color:#a82028; }
   .plBtns .pauseBtn.late{ flex:0 0 auto; min-width:0; padding:11px 12px; color:var(--dim); }
   .stTitle{ font:15px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; color:var(--acc); }
   .stMsg{ font-size:12px; line-height:1.4; color:var(--ink); }
@@ -2105,6 +2112,7 @@
 <div id="mgrMaker" class="pauseOv"><div class="pauseCard mkCard"></div></div>
 <div id="storyModal" class="pauseOv"><div class="pauseCard stCard"></div></div>
 <div id="pileModal" class="pauseOv"><div class="pauseCard pileCard"></div></div>
+<div id="paperWarn" class="pauseOv"><div class="pauseCard pileCard pwCard"></div></div>
 <div id="xplTip" role="tooltip"></div>
 <div id="pressModal" class="pauseOv"><div class="pauseCard prCard"></div></div>
 <div id="moneyModal" class="pauseOv"><div class="pauseCard mnCard"></div></div>
@@ -18985,6 +18993,21 @@
     if(!force&&((d.pile.day||'mon')==='mon'||d.pile.opened||MGUI.noPile||document.getElementById('storyModal').classList.contains('on')||(d.press&&d.press.qs.length))) return;   // (a Monday's waits for you -- PAPERS, off to the side; a matchday's after the press)
     d.pile.opened=true; MGUI.years=2; pilePaint(d); m.classList.add('on'); }
   function pileHide(){ const m=document.getElementById('pileModal'); if(m) m.classList.remove('on'); MGUI.seq=null; }   // (v148: the papers are the run's last)
+  // (v241) THE PAPERS LEFT UNREAD: on with papers still on the desk, a word first -- what's still there, a row each, the ones
+  // that need an answer marked. READ THEM opens the pile; GO ON ANYWAY goes on (a decision left waits in next Monday's
+  // papers while it stands, as before); a tap off it leaves things as they were. -> whether it's shown
+  const PW_ROWS=4;
+  function paperWarnShow(d){ const m=document.getElementById('paperWarn'), left=pileLeft(d); if(!m||!left.length) return false;
+    const rows=left.map(x=>{ const [title,,B]=pileBody(d,x); return { st:pileStamp(d,x), t:String(title).replace(/<[^>]*>/g,''), dec:B.some(([,a])=>a!=='next') }; }), nd=rows.filter(r=>r.dec).length;
+    const shown=rows.filter(r=>r.dec).concat(rows.filter(r=>!r.dec)).slice(0,PW_ROWS), more=rows.length-shown.length, moreDec=nd-shown.filter(r=>r.dec).length;   // (those that need an answer first; four at most, so it fits a phone held sideways)
+    m.querySelector('.pwCard').innerHTML='<div class="plHead"><span>'+mgEsc(mgPhaseLabel(d).toUpperCase())+'</span><span>'+left.length+' UNREAD'+(nd?' · <b>'+nd+'</b> NEED'+(nd>1?'':'S')+' AN ANSWER':'')+'</span></div>'
+      +'<div class="plPaper'+(left.length>2?' many':left.length>1?' more':'')+'"><div class="plStamp"><span>BEFORE YOU GO ON</span></div>'
+      +'<div class="plTitle">You haven’t read '+(left.length===1?'one of this week’s papers':left.length+' of this week’s papers')+'</div>'
+      +'<div class="pwRows">'+shown.map(r=>'<div class="pwRow"><i>'+r.st+'</i><b>'+r.t+'</b><em'+(r.dec?' class="dec"':'')+'>'+(r.dec?'NEEDS AN ANSWER':'TO READ')+'</em></div>').join('')
+      +(more?'<div class="pwRow more"><i></i><b>and '+more+' more</b><em'+(moreDec?' class="dec"':'')+'>'+(moreDec?moreDec+' NEED'+(moreDec>1?'':'S')+' AN ANSWER':'TO READ')+'</em></div>':'')+'</div>'
+      +(nd?'<div class="plLine"><span class="dim">A decision you leave waits in next Monday’s papers, while it stands.</span></div>':'')+'</div>'
+      +'<div class="plBtns"><button class="pauseBtn late" data-pw="go">GO ON ANYWAY</button><button class="pauseBtn on" data-pw="read">READ THEM</button></div>';
+    m.classList.add('on'); return true; }
   const pileNm=(d,pid)=>{ const p=d.roster.find(q=>q.id===pid); return p?mgEsc(p.name):'—'; };
   const pileDelta=v=>(v>0?'<span class="up">+':'<span class="dn">')+v.toFixed(1)+'</span>';
   const pileOffer=(d,p)=>'<div class="plYrs">OR OFFER <button data-pile="ofr" data-dir="-1" data-pid="'+p.id+'">−</button><b>'+money(cOfferOf(d,p))+' A WEEK</b><button data-pile="ofr" data-dir="1" data-pid="'+p.id+'">+</button></div>';
@@ -19172,6 +19195,10 @@
       +'<div class="plPaper'+(left.length>2?' many':left.length>1?' more':'')+'"><div class="plStamp"><span>'+pileStamp(d,x)+'</span>'+fresh+'</div>'
       +'<div class="plTitle">'+title+'</div>'+L.map(t=>/^<div/.test(t)?t:'<div class="plLine">'+t+'</div>').join('')+'</div>'
       +'<div class="plBtns">'+B.map(([t,a,w])=>'<button class="pauseBtn'+(w===0?' late':'')+'" data-pile="'+a+'" data-x="'+x.id+'">'+t+'</button>').join('')+'</div>'; }
+  document.getElementById('paperWarn').addEventListener('click',e=>{ const m=e.currentTarget, b=e.target.closest('[data-pw]'), d=CAREER&&CAREER.data;
+    if(!b){ if(e.target===m) m.classList.remove('on'); return; }   // (a tap off it: as it was)
+    m.classList.remove('on'); if(!d) return;
+    if(b.dataset.pw==='read') pileShow(d,true); else mgAct('forward',{sure:'1'}); });
   document.getElementById('pileModal').addEventListener('click',e=>{ const b=e.target.closest('[data-pile]'), d=CAREER&&CAREER.data; if(!b||!d||!d.pile) return;
     const a=b.dataset.pile; let err=null;
     if(a==='close'){ d.pile.opened=true; pileHide(); renderHub(); return; }
@@ -22075,6 +22102,7 @@
       case 'play': mgPlay(d); return;
       case 'sim': mgSim(d); return;
       case 'forward': { if(document.getElementById('careerHub').classList.contains('dayscene')) return;   // (one at a time)
+        if(!ds.sure&&!window.__pwOff&&paperWarnShow(d)) return;   // (v241: papers still unread -- a word first: paperWarnShow)
         const was=d.phase; mgForward(d); mgSave(d); MGUI.noPile=true; renderHub();
         dayScene(d,()=>{ MGUI.noPile=false; pileShow(d); if(d.phase!==was) showNote(was==='summer'?'Pre-season is over: the season starts on Saturday.':was==='winter'?'The winter break is over and the window has shut: back to the league.':'The season is over.','var(--good)'); }); return; }
       case 'continue': if(d.phase==='playoffs') mgPlayoffsOut(d); mgSave(d); renderHub(); return;

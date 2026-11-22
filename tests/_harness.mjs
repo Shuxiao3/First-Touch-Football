@@ -49,6 +49,7 @@ export async function signAside(page){
 }
 export async function pileAside(page){
   await signAside(page);
+  await page.addInitScript(() => { window.__pwOff = true; });   // (v241: and no word about papers left unread, as you go on -- a test of that has papers: true)
   await page.addLocatorHandler(page.locator('#pileModal.on'), async () => {
     await page.evaluate(() => { const x = document.querySelector('#pileModal.on [data-pile="close"]'); if(x) x.click(); else { const m = document.getElementById('pileModal'); if(m) m.classList.remove('on'); } });
   });
