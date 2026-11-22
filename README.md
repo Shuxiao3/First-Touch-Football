@@ -502,6 +502,9 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Every window boxed as the match screen's (v240).** The menus, the career's windows and cards, the match report and
+  the tactics take the look of the boxes along the top of a match: a dark outline, one thin light rim inside it and a dark
+  see-through fill, with 6 px corners (a 2 px light rim over a darker one, on the window colour, with 10 px corners, before).
 - **Keepers as their squads have them (v239).** In an exhibition or a career match each keeper now plays with his own
   numbers: before, both played with the keepers the game had loaded with (Reflexes 6.5 each, where a club's might have
   8.5 or 9.5). Two tests that failed most runs now measure what they mean to: a defender's read of a runner only while
@@ -3556,6 +3559,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v240: windows as the match screen's boxes.** --pxWin is the outline and a 1 px --rim (the darker --rimLo ring gone),
+  --rWin 6 px (it was 10), and every rule pairing --pxWin with var(--win) fills with --boxBg, rgb(20 26 44 / .9), the match
+  chips' own; the campus picture's frame (.cpMain::after) the same thin rim. Tests: `classic-ui.mjs`.
 - **v239: keepers, and two steadier tests.** buildTeams calls applyKeeperStats once the keepers exist (buildTeams.gk),
   so every exhibition and career match sets them from SQUAD and LINEUP as it does the outfielders (it ran once, at
   load). `classic-perks.mjs` checks both keepers against their squad entries. `classic-shots.mjs`: the runner check

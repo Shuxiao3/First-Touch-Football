@@ -116,7 +116,9 @@ for(const [w, h] of SIZES){
     const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
     const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
-    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && radius >= 8 && btnR >= 5, 'the menus are framed in pixels: a dark outline, a light rim, rounded corners (' + radius + ' / ' + btnR + ' px)');
+    const fill = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).backgroundColor);
+    // (v240: as the match screen's boxes -- a dark outline, one thin light rim, a dark see-through fill, 6 px corners; 10 before, and a second, darker rim)
+    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && !/127, 147, 196/.test(frame) && /rgba\(20, 26, 44, 0\.9\)/.test(fill) && radius === 6 && btnR >= 5, 'the menus are boxed as the match screen\'s: a dark outline, one thin light rim, a dark see-through fill, rounded corners (' + radius + ' / ' + btnR + ' px; ' + fill + ')');
     // (v221) ONE COLOUR SCHEME: no COLOURS row, no other scheme in the stylesheet, and a pick saved from before (RUBY) opens in BLUE
     const one = await page.evaluate(() => { let rules = 0; for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } for(const r of rs) if(r.selectorText && /data-theme/.test(r.selectorText)) rules++; }
       return { opts: document.querySelectorAll('#setRows [data-pref="theme"]').length, rules, font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }; });
