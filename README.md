@@ -502,6 +502,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **A building's page as its template (v255).** Training's Pitch, the Physio, the Scouts' Network, the Academy's
+  Facilities and a building not put up yet share it: on the left, five columns, its picture, its level in a panel (lit
+  at the top; NOT BUILT and the clubhouse it waits for), its levels in a row (done ✓, the one it's at lit, the next with
+  its price, one its clubhouse isn't up to locked) and what the next costs against your money; on the right, seven,
+  WHAT IT DOES (AT LEVEL 1 before it's up), its numbers as tiles two to a row with what the next level makes them, and
+  the one button bottom right: BUILD IT and its price, CLUBHOUSE when that's what it waits for, AS GOOD AS IT GETS at the
+  top.
 - **Decorate as its template (v254).** The trees, the garden and the plaza as cards three across, four columns each,
   two rows to a page: the thing in a well, its name and how many you have out and in store, and its buttons at the foot,
   PUT ONE OUT when there's one in store and BUY with its price (dimmed when it's more than you have); the pages at the
@@ -3702,6 +3709,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v255: a building's page.** bldScreen draws .bpTpl.tplPage: .bpL (.bpPic, .bpLvl with its .clChip chips, the
+  LEVELS .clNodes as segments, a .clGo .clHave cost line) and .bpR (its .tplWell, .bsTiles of .clTile two to a row, and
+  .clGo.bpAct with the one .tplBtn: data-mg up, goclub, or .off at the top). .tplBtn.off is a button's place with
+  nothing to press.
 - **v254: Decorate.** mgDecorTab draws a .tplRows.dcBox.tplPage (data-pages DC:) holding .dcGrid, three columns of
   .decoCard.tplBox cards (.dcPic, .decoTxt, .decoBtns with .tplBtn), each half the page's height less the pager's, so
   fitBox pages them two rows at a time.

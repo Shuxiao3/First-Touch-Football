@@ -2582,6 +2582,31 @@
   #bpBody .dcBox .decoTxt i{ flex:none; font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); white-space:nowrap; }
   #bpBody .dcBox .decoBtns{ flex:none; display:flex; flex-direction:row; gap:4px; } #bpBody .dcBox .decoBtns .tplBtn{ flex:1 1 0; min-width:0; height:32px; min-height:32px; padding:0 6px; }
   #bpBody .dcBox .decoBtns .tplBtn[disabled]{ opacity:.5; }
+  /* (v255) A BUILDING'S PAGE AS ITS TEMPLATE: the picture and its levels in five columns, what it does in seven */
+  #bpBody .bpTpl{ display:grid; grid-template-columns:calc(var(--tplC) * 5 + 32px) calc(var(--tplC) * 7 + 48px); gap:8px; height:100%; min-height:0; }
+  #bpBody .bpTpl > .tplBox{ position:relative; display:flex; flex-direction:column; gap:4px; min-width:0; min-height:0; overflow:hidden; }
+  #bpBody .bpTpl .bpPic{ flex:1 1 auto; min-height:60px; position:relative; border-radius:var(--rS); background:var(--well); overflow:hidden; }
+  #bpBody .bpTpl .bpPic img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; image-rendering:pixelated; border-radius:0; box-shadow:none; }
+  #bpBody .bpTpl .bpLvl{ flex:none; height:28px; display:flex; align-items:center; gap:6px; padding:0 8px; border-radius:var(--rS); background:var(--win); }
+  #bpBody .bpTpl .bpLvl.lit{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .bpTpl .bpLvl .clChip{ padding:0; border:0; background:none; box-shadow:none; font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; color:var(--ink); }
+  #bpBody .bpTpl .bpLvl .clChip.dim{ color:var(--dim); } #bpBody .bpTpl .bpLvl .clChip.warn{ color:var(--warn); } #bpBody .bpTpl .bpLvl .clChip + .clChip::before{ content:'·'; margin-right:6px; color:var(--dim); }
+  #bpBody .bpTpl .tplLbl{ flex:none; padding:4px 2px 0; }
+  #bpBody .bpTpl .clNodes{ flex:none; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:4px; padding:0; max-width:none; }
+  #bpBody .bpTpl .clNode{ width:auto; height:28px; flex-direction:row; justify-content:center; align-items:center; gap:4px; border-radius:var(--rS); background:var(--win); color:var(--dim); }
+  #bpBody .bpTpl .clNode b{ font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:inherit; white-space:nowrap; }
+  #bpBody .bpTpl .clNode em{ font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; color:var(--acc); } #bpBody .bpTpl .clNode .hic{ width:10px; height:10px; }
+  #bpBody .bpTpl .clNode.done{ color:var(--good); } #bpBody .bpTpl .clNode.now{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); color:var(--ink); } #bpBody .bpTpl .clNode.lock{ opacity:.6; }
+  #bpBody .bpTpl .bpL > .clGo{ flex:none; min-height:0; padding:2px 2px 0; } #bpBody .bpTpl .bpL > .clGo .clHave{ font:600 11px/1.2 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); }
+  #bpBody .bpTpl .bsTiles{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; max-width:none; }
+  #bpBody .bpTpl .clTile{ height:56px; box-sizing:border-box; padding:6px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; border-radius:var(--rS); background:var(--win); box-shadow:none; }
+  #bpBody .bpTpl .clTile .clLbl{ font:600 9px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .bpTpl .clTile b{ font:700 16px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpBody .bpTpl .clTile em{ font:600 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.04em; color:var(--acc); }
+  #bpBody .bpTpl .clTile.off b{ color:var(--dim); }
+  #bpBody .bpTpl .bpAct{ margin-top:auto; justify-content:flex-end; min-height:0; max-width:none; }
+  #bpBody .bpTpl .bpAct .tplBtn{ width:calc(var(--tplC) * 4 + 16px); }
+  .tplBtn.off{ background:var(--win); color:var(--dim); box-shadow:none; cursor:help; } .tplBtn[disabled]{ opacity:.55; cursor:default; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -22188,27 +22213,34 @@
   // next (or against the clubhouse it waits for) and the button. Every tile and node says the rest when tapped
   // (o.lvl(k): what level k brings, in words); o.what, what the building is for, a tap on its name. It was a picture,
   // rows of words, a line a level and the price over two pages
+  // (v255) A BUILDING'S PAGE AS ITS TEMPLATE: two boxes. On the left, five columns: its picture, its level in a panel (lit
+  // at the top; NOT BUILT and the clubhouse it waits for), its levels in a row -- done ✓, the one it's at lit, the next
+  // with its price, one its clubhouse isn't up to locked -- and what the next costs against your money. On the right,
+  // seven: WHAT IT DOES (AT LEVEL 1 before it's up) in its well, what it does as tiles two to a row, each with what the
+  // next level makes it, and the one button bottom right: BUILD IT (UP) and its price, ◀ CLUBHOUSE when that's what it
+  // waits for, AS GOOD AS IT GETS at the top. (v173-v254: the picture, then the name, tiles, a path of nodes and the
+  // button in one column.)
   function bldScreen(d,id,o){ const L=lvOf(d,id), mx=bldMax(id), nx=L+1, cl=lvOf(d,'club'), b=Math.round(d.budget||0), top=L>=mx;
     const need=top?0:clubNeed(id,nx), lock=!top&&cl<need, cost=top?0:bldCost(id,nx), why=top?null:bldBlock(d,id);
     const pic=o.pic||bldPic(d,id==='train'?CAMPUS_META.train[Math.max(1,L)]:CAMPUS_META.bld[id],(id==='train'?'train'+Math.max(1,L):'b:'+id));
-    let h='<div class="clId"><span class="bsIco">'+bldSvg(id)+'</span><b class="clName"'+(o.what?' data-xpl="'+xq(o.what)+'"':'')+'>'+o.name+'</b>'
-      +(L?'<span class="bsPips" data-xpl="'+xq('Level '+L+' of '+mx+'.')+'">'+Array.from({length:mx},(_,k)=>'<i'+(k<L?' class="on"':'')+'></i>').join('')+'</span><span class="clChip">LEVEL '+L+' OF '+mx+'</span>'
-          :'<span class="clChip dim">NOT BUILT</span>')
+    let l='<div class="bpPic">'+pic+'</div><div class="clId bpLvl'+(top?' lit':'')+'">'+(L?'<span class="clChip" data-xpl="'+xq('Level '+L+' of '+mx+'.')+'">LEVEL '+L+' OF '+mx+'</span>':'<span class="clChip dim">NOT BUILT</span>')
       +(lock?'<span class="clChip warn" data-xpl="'+xq((L?'Level '+nx:capFirst(BLD_NAME[id]))+' needs clubhouse '+need+' ('+CLUB_LV[need].n.toLowerCase()+').')+'">NEEDS '+clubShort(need)+'</span>':'')+'</div>';
-    const now=o.tiles(Math.max(1,L)), then=top?null:o.tiles(L?nx:1);
-    h+='<div class="bsTiles" style="grid-template-columns:repeat('+(now.length>3?Math.ceil(now.length/2):now.length)+',minmax(0,1fr))">'+now.map((t,i)=>{   /* (six: three and three) */ const n=L&&then&&then[i]&&then[i][1]!==t[1]?then[i][1]:null;
-      return '<div class="clTile'+(L?'':' off')+'" data-xpl="'+xq((L?'':'At level 1: ')+t[2]+(n?' Level '+nx+': '+n+'.':''))+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b>'+(n?'<em>LEVEL '+nx+' ▸ '+n+'</em>':L?'':'<em>AT LEVEL 1</em>')+'</div>'; }).join('')+'</div>';
     const node=k=>{ const st=k<L?'done':k===L?'now':k===nx?'next':'later', nd=clubNeed(id,k), lk=k>L&&cl<nd, c=bldCost(id,k);
-      return '<span class="clNode '+st+(lk?' lock':'')+'" data-xpl="'+xq('Level '+k+(k<=L?'':(c?', '+money(c):', free'))+': '+o.lvl(k)+'.'+(lk?' It needs clubhouse '+nd+' ('+CLUB_LV[nd].n.toLowerCase()+').':''))+'"><i>'+(st==='done'?'✓':'')+'</i><b>LEVEL '+k+'</b>'
-        +(lk?LOCK_SVG:st==='next'?'<em>'+(c?kPrice(c):'FREE')+'</em>':'')+'</span>'; };
-    h+='<div class="clPath"><span class="clLbl">LEVELS</span><div class="clNodes">'+Array.from({length:mx},(_,i)=>(i?'<s'+(i<L?' class="done"':'')+'></s>':'')+node(i+1)).join('')+'</div>';
-    if(top) h+='<div class="clGo"><em style="color:var(--good)" data-xpl="It is as good as it gets.">AS GOOD AS IT GETS</em></div>';
+      return '<span class="clNode '+st+(lk?' lock':'')+'" data-xpl="'+xq('Level '+k+(k<=L?'':(c?', '+money(c):', free'))+': '+o.lvl(k)+'.'+(lk?' It needs clubhouse '+nd+' ('+CLUB_LV[nd].n.toLowerCase()+').':''))+'"><b>'+(st==='done'?'✓ ':'')+'LEVEL '+k+'</b>'
+        +(lk?'<i class="hic" data-ic="lock"></i>':st==='next'?'<em>'+(c?kPrice(c):'FREE')+'</em>':'')+'</span>'; };
+    l+='<span class="tplLbl">LEVELS</span><div class="clNodes">'+Array.from({length:mx},(_,i)=>node(i+1)).join('')+'</div>';
+    let act;
+    if(top){ l+='<div class="clGo"><span class="clHave" data-xpl="It is as good as it gets.">Nothing more to build</span></div>'; act='<span class="tplBtn off" data-xpl="It is as good as it gets.">AS GOOD AS IT GETS</span>'; }
     else if(lock){ const k=cl+1, C=CLUB_LV[k];   // (the clubhouse on the way: your money against it, and off to it)
-      h+='<div class="clGo"><span class="clHave" data-xpl="'+xq('First '+C.n.toLowerCase()+' (clubhouse '+k+'): '+money(C.cost)+'; you have '+money(b)+'.'+(need>k?' Then clubhouse '+need+'.':''))+'">'+pBar(b,C.cost)+'<em>'+clubShort(k)+' '+kMoney(Math.max(0,b))+' / '+kPrice(C.cost)+'</em></span>'
-        +'<button class="mgBtn" data-mg="goclub">◀ CLUBHOUSE</button></div>'; }
-    else h+='<div class="clGo"><span class="clHave" data-xpl="'+xq((L?'Level '+nx:capFirst(BLD_NAME[id]))+' costs '+money(cost)+'; you have '+money(b)+'.')+'">'+pBar(b,cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(cost)+'</em></span>'
-        +'<button class="mgBtn go" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'>'+(L?o.verb||'BUILD IT UP':'BUILD IT')+'</button></div>';
-    return '<div class="bsWrap fitWhole">'+pic+'<div class="bsMain">'+h+'</div>'+(o.extra||'')+'</div></div>'; }
+      l+='<div class="clGo"><span class="clHave" data-xpl="'+xq('First '+C.n.toLowerCase()+' (clubhouse '+k+'): '+money(C.cost)+'; you have '+money(b)+'.'+(need>k?' Then clubhouse '+need+'.':''))+'">'+clubShort(k)+' '+kMoney(Math.max(0,b))+' / '+kPrice(C.cost)+'</span></div>';
+      act='<button class="tplBtn" data-mg="goclub"><i class="hic" data-ic="back"></i>CLUBHOUSE</button>'; }
+    else { l+='<div class="clGo"><span class="clHave" data-xpl="'+xq((L?'Level '+nx:capFirst(BLD_NAME[id]))+' costs '+money(cost)+'; you have '+money(b)+'.')+'">'+kMoney(Math.max(0,b))+' / '+kPrice(cost)+'</span></div>';
+      act='<button class="tplBtn pri" data-mg="up" data-b="'+id+'"'+(why?' disabled':'')+'><i class="hic" data-ic="upgrade"></i>'+(L?o.verb||'BUILD IT UP':'BUILD IT')+' · '+(cost?kPrice(cost):'FREE')+'</button>'; }
+    const now=o.tiles(Math.max(1,L)), then=top?null:o.tiles(L?nx:1);
+    const r='<div class="tplWell"'+(o.what?' data-xpl="'+xq(o.what)+'"':'')+'>'+(L?'WHAT IT DOES':'AT LEVEL 1')+'</div><div class="bsTiles">'+now.map((t,i)=>{ const n=L&&then&&then[i]&&then[i][1]!==t[1]?then[i][1]:null;
+      return '<div class="clTile'+(L?'':' off')+'" data-xpl="'+xq((L?'':'At level 1: ')+t[2]+(n?' Level '+nx+': '+n+'.':''))+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b>'+(n?'<em>LEVEL '+nx+' ▸ '+n+'</em>':'')+'</div>'; }).join('')+'</div>'
+      +'<div class="clGo bpAct">'+act+'</div>';
+    return '<div class="bpTpl tplPage"><div class="tplBox bpL">'+l+'</div><div class="tplBox bpR">'+r+'</div>'+(o.extra||'')+'</div>'; }
   // what each building does, level by level, as numbers (bldScreen's tiles) and in words (its nodes)
   const BS={
     train:{name:'TRAINING PITCH', verb:'BUILD IT UP', what:'The training pitch: each level trains everyone a little better. Every shape, style and team instruction is yours from the start.',
