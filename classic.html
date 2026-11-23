@@ -2538,6 +2538,63 @@
   #bpBody .tplRows{ position:relative; height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
   #bpBody .tplRows > .tplWell, #bpBody .tplRows > .tplSeg, #bpBody .tplRows > .fxTop{ flex:none; margin-bottom:2px; }
   #bpBody .tplRows > .fitPager{ bottom:4px; height:32px; } #bpBody .tplRows > .fitPager .mgAdj{ width:52px; height:28px; min-height:28px; }
+  /* (v256) TRAINING'S SELECTION as its template: three boxes, five, four and three columns -- the nine; the bench over the
+     men not taken, three to a page; the quick subs with how they work. Every bar 28 high (26 on a short phone), 2 apart */
+  #bpBody .selTpl{ --selH:28px; display:grid; grid-template-columns:calc(var(--tplC) * 5 + 32px) calc(var(--tplC) * 4 + 24px) calc(var(--tplC) * 3 + 16px); gap:8px; height:100%; min-height:0; padding:0; box-sizing:border-box; }
+  @media (max-height:350px){ #bpBody .selTpl{ --selH:26px; } }
+  #bpBody .selTpl > .selBox{ min-width:0; min-height:0; display:flex; flex-direction:column; gap:6px; overflow:hidden; }
+  #bpBody .selTpl .selCol{ flex:none; min-height:0; display:flex; flex-direction:column; gap:2px; }
+  #bpBody .selTpl .selCol[data-grp="rest"]{ flex:1 1 auto; }
+  #bpBody .selTpl .selHd{ flex:none; height:16px; padding:0 4px; line-height:16px; }
+  #bpBody .selTpl .selRow{ flex:none; height:var(--selH); box-sizing:border-box; background:var(--win); box-shadow:none; border-radius:var(--rS); }
+  #bpBody .selTpl .selRow.paired{ box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .selTpl .selRow.qpOn{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .selTpl .selRow.dropOver{ background:var(--rowOn); box-shadow:inset 0 0 0 2px var(--acc); }
+  #bpBody .selTpl .selRow.selOff{ display:none; }
+  #bpBody .selTpl .selRestHd{ flex:none; height:24px; display:flex; align-items:center; gap:4px; }
+  #bpBody .selTpl .selRestHd .selHd{ flex:1 1 auto; min-width:0; }
+  #bpBody .selTpl .selPg{ flex:none; display:flex; align-items:center; gap:4px; }
+  #bpBody .selTpl .selPgB{ width:30px; height:24px; min-height:24px; margin:0; padding:0; border:0; border-radius:var(--rS); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; cursor:pointer; }
+  #bpBody .selTpl .selPgB:disabled{ opacity:.35; cursor:default; }
+  #bpBody .selTpl .selPg b{ min-width:28px; text-align:center; font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; }
+  #bpBody .selTpl .qpCol{ gap:4px; }
+  #bpBody .selTpl .qpRow{ flex:none; height:28px; box-sizing:border-box; background:var(--win); box-shadow:none; border-radius:var(--rS); }
+  #bpBody .selTpl .qpRow.qpPair:not(.empty){ box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .selTpl .qpNow{ flex:none; height:auto; min-height:24px; padding:5px 8px; font:700 11px/14px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:0; text-transform:none; color:var(--acc); white-space:normal; }
+  #bpBody .selTpl .qpHowL{ flex:none; padding:0 4px; margin-top:4px; }
+  /* (v256) THE STAFF as its template, pattern 2 in three: your posts (the man picked, his lit), the men to hire as rows,
+     the man picked with HIRE -- four, five and three columns. The academy's Coach the same, its one post */
+  #bpBody .stfTpl.tplPanes{ grid-template-columns:calc(var(--tplC) * 4 + 24px) calc(var(--tplC) * 5 + 32px) calc(var(--tplC) * 3 + 16px); }
+  #bpBody .stfTpl .stfPosts{ min-width:0; min-height:0; display:flex; flex-direction:column; gap:4px; overflow:hidden; }
+  #bpBody .stfTpl .stfHead{ font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--acc); white-space:nowrap; }
+  #bpBody .stfTpl .stfHead .plN{ font:inherit; color:inherit; }
+  #bpBody .stfTpl .coPosts{ display:flex; flex-direction:column; gap:4px; margin:0; }
+  #bpBody .stfTpl .coPost{ flex:none; height:28px; flex-direction:row; align-items:center; gap:0; padding:0 8px 0 11px; background:var(--win); box-shadow:none; border-radius:var(--rS); }
+  #bpBody .stfTpl .coPost::before{ top:6px; bottom:6px; }
+  #bpBody .stfTpl .coPost .clLbl{ flex:none; font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .stfTpl .coPost .clLbl::after{ content:' · '; white-space:pre; }
+  #bpBody .stfTpl .coPost b{ flex:1 1 auto; min-width:0; font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; }
+  #bpBody .stfTpl .coPost .coPips{ flex:none; margin-left:6px; }
+  #bpBody .stfTpl .coPost.vac b{ color:var(--dim2); }
+  #bpBody .stfTpl .coPost.on{ background:var(--rowOn); box-shadow:none; } #bpBody .stfTpl .coPost.on::before{ background:var(--acc); }
+  #bpBody .stfTpl .stfNext{ margin-top:auto; gap:6px; font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; color:var(--dim); white-space:nowrap; cursor:help; }
+  #bpBody .stfTpl .stfNext span{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .stfTpl .stfNew{ margin-left:auto; padding:3px 6px; border-radius:3px; background:var(--acc); color:var(--accInk); font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.06em; }
+  #bpBody .tplPanes .mgPaneR .mgPaneScroll:has(> .mgCard.stfCard){ padding:0; }
+  #bpBody .stfTpl .stfCard{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:4px; margin:0; padding:0; background:none; box-shadow:none; }
+  #bpBody .stfTpl .stfWho{ flex:none; height:48px; gap:8px; padding:0 8px; text-transform:none; letter-spacing:0; }
+  #bpBody .stfTpl .coRow .plSt{ flex:none; margin:0 4px 0 0; }
+  #bpBody .stfTpl .stfWho > .hic{ flex:none; width:20px; height:20px; color:var(--acc); }
+  #bpBody .stfTpl .sqWho{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  #bpBody .stfTpl .sqWho b{ font:700 13px/1.1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .stfTpl .sqWho i{ font:600 10px/1.2 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .stfTpl .sqKv{ flex:none; height:24px; box-sizing:border-box; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); cursor:help; }
+  #bpBody .stfTpl .sqKv .hic{ width:12px; height:12px; color:var(--dim); }
+  #bpBody .stfTpl .sqKv span{ flex:1 1 auto; min-width:0; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .stfTpl .sqKv b{ flex:none; font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; }
+  #bpBody .stfTpl .sqKv .coPips{ flex:none; }
+  #bpBody .stfTpl .stfCard .coChips{ margin:2px 4px 0; }
+  #bpBody .stfTpl .stfFoot{ margin-top:auto; flex:none; display:grid; }
   .tplSeg{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:4px; height:28px; }
   .tplSegB{ min-width:0; height:28px; margin:0; padding:0 6px; border:0; border-radius:var(--rS); background:var(--win); color:var(--dim); cursor:pointer;
     font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -18798,21 +18855,23 @@
   const coPips=r=>'<span class="coPips">'+[1,2,3,4,5].map(i=>'<i'+(r>=i*2?' class="on"':r>=i*2-1?' class="half"':'')+'></i>').join('')+'</span>';
   function mgStaffTab(d,youth){ const kinds=youth?['youth']:STAFF_ORDER, C=youth?youthCands(d):staffCands(d), S=(d.staff||[]).filter(c=>kinds.includes(c.k)), sel=MGUI.csel, cap=staffCap(d);
     const cd=youth?d.ycand:d.cand, wk=d.weeks||0, fresh=!!cd&&cd.w===wk, next=cd?Math.max(1,4-(wk-(cd.w||0))):4;   // (this week's men: NEW)
-    const tile=k=>{ const c=coachOf(d,k);
-      return '<button class="coPost'+(c?'':' vac')+(c&&sel===c.id?' on':'')+'" style="--pc:'+POST_COL[k]+'" '+(c?'data-mg="csel" data-cid="'+c.id+'"':'data-xpl="'+xq('No '+STAFF_KIND[k].n+' coach'+(k==='youth'?': the lads train on their own.':': tap one of the '+STAFF_KIND[k].n+' men below to see him.'))+'"')+'>'
-        +'<i class="clLbl">'+(k==='youth'?'YOUTH':k.toUpperCase())+'</i><b>'+(c?mgEsc(surname(c.name)).toUpperCase():'VACANT')+'</b>'+(c?coPips(c.r):'<span class="coPips"></span>')+(fresh?'<em class="coNew">NEW</em>':'')+'</button>'; };
-    const row=c=>'<button class="mgRow pl coRow'+(sel===c.id?' on':'')+'" data-mg="csel" data-cid="'+c.id+'"><span class="pos pc" style="background:'+POST_COL[c.k]+'">'+(c.k==='youth'?'YTH':c.k.toUpperCase())+'</span>'
-      +'<span class="nm">'+mgEsc(c.name)+(c.r>cap?plSt('WON’T COME','bad'):'')+'</span><span class="ovr">'+c.r.toFixed(1)+'</span>'+coPips(c.r)+'<span class="amt">'+money(c.wage)+'</span></button>';
-    const top='<div class="coPosts" style="grid-template-columns:repeat('+kinds.length+',minmax(0,1fr))">'+kinds.map(tile).join('')+'</div>'
-      +'<div class="mgSum plSum"><span data-xpl="'+xq(youth?'Your youth coach trains the academy’s lads.':'A coach for each post: '+S.length+' of '+kinds.length+' filled.')+'"><b class="plN">'+S.length+'</b> OF '+kinds.length+' '+(kinds.length>1?'POSTS':'POST')+'</span> · '
-      +'<span data-xpl="'+xq('New men every four weeks: the next in '+next+' week'+(next>1?'s':'')+'.')+'">'+plCount(C.length,'TO HIRE')+' · NEXT IN '+next+' WK'+(next>1?'S':'')+'</span></div>';
-    const h='<div class="plTop">'+top+'<div class="plCols"><span class="pc">POST</span><span class="nm">NAME</span><span class="ovr">RATING</span><span class="pips"></span><span class="amt">WAGE/WK</span></div></div>'
-      +'<div class="mgList plList plOther">'+C.slice().sort((a,b)=>kinds.indexOf(a.k)-kinds.indexOf(b.k)||b.r-a.r).map(row).join('')+'</div>';
-    const c=S.find(x=>x.id===sel)||C.find(x=>x.id===sel), mine=c&&S.includes(c);
-    const card=c?'<div class="mgCard"><div class="mgCardName">'+mgEsc(c.name)+'</div><div class="mgCardSub">'+STAFF_KIND[c.k].n+' coach · rated '+c.r.toFixed(1)+'</div>'
-      +'<div class="mgFacts">'+mgFact('WAGE',money(c.wage)+'/wk','',true)+'</div>'+coachChips('GOOD AT',c.up,'up',youth)+coachChips('POOR AT',c.dn,'dn',youth)
-      +'<div class="mgAct">'+(mine?'<button class="mgBtn warn" data-mg="cfire" data-cid="'+c.id+'">RELEASE ('+money(c.wage*4)+')</button>':'<button class="mgBtn go" data-mg="chire" data-cid="'+c.id+'">HIRE</button>')+'</div></div>':'';
-    return mgPanes(h,card||'<div class="mgPick0">Tap a coach to see him here.</div>'); }
+    const c=S.find(x=>x.id===sel)||C.find(x=>x.id===sel), mine=c&&S.includes(c), lk=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
+    const tile=k=>{ const o=coachOf(d,k);   // (a post a row; lit, the post of the man picked -- yours, or the one he'd fill)
+      return '<button class="coPost'+(o?'':' vac')+(c&&c.k===k?' on':'')+'" style="--pc:'+POST_COL[k]+'" '+(o?'data-mg="csel" data-cid="'+o.id+'"':'data-xpl="'+xq('No '+STAFF_KIND[k].n+' coach'+(k==='youth'?': the lads train on their own.':': tap one of the '+STAFF_KIND[k].n+' men on the list to see him.'))+'"')+'>'
+        +'<i class="clLbl">'+(k==='youth'?'YOUTH':k.toUpperCase())+'</i><b>'+(o?mgEsc(surname(o.name)).toUpperCase():'VACANT')+'</b>'+(o?coPips(o.r):'')+'</button>'; };
+    const row=x=>'<button class="mgRow pl coRow'+(sel===x.id?' on':'')+'" data-mg="csel" data-cid="'+x.id+'"><span class="pos pc" style="background:'+POST_COL[x.k]+'">'+(x.k==='youth'?'YTH':x.k.toUpperCase())+'</span>'
+      +'<span class="nm">'+mgEsc(x.name)+'</span>'+(x.r>cap?plSt('WON’T COME','bad'):'')+'<span class="ovr">'+x.r.toFixed(1)+'</span><span class="amt">'+money(x.wage)+'</span></button>';
+    const posts='<div class="tplBox stfPosts"><div class="tplWell stfHead"><span data-xpl="'+xq(youth?'Your youth coach trains the academy’s lads.':'A coach for each post: '+S.length+' of '+kinds.length+' filled.')+'">'
+      +(youth?'YOUTH COACH':'YOUR STAFF')+' · <b class="plN">'+S.length+'</b> OF '+kinds.length+'</span></div><div class="coPosts">'+kinds.map(tile).join('')+'</div>'
+      +'<div class="tplWell stfNext" data-xpl="'+xq('New men every four weeks: the next in '+next+' week'+(next>1?'s':'')+'.')+'"><span>'+plCount(C.length,'TO HIRE')+' · NEXT IN '+next+' WK'+(next>1?'S':'')+'</span>'+(fresh?'<em class="stfNew">NEW</em>':'')+'</div></div>';
+    const list='<div class="mgPane mgPaneL tplBox"><div class="plCols"><span class="pc">POST</span><span class="nm">NAME</span><span class="ovr">RATING</span><span class="amt">WAGE/WK</span></div>'
+      +'<div class="mgPaneScroll plPane" data-pl="L:'+lk+'"><div class="mgList plList plOther">'+C.slice().sort((a,b)=>kinds.indexOf(a.k)-kinds.indexOf(b.k)||b.r-a.r).map(row).join('')+'</div></div><div class="plFade end"><b class="plMore"></b></div></div>';
+    const card=c?'<div class="mgCard stfCard"><div class="tplWell stfWho"><i class="hic" data-ic="coach"></i><span class="sqWho"><b>'+mgEsc(c.name)+'</b><i>'+STAFF_KIND[c.k].n[0].toUpperCase()+STAFF_KIND[c.k].n.slice(1)+' coach</i></span></div>'
+      +'<div class="sqKv" data-xpl="'+xq('Rated '+c.r.toFixed(1)+' of 10: the better he is, the more his post does.')+'"><i class="hic" data-ic="star"></i><span>Rating</span><b>'+c.r.toFixed(1)+'</b>'+coPips(c.r)+'</div>'
+      +'<div class="sqKv" data-xpl="'+xq(mine?'His wage, every week; to let him go costs four of them.':'His wage, every week, once he starts.')+'"><i class="hic" data-ic="wage"></i><span>Wage</span><b>'+money(c.wage)+'/wk</b></div>'
+      +coachChips('GOOD AT',c.up,'up',youth)+coachChips('POOR AT',c.dn,'dn',youth)
+      +'<div class="stfFoot">'+(mine?'<button class="tplBtn" data-mg="cfire" data-cid="'+c.id+'">RELEASE ('+money(c.wage*4)+')</button>':'<button class="tplBtn pri" data-mg="chire" data-cid="'+c.id+'"><i class="hic" data-ic="contract"></i>HIRE</button>')+'</div></div>':'';
+    return '<div class="mgPanes tplPanes stfTpl tplPage">'+posts+list+'<div class="mgPane mgPaneR tplBox"><div class="mgPaneScroll">'+(card||'<div class="mgPick0">Tap a coach to see him here.</div>')+'</div></div></div>'; }
 
   // ===== CHARACTER AND MORALE ===========================================================================================
   // HIS CHARACTER, in words, never numbers: traits drawn from his hidden values, each with a good side and a cost (see
@@ -21604,21 +21663,28 @@
     return d.qsubs=(Array.isArray(d.qsubs)?d.qsubs:[]).filter(ok).slice(0,SUB_MAX); }
   function mgSelectTab(d){ const lu=ensureLineup(d), R=d.roster, A=careerSlots(d.formation,'atk'), n8=1+lu.atk.length, L=selList(lu), nb=Math.min(L.length,n8+BENCH_N);
     const plans=qpPlans(d), sel=MGUI.qpSel, byId=id=>R.find(p=>p.id===id), tag=id=>{ const p=byId(id); return p?'#'+(p.num||'')+' '+mgEsc(surname(p.name||'')):''; };
+    const pgs=Math.max(1,Math.ceil((L.length-nb)/SEL_RPG)), pg=MGUI.selPg=clamp(MGUI.selPg||0,0,pgs-1);   // (v256: the men not taken, three to a page)
     const row=k=>{ const p=R[L[k]]; if(!p) return ''; const sl=k===0?{role:'GK',pos:'GK'}:k<n8?A[k-1]:null;
       const side=k>0&&k<n8?'xi':k>=n8&&k<nb&&p.role!=='GK'?'bench':null, pair=side==='xi'?plans.find(q=>q.off===p.id):side==='bench'?plans.find(q=>q.on===p.id):null;
       const on=!!(side&&sel&&sel.side===side&&sel.id===p.id)||MGUI.selPick===k;   // (v158: or picked to move, A TAP TO MOVE A MAN)
-      return '<div class="selRow'+(sl?' slot'+fitCls(fitPos(p),sl.role,spotFit(sl)):'')+(p.inj?' inj':'')+(on?' qpOn':'')+(pair?' paired':'')+'" data-k="'+k+'"'
+      return '<div class="selRow'+(sl?' slot'+fitCls(fitPos(p),sl.role,spotFit(sl)):'')+(p.inj?' inj':'')+(on?' qpOn':'')+(pair?' paired':'')+(k>=nb&&Math.floor((k-nb)/SEL_RPG)!==pg?' selOff':'')+'" data-k="'+k+'"'
         +(side?' data-mg="qpick" data-side="'+side+'" data-qid="'+p.id+'"':'')+'><span class="slK">'+(k+1)+'</span><span class="slNm">'+(p.inj?'<b class="injX">✚</b>':'')+mgEsc(initName(p.name))+'</span>'
         +(pair?'<span class="qpTo">'+(side==='xi'?'▸ '+tag(pair.on).split(' ')[0]:'◂ '+tag(pair.off).split(' ')[0])+'</span>':'')
         +'<span class="slPos">'+(sl?sl.pos:natPos(p))+'</span><span class="slOvr">'+ovrShownOf(p,sl?ovrAt(p,sl.role,spotFit(sl)):p.ovr)+'</span>'+condBar(p,'slCond')+'</div>'; };
-    const col=(g,hd,a,b)=>{ let h='<div class="selCol" data-grp="'+g+'"><div class="selHd">'+hd+'</div>'; for(let k=a;k<b;k++) h+=row(k); return h+'</div>'; };
+    const hd=t=>'<div class="selHd tplLbl">'+t+'</div>', col=(g,top,a,b)=>{ let h='<div class="selCol" data-grp="'+g+'">'+top; for(let k=a;k<b;k++) h+=row(k); return h+'</div>'; };
+    const pager=pgs<2?'':'<span class="selPg"><button class="selPgB" data-mg="selpg" data-d="-1"'+(pg<=0?' disabled':'')+' aria-label="the men before">◀</button><b>'+(pg+1)+' / '+pgs+'</b>'
+      +'<button class="selPgB" data-mg="selpg" data-d="1"'+(pg>=pgs-1?' disabled':'')+' aria-label="the men after">▶</button></span>';
     let plan=''; for(let k=0;k<SUB_MAX;k++){ const q=plans[k];
       plan+=q?'<div class="qpRow qpPair"><span class="slK">'+(k+1)+'</span><span class="slNm">'+tag(q.off)+' ▸ '+tag(q.on)+'</span><button class="qpX" data-mg="qpdel" data-k="'+k+'" aria-label="take this sub off the plan">✕</button></div>'
-        :'<div class="qpRow qpPair empty"><span class="slK">'+(k+1)+'</span><span class="slNm">—</span></div>'; }
-    plan+='<div class="qpHint">'+(MGUI.selPick!=null?'Now the man to swap him with (him again: let go).':sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.'
-      :'<span class="qpHow" data-xpl="Tap a man on the pitch, then one on the bench: in the match they\u2019re first on your quick subs. Your keeper or a man not taken, tapped, then anyone: they swap.">HOW IT WORKS</span>')+'</div>';   // (v177: J1 -- the how a tap away)
-    return '<div class="selB"><div class="selCols" style="--rows:'+Math.max(n8,nb-n8,L.length-nb,SUB_MAX+2)+'">'+col('xi','ON THE PITCH',0,n8)+col('bench','THE BENCH',n8,nb)+col('rest','NOT TAKEN',nb,L.length)
-      +'<div class="selCol qpCol" data-grp="qs"><div class="selHd">QUICK SUBS · '+plans.length+' OF '+SUB_MAX+'</div>'+plan+'</div></div></div>'; }
+        :'<div class="qpRow qpPair empty"><span class="slK">'+(k+1)+'</span><span class="slNm">–</span></div>'; }
+    const now=MGUI.selPick!=null?'Now the man to swap him with (him again: let go).':sel?'Now a man '+(sel.side==='xi'?'on the bench':'on the pitch')+' to pair him with.':'';
+    return '<div class="selB selTpl tplPage"><div class="tplBox selBox">'+col('xi',hd('ON THE PITCH'),0,n8)+'</div>'
+      +'<div class="tplBox selBox">'+col('bench',hd('THE BENCH'),n8,nb)+col('rest','<div class="selRestHd">'+hd('NOT TAKEN')+pager+'</div>',nb,L.length)+'</div>'
+      +'<div class="tplBox selBox"><div class="selCol qpCol" data-grp="qs">'+hd('QUICK SUBS · '+plans.length+' OF '+SUB_MAX)+plan+'</div>'+(now?'<div class="tplWell qpNow">'+now+'</div>':'')
+      +'<div class="tplLbl qpHowL"><span class="qpHow" data-xpl="Tap a man on the pitch, then one on the bench: in the match they\u2019re first on your quick subs. Your keeper or a man not taken, tapped, then anyone: they swap.">HOW IT WORKS</span></div></div></div>'; }   // (v177's how, a tap away: J1, no sentence on the page)
+  const SEL_RPG=3;   // (v256: three men not taken to a page, under the bench's five: every phone has room for them at 28 high, 26 on a short one)
+  // a man moved by a drag onto a place among the men not taken: that page shows, him on it
+  function selShowK(d,k){ const lu=ensureLineup(d), L=selList(lu), nb=Math.min(L.length,1+lu.atk.length+BENCH_N); if(k>=nb) MGUI.selPg=Math.floor((k-nb)/SEL_RPG); }
   // a man of the pitch and one of the bench, tapped in turn: paired (taking the place of either's last pair)
   function qpPair(d,off,on){ const plans=qpPlans(d), k=plans.findIndex(q=>q.off===off||q.on===on), q={off,on};
     const rest=plans.filter(x=>x.off!==off&&x.on!==on);
@@ -23294,6 +23360,7 @@
         if(!sel||sel.side===side){ MGUI.qpSel=sel&&sel.id===id?null:{side,id}; break; }
         const err=qpPair(d,side==='xi'?id:sel.id,side==='bench'?id:sel.id); MGUI.qpSel=null; if(err) say(err); break; }
       case 'qpdel': { const plans=qpPlans(d); plans.splice(+ds.k,1); d.qsubs=plans; MGUI.qpSel=null; break; }
+      case 'selpg': MGUI.selPg=(MGUI.selPg||0)+(+ds.d||0); break;   // (v256: the men not taken, a page on or back)
     }
     mgRerender();
     if(a==='sel'&&MGUI.sel){ const c=document.querySelector('#bpBody .mgCard'); if(c&&c.scrollIntoView&&!c.closest('.mgPane')) c.scrollIntoView({block:'nearest'}); } }
@@ -23455,7 +23522,7 @@
     const end=e=>{ if(!st||e.pointerId!==st.id) return; const s=st; st=null;
       if(!s.live){ if(e.type==='pointerup'&&!s.el.dataset.mg){ const d=CAREER&&CAREER.data; if(d) selTap(d,s.k); } return; }   // (v158: A TAP TO MOVE A MAN)
       s.ghost.remove(); s.el.classList.remove('lifted'); unmark(); quiet();
-      const d=CAREER&&CAREER.data; if(d&&s.aim&&e.type==='pointerup'&&selMove(d,s.k,s.aim.k,s.aim.swap)){ mgSave(d); rerenderOffice(); } };
+      const d=CAREER&&CAREER.data; if(d&&s.aim&&e.type==='pointerup'&&selMove(d,s.k,s.aim.k,s.aim.swap)){ mgSave(d); selShowK(d,s.aim.k); rerenderOffice(); } };
     addEventListener('pointerup',end); addEventListener('pointercancel',end); })();
 
   // ---- a new career: you, your club, its colours ----

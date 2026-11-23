@@ -691,20 +691,21 @@ for(const [w, h] of [[844, 340], [640, 360]]){
     const col = getComputedStyle(B).flexDirection === 'column', at = t => Math.round(col ? t.getBoundingClientRect().left : t.getBoundingClientRect().top);   // (v226: down the pitch's side on a wider phone -- one column)
     return { men: B.querySelectorAll('.ptk').length, rows: new Set(vis.map(at)).size, col, pager: pg && pg.getClientRects().length ? pg.textContent : '',
       pitch: Math.round(document.querySelector('#bpBody .tpitch').getBoundingClientRect().height) }; });
-  // ...and the Selection tab: the whole squad, a bar a man in three columns (the nine, the bench, the rest; the fourth
-  // is the quick subs), no faces, every bar the same height, all of them on the screen
+  // ...and the Selection tab: the whole squad, a bar a man in three boxes (the nine; the bench over the rest, three of
+  // them to a page; the quick subs), no faces, every bar on the page the same height, all of them on the screen
   const sel = async () => { await page.tap('#bpTabs .bpTab:text-is("Selection")'); await page.waitForTimeout(200);
-    const o = await page.evaluate(() => { const C = [...document.querySelectorAll('#bpBody .selCol:not(.qpCol)')], rows = [...document.querySelectorAll('#bpBody .selRow')], hs = rows.map(r => r.getBoundingClientRect().height);
+    const o = await page.evaluate(() => { const C = [...document.querySelectorAll('#bpBody .selCol:not(.qpCol)')], rows = [...document.querySelectorAll('#bpBody .selRow')], vis = rows.filter(r => r.getClientRects().length), hs = vis.map(r => r.getBoundingClientRect().height);
       return { cols: C.map(c => c.dataset.grp + ' ' + c.querySelectorAll('.selRow').length).join(', '), order: rows.map(r => +r.dataset.k).every((k, i) => k === i), imgs: document.querySelectorAll('#bpBody .selB img').length,
-        h: [Math.round(Math.min(...hs)), Math.round(Math.max(...hs))], inside: rows.every(r => { const b = r.getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth; }) }; });
+        h: [Math.round(Math.min(...hs)), Math.round(Math.max(...hs))], inside: vis.every(r => { const b = r.getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight && b.left >= 0 && b.right <= innerWidth; }),
+        shown: vis.length, pg: (document.querySelector('#bpBody .selPg b') || {}).textContent || '' }; });
     await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200); return o; };
   await grow(21); await redraw(); const f = await bs(), s20 = await sel();   // a full squad: nine on the pitch, the bench's five, seven not taken
-  ok(f.men === 5 && f.rows === 1 && !f.pager && f.pitch === pitch0 && s20.cols === 'xi 9, bench 5, rest 7' && s20.order && !s20.imgs && s20.h[0] === s20.h[1] && s20.h[0] >= 20 && s20.inside,
+  ok(f.men === 5 && f.rows === 1 && !f.pager && f.pitch === pitch0 && s20.cols === 'xi 9, bench 5, rest 7' && s20.order && !s20.imgs && s20.h[0] === s20.h[1] && s20.h[0] >= 26 && s20.inside && s20.shown === 17 && s20.pg === '1 / 3',
     w + 'x' + h + ': a full squad of 21: beside the pitch just the bench\'s five, on one line (' + (f.col ? 'down its side' : 'under it') + ') with no pager, the pitch keeping its height (' + f.pitch + ' px); the Selection tab has all twenty-one, '
-    + s20.cols + ', in order, no faces, every bar ' + s20.h[0] + ' px tall and on the screen');
+    + s20.cols + ', in order, no faces, the seven not taken three to a page (' + s20.pg + '), every bar ' + s20.h[0] + ' px tall and on the screen');
   await grow(23); await redraw(); const b1 = await bs(), s22 = await sel();   // (a squad from before the limit)
-  ok(b1.men === 5 && b1.rows === 1 && !b1.pager && b1.pitch === pitch0 && s22.cols === 'xi 9, bench 5, rest 9' && s22.order && s22.h[0] === s22.h[1] && s22.h[0] >= 18 && s22.inside,
-    w + 'x' + h + ': a squad of 23 from before: still just the five beside the pitch; the Selection tab\'s rest nine long, its bars ' + s22.h[0] + ' px, all on the screen');
+  ok(b1.men === 5 && b1.rows === 1 && !b1.pager && b1.pitch === pitch0 && s22.cols === 'xi 9, bench 5, rest 9' && s22.order && s22.h[0] === s22.h[1] && s22.h[0] >= 26 && s22.inside && s22.shown === 17 && s22.pg === '1 / 3',
+    w + 'x' + h + ': a squad of 23 from before: still just the five beside the pitch; the Selection tab\'s rest nine long, three to a page (' + s22.pg + '), its bars ' + s22.h[0] + ' px, all on the screen');
   await ctx.close(); }
 
 // AS WIDE AS THE PHONE: no bands -- the game screen is the screen, wider than 920 (more pitch across); the buttons

@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Training's Selection and the Staff as their templates (v256).** The Selection is three boxes, no frame round
+  them: the nine on the pitch (five columns); the bench's five over the men not taken, three of them to a page with ◀ and
+  ▶ by their heading (four columns); and your three quick subs with HOW IT WORKS under them, a tap away (three columns).
+  Every man is a bar 28 high you tap or drag as before (26 on a short phone), the one picked lit; a man dragged in among
+  the men not taken shows on his page. The Staff is a list and its man in three: your posts as rows down the left (the
+  post of the man you've picked lit), how many there are to hire and when new men come at its foot; the men to hire
+  in the middle; the man picked on the right, his rating and wage as rows, what he's good and poor at, and HIRE (or
+  RELEASE, for yours) at the foot. The academy's Coach is the same, its one post.
 - **A building's page as its template (v255).** Training's Pitch, the Physio, the Scouts' Network, the Academy's
   Facilities and a building not put up yet share it: on the left, five columns, its picture, its level in a panel (lit
   at the top; NOT BUILT and the clubhouse it waits for), its levels in a row (done ✓, the one it's at lit, the next with
@@ -3709,6 +3717,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v256: Training's Selection and the Staff.** mgSelectTab draws .selB.selTpl.tplPage, three .tplBox .selBox boxes
+  (the grid's five, four and three columns): the .selCol groups as before (xi; bench, then rest; .qpCol), their heads
+  .tplLbl, the bars --selH high (28, 26 under 350 px). The rest's head is .selRestHd, its pager .selPg (data-mg selpg,
+  MGUI.selPg); a bar not on the page is .selOff (SEL_RPG, three to a page), and selShowK turns to the page a drag put
+  him on. Under the quick subs, .qpNow while a man is picked, then .qpHowL (its sentence a tap away). mgStaffTab draws
+  .mgPanes.tplPanes.stfTpl: .stfPosts (the .stfHead well, .coPost rows, .stfNext at the foot), the .mgPaneL list (.coRow,
+  WON'T COME after the name) and the .mgPaneR card .stfCard (.stfWho well, .sqKv rows, .coChips, .stfFoot's .tplBtn).
 - **v255: a building's page.** bldScreen draws .bpTpl.tplPage: .bpL (.bpPic, .bpLvl with its .clChip chips, the
   LEVELS .clNodes as segments, a .clGo .clHave cost line) and .bpR (its .tplWell, .bsTiles of .clTile two to a row, and
   .clGo.bpAct with the one .tplBtn: data-mg up, goclub, or .off at the top). .tplBtn.off is a button's place with

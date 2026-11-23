@@ -389,6 +389,7 @@ const S0 = await selLu(), m1 = await selDrag(16, 2), S1 = await selLu();        
 const m2 = await selDrag(12, 9), S2 = await selLu();                                 // the bench's fourth to its first: the others along one
 const m3 = await selDrag(14, 10), S3 = await selLu();                                // the rest's first to the bench's second: the bench's fifth drops out
 const m4 = await selDrag(4, 11), S4 = await selLu();                                 // one on the pitch onto the bench: they change places
+for(let i = 0; i < 2; i++){ await page.click('#bpBody [data-mg="selpg"][data-d="1"]'); await page.waitForTimeout(80); }   // (v256: the men not taken three to a page -- the last of them on the third)
 const m5 = await selDrag(9, 20, true), S5 = await selLu();                           // the bench's first below the last of the rest: the end of the list
 const shown = await page.evaluate(() => [...document.querySelectorAll('#bpBody .selRow')].map(x => x.querySelector('.slNm').textContent));
 await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
@@ -403,7 +404,7 @@ const sw = (A, B, x, y) => A.atk[A.atk.indexOf(x)] === x && B.atk[A.atk.indexOf(
 ok(r.n === 21 && r.max === 21 && /21 PLAYERS OF 21/.test(sqSum) && r.firstSub === 'GK',   // (v171: the count over the list -- "most 21, fewest 14" a tap on it)
   'a squad is twenty-one at most (the clubhouse says so: "' + sqSum.split(' · ')[0] + '"); picked afresh, the next keeper is first on the bench');
 ok(String(lay.cols) === 'xi 0 1 2 3 4 5 6 7 8,bench 9 10 11 12 13,rest 14 15 16 17 18 19 20' && !lay.imgs && lay.top === 'GK',
-  'the Selection tab: the twenty-one in one list, top to bottom -- the keeper on top, the eight, the bench\'s five, the seven not taken -- in three columns, no faces');
+  'the Selection tab: the twenty-one in one list, top to bottom -- the keeper on top, the eight, the bench\'s five, the seven not taken -- in its boxes, no faces');
 ok(m1 === '2 swap' && sw(S0, S1, S0.atk[1], S0.bench[7]),
   'one not taken dragged onto a man on the pitch: they change places, his spot with the ball and without it his');
 ok(m2 === '9 above' && S2.bench.slice(0, 5).join() === [S1.bench[3], ...S1.bench.slice(0, 3), S1.bench[4]].join() && S2.bench.slice(5).join() === S1.bench.slice(5).join(),

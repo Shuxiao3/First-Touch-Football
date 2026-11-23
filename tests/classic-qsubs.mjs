@@ -158,7 +158,7 @@ const id = (side, k) => pc.$$eval(`#bpBody .selRow[data-side="${side}"]`, (ns, k
 const tapRow = async (side, k) => { await pc.click(`#bpBody .selRow[data-side="${side}"] >> nth=${k}`); await pc.waitForTimeout(80); };
 let T0 = await tab();
 ok(noSubs && T0.xi === 8 && T0.benchAll === 5 && T0.bench === 4 && T0.gkOff === 1 && T0.head.join('|') === 'ON THE PITCH|THE BENCH|NOT TAKEN|QUICK SUBS · 0 OF 3' && T0.pairs.length === 0,
-  'no Subs tab: the Selection tab\'s eight on the pitch and the bench\'s five (its keeper not to be had) to tap, and QUICK SUBS · 0 OF 3 down its fourth column');
+  'no Subs tab: the Selection tab\'s eight on the pitch and the bench\'s five (its keeper not to be had) to tap, and QUICK SUBS · 0 OF 3 in its third box');
 const x1 = await id('xi', 1), b1 = await id('bench', 1), b2 = await id('bench', 2), x4 = await id('xi', 4), b3i = await id('bench', 3);
 await tapRow('xi', 1); const Tl = await tab(); await tapRow('bench', 1); let T1 = await tab();
 await tapRow('xi', 1); await tapRow('bench', 2); let T2 = await tab();
