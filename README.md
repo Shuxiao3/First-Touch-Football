@@ -502,6 +502,21 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **After a match as its templates (v248).** THE RESULT: AFTER THE MATCH along the top; a box across the page with each
+  club's crest 16 in from its side, its name between the crest and the score and pushed to it, the score at 28 in a well
+  over the middle four columns and who won under it; then a box for each side's goals (the scorer and the minute, a row of
+  them, a tap on one for the whole of it, the assist included; your injuries under yours) and, in the last two columns,
+  where it leaves you: the table and the places it moved you, or how the cup or the playoffs stand. NEXT bottom right.
+  YOUR PLAYERS: every column as before in a box across the page, the heads in its well, a row of 22 for each man, your
+  best lit and starred, both sides' totals under them; when it runs to a second page, the page turner sits under the box
+  by CONTINUE. The FUND SUMMARY: a box eight columns wide, the lines in rows of 24 (what came in green, the wages red),
+  the week's net, then what's in the bank with the fans gained or lost after its words; CONTINUE along its foot. The
+  Stadium Summary in the same box, across the page. THE PAPERS: the cuttings pinned in a pile over the hub, darkened --
+  the one you're reading on top, tilted, its foot torn; the next three under it with only their stamps showing; a sticky
+  note at the left with how many are left, in marker; the answers on paper slips along the cutting's foot, taped down,
+  PUT THEM DOWN first and the main answer last, in red. No day, week or morale over them: the dressing room's cutting has
+  the morale by the week's change. A cutting with more on it than fits sets closer. The warning on going on with papers
+  unread is a cutting on top of the same pile, GO ON ANYWAY and READ THEM on slips.
 - **The labs and the match's cards as their templates (v247).** The labs: the match screen with a lab bar along the top,
   as the template draws it. EXIT LAB top left (where the score box is in a match), then the lab's name, how it's going
   (no balls yet, or the tally), your man and the menu along the header; every setting a button you tap through in one row
@@ -3643,6 +3658,17 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v248: after a match.** #matchReport's pages are absolutely placed on the grid (.tplHead, .mrBoard 88 high with
+  .mrCrest.l/.r, .mrNm.l/.r and .mrScore / .mrRes over the middle four columns; .mrGls.l/.r five columns and .mrTbl two
+  from 148 to 44 over --tplB; #mrNextBtn / #mrContinueBtn two columns at the foot; the .cfFoot grass under them). Each goal
+  is a .mrGoal span, "Surname 34’", its data-xpl the whole of it. YOUR PLAYERS' .mrStatsBox is a .tplBox marked fitOut:
+  fitBox gives a box so marked all its height and hangs the pager under it (.fitOut > .fitPager). #moneyModal's .mnCard
+  is a .tplBox on the grid (eight columns for the Fund Summary, twelve for the wide Stadium Summary), its NEXT / CONTINUE
+  a span and the next mark. The papers: pilePaint (and paperWarnShow) draw .plNote, .plUnder.u1-3 (the next papers'
+  stamps), .plSheet (the tilt and drop shadow) round .plPaper (the clip-path's torn foot), .plPin, and .plSlips (the
+  close slip, then .plBtns in row-reverse, so the first answer, .main, is last). pileFit adds .dense, .denser, then
+  .scroll to a cutting whose words run past its foot. The note's hand is 'FTC Marker': Permanent Marker (Apache 2.0,
+  assets/fonts/LICENSE-PermanentMarker.txt) cut with pyftsubset to the figures and "to go" (assets/fonts/ftc-marker.woff2).
 - **v247: the labs; the match's cards.** In lab mode #readout is a twelve-column grid on --tplL/--tplR (#labExitBtn columns
   1-2 with its back mark, #rBox 3-4 holding the lab's name, #rPlayer 9-11, #menuBtn 12) and #labHud sits over it:
   .labTallyRow the header's columns 5-8, #labBar a row of flex chips 44 down (each its <i> name over its <b> value; the

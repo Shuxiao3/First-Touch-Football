@@ -32,10 +32,11 @@ const t0 = Date.now();
 await page.waitForSelector('#matchReport', { state: 'visible', timeout: 240000 });
 info('the match took ' + Math.round((Date.now() - t0) / 1000) + 's');
 const text = await page.innerText('#matchReport');
-ok(/MATCHDAY 1/.test(text) && /\d+ – \d+/.test(text) && /League position/.test(text) && /NEXT/.test(text), 'the report, THE RESULT (v106): the score between the two clubs, the goals, where it leaves you, NEXT');
+ok(/AFTER THE MATCH/.test(text) && /\d+ – \d+/.test(text) && /TABLE\s+\d+(st|nd|rd|th)/.test(text) && /NEXT/.test(text), 'the report, THE RESULT (v106; v248 as its template): the score between the two clubs, the goals, the table where it leaves you, NEXT');
 await page.click('#mrNextBtn'); await page.waitForTimeout(120);
 const text2 = await page.innerText('#matchReport');
-ok(/YOUR PLAYERS/.test(text2) && /RATING/.test(text2) && /PASSES/.test(text2) && /SHOTS/.test(text2) && /TACKLES/.test(text2) && /YOUR BEST/.test(text2), 'NEXT: YOUR PLAYERS -- each one\'s rating, goals, assists, passes, shots, tackles; your best starred');
+const lit = await page.$$eval('#matchReport .mrStats tr.motm', ns => ns.map(n => n.textContent));
+ok(/YOUR PLAYERS/.test(text2) && /RATING/.test(text2) && /PASSES/.test(text2) && /SHOTS/.test(text2) && /TACKLES/.test(text2) && lit.length === 1 && /★/.test(lit[0]), 'NEXT: YOUR PLAYERS -- each one\'s rating, goals, assists, passes, shots, tackles; your best starred, his row lit (v248)');
 
 const d = await page.evaluate(() => JSON.parse(localStorage.getItem('ft_mgr_slot1')));
 ok(d.md === 1 && [1, 2, 3, 4].every(t => d.lg[t].fx[0].every(m => m[2] != null)), 'matchday 1 recorded in every league');

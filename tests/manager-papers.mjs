@@ -52,11 +52,26 @@ const side = await K(`(()=>{ const d=CAREER.data, b=document.querySelector('#car
 ok(!side.modal && side.shown && +side.n === side.left && side.left > 0 && side.fresh && !/PAPERS/.test(side.btn),
   'a week on: the papers wait off to the side, not over the hub -- PAPERS on the campus, ' + side.n + ' in its orange box, glowing till they\'re opened');
 await page.click('#careerHub .cpPapers'); await page.waitForTimeout(150);
-r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { kinds:L.map(x=>x.k), head:document.querySelector('#pileModal .plHead').textContent, wk:mgWeekShort(d), fresh:document.querySelector('#careerHub .cpPapers').classList.contains('fresh') }; })()`);
+r = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { kinds:L.map(x=>x.k), n:L.length, note:(document.querySelector('#pileModal .plNote')||{}).textContent, head:!!document.querySelector('#pileModal .plHead'), wk:mgWeekShort(d), fresh:document.querySelector('#careerHub .cpPapers').classList.contains('fresh') }; })()`);
 const first = await top();
 info('the first pile: ' + JSON.stringify({ r, first }));
-ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /THIS WEEK\s*(±0|[+-]\d+\.\d)/.test(first) && !/Team morale/.test(first) && /MORALE \d+\.\d/.test(r.head)   /* (v176: the morale in the head, the page's strip the week's change) */ && /TO GO/.test(r.head) && !r.fresh,
-  'PAPERS pressed (' + r.wk + '): the dressing room on top ("' + first.split('\n')[1] + '"), the side\'s morale over the pile, and the button\'s glow gone');
+ok(await modal() && r.kinds[0] === 'mor' && /THE DRESSING ROOM/.test(first) && /THIS WEEK\s*(±0|[+-]\d+\.\d)/.test(first) && !/Team morale/.test(first) && /MORALE\s*\d+\.\d/.test(first)   /* (v248: the morale on the dressing room's cutting, by the week's change) */
+  && !r.head && r.note === r.n + 'to go' && !r.fresh,
+  'PAPERS pressed (' + r.wk + '): the dressing room on top ("' + first.split('\n')[1] + '"), the side\'s morale on it by the week\'s change, ' + r.n + ' to go on the sticky note (v248: nothing over the pile), and the button\'s glow gone');
+// (v248) THE PILE AS ITS TEMPLATE: the cutting on top tilted, its foot torn; the next three under it, nearest first, only their
+// stamps showing; the note at the left in marker, tilted; the slips along the cutting's foot, PUT THEM DOWN first, the main
+// answer last and in red, the last one's right edge at the cutting's
+{ const pl = await K(`(()=>{ const d=CAREER.data, M=document.getElementById('pileModal'), R=e=>{ const r=e.getBoundingClientRect(); return { x:Math.round(r.left), y:Math.round(r.top), r:Math.round(r.right), b:Math.round(r.bottom) }; };
+    const sheet=M.querySelector('.plSheet'), paper=M.querySelector('.plPaper'), note=M.querySelector('.plNote');
+    return { sheet:R(sheet), sheetRot:getComputedStyle(sheet).transform, note:R(note), font:getComputedStyle(note.querySelector('b')).fontFamily, noteRot:getComputedStyle(note).transform, clip:getComputedStyle(paper).clipPath,
+      unders:[...M.querySelectorAll('.plUnder')].map(u=>({ ...R(u), t:u.textContent })).sort((a,b)=>b.y-a.y).map(u=>u.t), want:pileLeft(d).slice(1,4).map(x=>pileStamp(d,x).replace(/<[^>]*>/g,'')),
+      slips:[...M.querySelectorAll('.plSlip')].map(e=>({ ...R(e), main:e.classList.contains('main'), a:e.dataset.pile })).sort((a,b)=>a.x-b.x) }; })()`);
+  const S = pl.slips, last = S[S.length - 1];
+  info('the pile: ' + JSON.stringify({ sheet: pl.sheet, note: pl.note, unders: pl.unders, slips: S.map(x => x.a + (x.main ? '*' : '')) }));
+  ok(pl.sheetRot !== 'none' && /polygon/.test(pl.clip) && /FTC Marker/.test(pl.font) && pl.noteRot !== 'none' && pl.note.r < pl.sheet.x && pl.note.y > pl.sheet.y
+    && JSON.stringify(pl.unders) === JSON.stringify(pl.want) && S.length >= 2 && S[0].a === 'close' && last.main && S.filter(x => x.main).length === 1 && Math.abs(last.r - pl.sheet.r) <= 6
+    && S.every(x => Math.abs(x.b - S[0].b) <= 4 && x.y > pl.sheet.b),
+    'v248: THE PILE AS ITS TEMPLATE -- the cutting tilted and torn at its foot, the next ' + pl.unders.length + ' under it nearest first (' + pl.unders.join(', ') + '), the note at the left in marker, the slips along its foot from PUT THEM DOWN to the main answer at its right edge'); }
 await press('close');
 r = await K(`(()=>{ const d=CAREER.data; renderHub(); return { modal:document.getElementById('pileModal').classList.contains('on'), left:pileLeft(d).length }; })()`);
 await page.click('#careerHub .cpPapers'); await page.waitForTimeout(120);
@@ -192,11 +207,12 @@ const unread = await K(`(()=>{ const d=CAREER.data, L=pileLeft(d); return { n:L.
 const d0 = await day();
 await page.click('#chBottom [data-mg="forward"]'); await page.waitForTimeout(150);
 const w1 = await page.evaluate(() => { const c = document.querySelector('#paperWarn .pwCard'), R = [...c.querySelectorAll('.pwRow:not(.more)')];
-  return { on: document.getElementById('paperWarn').classList.contains('on'), rows: R.length, dec: R.filter(r => r.querySelector('em.dec')).length, decFirst: R.every((r, i) => i === 0 || !r.querySelector('em.dec') || R[i - 1].querySelector('em.dec')), more: (c.querySelector('.pwRow.more b') || {}).textContent || '', text: c.innerText }; });
+  return { on: document.getElementById('paperWarn').classList.contains('on'), rows: R.length, dec: R.filter(r => r.querySelector('em.dec')).length, decFirst: R.every((r, i) => i === 0 || !r.querySelector('em.dec') || R[i - 1].querySelector('em.dec')), more: (c.querySelector('.pwRow.more b') || {}).textContent || '', text: c.innerText,
+  note: (c.querySelector('.plNote') || {}).textContent, slips: [...c.querySelectorAll('.plSlip')].sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left).map(e => (e.classList.contains('main') ? '*' : '') + e.dataset.pw) }; });
 const d1 = await day();
 info('the warning: ' + JSON.stringify({ unread, w1: { on: w1.on, rows: w1.rows, dec: w1.dec, head: w1.text.split('\n').slice(0, 3).join(' / ') } }));
 ok(unread.fwd && unread.n >= 2 && w1.on && w1.rows === Math.min(unread.n, 4) && w1.dec === Math.min(unread.dec, 4) && w1.decFirst && (unread.n > 4 ? w1.more === 'and ' + (unread.n - 4) + ' more' : !w1.more)
-  && new RegExp(unread.n + ' UNREAD · ' + unread.dec + ' NEEDS? AN ANSWER').test(w1.text) && new RegExp('You haven’t read ' + unread.n + ' of this week’s papers').test(w1.text) && /BEFORE YOU GO ON/.test(w1.text) && d1 === d0,
+  && w1.note === unread.n + 'to go' && w1.slips.join() === 'go,*read' && new RegExp('You haven’t read ' + unread.n + ' of this week’s papers').test(w1.text) && /BEFORE YOU GO ON/.test(w1.text) && d1 === d0,
   'on with ' + unread.n + ' papers unread (' + unread.dec + ' needing an answer): a word first, those that need an answer listed first, four at most (' + w1.rows + ', then "' + w1.more + '"), and the day not gone on');
 await page.mouse.click(6, 6); await page.waitForTimeout(100);
 ok(!(await warnOn()) && (await day()) === d0, 'a tap off it: gone, and nothing else changed');

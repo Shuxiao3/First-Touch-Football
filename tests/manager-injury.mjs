@@ -154,8 +154,9 @@ await K(`(()=>{ half=1; ball.ownedBy=null; ball.dribbler=null; ball.lastTouch=nu
 const ht = await K(`(()=>{ const p=players.find(q=>q.team==='G'&&q.squadIdx===${h3.si}); return { half, cap:p?+p.staminaCap.toFixed(2):null }; })()`);
 ok(ht.half === 2 && ht.cap !== null && ht.cap <= 0.4, 'half-time: the others get some of their legs back, he doesn\'t (' + Math.round(ht.cap * 100) + '%)');
 await K(`(()=>{ finishCareerMatch(careerFix); return 1; })()`); await page.waitForTimeout(500);
-r = await K(`(()=>{ const d=CAREER.data, f=n=>{ const p=d.roster.find(x=>x.name===n); return p&&p.inj; }; return { inj:f(${JSON.stringify(h1.name)}), all:[${JSON.stringify(h1.name)},${JSON.stringify(h2.name)},${JSON.stringify(h3.name)}].filter(f).length, report:document.getElementById('matchReport').innerText }; })()`);
-ok(r.inj && r.all === 3 && /INJURED/.test(r.report), 'after it, the injuries are theirs, the three of them (his: ' + (r.inj ? r.inj.k + ', ' + r.inj.d + ' days' : 'none') + '), and the report lists them');
+r = await K(`(()=>{ const d=CAREER.data, f=n=>{ const p=d.roster.find(x=>x.name===n); return p&&p.inj; }; return { inj:f(${JSON.stringify(h1.name)}), all:[${JSON.stringify(h1.name)},${JSON.stringify(h2.name)},${JSON.stringify(h3.name)}].filter(f).length, rows:[...document.querySelectorAll('#matchReport .mrGl.inj')].map(e=>e.textContent),
+  listed:[${JSON.stringify(h1.name)},${JSON.stringify(h2.name)},${JSON.stringify(h3.name)}].every(n=>[...document.querySelectorAll('#matchReport .mrGl.inj')].some(e=>e.textContent.includes(n.split(' ').slice(-1)[0]))) }; })()`);
+ok(r.inj && r.all === 3 && r.listed && r.rows.length === 3 && r.rows.every(t => /^✚ .+ · .+, /.test(t)), 'after it, the injuries are theirs, the three of them (his: ' + (r.inj ? r.inj.k + ', ' + r.inj.d + ' days' : 'none') + '), and the report lists them under your goals (v248: ' + r.rows.join(' | ') + ')');
 
 // --- marked everywhere ---------------------------------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data; for(const p of d.roster){ delete p.inj; } const lu=ensureLineup(d); d.roster[lu.atk[0]].inj={k:'strain',d:15}; window.HURTNAME=d.roster[lu.atk[0]].name; mgSave(d); renderHub(); return 1; })()`);

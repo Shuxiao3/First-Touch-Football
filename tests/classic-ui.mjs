@@ -46,7 +46,9 @@ async function onScreen(page, sels){ return page.evaluate(sels => { const W = in
   for(const el of document.querySelectorAll('body *')){ const cs = getComputedStyle(el);
     if((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 1 && !el.classList.contains('plPane') && !el.classList.contains('setScroll') || /auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) && shown(el))
       out.push('a box scrolls: ' + (el.id || el.className)); }
-  for(const el of document.querySelectorAll('[data-pages]')) if(shown(el) && el.scrollHeight > el.clientHeight + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight);
+  for(const el of document.querySelectorAll('[data-pages]')){ if(!shown(el)) continue;   // (v248: a box marked fitOut has its pager under it -- that's all that may hang below it)
+    const pg = el.classList.contains('fitOut') ? el.querySelector(':scope > .fitPager') : null, under = pg ? Math.max(0, pg.offsetTop + pg.offsetHeight - el.clientHeight) : 0;
+    if(el.scrollHeight > el.clientHeight + under + 2) out.push('cut off, not paged: ' + el.dataset.pages + ' ' + el.scrollHeight + '/' + el.clientHeight); }
   return out; }, sels); }
 // NO MAN COVERS ANOTHER on a tactics pitch, and none hangs off it -- and how far its midfield spreads, top to bottom
 const apart = (page, sel) => page.evaluate(sel => { const P = document.querySelector(sel), pr = P.getBoundingClientRect(), T = [...P.querySelectorAll('.ptk')].map(e => e.getBoundingClientRect());
