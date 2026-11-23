@@ -2538,6 +2538,27 @@
   #bpBody .tplRows{ position:relative; height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
   #bpBody .tplRows > .tplWell, #bpBody .tplRows > .tplSeg, #bpBody .tplRows > .fxTop{ flex:none; margin-bottom:2px; }
   #bpBody .tplRows > .fitPager{ bottom:4px; height:32px; } #bpBody .tplRows > .fitPager .mgAdj{ width:52px; height:28px; min-height:28px; }
+  /* (v259) THE STADIUM as its templates: the figures as tiles across the top, then a box -- Money: the tickets (a panel a
+     stand, its price between - and +) and the books as rows, paged; Sponsors: who calls, then the boards and the names as
+     rows; Stands: the ground on the left (five columns), its level, figures, levels and BUILD IT on the right (seven) */
+  #bpBody .stTpl{ position:relative; display:flex; flex-direction:column; gap:8px; height:100%; min-height:0; }
+  #bpBody .stTpl > .stTiles, #bpBody .stTpl > .spTiles{ flex:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0; padding:0; }
+  #bpBody .stTpl > .spTiles{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  #bpBody .stTpl > .stTiles .clTile, #bpBody .stTpl > .spTiles .clTile{ height:48px; box-sizing:border-box; margin:0; padding:6px 10px; display:flex; flex-direction:column; justify-content:center; gap:4px; border:0; border-radius:var(--rWin); background:var(--boxBg); box-shadow:var(--pxWin); }
+  #bpBody .stTpl > .stBox{ flex:1 1 auto; min-height:0; height:auto; gap:4px; }
+  #bpBody .stBox .bpSect{ flex:none; height:24px; box-sizing:border-box; display:flex; align-items:center; gap:6px; margin:0; padding:0 8px; border:0; border-radius:var(--rS); background:var(--well); font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--acc); }
+  #bpBody .stBox .tkTbl{ flex:none; display:flex; flex-direction:column; gap:4px; margin:0; padding:0; border:0; }
+  #bpBody .stBox .tkRow{ height:40px; box-sizing:border-box; margin:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:8px; border:0; border-radius:var(--rS); background:var(--win); }
+  #bpBody .stBox .stadBtn[data-stad="seatrate"]{ flex:none; align-self:flex-start; width:calc(var(--tplC) * 4 + 24px); max-width:100%; height:28px; min-height:28px; margin:0; padding:0 10px; border-radius:var(--rS); font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; }
+  #bpBody .stBox .finRow{ flex:none; height:24px; box-sizing:border-box; align-items:center; padding:0 8px !important; border-radius:var(--rS); background:var(--win); font-size:11px; }
+  #bpBody .stBox .spCall{ flex:none; margin:0; padding:2px 4px; }
+  #bpBody .stBox .spRow{ flex:none; min-height:28px; box-sizing:border-box; margin:0; padding:0 8px; border:0; border-radius:var(--rS); background:var(--win); }
+  #bpBody .stBox .spBonus{ flex:none; margin:0; padding:0 8px; }
+  #bpBody .stTpl .stNote{ position:absolute; left:50%; top:4px; transform:translateX(-50%); z-index:6; padding:5px 10px; border-radius:var(--rS); background:var(--bad); color:#fff; font:600 11px/1.2 'Roboto Condensed','FTC Dot',sans-serif; white-space:nowrap; }
+  #bpBody .stTpl .sgTpl{ flex:1 1 auto; min-height:0; display:grid; grid-template-columns:calc(var(--tplC) * 5 + 32px) calc(var(--tplC) * 7 + 48px); gap:8px; margin:0; padding:0; }
+  #bpBody .stTpl .sgTpl > .tplBox{ width:auto; min-width:0; min-height:0; display:flex; flex-direction:column; gap:6px; overflow:hidden; margin:0; flex:none; }
+  #bpBody .stTpl .sgTpl > .sgSide{ padding:6px 8px; }
+  #bpBody .stTpl .sgHd{ flex:none; gap:6px; } #bpBody .stTpl .sgHd .hic{ width:14px; height:14px; }
   /* (v258) SCOUTING and THE ACADEMY as their templates: Reports and Prospects a list and its man (the market's look);
      Assignments the scouts' house on the left (four columns), the four leagues on the right, a row of four buttons each */
   #bpBody .tplPanes .tplWell.mkHead{ justify-content:flex-start; } #bpBody .tplPanes .tplWell.mkHead .hic{ width:14px; height:14px; flex:none; }
@@ -21193,7 +21214,7 @@
       else if(x.k==='windfall'&&x.amt>0) x.amt=mgRound(x.amt*27);
       else if(x.k==='money') for(const k of ['inc','wages','budget']) if(x[k]) x[k]=Math.round(x[k]*22); }
     mgNews(d,'The game’s money is the real game’s now -- wages, fees, the TV, the gate and what everything costs -- and the club’s bank with it: '+money(d.budget)+'.'); }
-  function finRow(label,val,bold,color){ return '<div style="display:flex;justify-content:space-between;gap:12px;'+(bold?'font-weight:700;':'')+'padding:2px 0"><span style="color:var(--dim)">'+label+'</span><span style="color:'+(color||'var(--good)')+'">'+val+'</span></div>'; }
+  function finRow(label,val,bold,color){ return '<div class="finRow" style="display:flex;justify-content:space-between;gap:12px;'+(bold?'font-weight:700;':'')+'padding:2px 0"><span style="color:var(--dim)">'+label+'</span><span style="color:'+(color||'var(--good)')+'">'+val+'</span></div>'; }
   // ===== END WAGE & FINANCE LOOP ==============================================================
 
   // ===== THE GROUND: its stands, its boards and its sponsors ===================================
@@ -21792,7 +21813,7 @@
     else if(lock){ const k=cl+1, C=CLUB_LV[k];
       side+='<div class="clGo"><span class="clHave" data-xpl="'+xq('First '+C.n.toLowerCase()+' (clubhouse '+k+'): '+money(C.cost)+'; you have '+money(b)+'.'+(need>k?' Then clubhouse '+need+'.':''))+'">'+pBar(b,C.cost)+'<em>'+clubShort(k)+' '+kMoney(Math.max(0,b))+' / '+kPrice(C.cost)+'</em></span><button class="mgBtn" data-mg="goclub">◀ CLUBHOUSE</button></div>'; }
     else side+='<div class="clGo"><span class="clHave" data-xpl="'+xq(nx.n+' costs '+money(nx.cost)+'; you have '+money(b)+'.')+'">'+pBar(b,nx.cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(nx.cost)+'</em></span><button class="mgBtn go" data-stad="upgrade"'+(ok?'':' disabled')+'>BUILD IT</button></div>';
-    return '<div class="sgWrap fitWhole"><div class="sgLeft">'+plan+pic+'</div><div class="sgSide">'+side+'</div></div></div>'; }
+    return '<div class="sgWrap sgTpl fitWhole"><div class="sgLeft tplBox"><div class="tplWell sgHd"><i class="hic" data-ic="stadium"></i>THE GROUND</div>'+plan+pic+'</div><div class="sgSide tplBox">'+side+'</div></div></div>'; }
   function renderStadiumTab(d, tab){ const f=computeFinance(d), S=stadOf(d), L=STAD_LEVELS[S.lvl]; let h='';
     if(tab==='Stands'){ h+=stadPlan(d,f);   // (v175: a plan of the ground, its levels a path -- J4; it was two pictures and four sentences)
     } else if(tab==='Sponsors'){
@@ -21802,6 +21823,7 @@
       const tier=(x,k)=>'<span class="spTier" data-xpl="'+xq((x?'This deal: '+SP_SIZES[x.sp.sz||0].what+'.':'Who calls for it now: '+SP_SIZES[sz].many+', '+fee(sz,k)+' a week.')+(nxt!=null?' '+capFirst(SP_SIZES[sz+1].many)+' would pay '+fee(sz+1,k)+'.':''))+'">'+SP_SIZES.map((z,i)=>'<i class="'+(x?(i===(x.sp.sz||0)?'on':''):(i===sz?'call':''))+'"></i>').join('')+'</span>';
       h+='<div class="spTiles">'+[['SPONSORS',money(f.dealsWk+f.boardsWk)+'/wk','Your sponsors: '+money(f.dealsWk+f.boardsWk)+' a week, the boards and the deals.'],['PARTNERS',money(f.sponsorWk)+'/wk','The club’s partners pay '+money(f.sponsorWk)+' a week, more the higher the league and your place in it.'],
         ['TV',money(f.broadcastWk)+'/wk','TV pays '+money(f.broadcastWk)+' a week, more the higher the league and your place in it.']].map(t=>'<div class="clTile" data-xpl="'+xq(t[2])+'"><i class="clLbl">'+t[0]+'</i><b>'+t[1]+'</b></div>').join('')+'</div>';
+      h+='<div class="tplBox tplRows stBox" data-pages="ST:stadium/Sponsors"><div class="bpSect">WHO CALLS</div>';   // (v259: in a box, paged)
       h+='<div class="spCall" data-xpl="'+xq('Sponsors come to you, in Monday’s papers: right now it’s '+SP_SIZES[sz].many+' who call. The bigger the club gets (its league, its fans, its ground, its place) the bigger the firms, and the more they pay. Your standing: '+Math.round(st)+(nxt!=null?'; '+SP_SIZES[sz+1].many+' at '+nxt+'.':'.'))+'"><span class="clLbl" style="font-size:7px;letter-spacing:.9px">CALLING</span><span class="spT">'
         +SP_SIZES.map((z,i)=>'<span'+(i===sz?' class="on"':'')+'>'+z.n.toUpperCase()+'</span>').join('')+'</span><span>STANDING <b>'+Math.round(st)+'</b>'+(nxt!=null?' · <b>'+nxt+'</b> FOR '+SP_SIZES[sz+1].n.toUpperCase():'')+'</span></div>';   // (v175: the firms' sizes, the one calling lit, where you stand and the next one's mark -- J4)
       h+='<div class="spRow"><span class="k" data-xpl="'+xq('Ad boards round the pitch: '+S.ads.length+' of '+S.boards+' taken'+(S.lvl<STAD_MAX?'; more with bigger stands.':'.'))+'">BOARDS</span><span class="v">'+S.ads.length+' of '+S.boards+' taken</span>'+tier(null,'board')+'<span class="amt">'+money(f.boardsWk)+'/wk</span></div>';
@@ -21818,6 +21840,7 @@
         for(const o of off) h+='<div class="spRow">'+spChip(o.sp)+'<span class="v">'+mgEsc(o.sp.name)+' <span class="sub">'+mgEsc(SP_PLACE[o.k])+(o.ground?' · “'+mgEsc(o.ground)+'”':'')+'</span></span><span class="amt">'+money(o.wk)+'/wk · '+spTerm(d,o.yrs)+'</span>'
           +'<button class="stadBtn" data-stad="spsign" data-id="'+o.id+'">SIGN</button><button class="stadBtn" data-stad="spno" data-id="'+o.id+'">NO</button></div>'
           +(o.m?'<div class="spBonus">BONUS · '+dealMetTxt(o.m)+'</div>':''); }
+      h+='</div>';
     } else {
       // Money: the gate and the ticket price, then the club's books
       h+='<div class="stTiles">'+[['FANS',Math.round(f.loyalty).toLocaleString(),'Club loyalty: '+Math.round(f.loyalty).toLocaleString()+' fans, everyone who’d ever come.','var(--warn)'],
@@ -21825,11 +21848,10 @@
         d.lastGate?['LAST CROWD',d.lastGate.att.toLocaleString()+(d.lastGate.att>=d.lastGate.cap?' · FULL':' · '+Math.round(d.lastGate.att/Math.max(1,d.lastGate.cap)*100)+'%'),'The last home game’s crowd: '+d.lastGate.att.toLocaleString()+' of '+d.lastGate.cap.toLocaleString()+' seats. Not every fan comes to every game: more come when the tickets are cheap, you’re high in the table or the game’s big, every one for a derby. How many, you see on the day.']
           :['LAST CROWD','—','Nobody’s come through the gate yet. Not every fan comes to every game: you’ll see how many in the stands on the day, and in THE GATE at full time.'],
         d.lastGate?['LAST GATE',money(d.lastGate.gate),'The gate at the last home game: '+money(d.lastGate.gate)+'.','var(--good)']:['LAST GATE','—','What the last home game took at the gate: none played yet.']].map(t=>'<div class="clTile" data-xpl="'+xq(t[2])+'"><i class="clLbl">'+t[0]+'</i><b'+(t[3]?' style="color:'+t[3]+'"':'')+'>'+t[1]+'</b></div>').join('')+'</div>';   // (v175: four tiles, the words a tap away -- J4)
-      h+=seatTable(d,f);
-      h+='<div class="bpSect">THE BOOKS</div>'+mgFinanceTab(d);
+      h+='<div class="tplBox tplRows stBox" data-pages="ST:stadium/Money">'+seatTable(d,f)+'<div class="bpSect">THE BOOKS</div>'+mgFinanceTab(d)+'</div>';   // (v259: in a box, paged)
     }
-    if(stadNote){ h+='<div style="text-align:center;color:var(--bad);font-size:11px;margin-top:10px">'+stadNote+'</div>'; stadNote=''; }
-    return h; }
+    if(stadNote){ h+='<div class="stNote">'+stadNote+'</div>'; stadNote=''; }
+    return '<div class="stTpl tplPage">'+h+'</div>'; }   // (v259: as its templates, no frame round it)
   function applyStadium(action, ds){ const d=CAREER&&CAREER.data; if(!d)return; let err=null;
     if(action==='seat-'||action==='seat+'){ const id=ds.id, lv=stadOf(d).lvl, fair=seatFair(d,id,lv), step=Math.max(1,Math.round(fair*0.05)), np=clamp(seatPrice(d,id,lv)+(action==='seat+'?step:-step),1,Math.max(2,Math.round(fair*4)));
       if(id==='B') d.ticketPrice=np; else { d.seats=d.seats||{}; d.seats[id]=np; } }

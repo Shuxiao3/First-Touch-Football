@@ -502,6 +502,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The stadium as its templates (v259).** No frame round its tabs now. Money has its four figures as tiles across the
+  top (fans, seats, the last crowd and gate), then a box: TICKETS in a well, a panel a stand with its seats and its price
+  between - and +, BACK TO THE GOING RATE, then THE BOOKS and their sections, a well each over their rows, a page at a
+  time. Sponsors has what sponsors, partners and the TV pay as tiles, then a box: who calls, a row of choices, then the
+  boards and the shirt, the stands and the ground's name as rows. Stands is the ground on the left (its plan and the
+  North Stand as it is) and on the right its level, its figures, its levels and BUILD IT.
 - **Scouting's Reports and Assignments, the Academy's Prospects as their templates (v258).** Reports is a list and its
   man, as on the market: how many you've scouted in the list's well, the columns with POT, and the man you pick in short
   (MAKE A BID, or OFFER A DEAL for a free agent); with none yet, NO REPORTS YET in a panel. Assignments has the scouts'
@@ -3731,6 +3737,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v259: the stadium.** renderStadiumTab wraps every tab in .stTpl.tplPage (so .tplBody, no frame): Money's .stTiles
+  and Sponsors' .spTiles across the top, then a .tplBox.tplRows.stBox paged by fitBox, its .bpSect headings drawn as
+  wells, .tkRow panels, .finRow (finRow's rows, now with a class) and .spRow rows. stadPlan's .sgWrap is .sgTpl, its
+  .sgLeft and .sgSide two .tplBox boxes, THE GROUND's well over the plan. stadNote is an .stNote over the page.
 - **v258: Scouting and the Academy.** mgReportsTab and mgProspectsTab draw mgTplPanes, their wells .mkHead with an icon;
   mgCard's 'sum' side is open to a scouted man (as 'buy' or 'free') and to a youngster ('youth': mkSum without the budget,
   RELEASE and PROMOTE). mgAssignTab draws .asTpl, .asL (the house, .asLv) and .asR (an .asLbl and an .asRow of four
