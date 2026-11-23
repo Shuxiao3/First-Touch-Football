@@ -46,10 +46,10 @@ await page.waitForTimeout(300);
 info('the career: ' + JSON.stringify(wk));
 
 let pt;
-// --- NET/WK (v160-v241: it opened THE WEEK'S MONEY; v242: that's gone -- the week's lines are the FUND SUMMARY's after a match) ----
-await page.tap('#chNetBtn'); await page.waitForTimeout(350);
-{ const r = await K(`(()=>({ on:document.getElementById('ldgModal').classList.contains('on'), hub:!!document.getElementById('chNetBtn').closest('[data-hub]'), net:document.getElementById('chNetBtn').textContent.trim(), wl:!!(CAREER.data.wl&&CAREER.data.wl.L) }))()`);
-  ok(!r.on && !r.hub && r.net.length > 0 && r.wl, 'v242: NET/WK is just the figure now (' + r.net + '): a tap opens nothing; the week\'s books are still kept, for the FUND SUMMARY (' + JSON.stringify(r) + ')'); }
+// --- NET/WK (v160-v241: it opened THE WEEK'S MONEY; v242: just the figure; v244: gone from the hub, the club's box has the
+// funds) -- the week's books still kept, for the FUND SUMMARY after a match ----
+{ const r = await K(`(()=>({ net:!!document.getElementById('chNetBtn'), funds:document.getElementById('chBudget').textContent, want:money(CAREER.data.budget), wl:!!(CAREER.data.wl&&CAREER.data.wl.L) }))()`);
+  ok(!r.net && r.funds === r.want && r.wl, 'v244: no NET/WK on the hub, the club\'s box with the funds (' + r.funds + '); the week\'s books still kept, for the FUND SUMMARY'); }
 
 // --- HOW TO PLAY and SKILL MOVES: a tap outside closes them too; not the card before your first match ---------------------------
 await K(`(()=>{ ctlShow(); return 1; })()`); await page.waitForTimeout(150);

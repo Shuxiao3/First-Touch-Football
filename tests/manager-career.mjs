@@ -412,7 +412,10 @@ ok(String(r.none) === '0.5,1' && String(r.l1) === '0.6,0.92,0.5,1' && String(r.l
   'the physio: half the legs back at half-time without one (v121; a quarter before), 60% at level 1 up to 85% at 4; tiring 8% slower a level (yours, not theirs); nothing hidden in a simulated game (v155: it was +1.6 at level 4, yours alone)');
 
 // --- DECORATIONS: bought from DECORATE and put down where you like (somewhere free), moved, put away, put out again ------
-await page.click('#careerHub .cpDeco'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(60);
+// (v244: DECORATE is the Clubhouse's last tab, off the hub -- its MOVE THEM on its screen)
+const decorOpen = async () => { await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
+  await page.click('#bpTabs .bpTab:text-is("Decorate")'); await page.waitForTimeout(80); };
+await decorOpen();
 const decoTabs = await page.$$eval('#bldgPanel .bpTab', ns => ns.map(n => n.textContent));
 const b0 = (await save()).budget;
 await page.click('#bpBody [data-mg="dbuy"][data-id="oak"]'); await page.waitForTimeout(150); await page.keyboard.press('Escape'); await page.waitForTimeout(150);
@@ -433,12 +436,12 @@ ok(decoTabs.join() === 'Trees,Garden,Plaza' && placing.on && placing.k === 'oak'
   'DECORATE: Trees, Garden, Plaza; an oak bought -- the shop shut, the oak over the campus to put down: ' + placing.bar.replace(/\s+/g, ' '));
 ok(red === false && green.ok && green.btn && d.deco.length === 1 && d.deco[0].k === 'oak' && d.deco[0].x === green.x && d.budget === b0 - 20000,
   'dragged onto the clubhouse it can\'t go (red); onto the lawn it can (green): put down there, $20,000 paid');
-await page.click('#careerHub [data-hub="move"]'); await page.waitForTimeout(60);
+await decorOpen(); await page.click('#bpFoot [data-hub="move"]'); await page.waitForTimeout(60);
 const oak = await toScreen(d.deco[0].x + 30, d.deco[0].y + 40); await page.mouse.click(oak[0], oak[1]); await page.waitForTimeout(80);
 const picked = await page.evaluate(() => ({ k: __MG.PLACE.k, idx: __MG.PLACE.idx, bar: document.getElementById('cpPlace').textContent }));
 await page.click('#cpPlace [data-cp="store"]'); await page.waitForTimeout(60); await page.click('#cpPlace [data-cp="done"]'); await page.waitForTimeout(60);
 d = await save(); const stored = [d.deco.length, d.store.oak];
-await page.click('#careerHub .cpDeco'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bpBody [data-mg="dout"][data-id="oak"]'); await page.waitForTimeout(120);
+await decorOpen(); await page.click('#bpBody [data-mg="dout"][data-id="oak"]'); await page.waitForTimeout(120);
 await page.click('#cpPlace [data-cp="ok"]'); await page.waitForTimeout(80);
 d = await save();
 ok(picked.k === 'oak' && /PUT AWAY/.test(picked.bar) && String(stored) === '0,1' && d.deco.length === 1 && !d.store.oak && d.budget === b0 - 20000,
@@ -633,7 +636,7 @@ ok(!s4.on && s5.on && /WONDERKID/.test(s5.text) && /Cuts inside from the flank/.
 const season = () => page.evaluate(() => { const M = __MG, d = M.d, seq = [], kick = []; let n = 0, hub = '', ledgerCup = false;
   while(d.phase !== 'review' && n++ < 500){ if(d.wday === 'mon'){ M.mgForward(d); continue; } const g = M.mgNextGame(d); if(!g){ M.mgPlayoffsOut(d); continue; }
     kick.push(M.mgStarters(d).filter(p => !p.inj && !(p.injB > 0)).map(p => [M.condOf(p), M.condCost(p)])); seq.push(g.kind === 'cup' ? g.key + g.r + '@' + (d.md - 1) : g.kind[0] + d.md);
-    if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = document.getElementById('chPhase').textContent; }
+    if(g.kind === 'cup' && !hub){ M.mgSave(d); M.renderHub(); hub = (document.querySelector('#chNextB .chNgS') || {}).textContent || ''; }   // (v244: the hub's NEXT GAME box)
     M.mgPlayGame(d, null, null); if(g.kind === 'cup' && d.ledger[0] && d.ledger[0].cup) ledgerCup = true; }   // (the books keep the last twelve: looked at as it's played)
   M.mgSave(d); M.renderHub(); const all = kick.flat().map(e => e[0]), wk = 7 * M.COND_DAY[0], keep = kick.flat().filter(e => e[1] <= wk).map(e => e[0]);   // (keep: men a week's rest keeps up with)
   return { seq, hub, avg: all.reduce((a, b) => a + b, 0) / all.length, low: Math.min(...all), lowKeep: Math.min(...keep), wins: ['coco', 'fashion', 'cl'].map(k => d.cup[k].win ? 1 : 0).join(''),
@@ -670,7 +673,7 @@ info('National Division: ' + JSON.stringify({ r: { coco: r.coco, fashion: r.fash
 ok(r.coco === '42,10,22' && r.fashion === '28,12,4' && r.cl === '16,4+4+4+4,12,4' && !r.l2 && r.abroad,
   'the cups: the Coco Cup Division 1 and up (42: ten first-round ties, 22 byes), the Fashion Cup the National Division and up (28: twelve ties, four byes), the Continental Champions Cup four from the Premier Division (in a first season its four strongest) and twelve from abroad (v197) in four groups of four; none for Division 2, and the clubs from abroad in no league');
 ok(r.in === '110' && cupAt.length >= 1 && onCal && /Cup · /.test(sn.hub) && sn.wins === '111' && /coco/.test(sn.runs) && /fashion/.test(sn.runs) && sn.ledgerCup && fxCup.length >= 1,
-  'in the National Division, the Coco and Fashion Cups (no Continental Champions Cup): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" next on the hub), in the fixtures and the books; the review says how far ('
+  'in the National Division, the Coco and Fashion Cups (no Continental Champions Cup): ' + cupAt.length + ' cup games, each the midweek after the league matchday its calendar says ("' + sn.hub + '" in the hub\'s NEXT GAME), in the fixtures and the books; the review says how far ('
   + sn.runs + '); every cup won by someone');
 
 const busy = phys => page.evaluate(phys => { const M = __MG, d = M.d; d.story = { vet: 2, kid: 2, phone: 2 };

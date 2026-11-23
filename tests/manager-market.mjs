@@ -71,20 +71,19 @@ ok(near(l15, lp * 1.5) && l750 === 750000, 'a price to list him at the same way:
 await K(`(()=>{ hideBldg(); return 1; })()`);
 
 // --- THE WEEK'S MONEY ----------------------------------------------------------------------------------------------------------------
-r = await K(`(()=>{ const d=CAREER.data; d.phase='summer'; renderHub(); return { lbl:document.getElementById('chNetLbl').textContent, v:document.getElementById('chNet').textContent, shirts:shirtSales(d).wk }; })()`);
-ok(r.lbl === 'PRE-SEASON/WK' && r.v === '+' + '$' + r.shirts.toLocaleString(), 'in pre-season NET/WK says what comes in a week -- the shirts, ' + r.v + ' -- not a league week\'s');
+// (v151-v243: NET/WK along the campus's foot, in pre-season the shirts; v244: the hub as the template has it -- no NET/WK, the
+// club's box with the funds, the bank as it is)
+r = await K(`(()=>{ const d=CAREER.data; d.phase='summer'; renderHub(); return { net:!!document.getElementById('chNet')||!!document.getElementById('chNetBtn'), funds:document.getElementById('chBudget').textContent, want:money(d.budget) }; })()`);
+ok(!r.net && r.funds === r.want, 'v244: no NET/WK on the hub; the club\'s box has the funds, the bank as it is (' + r.funds + ')');
 // a league week, a game in it: from Monday's bank to the next Monday's, to the dollar (a game played or simulated, the
 // days run on to the next Monday: its money is last week's)
 r = await K(`(()=>{ const d=CAREER.data; while(d.phase!=='league'||!mgNextGame(d)) mgForward(d); d.budget=Math.round(d.budget); mgSim(d); renderHub();
   const P=d.wlPrev, W=d.wl, sum=X=>Object.values(X.L).reduce((a,v)=>a+v,0);
-  return { lbl:document.getElementById('chNetLbl').textContent, b0:P.b0, b1:P.b1, restP:P.b1-P.b0-sum(P), L:P.L, restW:Math.round(d.budget)-W.b0-sum(W), W:W.L, now:Math.round(d.budget) }; })()`);
+  return { b0:P.b0, b1:P.b1, restP:P.b1-P.b0-sum(P), L:P.L, restW:Math.round(d.budget)-W.b0-sum(W), W:W.L, now:Math.round(d.budget) }; })()`);
 info('the game\'s week: ' + JSON.stringify(r));
-ok(r.lbl === 'NET/WK' && Math.abs(r.restP) <= 1 && Math.abs(r.restW) <= 1 && r.L.wages < 0 && r.L.tv > 0 && r.L.partners > 0,
-  'in the league NET/WK (v186: the gate as it\'s gone, no longer marked projected); the game\'s week, line by line (' + Object.entries(r.L).map(([k, v]) => k + ' ' + v).join(', ') + '), takes its Monday\'s $' + r.b0.toLocaleString() + ' to the next Monday\'s $' + r.b1.toLocaleString() + ', and this week\'s (' + Object.entries(r.W).map(([k, v]) => k + ' ' + v).join(', ') + ') to the $' + r.now.toLocaleString() + ' in the bank -- nothing left over');
-// (v160-v241: NET/WK tapped opened THE WEEK'S MONEY; v242: the books are gone -- a tap opens nothing, and the week's lines are the FUND SUMMARY's after a match)
-await page.click('#chNetBtn'); await page.waitForTimeout(150);
-r = await page.evaluate(() => ({ on: document.getElementById('ldgModal').classList.contains('on'), hub: document.getElementById('careerHub').classList.contains('show') }));
-ok(!r.on && r.hub, 'v242: NET/WK tapped opens nothing now (the hub as it was): the week\'s lines are the FUND SUMMARY\'s after a match');
+ok(Math.abs(r.restP) <= 1 && Math.abs(r.restW) <= 1 && r.L.wages < 0 && r.L.tv > 0 && r.L.partners > 0,
+  'the game\'s week, line by line (' + Object.entries(r.L).map(([k, v]) => k + ' ' + v).join(', ') + '), takes its Monday\'s $' + r.b0.toLocaleString() + ' to the next Monday\'s $' + r.b1.toLocaleString() + ', and this week\'s (' + Object.entries(r.W).map(([k, v]) => k + ' ' + v).join(', ') + ') to the $' + r.now.toLocaleString() + ' in the bank -- nothing left over');
+// (v160-v241: NET/WK tapped opened THE WEEK'S MONEY; v242: a tap opened nothing; v244: no NET/WK -- the week's lines are the FUND SUMMARY's after a match)
 // a week on: last week's lines kept, and they still add up; a release and a scout's report in this one
 r = await K(`(()=>{ const d=CAREER.data; mgForward(d); while(!mgNextGame(d)) mgForward(d); const P=d.wlPrev; const kP=Object.values(P.L).reduce((a,v)=>a+v,0);
   d.lv.scouting=1; const f=mgAiClubs(d).find(c=>c.tier===d.tier).players[2]; mgScout(d,f.id); const i=d.roster.length-1; mgRelease(d,i);

@@ -127,7 +127,8 @@ info('they want out: ' + JSON.stringify({ before: outA, oTxt: oTxt.split('\n').s
 ok(/HE WANTS TO LEAVE/.test(oTxt) && r.some(x => x.m > outA.find(y => y.n === x.n).m + 1 && !x.listed) && r.some(x => x.listed), 'one who wants out: TALK HIM ROUND lifts him (he says how he is); the other, LIST HIM, and he\'s on the transfer list');
 r = await K(`(()=>{ const d=CAREER.data; return { left:pileLeft(d).map(x=>x.k), modal:document.getElementById('pileModal').classList.contains('on') }; })()`);
 while((await K('pileLeft(CAREER.data).length')) > 0 && await modal()) await page.click('#pileModal .plBtns button:first-child').catch(() => {});
-ok(!(await modal()) && (await K('pileLeft(CAREER.data).length')) === 0 && await K(`getComputedStyle(document.querySelector('#careerHub .cpPapers')).display==='none'`), 'the last one done: the pile\'s gone, and so is PAPERS on the campus');
+ok(!(await modal()) && (await K('pileLeft(CAREER.data).length')) === 0 && await K(`(()=>{ const b=document.querySelector('#careerHub .cpPapers'); return getComputedStyle(b).display!=='none'&&b.classList.contains('none')&&!document.getElementById('cpPapersN').textContent; })()`),
+  'the last one done: the pile\'s gone, and PAPERS stays in the campus\'s corner, dimmed with no count (v244: it was gone till the next papers)');
 
 // --- LATER, and a decision left for next week -----------------------------------------------------------------------------------
 await K(`(()=>{ const d=CAREER.data, cl=d.div[1].filter(id=>id!==d.clubId); d.offers=[{id:++d.offerSeq,pid:d.roster[3].id,club:cl[0],fee:2000,wk:d.wkN}]; d.spOff=[]; pileBuild(d,{dev:null}); d.pile.opened=false; mgSave(d); renderHub(); pileShow(d,true); return 1; })()`);

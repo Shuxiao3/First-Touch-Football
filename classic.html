@@ -618,22 +618,41 @@
     background:radial-gradient(circle at 50% 18%, rgba(16,34,16,.6), rgba(5,8,6,.99) 75%);
     font-family:'Roboto Condensed','FTC Dot',sans-serif; color:var(--acc);
     padding: max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
-  #careerHub.show{ display:flex; }
+  #careerHub.show{ display:grid; }
   /* the hub is the club's campus: the buildings' menu down one side (the right, if Settings says so), the campus beside
      it -- its picture at 1x on a phone (cut to its middle where there's less room) -- and the figures along its foot */
-  #careerHub{ flex-direction:row; gap:8px; padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
-  #careerHub.cpRight{ flex-direction:row-reverse; }
-  .cpNav{ width:176px; flex:none; box-sizing:border-box; display:flex; flex-direction:column; gap:4px; padding:9px; min-height:0; background:var(--boxBg); border-radius:var(--rWin); box-shadow:var(--pxWin); }
-  .chId{ display:flex; align-items:center; gap:8px; min-width:0; flex:none; margin:0 0 4px 1px; }
+  /* THE HUB (v244), as the Hub template has it, on a grid of twelve columns: the top bar over the first nine (the crest and
+     the club, the week, the season and the division, MENU) and the week's button over the last three; the seven
+     buildings down columns 1 and 2; the campus in a box over 3 to 9, with the news (3 to 6) and the fixtures (7 to 9)
+     under it; the next game and the club at a glance down 10 to 12; the grass along the foot, as on every career page.
+     CAMPUS MENU on the right puts the buildings on the right and the next game and the club on the left. */
+  #careerHub{ grid-template-columns:minmax(58px,1fr) minmax(58px,1fr) repeat(10,minmax(0,1fr)); grid-template-rows:36px minmax(0,128fr) minmax(0,32fr) minmax(0,128fr); gap:8px;
+    grid-template-areas:"top top top top top top top top top btn btn btn" "nav nav cam cam cam cam cam cam cam nxt nxt nxt" "nav nav cam cam cam cam cam cam cam ovr ovr ovr" "nav nav nws nws nws nws fix fix fix ovr ovr ovr";
+    padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
+  #careerHub.cpRight{ grid-template-columns:repeat(10,minmax(0,1fr)) minmax(58px,1fr) minmax(58px,1fr); grid-template-areas:"top top top top top top top top top btn btn btn" "nxt nxt nxt cam cam cam cam cam cam cam nav nav" "ovr ovr ovr cam cam cam cam cam cam cam nav nav" "ovr ovr ovr nws nws nws nws fix fix fix nav nav"; }
+  .chTop{ grid-area:top; min-width:0; display:flex; align-items:center; gap:6px; padding:4px; background:var(--boxBg); border-radius:var(--rWin); box-shadow:var(--pxWin); }
+  .chId{ flex:0 1 auto; display:flex; align-items:center; gap:8px; min-width:0; margin:0 6px 0 4px; }
   .chIdT{ min-width:0; }
-  .chCrest{ flex:none; width:32px; height:36px; image-rendering:pixelated; }
+  .chCrest{ flex:none; width:24px; height:28px; image-rendering:pixelated; }
   .chCrest:not([src]){ display:none; }
-  .chClub{ font-family:'Roboto Condensed','FTC Dot',sans-serif; font-size:13px; color:var(--ink); letter-spacing:.3px; white-space:nowrap; overflow:hidden; }
-  .chMeta{ font-size:10px; color:var(--dim); letter-spacing:.5px; white-space:nowrap; margin-top:3px; }
-  .cpBldgs{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:4px; }
-  .cpBldgs .bldg{ flex:1 1 0; min-height:26px; max-height:40px; position:relative; display:flex; align-items:center; gap:8px; padding:0 7px 0 9px; border:0; border-radius:var(--r);
-    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font:12px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.5px; text-shadow:1px 1px 0 var(--btnSh); text-align:left; cursor:pointer; }
-  .cpBldgs .bldg svg{ width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
+  .chClub{ font:700 13px/1.1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chSub{ font-size:10px; line-height:1.2; color:var(--dim); letter-spacing:.3px; white-space:nowrap; }
+  .chPanel{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:6px; height:28px; box-sizing:border-box; padding:0 9px; background:var(--win); border-radius:var(--r);
+    font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.05em; color:var(--ink2); text-transform:uppercase; white-space:nowrap; overflow:hidden; }
+  .chPanel > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .hic{ display:inline-flex; flex:none; } .hic svg{ display:block; width:14px; height:14px; }
+  .chPanel .hic{ color:var(--dim); }
+  .chTop .chMenuBtn{ flex:none; display:flex; align-items:center; gap:6px; height:28px; min-height:28px; padding:0 10px; font-size:11px; }
+  .chSeason{ flex:none; }
+  @media (max-width:760px){ .chPanel .hic, .chSub{ display:none; } .chPanel{ padding:0 7px; } .chId{ margin:0 2px; gap:6px; } .chTop{ gap:4px; } }
+  #chBottom{ grid-area:btn; min-width:0; display:flex; gap:6px; }
+  #chBottom button{ flex:1 1 auto; min-width:0; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; border-radius:var(--r); font-size:13px; line-height:1.05; letter-spacing:.5px; white-space:normal; text-align:center; }
+  #chBottom .chBtn2{ flex:0 1 auto; margin:0; padding:0 8px; font-size:11px; }
+  .cpNav{ grid-area:nav; min-width:0; min-height:0; display:flex; flex-direction:column; }
+  .cpBldgs{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:8px; }
+  .cpBldgs .bldg{ flex:1 1 0; min-height:22px; max-height:36px; position:relative; display:flex; align-items:center; gap:7px; padding:0 7px 0 8px; border:0; border-radius:var(--r);
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font:600 12px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.5px; text-align:left; cursor:pointer; }
+  .cpBldgs .bldg svg{ width:16px; height:16px; flex:none; }
   .cpBldgs .bldg .bn{ flex:1 1 auto; min-width:0; white-space:nowrap; color:inherit; }
   @media (hover:hover){ .cpBldgs .bldg:hover{ filter:brightness(1.1); } }
   .cpBldgs .bldg:active{ box-shadow:var(--pxBtnDown); transform:translateY(1px); }
@@ -642,8 +661,6 @@
   .cpBldgs .bldg.unbuilt .bPrice{ display:block; }
   .cpBldgs .bldg.sel{ background:var(--fillAcc); color:var(--accInk); text-shadow:1px 1px 0 var(--accSh); box-shadow:var(--pxBtnOn); }
   .cpBldgs .bldg.sel .bPrice{ color:var(--accInk); }
-  .cpDeco{ flex:none; display:flex; align-items:center; gap:6px; min-height:30px; height:30px; padding:0 10px 0 8px; font-size:11px; pointer-events:auto; }
-  .cpDeco svg{ width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
   .bpBuild{ display:flex; gap:16px; align-items:flex-start; }
   .bpBuildPic{ flex:none; image-rendering:pixelated; border-radius:var(--r); box-shadow:var(--pxOut); }
   .bpBuildTxt{ flex:1 1 auto; min-width:0; }
@@ -670,27 +687,24 @@
   .lk{ display:inline-flex; align-items:center; gap:1px; margin-left:4px; font-style:normal; font-size:9px; letter-spacing:0; color:var(--dim); vertical-align:middle; }
   .formBtn.locked, .tbOpt.locked, .iOpt.locked{ opacity:.42; }
   .instrGrp.locked .instrGrpLbl{ color:var(--dim); }
-  .cpDeco .bPrice{ display:none; margin-left:4px; }
-  .cpDeco.locked{ opacity:.7; }
-  .cpDeco.locked .bPrice{ display:inline-flex; color:var(--dim); }
-  .cpMove{ flex:none; display:flex; align-items:center; gap:6px; min-height:30px; height:30px; padding:0 10px 0 8px; font-size:11px; pointer-events:auto; }
-  .cpPapers{ position:relative; flex:none; display:flex; align-items:center; gap:6px; min-height:30px; height:30px; padding:0 14px 0 8px; font-size:11px; pointer-events:auto; }
-  .cpPapers svg{ width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
-  .cpBadge{ position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px; box-sizing:border-box; border-radius:4px; background:#ff9a1f; color:#2a1400;
-    font:12px/20px 'Roboto Condensed','FTC Dot',sans-serif; text-align:center; text-shadow:none; box-shadow:0 0 0 2px #2a1400, 2px 2px 0 2px rgba(0,0,0,.35); }
+  .cpPapers{ position:relative; flex:none; display:flex; align-items:center; gap:6px; min-height:30px; height:30px; padding:0 14px 0 9px; font-size:11px; pointer-events:auto; }
+  .cpPapers .hic svg{ width:15px; height:15px; }
+  .cpPapers.none{ filter:saturate(.5) brightness(.85); }
+  .cpBadge{ position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px; box-sizing:border-box; border-radius:10px; background:#e5493c; color:#fff;
+    font:700 12px/20px 'Roboto Condensed','FTC Dot',sans-serif; text-align:center; text-shadow:none; box-shadow:0 0 0 2px var(--ol), 2px 2px 0 2px rgba(0,0,0,.35); }
+  .cpBadge:empty{ display:none; }
   .cpPapers.fresh{ animation:cpGlow 1.6s ease-in-out infinite; }
   .cpBadge.pop{ animation:cpPop .55s cubic-bezier(.2,1.6,.4,1) both; }
   @keyframes cpPop{ 0%{ transform:scale(0) rotate(-20deg); } 70%{ transform:scale(1.35) rotate(6deg); } 100%{ transform:scale(1) rotate(0); } }
   @keyframes cpGlow{ 0%,100%{ box-shadow:var(--pxBtn,0 0 0 0 transparent), 0 0 0 0 rgba(255,154,31,0); } 50%{ box-shadow:var(--pxBtn,0 0 0 0 transparent), 0 0 0 4px rgba(255,154,31,.55); } }
   @media (prefers-reduced-motion:reduce){ .cpPapers.fresh, .cpBadge.pop{ animation:none; } }
-  .cpMove svg{ width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
   .cpPlace{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); z-index:6; display:none; align-items:center; gap:6px; padding:5px 6px; max-width:calc(100% - 16px);
     background:var(--boxBg); border-radius:var(--rWin); box-shadow:var(--pxWin); white-space:nowrap; }
   .cpPlace .mgBtn{ flex:none; min-height:32px; }
   .cpPlN{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:11px; color:var(--ink); padding:0 4px; }
   #careerHub.placing .cpPlace{ display:flex; }
-  #careerHub.dayscene .cpNav{ pointer-events:none; }
-  #careerHub.placing .cpFoot, #careerHub.placing .cpTop{ display:none; }
+  #careerHub.dayscene .cpNav, #careerHub.dayscene #chBottom{ pointer-events:none; }   /* (v244: the week's button too, up in the top bar now) */
+  #careerHub.placing .cpTop{ display:none; }
   #careerHub.placing .cpNav{ pointer-events:none; opacity:.5; }
   #careerHub.placing .cpHots{ pointer-events:none; }
   #careerHub.placing .cpView{ touch-action:none; cursor:grab; }
@@ -709,10 +723,42 @@
   .decoBtns{ flex:none; display:flex; flex-direction:column; gap:4px; }
   .decoBtns .mgBtn{ min-width:84px; }
   .bBadge{ display:none; flex:none; min-width:18px; height:16px; padding:0 4px; box-sizing:border-box; border-radius:var(--rS); background:var(--warn); color:var(--accInk); font-size:10px; line-height:16px; text-align:center; text-shadow:none; box-shadow:var(--pxOut); }
-  .cpNav .chBottom{ flex:none; display:flex; gap:6px; margin-top:3px; }
-  .cpNav .chBottom button{ flex:1 1 auto; min-height:40px; margin:0; padding:4px 6px; border-radius:var(--r); font-size:14px; line-height:1.15; white-space:normal; }
-  .cpNav .chBottom .chBtn2{ flex:0 0 auto; font-size:11px; letter-spacing:.5px; padding:4px 7px; }
-  .cpMain{ flex:1 1 auto; min-width:0; position:relative; overflow:hidden; border-radius:var(--rWin); background:#65815e; box-shadow:var(--pxOut); }
+  .cpMain{ grid-area:cam; min-width:0; min-height:0; position:relative; overflow:hidden; border-radius:var(--rWin); background:#65815e; box-shadow:var(--pxOut); }
+  /* (v244) putting a decoration down: the campus over the whole page, at its own size */
+  #careerHub.placing .cpMain{ grid-area:2 / 1 / 5 / 13; z-index:30; }
+  .cpWorld.small canvas{ image-rendering:auto; }
+  /* the boxes round the campus: a title in a well, then its rows */
+  .chBox{ min-width:0; min-height:0; display:flex; flex-direction:column; gap:4px; padding:4px; overflow:hidden; background:var(--boxBg); border-radius:var(--rWin); box-shadow:var(--pxWin); }
+  .chNews{ grid-area:nws; cursor:pointer; } .chFix{ grid-area:fix; cursor:pointer; } .chNext{ grid-area:nxt; } .chOver{ grid-area:ovr; }
+  @media (hover:hover){ .chNews:hover, .chFix:hover{ filter:brightness(1.08); } }
+  .chWell{ flex:none; display:flex; align-items:center; gap:6px; height:24px; padding:0 8px; background:var(--well); border-radius:var(--r);
+    font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--acc); white-space:nowrap; overflow:hidden; }
+  .chWell .hic svg{ width:13px; height:13px; }
+  .chPill{ margin-left:auto; padding:3px 6px; border-radius:3px; background:var(--fillAcc); color:var(--accInk); font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; }
+  .chPill:empty{ display:none; }
+  .chNewsL, .chFixL, .chOverL{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:4px; }
+  .chNewsI{ flex:0 1 auto; min-height:0; overflow:hidden; box-sizing:border-box; padding:4px 8px; background:var(--win); border-radius:var(--r);
+    font:600 11.5px/1.25 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  .chNewsI span{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; max-height:2.5em; }
+  .chNewsI.none{ color:var(--dim); font-weight:400; }
+  .chFx, .chKv{ flex:1 1 0; min-height:0; display:flex; align-items:center; gap:7px; padding:0 8px; background:var(--win); border-radius:var(--r);
+    font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; }
+  .chFx{ max-height:28px; } .chKv{ max-height:24px; color:var(--ink2); }
+  .chFx > span, .chKv > span{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .chFx i.w{ flex:none; font-style:normal; color:var(--dim); min-width:20px; }
+  .chFx .hic, .chKv .hic{ color:var(--dim); } .chFx .hic svg, .chKv .hic svg{ width:13px; height:13px; }
+  .chKv b{ flex:none; font-weight:700; color:var(--ink); } .chKv em{ font-style:normal; margin-left:3px; font-size:9px; }
+  .chNextB{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:space-between; gap:3px; }
+  .chNg{ flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; justify-items:center; gap:4px; }
+  .chNg > div{ min-width:0; max-width:100%; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .chNg img{ width:36px; height:40px; max-height:calc(100% - 15px); object-fit:contain; image-rendering:pixelated; }
+  .chNg i{ font-style:normal; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:700 10px/1.1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; color:var(--ink2); text-transform:uppercase; }
+  .chNg b{ font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  .chNgS{ flex:none; height:24px; display:flex; align-items:center; justify-content:center; gap:6px; padding:0 6px; background:var(--win); border-radius:var(--r);
+    font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; color:var(--ink); text-transform:uppercase; white-space:nowrap; overflow:hidden; }
+  .chNgS span{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .chNgNone{ flex:1 1 auto; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--dim); text-align:center; }
+  @media (max-height:360px){ .chNg img{ width:28px; height:32px; } .chNgS{ height:20px; } .chWell{ height:20px; } .chTop .chMenuBtn, .chPanel{ height:26px; min-height:26px; } }
   .cpMain::after{ content:''; position:absolute; inset:0; z-index:6; border-radius:var(--rWin); box-shadow:inset 0 0 0 1px var(--rim); pointer-events:none; }   /* (v240: the match screen's thin rim) */
   .cpView{ position:absolute; inset:0; overflow:hidden; }
   .cpWorld{ position:absolute; left:0; top:0; width:768px; height:448px; transform-origin:0 0; }
@@ -726,10 +772,7 @@
   .cpTag b{ padding:5px 10px 6px; background:var(--win); border-radius:var(--r); box-shadow:var(--pxOut), inset 0 0 0 1px var(--rim), inset 0 -2px 0 0 var(--rimLo); font:13px 'Roboto Condensed','FTC Dot',sans-serif; font-weight:400; letter-spacing:1px; color:var(--ink); white-space:nowrap; }
   .cpTag b i{ font-style:normal; color:var(--acc); }
   .cpTag svg{ display:block; shape-rendering:crispEdges; }
-  .cpTop{ position:absolute; left:10px; right:10px; top:9px; z-index:5; display:flex; align-items:flex-start; gap:8px; pointer-events:none; }
-  .cpClub{ display:none; flex:none; align-items:center; gap:6px; height:28px; padding:0 9px 0 5px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font:12px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; }
-  .cpClub img{ width:16px; height:18px; image-rendering:pixelated; }
-  .cpClub img:not([src]){ display:none; }
+  .cpTop{ position:absolute; left:8px; right:8px; top:8px; z-index:5; display:flex; align-items:flex-start; gap:8px; pointer-events:none; }
   .cpNotes{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
   :root[data-text="large"] #bpBody, :root[data-text="large"] #bpFoot{ zoom:1.15; }   /* (v158: TEXT SIZE, LARGE -- a building's screens a size up, and their buttons with them; the pages fit what's left) */
   .ptk.armed{ outline:2px dashed var(--acc); outline-offset:3px; }   /* (v158: A TAP TO SWAP) */
@@ -748,16 +791,8 @@
   .mgQuick .mgMini{ padding:5px 8px; }
   .chMore{ font:10px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; color:var(--acc); background:none; border:0; padding:0 2px; cursor:pointer; pointer-events:auto; }   /* (v153) */
   .cpNotes .chWarn{ margin:0; max-width:100%; padding:5px 10px; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); font-size:11px; line-height:1.4; white-space:normal; text-align:center; }
-  .cpFoot{ position:absolute; left:10px; right:10px; bottom:8px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:8px; pointer-events:none; }
-  .cpStats{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:14px; height:30px; padding:0 10px; overflow:hidden; white-space:nowrap; background:var(--bg); border-radius:var(--r); box-shadow:var(--pxOut); pointer-events:auto; }
-  .cpSt{ flex:none; display:flex; align-items:baseline; gap:5px; font-size:9px; letter-spacing:.5px; color:var(--dim); }
-  .cpSt i{ font-style:normal; }
-  .cpSt b{ font-size:12px; font-weight:400; letter-spacing:0; color:var(--ink); }
-  #chPhase{ font-size:10px; color:var(--ink2); text-transform:uppercase; }
-  .cpStats[data-hide~="net"] .cpNet, .cpStats[data-hide~="fans"] .cpFans{ display:none; }
-  .cpFoot .chMenuBtn{ flex:none; min-height:30px; height:30px; padding:0 10px; font-size:11px; pointer-events:auto; }
-  @media (max-width:700px){ .cpNav{ width:156px; } }
-  @media (max-height:375px){ .cpNav .chId{ display:none; } .cpClub{ display:flex; } }
+  .cpStats{ flex:1 4 auto; min-width:0; display:flex; overflow:hidden; }
+  .cpStats .chPanel{ flex:1 1 auto; }
   .chBtn2{ font-family:'Roboto Condensed','FTC Dot',sans-serif; font-weight:700; font-size:14px; letter-spacing:1px; color:var(--acc); background:rgb(var(--accRGB) / .08); border:1px solid var(--well); border-radius:9px; padding:12px 22px; cursor:pointer; margin-right:10px; }
   .chBtn2:hover{ background:rgb(var(--accRGB) / .18); border-color:var(--acc); }
   .chBtn2:disabled,.chBtn2[disabled]{ opacity:.32; pointer-events:none; cursor:default; }
@@ -1731,7 +1766,7 @@
   .signCard .six{ margin:2px 0 0; } .signCard .cfBtns{ flex:none; margin-top:4px; }
   .ldgCard{ max-width:520px; gap:6px; } .ldgCard .cfBtns{ flex:none; margin-top:4px; }   /* (v160: its middle pages, .ldgMid; BACK always on the screen) */ .ldgSect{ font:10px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; color:var(--dim); margin-top:6px; }
   .ldgRow{ display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--ink2); padding:1px 0; } .ldgRow b{ font-weight:400; color:var(--ink); } .ldgRow.tot{ border-top:1px solid var(--well); padding-top:3px; } .ldgNote{ font-size:11px; color:var(--dim); }
-  #chNetBtn{ cursor:pointer; } #chNetBtn i{ text-decoration:underline dotted; }
+
   .trend, .mgRow .ovr i.trend{ font-style:normal; font-weight:400; font-size:.55em; margin-left:2px; vertical-align:.45em; }   /* (v152: WHICH WAY HE'S GOING) */
   .trend.up, .mgRow .ovr i.trend.up{ color:var(--good); } .trend.dn, .mgRow .ovr i.trend.dn{ color:var(--bad); }
   .mgRow .ovr i.trend{ font-size:9px; margin-left:1px; vertical-align:2px; }
@@ -2079,32 +2114,42 @@
   </div>
   <div id="matchReport"></div>
   <div id="careerHub">
+    <div class="chTop">
+      <div class="chId"><img id="chCrest" class="chCrest" alt=""><div class="chIdT"><div class="chClub" id="chClub">YOUR CLUB</div><div class="chSub">Career mode</div></div></div>
+      <div class="cpStats" id="cpStats"><span class="chPanel chDate"><i class="hic" data-ic="calendar"></i><span id="chPhase"></span></span></div>
+      <span class="chPanel chSeason"><i class="hic" data-ic="trophy"></i><span id="chMeta">Division 2</span></span>
+      <button class="chMenuBtn" data-hub="menu"><i class="hic" data-ic="menu"></i>MENU</button>
+    </div>
+    <div class="chBottom" id="chBottom"></div>
     <nav class="cpNav" aria-label="Buildings">
-      <div class="chId"><img id="chCrest" class="chCrest" alt="">
-        <div class="chIdT"><div class="chClub" id="chClub">YOUR CLUB</div><div class="chMeta" id="chMeta">Division 2</div></div></div>
       <div class="cpBldgs" id="chCampus">
-        <button class="bldg" data-bldg="club"><svg viewBox="0 0 24 24"><path d="M3.5 12 L12 5 L20.5 12"/><path d="M6 11 V20 H18 V11"/><rect x="10" y="14.5" width="4" height="5.5"/><path d="M12 5 V1.5 L15.5 2.6 L12 3.7"/></svg><span class="bn">CLUBHOUSE</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="train"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12"/><line x1="12" y1="6" x2="12" y2="18"/><circle cx="12" cy="12" r="2.6"/><rect x="2.5" y="9.5" width="2.6" height="5"/><rect x="18.9" y="9.5" width="2.6" height="5"/></svg><span class="bn">TRAINING</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="stadium"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/><ellipse cx="12" cy="12" rx="4.5" ry="2.3"/></svg><span class="bn">STADIUM</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="market"><svg viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><line x1="9.5" y1="5.5" x2="14.5" y2="5.5"/></svg><span class="bn">TRANSFERS</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="physio"><svg viewBox="0 0 24 24"><path d="M9 3.5 H15 V9 H20.5 V15 H15 V20.5 H9 V15 H3.5 V9 H9 Z"/></svg><span class="bn">PHYSIO</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="scouting"><svg viewBox="0 0 24 24"><circle cx="7.5" cy="15" r="3.5"/><circle cx="16.5" cy="15" r="3.5"/><path d="M4.6 13 L7 5 H10 L11 12.5"/><path d="M19.4 13 L17 5 H14 L13 12.5"/><line x1="11" y1="14" x2="13" y2="14"/></svg><span class="bn">SCOUTING</span><span class="bBadge"></span><span class="bPrice"></span></button>
-        <button class="bldg" data-bldg="academy"><svg viewBox="0 0 24 24"><path d="M2.5 9.5 L12 5 L21.5 9.5 L12 14 Z"/><path d="M6.5 11.5 V16 Q12 19 17.5 16 V11.5"/><line x1="21.5" y1="9.5" x2="21.5" y2="15"/></svg><span class="bn">ACADEMY</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="club"><i class="hic" data-ic="clubhouse"></i><span class="bn">CLUBHOUSE</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="train"><i class="hic" data-ic="training"></i><span class="bn">TRAINING</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="stadium"><i class="hic" data-ic="stadium"></i><span class="bn">STADIUM</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="market"><i class="hic" data-ic="transfers"></i><span class="bn">TRANSFERS</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="physio"><i class="hic" data-ic="physio"></i><span class="bn">PHYSIO</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="scouting"><i class="hic" data-ic="scouting"></i><span class="bn">SCOUTING</span><span class="bBadge"></span><span class="bPrice"></span></button>
+        <button class="bldg" data-bldg="academy"><i class="hic" data-ic="academy"></i><span class="bn">ACADEMY</span><span class="bBadge"></span><span class="bPrice"></span></button>
       </div>
-      <div class="chBottom" id="chBottom"></div>
     </nav>
     <div class="cpMain">
       <div class="cpView" id="cpView"><div class="cpWorld" id="cpWorld"><canvas id="cpCanvas" width="768" height="448" role="img" aria-label="your club's campus"></canvas><div class="cpHots" id="cpHots"></div></div><div class="cpTag" id="cpTag" aria-hidden="true"></div></div>
-      <div class="cpTop"><div class="cpClub"><img id="cpCrest" alt=""><span id="cpClubN"></span></div>
+      <div class="cpTop">
         <div class="cpNotes"><div class="chWarn" id="chWarn" style="display:none"></div><div class="chWarn" id="chNote" style="display:none;color:var(--warn)"></div></div>
-        <button class="chMenuBtn cpPapers" data-hub="papers" style="display:none" aria-label="the papers"><svg viewBox="0 0 24 24"><path d="M4 5 H17 V19 H6 Q4 19 4 17 Z"/><path d="M17 9 H20 V17 Q20 19 18 19 H17"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="15" x2="12" y2="15"/></svg>PAPERS<span class="cpBadge" id="cpPapersN"></span></button>
-        <button class="chMenuBtn cpDeco" data-hub="decor"><svg viewBox="0 0 24 24"><path d="M12 3 L6 11 H9 L5 17 H19 L15 11 H18 Z"/><line x1="12" y1="17" x2="12" y2="21"/></svg>DECORATE<span class="bPrice"></span></button>
-        <button class="chMenuBtn cpMove" data-hub="move"><svg viewBox="0 0 24 24"><path d="M12 3 V21 M3 12 H21"/><path d="M9 6 L12 3 L15 6 M9 18 L12 21 L15 18 M6 9 L3 12 L6 15 M18 9 L21 12 L18 15"/></svg>MOVE</button></div>
-      <div class="cpFoot"><div class="cpStats" id="cpStats"><span class="cpSt" id="chPhase"></span><span class="cpSt"><i>BUDGET</i><b id="chBudget">$0</b></span><span class="cpSt cpFans"><i>FANS</i><b id="chLoyal" style="color:var(--warn)">0</b></span><span class="cpSt cpNet" id="chNetBtn"><i id="chNetLbl">NET/WK</i><b id="chNet">$0</b></span></div>
-        <button class="chMenuBtn" data-hub="menu">☰ MENU</button></div>
+        <button class="chMenuBtn cpPapers" data-hub="papers" aria-label="the papers"><i class="hic" data-ic="news"></i>PAPERS<span class="cpBadge" id="cpPapersN"></span></button></div>
       <div class="cpPlace" id="cpPlace"></div>
       <div class="cpDay" id="cpDay" aria-hidden="true"><canvas id="cpDayCv"></canvas><div class="cpDayT" id="cpDayT"></div></div>
     </div>
+    <div class="chBox chNews" data-hub="news" role="button" tabindex="0" aria-label="the news"><div class="chWell"><i class="hic" data-ic="news"></i>NEWS<b class="chPill" id="chNewsN"></b></div><div class="chNewsL" id="chNewsL"></div></div>
+    <div class="chBox chFix" data-hub="fixtures" role="button" tabindex="0" aria-label="the fixtures"><div class="chWell"><i class="hic" data-ic="calendar"></i>FIXTURES<b class="chPill">ALL ›</b></div><div class="chFixL" id="chFixL"></div></div>
+    <div class="chBox chNext"><div class="chWell">NEXT GAME</div><div class="chNextB" id="chNextB"></div></div>
+    <div class="chBox chOver"><div class="chWell"><i class="hic" data-ic="books"></i>CLUB OVERVIEW</div><div class="chOverL">
+      <div class="chKv"><i class="hic" data-ic="leaguepos"></i><span>League position</span><b id="chPos"></b></div>
+      <div class="chKv"><i class="hic" data-ic="formation"></i><span>Record</span><b id="chRec"></b></div>
+      <div class="chKv"><i class="hic" data-ic="funds"></i><span>Funds</span><b id="chBudget">$0</b></div>
+      <div class="chKv"><i class="hic" data-ic="seats"></i><span>Capacity</span><b id="chCap"></b></div>
+      <div class="chKv"><i class="hic" data-ic="fans"></i><span>Fans</span><b><span id="chLoyal">0</span><em id="chFansT"></em></b></div>
+    </div></div>
     <div class="cfFoot" aria-hidden="true"><i class="cfL"></i><i class="cfM"></i><i class="cfR"></i></div>
     <div id="bldgPanel"><div class="bpInner">
       <div class="bpHead"><button class="bpTopBack" data-hub="bldgback" aria-label="back to the campus">◀ CAMPUS</button><h3 id="bpTitle"></h3><div class="bpTabs" id="bpTabs"></div></div>
@@ -21403,7 +21448,7 @@
   let matchReturn='menu';   // where Esc/finish returns after a match: 'menu' or 'hub'
   // ---- the buildings: each door opens one of these screens ----
   const MG_BLDGS={
-    club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures']},
+    club:    {title:'CLUBHOUSE', sub:'the clubhouse: what the club can build, contracts, the news, your career', tabs:['Club','Squad','News','League','Fixtures','Decorate']},   // (v244: DECORATE off the hub, the Clubhouse's last tab)
     train:   {title:'TRAINING', sub:'the training pitch: your tactics, who you take and your subs, and your coaches', tabs:['Tactics','Selection','Staff','Pitch']},
     market:  {title:'TRANSFERS', sub:'buy, sell and sign free agents, on your phone', tabs:['Search','Bids','Free agents','Offers','Selling']},
     physio:  {title:'PHYSIO', sub:'stamina on match day, and injuries', tabs:null},
@@ -21639,7 +21684,7 @@
         +'<button class="mgBtn" data-mg="dbuy" data-id="'+k+'"'+((d.budget||0)<price?' disabled':'')+'>'+money(price)+'</button></div></div>'; }
     return h+'</div>'; }
   function mgDecorLocked(d){ return '<div class="bpBuild fitWhole"><div class="bpBuildTxt"><div class="bpSect">COMES WITH CLUBHOUSE '+DECOR_CL+'</div>'
-      +'<div class="stadWhat">Trees, flowers, lamps, benches and the rest, bought one at a time and put wherever you like on the campus. They come with '+CLUB_LV[DECOR_CL].n.toLowerCase()+' (clubhouse '+DECOR_CL+').</div></div></div>'
+      +'<div class="stadWhat" data-xpl="'+xq('Trees, flowers, lamps, benches and the rest, bought one at a time and put wherever you like on the campus. They come with '+CLUB_LV[DECOR_CL].n.toLowerCase()+' (clubhouse '+DECOR_CL+').')+'">Trees, flowers, lamps and benches</div></div></div>'   // (v244: a label, its sentence a tap away -- J1: it's a Clubhouse tab now)
       +'<button class="mgBtn bpPin" data-mg="goclub">◀ THE CLUBHOUSE</button>'; }
   // what's on screen (never saved): the man picked, a bid or deal in progress, list filters
   const MGUI={sel:null, bid:null, deal:null, list:null, years:2, msg:'', msgCol:'', role:'ALL', tier:null, ntier:null, qpSel:null, noPile:false};
@@ -22036,14 +22081,18 @@
 
   // ---- the town (until it can be walked round: its buildings in a row) ----
   function renderHub(){ const d=CAREER&&CAREER.data; if(!d) return; const f=computeFinance(d);
-    const cn=document.getElementById('chClub'); cn.textContent=d.clubName; cn.style.fontSize=d.clubName.length>19?'10px':d.clubName.length>16?'11px':'';
-    document.getElementById('cpClubN').textContent=d.clubName;
-    { const u=crestURL(crestFor(d.world.clubs[d.clubId])); for(const id of ['chCrest','cpCrest']){ const im=document.getElementById(id); if(u) im.src=u; else im.removeAttribute('src'); } }
-    document.getElementById('chMeta').textContent=MG_LEAGUE[d.tier]+' · '+ordinal(mgPos(d));
-    const bEl=document.getElementById('chBudget'); bEl.textContent=money(d.budget); bEl.style.color=d.budget<0?'var(--bad)':'var(--good)';
+    hubIcons();
+    document.getElementById('chClub').textContent=d.clubName;
+    { const u=crestURL(crestFor(d.world.clubs[d.clubId])), im=document.getElementById('chCrest'); if(u) im.src=u; else im.removeAttribute('src'); }
+    document.getElementById('chMeta').textContent='Season '+d.season+' · '+MG_LEAGUE[d.tier];   // (v244: the top bar's -- your place in the league is the club's box)
+    // (v244) THE CLUB AT A GLANCE: where you stand, the season's record, the money, the seats and the fans (an arrow for
+    // what your last game won or lost them)
+    document.getElementById('chPos').textContent=ordinal(mgPos(d));
+    { const F=mgForm(d,999), n=k=>F.filter(x=>x===k).length; document.getElementById('chRec').textContent=n('W')+'W '+n('D')+'D '+n('L')+'L'; }
+    const bEl=document.getElementById('chBudget'); bEl.textContent=money(d.budget); bEl.style.color=d.budget<0?'var(--bad)':'';
+    document.getElementById('chCap').textContent=(f.capacity||0).toLocaleString();
     document.getElementById('chLoyal').textContent=Math.round(d.loyalty||0).toLocaleString();
-    const pre=d.phase==='summer'||d.phase==='winter', nv=pre?shirtSales(d).wk:weekNetNow(d,f), nEl=document.getElementById('chNet'), nl=document.getElementById('chNetLbl');   // (v151: projected, and in a pre-season week what comes in -- the shirts)
-    if(nl) nl.textContent=pre?'PRE-SEASON/WK':'NET/WK'; nEl.textContent=(nv>=0?'+':'')+money(nv); nEl.style.color=nv>=0?'var(--good)':'var(--bad)';
+    { const t=document.getElementById('chFansT'), v=d.loyD||0; t.textContent=v>0?'▲':v<0?'▼':''; t.style.color=v>0?'var(--good)':'var(--bad)'; }
     const w=[], lu=ensureLineup(d), gk=d.roster[lu.gk], bad=t=>'<span style="color:var(--bad)">'+t+'</span>', info=t=>'<span style="color:var(--warn)">'+t+'</span>';
     if(debtOver(d)) w.push(bad('THE BOARD: '+money(-d.budget-debtLimitOf(d))+' over what it lets the club owe — no signings or building, and if it’s still so at the season’s end your most valuable man is sold'));   // (v150)
     else if(d.budget<0) w.push(bad('IN THE RED — sell before you can buy'));
@@ -22073,8 +22122,8 @@
     badge('academy',lvOf(d,'academy')?(d.youth||[]).length:0);
     for(const id of ['market','physio','scouting','academy']){ const el=document.querySelector('#chCampus [data-bldg="'+id+'"]'); if(!el) continue;   // (a plot: its price; not yet: the clubhouse it needs)
       const L=lvOf(d,id), need=clubNeed(id,1), lock=!L&&lvOf(d,'club')<need, pc=el.querySelector('.bPrice');
-      if(id==='market'){ el.classList.toggle('unbuilt',false); el.classList.toggle('locked',!L); if(pc) pc.innerHTML=L?'':LOCK_SVG; continue; }   // (the phone: locked till it rings)
-      el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=lock?LOCK_SVG:!L?kPrice(bldCost(id,1)):'';
+      if(id==='market'){ el.classList.toggle('unbuilt',false); el.classList.toggle('locked',!L); if(pc) pc.innerHTML=''; hubBldIc(el,L?null:'lock'); continue; }   // (the phone: locked till it rings; v244: the padlock in place of its picture)
+      el.classList.toggle('unbuilt',!L&&!lock); el.classList.toggle('locked',lock); if(pc) pc.innerHTML=!L&&!lock?kPrice(bldCost(id,1)):''; hubBldIc(el,lock?'lock':null);
       { const bn=el.querySelector('.bn'); if(bn) bn.dataset.sub=lock?'needs clubhouse '+need:''; }   // (v153: under its name, what it waits for -- the lock and a number, "2", read as a building at level 2)
       el.setAttribute('aria-label',BLD_NAME[id]+(lock?': needs '+CLUB_LV[need].n.toLowerCase()+' (clubhouse '+need+')':!L?': '+money(bldCost(id,1))+' to build':'')); }
     { const el=document.querySelector('#chCampus [data-bldg="club"]'), L=lvOf(d,'club'), N=CLUB_LV[L+1];   // (v153: THE NEXT CLUBHOUSE, your money against it)
@@ -22082,13 +22131,11 @@
         el.classList.toggle('nextUp',!!N); const bn=el.querySelector('.bn'); if(bn) bn.dataset.sub=N?'next '+kPrice(N.cost):''; pg.style.display=N?'':'none';
         if(N) pg.firstChild.style.width=Math.round(100*clamp((d.budget||0)/N.cost,0,1))+'%';
         el.setAttribute('aria-label','the clubhouse'+(N?': next, '+N.n.toLowerCase()+' (clubhouse '+(L+1)+'), '+money(N.cost)+' -- you have '+money(Math.round(d.budget||0)):'')); } }
-    { const el=document.querySelector('#careerHub .cpDeco'), lock=lvOf(d,'club')<DECOR_CL; if(el){ el.classList.toggle('locked',lock); el.querySelector('.bPrice').innerHTML=lock?LOCK_SVG+clubShort(DECOR_CL):''; }
-      const mv=document.querySelector('#careerHub .cpMove'); if(mv) mv.style.display=(d.deco||[]).length?'':'none'; }
     // the week's button: on a Monday, on to the matchday (or the next week); on a matchday's morning, play it or simulate it
     let b=''; const g=mgNextGame(d), opp=g&&mgClub(d,g.opp), mon=d.wday!=='wed'&&d.wday!=='sat';
     if(d.phase==='review') b='<button class="chPlay" data-mg="review">SEASON REVIEW ▶</button>';
     else if(mon) b='<button class="chPlay" data-mg="forward">'+mgForwardWord(d)+' ▶</button>';   // (the papers: off to the side, see pilesBtn)
-    else if(g) b='<button class="chBtn2" data-mg="sim">SIMULATE ⏭</button><button class="chPlay" data-mg="play">PLAY ▶</button>';   // (the matchday's paper opens by itself; the table's in the clubhouse too)
+    else if(g) b='<button class="chBtn2" data-mg="sim">SIMULATE ⏭</button><button class="chPlay" data-mg="play">PLAY MATCH ▶</button>';   // (the matchday's paper opens by itself; the table's in the clubhouse too)
     else b='<button class="chPlay" data-mg="continue">CONTINUE ▶</button>';
     document.getElementById('chBottom').innerHTML=b;
     // along the campus's foot: the week and its day, and the game (on a Monday, the week's first) -- put shorter, if the
@@ -22097,7 +22144,8 @@
     ph.dataset.long='Season '+d.season+' · '+wk+(g?' · '+(mon?'next: ':'')+what+who:'');
     ph.dataset.mid=g&&!mon?MG_DAY[d.wday]+' · '+what+who:wk;
     ph.dataset.short=g&&!mon?(g.kind==='league'?'MD '+(d.md+1):g.short)+(opp?' · '+(g.home?'vs ':'@ ')+(opp.code||opp.name):''):mgWeekShort(d);
-    pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); fwPaint(d); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
+    ph.dataset.top=MG_DAY[d.wday||'mon']+' · '+(d.phase==='summer'?'Pre-season, week '+d.day+' of '+MG_WINDOW.summer:d.phase==='winter'?'Winter break':d.phase==='league'?'Week '+Math.min(d.md+1,MG_MD)+' of '+MG_MD:d.phase==='playoffs'?'Playoffs':'Season over');
+    hubBoxes(d); pilesBtn(d); cpPaint(d); cpHotspots(d); cpFitStats(); fwPaint(d); mgStoryShow(d); pressShow(d); moneyShow(d); pileShow(d);
     if(MGUI.seq&&!['storyModal','matchReport','pressModal','moneyModal','pileModal'].some(mgUpOn)) MGUI.seq=null; }   // (v148: the run over)
   // THE PAPERS' BUTTON (v106): off to the side, on the campus's top bar, with how many there are in an orange box -- it
   // pops in when they come, and the button glows till you've opened them. A Monday's pile waits there for you; only a
@@ -22125,9 +22173,67 @@
     if(!S||d.fw.off){ el.style.display='none'; return; }
     el.style.display=''; el.innerHTML='<div class="fwHead"><span>YOUR FIRST WEEK</span><button class="fwX" data-hub="fwoff" aria-label="put it away">✕</button></div>'
       +S.map(([k,t,go,done])=>'<button class="fwRow'+(done?' done':'')+'"'+(go?' data-hub="fwgo" data-go="'+go+'"':' data-hub="fwplay"')+'><b>'+(done?'✓':'·')+'</b>'+t+'</button>').join(''); }
+  // (v244) THE HUB'S ICONS: the solid set from the icon sheet, one colour, the text's -- the top bar, the buildings (a
+  // padlock in place of one not built yet), the boxes' titles and rows
+  const HUB_IC={
+    calendar:{"f":"<rect x=\"3\" y=\"4.5\" width=\"18\" height=\"17\" rx=\"2.5\"/><rect x=\"6.8\" y=\"2\" width=\"2.6\" height=\"5\" rx=\"1\"/><rect x=\"14.6\" y=\"2\" width=\"2.6\" height=\"5\" rx=\"1\"/>","cf":"<rect x=\"5.5\" y=\"10\" width=\"13\" height=\"9\" rx=\"1\"/>"},
+    trophy:{"f":"<path d=\"M7 3h10v6a5 5 0 0 1-10 0z\"/><rect x=\"11\" y=\"13\" width=\"2\" height=\"4.5\"/><rect x=\"7.5\" y=\"17\" width=\"9\" height=\"4.5\" rx=\"1\"/>","l":"<path d=\"M7 5.5H4.5a3 3 0 0 0 3 4.3M17 5.5h2.5a3 3 0 0 1-3 4.3\"/>"},
+    menu:{"f":"<rect x=\"3\" y=\"5\" width=\"18\" height=\"3\" rx=\"1.5\"/><rect x=\"3\" y=\"10.5\" width=\"18\" height=\"3\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"18\" height=\"3\" rx=\"1.5\"/>"},
+    cont:{"f":"<path d=\"M3 10.5h12.6L11 5.9l2.1-2.1L21.3 12l-8.2 8.2-2.1-2.1 4.6-4.6H3z\"/>"},
+    news:{"f":"<path d=\"M3 4h14v14.5a2.5 2.5 0 0 0 2.5 2.5H5.5A2.5 2.5 0 0 1 3 18.5z\"/><path d=\"M18 8h3v11a2 2 0 0 1-2 2 1.5 1.5 0 0 1-1-1.5z\"/>","cl":"<path d=\"M6.5 8h7M6.5 12h7M6.5 16h4.5\"/>"},
+    books:{"f":"<rect x=\"3\" y=\"10\" width=\"4\" height=\"9.5\" rx=\"1\"/><rect x=\"10\" y=\"4\" width=\"4\" height=\"15.5\" rx=\"1\"/><rect x=\"17\" y=\"13\" width=\"4\" height=\"6.5\" rx=\"1\"/><rect x=\"2\" y=\"20.5\" width=\"20\" height=\"2\" rx=\"1\"/>"},
+    leaguepos:{"f":"<path d=\"M2 14h6.5v8H2zM9 8h6v14H9zM15.5 11H22v11h-6.5z\"/>"},
+    formation:{"f":"<circle cx=\"12\" cy=\"4.5\" r=\"2.4\"/><circle cx=\"6.5\" cy=\"11\" r=\"2.4\"/><circle cx=\"17.5\" cy=\"11\" r=\"2.4\"/><circle cx=\"4.5\" cy=\"18.5\" r=\"2.4\"/><circle cx=\"12\" cy=\"18.5\" r=\"2.4\"/><circle cx=\"19.5\" cy=\"18.5\" r=\"2.4\"/>"},
+    funds:{"f":"<path d=\"M4 5.5C4 3.6 7.6 2 12 2s8 1.6 8 3.5v13c0 1.9-3.6 3.5-8 3.5s-8-1.6-8-3.5z\"/>","cl":"<path d=\"M4 9c1.3 1.6 4.4 2.7 8 2.7s6.7-1.1 8-2.7M4 14.5c1.3 1.6 4.4 2.7 8 2.7s6.7-1.1 8-2.7\" stroke-width=\"1.6\"/>"},
+    seats:{"f":"<path d=\"M6 3h12a2 2 0 0 1 2 2v6H4V5a2 2 0 0 1 2-2z\"/><rect x=\"2.5\" y=\"12\" width=\"19\" height=\"4\" rx=\"1\"/><rect x=\"5\" y=\"16\" width=\"2.5\" height=\"5.5\"/><rect x=\"16.5\" y=\"16\" width=\"2.5\" height=\"5.5\"/>"},
+    fans:{"f":"<circle cx=\"12\" cy=\"5.5\" r=\"2.7\"/><path d=\"M8.3 12.5L6.7 6.4l1.9-.6 1.6 4.7h3.6l1.6-4.7 1.9.6-1.6 6.1V21H8.3z\"/><circle cx=\"4.5\" cy=\"11\" r=\"2.3\"/><path d=\"M1 21v-3.3A3.5 3.5 0 0 1 4.5 14c1 0 1.9.4 2.5 1v6z\"/><circle cx=\"19.5\" cy=\"11\" r=\"2.3\"/><path d=\"M23 21v-3.3a3.5 3.5 0 0 0-3.5-3.7c-1 0-1.9.4-2.5 1v6z\"/>"},
+    home:{"f":"<path d=\"M12 2.5l10 8V12h-2v9H4v-9H2v-1.5z\"/>","cf":"<rect x=\"10\" y=\"14\" width=\"4\" height=\"7\"/>"},
+    derby:{"f":"<path d=\"M12 22c-4.4 0-7.5-2.9-7.5-7.1 0-3.4 2.1-5.5 3.6-7.4.5 2.3 1.7 3.5 3 3.5 0-3.5 1.4-6.7 4.6-9.3.2 4.7 4.8 6.8 4.8 13 0 4.3-3.4 7.3-8.5 7.3z\"/>","cf":"<path d=\"M12.2 19.6c-1.9 0-3.2-1.3-3.2-3.1 0-1.6 1-2.7 1.9-3.8.3 1.2.9 1.8 1.7 1.8 0-1.7.6-3.2 2.1-4.4.1 2.3 1.7 3.3 1.7 5.8 0 2.3-1.7 3.7-4.2 3.7z\"/>"},
+    lock:{"f":"<rect x=\"4\" y=\"10.5\" width=\"16\" height=\"11.5\" rx=\"2.5\"/>","cf":"<circle cx=\"12\" cy=\"15.6\" r=\"1.7\"/>","l":"<path d=\"M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5\" stroke-width=\"2.5\"/>"},
+    clubhouse:{"f":"<path d=\"M12 4.5l9 5.5V21H3V10z\"/><rect x=\"11.5\" y=\"1.5\" width=\"1.3\" height=\"4\"/><path d=\"M12.8 1.5l3.7 1.3-3.7 1.3z\"/>","cf":"<rect x=\"10\" y=\"14.5\" width=\"4\" height=\"6.5\"/><rect x=\"5.5\" y=\"11.5\" width=\"3\" height=\"3\"/><rect x=\"15.5\" y=\"11.5\" width=\"3\" height=\"3\"/>"},
+    training:{"f":"<path d=\"M9.5 3h5l4.2 15H5.3z\"/><rect x=\"2\" y=\"18.5\" width=\"20\" height=\"3\" rx=\"1\"/>","cf":"<path d=\"M7.7 10h8.6l.6 2.4H7.1z\"/>"},
+    stadium:{"f":"<path d=\"M2 8c0-2.2 4.5-4 10-4s10 1.8 10 4v8c0 2.2-4.5 4-10 4S2 18.2 2 16z\"/>","cf":"<ellipse cx=\"12\" cy=\"8.3\" rx=\"7.5\" ry=\"2.3\"/>","cl":"<path d=\"M8 19v-4.5M16 19v-4.5\"/>"},
+    transfers:{"f":"<path d=\"M16 2l5 5-5 5V8.5H3v-3h13z\"/><path d=\"M8 12l-5 5 5 5v-3.5h13v-3H8z\"/>"},
+    physio:{"f":"<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"4\"/>","cf":"<path d=\"M10.5 7h3v3.5H17v3h-3.5V17h-3v-3.5H7v-3h3.5z\"/>"},
+    scouting:{"f":"<circle cx=\"6.5\" cy=\"16\" r=\"4.5\"/><circle cx=\"17.5\" cy=\"16\" r=\"4.5\"/><path d=\"M3 13.5L5.8 4h4.2l1 8h2l1-8h4.2l2.8 9.5z\"/>","cf":"<circle cx=\"6.5\" cy=\"16\" r=\"2\"/><circle cx=\"17.5\" cy=\"16\" r=\"2\"/>"},
+    academy:{"f":"<rect x=\"11\" y=\"11\" width=\"2\" height=\"11\"/><path d=\"M12 13C6 13 3.5 10 3.5 5c5.5 0 8.5 2.5 8.5 8z\"/><path d=\"M12 11c0-4.5 2.5-7 8.5-7 0 5-3 7-8.5 7z\"/>"}};
+  let HUB_ICN=0;
+  function hubIc(k){ const ic=HUB_IC[k==='cup'?'trophy':k]; if(!ic) return ''; const id='hic'+(++HUB_ICN), cut=ic.cf||ic.cl;
+    return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(cut?'<defs><mask id="'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/>'
+      +(ic.cf?'<g fill="#000">'+ic.cf+'</g>':'')+(ic.cl?'<g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ic.cl+'</g>':'')+'</mask></defs>':'')
+      +'<g fill="currentColor"'+(cut?' mask="url(#'+id+')"':'')+'>'+(ic.f||'')+'</g>'+(ic.l?'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ic.l+'</g>':'')+'</svg>'; }
+  function hubIcons(){ document.querySelectorAll('#careerHub .hic[data-ic]').forEach(el=>{ if(el.dataset.done!==el.dataset.ic){ el.innerHTML=hubIc(el.dataset.ic); el.dataset.done=el.dataset.ic; } }); }
+  const BLD_IC={club:'clubhouse', train:'training', stadium:'stadium', market:'transfers', physio:'physio', scouting:'scouting', academy:'academy'};
+  function hubBldIc(el,k){ const ic=el.querySelector('.hic'); if(!ic) return; const want=k||BLD_IC[el.dataset.bldg]; if(ic.dataset.ic!==want){ ic.dataset.ic=want; hubIcons(); } }
+  // (v244) THE BOXES ROUND THE CAMPUS. The news: its two latest headlines, and how many have come in since you last read
+  // it (the Clubhouse's News). The fixtures: your next three games, each marked home, a derby or a cup tie. The next
+  // game: the two crests, the names and what it is (the league's week, or the cup's round), home or away -- the league's
+  // first game in a week without one.
+  const newsKey=n=>n?n.s+'|'+n.w+'|'+n.t:'';
+  function newsUnread(d){ const N=d.news||[]; if(!N.length) return 0; const i=d.newsSeen?N.findIndex(n=>newsKey(n)===d.newsSeen):-1; return i<0?N.length:i; }
+  function hubFixtures(d,n){ const L=d.lg&&d.lg[d.tier], out=[]; if(!L) return out;
+    for(let i=0;i<L.fx.length&&out.length<n;i++){ const m=L.fx[i].find(x=>x[0]===d.clubId||x[1]===d.clubId);
+      if(m&&m[2]==null&&!(d.phase==='league'&&i<d.md)){ const home=m[0]===d.clubId, opp=home?m[1]:m[0]; out.push({t:'W'+(i+1), w:'Week '+(i+1), home, opp, cup:false}); }
+      const c=CUP_CAL[i], C=c&&d.cup&&!d.cup.off&&d.cup.s===d.season&&d.cup[c[0]];
+      if(C&&C.in.includes(d.clubId)&&out.length<n){ const K=CUP[c[0]], t=cupTies(d,c[0],c[1]).find(x=>x[0]===d.clubId||x[1]===d.clubId);
+        if(t&&t[2]==null){ const home=t[0]===d.clubId; out.push({t:K.short+' '+K.rs[c[1]], w:K.name+' · '+K.rounds[c[1]], home, opp:home?t[1]:t[0], cup:true}); } } }
+    for(const F of out) F.derby=isDerby(d,F.opp);
+    return out; }
+  function hubBoxes(d){ const N=d.news||[], un=newsUnread(d);
+    document.getElementById('chNewsN').textContent=un?(un>9?'9+':un)+' UNREAD':'';
+    document.getElementById('chNewsL').innerHTML=N.length?N.slice(0,2).map(n=>'<div class="chNewsI"><span>'+mgEsc(n.t)+'</span></div>').join(''):'<div class="chNewsI none">No news yet.</div>';
+    const F=hubFixtures(d,3), ic=k=>'<i class="hic">'+hubIc(k)+'</i>', mark=x=>(x.home?ic('home'):'')+(x.derby?ic('derby'):'')+(x.cup?ic('cup'):'');
+    document.getElementById('chFixL').innerHTML=F.length?F.map(x=>'<div class="chFx"><i class="w">'+x.t+'</i><span>'+(x.home?'vs ':'at ')+mgEsc(mgNameOf(d,x.opp))+'</span>'+mark(x)+'</div>').join('')
+      :'<div class="chFx"><span style="color:var(--dim)">No more games this season</span></div>';
+    const g=mgNextGame(d), nx=g?{opp:g.opp, home:g.home, w:g.kind==='league'?MG_LEAGUE[d.tier]+' · Week '+(d.md+1):g.kind==='cup'?g.label:g.label}:(F[0]||null), el=document.getElementById('chNextB');
+    if(!nx){ el.innerHTML='<div class="chNgNone">No game to come this season</div>'; return; }
+    const you=d.world.clubs[d.clubId]||{}, them=d.world.clubs[nx.opp]||{}, cr=c=>{ const u=crestURL(crestFor(c)); return u?'<img src="'+u+'" alt="">':''; };
+    const what=F[0]&&!g?(F[0].cup?F[0].w:MG_LEAGUE[d.tier]+' · '+F[0].w):nx.w;
+    el.innerHTML='<div class="chNg"><div>'+cr(you)+'<i>'+mgEsc(d.clubName)+'</i></div><b>VS</b><div>'+cr(them)+'<i>'+mgEsc(mgNameOf(d,nx.opp))+'</i></div></div>'
+      +'<div class="chNgS"><span>'+mgEsc(what)+' · '+(nx.home?'Home':'Away')+'</span></div>'; }
   function pilesBtn(d){ const b=document.querySelector('#careerHub .cpPapers'), nEl=document.getElementById('cpPapersN'); if(!b||!nEl) return;
     const n=pileLeft(d).length, key=d.pile?(d.pile.w+'.'+(d.pile.day||'mon')):'';
-    b.style.display=n?'':'none'; b.classList.toggle('fresh',!!n&&!!d.pile&&!d.pile.opened);
+    b.classList.toggle('none',!n); b.classList.toggle('fresh',!!n&&!!d.pile&&!d.pile.opened);   // (v244: always in the campus's corner, as DECORATE was)
     if(String(n)!==nEl.textContent){ nEl.textContent=n||''; if(n&&(MGUI.pileKey!==key||n>(MGUI.pileN||0))){ nEl.classList.remove('pop'); void nEl.offsetWidth; nEl.classList.add('pop'); } }
     MGUI.pileKey=key; MGUI.pileN=n; }
   // ---- THE CAMPUS VIEW: the picture fitted to the space beside the menu -- at 1x (or more, to fill a big screen), the
@@ -22159,7 +22265,7 @@
   function placeStart(d,k,buy){ const [mx,my]=viewMid(), sp=decoSpot(d,k,mx,my); if(!sp) return 'There’s no room left on the campus.';
     hideBldg(); Object.assign(PLACE,{on:true,k,x:sp[0],y:sp[1],ok:true,buy,move:false,idx:-1}); placeUI(); return null; }
   function placeUI(){ const d=CAREER&&CAREER.data, hub=document.getElementById('careerHub'), bar=document.getElementById('cpPlace'); if(!hub||!bar) return;
-    hub.classList.toggle('placing',PLACE.on);
+    if(hub.classList.contains('placing')!==PLACE.on){ hub.classList.toggle('placing',PLACE.on); cpFit(); }   // (v244: the campus over the page while it's put down)
     if(!PLACE.on) bar.innerHTML='';
     else if(PLACE.k){ const it=DECO_SHOP.find(x=>x[0]===PLACE.k)||[];
       bar.innerHTML='<span class="cpPlN">'+(it[1]||'')+(PLACE.buy?' · '+money(it[3]):'')+'</span><button class="mgBtn go" data-cp="ok"'+(PLACE.ok?'':' disabled')+'>✓ PUT IT HERE</button>'
@@ -22193,13 +22299,22 @@
     v.addEventListener('pointerup',end); v.addEventListener('pointercancel',end); })();
   function cpWorld(anim,s,tx,ty){ const w=document.getElementById('cpWorld'); if(!w) return; w.classList.toggle('zoom',!!anim);
     w.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'; }
-  function cpFit(){ const v=document.getElementById('cpView'), M=CAMPUS_META; if(!v||!M.w) return; const vw=v.clientWidth, vh=v.clientHeight; if(!vw||!vh) return;
-    const [cx,cy,cw,ch]=M.core, s=Math.max(1,vw/M.w,vh/M.h), keep=(t,view,size)=>Math.min(0,Math.max(view-size,t));
-    CPV.s=s; CPV.tx=Math.round(keep(vw/2-(cx+cw/2)*s,vw,M.w*s)); CPV.ty=Math.round(keep(vh/2-(cy+ch/2)*s,vh,M.h*s));
+  // (v244) THE CAMPUS IN ITS BOX: as wide as the box, never bigger than its own size (and, a box bigger than it, filling
+  // it), the band from the stands to the buildings in the middle; at its own size over the whole page while a decoration's
+  // put down (PLACE)
+  function cpFit(){ const v=document.getElementById('cpView'), M=CAMPUS_META, w=document.getElementById('cpWorld'); if(!v||!M.w) return; const vw=v.clientWidth, vh=v.clientHeight; if(!vw||!vh) return;
+    const [cx,cy,cw,ch]=M.core, s=PLACE.on?Math.max(1,vw/M.w,vh/M.h):Math.max(vw/M.w,vh/M.h,Math.min(1,vw/M.w)), keep=(t,view,size)=>Math.min(0,Math.max(view-size,t));
+    const my=PLACE.on?cy+ch/2:Math.min(cy+ch/2,186);   // (the stand's foot to the clubhouse's, in a short box)
+    CPV.s=s; CPV.tx=Math.round(keep(vw/2-(cx+cw/2)*s,vw,M.w*s)); CPV.ty=Math.round(keep(vh/2-my*s,vh,M.h*s));
+    if(w) w.classList.toggle('small',s<1);
     if(!CPV.zoomed) cpWorld(false,CPV.s,CPV.tx,CPV.ty); cpFitStats(); }
   // the strip as long as it goes: the phase put shorter, then no NET/WK, then no FANS
-  function cpFitStats(){ const st=document.getElementById('cpStats'), ph=document.getElementById('chPhase'); if(!st||!ph||!st.clientWidth) return; const v=ph.dataset;
-    for(const [t,hide] of [[v.long,''],[v.mid,''],[v.mid,'net'],[v.mid,'net fans'],[v.short,'net fans']]){ ph.textContent=t||''; st.dataset.hide=hide; if(st.scrollWidth<=st.clientWidth+1) break; } }
+  // (v244: the week in the top bar -- the day and the week, else the week short)
+  function cpFitStats(){ const st=document.getElementById('cpStats'), ph=document.getElementById('chPhase'), se=document.getElementById('chMeta'), d=CAREER&&CAREER.data; if(!st||!ph||!st.clientWidth) return; const v=ph.dataset;
+    const whole=el=>{ const r=document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width<=el.getBoundingClientRect().width+.05; };   // (to the fraction of a pixel: a word cut by half a pixel still shows its "...")
+    const L=d?MG_LEAGUE[d.tier]:'', seas=d&&se?['Season '+d.season+' · '+L,'S'+d.season+' · '+L,L]:[null], fits=()=>whole(ph)&&(!se||whole(se));
+    out: for(const t of [v.top,v.short]) for(const sn of seas){ ph.textContent=t||''; if(sn!=null) se.textContent=sn; if(fits()) break out; } }   // (the two together: they share the bar)
+  try{ new ResizeObserver(()=>cpFitStats()).observe(document.querySelector('#careerHub .chTop')); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>cpFitStats()); }catch(e){}
   const cpStill=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
   // a building's button, or the building itself on the campus: its button lit, the camera in on it (its name over it), in
   function cpGo(id){ const d=CAREER&&CAREER.data; if(CPV.busy||!d||!MG_BLDGS[id]) return;
@@ -22306,6 +22421,7 @@
   // are), and a message, if there is one, as a toast along the bottom. A fresh building or tab starts on page 1.
   function paintBuilding(top){ const id=curBldg, b=MG_BLDGS[id]; if(!b) return; if(b.tabs&&!b.tabs.includes(curTab[id])) curTab[id]=b.tabs[0]; const t=b.tabs?curTab[id]:null;   // (a tab that's gone: the first)
     { const D=CAREER&&CAREER.data; if(D&&D.fw&&id==='club'&&t==='Squad') D.fw.squad=1; }   // (v157: YOUR FIRST WEEK)
+    { const D=CAREER&&CAREER.data; if(D&&id==='club'&&t==='News'&&D.news&&D.news.length) D.newsSeen=newsKey(D.news[0]); }   // (v244: the hub's news box, read)
     if(id==='stadium'&&CAREER&&CAREER.data) document.getElementById('bpTitle').textContent=groundName(CAREER.data).toUpperCase();   // (the stadium's door opens on its name)
     const D=CAREER&&CAREER.data, off=D&&((BLD_LV[id]&&!lvOf(D,id))||(id==='decor'&&lvOf(D,'club')<DECOR_CL));
     document.getElementById('bpTabs').innerHTML=b.tabs&&!off?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
@@ -22336,7 +22452,7 @@
     else if(id==='academy') h+=t==='Facilities'?mgFacilitiesTab(d):t==='Coach'?mgStaffTab(d,true):mgProspectsTab(d);
     else if(id==='stadium') h+=renderStadiumTab(d,t);
     else if(id==='review') h+=mgReviewBody(d);
-    else if(id==='decor') h+=mgDecorTab(d,t);
+    else if(id==='decor') h+=mgDecorTab(d,t)+((d.deco||[]).length?'<button class="mgBtn bpPin" data-hub="move">MOVE THEM</button>':'');   // (v244: moving them, here now)
     return h; }
   function mgRerender(){ const d=CAREER&&CAREER.data; if(!d) return; mgSave(d);
     if(curBldg&&document.getElementById('bldgPanel').classList.contains('show')) paintBuilding();
@@ -22461,7 +22577,8 @@
   function pauseFromMatch(){ if(matchReturn==='hub' && CAREER){ document.getElementById('stageWrap').classList.remove('menuMode'); showHubScreen(); } else { resumable=true; showStartMenu(); } }
   document.getElementById('careerHub').addEventListener('click',e=>{
     const bl=e.target.closest('[data-bldg]'); if(bl){ cpGo(bl.dataset.bldg); return; }
-    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',drop:null}); paintBuilding(true); } return; }
+    const tb=e.target.closest('[data-tab]'); if(tb){ if(curBldg==='club'&&tb.dataset.tab==='Decorate'){ openBuilding('decor'); return; }   // (v244: the trees, the garden and the plaza)
+      if(curBldg){ curTab[curBldg]=tb.dataset.tab; Object.assign(MGUI,{sel:null,bid:null,deal:null,list:null,msg:'',drop:null}); paintBuilding(true); } return; }
     if(e.target.closest('#bpMsg')){ document.getElementById('bpMsg').classList.remove('on'); return; }
     const sx=e.target.closest('[data-six]'); if(sx){ sixOpen=sixOpen===sx.dataset.six?null:sx.dataset.six; fitGoTo=sixOpen?'.sixOpen':null; paintBuilding(); return; }
     const cd=e.target.closest('[data-cside]'); if(cd){ cardSide=cd.dataset.cside; paintBuilding(); return; }
@@ -22484,12 +22601,14 @@
     const cp=e.target.closest('[data-cp]'); if(cp){ if(!cp.disabled) placeAct(cp.dataset.cp); return; }
     const h=e.target.closest('[data-hub]'); if(!h) return;
     if(h.dataset.hub==='menu') hubToMenu(); else if(h.dataset.hub==='bldgback') hideBldg(); else if(h.dataset.hub==='decor') openBuilding('decor');
-    else if(h.dataset.hub==='papers'){ const d=CAREER&&CAREER.data; if(d){ pileShow(d,true); pilesBtn(d); } }
+    else if(h.dataset.hub==='papers'){ const d=CAREER&&CAREER.data; if(d){ if(!pileLeft(d).length){ showNote('Nothing new in the papers.'); return; } pileShow(d,true); pilesBtn(d); } }
+    else if(h.dataset.hub==='news'){ curTab.club='News'; openBuilding('club'); }   // (v244: the news box -- the Clubhouse's News)
+    else if(h.dataset.hub==='fixtures'){ curTab.club='Fixtures'; openBuilding('club'); }   // (and the fixtures box, its Fixtures)
     else if(h.dataset.hub==='fwoff'){ const d=CAREER&&CAREER.data; if(d&&d.fw){ d.fw.off=1; mgSave(d); renderHub(); } }   // (v157: YOUR FIRST WEEK)
     else if(h.dataset.hub==='fwgo'){ const d=CAREER&&CAREER.data; if(d){ const g=h.dataset.go; if(g==='club') curTab.club='Squad'; openBuilding(g); } }
     else if(h.dataset.hub==='fwplay'){ const b=document.querySelector('#chBottom .chPlay'); if(b) b.classList.add('flash'), setTimeout(()=>b.classList.remove('flash'),900); }
     else if(h.dataset.hub==='warnall'){ MGUI.warnAll=!MGUI.warnAll; renderHub(); }   // (v153: every warning, or the first three)
-    else if(h.dataset.hub==='move'){ Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
+    else if(h.dataset.hub==='move'){ hideBldg(); Object.assign(PLACE,{on:true,k:null,idx:-1,move:true,buy:false}); placeUI(); }
   });
 
   // PICK HIM UP AND PUT HIM DOWN: touch a man (or press the mouse on him) and move, and he lifts straight away -- there's

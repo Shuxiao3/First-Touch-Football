@@ -175,20 +175,23 @@ for(const [w, h] of SIZES){
   await check('new career', ['#mgGo', '#mgrMaker [data-mm="cancel"]', '#mgName', '#mgClubIn']);
   await page.tap('#mgrMaker [data-mm="cancel"]'); await page.waitForTimeout(200);
   await newCareer(page);
-  await check('hub', ['#chBottom button', '#chCampus .bldg', '.chMenuBtn', '.cpStats', '#cpView']);
-  { // THE CAMPUS at 1x on a phone (no stretched pixels), its middle in the middle of the room it has, the strip whole;
-    // the menu down the left, or the right if Settings says so
+  await check('hub', ['#chBottom button', '#chCampus .bldg', '.chMenuBtn', '.cpStats', '#cpView', '.cpPapers', '.chNews .chWell', '.chFix .chFx', '.chNext .chNgS', '.chOver .chKv']);
+  { // (v244) THE HUB AS THE HUB TEMPLATE: the top bar and the week's button over the boxes; the campus in its box, as wide
+    // as the box (its own size at most) with the stand and the clubhouse in it; the week in the top bar whole; the menu
+    // down the left, or the right if Settings says so (the next game and the club's box then down the left)
     await page.waitForTimeout(150);
     const cp = async () => page.evaluate(() => { const v = document.getElementById('cpView').getBoundingClientRect(), m = new DOMMatrix(getComputedStyle(document.getElementById('cpWorld')).transform),
-      st = document.getElementById('cpStats'), nav = document.querySelector('.cpNav').getBoundingClientRect();
-      return { s: m.a, whole: Number.isInteger(m.e) && Number.isInteger(m.f), mid: [Math.round(m.e + (64 + 320) * m.a - v.width / 2), Math.round(m.f + (40 + 184) * m.a - v.height / 2)],
-        strip: st.scrollWidth <= st.clientWidth + 1, phase: document.getElementById('chPhase').textContent, right: nav.left > v.left }; });
+      ph = document.getElementById('chPhase'), nav = document.querySelector('.cpNav').getBoundingClientRect(), nx = document.querySelector('.chNext').getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(ph);
+      const top = document.querySelector('.chTop').getBoundingClientRect(), btn = document.getElementById('chBottom').getBoundingClientRect();
+      return { s: +m.a.toFixed(3), want: +Math.max(v.width / 768, v.height / 448, Math.min(1, v.width / 768)).toFixed(3), whole: Number.isInteger(m.e) && Number.isInteger(m.f),
+        stand: m.f + 74 * m.a >= -1, club: m.f + 287 * m.a <= v.height + 1, week: rg.getBoundingClientRect().width <= ph.getBoundingClientRect().width + 0.05, phase: ph.textContent,
+        bar: btn.left >= top.right && Math.abs(btn.top - top.top) < 1 && top.bottom <= v.top, right: nav.left > v.left && nx.right <= v.left }; });
     const c = await cp();
-    ok(c.s === 1 && c.whole && Math.abs(c.mid[0]) <= 2 && Math.abs(c.mid[1]) <= 2 && c.strip && !c.right,
-      w + 'x' + h + ': the campus at 1x, its middle in the middle (' + c.mid + '), the menu on the left, the strip whole: ' + c.phase);
-    if(w === 844 && h === 390){ await page.evaluate(() => window.__MG.setPref('side', 'right')); await page.waitForTimeout(100); const r = await cp();
+    ok(Math.abs(c.s - c.want) < 0.004 && c.whole && c.stand && c.club && c.week && c.bar && !c.right,
+      w + 'x' + h + ': the hub as the template -- the top bar with the week\'s button beside it, the campus in its box as wide as the box (x' + c.s + ') with the stand and the clubhouse in it, the week whole ("' + c.phase + '"), the menu on the left (v244)');
+    if(w === 844 && h === 390){ await page.evaluate(() => window.__MG.setPref('side', 'right')); await page.waitForTimeout(150); const r = await cp();
       await page.evaluate(() => window.__MG.setPref('side', 'left'));
-      ok(r.right && r.s === 1 && Math.abs(r.mid[0]) <= 2, 'CAMPUS MENU: RIGHT puts the buildings down the right, the campus as it was'); }
+      ok(r.right && Math.abs(r.s - r.want) < 0.004 && r.stand && r.club, 'CAMPUS MENU: RIGHT puts the buildings down the right and the next game and the club\'s box down the left, the campus in its box as it was'); }
   }
   await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once; NEXT DAY's sunset is manager-career.mjs's)
   const audit = [];   // (v177, the handoff's J1: no sentence longer than a label on a building's screen, by default -- its words a tap away)
@@ -215,7 +218,8 @@ for(const [w, h] of SIZES){
           .map(e => [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').replace(/\s+/g, ' ').trim()).filter(t => t.length > 48))) audit.push(b + ' / ' + t + ': "' + x.slice(0, 70) + '"'); }   // (v177: J1's audit -- the news is the game's voice)
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
   }
-  await page.tap('#careerHub [data-hub="decor"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
+  await page.tap('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);   // (v244: DECORATE, the Clubhouse's last tab)
+  await page.tap('#bpTabs .bpTab:text-is("Decorate")'); await page.waitForTimeout(100);
   for(const t of ['Trees', 'Garden', 'Plaza']){ await page.tap(`#bpTabs .bpTab:text-is("${t}")`); await page.waitForTimeout(100);
     await check('decorate / ' + t, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody', '.decoCard']); }
   await page.tap('.bpTopBack'); await page.waitForTimeout(80);
@@ -227,7 +231,7 @@ for(const [w, h] of SIZES){
     // or less: where it always stopped), and it's on no screen outside the career
     const foot = sel => page.evaluate(sel => { const f = document.querySelector(sel + ' > .cfFoot'); if(!f || !f.getClientRects().length) return null;
       const r = f.getBoundingClientRect(), cs = getComputedStyle(f), part = c => { const e = f.querySelector(c), s = getComputedStyle(e); return { w: e.getBoundingClientRect().width, img: /^url\("?data:image\/webp/.test(s.backgroundImage), rep: s.backgroundRepeat }; };
-      const page = sel === '#careerHub' ? ['.cpNav', '.cpMain'] : ['#bldgPanel .bpInner'], low = Math.max(...page.map(s => document.querySelector(s).getBoundingClientRect().bottom));
+      const page = sel === '#careerHub' ? ['.cpNav', '.cpMain', '.chNews', '.chFix', '.chOver'] : ['#bldgPanel .bpInner'], low = Math.max(...page.map(s => document.querySelector(s).getBoundingClientRect().bottom));
       return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, h: r.height, z: cs.zIndex, pe: cs.pointerEvents, L: part('.cfL'), M: part('.cfM'), R: part('.cfR'), low, W: innerWidth, H: innerHeight }; }, sel);
     const want = Math.min(64, Math.max(24, h * 0.08)), stop = h > 380 ? h - want - 2 : h > 350 ? h - want * 0.5 : h - 8;
     const good = f => !!f && Math.abs(f.bottom - f.H) < 1 && f.left === 0 && Math.abs(f.right - f.W) < 1 && Math.abs(f.h - want) < 1 && f.z === '-1' && f.pe === 'none'
@@ -241,7 +245,7 @@ for(const [w, h] of SIZES){
   if(w === 844 && h === 390){   // (v220) THE CAREER BACK IN THE PIXEL KIT: Fulltime 9's look (v206) and its type (v207) taken off the hub and the Tactics
     const hub = await page.evaluate(() => { const q = s => document.querySelector(s), fam = e => getComputedStyle(e).fontFamily.split(',')[0].replace(/["']/g, '').trim();
       const hex = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(), n = parseInt(hex.slice(1), 16);
-      return { ft: [...document.querySelectorAll('#ftTop, .ftCard, .ftCampus, .tacV, .tpV, .ptkFig')].length, crest: !!q('.cpNav #chClub'), week: !!q('.cpNav #chBottom'), strip: !!q('.cpFoot #cpStats'),
+      return { ft: [...document.querySelectorAll('#ftTop, .ftCard, .ftCampus, .tacV, .tpV, .ptkFig')].length, crest: !!q('.chTop #chClub'), week: !!q('#careerHub > #chBottom'), strip: !!q('.chTop #cpStats'),
         font: fam(q('#chClub')), bg: getComputedStyle(q('#careerHub')).backgroundColor, want: 'rgb(' + (n >> 16) + ', ' + (n >> 8 & 255) + ', ' + (n & 255) + ')',
         roboto: [...document.fonts].some(f => /Roboto/.test(f.family)) }; });
     await page.tap('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(80);
@@ -254,7 +258,7 @@ for(const [w, h] of SIZES){
         font: getComputedStyle(document.getElementById('bpTitle')).fontFamily.split(',')[0].replace(/["']/g, '').trim() }; });
     await page.tap('.bpTopBack'); await page.waitForTimeout(80);
     ok(!hub.ft && hub.crest && hub.week && hub.strip && hub.font === 'Roboto Condensed' && hub.bg === hub.want && hub.roboto,
-      'the career\'s home in the pixel kit again: no top bar, cards or cream (the hub on the scheme\'s ' + hub.bg + '), the crest, club and week\'s button down the menu, the money along the campus\'s foot, its words in Roboto Condensed (v224; FTC Dot from v220)');
+      'the career\'s home in the pixel kit: no Fulltime 9 cards or cream (the hub on the scheme\'s ' + hub.bg + '); v244: the crest, the club and the week in the top bar, the week\'s button beside it; its words in Roboto Condensed (v224)');
     ok(tac.wide && tac.beside && tac.upright && tac.pic && tac.faces === 9 && !tac.figs && tac.font === 'Roboto Condensed',
       'the Tactics (v226): the pitch upright on the Studio\'s pitch picture (Retro Pixel Soccer Field) -- the keeper at its foot, the forwards at its top -- the nine shown by their faces (' + tac.faces + '), the bench down its side on a phone this wide, the title in Roboto Condensed (v224)');
   }

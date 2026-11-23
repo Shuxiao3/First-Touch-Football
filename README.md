@@ -502,6 +502,20 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The hub as the Hub template (v244).** The career's home is laid out as the templates page's Hub. Along the top, one
+  bar with your crest and club ("Career mode" under it), the day and the week, the season and the division, and MENU;
+  beside it, the week's button (NEXT WEEK, FORWARD TO MATCHDAY, or SIMULATE and PLAY MATCH on a matchday). The seven
+  buildings run down the left, each with its icon and a padlock in place of the icon while it can't be built. The campus
+  sits in a box in the middle, as wide as the box with the stand and the clubhouse in view, and PAPERS sits in its
+  corner where DECORATE was, with the stories still to read in a red badge (dimmed when there are none). Under the
+  campus, NEWS (the two latest headlines, and how many have come in since you last read the Clubhouse's News) and
+  FIXTURES (your next three games, each marked home, a derby or a cup tie); a tap on either opens that tab of the
+  Clubhouse. Down the right, NEXT GAME (the two crests and names, and the league's week or the cup's round, home or
+  away) and CLUB OVERVIEW (league position, the season's record, funds, capacity, and the fans with an arrow for what
+  the last game did to them). The icons are the icon sheet's solid set in one colour. NET/WK and the strip along the
+  campus's foot are gone. DECORATE is the Clubhouse's last tab now, and MOVE THEM is on its screen; putting a
+  decoration down still spreads the campus over the page. CAMPUS MENU: RIGHT puts the buildings on the right and the
+  next game and the club on the left.
 - **The exhibition as a face-off, the match's tactics in two, the ground filling up (v243).** EXHIBITION puts the two
   clubs face to face: each side's best man drawn in its kit (as he plays, not a shirt), his name, position and rating
   and the kit under the club's name, the side's rating in a small box, its shape and style in two chips, and VS on the
@@ -3598,6 +3612,18 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v244: the Hub template.** #careerHub is a twelve-column grid (areas top, btn, nav, cam, nws, fix, nxt, ovr; mirrored by
+  .cpRight; the first two columns at least 58 px). .chTop holds #chCrest, #chClub, .chSub, #cpStats (.chDate with
+  #chPhase) and .chSeason (#chMeta, "Season N · Division"); cpFitStats picks the week's words (data-top, else
+  data-short) and the season's (full, "S1 · ", the division alone) together, measured with a Range to the fraction of a
+  pixel. #chBottom sits in the btn area. hubIc draws HUB_IC (the icon sheet's solid icons, cut-outs as masks) into
+  .hic[data-ic]; hubBldIc swaps a building's icon for the padlock. hubBoxes fills #chNewsN and #chNewsL (newsUnread:
+  d.newsSeen, the key of the newest headline when the Clubhouse's News was last open), #chFixL (hubFixtures: the next
+  league games and cup ties not played, with isDerby) and #chNextB; #chPos, #chRec, #chBudget, #chCap, #chLoyal and
+  #chFansT are the club's box. data-hub news and fixtures open those Clubhouse tabs; PAPERS stays up (.none with
+  nothing to read). cpFit scales the campus to the box's width (at most its own size, the canvas smoothed below 1x)
+  with campus y 186 in the middle; #careerHub.placing spreads .cpMain over rows 2 to 4 at 1x. The Clubhouse's tabs end
+  with Decorate, which opens the decor building; its MOVE THEM (data-hub move) hides the panel first.
 - **v243: the face-off, two tactics pages, the ground filling up.** exhSideHTML: .exhOvr (clubOvrShown), .exhSideComps
   (data-exh sidecomp; exhSideComp(t,comp) puts the side on the other list's first club that isn't the other side's), a
   canvas drawn by SPRITE.previewMan(cv,seed,kit) for exhBest (the squad's best man who isn't a keeper, by ovr; seeded as
