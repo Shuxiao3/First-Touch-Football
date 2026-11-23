@@ -165,7 +165,7 @@ for(const [w, h] of [[640, 360], [844, 340]]){
   ok(mind.side === 'mind' && mind.lit === 'PERSONALITY' && mind.facts.length === 9 && /^(DELIGHTED|CONTENT|SETTLED|UNSETTLED|UNHAPPY) · ./.test(mind.mood) && mind.talk && ['TEMPER', 'WORK', 'LEARNS', 'DRIVE', 'LOYALTY', 'VOICE', 'GRIT', 'BODY', 'SETTLES'].every(k => mind.facts.some(f => f.startsWith(k + ':')))
      && !mind.facts.some(f => /\d/.test(f.split(':')[1])) && (mind.tr.length > 0 || mind.ev.length === 1) && !mind.tags && /^PLAYS/.test(mind.pos) && mind.fits && !mind.cut.length,
     w + 'x' + h + ': PERSONALITY: his mood and why with TALK TO HIM (v152: "' + mind.mood + '"), his character in words, never numbers (' + mind.facts.slice(0, 4).join(', ') + '...), his traits (' + (mind.tr.join(' / ') || mind.ev[0]) + '), all on the card');
-  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(100); const back = await page.$eval('.mgPaneR .mgCard', c => c.dataset.side);
+  await page.click('.mgPaneR .sqMan, .mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(100); const back = await page.$eval('.mgPaneR .mgCard', c => c.dataset.side);
   ok(back === 'rate', '...and RATINGS turns it back to his ratings');
   await page.click('.mgPaneR .mgSides [data-mside="career"]'); await page.waitForTimeout(80);   // (back to his career, for the checks below)
   const cv = await page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
@@ -188,7 +188,7 @@ r = await K(`(()=>{ const d=CAREER.data, c=mgAiClubs(d).find(k=>k.tier===d.tier)
 const pid = r;
 await page.click('#chCampus [data-bldg="scouting"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Reports")'); await page.waitForTimeout(150);
 const look = async () => { await page.evaluate(id => { const n = document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`); n.click(); }, pid); await page.waitForTimeout(150);
-  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(80);
+  await page.click('.mgPaneR .sqMan, .mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(80);
   return page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), c = P.querySelector('.mgCard');
     return { fits: P.scrollHeight <= P.clientHeight + 1, facts: [...c.querySelectorAll('.mgFact')].map(e => e.textContent), more: (c.querySelector('[data-mg="scout"]') || {}).textContent || '', pot: c.querySelector('.cardEnd .mgCardSub').textContent,
       cut: [...c.querySelectorAll('.mgFact b')].filter(b => b.scrollWidth > b.clientWidth + 1).map(b => b.textContent) }; }); };

@@ -2538,6 +2538,22 @@
   #bpBody .tplRows{ position:relative; height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
   #bpBody .tplRows > .tplWell, #bpBody .tplRows > .tplSeg, #bpBody .tplRows > .fxTop{ flex:none; margin-bottom:2px; }
   #bpBody .tplRows > .fitPager{ bottom:4px; height:32px; } #bpBody .tplRows > .fitPager .mgAdj{ width:52px; height:28px; min-height:28px; }
+  /* (v258) SCOUTING and THE ACADEMY as their templates: Reports and Prospects a list and its man (the market's look);
+     Assignments the scouts' house on the left (four columns), the four leagues on the right, a row of four buttons each */
+  #bpBody .tplPanes .tplWell.mkHead{ justify-content:flex-start; } #bpBody .tplPanes .tplWell.mkHead .hic{ width:14px; height:14px; flex:none; }
+  #bpBody .plPane > .mkNone, #bpBody .mgPaneR .mgPaneScroll > .mkNone{ margin:56px 0 0; }
+  #bpBody .asTpl{ display:grid; grid-template-columns:calc(var(--tplC) * 4 + 24px) calc(var(--tplC) * 8 + 56px); gap:8px; height:100%; min-height:0; }
+  #bpBody .asTpl > .tplBox{ min-width:0; min-height:0; display:flex; flex-direction:column; gap:6px; overflow:hidden; }
+  #bpBody .asTpl .asPic{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; border-radius:var(--rS); background:var(--well); overflow:hidden; }
+  #bpBody .asTpl .asPic svg{ width:auto; height:60%; max-height:110px; max-width:80%; }
+  #bpBody .asTpl .asLv{ flex:none; justify-content:flex-start; gap:8px; color:var(--acc); }
+  #bpBody .asTpl .asLv .hic{ width:14px; height:14px; }
+  #bpBody .asTpl .asR{ justify-content:space-between; padding:6px 4px; }
+  #bpBody .asTpl .asLbl{ flex:none; padding:0 4px; cursor:help; }
+  #bpBody .asTpl .asRow{ flex:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+  #bpBody .asTpl .asRow .tplBtn{ height:36px; min-height:36px; padding:0 4px; }
+  #bpBody .asTpl .asRow .tplBtn[disabled]{ opacity:.4; cursor:default; }
+  @media (max-height:350px){ #bpBody .asTpl .asRow .tplBtn{ height:32px; min-height:32px; } }
   /* (v257) THE TRANSFER MARKET as its templates: the lists' wells with the window a badge, the filters in a row of 28,
      the man in short (the squad's own look, the budget over him); Bids two boxes, Offers one */
   #bpBody .tplPanes .tplBadge.mkWin{ background:var(--warn); color:#1b1206; } #bpBody .tplBadge.mkWin.on{ background:var(--good); color:#06180c; }
@@ -22499,7 +22515,7 @@
   // ctx: 'sale' on the market's Selling list (his deal side is selling him), else his contract; 'squad' in the clubhouse's
   // Squad tab (◀ TEAM in its tabs: back to the little pitch)
   function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return '';
-    const sumOk=ctx==='squad'||ctx==='sale'?!!f.mine:ctx==='buy'?!!f.club&&!f.mine&&!f.club.euro:ctx==='free'?!!f.free:false;   // (v257: the market's men in short too)
+    const sumOk=ctx==='squad'||ctx==='sale'?!!f.mine:ctx==='buy'?!!f.club&&!f.mine&&!f.club.euro:ctx==='free'?!!f.free:ctx==='youth'?!!f.youth:false;   // (v257: the market's men in short too)
     if(mgSide==='sum'&&!sumOk) mgSide='rate'; if(mgSide==='sum') return ctx==='squad'?sqSum(d,f.p):mkSum(d,f,ctx);   // (v252: the squad's man in short)
     const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p), pop=popOf(d,p,f.club);
     const abroad=!!(f.club&&f.club.euro), where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+(abroad?'abroad':MG_LEAGUE[f.club.tier]), wont=!f.mine&&!f.youth&&!abroad&&!!mgWontCome(d,p);   // (v198: a club from abroad's man -- a star, say -- isn't in a league here, nor on the market)
@@ -22727,11 +22743,11 @@
   function mkBud(d){ const b=Math.round(d.budget||0), agreed=(d.bids||[]).filter(x=>x.st==='yes').reduce((a,x)=>a+x.fee,0);
     return '<div class="sqKv mkBudRow" data-xpl="'+xq('Your budget: '+money(b)+(agreed?', '+money(agreed)+' of it agreed in bids.':'.'))+'"><i class="hic" data-ic="funds"></i><span>BUDGET</span><b style="color:'+(b<0?'var(--bad)':'var(--good)')+'">'+money(b)+'</b></div>'; }
   const mkPick0=d=>mkBud(d)+'<div class="mgPick0">Tap a player to see him here.</div>';
-  function mkSum(d,f,ctx){ const p=f.p, kit=f.mine?careerKit(d):f.club?f.club.home:null, sty=styleOf(p), known=f.mine||mgKnown(d,p);
+  function mkSum(d,f,ctx){ const p=f.p, kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null, sty=styleOf(p), known=f.mine||f.youth||mgKnown(d,p);
     const kv=(ic,l,v,x,col)=>'<div class="sqKv" data-xpl="'+xq(x)+'"><i class="hic" data-ic="'+ic+'"></i><span>'+l+'</span><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>';
     const btn=(pri,attr,ic,t)=>'<button class="tplBtn'+(pri?' pri':'')+'" '+attr+'>'+(ic?'<i class="hic" data-ic="'+ic+'"></i>':'')+t+'</button>';
     const scout=!known&&lvOf(d,'scouting')?btn(false,'data-mg="scout" data-pid="'+p.id+'"','scouting','SCOUT'):'';
-    let h=mkBud(d)+'<button class="sqMan" data-mside="rate">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+    let h=(ctx==='youth'?'':mkBud(d))+'<button class="sqMan" data-mside="rate">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
       +'<span class="sqWho"><b class="mgCardName">'+mgEsc(p.name)+'</b><i>'+natPos(p)+(sty?' · '+mgEsc(sty.name):'')+' · '+p.age+'</i></span><i class="hic" data-ic="next"></i></button>', foot='';
     if(ctx==='buy'){ const c=f.club, ask=mgAsk(d,p,c), B=mgBidOf(d,p.id);
       h+=kv('star','Rating',mgOvrTxt(d,p),known?'Rated '+ovrShownOf(p)+'.':'Not scouted: his rating as near as you can tell.')
@@ -22745,6 +22761,12 @@
         +kv('wage','Wants',(known?'':'~')+money(a.wage)+'/wk','The wage he asks, every week.')
         +kv('price','To sign',a.fee?(known?'':'~')+money(a.fee):'nothing',a.fee?'The fee he wants to sign.':'No fee: just his wage.',a.fee?'var(--warn)':'');
       foot=scout+btn(true,'data-mside="deal"','contract','OFFER A DEAL'); }
+    else if(ctx==='youth'){ const m=p.mor??MOR0, cd=condOf(p), pot=potTxt(d,p,{youth:true},true);   // (v258: the academy's lad)
+      h+=kv('star','Rating',ovrShownOf(p)+trendHtml(p),'Rated '+ovrShownOf(p)+'.')
+        +kv('upgrade','Could be',pot,'What he could become, as near as your coaches can tell: '+pot+'.','var(--good)')
+        +kv('morale','Mood',m.toFixed(1),'His mood, 1 to 10: '+morWord(m).toLowerCase()+'.',morCol(m))
+        +kv('fitness','Fitness',Math.round(cd*100)+'%','Fitness: '+Math.round(cd*100)+'%.',cd>=0.9?'var(--good)':cd>=0.75?'var(--warn)':'var(--bad)');
+      foot=btn(false,'data-mg="ryouth" data-pid="'+p.id+'"','close','RELEASE')+btn(true,'data-mg="promote" data-pid="'+p.id+'"','upgrade','PROMOTE'); }
     else { const m=p.mor??MOR0, cd=condOf(p), L=d.listed[p.id], O=(d.offers||[]).filter(o=>o.pid===p.id&&d.world.clubs[o.club]);
       h+=kv('star','Rating',ovrShownOf(p)+trendHtml(p),'Rated '+ovrShownOf(p)+'.')
         +kv('price',L?'Listed':'Worth',money(L||mgValue(d,p)),L?'On the transfer list at '+money(L)+'.':'What he’s worth: '+money(mgValue(d,p))+'.',L?'var(--warn)':'')
@@ -22820,27 +22842,30 @@
 
   // ---- scouting ----
   function mgReportsTab(d){ const K=d.kn||{}, L=Object.keys(K).filter(id=>K[id]>=1).map(Number).map(id=>mgFind(d,id)).filter(f=>f&&!f.mine&&!f.youth).sort((a,b)=>b.p.ovr-a.p.ovr);
-    let h='<div class="mgSum"><span data-xpl="A report loses a level when the season ends.">'+plCount(L.length,'SCOUTED')+'</span></div>';   // (v171: a tap for what becomes of a report)
-    if(!L.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="Scout a player from the market, or send your scouts round a league (Assignments).">NO REPORTS YET</span></div>';   // (v177: J1)
-    return mgPanes(plHead(h,'ASKING',true,true)+'<div class="mgList plList plOther">'+L.map(f=>mgRow(d,f.p,{ovr:String(ovrShownOf(f.p)), pot:potTxt(d,f.p,f,true), club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
-      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>',
-      MGUI.sel&&L.some(f=>f.p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
+    const f=MGUI.sel&&L.find(x=>x.p.id===MGUI.sel), card=f?mgCard(d,MGUI.sel,f.free?'free':'buy'):'';   // (v258: him in short, as on the market)
+    const rows=L.length?'<div class="mgList plList plOther">'+L.map(f=>mgRow(d,f.p,{ovr:String(ovrShownOf(f.p)), pot:potTxt(d,f.p,f,true), club:f.club?f.club.code:'FREE', tags:knTag(d,f.p),
+      right:f.club?money(mgAsk(d,f.p,f.club)):money(mgFreeAsk(d,f.p).wage)+'/wk', sel:MGUI.sel===f.p.id})).join('')+'</div>'
+      :mkNone('NO REPORTS YET','Scout a player from the market, or send your scouts round a league (Assignments).');   // (v177: J1)
+    return mgTplPanes('<div class="tplWell sqHead mkHead"><i class="hic" data-ic="scouting"></i><span data-xpl="A report loses a level when the season ends.">'+plCount(L.length,'SCOUTED')+'</span></div>'+mkCols('ASKING',true,true),
+      rows, card||'<div class="mkNone"><b class="tplPanel">Tap a player to see him here</b></div>'); }
   // SEND THE SCOUTS ROUND A LEAGUE (v173, J4): the four leagues a row each, its price by it, a button for each line --
   // what it does a tap on its name (it was a paragraph, and the leagues over two pages)
-  function mgAssignTab(d){ const L=lvOf(d,'scouting');
-    let h='<div class="clId"><span class="bsIco">'+bldSvg('scouting')+'</span><b class="clName" data-xpl="'+xq('Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes (level '+L+').')+'">ASSIGNMENTS</b>'
-      +'<span class="clChip" data-xpl="'+xq('Reports go as far as your scouts’ house: level '+L+' of 3.')+'">REPORTS TO LEVEL '+L+'</span></div><div class="bsAssign">';
-    for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6; h+='<span class="clLbl" data-xpl="'+xq('Every man in one position in '+lgThe(t)+': '+money(c)+'.')+'">'+MG_LEAGUE[t].toUpperCase()+'<b>'+kPrice(c)+' EACH</b></span>';
-      for(const r of ['GK','DEF','MID','ATT']) h+='<button class="mgBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+r+'"'+(c>d.budget?' disabled':'')+'>'+r+'s</button>'; }
-    return '<div class="bsWrap fitWhole"><div class="bsMain">'+h+'</div></div></div>'; }
+  function mgAssignTab(d){ const L=lvOf(d,'scouting'), IC={GK:'goal',DEF:'squad',MID:'squad',ATT:'boot'};   // (v258: as its template -- the house on the left, the leagues on the right)
+    let r=''; for(const t of [1,2,3,4]){ const c=MG_SCOUT_COST[t]*6;
+      r+='<div class="tplLbl asLbl" data-xpl="'+xq('Every man in one position in '+lgThe(t)+': '+money(c)+'.')+'">'+kPrice(c)+' EACH · '+MG_LEAGUE[t].toUpperCase()+'</div><div class="asRow">'
+        +['GK','DEF','MID','ATT'].map(x=>'<button class="tplBtn" data-mg="scoutgrp" data-t="'+t+'" data-r="'+x+'"'+(c>d.budget?' disabled':'')+'><i class="hic" data-ic="'+IC[x]+'"></i>'+x+'s</button>').join('')+'</div>'; }
+    return '<div class="asTpl tplPage"><div class="tplBox asL"><div class="asPic">'+bldSvg('scouting')+'</div>'
+      +'<b class="tplPanel asLv" data-xpl="'+xq('Send your scouts round a whole league: a report on every player in one position, or a level more on those you’ve scouted, as far as your scouts’ house goes (level '+L+' of 3).')+'"><i class="hic" data-ic="scouting"></i>REPORTS TO LEVEL '+L+'</b></div>'
+      +'<div class="tplBox asR">'+r+'</div></div>'; }
   const SCOUT_TELLS={1:'his rating; where he could get to',2:'his potential within ten; his character',3:'his potential within six; more of him'};
   function mgNetworkTab(d){ return bldScreen(d,'scouting',BS.scouting); }   // (v173: J4)
 
   // ---- the academy ----
-  function mgProspectsTab(d){ const Y=d.youth||[]; let h='';   // (v171: what they are, a tap on the count -- it was two lines over the list)
-    if(!Y.length) h+='<div class="mgSum"><span class="clChip dim" data-xpl="A new intake arrives every summer.">EMPTY</span></div>';   // (v177: J1)
-    return mgPanes(plHead('<div class="mgSum"><span data-xpl="Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.">'+plCount(Y.length,Y.length===1?'YOUNGSTER':'YOUNGSTERS')+'</span></div>'+h,null,false,true)+'<div class="mgList plList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:String(ovrShownOf(p)), pot:potTxt(d,p,{youth:true},true), trend:true, right:null, sel:MGUI.sel===p.id})).join('')+'</div>',   // (v171: his potential a column, his age by his name -- no AGE column)
-      MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel):''); }
+  function mgProspectsTab(d){ const Y=d.youth||[];   // (v258: as its template -- the lads a row each, the one picked in short with RELEASE and PROMOTE)
+    const rows=Y.length?'<div class="mgList plList">'+Y.slice().sort((a,b)=>potMid(d,b,true)-potMid(d,a,true)).map(p=>mgRow(d,p,{ovr:String(ovrShownOf(p)), pot:potTxt(d,p,{youth:true},true), trend:true, right:null, sel:MGUI.sel===p.id})).join('')+'</div>'
+      :mkNone('EMPTY','A new intake arrives every summer.');   // (v177: J1)
+    return mgTplPanes('<div class="tplWell sqHead mkHead"><i class="hic" data-ic="academy"></i><span data-xpl="Your own youngsters: they cost nothing until you promote them. At 19 a lad must be in the first team, or he leaves.">'+plCount(Y.length,Y.length===1?'YOUNGSTER':'YOUNGSTERS')+'</span></div>'+mkCols(null,false,true),
+      rows, MGUI.sel&&Y.some(p=>p.id===MGUI.sel)?mgCard(d,MGUI.sel,'youth'):'<div class="mkNone"><b class="tplPanel">Tap a lad to see him here</b></div>'); }
   function mgFacilitiesTab(d){ return bldScreen(d,'academy',BS.academy); }   // (v173: J4)
 
   // ---- the newsstand ----
@@ -23364,7 +23389,7 @@
       case 'papers': pileShow(d,true); return;
       case 'rvnext': case 'rvback': { const st=FITPG['B:review/']||(FITPG['B:review/']={p:0}); st.p=Math.max(0,st.p+(a==='rvnext'?1:-1)); fitNow(); rvFoot(); return; }   // (v242)
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+lgThe(d.tier)+': pre-season, and the window is open.','var(--good)'); return;
-      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; if(MGUI.sel&&(curBldg==='club'&&curTab.club==='Squad'||curBldg==='market'&&/^(Search|Free agents|Selling)$/.test(curTab.market))) mgSide='sum'; break;   // (v252: the squad's man, in short)
+      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; if(MGUI.sel&&(curBldg==='club'&&curTab.club==='Squad'||curBldg==='market'&&/^(Search|Free agents|Selling)$/.test(curTab.market)||curBldg==='scouting'&&curTab.scouting==='Reports'||curBldg==='academy'&&curTab.academy==='Prospects')) mgSide='sum'; break;   // (v252: the squad's man, in short)
       case 'talkcard': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(talkedThisWeek(d,p)){ say(TALK_AGAIN); break; }   // (v152: A WORD WITH HIM, from his card)
         const m0=p.mor??MOR0, L=mgTalk(d,p), up=Math.round(((p.mor??MOR0)-m0)*10)/10; MGUI.talk={pid, w:d.weeks||0, L:L.concat(up>0?['mood +'+up.toFixed(1)]:[])}; mgSave(d); break; }
       case 'bidset': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), want=ds.v!=null?+ds.v:mgRound(ask*(+ds.k));   // (v151: a quick figure, or one typed)

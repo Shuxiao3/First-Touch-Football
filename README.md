@@ -502,6 +502,12 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Scouting's Reports and Assignments, the Academy's Prospects as their templates (v258).** Reports is a list and its
+  man, as on the market: how many you've scouted in the list's well, the columns with POT, and the man you pick in short
+  (MAKE A BID, or OFFER A DEAL for a free agent); with none yet, NO REPORTS YET in a panel. Assignments has the scouts'
+  house on the left with how far its reports go, and on the right the four leagues, each its price and a row of four
+  buttons, GKs, DEFs, MIDs and ATTs. Prospects is the lads a row each with what they could become, the one you pick in
+  short (his rating, what he could be, his mood and fitness) with RELEASE and PROMOTE at the foot.
 - **The transfer market as its templates (v257).** Search, Free agents and Selling are a list and its man: the list's
   well says how many, with the window as a badge (WINDOW OPEN and its weeks, or WINDOW SHUT); the filters in one row of
   28 (each says what it's set to); the columns and the rows you tap. On the right your budget, then the man you pick in
@@ -3725,6 +3731,10 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v258: Scouting and the Academy.** mgReportsTab and mgProspectsTab draw mgTplPanes, their wells .mkHead with an icon;
+  mgCard's 'sum' side is open to a scouted man (as 'buy' or 'free') and to a youngster ('youth': mkSum without the budget,
+  RELEASE and PROMOTE). mgAssignTab draws .asTpl, .asL (the house, .asLv) and .asR (an .asLbl and an .asRow of four
+  .tplBtn for each league).
 - **v257: the transfer market.** Search, Free agents and Selling draw mgTplPanes: the head is mkWell (the count and
   mkWin, the window's .tplBadge), .mkFilters (mkDrop now <i>label</i><b>value</b>, .set once chosen) and mkCols (plHead's
   columns alone). mgCard takes 'buy' and 'free' as well as 'sale' and 'squad'; for those its 'sum' side is mkSum (.sqSum
