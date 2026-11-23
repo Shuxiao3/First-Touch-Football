@@ -502,6 +502,13 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The Clubhouse's Club as its template (v251).** Three boxes of four columns, the page's height, no frame round them.
+  THE CLUB NOW: the bank, the fans (▲ ▼ by your last game), a week's money and the dressing room; under it HISTORY:
+  seasons, promotions, titles and where you are now. Each is a row with its mark, and a tap says the rest. THE BUILDINGS:
+  a row each, tapped to go to it; the clubhouse first and lit, MOVE IN with the next one's price (red while it's more than
+  you have), THE HALL once it's the best; a building waiting for a clubhouse NOT BUILT, with a lock. RECORDS: the club's
+  seven, the record on the right and who holds it beside it, the biggest win's club by its code (its name a tap away).
+  The tiles, the form dots, the campus strip, the clubhouse's path and the season chips are gone from it.
 - **A building's frame and the season review as their templates (v250).** Every building's page has the templates'
   header: CAMPUS two columns wide with its back mark, the title at 18, the tabs on the right, each a button 36 high (the
   open one lit). The season review: where you finished at 28 in a well over the middle of a box across the page, with the
@@ -3675,6 +3682,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v251: the Clubhouse's Club.** mgClubTab draws .clTpl.tplPage: three .tplBox.clBox, each .tplWell headings and
+  rows. .clKv rows (a .hic mark, .clLbl, b), the records .clKv.clRk (an em for who holds it, "–" unset); the buildings
+  .clBld buttons, data-mg goto, the clubhouse's .lit with data-mg up and its .clPrice, disabled while bldBlock says no
+  (.best at the hall, .lock for one waiting for a clubhouse). paintBuilding marks a body holding a .tplPage .tplBody (it
+  was the review's .rvBody): no frame round it. clubTouches went with the rings it drew. In a match, a name a pixel too
+  long for your man's window has his first name's initial (playerHud shortened it only once it ran over by more than one).
 - **v250: a building's frame; the season review.** #bldgPanel .bpInner sits on the grid (--tplL / --tplR, --tplT to
   --tplB); .bpTopBack is two columns with its back mark, #bpTitle 18, .bpTab buttons 36 high, upper case. paintBuilding
   runs tpIcons over the body, and marks the review's .rvBody (no frame round it). mgReviewBody draws .rvTop (.rvSeason,

@@ -204,12 +204,12 @@ ok(/A full report/.test(msg) && k3.facts.length === 4 && !k3.more && k3.fits && 
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 // the club's records, in the Clubhouse
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Club")'); await page.waitForTimeout(200);
-const club = await K(`(()=>{ const o={}; for(const c of document.querySelectorAll('#bpBody .clRec')) o[c.querySelector('.clLbl').textContent]={ v:c.querySelector('b').textContent, who:c.querySelector('em').textContent, x:c.dataset.xpl }; return o; })()`);   // (v172: a card a record, J2)
+const club = await K(`(()=>{ const o={}; for(const c of document.querySelectorAll('#bpBody .clRk')) o[c.querySelector('.clLbl').textContent]={ v:c.querySelector('b').textContent, who:c.querySelector('em').textContent, x:c.dataset.xpl }; return o; })()`);   // (v251: a row a record, as its template -- v172: a card a record, J2)
 info('the Clubhouse\'s records: ' + JSON.stringify(club));
-const C = club, has = k => C[k] && C[k].v !== '—';
-ok(Object.keys(C).length === 7 && C['MOST GAMES'].who === 'YOUNG' && /^Most games for the club: Kit Young, \d+\.$/.test(C['MOST GAMES'].x) && C['BIGGEST WIN'].v === '6–0' && /^v [A-Z ]+ · S1$/.test(C['BIGGEST WIN'].who)
-   && C['RECORD SIGNING'].v === '$80K' && /\$80,000\.$/.test(C['RECORD SIGNING'].x) && C['RECORD SALE'].v === '$120K' && /\$120,000\.$/.test(C['RECORD SALE'].x) && has('MOST GOALS') && has('YOUNGEST') && has('YOUNGEST SCORER'),
-  'the Clubhouse\'s CLUB RECORDS, a card each, the record first and who holds it beside it: most games (' + C['MOST GAMES'].v + ' ' + C['MOST GAMES'].who + '), most goals, the youngest, the biggest win (6–0 ' + C['BIGGEST WIN'].who + '), the record signing ($80K) and sale ($120K), the rest a tap away');
+const C = club, has = k => C[k] && C[k].v !== '–';
+ok(Object.keys(C).length === 7 && C['Most games'].who === 'YOUNG' && /^Most games for the club: Kit Young, \d+\.$/.test(C['Most games'].x) && C['Biggest win'].v === '6–0' && /^v [A-Z]+ · S1$/.test(C['Biggest win'].who) && /^The biggest win: 6–0 v [A-Z][a-z]/.test(C['Biggest win'].x)
+   && C['Record signing'].v === '$80K' && /\$80,000\.$/.test(C['Record signing'].x) && C['Record sale'].v === '$120K' && /\$120,000\.$/.test(C['Record sale'].x) && has('Most goals') && has('Youngest') && has('Youngest scorer'),
+  'the Clubhouse\'s RECORDS, a row each, the record on the right and who holds it beside it: most games (' + C['Most games'].v + ' ' + C['Most games'].who + '), most goals, the youngest, the biggest win (6–0 ' + C['Biggest win'].who + ', the club by its name a tap away), the record signing ($80K) and sale ($120K)');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

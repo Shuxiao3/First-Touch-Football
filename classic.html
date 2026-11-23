@@ -2446,7 +2446,7 @@
      four columns, what it meant under it), the prize money, top scorer and next season in three boxes of four columns 104
      high; then a box a page -- its heading in the well, rows of 24 eight apart -- and NEXT four columns wide bottom right,
      the arrow back by it */
-  #bldgPanel .bpBody.rvBody{ padding:0; background:none; border:0; border-radius:0; box-shadow:none; }   /* (the review's boxes on the page, no frame round them) */
+  #bldgPanel .bpBody.tplBody{ padding:0; background:none; border:0; border-radius:0; box-shadow:none; }   /* (a page drawn as its template -- the review's, v251 the Clubhouse's Club -- its boxes on the page, no frame round them) */
   @media (max-height:350px){ #bldgPanel .mgPaneR .mgPaneScroll{ padding-top:6px; padding-bottom:6px; } }   /* (v250: on the grid the card's pane is narrower and its head a little lower -- on a short screen, a deal's row on two lines still fits) */
   #bpBody .rvTop{ position:relative; height:88px; margin:0 0 8px; }
   #bpBody .rvSeason{ position:absolute; left:12px; top:8px; }
@@ -2472,6 +2472,30 @@
   #bldgPanel #bpFoot:has([data-mg="rvnext"], [data-mg="newseason"]){ justify-content:flex-end; }
   #bpFoot [data-mg="rvnext"], #bpFoot [data-mg="newseason"]{ width:calc(var(--tplC) * 4 + 24px); max-width:none; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; letter-spacing:.06em; }
   #bpFoot [data-mg="rvnext"] .hic, #bpFoot [data-mg="newseason"] .hic{ width:16px; height:16px; }
+  /* (v251) THE CLUBHOUSE'S CLUB AS ITS TEMPLATE: three boxes of four columns, the page's height; each its heading in the
+     well, then rows of 24, four apart (a mark, the words, the figure on the right), or the buildings as rows of 36 you tap */
+  #bpBody .clTpl{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; height:100%; min-height:0; }
+  #bpBody .clTpl [data-xpl]{ cursor:help; }
+  #bpBody .clTpl .clBox{ display:flex; flex-direction:column; gap:4px; min-width:0; min-height:0; overflow:hidden; }
+  #bpBody .clTpl .tplWell{ flex:none; } #bpBody .clTpl .tplWell.clGap{ margin-top:4px; }
+  #bpBody .clTpl .clKv{ flex:none; height:24px; box-sizing:border-box; display:flex; flex-direction:row; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); }
+  #bpBody .clTpl .clKv .hic{ width:12px; height:12px; color:var(--dim); }
+  #bpBody .clTpl .clKv .clLbl{ flex:0 1 auto; min-width:0; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clTpl .clKv b{ flex:none; margin-left:auto; font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; }
+  #bpBody .clTpl .clKv b .trend{ font-style:normal; font-size:9px; margin-left:3px; } #bpBody .clTpl .clKv b .trend.up{ color:var(--good); } #bpBody .clTpl .clKv b .trend.dn{ color:var(--bad); }
+  #bpBody .clTpl .clRk em{ flex:0 1 auto; min-width:0; margin-left:auto; font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.04em; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clTpl .clRk .clLbl{ flex:none; } #bpBody .clTpl .clRk em + b{ margin-left:0; } #bpBody .clTpl .clRk.none b{ color:var(--dim); }
+  #bpBody .clTpl .clBld{ position:relative; flex:none; height:36px; box-sizing:border-box; margin:0; padding:0 10px; display:flex; flex-direction:row; align-items:center; gap:8px; text-align:left; cursor:pointer;
+    border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; }
+  #bpBody .clTpl .clBld .hic{ width:16px; height:16px; }
+  #bpBody .clTpl .clBld span{ flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .clTpl .clBld em{ flex:none; font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.04em; }
+  #bpBody .clTpl .clBld.lit{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); color:var(--ink); }
+  #bpBody .clTpl .clBld.lit em{ color:var(--acc); } #bpBody .clTpl .clBld.lit[disabled]{ opacity:1; filter:none; cursor:default; } #bpBody .clTpl .clBld.lit[disabled] em{ color:var(--bad); }
+  #bpBody .clTpl .clBld.best{ background:var(--win); box-shadow:none; color:var(--good); cursor:help; }
+  #bpBody .clTpl .clBld.lock{ opacity:.55; } #bpBody .clTpl .clBld .clLk{ width:12px; height:12px; }
+  @media (max-width:700px){ #bpBody .clTpl .clBld{ padding:0 8px; gap:6px; letter-spacing:.03em; } }
+  @media (max-height:350px){ #bpBody .clTpl .clBox{ gap:3px; } #bpBody .clTpl .tplWell.clGap{ margin-top:0; } }   /* (a short screen, Safari's bar showing: the club now and its history, ten rows, still in the box) */
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -15215,7 +15239,7 @@
     if(cap!==rpCap){ rpCap=cap; const s=document.getElementById('rpCap'); s.style.left=cap+'%'; s.style.display=cap<100?'':'none'; }
     // (v228) the window's narrower (the Studio's match screen): a name too long for it has his first name's initial
     if(rpFit!==rpKey){ const nm=document.getElementById('rpName'); if(nm.clientWidth>0){ rpFit=rpKey; const f=nm.textContent;
-      if(nm.scrollWidth>nm.clientWidth+1&&f.includes(' ')) nm.textContent=f[0]+'. '+f.slice(f.indexOf(' ')+1); } }
+      if(nm.scrollWidth>nm.clientWidth&&f.includes(' ')) nm.textContent=f[0]+'. '+f.slice(f.indexOf(' ')+1); } }   // (v251: a pixel over is over -- it was left cut)
   }
 
   // (v228) THEIR MAN, beside yours (#rTheir): theirs on the ball (their keeper holding it too), or else the one of theirs
@@ -22025,66 +22049,51 @@
   // the levels of a building, a line each: what each brings, the one it's at lit, the clubhouse a later one needs
   // its next level: what it costs and the button (or why not)
   // ---- the clubhouse: what it is, what the next one brings, and your career ----
-  // THE CLUBHOUSE (v172, the handoff's J2): the club on one screen, said in state, not sentences. On the left the club
-  // now: who you are (the crest, the name, the league and where you stand in it, the season and the week); the money,
-  // the fans (▲ ▼ by your last game), the week's net and the dressing room as four tiles; the last five league results
-  // as dots and the next game; the six buildings as tiles -- each one's level as pips, the clubhouse lit, one not yet
-  // open dimmed with a lock, and those the next clubhouse opens or builds up ringed (a tap goes to the building) -- and
-  // the clubhouse's own path, its four as nodes (done ✓, the one you're in filled, the next with its price, the rest
-  // dim), your money against the next one's price and the button to move in. On the right the club's story: your career
-  // in three numbers and a chip a season (the season on now lit), and the club's seven records, the record first and
-  // who holds it beside it ("—" till one's set). Every tile, dot, node, chip and card says the rest when tapped
-  // (data-xpl); it was a picture, a paragraph, a list of every clubhouse in sentences and the career in rows, over five pages
+  // THE CLUBHOUSE'S CLUB (v251: its template, three boxes of four columns). THE CLUB NOW -- the bank, the fans (▲ ▼ by
+  // your last game), a week's money, the dressing room -- and HISTORY -- seasons, promotions, titles, where you are now
+  // -- as rows of 24 with their marks; THE BUILDINGS as rows you tap, each to its page: the clubhouse first, lit while
+  // there's another to move into (MOVE IN and its price, red while it's more than you have; the hall once it's the
+  // best), a building waiting for a clubhouse NOT BUILT with a lock; the club's RECORDS as rows, the record on the
+  // right and who holds it beside it ("–" till one's set). Every row of figures says the rest when
+  // tapped (data-xpl). (v172-v250: who you are, tiles, the form and the next game, the campus as tiles, the clubhouse's
+  // path as nodes, your money against the next, a chip a season and the records as cards, in two columns.)
   const CL_SIX=['club','train','stadium','physio','scouting','academy'], CL_NM={club:'CLUB',train:'TRAINING',stadium:'STADIUM',physio:'PHYSIO',scouting:'SCOUTS',academy:'ACADEMY'};
   const bldSvg=id=>{ const e=document.querySelector('#chCampus [data-bldg="'+id+'"] svg'); return e?e.outerHTML:''; };   // (the campus menu's icon)
   const xq=t=>mgEsc(String(t)).replace(/"/g,'&quot;');   // (words for a data-xpl)
   const kMoney=v=>{ v=Math.round(v||0); return (v<0?'−':'')+kPrice(Math.abs(v)); };
-  // which buildings a clubhouse opens or lets you build up (for the ring on their tiles)
-  function clubTouches(lv){ const o=new Set(); for(const id in BLD_LV) BLD_LV[id].forEach((x,k)=>{ if(x&&x.cl===lv&&!x.call&&!(id==='train'&&k===1)) o.add(id); });
-    if(STAD_LEVELS.some((x,k)=>k>1&&STAD_CL[k]===lv)) o.add('stadium'); return o; }
-  function mgClubTab(d){ const L=lvOf(d,'club'), N=CLUB_LV[L+1], c=d.world.clubs[d.clubId]||{}, u=crestURL(crestFor(c)), pos=mgPos(d), M=d.manager, R=d.rec||{};
+  const CL_IC={club:'clubhouse',train:'training',stadium:'stadium',physio:'physio',scouting:'scouting',academy:'academy'};
+  function mgClubTab(d){ const L=lvOf(d,'club'), N=CLUB_LV[L+1], pos=mgPos(d), M=d.manager, R=d.rec||{};
     const f=computeFinance(d), pre=d.phase==='summer'||d.phase==='winter', nv=pre?shirtSales(d).wk:weekNetNow(d,f), tm=d.tm??MOR0, fans=Math.round(d.loyalty||0), fd=d.loyD||0, b=Math.round(d.budget||0);
-    const tile=(lbl,v,x,col)=>'<div class="clTile" data-xpl="'+xq(x)+'"><i class="clLbl">'+lbl+'</i><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>';
-    let l='<div class="clId">'+(u?'<img class="clCrest" src="'+u+'" alt="">':'')+'<b class="clName">'+mgEsc(d.clubName)+'</b>'
-      +'<span class="clChip" data-xpl="'+xq(d.clubName+' play in '+lgThe(d.tier)+'.')+'">'+MG_LEAGUE[d.tier].toUpperCase()+'</span>'
-      +'<span class="clChip" data-xpl="'+xq(d.md>0?ordinal(pos)+' in '+lgThe(d.tier)+' after '+Math.min(d.md,MG_MD)+' of '+MG_MD+' games.':'No league games yet: the table starts with the first matchday.')+'">'+(d.md>0?ordinal(pos).toUpperCase():'—')+'</span>'
-      +'<span class="clWk" data-xpl="'+xq('Season '+d.season+' · '+mgPhaseLabel(d)+'.')+'">S'+d.season+' · '+mgWeekShort(d).toUpperCase()+'</span></div>';
-    l+='<div class="clTiles">'+tile('BANK',kMoney(b),'Budget: '+money(b)+(b<0?', in the red.':'.'),b<0?'var(--bad)':'var(--good)')
-      +tile('FANS',fans.toLocaleString()+(fd?'<i class="trend '+(fd>0?'up':'dn')+'">'+(fd>0?'▲':'▼')+'</i>':''),'Fans: '+fans.toLocaleString()+(fd?' ('+(fd>0?'+':'')+fd+' after your last game).':'.'),'var(--warn)')
-      +tile(pre?'PRE/WK':'NET/WK',(nv>=0?'+':'')+kMoney(nv),pre?'What comes in a pre-season week (the shirts): '+money(nv)+'.':'The week’s money, as it’s gone: '+(nv>=0?'+':'')+money(nv)+' on an ordinary week, the gate as the last games took it.',nv>=0?'var(--good)':'var(--bad)')
-      +tile('MORALE','<span class="clSeg" style="color:'+morCol(tm)+'">'+[1,2,3,4,5,6,7,8,9,10].map(k=>'<s'+(k<=Math.round(tm)?' class="on"':'')+'></s>').join('')+'</span>'+tm.toFixed(1),'The dressing room, 1 to 10: '+tmWord(tm)+' ('+tm.toFixed(1)+').')+'</div>';
-    const F=mgForm(d,5), g=mgNextGame(d), op=g&&d.world.clubs[g.opp];
-    l+='<div class="clForm"><span class="clLbl">FORM</span><span class="clDots" data-xpl="'+xq(F.length?'The last '+F.length+' league results, the latest last: '+F.join(' ')+'.':'No league results yet.')+'">'+[0,1,2,3,4].map(i=>'<i'+(F[i]?' class="'+F[i]+'"':'')+'></i>').join('')+'</span>'
-      +'<span class="clLbl">NEXT</span><b class="clNext" data-xpl="'+xq(g&&op?g.label+': '+(g.home?'at home to ':'away at ')+op.name+'.':'No game this week'+(pre?': '+(d.phase==='summer'?'pre-season':'the winter break')+'.':'.'))+'">'+(g&&op?(g.home?'vs ':'@ ')+mgEsc(op.code||op.name)+'<em>'+(g.kind==='league'?'MD '+(d.md+1):mgEsc(g.short||(g.kind==='playoff'?'PLAYOFF':'')))+'</em>':'—')+'</b></div>';
-    const nx=N?clubTouches(L+1):new Set();
-    l+='<div><span class="clLbl">CAMPUS</span><div class="clCampus">'+CL_SIX.map(id=>{ const v=lvOf(d,id), mx=bldMax(id), lock=!v&&lvOf(d,'club')<clubNeed(id,1);
-        return '<button class="clB'+(id==='club'?' on':'')+(lock?' lock':'')+(nx.has(id)?' nx':'')+'" data-mg="goto" data-b="'+id+'">'+bldSvg(id)+'<b>'+CL_NM[id]+'</b><span class="clPips">'
-          +Array.from({length:mx},(_,k)=>'<i'+(k<v?' class="on"':'')+'></i>').join('')+'</span>'+(lock?LOCK_SVG:'')+'</button>'; }).join('')+'</div></div>';
-    const node=k=>{ const st=k<L?'done':k===L?'now':k===L+1?'next':'later', C=CLUB_LV[k], un=k>1?andList(clubUnlocks(k)):'the training pitch and the stadium to level '+STAD_CL.lastIndexOf(1);
-      return '<span class="clNode '+st+'" data-xpl="'+xq(capFirst(C.n.toLowerCase())+(k<L?', done: it brought ':k===L?', yours now: it brought ':', '+money(C.cost)+': it brings ')+un+'.')+'"><i>'+(st==='done'?'✓':'')+'</i><b>'+clubShort(k)+'</b>'+(st==='next'?'<em>'+kPrice(C.cost)+'</em>':'')+'</span>'; };
+    const kv=(ic,l,v,x,col,cls)=>'<div class="clKv'+(cls?' '+cls:'')+'" data-xpl="'+xq(x)+'"><i class="hic" data-ic="'+ic+'"></i><span class="clLbl">'+l+'</span><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>';
+    const H=M.history, seasons=H.length+(d.phase==='review'?0:1);
+    const now='<div class="tplBox clBox"><div class="tplWell">THE CLUB NOW</div>'
+      +kv('funds','Bank',kMoney(b),'Budget: '+money(b)+(b<0?', in the red.':'.'),b<0?'var(--bad)':'')
+      +kv('fans','Fans',fans.toLocaleString()+(fd?'<i class="trend '+(fd>0?'up':'dn')+'">'+(fd>0?'▲':'▼')+'</i>':''),'Fans: '+fans.toLocaleString()+(fd?' ('+(fd>0?'+':'')+fd+' after your last game).':'.'))
+      +kv('books',pre?'A week, pre-season':'A week',(nv>=0?'+':'')+kMoney(nv),pre?'What comes in a pre-season week (the shirts): '+money(nv)+'.':'The week’s money, as it’s gone: '+(nv>=0?'+':'')+money(nv)+' on an ordinary week, the gate as the last games took it.',nv>=0?'var(--good)':'var(--bad)')
+      +kv('morale','Morale',tm.toFixed(1),'The dressing room, 1 to 10: '+tmWord(tm)+' ('+tm.toFixed(1)+').',morCol(tm))
+      +'<div class="tplWell clGap">HISTORY</div>'
+      +kv('calendar','Seasons',String(seasons),seasons+' season'+(seasons>1?'s':'')+' in charge of '+d.clubName+'.')
+      +kv('upgrade','Promotions',String(M.promotions),M.promotions?M.promotions+' promotion'+(M.promotions>1?'s':'')+' won.':'No promotions yet.')
+      +kv('trophy','Titles',String(M.titles),M.titles?M.titles+' league title'+(M.titles>1?'s':'')+'.':'No league titles yet.')
+      +kv('clock','Now','Season '+d.season+(d.md>0?' · '+ordinal(pos):''),'Season '+d.season+', on now: '+MG_LEAGUE[d.tier]+(d.md>0?', '+ordinal(pos)+' after '+Math.min(d.md,MG_MD)+' of '+MG_MD+' games.':'.'))+'</div>';
     const why=N&&bldBlock(d,'club');
-    l+='<div class="clPath"><span class="clLbl">CLUBHOUSE '+L+' OF '+(CLUB_LV.length-1)+'</span><div class="clNodes">'+CLUB_LV.slice(1).map((_,i)=>(i?'<s'+(i<L?' class="done"':'')+'></s>':'')+node(i+1)).join('')+'</div>'
-      +(N?'<div class="clGo"><span class="clHave" data-xpl="'+xq(capFirst(N.n.toLowerCase())+' costs '+money(N.cost)+'; you have '+money(b)+'. It brings '+andList(clubUnlocks(L+1))+' (ringed on the campus).')+'">'+pBar(b,N.cost)+'<em>'+kMoney(Math.max(0,b))+' / '+kPrice(N.cost)+'</em></span>'
-          +'<button class="mgBtn go" data-mg="up" data-b="club"'+(why?' disabled':'')+'>MOVE IN</button></div>'
-         :'<div class="clGo"><em style="color:var(--good)" data-xpl="The best there is: everything is open to you.">THE BEST THERE IS</em></div>')+'</div>';
-    // the club's story
-    const H=M.history, seasons=H.length+(d.phase==='review'?0:1), num=(v,lbl,x)=>'<div class="clNum" data-xpl="'+xq(x)+'"><b>'+v+'</b><i class="clLbl">'+lbl+'</i></div>';
-    let r='<div><span class="clLbl">'+mgEsc(M.name).toUpperCase()+'</span><div class="clCareer">'+num(seasons,'SEASONS',seasons+' season'+(seasons>1?'s':'')+' in charge of '+d.clubName+'.')
-      +num(M.promotions,'PROMOTIONS',M.promotions?M.promotions+' promotion'+(M.promotions>1?'s':'')+' won.':'No promotions yet.')+num(M.titles,'TITLES',M.titles?M.titles+' league title'+(M.titles>1?'s':'')+'.':'No league titles yet.')+'</div></div>';
-    const chip=x=>'<span class="clS'+(/PROMOTED|CHAMPIONS/.test(x.result)?' up':x.result==='RELEGATED'?' dn':'')+'" data-xpl="'+xq('Season '+x.season+': '+MG_LEAGUE[x.tier]+', '+ordinal(x.pos)+(x.result?' · '+x.result.toLowerCase():'')+'.')+'">S'+x.season+' · '+ordinal(x.pos).toUpperCase()+'</span>';
-    r+='<div class="clSeasons">'+H.slice(d.phase==='review'?-6:-5).map(chip).join('')
-      +(d.phase==='review'?'':'<span class="clS live" data-xpl="'+xq('Season '+d.season+', on now: '+MG_LEAGUE[d.tier]+(d.md>0?', '+ordinal(pos)+'.':'.'))+'">S'+d.season+' · '+(d.md>0?ordinal(pos).toUpperCase():'NOW')+'</span>')+'</div>';
-    const sur=x=>mgEsc(surname(x.name)).toUpperCase();
-    const card=(lbl,x,v,who,said,yet)=>'<div class="clRec'+(x?'':' none')+'" data-xpl="'+xq(x?said:'Set '+yet+'.')+'"><i class="clLbl">'+lbl+'</i><span><b>'+(x?v:'—')+'</b><em>'+(x?who:'')+'</em></span></div>';
-    r+='<div class="clGrow"><span class="clLbl">CLUB RECORDS</span><div class="clRecs">'
-      +card('MOST GAMES',R.ap,R.ap&&R.ap.n,R.ap&&sur(R.ap),R.ap&&'Most games for the club: '+R.ap.name+', '+R.ap.n+'.','after your first game')
-      +card('MOST GOALS',R.gl,R.gl&&R.gl.n,R.gl&&sur(R.gl),R.gl&&'Most goals for the club: '+R.gl.name+', '+R.gl.n+'.','with your first goal')
-      +card('YOUNGEST',R.yd,R.yd&&R.yd.age,R.yd&&sur(R.yd)+' · S'+R.yd.s,R.yd&&'The youngest to play for the club: '+R.yd.name+', '+R.yd.age+' (season '+R.yd.s+').','after your first game')
-      +card('YOUNGEST SCORER',R.ys,R.ys&&R.ys.age,R.ys&&sur(R.ys)+' · S'+R.ys.s,R.ys&&'The youngest to score for the club: '+R.ys.name+', '+R.ys.age+' (season '+R.ys.s+').','with your first goal')
-      +card('BIGGEST WIN',R.bw,R.bw&&R.bw.gf+'–'+R.bw.ga,R.bw&&'v '+mgEsc(R.bw.opp).toUpperCase()+' · S'+R.bw.s,R.bw&&'The biggest win: '+R.bw.gf+'–'+R.bw.ga+' v '+R.bw.opp+' (season '+R.bw.s+').','with your first win')
-      +card('RECORD SIGNING',R.fp,R.fp&&kPrice(R.fp.fee),R.fp&&sur(R.fp),R.fp&&'The record signing: '+R.fp.name+', '+money(R.fp.fee)+'.','with your first fee paid')
-      +card('RECORD SALE',R.fs,R.fs&&kPrice(R.fs.fee),R.fs&&sur(R.fs),R.fs&&'The record sale: '+R.fs.name+', '+money(R.fs.fee)+'.','with your first fee taken')+'</div></div>';
-    return '<div class="clGrid"><div class="clCol">'+l+'</div><div class="clCol">'+r+'</div></div>'; }
+    const bld='<div class="tplBox clBox"><div class="tplWell">THE BUILDINGS</div>'
+      +(N?'<button class="clBld lit" data-mg="up" data-b="club"'+(why?' disabled':'')+'><i class="hic" data-ic="clubhouse"></i><span>CLUBHOUSE · MOVE IN</span><em class="clPrice">'+kPrice(N.cost)+'</em></button>'
+         :'<div class="clBld best" data-b="club" data-xpl="'+xq(CLUB_LV[L].n+': the best clubhouse there is, and everything open to you.')+'"><i class="hic" data-ic="clubhouse"></i><span>CLUBHOUSE · '+CLUB_LV[L].n.toUpperCase()+'</span></div>')
+      +CL_SIX.filter(id=>id!=='club').map(id=>{ const v=lvOf(d,id), lock=!v&&L<clubNeed(id,1);
+        return '<button class="clBld'+(lock?' lock':'')+'" data-mg="goto" data-b="'+id+'"><i class="hic" data-ic="'+CL_IC[id]+'"></i><span>'+CL_NM[id]+' · '+(v?'LEVEL '+v:'NOT BUILT')+'</span>'
+          +(lock?'<i class="hic clLk" data-ic="lock"></i>':'')+'</button>'; }).join('')+'</div>';
+    const sur=x=>mgEsc(surname(x.name)).toUpperCase(), bwBy=R.bw&&Object.values(d.world.clubs).find(c=>c&&c.code===R.bw.opp)||{};   // (the biggest win's club: its code on the row, its name a tap away)
+    const rec=(lbl,x,v,who,said,yet)=>'<div class="clKv clRk'+(x?'':' none')+'" data-xpl="'+xq(x?said:'Set '+yet+'.')+'"><span class="clLbl">'+lbl+'</span><em>'+(x?who:'')+'</em><b>'+(x?v:'–')+'</b></div>';
+    const recs='<div class="tplBox clBox"><div class="tplWell">RECORDS</div>'
+      +rec('Most games',R.ap,R.ap&&R.ap.n,R.ap&&sur(R.ap),R.ap&&'Most games for the club: '+R.ap.name+', '+R.ap.n+'.','after your first game')
+      +rec('Most goals',R.gl,R.gl&&R.gl.n,R.gl&&sur(R.gl),R.gl&&'Most goals for the club: '+R.gl.name+', '+R.gl.n+'.','with your first goal')
+      +rec('Youngest',R.yd,R.yd&&R.yd.age,R.yd&&sur(R.yd)+' · S'+R.yd.s,R.yd&&'The youngest to play for the club: '+R.yd.name+', '+R.yd.age+' (season '+R.yd.s+').','after your first game')
+      +rec('Youngest scorer',R.ys,R.ys&&R.ys.age,R.ys&&sur(R.ys)+' · S'+R.ys.s,R.ys&&'The youngest to score for the club: '+R.ys.name+', '+R.ys.age+' (season '+R.ys.s+').','with your first goal')
+      +rec('Biggest win',R.bw,R.bw&&R.bw.gf+'–'+R.bw.ga,R.bw&&'v '+mgEsc(R.bw.opp).toUpperCase()+' · S'+R.bw.s,R.bw&&'The biggest win: '+R.bw.gf+'–'+R.bw.ga+' v '+(bwBy.name||R.bw.opp)+' (season '+R.bw.s+').','with your first win')
+      +rec('Record signing',R.fp,R.fp&&kPrice(R.fp.fee),R.fp&&sur(R.fp),R.fp&&'The record signing: '+R.fp.name+', '+money(R.fp.fee)+'.','with your first fee paid')
+      +rec('Record sale',R.fs,R.fs&&kPrice(R.fs.fee),R.fs&&sur(R.fs),R.fs&&'The record sale: '+R.fs.name+', '+money(R.fs.fee)+'.','with your first fee taken')+'</div>';
+    return '<div class="clTpl tplPage">'+now+bld+recs+'</div>'; }
   // A BUILDING'S SCREEN (v173, the handoff's J4): one screen for the training pitch, the physio, the scouts' network
   // and the academy's facilities -- and for one not yet up. Its picture; its name and its level as pips (or NOT BUILT,
   // or the clubhouse it waits for, as a chip); what it does as the numbers it changes, a tile each (o.tiles(level):
@@ -22987,7 +22996,7 @@
     document.getElementById('bpTabs').innerHTML=b.tabs&&!off?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
     const body=document.getElementById('bpBody');
     if(top) fitForget(':'+id+'/');
-    body.innerHTML=renderBuildingBody(id); tpIcons(body); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes); body.classList.toggle('rvBody',id==='review');   // (v250: its marks; the review's boxes on the page itself)
+    body.innerHTML=renderBuildingBody(id); tpIcons(body); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes); body.classList.toggle('tplBody',id==='review'||!!body.querySelector('.tplPage'));   // (v250: its marks; the review's boxes on the page itself)
     if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
     foot.classList.toggle('on',foot.children.length>0); foot.dataset.rv='';

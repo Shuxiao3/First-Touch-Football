@@ -55,13 +55,14 @@ ok(r.lv === 2 && r.s.chips === 'LEVEL 2 OF 4 · NEEDS CLUBHOUSE' && r.s.nodes.jo
 R = await rail();
 ok(!R.physio.locked && R.physio.sub === '' && R.scouting.price === '$200K' && R.academy.sub === 'needs clubhouse 3' && R.club.sub === 'next $2M', 'at the cabin: the scouts\' house its price ($200K), the academy still "needs clubhouse 3", the clubhouse "next $2M"');
 r = await K(`(()=>{ const d=CAREER.data; curTab.club='Club'; openBuilding('club'); const B=document.getElementById('bpBody');
-  const nodes=[...B.querySelectorAll('.clNode')].map(n=>({ st:n.className.replace('clNode ',''), t:n.textContent, x:n.dataset.xpl })), go=B.querySelector('.clGo .clHave'), btn=B.querySelector('.clGo [data-mg="up"][data-b="club"]');
-  const rings=[...B.querySelectorAll('.clB.nx')].map(e=>e.dataset.b).join(','), locks=[...B.querySelectorAll('.clB.lock')].map(e=>e.dataset.b).join(','); hideBldg();
-  return { nodes, go:go&&go.textContent, gox:go&&go.dataset.xpl, btn:!!btn, rings, locks }; })()`);   // (v172: the path as nodes, J2 -- it was "Next, ..." and a list of every clubhouse in sentences)
+  const row=e=>e&&(e.dataset.b+':'+e.querySelector('span').textContent+(e.querySelector('em')?' '+e.querySelector('em').textContent:'')+(e.disabled?':off':''));
+  const locks=[...B.querySelectorAll('.clBld.lock')].map(e=>e.dataset.b).join(','), acad=row(B.querySelector('.clBld[data-b="academy"]'));
+  const b0=d.budget; d.budget=1e7; paintBuilding(); const up=row(B.querySelector('.clBld.lit[data-mg="up"][data-b="club"]'));
+  d.budget=100000; paintBuilding(); const short=row(B.querySelector('.clBld.lit')); d.budget=b0; hideBldg();
+  return { up, short, locks, acad }; })()`);   // (v251: the clubhouse's row in THE BUILDINGS -- v172 had its path as nodes, J2, and before that "Next, ..." and a list of every clubhouse in sentences)
 info('the clubhouse: ' + JSON.stringify(r));
-ok(r.nodes.map(n => n.st + ':' + n.t).join(' | ') === 'done:✓SHED | now:CABIN | next:CLUBHOUSE$2M | later:HALL' && /^The clubhouse, \$2,000,000: it brings the youth academy/.test(r.nodes[2].x) && !/put up|build up/.test(r.nodes[2].x)
-   && /^\$[\d.]+[KM]? \/ \$2M$/.test(r.go) && /^The clubhouse costs \$2,000,000; you have \$/.test(r.gox) && r.btn && /academy/.test(r.rings) && r.locks === 'academy',
-  'the clubhouse\'s path: ✓ the shed, the cabin it\'s in, the clubhouse next with its price ($2M), the hall; tapped, what the next BRINGS ("' + r.nodes[2].x.slice(0, 60) + '..."), your money against its price and MOVE IN, and the academy it opens ringed on the campus (locked till then)');
+ok(r.up === 'club:CLUBHOUSE · MOVE IN $2M' && r.short === 'club:CLUBHOUSE · MOVE IN $2M:off' && r.locks === 'academy' && r.acad === 'academy:ACADEMY · NOT BUILT',
+  'the clubhouse\'s row at the cabin: CLUBHOUSE · MOVE IN and the next one\'s price ($2M), not to be tapped while it\'s more than you have; the academy, waiting for the clubhouse, NOT BUILT and locked');
 
 // --- WHAT'S WAITING ON YOU -----------------------------------------------------------------------------------------------------------
 r = await K(`(()=>{ const d=CAREER.data, R=d.roster, S=d.season, c=mgAiClubs(d).find(k=>k.tier===d.tier), xi=mgStarters(d);

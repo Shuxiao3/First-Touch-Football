@@ -357,30 +357,35 @@ for(const [w, h] of SIZES){
       await page.evaluate(n0 => { const M = window.__MG, d = M.d; d.lineup = null; d.roster.splice(n0); M.mgSave(d); M.renderHub(); }, n0);
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   }
-  { // THE CLUBHOUSE ON ONE SCREEN (v172: the handoff's J2) -- its Club tab at every size: no pages and nothing off the
-    // screen; who you are (the crest, the name, the league and the place, the season), BANK, FANS, the week's net and
-    // MORALE, five form dots and the next game, the six buildings with their levels as pips, the clubhouse's four as
-    // nodes with your money against the next and MOVE IN, three career numbers, a chip a season, the seven records --
-    // no words longer than a label, and every figure a tap from its sentence
+  { // THE CLUBHOUSE'S CLUB AS ITS TEMPLATE (v251; v172 had it on one screen in two columns) -- at every size: three
+    // boxes of four columns, the page's height, no frame round them, no pages, nothing off the screen and no words cut;
+    // THE CLUB NOW (Bank, Fans, a week, Morale) and HISTORY (Seasons, Promotions, Titles, Now) as rows of 24 with their
+    // marks; THE BUILDINGS as six rows of 36 you tap, the clubhouse first, lit, MOVE IN and its price at the shed, the
+    // hall and nothing to buy once it's the best; RECORDS as seven rows; every row of figures a tap from its sentence
     const lv0 = await page.evaluate(() => { const d = __MG.d, v = d.lv.club; d.lv.club = 1; __MG.mgSave(d); return v; });   // (at the shed: the hall's after, as an earlier scene left it)
     await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Club")'); await page.waitForTimeout(150);
     const club = () => page.evaluate(() => { const B = document.getElementById('bpBody'), br = B.getBoundingClientRect(), q = s => [...B.querySelectorAll(s)];
-      const out = q('.clGrid *').filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && (r.bottom > br.bottom + 1 || r.right > br.right + 1 || r.top < br.top - 1 || r.left < br.left - 1); }).map(e => e.className).slice(0, 3);
-      const long = q('.clGrid *').filter(e => !e.children.length && !e.closest('.clName') && e.textContent.trim().length > 24).map(e => e.textContent.trim());
-      return { paged: !!B.querySelector('.fitPager'), out, long, id: !!B.querySelector('.clId .clCrest[src]') && !!B.querySelector('.clName') && q('.clId .clChip').length === 2 && !!B.querySelector('.clWk'),
-        tiles: q('.clTile .clLbl').map(e => e.textContent).join(' '), dots: q('.clDots i').length, next: !!B.querySelector('.clNext'),
-        campus: q('.clCampus .clB').map(e => e.dataset.b + ':' + e.querySelectorAll('.clPips i').length).join(' '), nodes: q('.clNode').map(e => e.className.replace('clNode ', '')).join(' '),
-        go: !!B.querySelector('.clGo .pBar') && !!B.querySelector('.clGo [data-mg="up"][data-b="club"]'), best: (B.querySelector('.clGo') || {}).textContent, nums: q('.clNum .clLbl').map(e => e.textContent).join(' '), chips: q('.clS').length, recs: q('.clRec').length,
-        noTap: q('.clTile, .clDots, .clNext, .clNode, .clNum, .clS, .clRec, .clChip, .clWk, .clHave').filter(e => !e.dataset.xpl).map(e => e.className) }; });
+      const out = q('.clTpl *').filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && (r.bottom > br.bottom + 1 || r.right > br.right + 1 || r.top < br.top - 1 || r.left < br.left - 1); }).map(e => e.className).slice(0, 3);
+      const cut = q('.clKv .clLbl, .clBld span').filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.textContent);
+      const pr = document.createElement('i'); pr.style.cssText = 'position:fixed;left:0;top:0;height:1px;width:var(--tplC)'; document.body.appendChild(pr); const cw = pr.getBoundingClientRect().width; pr.remove();
+      const boxes = q('.clTpl > .tplBox'), bw = boxes.map(x => x.getBoundingClientRect().width), bh = boxes.map(x => x.getBoundingClientRect().height);
+      return { paged: !!document.querySelector('#bldgPanel .fitPager'), out, cut, n: boxes.length, four: bw.every(v => Math.abs(v - (4 * cw + 24)) <= 2), tall: bh.every(v => Math.abs(v - br.height) <= 1), frame: getComputedStyle(B).boxShadow,
+        wells: q('.clTpl .tplWell').map(e => e.textContent).join(' | '), rows: q('.clKv:not(.clRk)').map(e => e.querySelector('.clLbl').textContent + (e.querySelector('.hic svg') ? '*' : '')).join(' / '),
+        h24: q('.clKv').every(e => Math.round(e.getBoundingClientRect().height) === 24),
+        bld: q('.clBld').map(e => e.dataset.b + ':' + e.querySelector('span').textContent + (e.matches('.lit') ? ' lit' : '') + (e.querySelector('.hic svg') ? '*' : '') + ':' + Math.round(e.getBoundingClientRect().height)),
+        up: !!B.querySelector('.clBld.lit[data-mg="up"][data-b="club"]'), price: (B.querySelector('.clBld.lit .clPrice') || {}).textContent, goto: q('.clBld[data-mg="goto"]').map(e => e.dataset.b).join(' '),
+        recs: q('.clRk .clLbl').map(e => e.textContent).join(' / '), noTap: q('.clKv, .clBld.best').filter(e => !e.dataset.xpl).map(e => e.textContent) }; });
     const c = await club();
     await page.evaluate(lv => { const d = __MG.d; d.lv.club = lv; __MG.mgSave(d); }, lv0); await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(80); await page.tap('#bpTabs .bpTab:text-is("Club")'); await page.waitForTimeout(150);
     const c4 = await club();
-    if(w === 844 && h === 390) info('the Clubhouse: ' + JSON.stringify(c) + ' / at clubhouse ' + lv0 + ': ' + JSON.stringify({ nodes: c4.nodes, go: c4.go, best: c4.best, paged: c4.paged, out: c4.out }));
-    ok(!c.paged && !c.out.length && c.id && c.tiles === 'BANK FANS PRE/WK MORALE' && c.dots === 5 && c.next && c.campus === 'club:4 train:4 stadium:5 physio:4 scouting:3 academy:3'
-       && c.nodes === 'now next later later' && c.go && c.nums === 'SEASONS PROMOTIONS TITLES' && c.chips === 1 && c.recs === 7 && !c.long.length && !c.noTap.length
-       && lv0 === 4 && c4.nodes === 'done done done now' && !c4.go && c4.best === 'THE BEST THERE IS' && !c4.paged && !c4.out.length,
-      w + 'x' + h + ': the Clubhouse on one screen, no pages and nothing off it -- who you are, the money, the fans, the week\'s net, the dressing room, the form and the next game, the six buildings and their levels, the clubhouse\'s path and MOVE IN, your career, a chip a season, the seven records; nothing longer than a label, every figure a tap from its sentence; in the hall, every clubhouse done and THE BEST THERE IS'
-      + (c.paged || c.out.length || c.long.length || c.noTap.length ? ' -- ' + JSON.stringify({ paged: c.paged, out: c.out, long: c.long, noTap: c.noTap }) : ''));
+    if(w === 844 && h === 390) info('the Clubhouse\'s Club: ' + JSON.stringify(c) + ' / at clubhouse ' + lv0 + ': ' + JSON.stringify({ bld: c4.bld[0], up: c4.up, paged: c4.paged, out: c4.out, cut: c4.cut }));
+    ok(!c.paged && !c.out.length && !c.cut.length && c.n === 3 && c.four && c.tall && c.frame === 'none' && c.wells === 'THE CLUB NOW | HISTORY | THE BUILDINGS | RECORDS'
+       && c.rows === 'Bank* / Fans* / A week, pre-season* / Morale* / Seasons* / Promotions* / Titles* / Now*' && c.h24
+       && c.bld.length === 6 && c.bld[0] === 'club:CLUBHOUSE · MOVE IN lit*:36' && c.bld.slice(1).every(x => /^\w+:[A-Z]+ · (LEVEL \d|NOT BUILT)\*:36$/.test(x)) && c.up && c.price === '$400K' && c.goto === 'train stadium physio scouting academy'
+       && c.recs === 'Most games / Most goals / Youngest / Youngest scorer / Biggest win / Record signing / Record sale' && !c.noTap.length
+       && lv0 === 4 && c4.bld[0] === 'club:CLUBHOUSE · THE HALL*:36' && !c4.up && !c4.paged && !c4.out.length && !c4.cut.length,
+      w + 'x' + h + ': the Clubhouse\'s Club as its template -- three boxes of four columns, the page\'s height, no frame, no pages, nothing off it or cut; the club now and its history as rows of 24 with their marks, the six buildings as rows of 36 you tap (the clubhouse lit, MOVE IN, $400K), the seven records, every row a tap from its sentence; in the hall, THE HALL and nothing to buy'
+      + (c.paged || c.out.length || c.cut.length || c.noTap.length || !c.four || !c.tall ? ' -- ' + JSON.stringify({ paged: c.paged, out: c.out, cut: c.cut, noTap: c.noTap, four: c.four, tall: c.tall }) : ''));
     await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
   if(w === 844 && h === 390){ // THE GROUND FROM ABOVE (v175: the handoff's J4) -- the Stands tab: the pitch and its stands round it, each with
     // its name, the ground's level as pips, its price on a chip and how full it is; the ends only once there are covered
