@@ -502,6 +502,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Decorate as its template (v254).** The trees, the garden and the plaza as cards three across, four columns each,
+  two rows to a page: the thing in a well, its name and how many you have out and in store, and its buttons at the foot,
+  PUT ONE OUT when there's one in store and BUY with its price (dimmed when it's more than you have); the pages at the
+  foot of the page.
 - **The Clubhouse's News, League and Fixtures as their templates (v253).** Each is one box across the page, its head on
   every page and the pages at its foot inside it. News: the season and the week in its well, then a row a story, the
   week small over it, newest first. League: the four divisions a row of choices at the top, the table in rows of 24 with
@@ -3698,6 +3702,9 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v254: Decorate.** mgDecorTab draws a .tplRows.dcBox.tplPage (data-pages DC:) holding .dcGrid, three columns of
+  .decoCard.tplBox cards (.dcPic, .decoTxt, .decoBtns with .tplBtn), each half the page's height less the pager's, so
+  fitBox pages them two rows at a time.
 - **v253: the Clubhouse's News, League and Fixtures.** Each tab is a .tplBox.tplRows.tplPage with its own data-pages
   (NW:, LG:, FX:), so fitBox pages its rows inside the box with the pager at its foot; its head is .fitKeep (on every
   page). .tplSeg is the templates' row of choices (.tplSegB, .lit), data-mg filt with ntier or fxc (a new choice goes

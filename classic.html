@@ -2571,6 +2571,17 @@
     font:600 9px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; }
   #bpBody .fxRun{ flex:none; height:24px; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); cursor:help; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; }
   #bpBody .fxRun .hic{ width:12px; height:12px; color:var(--dim); } #bpBody .fxRun span{ flex:1 1 auto; color:var(--dim); } #bpBody .fxRun b{ flex:none; font-weight:700; }
+  /* (v254) DECORATE AS ITS TEMPLATE: cards three across, four columns each, two rows to a page; the pages at the box's foot */
+  #bpBody .dcBox{ background:none; box-shadow:none; padding:0; }
+  #bpBody .dcGrid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  #bpBody .dcBox .decoCard{ height:calc((min(304px, 100dvh - 60px) - 56px) / 2); min-height:104px; box-sizing:border-box; display:flex; flex-direction:column; align-items:stretch; gap:4px; padding:4px; border-radius:var(--rWin); background:var(--boxBg); box-shadow:var(--pxWin); }
+  #bpBody .dcBox .dcPic{ flex:1 1 auto; min-height:40px; display:flex; align-items:center; justify-content:center; border-radius:var(--rS); background:var(--well); overflow:hidden; }
+  #bpBody .dcBox .dcPic{ position:relative; } #bpBody .dcBox .dcPic img{ position:absolute; left:4px; right:4px; top:4px; bottom:4px; width:calc(100% - 8px); height:calc(100% - 8px); object-fit:contain; image-rendering:pixelated; box-shadow:none; border-radius:0; max-width:none; }
+  #bpBody .dcBox .decoTxt{ flex:none; height:32px; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); }
+  #bpBody .dcBox .decoTxt b{ font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .dcBox .decoTxt i{ flex:none; font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); white-space:nowrap; }
+  #bpBody .dcBox .decoBtns{ flex:none; display:flex; flex-direction:row; gap:4px; } #bpBody .dcBox .decoBtns .tplBtn{ flex:1 1 0; min-width:0; height:32px; min-height:32px; padding:0 6px; }
+  #bpBody .dcBox .decoBtns .tplBtn[disabled]{ opacity:.5; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -22254,12 +22265,17 @@
     for(const strict of [true,false]) for(let r=0;r<520;r+=6){ const n=r?Math.max(8,Math.round(r/2)):1;
       for(let a=0;a<n;a++){ const t=a/n*Math.PI*2, xx=Math.round(x+Math.cos(t)*r), yy=Math.round(y+Math.sin(t)*r*.7); if(decoFree(d,k,xx,yy)&&(!strict||clear(xx,yy))) return [xx,yy]; } }
     return null; }
-  function mgDecorTab(d,t){ const placed={}; for(const e of d.deco||[]) placed[e.k]=(placed[e.k]||0)+1; let h='<div class="decoGrid">';
+  // (v254) DECORATE AS ITS TEMPLATE: cards three across, four columns each, two rows to a page -- the thing in a well,
+  // its name and how many you have out and in store, and its buttons at the foot (PUT ONE OUT, when there's one in store;
+  // BUY and its price, filled); the pages at the foot of the box (v244-v253: cards in a grid as wide as they'd go)
+  function mgDecorTab(d,t){ const placed={}; for(const e of d.deco||[]) placed[e.k]=(placed[e.k]||0)+1;
+    let h='<div class="tplRows dcBox tplPage" data-pages="DC:decor/'+t+'"><div class="dcGrid">';
     for(const [k,name,tab,price] of DECO_SHOP){ if(tab!==t) continue; const D=CAMPUS_META.deco[k], pic=CAMPUS.preview(D,200,96,null,'d:'+k), st=(d.store||{})[k]||0, n=placed[k]||0;
-      h+='<div class="decoCard fitWhole">'+(pic?'<img src="'+pic+'" alt="">':'')+'<div class="decoTxt"><b>'+name+'</b><i>'+[n?n+' out':'',st?st+' in store':''].filter(Boolean).join(' · ')+'</i></div>'
-        +'<div class="decoBtns">'+(st?'<button class="mgBtn" data-mg="dout" data-id="'+k+'">PUT ONE OUT</button>':'')
-        +'<button class="mgBtn" data-mg="dbuy" data-id="'+k+'"'+((d.budget||0)<price?' disabled':'')+'>'+money(price)+'</button></div></div>'; }
-    return h+'</div>'; }
+      h+='<div class="decoCard tplBox fitWhole"><div class="dcPic">'+(pic?'<img src="'+pic+'" alt="">':'')+'</div>'
+        +'<div class="decoTxt"><b>'+name+'</b><i>'+([n?n+' out':'',st?st+' in store':''].filter(Boolean).join(' · ')||'none yet')+'</i></div>'
+        +'<div class="decoBtns">'+(st?'<button class="tplBtn" data-mg="dout" data-id="'+k+'">PUT ONE OUT</button>':'')
+        +'<button class="tplBtn pri" data-mg="dbuy" data-id="'+k+'"'+((d.budget||0)<price?' disabled':'')+'><i class="hic" data-ic="price"></i>'+kPrice(price)+'</button></div></div>'; }
+    return h+'</div></div>'; }
   function mgDecorLocked(d){ return '<div class="bpBuild fitWhole"><div class="bpBuildTxt"><div class="bpSect">COMES WITH CLUBHOUSE '+DECOR_CL+'</div>'
       +'<div class="stadWhat" data-xpl="'+xq('Trees, flowers, lamps, benches and the rest, bought one at a time and put wherever you like on the campus. They come with '+CLUB_LV[DECOR_CL].n.toLowerCase()+' (clubhouse '+DECOR_CL+').')+'">Trees, flowers, lamps and benches</div></div></div>'   // (v244: a label, its sentence a tap away -- J1: it's a Clubhouse tab now)
       +'<button class="mgBtn bpPin" data-mg="goclub">◀ THE CLUBHOUSE</button>'; }
