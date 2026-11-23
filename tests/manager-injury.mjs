@@ -170,6 +170,7 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(120);
 const row = await page.$$eval('#bpBody .mgRow .plSt.inj', ns => ns.map(n => n.textContent));   // (v171: OUT 2W by his name)
 const hn = await K('HURTNAME'); await page.click(`#bpBody .mgRow:has-text("${hn}")`); await page.waitForTimeout(120);
+await page.click('#bpBody .sqMan'); await page.waitForTimeout(100);   // (v252: him in short first -- his well, a tap, his card)
 const card = await page.innerText('#bpBody .mgCard').catch(() => '');
 info('marked: ' + JSON.stringify({ warn, tok, sel, row, card: card.split('\n').find(l => /INJURED/.test(l)) }));
 ok(/✚/.test(warn) && /in your nine/.test(warn) && tok >= 1 && sel === 1 && row.length === 1 && /^OUT 2W$/.test(row[0]) && /INJURED · a strain · 2 weeks/.test(card),

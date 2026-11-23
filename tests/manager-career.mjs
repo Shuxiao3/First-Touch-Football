@@ -396,11 +396,11 @@ const tac = await page.evaluate(() => { const d = __MG.d, l = __MG.ensureLineup(
   pitch: document.querySelectorAll('#bpBody .tpitch .ptk').length, match: __MG.careerLineupYours(d).squad.length }; });
 await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(80);
-const sqSum = await page.textContent('#bpBody .mgSum'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
+const sqSum = await page.textContent('#bpBody .sqHead'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);   // (v252: the squad's count in its box's well)
 await page.evaluate(() => { const d = __MG.d, k = JSON.parse(window.__keepSel); d.roster = k.roster; d.lineup = k.lineup; __MG.mgSave(d); __MG.renderHub(); });
 info('selection: ' + JSON.stringify({ r, lay, m: [m1, m2, m3, m4, m5], tac, sqSum }));
 const sw = (A, B, x, y) => A.atk[A.atk.indexOf(x)] === x && B.atk[A.atk.indexOf(x)] === y && B.def[A.def.indexOf(x)] === y && B.bench[A.bench.indexOf(y)] === x;
-ok(r.n === 21 && r.max === 21 && /21 PLAYERS of 21/.test(sqSum) && r.firstSub === 'GK',   // (v171: the count over the list -- "most 21, fewest 14" a tap on it)
+ok(r.n === 21 && r.max === 21 && /21 PLAYERS OF 21/.test(sqSum) && r.firstSub === 'GK',   // (v171: the count over the list -- "most 21, fewest 14" a tap on it)
   'a squad is twenty-one at most (the clubhouse says so: "' + sqSum.split(' · ')[0] + '"); picked afresh, the next keeper is first on the bench');
 ok(String(lay.cols) === 'xi 0 1 2 3 4 5 6 7 8,bench 9 10 11 12 13,rest 14 15 16 17 18 19 20' && !lay.imgs && lay.top === 'GK',
   'the Selection tab: the twenty-one in one list, top to bottom -- the keeper on top, the eight, the bench\'s five, the seven not taken -- in three columns, no faces');

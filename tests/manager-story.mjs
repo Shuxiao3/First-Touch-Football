@@ -142,15 +142,15 @@ for(const [w, h] of [[640, 360], [844, 340]]){
   await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(200);
   await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
   await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), kid); await page.waitForTimeout(150);
-  await page.click('.mgPaneR .mgSides [data-mside="rate"]'); await page.waitForTimeout(80);   // (the side it was left on: back to his ratings)
-  // HIS CARD'S SIDES (v116): a tab each along its foot -- in the Squad tab ◀ TEAM first -- the one showing lit
+  await page.click('.mgPaneR .sqMan'); await page.waitForTimeout(80);   // (v252: him in short first -- his well, a tap, his card's ratings)
+  // HIS CARD'S SIDES (v116): a tab each along its foot -- in the Squad tab ◀ first (v252: back to him in short; ◀ TEAM before) -- the one showing lit
   const tabsOf = () => page.evaluate(() => { const P = document.querySelector('.mgPaneR .mgPaneScroll'), S = P.querySelector('.mgSides'), b = S ? [...S.querySelectorAll('button')] : [];
-    return { tabs: b.map(n => n.textContent.trim() + (n.classList.contains('on') ? '*' : '')), foot: !!S && Math.abs(S.getBoundingClientRect().bottom - (P.getBoundingClientRect().bottom - parseFloat(getComputedStyle(P).paddingBottom))) <= 1,
+    return { tabs: b.map(n => (n.querySelector('.hic[data-ic="back"]') ? '◀' : '') + n.textContent.trim() + (n.classList.contains('on') ? '*' : '')), foot: !!S && Math.abs(S.getBoundingClientRect().bottom - (P.getBoundingClientRect().bottom - parseFloat(getComputedStyle(P).paddingBottom))) <= 1,
       h: b.length ? Math.round(Math.min(...b.map(n => n.getBoundingClientRect().height))) : 0 }; });
   const T0 = await tabsOf(), flips = [];
   for(const k of ['rate', 'deal', 'career', 'mind']){ await page.click(`.mgPaneR .mgSides [data-mside="${k}"]`); await page.waitForTimeout(100); flips.push(await page.$eval('.mgPaneR .mgCard', c => c.dataset.side)); }
   info(w + 'x' + h + ' his card\'s tabs: ' + JSON.stringify({ T0, flips }));
-  ok(T0.tabs.join('|') === '◀ TEAM|RATINGS*|DEAL|CAREER|PERSONALITY' && T0.foot && T0.h >= 28 && flips.join() === 'rate,deal,career,mind',
+  ok(T0.tabs.join('|') === '◀|RATINGS*|DEAL|CAREER|PERSONALITY' && T0.foot && T0.h >= 28 && flips.join() === 'rate,deal,career,mind',
     w + 'x' + h + ': his card\'s sides a tab each along its foot (' + T0.tabs.join(' ') + ', ' + T0.h + ' px tall), each a tap away');
   await page.click('.mgPaneR .mgSides [data-mside="career"]'); await page.waitForTimeout(100);
   // ...and one more: HIS PERSONALITY (v116) -- his mood, his character in words two to a line, his traits as they've come out

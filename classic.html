@@ -2496,6 +2496,42 @@
   #bpBody .clTpl .clBld.lock{ opacity:.55; } #bpBody .clTpl .clBld .clLk{ width:12px; height:12px; }
   @media (max-width:700px){ #bpBody .clTpl .clBld{ padding:0 8px; gap:6px; letter-spacing:.03em; } }
   @media (max-height:350px){ #bpBody .clTpl .clBox{ gap:3px; } #bpBody .clTpl .tplWell.clGap{ margin-top:0; } }   /* (a short screen, Safari's bar showing: the club now and its history, ten rows, still in the box) */
+  /* (v252) A LIST AND ITS MAN AS THE TEMPLATE'S TWO BOXES (the squad's first): the list seven columns wide, its man five;
+     the list's well, its columns' heads, then rows of 28 two apart, the one picked lit; the man in short -- a well 48
+     high, rows of 24, SELL and NEW DEAL at the foot -- or his card, or the little pitch */
+  #bpBody .tplPanes{ display:grid; grid-template-columns:calc(var(--tplC) * 7 + 48px) calc(var(--tplC) * 5 + 32px); gap:8px; height:100%; min-height:0; }
+  @media (max-width:700px){ #bpBody .tplPanes:has(> .mgPaneR .mgCard[data-side]:not(.sqSum)){ grid-template-columns:calc(var(--tplC) * 6 + 40px) calc(var(--tplC) * 6 + 40px); } }   /* (a narrow phone, his card open: six and six, room for all of it) */
+  #bpBody .tplPanes > .mgPane{ position:relative; min-width:0; min-height:0; display:flex; flex-direction:column; gap:4px; overflow:hidden; box-shadow:var(--pxWin); }
+  #bpBody .tplPanes .tplWell{ flex:none; }
+  #bpBody .tplPanes .sqHead{ gap:8px; font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--acc); }
+  #bpBody .tplPanes .sqHead .plN{ font:inherit; color:inherit; } #bpBody .tplPanes .sqHead .sqBill{ color:var(--dim); }
+  #bpBody .tplPanes .tplBadge{ margin-left:auto; padding:3px 6px; border-radius:3px; background:var(--bad); color:#fff; font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; }
+  #bpBody .tplPanes .plCols{ flex:none; height:16px; padding:0 8px 0 11px; font:600 9px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .tplPanes .mgPaneL .mgPaneScroll.plPane{ padding:0 0 22px; }
+  #bpBody .tplPanes .plList{ gap:2px; }
+  #bpBody .tplPanes .mgRow.pl{ height:28px; padding:0 8px 0 11px; background:var(--win); box-shadow:none; border-radius:var(--rS); }
+  #bpBody .tplPanes .mgRow.pl.on{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .tplPanes .plFade{ left:4px; right:4px; bottom:4px; }
+  #bpBody .tplPanes .mgPaneR .mgPaneScroll{ padding:0; display:flex; flex-direction:column; }
+  #bpBody .tplPanes .mgPaneR .mgPaneScroll:has(> .mgCard:not(.sqSum)){ padding:4px 6px; }   /* (his card: a little in from the box's rim) */
+  #bpBody .tplPanes .sqPitchW{ padding:8px 8px 4px; }
+  #bpBody .sqSum{ flex:1 1 auto; display:flex; flex-direction:column; gap:4px; min-height:0; }
+  #bpBody .sqSum .sqMan{ flex:none; height:48px; box-sizing:border-box; display:flex; align-items:center; gap:8px; padding:0 8px 0 4px; border:0; border-radius:var(--rS); background:var(--well); color:var(--ink); text-align:left; cursor:pointer; }
+  #bpBody .sqSum .sqMan .cardBody{ width:26px; height:40px; padding:0; background:none; box-shadow:none; }
+  #bpBody .sqSum .sqWho{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  #bpBody .sqSum .sqWho b{ font:700 13px/1.1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .sqSum .sqWho i{ font:600 10px/1.2 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .sqSum .sqMan > .hic{ width:14px; height:14px; color:var(--dim); }
+  #bpBody .sqSum .sqKv{ flex:none; height:24px; box-sizing:border-box; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); cursor:help; }
+  #bpBody .sqSum .sqKv .hic{ width:12px; height:12px; color:var(--dim); }
+  #bpBody .sqSum .sqKv span{ flex:1 1 auto; min-width:0; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .sqSum .sqKv b{ flex:none; font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; }
+  #bpBody .sqSum .sqKv b .trend{ font-size:9px; margin-left:3px; }
+  #bpBody .sqSum .sqFoot{ margin-top:auto; flex:none; display:grid; grid-template-columns:2fr 3fr; gap:8px; }
+  .tplBtn{ height:36px; min-height:36px; margin:0; padding:0 10px; display:flex; align-items:center; justify-content:center; gap:6px; border:0; border-radius:var(--r); cursor:pointer;
+    background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; }
+  .tplBtn .hic{ width:14px; height:14px; } .tplBtn.pri{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #bpBody .tplPanes .mgSideT.back .hic{ width:14px; height:14px; } #bpBody .tplPanes .mgSideT.back{ flex:0 0 40px; display:flex; align-items:center; justify-content:center; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -22275,7 +22311,8 @@
     :'<div class="mgFacts">'+mgFact('SCOUTING','no scouts’ house','var(--dim)',true)+'</div>';
   // ctx: 'sale' on the market's Selling list (his deal side is selling him), else his contract; 'squad' in the clubhouse's
   // Squad tab (◀ TEAM in its tabs: back to the little pitch)
-  function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return ''; const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p), pop=popOf(d,p,f.club);
+  function mgCard(d,pid,ctx){ const f=mgFind(d,pid); if(!f) return ''; if(mgSide==='sum'&&!(ctx==='squad'&&f.mine)) mgSide='rate'; if(mgSide==='sum') return sqSum(d,f.p);   // (v252: the squad's man in short)
+    const p=f.p, known=f.mine||f.youth||mgKnown(d,p), sty=styleOf(p), pop=popOf(d,p,f.club);
     const abroad=!!(f.club&&f.club.euro), where=f.mine?'':f.youth?'Your academy':f.free?'Free agent':f.club.name+' · '+(abroad?'abroad':MG_LEAGUE[f.club.tier]), wont=!f.mine&&!f.youth&&!abroad&&!!mgWontCome(d,p);   // (v198: a club from abroad's man -- a star, say -- isn't in a league here, nor on the market)
     const kit=f.mine||f.youth?careerKit(d):f.club?f.club.home:null;
     let h='<div class="mgCard" data-side="'+mgSide+'"><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
@@ -22298,7 +22335,7 @@
       +'<div class="mgAct"><button class="mgBtn go" data-mg="promote" data-pid="'+p.id+'">PROMOTE</button><button class="mgBtn warn" data-mg="ryouth" data-pid="'+p.id+'">RELEASE</button></div>';
     else if(f.free) h+=mgFreeActions(d,p,known);
     else h+=mgBuyActions(d,p,f.club,known);
-    return h+mgSideTabs(ctx==='squad'?'<button class="mgSideT back" data-mg="sel" data-pid="'+p.id+'">◀ TEAM</button>':'')+'</div>'; }
+    return h+mgSideTabs(ctx==='squad'&&f.mine?'<button class="mgSideT back" data-mg="sqback" aria-label="back"><i class="hic" data-ic="back"></i></button>':'')+'</div>'; }   // (v252: ◀, back to him in short -- v171-v251 ◀ TEAM, back to the little pitch)
   // HIS CONTRACT (the squad): what he earns and is worth, how long he's signed for; a new deal; letting him go
   function mgContractActions(d,p){ if(p.loan) return '<div class="mgFacts">'+mgFact('WAGE',money(p.wage)+'/wk')+mgFact('ON LOAN','from '+mgEsc(mgNameOf(d,p.loan.from)),'var(--warn)')+mgFact('BACK','at the season’s end','',true)+'</div>';   // (his club's contract, not yours)
     const left=mgLeft(d,p), ends=p.until<=d.season;
@@ -22370,19 +22407,48 @@
   function mgSquadPitch(d){ const lu=ensureLineup(d), slots=careerSlots(d.formation,'atk',d.width.atk);
     let h='<div class="sqPitchW"><div class="tpitch sqPitch tvP"><div class="tvF">'+tbMen(d, lu.gk, lu.atk, slots, 'atk')+'</div>';   // (v226: upright, as the tactics')
     return h+'</div><div class="sqPitchHint" data-xpl="Hold a man in the list and drop him on a spot to put him there.">'+d.formation+' WITH THE BALL</div></div>'; }   // (v177: J1 -- the how a tap away)
-  // THE SQUAD (v171, J3): every man on one list that scrolls, keepers, defenders, midfielders and forwards in turn and
-  // the best first in each -- his line on his chip, no headings -- under a head that stays: how many (every row), the
-  // wage bill, and the deals running out as a badge
+  // THE CLUBHOUSE'S SQUAD (v252: its template, the list and its man). On the left a box seven columns wide: how many and
+  // the wage bill in its well, the deals ending a badge on it; the columns' heads; every man a row of 28 you tap, keepers,
+  // defenders, midfielders and forwards in turn and the best first in each, the one picked lit, eight on the screen and the
+  // rest a swipe away (v171: the list scrolls, J3). On the right, five columns: nobody picked, the lineup on its small
+  // pitch (a man held in the list and dropped on a spot goes there); a man picked, what he is in short -- his figure, name
+  // and what he plays in a well (a tap, his card), his rating, mood, fitness, wage and deal as rows, SELL and NEW DEAL at
+  // its foot. His card's four sides are a tap from it, and its first tab is ◀, back to him in short. (v171-v251: two
+  // panes, the list's head over it as it scrolled, his card at once.)
   function mgSquadTab(d){ const R=d.roster, lu=ensureLineup(d), f=computeFinance(d), S=d.season, ending=R.filter(p=>(p.until||0)<=S).length;
     const xi=new Set([lu.gk,...lu.atk].map(i=>R[i]).filter(Boolean)), subs=new Set(lu.bench.slice(0,BENCH_N).map(i=>R[i]).filter(Boolean));
     const L=['GK','DEF','MID','ATT'].flatMap(role=>R.filter(p=>p.role===role).sort((a,b)=>b.ovr-a.ovr));
-    const top='<div class="mgSum plSum"><span data-xpl="A squad is '+MG_MAX+' at most and '+MG_MIN+' at least.">'+plCount(L.length)+' <i>of '+MG_MAX+'</i></span> · '+money(f.wageWk)+'/WK'+(ending?' · '+plSt(ending+' DEAL'+(ending>1?'S END':' ENDS'),'bad'):'')+'</div>';
+    const head='<div class="tplWell sqHead"><span class="sqN" data-xpl="A squad is '+MG_MAX+' at most and '+MG_MIN+' at least.">'+plCount(L.length)+' OF '+MG_MAX+'</span>'
+      +'<span class="sqBill" data-xpl="'+xq('The wage bill: '+money(f.wageWk)+' a week.')+'">'+money(f.wageWk)+'/WK</span>'
+      +(ending?'<b class="tplBadge" data-xpl="'+xq(ending+(ending>1?' deals end':' deal ends')+' this season: a new deal on his card, or he goes for nothing in the summer.')+'">'+ending+' DEAL'+(ending>1?'S END':' ENDS')+'</b>':'')+'</div>'
+      +'<div class="plCols"><span class="pc">POS</span><span class="nm">NAME</span><span class="ovr">OVR</span><span class="mor">MOOD</span><span class="fit">FIT</span><span class="amt">WAGE</span></div>';
     let h='';
     for(const p of L){ const bid=(d.offers||[]).some(o=>o.pid===p.id);
       const tags=((p.until||0)<=S?plSt('DEAL ENDS','bad'):'')+(p.cAsk?plSt('NEW DEAL'):'')+(p.wantsOut?plSt('UNSETTLED','bad'):'')+(p.bb?plSt('BUYBACK'):'')+(bid?plSt('WANTED','ok'):'');
       h+=mgRow(d,p,{ovr:String(ovrShownOf(p)), trend:true, right:money(p.wage), tags, sel:MGUI.sel===p.id, edge:xi.has(p)?'xi':subs.has(p)?'sub':p.loan?'loan':d.listed[p.id]?'listed':''}); }
     const sel=MGUI.sel&&R.some(p=>p.id===MGUI.sel);
-    return mgPanes(plHead(top,'WAGE')+'<div class="sqList plList">'+h+'</div>', sel?mgCard(d,MGUI.sel,'squad'):'', '', sel?'':mgSquadPitch(d)); }   // (◀ TEAM, back to the little pitch, first in his card's tabs)
+    return mgTplPanes(head,'<div class="sqList plList">'+h+'</div>',sel?mgCard(d,MGUI.sel,'squad'):mgSquadPitch(d)); }
+  // (v252) A LIST AND ITS MAN AS THE TEMPLATE'S TWO BOXES: the list's head (its well, its filters, its columns) over the
+  // rows, which scroll in the box, N MORE at its foot; the man on the right, in a box of his own
+  function mgTplPanes(head,list,right){ const k=(curBldg||'')+'/'+((curBldg&&curTab[curBldg])||'');
+    return '<div class="mgPanes tplPanes tplPage"><div class="mgPane mgPaneL tplBox">'+head+'<div class="mgPaneScroll plPane" data-pl="L:'+k+'">'+list+'</div><div class="plFade end"><b class="plMore"></b></div></div>'
+      +'<div class="mgPane mgPaneR tplBox"><div class="mgPaneScroll">'+(right||'<div class="mgPick0">Tap a player to see him here.</div>')+'</div></div></div>'; }
+  // (v252) ONE OF YOUR MEN IN SHORT, the squad's man picked: his figure, name and what he plays in a well (a tap: his card,
+  // its RATINGS side), his rating, mood, fitness, wage and deal as rows, each a tap from its sentence; SELL (to the
+  // transfer market's Selling, him picked) and NEW DEAL (his card's DEAL side) at its foot
+  function sqSum(d,p){ const kit=careerKit(d), sty=styleOf(p), m=p.mor??MOR0, c=condOf(p), left=mgLeft(d,p), ends=(p.until||0)<=d.season, pot=potTxt(d,p,{mine:true},true);
+    const kv=(ic,l,v,x,col)=>'<div class="sqKv" data-xpl="'+xq(x)+'"><i class="hic" data-ic="'+ic+'"></i><span>'+l+'</span><b'+(col?' style="color:'+col+'"':'')+'>'+v+'</b></div>';
+    const deal=p.loan?'on loan':ends?'ends this season':'to season '+p.until, dealX=p.loan?'On loan from '+mgNameOf(d,p.loan.from)+', back at the season’s end.':ends?'His deal ends this season: a new deal, or he goes for nothing in the summer.':'Signed to season '+p.until+' ('+left+' season'+(left>1?'s':'')+').';
+    return '<div class="mgCard sqSum" data-side="sum"><button class="sqMan" data-mside="rate">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
+      +'<span class="sqWho"><b class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+(d.cap===p.id?' (C)':d.vice===p.id?' (VC)':'')+'</b><i>'+natPos(p)+(sty?' · '+mgEsc(sty.name):'')+' · '+p.age+'</i></span><i class="hic" data-ic="next"></i></button>'
+      +kv('star','Rating',ovrShownOf(p)+trendHtml(p),'Rated '+ovrShownOf(p)+(pot&&pot!=='?'?'; he could be '+pot+'.':'.'))
+      +kv('morale','Mood',m.toFixed(1),'His mood, 1 to 10: '+morWord(m).toLowerCase()+' ('+m.toFixed(1)+').',morCol(m))
+      +(p.inj?kv('injury','Fitness','OUT '+injShort(p.inj.d).toUpperCase(),'Injured: '+INJ_NAME[p.inj.k]+', '+injWeeks(p.inj.d)+'.','var(--bad)')
+        :kv('fitness','Fitness',Math.round(c*100)+'%','Fitness: '+Math.round(c*100)+'%.',c>=0.9?'var(--good)':c>=0.75?'var(--warn)':'var(--bad)'))
+      +kv('wage','Wage',money(p.wage)+'/wk','His wage: '+money(p.wage)+' a week; he’s worth '+money(mgValue(d,p))+'.')
+      +kv('contract','Deal',deal,dealX,ends&&!p.loan?'var(--warn)':'')
+      +'<div class="sqFoot"><button class="tplBtn" data-mg="sqsell" data-pid="'+p.id+'"><i class="hic" data-ic="price"></i>SELL</button>'
+      +'<button class="tplBtn pri" data-mside="deal"><i class="hic" data-ic="contract"></i>NEW DEAL</button></div></div>'; }
   function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d), F=mgForm(d,5);   // (v177: J1 -- the form as dots, what they are a tap away)
     let h='<div class="mgSum">'+MG_LEAGUE[d.tier].toUpperCase()+' · S'+d.season+' · <span data-xpl="'+xq(F.length?'The last '+F.length+' league results, the latest last: '+F.join(' ')+'.':'Form: none yet, no games.')+'">FORM <span class="clDots">'+[0,1,2,3,4].map(i=>'<i'+(F[i]?' class="'+F[i]+'"':'')+'></i>').join('')+'</span></span></div>'+mgCupsSum(d)+'<div class="mgList">';
     const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
@@ -23041,7 +23107,7 @@
       case 'papers': pileShow(d,true); return;
       case 'rvnext': case 'rvback': { const st=FITPG['B:review/']||(FITPG['B:review/']={p:0}); st.p=Math.max(0,st.p+(a==='rvnext'?1:-1)); fitNow(); rvFoot(); return; }   // (v242)
       case 'newseason': mgNewSeason(d); hideBldg(); mgSave(d); renderHub(); showNote('Season '+d.season+' in '+lgThe(d.tier)+': pre-season, and the window is open.','var(--good)'); return;
-      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; break;
+      case 'sel': MGUI.sel=(MGUI.sel===pid?null:pid); MGUI.bid=null; MGUI.deal=null; MGUI.list=null; MGUI.years=2; if(MGUI.sel&&curBldg==='club'&&curTab.club==='Squad') mgSide='sum'; break;   // (v252: the squad's man, in short)
       case 'talkcard': { const p=d.roster.find(x=>x.id===pid); if(!p) break; if(talkedThisWeek(d,p)){ say(TALK_AGAIN); break; }   // (v152: A WORD WITH HIM, from his card)
         const m0=p.mor??MOR0, L=mgTalk(d,p), up=Math.round(((p.mor??MOR0)-m0)*10)/10; MGUI.talk={pid, w:d.weeks||0, L:L.concat(up>0?['mood +'+up.toFixed(1)]:[])}; mgSave(d); break; }
       case 'bidset': { const f=mgFind(d,pid); if(!f||!f.club) break; const ask=mgAsk(d,f.p,f.club), want=ds.v!=null?+ds.v:mgRound(ask*(+ds.k));   // (v151: a quick figure, or one typed)
@@ -23098,6 +23164,11 @@
       case 'up': { const id=ds.b, was=lvOf(d,id), err=bldUp(d,id);
         say(err||(id==='club'?'You’ve moved into '+CLUB_LV[lvOf(d,'club')].n.toLowerCase()+'.':was?BLD_NAME[id].charAt(0).toUpperCase()+BLD_NAME[id].slice(1)+' is at level '+lvOf(d,id)+'.':BLD_NAME[id].charAt(0).toUpperCase()+BLD_NAME[id].slice(1)+(id==='market'?': you’re on it.':' is open.')),err?'var(--bad)':'var(--good)');
         if(!err&&!was&&BLD_LV[id]&&MG_BLDGS[id].tabs) curTab[id]=MG_BLDGS[id].tabs[0]; break; }
+      case 'sqsell': { const p=d.roster.find(x=>x.id===pid); if(!p) break;   // (v252: the squad's SELL -- to the market's Selling, him picked)
+        const why=p.hometown?HOME_MSG:p.loan?'He’s on loan: he isn’t yours to sell.':!lvOf(d,'market')?'No selling yet: your phone rings on the first day of pre-season.':null;
+        if(why){ say(why,'var(--warn)'); break; }
+        curTab.market='Selling'; MGUI.sel=p.id; mgSide='rate'; openBuilding('market'); return; }
+      case 'sqback': mgSide='sum'; break;   // (v252: his card's ◀, back to him in short)
       case 'goclub': openBuilding('club'); return;
       case 'goto': if(MG_BLDGS[ds.b]) openBuilding(ds.b); return;   // (v172: a tile on the Clubhouse's campus strip)
       case 'dbuy': case 'dout': { const err=placeStart(d,ds.id,a==='dbuy'); if(err) say(err,'var(--bad)'); else return; break; }

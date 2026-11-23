@@ -89,6 +89,7 @@ await K(`(()=>{ const d=CAREER.data; mgSave(d); renderHub(); return 1; })()`);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(120);
 const nm = await K(`CAREER.data.roster.find(p=>p.rn>0&&p.role!=='GK').name`);
 await page.click(`#bpBody .mgRow:has-text("${nm}")`); await page.waitForTimeout(150);
+await page.click('#bpBody .sqMan'); await page.waitForTimeout(100);   // (v252: him in short first -- his well, a tap, his card)
 const card = await page.innerText('#bpBody .mgCard').catch(() => '');
 info('his card: ' + card.split('\n').filter(l => /GAMES|ASSISTS|RATING|CLEAN|\d/.test(l)).slice(-8).join(' | '));
 ok(/GAMES · GOALS\s*\d+ · \d+/.test(card) && /ASSISTS( · CS)?\s*\d+/.test(card) && /RATING · FORM/.test(card) && /\d\.\d · \d\.\d/.test(card), 'his card: this season\'s games, goals and assists, his average rating and his form');

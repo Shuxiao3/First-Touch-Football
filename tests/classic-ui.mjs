@@ -318,7 +318,7 @@ for(const [w, h] of SIZES){
     const look = sel => page.evaluate(sel => { const b = document.querySelector(sel), br = b.getBoundingClientRect(), t = b.querySelector('.plTop'), top = t ? t.getBoundingClientRect().bottom : br.top;
       const rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length), seen = rows.filter(r => { const q = r.getBoundingClientRect(); return q.top >= top - 1 && q.bottom <= br.bottom + 1; }).map(r => r.dataset.pid);
       const fade = b.parentElement.querySelector(':scope > .plFade'), f = b.querySelector('.mkFilters'), fr = f && f.getBoundingClientRect(), c = b.querySelector('.plCols'), cr = c && c.getBoundingClientRect();
-      return { pager: !!b.parentElement.querySelector('.fitPager, [data-pages]'), rows: rows.length, seen, n: +((b.querySelector('.plN') || {}).textContent), last: rows.length ? seen.includes(rows[rows.length - 1].dataset.pid) : true,
+      return { pager: !!b.parentElement.querySelector('.fitPager, [data-pages]'), rows: rows.length, seen, n: +((b.querySelector('.plN') || b.parentElement.querySelector('.plN') || {}).textContent),   /* (v252: the squad's count in its box's well, over the rows) */ last: rows.length ? seen.includes(rows[rows.length - 1].dataset.pid) : true,
         more: fade && !fade.classList.contains('end') ? parseInt(fade.textContent) || 0 : 0, end: !!fade && fade.classList.contains('end'), st: Math.round(b.scrollTop), max: b.scrollHeight - b.clientHeight,
         stuck: (!f || fr.top >= br.top - 1 && fr.bottom <= top + 1) && !!cr && cr.top >= br.top - 1 && cr.bottom <= top + 1 }; }, sel);
     const L = '#bpBody .mgPaneL .plPane';
@@ -336,7 +336,7 @@ for(const [w, h] of SIZES){
       await page.tap('#chCampus [data-bldg="club"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
       const a = await look(L), got = new Set(a.seen); let z = a, k = 0;
       while(z.st < z.max - 1 && k++ < 20){ await swipe(L, 120); z = await look(L); z.seen.forEach(x => got.add(x)); }
-      const want = w === 844 && h === 340 ? 10 : 11, back = (await onScreen(page, ['.bpTopBack', '#bpTabs .bpTab', '.plTop'])).length;
+      const want = w === 844 && h === 340 ? 7 : 8, back = (await onScreen(page, ['.bpTopBack', '#bpTabs .bpTab', '#bpBody .mgPaneL .tplWell'])).length;   // (v252: the template's rows of 28, eight on the screen -- 11 and 10 before, rows of 22)
       info(w + 'x' + h + ' the squad: ' + JSON.stringify({ n: a.n, rows: a.rows, seen: a.seen.length, swipes: k, reached: got.size, more0: a.more, endMore: z.more, end: z.end }));
       ok(!a.pager && a.n === 25 && a.rows === 25 && a.seen.length >= want && got.size === 25 && z.end && !back,
         w + 'x' + h + ': a squad of 25 -- ' + a.seen.length + ' rows seen at once, every man reached by swiping from the top (' + got.size + ' in ' + k + ' swipes, no taps), 25 over the list and 25 in it');
@@ -666,6 +666,12 @@ for(const [w, h] of [[844, 340], [640, 360]]){
   const walk = async (bldg, tab, pids) => { await page.tap(`#chCampus [data-bldg="${bldg}"]`); await page.waitForTimeout(150); await page.tap(`#bpTabs .bpTab:text-is("${tab}")`); await page.waitForTimeout(150);
     const ids = pids || await page.$$eval('.mgPaneL .mgRow:not(.fitHide)', ns => ns.slice(0, 3).map(n => n.dataset.pid));
     for(const id of ids){ await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(80);
+      if(await page.$('.mgPaneR .sqSum')){   // (v252: the squad's man in short -- his well, five rows, SELL and NEW DEAL, all in its box; then his card, a tap on his well)
+        const s = await page.evaluate(() => { const B = document.querySelector('.mgPaneR'), br = B.getBoundingClientRect(), S = B.querySelector('.sqSum');
+          const out = [...S.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && (r.bottom > br.bottom + 1 || r.right > br.right + 1); }).map(e => e.className).slice(0, 3);
+          return { out, rows: S.querySelectorAll('.sqKv').length, btns: [...S.querySelectorAll('.sqFoot .tplBtn')].map(b => b.textContent).join(' / '), cut: [...S.querySelectorAll('.sqKv b, .tplBtn')].filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.textContent) }; });
+        views.push(s); if(s.out.length || s.rows !== 5 || s.btns !== 'SELL / NEW DEAL' || s.cut.length) bad.push(tab + ' in short ' + JSON.stringify(s));
+        await page.tap('.mgPaneR .sqMan'); await page.waitForTimeout(60); }
       for(const side of ['rate', 'deal', 'career', 'mind']){   // (his card's four sides, a tab each along its foot: v116)
         const tb = await page.$(`.mgPaneR .mgSides [data-mside="${side}"]`); if(tb){ await tb.tap(); await page.waitForTimeout(60); }
         const r = await card(); views.push(r); if(!r.fits || r.paged || r.long.length || r.cut.length || r.flips !== 4 || !r.tabsIn || r.tabH < 28 || r.tabCut.length) bad.push(tab + ' ' + side + ' ' + JSON.stringify(r));

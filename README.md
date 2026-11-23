@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The Clubhouse's Squad as its template (v252).** Two boxes, no frame round them: the list seven columns wide, the man
+  you pick five. The list's well says how many and the wage bill, with the deals ending as a badge; under the columns'
+  heads every man is a row of 28 you tap, the one picked lit, eight on the screen and the rest a swipe away. Nobody
+  picked, the right box has the lineup on its small pitch (a man held in the list and dropped on a spot goes there). A man
+  picked, it has him in short: his figure, name and what he plays in a well, his rating, mood, fitness, wage and deal as
+  rows (each a tap from its sentence), SELL and NEW DEAL at its foot. A tap on his well opens his card, its four sides as
+  before, with ◀ back to him in short; NEW DEAL opens it on its DEAL side; SELL takes him to the transfer market's
+  Selling.
 - **The Clubhouse's Club as its template (v251).** Three boxes of four columns, the page's height, no frame round them.
   THE CLUB NOW: the bank, the fans (▲ ▼ by your last game), a week's money and the dressing room; under it HISTORY:
   seasons, promotions, titles and where you are now. Each is a row with its mark, and a tap says the rest. THE BUILDINGS:
@@ -3682,6 +3690,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v252: the Clubhouse's Squad.** mgTplPanes draws a list and its man as two .tplBox boxes (.tplPanes.tplPage, the
+  grid's seven and five columns): the list's head (.tplWell .sqHead with .plN, .sqBill and a .tplBadge; .plCols) over the
+  .plPane rows, which scroll in the box. mgCard has a fifth side for the squad's own man, 'sum' (sqSum: .sqMan, the well
+  that opens his card; .sqKv rows; .sqFoot's .tplBtn SELL, data-mg sqsell, and NEW DEAL, data-mside deal); a pick in the
+  Squad sets it, and elsewhere it reads as 'rate'. His card's first tab is data-mg sqback (◀), not ◀ TEAM. .tplBtn is the
+  templates' button, 36 high with its mark (.pri filled). On a phone 700 wide or less the boxes go six and six while his
+  card is open, so all of it fits.
 - **v251: the Clubhouse's Club.** mgClubTab draws .clTpl.tplPage: three .tplBox.clBox, each .tplWell headings and
   rows. .clKv rows (a .hic mark, .clLbl, b), the records .clKv.clRk (an em for who holds it, "–" unset); the buildings
   .clBld buttons, data-mg goto, the clubhouse's .lit with data-mg up and its .clPrice, disabled while bldBlock says no

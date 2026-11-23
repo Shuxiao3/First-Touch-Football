@@ -168,6 +168,7 @@ await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(150);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(150);
 const ids = await K(`(()=>{ const d=CAREER.data, m=d.roster.find(p=>p.role==='MID'), g=d.roster.find(p=>p.role==='GK'); m.fo=null; g.fo=null; mgSave(d); return [m.id,g.id]; })()`);
 const cycle = async id => { await page.evaluate(id => document.querySelector(`.mgPaneL .mgRow[data-pid="${id}"]`).click(), id); await page.waitForTimeout(120);
+  if(await page.$('#bpBody .sqMan')){ await page.click('#bpBody .sqMan'); await page.waitForTimeout(80); }   // (v252: him in short first -- his well, a tap, his card)
   const seen = []; for(let i = 0; i < 7; i++){ const t = (await page.textContent('#bpBody [data-mg="focus"]')).trim(); seen.push(t); if(i && t === 'BALANCED') break;
     await page.click('#bpBody [data-mg="focus"]'); await page.waitForTimeout(80); } return seen.join(' > '); };
 const cm = await cycle(ids[0]); const fm = await fit(); const cg = await cycle(ids[1]);
