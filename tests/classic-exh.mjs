@@ -3,7 +3,10 @@
 // shape, and each side plays its own in the match. TACTICS on the setup screen sets the match up and waits: its tactics
 // screen before kick-off (◀ CLUBS back to the setup, KICK OFF ▶ to play), where a man off the bench for one in the team
 // is a change of team, not a sub; your shape and style there are kept with your club, and the match kicks off with
-// everyone in his spot in the shape you picked. A style back at the club's own isn't kept as a change.
+// everyone in his spot in the shape you picked. A style back at the club's own isn't kept as a change. (v243) The setup is
+// a face-off: each club's best man drawn in its kit, his name, position and rating under the club's, its rating in a box,
+// a switch on each side between the Premier League's clubs and the Champions Cup's; before kick-off the bench is on
+// PLAYER SWAP, where the man coming off and the man going on are tapped and MAKE THE SWAP changes the team.
 // On a copy of the game that lets the test reach the match.
 import { open, STAR } from './_harness.mjs';
 import { devices } from 'playwright';
@@ -22,7 +25,10 @@ const { browser, page, rep } = await open({ url: 'file://' + copy });
 const { ok, info } = rep;
 const K = s => page.evaluate(s => window.__K.ev(s), s);
 await page.evaluate(() => { localStorage.removeItem('ft_clubsq'); window.__K.ev("EXH.you='LIV'; EXH.opp='MCI'"); });
-const card = t => page.evaluate(t => { const el = document.getElementById('exhSide' + t); return { name: el.querySelector('.exhName').textContent, meta: el.querySelector('.exhMeta').textContent, style: el.querySelector('.exhStyle').textContent }; }, t);
+const card = t => page.evaluate(t => { const el = document.getElementById('exhSide' + t), cv = el.querySelector('canvas.exhKit'); let px = 0;
+  try{ const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; for(let i = 3; i < d.length; i += 4) if(d[i] > 0) px++; }catch(e){}   // (v243: the man drawn on it)
+  return { name: el.querySelector('.exhName').textContent, meta: el.querySelector('.exhMeta').textContent, style: el.querySelector('.exhStyle').textContent, form: el.querySelector('.exhForm').textContent,
+    ovr: el.querySelector('.exhOvr b').textContent, comp: (el.querySelector('.exhSc.on') || { dataset: {} }).dataset.comp, star: (el.querySelector('.exhMeta b') || {}).textContent || '', px }; }, t);
 
 // THE SETUP SCREEN: each club's way of playing under its shape
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');
@@ -34,6 +40,20 @@ ok(kinds >= 6 && /BRE:wing/.test(all) && /CRY:wing/.test(all) && /SUN:direct/.te
 await page.click('#exhSideR [data-exh="next"]'); await page.waitForTimeout(80); const r1 = await card('R');
 await page.click('#exhSideR [data-exh="prev"]'); await page.waitForTimeout(80);
 ok(r1.name === 'Manchester United' && r1.style === 'WING PLAY', `...the next club, its own: ${r1.name} ${r1.style}`);
+// v243: THE FACE-OFF -- each club's best man (outfield) drawn in its kit, not a shirt; his name, position and rating and the
+// kit under the club's name; the side's rating in its box; the league switch on PREMIER LEAGUE
+const best = await K(`['LIV','MCI'].map(id=>{ const s=clubSide(id), b=exhBest(s), top=Math.max(...s.squad.filter(e=>e&&e.role!=='GK').map(e=>e.ovr||0)); return b&&b.role!=='GK'&&b.ovr===top?b.name:'?'; })`);
+ok(g0.px > 300 && r0.px > 300 && g0.star === best[0] && r0.star === best[1] && /^★/.test(g0.meta) && / \d+ · HOME KIT$/.test(g0.meta) && g0.comp === 'pl' && r0.comp === 'pl' && /^\d+$/.test(g0.ovr) && g0.form && r0.form,
+  `the face-off (v243): each club's best man drawn in its kit -- ${g0.star} for ${g0.name} ("${g0.meta}"), ${r0.star} for ${r0.name} -- the side's rating in its box (${g0.ovr}, ${r0.ovr}), its shape and style under it (${g0.form}, ${r0.form}), the switch on PREMIER LEAGUE`);
+// v243: the switch on each side: CHAMPIONS CUP puts that side on the Champions Cup's clubs (the arrows then go round them),
+// PREMIER LEAGUE puts it back
+const lists = await K(`({ cc:CC_ORDER.map(c=>c.name), pl:CLUBS.map(c=>c.name) })`);
+await page.click('#exhSideR [data-exh="sidecomp"][data-comp="cc"]'); await page.waitForTimeout(120); const rc = await card('R');
+await page.click('#exhSideR [data-exh="next"]'); await page.waitForTimeout(80); const rc2 = await card('R');
+await page.click('#exhSideR [data-exh="sidecomp"][data-comp="pl"]'); await page.waitForTimeout(120); const rp = await card('R');
+ok(rc.comp === 'cc' && rc.name === lists.cc[0] && rc2.comp === 'cc' && rc2.name === lists.cc[1] && rc2.px > 300 && rp.comp === 'pl' && lists.pl.includes(rp.name) && rp.name !== g0.name,
+  `the league switch (v243): CHAMPIONS CUP -- ${rc.name}, the arrows to ${rc2.name}, its best man ${rc2.star}; PREMIER LEAGUE -- ${rp.name}`);
+await K("EXH.opp='MCI'; renderExh()"); await page.waitForTimeout(80);
 
 // KICK OFF as it was: straight in, each side its club's way
 await page.click('#exhGo'); await page.waitForTimeout(600);
@@ -48,7 +68,10 @@ const pre = await page.evaluate(() => { const ov = document.getElementById('mtac
   return { on: ov.classList.contains('on') && ov.classList.contains('pre'), back: ov.querySelector('.bpTopBack').textContent, head: document.getElementById('mtSubs').textContent, kick: k.width > 0 && k.right <= innerWidth,
     still: window.__K.ev('simNow'), screen: window.__K.ev('SCREEN'), dim: document.querySelectorAll('#mtacBody .tbBench .ptk.dim').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length }; });
 ok(pre.on && pre.back === '◀ CLUBS' && pre.head === 'BEFORE KICK-OFF' && pre.kick && pre.still === t0 && pre.screen === 'match', 'TACTICS: the tactics screen before kick-off -- ◀ CLUBS, BEFORE KICK-OFF, KICK OFF ▶ -- and the match waiting for it');
-ok(pre.bench === 5 && pre.dim === 0, 'the bench, all five to be had');
+await page.click('#mtacOv [data-mt="view"][data-v="swap"]'); await page.waitForTimeout(120);
+const pb = await page.evaluate(() => ({ dim: document.querySelectorAll('#mtacBody .tbBench .ptk.dim').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, kick: !!document.getElementById('mtKick'), title: document.getElementById('mtTitle').textContent }));
+ok(pre.bench === 0 && pb.title === 'PLAYER SWAP' && pb.bench === 5 && pb.dim === 0 && pb.kick, 'the bench on PLAYER SWAP (v243: none on TACTICS), all five to be had, KICK OFF there too');
+await page.click('#mtacOv [data-mt="view"][data-v="tac"]'); await page.waitForTimeout(120);
 // style and shape
 await page.click('#mtacBody [data-mtdrop="style"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtstyle="wing"]'); await page.waitForTimeout(80);
 await page.click('#mtacBody [data-mtdrop="form"]'); await page.waitForTimeout(80); await page.click('#mtacBody [data-mtform="3-3-2"]'); await page.waitForTimeout(120);
@@ -59,11 +82,15 @@ const centre = sel => page.$eval(sel, e => { const r = e.getBoundingClientRect()
 async function drag(a, b){ const p = await centre(a), q = await centre(b); await page.mouse.move(p.x, p.y); await page.mouse.down();
   for(let i = 1; i <= 8; i++){ await page.mouse.move(p.x + (q.x - p.x) * i / 8, p.y + (q.y - p.y) * i / 8); await page.waitForTimeout(15); }
   await page.mouse.up(); await page.waitForTimeout(120); }
-const inn = await page.$eval('#mtacBody .tbBench .ptk[data-mtk="bench"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tbBench .ptk[data-mtk="bench"]', ns => +ns[2].dataset.si));
+// (v243: on PLAYER SWAP -- the man coming off tapped, then the man going on, then MAKE THE SWAP)
+await page.click('#mtacOv [data-mt="view"][data-v="swap"]'); await page.waitForTimeout(120);
+const inn = await page.$$eval('#mtacBody .tbBench .ptk[data-mtk="bench"]', ns => +ns[2].dataset.si);
 const out = await page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[3].dataset.si);
-await drag(`#mtacBody .tbBench .ptk[data-si="${inn}"]`, `#mtacBody .tpitch .ptk[data-si="${out}"]`);
+await page.click(`#mtacBody .tpitch .ptk[data-si="${out}"]`); await page.waitForTimeout(60); await page.click(`#mtacBody .tbBench .ptk[data-si="${inn}"]`); await page.waitForTimeout(60);
+const can = await page.evaluate(() => !!document.querySelector('#mtacBody .mtDoSwap:not(:disabled)'));
+await page.click('#mtacBody .mtDoSwap'); await page.waitForTimeout(120);
 const sw = await K(`({ inTeam:LINEUP.G.atk.includes(${inn}), outBench:mtBench('G').includes(${out}), used:SUBS.G.used, onPitch:players.some(p=>p.team==='G'&&p.squadIdx===${inn}), msg:document.getElementById('mtMsg').textContent })`);
-ok(sw.inTeam && sw.onPitch && sw.outBench && sw.used === 0 && /no sub used/.test(sw.msg), `a man off the bench onto one in the team: in the team, the other on the bench, no sub used ("${sw.msg}")`);
+ok(can && sw.inTeam && sw.onPitch && sw.outBench && sw.used === 0 && /no sub used/.test(sw.msg), `a man off the bench for one in the team (MAKE THE SWAP): in the team, the other on the bench, no sub used ("${sw.msg}")`);
 // KICK OFF ▶: the match goes, everyone in his spot in the shape picked (kicked off, and read in the same moment: its
 // button is tapped on the phone below)
 const k0 = await K(`(()=>{ mtKickOff(); const G=players.filter(p=>p.team==='G'), a=atkOf('G'), lim=FW/2-a*MK;   // (a spot past halfway: held a metre short of it, his own half -- see THE KICK-OFF)
@@ -77,8 +104,8 @@ ok(k0.worst === 0 && k0.lines === '3-3-2', `...kicking off with everyone in his 
 await K('pauseFromMatch()'); await page.waitForTimeout(150);
 await page.click('#smItems [data-act="exhibition"]'); await page.waitForSelector('#exhPanel.show');
 const g2 = await card('G'), r2 = await card('R'), kept = await page.evaluate(() => { const o = JSON.parse(localStorage.getItem('ft_clubsq') || '{}'); return { liv: o.LIV && o.LIV.style, mci: o.MCI ? (o.MCI.style || null) : 'none', livIn: o.LIV && o.LIV.lineup.atk.length }; });
-ok(g2.style === 'WING PLAY' && /3-3-2/.test(g2.meta) && kept.liv === 'wing' && r2.style === 'CONTROL POSSESSION' && kept.mci === null,
-  `kept with your club: ${g2.name} ${g2.style} ${g2.meta.split(' · ')[2]}; City still ${r2.style} (nothing stored for it)`);
+ok(g2.style === 'WING PLAY' && g2.form === '3-3-2' && kept.liv === 'wing' && r2.style === 'CONTROL POSSESSION' && kept.mci === null,
+  `kept with your club: ${g2.name} ${g2.style} ${g2.form}; City still ${r2.style} (nothing stored for it)`);
 // ◀ CLUBS: back to the setup screen, no match
 await page.click('#exhTac'); await page.waitForTimeout(300);
 await page.click('#mtacOv .bpTopBack'); await page.waitForTimeout(200);
@@ -105,8 +132,8 @@ await page.click('#exhGrid [data-id="ROY"]'); await page.waitForTimeout(150);
 const roy = await card('R'), bill = (await page.textContent('#exhLeague')).trim();
 info('the picker: ' + JSON.stringify({ tabs, plN, ccIds, roy, bill }));
 ok(tabs === 'PREMIER LEAGUE*,CHAMPIONS CUP' && plN === 20 && ccIds === 'JUV,BOH,CAT,DOR,IST,LIS,ATH,ROY,CEN,RED,PAR,SEV'
-   && roy.name === 'Madrid Royale' && /^ROY · OVR \d+ · 3-1-3-1 · /.test(roy.meta) && roy.style === 'CONTROL POSSESSION' && /^CONTINENTAL CHAMPIONS CUP · 2026\/27/.test(bill),
-  'the picker: the Premier League\'s twenty and the Champions Cup\'s twelve a tab each; Madrid Royale picked (' + roy.meta + '), the match billed "' + bill.split(' · ').slice(0, 2).join(' · ') + '"');
+   && roy.name === 'Madrid Royale' && /^\d+$/.test(roy.ovr) && roy.form === '3-1-3-1' && roy.comp === 'cc' && roy.style === 'CONTROL POSSESSION' && /^CONTINENTAL CHAMPIONS CUP · 2026\/27/.test(bill),
+  'the picker: the Premier League\'s twenty and the Champions Cup\'s twelve a tab each; Madrid Royale picked (' + roy.form + ', OVR ' + roy.ovr + ', ' + roy.meta + ', its switch on CHAMPIONS CUP), the match billed "' + bill.split(' · ').slice(0, 2).join(' · ') + '"');
 const sq = await K(`(()=>{ const out={}, all=EXH_CLUBS.map(c=>[c,clubSquadGen(c)]);
   const names=all.flatMap(([c,s])=>s.map(e=>e.name)); out.n=names.length; out.dup=names.length-new Set(names).size;
   out.stars=all.flatMap(([c,s])=>s.filter(e=>e.star).map(e=>{ const S=STARS.find(x=>x.key===e.star); return c.id+':'+e.star+':'+(e.uniq&&styleOf(e).name==='Unique'&&e.style===S.base&&e.stars===S.sk&&entryStars(e)===S.sk&&STAR_KEYS.every((k,i)=>e.stats[k]===Math.max(1,S.v[i]/2))?'ok':'bad'); })).join(',');   // (v200: his skill stars the sheet's)
@@ -148,8 +175,8 @@ const { chromium } = await import('playwright');
 const b2 = await chromium.launch(), ctx = await b2.newContext({ ...devices['iPhone 14 landscape'] }); await ctx.addInitScript(STAR); const ph = await ctx.newPage();
 await ph.goto('file://' + copy); await ph.waitForTimeout(700);
 await ph.tap('#smItems [data-act="exhibition"]'); await ph.waitForSelector('#exhPanel.show');
-const eb = await ph.evaluate(() => [...document.querySelectorAll('#exhPanel .exhGo .smBtn')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.trim(), ok: r.right <= innerWidth && r.bottom <= innerHeight && r.height >= 30 }; }));
-ok(eb.length === 3 && eb.every(b => b.ok) && /TACTICS/.test(eb[1].t), 'on a phone, the setup screen\'s KICK OFF, TACTICS and BACK all on it');
+const eb = await ph.evaluate(() => [...document.querySelectorAll('#exhPanel .exhGo .smBtn, #exhPanel .exhBack')].map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.trim(), ok: r.right <= innerWidth && r.bottom <= innerHeight && r.top >= 0 && r.height >= 30 }; }));
+ok(eb.length === 3 && eb.every(b => b.ok) && eb.some(b => /TACTICS/.test(b.t)) && eb.some(b => /KICK OFF/.test(b.t)) && eb.some(b => /BACK/.test(b.t)), 'on a phone, the setup screen\'s KICK OFF, TACTICS and BACK all on it (v243: BACK up by the title)');
 await ph.tap('#exhTac'); await ph.waitForTimeout(400);
 const pk = await ph.evaluate(() => { const r = document.getElementById('mtKick').getBoundingClientRect(); return { on: r.width > 0 && r.right <= innerWidth && r.top >= 0, h: r.height }; });
 await ph.tap('#mtKick'); await ph.waitForTimeout(300);

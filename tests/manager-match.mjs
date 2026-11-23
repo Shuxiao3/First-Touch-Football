@@ -49,7 +49,7 @@ const allLines = () => page.evaluate(() => { for(let i = 0; i < 40; i++){ const 
 let money = await page.innerText('#moneyModal').catch(() => '');
 if(/STADIUM SUMMARY/.test(money)){   // (a home game -- a new career's first game is home or away as its fixtures fall: the ground first, v186)
   await allLines(); money = await page.innerText('#moneyModal').catch(() => '');
-  ok(/Fans in the ground/.test(money) && /Taken at the gate/.test(money), 'a home game: THE STADIUM SUMMARY first, who came and what they paid (v242)');
+  ok(/[\d,]+ in · (full|\d+% full)/.test(money) && /taken at the gate/i.test(money), 'a home game: THE STADIUM SUMMARY first, who came and what they paid (v242; v243: beside the ground filling up)');
   await page.evaluate(() => { const b = document.querySelector('#moneyModal.on [data-mn="go"]'); if(b) b.click(); }); await page.waitForTimeout(250); }
 await allLines(); money = await page.innerText('#moneyModal').catch(() => '');
 ok(/FUND SUMMARY/.test(money) && /At the start of the week/.test(money) && /Wages/.test(money) && /This week/.test(money) && /Now in the bank/.test(money) && /fans/.test(money),

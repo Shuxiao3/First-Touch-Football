@@ -77,12 +77,19 @@ await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(400)
 const press = async n => { for(let i = 0; i < n; i++){ await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(30); } };
 const gate = await K(`(()=>{ const d=CAREER.data, c=document.querySelector('#moneyModal .mnCard'), G=d.lastGate; if(!c||!/STADIUM SUMMARY/.test(c.textContent)) return null;
   const rows=[...c.querySelectorAll('.mnList > [data-seat]')];
-  return { rows:rows.map(r=>r.dataset.seat).join(), want:G.seats.slice().sort((a,b)=>a.price-b.price).map(x=>x.id).join(), first:c.querySelector('.mnList > *').textContent, n:c.querySelectorAll('.mnList > *').length,
-    shown:c.querySelectorAll('.mnList > .on').length, att:G.att, cap:G.cap, gate:G.gate, sum:G.seats.reduce((a,x)=>a+x.att,0), take:Math.round(G.seats.reduce((a,x)=>a+x.att*x.price,0)),
-    paid:rows.reduce((a,r)=>a+(+r.querySelector('b').textContent.replace(/[^0-9]/g,'')),0), led:d.ledger[0].gate, text:c.textContent }; })()`);
+  return { rows:rows.map(r=>r.dataset.seat).join(), want:G.seats.slice().sort((a,b)=>a.price-b.price).map(x=>x.id).join(), first:c.querySelector('.mnStep').textContent, n:c.querySelectorAll('.mnStep').length,
+    shown:c.querySelectorAll('.mnStep.on').length, boxes:[...c.querySelectorAll('.mnSt')].map(b=>({ id:b.dataset.st, f:b.style.getPropertyValue('--f'), t:b.textContent })), att:G.att, cap:G.cap, gate:G.gate, sum:G.seats.reduce((a,x)=>a+x.att,0), take:Math.round(G.seats.reduce((a,x)=>a+x.att*x.price,0)),
+    paid:rows.reduce((a,r)=>a+(+r.querySelector('b').textContent.replace(/[^0-9]/g,'')),0), led:d.ledger[0].gate, text:c.textContent,
+    seats:G.seats.map(x=>({ id:x.id, att:x.att, cap:x.cap })) }; })()`);
 if(gate){ info('THE STADIUM SUMMARY: ' + gate.first + ' · ' + gate.rows);
   ok(gate.shown === 0 && gate.rows === gate.want && gate.sum === gate.att && gate.take === gate.gate && Math.abs(gate.paid - gate.gate) <= gate.rows.split(',').length && gate.led === gate.gate && gate.first.includes(gate.att.toLocaleString()) && gate.text.includes('Taken at the gate'),
     'v242: THE STADIUM SUMMARY first, after a home game -- nothing up till NEXT; then the crowd (' + gate.att + ' of ' + gate.cap + '), each part of the ground cheapest first, its fans and price; they add up to the gate the books took');
+  // v243: the ground from above beside the lines -- a box for every part of the ground (the bleachers' two sides both
+  // the one part), each to fill as full as it was, saying just how many came and the percentage
+  const pcOf = x => x.cap ? Math.round(x.att / x.cap * 100) : 0;
+  const boxOk = gate.seats.every(x => gate.boxes.some(b => b.id === x.id)) && gate.boxes.every(b => { const x = gate.seats.find(q => q.id === b.id); if(!x) return false;
+    return b.f === Math.min(100, pcOf(x)) + '%' && (!b.t || b.t.replace(/[^0-9]/g, '') === String(x.att) + String(pcOf(x))); });
+  ok(boxOk && gate.boxes.filter(b => b.t).length === gate.seats.length, 'v243: the ground beside the lines -- ' + gate.boxes.length + ' stands for ' + gate.seats.length + ' parts of the ground, each to fill as full as it was, with how many came and the percentage (' + gate.boxes.filter(b => b.t).map(b => b.id + ' ' + b.t).join(', ') + ')');
   await press(gate.n + 1); }
 // v242: THE FUND SUMMARY (THE MONEY till now): the week from where the bank stood as it began -- each line, the wages in red,
 // the week's net, the bank now -- adding up

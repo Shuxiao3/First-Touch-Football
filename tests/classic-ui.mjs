@@ -9,8 +9,9 @@
 // their faces (the bench doesn't), his card has two sides (his ratings, all of him; his spot's instructions), and the
 // other phase's shape is a small name box off each spot's corner; each man's number and name sit in his token with room
 // round them, clear of its edges. The width shows on the pitch (a four across the middle spreads from COMPACT to WIDE)
-// and no man covers another or hangs off it, at every size; in a match his card shows his STAMINA as a bar, no figure,
-// the button that turns it over level with the bar's foot. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
+// and no man covers another or hangs off it, at every size; in a match (v243) TACTICS is the field and the tactics, no
+// man's card and no bench, and PLAYER SWAP the bench under the field, the man coming off and the man going on each with
+// his STAMINA as a bar, no figure, their six face to face. On a narrow phone (640x360) the bench stays on one line and every man's card fits. The
 // game is as wide as the phone: no bands, the buttons over the pitch's corner, the HUD just the score, the clock, your
 // man's window (his number, full name and position, his stamina and skill stars: top right beside the menu, at every
 // size) and the menu.
@@ -53,7 +54,6 @@ const apart = (page, sel) => page.evaluate(sel => { const P = document.querySele
     for(let j = i + 1; j < T.length; j++){ const b = T[j]; if(Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5) over++; } }
   const M = [...P.querySelectorAll('.ptk[data-role="MID"]')].map(e => e.getBoundingClientRect());
   return { n: T.length, over, out: Math.round(out), span: M.length ? Math.round(Math.max(...M.map(r => r.right)) - Math.min(...M.map(r => r.left))) : 0 }; }, sel);   // (span: the midfield across the upright pitch, v226)
-// HIS STAMINA on his card in a match: the word, a bar and no figure -- the button that turns the card over level with the bar's foot
 // YOUR MAN'S WINDOW in a match, top right beside the menu: what it says (his number, name, position, how many of its
 // stars are lit, how far its stamina bar is filled) against the man you control, and where it sits among the HUD's chips
 const hudWin = page => page.evaluate(() => { const c = window.__T.controlled(), R = e => e.getBoundingClientRect(), W = R(document.getElementById('rPlayer')), M = R(document.getElementById('menuBtn')), S = R(document.getElementById('stageWrap'));
@@ -65,8 +65,6 @@ const hudWin = page => page.evaluate(() => { const c = window.__T.controlled(), 
 const ini = n => n.includes(' ') ? n[0] + '. ' + n.slice(n.indexOf(' ') + 1) : n;   // (v228: a name too long for the narrower window has his first name's initial)
 const winOk = (v, full) => v.num === '#' + v.cNum && (full || v.cUniq || /\s/.test(v.cName) ? v.name === v.cName || v.name === ini(v.cName) : v.name.split(' ').length === 2 && v.name.endsWith(' ' + v.cName))   // (v201: a man with a first name already -- a star's -- shown as he is; v202: a star with one name too) && v.pos.length >= 2 && v.lit === Math.max(1, Math.min(5, v.cStars || 1))
   && Math.abs(v.fill - v.cSt) <= 0.02 && !v.cut && v.top <= 12 && v.gap >= 0 && v.gap <= 12 && v.level && v.inside && !v.over;
-const legsRow = (page, sel) => page.evaluate(sel => { const h = document.querySelector(sel + ' .mgCardHead'), l = h && h.querySelector('.mtLegs'), bar = l && l.querySelector('.statBar'), f = h && h.querySelector('button[data-cside]');
-  return { text: l ? l.textContent : '', pct: /%/.test(h ? h.textContent : ''), bar: bar ? Math.round(bar.getBoundingClientRect().bottom) : null, flip: f ? Math.round(f.getBoundingClientRect().bottom) : null }; }, sel);
 // INSTRUCTIONS up in a tactics screen's top row (v116: not on his card): lit or not, and just left of BEST 9 where there's one
 const insTop = (page, root) => page.evaluate(root => { const top = document.querySelector(root + ' .tbTop'), b = top && top.querySelector('.tbIns'), bs = top && top.querySelector('.tbBest'), r = b && b.getBoundingClientRect();
   return { there: !!b, lit: !!(b && b.classList.contains('go')), text: b ? b.textContent : '', inside: !!r && r.right <= innerWidth && r.left >= 0,
@@ -384,9 +382,19 @@ for(const [w, h] of SIZES){
     const menu = await page.evaluate(() => document.getElementById('pauseMenu').classList.contains('on') && !document.getElementById('skillsOverlay').classList.contains('on'));
     ok(t0 === t1 && menu, w + 'x' + h + ': SKILL MOVES from the pause menu: the match waits while it\'s open, and BACK goes back to the menu'); }
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
-  await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtacBody .tbDrop', '#mtacBody .tbBench']);
-  const lg = await legsRow(page, '#mtacBody'), it = await insTop(page, '#mtacBody');
-  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip == null && it.there && it.inside && !it.lit, w + 'x' + h + ': his card in a match: STAMINA and a bar, no figure, nothing on it to turn it over (INSTRUCTIONS is up in the top row)');
+  await mcheck('match tactics', ['#mtacOv .bpTopBack', '#mtTeams .bpTab', '#mtViews .bpTab', '#mtacBody .tbDrop', '#mtacBody .mtPanel .tbIns', '#mtacBody .mtGo']);
+  const tv = await page.evaluate(() => { const b = document.querySelector('#mtacBody .mtPanel .tbIns'), r = b && b.getBoundingClientRect();
+    return { card: !!document.querySelector('#mtacBody .mgCard, #mtacBody .mgCardHead, #mtacBody img.cardBody'), bench: document.querySelectorAll('#mtacBody .tbBench').length, ins: !!b && r.right <= innerWidth && r.bottom <= innerHeight,
+      lit: !!(b && b.classList.contains('go')), title: document.getElementById('mtTitle').textContent }; });
+  ok(tv.title === 'TACTICS' && !tv.card && !tv.bench && tv.ins && !tv.lit, w + 'x' + h + ': TACTICS in a match (v243): the field on the left, the tactics on the right -- no man\'s card and no bench on it, INSTRUCTIONS among the tactics');
+  await page.tap('#mtViews [data-v="swap"]'); await page.waitForTimeout(150);
+  await page.tap('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=1'); await page.waitForTimeout(80); await page.tap('#mtacBody .tbBench .ptk >> nth=0'); await page.waitForTimeout(80);
+  await mcheck('player swap', ['#mtacBody .tbBench .ptk', '#mtacBody .mtSide', '#mtacBody .mtCmpRow', '#mtacBody .mtDoSwap', '#mtacBody .mtGo']);
+  const lg = await page.evaluate(() => { const L = [...document.querySelectorAll('#mtacBody .mtSide .mtLegs')], go = document.querySelector('#mtacBody .mtDoSwap');
+    return { title: document.getElementById('mtTitle').textContent, n: L.length, text: L.map(l => l.firstElementChild.textContent).join(), fig: L.some(l => /\d/.test(l.textContent)), bars: L.filter(l => l.querySelector('.statBar i')).length,
+      rows: document.querySelectorAll('#mtacBody .mtCmpRow').length, go: !!go && !go.disabled }; });
+  ok(lg.title === 'PLAYER SWAP' && lg.n === 2 && lg.text === 'STAMINA,STAMINA' && !lg.fig && lg.bars === 2 && lg.rows === 6 && lg.go,
+    w + 'x' + h + ': PLAYER SWAP in a match (v243): the bench under the field; the man coming off and the man going on, each his STAMINA a bar with no figure, their six face to face, MAKE THE SWAP ready');
   await page.tap('#mtacOv [data-mt="back"]'); await page.waitForTimeout(100); await page.tap('#pauseGrid [data-pause="back"]');
   await page.evaluate(() => window.__T.end()); await page.waitForTimeout(400);
   await mcheck('match report', ['#mrNextBtn', '#matchReport .mrScore']);                     // (v106: THE RESULT, then NEXT)
@@ -569,11 +577,19 @@ for(const [w, h] of SIZES){
   ok(winOk(hw, true), '...in a match, your man\'s window at the top right beside the menu, his name whole (' + hw.num + ' ' + hw.name + ' ' + hw.pos + ')' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await page.tap('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout(200);
-  const wm = await walk('#mtacOv .tbRight', '#mtacOv .tpitch .ptk', '#mtacOv .tbTop .tbIns');
-  const lg = await legsRow(page, '#mtacOv .tbRight'), mp = await apart(page, '#mtacOv .tpitch'), mi = await insTop(page, '#mtacOv');
-  ok(lg.text === 'STAMINA' && !lg.pct && lg.bar != null && lg.flip == null && mi.there && mi.inside && mp.n === 9 && !mp.over && !mp.out,
-    '...in a match his card: STAMINA and a bar, no figure, INSTRUCTIONS up in the top row; the match\'s pitch: nobody overlaps or hangs off it');
-  ok(wo.views >= 14 && wm.views >= 14 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office, ' + wm.views + ' in a match' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
+  // (v243: no man's card in a match -- TACTICS, the instructions with the ball and without fitting beside the field; then
+  // PLAYER SWAP, three men on the pitch each against two on the bench, the two side by side fitting every time)
+  const mp = await apart(page, '#mtacOv .tpitch'), wm = { views: 0, bad: [] };
+  for(const ph of ['atk', 'def']){ await page.tap(`#mtacOv .mtPanel [data-mtph="${ph}"]`); await page.waitForTimeout(80); await page.tap('#mtacOv .mtPanel .tbIns'); await page.waitForTimeout(120); wm.views++;
+    if(!(await page.$('#mtacOv .mtInsV' + (ph === 'def' ? ' .tiRow' : ''))) || !await fits('#mtacOv .tbRight')) wm.bad.push('instructions ' + ph); await page.tap('#mtacOv .mtPanel .tbIns'); await page.waitForTimeout(80); }   // (with the ball, nothing to set: a word and WITHOUT THE BALL)
+  await page.tap('#mtacOv .mtPanel [data-mtph="atk"]'); await page.waitForTimeout(80);
+  await page.tap('#mtViews [data-v="swap"]'); await page.waitForTimeout(150); const ps = await apart(page, '#mtacOv .tpitch');
+  for(let i = 0; i < 3; i++) for(let j = 0; j < 2; j++){ const f = `#mtacOv .tpitch .ptk[data-mtk="field"] >> nth=${i}`, b = `#mtacOv .tbBench .ptk >> nth=${j}`;
+    await page.tap(f); await page.waitForTimeout(50); await page.tap(b); await page.waitForTimeout(60); wm.views++;
+    if(!await fits('#mtacOv .tbRight') || (await page.$$('#mtacOv .mtCmpRow')).length !== 6) wm.bad.push('swap ' + i + '/' + j);
+    await page.tap(f); await page.waitForTimeout(40); await page.tap(b); await page.waitForTimeout(40); }
+  ok(mp.n === 9 && !mp.over && !mp.out && ps.n === 9 && !ps.over && !ps.out, '...in a match (v243), TACTICS and PLAYER SWAP: the match\'s pitch on both, nobody overlapping or hanging off it');
+  ok(wo.views >= 14 && wm.views >= 8 && !wo.bad.length && !wm.bad.length, '...and every man\'s card fits its box, DEF open and his instructions: ' + wo.views + ' views in the Office; in a match the instructions with and without the ball and six men off against men on (v243: no man\'s card), ' + wm.views + ' views' + (wo.bad.length || wm.bad.length ? ' -- over: ' + wo.bad.concat(wm.bad).join(', ') : ''));
   await ctx.close(); }
 
 // A MAN'S CARD IN A BUILDING (the squad, the market, the academy) never goes over pages, any side -- his ratings (a

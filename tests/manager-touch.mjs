@@ -89,18 +89,21 @@ if(await page.$('#ctlModal.on')){ await page.tap('#ctlModal [data-ctl="go"], #ct
 await page.waitForTimeout(1500);
 const inMatch = await K('SCREEN');
 await page.tap('#qsBtn'); await page.waitForTimeout(200);
-if(await page.$('#qsDrop [data-qs="all"]')) await page.tap('#qsDrop [data-qs="all"]');   // (ALL SUBS: the match's tactics)
+const viaAll = !!(await page.$('#qsDrop [data-qs="all"]'));
+if(viaAll) await page.tap('#qsDrop [data-qs="all"]');   // (ALL SUBS: the match's tactics -- v243: on PLAYER SWAP)
 else { await page.tap('#qsBtn'); await page.waitForTimeout(150); await K(`(()=>{ openPause(); return 1; })()`); await page.waitForTimeout(150); await page.tap('#pauseMenu [data-pause="tactics"]'); }   // (v242: nobody tired, the drop-down's FORCE SUB -- the board from the menu's TACTICS)
 await page.waitForSelector('#mtacOv.on', { timeout: 4000 }); await page.waitForTimeout(200);
+const view0 = await page.textContent('#mtTitle');
+if(view0 !== 'PLAYER SWAP'){ await page.tap('#mtViews [data-v="swap"]'); await page.waitForTimeout(150); }   // (from the menu's TACTICS: TACTICS first)
 const offSi = await page.$eval('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(async () => +(await page.locator('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"]').nth(2).getAttribute('data-si')));
+await page.locator('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"]').nth(2).tap(); await page.waitForTimeout(150);
 await page.locator('#mtacOv .tbBench .ptk').first().tap(); await page.waitForTimeout(150);
-const armTxt = await page.textContent('#mtacOv [data-mtarm]');
-await page.tap('#mtacOv [data-mtarm]'); await page.waitForTimeout(150);
-const armed = await page.$$eval('#mtacOv .ptk.armed', ns => ns.length);
-await page.locator('#mtacOv .tacB1:not(.ro) .ptk[data-mtk="field"]').nth(2).tap(); await page.waitForTimeout(250);
+const two = await page.evaluate(() => document.querySelectorAll('#mtacOv .ptk.offSel').length + document.querySelectorAll('#mtacOv .ptk.onSel').length), btnTxt = await page.textContent('#mtacOv [data-mt="doswap"]');
+await page.tap('#mtacOv [data-mt="doswap"]'); await page.waitForTimeout(250);
 const used = await K('SUBS.G.used'), offNow = await K(`SUBS.G.off.includes(${offSi})`), waits = await K(`SUBS.G.q.some(x=>x.out===${offSi})`), ringed = await page.$$eval('#mtacOv .ptk.qWait', ns => ns.length);
-info('the match: ' + JSON.stringify({ inMatch, armTxt, armed, used, offNow, waits, ringed }));
-ok(inMatch === 'match' && /SWAP/.test(armTxt) && armed === 1 && ((used === 1 && offNow) || (used === 0 && waits && ringed === 2)), 'PLAY, then ALL SUBS: a man on the bench tapped, SWAP on his card, a man on the pitch tapped -- he\'s on, one sub used, no drag (v179: the ball in play, the two ringed till the next break)');
+info('the match: ' + JSON.stringify({ inMatch, viaAll, view0, two, btnTxt, used, offNow, waits, ringed }));
+ok(inMatch === 'match' && (!viaAll || view0 === 'PLAYER SWAP') && two === 2 && /MAKE THE SWAP/.test(btnTxt) && ((used === 1 && offNow) || (used === 0 && waits && ringed === 2)),
+  'PLAY, then ALL SUBS (v243: straight to PLAYER SWAP): the man coming off tapped, the man going on tapped, both ringed, MAKE THE SWAP -- he\'s on, one sub used, no drag (v179: the ball in play, the two ringed till the next break)');
 
 process.exitCode = rep.finish();
 await browser.close();

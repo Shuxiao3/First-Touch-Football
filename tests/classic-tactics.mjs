@@ -286,20 +286,27 @@ await page.click('#pauseGrid [data-pause="tactics"]'); await page.waitForTimeout
 const mt = await page.evaluate(() => ({ ghosts: document.querySelectorAll('#mtacBody .tpGhost').length, faces: document.querySelectorAll('#mtacBody .tpitch .ptk img.ptkFace').length,
   men: document.querySelectorAll('#mtacBody .tpitch .ptk').length, bench: document.querySelectorAll('#mtacBody .tbBench .ptk img').length,
   card: !!document.querySelector('#mtacBody img.cardBody'), you: document.querySelectorAll('#mtacBody .ptkYou').length }));
-ok(mt.ghosts === 0 && mt.faces === mt.men && mt.men === 9 && !mt.bench && mt.card && !mt.you, 'the match\'s tactics: faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), none on the bench, all of him on his card, no box for the other phase under them (v161), no YOU badge');
-const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent }));
-ok(pre.bench === 5 && /SUBS LEFT 3/.test(pre.head), 'the bench is five, and three subs a match: ' + pre.bench + ' on the bench, ' + pre.head);
+ok(mt.ghosts === 0 && mt.faces === mt.men && mt.men === 9 && !mt.bench && !mt.card && !mt.you, 'the match\'s tactics (v243: TACTICS, the field and the tactics): faces on the men on the pitch (' + mt.faces + '/' + mt.men + '), no bench and no man\'s card on it, no box for the other phase under them (v161), no YOU badge');
+// v243: PLAYER SWAP -- the bench under the field; tap the man coming off, then the man going on, and MAKE THE SWAP
+await page.click('#mtacOv [data-mt="view"][data-v="swap"]'); await page.waitForTimeout(150);
+const pre = await page.evaluate(() => ({ bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length, head: document.getElementById('mtSubs').textContent, title: document.getElementById('mtTitle').textContent,
+  go: !!document.querySelector('#mtacBody .mtDoSwap:disabled') }));
+ok(pre.title === 'PLAYER SWAP' && pre.bench === 5 && /SUBS LEFT 3/.test(pre.head) && pre.go, 'PLAYER SWAP (v243): the bench is five, and three subs a match: ' + pre.bench + ' on the bench, ' + pre.head + '; MAKE THE SWAP waiting for the two');
 const onName = await page.$eval('#mtacBody .tbBench .ptk', e => e.querySelector('.ptkName').textContent);
 const offSi = await page.$eval('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=2', e => +e.dataset.si).catch(() => page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', ns => +ns[2].dataset.si));
-await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${offSi}"]`);
+await page.click(`#mtacBody .tpitch .ptk[data-si="${offSi}"]`); await page.waitForTimeout(80); await page.click('#mtacBody .tbBench .ptk'); await page.waitForTimeout(80);
+const two = await page.evaluate(() => ({ off: !!document.querySelector('#mtacBody .tpitch .ptk.offSel'), on: !!document.querySelector('#mtacBody .tbBench .ptk.onSel'), sides: [...document.querySelectorAll('#mtacBody .mtSide .mtSideMan b')].map(b => b.textContent),
+  rows: document.querySelectorAll('#mtacBody .mtCmpRow').length, go: !!document.querySelector('#mtacBody .mtDoSwap:not(:disabled)') }));
+ok(two.off && two.on && two.sides.length === 2 && two.sides[1].endsWith(onName.split(' ').pop()) && two.rows === 6 && two.go, 'the man coming off and the man going on ringed, side by side with their six face to face (' + two.sides.join(' / ') + '), MAKE THE SWAP lit');
+await page.click('#mtacBody .mtDoSwap'); await page.waitForTimeout(120);
 const sub = await page.evaluate(offSi => { const T = window.__T, S = T.SUBS().G, p = T.players().find(q => q.team === 'G' && q.squadIdx === S.on[0]);
   return { used: S.used, off: S.off[0], name: p && p.pname, legs: p && p.stamina, head: document.getElementById('mtSubs').textContent }; }, offSi);
 ok(sub.used === 1 && sub.off === offSi && /\b/.test(sub.name || '') && (sub.name || '').endsWith(onName) && sub.legs === 1 && /SUBS LEFT 2/.test(sub.head),
-   'a sub by drag: ' + sub.name + ' on, fresh legs, ' + sub.head);
+   'MAKE THE SWAP: ' + sub.name + ' on, fresh legs, ' + sub.head);
 // the second and third subs, then a fourth that isn't allowed
 for(const k of [3, 4, 5]){ const si = await page.$$eval('#mtacBody .tpitch .ptk[data-mtk="field"]', (ns, k) => +ns[k].dataset.si, k); await drag('#mtacBody .tbBench .ptk', `#mtacBody .tpitch .ptk[data-si="${si}"]`); await page.waitForTimeout(80); }
 const sub3 = await page.evaluate(() => ({ used: window.__T.SUBS().G.used, head: document.getElementById('mtSubs').textContent, bench: document.querySelectorAll('#mtacBody .tbBench .ptk').length }));
-ok(sub3.used === 3 && /SUBS LEFT 0/.test(sub3.head) && sub3.bench === 2, 'a second sub and a third, and no fourth: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
+ok(sub3.used === 3 && /SUBS LEFT 0/.test(sub3.head) && sub3.bench === 2, 'a second sub and a third (dragged off the bench, as before), and no fourth: ' + sub3.used + ' made, ' + sub3.head + ', ' + sub3.bench + ' left on the bench');
 await page.click('#mtacOv [data-mt="back"]'); await page.waitForTimeout(80); await page.click('#pauseMenu [data-pause="back"]');
 
 // the holder: the midfield going forward (an engine setting since v161 -- each line's runs with the ball are its style's -- set here to try it), one still holds

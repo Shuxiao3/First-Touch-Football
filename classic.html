@@ -511,8 +511,8 @@
   .smRow .smBtn{white-space:nowrap;font-size:13px;padding-left:11px;padding-right:11px;}
   .smRow .smBtn .mk{margin-right:5px;}
   .smBtn.sel .mk,.smBtn:hover .mk{opacity:1;}
-  .smBtn.disabled{opacity:.32;cursor:not-allowed;color:var(--dim2);}
-  .smBtn.disabled:hover{background:rgb(var(--accRGB) / .06);border-color:var(--well);color:var(--dim2);}
+  .smBtn.disabled{opacity:.32;cursor:not-allowed;color:var(--ink);}   /* (v243: its words white -- with no shadow under them, the grey was lost on the stadium) */
+  .smBtn.disabled:hover{background:rgb(var(--accRGB) / .06);border-color:var(--well);color:var(--ink);}
   #startMenu .smVer{position:absolute;bottom:9px;right:11px;font-size:10px;color:var(--dim2);letter-spacing:1px;}
   .smPanel{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
     background:rgba(6,10,7,.97);z-index:61;font-family:'Roboto Condensed','FTC Dot',sans-serif;}
@@ -534,25 +534,48 @@
   .smBack{margin-top:14px;min-width:248px;}
   /* exhibition setup: two clubs, the player you control */
   #exhPanel{background:rgb(6,10,7);overflow:hidden;}
-  #exhPanel .exhWrap{max-width:660px;max-height:100%;min-height:0;}
+  #exhPanel .exhWrap{width:100%;max-width:712px;height:100%;min-height:0;margin:0 auto;display:flex;flex-direction:column;gap:8px;}   /* (v243: the face-off) */
   #exhPanel .exhGrid.on{flex:0 1 auto;min-height:0;overflow:hidden;}
   #exhPanel .exhGo{flex:none;}
   #exhPanel h3{margin-bottom:4px;}
   .exhLeague{font-size:10px;letter-spacing:3px;color:var(--dim2);margin-bottom:10px;}
-  .exhTeams{display:flex;align-items:stretch;justify-content:center;gap:8px;width:100%;}
-  .exhSide{flex:1 1 0;min-width:0;border:1px solid var(--well);border-radius:10px;padding:7px 6px 6px;background:rgb(var(--accRGB) / .04);}
+  /* (v243) THE FACE-OFF: BACK, the title and the bill along the top; your club and theirs in a box each either side of a VS
+     on a thin divider; in each, its OVR in a small dark box in the corner, PREMIER LEAGUE or CHAMPIONS CUP (the clubs its
+     arrows go through), its best outfield man as the game draws him in the kit it wears, its name, his line, its shape
+     and style; TACTICS and KICK OFF along the foot */
+  #startMenu:has(#exhPanel.show) > .smCenter, #startMenu:has(#exhPanel.show) > .smVer{visibility:hidden;}
+  #startMenu #exhPanel{background:rgb(9 13 26 / .62);}
+  .exhHead{flex:none;display:flex;align-items:center;gap:12px;height:36px;}
+  #exhPanel .exhHead h3{margin:0;font-size:18px;letter-spacing:.06em;}
+  .exhHead .exhBack{flex:none;width:112px;height:36px;padding:0 10px;text-align:center;}
+  #exhPanel .exhHead .exhLeague{margin:0 0 0 auto;white-space:nowrap;}
+  .exhTeams{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr);align-items:stretch;width:100%;}
+  .exhSide{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--well);border-radius:10px;padding:6px 10px 8px;background:rgb(var(--accRGB) / .04);}
   .exhSide.you{border-color:var(--phosphor-dim);}
-  .exhVs{align-self:center;font-family:'Roboto Condensed','FTC Dot',sans-serif;color:var(--dim2);font-size:13px;letter-spacing:1px;}
-  .exhLbl{font-size:10px;letter-spacing:2px;color:var(--dim);margin:1px 0 5px;text-transform:uppercase;}
-  .exhPick{display:flex;align-items:center;gap:4px;}
-  .exhArr{flex:0 0 auto;width:30px;height:48px;border-radius:7px;border:1px solid var(--well);background:rgb(var(--accRGB) / .06);color:var(--acc);font-size:13px;cursor:pointer;font-family:inherit;}
+  .exhVs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+  .exhVs i{display:block;width:2px;height:64px;border-radius:1px;background:linear-gradient(180deg,rgb(230 238 255 / 0),rgb(230 238 255 / .5));}
+  .exhVs i:last-child{background:linear-gradient(180deg,rgb(230 238 255 / .5),rgb(230 238 255 / 0));}
+  .exhVs b{font:700 22px/1 'Roboto Condensed','FTC Dot',sans-serif;letter-spacing:.1em;color:var(--ink);text-shadow:0 2px 0 var(--ol);}
+  .exhLbl{font-size:10px;letter-spacing:2px;color:var(--dim);margin:1px 0 0;text-transform:uppercase;}
+  .exhOvr{position:absolute;top:6px;right:6px;width:40px;height:40px;border-radius:3px;background:var(--well);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+  .exhOvr i{font:700 8px/1 'Roboto Condensed','FTC Dot',sans-serif;font-style:normal;letter-spacing:.1em;color:var(--dim);}
+  .exhOvr b{font:700 18px/1 'Roboto Condensed','FTC Dot',sans-serif;color:var(--acc);}
+  .exhSideComps{display:flex;gap:4px;}
+  .exhSc{height:22px;padding:0 9px;border:0;border-radius:3px;background:var(--win);color:var(--ink);font:700 9.5px/1 'Roboto Condensed','FTC Dot',sans-serif;letter-spacing:.06em;cursor:pointer;white-space:nowrap;}
+  .exhSc.on{background:var(--rowOn);box-shadow:inset 3px 0 0 var(--acc);}
+  .exhChips{display:flex;gap:8px;width:100%;margin-top:auto;}
+  .exhChips span{flex:1 1 0;min-width:0;height:28px;display:flex;align-items:center;justify-content:center;border-radius:3px;background:var(--win);font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;}
+  .exhPick{display:flex;align-items:center;gap:4px;width:100%;}
+  .exhArr{flex:0 0 auto;width:32px;height:64px;border-radius:7px;border:1px solid var(--well);background:rgb(var(--accRGB) / .06);color:var(--acc);font-size:13px;cursor:pointer;font-family:inherit;}
   .exhArr:hover{border-color:var(--acc);}
   .exhClub{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid transparent;background:none;color:var(--ink);cursor:pointer;padding:2px 4px 4px;border-radius:8px;font-family:inherit;}
   .exhClub:hover,.exhClub.open{border-color:var(--well);background:rgb(var(--accRGB) / .07);}
-  canvas.exhKit{width:64px;height:64px;image-rendering:pixelated;border:0;border-radius:0;box-shadow:none;background:none;}
+  canvas.exhKit{width:96px;height:96px;image-rendering:pixelated;border:0;border-radius:0;box-shadow:none;background:radial-gradient(ellipse 27px 5px at 50% 91%, rgb(0 0 0 / .5), rgb(0 0 0 / 0));}   /* (v243: his best man, three times life size, his shadow under him) */
   .exhName{font-family:'Roboto Condensed','FTC Dot',sans-serif;font-size:15px;line-height:22px;height:22px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
   .exhMeta{font-size:10px;color:var(--dim);letter-spacing:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
   .exhStyle{font:10px 'Roboto Condensed','FTC Dot',sans-serif;color:var(--acc);letter-spacing:1px;white-space:nowrap;}   /* (how the club plays: its style) */
+  #exhPanel .exhChips .exhStyle{color:var(--ink);font-size:10.5px;}
+  .exhMeta .exhStar{color:var(--acc);margin-right:3px;} .exhMeta b{color:var(--ink);font-weight:700;margin-right:4px;}
   .exhGrid{display:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;width:100%;margin-top:8px;align-content:start;}   /* (v198: rows their own height -- a page of them held at the box's height had them stretched under its pager) */
   .exhGrid.on{display:grid;}
   .exhChip{display:flex;align-items:center;gap:7px;border:1px solid var(--well);border-radius:7px;background:rgb(var(--accRGB) / .04);color:var(--ink2);font-family:inherit;font-size:11px;padding:6px 7px;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -562,10 +585,11 @@
   .exhGridHd{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}   /* (v198: the list's name, and the two lists a tab each) */
   .exhComps{display:flex;gap:5px;}
   .exhComp{min-height:22px;font-size:10px;letter-spacing:1px;padding:2px 9px;cursor:pointer;}
-  #exhPanel.picking canvas.exhKit, #exhPanel.picking .exhStyle{display:none;}   /* (v198: the list open -- the cards give it their kits' room, a phone's short screen) */
-  #exhPanel.picking .exhArr{height:36px;}
-  .exhGo{display:flex;gap:8px;margin-top:11px;width:100%;}
-  .exhGo .smBtn{flex:1;text-align:center;}
+  #exhPanel.picking canvas.exhKit, #exhPanel.picking .exhStyle, #exhPanel.picking .exhChips, #exhPanel.picking .exhSideComps, #exhPanel.picking .exhVs i{display:none;}   /* (v198: the list open -- the cards give it their kits' room, a phone's short screen) */
+  #exhPanel.picking .exhArr{height:36px;} #exhPanel.picking .exhTeams{flex:none;} #exhPanel.picking .exhGrid.on{flex:1 1 auto;}
+  .exhGo{display:flex;justify-content:flex-end;gap:8px;margin-top:0;width:100%;flex:none;}
+  .exhGo .smBtn{flex:0 0 172px;text-align:center;}
+  #exhPanel .exhGo .exhKick{background:var(--fillAcc);color:var(--accInk);box-shadow:var(--pxBtnOn);}   /* (KICK OFF the main one) */
   @media (max-width:520px){ .exhName{font-size:13px;} .exhMeta{white-space:normal;text-align:center;line-height:1.35;} }   /* (a phone: the club's line wraps inside its card) */
   /* hide the in-match HUD + touch controls while a menu screen is up */
   #stageWrap.menuMode #readout,
@@ -778,6 +802,42 @@
   .mnCard{ max-height:calc(100dvh - 20px); } .mnList{ display:flex; flex-direction:column; gap:2px; overflow-y:auto; min-height:0; flex:1 1 auto; overscroll-behavior:contain; }
   .mnList > *{ flex:none; } .mnRow span i{ display:block; font-style:normal; font-size:10.5px; color:var(--dim); margin-top:1px; }
   .mnRow.big b{ font-size:24px; } .mnRow.net{ border-top:2px dashed var(--well); padding-top:6px; margin-top:2px; }
+  /* (v243) THE STADIUM SUMMARY as the ground fills up: the ground from above on the left -- the North Stand (or one side
+     of the bleachers) along the top, the premium seats in a row under it, the West End and the East End either side of
+     the pitch, the South Stand (or the bleachers' other side) along the foot. Each stand is an empty box till its line
+     comes up, then fills from the bottom as full as it was, with just how many came and the percentage. The lines on the
+     right, and under them a running total that's what the gate took at the end. */
+  .mnCard.mnWide{ max-width:720px; } .mnWide .mnTitle{ text-align:left; padding-left:2px; }
+  .mnGround{ display:grid; grid-template-columns:minmax(232px,300px) minmax(0,1fr); gap:14px; min-height:0; flex:1 1 auto; }
+  .mnMapCol{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .mnMap{ display:grid; gap:6px; padding:8px; height:196px; box-sizing:border-box; background:var(--well); border-radius:3px;
+    grid-template-columns:34px minmax(0,1fr) 34px; grid-template-rows:24px 16px minmax(0,1fr) 28px; grid-template-areas:". n ." "w p e" "w f e" ". s ."; }
+  .mnMap.noPrem{ grid-template-rows:24px minmax(0,1fr) 28px; grid-template-areas:". n ." "w f e" ". s ."; }
+  .mnMap.noEnds{ grid-template-columns:minmax(0,1fr); grid-template-areas:"n" "p" "f" "s"; }
+  .mnMap.noEnds.noPrem{ grid-template-areas:"n" "f" "s"; }
+  .mnSt{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; min-width:0; border-radius:3px; background:#1b2547;
+    box-shadow:inset 0 0 0 1px var(--row); color:var(--ink); font:600 9.5px/1.15 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.03em; transition:box-shadow .25s; }
+  .mnSt.n{ grid-area:n; } .mnSt.s{ grid-area:s; } .mnSt.w{ grid-area:w; } .mnSt.e{ grid-area:e; }
+  .mnPrem{ grid-area:p; display:flex; justify-content:center; gap:6px; min-width:0; } .mnPrem .mnSt{ flex:0 1 66px; font-size:8.5px; letter-spacing:0; }
+  .mnPitch{ grid-area:f; position:relative; border-radius:2px; background:repeating-linear-gradient(90deg,#2f7d3b 0 18px,#358a42 18px 36px); box-shadow:inset 0 0 0 2px rgb(232 245 234 / .6); }
+  .mnPitch::after{ content:''; position:absolute; left:50%; top:4px; bottom:4px; border-left:2px solid rgb(232 245 234 / .6); }
+  .mnSt > i{ position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(180deg,#5cc27a,#2c7448); box-shadow:inset 0 1px 0 #9ef0b2; transition:height .6s ease-out; }
+  .mnSt > span{ position:relative; z-index:1; opacity:0; white-space:nowrap; text-shadow:0 1px 0 var(--ol), 0 0 3px var(--ol); transition:opacity .25s; }
+  .mnSt.on{ box-shadow:inset 0 0 0 1px var(--good); } .mnSt.on > i{ height:var(--f); } .mnSt.on > span{ opacity:1; }
+  .mnFansIn{ flex:none; text-align:center; font-size:11px; color:var(--dim); opacity:0; transition:opacity .25s; } .mnFansIn.on{ opacity:1; } .mnFansIn b{ color:var(--ink); font-weight:600; }
+  .mnSide{ display:flex; flex-direction:column; gap:6px; min-width:0; min-height:0; }
+  .mnWide .mnList{ gap:3px; scrollbar-width:none; } .mnWide .mnList::-webkit-scrollbar{ display:none; }
+  .mnWide .mnRow{ align-items:center; gap:8px; height:24px; padding:0 8px; background:var(--win); border-radius:3px; font-size:11.5px; }
+  .mnWide .mnRow svg{ flex:none; width:14px; height:14px; fill:var(--dim); }
+  .mnWide .mnRow span{ flex:1 1 auto; min-width:0; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mnWide .mnRow em{ font-style:normal; color:var(--dim); white-space:nowrap; } .mnWide .mnRow b{ min-width:62px; text-align:right; font-size:14px; font-weight:600; }
+  .mnSoFar{ flex:none; display:flex; align-items:center; gap:8px; height:32px; padding:0 8px; border-top:1px dashed var(--dim2); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink2); }
+  .mnSoFar svg{ flex:none; width:15px; height:15px; fill:var(--dim); } .mnSoFar.on svg{ fill:var(--good); }
+  .mnSoFar b{ margin-left:auto; font:600 18px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:0; color:var(--ink); } .mnSoFar.on b{ font-size:24px; color:var(--good); }
+  .mnSoFar .tg, .mnSoFar.on .sf{ display:none; } .mnSoFar.on .tg{ display:inline; }
+  .mnWide .mnGo{ align-self:flex-end; width:180px; margin-top:2px; }
+  @media (prefers-reduced-motion:reduce){ .mnSt, .mnSt > i, .mnSt > span, .mnFansIn{ transition:none; } }
   /* (v186) THE GATE: who came, stand by stand */
   .gtBig{ text-align:center; font-size:12px; color:var(--ink2); padding:2px 0 4px; } .gtBig b{ font:22px 'Roboto Condensed','FTC Dot',sans-serif; font-weight:400; color:var(--ink); }
   .gtTbl{ display:flex; flex-direction:column; gap:1px; } .gtRow{ display:grid; grid-template-columns:1fr auto 38px 34px 64px; gap:8px; align-items:baseline; font-size:11.5px; color:var(--ink2); padding:2px; }
@@ -1202,7 +1262,7 @@
   .mgCard, .tacStat, .sqCard, .exhSide, .mgOffer, .hsCell{ padding:12px 14px; }
   #bldgPanel .bpBody{ padding:12px 16px; }
   .chTop{ padding:8px 14px; }
-  /* buttons: a light top over a darker band, a rim, the outline; the text has a one-pixel shadow */
+  /* buttons: a light top over a darker band, a rim, the outline (v243: and no shadow under the words -- see the end) */
   .pauseBtn, .smBtn, .bpTab, .bpTopBack, .chPlay, .chBtn2, .chMenuBtn, .mgBtn, .mgAdj, .benchPg, .mgChip, .setOpt, .iOpt, .formBtn, .phTab,
   .mrContinue, .stadBtn, .btn, .mtab, .exhArr, .exhChip, .slotDel, .leBtn, .labChip, .iDone, .styBtn, .mkTab, .mkAdj, .menuChip, .cwSlider{
     border:0; border-radius:var(--r); background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font-family:'Roboto Condensed','FTC Dot',sans-serif; font-weight:600;   /* (v224: semibold, as the Fulltime 9 kit's labels) */
@@ -1868,8 +1928,51 @@
   .mtacCard h3{ font-family:'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); font-size:17px; letter-spacing:1px; text-shadow:2px 2px 0 var(--ol); }
   .mtacBody{ flex:1 1 auto; min-height:0; background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); }
   .mtSubs{ font:11px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--acc); letter-spacing:1px; }
-  .mtKick{ display:none; flex:none; margin-left:6px; color:var(--accInk); background:var(--acc); }   /* (before kick-off only: #mtacOv.pre) */
-  #mtacOv.pre .mtKick{ display:block; }
+  /* (v243) THE MATCH'S TACTICS, TWO PAGES: the pitch on the left, every man a card standing up on it (its edge under it, its
+     shadow thrown on the grass, smaller the further up the field it stands); on the right TACTICS has the side's tactics,
+     PLAYER SWAP the man coming off and the man going on, side by side */
+  #mtacOv .bpHead .mtViews{ margin-left:auto; }
+  #mtacOv .mtViews .bpTab{ min-height:30px; padding:0 12px; font-size:11px; }
+  #mtacOv .tacB1 .tbMain{ gap:6px; }
+  #mtacOv .tacB1 .tbLeft{ flex:1.85 1 0; flex-direction:column; gap:4px; padding:4px 4px 6px 10px; }
+  #mtacOv .tacB1 .tbRight{ flex:1 1 0; position:relative; display:flex; flex-direction:column; overflow:visible; padding:4px 10px 8px 4px; box-shadow:none; }
+  #mtacOv .mtPanel{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:6px; padding:8px; border-radius:var(--r); background:var(--well); }
+  #mtacOv .mtPanel .tbSeg{ display:flex; gap:4px; } #mtacOv .mtPanel .tbSeg .phTab{ flex:1 1 0; min-height:30px; }
+  #mtacOv .mtPanel .tbDropW{ position:static; display:block; }
+  #mtacOv .mtPanel .tbDrop{ width:100%; min-height:38px; }
+  #mtacOv .mtPanel .tbIns{ margin:0; width:100%; min-height:32px; }
+  #mtacOv .mtPanel .tbMenu{ top:8px; left:auto; right:calc(100% + 10px); }   /* (a menu opens over the pitch, beside the panel) */
+  #mtacOv .mtGap{ flex:1 1 auto; }
+  #mtacOv .mtGo{ width:100%; min-height:36px; flex:none; }
+  #mtacOv .mtInsTop{ display:flex; gap:4px; } #mtacOv .mtInsTop .tbSeg{ flex:1 1 auto; } #mtacOv .mtInsTop .tbIns{ width:auto; flex:none; padding:0 10px !important; }
+  #mtacOv .mtInsV{ padding:6px; } #mtacOv .mtInsV .tbCard{ flex:1 1 auto; min-height:0; }
+  #mtacOv .tacB1 .tbBench{ width:auto; flex:none; flex-direction:row; flex-wrap:nowrap; gap:6px; padding:0 0 6px; }
+  #mtacOv .tacB1 .tbBench .ptk{ flex:1 1 0; min-width:0; max-width:none; }
+  #mtacOv .mtBenchHd{ flex:none; font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--dim); padding:2px 0 0 2px; }
+  #mtacOv .tacB1 .tpitch .ptk{ transform:translate(-50%,-50%) scale(calc(.84 + .16 * var(--d,1)));
+    background:linear-gradient(180deg, var(--row), var(--win)); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
+  #mtacOv .tacB1 .tpitch .ptk::before{ content:''; position:absolute; left:4px; right:-2px; top:100%; height:12px; margin-top:4px; border-radius:2px; pointer-events:none;
+    background:rgb(0 0 0 / .4); filter:blur(1.5px); transform-origin:0 0; transform:skewX(48deg); }
+  #mtacOv .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
+  #mtacOv .tacB1 .ptk.offSel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .5), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
+  #mtacOv .tacB1 .ptk.onSel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--good), 0 0 0 4px rgb(var(--goodRGB) / .45); }
+  #mtacOv .ptk .ptkSt{ position:absolute; left:5px; right:5px; bottom:3px; height:3px; border-radius:2px; background:var(--ol); pointer-events:none; }
+  #mtacOv .ptk .ptkSt i{ display:block; height:100%; border-radius:2px; }
+  #mtacOv .mtSwapV .ptk:has(.ptkSt) .ptkTxt{ padding-bottom:5px; }
+  #mtacOv .mtSides{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #mtacOv .mtSideL{ font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; margin-bottom:5px; }
+  #mtacOv .mtSide.off .mtSideL{ color:var(--acc); } #mtacOv .mtSide.on .mtSideL{ color:var(--good); }
+  #mtacOv .mtSideMan{ display:flex; align-items:center; gap:6px; min-width:0; }
+  #mtacOv .mtSideMan .ptkFace{ width:36px; height:36px; border-radius:3px; background:var(--bg); }
+  #mtacOv .mtSideMan b{ display:block; font:700 13px/1.1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #mtacOv .mtSideMan span{ font:11px/1.3 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); } #mtacOv .mtSideMan em{ font-style:normal; color:var(--ink); font-weight:700; }
+  #mtacOv .mtSide .mtLegs{ margin-top:5px; }
+  #mtacOv .mtSideNone{ font:11px/1.3 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim2); padding:6px 0; }
+  #mtacOv .mtCmp{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:3px; }
+  #mtacOv .mtCmpRow{ flex:1 1 0; max-height:24px; min-height:18px; display:grid; grid-template-columns:1fr 44px 1fr; align-items:center; border-radius:3px; background:var(--win); }
+  #mtacOv .mtCmpRow b{ text-align:center; font:700 14px/1 'Roboto Condensed','FTC Dot',sans-serif; } #mtacOv .mtCmpRow i{ text-align:center; font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.1em; color:var(--dim); }
+  #mtacOv .mtCmp0{ align-items:center; justify-content:center; text-align:center; font:11px/1.4 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim2); }
+  #mtacOv .mtBtns{ display:flex; gap:6px; } #mtacOv .mtBtns .mgBtn{ flex:1 1 0; min-height:34px; padding:0 6px; font-size:11px; }
   .mtacBody .ptk{ position:absolute; }
   .mtacBody .tbBench .ptk{ position:relative; }
   .tacB1 .ptk.dim{ opacity:.45; }
@@ -1882,6 +1985,8 @@
   /* scrollbars */
   *{ scrollbar-color:var(--btnHi) var(--well); scrollbar-width:thin; }
   ::-webkit-scrollbar{ width:8px; height:8px; } ::-webkit-scrollbar-track{ background:var(--well); } ::-webkit-scrollbar-thumb{ background:var(--btnHi); }
+  /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
+  button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
 </head>
 <body>
@@ -1957,19 +2062,17 @@
       </div>
     </div>
     <div class="smPanel" id="exhPanel">
-      <div class="smCenter exhWrap">
-        <h3>EXHIBITION</h3>
-        <div class="exhLeague" id="exhLeague"></div>
+      <div class="exhWrap">
+        <div class="exhHead"><button class="smBtn exhBack" data-act="back"><span class="mk">◀</span>BACK</button><h3>EXHIBITION</h3><div class="exhLeague" id="exhLeague"></div></div>
         <div class="exhTeams">
           <div class="exhSide" id="exhSideG"></div>
-          <div class="exhVs">VS</div>
+          <div class="exhVs" aria-hidden="true"><i></i><b>VS</b><i></i></div>
           <div class="exhSide" id="exhSideR"></div>
         </div>
         <div class="exhGrid" id="exhGrid" data-pages="exhGrid"></div>
         <div class="exhGo">
-          <button class="smBtn" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
           <button class="smBtn" data-exh="tac" id="exhTac"><span class="mk">☰</span>TACTICS</button>
-          <button class="smBtn" data-act="back"><span class="mk">◀</span>BACK</button>
+          <button class="smBtn exhKick" data-exh="go" id="exhGo"><span class="mk">▶</span>KICK OFF</button>
         </div>
       </div>
     </div>
@@ -2099,8 +2202,8 @@
   </div>
 </div>
 <div id="mtacOv" class="pauseOv"><div class="mtacCard">
-  <div class="bpHead"><button class="bpTopBack" data-mt="back">◀ BACK</button><h3>TACTICS</h3><span class="mtSubs" id="mtSubs"></span>
-    <div class="bpTabs" id="mtTeams"></div><button class="bpTab mtKick" data-mt="kick" id="mtKick">KICK OFF ▶</button></div>
+  <div class="bpHead"><button class="bpTopBack" data-mt="back">◀ BACK</button><h3 id="mtTitle">TACTICS</h3><span class="mtSubs" id="mtSubs"></span>
+    <div class="bpTabs mtViews" id="mtViews"></div><div class="bpTabs" id="mtTeams"></div></div>
   <div class="mtacBody" id="mtacBody"></div>
   <div class="bpMsg" id="mtMsg"></div>
 </div></div>
@@ -16148,6 +16251,19 @@
       g.imageSmoothingEnabled=false; g.drawImage(cell,Math.round((cv.width-CELL*k)/2),Math.round((cv.height-CELL*k)/2),CELL*k,CELL*k);
       return true;
     }
+    // (v243) one man in a kit, facing you: his look from its seed (as lookOf seeds it in a match), on the exhibition's boxes
+    const pvMen={};
+    function previewMan(cv,seed,kit){
+      const g=cv.getContext('2d'); g.clearRect(0,0,cv.width,cv.height);
+      if(!cfg.ready||!cfg.body) return false;
+      const L=pvMen[seed]||(pvMen[seed]=makeLook(seed)), key='pv|'+L.key+'|'+kit.join('');
+      let c=cfg.looks[key];
+      if(!c){ const src=composeLook(L.style,L.ovs); c=bake(Object.assign({},kitSwaps(kit),lookSwaps(L)),0,0,0,0,src,PARTS.drawn);
+        if(kit[3]) paintLogo(c,logoSpots(src,L.style+'+'+L.ovs.join('+')),kit[3],kit[4]); cfg.looks[key]=c; }
+      const k=Math.max(1,Math.floor(Math.min(cv.width,cv.height)/CELL));
+      g.imageSmoothingEnabled=false; g.drawImage(c,0,(ANIM.idle.row+2)*CELL,CELL,CELL,Math.round((cv.width-CELL*k)/2),Math.round((cv.height-CELL*k)/2),CELL*k,CELL*k);
+      return true;
+    }
     // ---- LOOKS: every player his own, seeded from his name (so he looks the same match to match) ----
     // skin: [line, shadow, base, light] (the face is mostly the light tone) and the eyelid to go with it
     const SKIN_TONES=[
@@ -16413,7 +16529,7 @@
     const face=(who,kit)=>cut(who,kit,FACE), body=(who,kit)=>cut(who,kit,BODY);
     return { get enabled(){return cfg.enabled;}, get ready(){return cfg.ready;}, get keeperReady(){return cfg.gk.ready;},
              enable(v){cfg.enabled=(v!==false);}, disable(){cfg.enabled=false;},
-             load, loadParts, draw, drawTo, shadowTo, pick, pickKeeper, preview, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
+             load, loadParts, draw, drawTo, shadowTo, pick, pickKeeper, preview, previewMan, face, body, cfg, loadKeeper, drawKeeper, keeperShowsBall, lookOf, shadow,
              flush(){ cfg.looks={}; cfg.gk.looks={}; } };
   })();
   SPRITE.loadParts(PLAYER_BODY,PLAYER_HEADS); SPRITE.loadKeeper(KEEPER_SHEET); SPRITE.enable();   // art is embedded -> on by default
@@ -16914,7 +17030,7 @@
   // The other side: look, don't touch. =====
   const SUB_MAX=3;
   let SUBS={G:{used:0,on:[],off:[],q:[]},R:{used:0,on:[],off:[],q:[]}};   // (q, v179: subs waiting for a break in play -- see subsAtBreak)
-  const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false, fromHT:false};   // (v148: fromHT -- opened from half-time, and back to it)
+  const MT={team:'G', phase:'atk', drop:null, sel:null, pre:false, fromHT:false, view:'tac', off:null, on:null};   // (v148: fromHT -- opened from half-time, and back to it; v243: view, the page -- 'tac' or 'swap' -- and on PLAYER SWAP the man coming off and the man going on)
   function mtBench(t){ const li=LINEUP[t]; if(!li||!SQUAD[t]) return []; const on=new Set([li.gk,...li.atk]); return SQUAD[t].map((e,i)=>i).filter(i=>!on.has(i)&&!SUBS[t].off.includes(i)); }
   const mtCanSub=t=>t==='G'&&subsLeft()>0;
   function mtRating(e,role,pos){ return !e?0:rateAt(e.role,e.ovr,e.stats,fitPos(e),role,pos); }
@@ -16927,8 +17043,10 @@
   const mtWho=(t,si)=>{ const e=SQUAD[t]&&SQUAD[t][si]; return (LINEUP[t]&&si===LINEUP[t].gk&&keepers.find(q=>q.team===t))||players.find(q=>q.team===t&&q.squadIdx===si)
     ||(e?{team:t, pname:e.name, num:e.num, lookKey:e.lookKey}:{team:t}); };
   function mtTok(t,si,st,kind,role,pos){ const e=SQUAD[t][si]; if(!e) return ''; const r=mtRating(e,role,pos);   // (pos: the spot's fit -- spotFit; st: where he stands, tvPlace)
-    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(MT.sel===si?' statview':'')+(MT.arm===si?' armed':'')+(t==='G'&&SUBS.G.q.some(x=>x.out===si||x.inn===si)?' qWait':'')+(kind==='bench'&&!mtBenchOK(t)&&!SUBS.G.q.some(x=>x.inn===si)?' dim':'')+'"'+(kind==='bench'?'':st||'')
-      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r==null||r===''?r:ovrShownOf(e,r),natPos(e),surname(e.name),e.num)+'</button>'; }
+    const sw=MT.view==='swap', v=sw?mtLegsOf(t,si,kind!=='bench'):null;   // (v243: on PLAYER SWAP his legs along his foot, the man coming off and the man going on ringed)
+    return '<button class="ptk'+fitCls(fitPos(e),role,pos)+(sw?(MT.off===si?' offSel':MT.on===si?' onSel':''):(MT.arm===si?' sel':''))+(t==='G'&&SUBS.G.q.some(x=>x.out===si||x.inn===si)?' qWait':'')+(kind==='bench'&&!mtBenchOK(t)&&!SUBS.G.q.some(x=>x.inn===si)?' dim':'')+'"'+(kind==='bench'?'':st||'')
+      +' data-mtk="'+kind+'" data-si="'+si+'"'+(role?' data-role="'+role+'"':'')+(pos?' data-pos="'+pos+'"':'')+'>'+ptkBody(kind==='bench'?'':faceImg(mtWho(t,si),kind==='gk'?mtKeeperKit(t):teamKit(t)),r==null||r===''?r:ovrShownOf(e,r),natPos(e),surname(e.name),e.num)
+      +(sw?'<span class="ptkSt"><i style="width:'+Math.round(v*100)+'%;background:'+legCol(v)+'"></i></span>':'')+'</button>'; }
   function mtCard(t,si,phase){ if(t==='G'&&cardSide==='instr') return tiSideHtml(TI.G,phase,'mti',false,TAC.G&&TAC.G.style);   // (theirs are theirs: their men show their ratings)
     const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return '<div class="mgPick0">Tap a player for his card.</div>';
     const li=LINEUP[t], form=formFor(t,phase), slots=slotsFor(t,form,phase), k=li[phase].indexOf(si), sl=k>=0?slots[k]:null, role=si===li.gk?'GK':sl?sl.role:null;
@@ -16946,28 +17064,58 @@
     else if(MT.drop==='style'){ h+='<div class="tbMenuGrid2">'+STYLE_LIST.map(s=>
         '<button class="tbOpt'+(s[0]===TAC[t].style?' on':'')+'" data-mtstyle="'+s[0]+'"><b>'+s[1]+'</b></button>').join('')+'</div>'; }
     return h+'</div>'; }
+  // (v243) the six as numbers, for a man's two sides to be set face to face (PLAYER SWAP)
+  const sixVals=(st,G)=>G.map(([k,,ks])=>[k, ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length]);
+  const legCol=v=>v>0.6?'var(--good)':v>0.3?'var(--warn)':'var(--bad)';
+  function mtLegsOf(t,si,onPitch){ const e=SQUAD[t]&&SQUAD[t][si]; if(!e) return 1; if(!onPitch) return clamp(e.cond??1,0,1);
+    const p=mtWho(t,si); return p&&p.stamina!=null?clamp(p.stamina,0,1):1; }
+  const mtGoBtn=()=>MT.pre?'<button class="mgBtn go mtGo mtKick" data-mt="kick" id="mtKick">KICK OFF ▶</button>':'<button class="mgBtn go mtGo" data-mt="resume">BACK TO THE GAME ▶</button>';
+  // TACTICS' right side: with the ball or without it; the shape, the width, the style; INSTRUCTIONS (up in this side, in their place); and back to the game
+  function mtTacPanel(t,phase,drop,form,wl,sl,mine){
+    const seg='<div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-mtph="atk">WITH BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-mtph="def">WITHOUT</button></div>';
+    if(mine&&cardSide==='instr') return '<div class="mtPanel mtInsV"><div class="mtInsTop">'+seg+insBtn()+'</div>'+tiSideHtml(TI.G,phase,'mti',false,TAC.G&&TAC.G.style)+'</div>';
+    return '<div class="mtPanel">'+seg+drop('form',form)+drop('width',wl)+drop('style',sl)+(mine?insBtn():'')+'<span class="mtGap"></span>'+mtGoBtn()+'</div>'; }
+  // PLAYER SWAP's right side: the man coming off (tapped on the pitch) and the man going on (off the bench), each his face, his
+  // rating and his legs, then their six face to face in the stats' colours (sixCol); MAKE THE SWAP, and back to the game
+  function mtSwapPanel(t){ const mine=t==='G', li=LINEUP[t], eo=MT.off!=null?SQUAD[t][MT.off]:null, ei=MT.on!=null?SQUAD[t][MT.on]:null;
+    const side=(e,si,lbl,cls,onPitch,hint)=>{ let h='<div class="mtSide '+cls+'"><div class="mtSideL">'+lbl+'</div>';
+      if(!e) return h+'<div class="mtSideNone">'+hint+'</div></div>';
+      const v=mtLegsOf(t,si,onPitch);
+      return h+'<div class="mtSideMan">'+faceImg(mtWho(t,si),si===li.gk?mtKeeperKit(t):teamKit(t))+'<div style="min-width:0"><b>#'+e.num+' '+mgEsc(surname(e.name))+'</b><span>'+natPos(e)+' · <em>'+ovrShownOf(e)+'</em></span></div></div>'
+        +'<div class="mtLegs"><span>STAMINA</span><span class="statBar"><i style="width:'+Math.round(v*100)+'%;background:'+legCol(v)+'"></i></span></div></div>'; };
+    let h='<div class="mtPanel mtSwapP"><div class="mtSides">'+side(eo,MT.off,'COMING OFF','off',true,mine?'Tap a man on the pitch':'·')+side(ei,MT.on,'GOING ON','on',false,mine?'Tap a man on the bench':'·')+'</div>';
+    if(eo&&ei){ const G=eo.role==='GK'?SIX_GK:SIX, a=sixVals(eo.stats,G), b=sixVals(ei.stats,G);
+      h+='<div class="mtCmp">'+a.map((x,k)=>'<div class="mtCmpRow"><b style="color:'+sixCol(x[1])+'">'+x[1].toFixed(1)+'</b><i>'+x[0]+'</i><b style="color:'+sixCol(b[k][1])+'">'+b[k][1].toFixed(1)+'</b></div>').join('')+'</div>'; }
+    else h+='<div class="mtCmp mtCmp0">'+(mine?(MT.pre?'Before kick-off a man off the bench is a change of team: no sub used.':subsLeft()>0?'The two side by side, their numbers face to face.':'No subs left this match.'):'Their side: look, don\'t touch.')+'</div>';
+    const can=mine&&eo&&ei&&(MT.pre||subsLeft()>0);
+    return h+'<div class="mtBtns"><button class="mgBtn go mtDoSwap" data-mt="doswap"'+(can?'':' disabled')+'>⇅ MAKE THE SWAP</button>'+mtGoBtn()+'</div></div>'; }
   function renderMatchTac(){ const t=MT.team, phase=MT.phase, li=LINEUP[t]; if(!li||!SQUAD[t]) return;
-    const mine=t==='G', form=formFor(t,phase), slots=slotsFor(t,form,phase), order=li[phase]||li.atk, bench=mtBench(t);
-    if(MT.sel==null||!SQUAD[t][MT.sel]) MT.sel=(controlled&&controlled.team===t)?controlled.squadIdx:order[0];
+    const mine=t==='G', form=formFor(t,phase), slots=slotsFor(t,form,phase), order=li[phase]||li.atk, bench=mtBench(t), swap=MT.view==='swap';
+    if(MT.off!=null&&!(li.gk===MT.off||order.includes(MT.off))) MT.off=null;   // (gone off since, or not his side's)
+    if(MT.on!=null&&!bench.includes(MT.on)) MT.on=null;
     const lbl=x=>(x||'').toUpperCase(), w=widthSnap(widthOf(t,phase)), wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
     const sl=(STYLE_LIST.find(s=>s[0]===TAC[t].style)||STYLE_LIST[0])[1];
     const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(MT.drop===k?' on':'')+'" data-mtdrop="'+k+'"'+(mine?'':' disabled')+'><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+(mine?' ▾':'')+'</button>'+(MT.drop===k?mtMenuHtml(t,phase):'')+'</span>';
-    let h='<div class="tacB1'+(mine?'':' ro')+'"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-mtph="atk">WITH BALL</button><button class="phTab'+(phase==='def'?' on':'')+'" data-mtph="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop('style',sl)+(mine?insBtn():'')+'</div>';
-    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch tvP"><div class="tvF">';
+    let h='<div class="tacB1'+(mine?'':' ro')+(swap?' mtSwapV':' mtTacV')+'"><div class="tbMain"><div class="tbLeft"><div class="tpitch tvP"><div class="tvF">';
     const nOn=Math.min(order.length,slots.length), st=tvPlace([{u:0.5,t:0.945,k:0,n:1,c:0},...slots.slice(0,nOn).map(s=>mtPos(t,s))]);
     h+=mtTok(t,li.gk,st[0],'gk','GK','GK');
     for(let i=0;i<nOn;i++) h+=mtTok(t,order[i],st[i+1],'field',slots[i].role,spotFit(slots[i]));
-    h+='</div></div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,'','bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div></div>';   // (the bench under the pitch)
-    h+='<div class="tbRight">'+mtCard(t,MT.sel,phase)+'</div></div>';   // (his card, top to bottom)
+    h+='</div></div>';
+    if(swap) h+='<div class="mtBenchHd">THE BENCH</div><div class="tbBench" data-bench="m'+t+'">'+(bench.length?bench.map(si=>mtTok(t,si,'','bench',null)).join(''):'<span class="tbBenchNone">'+(mine?'no one left on the bench':'—')+'</span>')+'</div>';
+    h+='</div><div class="tbRight">'+(swap?mtSwapPanel(t):mtTacPanel(t,phase,drop,form,wl,sl,mine))+'</div></div>';
     document.getElementById('mtacBody').innerHTML=h+'</div>';
+    document.getElementById('mtTitle').textContent=swap?'PLAYER SWAP':'TACTICS';
+    document.getElementById('mtViews').innerHTML='<button class="bpTab'+(swap?'':' on')+'" data-mt="view" data-v="tac">TACTICS</button><button class="bpTab'+(swap?' on':'')+'" data-mt="view" data-v="swap">⇅ PLAYER SWAP</button>';
     document.getElementById('mtTeams').innerHTML='<button class="bpTab'+(mine?' on':'')+'" data-mt="team" data-t="G">'+mgEsc(lbl(TEAM.G.code))+'</button><button class="bpTab'+(mine?'':' on')+'" data-mt="team" data-t="R">'+mgEsc(lbl(TEAM.R.code))+'</button>';
     document.getElementById('mtSubs').textContent=MT.pre?'BEFORE KICK-OFF':mtBench('G').length||SUBS.G.used?'SUBS LEFT '+subsLeft()+(SUBS.G.q.length?' · '+SUBS.G.q.length+' AT THE BREAK':''):''; }
   // pre: before an exhibition's kick-off (kickOffExhibition) -- ◀ CLUBS back to the setup screen, KICK OFF ▶ to play, and a
   // man off the bench for one in the team a change of team, not a sub (mtLineup)
-  function openMatchTac(pre){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.arm=null; MT.pre=!!pre; menuOpen=true;
+  function openMatchTac(pre,view){ MT.team='G'; MT.phase='atk'; MT.drop=null; MT.sel=null; MT.arm=null; MT.off=null; MT.on=null; MT.view=view==='swap'?'swap':'tac'; MT.pre=!!pre; menuOpen=true;
     const ov=document.getElementById('mtacOv'); ov.classList.add('on'); ov.classList.toggle('pre',MT.pre);
     ov.querySelector('.bpTopBack').textContent=MT.pre?'◀ CLUBS':'◀ BACK'; renderMatchTac(); }
+  // (v243) BACK TO THE GAME: the match again -- straight to it, or to half-time's card if it opened from there
+  function mtResume(){ if(MT.pre){ mtKickOff(); return; } menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on');
+    if(MT.fromHT){ MT.fromHT=false; htShow(); } }
   function closeMatchTac(){ if(MT.pre){ mtBackToClubs(); return; }
     menuOpen=false; MT.drop=null; document.getElementById('mtacOv').classList.remove('on');
     if(MT.fromHT){ MT.fromHT=false; htShow(); return; }   // (v148: from half-time, back to it)
@@ -17117,7 +17265,7 @@
   document.getElementById('qsWrap').addEventListener('click',e=>{
     const b=e.target.closest('#qsBtn,[data-qs]'); if(!b) return; b.blur();
     if(b.id==='qsBtn') QS.open=!QS.open;                               // (only ever opened, and shut, by a press)
-    else if(b.dataset.qs==='all'){ QS.open=false; closePause(); openMatchTac(); }
+    else if(b.dataset.qs==='all'){ QS.open=false; closePause(); openMatchTac(false,'swap'); }   // (v243: on PLAYER SWAP)
     else if(b.dataset.qs==='force'){ const s=qsForce(); if(s) qsMake(s); }   // (v242)
     else { const [out,inn]=b.dataset.qs.split(':').map(Number), w=SUBS.G.q.findIndex(x=>x.out===out&&x.inn===inn);
       if(w>=0) SUBS.G.q.splice(w,1);                                    // (one waiting for the break: tap it again, and he stays on)
@@ -17134,7 +17282,10 @@
       else { subQ(t,{out,inn}); MT.sel=inn; mtMsg((ei?ei.name:'')+' on for '+(eo?eo.name:'')+' at the next break · '+nl(),'var(--good)'); } }   // (v179: the ball's in play -- see subsAtBreak)
     else if(kinds==='field+gk') mtMsg('Change your keeper with a sub off the bench.'); }
   document.getElementById('mtacOv').addEventListener('click',e=>{ const t=MT.team;
-    const b=e.target.closest('[data-mt]'); if(b){ if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='kick'){ mtKickOff(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; renderMatchTac(); return; } }
+    const b=e.target.closest('[data-mt]'); if(b){ if(b.disabled) return; if(b.dataset.mt==='back'){ closeMatchTac(); return; } if(b.dataset.mt==='kick'){ mtKickOff(); return; } if(b.dataset.mt==='team'){ MT.team=b.dataset.t; MT.sel=null; MT.drop=null; MT.arm=null; MT.off=null; MT.on=null; renderMatchTac(); return; }
+      if(b.dataset.mt==='view'){ MT.view=b.dataset.v==='swap'?'swap':'tac'; MT.drop=null; MT.arm=null; renderMatchTac(); return; }   // (v243: the two pages)
+      if(b.dataset.mt==='resume'){ mtResume(); return; }
+      if(b.dataset.mt==='doswap'){ if(t==='G'&&MT.off!=null&&MT.on!=null){ mtSwap({si:MT.off,kind:LINEUP.G.gk===MT.off?'gk':'field'},{si:MT.on,kind:'bench'}); MT.off=null; MT.on=null; } renderMatchTac(); return; } }
     const dd=e.target.closest('[data-mtdrop]'); if(dd){ if(!dd.disabled) MT.drop=MT.drop===dd.dataset.mtdrop?null:dd.dataset.mtdrop; renderMatchTac(); return; }
     if(MT.drop&&!e.target.closest('.tbMenu')){ MT.drop=null; renderMatchTac(); return; }
     const f=e.target.closest('[data-mtform]'); if(f){ MT.drop=null; if(!f.disabled){ setTeamForm(t,MT.phase,f.dataset.mtform); } renderMatchTac(); return; }
@@ -17147,9 +17298,11 @@
     const mi=e.target.closest('[data-mti]'); if(mi){ if(mi.disabled||t!=='G') return; tiNoteK=mi.dataset.mti; setMatchTI(t,mi.dataset.mti,mi.dataset.v); renderMatchTac(); return; }
     const tr=e.target.closest('[data-tirow]'); if(tr){ tiNoteK=tr.dataset.tirow; renderMatchTac(); return; }
     const am=e.target.closest('[data-mtarm]'); if(am){ const si=+am.dataset.mtarm; MT.arm=MT.arm===si?null:si; renderMatchTac(); return; }   // (v158: A TAP TO SWAP -- SWAP on his card, then the other man)
-    const tk=e.target.closest('[data-mtk]'); if(tk){ const si=+tk.dataset.si;
-      if(MT.arm!=null&&MT.arm!==si&&t==='G'){ const a=document.querySelector('#mtacOv .tacB1:not(.ro) .ptk[data-si="'+MT.arm+'"]'); MT.arm=null; if(a) mtSwap({si:+a.dataset.si,kind:a.dataset.mtk},{si,kind:tk.dataset.mtk}); renderMatchTac(); return; }
-      MT.arm=null; MT.sel=si; cardSide='rate'; renderMatchTac(); return; } });   // (a man tapped: his card)
+    const tk=e.target.closest('[data-mtk]'); if(tk){ const si=+tk.dataset.si, kind=tk.dataset.mtk; if(t!=='G') return;   // (theirs: look, don't touch)
+      if(MT.view==='swap'){ if(kind==='bench'){ if(!tk.classList.contains('dim')||MT.on===si) MT.on=MT.on===si?null:si; } else MT.off=MT.off===si?null:si; renderMatchTac(); return; }   // (v243: PLAYER SWAP -- the man coming off, the man going on)
+      if(kind==='gk'){ MT.arm=null; mtMsg('Change your keeper on PLAYER SWAP, with a man off the bench.'); renderMatchTac(); return; }
+      if(MT.arm!=null&&MT.arm!==si){ const a=MT.arm; MT.arm=null; mtSwap({si:a,kind:'field'},{si,kind:'field'}); renderMatchTac(); return; }   // (TACTICS: tap two of them and they swap spots)
+      MT.arm=MT.arm===si?null:si; renderMatchTac(); return; } });
   pxDrag(document.getElementById('mtacOv'), '.tacB1:not(.ro) .ptk[data-si]', {
     can(el){ return !MT.drop&&(el.dataset.mtk!=='bench'||mtBenchOK(MT.team)); },
     lift(el){ const e=SQUAD[MT.team][+el.dataset.si]; if(!e) return;
@@ -17214,12 +17367,12 @@
       const pc=o=>n(o,'pa')?Math.round(n(o,'pc')/n(o,'pa')*100)+'%':'—', row=(lbl,a,b)=>'<span>'+a+'</span><i>'+lbl+'</i><span>'+b+'</span>';
       h+='<div class="htStats">'+row('SHOTS',n(A,'sh'),n(B,'sh'))+row('ON TARGET',n(A,'son'),n(B,'son'))+row('PASSES',n(A,'pa'),n(B,'pa'))+row('FOUND',pc(A),pc(B))+row('TACKLES',n(A,'tk'),n(B,'tk'))+row('SAVES',n(A,'sav'),n(B,'sav'))+'</div>'; }
     const left=SUB_MAX-SUBS.G.used;
-    h+='<div class="htBtns"><button class="pauseBtn" data-ht="tac">SUBS ('+left+' LEFT)</button><button class="pauseBtn" data-ht="tac">TACTICS</button><button class="pauseBtn htGo" data-ht="go">SECOND HALF ▶</button></div>';
+    h+='<div class="htBtns"><button class="pauseBtn" data-ht="subs">SUBS ('+left+' LEFT)</button><button class="pauseBtn" data-ht="tac">TACTICS</button><button class="pauseBtn htGo" data-ht="go">SECOND HALF ▶</button></div>';
     card.innerHTML=h; document.getElementById('htModal').classList.add('on'); }
   function htGo(){ htOpen=false; document.getElementById('htModal').classList.remove('on'); }
   document.getElementById('htModal').addEventListener('click',e=>{ const b=e.target.closest('[data-ht]'); if(!b) return;
     if(b.dataset.ht==='go'){ htGo(); return; }
-    document.getElementById('htModal').classList.remove('on'); MT.fromHT=true; openMatchTac(); });   // (the board: back from it to here -- closeMatchTac)
+    document.getElementById('htModal').classList.remove('on'); MT.fromHT=true; openMatchTac(false,b.dataset.ht==='subs'?'swap':'tac'); });   // (the board: back from it to here -- closeMatchTac; v243: SUBS on PLAYER SWAP)
   // ===== IN-GAME PAUSE MENU (Tactics / Settings / Exit / Back) =====
   // (v157) THE MATCH AT A GLANCE, at the menu's top: the score, the minute and your subs left -- the HUD's, in one line
   function pauseState(){ const el=document.getElementById('pauseState'); if(!el) return; const t=id=>(document.getElementById(id)||{}).textContent||'';
@@ -20693,7 +20846,7 @@
     return list.map(q=>{ const i=cs.indexOf(q.c), off=q.y-D[i], xl=TVF.l0+TVF.l1*q.s, xr=TVF.r0+TVF.r1*q.s, mid=(xl+xr)/2*100, w=(xr-xl)*100, X=(xl+(xr-xl)*clamp(q.u,0,1))*100;
       const top=Math.abs(off)>0.05?'calc('+at[i]+' + '+off.toFixed(2)+'%)':at[i];
       const along=!q.k||!(q.n>1)?X.toFixed(2)+'%':'calc('+mid.toFixed(2)+'% + '+q.k+' * min(max('+Math.abs((X-mid)/q.k).toFixed(2)+'%, var(--colW)), calc(('+w.toFixed(2)+'% - 2 * var(--hw)) / '+(q.n-1)+')))';
-      return ' style="'+(q.n>=4?'--tw:min(var(--twMax), calc(('+w.toFixed(2)+'% - '+3*(q.n-1)+'px) / '+q.n+'));':'')+'left:clamp(var(--hw), '+along+', calc(100% - var(--hw)));top:'+top+'"'; }); }
+      return ' style="'+(q.n>=4?'--tw:min(var(--twMax), calc(('+w.toFixed(2)+'% - '+3*(q.n-1)+'px) / '+q.n+'));':'')+'--d:'+q.s.toFixed(3)+';left:clamp(var(--hw), '+along+', calc(100% - var(--hw)));top:'+top+'"'; }); }
   // the rows' heights, top to foot (D: where each would be, in % of the pitch): each a step (--rowV) at least below the one
   // above it and the top's room, then pulled up where the rows under it haven't the room above the foot
   function tvRows(D){ const R=D.length, s='var(--rowV)', hh='calc(var(--hh) - var(--mY))';   // (a row may stand in the box's room over and under the picture)
@@ -21011,19 +21164,30 @@
     document.getElementById('mrContinueBtn').onclick=()=>{ el.style.display='none'; renderHub(); }; }
   // BACK AT THE CLUB AFTER A MATCH YOU PLAYED (v242), after the press conference: the STADIUM SUMMARY after a home game --
   // who came, then what each part of the ground took, its fans and its price, the cheapest seats first and the VIP seats
-  // last, then the gate in all -- and then the FUND SUMMARY: the week's money from where the bank stood as it began, what
+  // last, then the gate in all (v243: beside the ground from above, each stand filling as its line comes up) -- and then the FUND SUMMARY: the week's money from where the bank stood as it began, what
   // came in (the gate, the TV, the partners, the sponsors, the shirts...), the wages out in red, the week's net and where
   // it stands now. Each starts with its title alone; NEXT brings up the next line, and with the last one up it reads
   // CONTINUE. A long one scrolls. (v106-v241: THE GATE and THE MONEY, every line at once.)
   function moneyShow(d){ const M=MGUI.money, el=document.getElementById('moneyModal'); if(!M||!el) return;
     if(el.classList.contains('on')||mgUpElse('moneyModal')||(d.press&&d.press.qs&&d.press.qs.length)) return;   // (v148: one at a time, after the press)
     MGUI.money=null; const card=el.querySelector('.mnCard'), lines=[], fmt=v=>(v<0?'−':'+')+money(Math.abs(v));
-    const row=(cls,l,v,sub)=>'<div class="mnRow '+cls+'"><span>'+l+(sub?'<i>'+sub+'</i>':'')+'</span><b>'+v+'</b></div>';
-    let title, done;
-    if(M.crowd&&!M.gateDone){ const G=M.crowd, pc=(a,c)=>c?Math.round(a/c*100):0; title='STADIUM SUMMARY';
-      lines.push(row('big','Fans in the ground',G.att.toLocaleString(),'of '+G.cap.toLocaleString()+' · '+(G.att>=G.cap?'full':pc(G.att,G.cap)+'% full')+(G.derby?' · the derby':'')));
-      for(const x of G.seats.slice().sort((a,b)=>a.price-b.price)) lines.push('<div class="mnRow" data-seat="'+x.id+'"><span>'+mgEsc(x.n)+'<i>'+x.att.toLocaleString()+' fans × $'+x.price+'</i></span><b>'+money(x.att*x.price)+'</b></div>');
-      lines.push(row('tot up','Taken at the gate',money(G.gate)));
+    const row=(cls,l,v,sub)=>'<div class="mnRow mnStep '+cls+'"><span>'+l+(sub?'<i>'+sub+'</i>':'')+'</span><b>'+v+'</b></div>';
+    let title, done, body=null;
+    if(M.crowd&&!M.gateDone){ const G=M.crowd, pc=(a,c)=>c?Math.round(a/c*100):0, n=v=>Math.round(v).toLocaleString(); title='STADIUM SUMMARY';
+      // (v243) the ground from above, each stand an empty box till its line comes up: the bleachers (one down each side)
+      // along the top and the foot, or the North and South Stands; the ends either side of the pitch; the premium seats in
+      // a row between the North Stand and the pitch. A stand shows just how many came and how full it was.
+      const by=id=>G.seats.find(x=>x.id===id), B=by('B'), prem=G.seats.filter(x=>x.prem), ends=!!(by('E')||by('W'));
+      const box=(x,pos,txt)=>'<div class="mnSt '+pos+'" data-st="'+x.id+'" style="--f:'+Math.min(100,pc(x.att,x.cap))+'%"><i></i>'+(txt?'<span>'+n(x.att)+(pos==='w'||pos==='e'?'<br>':' · ')+pc(x.att,x.cap)+'%</span>':'')+'</div>';
+      const side=(pos,id,txt)=>{ const x=B||by(id); return x?box(x,pos,txt):''; };
+      const map='<div class="mnMap'+(ends?'':' noEnds')+(prem.length?'':' noPrem')+'">'+side('n','N',true)+(prem.length?'<div class="mnPrem">'+prem.map(x=>box(x,'p',true)).join('')+'</div>':'')
+        +(ends?side('w','W',true):'')+'<div class="mnPitch"></div>'+(ends?side('e','E',true):'')+side('s','S',!B)+'</div>';
+      const IC={seats:'<path d="M6 3h12a2 2 0 0 1 2 2v6H4V5a2 2 0 0 1 2-2z"/><rect x="2.5" y="12" width="19" height="4" rx="1"/><rect x="5" y="16" width="2.5" height="5.5"/><rect x="16.5" y="16" width="2.5" height="5.5"/>',
+        vip:'<path d="M3 17.5L2 7l5.5 4.5L12 3.5l4.5 8L22 7l-1 10.5z"/><rect x="3" y="19" width="18" height="2.8" rx="1"/>', ticket:'<path d="M2 6h20v4a2 2 0 0 0 0 4v4H2v-4a2 2 0 0 0 0-4z"/>'};
+      const ic=k=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>';
+      const rows=G.seats.slice().sort((a,b)=>a.price-b.price).map(x=>'<div class="mnRow mnStep" data-seat="'+x.id+'" data-v="'+Math.round(x.att*x.price)+'">'+ic(x.prem?'vip':'seats')+'<span>'+mgEsc(x.n)+'</span><em>'+n(x.att)+' × $'+x.price+'</em><b>'+money(x.att*x.price)+'</b></div>').join('');
+      body='<div class="mnGround"><div class="mnMapCol">'+map+'<div class="mnFansIn mnStep"><b>'+n(G.att)+'</b> in · '+(G.att>=G.cap?'full':pc(G.att,G.cap)+'% full')+(G.derby?' · the derby':'')+'</div></div>'
+        +'<div class="mnSide"><div class="mnList">'+rows+'</div><div class="mnSoFar mnStep" data-tot="'+Math.round(G.gate)+'">'+ic('ticket')+'<span class="sf">So far</span><span class="tg">Taken at the gate</span><b>'+money(0)+'</b></div></div></div>';
       done=()=>{ M.gateDone=true; MGUI.money=M; el.classList.remove('on'); moneyShow(d); }; }
     else { title='FUND SUMMARY';
       // the week the game was in: this one if its money's in it, else the one before with this one's since (the club is on
@@ -21037,13 +21201,19 @@
       for(const k of ['gate','tv','partners','sponsors','shirts','league','prizes','wages','transfers','building','scouting','events','other']) if(Math.round(L[k]||0)) lines.push(row(L[k]>=0?'up':'dn',LDG_NAME[k],fmt(Math.round(L[k]))));
       const net=now-b0; lines.push(row('net '+(net>=0?'up':'dn'),'This week',fmt(net)));
       lines.push(row('tot','Now in the bank',money(now)));
-      if(M.fans) lines.push('<div class="mnFans">'+(M.fans>0?'+':'')+M.fans.toLocaleString()+' fans · '+Math.round(M.fansNow).toLocaleString()+' now</div>');
+      if(M.fans) lines.push('<div class="mnFans mnStep">'+(M.fans>0?'+':'')+M.fans.toLocaleString()+' fans · '+Math.round(M.fansNow).toLocaleString()+' now</div>');
       done=()=>{ el.classList.remove('on'); renderHub(); }; }
-    card.innerHTML='<div class="mnTitle">'+title+'</div><div class="mnList">'+lines.join('')+'</div><button class="mrContinue mnGo" data-mn="go">NEXT ▶</button>';
+    card.classList.toggle('mnWide',!!body);
+    card.innerHTML='<div class="mnTitle">'+title+'</div>'+(body||'<div class="mnList">'+lines.join('')+'</div>')+'<button class="mrContinue mnGo" data-mn="go">NEXT ▶</button>';
     el.classList.add('on');
-    const items=[...card.querySelectorAll('.mnList > *')], go=card.querySelector('[data-mn="go"]'); let shown=0;
+    // a line a press, in the order they read (v243: the Stadium Summary's crowd under the ground, its stands' lines
+    // lighting their stands as they come, then the running total turning into what the gate took)
+    const items=[...card.querySelectorAll('.mnStep')], go=card.querySelector('[data-mn="go"]'), tot=card.querySelector('.mnSoFar'); let shown=0, sofar=0;
     go.onclick=()=>{ if(shown>=items.length){ done(); return; }
-      const it=items[shown++]; it.classList.add('on'); try{ it.scrollIntoView({block:'nearest'}); }catch(e){}
+      const it=items[shown++]; it.classList.add('on');
+      if(it.dataset.seat){ card.querySelectorAll('.mnSt[data-st="'+it.dataset.seat+'"]').forEach(b=>b.classList.add('on')); sofar+=+it.dataset.v||0; if(tot) tot.querySelector('b').textContent=money(sofar); }
+      if(it===tot) tot.querySelector('b').textContent=money(+tot.dataset.tot||sofar);
+      if(it.parentNode&&it.parentNode.classList.contains('mnList')) try{ it.scrollIntoView({block:'nearest'}); }catch(e){}
       go.innerHTML=shown>=items.length?'CONTINUE ▶':'NEXT ▶'; }; }
 
   // (v151) a figure typed into a bid or a price: on Enter, or when the field's left -- digits only ($, commas, k and m
@@ -21168,16 +21338,22 @@
   // ----- the setup screen -----
   let exhGridSide=null;                       // 'G' / 'R' while picking that side's club from the full list
   let exhGridComp=null;                       // (v198) the list it shows: 'pl' the Premier League's, 'cc' the Champions Cup's (null: the club's own)
+  // (v243) a club's best outfield man: the one drawn on its box, in its kit
+  function exhBest(side){ return (side.squad||[]).filter(e=>e&&e.role!=='GK').sort((a,b)=>(b.ovr||0)-(a.ovr||0))[0]||null; }
   function exhSideHTML(t){
-    const id=t==='G'?EXH.you:EXH.opp, club=clubById(id), kit=matchKits(clubById(EXH.you),clubById(EXH.opp))[t], side=clubSide(id);
-    return '<div class="exhLbl">'+(t==='G'?'YOUR TEAM':'OPPONENT')+'</div><div class="exhPick">'
+    const id=t==='G'?EXH.you:EXH.opp, club=clubById(id), kit=matchKits(clubById(EXH.you),clubById(EXH.opp))[t], side=clubSide(id), best=exhBest(side), comp=club.cc?'cc':'pl';
+    const seed=best?(best.lookKey!=null?'id|'+best.lookKey:club.id+'|'+best.name):'';   // (as the match will seed his look: see SPRITE.lookOf)
+    return '<div class="exhLbl">'+(t==='G'?'YOUR TEAM':'OPPONENT')+'</div>'
+      +'<div class="exhOvr" title="the side\'s rating"><i>OVR</i><b>'+clubOvrShown(side.squad,side.lineup)+'</b></div>'
+      +'<div class="exhSideComps">'+[['pl','PREMIER LEAGUE'],['cc','CHAMPIONS CUP']].map(([k,n])=>'<button class="exhSc'+(k===comp?' on':'')+'" data-exh="sidecomp" data-side="'+t+'" data-comp="'+k+'">'+n+'</button>').join('')+'</div>'
+      +'<div class="exhPick">'
       +'<button class="exhArr" data-exh="prev" data-side="'+t+'" aria-label="previous club">\u25c0</button>'
       +'<button class="exhClub'+(exhGridSide===t?' open':'')+'" data-exh="grid" data-side="'+t+'" title="pick from all the clubs">'
-      +'<canvas class="exhKit" width="64" height="64" data-kit="'+kit.join(',')+'"></canvas>'
+      +'<canvas class="exhKit" width="96" height="96" data-kit="'+kit.join(',')+'" data-seed="'+mgEsc(seed)+'"></canvas>'
       +'<span class="exhName">'+club.name+'</span>'
-      +'<span class="exhMeta">'+club.id+' \u00b7 OVR '+clubOvrShown(side.squad,side.lineup)+' \u00b7 '+side.form+' \u00b7 '+kitKind(club,kit)+'</span>'
-      +'<span class="exhStyle">'+styleName(side.style||club.style)+'</span></button>'
-      +'<button class="exhArr" data-exh="next" data-side="'+t+'" aria-label="next club">\u25b6</button></div>';
+      +'<span class="exhMeta">'+(best?'<span class="exhStar">\u2605</span><b>'+mgEsc(best.name)+'</b>'+natPos(best)+' '+ovrShownOf(best)+' \u00b7 ':'')+kitKind(club,kit)+'</span></button>'
+      +'<button class="exhArr" data-exh="next" data-side="'+t+'" aria-label="next club">\u25b6</button></div>'
+      +'<div class="exhChips"><span class="exhForm">'+side.form+'</span><span class="exhStyle">'+styleName(side.style||club.style)+'</span></div>';
   }
   function drawKitSwatch(cv,k){                // (no sprites yet) a plain shirt and shorts
     const g=cv.getContext('2d'), w=cv.width, h=cv.height; g.clearRect(0,0,w,h);
@@ -21189,7 +21365,7 @@
     const cc=[EXH.you,EXH.opp].some(id=>(clubById(id)||{}).cc);   // (v198: one from the Champions Cup in it -- a Champions Cup night)
     document.getElementById('exhLeague').innerHTML=(cc?CC_LEAGUE:CLUB_LEAGUE);   // (v228: no difficulty to tap through: CHAMPION)
     for(const t of ['G','R']){ const el=document.getElementById('exhSide'+t); el.innerHTML=exhSideHTML(t); el.classList.toggle('you',t==='G'); }
-    document.querySelectorAll('#exhPanel canvas.exhKit').forEach(cv=>{ const k=cv.dataset.kit.split(','); if(!SPRITE.preview(cv,k)) drawKitSwatch(cv,k); });
+    document.querySelectorAll('#exhPanel canvas.exhKit').forEach(cv=>{ const k=cv.dataset.kit.split(','); if(!(cv.dataset.seed?SPRITE.previewMan(cv,cv.dataset.seed,k):SPRITE.preview(cv,k))) drawKitSwatch(cv,k); });   // (v243: its best man in it)
     const grid=document.getElementById('exhGrid');
     if(exhGridSide){
       const cur=exhGridSide==='G'?EXH.you:EXH.opp, other=exhGridSide==='G'?EXH.opp:EXH.you;
@@ -21203,16 +21379,19 @@
   }
   function exhSet(t,id){ if(t==='G') EXH.you=id; else EXH.opp=id; }
   function exhCycle(t,dir){
-    const other=t==='G'?EXH.opp:EXH.you, L=EXH_CLUBS; let i=L.findIndex(c=>c.id===(t==='G'?EXH.you:EXH.opp));   // (v198: the Premier League's, then the Champions Cup's)
+    const cur=t==='G'?EXH.you:EXH.opp, other=t==='G'?EXH.opp:EXH.you, L=(clubById(cur)||{}).cc?CC_ORDER:CLUBS; let i=L.findIndex(c=>c.id===cur);   // (v243: round its own competition's -- PREMIER LEAGUE or CHAMPIONS CUP, the switch over it)
     do{ i=(i+dir+L.length)%L.length; } while(L[i].id===other);
     exhSet(t,L[i].id);
   }
+  function exhSideComp(t,comp){ const cur=t==='G'?EXH.you:EXH.opp, other=t==='G'?EXH.opp:EXH.you, cc=comp==='cc';
+    if(!!(clubById(cur)||{}).cc===cc) return; const c=(cc?CC_ORDER:CLUBS).find(x=>x.id!==other); if(c) exhSet(t,c.id); }
   document.getElementById('exhPanel').addEventListener('click',e=>{
     const b=e.target.closest('[data-exh]'); if(!b||b.disabled) return;
     const a=b.dataset.exh, t=b.dataset.side;
     if(a==='go'){ kickOffExhibition(); return; }
     if(a==='tac'){ kickOffExhibition(true); return; }                 // (your tactics first: the match waits)
     if(a==='prev'||a==='next') exhCycle(t,a==='next'?1:-1);
+    else if(a==='sidecomp'){ exhSideComp(t,b.dataset.comp); exhGridSide=null; }   // (v243)
     else if(a==='grid'){ exhGridSide=(exhGridSide===t)?null:t; exhGridComp=null; }
     else if(a==='comp'){ exhGridComp=b.dataset.comp; fitForget('exhGrid'); }   // (v198: the other list, from its first page)
     else if(a==='pick'){ exhSet(t,b.dataset.id); exhGridSide=null; }
@@ -21508,7 +21687,12 @@
     ['PAS','Passing',['passAcc','longPass','crossing','offIQ']],['SHO','Shooting',['shotAcc','shotPower','longShots','compFinal']],['DEF','Defending',['tackle','slideTackle','interceptions','defIQ']]];
   const SIX_GK=[['DIV','Diving',['gkDiveRange']],['REF','Reflexes',['gkReflex']],['REA','Reach',['gkReach']],['SPD','Speed',['keeperSpd']],['KIC','Kicking',['gkDistribution','longPass','ballControl','composure']],['HAN','Handling',['gkHandling']]];
   let sixOpen=null;   // the group opened -- it stays open as you look at the next man
-  function sixCol(v){ return v>=7.5?'var(--good)':v>=6?'var(--good2)':v>=4.5?'var(--warn)':'var(--bad)'; }
+  // (v243) A STAT'S COLOUR, 1 to 10: grey at 1, white at 3.5, green at 6.5, blue at 10, blended between (four bands before:
+  // red under 4.5, amber, light green from 6, green from 7.5)
+  const STAT_STOPS=[[1,[138,147,168]],[3.5,[255,255,255]],[6.5,[76,217,100]],[10,[77,163,255]]];
+  function sixCol(v){ v=clamp(+v||1,1,10);
+    for(let i=1;i<STAT_STOPS.length;i++){ const [a,ca]=STAT_STOPS[i-1], [b,cb]=STAT_STOPS[i]; if(v<=b){ const f=(v-a)/(b-a); return 'rgb('+ca.map((c,j)=>Math.round(c+(cb[j]-c)*f)).join(' ')+')'; } }
+    return 'rgb(77 163 255)'; }
   function sixHtml(st,role){ const G=role==='GK'?SIX_GK:SIX; let h='<div class="six">';
     for(const [k,,ks] of G){ const v=ks.reduce((a,x)=>a+(+st[x]||0),0)/ks.length;
       h+='<button class="sixC'+(sixOpen===k?' on':'')+'" data-six="'+k+'"><b style="color:'+sixCol(v)+'">'+v.toFixed(1)+'</b><i>'+k+'</i></button>'; }

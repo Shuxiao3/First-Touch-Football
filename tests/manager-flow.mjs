@@ -120,8 +120,9 @@ const pressFirst = u.L[0] === 'pressModal';
 ok(u.L.length === 1 && !u.of && (pressFirst || u.L[0] === 'moneyModal'), 'CONTINUE: ' + (pressFirst ? 'the press conference, alone, no "3 OF 4"' : 'the money, alone'));
 if(pressFirst){ await page.click('#pressModal [data-pr="skip"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u); }
 // a summary: its title alone at first, NEXT bringing up a line a press, CONTINUE once they're all up
-const card = () => K(`(()=>{ const c=document.querySelector('#moneyModal .mnCard'); return { title:c.querySelector('.mnTitle').textContent, shown:[...c.querySelectorAll('.mnList > .on')].map(e=>e.innerText.replace(/\\s+/g,' ').trim()),
-  all:c.querySelectorAll('.mnList > *').length, btn:c.querySelector('[data-mn="go"]').textContent.trim(), red:[...c.querySelectorAll('.mnList > .on.dn')].map(e=>e.innerText.split('\\n')[0]) }; })()`);
+const card = () => K(`(()=>{ const c=document.querySelector('#moneyModal .mnCard'); return { title:c.querySelector('.mnTitle').textContent, shown:[...c.querySelectorAll('.mnStep.on')].map(e=>e.innerText.replace(/\\s+/g,' ').trim()),
+  all:c.querySelectorAll('.mnStep').length, btn:c.querySelector('[data-mn="go"]').textContent.trim(), red:[...c.querySelectorAll('.mnStep.on.dn')].map(e=>e.innerText.split('\\n')[0]),
+  lit:[...c.querySelectorAll('.mnSt.on')].map(b=>b.dataset.st), boxes:c.querySelectorAll('.mnSt').length, sofar:((c.querySelector('.mnSoFar b')||{}).textContent||'') }; })()`);
 const through = async () => { const first = await card(), seen = [first]; for(let i = 0; i < first.all; i++){ await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(40); seen.push(await card()); } return seen; };
 ok(u.L.length === 1 && u.L[0] === 'moneyModal' && !u.of, 'then the money, alone, no "4 OF 5"');
 let c0 = await card();
@@ -130,8 +131,14 @@ if(c0.title === 'STADIUM SUMMARY'){   // (after a home game: the ground first)
   const stands = end.shown.slice(1, -1), prices = stands.map(t => +((t.match(/× \$(\d+)/) || [])[1] || 0));
   ok(S[0].shown.length === 0 && /^NEXT/.test(S[0].btn) && S.slice(1, -1).every((x, i) => x.shown.length === i + 1 && /^NEXT/.test(x.btn)) && /^CONTINUE/.test(end.btn),
     'v242: THE STADIUM SUMMARY starts with its title alone; NEXT brings up a line a press (' + (S.length - 1) + ' lines), and with the last up it reads CONTINUE');
-  ok(/^Fans in the ground/.test(end.shown[0]) && prices.length >= 1 && prices.every((p, i) => !i || p >= prices[i - 1]) && /^Taken at the gate/.test(end.shown[end.shown.length - 1]),
-    'v242: the fans first, then each part of the ground, its fans and its price, cheapest first ($' + prices.join(', $') + '), then the gate in all');
+  ok(/^[\d,]+ in · (full|\d+% full)/.test(end.shown[0]) && prices.length >= 1 && prices.every((p, i) => !i || p >= prices[i - 1]) && /^taken at the gate/i.test(end.shown[end.shown.length - 1]),
+    'v242: the fans first, then each part of the ground, its fans and its price, cheapest first ($' + prices.join(', $') + '), then the gate in all (v243: "' + end.shown[0] + '" under the ground)');
+  // v243: the ground from above -- every stand an empty box at first; a stand's line lights its box (the bleachers' two)
+  // and adds its money to the running total; with the last line every stand is lit and the total is the gate
+  const add = S.slice(2, -1).every((x, i) => { const prev = S[i + 1], t = money(x.sofar) - money(prev.sofar), line = x.shown[x.shown.length - 1], v = money((line.match(/\$[\d,]+$/) || [''])[0]);
+    return x.lit.length > prev.lit.length && Math.abs(t - v) <= 1; });
+  ok(S[0].boxes >= 2 && S[0].lit.length === 0 && S[1].lit.length === 0 && add && end.lit.length === end.boxes && /^taken at the gate/i.test(end.shown[end.shown.length - 1]) && money(end.sofar) === money(end.shown[end.shown.length - 1]),
+    'v243: the ground fills up -- ' + S[0].boxes + ' stands, all empty till their lines come; each line lights its stand and adds to the running total; the last turns it into the gate (' + end.sofar + ')');
   await page.click('#moneyModal [data-mn="go"]'); await page.waitForTimeout(300); u = await ups(); steps.push(u); c0 = await card(); }
 { const S = await through(), end = S[S.length - 1], iG = end.shown.findIndex(t => /^The gate/.test(t)), iW = end.shown.findIndex(t => /^Wages/.test(t));
   info('the fund summary: ' + end.shown.join(' | '));

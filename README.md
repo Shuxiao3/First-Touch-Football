@@ -502,6 +502,23 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The exhibition as a face-off, the match's tactics in two, the ground filling up (v243).** EXHIBITION puts the two
+  clubs face to face: each side's best man drawn in its kit (as he plays, not a shirt), his name, position and rating
+  and the kit under the club's name, the side's rating in a small box, its shape and style in two chips, and VS on the
+  line between the two. A switch on each side picks between the Premier League's clubs and the Champions Cup's, and the
+  arrows go round that list; BACK is up by the title, TACTICS and KICK OFF along the foot. The match's tactics are two
+  pages, a tab each. TACTICS is the field on the left, its men as cards standing up off the grass with a shadow under
+  them, and the tactics on the right (WITH BALL or WITHOUT, SHAPE, WIDTH, STYLE, INSTRUCTIONS, then KICK OFF before a
+  match or BACK TO THE GAME); there's no man's card and no bench on it, and two men tapped one after the other swap
+  spots. PLAYER SWAP has the bench under the field and a stamina strip under every man: tap the man coming off and the
+  man going on, see the two side by side (face, rating, stamina and their six face to face) and MAKE THE SWAP, a change
+  of team before kick-off with no sub used. ALL SUBS and the half-time card's SUBS open PLAYER SWAP. A six's colours run
+  from grey at 1 through white at 3.5 and green at 6.5 to blue at 10, wherever one is shown. After a home game the
+  STADIUM SUMMARY has the ground from above beside its lines: every stand an empty box till its line comes up, then
+  filling from the bottom as full as it was, with how many came and the percentage (the North Stand along the top, the
+  premium seats in a row under it, the West End and the East End either side of the pitch, the South Stand along the
+  foot; at level 1 the bleachers down both sides). Under the ground, how many were in and how full; under the lines, a
+  running total that ends as what the gate took. And no button's words have a shadow under them now.
 - **Your notes on the screen templates (v242).** SETTINGS is one list that scrolls, with no pages: MATCH LENGTH, CAMPUS
   MENU, HALF-TIME and TIPS, then BUTTON LAYOUT, SKILL MOVES and LABS. GRAPHICS, EXHIBITION OPPONENTS and TEXT SIZE are
   gone: the game is pixel art, an exhibition's opponents are ELITE and the text is its usual size, even for settings kept
@@ -3581,6 +3598,20 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v243: the face-off, two tactics pages, the ground filling up.** exhSideHTML: .exhOvr (clubOvrShown), .exhSideComps
+  (data-exh sidecomp; exhSideComp(t,comp) puts the side on the other list's first club that isn't the other side's), a
+  canvas drawn by SPRITE.previewMan(cv,seed,kit) for exhBest (the squad's best man who isn't a keeper, by ovr; seeded as
+  the match seeds his look), .exhMeta his name, position and rating and kitKind, .exhChips (.exhForm, .exhStyle);
+  exhCycle goes round CC_ORDER or CLUBS by the club's own list; BACK sits in .exhHead. #mtacOv has #mtTitle and #mtViews
+  (data-mt view, data-v tac or swap) and MT.view, MT.off and MT.on; renderMatchTac draws .mtTacV (mtTacPanel: the seg,
+  the three drops, insBtn and mtGoBtn, data-mt kick before kick-off and resume after) or .mtSwapV (the bench under the
+  field; mtSwapPanel: a .mtSide for the man off and the man on, .mtCmp rows coloured by sixCol, data-mt doswap through
+  mtSwap). openMatchTac(pre,view); a token takes --d (tvPlace's depth) for its scale and its cast shadow, and on PLAYER
+  SWAP .offSel or .onSel and a .ptkSt strip. sixCol runs through STAT_STOPS (1 grey, 3.5 white, 6.5 green, 10 blue).
+  moneyShow's STADIUM SUMMARY: .mnCard.mnWide, .mnGround with .mnMap (a .mnSt per stand by id, --f its fill, .noEnds
+  and .noPrem), .mnFansIn, .mnList rows with data-seat and data-v, and .mnSoFar; every line it brings up is a .mnStep
+  (the FUND SUMMARY's too), and a seat's line lights .mnSt[data-st] and adds to the running total. A rule at the end of
+  the style sheet takes text-shadow off every button; .smBtn.disabled is var(--ink).
 - **v242: the templates' notes.** SET_ROWS is halfMin, side, ht and tips; the settings card's middle is `.pScroll.setScroll`
   (it scrolls; no fitBox pages) with BUTTON LAYOUT, SKILL MOVES (data-setskills; skFromSet sends closeSkills back to
   SETTINGS) and LABS (data-setlabs: the new #labsPanel smPanel, its labsback to SETTINGS), and #settingsOverlay.fromMatch
