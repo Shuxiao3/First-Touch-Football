@@ -185,6 +185,21 @@ for(let i = 0; i < 3 && !/REVIEW/.test(await bottom()); i++){ await page.click('
 d = await save();
 ok(d.phase === 'review' && d.review && d.review.pos >= 1, 'the season ends in the review: ' + (d.review && d.review.pos + ', ' + d.review.result));
 await page.click('#chBottom [data-mg="review"]'); await page.waitForTimeout(150);
+// (v250) THE REVIEW AS ITS TEMPLATE: the header on the grid (CAMPUS two columns wide with its mark, the title at 18); where
+// you finished at 28 in a well over the middle four columns of a box 88 high, three boxes of four columns under it, 104
+// high, 8 apart; NEXT four columns wide at the foot on the right; no frame round the page; each box after starts a page
+{ const L = await page.evaluate(() => { const q = s => document.querySelector(s), R = s => { const r = q(s).getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height), r: Math.round(r.right), b: Math.round(r.bottom) }; };
+    const pr=document.createElement('i'); pr.style.cssText='position:fixed;left:0;top:0;height:1px;width:var(--tplC)'; document.body.appendChild(pr); const col=pr.getBoundingClientRect().width; pr.remove();
+    const trio = [...document.querySelectorAll('#bpBody .rvTrio > .tplBox')].map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.width), Math.round(r.height)]; });
+    const shown = [...document.querySelectorAll('#bpBody > *')].filter(e => e.getClientRects().length && !e.classList.contains('fitPager')).map(e => e.className);
+    return { col, back: R('.bpTopBack'), backIc: !!q('.bpTopBack .hic svg'), title: getComputedStyle(q('#bpTitle')).fontSize, top: R('#bpBody .rvTop'), pos: R('#bpBody .rvPos'), posFs: getComputedStyle(q('#bpBody .rvPos')).fontSize, trio,
+      next: R('#bpFoot [data-mg="rvnext"], #bpFoot [data-mg="newseason"]'), body: getComputedStyle(q('#bpBody')).boxShadow + ' / ' + getComputedStyle(q('#bpBody')).backgroundColor, shown }; });
+  info('the review on the grid: ' + JSON.stringify({ top: L.top, pos: L.pos, trio: L.trio, next: L.next, shown: L.shown }));
+  const near = (a, b, t = 2) => Math.abs(a - b) <= t;
+  ok(near(L.back.w, L.col * 2 + 8) && L.back.h === 36 && L.backIc && L.title === '18px' && L.top.h === 88 && L.pos.h === 48 && L.posFs === '28px' && near(L.pos.w, L.col * 4 + 24) && near(L.pos.x + L.pos.w / 2, L.top.x + L.top.w / 2)
+    && L.trio.length === 3 && L.trio.every(t => near(t[1], L.col * 4 + 24) && t[2] === 104) && near(L.trio[1][0] - L.trio[0][0] - L.trio[0][1], 8) && near(L.next.w, L.col * 4 + 24) && near(L.next.r, L.top.r) && L.next.h === 36
+    && /^none/.test(L.body) && L.shown.length === 2 && /rvTop/.test(L.shown[0]) && /rvTrio/.test(L.shown[1]),
+    'v250: the review as its template -- CAMPUS two columns with its mark and the title at 18; the place at 28 in a well over the middle four columns of a box 88 high, three boxes of four columns under it, NEXT four columns at the foot; no frame round the page, and nothing else on the first page'); }
 // (v242) the review's pages: NEXT along the foot, a small arrow back by it once past the first, START SEASON 2 on the last;
 // the pages' own arrows not shown
 { const foot = () => page.evaluate(() => { const f = document.getElementById('bpFoot'), pg = document.querySelector('#bpBody > .fitPager');

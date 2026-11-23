@@ -115,7 +115,7 @@ r = await K(`(()=>{ const d=JSON.parse(JSON.stringify(CAREER.data)), W=d.world, 
   mgMigrate(d); const once={ budget:d.budget, wage:p.wage, want:mgWage(p.ovr), coach:coach.wage, ai:c.budget, listed:d.listed[p.id], value:mgValue(d,p), price:d.ticketPrice, flag:d.w149 };
   mgMigrate(d); once.again=d.budget===once.budget&&p.wage===once.wage; once.w0=w0; once.v0=v0; return once; })()`);
 info('a career from before: ' + JSON.stringify(r));
-ok(r.flag && r.budget === 45000 * 22 && Math.abs(r.wage - r.want) <= r.want * 0.02 && r.coach === 5000 && r.ai === 150e6 && Math.abs(r.listed - r.value) <= r.value * 0.02 && r.price === 35 && r.again,
+ok(r.flag && r.budget === 45000 * 22 && Math.abs(r.wage - r.want) <= r.want * 0.02 && r.coach === 5000 && r.ai === 150e6 && Math.abs(r.listed - r.value) <= Math.max(r.value * 0.02, 100) && r.price === 35 && r.again,   // (v250: or a rounding step, $100 -- both are rounded to it below $100,000)
   'a career from before: the bank $45,000 -> $' + r.budget.toLocaleString() + ' (22 times), a man on the going wage still on it ($' + r.w0 + ' -> $' + r.wage.toLocaleString() + '), a coach $250 -> $' + r.coach.toLocaleString() + ', a Premier Division club $6M -> $' + M(r.ai) + 'M, a man listed at his worth still at it ($' + r.v0.toLocaleString() + ' -> $' + r.listed.toLocaleString() + '), a $7 seat $' + r.price + ' -- and only once');
 
 process.exitCode = rep.finish();

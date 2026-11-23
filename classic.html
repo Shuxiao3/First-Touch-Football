@@ -1724,18 +1724,22 @@
   .tbRight .instrGrpLbl{ margin:0; min-width:64px; } .tbRight .instrOpts{ flex:1 1 0; min-width:0; gap:4px; } .tbRight .iOpt{ min-height:28px; padding:3px 7px; font-size:10px; }
   @media (max-height:360px), (max-width:700px){   /* a small phone: his figure and name a little smaller, so all his card fits */
     .tbRight .cardBody{ width:26px; height:40px; } .tbRight .mgCardName{ font-size:15px; } .tbRight .mgCardHead{ gap:8px; } }
-  @media (max-width:700px){   /* a narrow one: his name on one line, and the lines under his style run on under his rating
-                                 (they'd wrap beside it, and push the foot of his card off the screen) */
-    .tbRight, .tbLeft{ padding-left:8px; padding-right:8px; }
-    .tbRight .mgCardHead{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; grid-template-rows:auto 1fr; gap:0 6px; }
-    .tbRight .mgCardHead > .cardBody{ grid-column:1; grid-row:1 / span 6; }
-    .tbRight .mgCardHead > div:not(.cardEnd){ display:contents; }
-    .tbRight .mgCardHead > div:not(.cardEnd) > *{ grid-column:2 / -1; }
-    .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName{ grid-column:2; grid-row:1; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName + .mgCardSub{ grid-column:2; grid-row:2; }
-    .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; }
-    .tbRight .mgCardHead.hasLegs > div:not(.cardEnd) > .mtLegs{ grid-column:2; grid-row:3; align-self:end; }   /* (his stamina beside the button, level with it) */
-    .tbRight .mgCardHead.hasLegs > .cardEnd{ grid-row:1 / span 3; justify-content:space-between; align-self:stretch; } }
+  /* his name on one line, and the lines under his style run on under his rating (they'd wrap beside it, and push the
+     foot of his card off the screen) -- a narrow phone's till v250; on the grid his column is narrow at every size */
+  .tbRight .mgCardHead{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; grid-template-rows:auto 1fr; gap:0 6px; }
+  .tbRight .mgCardHead > .cardBody{ grid-column:1; grid-row:1 / span 6; }
+  .tbRight .mgCardHead > div:not(.cardEnd){ display:contents; }
+  .tbRight .mgCardHead > div:not(.cardEnd) > *{ grid-column:2 / -1; }
+  .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName{ grid-column:2; grid-row:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName + .mgCardSub{ grid-column:2; grid-row:2; }
+  .tbRight .mgCardHead > .cardEnd{ grid-column:3; grid-row:1 / span 2; }
+  .tbRight .mgCardHead.hasLegs > div:not(.cardEnd) > .mtLegs{ grid-column:2; grid-row:3; align-self:end; }   /* (his stamina beside the button, level with it) */
+  .tbRight .mgCardHead.hasLegs > .cardEnd{ grid-row:1 / span 3; justify-content:space-between; align-self:stretch; }
+  .tbRight .mgCardHead{ margin-bottom:4px; } .tbRight .six{ margin-bottom:4px; }   /* (v250: a category opened still on the card, on the grid's shorter column) */
+  .tbRight .sixOpen.long{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; } .tbRight .sixOpen.long .sixHd{ grid-column:1 / -1; }   /* (...a long one's rows two to a line, as a short phone's were) */
+  .tbRight .sixOpen.long .statRow .sl{ width:auto; flex:0 1 66px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tbRight .sixOpen.long{ gap:0 8px; padding-left:6px; padding-right:6px; } .tbRight .sixOpen.long .statRow{ gap:4px; } .tbRight .sixOpen.long .statRow .sv{ width:20px; }   /* (a bar's room beside each) */
+  @media (max-width:700px){ .tbRight, .tbLeft{ padding-left:8px; padding-right:8px; } .tbRight .mgCardHead > div:not(.cardEnd) > .mgCardName{ font-size:13px; } }   /* (a narrow one) */
   @media (max-height:360px){ .tbRight .cardEnd .mgCardSub{ display:none; } }   /* (a short one: his rating as a ... goes; it's amber out of position) */
   /* A BUILDING'S CARD (the squad, the market, scouting, the academy) is drawn as the tactics card: his figure, name and
      rating on top, then his six -- a category opened in a small grid under them -- or, turned over, his deal: a small
@@ -2425,6 +2429,49 @@
   #signModal .cfBtns .pauseBtn{ flex:none; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; }
   #signModal .cfBtns .sgSee{ width:calc(var(--tplC) * 4 + 24px); } #signModal .cfBtns .sgDone{ width:calc(var(--tplC) * 3 - 4px); background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
   #signModal .cfBtns .hic{ width:16px; height:16px; }
+  /* (v250) A BUILDING'S PAGE ON THE TEMPLATES' GRID: the header 36 high 8 from the top -- CAMPUS two columns wide with
+     its back mark, the title at 18, the tabs on the right, each a button 36 high (the open one lit) -- and the page under
+     it, 8 lower, to the content's foot; the grass behind */
+  #bldgPanel{ padding:0; }
+  #bldgPanel .bpInner{ position:absolute; left:var(--tplL); right:var(--tplR); top:var(--tplT); bottom:var(--tplB); width:auto; height:auto; max-width:none; gap:8px; }
+  #bldgPanel .bpHead{ height:36px; min-height:36px; gap:8px; }
+  #bldgPanel .bpTopBack{ width:calc(var(--tplC) * 2 + 8px); height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px;
+    border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:600 12px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; }
+  #bldgPanel .bpTopBack .hic{ width:16px; height:16px; }
+  #bldgPanel #bpTitle{ margin:0 0 0 2px; font:700 18px/36px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:var(--ink); text-transform:uppercase; white-space:nowrap; }
+  #bldgPanel .bpTabs{ gap:4px; }
+  #bldgPanel .bpTab{ min-width:60px; height:36px; min-height:36px; padding:0 10px; text-transform:uppercase; border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; }
+  #bldgPanel .bpTab.on{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  /* the season review: the result in a box 88 high (the season at its top left, the place at 28 in a well over the middle
+     four columns, what it meant under it), the prize money, top scorer and next season in three boxes of four columns 104
+     high; then a box a page -- its heading in the well, rows of 24 eight apart -- and NEXT four columns wide bottom right,
+     the arrow back by it */
+  #bldgPanel .bpBody.rvBody{ padding:0; background:none; border:0; border-radius:0; box-shadow:none; }   /* (the review's boxes on the page, no frame round them) */
+  @media (max-height:350px){ #bldgPanel .mgPaneR .mgPaneScroll{ padding-top:6px; padding-bottom:6px; } }   /* (v250: on the grid the card's pane is narrower and its head a little lower -- on a short screen, a deal's row on two lines still fits) */
+  #bpBody .rvTop{ position:relative; height:88px; margin:0 0 8px; }
+  #bpBody .rvSeason{ position:absolute; left:12px; top:8px; }
+  #bpBody .rvPos{ position:absolute; top:8px; left:calc(50% - var(--tplC) * 2 - 12px); width:calc(var(--tplC) * 4 + 24px); height:48px; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--rS); background:var(--well); font:700 28px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; }
+  #bpBody .rvRes{ position:absolute; top:60px; left:calc(50% - var(--tplC) * 2 - 12px); width:calc(var(--tplC) * 4 + 24px); text-align:center; }
+  #bpBody .rvTrio{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 8px; }
+  #bpBody .rvTrio > .tplBox{ height:104px; display:flex; flex-direction:column; gap:20px; }
+  #bpBody .rvTrio b{ padding:0 8px; font:700 14px/18px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .rvTrio b.up{ color:var(--good); } #bpBody .rvTrio b.dn{ color:var(--bad); }
+  #bpBody .rvBox{ display:flex; flex-direction:column; gap:8px; margin:0 0 8px; }
+  #bpBody .rvBox .tplWell .hic{ width:14px; height:14px; }
+  #bpBody .rvRow{ min-height:24px; box-sizing:border-box; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); font:600 11px/1.2 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); }
+  #bpBody .rvRow .hic{ width:12px; height:12px; flex:none; } #bpBody .rvRow .hic svg{ fill:var(--dim); }
+  #bpBody .rvRow span{ flex:1 1 auto; min-width:0; } #bpBody .rvRow b{ flex:0 1 auto; min-width:0; text-align:right; font:700 12px/1.2 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpBody .rvRow.sub span{ padding-left:20px; }
+  #bpBody .rvRow.you{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .rvGrew{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 8px; }
+  #bpBody .rvLbl{ margin:2px 0 -4px 4px; }
+  #bpBody .rvList{ min-height:24px; box-sizing:border-box; padding:4px 8px; border-radius:var(--rS); background:var(--win); font:600 11px/16px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpFoot .rvBack{ width:40px; height:36px; min-height:36px; padding:0; display:flex; align-items:center; justify-content:center; }
+  #bpFoot .rvBack .hic{ width:16px; height:16px; }
+  #bldgPanel #bpFoot:has([data-mg="rvnext"], [data-mg="newseason"]){ justify-content:flex-end; }
+  #bpFoot [data-mg="rvnext"], #bpFoot [data-mg="newseason"]{ width:calc(var(--tplC) * 4 + 24px); max-width:none; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; letter-spacing:.06em; }
+  #bpFoot [data-mg="rvnext"] .hic, #bpFoot [data-mg="newseason"] .hic{ width:16px; height:16px; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -2551,7 +2598,7 @@
     </div></div>
     <div class="cfFoot" aria-hidden="true"><i class="cfL"></i><i class="cfM"></i><i class="cfR"></i></div>
     <div id="bldgPanel"><div class="bpInner">
-      <div class="bpHead"><button class="bpTopBack" data-hub="bldgback" aria-label="back to the campus">◀ CAMPUS</button><h3 id="bpTitle"></h3><div class="bpTabs" id="bpTabs"></div></div>
+      <div class="bpHead"><button class="bpTopBack" data-hub="bldgback" aria-label="back to the campus"><i class="hic" data-ic="back"></i><span>CAMPUS</span></button><h3 id="bpTitle"></h3><div class="bpTabs" id="bpTabs"></div></div>
       <div class="bpBody" id="bpBody"></div>
       <div class="bpFoot" id="bpFoot"></div>
       <div class="bpMsg" id="bpMsg"></div>
@@ -2873,7 +2920,8 @@
       l.pb=ws.reduce((a,w)=>a+px(w,'borderBottomWidth')+px(w,'paddingBottom'),0); if(l.pb) l.pb+=px(l.els[0],'marginBottom'); }
     const span=(a,z)=>(a===0?lines[z].b:keepMB+lines[a].pt+lines[z].b-lines[a].t)+lines[z].pb;   // (a page from line a to line z, as tall as it draws)
     const cap=room-keepH, pages=[], head=i=>lines[i].els[0].matches('.bpSect,.mrSect,.instrHead,.sixHd,.benchHdr,.instrGrpLbl,.ldgSect'); let s0=0;
-    while(s0<lines.length){ let e=s0; while(e+1<lines.length&&span(s0,e+1)<=cap) e++;
+    const brk=i=>{ const b=lines[i].els[0].closest('.fitBreak'); return !!b&&box.contains(b)&&lines.findIndex(l=>l.els.some(x=>x===b||b.contains(x)))===i; };   // (v250: a box marked fitBreak starts a page)
+    while(s0<lines.length){ let e=s0; while(e+1<lines.length&&!brk(e+1)&&span(s0,e+1)<=cap) e++;
       if(e+1<lines.length){ if(e>s0&&head(e)) e--;                          // (a heading goes over with what it heads,
         else if(e-1>s0&&head(e-1)&&!head(e+1)) e-=2; }                      //  and takes at least two of its lines with it)
       pages.push([s0,e]); s0=e+1; }
@@ -22496,33 +22544,48 @@
   // ---- your house ----
 
   // ---- the end of the season ----
+  // (v250) THE SEASON REVIEW AS ITS TEMPLATE: a box across the page with the season and division at its top left, where you
+  // finished at 28 in a well over the middle four columns and what it meant under it; three boxes under that, four columns
+  // each -- the prize money, your top scorer, next season. Then, each starting a page of its own (fitBreak): the cups and
+  // the sponsors' bonuses; the awards; your squad a year older (two columns of rows, then who left, retired and came out of
+  // the academy, and the loans that ended); around the leagues (the cups' winners, each division's champions and who
+  // went up, green, and down, red). A box that runs long goes on over the next page. (v104-v249: one long page of lines.)
+  const rvRow=(l,v,o={})=>'<div class="rvRow'+(o.cls?' '+o.cls:'')+'">'+(o.ic?'<i class="hic" data-ic="'+o.ic+'"></i>':'')+'<span>'+l+'</span><b'+(o.col?' style="color:'+o.col+'"':'')+'>'+v+'</b></div>';
   function mgReviewBody(d){ const R=d.review; if(!R) return '<div class="mgHint">The season is still going.</div>';
-    const names=a=>a.length?a.map(mgEsc).join(', '):'—';
-    let h='<div class="mrHead"><div class="mrLabel">SEASON '+R.season+' · '+MG_LEAGUE[R.tier].toUpperCase()+'</div><div class="mrScore" style="color:'+(R.up||R.pos===1?'var(--good)':R.down?'var(--bad)':'var(--ink)')+'">'+ordinal(R.pos)+'</div>'
-      +'<div class="mrLabel" style="font-size:13px;color:var(--ink)">'+R.result+'</div></div>';
-    h+=finRow('Prize money','+'+money(R.prize),true)+((R.bonus||[]).length?'<div class="bpSect">SPONSORS’ BONUSES</div>'+R.bonus.map(b=>finRow(mgEsc(b.sp)+' · '+b.lbl,b.amt?'+'+money(b.amt):'—',false,b.amt?'var(--good)':'var(--dim)')).join(''):'')+(R.topScorer?finRow('Your top scorer',mgEsc(R.topScorer.name)+' · '+R.topScorer.goals+' goals'):'');
-    for(const [k,run] of R.cups||[]) h+=finRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),false,/WINNERS/.test(run)?'var(--good)':'var(--ink)');
-    h+=finRow('Next season',MG_LEAGUE[R.tier+(R.up?1:R.down?-1:0)],true,R.up?'var(--good)':R.down?'var(--bad)':'var(--ink)');
-    if((R.awards||[]).length){ h+='<div class="bpSect">THE AWARDS · '+MG_LEAGUE[R.tier].toUpperCase()+'</div>'; for(const a of R.awards) h+=finRow(a.t,mgEsc(a.name)+' ('+mgEsc(a.code)+') · '+a.v,false,a.you?'var(--good)':'var(--ink)');
-      if(R.poty) h+=finRow('The Player of the Year’s prize',money(R.poty.prize)+' · +'+R.poty.fans+' fans',false,'var(--good)'); }
-    if((R.loans||[]).length){ h+='<div class="bpSect">LOANS, OVER</div>'; for(const l of R.loans) h+=finRow(l.back?'Back from '+mgEsc(l.club):'Back to '+mgEsc(l.club),mgEsc(l.name)+(l.back?' · '+l.apps+' games, '+l.goals+' goals':''),false,'var(--ink)'); }
-    h+='<div class="bpSect">YOUR SQUAD, A YEAR OLDER</div>';
-    for(const g of R.grew) h+=finRow(mgEsc(g.name),g.from+' → '+g.to,false,g.to>g.from?'var(--good)':'var(--bad)');
-    if(!R.grew.length) h+='<div class="mgHint">Nobody changed.</div>';
-    h+=finRow('Contracts ended (now free agents)',names(R.expired),false,'var(--warn)')+finRow('Retired',names(R.retired),false,'#cfe7d2')+finRow('Left the academy',names(R.youthOut),false,'#cfe7d2');
-    h+='<div class="bpSect">AROUND THE LEAGUES</div>';
-    for(const k of ['cl','fashion','coco']) if((R.cupWin||{})[k]) h+=finRow(CUP[k].name+' winners',mgEsc(mgNameOf(d,R.cupWin[k])),false,'var(--ink)');
-    for(const t of [4,3,2,1]){ const mv=R.moves[t]; h+=finRow(MG_LEAGUE[t]+' champions',mgEsc(mgNameOf(d,mv.table[0])),false,'var(--ink)');
-      if(mv.up.length) h+=finRow(' up',mv.up.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--good)');
-      if(mv.down.length) h+=finRow(' down',mv.down.map(id=>mgEsc(mgNameOf(d,id))).join(', '),false,'var(--bad)'); }
-    return h; }   // (v242: its button is NEXT till the last page -- see rvFoot)
+    const names=a=>a.length?a.map(mgEsc).join(', '):'none', nx=MG_LEAGUE[R.tier+(R.up?1:R.down?-1:0)];
+    let h='<div class="rvTop tplBox"><div class="tplLbl rvSeason">SEASON '+R.season+' · '+MG_LEAGUE[R.tier].toUpperCase()+'</div>'
+      +'<div class="rvPos" style="color:'+(R.up||R.pos===1?'var(--good)':R.down?'var(--bad)':'var(--acc)')+'">'+ordinal(R.pos)+'</div><div class="tplLbl rvRes">'+mgEsc(R.result)+'</div></div>'
+      +'<div class="rvTrio"><div class="tplBox"><div class="tplWell">PRIZE MONEY</div><b class="up">+'+money(R.prize)+'</b></div>'
+      +'<div class="tplBox"><div class="tplWell">YOUR TOP SCORER</div><b>'+(R.topScorer?mgEsc(R.topScorer.name)+' · '+R.topScorer.goals+' goal'+(R.topScorer.goals===1?'':'s'):'nobody')+'</b></div>'
+      +'<div class="tplBox"><div class="tplWell">NEXT SEASON</div><b'+(R.up?' class="up"':R.down?' class="dn"':'')+'>'+mgEsc(nx)+'</b></div></div>';
+    const cups=R.cups||[], bon=R.bonus||[];
+    if(cups.length||bon.length){ h+='<div class="rvBox tplBox fitBreak">';
+      if(cups.length) h+='<div class="tplWell"><i class="hic" data-ic="trophy"></i>THE CUPS</div>'+cups.map(([k,run])=>rvRow(CUP[k].name,run.toLowerCase().replace(/^./,c=>c.toUpperCase()),{col:/WINNERS/.test(run)?'var(--good)':''})).join('');
+      if(bon.length) h+='<div class="tplWell"><i class="hic" data-ic="sponsor"></i>SPONSORS’ BONUSES</div>'+bon.map(b=>rvRow(mgEsc(b.sp)+' · '+b.lbl,b.amt?'+'+money(b.amt):'none',{col:b.amt?'var(--good)':'var(--dim)'})).join('');
+      h+='</div>'; }
+    if((R.awards||[]).length){ const AIC={'Player of the Year':'star','Best young player':'academy','Golden Boot':'boot','Golden Glove':'goal','Your Player of the Year':'superstar'};
+      h+='<div class="rvBox tplBox fitBreak"><div class="tplWell"><i class="hic" data-ic="trophy"></i>THE AWARDS · '+MG_LEAGUE[R.tier].toUpperCase()+'</div>'
+        +R.awards.map(a=>rvRow(a.t,mgEsc(a.name)+' ('+mgEsc(a.code)+') · '+a.v,{ic:AIC[a.t]||'star',cls:a.you?'you':'',col:a.you?'var(--good)':''})).join('')
+        +(R.poty?rvRow('The Player of the Year’s prize',money(R.poty.prize)+' · +'+R.poty.fans+' fans',{ic:'funds',col:'var(--good)'}):'')+'</div>'; }
+    h+='<div class="rvBox tplBox fitBreak"><div class="tplWell">YOUR SQUAD, A YEAR OLDER</div>'
+      +(R.grew.length?'<div class="rvGrew">'+R.grew.map(g=>rvRow(mgEsc(g.name),g.from+' → '+g.to,{col:g.to>g.from?'var(--good)':g.to<g.from?'var(--bad)':''})).join('')+'</div>':'<div class="rvRow"><span>Nobody changed.</span></div>')
+      +'<div class="tplLbl rvLbl">CONTRACTS ENDED (NOW FREE)</div><div class="rvList">'+names(R.expired)+'</div>'
+      +'<div class="tplLbl rvLbl">RETIRED</div><div class="rvList">'+names(R.retired)+'</div>'
+      +((R.youthOut||[]).length?'<div class="tplLbl rvLbl">LEFT THE ACADEMY</div><div class="rvList">'+names(R.youthOut)+'</div>':'')
+      +((R.loans||[]).length?'<div class="tplLbl rvLbl">LOANS, OVER</div>'+R.loans.map(l=>rvRow(l.back?'Back from '+mgEsc(l.club):'Back to '+mgEsc(l.club),mgEsc(l.name)+(l.back?' · '+l.apps+' games, '+l.goals+' goals':''))).join(''):'')+'</div>';
+    h+='<div class="rvBox tplBox fitBreak"><div class="tplWell">AROUND THE LEAGUES</div>';
+    for(const k of ['cl','fashion','coco']) if((R.cupWin||{})[k]) h+=rvRow(CUP[k].name+' winners',mgEsc(mgNameOf(d,R.cupWin[k])),{ic:'trophy'});
+    for(const t of [4,3,2,1]){ const mv=R.moves[t]; h+=rvRow(MG_LEAGUE[t]+' champions',mgEsc(mgNameOf(d,mv.table[0])),{ic:'star'});
+      if(mv.up.length) h+=rvRow('up',mv.up.map(id=>mgEsc(mgNameOf(d,id))).join(', '),{cls:'sub',col:'var(--good)'});
+      if(mv.down.length) h+=rvRow('down',mv.down.map(id=>mgEsc(mgNameOf(d,id))).join(', '),{cls:'sub',col:'var(--bad)'}); }
+    return h+'</div>'; }   // (v242: its button is NEXT till the last page -- see rvFoot)
   // THE SEASON REVIEW'S FOOT (v242): NEXT till the last page, then START SEASON; once past the first, a small arrow back
   // left of it. The pages' own arrows aren't shown.
   function rvFoot(){ const foot=document.getElementById('bpFoot'), d=CAREER&&CAREER.data; if(!foot||curBldg!=='review'||!d||!d.review) return;
     const st=FITPG['B:review/']||{p:0,n:1}, last=st.p>=(st.n||1)-1;
-    const want=(st.p>0?'<button class="mgAdj rvBack" data-mg="rvback" aria-label="the page before">◀</button>':'')
-      +(last?'<button class="mrContinue" data-mg="newseason">START SEASON '+(d.review.season+1)+' ▶</button>':'<button class="mrContinue" data-mg="rvnext">NEXT ▶</button>');
-    if(foot.dataset.rv!==want||!foot.children.length){ foot.innerHTML=want; foot.dataset.rv=want; } foot.classList.add('on'); }
+    const want=(st.p>0?'<button class="mgAdj rvBack" data-mg="rvback" aria-label="the page before"><i class="hic" data-ic="back"></i></button>':'')
+      +(last?'<button class="mrContinue" data-mg="newseason"><span>START SEASON '+(d.review.season+1)+'</span><i class="hic" data-ic="next"></i></button>':'<button class="mrContinue" data-mg="rvnext"><span>NEXT</span><i class="hic" data-ic="next"></i></button>');
+    if(foot.dataset.rv!==want||!foot.children.length){ foot.innerHTML=want; foot.dataset.rv=want; tpIcons(foot); } foot.classList.add('on'); }
 
   // ---- the town (until it can be walked round: its buildings in a row) ----
   function renderHub(){ const d=CAREER&&CAREER.data; if(!d) return; const f=computeFinance(d);
@@ -22924,7 +22987,7 @@
     document.getElementById('bpTabs').innerHTML=b.tabs&&!off?b.tabs.map(x=>'<button class="bpTab'+(x===t?' on':'')+'" data-tab="'+x+'">'+x+'</button>').join(''):'';
     const body=document.getElementById('bpBody');
     if(top) fitForget(':'+id+'/');
-    body.innerHTML=renderBuildingBody(id); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes);
+    body.innerHTML=renderBuildingBody(id); tpIcons(body); const panes=!!body.querySelector('.mgPanes,.tacB1,.selB'); body.classList.toggle('panes',panes); body.classList.toggle('rvBody',id==='review');   // (v250: its marks; the review's boxes on the page itself)
     if(panes) delete body.dataset.pages; else body.dataset.pages='B:'+id+'/'+(t||'');
     const foot=document.getElementById('bpFoot'); foot.innerHTML=''; body.querySelectorAll('.bpPin').forEach(el=>foot.appendChild(el));   // its main button(s) stay put
     foot.classList.toggle('on',foot.children.length>0); foot.dataset.rv='';

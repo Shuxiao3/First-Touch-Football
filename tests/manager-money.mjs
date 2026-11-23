@@ -106,7 +106,7 @@ r = await K(`(()=>{ const d=CAREER.data; d.review={season:d.season,tier:d.tier,p
     bonus:[{sp:'Apex Motors',lbl:'top 6',amt:2800},{sp:'Kestrel Bank',lbl:'not 75% full',amt:0}]}; const h=mgReviewBody(d).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); const b=mgFinanceTab(d).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); d.review=null;
   return { review:h.slice(h.indexOf('SPONSORS'),h.indexOf('SPONSORS')+90), books:/Shirt sales \\(each Monday\\) \\$[\\d,]+/.test(b) }; })()`);   // (v105: the shirts are each Monday's)
 info('the review and the books: ' + JSON.stringify(r));
-ok(/SPONSORS’ BONUSES Apex Motors · top 6 \+\$2,800 Kestrel Bank · not 75% full —/.test(r.review) && r.books, 'the season\'s review lists the sponsors\' bonuses; the books, the shirt sales (each Monday)');
+ok(/SPONSORS’ BONUSES Apex Motors · top 6 \+\$2,800 Kestrel Bank · not 75% full none/.test(r.review) && r.books,   /* (v250: none, as the review's other boxes have it) */ 'the season\'s review lists the sponsors\' bonuses; the books, the shirt sales (each Monday)');
 
 process.exitCode = rep.finish() ? 1 : 0;
 await browser.close();

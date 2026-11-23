@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **A building's frame and the season review as their templates (v250).** Every building's page has the templates'
+  header: CAMPUS two columns wide with its back mark, the title at 18, the tabs on the right, each a button 36 high (the
+  open one lit). The season review: where you finished at 28 in a well over the middle of a box across the page, with the
+  season and division at its top left and what it meant under it; the prize money, your top scorer and next season in three
+  boxes under it. Then a box a page, no frame round them: the cups and the sponsors' bonuses, the awards (each with its
+  mark, your own Player of the Year lit), your squad a year older in two columns with who left and retired under it, and
+  around the leagues; a box that runs long goes on over the next page. NEXT four columns wide at the foot, the arrow back
+  beside it, START SEASON on the last page.
 - **The career's story cards and the signing overview as their templates (v249).** The phone call, the chairman, the
   hometown hero and the wonderkid each come up in a box over the career home: a face in a well at its top left (the phone
   ringing, then still, for the call; the man himself for the hero and the wonderkid), the title beside it, what's said
@@ -3667,6 +3675,15 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v250: a building's frame; the season review.** #bldgPanel .bpInner sits on the grid (--tplL / --tplR, --tplT to
+  --tplB); .bpTopBack is two columns with its back mark, #bpTitle 18, .bpTab buttons 36 high, upper case. paintBuilding
+  runs tpIcons over the body, and marks the review's .rvBody (no frame round it). mgReviewBody draws .rvTop (.rvSeason,
+  .rvPos, .rvRes), .rvTrio and .rvBox boxes of .rvRow rows (and .rvGrew, two columns; .rvList); each .rvBox is marked
+  fitBreak, which fitBox now honours: a box so marked starts a page of its own. rvFoot's buttons carry the back and next
+  marks. On the grid a man's card has a narrower pane, so under 350 high the pane is padded 6 top and bottom, not 10: a
+  deal's row on two lines still fits. The tactics card's column is narrow at every size now, so its head is laid out as a
+  narrow phone's was (his name on one line, the lines under his style running on under his rating), and a long category
+  opened under the six has its rows two to a line.
 - **v249: the story cards; the signing overview.** #storyModal .stCard is a .tplBox look placed on the grid (eight columns,
   76 down, 224 high; .stBig, the wonderkid's, ten columns from under the header to the foot): .stFace (a well holding
   PHONE_SVG, or bodyImg of the man -- the wonderkid's from lookKey 'kid:' and his name), .stTop (the title, .stName,
