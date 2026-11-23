@@ -48,7 +48,7 @@ await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById(
 if(await page.isVisible('#storyModal.on')){ await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(40); await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(40); }   // (the phone rings on the first day of pre-season: answered)
 await page.emulateMedia({ reducedMotion: 'reduce' });   // (the buildings open at once, the days just turn)
 await page.evaluate(() => { const d = window.__S.d; d.lv.train = 4; window.__S.mgSave(d); });   // (every shape, style and instruction: the training pitch's locks are manager-career.mjs's)
-await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(100);
+await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.evaluate(() => { const b = document.querySelector('#bpBody [data-tlist="bench"]'); if(b) b.click(); }); await page.waitForTimeout(100);
 // the shape, the width and the style are menus on the top row: open one, pick from it (it closes)
 const menu = async k => { if(!(await page.$(`#bpBody [data-tdrop="${k}"].on`))){ await page.click(`#bpBody [data-tdrop="${k}"]`); await page.waitForTimeout(60); } };
 const shut = async () => { if(await page.$('#bpBody .tbDrop.on')){ await page.click('#bpBody .tbDrop.on'); await page.waitForTimeout(60); } };
@@ -128,7 +128,7 @@ const panel = () => page.evaluate(() => { const P = document.querySelector('#cTa
 const cti = async (k, v) => { await page.click(`#cTacRight [data-cti="${k}"][data-v="${v}"]`); await page.waitForTimeout(60); };
 await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
 let lu = d.lineup;
-const insB = () => page.evaluate(() => { const top = document.querySelector('#bpBody .tbTop'), b = top && top.querySelector('.tbIns'), bs = top && top.querySelector('.tbBest');
+const insB = () => page.evaluate(() => { const i0 = document.querySelector('#bpBody .tbTop .tbIns'), top = i0 && i0.closest('.tbTop'), b = top && top.querySelector('.tbIns'), bs = top && top.querySelector('.tbBest');   /* (v260: the row they share, at the foot of the template's right box) */
   return { lit: !!(b && b.classList.contains('go')), left: !!(b && bs && b.nextElementSibling === bs && b.getBoundingClientRect().right <= bs.getBoundingClientRect().left),
     flips: document.querySelectorAll('#cTacRight [data-cside]').length, card: !!document.querySelector('#cTacRight .mgCardHead') }; });
 await tap(lu.atk[5]); const ib0 = await insB(); await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60);
@@ -136,7 +136,7 @@ let pn = await panel(); const ib1 = await insB();
 const wb = await page.evaluate(() => { const P = document.querySelector('#cTacRight .tiPanel'); return P ? { text: P.innerText.replace(/\s+/g, ' '), opts: P.querySelectorAll('[data-cti]').length, go: !!P.querySelector('.tiGoDef[data-ctphase="def"]') } : null; });
 info('with the ball: ' + (wb && wb.text));
 ok(!ib0.lit && ib0.left && !ib0.flips && ib0.card && ib1.lit && pn && /WITH THE BALL/.test(pn.head) && !pn.pitch && !pn.rows.length && wb && !wb.opts && /Nothing to set with the ball/.test(wb.text) && /GEGENPRESS:/.test(wb.text) && wb.go,
-  'INSTRUCTIONS, in the top row just left of BEST 9 (nothing on his card turns it over): lit -- and with the ball nothing to set: each man to his own style, the side to its (GEGENPRESS), and a button over to WITHOUT THE BALL');
+  'INSTRUCTIONS, just left of BEST 9 (nothing on his card turns it over): lit -- and with the ball nothing to set: each man to his own style, the side to its (GEGENPRESS), and a button over to WITHOUT THE BALL');
 await page.click('#cTacRight .tiGoDef'); await page.waitForTimeout(60);
 pn = await panel();
 ok(pn && String(pn.rows) === 'ENGAGE WITH,DEFENDERS,DEF TACKLES,MID TACKLES,FORWARDS' && pn.pitch && /WITHOUT THE BALL/.test(pn.head) && (await page.$eval('#bpBody .phTab.on', e => e.dataset.ctphase)) === 'def',
@@ -189,7 +189,7 @@ d = await save();
 ok(d.lineup.atk[0] === in1 && d.lineup.bench.includes(out1), 'Squad: a man in the list dropped on a spot on the little pitch takes it');
 await drag(`#bpBody .sqList .mgRow[data-pid="${d.roster[out1].id}"]`, `#bpBody .sqPitch .ptk[data-ri="${in1}"]`);
 d = await save(); lu = d.lineup;
-await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60); await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
+await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60); await page.click('#chCampus [data-bldg="train"]'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.evaluate(() => { const b = document.querySelector('#bpBody [data-tlist="bench"]'); if(b) b.click(); }); await page.waitForTimeout(80);
 
 // --- POSITIONS: his own, his second ones, the rest ------------------------------------------------------------------
 const fit = await page.evaluate(() => { const S = window.__S, T = window.__T, spots = ['CB','FB','DM','CM','AM','WM','W','ST'], o = {};

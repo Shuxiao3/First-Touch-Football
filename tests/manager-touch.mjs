@@ -54,7 +54,7 @@ await page.tap('#bldgPanel .bpTopBack'); await page.waitForTimeout(120);
 await page.tap('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.waitForTimeout(150);
 await page.tap('#bpTabs .bpTab:text-is("Tactics")'); await page.waitForTimeout(200);
 const tb = await K(`(()=>{ const lu=ensureLineup(CAREER.data); return { b:lu.bench[0], f:lu.atk[3] }; })()`);
-await page.tap(`#bpBody .ptk[data-tac="bench"][data-ri="${tb.b}"]`); await page.waitForTimeout(150);
+await page.tap('#bpBody [data-tlist="bench"]'); await page.waitForTimeout(120); await page.tap(`#bpBody .ptk[data-tac="bench"][data-ri="${tb.b}"]`); await page.waitForTimeout(150);   // (v260: the bench's rows, THE BENCH tapped)
 await page.tap('#bpBody [data-tarm]'); await page.waitForTimeout(150);
 await page.tap(`#bpBody .ptk[data-tac="field"][data-ri="${tb.f}"]`); await page.waitForTimeout(200);
 const tb2 = await K(`(()=>{ const lu=ensureLineup(CAREER.data); return { inXi:lu.atk.includes(${tb.b}), outXi:!lu.atk.includes(${tb.f}) }; })()`);

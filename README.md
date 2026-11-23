@@ -502,6 +502,16 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **Training's Tactics as its template (v260).** Three boxes of four columns, no frame round them: the pitch with your
+  nine on it; the nine as rows, the rating, the place and the name, with THE BENCH · 5 at the foot (a tap turns the rows
+  over to the bench, and ON THE PITCH back); and the side's tactics, WITH BALL and WITHOUT, SHAPE, WIDTH and STYLE, then
+  the man you've picked (his figure, rating, fitness, places and six numbers, SWAP), and INSTRUCTIONS and BEST 9 at the
+  foot. Every man, on the pitch or in the rows, can still be dragged onto another or picked and swapped: a man on the
+  bench's rows dragged onto one on the pitch comes on for him. A man tapped is lit on the pitch and in the rows both.
+  The men on this narrower pitch are narrower too, so a line of four fits and WIDE has room to spread them. A rating
+  opened on his card has the box to itself (each part's name over its bar), the row of tactics back when it shuts;
+  with the side's instructions up, WITH BALL and WITHOUT stay and SHAPE, WIDTH and STYLE step aside. On a phone 700
+  wide or less the man's box is five columns and the rows three.
 - **The stadium as its templates (v259).** No frame round its tabs now. Money has its four figures as tiles across the
   top (fans, seats, the last crowd and gate), then a box: TICKETS in a well, a panel a stand with its seats and its price
   between - and +, BACK TO THE GOING RATE, then THE BOOKS and their sections, a well each over their rows, a page at a
@@ -3737,6 +3747,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v260: Training's Tactics.** renderTactics draws .tacB1.tacTpl.tplPage, three .tplBox boxes on the grid's four
+  columns each: .tbLeft (the .tpitch as before), .tacList (a .tacHd well, then .tacRows of tbTok men with no place of
+  their own, or, with tacList 'bench', the .tbBench's; .tacFlip, data-tlist, turns them over) and .tbRight.tacSide (the
+  first .tbTop with the phase tabs and the three drops; #cTacRight, the card paintCareerRight repaints; a second .tbTop,
+  .tacFoot, with INSTRUCTIONS and BEST 9). The rows are .ptk like the pitch's men, so pxDrag and the taps take them
+  as they are; tokSpots reads the pitch's alone, and tacticTap lights both of a man.
 - **v259: the stadium.** renderStadiumTab wraps every tab in .stTpl.tplPage (so .tplBody, no frame): Money's .stTiles
   and Sponsors' .spTiles across the top, then a .tplBox.tplRows.stBox paged by fitBox, its .bpSect headings drawn as
   wells, .tkRow panels, .finRow (finRow's rows, now with a class) and .spRow rows. stadPlan's .sgWrap is .sgTpl, its

@@ -346,13 +346,13 @@ ok(r.pre === '{"club":4,"train":4,"physio":0,"market":1,"scouting":2,"academy":3
 // all open (v106) -- and its Pitch tab says so ---------------------------------------------------------------------------
 await page.evaluate(() => { const d = __MG.d; d.lv.train = 1; __MG.mgSave(d); });
 await page.click('#chCampus [data-bldg="train"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
-const locks = async () => { const o = {};
+const locks = async () => { const o = {}; if(await page.$('#bpBody .tbTop .tbIns[data-cside="rate"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (v260: the side's instructions shut first -- SHAPE, WIDTH and STYLE step aside while they're up)
   await page.click('#bpBody [data-tdrop="form"]'); await page.waitForTimeout(60); o.forms = await page.$$eval('#bpBody .formBtn.locked, #bpBody .formBtn[disabled]', ns => ns.map(n => n.dataset.cform)); o.open = await page.$$eval('#bpBody .formBtn:not([disabled])', ns => ns.length);
   await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60); o.styles = await page.$$eval('#bpBody .tbOpt.locked, #bpBody .tbOpt[disabled]', ns => ns.length);
   o.free = await page.$$eval('#bpBody .tbOpt:not(.locked)', ns => ns.map(n => n.textContent).join()); await page.click('#bpBody [data-tdrop="style"]'); await page.waitForTimeout(60);
   await page.click('#bpBody .tpitch .ptk[data-tac="field"] >> nth=2'); await page.waitForTimeout(60);
   if(await page.$('#bpBody .tbTop .tbIns[data-cside="instr"]')){ await page.click('#bpBody .tbTop .tbIns'); await page.waitForTimeout(60); }   // (INSTRUCTIONS, up in the top row: v116)
-  await page.click('#bpBody [data-ctphase="def"]'); await page.waitForTimeout(60);   // (v161: the instructions are without the ball's)
+  await page.click('#bpBody [data-ctphase="def"]:visible'); await page.waitForTimeout(60);   // (v161: the instructions are without the ball's; v260: the panel's own button, the top row stepping aside while it's open)
   o.instr = await page.$$eval('#cTacRight .tiRow', ns => ns.map(n => (n.querySelector('.locked, [disabled]') ? 'locked ' : '') + n.querySelector('.tiLbl').textContent).join(', '));   // (v112: the team's instructions)
   await page.click('#bpBody [data-ctphase="atk"]'); await page.waitForTimeout(60);
   return o; };
@@ -392,9 +392,9 @@ const m4 = await selDrag(4, 11), S4 = await selLu();                            
 for(let i = 0; i < 2; i++){ await page.click('#bpBody [data-mg="selpg"][data-d="1"]'); await page.waitForTimeout(80); }   // (v256: the men not taken three to a page -- the last of them on the third)
 const m5 = await selDrag(9, 20, true), S5 = await selLu();                           // the bench's first below the last of the rest: the end of the list
 const shown = await page.evaluate(() => [...document.querySelectorAll('#bpBody .selRow')].map(x => x.querySelector('.slNm').textContent));
-await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80);
+await page.click('#bldgPanel .bpTab:text-is("Tactics")'); await page.waitForTimeout(80); await page.click('#bpBody [data-tlist="bench"]'); await page.waitForTimeout(60);   // (v260: the bench's rows, a tap on THE BENCH)
 const tac = await page.evaluate(() => { const d = __MG.d, l = __MG.ensureLineup(d); return { bench: [...document.querySelectorAll('#bpBody .tbBench .ptk')].map(t => +t.dataset.ri).join(), five: l.bench.slice(0, 5).join(),
-  pitch: document.querySelectorAll('#bpBody .tpitch .ptk').length, match: __MG.careerLineupYours(d).squad.length }; });
+  pitch: document.querySelectorAll('#bpBody .tpitch .ptk').length, match: __MG.careerLineupYours(d).squad.length }; }); await page.click('#bpBody [data-tlist="xi"]'); await page.waitForTimeout(40);
 await page.click('#bldgPanel .bpTab:text-is("Pitch")'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);
 await page.click('#chCampus [data-bldg="club"]'); await page.waitForSelector('#bldgPanel.show'); await page.click('#bldgPanel .bpTab:text-is("Squad")'); await page.waitForTimeout(80);
 const sqSum = await page.textContent('#bpBody .sqHead'); await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(80);   // (v252: the squad's count in its box's well)

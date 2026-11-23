@@ -2538,6 +2538,49 @@
   #bpBody .tplRows{ position:relative; height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
   #bpBody .tplRows > .tplWell, #bpBody .tplRows > .tplSeg, #bpBody .tplRows > .fxTop{ flex:none; margin-bottom:2px; }
   #bpBody .tplRows > .fitPager{ bottom:4px; height:32px; } #bpBody .tplRows > .fitPager .mgAdj{ width:52px; height:28px; min-height:28px; }
+  /* (v260) TRAINING'S TACTICS as its template: three boxes of four columns -- the pitch; the nine as rows (the bench a
+     tap away, its rows in their place), each a man to tap or drag onto another; the side's tactics (WITH BALL and
+     WITHOUT, INSTRUCTIONS, SHAPE, WIDTH and STYLE), the man picked, and BEST 9 at the foot */
+  #bpBody .tacTpl{ display:grid; grid-template-columns:repeat(3, calc(var(--tplC) * 4 + 24px)); gap:8px; height:100%; min-height:0; }
+  #bpBody .tacTpl > .tplBox{ min-width:0; min-height:0; display:flex; flex-direction:column; gap:4px; overflow:hidden; box-shadow:var(--pxWin); }
+  #bpBody .tacTpl > .tbLeft{ flex:none; padding:4px; }
+  #bpBody .tacTpl > .tbLeft .tpitch{ flex:1 1 auto; min-height:0; }
+  #bpBody .tacTpl .tpitch.tvP{ --twMax:clamp(46px,22%,64px); }   /* (narrower men on the template's narrower pitch: a four across fits, and WIDE has room to spread them) */
+  #bpBody .tacTpl .tacSide:has(#cTacRight .sixOpen) > .tbTop:not(.tacFoot){ display:none; }   /* (a rating opened: the card has the box, the row back when it shuts) */
+  #bpBody .tacTpl .tacSide:has(#cTacRight .tiPanel) > .tbTop:not(.tacFoot) > .tbDropW{ display:none; }   /* (the side's instructions: WITH BALL and WITHOUT stay, the shape, width and style step aside) */
+  #bpBody .tacTpl #cTacRight .sixOpen .statRow{ display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:0 4px; }   /* (a rating opened in the narrower card: each part's name over its bar and figure) */
+  #bpBody .tacTpl #cTacRight .sixOpen .statRow .sl{ grid-column:1 / -1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:11px; }
+  #bpBody .tacTpl #cTacRight .sixOpen .statRow .statBar{ width:auto; min-width:0; }   /* (a rating opened, or the side's instructions: the card has the box, the shape and style a tap on its close away) */
+  @media (max-width:700px){ #bpBody .tacTpl{ grid-template-columns:calc(var(--tplC) * 4 + 24px) calc(var(--tplC) * 3 + 16px) calc(var(--tplC) * 5 + 32px); } }   /* (a narrow phone: the man's card five columns, the rows three) */
+  #bpBody .tacTpl .tacHd{ flex:none; gap:8px; font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--acc); }
+  #bpBody .tacTpl .tacHd .tplBadge{ margin-left:auto; padding:3px 6px; border-radius:3px; background:var(--win); color:var(--ink); font:700 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; }
+  #bpBody .tacTpl .tacRows, #bpBody .tacTpl .tacList .tbBench{ flex:1 1 auto; min-height:0; width:auto; display:flex; flex-direction:column; flex-wrap:nowrap; align-items:stretch; justify-content:flex-start; gap:2px; padding:0; margin:0; }
+  #bpBody .tacTpl .tacList .ptk{ position:relative; left:auto !important; top:auto !important; transform:none; flex:1 1 0; width:auto; min-width:0; max-width:none; height:auto; min-height:20px; max-height:26px;
+    display:flex; align-items:center; padding:0 8px 0 11px; border-radius:var(--rS); background:var(--win); box-shadow:none; }
+  #bpBody .tacTpl .tacList .ptk > :not(.ptkTxt):not(.ptkCond){ display:none; }
+  #bpBody .tacTpl .tacList .ptk .ptkTxt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:row; align-items:center; gap:8px; }
+  #bpBody .tacTpl .tacList .ptk .ptkOvr{ flex:none; display:flex; align-items:baseline; gap:6px; font-size:13px; text-shadow:none; }
+  #bpBody .tacTpl .tacList .ptk .ptkPos{ font-size:9px; font-style:normal; color:var(--dim); }
+  #bpBody .tacTpl .tacList .ptk .ptkNm{ flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:4px; }
+  #bpBody .tacTpl .tacList .ptk .ptkName{ font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpBody .tacTpl .tacList .ptk.statview{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .tacTpl .tacList .ptk.armed{ box-shadow:inset 0 0 0 2px var(--warn); }
+  #bpBody .tacTpl .tacList .ptk.canswap{ box-shadow:inset 0 0 0 1px var(--acc); } #bpBody .tacTpl .tacList .ptk.dropOver{ background:var(--acc); }
+  #bpBody .tacTpl .tacList .ptk::after{ content:none !important; }
+  #bpBody .tacTpl .tacList .benchPg{ display:none; }
+  #bpBody .tacTpl .tacFlip{ flex:none; height:28px; min-height:28px; justify-content:space-between; padding:0 10px; }
+  #bpBody .tacTpl .tacFlip .hic{ width:12px; height:12px; }
+  #bpBody .tacTpl > .tacSide{ padding:4px; overflow:visible; }
+  #bpBody .tacTpl .tacSide .tbTop{ flex:none; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:0; }
+  #bpBody .tacTpl .tacSide .tbSeg{ grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+  #bpBody .tacTpl .tacSide .tbTop.tacFoot{ grid-template-columns:2fr 3fr; }
+  #bpBody .tacTpl .tacSide .phTab{ height:28px; min-height:28px; min-width:0; padding:0 4px; font-size:10px; }
+  #bpBody .tacTpl .tacSide .tbIns{ height:36px; min-height:36px; min-width:0; margin:0; padding:0 4px; font-size:10px; letter-spacing:.02em; }
+  #bpBody .tacTpl .tacSide .tbDropW{ min-width:0; position:relative; } #bpBody .tacTpl .tacSide .tbDrop{ width:100%; min-width:0; height:36px; padding:0 4px; }
+  #bpBody .tacTpl .tacSide .tbDropW:last-child .tbMenu{ right:0; left:auto; }
+  #bpBody .tacTpl .tacSide .tacCard{ flex:1 1 auto; min-height:0; overflow:hidden; padding:0; box-shadow:none; }
+  #bpBody .tacTpl .tacSide .tbBest{ flex:none; height:36px; min-height:36px; margin:0; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:var(--r); background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #bpBody .tacTpl .tacSide .tbBest .hic{ width:14px; height:14px; }
   /* (v259) THE STADIUM as its templates: the figures as tiles across the top, then a box -- Money: the tickets (a panel a
      stand, its price between - and +) and the books as rows, paged; Sponsors: who calls, then the boards and the names as
      rows; Stands: the ground on the left (five columns), its level, figures, levels and BUILD IT on the right (seven) */
@@ -21450,7 +21493,7 @@
   // Two shapes, one for each phase -- with the ball and without it -- each with its width. lineup.atk is who plays in
   // each attacking spot, lineup.def who plays in each defending one (the same eight), lineup.gk the keeper. Anyone can
   // play anywhere: out of position a man is as good as his stats make him there (ovrAt).
-  let tacNote='', statViewRi=null, tacPhase='atk';
+  let tacNote='', statViewRi=null, tacPhase='atk', tacList='xi';   // (v260: tacList, the rows Training's Tactics shows -- the nine, or the bench)
   const TAC_GK=[50,92];
   const CAREER_STEP={1:0,2:52,3:23,4:17};
   function ensureForms(d){ careerTo7(d); careerTo8(d);
@@ -21684,13 +21727,18 @@
     const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(tacDrop===k?' on':'')+'" data-tdrop="'+k+'"><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+' ▾</button>'+(tacDrop===k?tbMenuHtml(d,phase):'')+'</span>';
     const wl=(WIDTHS.find(x=>x[2]===w)||WIDTHS[1])[1];
     const sl=(STYLE_LIST.find(t=>t[0]===styleKey(d.style))||STYLE_LIST[0])[1];   // (one style, with the ball and without it)
-    let h='<div class="tacB1"><div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
-      +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'
-      +drop('form',form)+drop('width',wl)+drop('style',sl)+insBtn()+'<button class="mgBtn tbBest" data-mg="best8">BEST 9</button></div>';
-    h+='<div class="tbMain"><div class="tbLeft"><div class="tpitch tvP" data-phase="'+phase+'"><div class="tvF">'+tbMen(d, lu.gk, order, slots, phase)+'</div></div>';
-    h+='<div class="tbBench" data-bench="office">'+lu.bench.slice(0,BENCH_N).map(ri=>tbTok(d, ri, '', 'bench', phase, null)).join('')+'</div></div>';   // (the bench under the pitch, its five: who's taken at all is the Selection tab's)
-    h+='<div class="tbRight" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div></div>';   // (his card, top to bottom)
-    return h+'</div>'; }
+    const n=Math.min(order.length,slots.length), bench=lu.bench.slice(0,BENCH_N), row=(ri,kind,role,pos)=>tbTok(d,ri,'',kind,phase,role,pos);   // (v260: a man a row, as on the pitch)
+    const top='<div class="tbTop"><div class="tbSeg"><button class="phTab'+(phase==='atk'?' on':'')+'" data-ctphase="atk">WITH BALL</button>'
+      +'<button class="phTab'+(phase==='def'?' on':'')+'" data-ctphase="def">WITHOUT</button></div>'+drop('form',form)+drop('width',wl)+drop('style',sl)+'</div>';
+    const list=tacList==='bench'
+      ?'<div class="tplWell tacHd"><span>THE BENCH</span><em class="tplBadge">'+bench.length+'</em></div><div class="tbBench tacRows" data-bench="office">'+bench.map(ri=>row(ri,'bench',null,null)).join('')+'</div>'
+        +'<button class="tplBtn tacFlip" data-tlist="xi"><i class="hic" data-ic="back"></i>ON THE PITCH · '+(1+n)+'</button>'
+      :'<div class="tplWell tacHd"><span>ON THE PITCH</span><em class="tplBadge">'+(1+n)+'</em></div><div class="tacRows">'+row(lu.gk,'gk','GK','GK')+order.slice(0,n).map((ri,i)=>row(ri,'field',slots[i].role,spotFit(slots[i]))).join('')+'</div>'
+        +'<button class="tplBtn tacFlip" data-tlist="bench">THE BENCH · '+bench.length+'<i class="hic" data-ic="next"></i></button>';
+    return '<div class="tacB1 tacTpl tplPage"><div class="tbLeft tplBox"><div class="tpitch tvP" data-phase="'+phase+'"><div class="tvF">'+tbMen(d, lu.gk, order, slots, phase)+'</div></div></div>'
+      +'<div class="tplBox tacList">'+list+'</div>'
+      +'<div class="tbRight tplBox tacSide">'+top+'<div class="tacCard" id="cTacRight">'+(tacNote?'<div class="tacWarn">'+tacNote+'</div>':'')+tbCard(d, statViewRi, phase)+'</div>'
+      +'<div class="tbTop tacFoot">'+insBtn()+'<button class="mgBtn tbBest" data-mg="best8"><i class="hic" data-ic="formation"></i>BEST 9</button></div></div></div>'; }   // (v260: the template's three boxes; v226-v259 a bar along the top, the pitch with the bench by it, his card)
   function setCareerForm(d, phase, form){ ensureForms(d);
     if(phase==='def'){ if(ATK_ONLY.includes(form)||!FORMS[form]) return; d.formDef=form; } else { if(DEF_ONLY.includes(form)||!FORMS[form]) return; d.formation=form; }
     const lu=ensureLineup(d); lu.def=careerMapDef(d);
@@ -21699,7 +21747,7 @@
   // a tap shows his card and instructions on the right (moving him is a drag: see pxDrag below)
   function tacticTap(el){ const d=CAREER&&CAREER.data; if(!d)return; ensureLineup(d);
     statViewRi=+el.dataset.ri; cardToRate(document.getElementById('bpBody')); paintCareerRight(d);
-    document.querySelectorAll('#bpBody .ptk.statview').forEach(x=>x.classList.remove('statview')); if(el.classList)el.classList.add('statview'); }
+    document.querySelectorAll('#bpBody .ptk.statview').forEach(x=>x.classList.remove('statview')); document.querySelectorAll('#bpBody .ptk[data-ri="'+el.dataset.ri+'"]').forEach(x=>x.classList.add('statview')); }   // (v260: on the pitch and in the rows)
   // two men change places (a: the one picked up, b: the one he's put on), as the career's lineup has them
   function careerSwap(d,a,b,ph){ const lu=ensureLineup(d); tacNote=''; if(a.ri===b.ri) return;
     const kinds=[a.kind,b.kind].sort().join('+');
@@ -23536,6 +23584,7 @@
     const ci=e.target.closest('[data-cti]'); if(ci){ const d=CAREER&&CAREER.data; tiNoteK=ci.dataset.cti; if(d&&!ci.disabled){ ensureForms(d); if(tiSet(d.ti,ci.dataset.cti,ci.dataset.v)) mgSave(d); } paintCareerRight(d); return; }   // a team instruction
     const cr=e.target.closest('[data-tirow]'); if(cr){ const d=CAREER&&CAREER.data; tiNoteK=cr.dataset.tirow; if(d) paintCareerRight(d); return; }       // (its note)
     const cs=e.target.closest('[data-cstyle]'); if(cs){ const d=CAREER&&CAREER.data; tacDrop=null; if(d&&!cs.disabled){ d.style=setStyle('G',cs.dataset.cstyle); d.ti=tiDefault(d.style); mgSave(d); mgRerender(); } return; }   // (a style sets its instructions too)
+    const tl=e.target.closest('[data-tlist]'); if(tl){ tacList=tl.dataset.tlist==='bench'?'bench':'xi'; rerenderOffice(); return; }   // (v260: the rows, the nine or the bench)
     const ta=e.target.closest('[data-tarm]'); if(ta){ const ri=+ta.dataset.tarm; TARM=TARM===ri?null:ri; const d=CAREER&&CAREER.data; if(d) paintBuilding(); return; }   // (v158: A TAP TO SWAP)
     const tc=e.target.closest('[data-tac]'); if(tc){ if(tc.closest('.sqPitch')){ const d=CAREER&&CAREER.data, p=d&&d.roster[+tc.dataset.ri]; if(p){ MGUI.sel=p.id; mgRerender(); } return; }
       if(TARM!=null&&+tc.dataset.ri!==TARM){ const d=CAREER&&CAREER.data, a=document.querySelector('#bpBody .ptk[data-tac][data-ri="'+TARM+'"]'); TARM=null;
