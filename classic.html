@@ -1986,8 +1986,12 @@
   #mtacOv .mtBenchHd{ flex:none; font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--dim); padding:2px 0 0 2px; }
   #mtacOv .tacB1 .tpitch .ptk{ transform:translate(-50%,-50%) scale(calc(.84 + .16 * var(--d,1)));
     background:linear-gradient(180deg, var(--row), var(--win)); box-shadow:var(--pxOut), inset 0 0 0 2px var(--frame), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
-  #mtacOv .tacB1 .tpitch .ptk::before{ content:''; position:absolute; left:4px; right:-2px; top:100%; height:12px; margin-top:4px; border-radius:2px; pointer-events:none;
-    background:rgb(0 0 0 / .4); filter:blur(1.5px); transform-origin:0 0; transform:skewX(48deg); }
+  /* (v245) each card's shadow thrown on the grass behind it, up the field and off to the right, as from a light at your back:
+     a shadow of its own (.ptkSh), the size of its card and where it stands, drawn before every card -- so each card stands in
+     front of its own shadow and of its neighbours', and no shadow lies on a card */
+  #mtacOv .tacB1 .tpitch .ptkSh{ position:absolute; --tw:var(--twMax); --hw:calc(var(--tw) / 2 + 2px); --colW:calc(var(--tw) + 3px); --hh:20px; width:var(--tw); height:36px; transform:translate(-50%,-50%) scale(calc(.84 + .16 * var(--d,1))); pointer-events:none; }
+  #mtacOv .tacB1 .tpitch .ptkSh::before{ content:''; position:absolute; inset:0 1px 0 1px; border-radius:3px; background:rgb(0 0 0 / .42); filter:blur(1.5px);
+    transform-origin:50% 100%; transform:translateY(4px) skewX(-42deg) scaleY(.92); }
   #mtacOv .tacB1 .ptk.sel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--warn), 0 0 0 4px rgb(var(--warnRGB) / .5), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
   #mtacOv .tacB1 .ptk.offSel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--acc), 0 0 0 4px rgb(var(--accRGB) / .5), 0 4px 0 #1b2440, 0 5px 0 1px var(--ol); }
   #mtacOv .tacB1 .ptk.onSel{ box-shadow:var(--pxOut), inset 0 0 0 2px var(--good), 0 0 0 4px rgb(var(--goodRGB) / .45); }
@@ -17143,6 +17147,7 @@
     const drop=(k,label)=>'<span class="tbDropW"><button class="tbDrop'+(MT.drop===k?' on':'')+'" data-mtdrop="'+k+'"'+(mine?'':' disabled')+'><i>'+{form:'SHAPE',width:'WIDTH',style:'STYLE'}[k]+'</i>'+label+(mine?' ▾':'')+'</button>'+(MT.drop===k?mtMenuHtml(t,phase):'')+'</span>';
     let h='<div class="tacB1'+(mine?'':' ro')+(swap?' mtSwapV':' mtTacV')+'"><div class="tbMain"><div class="tbLeft"><div class="tpitch tvP"><div class="tvF">';
     const nOn=Math.min(order.length,slots.length), st=tvPlace([{u:0.5,t:0.945,k:0,n:1,c:0},...slots.slice(0,nOn).map(s=>mtPos(t,s))]);
+    h+=ptkShadows(st,[li.gk,...order.slice(0,nOn)]);   // (v245: the shadows first, so every card stands in front of them)
     h+=mtTok(t,li.gk,st[0],'gk','GK','GK');
     for(let i=0;i<nOn;i++) h+=mtTok(t,order[i],st[i+1],'field',slots[i].role,spotFit(slots[i]));
     h+='</div></div>';
@@ -20897,6 +20902,7 @@
   function tvRows(D){ const R=D.length, s='var(--rowV)', hh='calc(var(--hh) - var(--mY))';   // (a row may stand in the box's room over and under the picture)
     const down=i=>{ const t=['calc('+hh+' + '+i+' * '+s+')']; for(let j=0;j<=i;j++) t.push(j===i?D[j].toFixed(2)+'%':'calc('+D[j].toFixed(2)+'% + '+(i-j)+' * '+s+')'); return 'max('+t.join(', ')+')'; };
     return D.map((_,i)=>{ const t=[down(i)]; for(let j=i+1;j<R;j++) t.push('calc('+down(j)+' - '+(j-i)+' * '+s+')'); t.push('calc(100% - '+hh+' - '+(R-1-i)+' * '+s+')'); return 'min('+t.join(', ')+')'; }); }
+  const ptkShadows=(st,keys)=>st.map((s,i)=>keys[i]==null?'':'<i class="ptkSh" data-shk="'+keys[i]+'"'+s+'></i>').join('');   // (v245: each card's shadow, under every card -- see .ptkSh)
   const ptkBody=(face,ovr,pos,name,num)=>(face||'')+'<span class="ptkTxt"><span class="ptkOvr">'+ovr+'<i class="ptkPos">'+pos+'</i></span><span class="ptkNm"><span class="ptkName">'+name+'</span>'+shirtNo(num)+'</span></span>';
   function tbTok(d, ri, st, kind, phase, slotRole, pos){ const p=d.roster[ri]; if(!p) return '';   // (pos: the spot's fit -- spotFit; st: where he stands, tvPlace)
     const r=slotRole?ovrAt(p,slotRole,pos):p.ovr;
@@ -20916,7 +20922,8 @@
     const moved=[];
     for(const el of root.querySelectorAll('.tpitch .ptk')){ const k=el.dataset.ri??el.dataset.si, b=k!=null&&before.get(k); if(!b) continue;
       const r=el.getBoundingClientRect(), dx=b.x-(r.left+r.width/2), dy=b.y-(r.top+r.height/2); if(Math.hypot(dx,dy)<1) continue;
-      el.style.transition='none'; el.style.transform='translate(calc(-50% + '+dx.toFixed(1)+'px), calc(-50% + '+dy.toFixed(1)+'px))'; moved.push(el); }
+      el.style.transition='none'; el.style.transform='translate(calc(-50% + '+dx.toFixed(1)+'px), calc(-50% + '+dy.toFixed(1)+'px))'; moved.push(el);
+      const sh=root.querySelector('.tpitch .ptkSh[data-shk="'+k+'"]'); if(sh){ sh.style.transition='none'; sh.style.transform=el.style.transform; moved.push(sh); } }   // (v245: his shadow with him)
     if(!moved.length) return 0;
     void root.offsetWidth;   // (drawn where they were first)
     for(const el of moved){ el.style.transition='transform '+TOK_SLIDE+'s cubic-bezier(.3,.7,.25,1)'; el.style.transform='';

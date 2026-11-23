@@ -502,6 +502,10 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The tactics cards' shadows behind them (v245).** On the match's TACTICS and PLAYER SWAP pages (and before an
+  exhibition's kick-off), each man's card throws its shadow on the grass behind it, up the field and off to the right, as
+  from a light at your back. Every shadow lies under every card, so a card always stands in front of its own shadow and
+  its neighbours', and the shadows slide with the cards when WITH BALL or WITHOUT moves them.
 - **The hub as the Hub template (v244).** The career's home is laid out as the templates page's Hub. Along the top, one
   bar with your crest and club ("Career mode" under it), the day and the week, the season and the division, and MENU;
   beside it, the week's button (NEXT WEEK, FORWARD TO MATCHDAY, or SIMULATE and PLAY MATCH on a matchday). The seven
@@ -3612,6 +3616,11 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v245: the cards' shadows.** renderMatchTac writes a .ptkSh for each man on the pitch (ptkShadows: the same tvPlace
+  style as his card, data-shk his index) before any card, so each card, its own stacking context, paints over every
+  shadow; .ptkSh is a card-sized box (--tw, --hw, --colW and --hh as a card's, 36 px high, the same depth scale) whose
+  ::before is the shadow, skewed -42 degrees from its foot and nudged down 4 px. tokSlide moves each shadow with its card.
+  The card's own ::before shadow (v243) is gone.
 - **v244: the Hub template.** #careerHub is a twelve-column grid (areas top, btn, nav, cam, nws, fix, nxt, ovr; mirrored by
   .cpRight; the first two columns at least 58 px). .chTop holds #chCrest, #chClub, .chSub, #cpStats (.chDate with
   #chPhase) and .chSeason (#chMeta, "Season N · Division"); cpFitStats picks the week's words (data-top, else

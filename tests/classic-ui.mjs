@@ -391,6 +391,15 @@ for(const [w, h] of SIZES){
     return { card: !!document.querySelector('#mtacBody .mgCard, #mtacBody .mgCardHead, #mtacBody img.cardBody'), bench: document.querySelectorAll('#mtacBody .tbBench').length, ins: !!b && r.right <= innerWidth && r.bottom <= innerHeight,
       lit: !!(b && b.classList.contains('go')), title: document.getElementById('mtTitle').textContent }; });
   ok(tv.title === 'TACTICS' && !tv.card && !tv.bench && tv.ins && !tv.lit, w + 'x' + h + ': TACTICS in a match (v243): the field on the left, the tactics on the right -- no man\'s card and no bench on it, INSTRUCTIONS among the tactics');
+  // (v245) each card's shadow thrown behind it: a shadow of its own where its card stands, every one drawn before the cards
+  // (so a card stands in front of its own shadow and its neighbours'), leaning up the field to the right; none off the card itself
+  const shd = await page.evaluate(() => { const F = document.querySelector('#mtacBody .tpitch .tvF'), kids = [...F.children], S = kids.filter(e => e.classList.contains('ptkSh')), C = kids.filter(e => e.classList.contains('ptk'));
+    const mid = e => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r.width]; }, by = new Map(S.map(e => [e.dataset.shk, e]));
+    const off = Math.max(...C.map(c => { const s = by.get(c.dataset.si), a = mid(c), b = s ? mid(s) : [1e9, 1e9, 0]; return Math.hypot(a[0] - b[0], a[1] - b[1]) + Math.abs(a[2] - b[2]); }));
+    const m = /matrix\(([^)]+)\)/.exec(getComputedStyle(S[0], '::before').transform), c = m ? +m[1].split(',')[2] : 0;
+    return { n: S.length, cards: C.length, under: Math.max(...S.map(e => kids.indexOf(e))) < Math.min(...C.map(e => kids.indexOf(e))), off: Math.round(off), lean: c, own: getComputedStyle(C[0], '::before').transform }; });
+  ok(shd.cards === 9 && shd.n === 9 && shd.under && shd.off <= 1 && shd.lean < -0.5 && shd.own === 'none',
+    w + 'x' + h + ': the cards\' shadows (v245): one behind each of the ' + shd.cards + ' cards (' + shd.n + '), where it stands and as wide, every one drawn before the cards, leaning up the field to the right (' + shd.lean.toFixed(2) + ')');
   await page.tap('#mtViews [data-v="swap"]'); await page.waitForTimeout(150);
   await page.tap('#mtacBody .tpitch .ptk[data-mtk="field"] >> nth=1'); await page.waitForTimeout(80); await page.tap('#mtacBody .tbBench .ptk >> nth=0'); await page.waitForTimeout(80);
   await mcheck('player swap', ['#mtacBody .tbBench .ptk', '#mtacBody .mtSide', '#mtacBody .mtCmpRow', '#mtacBody .mtDoSwap', '#mtacBody .mtGo']);
