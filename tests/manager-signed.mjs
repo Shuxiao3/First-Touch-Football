@@ -59,6 +59,18 @@ ok(me && v.on && v.title === 'SIGNED' && v.name === '#' + me.num + ' ' + fa.name
 ok(v.facts.FROM === 'a free agent' && v.facts['TO SIGN'] === (fa.fee ? '$' + fa.fee.toLocaleString() : 'nothing') && v.facts.WAGE === me.wage && v.facts.CONTRACT === me.until && v.six === 6,
   'where he came from, what he cost, his wage and his contract (' + Object.entries(v.facts).map(([k, x]) => k + ' ' + x).join(', ') + '), and his six');
 ok({ nine: /^In your nine/, bench: /^On your bench/, squad: /not in your nine or on the bench yet/ }[me.where].test(v.where), 'where he is in your squad: "' + v.where + '"');
+// (v249) AS ITS TEMPLATE: a box ten columns wide, the title at 16 on the left, his figure in a well 88 square, his rating at
+// 28 in a well 72 x 40, his deal in rows of 24, his six as tiles 48 high, SEE HIM IN THE SQUAD four columns wide on the
+// left of the foot and DONE three on the right
+{ const L = await page.evaluate(() => { const c = document.querySelector('#signModal .signCard'), R = e => e.getBoundingClientRect(), cr = R(c), q = s => c.querySelector(s);
+    const pr=document.createElement('i'); pr.style.cssText='position:fixed;left:0;top:0;height:1px;width:var(--tplC)'; document.body.appendChild(pr); const col=pr.getBoundingClientRect().width; pr.remove();
+    const see = R(q('[data-sg="see"]')), done = R(q('[data-sg="done"]')), face = R(q('.sgFace')), ovr = R(q('.mgCardOvr'));
+    return { w: Math.round(cr.width), col, title: getComputedStyle(q('.pauseTitle')).textAlign + ' ' + getComputedStyle(q('.pauseTitle')).fontSize, face: Math.round(face.width) + 'x' + Math.round(face.height), ovr: Math.round(ovr.width) + 'x' + Math.round(ovr.height) + ' ' + getComputedStyle(q('.mgCardOvr')).fontSize,
+      facts: [...c.querySelectorAll('.signFacts .mgFact')].map(e => Math.round(R(e).height)), six: [...c.querySelectorAll('.sixC')].map(e => Math.round(R(e).height)), see: [Math.round(see.left - cr.left), Math.round(see.width)], done: [Math.round(cr.right - done.right), Math.round(done.width)] }; });
+  info('the overview on the grid: ' + JSON.stringify(L));
+  ok(Math.abs(L.w - (L.col * 10 + 72)) <= 2 && L.title === 'left 16px' && L.face === '88x88' && L.ovr === '72x40 28px' && L.facts.length >= 2 && L.facts.every(h => h === 24) && L.six.length === 6 && L.six.every(h => h === 48)
+    && L.see[0] === 16 && Math.abs(L.see[1] - (L.col * 4 + 24)) <= 2 && L.done[0] === 16 && Math.abs(L.done[1] - (L.col * 3 - 4)) <= 2,
+    'v249: the overview as its template -- ten columns wide, the title on the left at 16, his figure in a well, his rating at 28 in a well 72 x 40, his deal in rows of 24, his six as tiles 48 high, SEE HIM IN THE SQUAD and DONE at the foot'); }
 ok(v.top >= 0 && v.bottom <= v.vh && v.cut <= 1 && v.B.length === 2 && v.B.every(b => b.ok), 'all of it on the smallest iPhone held sideways, SEE HIM IN THE SQUAD and DONE a tap away (' + v.top + ' to ' + v.bottom + ' px of ' + v.vh + ')');
 await page.tap('#signModal .sixC >> nth=3'); await page.waitForTimeout(150);
 const v6 = await view(), plain = await K(`document.querySelectorAll('#signModal button.sixC, #signModal [data-six]').length`);

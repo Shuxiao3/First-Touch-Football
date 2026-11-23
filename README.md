@@ -502,6 +502,15 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The career's story cards and the signing overview as their templates (v249).** The phone call, the chairman, the
+  hometown hero and the wonderkid each come up in a box over the career home: a face in a well at its top left (the phone
+  ringing, then still, for the call; the man himself for the hero and the wonderkid), the title beside it, what's said
+  under it, and the one button filled at the foot on the right. The hero's card has his name, his rating and his wage in
+  rows and a line on who he is; the wonderkid's is ten columns wide, his name, rating and ceiling by his face, where he
+  plays and how in rows of chips across it (the one picked lit), SIGN HIM bottom right. The overview of a man you've just
+  signed or kept: a box ten columns wide, his figure in a well, his name, what he is and where he is in your squad, his
+  rating at 28 in a well with what he could be beside it, his deal in rows on the right, his six as tiles, SEE HIM IN THE
+  SQUAD and DONE along the foot.
 - **After a match as its templates (v248).** THE RESULT: AFTER THE MATCH along the top; a box across the page with each
   club's crest 16 in from its side, its name between the crest and the score and pushed to it, the score at 28 in a well
   over the middle four columns and who won under it; then a box for each side's goals (the scorer and the minute, a row of
@@ -3658,6 +3667,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v249: the story cards; the signing overview.** #storyModal .stCard is a .tplBox look placed on the grid (eight columns,
+  76 down, 224 high; .stBig, the wonderkid's, ten columns from under the header to the foot): .stFace (a well holding
+  PHONE_SVG, or bodyImg of the man -- the wonderkid's from lookKey 'kid:' and his name), .stTop (the title, .stName,
+  .stKvs, .stMsg, .stTag), the wonderkid's .stRow.tplSeg rows, and .cfBtns holding .stGo, filled, at the foot's right.
+  #signModal .signCard: .sgTop (a grid: .sgWho, that is .sgFace and .sgId with .sgRate, beside .signFacts), the six as
+  .sixC tiles (the label over the figure), .sgSee and .sgDone. The chairman's words lose their em dash.
 - **v248: after a match.** #matchReport's pages are absolutely placed on the grid (.tplHead, .mrBoard 88 high with
   .mrCrest.l/.r, .mrNm.l/.r and .mrScore / .mrRes over the middle four columns; .mrGls.l/.r five columns and .mrTbl two
   from 148 to 44 over --tplB; #mrNextBtn / #mrContinueBtn two columns at the foot; the .cfFoot grass under them). Each goal

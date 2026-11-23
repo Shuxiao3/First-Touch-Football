@@ -80,6 +80,9 @@ info('the match\'s shape menu: ' + menu.map(m => m.t).join(' · ') + ' (' + rows
 ok(menu.length === 16 && rows === 4 && menu.every(m => m.t === m.f) && picked.forms[0] === '3-2-3 (2)' && /3-2-3 \(2\)/.test(picked.shown), 'the match\'s shape menu: the sixteen, four rows of four, each by its name; 3-2-3 (2) picked from it and shown on the menu button');
 // (v245: the save is waited for before the reload, and the game after it -- under a full suite's load 150 + 700 ms weren't always enough)
 await page.waitForFunction(() => { try{ const y = JSON.parse(localStorage.getItem('ft_exh') || '{}').you; return !!y && window.__C.clubSide(y).form === '3-2-3 (2)'; }catch(e){ return false; } }, null, { timeout: 4000 }).catch(() => {});
+// (v249: and a moment more -- a reload straight after a write could find the whole of the page's storage gone, the browser
+// not yet having written it through; then even the club picked was gone, and the side came back as the club's own)
+await page.waitForTimeout(1500);
 await page.reload(); await page.waitForFunction(() => !!(window.__C && window.__C.clubSide), null, { timeout: 8000 }).catch(() => {}); await page.waitForTimeout(400);
 const back = await page.evaluate(() => { const s = window.__C.clubSide(JSON.parse(localStorage.getItem('ft_exh') || '{}').you || 'ARS'); return s.form; });
 ok(back === '3-2-3 (2)', 'kept with your club: there again after a reload (' + back + ')');

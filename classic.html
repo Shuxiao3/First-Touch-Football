@@ -2364,6 +2364,67 @@
   #pileModal .plSlip:active, #paperWarn .plSlip:active{ filter:drop-shadow(0 1px 2px rgb(0 0 0 / .45)); box-shadow:none; transform:rotate(var(--r)) translateY(2px); background:none; color:#1f2340; }
   #pileModal .plSlip.main:active, #paperWarn .plSlip.main:active{ color:#a82028; }
   @media (max-width:720px){ .plSlips, .plSlips .plBtns{ gap:8px; } #pileModal .plSlip, #paperWarn .plSlip{ padding:0 12px; min-width:72px; } #pileModal .plSlip.main, #paperWarn .plSlip.main{ min-width:96px; } }
+  /* (v249) THE STORY CARDS AS THEIR TEMPLATES: a box from the third column to the tenth, 76 down and 224 high -- the face
+     96 square in a well 16 in, the title at 16 and what's said 128 in, the button four columns wide 16 in from the foot and
+     the right. The wonderkid's from the second column to the eleventh, under the header to the foot: his face 80, his
+     name and figures 112 in, POSITION and STYLE rows of chips across it, SIGN HIM three columns wide */
+  #storyModal .stCard{ position:absolute; left:calc(var(--tplL) + var(--tplC) * 2 + 16px); width:calc(var(--tplC) * 8 + 56px); top:calc(var(--tplT) + 68px); height:224px;
+    max-width:none; max-height:none; margin:0; padding:12px 16px 16px 128px; box-sizing:border-box; display:block; gap:0; overflow:hidden;
+    background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); border:0; }
+  #storyModal .stCard.stBig{ left:calc(var(--tplL) + var(--tplC) + 8px); width:calc(var(--tplC) * 10 + 72px); top:calc(var(--tplT) + 44px); height:auto; bottom:var(--tplB); padding:8px 16px 16px; }
+  #storyModal .stFace{ position:absolute; left:16px; top:16px; width:96px; height:96px; border-radius:var(--rS); background:var(--well); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #storyModal .stBig .stFace{ top:12px; width:80px; height:80px; }
+  #storyModal .stFace .cardBody, #signModal .sgFace .cardBody{ height:84%; width:auto; padding:0; margin:0; background:none; box-shadow:none; border:0; border-radius:0; image-rendering:pixelated; }
+  #storyModal .stFace .stPhone{ margin:0; } #storyModal .stFace .stPhone svg{ width:34px; height:48px; }
+  #storyModal .stBig .stTop{ margin-left:96px; min-height:84px; }
+  #storyModal .stTitle{ margin:0; font:700 16px/28px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #storyModal .stMsg{ margin:6px 0 0; font-size:12px; line-height:1.45; color:var(--ink2); } #storyModal .stMsg.dim{ font-size:11px; color:var(--dim); }
+  #storyModal .stName{ margin:2px 0 0; font:700 14px/20px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); } #storyModal .stName i{ font-style:normal; font-weight:600; font-size:11px; color:var(--dim); }
+  #storyModal .stKvs{ display:flex; gap:4px; margin:4px 0 0; }
+  #storyModal .stKv{ height:24px; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); }
+  #storyModal .stKv:first-child{ width:140px; } #storyModal .stKv:nth-child(2){ width:160px; } #storyModal .stBig .stKv:first-child{ width:120px; } #storyModal .stBig .stKv:nth-child(2){ width:140px; }
+  #storyModal .stKv span{ font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); } #storyModal .stKv b{ font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #storyModal .stTag{ display:inline-flex; align-items:center; gap:6px; height:24px; margin:10px 0 0; padding:0 10px 0 8px; border-radius:var(--rS); background:var(--win); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #storyModal .stTag .hic{ width:14px; height:14px; }
+  #storyModal .stLbl{ margin:8px 0 2px; font:700 10px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--dim); }
+  #storyModal .stRow.tplSeg{ flex-wrap:nowrap; gap:4px; } #storyModal .stRow.tplSeg > button{ height:28px; min-height:28px; margin:0; padding:0 4px; }
+  #storyModal .stRow.stSty > button{ white-space:normal; line-height:1.05; font-size:10.5px; letter-spacing:.03em; padding:0 2px; }
+  #storyModal .stBlurb{ margin:8px 0 0; font-size:11px; color:var(--dim); }
+  #storyModal .cfBtns{ position:absolute; right:16px; bottom:16px; width:calc(var(--tplC) * 4 + 4px); margin:0; display:flex; }
+  #storyModal .stBig .cfBtns{ width:calc(var(--tplC) * 3 - 4px); }
+  #storyModal .stGo{ flex:1 1 auto; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px;
+    background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #storyModal .stGo .hic{ width:16px; height:16px; }
+  /* the signing overview: a box from the second column to the eleventh, under the header to the foot -- the title at 16;
+     his figure 88 square in a well, his name at 14 and the rest 100 in from it, his rating at 28 in a well 72 x 40; what
+     his deal was and is (or what he cost) in rows of 24 from the seventh column; his six as tiles 48 high; SEE HIM IN THE
+     SQUAD four columns wide at the left of the foot, DONE three at the right */
+  #signModal .signCard{ position:absolute; left:calc(var(--tplL) + var(--tplC) + 8px); width:calc(var(--tplC) * 10 + 72px); top:calc(var(--tplT) + 44px); bottom:var(--tplB);
+    max-width:none; max-height:none; margin:0; padding:4px 16px 16px; box-sizing:border-box; display:flex; flex-direction:column; gap:0; overflow:hidden;
+    background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); border:0; }
+  #signModal .pauseTitle{ margin:0; text-align:left; font:700 16px/28px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:var(--ink); }
+  #signModal .sgTop{ display:grid; grid-template-columns:minmax(0,1fr) calc(var(--tplC) * 5 + 4px); gap:12px; margin:8px 0 0; align-items:start; }
+  #signModal .sgWho{ display:flex; gap:12px; align-items:flex-start; margin:0; padding:0; background:none; box-shadow:none; min-width:0; }
+  #signModal .sgFace{ flex:none; width:88px; height:88px; border-radius:var(--rS); background:var(--well); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #signModal .sgId{ min-width:0; display:flex; flex-direction:column; }
+  #signModal .mgCardName{ font:700 14px/20px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #signModal .mgCardSub{ font-size:11px; line-height:15px; color:var(--dim); text-align:left; }
+  #signModal .sgRate{ display:flex; align-items:center; gap:8px; margin:6px 0 0; }
+  #signModal .mgCardOvr{ flex:none; width:72px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:var(--rS); background:var(--well); font:700 28px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--acc); }
+  #signModal .sgPot{ font:700 10px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+  #signModal .signFacts{ display:flex; flex-direction:column; gap:4px; margin:0; }
+  #signModal .signFacts .mgFact{ height:24px; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 8px; margin:0; border-radius:var(--rS); background:var(--win); min-width:0; }
+  #signModal .signFacts .mgFact span{ flex:none; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--dim); text-transform:uppercase; }
+  #signModal .signFacts .mgFact b{ min-width:0; font:700 12px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
+  #signModal .six{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; margin:16px 0 0; }
+  #signModal .sixC{ height:48px; min-height:48px; box-sizing:border-box; margin:0; padding:5px 8px; display:flex; flex-direction:column-reverse; align-items:flex-start; justify-content:flex-end; gap:2px;
+    border:0; border-radius:var(--rS); background:var(--win); box-shadow:none; cursor:default; }
+  #signModal .sixC i{ font:700 9.5px/12px 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.08em; color:var(--dim); }
+  #signModal .sixC b{ font:700 18px/20px 'Roboto Condensed','FTC Dot',sans-serif; }
+  #signModal .cfBtns{ margin:auto 0 0; display:flex; justify-content:space-between; gap:8px; }
+  #signModal .cfBtns .pauseBtn{ flex:none; height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; }
+  #signModal .cfBtns .sgSee{ width:calc(var(--tplC) * 4 + 24px); } #signModal .cfBtns .sgDone{ width:calc(var(--tplC) * 3 - 4px); background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #signModal .cfBtns .hic{ width:16px; height:16px; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -19428,25 +19489,31 @@
     if(m.classList.contains('on')&&m.dataset.k===want) return;
     if(mgUpElse('storyModal')) return;   // (v148: one at a time)
     m.dataset.k=want; mgStoryPaint(d); m.classList.add('on'); }
-  function mgStoryPaint(d){ const S=d.story, card=document.querySelector('#storyModal .stCard'); let h='';
-    if(S.phone===1) h=MGUI.phoneStep?'<div class="stTitle">THE CHAIRMAN</div><div class="stPhone">'+PHONE_SVG+'</div>'
-        +'<div class="stMsg">“Pre-season starts today, and the transfer window’s open. From now on, transfers go through this phone: agents, other clubs, free agents. Anyone you want to buy, sell or sign — make the call.”</div>'
-        +'<div class="stMsg"><b>TRANSFERS</b> is open now, in the menu.</div><div class="cfBtns"><button class="pauseBtn" data-st="phone">GOT IT</button></div>'
-      :'<div class="stTitle">YOUR PHONE IS RINGING</div><div class="stPhone ring">'+PHONE_SVG+'</div><div class="cfBtns"><button class="pauseBtn" data-st="answer">ANSWER</button></div>';
-    else if(S.vet===1){ const p=d.roster.find(x=>x.id===S.vetId);
-      const nm=p&&p.role!=='GK'?((STYLES[p.style]||{}).name||p.subRole||''):'', what=p?(p.role==='GK'?'a goalkeeper':(/^[aeiou]/i.test(nm)?'an ':'a ')+nm.charAt(0).toLowerCase()+nm.slice(1)):'';
-      h='<div class="stTitle">A HOMETOWN HERO COMES HOME</div><div class="stMsg">'+(p?'<b>'+mgEsc(p.name)+'</b>, '+p.age+(S.vetFrom?', once of '+mgEsc(S.vetFrom)+',':'')+' has come home to finish his career, and he'
-        +'’ll take a pay cut to play for the club he grew up with: '+what+' rated <b>'+ovrShownOf(p)+'</b>, on <b>'+money(p.wage)+'</b> a week to the end of next season.':'')+'</div>'
-        +'<div class="cfBtns"><button class="pauseBtn" data-st="ok">WELCOME HIM</button></div>'; }
+  // (v249) THE STORY CARDS AS THEIR TEMPLATES: a box eight columns wide over the career home, a face in a well at
+  // its top left (the phone, ringing and then still, for the call; the man himself for the hometown hero and the
+  // wonderkid), the title at 16 beside it, what's said under that, and the one button filled along the foot at the right.
+  // The wonderkid's is ten columns wide and the page's height: his name, rating and ceiling by his face, then where he
+  // plays and how in rows of chips across the card, the one picked lit, the style's line, SIGN HIM bottom right.
+  // (v109-v248: a centred card, the phone drawn big in the middle, each story a sentence.)
+  function mgStoryPaint(d){ const S=d.story, card=document.querySelector('#storyModal .stCard'); let h='', big=false;
+    const kv=(k,v)=>'<div class="stKv"><span>'+k+'</span><b>'+v+'</b></div>', go=(a,t,ic)=>'<div class="cfBtns"><button class="pauseBtn stGo" data-st="'+a+'">'+(ic?'<i class="hic" data-ic="'+ic+'"></i>':'')+'<span>'+t+'</span></button></div>';
+    if(S.phone===1) h=MGUI.phoneStep?'<div class="stFace"><div class="stPhone">'+PHONE_SVG+'</div></div><div class="stTop"><div class="stTitle">THE CHAIRMAN</div>'
+        +'<div class="stMsg">“Pre-season starts today, and the transfer window’s open. From now on, transfers go through this phone: agents, other clubs, free agents. Anyone you want, make the call.”</div>'
+        +'<div class="stTag"><i class="hic" data-ic="transfers"></i><span>TRANSFERS IS OPEN</span></div></div>'+go('phone','GOT IT')
+      :'<div class="stFace"><div class="stPhone ring">'+PHONE_SVG+'</div></div><div class="stTop"><div class="stTitle">YOUR PHONE IS RINGING</div><div class="stMsg dim">An unknown number. It could be anyone.</div></div>'+go('answer','ANSWER','phone');
+    else if(S.vet===1){ const p=d.roster.find(x=>x.id===S.vetId), kit=careerKit(d);
+      const nm=p&&p.role!=='GK'?((STYLES[p.style]||{}).name||p.subRole||''):'', what=p?(p.role==='GK'?'A goalkeeper':(/^[aeiou]/i.test(nm)?'An ':'A ')+nm.charAt(0).toLowerCase()+nm.slice(1)):'';
+      h='<div class="stFace">'+(p?bodyImg({lookKey:p.id},kit):'')+'</div><div class="stTop"><div class="stTitle">A HOMETOWN HERO COMES HOME</div>'
+        +(p?'<div class="stName">'+mgEsc(p.name)+'</div><div class="stKvs">'+kv('RATED',ovrShownOf(p))+kv('WAGE',money(p.wage)+'/wk')+'</div>'
+          +'<div class="stMsg dim">'+what+', '+p.age+(S.vetFrom?', once of '+mgEsc(S.vetFrom):'')+'. Home to finish his career on a pay cut, to the end of next season.</div>':'')+'</div>'+go('ok','WELCOME HIM','yes'); }
     else if(S.kid===1){ const A=S.kidAsk, pos=MGUI.kidPos&&KID_POS.includes(MGUI.kidPos)?MGUI.kidPos:'STK', L=SUB_STYLES[pos]||[], sty=L.includes(MGUI.kidSty)?MGUI.kidSty:L[0];
-      MGUI.kidPos=pos; MGUI.kidSty=sty;
-      h='<div class="stTitle">A WONDERKID ASKS TO JOIN</div><div class="stMsg"><b>'+mgEsc(A.name)+'</b>, 16, has turned the big clubs down to play for '+mgEsc(d.clubName)
-        +'. He’s rated <b>'+ovrShown(A.ovr)+'</b> now, with a ceiling of <b>'+rangeShown(kidPot(A))+'</b>. Where does he play, and how?</div>'
-        +'<div class="stLbl">POSITION</div><div class="stRow">'+KID_POS.map(k=>'<button class="mgChip'+(k===pos?' on':'')+'" data-st="pos" data-v="'+k+'">'+k+'</button>').join('')+'</div>'
-        +'<div class="stLbl">STYLE</div><div class="stRow">'+(L.length?L.map(k=>'<button class="mgChip'+(k===sty?' on':'')+'" data-st="sty" data-v="'+k+'">'+STYLES[k].name.toUpperCase()+'</button>').join(''):'<span class="stBlurb">A keeper has no style to pick.</span>')+'</div>'
-        +'<div class="stBlurb">'+(sty&&STYLES[sty]?mgEsc(STYLES[sty].blurb):'')+'</div>'
-        +'<div class="cfBtns"><button class="pauseBtn" data-st="sign">SIGN HIM</button></div>'; }
-    card.innerHTML=h; }
+      MGUI.kidPos=pos; MGUI.kidSty=sty; big=true;
+      h='<div class="stFace">'+bodyImg({lookKey:'kid:'+A.name},careerKit(d))+'</div><div class="stTop"><div class="stTitle">A WONDERKID ASKS TO JOIN</div>'
+        +'<div class="stName">'+mgEsc(A.name)+'<i> · 16</i></div><div class="stKvs">'+kv('RATED',ovrShown(A.ovr))+kv('CEILING',rangeShown(kidPot(A)))+'</div></div>'
+        +'<div class="stLbl">POSITION</div><div class="stRow tplSeg">'+KID_POS.map(k=>'<button class="mgChip'+(k===pos?' on':'')+'" data-st="pos" data-v="'+k+'">'+k+'</button>').join('')+'</div>'
+        +'<div class="stLbl">STYLE</div><div class="stRow tplSeg stSty">'+(L.length?L.map(k=>'<button class="mgChip'+(k===sty?' on':'')+'" data-st="sty" data-v="'+k+'">'+STYLES[k].name.toUpperCase()+'</button>').join(''):'<span class="stBlurb">A keeper has no style to pick.</span>')+'</div>'
+        +'<div class="stBlurb">'+(sty&&STYLES[sty]?mgEsc(STYLES[sty].blurb):'')+'</div>'+go('sign','SIGN HIM','contract'); }
+    card.classList.toggle('stBig',big); card.innerHTML=h; tpIcons(card); }
   document.getElementById('storyModal').addEventListener('click',e=>{ const b=e.target.closest('[data-st]'), d=CAREER&&CAREER.data; if(!b||!d||!d.story) return;
     const a=b.dataset.st;
     if(a==='answer'){ MGUI.phoneStep=1; mgStoryPaint(d); }
@@ -20744,20 +20811,23 @@
   function signPaint(d){ const m=document.getElementById('signModal'), Q=MGUI.signQ||[], e=Q[0], p=e&&d.roster.find(x=>x.id===e.pid);
     if(!p){ MGUI.signQ=[]; m.classList.remove('on'); return; }
     const sty=styleOf(p), kit=careerKit(d), lu=ensureLineup(d), bi=lu.bench.indexOf(d.roster.indexOf(p)), xi=mgStarters(d).includes(p);
-    const where=xi?'In your nine':bi>=0&&bi<BENCH_N?'On your bench':'In your squad: not in your nine or on the bench yet (Training’s Selection)';
-    let h='<div class="pauseTitle">'+SIGN_TITLE[e.k]+'</div><div class="mgCardHead">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)
-      +'<div><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div><div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p),true):'')+'</div>'
-      +'<div class="mgCardSub signWhere">'+where+'</div></div>'
-      +'<div class="cardEnd"><div class="mgCardOvr">'+ovrShownOf(p)+'</div><div class="mgCardSub" style="text-align:right">'+potCardTxt(d,p,mgFind(d,p.id))+'</div></div></div>';
+    const where=xi?'In your nine':bi>=0&&bi<BENCH_N?'On your bench':'In your squad, not in your nine or on the bench yet';
+    // (v249) AS ITS TEMPLATE: a box ten columns wide -- the title at 16, his figure in a well, his name at 14, what he is and
+    // where he is in your squad, his rating at 28 in a well with what he could be beside it; what his deal was and is, or
+    // what he cost, in rows on the right; his six in a row of tiles; SEE HIM IN THE SQUAD and DONE along the foot
+    let h='<div class="pauseTitle">'+SIGN_TITLE[e.k]+'</div><div class="sgTop"><div class="mgCardHead sgWho"><div class="sgFace">'+bodyImg({lookKey:p.id},p.role==='GK'?keeperKit(kit):kit)+'</div>'
+      +'<div class="sgId"><div class="mgCardName">'+(p.num?'#'+p.num+' ':'')+mgEsc(p.name)+'</div><div class="mgCardSub">'+natPos(p)+(sty?' · '+nbsp(sty.name):'')+' · age\u00a0'+p.age+(p.role!=='GK'?' · '+starsHtml(careerStars(p),true):'')+'</div>'
+      +'<div class="mgCardSub signWhere">'+where+'</div>'
+      +'<div class="sgRate"><div class="mgCardOvr">'+ovrShownOf(p)+'</div><div class="mgCardSub sgPot">'+potCardTxt(d,p,mgFind(d,p.id))+'</div></div></div></div>';
     const F=[], wk=w=>money(w)+'/wk';
     if(e.k==='renew') F.push(mgFact('WAS',wk(e.wage0)+', to season '+(e.until0||d.season)), mgFact('NOW',wk(p.wage)+', to season '+p.until,'var(--good)'));
     else if(e.k==='loan') F.push(mgFact('ON LOAN FROM',mgEsc((e.from||'').replace(/ \(.*\)$/,''))), mgFact('LOAN FEE',money(e.fee||0),'var(--warn)'), mgFact('HIS WAGE',wk(p.wage)+(p.loan?' ('+Math.round(p.loan.share*100)+'% of it)':'')), mgFact('UNTIL','the end of the season'));
     else { F.push(mgFact('FROM',mgEsc(e.from||'')), mgFact(e.k==='free'?'TO SIGN':'FEE',e.fee?money(e.fee):'nothing',e.fee?'var(--warn)':''), mgFact('WAGE',wk(p.wage)), mgFact('CONTRACT','to season '+p.until));
       if(e.k==='bb'&&p.bb) F.push(mgFact('BUYBACK',money(p.bb.fee)+', to season '+p.bb.until,'var(--warn)',true)); }
     const so=sixOpen; sixOpen=null; const six=sixHtml(mgStats(p),p.role).replace(/<button class="sixC([^"]*)" data-six="[A-Z]+">/g,'<div class="sixC$1">').replace(/<\/button>/g,'</div>'); sixOpen=so;   // (to look at: his card in the squad has the rest)
-    h+='<div class="signFacts">'+F.join('')+'</div>'+six
-      +'<div class="cfBtns"><button class="pauseBtn" data-sg="see">SEE HIM IN THE SQUAD</button><button class="pauseBtn" data-sg="done">'+(Q.length>1?'NEXT (1 OF '+Q.length+') ▸':'DONE')+'</button></div>';
-    m.querySelector('.signCard').innerHTML=h; m.classList.add('on'); }
+    h+='<div class="signFacts">'+F.join('')+'</div></div>'+six
+      +'<div class="cfBtns"><button class="pauseBtn sgSee" data-sg="see"><i class="hic" data-ic="squad"></i><span>SEE HIM IN THE SQUAD</span></button><button class="pauseBtn sgDone" data-sg="done"><span>'+(Q.length>1?'NEXT (1 OF '+Q.length+')':'DONE')+'</span>'+(Q.length>1?'<i class="hic" data-ic="next"></i>':'')+'</button></div>';
+    const c=m.querySelector('.signCard'); c.innerHTML=h; tpIcons(c); m.classList.add('on'); }
   document.getElementById('signModal').addEventListener('click',ev=>{ const d=CAREER&&CAREER.data, m=document.getElementById('signModal'); if(!d){ m.classList.remove('on'); return; }
     const b=ev.target.closest('[data-sg]');
     if(b&&b.dataset.sg==='see'){ const e0=(MGUI.signQ||[])[0]; MGUI.signQ=[]; m.classList.remove('on'); if(e0){ pileHide(); curTab.club='Squad'; openBuilding('club'); MGUI.sel=e0.pid; mgSide='rate'; paintBuilding(); } return; }

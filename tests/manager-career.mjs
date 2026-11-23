@@ -609,10 +609,18 @@ await create('Story Town');
 const games = n => page.evaluate(n => { const M = __MG, d = M.d; d.phase = 'league'; d.day = 0; for(let i = 0; i < n; i++) M.mgPlayGame(d); d.press = null; M.mgSave(d); M.renderHub(); return d.md; }, n);   // (v148: the press conference sent the assistant, as a player would -- the story waits for it: one at a time)
 const story = () => page.evaluate(() => ({ on: document.getElementById('storyModal').classList.contains('on'), text: document.querySelector('#storyModal .stCard').innerText.replace(/\s+/g, ' ') }));
 const ring = await story();
+// (v249) THE STORY CARD AS ITS TEMPLATE: a box eight columns wide and 224 high, the face 96 square in a well 16 in from its
+// corner, the title at 16 beside it, the one button four columns wide 16 in from the foot and the right
+const stl = await page.evaluate(() => { const c = document.querySelector('#storyModal .stCard'), f = c.querySelector('.stFace'), b = c.querySelector('.stGo'), t = c.querySelector('.stTitle'), R = e => e.getBoundingClientRect(), cr = R(c), fr = R(f), br = R(b);
+  const pr=document.createElement('i'); pr.style.cssText='position:fixed;left:0;top:0;height:1px;width:var(--tplC)'; document.body.appendChild(pr); const col=pr.getBoundingClientRect().width; pr.remove();
+  return { w: Math.round(cr.width), col, h: Math.round(cr.height), face: [Math.round(fr.left - cr.left), Math.round(fr.top - cr.top), Math.round(fr.width), Math.round(fr.height)].join(), btn: [Math.round(cr.right - br.right), Math.round(cr.bottom - br.bottom), Math.round(br.width), Math.round(br.height)], tFont: getComputedStyle(t).fontSize, tLeft: Math.round(R(t).left - cr.left), ic: !!b.querySelector('.hic svg') }; });
+info('the story card: ' + JSON.stringify(stl));
+ok(Math.abs(stl.w - (stl.col * 8 + 56)) <= 2 && stl.h === 224 && stl.face === '16,16,96,96' && stl.btn[0] === 16 && stl.btn[1] === 16 && Math.abs(stl.btn[2] - (stl.col * 4 + 4)) <= 2 && stl.btn[3] === 36 && stl.tFont === '16px' && stl.tLeft === 128 && stl.ic,
+  'v249: the story card as its template -- eight columns wide, the face in a well at its corner, the title 128 in at 16, ANSWER (and its phone) four columns wide at the foot on the right');
 await page.click('#storyModal [data-st="answer"]'); await page.waitForTimeout(60); const call = await story();
 await page.click('#storyModal [data-st="phone"]'); await page.waitForTimeout(60); const s1 = await story();
 const mk = await page.evaluate(() => ({ market: __MG.d.lv.market, budget: __MG.d.budget, news: __MG.d.news.some(n => /transfers go through your phone/.test(n.t)) }));
-ok(ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /Pre-season starts today/.test(call.text) && /TRANSFERS is open/.test(call.text) && !s1.on && mk.market === 1 && mk.news,
+ok(ring.on && /YOUR PHONE IS RINGING/.test(ring.text) && /THE CHAIRMAN/.test(call.text) && /Pre-season starts today/.test(call.text) && /TRANSFERS IS OPEN/.test(call.text) && !s1.on && mk.market === 1 && mk.news,
   'on the first day of pre-season your phone rings -- ANSWER: the chairman, transfers go through it now ("' + call.text.slice(12, 90) + '..."); TRANSFERS is open, nothing paid');
 await games(1); const s1b = await story(); await games(1); const s2 = await story();
 const vet = await page.evaluate(() => { const M = __MG, d = M.d, p = d.roster.find(x => x.id === d.story.vetId); return p && { age: p.age, ovr: p.ovr, role: p.role, wage: p.wage, fair: M.mgDemand(d, p, false), until: p.until, season: d.season, n: d.roster.length }; });
