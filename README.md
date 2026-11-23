@@ -502,6 +502,22 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The Start screens as their templates (v246).** The first of the templates built into the game, the Start section's:
+  every screen on the templates' grid (twelve columns 8 apart, 72 px in from the sides at 852 wide and less on a smaller
+  phone, never inside a notch), with a header 36 high along the top (the back button two columns wide, the title beside
+  it, any tabs at the right end), boxes under it in a thin light rim, rows 28 high you tap and 24 you read, and the main
+  button bottom right. The title: the logo 64 high with NINE A SIDE under it, then CONTINUE, LOAD GAME, NEW CAREER,
+  EXHIBITION and SETTINGS four columns wide, 36 high and 8 apart. NEW CAREER and LOAD GAME: BACK and the title, the three
+  slots in a box over the stadium (56 high, the save mark, SLOT 1 · EMPTY or the club and its division; the red square
+  beside a saved one deletes it). The career maker: CANCEL, NEW CAREER and CLUB, KIT and CREST along the top; YOU AND
+  YOUR CLUB on the left (your name, the club, its three letters, then where you start), ON THE SCOREBOARD on the right
+  (your crest, the score box, NEXT at its foot, START CAREER on the crest). A question (yes or no): the question at 16,
+  a line on what it means, CANCEL and the yes. SETTINGS: one box with the list scrolling in it, each setting and its line
+  on the left, its choices on the right (the one in use lit), BUTTON LAYOUT, SKILL MOVES and LABS as rows of their own,
+  the credits at the foot. LABS: the five as a column. SKILL MOVES: the moves as rows with their stars on the right, the
+  one you tap drawn and playing on the left. HOW TO PLAY: the eight in two columns of four (MOVE, PASS, SHOOT, CROSS;
+  SKILL, DEFENDING, CORNERS, MENU), a mark, the name and a line each, the whole of it a tap away, BACK TO THE GAME
+  bottom right. The icons are the icon sheet's whole solid set now.
 - **The tactics cards' shadows behind them (v245).** On the match's TACTICS and PLAYER SWAP pages (and before an
   exhibition's kick-off), each man's card throws its shadow on the grass behind it, up the field and off to the right, as
   from a light at your back. Every shadow lies under every card, so a card always stands in front of its own shadow and
@@ -3616,6 +3632,17 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v246: the templates' frame; the Start section.** CSS: --tplL / --tplR (max(the safe inset, clamp(12px, (100vw - 712px)
+  / 2, 72px))), --tplT (8 px or the inset), --tplC (a column: (100vw - margins - 88px) / 12) and --tplB (the content's
+  foot: max(8px, 100dvh - 356px)); .tplHead (.tplBack two columns by 36, .tplTitle 18 px, .tplTabs at the right end),
+  .tplBox (--boxBg in --pxWin, 4 px in), .tplWell, .tplLbl, .tplSeg; .tplPage (a start-menu page) and .tplPageOv (an
+  overlay whose card is the whole screen), with the title's menu hidden behind either. HUB_IC is the templates page's
+  whole solid icon set, and tpIcons(root) fills every .hic[data-ic] under root. The slots: .tplSlots boxes from the third
+  column to the tenth. showConfirm(msg, onYes, {q}) sets .cfQ (the question; else the first sentence of msg) over .cfMsg.
+  renderMgrMaker writes .mkL and .mkR (same ids as before: mgName, mgClubIn, mgCode, mkSbBox, mgGo, mgKitCv, mgCrestCv;
+  mkCrestBig new). Settings: the page rows (BUTTON LAYOUT, SKILL MOVES, LABS, ADVANCED) are .setRow with the old toggle
+  classes on the row. Skill moves: skSel, the move picked (#skGrid holds its one .skCard, so skAnimate is as it was),
+  #skList its rows (data-skpick). CTL rows: [name, icon, line, the whole], each .ctlRow carrying the whole as data-xpl.
 - **v245: the cards' shadows.** renderMatchTac writes a .ptkSh for each man on the pitch (ptkShadows: the same tvPlace
   style as his card, data-shk his index) before any card, so each card, its own stacking context, paints over every
   shadow; .ptkSh is a card-sized box (--tw, --hw, --colW and --hh as a card's, 36 px high, the same depth scale) whose

@@ -61,9 +61,12 @@ const firstStays = (await isOn('ctlModal')) && !(await K('window.__kicked'));
 await page.tap('#ctlModal [data-ctl="go"]'); await page.waitForTimeout(150);
 const kicked = !(await isOn('ctlModal')) && (await K('window.__kicked')) === 1;
 ok(ctlGone && firstStays && kicked, 'HOW TO PLAY: a tap outside closes it; the card before your first match stays till KICK OFF');
+// (v246: SKILL MOVES is a page as its template, the whole screen -- BACK top left closes it; a tap on the page picks, it doesn't close)
 await K(`(()=>{ openSkills(); return 1; })()`); await page.waitForTimeout(200);
-pt = await outside('#skillsOverlay .skillsCard'); await page.touchscreen.tap(pt.x, pt.y); await page.waitForTimeout(150);
-ok(!(await K('skillsOpen')) && !(await isOn('skillsOverlay')), 'SKILL MOVES: a tap outside closes it (' + pt.room + ' px round the card)');
+await page.tap('#skillsOverlay .skList .skRow >> nth=2'); await page.waitForTimeout(150);
+const skStays = (await K('skillsOpen')) && (await isOn('skillsOverlay'));
+await page.tap('#skillsOverlay .tplHead [data-skclose]'); await page.waitForTimeout(150);
+ok(skStays && !(await K('skillsOpen')) && !(await isOn('skillsOverlay')), 'SKILL MOVES, a page of its own (v246): a move tapped is picked and the page stays; BACK top left closes it');
 
 process.exitCode = rep.finish();
 await browser.close();

@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 
 let src = readFileSync(fileURLToPath(new URL('../classic.html', import.meta.url)), 'utf8');
 const patch = (from, to) => { if(src.split(from).length !== 2) throw new Error('instrumenting: anchor not found once: ' + from); src = src.replace(from, to); };
-patch('  const LAB_TITLE=', '  window.__T={controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, shirt:t=>shirtCol(t), sides:(g,r)=>{ if(g){ EXH.play.you=g; EXH.play.opp=r; setTeamsFromClubs(); } return [EXH.play.you,EXH.play.opp]; }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
+patch('  const LAB_TITLE=', '  window.__T={ctlShow:o=>ctlShow(o), ctlHide:()=>ctlHide(), controlled:()=>controlled, players:()=>players, setControlled, sim:()=>simNow, mateAt:(x,y)=>mateAtClient(x,y), scr:q=>{ const s=proj(q.x,q.y,PLAYER_H*0.45), r=rect(); return {x:r.left+s.x*r.width/W, y:r.top+s.y*r.height/H}; }, theirBall:()=>{ const o=players.find(p=>p.team!==controlled.team&&p.role!==\'G\'); own(o,o.r+ball.r+5); }, camX:()=>camX, shirt:t=>shirtCol(t), sides:(g,r)=>{ if(g){ EXH.play.you=g; EXH.play.opp=r; setTeamsFromClubs(); } return [EXH.play.you,EXH.play.opp]; }, clear:()=>{ for(const p of players) if(p.team!==controlled.team){ p.x=FW-60; p.vx=p.vy=0; } }, end:()=>{ if(careerFix) finishCareerMatch(careerFix); }};\n  const LAB_TITLE=');
 patch('  let INJ_OFF=false;', '  let INJ_OFF=true;');   // (injuries off: a man hurt in a match would change who plays -- manager-injury.mjs is injuries' test)
 patch('  // ===== END MANAGER CAREER', '  window.__MG={get d(){ return CAREER&&CAREER.data; }, setPref, bldUp, mgMarketOpen, lvOf, mgForward, mgPlayGame, mgWindowOpen, mgSave, renderHub, STYLES, setCareerForm, FORMS, ATK_ONLY, DEF_ONLY, mgNewPlayer};\n  // ===== END MANAGER CAREER');
 const copy = join(mkdtempSync(join(tmpdir(), 'ftf-ui-')), 'classic.html');
@@ -71,20 +71,19 @@ const insTop = (page, root) => page.evaluate(root => { const top = document.quer
     left: !!b && (!bs || (b.nextElementSibling === bs && r.right <= bs.getBoundingClientRect().left && Math.abs(r.top - bs.getBoundingClientRect().top) < 2)) }; }, root);
 // THE SKILL MOVES PAGE as it is on the screen: each page's moves (▶ to the next), any whose name or card is cut off, and
 // whether each move showing has its drawing drawn and its clip moving
-async function skillsPage(page){
-  const all = await page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].map(c => c.dataset.sk)), seen = [], cut = []; let pages = 1;
-  for(let i = 0; i < 6; i++){
-    const v = await page.evaluate(() => { const vis = [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length);
-      return { kinds: vis.map(c => c.dataset.sk), cut: vis.filter(c => { const n = c.querySelector('.skName'); return n.scrollWidth > n.clientWidth + 1 || c.scrollWidth > c.clientWidth + 1; }).map(c => c.dataset.sk),
-        next: !!document.querySelector('#skGrid .fitPager [data-fitgo="1"]:not([disabled])') }; });
-    seen.push(...v.kinds); cut.push(...v.cut); if(!v.next) break; await page.tap('#skGrid .fitPager [data-fitgo="1"]'); await page.waitForTimeout(150); pages++; }
+async function skillsPage(page){   // (v246: as its template -- the moves as rows on the right, the one picked drawn and playing on the left)
+  const all = await page.evaluate(() => [...document.querySelectorAll('#skList .skRow')].map(r => r.dataset.skpick));
+  const cut = await page.evaluate(() => [...document.querySelectorAll('#skList .skRow')].filter(r => { const n = r.querySelector('.skName'), q = r.getBoundingClientRect(), L = r.closest('.skList').getBoundingClientRect();
+    return n.scrollWidth > n.clientWidth + 1 || r.scrollWidth > r.clientWidth + 1 || q.bottom > L.bottom + 1 || q.top < L.top - 1; }).map(r => r.dataset.skpick));
+  const seen = [];
+  for(const k of all){ await page.evaluate(k => document.querySelector('#skList [data-skpick="' + k + '"]').click(), k); await page.waitForTimeout(40);
+    seen.push(await page.evaluate(k => { const c = document.querySelector('#skGrid .skCard'), on = document.querySelector('#skList .skRow.on'); return c && on && c.dataset.sk === k && on.dataset.skpick === k ? k : '-'; }, k)); }
   const px = () => page.evaluate(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).map(c => {
     const sum = cv => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let h = 0, n = 0; for(let i = 0; i < d.length; i += 4){ h = (h * 31 + d[i] + d[i + 1] * 3 + d[i + 2] * 7) >>> 0; if(d[i + 3]) n++; } return [h, n]; };
     return { drawn: sum(c.querySelector('.skDraw'))[1], clip: sum(c.querySelector('.skClip'))[0] }; }));
-  // (v224: the last page's cards drawn before they're sampled -- a frame can come late after a page turns, and that isn't a fault)
   await page.waitForFunction(() => [...document.querySelectorAll('#skGrid .skCard')].filter(c => c.getClientRects().length).every(c => c.querySelector('.skDraw').dataset.drawn), null, { timeout: 1500 }).catch(() => {});
   const a = await px(); await page.waitForTimeout(450); const b = await px();
-  return { all, seen, cut, pages, drawn: a.length > 0 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
+  return { all, seen, cut, pages: 1, drawn: a.length === 1 && a.every(x => x.drawn > 50), moving: a.some((x, i) => b[i] && x.clip !== b[i].clip) }; }
 async function newCareer(page){
   await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200); await page.tap('#newSlotList .slotBtn >> nth=1'); await page.waitForTimeout(300);
   await page.fill('#mgName', 'Sam Okafor'); await page.fill('#mgClubIn', 'Fenmoor Athletic'); await page.evaluate(()=>{ for(let i=0;i<3;i++){ const g=document.getElementById('mgGo'), m=document.getElementById('mgrMaker'); if(!g||!m||!m.classList.contains('on')||g.disabled) break; g.click(); } })   /* (v242: NEXT, NEXT, START CAREER) */; await page.waitForSelector('#careerHub.show', { timeout: 6000 });
@@ -98,10 +97,10 @@ for(const [w, h] of SIZES){
   await check('start menu', ['#smItems .smBtn']);
   const footOnTitle = await page.evaluate(() => [...document.querySelectorAll('.cfFoot')].filter(f => f.getClientRects().length).length);   // (v225: the footer's the career's alone)
   await page.tap('#smItems [data-act="settings"]'); await page.waitForTimeout(150);
-  await check('settings', ['#settingsOverlay .pauseTitle', '#setRows .setOpt', '[data-setclose]']);
+  await check('settings', ['#settingsOverlay .tplTitle', '#setRows .setOpt', '[data-setclose]']);
   if(w === 844 && h === 390){
     const st = await page.evaluate(() => ({ rows: [...document.querySelectorAll('#setRows .setLbl')].map(e => e.firstChild.textContent), dials: document.querySelectorAll('#settingsOverlay .dial').length,
-      dev: getComputedStyle(document.querySelector('[data-setdev]')).display }));
+      dev: document.querySelector('[data-setdev]').getClientRects().length ? 'shown' : 'none' }));   // (v246: its row hidden, not the button)
     ok(String(st.rows) === 'MATCH LENGTH,CAMPUS MENU,HALF-TIME,TIPS' && st.dials === 0 && st.dev === 'none', 'Settings: a player\'s settings only (' + st.rows.join(', ') + '), no feel dials -- and no DIFFICULTY (v228: CHAMPION), no EXHIBITION OPPONENTS, GRAPHICS or TEXT SIZE (v242)');
     // (v136) MATCH LENGTH: 4 minutes unless you pick another (it was 3) -- and a 3 kept from before, picked or not, is the
     // new 4, where a 3 picked from now on stays 3
@@ -111,12 +110,12 @@ for(const [w, h] of SIZES){
       const pg = await c.newPage(); await pg.goto('file://' + copy); await pg.waitForTimeout(500); await pg.click('#smItems [data-act="settings"]'); await pg.waitForTimeout(150); const v = await mlOn(pg); await c.close(); return v; };
     const old3 = await keptAs({ halfMin: 3, diff: 'star' }), new3 = await keptAs({ halfMin: 3, diff: 'star', pv: 1 }), old5 = await keptAs({ halfMin: 5, diff: 'star' });
     ok(fresh === '4 MIN' && old3 === '4 MIN' && new3 === '3 MIN' && old5 === '5 MIN', `MATCH LENGTH: 4 minutes unless you pick another (${fresh}); a 3 kept from before is the new 4 (${old3}), one picked since stays (${new3}), a 5 kept as it was (${old5}) (v136)`);
-    const frame = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).boxShadow);
-    const radius = await page.$eval('#settingsOverlay .pauseCard', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
+    const frame = await page.$eval('#settingsOverlay .setBox', e => getComputedStyle(e).boxShadow);   // (v246: settings a page as its template, its list in a box)
+    const radius = await page.$eval('#settingsOverlay .setBox', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
     const btnR = await page.$eval('#setRows .setOpt', e => parseFloat(getComputedStyle(e).borderTopLeftRadius));
-    const fill = await page.$eval('#settingsOverlay .pauseCard', e => getComputedStyle(e).backgroundColor);
+    const fill = await page.$eval('#settingsOverlay .setBox', e => getComputedStyle(e).backgroundColor);
     // (v240: as the match screen's boxes -- a dark outline, one thin light rim, a dark see-through fill, 6 px corners; 10 before, and a second, darker rim)
-    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && !/127, 147, 196/.test(frame) && /rgba\(20, 26, 44, 0\.9\)/.test(fill) && radius === 6 && btnR >= 5, 'the menus are boxed as the match screen\'s: a dark outline, one thin light rim, a dark see-through fill, rounded corners (' + radius + ' / ' + btnR + ' px; ' + fill + ')');
+    ok(/11, 15, 30/.test(frame) && /230, 238, 255/.test(frame) && !/127, 147, 196/.test(frame) && /rgba\(20, 26, 44, 0\.9\)/.test(fill) && radius === 6 && btnR >= 3, 'the menus are boxed as the match screen\'s: a dark outline, one thin light rim, a dark see-through fill, rounded corners (' + radius + ' / ' + btnR + ' px; ' + fill + ')');
     // (v221) ONE COLOUR SCHEME: no COLOURS row, no other scheme in the stylesheet, and a pick saved from before (RUBY) opens in BLUE
     const one = await page.evaluate(() => { let rules = 0; for(const sh of document.styleSheets){ let rs; try{ rs = sh.cssRules; }catch(e){ continue; } for(const r of rs) if(r.selectorText && /data-theme/.test(r.selectorText)) rules++; }
       return { opts: document.querySelectorAll('#setRows [data-pref="theme"]').length, rules, font: getComputedStyle(document.querySelector('#setRows .setOpt')).fontFamily }; });
@@ -143,7 +142,7 @@ for(const [w, h] of SIZES){
       await c.close(); return r; };
     const sizes = [[844, 340], [852, 393], [932, 430]], lg = [];
     for(const [w, h] of sizes) lg.push(await logoAt(w, h));
-    ok(lg.every((r, i) => r && r.nat[0] === 491 && r.nat[1] === 159 && /Fulltime 9/.test(r.alt) && !r.words && r.top >= 0 && r.bottom <= r.first && r.last <= sizes[i][1]) && lg[1].h > lg[0].h,
+    ok(lg.every((r, i) => r && r.nat[0] === 491 && r.nat[1] === 159 && /Fulltime 9/.test(r.alt) && !r.words && r.top >= 0 && r.bottom <= r.first && r.last <= sizes[i][1] && Math.round(r.h) === 64 && Math.round(r.top) === 8),   // (v246: 64 high, 8 down, as the template)
       'the title is the Fulltime 9 logo, above the menu with the menu whole on the screen: ' + lg.map((r, i) => r ? sizes[i].join('x') + ' ' + Math.round(r.h) + ' px tall, the last button at ' + Math.round(r.last) : 'no logo').join('; ') + ' (v223)');
     // (v224) THE TITLE PAGE AS LAID OUT IN THE STUDIO, AND ONE FONT: CONTINUE, LOAD GAME, NEW CAREER, EXHIBITION and SETTINGS in one
     // column down the middle, 257 wide and 12 apart, NEW CAREER lit with no game saved, the labs off it; Roboto Condensed for every word
@@ -155,19 +154,45 @@ for(const [w, h] of SIZES){
         return { btns, ftc, rc: document.fonts.check('600 14px "Roboto Condensed"'), labs: [...document.querySelectorAll('#smItems [data-act$="lab"], #smItems [data-act="skills"]')].filter(b => b.offsetParent).length }; });
       await c.close();
       const bt = t.btns, gaps = bt.slice(1).map((x, i) => Math.round(x.top - bt[i].bottom)), lit = bt.find(x => x.sel);
-      ok(bt.map(x => x.t).join(',') === 'CONTINUE,LOAD GAME,NEW CAREER,EXHIBITION,SETTINGS' && bt.every(x => Math.abs(x.l - bt[0].l) < 1 && Math.abs(x.w - 257) < 1.5 && Math.abs(x.l + x.w / 2 - 426) < 1.5)
-        && gaps.every(g => g === 12) && lit && lit.t === 'NEW CAREER' && t.labs === 0,
-        'the title page as laid out in the Studio: ' + bt.map(x => x.t).join(', ') + ', one column down the middle, ' + Math.round(bt[0] ? bt[0].w : 0) + ' wide, ' + gaps.join('/') + ' apart, ' + (lit ? lit.t : 'nothing') + ' lit, ' + t.labs + ' labs (v224)');
+      ok(bt.map(x => x.t).join(',') === 'CONTINUE,LOAD GAME,NEW CAREER,EXHIBITION,SETTINGS' && bt.every(x => Math.abs(x.l - bt[0].l) < 1 && Math.abs(x.w - 232) < 1.5 && Math.abs(x.l + x.w / 2 - 426) < 1.5)
+        && gaps.every(g => g === 8) && lit && lit.t === 'NEW CAREER' && t.labs === 0,   // (v246: four columns of the grid, 8 apart, as the template)
+        'the title page as its template: ' + bt.map(x => x.t).join(', ') + ', one column down the middle, ' + Math.round(bt[0] ? bt[0].w : 0) + ' wide, ' + gaps.join('/') + ' apart, ' + (lit ? lit.t : 'nothing') + ' lit, ' + t.labs + ' labs (v224)');
       ok(t.rc && t.ftc === 0 && bt.every(x => /^"?Roboto Condensed/.test(x.font)), 'one font for every word: Roboto Condensed, loaded, and no rule leading with the pixel font (kept for the symbols alone) (v224)'); }
     ok(/^"?Roboto Condensed/.test(one.font), 'one font throughout: Roboto Condensed since v224 (' + one.font + ')');
   }
   await page.tap('[data-setclose]'); await page.waitForTimeout(100);
   await page.$eval('#smItems [data-act="skills"]', b => b.click()); await page.waitForTimeout(300);
-  await check('skill moves', ['#skillsOverlay .pauseTitle', '#skillsOverlay .skHint', '#skGrid .skCard', '[data-skclose]']);
+  await check('skill moves', ['#skillsOverlay .tplTitle', '#skillsOverlay .skHint', '#skGrid .skCard', '#skList .skRow', '[data-skclose]']);
   { const sk = await skillsPage(page);
     ok(sk.all.length === 9 && sk.seen.join() === sk.all.join() && !sk.cut.length && sk.drawn && sk.moving,
-      w + 'x' + h + ': SKILL MOVES: all nine moves over ' + sk.pages + ' page' + (sk.pages > 1 ? 's' : '') + ', each name whole, what to draw drawn and its clip playing' + (sk.cut.length ? ' -- cut: ' + sk.cut.join(', ') : '') + (sk.seen.join() !== sk.all.join() ? ' -- seen ' + sk.seen.join(' ') : '') + (!sk.drawn ? ' -- not drawn' : '') + (!sk.moving ? ' -- clips still' : '')); }
+      w + 'x' + h + ': SKILL MOVES as its template (v246): all nine moves as rows, each name whole and each picked in turn into the box on the left, what to draw drawn and its clip playing' + (sk.cut.length ? ' -- cut: ' + sk.cut.join(', ') : '') + (sk.seen.join() !== sk.all.join() ? ' -- seen ' + sk.seen.join(' ') : '') + (!sk.drawn ? ' -- not drawn' : '') + (!sk.moving ? ' -- clips still' : '')); }
   await page.tap('[data-skclose]'); await page.waitForTimeout(100);
+  // (v246) THE START SECTION AS ITS TEMPLATES: on the grid (twelve columns 8 apart between the margins, C one column) --
+  // NEW CAREER's slots in a box from the third column to the tenth, 56 high and 8 apart, BACK top left (two columns by 36,
+  // 8 down) and the title beside it; the maker's two boxes, seven columns and five, CLUB KIT CREST at the header's right
+  // end; HOW TO PLAY's eight in two columns of four, down the first then the second
+  { const G = await page.evaluate(() => { const cs = getComputedStyle(document.documentElement), px = v => parseFloat(v);
+      const t = document.createElement('div'); t.style.cssText = 'position:fixed;left:var(--tplL);width:var(--tplC);top:0;height:1px'; document.body.appendChild(t); const r = t.getBoundingClientRect(); t.remove(); return { L: r.left, C: r.width }; });
+    const near = (a, b) => Math.abs(a - b) <= 1;
+    await page.tap('#smItems [data-act="new"]'); await page.waitForTimeout(200);
+    const sl = await page.evaluate(() => { const R = e => e.getBoundingClientRect(), b = R(document.querySelector('#newPanel .tplBack')), ti = R(document.querySelector('#newPanel .tplTitle')), box = R(document.getElementById('newSlotList')),
+      rows = [...document.querySelectorAll('#newSlotList .slotBtn')].map(R); return { b: [b.left, b.top, b.width, b.height], ti: ti.left - b.right, box: [box.left, box.top, box.width], h: rows.map(q => Math.round(q.height)), gap: rows.slice(1).map((q, i) => Math.round(q.top - rows[i].bottom)),
+        menu: getComputedStyle(document.querySelector('#startMenu > .smCenter')).visibility }; });
+    const slOk = near(sl.b[0], G.L) && sl.b[1] === 8 && near(sl.b[2], 2 * G.C + 8) && sl.b[3] === 36 && sl.ti >= 6 && sl.ti <= 12 && near(sl.box[0], G.L + 2 * G.C + 16) && sl.box[1] === 52 && near(sl.box[2], 8 * G.C + 56)
+      && sl.h.join() === '56,56,56' && sl.gap.join() === '8,8' && sl.menu === 'hidden';
+    await page.tap('#newSlotList .slotBtn >> nth=2'); await page.waitForSelector('#mgrMaker.on', { timeout: 3000 }).catch(() => {}); await page.waitForTimeout(200);
+    const mk = await page.evaluate(() => { const R = e => e.getBoundingClientRect(), l = R(document.querySelector('#mgrMaker .mkL')), r = R(document.querySelector('#mgrMaker .mkR')), tabs = [...document.querySelectorAll('#mgrMaker .tplTabs .mkTab')].map(R), go = R(document.getElementById('mgGo'));
+      return { l: [l.left, l.top, l.width], r: [r.left, r.width, innerWidth - r.right], tabsEnd: innerWidth - tabs[tabs.length - 1].right, tabs: tabs.map(q => Math.round(q.width) + 'x' + Math.round(q.height)), goIn: go.left >= r.left && go.right <= r.right && go.bottom <= r.bottom, wells: [...document.querySelectorAll('#mgrMaker .tplWell')].map(w => w.textContent) }; });
+    const mkOk = near(mk.l[0], G.L) && mk.l[1] === 52 && near(mk.l[2], 7 * G.C + 48) && near(mk.r[1], 5 * G.C + 32) && near(mk.r[2], G.L) && near(mk.tabsEnd, G.L) && mk.tabs.join() === '60x36,60x36,60x36' && mk.goIn && mk.wells.join() === 'YOU AND YOUR CLUB,ON THE SCOREBOARD';
+    await page.tap('#mgrMaker [data-mm="cancel"]'); await page.waitForTimeout(200);
+    await page.evaluate(() => { const b = document.querySelector('#newPanel [data-act="back"]'); if(b && b.offsetParent) b.click(); }); await page.waitForTimeout(150);
+    await page.evaluate(() => window.__T && window.__T.ctlShow ? window.__T.ctlShow({}) : null);
+    const ct = await page.evaluate(() => { const m = document.getElementById('ctlModal'); if(!m.classList.contains('on')) return null; const R = e => e.getBoundingClientRect(), rows = [...m.querySelectorAll('.ctlRow')].map(e => ({ k: e.querySelector('b').textContent, r: R(e) })), go = R(m.querySelector('[data-ctl="go"]')), card = R(m.querySelector('.ctlCard'));
+      return { order: rows.map(x => x.k).join(), cols: [...new Set(rows.map(x => Math.round(x.r.left)))].length, h: [...new Set(rows.map(x => Math.round(x.r.height)))].join(), firstCol: rows.slice(0, 4).every(x => Math.round(x.r.left) === Math.round(rows[0].r.left)), go: [Math.round(card.right - go.right), Math.round(card.bottom - go.bottom)], tap: rows.every(x => true) }; });
+    if(ct) await page.evaluate(() => window.__T.ctlHide());
+    ok(slOk && mkOk && (!ct || (ct.order === 'MOVE,PASS,SHOOT,CROSS,SKILL,DEFENDING,CORNERS,MENU' && ct.cols === 2 && (ct.h === '48' || (h < 370 && ct.h === '44')) && ct.firstCol && ct.go[0] <= 6 && ct.go[1] <= 6)),
+      w + 'x' + h + ': the Start screens as their templates (v246): NEW CAREER\'s slots in a box from the 3rd column to the 10th, 56 high and 8 apart, BACK (2 columns by 36, 8 down) and the title beside it, the menu hidden behind; the maker\'s boxes 7 and 5 columns, CLUB KIT CREST 60 x 36 at the header\'s end, NEXT in the right box' + (ct ? '; HOW TO PLAY\'s eight in two columns of four, BACK TO THE GAME bottom right' : '')
+      + (slOk && mkOk && (!ct || ct.order === 'MOVE,PASS,SHOOT,CROSS,SKILL,DEFENDING,CORNERS,MENU') ? '' : ' -- ' + JSON.stringify({ G, sl, mk, ct }))); }
   await page.tap('#smItems [data-act="exhibition"]'); await page.waitForTimeout(200);
   await check('exhibition', ['#exhGo', '#exhPanel [data-act="back"]']);
   await page.tap('#exhPanel [data-act="back"]'); await page.waitForTimeout(100);

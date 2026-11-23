@@ -43,8 +43,8 @@ await K(`(()=>{ const d=CAREER.data; if(d.pile) d.pile.opened=true; pileHide(); 
 await page.click('#chBottom [data-mg="play"]'); await page.waitForTimeout(300);
 let r = await K(`(()=>{ const c=document.querySelector('#ctlModal .ctlCard'); return { on:document.getElementById('ctlModal').classList.contains('on'), screen:SCREEN, text:c.innerText, keys:[...c.querySelectorAll('.ctlRows b')].map(b=>b.textContent), seen:PREFS.seenCtl }; })()`);
 info('the card: ' + r.keys.join(' | '));
-ok(r.on && r.screen === 'hub' && ['LEFT', 'PASS', 'SHOOT', 'CROSS', 'SKILL', 'DEFENDING', 'CORNERS', '☰'].every(k => r.keys.includes(k)) && /HOW TO PLAY/.test(r.text) && /KICK OFF/.test(r.text) && /Hold it to wind up/.test(r.text),
-  'PLAY, your first career match: HOW TO PLAY first, the match not yet begun -- the screen\'s buttons (v159: on any device): steering on the left, PASS, SHOOT (hold it to wind up), CROSS, SKILL, defending, your corner, ☰; KICK OFF');
+ok(r.on && r.screen === 'hub' && ['MOVE', 'PASS', 'SHOOT', 'CROSS', 'SKILL', 'DEFENDING', 'CORNERS', 'MENU'].every(k => r.keys.includes(k)) && /HOW TO PLAY/.test(r.text) && /KICK OFF/.test(r.text) && /Hold to wind up/.test(r.text),   // (v246: the template's names and lines; the whole of each a tap away)
+  'PLAY, your first career match: HOW TO PLAY first, the match not yet begun -- the screen\'s buttons (v159: on any device): MOVE on the left, PASS, SHOOT (hold to wind up), CROSS, SKILL, DEFENDING, CORNERS, MENU; KICK OFF');
 await page.click('#ctlModal [data-ctl="go"]'); await page.waitForTimeout(2500);
 r = await K(`({ screen:SCREEN, on:document.getElementById('ctlModal').classList.contains('on'), fix:!!careerFix })`);
 ok(r.screen === 'match' && !r.on && r.fix, 'KICK OFF: the card gone, the match on');

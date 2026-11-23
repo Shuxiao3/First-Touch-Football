@@ -56,10 +56,10 @@ const pc = await words(page), mob = await words(ph);
 info('the computer page: isTouch ' + pc.touch + ', the phone page: isTouch ' + mob.touch);
 
 // --- HOW TO PLAY ---------------------------------------------------------------------------------------------------------------
-const HEADS = ['LEFT', 'PASS', 'SHOOT', 'CROSS', 'SKILL', 'DEFENDING', 'CORNERS', '☰'];
+const HEADS = ['MOVE', 'PASS', 'SHOOT', 'CROSS', 'SKILL', 'DEFENDING', 'CORNERS', 'MENU'];   // (v246: as the template names them)
 info('the card: ' + pc.card.heads.join(' | '));
 ok(!pc.touch && mob.touch && pc.card.heads.join('|') === HEADS.join('|') && pc.card.html === mob.card.html && !bad(pc.card.html).length,
-  'HOW TO PLAY on a computer\'s page is the phone\'s card, word for word: the left of the screen to steer, PASS, SHOOT, CROSS, SKILL, defending, your corner, ☰ -- no keys');
+  'HOW TO PLAY on a computer\'s page is the phone\'s card, word for word: MOVE (the left of the screen), PASS, SHOOT, CROSS, SKILL, DEFENDING, CORNERS, MENU -- no keys');
 ok(/SKILL MOVES in the menu/.test(pc.card.html) && /− and \+/.test(pc.card.html), 'the card says where the skill moves are, and how your corner is set (− and +)');
 
 // --- THE TIPS --------------------------------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ const tuneBad = pc.tune.filter(t => bad(t).length), dialBad = pc.dials.filter(t 
 ok(!tuneBad.length && !dialBad.length, 'the TUNE drawer\'s notes and the settings\' dials: no key, no mouse' + (tuneBad.concat(dialBad).length ? ' -- ' + tuneBad.concat(dialBad).join(' | ').slice(0, 300) : ''));
 
 // --- THE SKILL MOVES PAGE, YOUR CORNER, THE BUTTONS' NAMES ------------------------------------------------------------------------
-ok(/^Start on <b>SKILL<\/b> and draw/.test(pc.skills) && pc.skills === mob.skills && !bad(pc.skills).length, 'the skill moves page: "' + pc.skills.replace(/<[^>]+>/g, '') + '"');
+ok(/^Hold <b>SKILL<\/b>, then draw from it/.test(pc.skills) && pc.skills === mob.skills && !bad(pc.skills).length, 'the skill moves page: "' + pc.skills.replace(/<[^>]+>/g, '') + '"');
 ok(!/<kbd/.test(pc.corner) && /−/.test(pc.corner) && pc.kbd === 0, 'your corner\'s panel: − and +, no key beside them; no key hint anywhere on the page');
 const tBad = pc.titles.filter(t => bad(t).length || /\([A-Z]\)/.test(t));
 ok(!tBad.length, 'no button\'s name gives a key (' + pc.titles.length + ' names and labels)' + (tBad.length ? ' -- ' + tBad.join(' | ') : ''));

@@ -31,13 +31,20 @@ ok(r.opp === 3 && r.val === 3 && r.art === true && r.text === 'n' && !r.big, 'se
 
 // --- the list ---------------------------------------------------------------------------------------------------------------------
 await page.tap('#smItems [data-act="settings"]'); await page.waitForTimeout(300);
-const list = () => page.evaluate(() => { const ov = document.getElementById('settingsOverlay'), sc = ov.querySelector('.setScroll'), vis = sel => { const e = ov.querySelector(sel); return !!e && getComputedStyle(e).display !== 'none'; };
-  return { on: ov.classList.contains('on'), rows: [...ov.querySelectorAll('.setLbl')].map(e => e.childNodes[0].textContent.trim()), pager: !!ov.querySelector('.fitPager'), sh: sc.scrollHeight, ch: sc.clientHeight, st: sc.scrollTop,
+const list = () => page.evaluate(() => { const ov = document.getElementById('settingsOverlay'), sc = ov.querySelector('.setScroll'), vis = sel => { const e = ov.querySelector(sel); return !!e && e.getClientRects().length > 0; };   // (v246: a page's row hides it, not the button)
+  return { on: ov.classList.contains('on'), rows: [...ov.querySelectorAll('#setRows .setLbl')].map(e => e.childNodes[0].textContent.trim()), pager: !!ov.querySelector('.fitPager'), sh: sc.scrollHeight, ch: sc.clientHeight, st: sc.scrollTop,
     layout: !!ov.querySelector('[data-setlayout]'), skills: vis('[data-setskills]'), labs: vis('[data-setlabs]'), fromMatch: ov.classList.contains('fromMatch') }; });
 r = await list();
 info('SETTINGS: ' + JSON.stringify(r));
 ok(r.on && r.rows.join() === 'MATCH LENGTH,CAMPUS MENU,HALF-TIME,TIPS', 'SETTINGS: MATCH LENGTH, CAMPUS MENU, HALF-TIME, TIPS -- no GRAPHICS, no EXHIBITION OPPONENTS, no TEXT SIZE');
 ok(!r.pager && r.layout && r.skills && r.labs && !r.fromMatch, 'one list, no pages; BUTTON LAYOUT, SKILL MOVES and LABS in it (from the title page)');
+const tpl = await page.evaluate(() => { const ov = document.getElementById('settingsOverlay'), R = e => e.getBoundingClientRect(), b = R(ov.querySelector('.tplBack')), t = R(ov.querySelector('.tplTitle')), box = R(ov.querySelector('.setBox'));
+  const rows = [...ov.querySelectorAll('.setScroll .setRow')].filter(e => e.getClientRects().length).map(R), gaps = rows.slice(1).map((q, i) => Math.round(q.top - rows[i].top));
+  const opt = R(ov.querySelector('#setRows .setOpts')), lbls = [...ov.querySelectorAll('.setScroll > .setRow .setLbl')].filter(e => e.getClientRects().length).map(e => e.childNodes[0].textContent.trim());
+  return { back: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)], title: Math.round(t.left - b.right), box: [Math.round(box.left), Math.round(box.top - b.bottom), Math.round(innerWidth - box.right)], gaps, opt: Math.round(opt.width), pages: lbls, W: innerWidth }; });
+info('the template: ' + JSON.stringify(tpl));
+ok(tpl.back[1] === 8 && tpl.back[3] === 36 && Math.abs(tpl.back[2] - 112) <= 1 && tpl.title >= 6 && tpl.title <= 12 && tpl.box[0] === tpl.back[0] && tpl.box[1] === 8 && tpl.gaps.every(g => g === 48) && Math.abs(tpl.opt - 340) <= 2 && tpl.pages.join() === 'BUTTON LAYOUT,SKILL MOVES,LABS',
+  'as its template (v246): BACK top left (112 x 36, 8 down), SETTINGS beside it, one box under them the width of the grid, a setting every 48 px with its choices in a column 340 wide; BUTTON LAYOUT, SKILL MOVES and LABS rows of their own');
 await page.evaluate(() => document.querySelector('#settingsOverlay [data-setlabs]').scrollIntoView({ block: 'end' })); await page.waitForTimeout(150);
 const r2 = await list(), labsBox = await page.locator('#settingsOverlay [data-setlabs]').boundingBox(), scBox = await page.locator('#settingsOverlay .setScroll').boundingBox();
 ok(r.sh > r.ch && r2.st > 0 && labsBox.y >= scBox.y - 1 && labsBox.y + labsBox.height <= scBox.y + scBox.height + 1, 'too long for the card: it scrolls (' + r.sh + ' px in ' + r.ch + '), LABS scrolled into it');

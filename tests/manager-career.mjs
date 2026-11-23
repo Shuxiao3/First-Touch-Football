@@ -70,11 +70,11 @@ ok(await page.inputValue('#mgCode') === 'FMR' && !(await page.isDisabled('#mgGo'
 // (v242) the three steps in order: KIT and CREST locked till NEXT has got you there; START CAREER only on the last
 { const r = await page.evaluate(() => { const t = k => document.querySelector('#mgrMaker [data-mm="tab"][data-t="'+k+'"]'), g = document.getElementById('mgGo');
     return { kit: t('kit').disabled, crest: t('crest').disabled, btn: g.textContent.trim(), act: g.dataset.mm, sb: !!document.querySelector('#mkSbBox .mkSbClk') && !!document.querySelector('#mkSbBox .mkSbNums') }; });
-  ok(r.kit && r.crest && /^Next/.test(r.btn) && r.act === 'next', 'v242: on CLUB, KIT and CREST are locked and the button is NEXT (' + JSON.stringify(r) + ')');
+  ok(r.kit && r.crest && /^Next/i.test(r.btn) && r.act === 'next', 'v242: on CLUB, KIT and CREST are locked and the button is NEXT (' + JSON.stringify(r) + ')');
   ok(r.sb, 'v242: ON THE SCOREBOARD is a mock of the match\'s score box: the clock in its well, the crests and letters, the score by the strips'); }
 await page.click('#mgGo');
 { const r = await page.evaluate(() => ({ tab: (document.querySelector('#mgrMaker .mkTab.on')||{}).dataset.t, crest: document.querySelector('#mgrMaker [data-mm="tab"][data-t="crest"]').disabled, club: document.querySelector('#mgrMaker [data-mm="tab"][data-t="club"]').disabled, btn: document.getElementById('mgGo').textContent.trim() }));
-  ok((r.tab === 'kit' && r.crest && !r.club && /^Next/.test(r.btn)), 'v242: NEXT took you to KIT -- CLUB open to go back to, CREST still locked, NEXT again (' + JSON.stringify(r) + ')'); }
+  ok((r.tab === 'kit' && r.crest && !r.club && /^Next/i.test(r.btn)), 'v242: NEXT took you to KIT -- CLUB open to go back to, CREST still locked, NEXT again (' + JSON.stringify(r) + ')'); }
 await page.click('#mgrMaker [data-mm="pri"][data-c="#1d4fa3"]'); await page.click('#mgrMaker [data-mm="sec"][data-c="#f2d23c"]');
 await page.click('#mgGo');
 ok(/Start career/i.test(await page.textContent('#mgGo')) && (await page.getAttribute('#mgGo', 'data-mm')) === 'go', 'v242: on CREST, the last, the button is START CAREER');
