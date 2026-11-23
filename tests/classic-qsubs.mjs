@@ -62,8 +62,8 @@ const best = await K(`(()=>{ const s=qsSuggest()[0], sl=qsSlot(s.out); return Ma
 info('worn out (' + worn.name + '): ' + JSON.stringify(S.rows));
 ok(S.rows.length >= 1 && S.rows[0].text.includes(worn.name.split(' ').slice(-1)[0]) && sug[0].out === worn.si && sug[0].rIn === best && sug[0].rIn > sug[0].rOut * (0.74 + 0.26 * sug[0].cap),
   `pressed, he's first, with the bench's best at his spot (${sug[0] && sug[0].rIn}, against his ${sug[0] && sug[0].rOut} on tired legs)`);
-const dropBox = await box('#qsDrop');
-ok(dropBox.w <= 210 && S.rows.every(r => r.h <= 30) && /▸/.test(S.rows[0].text) && !/OFF|ON |FRESH/.test(S.rows[0].text), `small: ${Math.round(dropBox.w)} px wide, a sub a line ${Math.round(S.rows[0].h)} px high ("${S.rows[0].text}")`);
+const dropBox = await box('#qsDrop'), col4 = await page.evaluate(() => { const t = document.createElement('div'); t.style.cssText = 'position:fixed;width:calc(var(--tplC) * 4 + 24px);height:1px'; document.body.appendChild(t); const w = t.getBoundingClientRect().width; t.remove(); return w; });   // (v247: four columns, as the template)
+ok(Math.abs(dropBox.w - col4) <= 1.5 && S.rows.every(r => r.h <= 30) && /▸/.test(S.rows[0].text) && !/OFF|ON |FRESH/.test(S.rows[0].text), `four columns wide as the template (v247): ${Math.round(dropBox.w)} px, a sub a line ${Math.round(S.rows[0].h)} px high ("${S.rows[0].text}")`);
 
 // THE SUB (v179: at the next break in play): the ball in play -- our keeper with it in his hands, nothing to send it out
 // for a few seconds -- tap his line: he's waiting, still on, his line ringed, the sub counted; the ball out over the
@@ -128,7 +128,7 @@ const t1 = await KP(`({ open:document.getElementById('qsWrap').classList.contain
 ok(t1.open && t1.taps === 0 && !t1.trap, 'on a phone, a tap on the chip opens it and isn\'t taken as a tap on the game');
 const fit = await ph.evaluate(() => { const r = document.getElementById('qsDrop').getBoundingClientRect(), c = document.getElementById('rPlayer').getBoundingClientRect(), q = document.getElementById('qsWrap').getBoundingClientRect();
   return { l: r.left, r: r.right, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, rows: document.querySelectorAll('#qsDrop .qsRow').length, row: Math.abs(c.top - q.top) < 2 }; });
-ok(fit.l >= 0 && fit.r <= fit.vw && fit.row && fit.rows === 3 && fit.h <= 130 && fit.w <= 210,
+ok(fit.l >= 0 && fit.r <= fit.vw && fit.row && fit.rows === 3 && fit.h <= 140 && fit.w <= 240,
   `...and three subs down it is ${Math.round(fit.w)}x${Math.round(fit.h)} px of a ${fit.vw}x${fit.vh} screen, on it, the chip on the card's line`);
 await ph.tap('#qsDrop [data-qs="all"]'); await ph.waitForTimeout(250);
 const tac = await KP(`({ tac:document.getElementById('mtacOv').classList.contains('on'), open:document.getElementById('qsWrap').classList.contains('open') })`);

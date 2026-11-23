@@ -502,6 +502,17 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The labs and the match's cards as their templates (v247).** The labs: the match screen with a lab bar along the top,
+  as the template draws it. EXIT LAB top left (where the score box is in a match), then the lab's name, how it's going
+  (no balls yet, or the tally), your man and the menu along the header; every setting a button you tap through in one row
+  under it, its name small and what it is now big, the ball (SERVE, or NEW) the lit one at the end; the hint, or the last
+  go, under that, six columns wide in the middle. In the Shooting Lab your last shots have a box of their own on the right,
+  YOUR LAST SHOTS over the goal. In a match: the menu is a card six columns wide (MENU and the score, the minute and the
+  subs left to the left; TACTICS, SKILL MOVES, CONTROLS, SETTINGS, EXIT GAME and SIM THE REST in pairs, each with its
+  mark; BACK TO THE GAME lit along the foot), and so is the menu at full time; half-time shows the crests either side of
+  the score at 28 in a well, the numbers so far (a career's), SUBS and TACTICS with their marks, SECOND HALF lit; the
+  quick subs box is four columns wide under SUBS, FORCE SUB and ALL SUBS full buttons; your corner's box is three
+  columns wide, YOUR CORNER in its well, the − and + 28 square.
 - **The Start screens as their templates (v246).** The first of the templates built into the game, the Start section's:
   every screen on the templates' grid (twelve columns 8 apart, 72 px in from the sides at 852 wide and less on a smaller
   phone, never inside a notch), with a header 36 high along the top (the back button two columns wide, the title beside
@@ -3632,6 +3643,14 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v247: the labs; the match's cards.** In lab mode #readout is a twelve-column grid on --tplL/--tplR (#labExitBtn columns
+  1-2 with its back mark, #rBox 3-4 holding the lab's name, #rPlayer 9-11, #menuBtn 12) and #labHud sits over it:
+  .labTallyRow the header's columns 5-8, #labBar a row of flex chips 44 down (each its <i> name over its <b> value; the
+  ball #labGoChip's <i>BALL</i> over SERVE or NEW), #labResult a block (its words and marks inline) 84 down in columns
+  4-9. The empty tallies read as the template's (no balls yet; with NEXT on cue, tap SERVE or NEW). #labLow (the Shooting
+  Lab's goal) is a .tplBox in the last three columns 84 down, YOUR LAST SHOTS its well. tpIcons(document) runs once at
+  start for the page's own marks. The menu (#pauseMenu .pauseMain) and the half-time card (#htModal .htCard; .htFace: the
+  crests from #crG / #crR either side of .htScore) are six columns wide; #qsDrop four (left -24 px of SUBS), #cornerSet three.
 - **v246: the templates' frame; the Start section.** CSS: --tplL / --tplR (max(the safe inset, clamp(12px, (100vw - 712px)
   / 2, 72px))), --tplT (8 px or the inset), --tplC (a column: (100vw - margins - 88px) / 12) and --tplB (the content's
   foot: max(8px, 100dvh - 356px)); .tplHead (.tplBack two columns by 36, .tplTitle 18 px, .tplTabs at the right end),

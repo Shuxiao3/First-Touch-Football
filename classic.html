@@ -2158,6 +2158,79 @@
   #ctlModal .ctlFoot{ flex:none; display:flex; align-items:center; gap:8px; padding:0 0 0 8px; }
   #ctlModal .ctlNote{ flex:1 1 auto; margin:0; font-size:10px; color:var(--dim); text-align:left; }
   #ctlModal .ctlFoot .pauseBtn{ flex:none; width:calc(var(--tplC) * 4 - 8px); height:36px; min-height:36px; margin:0 0 0 auto; font-size:12px; }
+  /* (v247) THE LABS AS THEIR TEMPLATE: the match screen with a lab bar along the top -- EXIT LAB top left (where the score
+     box is in a match), the lab's name, how it's going and your man along the header, the menu at its end; every setting a
+     button you tap through in one row under it (its name small, what it is now big; the ball the lit one at the end); the
+     hint, or the last go, under that. The match's buttons where they are in a match. In the Shooting Lab your last shots
+     have a box of their own on the right */
+  #stageWrap.labMode #readout{ left:var(--tplL); right:var(--tplR); top:var(--tplT); height:36px; display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); column-gap:8px; flex-wrap:nowrap; align-items:stretch; }
+  #stageWrap.labMode #readout > *{ margin:0 !important; }
+  #stageWrap.labMode #qsWrap{ display:none !important; }
+  #stageWrap.labMode #labExitBtn{ grid-column:1 / 3; grid-row:1; display:flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 8px; pointer-events:auto;
+    border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:600 12px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; }
+  #stageWrap.labMode #labExitBtn .hic{ width:16px; height:16px; }
+  #stageWrap.labMode #rBox{ grid-column:3 / 5; grid-row:1; height:36px; padding:0 8px; display:flex; align-items:center; justify-content:center; }
+  #stageWrap.labMode #rBox #rClockChip{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:none; box-shadow:none; }
+  #stageWrap.labMode #rClockChip.word #rClock{ font-size:12px; line-height:14px; letter-spacing:.06em; color:var(--ink); }
+  #stageWrap.labMode #rPlayer{ grid-column:9 / 12; grid-row:1; width:auto; min-width:0; height:36px; }
+  #stageWrap.labMode #menuBtn{ grid-column:12 / 13; grid-row:1; width:auto; height:36px; }
+  #stageWrap.labMode #labHud{ left:var(--tplL); right:var(--tplR); top:var(--tplT); bottom:auto; height:120px; display:block; gap:0; }
+  #stageWrap.labMode .labTallyRow{ position:absolute; top:0; height:36px; left:calc(var(--tplC) * 4 + 32px); width:calc(var(--tplC) * 4 + 24px); box-sizing:border-box; margin:0; padding:0 8px;
+    display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:6px; background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); font-size:11px; color:var(--ink); white-space:nowrap; overflow:hidden; }
+  #stageWrap.labMode #labTally{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #stageWrap.labMode .labClear{ flex:none; color:var(--dim); font-size:9.5px; }
+  #stageWrap.labMode #labBar{ position:absolute; top:44px; left:0; right:0; height:32px; display:flex; flex-wrap:nowrap; gap:4px; justify-content:stretch; }
+  #stageWrap.labMode #labBar .labChip{ flex:1 1 0; min-width:0; height:32px; min-height:32px; margin:0; padding:0 4px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); line-height:1; }
+  #stageWrap.labMode #labBar .labChip i{ font:700 8.5px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:rgb(255 255 255 / .82); }
+  #stageWrap.labMode #labBar .labChip b{ max-width:100%; font:700 11px/1.1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #stageWrap.labMode #labBar .labChip.labGo{ background:var(--fillAcc); box-shadow:var(--pxBtnOn); }
+  #stageWrap.labMode #labBar .labChip.labGo i, #stageWrap.labMode #labBar .labChip.labGo b{ color:var(--accInk); }
+  #stageWrap.labMode #labBar .labChip.wait{ filter:saturate(.6) brightness(.9); }
+  #stageWrap.labMode #labResult{ position:absolute; top:84px; left:calc(var(--tplC) * 3 + 24px); width:calc(var(--tplC) * 6 + 40px); min-height:28px; box-sizing:border-box; margin:0; padding:7px 10px;
+    display:block; text-align:center; font-size:11px; line-height:14px; background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); white-space:normal; overflow:visible; text-overflow:clip; }
+  #stageWrap.labMode #labMeter{ display:none !important; }
+  #stageWrap.labMode[data-labkind="shoot"] #labLow{ left:auto; right:var(--tplR); bottom:auto; top:calc(var(--tplT) + 84px); width:calc(var(--tplC) * 3 + 16px); }
+  #labGoal.tplBox{ display:flex; flex-direction:column; gap:4px; }
+  #labGoal .tplWell{ flex:none; }
+  #labGoal .lgBox{ height:44px; background:var(--well); border:0; border-radius:var(--rS); }
+  #labGoal .lmScale{ font-size:9px; line-height:12px; } #labGoal #labGoalTxt{ visibility:hidden; }   /* (the box says whose: YOUR LAST SHOTS) */
+  /* (v247) THE MATCH'S CARDS AS THEIR TEMPLATES. The menu: a card six columns wide over the match -- MENU and the score,
+     the minute and the subs left under it, then six buttons in pairs (each its mark), BACK TO THE GAME lit along the foot.
+     Half-time: HALF TIME, the crests with the score at 28 in a well between them, the numbers so far (a career's), SUBS and
+     TACTICS, SECOND HALF lit. Quick subs: a box four columns wide under SUBS. Your corner: a box three columns wide, its
+     − and + 28 square */
+  #pauseMenu .pauseMain, #htModal .htCard{ width:calc(var(--tplC) * 6 + 40px); min-width:300px; max-width:none; padding:8px 16px 16px; box-sizing:border-box; gap:0; }
+  #pauseMenu .pauseTitle, #htModal .pauseTitle{ margin:0; text-align:left; font:700 16px/28px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.04em; color:var(--ink); }
+  #pauseMenu .pauseState{ margin:0 0 6px; text-align:left; font-size:11px; line-height:18px; color:var(--dim); }
+  #pauseMenu .pauseGrid{ display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+  #pauseMenu .pauseGrid .pauseBtn, #htModal .htBtns .pauseBtn{ height:36px; min-height:36px; margin:0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; text-transform:uppercase; }
+  #pauseMenu .pauseGrid .pauseBtn .hic, #htModal .htBtns .pauseBtn .hic{ width:14px; height:14px; }
+  #pauseMenu .pauseGrid .pauseBtn.devOnly{ display:none; } body.dev #pauseMenu .pauseGrid .pauseBtn.devOnly{ display:flex; }
+  #pauseMenu .pauseGrid .pauseBack{ margin-top:8px; background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #htModal .htFace{ display:grid; grid-template-columns:1fr calc(var(--tplC) * 2 + 40px) 1fr; align-items:center; gap:8px; margin:10px 0 0; }
+  #htModal .htSide{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; }
+  #htModal .htSide img{ width:40px; height:46px; object-fit:contain; image-rendering:pixelated; }
+  #htModal .htSide b{ font:700 10px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--dim); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #htModal .htFace .htScore{ height:48px; display:flex; align-items:center; justify-content:center; border-radius:var(--rS); background:var(--well); font:700 28px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--acc); letter-spacing:.04em; }
+  #htModal .htGoals{ margin:6px 0 0; font-size:10.5px; line-height:14px; color:var(--dim); text-align:center; }
+  #htModal .htStats{ margin:8px 0 0; }
+  #htModal .htBtns{ display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:12px 0 0; }
+  #htModal .htBtns .htGo{ grid-column:1 / -1; margin-top:16px; background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
+  #qsDrop{ left:-24px; right:auto; width:calc(var(--tplC) * 4 + 24px); padding:4px; gap:4px; background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); border:0; }
+  #qsDrop .qsNone{ padding:6px 8px 4px; font:700 12px/20px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #qsDrop .qsAll{ align-self:stretch; height:28px; min-height:28px; margin:4px 0 0; padding:0 8px; display:flex; align-items:center; justify-content:center; gap:6px;
+    border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:1px; text-decoration:none; }
+  #qsDrop .qsAll .hic{ width:14px; height:14px; }
+  #qsDrop .qsAll[disabled]{ opacity:.4; filter:saturate(.3); }
+  #cornerSet{ width:calc(var(--tplC) * 3 + 16px); padding:4px; box-sizing:border-box; background:var(--boxBg); box-shadow:var(--pxWin); border-radius:var(--rWin); border:0; }
+  #cornerSet .csTitle{ height:24px; margin:0 0 4px; padding:0 8px; display:flex; align-items:center; border-radius:var(--rS); background:var(--well); font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; color:var(--acc); text-align:left; }
+  #cornerSet .csRow{ height:28px; margin:4px 0 0; padding:0 4px 0 8px; gap:4px; }
+  #cornerSet .csRow:last-child{ height:24px; }
+  #cornerSet .csLbl{ flex:1 1 auto; width:auto; font:700 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #cornerSet .csBtn, #cornerSet .csGap{ width:28px; height:28px; flex:none; }
+  #cornerSet .csBtn{ border:0; border-radius:var(--r); background:var(--fillBtn); box-shadow:var(--pxBtn); color:var(--btnInk); font:700 14px/1 'Roboto Condensed','FTC Dot',sans-serif; }
+  #cornerSet b{ width:28px; flex:none; font:700 14px/28px 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); text-align:center; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -2301,7 +2374,7 @@
     <div class="chip xplUI" id="rTheir" data-xpl="their"><span class="hW"><b id="rtNum"></b><small id="rtPos"></small></span><span class="hP"><span id="rtName"></span><span class="statBar"><i id="rtSt"></i></span></span></div>
     <div class="chip xplUI" id="rPlayer" data-xpl="hud"><span class="hW"><b id="rpNum"></b><small id="rpPos"></small></span><span class="hP"><span class="hRow"><span id="rpName"></span><span id="rpStars"></span></span><span class="hRow hLegs"><small>STAMINA</small><span class="statBar"><i id="rpSt"></i><s id="rpCap"></s></span></span></span></div>
     <button id="menuBtn" class="chip menuChip" aria-label="pause: the menu" title="Pause: the menu">☰</button>
-    <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit">EXIT LAB</button>
+    <button id="labExitBtn" class="chip menuChip labUI" data-lab="exit"><i class="hic" data-ic="back"></i>EXIT LAB</button>
   </div>
   <div id="labHud" class="labUI">
     <div id="labBar">
@@ -2327,7 +2400,7 @@
       <button class="labChip" data-lab="slow"><i>TIME</i><b id="labSlowV">1×</b></button>
       <button class="labChip" data-kinds="trap" data-lab="recv"><i>RECEIVER</i><b id="labRecvV">YOU</b></button>
       <button class="labChip" data-kinds="none" data-lab="guide"><i>GUIDE</i><b id="labGuideV">ON</b></button>
-      <button class="labChip labGo" data-lab="go" id="labGoChip"><b id="labGoV">▶ SERVE</b></button>
+      <button class="labChip labGo" data-lab="go" id="labGoChip"><i>BALL</i><b id="labGoV">SERVE</b></button>
       <button class="labChip" data-lab="tune" id="labTuneChip"><b>⚙ TUNE</b></button>
     </div>
     <div id="labMeter" data-kinds="none">
@@ -2339,7 +2412,8 @@
     <div class="labTallyRow"><span id="labTally"></span><button class="labClear" data-lab="clear" title="Clear the tally">clear</button></div>
   </div>
   <div id="labLow" class="labUI">
-    <div id="labGoal">
+    <div id="labGoal" class="tplBox">
+      <div class="tplWell">YOUR LAST SHOTS</div>
       <div class="lgBox" id="labGoalBox"><div class="lgFrame"></div><div id="labGoalDots"></div></div>
       <div class="lmScale"><span>◂ LEFT</span><span id="labGoalTxt">your last shots</span><span>RIGHT ▸</span></div>
     </div>
@@ -2367,13 +2441,13 @@
     <div class="pauseTitle">MENU</div>
     <div class="pauseState" id="pauseState"></div>
     <div class="pauseGrid" id="pauseGrid">
-      <button class="pauseBtn" data-pause="tactics">TACTICS</button>
-      <button class="pauseBtn" data-pause="skills">SKILL MOVES</button>
-      <button class="pauseBtn" data-pause="controls">CONTROLS</button>
-      <button class="pauseBtn" data-pause="settings">SETTINGS</button>
-      <button class="pauseBtn pauseExit" data-pause="exit">EXIT GAME</button>
+      <button class="pauseBtn" data-pause="tactics"><i class="hic" data-ic="tactics"></i>TACTICS</button>
+      <button class="pauseBtn" data-pause="skills"><i class="hic" data-ic="star"></i>SKILL MOVES</button>
+      <button class="pauseBtn" data-pause="controls"><i class="hic" data-ic="info"></i>CONTROLS</button>
+      <button class="pauseBtn" data-pause="settings"><i class="hic" data-ic="settings"></i>SETTINGS</button>
+      <button class="pauseBtn pauseExit" data-pause="exit"><i class="hic" data-ic="close"></i>EXIT GAME</button>
       <button class="pauseBtn pauseSim" data-pause="simrest">SIM THE REST ⏭</button>
-      <button class="pauseBtn pauseBack" data-pause="back" style="grid-column:1/-1">◀ BACK TO GAME</button>
+      <button class="pauseBtn pauseBack" data-pause="back" style="grid-column:1/-1"><i class="hic" data-ic="back"></i>BACK TO THE GAME</button>
       <button class="pauseBtn devOnly" data-pause="oldtac" style="grid-column:1/-1">DEV · OLD TACTICS MENU</button>
     </div>
   </div>
@@ -5892,8 +5966,8 @@
     LAB.on=true; LAB.rep=null; LAB.last=null; LAB.fx=null; LAB.nextT=0.8; LAB.dirty=true; LAB.zoneSig=''; LAB.trail=[];
     trapping=0; trapCd=0;
     const wrap=document.getElementById('stageWrap'); wrap.classList.add('labMode'); wrap.dataset.labkind=LAB.kind;
-    if(labEl.labGoV) labEl.labGoV.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL';
-    else { const g=document.getElementById('labGoV'); if(g) g.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL'; }
+    if(labEl.labGoV) labEl.labGoV.textContent=LAB.kind==='trap'?'SERVE':'NEW';   // (v247: BALL over it, as the template)
+    else { const g=document.getElementById('labGoV'); if(g) g.textContent=LAB.kind==='trap'?'SERVE':'NEW'; }
     if(LAB.kind==='pass') passLabSetup();
     else if(LAB.kind==='shoot') shootLabSetup();
     else if(LAB.kind==='dribble') dribLabSetup();
@@ -6120,7 +6194,7 @@
     labEl.labSlowV.textContent=LAB.slow===1?'1×':LAB.slow===0.5?'½×':'¼×';
     labEl.labTuneChip.classList.toggle('on',LAB.tune);
     labEl.labGoChip.classList.toggle('wait',!LAB.auto&&(!r||r.done));
-    labEl.labGoV.textContent=LAB.kind==='trap'?'▶ SERVE':'▶ NEW BALL';
+    labEl.labGoV.textContent=LAB.kind==='trap'?'SERVE':'NEW';
   }
   function labHud(){
     if(!labEl.labCursor) labInitHud();
@@ -6167,8 +6241,8 @@
   }
   function labTallyText(){
     const T=labTally();
-    if(!T.reps) return LAB.auto?'no balls yet · the machine serves on its own'
-                               :'no balls yet · tap ▶ SERVE for a ball';
+    if(!T.reps) return LAB.auto?'no balls yet'   // (v247: as the template -- the machine serving on its own is NEXT: AUTO's to show)
+                               :'no balls yet · tap SERVE';
     const parts=[T.reps+(T.reps===1?' ball':' balls')];
     for(const k of ['perfect','clean','loose','heavy']) if(T[k]) parts.push(T[k]+' '+k);
     if(T.past) parts.push(T.past+' ran past');
@@ -6514,8 +6588,8 @@
   }
   function passLabTallyText(){
     const T=passLabTally();
-    if(!T.n) return LAB.auto?'no passes yet · a new ball comes after each one'
-                             :'no passes yet · tap ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no passes yet'
+                             :'no passes yet · tap NEW to reset';
     const parts=[T.n+(T.n===1?' pass':' passes'), T.ok+' received ('+Math.round(T.ok/T.n*100)+'%)'];
     if(T.cut) parts.push(T.cut+' cut out');
     for(const k of Object.keys(T.by)) parts.push(k.toLowerCase()+' '+T.by[k].ok+'/'+T.by[k].n);
@@ -6697,8 +6771,8 @@
   }
   function shootLabTallyText(){
     const T=shootLabTally();
-    if(!T.n) return LAB.auto?'no shots yet · a new ball comes after each one'
-                             :'no shots yet · tap ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no shots yet'
+                             :'no shots yet · tap NEW to reset';
     const on=T.goal+T.saved, parts=[T.n+(T.n===1?' shot':' shots'), T.goal+' scored', T.saved+' saved'];
     if(T.post) parts.push(T.post+' off the post');
     if(T.wide+T.over) parts.push((T.wide+T.over)+' off target ('+[T.wide?T.wide+' wide':'',T.over?T.over+' over':''].filter(Boolean).join(', ')+')');
@@ -6869,8 +6943,8 @@
   }
   function dribLabTallyText(){
     const T=dribLabTally();
-    if(!T.n) return LAB.auto?'no runs yet · a new ball comes after each one'
-                             :'no runs yet · tap ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no runs yet'
+                             :'no runs yet · tap NEW to reset';
     const parts=[T.n+(T.n===1?' run':' runs'), T.beat+' beat him ('+Math.round(T.beat/T.n*100)+'%)', T.tackled+' tackled'];
     if(T.out+T.time) parts.push((T.out+T.time)+' lost or too slow');
     for(const k of SKILL_KINDS){ const m=T.mv[k]; if(m&&m.n) parts.push(SKILL_NAME[k].toLowerCase()+' ×'+m.n+' ('+m.b+' got you past)'); }
@@ -7067,8 +7141,8 @@
   }
   function crossLabTallyText(){
     const T=crossLabTally();
-    if(!T.n) return LAB.auto?'no crosses yet · a new ball comes after each one'
-                             :'no crosses yet · tap ▶ NEW BALL to reset';
+    if(!T.n) return LAB.auto?'no crosses yet'
+                             :'no crosses yet · tap NEW to reset';
     const parts=[T.n+(T.n===1?' cross':' crosses'), T.found+' to ours ('+Math.round(T.found/T.n*100)+'%)'];
     if(T.head) parts.push(T.head+' headed');
     if(T.found>T.head) parts.push((T.found-T.head)+' to his feet');
@@ -17418,8 +17492,9 @@
         +'<span class="statBar"><i style="width:'+pc+'%;background:'+(pc>60?'':pc>30?'var(--warn)':'var(--bad)')+'"></i></span></span><span class="ar">'+(wait?'…':'▸')+'</span>'
         +'<span class="qsIn"><span class="nm">#'+ei.num+' '+surname(ei.name)+'</span></span></button>'; };
     const h=SUBS.G.q.map(s=>row(s,true)).join('')+sug.map(s=>row(s,false)).join('');
-    document.getElementById('qsDrop').innerHTML=h?h+'<button class="qsAll" data-qs="all">ALL SUBS ▸</button>'
-      :'<div class="qsNone">No one\'s tired yet</div><button class="qsAll qsForce" data-qs="force"'+(qsForce()?'':' disabled')+'>FORCE SUB ▸</button>'; }   // (v242: nobody tired -- FORCE SUB)
+    const dr=document.getElementById('qsDrop');   // (v247: as the template -- FORCE SUB and ALL SUBS full buttons with the swap's mark)
+    dr.innerHTML=h?h+'<button class="qsAll" data-qs="all"><i class="hic" data-ic="sub"></i>ALL SUBS</button>'
+      :'<div class="qsNone">No one\'s tired yet</div><button class="qsAll qsForce" data-qs="force"'+(qsForce()?'':' disabled')+'><i class="hic" data-ic="sub"></i>FORCE SUB</button>'; tpIcons(dr); }   // (v242: nobody tired -- FORCE SUB)
   // FORCE SUB (v242): with nobody tired enough to be offered, the most tired man on (his ceiling, then his legs now) off for
   // the man on the bench who'd do his job best -- at the next break in play, as any sub
   function qsForce(){ if(subsLeft()<=SUBS.G.q.length) return null; const usedIn=new Set(SUBS.G.q.map(x=>x.inn)), usedOut=new Set(SUBS.G.q.map(x=>x.out));
@@ -17539,14 +17614,15 @@
     const nm=t=>mgEsc((document.getElementById(t==='G'?'tnG':'tnR')||{}).textContent||t);
     const minute=x=>x.half!=null?Math.max(1,Math.min(45,Math.round(((x.time||0))/(2*L)*90))):null;
     const gl=t=>goalLog.filter(x=>x.team===t).map(x=>(minute(x)!=null?minute(x)+'’ ':'')+mgEsc(surname(x.scorerName||''))+(x.ownGoal?' (OG)':'')).join(', ');
-    let h='<div class="pauseTitle">HALF TIME</div><div class="htNames"><span>'+nm('G')+'</span><b class="htScore">'+scoreG+' – '+scoreR+'</b><span>'+nm('R')+'</span></div>';
+    const cr=t=>{ const im=document.getElementById(t==='G'?'crG':'crR'); return im&&im.src?'<img src="'+im.src+'" alt="">':''; };   // (v247: as the template -- the crests either side of the score)
+    let h='<div class="pauseTitle">HALF TIME</div><div class="htFace htNames"><div class="htSide">'+cr('G')+'<b>'+nm('G')+'</b></div><b class="htScore">'+scoreG+' – '+scoreR+'</b><div class="htSide">'+cr('R')+'<b>'+nm('R')+'</b></div></div>';
     const gG=gl('G'), gR=gl('R'); if(gG||gR) h+='<div class="htGoals">'+(gG||'—')+' · '+(gR||'—')+'</div>';
     if(careerFix){ const tot=t=>{ const o={}; for(const x of Object.values(MSTAT[t]||{})) for(const k in x) o[k]=(o[k]||0)+x[k]; return o; }, A=tot('G'), B=tot('R'), n=(o,k)=>o[k]||0;
       const pc=o=>n(o,'pa')?Math.round(n(o,'pc')/n(o,'pa')*100)+'%':'—', row=(lbl,a,b)=>'<span>'+a+'</span><i>'+lbl+'</i><span>'+b+'</span>';
       h+='<div class="htStats">'+row('SHOTS',n(A,'sh'),n(B,'sh'))+row('ON TARGET',n(A,'son'),n(B,'son'))+row('PASSES',n(A,'pa'),n(B,'pa'))+row('FOUND',pc(A),pc(B))+row('TACKLES',n(A,'tk'),n(B,'tk'))+row('SAVES',n(A,'sav'),n(B,'sav'))+'</div>'; }
     const left=SUB_MAX-SUBS.G.used;
-    h+='<div class="htBtns"><button class="pauseBtn" data-ht="subs">SUBS ('+left+' LEFT)</button><button class="pauseBtn" data-ht="tac">TACTICS</button><button class="pauseBtn htGo" data-ht="go">SECOND HALF ▶</button></div>';
-    card.innerHTML=h; document.getElementById('htModal').classList.add('on'); }
+    h+='<div class="htBtns"><button class="pauseBtn" data-ht="subs"><i class="hic" data-ic="sub"></i>SUBS · '+left+' LEFT</button><button class="pauseBtn" data-ht="tac"><i class="hic" data-ic="tactics"></i>TACTICS</button><button class="pauseBtn htGo" data-ht="go">SECOND HALF ▶</button></div>';
+    card.innerHTML=h; tpIcons(card); document.getElementById('htModal').classList.add('on'); }
   function htGo(){ htOpen=false; document.getElementById('htModal').classList.remove('on'); }
   document.getElementById('htModal').addEventListener('click',e=>{ const b=e.target.closest('[data-ht]'); if(!b) return;
     if(b.dataset.ht==='go'){ htGo(); return; }
@@ -22391,6 +22467,7 @@
       +(ic.cf?'<g fill="#000">'+ic.cf+'</g>':'')+(ic.cl?'<g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ic.cl+'</g>':'')+'</mask></defs>':'')
       +'<g fill="currentColor"'+(cut?' mask="url(#'+id+')"':'')+'>'+(ic.f||'')+'</g>'+(ic.l?'<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ic.l+'</g>':'')+'</svg>'; }
   function tpIcons(root){ (root||document).querySelectorAll('.hic[data-ic]').forEach(el=>{ if(el.dataset.done!==el.dataset.ic){ el.innerHTML=hubIc(el.dataset.ic); el.dataset.done=el.dataset.ic; } }); }   // (v246: any screen's icons)
+  try{ tpIcons(document); }catch(e){}   // (v247: what's written into the page from the start -- EXIT LAB's mark among them)
   function hubIcons(){ document.querySelectorAll('#careerHub .hic[data-ic]').forEach(el=>{ if(el.dataset.done!==el.dataset.ic){ el.innerHTML=hubIc(el.dataset.ic); el.dataset.done=el.dataset.ic; } }); }
   const BLD_IC={club:'clubhouse', train:'training', stadium:'stadium', market:'transfers', physio:'physio', scouting:'scouting', academy:'academy'};
   function hubBldIc(el,k){ const ic=el.querySelector('.hic'); if(!ic) return; const want=k||BLD_IC[el.dataset.bldg]; if(ic.dataset.ic!==want){ ic.dataset.ic=want; hubIcons(); } }

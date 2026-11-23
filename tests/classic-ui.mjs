@@ -403,6 +403,13 @@ for(const [w, h] of SIZES){
   ok(winOk(hw, true), w + 'x' + h + ': your man\'s window, top right beside the menu and level with it: ' + hw.num + ' ' + hw.name + ' ' + hw.pos + ', ' + hw.lit + ' stars lit, stamina ' + Math.round(hw.fill * 100) + '% -- his, all of it on screen and over no other chip' + (winOk(hw, true) ? '' : ' ' + JSON.stringify(hw)));
   await page.evaluate(() => document.getElementById('menuBtn').click()); await page.waitForTimeout(150);
   await mcheck('pause', ['#pauseGrid .pauseBtn']);
+  // (v247) the menu as its template: a card six columns wide -- MENU and its line, six buttons in pairs 36 high with their
+  // marks (SIM THE REST's ⏭ its own), BACK TO THE GAME lit along the foot
+  { const pm = await page.evaluate(() => { const t = document.createElement('div'); t.style.cssText = 'position:fixed;width:calc(var(--tplC) * 6 + 40px);height:1px'; document.body.appendChild(t); const w6 = t.getBoundingClientRect().width; t.remove();
+      const card = document.querySelector('#pauseMenu .pauseMain').getBoundingClientRect(), B = [...document.querySelectorAll('#pauseGrid .pauseBtn')].filter(b => b.getClientRects().length), back = document.querySelector('#pauseGrid .pauseBack');
+      return { w: card.width, w6, n: B.length, h: [...new Set(B.map(b => Math.round(b.getBoundingClientRect().height)))].join(), marks: B.filter(b => b.querySelector('.hic svg')).length, lit: getComputedStyle(back).backgroundImage.includes('255, 156, 64'), back: back.textContent.trim(), title: getComputedStyle(document.querySelector('#pauseMenu .pauseTitle')).textAlign }; });
+    ok(Math.abs(pm.w - Math.max(300, pm.w6)) <= 1.5 && pm.n === 7 && pm.h === '36' && pm.marks === 6 && pm.lit && pm.back === 'BACK TO THE GAME' && pm.title === 'left',
+      w + 'x' + h + ': the menu as its template (v247): six columns wide, MENU to the left, six buttons in pairs with their marks, 36 high, BACK TO THE GAME lit (' + JSON.stringify(pm) + ')'); }
   if(w === 844 && h === 390) ok(!(await page.$('#pauseQuick, #pqMenu')), 'the pause menu: six buttons (SIM THE REST among them, v106), no quick-tactics row');
   await page.tap('#pauseGrid [data-pause="skills"]'); await page.waitForTimeout(300);
   await mcheck('skill moves, in a match', ['#skillsOverlay .pauseTitle', '#skGrid .skCard', '[data-skclose]']);

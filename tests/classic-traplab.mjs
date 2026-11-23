@@ -71,6 +71,18 @@ const meter = await mp.isVisible('#labMeter');
 info('the lab: ' + inLab + ' -- "' + intro.replace(/<[^>]+>/g, '') + '" -- chips: ' + bar.join(' | '));
 ok(!onMenu && inLab === 'trap', 'TRAP LAB is off the title page since v224 (as laid out in the Studio; v212 had put it back), and still opens the Trap Lab');
 ok(/^Flick on <b>SKILL<\/b>/.test(intro) && !meter && !bar.some(t => /GUIDE/.test(t)), 'it says to flick on SKILL, as in a match -- no timing meter and no guide, as there\'s no press to time');
+// (v247) THE LAB AS ITS TEMPLATE: on the grid (C a column) -- EXIT LAB top left (two columns by 36, 8 down), the lab's name
+// beside it (two), how it's going (four), your man (three), the menu (one); every setting a button in one row under them,
+// 32 high and as wide as the grid, the ball the lit one at the end; the hint under that, six columns in the middle
+{ const g = await mp.evaluate(() => { const t = document.createElement('div'); t.style.cssText = 'position:fixed;left:var(--tplL);width:var(--tplC);top:0;height:1px'; document.body.appendChild(t); const r = t.getBoundingClientRect(); t.remove();
+    const R = id => { const e = typeof id === 'string' ? document.querySelector(id) : id, q = e.getBoundingClientRect(); return [Math.round(q.left), Math.round(q.top), Math.round(q.width), Math.round(q.height)]; };
+    const chips = [...document.querySelectorAll('#labBar .labChip')].filter(e => e.offsetParent).map(R), last = [...document.querySelectorAll('#labBar .labChip')].filter(e => e.offsetParent).pop();
+    return { L: r.left, C: r.width, exit: R('#labExitBtn'), name: R('#rBox'), tally: R('.labTallyRow'), man: R('#rPlayer'), menu: R('#menuBtn'), chips, lastGo: last && last.classList.contains('labGo'), hint: R('#labResult'), W: innerWidth }; });
+  const col = (c, n) => [Math.round(g.L + (c - 1) * (g.C + 8)), Math.round(n * g.C + (n - 1) * 8)], near = (a, b) => Math.abs(a - b) <= 1.5;
+  const at = (box, c, n, y, h) => near(box[0], col(c, n)[0]) && near(box[2], col(c, n)[1]) && box[1] === y && box[3] === h;
+  const rowOk = g.chips.length >= 6 && g.chips.every(q => q[1] === 52 && q[3] === 32) && near(g.chips[0][0], g.L) && near(g.chips[g.chips.length - 1][0] + g.chips[g.chips.length - 1][2], g.W - g.L);
+  ok(at(g.exit, 1, 2, 8, 36) && at(g.name, 3, 2, 8, 36) && at(g.tally, 5, 4, 8, 36) && at(g.man, 9, 3, 8, 36) && at(g.menu, 12, 1, 8, 36) && rowOk && g.lastGo && near(g.hint[0], col(4, 6)[0]) && near(g.hint[2], col(4, 6)[1]) && g.hint[1] === 92,
+    'the lab as its template (v247): EXIT LAB top left, the lab, how it\'s going, your man and the menu along the header (2, 2, 4, 3 and 1 columns, 36 high); every setting a button in one row under them, 32 high across the grid, the ball lit at its end; the hint under that, six columns in the middle' + (rowOk ? '' : ' -- ' + JSON.stringify(g))); }
 
 if(/AUTO/.test(await mp.textContent('#labAutoV'))){ await mp.tap('#labBar [data-lab="auto"]'); await mp.waitForTimeout(100); }   // (balls on cue)
 const cdp = await mob.newCDPSession(mp), finger = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 5 }] });
@@ -175,6 +187,15 @@ const dials = await mp.evaluate(() => ['trapSweet', 'trapWin', 'trapLate', 'trap
 ok(!dials.length, 'the old timed press\'s dials are gone from Settings (sweet spot, window, late tolerance, lockout, and the drag on TRAP)' + (dials.length ? ': ' + dials.join(', ') : ''));
 await mp.tap('#labExitBtn'); await mp.waitForTimeout(600);
 ok(await mp.isVisible('#smItems [data-act="new"]'), 'EXIT LAB goes back to the start menu');
+// (v247) the Shooting Lab: your last shots in a box of their own on the right, the last three columns, under the bar
+await mp.$eval('#smItems [data-act="shootlab"]', b => b.click()); await mp.waitForTimeout(600);
+{ const gb = await mp.evaluate(() => { const t = document.createElement('div'); t.style.cssText = 'position:fixed;left:var(--tplL);width:var(--tplC);top:0;height:1px'; document.body.appendChild(t); const r = t.getBoundingClientRect(); t.remove();
+    const b = document.getElementById('labGoal').getBoundingClientRect(), w = document.querySelector('#labGoal .tplWell'), sh = document.getElementById('shootBtn'), s = sh ? sh.getBoundingClientRect() : null;
+    return { L: r.left, C: r.width, b: [b.left, b.top, b.width, b.bottom], well: w ? w.textContent : '', clear: !s || b.bottom <= s.top || b.right <= s.left }; });
+  const left = gb.L + 9 * (gb.C + 8), w3 = 3 * gb.C + 16;
+  ok(Math.abs(gb.b[0] - left) <= 1.5 && Math.abs(gb.b[2] - w3) <= 1.5 && Math.round(gb.b[1]) === 92 && gb.well === 'YOUR LAST SHOTS' && gb.clear,
+    'the Shooting Lab as its template (v247): your last shots in a box of their own, the last three columns under the bar, YOUR LAST SHOTS over the goal, clear of SHOOT (' + JSON.stringify(gb.b.map(Math.round)) + ')'); }
+await mp.tap('#labExitBtn'); await mp.waitForTimeout(400);
 await mob.close();
 
 process.exitCode = rep.finish();
