@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The Clubhouse's News, League and Fixtures as their templates (v253).** Each is one box across the page, its head on
+  every page and the pages at its foot inside it. News: the season and the week in its well, then a row a story, the
+  week small over it, newest first. League: the four divisions a row of choices at the top, the table in rows of 24 with
+  your club lit (the places that go up, play off and go down marked), then the division's top scorers and its last
+  results, each from a page of its own. Fixtures: the competitions you're in as a row of choices (your league, then each
+  cup; NO CUPS beside it when there's none, why a tap away). Your league is the season in order, your cup ties in the
+  midweeks between, each game at home (its mark) or away, its result, NEXT, or their rating; a cup is how far you've gone,
+  then its rounds, and in the Continental Champions Cup your group's table.
 - **The Clubhouse's Squad as its template (v252).** Two boxes, no frame round them: the list seven columns wide, the man
   you pick five. The list's well says how many and the wage bill, with the deals ending as a badge; under the columns'
   heads every man is a row of 28 you tap, the one picked lit, eight on the screen and the rest a swipe away. Nobody
@@ -3690,6 +3698,13 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v253: the Clubhouse's News, League and Fixtures.** Each tab is a .tplBox.tplRows.tplPage with its own data-pages
+  (NW:, LG:, FX:), so fitBox pages its rows inside the box with the pager at its foot; its head is .fitKeep (on every
+  page). .tplSeg is the templates' row of choices (.tplSegB, .lit), data-mg filt with ntier or fxc (a new choice goes
+  back to page 1); .tplPanel a chip beside it. mgTablesTab holds mgScorersTab and mgResultsTab(d,true) as .fitBreak
+  sections; mgScorersTab follows the division shown. mgFixturesTab draws .mgFx rows (.md, .nm with the home mark, .fxR
+  for a rating, .fxNext) for your league with your cup ties (.cup) and .mgFxBreak, or a cup's .fxRun and rounds;
+  renderBuildingBody no longer adds the scorers and results after them.
 - **v252: the Clubhouse's Squad.** mgTplPanes draws a list and its man as two .tplBox boxes (.tplPanes.tplPage, the
   grid's seven and five columns): the list's head (.tplWell .sqHead with .plN, .sqBill and a .tplBadge; .plCols) over the
   .plPane rows, which scroll in the box. mgCard has a fifth side for the squad's own man, 'sum' (sqSum: .sqMan, the well

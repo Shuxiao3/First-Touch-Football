@@ -2532,6 +2532,45 @@
     background:var(--fillBtn); color:var(--btnInk); box-shadow:var(--pxBtn); font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; }
   .tplBtn .hic{ width:14px; height:14px; } .tplBtn.pri{ background:var(--fillAcc); color:var(--accInk); box-shadow:var(--pxBtnOn); }
   #bpBody .tplPanes .mgSideT.back .hic{ width:14px; height:14px; } #bpBody .tplPanes .mgSideT.back{ flex:0 0 40px; display:flex; align-items:center; justify-content:center; }
+  /* (v253) A TABLE YOU READ AS ITS TEMPLATE (the Clubhouse's News, League and Fixtures): one box across the page, its
+     head on every page (a well, or a row of choices and the columns' heads), then rows of 24 (the news 44) two apart,
+     yours lit; the pages at its foot, inside the box */
+  #bpBody .tplRows{ position:relative; height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; }
+  #bpBody .tplRows > .tplWell, #bpBody .tplRows > .tplSeg, #bpBody .tplRows > .fxTop{ flex:none; margin-bottom:2px; }
+  #bpBody .tplRows > .fitPager{ bottom:4px; height:32px; } #bpBody .tplRows > .fitPager .mgAdj{ width:52px; height:28px; min-height:28px; }
+  .tplSeg{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:4px; height:28px; }
+  .tplSegB{ min-width:0; height:28px; margin:0; padding:0 6px; border:0; border-radius:var(--rS); background:var(--win); color:var(--dim); cursor:pointer;
+    font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tplSegB.lit{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); color:var(--ink); }
+  .tplPanel{ height:28px; display:flex; align-items:center; justify-content:center; padding:0 10px; border-radius:var(--rS); background:var(--win); color:var(--dim); cursor:help;
+    font:600 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.06em; white-space:nowrap; }
+  #bpBody .nwRow{ flex:none; min-height:44px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; gap:3px; margin:0; padding:5px 10px; border:0; border-radius:var(--rS); background:var(--win); }
+  #bpBody .nwRow i{ font:600 9px/1 'Roboto Condensed','FTC Dot',sans-serif; font-style:normal; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .nwRow b{ font:700 12px/1.25 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpBody .lgBox .mgTbl{ flex:none; border-collapse:separate; border-spacing:0 2px; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; margin:-2px 0; }
+  #bpBody .lgBox .mgTbl th{ height:16px; padding:0 8px; border:0; font:600 9px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .lgBox .mgTbl td{ height:24px; padding:0 8px; border:0; background:var(--win); color:var(--ink); }
+  #bpBody .lgBox .mgTbl td:first-child{ border-radius:var(--rS) 0 0 var(--rS); } #bpBody .lgBox .mgTbl td:last-child{ border-radius:0 var(--rS) var(--rS) 0; font-weight:700; }
+  #bpBody .lgBox .mgTbl tr.you td{ background:var(--rowOn); color:var(--ink); } #bpBody .lgBox .mgTbl tr.you td:first-child{ box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .lgBox .mgTbl tr.up td:first-child{ color:var(--good); } #bpBody .lgBox .mgTbl tr.po td:first-child{ color:var(--warn); } #bpBody .lgBox .mgTbl tr.dn td:first-child{ color:var(--bad); }
+  #bpBody .tplRows .mgHint{ flex:none; margin:4px 2px 0; font-size:10px; }
+  #bpBody .tplRows .bpSect{ flex:none; height:24px; margin:0 0 2px; padding:0 8px; display:flex; align-items:center; border-radius:var(--rS); background:var(--well); color:var(--acc);
+    font:700 10px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; }
+  #bpBody .lgMore{ display:flex; flex-direction:column; gap:2px; }
+  #bpBody .lgMore > div:not(.bpSect):not(.mgHint):not(.mgFilters){ flex:none; height:24px; box-sizing:border-box; align-items:center; padding:0 8px !important; border-radius:var(--rS); background:var(--win); font-size:11px; }
+  #bpBody .fxTop{ display:flex; gap:4px; } #bpBody .fxTop .tplSeg{ flex:1 1 auto; min-width:0; } #bpBody .fxTop .fxNone{ flex:0 0 calc(var(--tplC) * 3 + 16px); }
+  #bpBody .fxCols{ flex:none; height:16px; display:flex; align-items:center; gap:8px; padding:0 8px; font:600 9px/16px 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.08em; color:var(--dim); }
+  #bpBody .fxCols .md, #bpBody .fxBox .mgFx .md{ flex:0 0 64px; } #bpBody .fxCols .nm, #bpBody .fxBox .mgFx .nm{ flex:1 1 auto; min-width:0; }
+  #bpBody .fxBox .mgFx{ flex:none; height:24px; box-sizing:border-box; display:flex; align-items:center; gap:8px; margin:0; padding:0 8px; border:0; border-radius:var(--rS); background:var(--win);
+    font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; color:var(--ink); }
+  #bpBody .fxBox .mgFx .md{ color:var(--dim); font-size:10px; letter-spacing:.04em; } #bpBody .fxBox .mgFx .nm{ display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bpBody .fxBox .mgFx .nm .hic{ width:12px; height:12px; color:var(--dim); } #bpBody .fxBox .mgFx > span:last-child{ flex:none; }
+  #bpBody .fxBox .mgFx.next, #bpBody .fxBox .mgFx.you{ background:var(--rowOn); box-shadow:inset 3px 0 0 var(--acc); }
+  #bpBody .fxBox .fxR{ color:var(--dim); } #bpBody .fxBox .fxNext{ color:var(--warn); }
+  #bpBody .fxBox .mgFxBreak{ flex:none; height:24px; display:flex; align-items:center; justify-content:center; margin:0; border-radius:var(--rS); background:var(--well); color:var(--dim);
+    font:600 9px/1 'Roboto Condensed','FTC Dot',sans-serif; letter-spacing:.1em; }
+  #bpBody .fxRun{ flex:none; height:24px; display:flex; align-items:center; gap:8px; padding:0 8px; border-radius:var(--rS); background:var(--win); cursor:help; font:600 11px/1 'Roboto Condensed','FTC Dot',sans-serif; }
+  #bpBody .fxRun .hic{ width:12px; height:12px; color:var(--dim); } #bpBody .fxRun span{ flex:1 1 auto; color:var(--dim); } #bpBody .fxRun b{ flex:none; font-weight:700; }
   /* (v243) no shadow under a button's words: every button in the game, and whatever's written inside it */
   button, button *, .smBtn, .pauseBtn, .bpTab, .bpTopBack, .mgBtn, .tbDrop, .tbOpt, .mgSideT, .cpBldgs .bldg{ text-shadow:none !important; }
 </style>
@@ -22449,23 +22488,41 @@
       +kv('contract','Deal',deal,dealX,ends&&!p.loan?'var(--warn)':'')
       +'<div class="sqFoot"><button class="tplBtn" data-mg="sqsell" data-pid="'+p.id+'"><i class="hic" data-ic="price"></i>SELL</button>'
       +'<button class="tplBtn pri" data-mside="deal"><i class="hic" data-ic="contract"></i>NEW DEAL</button></div></div>'; }
-  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d), F=mgForm(d,5);   // (v177: J1 -- the form as dots, what they are a tap away)
-    let h='<div class="mgSum">'+MG_LEAGUE[d.tier].toUpperCase()+' · S'+d.season+' · <span data-xpl="'+xq(F.length?'The last '+F.length+' league results, the latest last: '+F.join(' ')+'.':'Form: none yet, no games.')+'">FORM <span class="clDots">'+[0,1,2,3,4].map(i=>'<i'+(F[i]?' class="'+F[i]+'"':'')+'></i>').join('')+'</span></span></div>'+mgCupsSum(d)+'<div class="mgList">';
+  // (v253) THE CLUBHOUSE'S FIXTURES AS ITS TEMPLATE: a box across the page; at its top (on every page) the competitions
+  // you're in this season as a row of choices -- your league first, then each cup, NO CUPS beside it when there's none --
+  // and the columns' heads; then a row of 24 a game. Your league: the season in order, your cup ties in the midweeks
+  // between and the winter break where it falls -- the week, at home (its mark) or away and who, then the result, NEXT,
+  // or their rating. A cup: how far you've gone, then its rounds a row each (a bye, or the next not drawn yet), and in the
+  // Continental Champions Cup your group's table. The pages at its foot. (v177-v252: a line with the form as dots, the
+  // cups' runs as lines, then the list.)
+  function mgFixturesTab(d){ const L=d.lg[d.tier], nx=mgNextGame(d), C=d.cup, cur=!!(C&&!C.off&&C.s===d.season), mine=cur?['coco','fashion','cl'].filter(k=>C[k]&&C[k].in.includes(d.clubId)):[];
+    if(MGUI.fxc&&!mine.includes(MGUI.fxc)) MGUI.fxc=null; const on=MGUI.fxc||'lg';
     const res=(you,them,pens)=>{ const r=pens!=null?(pens?'W':'L'):you>them?'W':you<them?'L':'D';
       return '<span style="color:'+(r==='W'?'var(--good)':r==='D'?'var(--warn)':'var(--bad)')+'">'+r+' '+you+'–'+them+(pens!=null&&you===them?' P':'')+'</span>'; };
-    L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
-      if(m){ const home=m[0]===d.clubId, opp=home?m[1]:m[0], next=nx&&nx.kind==='league'&&i===d.md; let right;
-        if(m[2]!=null) right=res(home?m[2]:m[3],home?m[3]:m[2]);
-        else right=next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+clubRating(d,opp,true)+'</span>';
-        h+='<div class="mgFx'+(next?' next':'')+'"><span class="md">'+(i+1)+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,opp))+'</span>'+right+'</div>'; }
-      const c=CUP_CAL[i], C=c&&d.cup&&!d.cup.off&&d.cup.s===d.season&&d.cup[c[0]];   // (the midweek after it: your cup tie, if you're still in)
-      if(C&&C.in.includes(d.clubId)){ const K=CUP[c[0]], t=cupTies(d,c[0],c[1]).find(x=>x[0]===d.clubId||x[1]===d.clubId), run=mgCupRun(d,c[0]);
+    const row=(cls,md,nm,right,home)=>'<div class="mgFx'+(cls?' '+cls:'')+'"><span class="md">'+md+'</span><span class="nm">'+(home?'<i class="hic" data-ic="home"></i>':'')+nm+'</span>'+right+'</div>';
+    const rate=id=>'<span class="fxR">'+clubRating(d,id,true)+'</span>', NEXT='<span class="fxNext">NEXT</span>';
+    const none=mine.length?'':'<span class="tplPanel fxNone" data-xpl="'+xq(!cur?'The cups start with next season.':d.tier===1?MG_LEAGUE[1]+' plays only the league: the Coco Cup comes with '+MG_LEAGUE[2]+'.':'No cups for you this season.')+'">'+(cur?'NO CUPS':'NO CUPS YET')+'</span>';
+    let h='<div class="tplBox fxBox tplRows tplPage" data-pages="FX:club/Fixtures"><div class="fxTop fitKeep">'+tplSeg('fxc',[['lg',MG_LEAGUE[d.tier].toUpperCase()]].concat(mine.map(k=>[k,CUP[k].name.toUpperCase()])),on)+none+'</div>'
+      +'<div class="fxCols fitKeep"><span class="md">WEEK</span><span class="nm">OPPONENT</span><span>'+(on==='lg'?'RESULT · RATING':'RESULT')+'</span></div>';
+    if(on==='lg') L.fx.forEach((day,i)=>{ const m=day.find(x=>x[0]===d.clubId||x[1]===d.clubId);
+      if(m){ const home=m[0]===d.clubId, opp=home?m[1]:m[0], next=nx&&nx.kind==='league'&&i===d.md;
+        h+=row(next?'next':'',i+1,(home?'vs ':'at ')+mgEsc(mgNameOf(d,opp)),m[2]!=null?res(home?m[2]:m[3],home?m[3]:m[2]):next?NEXT:rate(opp),home); }
+      const c=CUP_CAL[i], K=c&&CUP[c[0]], CC=c&&cur&&C[c[0]];   // (the midweek after it: your cup tie, if you're still in)
+      if(CC&&CC.in.includes(d.clubId)){ const t=cupTies(d,c[0],c[1]).find(x=>x[0]===d.clubId||x[1]===d.clubId), run=mgCupRun(d,c[0]);
         if(t){ const home=t[0]===d.clubId, next=nx&&nx.kind==='cup'&&nx.key===c[0]&&nx.r===c[1], ko=c[0]!=='cl'||c[1]>=6;
-          const right=t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?'<span style="color:var(--warn)">NEXT</span>':'<span style="color:#5d7350">'+clubRating(d,home?t[1]:t[0],true)+'</span>';
-          h+='<div class="mgFx cup'+(next?' next':'')+'"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm">'+(home?'vs ':'@ ')+mgEsc(mgNameOf(d,home?t[1]:t[0]))+'</span>'+right+'</div>'; }
-        else if(c[0]!=='cl'&&((C.r[c[1]]||{}).byes||[]).includes(d.clubId)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">a bye: through to the '+K.rounds[c[1]+1].toLowerCase()+'</span><span></span></div>';
-        else if(/^IN THE/.test(run)) h+='<div class="mgFx cup"><span class="md">'+K.short+' '+K.rs[c[1]]+'</span><span class="nm" style="color:#5d7350">'+(K.rounds[c[1]].toLowerCase())+', not drawn yet</span><span></span></div>'; }
-      if(i===MG_HALF-1) h+='<div class="mgFxBreak">— winter transfer window —</div>'; });
+          h+=row('cup'+(next?' next':''),K.short+' '+K.rs[c[1]],(home?'vs ':'at ')+mgEsc(mgNameOf(d,home?t[1]:t[0])),t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?NEXT:rate(home?t[1]:t[0]),home); }
+        else if(c[0]!=='cl'&&((CC.r[c[1]]||{}).byes||[]).includes(d.clubId)) h+=row('cup',K.short+' '+K.rs[c[1]],'a bye: through to the '+K.rounds[c[1]+1].toLowerCase(),'<span></span>');
+        else if(/^IN THE/.test(run)) h+=row('cup',K.short+' '+K.rs[c[1]],K.rounds[c[1]].toLowerCase()+', not drawn yet','<span></span>'); }
+      if(i===MG_HALF-1) h+='<div class="mgFxBreak">THE WINTER BREAK · THE TRANSFER WINDOW OPENS</div>'; });
+    else { const K=CUP[on], CC=C[on], run=mgCupRun(d,on); let drawnNext=false;
+      h+='<div class="fxRun" data-xpl="'+xq(K.name+': '+run.toLowerCase()+'.')+'"><i class="hic" data-ic="trophy"></i><span>'+K.name+'</span><b style="color:'+(/WINNERS/.test(run)?'var(--good)':/^OUT|RUNNERS/.test(run)?'var(--bad)':'var(--ink)')+'">'+run+'</b></div>';
+      K.rounds.forEach((rn,r)=>{ const t=cupTies(d,on,r).find(x=>x[0]===d.clubId||x[1]===d.clubId);
+        if(t){ const home=t[0]===d.clubId, ko=on!=='cl'||r>=6, next=nx&&nx.kind==='cup'&&nx.key===on&&nx.r===r;
+          h+=row('cup'+(next?' next':''),K.rs[r],(home?'vs ':'at ')+mgEsc(mgNameOf(d,home?t[1]:t[0])),t[2]!=null?res(home?t[2]:t[3],home?t[3]:t[2],ko?t[t[4]]===d.clubId:null):next?NEXT:rate(home?t[1]:t[0]),home); }
+        else if(on!=='cl'&&((CC.r[r]||{}).byes||[]).includes(d.clubId)) h+=row('cup',K.rs[r],'a bye: through to the '+K.rounds[r+1].toLowerCase(),'<span></span>');
+        else if(/^IN THE/.test(run)&&!drawnNext&&(on!=='cl'||r>=6)){ drawnNext=true; h+=row('cup',K.rs[r],rn.toLowerCase()+', not drawn yet','<span></span>'); } });
+      if(on==='cl'){ const G=CC.gr.find(g=>g.ids.includes(d.clubId));
+        if(G) h+='<div class="bpSect fitBreak">YOUR GROUP</div>'+mgTableOf(G.ids,G.fx).map((r,i)=>'<div class="mgFx'+(r.id===d.clubId?' you':'')+'"><span class="md">'+(i+1)+'</span><span class="nm">'+mgEsc(mgNameOf(d,r.id))+'</span><span>'+r.p+' played · '+r.pts+' pts</span></div>').join(''); } }
     return h+'</div>'; }
   // the cups this season, a line each: how far you've gone in each you're in (your Champions League group's table too)
   function mgCupsSum(d){ const C=d.cup, cur=C&&!C.off&&C.s===d.season; let h='';
@@ -22597,14 +22654,24 @@
   function mgFacilitiesTab(d){ return bldScreen(d,'academy',BS.academy); }   // (v173: J4)
 
   // ---- the newsstand ----
-  function mgHeadlinesTab(d){ return (d.news||[]).slice(0,45).map(n=>'<div class="mgNews"><i>S'+n.s+' · '+mgEsc(n.w)+'</i>'+mgEsc(n.t)+'</div>').join('')||'<div class="mgHint">No news yet.</div>'; }
+  // (v253) THE CLUBHOUSE'S NEWS AS ITS TEMPLATE: a box across the page, the season and the week in its well (on every
+  // page), the news a row each, newest first -- the week small over the story -- the pages at its foot
+  function mgHeadlinesTab(d){ const N=(d.news||[]).slice(0,45);
+    return '<div class="tplBox nwBox tplRows tplPage" data-pages="NW:club/News"><div class="tplWell fitKeep"><i class="hic" data-ic="news"></i>SEASON '+d.season+' · '+mgEsc(mgWeekShort(d)).toUpperCase()+'</div>'
+      +(N.length?N.map(n=>'<div class="mgNews nwRow"><i>S'+n.s+' · '+mgEsc(n.w).toUpperCase()+'</i><b>'+mgEsc(n.t)+'</b></div>').join(''):'<div class="mgNews nwRow"><b>No news yet.</b></div>')+'</div>'; }
   function mgTableHtml(d,t){ const T=mgTable(d,t);
     let h='<table class="mgTbl"><thead><tr><th>#</th><th>CLUB</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>PTS</th></tr></thead>';
     T.forEach((r,i)=>{ const z=(t<4&&i<2)?'up':(t<4&&i<6)?'po':(t>1&&i>=MG_CLUBS-3)?'dn':'';
       h+='<tr class="'+z+(r.id===d.clubId?' you':'')+'"><td>'+(i+1)+'</td><td>'+mgEsc(mgNameOf(d,r.id))+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.gd>0?'+':'')+r.gd+'</td><td>'+r.pts+'</td></tr>'; });
     return h+'</table><div class="mgHint">'+(t<4?'Top 2 go up · 3rd–6th play off for one more place':'The top league: no promotion')+(t>1?' · bottom 3 go down':'')+'</div>'; }
-  function mgTablesTab(d){ const t=MGUI.ntier||d.tier; return mgChips('ntier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x]]),t)+mgTableHtml(d,t); }
-  function mgResultsTab(d){ const t=MGUI.ntier||d.tier, last=Math.min(d.md,MG_MD)-1; let h=mgChips('ntier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x]]),t);
+  // (v253) THE CLUBHOUSE'S LEAGUE AS ITS TEMPLATE: a box across the page, the four divisions a row of choices at its top
+  // (on every page), the table in rows of 24 with your club lit, what the places mean under it; then, each from a page of
+  // its own, the division's top scorers and its last results (the playoffs' too) -- the pages at its foot
+  const tplSeg=(key,opts,cur)=>'<div class="tplSeg fitKeep">'+opts.map(([v,l])=>'<button class="tplSegB'+(String(v)===String(cur)?' lit':'')+'" data-mg="filt" data-k="'+key+'" data-v="'+v+'">'+l+'</button>').join('')+'</div>';
+  function mgTablesTab(d){ const t=MGUI.ntier||d.tier;
+    return '<div class="tplBox lgBox tplRows tplPage" data-pages="LG:club/League">'+tplSeg('ntier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x].toUpperCase()]),t)+mgTableHtml(d,t)
+      +'<div class="fitBreak lgMore">'+mgScorersTab(d)+'</div><div class="fitBreak lgMore">'+mgResultsTab(d,true)+'</div></div>'; }
+  function mgResultsTab(d,inBox){ const t=MGUI.ntier||d.tier, last=Math.min(d.md,MG_MD)-1; let h=inBox?'':mgChips('ntier',[1,2,3,4].map(x=>[x,MG_LEAGUE[x]]),t);   // (v253: in the League's box, its row of choices above)
     const P=d.po&&d.po[t];
     if(P){ h+='<div class="bpSect">PLAYOFFS</div>';
       for(const m of P.semis.concat(P.final?[P.final]:[])) h+=finRow(mgEsc(mgNameOf(d,m[0]))+' v '+mgEsc(mgNameOf(d,m[1])),m[2]==null?'to play':m[2]+' – '+m[3]+(m[2]===m[3]?' ('+mgEsc(mgNameOf(d,m[m[4]]))+' on pens)':''),m[0]===d.clubId||m[1]===d.clubId,'#cfe7d2'); }
@@ -22612,9 +22679,9 @@
     h+='<div class="bpSect">MATCHDAY '+(last+1)+'</div>';
     for(const m of d.lg[t].fx[last]) h+=finRow(mgEsc(mgNameOf(d,m[0]))+' v '+mgEsc(mgNameOf(d,m[1])),m[2]+' – '+m[3],m[0]===d.clubId||m[1]===d.clubId,'#cfe7d2');
     return h; }
-  function mgScorersTab(d){ const L=[]; for(const id of d.div[d.tier]) for(const p of mgPlayersOf(d,id)) if(p.goals) L.push([p,id]);
+  function mgScorersTab(d){ const t=MGUI.ntier||d.tier, L=[]; for(const id of d.div[t]) for(const p of mgPlayersOf(d,id)) if(p.goals) L.push([p,id]);   // (v253: the division shown)
     L.sort((a,b)=>b[0].goals-a[0].goals);
-    return '<div class="bpSect">'+MG_LEAGUE[d.tier].toUpperCase()+' · TOP SCORERS</div>'+(L.slice(0,12).map(([p,id],i)=>finRow((i+1)+'. '+mgEsc(p.name)+' ('+mgEsc(d.world.clubs[id].code)+')',p.goals+' goal'+(p.goals>1?'s':''),id===d.clubId,id===d.clubId?'var(--good)':'#cfe7d2')).join('')||'<div class="mgHint">Nobody has scored yet: the top scorers start with the league’s first matchday.</div>'); }
+    return '<div class="bpSect">'+MG_LEAGUE[t].toUpperCase()+' · TOP SCORERS</div>'+(L.slice(0,12).map(([p,id],i)=>finRow((i+1)+'. '+mgEsc(p.name)+' ('+mgEsc(d.world.clubs[id].code)+')',p.goals+' goal'+(p.goals>1?'s':''),id===d.clubId,id===d.clubId?'var(--good)':'#cfe7d2')).join('')||'<div class="mgHint">Nobody has scored yet: the top scorers start with the league’s first matchday.</div>'); }
 
   // ---- your house ----
 
@@ -23078,8 +23145,8 @@
     if(BLD_LV[id]&&!lvOf(d,id)) return mgBuildBody(d,id);                                         // (not up yet: what it'd cost, or what it needs)
     if(id==='decor'&&lvOf(d,'club')<DECOR_CL) return mgDecorLocked(d);
     const t=b.tabs?(b.tabs.includes(curTab[id])?curTab[id]:b.tabs[0]):null;   // (a tab that's gone -- v116's Subs, Concessions -- the first)
-    if(id==='club') h+=t==='Squad'?mgSquadTab(d):t==='News'?mgHeadlinesTab(d):t==='League'?mgTablesTab(d)+mgScorersTab(d)
-      :t==='Fixtures'?mgFixturesTab(d)+'<div class="bpSect">THE RESULTS</div>'+mgResultsTab(d):mgClubTab(d);
+    if(id==='club') h+=t==='Squad'?mgSquadTab(d):t==='News'?mgHeadlinesTab(d):t==='League'?mgTablesTab(d)
+      :t==='Fixtures'?mgFixturesTab(d):mgClubTab(d);   // (v253: the League's box holds its scorers and last results; the Fixtures' its cups)
     else if(id==='train') h+=t==='Pitch'?mgTrainTab(d):t==='Selection'?mgSelectTab(d):t==='Staff'?mgStaffTab(d):renderTactics(d,tacPhase);
     else if(id==='physio') h+=mgPhysioBody(d);
     else if(id==='market') h+=t==='Free agents'?mgFreeTab(d):t==='Offers'?mgOffersTab(d):t==='Selling'?mgSellingTab(d):t==='Bids'?mgBidsTab(d):mgSearchTab(d);
@@ -23155,7 +23222,7 @@
       case 'reject': { const msg=mgRejectOffer(d,+ds.oid); if(msg) say(msg); break; }   // (v156: HE HEARS OF IT)
       case 'promote': { const err=mgPromoteYouth(d,pid); say(err||'Promoted to the first team.',err?'var(--bad)':'var(--good)'); if(!err) MGUI.sel=null; break; }
       case 'ryouth': mgReleaseYouth(d,pid); MGUI.sel=null; break;
-      case 'filt': MGUI[ds.k]=ds.k==='tier'||ds.k==='ntier'?+ds.v:ds.v; MGUI.sel=null; MGUI.drop=null; fitForget('L:'+curBldg+'/');
+      case 'filt': MGUI[ds.k]=ds.k==='tier'||ds.k==='ntier'?+ds.v:ds.v; MGUI.sel=null; MGUI.drop=null; fitForget('L:'+curBldg+'/'); if(ds.k==='fxc'||ds.k==='ntier') fitForget(':'+curBldg+'/'+curTab[curBldg]);   // (v253: a new competition or division, its first page)
         if(ds.k==='arch'&&STYLES[ds.v]) MGUI.mpos=STYLES[ds.v].sub;                                    // (a type is a position's)
         if(ds.k==='mpos'&&ds.v!=='ALL'&&STYLES[MGUI.arch]&&STYLES[MGUI.arch].sub!==ds.v) MGUI.arch='ALL';   // (a position: only its own types)
         if(ds.k==='mpos'&&ds.v==='GK') MGUI.arch='ALL'; break;

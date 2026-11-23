@@ -92,7 +92,7 @@ r = await K(`(()=>{ const d=CAREER.data; hideBldg(); mgWeekStart(d); const was=d
 if(r.why) info('the papers would not open: ' + JSON.stringify(r.why));
 ok(r.head && r.head === r.tm && r.once && r.body && !r.again && r.week, 'the dressing room\'s cutting gives the side\'s mood as it is now (' + r.head + ', moved from ' + r.was + ' after the papers came), once, by the week\'s change (v248: it was over the pile)');
 r = await K(`(()=>{ const d=CAREER.data, L=d.lg[d.tier], m=L.fx[Math.max(d.md+1,1)].find(x=>x[0]===d.clubId||x[1]===d.clubId), opp=m[0]===d.clubId?m[1]:m[0], c=d.world.clubs[opp];
-  const md=Math.max(d.md+1,1)+1, shown=()=>{ const row=mgFixturesTab(d).split('<div class="mgFx').find(x=>x.includes('<span class="md">'+md+'</span>')); return row?+(row.match(/#5d7350">(\\d+)</)||[])[1]:null; };
+  const md=Math.max(d.md+1,1)+1, shown=()=>{ const row=mgFixturesTab(d).split('<div class="mgFx').find(x=>x.includes('<span class="md">'+md+'</span>')); return row?+(row.match(/class="fxR">(\\d+)</)||[])[1]:null; };   // (v253: their rating, in its own span)
   const a=shown(), s0=mgStrength(d,opp); for(const p of c.players) p.cond=0.7; const b=shown(), s1=mgStrength(d,opp); for(const p of c.players) p.cond=1;
   const by=(x,y)=>y.ovr-x.ovr, P=c.players.filter(p=>!p.inj), xi=P.filter(p=>p.role==='GK').sort(by).slice(0,1).concat(P.filter(p=>p.role!=='GK').sort(by).slice(0,OUTFIELD));
   return { a, b, s0:+s0.toFixed(1), s1:+s1.toFixed(1), want:Math.round(xi.reduce((t,p)=>t+p.ovr,0)/xi.length) }; })()`);
