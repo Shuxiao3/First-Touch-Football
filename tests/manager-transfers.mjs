@@ -229,7 +229,7 @@ ok(inBud.length > 0 && inBud.length < all0.length && inBud.every(r => r.amt <= b
 await page.click('#bldgPanel .bpTab:text-is("Bids")'); await page.waitForTimeout(80);
 const hist = await K(`(()=>{ const L=CAREER.data.bidLog||[]; return { log:L.slice(0,4).map(e=>e.name+':'+e.out), txt:document.getElementById('bpBody').textContent }; })()`);   // (all its pages)
 info('the bids log: ' + JSON.stringify(hist.log) + ' -- ' + (hist.txt.match(/This season:[^·]*·[^·A-Z]*/) || [''])[0]);
-ok(hist.log.includes(r.name + ':signed') && hist.log.includes(r2.name + ':walked') && /HOW THEY WENT/.test(hist.txt) && /SIGNED/.test(hist.txt) && /YOU WALKED AWAY/.test(hist.txt) && /This season: \d+ bids? · \d+ signed/.test(hist.txt),
+ok(hist.log.includes(r.name + ':signed') && hist.log.includes(r2.name + ':walked') && /HOW THEY WENT/.test(hist.txt) && /SIGNED/.test(hist.txt) && /YOU WALKED AWAY/.test(hist.txt) && /THIS SEASON: \d+ BIDS? · \d+ SIGNED/.test(hist.txt),   // (v257: a badge by HOW THEY WENT)
   'the Bids tab keeps how each one went: ' + r.name + ' SIGNED, ' + r2.name + ' YOU WALKED AWAY; and the season\'s bids and signings');
 await page.click('#bldgPanel .bpTopBack'); await page.waitForTimeout(60);
 

@@ -317,17 +317,17 @@ for(const [w, h] of SIZES){
       await page.waitForTimeout(120); await T('touchEnd', r.x, r.y - dy); await page.waitForTimeout(150); };   // (held still at the end: no fling)
     const look = sel => page.evaluate(sel => { const b = document.querySelector(sel), br = b.getBoundingClientRect(), t = b.querySelector('.plTop'), top = t ? t.getBoundingClientRect().bottom : br.top;
       const rows = [...b.querySelectorAll('.mgRow')].filter(r => r.getClientRects().length), seen = rows.filter(r => { const q = r.getBoundingClientRect(); return q.top >= top - 1 && q.bottom <= br.bottom + 1; }).map(r => r.dataset.pid);
-      const fade = b.parentElement.querySelector(':scope > .plFade'), f = b.querySelector('.mkFilters'), fr = f && f.getBoundingClientRect(), c = b.querySelector('.plCols'), cr = c && c.getBoundingClientRect();
+      const fade = b.parentElement.querySelector(':scope > .plFade'), f = b.querySelector('.mkFilters') || b.parentElement.querySelector('.mkFilters'), fr = f && f.getBoundingClientRect(), c = b.querySelector('.plCols') || b.parentElement.querySelector('.plCols'), cr = c && c.getBoundingClientRect();   /* (v257: the market's filters and heads over the list, in its box) */
       return { pager: !!b.parentElement.querySelector('.fitPager, [data-pages]'), rows: rows.length, seen, n: +((b.querySelector('.plN') || b.parentElement.querySelector('.plN') || {}).textContent),   /* (v252: the squad's count in its box's well, over the rows) */ last: rows.length ? seen.includes(rows[rows.length - 1].dataset.pid) : true,
         more: fade && !fade.classList.contains('end') ? parseInt(fade.textContent) || 0 : 0, end: !!fade && fade.classList.contains('end'), st: Math.round(b.scrollTop), max: b.scrollHeight - b.clientHeight,
-        stuck: (!f || fr.top >= br.top - 1 && fr.bottom <= top + 1) && !!cr && cr.top >= br.top - 1 && cr.bottom <= top + 1 }; }, sel);
+        stuck: (!f || fr.top >= br.top - 1 && fr.bottom <= top + 1) && !!cr && cr.top >= br.top - 1 && cr.bottom <= top + 1 || !!cr && !b.contains(c) && cr.bottom <= br.top + 1 && (!f || fr.bottom <= br.top + 1) }; }, sel);
     const L = '#bpBody .mgPaneL .plPane';
     if(w === 844 && h === 390){
       await page.tap('#chCampus [data-bldg="market"]'); await page.waitForTimeout(150); await page.tap('#bpTabs .bpTab:text-is("Search")'); await page.waitForTimeout(150);
       const a = await look(L); await swipe(L, 150); const b = await look(L);
       await page.evaluate(L => { const e = document.querySelector(L); e.scrollTop = e.scrollHeight; e.dispatchEvent(new Event('scroll')); }, L); await page.waitForTimeout(100); const z = await look(L);
       info('the market list: ' + JSON.stringify({ top: { rows: a.rows, seen: a.seen.length, n: a.n, more: a.more }, swiped: { st: b.st, seen: b.seen.length, more: b.more, stuck: b.stuck }, end: { st: z.st, max: z.max, last: z.last, more: z.more, end: z.end } }));
-      ok(!a.pager && a.rows > 30 && a.n === a.rows && a.seen.length >= 10 && a.more > 0 && a.more <= a.rows - a.seen.length, 'the market\'s list: no pages, ' + a.seen.length + ' rows on the screen at once, ' + a.n + ' over it and ' + a.rows + ' in it, ' + a.more + ' MORE');   // (v225: 10 rows, the footer under the page; 11 before)
+      ok(!a.pager && a.rows > 30 && a.n === a.rows && a.seen.length >= 7 && a.more > 0 && a.more <= a.rows - a.seen.length, 'the market\'s list: no pages, ' + a.seen.length + ' rows on the screen at once, ' + a.n + ' over it and ' + a.rows + ' in it, ' + a.more + ' MORE');   // (v225: 10 rows, the footer under the page; 11 before. v257: 7, the template's well, filters and heads over them)
       ok(b.st >= 100 && b.more < a.more && b.stuck && !b.seen.includes(a.seen[0]), 'a finger up it: it moves (' + b.st + ' px), N MORE counts down (' + a.more + ' -> ' + b.more + '), the filters and the column heads stay where they were');
       ok(z.st >= z.max - 1 && z.last && z.end && z.more === 0, 'at its foot: the last man on the screen, and no N MORE');
       await page.tap('.bpTopBack'); await page.waitForTimeout(80); }
@@ -670,7 +670,7 @@ for(const [w, h] of [[844, 340], [640, 360]]){
         const s = await page.evaluate(() => { const B = document.querySelector('.mgPaneR'), br = B.getBoundingClientRect(), S = B.querySelector('.sqSum');
           const out = [...S.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && (r.bottom > br.bottom + 1 || r.right > br.right + 1); }).map(e => e.className).slice(0, 3);
           return { out, rows: S.querySelectorAll('.sqKv').length, btns: [...S.querySelectorAll('.sqFoot .tplBtn')].map(b => b.textContent).join(' / '), cut: [...S.querySelectorAll('.sqKv b, .tplBtn')].filter(e => e.scrollWidth > e.clientWidth + 1).map(e => e.textContent) }; });
-        views.push(s); if(s.out.length || s.rows !== 5 || s.btns !== 'SELL / NEW DEAL' || s.cut.length) bad.push(tab + ' in short ' + JSON.stringify(s));
+        views.push(s); if(s.out.length || (tab === 'Squad' ? s.rows !== 5 || s.btns !== 'SELL / NEW DEAL' : s.rows < 4) || s.cut.length) bad.push(tab + ' in short ' + JSON.stringify(s));   // (v257: the market's men in short too, their own buttons)
         await page.tap('.mgPaneR .sqMan'); await page.waitForTimeout(60); }
       for(const side of ['rate', 'deal', 'career', 'mind']){   // (his card's four sides, a tab each along its foot: v116)
         const tb = await page.$(`.mgPaneR .mgSides [data-mside="${side}"]`); if(tb){ await tb.tap(); await page.waitForTimeout(60); }

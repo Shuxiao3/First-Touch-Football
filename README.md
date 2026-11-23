@@ -502,6 +502,14 @@ is still seven and a keeper). It's a copy of `index.html` with two changes:
   his name, stars and stamina (an orange stripe); and the menu. Their sizes and places are as they were. The buttons are
   rings in their own colours (PASS and SWITCH orange, SHOOT and SLIDE red, CROSS and CLEAR blue, SKILL gold) with a
   see-through middle and a line drawing over the name, and their sizes and places as they were.
+- **The transfer market as its templates (v257).** Search, Free agents and Selling are a list and its man: the list's
+  well says how many, with the window as a badge (WINDOW OPEN and its weeks, or WINDOW SHUT); the filters in one row of
+  28 (each says what it's set to); the columns and the rows you tap. On the right your budget, then the man you pick in
+  short: his figure, name and what he plays in a well (a tap opens his card, ◀ back), his numbers as rows, and the
+  buttons at the foot: SCOUT and MAKE A BID (SIGN HIM once agreed) on Search, OFFER A DEAL for a free agent, SET A PRICE
+  and PUT UP FOR SALE (or TAKE HIM OFF) on Selling. Bids is two boxes, OUT NOW with your budget under it and HOW THEY
+  WENT with the season's count as a badge; Offers is one box, FOR YOUR MEN. With nothing in them they say so in a panel,
+  what it means a tap away.
 - **Training's Selection and the Staff as their templates (v256).** The Selection is three boxes, no frame round
   them: the nine on the pitch (five columns); the bench's five over the men not taken, three of them to a page with ◀ and
   ▶ by their heading (four columns); and your three quick subs with HOW IT WORKS under them, a tap away (three columns).
@@ -3717,6 +3725,12 @@ test, and like the Trap Lab the values are the game's settings.
   wage to sign for every point over its mid-table less three, and nobody bids for a man you signed on a free while
   he's on that deal (deadline day included) unless you list him, he wants out or he's come on four points. See **He
   reads it first**, **Catch it or punch it** and **Free agents**.
+- **v257: the transfer market.** Search, Free agents and Selling draw mgTplPanes: the head is mkWell (the count and
+  mkWin, the window's .tplBadge), .mkFilters (mkDrop now <i>label</i><b>value</b>, .set once chosen) and mkCols (plHead's
+  columns alone). mgCard takes 'buy' and 'free' as well as 'sale' and 'squad'; for those its 'sum' side is mkSum (.sqSum
+  .mkSum: mkBud, the .sqMan well, .sqKv rows, .sqFoot's .tplBtn). A pick on those tabs, SELL from the squad and HIS CARD
+  on Bids all open him in short. Bids is .mkTwo, two .tplBox.tplRows boxes paged by fitBox; Offers .mkOne; an empty one
+  shows mkNone, a .tplPanel with its sentence as data-xpl.
 - **v256: Training's Selection and the Staff.** mgSelectTab draws .selB.selTpl.tplPage, three .tplBox .selBox boxes
   (the grid's five, four and three columns): the .selCol groups as before (xi; bench, then rest; .qpCol), their heads
   .tplLbl, the bars --selH high (28, 26 under 350 px). The rest's head is .selRestHd, its pager .selPg (data-mg selpg,
